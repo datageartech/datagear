@@ -618,7 +618,8 @@ public class DbVersionManager extends AbstractVersionContentReader
 		{
 			Version myVersion = vc.getVersion();
 			
-			if (myVersion.isHigherThan(from) && (myVersion.equals(to) || myVersion.isLowerThan(to)))
+			// 使用方法参数对象调用比较方法，因为它们可能是Version的子类
+			if (from.isLowerThan(myVersion) && (to.equals(myVersion) || to.isHigherThan(myVersion)))
 			{
 				myVersionContents.add(vc);
 			}

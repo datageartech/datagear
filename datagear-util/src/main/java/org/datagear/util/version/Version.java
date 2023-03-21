@@ -199,42 +199,26 @@ public class Version implements Serializable, Comparable<Version>
 	 */
 	public boolean isHigherThan(Version another)
 	{
-		return !isLowerThan(another) && !equals(another);
+		return !isLowerThan(another) && !isEqual(another);
 	}
 
-	@Override
-	public int compareTo(Version o)
-	{
-		if (this.isLowerThan(o))
-			return -1;
-		else if (this.equals(o))
-			return 0;
-		else
-			return 1;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((build == null) ? 0 : build.hashCode());
-		result = prime * result + ((major == null) ? 0 : major.hashCode());
-		result = prime * result + ((minor == null) ? 0 : minor.hashCode());
-		result = prime * result + ((revision == null) ? 0 : revision.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
+	/**
+	 * 是否相同版本号。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public boolean isEqual(Object obj)
 	{
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof Version))
 			return false;
+
 		Version other = (Version) obj;
+
 		if (build == null)
 		{
 			if (other.build != null)
@@ -264,6 +248,35 @@ public class Version implements Serializable, Comparable<Version>
 		else if (!revision.equals(other.revision))
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(Version o)
+	{
+		if (this.isLowerThan(o))
+			return -1;
+		else if (this.equals(o))
+			return 0;
+		else
+			return 1;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((build == null) ? 0 : build.hashCode());
+		result = prime * result + ((major == null) ? 0 : major.hashCode());
+		result = prime * result + ((minor == null) ? 0 : minor.hashCode());
+		result = prime * result + ((revision == null) ? 0 : revision.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		return isEqual(obj);
 	}
 
 	@Override

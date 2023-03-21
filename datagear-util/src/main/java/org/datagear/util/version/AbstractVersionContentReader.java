@@ -52,7 +52,7 @@ public abstract class AbstractVersionContentReader
 	 * @param from
 	 *            起始版本，为{@code null}表示从第一个版本
 	 * @param to
-	 *            结束版本（包含），为{@code null}表示至最后一个版本
+	 *            结束版本，为{@code null}表示至最后一个版本
 	 * @param containsFrom
 	 *            是否包含起始版本
 	 * @param contailsTo
@@ -78,12 +78,14 @@ public abstract class AbstractVersionContentReader
 			{
 				Version myVersion = resolveVersion(line);
 
-				if (to != null && (myVersion.isHigherThan(to) || (!contailsTo && myVersion.equals(to))))
+				// 使用方法参数对象调用比较方法，因为它们可能是Version的子类
+				if (to != null && (to.isLowerThan(myVersion) || (!contailsTo && to.equals(myVersion))))
 				{
 					break;
 				}
 
-				if (from == null || myVersion.isHigherThan(from) || (containsFrom && myVersion.equals(from)))
+				// 使用方法参数对象调用比较方法，因为它们可能是Version的子类
+				if (from == null || from.isLowerThan(myVersion) || (containsFrom && from.equals(myVersion)))
 				{
 					if (versionContent != null)
 					{
