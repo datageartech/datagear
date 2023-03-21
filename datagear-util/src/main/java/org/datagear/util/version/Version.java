@@ -218,6 +218,7 @@ public class Version implements Serializable, Comparable<Version>
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((build == null) ? 0 : build.hashCode());
 		result = prime * result + ((major == null) ? 0 : major.hashCode());
 		result = prime * result + ((minor == null) ? 0 : minor.hashCode());
 		result = prime * result + ((revision == null) ? 0 : revision.hashCode());
@@ -231,9 +232,16 @@ public class Version implements Serializable, Comparable<Version>
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof Version))
+		if (getClass() != obj.getClass())
 			return false;
 		Version other = (Version) obj;
+		if (build == null)
+		{
+			if (other.build != null)
+				return false;
+		}
+		else if (!build.equals(other.build))
+			return false;
 		if (major == null)
 		{
 			if (other.major != null)
@@ -254,13 +262,6 @@ public class Version implements Serializable, Comparable<Version>
 				return false;
 		}
 		else if (!revision.equals(other.revision))
-			return false;
-		if (build == null)
-		{
-			if (other.build != null)
-				return false;
-		}
-		else if (!build.equals(other.build))
 			return false;
 		return true;
 	}
