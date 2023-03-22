@@ -152,6 +152,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
@@ -434,8 +435,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		PathMatchingResourcePatternResolver resolver = this.resourcePatternResolver();
 		Resource[] mapperResources = resolver.getResources(
-				org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
-				+ "org/datagear/management/mapper/*.xml");
+				ResourceLoader.CLASSPATH_URL_PREFIX + "org/datagear/management/mapper/*.xml");
 		
 		return mapperResources;
 	}
