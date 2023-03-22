@@ -121,10 +121,9 @@
 			po.setChartPlugins(response.pluginInfos);
 		}
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

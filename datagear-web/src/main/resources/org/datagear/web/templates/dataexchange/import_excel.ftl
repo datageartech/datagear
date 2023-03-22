@@ -117,10 +117,9 @@
 				uploadFileLabelDesc: "<@spring.message code='dataImport.uploadFile.excel.desc' />",
 				fileEncodingEnable: false
 			});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

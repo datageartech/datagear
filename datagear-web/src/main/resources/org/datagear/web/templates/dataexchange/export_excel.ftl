@@ -118,10 +118,9 @@
 	po.setupExport();
 	po.setupExportHead("<@spring.message code='dataExport.exportExcelData' />");
 	po.setupExportTableHead({ fileEncodingEnable: false });
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

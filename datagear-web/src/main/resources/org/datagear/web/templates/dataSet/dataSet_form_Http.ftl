@@ -228,10 +228,9 @@
 									{mode: {name: "javascript", json: true}});
 		po.setCodeTextTimeout(po.headerContentEditor, fm.headerContent);
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

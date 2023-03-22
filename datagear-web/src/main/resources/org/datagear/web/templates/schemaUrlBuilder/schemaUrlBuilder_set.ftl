@@ -124,10 +124,9 @@
 		po.codeEditor = po.createCodeEditor(po.elementOfId("${pid}codeEditor"), codeEditorOptions);
 		po.setCodeTextTimeout(po.codeEditor, fm.code, true);
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

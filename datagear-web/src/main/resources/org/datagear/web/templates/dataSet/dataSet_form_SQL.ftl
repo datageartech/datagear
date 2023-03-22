@@ -149,10 +149,9 @@
 							po.inflateSqlEditorOptions({ value: "" }));
 		po.setCodeTextTimeout(po.codeEditor, fm.sql);
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

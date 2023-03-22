@@ -1302,10 +1302,9 @@
 			po.elementOfId("${pid}showFullValueProxy").click();
 		});
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

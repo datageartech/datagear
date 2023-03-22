@@ -17,5 +17,12 @@
  *
 -->
 <#--
-扩展预留：page_main_header.ftl
+执行vue挂载片段
 -->
+<script>
+(function(po)
+{
+	po.vueMount();
+})
+(${pid});
+</script>

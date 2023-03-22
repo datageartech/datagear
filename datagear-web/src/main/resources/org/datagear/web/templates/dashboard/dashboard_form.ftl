@@ -264,10 +264,13 @@
 	po.setupResourceList();
 	po.setupResourceEditor();
 	
-	po.vueMount();
-	po.showFirstTemplateContent();
+	po.vueMounted(function()
+	{
+		po.showFirstTemplateContent();
+	});
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

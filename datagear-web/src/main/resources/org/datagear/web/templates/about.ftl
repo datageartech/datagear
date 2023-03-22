@@ -105,12 +105,6 @@ If not, see &lt;<a href="https://www.gnu.org/licenses/" target="_blank" class="l
 	</form>
 </div>
 <#include "include/page_form.ftl">
-<script>
-(function(po)
-{
-	po.vueMount();
-})
-(${pid});
-</script>
+<#include "include/page_vue_mount.ftl">
 </body>
 </html>

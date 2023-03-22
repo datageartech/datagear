@@ -212,10 +212,9 @@
 	{
 		po.element(".step-${step.step}").removeClass("p-disabled").addClass("p-highlight p-steps-current");
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "include/page_vue_mount.ftl">
 </body>
 </html>

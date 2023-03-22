@@ -180,10 +180,9 @@
 		//用于兼容旧版本的工作表序号功能，参考AbstractExcelDataSet.getSheetIndex()
 		enableSheetIndex: (formModel.sheetIndex != null && formModel.sheetIndex > 0)
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

@@ -116,10 +116,9 @@
 			{
 				uploadFileLabelDesc: "<@spring.message code='dataImport.uploadFile.csv.desc' />",
 			});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>

@@ -285,4 +285,4 @@ User currentUser
 })
 (${pid});
 </script>
-<#include "ext/page_main_header_ext.ftl">
+<#include "ext/include/page_main_header.ftl">

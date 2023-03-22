@@ -71,13 +71,7 @@
 			</div>
 		</div>
 	</div>
-	<script>
-	(function(po)
-	{
-		po.vueMount();
-	})
-	(${pid});
-	</script>
+	<#include "include/page_vue_mount.ftl">
 </#if>
 </body>
 </html>

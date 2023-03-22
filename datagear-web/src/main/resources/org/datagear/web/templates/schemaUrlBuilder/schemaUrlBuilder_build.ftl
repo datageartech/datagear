@@ -191,10 +191,9 @@
 				fm.name = (dftValue.name || "");
 		}
 	});
-	
-	po.vueMount();
 })
 (${pid});
 </script>
+<#include "../include/page_vue_mount.ftl">
 </body>
 </html>
