@@ -155,178 +155,430 @@ public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implemen
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
-		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
-
 		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
 		http.csrf().disable();
 
 		// 默认"X-Frame-Options"值为"DENY"，这会导致系统的图表/看板展示页面无法被其他应用嵌入iframe，因此需禁用
 		http.headers().frameOptions().disable();
 
-		http.authorizeRequests()
+		configAccessForShowChartAndDashboard(http);
+		configAccessForSchema(http);
+		configAccessForAnalysisProject(http);
+		configAccessForDataSet(http);
+		configAccessForChart(http);
+		configAccessForDashboard(http);
+		configAccessForChartPlugin(http);
+		configAccessForDataSetResDirectory(http);
+		configAccessForDashboardGlobalRes(http);
+		configAccessForDriverEntity(http);
+		configAccessForSchemaUrlBuilder(http);
+		configAccessForUser(http);
+		configAccessForRole(http);
+		configAccessForSchemaGuard(http);
+		configAccessForAuthorization(http);
+		configAccessForLogin(http);
+		configAccessForRegister(http);
+		configAccessForResetPassword(http);
+		configAccessForChangeTheme(http);
+		configAccessForCheckCode(http);
+		configAccessBeforeAllOther(http);
 
-				// 切换主题、校验码
-				.antMatchers("/changeThemeData/**", "/checkCode/**").permitAll()
+		configAccessAllOther(http);
 
-				// 展示图表和看板
-				// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
-				.antMatchers(
-						//图表插件
-						"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
-						//图表展示
-						"/chart/show/**", "/chart/showData",
-						//看板展示
-						"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/heartbeat",
-						"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**")
-				.access(AUTH_ANONYMOUS_OR_USER)
-
-				// 展示图表和看板
-				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
-				.antMatchers("/analysis/chart/show/**", "/analysis/dashboard/show/**")
-				.access(AUTH_ANONYMOUS_OR_USER)
-
-				// 数据源
-				// 编辑
-				.antMatchers("/schema/add", "/schema/saveAdd",
-						"/schema/edit", "/schema/saveEdit",
-						"/schema/delete")
-				.access(AUTH_USER_AND_DATA_MANAGER)
-				// 其他
-				.antMatchers("/schema/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-
-				// 数据源数据管理、导入导出、SQL工作台、SQL编辑器
-				// 用户针对数据源数据的所有操作都已受其所属数据源权限控制，所以不必再引入数据管理员/数据分析员权限
-				.antMatchers("/data/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-				.antMatchers("/dataexchange/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-				.antMatchers("/sqlpad/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-				.antMatchers("/sqlEditor/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-
-				// 数据分析项目
-				// 编辑
-				.antMatchers("/analysisProject/add", "/analysisProject/saveAdd",
-						"/analysisProject/edit", "/analysisProject/saveEdit",
-						"/analysisProject/delete")
-				.access(AUTH_USER_AND_DATA_MANAGER)
-				// 其他
-				.antMatchers("/analysisProject/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-
-				// 数据集
-				// 编辑
-				.antMatchers("/dataSet/addFor*", "/dataSet/saveAddFor*",
-						"/dataSet/edit", "/dataSet/saveEditFor*", "/dataSet/copy",
-						"/dataSet/delete",
-						"/dataSet/uploadFile")
-				.access(AUTH_USER_AND_DATA_MANAGER)
-				// 其他
-				.antMatchers("/dataSet/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-
-				// 图表
-				// 编辑
-				.antMatchers("/chart/add", "/chart/edit",  "/chart/copy",
-						"/chart/save", "/chart/delete")
-				.access(AUTH_USER_AND_DATA_MANAGER)
-				// 其他
-				.antMatchers("/chart/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-
-				// 看板
-				// 编辑
-				.antMatchers("/dashboard/add", "/dashboard/edit", "/dashboard/save", "/dashboard/copy",
-						"/dashboard/saveTemplateNames", "/dashboard/deleteResource",
-						"/dashboard/uploadResourceFile", "/dashboard/saveUploadResourceFile",
-						"/dashboard/saveResourceContent",
-						"/dashboard/import", "/dashboard/uploadImportFile",
-						"/dashboard/saveImport", "/dashboard/delete",
-						"/dashboard/shareSet", "/dashboard/saveShareSet")
-				.access(AUTH_USER_AND_DATA_MANAGER)
-				// 其他
-				.antMatchers("/dashboard/**")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-
-				// 图表插件
-				// 选择
-				.antMatchers("/chartPlugin/select", "/chartPlugin/selectData")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-				// 管理
-				.antMatchers("/chartPlugin/**").access(AUTH_ADMIN)
-
-				// 数据集资源
-				// 选择
-				.antMatchers("/dataSetResDirectory/view", "/dataSetResDirectory/select",
-						"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-				// 管理
-				.antMatchers("/dataSetResDirectory/**").access(AUTH_ADMIN)
-
-				// 看板全局资源
-				// 选择
-				.antMatchers("/dashboardGlobalRes/queryData")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-				// 管理
-				.antMatchers("/dashboardGlobalRes/**").access(AUTH_ADMIN)
-
-				// 数据授权
-				.antMatchers("/authorization/**").access(AUTH_USER_AND_DATA_MANAGER)
-
-				// 驱动程序
-				// 选择
-				.antMatchers("/driverEntity/view", "/driverEntity/select", "/driverEntity/queryData",
-						"/driverEntity/downloadDriverFile", "/driverEntity/listDriverFile")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-				// 管理
-				.antMatchers("/driverEntity/**").access(AUTH_ADMIN)
-
-				// 数据源URL构建器
-				// 构建
-				.antMatchers("/schemaUrlBuilder/build")
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-				// 管理
-				.antMatchers("/schemaUrlBuilder/*").access(AUTH_ADMIN)
-
-				// 用户
-				// 个人设置
-				.antMatchers("/user/personalSet", "/user/savePersonalSet").access(AUTH_USER)
-				// 选择
-				.antMatchers("/user/select", "/user/pagingQueryData").access(AUTH_USER)
-				// 管理
-				.antMatchers("/user/**").access(AUTH_ADMIN)
-
-				// 角色
-				// 选择
-				.antMatchers("/role/select", "/role/pagingQueryData").access(AUTH_USER)
-				// 管理
-				.antMatchers("/role/**").access(AUTH_ADMIN)
-
-				// 数据源防护
-				.antMatchers("/schemaGuard/**").access(AUTH_ADMIN)
-
-				//
-				.antMatchers("/login/**", "/register/**", "/resetPassword/**").permitAll()
-
-				//
-				.antMatchers("/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-
-				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
-				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
-				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
-				.successHandler(this.authenticationSuccessHandler())
-				.failureHandler(this.authenticationFailureHandler())
-
-				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
-
-				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
-				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName("REMEMBER_ME");
-
+		configLoginAndOutForm(http);
 		configureAnonymous(http);
+		configLoginLatchFilter(http);
+	}
 
+	/**
+	 * 配置{@linkplain LoginLatchFilter}过滤器。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configLoginLatchFilter(HttpSecurity http) throws Exception
+	{
 		http.addFilterBefore(
 				new LoginLatchFilter(LOGIN_PROCESS_URL,
 						(AuthenticationFailureHandlerImpl) this.authenticationFailureHandler(),
 						this.coreConfig.getApplicationProperties(), this.coreConfig.checkCodeManager()),
 				UsernamePasswordAuthenticationFilter.class);
+	}
+
+	/**
+	 * 配置登录、退出相关访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configLoginAndOutForm(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests()
+				// 登录
+				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
+				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
+				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
+				.successHandler(this.authenticationSuccessHandler()).failureHandler(this.authenticationFailureHandler())
+
+				// 退出
+				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
+
+				// 记住登录
+				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
+				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName("REMEMBER_ME");
+
+	}
+
+	/**
+	 * 配置图表、看板展示功能访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForShowChartAndDashboard(HttpSecurity http) throws Exception
+	{
+		// 展示图表和看板
+		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
+		http.authorizeRequests().antMatchers(
+				// 图表插件
+				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
+				// 图表展示
+				"/chart/show/**", "/chart/showData",
+				// 看板展示
+				"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/heartbeat",
+				"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**")
+				.access(AUTH_ANONYMOUS_OR_USER)
+
+				// 展示图表和看板
+				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
+				.antMatchers("/analysis/chart/show/**", "/analysis/dashboard/show/**").access(AUTH_ANONYMOUS_OR_USER);
+	}
+
+	/**
+	 * 配置看板模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForDashboard(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleManagerAnalyst(http, //
+				new String[] { "/dashboard/add", "/dashboard/edit", "/dashboard/save", "/dashboard/copy",
+						"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile",
+						"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import",
+						"/dashboard/uploadImportFile", "/dashboard/saveImport", "/dashboard/delete",
+						"/dashboard/shareSet", "/dashboard/saveShareSet" },
+				"/dashboard/**");
+	}
+
+	/**
+	 * 配置图表模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForChart(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleManagerAnalyst(http, //
+				new String[] { "/chart/add", "/chart/edit", "/chart/copy", "/chart/save", "/chart/delete" },
+				"/chart/**");
+	}
+
+	/**
+	 * 配置数据集模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForDataSet(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleManagerAnalyst(http, //
+				new String[] { "/dataSet/addFor*", "/dataSet/saveAddFor*", "/dataSet/edit", "/dataSet/saveEditFor*",
+						"/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile" },
+				"/dataSet/**");
+	}
+
+	/**
+	 * 配置数据分析项目模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForAnalysisProject(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleManagerAnalyst(http,
+				new String[] { "/analysisProject/add", "/analysisProject/saveAdd", "/analysisProject/edit",
+						"/analysisProject/saveEdit", "/analysisProject/delete" },
+				"/analysisProject/**");
+	}
+
+	/**
+	 * 配置数据源模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForSchema(HttpSecurity http) throws Exception
+	{
+		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
+
+		configAccessForRoleManagerAnalyst(http,
+				new String[] { "/schema/add", "/schema/saveAdd", "/schema/edit", "/schema/saveEdit", "/schema/delete" },
+				"/schema/**");
+
+		// 数据源数据管理、导入导出、SQL工作台、SQL编辑器
+		// 用户针对数据源数据的所有操作都已受其所属数据源权限控制，所以不必再引入数据管理员/数据分析员权限
+		http.authorizeRequests() //
+				.antMatchers("/data/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
+				.antMatchers("/dataexchange/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
+				.antMatchers("/sqlpad/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
+				.antMatchers("/sqlEditor/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER);
+
+	}
+
+	/**
+	 * 配置图表插件模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForChartPlugin(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleAdmin(http, //
+				"/chartPlugin/**",
+				new String[] { "/chartPlugin/select", "/chartPlugin/selectData" });
+	}
+
+	/**
+	 * 配置数据集资源目录模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForDataSetResDirectory(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleAdmin(http, //
+				"/dataSetResDirectory/**", //
+				new String[] { "/dataSetResDirectory/view", "/dataSetResDirectory/select",
+						"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles" });
+	}
+
+	/**
+	 * 配置看板全局资源模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForDashboardGlobalRes(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleAdmin(http, //
+				"/dashboardGlobalRes/**", //
+				new String[] { "/dashboardGlobalRes/queryData" });
+	}
+
+	/**
+	 * 配置数据源驱动程序模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForDriverEntity(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleAdmin(http, //
+				"/driverEntity/**", //
+				new String[] { "/driverEntity/view", "/driverEntity/select", "/driverEntity/queryData",
+						"/driverEntity/downloadDriverFile", "/driverEntity/listDriverFile" });
+	}
+
+	/**
+	 * 配置数据源URL构建器模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForSchemaUrlBuilder(HttpSecurity http) throws Exception
+	{
+		configAccessForRoleAdmin(http, //
+				"/schemaUrlBuilder/*", //
+				new String[] { "/schemaUrlBuilder/build" });
+	}
+
+	/**
+	 * 配置用户模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForUser(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests()
+				// 个人设置
+				.antMatchers("/user/personalSet", "/user/savePersonalSet").access(AUTH_USER)
+				// 选择
+				.antMatchers("/user/select", "/user/pagingQueryData").access(AUTH_USER)
+				// 管理
+				.antMatchers("/user/**").access(AUTH_ADMIN);
+	}
+
+	/**
+	 * 配置角色模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForRole(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests()
+				// 选择
+				.antMatchers("/role/select", "/role/pagingQueryData").access(AUTH_USER)
+				// 管理
+				.antMatchers("/role/**").access(AUTH_ADMIN);
+	}
+
+	/**
+	 * 配置数据源防护模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForSchemaGuard(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests()
+				.antMatchers("/schemaGuard/**").access(AUTH_ADMIN);
+	}
+
+	/**
+	 * 配置数据授权模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForAuthorization(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/authorization/**").access(AUTH_USER_AND_DATA_MANAGER);
+	}
+
+	/**
+	 * 配置登录模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForLogin(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/login/**").permitAll();
+	}
+
+	/**
+	 * 配置注册模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForRegister(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/register/**").permitAll();
+	}
+
+	/**
+	 * 配置重置密码模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForResetPassword(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/resetPassword/**").permitAll();
+	}
+
+	/**
+	 * 配置切换主题模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForChangeTheme(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/changeThemeData/**").permitAll();
+	}
+
+	/**
+	 * 配置校验码模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForCheckCode(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/checkCode/**").permitAll();
+	}
+
+	/**
+	 * 配置{@linkplain #configAccessBeforeAllOther(HttpSecurity)}之前的访问权限。
+	 * <p>
+	 * 此方法默认什么也不做，留作扩展。
+	 * </p>
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessBeforeAllOther(HttpSecurity http) throws Exception
+	{
+	}
+
+	/**
+	 * 配置所有其他功能访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessAllOther(HttpSecurity http) throws Exception
+	{
+		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
+
+		http.authorizeRequests().antMatchers("/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER);
+	}
+
+	/**
+	 * 配置{@linkplain Role#ROLE_DATA_MANAGER}、{@linkplain Role#ROLE_DATA_ANALYST}角色相关的访问权限。
+	 * 
+	 * @param http
+	 * @param managerUrlPatterns
+	 * @param otherUrlPatterns
+	 * @throws Exception
+	 */
+	protected void configAccessForRoleManagerAnalyst(HttpSecurity http, String[] managerUrlPatterns,
+			String otherUrlPattern) throws Exception
+	{
+		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
+
+		http.authorizeRequests()
+				// 管理
+				.antMatchers(managerUrlPatterns).access(AUTH_USER_AND_DATA_MANAGER)
+				// 其他
+				.antMatchers(otherUrlPattern)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST);
+	}
+
+	/**
+	 * 配置{@linkplain AuthUser#ROLE_ADMIN}角色相关的访问权限。
+	 * 
+	 * @param http
+	 * @param managerUrlPattern
+	 * @param otherUrlPatterns
+	 * @throws Exception
+	 */
+	protected void configAccessForRoleAdmin(HttpSecurity http, String managerUrlPattern,
+			String[] otherUrlPatterns) throws Exception
+	{
+		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
+
+		http.authorizeRequests()
+				// 其他
+				.antMatchers(otherUrlPatterns)
+				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
+				// 管理
+				.antMatchers(managerUrlPattern).access(AUTH_ADMIN);
 	}
 
 	/**
