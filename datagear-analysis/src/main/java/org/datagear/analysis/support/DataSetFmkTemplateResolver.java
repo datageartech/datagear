@@ -84,7 +84,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		return configuration;
 	}
 
-	public void setConfiguration(Configuration configuration)
+	protected void setConfiguration(Configuration configuration)
 	{
 		this.configuration = configuration;
 
@@ -108,9 +108,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		// 数值插值设置为标准格式
 		configuration.setNumberFormat(FREEMARKER_NUMBER_FORMAT_COMPUTER);
 
-		// 由于此类的模板策略是直接使用模板作为模板名，如果此方法设置为true，
-		// 下面的NameTemplateLoader.findTemplateSource(String)的参数SQL会被加上Locale后缀导致逻辑出错，
-		// 因此这里必须设置为false
+		// 此类的模板策略不需要国际化支持，应禁用
 		configuration.setLocalizedLookup(false);
 	}
 
