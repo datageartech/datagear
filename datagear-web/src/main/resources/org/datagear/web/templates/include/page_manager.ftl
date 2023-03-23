@@ -33,7 +33,6 @@ String action
 	po.isSelectAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_SELECT}") == 0);
 	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
 	po.isReadonlyAction = ("${(isReadonlyAction!false)?string('true','false')}" == "true");
-	po.isReadonlyAction = (po.isReadonlyAction || po.isSelectAction);
 	
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='pleaseSelectAtLeastOne' />";

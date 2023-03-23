@@ -425,9 +425,7 @@ public abstract class AbstractController
 	{
 		setReadonlyAction(model, true);
 		
-		boolean multiple = false;
-		if (request.getParameter("multiple") != null)
-			multiple = true;
+		boolean multiple = isMultipleSelectRequest(request);
 
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_SELECT);
 		model.addAttribute(KEY_IS_MULTIPLE_SELECT, multiple);
@@ -436,22 +434,15 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 设置{@code isMultipleSelect}属性。
+	 * 是否多选请求。
 	 * 
 	 * @param request
-	 * @param model
 	 * @return
 	 */
-	@Deprecated
-	protected boolean setIsMultipleSelectAttribute(HttpServletRequest request, org.springframework.ui.Model model)
+	protected boolean isMultipleSelectRequest(HttpServletRequest request)
 	{
-		boolean isMultipleSelect = false;
-		if (request.getParameter("multiple") != null)
-			isMultipleSelect = true;
-
-		model.addAttribute("isMultipleSelect", isMultipleSelect);
-
-		return isMultipleSelect;
+		String multipleParam = request.getParameter("multiple");
+		return (multipleParam != null);
 	}
 
 	/**
