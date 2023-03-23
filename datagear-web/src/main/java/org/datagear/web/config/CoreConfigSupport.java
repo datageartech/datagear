@@ -34,8 +34,6 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.TplDashboardWidgetResManager;
-import org.datagear.analysis.support.DataSetFmkTemplateResolver.NameTemplateLoader;
-import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
@@ -1041,15 +1039,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 						.setPermissionCacheService(this.cacheServiceConfig.createPermissionCacheService(es.getClass()));
 			}
 		}
-
-		DataSetFmkTemplateResolvers.PLAIN.getNameTemplateLoader().setCacheService(
-				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".plain"));
-		DataSetFmkTemplateResolvers.CSV.getNameTemplateLoader().setCacheService(
-				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".csv"));
-		DataSetFmkTemplateResolvers.JSON.getNameTemplateLoader().setCacheService(
-				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".json"));
-		DataSetFmkTemplateResolvers.SQL.getNameTemplateLoader().setCacheService(
-				this.cacheServiceConfig.createCacheService(NameTemplateLoader.class.getName() + ".sql"));
 
 		Map<String, HtmlTplDashboardWidgetHtmlRenderer> renderers = context
 				.getBeansOfType(HtmlTplDashboardWidgetHtmlRenderer.class);

@@ -23,9 +23,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 
-import org.datagear.util.CacheService;
-import org.springframework.cache.Cache.ValueWrapper;
-
 import freemarker.cache.TemplateLoader;
 import freemarker.core.OutputFormat;
 import freemarker.template.Configuration;
@@ -55,7 +52,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	 */
 	public static final String FREEMARKER_NUMBER_FORMAT_COMPUTER = "computer";
 
-	private NameTemplateLoader nameTemplateLoader;
+	private final ThreadLocaleTemplateLoader threadLocaleTemplateLoader = new ThreadLocaleTemplateLoader();
 
 	private Configuration configuration;
 
@@ -72,7 +69,6 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	public DataSetFmkTemplateResolver(OutputFormat outputFormat, int cacheCapacity)
 	{
 		super();
-		this.nameTemplateLoader = new NameTemplateLoader();
 
 		Configuration configuration = new Configuration(Configuration.VERSION_2_3_30);
 		configuration.setCacheStorage(new freemarker.cache.MruCacheStorage(0, cacheCapacity));
@@ -81,19 +77,6 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 			configuration.setOutputFormat(outputFormat);
 
 		setConfiguration(configuration);
-	}
-
-	public NameTemplateLoader getNameTemplateLoader()
-	{
-		return nameTemplateLoader;
-	}
-
-	public void setNameTemplateLoader(NameTemplateLoader nameTemplateLoader)
-	{
-		this.nameTemplateLoader = nameTemplateLoader;
-
-		if (this.configuration != null)
-			this.configuration.setTemplateLoader(this.nameTemplateLoader);
 	}
 
 	public Configuration getConfiguration()
@@ -105,9 +88,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	{
 		this.configuration = configuration;
 
-		if (this.nameTemplateLoader != null)
-			this.configuration.setTemplateLoader(this.nameTemplateLoader);
-
+		this.configuration.setTemplateLoader(this.threadLocaleTemplateLoader);
 		setDataSetTemplateStandardConfig(this.configuration);
 	}
 
@@ -153,6 +134,8 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 
 		Map<String, ?> values = templateContext.getValues();
 
+		ThreadLocaleTemplateLoader.setTemplate(template);
+
 		try
 		{
 			Template templateObj = this.configuration.getTemplate(template);
@@ -168,33 +151,29 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		{
 			throw new TemplateResolverException(e);
 		}
+		finally
+		{
+			ThreadLocaleTemplateLoader.removeTemplate();
+		}
 
 		return re;
 	}
 
 	/**
-	 * 直接使用名称作为模板的{@linkplain TemplateLoader}。
+	 * 使用{@linkplain ThreadLocaleTemplateLoader#setTemplate(String)}作为模板的{@linkplain TemplateLoader}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class NameTemplateLoader implements TemplateLoader
+	protected static class ThreadLocaleTemplateLoader implements TemplateLoader
 	{
-		private CacheService cacheService = new CacheService(null, false, false, true);
+		protected static final ThreadLocal<String> TEMPLATE_THREAD_LOCAL = new ThreadLocal<String>();
 
-		public NameTemplateLoader()
+		protected static final long LAST_MODIFLED = System.currentTimeMillis();
+
+		public ThreadLocaleTemplateLoader()
 		{
 			super();
-		}
-
-		public CacheService getCacheService()
-		{
-			return cacheService;
-		}
-
-		public void setCacheService(CacheService cacheService)
-		{
-			this.cacheService = cacheService;
 		}
 
 		@Override
@@ -205,55 +184,57 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		@Override
 		public Object findTemplateSource(String name) throws IOException
 		{
-			String key = getCacheKey(name);
-			ValueWrapper tsWrapper = this.cacheService.get(key);
-			Object ts = (tsWrapper == null ? null : tsWrapper.get());
-
-			if (ts != null)
-				return ts;
-
-			ts = new NameTemplateSource(name, System.currentTimeMillis());
-			this.cacheService.put(key, ts);
-
+			// 注意：
+			// 这里的实现不能直接使用name作为模板，因为它可能并不是原始的DataSetFmkTemplateResolver.resolve()方法传入的模板,
+			// 因为这里的name是经过了freemarker.cache.TemplateNameFormat处理的
+			TemplateContentSource ts = new TemplateContentSource(name, TEMPLATE_THREAD_LOCAL.get(), LAST_MODIFLED);
 			return ts;
 		}
 
 		@Override
 		public long getLastModified(Object templateSource)
 		{
-			return ((NameTemplateSource) templateSource).getLastModified();
+			return ((TemplateContentSource) templateSource).getLastModified();
 		}
 
 		@Override
 		public Reader getReader(Object templateSource, String encoding) throws IOException
 		{
-			return new StringReader(((NameTemplateSource) templateSource).getName());
+			return new StringReader(((TemplateContentSource) templateSource).getTemplate());
 		}
 
-		protected String getCacheKey(String name)
+		public static void setTemplate(String template)
 		{
-			if (!this.cacheService.isShared())
-				return name;
-
-			return NameTemplateLoader.class.getName() + "." + name;
+			TEMPLATE_THREAD_LOCAL.set(template);
 		}
 
-		protected static class NameTemplateSource
+		public static void removeTemplate()
+		{
+			TEMPLATE_THREAD_LOCAL.remove();
+		}
+
+		protected static class TemplateContentSource
 		{
 			private final String name;
-
+			private final String template;
 			private final long lastModified;
 
-			public NameTemplateSource(String name, long lastModified)
+			public TemplateContentSource(String name, String template, long lastModified)
 			{
 				super();
 				this.name = name;
+				this.template = template;
 				this.lastModified = lastModified;
 			}
 
 			public String getName()
 			{
 				return name;
+			}
+
+			public String getTemplate()
+			{
+				return template;
 			}
 
 			public long getLastModified()
@@ -266,7 +247,9 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 			{
 				final int prime = 31;
 				int result = 1;
+				result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
 				result = prime * result + ((name == null) ? 0 : name.hashCode());
+				result = prime * result + ((template == null) ? 0 : template.hashCode());
 				return result;
 			}
 
@@ -279,13 +262,22 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 					return false;
 				if (getClass() != obj.getClass())
 					return false;
-				NameTemplateSource other = (NameTemplateSource) obj;
+				TemplateContentSource other = (TemplateContentSource) obj;
+				if (lastModified != other.lastModified)
+					return false;
 				if (name == null)
 				{
 					if (other.name != null)
 						return false;
 				}
 				else if (!name.equals(other.name))
+					return false;
+				if (template == null)
+				{
+					if (other.template != null)
+						return false;
+				}
+				else if (!template.equals(other.template))
 					return false;
 				return true;
 			}
