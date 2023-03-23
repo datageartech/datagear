@@ -621,16 +621,22 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public DataSetEntityService dataSetEntityService()
 	{
-		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.authorizationService(), this.connectionSource(), this.schemaService(),
-				this.analysisProjectService(), this.userService(), this.dataSetResDirectoryService(),
-				this.dataSetRootDirectory(),
-				this.httpClient());
+		DataSetEntityServiceImpl bean = createDataSetEntityServiceImpl();
 
 		bean.setDataSetResourceDataCacheService(this.cacheServiceConfig
 				.createCacheService(DataSetEntityService.class.getName() + ".dataSetResourceDataCacheService"));
 
 		bean.setSqlDataSetSqlValidator(this.sqlDataSetSqlValidator());
+
+		return bean;
+	}
+
+	protected DataSetEntityServiceImpl createDataSetEntityServiceImpl()
+	{
+		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.authorizationService(), this.connectionSource(), this.schemaService(),
+				this.analysisProjectService(), this.userService(), this.dataSetResDirectoryService(),
+				this.dataSetRootDirectory(), this.httpClient());
 
 		return bean;
 	}

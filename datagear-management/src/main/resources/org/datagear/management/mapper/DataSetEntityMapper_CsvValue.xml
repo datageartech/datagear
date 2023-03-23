@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.DataSetEntity">
+	
+	<insert id="insertCsvValueDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_CSV_VALUE
+			(
+			DS_ID, DS_VALUE, DS_NAME_ROW
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.value}, #{entity.nameRow}
+			)
+	</insert>
+	
+	<update id="updateCsvValueDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_CSV_VALUE SET
+			DS_VALUE = #{entity.value},
+			DS_NAME_ROW = #{entity.nameRow}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<select id="getCsvValueDataSetEntityById" resultType="org.datagear.management.domain.CsvValueDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_VALUE AS ${_iq_}value${_iq_},
+			T2.DS_NAME_ROW AS ${_iq_}nameRow${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_CSV_VALUE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+</mapper>

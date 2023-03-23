@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.DataSetEntity">
+	
+	<insert id="insertJsonFileDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_JSON_FILE
+			(
+				DS_ID, DS_FILE_NAME, DS_FILE_ENCODING, DS_DISPLAY_NAME, DS_DATA_JSON_PATH,
+				DS_FILE_SOURCE_TYPE, DS_DSRD_ID, DS_DSRD_FILE_NAME
+			)
+		VALUES
+			(
+				#{entity.id}, #{entity.fileName}, #{entity.encoding}, #{entity.displayName}, #{entity.dataJsonPath},
+				#{entity.fileSourceType}, #{entity.dataSetResDirectory.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
+			)
+	</insert>
+	
+	<update id="updateJsonFileDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_JSON_FILE SET
+			DS_FILE_NAME = #{entity.fileName},
+			DS_FILE_ENCODING = #{entity.encoding},
+			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_DATA_JSON_PATH = #{entity.dataJsonPath},
+			DS_FILE_SOURCE_TYPE = #{entity.fileSourceType},
+			DS_DSRD_ID = #{entity.dataSetResDirectory.id, jdbcType=VARCHAR},
+			DS_DSRD_FILE_NAME = #{entity.dataSetResFileName}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<select id="getJsonFileDataSetEntityById" resultType="org.datagear.management.domain.JsonFileDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_FILE_NAME AS ${_iq_}fileName${_iq_},
+			T2.DS_FILE_ENCODING AS ${_iq_}encoding${_iq_},
+			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_},
+			T2.DS_DATA_JSON_PATH AS ${_iq_}dataJsonPath${_iq_},
+			T2.DS_FILE_SOURCE_TYPE AS ${_iq_}fileSourceType${_iq_},
+			T2.DS_DSRD_ID AS ${_iq_}dataSetResDirectory.id${_iq_},
+			T2.DS_DSRD_FILE_NAME AS ${_iq_}dataSetResFileName${_iq_},
+			DSRD.DD_DIRECTORY AS ${_iq_}dataSetResDirectory.directory${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_JSON_FILE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+		LEFT JOIN
+			DATAGEAR_DSR_DIRECTORY DSRD
+		ON
+			T2.DS_DSRD_ID = DSRD.DD_ID
+	</select>
+	
+</mapper>

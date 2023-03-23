@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.DataSetEntity">
+	
+	<insert id="insertHttpDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_HTTP
+			(
+			DS_ID, DS_URI, DS_HEADER_CONTENT, DS_RQT_METHOD, DS_RQT_CONTENT_TYPE,
+			DS_RQT_CONTENT_CHARSET, DS_RQT_CONTENT, DS_RPS_CONTENT_TYPE, DS_RPS_DATA_JSON_PATH
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.uri}, #{entity.headerContent}, #{entity.requestMethod}, #{entity.requestContentType},
+			#{entity.requestContentCharset}, #{entity.requestContent}, #{entity.responseContentType}, #{entity.responseDataJsonPath}
+			)
+	</insert>
+	
+	<update id="updateHttpDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_HTTP SET
+			DS_URI = #{entity.uri},
+			DS_HEADER_CONTENT = #{entity.headerContent},
+			DS_RQT_METHOD = #{entity.requestMethod},
+			DS_RQT_CONTENT_TYPE = #{entity.requestContentType},
+			DS_RQT_CONTENT_CHARSET = #{entity.requestContentCharset},
+			DS_RQT_CONTENT = #{entity.requestContent},
+			DS_RPS_CONTENT_TYPE = #{entity.responseContentType},
+			DS_RPS_DATA_JSON_PATH = #{entity.responseDataJsonPath}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<select id="getHttpDataSetEntityById" resultType="org.datagear.management.domain.HttpDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_URI AS ${_iq_}uri${_iq_},
+			T2.DS_HEADER_CONTENT AS ${_iq_}headerContent${_iq_},
+			T2.DS_RQT_METHOD AS ${_iq_}requestMethod${_iq_},
+			T2.DS_RQT_CONTENT_TYPE AS ${_iq_}requestContentType${_iq_},
+			T2.DS_RQT_CONTENT_CHARSET AS ${_iq_}requestContentCharset${_iq_},
+			T2.DS_RQT_CONTENT AS ${_iq_}requestContent${_iq_},
+			T2.DS_RPS_CONTENT_TYPE AS ${_iq_}responseContentType${_iq_},
+			T2.DS_RPS_DATA_JSON_PATH AS ${_iq_}responseDataJsonPath${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_HTTP T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+</mapper>

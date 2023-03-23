@@ -172,12 +172,18 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		SqlDataSetEntity dataSet = new SqlDataSetEntity();
+		SqlDataSetEntity dataSet = createDftSqlDataSetEntity(request, response, model);
 		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected SqlDataSetEntity createDftSqlDataSetEntity(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		return new SqlDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
@@ -207,12 +213,18 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForJsonValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		JsonValueDataSetEntity dataSet = new JsonValueDataSetEntity();
+		JsonValueDataSetEntity dataSet = createDftJsonValueDataSetEntity(request, response, model);
 		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected JsonValueDataSetEntity createDftJsonValueDataSetEntity(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		return new JsonValueDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
@@ -242,7 +254,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForJsonFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
+		JsonFileDataSetEntity dataSet = createDftJsonFileDataSetEntity(request, response, model);
 		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		setRequestAnalysisProject(request, response, dataSet);
 
@@ -250,6 +262,12 @@ public class DataSetController extends AbstractSchemaConnController
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected JsonFileDataSetEntity createDftJsonFileDataSetEntity(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		return new JsonFileDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
@@ -281,7 +299,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		ExcelDataSetEntity dataSet = new ExcelDataSetEntity();
+		ExcelDataSetEntity dataSet = createDftExcelDataSetEntity(request, response, model);
 		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		dataSet.setNameRow(1);
 		setRequestAnalysisProject(request, response, dataSet);
@@ -289,6 +307,12 @@ public class DataSetController extends AbstractSchemaConnController
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected ExcelDataSetEntity createDftExcelDataSetEntity(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		return new ExcelDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
@@ -320,13 +344,19 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForCsvValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		CsvValueDataSetEntity dataSet = new CsvValueDataSetEntity();
+		CsvValueDataSetEntity dataSet = createDftCsvValueDataSetEntity(request, response, model);
 		dataSet.setNameRow(1);
 		setRequestAnalysisProject(request, response, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected CsvValueDataSetEntity createDftCsvValueDataSetEntity(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		return new CsvValueDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
@@ -356,7 +386,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForCsvFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		CsvFileDataSetEntity dataSet = new CsvFileDataSetEntity();
+		CsvFileDataSetEntity dataSet = createDftCsvFileDataSetEntity(request, response, model);
 		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
 		dataSet.setNameRow(1);
 		setRequestAnalysisProject(request, response, dataSet);
@@ -365,6 +395,12 @@ public class DataSetController extends AbstractSchemaConnController
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected CsvFileDataSetEntity createDftCsvFileDataSetEntity(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		return new CsvFileDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
@@ -396,13 +432,19 @@ public class DataSetController extends AbstractSchemaConnController
 	public String addForHttp(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		HttpDataSetEntity dataSet = new HttpDataSetEntity();
+		HttpDataSetEntity dataSet = createDftHttpDataSetEntity(request, response, model);
 		setRequestAnalysisProject(request, response, dataSet);
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());	
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http);
 
 		return buildFormView(dataSet.getDataSetType());
+	}
+
+	protected HttpDataSetEntity createDftHttpDataSetEntity(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		return new HttpDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
