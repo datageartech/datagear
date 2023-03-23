@@ -590,7 +590,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 			for (String sql : sqls)
 			{
 				if (LOGGER.isInfoEnabled())
-					LOGGER.info("Start execute sql : " + sql);
+					LOGGER.info("Start execute sql : " + IOUtil.LINE_SEPARATOR + sql);
 
 				st.execute(sql);
 			}
