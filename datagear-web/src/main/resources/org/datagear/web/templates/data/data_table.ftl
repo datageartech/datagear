@@ -58,7 +58,7 @@
 				v-if="pm.canReadTableData">
 			</p-button>
 			<p-button label="<@spring.message code='export' />" @click="onExport"
-				v-if="!pm.isSelectAction && pm.canReadTableData">
+				v-if="!pm.isReadonlyAction && pm.canDeleteTableData">
 			</p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete"
 				class="p-button-danger"

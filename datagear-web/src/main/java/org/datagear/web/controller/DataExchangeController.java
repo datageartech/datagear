@@ -787,7 +787,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -833,7 +833,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -876,7 +876,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkReadTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
@@ -934,7 +934,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -978,7 +978,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkReadTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -1036,7 +1036,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -1084,7 +1084,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkReadTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
@@ -1142,7 +1142,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -1188,7 +1188,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkReadTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
@@ -1231,9 +1231,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/download")
 	@ResponseBody
 	public void exptDownload(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("fileName") String fileName) throws Exception
+			@RequestParam("fileName") String fileName) throws Throwable
 	{
+		final User user = WebUtils.getUser();
+
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				checkDeleteTableDataPermission(schema, user);
+			}
+		}.execute();
+
 		response.setCharacterEncoding(RESPONSE_ENCODING);
 		response.setHeader("Content-Disposition",
 				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
@@ -1257,9 +1270,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/downloadAll")
 	@ResponseBody
 	public void exptDownloadAll(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("fileName") String fileName) throws Exception
+			@RequestParam("fileName") String fileName) throws Throwable
 	{
+		final User user = WebUtils.getUser();
+
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				checkDeleteTableDataPermission(schema, user);
+			}
+		}.execute();
+
 		response.setCharacterEncoding(RESPONSE_ENCODING);
 		response.setHeader("Content-Disposition",
 				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
