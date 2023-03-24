@@ -267,7 +267,7 @@ public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implemen
 						"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile",
 						"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import",
 						"/dashboard/uploadImportFile", "/dashboard/saveImport", "/dashboard/delete",
-						"/dashboard/shareSet", "/dashboard/saveShareSet" },
+						"/dashboard/shareSet", "/dashboard/saveShareSet", "/dashboard/export" },
 				"/dashboard/**");
 	}
 
