@@ -1748,7 +1748,7 @@
 		{
 			if(cms && cms.names && cms.names.length > 0)
 			{
-				re.builtins.push(cms.names[0]);
+				re.builtins.push(cms.names[1] ? cms.names[1] : cms.names[0]);
 			}
 		});
 		

@@ -292,7 +292,8 @@ page_boolean_options.ftl
 		{
 			if(cms && cms.names && cms.names.length > 0)
 			{
-				inputPayload.push({ name: cms.names[0], value: cms.names[0]});
+				var mapName = (cms.names[1] ? cms.names[1] : cms.names[0]);
+				inputPayload.push({ name: mapName, value: mapName});
 			}
 		});
 		
