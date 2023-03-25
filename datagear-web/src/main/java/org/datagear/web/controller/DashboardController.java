@@ -1463,14 +1463,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			response.setContentType(CONTENT_TYPE_HTML);
 			out = IOUtil.getBufferedWriter(response.getWriter());
 
-			List<HtmlTplDashboardImport> importList = buildHtmlTplDashboardImports(request);
-			if (isShowForEdit)
-			{
-				importList.add(HtmlTplDashboardImport.valueOfLinkCss("dashboardEditorStyle",
-						WebUtils.getContextPath(request) + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
-				importList.add(HtmlTplDashboardImport.valueOfJavaScript("dashboardEditor",
-						WebUtils.getContextPath(request) + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
-			}
+			List<HtmlTplDashboardImport> importList = buildHtmlTplDashboardImports(request, isShowForEdit);
 			
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
 					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")),

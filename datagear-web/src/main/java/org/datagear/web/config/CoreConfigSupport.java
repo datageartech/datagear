@@ -133,6 +133,7 @@ import org.datagear.web.util.DashboardSharePasswordCryptoImpl;
 import org.datagear.web.util.DashboardSharePasswordCryptoImpl.EncryptType;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
+import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
@@ -565,6 +566,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DashboardThemeSource dashboardThemeSource()
 	{
 		DashboardThemeSource bean = new SimpleDashboardThemeSource();
+		return bean;
+	}
+	
+	@Bean
+	public HtmlTplDashboardImportResolver htmlTplDashboardImportResolver()
+	{
+		HtmlTplDashboardImportResolver bean = new HtmlTplDashboardImportResolver();
 		return bean;
 	}
 

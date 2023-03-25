@@ -50,14 +50,13 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
-import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
+import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,28 +150,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板心跳URL名 */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
 
-	/**
-	 * 内置看板资源名，不要修改它们，因为它们可能会在看板模板中通过{@linkplain HtmlTplDashboardWidgetHtmlRenderer#DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT}设置。
-	 */
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY = "jquery";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS = "echarts";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD = "echarts-wordcloud";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_LIQUIDFILL = "echarts-liquidfill";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES = "DataTables";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER = "jquery-datetimepicker";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY = "chartFactory";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY = "dashboardFactory";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME = "serverTime";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT = "chartSupport";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING = "chartSetting";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER = "chartPluginManager";
-	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE = "dashboardStyle";
-
 	@Autowired
 	private DataSetParamValueConverter dataSetParamValueConverter;
 
 	@Autowired
 	private DashboardThemeSource dashboardThemeSource;
+	
+	@Autowired
+	private HtmlTplDashboardImportResolver htmlTplDashboardImportResolver;
 	
 	@Autowired
 	private ThemeSpec themeSpec;
@@ -200,6 +185,16 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public void setDashboardThemeSource(DashboardThemeSource dashboardThemeSource)
 	{
 		this.dashboardThemeSource = dashboardThemeSource;
+	}
+
+	public HtmlTplDashboardImportResolver getHtmlTplDashboardImportResolver()
+	{
+		return htmlTplDashboardImportResolver;
+	}
+
+	public void setHtmlTplDashboardImportResolver(HtmlTplDashboardImportResolver htmlTplDashboardImportResolver)
+	{
+		this.htmlTplDashboardImportResolver = htmlTplDashboardImportResolver;
 	}
 
 	public ThemeSpec getThemeSpec()
@@ -240,53 +235,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param request
 	 * @return
 	 */
-	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImports(HttpServletRequest request)
+	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImports(HttpServletRequest request, boolean edit)
 	{
-		List<HtmlTplDashboardImport> impts = new ArrayList<>();
-
-		String contextPath = WebUtils.getContextPath(request);
-		String rp = "rc" + Long.toHexString(System.currentTimeMillis());
-
-		String staticPrefix = contextPath + "/static";
-		String libPrefix = staticPrefix + "/lib";
-		String cssPrefix = staticPrefix + "/css";
-		String scriptPrefix = staticPrefix + "/script";
-
-		// CSS
-		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
-						libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
-		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
-				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
-		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE,
-				cssPrefix + "/analysis.css?v=" + Global.VERSION));
-
-		// JS
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
-				libPrefix + "/jquery-3.6.0/jquery-3.6.0.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
-				libPrefix + "/echarts-5.4.1/echarts.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD,
-				libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_LIQUIDFILL,
-				libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
-						libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
-				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY,
-						scriptPrefix + "/chartFactory.js?v=" + Global.VERSION));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
-				scriptPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME,
-						contextPath + "/dashboard/serverTime.js?v=" + rp));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,
-						scriptPrefix + "/chartSupport.js?v=" + Global.VERSION));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
-						scriptPrefix + "/chartSetting.js?v=" + Global.VERSION));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
-				contextPath + "/chartPlugin/chartPluginManager.js?v=" + Global.VERSION));
-
-		return impts;
+		return this.htmlTplDashboardImportResolver.resolve(request, edit);
 	}
 
 	/**

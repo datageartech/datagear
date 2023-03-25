@@ -71,6 +71,11 @@
 	/**看板对象基类*/
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
 	
+	/** 内置地图 */
+	var builtinChartMaps = (dashboardFactory.builtinChartMaps || (dashboardFactory.builtinChartMaps = []));
+	
+	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/lib/echarts-map/"));
+	
 	//----------------------------------------
 	// chartStatusConst开始
 	//----------------------------------------
@@ -836,9 +841,6 @@
 	 */
 	dashboardBase._initMapURLs = function()
 	{
-		var builtinChartMaps = dashboardFactory.builtinChartMaps;
-		var builtinChartMapBaseURL = dashboardFactory.builtinChartMapBaseURL;
-		
 		var mapURLs = {};
 		
 		for(var i=0; i<builtinChartMaps.length; i++)
@@ -3024,7 +3026,7 @@
 	 * 内置地图JSON地址配置。
 	 * 注意：配置对象中的names数组第二个元素应是标准常用名称，因为图表属性内置DG_MAP取值是取它的第二个元素
 	 */
-	dashboardFactory.builtinChartMaps =
+	var dftBuiltinChartMaps =
 	[
 		{
 		  "names" : [ "100000", "中国", "中华人民共和国", "china", "China" ],
@@ -3175,6 +3177,7 @@
 		{names: ["world", "世界"], url: "world.json"}
 	];
 	
-	dashboardFactory.builtinChartMapBaseURL = "/static/lib/echarts-map/";
+	for(var i=0; i<dftBuiltinChartMaps.length; i++)
+		builtinChartMaps.push(dftBuiltinChartMaps[i]);
 })
 (this);

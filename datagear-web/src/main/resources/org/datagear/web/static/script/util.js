@@ -2266,25 +2266,25 @@ $.inflatePageObj = function(po)
 					setupObj[cpn] = Vue.computed(computedObj[cpn]);
 				}
 				
-				Vue.onMounted(function()
+				return setupObj;
+			},
+			mounted()
+			{
+				po._vueApp = this;
+				
+				$.each(mountedObj, function(idx, callback)
 				{
-					$.each(mountedObj, function(idx, callback)
-					{
-						callback();
-					});
-					
-					$.initGlobalTip();
-					$.initGlobalConfirm();
+					callback();
 				});
 				
-				return setupObj;
+				$.initGlobalTip();
+				$.initGlobalConfirm();
 			},
 			components: componentsObj
 		});
 		
-		this._vueApp = Vue.createApp(app).use(primevue.config.default)
-						.directive("tooltip", primevue.tooltip).mount("#"+this.pid);
-		return this._vueApp;
+		var vueApp = Vue.createApp(app).use(primevue.config.default).directive("tooltip", primevue.tooltip).mount("#"+this.pid);
+		return vueApp;
 	};
 	
 	//获取挂载后的vue实例
