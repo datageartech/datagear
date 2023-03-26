@@ -3034,147 +3034,46 @@
 		  //"map" : "100000_full.json"
 		  "map" : "china_right_nanhaizhudao.json"
 		},
-		{
-		  "names" : [ "110000", "北京市", "北京", "京", "beijing", "Beijing" ],
-		  "map" : "110000_full.json"
-		},
-		{
-		  "names" : [ "120000", "天津市", "天津", "津", "tianjin", "Tianjin" ],
-		  "map" : "120000_full.json"
-		},
-		{
-		  "names" : [ "130000", "河北省", "河北", "冀", "hebei", "Hebei" ],
-		  "map" : "130000_full.json"
-		},
-		{
-		  "names" : [ "140000", "山西省", "山西", "晋", "shanxi", "Shanxi" ],
-		  "map" : "140000_full.json"
-		},
-		{
-		  "names" : [ "150000", "内蒙古自治区", "内蒙古", "蒙", "neimenggu", "Neimenggu" ],
-		  "map" : "150000_full.json"
-		},
-		{
-		  "names" : [ "210000", "辽宁省", "辽宁", "辽", "liaoning", "Liaoning" ],
-		  "map" : "210000_full.json"
-		},
-		{
-		  "names" : [ "220000", "吉林省", "吉林", "吉", "jilin", "Jilin" ],
-		  "map" : "220000_full.json"
-		},
-		{
-		  "names" : [ "230000", "黑龙江省", "黑龙江", "黑", "heilongjiang", "Heilongjiang" ],
-		  "map" : "230000_full.json"
-		},
-		{
-		  "names" : [ "310000", "上海市", "上海", "沪", "shanghai", "Shanghai" ],
-		  "map" : "310000_full.json"
-		},
-		{
-		  "names" : [ "320000", "江苏省", "江苏", "苏", "jiangsu", "Jiangsu" ],
-		  "map" : "320000_full.json"
-		},
-		{
-		  "names" : [ "330000", "浙江省", "浙江", "浙", "zhejiang", "Zhejiang" ],
-		  "map" : "330000_full.json"
-		},
-		{
-		  "names" : [ "340000", "安徽省", "安徽", "皖", "Anhui", "anhui" ],
-		  "map" : "340000_full.json"
-		},
-		{
-		  "names" : [ "350000", "福建省", "福建", "闽", "fujian", "Fujian" ],
-		  "map" : "350000_full.json"
-		},
-		{
-		  "names" : [ "360000", "江西省", "江西", "赣", "jiangxi", "Jiangxi" ],
-		  "map" : "360000_full.json"
-		},
-		{
-		  "names" : [ "370000", "山东省", "山东", "鲁", "shandong", "Shandong" ],
-		  "map" : "370000_full.json"
-		},
-		{
-		  "names" : [ "410000", "河南省", "河南", "豫", "henan", "Henan" ],
-		  "map" : "410000_full.json"
-		},
-		{
-		  "names" : [ "420000", "湖北省", "湖北", "鄂", "hubei", "Hubei" ],
-		  "map" : "420000_full.json"
-		},
-		{
-		  "names" : [ "430000", "湖南省", "湖南", "湘", "hunan", "Hunan" ],
-		  "map" : "430000_full.json"
-		},
-		{
-		  "names" : [ "440000", "广东省", "广东", "粤", "guangdong", "Guangdong" ],
-		  "map" : "440000_full.json"
-		},
-		{
-		  "names" : [ "450000", "广西壮族自治区", "广西", "桂", "guangxi", "Guangxi" ],
-		  "map" : "450000_full.json"
-		},
-		{
-		  "names" : [ "460000", "海南省", "海南", "琼", "hainan", "Hainan" ],
-		  "map" : "460000_full.json"
-		},
-		{
-		  "names" : [ "500000", "重庆市", "重庆", "渝", "chongqing", "Chongqing" ],
-		  "map" : "500000_full.json"
-		},
-		{
-		  "names" : [ "510000", "四川省", "四川", "川", "sichuan", "Sichuan" ],
-		  "map" : "510000_full.json"
-		},
-		{
-		  "names" : [ "520000", "贵州省", "贵州", "黔", "guizhou", "Guizhou" ],
-		  "map" : "520000_full.json"
-		},
-		{
-		  "names" : [ "530000", "云南省", "云南", "滇", "yunnan", "Yunnan" ],
-		  "map" : "530000_full.json"
-		},
-		{
-		  "names" : [ "540000", "西藏自治区", "西藏", "藏", "xizang", "Xizang" ],
-		  "map" : "540000_full.json"
-		},
-		{
-		  "names" : [ "610000", "陕西省", "陕西", "陕", "shanxi1", "shaanxi", "Shaanxi" ],
-		  "map" : "610000_full.json"
-		},
-		{
-		  "names" : [ "620000", "甘肃省", "甘肃", "甘", "gansu", "Gansu" ],
-		  "map" : "620000_full.json"
-		},
-		{
-		  "names" : [ "630000", "青海省", "青海", "青", "qinghai", "Qinghai" ],
-		  "map" : "630000_full.json"
-		},
-		{
-		  "names" : [ "640000", "宁夏回族自治区", "宁夏", "宁", "ningxia", "Ningxia" ],
-		  "map" : "640000_full.json"
-		},
-		{
-		  "names" : [ "650000", "新疆维吾尔自治区", "新疆", "新", "xinjiang", "Xinjiang" ],
-		  "map" : "650000_full.json"
-		},
-		{
-		  "names" : [ "710000", "台湾省", "台湾", "taiwan", "Taiwan" ],
-		  "map" : "710000.json"
-		},
-		{
-		  "names" : [ "810000", "香港特别行政区", "香港", "港", "xianggang", "Xianggang", "HongKong", "Hongkong" ],
-		  "map" : "810000_full.json"
-		},
-		{
-		  "names" : [ "820000", "澳门特别行政区", "澳门", "澳", "aomen", "Aomen", "Macao" ],
-		  "map" : "820000_full.json"
-		},
+		{ "names" : [ "110000", "北京", "北京市", "京", "beijing", "Beijing" ], "map" : "110000_full.json" },
+		{ "names" : [ "120000", "天津", "天津市", "津", "tianjin", "Tianjin" ], "map" : "120000_full.json" },
+		{ "names" : [ "130000", "河北", "河北省", "冀", "hebei", "Hebei" ], "map" : "130000_full.json" },
+		{ "names" : [ "140000", "山西", "山西省", "晋", "shanxi", "Shanxi" ], "map" : "140000_full.json" },
+		{ "names" : [ "150000", "内蒙古", "内蒙古自治区", "蒙", "neimenggu", "Neimenggu" ], "map" : "150000_full.json" },
+		{ "names" : [ "210000", "辽宁", "辽宁省", "辽", "liaoning", "Liaoning" ], "map" : "210000_full.json" },
+		{ "names" : [ "220000", "吉林", "吉林省", "吉", "jilin", "Jilin" ], "map" : "220000_full.json" },
+		{ "names" : [ "230000", "黑龙江", "黑龙江省", "黑", "heilongjiang", "Heilongjiang" ], "map" : "230000_full.json" },
+		{ "names" : [ "310000", "上海", "上海市", "沪", "shanghai", "Shanghai" ], "map" : "310000_full.json" },
+		{ "names" : [ "320000", "江苏", "江苏省", "苏", "jiangsu", "Jiangsu" ], "map" : "320000_full.json" },
+		{ "names" : [ "330000", "浙江", "浙江省", "浙", "zhejiang", "Zhejiang" ], "map" : "330000_full.json" },
+		{ "names" : [ "340000", "安徽", "安徽省", "皖", "Anhui", "anhui" ], "map" : "340000_full.json" },
+		{ "names" : [ "350000", "福建", "福建省", "闽", "fujian", "Fujian" ], "map" : "350000_full.json" },
+		{ "names" : [ "360000", "江西", "江西省", "赣", "jiangxi", "Jiangxi" ], "map" : "360000_full.json" },
+		{ "names" : [ "370000", "山东", "山东省", "鲁", "shandong", "Shandong" ], "map" : "370000_full.json" },
+		{ "names" : [ "410000", "河南", "河南省", "豫", "henan", "Henan" ], "map" : "410000_full.json" },
+		{ "names" : [ "420000", "湖北", "湖北省", "鄂", "hubei", "Hubei" ], "map" : "420000_full.json" },
+		{ "names" : [ "430000", "湖南", "湖南省", "湘", "hunan", "Hunan" ], "map" : "430000_full.json" },
+		{ "names" : [ "440000", "广东", "广东省", "粤", "guangdong", "Guangdong" ], "map" : "440000_full.json" },
+		{ "names" : [ "450000", "广西", "广西壮族自治区", "桂", "guangxi", "Guangxi" ], "map" : "450000_full.json" },
+		{ "names" : [ "460000", "海南", "海南省", "琼", "hainan", "Hainan" ], "map" : "460000_full.json" },
+		{ "names" : [ "500000", "重庆", "重庆市", "渝", "chongqing", "Chongqing" ], "map" : "500000_full.json" },
+		{ "names" : [ "510000", "四川", "四川省", "川", "sichuan", "Sichuan" ], "map" : "510000_full.json" },
+		{ "names" : [ "520000", "贵州", "贵州省", "黔", "guizhou", "Guizhou" ], "map" : "520000_full.json" },
+		{ "names" : [ "530000", "云南", "云南省", "滇", "yunnan", "Yunnan" ], "map" : "530000_full.json" },
+		{ "names" : [ "540000", "西藏", "西藏自治区", "藏", "xizang", "Xizang" ], "map" : "540000_full.json" },
+		{ "names" : [ "610000", "陕西", "陕西省", "陕", "shanxi1", "shaanxi", "Shaanxi" ], "map" : "610000_full.json" },
+		{ "names" : [ "620000", "甘肃", "甘肃省", "甘", "gansu", "Gansu" ], "map" : "620000_full.json" },
+		{ "names" : [ "630000", "青海", "青海省", "青", "qinghai", "Qinghai" ], "map" : "630000_full.json" },
+		{ "names" : [ "640000", "宁夏", "宁夏回族自治区", "宁", "ningxia", "Ningxia" ], "map" : "640000_full.json" },
+		{ "names" : [ "650000", "新疆", "新疆维吾尔自治区", "新", "xinjiang", "Xinjiang" ], "map" : "650000_full.json" },
+		{ "names" : [ "710000", "台湾", "台湾省", "taiwan", "Taiwan" ], "map" : "710000.json" },
+		{ "names" : [ "810000", "香港", "香港特别行政区", "港", "xianggang", "Xianggang", "HongKong", "Hongkong" ], "map" : "810000_full.json" },
+		{ "names" : [ "820000", "澳门", "澳门特别行政区", "澳", "aomen", "Aomen", "Macao" ], "map" : "820000_full.json" }
 		
 		//旧版遗留地图
-		{names: ["china-contour", "中国轮廓"], url: "china-contour.json"},
-		{names: ["china-cities", "中国城市"], url: "china-cities.json"},
-		{names: ["world", "世界"], url: "world.json"}
+		,
+		{names: ["china-contour", "中国轮廓"], map: "china-contour.json"},
+		{names: ["china-cities", "中国城市"], map: "china-cities.json"},
+		{names: ["world", "世界"], map: "world.json"}
 	];
 	
 	for(var i=0; i<dftBuiltinChartMaps.length; i++)
