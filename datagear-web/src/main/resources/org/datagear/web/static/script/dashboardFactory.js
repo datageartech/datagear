@@ -3024,7 +3024,6 @@
 	
 	/**
 	 * 内置地图JSON地址配置。
-	 * 注意：配置对象中的names数组第二个元素应是标准常用名称，因为图表属性内置DG_MAP取值是取它的第二个元素
 	 */
 	var dftBuiltinChartMaps =
 	[
