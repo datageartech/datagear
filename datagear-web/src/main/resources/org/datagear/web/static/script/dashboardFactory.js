@@ -3023,60 +3023,87 @@
 	};
 	
 	/**
-	 * 内置地图JSON地址配置。
+	 * 添加内置图表地图集。
+	 * 
+	 * @param chartMaps 内置图表地图，格式为：[{ names: ["...", ...], map: "...", stdName: "...", "adcode": "...", "parent": "..." }]
+	 */
+	dashboardFactory.addBuiltinChartMaps = function(chartMaps)
+	{
+		var ukChartMapNames = (dashboardFactory._uniqueBuiltinChartMapNames || (dashboardFactory._uniqueBuiltinChartMapNames = {}));
+		
+		for(var i=0; i<chartMaps.length; i++)
+		{
+			var cm = chartMaps[i];
+			var names = cm.names;
+			
+			for(var j=0; j<names.length; j++)
+			{
+				var name = names[j];
+				
+				if(ukChartMapNames[name])
+					throw new Error("Duplicate built-in chart map name : " + name);
+				
+				ukChartMapNames[name] = true;
+			}
+			
+			builtinChartMaps.push(cm);
+		}
+	};
+	
+	/**
+	 * 内置地图JSON地址配置：省级及以上。
 	 */
 	var dftBuiltinChartMaps =
 	[
 		{
-			"names" : [ "100000", "中国", "中华人民共和国", "china", "China" ],
+			"names":["100000","中国","中华人民共和国","china","China"],
 			//标准中国地图南海诸岛太占空间，所以采用下面南海诸岛在右侧的中国地图
 			//"map" : "100000_full.json"
 			"map" : "china_right_nanhaizhudao.json",
-			"adcode":"100000","parent":null,"localName":"中国"
+			"stdName":"中国","adcode":"100000","parent":null
 		},
-		{"names":["110000","北京","北京市","京","beijing","Beijing"],"map":"110000_full.json","adcode":"110000","parent":"100000","localName":"北京"},
-		{"names":["120000","天津","天津市","津","tianjin","Tianjin"],"map":"120000_full.json","adcode":"120000","parent":"100000","localName":"天津"},
-		{"names":["130000","河北","河北省","冀","hebei","Hebei"],"map":"130000_full.json","adcode":"130000","parent":"100000","localName":"河北"},
-		{"names":["140000","山西","山西省","晋","shanxi","Shanxi"],"map":"140000_full.json","adcode":"140000","parent":"100000","localName":"山西"},
-		{"names":["150000","内蒙古","内蒙古自治区","蒙","neimenggu","Neimenggu"],"map":"150000_full.json","adcode":"150000","parent":"100000","localName":"内蒙古"},
-		{"names":["210000","辽宁","辽宁省","辽","liaoning","Liaoning"],"map":"210000_full.json","adcode":"210000","parent":"100000","localName":"辽宁"},
-		{"names":["220000","吉林","吉林省","吉","jilin","Jilin"],"map":"220000_full.json","adcode":"220000","parent":"100000","localName":"吉林"},
-		{"names":["230000","黑龙江","黑龙江省","黑","heilongjiang","Heilongjiang"],"map":"230000_full.json","adcode":"230000","parent":"100000","localName":"黑龙江"},
-		{"names":["310000","上海","上海市","沪","shanghai","Shanghai"],"map":"310000_full.json","adcode":"310000","parent":"100000","localName":"上海"},
-		{"names":["320000","江苏","江苏省","苏","jiangsu","Jiangsu"],"map":"320000_full.json","adcode":"320000","parent":"100000","localName":"江苏"},
-		{"names":["330000","浙江","浙江省","浙","zhejiang","Zhejiang"],"map":"330000_full.json","adcode":"330000","parent":"100000","localName":"浙江"},
-		{"names":["340000","安徽","安徽省","皖","Anhui","anhui"],"map":"340000_full.json","adcode":"340000","parent":"100000","localName":"安徽"},
-		{"names":["350000","福建","福建省","闽","fujian","Fujian"],"map":"350000_full.json","adcode":"350000","parent":"100000","localName":"福建"},
-		{"names":["360000","江西","江西省","赣","jiangxi","Jiangxi"],"map":"360000_full.json","adcode":"360000","parent":"100000","localName":"江西"},
-		{"names":["370000","山东","山东省","鲁","shandong","Shandong"],"map":"370000_full.json","adcode":"370000","parent":"100000","localName":"山东"},
-		{"names":["410000","河南","河南省","豫","henan","Henan"],"map":"410000_full.json","adcode":"410000","parent":"100000","localName":"河南"},
-		{"names":["420000","湖北","湖北省","鄂","hubei","Hubei"],"map":"420000_full.json","adcode":"420000","parent":"100000","localName":"湖北"},
-		{"names":["430000","湖南","湖南省","湘","hunan","Hunan"],"map":"430000_full.json","adcode":"430000","parent":"100000","localName":"湖南"},
-		{"names":["440000","广东","广东省","粤","guangdong","Guangdong"],"map":"440000_full.json","adcode":"440000","parent":"100000","localName":"广东"},
-		{"names":["450000","广西","广西壮族自治区","桂","guangxi","Guangxi"],"map":"450000_full.json","adcode":"450000","parent":"100000","localName":"广西"},
-		{"names":["460000","海南","海南省","琼","hainan","Hainan"],"map":"460000_full.json","adcode":"460000","parent":"100000","localName":"海南"},
-		{"names":["500000","重庆","重庆市","渝","chongqing","Chongqing"],"map":"500000_full.json","adcode":"500000","parent":"100000","localName":"重庆"},
-		{"names":["510000","四川","四川省","川","sichuan","Sichuan"],"map":"510000_full.json","adcode":"510000","parent":"100000","localName":"四川"},
-		{"names":["520000","贵州","贵州省","黔","guizhou","Guizhou"],"map":"520000_full.json","adcode":"520000","parent":"100000","localName":"贵州"},
-		{"names":["530000","云南","云南省","滇","yunnan","Yunnan"],"map":"530000_full.json","adcode":"530000","parent":"100000","localName":"云南"},
-		{"names":["540000","西藏","西藏自治区","藏","xizang","Xizang"],"map":"540000_full.json","adcode":"540000","parent":"100000","localName":"西藏"},
-		{"names":["610000","陕西","陕西省","陕","shanxi1","shaanxi","Shaanxi"],"map":"610000_full.json","adcode":"610000","parent":"100000","localName":"陕西"},
-		{"names":["620000","甘肃","甘肃省","甘","gansu","Gansu"],"map":"620000_full.json","adcode":"620000","parent":"100000","localName":"甘肃"},
-		{"names":["630000","青海","青海省","青","qinghai","Qinghai"],"map":"630000_full.json","adcode":"630000","parent":"100000","localName":"青海"},
-		{"names":["640000","宁夏","宁夏回族自治区","宁","ningxia","Ningxia"],"map":"640000_full.json","adcode":"640000","parent":"100000","localName":"宁夏"},
-		{"names":["650000","新疆","新疆维吾尔自治区","新","xinjiang","Xinjiang"],"map":"650000_full.json","adcode":"650000","parent":"100000","localName":"新疆"},
-		{"names":["710000","台湾","台湾省","taiwan","Taiwan"],"map":"710000.json","adcode":"710000","parent":"100000","localName":"台湾"},
-		{"names":["810000","香港","香港特别行政区","港","xianggang","Xianggang","HongKong","Hongkong"],"map":"810000_full.json","adcode":"810000","parent":"100000","localName":"香港"},
-		{"names":["820000","澳门","澳门特别行政区","澳","aomen","Aomen","Macao"],"map":"820000_full.json","adcode":"820000","parent":"100000","localName":"澳门"}
+		{"names":["110000","北京市","北京","京","beijing","Beijing"],"map":"110000_full.json","stdName":"北京市","adcode":"110000","parent":"100000"},
+		{"names":["120000","天津市","天津","津","tianjin","Tianjin"],"map":"120000_full.json","stdName":"天津市","adcode":"120000","parent":"100000"},
+		{"names":["130000","河北省","河北","冀","hebei","Hebei"],"map":"130000_full.json","stdName":"河北省","adcode":"130000","parent":"100000"},
+		{"names":["140000","山西省","山西","晋","shanxi","Shanxi"],"map":"140000_full.json","stdName":"山西省","adcode":"140000","parent":"100000"},
+		{"names":["150000","内蒙古自治区","内蒙古","蒙","neimenggu","Neimenggu"],"map":"150000_full.json","stdName":"内蒙古自治区","adcode":"150000","parent":"100000"},
+		{"names":["210000","辽宁省","辽宁","辽","liaoning","Liaoning"],"map":"210000_full.json","stdName":"辽宁省","adcode":"210000","parent":"100000"},
+		{"names":["220000","吉林省","吉林","吉","jilin","Jilin"],"map":"220000_full.json","stdName":"吉林省","adcode":"220000","parent":"100000"},
+		{"names":["230000","黑龙江省","黑龙江","黑","heilongjiang","Heilongjiang"],"map":"230000_full.json","stdName":"黑龙江省","adcode":"230000","parent":"100000"},
+		{"names":["310000","上海市","上海","沪","shanghai","Shanghai"],"map":"310000_full.json","stdName":"上海市","adcode":"310000","parent":"100000"},
+		{"names":["320000","江苏省","江苏","苏","jiangsu","Jiangsu"],"map":"320000_full.json","stdName":"江苏省","adcode":"320000","parent":"100000"},
+		{"names":["330000","浙江省","浙江","浙","zhejiang","Zhejiang"],"map":"330000_full.json","stdName":"浙江省","adcode":"330000","parent":"100000"},
+		{"names":["340000","安徽省","安徽","皖","Anhui","anhui"],"map":"340000_full.json","stdName":"安徽省","adcode":"340000","parent":"100000"},
+		{"names":["350000","福建省","福建","闽","fujian","Fujian"],"map":"350000_full.json","stdName":"福建省","adcode":"350000","parent":"100000"},
+		{"names":["360000","江西省","江西","赣","jiangxi","Jiangxi"],"map":"360000_full.json","stdName":"江西省","adcode":"360000","parent":"100000"},
+		{"names":["370000","山东省","山东","鲁","shandong","Shandong"],"map":"370000_full.json","stdName":"山东省","adcode":"370000","parent":"100000"},
+		{"names":["410000","河南省","河南","豫","henan","Henan"],"map":"410000_full.json","stdName":"河南省","adcode":"410000","parent":"100000"},
+		{"names":["420000","湖北省","湖北","鄂","hubei","Hubei"],"map":"420000_full.json","stdName":"湖北省","adcode":"420000","parent":"100000"},
+		{"names":["430000","湖南省","湖南","湘","hunan","Hunan"],"map":"430000_full.json","stdName":"湖南省","adcode":"430000","parent":"100000"},
+		{"names":["440000","广东省","广东","粤","guangdong","Guangdong"],"map":"440000_full.json","stdName":"广东省","adcode":"440000","parent":"100000"},
+		{"names":["450000","广西壮族自治区","广西","桂","guangxi","Guangxi"],"map":"450000_full.json","stdName":"广西壮族自治区","adcode":"450000","parent":"100000"},
+		{"names":["460000","海南省","海南","琼","hainan","Hainan"],"map":"460000_full.json","stdName":"海南省","adcode":"460000","parent":"100000"},
+		{"names":["500000","重庆市","重庆","渝","chongqing","Chongqing"],"map":"500000_full.json","stdName":"重庆市","adcode":"500000","parent":"100000"},
+		{"names":["510000","四川省","四川","川","sichuan","Sichuan"],"map":"510000_full.json","stdName":"四川省","adcode":"510000","parent":"100000"},
+		{"names":["520000","贵州省","贵州","黔","guizhou","Guizhou"],"map":"520000_full.json","stdName":"贵州省","adcode":"520000","parent":"100000"},
+		{"names":["530000","云南省","云南","滇","yunnan","Yunnan"],"map":"530000_full.json","stdName":"云南省","adcode":"530000","parent":"100000"},
+		{"names":["540000","西藏自治区","西藏","藏","xizang","Xizang"],"map":"540000_full.json","stdName":"西藏自治区","adcode":"540000","parent":"100000"},
+		{"names":["610000","陕西省","陕西","陕","shanxi1","shaanxi","Shaanxi"],"map":"610000_full.json","stdName":"陕西省","adcode":"610000","parent":"100000"},
+		{"names":["620000","甘肃省","甘肃","甘","gansu","Gansu"],"map":"620000_full.json","stdName":"甘肃省","adcode":"620000","parent":"100000"},
+		{"names":["630000","青海省","青海","青","qinghai","Qinghai"],"map":"630000_full.json","stdName":"青海省","adcode":"630000","parent":"100000"},
+		{"names":["640000","宁夏回族自治区","宁夏","宁","ningxia","Ningxia"],"map":"640000_full.json","stdName":"宁夏回族自治区","adcode":"640000","parent":"100000"},
+		{"names":["650000","新疆维吾尔自治区","新疆","新","xinjiang","Xinjiang"],"map":"650000_full.json","stdName":"新疆维吾尔自治区","adcode":"650000","parent":"100000"},
+		{"names":["710000","台湾省","台湾","taiwan","Taiwan"],"map":"710000.json","stdName":"台湾省","adcode":"710000","parent":"100000"},
+		{"names":["810000","香港特别行政区","香港","港","xianggang","Xianggang","HongKong","Hongkong"],"map":"810000_full.json","stdName":"香港特别行政区","adcode":"810000","parent":"100000"},
+		{"names":["820000","澳门特别行政区","澳门","澳","aomen","Aomen","Macao"],"map":"820000_full.json","stdName":"澳门特别行政区","adcode":"820000","parent":"100000"}
 		
 		//旧版遗留地图
 		,
-		{names: ["china-contour", "中国轮廓"], map: "china-contour.json"},
-		{names: ["china-cities", "中国城市"], map: "china-cities.json"},
-		{names: ["world", "世界"], map: "world.json"}
+		{"names":["中国轮廓", "china-contour"],"map":"china-contour.json"},
+		{"names":["中国城市", "china-cities"],"map":"china-cities.json"},
+		{"names":["世界", "world"],"map":"world.json"}
 	];
 	
-	for(var i=0; i<dftBuiltinChartMaps.length; i++)
-		builtinChartMaps.push(dftBuiltinChartMaps[i]);
+	dashboardFactory.addBuiltinChartMaps(dftBuiltinChartMaps);
 })
 (this);
