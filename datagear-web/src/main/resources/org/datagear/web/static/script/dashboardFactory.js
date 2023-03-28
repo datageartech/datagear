@@ -3025,7 +3025,20 @@
 	/**
 	 * 添加内置图表地图集。
 	 * 
-	 * @param chartMaps 内置图表地图，格式为：[{ names: ["...", ...], map: "...", adname: "...", "adcode": "...", "parent": "..." }]
+	 * @param chartMaps 内置图表地图，格式为：[
+						{
+							//地图名数组
+						  	names: ["...", ...],
+							//地图文件
+							map: "...",
+							//可选，行政区划名称
+							adname: "...",
+							//可选，行政区划编码
+							"adcode": "...",
+							//可选，上级行政区划编码
+							"parent": "..." 
+						},
+						...]
 	 */
 	dashboardFactory.addBuiltinChartMaps = function(chartMaps)
 	{
@@ -3035,6 +3048,7 @@
 		{
 			var cm = chartMaps[i];
 			var names = cm.names;
+			var adcodeInNames = (cm.adcode ? false : true);
 			
 			for(var j=0; j<names.length; j++)
 			{
@@ -3044,10 +3058,73 @@
 					throw new Error("Duplicate built-in chart map name : " + name);
 				
 				ukChartMapNames[name] = true;
+				
+				if(!adcodeInNames && name == cm.adcode)
+					adcodeInNames = true;
 			}
+			
+			if(!adcodeInNames)
+				throw new Error("The adcode ["+cm.adcode+"] must be added to [names]");
 			
 			builtinChartMaps.push(cm);
 		}
+	};
+	
+	/**
+	 * 获取标准内置图表地图。
+	 * 返回一个数组，其中每个元素都可能是树形结构根节点，节点格式为：
+	 * {
+	 *   //地图名，可用于dg-chart-map的名称
+	 *   name: "...",
+	 *   //显示标签
+	 *   label: "...",
+	 *   //子节点，为null表示没有
+	 *   children: [ ... ],
+	 * }
+	 * 
+	 * @param listener 可选，节点监听器，格式为：
+	 * {
+	 *   //节点添加后置处理函数，parent为null表明节点添加到了rootArray中
+	 *   added: function(node, parent, rootArray){}
+	 * }
+	 */
+	dashboardFactory.getStdBuiltinChartMaps = function(listener)
+	{
+		var re = [];
+		
+		var nodeCache = {};
+		
+		for(var i=0; i<builtinChartMaps.length; i++)
+		{
+			var bcm = builtinChartMaps[i];
+			
+			if(!bcm.adname || !bcm.adcode)
+				continue;
+			
+			//dashboardFactory.addBuiltinChartMaps()函数已经确保了adcode可以用作地图名
+			//而且它是全局唯一的，最合适
+			var node = { name: bcm.adcode, label: bcm.adname };
+			var parentNode = (bcm.parent ? nodeCache[bcm.parent] : null);
+			
+			if(parentNode)
+			{
+				if(!parentNode.children)
+					parentNode.children = [];
+				
+				parentNode.children.push(node);
+			}
+			else
+			{
+				re.push(node);
+			}
+			
+			if(listener && listener.added)
+				listener.added(node, parentNode, re);
+			
+			nodeCache[node.name] = node;
+		}
+		
+		return re;
 	};
 	
 	/**
