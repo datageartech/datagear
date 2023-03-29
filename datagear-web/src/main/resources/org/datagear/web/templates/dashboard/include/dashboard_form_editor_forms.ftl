@@ -1935,28 +1935,13 @@ page_boolean_options.ftl
 	};
 	
 	//重写chart_attr_values_form.ftl中的函数
-	po.getChartPluginAttributeInputPayloadForMapSuper = po.getChartPluginAttributeInputPayloadForMap;
-	po.getChartPluginAttributeInputPayloadForMap = function(asTree)
+	po.getChartPluginAttributeInputOptionsForMap = function(asTree)
 	{
-		var re = po.getChartPluginAttributeInputPayloadForMapSuper(asTree);
+		var re = [];
 		
 		var dashboardEditor = po.visualDashboardEditorByTab();
 		if(dashboardEditor)
-		{
-			var myRe = [];
-			var mapNames = dashboardEditor.getDashboardMapNames();
-			
-			$.each(mapNames.mapUrls, function(i, n)
-			{
-				if(asTree)
-					myRe.push({ key: n, label: n });
-				else
-					myRe.push({ name: n, value: n });
-			});
-			
-			if(myRe.length > 0)
-				re = myRe.concat(re);
-		}
+			re = dashboardEditor.getChartPluginAttributeInputOptionsForMap(asTree);
 		
 		return re;
 	};

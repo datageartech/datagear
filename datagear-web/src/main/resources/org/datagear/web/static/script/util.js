@@ -767,14 +767,14 @@
 	};
 	
 	//是否为空
-	$.isEmptyValue = function(value, checkElement)
+	$.isEmptyValue = function(value, checkElement, checkProperty)
 	{
 		checkElement = (checkElement == null ? false : checkElement);
+		checkProperty = (checkProperty == null ? false : checkProperty);
 		
 		if(value == null)
 			return true;
-		
-		if($.isTypeString(value))
+		else if($.isTypeString(value))
 			return (value.length == 0);
 		else if($.isArray(value))
 		{
@@ -784,12 +784,26 @@
 			{
 				for(var i=0; i<value.length; i++)
 				{
-					if($.isEmptyValue(value[i], false))
+					if($.isEmptyValue(value[i], false, false))
 						return true;
 				}
 				
 				return (value.length == 0);
 			}
+		}
+		else if($.isPlainObject(value))
+		{
+			var pcount = 0;
+			
+			for(var p in value)
+			{
+				pcount++;
+				
+				if(checkProperty && $.isEmptyValue(value[p], false, false))
+					return true;
+			}
+			
+			return (pcount == 0);
 		}
 		else
 			return false;
@@ -1852,7 +1866,7 @@ $.validator.addMethod("required", function(value, ele)
 			value = Vue.toRaw(reactiveFormModel[name]);
 	}
 	
-	return !$.isEmptyValue(value, true);
+	return !$.isEmptyValue(value, true, false);
 });
 
 $.fn.extend(

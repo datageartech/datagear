@@ -53,7 +53,7 @@ page_boolean_options.ftl
 					<div v-if="cpa.inputPayload.multiple == true">
 						<div v-if="cpa.inputPayload.treeSelect == true">
 							<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-								selection-mode="multiple" :show-clear="true" class="input w-full">
+								selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />">
 							</p-treeselect>
 						</div>
 						<div v-else>
@@ -67,7 +67,7 @@ page_boolean_options.ftl
 						<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
 							<div class="flex mb-1">
 								<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-									:show-clear="!cpa.required" class="input w-full" v-if="cpa.inputPayload.treeSelect == true">
+									class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
 								</p-treeselect>
 								<p-dropdown :id="'${pid}cpattr_'+cpa.name+'_'+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
 									option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
@@ -85,7 +85,7 @@ page_boolean_options.ftl
 					<div v-else>
 						<div v-if="cpa.inputPayload.treeSelect == true">
 							<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-								:show-clear="!cpa.required" class="input w-full">
+								class="input w-full" placeholder="<@spring.message code='none' />">
 							</p-treeselect>
 						</div>
 						<div v-else>
@@ -301,11 +301,11 @@ page_boolean_options.ftl
 				inputPayload.treeSelect = true;
 			}
 			
-			inputPayload.options = po.getChartPluginAttributeInputPayloadForMap(inputPayload.treeSelect);
+			inputPayload.options = po.getChartPluginAttributeInputOptionsForMap(inputPayload.treeSelect);
 		}
 	};
 	
-	po.getChartPluginAttributeInputPayloadForMap = function(asTree)
+	po.getChartPluginAttributeInputOptionsForMap = function(asTree)
 	{
 		//树
 		if(asTree)
@@ -410,41 +410,6 @@ page_boolean_options.ftl
 		return groups;
 	};
 	
-	//树组件Model转换为插件属性值，它的模型结构是：{ v0: true, ... }，需进行转换
-	po.treeModelToChartAttrValue = function(treeModel, single)
-	{
-		//不是树组件Model的应原样返回
-		if(!treeModel || !$.isPlainObject(treeModel))
-			return treeModel;
-		
-		var values = [];
-		
-		$.each(treeModel, function(p, v)
-		{
-			if(v === true)
-				values.push(p);
-		});
-		
-		return (single ? values[0] : values);
-	};
-	
-	//插件属性值转换为树组件Model，它的模型结构是：{ v0: true, ... }
-	po.chartAttrValueToTreeModel = function(value)
-	{
-		var re = {};
-		
-		if(value != null)
-		{
-			value = ($.isArray(value) ? value : [ value ]);
-			$.each(value, function(i, v)
-			{
-				re[v] = true;
-			});
-		}
-		
-		return re;
-	};
-	
 	//整理图表属性值：类型转换、选项值限定
 	po.trimChartAttrValues = function(attrValues, cpas)
 	{
@@ -466,10 +431,11 @@ page_boolean_options.ftl
 			var inputType = cpa.inputType;
 			var inputPayload = cpa.inputPayload;
 			var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
+			var isMultipleSelect = (inputPayload && (inputPayload.multiple == true || inputPayload.multiple == po.ChartPluginAttribute.MultipleRepeat));
 			
 			//需先转换树组件Model
 			if(isTreeSelect)
-				v = po.treeModelToChartAttrValue(v, !inputPayload.multiple);
+				v = po.trimChartAttrValueIfTreeModel(v, !isMultipleSelect);
 			
 			//需转换类型
 			v = po.toChartAttrTypeValue(cpa.type, v);
@@ -477,9 +443,7 @@ page_boolean_options.ftl
 			if(v != null)
 			{
 				//多选输入框应强制转换为数组
-				if(inputPayload
-						&& (inputPayload.multiple == true || inputPayload.multiple == po.ChartPluginAttribute.MultipleRepeat)
-						&& !$.isArray(v))
+				if(isMultipleSelect && !$.isArray(v))
 				{
 					v = [ v ];
 				}
@@ -526,6 +490,24 @@ page_boolean_options.ftl
 		});
 		
 		return re;
+	};
+	
+	//树组件Model结构是：{ v0: true, ... }，需进行转换
+	po.trimChartAttrValueIfTreeModel = function(treeModel, single)
+	{
+		//不是树组件Model的应原样返回
+		if(!treeModel || !$.isPlainObject(treeModel))
+			return treeModel;
+		
+		var values = [];
+		
+		$.each(treeModel, function(p, v)
+		{
+			if(v === true)
+				values.push(p);
+		});
+		
+		return (single ? values[0] : values);
 	};
 	
 	po.toChartAttrTypeValue = function(type, value)
@@ -579,6 +561,26 @@ page_boolean_options.ftl
 		});
 		
 		return formValues;
+	};
+	
+	//插件属性值转换为树组件Model，它的模型结构是：{ v0: true, ... }
+	po.chartAttrValueToTreeModel = function(value)
+	{
+		if(value != null && $.isPlainObject(value))
+			return value;
+		
+		var re = {};
+		
+		if(value != null)
+		{
+			value = ($.isArray(value) ? value : [ value ]);
+			$.each(value, function(i, v)
+			{
+				re[v] = true;
+			});
+		}
+		
+		return re;
 	};
 	
 	po.toChartAttrValuesFormColorProxy = function(attrValues, cpas)

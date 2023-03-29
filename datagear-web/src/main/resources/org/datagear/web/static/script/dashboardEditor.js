@@ -1736,21 +1736,46 @@
 	};
 	
 	/**
-	 * 获取看板地图名称。
-	 * 
-	 * @returns { mapUrls: ["...", ...], builtins: ["...", ...] }
+	 * 获取看板图表插件属性内置地图选项集。
 	 */
-	editor.getDashboardMapNames = function()
+	editor.getChartPluginAttributeInputOptionsForMap = function(asTree)
 	{
-		var re = { mapUrls: [], builtins: [] };
+		var re = [];
 		
-		$.each(dashboardFactory.builtinChartMaps, function(i, cms)
+		//树
+		if(asTree)
 		{
-			if(cms && cms.names && cms.names.length > 0)
+			var listener =
 			{
-				re.builtins.push(cms.names[1] ? cms.names[1] : cms.names[0]);
-			}
-		});
+				added: function(node, parent, rootArray)
+				{
+					//转换为UI组件所需的结构
+					node.key = node.mapName;
+					node.label = node.mapLabel;
+					if(parent && !parent.children)
+						parent.children = parent.mapChildren;
+				}
+			};
+			
+			re = dashboardFactory.getStdBuiltinChartMapTree(listener);
+		}
+		//数组
+		else
+		{
+			var listener =
+			{
+				added: function(node, rootArray)
+				{
+					//转换为UI组件所需的结构
+					node.value = node.mapName;
+					node.name = node.mapLabel;
+				}
+			};
+			
+			re = dashboardFactory.getStdBuiltinChartMapArray(listener);
+		}
+		
+		var mapURLs = [];
 		
 		var mapURLsBody = $(document.body).attr(chartFactory.elementAttrConst.MAP_URLS);
 		mapURLsBody = (mapURLsBody ? chartFactory.evalSilently(mapURLsBody, {}) : {});
@@ -1759,9 +1784,15 @@
 		{
 			if(p && chartFactory.isString(v))
 			{
-				re.mapUrls.push(p);
+				if(asTree)
+					mapURLs.push({ key: p, label: p });
+				else
+					mapURLs.push({ name: p, value: p });
 			}
 		});
+		
+		if(mapURLs.length > 0)
+			re = mapURLs.concat(re);
 		
 		return re;
 	};
@@ -2591,10 +2622,14 @@
 			
 			for(var i=0; i<obj.length; i++)
 			{
-				if(i > 0)
-					str += ",";
-				
-				str += this._serializeForAttrValue(obj[i]);
+				var vstr = this._serializeForAttrValue(obj[i]);
+				if(vstr != null && vstr != "")
+				{
+					if(str != "[")
+						str += ",";
+					
+					str += vstr;
+				}
 			}
 			
 			str += "]";
@@ -2607,13 +2642,14 @@
 			
 			for(var p in obj)
 			{
-				if(str != "{")
-					str += ",";
-				
-				var v = this._serializeForAttrValue(obj[p]);
-				
-				if(v != null)
-					str += this._serializeForAttrValue(p) + ":" + v;
+				var vstr = this._serializeForAttrValue(obj[p]);
+				if(vstr != null && vstr != "")
+				{
+					if(str != "{")
+						str += ",";
+					
+					str += this._serializeForAttrValue(p) + ":" + vstr;
+				}
 			}
 			
 			str += "}";
