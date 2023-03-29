@@ -110,5 +110,6 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/chartFactory.js?v=${Global.VERSION}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/chartSetting.js?v=${Global.VERSION}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/dashboardFactory.js?v=${Global.VERSION}" type="text/javascript"></script>
+<#include "ext/include/html_head.ftl">
 ${(detectNewVersionScript!'')?no_esc}
 </#if>
