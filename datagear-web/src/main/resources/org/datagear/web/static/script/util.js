@@ -650,6 +650,27 @@
 		return -1;
 	};
 	
+	$.inTreeArrayById = function(treeArray, idValue, idPropName, childrenPropName)
+	{
+		idPropName = (idPropName == null ? "id" : idPropName);
+		childrenPropName = (childrenPropName == null ? "children" : childrenPropName);
+		
+		var idx = $.inArrayById(treeArray, idValue, idPropName);
+		
+		if(idx > -1)
+			return true;
+			
+		for(var i=0; i<treeArray.length; i++)
+		{
+			var children = (treeArray[i] ?  treeArray[i][childrenPropName] : null);
+			
+			if(children && $.inTreeArrayById(children, idValue, idPropName, childrenPropName))
+				return true;
+		}
+		
+		return false;
+	};
+	
 	$.removeById = function(array, idValue, idPropName)
 	{
 		var idx = $.inArrayById(array, idValue, idPropName);
@@ -2240,7 +2261,8 @@ $.inflatePageObj = function(po)
 		"p-splitter": primevue.splitter,
         "p-splitterpanel": primevue.splitterpanel,
         "p-progressbar": primevue.progressbar,
-		"p-multiselect": primevue.multiselect
+		"p-multiselect": primevue.multiselect,
+		"p-treeselect": primevue.treeselect
 	};
 	
 	//vue挂载

@@ -85,6 +85,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/primevue@3.15.0/radiobutton/radiobutton.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/progressbar/progressbar.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.15.0/multiselect/multiselect.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.15.0/treeselect/treeselect.min.js" type="text/javascript"></script>
 
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>

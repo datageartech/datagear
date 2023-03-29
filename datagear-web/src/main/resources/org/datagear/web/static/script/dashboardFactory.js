@@ -3071,15 +3071,15 @@
 	};
 	
 	/**
-	 * 获取标准内置图表地图。
+	 * 获取标准内置图表地图树形结构。
 	 * 返回一个数组，其中每个元素都可能是树形结构根节点，节点格式为：
 	 * {
 	 *   //地图名，可用于dg-chart-map的名称
-	 *   name: "...",
+	 *   mapName: "...",
 	 *   //显示标签
-	 *   label: "...",
+	 *   mapLabel: "...",
 	 *   //子节点，为null表示没有
-	 *   children: [ ... ],
+	 *   mapChildren: [ ... ],
 	 * }
 	 * 
 	 * @param listener 可选，节点监听器，格式为：
@@ -3088,7 +3088,7 @@
 	 *   added: function(node, parent, rootArray){}
 	 * }
 	 */
-	dashboardFactory.getStdBuiltinChartMaps = function(listener)
+	dashboardFactory.getStdBuiltinChartMapTree = function(listener)
 	{
 		var re = [];
 		
@@ -3103,15 +3103,15 @@
 			
 			//dashboardFactory.addBuiltinChartMaps()函数已经确保了adcode可以用作地图名
 			//而且它是全局唯一的，最合适
-			var node = { name: bcm.adcode, label: bcm.adname };
+			var node = { mapName: bcm.adcode, mapLabel: bcm.adname };
 			var parentNode = (bcm.parent ? nodeCache[bcm.parent] : null);
 			
 			if(parentNode)
 			{
-				if(!parentNode.children)
-					parentNode.children = [];
+				if(!parentNode.mapChildren)
+					parentNode.mapChildren = [];
 				
-				parentNode.children.push(node);
+				parentNode.mapChildren.push(node);
 			}
 			else
 			{
@@ -3121,7 +3121,46 @@
 			if(listener && listener.added)
 				listener.added(node, parentNode, re);
 			
-			nodeCache[node.name] = node;
+			nodeCache[bcm.adcode] = node;
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取标准内置图表地图平铺数组。
+	 * 返回一个数组，其中元素格式为：
+	 * {
+	 *   //地图名，可用于dg-chart-map的名称
+	 *   mapName: "...",
+	 *   //显示标签
+	 *   mapLabel: "..."
+	 * }
+	 * 
+	 * @param listener 可选，节点监听器，格式为：
+	 * {
+	 *   //节点添加后置处理函数
+	 *   added: function(node, rootArray){}
+	 * }
+	 */
+	dashboardFactory.getStdBuiltinChartMapArray = function(listener)
+	{
+		var re = [];
+		
+		for(var i=0; i<builtinChartMaps.length; i++)
+		{
+			var bcm = builtinChartMaps[i];
+			
+			if(!bcm.adname || !bcm.adcode)
+				continue;
+			
+			//dashboardFactory.addBuiltinChartMaps()函数已经确保了adcode可以用作地图名
+			//而且它是全局唯一的，最合适
+			var node = { mapName: bcm.adcode, mapLabel: bcm.adname };
+			re.push(node);
+			
+			if(listener && listener.added)
+				listener.added(node, re);
 		}
 		
 		return re;
@@ -3174,11 +3213,13 @@
 		{"names":["810000","香港特别行政区","香港","港","xianggang","Xianggang","HongKong","Hongkong"],"map":"810000_full.json","adname":"香港特别行政区","adcode":"810000","parent":"100000"},
 		{"names":["820000","澳门特别行政区","澳门","澳","aomen","Aomen","Macao"],"map":"820000_full.json","adname":"澳门特别行政区","adcode":"820000","parent":"100000"}
 		
-		//旧版遗留地图
+		//世界地图
 		,
+		{"names":["ext-world","world", "世界"],"map":"world.json","adname":"世界","adcode":"ext-world","parent":null},
+		
+		//旧版遗留地图
 		{"names":["ext-china-contour","china-contour", "中国轮廓"],"map":"china-contour.json"},
-		{"names":["ext-china-cities","china-cities", "中国城市"],"map":"china-cities.json"},
-		{"names":["ext-world","world", "世界"],"map":"world.json"}
+		{"names":["ext-china-cities","china-cities", "中国城市"],"map":"china-cities.json"}
 	];
 	
 	dashboardFactory.addBuiltinChartMaps(dftBuiltinChartMaps);
