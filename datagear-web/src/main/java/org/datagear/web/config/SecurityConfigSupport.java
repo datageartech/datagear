@@ -41,9 +41,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -65,7 +64,7 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
  * 
  * @author datagear@163.com
  */
-public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implements ApplicationListener<ContextRefreshedEvent>
+public class SecurityConfigSupport implements ApplicationListener<ContextRefreshedEvent>
 {
 	public static final String LOGIN_PROCESS_URL = "/login/doLogin";
 
@@ -145,15 +144,20 @@ public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implemen
 		return bean;
 	}
 
-	@Override
-	public void configure(WebSecurity web) throws Exception
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
 	{
-		// 静态资源
-		web.ignoring().antMatchers("/static/**");
+		configureHttpSecurity(http);
+		return http.build();
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception
+	/**
+	 * 配置{@linkplain HttpSecurity}。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configureHttpSecurity(HttpSecurity http) throws Exception
 	{
 		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
 		http.csrf().disable();
@@ -161,6 +165,7 @@ public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implemen
 		// 默认"X-Frame-Options"值为"DENY"，这会导致系统的图表/看板展示页面无法被其他应用嵌入iframe，因此需禁用
 		http.headers().frameOptions().disable();
 
+		configAccessForStatic(http);
 		configAccessForShowChartAndDashboard(http);
 		configAccessForSchema(http);
 		configAccessForAnalysisProject(http);
@@ -226,7 +231,17 @@ public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implemen
 				// 记住登录
 				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
 				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName("REMEMBER_ME");
+	}
 
+	/**
+	 * 配置静态资源访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForStatic(HttpSecurity http) throws Exception
+	{
+		http.authorizeRequests().antMatchers("/static/**").permitAll();
 	}
 
 	/**
@@ -606,7 +621,6 @@ public class SecurityConfigSupport extends WebSecurityConfigurerAdapter implemen
 	}
 
 	@Bean
-	@Override
 	public UserDetailsService userDetailsService()
 	{
 		UserDetailsService bean = new UserDetailsServiceImpl(this.coreConfig.userService());
