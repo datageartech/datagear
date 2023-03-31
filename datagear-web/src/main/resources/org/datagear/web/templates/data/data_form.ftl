@@ -75,7 +75,7 @@
 						</div>
 						<div class="fileupload-wrapper flex align-items-center mt-1" v-if="!pm.isReadonlyAction">
 				        	<p-fileupload mode="basic" name="file" :url="pm.uploadBinaryColumnFileUrl"
-				        		@upload="onBinaryColumnFileUploaded($event, col)" @select="onSelectBinaryColumnFile($event, col)" @progress="onProgressBinaryColumnFile($event, col)"
+				        		@upload="onBinaryColumnFileUploaded($event, col)" @select="onSelectBinaryColumnFile($event, col)" @progress="onProgressBinaryColumnFile($event, col)" @error="onErrorBinaryColumnFile($event, col)"
 				        		:auto="true" choose-label="<@spring.message code='upload' />" class="mr-2">
 				        	</p-fileupload>
 				        	<div class="fileupload-info text-color-secondary">
@@ -255,6 +255,17 @@
 				var myUploadInfo = binaryColumnUploadInfos[column.name];
 				
 				myUploadInfo.progress = (e.progress >= 100 ? 99 : e.progress) +"%";
+			},
+
+			onErrorBinaryColumnFile: function(e, column)
+			{
+				var om = $.getResponseJson(e.xhr);
+				var message = "Error";
+				
+				if(om && om.message)
+					message = om.message;
+				
+				$.tipError(message);
 			},
 			
 			onBinaryColumnFileUploaded: function(e, column)

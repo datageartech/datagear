@@ -31,6 +31,7 @@ import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.ThemeSpec;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -252,6 +253,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	}
 
 	@Bean("multipartResolver")
+	@ConfigurationProperties("multipart")
 	public MultipartResolver multipartResolver()
 	{
 		CommonsMultipartResolver bean = new CommonsMultipartResolver();

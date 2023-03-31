@@ -58,6 +58,7 @@ import org.datagear.persistence.support.SqlParamValueSqlExpressionException;
 import org.datagear.persistence.support.SqlParamValueVariableExpressionException;
 import org.datagear.persistence.support.SqlValidationException;
 import org.datagear.persistence.support.UnsupportedDialectException;
+import org.datagear.util.FileInfo;
 import org.datagear.util.MalformedZipException;
 import org.datagear.web.util.OperationMessage;
 import org.slf4j.Logger;
@@ -71,6 +72,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
  * mvc控制器Advice。
@@ -220,6 +222,18 @@ public class ControllerAdvice extends AbstractController
 			DataSetResDirectoryNotFoundException exception)
 	{
 		setOptMsgForThrowable(request, exception, exception.getDirectory());
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleControllerMaxUploadSizeExceededException(HttpServletRequest request,
+			HttpServletResponse response, MaxUploadSizeExceededException exception)
+	{
+		// 这个异常DeliverContentTypeExceptionHandlerExceptionResolver处理不到，所以这里手动设置为CONTENT_TYPE_JSON
+		response.setContentType(CONTENT_TYPE_JSON);
+
+		setOptMsgForThrowable(request, exception, FileInfo.toPrettySize(exception.getMaxUploadSize()));
 		return getErrorView(request, response);
 	}
 

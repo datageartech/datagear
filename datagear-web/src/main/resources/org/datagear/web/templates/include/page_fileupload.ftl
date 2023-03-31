@@ -49,6 +49,17 @@
 		pm.fileuploadInfo.progress = "100%";
 	};
 	
+	po.uploadFileOnError = function(e)
+	{
+		var om = $.getResponseJson(e.xhr);
+		var message = "Error";
+		
+		if(om && om.message)
+			message = om.message;
+		
+		$.tipError(message);
+	};
+	
 	po.clearFileuploadInfo = function()
 	{
 		var pm = po.vuePageModel();
@@ -66,6 +77,11 @@
 		uploadFileOnProgress: function(e)
 		{
 			po.uploadFileOnProgress(e);
+		},
+		
+		uploadFileOnError: function(e)
+		{
+			po.uploadFileOnError(e);
 		}
 	});
 })

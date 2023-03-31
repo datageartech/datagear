@@ -64,7 +64,7 @@
 				<div class="field-input col-12">
 					<div id="${pid}uploadResFile" class="fileupload-wrapper flex align-items-center">
 						<p-fileupload mode="basic" name="file" :url="pm.uploadResModel.url"
-			        		@upload="onResUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress"
+			        		@upload="onResUploaded" @select="uploadFileOnSelect" @progress="uploadFileOnProgress" @error="uploadFileOnError"
 			        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2">
 			        	</p-fileupload>
 						<#include "../../include/page_fileupload.ftl">

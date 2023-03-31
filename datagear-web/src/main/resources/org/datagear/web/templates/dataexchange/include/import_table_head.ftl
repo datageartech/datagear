@@ -31,7 +31,7 @@ import_js.ftl
 			</label>
 		</div>
 		<p-fileupload mode="basic" name="file" :url="pm.uploadFileUrl"
-       		@upload="onUploaded" @select="uploadFileOnSelect" @before-upload="onBeforeUpload" @progress="uploadFileOnProgress"
+       		@upload="onUploaded" @select="uploadFileOnSelect" @before-upload="onBeforeUpload" @progress="uploadFileOnProgress" @error="uploadFileOnError"
        		:auto="true" choose-label="<@spring.message code='select' />" class="mr-2"
        		:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
        	</p-fileupload>
