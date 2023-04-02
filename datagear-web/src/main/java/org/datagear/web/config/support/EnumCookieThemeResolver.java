@@ -20,6 +20,7 @@ package org.datagear.web.config.support;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.util.Global;
 import org.datagear.web.util.ThemeSpec;
 import org.springframework.web.servlet.theme.CookieThemeResolver;
 
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.theme.CookieThemeResolver;
  */
 public class EnumCookieThemeResolver extends CookieThemeResolver
 {
-	public static final String COOKIE_THEME_NAME = "THEME";
+	public static final String COOKIE_THEME_NAME = Global.NAME_SHORTCUT_UC_PREFIX + "THEME";
 	
 	private ThemeSpec themeSpec;
 

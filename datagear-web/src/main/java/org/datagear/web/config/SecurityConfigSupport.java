@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.datagear.management.domain.Role;
 import org.datagear.management.service.CreateUserEntityService;
+import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
@@ -230,7 +231,7 @@ public class SecurityConfigSupport implements ApplicationListener<ContextRefresh
 
 				// 记住登录
 				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
-				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName("REMEMBER_ME");
+				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName(Global.NAME_SHORTCUT_UC_PREFIX + "REMEMBER_ME");
 	}
 
 	/**

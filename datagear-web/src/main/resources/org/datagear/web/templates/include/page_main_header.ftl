@@ -67,7 +67,7 @@ User currentUser
 	
 	po.newVersionDetected = function()
 	{
-		var detectedVersion = $.cookie("DETECTED_VERSION");
+		var detectedVersion = $.cookie("${Global.NAME_SHORTCUT_UC_PREFIX}DETECTED_VERSION");
 		if(typeof(DATA_GEAR_LATEST_VERSION) != "undefined")
 		{
 			$.cookie("${WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED}", "true", {expires : 1, path : po.concatContextPath("/")});
@@ -75,7 +75,7 @@ User currentUser
 			if(DATA_GEAR_LATEST_VERSION != detectedVersion)
 			{
 				detectedVersion = DATA_GEAR_LATEST_VERSION;
-				$.cookie("DETECTED_VERSION", detectedVersion, {expires : 100, path : po.concatContextPath("/")});
+				$.cookie("${Global.NAME_SHORTCUT_UC_PREFIX}DETECTED_VERSION", detectedVersion, {expires : 100, path : po.concatContextPath("/")});
 			}
 		}
 		

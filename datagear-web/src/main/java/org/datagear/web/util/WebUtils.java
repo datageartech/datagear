@@ -62,7 +62,7 @@ public class WebUtils
 	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
 
 	/** Cookie中存储是否已执行过本次的检测新版本的名称 */
-	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = "DETECT_NEW_VERSION_RESOLVED";
+	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = Global.NAME_SHORTCUT_UC_PREFIX + "DETECT_NEW_VERSION_RESOLVED";
 
 	/**
 	 * 获取应用上下文路径。

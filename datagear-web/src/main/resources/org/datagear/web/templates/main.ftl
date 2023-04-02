@@ -71,7 +71,7 @@
 <script>
 (function(po)
 {
-	po.mainMenuCollapseCookieName="MAIN_MENU_COLLAPSE";
+	po.mainMenuCollapseCookieName="${Global.NAME_SHORTCUT_UC_PREFIX}MAIN_MENU_COLLAPSE";
 	
 	po.vuePageModel(
 	{

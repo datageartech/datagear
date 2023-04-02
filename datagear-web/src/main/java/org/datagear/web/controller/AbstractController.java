@@ -41,6 +41,7 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.EntityService;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
@@ -83,23 +84,9 @@ public abstract class AbstractController
 
 	public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript";
 
-	@Deprecated
-	public static final String KEY_TITLE_MESSAGE_KEY = "titleMessageKey";
-
-	@Deprecated
-	public static final String KEY_FORM_ACTION = "formAction";
-
-	@Deprecated
-	public static final String KEY_READONLY = "readonly";
-
-	@Deprecated
-	public static final String KEY_SELECT_OPERATION = "selectOperation";
-
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 
-	public static final String DATA_FILTER_COOKIE = "DATA_FILTER_SEARCH";
-
-	public static final String KEY_ANALYSIS_PROJECT_ID = "ANALYSIS_PROJECT_ID";
+	public static final String KEY_ANALYSIS_PROJECT_ID = Global.NAME_SHORTCUT_UC_PREFIX + "ANALYSIS_PROJECT_ID";
 
 	public static final String ERROR_PAGE_URL = "/error";
 
@@ -396,9 +383,6 @@ public abstract class AbstractController
 		}
 
 		String value = pagingQuery.getDataFilter();
-
-		if (isEmpty(value))
-			value = WebUtils.getCookieValue(request, DATA_FILTER_COOKIE);
 
 		if (DataPermissionEntityService.DATA_FILTER_VALUE_MINE.equalsIgnoreCase(value))
 			value = DataPermissionEntityService.DATA_FILTER_VALUE_MINE;

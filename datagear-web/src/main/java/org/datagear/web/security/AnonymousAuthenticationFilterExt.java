@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
+import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.WebUtils;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -57,7 +58,7 @@ public class AnonymousAuthenticationFilterExt extends AnonymousAuthenticationFil
 {
 	public static final String SESSION_KEY_AUTH_USER_ANONYMOUS = "AUTH_USER_ANONYMOUS";
 
-	public static final String COOKIE_USER_ID_ANONYMOUS = "USER_ID_ANONYMOUS";
+	public static final String COOKIE_USER_ID_ANONYMOUS =  Global.NAME_SHORTCUT_UC_PREFIX + "USER_ID_ANONYMOUS";
 
 	private String key;
 

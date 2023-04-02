@@ -47,4 +47,9 @@ public final class Global
 
 	/** 官网 */
 	public static final String WEB_SITE = "http://www.datagear.tech";
+	
+	/**
+	 * 名称缩写前缀。
+	 */
+	public static final String NAME_SHORTCUT_UC_PREFIX = "DG_";
 }
