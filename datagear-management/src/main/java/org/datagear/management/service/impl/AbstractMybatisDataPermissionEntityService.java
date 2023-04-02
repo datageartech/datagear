@@ -562,10 +562,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 */
 	protected Object toPermissionCacheKeyOfStr(String id)
 	{
-		if (this.permissionCacheService.isShared())
-			return new GlobalEntityCacheKey<String>(getSqlNamespace() + "Permission", id);
-		else
-			return id;
+		return new GlobalEntityCacheKey<String>(getSqlNamespace() + "Permission", id);
 	}
 
 	protected boolean isPermissionCacheEnabled()

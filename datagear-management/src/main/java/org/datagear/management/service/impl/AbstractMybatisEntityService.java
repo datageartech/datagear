@@ -511,10 +511,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected Object toCacheKey(ID id)
 	{
-		if (this.cacheService.isShared())
-			return new GlobalEntityCacheKey<ID>(getSqlNamespace(), id);
-		else
-			return id;
+		return new GlobalEntityCacheKey<ID>(getSqlNamespace(), id);
 	}
 
 	/**

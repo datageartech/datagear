@@ -34,9 +34,6 @@ public class CacheService
 	/** 缓存是否开启序列化特性 */
 	private boolean serialized = false;
 
-	/** 是否是共享缓存 */
-	private boolean shared = false;
-
 	/** 是否禁用 */
 	private boolean disabled = false;
 
@@ -61,22 +58,20 @@ public class CacheService
 	 * 
 	 * @param cache      允许{@code null}
 	 * @param serialized
-	 * @param shared
 	 * @param disabled
 	 */
-	public CacheService(Cache cache, boolean serialized, boolean shared, boolean disabled)
+	public CacheService(Cache cache, boolean serialized, boolean disabled)
 	{
 		super();
 		this.cache = cache;
 		this.serialized = serialized;
-		this.shared = shared;
 		this.disabled = disabled;
 	}
 
 	/**
 	 * 获取缓存。
 	 * <p>
-	 * 使用参考{@linkplain #isEnabled()}、{@linkplain #isShared()}。
+	 * 使用参考{@linkplain #isEnabled()}。
 	 * </p>
 	 * 
 	 * @return 可能为{@code null}。
@@ -107,24 +102,6 @@ public class CacheService
 	public void setSerialized(boolean serialized)
 	{
 		this.serialized = serialized;
-	}
-
-	/**
-	 * 是否共享缓存。
-	 * <p>
-	 * 当为{@code true}时，使用{@linkplain #getCache()}应生成全局缓存KEY。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	public boolean isShared()
-	{
-		return shared;
-	}
-
-	public void setShared(boolean shared)
-	{
-		this.shared = shared;
 	}
 
 	public boolean isDisabled()
