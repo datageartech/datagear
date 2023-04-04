@@ -151,6 +151,18 @@
 						po.copyToClipboard(po.serverURL + po.buildShowURL(entity.id));
 	 				});
 				}
+			},
+			{
+				label: "<@spring.message code='generateIframeNestCode' />",
+				command: function()
+				{
+					po.executeOnSelect(function(entity)
+					{
+						var url = po.serverURL + po.buildShowURL(entity.id);
+						var iframeCode = "<iframe src=\""+ url +"\" style=\"width:100%;height:100%;border:0;\"></iframe>";
+						po.copyToClipboard(iframeCode);
+					});
+				}
 			}
 		]
 	});
