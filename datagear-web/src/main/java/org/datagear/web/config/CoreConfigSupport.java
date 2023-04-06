@@ -155,6 +155,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -533,11 +534,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public PasswordEncoder passwordEncoder()
 	{
-		@SuppressWarnings("deprecation")
-		org.springframework.security.crypto.password.StandardPasswordEncoder bean =
-				//
-				new org.springframework.security.crypto.password.StandardPasswordEncoder();
-
+		PasswordEncoder bean = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 		return bean;
 	}
 
