@@ -50,8 +50,8 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
@@ -230,14 +230,25 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
-	 * 构建看板导入列表。
+	 * 构建看板导入列表：展示。
 	 * 
 	 * @param request
 	 * @return
 	 */
-	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImports(HttpServletRequest request, boolean edit)
+	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImportsForShow(HttpServletRequest request)
 	{
-		return this.htmlTplDashboardImportResolver.resolve(request, edit);
+		return this.htmlTplDashboardImportResolver.resolve(request, HtmlTplDashboardImportResolver.MODE_SHOW);
+	}
+
+	/**
+	 * 构建看板导入列表：可视编辑。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImportsForEdit(HttpServletRequest request)
+	{
+		return this.htmlTplDashboardImportResolver.resolve(request, HtmlTplDashboardImportResolver.MODE_EDIT);
 	}
 
 	/**

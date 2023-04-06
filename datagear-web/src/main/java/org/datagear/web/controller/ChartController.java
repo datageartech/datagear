@@ -523,7 +523,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
 					getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, dashboardWidget.getFirstTemplate(), out,
-					createWebContext(request), buildHtmlTplDashboardImports(request, false), htmlTitleHandler);
+					createWebContext(request), buildHtmlTplDashboardImportsForShow(request), htmlTitleHandler);
 			renderContext.setTemplateReader(templateIn);
 			renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
 

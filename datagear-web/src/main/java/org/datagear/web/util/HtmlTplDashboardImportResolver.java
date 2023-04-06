@@ -52,6 +52,16 @@ public class HtmlTplDashboardImportResolver
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE = "dashboardStyle";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR = "dashboardEditor";
 
+	/**
+	 * 看板展示模式：展示
+	 */
+	public static final String MODE_SHOW = "SHOW";
+
+	/**
+	 * 看板展示模式：可视编辑
+	 */
+	public static final String MODE_EDIT = "EDIT";
+
 	public HtmlTplDashboardImportResolver()
 	{
 		super();
@@ -61,10 +71,11 @@ public class HtmlTplDashboardImportResolver
 	 * 获取执行请求的{@linkplain HtmlTplDashboardImport}加载列表。
 	 * 
 	 * @param request
-	 * @param edit 是否可视编辑操作
+	 * @param mode
+	 *            参考{@linkplain #MODE_SHOW}、{@linkplain #MODE_EDIT}
 	 * @return
 	 */
-	public List<HtmlTplDashboardImport> resolve(HttpServletRequest request, boolean edit)
+	public List<HtmlTplDashboardImport> resolve(HttpServletRequest request, String mode)
 	{
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
 
@@ -84,7 +95,7 @@ public class HtmlTplDashboardImportResolver
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE,
 				cssPrefix + "/analysis.css?v=" + Global.VERSION));
 		
-		if(edit)
+		if (isModelEdit(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
 					WebUtils.getContextPath(request) + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
@@ -116,12 +127,17 @@ public class HtmlTplDashboardImportResolver
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
 				contextPath + "/chartPlugin/chartPluginManager.js?v=" + Global.VERSION));
 
-		if(edit)
+		if (isModelEdit(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
 					WebUtils.getContextPath(request) + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
 		}
 
 		return impts;
+	}
+
+	protected boolean isModelEdit(String mode)
+	{
+		return MODE_EDIT.equals(mode);
 	}
 }
