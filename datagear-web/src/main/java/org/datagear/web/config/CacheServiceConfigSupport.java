@@ -81,7 +81,7 @@ public class CacheServiceConfigSupport
 		
 		cacheService
 				.setDisabled(applicationProperties.isCacheServiceDisabled());
-		cacheService.setSerialized(false);
+		cacheService.setSafeForEdit(false);
 		
 		if (!applicationProperties.isCacheServiceDisabled())
 			cacheService.setCache(this.cacheServiceCacheManager().getCache(name));

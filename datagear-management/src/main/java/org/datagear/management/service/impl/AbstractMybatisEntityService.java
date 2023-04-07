@@ -475,7 +475,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * 参考{@linkplain #cacheGet(Object)}、{@linkplain #cachePut(Object, Entity)}、{@linkplain #cachePutQueryResult(List)}。
 	 * </p>
 	 * <p>
-	 * 如果{@linkplain #getCacheService()}的{@linkplain CacheService#isSerialized()}为{@code false}（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；
+	 * 如果{@linkplain #getCacheService()}的{@linkplain CacheService#isSafeForEdit()}为{@code false}（比如进程内缓存），应遵循{@linkplain CloneableEntity#clone()}规则；
 	 * 否则，可直接返回原实体。
 	 * </p>
 	 * <p>
@@ -491,7 +491,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	@SuppressWarnings("unchecked")
 	protected T cacheCloneEntity(T value)
 	{
-		if (this.cacheService.isSerialized())
+		if (this.cacheService.isSafeForEdit())
 			return value;
 
 		if (value instanceof CloneableEntity)

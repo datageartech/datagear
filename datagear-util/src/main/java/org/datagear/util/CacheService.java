@@ -31,8 +31,8 @@ public class CacheService
 	/** 缓存 */
 	private Cache cache = null;
 
-	/** 缓存是否开启序列化特性 */
-	private boolean serialized = false;
+	/** 缓存是否是编辑安全的 */
+	private boolean safeForEdit = false;
 
 	/** 是否禁用 */
 	private boolean disabled = false;
@@ -56,16 +56,16 @@ public class CacheService
 	/**
 	 * 创建。
 	 * 
-	 * @param cache      允许{@code null}
-	 * @param serialized
-	 * @param disabled
+	 * @param cache
+	 *            允许{@code null}
+	 * @param safeForEdit
+	 *            参考{@linkplain #isSafeForEdit()}
 	 */
-	public CacheService(Cache cache, boolean serialized, boolean disabled)
+	public CacheService(Cache cache, boolean safeForEdit)
 	{
 		super();
 		this.cache = cache;
-		this.serialized = serialized;
-		this.disabled = disabled;
+		this.safeForEdit = safeForEdit;
 	}
 
 	/**
@@ -87,21 +87,21 @@ public class CacheService
 	}
 
 	/**
-	 * 缓存是否开启序列化特性。
+	 * 缓存是否是编辑安全的。
 	 * <p>
-	 * 当为{@code true}时，则不必在存入缓存前、取出缓存后，进行克隆以确保缓存不被改变。
+	 * 即：获取、存入缓存后，修改对象属性不会影响已缓存的对象。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	public boolean isSerialized()
+	public boolean isSafeForEdit()
 	{
-		return serialized;
+		return safeForEdit;
 	}
 
-	public void setSerialized(boolean serialized)
+	public void setSafeForEdit(boolean safeForEdit)
 	{
-		this.serialized = serialized;
+		this.safeForEdit = safeForEdit;
 	}
 
 	public boolean isDisabled()
@@ -133,7 +133,7 @@ public class CacheService
 	/**
 	 * 获取缓存。
 	 * <p>
-	 * 如果{@linkplain #isSerialized()}为{@code false}，调用方应确保获取对象不被修改。
+	 * 如果{@linkplain #isSafeForEdit()}为{@code false}，调用方应确保获取对象不被修改。
 	 * </p>
 	 * 
 	 * @param key
@@ -150,10 +150,10 @@ public class CacheService
 	/**
 	 * 存入缓存。
 	 * <p>
-	 * 如果{@linkplain #isEnabled()}为{@code false}，将不执行任何操作。
+	 * 如果{@linkplain #isSafeForEdit()}为{@code false}，调用方应确保存入对象不会被修改。
 	 * </p>
 	 * <p>
-	 * 如果{@linkplain #isSerialized()}为{@code false}，调用方应确保存入对象不被修改，比如：存入对象副本。
+	 * 如果{@linkplain #isEnabled()}为{@code false}，将不执行任何操作。
 	 * </p>
 	 * 
 	 * @param key
