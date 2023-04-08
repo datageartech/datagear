@@ -52,11 +52,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/dataSetResDirectory")
 public class DataSetResDirectoryController extends AbstractController
 {
-	static
-	{
-		AuthorizationResourceMetas.registerForShare(DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE);
-	}
-
 	@Autowired
 	private DataSetResDirectoryService dataSetResDirectoryService;
 

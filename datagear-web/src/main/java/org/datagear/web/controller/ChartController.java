@@ -83,11 +83,6 @@ import org.springframework.web.context.request.WebRequest;
 @RequestMapping("/chart")
 public class ChartController extends AbstractChartPluginAwareController implements ServletContextAware
 {
-	static
-	{
-		AuthorizationResourceMetas.registerForShare(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE);
-	}
-
 	@Autowired
 	private HtmlChartWidgetEntityService htmlChartWidgetEntityService;
 

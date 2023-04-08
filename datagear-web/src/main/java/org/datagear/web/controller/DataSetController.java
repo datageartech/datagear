@@ -93,11 +93,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/dataSet")
 public class DataSetController extends AbstractSchemaConnController
 {
-	static
-	{
-		AuthorizationResourceMetas.registerForShare(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE);
-	}
-
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
 

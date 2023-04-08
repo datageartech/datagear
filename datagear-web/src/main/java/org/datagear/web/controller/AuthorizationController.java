@@ -30,8 +30,8 @@ import org.datagear.management.service.impl.AuthorizationQueryContext;
 import org.datagear.management.service.impl.EnumValueLabel;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
-import org.datagear.web.controller.AuthorizationResourceMetas.PermissionMeta;
-import org.datagear.web.controller.AuthorizationResourceMetas.ResourceMeta;
+import org.datagear.web.controller.AuthorizationResMetaManager.PermissionMeta;
+import org.datagear.web.controller.AuthorizationResMetaManager.ResourceMeta;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +56,9 @@ public class AuthorizationController extends AbstractController
 	@Autowired
 	private AuthorizationService authorizationService;
 
+	@Autowired
+	private AuthorizationResMetaManager authorizationResMetaManager;
+
 	public AuthorizationController()
 	{
 		super();
@@ -69,6 +72,16 @@ public class AuthorizationController extends AbstractController
 	public void setAuthorizationService(AuthorizationService authorizationService)
 	{
 		this.authorizationService = authorizationService;
+	}
+
+	public AuthorizationResMetaManager getAuthorizationResMetaManager()
+	{
+		return authorizationResMetaManager;
+	}
+
+	public void setAuthorizationResMetaManager(AuthorizationResMetaManager authorizationResMetaManager)
+	{
+		this.authorizationResMetaManager = authorizationResMetaManager;
 	}
 
 	@RequestMapping("/{resourceType}/{resource}/add")
@@ -241,7 +254,7 @@ public class AuthorizationController extends AbstractController
 
 	protected ResourceMeta setResourceMetaAttribute(org.springframework.ui.Model model, String resourceType)
 	{
-		ResourceMeta resourceMeta = AuthorizationResourceMetas.get(resourceType);
+		ResourceMeta resourceMeta = this.authorizationResMetaManager.get(resourceType);
 
 		if (resourceMeta == null)
 			throw new IllegalInputException();

@@ -46,11 +46,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/analysisProject")
 public class AnalysisProjectController extends AbstractController
 {
-	static
-	{
-		AuthorizationResourceMetas.registerForShare(AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
-	}
-
 	@Autowired
 	private AnalysisProjectService analysisProjectService;
 

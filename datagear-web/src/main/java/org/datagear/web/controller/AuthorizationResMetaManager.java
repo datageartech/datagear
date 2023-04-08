@@ -22,10 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.management.domain.Authorization;
-import org.datagear.management.domain.Schema;
 
 /**
- * 授权资源元信息。
+ * 授权资源元信息管理器。
  * <p>
  * {@linkplain AuthorizationController}使用此类提供的元信息绘制授权页面。
  * </p>
@@ -33,16 +32,21 @@ import org.datagear.management.domain.Schema;
  * @author datagear@163.com
  *
  */
-public class AuthorizationResourceMetas
+public class AuthorizationResMetaManager
 {
-	private static final ConcurrentMap<String, ResourceMeta> RESOURCEMETA_MAP = new ConcurrentHashMap<String, ResourceMeta>();
+	private final ConcurrentMap<String, ResourceMeta> RESOURCEMETA_MAP = new ConcurrentHashMap<String, ResourceMeta>();
+
+	public AuthorizationResMetaManager()
+	{
+		super();
+	}
 
 	/**
 	 * 注册{@linkplain ResourceMeta}。
 	 * 
 	 * @param resourceMeta
 	 */
-	public static void register(ResourceMeta resourceMeta)
+	public void register(ResourceMeta resourceMeta)
 	{
 		RESOURCEMETA_MAP.put(resourceMeta.getResourceType(), resourceMeta);
 	}
@@ -52,7 +56,7 @@ public class AuthorizationResourceMetas
 	 * 
 	 * @param resourceType
 	 */
-	public static void registerForShare(String resourceType)
+	public void registerForShare(String resourceType)
 	{
 		PermissionMeta read = PermissionMeta.valueOfRead();
 		ResourceMeta resourceMeta = new ResourceMeta(resourceType, PermissionMeta.valuesOf(read));
@@ -61,6 +65,23 @@ public class AuthorizationResourceMetas
 
 		resourceMeta.setAuthPrincipalLabel("authorization.default.share.principal");
 		resourceMeta.setAuthPrincipalTypeLabel("authorization.default.share.principalType");
+
+		register(resourceMeta);
+	}
+	
+	/**
+	 * 注册标准的【读、写、删除、无】授权功能{@linkplain ResourceMeta}。
+	 * 
+	 * @param resourceType
+	 */
+	public void registerForStandard(String resourceType)
+	{
+		PermissionMeta read = PermissionMeta.valueOfRead();
+		PermissionMeta edit = PermissionMeta.valueOfEdit();
+		PermissionMeta delete = PermissionMeta.valueOfDelete();
+		PermissionMeta none = PermissionMeta.valueOfNone();
+
+		ResourceMeta resourceMeta = new ResourceMeta(resourceType, PermissionMeta.valuesOf(read, edit, delete, none));
 
 		register(resourceMeta);
 	}
@@ -74,39 +95,11 @@ public class AuthorizationResourceMetas
 	 * @param resourceType
 	 * @return
 	 */
-	public static ResourceMeta get(String resourceType)
+	public ResourceMeta get(String resourceType)
 	{
 		return RESOURCEMETA_MAP.get(resourceType);
 	}
-
-	static
-	{
-		// 数据源授权资源元信息
-		{
-			PermissionMeta read = PermissionMeta.valueOfRead(Schema.PERMISSION_TABLE_DATA_READ);
-			read.setPermissionLabelDesc("schema.auth.permission.read.desc");
-
-			PermissionMeta edit = PermissionMeta.valueOfEdit(Schema.PERMISSION_TABLE_DATA_EDIT);
-			edit.setPermissionLabelDesc("schema.auth.permission.edit.desc");
-
-			PermissionMeta delete = PermissionMeta.valueOfDelete(Schema.PERMISSION_TABLE_DATA_DELETE);
-			delete.setPermissionLabelDesc("schema.auth.permission.delete.desc");
-
-			PermissionMeta none = PermissionMeta.valueOfNone();
-			none.setPermissionLabelDesc("schema.auth.permission.none.desc");
-
-			ResourceMeta resourceMeta = new ResourceMeta(Schema.AUTHORIZATION_RESOURCE_TYPE,
-					PermissionMeta.valuesOf(read, edit, delete, none));
-
-			register(resourceMeta);
-		}
-	}
-
-	private AuthorizationResourceMetas()
-	{
-		super();
-	}
-
+	
 	/**
 	 * 授权资源元信息。
 	 * 
@@ -343,7 +336,10 @@ public class AuthorizationResourceMetas
 
 		public static PermissionMeta valueOfRead(int permission)
 		{
-			return new PermissionMeta(permission, "authorization.permission.READ");
+			PermissionMeta pm = new PermissionMeta(permission, "authorization.permission.READ");
+			pm.setPermissionLabelDesc("authorization.permission.READ.desc");
+			
+			return pm;
 		}
 
 		public static PermissionMeta valueOfEdit()
@@ -353,7 +349,10 @@ public class AuthorizationResourceMetas
 
 		public static PermissionMeta valueOfEdit(int permission)
 		{
-			return new PermissionMeta(permission, "authorization.permission.EDIT");
+			PermissionMeta pm = new PermissionMeta(permission, "authorization.permission.EDIT");
+			pm.setPermissionLabelDesc("authorization.permission.EDIT.desc");
+			
+			return pm;
 		}
 
 		public static PermissionMeta valueOfDelete()
@@ -363,7 +362,10 @@ public class AuthorizationResourceMetas
 
 		public static PermissionMeta valueOfDelete(int permission)
 		{
-			return new PermissionMeta(permission, "authorization.permission.DELETE");
+			PermissionMeta pm = new PermissionMeta(permission, "authorization.permission.DELETE");
+			pm.setPermissionLabelDesc("authorization.permission.DELETE.desc");
+			
+			return pm;
 		}
 
 		public static PermissionMeta valueOfNone()
@@ -373,7 +375,10 @@ public class AuthorizationResourceMetas
 
 		public static PermissionMeta valueOfNone(int permission)
 		{
-			return new PermissionMeta(permission, "authorization.permission.NONE");
+			PermissionMeta pm = new PermissionMeta(permission, "authorization.permission.NONE");
+			pm.setPermissionLabelDesc("authorization.permission.NONE.desc");
+			
+			return pm;
 		}
 
 		public static PermissionMeta[] valuesOf(PermissionMeta... permissionMetas)

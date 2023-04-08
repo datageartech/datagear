@@ -141,11 +141,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor";
 
-	static
-	{
-		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE);
-	}
-
 	@Autowired
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 

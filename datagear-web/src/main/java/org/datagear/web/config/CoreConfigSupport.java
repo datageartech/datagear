@@ -115,6 +115,8 @@ import org.datagear.util.StringUtil;
 import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
 import org.datagear.util.sqlvalidator.SqlValidator;
+import org.datagear.web.controller.AuthorizationResMetaManager;
+import org.datagear.web.controller.AuthorizationResMetas;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.controller.RegisterController;
 import org.datagear.web.format.DateFormatter;
@@ -570,6 +572,22 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public HtmlTplDashboardImportResolver htmlTplDashboardImportResolver()
 	{
 		HtmlTplDashboardImportResolver bean = new HtmlTplDashboardImportResolver();
+		return bean;
+	}
+	
+	@Bean
+	public AuthorizationResMetaManager authorizationResMetaManager()
+	{
+		AuthorizationResMetaManager bean = new AuthorizationResMetaManager();
+		return bean;
+	}
+	
+	@Bean
+	public AuthorizationResMetas authorizationResMetas()
+	{
+		AuthorizationResMetas bean = new AuthorizationResMetas(this.authorizationResMetaManager());
+		bean.register();
+		
 		return bean;
 	}
 
