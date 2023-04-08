@@ -18,14 +18,12 @@
 package org.datagear.web.security;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
-import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.WebUtils;
@@ -41,8 +39,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  */
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler
 {
-	private List<CreateUserEntityService> createUserEntityServices;
-
 	private UsernameLoginLatch usernameLoginLatch;
 
 	private CheckCodeManager checkCodeManager;
@@ -52,16 +48,6 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 		super();
 		this.usernameLoginLatch = usernameLoginLatch;
 		this.checkCodeManager = checkCodeManager;
-	}
-
-	public List<CreateUserEntityService> getCreateUserEntityServices()
-	{
-		return createUserEntityServices;
-	}
-
-	public void setCreateUserEntityServices(List<CreateUserEntityService> createUserEntityServices)
-	{
-		this.createUserEntityServices = createUserEntityServices;
 	}
 
 	public UsernameLoginLatch getUsernameLoginLatch()
@@ -91,7 +77,6 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 		clearLoginCheckCode(request, response, authentication);
 		clearUsernameLoginLatch(request, response, authentication);
 
-		migrateAnonymousUserData(request, response, authentication);
 		request.getRequestDispatcher("/login/success").forward(request, response);
 	}
 
@@ -106,39 +91,5 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 	{
 		User user = WebUtils.getUser(authentication);
 		this.usernameLoginLatch.clear(user.getName());
-	}
-
-	/**
-	 * 将匿名用户的数据迁移至登录用户上。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param loginUser
-	 */
-	protected void migrateAnonymousUserData(HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication)
-	{
-		User user = WebUtils.getUser(authentication);
-
-		if (user.isAnonymous())
-			return;
-
-		// 不迁移至管理员用户上
-		if (user.isAdmin())
-			return;
-
-		String anonymousUserId = WebUtils.getCookieValue(request,
-				AnonymousAuthenticationFilterExt.COOKIE_USER_ID_ANONYMOUS);
-
-		if (anonymousUserId != null && !anonymousUserId.isEmpty())
-		{
-			if (this.createUserEntityServices != null)
-			{
-				for (CreateUserEntityService service : this.createUserEntityServices)
-				{
-					service.updateCreateUserId(anonymousUserId, user.getId());
-				}
-			}
-		}
 	}
 }

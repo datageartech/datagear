@@ -19,12 +19,10 @@ package org.datagear.web.config;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.datagear.management.domain.Role;
-import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
@@ -35,11 +33,8 @@ import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
 import org.datagear.web.security.LoginLatchFilter;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -65,7 +60,7 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
  * 
  * @author datagear@163.com
  */
-public class SecurityConfigSupport implements ApplicationListener<ContextRefreshedEvent>
+public class SecurityConfigSupport
 {
 	public static final String LOGIN_PROCESS_URL = "/login/doLogin";
 
@@ -160,12 +155,9 @@ public class SecurityConfigSupport implements ApplicationListener<ContextRefresh
 	 */
 	protected void configureHttpSecurity(HttpSecurity http) throws Exception
 	{
-		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
-		http.csrf().disable();
-
-		// 默认"X-Frame-Options"值为"DENY"，这会导致系统的图表/看板展示页面无法被其他应用嵌入iframe，因此需禁用
-		http.headers().frameOptions().disable();
-
+		configureCsrf(http);
+		configureHeaders(http);
+		
 		configAccessForStatic(http);
 		configAccessForShowChartAndDashboard(http);
 		configAccessForSchema(http);
@@ -194,6 +186,30 @@ public class SecurityConfigSupport implements ApplicationListener<ContextRefresh
 		configLoginAndOutForm(http);
 		configureAnonymous(http);
 		configLoginLatchFilter(http);
+	}
+
+	/**
+	 * 配置CSRF。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configureCsrf(HttpSecurity http) throws Exception
+	{
+		// 默认是开启CSRF的，系统目前没有提供相关支持，因此需禁用
+		http.csrf().disable();
+	}
+
+	/**
+	 * 配置headers。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configureHeaders(HttpSecurity http) throws Exception
+	{
+		// 默认"X-Frame-Options"值为"DENY"，这会导致系统的图表/看板展示页面无法被其他应用嵌入iframe，因此需禁用
+		http.headers().frameOptions().disable();
 	}
 
 	/**
@@ -638,23 +654,5 @@ public class SecurityConfigSupport implements ApplicationListener<ContextRefresh
 		// 因此这里需要设置为允许，不然功能将无法使用
 		firewall.setAllowSemicolon(true);
 		return firewall;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		ApplicationContext context = event.getApplicationContext();
-
-		inflateAuthenticationSuccessHandler(context);
-	}
-
-	protected void inflateAuthenticationSuccessHandler(ApplicationContext context)
-	{
-		List<CreateUserEntityService> serviceList = CoreConfigSupport.getCreateUserEntityServices(context);
-
-		AuthenticationSuccessHandler ash = authenticationSuccessHandler();
-
-		if (ash instanceof AuthenticationSuccessHandlerImpl)
-			((AuthenticationSuccessHandlerImpl) ash).setCreateUserEntityServices(serviceList);
 	}
 }
