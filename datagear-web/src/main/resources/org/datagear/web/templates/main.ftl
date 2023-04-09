@@ -124,13 +124,17 @@
 		onMainMenuTabChange: function(e)
 		{
 			e.originalEvent.preventDefault();
-			
-			var mainMenu = po.vuePageModel().mainMenu;
-			var item = mainMenu.items[e.index];
-			
-			po.showMainPanel("mainMenuTab"+item.label, item.url, item.label);
+			po.showMainPanelOfIndex(e.index);
 		}
 	});
+	
+	po.showMainPanelOfIndex = function(menuIndex)
+	{
+		var pm = po.vuePageModel();
+		pm.mainMenu.active = menuIndex;
+		var item = pm.mainMenu.items[menuIndex];
+		po.showMainPanel("mainMenuTab"+item.label, item.url, item.label);
+	};
 	
 	po.showMainPanel = function(name, url)
 	{
