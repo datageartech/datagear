@@ -381,7 +381,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return HttpClients.createDefault();
 	}
 
-	protected File createDirectory(String directoryName, boolean createIfInexistence)
+	public File createDirectory(String directoryName, boolean createIfInexistence)
 	{
 		DirectoryFactory bean = new DirectoryFactory();
 		bean.setDirectoryName(directoryName);

@@ -93,7 +93,7 @@ public class ApplicationPropertiesConfigSupport
 	@Bean
 	public ApplicationProperties applicationProperties()
 	{
-		ApplicationPropertiesImpl bean = new ApplicationPropertiesImpl();
+		ApplicationProperties bean = createApplicationProperties();
 
 		bean.setSqlDataSetInvalidSqlKeywords(this.sqlDataSetInvalidSqlKeywords());
 		bean.setDsmanagerQueryInvalidSqlKeywords(this.dsmanagerQueryInvalidSqlKeywords());
@@ -103,6 +103,11 @@ public class ApplicationPropertiesConfigSupport
 		bean.setDsmanagerSqlpadDeleteInvalidSqlKeywords(this.dsmanagerSqlpadDeleteInvalidSqlKeywords());
 
 		return bean;
+	}
+	
+	protected ApplicationProperties createApplicationProperties()
+	{
+		return new ApplicationPropertiesImpl();
 	}
 
 	protected static class ApplicationPropertiesImpl extends ApplicationProperties

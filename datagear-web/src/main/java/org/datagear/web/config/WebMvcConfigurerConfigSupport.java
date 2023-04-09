@@ -186,7 +186,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer()
 	{
-		FreeMarkerConfigurer bean = new FreeMarkerConfigurer();
+		FreeMarkerConfigurer bean = createFreeMarkerConfigurer();
 
 		Properties settings = new Properties();
 		settings.setProperty("datetime_format", org.datagear.util.DateFormat.DEFAULT_TIMESTAMP_FORMAT);
@@ -209,6 +209,11 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 		bean.setFreemarkerVariables(variables);
 
 		return bean;
+	}
+	
+	protected FreeMarkerConfigurer createFreeMarkerConfigurer()
+	{
+		return new FreeMarkerConfigurer();
 	}
 	
 	protected String[] getFreeMarkerTemplateLoaderPaths()
