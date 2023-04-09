@@ -218,7 +218,6 @@
 })
 (${pid});
 </script>
-<#include "../include/ext/dashboard/dashboard_table.ftl">
 <#include "../include/page_vue_mount.ftl">
 </body>
 </html>

@@ -231,7 +231,6 @@
 })
 (${pid});
 </script>
-<#include "../include/ext/dataSet/dataSet_form_Http.ftl">
 <#include "../include/page_vue_mount.ftl">
 </body>
 </html>

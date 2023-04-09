@@ -220,7 +220,6 @@
 })
 (${pid});
 </script>
-<#include "../include/ext/chart/chart_table.ftl">
 <#include "../include/page_vue_mount.ftl">
 </body>
 </html>
