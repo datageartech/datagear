@@ -86,7 +86,7 @@ public abstract class AbstractController
 
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 
-	public static final String KEY_ANALYSIS_PROJECT_ID = Global.NAME_SHORTCUT_UC_PREFIX + "ANALYSIS_PROJECT_ID";
+	public static final String KEY_ANALYSIS_PROJECT_ID = Global.NAME_SHORT_UCUS + "ANALYSIS_PROJECT_ID";
 
 	public static final String ERROR_PAGE_URL = "/error";
 

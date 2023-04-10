@@ -58,7 +58,7 @@ public class AnonymousAuthenticationFilterExt extends AnonymousAuthenticationFil
 {
 	public static final String SESSION_KEY_AUTH_USER_ANONYMOUS = "AUTH_USER_ANONYMOUS";
 
-	public static final String COOKIE_USER_ID_ANONYMOUS =  Global.NAME_SHORTCUT_UC_PREFIX + "USER_ID_ANONYMOUS";
+	public static final String COOKIE_USER_ID_ANONYMOUS =  Global.NAME_SHORT_UCUS + "USER_ID_ANONYMOUS";
 
 	private String key;
 

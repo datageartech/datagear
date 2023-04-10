@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.util.Global;
+
 /**
  * 图表定义。
  * 
@@ -32,7 +34,7 @@ import java.util.Map;
 public class ChartDefinition extends AbstractIdentifiable implements ResultDataFormatAware
 {
 	/** 内置图表属性名前缀 */
-	public static final String BUILTIN_ATTR_PREFIX = "DG_";
+	public static final String BUILTIN_ATTR_PREFIX = Global.NAME_SHORT_UCUS;
 
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_NAME = "name";

@@ -247,7 +247,7 @@ public class SecurityConfigSupport
 
 				// 记住登录
 				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
-				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName(Global.NAME_SHORTCUT_UC_PREFIX + "REMEMBER_ME");
+				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName(Global.NAME_SHORT_UCUS + "REMEMBER_ME");
 	}
 
 	/**

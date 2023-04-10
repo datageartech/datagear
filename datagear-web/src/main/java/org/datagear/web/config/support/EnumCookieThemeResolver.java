@@ -35,7 +35,7 @@ import org.springframework.web.servlet.theme.CookieThemeResolver;
  */
 public class EnumCookieThemeResolver extends CookieThemeResolver
 {
-	public static final String COOKIE_THEME_NAME = Global.NAME_SHORTCUT_UC_PREFIX + "THEME";
+	public static final String COOKIE_THEME_NAME = Global.NAME_SHORT_UCUS + "THEME";
 	
 	private ThemeSpec themeSpec;
 
