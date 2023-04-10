@@ -230,7 +230,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public MessageSource messageSource()
 	{
-		ResourceBundleMessageSource bean = new ResourceBundleMessageSource();
+		ResourceBundleMessageSource bean = createResourceBundleMessageSource();
 		bean.setBasenames(getMessageSourceBasenames());
 		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
 		// i18n找不到指定语言的bundle时不使用操作系统默认语言重新查找，直接使用默认bundle。
@@ -239,6 +239,11 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		bean.setFallbackToSystemLocale(false);
 
 		return bean;
+	}
+
+	protected ResourceBundleMessageSource createResourceBundleMessageSource()
+	{
+		return new ResourceBundleMessageSource();
 	}
 
 	protected String[] getMessageSourceBasenames()
@@ -273,7 +278,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public FormattingConversionService conversionService()
 	{
-		DefaultFormattingConversionService bean = new DefaultFormattingConversionService(false);
+		DefaultFormattingConversionService bean = createDefaultFormattingConversionService();
 
 		bean.addFormatter(this.sqlDateFormatter());
 		bean.addFormatter(this.sqlTimeFormatter());
@@ -285,10 +290,15 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return bean;
 	}
 
+	protected DefaultFormattingConversionService createDefaultFormattingConversionService()
+	{
+		return new DefaultFormattingConversionService(false);
+	}
+
 	@Bean
 	public ObjectMapperBuilder objectMapperBuilder()
 	{
-		ObjectMapperBuilder bean = new ObjectMapperBuilder();
+		ObjectMapperBuilder bean = createObjectMapperBuilder();
 
 		FormatterSerializer<java.sql.Date> sqlDateSerializer = new FormatterSerializer<java.sql.Date>(
 				this.sqlDateFormatter());
@@ -319,6 +329,11 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		bean.addJsonDeserializer(java.util.Date.class, dateDeserializer);
 
 		return bean;
+	}
+
+	protected ObjectMapperBuilder createObjectMapperBuilder()
+	{
+		return new ObjectMapperBuilder();
 	}
 
 	@Bean
@@ -412,7 +427,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		try
 		{
-			SqlSessionFactoryBean bean = this.getSqlSessionFactoryBean();
+			SqlSessionFactoryBean bean = this.sqlSessionFactoryBean();
 			return bean.getObject();
 		}
 		catch (Exception e)
@@ -421,7 +436,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		}
 	}
 	
-	protected SqlSessionFactoryBean getSqlSessionFactoryBean() throws Exception
+	protected SqlSessionFactoryBean sqlSessionFactoryBean() throws Exception
 	{
 		SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
 		

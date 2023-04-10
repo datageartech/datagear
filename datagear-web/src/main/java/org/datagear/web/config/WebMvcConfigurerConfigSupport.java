@@ -117,16 +117,16 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	{
 		registry.addResourceHandler(STATIC_RES_PATH_PATTERN).addResourceLocations(STATIC_RES_LOCATION)
 			.resourceChain(false)
-			.addTransformer(getClearCssCommentResourceTransformer())
-			.addTransformer(getClearJsCommentResourceTransformer());
+			.addTransformer(clearCssCommentResourceTransformer())
+			.addTransformer(clearJsCommentResourceTransformer());
 	}
 	
-	protected ClearCssCommentResourceTransformer getClearCssCommentResourceTransformer()
+	protected ClearCssCommentResourceTransformer clearCssCommentResourceTransformer()
 	{
 		return new ClearCssCommentResourceTransformer(STATIC_RES_CSS_PATH_PATTERN, STATIC_RES_THEME_PATH_PATTERN);
 	}
 	
-	protected ClearJsCommentResourceTransformer getClearJsCommentResourceTransformer()
+	protected ClearJsCommentResourceTransformer clearJsCommentResourceTransformer()
 	{
 		return new ClearJsCommentResourceTransformer(STATIC_RES_JS_PATH_PATTERN);
 	}
@@ -134,13 +134,23 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		ThemeChangeInterceptor themeChangeInterceptor = new ThemeChangeInterceptor();
+		ThemeChangeInterceptor themeChangeInterceptor = createThemeChangeInterceptor();
 		registry.addInterceptor(themeChangeInterceptor).addPathPatterns("/changeThemeData");
 
-		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
+		LocaleChangeInterceptor localeChangeInterceptor = createLocaleChangeInterceptor();
 		// 忽略非法语言，避免抛出异常
 		localeChangeInterceptor.setIgnoreInvalidLocale(true);
 		registry.addInterceptor(localeChangeInterceptor).addPathPatterns("/changeLocale");
+	}
+
+	protected ThemeChangeInterceptor createThemeChangeInterceptor()
+	{
+		return new ThemeChangeInterceptor();
+	}
+
+	protected LocaleChangeInterceptor createLocaleChangeInterceptor()
+	{
+		return new LocaleChangeInterceptor();
 	}
 
 	@Override
@@ -171,7 +181,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry)
 	{
-		FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver();
+		FreeMarkerViewResolver viewResolver = createFreeMarkerViewResolver();
 		viewResolver.setViewClass(CustomFreeMarkerView.class);
 		viewResolver.setContentType("text/html;charset=" + IOUtil.CHARSET_UTF_8);
 		viewResolver.setExposeRequestAttributes(true);
@@ -181,6 +191,11 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 		viewResolver.setSuffix(".ftl");
 
 		registry.viewResolver(viewResolver);
+	}
+
+	protected FreeMarkerViewResolver createFreeMarkerViewResolver()
+	{
+		return new FreeMarkerViewResolver();
 	}
 
 	@Bean
