@@ -32,7 +32,7 @@
 <div id="${pid}">
 	<div class="flex flex-column h-screen m-0">
 		<#include "include/page_main_header.ftl">
-		<div class="page-main-content flex-grow-1 p-0">
+		<div class="page-main-content flex-grow-1 overflow-auto p-0">
 			<div class="grid h-full m-0 flex-nowrap">
 				<div class="page-main-menu col-fixed px-0 pb-0">
 					<div class="grid grid-nogutter flex-column align-items-center p-card h-full border-noround-left border-noround-bottom">
