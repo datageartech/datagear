@@ -27,11 +27,11 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
 <#include "include/data_page_obj.ftl">
-<div id="${pid}" class="page page-manager page-table page-schemadata">
-	<div class="page-header grid grid-nogutter align-items-center pb-2">
+<div id="${pid}" class="page page-manager page-table page-schemadata h-full flex flex-column overflow-auto">
+	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12 flex align-items-center mb-1">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
@@ -42,7 +42,7 @@
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
 			<#include "include/data_search_form.ftl">
 		</div>
-		<div class="h-opts col-12 text-right" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
+		<div class="operations col-12 flex gap-1 flex-wrap md:justify-content-end" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect"
 				v-if="pm.isSelectAction">
 			</p-button>
@@ -66,7 +66,7 @@
 			</p-button>
 		</div>
 	</div>
-	<div class="page-content">
+	<div class="page-content flex-grow-1 overflow-auto">
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
 			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate" :first="pm.pageRecordIndex"
 			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"

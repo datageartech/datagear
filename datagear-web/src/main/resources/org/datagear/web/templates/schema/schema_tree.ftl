@@ -28,45 +28,43 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-manager-schema">
-	<div class="grid grid-nogutter m-0 flex-nowrap">
+<div id="${pid}" class="page page-manager page-manager-schema h-full flex flex-column overflow-auto">
+	<div class="grid grid-nogutter m-0 flex-nowrap h-full overflow-auto">
 		<div class="col-3">
-			<div class="flex flex-column m-0">
-				<div class="page-header">
-					<div class="grid align-items-center flex-nowrap">
-						<div class="col">
-							<form @submit.prevent="onSearch" class="py-1">
-								<div class="p-inputgroup">
-									<div class="p-input-icon-left flex-grow-1">
-										<i class="cursor-pointer" @click="onToggleSearchType"
-											:class="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-file'"
-											title="<@spring.message code='switchSearchMode' />">
-										</i>
-										<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
-									</div>
-									<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
+			<div class="flex flex-column h-full">
+				<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0 gap-2">
+					<div class="col">
+						<form @submit.prevent="onSearch" class="py-1">
+							<div class="p-inputgroup">
+								<div class="p-input-icon-left flex-grow-1">
+									<i class="cursor-pointer" @click="onToggleSearchType"
+										:class="pm.searchType=='schema' ? 'pi pi-database' : 'pi pi-file'"
+										title="<@spring.message code='switchSearchMode' />">
+									</i>
+									<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
 								</div>
-							</form>
-						</div>
-						<div class="col-fixed text-right">
-							<div class="p-buttonset" v-if="!pm.isReadonlyAction">
-								<p-button type="button" icon="pi pi-plus" @click="onAdd"></p-button>
-								<p-button type="button" icon="pi pi-angle-down"
-									aria-haspopup="true" aria-controls="${pid}schemaOptMenu"
-									@click="onToggleSchemaOptMenu">
-								</p-button>
+								<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
 							</div>
+						</form>
+					</div>
+					<div class="col-fixed text-right">
+						<div class="p-buttonset" v-if="!pm.isReadonlyAction">
+							<p-button type="button" icon="pi pi-plus" @click="onAdd"></p-button>
 							<p-button type="button" icon="pi pi-angle-down"
 								aria-haspopup="true" aria-controls="${pid}schemaOptMenu"
-								@click="onToggleSchemaOptMenu" v-if="pm.isReadonlyAction">
+								@click="onToggleSchemaOptMenu">
 							</p-button>
-							<p-menu id="${pid}schemaOptMenu" ref="${pid}schemaOptMenuEle" :model="pm.schemaOptMenuItems" :popup="true"></p-menu>
 						</div>
+						<p-button type="button" icon="pi pi-angle-down"
+							aria-haspopup="true" aria-controls="${pid}schemaOptMenu"
+							@click="onToggleSchemaOptMenu" v-if="pm.isReadonlyAction">
+						</p-button>
+						<p-menu id="${pid}schemaOptMenu" ref="${pid}schemaOptMenuEle" :model="pm.schemaOptMenuItems" :popup="true"></p-menu>
 					</div>
 				</div>
-				<div class="page-content flex-grow-1 p-0">
+				<div class="page-content flex-grow-1 overflow-auto">
 					<p-tree :value="pm.schemaNodes"
 						selection-mode="multiple" v-model:selection-keys="pm.selectedNodeKeys"
 						@node-expand="onSchemaNodeExpand" @node-select="onSchemaNodeSelect"
@@ -75,9 +73,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="schema-tabs-wrapper col-9 pl-3">
+		<div class="schema-tabs-wrapper col-9 pl-3 pt-1 overflow-auto">
 			<p-tabview v-model:active-index="pm.schemaTabs.activeIndex" :scrollable="true" @tab-change="onSchemaTabChange"
-				@tab-click="onSchemaTabClick" class="contextmenu-tabview light-tabview" :class="{'opacity-0': pm.schemaTabs.items.length == 0}">
+				@tab-click="onSchemaTabClick" class="contextmenu-tabview light-tabview h-full flex flex-column overflow-auto" :class="{'opacity-0': pm.schemaTabs.items.length == 0}">
 				<p-tabpanel v-for="tab in pm.schemaTabs.items" :key="tab.id">
 					<template #header>
 						<span class="p-tabview-title" :title="tab.desc">{{tab.title}}</span>
@@ -86,7 +84,7 @@
 							@click="onSchemaTabMenuToggle($event, tab)" aria-haspopup="true" aria-controls="${pid}schemaTabMenu">
 						</p-button>
 					</template>
-					<div :id="tab.id"></div>
+					<div :id="tab.id" class=" h-full overflow-auto"></div>
 				</p-tabpanel>
 			</p-tabview>
 			<p-menu id="${pid}schemaTabMenu" ref="${pid}schemaTabMenuEle" :model="pm.schemaTabMenuItems" :popup="true" class="text-sm"></p-menu>
