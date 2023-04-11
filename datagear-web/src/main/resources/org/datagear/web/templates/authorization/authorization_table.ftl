@@ -29,7 +29,7 @@
 </head>
 <body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-table">
+<div id="${pid}" class="page page-manager page-table h-full flex flex-column overflow-auto">
 	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
 			<#include "../include/page_search_form.ftl">

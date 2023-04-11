@@ -543,30 +543,13 @@ label.align-tip{
 	display: none;
 }
 
-/*管理页*/
-.page-manager .page-content{
-	/*屏幕高度 - 页内header高度 - 页foot高度*/
-	height: calc(100vh - 5rem - 0.5rem);
+.p-dialog > .p-dialog-content > .page-manager,
+.p-dialog > .p-dialog-content .page-manager-wrapper > .page-manager{
+	height: calc(90vh - 6rem) !important;
 }
-.page-manager.page-search-ap-aware .page-content{
-	/*屏幕高度 - 页内header高度 - 页foot高度*/
-	height: calc(100vh - 6.7rem - 0.5rem);
-}
-.page-main-panel .page-manager .page-content{
-	/*屏幕高度 - 主页header高度 - 页内header高度*/
-	height: calc(100vh - 5rem - 5rem);
-}
-.page-main-panel .page-manager.page-search-ap-aware .page-content{
-	/*屏幕高度 - 主页header高度 - 页内header高度*/
-	height: calc(100vh - 5rem - 6.7rem);
-}
-.p-dialog .page-manager .page-content{
-	/*对话框高度 - 对话框header高度 - 页内header高度*/
-	height: calc(90vh - 6rem - 5rem);
-}
-.p-dialog .page-manager.page-search-ap-aware .page-content{
-	/*对话框高度 - 对话框header高度 - 页内header高度*/
-	height: calc(90vh - 6rem - 6.7rem);
+.p-overlaypanel > .p-overlaypanel-content > .page-manager,
+.p-overlaypanel > .p-overlaypanel-content .page-manager-wrapper > .page-manager{
+	height: 50vh !important;
 }
 
 /*表单页*/
@@ -579,10 +562,10 @@ label.align-tip{
 }
 .page-form form.readonly .hide-if-readonly,
 .page-form form.readonly .page-form-foot{
-	display: none;
+	display: none !important;
 }
 .page-form form.readonly.show-foot .page-form-foot{
-	display: unset;
+	display: flex !important;
 }
 .page-form form.readonly .page-form-content{
 	/*屏幕高度 - 底部留白高度*/
@@ -932,75 +915,4 @@ label.align-tip{
 .page-sqlpad .sqlpad-tabs-wrapper .result-message .execution-message .sql-value{
 	width: 20rem;
 	overflow: hidden;
-}
-.sql-history-panel-content .page-manager .page-content{
-	height: 45vh;
-}
-
-/*数据源-数据导入导出页*/
-.page-dataexchange.page-manager .page-content{
-	/*屏幕高度 - 页头高度*/
-	height: calc(100vh - 6rem);
-}
-.page-manager-schema .schema-tabs-wrapper .page-dataexchange.page-manager .page-content{
-	/*屏幕高度 - 选项卡标题高度 - 页头高度*/
-	height: calc(100vh - 4.5rem - 6rem);
-}
-.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-dataexchange.page-manager .page-content{
-	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页头高度*/
-	height: calc(100vh - 5rem - 4.5rem - 6rem);
-}
-.p-dialog .page-dataexchange.page-manager .page-content{
-	/*屏幕高度 - 对话框header高度 - 页头高度*/
-	height: calc(90vh - 6rem - 6rem);
-}
-.page-dataexchange .page-content .page-form .page-form-content{
-	/*屏幕高度 - 页头高度 - 表单foot高度*/
-	height: calc(100vh - 6rem - 3.5rem);
-}
-.page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content{
-	/*屏幕高度 - 选项卡标题高度 - 页头高度 - 表单foot高度*/
-	height: calc(100vh - 4.5rem - 6rem - 3.5rem);
-}
-.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content{
-	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页头高度 - 表单foot高度*/
-	height: calc(100vh - 5rem - 4.5rem - 6rem - 3.5rem);
-}
-.p-dialog .page-dataexchange .page-content .page-form .page-form-content{
-	/*屏幕高度 - 对话框header高度 - 页头高度 - 表单foot高度*/
-	height: calc(90vh - 6rem - 6rem - 3.5rem);
-}
-.page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
-	/*屏幕高度 - 页头高度 - 表单foot高度 - 表头高度*/
-	height: calc(100vh - 6rem - 3.5rem - 3.5rem);
-}
-.page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
-	/*屏幕高度 - 选项卡标题高度 - 页头高度 - 表单foot高度 - 表头高度*/
-	height: calc(100vh - 4.5rem - 6rem - 3.5rem - 3.5rem);
-}
-.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
-	/*屏幕高度 - 主页header高度 - 选项卡标题高度 - 页头高度 - 表单foot高度 - 表头高度*/
-	height: calc(100vh - 5rem - 4.5rem - 6rem - 3.5rem - 3.5rem);
-}
-.p-dialog .page-dataexchange .page-content .page-form .page-form-content .subdataexchange-table-wrapper{
-	/*屏幕高度 - 对话框header高度 - 页头高度 - 表单foot高度 - 表头高度*/
-	height: calc(90vh - 6rem - 6rem - 3.5rem - 3.5rem);
-}
-
-/*数据源-表数据查询管理页*/
-.page-manager.page-schemadata .page-content{
-	/*屏幕高度 - 页内header高度*/
-	height: calc(100vh - 6.7rem);
-}
-.page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
-	/*屏幕高度 - 选项卡标题高度 - 页内header高度*/
-	height: calc(100vh - 4.5rem - 6.7rem);
-}
-.page-main-panel .page-manager-schema .schema-tabs-wrapper .page-manager .page-content{
-	/*屏幕高度 - 主页header高度 - 表名选项卡标题高度 - 页内header高度*/
-	height: calc(100vh - 5rem - 4.5rem - 6.7rem);
-}
-.p-dialog .page-manager.page-schemadata .page-content{
-	/*屏幕高度 - 对话框header高度 - 页内header高度*/
-	height: calc(90vh - 6rem - 6.7rem);
 }

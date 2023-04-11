@@ -23,7 +23,7 @@
 dataexchange_js.ftl
 export_js.ftl
 -->
-<div class="flex align-items-center justify-content-between">
+<div class="flex-grow-0 flex align-items-center justify-content-between">
 	<div class="fileupload-wrapper flex align-items-center">
 		<p-splitbutton label="<@spring.message code='add' />" @click="onAdd" :model="pm.addBtnItems"
 			:disabled="pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
@@ -37,7 +37,7 @@ export_js.ftl
 			</p-progressbar>
 		</div>
 	</div>
-	<div class="h-opts">
+	<div class="flex gap-1">
 		<p-button type="button" label="<@spring.message code='delete' />"
 			@click="onDeleteSelSubDataExchanges"
 			class="p-button-danger"

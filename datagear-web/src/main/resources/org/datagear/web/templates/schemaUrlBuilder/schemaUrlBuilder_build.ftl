@@ -82,10 +82,10 @@
 		        </div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center" v-if="pm.isPreviewAction">
+		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2" v-if="pm.isPreviewAction">
 			<p-inputtext id="${pid}previewResult" v-model="fm.previewResult" type="text" class="input w-8 text-center"
         		placeholder="<@spring.message code='previewResult' />" name="previewResult" maxlength="2000">
         	</p-inputtext>

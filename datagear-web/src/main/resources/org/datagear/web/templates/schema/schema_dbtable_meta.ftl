@@ -89,7 +89,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		</div>
 	</form>
 </div>

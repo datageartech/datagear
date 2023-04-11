@@ -24,7 +24,7 @@ page_boolean_options.ftl
 -->
 <#assign ChartPluginAttributeType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
 <#assign ChartPluginAttributeInputType=statics['org.datagear.analysis.ChartPluginAttribute$InputType']>
-<form id="${pid}chartAttrValuesForm" class="flex flex-column chart-attr-values-form" :class="{readonly: pm.chartAttrValuesForm.readonly}">
+<form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<div v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
 			<p-divider align="center">
@@ -162,7 +162,7 @@ page_boolean_options.ftl
 			</div>
 		</div>
 	</div>
-	<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 		
 		<p-button v-for="(btn, btnIdx) in pm.chartAttrValuesForm.buttons" :key="btnIdx"

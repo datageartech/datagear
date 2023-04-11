@@ -26,19 +26,19 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-table">
-	<div class="page-header grid align-items-center">
+<div id="${pid}" class="page page-manager page-table h-full flex flex-column overflow-auto">
+	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12 md:col-6">
 			<#include "../include/page_search_form.ftl">
 		</div>
-		<div class="h-opts col-12 md:col-6 text-right">
+		<div class="operations col-12 md:col-6 flex gap-1 flex-wrap md:justify-content-end">
 			<p-button label="<@spring.message code='insert' />" @click="onSelect"></p-button>
 			<p-button label="<@spring.message code='copy' />" @click="onCopyToClipboard" class="p-button-secondary"></p-button>
 		</div>
 	</div>
-	<div class="page-content">
+	<div class="page-content flex-grow-1 overflow-auto">
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
 			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate" :first="pm.pageRecordIndex"
 			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"
@@ -52,8 +52,8 @@
 			<p-column field="sql" header="<@spring.message code='sql' />" :sortable="true" class="col-desc"></p-column>
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
+		<#include "../include/page_copy_to_clipboard.ftl">
 	</div>
-	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_manager.ftl">
 <#include "../include/page_table.ftl">

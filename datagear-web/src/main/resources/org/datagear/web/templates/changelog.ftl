@@ -59,7 +59,7 @@
 				</div>
 			</#list>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center">
+		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<#if !(allListed??) || allListed == false>
 			<div class="text-primary">
 				<a href="${contextPath}/changelogs" target="_blank" class="link">

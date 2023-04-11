@@ -32,7 +32,7 @@
 	<#include "include/import_head.ftl">
 	<div class="page-content flex-grow-1 overflow-auto">
 		<div class="page-form h-full overflow-auto">
-			<form id="${pid}form" action="#" class=" h-full flex flex-column overflow-auto">
+			<form id="${pid}form" action="#" class="h-full flex flex-column overflow-auto">
 				<div class="page-form-content p-2 flex-grow-1 overflow-auto"
 					:class="pm.steps.activeIndex == 0 ? '' : 'hidden'">
 					<div class="field grid">
@@ -47,9 +47,9 @@
 					</div>
 				</div>
 				<div class="page-form-content p-2 flex-grow-1 overflow-auto"
-					:class="pm.steps.activeIndex == 1 ? '' : 'hidden'">
+					:class="pm.steps.activeIndex == 1 ? 'flex flex-column' : 'hidden'">
 					<#include "include/import_table_head.ftl">
-					<div class="subdataexchange-table-wrapper pt-2">
+					<div class="subdataexchange-table-wrapper flex-grow-1 overflow-auto pt-2">
 						<p-datatable :value="fm.subDataExchanges" :scrollable="true" scroll-height="flex"
 							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
 							:resizable-columns="true" column-resize-mode="expand"

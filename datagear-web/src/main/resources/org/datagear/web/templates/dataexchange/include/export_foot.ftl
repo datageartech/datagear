@@ -22,14 +22,14 @@
 依赖：
 dataexchange_js.ftl
 -->
-<div class="page-form-foot pt-3 text-center flex justify-content-between">
+<div class="page-form-foot p-1 pt-2 flex-grow-0 flex justify-content-between">
 	<div class="w-4 text-left">
 		<p-button type="button" label="<@spring.message code='return' />"
 			class="p-button-secondary" @click="onReturn"
 			:disabled="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
 		</p-button>
 	</div>
-	<div class="w-4 text-center h-opts">
+	<div class="w-4 flex justify-content-center gap-2">
 		<p-button type="button" label="<@spring.message code='previousStep' />"
 			@click="onToPrevStep" :disabled="pm.steps.activeIndex == 0 || pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 		</p-button>

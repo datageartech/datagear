@@ -26,14 +26,14 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-export-data-sql">
+<div id="${pid}" class="page page-manager page-dataexchange page-export-data-sql h-full flex flex-column overflow-auto">
 	<#include "include/export_head.ftl">
-	<div class="page-content">
-		<div class="page-form">
-			<form id="${pid}form" action="#">
-				<div class="page-form-content p-2 overflow-y-auto"
+	<div class="page-content flex-grow-1 overflow-auto">
+		<div class="page-form h-full overflow-auto">
+			<form id="${pid}form" action="#" class="h-full flex flex-column overflow-auto">
+				<div class="page-form-content p-2 flex-grow-1 overflow-auto"
 					:class="pm.steps.activeIndex == 0 ? '' : 'hidden'">
 					<#include "include/dataexchange_data_format.ftl">
 					<div class="field grid">
@@ -57,10 +57,10 @@
 						</div>
 					</div>
 				</div>
-				<div class="page-form-content p-2 overflow-y-auto"
-					:class="pm.steps.activeIndex == 1 ? '' : 'hidden'">
+				<div class="page-form-content p-2 flex-grow-1 overflow-auto"
+					:class="pm.steps.activeIndex == 1 ? 'flex flex-column' : 'hidden'">
 					<#include "include/export_table_head.ftl">
-					<div class="subdataexchange-table-wrapper pt-2">
+					<div class="subdataexchange-table-wrapper flex-grow-1 overflow-auto pt-2">
 						<p-datatable :value="fm.subDataExchanges" :scrollable="true" scroll-height="flex"
 							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
 							:resizable-columns="true" column-resize-mode="expand"

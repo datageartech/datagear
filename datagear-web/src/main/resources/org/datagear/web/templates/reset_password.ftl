@@ -129,7 +129,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="page-form-foot flex-grow-0 pt-3 text-center">
+						<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 							<p-button type="button" label="<@spring.message code='restart' />"
 								class="p-button-secondary mx-2" @click="onRestart" <#if step.firstStep>disabled="disabled"</#if> >
 							</p-button>

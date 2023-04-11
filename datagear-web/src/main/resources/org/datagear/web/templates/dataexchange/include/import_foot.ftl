@@ -29,7 +29,7 @@ dataexchange_js.ftl
 			:disabled="pm.dataExchangeStatus == pm.DataExchangeStatusEnum.exchange">
 		</p-button>
 	</div>
-	<div class="w-4 text-center h-opts">
+	<div class="w-4 flex justify-content-center gap-2">
 		<p-button type="button" label="<@spring.message code='previousStep' />"
 			@click="onToPrevStep" :disabled="pm.steps.activeIndex == 0 || pm.dataExchangeStatus != pm.DataExchangeStatusEnum.edit">
 		</p-button>

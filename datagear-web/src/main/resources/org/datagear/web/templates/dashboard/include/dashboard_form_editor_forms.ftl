@@ -103,7 +103,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -157,7 +157,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -215,7 +215,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -239,7 +239,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -286,7 +286,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -339,7 +339,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -386,7 +386,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -436,7 +436,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 				<p-button type="button" label="<@spring.message code='resetToDefault' />"
 					class="p-button-secondary" @click="onVeDashboardSizeResetToDft">
@@ -474,7 +474,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 				<p-button type="button" class="p-button-secondary" label="<@spring.message code='viewOriginalOptions' />"
 					aria:haspopup="true" aria-controls="${pid}optionsOriginPanel" @click="onShowOptionsOriginPanel"
@@ -602,7 +602,7 @@ page_boolean_options.ftl
 					</div>
 				</div>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>
@@ -1826,7 +1826,7 @@ page_boolean_options.ftl
 					</p-tabpanel>
 				</p-tabview>
 			</div>
-			<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 			</div>
 		</form>

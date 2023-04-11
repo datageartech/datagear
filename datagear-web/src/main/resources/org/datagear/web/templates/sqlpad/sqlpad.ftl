@@ -236,7 +236,7 @@
 				<@spring.message code='sqlHistory' />
 			</label>
 		</div>
-		<div id="${pid}sqlHistoryPanelContent" class="sql-history-panel-content p-2 table-sm" style="width:50vw;">
+		<div id="${pid}sqlHistoryPanelContent" class="page-manager-wrapper p-2 table-sm" style="width:50vw;">
 		</div>
 	</p-overlaypanel>
 	<#include "../include/page_foot.ftl">

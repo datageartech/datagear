@@ -276,7 +276,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow"></p-button>
 		</div>
@@ -451,7 +451,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="page-form-foot flex-grow-0 pt-3 text-center h-opts">
+				<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 					<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 				</div>
 			</form>

@@ -23,7 +23,7 @@
 dataexchange_js.ftl
 import_js.ftl
 -->
-<div class="flex align-items-center justify-content-between">
+<div class="flex-grow-0 flex align-items-center justify-content-between">
 	<div class="fileupload-wrapper flex align-items-center">
 		<div class="mr-3">
 			<label :title="pm.tableHeadOptions.uploadFileLabelDesc">
@@ -45,7 +45,7 @@ import_js.ftl
 			</p-progressbar>
 		</div>
 	</div>
-	<div class="h-opts">
+	<div class="flex gap-1">
 		<p-button type="button" label="<@spring.message code='delete' />"
 			@click="onDeleteSelSubDataExchanges"
 			class="p-button-danger"
