@@ -26,10 +26,10 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-export-data">
-	<div class="page-header grid grid-nogutter align-items-center pb-2">
+<div id="${pid}" class="page page-manager page-export-data h-full flex flex-column overflow-auto">
+	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12 flex align-items-center mb-1">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
@@ -42,8 +42,8 @@
 			</label>
 		</div>
 	</div>
-	<div class="page-content">
-		<form id="${pid}form">
+	<div class="page-content flex-grow-1 overflow-auto">
+		<form id="${pid}form" action="#">
 			<div class="pl-5 pt-4 pb-2">
 				<div class="field-radiobutton">
 					<p-radiobutton id="${pid}vsc" name="dataType" value="csv" v-model="fm.dataType"></p-radiobutton>

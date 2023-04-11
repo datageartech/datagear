@@ -22,7 +22,7 @@
 依赖：
 dataexchange_js.ftl
 -->
-<div class="page-form-foot pt-3 text-center flex justify-content-between">
+<div class="page-form-foot p-1 pt-2 flex-grow-0 flex justify-content-between">
 	<div class="w-4 text-left">
 		<p-button type="button" label="<@spring.message code='return' />"
 			class="p-button-secondary" @click="onReturn"

@@ -30,10 +30,10 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-sqlpad">
-	<div class="page-header grid grid-nogutter align-items-center pb-2">
+<div id="${pid}" class="page page-manager page-sqlpad h-full flex flex-column overflow-auto">
+	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12 flex align-items-center mb-2">
 			<i class="pi pi-database text-color-secondary text-sm"></i>
 			<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
@@ -41,7 +41,7 @@
 			<div class="text-color-secondary text-sm"><@spring.message code='module.sqlpad' /></div>
 		</div>
 		<div class="col-12 flex">
-			<div class="flex-grow-1 h-opts">
+			<div class="flex-grow-1 flex gap-1 flex-wrap">
 				<p-button type="button" class="px-4" @click="onExecute"
 					:icon="pm.executionStatus == pm.executionStatusType.EXECUTING ? 'pi pi-pause' : 'pi pi-play'"
 					title="<@spring.message code='sqlpad.executeWithShortcut' />">
@@ -72,7 +72,7 @@
 					title="<@spring.message code='sqlpad.clearEditSql' />">
 				</p-button>
 			</div>
-			<div class="flex-grow-0 text-right h-opts">
+			<div class="flex-grow-0 flex gap-1 flex-wrap justify-content-end">
 				<p-button type="button" icon="pi pi-history" class="p-button-secondary px-4"
 					aria:haspopup="true" aria-controls="${pid}sqlHistoryPanel"
 					@click="onToggleSqlHistoryPanel" title="<@spring.message code='sqlHistory' />">
@@ -84,7 +84,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="page-content">
+	<div class="page-content flex-grow-1 overflow-auto">
 		<p-splitter layout="vertical" class="h-full">
 			<p-splitterpanel :size="60" :min-size="20" class="overflow-auto">
 				<form id="${pid}form" class="w-full h-full p-0 m-0">

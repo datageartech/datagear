@@ -19,7 +19,7 @@
 <#--
 导入页头片段
 -->
-<div class="page-header grid grid-nogutter align-items-center pb-2">
+<div class="page-header grid grid-nogutter align-items-center p-1 pb-2 flex-grow-0">
 	<div class="col-12 flex align-items-center mb-1">
 		<i class="pi pi-database text-color-secondary text-sm"></i>
 		<div class="text-color-secondary text-sm ml-1">${schema.title}</div>
@@ -27,7 +27,7 @@
 		<div class="text-color-secondary text-sm"><@spring.message code='module.importData' /></div>
 	</div>
 	<div class="col-12">
-		<div class="grid">
+		<div class="grid grid-nogutter">
 			<label class="text-lg font-bold col-5 md:col-3">
 				{{pm.importHeadTitle}}
 			</label>

@@ -26,14 +26,14 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-manager page-dataexchange page-import-data-json">
+<div id="${pid}" class="page page-manager page-dataexchange page-import-data-json h-full flex flex-column overflow-auto">
 	<#include "include/import_head.ftl">
-	<div class="page-content">
-		<div class="page-form">
-			<form id="${pid}form" action="#">
-				<div class="page-form-content p-2 overflow-y-auto"
+	<div class="page-content flex-grow-1 overflow-auto">
+		<div class="page-form h-full overflow-auto">
+			<form id="${pid}form" action="#" class=" h-full flex flex-column overflow-auto">
+				<div class="page-form-content p-2 flex-grow-1 overflow-auto"
 					:class="pm.steps.activeIndex == 0 ? '' : 'hidden'">
 					<#include "include/dataexchange_data_format.ftl">
 					<#include "include/import_value_data_Import_option.ftl">
@@ -49,7 +49,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="page-form-content p-2 overflow-y-auto"
+				<div class="page-form-content p-2 flex-grow-1 overflow-auto"
 					:class="pm.steps.activeIndex == 1 ? '' : 'hidden'">
 					<#include "include/import_table_head.ftl">
 					<div class="subdataexchange-table-wrapper pt-2">
