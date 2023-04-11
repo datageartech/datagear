@@ -531,11 +531,12 @@ label.align-tip{
 	background-color: var(--surface-100);
 }
 
-.page-foot{
+.page-main .page-foot{
 	position: absolute;
-    bottom: 0;
-    right: 1px;
+	bottom: 0;
+	right: 0;
 }
+
 .p-dialog .page-foot,
 .page-main-panel .page-foot,
 .p-tabview-panels .page-foot{

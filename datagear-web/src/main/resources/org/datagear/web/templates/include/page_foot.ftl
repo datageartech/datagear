@@ -19,7 +19,7 @@
 <#--
 页脚
 -->
-<div class="page-foot text-center text-xs opacity-30 text-color-secondary">
+<div class="page-foot text-right text-xs opacity-30 text-color-secondary pt-1 pr-1 flex-grow-0">
 	<span class="text-color-secondary">Copyright 2018-2023 datagear.tech</span>
 	<span class="text-color-secondary ml-2">LGPL-3.0</span>
 </div>
