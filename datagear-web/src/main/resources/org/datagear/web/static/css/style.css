@@ -240,6 +240,9 @@ label.align-tip{
 	margin-right: 0;
 	margin-bottom: 0.5em;
 }
+.p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-text{
+	text-align: center;
+}
 .p-tabmenu.vertical-tabmenu .p-tabmenu-nav .p-tabmenuitem{
 	margin-bottom: 0.5em;
 }
@@ -454,6 +457,32 @@ label.align-tip{
 	z-index: 0;
 }
 
+/*弹性选项卡*/
+.flex-tabview.p-tabview > .p-tabview-nav-container{
+	/* flex-shrink-0 */
+	flex-shrink: 0 !important;
+}
+.flex-tabview.p-tabview > .p-tabview-panels{
+	/* flex-grow-1 */
+	flex-grow: 1 !important;
+	/* overflow-auto */
+	overflow: auto !important;
+	/* pb-0 */
+	padding-bottom: 0rem !important;
+	/* pl-1 */
+	padding-left: 0.25rem !important;
+	/* pr-1 */
+	padding-right: 0.25rem !important;
+	/* pt-2 */
+	padding-top: 0.5rem !important;
+}
+.flex-tabview.p-tabview > .p-tabview-panels > .p-tabview-panel{
+	/* h-full */
+	height: 100% !important;
+	/* overflow-auto */
+	overflow: auto !important;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.15em;
@@ -553,10 +582,6 @@ label.align-tip{
 }
 
 /*表单页*/
-.page-form .page-form-content{
-	/*屏幕高度 - 表单foot高度*/
-	max-height: calc(100vh - 5rem);
-}
 .page-form .page-form-content.no-max-height{
 	max-height: unset;
 }
@@ -567,25 +592,23 @@ label.align-tip{
 .page-form form.readonly.show-foot .page-form-foot{
 	display: flex !important;
 }
-.page-form form.readonly .page-form-content{
-	/*屏幕高度 - 底部留白高度*/
-	max-height: calc(100vh - 1rem);
-}
+.page-form .page-form-content,
 .page-form form.readonly.show-foot .page-form-content{
 	/*屏幕高度 - 表单foot高度*/
 	max-height: calc(100vh - 5rem);
 }
-.p-dialog .page-form .page-form-content{
+.page-form form.readonly .page-form-content{
+	/*屏幕高度 - 底部留白高度*/
+	max-height: calc(100vh - 1rem);
+}
+.p-dialog .page-form .page-form-content,
+.p-dialog .page-form form.readonly.show-foot .page-form-content{
 	/*对话框高度 - 对话框header高度 - 表单foot高度*/
 	max-height: calc(90vh - 6rem - 5rem);
 }
 .p-dialog .page-form form.readonly .page-form-content{
 	/*对话框高度 - 对话框header高度 - 底部留白高度*/
 	max-height: calc(90vh - 6rem - 1rem);
-}
-.p-dialog .page-form form.readonly.show-foot .page-form-content{
-	/*对话框高度 - 对话框header高度 - 表单foot高度*/
-	max-height: calc(90vh - 6rem - 5rem);
 }
 
 .plugin-info .plugin-icon{
@@ -612,26 +635,6 @@ label.align-tip{
 .page-manager-schema .p-tree.schema-tree .p-tree-wrapper .p-tree-container{
 	height: 100% !important;
 	overflow: auto;
-}
-.page-manager-schema .schema-tabs-wrapper > .p-tabview > .p-tabview-panels{
-	/* flex-grow-1 */
-	flex-grow: 1 !important;
-	/* overflow-auto */
-	overflow: auto !important;
-	/* pb-0 */
-	padding-bottom: 0rem !important;
-	/* pl-1 */
-	padding-left: 0.25rem !important;
-	/* pr-1 */
-	padding-right: 0.25rem !important;
-	/* pt-2 */
-	padding-top: 0.5rem !important;
-}
-.page-manager-schema .schema-tabs-wrapper > .p-tabview > .p-tabview-panels > .p-tabview-panel{
-	/* h-full */
-	height: 100% !important;
-	/* overflow-auto */
-	overflow: auto !important;
 }
 
 .page-form-schema .properties-wrapper .properties-table .p-datatable-wrapper{

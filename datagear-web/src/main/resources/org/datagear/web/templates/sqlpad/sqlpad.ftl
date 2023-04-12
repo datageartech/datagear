@@ -108,7 +108,7 @@
 						</p-button>
 					</div>
 					<p-tabview v-model:active-index="pm.sqlpadTabs.activeIndex" :scrollable="true" @tab-change="onSqlpadTabChange"
-						@tab-click="onSqlpadTabClick" class="contextmenu-tabview light-tabview h-full relative" :class="{'opacity-0': pm.sqlpadTabs.items.length == 0}">
+						@tab-click="onSqlpadTabClick" class="contextmenu-tabview light-tabview relative h-full" :class="{'opacity-0': pm.sqlpadTabs.items.length == 0}">
 						<p-tabpanel v-for="tab in pm.sqlpadTabs.items" :key="tab.id" :header="tab.title">
 							<template #header>
 								<p-button type="button" icon="pi pi-angle-down"
