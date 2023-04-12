@@ -483,6 +483,23 @@ label.align-tip{
 	overflow: auto !important;
 }
 
+.flex-card.p-card > .p-card-body{
+	/* h-full */
+	height: 100% !important;
+	/* overflow-auto */
+	overflow: auto !important;
+	/* flex */
+	display: flex !important;
+	/* flex-column */
+	flex-direction: column !important;
+}
+.flex-card.p-card > .p-card-body > .p-card-content{
+	/* flex-grow-1 */
+	flex-grow: 1 !important;
+	/* overflow-auto */
+	overflow: auto !important;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.15em;
