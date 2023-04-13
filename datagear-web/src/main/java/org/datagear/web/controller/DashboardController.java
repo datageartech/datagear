@@ -368,7 +368,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		for (int i = 0; i < resourceNames.length; i++)
 			saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
 
-		Map<String, Object> data = buildDashboardIdTemplatesHashMap(dashboard.getId(), templates);
+		// 返回部分基本信息
+		HtmlTplDashboardWidgetEntity data = new HtmlTplDashboardWidgetEntity();
+		data.setId(dashboard.getId());
+		data.setName(dashboard.getName());
+		data.setTemplates(templates);
+		data.setTemplateEncoding(dashboard.getTemplateEncoding());
+		data.setCreateUser(dashboard.getCreateUser());
+		data.setCreateTime(dashboard.getCreateTime());
+		data.setAnalysisProject(dashboard.getAnalysisProject());
 
 		return optSuccessDataResponseEntity(request, data);
 	}
