@@ -171,11 +171,22 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected boolean update(T entity, Map<String, Object> params)
 	{
-		checkUpdateInput(entity);
+		return (update("update", entity, params) > 0);
+	}
 
+	/**
+	 * 更新。
+	 * 
+	 * @param entity
+	 * @param params
+	 * @return
+	 */
+	protected int update(String statement, T entity, Map<String, Object> params)
+	{
+		checkUpdateInput(entity);
 		params.put("entity", entity);
 
-		return (updateMybatis("update", params) > 0);
+		return updateMybatis(statement, params);
 	}
 
 	/**
@@ -374,9 +385,37 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected PagingData<T> pagingQuery(String statement, PagingQuery pagingQuery, Map<String, Object> params,
 			boolean postProcessQuery)
 	{
+		return pagingQuery(statement, pagingQuery, params, true, 0, postProcessQuery);
+	}
+
+	/**
+	 * 分页查询。
+	 * <p>
+	 * 如果{@code queryTotal}为{@code true}，此方法要求已定义{@code [statement]Count}
+	 * SQL。例如：
+	 * </p>
+	 * <p>
+	 * 如果{@code statement}为{@code "pagingQuery"}，那么必须已定义{@code "pagingQueryCount"}
+	 * SQL Mapper。
+	 * </p>
+	 * 
+	 * @param statement
+	 * @param pagingQuery
+	 * @param params
+	 * @param queryTotal
+	 * @param total
+	 *            如果{@code queryTotal}为{@code false}，应设置此总记录数；否则，设为{@code 0}即可
+	 * @param postProcessQuery
+	 *            是否内部执行{@linkplain #postProcessQuery(List)}
+	 * @return
+	 */
+	protected PagingData<T> pagingQuery(String statement, PagingQuery pagingQuery, Map<String, Object> params,
+			boolean queryTotal, int total, boolean postProcessQuery)
+	{
 		addQueryParam(params, pagingQuery);
 
-		int total = (Integer) selectOneMybatis(statement + "Count", params);
+		if (queryTotal)
+			total = (Integer) selectOneMybatis(statement + "Count", params);
 
 		PagingData<T> pagingData = new PagingData<>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
