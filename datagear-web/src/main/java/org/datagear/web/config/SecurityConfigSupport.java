@@ -274,14 +274,14 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForShowChartAndDashboard(HttpSecurity http) throws Exception
 	{
-		// 展示图表和看板
-		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
-		http.authorizeRequests().antMatchers(showChartAndDashboardUrls()).access(AUTH_ANONYMOUS_OR_USER);
+		configAccessForModuleAccess(http, showChartAndDashboardModuleAccess());
 	}
 
-	protected String[] showChartAndDashboardUrls()
+	protected ModuleAccess showChartAndDashboardModuleAccess()
 	{
-		String[] re = new String[] {
+		// 展示图表和看板
+		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
+		UrlsAccess show = new UrlsAccess(AUTH_ANONYMOUS_OR_USER,
 				// 图表插件
 				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
 				// 图表展示
@@ -292,10 +292,9 @@ public class SecurityConfigSupport
 
 				// 旧版图表和看板展示
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
-				"/analysis/chart/show/**", "/analysis/dashboard/show/**"
-		};
+				"/analysis/chart/show/**", "/analysis/dashboard/show/**");
 
-		return re;
+		return new ModuleAccess(show);
 	}
 
 	/**
