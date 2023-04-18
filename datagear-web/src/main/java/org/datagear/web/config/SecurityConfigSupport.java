@@ -17,8 +17,12 @@
 
 package org.datagear.web.config;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -161,6 +165,7 @@ public class SecurityConfigSupport
 		configAccessForStatic(http);
 		configAccessForShowChartAndDashboard(http);
 		configAccessForSchema(http);
+		configAccessForSchemaData(http);
 		configAccessForAnalysisProject(http);
 		configAccessForDataSet(http);
 		configAccessForChart(http);
@@ -271,19 +276,26 @@ public class SecurityConfigSupport
 	{
 		// 展示图表和看板
 		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
-		http.authorizeRequests().antMatchers(
+		http.authorizeRequests().antMatchers(showChartAndDashboardUrls()).access(AUTH_ANONYMOUS_OR_USER);
+	}
+
+	protected String[] showChartAndDashboardUrls()
+	{
+		String[] re = new String[] {
 				// 图表插件
 				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
 				// 图表展示
 				"/chart/show/**", "/chart/showData",
 				// 看板展示
 				"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/heartbeat",
-				"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**")
-				.access(AUTH_ANONYMOUS_OR_USER)
+				"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**",
 
-				// 展示图表和看板
+				// 旧版图表和看板展示
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
-				.antMatchers("/analysis/chart/show/**", "/analysis/dashboard/show/**").access(AUTH_ANONYMOUS_OR_USER);
+				"/analysis/chart/show/**", "/analysis/dashboard/show/**"
+		};
+
+		return re;
 	}
 
 	/**
@@ -294,13 +306,25 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForDashboard(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleManagerAnalyst(http, //
-				new String[] { "/dashboard/add", "/dashboard/edit", "/dashboard/save", "/dashboard/copy",
-						"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile",
-						"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import",
-						"/dashboard/uploadImportFile", "/dashboard/saveImport", "/dashboard/delete",
-						"/dashboard/shareSet", "/dashboard/saveShareSet", "/dashboard/export" },
+		configAccessForModuleAccess(http, dashboardModuleAccess());
+	}
+
+	protected ModuleAccess dashboardModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess edit = new UrlsAccess(AUTH_USER_AND_DATA_MANAGER, "/dashboard/add", "/dashboard/edit",
+				"/dashboard/save", "/dashboard/copy",
+				"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile",
+				"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import",
+				"/dashboard/uploadImportFile", "/dashboard/saveImport", "/dashboard/delete",
+				"/dashboard/shareSet", "/dashboard/saveShareSet", "/dashboard/export");
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
 				"/dashboard/**");
+
+		return new ModuleAccess(edit, read);
 	}
 
 	/**
@@ -311,9 +335,21 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForChart(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleManagerAnalyst(http, //
-				new String[] { "/chart/add", "/chart/edit", "/chart/copy", "/chart/save", "/chart/delete" },
+		configAccessForModuleAccess(http, chartModuleAccess());
+	}
+
+	protected ModuleAccess chartModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess edit = new UrlsAccess(AUTH_USER_AND_DATA_MANAGER, "/chart/add", "/chart/edit", "/chart/copy",
+				"/chart/save", "/chart/delete");
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
 				"/chart/**");
+
+		return new ModuleAccess(edit, read);
 	}
 
 	/**
@@ -324,10 +360,22 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForDataSet(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleManagerAnalyst(http, //
-				new String[] { "/dataSet/addFor*", "/dataSet/saveAddFor*", "/dataSet/edit", "/dataSet/saveEditFor*",
-						"/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile" },
+		configAccessForModuleAccess(http, dataSetModuleAccess());
+	}
+
+	protected ModuleAccess dataSetModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess edit = new UrlsAccess(AUTH_USER_AND_DATA_MANAGER, "/dataSet/addFor*", "/dataSet/saveAddFor*",
+				"/dataSet/edit", "/dataSet/saveEditFor*",
+				"/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile");
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
 				"/dataSet/**");
+
+		return new ModuleAccess(edit, read);
 	}
 
 	/**
@@ -338,10 +386,22 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForAnalysisProject(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleManagerAnalyst(http,
-				new String[] { "/analysisProject/add", "/analysisProject/saveAdd", "/analysisProject/edit",
-						"/analysisProject/saveEdit", "/analysisProject/delete" },
+		configAccessForModuleAccess(http, analysisProjectModuleAccess());
+	}
+
+	protected ModuleAccess analysisProjectModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess edit = new UrlsAccess(AUTH_USER_AND_DATA_MANAGER, "/analysisProject/add", "/analysisProject/saveAdd",
+				"/analysisProject/edit",
+				"/analysisProject/saveEdit", "/analysisProject/delete");
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
 				"/analysisProject/**");
+
+		return new ModuleAccess(edit, read);
 	}
 
 	/**
@@ -352,20 +412,45 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForSchema(HttpSecurity http) throws Exception
 	{
-		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
+		configAccessForModuleAccess(http, schemaModuleAccess());
+	}
 
-		configAccessForRoleManagerAnalyst(http,
-				new String[] { "/schema/add", "/schema/saveAdd", "/schema/edit", "/schema/saveEdit", "/schema/delete" },
+	protected ModuleAccess schemaModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess edit = new UrlsAccess(AUTH_USER_AND_DATA_MANAGER, "/schema/add", "/schema/saveAdd", "/schema/edit",
+				"/schema/saveEdit", "/schema/delete");
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
 				"/schema/**");
+
+		return new ModuleAccess(edit, read);
+	}
+
+	/**
+	 * 配置数据源模块访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForSchemaData(HttpSecurity http) throws Exception
+	{
+		configAccessForModuleAccess(http, schemaDataModuleAccess());
+	}
+
+	protected ModuleAccess schemaDataModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
 
 		// 数据源数据管理、导入导出、SQL工作台、SQL编辑器
 		// 用户针对数据源数据的所有操作都已受其所属数据源权限控制，所以不必再引入数据管理员/数据分析员权限
-		http.authorizeRequests() //
-				.antMatchers("/data/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-				.antMatchers("/dataexchange/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-				.antMatchers("/sqlpad/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER)
-				.antMatchers("/sqlEditor/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER);
+		UrlsAccess ua = new UrlsAccess(
+				disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER,
+				"/data/**", "/dataexchange/**", "/sqlpad/**", "/sqlEditor/**");
 
+		return new ModuleAccess(ua);
 	}
 
 	/**
@@ -376,9 +461,20 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForChartPlugin(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleAdmin(http, //
-				"/chartPlugin/**",
-				new String[] { "/chartPlugin/select", "/chartPlugin/selectData" });
+		configAccessForModuleAccess(http, chartPluginModuleAccess());
+	}
+
+	protected ModuleAccess chartPluginModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
+				"/chartPlugin/select", "/chartPlugin/selectData");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/chartPlugin/**");
+
+		return new ModuleAccess(read, edit);
 	}
 
 	/**
@@ -389,10 +485,21 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForDataSetResDirectory(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleAdmin(http, //
-				"/dataSetResDirectory/**", //
-				new String[] { "/dataSetResDirectory/view", "/dataSetResDirectory/select",
-						"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles" });
+		configAccessForModuleAccess(http, dataSetResDirectoryModuleAccess());
+	}
+
+	protected ModuleAccess dataSetResDirectoryModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
+				"/dataSetResDirectory/view", "/dataSetResDirectory/select",
+				"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/dataSetResDirectory/**");
+
+		return new ModuleAccess(read, edit);
 	}
 
 	/**
@@ -403,9 +510,20 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForDashboardGlobalRes(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleAdmin(http, //
-				"/dashboardGlobalRes/**", //
-				new String[] { "/dashboardGlobalRes/queryData" });
+		configAccessForModuleAccess(http, dashboardGlobalResModuleAccess());
+	}
+
+	protected ModuleAccess dashboardGlobalResModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
+				"/dashboardGlobalRes/queryData");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/dashboardGlobalRes/**");
+
+		return new ModuleAccess(read, edit);
 	}
 
 	/**
@@ -416,10 +534,21 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForDriverEntity(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleAdmin(http, //
-				"/driverEntity/**", //
-				new String[] { "/driverEntity/view", "/driverEntity/select", "/driverEntity/queryData",
-						"/driverEntity/downloadDriverFile", "/driverEntity/listDriverFile" });
+		configAccessForModuleAccess(http, driverEntityModuleAccess());
+	}
+
+	protected ModuleAccess driverEntityModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
+				"/driverEntity/view", "/driverEntity/select", "/driverEntity/queryData",
+				"/driverEntity/downloadDriverFile", "/driverEntity/listDriverFile");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/driverEntity/**");
+
+		return new ModuleAccess(read, edit);
 	}
 
 	/**
@@ -430,9 +559,20 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForSchemaUrlBuilder(HttpSecurity http) throws Exception
 	{
-		configAccessForRoleAdmin(http, //
-				"/schemaUrlBuilder/*", //
-				new String[] { "/schemaUrlBuilder/build" });
+		configAccessForModuleAccess(http, schemaUrlBuilderModuleAccess());
+	}
+
+	protected ModuleAccess schemaUrlBuilderModuleAccess()
+	{
+		boolean disableAnonymous = isDisableAnonymous();
+
+		UrlsAccess read = new UrlsAccess(
+				disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST,
+				"/schemaUrlBuilder/build");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/schemaUrlBuilder/**");
+
+		return new ModuleAccess(read, edit);
 	}
 
 	/**
@@ -443,13 +583,18 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForUser(HttpSecurity http) throws Exception
 	{
-		http.authorizeRequests()
-				// 个人设置
-				.antMatchers("/user/personalSet", "/user/savePersonalSet").access(AUTH_USER)
-				// 选择
-				.antMatchers("/user/select", "/user/pagingQueryData").access(AUTH_USER)
-				// 管理
-				.antMatchers("/user/**").access(AUTH_ADMIN);
+		configAccessForModuleAccess(http, userModuleAccess());
+	}
+
+	protected ModuleAccess userModuleAccess()
+	{
+		UrlsAccess other = new UrlsAccess(
+				AUTH_USER,
+				"/user/personalSet", "/user/savePersonalSet", "/user/select", "/user/pagingQueryData");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/user/**");
+
+		return new ModuleAccess(other, edit);
 	}
 
 	/**
@@ -460,11 +605,18 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForRole(HttpSecurity http) throws Exception
 	{
-		http.authorizeRequests()
-				// 选择
-				.antMatchers("/role/select", "/role/pagingQueryData").access(AUTH_USER)
-				// 管理
-				.antMatchers("/role/**").access(AUTH_ADMIN);
+		configAccessForModuleAccess(http, roleModuleAccess());
+	}
+
+	protected ModuleAccess roleModuleAccess()
+	{
+		UrlsAccess read = new UrlsAccess(
+				AUTH_USER,
+				"/role/select", "/role/pagingQueryData");
+
+		UrlsAccess edit = new UrlsAccess(AUTH_ADMIN, "/role/**");
+
+		return new ModuleAccess(read, edit);
 	}
 
 	/**
@@ -475,8 +627,13 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForSchemaGuard(HttpSecurity http) throws Exception
 	{
-		http.authorizeRequests()
-				.antMatchers("/schemaGuard/**").access(AUTH_ADMIN);
+		configAccessForModuleAccess(http, schemaGuardModuleAccess());
+	}
+
+	protected ModuleAccess schemaGuardModuleAccess()
+	{
+		UrlsAccess ua = new UrlsAccess(AUTH_ADMIN, "/schemaGuard/**");
+		return new ModuleAccess(ua);
 	}
 
 	/**
@@ -487,7 +644,13 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForAuthorization(HttpSecurity http) throws Exception
 	{
-		http.authorizeRequests().antMatchers("/authorization/**").access(AUTH_USER_AND_DATA_MANAGER);
+		configAccessForModuleAccess(http, authorizationModuleAccess());
+	}
+
+	protected ModuleAccess authorizationModuleAccess()
+	{
+		UrlsAccess ua = new UrlsAccess(AUTH_USER_AND_DATA_MANAGER, "/authorization/**");
+		return new ModuleAccess(ua);
 	}
 
 	/**
@@ -566,51 +729,14 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessAllOther(HttpSecurity http) throws Exception
 	{
-		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
-
+		boolean disableAnonymous = isDisableAnonymous();
 		http.authorizeRequests().antMatchers("/**").access(disableAnonymous ? AUTH_USER : AUTH_ANONYMOUS_OR_USER);
 	}
 
-	/**
-	 * 配置{@linkplain Role#ROLE_DATA_MANAGER}、{@linkplain Role#ROLE_DATA_ANALYST}角色相关的访问权限。
-	 * 
-	 * @param http
-	 * @param managerUrlPatterns
-	 * @param otherUrlPatterns
-	 * @throws Exception
-	 */
-	protected void configAccessForRoleManagerAnalyst(HttpSecurity http, String[] managerUrlPatterns,
-			String otherUrlPattern) throws Exception
+	protected void configAccessForModuleAccess(HttpSecurity http, ModuleAccess ma) throws Exception
 	{
-		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
-
-		http.authorizeRequests()
-				// 管理
-				.antMatchers(managerUrlPatterns).access(AUTH_USER_AND_DATA_MANAGER)
-				// 其他
-				.antMatchers(otherUrlPattern)
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST);
-	}
-
-	/**
-	 * 配置{@linkplain AuthUser#ROLE_ADMIN}角色相关的访问权限。
-	 * 
-	 * @param http
-	 * @param managerUrlPattern
-	 * @param otherUrlPatterns
-	 * @throws Exception
-	 */
-	protected void configAccessForRoleAdmin(HttpSecurity http, String managerUrlPattern,
-			String[] otherUrlPatterns) throws Exception
-	{
-		boolean disableAnonymous = this.coreConfig.getApplicationProperties().isDisableAnonymous();
-
-		http.authorizeRequests()
-				// 其他
-				.antMatchers(otherUrlPatterns)
-				.access(disableAnonymous ? AUTH_USER_AND_DATA_MANAGER_OR_ANALYST : AUTH_DATA_MANAGER_OR_ANALYST)
-				// 管理
-				.antMatchers(managerUrlPattern).access(AUTH_ADMIN);
+		for(UrlsAccess ua : ma.getUrlsAccesses())
+			http.authorizeRequests().antMatchers(ua.getUrlArray()).access(ua.getAccess());
 	}
 
 	/**
@@ -637,6 +763,11 @@ public class SecurityConfigSupport
 				.authenticationFilter(anonymousAuthenticationFilter);
 	}
 
+	protected boolean isDisableAnonymous()
+	{
+		return this.coreConfig.getApplicationProperties().isDisableAnonymous();
+	}
+
 	@Bean
 	public UserDetailsService userDetailsService()
 	{
@@ -654,5 +785,119 @@ public class SecurityConfigSupport
 		// 因此这里需要设置为允许，不然功能将无法使用
 		firewall.setAllowSemicolon(true);
 		return firewall;
+	}
+
+	/**
+	 * 模块访问配置。
+	 */
+	public static class ModuleAccess implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private List<UrlsAccess> urlsAccesses = new ArrayList<UrlsAccess>(3);
+
+		public ModuleAccess()
+		{
+			super();
+		}
+
+		public ModuleAccess(List<UrlsAccess> urlsAccesses)
+		{
+			super();
+			this.urlsAccesses.addAll(urlsAccesses);
+		}
+
+		public ModuleAccess(UrlsAccess... urlsAccesses)
+		{
+			super();
+			Collections.addAll(this.urlsAccesses, urlsAccesses);
+		}
+
+		public List<UrlsAccess> getUrlsAccesses()
+		{
+			return urlsAccesses;
+		}
+
+		public void setUrlsAccesses(List<UrlsAccess> urlsAccesses)
+		{
+			this.urlsAccesses = urlsAccesses;
+		}
+
+		public void addUrlsAccesses(List<UrlsAccess> urlsAccesses)
+		{
+			this.urlsAccesses.addAll(urlsAccesses);
+		}
+
+		public void addUrlsAccesses(UrlsAccess... urlsAccesses)
+		{
+			Collections.addAll(this.urlsAccesses, urlsAccesses);
+		}
+	}
+
+	/**
+	 * URL访问配置。
+	 */
+	public static class UrlsAccess implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String access;
+
+		private List<String> urls = new ArrayList<String>();
+
+		public UrlsAccess(String access)
+		{
+			super();
+			this.access = access;
+		}
+
+		public UrlsAccess(String access, List<String> urls)
+		{
+			super();
+			this.access = access;
+			this.urls.addAll(urls);
+		}
+
+		public UrlsAccess(String access, String... urls)
+		{
+			super();
+			this.access = access;
+			Collections.addAll(this.urls, urls);
+		}
+
+		public String getAccess()
+		{
+			return access;
+		}
+
+		public void setAccess(String access)
+		{
+			this.access = access;
+		}
+
+		public List<String> getUrls()
+		{
+			return urls;
+		}
+
+		public void setUrls(List<String> urls)
+		{
+			this.urls = urls;
+		}
+
+		public String[] getUrlArray()
+		{
+			return this.urls.toArray(new String[this.urls.size()]);
+		}
+
+		public void addUrls(List<String> urls)
+		{
+			this.urls.addAll(urls);
+		}
+
+		public void addUrls(String... urls)
+		{
+			Collections.addAll(this.urls, urls);
+		}
 	}
 }
