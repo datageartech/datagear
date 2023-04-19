@@ -71,9 +71,9 @@ public class RoleSpec
 	public RoleSpec()
 	{
 		super();
-		this.builtinRoleIds.add(ROLE_REGISTRY);
-		this.builtinRoleIds.add(ROLE_DATA_MANAGER);
-		this.builtinRoleIds.add(ROLE_DATA_ANALYST);
+		addBuiltinRoleId(ROLE_REGISTRY);
+		addBuiltinRoleId(ROLE_DATA_MANAGER);
+		addBuiltinRoleId(ROLE_DATA_ANALYST);
 	}
 
 	/**
