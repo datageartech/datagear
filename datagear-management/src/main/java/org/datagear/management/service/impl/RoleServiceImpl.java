@@ -26,6 +26,7 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.service.AuthorizationListener;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.RoleService;
+import org.datagear.management.util.RoleSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -39,6 +40,8 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role>
 		implements RoleService, AuthorizationListenerAware
 {
 	protected static final String SQL_NAMESPACE = Role.class.getName();
+
+	private RoleSpec roleSpec = new RoleSpec();
 
 	private AuthorizationListener authorizationListener = null;
 
@@ -55,6 +58,16 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role>
 	public RoleServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
 		super(sqlSessionTemplate, dialect);
+	}
+
+	public RoleSpec getRoleSpec()
+	{
+		return roleSpec;
+	}
+
+	public void setRoleSpec(RoleSpec roleSpec)
+	{
+		this.roleSpec = roleSpec;
 	}
 
 	@Override
@@ -94,7 +107,7 @@ public class RoleServiceImpl extends AbstractMybatisEntityService<String, Role>
 	@Override
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
-		if (Role.isBuiltinRole(id))
+		if (this.roleSpec.isBuiltinRole(id))
 			throw new DeleteBuiltinRoleDeniedException(id);
 
 		boolean deleted = super.deleteById(id, params);

@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.RoleSpec;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
@@ -164,7 +165,7 @@ public class RegisterController extends AbstractController
 				roles.add(new Role(roleId, roleId));
 		}
 
-		roles.add(new Role(Role.ROLE_REGISTRY, Role.ROLE_REGISTRY));
+		roles.add(new Role(RoleSpec.ROLE_REGISTRY, RoleSpec.ROLE_REGISTRY));
 
 		return roles;
 	}

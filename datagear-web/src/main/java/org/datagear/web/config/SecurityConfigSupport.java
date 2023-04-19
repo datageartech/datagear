@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.datagear.management.domain.Role;
+import org.datagear.management.util.RoleSpec;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
@@ -72,18 +72,20 @@ public class SecurityConfigSupport
 	 * 授权角色：登录用户 且 数据管理员
 	 */
 	protected static final String AUTH_USER_AND_DATA_MANAGER = "hasAuthority('" + AuthUser.ROLE_USER+ "')"
-			+" and hasAuthority('" + Role.ROLE_DATA_MANAGER + "')";
+			+ " and hasAuthority('" + RoleSpec.ROLE_DATA_MANAGER + "')";
 
 	/**
 	 * 授权角色：登录用户 且 (数据管理员 或 数据分析员)
 	 */
 	protected static final String AUTH_USER_AND_DATA_MANAGER_OR_ANALYST = "hasAnyAuthority('" + AuthUser.ROLE_USER + "')"
-			+" and hasAnyAuthority('" + Role.ROLE_DATA_MANAGER + "','" + Role.ROLE_DATA_ANALYST + "')";
+			+ " and hasAnyAuthority('" + RoleSpec.ROLE_DATA_MANAGER + "','" + RoleSpec.ROLE_DATA_ANALYST
+			+ "')";
 
 	/**
 	 * 授权角色：数据管理员 或 数据分析员
 	 */
-	protected static final String AUTH_DATA_MANAGER_OR_ANALYST = "hasAnyAuthority('" + Role.ROLE_DATA_MANAGER + "','" + Role.ROLE_DATA_ANALYST + "')";
+	protected static final String AUTH_DATA_MANAGER_OR_ANALYST = "hasAnyAuthority('" + RoleSpec.ROLE_DATA_MANAGER
+			+ "','" + RoleSpec.ROLE_DATA_ANALYST + "')";
 
 	/**
 	 * 授权角色：系统管理员

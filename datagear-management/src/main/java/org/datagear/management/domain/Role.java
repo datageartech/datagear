@@ -17,10 +17,14 @@
 
 package org.datagear.management.domain;
 
+import org.datagear.management.util.RoleSpec;
 import org.springframework.beans.BeanUtils;
 
 /**
  * 角色。
+ * <p>
+ * 系统内置角色参考{@linkplain RoleSpec}。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -28,35 +32,6 @@ import org.springframework.beans.BeanUtils;
 public class Role extends AbstractStringIdEntity implements CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * 内置角色前缀。
-	 */
-	public static final String BUILTIN_ROLE_PREFIX = "ROLE_";
-
-	/**
-	 * 角色ID：{@code ROLE_REGISTRY} 注册用户。 
-	 * <p>
-	 * 系统新添加和注册的用户都会关联此角色，便于用户针对注册用户授权。
-	 * </p>
-	 */
-	public static final String ROLE_REGISTRY = BUILTIN_ROLE_PREFIX + "REGISTRY";
-
-	/**
-	 * 角色ID：{@code ROLE_DATA_ADMIN} 数据管理员。
-	 * <p>
-	 * 可以管理（添加、编辑、查看、删除）数据源、数据集、图表、看板。
-	 * </p>
-	 */
-	public static final String ROLE_DATA_MANAGER = BUILTIN_ROLE_PREFIX + "DATA_ADMIN";
-
-	/**
-	 * 角色ID：{@code ROLE_DATA_ANALYST} 数据分析员。 
-	 * <p>
-	 * 仅可查看数据源、数据集、图表、看板，展示图表和看板。
-	 * </p>
-	 */
-	public static final String ROLE_DATA_ANALYST = BUILTIN_ROLE_PREFIX + "DATA_ANALYST";
 
 	/** 名称 */
 	private String name;
@@ -115,16 +90,5 @@ public class Role extends AbstractStringIdEntity implements CloneableEntity
 		BeanUtils.copyProperties(this, entity);
 
 		return entity;
-	}
-
-	/**
-	 * 给定角色ID是否是内置角色。
-	 * 
-	 * @param roleId
-	 * @return
-	 */
-	public static boolean isBuiltinRole(String roleId)
-	{
-		return roleId != null && roleId.startsWith(BUILTIN_ROLE_PREFIX);
 	}
 }

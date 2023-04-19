@@ -17,13 +17,13 @@
 
 package org.datagear.management.service;
 
-import org.datagear.management.domain.Role;
+import org.datagear.management.util.RoleSpec;
 
 /**
  * 删除内置角色异常。
  * <p>
  * 当{@linkplain RoleService#deleteById(String)}、{@linkplain RoleService#deleteByIds(String[])}
- * 试图删除内置角色时（参考{@linkplain Role#isBuiltinRole(String)}），将抛出此异常。
+ * 试图删除内置角色时（参考{@linkplain RoleSpec#isBuiltinRole(String)}），将抛出此异常。
  * </p>
  * 
  * @author datagear@163.com

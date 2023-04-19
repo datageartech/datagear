@@ -35,11 +35,11 @@ import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
-import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.EntityService;
+import org.datagear.management.util.RoleSpec;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
@@ -198,7 +198,7 @@ public abstract class AbstractController
 		{
 			readonly = true;
 		}
-		else if(user.isAdmin() || user.hasRole(Role.ROLE_DATA_MANAGER))
+		else if (user.isAdmin() || user.hasRole(RoleSpec.ROLE_DATA_MANAGER))
 		{
 			readonly = false;
 		}
