@@ -360,7 +360,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String query(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setReadonlyActionByRole(model, WebUtils.getUser());
+		setReadonlyAction(model, WebUtils.getUser());
 		return "/dashboardGlobalRes/dashboardGlobalRes_table";
 	}
 

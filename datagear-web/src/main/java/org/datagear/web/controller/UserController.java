@@ -249,7 +249,7 @@ public class UserController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setReadonlyActionByRole(model, WebUtils.getUser());
+		setReadonlyAction(model, WebUtils.getUser());
 		return "/user/user_table";
 	}
 

@@ -97,6 +97,7 @@ import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
+import org.datagear.management.util.RoleSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
 import org.datagear.management.util.typehandlers.DataFormatTypeHandler;
@@ -651,6 +652,15 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public RoleService roleService()
 	{
 		RoleServiceImpl bean = new RoleServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
+		bean.setRoleSpec(this.roleSpec());
+
+		return bean;
+	}
+
+	@Bean
+	public RoleSpec roleSpec()
+	{
+		RoleSpec bean = new RoleSpec();
 		return bean;
 	}
 

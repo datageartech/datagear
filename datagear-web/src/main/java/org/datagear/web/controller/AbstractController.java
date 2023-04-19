@@ -190,11 +190,44 @@ public abstract class AbstractController
 		return entity;
 	}
 	
-	protected boolean setReadonlyActionByRole(Model model, User user)
+	/**
+	 * 设置用户是否只能执行只读操作。
+	 * 
+	 * @param model
+	 * @param user
+	 * @return
+	 */
+	protected boolean setReadonlyAction(Model model, User user)
+	{
+		boolean readonly = isReadonlyAction(model, user);
+		return setReadonlyAction(model, readonly);
+	}
+
+	/**
+	 * 设置是否只能执行只读操作。
+	 * 
+	 * @param model
+	 * @param readonly
+	 * @return
+	 */
+	protected boolean setReadonlyAction(Model model, boolean readonly)
+	{
+		model.addAttribute(KEY_IS_READONLY_ACTION, readonly);
+		return readonly;
+	}
+
+	/**
+	 * 判断用户是否只能执行只读操作。
+	 * 
+	 * @param model
+	 * @param user
+	 * @return
+	 */
+	protected boolean isReadonlyAction(Model model, User user)
 	{
 		boolean readonly = true;
-		
-		if(user == null || user.isAnonymous())
+
+		if (user == null || user.isAnonymous())
 		{
 			readonly = true;
 		}
@@ -202,13 +235,7 @@ public abstract class AbstractController
 		{
 			readonly = false;
 		}
-		
-		return setReadonlyAction(model, readonly);
-	}
 
-	protected boolean setReadonlyAction(Model model, boolean readonly)
-	{
-		model.addAttribute(KEY_IS_READONLY_ACTION, readonly);
 		return readonly;
 	}
 
