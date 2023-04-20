@@ -847,6 +847,16 @@ public class SecurityConfigSupport
 		{
 			Collections.addAll(this.urlsAccesses, urlsAccesses);
 		}
+
+		public UrlsAccess getUrlsAccess(int index)
+		{
+			return this.urlsAccesses.get(index);
+		}
+
+		public void setUrlsAccess(int index, UrlsAccess urlsAccess)
+		{
+			this.urlsAccesses.set(index, urlsAccess);
+		}
 	}
 
 	/**
