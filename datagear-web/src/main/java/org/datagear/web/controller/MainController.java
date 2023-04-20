@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.util.IOUtil;
+import org.datagear.web.security.ModuleAccessibility;
 import org.datagear.web.util.WebUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
@@ -63,6 +64,11 @@ public class MainController extends AbstractController
 	{
 		WebUtils.setEnableDetectNewVersionRequest(request);
 		
+		ModuleAccessibility moduleAccessibility = getAuthenticationSecurity()
+				.resolveModuleAccessibility(WebUtils.getAuthentication());
+
+		addAttributeForWriteJson(model, "moduleAccessibility", moduleAccessibility);
+
 		return "/main";
 	}
 

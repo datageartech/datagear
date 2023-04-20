@@ -72,6 +72,7 @@
 (function(po)
 {
 	po.mainMenuCollapseCookieName="${Global.NAME_SHORT_UCUS}MAIN_MENU_COLLAPSE";
+	po.moduleAccessibility = $.unescapeHtmlForJson(<@writeJson var=moduleAccessibility />);
 	
 	po.vuePageModel(
 	{
@@ -85,27 +86,32 @@
 				{
 					label: "<@spring.message code='module.schema' />",
 					icon: 'pi pi-fw pi-database',
-					url: po.concatContextPath("/schema/query")
+					url: po.concatContextPath("/schema/query"),
+					disabled: !po.moduleAccessibility.schemaAccessible
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",
 					icon: 'pi pi-fw pi-folder',
-					url: po.concatContextPath("/analysisProject/pagingQuery")
+					url: po.concatContextPath("/analysisProject/pagingQuery"),
+					disabled: !po.moduleAccessibility.analysisProjectAccessible
 				},
 				{
 					label: "<@spring.message code='module.dataSet' />",
 					icon: 'pi pi-fw pi-table',
-					url: po.concatContextPath("/dataSet/pagingQuery")
+					url: po.concatContextPath("/dataSet/pagingQuery"),
+					disabled: !po.moduleAccessibility.dataSetAccessible
 				},
 				{
 					label: "<@spring.message code='module.chart' />",
 					icon: 'pi pi-fw pi-chart-line',
-					url: po.concatContextPath("/chart/pagingQuery")
+					url: po.concatContextPath("/chart/pagingQuery"),
+					disabled: !po.moduleAccessibility.chartAccessible
 				},
 				{
 					label: "<@spring.message code='module.dashboard' />",
 					icon: 'pi pi-fw pi-images',
-					url: po.concatContextPath("/dashboard/pagingQuery")
+					url: po.concatContextPath("/dashboard/pagingQuery"),
+					disabled: !po.moduleAccessibility.dashboardAccessible
 				}
 			]
 		}

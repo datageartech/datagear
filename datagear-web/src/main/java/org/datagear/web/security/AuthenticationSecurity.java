@@ -166,6 +166,18 @@ public class AuthenticationSecurity
 		return containsAnonymous(gas);
 	}
 
+	/**
+	 * 获取指定用户的{@linkplain ModuleAccessibility}。
+	 * 
+	 * @param auth
+	 * @return
+	 */
+	public ModuleAccessibility resolveModuleAccessibility(Authentication auth)
+	{
+		boolean accessible = hasDataAnalyst(auth);
+		return new ModuleAccessibility(accessible, accessible, accessible, accessible, accessible);
+	}
+
 	protected boolean containsAnonymous(Collection<? extends GrantedAuthority> gas)
 	{
 		return gas.contains(AuthUser.GA_ANONYMOUS);
