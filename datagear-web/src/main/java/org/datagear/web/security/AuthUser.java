@@ -50,6 +50,12 @@ public class AuthUser implements UserDetails
 	 */
 	public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 
+	public static final GrantedAuthority GA_ANONYMOUS = new SimpleGrantedAuthority(ROLE_ANONYMOUS);
+
+	public static final GrantedAuthority GA_USER = new SimpleGrantedAuthority(ROLE_USER);
+
+	public static final GrantedAuthority GA_ADMIN = new SimpleGrantedAuthority(ROLE_ADMIN);
+
 	private static final long serialVersionUID = 1L;
 
 	private final User user;
@@ -77,16 +83,14 @@ public class AuthUser implements UserDetails
 
 		if (user.isAnonymous())
 		{
-			this.authorities.add(new SimpleGrantedAuthority(ROLE_ANONYMOUS));
+			this.authorities.add(GA_ANONYMOUS);
 		}
 		else
 		{
-			this.authorities.add(new SimpleGrantedAuthority(ROLE_USER));
-			
+			this.authorities.add(GA_USER);
+
 			if (user.isAdmin())
-			{
-				this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
-			}
+				this.authorities.add(GA_ADMIN);
 		}
 	}
 

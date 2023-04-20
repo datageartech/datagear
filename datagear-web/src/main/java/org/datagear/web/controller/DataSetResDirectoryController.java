@@ -161,7 +161,7 @@ public class DataSetResDirectoryController extends AbstractController
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setIsShowDirectory(request, model);
-		setReadonlyAction(model, WebUtils.getUser());
+		setReadonlyAction(model);
 		
 		return "/dataSetResDirectory/dataSetResDirectory_table";
 	}

@@ -127,6 +127,7 @@ import org.datagear.web.format.SqlTimestampFormatter;
 import org.datagear.web.json.jackson.FormatterDeserializer;
 import org.datagear.web.json.jackson.FormatterSerializer;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
+import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
@@ -413,6 +414,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		}
 
 		return bean.getDirectory();
+	}
+
+	@Bean
+	public AuthenticationSecurity authenticationSecurity()
+	{
+		AuthenticationSecurity bean = new AuthenticationSecurity(getApplicationProperties().isDisableAnonymous());
+		return bean;
 	}
 
 	@Bean(initMethod = "upgrade")

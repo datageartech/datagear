@@ -39,7 +39,6 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.EntityService;
-import org.datagear.management.util.RoleSpec;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
@@ -47,6 +46,7 @@ import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -57,6 +57,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 
 import freemarker.template.TemplateModel;
@@ -123,6 +124,9 @@ public abstract class AbstractController
 	@Autowired
 	private MessageSource messageSource;
 
+	@Autowired
+	private AuthenticationSecurity authenticationSecurity;
+
 	public AbstractController()
 	{
 		super();
@@ -146,6 +150,16 @@ public abstract class AbstractController
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
+	}
+
+	public AuthenticationSecurity getAuthenticationSecurity()
+	{
+		return authenticationSecurity;
+	}
+
+	public void setAuthenticationSecurity(AuthenticationSecurity authenticationSecurity)
+	{
+		this.authenticationSecurity = authenticationSecurity;
 	}
 
 	protected <ID, T extends Entity<ID>> T getByIdForEdit(EntityService<ID, T> service, ID id) throws RecordNotFoundException
@@ -191,15 +205,14 @@ public abstract class AbstractController
 	}
 	
 	/**
-	 * 设置用户是否只能执行只读操作。
+	 * 设置当前用户是否只能执行只读操作。
 	 * 
 	 * @param model
-	 * @param user
 	 * @return
 	 */
-	protected boolean setReadonlyAction(Model model, User user)
+	protected boolean setReadonlyAction(Model model)
 	{
-		boolean readonly = isReadonlyAction(model, user);
+		boolean readonly = isReadonlyAction(model, WebUtils.getAuthentication());
 		return setReadonlyAction(model, readonly);
 	}
 
@@ -220,18 +233,18 @@ public abstract class AbstractController
 	 * 判断用户是否只能执行只读操作。
 	 * 
 	 * @param model
-	 * @param user
+	 * @param auth
 	 * @return
 	 */
-	protected boolean isReadonlyAction(Model model, User user)
+	protected boolean isReadonlyAction(Model model, Authentication auth)
 	{
 		boolean readonly = true;
 
-		if (user == null || user.isAnonymous())
+		if (this.authenticationSecurity.isAnonymous(auth))
 		{
 			readonly = true;
 		}
-		else if (user.isAdmin() || user.hasRole(RoleSpec.ROLE_DATA_MANAGER))
+		else if (this.authenticationSecurity.hasDataManager(auth))
 		{
 			readonly = false;
 		}

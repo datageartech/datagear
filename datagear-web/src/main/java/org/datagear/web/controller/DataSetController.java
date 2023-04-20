@@ -834,7 +834,7 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setReadonlyAction(model, WebUtils.getUser());
+		setReadonlyAction(model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
 				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
 		
