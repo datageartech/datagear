@@ -31,28 +31,44 @@ public class ModuleAccessibility implements Serializable
 
 	private boolean schemaAccessible = false;
 
+	private boolean schemaOperator = false;
+
 	private boolean analysisProjectAccessible = false;
+
+	private boolean analysisProjectOperator = false;
 
 	private boolean dataSetAccessible = false;
 
+	private boolean dataSetOperator = false;
+
 	private boolean chartAccessible = false;
 
+	private boolean chartOperator = false;
+
 	private boolean dashboardAccessible = false;
+
+	private boolean dashboardOperator = false;
 
 	public ModuleAccessibility()
 	{
 		super();
 	}
 
-	public ModuleAccessibility(boolean schemaAccessible, boolean analysisProjectAccessible, boolean dataSetAccessible,
-			boolean chartAccessible, boolean dashboardAccessible)
+	public ModuleAccessibility(boolean schemaAccessible, boolean schemaOperator, boolean analysisProjectAccessible,
+			boolean analysisProjectOperator, boolean dataSetAccessible, boolean dataSetOperator,
+			boolean chartAccessible, boolean chartOperator, boolean dashboardAccessible, boolean dashboardOperator)
 	{
 		super();
 		this.schemaAccessible = schemaAccessible;
+		this.schemaOperator = schemaOperator;
 		this.analysisProjectAccessible = analysisProjectAccessible;
+		this.analysisProjectOperator = analysisProjectOperator;
 		this.dataSetAccessible = dataSetAccessible;
+		this.dataSetOperator = dataSetOperator;
 		this.chartAccessible = chartAccessible;
+		this.chartOperator = chartOperator;
 		this.dashboardAccessible = dashboardAccessible;
+		this.dashboardOperator = dashboardOperator;
 	}
 
 	public boolean isSchemaAccessible()
@@ -65,6 +81,16 @@ public class ModuleAccessibility implements Serializable
 		this.schemaAccessible = schemaAccessible;
 	}
 
+	public boolean isSchemaOperator()
+	{
+		return schemaOperator;
+	}
+
+	public void setSchemaOperator(boolean schemaOperator)
+	{
+		this.schemaOperator = schemaOperator;
+	}
+
 	public boolean isAnalysisProjectAccessible()
 	{
 		return analysisProjectAccessible;
@@ -73,6 +99,16 @@ public class ModuleAccessibility implements Serializable
 	public void setAnalysisProjectAccessible(boolean analysisProjectAccessible)
 	{
 		this.analysisProjectAccessible = analysisProjectAccessible;
+	}
+
+	public boolean isAnalysisProjectOperator()
+	{
+		return analysisProjectOperator;
+	}
+
+	public void setAnalysisProjectOperator(boolean analysisProjectOperator)
+	{
+		this.analysisProjectOperator = analysisProjectOperator;
 	}
 
 	public boolean isDataSetAccessible()
@@ -85,6 +121,16 @@ public class ModuleAccessibility implements Serializable
 		this.dataSetAccessible = dataSetAccessible;
 	}
 
+	public boolean isDataSetOperator()
+	{
+		return dataSetOperator;
+	}
+
+	public void setDataSetOperator(boolean dataSetOperator)
+	{
+		this.dataSetOperator = dataSetOperator;
+	}
+
 	public boolean isChartAccessible()
 	{
 		return chartAccessible;
@@ -95,6 +141,16 @@ public class ModuleAccessibility implements Serializable
 		this.chartAccessible = chartAccessible;
 	}
 
+	public boolean isChartOperator()
+	{
+		return chartOperator;
+	}
+
+	public void setChartOperator(boolean chartOperator)
+	{
+		this.chartOperator = chartOperator;
+	}
+
 	public boolean isDashboardAccessible()
 	{
 		return dashboardAccessible;
@@ -103,5 +159,15 @@ public class ModuleAccessibility implements Serializable
 	public void setDashboardAccessible(boolean dashboardAccessible)
 	{
 		this.dashboardAccessible = dashboardAccessible;
+	}
+
+	public boolean isDashboardOperator()
+	{
+		return dashboardOperator;
+	}
+
+	public void setDashboardOperator(boolean dashboardOperator)
+	{
+		this.dashboardOperator = dashboardOperator;
 	}
 }

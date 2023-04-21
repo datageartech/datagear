@@ -175,7 +175,10 @@ public class AuthenticationSecurity
 	public ModuleAccessibility resolveModuleAccessibility(Authentication auth)
 	{
 		boolean accessible = hasDataAnalyst(auth);
-		return new ModuleAccessibility(accessible, accessible, accessible, accessible, accessible);
+		boolean operator = hasDataManager(auth);
+
+		return new ModuleAccessibility(accessible, operator, accessible, operator, accessible, operator, accessible,
+				operator, accessible, operator);
 	}
 
 	protected boolean containsAnonymous(Collection<? extends GrantedAuthority> gas)
