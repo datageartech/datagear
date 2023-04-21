@@ -87,31 +87,31 @@
 					label: "<@spring.message code='module.schema' />",
 					icon: 'pi pi-fw pi-database',
 					url: po.concatContextPath("/schema/query"),
-					disabled: !po.moduleAccessibility.schemaAccessible
+					visible: po.moduleAccessibility.schemaAccessible
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",
 					icon: 'pi pi-fw pi-folder',
 					url: po.concatContextPath("/analysisProject/pagingQuery"),
-					disabled: !po.moduleAccessibility.analysisProjectAccessible
+					visible: po.moduleAccessibility.analysisProjectAccessible
 				},
 				{
 					label: "<@spring.message code='module.dataSet' />",
 					icon: 'pi pi-fw pi-table',
 					url: po.concatContextPath("/dataSet/pagingQuery"),
-					disabled: !po.moduleAccessibility.dataSetAccessible
+					visible: po.moduleAccessibility.dataSetAccessible
 				},
 				{
 					label: "<@spring.message code='module.chart' />",
 					icon: 'pi pi-fw pi-chart-line',
 					url: po.concatContextPath("/chart/pagingQuery"),
-					disabled: !po.moduleAccessibility.chartAccessible
+					visible: po.moduleAccessibility.chartAccessible
 				},
 				{
 					label: "<@spring.message code='module.dashboard' />",
 					icon: 'pi pi-fw pi-images',
 					url: po.concatContextPath("/dashboard/pagingQuery"),
-					disabled: !po.moduleAccessibility.dashboardAccessible
+					visible: po.moduleAccessibility.dashboardAccessible
 				}
 			]
 		}
@@ -174,6 +174,34 @@
 			});
 		}
 	};
+	
+	po.vueMounted(function()
+	{
+		var pm = po.vuePageModel();
+		var mainMenu = pm.mainMenu;
+		var mainMenuItems = mainMenu.items;
+		var hasVisible = false;
+		
+		for(var i=0; i<mainMenuItems.length; i++)
+		{
+			if(mainMenuItems[i].visible !== false)
+			{
+				hasVisible = true;
+				break;
+			}
+		}
+		
+		//没有任何模块权限，添加一个提示菜单
+		if(!hasVisible)
+		{
+			mainMenuItems.push(
+			{
+				label: "<@spring.message code='noAuthorization' />",
+				icon: 'pi pi-fw pi-exclamation-triangle',
+				disabled: true
+			});
+		}
+	});
 })
 (${pid});
 </script>
