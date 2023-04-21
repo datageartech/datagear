@@ -38,8 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -126,9 +124,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class DataExchangeController extends AbstractSchemaConnController
 {
 	public static final Pattern TABLE_NAME_QUERY_PATTERN = Pattern.compile("^\\s*\\S+\\s*$", Pattern.CASE_INSENSITIVE);
-
-	protected static final String KEY_SESSION_BatchDataExchangeInfoMap = DataExchangeController.class.getName()
-			+ ".BatchDataExchangeInfoMap";
 
 	@Autowired
 	private DataExchangeService<DataExchange> dataExchangeService;
@@ -345,7 +340,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -448,7 +443,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -573,7 +568,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -691,7 +686,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -911,7 +906,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -1013,7 +1008,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -1119,7 +1114,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -1223,7 +1218,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService.exchange(batchDataExchange);
 
 		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
-		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+		setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -1541,7 +1536,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		if (isEmpty(form.getDataExchangeId()))
 			throw new IllegalInputException();
 
-		BatchDataExchangeInfo batchDataExchangeInfo = retrieveBatchDataExchangeInfo(request, form.getDataExchangeId());
+		BatchDataExchangeInfo batchDataExchangeInfo = getSessionBatchDataExchangeInfo(request, form.getDataExchangeId());
 		
 		if (batchDataExchangeInfo != null && form.getSubDataExchangeIds() != null)
 		{
@@ -1550,6 +1545,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			
 			for (String subDataExchangeId : subDataExchangeIds)
 				batchDataExchangeResult.cancel(subDataExchangeId);
+
+			setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
 		}
 		
 		return optSuccessResponseEntity(request);
@@ -1586,52 +1583,39 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	/**
-	 * 将{@linkplain BatchDataExchangeInfo}存储至session中。
-	 * 
-	 * @param request
-	 * @param batchDataExchangeInfo
-	 */
-	@SuppressWarnings("unchecked")
-	protected void storeBatchDataExchangeInfo(HttpServletRequest request, BatchDataExchangeInfo batchDataExchangeInfo)
-	{
-		HttpSession session = request.getSession();
-
-		ConcurrentMap<String, BatchDataExchangeInfo> map = null;
-
-		synchronized (session)
-		{
-			map = (ConcurrentMap<String, BatchDataExchangeInfo>) session
-					.getAttribute(KEY_SESSION_BatchDataExchangeInfoMap);
-
-			if (map == null)
-			{
-				map = new ConcurrentHashMap<>();
-				session.setAttribute(KEY_SESSION_BatchDataExchangeInfoMap, map);
-			}
-		}
-
-		map.put(batchDataExchangeInfo.getDataExchangeId(), batchDataExchangeInfo);
-	}
-
-	/**
-	 * 从session中取回{@linkplain BatchDataExchangeInfo}。
+	 * 获取会话中的{@linkplain BatchDataExchangeInfo}。
+	 * <p>
+	 * 如果修改了获取的{@linkplain BatchDataExchangeInfo}的状态，应在修改之后调用{@linkplain #setSessionBatchDataExchangeInfo(HttpServletRequest, BatchDataExchangeInfo)}，
+	 * 以为可能扩展的分布式会话提供支持。
+	 * </p>
 	 * 
 	 * @param request
 	 * @param dataExchangeId
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	protected BatchDataExchangeInfo retrieveBatchDataExchangeInfo(HttpServletRequest request, String dataExchangeId)
+	protected BatchDataExchangeInfo getSessionBatchDataExchangeInfo(HttpServletRequest request, String dataExchangeId)
 	{
 		HttpSession session = request.getSession();
+		String key = toSessionKeyForBatchDataExchangeInfo(request, dataExchangeId);
+		return (BatchDataExchangeInfo) session.getAttribute(key);
+	}
 
-		ConcurrentMap<String, BatchDataExchangeInfo> map = (ConcurrentMap<String, BatchDataExchangeInfo>) session
-				.getAttribute(KEY_SESSION_BatchDataExchangeInfoMap);
+	/**
+	 * 设置会话中的{@linkplain BatchDataExchangeInfo}。
+	 * 
+	 * @param request
+	 * @param batchDataExchangeInfo
+	 */
+	protected void setSessionBatchDataExchangeInfo(HttpServletRequest request, BatchDataExchangeInfo batchDataExchangeInfo)
+	{
+		HttpSession session = request.getSession();
+		String key = toSessionKeyForBatchDataExchangeInfo(request, batchDataExchangeInfo.getDataExchangeId());
+		session.setAttribute(key, batchDataExchangeInfo);
+	}
 
-		if (map == null)
-			return null;
-
-		return map.get(dataExchangeId);
+	protected String toSessionKeyForBatchDataExchangeInfo(HttpServletRequest request, String dataExchangeId)
+	{
+		return "dataexchange-" + dataExchangeId;
 	}
 
 	protected void listDataImportFileInfos(File directory, FileFilter fileFilter, String parentPath,

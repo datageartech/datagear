@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
@@ -112,10 +113,12 @@ public class RegisterController extends AbstractController
 	public ResponseEntity<OperationMessage> doRegister(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody RegisterForm form)
 	{
+		HttpSession session = request.getSession();
+
 		if (this.applicationProperties.isDisableRegister())
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "registerDisabled");
 		
-		if(!this.checkCodeManager.isCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
+		if (!this.checkCodeManager.isCheckCode(session, CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
 
 		User user = form.getUser();
@@ -136,8 +139,8 @@ public class RegisterController extends AbstractController
 
 		this.userService.add(user);
 
-		this.checkCodeManager.removeCheckCode(request.getSession(), CHECK_CODE_MODULE_REGISTER);
-		request.getSession().setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
+		this.checkCodeManager.removeCheckCode(session, CHECK_CODE_MODULE_REGISTER);
+		session.setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
 
 		return optSuccessResponseEntity(request);
 	}

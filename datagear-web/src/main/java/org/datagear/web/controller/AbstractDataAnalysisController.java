@@ -388,8 +388,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (StringUtil.isEmpty(form.getDashboardId()))
 			throw new IllegalInputException();
 
-		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-		DashboardInfo dashboardInfo = dashboardInfoManager.get(form.getDashboardId());
+		DashboardInfo dashboardInfo = getSessionDashboardInfo(request, form.getDashboardId());
 
 		if (dashboardInfo == null)
 			throw new IllegalInputException();
@@ -516,23 +515,51 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return WebUtils.addJsessionidParam(url, sessionId);
 	}
 
-	protected SessionDashboardInfoManager getSessionDashboardInfoManagerNotNull(HttpServletRequest request)
+	/**
+	 * 在会话中存储{@linkplain DashboardInfo}。
+	 * 
+	 * @param request
+	 * @param di
+	 */
+	protected void setSessionDashboardInfo(HttpServletRequest request, DashboardInfo di)
 	{
 		HttpSession session = request.getSession();
+		String key = toSessionKeyForDashboardInfo(request, di.getDashboardId());
+		session.setAttribute(key, di);
+	}
 
-		synchronized (session)
-		{
-			SessionDashboardInfoManager dashboardManager = (SessionDashboardInfoManager) session
-					.getAttribute(SessionDashboardInfoManager.class.getName());
+	/**
+	 * 获取会话中存储的{@linkplain DashboardInfo}。
+	 * 
+	 * @param request
+	 * @param dashboardId
+	 * @return 返回{@code null}表示没有
+	 */
+	protected DashboardInfo getSessionDashboardInfo(HttpServletRequest request, String dashboardId)
+	{
+		HttpSession session = request.getSession();
+		String key = toSessionKeyForDashboardInfo(request, dashboardId);
+		return (DashboardInfo) session.getAttribute(key);
+	}
 
-			if (dashboardManager == null)
-			{
-				dashboardManager = new SessionDashboardInfoManager();
-				session.setAttribute(SessionDashboardInfoManager.class.getName(), dashboardManager);
-			}
+	/**
+	 * 为会话中的{@linkplain DashboardInfo}添加图表信息。
+	 * 
+	 * @param request
+	 * @param di
+	 * @param chartIdToChartWidgetIds
+	 */
+	protected void addSessionDashboardInfoCharts(HttpServletRequest request, DashboardInfo di,
+			Map<String, String> chartIdToChartWidgetIds)
+	{
+		di.putChartWidgetIds(chartIdToChartWidgetIds);
+		// 无论di是否已存储至会话，这里都应再执行存储，以为可能扩展的分布式会话提供支持
+		setSessionDashboardInfo(request, di);
+	}
 
-			return dashboardManager;
-		}
+	protected String toSessionKeyForDashboardInfo(HttpServletRequest request, String dashboardId)
+	{
+		return "dashboard-" + dashboardId;
 	}
 
 	/**
@@ -570,34 +597,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public void setDashboardQuery(DashboardQuery dashboardQuery)
 		{
 			this.dashboardQuery = dashboardQuery;
-		}
-	}
-
-	protected static class SessionDashboardInfoManager implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private Map<String, DashboardInfo> dashboardInfos = null;
-
-		public SessionDashboardInfoManager()
-		{
-			super();
-		}
-
-		public synchronized DashboardInfo get(String dashboardId)
-		{
-			if (this.dashboardInfos == null)
-				return null;
-
-			return this.dashboardInfos.get(dashboardId);
-		}
-
-		public synchronized void put(DashboardInfo dashboardInfo)
-		{
-			if (this.dashboardInfos == null)
-				this.dashboardInfos = new HashMap<>();
-
-			this.dashboardInfos.put(dashboardInfo.getDashboardId(), dashboardInfo);
 		}
 	}
 

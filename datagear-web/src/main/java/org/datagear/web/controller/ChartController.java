@@ -523,9 +523,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
-
-			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-			dashboardInfoManager.put(new DashboardInfo(dashboard, false));
+			setSessionDashboardInfo(request, new DashboardInfo(dashboard, false));
 		}
 		finally
 		{

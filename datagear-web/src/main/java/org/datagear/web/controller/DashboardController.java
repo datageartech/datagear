@@ -1111,7 +1111,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
-			DashboardShowAuthCheckManager manager = getDashboardShowAuthCheckManager(request, true);
+			DashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request);
 
 			if (manager.isAuthDenied(dashboardWidgetId))
 			{
@@ -1143,6 +1143,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 									0));
 				}
 			}
+
+			setSessionDashboardShowAuthCheckManager(request, manager);
 		}
 
 		return responseEntity;
@@ -1170,9 +1172,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (dashboardShareSet.isAnonymousPassword() && !user.isAnonymous())
 			return true;
 
-		DashboardShowAuthCheckManager manager = getDashboardShowAuthCheckManager(request, false);
-
-		return (manager == null ? false : manager.isAuthed(dashboardWidget.getId()));
+		DashboardShowAuthCheckManager manager = getSessionDashboardShowAuthCheckManager(request);
+		return manager.isAuthed(dashboardWidget.getId());
 	}
 
 	protected String buildShowAuthUrlForShowRequest(HttpServletRequest request, String id, String resName)
@@ -1187,29 +1188,51 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return authPath;
 	}
 
-	protected DashboardShowAuthCheckManager getDashboardShowAuthCheckManager(HttpServletRequest request,
-			boolean nonNull)
+	/**
+	 * 获取会话中的{@linkplain DashboardShowAuthCheckManager}。
+	 * <p>
+	 * 如果修改了获取的{@linkplain DashboardShowAuthCheckManager}的状态，应在修改之后调用{@linkplain #setSessionDashboardShowAuthCheckManager(HttpServletRequest, DashboardShowAuthCheckManager)}，
+	 * 以为可能扩展的分布式会话提供支持。
+	 * </p>
+	 * 
+	 * @param request
+	 * @return 非{@code null}
+	 */
+	protected DashboardShowAuthCheckManager getSessionDashboardShowAuthCheckManager(HttpServletRequest request)
 	{
 		HttpSession session = request.getSession();
 
-		DashboardShowAuthCheckManager manager = (DashboardShowAuthCheckManager) session
-				.getAttribute(DashboardShowAuthCheckManager.class.getName());
-
-		if (!nonNull)
-			return manager;
+		DashboardShowAuthCheckManager manager = null;
 
 		synchronized (session)
 		{
+			manager = (DashboardShowAuthCheckManager) session
+					.getAttribute(DashboardShowAuthCheckManager.class.getName());
+
 			if (manager == null)
 			{
 				manager = new DashboardShowAuthCheckManager(
 						this.applicationProperties.getDashboardSharePasswordAuthFailThreshold(),
 						this.applicationProperties.getDashboardSharePasswordAuthFailPastMinutes() * 60 * 1000);
+
 				session.setAttribute(DashboardShowAuthCheckManager.class.getName(), manager);
 			}
 		}
 
 		return manager;
+	}
+
+	/**
+	 * 设置会话中的{@linkplain DashboardShowAuthCheckManager}。
+	 * 
+	 * @param request
+	 * @param manager
+	 */
+	protected void setSessionDashboardShowAuthCheckManager(HttpServletRequest request,
+			DashboardShowAuthCheckManager manager)
+	{
+		HttpSession session = request.getSession();
+		session.setAttribute(DashboardShowAuthCheckManager.class.getName(), manager);
 	}
 
 	/**
@@ -1489,9 +1512,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 			
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
-			
-			SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-			dashboardInfoManager.put(new DashboardInfo(dashboard, isShowForEdit));
+			setSessionDashboardInfo(request, new DashboardInfo(dashboard, isShowForEdit));
 		}
 		finally
 		{
@@ -1672,8 +1693,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		User user = WebUtils.getUser();
 
-		SessionDashboardInfoManager dashboardInfoManager = getSessionDashboardInfoManagerNotNull(request);
-		DashboardInfo dashboardInfo = dashboardInfoManager.get(dashboardId);
+		DashboardInfo dashboardInfo = getSessionDashboardInfo(request, dashboardId);
 
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
@@ -1714,7 +1734,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			for (int i = 0; i < chartWidgets.length; i++)
 				chartIdToChartWidgetIds.put(charts[i].getId(), chartWidgets[i].getId());
 
-			dashboardInfo.putChartWidgetIds(chartIdToChartWidgetIds);
+			addSessionDashboardInfoCharts(request, dashboardInfo, chartIdToChartWidgetIds);
 		}
 		finally
 		{

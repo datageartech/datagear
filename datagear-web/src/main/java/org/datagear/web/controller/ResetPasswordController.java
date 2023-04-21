@@ -105,16 +105,14 @@ public class ResetPasswordController extends AbstractController
 	@RequestMapping
 	public String resetPassword(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		HttpSession session = request.getSession();
-
-		ResetPasswordStep resetPasswordStep = (ResetPasswordStep) session.getAttribute(KEY_STEP);
+		ResetPasswordStep resetPasswordStep = getSessionResetPasswordStep(request);
 
 		if (resetPasswordStep == null || request.getParameter("step") == null)
 		{
 			resetPasswordStep = new ResetPasswordStep(4);
 			resetPasswordStep.setStep(1, STEP_FILL_USER_INFO);
 
-			session.setAttribute(KEY_STEP, resetPasswordStep);
+			setSessionResetPasswordStep(request, resetPasswordStep);
 		}
 
 		model.addAttribute("step", resetPasswordStep);
@@ -133,7 +131,7 @@ public class ResetPasswordController extends AbstractController
 		if (isEmpty(username))
 			throw new IllegalInputException();
 
-		ResetPasswordStep resetPasswordStep = getResetPasswordStep(request);
+		ResetPasswordStep resetPasswordStep = getSessionResetPasswordStep(request);
 
 		if (isEmpty(resetPasswordStep))
 			return optStepNotInSessionResponseEntity(request);
@@ -149,6 +147,8 @@ public class ResetPasswordController extends AbstractController
 				this.resetPasswordCheckFileDirectory.getAbsolutePath(), resetPasswordStep.getCheckFileName()));
 		resetPasswordStep.setStep(2, STEP_CHECK_USER);
 
+		setSessionResetPasswordStep(request, resetPasswordStep);
+
 		return optSuccessResponseEntity(request);
 	}
 
@@ -156,7 +156,7 @@ public class ResetPasswordController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> checkUser(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		ResetPasswordStep resetPasswordStep = getResetPasswordStep(request);
+		ResetPasswordStep resetPasswordStep = getSessionResetPasswordStep(request);
 
 		if (isEmpty(resetPasswordStep) || isEmpty(resetPasswordStep.getUsername())
 				|| isEmpty(resetPasswordStep.getCheckFileName()))
@@ -171,6 +171,8 @@ public class ResetPasswordController extends AbstractController
 		resetPasswordStep.setCheckOk(true);
 		resetPasswordStep.setStep(3, STEP_SET_NEW_PASSWORD);
 
+		setSessionResetPasswordStep(request, resetPasswordStep);
+
 		return optSuccessResponseEntity(request);
 	}
 
@@ -184,7 +186,7 @@ public class ResetPasswordController extends AbstractController
 		if (isEmpty(password))
 			throw new IllegalInputException();
 
-		ResetPasswordStep resetPasswordStep = getResetPasswordStep(request);
+		ResetPasswordStep resetPasswordStep = getSessionResetPasswordStep(request);
 
 		if (isEmpty(resetPasswordStep) || isEmpty(resetPasswordStep.getUsername())
 				|| isEmpty(resetPasswordStep.getCheckFileName()) || !resetPasswordStep.isCheckOk())
@@ -200,6 +202,8 @@ public class ResetPasswordController extends AbstractController
 		resetPasswordStep.setStep(4, STEP_FINISH);
 		this.usernameLoginLatch.clear(user.getName());
 
+		setSessionResetPasswordStep(request, resetPasswordStep);
+
 		return optSuccessResponseEntity(request);
 	}
 
@@ -208,13 +212,34 @@ public class ResetPasswordController extends AbstractController
 		return optFailDataResponseEntity(request, "resetPassword.stepNotInSession");
 	}
 
-	protected ResetPasswordStep getResetPasswordStep(HttpServletRequest request)
+	/**
+	 * 获取会话中的{@linkplain ResetPasswordStep}。
+	 * <p>
+	 * 如果修改了获取的{@linkplain ResetPasswordStep}的状态，应在修改之后调用{@linkplain #setSessionResetPasswordStep(HttpServletRequest, ResetPasswordStep)}，
+	 * 以为可能扩展的分布式会话提供支持。
+	 * </p>
+	 * 
+	 * @param request
+	 * @return 没有则返回{@code null}
+	 */
+	protected ResetPasswordStep getSessionResetPasswordStep(HttpServletRequest request)
 	{
 		HttpSession session = request.getSession();
-
 		ResetPasswordStep resetPasswordStep = (ResetPasswordStep) session.getAttribute(KEY_STEP);
 
 		return resetPasswordStep;
+	}
+
+	/**
+	 * 设置会话中的{@linkplain ResetPasswordStep}。
+	 * 
+	 * @param request
+	 * @param step
+	 */
+	protected void setSessionResetPasswordStep(HttpServletRequest request, ResetPasswordStep step)
+	{
+		HttpSession session = request.getSession();
+		session.setAttribute(KEY_STEP, step);
 	}
 
 	/**
