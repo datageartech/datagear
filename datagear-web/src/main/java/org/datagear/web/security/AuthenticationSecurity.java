@@ -167,18 +167,25 @@ public class AuthenticationSecurity
 	}
 
 	/**
-	 * 获取指定用户的{@linkplain ModuleAccessibility}。
+	 * 获取指定用户的{@linkplain ModulePermissions}。
 	 * 
 	 * @param auth
 	 * @return
 	 */
-	public ModuleAccessibility resolveModuleAccessibility(Authentication auth)
+	public ModulePermissions resolveModulePermissions(Authentication auth)
 	{
-		boolean accessible = hasDataAnalyst(auth);
+		boolean accessor = hasDataAnalyst(auth);
 		boolean operator = hasDataManager(auth);
+		boolean visible = accessor;
 
-		return new ModuleAccessibility(accessible, operator, accessible, operator, accessible, operator, accessible,
-				operator, accessible, operator);
+		ModulePermission schemaPermission = new ModulePermission(accessor, operator, visible);
+		ModulePermission analysisProjectPermission = new ModulePermission(accessor, operator, visible);
+		ModulePermission dataSetPermission = new ModulePermission(accessor, operator, visible);
+		ModulePermission chartPermission = new ModulePermission(accessor, operator, visible);
+		ModulePermission dashboardPermission = new ModulePermission(accessor, operator, visible);
+
+		return new ModulePermissions(schemaPermission, analysisProjectPermission, dataSetPermission, chartPermission,
+				dashboardPermission);
 	}
 
 	protected boolean containsAnonymous(Collection<? extends GrantedAuthority> gas)
