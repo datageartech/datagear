@@ -34,7 +34,7 @@ import org.datagear.management.domain.Authorization;
  */
 public class AuthorizationResMetaManager
 {
-	private final ConcurrentMap<String, ResourceMeta> RESOURCEMETA_MAP = new ConcurrentHashMap<String, ResourceMeta>();
+	private final ConcurrentMap<String, ResourceMeta> resourcemetaMap = new ConcurrentHashMap<String, ResourceMeta>();
 
 	public AuthorizationResMetaManager()
 	{
@@ -48,7 +48,7 @@ public class AuthorizationResMetaManager
 	 */
 	public void register(ResourceMeta resourceMeta)
 	{
-		RESOURCEMETA_MAP.put(resourceMeta.getResourceType(), resourceMeta);
+		resourcemetaMap.put(resourceMeta.getResourceType(), resourceMeta);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class AuthorizationResMetaManager
 	 */
 	public ResourceMeta get(String resourceType)
 	{
-		return RESOURCEMETA_MAP.get(resourceType);
+		return resourcemetaMap.get(resourceType);
 	}
 	
 	/**
