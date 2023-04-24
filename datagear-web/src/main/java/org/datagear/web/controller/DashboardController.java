@@ -120,6 +120,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
+	/** 看板心跳参数：看板ID */
+	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = "dashboardId";
+
+	/** 看板心跳参数：频率 */
+	public static final String HEARTBEAT_PARAM_INTERVAL = "interval";
+
 	/**
 	 * 看板页面中服务端日期JS变量名：{@code _DATAGEAR_SERVER_TIME}
 	 */
@@ -1823,17 +1829,28 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * 
 	 * @param request
 	 * @param response
-	 * @param model
-	 * @param dashbaordId
+	 * @param dashboardId
+	 * @param interval
+	 * @return
 	 * @throws Throwable
 	 */
 	@RequestMapping(value = HEARTBEAT_TAIL_URL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, Object> heartbeat(HttpServletRequest request, HttpServletResponse response) throws Throwable
+	public Map<String, Object> heartbeat(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(HEARTBEAT_PARAM_DASHBOARD_ID) String dashboardId,
+			@RequestParam(HEARTBEAT_PARAM_INTERVAL) long interval) throws Throwable
 	{
+		long time = System.currentTimeMillis();
+
 		Map<String, Object> data = new HashMap<>();
 		data.put("heartbeat", true);
-		data.put("time", System.currentTimeMillis());
+		data.put("dashboardId", dashboardId);
+		data.put("time", time);
+
+		updateSessionDashboardInfoAccess(request, dashboardId, time);
+
+		// 需定时清理，防止会话中存储过多已过期的看板信息
+		removeSessionDashboardInfoExpired(request, interval * 3);
 
 		return data;
 	}

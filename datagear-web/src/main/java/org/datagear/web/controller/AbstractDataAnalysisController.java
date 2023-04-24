@@ -29,7 +29,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
@@ -56,6 +55,8 @@ import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
+import org.datagear.web.util.ExpiredSessionAttrManager;
+import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
@@ -162,6 +163,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	@Autowired
 	private ThemeSpec themeSpec;
 
+	@Autowired
+	private ExpiredSessionAttrManager expiredSessionAttrManager;
+
 	public AbstractDataAnalysisController()
 	{
 		super();
@@ -205,6 +209,16 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public void setThemeSpec(ThemeSpec themeSpec)
 	{
 		this.themeSpec = themeSpec;
+	}
+
+	public ExpiredSessionAttrManager getExpiredSessionAttrManager()
+	{
+		return expiredSessionAttrManager;
+	}
+
+	public void setExpiredSessionAttrManager(ExpiredSessionAttrManager expiredSessionAttrManager)
+	{
+		this.expiredSessionAttrManager = expiredSessionAttrManager;
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
@@ -523,9 +537,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 */
 	protected void setSessionDashboardInfo(HttpServletRequest request, DashboardInfo di)
 	{
-		HttpSession session = request.getSession();
-		String key = toSessionKeyForDashboardInfo(request, di.getDashboardId());
-		session.setAttribute(key, di);
+		String name = toSessionNameForDashboardInfo(request, di.getDashboardId());
+		getExpiredSessionAttrManager().setAttr(request, name, di);
 	}
 
 	/**
@@ -537,9 +550,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 */
 	protected DashboardInfo getSessionDashboardInfo(HttpServletRequest request, String dashboardId)
 	{
-		HttpSession session = request.getSession();
-		String key = toSessionKeyForDashboardInfo(request, dashboardId);
-		return (DashboardInfo) session.getAttribute(key);
+		String name = toSessionNameForDashboardInfo(request, dashboardId);
+		return getExpiredSessionAttrManager().getAttr(request, name);
 	}
 
 	/**
@@ -553,13 +565,39 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			Map<String, String> chartIdToChartWidgetIds)
 	{
 		di.putChartWidgetIds(chartIdToChartWidgetIds);
+
 		// 无论di是否已存储至会话，这里都应再执行存储，以为可能扩展的分布式会话提供支持
-		setSessionDashboardInfo(request, di);
+		String name = toSessionNameForDashboardInfo(request, di.getDashboardId());
+		getExpiredSessionAttrManager().setAttr(request, name, di);
 	}
 
-	protected String toSessionKeyForDashboardInfo(HttpServletRequest request, String dashboardId)
+	/**
+	 * 更新会话中的{@linkplain DashboardInfo}的访问时间。
+	 * 
+	 * @param request
+	 * @param dashboardId
+	 * @param time
+	 */
+	protected void updateSessionDashboardInfoAccess(HttpServletRequest request, String dashboardId, long time)
 	{
-		return "dashboard-" + dashboardId;
+		String name = toSessionNameForDashboardInfo(request, dashboardId);
+		getExpiredSessionAttrManager().updateAccessTime(request, name, time);
+	}
+
+	/**
+	 * 移除会话中的过期{@linkplain DashboardInfo}。
+	 * 
+	 * @param request
+	 * @param timeout
+	 */
+	protected void removeSessionDashboardInfoExpired(HttpServletRequest request, long timeout)
+	{
+		getExpiredSessionAttrManager().removeExpired(request, timeout, DashboardInfo.class);
+	}
+
+	protected String toSessionNameForDashboardInfo(HttpServletRequest request, String dashboardId)
+	{
+		return DashboardInfo.class.getSimpleName() + "-" + dashboardId;
 	}
 
 	/**
@@ -600,7 +638,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		}
 	}
 
-	protected static class DashboardInfo implements Serializable
+	protected static class DashboardInfo implements ExpiredSessionAttr
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -617,6 +655,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		
 		private final boolean showForEdit;
 
+		private volatile long lastAccessTime = 0;
+
 		public DashboardInfo(HtmlTplDashboard dashboard, boolean showForEdit)
 		{
 			this.dashboardId = dashboard.getId();
@@ -631,6 +671,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			}
 
 			this.showForEdit = showForEdit;
+			this.lastAccessTime = System.currentTimeMillis();
 		}
 
 		public String getDashboardId()
@@ -674,6 +715,18 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public synchronized void putChartWidgetIds(Map<String, String> chartIdToChartWidgetIds)
 		{
 			this.chartIdToChartWidgetIds.putAll(chartIdToChartWidgetIds);
+		}
+
+		@Override
+		public long getLastAccessTime()
+		{
+			return this.lastAccessTime;
+		}
+
+		@Override
+		public void setLastAccessTime(long time)
+		{
+			this.lastAccessTime = time;
 		}
 	}
 

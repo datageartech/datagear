@@ -29,6 +29,7 @@ import org.datagear.web.config.support.CustomErrorPageRegistrar;
 import org.datagear.web.config.support.EnumCookieThemeResolver;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.ThemeSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -284,6 +285,13 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	public ErrorPageRegistrar errorPageRegistrar()
 	{
 		CustomErrorPageRegistrar bean = new CustomErrorPageRegistrar();
+		return bean;
+	}
+
+	@Bean
+	public ExpiredSessionAttrManager expiredSessionAttrManager()
+	{
+		ExpiredSessionAttrManager bean = new ExpiredSessionAttrManager();
 		return bean;
 	}
 }

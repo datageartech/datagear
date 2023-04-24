@@ -193,6 +193,19 @@
 			});
 	
 	/**
+	 * 心跳配置，需与后台保持一致。
+	 */
+	dashboardFactory.heartbeatConfig = (dashboardFactory.heartbeatConfig ||
+			{
+				//心跳间隔毫秒数，默认5分钟
+				interval: 1000*60*5,
+				//org.datagear.web.controller.DashboardController.HEARTBEAT_PARAM_DASHBOARD_ID
+				dashboardIdParamName: "dashboardId",
+				//org.datagear.web.controller.DashboardController.HEARTBEAT_PARAM_INTERVAL
+				intervalParamName: "interval"
+			});
+	
+	/**
 	 * 更新图表数据ajax请求的重试秒数，当更新图表数据ajax请求出错后，会在过这些秒后重试请求。
 	 */
 	dashboardFactory.UPDATE_AJAX_RETRY_SECONDS = 5;
@@ -232,7 +245,7 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
-		this._initStartHeartBeatIfNot(dashboard.renderContext);
+		this._initStartHeartBeatIfNot(dashboard);
 		this._initDashboardBaseProperties(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		
@@ -328,15 +341,16 @@
 		delete dashboard.loadableChartWidgets;
 	};
 	
-	dashboardFactory._initStartHeartBeatIfNot = function(renderContext)
+	dashboardFactory._initStartHeartBeatIfNot = function(dashboard)
 	{
 		if(dashboardFactory._initStartHeartBeat)
 			return;
 		
 		//开启心跳，避免会话超时
+		var renderContext = dashboard.renderContext;
 		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
 		var heartbeatURL = chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
-		this.startHeartBeat(heartbeatURL);
+		this.startHeartBeat(heartbeatURL, dashboard.id);
 		
 		dashboardFactory._initStartHeartBeat = true;
 	};
@@ -344,8 +358,9 @@
 	/**
 	 * 开始执行心跳请求。
 	 * @param heartbeatURL 心跳URL，可选，初次调用时需设置
+	 * @param dashboardId 看板ID
 	 */
-	dashboardFactory.startHeartBeat = function(heartbeatURL)
+	dashboardFactory.startHeartBeat = function(heartbeatURL, dashboardId)
 	{
 		if(this._heartbeatStatus == "run")
 			return false;
@@ -353,7 +368,7 @@
 		this._heartbeatStatus = "run";
 		
 		this.heartbeatURL = (heartbeatURL == undefined ? this.heartbeatURL : heartbeatURL);
-		this._heartBeatAjaxRequestTimeout();
+		this._heartBeatAjaxRequestTimeout(dashboardId);
 		
 		return true;
 	};
@@ -369,9 +384,9 @@
 			clearTimeout(this._heartbeatTimeoutId);
 	};
 	
-	dashboardFactory._heartBeatAjaxRequestTimeout = function()
+	dashboardFactory._heartBeatAjaxRequestTimeout = function(dashboardId)
 	{
-		var interval = (this.heartbeatInterval || 1000*60*5);
+		var interval = dashboardFactory.heartbeatConfig.interval;
 		
 		var _thisFactory = this;
 		
@@ -384,14 +399,19 @@
 				if(url == null)
 					throw new Error("[dashboardFactory.heartbeatURL] must be set");
 				
+				var data = {};
+				data[dashboardFactory.heartbeatConfig.dashboardIdParamName] = dashboardId;
+				data[dashboardFactory.heartbeatConfig.intervalParamName] = interval;
+				
 				$.ajax({
 					type : "GET",
 					cache: false,
 					url : url,
+					data: data,
 					complete : function()
 					{
 						if(_thisFactory._heartbeatStatus == "run")
-							_thisFactory._heartBeatAjaxRequestTimeout();
+							_thisFactory._heartBeatAjaxRequestTimeout(dashboardId);
 					}
 				});
 			}
