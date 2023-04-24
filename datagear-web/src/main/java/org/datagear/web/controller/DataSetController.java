@@ -866,7 +866,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/previewSql", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
@@ -904,7 +904,7 @@ public class DataSetController extends AbstractSchemaConnController
 				resolveSqlParam.getDataSetParams());
 	}
 
-	@RequestMapping(value = "/previewJsonValue", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
@@ -919,7 +919,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/previewJsonFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview,
@@ -937,7 +937,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/previewExcel", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview,
@@ -954,7 +954,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/previewCsvValue", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewCsvValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
@@ -969,7 +969,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/previewCsvFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewCsvFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvFileDataSetEntityPreview preview,
@@ -986,7 +986,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/previewHttp", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewHttp(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable

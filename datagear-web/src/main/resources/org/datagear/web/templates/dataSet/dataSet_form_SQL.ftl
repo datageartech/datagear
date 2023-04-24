@@ -81,7 +81,7 @@
 (function(po)
 {
 	po.submitUrl = "/dataSet/"+po.submitAction;
-	po.previewUrl = "/dataSet/previewSql";
+	po.previewUrl = "/dataSet/previewSQL";
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
