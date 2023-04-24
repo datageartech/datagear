@@ -151,6 +151,12 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板心跳URL名 */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
 
+	/** 看板心跳URL后缀 */
+	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
+
+	/** 看板心跳频率：5分钟 */
+	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
+
 	@Autowired
 	private DataSetParamValueConverter dataSetParamValueConverter;
 
@@ -507,7 +513,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
-		String heartbeatURL = "/dashboard" + DashboardController.HEARTBEAT_TAIL_URL;
+		String heartbeatURL = "/dashboard" + HEARTBEAT_TAIL_URL;
 		heartbeatURL = addJsessionidParam(heartbeatURL, request.getSession().getId());
 
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
@@ -585,14 +591,16 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
-	 * 移除会话中的过期{@linkplain DashboardInfo}。
+	 * 移除会话中过期的看板信息。
+	 * <p>
+	 * 需定时清理，防止会话中存储过多已过期的看板信息
+	 * </p>
 	 * 
 	 * @param request
-	 * @param timeout
 	 */
-	protected void removeSessionDashboardInfoExpired(HttpServletRequest request, long timeout)
+	protected void removeSessionDashboardInfoExpired(HttpServletRequest request)
 	{
-		getExpiredSessionAttrManager().removeExpired(request, timeout, DashboardInfo.class);
+		getExpiredSessionAttrManager().removeExpired(request, HEARTBEAT_INTERVAL_MS * 3, DashboardInfo.class);
 	}
 
 	protected String toSessionNameForDashboardInfo(HttpServletRequest request, String dashboardId)

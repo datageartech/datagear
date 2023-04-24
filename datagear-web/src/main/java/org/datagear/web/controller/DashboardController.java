@@ -118,13 +118,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	/** 加载看板图表参数：图表部件ID */
 	public static final String LOAD_CHART_PARAM_CHART_WIDGET_ID = "chartWidgetId";
 
-	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
-
 	/** 看板心跳参数：看板ID */
 	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = "dashboardId";
-
-	/** 看板心跳参数：频率 */
-	public static final String HEARTBEAT_PARAM_INTERVAL = "interval";
 
 	/**
 	 * 看板页面中服务端日期JS变量名：{@code _DATAGEAR_SERVER_TIME}
@@ -1526,6 +1521,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
+
+		removeSessionDashboardInfoExpired(request);
 	}
 	
 	/**
@@ -1830,15 +1827,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @param request
 	 * @param response
 	 * @param dashboardId
-	 * @param interval
 	 * @return
 	 * @throws Throwable
 	 */
 	@RequestMapping(value = HEARTBEAT_TAIL_URL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> heartbeat(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(HEARTBEAT_PARAM_DASHBOARD_ID) String dashboardId,
-			@RequestParam(HEARTBEAT_PARAM_INTERVAL) long interval) throws Throwable
+			@RequestParam(HEARTBEAT_PARAM_DASHBOARD_ID) String dashboardId) throws Throwable
 	{
 		long time = System.currentTimeMillis();
 
@@ -1848,9 +1843,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("time", time);
 
 		updateSessionDashboardInfoAccess(request, dashboardId, time);
-
-		// 需定时清理，防止会话中存储过多已过期的看板信息
-		removeSessionDashboardInfoExpired(request, interval * 3);
+		removeSessionDashboardInfoExpired(request);
 
 		return data;
 	}

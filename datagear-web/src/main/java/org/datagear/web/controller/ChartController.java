@@ -531,6 +531,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
+
+		removeSessionDashboardInfoExpired(request);
 	}
 
 	@Override

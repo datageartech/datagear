@@ -197,12 +197,10 @@
 	 */
 	dashboardFactory.heartbeatConfig = (dashboardFactory.heartbeatConfig ||
 			{
-				//心跳间隔毫秒数，默认5分钟
-				interval: 1000*60*5,
 				//org.datagear.web.controller.DashboardController.HEARTBEAT_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
-				//org.datagear.web.controller.DashboardController.HEARTBEAT_PARAM_INTERVAL
-				intervalParamName: "interval"
+				//org.datagear.web.controller.AbstractDataAnalysisController.HEARTBEAT_INTERVAL_MS
+				interval: 1000 * 60 * 5
 			});
 	
 	/**
@@ -401,7 +399,6 @@
 				
 				var data = {};
 				data[dashboardFactory.heartbeatConfig.dashboardIdParamName] = dashboardId;
-				data[dashboardFactory.heartbeatConfig.intervalParamName] = interval;
 				
 				$.ajax({
 					type : "GET",
