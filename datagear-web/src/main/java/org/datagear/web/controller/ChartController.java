@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPluginManager;
@@ -550,14 +549,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
-		HttpSession session = request.getSession();
-
 		WebContext webContext = createInitWebContext(request);
 
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addJsessionidParam("/chart/showData", session.getId()));
+				addJsessionidParam("/chart/showData", request));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addJsessionidParam("/dashboard/loadChart", session.getId()));
+				addJsessionidParam("/dashboard/loadChart", request));
 		addHeartBeatValue(request, webContext);
 
 		return webContext;

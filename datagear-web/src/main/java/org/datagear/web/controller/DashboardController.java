@@ -1948,14 +1948,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
-		HttpSession session = request.getSession();
-
 		WebContext webContext = createInitWebContext(request);
 
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addJsessionidParam("/dashboard/showData", session.getId()));
+				addJsessionidParam("/dashboard/showData", request));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addJsessionidParam("/dashboard/loadChart", session.getId()));
+				addJsessionidParam("/dashboard/loadChart", request));
 		addHeartBeatValue(request, webContext);
 
 		return webContext;

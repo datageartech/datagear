@@ -185,11 +185,13 @@ public class LoginController extends AbstractController
 
 		if (authenticationException == null)
 		{
-			authenticationException = (AuthenticationException) request.getSession()
+			HttpSession session = request.getSession();
+
+			authenticationException = (AuthenticationException) session
 					.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
 
 			if (authenticationException != null)
-				request.getSession().removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+				session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
 		}
 
 		return authenticationException;

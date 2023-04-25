@@ -536,6 +536,19 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
+	 * 为指定URL添加会话ID参数。
+	 * 
+	 * @param url
+	 * @param session
+	 * @return
+	 */
+	protected String addJsessionidParam(String url, HttpServletRequest request)
+	{
+		String sessionId = request.getSession().getId();
+		return WebUtils.addJsessionidParam(url, sessionId);
+	}
+
+	/**
 	 * 在会话中存储{@linkplain DashboardInfo}。
 	 * 
 	 * @param request
