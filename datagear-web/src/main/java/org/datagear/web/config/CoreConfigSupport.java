@@ -131,13 +131,16 @@ import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
+import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DashboardSharePasswordCryptoImpl;
 import org.datagear.web.util.DashboardSharePasswordCryptoImpl.EncryptType;
+import org.datagear.web.util.DefaultMessageChannel;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
+import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
@@ -850,9 +853,17 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public SqlpadExecutionService sqlpadExecutionService()
 	{
 		SqlpadExecutionService bean = new SqlpadExecutionService(this.connectionSource(), this.messageSource(),
-				this.sqlHistoryService(), this.sqlSelectManager());
+				this.sqlHistoryService(), this.sqlSelectManager(), this.sqlpadMessageChannel());
 		bean.setSqlPermissionValidator(this.sqlPermissionValidator());
 
+		return bean;
+	}
+
+	@Bean
+	MessageChannel sqlpadMessageChannel()
+	{
+		DefaultMessageChannel bean = new DefaultMessageChannel(
+				SqlpadExecutionSubmit.MAX_PAUSE_OVER_TIME_THREASHOLD_MINUTES * 60);
 		return bean;
 	}
 
@@ -888,6 +899,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public GenericDataExchangeService dataExchangeService()
 	{
 		GenericDataExchangeService bean = new GenericDataExchangeService();
+		return bean;
+	}
+
+	@Bean
+	MessageChannel dataExchangeMessageChannel()
+	{
+		DefaultMessageChannel bean = new DefaultMessageChannel();
 		return bean;
 	}
 

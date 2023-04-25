@@ -140,7 +140,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@Autowired
 	private PersistenceManager persistenceManager;
 
-	private MessageChannel messageChannel = new MessageChannel();
+	@Autowired
+	private MessageChannel dataExchangeMessageChannel;
 
 	public DataExchangeController()
 	{
@@ -155,16 +156,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDataExchangeService(DataExchangeService<DataExchange> dataExchangeService)
 	{
 		this.dataExchangeService = dataExchangeService;
-	}
-
-	public MessageChannel getMessageChannel()
-	{
-		return messageChannel;
-	}
-
-	protected void setMessageChannel(MessageChannel messageChannel)
-	{
-		this.messageChannel = messageChannel;
 	}
 
 	public DBMetaResolver getDbMetaResolver()
@@ -205,6 +196,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setPersistenceManager(PersistenceManager persistenceManager)
 	{
 		this.persistenceManager = persistenceManager;
+	}
+
+	public MessageChannel getDataExchangeMessageChannel()
+	{
+		return dataExchangeMessageChannel;
+	}
+
+	public void setDataExchangeMessageChannel(MessageChannel dataExchangeMessageChannel)
+	{
+		this.dataExchangeMessageChannel = dataExchangeMessageChannel;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -308,7 +309,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					form.getImportOption(), subForm.getTableName(), readerFactory);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
+					this.dataExchangeMessageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -421,7 +422,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, form.getImportOption(),
 					readerFactory);
 
-			MessageSubDataImportListener listener = new MessageSubDataImportListener(this.messageChannel,
+			MessageSubDataImportListener listener = new MessageSubDataImportListener(this.dataExchangeMessageChannel,
 					dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					form.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
@@ -532,7 +533,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					form.getImportOption(), subForm.getTableName(), readerFactory);
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
+					this.dataExchangeMessageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					jsonDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -653,7 +654,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			excelDataImport.setUnifiedTable(subForm.getTableName());
 
 			MessageSubTextValueDataImportListener listener = new MessageSubTextValueDataImportListener(
-					this.messageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
+					this.dataExchangeMessageChannel, dataExchangeId, getMessageSource(), locale, subForm.getId(),
 					excelDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -889,7 +890,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, form.getDataFormat(),
 					form.getExportOption(), query, writerFactory);
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.dataExchangeMessageChannel,
 					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -991,7 +993,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			ExcelDataExport excelDataExport = new ExcelDataExport(connectionFactory, form.getDataFormat(),
 					form.getExportOption(), query, writerFactory);
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.dataExchangeMessageChannel,
 					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -1097,7 +1100,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, form.getDataFormat(),
 					form.getExportOption(), query, subForm.getTableName(), writerFactory);
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.dataExchangeMessageChannel,
 					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -1201,7 +1205,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			JsonDataExport csvDataExport = new JsonDataExport(connectionFactory, form.getDataFormat(),
 					exportOption, query, writerFactory, subForm.getTableName());
 
-			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(this.messageChannel,
+			MessageSubTextDataExportListener listener = new MessageSubTextDataExportListener(
+					this.dataExchangeMessageChannel,
 					dataExchangeId, getMessageSource(), getLocale(request), subForm.getId());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subForm.getId()));
 			listener.setSendExchangingMessageInterval(
@@ -1311,7 +1316,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		if (messageCount < 1)
 			messageCount = 1;
 
-		return this.messageChannel.pull(dataExchangeId, messageCount);
+		return this.dataExchangeMessageChannel.pull(dataExchangeId, messageCount);
 	}
 	
 	/**
@@ -1482,7 +1487,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
 
-		MessageBatchDataExchangeListener listener = new MessageBatchDataExchangeListener(this.messageChannel, channel,
+		MessageBatchDataExchangeListener listener = new MessageBatchDataExchangeListener(
+				this.dataExchangeMessageChannel, channel,
 				getMessageSource(), locale);
 		batchDataExchange.setListener(listener);
 
