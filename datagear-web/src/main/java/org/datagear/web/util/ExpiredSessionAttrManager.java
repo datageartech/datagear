@@ -132,6 +132,7 @@ public class ExpiredSessionAttrManager
 	 * 
 	 * @param request
 	 * @param timeout
+	 *            过期毫秒数
 	 * @param type
 	 */
 	public void removeExpired(HttpServletRequest request, long timeout, Class<? extends ExpiredSessionAttr> type)
@@ -166,8 +167,8 @@ public class ExpiredSessionAttrManager
 			removeCount++;
 
 			if (LOGGER.isDebugEnabled())
-				LOGGER.debug("Removed expired session attribute {}/{}, total {} : {}", removeCount, removesTotal, total,
-						remove);
+				LOGGER.debug("Removed expired session attribute '{}' of type [{}]： {}/{}, total {}", remove, type,
+						removeCount, removesTotal, total);
 		}
 	}
 

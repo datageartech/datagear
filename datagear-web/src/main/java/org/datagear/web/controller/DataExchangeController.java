@@ -95,10 +95,13 @@ import org.datagear.util.resource.FileReaderResourceFactory;
 import org.datagear.util.resource.FileWriterResourceFactory;
 import org.datagear.util.resource.ResourceFactory;
 import org.datagear.util.sqlvalidator.SqlValidator;
+import org.datagear.web.controller.AbstractDataAnalysisController.DashboardInfo;
 import org.datagear.web.dataexchange.MessageBatchDataExchangeListener;
 import org.datagear.web.dataexchange.MessageSubDataImportListener;
 import org.datagear.web.dataexchange.MessageSubTextDataExportListener;
 import org.datagear.web.dataexchange.MessageSubTextValueDataImportListener;
+import org.datagear.web.util.ExpiredSessionAttrManager;
+import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -142,6 +145,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@Autowired
 	private MessageChannel dataExchangeMessageChannel;
+
+	@Autowired
+	private ExpiredSessionAttrManager expiredSessionAttrManager;
+
+	private long expiredBatchDataExchangeInfoMs = 1000 * 60 * 30;
 
 	public DataExchangeController()
 	{
@@ -206,6 +214,26 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDataExchangeMessageChannel(MessageChannel dataExchangeMessageChannel)
 	{
 		this.dataExchangeMessageChannel = dataExchangeMessageChannel;
+	}
+
+	public ExpiredSessionAttrManager getExpiredSessionAttrManager()
+	{
+		return expiredSessionAttrManager;
+	}
+
+	public void setExpiredSessionAttrManager(ExpiredSessionAttrManager expiredSessionAttrManager)
+	{
+		this.expiredSessionAttrManager = expiredSessionAttrManager;
+	}
+
+	public long getExpiredBatchDataExchangeInfoMs()
+	{
+		return expiredBatchDataExchangeInfoMs;
+	}
+
+	public void setExpiredBatchDataExchangeInfoMs(long expiredBatchDataExchangeInfoMs)
+	{
+		this.expiredBatchDataExchangeInfoMs = expiredBatchDataExchangeInfoMs;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -1546,13 +1574,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 		
 		if (batchDataExchangeInfo != null && form.getSubDataExchangeIds() != null)
 		{
-			List<String> subDataExchangeIds = form.getSubDataExchangeIds();
-			BatchDataExchangeResult batchDataExchangeResult = batchDataExchangeInfo.getBatchDataExchange().getResult();
+			BatchDataExchange batchDataExchange = batchDataExchangeInfo.getBatchDataExchange();
 			
-			for (String subDataExchangeId : subDataExchangeIds)
-				batchDataExchangeResult.cancel(subDataExchangeId);
+			// BatchDataExchangeInfo.batchDataExchange是transient的，
+			// 在可能的分布式会话方案时可能为null，需在这里校验
+			if (batchDataExchange != null)
+			{
+				List<String> subDataExchangeIds = form.getSubDataExchangeIds();
+				BatchDataExchangeResult batchDataExchangeResult = batchDataExchange.getResult();
 
-			setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
+				for (String subDataExchangeId : subDataExchangeIds)
+					batchDataExchangeResult.cancel(subDataExchangeId);
+
+				setSessionBatchDataExchangeInfo(request, batchDataExchangeInfo);
+			}
 		}
 		
 		return optSuccessResponseEntity(request);
@@ -1602,8 +1637,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected BatchDataExchangeInfo getSessionBatchDataExchangeInfo(HttpServletRequest request, String dataExchangeId)
 	{
 		HttpSession session = request.getSession();
-		String key = toSessionKeyForBatchDataExchangeInfo(request, dataExchangeId);
-		return (BatchDataExchangeInfo) session.getAttribute(key);
+		String name = toSessionNameForBatchDataExchangeInfo(request, dataExchangeId);
+		return (BatchDataExchangeInfo) session.getAttribute(name);
 	}
 
 	/**
@@ -1615,11 +1650,32 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected void setSessionBatchDataExchangeInfo(HttpServletRequest request, BatchDataExchangeInfo batchDataExchangeInfo)
 	{
 		HttpSession session = request.getSession();
-		String key = toSessionKeyForBatchDataExchangeInfo(request, batchDataExchangeInfo.getDataExchangeId());
-		session.setAttribute(key, batchDataExchangeInfo);
+		String name = toSessionNameForBatchDataExchangeInfo(request, batchDataExchangeInfo.getDataExchangeId());
+		session.setAttribute(name, batchDataExchangeInfo);
+
+		removeSessionExpiredBatchDataExchangeInfo(request);
 	}
 
-	protected String toSessionKeyForBatchDataExchangeInfo(HttpServletRequest request, String dataExchangeId)
+	/**
+	 * 移除会话中过期的{@linkplain BatchDataExchangeInfo}。
+	 * <p>
+	 * 目前需要获取会话中{@linkplain BatchDataExchangeInfo}的操作只有
+	 * {@linkplain #cancel(HttpServletRequest, HttpServletResponse, String, CancelDataExchangeForm)}，
+	 * 所以移除基本没有什么影响。
+	 * </p>
+	 * <p>
+	 * 需定时清理，防止会话中存储过多已过期的信息
+	 * </p>
+	 * 
+	 * @param request
+	 */
+	protected void removeSessionExpiredBatchDataExchangeInfo(HttpServletRequest request)
+	{
+		getExpiredSessionAttrManager().removeExpired(request, this.expiredBatchDataExchangeInfoMs,
+				DashboardInfo.class);
+	}
+
+	protected String toSessionNameForBatchDataExchangeInfo(HttpServletRequest request, String dataExchangeId)
 	{
 		return "dataexchange-" + dataExchangeId;
 	}
@@ -2360,17 +2416,23 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected static class BatchDataExchangeInfo implements Serializable
+	protected static class BatchDataExchangeInfo implements ExpiredSessionAttr, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
 		private String dataExchangeId;
 
+		/**
+		 * 此对象包含无法序列化的信息，应添加transient修饰符
+		 */
 		private transient BatchDataExchange batchDataExchange;
+
+		private volatile long lastAccessTime = 0;
 
 		public BatchDataExchangeInfo()
 		{
 			super();
+			this.lastAccessTime = System.currentTimeMillis();
 		}
 
 		public BatchDataExchangeInfo(String dataExchangeId, BatchDataExchange batchDataExchange)
@@ -2378,6 +2440,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			super();
 			this.dataExchangeId = dataExchangeId;
 			this.batchDataExchange = batchDataExchange;
+			this.lastAccessTime = System.currentTimeMillis();
 		}
 
 		public String getDataExchangeId()
@@ -2398,6 +2461,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setBatchDataExchange(BatchDataExchange batchDataExchange)
 		{
 			this.batchDataExchange = batchDataExchange;
+		}
+
+		@Override
+		public long getLastAccessTime()
+		{
+			return lastAccessTime;
+		}
+
+		@Override
+		public void setLastAccessTime(long lastAccessTime)
+		{
+			this.lastAccessTime = lastAccessTime;
 		}
 	}
 }
