@@ -325,6 +325,8 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (!isLegalChartPlugin(uploadPlugin))
 			return null;
 
+		HtmlChartPlugin re = null;
+
 		String pluginFileName = uploadPluginFile.getName();
 
 		File sameName = FileUtil.getFile(this.directory, pluginFileName, false);
@@ -333,7 +335,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (!sameName.exists())
 		{
 			IOUtil.copy(uploadPluginFile, this.directory, true);
-			return registerHtmlChartPlugin(uploadPlugin, sameName);
+			re = registerHtmlChartPlugin(uploadPlugin, sameName);
 		}
 		else
 		{
@@ -345,7 +347,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			{
 				FileUtil.deleteFile(sameName);
 				IOUtil.copy(uploadPluginFile, this.directory, true);
-				return registerHtmlChartPlugin(uploadPlugin, sameName);
+				re = registerHtmlChartPlugin(uploadPlugin, sameName);
 			}
 			else
 			{
@@ -356,10 +358,8 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					{
 						FileUtil.deleteFile(sameName);
 						IOUtil.copy(uploadPluginFile, this.directory, true);
-						return registerHtmlChartPlugin(uploadPlugin, sameName);
+						re = registerHtmlChartPlugin(uploadPlugin, sameName);
 					}
-					else
-						return null;
 				}
 				// 不同ID的插件，则删除它，载入新的
 				else
@@ -367,10 +367,15 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					removeChartPlugin(loadedPluginId);
 
 					IOUtil.copy(uploadPluginFile, this.directory, true);
-					return registerHtmlChartPlugin(uploadPlugin, sameName);
+					re = registerHtmlChartPlugin(uploadPlugin, sameName);
 				}
 			}
 		}
+
+		// 需要重新初始化插件资源，因为文件路径已经改变
+		this.htmlChartPluginLoader.inflateResources(re, sameName);
+
+		return re;
 	}
 
 	@Override

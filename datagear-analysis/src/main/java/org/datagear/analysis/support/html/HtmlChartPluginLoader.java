@@ -317,6 +317,29 @@ public class HtmlChartPluginLoader
 		return plugins;
 	}
 
+	/**
+	 * 设置插件资源{@linkplain HtmlChartPlugin#setResources(List)}。
+	 * 
+	 * @param plugin     插件
+	 * @param pluginFile 用于加载上述插件的ZIP文件、文件夹
+	 * @throws HtmlChartPluginLoadException
+	 */
+	public void inflateResources(HtmlChartPlugin plugin, File pluginFile) throws HtmlChartPluginLoadException
+	{
+		try
+		{
+			inflateChartPluginResources(plugin, pluginFile);
+		}
+		catch(HtmlChartPluginLoadException e)
+		{
+			throw e;
+		}
+		catch(Exception e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+	}
+
 	protected HtmlChartPlugin loadFileExt(File file) throws HtmlChartPluginLoadException
 	{
 		return null;
