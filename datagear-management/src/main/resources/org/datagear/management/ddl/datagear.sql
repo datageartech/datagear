@@ -508,7 +508,7 @@ ALTER TABLE DATAGEAR_DATA_SET_PROP ADD COLUMN PROP_EXPRESSION VARCHAR(1000);
 
 
 -----------------------------------------
---version[4.5.2], DO NOT EDIT THIS LINE!
+--version[4.6.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
 --2023-04-06
