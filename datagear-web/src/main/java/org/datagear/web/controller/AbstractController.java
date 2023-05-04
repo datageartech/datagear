@@ -75,7 +75,7 @@ public abstract class AbstractController
 	 */
 	public static final long CONTROLLER_LOAD_TIME = System.currentTimeMillis();
 	
-	public static final String RESPONSE_ENCODING = "UTF-8";
+	public static final String RESPONSE_ENCODING = IOUtil.CHARSET_UTF_8;
 
 	public static final String CONTENT_TYPE_JSON = "application/json";
 

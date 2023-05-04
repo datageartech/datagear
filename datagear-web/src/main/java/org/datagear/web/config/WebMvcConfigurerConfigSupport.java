@@ -86,7 +86,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	public static final String STATIC_RES_THEME_PATH_PATTERN = "/static/theme/**/*.css";
 
 	/** 系统静态资源位置 */
-	public static final String STATIC_RES_LOCATION = "classpath:/org/datagear/web/static/";
+	public static final String STATIC_RES_LOCATION = "classpath:org/datagear/web/static/";
 
 	/** Freemarker模板路径 */
 	public static final String FREEMARKER_TEMPLATE_PATH = "classpath:org/datagear/web/templates/";

@@ -40,6 +40,7 @@ import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
+import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 import org.junit.Test;
@@ -66,7 +67,8 @@ public class JsonChartPluginPropertiesResolverTest
 					.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());
@@ -330,7 +332,8 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSetRange-number.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("dataset-range-number", chartPlugin.getId());
 
@@ -348,7 +351,8 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSetRange.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
 
@@ -370,7 +374,8 @@ public class JsonChartPluginPropertiesResolverTest
 					"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-string-categories.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertEquals(2, chartPlugin.getCategories().size());
@@ -411,7 +416,8 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-3.0.1.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());

@@ -30,6 +30,7 @@ import org.datagear.dataexchange.support.CsvDataExportService;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.CsvDataImportService;
 import org.datagear.util.FileUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ConnectionFactory;
 import org.datagear.util.resource.DataSourceConnectionFactory;
@@ -96,7 +97,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 			final String subDataExchangeId = "export-1";
 
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory
-					.valueOf(FileUtil.getFile("target/BatchDataExchangeServiceTest.csv"), "UTF-8");
+					.valueOf(FileUtil.getFile("target/BatchDataExchangeServiceTest.csv"), IOUtil.CHARSET_UTF_8);
 			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, dataFormat,
 					new TextDataExportOption(true), new TableQuery(TABLE_NAME_DATA_IMPORT), writerFactory);
 			csvDataExport.setListener(new TextDataExportListener()

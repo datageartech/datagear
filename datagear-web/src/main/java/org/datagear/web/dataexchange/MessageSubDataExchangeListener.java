@@ -43,7 +43,7 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 {
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
-	public static final String LOG_FILE_CHARSET = "UTF-8";
+	public static final String LOG_FILE_CHARSET = IOUtil.CHARSET_UTF_8;
 
 	public static final String LOG_FILE_CONTENT_DIV = "----------------------------------------";
 

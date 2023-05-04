@@ -19,6 +19,8 @@ package org.datagear.analysis;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datagear.util.IOUtil;
+
 /**
  * 模板看板部件。
  * <p>
@@ -30,7 +32,7 @@ import java.util.List;
  */
 public abstract class TplDashboardWidget extends AbstractIdentifiable
 {
-	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
+	public static final String DEFAULT_TEMPLATE_ENCODING = IOUtil.CHARSET_UTF_8;
 
 	/** 模板名称集 */
 	private String[] templates;

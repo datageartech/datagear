@@ -55,7 +55,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileDriverEntityManager.class);
 
-	public static final String DEFAULT_DRIVER_ENTITY_FILE_ENCODING = "UTF-8";
+	public static final String DEFAULT_DRIVER_ENTITY_FILE_ENCODING = IOUtil.CHARSET_UTF_8;
 
 	private File rootDirectory;
 

@@ -329,7 +329,7 @@ public class SqlScriptParserTest
 		InputStream inputStream = SqlScriptParserTest.class.getClassLoader()
 				.getResourceAsStream("org/datagear/util/SqlScriptParserTest.sql");
 
-		Reader reader = new InputStreamReader(inputStream, "UTF-8");
+		Reader reader = new InputStreamReader(inputStream, IOUtil.CHARSET_UTF_8);
 
 		SqlScriptParser parser = new SqlScriptParser(reader);
 
@@ -346,7 +346,7 @@ public class SqlScriptParserTest
 		InputStream inputStream = SqlScriptParserTest.class.getClassLoader()
 				.getResourceAsStream("org/datagear/util/SqlScriptParserTest.sql");
 
-		Reader reader = new InputStreamReader(inputStream, "UTF-8");
+		Reader reader = new InputStreamReader(inputStream, IOUtil.CHARSET_UTF_8);
 
 		SqlScriptParser parser = new SqlScriptParser(reader);
 

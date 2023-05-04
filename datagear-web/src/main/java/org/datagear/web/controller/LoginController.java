@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.User;
+import org.datagear.util.IOUtil;
 import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -223,7 +224,7 @@ public class LoginController extends AbstractController
 
 		try
 		{
-			return URLEncoder.encode(username, "UTF-8");
+			return URLEncoder.encode(username, IOUtil.CHARSET_UTF_8);
 		}
 		catch (UnsupportedEncodingException e)
 		{

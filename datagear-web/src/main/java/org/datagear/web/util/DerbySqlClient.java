@@ -153,7 +153,7 @@ public class DerbySqlClient extends JdbcSupport
 
 					try
 					{
-						reader = IOUtil.getReader(FileUtil.getFile(filePath), "UTF-8");
+						reader = IOUtil.getReader(FileUtil.getFile(filePath), IOUtil.CHARSET_UTF_8);
 						SqlScriptParser sqlScriptParser = new SqlScriptParser(reader);
 						SqlStatement sql = null;
 
@@ -294,7 +294,7 @@ public class DerbySqlClient extends JdbcSupport
 	}
 
 	@Configuration
-	@PropertySource(value = ApplicationPropertiesConfigSupport.PROPERTY_SOURCE_PATH, encoding = "UTF-8")
+	@PropertySource(value = ApplicationPropertiesConfigSupport.PROPERTY_SOURCE_PATH, encoding = IOUtil.CHARSET_UTF_8)
 	public static class DerbySqlClientPropertiesConfig extends ApplicationPropertiesConfigSupport
 	{
 		public DerbySqlClientPropertiesConfig()

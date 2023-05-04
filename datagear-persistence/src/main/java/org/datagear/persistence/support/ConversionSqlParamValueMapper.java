@@ -874,7 +874,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		// XML默认为UTF-8
 		if (Types.SQLXML == column.getType() && StringUtil.isEmpty(charset))
-			charset = "UTF-8";
+			charset = IOUtil.CHARSET_UTF_8;
 
 		return IOUtil.getReader(file, charset);
 	}

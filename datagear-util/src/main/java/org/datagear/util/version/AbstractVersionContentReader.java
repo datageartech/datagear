@@ -38,7 +38,7 @@ public abstract class AbstractVersionContentReader
 	public static final String LINE_SEPARATOR = IOUtil.LINE_SEPARATOR;
 
 	/** UTF-8编码 */
-	public static final String ENCODING_UTF8 = "UTF-8";
+	public static final String ENCODING_UTF8 = IOUtil.CHARSET_UTF_8;
 
 	public AbstractVersionContentReader()
 	{

@@ -17,6 +17,7 @@
 
 package org.datagear.webapp.config;
 
+import org.datagear.util.IOUtil;
 import org.datagear.web.config.ApplicationPropertiesConfigSupport;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -27,7 +28,7 @@ import org.springframework.context.annotation.PropertySource;
  * @author datagear@163.com
  */
 @Configuration
-@PropertySource(value = ApplicationPropertiesConfigSupport.PROPERTY_SOURCE_PATH, encoding = "UTF-8")
+@PropertySource(value = ApplicationPropertiesConfigSupport.PROPERTY_SOURCE_PATH, encoding = IOUtil.CHARSET_UTF_8)
 public class ApplicationPropertiesConfig extends ApplicationPropertiesConfigSupport
 {
 	public ApplicationPropertiesConfig()
