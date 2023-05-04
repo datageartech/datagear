@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.web.config.support.ClearCssCommentResourceTransformer;
 import org.datagear.web.config.support.ClearJsCommentResourceTransformer;
@@ -265,7 +266,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	{
 		CookieLocaleResolver bean = new CookieLocaleResolver();
 		bean.setCookieMaxAge(60 * 60 * 24 * 365);
-		bean.setCookieName("LOCALE");
+		bean.setCookieName(Global.NAME_SHORT_UCUS + "LOCALE");
 
 		// 不设置默认语言，这样当没有"LOCALE"的cookie值时，可以根据客户端语言自动选择更合适的i18n
 		// bean.setDefaultLocale(Locale.CHINESE);
