@@ -373,7 +373,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 
 		// 需要重新初始化插件资源，因为文件路径已经改变
-		this.htmlChartPluginLoader.inflateResources(re, sameName);
+		if (re != null)
+		{
+			this.htmlChartPluginLoader.inflateResources(re, sameName);
+		}
 
 		return re;
 	}
