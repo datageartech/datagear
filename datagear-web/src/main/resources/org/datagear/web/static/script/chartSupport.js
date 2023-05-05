@@ -2276,7 +2276,7 @@
 					id: 0,
 		            type: "map",
 					//这里必须设置map，不然渲染会报错，update中会特殊处理
-					map: (chart.map() || "china")
+					map: (chart.map() || chartSupport.defaultMapName())
 		        }
 			]
 		},
@@ -2496,7 +2496,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china")
+				map: (chart.map() || chartSupport.defaultMapName())
 			},
 			series:
 			[
@@ -2684,7 +2684,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china")
+				map: (chart.map() || chartSupport.defaultMapName())
 			},
 			series:
 			[
@@ -2967,7 +2967,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china")
+				map: (chart.map() || chartSupport.defaultMapName())
 			},
 			series:
 			[
@@ -3166,7 +3166,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china")
+				map: (chart.map() || chartSupport.defaultMapName())
 			},
 			series:
 			[
@@ -3350,7 +3350,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || "china")
+				map: (chart.map() || chartSupport.defaultMapName())
 			},
 			visualMap:
 			{
@@ -9282,8 +9282,18 @@
 			};
 			
 			return extractor;
-		},
-		
+		}
+	};
+	
+	/**
+	 * 获取默认地图名。
+	 * 地图类图表需要默认地图执行render初始渲染。
+	 * 注意：返回的默认地图名应是在dashboardFactory.js中dftBuiltinChartMaps的其中之一。
+	 */
+	chartSupport.defaultMapName = function()
+	{
+		//中国地图
+		return "china";
 	};
 	
 	//---------------------------------------------------------
