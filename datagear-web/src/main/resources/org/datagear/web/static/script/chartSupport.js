@@ -9292,7 +9292,7 @@
 	 */
 	chartSupport.defaultMapName = function()
 	{
-		//中国地图
+		//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
 		return "china";
 	};
 	

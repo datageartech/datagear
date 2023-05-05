@@ -3192,7 +3192,7 @@
 			"names":["100000","中国","中华人民共和国","china","China"],
 			//标准中国地图南海诸岛太占空间，所以采用下面南海诸岛在右侧的中国地图
 			//"map" : "100000_full.json"
-			"map" : "china_right_nanhaizhudao.json",
+			"map" : "china_nhzd.json",
 			"adname":"中国","adcode":"100000","parent":null
 		},
 		{"names":["110000","北京市","北京","京","beijing","Beijing"],"map":"110000_full.json","adname":"北京市","adcode":"110000","parent":"100000"},
