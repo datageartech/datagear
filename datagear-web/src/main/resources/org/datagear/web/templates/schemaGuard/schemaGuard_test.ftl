@@ -52,7 +52,7 @@
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='test' />"></p-button>
 		</div>
-		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2" style="min-height:6.2rem;">
+		<div class="page-form-foot flex-grow-0 flex flex-column justify-content-center align-items-center gap-2 pt-2" style="min-height:6.5rem;">
 			<div class="p-component py-1">{{pm.testResult.url}}</div>
 			<div class="p-component py-1">
 				<p-inlinemessage severity="success" v-if="pm.testResult.result=='true'">
