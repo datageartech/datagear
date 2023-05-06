@@ -127,6 +127,9 @@ SQL数据集
 - datagear-web
   <br>系统web模块，定义web控制器、操作页面
 
+- datagear-webapp
+  <br>系统web应用模块，定义程序启动类
+
 ## 依赖
 
 	Java 8+
@@ -150,13 +153,13 @@ SQL数据集
 
 	mvn clean package -DskipTests
 
-编译完成后，将在`datagear-web/target/datagear-[version]-packages/`内生成程序包。
+编译完成后，将在`datagear-webapp/target/datagear-[version]-packages/`内生成程序包。
 
 ## 调试
 	
 1. 将`datagear`以maven工程导入至IDE工具
 
-2. 以调试模式运行datagear-web模块的启动类：`org.datagear.web.DataGearApplication`
+2. 以调试模式运行`datagear-webapp`模块的启动类`org.datagear.webapp.DataGearApplication`
 
 3. 打开浏览器，输入：`http://localhost:50401`
 	
