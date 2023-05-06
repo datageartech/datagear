@@ -166,7 +166,7 @@ public class ResetPasswordController extends AbstractController
 				false);
 
 		if (!checkFile.exists())
-			return optFailDataResponseEntity(request, "resetPassword.checkFileNotExists");
+			return optFailResponseEntity(request, "resetPassword.checkFileNotExists");
 
 		resetPasswordStep.setCheckOk(true);
 		resetPasswordStep.setStep(3, STEP_SET_NEW_PASSWORD);
