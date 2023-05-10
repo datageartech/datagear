@@ -139,11 +139,11 @@ SQL数据集
 
 ### 准备单元测试环境
 
-1. 安装 MySQL-8.0 数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
+1. 安装`MySQL-8.0`数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
 
 2. 新建测试数据库，名称取为：`dg_test`
 
-3. 使用`test/sql/test-sql-script-mysql.sql`脚本初始化`dg_test`库
+3. 使用`test/sql/test-mysql.sql`脚本初始化`dg_test`库
 
 ### 执行编译命令
 
