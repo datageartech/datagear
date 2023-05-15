@@ -1285,7 +1285,7 @@
 					if(!myValid)
 						break;
 					
-					myValid = (chartFactory.isNullOrEmpty(val) ? true : regexNumber.test(val[i]));
+					myValid = (chartFactory.isNullOrEmpty(val[i]) ? true : regexNumber.test(val[i]));
 				}
 				
 				if(!myValid)
