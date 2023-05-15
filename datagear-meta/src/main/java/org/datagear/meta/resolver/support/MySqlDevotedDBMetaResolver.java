@@ -62,15 +62,13 @@ public class MySqlDevotedDBMetaResolver extends AbstractConnectionDevotedDBMetaR
 
 		if (StringUtil.isEmpty(comment))
 			return;
-
+		
+		//老版本的mysql返回的实际注释在';'之后，这里特殊处理
 		int colonIdx = comment.indexOf(';');
-
 		if (colonIdx > -1)
 		{
 			comment = comment.substring(0, colonIdx);
 			st.setComment(comment);
 		}
-		else
-			st.setComment("");
 	}
 }
