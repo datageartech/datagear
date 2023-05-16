@@ -12,7 +12,7 @@
 
 DataGear是一款开源免费的数据可视化分析平台，自由制作任何您想要的数据看板，支持接入SQL、CSV、Excel、HTTP接口、JSON等多种数据源。
 
-## [DataGear 4.5.1 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 4.6.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
 ## 系统特点
 
