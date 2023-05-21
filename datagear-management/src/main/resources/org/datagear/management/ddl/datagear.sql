@@ -514,3 +514,9 @@ ALTER TABLE DATAGEAR_DATA_SET_PROP ADD COLUMN PROP_EXPRESSION VARCHAR(1000);
 --2023-04-06
 --升级用户密码加密策略，旧密码需添加'{sha256}'前缀
 UPDATE DATAGEAR_USER SET USER_PASSWORD = '{sha256}' || USER_PASSWORD WHERE USER_PASSWORD NOT LIKE '{%';
+
+
+-----------------------------------------
+--version[4.7.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
