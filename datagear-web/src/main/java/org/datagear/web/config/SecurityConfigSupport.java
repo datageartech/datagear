@@ -56,8 +56,10 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
  * <p>
  * 子类应该添加如下注解：
  * </p>
+ * 
  * <pre>
  * {@code @Configuration}
+ * {@code @EnableWebSecurity}
  * </pre>
  * <p>
  * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
@@ -68,7 +70,15 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
  */
 public class SecurityConfigSupport
 {
+	/**
+	 * 处理登录URL。
+	 */
 	public static final String LOGIN_PROCESS_URL = "/login/doLogin";
+
+	/**
+	 * 退出URL。
+	 */
+	public static final String LOGOUT_URL = "/logout";
 
 	private CoreConfigSupport coreConfig;
 
@@ -152,7 +162,7 @@ public class SecurityConfigSupport
 
 		configAccessAllOther(http);
 
-		configLoginAndOutForm(http);
+		configLoginAndOut(http);
 		configureAnonymous(http);
 		configLoginLatchFilter(http);
 	}
@@ -197,25 +207,26 @@ public class SecurityConfigSupport
 	}
 
 	/**
-	 * 配置登录、退出相关访问权限。
+	 * 配置登录/退出。
 	 * 
 	 * @param http
 	 * @throws Exception
 	 */
-	protected void configLoginAndOutForm(HttpSecurity http) throws Exception
+	protected void configLoginAndOut(HttpSecurity http) throws Exception
 	{
-		http.authorizeHttpRequests()
-				// 登录
-				.and().formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
+		http
+		// 登录
+				.formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
 				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
 				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
 				.successHandler(this.authenticationSuccessHandler()).failureHandler(this.authenticationFailureHandler())
 
 				// 退出
-				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
+				.and().logout().logoutUrl(LOGOUT_URL).invalidateHttpSession(true).logoutSuccessUrl("/")
 
 				// 记住登录
-				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
+				.and().rememberMe().key(Global.NAME_SHORT_UCUS + "REMEMBER_ME_KEY")
+				.tokenValiditySeconds(60 * 60 * 24 * 365)
 				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName(Global.NAME_SHORT_UCUS + "REMEMBER_ME");
 	}
 
@@ -245,20 +256,27 @@ public class SecurityConfigSupport
 	{
 		// 展示图表和看板
 		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
-		UrlsAccess show = new UrlsAccess(anonymousAuthorizationManager(),
+
+		UrlsAccess showStatic = new UrlsAccess(anonymousAuthorizationManager(),
 				// 图表插件
 				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
+				// 看板心跳
+				"/dashboard/heartbeat",
+				// 看板服务端时间
+				"/dashboard/serverTime.js");
+
+		UrlsAccess show = new UrlsAccess(anonymousAuthorizationManager(),
 				// 图表展示
 				"/chart/show/**", "/chart/showData",
 				// 看板展示
-				"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/heartbeat",
-				"/dashboard/serverTime.js", "/dashboard/auth/**", "/dashboard/authcheck/**",
+				"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/auth/**",
+				"/dashboard/authcheck/**",
 
 				// 旧版图表和看板展示
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
 				"/analysis/chart/show/**", "/analysis/dashboard/show/**");
 
-		return new ModuleAccess(show);
+		return new ModuleAccess(showStatic, show);
 	}
 
 	/**

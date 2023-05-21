@@ -20,6 +20,7 @@ package org.datagear.webapp.config;
 import org.datagear.web.config.SecurityConfigSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 /**
  * 安全配置。
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * @author datagear@163.com
  */
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig extends SecurityConfigSupport
 {
 	@Autowired
