@@ -257,7 +257,9 @@ public class SecurityConfigSupport
 		// 展示图表和看板
 		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
 
-		UrlsAccess showStatic = new UrlsAccess(anonymousAuthorizationManager(),
+		AuthorizationManager<RequestAuthorizationContext> authorizationManager = showChartAndDashboardAuthorizationManager();
+		
+		UrlsAccess showStatic = new UrlsAccess(authorizationManager,
 				// 图表插件
 				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
 				// 看板心跳
@@ -265,7 +267,7 @@ public class SecurityConfigSupport
 				// 看板服务端时间
 				"/dashboard/serverTime.js");
 
-		UrlsAccess show = new UrlsAccess(anonymousAuthorizationManager(),
+		UrlsAccess show = new UrlsAccess(authorizationManager,
 				// 图表展示
 				"/chart/show/**", "/chart/showData",
 				// 看板展示
@@ -277,6 +279,23 @@ public class SecurityConfigSupport
 				"/analysis/chart/show/**", "/analysis/dashboard/show/**");
 
 		return new ModuleAccess(showStatic, show);
+	}
+	
+	protected AuthorizationManager<RequestAuthorizationContext> showChartAndDashboardAuthorizationManager()
+	{
+		ApplicationProperties properties = getCoreConfig().getApplicationProperties();
+		AuthorizationManager<RequestAuthorizationContext> anonymousAuthManager = anonymousAuthorizationManager();
+		AuthenticationSecurity authSecurity = getAuthenticationSecurity();
+
+		return (auth, request) ->
+		{
+			if(properties.isDisableShowAnonymous())
+			{
+				return new AuthorizationDecision(authSecurity.hasUser(auth.get()));
+			}
+			else
+				return anonymousAuthManager.check(auth, request);
+		};
 	}
 
 	/**

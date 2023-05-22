@@ -84,9 +84,13 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${builtinChartPluginLastModifiedFile}")
 	private String builtinChartPluginLastModifiedFile;
 
-	/** 是否禁用匿名用户 */
+	/** 是否禁用匿名用户访问系统 */
 	@Value("${disableAnonymous}")
 	private boolean disableAnonymous;
+
+	/** 是否禁用图表/看板展示操作的匿名用户访问 */
+	@Value("${disableShowAnonymous}")
+	private boolean disableShowAnonymous;
 
 	/** 是否禁用注册功能 */
 	@Value("${disableRegister}")
@@ -345,6 +349,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setDisableAnonymous(boolean disableAnonymous)
 	{
 		this.disableAnonymous = disableAnonymous;
+	}
+
+	public boolean isDisableShowAnonymous()
+	{
+		return disableShowAnonymous;
+	}
+
+	protected void setDisableShowAnonymous(boolean disableShowAnonymous)
+	{
+		this.disableShowAnonymous = disableShowAnonymous;
 	}
 
 	public boolean isDisableRegister()
