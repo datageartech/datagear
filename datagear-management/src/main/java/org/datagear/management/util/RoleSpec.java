@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.datagear.management.domain.Role;
+import org.datagear.util.StringUtil;
 
 /**
  * 角色规范。
@@ -117,5 +118,32 @@ public class RoleSpec
 	{
 		String roleId = (role == null ? null : role.getId());
 		return isBuiltinRole(roleId);
+	}
+
+	/**
+	 * 由英文逗号分隔的角色ID字符串构建{@linkplain Role}集合。
+	 * 
+	 * @param roleIdsStr
+	 *            角色ID字符串，多个以英文逗号分隔
+	 * @param addRoleRegistry
+	 *            是否添加{@linkplain #ROLE_REGISTRY}
+	 * @return
+	 */
+	public Set<Role> buildRolesByIds(String roleIdsStr, boolean addRoleRegistry)
+	{
+		Set<Role> roles = new HashSet<>();
+
+		if (!StringUtil.isBlank(roleIdsStr))
+		{
+			String[] roleIds = StringUtil.split(roleIdsStr, ",", true);
+
+			for (String roleId : roleIds)
+				roles.add(new Role(roleId, roleId));
+		}
+
+		if (addRoleRegistry)
+			roles.add(new Role(RoleSpec.ROLE_REGISTRY, RoleSpec.ROLE_REGISTRY));
+
+		return roles;
 	}
 }

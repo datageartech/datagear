@@ -18,19 +18,15 @@
 package org.datagear.web.controller;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.RoleSpec;
 import org.datagear.util.IDUtil;
-import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.OperationMessage;
@@ -66,6 +62,9 @@ public class RegisterController extends AbstractController
 	@Autowired
 	private CheckCodeManager checkCodeManager;
 
+	@Autowired
+	private RoleSpec roleSpec;
+
 	public RegisterController()
 	{
 		super();
@@ -89,6 +88,26 @@ public class RegisterController extends AbstractController
 	public void setUserService(UserService userService)
 	{
 		this.userService = userService;
+	}
+
+	public CheckCodeManager getCheckCodeManager()
+	{
+		return checkCodeManager;
+	}
+
+	public void setCheckCodeManager(CheckCodeManager checkCodeManager)
+	{
+		this.checkCodeManager = checkCodeManager;
+	}
+
+	public RoleSpec getRoleSpec()
+	{
+		return roleSpec;
+	}
+
+	public void setRoleSpec(RoleSpec roleSpec)
+	{
+		this.roleSpec = roleSpec;
 	}
 
 	@RequestMapping
@@ -135,7 +154,7 @@ public class RegisterController extends AbstractController
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists",
 					user.getName());
 
-		user.setRoles(buildUserRolesForSave(this.applicationProperties.getDefaultRoleRegister()));
+		user.setRoles(this.roleSpec.buildRolesByIds(this.applicationProperties.getDefaultRoleRegister(), true));
 
 		this.userService.add(user);
 
@@ -154,23 +173,6 @@ public class RegisterController extends AbstractController
 			return "redirect:/register";
 		else
 			return "/register_success";
-	}
-
-	public static Set<Role> buildUserRolesForSave(String roleIdsStr)
-	{
-		Set<Role> roles = new HashSet<>();
-
-		if (!StringUtil.isBlank(roleIdsStr))
-		{
-			String[] roleIds = StringUtil.split(roleIdsStr, ",", true);
-
-			for (String roleId : roleIds)
-				roles.add(new Role(roleId, roleId));
-		}
-
-		roles.add(new Role(RoleSpec.ROLE_REGISTRY, RoleSpec.ROLE_REGISTRY));
-
-		return roles;
 	}
 
 	public static class RegisterForm implements ControllerForm

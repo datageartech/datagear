@@ -33,6 +33,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.RoleSpec;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
@@ -69,6 +70,9 @@ public class UserController extends AbstractController
 
 	@Autowired
 	private ApplicationProperties applicationProperties;
+
+	@Autowired
+	private RoleSpec roleSpec;
 
 	public UserController()
 	{
@@ -115,12 +119,22 @@ public class UserController extends AbstractController
 		this.applicationProperties = applicationProperties;
 	}
 
+	public RoleSpec getRoleSpec()
+	{
+		return roleSpec;
+	}
+
+	public void setRoleSpec(RoleSpec roleSpec)
+	{
+		this.roleSpec = roleSpec;
+	}
+
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		User user = new User();
 
-		Set<Role> dftRoles = RegisterController.buildUserRolesForSave(this.applicationProperties.getDefaultRoleAdd());
+		Set<Role> dftRoles = this.roleSpec.buildRolesByIds(this.applicationProperties.getDefaultRoleAdd(), true);
 		Set<Role> addRoles = new HashSet<Role>(dftRoles.size());
 		for (Role r : dftRoles)
 		{
