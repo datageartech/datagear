@@ -45,6 +45,9 @@ import java.util.regex.Pattern;
  */
 public class AsteriskPatternMatcher
 {
+	/** 是否忽略大小写 */
+	private boolean ignoreCase = false;
+
 	private CopyOnWriteArrayList<AsteriskRegexPattern> asteriskRegexPatternCache = new CopyOnWriteArrayList<AsteriskRegexPattern>();
 
 	private int cacheSize = 100;
@@ -52,6 +55,22 @@ public class AsteriskPatternMatcher
 	public AsteriskPatternMatcher()
 	{
 		super();
+	}
+
+	public AsteriskPatternMatcher(boolean ignoreCase)
+	{
+		super();
+		this.ignoreCase = ignoreCase;
+	}
+
+	public boolean isIgnoreCase()
+	{
+		return ignoreCase;
+	}
+
+	public void setIgnoreCase(boolean ignoreCase)
+	{
+		this.ignoreCase = ignoreCase;
 	}
 
 	protected int getCacheSize()
@@ -140,7 +159,10 @@ public class AsteriskPatternMatcher
 
 		String regex = pb.toString();
 
-		return Pattern.compile(regex);
+		if (isIgnoreCase())
+			return Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		else
+			return Pattern.compile(regex);
 	}
 
 	private static class AsteriskRegexPattern implements Serializable

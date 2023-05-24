@@ -74,6 +74,14 @@ public class AsteriskPatternMatcherTest
 		}
 
 		{
+			String pattern = "abc";
+
+			assertTrue(matcher.matches(pattern, "abc"));
+			assertFalse(matcher.matches(pattern, "abcdef"));
+			assertFalse(matcher.matches(pattern, "defabc"));
+		}
+
+		{
 			String pattern = "abc*ghi";
 
 			assertTrue(matcher.matches(pattern, "abcghi"));
@@ -104,6 +112,43 @@ public class AsteriskPatternMatcherTest
 
 			assertTrue(matcher.matches(pattern, "jdbc:mysql://192.168.1.1:3306/dg_test"));
 			assertFalse(matcher.matches(pattern, "jdbc:mysql://192.168.1.2:3306/dg_test"));
+		}
+
+		{
+			String pattern = "abc*";
+
+			assertFalse(matcher.matches(pattern, "Abc"));
+			assertFalse(matcher.matches(pattern, "ABCd"));
+		}
+	}
+
+	@Test
+	public void test_ignoreCase_true()
+	{
+		AsteriskPatternMatcher matcher = new AsteriskPatternMatcher();
+		matcher.setIgnoreCase(true);
+
+		{
+			String pattern = "abc*";
+
+			assertTrue(matcher.matches(pattern, "Abc"));
+			assertTrue(matcher.matches(pattern, "ABCd"));
+		}
+
+		{
+			String pattern = "*abc";
+
+			assertTrue(matcher.matches(pattern, "aBc"));
+			assertTrue(matcher.matches(pattern, "defAbc"));
+		}
+
+		{
+			String pattern = "abc";
+
+			assertTrue(matcher.matches(pattern, "abc"));
+			assertTrue(matcher.matches(pattern, "aBc"));
+			assertFalse(matcher.matches(pattern, "abcdef"));
+			assertFalse(matcher.matches(pattern, "defabc"));
 		}
 	}
 }
