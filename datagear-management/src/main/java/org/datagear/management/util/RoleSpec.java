@@ -138,12 +138,44 @@ public class RoleSpec
 			String[] roleIds = StringUtil.split(roleIdsStr, ",", true);
 
 			for (String roleId : roleIds)
-				roles.add(new Role(roleId, roleId));
+				roles.add(buildRoleById(roleId));
 		}
 
 		if (addRoleRegistry)
-			roles.add(new Role(RoleSpec.ROLE_REGISTRY, RoleSpec.ROLE_REGISTRY));
+			roles.add(buildRoleById(RoleSpec.ROLE_REGISTRY));
 
 		return roles;
+	}
+
+	/**
+	 * 由角色ID集合构建{@linkplain Role}集合。
+	 * 
+	 * @param roleIds
+	 * @param addRoleRegistry
+	 *            是否添加{@linkplain #ROLE_REGISTRY}
+	 * @return
+	 */
+	public Set<Role> buildRolesByIds(Set<String> roleIds, boolean addRoleRegistry)
+	{
+		Set<Role> roles = new HashSet<>();
+
+		for (String roleId : roleIds)
+			roles.add(buildRoleById(roleId));
+
+		if (addRoleRegistry)
+			roles.add(buildRoleById(RoleSpec.ROLE_REGISTRY));
+
+		return roles;
+	}
+
+	/**
+	 * 由ID构建{@linkplain Role}。
+	 * 
+	 * @param roleId
+	 * @return
+	 */
+	public Role buildRoleById(String roleId)
+	{
+		return new Role(roleId, roleId);
 	}
 }
