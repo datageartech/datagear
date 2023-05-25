@@ -120,6 +120,14 @@ public class AsteriskPatternMatcherTest
 			assertFalse(matcher.matches(pattern, "Abc"));
 			assertFalse(matcher.matches(pattern, "ABCd"));
 		}
+
+		{
+			String pattern = "";
+
+			assertTrue(matcher.matches(pattern, ""));
+			assertFalse(matcher.matches(pattern, "a"));
+			assertFalse(matcher.matches(pattern, "abc"));
+		}
 	}
 
 	@Test

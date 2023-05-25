@@ -61,7 +61,7 @@ public class AsteriskPatternSupport
 	 * @param paramPattern
 	 *            {@code true} 将{@code params}作为匹配模式，{@code false}
 	 *            将{@code map}的关键字作为匹配模式
-	 * @return
+	 * @return 没有匹配时返回{@code null}
 	 */
 	public <V> V findKeyMatched(Map<String, V> map, Collection<String> params, boolean paramPattern)
 	{
@@ -88,7 +88,7 @@ public class AsteriskPatternSupport
 	 * @param paramPattern
 	 *            {@code true} 将{@code param}作为匹配模式，{@code false}
 	 *            将{@code map}的关键字作为匹配模式
-	 * @return
+	 * @return 没有匹配时返回{@code null}
 	 */
 	public <V> V findKeyMatched(Map<String, V> map, String param, boolean paramPattern)
 	{
@@ -99,7 +99,10 @@ public class AsteriskPatternSupport
 		{
 			String myKey = entry.getKey();
 
-			if (StringUtil.isEmpty(myKey))
+			if (StringUtil.isEquals(myKey, param))
+				return entry.getValue();
+
+			if (myKey == null)
 				continue;
 
 			boolean match = false;
@@ -124,7 +127,7 @@ public class AsteriskPatternSupport
 	 * @param paramPattern
 	 *            {@code true} 将{@code params}作为匹配模式，{@code false}
 	 *            将{@code list}的{@linkplain KeyValuePair#getKey()}作为匹配模式
-	 * @return
+	 * @return 没有匹配时返回{@code null}
 	 */
 	public <V> V findKeyMatched(List<? extends KeyValuePair<String, V>> list, Collection<String> params,
 			boolean paramPattern)
@@ -151,7 +154,7 @@ public class AsteriskPatternSupport
 	 * @param paramPattern
 	 *            {@code true} 将{@code param}作为匹配模式，{@code false}
 	 *            将{@code list}的{@linkplain KeyValuePair#getKey()}作为匹配模式
-	 * @return
+	 * @return 没有匹配时返回{@code null}
 	 */
 	public <V> V findKeyMatched(List<? extends KeyValuePair<String, V>> list, String param, boolean paramPattern)
 	{
@@ -162,7 +165,10 @@ public class AsteriskPatternSupport
 		{
 			String myKey = entry.getKey();
 
-			if (StringUtil.isEmpty(myKey))
+			if (StringUtil.isEquals(myKey, param))
+				return entry.getValue();
+
+			if (myKey == null)
 				continue;
 
 			boolean match = false;
