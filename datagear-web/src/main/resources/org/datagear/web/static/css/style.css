@@ -45,6 +45,15 @@
 	opacity: 0.8;
 }
 
+a.link-underline,
+a.link-underline:link,
+a.link-underline:visited,
+a.link-underline:active{
+	text-decoration: none;
+}
+a.link-underline:hover{
+	text-decoration: underline;
+}
 a.link,
 a.link:link,
 a.link:visited,
