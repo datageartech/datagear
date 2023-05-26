@@ -29,6 +29,7 @@ import java.util.UUID;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
+import org.datagear.web.security.AjaxAwareAuthenticationEntryPoint;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthenticationFailureHandlerImpl;
 import org.datagear.web.security.AuthenticationSecurity;
@@ -42,12 +43,14 @@ import org.springframework.security.authentication.AnonymousAuthenticationProvid
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -214,9 +217,10 @@ public class SecurityConfigSupport
 	 */
 	protected void configLoginAndOut(HttpSecurity http) throws Exception
 	{
-		http
+		FormLoginConfigurer<HttpSecurity> formConfig = http.formLogin();
+
 		// 登录
-				.formLogin().loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
+		formConfig.loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
 				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
 				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
 				.successHandler(this.authenticationSuccessHandler()).failureHandler(this.authenticationFailureHandler())
@@ -228,6 +232,11 @@ public class SecurityConfigSupport
 				.and().rememberMe().key(Global.NAME_SHORT_UCUS + "REMEMBER_ME_KEY")
 				.tokenValiditySeconds(60 * 60 * 24 * 365)
 				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName(Global.NAME_SHORT_UCUS + "REMEMBER_ME");
+
+		AjaxAwareAuthenticationEntryPoint entryPoint = new AjaxAwareAuthenticationEntryPoint(
+				new LoginUrlAuthenticationEntryPoint(LoginController.LOGIN_PAGE));
+
+		http.exceptionHandling().authenticationEntryPoint(entryPoint);
 	}
 
 	/**
