@@ -65,6 +65,11 @@ public class WebUtils
 	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = Global.NAME_SHORT_UCUS + "DETECT_NEW_VERSION_RESOLVED";
 
 	/**
+	 * 首页URL。
+	 */
+	public static final String INDEX_PAGE_URL = "/";
+
+	/**
 	 * 获取应用上下文路径。
 	 * 
 	 * @param request

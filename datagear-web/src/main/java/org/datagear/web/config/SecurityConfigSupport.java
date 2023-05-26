@@ -36,6 +36,7 @@ import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
 import org.datagear.web.security.LoginLatchFilter;
 import org.datagear.web.security.UserDetailsServiceImpl;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -226,7 +227,8 @@ public class SecurityConfigSupport
 				.successHandler(this.authenticationSuccessHandler()).failureHandler(this.authenticationFailureHandler())
 
 				// 退出
-				.and().logout().logoutUrl(LOGOUT_URL).invalidateHttpSession(true).logoutSuccessUrl("/")
+				.and().logout().logoutUrl(LOGOUT_URL).invalidateHttpSession(true)
+				.logoutSuccessUrl(WebUtils.INDEX_PAGE_URL)
 
 				// 记住登录
 				.and().rememberMe().key(Global.NAME_SHORT_UCUS + "REMEMBER_ME_KEY")
