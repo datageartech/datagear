@@ -43,7 +43,7 @@
 					<form id="${pid}form" class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="mb-4 text-center text-primary text-lg">
-								<a :href="fm.redirectPath" class="link">
+								<a :href="fm.redirectPath" class="link text-primary">
 									{{fm.dashboardNameMask}}
 								</a>
 							</div>

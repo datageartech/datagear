@@ -62,7 +62,7 @@
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<#if !(allListed??) || allListed == false>
 			<div class="text-primary">
-				<a href="${contextPath}/changelogs" target="_blank" class="link">
+				<a href="${contextPath}/changelogs" target="_blank" class="link text-primary">
 					<@spring.message code='viewAll' />
 				</a>
 			</div>

@@ -36,8 +36,8 @@ User currentUser
 			<div class="flex justify-content-end align-items-center">
 				<div class="mr-1">
 					<#if currentUser.anonymous>
-						<a href="${contextPath}/login" class="link px-1"><@spring.message code='module.login' /></a>
-						<a href="${contextPath}/" class="link px-1"><@spring.message code='module.main' /></a>
+						<a href="${contextPath}/login" class="link text-primary px-1"><@spring.message code='module.login' /></a>
+						<a href="${contextPath}/" class="link text-primary px-1"><@spring.message code='module.main' /></a>
 					<#else>
 						<span class="text-color-secondary">
 							<i class="pi pi-user text-sm"></i>

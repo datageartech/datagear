@@ -513,7 +513,7 @@
 				var tabId = po.nextSqlResultTabId();
 				po.renderSqlResultTab(tabId, msgData.sqlStatement.sql, msgData.sqlSelectResult, (po.executingSqlCount == 1));
 				
-				$("<a href='javascript:void(0);' class='sql-result-link link' />")
+				$("<a href='javascript:void(0);' class='sql-result-link link text-primary' />")
 					.html("<@spring.message code='viewResult' />")
 					.data("tabId", tabId)
 					.data("sql", msgData.sqlStatement.sql)

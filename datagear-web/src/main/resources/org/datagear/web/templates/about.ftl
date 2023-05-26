@@ -59,7 +59,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}officalSite" class="text-primary">
-		        		<a href="${Global.WEB_SITE}" target="_blank" class="link">${Global.WEB_SITE}</a>
+		        		<a href="${Global.WEB_SITE}" target="_blank" class="link text-primary">${Global.WEB_SITE}</a>
 		        	</div>
 		        </div>
 			</div>
@@ -69,7 +69,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}sourceCode" class="text-primary">
-		        		<a href="${Global.WEB_SITE}" target="_blank" class="link">${Global.WEB_SITE}</a>
+		        		<a href="${Global.WEB_SITE}" target="_blank" class="link text-primary">${Global.WEB_SITE}</a>
 		        	</div>
 		        </div>
 			</div>
@@ -79,7 +79,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div id="${pid}license" class="text-primary">
-		        		<a href="https://www.gnu.org/licenses/" target="_blank" class="link">LGPL-3.0</a>
+		        		<a href="https://www.gnu.org/licenses/" target="_blank" class="link text-primary">LGPL-3.0</a>
 		        	</div>
 		        </div>
 			</div>

@@ -45,72 +45,13 @@
 	opacity: 0.8;
 }
 
-a.link-underline,
-a.link-underline:link,
-a.link-underline:visited,
-a.link-underline:active{
-	text-decoration: none;
-}
-a.link-underline:hover{
-	text-decoration: underline;
-}
 a.link,
 a.link:link,
 a.link:visited,
 a.link:active{
-	color: var(--text-color);
 	text-decoration: none;
 }
 a.link:hover{
-	color: var(--text-color);
-	text-decoration: underline;
-}
-.text-primary a.link,
-.text-primary a.link:link,
-.text-primary a.link:visited,
-.text-primary a.link:active
-a.link.text-primary,
-a.link.text-primary:link,
-a.link.text-primary:visited,
-a.link.text-primary:active{
-	color: var(--primary-color);
-	text-decoration: none;
-}
-.text-primary a.link:hover,
-a.link.text-primary:hover{
-	color: var(--primary-color);
-	text-decoration: underline;
-}
-.text-color a.link,
-.text-color a.link:link,
-.text-color a.link:visited,
-.text-color a.link:active,
-a.link.text-color,
-a.link.text-color:link,
-a.link.text-color:visited,
-a.link.text-color:active{
-	color: var(--text-color);
-	text-decoration: none;
-}
-.text-color a.link:hover,
-a.link.text-color:hover{
-	color: var(--text-color);
-	text-decoration: underline;
-}
-.text-color-secondary a.link,
-.text-color-secondary a.link:link,
-.text-color-secondary a.link:visited,
-.text-color-secondary a.link:active,
-a.link.text-color-secondary,
-a.link.text-color-secondary:link,
-a.link.text-color-secondary:visited,
-a.link.text-color-secondary:active{
-	color: var(--text-color-secondary);
-	text-decoration: none;
-}
-.text-color-secondary a.link:hover,
-a.link.text-color-secondary:hover{
-	color: var(--text-color-secondary);
 	text-decoration: underline;
 }
 
