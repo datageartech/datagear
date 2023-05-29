@@ -81,6 +81,11 @@
 	{
 		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(id)+"/");
 	};
+
+	po.buildIframeNestCode = function(url)
+	{
+		return "<iframe src=\""+ url +"\" style=\"width:100%;height:100%;border:0;\"></iframe>";
+	};
 	
 	po.setupAjaxTable("/dashboard/pagingQueryData",
 	{
@@ -159,7 +164,7 @@
 					po.executeOnSelect(function(entity)
 					{
 						var url = po.serverURL + po.buildShowURL(entity.id);
-						var iframeCode = "<iframe src=\""+ url +"\" style=\"width:100%;height:100%;border:0;\"></iframe>";
+						var iframeCode = po.buildIframeNestCode(url);
 						po.copyToClipboard(iframeCode);
 					});
 				}
