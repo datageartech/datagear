@@ -117,6 +117,18 @@ public class WebUtils
 	}
 
 	/**
+	 * 获取请求头的{@code Referer}值。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getReferer(HttpServletRequest request)
+	{
+		String ref = request.getHeader("Referer");
+		return (ref == null ? "" : ref);
+	}
+
+	/**
 	 * 获取当前{@linkplain Authentication}。
 	 * 
 	 * @return

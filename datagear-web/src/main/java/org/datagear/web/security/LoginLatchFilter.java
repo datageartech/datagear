@@ -43,7 +43,7 @@ public class LoginLatchFilter implements Filter
 {
 	private String loginProcessingUrl;
 
-	private AuthenticationFailureHandlerImpl authenticationFailureHandlerImpl;
+	private AuthenticationFailureHandlerExt authenticationFailureHandlerExt;
 
 	private ApplicationProperties applicationProperties;
 
@@ -59,12 +59,12 @@ public class LoginLatchFilter implements Filter
 	}
 
 	public LoginLatchFilter(String loginProcessingUrl,
-			AuthenticationFailureHandlerImpl authenticationFailureHandlerImpl,
+			AuthenticationFailureHandlerExt authenticationFailureHandlerExt,
 			ApplicationProperties applicationProperties, CheckCodeManager checkCodeManager)
 	{
 		super();
 		setLoginProcessingUrl(loginProcessingUrl);
-		this.authenticationFailureHandlerImpl = authenticationFailureHandlerImpl;
+		this.authenticationFailureHandlerExt = authenticationFailureHandlerExt;
 		this.applicationProperties = applicationProperties;
 		this.checkCodeManager = checkCodeManager;
 	}
@@ -80,14 +80,14 @@ public class LoginLatchFilter implements Filter
 		this._loginProcessingRequestMatcher = new AntPathRequestMatcher(loginProcessingUrl, "POST");
 	}
 
-	public AuthenticationFailureHandlerImpl getAuthenticationFailureHandlerImpl()
+	public AuthenticationFailureHandlerExt getAuthenticationFailureHandlerExt()
 	{
-		return authenticationFailureHandlerImpl;
+		return authenticationFailureHandlerExt;
 	}
 
-	public void setAuthenticationFailureHandlerImpl(AuthenticationFailureHandlerImpl authenticationFailureHandlerImpl)
+	public void setAuthenticationFailureHandlerExt(AuthenticationFailureHandlerExt authenticationFailureHandlerExt)
 	{
-		this.authenticationFailureHandlerImpl = authenticationFailureHandlerImpl;
+		this.authenticationFailureHandlerExt = authenticationFailureHandlerExt;
 	}
 
 	public ApplicationProperties getApplicationProperties()
@@ -139,24 +139,24 @@ public class LoginLatchFilter implements Filter
 
 			if (!this.checkCodeManager.isCheckCode(req.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN, cc))
 			{
-				this.authenticationFailureHandlerImpl.onAuthenticationFailure(req, res,
+				this.authenticationFailureHandlerExt.onAuthenticationFailure(req, res,
 						new LoginCheckCodeErrorException(), false);
 
 				return;
 			}
 		}
 
-		if (AccessLatch.isLatched(this.authenticationFailureHandlerImpl.getIpLoginLatchRemain(req)))
+		if (AccessLatch.isLatched(this.authenticationFailureHandlerExt.getIpLoginLatchRemain(req)))
 		{
-			this.authenticationFailureHandlerImpl.onAuthenticationFailure(req, res,
+			this.authenticationFailureHandlerExt.onAuthenticationFailure(req, res,
 					new IpLoginLatchedException(), false);
 
 			return;
 		}
 
-		if (AccessLatch.isLatched(this.authenticationFailureHandlerImpl.getUsernameLoginLatchRemain(req)))
+		if (AccessLatch.isLatched(this.authenticationFailureHandlerExt.getUsernameLoginLatchRemain(req)))
 		{
-			this.authenticationFailureHandlerImpl.onAuthenticationFailure(req, res, new UsernameLoginLatchedException(),
+			this.authenticationFailureHandlerExt.onAuthenticationFailure(req, res, new UsernameLoginLatchedException(),
 					false);
 
 			return;

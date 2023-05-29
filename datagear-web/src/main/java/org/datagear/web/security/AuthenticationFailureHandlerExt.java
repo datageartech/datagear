@@ -26,16 +26,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.web.util.accesslatch.IpLoginLatch;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 /**
- * {@linkplain AuthenticationFailureHandler}自定义实现。
+ * 记住登录次数的{@linkplain SimpleUrlAuthenticationFailureHandler}扩展类。
  * 
  * @author datagear@163.com
  *
  */
-public class AuthenticationFailureHandlerImpl extends SimpleUrlAuthenticationFailureHandler
+public class AuthenticationFailureHandlerExt extends SimpleUrlAuthenticationFailureHandler
 {
 	private IpLoginLatch ipLoginLatch;
 
@@ -43,7 +42,7 @@ public class AuthenticationFailureHandlerImpl extends SimpleUrlAuthenticationFai
 
 	private String loginUsernameParam;
 
-	public AuthenticationFailureHandlerImpl(String defaultFailureUrl, IpLoginLatch ipLoginLatch,
+	public AuthenticationFailureHandlerExt(String defaultFailureUrl, IpLoginLatch ipLoginLatch,
 			UsernameLoginLatch usernameLoginLatch, String loginUsernameParam)
 	{
 		super(defaultFailureUrl);

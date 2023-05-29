@@ -57,6 +57,16 @@ public class LoginController extends AbstractController
 	public static final String LOGIN_PAGE = "/login";
 
 	/**
+	 * 登录成功页
+	 */
+	public static final String LOGIN_PAGE_SUCCESS = "/login/success";
+
+	/**
+	 * 登录错误页
+	 */
+	public static final String LOGIN_PAGE_ERROR = "/login/error";
+
+	/**
 	 * 登录参数：用户名
 	 */
 	public static final String LOGIN_PARAM_USER_NAME = "name";
@@ -119,7 +129,9 @@ public class LoginController extends AbstractController
 	{
 		User user = new User();
 		user.setName(resolveLoginUsername(request, response));
-		
+
+		model.addAttribute("pageReferer", WebUtils.getReferer(request));
+		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setFormModel(model, user, "login", "doLogin");
 		WebUtils.setEnableDetectNewVersionRequest(request);
 		

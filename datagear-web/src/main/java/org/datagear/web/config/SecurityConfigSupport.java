@@ -31,9 +31,9 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.security.AjaxAwareAuthenticationEntryPoint;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
-import org.datagear.web.security.AuthenticationFailureHandlerImpl;
+import org.datagear.web.security.AuthenticationFailureHandlerExt;
 import org.datagear.web.security.AuthenticationSecurity;
-import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
+import org.datagear.web.security.AuthenticationSuccessHandlerExt;
 import org.datagear.web.security.LoginLatchFilter;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.datagear.web.util.WebUtils;
@@ -106,8 +106,9 @@ public class SecurityConfigSupport
 	@Bean
 	public AuthenticationSuccessHandler authenticationSuccessHandler()
 	{
-		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl(
-				this.coreConfig.usernameLoginLatch(), this.coreConfig.checkCodeManager());
+		AuthenticationSuccessHandlerExt bean = new AuthenticationSuccessHandlerExt(
+				LoginController.LOGIN_PAGE_SUCCESS, this.coreConfig.usernameLoginLatch(),
+				this.coreConfig.checkCodeManager());
 
 		return bean;
 	}
@@ -115,7 +116,7 @@ public class SecurityConfigSupport
 	@Bean
 	public AuthenticationFailureHandler authenticationFailureHandler()
 	{
-		AuthenticationFailureHandlerImpl bean = new AuthenticationFailureHandlerImpl("/login/error",
+		AuthenticationFailureHandlerExt bean = new AuthenticationFailureHandlerExt(LoginController.LOGIN_PAGE_ERROR,
 				this.coreConfig.ipLoginLatch(), this.coreConfig.usernameLoginLatch(),
 				LoginController.LOGIN_PARAM_USER_NAME);
 
@@ -205,7 +206,7 @@ public class SecurityConfigSupport
 	{
 		http.addFilterBefore(
 				new LoginLatchFilter(LOGIN_PROCESS_URL,
-						(AuthenticationFailureHandlerImpl) this.authenticationFailureHandler(),
+						(AuthenticationFailureHandlerExt) this.authenticationFailureHandler(),
 						this.coreConfig.getApplicationProperties(), this.coreConfig.checkCodeManager()),
 				UsernamePasswordAuthenticationFilter.class);
 	}

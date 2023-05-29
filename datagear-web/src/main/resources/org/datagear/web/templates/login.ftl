@@ -96,6 +96,8 @@
 (function(po)
 {
 	po.submitUrl = "/login/doLogin";
+	po.pageReferer = "${pageReferer}";
+	po.serverURL = "${serverURL}";
 	
 	po.disableLoginCheckCode = ("${(configProperties.disableLoginCheckCode)?string('true','false')}" == "true");
 	po.disableRegister = ("${(configProperties.disableRegister)?string('true','false')}" == "true");
@@ -113,11 +115,17 @@
 		type: "POST",
 		contentType: $.CONTENT_TYPE_FORM,
 		tipSuccess: false,
-		success: function()
+		success: function(response)
 		{
-			(window.top ? window.top : window).location.href="${contextPath}/";
+			po.handleLoginSuccess(response);
 		}
 	});
+	
+	po.handleLoginSuccess = function(response)
+	{
+		var url = (po.pageReferer && po.pageReferer.indexOf(po.serverURL) >= 0 ? po.pageReferer : "${contextPath}/");
+		(window.top ? window.top : window).location.href = url;
+	};
 	
 	if(!po.disableLoginCheckCode)
 	{
