@@ -122,6 +122,10 @@
 	po.handleLoginSuccess = function(response)
 	{
 		var url = "${contextPath}/";
+		
+		if(response && response.data && response.data.redirectUrl)
+			url = response.data.redirectUrl;
+		
 		(window.top ? window.top : window).location.href = url;
 	};
 	

@@ -19,6 +19,8 @@ package org.datagear.web.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +39,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -94,6 +99,8 @@ public class LoginController extends AbstractController
 	@Autowired
 	private UsernameLoginLatch usernameLoginLatch;
 
+	private RequestCache requestCache = new HttpSessionRequestCache();
+
 	public LoginController()
 	{
 		super();
@@ -119,6 +126,16 @@ public class LoginController extends AbstractController
 		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
+	public RequestCache getRequestCache()
+	{
+		return requestCache;
+	}
+
+	public void setRequestCache(RequestCache requestCache)
+	{
+		this.requestCache = requestCache;
+	}
+
 	/**
 	 * 打开登录界面。
 	 * 
@@ -140,7 +157,24 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginSuccess(HttpServletRequest request, HttpServletResponse response)
 	{
-		return optSuccessDataResponseEntity(request, "loginSuccess");
+		ResponseEntity<OperationMessage> responseEntity = optSuccessDataResponseEntity(request, "loginSuccess");
+
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		String redirectUrl = WebUtils.INDEX_PAGE_URL;
+
+		// 参考：
+		// org.springframework.security.web.access.ExceptionTranslationFilter.sendStartAuthentication()
+		// org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
+		SavedRequest savedRequest = this.requestCache.getRequest(request, response);
+		if (savedRequest != null)
+			redirectUrl = savedRequest.getRedirectUrl();
+
+		data.put("redirectUrl", redirectUrl);
+
+		responseEntity.getBody().setData(data);
+
+		return responseEntity;
 	}
 
 	@RequestMapping(value = "/error", produces = CONTENT_TYPE_JSON)
