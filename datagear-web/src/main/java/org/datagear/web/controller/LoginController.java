@@ -130,8 +130,6 @@ public class LoginController extends AbstractController
 		User user = new User();
 		user.setName(resolveLoginUsername(request, response));
 
-		model.addAttribute("pageReferer", WebUtils.getReferer(request));
-		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setFormModel(model, user, "login", "doLogin");
 		WebUtils.setEnableDetectNewVersionRequest(request);
 		

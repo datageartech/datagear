@@ -96,8 +96,6 @@
 (function(po)
 {
 	po.submitUrl = "/login/doLogin";
-	po.pageReferer = "${pageReferer}";
-	po.serverURL = "${serverURL}";
 	
 	po.disableLoginCheckCode = ("${(configProperties.disableLoginCheckCode)?string('true','false')}" == "true");
 	po.disableRegister = ("${(configProperties.disableRegister)?string('true','false')}" == "true");
@@ -123,7 +121,7 @@
 	
 	po.handleLoginSuccess = function(response)
 	{
-		var url = (po.pageReferer && po.pageReferer.indexOf(po.serverURL) >= 0 ? po.pageReferer : "${contextPath}/");
+		var url = "${contextPath}/";
 		(window.top ? window.top : window).location.href = url;
 	};
 	
