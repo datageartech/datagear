@@ -81,19 +81,33 @@ public class AjaxAwareAuthenticationEntryPoint implements AuthenticationEntryPoi
 	{
 		if (isAjaxRequest(request))
 		{
-			if (this.isUseForward())
-			{
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				RequestDispatcher dispatcher = request.getRequestDispatcher(ErrorController.ERROR_PAGE_URL);
-				dispatcher.forward(request, response);
-			}
-			else
-			{
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-			}
+			commenceForAjax(request, response, authException);
 		}
 		else
-			this.authenticationEntryPoint.commence(request, response, authException);
+		{
+			commenceForNoneAjax(request, response, authException);
+		}
+	}
+
+	protected void commenceForAjax(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException authException) throws IOException, ServletException
+	{
+		if (this.isUseForward())
+		{
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			RequestDispatcher dispatcher = request.getRequestDispatcher(ErrorController.ERROR_PAGE_URL);
+			dispatcher.forward(request, response);
+		}
+		else
+		{
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+		}
+	}
+
+	protected void commenceForNoneAjax(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException authException) throws IOException, ServletException
+	{
+		this.authenticationEntryPoint.commence(request, response, authException);
 	}
 
 	/**
