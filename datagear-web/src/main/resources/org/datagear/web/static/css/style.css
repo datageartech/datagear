@@ -257,6 +257,12 @@ label.align-tip{
 	left: -100%;
 }
 
+.flex-tieredmenu-wrapper .p-tieredmenu{
+	width: auto;
+	/*最小宽度与默认一致*/
+	min-width: 12.5rem;
+}
+
 /*表格遮罩层*/
 .p-datatable-loading-overlay{
 	opacity: .5;
