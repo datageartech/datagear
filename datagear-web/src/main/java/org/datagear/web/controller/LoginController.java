@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
@@ -181,7 +180,7 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginError(HttpServletRequest request, HttpServletResponse response)
 	{
-		AuthenticationException ae = getAuthenticationExceptionWithRemove(request);
+		AuthenticationException ae = getAuthenticationException(request, true);
 		if (ae != null)
 		{
 			if (ae instanceof LoginCheckCodeErrorException)
@@ -219,27 +218,6 @@ public class LoginController extends AbstractController
 		{
 			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "usernameOrPasswordError");
 		}
-	}
-
-	protected AuthenticationException getAuthenticationExceptionWithRemove(HttpServletRequest request)
-	{
-		// 参考org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler.saveException()
-
-		AuthenticationException authenticationException = (AuthenticationException) request
-				.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-
-		if (authenticationException == null)
-		{
-			HttpSession session = request.getSession();
-
-			authenticationException = (AuthenticationException) session
-					.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-
-			if (authenticationException != null)
-				session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-		}
-
-		return authenticationException;
 	}
 
 	protected String resolveLoginUsername(HttpServletRequest request, HttpServletResponse response)

@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
@@ -59,6 +60,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.ui.Model;
 
 import freemarker.template.TemplateModel;
@@ -1163,5 +1166,33 @@ public abstract class AbstractController
 	protected void setCacheControlNoCache(HttpServletResponse response)
 	{
 		response.setHeader("Cache-Control", "no-cache");
+	}
+
+	/**
+	 * 获取{@linkplain AuthenticationException}。
+	 * 
+	 * @param request
+	 * @param removeSession
+	 * @return 返回{@code null}表示没有
+	 */
+	protected AuthenticationException getAuthenticationException(HttpServletRequest request, boolean removeSession)
+	{
+		// 参考org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler.saveException()
+
+		AuthenticationException exception = (AuthenticationException) request
+				.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
+		if (exception == null)
+		{
+			HttpSession session = request.getSession();
+
+			exception = (AuthenticationException) session
+					.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
+			if (exception != null && removeSession)
+				session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+		}
+
+		return exception;
 	}
 }
