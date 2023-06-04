@@ -212,7 +212,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		
 		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 		convertForFormModel(chart, request);
@@ -227,7 +227,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
 		setNullAnalysisProjectIfNoPermission(user, chart, getAnalysisProjectService());
@@ -268,7 +268,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HtmlChartWidgetEntity entity)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		trimAnalysisProjectAwareEntityForSave(entity);
 
@@ -302,7 +302,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
 		convertForFormModel(chart, request);
@@ -318,7 +318,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -359,7 +359,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
@@ -394,7 +394,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 		else
 		{
-			User user = WebUtils.getUser();
+			User user = getCurrentUser();
 			HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 	
 			showChart(request, response, model, user, chart);
@@ -415,7 +415,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
 		String resName = resolvePathAfter(request, "/show/" + id + "/");

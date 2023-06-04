@@ -33,7 +33,6 @@ import org.datagear.util.IDUtil;
 import org.datagear.web.controller.AuthorizationResMetaManager.PermissionMeta;
 import org.datagear.web.controller.AuthorizationResMetaManager.ResourceMeta;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -88,7 +87,7 @@ public class AuthorizationController extends AbstractController
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -109,7 +108,7 @@ public class AuthorizationController extends AbstractController
 			@PathVariable("resource") String resource,
 			@RequestBody Authorization authorization)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -129,7 +128,7 @@ public class AuthorizationController extends AbstractController
 			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -151,7 +150,7 @@ public class AuthorizationController extends AbstractController
 			@PathVariable("resource") String resource,
 			@RequestBody Authorization authorization)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -174,7 +173,7 @@ public class AuthorizationController extends AbstractController
 			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -195,7 +194,7 @@ public class AuthorizationController extends AbstractController
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
 			@PathVariable("resource") String resource, @RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -209,7 +208,7 @@ public class AuthorizationController extends AbstractController
 	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -228,7 +227,7 @@ public class AuthorizationController extends AbstractController
 			@PathVariable("resource") String resource,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		checkIsAllowAuthorization(user, resourceType, resource);

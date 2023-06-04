@@ -108,7 +108,7 @@ public class SecurityConfigSupport
 	{
 		AuthenticationSuccessHandlerExt bean = new AuthenticationSuccessHandlerExt(
 				LoginController.LOGIN_PAGE_SUCCESS, this.coreConfig.usernameLoginLatch(),
-				this.coreConfig.checkCodeManager());
+				this.coreConfig.checkCodeManager(), this.coreConfig.authenticationUserGetter());
 
 		return bean;
 	}

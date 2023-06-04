@@ -39,7 +39,6 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -289,7 +288,7 @@ public class UserController extends AbstractController
 	public String personalSet(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		User operator = WebUtils.getUser();
+		User operator = getCurrentUser();
 
 		User user = this.userService.getByIdNoPassword(operator.getId());
 
@@ -310,7 +309,7 @@ public class UserController extends AbstractController
 		if (isBlank(user.getName()))
 			throw new IllegalInputException();
 
-		User operator = WebUtils.getUser();
+		User operator = getCurrentUser();
 
 		user.setId(operator.getId());
 

@@ -34,7 +34,6 @@ import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
 import org.datagear.web.util.KeywordMatcher;
-import org.datagear.web.util.WebUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,7 +61,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 
 		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
 				schemaId, true)
@@ -101,7 +100,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 			@RequestParam("table") final String table,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 
 		Table tableObj = null;
 

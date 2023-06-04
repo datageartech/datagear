@@ -47,6 +47,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.security.AuthenticationSecurity;
+import org.datagear.web.security.AuthenticationUserGetter;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -127,6 +128,9 @@ public abstract class AbstractController
 	@Autowired
 	private AuthenticationSecurity authenticationSecurity;
 
+	@Autowired
+	private AuthenticationUserGetter authenticationUserGetter;
+
 	public AbstractController()
 	{
 		super();
@@ -160,6 +164,31 @@ public abstract class AbstractController
 	public void setAuthenticationSecurity(AuthenticationSecurity authenticationSecurity)
 	{
 		this.authenticationSecurity = authenticationSecurity;
+	}
+
+	public AuthenticationUserGetter getAuthenticationUserGetter()
+	{
+		return authenticationUserGetter;
+	}
+
+	public void setAuthenticationUserGetter(AuthenticationUserGetter authenticationUserGetter)
+	{
+		this.authenticationUserGetter = authenticationUserGetter;
+	}
+
+	protected User getCurrentUser()
+	{
+		return this.authenticationUserGetter.getUser();
+	}
+
+	protected User getCurrentUser(Authentication authentication)
+	{
+		return this.authenticationUserGetter.getUser(authentication);
+	}
+
+	protected Authentication getCurrentAuthentication()
+	{
+		return this.authenticationUserGetter.getAuthentication();
 	}
 
 	protected <ID, T extends Entity<ID>> T getByIdForEdit(EntityService<ID, T> service, ID id) throws RecordNotFoundException
@@ -212,7 +241,7 @@ public abstract class AbstractController
 	 */
 	protected boolean setReadonlyAction(Model model)
 	{
-		boolean readonly = isReadonlyAction(model, WebUtils.getAuthentication());
+		boolean readonly = isReadonlyAction(model, getCurrentAuthentication());
 		return setReadonlyAction(model, readonly);
 	}
 
@@ -286,7 +315,7 @@ public abstract class AbstractController
 	protected AnalysisProject getRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
 			AnalysisProjectService analysisProjectService)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		String analysisId = request.getParameter(KEY_ANALYSIS_PROJECT_ID);
 		

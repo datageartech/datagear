@@ -169,7 +169,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam(value="sql", required = false) String sql) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -206,7 +206,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam(value = "overTimeThreashold", required = false) Integer overTimeThreashold,
 			@RequestParam(value = "resultsetFetchSize", required = false) Integer resultsetFetchSize) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 
 		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
@@ -276,7 +276,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestBody SqlpadSelectForm form) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 		
 		String sqlpadId = form.getSqlpadId();
 		final String sql = form.getSql();
@@ -379,7 +379,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		return this.sqlHistoryService.pagingQueryByUserId(schemaId, user.getId(), pagingQuery);
@@ -392,7 +392,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
-		final User user = WebUtils.getUser();
+		final User user = getCurrentUser();
 
 		Schema schema = getSchemaForUserNotNull(user, schemaId);
 

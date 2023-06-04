@@ -286,7 +286,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		
@@ -300,7 +300,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 		setNullAnalysisProjectIfNoPermission(user, dashboard, getAnalysisProjectService());
@@ -326,7 +326,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				|| form.getResourceContents().length != form.getResourceIsTemplates().length)
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = form.getDashboard();
 
@@ -391,7 +391,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (isEmpty(templates))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity widget = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -410,7 +410,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, @RequestParam("id") String id,
 			@RequestParam("resourceName") String resourceName) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		
 		resourceName = trimResourceName(resourceName);
 
@@ -454,7 +454,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public List<String> listResources(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
@@ -475,7 +475,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("name") String name)
 			throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		
 		name = trimResourceName(name);
 		boolean isNameDirectory = FileUtil.isDirectoryName(name);
@@ -518,7 +518,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam("destName") String destName)
 			throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		
 		srcName = trimResourceName(srcName);
 		destName = trimResourceName(destName);
@@ -597,7 +597,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam("autoUnzip") boolean autoUnzip,
 			@RequestParam("zipFileNameEncoding") String zipFileNameEncoding) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -663,7 +663,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam("resourceContent") String resourceContent,
 			@RequestParam(value = "isTemplate", required = false) Boolean isTemplate) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -864,7 +864,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		String templateEncoding = resolveTemplateEncoding(FileUtil.getFile(uploadDirectory, templates[0]));
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		dashboard.setTemplateSplit(form.getTemplate());
@@ -896,7 +896,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -910,7 +910,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void export(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -942,7 +942,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -983,7 +983,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HttpServletResponse response, final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
@@ -996,7 +996,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public String shareSet(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -1022,7 +1022,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (isEmpty(form.getId()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, form.getId());
 
@@ -1048,7 +1048,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@PathVariable("id") String id,
 			@RequestParam(value = DASHBOARD_SHOW_AUTH_PARAM_NAME, required = false) String name) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, id);
 
@@ -1095,7 +1095,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (isEmpty(form.getId()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		HtmlTplDashboardWidgetEntity dashboardWidget = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, form.getId());
 
 		String password = (StringUtil.isEmpty(form.getPassword()) ? "" : form.getPassword());
@@ -1261,7 +1261,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 		else
 		{
-			User user = WebUtils.getUser();
+			User user = getCurrentUser();
 			HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 
 			if (!isShowAuthed(request, user, dashboardWidget))
@@ -1303,7 +1303,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
@@ -1694,7 +1694,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			@RequestParam(value = LOAD_CHART_FOR_EDITOR_PARAM, required = false) String loadChartForEditorStr)
 			throws Throwable
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		DashboardInfo dashboardInfo = getSessionDashboardInfo(request, dashboardId);
 

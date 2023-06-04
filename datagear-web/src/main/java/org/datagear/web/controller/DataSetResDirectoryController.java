@@ -33,7 +33,6 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -87,7 +86,7 @@ public class DataSetResDirectoryController extends AbstractController
 	{
 		checkSaveEntity(dataSetResDirectory);
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		dataSetResDirectory.setId(IDUtil.randomIdOnTime20());
 		dataSetResDirectory.setCreateUser(user);
@@ -101,7 +100,7 @@ public class DataSetResDirectoryController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		DataSetResDirectory dataSetResDirectory = getByIdForEdit(this.dataSetResDirectoryService, user, id);
 
 		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
@@ -116,7 +115,7 @@ public class DataSetResDirectoryController extends AbstractController
 	{
 		checkSaveEntity(dataSetResDirectory);
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		this.dataSetResDirectoryService.update(user, dataSetResDirectory);
 
@@ -127,7 +126,7 @@ public class DataSetResDirectoryController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		DataSetResDirectory dataSetResDirectory = getByIdForView(this.dataSetResDirectoryService, user, id);
 
 		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
@@ -144,7 +143,7 @@ public class DataSetResDirectoryController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -181,7 +180,7 @@ public class DataSetResDirectoryController extends AbstractController
 			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
 			throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<DataSetResDirectory> pagingData = this.dataSetResDirectoryService.pagingQuery(user, pagingQuery);
@@ -202,7 +201,7 @@ public class DataSetResDirectoryController extends AbstractController
 			org.springframework.ui.Model springModel, @RequestParam("id") String id,
 			@RequestParam(value="subPath", required = false) String subPath) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		DataSetResDirectory dataSetResDirectory =  getByIdForView(this.dataSetResDirectoryService, user, id);
 		File directory = FileUtil.getDirectory(dataSetResDirectory.getDirectory(), false);
@@ -234,7 +233,7 @@ public class DataSetResDirectoryController extends AbstractController
 	
 	protected boolean isShowDirectory(HttpServletRequest request)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		return user.isAdmin();
 	}
 }

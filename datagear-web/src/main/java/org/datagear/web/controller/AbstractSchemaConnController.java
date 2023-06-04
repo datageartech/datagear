@@ -35,7 +35,6 @@ import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.util.SchemaConnectionSupport;
 import org.datagear.util.JdbcUtil;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -122,7 +121,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	protected Schema getSchemaForUserNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
 			throws PermissionDeniedException, SchemaNotFoundException
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		Schema schema = this.schemaService.getById(user, schemaId);
 

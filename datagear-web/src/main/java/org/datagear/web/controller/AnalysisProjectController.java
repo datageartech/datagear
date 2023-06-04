@@ -26,7 +26,6 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -81,7 +80,7 @@ public class AnalysisProjectController extends AbstractController
 	{
 		checkSaveEntity(analysisProject);
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		analysisProject.setId(IDUtil.randomIdOnTime20());
 		analysisProject.setCreateUser(user);
@@ -95,7 +94,7 @@ public class AnalysisProjectController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		AnalysisProject analysisProject = getByIdForEdit(this.analysisProjectService, user, id);
 		
 		setFormModel(model, analysisProject, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
@@ -109,7 +108,7 @@ public class AnalysisProjectController extends AbstractController
 	{
 		checkSaveEntity(analysisProject);
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		this.analysisProjectService.update(user, analysisProject);
 
@@ -120,7 +119,7 @@ public class AnalysisProjectController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		AnalysisProject analysisProject = getByIdForView(this.analysisProjectService, user, id);
 
 		setFormModel(model, analysisProject, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
@@ -132,7 +131,7 @@ public class AnalysisProjectController extends AbstractController
 	public AnalysisProject getByIdSilently(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		AnalysisProject analysisProject = null;
 
@@ -152,7 +151,7 @@ public class AnalysisProjectController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -185,7 +184,7 @@ public class AnalysisProjectController extends AbstractController
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<AnalysisProject> pagingData = this.analysisProjectService.pagingQuery(user, pagingQuery,

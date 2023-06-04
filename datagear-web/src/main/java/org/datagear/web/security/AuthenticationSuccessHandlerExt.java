@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.User;
 import org.datagear.web.controller.LoginController;
 import org.datagear.web.util.CheckCodeManager;
-import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -43,17 +42,20 @@ public class AuthenticationSuccessHandlerExt extends SimpleUrlAuthenticationSucc
 
 	private CheckCodeManager checkCodeManager;
 
+	private AuthenticationUserGetter authenticationUserGetter;
+
 	public AuthenticationSuccessHandlerExt()
 	{
 		super();
 	}
 
 	public AuthenticationSuccessHandlerExt(String defaultTargetUrl, UsernameLoginLatch usernameLoginLatch,
-			CheckCodeManager checkCodeManager)
+			CheckCodeManager checkCodeManager, AuthenticationUserGetter authenticationUserGetter)
 	{
 		super(defaultTargetUrl);
 		this.usernameLoginLatch = usernameLoginLatch;
 		this.checkCodeManager = checkCodeManager;
+		this.authenticationUserGetter = authenticationUserGetter;
 	}
 
 	public UsernameLoginLatch getUsernameLoginLatch()
@@ -76,6 +78,16 @@ public class AuthenticationSuccessHandlerExt extends SimpleUrlAuthenticationSucc
 		this.checkCodeManager = checkCodeManager;
 	}
 
+	public AuthenticationUserGetter getAuthenticationUserGetter()
+	{
+		return authenticationUserGetter;
+	}
+
+	public void setAuthenticationUserGetter(AuthenticationUserGetter authenticationUserGetter)
+	{
+		this.authenticationUserGetter = authenticationUserGetter;
+	}
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException
@@ -94,7 +106,7 @@ public class AuthenticationSuccessHandlerExt extends SimpleUrlAuthenticationSucc
 	protected void clearUsernameLoginLatch(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication)
 	{
-		User user = WebUtils.getUser(authentication);
+		User user = this.authenticationUserGetter.getUser(authentication);
 		this.usernameLoginLatch.clear(user.getName());
 	}
 }

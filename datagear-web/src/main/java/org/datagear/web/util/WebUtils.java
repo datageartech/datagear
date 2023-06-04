@@ -25,15 +25,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.User;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.web.security.AuthUser;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -126,61 +122,6 @@ public class WebUtils
 	{
 		String ref = request.getHeader("Referer");
 		return (ref == null ? "" : ref);
-	}
-
-	/**
-	 * 获取当前{@linkplain Authentication}。
-	 * 
-	 * @return
-	 */
-	public static Authentication getAuthentication()
-	{
-		return SecurityContextHolder.getContext().getAuthentication();
-	}
-
-	/**
-	 * 获取当前用户（认证用户或者匿名用户）。
-	 * <p>
-	 * 此方法不会返回{@code null}。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	public static User getUser()
-	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return getUser(authentication);
-	}
-
-	/**
-	 * 获取当前用户（认证用户或者匿名用户）。
-	 * <p>
-	 * 此方法不会返回{@code null}。
-	 * </p>
-	 * 
-	 * @param authentication
-	 * @return
-	 */
-	public static User getUser(Authentication authentication)
-	{
-		User user = null;
-
-		Object principal = authentication.getPrincipal();
-
-		if (principal instanceof User)
-		{
-			user = (User) principal;
-		}
-		else if (principal instanceof AuthUser)
-		{
-			AuthUser ou = (AuthUser) principal;
-			user = ou.getUser();
-		}
-
-		if (user == null)
-			throw new IllegalStateException();
-
-		return user;
 	}
 
 	/**

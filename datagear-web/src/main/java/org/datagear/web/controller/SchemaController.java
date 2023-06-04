@@ -44,7 +44,6 @@ import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -109,7 +108,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping("/copy")
 	public String copy(org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		Schema schema = getByIdForView(getSchemaService(), user, id);
 		schema.setId(null);
 		schema.clearPassword();
@@ -126,7 +125,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody Schema schema)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
@@ -144,7 +143,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		Schema schema = getByIdForEdit(getSchemaService(), user, id);
 		
 		setFormModel(model, schema, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
@@ -159,7 +158,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		Schema old = getSchemaService().getById(schema.getId());
 
@@ -177,7 +176,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		Schema schema = getByIdForView(getSchemaService(), user, id);
 		schema.clearPassword();
 
@@ -190,7 +189,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		for (int i = 0; i < ids.length; i++)
 		{
@@ -226,7 +225,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public List<Schema> queryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
@@ -240,7 +239,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public PagingData<Schema> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<Schema> pagingData = getSchemaService().pagingQuery(user, pagingQuery);
@@ -257,7 +256,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		if (!this.schemaGuardService.isPermitted(user, schema.getUrl()))
 			throw new SaveSchemaUrlPermissionDeniedException();
@@ -290,7 +289,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
 
-		User user = WebUtils.getUser();
+		User user = getCurrentUser();
 
 		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
 

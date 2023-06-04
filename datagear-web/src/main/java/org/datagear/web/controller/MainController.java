@@ -65,7 +65,7 @@ public class MainController extends AbstractController
 		WebUtils.setEnableDetectNewVersionRequest(request);
 		
 		ModulePermissions mps = getAuthenticationSecurity()
-				.resolveModulePermissions(WebUtils.getAuthentication());
+				.resolveModulePermissions(getCurrentAuthentication());
 
 		addAttributeForWriteJson(model, "modulePermissions", mps);
 

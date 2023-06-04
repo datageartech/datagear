@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
+import org.datagear.web.security.AuthenticationUserGetter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -74,13 +75,15 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	{
 		super.exposeHelpers(model, request);
 		
-		ApplicationProperties applicationProperties = getApplicationProperties(request);
+		ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
+		ApplicationProperties applicationProperties = ac.getBean(ApplicationProperties.class);
+		AuthenticationUserGetter userGetter = ac.getBean(AuthenticationUserGetter.class);
 
 		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
 		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
 		model.put(VAR_CONTEXT_PATH, WebUtils.getContextPath(request));
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
-		model.put(VAR_CURRENT_USER, WebUtils.getUser());
+		model.put(VAR_CURRENT_USER, userGetter.getUser());
 		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
 		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
 		
@@ -88,12 +91,6 @@ public class CustomFreeMarkerView extends FreeMarkerView
 			setDetectNewVersionScriptAttr(model, request, applicationProperties.isDisableDetectNewVersion());
 		else
 			setDetectNewVersionScriptAttr(model, request, true);
-	}
-	
-	protected ApplicationProperties getApplicationProperties(HttpServletRequest request)
-	{
-		ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
-		return ac.getBean(ApplicationProperties.class);
 	}
 
 	/**
