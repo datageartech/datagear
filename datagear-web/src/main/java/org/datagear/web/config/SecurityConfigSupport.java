@@ -24,19 +24,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
-import org.datagear.web.controller.LoginController;
-import org.datagear.web.security.AjaxAwareAuthenticationEntryPoint;
+import org.datagear.web.config.support.FormLoginConfgBean;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
-import org.datagear.web.security.AuthenticationFailureHandlerExt;
 import org.datagear.web.security.AuthenticationSecurity;
-import org.datagear.web.security.AuthenticationSuccessHandlerExt;
-import org.datagear.web.security.LoginLatchFilter;
 import org.datagear.web.security.UserDetailsServiceImpl;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,15 +38,10 @@ import org.springframework.security.authentication.AnonymousAuthenticationProvid
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
@@ -104,30 +93,21 @@ public class SecurityConfigSupport
 	}
 
 	@Bean
-	public AuthenticationSuccessHandler authenticationSuccessHandler()
-	{
-		AuthenticationSuccessHandlerExt bean = new AuthenticationSuccessHandlerExt(
-				LoginController.LOGIN_PAGE_SUCCESS, this.coreConfig.usernameLoginLatch(),
-				this.coreConfig.checkCodeManager(), this.coreConfig.authenticationUserGetter());
-
-		return bean;
-	}
-
-	@Bean
-	public AuthenticationFailureHandler authenticationFailureHandler()
-	{
-		AuthenticationFailureHandlerExt bean = new AuthenticationFailureHandlerExt(LoginController.LOGIN_PAGE_ERROR,
-				this.coreConfig.ipLoginLatch(), this.coreConfig.usernameLoginLatch(),
-				LoginController.LOGIN_PARAM_USER_NAME);
-
-		return bean;
-	}
-
-	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
 	{
 		configureHttpSecurity(http);
 		return http.build();
+	}
+
+	@Bean
+	public FormLoginConfgBean formLoginConfgBean()
+	{
+		CoreConfigSupport coreConfig = getCoreConfig();
+		FormLoginConfgBean bean = new FormLoginConfgBean(coreConfig.getApplicationProperties(),
+				coreConfig.checkCodeManager(), coreConfig.ipLoginLatch(), coreConfig.usernameLoginLatch(),
+				coreConfig.authenticationUserGetter());
+
+		return bean;
 	}
 
 	/**
@@ -169,7 +149,6 @@ public class SecurityConfigSupport
 
 		configLoginAndOut(http);
 		configureAnonymous(http);
-		configLoginLatchFilter(http);
 	}
 
 	/**
@@ -197,21 +176,6 @@ public class SecurityConfigSupport
 	}
 
 	/**
-	 * 配置{@linkplain LoginLatchFilter}过滤器。
-	 * 
-	 * @param http
-	 * @throws Exception
-	 */
-	protected void configLoginLatchFilter(HttpSecurity http) throws Exception
-	{
-		http.addFilterBefore(
-				new LoginLatchFilter(LOGIN_PROCESS_URL,
-						(AuthenticationFailureHandlerExt) this.authenticationFailureHandler(),
-						this.coreConfig.getApplicationProperties(), this.coreConfig.checkCodeManager()),
-				UsernamePasswordAuthenticationFilter.class);
-	}
-
-	/**
 	 * 配置登录/退出。
 	 * 
 	 * @param http
@@ -219,27 +183,8 @@ public class SecurityConfigSupport
 	 */
 	protected void configLoginAndOut(HttpSecurity http) throws Exception
 	{
-		FormLoginConfigurer<HttpSecurity> formConfig = http.formLogin();
-
-		// 登录
-		formConfig.loginPage(LoginController.LOGIN_PAGE).loginProcessingUrl(LOGIN_PROCESS_URL)
-				.usernameParameter(LoginController.LOGIN_PARAM_USER_NAME)
-				.passwordParameter(LoginController.LOGIN_PARAM_PASSWORD)
-				.successHandler(this.authenticationSuccessHandler()).failureHandler(this.authenticationFailureHandler())
-
-				// 退出
-				.and().logout().logoutUrl(LOGOUT_URL).invalidateHttpSession(true)
-				.logoutSuccessUrl(WebUtils.INDEX_PAGE_URL)
-
-				// 记住登录
-				.and().rememberMe().key(Global.NAME_SHORT_UCUS + "REMEMBER_ME_KEY")
-				.tokenValiditySeconds(60 * 60 * 24 * 365)
-				.rememberMeParameter(LoginController.LOGIN_PARAM_REMEMBER_ME).rememberMeCookieName(Global.NAME_SHORT_UCUS + "REMEMBER_ME");
-
-		AjaxAwareAuthenticationEntryPoint entryPoint = new AjaxAwareAuthenticationEntryPoint(
-				new LoginUrlAuthenticationEntryPoint(LoginController.LOGIN_PAGE));
-
-		http.exceptionHandling().authenticationEntryPoint(entryPoint);
+		FormLoginConfgBean formLoginConfgBean = this.formLoginConfgBean();
+		formLoginConfgBean.configHttpSecurity(http);
 	}
 
 	/**
@@ -806,19 +751,19 @@ public class SecurityConfigSupport
 	 */
 	protected void configureAnonymous(HttpSecurity http) throws Exception
 	{
-		String anonymousAuthKey = UUID.randomUUID().toString();
-
 		String[] anonymousRoleIds = StringUtil
 				.split(this.coreConfig.getApplicationProperties().getDefaultRoleAnonymous(), ",", true);
 		Set<String> anonymousRoleIdSet = new HashSet<>();
 		anonymousRoleIdSet.addAll(Arrays.asList(anonymousRoleIds));
 
 		AnonymousAuthenticationFilterExt anonymousAuthenticationFilter = new AnonymousAuthenticationFilterExt(
-				anonymousAuthKey);
+				Global.NAME_SHORT_UCUS + "ANONYMOUS_AUTH_FILTER");
 		anonymousAuthenticationFilter.setAnonymousRoleIds(anonymousRoleIdSet);
 		anonymousAuthenticationFilter.setRoleService(this.coreConfig.roleService());
 
-		http.anonymous().authenticationProvider(new AnonymousAuthenticationProvider(anonymousAuthKey))
+		http.anonymous()
+				.authenticationProvider(
+						new AnonymousAuthenticationProvider(Global.NAME_SHORT_UCUS + "ANONYMOUS_AUTH_PROVIDER"))
 				.authenticationFilter(anonymousAuthenticationFilter);
 	}
 
