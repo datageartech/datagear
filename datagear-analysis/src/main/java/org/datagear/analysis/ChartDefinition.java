@@ -33,7 +33,15 @@ import org.datagear.util.Global;
  */
 public class ChartDefinition extends AbstractIdentifiable implements ResultDataFormatAware
 {
-	/** 内置图表属性名前缀 */
+	/**
+	 * 内置图表属性名前缀。
+	 * <p>
+	 * 所有内置属性名都应以此作为前缀，避免名称冲突。
+	 * </p>
+	 * <p>
+	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的图表中，重构它将导致这些图表逻辑出错。
+	 * </p>
+	 */
 	public static final String BUILTIN_ATTR_PREFIX = Global.NAME_SHORT_UCUS;
 
 	public static final String PROPERTY_ID = "id";

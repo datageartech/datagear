@@ -20,6 +20,8 @@ package org.datagear.analysis;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.datagear.util.Global;
+
 /**
  * 数据集查询。
  * <p>
@@ -31,6 +33,17 @@ import java.util.Map;
  */
 public class DataSetQuery implements ResultDataFormatAware
 {
+	/**
+	 * 内置参数名前缀。
+	 * <p>
+	 * 所有内置参数名都应以此作为前缀，避免名称冲突。
+	 * </p>
+	 * <p>
+	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
+	 * </p>
+	 */
+	public static final String BUILTIN_PARAM_PREFIX = Global.NAME_SHORT_UCUS;
+
 	/** 参数值映射表 */
 	private Map<String, Object> paramValues = new HashMap<String, Object>();
 

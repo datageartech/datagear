@@ -147,7 +147,9 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 			File file = null;
 
 			if (FILE_SOURCE_TYPE_UPLOAD.equals(entity.getFileSourceType()))
+			{
 				file = FileUtil.getFile(entity.getDirectory(), entity.getFileName());
+			}
 			else if (FILE_SOURCE_TYPE_SERVER.equals(entity.getFileSourceType()))
 			{
 				// 服务器端文件名允许参数化

@@ -773,8 +773,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
 		 * </p>
 		 */
-		public static final String DATA_SET_PARAM_NAME_CURRENT_USER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-				+ "USER";
+		public static final String DATA_SET_PARAM_NAME_CURRENT_USER = DataSetQuery.BUILTIN_PARAM_PREFIX + "USER";
 
 		/**
 		 * 内置数据集参数：当前角色名集。
@@ -786,7 +785,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
 		 * </p>
 		 */
-		public static final String DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+		public static final String DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES = DataSetQuery.BUILTIN_PARAM_PREFIX
 				+ "ROLE_NAMES";
 
 		/** ID */
