@@ -32,8 +32,8 @@ public class CoreConfig extends CoreConfigSupport
 {
 	@Autowired
 	public CoreConfig(ApplicationPropertiesConfig applicationPropertiesConfig, DataSourceConfig dataSourceConfig,
-			CacheServiceConfig cacheServiceConfig)
+			CacheConfig cacheConfig)
 	{
-		super(applicationPropertiesConfig, dataSourceConfig, cacheServiceConfig);
+		super(applicationPropertiesConfig, dataSourceConfig, cacheConfig);
 	}
 }

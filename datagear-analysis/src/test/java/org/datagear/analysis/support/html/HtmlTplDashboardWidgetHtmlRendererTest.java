@@ -40,7 +40,6 @@ import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardFilterContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplChartMeta;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.TplDashboardMeta;
-import org.datagear.util.CacheService;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.junit.Test;
@@ -101,8 +100,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		this.rendererWithCache = new TestFixedIdHtmlTplDashboardWidgetHtmlRenderer(chartWidgetSource);
 
 		ConcurrentMapCache cache = new ConcurrentMapCache(HtmlTplDashboardWidgetHtmlRendererTest.class.getSimpleName());
-		CacheService cacheService = new CacheService(cache);
-		this.rendererWithCache.setCacheService(cacheService);
+		this.rendererWithCache.setCache(cache);
 	}
 
 	@Test

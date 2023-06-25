@@ -191,16 +191,16 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 	private DataSourceConfigSupport dataSourceConfig;
 
-	private CacheServiceConfigSupport cacheServiceConfig;
+	private CacheConfigSupport cacheConfig;
 
 	@Autowired
 	public CoreConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig, DataSourceConfigSupport dataSourceConfig,
-			CacheServiceConfigSupport cacheServiceConfig)
+			CacheConfigSupport cacheConfig)
 	{
 		super();
 		this.applicationPropertiesConfig = applicationPropertiesConfig;
 		this.dataSourceConfig = dataSourceConfig;
-		this.cacheServiceConfig = cacheServiceConfig;
+		this.cacheConfig = cacheConfig;
 	}
 
 	public ApplicationPropertiesConfigSupport getApplicationPropertiesConfig()
@@ -223,14 +223,14 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		this.dataSourceConfig = dataSourceConfig;
 	}
 
-	public CacheServiceConfigSupport getCacheServiceConfig()
+	public CacheConfigSupport getCacheConfig()
 	{
-		return cacheServiceConfig;
+		return cacheConfig;
 	}
 
-	public void setCacheServiceConfig(CacheServiceConfigSupport cacheServiceConfig)
+	public void setCacheConfig(CacheConfigSupport cacheConfig)
 	{
-		this.cacheServiceConfig = cacheServiceConfig;
+		this.cacheConfig = cacheConfig;
 	}
 
 	@Bean
@@ -688,8 +688,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		DataSetEntityServiceImpl bean = createDataSetEntityServiceImpl();
 
-		bean.setDataSetResourceDataCacheService(this.cacheServiceConfig
-				.createCacheService(DataSetEntityService.class.getName() + ".dataSetResourceDataCacheService"));
+		bean.setDataSetResourceDataCache(this.cacheConfig
+				.createCache(DataSetEntityService.class.getName() + ".dataSetResourceDataCache"));
 
 		bean.setSqlDataSetSqlValidator(this.sqlDataSetSqlValidator());
 
@@ -1113,12 +1113,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 		for (AbstractMybatisEntityService es : entityServices.values())
 		{
-			es.setCacheService(this.cacheServiceConfig.createCacheService(es.getClass()));
+			es.setCache(this.cacheConfig.createCache(es.getClass()));
 
 			if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 			{
 				((AbstractMybatisDataPermissionEntityService<?, ?>) es)
-						.setPermissionCacheService(this.cacheServiceConfig.createPermissionCacheService(es.getClass()));
+						.setPermissionCache(
+								this.cacheConfig.createCache(es.getClass().getName() + "PermissionCache"));
 			}
 		}
 
@@ -1127,7 +1128,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 		for (HtmlTplDashboardWidgetHtmlRenderer renderer : renderers.values())
 		{
-			renderer.setCacheService(this.cacheServiceConfig.createCacheService(renderer.getClass()));
+			renderer.setCache(this.cacheConfig.createLocalCache(renderer.getClass()));
 		}
 	}
 

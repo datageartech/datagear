@@ -27,7 +27,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet.DataSetResource;
-import org.datagear.util.CacheService;
+import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
 /**
@@ -38,7 +38,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  */
 public abstract class AbstractResolvableResourceDataSet<T extends DataSetResource> extends AbstractResolvableDataSet
 {
-	private CacheService cacheService = null;
+	private Cache cache = null;
 
 	public AbstractResolvableResourceDataSet()
 	{
@@ -55,14 +55,14 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		super(id, name, properties);
 	}
 
-	public CacheService getCacheService()
+	public Cache getCache()
 	{
-		return cacheService;
+		return cache;
 	}
 
-	public void setCacheService(CacheService cacheService)
+	public void setCache(Cache cache)
 	{
-		this.cacheService = cacheService;
+		this.cache = cache;
 	}
 
 	/**
@@ -110,17 +110,17 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 */
 	protected ResourceData getResourceData(T resource) throws Throwable
 	{
-		if (!resource.isIdempotent() || this.cacheService == null || !this.cacheService.isEnabled())
+		if (!resource.isIdempotent() || this.cache == null)
 			return resolveResourceData(resource);
 
-		ValueWrapper vw = this.cacheService.get(resource);
+		ValueWrapper vw = this.cache.get(resource);
 		ResourceData rd = (vw == null ? null : (ResourceData) vw.get());
 
 		if (rd != null)
 			return rd;
 
 		rd = resolveResourceData(resource);
-		this.cacheService.put(resource, rd);
+		this.cache.put(resource, rd);
 
 		return rd;
 	}

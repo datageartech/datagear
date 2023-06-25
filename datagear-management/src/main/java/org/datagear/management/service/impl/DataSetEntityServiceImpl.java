@@ -55,11 +55,11 @@ import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.util.CacheService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.sqlvalidator.SqlValidator;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.cache.Cache;
 
 /**
  * {@linkplain DataSetEntityService}实现类。
@@ -87,7 +87,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private HttpClient httpClient;
 
-	private CacheService dataSetResourceDataCacheService = null;
+	private Cache dataSetResourceDataCache = null;
 
 	private SqlValidator sqlDataSetSqlValidator;
 
@@ -201,14 +201,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.httpClient = httpClient;
 	}
 
-	public CacheService getDataSetResourceDataCacheService()
+	public Cache getDataSetResourceDataCache()
 	{
-		return dataSetResourceDataCacheService;
+		return dataSetResourceDataCache;
 	}
 
-	public void setDataSetResourceDataCacheService(CacheService dataSetResourceDataCacheService)
+	public void setDataSetResourceDataCache(Cache dataSetResourceDataCache)
 	{
-		this.dataSetResourceDataCacheService = dataSetResourceDataCacheService;
+		this.dataSetResourceDataCache = dataSetResourceDataCache;
 	}
 
 	@Override
@@ -248,7 +248,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		}
 
 		if (entity instanceof AbstractResolvableResourceDataSet<?>)
-			((AbstractResolvableResourceDataSet<?>) entity).setCacheService(getDataSetResourceDataCacheService());
+			((AbstractResolvableResourceDataSet<?>) entity).setCache(this.dataSetResourceDataCache);
 
 		return entity;
 	}

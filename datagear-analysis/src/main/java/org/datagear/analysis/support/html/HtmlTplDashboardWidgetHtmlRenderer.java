@@ -34,13 +34,13 @@ import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.util.CacheService;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.CopyWriter;
 import org.datagear.util.html.DefaultFilterHandler;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
+import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
 /**
@@ -184,7 +184,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/**全局JS对象（通常是：window）的局部变量名*/
 	private String localGlobalVarName = Global.PRODUCT_NAME_EN_LC + "Global" + IDUtil.toStringOfMaxRadix();
 	
-	private CacheService cacheService = null;
+	private Cache cache = null;
 
 	public HtmlTplDashboardWidgetHtmlRenderer()
 	{
@@ -296,14 +296,22 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.localGlobalVarName = localGlobalVarName;
 	}
 
-	public CacheService getCacheService()
+	public Cache getCache()
 	{
-		return cacheService;
+		return cache;
 	}
 
-	public void setCacheService(CacheService cacheService)
+	/**
+	 * 设置缓存。
+	 * <p>
+	 * 无论应用是否处于分布式运行环境，这里都可以使用进程内缓存以提高性能，因为此类的缓存策略会根据底层资源的上次修改时间校验和操作缓存。
+	 * </p>
+	 * 
+	 * @param cache
+	 */
+	public void setCache(Cache cache)
 	{
-		this.cacheService = cacheService;
+		this.cache = cache;
 	}
 
 	@Override
@@ -392,7 +400,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected TplDashboardMeta getTplDashboardMetaCache(HtmlTplDashboardWidget dashboardWidget,
 			HtmlTplDashboardRenderContext renderContext)
 	{
-		if (this.cacheService == null)
+		if (this.cache == null)
 			return null;
 
 		// 没有上次修改时间的不应返回缓存
@@ -401,7 +409,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		TplDashboardMetaCacheKey key = new TplDashboardMetaCacheKey(dashboardWidget.getId(),
 				renderContext.getTemplate());
-		ValueWrapper valueWrapper = this.cacheService.get(key);
+		ValueWrapper valueWrapper = this.cache.get(key);
 		TplDashboardMetaCacheValue value = (valueWrapper == null ? null
 				: (TplDashboardMetaCacheValue) valueWrapper.get());
 
@@ -414,7 +422,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected boolean setTplDashboardMetaCache(HtmlTplDashboardWidget dashboardWidget,
 			HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta)
 	{
-		if (this.cacheService == null)
+		if (this.cache == null)
 			return false;
 
 		// 没有上次修改时间的不应设置缓存
@@ -426,7 +434,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		TplDashboardMetaCacheValue value = new TplDashboardMetaCacheValue(dashboardMeta,
 				renderContext.getTemplateLastModified());
 
-		this.cacheService.put(key, value);
+		this.cache.put(key, value);
 
 		return true;
 	}

@@ -17,23 +17,23 @@
 
 package org.datagear.webapp.config;
 
-import org.datagear.web.config.CacheServiceConfigSupport;
+import org.datagear.web.config.CacheConfigSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 缓存服务配置。
+ * 缓存配置。
  * 
  * @author datagear@163.com
  *
  */
 @Configuration
 @EnableCaching
-public class CacheServiceConfig extends CacheServiceConfigSupport
+public class CacheConfig extends CacheConfigSupport
 {
 	@Autowired
-	public CacheServiceConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
+	public CacheConfig(ApplicationPropertiesConfig applicationPropertiesConfig)
 	{
 		super(applicationPropertiesConfig);
 	}

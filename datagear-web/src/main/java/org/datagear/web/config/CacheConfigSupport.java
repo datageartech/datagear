@@ -17,19 +17,21 @@
 
 package org.datagear.web.config;
 
-import org.datagear.util.CacheService;
 import org.datagear.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.support.NoOpCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 缓存服务配置。
+ * 缓存配置。
  * <p>
  * 子类应该添加如下注解：
  * </p>
+ * 
  * <pre>
  * {@code @Configuration}
  * {@code @EnableCaching}
@@ -42,51 +44,77 @@ import org.springframework.context.annotation.Configuration;
  * @author datagear@163.com
  *
  */
-public class CacheServiceConfigSupport
+public class CacheConfigSupport
 {
 	private ApplicationPropertiesConfigSupport applicationPropertiesConfig;
 
 	@Autowired
-	public CacheServiceConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig)
+	public CacheConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig)
 	{
 		super();
 		this.applicationPropertiesConfig = applicationPropertiesConfig;
 	}
 	
 	@Bean
-	public CacheManager cacheServiceCacheManager()
+	public CacheManager cacheManager()
 	{
 		CaffeineCacheManager bean = new CaffeineCacheManager();
 
-		if (!StringUtil.isEmpty(getApplicationProperties().getCacheServiceSpec()))
-			bean.setCacheSpecification(getApplicationProperties().getCacheServiceSpec());
+		String cacheSpec = getApplicationProperties().getCacheSpec();
+
+		if (!StringUtil.isEmpty(cacheSpec))
+			bean.setCacheSpecification(cacheSpec);
 
 		return bean;
 	}
 	
-	public CacheService createCacheService(Class<?> cacheNameClass)
+	/**
+	 * 创建{@linkplain Cache}。
+	 * 
+	 * @param cacheNameClass
+	 * @return
+	 */
+	public Cache createCache(Class<?> cacheNameClass)
 	{
-		return createCacheService(cacheNameClass.getName());
+		return createCache(cacheNameClass.getName());
 	}
 
-	public CacheService createPermissionCacheService(Class<?> cacheNameClass)
+	/**
+	 * 创建{@linkplain Cache}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Cache createCache(String name)
 	{
-		return createCacheService(cacheNameClass.getName() + "Permission");
-	}
-
-	public CacheService createCacheService(String name)
-	{
-		CacheService cacheService = new CacheService();
 		ApplicationProperties applicationProperties = getApplicationProperties();
-		
-		cacheService
-				.setDisabled(applicationProperties.isCacheServiceDisabled());
-		cacheService.setSafeForEdit(false);
-		
-		if (!applicationProperties.isCacheServiceDisabled())
-			cacheService.setCache(this.cacheServiceCacheManager().getCache(name));
 
-		return cacheService;
+		if (applicationProperties.isCacheDisabled())
+			return new NoOpCache(name);
+
+		return this.cacheManager().getCache(name);
+	}
+
+	/**
+	 * 创建进程内{@linkplain Cache}。
+	 * 
+	 * @param cacheNameClass
+	 * @return
+	 */
+	public Cache createLocalCache(Class<?> cacheNameClass)
+	{
+		return createLocalCache(cacheNameClass.getName());
+	}
+
+	/**
+	 * 创建进程内{@linkplain Cache}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Cache createLocalCache(String name)
+	{
+		return createCache(name);
 	}
 
 	protected ApplicationProperties getApplicationProperties()
