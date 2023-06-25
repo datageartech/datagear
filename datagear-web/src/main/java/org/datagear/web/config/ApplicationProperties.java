@@ -19,6 +19,7 @@ package org.datagear.web.config;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -209,6 +210,9 @@ public abstract class ApplicationProperties implements Serializable
 
 	/** 数据源管理SQL工作台-删除权限用户的SQL关键字黑名单 */
 	private Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords = Collections.emptyMap();
+
+	/** 跨域请求配置列表 */
+	private List<CrossOriginProperties> crossOriginPropertiess = Collections.emptyList();
 
 	public ApplicationProperties()
 	{
@@ -669,5 +673,16 @@ public abstract class ApplicationProperties implements Serializable
 	public void setDsmanagerSqlpadDeleteInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords)
 	{
 		this.dsmanagerSqlpadDeleteInvalidSqlKeywords = dsmanagerSqlpadDeleteInvalidSqlKeywords;
+	}
+
+	public List<CrossOriginProperties> getCrossOriginPropertiess()
+	{
+		return crossOriginPropertiess;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void setCrossOriginPropertiess(List<? extends CrossOriginProperties> crossOriginPropertiess)
+	{
+		this.crossOriginPropertiess = (List<CrossOriginProperties>) crossOriginPropertiess;
 	}
 }

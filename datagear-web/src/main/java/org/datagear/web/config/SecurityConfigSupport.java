@@ -43,6 +43,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * 安全配置。
@@ -72,6 +75,8 @@ public class SecurityConfigSupport
 	 * 退出URL。
 	 */
 	public static final String LOGOUT_URL = "/logout";
+
+	public static final String SHOW_CHART_DASHBOARD_PATH_PLACEHOLDER = "SHOW_PATHS";
 
 	private CoreConfigSupport coreConfig;
 
@@ -120,6 +125,7 @@ public class SecurityConfigSupport
 	{
 		configureCsrf(http);
 		configureHeaders(http);
+		configCors(http);
 		
 		configAccessForStatic(http);
 		configAccessForShowChartAndDashboard(http);
@@ -173,6 +179,68 @@ public class SecurityConfigSupport
 	{
 		// 默认"X-Frame-Options"值为"DENY"，这会导致系统的图表/看板展示页面无法被其他应用嵌入iframe，因此需禁用
 		http.headers().frameOptions().disable();
+	}
+
+	/**
+	 * 配置跨域访问。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configCors(HttpSecurity http) throws Exception
+	{
+		http.cors((customizer) ->
+		{
+			customizer.configurationSource(corsConfigurationSource());
+		});
+	}
+
+	protected CorsConfigurationSource corsConfigurationSource()
+	{
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+		ApplicationProperties properties = getCoreConfig().getApplicationProperties();
+		List<CrossOriginProperties> corsPropertiess = properties.getCrossOriginPropertiess();
+
+		for (CrossOriginProperties corsps : corsPropertiess)
+		{
+			String[] paths = corsps.getPaths();
+
+			if (paths == null || paths.length == 0)
+				continue;
+
+			if (paths.length == 1 && SHOW_CHART_DASHBOARD_PATH_PLACEHOLDER.equalsIgnoreCase(paths[0]))
+				paths = resolveShowChartAndDashboardUrls();
+
+			for (String path : paths)
+			{
+				CorsConfiguration coscfg = new CorsConfiguration();
+				coscfg.setAllowedOriginPatterns(Arrays.asList(corsps.getAllowedOriginPatterns()));
+				coscfg.setAllowedMethods(Arrays.asList(corsps.getAllowedMethods()));
+				coscfg.setAllowedHeaders(Arrays.asList(corsps.getAllowedHeaders()));
+				coscfg.setExposedHeaders(Arrays.asList(corsps.getExposedHeaders()));
+				coscfg.setAllowCredentials(corsps.isAllowCredentials());
+				if (corsps.getMaxAge() != null)
+					coscfg.setMaxAge(corsps.getMaxAge());
+
+				source.registerCorsConfiguration(path, coscfg);
+			}
+		}
+
+		return source;
+	}
+
+	protected String[] resolveShowChartAndDashboardUrls()
+	{
+		List<String> urls = new ArrayList<String>();
+
+		ModuleAccess moduleAccess = this.showChartAndDashboardModuleAccess();
+		List<UrlsAccess> urlsAccesses = moduleAccess.getUrlsAccesses();
+
+		for (UrlsAccess ua : urlsAccesses)
+			urls.addAll(ua.getUrls());
+
+		return urls.toArray(new String[urls.size()]);
 	}
 
 	/**

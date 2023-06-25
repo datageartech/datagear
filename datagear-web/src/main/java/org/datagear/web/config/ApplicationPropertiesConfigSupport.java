@@ -17,7 +17,9 @@
 
 package org.datagear.web.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -91,6 +93,13 @@ public class ApplicationPropertiesConfigSupport
 	}
 
 	@Bean
+	@ConfigurationProperties("cors")
+	public List<CrossOriginPropertiesImpl> crossOriginPropertiess()
+	{
+		return new ArrayList<CrossOriginPropertiesImpl>();
+	}
+
+	@Bean
 	public ApplicationProperties applicationProperties()
 	{
 		ApplicationProperties bean = createApplicationProperties();
@@ -101,6 +110,7 @@ public class ApplicationPropertiesConfigSupport
 		bean.setDsmanagerSqlpadReadInvalidSqlKeywords(this.dsmanagerSqlpadReadInvalidSqlKeywords());
 		bean.setDsmanagerSqlpadEditInvalidSqlKeywords(this.dsmanagerSqlpadEditInvalidSqlKeywords());
 		bean.setDsmanagerSqlpadDeleteInvalidSqlKeywords(this.dsmanagerSqlpadDeleteInvalidSqlKeywords());
+		bean.setCrossOriginPropertiess(this.crossOriginPropertiess());
 
 		return bean;
 	}
@@ -117,6 +127,58 @@ public class ApplicationPropertiesConfigSupport
 		public ApplicationPropertiesImpl()
 		{
 			super();
+		}
+	}
+
+	protected static class CrossOriginPropertiesImpl extends CrossOriginProperties
+	{
+		private static final long serialVersionUID = 1L;
+
+		public CrossOriginPropertiesImpl()
+		{
+			super();
+		}
+
+		@Override
+		public void setPaths(String[] paths)
+		{
+			super.setPaths(paths);
+		}
+
+		@Override
+		public void setAllowedOriginPatterns(String[] allowedOriginPatterns)
+		{
+			super.setAllowedOriginPatterns(allowedOriginPatterns);
+		}
+
+		@Override
+		public void setAllowedMethods(String[] allowedMethods)
+		{
+			super.setAllowedMethods(allowedMethods);
+		}
+
+		@Override
+		public void setAllowedHeaders(String[] allowedHeaders)
+		{
+			super.setAllowedHeaders(allowedHeaders);
+		}
+
+		@Override
+		public void setExposedHeaders(String[] exposedHeaders)
+		{
+			super.setExposedHeaders(exposedHeaders);
+		}
+
+		@Override
+		public void setAllowCredentials(boolean allowCredentials)
+		{
+			super.setAllowCredentials(allowCredentials);
+		}
+
+		@Override
+		public void setMaxAge(Long maxAge)
+		{
+			super.setMaxAge(maxAge);
 		}
 	}
 }
