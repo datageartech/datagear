@@ -19,8 +19,13 @@ package org.datagear.web.config;
 
 import java.io.Serializable;
 
+import org.springframework.web.cors.CorsConfiguration;
+
 /**
  * 跨域请求配置项。
+ * <p>
+ * 参考{@linkplain CorsConfiguration}。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -30,6 +35,8 @@ public abstract class CrossOriginProperties implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	private String[] paths;
+
+	private String[] allowedOrigins;
 
 	private String[] allowedOriginPatterns;
 
@@ -56,6 +63,16 @@ public abstract class CrossOriginProperties implements Serializable
 	protected void setPaths(String[] paths)
 	{
 		this.paths = paths;
+	}
+
+	public String[] getAllowedOrigins()
+	{
+		return allowedOrigins;
+	}
+
+	public void setAllowedOrigins(String[] allowedOrigins)
+	{
+		this.allowedOrigins = allowedOrigins;
 	}
 
 	public String[] getAllowedOriginPatterns()

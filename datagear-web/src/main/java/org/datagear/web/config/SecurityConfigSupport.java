@@ -215,11 +215,23 @@ public class SecurityConfigSupport
 			for (String path : paths)
 			{
 				CorsConfiguration coscfg = new CorsConfiguration();
-				coscfg.setAllowedOriginPatterns(Arrays.asList(corsps.getAllowedOriginPatterns()));
-				coscfg.setAllowedMethods(Arrays.asList(corsps.getAllowedMethods()));
-				coscfg.setAllowedHeaders(Arrays.asList(corsps.getAllowedHeaders()));
-				coscfg.setExposedHeaders(Arrays.asList(corsps.getExposedHeaders()));
+
+				if (corsps.getAllowedOrigins() != null && corsps.getAllowedOrigins().length > 0)
+					coscfg.setAllowedOriginPatterns(Arrays.asList(corsps.getAllowedOrigins()));
+				else if (corsps.getAllowedOriginPatterns() != null && corsps.getAllowedOriginPatterns().length > 0)
+					coscfg.setAllowedOriginPatterns(Arrays.asList(corsps.getAllowedOriginPatterns()));
+
+				if (corsps.getAllowedMethods() != null && corsps.getAllowedMethods().length > 0)
+					coscfg.setAllowedMethods(Arrays.asList(corsps.getAllowedMethods()));
+
+				if (corsps.getAllowedHeaders() != null && corsps.getAllowedHeaders().length > 0)
+					coscfg.setAllowedHeaders(Arrays.asList(corsps.getAllowedHeaders()));
+
+				if (corsps.getExposedHeaders() != null && corsps.getExposedHeaders().length > 0)
+					coscfg.setExposedHeaders(Arrays.asList(corsps.getExposedHeaders()));
+
 				coscfg.setAllowCredentials(corsps.isAllowCredentials());
+
 				if (corsps.getMaxAge() != null)
 					coscfg.setMaxAge(corsps.getMaxAge());
 
