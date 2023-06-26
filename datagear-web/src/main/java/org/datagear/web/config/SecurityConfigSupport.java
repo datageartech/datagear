@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpSession;
+
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.FormLoginConfgBean;
@@ -38,6 +40,8 @@ import org.springframework.security.authentication.AnonymousAuthenticationProvid
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -95,6 +99,15 @@ public class SecurityConfigSupport
 	public void setCoreConfig(CoreConfigSupport coreConfig)
 	{
 		this.coreConfig = coreConfig;
+	}
+
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() throws Exception
+	{
+		return ((web) ->
+		{
+			this.configAccessForStatic(web);
+		});
 	}
 
 	@Bean
@@ -270,12 +283,49 @@ public class SecurityConfigSupport
 	/**
 	 * 配置静态资源访问权限。
 	 * 
+	 * @param webSecurity
+	 * @throws Exception
+	 */
+	protected void configAccessForStatic(WebSecurity webSecurity)
+	{
+		webSecurity.ignoring().antMatchers(staticPathPatterns());
+	}
+
+	/**
+	 * 获取静态资源路径匹配模式。
+	 * <p>
+	 * 系统所有静态资源都应在此返回，避免仍会执行security相关逻辑而影响性能（比如{@linkplain AnonymousAuthenticationFilterExt}）。
+	 * </p>
+	 * <p>
+	 * 注意：图表/看板展示页面的静态资源也应在此返回，不然对于某些iframe嵌入环境（比如Firefox），
+	 * 每个静态资源加载都会创建一个新的{@linkplain HttpSession}（由{@linkplain AnonymousAuthenticationFilterExt}创建），
+	 * 导致页面上依赖{@linkplain HttpSession}的功能异常（比如：加载图表数据、异步加载图表等）。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected static String[] staticPathPatterns()
+	{
+		List<String> pathPatterns = new ArrayList<String>();
+		pathPatterns.add("/static/**");
+		pathPatterns.addAll(Arrays.asList(showChartAndDashboardStaticUrlPattern()));
+
+		return pathPatterns.toArray(new String[pathPatterns.size()]);
+	}
+
+	/**
+	 * 配置静态资源访问权限。
+	 * 
 	 * @param http
 	 * @throws Exception
 	 */
 	protected void configAccessForStatic(HttpSecurity http) throws Exception
 	{
-		http.authorizeHttpRequests().antMatchers("/static/**").permitAll();
+		// XXX 这里配置静态资源，仍然会走security相关逻辑，影响性能，改为采用上述
+		// configAccessForStatic(WebSecurity)
+		// 方式
+
+		// http.authorizeHttpRequests().antMatchers("/static/**").permitAll();
 	}
 
 	/**
@@ -296,13 +346,7 @@ public class SecurityConfigSupport
 
 		AuthorizationManager<RequestAuthorizationContext> authorizationManager = showChartAndDashboardAuthorizationManager();
 		
-		UrlsAccess showStatic = new UrlsAccess(authorizationManager,
-				// 图表插件
-				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
-				// 看板心跳
-				"/dashboard/heartbeat",
-				// 看板服务端时间
-				"/dashboard/serverTime.js");
+		UrlsAccess showStatic = new UrlsAccess(authorizationManager, showChartAndDashboardStaticUrlPattern());
 
 		UrlsAccess show = new UrlsAccess(authorizationManager,
 				// 图表展示
@@ -310,6 +354,8 @@ public class SecurityConfigSupport
 				// 看板展示
 				"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/auth/**",
 				"/dashboard/authcheck/**",
+				// 看板心跳
+				"/dashboard/heartbeat",
 
 				// 旧版图表和看板展示
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
@@ -318,6 +364,17 @@ public class SecurityConfigSupport
 		return new ModuleAccess(showStatic, show);
 	}
 	
+	protected static String[] showChartAndDashboardStaticUrlPattern()
+	{
+		return new String[] {
+				// 图表插件
+				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
+				// 看板服务端时间
+				"/dashboard/serverTime.js"
+				//
+		};
+	}
+
 	protected AuthorizationManager<RequestAuthorizationContext> showChartAndDashboardAuthorizationManager()
 	{
 		ApplicationProperties properties = getCoreConfig().getApplicationProperties();
