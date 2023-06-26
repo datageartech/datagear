@@ -42,6 +42,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
@@ -96,10 +97,13 @@ public class AnonymousAuthenticationFilterExt extends AnonymousAuthenticationFil
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
 			throws IOException, ServletException
 	{
+		// 此处代码修改自父类
 		if (SecurityContextHolder.getContext().getAuthentication() == null)
 		{
-			SecurityContextHolder.getContext()
-					.setAuthentication(createAuthentication((HttpServletRequest) req, (HttpServletResponse) res));
+			Authentication authentication = createAuthentication((HttpServletRequest) req, (HttpServletResponse) res);
+			SecurityContext context = SecurityContextHolder.createEmptyContext();
+			context.setAuthentication(authentication);
+			SecurityContextHolder.setContext(context);
 		}
 
 		chain.doFilter(req, res);

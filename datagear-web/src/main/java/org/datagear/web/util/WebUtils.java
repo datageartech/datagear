@@ -200,7 +200,7 @@ public class WebUtils
 			int age, String path)
 	{
 		if (StringUtil.isEmpty(path))
-			path = getContextPath(request);
+			path = getContextPath(request) + "/";
 
 		Cookie cookie = new Cookie(name, value);
 		cookie.setPath(path);
