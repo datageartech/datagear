@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpSession;
-
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.FormLoginConfgBean;
@@ -104,10 +102,15 @@ public class SecurityConfigSupport
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() throws Exception
 	{
-		return ((web) ->
+		return ((webSecurity) ->
 		{
-			this.configAccessForStatic(web);
+			this.configWebSecurity(webSecurity);
 		});
+	}
+
+	protected void configWebSecurity(WebSecurity webSecurity)
+	{
+		this.configAccessForStatic(webSecurity);
 	}
 
 	@Bean
@@ -288,44 +291,35 @@ public class SecurityConfigSupport
 	 */
 	protected void configAccessForStatic(WebSecurity webSecurity)
 	{
-		webSecurity.ignoring().antMatchers(staticPathPatterns());
+		webSecurity.ignoring().antMatchers(staticResourcePathPatterns());
 	}
 
 	/**
 	 * 获取静态资源路径匹配模式。
 	 * <p>
-	 * 系统所有静态资源都应在此返回，避免仍会执行security相关逻辑而影响性能（比如{@linkplain AnonymousAuthenticationFilterExt}）。
-	 * </p>
-	 * <p>
-	 * 注意：图表/看板展示页面的静态资源也应在此返回，不然对于某些iframe嵌入环境（比如Firefox），
-	 * 每个静态资源加载都会创建一个新的{@linkplain HttpSession}（由{@linkplain AnonymousAuthenticationFilterExt}创建），
-	 * 导致页面上依赖{@linkplain HttpSession}的功能异常（比如：加载图表数据、异步加载图表等）。
+	 * 系统静态资源应在此配置和返回，避免仍会执行安全框架相关逻辑而影响性能（比如{@linkplain AnonymousAuthenticationFilterExt}）。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	protected static String[] staticPathPatterns()
+	protected static String[] staticResourcePathPatterns()
 	{
-		List<String> pathPatterns = new ArrayList<String>();
-		pathPatterns.add("/static/**");
-		pathPatterns.addAll(Arrays.asList(showChartAndDashboardStaticUrlPattern()));
-
-		return pathPatterns.toArray(new String[pathPatterns.size()]);
+		return new String[] { "/static/**" };
 	}
 
 	/**
 	 * 配置静态资源访问权限。
+	 * <p>
+	 * 在此方法内使用{@code http.authorizeHttpRequests().antMatchers("/static/**").permitAll()}的方式配置静态资源，
+	 * 在请求时仍然会执行安全框架相关逻辑，影响性能，因此这里弃用，改为采用{@linkplain #configAccessForStatic(WebSecurity)}方式。
+	 * </p>
 	 * 
 	 * @param http
 	 * @throws Exception
 	 */
+	@Deprecated
 	protected void configAccessForStatic(HttpSecurity http) throws Exception
 	{
-		// XXX 这里配置静态资源，仍然会走security相关逻辑，影响性能，改为采用上述
-		// configAccessForStatic(WebSecurity)
-		// 方式
-
-		// http.authorizeHttpRequests().antMatchers("/static/**").permitAll();
 	}
 
 	/**
