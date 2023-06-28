@@ -375,11 +375,10 @@ public class StringUtil
 	 * @param splitter
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<String> splitWithTrim(String str, String splitter)
 	{
 		if (str == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		String[] strs = str.split(splitter);
 
@@ -578,5 +577,44 @@ public class StringUtil
 			return false;
 
 		return (v.intValue() > 0);
+	}
+
+	/**
+	 * 转换为字符串。
+	 * 
+	 * @param o
+	 * @return 当{@code o}为{@code null}时将返回{@code null}
+	 * @see {@linkplain #toString(Object, String)}
+	 */
+	public static String toString(Object o)
+	{
+		return toString(o, null);
+	}
+
+	/**
+	 * 转换为字符串。
+	 * <p>
+	 * 如果不是{@linkplain String}类型，将调用{@linkplain Object#toString()}。
+	 * </p>
+	 * 
+	 * @param o
+	 * @param nullValue
+	 *            当{@code o}为{@code null}时的返回值
+	 * @return
+	 */
+	public static String toString(Object o, String nullValue)
+	{
+		if (o == null)
+		{
+			return nullValue;
+		}
+		else if (o instanceof String)
+		{
+			return (String) o;
+		}
+		else
+		{
+			return o.toString();
+		}
 	}
 }
