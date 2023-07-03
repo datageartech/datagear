@@ -19,7 +19,6 @@ package org.datagear.web.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -502,7 +501,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		{
 			return this.mbSqlDialectBuilder().build(this.dataSourceConfig.dataSource());
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			throw new BeanInitializationException("Init " + MbSqlDialect.class + " failed", e);
 		}
