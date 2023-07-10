@@ -126,9 +126,9 @@
 			    				<!-- 为management模块的datagear.sql添加版本号行 -->
 			    				<echo file="datagear-management/src/main/resources/org/datagear/management/ddl/datagear.sql" encoding="UTF-8" append="true">
 ${line.separator}
------------------------------------------
---version[${project.version}], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[${project.version}], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 ${line.separator}
 </echo>
 								<!-- 为web模块的changelog.txt添加版本号行 -->

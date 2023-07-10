@@ -1,14 +1,14 @@
------------------------------------------
---version[2.13.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[2.13.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
---版本
+/*版本*/
 CREATE TABLE DATAGEAR_VERSION
 (
 	VERSION_VALUE VARCHAR(100)
 );
 
---用户
+/*用户*/
 CREATE TABLE DATAGEAR_USER
 (
 	USER_ID VARCHAR(50) NOT NULL,
@@ -24,10 +24,10 @@ ALTER TABLE DATAGEAR_USER ADD CONSTRAINT DG_PK_USER_ID PRIMARY KEY (USER_ID);
 
 ALTER TABLE DATAGEAR_USER ADD CONSTRAINT DG_UK_USER_NAME UNIQUE (USER_NAME);
 
---内置管理员账号：admin/admin
+/*内置管理员账号：admin/admin*/
 INSERT INTO DATAGEAR_USER VALUES('admin', 'admin', '4c6d8d058a4db956660f0ee51fcb515f93471a086fc676bfb71ba2ceece5bf4702c61cefab3fa54b', '', '', 'true', CURRENT_TIMESTAMP);
 
---角色
+/*角色*/
 CREATE TABLE DATAGEAR_ROLE
 (
 	ROLE_ID VARCHAR(50) NOT NULL,
@@ -39,14 +39,14 @@ CREATE TABLE DATAGEAR_ROLE
 
 ALTER TABLE DATAGEAR_ROLE ADD CONSTRAINT DG_PK_ROLE_ID PRIMARY KEY (ROLE_ID);
 
---内置角色
+/*内置角色*/
 INSERT INTO DATAGEAR_ROLE VALUES('ROLE_REGISTRY', '注册用户', '系统新添加和注册的用户都会自动添加至此角色', 'true', CURRENT_TIMESTAMP);
 
 INSERT INTO DATAGEAR_ROLE VALUES('ROLE_DATA_ADMIN', '数据管理员', '可添加、编辑、管理数据源、项目、数据集、图表、看板', 'true', CURRENT_TIMESTAMP);
 
 INSERT INTO DATAGEAR_ROLE VALUES('ROLE_DATA_ANALYST', '数据分析员', '仅可查看数据源、项目、数据集、图表、看板，展示图表和看板', 'true', CURRENT_TIMESTAMP);
 
---角色用户
+/*角色用户*/
 CREATE TABLE DATAGEAR_ROLE_USER
 (
 	RU_ID VARCHAR(50) NOT NULL,
@@ -62,12 +62,12 @@ ALTER TABLE DATAGEAR_ROLE_USER ADD CONSTRAINT DG_FK_RU_USER_ID FOREIGN KEY (RU_U
 
 ALTER TABLE DATAGEAR_ROLE_USER ADD CONSTRAINT DG_UK_RU_ROLE_USER_ID UNIQUE (RU_ROLE_ID, RU_USER_ID);
 
---内置用户角色
+/*内置用户角色*/
 INSERT INTO DATAGEAR_ROLE_USER VALUES('RUREGADMIN', 'ROLE_REGISTRY', 'admin');
 
 INSERT INTO DATAGEAR_ROLE_USER VALUES('RUDAADMIN', 'ROLE_DATA_ADMIN', 'admin');
 
---授权
+/*授权*/
 CREATE TABLE DATAGEAR_AUTHORIZATION
 (
 	AUTH_ID VARCHAR(50) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE DATAGEAR_AUTHORIZATION
 
 ALTER TABLE DATAGEAR_AUTHORIZATION ADD CONSTRAINT DG_PK_AUTH_ID PRIMARY KEY (AUTH_ID);
 
---数据源
+/*数据源*/
 CREATE TABLE DATAGEAR_SCHEMA
 (
 	SCHEMA_ID VARCHAR(50) NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE DATAGEAR_SCHEMA
 
 ALTER TABLE DATAGEAR_SCHEMA ADD CONSTRAINT DG_PK_SCHEMA_ID PRIMARY KEY (SCHEMA_ID);
 
---数据源防护
+/*数据源防护*/
 CREATE TABLE DATAGEAR_SCHEMA_GUARD
 (
 	SG_ID VARCHAR(50) NOT NULL,
@@ -111,7 +111,7 @@ CREATE TABLE DATAGEAR_SCHEMA_GUARD
 
 ALTER TABLE DATAGEAR_SCHEMA_GUARD ADD CONSTRAINT DG_PK_SG_ID PRIMARY KEY (SG_ID);
 
---SQL历史
+/*SQL历史*/
 CREATE TABLE DATAGEAR_SQL_HISTORY
 (
 	SQLHIS_ID VARCHAR(50) NOT NULL,
@@ -125,7 +125,7 @@ ALTER TABLE DATAGEAR_SQL_HISTORY ADD CONSTRAINT DG_PK_SQLHIS_ID PRIMARY KEY (SQL
 
 ALTER TABLE DATAGEAR_SQL_HISTORY ADD CONSTRAINT DG_FK_SQLHIS_SCHEMA_ID FOREIGN KEY (SQLHIS_SCHEMA_ID) REFERENCES DATAGEAR_SCHEMA (SCHEMA_ID) ON DELETE CASCADE;
 
---数据分析项目
+/*数据分析项目*/
 CREATE TABLE DATAGEAR_ANALYSIS_PROJECT
 (
 	AP_ID VARCHAR(50) NOT NULL,
@@ -137,7 +137,7 @@ CREATE TABLE DATAGEAR_ANALYSIS_PROJECT
 
 ALTER TABLE DATAGEAR_ANALYSIS_PROJECT ADD CONSTRAINT DG_PK_AP_ID PRIMARY KEY (AP_ID);
 
---数据集
+/*数据集*/
 CREATE TABLE DATAGEAR_DATA_SET
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -155,7 +155,7 @@ ALTER TABLE DATAGEAR_DATA_SET ADD CONSTRAINT DG_FK_DS_APP_ID FOREIGN KEY (DS_AP_
 
 CREATE INDEX DG_IDX_DS_CREATE_USER_ID ON DATAGEAR_DATA_SET(DS_CREATE_USER_ID);
 
---数据集属性
+/*数据集属性*/
 CREATE TABLE DATAGEAR_DATA_SET_PROP
 (
 	PROP_DS_ID VARCHAR(50) NOT NULL,
@@ -170,7 +170,7 @@ ALTER TABLE DATAGEAR_DATA_SET_PROP ADD CONSTRAINT DG_FK_DS_PROP_DS_ID FOREIGN KE
 
 ALTER TABLE DATAGEAR_DATA_SET_PROP ADD CONSTRAINT DG_UK_DS_PROP_DS_ID_NAME UNIQUE (PROP_DS_ID, PROP_NAME);
 
---数据集参数
+/*数据集参数*/
 CREATE TABLE DATAGEAR_DATA_SET_PAR
 (
 	PAR_DS_ID VARCHAR(50) NOT NULL,
@@ -187,7 +187,7 @@ ALTER TABLE DATAGEAR_DATA_SET_PAR ADD CONSTRAINT DG_FK_DS_PAR_DS_ID FOREIGN KEY 
 
 ALTER TABLE DATAGEAR_DATA_SET_PAR ADD CONSTRAINT DG_UK_DS_PAR_DS_ID_NAME UNIQUE (PAR_DS_ID, PAR_NAME);
 
---数据集资源目录
+/*数据集资源目录*/
 CREATE TABLE DATAGEAR_DSR_DIRECTORY
 (
 	DD_ID VARCHAR(50) NOT NULL,
@@ -199,7 +199,7 @@ CREATE TABLE DATAGEAR_DSR_DIRECTORY
 
 ALTER TABLE DATAGEAR_DSR_DIRECTORY ADD CONSTRAINT DG_PK_DD_ID PRIMARY KEY (DD_ID);
 
---SQL数据集
+/*SQL数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_SQL
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -213,7 +213,7 @@ ALTER TABLE DATAGEAR_DATA_SET_SQL ADD CONSTRAINT DG_FK_DS_SQL_SCHEMA_ID FOREIGN 
 
 ALTER TABLE DATAGEAR_DATA_SET_SQL ADD CONSTRAINT DG_FK_DS_SQL_DS_ID FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID) ON DELETE CASCADE;
 
---JSON值数据集
+/*JSON值数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_JSON_VALUE
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -224,7 +224,7 @@ ALTER TABLE DATAGEAR_DATA_SET_JSON_VALUE ADD CONSTRAINT DG_PK_DS_JSONV_ID PRIMAR
 
 ALTER TABLE DATAGEAR_DATA_SET_JSON_VALUE ADD CONSTRAINT DG_FK_DS_JSONV_DS_ID FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID) ON DELETE CASCADE;
 
---JSON文件数据集
+/*JSON文件数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_JSON_FILE
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -243,7 +243,7 @@ ALTER TABLE DATAGEAR_DATA_SET_JSON_FILE ADD CONSTRAINT DG_FK_DS_JSONF_DS_ID FORE
 
 ALTER TABLE DATAGEAR_DATA_SET_JSON_FILE ADD CONSTRAINT DG_FK_DS_JSONF_DSRD_ID FOREIGN KEY (DS_DSRD_ID) REFERENCES DATAGEAR_DSR_DIRECTORY (DD_ID);
 
---Excel文件数据集
+/*Excel文件数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_EXCEL
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -265,7 +265,7 @@ ALTER TABLE DATAGEAR_DATA_SET_EXCEL ADD CONSTRAINT DG_FK_DS_EXCEL_DS_ID FOREIGN 
 
 ALTER TABLE DATAGEAR_DATA_SET_EXCEL ADD CONSTRAINT DG_FK_DS_EXCEL_DSRD_ID FOREIGN KEY (DS_DSRD_ID) REFERENCES DATAGEAR_DSR_DIRECTORY (DD_ID);
 
---CSV值数据集
+/*CSV值数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_CSV_VALUE
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -277,7 +277,7 @@ ALTER TABLE DATAGEAR_DATA_SET_CSV_VALUE ADD CONSTRAINT DG_PK_DS_CSVV_ID PRIMARY 
 
 ALTER TABLE DATAGEAR_DATA_SET_CSV_VALUE ADD CONSTRAINT DG_FK_DS_CSVV_DS_ID FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID) ON DELETE CASCADE;
 
---CSV文件数据集
+/*CSV文件数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_CSV_FILE
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -296,7 +296,7 @@ ALTER TABLE DATAGEAR_DATA_SET_CSV_FILE ADD CONSTRAINT DG_FK_DS_CSVF_DS_ID FOREIG
 
 ALTER TABLE DATAGEAR_DATA_SET_CSV_FILE ADD CONSTRAINT DG_FK_DS_CSVF_DSRD_ID FOREIGN KEY (DS_DSRD_ID) REFERENCES DATAGEAR_DSR_DIRECTORY (DD_ID);
 
---HTTP数据集
+/*HTTP数据集*/
 CREATE TABLE DATAGEAR_DATA_SET_HTTP
 (
 	DS_ID VARCHAR(50) NOT NULL,
@@ -314,7 +314,7 @@ ALTER TABLE DATAGEAR_DATA_SET_HTTP ADD CONSTRAINT DG_PK_DS_HTTP_ID PRIMARY KEY (
 
 ALTER TABLE DATAGEAR_DATA_SET_HTTP ADD CONSTRAINT DG_FK_DS_HTTP_DS_ID FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID) ON DELETE CASCADE;
 
---图表
+/*图表*/
 CREATE TABLE DATAGEAR_HTML_CHART_WIDGET
 (
 	HCW_ID VARCHAR(50) NOT NULL,
@@ -333,7 +333,7 @@ ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD CONSTRAINT DG_FK_HCW_AP_ID FOREIGN KE
 
 CREATE INDEX DG_IDX_HCW_CREATE_USER_ID ON DATAGEAR_HTML_CHART_WIDGET(HCW_CREATE_USER_ID);
 
---图表数据集信息
+/*图表数据集信息*/
 CREATE TABLE DATAGEAR_HCW_DS
 (
 	HCW_ID VARCHAR(50) NOT NULL,
@@ -351,7 +351,7 @@ ALTER TABLE DATAGEAR_HCW_DS ADD CONSTRAINT DG_FK_HCW_ID FOREIGN KEY (HCW_ID) REF
 
 ALTER TABLE DATAGEAR_HCW_DS ADD CONSTRAINT DG_FK_HCW_DS_ID FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID);
 
---看板
+/*看板*/
 CREATE TABLE DATAGEAR_HTML_DASHBOARD
 (
 	HD_ID VARCHAR(50) NOT NULL,
@@ -369,18 +369,18 @@ ALTER TABLE DATAGEAR_HTML_DASHBOARD ADD CONSTRAINT DG_FK_HD_AP_ID FOREIGN KEY (H
 
 CREATE INDEX DG_IDX_HD_CREATE_USER_ID ON DATAGEAR_HTML_DASHBOARD(HD_CREATE_USER_ID);
 
---整数取余函数
---valueNum    待取余的整数值
---divNum      除数
+/*整数取余函数*/
+/*valueNum    待取余的整数值*/
+/*divNum      除数*/
 CREATE FUNCTION DATAGEAR_FUNC_MODINT(valueNum INTEGER, divNum INTEGER) RETURNS INTEGER
 PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.datagear.management.util.DerbyFunctionSupport.modInt';
 
------------------------------------------
---version[3.0.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[3.0.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
---2022-03-07
---看板分享设置
+/*2022-03-07*/
+/*看板分享设置*/
 CREATE TABLE DATAGEAR_DB_SHARE_SET
 (
 	DSS_ID VARCHAR(50) NOT NULL,
@@ -393,130 +393,130 @@ ALTER TABLE DATAGEAR_DB_SHARE_SET ADD CONSTRAINT DG_PK_DSS_ID PRIMARY KEY (DSS_I
 
 ALTER TABLE DATAGEAR_DB_SHARE_SET ADD CONSTRAINT DG_FK_DSS_ID FOREIGN KEY (DSS_ID) REFERENCES DATAGEAR_HTML_DASHBOARD (HD_ID) ON DELETE CASCADE;
 
---2022-03-17
---数据集表添加可变数据模型列
+/*2022-03-17*/
+/*数据集表添加可变数据模型列*/
 ALTER TABLE DATAGEAR_DATA_SET ADD COLUMN DS_MUTABLE_MODEL VARCHAR(20);
 
------------------------------------------
---version[3.0.1], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[3.0.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
------------------------------------------
---version[3.1.0], DO NOT EDIT THIS LINE!
------------------------------------------
-
-
-
------------------------------------------
---version[3.2.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[3.1.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.0.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[3.2.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.0.1], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.0.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.1.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.0.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
---2022-09-17
---数据集资源目录表添加名称列
+
+
+/*-----------------------------------------*/
+/*--version[4.1.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
+/*2022-09-17*/
+/*数据集资源目录表添加名称列*/
 ALTER TABLE DATAGEAR_DSR_DIRECTORY ADD COLUMN DD_NAME VARCHAR(100);
 
 UPDATE DATAGEAR_DSR_DIRECTORY SET DD_NAME = DD_DIRECTORY;
 
 ALTER TABLE DATAGEAR_DSR_DIRECTORY ALTER COLUMN DD_NAME SET NOT NULL;
 
---2022-09-18
---扩充看板模板名称列
+/*2022-09-18*/
+/*扩充看板模板名称列*/
 ALTER TABLE DATAGEAR_HTML_DASHBOARD ALTER COLUMN HD_TEMPLATE SET DATA TYPE VARCHAR(1000);
 
---数据库模式表添加属性列
+/*数据库模式表添加属性列*/
 ALTER TABLE DATAGEAR_SCHEMA ADD COLUMN SCHEMA_PROPERTIES VARCHAR(2000);
 
---2022-09-19
---Excel数据集新增sheet名称列
+/*2022-09-19*/
+/*Excel数据集新增sheet名称列*/
 ALTER TABLE DATAGEAR_DATA_SET_EXCEL ADD COLUMN DS_SHEET_NAME VARCHAR(200);
 
---2022-09-26
---看板分享密码添加前缀
+/*2022-09-26*/
+/*看板分享密码添加前缀*/
 UPDATE DATAGEAR_DB_SHARE_SET SET DSS_PSD = '{std}' || DSS_PSD WHERE DSS_PSD IS NOT NULL AND DSS_PSD != '' AND DSS_PSD NOT LIKE '{std}%';
 
 
------------------------------------------
---version[4.1.1], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.1.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.2.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.2.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
---2022-10-26
---图表部件表添加属性值列
+/*2022-10-26*/
+/*图表部件表添加属性值列*/
 ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_ATTR_VALUES VARCHAR(5000);
 
---2022-11-06
---图表部件表添加选项信息列
+/*2022-11-06*/
+/*图表部件表添加选项信息列*/
 ALTER TABLE DATAGEAR_HTML_CHART_WIDGET ADD COLUMN HCW_OPTIONS VARCHAR(5000);
 
 
------------------------------------------
---version[4.3.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.3.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.3.1], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.3.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.4.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.4.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.5.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.5.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
---2023-02-14
---计算数据集属性
+/*2023-02-14*/
+/*计算数据集属性*/
 ALTER TABLE DATAGEAR_DATA_SET_PROP ADD COLUMN PROP_EVALUATED VARCHAR(10);
 
 ALTER TABLE DATAGEAR_DATA_SET_PROP ADD COLUMN PROP_EXPRESSION VARCHAR(1000);
 
 
------------------------------------------
---version[4.5.1], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.5.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
 
 
------------------------------------------
---version[4.6.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.6.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 
---2023-04-06
---升级用户密码加密策略，旧密码需添加'{sha256}'前缀
+/*2023-04-06*/
+/*升级用户密码加密策略，旧密码需添加'{sha256}'前缀*/
 UPDATE DATAGEAR_USER SET USER_PASSWORD = '{sha256}' || USER_PASSWORD WHERE USER_PASSWORD NOT LIKE '{%';
 
 
------------------------------------------
---version[4.7.0], DO NOT EDIT THIS LINE!
------------------------------------------
+/*-----------------------------------------*/
+/*--version[4.7.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
 

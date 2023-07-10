@@ -50,9 +50,9 @@ import org.springframework.core.io.ResourceLoader;
  * 它对SQL脚本文件格式有如下规范：
  * </p>
  * <ul>
- * <li>以“--”开头的行表示注释行，将被忽略执行；</li>
+ * <li><code>&#47;*...*&#47;</code>的行表示注释行，将被忽略执行；</li>
  * <li>空行用于分隔SQL语句；</li>
- * <li>“--version[1.0.0]...”是版本行，用于标识后续的SQL版本，直到下一个版本行或者文件末尾；</li>
+ * <li>“&#47;*--version[1.0.0]...*&#47;”的行是版本行，用于标识后续的SQL版本，直到下一个版本行或者文件末尾；</li>
  * </ul>
  * 
  * @author datagear@163.com
@@ -66,10 +66,13 @@ public class DbVersionManager extends AbstractVersionContentReader
 	public static final String DEFAULT_SQL_SCRIPT_LOCATION = ResourceLoader.CLASSPATH_URL_PREFIX
 			+ "org/datagear/management/ddl/datagear.sql";
 
-	/** 数据库SQL文件中版本号注释开头标识 */
-	public static final String VERSION_LINE_PREFIX = "--version[";
+	/** 注释行开头标识 */
+	public static final String COMMENT_LINE_PREFIX = "/*";
 
-	/** 数据库SQL文件中版本号注释结尾标识 */
+	/** 版本号行注释开头标识 */
+	public static final String VERSION_LINE_PREFIX = "/*--version[";
+
+	/** 版本号行注释中的版本号结尾标识 */
 	public static final String VERSION_LINE_SUFFIX = "]";
 
 	/**
@@ -710,6 +713,12 @@ public class DbVersionManager extends AbstractVersionContentReader
 				contents.add(deleteTailSemicolon(sql));
 			}
 		}
+	}
+
+	@Override
+	protected boolean isCommentLine(String line)
+	{
+		return line.startsWith(COMMENT_LINE_PREFIX);
 	}
 
 	@Override

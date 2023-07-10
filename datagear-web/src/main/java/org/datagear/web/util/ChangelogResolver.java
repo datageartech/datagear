@@ -42,7 +42,10 @@ public class ChangelogResolver extends AbstractVersionContentReader
 {
 	public static final String CHANGELOG_CLASS_PATH = "org/datagear/web/changelog.txt";
 
-	/** 数据库SQL文件中版本号注释开头标识 */
+	/** 注释行开头标识 */
+	public static final String COMMENT_LINE_PREFIX = "--";
+
+	/** 版本号注释开头标识 */
 	public static final String VERSION_LINE_PREFIX = "--v";
 	
 	private String changelogPath = CHANGELOG_CLASS_PATH;
@@ -165,6 +168,12 @@ public class ChangelogResolver extends AbstractVersionContentReader
 	@Override
 	protected void finishVersionContent(VersionContent versionContent, List<String> contents, StringBuilder cache)
 	{
+	}
+
+	@Override
+	protected boolean isCommentLine(String line)
+	{
+		return line.startsWith(COMMENT_LINE_PREFIX);
 	}
 
 	@Override
