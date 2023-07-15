@@ -36,16 +36,21 @@
 			<choose><when test="_pagingQuerySupported == true">
 			AND SQLHIS_ID NOT IN
 			(
-				<include refid="common.pagingQueryHead" />
-					SELECT
-						T.SQLHIS_ID
-					FROM
-						DATAGEAR_SQL_HISTORY T
-					WHERE
-						SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId}
-					ORDER BY
-						SQLHIS_CREATE_TIME DESC
-				<include refid="common.pagingQueryFoot" />
+				SELECT
+					RHID.SQLHIS_ID
+				FROM
+					(
+						<include refid="common.pagingQueryHead" />
+							SELECT
+								T.SQLHIS_ID
+							FROM
+								DATAGEAR_SQL_HISTORY T
+							WHERE
+								SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId}
+							ORDER BY
+								SQLHIS_CREATE_TIME DESC
+						<include refid="common.pagingQueryFoot" />
+					) RHID
 			)
 			</when><otherwise>
 			AND SQLHIS_CREATE_TIME &lt; #{deleteBeforeDate}
