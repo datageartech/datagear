@@ -113,7 +113,9 @@
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
 		var fm = po.vueFormModel();
-		subDataExchange.dependentNumber = fm.dependentNumberAuto;
+		
+		if(fm.importOption && fm.importOption.jsonDataFormat == po.JsonDataFormat.ROW_ARRAY)
+			subDataExchange.dependentNumber = fm.dependentNumberAuto;
 	};
 	
 	po.checkSubmitSubDataExchange = function(subDataExchange, index, action)
