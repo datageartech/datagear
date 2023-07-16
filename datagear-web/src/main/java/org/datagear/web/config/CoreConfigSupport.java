@@ -49,6 +49,7 @@ import org.datagear.connection.support.MySqlDevotedPropertiesProcessor;
 import org.datagear.connection.support.OracleDevotedPropertiesProcessor;
 import org.datagear.dataexchange.BatchDataExchange;
 import org.datagear.dataexchange.BatchDataExchangeService;
+import org.datagear.dataexchange.DataImportDependencyResolver;
 import org.datagear.dataexchange.DevotedDataExchangeService;
 import org.datagear.dataexchange.GenericDataExchangeService;
 import org.datagear.dataexchange.support.CsvDataExportService;
@@ -867,10 +868,17 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	MessageChannel sqlpadMessageChannel()
+	public MessageChannel sqlpadMessageChannel()
 	{
 		DefaultMessageChannel bean = new DefaultMessageChannel(
 				SqlpadExecutionSubmit.MAX_PAUSE_OVER_TIME_THREASHOLD_MINUTES * 60);
+		return bean;
+	}
+
+	@Bean
+	public DataImportDependencyResolver dataImportDependencyResolver()
+	{
+		DataImportDependencyResolver bean = new DataImportDependencyResolver(this.dbMetaResolver());
 		return bean;
 	}
 

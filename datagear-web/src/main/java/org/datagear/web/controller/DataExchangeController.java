@@ -53,6 +53,9 @@ import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataFormatContext;
+import org.datagear.dataexchange.DataImportDependencyResolver;
+import org.datagear.dataexchange.DataImportDependencyResolver.AutoDataImportDependency;
+import org.datagear.dataexchange.DataImportDependencyResolver.DataImportDependency;
 import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.Query;
@@ -131,6 +134,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DataExchangeService<DataExchange> dataExchangeService;
 
 	@Autowired
+	private DataImportDependencyResolver dataImportDependencyResolver;
+
+	@Autowired
 	private DBMetaResolver dbMetaResolver;
 
 	@Autowired
@@ -163,6 +169,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDataExchangeService(DataExchangeService<DataExchange> dataExchangeService)
 	{
 		this.dataExchangeService = dataExchangeService;
+	}
+
+	public DataImportDependencyResolver getDataImportDependencyResolver()
+	{
+		return dataImportDependencyResolver;
+	}
+
+	public void setDataImportDependencyResolver(DataImportDependencyResolver dataImportDependencyResolver)
+	{
+		this.dataImportDependencyResolver = dataImportDependencyResolver;
 	}
 
 	public DBMetaResolver getDbMetaResolver()
@@ -324,7 +340,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
 
-		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
+		final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
+		final List<AutoDataImportDependency> dds = new ArrayList<>(subDataExchangeForms.size());
 
 		for (TextValueFileSubDataImportForm subForm : subDataExchangeForms)
 		{
@@ -344,7 +361,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			csvDataImport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), csvDataImport);
-			subDataExchanges.add(subDataExchange);
+			AutoDataImportDependency dd = toAutoDataImportDependency(subDataExchange, subForm,
+					form.getDependentNumberAuto());
+
+			dds.add(dd);
 		}
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -354,15 +374,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 					Schema schema) throws Throwable
 			{
 				Connection cn = getConnection();
-				inflateDependentNumbers(cn, subDataExchangeForms, form.getDependentNumberAuto());
+
+				List<SubDataExchange> mySubDataExchanges = dataImportDependencyResolver.resolveAuto(dds, cn);
+				subDataExchanges.addAll(mySubDataExchanges);
 			}
 		}.execute();
 
-		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
-
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
-
-		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
 				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
@@ -438,7 +456,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
-		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
+
+		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
+		List<DataImportDependency> dds = new ArrayList<>(subDataExchangeForms.size());
 
 		for (FileSubDataImportForm subForm : subDataExchangeForms)
 		{
@@ -458,14 +478,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 			sqlDataImport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), sqlDataImport);
-			subDataExchanges.add(subDataExchange);
+			DataImportDependency dd = toDataImportDependency(subDataExchange, subForm);
+
+			dds.add(dd);
 		}
 
-		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
+		List<SubDataExchange> mySubDataExchanges = dataImportDependencyResolver.resolve(dds);
+		subDataExchanges.addAll(mySubDataExchanges);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
-
-		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
 				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
@@ -548,7 +569,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
 
-		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
+		final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
+		final List<AutoDataImportDependency> dds = new ArrayList<>(subDataExchangeForms.size());
 
 		for (TextValueFileSubDataImportForm subForm : subDataExchangeForms)
 		{
@@ -568,7 +590,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			jsonDataImport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), jsonDataImport);
-			subDataExchanges.add(subDataExchange);
+			AutoDataImportDependency dd = toAutoDataImportDependency(subDataExchange, subForm,
+					form.getDependentNumberAuto());
+
+			dds.add(dd);
 		}
 
 		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
@@ -581,16 +606,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 				{
 					Connection cn = getConnection();
 
-					inflateDependentNumbers(cn, subDataExchangeForms, form.getDependentNumberAuto());
+					List<SubDataExchange> mySubDataExchanges = dataImportDependencyResolver.resolveAuto(dds, cn);
+					subDataExchanges.addAll(mySubDataExchanges);
 				}
 			}.execute();
 		}
+		else
+		{
+			List<SubDataExchange> mySubDataExchanges = dataImportDependencyResolver.resolve(dds);
+			subDataExchanges.addAll(mySubDataExchanges);
+		}
 
-		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
-
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
-
-		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
 				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
@@ -670,7 +697,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 		Locale locale = getLocale(request);
 
-		List<SubDataExchange> subDataExchanges = new ArrayList<SubDataExchange>(subDataExchangeForms.size());
+		final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
+		final List<AutoDataImportDependency> dds = new ArrayList<>(subDataExchangeForms.size());
 
 		for (TextValueFileSubDataImportForm subForm : subDataExchangeForms)
 		{
@@ -689,7 +717,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			excelDataImport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subForm.getId(), subForm.getNumber(), excelDataImport);
-			subDataExchanges.add(subDataExchange);
+			AutoDataImportDependency dd = toAutoDataImportDependency(subDataExchange, subForm,
+					form.getDependentNumberAuto());
+
+			dds.add(dd);
 		}
 
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
@@ -700,15 +731,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 				Connection cn = getConnection();
 
-				inflateDependentNumbers(cn, subDataExchangeForms, form.getDependentNumberAuto());
+				List<SubDataExchange> mySubDataExchanges = dataImportDependencyResolver.resolveAuto(dds, cn);
+				subDataExchanges.addAll(mySubDataExchanges);
 			}
 		}.execute();
 
-		resolveSubDataExchangeDependencies(subDataExchanges, subDataExchangeForms);
-
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchanges);
-
-		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
 				dataExchangeId, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
@@ -1346,104 +1374,34 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return this.dataExchangeMessageChannel.pull(dataExchangeId, messageCount);
 	}
 	
-	/**
-	 * 根据表依赖关系填充依赖编号。
-	 * 
-	 * @param cn
-	 * @param subForms
-	 * @param inflateFlag 允许{@code null}
-	 */
-	protected void inflateDependentNumbers(Connection cn, List<? extends TextValueFileSubDataImportForm> subForms, String inflateFlag)
+	protected AutoDataImportDependency toAutoDataImportDependency(SubDataExchange subDataExchange,
+			TextValueFileSubDataImportForm form, String autoFlag)
 	{
-		if (subForms == null || subForms.isEmpty())
-			return;
-		
-		String[] tableNames = new String[subForms.size()];
-		for(int i=0, len=subForms.size(); i<len; i++)
+		String index = form.getNumber();
+		String tableName = form.getTableName();
+		String dependentNumber = form.getDependentNumber();
+
+		if (StringUtil.isEquals(autoFlag, dependentNumber))
 		{
-			TextValueFileSubDataImportForm subForm = subForms.get(i);
-			tableNames[i] = subForm.getTableName();
+			return new AutoDataImportDependency(subDataExchange, index, tableName);
 		}
-
-		List<String[]> importTabless = this.dbMetaResolver.getImportTables(cn, tableNames);
-
-		for(int i=0, len=subForms.size(); i<len; i++)
+		else
 		{
-			TextValueFileSubDataImportForm subForm = subForms.get(i);
-			
-			if(!StringUtil.isEquals(inflateFlag, subForm.getDependentNumber()))
-				continue;
-			
-			String[] myImportTables = importTabless.get(i);
-			
-			if (myImportTables == null || myImportTables.length == 0)
-				subForm.setDependentNumber("");
-			else
-			{
-				StringBuilder myDependentNumber = new StringBuilder();
+			String[] dependIndexes = (StringUtil.isBlank(dependentNumber) ? DataImportDependency.DEPEND_INDEXES_EMPTY
+					: StringUtil.split(dependentNumber, ",", true));
 
-				for (String myImportTable : myImportTables)
-				{
-					for(TextValueFileSubDataImportForm ifm : subForms)
-					{
-						if (myImportTable.equalsIgnoreCase(ifm.getTableName()))
-						{
-							if (myDependentNumber.length() != 0)
-								myDependentNumber.append(',');
-							
-							myDependentNumber.append(ifm.getNumber());
-						}
-					}
-				}
-
-				subForm.setDependentNumber(myDependentNumber.toString());
-			}
+			return new AutoDataImportDependency(subDataExchange, index, dependIndexes);
 		}
 	}
 
-	/**
-	 * 处理{@linkplain SubDataExchange}依赖。
-	 * 
-	 * @param subDataExchanges
-	 * @param subForms
-	 */
-	protected void resolveSubDataExchangeDependencies(List<? extends SubDataExchange> subDataExchanges,
-			List<? extends FileSubDataImportForm> subForms)
+	protected DataImportDependency toDataImportDependency(SubDataExchange subDataExchange, FileSubDataImportForm form)
 	{
-		for (int i = 0, len=subDataExchanges.size(); i < len; i++)
-		{
-			SubDataExchange subDataExchange = subDataExchanges.get(i);
-			FileSubDataImportForm subForm = subForms.get(i);
-			String dependentNumber = subForm.getDependentNumber();
-			dependentNumber = (dependentNumber == null ? null : dependentNumber.trim());
+		String index = form.getNumber();
+		String dependentNumber = form.getDependentNumber();
+		String[] dependIndexes = (StringUtil.isBlank(dependentNumber) ? DataImportDependency.DEPEND_INDEXES_EMPTY
+				: StringUtil.split(dependentNumber, ",", true));
 
-			if (isEmpty(dependentNumber))
-				continue;
-
-			String[] myDependentNumbers = dependentNumber.split(",");
-
-			Set<SubDataExchange> myDependencies = new HashSet<>();
-
-			for (int j = 0; j < myDependentNumbers.length; j++)
-			{
-				String myDependentNumber = myDependentNumbers[j].trim();
-
-				if (isEmpty(myDependentNumber))
-					continue;
-
-				for(int k=0, klen=subForms.size(); k< klen; k++)
-				{
-					if (subForms.get(k).getNumber().equals(myDependentNumber))
-					{
-						myDependencies.add(subDataExchanges.get(k));
-						break;
-					}
-				}
-			}
-
-			if (!myDependencies.isEmpty())
-				subDataExchange.setDependencies(myDependencies);
-		}
+		return new DataImportDependency(subDataExchange, index, dependIndexes);
 	}
 
 	protected List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
