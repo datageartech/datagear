@@ -22,6 +22,7 @@ import org.datagear.webapp.config.WebMvcConfigurerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 
 /**
@@ -34,7 +35,11 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 		// 错误页面完全自定义
 		ErrorMvcAutoConfiguration.class,
 		// Freemarker完全自定义
-		FreeMarkerAutoConfiguration.class })
+		FreeMarkerAutoConfiguration.class,
+		// 上传文件完全自定义为CommonsMultipartResolver，需禁用此项，不然可能会出现上传文件为null的情况
+		MultipartAutoConfiguration.class
+		//
+})
 public class DataGearApplication
 {
 	public static void main(String[] args)
