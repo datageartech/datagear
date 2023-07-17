@@ -75,7 +75,7 @@ public class TableType
 	}
 
 	/**
-	 * 过滤用户数据表。
+	 * 过滤保留用户数据表。
 	 * 
 	 * @param cn
 	 * @param dbMetaResolver
@@ -97,7 +97,7 @@ public class TableType
 	}
 
 	/**
-	 * 过滤用户数据实体表。
+	 * 过滤保留用户数据实体表。
 	 * 
 	 * @param cn
 	 * @param dbMetaResolver

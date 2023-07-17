@@ -81,6 +81,7 @@ import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.TableType;
+import org.datagear.meta.TableUtil;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PersistenceManager;
@@ -1497,23 +1498,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public List<String> getAllTableNames(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
+		List<String> tableNames = new ReturnSchemaConnExecutor<List<String>>(request, response, springModel,
 				schemaId, true)
 		{
 			@Override
-			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
+			protected List<String> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				Connection cn = getConnection();
 
 				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
-				return TableType.filterUserDataEntityTables(cn, getDbMetaResolver(), tables);
+				tables = TableType.filterUserDataEntityTables(cn, getDbMetaResolver(), tables);
+
+				return TableUtil.namesOf(tables, true);
 			}
 
 		}.execute();
-
-		List<String> tableNames = toTableNames(tables);
-		Collections.sort(tableNames);
 
 		return tableNames;
 	}
@@ -1550,16 +1550,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 	
-	protected List<String> toTableNames(List<SimpleTable> tables)
-	{
-		List<String> list = new ArrayList<>(tables.size());
-
-		for (SimpleTable table : tables)
-			list.add(table.getName());
-
-		return list;
-	}
-
 	/**
 	 * 计算导入/导出中消息发送间隔。
 	 * <p>

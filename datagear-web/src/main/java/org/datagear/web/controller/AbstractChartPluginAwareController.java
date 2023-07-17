@@ -42,10 +42,10 @@ import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.management.domain.ChartDataSetVO;
+import org.datagear.util.KeywordMatcher;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 import org.datagear.util.i18n.LabelUtil;
-import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util;
+package org.datagear.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

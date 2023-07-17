@@ -18,7 +18,6 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,7 +32,8 @@ import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
-import org.datagear.web.util.KeywordMatcher;
+import org.datagear.meta.TableUtil;
+import org.datagear.util.KeywordMatcher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,14 +80,8 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 
 		}.execute();
 
-		SchemaController.sortByTableName(tables);
-
-		List<SimpleTable> keywordTables = SchemaController.findByKeyword(tables, keyword);
-
-		List<String> tableNames = new ArrayList<>();
-
-		for (SimpleTable tableInfo : keywordTables)
-			tableNames.add(tableInfo.getName());
+		List<SimpleTable> keywordTables = TableUtil.findByKeyword(tables, keyword);
+		List<String> tableNames = TableUtil.namesOf(keywordTables, true);
 
 		return tableNames;
 	}

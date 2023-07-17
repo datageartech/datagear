@@ -18,8 +18,6 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -36,13 +34,13 @@ import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedExcepti
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
+import org.datagear.meta.TableUtil;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -322,9 +320,9 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		}.execute();
 
-		sortByTableName(tables);
+		TableUtil.sortAscByName(tables);
 
-		List<SimpleTable> keywordTables = findByKeyword(tables, pagingQuery.getKeyword());
+		List<SimpleTable> keywordTables = TableUtil.findByKeyword(tables, pagingQuery.getKeyword());
 
 		PagingData<SimpleTable> pagingData = new PagingData<>(pagingQuery.getPage(), keywordTables.size(),
 				pagingQuery.getPageSize());
@@ -399,42 +397,4 @@ public class SchemaController extends AbstractSchemaConnTableController
 			}
 		}
 	}
-
-	/**
-	 * 将{@linkplain SimpleTable}数组按照{@linkplain SimpleTable#getName()}排序。
-	 * 
-	 * @param tables
-	 */
-	public static void sortByTableName(List<SimpleTable> tables)
-	{
-		Collections.sort(tables, TABLE_SORT_BY_NAME_COMPARATOR);
-	}
-
-	/**
-	 * 根据表名称关键字查询{@linkplain TableInfo}列表。
-	 * 
-	 * @param tables
-	 * @param tableNameKeyword
-	 * @return
-	 */
-	public static List<SimpleTable> findByKeyword(List<SimpleTable> tables, String tableNameKeyword)
-	{
-		return KeywordMatcher.<SimpleTable> match(tables, tableNameKeyword, new KeywordMatcher.MatchValue<SimpleTable>()
-		{
-			@Override
-			public String[] get(SimpleTable t)
-			{
-				return new String[] { t.getName() };
-			}
-		});
-	}
-
-	public static Comparator<SimpleTable> TABLE_SORT_BY_NAME_COMPARATOR = new Comparator<SimpleTable>()
-	{
-		@Override
-		public int compare(SimpleTable o1, SimpleTable o2)
-		{
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
 }
