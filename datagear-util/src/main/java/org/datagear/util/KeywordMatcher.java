@@ -20,35 +20,58 @@ package org.datagear.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * 关键字查找工具类。
+ * <p>
+ * 用于支持以{@code '%'}作为关键字通配符的查找。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
 public class KeywordMatcher
 {
+	/** 是否忽略大小写 */
+	private boolean ignoreCase = true;
+
+	public KeywordMatcher()
+	{
+		super();
+	}
+
+	public boolean isIgnoreCase()
+	{
+		return ignoreCase;
+	}
+
+	public void setIgnoreCase(boolean ignoreCase)
+	{
+		this.ignoreCase = ignoreCase;
+	}
+
 	/**
-	 * 关键字匹配。
+	 * 查找关键字匹配的项。
 	 * 
 	 * @param list
 	 * @param keyword
+	 *            包含的{@code%}作为通配符
 	 * @param matchValue
 	 * @return
 	 */
-	public static <T> List<T> match(List<T> list, String keyword, MatchValue<T> matchValue)
+	public <T> List<T> match(List<T> list, String keyword, MatchValue<T> matchValue)
 	{
-		KeywordInfo keywordInfo = resolveKeywordInfo(keyword);
+		Pattern pattern = toPattern(keyword);
 
-		if (keywordInfo == null)
+		if (pattern == null)
 			return list;
 
 		List<T> result = new ArrayList<>();
 
 		for (T obj : list)
 		{
-			if (match(obj, keywordInfo, matchValue))
+			if (match(pattern, obj, matchValue))
 				result.add(obj);
 		}
 
@@ -56,178 +79,101 @@ public class KeywordMatcher
 	}
 
 	/**
-	 * 关键字匹配。
+	 * 查找关键字匹配的项。
 	 * 
 	 * @param array
 	 * @param keyword
+	 *            包含的{@code%}作为通配符
 	 * @param matchValue
 	 * @return
 	 */
-	public static <T> List<T> match(T[] array, String keyword, MatchValue<T> matchValue)
+	public <T> List<T> match(T[] array, String keyword, MatchValue<T> matchValue)
 	{
-		KeywordInfo keywordInfo = resolveKeywordInfo(keyword);
+		Pattern pattern = toPattern(keyword);
 
-		if (keywordInfo == null)
+		if (pattern == null)
 			return Arrays.asList(array);
 
 		List<T> result = new ArrayList<>();
 
 		for (T obj : array)
 		{
-			if (match(obj, keywordInfo, matchValue))
+			if (match(pattern, obj, matchValue))
 				result.add(obj);
 		}
 
 		return result;
 	}
 
-	protected static <T> boolean match(T obj, KeywordInfo keywordInfo, MatchValue<T> matchValue)
+	protected <T> boolean match(Pattern regex, T obj, MatchValue<T> matchValue)
 	{
-		String[] upperValues = matchValue.get(obj);
+		String[] values = matchValue.get(obj);
+		return match(regex, values);
+	}
 
-		if (upperValues == null)
+	protected boolean match(Pattern regex, String[] values)
+	{
+		if (values == null)
 			return false;
 
-		MatchType matchType = keywordInfo.getMatchType();
-		String keyword = keywordInfo.getUpperKeyword();
-
-		for (int i = 0; i < upperValues.length; i++)
+		for (String value : values)
 		{
-			if (upperValues[i] != null)
-				upperValues[i] = upperValues[i].toUpperCase();
+			if (value != null && regex.matcher(value).matches())
+				return true;
 		}
 
-		if (MatchType.START.equals(keywordInfo.matchType))
-		{
-			for (String upperValue : upperValues)
-			{
-				if (upperValue != null && upperValue.startsWith(keyword))
-					return true;
-			}
-
-			return false;
-		}
-		else if (MatchType.END.equals(matchType))
-		{
-			for (String upperValue : upperValues)
-			{
-				if (upperValue != null && upperValue.endsWith(keyword))
-					return true;
-			}
-
-			return false;
-		}
-		else if (MatchType.CONTAIN.equals(matchType))
-		{
-			for (String upperValue : upperValues)
-			{
-				if (upperValue != null && upperValue.indexOf(keyword) >= 0)
-					return true;
-			}
-
-			return false;
-		}
-		else
-			return false;
+		return false;
 	}
 
 	/**
-	 * 解析{@linkplain KeywordInfo}。
+	 * 将查询关键字解析为{@linkplain Pattern}。
 	 * 
 	 * @param keyword
-	 * @return
+	 * @return 当{@code keyword}为{@code null}、{@code ""}时返回{@code null}
 	 */
-	protected static KeywordInfo resolveKeywordInfo(String keyword)
+	protected Pattern toPattern(String keyword)
 	{
-		if (keyword == null)
+		if (keyword == null || keyword.isEmpty())
 			return null;
 
-		keyword = keyword.trim();
+		if (!keyword.startsWith("%") && !keyword.endsWith("%"))
+			keyword = "%" + keyword + "%";
 
-		if (keyword.isEmpty())
-			return null;
+		StringBuilder pb = new StringBuilder();
 
-		MatchType matchType;
+		pb.append('^');
 
-		if (keyword.startsWith("%"))
+		char[] cs = keyword.toCharArray();
+		StringBuilder lb = new StringBuilder();
+		for (int i = 0; i < cs.length; i++)
 		{
-			matchType = MatchType.END;
-			keyword = keyword.substring(1);
+			char c = cs[i];
 
-			if (keyword.endsWith("%"))
+			if (c == '%')
 			{
-				matchType = MatchType.CONTAIN;
-				keyword = keyword.substring(0, keyword.length() - 1);
+				if (lb.length() > 0)
+				{
+					pb.append(Pattern.quote(lb.toString()));
+					lb.delete(0, lb.length());
+				}
+
+				pb.append(".*");
 			}
+			else
+				lb.append(c);
 		}
+
+		if (lb.length() > 0)
+			pb.append(Pattern.quote(lb.toString()));
+
+		pb.append('$');
+
+		String regex = pb.toString();
+
+		if (isIgnoreCase())
+			return Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		else
-		{
-			matchType = MatchType.CONTAIN;
-
-			if (keyword.endsWith("%"))
-			{
-				matchType = MatchType.START;
-				keyword = keyword.substring(0, keyword.length() - 1);
-			}
-		}
-
-		return new KeywordInfo(matchType, keyword);
-	}
-
-	protected static class KeywordInfo
-	{
-		private MatchType matchType;
-
-		private String keyword;
-
-		private String upperKeyword;
-
-		public KeywordInfo()
-		{
-			super();
-		}
-
-		public KeywordInfo(MatchType matchType, String keyword)
-		{
-			super();
-			this.matchType = matchType;
-			this.keyword = keyword;
-			this.upperKeyword = keyword.toUpperCase();
-		}
-
-		public MatchType getMatchType()
-		{
-			return matchType;
-		}
-
-		public void setMatchType(MatchType matchType)
-		{
-			this.matchType = matchType;
-		}
-
-		public String getKeyword()
-		{
-			return keyword;
-		}
-
-		public void setKeyword(String keyword)
-		{
-			this.keyword = keyword;
-		}
-
-		public String getUpperKeyword()
-		{
-			return upperKeyword;
-		}
-	}
-
-	protected enum MatchType
-	{
-		START,
-
-		CONTAIN,
-
-		END
+			return Pattern.compile(regex);
 	}
 
 	/**

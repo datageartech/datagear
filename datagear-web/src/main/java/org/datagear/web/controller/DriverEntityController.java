@@ -45,6 +45,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.KeywordMatcher;
+import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.web.util.DriverInfo;
 import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,8 @@ public class DriverEntityController extends AbstractController
 	@Autowired
 	private File tempDirectory;
 
+	private KeywordMatcher keywordMatcher = new KeywordMatcher();
+
 	private List<String> commonDriverClassNames = Collections
 			.unmodifiableList(DriverInfo.getDriverClassNames(DriverInfo.getCommonInDriverInfos()));
 
@@ -101,6 +104,16 @@ public class DriverEntityController extends AbstractController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public KeywordMatcher getKeywordMatcher()
+	{
+		return keywordMatcher;
+	}
+
+	public void setKeywordMatcher(KeywordMatcher keywordMatcher)
+	{
+		this.keywordMatcher = keywordMatcher;
 	}
 
 	public List<String> getCommonDriverClassNames()
@@ -571,8 +584,7 @@ public class DriverEntityController extends AbstractController
 	 */
 	protected List<DriverEntity> findByKeyword(List<DriverEntity> driverEntities, String keyword)
 	{
-		return KeywordMatcher.<DriverEntity> match(driverEntities, keyword,
-				new KeywordMatcher.MatchValue<DriverEntity>()
+		return this.keywordMatcher.match(driverEntities, keyword, new MatchValue<DriverEntity>()
 				{
 					@Override
 					public String[] get(DriverEntity t)

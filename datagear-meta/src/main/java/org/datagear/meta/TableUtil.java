@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.util.KeywordMatcher;
+import org.datagear.util.KeywordMatcher.MatchValue;
 
 /**
  * 表常用工具类。
@@ -79,15 +80,59 @@ public class TableUtil
 	 * 根据表名称关键字查询{@linkplain TableInfo}列表。
 	 * 
 	 * @param tables
-	 * @param tableNameKeyword
+	 * @param nameKeyword
 	 * @return
 	 */
-	public static <T extends AbstractTable> List<T> findByKeyword(List<T> tables, String tableNameKeyword)
+	public static <T extends AbstractTable> List<T> findTable(List<T> tables, String nameKeyword)
 	{
-		return KeywordMatcher.<T> match(tables, tableNameKeyword, new KeywordMatcher.MatchValue<T>()
+		KeywordMatcher km = new KeywordMatcher();
+
+		return km.match(tables, nameKeyword, new MatchValue<T>()
 		{
 			@Override
 			public String[] get(T t)
+			{
+				return new String[] { t.getName() };
+			}
+		});
+	}
+
+	/**
+	 * 根据名称关键字查询{@linkplain Column}列表。
+	 * 
+	 * @param columns
+	 * @param nameKeyword
+	 * @return
+	 */
+	public static List<Column> findColumn(Column[] columns, String nameKeyword)
+	{
+		KeywordMatcher km = new KeywordMatcher();
+
+		return km.match(columns, nameKeyword, new MatchValue<Column>()
+		{
+			@Override
+			public String[] get(Column t)
+			{
+				return new String[] { t.getName() };
+			}
+		});
+	}
+
+	/**
+	 * 根据名称关键字查询{@linkplain Column}列表。
+	 * 
+	 * @param columns
+	 * @param nameKeyword
+	 * @return
+	 */
+	public static List<Column> findColumn(List<Column> columns, String nameKeyword)
+	{
+		KeywordMatcher km = new KeywordMatcher();
+
+		return km.match(columns, nameKeyword, new MatchValue<Column>()
+		{
+			@Override
+			public String[] get(Column t)
 			{
 				return new String[] { t.getName() };
 			}
@@ -98,6 +143,15 @@ public class TableUtil
 	{
 		@Override
 		public int compare(AbstractTable o1, AbstractTable o2)
+		{
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
+
+	protected static final Comparator<Column> COLUMN_SORT_BY_NAME_COMPARATOR = new Comparator<Column>()
+	{
+		@Override
+		public int compare(Column o1, Column o2)
 		{
 			return o1.getName().compareTo(o2.getName());
 		}

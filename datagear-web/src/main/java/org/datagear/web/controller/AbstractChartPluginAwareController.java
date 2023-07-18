@@ -43,6 +43,7 @@ import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.util.KeywordMatcher;
+import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 import org.datagear.util.i18n.LabelUtil;
@@ -63,6 +64,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
 
 	private ChartPluginCategorizationResolver chartPluginCategorizationResolver = new ChartPluginCategorizationResolver();
+
+	private KeywordMatcher keywordMatcher = new KeywordMatcher();
 
 	public AbstractChartPluginAwareController()
 	{
@@ -88,6 +91,16 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			ChartPluginCategorizationResolver chartPluginCategorizationResolver)
 	{
 		this.chartPluginCategorizationResolver = chartPluginCategorizationResolver;
+	}
+
+	public KeywordMatcher getKeywordMatcher()
+	{
+		return keywordMatcher;
+	}
+
+	public void setKeywordMatcher(KeywordMatcher keywordMatcher)
+	{
+		this.keywordMatcher = keywordMatcher;
 	}
 
 	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginView> chartPluginVOs)
@@ -143,8 +156,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 				pluginViews.add(toHtmlChartPluginView(plugin, themeName, locale));
 		}
 
-		return KeywordMatcher.<HtmlChartPluginView> match(pluginViews, keyword,
-				new KeywordMatcher.MatchValue<HtmlChartPluginView>()
+		return this.keywordMatcher.match(pluginViews, keyword, new MatchValue<HtmlChartPluginView>()
 				{
 					@Override
 					public String[] get(HtmlChartPluginView t)

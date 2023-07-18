@@ -19,13 +19,11 @@ package org.datagear.web.controller;
 
 import java.sql.Connection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.meta.Column;
@@ -33,7 +31,6 @@ import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
 import org.datagear.meta.TableUtil;
-import org.datagear.util.KeywordMatcher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,7 +77,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 
 		}.execute();
 
-		List<SimpleTable> keywordTables = TableUtil.findByKeyword(tables, keyword);
+		List<SimpleTable> keywordTables = TableUtil.findTable(tables, keyword);
 		List<String> tableNames = TableUtil.namesOf(keywordTables, true);
 
 		return tableNames;
@@ -122,38 +119,9 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 
 		Column[] columns = tableObj.getColumns();
 		
-		List<Column> keywordColumns = findByKeyword(columns, keyword);
-		//使用列定义顺序而非名称排序顺序更合适
-		//Collections.sort(keywordColumns, COLUMN_SORT_BY_NAME_COMPARATOR);
+		// 这里无需排序，使用列定义顺序而非名称排序顺序更合适
+		List<Column> keywordColumns = TableUtil.findColumn(columns, keyword);
 		
 		return keywordColumns;
 	}
-
-	/**
-	 * 根据列名称关键字查询{@linkplain ColumnInfo}列表。
-	 * 
-	 * @param columnInfos
-	 * @param columnNameKeyword
-	 * @return
-	 */
-	public static List<Column> findByKeyword(Column[] columnInfos, String columnNameKeyword)
-	{
-		return KeywordMatcher.<Column> match(columnInfos, columnNameKeyword, new KeywordMatcher.MatchValue<Column>()
-		{
-			@Override
-			public String[] get(Column t)
-			{
-				return new String[] { t.getName() };
-			}
-		});
-	}
-
-	public static Comparator<Column> COLUMN_SORT_BY_NAME_COMPARATOR = new Comparator<Column>()
-	{
-		@Override
-		public int compare(Column o1, Column o2)
-		{
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
 }

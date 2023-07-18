@@ -322,7 +322,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		TableUtil.sortAscByName(tables);
 
-		List<SimpleTable> keywordTables = TableUtil.findByKeyword(tables, pagingQuery.getKeyword());
+		List<SimpleTable> keywordTables = TableUtil.findTable(tables, pagingQuery.getKeyword());
 
 		PagingData<SimpleTable> pagingData = new PagingData<>(pagingQuery.getPage(), keywordTables.size(),
 				pagingQuery.getPageSize());

@@ -39,6 +39,7 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.KeywordMatcher;
+import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.CoreConfigSupport;
 import org.datagear.web.util.OperationMessage;
@@ -72,6 +73,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@Autowired
 	private File tempDirectory;
 
+	private KeywordMatcher keywordMatcher = new KeywordMatcher();
+
 	private ServletContext servletContext;
 
 	public DashboardGlobalResController()
@@ -97,6 +100,16 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public KeywordMatcher getKeywordMatcher()
+	{
+		return keywordMatcher;
+	}
+
+	public void setKeywordMatcher(KeywordMatcher keywordMatcher)
+	{
+		this.keywordMatcher = keywordMatcher;
 	}
 
 	public ServletContext getServletContext()
@@ -391,8 +404,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		if (StringUtil.isEmpty(keyword))
 			return resItems;
 
-		return KeywordMatcher.<DashboardGlobalResItem> match(resItems, keyword,
-				new KeywordMatcher.MatchValue<DashboardGlobalResItem>()
+		return this.keywordMatcher.match(resItems, keyword, new MatchValue<DashboardGlobalResItem>()
 				{
 					@Override
 					public String[] get(DashboardGlobalResItem t)
