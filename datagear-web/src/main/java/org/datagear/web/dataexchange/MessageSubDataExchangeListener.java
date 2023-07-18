@@ -100,6 +100,12 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 		return sendExchangingMessageInterval;
 	}
 
+	/**
+	 * 设置发送交换中消息的间隔毫秒数
+	 * 
+	 * @param sendExchangingMessageInterval
+	 *            {@code -1}表示不发送
+	 */
 	public void setSendExchangingMessageInterval(int sendExchangingMessageInterval)
 	{
 		this.sendExchangingMessageInterval = sendExchangingMessageInterval;
@@ -179,6 +185,9 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	protected boolean isTimeSendExchangingMessage()
 	{
+		if (this.sendExchangingMessageInterval < 0)
+			return false;
+
 		long currentTime = System.currentTimeMillis();
 
 		if (currentTime - this._prevSendExchangingMessageTime < this.sendExchangingMessageInterval)
