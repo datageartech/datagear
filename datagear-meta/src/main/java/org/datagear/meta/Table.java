@@ -175,6 +175,34 @@ public class Table extends AbstractTable
 		return columns;
 	}
 
+	/**
+	 * 给定列是否是外键列。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean isImportKeyColumn(String name)
+	{
+		if (!this.hasImportKey())
+			return false;
+
+		for (ImportKey ik : this.importKeys)
+		{
+			String[] colNames = ik.getColumnNames();
+
+			if (colNames != null)
+			{
+				for (String colName : colNames)
+				{
+					if (name.equals(colName))
+						return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	@Override
 	public String toString()
 	{

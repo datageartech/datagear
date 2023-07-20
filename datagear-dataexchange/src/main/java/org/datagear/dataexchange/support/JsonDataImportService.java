@@ -38,6 +38,7 @@ import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowColumnDataIndex;
 import org.datagear.meta.Column;
+import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
@@ -179,16 +180,16 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 	 * @param context
 	 * @param cn
 	 * @param p
-	 * @param table
+	 * @param tableName
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
 	protected void importJsonArray(JsonDataImport dataExchange, IndexFormatDataExchangeContext context, Connection cn,
-			JsonParser p, String table) throws Throwable
+			JsonParser p, String tableName) throws Throwable
 	{
 		JsonDataImportOption importOption = dataExchange.getImportOption();
 
-		List<Column> totalColumns = getColumns(cn, table);
+		Table table = getTableIfValid(cn, tableName);
 
 		PreparedStatement prevSt = null;
 		List<Column> prevColumns = null;
@@ -209,7 +210,7 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 
 			Map<String, Object> row = parseNextObject(p);
 
-			Object[] myColumnValuess = getColumnValues(dataExchange, table, totalColumns, row);
+			Object[] myColumnValuess = getColumnValues(dataExchange, table, row);
 			List<Column> myColumns = (List<Column>) myColumnValuess[0];
 			List<Object> myColumnValues = (List<Object>) myColumnValuess[1];
 
@@ -228,7 +229,7 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 				{
 					JdbcUtil.closeStatement(prevSt);
 
-					String sql = buildInsertPreparedSql(cn, table, myColumns);
+					String sql = buildInsertPreparedSql(cn, tableName, myColumns);
 
 					prevSt = cn.prepareStatement(sql);
 					prevColumns = myColumns;
@@ -248,17 +249,17 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 	 * 
 	 * @param dataExchange
 	 * @param table
-	 * @param columns
 	 * @param row
 	 * @return
 	 * @throws ColumnNotFoundException
 	 */
-	protected Object[] getColumnValues(JsonDataImport dataExchange, String table, List<Column> columns,
+	protected Object[] getColumnValues(JsonDataImport dataExchange, Table table,
 			Map<String, Object> row) throws ColumnNotFoundException
 	{
 		List<Column> myColumns = new ArrayList<>();
 		List<Object> myColumnValues = new ArrayList<>();
 
+		Column[] columns = table.getColumns();
 		for (Column column : columns)
 		{
 			if (row.containsKey(column.getName()))
@@ -275,8 +276,8 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 
 			for (String myName : myNames)
 			{
-				if (findColumn(columns, myName) == null)
-					throw new ColumnNotFoundException(table, myName);
+				if (table.getColumn(myName) == null)
+					throw new ColumnNotFoundException(table.getName(), myName);
 			}
 		}
 

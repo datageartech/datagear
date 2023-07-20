@@ -36,18 +36,19 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.codec.DecoderException;
 import org.datagear.meta.Column;
+import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.NumberParserException;
 import org.datagear.util.SqlParamValue;
+import org.datagear.util.StringUtil;
 import org.datagear.util.resource.ResourceFactory;
 
 /**
@@ -398,73 +399,44 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 移除{@code null}列信息位置对应的列值。
-	 * <p>
-	 * 如果没有{@code null}列信息，将返回原列值列表。
-	 * </p>
+	 * 扩容集合直到满足长度。
 	 * 
-	 * @param rawColumns
-	 * @param noNullColumns
-	 * @param columnValues
-	 * @return
+	 * @param <G>
+	 * @param list
+	 * @param size
+	 * @param expandValue
 	 */
-	protected <G> List<G> removeNullColumnValues(List<Column> rawColumns, List<Column> noNullColumns,
-			List<G> columnValues)
+	protected <G> void expandToSize(Collection<G> list, int size, G expandValue)
 	{
-		if (noNullColumns == rawColumns || noNullColumns.size() == rawColumns.size())
-			return columnValues;
+		int expandCount = (size - list.size());
 
-		List<G> newColumnValues = new ArrayList<>(noNullColumns.size());
-
-		for (G ele : columnValues)
+		for (int i = 0; i < expandCount; i++)
 		{
-			if (ele == null)
-				continue;
-
-			newColumnValues.add(ele);
+			list.add(expandValue);
 		}
-
-		return newColumnValues;
 	}
 
 	/**
 	 * 移除{@linkplain Column}列表中的{@code null}元素。
-	 * <p>
-	 * 如果没有{@code null}元素，将返回原列表。
-	 * </p>
 	 * 
 	 * @param columns
 	 * @return
 	 */
 	protected List<Column> removeNullColumns(List<Column> columns)
 	{
-		boolean noNull = true;
-
-		for (Column column : columns)
-		{
-			if (column == null)
-			{
-				noNull = false;
-				break;
-			}
-		}
-
-		if (noNull)
-			return columns;
-
-		List<Column> list = new ArrayList<>(columns.size());
+		List<Column> re = new ArrayList<>(columns.size());
 
 		for (Column column : columns)
 		{
 			if (column != null)
-				list.add(column);
+				re.add(column);
 		}
 
-		return list;
+		return re;
 	}
 
 	/**
-	 * 获取表所有咧信息。
+	 * 获取表信息。
 	 * 
 	 * @param cn
 	 * @param table
@@ -472,68 +444,101 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @return
 	 * @throws TableNotFoundException
 	 */
-	protected List<Column> getColumns(Connection cn, String table, DBMetaResolver dbMetaResolver)
+	protected Table getTableIfValid(Connection cn, String table, DBMetaResolver dbMetaResolver)
 			throws TableNotFoundException
 	{
-		Column[] allColumns = dbMetaResolver.getColumns(cn, table);
+		Table t = dbMetaResolver.getTable(cn, table);
 
-		if (allColumns == null || allColumns.length == 0)
+		if (!t.hasColumn())
 			throw new TableNotFoundException(table);
 
-		return Arrays.asList(allColumns);
+		return t;
 	}
 
 	/**
-	 * 获取表指定列信息列表。
-	 * <p>
-	 * 当指定位置的列不存在时，如果{@code nullIfColumnNotFound}为{@code true}，返回列表对应位置将为{@code null}，
-	 * 否则，将立刻抛出{@linkplain ColumnNotFoundException}。
-	 * </p>
+	 * 查找表列。
 	 * 
-	 * @param cn
 	 * @param table
 	 * @param columnNames
 	 * @param nullIfColumnNotFound
-	 * @param dbMetaResolver
+	 *            当为{@code false}时，如果未找到指定名称的列，将抛出{@linkplain ColumnNotFoundException}异常
 	 * @return
-	 * @throws TableNotFoundException
 	 * @throws ColumnNotFoundException
 	 */
-	protected List<Column> getColumns(Connection cn, String table, List<String> columnNames,
-			boolean nullIfColumnNotFound, DBMetaResolver dbMetaResolver)
-			throws TableNotFoundException, ColumnNotFoundException
+	protected List<Column> findColumns(Table table, List<String> columnNames, boolean nullIfColumnNotFound)
+			throws ColumnNotFoundException
 	{
 		int size = columnNames.size();
 
 		List<Column> columns = new ArrayList<>(size);
 
-		Column[] allColumns = dbMetaResolver.getColumns(cn, table);
-
-		if (allColumns == null || allColumns.length == 0)
-			throw new TableNotFoundException(table);
-
-		for (int i = 0; i < size; i++)
+		for (String columnName : columnNames)
 		{
-			String columnName = columnNames.get(i);
-
-			Column column = null;
-
-			for (int j = 0; j < allColumns.length; j++)
-			{
-				if (allColumns[j].getName().equals(columnName))
-				{
-					column = allColumns[j];
-					break;
-				}
-			}
+			Column column = table.getColumn(columnName);
 
 			if (!nullIfColumnNotFound && column == null)
-				throw new ColumnNotFoundException(table, columnName);
+				throw new ColumnNotFoundException(table.getName(), columnName);
 
 			columns.add(column);
 		}
 
 		return columns;
+	}
+
+	/**
+	 * 是否外键列。
+	 * 
+	 * @param table
+	 * @param columns
+	 * @return
+	 */
+	protected List<Boolean> isImportKeyColumns(Table table, List<Column> columns)
+	{
+		List<Boolean> re = new ArrayList<Boolean>(columns.size());
+
+		for (Column column : columns)
+		{
+			re.add(table.isImportKeyColumn(column.getName()));
+		}
+
+		return re;
+	}
+
+	/**
+	 * 移除{@code null}列信息位置对应的值。
+	 * 
+	 * @param columns
+	 * @param columnValues
+	 * @return
+	 */
+	protected <G> List<G> removeValueOfNullColumn(List<Column> columns, List<G> columnValues)
+	{
+		List<G> re = new ArrayList<>(columnValues.size());
+
+		for (int i = 0, len = columns.size(); i < len; i++)
+		{
+			if (columns.get(i) != null)
+			{
+				re.add(columnValues.get(i));
+			}
+		}
+
+		return re;
+	}
+
+	/**
+	 * 移除{@code null}列信息位置对应的值。
+	 * 
+	 * @param <G>
+	 * @param columns
+	 * @param columnValues
+	 * @param expandValue
+	 * @return
+	 */
+	protected <G> List<G> removeValueOfNullColumnExpanded(List<Column> columns, List<G> columnValues, G expandValue)
+	{
+		expandToSize(columnValues, columns.size(), expandValue);
+		return removeValueOfNullColumn(columns, columnValues);
 	}
 
 	/**
@@ -580,6 +585,39 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
+	 * 将空字符串的外键列值设为{@code null}。
+	 * 
+	 * @param <V>
+	 * @param columns
+	 * @param importKeyColumns
+	 * @param columnValues
+	 */
+	protected <V> void setNullForEmptyIfImportKey(List<Column> columns, List<Boolean> importKeyColumns,
+			List<V> columnValues)
+	{
+		for (int i = 0, len = columns.size(); i < len; i++)
+		{
+			Column col = columns.get(i);
+
+			// 只有在列允许null值时才应设置
+			if (col.isNullable())
+			{
+				boolean ikc = importKeyColumns.get(i);
+
+				if (ikc)
+				{
+					V cv = columnValues.get(i);
+
+					if (cv instanceof String && (StringUtil.isEmpty((String) cv)))
+					{
+						columnValues.set(i, null);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * 设置{@linkplain PreparedStatement}的参数值，并在必要时进行数据类型转换。
 	 * 
 	 * @param cn
@@ -588,7 +626,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param paramValue
 	 * @param column
 	 * @param dataFormatContext
-	 *            当{@code parameterValue}为字符串且需要类型转换时使用，允许为{@code null}
+	 *            允许为{@code null}，当{@code parameterValue}为字符串且需要类型转换时使用
 	 * @throws SQLException
 	 * @throws ParseException
 	 * @throws NumberParserException
@@ -1082,7 +1120,8 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 */
 	protected boolean importValueData(Connection cn, PreparedStatement st, List<Column> columns,
 			List<? extends Object> columnValues, DataIndex dataIndex, boolean nullForIllegalColumnValue,
-			ExceptionResolve exceptionResolve, DataFormatContext dataFormatContext, ValueDataImportListener listener)
+			ExceptionResolve exceptionResolve, DataFormatContext dataFormatContext,
+			ValueDataImportListener listener)
 			throws DataExchangeException
 	{
 		DataExchangeException exception = null;

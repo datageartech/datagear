@@ -33,6 +33,15 @@ public class ValueDataImportOption extends DataImportOption
 	/** 当列值非法时设置为null */
 	private boolean nullForIllegalColumnValue;
 
+	/**
+	 * 如果列是外键且列值为空字符串时，是否设置为null。
+	 * <p>
+	 * 某些文本类数据源（比如CSV）本应为{@code null}的值可能会读取为空字符串，
+	 * 此时如果对应列为外键列，某些数据库（比如MySQL-5.7）无法处理，需要重新设置为{@code null}才可以。
+	 * </p>
+	 */
+	private boolean nullForEmptyImportKey = false;
+
 	public ValueDataImportOption()
 	{
 		super();
@@ -66,11 +75,21 @@ public class ValueDataImportOption extends DataImportOption
 		this.nullForIllegalColumnValue = nullForIllegalColumnValue;
 	}
 
+	public boolean isNullForEmptyImportKey()
+	{
+		return nullForEmptyImportKey;
+	}
+
+	public void setNullForEmptyImportKey(boolean nullForEmptyImportKey)
+	{
+		this.nullForEmptyImportKey = nullForEmptyImportKey;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [exceptionResolve=" + getExceptionResolve() + ", ignoreInexistentColumn="
-				+ ignoreInexistentColumn + ", nullForIllegalColumnValue=" + nullForIllegalColumnValue + "]";
+		return getClass().getSimpleName() + " [ignoreInexistentColumn=" + ignoreInexistentColumn
+				+ ", nullForIllegalColumnValue=" + nullForIllegalColumnValue + ", nullForEmptyImportKey="
+				+ nullForEmptyImportKey + ", exceptionResolve=" + getExceptionResolve() + "]";
 	}
-
 }

@@ -55,7 +55,9 @@ import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
+import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.meta.Column;
+import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
@@ -259,8 +261,10 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 		private SSTRecord _sstRecord;
 		private List<String> _columnNames = null;
 		private List<Object> _columnValues = null;
+		private Table _table = null;
 		private List<Column> _columns = null;
-		private List<Column> _noNullColumns = null;
+		private List<Column> _nonNullColumns = null;
+		private List<Boolean> _nonNullImportKeyColumns = null;
 		private PreparedStatement _statement = null;
 
 		public XlsEventListener()
@@ -450,6 +454,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 
 			if (record instanceof LastCellOfRowDummyRecord)
 			{
+				ValueDataImportOption importOption = this.excelDataImport.getImportOption();
 				LastCellOfRowDummyRecord lastDummyRecord = (LastCellOfRowDummyRecord) record;
 				int row = lastDummyRecord.getRow();
 
@@ -461,16 +466,18 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 				{
 					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
 							: this._sheetNames.get(this._sheetIndex));
-					this._columns = ExcelDataImportService.this.getColumns(this.connection, tableName,
-							this._columnNames, this.excelDataImport.getImportOption().isIgnoreInexistentColumn());
-
-					this._noNullColumns = removeNullColumns(this._columns);
+					this._table = ExcelDataImportService.this.getTableIfValid(connection, tableName);
+					this._columns = ExcelDataImportService.this.findColumns(this._table, this._columnNames,
+							importOption.isIgnoreInexistentColumn());
+					this._nonNullColumns = removeNullColumns(this._columns);
+					this._nonNullImportKeyColumns = ExcelDataImportService.this.isImportKeyColumns(this._table,
+							this._nonNullColumns);
 
 					// 表不匹配
-					if (this._noNullColumns == null || this._noNullColumns.isEmpty())
+					if (this._nonNullColumns == null || this._nonNullColumns.isEmpty())
 						throw new TableMismatchException(tableName);
 
-					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumns);
+					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._nonNullColumns);
 					this._statement = createPreparedStatementUnchecked(this.connection, sql);
 				}
 				// 导入数据
@@ -481,15 +488,21 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 						;
 					else
 					{
-						List<Object> columnValues = removeNullColumnValues(this._columns, this._noNullColumns,
-								this._columnValues);
+						// Excel如果某行的右侧所有列都为空，可能不会读取到_columnValues，所以需要在这里扩容确保长度一致
+						List<Object> columnValues = removeValueOfNullColumnExpanded(this._columns, this._columnValues,
+								null);
+
+						if (importOption.isNullForEmptyImportKey())
+						{
+							setNullForEmptyIfImportKey(this._nonNullColumns, this._nonNullImportKeyColumns,
+									columnValues);
+						}
 
 						this.importContext.setDataIndex(ExcelDataIndex.valueOf(this._sheetIndex, this._rowIndex));
 
 						ExcelDataImportService.this.importValueData(this.connection, this._statement,
-								this._noNullColumns, columnValues, this.importContext.getDataIndex(),
-								this.excelDataImport.getImportOption().isNullForIllegalColumnValue(),
-								this.excelDataImport.getImportOption().getExceptionResolve(),
+								this._nonNullColumns, columnValues, this.importContext.getDataIndex(),
+								importOption.isNullForIllegalColumnValue(), importOption.getExceptionResolve(),
 								this.importContext.getDataFormatContext(), this.excelDataImport.getListener());
 					}
 				}
@@ -544,8 +557,10 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 		private List<String> _columnNames = new ArrayList<>();
 		// 当前行的数据库列值
 		private List<Object> _columnValues = new ArrayList<>();
+		private Table _table = null;
 		private List<Column> _columns = null;
-		private List<Column> _noNullColumns = null;
+		private List<Column> _nonNullColumns = null;
+		private List<Boolean> _nonNullImportKeyColumns = null;
 		private PreparedStatement _statement = null;
 
 		public XlsxSheetHandler()
@@ -770,21 +785,25 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 			}
 			else if ("row".equals(name))
 			{
+				ValueDataImportOption importOption = this.excelDataImport.getImportOption();
+
 				// 初始化列信息
 				if (this._rowIndex == 0)
 				{
 					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
 							: this.sheetName);
-					this._columns = ExcelDataImportService.this.getColumns(this.connection, tableName,
-							this._columnNames, this.excelDataImport.getImportOption().isIgnoreInexistentColumn());
-
-					this._noNullColumns = removeNullColumns(this._columns);
+					this._table = ExcelDataImportService.this.getTableIfValid(connection, tableName);
+					this._columns = ExcelDataImportService.this.findColumns(this._table, this._columnNames,
+							importOption.isIgnoreInexistentColumn());
+					this._nonNullColumns = removeNullColumns(this._columns);
+					this._nonNullImportKeyColumns = ExcelDataImportService.this.isImportKeyColumns(this._table,
+							this._nonNullColumns);
 
 					// 表不匹配
-					if (this._noNullColumns == null || this._noNullColumns.isEmpty())
+					if (this._nonNullColumns == null || this._nonNullColumns.isEmpty())
 						throw new TableMismatchException(tableName);
 
-					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumns);
+					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._nonNullColumns);
 					this._statement = createPreparedStatementUnchecked(this.connection, sql);
 				}
 				// 导入数据
@@ -795,15 +814,20 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 						;
 					else
 					{
-						List<Object> columnValues = removeNullColumnValues(this._columns, this._noNullColumns,
-								this._columnValues);
+						// Excel如果某行的右侧所有列都为空，可能不会读取到_columnValues，所以需要在这里扩容确保长度一致
+						List<Object> columnValues = removeValueOfNullColumnExpanded(this._columns, this._columnValues,
+								null);
 
+						if (importOption.isNullForEmptyImportKey())
+						{
+							setNullForEmptyIfImportKey(this._nonNullColumns, this._nonNullImportKeyColumns,
+									columnValues);
+						}
 						this.importContext.setDataIndex(ExcelDataIndex.valueOf(this.sheetIndex, this._rowIndex));
 
 						ExcelDataImportService.this.importValueData(this.connection, this._statement,
-								this._noNullColumns, columnValues, this.importContext.getDataIndex(),
-								this.excelDataImport.getImportOption().isNullForIllegalColumnValue(),
-								this.excelDataImport.getImportOption().getExceptionResolve(),
+								this._nonNullColumns, columnValues, this.importContext.getDataIndex(),
+								importOption.isNullForIllegalColumnValue(), importOption.getExceptionResolve(),
 								this.importContext.getDataFormatContext(), this.excelDataImport.getListener());
 					}
 				}

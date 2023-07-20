@@ -34,8 +34,10 @@ import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.meta.Column;
+import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * CSV导入服务。
@@ -73,36 +75,39 @@ public class CsvDataImportService extends AbstractDevotedDBMetaDataExchangeServi
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
 		JdbcUtil.setReadonlyIfSupports(cn, false);
 
+		String tableName = dataExchange.getTable();
+		Table table = this.getTableIfValid(cn, tableName);
+		List<Column> columns = null;
+		List<Column> nonNullColumns = null;
+		List<Boolean> nonNullImportKeyColumns = null;
+
 		PreparedStatement st = null;
-
-		List<Column> rawColumns = null;
-		List<Column> noNullColumns = null;
-
 		CSVParser csvParser = buildCSVParser(csvReader);
-
 		long row = 0;
 
 		for (CSVRecord csvRecord : csvParser)
 		{
 			importContext.setDataIndex(RowDataIndex.valueOf(row));
 
-			if (rawColumns == null)
+			if (columns == null)
 			{
-				rawColumns = resolveColumns(dataExchange, cn, csvRecord);
-				noNullColumns = removeNullColumns(rawColumns);
+				columns = resolveColumns(table, dataExchange, csvRecord);
+				nonNullColumns = removeNullColumns(columns);
+				nonNullImportKeyColumns = isImportKeyColumns(table, nonNullColumns);
 
 				// 表不匹配
-				if (noNullColumns == null || noNullColumns.isEmpty())
-					throw new TableMismatchException(dataExchange.getTable());
+				if (StringUtil.isEmpty(nonNullColumns))
+					throw new TableMismatchException(tableName);
 
-				String sql = buildInsertPreparedSql(cn, dataExchange.getTable(), noNullColumns);
+				String sql = buildInsertPreparedSql(cn, tableName, nonNullColumns);
 				st = cn.prepareStatement(sql);
 			}
 			else
 			{
-				List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumns, noNullColumns);
+				List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, columns, nonNullColumns,
+						nonNullImportKeyColumns);
 
-				importValueData(cn, st, noNullColumns, columnValues, importContext.getDataIndex(),
+				importValueData(cn, st, nonNullColumns, columnValues, importContext.getDataIndex(),
 						importOption.isNullForIllegalColumnValue(), importOption.getExceptionResolve(),
 						importContext.getDataFormatContext(), dataExchange.getListener());
 			}
@@ -129,35 +134,42 @@ public class CsvDataImportService extends AbstractDevotedDBMetaDataExchangeServi
 	 * 否则，将立刻抛出{@linkplain ColumnNotFoundException}。
 	 * </p>
 	 * 
+	 * @param table
 	 * @param impt
-	 * @param cn
 	 * @param csvRecord
 	 * @return
 	 * @throws ColumnNotFoundException
 	 */
-	protected List<Column> resolveColumns(CsvDataImport impt, Connection cn, CSVRecord csvRecord)
+	protected List<Column> resolveColumns(Table table, CsvDataImport impt, CSVRecord csvRecord)
 			throws ColumnNotFoundException
 	{
 		List<String> columnNames = resolveCSVRecordValues(impt, csvRecord);
-
-		return getColumns(cn, impt.getTable(), columnNames, impt.getImportOption().isIgnoreInexistentColumn());
+		return findColumns(table, columnNames, impt.getImportOption().isIgnoreInexistentColumn());
 	}
 
 	/**
-	 * 解析{@linkplain CSVRecord}值数组。
+	 * 解析{@linkplain CSVRecord}值列表。
 	 * 
 	 * @param impt
 	 * @param csvRecord
-	 * @param rawColumns
-	 * @param noNullColumns
+	 * @param columns
+	 * @param nonNullColumns
+	 * @param nonNullImportKeyColumns
 	 * @return
 	 */
-	protected List<String> resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord, List<Column> rawColumns,
-			List<Column> noNullColumns)
+	protected List<String> resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord, List<Column> columns,
+			List<Column> nonNullColumns, List<Boolean> nonNullImportKeyColumns)
 	{
 		List<String> values = resolveCSVRecordValues(impt, csvRecord);
+		// 这里需移除null列的列值
+		values = removeValueOfNullColumnExpanded(columns, values, null);
 
-		return removeNullColumnValues(rawColumns, noNullColumns, values);
+		if (impt.getImportOption().isNullForEmptyImportKey())
+		{
+			setNullForEmptyIfImportKey(nonNullColumns, nonNullImportKeyColumns, values);
+		}
+
+		return values;
 	}
 
 	/**
