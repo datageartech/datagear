@@ -1,0 +1,60 @@
+{
+	"T_DATA_IMPORT":
+	[
+		{
+			"ID": 1,
+			"NAME": "NAME-1",
+			"COL_DATE": "2019-01-01",
+			"COL_DATETIME": "2019-01-01 11:11:11",
+			"COL_TIME": "09:35:20",
+			"COL_TIMESTAMP": "2019-01-01 12:12:12",
+			"COL_BLOB": "0xffd1",
+			"COL_CLOB": "clob-content-1"
+		},
+		{
+			"ID": "2",
+			"NAME": "NAME-2",
+			"COL_DATE": "2019-01-02",
+			"COL_DATETIME": "2019-01-02 11:11:12",
+			"COL_TIME": "09:35:21",
+			"COL_TIMESTAMP": "2019-01-02 12:12:13",
+			"COL_BLOB": "0xffd2",
+			"COL_CLOB": "clob-content-2"
+		},
+		{
+			"ID": "3",
+			"NAME": "NAME-3"
+		}
+	],
+	"T_DATA_EXPORT":
+	[
+		{
+			"ID": 1,
+			"NAME": "NAME-1",
+			"COL_DATE": "2019-01-01",
+			"COL_DATETIME": "2019-01-01 11:11:11",
+			"COL_TIME": "09:35:20",
+			"COL_TIMESTAMP": "2019-01-01 12:12:12",
+			"COL_BLOB": "0xffd1",
+			"COL_CLOB": "clob-content-1"
+		},
+		{
+			"ID": "2",
+			"NAME": "NAME-2",
+			"COL_DATE": "2019-01-02",
+			"COL_DATETIME": "2019-01-02 11:11:12",
+			"COL_TIME": "09:35:21",
+			"COL_TIMESTAMP": "2019-01-02 12:12:13",
+			"COL_BLOB": "0xffd2",
+			"COL_CLOB": "clob-content-2"
+		},
+		{
+			"ID": "3",
+			"NAME": "NAME-3"
+		},
+		{
+			"ID": "4",
+			"NAME": "NAME-4"
+		}
+	]
+}

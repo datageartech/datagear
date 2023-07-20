@@ -69,7 +69,7 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 						"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xls");
 
 				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
-						true);
+						true, true);
 
 				ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 						valueDataImportOption, excelFile);
@@ -104,7 +104,8 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true,
+					true);
 
 			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, excelFile);
@@ -160,7 +161,8 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true,
+					true);
 
 			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, excelFile);
@@ -229,7 +231,8 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true,
+					true);
 
 			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, excelFile);

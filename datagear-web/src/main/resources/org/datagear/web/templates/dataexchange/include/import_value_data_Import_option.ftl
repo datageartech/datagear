@@ -45,6 +45,16 @@ import_js.ftl
 	</div>
 </div>
 <div class="field grid">
+	<label for="${pid}nullForEmptyImportKey" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+		<@spring.message code='dataImport.nullForEmptyImportKey' />
+	</label>
+	<div class="field-input col-12 md:col-9">
+		<p-selectbutton id="${pid}nullForEmptyImportKey" v-model="fm.importOption.nullForEmptyImportKey"
+			:options="pm.booleanOptions" option-label="name" option-value="value" class="input w-full">
+       	</p-selectbutton>
+	</div>
+</div>
+<div class="field grid">
 	<label for="${pid}exceptionResolve" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 		<@spring.message code='dataExchange.exceptionResolve' />
 	</label>

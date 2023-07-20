@@ -22,6 +22,7 @@ import java.io.Reader;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.TableTextValueDataImport;
 import org.datagear.dataexchange.ValueDataImportOption;
+import org.datagear.util.StringUtil;
 import org.datagear.util.resource.ConnectionFactory;
 import org.datagear.util.resource.ResourceFactory;
 
@@ -41,6 +42,13 @@ public class JsonDataImport extends TableTextValueDataImport
 	}
 
 	public JsonDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, JsonDataImportOption importOption,
+			ResourceFactory<Reader> readerFactory)
+	{
+		super(connectionFactory, dataFormat, importOption, null);
+		this.readerFactory = readerFactory;
+	}
+
+	public JsonDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, JsonDataImportOption importOption,
 			String table, ResourceFactory<Reader> readerFactory)
 	{
 		super(connectionFactory, dataFormat, importOption, table);
@@ -55,6 +63,11 @@ public class JsonDataImport extends TableTextValueDataImport
 	public void setReaderFactory(ResourceFactory<Reader> readerFactory)
 	{
 		this.readerFactory = readerFactory;
+	}
+
+	public boolean hasTable()
+	{
+		return !StringUtil.isEmpty(getTable());
 	}
 
 	@Override

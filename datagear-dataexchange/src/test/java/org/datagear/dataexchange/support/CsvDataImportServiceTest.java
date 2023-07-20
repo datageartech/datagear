@@ -68,7 +68,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 						"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
 				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
-						true);
+						true, true);
 				CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 						valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
@@ -102,7 +102,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 
 			final AtomicInteger importCountInListener = new AtomicInteger(0);
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true,
+					true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
@@ -152,7 +153,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.IGNORE, true,
-					true);
+					true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
@@ -208,7 +209,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 						"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
 				ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true,
-						false);
+						false, true);
 				CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 						valueDataImportOption, TABLE_NAME_DATA_IMPORT, readerFactory);
 
@@ -243,7 +244,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.IGNORE, true,
-					true);
+					true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME_UNSIGNED_NUMBER, readerFactory);
 

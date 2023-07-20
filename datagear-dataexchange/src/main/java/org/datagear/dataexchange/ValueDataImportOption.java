@@ -48,11 +48,12 @@ public class ValueDataImportOption extends DataImportOption
 	}
 
 	public ValueDataImportOption(ExceptionResolve exceptionResolve, boolean ignoreInexistentColumn,
-			boolean nullForIllegalColumnValue)
+			boolean nullForIllegalColumnValue, boolean nullForEmptyImportKey)
 	{
 		super(exceptionResolve);
 		this.ignoreInexistentColumn = ignoreInexistentColumn;
 		this.nullForIllegalColumnValue = nullForIllegalColumnValue;
+		this.nullForEmptyImportKey = nullForEmptyImportKey;
 	}
 
 	public boolean isIgnoreInexistentColumn()

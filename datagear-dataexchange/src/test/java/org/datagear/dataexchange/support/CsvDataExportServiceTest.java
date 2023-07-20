@@ -78,7 +78,8 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = ClasspathReaderResourceFactory
 					.valueOf(getResourceClasspath("support/CsvDataExportServiceTest.csv"), IOUtil.CHARSET_UTF_8);
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true,
+					true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME_DATA_EXPORT, readerFactory);
 
@@ -99,7 +100,8 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 					.valueOf(getResourceClasspath("support/CsvDataImportServiceTest_unsigned_number.csv"),
 							IOUtil.CHARSET_UTF_8);
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true,
+					true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME_UNSIGNED_NUMBER, readerFactory);
 

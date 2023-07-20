@@ -36,6 +36,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -492,6 +493,18 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param columns
 	 * @return
 	 */
+	protected List<Boolean> isImportKeyColumns(Table table, Column[] columns)
+	{
+		return isImportKeyColumns(table, Arrays.asList(columns));
+	}
+
+	/**
+	 * 是否外键列。
+	 * 
+	 * @param table
+	 * @param columns
+	 * @return
+	 */
 	protected List<Boolean> isImportKeyColumns(Table table, List<Column> columns)
 	{
 		List<Boolean> re = new ArrayList<Boolean>(columns.size());
@@ -608,7 +621,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				{
 					V cv = columnValues.get(i);
 
-					if (cv instanceof String && (StringUtil.isEmpty((String) cv)))
+					if ((cv instanceof String) && StringUtil.isEmpty((String) cv))
 					{
 						columnValues.set(i, null);
 					}
