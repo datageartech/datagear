@@ -11,16 +11,16 @@
 			)
 		VALUES
 			(
-				#{entity.id}, #{entity.fileName}, #{entity.encoding}, #{entity.displayName}, #{entity.nameRow},
+				#{entity.id}, #{entity.fileName, jdbcType=VARCHAR}, #{entity.encoding}, #{entity.displayName, jdbcType=VARCHAR}, #{entity.nameRow},
 				#{entity.fileSourceType}, #{entity.dataSetResDirectory.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
 			)
 	</insert>
 	
 	<update id="updateCsvFileDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_CSV_FILE SET
-			DS_FILE_NAME = #{entity.fileName},
+			DS_FILE_NAME = #{entity.fileName, jdbcType=VARCHAR},
 			DS_FILE_ENCODING = #{entity.encoding},
-			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_DISPLAY_NAME = #{entity.displayName, jdbcType=VARCHAR},
 			DS_NAME_ROW = #{entity.nameRow},
 			DS_FILE_SOURCE_TYPE = #{entity.fileSourceType},
 			DS_DSRD_ID = #{entity.dataSetResDirectory.id, jdbcType=VARCHAR},

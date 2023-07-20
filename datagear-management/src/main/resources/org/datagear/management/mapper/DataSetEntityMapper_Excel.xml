@@ -12,7 +12,7 @@
 			)
 		VALUES
 			(
-				#{entity.id}, #{entity.fileName}, #{entity.displayName}, #{entity.sheetName, jdbcType=VARCHAR}, #{entity.sheetIndex},
+				#{entity.id}, #{entity.fileName, jdbcType=VARCHAR}, #{entity.displayName, jdbcType=VARCHAR}, #{entity.sheetName, jdbcType=VARCHAR}, #{entity.sheetIndex},
 				#{entity.nameRow}, #{entity.dataRowExp}, #{entity.dataColumnExp}, #{entity.forceXls},
 				#{entity.fileSourceType}, #{entity.dataSetResDirectory.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
 			)
@@ -20,8 +20,8 @@
 	
 	<update id="updateExcelDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_EXCEL SET
-			DS_FILE_NAME = #{entity.fileName},
-			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_FILE_NAME = #{entity.fileName, jdbcType=VARCHAR},
+			DS_DISPLAY_NAME = #{entity.displayName, jdbcType=VARCHAR},
 			DS_SHEET_NAME = #{entity.sheetName, jdbcType=VARCHAR},
 			DS_SHEET_INDEX = #{entity.sheetIndex},
 			DS_NAME_ROW = #{entity.nameRow},
