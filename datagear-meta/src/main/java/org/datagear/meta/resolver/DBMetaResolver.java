@@ -93,14 +93,40 @@ public interface DBMetaResolver
 	boolean isUserDataEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
 
 	/**
+	 * 获取准确表名。
+	 * <p>
+	 * 某些数据库的表名可能会区分大小写，导致此类的其他方法异常（比如{@linkplain #getTable(Connection, String)}会在给定的表名参数大小写不匹配时报找不到表错误），
+	 * 此时，可以使用这个方法获取准确表名后再尝试。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param tableName
+	 * @return 数据库中准确使用的表名，可能是与{@code tableName}相同的，或者大小写不同的，{@code null}表示不存在
+	 * @throws DBMetaResolverException
+	 */
+	String getExactTableName(Connection cn, String tableName) throws DBMetaResolverException;
+
+	/**
+	 * 获取准确表名。
+	 * 
+	 * @param cn
+	 * @param tableNames
+	 * @return 元素为{@code null}表示不存在
+	 * @throws DBMetaResolverException
+	 * @see {@linkplain #getExactTableName(Connection, String)}
+	 */
+	String[] getExactTableNames(Connection cn, String[] tableNames) throws DBMetaResolverException;
+
+	/**
 	 * 获取指定名称的{@linkplain Table}。
 	 * 
 	 * @param cn
 	 * @param tableName
 	 * @return
+	 * @throws TableNotFoundException
 	 * @throws DBMetaResolverException
 	 */
-	Table getTable(Connection cn, String tableName) throws DBMetaResolverException;
+	Table getTable(Connection cn, String tableName) throws TableNotFoundException, DBMetaResolverException;
 
 	/**
 	 * 获取指定表的所有{@linkplain Column}。

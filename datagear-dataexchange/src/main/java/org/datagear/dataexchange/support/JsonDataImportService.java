@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.json.Json;
 import javax.json.stream.JsonLocation;
@@ -255,31 +254,27 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 	protected Object[] getColumnValues(JsonDataImport dataExchange, Table table, List<Boolean> importKeyColumns,
 			Map<String, Object> row) throws ColumnNotFoundException
 	{
+		boolean ignoreInexistentColumn = dataExchange.getImportOption().isIgnoreInexistentColumn();
 		List<Column> myColumns = new ArrayList<>();
 		List<Boolean> myImportKeyColumns = new ArrayList<Boolean>();
 		List<Object> myColumnValues = new ArrayList<>();
 
-		Column[] columns = table.getColumns();
-		for (int i = 0; i < columns.length; i++)
+		// 这里应使用Table的API查找到对应的Column后再执行其他逻辑，因为可能存在大小写不一致的问题
+		for (Map.Entry<String, Object> entry : row.entrySet())
 		{
-			Column column = columns[i];
-			if (row.containsKey(column.getName()))
+			int columnIndex = table.getColumnIndex(entry.getKey());
+
+			if (columnIndex >= 0)
 			{
+				Column column = table.getColumn(columnIndex);
 				myColumns.add(column);
-				myImportKeyColumns.add(importKeyColumns.get(i));
-				myColumnValues.add(row.get(column.getName()));
+				myImportKeyColumns.add(importKeyColumns.get(columnIndex));
+				myColumnValues.add(entry.getValue());
 			}
-		}
-
-		// 有不存在的列且不被允许
-		if (row.size() > myColumns.size() && !dataExchange.getImportOption().isIgnoreInexistentColumn())
-		{
-			Set<String> myNames = row.keySet();
-
-			for (String myName : myNames)
+			else
 			{
-				if (table.getColumn(myName) == null)
-					throw new ColumnNotFoundException(table.getName(), myName);
+				if (!ignoreInexistentColumn)
+					throw new ColumnNotFoundException(table.getName(), entry.getKey());
 			}
 		}
 

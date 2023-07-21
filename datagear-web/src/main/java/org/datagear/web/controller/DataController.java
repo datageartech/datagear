@@ -743,7 +743,7 @@ public class DataController extends AbstractSchemaConnTableController
 		if (row == null || row.isEmpty())
 			return row;
 
-		Column[] bcs = Table.getBinaryColumns(table);
+		Column[] bcs = table.getBinaryColumns();
 
 		if (StringUtil.isEmpty(bcs))
 			return row;

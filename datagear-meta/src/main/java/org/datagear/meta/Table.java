@@ -143,6 +143,53 @@ public class Table extends AbstractTable
 	}
 
 	/**
+	 * 获取指定名称的列索引。
+	 * 
+	 * @param name
+	 * @return {@code -1}表示没有找到
+	 */
+	public int getColumnIndex(String name)
+	{
+		int re = -1;
+
+		if (this.columns == null)
+			return re;
+
+		for (int i = 0; i < this.columns.length; i++)
+		{
+			Column column = this.columns[i];
+			String myName = column.getName();
+
+			// 优先取准确列，其次取忽略大小写的列
+			if (myName.equals(name))
+			{
+				re = i;
+				break;
+			}
+			else if (myName.equalsIgnoreCase(name))
+			{
+				re = i;
+			}
+		}
+
+		return re;
+	}
+
+	/**
+	 * 获取指定索引的{@linkplain Column}。
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public Column getColumn(int index)
+	{
+		if (this.columns == null)
+			throw new NullPointerException("no column");
+
+		return this.columns[index];
+	}
+
+	/**
 	 * 获取指定名称的{@linkplain Column}。
 	 * 
 	 * @param name
@@ -150,13 +197,28 @@ public class Table extends AbstractTable
 	 */
 	public Column getColumn(String name)
 	{
+		Column re = null;
+
+		if (this.columns == null)
+			return re;
+
 		for (Column column : this.columns)
 		{
-			if (column.getName().equals(name))
-				return column;
+			String myName = column.getName();
+
+			// 优先取准确列，其次取忽略大小写的列
+			if (myName.equals(name))
+			{
+				re = column;
+				break;
+			}
+			else if (myName.equalsIgnoreCase(name))
+			{
+				re = column;
+			}
 		}
 
-		return null;
+		return re;
 	}
 
 	/**
@@ -173,6 +235,27 @@ public class Table extends AbstractTable
 			columns[i] = getColumn(names[i]);
 
 		return columns;
+	}
+
+	/**
+	 * 获取所有二进制列。
+	 * 
+	 * @return 返回空数组表示没有。
+	 */
+	public Column[] getBinaryColumns()
+	{
+		List<Column> re = new ArrayList<>(2);
+
+		if (this.columns != null)
+		{
+			for (Column column : this.columns)
+			{
+				if (JdbcUtil.isBinaryType(column.getType()))
+					re.add(column);
+			}
+		}
+
+		return re.toArray(new Column[re.size()]);
 	}
 
 	/**
@@ -194,7 +277,8 @@ public class Table extends AbstractTable
 			{
 				for (String colName : colNames)
 				{
-					if (name.equals(colName))
+					// 此处不应区分大小写
+					if (name.equalsIgnoreCase(colName))
 						return true;
 				}
 			}
@@ -209,24 +293,5 @@ public class Table extends AbstractTable
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", comment=" + getComment()
 				+ ", columns=" + Arrays.toString(columns) + ", primaryKey=" + primaryKey + ", uniqueKeys="
 				+ Arrays.toString(uniqueKeys) + ", importKeys=" + Arrays.toString(importKeys) + "]";
-	}
-
-	/**
-	 * 获取所有二进制列。
-	 * 
-	 * @return 返回空数组表示没有。
-	 */
-	public static Column[] getBinaryColumns(Table table)
-	{
-		List<Column> bcs = new ArrayList<>(1);
-
-		Column[] columns = table.getColumns();
-		for (Column column : columns)
-		{
-			if (JdbcUtil.isBinaryType(column.getType()))
-				bcs.add(column);
-		}
-
-		return bcs.toArray(new Column[bcs.size()]);
 	}
 }

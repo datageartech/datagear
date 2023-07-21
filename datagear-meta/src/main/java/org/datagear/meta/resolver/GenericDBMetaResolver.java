@@ -105,7 +105,21 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
-	public Table getTable(Connection cn, String tableName) throws DBMetaResolverException
+	public String getExactTableName(Connection cn, String tableName) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getExactTableName(cn, tableName);
+	}
+
+	@Override
+	public String[] getExactTableNames(Connection cn, String[] tableNames) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getExactTableNames(cn, tableNames);
+	}
+
+	@Override
+	public Table getTable(Connection cn, String tableName) throws TableNotFoundException, DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
 		return resolver.getTable(cn, tableName);

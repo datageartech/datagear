@@ -75,8 +75,8 @@ public class CsvDataImportService extends AbstractDevotedDBMetaDataExchangeServi
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
 		JdbcUtil.setReadonlyIfSupports(cn, false);
 
-		String tableName = dataExchange.getTable();
-		Table table = this.getTableIfValid(cn, tableName);
+		Table table = this.getTableIfValid(cn, dataExchange.getTable());
+		String tableName = table.getName();
 		List<Column> columns = null;
 		List<Column> nonNullColumns = null;
 		List<Boolean> nonNullImportKeyColumns = null;

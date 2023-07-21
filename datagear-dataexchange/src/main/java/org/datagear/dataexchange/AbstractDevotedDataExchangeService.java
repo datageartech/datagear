@@ -448,9 +448,32 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	protected Table getTableIfValid(Connection cn, String table, DBMetaResolver dbMetaResolver)
 			throws TableNotFoundException
 	{
-		Table t = dbMetaResolver.getTable(cn, table);
+		Table t = null;
 
-		if (!t.hasColumn())
+		try
+		{
+			t = dbMetaResolver.getTable(cn, table);
+		}
+		catch (org.datagear.meta.resolver.TableNotFoundException e)
+		{
+			String exactName = dbMetaResolver.getExactTableName(cn, table);
+
+			if (exactName == null || exactName.equals(table))
+				throw new TableNotFoundException(table);
+			else
+			{
+				try
+				{
+					t = dbMetaResolver.getTable(cn, exactName);
+				}
+				catch (org.datagear.meta.resolver.TableNotFoundException e1)
+				{
+					throw new TableNotFoundException(table);
+				}
+			}
+		}
+
+		if (t == null || !t.hasColumn())
 			throw new TableNotFoundException(table);
 
 		return t;

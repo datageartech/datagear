@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -157,7 +158,74 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	}
 
 	@Override
-	public Table getTable(Connection cn, String tableName) throws DBMetaResolverException
+	public String getExactTableName(Connection cn, String tableName) throws DBMetaResolverException
+	{
+		String[] re = getExactTableNames(cn, new String[] { tableName });
+		return re[0];
+	}
+
+	@Override
+	public String[] getExactTableNames(Connection cn, String[] tableNames) throws DBMetaResolverException
+	{
+		String[] re = new String[tableNames.length];
+
+		Arrays.fill(re, null);
+
+		String catalog = getCatalog(cn);
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		ResultSet rs = null;
+		String[] tableTypes = getTableTypes(cn, metaData);
+
+		try
+		{
+			rs = getTableResulSet(cn, metaData, catalog, schema, null, tableTypes);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
+
+			while (rs.next())
+			{
+				String name = mrs.getString("TABLE_NAME", null);
+
+				if (name != null)
+				{
+					int okCount = 0;
+
+					for (int i = 0; i < tableNames.length; i++)
+					{
+						if (re[i] != null && re[i].equals(tableNames[i]))
+							continue;
+
+						if (name.equals(tableNames[i]))
+						{
+							re[i] = name;
+							okCount++;
+						}
+						else if (re[i] == null && name.equalsIgnoreCase(tableNames[i]))
+						{
+							re[i] = name;
+						}
+					}
+
+					if (okCount == tableNames.length)
+						break;
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBMetaResolverException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+		}
+
+		return re;
+	}
+
+	@Override
+	public Table getTable(Connection cn, String tableName) throws TableNotFoundException, DBMetaResolverException
 	{
 		@JDBCCompatiblity("如果cn为readonly，某些驱动程序的DatabaseMetaData.isReadOnly()也将为true（比如：Postgresql JDBC 42.2.5），"
 				+ "这会导致解析Table.readonly不正确，因此这里设为false，以保证解析正确")
@@ -437,7 +505,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	}
 
 	protected Table getTable(Connection cn, DatabaseMetaData metaData, String catalog, String schema, String tableName)
-			throws DBMetaResolverException
+			throws TableNotFoundException, DBMetaResolverException
 	{
 		boolean readonly = resolveTableReadonly(cn);
 
@@ -447,9 +515,10 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 			throw new TableNotFoundException(tableName);
 
 		SimpleTable simpleTable = simpleTables.get(0);
+		tableName = simpleTable.getName();
 
 		Table table = new Table();
-		table.setName(simpleTable.getName());
+		table.setName(tableName);
 		table.setType(simpleTable.getType());
 		table.setComment(simpleTable.getComment());
 		table.setColumns(getColumns(cn, metaData, catalog, schema, tableName, null));

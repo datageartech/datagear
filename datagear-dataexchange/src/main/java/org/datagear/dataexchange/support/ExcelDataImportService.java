@@ -467,6 +467,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
 							: this._sheetNames.get(this._sheetIndex));
 					this._table = ExcelDataImportService.this.getTableIfValid(connection, tableName);
+					tableName = this._table.getName();
 					this._columns = ExcelDataImportService.this.findColumns(this._table, this._columnNames,
 							importOption.isIgnoreInexistentColumn());
 					this._nonNullColumns = removeNullColumns(this._columns);
@@ -793,6 +794,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
 							: this.sheetName);
 					this._table = ExcelDataImportService.this.getTableIfValid(connection, tableName);
+					tableName = this._table.getName();
 					this._columns = ExcelDataImportService.this.findColumns(this._table, this._columnNames,
 							importOption.isIgnoreInexistentColumn());
 					this._nonNullColumns = removeNullColumns(this._columns);
