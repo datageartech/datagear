@@ -111,9 +111,8 @@ public abstract class AbstractLogFileSupport
 
 		try
 		{
-			this._logFileWriter.write(log);
-			this._logFileWriter.newLine();
-
+			// 这里不使用BufferedWriter.newLine()，因为在多线程写时，可能会错行
+			this._logFileWriter.write(log + IOUtil.LINE_SEPARATOR);
 			return true;
 		}
 		catch (Throwable t)
