@@ -17,15 +17,9 @@
 
 package org.datagear.dataexchange.listener;
 
-import java.io.BufferedWriter;
-import java.io.File;
-
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.DataIndex;
-import org.datagear.util.IOUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 写入日志文件的{@linkplain DataExchangeListener}。
@@ -33,60 +27,18 @@ import org.slf4j.LoggerFactory;
  * @author datagear@163.com
  *
  */
-public class LogFileDataExchangeListener implements DataExchangeListener
+public class LogFileDataExchangeListener extends AbstractLogFileSupport implements DataExchangeListener
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(LogFileDataExchangeListener.class);
-
-	private File logFile = null;
-
-	private String logFileEncoding = IOUtil.CHARSET_UTF_8;
-
-	private volatile BufferedWriter _logFileWriter = null;
-
 	public LogFileDataExchangeListener()
 	{
 		super();
 	}
 
-	public boolean hasLogFile()
-	{
-		return (this.logFile != null);
-	}
-
-	public File getLogFile()
-	{
-		return logFile;
-	}
-
-	public void setLogFile(File logFile)
-	{
-		this.logFile = logFile;
-	}
-
-	public String getLogFileEncoding()
-	{
-		return logFileEncoding;
-	}
-
-	public void setLogFileEncoding(String logFileEncoding)
-	{
-		this.logFileEncoding = logFileEncoding;
-	}
-
 	@Override
 	public void onStart()
 	{
-		if (hasLogFile())
+		if (prepareLogResource())
 		{
-			try
-			{
-				this._logFileWriter = IOUtil.getWriter(this.logFile, this.logFileEncoding);
-			}
-			catch (Throwable t)
-			{
-				LOGGER.error("create log writer error", t);
-			}
-
 			writeStartLog();
 		}
 	}
@@ -115,7 +67,7 @@ public class LogFileDataExchangeListener implements DataExchangeListener
 		if (hasLogFile())
 		{
 			writeFinishLog();
-			IOUtil.close(this._logFileWriter);
+			releaseLogResource();
 		}
 	}
 
@@ -209,30 +161,5 @@ public class LogFileDataExchangeListener implements DataExchangeListener
 	protected void writeDataLog(DataIndex dataIndex, String log)
 	{
 		writeLogLine("[" + dataIndex + "] " + log);
-	}
-
-	/**
-	 * 写一行日志。
-	 * 
-	 * @param log
-	 * @return
-	 */
-	protected boolean writeLogLine(String log)
-	{
-		if (this._logFileWriter == null)
-			return false;
-
-		try
-		{
-			this._logFileWriter.write(log);
-			this._logFileWriter.newLine();
-
-			return true;
-		}
-		catch (Throwable t)
-		{
-			LOGGER.error("write log error", t);
-			return false;
-		}
 	}
 }
