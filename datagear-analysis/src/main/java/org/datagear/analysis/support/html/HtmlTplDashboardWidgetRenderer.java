@@ -488,7 +488,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + exceptionWidgetId
-					+ "] on exception : " + t.getMessage());
+					+ "] on exception", t);
 
 		return widget;
 	}
