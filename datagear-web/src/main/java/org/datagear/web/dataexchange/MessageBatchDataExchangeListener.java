@@ -20,8 +20,10 @@ package org.datagear.web.dataexchange;
 import java.util.Locale;
 
 import org.datagear.dataexchange.BatchDataExchangeListener;
+import org.datagear.dataexchange.CancelReason;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.SubDataExchange;
+import org.datagear.dataexchange.SubmitFailReason;
 import org.datagear.web.util.MessageChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,13 +58,13 @@ public class MessageBatchDataExchangeListener extends MessageDataExchangeListene
 	}
 
 	@Override
-	public void onSubmitFail(SubDataExchange subDataExchange)
+	public void onSubmitFail(SubDataExchange subDataExchange, SubmitFailReason reason)
 	{
 		sendMessage(new SubSubmitFail(subDataExchange.getId()));
 	}
 
 	@Override
-	public void onCancel(SubDataExchange subDataExchange)
+	public void onCancel(SubDataExchange subDataExchange, CancelReason reason)
 	{
 		sendMessage(new SubCancelSuccess(subDataExchange.getId()));
 	}
