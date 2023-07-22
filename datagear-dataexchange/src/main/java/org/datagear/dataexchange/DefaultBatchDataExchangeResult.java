@@ -17,16 +17,15 @@
 
 package org.datagear.dataexchange;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 默认{@linkplain BatchDataExchangeResult}实现类。
@@ -36,8 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBatchDataExchangeResult.class);
-
 	private final int subTotal;
 	private final DataExchangeService<?> subDataExchangeService;
 	private final ExecutorService executorService;
@@ -229,6 +226,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 		else
 		{
 			Set<SubDataExchange> cancelleds = new HashSet<SubDataExchange>();
+			Map<String, String> cancelledDepends = new HashMap<String, String>();
 
 			synchronized (this._subLock)
 			{
@@ -237,7 +235,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 				if (subDataExchange != null)
 				{
 					cancelleds.add(subDataExchange);
-					removeDescendants(this._unsubmits, subDataExchange, cancelleds);
+					removeDescendants(this._unsubmits, subDataExchange, cancelleds, cancelledDepends);
 
 					this._cancelleds.addAll(cancelleds);
 				}
@@ -246,7 +244,12 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 			if (this.listener != null)
 			{
 				for (SubDataExchange cancelled : cancelleds)
-					this.listener.onCancel(cancelled);
+				{
+					String dependentId = cancelledDepends.get(cancelled.getId());
+					CancelReason reason = (dependentId == null ? new DirectCancelReason()
+							: new DependentCancelReason(dependentId));
+					this.listener.onCancel(cancelled, reason);
+				}
 			}
 
 			postProcessIfFinish();
@@ -261,11 +264,12 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	protected void forCancel(SubDataExchange subDataExchange)
 	{
 		Set<SubDataExchange> cancelleds = new HashSet<SubDataExchange>();
+		Map<String, String> cancelledDepends = new HashMap<String, String>();
 
 		synchronized (this._subLock)
 		{
 			cancelleds.add(subDataExchange);
-			removeDescendants(this._unsubmits, subDataExchange, cancelleds);
+			removeDescendants(this._unsubmits, subDataExchange, cancelleds, cancelledDepends);
 
 			this._cancelleds.addAll(cancelleds);
 		}
@@ -273,7 +277,12 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 		if (this.listener != null)
 		{
 			for (SubDataExchange cancelled : cancelleds)
-				this.listener.onCancel(cancelled);
+			{
+				String dependentId = cancelledDepends.get(cancelled.getId());
+				CancelReason reason = (dependentId == null ? new DirectCancelReason()
+						: new DependentCancelReason(dependentId));
+				this.listener.onCancel(cancelled, reason);
+			}
 		}
 
 		postProcessIfFinish();
@@ -314,15 +323,17 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	{
 		Set<SubDataExchange> submitSuccesses = new HashSet<SubDataExchange>();
 		Set<SubDataExchange> submitFails = new HashSet<SubDataExchange>();
+		Map<String, Throwable> submitFailThrowables = new HashMap<String, Throwable>();
+		Map<String, String> submitFailDepends = new HashMap<String, String>();
 
 		synchronized (this._subLock)
 		{
 			for (SubDataExchange subDataExchange : subDataExchanges)
 			{
 				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(subDataExchange);
-				boolean success = submit(task);
+				Throwable result = submit(task);
 
-				if (success)
+				if (result == null)
 				{
 					submitSuccesses.add(subDataExchange);
 					this._submitSuccesses.add(task);
@@ -330,7 +341,8 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 				else
 				{
 					submitFails.add(subDataExchange);
-					removeDescendants(this._unsubmits, subDataExchange, submitFails);
+					submitFailThrowables.put(subDataExchange.getId(), result);
+					removeDescendants(this._unsubmits, subDataExchange, submitFails, submitFailDepends);
 				}
 			}
 
@@ -343,7 +355,18 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 				this.listener.onSubmitSuccess(sub);
 
 			for (SubDataExchange sub : submitFails)
-				this.listener.onSubmitFail(sub);
+			{
+				String failSubId = sub.getId();
+				Throwable failThrowable = submitFailThrowables.get(failSubId);
+				SubmitFailReason reason = null;
+
+				if (failThrowable != null)
+					reason = new ExceptionSubmitFailReason(failThrowable);
+				else
+					reason = new DependentSubmitFailReason(submitFailDepends.get(failSubId));
+
+				this.listener.onSubmitFail(sub, reason);
+			}
 		}
 	}
 
@@ -351,19 +374,18 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	 * 提交一个子数据交换任务。
 	 * 
 	 * @param task
-	 * @return true 提交成功；false 提交失败
+	 * @return {@code null}表示提交成功
 	 */
-	protected boolean submit(SubDataExchangeFutureTask task)
+	protected Throwable submit(SubDataExchangeFutureTask task)
 	{
 		try
 		{
 			this.executorService.submit(task);
-			return true;
+			return null;
 		}
 		catch (Throwable t)
 		{
-			LOGGER.error("submit sub exchange task error", t);
-			return false;
+			return t;
 		}
 	}
 
@@ -448,9 +470,10 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	 * @param subDataExchanges
 	 * @param subDataExchange
 	 * @param removeds
+	 * @param removedDepends
 	 */
 	protected void removeDescendants(Set<SubDataExchange> subDataExchanges, SubDataExchange subDataExchange,
-			Set<SubDataExchange> removeds)
+			Set<SubDataExchange> removeds, Map<String, String> removedDepends)
 	{
 		Set<SubDataExchange> myRemoveds = new HashSet<SubDataExchange>();
 
@@ -466,6 +489,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 			if (next.getDependencies().contains(subDataExchange))
 			{
 				myRemoveds.add(next);
+				removedDepends.put(next.getId(), subDataExchange.getId());
 				iterator.remove();
 			}
 		}
@@ -473,7 +497,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 		removeds.addAll(myRemoveds);
 
 		for (SubDataExchange myRemoved : myRemoveds)
-			removeDescendants(subDataExchanges, myRemoved, removeds);
+			removeDescendants(subDataExchanges, myRemoved, removeds, removedDepends);
 	}
 
 	/**
