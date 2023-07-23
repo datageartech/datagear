@@ -79,20 +79,31 @@ public class DefaultMessageChannel implements MessageChannel
 		return (T) queue.poll();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> pull(String channel, int count)
 	{
 		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(channel);
 
 		List<T> list = new LinkedList<T>();
-
-		for (int i = 0; i < count; i++)
+		
+		if(count < 0)
 		{
-			@SuppressWarnings("unchecked")
-			T msg = (T) queue.poll();
-
-			if (msg != null)
-				list.add(msg);
+			Object msg = null;
+			while ((msg = queue.poll()) != null)
+			{
+				list.add((T) msg);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < count; i++)
+			{
+				T msg = (T) queue.poll();
+	
+				if (msg != null)
+					list.add(msg);
+			}
 		}
 
 		return list;

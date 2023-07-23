@@ -47,7 +47,9 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(MessageDataExchangeListener.class);
 
-	public static final String EXCEPTION_DISPLAY_MESSAGE_KEY = "dataExchange.error.";
+	public static final String EXCEPTION_MESSAGE_KEY_PREFIX = "dataExchange.error.";
+
+	private String exceptionMessageKeyPrefix = EXCEPTION_MESSAGE_KEY_PREFIX;
 
 	private MessageChannel messageChannel;
 
@@ -72,6 +74,16 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 		this.dataExchangeServerChannel = dataExchangeServerChannel;
 		this.messageSource = messageSource;
 		this.locale = locale;
+	}
+
+	public String getExceptionMessageKeyPrefix()
+	{
+		return exceptionMessageKeyPrefix;
+	}
+
+	public void setExceptionMessageKeyPrefix(String exceptionMessageKeyPrefix)
+	{
+		this.exceptionMessageKeyPrefix = exceptionMessageKeyPrefix;
 	}
 
 	public MessageChannel getMessageChannel()
@@ -248,7 +260,7 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 */
 	protected String buildDataExchangeExceptionI18nCode(DataExchangeException e)
 	{
-		return EXCEPTION_DISPLAY_MESSAGE_KEY + e.getClass().getSimpleName();
+		return this.exceptionMessageKeyPrefix + e.getClass().getSimpleName();
 	}
 
 	/**
@@ -271,6 +283,16 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	}
 
 	/**
+	 * 获取{@linkplain #onStart()}的执行时间。
+	 * 
+	 * @return
+	 */
+	protected long getStartTime()
+	{
+		return this._startTime;
+	}
+
+	/**
 	 * 计算耗时毫秒数。
 	 * 
 	 * @return
@@ -285,7 +307,10 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * 
 	 * @return
 	 */
-	protected abstract DataExchangeMessage buildStartMessage();
+	protected DataExchangeMessage buildStartMessage()
+	{
+		return new Start();
+	}
 
 	/**
 	 * 构建异常消息。
@@ -293,19 +318,114 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * @param e
 	 * @return
 	 */
-	protected abstract DataExchangeMessage buildExceptionMessage(DataExchangeException e);
+	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
+	{
+		return new Exception(resolveDataExchangeExceptionI18n(e));
+	}
 
 	/**
 	 * 构建成功消息。
 	 * 
 	 * @return
 	 */
-	protected abstract DataExchangeMessage buildSuccessMessage();
+	protected DataExchangeMessage buildSuccessMessage()
+	{
+		return new Success();
+	}
 
 	/**
 	 * 构建完成消息。
 	 * 
 	 * @return
 	 */
-	protected abstract DataExchangeMessage buildFinishMessage();
+	protected DataExchangeMessage buildFinishMessage()
+	{
+		return new Finish(evalDuration());
+	}
+
+	/**
+	 * 数据交换开始消息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class Start extends DataExchangeMessage
+	{
+		public Start()
+		{
+			super();
+		}
+	}
+
+	/**
+	 * 数据交换异常消息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class Exception extends DataExchangeMessage
+	{
+		private String content;
+
+		public Exception()
+		{
+			super();
+		}
+
+		public Exception(String content)
+		{
+			super();
+			this.content = content;
+		}
+
+		public String getContent()
+		{
+			return content;
+		}
+
+		public void setContent(String content)
+		{
+			this.content = content;
+		}
+	}
+
+	public static class Success extends DataExchangeMessage
+	{
+		public Success()
+		{
+			super();
+		}
+	}
+
+	/**
+	 * 数据交换完成消息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class Finish extends DataExchangeMessage
+	{
+		private long duration;
+
+		public Finish()
+		{
+			super();
+		}
+
+		public Finish(long duration)
+		{
+			super();
+			this.duration = duration;
+		}
+
+		public long getDuration()
+		{
+			return duration;
+		}
+
+		public void setDuration(long duration)
+		{
+			this.duration = duration;
+		}
+	}
 }

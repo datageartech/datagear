@@ -21,7 +21,6 @@ import java.util.Locale;
 
 import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.CancelReason;
-import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.SubDataExchange;
 import org.datagear.dataexchange.SubmitFailException;
 import org.datagear.web.util.MessageChannel;
@@ -67,116 +66,6 @@ public class MessageBatchDataExchangeListener extends MessageDataExchangeListene
 	public void onCancel(SubDataExchange subDataExchange, CancelReason reason)
 	{
 		sendMessage(new SubCancelSuccess(subDataExchange.getId()));
-	}
-
-	@Override
-	protected DataExchangeMessage buildStartMessage()
-	{
-		return new Start();
-	}
-
-	@Override
-	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
-	{
-		return new Exception(resolveDataExchangeExceptionI18n(e));
-	}
-
-	@Override
-	protected DataExchangeMessage buildSuccessMessage()
-	{
-		return new Success();
-	}
-
-	@Override
-	protected DataExchangeMessage buildFinishMessage()
-	{
-		return new Finish(evalDuration());
-	}
-
-	/**
-	 * 数据交换开始消息。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class Start extends DataExchangeMessage
-	{
-		public Start()
-		{
-			super();
-		}
-	}
-
-	/**
-	 * 数据交换异常消息。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class Exception extends DataExchangeMessage
-	{
-		private String content;
-
-		public Exception()
-		{
-			super();
-		}
-
-		public Exception(String content)
-		{
-			super();
-			this.content = content;
-		}
-
-		public String getContent()
-		{
-			return content;
-		}
-
-		public void setContent(String content)
-		{
-			this.content = content;
-		}
-	}
-
-	public static class Success extends DataExchangeMessage
-	{
-		public Success()
-		{
-			super();
-		}
-	}
-
-	/**
-	 * 数据交换完成消息。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class Finish extends DataExchangeMessage
-	{
-		private long duration;
-
-		public Finish()
-		{
-			super();
-		}
-
-		public Finish(long duration)
-		{
-			super();
-			this.duration = duration;
-		}
-
-		public long getDuration()
-		{
-			return duration;
-		}
-
-		public void setDuration(long duration)
-		{
-			this.duration = duration;
-		}
 	}
 
 	/**

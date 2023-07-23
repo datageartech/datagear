@@ -53,6 +53,7 @@ public interface MessageChannel
 	 * @param <T>
 	 * @param channel
 	 * @param count
+	 *            最多数量，{@code -1}表示所有消息
 	 * @return 消息对象列表，返回空列表表示无消息
 	 */
 	public <T> List<T> pull(String channel, int count);

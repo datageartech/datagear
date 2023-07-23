@@ -918,7 +918,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	MessageChannel dataExchangeMessageChannel()
+	public MessageChannel dataExchangeMessageChannel()
 	{
 		DefaultMessageChannel bean = new DefaultMessageChannel();
 		return bean;
