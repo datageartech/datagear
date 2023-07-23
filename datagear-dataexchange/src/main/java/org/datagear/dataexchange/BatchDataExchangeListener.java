@@ -36,9 +36,9 @@ public interface BatchDataExchangeListener extends DataExchangeListener
 	 * 子数据交换提交失败。
 	 * 
 	 * @param subDataExchange
-	 * @param reason
+	 * @param exception
 	 */
-	void onSubmitFail(SubDataExchange subDataExchange, SubmitFailReason reason);
+	void onSubmitFail(SubDataExchange subDataExchange, SubmitFailException exception);
 
 	/**
 	 * 子数据交换取消。

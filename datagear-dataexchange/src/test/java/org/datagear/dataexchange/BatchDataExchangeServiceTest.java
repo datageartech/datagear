@@ -185,7 +185,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 			}
 
 			@Override
-			public void onSubmitFail(SubDataExchange subDataExchange, SubmitFailReason reason)
+			public void onSubmitFail(SubDataExchange subDataExchange, SubmitFailException exception)
 			{
 				println("onSubmitFail : " + subDataExchange.getId());
 			}

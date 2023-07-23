@@ -104,7 +104,7 @@ public abstract class AbstractLogFileSupport
 	 * @param log
 	 * @return
 	 */
-	protected boolean writeLogLine(String log)
+	public boolean writeLogLine(String log)
 	{
 		if (!hasLogFile())
 			return false;

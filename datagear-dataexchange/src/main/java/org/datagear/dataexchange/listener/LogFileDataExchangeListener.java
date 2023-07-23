@@ -76,7 +76,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @param log
 	 */
-	protected void writeStartLog()
+	public void writeStartLog()
 	{
 		writeLogLine(getStartLog());
 	}
@@ -86,7 +86,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @param log
 	 */
-	protected void writeSuccessLog()
+	public void writeSuccessLog()
 	{
 		writeLogLine(getSuccessLog());
 	}
@@ -96,7 +96,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @param log
 	 */
-	protected void writeFinishLog()
+	public void writeFinishLog()
 	{
 		writeLogLine(getFinishLog());
 	}
@@ -106,7 +106,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @param e
 	 */
-	protected void writeExceptionLog(DataExchangeException e)
+	public void writeExceptionLog(DataExchangeException e)
 	{
 		writeLogLine(getExceptionLog(e));
 	}
@@ -116,7 +116,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @return
 	 */
-	protected String getStartLog()
+	public String getStartLog()
 	{
 		return "Start";
 	}
@@ -126,7 +126,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @return
 	 */
-	protected String getSuccessLog()
+	public String getSuccessLog()
 	{
 		return "Success";
 	}
@@ -136,7 +136,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * 
 	 * @return
 	 */
-	protected String getFinishLog()
+	public String getFinishLog()
 	{
 		return "Finish";
 	}
@@ -147,7 +147,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * @param e
 	 * @return
 	 */
-	protected String getExceptionLog(DataExchangeException e)
+	public String getExceptionLog(DataExchangeException e)
 	{
 		return e.getMessage();
 	}
@@ -158,7 +158,7 @@ public class LogFileDataExchangeListener extends AbstractLogFileSupport implemen
 	 * @param dataIndex
 	 * @param log
 	 */
-	protected void writeDataLog(DataIndex dataIndex, String log)
+	public void writeDataLog(DataIndex dataIndex, String log)
 	{
 		writeLogLine("[" + dataIndex + "] " + log);
 	}

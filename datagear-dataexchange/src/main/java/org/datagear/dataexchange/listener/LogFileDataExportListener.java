@@ -43,8 +43,8 @@ public class LogFileDataExportListener extends LogFileDataExchangeListener imple
 		}
 	}
 
-	protected String getSuccessLog(DataIndex dataIndex)
+	public String getSuccessLog(DataIndex dataIndex)
 	{
-		return "[" + dataIndex + "] Success";
+		return "[" + dataIndex + "] OK";
 	}
 }

@@ -18,20 +18,32 @@
 package org.datagear.dataexchange;
 
 /**
- * 子数据交换失败原因。
+ * 由于依赖子交换提交异常而产生的提交异常。
  * 
  * @author datagear@163.com
  *
  */
-public class SubmitFailReason extends AbstractReason
+public class DependentSubmitFailException extends SubmitFailException
 {
-	public SubmitFailReason()
+	private static final long serialVersionUID = 1L;
+
+	public DependentSubmitFailException()
 	{
 		super();
 	}
 
-	public SubmitFailReason(String reason)
+	public DependentSubmitFailException(String message)
 	{
-		super(reason);
+		super(message);
+	}
+
+	public DependentSubmitFailException(Throwable cause)
+	{
+		super(cause);
+	}
+
+	public DependentSubmitFailException(String message, Throwable cause)
+	{
+		super(message, cause);
 	}
 }

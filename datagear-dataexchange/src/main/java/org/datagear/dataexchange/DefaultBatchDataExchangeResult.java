@@ -328,7 +328,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	{
 		Set<SubDataExchange> submitSuccesses = new HashSet<SubDataExchange>();
 		Set<SubDataExchange> submitFails = new HashSet<SubDataExchange>();
-		Map<String, Throwable> submitFailThrowables = new HashMap<String, Throwable>();
+		Map<String, SubmitFailException> submitFailThrowables = new HashMap<String, SubmitFailException>();
 		Map<String, String> submitFailDepends = new HashMap<String, String>();
 
 		synchronized (this._subLock)
@@ -336,7 +336,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 			for (SubDataExchange subDataExchange : subDataExchanges)
 			{
 				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(subDataExchange);
-				Throwable result = submit(task);
+				SubmitFailException result = submit(task);
 
 				if (result == null)
 				{
@@ -362,15 +362,13 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 			for (SubDataExchange sub : submitFails)
 			{
 				String failSubId = sub.getId();
-				Throwable failThrowable = submitFailThrowables.get(failSubId);
-				SubmitFailReason reason = null;
+				SubmitFailException failException = submitFailThrowables.get(failSubId);
 
-				if (failThrowable != null)
-					reason = new ExceptionSubmitFailReason(failThrowable);
-				else
-					reason = new DependentSubmitFailReason(submitFailDepends.get(failSubId));
+				if (failException == null)
+					failException = new DependentSubmitFailException(
+							"Submit fail by dependency [" + submitFailDepends.get(failSubId) + "] submit fail");
 
-				listenerOnSubmitFail(this.listener, sub, reason);
+				listenerOnSubmitFail(this.listener, sub, failException);
 			}
 		}
 	}
@@ -381,7 +379,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	 * @param task
 	 * @return {@code null}表示提交成功
 	 */
-	protected Throwable submit(SubDataExchangeFutureTask task)
+	protected SubmitFailException submit(SubDataExchangeFutureTask task)
 	{
 		try
 		{
@@ -390,7 +388,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 		}
 		catch (Throwable t)
 		{
-			return t;
+			throw new SubmitFailException(t);
 		}
 	}
 
@@ -521,14 +519,14 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	}
 
 	protected void listenerOnSubmitFail(BatchDataExchangeListener listener, SubDataExchange subDataExchange,
-			SubmitFailReason reason)
+			SubmitFailException exception)
 	{
 		if (listener == null)
 			return;
 
 		try
 		{
-			listener.onSubmitFail(subDataExchange, reason);
+			listener.onSubmitFail(subDataExchange, exception);
 		}
 		catch (Throwable t)
 		{

@@ -23,7 +23,7 @@ import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.CancelReason;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.SubDataExchange;
-import org.datagear.dataexchange.SubmitFailReason;
+import org.datagear.dataexchange.SubmitFailException;
 import org.datagear.web.util.MessageChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class MessageBatchDataExchangeListener extends MessageDataExchangeListene
 	}
 
 	@Override
-	public void onSubmitFail(SubDataExchange subDataExchange, SubmitFailReason reason)
+	public void onSubmitFail(SubDataExchange subDataExchange, SubmitFailException exception)
 	{
 		sendMessage(new SubSubmitFail(subDataExchange.getId()));
 	}
