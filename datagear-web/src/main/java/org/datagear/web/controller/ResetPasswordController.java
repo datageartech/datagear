@@ -143,8 +143,8 @@ public class ResetPasswordController extends AbstractController
 
 		resetPasswordStep.setUsername(username);
 		resetPasswordStep.setCheckFileName(IDUtil.uuid());
-		resetPasswordStep.setCheckFileTip(getMessage(request, "resetPassword.pleaseCreateCheckFile",
-				this.resetPasswordCheckFileDirectory.getAbsolutePath(), resetPasswordStep.getCheckFileName()));
+		resetPasswordStep.setCheckFileTip(
+				getMessage(request, "resetPassword.pleaseCreateCheckFile", resetPasswordStep.getCheckFileName()));
 		resetPasswordStep.setStep(2, STEP_CHECK_USER);
 
 		setSessionResetPasswordStep(request, resetPasswordStep);
