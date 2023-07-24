@@ -20,6 +20,7 @@ package org.datagear.webapp.config;
 
 import org.datagear.web.config.CoreConfigSupport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -28,12 +29,12 @@ import org.springframework.context.annotation.Configuration;
  * @author datagear@163.com
  */
 @Configuration
+@EnableCaching
 public class CoreConfig extends CoreConfigSupport
 {
 	@Autowired
-	public CoreConfig(ApplicationPropertiesConfig applicationPropertiesConfig, DataSourceConfig dataSourceConfig,
-			CacheConfig cacheConfig)
+	public CoreConfig(ApplicationPropertiesConfig applicationPropertiesConfig, DataSourceConfig dataSourceConfig)
 	{
-		super(applicationPropertiesConfig, dataSourceConfig, cacheConfig);
+		super(applicationPropertiesConfig, dataSourceConfig);
 	}
 }

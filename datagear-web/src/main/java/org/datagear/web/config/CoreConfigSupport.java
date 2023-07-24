@@ -151,6 +151,9 @@ import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
@@ -171,8 +174,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * <p>
  * 子类应该添加如下注解：
  * </p>
+ * 
  * <pre>
  * {@code @Configuration}
+ * {@code @EnableCaching}
  * </pre>
  * <p>
  * Spring会递归处理{@linkplain Configuration @Configuration}类的父类，可能会导致某些非预期的父类配置被加载，
@@ -191,16 +196,15 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 	private DataSourceConfigSupport dataSourceConfig;
 
-	private CacheConfigSupport cacheConfig;
+	private CacheManager _localCacheManager;
 
 	@Autowired
-	public CoreConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig, DataSourceConfigSupport dataSourceConfig,
-			CacheConfigSupport cacheConfig)
+	public CoreConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig,
+			DataSourceConfigSupport dataSourceConfig)
 	{
 		super();
 		this.applicationPropertiesConfig = applicationPropertiesConfig;
 		this.dataSourceConfig = dataSourceConfig;
-		this.cacheConfig = cacheConfig;
 	}
 
 	public ApplicationPropertiesConfigSupport getApplicationPropertiesConfig()
@@ -221,16 +225,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public void setDataSourceConfig(DataSourceConfigSupport dataSourceConfig)
 	{
 		this.dataSourceConfig = dataSourceConfig;
-	}
-
-	public CacheConfigSupport getCacheConfig()
-	{
-		return cacheConfig;
-	}
-
-	public void setCacheConfig(CacheConfigSupport cacheConfig)
-	{
-		this.cacheConfig = cacheConfig;
 	}
 
 	@Bean
@@ -687,10 +681,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DataSetEntityService dataSetEntityService()
 	{
 		DataSetEntityServiceImpl bean = createDataSetEntityServiceImpl();
-
-		bean.setDataSetResourceDataCache(this.cacheConfig
-				.createCache(DataSetEntityService.class.getName() + ".dataSetResourceDataCache"));
-
 		bean.setSqlDataSetSqlValidator(this.sqlDataSetSqlValidator());
 
 		return bean;
@@ -1115,19 +1105,27 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@SuppressWarnings("rawtypes")
 	protected void initCacheServices(ApplicationContext context)
 	{
+		CacheManager cacheManager = getCacheManager(context);
+
 		Map<String, AbstractMybatisEntityService> entityServices = context
 				.getBeansOfType(AbstractMybatisEntityService.class);
 
 		for (AbstractMybatisEntityService es : entityServices.values())
 		{
-			es.setCache(this.cacheConfig.createCache(es.getClass()));
+			es.setCache(getCache(cacheManager, es.getClass()));
 
 			if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 			{
 				((AbstractMybatisDataPermissionEntityService<?, ?>) es)
-						.setPermissionCache(
-								this.cacheConfig.createCache(es.getClass().getName() + "PermissionCache"));
+						.setPermissionCache(getCache(cacheManager, es.getClass().getName() + "PermissionCache"));
 			}
+		}
+
+		DataSetEntityService dataSetEntityService = this.dataSetEntityService();
+		if (dataSetEntityService instanceof DataSetEntityServiceImpl)
+		{
+			((DataSetEntityServiceImpl) dataSetEntityService).setDataSetResourceDataCache(
+					getCache(cacheManager, DataSetEntityService.class.getName() + "DsrdCache"));
 		}
 
 		Map<String, HtmlTplDashboardWidgetHtmlRenderer> renderers = context
@@ -1135,7 +1133,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 		for (HtmlTplDashboardWidgetHtmlRenderer renderer : renderers.values())
 		{
-			renderer.setCache(this.cacheConfig.createLocalCache(renderer.getClass()));
+			renderer.setCache(getLocalCache(renderer.getClass()));
 		}
 	}
 
@@ -1155,6 +1153,74 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 		if (userService instanceof UserServiceImpl)
 			((UserServiceImpl) userService).setCreateUserEntityServices(serviceList);
+	}
+
+	/**
+	 * 创建{@linkplain Cache}。
+	 * 
+	 * @param cacheNameClass
+	 * @return
+	 */
+	protected Cache getCache(CacheManager cacheManager, Class<?> cacheNameClass)
+	{
+		return getCache(cacheManager, cacheNameClass.getName());
+	}
+
+	/**
+	 * 创建{@linkplain Cache}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	protected Cache getCache(CacheManager cacheManager, String name)
+	{
+		return cacheManager.getCache(name);
+	}
+
+	/**
+	 * 获取进程内{@linkplain Cache}。
+	 * 
+	 * @param cacheNameClass
+	 * @return
+	 */
+	protected Cache getLocalCache(Class<?> cacheNameClass)
+	{
+		return getLocalCache(cacheNameClass.getName());
+	}
+
+	/**
+	 * 获取进程内{@linkplain Cache}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	protected Cache getLocalCache(String name)
+	{
+		return getLocalCacheManager().getCache(name);
+	}
+
+	protected CacheManager getCacheManager(ApplicationContext context)
+	{
+		CacheManager cacheManager = context.getBean(CacheManager.class);
+		return cacheManager;
+	}
+
+	protected CacheManager getLocalCacheManager()
+	{
+		// 本地缓存不能在构造方法种初始化，会出现Spring循环依赖问题
+		synchronized (this)
+		{
+			if (this._localCacheManager != null)
+				return this._localCacheManager;
+
+			CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+			String cacheSpec = getApplicationProperties().getLocalCacheSpec();
+			if (!StringUtil.isEmpty(cacheSpec))
+				caffeineCacheManager.setCacheSpecification(cacheSpec);
+			this._localCacheManager = caffeineCacheManager;
+
+			return this._localCacheManager;
+		}
 	}
 
 	/**

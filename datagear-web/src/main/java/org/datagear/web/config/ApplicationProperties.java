@@ -141,13 +141,9 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${datasourceDialect}")
 	private String datasourceDialect;
 
-	/** 服务层缓存-是否禁用 */
-	@Value("${cache.disabled}")
-	private boolean cacheDisabled;
-
-	/** 服务层缓存-置项 */
-	@Value("${cache.spec}")
-	private String cacheSpec;
+	/** 本地缓存配置 */
+	@Value("${localCache.spec}")
+	private String localCacheSpec;
 
 	/** 看板分享密码加密是否禁用 */
 	@Value("${dashboardSharePassword.crypto.disabled}")
@@ -485,24 +481,14 @@ public abstract class ApplicationProperties implements Serializable
 		this.datasourceDialect = datasourceDialect;
 	}
 
-	public boolean isCacheDisabled()
+	public String getLocalCacheSpec()
 	{
-		return cacheDisabled;
+		return localCacheSpec;
 	}
 
-	public void setCacheDisabled(boolean cacheDisabled)
+	protected void setLocalCacheSpec(String localCacheSpec)
 	{
-		this.cacheDisabled = cacheDisabled;
-	}
-
-	public String getCacheSpec()
-	{
-		return cacheSpec;
-	}
-
-	public void setCacheSpec(String cacheSpec)
-	{
-		this.cacheSpec = cacheSpec;
+		this.localCacheSpec = localCacheSpec;
 	}
 
 	public boolean isDashboardSharePasswordCryptoDisabled()
