@@ -1252,6 +1252,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (params != null)
 		{
 			Set<String> names = new HashSet<>();
+
 			for (DataSetParam param : params)
 			{
 				String name = param.getName();
@@ -1260,12 +1261,20 @@ public class DataSetController extends AbstractSchemaConnController
 				{
 					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "paramNameRequired");
 				}
-				else if (names.contains(name))
-				{
-					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "paramNameMustBeUnique");
-				}
 				else
-					names.add(name);
+				{
+					// 参数名限定为：不允许忽略大小写的重名。
+					// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
+					String upperCaseName = name.toUpperCase();
+
+					if (names.contains(upperCaseName))
+					{
+						return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+								"paramNameMustBeUniqueIgnoreCase");
+					}
+					else
+						names.add(upperCaseName);
+				}
 			}
 		}
 
@@ -1273,6 +1282,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (properties != null)
 		{
 			Set<String> names = new HashSet<>();
+
 			for (DataSetProperty property : properties)
 			{
 				String name = property.getName();
@@ -1281,12 +1291,20 @@ public class DataSetController extends AbstractSchemaConnController
 				{
 					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "propertyNameRequired");
 				}
-				else if (names.contains(name))
-				{
-					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "propertyNameMustBeUnique");
-				}
 				else
-					names.add(name);
+				{
+					// 属性名限定为：不允许忽略大小写的重名。
+					// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
+					String upperCaseName = name.toUpperCase();
+
+					if (names.contains(upperCaseName))
+					{
+						return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+								"propertyNameMustBeUniqueIgnoreCase");
+					}
+					else
+						names.add(upperCaseName);
+				}
 			}
 		}
 

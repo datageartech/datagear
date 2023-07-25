@@ -215,10 +215,23 @@ dataSet_form_param_property_form.ftl
 	
 	po.vueRef("${pid}dataSourceFormatPanelEle", null);
 	
-	po.hasDuplicateName = function(array, name, ignoreIdx)
+	po.hasDuplicateNameNoCase = function(array, name, ignoreIdx)
 	{
-		var nameIdx = $.inArrayById(array, name, "name");
-		return (nameIdx >= 0 && nameIdx != ignoreIdx ? true : false);
+		name = (name || "").toUpperCase();
+		
+		for(var i=0; i<array.length; i++)
+		{
+			if(i != ignoreIdx)
+			{
+				var myName = (array[i].name || "").toUpperCase();
+				if(name == myName)
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	};
 	
 	po.vueMethod(
@@ -229,9 +242,9 @@ dataSet_form_param_property_form.ftl
 			{
 				var fm = po.vueFormModel();
 				
-				if(po.hasDuplicateName(fm.params, dsp.name))
+				if(po.hasDuplicateNameNoCase(fm.params, dsp.name))
 				{
-					$.tipInfo("<@spring.message code='paramNameMustBeUnique' />");
+					$.tipInfo("<@spring.message code='paramNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
@@ -251,9 +264,9 @@ dataSet_form_param_property_form.ftl
 			
 			po.showDataSetParamForm("<@spring.message code='edit' />", dsp, function(dsp)
 			{
-				if(po.hasDuplicateName(fm.params, dsp.name, dspIdx))
+				if(po.hasDuplicateNameNoCase(fm.params, dsp.name, dspIdx))
 				{
-					$.tipInfo("<@spring.message code='paramNameMustBeUnique' />");
+					$.tipInfo("<@spring.message code='paramNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
@@ -266,9 +279,9 @@ dataSet_form_param_property_form.ftl
 			
 			po.showDataSetPropertyForm("<@spring.message code='add' />", {}, function(dsp)
 			{
-				if(po.hasDuplicateName(fm.properties, dsp.name))
+				if(po.hasDuplicateNameNoCase(fm.properties, dsp.name))
 				{
-					$.tipInfo("<@spring.message code='propertyNameMustBeUnique' />");
+					$.tipInfo("<@spring.message code='propertyNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
@@ -289,9 +302,9 @@ dataSet_form_param_property_form.ftl
 			
 			po.showDataSetPropertyForm("<@spring.message code='edit' />", dsp, function(dsp)
 			{
-				if(po.hasDuplicateName(fm.properties, dsp.name, dspIdx))
+				if(po.hasDuplicateNameNoCase(fm.properties, dsp.name, dspIdx))
 				{
-					$.tipInfo("<@spring.message code='propertyNameMustBeUnique' />");
+					$.tipInfo("<@spring.message code='propertyNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				

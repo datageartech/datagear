@@ -344,12 +344,6 @@ page_simple_form.ftl
 		]
 	});
 	
-	po.hasDuplicateName = function(array, name, ignoreIdx)
-	{
-		var nameIdx = $.inArrayById(array, name, "name");
-		return (nameIdx >= 0 && nameIdx != ignoreIdx ? true : false);
-	};
-	
 	po.vueMethod(
 	{
 		onDataSetParamFormPanelShow: function()
