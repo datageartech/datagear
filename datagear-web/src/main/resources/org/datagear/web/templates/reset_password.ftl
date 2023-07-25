@@ -79,6 +79,9 @@
 								        		${step.checkFileTip?no_esc}
 								        	</div>
 								        	<div class="desc text-color-secondary mt-3">
+								        		<small><@spring.message code='resetPassword.checkFile.desc0' /></small>
+								        	</div>
+								        	<div class="desc text-color-secondary">
 								        		<small><@spring.message code='resetPassword.checkFile.desc1' /></small>
 								        	</div>
 								        	<div class="desc text-color-secondary">
