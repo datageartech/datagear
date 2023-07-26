@@ -36,7 +36,7 @@
 			<div class="grid grid-nogutter justify-content-center">
 				<p-card class="col-10 md:col-5 p-card mt-6">
 					<template #title><@spring.message code='module.register' /></template>
-					<template #content>
+					<template id="${pid}tplDomContent" #content>
 					<form id="${pid}form" class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="field grid">
