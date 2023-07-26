@@ -54,7 +54,7 @@ public class ResetPasswordController extends AbstractController
 	public static final String MESSAGE_KEY_BASENAME = "resetPassword";
 	
 	public static final String STEP_FILL_USER_INFO = "fillUserInfo";
-	public static final String STEP_CHECK_USER = "checkUser";
+	public static final String STEP_CHECK_USER_INFO = "checkUserInfo";
 	public static final String STEP_SET_NEW_PASSWORD = "setNewPassword";
 	public static final String STEP_FINISH = "finish";
 
@@ -109,9 +109,7 @@ public class ResetPasswordController extends AbstractController
 
 		if (resetPasswordStep == null || request.getParameter("step") == null)
 		{
-			resetPasswordStep = new ResetPasswordStep(4);
-			resetPasswordStep.setStep(1, STEP_FILL_USER_INFO);
-
+			resetPasswordStep = createInitResetPasswordStep(request, response);
 			setSessionResetPasswordStep(request, resetPasswordStep);
 		}
 
@@ -121,7 +119,7 @@ public class ResetPasswordController extends AbstractController
 		return "/reset_password";
 	}
 
-	@RequestMapping(value = "/fillUserInfo", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/" + STEP_FILL_USER_INFO, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> fillUserInfo(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestBody FillUserInfoForm form)
@@ -145,16 +143,17 @@ public class ResetPasswordController extends AbstractController
 		resetPasswordStep.setCheckFileName(IDUtil.uuid());
 		resetPasswordStep.setCheckFileTip(
 				getMessage(request, "resetPassword.pleaseCreateCheckFile", resetPasswordStep.getCheckFileName()));
-		resetPasswordStep.setStep(2, STEP_CHECK_USER);
+		resetPasswordStep.setStep(2, STEP_CHECK_USER_INFO);
 
 		setSessionResetPasswordStep(request, resetPasswordStep);
 
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/checkUser", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/" + STEP_CHECK_USER_INFO, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> checkUser(HttpServletRequest request, HttpServletResponse response, Model model)
+	public ResponseEntity<OperationMessage> checkUserInfo(HttpServletRequest request, HttpServletResponse response,
+			Model model)
 	{
 		ResetPasswordStep resetPasswordStep = getSessionResetPasswordStep(request);
 
@@ -176,7 +175,7 @@ public class ResetPasswordController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/setNewPassword", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/" + STEP_SET_NEW_PASSWORD, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> setNewPassword(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestBody SetNewPasswordForm form)
@@ -240,6 +239,23 @@ public class ResetPasswordController extends AbstractController
 	{
 		HttpSession session = request.getSession();
 		session.setAttribute(KEY_STEP, step);
+	}
+
+	/**
+	 * 创建初始{@linkplain ResetPasswordStep}。
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	protected ResetPasswordStep createInitResetPasswordStep(HttpServletRequest request, HttpServletResponse response)
+	{
+		int totalStep = 4;
+
+		ResetPasswordStep step = new ResetPasswordStep(totalStep);
+		step.setStep(1, STEP_FILL_USER_INFO);
+
+		return step;
 	}
 
 	/**

@@ -168,7 +168,7 @@
 				class: "step-1"
 			},
 			{
-				label: "<@spring.message code='resetPassword.step.checkUser' />",
+				label: "<@spring.message code='resetPassword.step.checkUserInfo' />",
 				class: "step-2"
 			},
 			{
