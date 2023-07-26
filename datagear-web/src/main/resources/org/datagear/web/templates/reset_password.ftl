@@ -53,7 +53,7 @@
 											<@spring.message code='username' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-inputtext id="${pid}nameuser" v-model="fm.username" type="text" class="input w-full"
+								        	<p-inputtext id="${pid}username" v-model="fm.username" type="text" class="input w-full"
 								        		name="username" required maxlength="50" autofocus>
 								        	</p-inputtext>
 								        </div>
