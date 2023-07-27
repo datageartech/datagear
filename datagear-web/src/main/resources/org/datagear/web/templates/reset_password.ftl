@@ -39,7 +39,7 @@
 			<div class="grid grid-nogutter justify-content-center">
 				<p-card class="col-10 md:col-8 p-card mt-6">
 					<template #title><@spring.message code='module.resetPassword' /></template>
-					<template #content>
+					<template id="${pid}tplDomContent" #content>
 					<form id="${pid}form" class="flex flex-column">
 						<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 							<div class="mb-5">
@@ -65,7 +65,7 @@
 											<@spring.message code='username' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-inputtext id="${pid}nameuser" v-model="fm.username" type="text" class="input w-full"
+								        	<p-inputtext id="${pid}username" v-model="fm.username" type="text" class="input w-full"
 								        		name="username" maxlength="50" readonly>
 								        	</p-inputtext>
 								        </div>
@@ -96,7 +96,7 @@
 											<@spring.message code='username' />
 										</label>
 								        <div class="field-input col-12 md:col-9">
-								        	<p-inputtext id="${pid}nameuser" v-model="fm.username" type="text" class="input w-full"
+								        	<p-inputtext id="${pid}username" v-model="fm.username" type="text" class="input w-full"
 								        		name="username" maxlength="50" readonly>
 								        	</p-inputtext>
 								        </div>

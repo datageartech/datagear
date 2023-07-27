@@ -31,6 +31,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -113,7 +114,7 @@ public class ResetPasswordController extends AbstractController
 			setSessionResetPasswordStep(request, resetPasswordStep);
 		}
 
-		model.addAttribute("step", resetPasswordStep);
+		model.addAttribute("step", toResetPasswordStepView(request, response, resetPasswordStep));
 		WebUtils.setEnableDetectNewVersionRequest(request);
 
 		return "/reset_password";
@@ -187,8 +188,7 @@ public class ResetPasswordController extends AbstractController
 
 		ResetPasswordStep resetPasswordStep = getSessionResetPasswordStep(request);
 
-		if (isEmpty(resetPasswordStep) || isEmpty(resetPasswordStep.getUsername())
-				|| isEmpty(resetPasswordStep.getCheckFileName()) || !resetPasswordStep.isCheckOk())
+		if (isEmpty(resetPasswordStep) || isEmpty(resetPasswordStep.getUsername()) || !resetPasswordStep.isCheckOk())
 			return optStepNotInSessionResponseEntity(request);
 
 		String username = resetPasswordStep.getUsername();
@@ -256,6 +256,25 @@ public class ResetPasswordController extends AbstractController
 		step.setStep(1, STEP_FILL_USER_INFO);
 
 		return step;
+	}
+
+	/**
+	 * 转换为页面展示信息。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param step
+	 * @return
+	 */
+	protected ResetPasswordStep toResetPasswordStepView(HttpServletRequest request, HttpServletResponse response,
+			ResetPasswordStep step)
+	{
+		ResetPasswordStep re = new ResetPasswordStep(step.getStep());
+		BeanUtils.copyProperties(step, re);
+
+		re.setPassword(null);
+
+		return re;
 	}
 
 	/**
