@@ -460,6 +460,32 @@ public class StringUtil
 	}
 
 	/**
+	 * 脱敏处理邮箱字符串中的用户名部分（{@linkplain '@'}之前），生成类似{@code "abc****def"}的字符串。
+	 * 
+	 * @param email
+	 * @param prefixCount
+	 * @param suffixCount
+	 * @param maskCount
+	 * @return
+	 */
+	public static String maskEmail(String email, int prefixCount, int suffixCount, int maskCount)
+	{
+		String prefix = email;
+		String suffix = "";
+		
+		int idx = email.indexOf('@');
+		if(idx > 0)
+		{
+			prefix = email.substring(0, idx);
+			suffix = email.substring(idx);
+		}
+
+		prefix = mask(prefix, prefixCount, suffixCount, maskCount);
+
+		return prefix + suffix;
+	}
+
+	/**
 	 * 解码URL。
 	 * 
 	 * @param url
