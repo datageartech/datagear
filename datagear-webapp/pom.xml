@@ -73,7 +73,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.2</version>
+				<version>${maven-war-plugin.version}</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -97,30 +97,8 @@
 			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-			    <version>${maven-antrun-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>clearDistDirectory</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="${dist.target.dir}" includeEmptyDirs="true" />
-								<mkdir dir="${dist.target.dir}"/>
-								<delete dir="${dist.package.target.dir}" includeEmptyDirs="true" />
-								<mkdir dir="${dist.package.target.dir}" />
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven-resources-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>prepareWarResources</id>
@@ -179,6 +157,21 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 			    <version>${maven-antrun-plugin.version}</version>
 				<executions>
+					<execution>
+						<id>clearDistDirectory</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="${dist.target.dir}" includeEmptyDirs="true" />
+								<mkdir dir="${dist.target.dir}"/>
+								<delete dir="${dist.package.target.dir}" includeEmptyDirs="true" />
+								<mkdir dir="${dist.package.target.dir}" />
+							</tasks>
+						</configuration>
+					</execution>
 					<execution>
 			    		<id>prepareWarLICENSE</id>
 			    		<phase>prepare-package</phase>
