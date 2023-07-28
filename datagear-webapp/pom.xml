@@ -158,21 +158,6 @@
 			    <version>${maven-antrun-plugin.version}</version>
 				<executions>
 					<execution>
-						<id>clearDistDirectory</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="${dist.target.dir}" includeEmptyDirs="true" />
-								<mkdir dir="${dist.target.dir}"/>
-								<delete dir="${dist.package.target.dir}" includeEmptyDirs="true" />
-								<mkdir dir="${dist.package.target.dir}" />
-							</tasks>
-						</configuration>
-					</execution>
-					<execution>
 			    		<id>prepareWarLICENSE</id>
 			    		<phase>prepare-package</phase>
 			    		<goals>
