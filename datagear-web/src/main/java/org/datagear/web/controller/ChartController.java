@@ -54,10 +54,12 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
+import org.datagear.management.service.UserService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -99,6 +101,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
+
+	@Autowired
+	private UserService userService;
 
 	private ChartPluginAttributeValueConverter chartPluginAttributeValueConverter = new ChartPluginAttributeValueConverter();
 
@@ -169,6 +174,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
 		this.dataSetEntityService = dataSetEntityService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
 	}
 
 	public ChartPluginAttributeValueConverter getChartPluginAttributeValueConverter()
@@ -367,6 +382,36 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		setChartPluginView(request, pagingData.getItems());
 
 		return pagingData;
+	}
+
+	@RequestMapping(value = "/hasReadPermission", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public boolean[] hasReadPermission(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HasReadPermissionForm form) throws Exception
+	{
+		if(StringUtil.isEmpty(form.getUserId()))
+			throw new IllegalInputException();
+		
+		String[] chartWidgetIds = form.getChartWidgetIds();
+		
+		if(isEmpty(chartWidgetIds))
+			return new boolean[0];
+		
+		User user  = this.userService.getByIdSimple(form.getUserId());
+		
+		if(user == null)
+			throw new IllegalInputException();
+		
+		boolean[] re = new boolean[chartWidgetIds.length];
+		
+		int[] permissions = getHtmlChartWidgetEntityService().getPermissions(user, chartWidgetIds);
+		
+		for(int i=0; i<chartWidgetIds.length; i++)
+		{
+			re[i] = Authorization.canRead(permissions[i]);
+		}
+		
+		return re;
 	}
 
 	/**
@@ -639,5 +684,38 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		addAttributeForWriteJson(model, "initResultDataFormat",
 				(entity.getResultDataFormat() != null ? entity.getResultDataFormat() : createDefaultResultDataFormat()));
 		model.addAttribute("enableResultDataFormat", (entity.getResultDataFormat() != null));
+	}
+	
+	public static class HasReadPermissionForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String userId;
+		private String[] chartWidgetIds;
+		
+		public HasReadPermissionForm()
+		{
+			super();
+		}
+
+		public String getUserId()
+		{
+			return userId;
+		}
+
+		public void setUserId(String userId)
+		{
+			this.userId = userId;
+		}
+
+		public String[] getChartWidgetIds()
+		{
+			return chartWidgetIds;
+		}
+
+		public void setChartWidgetIds(String[] chartWidgetIds)
+		{
+			this.chartWidgetIds = chartWidgetIds;
+		}
 	}
 }

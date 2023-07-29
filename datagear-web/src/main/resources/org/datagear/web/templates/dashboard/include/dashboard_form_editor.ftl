@@ -95,6 +95,7 @@
 <script>
 (function(po)
 {
+	po.currentUserId = "${currentUser.id!}";
 	po.defaultTemplateName = "${defaultTempalteName}";
 	
 	//实现重命名操作后编辑器更新逻辑
@@ -766,6 +767,8 @@
 		
 		po.insertCodeText(codeEditor, cursor, code);
 		codeEditor.focus();
+		
+		po.tipChartPermissionIfNeed(chartWidgets);
 	};
 	
 	po.getTemplatePrevTagText = function(codeEditor, cursor)
@@ -801,6 +804,36 @@
 		return text;
 	};
 	
+	//如果插入了看板创建用户没有权限的图表，这里给出提示
+	po.tipChartPermissionIfNeed = function(chartWidgets)
+	{
+		if(!chartWidgets || chartWidgets.length == 0)
+			return;
+		
+		var fm = po.vueFormModel();
+		if(fm.createUser && fm.createUser.id && po.currentUserId != fm.createUser.id)
+		{
+			var chartWidgetIds = $.propertyValue(chartWidgets, "id");
+			
+			po.ajaxJson("/chart/hasReadPermission",
+			{
+				data: { userId: fm.createUser.id, chartWidgetIds: chartWidgetIds },
+				success: function(response)
+				{
+					var msg = "<@spring.message code='dashboard.insertNoPermissionChart' />";
+					for(var i=0; i<chartWidgets.length; i++)
+					{
+						if(!response[i])
+						{
+							var cw = chartWidgets[i];
+							$.tipWarn({ summary: $.validator.format(msg, cw.name, cw.id), life: 5000});
+						}
+					}
+				}
+			});
+		}
+	};
+	
 	po.showFirstTemplateContent = function()
 	{
 		var fm = po.vueFormModel();
@@ -827,6 +860,8 @@
 			chartFactory.logException(e);
 			return false;
 		}
+		
+		po.tipChartPermissionIfNeed(chartWidgets);
 	};
 	
 	po.insertVeChart = function(chartWidgets)
@@ -846,6 +881,8 @@
 			chartFactory.logException(e);
 			return false;
 		}
+		
+		po.tipChartPermissionIfNeed(chartWidgets);
 	};
 	
 	po.insertVeGridLayout = function(model)

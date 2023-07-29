@@ -1472,10 +1472,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		Reader showHtmlIn = null;
 		Writer out = null;
 
-		// 使用看板创建用户，确保当前用户对看板模板内定义的图表有权限
-		// 如果当前用户是管理员，则不应使用看板创建用户，避免管理员在其他用户的看板内添加管理员创建的图表时，出现无权访问的情况，
-		// 但是，其他用户打开看板时对此图表仍无权访问
-		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(currentUser.isAdmin() ? currentUser : createUser));
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
 
 		try
 		{
@@ -1745,7 +1742,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 	}
 	
-	protected void handleLoadChartPattern(User user, DashboardInfo dashboardInfo,
+	protected void handleLoadChartPattern(User currentUser, DashboardInfo dashboardInfo,
 			HtmlTplDashboardWidgetEntity dashboardWidget, String[] chartWidgetIds, HtmlChartWidget[] chartWidgets,
 			HtmlTplDashboardWidgetRenderer renderer, boolean loadChartForEditor) throws Throwable
 	{
@@ -1754,7 +1751,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		// 看板可视编辑模式时，插入图表操作不应受看板内定义的异步加载权限控制
 		if (loadChartForEditor)
 		{
-			lcws = LoadableChartWidgets.permitted();
+			//看板展示时是根据创建用户权限加载图表的，这里也应保持一致
+			if(Authorization.canEdit(dashboardWidget.getDataPermission()))
+				lcws = LoadableChartWidgets.all();
+			else
+				lcws = LoadableChartWidgets.none();
 		}
 		else
 		{
@@ -1786,7 +1787,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		else if(lcws.isPatternPermitted())
 		{
 			// 使用当前用户
-			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
+			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(currentUser));
 		}
 		//仅可异步加载看板创建者有权限的、且在指定列表内的图表
 		else if(lcws.isPatternList())
