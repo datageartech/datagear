@@ -54,7 +54,7 @@ public class LogFileDataImportListener extends LogFileDataExchangeListener imple
 
 	protected String getSuccessLog(DataIndex dataIndex)
 	{
-		return "[" + dataIndex + "] Success";
+		return "[" + dataIndex + "] OK";
 	}
 	
 	protected String getIgnoreLog(DataIndex dataIndex, DataExchangeException e)
