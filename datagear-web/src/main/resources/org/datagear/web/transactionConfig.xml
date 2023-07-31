@@ -20,12 +20,12 @@
 			<tx:method name="pagingQuery*" read-only="true" />
 			<tx:method name="exists*" read-only="true" />
 			<tx:method name="is*" read-only="true" />
-			<tx:method name="*" />
+			<tx:method name="*" read-only="false" />
 		</tx:attributes>
 	</tx:advice>
 	
 	<aop:config>
-		<aop:pointcut id="serviceOperation" expression="execution(* org.datagear.management.service.*Service.*(..))" />
+		<aop:pointcut id="serviceOperation" expression="execution(* org.datagear.management.service..*.*(..))" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="serviceOperation" />
 	</aop:config>
 
