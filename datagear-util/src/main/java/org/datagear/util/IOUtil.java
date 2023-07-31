@@ -24,6 +24,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -876,62 +877,79 @@ public class IOUtil
 		}
 	}
 
+
 	/**
 	 * 拷贝文件。
 	 * 
 	 * @param src
 	 * @param dest
-	 * @param srcAsSubDirectory
+	 * @param srcIntoDest
+	 *            是否将{@code src}拷贝至{@code dest}目录内部
 	 * @return 目标文件
 	 * @throws IOException
 	 */
-	public static File copy(File src, File dest, boolean srcAsSubDirectory) throws IOException
+	public static File copy(File src, File dest, boolean srcIntoDest) throws IOException
 	{
+		return copy(src, dest, srcIntoDest, null);
+	}
+
+	/**
+	 * 拷贝文件。
+	 * 
+	 * @param src
+	 * @param dest
+	 * @param srcIntoDest
+	 *            是否将{@code src}拷贝至{@code dest}目录内部
+	 * @param fileFilter
+	 *            允许为{@code null}，仅拷贝接受的文件
+	 * @return 目标文件，{@code null}表示没有拷贝任何文件
+	 * @throws IOException
+	 */
+	public static File copy(File src, File dest, boolean srcIntoDest, FileFilter fileFilter) throws IOException
+	{
+		if (fileFilter != null && !fileFilter.accept(src))
+			return null;
+
 		if (src.isDirectory())
 		{
 			if (!dest.exists())
 				dest.mkdirs();
-			else if (!dest.isDirectory())
-				throw new IllegalArgumentException("[dest] must be directory");
 
-			File destFile = dest;
-			if (srcAsSubDirectory)
-				destFile = FileUtil.getDirectory(dest, src.getName());
+			if (srcIntoDest)
+				dest = FileUtil.getDirectory(dest, src.getName());
 
 			File[] children = src.listFiles();
 			if (children != null)
 			{
 				for (File child : children)
-					copy(child, FileUtil.getFile(destFile, child.getName()), false);
+					copy(child, FileUtil.getFile(dest, child.getName()), false, fileFilter);
 			}
 			
-			return destFile;
+			return dest;
 		}
 		else
 		{
-			if (dest.isDirectory())
+			if (srcIntoDest)
 			{
-				File destFile = FileUtil.getFile(dest, src.getName());
-				copy(src, destFile, false);
-				
-				return destFile;
-			}
-			else
-			{
-				OutputStream out = null;
+				if (!dest.exists())
+					dest.mkdirs();
 
-				try
-				{
-					out = IOUtil.getOutputStream(dest);
-					IOUtil.write(src, out);
-				}
-				finally
-				{
-					IOUtil.close(out);
-				}
-				
-				return dest;
+				dest = FileUtil.getFile(dest, src.getName());
 			}
+
+			OutputStream out = null;
+
+			try
+			{
+				out = IOUtil.getOutputStream(dest);
+				IOUtil.write(src, out);
+			}
+			finally
+			{
+				IOUtil.close(out);
+			}
+
+			return dest;
 		}
 	}
 

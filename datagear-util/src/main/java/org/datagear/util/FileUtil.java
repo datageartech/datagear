@@ -319,6 +319,38 @@ public class FileUtil
 	}
 
 	/**
+	 * 删除所有空子目录。
+	 * 
+	 * @param file
+	 * @param deleteSelf
+	 *            如果{@code file}为空，是否删除
+	 */
+	public static void deleteEmptySubDirectory(File file, boolean deleteSelf)
+	{
+		if (!file.exists() || !file.isDirectory())
+			return;
+
+		File[] children = file.listFiles();
+
+		if (children != null)
+		{
+			for (File child : children)
+			{
+				if (child.isDirectory())
+					deleteEmptySubDirectory(child, true);
+			}
+		}
+
+		children = file.listFiles();
+
+		if (children == null || children.length == 0)
+		{
+			if (deleteSelf)
+				file.delete();
+		}
+	}
+
+	/**
 	 * 在指定目录下生成一个文件。
 	 * 
 	 * @param parent
