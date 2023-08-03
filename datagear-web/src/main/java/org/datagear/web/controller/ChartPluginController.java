@@ -230,7 +230,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 	{
 		response.addHeader("Content-Disposition",
 				"attachment;filename=" + toResponseAttachmentFileName(request, response, "chartPlugins.zip"));
-		response.setContentType("application/octet-stream");
+		response.setContentType(CONTENT_TYPE_OCTET_STREAM);
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
 

@@ -922,7 +922,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		response.addHeader("Content-Disposition",
 				"attachment;filename=" + toResponseAttachmentFileName(request, response, dashboard.getName() + ".zip"));
-		response.setContentType("application/octet-stream");
+		response.setContentType(CONTENT_TYPE_OCTET_STREAM);
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
 

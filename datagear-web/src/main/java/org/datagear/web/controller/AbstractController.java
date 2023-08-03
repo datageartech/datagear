@@ -89,6 +89,8 @@ public abstract class AbstractController
 
 	public static final String CONTENT_TYPE_JAVASCRIPT = "application/javascript";
 
+	public static final String CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
+
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 
 	public static final String KEY_ANALYSIS_PROJECT_ID = Global.NAME_SHORT_UCUS + "ANALYSIS_PROJECT_ID";

@@ -265,7 +265,7 @@ public class DriverEntityController extends AbstractController
 	{
 		response.addHeader("Content-Disposition",
 				"attachment;filename=" + toResponseAttachmentFileName(request, response, "drivers.zip"));
-		response.setContentType("application/octet-stream");
+		response.setContentType(CONTENT_TYPE_OCTET_STREAM);
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
 
