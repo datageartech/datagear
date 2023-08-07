@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ConnectionFactory;
 import org.datagear.util.resource.ResourceFactory;
 import org.slf4j.Logger;
@@ -134,6 +135,11 @@ public class DataExchangeContext
 	{
 		if (this.connection == null)
 			return false;
+
+		// 清除可能的只读设置，避免其他复用此连接的写操作报只读连接异常
+		boolean isReadonly = JdbcUtil.isReadonlyIfSupports(connection, true);
+		if (isReadonly)
+			JdbcUtil.setReadonlyIfSupports(connection, false);
 
 		try
 		{
