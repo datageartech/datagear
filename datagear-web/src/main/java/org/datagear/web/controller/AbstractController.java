@@ -647,6 +647,20 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 返回错误消息页面。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param msg
+	 * @return
+	 */
+	protected String errorViewOptMsg(HttpServletRequest request, HttpServletResponse response, OperationMessage msg)
+	{
+		setOperationMessage(request, msg);
+		return getErrorView(request, response);
+	}
+
+	/**
 	 * 获取错误信息视图。
 	 * 
 	 * @param request
