@@ -71,6 +71,39 @@ public class StringUtil
 	}
 
 	/**
+	 * 数组是否为{@code null}、空。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isEmpty(Object[] obj)
+	{
+		return (obj == null || obj.length == 0);
+	}
+
+	/**
+	 * 集合是否为{@code null}、空。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isEmpty(Collection<?> obj)
+	{
+		return (obj == null || obj.isEmpty());
+	}
+
+	/**
+	 * 映射表是否为{@code null}、空。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isEmpty(Map<?, ?> obj)
+	{
+		return (obj == null || obj.isEmpty());
+	}
+
+	/**
 	 * 判断对象、字符串、数组、集合、Map是否为{@code null}、空、空元素。
 	 * 
 	 * @param obj
@@ -84,27 +117,19 @@ public class StringUtil
 		}
 		else if (obj instanceof String)
 		{
-			String str = (String) obj;
-			return (str == null || str.isEmpty());
+			return isEmpty((String) obj);
 		}
 		else if (obj instanceof Object[])
 		{
-			Object[] array = (Object[]) obj;
-
-			return (array.length == 0);
+			return isEmpty((Object[]) obj);
 		}
 		else if (obj instanceof Collection<?>)
 		{
-			@SuppressWarnings("unchecked")
-			Collection<Object> collection = (Collection<Object>) obj;
-
-			return (collection.isEmpty());
+			return isEmpty((Collection<?>) obj);
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
-			Map<?, ?> map = (Map<?, ?>) obj;
-
-			return map.isEmpty();
+			return isEmpty((Map<?, ?>) obj);
 		}
 		else
 			return false;
