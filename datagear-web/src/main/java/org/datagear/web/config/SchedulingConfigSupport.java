@@ -21,7 +21,8 @@ import org.datagear.web.util.DirectoryCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
  * 计划任务配置。
@@ -40,7 +41,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * @author datagear@163.com
  *
  */
-public class SchedulingConfigSupport
+public class SchedulingConfigSupport implements SchedulingConfigurer
 {
 	private CoreConfigSupport coreConfig;
 
@@ -60,6 +61,32 @@ public class SchedulingConfigSupport
 		this.coreConfig = coreConfig;
 	}
 
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar taskRegistrar)
+	{
+		configCleanTempDirectoryTask(taskRegistrar);
+	}
+
+	/**
+	 * 配置清理临时目录任务。
+	 * 
+	 * @param taskRegistrar
+	 */
+	protected void configCleanTempDirectoryTask(ScheduledTaskRegistrar taskRegistrar)
+	{
+		DirectoryCleaner directoryCleaner = this.tempDirectoryCleaner();
+
+		taskRegistrar.addCronTask(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				directoryCleaner.clean();
+			}
+			//
+		}, getCoreConfig().getApplicationProperties().getCleanTempDirectoryInterval());
+	}
+
 	@Bean
 	public DirectoryCleaner tempDirectoryCleaner()
 	{
@@ -68,11 +95,5 @@ public class SchedulingConfigSupport
 
 		DirectoryCleaner bean = new DirectoryCleaner(this.coreConfig.tempDirectory(), expiredMinutes);
 		return bean;
-	}
-
-	@Scheduled(cron = "${cleanTempDirectory.interval}")
-	public void cleanTempDirectory()
-	{
-		this.tempDirectoryCleaner().clean();
 	}
 }
