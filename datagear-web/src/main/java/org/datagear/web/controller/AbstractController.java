@@ -647,7 +647,20 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 返回错误消息页面。
+	 * 返回{@linkplain HttpServletResponse#SC_BAD_REQUEST}错误消息页面。
+	 * @param request
+	 * @param response
+	 * @param msgCode
+	 * @param msgArgs
+	 * @return
+	 */
+	protected String errorViewOptMsg(HttpServletRequest request, HttpServletResponse response, String msgCode, Object... msgArgs)
+	{
+		return errorViewOptMsg(request, response, HttpServletResponse.SC_BAD_REQUEST, msgCode, msgArgs);
+	}
+
+	/**
+	 * 返回{@linkplain HttpServletResponse#SC_BAD_REQUEST}错误消息页面。
 	 * 
 	 * @param request
 	 * @param response
@@ -656,6 +669,40 @@ public abstract class AbstractController
 	 */
 	protected String errorViewOptMsg(HttpServletRequest request, HttpServletResponse response, OperationMessage msg)
 	{
+		return errorViewOptMsg(request, response, HttpServletResponse.SC_BAD_REQUEST, msg);
+	}
+
+	/**
+	 * 返回错误消息页面。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param statusCode
+	 * @param msgCode
+	 * @param msgArgs
+	 * @return
+	 */
+	protected String errorViewOptMsg(HttpServletRequest request, HttpServletResponse response, int statusCode,
+			String msgCode, Object... msgArgs)
+	{
+		response.setStatus(statusCode);
+		setOperationMessage(request, optMsgFail(request, msgCode, msgArgs));
+		return getErrorView(request, response);
+	}
+
+	/**
+	 * 返回错误消息页面。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param statusCode
+	 * @param msg
+	 * @return
+	 */
+	protected String errorViewOptMsg(HttpServletRequest request, HttpServletResponse response, int statusCode,
+			OperationMessage msg)
+	{
+		response.setStatus(statusCode);
 		setOperationMessage(request, msg);
 		return getErrorView(request, response);
 	}
