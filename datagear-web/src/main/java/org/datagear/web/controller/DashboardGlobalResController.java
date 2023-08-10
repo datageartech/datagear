@@ -322,7 +322,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		if (!file.exists())
 			throw new RecordNotFoundException();
 
-		String responseFileName = toResponseAttachmentFileName(request, response, file.getName());
+		String responseFileName = file.getName();
 
 		if (file.isDirectory())
 		{
@@ -331,7 +331,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		}
 
 		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
-		response.setHeader("Content-Disposition", "attachment; filename=" + responseFileName);
+		setDownloadResponseHeader(request, response, responseFileName);
 		OutputStream out = response.getOutputStream();
 
 		if (file.isDirectory())

@@ -920,8 +920,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 		dashboardWidgetResManager.copyTo(dashboard.getId(), tmpDirectory);
 
-		response.addHeader("Content-Disposition",
-				"attachment;filename=" + toResponseAttachmentFileName(request, response, dashboard.getName() + ".zip"));
+		setDownloadResponseHeader(request, response, dashboard.getName() + ".zip");
 		response.setContentType(CONTENT_TYPE_OCTET_STREAM);
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());

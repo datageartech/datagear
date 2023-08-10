@@ -675,8 +675,7 @@ public class DataController extends AbstractSchemaConnTableController
 		}.execute();
 
 		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + toResponseAttachmentFileName(request, response, columnName));
+		setDownloadResponseHeader(request, response, columnName);
 
 		InputStream in = null;
 		OutputStream out = null;

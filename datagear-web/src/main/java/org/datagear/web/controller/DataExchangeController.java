@@ -1305,8 +1305,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}.execute();
 
 		response.setCharacterEncoding(RESPONSE_ENCODING);
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
+		setDownloadResponseHeader(request, response, fileName);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File file = FileUtil.getFile(directory, fileName);
@@ -1344,8 +1343,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}.execute();
 
 		response.setCharacterEncoding(RESPONSE_ENCODING);
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
+		setDownloadResponseHeader(request, response, fileName);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 

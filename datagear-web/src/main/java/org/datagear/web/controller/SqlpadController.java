@@ -338,8 +338,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			throw new FileNotFoundException(value);
 
 		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + toResponseAttachmentFileName(request, response, "BLOB"));
+		setDownloadResponseHeader(request, response, "BLOB");
 
 		InputStream in = null;
 		OutputStream out = null;

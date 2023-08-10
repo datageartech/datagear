@@ -1122,6 +1122,20 @@ public abstract class AbstractController
 		else
 			return url + "&" + qs;
 	}
+	
+	/**
+	 * 设置下载文件响应头。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param fileName
+	 * @throws IOException
+	 */
+	protected void setDownloadResponseHeader(HttpServletRequest request, HttpServletResponse response, String fileName) throws IOException
+	{
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
+	}
 
 	/**
 	 * 将文件名转换为作为响应下载文件名。

@@ -756,8 +756,7 @@ public class DataSetController extends AbstractSchemaConnController
 		String displayName = dataSetEntity.getDisplayName();
 
 		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
-		response.setHeader("Content-Disposition",
-				"attachment; filename=" + toResponseAttachmentFileName(request, response, displayName));
+		setDownloadResponseHeader(request, response, displayName);
 		OutputStream out = response.getOutputStream();
 
 		IOUtil.write(entityFile, out);
