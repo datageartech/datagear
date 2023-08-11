@@ -17,24 +17,25 @@
 
 package org.datagear.web.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.datagear.web.util.DashboardSharePasswordCryptoImpl.EncryptType;
+import org.datagear.web.util.DelegatingTextEncryptor.EncryptType;
 import org.junit.Test;
 
 /**
- * {@linkplain DashboardSharePasswordCryptoImpl}单元测试用例。
+ * {@linkplain DelegatingTextEncryptor}单元测试用例。
  * 
  * @author datagear@163.com
  *
  */
-public class DashboardSharePasswordCryptoImplTest
+public class DelegatingTextEncryptorTest
 {
 	protected static final String SECRET_KEY = "RGF0YUdlYXI=";
 	protected static final String SALT = "4461746147656172";
 	
-	private DashboardSharePasswordCryptoImpl dspcNoop = new DashboardSharePasswordCryptoImpl(EncryptType.NOOP, SECRET_KEY, SALT);
-	private DashboardSharePasswordCryptoImpl dspcStd = new DashboardSharePasswordCryptoImpl(EncryptType.STD, SECRET_KEY, SALT);
+	private DelegatingTextEncryptor encryptorNoop = new DelegatingTextEncryptor(EncryptType.NOOP, SECRET_KEY, SALT);
+	private DelegatingTextEncryptor encryptorStd = new DelegatingTextEncryptor(EncryptType.STD, SECRET_KEY, SALT);
 	
 	@Test
 	public void test()
@@ -42,21 +43,23 @@ public class DashboardSharePasswordCryptoImplTest
 		String password = "1234";
 		
 		{
-			String encrypt = dspcNoop.encrypt(password);
+			String encrypt = encryptorNoop.encrypt(password);
 			
-			String decrypt0 = dspcNoop.decrypt(encrypt);
-			String decrypt1 = dspcStd.decrypt(encrypt);
+			String decrypt0 = encryptorNoop.decrypt(encrypt);
+			String decrypt1 = encryptorStd.decrypt(encrypt);
 			
+			assertEquals(DelegatingTextEncryptor.ENCRYPT_TYPE_PREFIX_NOOP + password, encrypt);
 			assertEquals(password, decrypt0);
 			assertEquals(password, decrypt1);
 		}
 
 		{
-			String encrypt = dspcStd.encrypt(password);
+			String encrypt = encryptorStd.encrypt(password);
 			
-			String decrypt0 = dspcNoop.decrypt(encrypt);
-			String decrypt1 = dspcStd.decrypt(encrypt);
+			String decrypt0 = encryptorNoop.decrypt(encrypt);
+			String decrypt1 = encryptorStd.decrypt(encrypt);
 			
+			assertTrue(encrypt.startsWith(DelegatingTextEncryptor.ENCRYPT_TYPE_PREFIX_STD));
 			assertEquals(password, decrypt0);
 			assertEquals(password, decrypt1);
 		}

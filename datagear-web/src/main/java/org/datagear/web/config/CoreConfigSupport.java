@@ -85,7 +85,6 @@ import org.datagear.management.service.impl.AuthorizationListenerAware;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
 import org.datagear.management.service.impl.BundleAnalysisProjectAuthorizationListener;
 import org.datagear.management.service.impl.BundleAuthorizationListener;
-import org.datagear.management.service.impl.DashboardSharePasswordCrypto;
 import org.datagear.management.service.impl.DashboardShareSetServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
@@ -133,9 +132,9 @@ import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.CheckCodeManager;
-import org.datagear.web.util.DashboardSharePasswordCryptoImpl;
-import org.datagear.web.util.DashboardSharePasswordCryptoImpl.EncryptType;
 import org.datagear.web.util.DefaultMessageChannel;
+import org.datagear.web.util.DelegatingTextEncryptor;
+import org.datagear.web.util.DelegatingTextEncryptor.EncryptType;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
@@ -164,6 +163,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -775,18 +775,18 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DashboardShareSetService dashboardShareSetService()
 	{
 		DashboardShareSetService bean = new DashboardShareSetServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.dashboardSharePasswordCrypto());
+				this.dashboardSharePsdEncryptor());
 		return bean;
 	}
 
-	@Bean
-	public DashboardSharePasswordCrypto dashboardSharePasswordCrypto()
+	protected TextEncryptor dashboardSharePsdEncryptor()
 	{
-		EncryptType encryptType = (getApplicationProperties().isDashboardSharePasswordCryptoDisabled() ?  EncryptType.NOOP : EncryptType.STD);
+		ApplicationProperties properties = getApplicationProperties();
+		EncryptType encryptType = (properties.isDashboardSharePsdCryptoDisabled() ? EncryptType.NOOP
+				: EncryptType.STD);
 		
-		DashboardSharePasswordCrypto bean = new DashboardSharePasswordCryptoImpl(encryptType,
-				getApplicationProperties().getDashboardSharePasswordCryptoSecretKey(),
-				getApplicationProperties().getDashboardSharePasswordCryptoSalt());
+		DelegatingTextEncryptor bean = new DelegatingTextEncryptor(encryptType,
+				properties.getDashboardSharePsdCryptoSecretKey(), properties.getDashboardSharePsdCryptoSalt());
 		
 		return bean;
 	}

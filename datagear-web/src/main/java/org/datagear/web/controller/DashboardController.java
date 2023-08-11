@@ -1212,8 +1212,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			if (manager == null)
 			{
 				manager = new DashboardShowAuthCheckManager(
-						this.applicationProperties.getDashboardSharePasswordAuthFailThreshold(),
-						this.applicationProperties.getDashboardSharePasswordAuthFailPastMinutes() * 60 * 1000);
+						this.applicationProperties.getDashboardSharePsdAuthFailThreshold(),
+						this.applicationProperties.getDashboardSharePsdAuthFailPastMinutes() * 60 * 1000);
 
 				session.setAttribute(DashboardShowAuthCheckManager.class.getName(), manager);
 			}

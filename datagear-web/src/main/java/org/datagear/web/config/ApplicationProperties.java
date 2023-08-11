@@ -146,24 +146,24 @@ public abstract class ApplicationProperties implements Serializable
 	private String localCacheSpec;
 
 	/** 看板分享密码加密是否禁用 */
-	@Value("${dashboardSharePassword.crypto.disabled}")
-	private boolean dashboardSharePasswordCryptoDisabled;
+	@Value("${dashboardSharePsd.crypto.disabled}")
+	private boolean dashboardSharePsdCryptoDisabled;
 
 	/** 看板分享密码加密密钥 */
-	@Value("${dashboardSharePassword.crypto.secretKey}")
-	private String dashboardSharePasswordCryptoSecretKey;
+	@Value("${dashboardSharePsd.crypto.secretKey}")
+	private String dashboardSharePsdCryptoSecretKey;
 
 	/** 看板分享密码加密盐值 */
-	@Value("${dashboardSharePassword.crypto.salt}")
-	private String dashboardSharePasswordCryptoSalt;
+	@Value("${dashboardSharePsd.crypto.salt}")
+	private String dashboardSharePsdCryptoSalt;
 
 	/** 看板访问密码允许填错次数 */
-	@Value("${dashboardSharePassword.authFailThreshold}")
-	private int dashboardSharePasswordAuthFailThreshold;
+	@Value("${dashboardSharePsd.authFailThreshold}")
+	private int dashboardSharePsdAuthFailThreshold;
 
 	/** 看板访问密码允许填错次数的限定分钟数 */
-	@Value("${dashboardSharePassword.authFailPastMinutes}")
-	private int dashboardSharePasswordAuthFailPastMinutes;
+	@Value("${dashboardSharePsd.authFailPastMinutes}")
+	private int dashboardSharePsdAuthFailPastMinutes;
 
 	/** IP登录错误秒数限定 */
 	@Value("${ipLoginLatch.seconds}")
@@ -491,54 +491,54 @@ public abstract class ApplicationProperties implements Serializable
 		this.localCacheSpec = localCacheSpec;
 	}
 
-	public boolean isDashboardSharePasswordCryptoDisabled()
+	public boolean isDashboardSharePsdCryptoDisabled()
 	{
-		return dashboardSharePasswordCryptoDisabled;
+		return dashboardSharePsdCryptoDisabled;
 	}
 
-	public void setDashboardSharePasswordCryptoDisabled(boolean dashboardSharePasswordCryptoDisabled)
+	public void setDashboardSharePsdCryptoDisabled(boolean dashboardSharePsdCryptoDisabled)
 	{
-		this.dashboardSharePasswordCryptoDisabled = dashboardSharePasswordCryptoDisabled;
+		this.dashboardSharePsdCryptoDisabled = dashboardSharePsdCryptoDisabled;
 	}
 
-	public String getDashboardSharePasswordCryptoSecretKey()
+	public String getDashboardSharePsdCryptoSecretKey()
 	{
-		return dashboardSharePasswordCryptoSecretKey;
+		return dashboardSharePsdCryptoSecretKey;
 	}
 
-	public void setDashboardSharePasswordCryptoSecretKey(String dashboardSharePasswordCryptoSecretKey)
+	public void setDashboardSharePsdCryptoSecretKey(String dashboardSharePsdCryptoSecretKey)
 	{
-		this.dashboardSharePasswordCryptoSecretKey = dashboardSharePasswordCryptoSecretKey;
+		this.dashboardSharePsdCryptoSecretKey = dashboardSharePsdCryptoSecretKey;
 	}
 
-	public String getDashboardSharePasswordCryptoSalt()
+	public String getDashboardSharePsdCryptoSalt()
 	{
-		return dashboardSharePasswordCryptoSalt;
+		return dashboardSharePsdCryptoSalt;
 	}
 
-	public void setDashboardSharePasswordCryptoSalt(String dashboardSharePasswordCryptoSalt)
+	public void setDashboardSharePsdCryptoSalt(String dashboardSharePsdCryptoSalt)
 	{
-		this.dashboardSharePasswordCryptoSalt = dashboardSharePasswordCryptoSalt;
+		this.dashboardSharePsdCryptoSalt = dashboardSharePsdCryptoSalt;
 	}
 
-	public int getDashboardSharePasswordAuthFailThreshold()
+	public int getDashboardSharePsdAuthFailThreshold()
 	{
-		return dashboardSharePasswordAuthFailThreshold;
+		return dashboardSharePsdAuthFailThreshold;
 	}
 
-	public void setDashboardSharePasswordAuthFailThreshold(int dashboardSharePasswordAuthFailThreshold)
+	public void setDashboardSharePsdAuthFailThreshold(int dashboardSharePsdAuthFailThreshold)
 	{
-		this.dashboardSharePasswordAuthFailThreshold = dashboardSharePasswordAuthFailThreshold;
+		this.dashboardSharePsdAuthFailThreshold = dashboardSharePsdAuthFailThreshold;
 	}
 
-	public int getDashboardSharePasswordAuthFailPastMinutes()
+	public int getDashboardSharePsdAuthFailPastMinutes()
 	{
-		return dashboardSharePasswordAuthFailPastMinutes;
+		return dashboardSharePsdAuthFailPastMinutes;
 	}
 
-	public void setDashboardSharePasswordAuthFailPastMinutes(int dashboardSharePasswordAuthFailPastMinutes)
+	public void setDashboardSharePsdAuthFailPastMinutes(int dashboardSharePsdAuthFailPastMinutes)
 	{
-		this.dashboardSharePasswordAuthFailPastMinutes = dashboardSharePasswordAuthFailPastMinutes;
+		this.dashboardSharePsdAuthFailPastMinutes = dashboardSharePsdAuthFailPastMinutes;
 	}
 
 	public int getIpLoginLatchSeconds()

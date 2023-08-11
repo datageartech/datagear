@@ -24,6 +24,7 @@ import org.datagear.management.domain.DashboardShareSet;
 import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
  * {@linkplain DashboardShareSetService}实现类。
@@ -36,7 +37,7 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 {
 	protected static final String SQL_NAMESPACE = DashboardShareSet.class.getName();
 
-	private DashboardSharePasswordCrypto dashboardSharePasswordCrypto;
+	private TextEncryptor textEncryptor;
 
 	public DashboardShareSetServiceImpl()
 	{
@@ -44,27 +45,27 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 	}
 
 	public DashboardShareSetServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			DashboardSharePasswordCrypto dashboardSharePasswordCrypto)
+			TextEncryptor textEncryptor)
 	{
 		super(sqlSessionFactory, dialect);
-		this.dashboardSharePasswordCrypto = dashboardSharePasswordCrypto;
+		this.textEncryptor = textEncryptor;
 	}
 
 	public DashboardShareSetServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			DashboardSharePasswordCrypto dashboardSharePasswordCrypto)
+			TextEncryptor textEncryptor)
 	{
 		super(sqlSessionTemplate, dialect);
-		this.dashboardSharePasswordCrypto = dashboardSharePasswordCrypto;
+		this.textEncryptor = textEncryptor;
 	}
 
-	public DashboardSharePasswordCrypto getDashboardSharePasswordEncoder()
+	public TextEncryptor getTextEncryptor()
 	{
-		return dashboardSharePasswordCrypto;
+		return textEncryptor;
 	}
 
-	public void setDashboardSharePasswordEncoder(DashboardSharePasswordCrypto dashboardSharePasswordCrypto)
+	public void setTextEncryptor(TextEncryptor textEncryptor)
 	{
-		this.dashboardSharePasswordCrypto = dashboardSharePasswordCrypto;
+		this.textEncryptor = textEncryptor;
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 	protected void add(DashboardShareSet entity, Map<String, Object> params)
 	{
 		entity = entity.clone();
-		entity.setPassword(this.dashboardSharePasswordCrypto.encrypt(entity.getPassword()));
+		entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
 
 		super.add(entity, params);
 	}
@@ -87,7 +88,7 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 	protected boolean update(DashboardShareSet entity, Map<String, Object> params)
 	{
 		entity = entity.clone();
-		entity.setPassword(this.dashboardSharePasswordCrypto.encrypt(entity.getPassword()));
+		entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
 
 		return super.update(entity, params);
 	}
@@ -98,7 +99,7 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 		DashboardShareSet entity = super.getByIdFromDB(id, params);
 
 		if (entity != null)
-			entity.setPassword(this.dashboardSharePasswordCrypto.decrypt(entity.getPassword()));
+			entity.setPassword(this.textEncryptor.decrypt(entity.getPassword()));
 
 		return entity;
 	}
