@@ -95,7 +95,6 @@ import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.SchemaGuardServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
-import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
 import org.datagear.management.util.RoleSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -129,7 +128,6 @@ import org.datagear.web.json.jackson.FormatterSerializer;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.AuthenticationUserGetter;
-import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
@@ -570,13 +568,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public UserPasswordEncoder userPasswordEncoder()
-	{
-		UserPasswordEncoderImpl bean = new UserPasswordEncoderImpl(this.passwordEncoder());
-		return bean;
-	}
-
-	@Bean
 	public HtmlFilter htmlFilter()
 	{
 		HtmlFilter bean = new HtmlFilter();
@@ -656,7 +647,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public UserService userService()
 	{
 		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(), this.roleService());
-		bean.setUserPasswordEncoder(this.userPasswordEncoder());
+		bean.setPasswordEncoder(this.passwordEncoder());
 
 		return bean;
 	}
