@@ -787,6 +787,10 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		
 		DelegatingTextEncryptor bean = new DelegatingTextEncryptor(encryptType,
 				properties.getDashboardSharePsdCryptoSecretKey(), properties.getDashboardSharePsdCryptoSalt());
+		// 这里必须设置为安全解密，不然如果配置里改了密钥、盐值，会导致相关功能解密报错而无法使用
+		bean.setSafeDecrypt(true);
+		// 这里应设置安全解密返回随机字符串，因为使用固定的默认值不安全
+		bean.setRandomSafeDecryptValue(true);
 		
 		return bean;
 	}

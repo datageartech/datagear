@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Scanner;
 
+import org.datagear.util.IDUtil;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -56,6 +57,12 @@ public class DelegatingTextEncryptor implements TextEncryptor
 
 	private final TextEncryptor stdTextEncryptor;
 
+	private boolean safeDecrypt = false;
+
+	private boolean randomSafeDecryptValue = false;
+
+	private String defaultSafeDecryptValue = "";
+
 	public DelegatingTextEncryptor(EncryptType encryptType, String secretKey, String salt)
 	{
 		super();
@@ -76,6 +83,42 @@ public class DelegatingTextEncryptor implements TextEncryptor
 	public TextEncryptor getStdTextEncryptor()
 	{
 		return stdTextEncryptor;
+	}
+
+	/**
+	 * 是否安全解密，即{@linkplain #decrypt(String)}出现异常时不抛出而返回随机字符串（当{@linkplain #isRandomSafeDecryptValue()}为{@code true}时）、
+	 * 或者{@linkplain #getDefaultSafeDecryptValue()}。
+	 * 
+	 * @return
+	 */
+	public boolean isSafeDecrypt()
+	{
+		return safeDecrypt;
+	}
+
+	public void setSafeDecrypt(boolean safeDecrypt)
+	{
+		this.safeDecrypt = safeDecrypt;
+	}
+
+	public boolean isRandomSafeDecryptValue()
+	{
+		return randomSafeDecryptValue;
+	}
+
+	public void setRandomSafeDecryptValue(boolean randomSafeDecryptValue)
+	{
+		this.randomSafeDecryptValue = randomSafeDecryptValue;
+	}
+
+	public String getDefaultSafeDecryptValue()
+	{
+		return defaultSafeDecryptValue;
+	}
+
+	public void setDefaultSafeDecryptValue(String defaultSafeDecryptValue)
+	{
+		this.defaultSafeDecryptValue = defaultSafeDecryptValue;
 	}
 
 	/**
@@ -139,7 +182,22 @@ public class DelegatingTextEncryptor implements TextEncryptor
 		else
 			throw new UnsupportedOperationException("Unsupported decryption");
 
-		return textEncryptor.decrypt(password);
+		if (this.safeDecrypt)
+		{
+			try
+			{
+				return textEncryptor.decrypt(password);
+			}
+			catch (Throwable t)
+			{
+				if (this.randomSafeDecryptValue)
+					return IDUtil.random(10);
+				else
+					return this.defaultSafeDecryptValue;
+			}
+		}
+		else
+			return textEncryptor.decrypt(password);
 	}
 
 	/**
