@@ -26,6 +26,8 @@
 <script>
 (function(po)
 {
+	po.dftUploadSuccessMsg = "<@spring.message code='uploadSuccess' />";
+	
 	po.vuePageModel(
 	{
 		fileuploadInfo: { name: "", progress: "" }
@@ -43,10 +45,23 @@
 		pm.fileuploadInfo.progress = (e.progress >= 100 ? 99 : e.progress) +"%";
 	};
 	
-	po.uploadFileOnUploaded = function(e)
+	po.uploadFileOnUploaded = function(e, tip, tipMsg)
 	{
+		tip = (tip == null ? false : tip);
+		
 		var pm = po.vuePageModel();
 		pm.fileuploadInfo.progress = "100%";
+		
+		if(tip)
+		{
+			if(!tipMsg)
+			{
+				var response = $.getResponseJson(e.xhr);
+				tipMsg = (response && response.message ? response.message : po.dftUploadSuccessMsg);
+			}
+			
+			$.tipSuccess(tipMsg);
+		}
 	};
 	
 	po.uploadFileOnError = function(e)
