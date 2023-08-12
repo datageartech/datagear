@@ -145,9 +145,21 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${localCache.spec}")
 	private String localCacheSpec;
 
-	/** 看板分享密码加密是否禁用 */
-	@Value("${dashboardSharePsd.crypto.disabled}")
-	private boolean dashboardSharePsdCryptoDisabled;
+	/** 数据源密码加密是否启用 */
+	@Value("${schemaPsd.crypto.enabled}")
+	private boolean schemaPsdCryptoEnabled;
+
+	/** 数据源密码加密密钥 */
+	@Value("${schemaPsd.crypto.secretKey}")
+	private String schemaPsdCryptoSecretKey;
+
+	/** 数据源密码加密盐值 */
+	@Value("${schemaPsd.crypto.salt}")
+	private String schemaPsdCryptoSalt;
+
+	/** 看板分享密码加密是否启用 */
+	@Value("${dashboardSharePsd.crypto.enabled}")
+	private boolean dashboardSharePsdCryptoEnabled;
 
 	/** 看板分享密码加密密钥 */
 	@Value("${dashboardSharePsd.crypto.secretKey}")
@@ -491,14 +503,44 @@ public abstract class ApplicationProperties implements Serializable
 		this.localCacheSpec = localCacheSpec;
 	}
 
-	public boolean isDashboardSharePsdCryptoDisabled()
+	public boolean isSchemaPsdCryptoEnabled()
 	{
-		return dashboardSharePsdCryptoDisabled;
+		return schemaPsdCryptoEnabled;
 	}
 
-	public void setDashboardSharePsdCryptoDisabled(boolean dashboardSharePsdCryptoDisabled)
+	protected void setSchemaPsdCryptoEnabled(boolean schemaPsdCryptoEnabled)
 	{
-		this.dashboardSharePsdCryptoDisabled = dashboardSharePsdCryptoDisabled;
+		this.schemaPsdCryptoEnabled = schemaPsdCryptoEnabled;
+	}
+
+	public String getSchemaPsdCryptoSecretKey()
+	{
+		return schemaPsdCryptoSecretKey;
+	}
+
+	protected void setSchemaPsdCryptoSecretKey(String schemaPsdCryptoSecretKey)
+	{
+		this.schemaPsdCryptoSecretKey = schemaPsdCryptoSecretKey;
+	}
+
+	public String getSchemaPsdCryptoSalt()
+	{
+		return schemaPsdCryptoSalt;
+	}
+
+	protected void setSchemaPsdCryptoSalt(String schemaPsdCryptoSalt)
+	{
+		this.schemaPsdCryptoSalt = schemaPsdCryptoSalt;
+	}
+
+	public boolean isDashboardSharePsdCryptoEnabled()
+	{
+		return dashboardSharePsdCryptoEnabled;
+	}
+
+	protected void setDashboardSharePsdCryptoEnabled(boolean dashboardSharePsdCryptoEnabled)
+	{
+		this.dashboardSharePsdCryptoEnabled = dashboardSharePsdCryptoEnabled;
 	}
 
 	public String getDashboardSharePsdCryptoSecretKey()
@@ -506,7 +548,7 @@ public abstract class ApplicationProperties implements Serializable
 		return dashboardSharePsdCryptoSecretKey;
 	}
 
-	public void setDashboardSharePsdCryptoSecretKey(String dashboardSharePsdCryptoSecretKey)
+	protected void setDashboardSharePsdCryptoSecretKey(String dashboardSharePsdCryptoSecretKey)
 	{
 		this.dashboardSharePsdCryptoSecretKey = dashboardSharePsdCryptoSecretKey;
 	}
@@ -516,7 +558,7 @@ public abstract class ApplicationProperties implements Serializable
 		return dashboardSharePsdCryptoSalt;
 	}
 
-	public void setDashboardSharePsdCryptoSalt(String dashboardSharePsdCryptoSalt)
+	protected void setDashboardSharePsdCryptoSalt(String dashboardSharePsdCryptoSalt)
 	{
 		this.dashboardSharePsdCryptoSalt = dashboardSharePsdCryptoSalt;
 	}
@@ -526,7 +568,7 @@ public abstract class ApplicationProperties implements Serializable
 		return dashboardSharePsdAuthFailThreshold;
 	}
 
-	public void setDashboardSharePsdAuthFailThreshold(int dashboardSharePsdAuthFailThreshold)
+	protected void setDashboardSharePsdAuthFailThreshold(int dashboardSharePsdAuthFailThreshold)
 	{
 		this.dashboardSharePsdAuthFailThreshold = dashboardSharePsdAuthFailThreshold;
 	}
@@ -536,7 +578,7 @@ public abstract class ApplicationProperties implements Serializable
 		return dashboardSharePsdAuthFailPastMinutes;
 	}
 
-	public void setDashboardSharePsdAuthFailPastMinutes(int dashboardSharePsdAuthFailPastMinutes)
+	protected void setDashboardSharePsdAuthFailPastMinutes(int dashboardSharePsdAuthFailPastMinutes)
 	{
 		this.dashboardSharePsdAuthFailPastMinutes = dashboardSharePsdAuthFailPastMinutes;
 	}
@@ -546,7 +588,7 @@ public abstract class ApplicationProperties implements Serializable
 		return ipLoginLatchSeconds;
 	}
 
-	public void setIpLoginLatchSeconds(int ipLoginLatchSeconds)
+	protected void setIpLoginLatchSeconds(int ipLoginLatchSeconds)
 	{
 		this.ipLoginLatchSeconds = ipLoginLatchSeconds;
 	}
@@ -556,7 +598,7 @@ public abstract class ApplicationProperties implements Serializable
 		return ipLoginLatchFrequency;
 	}
 
-	public void setIpLoginLatchFrequency(int ipLoginLatchFrequency)
+	protected void setIpLoginLatchFrequency(int ipLoginLatchFrequency)
 	{
 		this.ipLoginLatchFrequency = ipLoginLatchFrequency;
 	}
@@ -566,7 +608,7 @@ public abstract class ApplicationProperties implements Serializable
 		return usernameLoginLatchSeconds;
 	}
 
-	public void setUsernameLoginLatchSeconds(int usernameLoginLatchSeconds)
+	protected void setUsernameLoginLatchSeconds(int usernameLoginLatchSeconds)
 	{
 		this.usernameLoginLatchSeconds = usernameLoginLatchSeconds;
 	}
@@ -576,7 +618,7 @@ public abstract class ApplicationProperties implements Serializable
 		return usernameLoginLatchFrequency;
 	}
 
-	public void setUsernameLoginLatchFrequency(int usernameLoginLatchFrequency)
+	protected void setUsernameLoginLatchFrequency(int usernameLoginLatchFrequency)
 	{
 		this.usernameLoginLatchFrequency = usernameLoginLatchFrequency;
 	}
@@ -586,7 +628,7 @@ public abstract class ApplicationProperties implements Serializable
 		return disableLoginCheckCode;
 	}
 
-	public void setDisableLoginCheckCode(boolean disableLoginCheckCode)
+	protected void setDisableLoginCheckCode(boolean disableLoginCheckCode)
 	{
 		this.disableLoginCheckCode = disableLoginCheckCode;
 	}
@@ -596,7 +638,7 @@ public abstract class ApplicationProperties implements Serializable
 		return poiZipSecureFileMinInflateRatio;
 	}
 
-	public void setPoiZipSecureFileMinInflateRatio(String poiZipSecureFileMinInflateRatio)
+	protected void setPoiZipSecureFileMinInflateRatio(String poiZipSecureFileMinInflateRatio)
 	{
 		this.poiZipSecureFileMinInflateRatio = poiZipSecureFileMinInflateRatio;
 	}

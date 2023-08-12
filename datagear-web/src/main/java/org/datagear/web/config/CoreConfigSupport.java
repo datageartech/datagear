@@ -631,6 +631,22 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.authorizationService(), this.driverEntityManager(), this.userService(), this.schemaGuardService());
+		bean.setTextEncryptor(this.schemaPsdEncryptor());
+
+		return bean;
+	}
+
+	protected TextEncryptor schemaPsdEncryptor()
+	{
+		ApplicationProperties properties = getApplicationProperties();
+		EncryptType encryptType = (properties.isSchemaPsdCryptoEnabled() ? EncryptType.STD : EncryptType.NOOP);
+
+		DelegatingTextEncryptor bean = new DelegatingTextEncryptor(encryptType,
+				properties.getSchemaPsdCryptoSecretKey(), properties.getSchemaPsdCryptoSalt());
+		// 这里必须设置为安全解密，不然如果配置里改了密钥、盐值，会导致相关功能解密报错而无法使用
+		bean.setSafeDecrypt(true);
+		// 这里应设置安全解密返回随机字符串，因为使用固定的默认值不安全
+		bean.setRandomSafeDecryptValue(true);
 
 		return bean;
 	}
@@ -774,16 +790,17 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public DashboardShareSetService dashboardShareSetService()
 	{
-		DashboardShareSetService bean = new DashboardShareSetServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.dashboardSharePsdEncryptor());
+		DashboardShareSetServiceImpl bean = new DashboardShareSetServiceImpl(this.sqlSessionFactory(),
+				this.mbSqlDialect());
+		bean.setTextEncryptor(this.dashboardSharePsdEncryptor());
+
 		return bean;
 	}
 
 	protected TextEncryptor dashboardSharePsdEncryptor()
 	{
 		ApplicationProperties properties = getApplicationProperties();
-		EncryptType encryptType = (properties.isDashboardSharePsdCryptoDisabled() ? EncryptType.NOOP
-				: EncryptType.STD);
+		EncryptType encryptType = (properties.isDashboardSharePsdCryptoEnabled() ? EncryptType.STD : EncryptType.NOOP);
 		
 		DelegatingTextEncryptor bean = new DelegatingTextEncryptor(encryptType,
 				properties.getDashboardSharePsdCryptoSecretKey(), properties.getDashboardSharePsdCryptoSalt());

@@ -17,6 +17,8 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.Map;
+
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Schema;
@@ -29,6 +31,7 @@ import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
  * {@linkplain SchemaService}实现类。
@@ -47,14 +50,16 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	private SchemaGuardService schemaGuardService;
 
+	private TextEncryptor textEncryptor = null;
+
 	public SchemaServiceImpl()
 	{
 		super();
 	}
 
 	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			AuthorizationService authorizationService,
-			DriverEntityManager driverEntityManager, UserService userService, SchemaGuardService schemaGuardService)
+			AuthorizationService authorizationService, DriverEntityManager driverEntityManager, UserService userService,
+			SchemaGuardService schemaGuardService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
@@ -63,8 +68,8 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			AuthorizationService authorizationService,
-			DriverEntityManager driverEntityManager, UserService userService, SchemaGuardService schemaGuardService)
+			AuthorizationService authorizationService, DriverEntityManager driverEntityManager, UserService userService,
+			SchemaGuardService schemaGuardService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
@@ -102,6 +107,16 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 		this.schemaGuardService = schemaGuardService;
 	}
 
+	public TextEncryptor getTextEncryptor()
+	{
+		return textEncryptor;
+	}
+
+	public void setTextEncryptor(TextEncryptor textEncryptor)
+	{
+		this.textEncryptor = textEncryptor;
+	}
+
 	@Override
 	public String getResourceType()
 	{
@@ -112,6 +127,13 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public void add(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity.getUrl());
+
+		if (this.textEncryptor != null)
+		{
+			entity = entity.clone();
+			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		}
+
 		super.add(user, entity);
 	}
 
@@ -119,6 +141,13 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public boolean update(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity.getUrl());
+
+		if (this.textEncryptor != null)
+		{
+			entity = entity.clone();
+			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		}
+
 		return super.update(user, entity);
 	}
 
@@ -138,6 +167,17 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public int updateCreateUserId(String[] oldUserIds, String newUserId)
 	{
 		return super.updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	@Override
+	protected Schema getByIdFromDB(String id, Map<String, Object> params)
+	{
+		Schema entity = super.getByIdFromDB(id, params);
+
+		if (this.textEncryptor != null && entity != null)
+			entity.setPassword(this.textEncryptor.decrypt(entity.getPassword()));
+
+		return entity;
 	}
 
 	@Override

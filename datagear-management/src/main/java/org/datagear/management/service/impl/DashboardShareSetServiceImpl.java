@@ -37,25 +37,21 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 {
 	protected static final String SQL_NAMESPACE = DashboardShareSet.class.getName();
 
-	private TextEncryptor textEncryptor;
+	private TextEncryptor textEncryptor = null;
 
 	public DashboardShareSetServiceImpl()
 	{
 		super();
 	}
 
-	public DashboardShareSetServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
-			TextEncryptor textEncryptor)
+	public DashboardShareSetServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
 		super(sqlSessionFactory, dialect);
-		this.textEncryptor = textEncryptor;
 	}
 
-	public DashboardShareSetServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
-			TextEncryptor textEncryptor)
+	public DashboardShareSetServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
 		super(sqlSessionTemplate, dialect);
-		this.textEncryptor = textEncryptor;
 	}
 
 	public TextEncryptor getTextEncryptor()
@@ -78,8 +74,11 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 	@Override
 	protected void add(DashboardShareSet entity, Map<String, Object> params)
 	{
-		entity = entity.clone();
-		entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		if (this.textEncryptor != null)
+		{
+			entity = entity.clone();
+			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		}
 
 		super.add(entity, params);
 	}
@@ -87,8 +86,11 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 	@Override
 	protected boolean update(DashboardShareSet entity, Map<String, Object> params)
 	{
-		entity = entity.clone();
-		entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		if (this.textEncryptor != null)
+		{
+			entity = entity.clone();
+			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		}
 
 		return super.update(entity, params);
 	}
@@ -98,7 +100,7 @@ public class DashboardShareSetServiceImpl extends AbstractMybatisEntityService<S
 	{
 		DashboardShareSet entity = super.getByIdFromDB(id, params);
 
-		if (entity != null)
+		if (this.textEncryptor != null && entity != null)
 			entity.setPassword(this.textEncryptor.decrypt(entity.getPassword()));
 
 		return entity;
