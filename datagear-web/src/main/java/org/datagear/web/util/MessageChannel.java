@@ -31,30 +31,33 @@ import java.util.List;
 public interface MessageChannel
 {
 	/**
-	 * 推入消息。
+	 * 发送消息至指定通道末尾。
 	 * 
-	 * @param channel
+	 * @param name
+	 *            消息通道名称
 	 * @param messages
 	 */
-	public void push(String channel, Object... messages);
+	public void push(String name, Object... messages);
 
 	/**
-	 * 拉取消息。
+	 * 从指定通道开头读取一条消息并删除它。
 	 * 
 	 * @param <T>
-	 * @param channel
+	 * @param name
+	 *            消息通道名称
 	 * @return 消息对象，返回{@code null}表示无消息
 	 */
-	public <T> T pull(String channel);
+	public <T> T poll(String name);
 
 	/**
-	 * 拉取最多指定数量的消息。
+	 * 从指定通道开头读取最多指定数量的消息并删除它们。
 	 * 
 	 * @param <T>
-	 * @param channel
+	 * @param name
+	 *            消息通道名称
 	 * @param count
 	 *            最多数量，{@code -1}表示所有消息
 	 * @return 消息对象列表，返回空列表表示无消息
 	 */
-	public <T> List<T> pull(String channel, int count);
+	public <T> List<T> poll(String name, int count);
 }

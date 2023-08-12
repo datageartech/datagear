@@ -1371,7 +1371,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		if (messageCount < 1)
 			messageCount = 1;
 
-		return this.dataExchangeMessageChannel.pull(dataExchangeId, messageCount);
+		return this.dataExchangeMessageChannel.poll(dataExchangeId, messageCount);
 	}
 	
 	protected AutoDataImportDependency toAutoDataImportDependency(SubDataExchange subDataExchange,

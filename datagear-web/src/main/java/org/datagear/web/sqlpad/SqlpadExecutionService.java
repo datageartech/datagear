@@ -213,7 +213,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 	 */
 	public <T> List<T> message(String sqlpadId, int count)
 	{
-		return this.messageChannel.pull(sqlpadId, count);
+		return this.messageChannel.poll(sqlpadId, count);
 	}
 
 	/**

@@ -62,9 +62,9 @@ public class DefaultMessageChannel implements MessageChannel
 	}
 
 	@Override
-	public void push(String channel, Object... messages)
+	public void push(String name, Object... messages)
 	{
-		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(channel);
+		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(name);
 
 		for (int i = 0; i < messages.length; i++)
 			queue.add(messages[i]);
@@ -72,18 +72,18 @@ public class DefaultMessageChannel implements MessageChannel
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T pull(String channel)
+	public <T> T poll(String name)
 	{
-		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(channel);
+		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(name);
 
 		return (T) queue.poll();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> List<T> pull(String channel, int count)
+	public <T> List<T> poll(String name, int count)
 	{
-		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(channel);
+		LinkedBlockingQueue<Object> queue = getChannelQueueNonNull(name);
 
 		List<T> list = new LinkedList<T>();
 		
@@ -109,11 +109,11 @@ public class DefaultMessageChannel implements MessageChannel
 		return list;
 	}
 
-	protected LinkedBlockingQueue<Object> getChannelQueueNonNull(String channel)
+	protected LinkedBlockingQueue<Object> getChannelQueueNonNull(String name)
 	{
 		try
 		{
-			return this._cache.get(channel);
+			return this._cache.get(name);
 		}
 		catch (Throwable e)
 		{
