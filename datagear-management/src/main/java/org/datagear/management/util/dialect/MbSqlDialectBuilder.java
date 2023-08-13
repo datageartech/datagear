@@ -33,6 +33,8 @@ import org.datagear.util.StringUtil;
  */
 public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 {
+	public static final String DIALECT_NAME_DEFAULT = "default";
+
 	/**
 	 * 默认标识符引用符。
 	 */
@@ -44,11 +46,22 @@ public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 	}
 
 	@Override
+	protected MbSqlDialect buildByUnknownDialectName(Connection cn, String dialectName) throws Exception
+	{
+		if (DIALECT_NAME_DEFAULT.equals(dialectName))
+		{
+			return buildDefaultDialect(cn);
+		}
+		else
+			return super.buildByUnknownDialectName(cn, dialectName);
+	}
+
+	@Override
 	protected MbSqlDialect buildByDialectClassName(Connection cn, String dialectClassName) throws Exception
 	{
 		MbSqlDialect dialect = super.buildByDialectClassName(cn, dialectClassName);
 
-		if (StringUtil.isEmpty(dialect.getIdentifierQuote()))
+		if (dialect != null && StringUtil.isEmpty(dialect.getIdentifierQuote()))
 			dialect.setIdentifierQuote(getIdentifierQuote(cn));
 
 		return dialect;
@@ -85,6 +98,11 @@ public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 	}
 
 	@Override
+	protected String getDialectClassDisplayName()
+	{
+		return MbSqlDialect.class.getSimpleName();
+	}
+
 	protected DefaultMbSqlDialect buildDefaultDialect(Connection cn) throws SQLException
 	{
 		return new DefaultMbSqlDialect(getIdentifierQuote(cn));

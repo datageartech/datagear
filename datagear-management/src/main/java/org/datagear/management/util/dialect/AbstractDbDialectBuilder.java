@@ -57,8 +57,6 @@ public abstract class AbstractDbDialectBuilder<T>
 
 	public static final String DIALECT_NAME_SQLSERVER = "sqlserver";
 
-	public static final String DIALECT_NAME_DEFAULT = "default";
-
 	/** 方言名 */
 	private String dialectName = null;
 
@@ -77,7 +75,7 @@ public abstract class AbstractDbDialectBuilder<T>
 	}
 
 	/**
-	 * 设置方言名，可以是{@code DIALECT_NAME_*}常量标识，或者是数据库方言类全名。
+	 * 设置方言名，可以是{@code DIALECT_NAME_*}常量标识，或者是方言类全名。
 	 * 
 	 * @param dialectName
 	 *            允许为{@code null}，此时将根当前数据库自动判断
@@ -140,7 +138,7 @@ public abstract class AbstractDbDialectBuilder<T>
 			}
 
 			if (dialect == null)
-				dialect = buildDefaultDialect(cn);
+				dialect = buildForNull(cn);
 		}
 		catch (DbDialectBuilderException e)
 		{
@@ -151,13 +149,29 @@ public abstract class AbstractDbDialectBuilder<T>
 			throw new DbDialectBuilderException(e);
 		}
 
-		if (dialect == null)
-			throw new DbDialectBuilderException("Null dialect");
-
 		if (LOGGER.isInfoEnabled())
 			LOGGER.info("Build " + dialect.toString() + " for current environment");
 
 		return dialect;
+	}
+
+	/**
+	 * 没有构建任何方言时的最终构建方法。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DbDialectBuilderException
+	 * @throws Exception
+	 */
+	protected T buildForNull(Connection cn) throws DbDialectBuilderException, Exception
+	{
+		throw new DbDialectBuilderException(
+				"Can not build " + getDialectClassDisplayName() + " for current environment");
+	}
+
+	protected String getDialectClassDisplayName()
+	{
+		return "dialect";
 	}
 
 	protected String getUrl(Connection cn) throws Exception
@@ -201,16 +215,33 @@ public abstract class AbstractDbDialectBuilder<T>
 		{
 			dialect = buildSqlserverDialect(cn);
 		}
-		else if (DIALECT_NAME_DEFAULT.equalsIgnoreCase(dialectName))
-		{
-			dialect = buildDefaultDialect(cn);
-		}
 		else
 		{
-			dialect = buildByDialectClassName(cn, dialectName);
+			dialect = buildByUnknownDialectName(cn, dialectName);
 		}
 
 		return dialect;
+	}
+
+	/**
+	 * 根据未知方言名构建。
+	 * 
+	 * @param cn
+	 * @param dialectName
+	 * @return 返回{@code null}表示不支持
+	 * @throws Exception
+	 */
+	protected T buildByUnknownDialectName(Connection cn, String dialectName) throws Exception
+	{
+		// 可能是类名
+		if (dialectName.indexOf('.') > 0)
+		{
+			return buildByDialectClassName(cn, dialectName);
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -221,11 +252,23 @@ public abstract class AbstractDbDialectBuilder<T>
 	 * @return 返回{@code null}表示不支持
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	protected T buildByDialectClassName(Connection cn, String dialectClassName) throws Exception
 	{
-		Class<?> dialectClass = Class.forName(dialectClassName);
-		@SuppressWarnings("unchecked")
-		T dialect = (T) dialectClass.newInstance();
+		T dialect = null;
+		
+		try
+		{
+			Class<?> dialectClass = Class.forName(dialectClassName);
+			dialect = (T) dialectClass.newInstance();
+		}
+		catch(Throwable t)
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn(
+						"Can not build " + getDialectClassDisplayName() + " by class [" + dialectClassName
+						+ "]", t);
+		}
 
 		return dialect;
 	}
@@ -266,8 +309,25 @@ public abstract class AbstractDbDialectBuilder<T>
 		{
 			dialect = buildSqlserverDialect(cn);
 		}
+		else
+		{
+			dialect = buildByUnknownUrl(cn, url);
+		}
 
 		return dialect;
+	}
+
+	/**
+	 * 根据未知连接URL构建。
+	 * 
+	 * @param cn
+	 * @param url
+	 * @return 返回{@code null}表示不支持
+	 * @throws Exception
+	 */
+	protected T buildByUnknownUrl(Connection cn, String url) throws Exception
+	{
+		return null;
 	}
 
 	protected T buildDerbyDialect(Connection cn) throws Exception
@@ -291,11 +351,6 @@ public abstract class AbstractDbDialectBuilder<T>
 	}
 
 	protected T buildSqlserverDialect(Connection cn) throws Exception
-	{
-		return null;
-	}
-
-	protected T buildDefaultDialect(Connection cn) throws Exception
 	{
 		return null;
 	}
