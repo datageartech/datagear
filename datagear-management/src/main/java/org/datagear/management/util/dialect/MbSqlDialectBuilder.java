@@ -21,6 +21,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.datagear.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@linkplain MbSqlDialect}构建器。
@@ -33,6 +35,8 @@ import org.datagear.util.StringUtil;
  */
 public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MbSqlDialectBuilder.class);
+
 	public static final String DIALECT_NAME_DEFAULT = "default";
 
 	/**
@@ -43,6 +47,17 @@ public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 	public MbSqlDialectBuilder()
 	{
 		super();
+	}
+
+	@Override
+	public MbSqlDialect build(Connection cn) throws DbDialectBuilderException
+	{
+		MbSqlDialect mbd = super.build(cn);
+
+		if (LOGGER.isInfoEnabled())
+			LOGGER.info("Build " + mbd + " for current environment");
+
+		return mbd;
 	}
 
 	@Override

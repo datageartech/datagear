@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractDbDialectBuilder<T>
 {
-	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractDbDialectBuilder.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDbDialectBuilder.class);
 
 	public static final String DIALECT_NAME_DERBY = "derby";
 
@@ -148,9 +148,6 @@ public abstract class AbstractDbDialectBuilder<T>
 		{
 			throw new DbDialectBuilderException(e);
 		}
-
-		if (LOGGER.isInfoEnabled())
-			LOGGER.info("Build " + dialect.toString() + " for current environment");
 
 		return dialect;
 	}
