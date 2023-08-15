@@ -460,6 +460,23 @@ public class IOUtil
 	}
 
 	/**
+	 * 获取输出流。
+	 * 
+	 * @param out
+	 * @param charset
+	 *            允许为{@code null}
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static BufferedWriter getWriter(OutputStream out, Charset charset) throws UnsupportedEncodingException
+	{
+		if (charset == null)
+			return new BufferedWriter(new OutputStreamWriter(out));
+		else
+			return new BufferedWriter(new OutputStreamWriter(out, charset));
+	}
+
+	/**
 	 * 获取{@linkplain BufferedWriter}。
 	 * 
 	 * @param writer
