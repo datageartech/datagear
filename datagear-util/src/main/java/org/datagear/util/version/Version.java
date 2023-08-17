@@ -21,6 +21,17 @@ import java.io.Serializable;
 
 /**
  * 版本号。
+ * <p>
+ * 示例：
+ * </p>
+ * <p>
+ * {@code 0.1}<br>
+ * {@code 1.2}<br>
+ * {@code 2.1.3}<br>
+ * {@code 3.2-A0}<br>
+ * {@code 3.3-B1}<br>
+ * {@code 3.5.2-B3}
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -250,6 +261,22 @@ public class Version implements Serializable, Comparable<Version>
 		return true;
 	}
 
+	/**
+	 * 返回字符串形式，仅包含版本信息。
+	 * 
+	 * @return
+	 */
+	public String stringOf()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.major).append(SPLITTER_D).append(this.minor).append(SPLITTER_D).append(this.revision);
+
+		if (!this.build.isEmpty())
+			sb.append(SPLITTER_L).append(this.build);
+
+		return sb.toString();
+	}
+
 	@Override
 	public int compareTo(Version o)
 	{
@@ -279,6 +306,9 @@ public class Version implements Serializable, Comparable<Version>
 		return isEqual(obj);
 	}
 
+	/**
+	 * 要获取版本的字符串形式，应使用{@linkplain #stringOf()}。
+	 */
 	@Override
 	public String toString()
 	{
@@ -327,13 +357,7 @@ public class Version implements Serializable, Comparable<Version>
 	 */
 	public static String stringOf(Version version)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(version.major).append(SPLITTER_D).append(version.minor).append(SPLITTER_D).append(version.revision);
-
-		if (!version.build.isEmpty())
-			sb.append(SPLITTER_L).append(version.build);
-
-		return sb.toString();
+		return version.stringOf();
 	}
 
 	/**
@@ -348,7 +372,7 @@ public class Version implements Serializable, Comparable<Version>
 	 */
 	public static Version valueOf(String version) throws IllegalArgumentException
 	{
-		if (!isValidVersionString(version))
+		if (!isValidVersion(version))
 			throw new IllegalArgumentException("illegal version : " + version);
 
 		String[] vs = version.split(SPLITTER_D_REGEX);
@@ -384,12 +408,12 @@ public class Version implements Serializable, Comparable<Version>
 	}
 
 	/**
-	 * 字符串版本号是否合法。
+	 * 是否是合法的版本号。
 	 * 
 	 * @param version
 	 * @return
 	 */
-	public static boolean isValidVersionString(String version)
+	public static boolean isValidVersion(String version)
 	{
 		return (version != null && version.matches("\\d+(\\.\\d+){1,2}(\\-\\w+){0,1}"));
 	}
