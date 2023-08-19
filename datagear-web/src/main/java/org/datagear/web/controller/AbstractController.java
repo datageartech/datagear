@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,19 +42,18 @@ import org.datagear.management.service.EntityService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
-import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.AuthenticationUserGetter;
+import org.datagear.web.util.MessageSourceSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +70,7 @@ import freemarker.template.TemplateModel;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractController
+public abstract class AbstractController extends MessageSourceSupport
 {
 	/**
 	 * 控制器类加载时间戳。
@@ -128,9 +126,6 @@ public abstract class AbstractController
 	private ConversionService conversionService;
 
 	@Autowired
-	private MessageSource messageSource;
-
-	@Autowired
 	private AuthenticationSecurity authenticationSecurity;
 
 	@Autowired
@@ -141,14 +136,11 @@ public abstract class AbstractController
 		super();
 	}
 
-	public MessageSource getMessageSource()
-	{
-		return messageSource;
-	}
-
+	@Autowired
+	@Override
 	public void setMessageSource(MessageSource messageSource)
 	{
-		this.messageSource = messageSource;
+		super.setMessageSource(messageSource);
 	}
 
 	public ConversionService getConversionService()
@@ -716,7 +708,7 @@ public abstract class AbstractController
 	 */
 	protected String getErrorView(HttpServletRequest request, HttpServletResponse response)
 	{
-		setAttributeIfIsJsonResponse(request, response);
+		setErrorAttrIfIsJsonResponse(request, response);
 		return ERROR_PAGE_URL;
 	}
 
@@ -726,7 +718,7 @@ public abstract class AbstractController
 	 * @param request
 	 * @param response
 	 */
-	protected void setAttributeIfIsJsonResponse(HttpServletRequest request, HttpServletResponse response)
+	protected void setErrorAttrIfIsJsonResponse(HttpServletRequest request, HttpServletResponse response)
 	{
 		String expectedContentType = DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
 		if (expectedContentType != null && !expectedContentType.isEmpty())
@@ -876,7 +868,7 @@ public abstract class AbstractController
 		if (saveCount > 0)
 			return optSuccessResponseEntity(request, "operationSuccess.withSaveCount", saveCount);
 
-		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
+		@org.datagear.util.JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (saveCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
@@ -898,7 +890,7 @@ public abstract class AbstractController
 		if (deleteCount > 0)
 			return optSuccessResponseEntity(request, "operationSuccess.withDeleteCount", deleteCount);
 
-		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
+		@org.datagear.util.JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
 		// if (deleteCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
@@ -933,63 +925,6 @@ public abstract class AbstractController
 	{
 		String message = getMessage(request, code, messageArgs);
 		return OperationMessage.valueOfFail(code, message);
-	}
-
-	/**
-	 * 获取I18N消息内容。
-	 * <p>
-	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param code
-	 * @param args
-	 * @return
-	 */
-	protected String getMessage(HttpServletRequest request, String code, Object... args)
-	{
-		try
-		{
-			return this.messageSource.getMessage(code, args, getLocale(request));
-		}
-		catch (NoSuchMessageException e)
-		{
-			return "???" + code + "???";
-		}
-	}
-
-	/**
-	 * 获取I18N消息内容。
-	 * <p>
-	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
-	 * </p>
-	 * 
-	 * @param locale
-	 * @param code
-	 * @param args
-	 * @return
-	 */
-	protected String getMessage(Locale locale, String code, Object... args)
-	{
-		try
-		{
-			return this.messageSource.getMessage(code, args, locale);
-		}
-		catch (NoSuchMessageException e)
-		{
-			return "???" + code + "???";
-		}
-	}
-
-	/**
-	 * 获取请求地区。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected Locale getLocale(HttpServletRequest request)
-	{
-		return WebUtils.getLocale(request);
 	}
 
 	/**
@@ -1042,7 +977,11 @@ public abstract class AbstractController
 	 */
 	protected OperationMessage buildOptMsgForHttpError(HttpServletRequest request, Integer statusCode)
 	{
-		String message = (String) request.getAttribute("javax.servlet.error.message");
+		String rawMsg = (String) request.getAttribute("javax.servlet.error.message");
+		if (rawMsg == null)
+			rawMsg = "";
+
+		String message = "";
 
 		String statusCodeKey = "error.httpError";
 
@@ -1051,7 +990,7 @@ public abstract class AbstractController
 
 		try
 		{
-			message = getMessage(request, statusCodeKey, new Object[0]);
+			message = getMessage(request, statusCodeKey, rawMsg);
 		}
 		catch (Throwable t)
 		{

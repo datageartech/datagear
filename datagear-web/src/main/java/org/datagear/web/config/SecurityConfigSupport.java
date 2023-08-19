@@ -344,12 +344,12 @@ public class SecurityConfigSupport
 
 		UrlsAccess show = new UrlsAccess(authorizationManager,
 				// 图表展示
-				"/chart/show/**", "/chart/showData",
+				"/chart/show/**", "/chart/showData*",
 				// 看板展示
-				"/dashboard/show/**", "/dashboard/showData", "/dashboard/loadChart", "/dashboard/auth/**",
+				"/dashboard/show/**", "/dashboard/showData*", "/dashboard/loadChart*", "/dashboard/auth/**",
 				"/dashboard/authcheck/**",
 				// 看板心跳
-				"/dashboard/heartbeat",
+				"/dashboard/heartbeat*",
 
 				// 旧版图表和看板展示
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
