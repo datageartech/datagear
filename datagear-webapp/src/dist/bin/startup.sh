@@ -6,7 +6,11 @@ JAVA_VERSION=""
 
 ECHO_PREFIX="[DataGear] :"
 
-APP_MAIN="${productNameJar}"
+APP_HOME=`dirname "$0"`
+APP_HOME=`cd "$APP_HOME" >/dev/null; pwd`
+APP_JAR="${productNameJar}"
+
+cd "$APP_HOME"
 
 APP_PID=0
 
@@ -30,7 +34,7 @@ fi
 readAppPID()
 {
 	if [ -n "$JAVA_HOME" ]; then
-		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$APP_MAIN"`
+		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$APP_JAR"`
 		
 		if [ -n "$JAVAPS" ]; then
 			APP_PID=`echo $JAVAPS | awk '{print $1}'`
@@ -38,7 +42,7 @@ readAppPID()
 			APP_PID=0
 		fi
 	else
-		JAVAPS=`ps -ef | grep "$APP_MAIN" | grep -v grep`
+		JAVAPS=`ps -ef | grep "$APP_JAR" | grep -v grep`
 		
 		if [ -n "$JAVAPS" ]; then
 			APP_PID=`echo $JAVAPS | awk '{print $2}'`
@@ -57,9 +61,9 @@ else
 	echo "$ECHO_PREFIX starting..."
 	
 	if [ -n "$JAVA_HOME" ]; then
-		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar $APP_MAIN >/dev/null 2>&1 &
+		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar $APP_JAR >/dev/null 2>&1 &
 	else
-		nohup java $JAVA_OPTS -jar $APP_MAIN >/dev/null 2>&1 &
+		nohup java $JAVA_OPTS -jar $APP_JAR >/dev/null 2>&1 &
 	fi
 	
 	readAppPID
