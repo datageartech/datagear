@@ -2,17 +2,20 @@
 
 JAVA_HOME=$JAVA_HOME
 JAVA_OPTS=$JAVA_OPTS
-JAVA_VERSION=""
 
-ECHO_PREFIX="[DataGear] :"
+DG_ECHO_PREFIX="[DataGear] :"
 
-APP_HOME=`dirname "$0"`
-APP_HOME=`cd "$APP_HOME" >/dev/null; pwd`
-APP_JAR="${productNameJar}"
+#when not run at application path, need the following set
 
-cd "$APP_HOME"
+DG_APP_HOME=`dirname "$0"`
+DG_APP_HOME=`cd "$DG_APP_HOME" >/dev/null; pwd`
+DG_APP_NAME="${productNameJar}"
+DG_APP_FULL_NAME="$DG_APP_HOME/$DG_APP_NAME"
+DG_APP_CONFIG_PATH="$DG_APP_HOME/config/application.properties"
 
-APP_PID=0
+export DG_APP_HOME=$DG_APP_HOME
+
+DG_APP_PID=0
 
 echo "  ____        _         ____                 "
 echo " |  _ \  __ _| |_ __ _ / ___| ___  __ _ _ __ "
@@ -24,54 +27,55 @@ echo "  DataGear-v${project.version}  http://www.datagear.tech";
 echo ""
 
 if [ -n "$JAVA_HOME" ]; then
-	echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
+	echo "$DG_ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 else
 	java -version
 	echo ""
-	echo "$ECHO_PREFIX using previous java runtime"
+	echo "$DG_ECHO_PREFIX using previous java runtime"
 fi
 
 readAppPID()
 {
 	if [ -n "$JAVA_HOME" ]; then
-		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$APP_JAR"`
+		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$DG_APP_NAME"`
 		
 		if [ -n "$JAVAPS" ]; then
-			APP_PID=`echo $JAVAPS | awk '{print $1}'`
+			DG_APP_PID=`echo $JAVAPS | awk '{print $1}'`
 		else
-			APP_PID=0
+			DG_APP_PID=0
 		fi
 	else
-		JAVAPS=`ps -ef | grep "$APP_JAR" | grep -v grep`
+		JAVAPS=`ps -ef | grep "$DG_APP_NAME" | grep -v grep`
 		
 		if [ -n "$JAVAPS" ]; then
-			APP_PID=`echo $JAVAPS | awk '{print $2}'`
+			DG_APP_PID=`echo $JAVAPS | awk '{print $2}'`
 		else
-			APP_PID=0
+			DG_APP_PID=0
 		fi
 	fi
 }
 
 readAppPID
 
-if [ $APP_PID -ne 0 ]; then
-	echo "$ECHO_PREFIX application is already running, PID is $APP_PID"
-	echo "$ECHO_PREFIX starting [Failed]"
+if [ $DG_APP_PID -ne 0 ]; then
+	echo "$DG_ECHO_PREFIX application is already running, PID is $DG_APP_PID"
+	echo "$DG_ECHO_PREFIX start failed"
 else
-	echo "$ECHO_PREFIX starting..."
+	echo "$DG_ECHO_PREFIX starting..."
 	
 	if [ -n "$JAVA_HOME" ]; then
-		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar $APP_JAR >/dev/null 2>&1 &
+		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" --spring.config.additional-location="$DG_APP_CONFIG_PATH" >/dev/null 2>&1 &
 	else
-		nohup java $JAVA_OPTS -jar $APP_JAR >/dev/null 2>&1 &
+		nohup java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" --spring.config.additional-location="$DG_APP_CONFIG_PATH" >/dev/null 2>&1 &
 	fi
 	
 	readAppPID
 	
-	if [ $APP_PID -ne 0 ]; then
-		echo "$ECHO_PREFIX PID is $APP_PID"
-		echo "$ECHO_PREFIX starting [OK]"
+	if [ $DG_APP_PID -ne 0 ]; then
+		echo "$DG_ECHO_PREFIX PID is $DG_APP_PID"
+		echo "$DG_ECHO_PREFIX start OK"
+		echo "$DG_ECHO_PREFIX it may take some seconds for use"
 	else
-		echo "$ECHO_PREFIX starting [Failed]"
+		echo "$DG_ECHO_PREFIX start failed"
 	fi
 fi

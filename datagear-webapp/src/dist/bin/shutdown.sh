@@ -3,52 +3,52 @@
 JAVA_HOME=$JAVA_HOME
 JAVA_OPTS=$JAVA_OPTS
 
-ECHO_PREFIX="[DataGear] :"
+DG_ECHO_PREFIX="[DataGear] :"
 
-APP_JAR="${productNameJar}"
+DG_APP_NAME="${productNameJar}"
 
-APP_PID=0
+DG_APP_PID=0
 
 if [ -n "$JAVA_HOME" ]; then
-	echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
+	echo "$DG_ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 else
 	java -version
 	echo ""
-	echo "$ECHO_PREFIX using previous java runtime"
+	echo "$DG_ECHO_PREFIX using previous java runtime"
 fi
 
 readAppPID()
 {
 	if [ -n "$JAVA_HOME" ]; then
-		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$APP_JAR"`
+		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$DG_APP_NAME"`
 		
 		if [ -n "$JAVAPS" ]; then
-			APP_PID=`echo $JAVAPS | awk '{print $1}'`
+			DG_APP_PID=`echo $JAVAPS | awk '{print $1}'`
 		else
-			APP_PID=0
+			DG_APP_PID=0
 		fi
 	else
-		JAVAPS=`ps -ef | grep "$APP_JAR" | grep -v grep`
+		JAVAPS=`ps -ef | grep "$DG_APP_NAME" | grep -v grep`
 		
 		if [ -n "$JAVAPS" ]; then
-			APP_PID=`echo $JAVAPS | awk '{print $2}'`
+			DG_APP_PID=`echo $JAVAPS | awk '{print $2}'`
 		else
-			APP_PID=0
+			DG_APP_PID=0
 		fi
 	fi
 }
 
 readAppPID
 
-if [ $APP_PID -ne 0 ]; then
-	echo "$ECHO_PREFIX stopping... (PID=$APP_PID)"
-	kill -9 $APP_PID
+if [ $DG_APP_PID -ne 0 ]; then
+	echo "$DG_ECHO_PREFIX stopping... (PID=$DG_APP_PID)"
+	kill -9 $DG_APP_PID
 	if [ $? -eq 0 ]; then
-		echo "$ECHO_PREFIX stopping [OK]"
+		echo "$DG_ECHO_PREFIX stop OK"
 	else
-		echo "$ECHO_PREFIX stopping [Failed]"
+		echo "$DG_ECHO_PREFIX stop failed"
 	fi
 else
-	echo "$ECHO_PREFIX application is not running"
-	echo "$ECHO_PREFIX stopping [Failed]"
+	echo "$DG_ECHO_PREFIX application is not running"
+	echo "$DG_ECHO_PREFIX stop failed"
 fi
