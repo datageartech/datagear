@@ -37,45 +37,41 @@ public abstract class ApplicationProperties implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 工作空间主目录 */
-	@Value("${DataGearWorkspace}")
-	private String dataGearWorkspace;
-
 	/** #重设密码创建校验文件的目录 */
-	@Value("${directory.resetPasswordCheckFile}")
-	private String directoryResetPasswordCheckFile;
+	@Value("${resetPasswordCheckFileDirectory}")
+	private String resetPasswordCheckFileDirectory;
 
 	/** 驱动程序管理主目录 */
-	@Value("${directory.driver}")
-	private String directoryDriver;
+	@Value("${driverRootDirectory}")
+	private String driverRootDirectory;
 
 	/** 系统使用的derby数据库主目录 */
-	@Value("${directory.derby}")
-	private String directoryDerby;
+	@Value("${derbyDirectory}")
+	private String derbyDirectory;
 
 	/** 临时文件目录 */
-	@Value("${directory.temp}")
-	private String directoryTemp;
+	@Value("${tempDirectory}")
+	private String tempDirectory;
 
 	/** 图表插件主目录 */
-	@Value("${directory.chartPlugin}")
-	private String directoryChartPlugin;
+	@Value("${chartPluginRootDirectory}")
+	private String chartPluginRootDirectory;
 
 	/** 看板主目录 */
-	@Value("${directory.dashboard}")
-	private String directoryDashboard;
+	@Value("${dashboardRootDirectory}")
+	private String dashboardRootDirectory;
 
 	/** 看板全局资源主目录 */
-	@Value("${directory.dashboardGlobalRes}")
-	private String directoryDashboardGlobalRes;
+	@Value("${dashboardGlobalResRootDirectory}")
+	private String dashboardGlobalResRootDirectory;
 
 	/** 看板模板内引用全局资源的URL前缀 */
 	@Value("${dashboardGlobalResUrlPrefix}")
 	private String dashboardGlobalResUrlPrefix;
 
 	/** 数据集文件主目录 */
-	@Value("${directory.dataSet}")
-	private String directoryDataSet;
+	@Value("${dataSetRootDirectory}")
+	private String dataSetRootDirectory;
 
 	/** 数据编辑界面自定义URL构建器脚本文件 */
 	@Value("${schemaUrlBuilderScriptFile}")
@@ -227,84 +223,74 @@ public abstract class ApplicationProperties implements Serializable
 		super();
 	}
 
-	public String getDataGearWorkspace()
+	public String getResetPasswordCheckFileDirectory()
 	{
-		return dataGearWorkspace;
+		return resetPasswordCheckFileDirectory;
 	}
 
-	protected void setDataGearWorkspace(String dataGearWorkspace)
+	protected void setResetPasswordCheckFileDirectory(String resetPasswordCheckFileDirectory)
 	{
-		this.dataGearWorkspace = dataGearWorkspace;
+		this.resetPasswordCheckFileDirectory = resetPasswordCheckFileDirectory;
 	}
 
-	public String getDirectoryResetPasswordCheckFile()
+	public String getDriverRootDirectory()
 	{
-		return directoryResetPasswordCheckFile;
+		return driverRootDirectory;
 	}
 
-	protected void setDirectoryResetPasswordCheckFile(String directoryResetPasswordCheckFile)
+	protected void setDriverRootDirectory(String driverRootDirectory)
 	{
-		this.directoryResetPasswordCheckFile = directoryResetPasswordCheckFile;
+		this.driverRootDirectory = driverRootDirectory;
 	}
 
-	public String getDirectoryDriver()
+	public String getDerbyDirectory()
 	{
-		return directoryDriver;
+		return derbyDirectory;
 	}
 
-	protected void setDirectoryDriver(String directoryDriver)
+	protected void setDerbyDirectory(String derbyDirectory)
 	{
-		this.directoryDriver = directoryDriver;
+		this.derbyDirectory = derbyDirectory;
 	}
 
-	public String getDirectoryDerby()
+	public String getTempDirectory()
 	{
-		return directoryDerby;
+		return tempDirectory;
 	}
 
-	protected void setDirectoryDerby(String directoryDerby)
+	protected void setTempDirectory(String tempDirectory)
 	{
-		this.directoryDerby = directoryDerby;
+		this.tempDirectory = tempDirectory;
 	}
 
-	public String getDirectoryTemp()
+	public String getChartPluginRootDirectory()
 	{
-		return directoryTemp;
+		return chartPluginRootDirectory;
 	}
 
-	protected void setDirectoryTemp(String directoryTemp)
+	protected void setChartPluginRootDirectory(String chartPluginRootDirectory)
 	{
-		this.directoryTemp = directoryTemp;
+		this.chartPluginRootDirectory = chartPluginRootDirectory;
 	}
 
-	public String getDirectoryChartPlugin()
+	public String getDashboardRootDirectory()
 	{
-		return directoryChartPlugin;
+		return dashboardRootDirectory;
 	}
 
-	protected void setDirectoryChartPlugin(String directoryChartPlugin)
+	protected void setDashboardRootDirectory(String dashboardRootDirectory)
 	{
-		this.directoryChartPlugin = directoryChartPlugin;
+		this.dashboardRootDirectory = dashboardRootDirectory;
 	}
 
-	public String getDirectoryDashboard()
+	public String getDashboardGlobalResRootDirectory()
 	{
-		return directoryDashboard;
+		return dashboardGlobalResRootDirectory;
 	}
 
-	protected void setDirectoryDashboard(String directoryDashboard)
+	protected void setDashboardGlobalResRootDirectory(String dashboardGlobalResRootDirectory)
 	{
-		this.directoryDashboard = directoryDashboard;
-	}
-
-	public String getDirectoryDashboardGlobalRes()
-	{
-		return directoryDashboardGlobalRes;
-	}
-
-	protected void setDirectoryDashboardGlobalRes(String directoryDashboardGlobalRes)
-	{
-		this.directoryDashboardGlobalRes = directoryDashboardGlobalRes;
+		this.dashboardGlobalResRootDirectory = dashboardGlobalResRootDirectory;
 	}
 
 	public String getDashboardGlobalResUrlPrefixName()
@@ -323,14 +309,14 @@ public abstract class ApplicationProperties implements Serializable
 		this.dashboardGlobalResUrlPrefix = dashboardGlobalResUrlPrefix;
 	}
 
-	public String getDirectoryDataSet()
+	public String getDataSetRootDirectory()
 	{
-		return directoryDataSet;
+		return dataSetRootDirectory;
 	}
 
-	protected void setDirectoryDataSet(String directoryDataSet)
+	protected void setDataSetRootDirectory(String dataSetRootDirectory)
 	{
-		this.directoryDataSet = directoryDataSet;
+		this.dataSetRootDirectory = dataSetRootDirectory;
 	}
 
 	public String getSchemaUrlBuilderScriptFile()

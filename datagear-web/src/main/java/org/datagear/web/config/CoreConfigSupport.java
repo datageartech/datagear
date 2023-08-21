@@ -335,45 +335,45 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public File driverEntityManagerRootDirectory()
+	public File driverRootDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryDriver(), true);
+		return createDirectory(getApplicationProperties().getDriverRootDirectory(), true);
 	}
 
 	@Bean
 	public File tempDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryTemp(), true);
+		return createDirectory(getApplicationProperties().getTempDirectory(), true);
 	}
 
 	@Bean
 	public File chartPluginRootDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryChartPlugin(), true);
+		return createDirectory(getApplicationProperties().getChartPluginRootDirectory(), true);
 	}
 
 	@Bean
 	public File dashboardRootDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryDashboard(), true);
+		return createDirectory(getApplicationProperties().getDashboardRootDirectory(), true);
 	}
 
 	@Bean(NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY)
 	public File dashboardGlobalResRootDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryDashboardGlobalRes(), true);
+		return createDirectory(getApplicationProperties().getDashboardGlobalResRootDirectory(), true);
 	}
 
 	@Bean
 	public File resetPasswordCheckFileDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryResetPasswordCheckFile(), true);
+		return createDirectory(getApplicationProperties().getResetPasswordCheckFileDirectory(), true);
 	}
 
 	@Bean
 	public File dataSetRootDirectory()
 	{
-		return createDirectory(getApplicationProperties().getDirectoryDataSet(), true);
+		return createDirectory(getApplicationProperties().getDataSetRootDirectory(), true);
 	}
 
 	@Bean
@@ -510,7 +510,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean(destroyMethod = "releaseAll")
 	public XmlDriverEntityManager driverEntityManager()
 	{
-		XmlDriverEntityManager bean = new XmlDriverEntityManager(driverEntityManagerRootDirectory());
+		XmlDriverEntityManager bean = new XmlDriverEntityManager(driverRootDirectory());
 		return bean;
 	}
 
