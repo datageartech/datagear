@@ -3,15 +3,21 @@
 JAVA_HOME=$JAVA_HOME
 JAVA_OPTS=$JAVA_OPTS
 
+#this make application can run at other path
+DG_APP_HOME=$DG_APP_HOME
+
+if [ -n "$DG_APP_HOME" ]; then
+	DG_APP_HOME=$DG_APP_HOME
+else
+	DG_APP_HOME=`dirname "$0"`
+	DG_APP_HOME=`cd "$DG_APP_HOME" >/dev/null; pwd`
+fi
+
 DG_ECHO_PREFIX="[DataGear] :"
 
-#when not run at application path, need the following set
-
-DG_APP_HOME=`dirname "$0"`
-DG_APP_HOME=`cd "$DG_APP_HOME" >/dev/null; pwd`
 DG_APP_NAME="${productNameJar}"
 DG_APP_FULL_NAME="$DG_APP_HOME/$DG_APP_NAME"
-DG_APP_CONFIG_PATH="$DG_APP_HOME/config/application.properties"
+DG_SPRING_OPTS="--spring.config.additional-location=$DG_APP_HOME/config/application.properties"
 
 export DG_APP_HOME=$DG_APP_HOME
 
@@ -64,9 +70,9 @@ else
 	echo "$DG_ECHO_PREFIX starting..."
 	
 	if [ -n "$JAVA_HOME" ]; then
-		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" --spring.config.additional-location="$DG_APP_CONFIG_PATH" >/dev/null 2>&1 &
+		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" $DG_SPRING_OPTS >/dev/null 2>&1 &
 	else
-		nohup java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" --spring.config.additional-location="$DG_APP_CONFIG_PATH" >/dev/null 2>&1 &
+		nohup java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" $DG_SPRING_OPTS >/dev/null 2>&1 &
 	fi
 	
 	readAppPID
