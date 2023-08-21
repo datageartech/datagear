@@ -2,7 +2,15 @@
 
 rem when not run at application path, need the following set
 
+if "%DG_APP_HOME%" == "" goto setAppHomeAuto
+if not "%DG_APP_HOME%" == "" goto setAppHomePreSet
+
+:setAppHomeAuto
 set "DG_APP_HOME=%~dp0"
+
+:setAppHomePreSet
+set "DG_APP_HOME=%DG_APP_HOME%"
+
 set "DG_APP_FULL_NAME=%DG_APP_HOME%${productNameJar}"
 set "DG_APP_CONFIG_PATH=%DG_APP_HOME%\config\application.properties"
 
