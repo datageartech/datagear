@@ -105,7 +105,7 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 		}
 		finally
 		{
-			if (fullRenderContext != rawRenderContext)
+			if (fullRenderContext != null && fullRenderContext != rawRenderContext)
 				IOUtil.close(fullRenderContext.getTemplateReader());
 		}
 	}
