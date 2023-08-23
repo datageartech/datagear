@@ -75,16 +75,23 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	{
 		super.exposeHelpers(model, request);
 		
-		ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
-		ApplicationProperties applicationProperties = ac.getBean(ApplicationProperties.class);
-		AuthenticationUserGetter userGetter = ac.getBean(AuthenticationUserGetter.class);
-
 		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
 		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
 		model.put(VAR_CONTEXT_PATH, WebUtils.getContextPath(request));
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
-		model.put(VAR_CURRENT_USER, userGetter.getUser());
 		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
+
+		ApplicationContext ac = WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
+		exposeHelpersOfApplicationContext(model, request, ac);
+	}
+
+	protected void exposeHelpersOfApplicationContext(Map<String, Object> model, HttpServletRequest request,
+			ApplicationContext applicationContext) throws Exception
+	{
+		ApplicationProperties applicationProperties = applicationContext.getBean(ApplicationProperties.class);
+		AuthenticationUserGetter userGetter = applicationContext.getBean(AuthenticationUserGetter.class);
+
+		model.put(VAR_CURRENT_USER, userGetter.getUser());
 		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
 		
 		if(WebUtils.isEnableDetectNewVersionRequest(request))
