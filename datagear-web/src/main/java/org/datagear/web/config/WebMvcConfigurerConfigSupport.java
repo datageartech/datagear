@@ -51,6 +51,7 @@ import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerView;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -184,20 +185,29 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	public void configureViewResolvers(ViewResolverRegistry registry)
 	{
 		FreeMarkerViewResolver viewResolver = createFreeMarkerViewResolver();
-		viewResolver.setViewClass(CustomFreeMarkerView.class);
-		viewResolver.setContentType("text/html;charset=" + IOUtil.CHARSET_UTF_8);
-		viewResolver.setExposeRequestAttributes(true);
-		viewResolver.setAllowRequestOverride(true);
-		viewResolver.setCache(true);
-		viewResolver.setPrefix("");
-		viewResolver.setSuffix(".ftl");
-
+		configFreeMarkerViewResolver(viewResolver);
 		registry.viewResolver(viewResolver);
 	}
 
 	protected FreeMarkerViewResolver createFreeMarkerViewResolver()
 	{
 		return new FreeMarkerViewResolver();
+	}
+
+	protected void configFreeMarkerViewResolver(FreeMarkerViewResolver viewResolver)
+	{
+		viewResolver.setViewClass(freeMarkerViewClass());
+		viewResolver.setContentType("text/html;charset=" + IOUtil.CHARSET_UTF_8);
+		viewResolver.setExposeRequestAttributes(true);
+		viewResolver.setAllowRequestOverride(true);
+		viewResolver.setCache(true);
+		viewResolver.setPrefix("");
+		viewResolver.setSuffix(".ftl");
+	}
+
+	protected Class<? extends FreeMarkerView> freeMarkerViewClass()
+	{
+		return CustomFreeMarkerView.class;
 	}
 
 	@Bean
