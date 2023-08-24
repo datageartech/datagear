@@ -27,13 +27,13 @@ User currentUser
 <#assign ThemeSpec=statics['org.datagear.web.util.ThemeSpec']>
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
-<div class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
+<div id="${pid}mainHeader" class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
 	<div class="grid grid-nogutter align-items-center">
-		<div class="logo-wrapper col-fixed flex align-items-center pl-1">
+		<div class="logo-wrapper header-left col-fixed flex align-items-center pl-1">
 			<#include "html_logo.ftl">
 		</div>
 		<div class="col text-right pr-2">
-			<div class="flex justify-content-end align-items-center">
+			<div class="header-right flex justify-content-end align-items-center">
 				<div class="mr-1">
 					<#if currentUser.anonymous>
 						<a href="${contextPath}/login" class="link text-primary px-1"><@spring.message code='module.login' /></a>
