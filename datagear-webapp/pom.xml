@@ -168,6 +168,7 @@
 			    				<copy file="../COPYING" todir="${project.build.directory}/${productName}" />
 			    				<copy file="../COPYING.LESSER" todir="${project.build.directory}/${productName}" />
 			    				<copy file="../LICENSE" todir="${project.build.directory}/${productName}" />
+			    				<copy file="../NOTICE" todir="${project.build.directory}/${productName}" />
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
@@ -185,6 +186,7 @@
 			    				<copy file="../COPYING" todir="${dist.target.dir}" />
 			    				<copy file="../COPYING.LESSER" todir="${dist.target.dir}" />
 								<copy file="../LICENSE" todir="${dist.target.dir}" />
+			    				<copy file="../NOTICE" todir="${dist.target.dir}" />
 								
 								<zip destfile="${dist.package.target.dir}/${productName}.zip" basedir="${project.build.directory}/${productName}-bin" includes="${productName}/**/*" />
 								<copy file="${project.build.directory}/${productNameWar}.original" tofile="${dist.package.target.dir}/${productNameWar}" />
