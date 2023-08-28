@@ -17,13 +17,12 @@
 
 package org.datagear.management.service.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -261,8 +260,8 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return false;
 
-		for (String res : resources)
-			this.permissionCache.evict(toPermissionCacheKeyOfStr(res));
+		for (String resource : resources)
+			this.permissionCache.evict(toPermissionCacheKeyOfStr(resource));
 
 		return true;
 	}
@@ -471,9 +470,10 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			return null;
 
 		ValueWrapper valueWrapper = this.permissionCache.get(toPermissionCacheKey(id));
-		UserIdPermissionMap upm = (valueWrapper == null ? null : (UserIdPermissionMap) valueWrapper.get());
+		UserIdPermissionCacheValue upcv = (valueWrapper == null ? null
+				: (UserIdPermissionCacheValue) valueWrapper.get());
 
-		return (upm == null ? null : upm.getPermission(userId));
+		return (upcv == null ? null : upcv.getPermission(userId));
 	}
 
 	protected void permissionCachePut(ID id, String userId, int permission)
@@ -484,14 +484,15 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		Object key = toPermissionCacheKey(id);
 
 		ValueWrapper valueWrapper = this.permissionCache.get(key);
-		UserIdPermissionMap upm = (valueWrapper == null ? null : (UserIdPermissionMap) valueWrapper.get());
-		if (upm == null)
-		{
-			upm = new UserIdPermissionMap();
-			this.permissionCache.put(key, upm);
-		}
+		UserIdPermissionCacheValue upcv = (valueWrapper == null ? null
+				: (UserIdPermissionCacheValue) valueWrapper.get());
+		if (upcv == null)
+			upcv = new UserIdPermissionCacheValue();
 
-		upm.putPermission(userId, permission);
+		upcv.putPermission(userId, permission);
+
+		// 注意：无论upcv之前是否存在于缓存，这里都应再次执行存入缓存操作
+		this.permissionCache.put(key, upcv);
 	}
 
 	protected void permissionCachePutQueryResult(String statement, Map<String, Object> params, List<T> result)
@@ -546,11 +547,12 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * </p>
 	 * 
 	 * @param id
+	 *            实体ID，允许{@code null}
 	 * @return
 	 */
 	protected Object toPermissionCacheKey(ID id)
 	{
-		String idStr = (id == null ? null : id.toString());
+		String idStr = (id == null ? "" : id.toString());
 		return toPermissionCacheKeyOfStr(idStr);
 	}
 
@@ -561,11 +563,12 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * </p>
 	 * 
 	 * @param id
+	 *            实体ID
 	 * @return
 	 */
 	protected Object toPermissionCacheKeyOfStr(String id)
 	{
-		return new GlobalEntityCacheKey<String>(getSqlNamespace() + "Permission", id);
+		return new GlobalPermissionCacheKey<String>(getSqlNamespace(), id);
 	}
 
 	/**
@@ -615,28 +618,160 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, Authorization.PERMISSION_NONE_START);
 	}
 
-	protected static class UserIdPermissionMap
+	/**
+	 * 全局权限缓存KEY。
+	 * 
+	 * @author datagear@163.com
+	 * 
+	 * @param <ID>
+	 */
+	public static class GlobalPermissionCacheKey<ID> extends GlobalEntityCacheKey<ID>
 	{
-		private ConcurrentMap<String, Integer> userIdPermissions = new ConcurrentHashMap<String, Integer>();
+		private static final long serialVersionUID = 1L;
 
-		public UserIdPermissionMap()
+		public GlobalPermissionCacheKey(String namespace, ID id)
+		{
+			super(namespace, id);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return super.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			return true;
+		}
+	}
+
+	/**
+	 * 用户权限集缓存值。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class UserIdPermissionCacheValue implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private List<UserIdPermission> userIdPermissions = new ArrayList<>();
+
+		private int maxSize = 100;
+
+		public UserIdPermissionCacheValue()
 		{
 			super();
 		}
 
-		public Integer getPermission(String userId)
+		public List<UserIdPermission> getUserIdPermissions()
 		{
-			return this.userIdPermissions.get(userId);
+			return userIdPermissions;
 		}
 
-		public void putPermission(String userId, Integer permission)
+		public void setUserIdPermissions(List<UserIdPermission> userIdPermissions)
 		{
-			this.userIdPermissions.put(userId, permission);
+			this.userIdPermissions = userIdPermissions;
 		}
 
-		public void clear()
+		public int getMaxSize()
+		{
+			return maxSize;
+		}
+
+		public void setMaxSize(int maxSize)
+		{
+			this.maxSize = maxSize;
+		}
+
+		public synchronized Integer getPermission(String userId)
+		{
+			int idx = findByUserId(userId);
+			return (idx < 0 ? null : this.userIdPermissions.get(idx).getPermission());
+		}
+
+		public synchronized void putPermission(String userId, Integer permission)
+		{
+			int idx = findByUserId(userId);
+
+			if (idx >= 0)
+				this.userIdPermissions.remove(idx);
+
+			this.userIdPermissions.add(new UserIdPermission(userId, permission));
+
+			while (this.userIdPermissions.size() > this.maxSize)
+				this.userIdPermissions.remove(0);
+		}
+
+		protected int findByUserId(String userId)
+		{
+			for (int i = 0, len = this.userIdPermissions.size(); i < len; i++)
+			{
+				if (StringUtil.isEquals(this.userIdPermissions.get(i).getUserId(), userId))
+					return i;
+			}
+
+			return -1;
+		}
+
+		public synchronized void clear()
 		{
 			this.userIdPermissions.clear();
+		}
+	}
+
+	/**
+	 * 用户权限。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class UserIdPermission implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String userId;
+
+		private Integer permission;
+
+		public UserIdPermission()
+		{
+			super();
+		}
+
+		public UserIdPermission(String userId, Integer permission)
+		{
+			super();
+			this.userId = userId;
+			this.permission = permission;
+		}
+
+		public String getUserId()
+		{
+			return userId;
+		}
+
+		public void setUserId(String userId)
+		{
+			this.userId = userId;
+		}
+
+		public Integer getPermission()
+		{
+			return permission;
+		}
+
+		public void setPermission(Integer permission)
+		{
+			this.permission = permission;
 		}
 	}
 }

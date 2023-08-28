@@ -516,7 +516,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 *
 	 * @param <ID>
 	 */
-	protected static class GlobalEntityCacheKey<ID> implements Serializable
+	public static class GlobalEntityCacheKey<ID> implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
