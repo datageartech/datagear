@@ -17,8 +17,6 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
-
 /**
  * 数据集参数。
  * <p>
@@ -28,7 +26,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class DataSetParam extends AbstractNameTypeAware implements NameTypeInputAware, Serializable
+public class DataSetParam extends AbstractNameTypeAware implements NameTypeInputAware
 {
 	private static final long serialVersionUID = 1L;
 

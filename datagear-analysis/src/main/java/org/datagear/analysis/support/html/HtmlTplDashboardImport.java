@@ -17,6 +17,8 @@
 
 package org.datagear.analysis.support.html;
 
+import java.io.Serializable;
+
 /**
  * HTML模板看板导入项。
  * <p>
@@ -26,8 +28,10 @@ package org.datagear.analysis.support.html;
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboardImport
+public class HtmlTplDashboardImport implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 名称 */
 	private String name;
 

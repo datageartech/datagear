@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,8 +27,10 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DashboardResult
+public class DashboardResult implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 图表ID-图表结果映射表 */
 	private Map<String, ChartResult> chartResults = Collections.emptyMap();
 

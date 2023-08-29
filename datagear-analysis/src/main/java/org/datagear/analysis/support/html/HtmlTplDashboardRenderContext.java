@@ -36,6 +36,8 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlTplDashboardRenderContext extends TplDashboardRenderContext
 {
+	private static final long serialVersionUID = 1L;
+
 	private List<HtmlTplDashboardImport> importList = Collections.emptyList();
 	
 	private HtmlTitleHandler htmlTitleHandler = null;

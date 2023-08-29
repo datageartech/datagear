@@ -62,6 +62,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> extends AbstractResolvableResourceDataSet<T>
 {
+	private static final long serialVersionUID = 1L;
+
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExcelDataSet.class);
 
 	public static final String EXTENSION_XLSX = "xlsx";
@@ -654,8 +656,8 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 		private boolean xls;
 
-		private List<IndexRange> _dataRowRanges = null;
-		private List<IndexRange> _dataColumnRanges = null;
+		private transient List<IndexRange> _dataRowRanges = null;
+		private transient List<IndexRange> _dataColumnRanges = null;
 
 		public ExcelDataSetResource()
 		{

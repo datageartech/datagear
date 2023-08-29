@@ -114,6 +114,8 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 */
 	protected static class HtmlChartJson extends HtmlChart
 	{
+		private static final long serialVersionUID = 1L;
+
 		public HtmlChartJson(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
 		{
 			super(htmlChart);
@@ -131,6 +133,8 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 */
 	protected static class ChartDataSetJson extends ChartDataSet
 	{
+		private static final long serialVersionUID = 1L;
+
 		public ChartDataSetJson(ChartDataSet chartDataSet)
 		{
 			super(new DataSetJson(chartDataSet.getDataSet()));
@@ -171,6 +175,8 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 */
 	protected static class DataSetJson extends AbstractDataSet
 	{
+		private static final long serialVersionUID = 1L;
+
 		public DataSetJson(DataSet dataSet)
 		{
 			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());

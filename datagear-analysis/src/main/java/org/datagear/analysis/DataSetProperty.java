@@ -17,7 +17,6 @@
 
 package org.datagear.analysis;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -30,7 +29,7 @@ import java.math.BigInteger;
  * @author datagear@163.com
  *
  */
-public class DataSetProperty extends AbstractNameTypeAware implements Cloneable, Serializable
+public class DataSetProperty extends AbstractNameTypeAware implements Cloneable
 {
 	private static final long serialVersionUID = 1L;
 

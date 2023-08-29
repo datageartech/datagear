@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataSet.class);
 
 	protected static final JdbcSupport JDBC_SUPPORT = new JdbcSupport();

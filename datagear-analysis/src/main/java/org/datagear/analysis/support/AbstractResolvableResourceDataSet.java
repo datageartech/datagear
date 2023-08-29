@@ -27,6 +27,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet.DataSetResource;
+import org.datagear.util.cache.CommonCacheKey;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
@@ -38,6 +39,8 @@ import org.springframework.cache.Cache.ValueWrapper;
  */
 public abstract class AbstractResolvableResourceDataSet<T extends DataSetResource> extends AbstractResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	private Cache cache = null;
 
 	public AbstractResolvableResourceDataSet()
@@ -174,7 +177,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 * @author datagear@163.com
 	 *
 	 */
-	public static abstract class DataSetResource implements Serializable
+	public static abstract class DataSetResource implements CommonCacheKey
 	{
 		private static final long serialVersionUID = 1L;
 		

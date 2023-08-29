@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class Theme implements Serializable, NameAware
+public class Theme implements NameAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 

@@ -17,6 +17,8 @@
 
 package org.datagear.analysis.support.html;
 
+import java.io.Serializable;
+
 import org.datagear.util.StringUtil;
 
 /**
@@ -25,8 +27,10 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class DefaultHtmlTitleHandler implements HtmlTitleHandler
+public class DefaultHtmlTitleHandler implements HtmlTitleHandler, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String suffix = "";
 
 	private String suffixForBlank = "";

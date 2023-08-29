@@ -138,6 +138,8 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	 */
 	protected static class RenderContextJson extends DefaultRenderContext
 	{
+		private static final long serialVersionUID = 1L;
+
 		public RenderContextJson(RenderContext renderContext)
 		{
 			this(renderContext, null);
@@ -164,6 +166,8 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	 */
 	protected static class NoAttributesRenderContextJson extends DefaultRenderContext
 	{
+		private static final long serialVersionUID = 1L;
+
 		public NoAttributesRenderContextJson(RenderContext renderContext)
 		{
 			super();

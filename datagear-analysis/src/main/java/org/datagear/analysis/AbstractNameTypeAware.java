@@ -17,14 +17,18 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
+
 /**
  * 抽象{@linkplain NameTypeAware}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractNameTypeAware implements NameTypeAware
+public abstract class AbstractNameTypeAware implements NameTypeAware, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 名称 */
 	private String name;
 

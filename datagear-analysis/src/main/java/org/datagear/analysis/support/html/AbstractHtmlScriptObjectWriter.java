@@ -18,6 +18,7 @@
 package org.datagear.analysis.support.html;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.Writer;
 import java.util.Map;
 
@@ -131,8 +132,10 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 	}
 
-	protected static class RefRenderContext implements RenderContext, JsonRefObject
+	protected static class RefRenderContext implements RenderContext, JsonRefObject, Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String refName;
 
 		public RefRenderContext(String refName)
@@ -192,6 +195,8 @@ public abstract class AbstractHtmlScriptObjectWriter
 
 	protected static class RefHtmlChartPlugin extends HtmlChartPlugin implements JsonRefObject
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String refName;
 
 		public RefHtmlChartPlugin(String refName)

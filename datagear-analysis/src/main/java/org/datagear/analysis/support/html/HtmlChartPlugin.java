@@ -59,6 +59,8 @@ import org.datagear.util.i18n.Label;
  */
 public class HtmlChartPlugin extends AbstractChartPlugin
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 图表渲染器属性名 */
 	public static final String PROPERTY_RENDERER = "renderer";
 	

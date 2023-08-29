@@ -652,9 +652,6 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 			return true;
 		}
 
-		/**
-		 * 注意：此类必须重写此方法，以支持可能的redis缓存配置
-		 */
 		@Override
 		public String toString()
 		{

@@ -17,6 +17,7 @@
 
 package org.datagear.analysis.support;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,8 +43,10 @@ import org.datagear.analysis.support.DataSetPropertyExpEvaluator.ValueSetter;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
+public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String name;
 
 	private boolean mutableModel = false;

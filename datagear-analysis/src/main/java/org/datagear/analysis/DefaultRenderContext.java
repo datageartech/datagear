@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +27,10 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DefaultRenderContext implements RenderContext
+public class DefaultRenderContext implements RenderContext, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private Map<String, Object> attributes;
 
 	public DefaultRenderContext()
@@ -48,6 +51,7 @@ public class DefaultRenderContext implements RenderContext
 		this.attributes = renderContext.attributes;
 	}
 
+	@Override
 	public Map<String, Object> getAttributes()
 	{
 		return attributes;

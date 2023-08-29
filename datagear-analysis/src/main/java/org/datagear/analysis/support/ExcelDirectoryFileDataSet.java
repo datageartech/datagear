@@ -37,6 +37,8 @@ import org.datagear.util.FileUtil;
  */
 public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	/** Excel文件所在的目录 */
 	private File directory;
 

@@ -39,7 +39,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class Group extends AbstractLabeled implements Serializable, NameAware
+public class Group extends AbstractLabeled implements NameAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	

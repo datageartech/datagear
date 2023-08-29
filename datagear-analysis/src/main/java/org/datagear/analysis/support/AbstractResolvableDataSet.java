@@ -38,6 +38,8 @@ import org.datagear.analysis.ResolvedDataSetResult;
  */
 public abstract class AbstractResolvableDataSet extends AbstractDataSet implements ResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	public AbstractResolvableDataSet()
 	{
 		super();

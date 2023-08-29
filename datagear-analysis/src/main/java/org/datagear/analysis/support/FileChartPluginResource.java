@@ -20,6 +20,7 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.util.IOUtil;
@@ -30,8 +31,10 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public class FileChartPluginResource implements ChartPluginResource
+public class FileChartPluginResource implements ChartPluginResource, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String name;
 
 	private File file;

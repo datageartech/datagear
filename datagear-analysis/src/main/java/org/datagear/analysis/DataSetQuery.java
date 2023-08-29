@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,8 +32,10 @@ import org.datagear.util.Global;
  * @author datagear@163.com
  *
  */
-public class DataSetQuery implements ResultDataFormatAware
+public class DataSetQuery implements ResultDataFormatAware, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * 内置参数名前缀。
 	 * <p>

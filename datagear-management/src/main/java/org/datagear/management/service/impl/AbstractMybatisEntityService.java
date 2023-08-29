@@ -17,7 +17,6 @@
 
 package org.datagear.management.service.impl;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +40,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
+import org.datagear.util.cache.CommonCacheKey;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -516,7 +516,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 *
 	 * @param <ID>
 	 */
-	public static class GlobalEntityCacheKey<ID> implements Serializable
+	public static class GlobalEntityCacheKey<ID> implements CommonCacheKey
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -578,9 +578,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 			return true;
 		}
 
-		/**
-		 * 注意：此类必须重写此方法，以支持可能的redis缓存配置
-		 */
 		@Override
 		public String toString()
 		{

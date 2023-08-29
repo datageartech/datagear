@@ -40,6 +40,8 @@ import org.datagear.util.StringUtil;
  */
 public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<ExcelFileDataSetResource>
 {
+	private static final long serialVersionUID = 1L;
+
 	public AbstractExcelFileDataSet()
 	{
 		super();
@@ -202,6 +204,15 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 			if (lastModified != other.lastModified)
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [filePath=" + filePath + ", lastModified=" + lastModified
+					+ ", sheetName=" + getSheetName() + ", sheetIndex=" + getSheetIndex() + ", nameRow=" + getNameRow()
+					+ ", dataRowExp=" + getDataRowExp() + ", dataColumnExp=" + getDataColumnExp() + ", xls=" + isXls()
+					+ ", resolvedTemplate=" + getResolvedTemplate() + "]";
 		}
 	}
 }

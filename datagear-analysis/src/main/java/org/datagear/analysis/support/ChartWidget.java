@@ -17,8 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.Serializable;
-
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
@@ -44,6 +42,8 @@ import org.datagear.util.StringUtil;
  */
 public class ChartWidget extends ChartDefinition
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 图表部件渲染时的部件信息属性名 */
 	public static final String ATTR_CHART_WIDGET = BUILTIN_ATTR_PREFIX + "CHART_WIDGET";
 
@@ -160,7 +160,7 @@ public class ChartWidget extends ChartDefinition
 	 * 
 	 * @author datagear@163.com
 	 */
-	public static class ChartWidgetId extends AbstractIdentifiable implements Serializable
+	public static class ChartWidgetId extends AbstractIdentifiable
 	{
 		private static final long serialVersionUID = 1L;
 

@@ -31,6 +31,8 @@ import java.io.Writer;
  */
 public class TplDashboardRenderContext extends DefaultRenderContext
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final long TEMPLATE_LAST_MODIFIED_NONE = -1;
 
 	/**模板名*/
@@ -40,10 +42,10 @@ public class TplDashboardRenderContext extends DefaultRenderContext
 	private long templateLastModified = TEMPLATE_LAST_MODIFIED_NONE;
 
 	/**模版输入流*/
-	private Reader templateReader = null;
+	private transient Reader templateReader = null;
 
 	/**输出流*/
-	private Writer writer;
+	private transient Writer writer;
 	
 	public TplDashboardRenderContext()
 	{

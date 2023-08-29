@@ -31,6 +31,8 @@ import org.datagear.analysis.ResolvedDataSetResult;
  */
 public class TemplateResolvedDataSetResult extends ResolvedDataSetResult
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 已解析的模板 */
 	private String templateResult;
 

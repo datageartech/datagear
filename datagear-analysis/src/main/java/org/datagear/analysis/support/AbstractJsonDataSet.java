@@ -49,6 +49,8 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends AbstractResolvableResourceDataSet<T>
 		implements ResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 使用Jackson的{@code JSONPath}配置 */
 	protected static final Configuration JACKSON_JSON_PATH_CONFIGURATION = Configuration.builder()
 			.jsonProvider(new JacksonJsonProvider()).mappingProvider(new JacksonMappingProvider()).build();

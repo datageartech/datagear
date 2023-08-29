@@ -17,14 +17,18 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
+
 /**
  * 抽象{@linkplain Identifiable}。
  * 
  * @author datagear@163.com
  *
  */
-public class AbstractIdentifiable implements Identifiable
+public class AbstractIdentifiable implements Identifiable, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String id;
 
 	public AbstractIdentifiable()

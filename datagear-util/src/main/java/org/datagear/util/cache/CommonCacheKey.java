@@ -15,40 +15,52 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis;
+package org.datagear.util.cache;
 
 import java.io.Serializable;
 
 /**
- * 图表结果错误信息。
+ * 通用缓存KEY。
+ * <p>
+ * 通用缓存KEY应：
+ * </p>
+ * <p>
+ * 实现{@linkplain Serializable}，以支持序列化/反序列化缓存KEY。
+ * </p>
+ * <p>
+ * 实现{@linkplain #hashCode()}、{@linkplain #equals(Object)}，以支持缓存KEY比较。
+ * </p>
+ * <p>
+ * 实现{@linkplain #toString()}，以支持转换为字符串缓存KEY。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChartResultError implements Serializable
+public interface CommonCacheKey extends Serializable
 {
-	private static final long serialVersionUID = 1L;
+	/**
+	 * 获取缓存KEY的hash值。
+	 * 
+	 * @return
+	 */
+	@Override
+	int hashCode();
 
-	private Throwable throwable;
+	/**
+	 * 比较缓存KEY。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	@Override
+	boolean equals(Object obj);
 
-	public ChartResultError()
-	{
-		super();
-	}
-
-	public ChartResultError(Throwable throwable)
-	{
-		super();
-		this.throwable = throwable;
-	}
-
-	public Throwable getThrowable()
-	{
-		return throwable;
-	}
-
-	public void setThrowable(Throwable throwable)
-	{
-		this.throwable = throwable;
-	}
+	/**
+	 * 获取缓存KEY字符串格式。
+	 * 
+	 * @return
+	 */
+	@Override
+	String toString();
 }

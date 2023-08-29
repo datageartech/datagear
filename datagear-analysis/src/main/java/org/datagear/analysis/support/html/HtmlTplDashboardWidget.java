@@ -37,9 +37,11 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlTplDashboardWidget extends TplDashboardWidget
 {
-	private HtmlTplDashboardWidgetRenderer renderer;
+	private static final long serialVersionUID = 1L;
 
-	private TplDashboardWidgetResManager resManager;
+	private transient HtmlTplDashboardWidgetRenderer renderer;
+
+	private transient TplDashboardWidgetResManager resManager;
 
 	public HtmlTplDashboardWidget()
 	{

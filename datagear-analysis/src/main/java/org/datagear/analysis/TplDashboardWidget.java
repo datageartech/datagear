@@ -32,6 +32,8 @@ import org.datagear.util.IOUtil;
  */
 public abstract class TplDashboardWidget extends AbstractIdentifiable
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String DEFAULT_TEMPLATE_ENCODING = IOUtil.CHARSET_UTF_8;
 
 	/** 模板名称集 */

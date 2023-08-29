@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -33,8 +34,10 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public class ZipEntryChartPluginResource implements ChartPluginResource
+public class ZipEntryChartPluginResource implements ChartPluginResource, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String name;
 
 	private File zipFile;

@@ -36,6 +36,8 @@ import org.datagear.analysis.DashboardResult;
  */
 public class ErrorMessageDashboardResult extends DashboardResult
 {
+	private static final long serialVersionUID = 1L;
+
 	private Map<String, ChartResultErrorMessage> chartResultErrorMessages = Collections.emptyMap();
 
 	public ErrorMessageDashboardResult(DashboardResult result)

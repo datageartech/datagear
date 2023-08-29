@@ -17,8 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.Serializable;
-
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetQuery;
@@ -33,7 +31,7 @@ import org.datagear.analysis.DataSetResult;
  * @author datagear@163.com
  *
  */
-public class ProfileDataSet extends AbstractDataSet implements Serializable
+public class ProfileDataSet extends AbstractDataSet
 {
 	private static final long serialVersionUID = 1L;
 

@@ -42,6 +42,8 @@ import org.datagear.util.IOUtil;
 public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends AbstractResolvableResourceDataSet<T>
 		implements ResolvableDataSet
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * CSV解析器。
 	 */

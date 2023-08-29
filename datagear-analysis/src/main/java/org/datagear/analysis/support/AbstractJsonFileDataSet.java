@@ -36,6 +36,8 @@ import org.datagear.util.IOUtil;
  */
 public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFileDataSetResource>
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 文件编码 */
 	private String encoding = IOUtil.CHARSET_UTF_8;
 
@@ -178,6 +180,14 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 			if (lastModified != other.lastModified)
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [encoding=" + encoding + ", filePath=" + filePath + ", lastModified="
+					+ lastModified + ", dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
+					+ getResolvedTemplate() + "]";
 		}
 	}
 }

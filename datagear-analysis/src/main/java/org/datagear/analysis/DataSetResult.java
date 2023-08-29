@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -25,8 +26,10 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetResult
+public class DataSetResult implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 结果数据对象 */
 	private Object data;
 

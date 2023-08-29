@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,8 +27,10 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class ChartResult
+public class ChartResult implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private List<DataSetResult> dataSetResults = Collections.emptyList();
 
 	public ChartResult()

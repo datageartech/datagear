@@ -38,6 +38,8 @@ import org.datagear.util.IOUtil;
  */
 public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResource>
 {
+	private static final long serialVersionUID = 1L;
+
 	private String value;
 
 	public JsonValueDataSet()
@@ -130,6 +132,13 @@ public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResour
 			if (getClass() != obj.getClass())
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
+					+ getResolvedTemplate() + "]";
 		}
 	}
 }

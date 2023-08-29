@@ -20,6 +20,7 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -166,6 +167,8 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	protected static class HtmlChartPluginJson extends AbstractChartPlugin
 	{
+		private static final long serialVersionUID = 1L;
+
 		public HtmlChartPluginJson(HtmlChartPlugin plugin, Locale locale)
 		{
 			super(plugin.getId(), plugin.getNameLabel());
@@ -189,8 +192,10 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		}
 	}
 
-	protected static class ChartPluginResourceJson implements ChartPluginResource
+	protected static class ChartPluginResourceJson implements ChartPluginResource, Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String name;
 
 		public ChartPluginResourceJson()

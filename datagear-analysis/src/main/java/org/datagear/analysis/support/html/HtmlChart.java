@@ -31,6 +31,8 @@ import org.datagear.analysis.RenderContext;
  */
 public class HtmlChart extends Chart
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 图表的HTML元素ID */
 	private String elementId;
 

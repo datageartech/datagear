@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,8 +27,10 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class Dashboard extends DashboardQueryHandler implements Identifiable
+public class Dashboard extends DashboardQueryHandler implements Identifiable, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String PROPERTY_ID = "id";
 	public static final String PROPERTY_RENDER_CONTEXT = "renderContext";
 	public static final String PROPERTY_CHARTS = "charts";

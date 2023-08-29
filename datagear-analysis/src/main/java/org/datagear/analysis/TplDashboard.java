@@ -25,6 +25,8 @@ package org.datagear.analysis;
  */
 public class TplDashboard extends Dashboard
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String PROPERTY_TEMPLATE = "template";
 	public static final String PROPERTY_WIDGET = "widget";
 	
