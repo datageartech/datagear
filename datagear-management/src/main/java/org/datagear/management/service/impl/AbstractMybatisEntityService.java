@@ -577,5 +577,14 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 				return false;
 			return true;
 		}
+
+		/**
+		 * 注意：此类必须重写此方法，以支持可能的redis缓存配置
+		 */
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [namespace=" + namespace + ", id=" + id + "]";
+		}
 	}
 }

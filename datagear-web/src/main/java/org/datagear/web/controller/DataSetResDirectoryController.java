@@ -133,7 +133,7 @@ public class DataSetResDirectoryController extends AbstractController
 		boolean isShowDirectory = setIsShowDirectory(request, model);
 		
 		if(!isShowDirectory)
-			dataSetResDirectory.clearDirectory();
+			dataSetResDirectory.setDirectory(null);
 		
 		return "/dataSetResDirectory/dataSetResDirectory_form";
 	}
@@ -189,7 +189,7 @@ public class DataSetResDirectoryController extends AbstractController
 		{
 			List<DataSetResDirectory> items = pagingData.getItems();
 			for(DataSetResDirectory item : items)
-				item.clearDirectory();
+				item.setDirectory(null);
 		}
 		
 		return pagingData;

@@ -247,6 +247,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			sqlDataSetEntity.setSqlValidator(this.sqlDataSetSqlValidator);
 		}
 
+		if (entity instanceof DirectoryFileDataSetEntity)
+			((DirectoryFileDataSetEntity) entity).setDirectory(getDataSetDirectory(entity.getId()));
+
+		if (entity instanceof HttpDataSetEntity)
+			((HttpDataSetEntity) entity).setHttpClient(this.httpClient);
+
 		if (entity instanceof AbstractResolvableResourceDataSet<?>)
 			((AbstractResolvableResourceDataSet<?>) entity).setCache(this.dataSetResourceDataCache);
 
@@ -544,9 +550,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		JsonFileDataSetEntity entity = selectOneMybatis("getJsonFileDataSetEntityById", params);
 
-		if (entity != null)
-			entity.setDirectory(getDataSetDirectory(id));
-
 		return entity;
 	}
 
@@ -556,9 +559,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("id", id);
 
 		ExcelDataSetEntity entity = selectOneMybatis("getExcelDataSetEntityById", params);
-
-		if (entity != null)
-			entity.setDirectory(getDataSetDirectory(id));
 
 		return entity;
 	}
@@ -580,9 +580,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		CsvFileDataSetEntity entity = selectOneMybatis("getCsvFileDataSetEntityById", params);
 
-		if (entity != null)
-			entity.setDirectory(getDataSetDirectory(id));
-
 		return entity;
 	}
 
@@ -592,9 +589,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("id", id);
 
 		HttpDataSetEntity entity = selectOneMybatis("getHttpDataSetEntityById", params);
-
-		if (entity != null)
-			entity.setHttpClient(this.httpClient);
 
 		return entity;
 	}

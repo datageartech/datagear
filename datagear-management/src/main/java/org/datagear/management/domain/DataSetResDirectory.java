@@ -148,17 +148,4 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 
 		return entity;
 	}
-	
-	public void clearDirectory()
-	{
-		this.directory = null;
-	}
-	
-	public static void clearDirectory(DataSetResDirectory dsr)
-	{
-		if(dsr == null)
-			return;
-		
-		dsr.clearDirectory();
-	}
 }

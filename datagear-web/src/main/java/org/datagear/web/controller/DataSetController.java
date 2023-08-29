@@ -40,6 +40,7 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.ProfileDataSet;
@@ -1021,11 +1022,16 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			DirectoryFileDataSetEntity dfDataSetEntity = ((DirectoryFileDataSetEntity) entity);
 			dfDataSetEntity.setDirectory(null);
-			DataSetResDirectory.clearDirectory(dfDataSetEntity.getDataSetResDirectory());
+			DataSetResDirectory dataSetResDirectory = dfDataSetEntity.getDataSetResDirectory();
+			if (dataSetResDirectory != null)
+				dataSetResDirectory.setDirectory(null);
 		}
 		
 		if(entity instanceof HttpDataSetEntity)
 			((HttpDataSetEntity) entity).setHttpClient(null);
+
+		if (entity instanceof AbstractResolvableResourceDataSet<?>)
+			((AbstractResolvableResourceDataSet<?>) entity).setCache(null);
 	}
 
 	/**
