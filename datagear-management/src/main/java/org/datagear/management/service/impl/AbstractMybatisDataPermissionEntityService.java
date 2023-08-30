@@ -39,6 +39,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
+import org.datagear.util.cache.CollectionCacheValue;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -57,9 +58,17 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	private Cache permissionCache = null;
 
 	/**
-	 * 查询操作时缓存权限数目。
+	 * 查询操作时缓存权限的记录数目。
+	 * <p>
+	 * 默认不开启了，影响查询性能，而且缓存价值也不大。
+	 * </p>
 	 */
-	private int permissionCacheCountForQuery = 10;
+	private int permissionCacheCountForQuery = 0;
+
+	/**
+	 * 每条记录权限缓存存储的最多用户权限数。
+	 */
+	private int entityUserPermissionCacheCount = 50;
 
 	public AbstractMybatisDataPermissionEntityService()
 	{
@@ -108,6 +117,16 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	public void setPermissionCacheCountForQuery(int permissionCacheCountForQuery)
 	{
 		this.permissionCacheCountForQuery = permissionCacheCountForQuery;
+	}
+
+	public int getEntityUserPermissionCacheCount()
+	{
+		return entityUserPermissionCacheCount;
+	}
+
+	public void setEntityUserPermissionCacheCount(int entityUserPermissionCacheCount)
+	{
+		this.entityUserPermissionCacheCount = entityUserPermissionCacheCount;
 	}
 
 	@Override
@@ -489,7 +508,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (upcv == null)
 			upcv = new UserIdPermissionCacheValue();
 
-		upcv.putPermission(userId, permission);
+		upcv.add(new UserIdPermission(userId, permission), this.entityUserPermissionCacheCount);
 
 		// 注意：无论upcv之前是否存在于缓存，这里都应再次执行存入缓存操作
 		this.permissionCache.put(key, upcv);
@@ -665,72 +684,40 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class UserIdPermissionCacheValue implements Serializable
+	public static class UserIdPermissionCacheValue extends CollectionCacheValue<UserIdPermission>
 	{
 		private static final long serialVersionUID = 1L;
-
-		private List<UserIdPermission> userIdPermissions = new ArrayList<>();
-
-		private int maxSize = 100;
 
 		public UserIdPermissionCacheValue()
 		{
 			super();
 		}
 
-		public List<UserIdPermission> getUserIdPermissions()
+		public Integer getPermission(String userId)
 		{
-			return userIdPermissions;
-		}
-
-		public void setUserIdPermissions(List<UserIdPermission> userIdPermissions)
-		{
-			this.userIdPermissions = userIdPermissions;
-		}
-
-		public int getMaxSize()
-		{
-			return maxSize;
-		}
-
-		public void setMaxSize(int maxSize)
-		{
-			this.maxSize = maxSize;
-		}
-
-		public synchronized Integer getPermission(String userId)
-		{
-			int idx = findByUserId(userId);
-			return (idx < 0 ? null : this.userIdPermissions.get(idx).getPermission());
-		}
-
-		public synchronized void putPermission(String userId, Integer permission)
-		{
-			int idx = findByUserId(userId);
-
-			if (idx >= 0)
-				this.userIdPermissions.remove(idx);
-
-			this.userIdPermissions.add(new UserIdPermission(userId, permission));
-
-			while (this.userIdPermissions.size() > this.maxSize)
-				this.userIdPermissions.remove(0);
-		}
-
-		protected int findByUserId(String userId)
-		{
-			for (int i = 0, len = this.userIdPermissions.size(); i < len; i++)
+			UserIdPermission up = find(t ->
 			{
-				if (StringUtil.isEquals(this.userIdPermissions.get(i).getUserId(), userId))
-					return i;
-			}
+				return StringUtil.isEquals(userId, t.getUserId());
+			});
 
-			return -1;
+			return (up == null ? null : up.getPermission());
 		}
 
-		public synchronized void clear()
+		/**
+		 * 添加。
+		 * <p>
+		 * 注意：执行此操作后应执行存入缓存操作。
+		 * </p>
+		 * 
+		 * @param up
+		 * @param maxSize
+		 */
+		public void add(UserIdPermission up, int maxSize)
 		{
-			this.userIdPermissions.clear();
+			add(up, (t) ->
+			{
+				return StringUtil.isEquals(up.getUserId(), t.getUserId());
+			}, maxSize);
 		}
 	}
 

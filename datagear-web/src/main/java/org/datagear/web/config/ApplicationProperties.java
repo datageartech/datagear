@@ -197,6 +197,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${poi.zipSecureFile.minInflateRatio}")
 	private String poiZipSecureFileMinInflateRatio = "";
 
+	/** 每条记录权限缓存存储的最多用户权限数 */
+	@Value("${entityUserPermissionCacheCount}")
+	private int entityUserPermissionCacheCount;
+
 	/** SQL数据集的SQL关键字黑名单 */
 	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
 
@@ -627,6 +631,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setPoiZipSecureFileMinInflateRatio(String poiZipSecureFileMinInflateRatio)
 	{
 		this.poiZipSecureFileMinInflateRatio = poiZipSecureFileMinInflateRatio;
+	}
+
+	public int getEntityUserPermissionCacheCount()
+	{
+		return entityUserPermissionCacheCount;
+	}
+
+	protected void setEntityUserPermissionCacheCount(int entityUserPermissionCacheCount)
+	{
+		this.entityUserPermissionCacheCount = entityUserPermissionCacheCount;
 	}
 
 	public Map<String, String> getSqlDataSetInvalidSqlKeywords()

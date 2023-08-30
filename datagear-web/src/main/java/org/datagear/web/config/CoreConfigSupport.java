@@ -1128,8 +1128,10 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 			if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 			{
-				((AbstractMybatisDataPermissionEntityService<?, ?>) es)
-						.setPermissionCache(getCache(cacheManager, es.getClass().getName() + "PermissionCache"));
+				AbstractMybatisDataPermissionEntityService<?, ?> dpes = (AbstractMybatisDataPermissionEntityService<?, ?>) es;
+
+				dpes.setPermissionCache(getCache(cacheManager, es.getClass().getName() + "PermissionCache"));
+				dpes.setEntityUserPermissionCacheCount(getApplicationProperties().getEntityUserPermissionCacheCount());
 			}
 		}
 
