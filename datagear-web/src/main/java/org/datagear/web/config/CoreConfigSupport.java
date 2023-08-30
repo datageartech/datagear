@@ -139,8 +139,8 @@ import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
+import org.datagear.web.util.SchemaTableCache;
 import org.datagear.web.util.SqlDriverChecker;
-import org.datagear.web.util.TableCache;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
 import org.datagear.web.util.accesslatch.IpLoginLatch;
@@ -537,10 +537,12 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return bean;
 	}
 
-	@Bean(initMethod = "init")
-	public TableCache tableCache()
+	@Bean
+	public SchemaTableCache schemaTableCache()
 	{
-		TableCache bean = new TableCache();
+		SchemaTableCache bean = new SchemaTableCache();
+		bean.setTableCacheMaxLength(getApplicationProperties().getSchemaTableCacheMaxLength());
+
 		return bean;
 	}
 
@@ -689,7 +691,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		DataSetEntityServiceImpl bean = createDataSetEntityServiceImpl();
 		bean.setSqlDataSetSqlValidator(this.sqlDataSetSqlValidator());
-		bean.setDataSetCacheDataMaxLength(getApplicationProperties().getDataSetCacheDataMaxLength());
+		bean.setDataSetCacheMaxLength(getApplicationProperties().getDataSetCacheMaxLength());
 
 		return bean;
 	}
@@ -1131,16 +1133,18 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 			{
 				AbstractMybatisDataPermissionEntityService<?, ?> dpes = (AbstractMybatisDataPermissionEntityService<?, ?>) es;
 
-				dpes.setPermissionCache(getCache(cacheManager, es.getClass().getName() + "PermissionCache"));
-				dpes.setEntityUserPermissionCacheCount(getApplicationProperties().getEntityUserPermissionCacheCount());
+				dpes.setPermissionCache(getCache(cacheManager, es.getClass(), "Permission"));
+				dpes.setPermissionCacheMaxLength(getApplicationProperties().getPermissionCacheMaxLength());
 			}
 		}
+
+		this.schemaTableCache().setCache(getCache(cacheManager, SchemaTableCache.class));
 
 		DataSetEntityService dataSetEntityService = this.dataSetEntityService();
 		if (dataSetEntityService instanceof DataSetEntityServiceImpl)
 		{
 			((DataSetEntityServiceImpl) dataSetEntityService).setDataSetResourceDataCache(
-					getCache(cacheManager, DataSetEntityService.class.getName() + "DsrdCache"));
+					getCache(cacheManager, DataSetEntityService.class, "DsResData"));
 		}
 
 		Map<String, HtmlTplDashboardWidgetHtmlRenderer> renderers = context
@@ -1172,18 +1176,40 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 	/**
 	 * 创建{@linkplain Cache}。
+	 * <P>
+	 * 使用{@linkplain Class#getSimpleName()}加{@code "Cache"}作为缓存名。
+	 * </p>
 	 * 
+	 * @param cacheManager
 	 * @param cacheNameClass
 	 * @return
 	 */
 	protected Cache getCache(CacheManager cacheManager, Class<?> cacheNameClass)
 	{
-		return getCache(cacheManager, cacheNameClass.getName());
+		return getCache(cacheManager, cacheNameClass, null);
+	}
+
+	/**
+	 * 创建{@linkplain Cache}。
+	 * <P>
+	 * 使用{@linkplain Class#getSimpleName()}加{@code suffix}（可选）加{@code "Cache"}作为缓存名。
+	 * </p>
+	 * 
+	 * @param cacheManager
+	 * @param cacheNameClass
+	 * @param suffix
+	 *            允许{@code null}
+	 * @return
+	 */
+	protected Cache getCache(CacheManager cacheManager, Class<?> cacheNameClass, String suffix)
+	{
+		return getCache(cacheManager, cacheNameClass.getSimpleName() + (suffix == null ? "" : suffix) + "Cache");
 	}
 
 	/**
 	 * 创建{@linkplain Cache}。
 	 * 
+	 * @param cacheManager
 	 * @param name
 	 * @return
 	 */
@@ -1194,13 +1220,32 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 	/**
 	 * 获取进程内{@linkplain Cache}。
+	 * <P>
+	 * 使用{@linkplain Class#getSimpleName()}加{@code "Cache"}作为缓存名。
+	 * </p>
 	 * 
 	 * @param cacheNameClass
 	 * @return
 	 */
 	protected Cache getLocalCache(Class<?> cacheNameClass)
 	{
-		return getLocalCache(cacheNameClass.getName());
+		return getLocalCache(cacheNameClass, null);
+	}
+
+	/**
+	 * 获取进程内{@linkplain Cache}。
+	 * <P>
+	 * 使用{@linkplain Class#getSimpleName()}加{@code suffix}（可选）加{@code "Cache"}作为缓存名。
+	 * </p>
+	 * 
+	 * @param cacheNameClass
+	 * @param suffix
+	 *            允许{@code null}
+	 * @return
+	 */
+	protected Cache getLocalCache(Class<?> cacheNameClass, String suffix)
+	{
+		return getLocalCache(cacheNameClass.getSimpleName() + (suffix == null ? "" : suffix) + "Cache");
 	}
 
 	/**

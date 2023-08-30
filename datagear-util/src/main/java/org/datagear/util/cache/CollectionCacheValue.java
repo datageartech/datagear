@@ -68,17 +68,6 @@ public class CollectionCacheValue<T extends Serializable> implements Serializabl
 	}
 
 	/**
-	 * 清空。
-	 * <p>
-	 * 注意：执行此操作后应执行存入缓存操作。
-	 * </p>
-	 */
-	public synchronized void clear()
-	{
-		this.values.clear();
-	}
-
-	/**
 	 * 添加。
 	 * <p>
 	 * 注意：执行此操作后应执行存入缓存操作。
@@ -93,11 +82,7 @@ public class CollectionCacheValue<T extends Serializable> implements Serializabl
 	public synchronized void add(T value, Predicate<T> removePredicate, int maxSize)
 	{
 		if (removePredicate != null)
-		{
-			int idx = doFindIndex(removePredicate);
-			if (idx >= 0)
-				this.values.remove(idx);
-		}
+			doRemove(removePredicate);
 
 		this.values.add(value);
 
@@ -106,6 +91,41 @@ public class CollectionCacheValue<T extends Serializable> implements Serializabl
 			while (this.values.size() > maxSize)
 				this.values.remove(0);
 		}
+	}
+
+	/**
+	 * 移除一个匹配项。
+	 * <p>
+	 * 注意：执行此操作后应执行存入缓存操作。
+	 * </p>
+	 * 
+	 * @param removePredicate
+	 * @return 可能{@code null}，移除项
+	 */
+	public synchronized T remove(Predicate<T> removePredicate)
+	{
+		return doRemove(removePredicate);
+	}
+
+	/**
+	 * 清空。
+	 * <p>
+	 * 注意：执行此操作后应执行存入缓存操作。
+	 * </p>
+	 */
+	public synchronized void clear()
+	{
+		this.values.clear();
+	}
+
+	protected T doRemove(Predicate<T> removePredicate)
+	{
+		int idx = doFindIndex(removePredicate);
+
+		if (idx >= 0)
+			return this.values.remove(idx);
+		else
+			return null;
 	}
 
 	protected int doFindIndex(Predicate<T> predicate)

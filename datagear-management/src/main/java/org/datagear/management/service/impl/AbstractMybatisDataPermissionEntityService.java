@@ -68,7 +68,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	/**
 	 * 每条记录权限缓存存储的最多用户权限数。
 	 */
-	private int entityUserPermissionCacheCount = 50;
+	private int permissionCacheMaxLength = 10;
 
 	public AbstractMybatisDataPermissionEntityService()
 	{
@@ -119,14 +119,14 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		this.permissionCacheCountForQuery = permissionCacheCountForQuery;
 	}
 
-	public int getEntityUserPermissionCacheCount()
+	public int getPermissionCacheMaxLength()
 	{
-		return entityUserPermissionCacheCount;
+		return permissionCacheMaxLength;
 	}
 
-	public void setEntityUserPermissionCacheCount(int entityUserPermissionCacheCount)
+	public void setPermissionCacheMaxLength(int permissionCacheMaxLength)
 	{
-		this.entityUserPermissionCacheCount = entityUserPermissionCacheCount;
+		this.permissionCacheMaxLength = permissionCacheMaxLength;
 	}
 
 	@Override
@@ -505,10 +505,11 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		ValueWrapper valueWrapper = this.permissionCache.get(key);
 		UserIdPermissionCacheValue upcv = (valueWrapper == null ? null
 				: (UserIdPermissionCacheValue) valueWrapper.get());
+
 		if (upcv == null)
 			upcv = new UserIdPermissionCacheValue();
 
-		upcv.add(new UserIdPermission(userId, permission), this.entityUserPermissionCacheCount);
+		upcv.add(new UserIdPermission(userId, permission), this.permissionCacheMaxLength);
 
 		// 注意：无论upcv之前是否存在于缓存，这里都应再次执行存入缓存操作
 		this.permissionCache.put(key, upcv);

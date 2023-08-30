@@ -45,7 +45,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	private transient Cache cache = null;
 
 	/** 缓存数据的最大条目数 */
-	private int cacheDataMaxLength = 10000;
+	private int dataCacheMaxLength = 500;
 
 	public AbstractResolvableResourceDataSet()
 	{
@@ -72,14 +72,14 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		this.cache = cache;
 	}
 
-	public int getCacheDataMaxLength()
+	public int getDataCacheMaxLength()
 	{
-		return cacheDataMaxLength;
+		return dataCacheMaxLength;
 	}
 
-	public void setCacheDataMaxLength(int cacheDataMaxLength)
+	public void setDataCacheMaxLength(int dataCacheMaxLength)
 	{
-		this.cacheDataMaxLength = cacheDataMaxLength;
+		this.dataCacheMaxLength = dataCacheMaxLength;
 	}
 
 	/**
@@ -171,7 +171,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		if (this.cache == null)
 			return false;
 
-		if (data != null && data.dataSize() > this.cacheDataMaxLength)
+		if (data != null && data.dataSize() > this.dataCacheMaxLength)
 			return false;
 
 		this.cache.put(resource, data);

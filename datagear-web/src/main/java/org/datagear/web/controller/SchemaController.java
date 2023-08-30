@@ -165,7 +165,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
 				&& (!StringUtil.isEquals(schema.getUrl(), old.getUrl()) || !StringUtil.isEquals(schema.getUser(), old.getUser())))
-			getTableCache().invalidate(schema.getId());
+			getSchemaTableCache().invalidate(schema.getId());
 
 		return optSuccessDataResponseEntity(request, schema);
 	}
@@ -197,7 +197,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 			// 清除缓存
 			if (deleted)
-				getTableCache().invalidate(id);
+				getSchemaTableCache().invalidate(id);
 		}
 
 		return optSuccessResponseEntity(request);
@@ -342,7 +342,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			@RequestParam(value = "reload", required = false) Boolean forceReload) throws Throwable
 	{
 		if (Boolean.TRUE.equals(forceReload))
-			getTableCache().invalidate(schemaId, tableName);
+			getSchemaTableCache().invalidate(schemaId, tableName);
 
 		ReturnSchemaConnTableExecutor<Table> executor = new ReturnSchemaConnTableExecutor<Table>(request, response,
 				springModel, schemaId, tableName, true)

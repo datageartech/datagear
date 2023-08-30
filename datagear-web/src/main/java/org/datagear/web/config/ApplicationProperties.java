@@ -198,12 +198,16 @@ public abstract class ApplicationProperties implements Serializable
 	private String poiZipSecureFileMinInflateRatio = "";
 
 	/** 每条记录权限缓存存储的最多用户权限数 */
-	@Value("${entityUserPermissionCacheCount}")
-	private int entityUserPermissionCacheCount;
+	@Value("${permissionCacheMaxLength}")
+	private int permissionCacheMaxLength;
+
+	/** 数据源缓存表信息最大个数 */
+	@Value("${schemaTableCacheMaxLength}")
+	private int schemaTableCacheMaxLength;
 
 	/** 数据集缓存数据的最大条目数 */
-	@Value("${dataSetCacheDataMaxLength}")
-	private int dataSetCacheDataMaxLength;
+	@Value("${dataSetCacheMaxLength}")
+	private int dataSetCacheMaxLength;
 
 	/** SQL数据集的SQL关键字黑名单 */
 	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
@@ -637,24 +641,34 @@ public abstract class ApplicationProperties implements Serializable
 		this.poiZipSecureFileMinInflateRatio = poiZipSecureFileMinInflateRatio;
 	}
 
-	public int getEntityUserPermissionCacheCount()
+	public int getPermissionCacheMaxLength()
 	{
-		return entityUserPermissionCacheCount;
+		return permissionCacheMaxLength;
 	}
 
-	protected void setEntityUserPermissionCacheCount(int entityUserPermissionCacheCount)
+	public void setPermissionCacheMaxLength(int permissionCacheMaxLength)
 	{
-		this.entityUserPermissionCacheCount = entityUserPermissionCacheCount;
+		this.permissionCacheMaxLength = permissionCacheMaxLength;
 	}
 
-	public int getDataSetCacheDataMaxLength()
+	public int getSchemaTableCacheMaxLength()
 	{
-		return dataSetCacheDataMaxLength;
+		return schemaTableCacheMaxLength;
 	}
 
-	protected void setDataSetCacheDataMaxLength(int dataSetCacheDataMaxLength)
+	protected void setSchemaTableCacheMaxLength(int schemaTableCacheMaxLength)
 	{
-		this.dataSetCacheDataMaxLength = dataSetCacheDataMaxLength;
+		this.schemaTableCacheMaxLength = schemaTableCacheMaxLength;
+	}
+
+	public int getDataSetCacheMaxLength()
+	{
+		return dataSetCacheMaxLength;
+	}
+
+	protected void setDataSetCacheMaxLength(int dataSetCacheMaxLength)
+	{
+		this.dataSetCacheMaxLength = dataSetCacheMaxLength;
 	}
 
 	public Map<String, String> getSqlDataSetInvalidSqlKeywords()

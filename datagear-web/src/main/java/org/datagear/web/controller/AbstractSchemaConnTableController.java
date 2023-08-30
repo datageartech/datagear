@@ -24,7 +24,7 @@ import org.datagear.management.domain.Schema;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.NoColumnDefinedException;
-import org.datagear.web.util.TableCache;
+import org.datagear.web.util.SchemaTableCache;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -39,7 +39,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 	private DBMetaResolver dbMetaResolver;
 
 	@Autowired
-	private TableCache tableCache;
+	private SchemaTableCache schemaTableCache;
 
 	public AbstractSchemaConnTableController()
 	{
@@ -56,14 +56,14 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		this.dbMetaResolver = dbMetaResolver;
 	}
 
-	public TableCache getTableCache()
+	public SchemaTableCache getSchemaTableCache()
 	{
-		return tableCache;
+		return schemaTableCache;
 	}
 
-	public void setTableCache(TableCache tableCache)
+	public void setSchemaTableCache(SchemaTableCache schemaTableCache)
 	{
-		this.tableCache = tableCache;
+		this.schemaTableCache = schemaTableCache;
 	}
 
 	/**
@@ -97,11 +97,11 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		{
 			springModel.addAttribute("tableName", this.tableName);
 
-			Table table = getTableCache().get(schema.getId(), this.tableName);
+			Table table = getSchemaTableCache().get(schema.getId(), this.tableName);
 			if (table == null)
 			{
 				table = getDbMetaResolver().getTable(getConnection(), this.tableName);
-				getTableCache().put(schema.getId(), table);
+				getSchemaTableCache().put(schema.getId(), table);
 			}
 
 			if (!table.hasColumn())
