@@ -89,6 +89,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private Cache dataSetResourceDataCache = null;
 
+	/** 数据集缓存数据的最大条目数 */
+	private int dataSetCacheDataMaxLength = 10000;
+
 	private SqlValidator sqlDataSetSqlValidator;
 
 	public DataSetEntityServiceImpl()
@@ -211,6 +214,16 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.dataSetResourceDataCache = dataSetResourceDataCache;
 	}
 
+	public int getDataSetCacheDataMaxLength()
+	{
+		return dataSetCacheDataMaxLength;
+	}
+
+	public void setDataSetCacheDataMaxLength(int dataSetCacheDataMaxLength)
+	{
+		this.dataSetCacheDataMaxLength = dataSetCacheDataMaxLength;
+	}
+
 	@Override
 	public SqlValidator getSqlDataSetSqlValidator()
 	{
@@ -254,7 +267,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			((HttpDataSetEntity) entity).setHttpClient(this.httpClient);
 
 		if (entity instanceof AbstractResolvableResourceDataSet<?>)
-			((AbstractResolvableResourceDataSet<?>) entity).setCache(this.dataSetResourceDataCache);
+		{
+			AbstractResolvableResourceDataSet<?> rds = (AbstractResolvableResourceDataSet<?>) entity;
+			rds.setCache(this.dataSetResourceDataCache);
+			rds.setCacheDataMaxLength(this.dataSetCacheDataMaxLength);
+		}
 
 		return entity;
 	}

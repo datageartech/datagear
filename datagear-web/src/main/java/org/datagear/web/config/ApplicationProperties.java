@@ -201,6 +201,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${entityUserPermissionCacheCount}")
 	private int entityUserPermissionCacheCount;
 
+	/** 数据集缓存数据的最大条目数 */
+	@Value("${dataSetCacheDataMaxLength}")
+	private int dataSetCacheDataMaxLength;
+
 	/** SQL数据集的SQL关键字黑名单 */
 	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
 
@@ -641,6 +645,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setEntityUserPermissionCacheCount(int entityUserPermissionCacheCount)
 	{
 		this.entityUserPermissionCacheCount = entityUserPermissionCacheCount;
+	}
+
+	public int getDataSetCacheDataMaxLength()
+	{
+		return dataSetCacheDataMaxLength;
+	}
+
+	protected void setDataSetCacheDataMaxLength(int dataSetCacheDataMaxLength)
+	{
+		this.dataSetCacheDataMaxLength = dataSetCacheDataMaxLength;
 	}
 
 	public Map<String, String> getSqlDataSetInvalidSqlKeywords()

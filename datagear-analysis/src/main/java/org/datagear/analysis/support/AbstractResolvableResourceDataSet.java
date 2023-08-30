@@ -18,6 +18,7 @@
 package org.datagear.analysis.support;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,7 +42,10 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 {
 	private static final long serialVersionUID = 1L;
 
-	private Cache cache = null;
+	private transient Cache cache = null;
+
+	/** 缓存数据的最大条目数 */
+	private int cacheDataMaxLength = 10000;
 
 	public AbstractResolvableResourceDataSet()
 	{
@@ -66,6 +70,16 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	public void setCache(Cache cache)
 	{
 		this.cache = cache;
+	}
+
+	public int getCacheDataMaxLength()
+	{
+		return cacheDataMaxLength;
+	}
+
+	public void setCacheDataMaxLength(int cacheDataMaxLength)
+	{
+		this.cacheDataMaxLength = cacheDataMaxLength;
 	}
 
 	/**
@@ -116,16 +130,52 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		if (!resource.isIdempotent() || this.cache == null)
 			return resolveResourceData(resource);
 
-		ValueWrapper vw = this.cache.get(resource);
+		ValueWrapper vw = getCacheResourceData(resource);
 		ResourceData rd = (vw == null ? null : (ResourceData) vw.get());
 
 		if (rd != null)
 			return rd;
 
 		rd = resolveResourceData(resource);
-		this.cache.put(resource, rd);
+
+		setCacheResourceData(resource, rd);
 
 		return rd;
+	}
+
+	/**
+	 * 从缓存中获取数据。
+	 * 
+	 * @param resource
+	 * @return 可能为{@code null}
+	 * @throws Throwable
+	 */
+	protected ValueWrapper getCacheResourceData(T resource) throws Throwable
+	{
+		if (this.cache == null)
+			return null;
+
+		return this.cache.get(resource);
+	}
+
+	/**
+	 * 将数据存入缓存。
+	 * 
+	 * @param resource
+	 * @param data
+	 * @return
+	 * @throws Throwable
+	 */
+	protected boolean setCacheResourceData(T resource, ResourceData data) throws Throwable
+	{
+		if (this.cache == null)
+			return false;
+
+		if (data != null && data.dataSize() > this.cacheDataMaxLength)
+			return false;
+
+		this.cache.put(resource, data);
+		return true;
 	}
 
 	/**
@@ -291,6 +341,11 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			return data;
 		}
 
+		public void setData(Object data)
+		{
+			this.data = data;
+		}
+
 		/**
 		 * 获取{@linkplain DataSetProperty}列表。
 		 * <p>
@@ -309,9 +364,23 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			this.properties = (properties == null ? Collections.emptyList() : Collections.unmodifiableList(properties));
 		}
 
-		public void setData(Object data)
+		/**
+		 * 获取当{@linkplain #getData()}是数组、集合时的长度。
+		 * 
+		 * @return {@code -1}表示不是数组、集合
+		 */
+		public int dataSize()
 		{
-			this.data = data;
+			if (this.data == null)
+				return -1;
+
+			if (this.data instanceof Collection<?>)
+				return ((Collection<?>) this.data).size();
+
+			if (this.data instanceof Object[])
+				return ((Object[]) this.data).length;
+
+			return -1;
 		}
 	}
 }
