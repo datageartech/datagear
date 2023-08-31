@@ -28,6 +28,8 @@ import org.datagear.dataexchange.SubDataExchange;
  */
 public class SubDataExchangeMessage extends DataExchangeMessage
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 子数据交换标识 */
 	private String subDataExchangeId;
 

@@ -351,6 +351,8 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 */
 	public static class Start extends DataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public Start()
 		{
 			super();
@@ -365,6 +367,8 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 */
 	public static class Exception extends DataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		private String content;
 
 		public Exception()
@@ -391,6 +395,8 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 
 	public static class Success extends DataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public Success()
 		{
 			super();
@@ -405,6 +411,8 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 */
 	public static class Finish extends DataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		private long duration;
 
 		public Finish()

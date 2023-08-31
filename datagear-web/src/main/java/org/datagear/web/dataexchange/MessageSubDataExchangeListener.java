@@ -288,6 +288,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubStart extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = SubSubmitSuccess.ORDER + 1;
 
 		public SubStart()
@@ -309,6 +311,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubException extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = SubStart.ORDER + 2;
 
 		private String content;
@@ -356,6 +360,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubSuccess extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = SubStart.ORDER + 2;
 
 		private long duration;
@@ -390,6 +396,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubFinish extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = SubSuccess.ORDER + 1;
 
 		public SubFinish()
@@ -411,6 +419,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubExchangingWithCount extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = SubStart.ORDER + 1;
 
 		private int successCount;
@@ -458,6 +468,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubExceptionWithCount extends SubException
 	{
+		private static final long serialVersionUID = 1L;
+
 		private ExceptionResolve exceptionResolve;
 
 		private int successCount;
@@ -517,6 +529,8 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 */
 	public static class SubSuccessWithCount extends SubSuccess
 	{
+		private static final long serialVersionUID = 1L;
+
 		private int successCount;
 
 		private int failCount;

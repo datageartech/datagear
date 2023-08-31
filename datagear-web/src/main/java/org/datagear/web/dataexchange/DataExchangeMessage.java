@@ -17,14 +17,18 @@
 
 package org.datagear.web.dataexchange;
 
+import java.io.Serializable;
+
 /**
  * 数据交换消息。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class DataExchangeMessage
+public abstract class DataExchangeMessage implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String type;
 
 	public DataExchangeMessage()

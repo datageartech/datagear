@@ -17,6 +17,7 @@
 
 package org.datagear.persistence.support;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.datagear.meta.Table;
@@ -28,8 +29,10 @@ import org.datagear.persistence.Row;
  * @author datagear@163.com
  *
  */
-public class SqlSelectResult
+public class SqlSelectResult implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private String sql;
 
 	private Table table;

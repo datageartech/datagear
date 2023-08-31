@@ -1064,8 +1064,10 @@ public class SqlpadExecutionService extends PersistenceSupport
 		NONE
 	}
 
-	protected static abstract class MessageData
+	protected static abstract class MessageData implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		protected static final String TIME_PATTERN = "HH:mm:ss";
 
 		private String type;
@@ -1113,6 +1115,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	protected static class StartMessageData extends MessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "START";
 
 		private int sqlCount = 0;
@@ -1141,6 +1145,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	protected static class SqlSuccessMessageData extends MessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "SQLSUCCESS";
 
 		private SqlStatement sqlStatement;
@@ -1222,6 +1228,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	protected static class ExceptionMessageData extends MessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "EXCEPTION";
 
 		private String content;
@@ -1267,6 +1275,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	protected static class SQLExceptionMessageData extends ExceptionMessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "SQLEXCEPTION";
 
 		private SqlStatement sqlStatement;
@@ -1311,6 +1321,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	protected static class SqlCommandMessageData extends MessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "SQLCOMMAND";
 
 		private SqlCommand sqlCommand;
@@ -1364,6 +1376,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	protected static class TextMessageData extends MessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "TEXT";
 		
 		public static final String TEXT_TYPE_WAIT_COR = "WAIT_COMMIT_OR_ROLLBACK";
@@ -1418,6 +1432,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 	
 	protected static class FinishMessageData extends MessageData
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final String TYPE = "FINISH";
 
 		private SQLExecutionStat sqlExecutionStat;

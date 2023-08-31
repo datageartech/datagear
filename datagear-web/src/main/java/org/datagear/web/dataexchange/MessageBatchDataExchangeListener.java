@@ -76,6 +76,8 @@ public class MessageBatchDataExchangeListener extends MessageDataExchangeListene
 	 */
 	public static class SubSubmitSuccess extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = 0;
 
 		public SubSubmitSuccess()
@@ -97,6 +99,8 @@ public class MessageBatchDataExchangeListener extends MessageDataExchangeListene
 	 */
 	public static class SubSubmitFail extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = 0;
 
 		public SubSubmitFail()
@@ -118,6 +122,8 @@ public class MessageBatchDataExchangeListener extends MessageDataExchangeListene
 	 */
 	public static class SubCancelSuccess extends SubDataExchangeMessage
 	{
+		private static final long serialVersionUID = 1L;
+
 		public static final int ORDER = SubSubmitSuccess.ORDER + 99;
 
 		public SubCancelSuccess()
