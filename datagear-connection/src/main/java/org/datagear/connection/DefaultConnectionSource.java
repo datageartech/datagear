@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -49,6 +50,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
+import com.github.benmanes.caffeine.cache.Scheduler;
 
 /**
  * 默认{@linkplain ConnectionSource}实现。
@@ -69,6 +71,9 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private PropertiesProcessor propertiesProcessor = null;
 
+	/** 内置数据源过期秒数 */
+	private int internalDsExpiredSeconds = 60 * 60 * 24;
+
 	private Cache<ConnectionIdentity, InternalDataSourceHolder> internalDataSourceCache;
 
 	private ConcurrentMap<String, PreferedDriverEntityResult> _urlPreferedDriverEntityMap = new ConcurrentHashMap<>();
@@ -82,10 +87,20 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	public DefaultConnectionSource(DriverEntityManager driverEntityManager)
 	{
+		this(driverEntityManager, null);
+	}
+
+	public DefaultConnectionSource(DriverEntityManager driverEntityManager, Integer internalDsExpiredSeconds)
+	{
 		super();
 		this.driverEntityManager = driverEntityManager;
+
+		if (internalDsExpiredSeconds != null)
+			this.internalDsExpiredSeconds = internalDsExpiredSeconds;
+
 		this.internalDataSourceCache = Caffeine.newBuilder().maximumSize(50)
-				.expireAfterAccess(60 * 24, TimeUnit.MINUTES)
+				.expireAfterAccess(this.internalDsExpiredSeconds, TimeUnit.SECONDS)
+				.scheduler(Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1)))
 				.removalListener(new DriverBasicDataSourceRemovalListener()).build();
 	}
 
@@ -122,6 +137,16 @@ public class DefaultConnectionSource implements ConnectionSource
 	protected Cache<ConnectionIdentity, InternalDataSourceHolder> getInternalDataSourceCache()
 	{
 		return this.internalDataSourceCache;
+	}
+
+	protected int getInternalDsExpiredSeconds()
+	{
+		return internalDsExpiredSeconds;
+	}
+
+	protected void setInternalDsExpiredSeconds(int internalDsExpiredSeconds)
+	{
+		this.internalDsExpiredSeconds = internalDsExpiredSeconds;
 	}
 
 	/**
