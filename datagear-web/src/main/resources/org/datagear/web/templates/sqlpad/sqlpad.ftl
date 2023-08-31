@@ -293,18 +293,18 @@
 	
 	po.messageType =
 	{
-		START: "START", //SqlpadExecutionService.StartMessageData
-		SQLSUCCESS: "SQLSUCCESS", //SqlpadExecutionService.SqlSuccessMessageData
-		EXCEPTION: "EXCEPTION", //SqlpadExecutionService.ExceptionMessageData
-		SQLEXCEPTION: "SQLEXCEPTION", //SqlpadExecutionService.SQLExceptionMessageData
-		SQLCOMMAND: "SQLCOMMAND", //SqlpadExecutionService.SqlCommandMessageData
-		TEXT: "TEXT", //SqlpadExecutionService.TextMessageData
-		FINISH: "FINISH" //SqlpadExecutionService.FinishMessageData
+		START: "StartMessage", //SqlpadExecutionService.StartMessage
+		SQLSUCCESS: "SqlSuccessMessage", //SqlpadExecutionService.SqlSuccessMessage
+		EXCEPTION: "ExceptionMessage", //SqlpadExecutionService.ExceptionMessage
+		SQLEXCEPTION: "SQLExceptionMessage", //SqlpadExecutionService.SQLExceptionMessage
+		SQLCOMMAND: "SqlCommandMessage", //SqlpadExecutionService.SqlCommandMessage
+		TEXT: "TextMessage", //SqlpadExecutionService.TextMessage
+		FINISH: "FinishMessage" //SqlpadExecutionService.FinishMessage
 	};
 	
 	po.textMessageTextType =
 	{
-		TEXT_TYPE_WAIT_COR: "WAIT_COMMIT_OR_ROLLBACK" //TextMessageData.TEXT_TYPE_WAIT_COR
+		TEXT_TYPE_WAIT_COR: "WAIT_COMMIT_OR_ROLLBACK" //SqlpadExecutionService.TextMessage.TEXT_TYPE_WAIT_COR
 	};
 	
 	po.msgsTabPanelId = $.uid("msgspanel");

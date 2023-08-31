@@ -25,6 +25,7 @@ import org.datagear.dataexchange.DataImportListener;
 import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.web.util.MessageChannel;
+import org.datagear.web.util.msg.Message;
 import org.springframework.context.MessageSource;
 
 /**
@@ -89,14 +90,14 @@ public class MessageSubDataImportListener extends MessageSubDataExchangeListener
 	}
 
 	@Override
-	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
+	protected Message buildExceptionMessage(DataExchangeException e)
 	{
 		return new SubExceptionWithCount(getSubDataExchangeId(), resolveDataExchangeExceptionI18n(e), evalDuration(),
 				this.exceptionResolve, this._successCount.intValue(), this._failCount.intValue());
 	}
 
 	@Override
-	protected DataExchangeMessage buildSuccessMessage()
+	protected Message buildSuccessMessage()
 	{
 		SubSuccessWithCount message = new SubSuccessWithCount(getSubDataExchangeId(), evalDuration(),
 				this._successCount.intValue(), this._failCount.intValue());

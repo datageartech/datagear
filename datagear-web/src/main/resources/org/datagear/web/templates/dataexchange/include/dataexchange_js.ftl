@@ -29,10 +29,10 @@ page_format_time.ftl
 	
 	po.DataExchangeMessageType =
 	{
-		Exception: "Exception", //MessageBatchDataExchangeListener.Exception
-		Finish: "Finish", //MessageBatchDataExchangeListener.Finish
-		Start: "Start", //MessageBatchDataExchangeListener.Start
-		Success: "Success", //MessageBatchDataExchangeListener.Success
+		Exception: "ExceptionMessage", //ExceptionMessage
+		Finish: "FinishMessage", //MessageBatchDataExchangeListener.FinishMessage
+		Start: "StartMessage", //StartMessage
+		Success: "SuccessMessage", //SuccessMessage
 		SubCancelSuccess: "SubCancelSuccess", //MessageBatchDataExchangeListener.SubCancelSuccess
 		SubException: "SubException", //MessageSubDataExchangeListener.SubException
 		SubExceptionWithCount: "SubExceptionWithCount", //MessageSubDataExchangeListener.SubExceptionWithCount

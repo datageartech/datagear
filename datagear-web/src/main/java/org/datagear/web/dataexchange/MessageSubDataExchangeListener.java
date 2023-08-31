@@ -31,6 +31,7 @@ import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.util.IOUtil;
 import org.datagear.web.dataexchange.MessageBatchDataExchangeListener.SubSubmitSuccess;
 import org.datagear.web.util.MessageChannel;
+import org.datagear.web.util.msg.Message;
 import org.springframework.context.MessageSource;
 
 /**
@@ -155,25 +156,25 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	}
 
 	@Override
-	protected DataExchangeMessage buildStartMessage()
+	protected Message buildStartMessage()
 	{
 		return new SubStart(this.subDataExchangeId);
 	}
 
 	@Override
-	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
+	protected Message buildExceptionMessage(DataExchangeException e)
 	{
 		return new SubException(this.subDataExchangeId, resolveDataExchangeExceptionI18n(e), evalDuration());
 	}
 
 	@Override
-	protected DataExchangeMessage buildSuccessMessage()
+	protected Message buildSuccessMessage()
 	{
 		return new SubSuccess(this.subDataExchangeId, evalDuration());
 	}
 
 	@Override
-	protected DataExchangeMessage buildFinishMessage()
+	protected Message buildFinishMessage()
 	{
 		return new SubFinish(this.subDataExchangeId);
 	}
@@ -201,7 +202,7 @@ public abstract class MessageSubDataExchangeListener extends MessageDataExchange
 	 * 
 	 * @return
 	 */
-	protected void sendExchangingMessage(DataExchangeMessage message)
+	protected void sendExchangingMessage(Message message)
 	{
 		sendMessage(message);
 		this._prevSendExchangingMessageTime = System.currentTimeMillis();

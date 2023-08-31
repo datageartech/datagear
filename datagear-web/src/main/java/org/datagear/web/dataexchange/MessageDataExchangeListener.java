@@ -33,6 +33,10 @@ import org.datagear.dataexchange.UnsupportedExchangeException;
 import org.datagear.dataexchange.support.IllegalJsonDataFormatException;
 import org.datagear.dataexchange.support.TableMismatchException;
 import org.datagear.web.util.MessageChannel;
+import org.datagear.web.util.msg.ExceptionMessage;
+import org.datagear.web.util.msg.Message;
+import org.datagear.web.util.msg.StartMessage;
+import org.datagear.web.util.msg.SuccessMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -154,17 +158,17 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	/**
 	 * 发送消息。
 	 * 
-	 * @param dataExchangeMessage
+	 * @param message
 	 */
-	protected void sendMessage(DataExchangeMessage dataExchangeMessage)
+	protected void sendMessage(Message message)
 	{
 		try
 		{
-			this.messageChannel.push(this.dataExchangeServerChannel, dataExchangeMessage);
+			this.messageChannel.push(this.dataExchangeServerChannel, message);
 		}
 		catch (Throwable t)
 		{
-			LOGGER.error("send message error", dataExchangeMessage);
+			LOGGER.error("Send message error", message);
 		}
 	}
 
@@ -307,9 +311,9 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * 
 	 * @return
 	 */
-	protected DataExchangeMessage buildStartMessage()
+	protected Message buildStartMessage()
 	{
-		return new Start();
+		return new StartMessage();
 	}
 
 	/**
@@ -318,9 +322,9 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * @param e
 	 * @return
 	 */
-	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
+	protected Message buildExceptionMessage(DataExchangeException e)
 	{
-		return new Exception(resolveDataExchangeExceptionI18n(e));
+		return new ExceptionMessage(resolveDataExchangeExceptionI18n(e));
 	}
 
 	/**
@@ -328,9 +332,9 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * 
 	 * @return
 	 */
-	protected DataExchangeMessage buildSuccessMessage()
+	protected Message buildSuccessMessage()
 	{
-		return new Success();
+		return new SuccessMessage();
 	}
 
 	/**
@@ -338,69 +342,9 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * 
 	 * @return
 	 */
-	protected DataExchangeMessage buildFinishMessage()
+	protected Message buildFinishMessage()
 	{
-		return new Finish(evalDuration());
-	}
-
-	/**
-	 * 数据交换开始消息。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class Start extends DataExchangeMessage
-	{
-		private static final long serialVersionUID = 1L;
-
-		public Start()
-		{
-			super();
-		}
-	}
-
-	/**
-	 * 数据交换异常消息。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class Exception extends DataExchangeMessage
-	{
-		private static final long serialVersionUID = 1L;
-
-		private String content;
-
-		public Exception()
-		{
-			super();
-		}
-
-		public Exception(String content)
-		{
-			super();
-			this.content = content;
-		}
-
-		public String getContent()
-		{
-			return content;
-		}
-
-		public void setContent(String content)
-		{
-			this.content = content;
-		}
-	}
-
-	public static class Success extends DataExchangeMessage
-	{
-		private static final long serialVersionUID = 1L;
-
-		public Success()
-		{
-			super();
-		}
+		return new FinishMessage(evalDuration());
 	}
 
 	/**
@@ -409,18 +353,18 @@ public abstract class MessageDataExchangeListener implements DataExchangeListene
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class Finish extends DataExchangeMessage
+	public static class FinishMessage extends org.datagear.web.util.msg.FinishMessage
 	{
 		private static final long serialVersionUID = 1L;
 
 		private long duration;
 
-		public Finish()
+		public FinishMessage()
 		{
 			super();
 		}
 
-		public Finish(long duration)
+		public FinishMessage(long duration)
 		{
 			super();
 			this.duration = duration;

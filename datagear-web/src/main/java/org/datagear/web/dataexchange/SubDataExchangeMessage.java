@@ -19,6 +19,7 @@ package org.datagear.web.dataexchange;
 
 import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.SubDataExchange;
+import org.datagear.web.util.msg.Message;
 
 /**
  * 批量数据交换的子数据交换消息。
@@ -26,7 +27,7 @@ import org.datagear.dataexchange.SubDataExchange;
  * @author datagear@163.com
  *
  */
-public class SubDataExchangeMessage extends DataExchangeMessage
+public class SubDataExchangeMessage extends Message
 {
 	private static final long serialVersionUID = 1L;
 
