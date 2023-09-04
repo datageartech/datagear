@@ -1117,42 +1117,53 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 			aware.setAnalysisProjectAuthorizationListener(listener);
 	}
 
-	@SuppressWarnings("rawtypes")
+	/**
+	 * 初始化缓存相关服务类实例。
+	 * 
+	 * @param context
+	 */
 	protected void initCacheServices(ApplicationContext context)
 	{
 		CacheManager cacheManager = getCacheManager(context);
 
+		initAbstractMybatisEntityServiceCaches(context, cacheManager);
+		this.schemaTableCache().setCache(getCache(cacheManager, SchemaTableCache.class.getName()));
+		initHtmlTplDashboardWidgetHtmlRendererCaches(context, cacheManager);
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void initAbstractMybatisEntityServiceCaches(ApplicationContext context, CacheManager cacheManager)
+	{
 		Map<String, AbstractMybatisEntityService> entityServices = context
 				.getBeansOfType(AbstractMybatisEntityService.class);
 
-		for (AbstractMybatisEntityService es : entityServices.values())
+		for (Map.Entry<String, AbstractMybatisEntityService> entry : entityServices.entrySet())
 		{
-			es.setCache(getCache(cacheManager, es.getClass()));
+			// 缓存名应是固定不变的，避免多次重启导致占用过多缓存名
+			String cacheName = entry.getKey();
+
+			AbstractMybatisEntityService es = entry.getValue();
+			es.setCache(getCache(cacheManager, cacheName));
 
 			if (es instanceof AbstractMybatisDataPermissionEntityService<?, ?>)
 			{
 				AbstractMybatisDataPermissionEntityService<?, ?> dpes = (AbstractMybatisDataPermissionEntityService<?, ?>) es;
-
-				dpes.setPermissionCache(getCache(cacheManager, es.getClass(), "Permission"));
+				dpes.setPermissionCache(getCache(cacheManager, cacheName + "Permission"));
 				dpes.setPermissionCacheMaxLength(getApplicationProperties().getPermissionCacheMaxLength());
 			}
 		}
+	}
 
-		this.schemaTableCache().setCache(getCache(cacheManager, SchemaTableCache.class));
-
-		DataSetEntityService dataSetEntityService = this.dataSetEntityService();
-		if (dataSetEntityService instanceof DataSetEntityServiceImpl)
-		{
-			((DataSetEntityServiceImpl) dataSetEntityService).setDataSetResourceDataCache(
-					getCache(cacheManager, DataSetEntityService.class, "DsResData"));
-		}
-
-		Map<String, HtmlTplDashboardWidgetHtmlRenderer> renderers = context
+	protected void initHtmlTplDashboardWidgetHtmlRendererCaches(ApplicationContext context, CacheManager cacheManager)
+	{
+		Map<String, HtmlTplDashboardWidgetHtmlRenderer> dashboardRenderers = context
 				.getBeansOfType(HtmlTplDashboardWidgetHtmlRenderer.class);
-
-		for (HtmlTplDashboardWidgetHtmlRenderer renderer : renderers.values())
+		for (Map.Entry<String, HtmlTplDashboardWidgetHtmlRenderer> entry : dashboardRenderers.entrySet())
 		{
-			renderer.setCache(getLocalCache(renderer.getClass()));
+			// 缓存名应是固定不变的，避免多次重启导致占用过多缓存名
+			String cacheName = entry.getKey();
+
+			entry.getValue().setCache(getLocalCache(cacheName));
 		}
 	}
 
@@ -1176,38 +1187,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 
 	/**
 	 * 创建{@linkplain Cache}。
-	 * <P>
-	 * 使用{@linkplain Class#getSimpleName()}加{@code "Cache"}作为缓存名。
+	 * <p>
+	 * 此方法会自动添加{@code "dgcache"}前缀。
 	 * </p>
-	 * 
-	 * @param cacheManager
-	 * @param cacheNameClass
-	 * @return
-	 */
-	protected Cache getCache(CacheManager cacheManager, Class<?> cacheNameClass)
-	{
-		return getCache(cacheManager, cacheNameClass, null);
-	}
-
-	/**
-	 * 创建{@linkplain Cache}。
-	 * <P>
-	 * 使用{@linkplain Class#getSimpleName()}加{@code suffix}（可选）加{@code "Cache"}作为缓存名。
-	 * </p>
-	 * 
-	 * @param cacheManager
-	 * @param cacheNameClass
-	 * @param suffix
-	 *            允许{@code null}
-	 * @return
-	 */
-	protected Cache getCache(CacheManager cacheManager, Class<?> cacheNameClass, String suffix)
-	{
-		return getCache(cacheManager, cacheNameClass.getSimpleName() + (suffix == null ? "" : suffix) + "Cache");
-	}
-
-	/**
-	 * 创建{@linkplain Cache}。
 	 * 
 	 * @param cacheManager
 	 * @param name
@@ -1215,47 +1197,22 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	 */
 	protected Cache getCache(CacheManager cacheManager, String name)
 	{
+		name = "dgcache" + name;
 		return cacheManager.getCache(name);
 	}
 
 	/**
 	 * 获取进程内{@linkplain Cache}。
-	 * <P>
-	 * 使用{@linkplain Class#getSimpleName()}加{@code "Cache"}作为缓存名。
+	 * <p>
+	 * 此方法会自动添加{@code "dgcache"}前缀。
 	 * </p>
-	 * 
-	 * @param cacheNameClass
-	 * @return
-	 */
-	protected Cache getLocalCache(Class<?> cacheNameClass)
-	{
-		return getLocalCache(cacheNameClass, null);
-	}
-
-	/**
-	 * 获取进程内{@linkplain Cache}。
-	 * <P>
-	 * 使用{@linkplain Class#getSimpleName()}加{@code suffix}（可选）加{@code "Cache"}作为缓存名。
-	 * </p>
-	 * 
-	 * @param cacheNameClass
-	 * @param suffix
-	 *            允许{@code null}
-	 * @return
-	 */
-	protected Cache getLocalCache(Class<?> cacheNameClass, String suffix)
-	{
-		return getLocalCache(cacheNameClass.getSimpleName() + (suffix == null ? "" : suffix) + "Cache");
-	}
-
-	/**
-	 * 获取进程内{@linkplain Cache}。
 	 * 
 	 * @param name
 	 * @return
 	 */
 	protected Cache getLocalCache(String name)
 	{
+		name = "dgcache" + name;
 		return getLocalCacheManager().getCache(name);
 	}
 
