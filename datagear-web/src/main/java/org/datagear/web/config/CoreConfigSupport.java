@@ -1124,16 +1124,21 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	 */
 	protected void initCacheServices(ApplicationContext context)
 	{
-		CacheManager cacheManager = getCacheManager(context);
+		initAbstractMybatisEntityServiceCaches(context);
+		initHtmlTplDashboardWidgetHtmlRendererCaches(context);
+		initSchemaTableCache(context);
+	}
 
-		initAbstractMybatisEntityServiceCaches(context, cacheManager);
-		this.schemaTableCache().setCache(getCache(cacheManager, SchemaTableCache.class.getName()));
-		initHtmlTplDashboardWidgetHtmlRendererCaches(context, cacheManager);
+	protected void initSchemaTableCache(ApplicationContext context)
+	{
+		CacheManager cacheManager = getCacheManager(context);
+		this.schemaTableCache().setCache(getCache(cacheManager, SchemaTableCache.class.getSimpleName()));
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected void initAbstractMybatisEntityServiceCaches(ApplicationContext context, CacheManager cacheManager)
+	protected void initAbstractMybatisEntityServiceCaches(ApplicationContext context)
 	{
+		CacheManager cacheManager = getCacheManager(context);
 		Map<String, AbstractMybatisEntityService> entityServices = context
 				.getBeansOfType(AbstractMybatisEntityService.class);
 
@@ -1154,15 +1159,15 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		}
 	}
 
-	protected void initHtmlTplDashboardWidgetHtmlRendererCaches(ApplicationContext context, CacheManager cacheManager)
+	protected void initHtmlTplDashboardWidgetHtmlRendererCaches(ApplicationContext context)
 	{
 		Map<String, HtmlTplDashboardWidgetHtmlRenderer> dashboardRenderers = context
 				.getBeansOfType(HtmlTplDashboardWidgetHtmlRenderer.class);
+
 		for (Map.Entry<String, HtmlTplDashboardWidgetHtmlRenderer> entry : dashboardRenderers.entrySet())
 		{
 			// 缓存名应是固定不变的，避免多次重启导致占用过多缓存名
 			String cacheName = entry.getKey();
-
 			entry.getValue().setCache(getLocalCache(cacheName));
 		}
 	}
@@ -1186,7 +1191,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	/**
-	 * 创建{@linkplain Cache}。
+	 * 获取{@linkplain Cache}。
 	 * <p>
 	 * 此方法会自动添加{@code "dgcache"}前缀。
 	 * </p>
@@ -1212,16 +1217,26 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	 */
 	protected Cache getLocalCache(String name)
 	{
-		name = "dgcache" + name;
-		return getLocalCacheManager().getCache(name);
+		return getCache(getLocalCacheManager(), name);
 	}
 
+	/**
+	 * 获取系统级{@linkplain CacheManager}。
+	 * 
+	 * @param context
+	 * @return
+	 */
 	protected CacheManager getCacheManager(ApplicationContext context)
 	{
 		CacheManager cacheManager = context.getBean(CacheManager.class);
 		return cacheManager;
 	}
 
+	/**
+	 * 获取进程内{@linkplain CacheManager}。
+	 * 
+	 * @return
+	 */
 	protected CacheManager getLocalCacheManager()
 	{
 		// 本地缓存不能在构造方法种初始化，会出现Spring循环依赖问题
@@ -1261,7 +1276,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	 * @param context
 	 * @return
 	 */
-	public static List<CreateUserEntityService> getCreateUserEntityServices(ApplicationContext context)
+	protected List<CreateUserEntityService> getCreateUserEntityServices(ApplicationContext context)
 	{
 		Map<String, CreateUserEntityService> serviceMap = context.getBeansOfType(CreateUserEntityService.class);
 		List<CreateUserEntityService> serviceList = new ArrayList<CreateUserEntityService>(serviceMap.size());
