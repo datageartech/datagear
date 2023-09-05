@@ -95,17 +95,30 @@ public class PathDriverFactory
 
 	/**
 	 * 释放资源。
-	 * 
-	 * @throws PathDriverFactoryException
+	 * <p>
+	 * 此方法不会抛出任何异常。
+	 * </p>
 	 */
-	public synchronized void release() throws PathDriverFactoryException
+	public synchronized void release()
 	{
 		try
 		{
 			releaseJdbcDrivers();
 		}
-		finally
+		catch (Throwable t)
 		{
+			if (LOGGER.isErrorEnabled())
+				LOGGER.error("release error", t);
+		}
+
+		try
+		{
+			this.pathDriverClassLoader.close();
+		}
+		catch (Throwable t)
+		{
+			if (LOGGER.isErrorEnabled())
+				LOGGER.error("release error", t);
 		}
 	}
 

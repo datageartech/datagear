@@ -128,7 +128,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * 
 	 * @throws DriverEntityManagerException
 	 */
-	public void init() throws DriverEntityManagerException
+	public synchronized void init() throws DriverEntityManagerException
 	{
 		if (!this.rootDirectory.exists())
 			this.rootDirectory.mkdirs();
@@ -155,7 +155,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public boolean[] update(DriverEntity... driverEntities) throws DriverEntityManagerException
+	public synchronized boolean[] update(DriverEntity... driverEntities) throws DriverEntityManagerException
 	{
 		reloadDriverEntityFileIfModified();
 
@@ -273,7 +273,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public boolean deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException
+	public synchronized boolean deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
 		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 
@@ -281,7 +281,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public InputStream getDriverLibrary(DriverEntity driverEntity, String libraryName)
+	public synchronized InputStream getDriverLibrary(DriverEntity driverEntity, String libraryName)
 			throws DriverEntityManagerException
 	{
 		File file = getDriverLibraryFile(driverEntity.getId(), libraryName);
@@ -297,7 +297,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public void readDriverLibrary(DriverEntity driverEntity, String libraryName, OutputStream out)
+	public synchronized void readDriverLibrary(DriverEntity driverEntity, String libraryName, OutputStream out)
 			throws DriverEntityManagerException
 	{
 		File file = getDriverLibraryFile(driverEntity.getId(), libraryName);
@@ -320,7 +320,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public List<DriverLibraryInfo> getDriverLibraryInfos(DriverEntity driverEntity) throws DriverEntityManagerException
+	public synchronized List<DriverLibraryInfo> getDriverLibraryInfos(DriverEntity driverEntity)
+			throws DriverEntityManagerException
 	{
 		List<DriverLibraryInfo> driverLibraryInfos = new ArrayList<DriverLibraryInfo>();
 
@@ -346,7 +347,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
+	public synchronized Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
 		PathDriverFactory pathDriverFactory = getPathDriverFactoryNotNull(driverEntity);
 
@@ -354,7 +355,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public void release(DriverEntity driverEntity) throws DriverEntityManagerException
+	public synchronized void release(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
 		removePathDriverFactory(driverEntity);
 	}
@@ -364,15 +365,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		for (Map.Entry<String, PathDriverFactoryInfo> entry : this.pathDriverFactoryInfoMap.entrySet())
 		{
-			try
-			{
-				entry.getValue().getPathDriverFactory().release();
-			}
-			catch (Throwable t)
-			{
-				if (LOGGER.isErrorEnabled())
-					LOGGER.error("releaseAllDrivers", t);
-			}
+			entry.getValue().getPathDriverFactory().release();
 		}
 
 		this.pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
@@ -605,7 +598,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * @return
 	 * @throws PathDriverFactoryException
 	 */
-	protected synchronized PathDriverFactory getPathDriverFactoryNotNull(DriverEntity driverEntity)
+	protected PathDriverFactory getPathDriverFactoryNotNull(DriverEntity driverEntity)
 			throws PathDriverFactoryException
 	{
 		String driverEntityId = driverEntity.getId();
@@ -645,9 +638,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * 移除{@linkplain PathDriverFactory}。
 	 * 
 	 * @param driverEntity
-	 * @throws PathDriverFactoryException
 	 */
-	protected synchronized void removePathDriverFactory(DriverEntity driverEntity) throws PathDriverFactoryException
+	protected void removePathDriverFactory(DriverEntity driverEntity)
 	{
 		PathDriverFactoryInfo pathDriverFactoryInfo = this.pathDriverFactoryInfoMap.remove(driverEntity.getId());
 

@@ -18,8 +18,10 @@
 package org.datagear.connection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.Writer;
@@ -185,6 +187,7 @@ public class XmlDriverEntityManagerTest
 				Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver"));
 				assertNotNull(driver);
 				assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
+				assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
 			}
 
 			println();
@@ -197,6 +200,7 @@ public class XmlDriverEntityManagerTest
 
 					assertNotNull(driver);
 					assertEquals("com.mysql.cj.jdbc.Driver", driver.getClass().getName());
+					assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
 				}
 				catch (PathDriverFactoryException e)
 				{
@@ -212,6 +216,7 @@ public class XmlDriverEntityManagerTest
 						.getDriver(DriverEntity.valueOf("oracle", "oracle.jdbc.OracleDriver"));
 				assertNotNull(driver);
 				assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
+				assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
 			}
 
 			println();
@@ -222,6 +227,7 @@ public class XmlDriverEntityManagerTest
 							.getDriver(DriverEntity.valueOf("mixed", "com.mysql.jdbc.Driver"));
 					assertNotNull(driver);
 					assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
+					assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
 				}
 
 				println();
@@ -231,11 +237,11 @@ public class XmlDriverEntityManagerTest
 							.getDriver(DriverEntity.valueOf("mixed", "oracle.jdbc.OracleDriver"));
 					assertNotNull(driver);
 					assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
+					assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
 				}
 			}
 
 			println();
-
 			printlnMyContextDrivers();
 		}
 		finally
@@ -306,50 +312,73 @@ public class XmlDriverEntityManagerTest
 		{
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
 
-			driverEntityManager.init();
-
-			expected = driverEntityManager.getAll();
-
+			try
 			{
-				ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePath);
-				driverEntityManager.exportToZip(out);
-				IOUtil.close(out);
+				driverEntityManager.init();
 
-				Assert.assertTrue(FileUtil.getFile(zipFilePath).exists());
+				expected = driverEntityManager.getAll();
+
+				{
+					ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePath);
+					driverEntityManager.exportToZip(out);
+					IOUtil.close(out);
+
+					Assert.assertTrue(FileUtil.getFile(zipFilePath).exists());
+				}
+
+				{
+					ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePathFiltered);
+					driverEntityManager.exportToZip(out, "mysql", "oracle");
+					IOUtil.close(out);
+
+					Assert.assertTrue(FileUtil.getFile(zipFilePathFiltered).exists());
+
+					expectedFiltered.add(driverEntityManager.get("mysql"));
+					expectedFiltered.add(driverEntityManager.get("oracle"));
+				}
 			}
-
+			finally
 			{
-				ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePathFiltered);
-				driverEntityManager.exportToZip(out, "mysql", "oracle");
-				IOUtil.close(out);
-
-				Assert.assertTrue(FileUtil.getFile(zipFilePathFiltered).exists());
-
-				expectedFiltered.add(driverEntityManager.get("mysql"));
-				expectedFiltered.add(driverEntityManager.get("oracle"));
+				driverEntityManager.releaseAll();
 			}
 		}
 
 		{
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("target/exportToZipTest");
-			driverEntityManager.init();
 
-			ZipInputStream in = IOUtil.getZipInputStream(zipFilePath);
-			driverEntityManager.importFromZip(in);
-			IOUtil.close(in);
+			try
+			{
+				driverEntityManager.init();
 
-			Assert.assertEquals(expected, driverEntityManager.getAll());
+				ZipInputStream in = IOUtil.getZipInputStream(zipFilePath);
+				driverEntityManager.importFromZip(in);
+				IOUtil.close(in);
+
+				Assert.assertEquals(expected, driverEntityManager.getAll());
+			}
+			finally
+			{
+				driverEntityManager.releaseAll();
+			}
 		}
 
 		{
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("target/exportToZipTestFiltered");
-			driverEntityManager.init();
 
-			ZipInputStream in = IOUtil.getZipInputStream(zipFilePathFiltered);
-			driverEntityManager.importFromZip(in);
-			IOUtil.close(in);
+			try
+			{
+				driverEntityManager.init();
 
-			Assert.assertEquals(expectedFiltered, driverEntityManager.getAll());
+				ZipInputStream in = IOUtil.getZipInputStream(zipFilePathFiltered);
+				driverEntityManager.importFromZip(in);
+				IOUtil.close(in);
+
+				Assert.assertEquals(expectedFiltered, driverEntityManager.getAll());
+			}
+			finally
+			{
+				driverEntityManager.releaseAll();
+			}
 		}
 	}
 
@@ -365,25 +394,76 @@ public class XmlDriverEntityManagerTest
 		{
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
 
-			driverEntityManager.init();
-
-			expected = driverEntityManager.getAll();
-
+			try
 			{
-				ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePath);
-				driverEntityManager.exportToZip(out);
-				IOUtil.close(out);
+				driverEntityManager.init();
+
+				expected = driverEntityManager.getAll();
+
+				{
+					ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePath);
+					driverEntityManager.exportToZip(out);
+					IOUtil.close(out);
+				}
+			}
+			finally
+			{
+				driverEntityManager.releaseAll();
 			}
 		}
 
 		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("target/readDriverEntitiesFromZip");
-		driverEntityManager.init();
 
-		ZipInputStream in = IOUtil.getZipInputStream(zipFilePath);
-		List<DriverEntity> driverEntities = driverEntityManager.readDriverEntitiesFromZip(in);
-		IOUtil.close(in);
+		try
+		{
+			driverEntityManager.init();
 
-		Assert.assertEquals(expected, driverEntities);
+			ZipInputStream in = IOUtil.getZipInputStream(zipFilePath);
+			List<DriverEntity> driverEntities = driverEntityManager.readDriverEntitiesFromZip(in);
+			IOUtil.close(in);
+
+			Assert.assertEquals(expected, driverEntities);
+		}
+		finally
+		{
+			driverEntityManager.releaseAll();
+		}
+	}
+
+	@Test
+	public void releaseTest() throws Exception
+	{
+		printlnMyContextDrivers();
+
+		File directory = FileUtil.getDirectory("target/test/releaseTest");
+		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/mysql"), directory, true);
+		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
+		File driverJarFile = FileUtil.getFile("target/test/releaseTest/mysql/mysql-connector-java-5.1.23.jar");
+
+		assertTrue(driverJarFile.exists());
+
+		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
+		DriverEntity driverEntity = DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver");
+
+		try
+		{
+			Driver driver = driverEntityManager.getDriver(driverEntity);
+			assertNotNull(driver);
+			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
+			assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+
+			driverJarFile.delete();
+			assertTrue(driverJarFile.exists());
+
+			driverEntityManager.release(driverEntity);
+
+			driverJarFile.delete();
+			assertFalse(driverJarFile.exists());
+		}
+		finally
+		{
+			driverEntityManager.releaseAll();
+		}
 	}
 
 	protected static void printlnMyContextDrivers()

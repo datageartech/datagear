@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public class PathDriverClassLoader extends URLClassLoader
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PathDriverClassLoader.class);
+	private static final boolean LOGGER_DEBUG_ENABLED = LOGGER.isDebugEnabled();
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
@@ -96,19 +97,8 @@ public class PathDriverClassLoader extends URLClassLoader
 	@Override
 	public URL getResource(String name)
 	{
+		// 这里不能直接使用父类方法，因为驱动程序类加载器是独立的，不应该代理至父类加载器
 		URL url = findResource(name);
-
-		// 对于独立的驱动程序类加载器，不应该代理至父类加载器
-		// if (url == null)
-		// {
-		// ClassLoader parent = getParentClassLoader();
-		//
-		// if (LOGGER.isDebugEnabled())
-		// LOGGER.debug("delegate parent class loader for getting resource URL
-		// for [" + name + "]");
-		//
-		// return parent.getResource(name);
-		// }
 
 		// 禁用这里的调试输出，有些驱动（MySQL驱动）会频繁自动调用此接口，刷屏日志
 		// if (LOGGER.isDebugEnabled())
@@ -121,21 +111,10 @@ public class PathDriverClassLoader extends URLClassLoader
 	@Override
 	public Enumeration<URL> getResources(String name) throws IOException
 	{
+		// 这里不能直接使用父类方法，因为驱动程序类加载器是独立的，不应该代理至父类加载器
 		Enumeration<URL> urls = findResources(name);
 
-		// 对于独立的驱动程序类加载器，不应该代理至父类加载器
-		// if (urls == null || urls.hasMoreElements())
-		// {
-		// ClassLoader parent = getParentClassLoader();
-		//
-		// if (LOGGER.isDebugEnabled())
-		// LOGGER.debug("delegate parent class loader for getting resource URLs
-		// for [" + name + "]");
-		//
-		// return parent.getResources(name);
-		// }
-
-		if (LOGGER.isDebugEnabled())
+		if (LOGGER_DEBUG_ENABLED)
 			LOGGER.debug("getResources for [" + name + "] in path [" + getPath() + "]");
 
 		return urls;
@@ -144,125 +123,90 @@ public class PathDriverClassLoader extends URLClassLoader
 	@Override
 	public InputStream getResourceAsStream(String name)
 	{
-		URL url = findResource(name);
+		InputStream in = super.getResourceAsStream(name);
 
-		// 对于独立的驱动程序类加载器，不应该代理至父类加载器
-		// if (url == null)
-		// {
-		// ClassLoader parent = getParentClassLoader();
-		//
-		// if (LOGGER.isDebugEnabled())
-		// LOGGER.debug("delegate parent class loader for getting resource as
-		// stream for [" + name + "]");
-		//
-		// return parent.getResourceAsStream(name);
-		// }
-
-		if (url == null)
-			return null;
-
-		InputStream in = null;
-
-		try
-		{
-			in = url.openStream();
-		}
-		catch (IOException e)
-		{
-		}
-
-		if (LOGGER.isDebugEnabled())
+		if (LOGGER_DEBUG_ENABLED)
 			LOGGER.debug("getResourceAsStream [" + in + "] for [" + name + "] in path [" + getPath() + "]");
 
 		return in;
 	}
 
 	@Override
-	protected synchronized Class<?> loadClass(String name, boolean resolve)
-			throws ClassNotFoundException, ClassFormatError
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException, ClassFormatError
 	{
 		// JDK标准库应由父类加载
 		if (isJDKStandardClassName(name))
 			return Class.forName(name, resolve, getParentClassLoader());
 
-		// -拷贝自java.net.URLClassLoader.FactoryURLClassLoader
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null)
+		synchronized (getClassLoadingLock(name))
 		{
-			int i = name.lastIndexOf('.');
-			if (i != -1)
-			{
-				sm.checkPackageAccess(name.substring(0, i));
-			}
-		}
-		// -
+			Class<?> clazz = findLoadedClass(name);
 
-		Class<?> clazz = findLoadedClass(name);
-
-		if (clazz == null)
-		{
-			try
+			if (clazz == null)
 			{
-				clazz = findClass(name);
+				try
+				{
+					clazz = findClass(name);
+				}
+				catch (ClassNotFoundException e)
+				{
+				}
+				catch (ClassFormatError e)
+				{
+					// 类加载出错（比如版本不兼容），则抛出
+					throw e;
+				}
 			}
-			catch (ClassNotFoundException e)
-			{
-			}
-			catch (ClassFormatError e)
-			{
-				// 类加载出错（比如版本不兼容），则抛出
-				throw e;
-			}
-		}
 
-		// 强制在此加载的类
-		if (clazz == null && this.outsideForceLoads != null && this.outsideForceLoads.contains(name))
-		{
-			InputStream in = getParentClassLoader().getResourceAsStream(classNameToPath(name));
+			// 强制在此加载的类
+			if (clazz == null && this.outsideForceLoads != null && this.outsideForceLoads.contains(name))
+			{
+				InputStream in = getParentClassLoader().getResourceAsStream(classNameToPath(name));
 
-			if (in == null)
+				if (in == null)
+					throw new ClassNotFoundException(name);
+
+				byte[] bytes = null;
+
+				try
+				{
+					bytes = IOUtil.getBytes(in);
+				}
+				catch (IOException e)
+				{
+					throw new ClassNotFoundException(name, e);
+				}
+				finally
+				{
+					IOUtil.close(in);
+				}
+
+				clazz = defineClass(name, bytes, 0, bytes.length);
+			}
+
+			// 此时仅代理父类加载JDK扩展库，其他都应由此类加载器加载
+			if (clazz == null && isJDKExtClassName(name))
+			{
+				ClassLoader parent = getParentClassLoader();
+
+				if (LOGGER_DEBUG_ENABLED)
+					LOGGER.debug("delegate parent class loader for loading class [" + name + "]");
+
+				clazz = Class.forName(name, false, parent);
+			}
+
+			if (clazz == null)
 				throw new ClassNotFoundException(name);
 
-			byte[] bytes = null;
+			if (resolve)
+				resolveClass(clazz);
 
-			try
-			{
-				bytes = IOUtil.getBytes(in);
-			}
-			catch (IOException e)
-			{
-				throw new ClassNotFoundException(name, e);
-			}
-			finally
-			{
-				IOUtil.close(in);
-			}
+			if (LOGGER_DEBUG_ENABLED)
+				LOGGER.debug("load class [" + (clazz == null ? "null" : clazz.getName()) + "] for name [" + name
+						+ "] in path [" + getPath() + "]");
 
-			clazz = defineClass(name, bytes, 0, bytes.length);
+			return clazz;
 		}
-
-		// 此时仅代理父类加载JDK扩展库，其他都应由此类加载器加载
-		if (clazz == null && isJDKExtClassName(name))
-		{
-			ClassLoader parent = getParentClassLoader();
-
-			if (LOGGER.isDebugEnabled())
-				LOGGER.debug("delegate parent class loader for loading class [" + name + "]");
-
-			clazz = Class.forName(name, false, parent);
-		}
-
-		if (clazz == null)
-			throw new ClassNotFoundException(name);
-
-		if (resolve)
-			resolveClass(clazz);
-
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("load class [" + (clazz == null ? "null" : clazz.getName()) + "] for name [" + name
-					+ "] in path [" + getPath() + "]");
-
-		return clazz;
 	}
 
 	/**
