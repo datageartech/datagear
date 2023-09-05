@@ -158,6 +158,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -190,6 +191,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	
 	public static final String INVALID_SQL_KEYWORDS_PREFIX_REGEX="regex:";
 
+	private Environment environment;
+
 	private ApplicationPropertiesConfigSupport applicationPropertiesConfig;
 
 	private DataSourceConfigSupport dataSourceConfig;
@@ -197,12 +200,23 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	private CacheManager _localCacheManager;
 
 	@Autowired
-	public CoreConfigSupport(ApplicationPropertiesConfigSupport applicationPropertiesConfig,
+	public CoreConfigSupport(Environment environment, ApplicationPropertiesConfigSupport applicationPropertiesConfig,
 			DataSourceConfigSupport dataSourceConfig)
 	{
 		super();
+		this.environment = environment;
 		this.applicationPropertiesConfig = applicationPropertiesConfig;
 		this.dataSourceConfig = dataSourceConfig;
+	}
+
+	public Environment getEnvironment()
+	{
+		return environment;
+	}
+
+	public void setEnvironment(Environment environment)
+	{
+		this.environment = environment;
 	}
 
 	public ApplicationPropertiesConfigSupport getApplicationPropertiesConfig()
@@ -1245,11 +1259,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 			if (this._localCacheManager != null)
 				return this._localCacheManager;
 
-			CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-			String cacheSpec = getApplicationProperties().getLocalCacheSpec();
+			CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+
+			String cacheSpec = this.environment.getProperty("spring.cache.caffeine.spec");
 			if (!StringUtil.isEmpty(cacheSpec))
-				caffeineCacheManager.setCacheSpecification(cacheSpec);
-			this._localCacheManager = caffeineCacheManager;
+				cacheManager.setCacheSpecification(cacheSpec);
+
+			this._localCacheManager = cacheManager;
 
 			return this._localCacheManager;
 		}

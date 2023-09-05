@@ -137,10 +137,6 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${datasourceDialect}")
 	private String datasourceDialect;
 
-	/** 本地缓存配置 */
-	@Value("${localCache.spec}")
-	private String localCacheSpec;
-
 	/** 数据源密码加密是否启用 */
 	@Value("${schemaPsd.crypto.enabled}")
 	private boolean schemaPsdCryptoEnabled;
@@ -489,16 +485,6 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setDatasourceDialect(String datasourceDialect)
 	{
 		this.datasourceDialect = datasourceDialect;
-	}
-
-	public String getLocalCacheSpec()
-	{
-		return localCacheSpec;
-	}
-
-	protected void setLocalCacheSpec(String localCacheSpec)
-	{
-		this.localCacheSpec = localCacheSpec;
 	}
 
 	public boolean isSchemaPsdCryptoEnabled()

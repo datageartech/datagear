@@ -22,6 +22,7 @@ import org.datagear.web.config.CoreConfigSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * 核心配置。
@@ -33,8 +34,9 @@ import org.springframework.context.annotation.Configuration;
 public class CoreConfig extends CoreConfigSupport
 {
 	@Autowired
-	public CoreConfig(ApplicationPropertiesConfig applicationPropertiesConfig, DataSourceConfig dataSourceConfig)
+	public CoreConfig(Environment environment, ApplicationPropertiesConfig applicationPropertiesConfig,
+			DataSourceConfig dataSourceConfig)
 	{
-		super(applicationPropertiesConfig, dataSourceConfig);
+		super(environment, applicationPropertiesConfig, dataSourceConfig);
 	}
 }
