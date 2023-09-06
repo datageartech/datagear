@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -215,7 +216,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		reloadDriverEntityFileIfModified();
 
-		return new ArrayList<DriverEntity>(this.driverEntities);
+		return Collections.unmodifiableList(this.driverEntities);
 	}
 
 	@Override
@@ -227,8 +228,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized long getLastModified(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		PathDriverFactoryInfo pdfi = this.pathDriverFactoryInfoMap.get(driverEntity.getId());
-		return (pdfi == null ? -1 : pdfi.getLastModified());
+		PathDriverFactory pdf = getPathDriverFactoryNonNull(driverEntity);
+		return pdf.getLastModified();
 	}
 
 	@Override
@@ -356,7 +357,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		PathDriverFactory pathDriverFactory = getPathDriverFactoryNotNull(driverEntity);
+		PathDriverFactory pathDriverFactory = getPathDriverFactoryNonNull(driverEntity);
 		return pathDriverFactory.getDriver(driverEntity.getDriverClassName());
 	}
 
@@ -604,40 +605,41 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * @return
 	 * @throws PathDriverFactoryException
 	 */
-	protected PathDriverFactory getPathDriverFactoryNotNull(DriverEntity driverEntity)
+	protected PathDriverFactory getPathDriverFactoryNonNull(DriverEntity driverEntity)
 			throws PathDriverFactoryException
 	{
 		String driverEntityId = driverEntity.getId();
 
-		PathDriverFactory pathDriverFactory = null;
+		PathDriverFactory pdf = null;
 
-		PathDriverFactoryInfo pathDriverFactoryInfo = this.pathDriverFactoryInfoMap.get(driverEntityId);
-		if (pathDriverFactoryInfo != null)
+		PathDriverFactoryInfo pdzfi = this.pathDriverFactoryInfoMap.get(driverEntityId);
+
+		if (pdzfi != null)
 		{
-			if (pathDriverFactoryInfo.isModifiedAfterCreation())
+			if (pdzfi.isModifiedAfterCreation())
 			{
 				this.pathDriverFactoryInfoMap.remove(driverEntityId);
-				pathDriverFactoryInfo.getPathDriverFactory().release();
+				pdzfi.getPathDriverFactory().release();
 
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug(" [" + pathDriverFactory + "] is discarded for modification");
+					LOGGER.debug(" [" + pdf + "] is discarded for modification");
 			}
 			else
-				pathDriverFactory = pathDriverFactoryInfo.getPathDriverFactory();
+				pdf = pdzfi.getPathDriverFactory();
 		}
 
-		if (pathDriverFactory == null)
+		if (pdf == null)
 		{
-			pathDriverFactory = createPathDriverFactory(driverEntity);
-			pathDriverFactoryInfo = new PathDriverFactoryInfo(pathDriverFactory);
+			pdf = createPathDriverFactory(driverEntity);
+			pdzfi = new PathDriverFactoryInfo(pdf);
 
-			this.pathDriverFactoryInfoMap.put(driverEntityId, pathDriverFactoryInfo);
+			this.pathDriverFactoryInfoMap.put(driverEntityId, pdzfi);
 
 			if (LOGGER.isDebugEnabled())
-				LOGGER.debug(" [" + pathDriverFactory + "] is created for loading drivers.");
+				LOGGER.debug(" [" + pdf + "] is created for loading drivers.");
 		}
 
-		return pathDriverFactory;
+		return pdf;
 	}
 
 	/**
@@ -991,7 +993,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		{
 			super();
 			this.pathDriverFactory = pathDriverFactory;
-			this.creationModified = this.pathDriverFactory.getPathLastModified();
+			this.creationModified = this.pathDriverFactory.getLastModified();
 		}
 
 		public PathDriverFactory getPathDriverFactory()
@@ -1006,12 +1008,12 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		public boolean isModifiedAfterCreation()
 		{
-			return this.pathDriverFactory.getPathLastModified() != this.creationModified;
+			return this.pathDriverFactory.getLastModified() != this.creationModified;
 		}
 
 		public long getLastModified()
 		{
-			return this.pathDriverFactory.getPathLastModified();
+			return this.pathDriverFactory.getLastModified();
 		}
 	}
 }

@@ -69,6 +69,9 @@ public interface DriverEntityManager
 
 	/**
 	 * 获取所有{@linkplain DriverEntity}。
+	 * <p>
+	 * 通常是不可修改的列表。
+	 * </p>
 	 * 
 	 * @return
 	 * @throws DriverEntityManagerException
@@ -161,7 +164,7 @@ public interface DriverEntityManager
 	Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException;
 
 	/**
-	 * 释放指定{@linkplain DriverEntity}的资源。
+	 * 释放指定{@linkplain DriverEntity}的资源，但不删除{@linkplain DriverEntity}。
 	 * 
 	 * @param driverEntity
 	 * @throws DriverEntityManagerException
@@ -169,7 +172,7 @@ public interface DriverEntityManager
 	void release(DriverEntity driverEntity) throws DriverEntityManagerException;
 
 	/**
-	 * 释放所有资源。
+	 * 释放所有{@linkplain DriverEntity}的资源，但不删除任何{@linkplain DriverEntity}。
 	 */
 	void releaseAll();
 

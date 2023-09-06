@@ -140,7 +140,7 @@ public class PathDriverFactory
 	 * 
 	 * @return
 	 */
-	public long getPathLastModified()
+	public long getLastModified()
 	{
 		return FileUtil.lastModifiedOfPath(this.path);
 	}
