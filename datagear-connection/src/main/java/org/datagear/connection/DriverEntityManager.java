@@ -84,6 +84,14 @@ public interface DriverEntityManager
 	long getLastModified() throws DriverEntityManagerException;
 
 	/**
+	 * 获取驱动库上次变更时间。
+	 * 
+	 * @return {@code -1}表示没有
+	 * @throws DriverEntityManagerException
+	 */
+	long getLastModified(DriverEntity driverEntity) throws DriverEntityManagerException;
+
+	/**
 	 * 添加驱动程序库。
 	 * 
 	 * @param driverEntity

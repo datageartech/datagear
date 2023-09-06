@@ -225,6 +225,13 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
+	public synchronized long getLastModified(DriverEntity driverEntity) throws DriverEntityManagerException
+	{
+		PathDriverFactoryInfo pdfi = this.pathDriverFactoryInfoMap.get(driverEntity.getId());
+		return (pdfi == null ? -1 : pdfi.getLastModified());
+	}
+
+	@Override
 	public synchronized void addDriverLibrary(DriverEntity driverEntity, String libraryName, InputStream in)
 			throws DriverEntityManagerException
 	{
@@ -350,7 +357,6 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	public synchronized Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
 		PathDriverFactory pathDriverFactory = getPathDriverFactoryNotNull(driverEntity);
-
 		return pathDriverFactory.getDriver(driverEntity.getDriverClassName());
 	}
 
@@ -614,7 +620,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 				pathDriverFactoryInfo.getPathDriverFactory().release();
 
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug(" [" + pathDriverFactory + "] has been discarded for its path modification");
+					LOGGER.debug(" [" + pathDriverFactory + "] is discarded for modification");
 			}
 			else
 				pathDriverFactory = pathDriverFactoryInfo.getPathDriverFactory();
@@ -979,14 +985,13 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		private final PathDriverFactory pathDriverFactory;
 
-		private final long lastModifiedOnCreation;
+		private final long creationModified;
 
 		public PathDriverFactoryInfo(PathDriverFactory pathDriverFactory)
 		{
 			super();
-
 			this.pathDriverFactory = pathDriverFactory;
-			this.lastModifiedOnCreation = this.pathDriverFactory.getPathLastModified();
+			this.creationModified = this.pathDriverFactory.getPathLastModified();
 		}
 
 		public PathDriverFactory getPathDriverFactory()
@@ -994,14 +999,19 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			return pathDriverFactory;
 		}
 
-		public long getLastModifiedOnCreation()
+		public long getCreationModified()
 		{
-			return lastModifiedOnCreation;
+			return creationModified;
 		}
 
 		public boolean isModifiedAfterCreation()
 		{
-			return this.pathDriverFactory.getPathLastModified() > this.lastModifiedOnCreation;
+			return this.pathDriverFactory.getPathLastModified() != this.creationModified;
+		}
+
+		public long getLastModified()
+		{
+			return this.pathDriverFactory.getPathLastModified();
 		}
 	}
 }

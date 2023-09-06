@@ -698,6 +698,12 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 		}
 
 		@Override
+		public long getLastModified(DriverEntity driverEntity) throws DriverEntityManagerException
+		{
+			return 0;
+		}
+
+		@Override
 		public void addDriverLibrary(DriverEntity driverEntity, String libraryName, InputStream in)
 				throws DriverEntityManagerException
 		{

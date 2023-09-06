@@ -179,10 +179,12 @@ public class XmlDriverEntityManagerTest
 	{
 		printlnMyContextDrivers();
 
-		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
+		XmlDriverEntityManager driverEntityManager = createDriverEntityManager("getDriverTest");
 
 		try
 		{
+			driverEntityManager.init();
+
 			{
 				Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver"));
 				assertNotNull(driver);
@@ -253,10 +255,12 @@ public class XmlDriverEntityManagerTest
 	@Test
 	public void getDriverTestWithDirectoryModified() throws Exception
 	{
-		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
+		XmlDriverEntityManager driverEntityManager = createDriverEntityManager("getDriverTestWithDirectoryModified");
 
 		try
 		{
+			driverEntityManager.init();
+
 			DriverEntity driverEntity = DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver");
 
 			Driver driver = driverEntityManager.getDriver(driverEntity);
@@ -271,6 +275,8 @@ public class XmlDriverEntityManagerTest
 
 			assertEquals(classLoader, unmodifiedClassLoader);
 
+			Thread.sleep(2000);
+
 			File modifiedFile = FileUtil.getFile(driverEntityManager.getRootDirectory(), "mysql/modified.txt");
 			Writer writer = null;
 			try
@@ -282,6 +288,8 @@ public class XmlDriverEntityManagerTest
 			{
 				writer.close();
 			}
+
+			Thread.sleep(2000);
 
 			Driver modifiedDriver = driverEntityManager.getDriver(driverEntity);
 			ClassLoader modifiedClassLoader = modifiedDriver.getClass().getClassLoader();
@@ -310,7 +318,7 @@ public class XmlDriverEntityManagerTest
 		List<DriverEntity> expectedFiltered = new ArrayList<DriverEntity>();
 
 		{
-			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
+			XmlDriverEntityManager driverEntityManager = createDriverEntityManager("exportToZipTest");
 
 			try
 			{
@@ -392,7 +400,7 @@ public class XmlDriverEntityManagerTest
 		List<DriverEntity> expected = null;
 
 		{
-			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
+			XmlDriverEntityManager driverEntityManager = createDriverEntityManager("readDriverEntitiesFromZipTest");
 
 			try
 			{
@@ -436,6 +444,8 @@ public class XmlDriverEntityManagerTest
 		printlnMyContextDrivers();
 
 		File directory = FileUtil.getDirectory("target/test/releaseTest");
+		FileUtil.clearDirectory(directory);
+
 		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/mysql"), directory, true);
 		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
 		File driverJarFile = FileUtil.getFile("target/test/releaseTest/mysql/mysql-connector-java-5.1.23.jar");
@@ -447,6 +457,8 @@ public class XmlDriverEntityManagerTest
 
 		try
 		{
+			driverEntityManager.init();
+
 			Driver driver = driverEntityManager.getDriver(driverEntity);
 			assertNotNull(driver);
 			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
@@ -464,6 +476,17 @@ public class XmlDriverEntityManagerTest
 		{
 			driverEntityManager.releaseAll();
 		}
+	}
+
+	protected XmlDriverEntityManager createDriverEntityManager(String name) throws Exception
+	{
+		File directory = FileUtil.getDirectory("target/test/XmlDriverEntityManagerTest/" + name);
+		FileUtil.clearDirectory(directory);
+
+		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers"), directory, false);
+
+		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
+		return driverEntityManager;
 	}
 
 	protected static void printlnMyContextDrivers()

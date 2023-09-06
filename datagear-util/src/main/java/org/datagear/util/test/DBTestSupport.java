@@ -63,6 +63,26 @@ public abstract class DBTestSupport
 		}
 	}
 
+	protected Properties getProperties()
+	{
+		return JDBC_PROPERTIES;
+	}
+
+	protected String getUrl()
+	{
+		return JDBC_PROPERTIES.getProperty("jdbc.url");
+	}
+
+	protected String getUser()
+	{
+		return JDBC_PROPERTIES.getProperty("jdbc.user");
+	}
+
+	protected String getPassword()
+	{
+		return JDBC_PROPERTIES.getProperty("jdbc.password");
+	}
+
 	protected Connection getConnection() throws SQLException
 	{
 		return DriverManager.getConnection(JDBC_PROPERTIES.getProperty("jdbc.url"),

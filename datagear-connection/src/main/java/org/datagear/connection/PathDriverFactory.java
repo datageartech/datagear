@@ -142,7 +142,7 @@ public class PathDriverFactory
 	 */
 	public long getPathLastModified()
 	{
-		return getPathLastModified(this.path);
+		return FileUtil.lastModifiedOfPath(this.path);
 	}
 
 	/**
@@ -248,35 +248,6 @@ public class PathDriverFactory
 	protected PathDriverClassLoader getPathDriverClassLoader()
 	{
 		return this.pathDriverClassLoader;
-	}
-
-	/**
-	 * 获取路径的上次修改时间。
-	 * 
-	 * @param path
-	 * @return
-	 */
-	protected long getPathLastModified(File path)
-	{
-		long pathLastModified = path.lastModified();
-
-		if (path.isDirectory())
-		{
-			File[] children = path.listFiles();
-
-			if (children != null)
-			{
-				for (File child : children)
-				{
-					long childLastModified = child.lastModified();
-
-					if (childLastModified > pathLastModified)
-						pathLastModified = childLastModified;
-				}
-			}
-		}
-
-		return pathLastModified;
 	}
 
 	@Override

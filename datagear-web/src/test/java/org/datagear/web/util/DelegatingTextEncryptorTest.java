@@ -18,6 +18,7 @@
 package org.datagear.web.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import org.datagear.web.util.DelegatingTextEncryptor.EncryptType;
@@ -65,7 +66,7 @@ public class DelegatingTextEncryptorTest
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void test_change_secret_key()
 	{
 		String password = "1234";
@@ -74,10 +75,13 @@ public class DelegatingTextEncryptorTest
 		DelegatingTextEncryptor myEncryptorStd = new DelegatingTextEncryptor(EncryptType.STD,
 				"SD" + SECRET_KEY.substring(2), SALT);
 
-		myEncryptorStd.decrypt(encrypt);
+		assertThrows(Exception.class, () ->
+		{
+			myEncryptorStd.decrypt(encrypt);
+		});
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void test_change_salt()
 	{
 		String password = "1234";
@@ -86,7 +90,10 @@ public class DelegatingTextEncryptorTest
 		DelegatingTextEncryptor myEncryptorStd = new DelegatingTextEncryptor(EncryptType.STD, SECRET_KEY,
 				SALT.substring(0, SALT.length() - 2) + "35");
 
-		myEncryptorStd.decrypt(encrypt);
+		assertThrows(Exception.class, () ->
+		{
+			myEncryptorStd.decrypt(encrypt);
+		});
 	}
 
 	@Test
