@@ -204,6 +204,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		{
 			removeCount += removeExists(driverEntities, ids[i]);
 
+			// 需先释放资源
+			removePathDriverFactoryInfo(ids[i]);
 			deleteDriverLibraryDirectory(ids[i]);
 		}
 
@@ -228,14 +230,17 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized long getLastModified(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		PathDriverFactory pdf = getPathDriverFactoryNonNull(driverEntity);
-		return pdf.getLastModified();
+		PathDriverFactoryInfo pdfi = getPathDriverFactoryInfoNonNull(driverEntity, false);
+		return pdfi.getLastModified();
 	}
 
 	@Override
 	public synchronized void addDriverLibrary(DriverEntity driverEntity, String libraryName, InputStream in)
 			throws DriverEntityManagerException
 	{
+		// 需先释放资源
+		removePathDriverFactoryInfo(driverEntity);
+
 		File file = getDriverLibraryFile(driverEntity.getId(), libraryName);
 
 		BufferedOutputStream out = null;
@@ -259,6 +264,9 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	public synchronized boolean[] deleteDriverLibrary(DriverEntity driverEntity, String... libraryName)
 			throws DriverEntityManagerException
 	{
+		// 需先释放资源
+		removePathDriverFactoryInfo(driverEntity);
+
 		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 
 		boolean[] deleted = new boolean[libraryName.length];
@@ -283,8 +291,10 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized boolean deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
+		// 需先释放资源
+		removePathDriverFactoryInfo(driverEntity);
 
+		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 		return FileUtil.clearDirectory(directory);
 	}
 
@@ -357,14 +367,14 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		PathDriverFactory pathDriverFactory = getPathDriverFactoryNonNull(driverEntity);
-		return pathDriverFactory.getDriver(driverEntity.getDriverClassName());
+		PathDriverFactoryInfo pdfi = getPathDriverFactoryInfoNonNull(driverEntity, true);
+		return pdfi.getPathDriverFactory().getDriver(driverEntity.getDriverClassName());
 	}
 
 	@Override
 	public synchronized void release(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		removePathDriverFactory(driverEntity);
+		removePathDriverFactoryInfo(driverEntity);
 	}
 
 	@Override
@@ -372,7 +382,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		for (Map.Entry<String, PathDriverFactoryInfo> entry : this.pathDriverFactoryInfoMap.entrySet())
 		{
-			entry.getValue().getPathDriverFactory().release();
+			releasePathDriverFactory(entry.getValue());
 		}
 
 		this.pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
@@ -596,65 +606,74 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	/**
-	 * 获取指定{@linkplain DriverEntity}的{@linkplain PathDriverFactory}。
+	 * 获取指定{@linkplain DriverEntity}的{@linkplain PathDriverFactoryInfo}。
 	 * <p>
 	 * 此方法不会返回{@code null}。
 	 * </p>
 	 * 
 	 * @param driverEntity
+	 * @param renewIfModified
+	 *            是否在有修改时重新创建
 	 * @return
 	 * @throws PathDriverFactoryException
 	 */
-	protected PathDriverFactory getPathDriverFactoryNonNull(DriverEntity driverEntity)
+	protected PathDriverFactoryInfo getPathDriverFactoryInfoNonNull(DriverEntity driverEntity, boolean renewIfModified)
 			throws PathDriverFactoryException
 	{
 		String driverEntityId = driverEntity.getId();
 
-		PathDriverFactory pdf = null;
-
 		PathDriverFactoryInfo pdzfi = this.pathDriverFactoryInfoMap.get(driverEntityId);
 
-		if (pdzfi != null)
+		if (pdzfi != null && renewIfModified && pdzfi.isModifiedAfterCreation())
 		{
-			if (pdzfi.isModifiedAfterCreation())
-			{
-				this.pathDriverFactoryInfoMap.remove(driverEntityId);
-				pdzfi.getPathDriverFactory().release();
+			removePathDriverFactoryInfo(driverEntity);
 
-				if (LOGGER.isDebugEnabled())
-					LOGGER.debug(" [" + pdf + "] is discarded for modification");
-			}
-			else
-				pdf = pdzfi.getPathDriverFactory();
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug(pdzfi + " is discarded for modification");
+
+			pdzfi = null;
 		}
 
-		if (pdf == null)
+		if (pdzfi == null)
 		{
-			pdf = createPathDriverFactory(driverEntity);
-			pdzfi = new PathDriverFactoryInfo(pdf);
+			pdzfi = new PathDriverFactoryInfo(createPathDriverFactory(driverEntity));
 
 			this.pathDriverFactoryInfoMap.put(driverEntityId, pdzfi);
 
 			if (LOGGER.isDebugEnabled())
-				LOGGER.debug(" [" + pdf + "] is created for loading drivers.");
+				LOGGER.debug(pdzfi + " is created for loading drivers.");
 		}
 
-		return pdf;
+		return pdzfi;
 	}
 
 	/**
-	 * 移除{@linkplain PathDriverFactory}。
+	 * 移除并释放{@linkplain PathDriverFactoryInfo}。
 	 * 
 	 * @param driverEntity
 	 */
-	protected void removePathDriverFactory(DriverEntity driverEntity)
+	protected void removePathDriverFactoryInfo(DriverEntity driverEntity)
 	{
-		PathDriverFactoryInfo pathDriverFactoryInfo = this.pathDriverFactoryInfoMap.remove(driverEntity.getId());
+		removePathDriverFactoryInfo(driverEntity.getId());
+	}
 
-		if (pathDriverFactoryInfo == null)
+	/**
+	 * 移除并释放{@linkplain PathDriverFactoryInfo}。
+	 * 
+	 * @param driverEntityId
+	 */
+	protected void removePathDriverFactoryInfo(String driverEntityId)
+	{
+		PathDriverFactoryInfo pathDriverFactoryInfo = this.pathDriverFactoryInfoMap.remove(driverEntityId);
+		releasePathDriverFactory(pathDriverFactoryInfo);
+	}
+
+	protected void releasePathDriverFactory(PathDriverFactoryInfo factoryInfo)
+	{
+		if (factoryInfo == null)
 			return;
 
-		pathDriverFactoryInfo.getPathDriverFactory().release();
+		factoryInfo.getPathDriverFactory().release();
 	}
 
 	/**
@@ -1014,6 +1033,13 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		public long getLastModified()
 		{
 			return this.pathDriverFactory.getLastModified();
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [pathDriverFactory=" + pathDriverFactory + ", creationModified="
+					+ creationModified + "]";
 		}
 	}
 }
