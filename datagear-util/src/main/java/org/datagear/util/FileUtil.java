@@ -866,4 +866,47 @@ public class FileUtil
 			deleteFile(path);
 		}
 	}
+
+	/**
+	 * 获取文件自身的上次修改时间。
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static long lastModified(File file)
+	{
+		return file.lastModified();
+	}
+
+	/**
+	 * 获取上次修改时间。
+	 * <p>
+	 * 如果是目录，则取其中最新文件的上次修改时间。
+	 * </p>
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static long lastModifiedOfPath(File file)
+	{
+		long lastModified = file.lastModified();
+
+		if (file.isDirectory())
+		{
+			File[] children = file.listFiles();
+
+			if (children != null)
+			{
+				for (File child : children)
+				{
+					long childLastModified = lastModified(child);
+
+					if (childLastModified > lastModified)
+						lastModified = childLastModified;
+				}
+			}
+		}
+
+		return lastModified;
+	}
 }
