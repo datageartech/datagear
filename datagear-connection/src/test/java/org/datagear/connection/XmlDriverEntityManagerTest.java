@@ -446,8 +446,8 @@ public class XmlDriverEntityManagerTest
 		File directory = FileUtil.getDirectory("target/test/releaseTest");
 		FileUtil.clearDirectory(directory);
 
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/mysql"), directory, true);
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/mysql"), directory);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory);
 		File driverJarFile = FileUtil.getFile(directory, "mysql/mysql-connector-java-5.1.23.jar");
 
 		assertTrue(driverJarFile.exists());
@@ -484,7 +484,7 @@ public class XmlDriverEntityManagerTest
 		File directory = FileUtil.getDirectory("target/test/addDriverLibraryTest");
 		FileUtil.clearDirectory(directory);
 
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory);
 		File driverJarFile = FileUtil.getFile(directory, "mysql/mysql-connector-java-5.1.23.jar");
 
 		assertFalse(driverJarFile.exists());
@@ -532,8 +532,8 @@ public class XmlDriverEntityManagerTest
 		File directory = FileUtil.getDirectory("target/test/deleteDriverLibraryTest_DriverEntity_Strings");
 		FileUtil.clearDirectory(directory);
 
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/mysql"), directory, true);
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/mysql"), directory);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory);
 		File driverJarFile = FileUtil.getFile(directory, "mysql/mysql-connector-java-5.1.23.jar");
 
 		assertTrue(driverJarFile.exists());
@@ -572,8 +572,8 @@ public class XmlDriverEntityManagerTest
 		File directory = FileUtil.getDirectory("target/test/deleteDriverLibraryTest_DriverEntity");
 		FileUtil.clearDirectory(directory);
 
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/mysql"), directory, true);
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/mysql"), directory);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory);
 		File driverJarFile = FileUtil.getFile(directory, "mysql/mysql-connector-java-5.1.23.jar");
 
 		assertTrue(driverJarFile.exists());
@@ -611,7 +611,7 @@ public class XmlDriverEntityManagerTest
 		File directory = FileUtil.getDirectory("target/test/XmlDriverEntityManagerTest/" + name);
 		FileUtil.clearDirectory(directory);
 
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers"), directory, false);
+		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers"), directory);
 
 		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
 		return driverEntityManager;

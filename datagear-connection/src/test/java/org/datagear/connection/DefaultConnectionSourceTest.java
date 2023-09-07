@@ -385,8 +385,8 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 		File directory = FileUtil.getDirectory("target/test/DefaultConnectionSourceTest/" + name);
 		FileUtil.clearDirectory(directory);
 
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/mysql-jre8"), directory, true);
-		IOUtil.copy(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory, true);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/mysql-jre8"), directory);
+		IOUtil.copyInto(FileUtil.getFile("src/test/resources/drivers/driverEntityInfo.xml"), directory);
 
 		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
 		driverEntityManager.init();

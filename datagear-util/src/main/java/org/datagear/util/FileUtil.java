@@ -862,7 +862,7 @@ public class FileUtil
 			
 			handledFiles.put(newPath, path);
 			
-			newPath = IOUtil.copy(path, newPath, false);
+			newPath = IOUtil.copy(path, newPath);
 			deleteFile(path);
 		}
 	}

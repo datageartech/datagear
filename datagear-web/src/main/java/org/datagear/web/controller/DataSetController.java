@@ -513,7 +513,7 @@ public class DataSetController extends AbstractSchemaConnController
 				File tmpFile = FileUtil.generateUniqueFile(getTempDataSetDirectory(),
 						FileUtil.getExtension(dataSetFileName));
 				String fileName = tmpFile.getName();
-				IOUtil.copy(sourceFile, tmpFile, false);
+				IOUtil.copy(sourceFile, tmpFile);
 				dataSetEntity.setFileName(fileName);
 			}
 		}
@@ -1082,7 +1082,7 @@ public class DataSetController extends AbstractSchemaConnController
 		File tmpFile = FileUtil.getFile(getTempDataSetDirectory(), fileName);
 		File entityFile = FileUtil.getFile(dataSetDirectory, fileName);
 
-		IOUtil.copy(tmpFile, entityFile, false);
+		IOUtil.copy(tmpFile, entityFile);
 
 		return true;
 	}
