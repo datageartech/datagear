@@ -113,14 +113,14 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 	public void copyFrom(String id, File directory) throws IOException
 	{
 		File myDirectory = FileUtil.getDirectory(this.rootDirectory, id);
-		IOUtil.copy(directory, myDirectory, false);
+		IOUtil.copy(directory, myDirectory);
 	}
 
 	@Override
 	public void copyTo(String id, File directory) throws IOException
 	{
 		File myDirectory = FileUtil.getDirectory(this.rootDirectory, id);
-		IOUtil.copy(myDirectory, directory, false);
+		IOUtil.copy(myDirectory, directory);
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 		File sourceDirectory = FileUtil.getDirectory(this.rootDirectory, sourceId);
 		File targetDirectory = FileUtil.getDirectory(this.rootDirectory, targetId);
 
-		IOUtil.copy(sourceDirectory, targetDirectory, false);
+		IOUtil.copy(sourceDirectory, targetDirectory);
 	}
 
 	@Override

@@ -178,7 +178,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 				throw new IllegalInputException();
 
 			File resFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath, true);
-			IOUtil.copy(file, resFile, false);
+			IOUtil.copy(file, resFile);
 		}
 
 		return optSuccessResponseEntity(request);

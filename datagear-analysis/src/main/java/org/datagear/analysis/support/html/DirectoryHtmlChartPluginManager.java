@@ -256,7 +256,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				File pluginFile = getPluginFile(id);
 
 				if (pluginFile.exists())
-					IOUtil.copy(pluginFile, tmpDirectory, true);
+					IOUtil.copyInto(pluginFile, tmpDirectory);
 			}
 
 			IOUtil.writeFileToZipOutputStream(out, tmpDirectory, "");
@@ -334,7 +334,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		// 不存在同名的文件，则拷贝并执行加载
 		if (!sameName.exists())
 		{
-			IOUtil.copy(uploadPluginFile, this.directory, true);
+			IOUtil.copyInto(uploadPluginFile, this.directory);
 			re = registerHtmlChartPlugin(uploadPlugin, sameName);
 		}
 		else
@@ -346,7 +346,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			if (loadedPlugin == null)
 			{
 				FileUtil.deleteFile(sameName);
-				IOUtil.copy(uploadPluginFile, this.directory, true);
+				IOUtil.copyInto(uploadPluginFile, this.directory);
 				re = registerHtmlChartPlugin(uploadPlugin, sameName);
 			}
 			else
@@ -357,7 +357,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					if (canReplaceForSameId(uploadPlugin, loadedPlugin))
 					{
 						FileUtil.deleteFile(sameName);
-						IOUtil.copy(uploadPluginFile, this.directory, true);
+						IOUtil.copyInto(uploadPluginFile, this.directory);
 						re = registerHtmlChartPlugin(uploadPlugin, sameName);
 					}
 				}
@@ -366,7 +366,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				{
 					removeChartPlugin(loadedPluginId);
 
-					IOUtil.copy(uploadPluginFile, this.directory, true);
+					IOUtil.copyInto(uploadPluginFile, this.directory);
 					re = registerHtmlChartPlugin(uploadPlugin, sameName);
 				}
 			}

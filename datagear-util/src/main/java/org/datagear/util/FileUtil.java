@@ -862,7 +862,7 @@ public class FileUtil
 			
 			handledFiles.put(newPath, path);
 			
-			newPath = IOUtil.copy(path, newPath, false);
+			newPath = IOUtil.copy(path, newPath);
 			deleteFile(path);
 		}
 	}
@@ -908,5 +908,16 @@ public class FileUtil
 		}
 
 		return lastModified;
+	}
+
+	/**
+	 * 如果目录不存在，则创建。
+	 * 
+	 * @param directory
+	 */
+	public static void mkdirsIfNot(File directory)
+	{
+		if (!directory.exists())
+			directory.mkdirs();
 	}
 }

@@ -24,7 +24,6 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -894,79 +893,102 @@ public class IOUtil
 		}
 	}
 
-
 	/**
-	 * 拷贝文件。
+	 * 拷贝文件至目录内。
 	 * 
-	 * @param src
-	 * @param dest
-	 * @param srcIntoDest
-	 *            是否将{@code src}拷贝至{@code dest}目录内部
+	 * @param from
+	 *            文件、目录
+	 * @param to
+	 *            目录，不存在时会自动创建
 	 * @return 目标文件
 	 * @throws IOException
 	 */
-	public static File copy(File src, File dest, boolean srcIntoDest) throws IOException
+	public static File copyInto(File from, File to) throws IOException
 	{
-		return copy(src, dest, srcIntoDest, null);
+		if (!to.exists())
+			to.mkdirs();
+
+		if (!to.isDirectory())
+			throw new IllegalArgumentException("[" + to + "] must be directory");
+
+		if (from.isDirectory())
+			to = FileUtil.getDirectory(to, from.getName());
+		else
+			to = FileUtil.getFile(to, from.getName());
+
+		copy(from, to, null);
+
+		return to;
 	}
 
 	/**
 	 * 拷贝文件。
 	 * 
-	 * @param src
-	 * @param dest
-	 * @param srcIntoDest
-	 *            是否将{@code src}拷贝至{@code dest}目录内部
-	 * @param fileFilter
+	 * @param from
+	 *            文件、目录
+	 * @param to
+	 *            文件、目录，不存在时会自动创建
+	 * @throws IOException
+	 */
+	public static File copy(File from, File to) throws IOException
+	{
+		return copy(from, to, null);
+	}
+
+	/**
+	 * 拷贝文件。
+	 * 
+	 * @param from
+	 *            文件、目录
+	 * @param to
+	 *            文件、目录，不存在时会自动创建
+	 * @param filter
 	 *            允许为{@code null}，仅拷贝接受的文件
 	 * @return 目标文件，{@code null}表示没有拷贝任何文件
 	 * @throws IOException
 	 */
-	public static File copy(File src, File dest, boolean srcIntoDest, FileFilter fileFilter) throws IOException
+	public static File copy(File from, File to, CopyFileFilter filter) throws IOException
 	{
-		if (fileFilter != null && !fileFilter.accept(src))
+		if (filter != null && !filter.accept(from, to))
 			return null;
 
-		if (src.isDirectory())
+		if (from.isDirectory())
 		{
-			if (!dest.exists())
-				dest.mkdirs();
+			if (!to.exists())
+				to.mkdirs();
 
-			if (srcIntoDest)
-				dest = FileUtil.getDirectory(dest, src.getName());
+			if (!to.isDirectory())
+				throw new IllegalArgumentException("[" + to + "] must be directory");
 
-			File[] children = src.listFiles();
+			File[] children = from.listFiles();
+
 			if (children != null)
 			{
 				for (File child : children)
-					copy(child, FileUtil.getFile(dest, child.getName()), false, fileFilter);
+					copy(child, FileUtil.getFile(to, child.getName()), filter);
 			}
-			
-			return dest;
+
+			return to;
 		}
 		else
 		{
-			if (srcIntoDest)
-			{
-				if (!dest.exists())
-					dest.mkdirs();
-
-				dest = FileUtil.getFile(dest, src.getName());
-			}
+			// 如果目标时目录，应先删除
+			if (to.exists() && to.isDirectory())
+				FileUtil.deleteFile(to);
 
 			OutputStream out = null;
 
 			try
 			{
-				out = IOUtil.getOutputStream(dest);
-				IOUtil.write(src, out);
+				out = IOUtil.getOutputStream(to);
+				IOUtil.write(from, out);
 			}
 			finally
 			{
 				IOUtil.close(out);
 			}
 
-			return dest;
+			return to;
 		}
 	}
 
