@@ -222,7 +222,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public long getLastModified() throws DriverEntityManagerException
+	public synchronized long getLastModified() throws DriverEntityManagerException
 	{
 		return this.driverEntityInfoFileLastModified;
 	}
@@ -382,7 +382,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		for (Map.Entry<String, PathDriverFactoryInfo> entry : this.pathDriverFactoryInfoMap.entrySet())
 		{
-			releasePathDriverFactory(entry.getValue());
+			releasePathDriverFactoryInfo(entry.getValue());
 		}
 
 		this.pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
@@ -636,7 +636,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		if (pdzfi == null)
 		{
-			pdzfi = new PathDriverFactoryInfo(createPathDriverFactory(driverEntity));
+			pdzfi = createPathDriverFactoryInfo(driverEntity);
 
 			this.pathDriverFactoryInfoMap.put(driverEntityId, pdzfi);
 
@@ -665,10 +665,10 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	protected void removePathDriverFactoryInfo(String driverEntityId)
 	{
 		PathDriverFactoryInfo pathDriverFactoryInfo = this.pathDriverFactoryInfoMap.remove(driverEntityId);
-		releasePathDriverFactory(pathDriverFactoryInfo);
+		releasePathDriverFactoryInfo(pathDriverFactoryInfo);
 	}
 
-	protected void releasePathDriverFactory(PathDriverFactoryInfo factoryInfo)
+	protected void releasePathDriverFactoryInfo(PathDriverFactoryInfo factoryInfo)
 	{
 		if (factoryInfo == null)
 			return;
@@ -677,20 +677,21 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	/**
-	 * 创建{@linkplain PathDriverFactory}实例并对其进行初始化。
+	 * 创建{@linkplain PathDriverFactoryInfo}实例并进行必要的初始化。
 	 * 
 	 * @param driverEntity
 	 * @return
 	 * @throws PathDriverFactoryException
 	 */
-	protected PathDriverFactory createPathDriverFactory(DriverEntity driverEntity) throws PathDriverFactoryException
+	protected PathDriverFactoryInfo createPathDriverFactoryInfo(DriverEntity driverEntity)
+			throws PathDriverFactoryException
 	{
 		File path = getDriverLibraryDirectory(driverEntity.getId(), true);
 
 		PathDriverFactory pathDriverFactory = new PathDriverFactory(path);
 		pathDriverFactory.init();
 
-		return pathDriverFactory;
+		return new PathDriverFactoryInfo(pathDriverFactory);
 	}
 
 	/**

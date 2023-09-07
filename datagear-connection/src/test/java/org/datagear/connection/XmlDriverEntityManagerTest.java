@@ -191,7 +191,7 @@ public class XmlDriverEntityManagerTest
 				Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver"));
 				assertNotNull(driver);
 				assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-				assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+				assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 			}
 
 			println();
@@ -204,7 +204,7 @@ public class XmlDriverEntityManagerTest
 
 					assertNotNull(driver);
 					assertEquals("com.mysql.cj.jdbc.Driver", driver.getClass().getName());
-					assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+					assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 				}
 				catch (PathDriverFactoryException e)
 				{
@@ -220,7 +220,7 @@ public class XmlDriverEntityManagerTest
 						.getDriver(DriverEntity.valueOf("oracle", "oracle.jdbc.OracleDriver"));
 				assertNotNull(driver);
 				assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
-				assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+				assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 			}
 
 			println();
@@ -231,7 +231,7 @@ public class XmlDriverEntityManagerTest
 							.getDriver(DriverEntity.valueOf("mixed", "com.mysql.jdbc.Driver"));
 					assertNotNull(driver);
 					assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-					assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+					assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 				}
 
 				println();
@@ -241,7 +241,7 @@ public class XmlDriverEntityManagerTest
 							.getDriver(DriverEntity.valueOf("mixed", "oracle.jdbc.OracleDriver"));
 					assertNotNull(driver);
 					assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
-					assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+					assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 				}
 			}
 
@@ -462,7 +462,7 @@ public class XmlDriverEntityManagerTest
 			Driver driver = driverEntityManager.getDriver(driverEntity);
 			assertNotNull(driver);
 			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-			assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+			assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 
 			driverJarFile.delete();
 			assertTrue(driverJarFile.exists());
@@ -518,7 +518,7 @@ public class XmlDriverEntityManagerTest
 
 			assertNotNull(driver);
 			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-			assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+			assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 		}
 		finally
 		{
@@ -549,7 +549,7 @@ public class XmlDriverEntityManagerTest
 
 			assertNotNull(driver);
 			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-			assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+			assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 
 			driverEntityManager.deleteDriverLibrary(driverEntity, "mysql-connector-java-5.1.23.jar");
 
@@ -589,7 +589,7 @@ public class XmlDriverEntityManagerTest
 
 			assertNotNull(driver);
 			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-			assertTrue(driver.getClass().getClassLoader() instanceof PathDriverClassLoader);
+			assertTrue(driver.getClass().getClassLoader() instanceof PathClassLoader);
 
 			driverEntityManager.deleteDriverLibrary(driverEntity);
 

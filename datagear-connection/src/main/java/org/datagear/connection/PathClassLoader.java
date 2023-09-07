@@ -23,8 +23,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,20 +34,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 指定路径的驱动类加载器。
+ * 指定路径的类加载器。
  * <p>
  * 注意：对于非JDK自带的类，此类加载器仅会从{@linkplain #getPath()}加载，而不会代理给父类加载器。
  * </p>
  * <p>
- * 此规则可以避免驱动类依赖的某些库在{@linkplain #getPath()}中找不到时代理至应用类加载器，而可能出现版本不一致的情况。
+ * 此规则可以避加载类依赖的某些库在{@linkplain #getPath()}中找不到时代理至应用类加载器，而可能出现版本不一致的情况。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class PathDriverClassLoader extends URLClassLoader
+public class PathClassLoader extends URLClassLoader
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(PathDriverClassLoader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PathClassLoader.class);
 	private static final boolean LOGGER_DEBUG_ENABLED = LOGGER.isDebugEnabled();
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
@@ -55,28 +55,27 @@ public class PathDriverClassLoader extends URLClassLoader
 	private File path;
 
 	/** 要强制加载类路径之外的类名集 */
-	private Set<String> outsideForceLoads = new HashSet<String>();
+	private Set<String> outsideForceLoads = Collections.emptySet();
 
-	public PathDriverClassLoader(String path)
+	public PathClassLoader(String path)
 	{
 		this(FileUtil.getFile(path), null);
 	}
 
-	public PathDriverClassLoader(File path)
+	public PathClassLoader(File path)
 	{
 		this(path, null);
 	}
 
-	public PathDriverClassLoader(String path, ClassLoader parent)
+	public PathClassLoader(String path, ClassLoader parent)
 	{
 		this(FileUtil.getFile(path), parent);
 	}
 
-	public PathDriverClassLoader(File path, ClassLoader parent)
+	public PathClassLoader(File path, ClassLoader parent)
 	{
 		super(toLoadClassURLs(path), parent);
 		this.path = path;
-		this.outsideForceLoads.add(DriverTool.class.getName());
 	}
 
 	public File getPath()
@@ -91,7 +90,7 @@ public class PathDriverClassLoader extends URLClassLoader
 
 	public void setOutsideForceLoads(Set<String> outsideForceLoads)
 	{
-		this.outsideForceLoads.addAll(outsideForceLoads);
+		this.outsideForceLoads = outsideForceLoads;
 	}
 
 	@Override
@@ -241,7 +240,7 @@ public class PathDriverClassLoader extends URLClassLoader
 	{
 		ClassLoader parent = getParent();
 		if (parent == null)
-			parent = PathDriverClassLoader.class.getClassLoader();
+			parent = PathClassLoader.class.getClassLoader();
 
 		return parent;
 	}
