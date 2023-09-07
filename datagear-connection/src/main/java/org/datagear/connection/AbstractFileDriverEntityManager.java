@@ -636,8 +636,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		if (pdzfi == null)
 		{
-			pdzfi = createPathDriverFactoryInfo(driverEntity);
-
+			pdzfi = preparePathDriverFactoryInfo(driverEntity);
 			this.pathDriverFactoryInfoMap.put(driverEntityId, pdzfi);
 
 			if (LOGGER.isDebugEnabled())
@@ -645,6 +644,22 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		}
 
 		return pdzfi;
+	}
+
+	/**
+	 * 准备{@linkplain PathDriverFactoryInfo}实例，进行必要的初始化。
+	 * 
+	 * @param driverEntity
+	 * @return
+	 * @throws PathDriverFactoryException
+	 */
+	protected PathDriverFactoryInfo preparePathDriverFactoryInfo(DriverEntity driverEntity)
+			throws PathDriverFactoryException
+	{
+		PathDriverFactoryInfo pdfi = createPathDriverFactoryInfo(driverEntity);
+		initPathDriverFactoryInfo(pdfi);
+
+		return pdfi;
 	}
 
 	/**
@@ -668,16 +683,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		releasePathDriverFactoryInfo(pathDriverFactoryInfo);
 	}
 
-	protected void releasePathDriverFactoryInfo(PathDriverFactoryInfo factoryInfo)
-	{
-		if (factoryInfo == null)
-			return;
-
-		factoryInfo.getPathDriverFactory().release();
-	}
-
 	/**
-	 * 创建{@linkplain PathDriverFactoryInfo}实例并进行必要的初始化。
+	 * 创建{@linkplain PathDriverFactoryInfo}但不初始化。
 	 * 
 	 * @param driverEntity
 	 * @return
@@ -687,11 +694,31 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			throws PathDriverFactoryException
 	{
 		File path = getDriverLibraryDirectory(driverEntity.getId(), true);
-
 		PathDriverFactory pathDriverFactory = new PathDriverFactory(path);
-		pathDriverFactory.init();
-
 		return new PathDriverFactoryInfo(pathDriverFactory);
+	}
+
+	/**
+	 * 初始化{@linkplain PathDriverFactoryInfo}。
+	 * 
+	 * @param factoryInfo
+	 */
+	protected void initPathDriverFactoryInfo(PathDriverFactoryInfo factoryInfo)
+	{
+		factoryInfo.getPathDriverFactory().init();
+	}
+
+	/**
+	 * 释放{@linkplain PathDriverFactoryInfo}。
+	 * 
+	 * @param factoryInfo
+	 */
+	protected void releasePathDriverFactoryInfo(PathDriverFactoryInfo factoryInfo)
+	{
+		if (factoryInfo == null)
+			return;
+
+		factoryInfo.getPathDriverFactory().release();
 	}
 
 	/**
