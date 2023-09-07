@@ -230,8 +230,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized long getLastModified(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		PathDriverFactoryInfo pdfi = getPathDriverFactoryInfoNonNull(driverEntity, false);
-		return pdfi.getLastModified();
+		File path = getDriverLibraryDirectory(driverEntity.getId(), true);
+		return FileUtil.lastModifiedOfPath(path);
 	}
 
 	@Override
@@ -367,7 +367,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
-		PathDriverFactoryInfo pdfi = getPathDriverFactoryInfoNonNull(driverEntity, true);
+		PathDriverFactoryInfo pdfi = getLatestPathDriverFactoryInfoNonNull(driverEntity);
 		return pdfi.getPathDriverFactory().getDriver(driverEntity.getDriverClassName());
 	}
 
@@ -606,25 +606,23 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	/**
-	 * 获取指定{@linkplain DriverEntity}的{@linkplain PathDriverFactoryInfo}。
+	 * 获取最新的且已初始化的{@linkplain PathDriverFactoryInfo}。
 	 * <p>
 	 * 此方法不会返回{@code null}。
 	 * </p>
 	 * 
 	 * @param driverEntity
-	 * @param renewIfModified
-	 *            是否在有修改时重新创建
 	 * @return
 	 * @throws PathDriverFactoryException
 	 */
-	protected PathDriverFactoryInfo getPathDriverFactoryInfoNonNull(DriverEntity driverEntity, boolean renewIfModified)
+	protected PathDriverFactoryInfo getLatestPathDriverFactoryInfoNonNull(DriverEntity driverEntity)
 			throws PathDriverFactoryException
 	{
 		String driverEntityId = driverEntity.getId();
 
 		PathDriverFactoryInfo pdzfi = this.pathDriverFactoryInfoMap.get(driverEntityId);
 
-		if (pdzfi != null && renewIfModified && pdzfi.isModifiedAfterCreation())
+		if (pdzfi != null && pdzfi.isModifiedAfterCreation())
 		{
 			removePathDriverFactoryInfo(driverEntity);
 
@@ -1038,9 +1036,14 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		public PathDriverFactoryInfo(PathDriverFactory pathDriverFactory)
 		{
+			this(pathDriverFactory, pathDriverFactory.getLastModified());
+		}
+
+		public PathDriverFactoryInfo(PathDriverFactory pathDriverFactory, long creationModified)
+		{
 			super();
 			this.pathDriverFactory = pathDriverFactory;
-			this.creationModified = this.pathDriverFactory.getLastModified();
+			this.creationModified = creationModified;
 		}
 
 		public PathDriverFactory getPathDriverFactory()
@@ -1055,7 +1058,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		public boolean isModifiedAfterCreation()
 		{
-			return this.pathDriverFactory.getLastModified() != this.creationModified;
+			return getLastModified() != this.creationModified;
 		}
 
 		public long getLastModified()
