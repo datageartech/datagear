@@ -302,7 +302,7 @@ public class SecurityConfigSupport
 	 * 
 	 * @return
 	 */
-	protected static String[] staticResourcePathPatterns()
+	protected String[] staticResourcePathPatterns()
 	{
 		return new String[] { "/static/**" };
 	}
@@ -358,7 +358,7 @@ public class SecurityConfigSupport
 		return new ModuleAccess(showStatic, show);
 	}
 	
-	protected static String[] showChartAndDashboardStaticUrlPattern()
+	protected String[] showChartAndDashboardStaticUrlPattern()
 	{
 		return new String[] {
 				// 图表插件
