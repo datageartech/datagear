@@ -156,7 +156,7 @@ public class RegisterController extends AbstractController
 
 		user.setRoles(this.roleSpec.buildRolesByIds(this.applicationProperties.getDefaultRoleRegister(), true));
 
-		this.userService.add(user);
+		addRegisterUser(user);
 
 		this.checkCodeManager.removeCheckCode(session, CHECK_CODE_MODULE_REGISTER);
 		session.setAttribute(SESSION_KEY_REGISTER_USER_NAME, user.getName());
@@ -173,6 +173,11 @@ public class RegisterController extends AbstractController
 			return "redirect:/register";
 		else
 			return "/register_success";
+	}
+
+	protected void addRegisterUser(User user)
+	{
+		this.userService.add(user);
 	}
 
 	public static class RegisterForm implements ControllerForm
