@@ -115,6 +115,12 @@
 {
 	po.submitUrl = "/user/"+po.submitAction;
 	po.disableRoles = ("${(disableRoles!false)?string('true', 'false')}"  == "true");
+
+	po.beforeSubmitForm = function(action)
+	{
+		var data = action.options.data;
+		data.confirmPassword = undefined;
+	};
 	
 	po.vuePageModel(
 	{

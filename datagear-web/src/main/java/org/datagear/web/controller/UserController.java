@@ -165,7 +165,7 @@ public class UserController extends AbstractController
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
 
-		this.userService.add(user);
+		saveAddUser(user);
 
 		return optSuccessDataResponseEntity(request, user);
 	}
@@ -200,7 +200,7 @@ public class UserController extends AbstractController
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
 
-		this.userService.update(user);
+		saveEditUser(user);
 
 		return optSuccessDataResponseEntity(request, user);
 	}
@@ -321,9 +321,24 @@ public class UserController extends AbstractController
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
 
-		this.userService.updateIgnoreRole(user);
+		savePersonalSetUser(user);
 
 		return optSuccessResponseEntity(request);
+	}
+
+	protected void saveAddUser(User user)
+	{
+		this.userService.add(user);
+	}
+
+	protected void saveEditUser(User user)
+	{
+		this.userService.update(user);
+	}
+
+	protected void savePersonalSetUser(User user)
+	{
+		this.userService.updateIgnoreRole(user);
 	}
 
 	protected List<Role> toUserRolesList(User user)
