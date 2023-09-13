@@ -143,6 +143,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		User user = getCurrentUser();
 		Schema schema = getByIdForEdit(getSchemaService(), user, id);
+		schema.clearPassword();
 		
 		setFormModel(model, schema, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		return "/schema/schema_form";
@@ -176,7 +177,10 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		User user = getCurrentUser();
 		Schema schema = getByIdForView(getSchemaService(), user, id);
-		schema.clearPassword();
+
+		// 脱敏显示密码，可以让用户了解到是否设置了密码
+		if (!StringUtil.isEmpty(schema.getPassword()))
+			schema.setPassword(StringUtil.mask(schema.getPassword(), 0, 0, schema.getPassword().length()));
 
 		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/schema/schema_form";
