@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.datagear.management.domain.User;
 import org.datagear.util.IOUtil;
 import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.OperationMessage;
@@ -143,13 +142,21 @@ public class LoginController extends AbstractController
 	@RequestMapping
 	public String login(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		User user = new User();
-		user.setName(resolveLoginUsername(request, response));
+		LoginForm form = createLoginForm(request, response, model);
 
-		setFormModel(model, user, "login", "doLogin");
+		setFormModel(model, form, "login", "doLogin");
 		WebUtils.setEnableDetectNewVersionRequest(request);
 		
 		return "/login";
+	}
+
+	protected LoginForm createLoginForm(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		LoginForm form = new LoginForm();
+		form.setName(resolveLoginUsername(request, response));
+
+		return form;
 	}
 
 	@RequestMapping(value = "/success", produces = CONTENT_TYPE_JSON)
@@ -272,6 +279,64 @@ public class LoginController extends AbstractController
 		catch (UnsupportedEncodingException e)
 		{
 			throw new ControllerException(e);
+		}
+	}
+
+	public static class LoginForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String name = "";
+
+		private String password = "";
+
+		private String checkCode = "";
+
+		private boolean rememberMe = false;
+
+		public LoginForm()
+		{
+			super();
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public String getPassword()
+		{
+			return password;
+		}
+
+		public void setPassword(String password)
+		{
+			this.password = password;
+		}
+
+		public String getCheckCode()
+		{
+			return checkCode;
+		}
+
+		public void setCheckCode(String checkCode)
+		{
+			this.checkCode = checkCode;
+		}
+
+		public boolean isRememberMe()
+		{
+			return rememberMe;
+		}
+
+		public void setRememberMe(boolean rememberMe)
+		{
+			this.rememberMe = rememberMe;
 		}
 	}
 }
