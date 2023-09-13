@@ -180,7 +180,6 @@
 				po.ajax("/driverEntity/deleteDriverFile",
 				{
 					data: {id: fm.id, file: name},
-					tipSuccess: false,
 					success: function(response)
 					{
 						po.setDriverLibrary(response.data);
