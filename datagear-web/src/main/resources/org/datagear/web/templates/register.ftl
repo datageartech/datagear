@@ -108,6 +108,12 @@
 (function(po)
 {
 	po.submitUrl = "/register/doRegister";
+
+	po.beforeSubmitForm = function(action)
+	{
+		var user = action.options.data.user;
+		user.confirmPassword = undefined;
+	};
 	
 	po.setupForm({user: {}},
 	{
