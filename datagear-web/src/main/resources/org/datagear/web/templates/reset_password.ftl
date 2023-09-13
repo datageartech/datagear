@@ -158,6 +158,16 @@
 (function(po)
 {
 	po.submitUrl = "/resetPassword/${step.action}";
+	po.isStepSetNewPassword = ("${step.step}" == "3");
+
+	po.beforeSubmitForm = function(action)
+	{
+		if(po.isStepSetNewPassword)
+		{
+			var data = action.options.data;
+			data.confirmPassword = undefined;
+		}
+	};
 	
 	po.vuePageModel(
 	{

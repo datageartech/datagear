@@ -498,8 +498,6 @@ public class ResetPasswordController extends AbstractController
 
 		private String password;
 
-		private String confirmPassword;
-
 		public SetNewPasswordForm()
 		{
 			super();
@@ -513,16 +511,6 @@ public class ResetPasswordController extends AbstractController
 		public void setPassword(String password)
 		{
 			this.password = password;
-		}
-
-		public String getConfirmPassword()
-		{
-			return confirmPassword;
-		}
-
-		public void setConfirmPassword(String confirmPassword)
-		{
-			this.confirmPassword = confirmPassword;
 		}
 	}
 }
