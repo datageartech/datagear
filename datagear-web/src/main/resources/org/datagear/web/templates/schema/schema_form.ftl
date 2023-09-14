@@ -80,6 +80,9 @@
 		        		input-class="w-full" toggle-mask :feedback="false"
 		        		name="password" maxlength="100" autocomplete="new-password">
 		        	</p-password>
+		        	<div class="desc text-color-secondary">
+		        		<small><@spring.message code='schema.password.input.desc' /></small>
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
