@@ -1008,6 +1008,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			dashboardShareSet.setAnonymousPassword(false);
 		}
 
+		dashboardShareSet.setPassword("");
+
 		setFormModel(model, dashboardShareSet, "shareSet", "saveShareSet");
 
 		return "/dashboard/dashboard_share_set";

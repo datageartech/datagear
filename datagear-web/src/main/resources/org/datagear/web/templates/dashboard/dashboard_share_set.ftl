@@ -61,6 +61,9 @@
 		        		input-class="w-full" toggle-mask :feedback="false"
 		        		name="password" :required="fm.enablePassword" maxlength="20" autocomplete="new-password">
 		        	</p-password>
+		        	<div class="desc text-color-secondary">
+		        		<small><@spring.message code='dashboardShareSet.password.input.desc' /></small>
+		        	</div>
 		        </div>
 			</div>
 		</div>
