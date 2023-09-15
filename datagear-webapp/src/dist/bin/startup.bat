@@ -12,8 +12,8 @@ set DG_APP_HOME=%~dp0
 goto okAppHome
 
 :okAppHome
-set DG_APP_FULL_NAME=%DG_APP_HOME%${productNameJar}
-set DG_SPRING_OPTS=--spring.config.additional-location=%DG_APP_HOME%config\application.properties
+set DG_APP_FULL_NAME=%DG_APP_HOME%\${productNameJar}
+set DG_SPRING_OPTS=--spring.config.additional-location=%DG_APP_HOME%\config\application.properties
 
 if "%JAVA_HOME%" == "" goto runNoJavaHome
 if not "%JAVA_HOME%" == "" goto runJavaHome
@@ -24,7 +24,7 @@ goto end
 
 :runJavaHome
 echo Using JAVA_HOME "%JAVA_HOME%"
-"%JAVA_HOME%/bin/java" %JAVA_OPTS% -jar "%DG_APP_FULL_NAME%" %DG_SPRING_OPTS%
+"%JAVA_HOME%\bin\java" %JAVA_OPTS% -jar "%DG_APP_FULL_NAME%" %DG_SPRING_OPTS%
 goto end
 
 :end
