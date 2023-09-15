@@ -38,7 +38,6 @@ import org.datagear.meta.TableUtil;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
@@ -178,10 +177,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		User user = getCurrentUser();
 		Schema schema = getByIdForView(getSchemaService(), user, id);
-
-		// 显示脱敏信息，可以让用户了解到是否设置了密码
-		if (!StringUtil.isEmpty(schema.getPassword()))
-			schema.setPassword(StringUtil.mask(Global.PRODUCT_NAME_EN, 0, 0, Global.PRODUCT_NAME_EN.length()));
+		schema.clearPassword();
 
 		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/schema/schema_form";

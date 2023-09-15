@@ -70,7 +70,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="!pm.isReadonlyAction">
 				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='schema.password.desc' />">
 					<@spring.message code='password' />
