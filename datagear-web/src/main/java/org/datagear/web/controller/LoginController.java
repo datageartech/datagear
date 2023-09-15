@@ -167,7 +167,7 @@ public class LoginController extends AbstractController
 
 		Map<String, Object> data = new HashMap<String, Object>();
 
-		String redirectUrl = WebUtils.INDEX_PAGE_URL;
+		String redirectUrl = WebUtils.getIndexPath(request);
 
 		// 参考：
 		// org.springframework.security.web.access.ExceptionTranslationFilter.sendStartAuthentication()

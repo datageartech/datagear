@@ -77,6 +77,20 @@ public class WebUtils
 	}
 
 	/**
+	 * 获取应用首页路径。
+	 * <p>
+	 * 通常是：{@code "/"}、{@code "context-path/"}
+	 * </p>
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getIndexPath(HttpServletRequest request)
+	{
+		return request.getContextPath() + "/";
+	}
+
+	/**
 	 * 获取应用服务URL。
 	 * <p>
 	 * 例如：<br>
