@@ -162,7 +162,7 @@ User currentUser
 					},
 					{
 						label: "<@spring.message code='module.chartPlugin' />",
-						url: po.concatContextPath("/chartPlugin/query"),
+						url: po.concatContextPath("/chartPlugin/pagingQuery"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{

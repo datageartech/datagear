@@ -44,16 +44,21 @@
 	</div>
 	<div class="page-content flex-grow-1 overflow-auto">
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
-			:loading="pm.loading" :lazy="true"
+			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate" :first="pm.pageRecordIndex"
+			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"
+			:rows-per-page-options="pm.rowsPerPageOptions" :loading="pm.loading"
+			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			:resizable-columns="true" column-resize-mode="expand"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
+			<!--
 			<p-column field="number" header="<@spring.message code='serialNumber' />" :frozen="true" class="col-row-number">
 				<template #body="slotProps">
-					{{slotProps.index + 1}}
+					{{pm.pageRecordIndex + slotProps.index + 1}}
 				</template>
 			</p-column>
+			-->
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
 			<p-column field="order" header="<@spring.message code='order' />" :hidden="true"></p-column>
 			<p-column field="nameLabel" header="<@spring.message code='name' />" class="col-name">
@@ -72,7 +77,7 @@
 <script>
 (function(po)
 {
-	po.setupAjaxTable("/chartPlugin/queryData",
+	po.setupAjaxTable("/chartPlugin/pagingQueryData",
 	{
 		multiSortMeta: [ {field: "order", order: 1} ]
 	});

@@ -44,6 +44,7 @@ import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
+import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -254,23 +255,28 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/query")
-	public String query(HttpServletRequest request, org.springframework.ui.Model model)
+	@RequestMapping("/pagingQuery")
+	public String pagingQuery(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyAction(model);
 		return "/chartPlugin/chartPlugin_table";
 	}
 
-	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<HtmlChartPluginView> queryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<HtmlChartPluginView> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
 			throws Exception
 	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		List<HtmlChartPluginView> chartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword());
 
-		return findHtmlChartPluginViews(request, pagingQuery.getKeyword());
+		PagingData<HtmlChartPluginView> pagingData = new PagingData<>(pagingQuery.getPage(), chartPluginViews.size(),
+				pagingQuery.getPageSize());
+		pagingData.setItems(chartPluginViews.subList(pagingData.getStartIndex(), pagingData.getEndIndex()));
+
+		return pagingData;
 	}
 
 	@RequestMapping("/select")
