@@ -518,7 +518,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		DataFormat defaultDataFormat = new DataFormat();
 		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
 		JsonDataImportOption importOption = new JsonDataImportOption(ExceptionResolve.ROLLBACK, false, false, true,
-				JsonDataFormat.TABLE_OBJECT);
+				JsonDataFormat.ROW_ARRAY);
 		
 		JsonFileBatchDataImportForm formModel = new JsonFileBatchDataImportForm();
 		formModel.setDataExchangeId(dataExchangeId);
@@ -1208,7 +1208,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String dataExchangeId = IDUtil.uuid();
 		DataFormat defaultDataFormat = new DataFormat();
 		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
-		JsonDataExportOption exportOption = new JsonDataExportOption(false, JsonDataFormat.TABLE_OBJECT);
+		JsonDataExportOption exportOption = new JsonDataExportOption(false, JsonDataFormat.ROW_ARRAY);
 		
 		JsonFileBatchDataExportForm formModel = new JsonFileBatchDataExportForm();
 		formModel.setDataExchangeId(dataExchangeId);
