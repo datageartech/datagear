@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.SchemaGuard;
 import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.service.SchemaGuardService.GuardEntity;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.vo.DataFilterPagingQuery;
@@ -67,6 +68,7 @@ public class SchemaGuardController extends AbstractController
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		SchemaGuard schemaGuard = new SchemaGuard();
+		schemaGuard.setPermitted(false);
 
 		setFormModel(model, schemaGuard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
@@ -174,7 +176,7 @@ public class SchemaGuardController extends AbstractController
 	{
 		String url = form.getUrl();
 
-		boolean permitted = this.schemaGuardService.isPermitted(url);
+		boolean permitted = this.schemaGuardService.isPermitted(new GuardEntity(url));
 
 		return optSuccessDataResponseEntity(request, permitted);
 	}

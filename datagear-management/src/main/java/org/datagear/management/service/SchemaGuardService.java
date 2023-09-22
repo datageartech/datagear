@@ -17,8 +17,12 @@
 
 package org.datagear.management.service;
 
+import java.io.Serializable;
+import java.util.List;
+
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SchemaGuard;
+import org.datagear.management.domain.SchemaProperty;
 import org.datagear.management.domain.User;
 import org.datagear.util.AsteriskPatternMatcher;
 
@@ -31,23 +35,83 @@ import org.datagear.util.AsteriskPatternMatcher;
 public interface SchemaGuardService extends EntityService<String, SchemaGuard>
 {
 	/**
-	 * 是否允许创建指定的{@linkplain Schema#getUrl()}。
+	 * 是否允许创建指定的{@linkplain GuardEntity}。
 	 * <p>
 	 * 实现类应支持{@linkplain AsteriskPatternMatcher}匹配规则，
 	 * 并且，如果没有定义任何{@linkplain SchemaGuard}，应返回{@code true}。
 	 * </p>
 	 * 
-	 * @param schemaURL
+	 * @param guardEntity
 	 * @return
 	 */
-	boolean isPermitted(String schemaUrl);
+	boolean isPermitted(GuardEntity guardEntity);
 
 	/**
-	 * 是否允许创建指定的{@linkplain Schema#getUrl()}。
+	 * 是否允许创建指定的{@linkplain GuardEntity}。
 	 * 
 	 * @param user
-	 * @param schemaUrl
+	 * @param guardEntity
 	 * @return
 	 */
-	boolean isPermitted(User user, String schemaUrl);
+	boolean isPermitted(User user, GuardEntity guardEntity);
+
+	/**
+	 * 数据源防护对象。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class GuardEntity implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 数据源连接URL */
+		private String url;
+
+		/** 数据源连接属性 */
+		private List<SchemaProperty> properties = null;
+
+		public GuardEntity()
+		{
+			super();
+		}
+
+		public GuardEntity(String url)
+		{
+			super();
+			this.url = url;
+		}
+
+		public GuardEntity(String url, List<SchemaProperty> properties)
+		{
+			super();
+			this.url = url;
+			this.properties = properties;
+		}
+
+		public GuardEntity(Schema schema)
+		{
+			this(schema.getUrl(), schema.getProperties());
+		}
+
+		public String getUrl()
+		{
+			return url;
+		}
+
+		public void setUrl(String url)
+		{
+			this.url = url;
+		}
+
+		public List<SchemaProperty> getProperties()
+		{
+			return properties;
+		}
+
+		public void setProperties(List<SchemaProperty> properties)
+		{
+			this.properties = properties;
+		}
+	}
 }

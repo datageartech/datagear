@@ -30,6 +30,7 @@ import org.datagear.management.domain.DataPermissionAware;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.service.SchemaGuardService.GuardEntity;
 import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
@@ -257,7 +258,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		User user = getCurrentUser();
 
-		if (!this.schemaGuardService.isPermitted(user, schema.getUrl()))
+		if (!this.schemaGuardService.isPermitted(user, new GuardEntity(schema)))
 			throw new SaveSchemaUrlPermissionDeniedException();
 
 		// 用户选定驱动程序时

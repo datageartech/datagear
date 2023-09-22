@@ -26,6 +26,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.service.SchemaGuardService.GuardEntity;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -126,7 +127,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	public void add(User user, Schema entity) throws PermissionDeniedException
 	{
-		checkSaveUrlPermission(user, entity.getUrl());
+		checkSaveUrlPermission(user, entity);
 
 		if (this.textEncryptor != null)
 		{
@@ -140,7 +141,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	public boolean update(User user, Schema entity) throws PermissionDeniedException
 	{
-		checkSaveUrlPermission(user, entity.getUrl());
+		checkSaveUrlPermission(user, entity);
 
 		if (this.textEncryptor != null)
 		{
@@ -210,9 +211,9 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	 * @param url
 	 * @throws SaveSchemaUrlPermissionDeniedException
 	 */
-	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
+	protected void checkSaveUrlPermission(User user, Schema schema) throws SaveSchemaUrlPermissionDeniedException
 	{
-		if (this.schemaGuardService.isPermitted(user, url))
+		if (this.schemaGuardService.isPermitted(user, new GuardEntity(schema)))
 			return;
 
 		throw new SaveSchemaUrlPermissionDeniedException();

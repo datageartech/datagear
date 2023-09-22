@@ -17,12 +17,18 @@
 
 package org.datagear.management.domain;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.datagear.analysis.support.JsonSupport;
+import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
+import org.springframework.lang.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 数据源防护。
@@ -34,8 +40,14 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 匹配模式 */
+	/** 连接URL匹配模式 */
 	private String pattern;
+
+	/** 连接用户名匹配模式 */
+	private String userPattern = null;
+
+	/** 连接属性匹配模式 */
+	private List<SchemaPropertyPattern> propertyPatterns = null;
 
 	/** 是否允许：true 允许；false 禁止 */
 	private boolean permitted = true;
@@ -73,6 +85,28 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	public void setPattern(String pattern)
 	{
 		this.pattern = pattern;
+	}
+
+	@Nullable
+	public String getUserPattern()
+	{
+		return userPattern;
+	}
+
+	public void setUserPattern(String userPattern)
+	{
+		this.userPattern = userPattern;
+	}
+
+	@Nullable
+	public List<SchemaPropertyPattern> getPropertyPatterns()
+	{
+		return propertyPatterns;
+	}
+
+	public void setPropertyPatterns(List<SchemaPropertyPattern> propertyPatterns)
+	{
+		this.propertyPatterns = propertyPatterns;
 	}
 
 	public boolean isPermitted()
@@ -113,6 +147,34 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;
+	}
+
+	/**
+	 * 返回{@linkplain #getPropertyPatterns()}的JSON。
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public String getPropertyPatternsJson()
+	{
+		if (this.propertyPatterns == null)
+			return "[]";
+
+		return JsonSupport.generate(this.propertyPatterns, "[]");
+	}
+
+	/**
+	 * 设置{@linkplain #setPropertyPatterns(List)}的JSON。
+	 * 
+	 * @param json
+	 */
+	public void setPropertyPatternsJson(String json)
+	{
+		if (StringUtil.isEmpty(json))
+			return;
+
+		SchemaPropertyPattern[] propertyPatterns = JsonSupport.parse(json, SchemaPropertyPattern[].class, null);
+		setPropertyPatterns(Arrays.asList(propertyPatterns));
 	}
 
 	@Override

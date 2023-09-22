@@ -73,7 +73,7 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 	}
 
 	@Override
-	public boolean isPermitted(String schemaUrl)
+	public boolean isPermitted(GuardEntity guardEntity)
 	{
 		if (this._schemaGuardListCache == null)
 		{
@@ -81,6 +81,8 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 			SchemaGuard.sortByPriority(schemaGuards);
 			this._schemaGuardListCache = Collections.unmodifiableList(new ArrayList<SchemaGuard>(schemaGuards));
 		}
+
+		// TODO 校验GuardEntity.getProperties()
 
 		// 默认为true，表示允许，比如当没有定义任何SchemaGuard时
 		boolean permitted = true;
@@ -95,7 +97,7 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 			if(StringUtil.isEmpty(pattern))
 				continue;
 			
-			if (this.asteriskPatternMatcher.matches(pattern, schemaUrl))
+			if (this.asteriskPatternMatcher.matches(pattern, guardEntity.getUrl()))
 			{
 				permitted = schemaGuard.isPermitted();
 				break;
@@ -106,12 +108,12 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 	}
 
 	@Override
-	public boolean isPermitted(User user, String schemaUrl)
+	public boolean isPermitted(User user, GuardEntity guardEntity)
 	{
 		if (user.isAdmin())
 			return true;
 
-		return this.isPermitted(schemaUrl);
+		return this.isPermitted(guardEntity);
 	}
 
 	@Override
