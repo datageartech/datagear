@@ -36,6 +36,36 @@ public class AsteriskPatternMatcherTest
 		AsteriskPatternMatcher matcher = new AsteriskPatternMatcher();
 
 		{
+			String pattern = null;
+
+			assertTrue(matcher.matches(pattern, null));
+			assertFalse(matcher.matches(pattern, ""));
+			assertFalse(matcher.matches(pattern, "abc"));
+		}
+
+		{
+			String pattern = "";
+
+			assertTrue(matcher.matches(pattern, ""));
+			assertFalse(matcher.matches(pattern, null));
+			assertFalse(matcher.matches(pattern, "abc"));
+		}
+
+		{
+			String pattern = null;
+
+			assertTrue(matcher.matches(pattern, null));
+			assertFalse(matcher.matches(pattern, ""));
+			assertFalse(matcher.matches(pattern, "abc"));
+		}
+
+		{
+			assertTrue(matcher.matches(null, null));
+			assertFalse(matcher.matches("", null));
+			assertFalse(matcher.matches("abc", null));
+		}
+
+		{
 			String pattern = "*";
 
 			assertTrue(matcher.matches(pattern, ""));

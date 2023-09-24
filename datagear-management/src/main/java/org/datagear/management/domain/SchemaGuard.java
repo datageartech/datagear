@@ -40,14 +40,31 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 连接URL匹配模式 */
-	private String pattern;
+	/** 连接属性匹配类型：任一 */
+	public static final String PROPERTIES_MATCH_MODE_ANY = "ANY";
 
-	/** 连接用户名匹配模式 */
-	private String userPattern = null;
+	/** 连接属性匹配类型：全部 */
+	public static final String PROPERTIES_MATCH_MODE_ALL = "ALL";
 
-	/** 连接属性匹配模式 */
-	private List<SchemaPropertyPattern> propertyPatterns = null;
+	/** 连接URL匹配模式，{@code null}、{@code ""}匹配所有 */
+	private String pattern = "";
+
+	/** 连接用户名匹配模式，{@code null}、{@code ""}匹配所有 */
+	private String userPattern = "";
+
+	/**
+	 * 当{@linkplain #propertyPatterns}为空时，是否匹配任意连接属性，否则将仅匹配空连接属性。
+	 * <p>
+	 * 默认应为{@code true}，以兼容4.6.0-版本没有{@linkplain #propertyPatterns}的情况。
+	 * </p>
+	 */
+	private boolean emptyPropertyPatternsForAll = true;
+
+	/** 连接属性匹配模式，{@code null}、空列表匹配所有 */
+	private List<SchemaPropertyPattern> propertyPatterns = Collections.emptyList();
+
+	/** {@linkplain #propertyPatterns}的匹配类型 */
+	private String propertiesMatchMode = PROPERTIES_MATCH_MODE_ALL;
 
 	/** 是否允许：true 允许；false 禁止 */
 	private boolean permitted = true;
@@ -98,6 +115,16 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 		this.userPattern = userPattern;
 	}
 
+	public boolean isEmptyPropertyPatternsForAll()
+	{
+		return emptyPropertyPatternsForAll;
+	}
+
+	public void setEmptyPropertyPatternsForAll(boolean emptyPropertyPatternsForAll)
+	{
+		this.emptyPropertyPatternsForAll = emptyPropertyPatternsForAll;
+	}
+
 	@Nullable
 	public List<SchemaPropertyPattern> getPropertyPatterns()
 	{
@@ -107,6 +134,16 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	public void setPropertyPatterns(List<SchemaPropertyPattern> propertyPatterns)
 	{
 		this.propertyPatterns = propertyPatterns;
+	}
+
+	public String getPropertiesMatchMode()
+	{
+		return propertiesMatchMode;
+	}
+
+	public void setPropertiesMatchMode(String propertiesMatchMode)
+	{
+		this.propertiesMatchMode = propertiesMatchMode;
 	}
 
 	public boolean isPermitted()

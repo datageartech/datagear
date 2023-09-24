@@ -17,13 +17,9 @@
 
 package org.datagear.management.service;
 
-import java.io.Serializable;
-import java.util.List;
-
-import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SchemaGuard;
-import org.datagear.management.domain.SchemaProperty;
 import org.datagear.management.domain.User;
+import org.datagear.management.util.GuardEntity;
 import org.datagear.util.AsteriskPatternMatcher;
 
 /**
@@ -54,64 +50,4 @@ public interface SchemaGuardService extends EntityService<String, SchemaGuard>
 	 * @return
 	 */
 	boolean isPermitted(User user, GuardEntity guardEntity);
-
-	/**
-	 * 数据源防护对象。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class GuardEntity implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		/** 数据源连接URL */
-		private String url;
-
-		/** 数据源连接属性 */
-		private List<SchemaProperty> properties = null;
-
-		public GuardEntity()
-		{
-			super();
-		}
-
-		public GuardEntity(String url)
-		{
-			super();
-			this.url = url;
-		}
-
-		public GuardEntity(String url, List<SchemaProperty> properties)
-		{
-			super();
-			this.url = url;
-			this.properties = properties;
-		}
-
-		public GuardEntity(Schema schema)
-		{
-			this(schema.getUrl(), schema.getProperties());
-		}
-
-		public String getUrl()
-		{
-			return url;
-		}
-
-		public void setUrl(String url)
-		{
-			this.url = url;
-		}
-
-		public List<SchemaProperty> getProperties()
-		{
-			return properties;
-		}
-
-		public void setProperties(List<SchemaProperty> properties)
-		{
-			this.properties = properties;
-		}
-	}
 }

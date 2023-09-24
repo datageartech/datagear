@@ -31,11 +31,11 @@ public class SchemaPropertyPattern implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 属性名匹配模式 */
-	private String namePattern;
+	/** 属性名匹配模式，{@code null}、{@code ""}匹配所有 */
+	private String namePattern = "";
 
-	/** 属性值匹配模式 */
-	private String valuePattern = null;
+	/** 属性值匹配模式，{@code null}、{@code ""}匹配所有 */
+	private String valuePattern = "";
 
 	public SchemaPropertyPattern()
 	{

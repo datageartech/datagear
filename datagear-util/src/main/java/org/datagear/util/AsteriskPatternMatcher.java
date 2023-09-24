@@ -45,6 +45,13 @@ import java.util.regex.Pattern;
  */
 public class AsteriskPatternMatcher
 {
+	public static final char ASTERISK = '*';
+
+	/**
+	 * 能够匹配任意非{@code null}字符串的模式。
+	 */
+	public static final String ALL_PATTERN = new StringBuilder().append(ASTERISK).toString();
+
 	/** 是否忽略大小写 */
 	private boolean ignoreCase = false;
 
@@ -87,13 +94,22 @@ public class AsteriskPatternMatcher
 	 * 是否匹配。
 	 * 
 	 * @param asteriskPattern
-	 *            星号模式字符串
+	 *            允许{@code null}、{@code ""}，星号模式字符串，{@code null}只能匹配{@code null}，{@code ""}只能匹配{@code ""}
 	 * @param text
-	 *            要匹配的字符串
+	 *            允许{@code null}、{@code ""}，要匹配的字符串，{@code null}只能被{@code null}匹配，{@code ""}可以被{@code ""}、{@code "*"}匹配
 	 * @return
 	 */
 	public boolean matches(String asteriskPattern, String text)
 	{
+		if (asteriskPattern == null)
+			return (text == null);
+
+		if (asteriskPattern.isEmpty())
+			return (text != null && text.isEmpty());
+
+		if (text == null)
+			return (asteriskPattern == null);
+
 		Pattern rp = getRegexPattern(asteriskPattern);
 		return rp.matcher(text).matches();
 	}
@@ -138,7 +154,7 @@ public class AsteriskPatternMatcher
 		{
 			char c = cs[i];
 
-			if (c == '*')
+			if (c == ASTERISK)
 			{
 				if (lb.length() > 0)
 				{

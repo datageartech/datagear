@@ -26,10 +26,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.SchemaGuard;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.util.GuardEntity;
+import org.datagear.management.util.SchemaGuardChecker;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.Query;
-import org.datagear.util.AsteriskPatternMatcher;
-import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -43,7 +43,7 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 {
 	protected static final String SQL_NAMESPACE = SchemaGuard.class.getName();
 
-	private AsteriskPatternMatcher asteriskPatternMatcher = new AsteriskPatternMatcher();
+	private SchemaGuardChecker schemaGuardChecker = new SchemaGuardChecker();
 
 	private volatile List<SchemaGuard> _schemaGuardListCache = null;
 
@@ -62,14 +62,14 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 		super(sqlSessionTemplate, dialect);
 	}
 
-	public AsteriskPatternMatcher getAsteriskPatternMatcher()
+	public SchemaGuardChecker getSchemaGuardChecker()
 	{
-		return asteriskPatternMatcher;
+		return schemaGuardChecker;
 	}
 
-	public void setAsteriskPatternMatcher(AsteriskPatternMatcher asteriskPatternMatcher)
+	public void setSchemaGuardChecker(SchemaGuardChecker schemaGuardChecker)
 	{
-		this.asteriskPatternMatcher = asteriskPatternMatcher;
+		this.schemaGuardChecker = schemaGuardChecker;
 	}
 
 	@Override
@@ -82,29 +82,7 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 			this._schemaGuardListCache = Collections.unmodifiableList(new ArrayList<SchemaGuard>(schemaGuards));
 		}
 
-		// TODO 校验GuardEntity.getProperties()
-
-		// 默认为true，表示允许，比如当没有定义任何SchemaGuard时
-		boolean permitted = true;
-
-		for (SchemaGuard schemaGuard : this._schemaGuardListCache)
-		{
-			if (!schemaGuard.isEnabled())
-				continue;
-
-			String pattern = schemaGuard.getPattern();
-			
-			if(StringUtil.isEmpty(pattern))
-				continue;
-			
-			if (this.asteriskPatternMatcher.matches(pattern, guardEntity.getUrl()))
-			{
-				permitted = schemaGuard.isPermitted();
-				break;
-			}
-		}
-
-		return permitted;
+		return this.schemaGuardChecker.isPermitted(this._schemaGuardListCache, guardEntity);
 	}
 
 	@Override

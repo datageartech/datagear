@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.SchemaGuard;
 import org.datagear.management.service.SchemaGuardService;
-import org.datagear.management.service.SchemaGuardService.GuardEntity;
+import org.datagear.management.util.GuardEntity;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.vo.DataFilterPagingQuery;
