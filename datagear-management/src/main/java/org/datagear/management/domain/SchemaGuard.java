@@ -230,10 +230,14 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	public void setPropertyPatternsJson(String json)
 	{
 		if (StringUtil.isEmpty(json))
-			return;
-
-		SchemaPropertyPattern[] propertyPatterns = JsonSupport.parse(json, SchemaPropertyPattern[].class, null);
-		setPropertyPatterns(Arrays.asList(propertyPatterns));
+		{
+			setPropertyPatterns(Collections.emptyList());
+		}
+		else
+		{
+			SchemaPropertyPattern[] propertyPatterns = JsonSupport.parse(json, SchemaPropertyPattern[].class, null);
+			setPropertyPatterns(Arrays.asList(propertyPatterns));
+		}
 	}
 
 	@Override

@@ -244,10 +244,14 @@ public class Schema extends AbstractStringIdEntity
 	public void setPropertiesJson(String json)
 	{
 		if (StringUtil.isEmpty(json))
-			return;
-
-		SchemaProperty[] schemaProperties = JsonSupport.parse(json, SchemaProperty[].class, null);
-		setProperties(Arrays.asList(schemaProperties));
+		{
+			setProperties(null);
+		}
+		else
+		{
+			SchemaProperty[] schemaProperties = JsonSupport.parse(json, SchemaProperty[].class, null);
+			setProperties(Arrays.asList(schemaProperties));
+		}
 	}
 
 	@Override

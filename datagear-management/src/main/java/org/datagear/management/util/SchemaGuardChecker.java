@@ -117,7 +117,11 @@ public class SchemaGuardChecker
 		if (properties.isEmpty())
 			return false;
 
-		if (SchemaGuard.PROPERTIES_MATCH_MODE_ANY.equalsIgnoreCase(schemaGuard.getPropertiesMatchMode()))
+		String pmm = schemaGuard.getPropertiesMatchMode();
+		if (StringUtil.isEmpty(pmm))
+			pmm = SchemaGuard.PROPERTIES_MATCH_MODE_ANY;
+
+		if (SchemaGuard.PROPERTIES_MATCH_MODE_ANY.equalsIgnoreCase(pmm))
 		{
 			for (SchemaPropertyPattern pattern : patterns)
 			{
@@ -145,7 +149,7 @@ public class SchemaGuardChecker
 
 			return false;
 		}
-		else if (SchemaGuard.PROPERTIES_MATCH_MODE_ALL.equalsIgnoreCase(schemaGuard.getPropertiesMatchMode()))
+		else if (SchemaGuard.PROPERTIES_MATCH_MODE_ALL.equalsIgnoreCase(pmm))
 		{
 			for (SchemaPropertyPattern pattern : patterns)
 			{

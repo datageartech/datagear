@@ -52,7 +52,8 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
-			<p-column field="pattern" header="<@spring.message code='pattern' />" :sortable="true" class="col-name"></p-column>
+			<p-column field="pattern" header="<@spring.message code='urlPattern' />" :sortable="true" class="col-name"></p-column>
+			<p-column field="userPattern" header="<@spring.message code='usernamePattern' />" :sortable="true" class="col-name"></p-column>
 			<p-column field="permitted" header="<@spring.message code='isPermit' />" :sortable="true">
 				<template #body="{data}">
 					{{formatPermitted(data)}}

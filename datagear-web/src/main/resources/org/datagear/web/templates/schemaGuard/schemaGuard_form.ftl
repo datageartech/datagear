@@ -44,6 +44,17 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}userPattern" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='schemaGuard.userPattern.desc' />">
+					<@spring.message code='usernamePattern' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}userPattern" v-model="fm.userPattern" type="text" class="input w-full"
+		        		name="userPattern" maxlength="200">
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}permitted" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='schemaGuard.permitted.desc' />">
 					<@spring.message code='isPermit' />
