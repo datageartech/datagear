@@ -114,6 +114,9 @@ public class SchemaGuardChecker
 				return properties.isEmpty();
 		}
 
+		if (properties.isEmpty())
+			return false;
+
 		if (SchemaGuard.PROPERTIES_MATCH_MODE_ANY.equalsIgnoreCase(schemaGuard.getPropertiesMatchMode()))
 		{
 			for (SchemaPropertyPattern pattern : patterns)

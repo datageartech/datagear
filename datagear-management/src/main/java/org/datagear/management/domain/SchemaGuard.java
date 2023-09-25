@@ -64,7 +64,7 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	private List<SchemaPropertyPattern> propertyPatterns = Collections.emptyList();
 
 	/** {@linkplain #propertyPatterns}的匹配类型 */
-	private String propertiesMatchMode = PROPERTIES_MATCH_MODE_ALL;
+	private String propertiesMatchMode = PROPERTIES_MATCH_MODE_ANY;
 
 	/** 是否允许：true 允许；false 禁止 */
 	private boolean permitted = true;
@@ -92,6 +92,28 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	{
 		super(id);
 		this.pattern = pattern;
+	}
+
+	public SchemaGuard(String id, String pattern, boolean permitted)
+	{
+		super(id);
+		this.pattern = pattern;
+		this.permitted = permitted;
+	}
+
+	public SchemaGuard(String id, String pattern, String userPattern)
+	{
+		super(id);
+		this.pattern = pattern;
+		this.userPattern = userPattern;
+	}
+
+	public SchemaGuard(String id, String pattern, String userPattern, boolean permitted)
+	{
+		super(id);
+		this.pattern = pattern;
+		this.userPattern = userPattern;
+		this.permitted = permitted;
 	}
 
 	public String getPattern()

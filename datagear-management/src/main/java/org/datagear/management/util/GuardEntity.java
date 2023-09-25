@@ -54,6 +54,13 @@ public class GuardEntity implements Serializable
 		this.url = url;
 	}
 
+	public GuardEntity(String url, String user)
+	{
+		super();
+		this.url = url;
+		this.user = user;
+	}
+
 	public GuardEntity(String url, String user, List<SchemaProperty> properties)
 	{
 		super();
