@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign SchemaGuard=statics['org.datagear.management.domain.SchemaGuard']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -50,8 +51,65 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}userPattern" v-model="fm.userPattern" type="text" class="input w-full"
-		        		name="userPattern" maxlength="200">
+		        		name="userPattern" required maxlength="100">
 		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}propertyPatterns" class="field-label col-12 mb-2"
+					title="<@spring.message code='schemaGuard.propertyPatterns.desc' />">
+					<@spring.message code='schemaGuard.propertyPatterns' />
+				</label>
+				<div class="field-input col-12">
+					<div class="p-component p-inputtext">
+						<div class="flex flex-row pb-2" v-if="!pm.isReadonlyAction">
+							<div class="h-opts flex-grow-1">
+								<p-button type="button" label="<@spring.message code='add' />"
+									@click="onAddPropertyPattern" class="p-button-secondary p-button-sm">
+								</p-button>
+								<p-button type="button" label="<@spring.message code='edit' />"
+									@click="onEditPropertyPattern" class="p-button-secondary p-button-sm">
+								</p-button>
+								<p-button type="button" label="<@spring.message code='delete' />"
+									@click="onDeletePropertyPattern" class="p-button-danger p-button-sm">
+								</p-button>
+							</div>
+						</div>
+						<div id="${pid}propertyPatterns" class="property-patterns-wrapper input w-full overflow-auto">
+							<p-datatable :value="fm.propertyPatterns" :scrollable="true"
+								v-model:selection="pm.selectedPropertyPatterns"
+								:resizable-columns="true" column-resize-mode="expand"
+								selection-mode="multiple" dataKey="name" striped-rows class="propertyPatterns-table table-sm">
+								<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
+								<p-column field="namePattern" header="<@spring.message code='propertyNamePattern' />">
+								</p-column>
+								<p-column field="valuePattern" header="<@spring.message code='propertyValuePattern' />">
+								</p-column>
+							</p-datatable>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}propertiesMatchMode" class="field-label col-12 mb-2"
+					title="<@spring.message code='schemaGuard.propertiesMatchMode.desc' />">
+					<@spring.message code='schemaGuard.propertiesMatchMode' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-selectbutton id="${pid}propertiesMatchMode" v-model="fm.propertiesMatchMode" :options="pm.propertiesMatchModeOptions"
+		        		option-label="name" option-value="value" class="input w-full">
+		        	</p-selectbutton>
+		        </div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}emptyPropertyPatternsForAll" class="field-label col-12 mb-2"
+					title="<@spring.message code='schemaGuard.emptyPropertyPatternsForAll.desc' />">
+					<@spring.message code='schemaGuard.emptyPropertyPatternsForAll' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-selectbutton id="${pid}emptyPropertyPatternsForAll" v-model="fm.emptyPropertyPatternsForAll" :options="pm.booleanOptions"
+		        		option-label="name" option-value="value" class="input w-full">
+		        	</p-selectbutton>
 		        </div>
 			</div>
 			<div class="field grid">
@@ -91,20 +149,153 @@
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
+	<p-dialog :header="pm.propertyPatternForm.title" append-to="body"
+		position="center" :dismissable-mask="true" :modal="true"
+		v-model:visible="pm.propertyPatternForm.show" @show="onPropertyPatternFormPanelShow">
+		<div class="page page-form">
+			<form id="${pid}propertyPatternForm" class="flex flex-column">
+				<div class="page-form-content flex-grow-1 px-2 py-1 panel-content-size-xs-minw overflow-y-auto">
+					<div class="field grid">
+						<label for="${pid}ppFormNamePattern" class="field-label col-12 mb-2"
+							title="<@spring.message code='schemaGuard.propertyNamePattern.desc' />">
+							<@spring.message code='propertyNamePattern' />
+						</label>
+						<div class="field-input col-12">
+							<p-inputtext id="${pid}ppFormNamePattern" v-model="pm.propertyPatternForm.data.namePattern" type="text"
+								class="input w-full" name="namePattern" required maxlength="100" autofocus>
+							</p-inputtext>
+						</div>
+					</div>
+					<div class="field grid">
+						<label for="${pid}ppFormValuePattern" class="field-label col-12 mb-2"
+							title="<@spring.message code='schemaGuard.propertyValuePattern.desc' />">
+							<@spring.message code='propertyValuePattern' />
+						</label>
+						<div class="field-input col-12">
+							<p-inputtext id="${pid}ppFormValuePattern" v-model="pm.propertyPatternForm.data.valuePattern" type="text"
+								class="input w-full" name="valuePattern" required maxlength="100">
+							</p-inputtext>
+						</div>
+					</div>
+				</div>
+				<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+					<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+				</div>
+			</form>
+		</div>
+	</p-dialog>
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_simple_form.ftl">
 <#include "../include/page_boolean_options.ftl">
 <script>
 (function(po)
 {
 	po.submitUrl = "/schemaGuard/"+po.submitAction;
 	
+	po.showPropertyPatternFormPanel = function(action, data, submitHandler)
+	{
+		data = $.extend(true,
+				{
+					namePattern: "",
+					valuePattern: "*"
+				},
+				po.vueRaw(data));
+		
+		var pm = po.vuePageModel();
+		pm.propertyPatternForm.title = "<@spring.message code='schemaGuard.propertyPatterns' />" + " - " + action;
+		pm.propertyPatternForm.data = data;
+		pm.propertyPatternForm.submitHandler = submitHandler;
+		pm.propertyPatternForm.show = true;
+	};
+	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+	formModel.propertyPatterns = (formModel.propertyPatterns == null ? [] : formModel.propertyPatterns);
+	
 	po.setupForm(formModel, {},
 	{
 		rules :
 		{
 			priority : "integer"
+		}
+	});
+
+	po.vuePageModel(
+	{
+		selectedPropertyPatterns: [],
+		propertyPatternForm:
+		{
+			show: false,
+			title: "",
+			data: {},
+			submitHandler: null
+		},
+		propertiesMatchModeOptions:
+		[
+			{name: "<@spring.message code='schemaGuard.propertiesMatchMode.ANY' />", value: "${SchemaGuard.PROPERTIES_MATCH_MODE_ANY}"},
+			{name: "<@spring.message code='schemaGuard.propertiesMatchMode.ALL' />", value: "${SchemaGuard.PROPERTIES_MATCH_MODE_ALL}"}
+		]
+	});
+	
+
+	po.vueMethod(
+	{
+		onAddPropertyPattern: function(e)
+		{
+			po.showPropertyPatternFormPanel("<@spring.message code='add' />", {}, function(sp)
+			{
+				var fm = po.vueFormModel();
+				fm.propertyPatterns.push(sp);
+			});
+		},
+		
+		onEditPropertyPattern: function(e)
+		{
+			var pm = po.vuePageModel();
+			
+			if(!pm.selectedPropertyPatterns || pm.selectedPropertyPatterns.length == 0)
+				return;
+			
+			var fm = po.vueFormModel();
+			var pp = pm.selectedPropertyPatterns[0];
+			var ppIdx = $.inArrayById(fm.propertyPatterns, pp.namePattern, "namePattern");
+			
+			po.showPropertyPatternFormPanel("<@spring.message code='edit' />", pp, function(pp)
+			{
+				fm.propertyPatterns[ppIdx] = pp;
+			});
+		},
+		
+		onDeletePropertyPattern: function(e)
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			var pps = $.wrapAsArray(po.vueRaw(pm.selectedPropertyPatterns));
+			
+			$.each(pps, function(idx, pp)
+			{
+				$.removeById(fm.propertyPatterns, pp.namePattern, "namePattern");
+			});
+		},
+		
+		onPropertyPatternFormPanelShow: function()
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			var form = po.elementOfId("${pid}propertyPatternForm", document.body);
+			po.setupSimpleForm(form, pm.propertyPatternForm.data, function()
+			{
+				var close = true;
+				
+				if(pm.propertyPatternForm.submitHandler)
+				{
+					var data = $.extend(true, {}, po.vueRaw(pm.propertyPatternForm.data));
+					close = pm.propertyPatternForm.submitHandler(data);
+				}
+				
+				pm.propertyPatternForm.show = (close === false);
+			});
 		}
 	});
 })

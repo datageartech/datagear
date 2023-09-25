@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.SchemaGuard;
 import org.datagear.management.service.SchemaGuardService;
 import org.datagear.management.util.GuardEntity;
+import org.datagear.util.AsteriskPatternMatcher;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.vo.DataFilterPagingQuery;
@@ -68,6 +69,7 @@ public class SchemaGuardController extends AbstractController
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		SchemaGuard schemaGuard = new SchemaGuard();
+		schemaGuard.setUserPattern(AsteriskPatternMatcher.ALL_PATTERN);
 		schemaGuard.setPermitted(false);
 
 		setFormModel(model, schemaGuard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
