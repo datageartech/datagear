@@ -56,7 +56,7 @@ public class SchemaGuardCheckerTest
 		// 全部允许
 		{
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
-					new SchemaGuard("1", "*", true));
+					new SchemaGuard("1", "1", "1", "*", true));
 
 			assertTrue(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root")));
@@ -68,7 +68,7 @@ public class SchemaGuardCheckerTest
 		// 全部禁止
 		{
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
-					new SchemaGuard("1", "*", false));
+					new SchemaGuard("1", "1", "*", false));
 
 			assertFalse(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root")));
@@ -80,8 +80,8 @@ public class SchemaGuardCheckerTest
 		// 仅允许指定URL
 		{
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
-					new SchemaGuard("1", "*192.168.1.1*"), //
-					new SchemaGuard("2", "*", false));
+					new SchemaGuard("1", "1", "*192.168.1.1*"), //
+					new SchemaGuard("2", "2", "*", false));
 
 			assertTrue(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root")));
@@ -93,8 +93,8 @@ public class SchemaGuardCheckerTest
 		// 仅禁止指定URL
 		{
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
-					new SchemaGuard("1", "*192.168.1.1*", false), //
-					new SchemaGuard("2", "*", true));
+					new SchemaGuard("1", "1", "*192.168.1.1*", false), //
+					new SchemaGuard("2", "2", "*", true));
 
 			assertFalse(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root")));
@@ -109,8 +109,8 @@ public class SchemaGuardCheckerTest
 		// 仅禁止指定用户名
 		{
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
-					new SchemaGuard("1", "*", "root", false), //
-					new SchemaGuard("2", "*", "*", true));
+					new SchemaGuard("1", "1", "*", "root", false), //
+					new SchemaGuard("2", "2", "*", "*", true));
 
 			assertFalse(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://127.0.0.1:3306/test", "root")));
@@ -121,12 +121,12 @@ public class SchemaGuardCheckerTest
 
 		// 仅禁止指定URL、且包含指定属性名
 		{
-			SchemaGuard schemaGuard0 = new SchemaGuard("1", "*192.168.1.1*", false);
+			SchemaGuard schemaGuard0 = new SchemaGuard("1", "1", "*192.168.1.1*", false);
 			schemaGuard0.setPropertyPatterns(Arrays.asList(new SchemaPropertyPattern("*first*")));
 
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
 					schemaGuard0, //
-					new SchemaGuard("2", "*", true));
+					new SchemaGuard("2", "2", "*", true));
 
 			assertFalse(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root", schemaProperties)));
@@ -143,15 +143,15 @@ public class SchemaGuardCheckerTest
 
 		// 仅禁止指定URL、或者包含指定属性名
 		{
-			SchemaGuard schemaGuard0 = new SchemaGuard("1", "*192.168.1.1*", false);
+			SchemaGuard schemaGuard0 = new SchemaGuard("1", "1", "*192.168.1.1*", false);
 
-			SchemaGuard schemaGuard1 = new SchemaGuard("2", "*", false);
+			SchemaGuard schemaGuard1 = new SchemaGuard("2", "2", "*", false);
 			schemaGuard1.setPropertyPatterns(Arrays.asList(new SchemaPropertyPattern("*first*")));
 
 			List<SchemaGuard> schemaGuards = Arrays.asList( //
 					schemaGuard0, //
 					schemaGuard1, //
-					new SchemaGuard("3", "*", true));
+					new SchemaGuard("3", "3", "*", true));
 
 			assertFalse(this.schemaGuardChecker.isPermitted(schemaGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root", schemaProperties)));
@@ -175,7 +175,7 @@ public class SchemaGuardCheckerTest
 	public void isUrlMatchedTest()
 	{
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*192.168.1.1*");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*192.168.1.1*");
 
 			assertTrue(this.schemaGuardChecker.isUrlMatched(schemaGuard,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test")));
@@ -185,7 +185,7 @@ public class SchemaGuardCheckerTest
 
 		// 忽略大小写
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*abc*");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*abc*");
 
 			assertTrue(this.schemaGuardChecker.isUrlMatched(schemaGuard,
 					new GuardEntity("abc")));
@@ -196,7 +196,7 @@ public class SchemaGuardCheckerTest
 
 		// 模式为null
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", null);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", null);
 
 			assertTrue(this.schemaGuardChecker.isUrlMatched(schemaGuard,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test")));
@@ -206,7 +206,7 @@ public class SchemaGuardCheckerTest
 
 		// 模式为""
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "");
 
 			assertTrue(this.schemaGuardChecker.isUrlMatched(schemaGuard,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test")));
@@ -216,7 +216,7 @@ public class SchemaGuardCheckerTest
 
 		// 目标为null
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "");
 
 			assertTrue(this.schemaGuardChecker.isUrlMatched(schemaGuard, new GuardEntity((String) null)));
 		}
@@ -226,7 +226,7 @@ public class SchemaGuardCheckerTest
 	public void isUserMatchedTest()
 	{
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "", "*root*");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "", "*root*");
 
 			assertTrue(this.schemaGuardChecker.isUserMatched(schemaGuard,
 					new GuardEntity("", "root")));
@@ -235,7 +235,7 @@ public class SchemaGuardCheckerTest
 
 		// 忽略大小写
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "", "*abc*");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "", "*abc*");
 
 			assertTrue(this.schemaGuardChecker.isUserMatched(schemaGuard, new GuardEntity("", "abc")));
 			assertTrue(this.schemaGuardChecker.isUserMatched(schemaGuard, new GuardEntity("", "aBc")));
@@ -244,7 +244,7 @@ public class SchemaGuardCheckerTest
 
 		// 模式为null
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "", null);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "", null);
 
 			assertTrue(this.schemaGuardChecker.isUserMatched(schemaGuard,
 					new GuardEntity("", "abc")));
@@ -254,7 +254,7 @@ public class SchemaGuardCheckerTest
 
 		// 模式为""
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "");
 
 			assertTrue(this.schemaGuardChecker.isUserMatched(schemaGuard,
 					new GuardEntity("", "abc")));
@@ -264,7 +264,7 @@ public class SchemaGuardCheckerTest
 
 		// 目标为null
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "", "");
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "", "");
 
 			assertTrue(this.schemaGuardChecker.isUserMatched(schemaGuard, new GuardEntity((String) null, null)));
 		}
@@ -275,7 +275,7 @@ public class SchemaGuardCheckerTest
 	{
 		// 空属性列表匹配模式
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setEmptyPropertyPatternsForAll(true);
 
 			assertTrue(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
@@ -285,7 +285,7 @@ public class SchemaGuardCheckerTest
 					new GuardEntity("", "", schemaProperties)));
 		}
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setEmptyPropertyPatternsForAll(false);
 
 			assertTrue(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
@@ -297,7 +297,7 @@ public class SchemaGuardCheckerTest
 
 		// 目标属性列表为空
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setPropertyPatterns(Arrays.asList(new SchemaPropertyPattern("*first*")));
 
 			assertFalse(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
@@ -306,7 +306,7 @@ public class SchemaGuardCheckerTest
 
 		// 匹配任一属性名
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setPropertyPatterns(
 					Arrays.asList(new SchemaPropertyPattern("*first*"), new SchemaPropertyPattern("*second*")));
 
@@ -322,7 +322,7 @@ public class SchemaGuardCheckerTest
 					.asList(new SchemaProperty("secondsProperty", "123"), new SchemaProperty("werwerw23", "123")))));
 		}
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setPropertyPatterns(
 					Arrays.asList(new SchemaPropertyPattern("*first*"), new SchemaPropertyPattern("*second*")));
 			schemaGuard.setPropertiesMatchMode(SchemaGuard.PROPERTIES_MATCH_MODE_ANY);
@@ -337,7 +337,7 @@ public class SchemaGuardCheckerTest
 
 		// 匹配所有属性名
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setPropertyPatterns(
 					Arrays.asList(new SchemaPropertyPattern("*first*"), new SchemaPropertyPattern("*second*")));
 			schemaGuard.setPropertiesMatchMode(SchemaGuard.PROPERTIES_MATCH_MODE_ALL);
@@ -354,7 +354,7 @@ public class SchemaGuardCheckerTest
 
 		// 匹配属性名、属性值
 		{
-			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			SchemaGuard schemaGuard = new SchemaGuard("1", "1", "*", "*", true);
 			schemaGuard.setPropertyPatterns(
 					Arrays.asList(new SchemaPropertyPattern("*first*", "root")));
 

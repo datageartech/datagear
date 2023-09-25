@@ -6,12 +6,12 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_SCHEMA_GUARD
 			(
-			SG_ID, SG_PATTERN, SG_USER_PATTERN, SG_PROP_PATTERNS, SG_EMPTY_PPT_FA, SG_PROP_MATCH_MODE,
+			SG_ID, SG_NAME, SG_PATTERN, SG_USER_PATTERN, SG_PROP_PATTERNS, SG_EMPTY_PPT_FA, SG_PROP_MATCH_MODE,
 			SG_PERMITTED, SG_PRIORITY, SG_ENABLED, SG_CREATE_TIME
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.pattern},
+			#{entity.id}, #{entity.name}, #{entity.pattern},
 			#{entity.userPattern, jdbcType=VARCHAR}, #{entity.propertyPatternsJson, jdbcType=VARCHAR},
 			#{entity.emptyPropertyPatternsForAll, jdbcType=VARCHAR}, #{entity.propertiesMatchMode, jdbcType=VARCHAR},
 			#{entity.permitted, jdbcType=VARCHAR}, #{entity.priority}, #{entity.enabled, jdbcType=VARCHAR}, #{entity.createTime}
@@ -20,6 +20,7 @@
 	
 	<update id="update">
 		UPDATE DATAGEAR_SCHEMA_GUARD SET
+			SG_NAME = #{entity.name},
 			SG_PATTERN = #{entity.pattern},
 			SG_USER_PATTERN = #{entity.userPattern, jdbcType=VARCHAR},
 			SG_PROP_PATTERNS = #{entity.propertyPatternsJson, jdbcType=VARCHAR},
@@ -88,6 +89,7 @@
 	<sql id="queryView">
 		SELECT
 			A.SG_ID AS ${_iq_}id${_iq_},
+			A.SG_NAME AS ${_iq_}name${_iq_},
 			A.SG_PATTERN AS ${_iq_}pattern${_iq_},
 			A.SG_USER_PATTERN AS ${_iq_}userPattern${_iq_},
 			A.SG_PROP_PATTERNS AS ${_iq_}propertyPatternsJson${_iq_},
@@ -106,7 +108,7 @@
 		<if test="queryKeyword != null">
 		AND
 		(
-			${_iq_}pattern${_iq_} LIKE #{queryKeyword} OR ${_iq_}userPattern${_iq_} LIKE #{queryKeyword}
+			${_iq_}name${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 	</sql>

@@ -159,7 +159,7 @@ public class SchemaGuardController extends AbstractController
 
 	protected void checkSaveEntity(SchemaGuard schemaGuard)
 	{
-		if (isBlank(schemaGuard.getPattern()))
+		if (isBlank(schemaGuard.getName()) || isBlank(schemaGuard.getPattern()))
 			throw new IllegalInputException();
 	}
 

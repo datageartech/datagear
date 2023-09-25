@@ -46,6 +46,9 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	/** 连接属性匹配类型：全部 */
 	public static final String PROPERTIES_MATCH_MODE_ALL = "ALL";
 
+	/** 名称 */
+	private String name;
+
 	/** 连接URL匹配模式，{@code null}、{@code ""}匹配所有 */
 	private String pattern = "";
 
@@ -88,32 +91,46 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 		super(id);
 	}
 
-	public SchemaGuard(String id, String pattern)
+	public SchemaGuard(String id, String name, String pattern)
 	{
 		super(id);
+		this.name = name;
 		this.pattern = pattern;
 	}
 
-	public SchemaGuard(String id, String pattern, boolean permitted)
+	public SchemaGuard(String id, String name, String pattern, boolean permitted)
 	{
 		super(id);
+		this.name = name;
 		this.pattern = pattern;
 		this.permitted = permitted;
 	}
 
-	public SchemaGuard(String id, String pattern, String userPattern)
+	public SchemaGuard(String id, String name, String pattern, String userPattern)
 	{
 		super(id);
+		this.name = name;
 		this.pattern = pattern;
 		this.userPattern = userPattern;
 	}
 
-	public SchemaGuard(String id, String pattern, String userPattern, boolean permitted)
+	public SchemaGuard(String id, String name, String pattern, String userPattern, boolean permitted)
 	{
 		super(id);
+		this.name = name;
 		this.pattern = pattern;
 		this.userPattern = userPattern;
 		this.permitted = permitted;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public String getPattern()

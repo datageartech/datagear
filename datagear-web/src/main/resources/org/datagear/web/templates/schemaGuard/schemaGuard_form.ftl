@@ -34,13 +34,23 @@
 	<form id="${pid}form" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
+				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='name' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}name" v-model="fm.name" type="text" class="input w-full"
+		        		name="name" required maxlength="100" autofocus>
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}pattern" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='schemaGuard.pattern.desc' />">
 					<@spring.message code='urlPattern' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}pattern" v-model="fm.pattern" type="text" class="input w-full"
-		        		name="pattern" required maxlength="200" autofocus>
+		        		name="pattern" required maxlength="200">
 		        	</p-inputtext>
 		        </div>
 			</div>
