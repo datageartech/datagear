@@ -52,6 +52,9 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	/** 连接用户名匹配模式，{@code null}、{@code ""}匹配所有 */
 	private String userPattern = "";
 
+	/** 连接属性匹配模式，{@code null}、空列表匹配所有 */
+	private List<SchemaPropertyPattern> propertyPatterns = Collections.emptyList();
+
 	/**
 	 * 当{@linkplain #propertyPatterns}为空时，是否匹配任意连接属性，否则将仅匹配空连接属性。
 	 * <p>
@@ -59,9 +62,6 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	 * </p>
 	 */
 	private boolean emptyPropertyPatternsForAll = true;
-
-	/** 连接属性匹配模式，{@code null}、空列表匹配所有 */
-	private List<SchemaPropertyPattern> propertyPatterns = Collections.emptyList();
 
 	/** {@linkplain #propertyPatterns}的匹配类型 */
 	private String propertiesMatchMode = PROPERTIES_MATCH_MODE_ANY;
@@ -137,16 +137,6 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 		this.userPattern = userPattern;
 	}
 
-	public boolean isEmptyPropertyPatternsForAll()
-	{
-		return emptyPropertyPatternsForAll;
-	}
-
-	public void setEmptyPropertyPatternsForAll(boolean emptyPropertyPatternsForAll)
-	{
-		this.emptyPropertyPatternsForAll = emptyPropertyPatternsForAll;
-	}
-
 	@Nullable
 	public List<SchemaPropertyPattern> getPropertyPatterns()
 	{
@@ -156,6 +146,16 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	public void setPropertyPatterns(List<SchemaPropertyPattern> propertyPatterns)
 	{
 		this.propertyPatterns = propertyPatterns;
+	}
+
+	public boolean isEmptyPropertyPatternsForAll()
+	{
+		return emptyPropertyPatternsForAll;
+	}
+
+	public void setEmptyPropertyPatternsForAll(boolean emptyPropertyPatternsForAll)
+	{
+		this.emptyPropertyPatternsForAll = emptyPropertyPatternsForAll;
 	}
 
 	public String getPropertiesMatchMode()

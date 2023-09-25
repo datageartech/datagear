@@ -350,7 +350,22 @@ public class SchemaGuardCheckerTest
 
 			assertFalse(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
 					new GuardEntity("", "", Arrays.asList(new SchemaProperty("secondProperty", "123")))));
+		}
 
+		// 匹配属性名、属性值
+		{
+			SchemaGuard schemaGuard = new SchemaGuard("1", "*", "*", true);
+			schemaGuard.setPropertyPatterns(
+					Arrays.asList(new SchemaPropertyPattern("*first*", "root")));
+
+			assertTrue(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
+					new GuardEntity("", "", Arrays.asList(new SchemaProperty("firstProperty", "root")))));
+
+			assertFalse(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
+					new GuardEntity("", "", schemaProperties)));
+
+			assertFalse(this.schemaGuardChecker.isPropertiesMatched(schemaGuard,
+					new GuardEntity("", "", Arrays.asList(new SchemaProperty("firstProperty", "123")))));
 		}
 	}
 }
