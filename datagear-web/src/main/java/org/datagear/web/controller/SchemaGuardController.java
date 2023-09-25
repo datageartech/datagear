@@ -174,34 +174,9 @@ public class SchemaGuardController extends AbstractController
 	@RequestMapping(value = "/testExecute", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> testExecute(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SchemaGuardTestForm form)
+			@RequestBody GuardEntity form)
 	{
-		String url = form.getUrl();
-
-		boolean permitted = this.schemaGuardService.isPermitted(new GuardEntity(url));
-
+		boolean permitted = this.schemaGuardService.isPermitted(form);
 		return optSuccessDataResponseEntity(request, permitted);
-	}
-
-	public static class SchemaGuardTestForm implements ControllerForm
-	{
-		private static final long serialVersionUID = 1L;
-
-		private String url;
-
-		public SchemaGuardTestForm()
-		{
-			super();
-		}
-
-		public String getUrl()
-		{
-			return url;
-		}
-
-		public void setUrl(String url)
-		{
-			this.url = url;
-		}
 	}
 }
