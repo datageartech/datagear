@@ -25,6 +25,7 @@ import java.util.Map;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.core.OutputFormat;
+import freemarker.core.TemplateClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -110,6 +111,12 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 
 		// 此类的模板策略不需要国际化支持，应禁用
 		configuration.setLocalizedLookup(false);
+
+		// 禁用"?new"指令，这里不需此特性，并且此指令会导致远程命令执行安全漏洞
+		configuration.setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
+
+		// 禁用"?api"指令，这里不需要此特性，并且此指令会导致安全问题
+		configuration.setAPIBuiltinEnabled(false);
 	}
 
 	/**
