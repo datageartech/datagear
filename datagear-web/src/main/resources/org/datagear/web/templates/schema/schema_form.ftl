@@ -97,6 +97,9 @@
 								<p-button type="button" label="<@spring.message code='add' />"
 									@click="onAddProperty" class="p-button-secondary p-button-sm">
 								</p-button>
+								<p-button type="button" label="<@spring.message code='edit' />"
+									@click="onEditProperty" class="p-button-secondary p-button-sm">
+								</p-button>
 								<p-button type="button" label="<@spring.message code='delete' />"
 									@click="onDeleteProperty" class="p-button-danger p-button-sm">
 								</p-button>
@@ -105,24 +108,12 @@
 						<div id="${pid}properties" class="properties-wrapper input w-full overflow-auto">
 							<p-datatable :value="fm.properties" :scrollable="true"
 								v-model:selection="pm.selectedProperties"
-								v-model:editing-rows="pm.editingPropertyRows"  @row-edit-save="onPropertyRowEditSave"
-								@row-edit-cancel="onPropertyRowEditCancel"
 								:resizable-columns="true" column-resize-mode="expand"
 								selection-mode="multiple" dataKey="name" striped-rows class="properties-table table-sm">
 								<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
-								<p-column :row-editor="true" :frozen="true"
-									class="col-edit-btn" bodyStyle="text-align:center"
-									v-if="!pm.isReadonlyAction">
-								</p-column>
 								<p-column field="name" header="<@spring.message code='propertyName' />">
-									<template #editor="{ data, field }">
-										<p-inputtext v-model="data[field]" @keydown.enter="onRowEditInputPreventDefault" maxlength="100" autofocus></p-inputtext>
-									</template>
 								</p-column>
 								<p-column field="value" header="<@spring.message code='propertyValue' />">
-									<template #editor="{ data, field }">
-										<p-inputtext v-model="data[field]" @keydown.enter="onRowEditInputPreventDefault" maxlength="100"></p-inputtext>
-									</template>
 								</p-column>
 							</p-datatable>
 						</div>
@@ -176,8 +167,42 @@
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
+	<p-dialog :header="pm.propertyForm.title" append-to="body"
+		position="center" :dismissable-mask="true" :modal="true"
+		v-model:visible="pm.propertyForm.show" @show="onPropertyFormPanelShow">
+		<div class="page page-form">
+			<form id="${pid}propertyForm" class="flex flex-column">
+				<div class="page-form-content flex-grow-1 px-2 py-1 panel-content-size-xs-minw overflow-y-auto">
+					<div class="field grid">
+						<label for="${pid}propertyFormName" class="field-label col-12 mb-2">
+							<@spring.message code='propertyName' />
+						</label>
+						<div class="field-input col-12">
+							<p-inputtext id="${pid}propertyFormName" v-model="pm.propertyForm.data.name" type="text"
+								class="input w-full" name="name" required maxlength="100" autofocus>
+							</p-inputtext>
+						</div>
+					</div>
+					<div class="field grid">
+						<label for="${pid}propertyFormValue" class="field-label col-12 mb-2">
+							<@spring.message code='propertyValue' />
+						</label>
+						<div class="field-input col-12">
+							<p-inputtext id="${pid}propertyFormValue" v-model="pm.propertyForm.data.value" type="text"
+								class="input w-full" name="value" maxlength="100">
+							</p-inputtext>
+						</div>
+					</div>
+				</div>
+				<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+					<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+				</div>
+			</form>
+		</div>
+	</p-dialog>
 </div>
 <#include "../include/page_form.ftl">
+<#include "../include/page_simple_form.ftl">
 <script>
 (function(po)
 {
@@ -209,13 +234,35 @@
 		action.url = "/schema/testConnection";
 		action.options.defaultSuccessCallback = false;
 	};
-	
+
+	po.showPropertyFormPanel = function(action, data, submitHandler)
+	{
+		data = $.extend(true,
+				{
+					name: "",
+					value: ""
+				},
+				po.vueRaw(data));
+		
+		var pm = po.vuePageModel();
+		pm.propertyForm.title = "<@spring.message code='schema.properties' />" + " - " + action;
+		pm.propertyForm.data = data;
+		pm.propertyForm.submitHandler = submitHandler;
+		pm.propertyForm.show = true;
+	};
+
 	po.vuePageModel(
 	{
 		selectedProperties: [],
-		editingPropertyRows: [],
 		inTestAction: false,
-		testActionBtnLabel: "<@spring.message code='test' />"
+		testActionBtnLabel: "<@spring.message code='test' />",
+		propertyForm:
+		{
+			show: false,
+			title: "",
+			data: {},
+			submitHandler: null
+		}
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -261,11 +308,28 @@
 		
 		onAddProperty: function(e)
 		{
-			var fm = po.vueFormModel();
+			po.showPropertyFormPanel("<@spring.message code='add' />", {}, function(sp)
+			{
+				var fm = po.vueFormModel();
+				fm.properties.push(sp);
+			});
+		},
+		
+		onEditProperty: function(e)
+		{
 			var pm = po.vuePageModel();
 			
-			fm.properties.push({ name: "", value: "" });
-			pm.editingPropertyRows.push(fm.properties[fm.properties.length-1]);
+			if(!pm.selectedProperties || pm.selectedProperties.length == 0)
+				return;
+			
+			var fm = po.vueFormModel();
+			var sp = pm.selectedProperties[0];
+			var spIdx = $.inArrayById(fm.properties, sp.name, "name");
+			
+			po.showPropertyFormPanel("<@spring.message code='edit' />", sp, function(sp)
+			{
+				fm.properties[spIdx] = sp;
+			});
 		},
 		
 		onDeleteProperty: function(e)
@@ -280,49 +344,24 @@
 			});
 		},
 		
-		onPropertyRowEditSave: function(e)
+		onPropertyFormPanelShow: function()
 		{
 			var fm = po.vueFormModel();
-			var valid = true;
+			var pm = po.vuePageModel();
 			
-			if(!e.newData.name)
+			var form = po.elementOfId("${pid}propertyForm", document.body);
+			po.setupSimpleForm(form, pm.propertyForm.data, function()
 			{
-				valid = false;
-				$.tipInfo("<@spring.message code='propertyNameRequired' />");
-			}
-			
-			if(!valid)
-			{
-				var pm = po.vuePageModel();
-				pm.editingPropertyRows.push(e.data);
-			}
-			else
-			{
-				fm.properties[e.index] = e.newData;
-			}
-		},
-		
-		onPropertyRowEditCancel: function(e)
-		{
-			var fm = po.vueFormModel();
-			var valid = true;
-			
-			if(!e.data.name)
-			{
-				valid = false;
-				$.tipInfo("<@spring.message code='propertyNameRequired' />");
-			}
-			
-			if(!valid)
-			{
-				var pm = po.vuePageModel();
-				pm.editingPropertyRows.push(e.data);
-			}
-		},
-		
-		onRowEditInputPreventDefault: function(e)
-		{
-			e.preventDefault();
+				var close = true;
+				
+				if(pm.propertyForm.submitHandler)
+				{
+					var data = $.extend(true, {}, po.vueRaw(pm.propertyForm.data));
+					close = pm.propertyForm.submitHandler(data);
+				}
+				
+				pm.propertyForm.show = (close === false);
+			});
 		},
 		
 		onDeleteDriverEntity: function()
