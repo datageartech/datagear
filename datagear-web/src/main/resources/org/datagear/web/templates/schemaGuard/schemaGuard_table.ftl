@@ -52,19 +52,24 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
-			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
-			<p-column field="permitted" header="<@spring.message code='isPermit' />" :sortable="true">
+			<p-column field="name" header="<@spring.message code='name' />" class="col-name"></p-column>
+			<p-column field="permitted" header="<@spring.message code='isPermit' />">
 				<template #body="{data}">
 					{{formatPermitted(data)}}
 				</template>
 			</p-column>
-			<p-column field="priority" header="<@spring.message code='priority' />" :sortable="true"></p-column>
-			<p-column field="enabled" header="<@spring.message code='isEnable' />" :sortable="true">
+			<p-column field="priority" header="<@spring.message code='priority' />"></p-column>
+			<p-column field="enabled" header="<@spring.message code='isEnable' />">
 				<template #body="{data}">
 					{{formatEnabled(data)}}
 				</template>
 			</p-column>
 		</p-datatable>
+	</div>
+	<div class="flex-grow-0">
+		<div class="flex justify-content-center align-items-center text-color-secondary">
+			<small><@spring.message code='schemaGuard.table.desc' /></small>
+		</div>
 	</div>
 	<#include "../include/page_foot.ftl">
 </div>
@@ -76,7 +81,7 @@
 {
 	po.setupAjaxTable("/schemaGuard/queryData",
 	{
-		multiSortMeta: [ {field: "priority", order: -1} ]
+		multiSortMeta: []
 	});
 	
 	po.vueMethod(

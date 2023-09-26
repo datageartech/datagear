@@ -153,6 +153,7 @@ public class SchemaGuardController extends AbstractController
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		List<SchemaGuard> schemaGuards = this.schemaGuardService.query(pagingQuery);
+		SchemaGuard.sortByPriority(schemaGuards);
 
 		return schemaGuards;
 	}
