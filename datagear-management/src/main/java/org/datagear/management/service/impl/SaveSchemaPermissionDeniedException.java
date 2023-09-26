@@ -22,31 +22,31 @@ import javax.xml.validation.Schema;
 import org.datagear.management.service.PermissionDeniedException;
 
 /**
- * 保存指定URL的{@linkplain Schema}无权限异常。
+ * 无权保存{@linkplain Schema}异常。
  * 
  * @author datagear@163.com
  *
  */
-public class SaveSchemaUrlPermissionDeniedException extends PermissionDeniedException
+public class SaveSchemaPermissionDeniedException extends PermissionDeniedException
 {
 	private static final long serialVersionUID = 1L;
 
-	public SaveSchemaUrlPermissionDeniedException()
+	public SaveSchemaPermissionDeniedException()
 	{
 		super();
 	}
 
-	public SaveSchemaUrlPermissionDeniedException(String message)
+	public SaveSchemaPermissionDeniedException(String message)
 	{
 		super(message);
 	}
 
-	public SaveSchemaUrlPermissionDeniedException(Throwable cause)
+	public SaveSchemaPermissionDeniedException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public SaveSchemaUrlPermissionDeniedException(String message, Throwable cause)
+	public SaveSchemaPermissionDeniedException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}

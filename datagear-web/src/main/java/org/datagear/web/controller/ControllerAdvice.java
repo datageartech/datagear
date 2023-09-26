@@ -47,7 +47,7 @@ import org.datagear.connection.URLNotAcceptedException;
 import org.datagear.connection.UnsupportedGetConnectionException;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
+import org.datagear.management.service.impl.SaveSchemaPermissionDeniedException;
 import org.datagear.meta.resolver.DBMetaResolverException;
 import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.NonUniqueResultException;
@@ -547,10 +547,10 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(SaveSchemaUrlPermissionDeniedException.class)
+	@ExceptionHandler(SaveSchemaPermissionDeniedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleServiceSaveSchemaUrlPermissionDeniedException(HttpServletRequest request,
-			HttpServletResponse response, SaveSchemaUrlPermissionDeniedException exception)
+	public String handleServiceSaveSchemaPermissionDeniedException(HttpServletRequest request,
+			HttpServletResponse response, SaveSchemaPermissionDeniedException exception)
 	{
 		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
