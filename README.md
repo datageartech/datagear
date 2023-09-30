@@ -28,6 +28,10 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 - 自由开放的数据看板
 <br>数据看板采用原生的HTML网页作为模板，支持导入任意HTML网页，支持以可视化方式进行看板设计和编辑，也支持使用JavaScript、CSS等web前端技术自由编辑看板源码，内置丰富的API，可制作图表联动、数据钻取、异步加载、交互表单等个性化的数据看板。
 
+## 功能
+
+![screenshot/architecture.png](screenshot/architecture.png)
+
 ## 官网
 
 [http://www.datagear.tech](http://www.datagear.tech)
