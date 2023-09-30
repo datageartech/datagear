@@ -14,7 +14,7 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 ## [DataGear 4.6.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
-## 系统特点
+# 特点
 
 - 友好接入的数据源
 <br>支持运行时接入任意提供JDBC驱动的数据库，包括MySQL、Oracle、PostgreSQL、SQL Server等关系数据库，以及Elasticsearch、ClickHouse、Hive等大数据引擎
@@ -28,35 +28,35 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 - 自由开放的数据看板
 <br>数据看板采用原生的HTML网页作为模板，支持导入任意HTML网页，支持以可视化方式进行看板设计和编辑，也支持使用JavaScript、CSS等web前端技术自由编辑看板源码，内置丰富的API，可制作图表联动、数据钻取、异步加载、交互表单等个性化的数据看板。
 
-## 功能
+# 功能
 
 ![screenshot/architecture.png](screenshot/architecture.png)
 
-## 官网
+# 官网
 
 [http://www.datagear.tech](http://www.datagear.tech)
 
-## 文档
+# 文档
 
 [http://www.datagear.tech/documentation](http://www.datagear.tech/documentation)
 
-## 示例
+# 示例
 
 [https://my.oschina.net/u/4035217](https://my.oschina.net/u/4035217)
 
-## 源码
+# 源码
 
 Gitee：[https://gitee.com/datagear/datagear](https://gitee.com/datagear/datagear)
 
 Github：[https://github.com/datageartech/datagear](https://github.com/datageartech/datagear)
 
-## 交流
+# 交流
 
 QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199（已满）](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)、[541252568](https://jq.qq.com/?_wv=1027&k=F7dwDVLO)
 
 留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
 
-## 界面
+# 界面
 
 数据源管理
 
@@ -95,7 +95,7 @@ SQL数据集
 ![screenshot/dashboard-link-load-chart.gif](screenshot/dashboard-link-load-chart.gif)
 
 
-## 技术栈（前后端一体）
+# 技术栈（前后端一体）
 
 - 后端
   <br>
@@ -105,7 +105,7 @@ SQL数据集
   <br>
   jQuery、Vue3、PrimeVue、CodeMirror、ECharts、DataTables
 
-## 模块介绍
+# 模块介绍
 
 - datagear-analysis
   <br>数据分析底层模块，定义数据集、图表、看板API
@@ -134,14 +134,14 @@ SQL数据集
 - datagear-webapp
   <br>系统web应用模块，定义程序启动类
 
-## 依赖
+# 依赖
 
 	Java 8+
 	Servlet 3.1+
 
-## 编译
+# 编译
 
-### 准备单元测试环境
+## 准备单元测试环境
 
 1. 安装`MySQL-8.0`数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
 
@@ -149,7 +149,7 @@ SQL数据集
 
 3. 使用`test/sql/test-mysql.sql`脚本初始化`dg_test`库
 
-### 执行编译命令
+## 执行编译命令
 
 	mvn clean package
 
@@ -159,7 +159,7 @@ SQL数据集
 
 编译完成后，将在`datagear-webapp/target/datagear-[version]-packages/`内生成程序包。
 
-## 调试
+# 调试
 	
 1. 将`datagear`以maven工程导入至IDE工具
 
@@ -188,7 +188,7 @@ SQL数据集
 
 系统自带了一个可用于为内置数据库执行SQL语句的简单工具类`org.datagear.web.util.DerbySqlClient`，可以在IDE中直接运行。注意：运行前需要先停止DataGear程序。
 
-## 版权和许可
+# 版权和许可
 
 Copyright 2018-2023 datagear.tech
 
