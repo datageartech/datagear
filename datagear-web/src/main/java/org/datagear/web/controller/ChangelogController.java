@@ -24,9 +24,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.util.Global;
+import org.datagear.util.version.ChangelogResolver;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
-import org.datagear.web.util.ChangelogResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -76,7 +76,7 @@ public class ChangelogController extends AbstractController
 
 		if (version != null)
 		{
-			VersionContent versionChangelog = this.changelogResolver.resolveChangelog(version);
+			VersionContent versionChangelog = this.changelogResolver.resolveVersion(version);
 			versionChangelogs.add(versionChangelog);
 		}
 

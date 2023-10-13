@@ -114,6 +114,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
 import org.datagear.util.sqlvalidator.SqlValidator;
+import org.datagear.util.version.ChangelogResolver;
 import org.datagear.web.controller.AuthorizationResMetaManager;
 import org.datagear.web.controller.AuthorizationResMetas;
 import org.datagear.web.controller.LoginController;
@@ -130,7 +131,6 @@ import org.datagear.web.security.AuthenticationUserGetter;
 import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
-import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DefaultMessageChannel;
 import org.datagear.web.util.DelegatingTextEncryptor;
@@ -159,6 +159,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -855,7 +856,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public ChangelogResolver changelogResolver()
 	{
-		return new ChangelogResolver();
+		return new ChangelogResolver(
+				new ClassPathResource("org/datagear/web/changelog.txt", CoreConfigSupport.class.getClassLoader()));
 	}
 
 	@Bean

@@ -15,70 +15,119 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util;
+package org.datagear.util.version;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 
 import org.datagear.util.IOUtil;
-import org.datagear.util.version.AbstractVersionContentReader;
-import org.datagear.util.version.Version;
-import org.datagear.util.version.VersionContent;
+import org.springframework.core.io.Resource;
 
 /**
- * 更新日志解析器。
+ * 版本更新日志解析器。
  * <p>
- * 此类解析{@linkplain #getChangelogPath()}类路径文件的更新日志。
+ * 用于解析格式如：
  * </p>
+ * <p>
+ * 
+ * <pre>
+ * --注释0
+ * --v1.0.0
+ * XXXXXX
+ * XXXXXX
+ * 
+ * --注释1
+ * --v2.0.0
+ * XXXXXX
+ * XXXXXX
+ * </pre>
+ * </p>
+ * <P>
+ * 文件中的版本日志信息。
+ * </P>
  * 
  * @author datagear@163.com
  *
  */
 public class ChangelogResolver extends AbstractVersionContentReader
 {
-	public static final String CHANGELOG_CLASS_PATH = "org/datagear/web/changelog.txt";
-
 	/** 注释行开头标识 */
 	public static final String COMMENT_LINE_PREFIX = "--";
 
 	/** 版本号注释开头标识 */
 	public static final String VERSION_LINE_PREFIX = "--v";
-	
-	private String changelogPath = CHANGELOG_CLASS_PATH;
 
-	private String changelogEncoding = ENCODING_UTF8;
+	/**
+	 * 更新日志资源
+	 */
+	private Resource resource;
+
+	private String encoding = ENCODING_UTF8;
+
+	/** 注释行前缀 */
+	private String commentLinePrefix = COMMENT_LINE_PREFIX;
+
+	/**
+	 * 版本号行前缀，前缀后的此行内容是版本号
+	 */
+	private String versionLinePrefix = VERSION_LINE_PREFIX;
 
 	public ChangelogResolver()
 	{
 		super();
 	}
 
-	public String getChangelogPath()
+	public ChangelogResolver(Resource resource)
 	{
-		return changelogPath;
+		super();
+		this.resource = resource;
 	}
 
-	public void setChangelogPath(String changelogPath)
+	public Resource getResource()
 	{
-		this.changelogPath = changelogPath;
+		return resource;
 	}
 
-	public String getChangelogEncoding()
+	public void setResource(Resource resource)
 	{
-		return changelogEncoding;
+		this.resource = resource;
 	}
 
-	public void setChangelogEncoding(String changelogEncoding)
+	public String getEncoding()
 	{
-		this.changelogEncoding = changelogEncoding;
+		return encoding;
+	}
+
+	public void setEncoding(String encoding)
+	{
+		this.encoding = encoding;
+	}
+
+	public String getCommentLinePrefix()
+	{
+		return commentLinePrefix;
+	}
+
+	public void setCommentLinePrefix(String commentLinePrefix)
+	{
+		this.commentLinePrefix = commentLinePrefix;
+	}
+
+	public String getVersionLinePrefix()
+	{
+		return versionLinePrefix;
+	}
+
+	public void setVersionLinePrefix(String versionLinePrefix)
+	{
+		this.versionLinePrefix = versionLinePrefix;
 	}
 
 	/**
-	 * 解析所有版本更新日志。
+	 * 解析所有版本更新日志，按版本号从大到小排列。
 	 * 
 	 * @return
 	 * @throws IOException
@@ -89,7 +138,7 @@ public class ChangelogResolver extends AbstractVersionContentReader
 
 		try
 		{
-			reader = getChangelogBufferedReader();
+			reader = getResourceBufferedReader();
 
 			List<VersionContent> versionContents = resolveVersionContents(reader, null, null, true, true);
 
@@ -108,7 +157,7 @@ public class ChangelogResolver extends AbstractVersionContentReader
 	}
 
 	/**
-	 * 解析最新的N个版本更新日志。
+	 * 解析最新的N个版本更新日志，按版本号从大到小排列。。
 	 * 
 	 * @param top
 	 * @return
@@ -131,13 +180,13 @@ public class ChangelogResolver extends AbstractVersionContentReader
 	 * @return
 	 * @throws IOException
 	 */
-	public VersionContent resolveChangelog(Version version) throws IOException
+	public VersionContent resolveVersion(Version version) throws IOException
 	{
 		BufferedReader reader = null;
 
 		try
 		{
-			reader = getChangelogBufferedReader();
+			reader = getResourceBufferedReader();
 
 			List<VersionContent> versionContents = resolveVersionContents(reader, version, version, true, true);
 
@@ -149,10 +198,9 @@ public class ChangelogResolver extends AbstractVersionContentReader
 		}
 	}
 
-	protected BufferedReader getChangelogBufferedReader() throws IOException
+	protected BufferedReader getResourceBufferedReader() throws IOException
 	{
-		InputStream in = getClass().getClassLoader().getResourceAsStream(this.changelogPath);
-		return new BufferedReader(new InputStreamReader(in, this.changelogEncoding));
+		return new BufferedReader(new InputStreamReader(this.resource.getInputStream(), this.encoding));
 	}
 
 	@Override
@@ -173,24 +221,24 @@ public class ChangelogResolver extends AbstractVersionContentReader
 	@Override
 	protected boolean isCommentLine(String line)
 	{
-		return line.startsWith(COMMENT_LINE_PREFIX);
+		return line.startsWith(this.commentLinePrefix);
 	}
 
 	@Override
 	protected boolean isVersionLine(String line)
 	{
-		return line.startsWith(VERSION_LINE_PREFIX);
+		return line.startsWith(this.versionLinePrefix);
 	}
 
 	@Override
 	protected Version resolveVersion(String line)
 	{
-		int start = line.indexOf(VERSION_LINE_PREFIX);
+		int start = line.indexOf(this.versionLinePrefix);
 
 		if (start < 0)
 			throw new IllegalArgumentException("[" + line + "] is not version line");
 
-		start = start + VERSION_LINE_PREFIX.length();
+		start = start + this.versionLinePrefix.length();
 
 		String version = line.substring(start, line.length()).trim();
 
