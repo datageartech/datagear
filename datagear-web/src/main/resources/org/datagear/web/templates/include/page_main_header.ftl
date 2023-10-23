@@ -29,7 +29,7 @@ User currentUser
 <#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
 <div id="${pid}mainHeader" class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
 	<div class="grid grid-nogutter align-items-center">
-		<div class="logo-wrapper header-left col-fixed flex align-items-center pl-1">
+		<div id="sysLogoWrapper" class="logo-wrapper header-left col-fixed flex align-items-center pl-1">
 			<#include "html_logo.ftl">
 		</div>
 		<div class="col text-right pr-2">
@@ -106,7 +106,14 @@ User currentUser
 		{
 			$.each(data, function(idx, item)
 			{
-				$("#"+item.cssId).attr("href", item.href);
+				if(item.changeAttr)
+				{
+					$(item.changeElement).attr(item.changeAttr, item.changeValue);
+				}
+				else if(item.changeHtml)
+				{
+					$(item.changeElement).html(item.changeValue);
+				}
 			});
 		});
 	};

@@ -130,4 +130,26 @@ public class ThemeSpec
 
 		return dh;
 	}
+
+	/**
+	 * 是否浅色主题。
+	 * 
+	 * @param theme
+	 * @return
+	 */
+	public boolean isLightTheme(String theme)
+	{
+		return BLUE.equals(theme);
+	}
+
+	/**
+	 * 是否暗色主题。
+	 * 
+	 * @param theme
+	 * @return
+	 */
+	public boolean isDarkTheme(String theme)
+	{
+		return BLUE_DARK.equals(theme);
+	}
 }
