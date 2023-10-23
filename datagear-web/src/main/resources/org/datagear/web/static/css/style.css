@@ -41,9 +41,6 @@
 	text-indent: -999px;
 	opacity: 1;
 }
-.logo:hover{
-	opacity: 0.8;
-}
 
 a.link,
 a.link:link,
@@ -53,6 +50,9 @@ a.link:active{
 }
 a.link:hover{
 	text-decoration: underline;
+}
+a.img-link:hover{
+	opacity: 0.8;
 }
 
 label[title]:not(.no-tip)::after,

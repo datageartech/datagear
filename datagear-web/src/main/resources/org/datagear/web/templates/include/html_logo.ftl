@@ -16,6 +16,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<a href="${statics['org.datagear.util.Global'].WEB_SITE}" target="_blank" class="logo link font-bold">
+<a href="${statics['org.datagear.util.Global'].WEB_SITE}" target="_blank" class="logo link img-link font-bold">
 	<@spring.message code="app.name" />
 </a>
