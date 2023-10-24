@@ -42,6 +42,7 @@ import org.datagear.analysis.support.ChartPluginAttributeValueConverter;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
@@ -54,8 +55,8 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
-import org.datagear.management.service.UserService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
+import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -559,8 +560,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			response.setContentType(CONTENT_TYPE_HTML);
 			out = IOUtil.getBufferedWriter(response.getWriter());
 
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
-					getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
+			HtmlTitleHandler htmlTitleHandler = getShowChartHtmlTitleHandler(request, response, user, chart);
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, dashboardWidget.getFirstTemplate(), out,
 					createWebContext(request), buildHtmlTplDashboardImportsForShow(request), htmlTitleHandler);
 			renderContext.setTemplateReader(templateIn);
@@ -577,6 +577,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 
 		removeSessionDashboardInfoExpired(request);
+	}
+
+	protected HtmlTitleHandler getShowChartHtmlTitleHandler(HttpServletRequest request, HttpServletResponse response,
+			User user, HtmlChartWidgetEntity chart) throws Exception
+	{
+		return new DefaultHtmlTitleHandler(
+				getMessage(request, "chart.show.htmlTitleSuffix", getMessage(request, "app.name")));
 	}
 
 	@Override

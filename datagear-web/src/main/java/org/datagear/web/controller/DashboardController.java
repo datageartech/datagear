@@ -54,6 +54,7 @@ import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
+import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
@@ -1491,10 +1492,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			List<HtmlTplDashboardImport> importList = (isShowForEdit ? buildHtmlTplDashboardImportsForEdit(request)
 					: buildHtmlTplDashboardImportsForShow(request));
 			
-			DefaultHtmlTitleHandler htmlTitleHandler = new DefaultHtmlTitleHandler(
-					getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")),
-					getMessage(request, "dashboard.show.htmlTitleSuffixForEmpty", dashboardWidget.getName(),
-							getMessage(request, "app.name")));
+			HtmlTitleHandler htmlTitleHandler = getShowDashboardHtmlTitleHandler(request, response, currentUser,
+					dashboardWidget);
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, template, out,
 					createWebContext(request), importList, htmlTitleHandler);
 			
@@ -1521,6 +1520,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		}
 
 		removeSessionDashboardInfoExpired(request);
+	}
+
+	protected HtmlTitleHandler getShowDashboardHtmlTitleHandler(HttpServletRequest request,
+			HttpServletResponse response, User user, HtmlTplDashboardWidgetEntity dashboardWidget) throws Exception
+	{
+		return new DefaultHtmlTitleHandler(
+				getMessage(request, "dashboard.show.htmlTitleSuffix", getMessage(request, "app.name")),
+				getMessage(request, "dashboard.show.htmlTitleSuffixForEmpty", dashboardWidget.getName(),
+						getMessage(request, "app.name")));
 	}
 	
 	/**
