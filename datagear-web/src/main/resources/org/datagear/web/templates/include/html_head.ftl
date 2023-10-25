@@ -41,7 +41,7 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/css/codemirror-5.64.0/custom.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" id="styleCssLink" />
 
-<script src="${contextPath}/static/lib/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/jquery-3.7.1/jquery-3.7.1.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>

@@ -103,7 +103,7 @@ public class HtmlTplDashboardImportResolver
 
 		// JS
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
-				libPrefix + "/jquery-3.6.0/jquery-3.6.0.min.js"));
+				libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
 				libPrefix + "/echarts-5.4.3/echarts.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD,
