@@ -36,26 +36,6 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 [http://www.datagear.tech](http://www.datagear.tech)
 
-# 文档
-
-[http://www.datagear.tech/documentation](http://www.datagear.tech/documentation)
-
-# 示例
-
-[https://my.oschina.net/u/4035217](https://my.oschina.net/u/4035217)
-
-# 源码
-
-Gitee：[https://gitee.com/datagear/datagear](https://gitee.com/datagear/datagear)
-
-Github：[https://github.com/datageartech/datagear](https://github.com/datageartech/datagear)
-
-# 交流
-
-QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199（已满）](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)、[541252568](https://jq.qq.com/?_wv=1027&k=F7dwDVLO)
-
-留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
-
 # 界面
 
 数据源管理
@@ -182,9 +162,9 @@ SQL数据集
 
 	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='当前版本号'
 	
-例如，对于`4.1.0`版本，应执行：
+例如，对于`4.6.0`版本，应执行：
 
-	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='4.1.0'
+	UPDATE DATAGEAR_VERSION SET VERSION_VALUE='4.6.0'
 
 系统自带了一个可用于为内置数据库执行SQL语句的简单工具类`org.datagear.web.util.DerbySqlClient`，可以在IDE中直接运行。注意：运行前需要先停止DataGear程序。
 
