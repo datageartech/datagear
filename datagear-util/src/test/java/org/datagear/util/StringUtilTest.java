@@ -219,36 +219,6 @@ public class StringUtilTest
 	}
 
 	@Test
-	public void encodePathURLTest() throws Exception
-	{
-		{
-			String url = "abc";
-			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
-			assertEquals(url, actual);
-		}
-
-		{
-			String url = "abc/def/ghi";
-			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
-			assertEquals(url, actual);
-		}
-
-		{
-			String url = "abc/中 文/?/ghi";
-			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
-			assertEquals("abc/%E4%B8%AD+%E6%96%87/%3F/ghi", actual);
-			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
-		}
-
-		{
-			String url = "/abc//中 文/?/ghi//";
-			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
-			assertEquals("/abc//%E4%B8%AD+%E6%96%87/%3F/ghi//", actual);
-			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
-		}
-	}
-
-	@Test
 	public void toBooleanTest_String() throws Exception
 	{
 		{
@@ -349,6 +319,100 @@ public class StringUtilTest
 			int v = -1;
 			boolean actual = StringUtil.toBoolean(v);
 			assertFalse(actual);
+		}
+	}
+
+	@Test
+	public void encodeURLTest() throws Exception
+	{
+		{
+			String s = "/a/b/c";
+			String actual = StringUtil.encodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("%2Fa%2Fb%2Fc", actual);
+		}
+
+		{
+			String s = "/a/b/ c";
+			String actual = StringUtil.encodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("%2Fa%2Fb%2F+c", actual);
+		}
+
+		{
+			String s = "/a/b/c?param=1";
+			String actual = StringUtil.encodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("%2Fa%2Fb%2Fc%3Fparam%3D1", actual);
+		}
+
+		{
+			String s = "中文";
+			String actual = StringUtil.encodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("%E4%B8%AD%E6%96%87", actual);
+		}
+	}
+
+	@Test
+	public void decodeURLTest() throws Exception
+	{
+		{
+			String s = "%2Fa%2Fb%2Fc";
+			String actual = StringUtil.decodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("/a/b/c", actual);
+		}
+
+		{
+			String s = "%2Fa%2Fb%2F+c";
+			String actual = StringUtil.decodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("/a/b/ c", actual);
+		}
+
+		{
+			String s = "%2Fa%2Fb%2Fc%3Fparam%3D1";
+			String actual = StringUtil.decodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("/a/b/c?param=1", actual);
+		}
+
+		{
+			String s = "%E4%B8%AD%E6%96%87";
+			String actual = StringUtil.decodeURL(s, IOUtil.CHARSET_UTF_8);
+
+			assertEquals("中文", actual);
+		}
+	}
+
+	@Test
+	public void encodePathURLTest() throws Exception
+	{
+		{
+			String url = "abc";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals(url, actual);
+		}
+
+		{
+			String url = "abc/def/ghi";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals(url, actual);
+		}
+
+		{
+			String url = "abc/中 文/?/ghi";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals("abc/%E4%B8%AD+%E6%96%87/%3F/ghi", actual);
+			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
+		}
+
+		{
+			String url = "/abc//中 文/?/ghi//";
+			String actual = StringUtil.encodePathURL(url, IOUtil.CHARSET_UTF_8);
+			assertEquals("/abc//%E4%B8%AD+%E6%96%87/%3F/ghi//", actual);
+			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
 		}
 	}
 }
