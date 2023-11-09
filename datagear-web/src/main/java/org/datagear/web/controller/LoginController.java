@@ -17,8 +17,6 @@
 
 package org.datagear.web.controller;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.datagear.util.IOUtil;
 import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -238,48 +235,6 @@ public class LoginController extends AbstractController
 			username = "";
 
 		return username;
-	}
-
-	/**
-	 * 将用户名编码为可存储至Cookie的字符串。
-	 * 
-	 * @param username
-	 * @return
-	 */
-	public static String encodeCookieUserName(String username)
-	{
-		if (username == null || username.isEmpty())
-			return username;
-
-		try
-		{
-			return URLEncoder.encode(username, IOUtil.CHARSET_UTF_8);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new ControllerException(e);
-		}
-	}
-
-	/**
-	 * 将{@linkplain #encodeCookieUserName(String)}的用户名解码。
-	 * 
-	 * @param username
-	 * @return
-	 */
-	public static String decodeCookieUserName(String username)
-	{
-		if (username == null || username.isEmpty())
-			return username;
-
-		try
-		{
-			return WebUtils.decodeURL(username);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new ControllerException(e);
-		}
 	}
 
 	public static class LoginForm implements ControllerForm
