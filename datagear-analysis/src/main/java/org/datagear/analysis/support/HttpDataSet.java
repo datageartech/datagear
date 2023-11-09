@@ -19,6 +19,8 @@ package org.datagear.analysis.support;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,6 +121,19 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/** HTTP请求地址 */
 	private String uri;
 
+	/**
+	 * 是否编码uri。
+	 * <p>
+	 * 当uri中包含中文时，通常需要进行编码。
+	 * </p>
+	 * <p>
+	 * 注意：这个属性在{@code 4.7.0}版本之前是没有的，因此默认值应设为{@code false}，以兼容旧数据。
+	 * </p>
+	 * 
+	 * @since 4.7.0
+	 */
+	private boolean encodeUri = false;
+
 	/** 请求头JSON文本 */
 	private String headerContent = "";
 
@@ -185,6 +200,16 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public void setUri(String uri)
 	{
 		this.uri = uri;
+	}
+
+	public boolean isEncodeUri()
+	{
+		return encodeUri;
+	}
+
+	public void setEncodeUri(boolean encodeUri)
+	{
+		this.encodeUri = encodeUri;
 	}
 
 	public String getHeaderContent()
@@ -363,6 +388,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		try
 		{
 			uri = resolveTemplateUri(query);
+			uri = encodeUriIfRequired(uri);
 
 			ClassicHttpRequest request = createHttpRequest(uri);
 
@@ -385,6 +411,21 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		{
 			throw new DataSetSourceParseException(t, buildResolvedTemplate(uri, headerContent, requestContent));
 		}
+	}
+
+	/**
+	 * 对URI进行编码，避免出现中文参数乱码问题。
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	protected String encodeUriIfRequired(String uri) throws URISyntaxException
+	{
+		if (!this.encodeUri)
+			return uri;
+
+		return new URI(uri).toASCIIString();
 	}
 
 	protected String buildResolvedTemplate(String uri, String headerContent, String requestContent)

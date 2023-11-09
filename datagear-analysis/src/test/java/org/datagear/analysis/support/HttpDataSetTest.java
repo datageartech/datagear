@@ -18,11 +18,13 @@
 package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.util.IOUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -182,6 +185,33 @@ public class HttpDataSetTest
 					{
 						StringEntity responseEntity = new StringEntity(
 								"{ path0: { path1: [ { path2: [{name: 'aaa', value: 11}, {name: '名称b', value: 22}] } ] } }",
+								ContentType.APPLICATION_JSON);
+						response.setEntity(responseEntity);
+					}
+				})
+				//
+				//
+				.register("/testGetChineseParam", new HttpRequestHandler()
+				{
+					@Override
+					public void handle(ClassicHttpRequest request, ClassicHttpResponse response, HttpContext context)
+							throws HttpException, IOException
+					{
+						URI uri = null;
+
+						try
+						{
+							uri = request.getUri();
+						}
+						catch (Exception e)
+						{
+							throw new IOException(e);
+						}
+
+						String q = uri.getQuery();
+
+						StringEntity responseEntity = new StringEntity(
+								"{ q : '" + q + "' }",
 								ContentType.APPLICATION_JSON);
 						response.setEntity(responseEntity);
 					}
@@ -590,49 +620,53 @@ public class HttpDataSetTest
 	}
 
 	@Test
-	public void resolveTest_setResponseDataJsonPath() throws Throwable
+	public void resolveTest_chineseInUri() throws Throwable
 	{
-		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
-				SERVER + "/testResponseJsonPath");
-		dataSet.setResponseDataJsonPath("path0.path1[0].path2");
-
-		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
-		List<DataSetProperty> properties = result.getProperties();
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
-
+		// 默认
 		{
-			assertEquals(2, properties.size());
+			HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+					SERVER + "/testGetChineseParam?p=中文");
+			dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_GET);
 
-			{
-				DataSetProperty property = properties.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
-			}
+			TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
+			DataSetResult dr = result.getResult();
+			@SuppressWarnings("unchecked")
+			Map<String, String> data = (Map<String, String>) dr.getData();
+			String v = data.get("q");
 
-			{
-				DataSetProperty property = properties.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
-			}
+			assertNotEquals("p=中文", v);
 		}
 
+		// false
 		{
-			assertEquals(2, data.size());
+			HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+					SERVER + "/testGetChineseParam?p=中文");
+			dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_GET);
+			dataSet.setEncodeUri(false);
 
-			{
-				Map<String, Object> row = data.get(0);
+			TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
+			DataSetResult dr = result.getResult();
+			@SuppressWarnings("unchecked")
+			Map<String, String> data = (Map<String, String>) dr.getData();
+			String v = data.get("q");
 
-				assertEquals("aaa", row.get("name"));
-				assertEquals(11, ((Number) row.get("value")).intValue());
-			}
+			assertNotEquals("p=中文", v);
+		}
 
-			{
-				Map<String, Object> row = data.get(1);
+		// true
+		{
+			HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+					SERVER + "/testGetChineseParam?p=中文");
+			dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_GET);
+			dataSet.setEncodeUri(true);
 
-				assertEquals("名称b", row.get("name"));
-				assertEquals(22, ((Number) row.get("value")).intValue());
-			}
+			TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
+			DataSetResult dr = result.getResult();
+			@SuppressWarnings("unchecked")
+			Map<String, String> data = (Map<String, String>) dr.getData();
+			String v = data.get("q");
+
+			assertEquals("p=中文", v);
 		}
 	}
 

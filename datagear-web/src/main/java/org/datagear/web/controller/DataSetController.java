@@ -429,6 +429,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		HttpDataSetEntity dataSet = createDftHttpDataSetEntity(request, response, model);
 		setRequestAnalysisProject(request, response, dataSet);
+		dataSet.setEncodeUri(true);
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());	
 		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http);

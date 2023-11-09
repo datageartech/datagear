@@ -46,6 +46,17 @@
 				</div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}encodeUri" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='httpDataSet.encodeUri.desc' />">
+					<@spring.message code='encodeRequestURI' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-selectbutton v-model="fm.encodeUri" :options="pm.booleanOptions"
+						option-label="name" option-value="value" class="input w-full">
+					</p-selectbutton>
+				</div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}requestMethod" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='requestMethod' />
 				</label>
@@ -148,6 +159,7 @@
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
 		fingerprint.uri = dataSet.uri;
+		fingerprint.encodeUri = dataSet.encodeUri;
 		fingerprint.requestMethod = dataSet.requestMethod;
 		fingerprint.requestContentType = dataSet.requestContentType;
 		fingerprint.requestContentCharset = dataSet.requestContentCharset;
