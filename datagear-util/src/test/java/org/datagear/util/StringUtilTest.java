@@ -415,4 +415,30 @@ public class StringUtilTest
 			assertEquals(url, StringUtil.decodeURL(actual, IOUtil.CHARSET_UTF_8));
 		}
 	}
+
+	@Test
+	public void toAsciiURITest() throws Exception
+	{
+		{
+			String uri = "http://abc.def/def/ghi?param1=a&param2=b#jkl";
+			String actual = StringUtil.toAsciiURI(uri);
+			assertEquals(uri, actual);
+		}
+
+		{
+			String uri = "中文一/ghi?param1=中文二&param2=中文三#中文四";
+			String actual = StringUtil.toAsciiURI(uri);
+			assertEquals(
+					"%E4%B8%AD%E6%96%87%E4%B8%80/ghi?param1=%E4%B8%AD%E6%96%87%E4%BA%8C&param2=%E4%B8%AD%E6%96%87%E4%B8%89#%E4%B8%AD%E6%96%87%E5%9B%9B",
+					actual);
+		}
+
+		{
+			String uri = "http://中文.def.com/中文一/ghi?param1=中文二&param2=b#中文三";
+			String actual = StringUtil.toAsciiURI(uri);
+			assertEquals(
+					"http://%E4%B8%AD%E6%96%87.def.com/%E4%B8%AD%E6%96%87%E4%B8%80/ghi?param1=%E4%B8%AD%E6%96%87%E4%BA%8C&param2=b#%E4%B8%AD%E6%96%87%E4%B8%89",
+					actual);
+		}
+	}
 }

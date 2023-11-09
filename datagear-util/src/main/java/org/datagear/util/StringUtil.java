@@ -18,6 +18,7 @@
 package org.datagear.util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -587,6 +588,29 @@ public class StringUtil
 		}
 
 		return re.toString();
+	}
+
+	/**
+	 * 将指定URI转换为RFC 2396规范编码的URI。
+	 * <p>
+	 * 例如：
+	 * </p>
+	 * <p>
+	 * <code>http://中文.def.com/中文一/ghi?param1=中文二&amp;param2=b#中文三</code>
+	 * </p>
+	 * <p>
+	 * 将被转换为：
+	 * </p>
+	 * <p>
+	 * <code>http://%E4%B8%AD%E6%96%87.def.com/%E4%B8%AD%E6%96%87%E4%B8%80/ghi?param1=%E4%B8%AD%E6%96%87%E4%BA%8C&amp;param2=b#%E4%B8%AD%E6%96%87%E4%B8%89</code>
+	 * </p>
+	 * 
+	 * @param uri
+	 * @return
+	 */
+	public static String toAsciiURI(String uri)
+	{
+		return URI.create(uri).toASCIIString();
 	}
 
 	/**
