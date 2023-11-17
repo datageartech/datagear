@@ -53,7 +53,7 @@
 			:resizable-columns="true" column-resize-mode="expand"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" dataKey="id" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
-			<p-column field="id" header="<@spring.message code='id' />" class="col-id"></p-column>
+			<p-column field="id" header="<@spring.message code='id' />" :sortable="true" class="col-id"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
 			<p-column field="enabled" header="<@spring.message code='isEnable' />" :sortable="true" class="col-boolean">
 				<template #body="{data}">
