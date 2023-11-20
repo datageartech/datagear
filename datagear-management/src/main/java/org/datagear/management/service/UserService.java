@@ -80,6 +80,13 @@ public interface UserService extends EntityService<String, User>
 	List<User> getByIdsSimple(String[] ids, boolean discardNull);
 
 	/**
+	 * 获总计取用户数。
+	 * 
+	 * @return
+	 */
+	int getUserCount();
+
+	/**
 	 * 更新，但是忽略{@linkplain User#getRoles()}。
 	 * 
 	 * @param user

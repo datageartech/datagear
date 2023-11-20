@@ -86,6 +86,13 @@
 			RU_USER_ID = #{userId}
 	</select>
 	
+	<select id="getUserCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			DATAGEAR_USER T
+	</select>
+	
 	<select id="query" resultType="org.datagear.management.domain.User">
 		SELECT
 			T.*

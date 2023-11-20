@@ -194,6 +194,13 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	}
 
 	@Override
+	public int getUserCount()
+	{
+		Number userCount = (Number) selectOneMybatis("getUserCount");
+		return (userCount == null ? 0 : userCount.intValue());
+	}
+
+	@Override
 	public boolean updatePasswordById(String id, String newPassword, boolean encrypt)
 	{
 		if (encrypt && this.passwordEncoder != null)
