@@ -184,13 +184,25 @@ public class LoginController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> loginError(HttpServletRequest request, HttpServletResponse response)
 	{
-		AuthenticationException ae = getAuthenticationException(request, true);
-		if (ae != null)
+		AuthenticationException exception = getAuthenticationException(request, true);
+		return handleLoginError(request, response, exception);
+	}
+
+	/**
+	 * 处理登录错误。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param exception
+	 *            可能为{@code null}
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> handleLoginError(HttpServletRequest request,
+			HttpServletResponse response, AuthenticationException exception)
+	{
+		if (exception instanceof LoginCheckCodeErrorException)
 		{
-			if (ae instanceof LoginCheckCodeErrorException)
-			{
-				return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "checkCodeError");
-			}
+			return optFailResponseEntity(request, HttpStatus.UNAUTHORIZED, "checkCodeError");
 		}
 
 		int ipLoginRemain = this.ipLoginLatch.remain(request);

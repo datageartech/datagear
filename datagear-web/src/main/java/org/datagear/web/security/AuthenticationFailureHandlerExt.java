@@ -108,7 +108,7 @@ public class AuthenticationFailureHandlerExt extends SimpleUrlAuthenticationFail
 		return this.usernameLoginLatch.remain(getLoginUsername(request));
 	}
 
-	protected String getLoginUsername(HttpServletRequest request)
+	public String getLoginUsername(HttpServletRequest request)
 	{
 		return request.getParameter(this.loginUsernameParam);
 	}

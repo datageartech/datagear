@@ -130,33 +130,40 @@ public class LoginLatchFilter implements Filter
 		if (!requiresCheck(req, res))
 		{
 			chain.doFilter(request, response);
-			return;
 		}
+		else
+		{
+			doFilterLoginLatch(req, res, chain);
+		}
+	}
 
+	protected void doFilterLoginLatch(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+			throws IOException, ServletException
+	{
 		if (!this.applicationProperties.isDisableLoginCheckCode())
 		{
-			String cc = getLoginCheckCode(req);
+			String cc = getLoginCheckCode(request);
 
-			if (!this.checkCodeManager.isCheckCode(req.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN, cc))
+			if (!this.checkCodeManager.isCheckCode(request.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN, cc))
 			{
-				this.authenticationFailureHandlerExt.onAuthenticationFailure(req, res,
+				this.authenticationFailureHandlerExt.onAuthenticationFailure(request, response,
 						new LoginCheckCodeErrorException(), false);
 
 				return;
 			}
 		}
 
-		if (AccessLatch.isLatched(this.authenticationFailureHandlerExt.getIpLoginLatchRemain(req)))
+		if (AccessLatch.isLatched(this.authenticationFailureHandlerExt.getIpLoginLatchRemain(request)))
 		{
-			this.authenticationFailureHandlerExt.onAuthenticationFailure(req, res,
+			this.authenticationFailureHandlerExt.onAuthenticationFailure(request, response,
 					new IpLoginLatchedException(), false);
 
 			return;
 		}
 
-		if (AccessLatch.isLatched(this.authenticationFailureHandlerExt.getUsernameLoginLatchRemain(req)))
+		if (AccessLatch.isLatched(this.authenticationFailureHandlerExt.getUsernameLoginLatchRemain(request)))
 		{
-			this.authenticationFailureHandlerExt.onAuthenticationFailure(req, res, new UsernameLoginLatchedException(),
+			this.authenticationFailureHandlerExt.onAuthenticationFailure(request, response, new UsernameLoginLatchedException(),
 					false);
 
 			return;

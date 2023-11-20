@@ -100,6 +100,46 @@ public class FormLoginConfgBean
 		this.applicationProperties = applicationProperties;
 	}
 
+	public CheckCodeManager getCheckCodeManager()
+	{
+		return checkCodeManager;
+	}
+
+	public void setCheckCodeManager(CheckCodeManager checkCodeManager)
+	{
+		this.checkCodeManager = checkCodeManager;
+	}
+
+	public IpLoginLatch getIpLoginLatch()
+	{
+		return ipLoginLatch;
+	}
+
+	public void setIpLoginLatch(IpLoginLatch ipLoginLatch)
+	{
+		this.ipLoginLatch = ipLoginLatch;
+	}
+
+	public UsernameLoginLatch getUsernameLoginLatch()
+	{
+		return usernameLoginLatch;
+	}
+
+	public void setUsernameLoginLatch(UsernameLoginLatch usernameLoginLatch)
+	{
+		this.usernameLoginLatch = usernameLoginLatch;
+	}
+
+	public AuthenticationUserGetter getAuthenticationUserGetter()
+	{
+		return authenticationUserGetter;
+	}
+
+	public void setAuthenticationUserGetter(AuthenticationUserGetter authenticationUserGetter)
+	{
+		this.authenticationUserGetter = authenticationUserGetter;
+	}
+
 	public String getLoginPage()
 	{
 		return loginPage;
@@ -231,10 +271,15 @@ public class FormLoginConfgBean
 	protected void configLoginLatchFilter(HttpSecurity http) throws Exception
 	{
 		http.addFilterBefore(
-				new LoginLatchFilter(this.loginProcessUrl,
-						(AuthenticationFailureHandlerExt) this.authenticationFailureHandler(),
-						this.applicationProperties, this.checkCodeManager),
+				getLoginLatchFilter(),
 				UsernamePasswordAuthenticationFilter.class);
+	}
+
+	protected LoginLatchFilter getLoginLatchFilter()
+	{
+		return new LoginLatchFilter(this.loginProcessUrl,
+				(AuthenticationFailureHandlerExt) this.authenticationFailureHandler(), this.applicationProperties,
+				this.checkCodeManager);
 	}
 
 	protected AuthenticationSuccessHandler authenticationSuccessHandler()
