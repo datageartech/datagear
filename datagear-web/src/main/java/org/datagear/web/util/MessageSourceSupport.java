@@ -58,6 +58,45 @@ public class MessageSourceSupport
 	/**
 	 * 获取I18N消息内容。
 	 * <p>
+	 * 如果找不到对应消息码的消息，则返回{@code null}。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param code
+	 * @param args
+	 * @return
+	 */
+	public String getMessageNullable(HttpServletRequest request, String code, Object... args)
+	{
+		return getMessageNullable(getLocale(request), code, args);
+	}
+
+	/**
+	 * 获取I18N消息内容。
+	 * <p>
+	 * 如果找不到对应消息码的消息，则返回{@code null}。
+	 * </p>
+	 * 
+	 * @param locale
+	 * @param code
+	 * @param args
+	 * @return
+	 */
+	public String getMessageNullable(Locale locale, String code, Object... args)
+	{
+		try
+		{
+			return this.messageSource.getMessage(code, args, locale);
+		}
+		catch (NoSuchMessageException e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 获取I18N消息内容。
+	 * <p>
 	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
 	 * </p>
 	 * 

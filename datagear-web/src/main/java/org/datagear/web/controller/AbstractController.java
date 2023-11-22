@@ -950,15 +950,7 @@ public abstract class AbstractController extends MessageSourceSupport
 			if (exception != null)
 			{
 				String code = buildExceptionMsgCode(exception.getClass());
-				String message = null;
-
-				try
-				{
-					message = getMessage(request, code, exception.getMessage());
-				}
-				catch (Throwable t)
-				{
-				}
+				String message = getMessageNullable(request, code, exception.getMessage());
 
 				if (message != null)
 					operationMessage = OperationMessage.valueOfFail(code, message);
@@ -1013,19 +1005,19 @@ public abstract class AbstractController extends MessageSourceSupport
 		if (rawMsg == null)
 			rawMsg = "";
 
-		String message = "";
-
-		String statusCodeKey = "error.httpError";
+		String statusCodeKey = null;
+		String message = null;
 
 		if (statusCode != null)
-			statusCodeKey += "." + statusCode.intValue();
-
-		try
 		{
-			message = getMessage(request, statusCodeKey, rawMsg);
+			statusCodeKey = "error.httpError" + "." + statusCode.intValue();
+			message = getMessageNullable(request, statusCodeKey, rawMsg);
 		}
-		catch (Throwable t)
+
+		if (message == null)
 		{
+			statusCodeKey = "error.httpError";
+			message = getMessage(request, statusCodeKey, rawMsg);
 		}
 
 		return OperationMessage.valueOfFail(statusCodeKey, message);
