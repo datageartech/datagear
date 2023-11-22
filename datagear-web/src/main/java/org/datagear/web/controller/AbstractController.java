@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -940,7 +941,37 @@ public abstract class AbstractController extends MessageSourceSupport
 
 		if (operationMessage == null)
 		{
-			Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+			Exception exception = null;
+
+			Object exceptionAttr = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+			if (exceptionAttr instanceof Exception)
+				exception = (Exception) exceptionAttr;
+
+			if (exception != null)
+			{
+				String code = buildExceptionMsgCode(exception.getClass());
+				String message = null;
+
+				try
+				{
+					message = getMessage(request, code, exception.getMessage());
+				}
+				catch (Throwable t)
+				{
+				}
+
+				if (message != null)
+					operationMessage = OperationMessage.valueOfFail(code, message);
+			}
+		}
+
+		if (operationMessage == null)
+		{
+			Integer statusCode = null;
+
+			Object statusCodeAttr = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+			if (statusCodeAttr instanceof Integer)
+				statusCode = (Integer) statusCodeAttr;
 
 			if (statusCode == null)
 				statusCode = response.getStatus();
@@ -977,7 +1008,8 @@ public abstract class AbstractController extends MessageSourceSupport
 	 */
 	protected OperationMessage buildOptMsgForHttpError(HttpServletRequest request, Integer statusCode)
 	{
-		String rawMsg = (String) request.getAttribute("javax.servlet.error.message");
+		String rawMsg = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+
 		if (rawMsg == null)
 			rawMsg = "";
 
