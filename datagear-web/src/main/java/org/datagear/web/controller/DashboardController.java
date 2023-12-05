@@ -725,7 +725,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream(), zipFileNameEncoding);
 			try
 			{
-				IOUtil.unzip(in, dashboardDirectory);
+				IOUtil.unzipCheckMalformed(in, dashboardDirectory);
 			}
 			finally
 			{

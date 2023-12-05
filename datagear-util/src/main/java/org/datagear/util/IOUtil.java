@@ -841,7 +841,7 @@ public class IOUtil
 		}
 		catch(IllegalArgumentException e)
 		{
-			if("MALFORMED".equalsIgnoreCase(e.getMessage()))
+			if (MalformedZipException.isMalformedZipException(e))
 				throw new MalformedZipException(e);
 			else
 				throw e;

@@ -1427,7 +1427,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			try
 			{
 				in = IOUtil.getZipInputStream(multipartFile.getInputStream(), zipFileNameEncoding);
-				IOUtil.unzip(in, unzipDirectory);
+				IOUtil.unzipCheckMalformed(in, unzipDirectory);
 			}
 			finally
 			{

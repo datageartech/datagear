@@ -18,6 +18,7 @@
 package org.datagear.util;
 
 import java.io.IOException;
+import java.util.zip.ZipInputStream;
 
 /**
  * 解压zip时的{@code MALFORMED}异常。
@@ -52,5 +53,11 @@ public class MalformedZipException extends IOException
 	public MalformedZipException(String message, Throwable cause)
 	{
 		super(message, cause);
+	}
+
+	public static boolean isMalformedZipException(IllegalArgumentException e)
+	{
+		String msg = e.getMessage();
+		return (msg != null && msg.toUpperCase().indexOf("MALFORMED") >= 0);
 	}
 }
