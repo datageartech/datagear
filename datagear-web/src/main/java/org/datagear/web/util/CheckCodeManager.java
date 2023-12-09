@@ -17,10 +17,7 @@
 
 package org.datagear.web.util;
 
-import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +40,7 @@ public class CheckCodeManager
 	 */
 	public static final int CODE_LEN = 4;
 
-	public static final String SESSION_KEY_CHECK_CODES = CheckCodes.class.getName();
+	public static final String SESSION_CHECK_CODE_PREFIX = "CHECK_CODE_";
 
 	private ConcurrentMap<String, Boolean> modules;
 
@@ -122,20 +119,8 @@ public class CheckCodeManager
 		if (!this.hasModule(module))
 			throw new IllegalArgumentException("Illegal module : " + module);
 
-		CheckCodes ccs;
-
-		synchronized (session)
-		{
-			ccs = (CheckCodes) session.getAttribute(SESSION_KEY_CHECK_CODES);
-
-			if (ccs == null)
-			{
-				ccs = new CheckCodes();
-				session.setAttribute(SESSION_KEY_CHECK_CODES, ccs);
-			}
-		}
-
-		ccs.set(module, code);
+		module = toSessionCheckCodeKey(module);
+		session.setAttribute(module, code);
 	}
 
 	/**
@@ -147,9 +132,8 @@ public class CheckCodeManager
 	 */
 	public String getCheckCode(HttpSession session, String module)
 	{
-		CheckCodes ccs = (CheckCodes) session.getAttribute(SESSION_KEY_CHECK_CODES);
-
-		return (ccs == null ? null : ccs.get(module));
+		module = toSessionCheckCodeKey(module);
+		return (String) session.getAttribute(module);
 	}
 
 	/**
@@ -160,10 +144,8 @@ public class CheckCodeManager
 	 */
 	public void removeCheckCode(HttpSession session, String module)
 	{
-		CheckCodes ccs = (CheckCodes) session.getAttribute(SESSION_KEY_CHECK_CODES);
-
-		if (ccs != null)
-			ccs.remove(module);
+		module = toSessionCheckCodeKey(module);
+		session.removeAttribute(module);
 	}
 
 	/**
@@ -181,30 +163,8 @@ public class CheckCodeManager
 		return (c == null ? false : c.equals(code));
 	}
 
-	protected static class CheckCodes implements Serializable
+	protected String toSessionCheckCodeKey(String module)
 	{
-		private static final long serialVersionUID = 1L;
-
-		private Map<String, String> codes = new HashMap<String, String>();
-
-		public CheckCodes()
-		{
-			super();
-		}
-
-		public synchronized void set(String module, String code)
-		{
-			this.codes.put(module, code);
-		}
-
-		public synchronized String get(String module)
-		{
-			return this.codes.get(module);
-		}
-
-		public synchronized void remove(String module)
-		{
-			this.codes.remove(module);
-		}
+		return SESSION_CHECK_CODE_PREFIX + module;
 	}
 }
