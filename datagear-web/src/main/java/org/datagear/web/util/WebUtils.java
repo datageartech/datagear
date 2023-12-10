@@ -469,7 +469,27 @@ public class WebUtils
 	{
 		String remoteAddress = request.getRemoteAddr();
 
-		String headerAddress = request.getHeader("x-forwarded-for");
+		String headerAddress = "";
+
+		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
+		{
+			headerAddress = request.getHeader("x-forwarded-for");
+		}
+
+		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
+		{
+			headerAddress = request.getHeader("X-Real-IP");
+		}
+
+		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
+		{
+			headerAddress = request.getHeader("Remote-Host");
+		}
+
+		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
+		{
+			headerAddress = request.getHeader("Remote_Addr");
+		}
 
 		if (StringUtil.isEmpty(headerAddress) || "unknown".equalsIgnoreCase(headerAddress))
 		{

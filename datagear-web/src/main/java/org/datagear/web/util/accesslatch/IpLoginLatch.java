@@ -20,6 +20,8 @@ package org.datagear.web.util.accesslatch;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.web.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * IP登录{@linkplain AccessLatch}。
@@ -29,6 +31,8 @@ import org.datagear.web.util.WebUtils;
  */
 public class IpLoginLatch extends ResourceAccessLatch
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(IpLoginLatch.class);
+
 	public static final String RESOURCE = IpLoginLatch.class.getName();
 
 	public IpLoginLatch()
@@ -64,6 +68,11 @@ public class IpLoginLatch extends ResourceAccessLatch
 
 	public String getClientAddress(HttpServletRequest request)
 	{
-		return WebUtils.getClientAddress(request);
+		String addr = WebUtils.getClientAddress(request);
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Got client address from request : " + addr);
+
+		return addr;
 	}
 }
