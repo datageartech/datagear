@@ -110,6 +110,8 @@ import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.LastModifiedService;
+import org.datagear.util.SimpleLastModifiedService;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
@@ -409,6 +411,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return HttpClients.createDefault();
 	}
 
+	@Bean
+	public LastModifiedService lastModifiedService()
+	{
+		SimpleLastModifiedService bean = new SimpleLastModifiedService();
+		return bean;
+	}
+
 	public File createDirectory(String directoryName, boolean createIfInexistence)
 	{
 		DirectoryFactory bean = new DirectoryFactory();
@@ -533,7 +542,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public XmlDriverEntityManagerInitializer xmlDriverEntityManagerInitializer()
 	{
 		XmlDriverEntityManagerInitializer bean = new XmlDriverEntityManagerInitializer(this.driverEntityManager());
-
 		return bean;
 	}
 
@@ -671,7 +679,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public SchemaGuardService schemaGuardService()
 	{
-		SchemaGuardServiceImpl bean = new SchemaGuardServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect());
+		SchemaGuardServiceImpl bean = new SchemaGuardServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.lastModifiedService());
 
 		return bean;
 	}
