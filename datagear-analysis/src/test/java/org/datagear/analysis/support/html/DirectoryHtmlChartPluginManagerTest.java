@@ -27,6 +27,7 @@ import java.util.Set;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.SimpleLastModifiedService;
 import org.junit.Test;
 
 /**
@@ -54,7 +55,7 @@ public class DirectoryHtmlChartPluginManagerTest
 		htmlChartPluginLoader.setTmpDirectory(tmpDirectory);
 
 		DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager = new DirectoryHtmlChartPluginManager(
-				managerDirectory, htmlChartPluginLoader);
+				managerDirectory, htmlChartPluginLoader, new SimpleLastModifiedService());
 		directoryHtmlChartPluginManager.setTmpDirectory(tmpDirectory);
 
 		FileUtil.clearDirectory(managerDirectory);
