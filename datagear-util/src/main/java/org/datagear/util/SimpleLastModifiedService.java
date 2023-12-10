@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author datagear@163.com
  *
  */
-public class SimpleLastModifiedService implements LastModifiedService
+public class SimpleLastModifiedService extends AbstractLastModifiedService
 {
 	private ConcurrentMap<String, Long> lastModifieds = new ConcurrentHashMap<>();
 
@@ -36,31 +36,14 @@ public class SimpleLastModifiedService implements LastModifiedService
 	}
 
 	@Override
-	public long getLastModified(String name)
+	protected Long getLastModifiedInner(String name)
 	{
-		Long v = this.lastModifieds.get(name);
-		return (v == null ? LAST_MODIFIED_UNSET : v.longValue());
+		return this.lastModifieds.get(name);
 	}
 
 	@Override
-	public void setLastModified(String name, long lastModified)
+	protected void setLastModifiedInner(String name, long lastModified)
 	{
 		this.lastModifieds.put(name, lastModified);
-	}
-
-	@Override
-	public long setLastModifiedNow(String name)
-	{
-		long v = System.currentTimeMillis();
-		setLastModified(name, v);
-
-		return v;
-	}
-
-	@Override
-	public boolean isModified(String name, long lastModified)
-	{
-		long v = getLastModified(name);
-		return (v != lastModified);
 	}
 }

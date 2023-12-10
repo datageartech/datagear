@@ -28,7 +28,7 @@ public interface LastModifiedService
 	/**
 	 * 未设置时的默认值。
 	 */
-	long LAST_MODIFIED_UNSET = -1;
+	long LAST_MODIFIED_UNSET = -9;
 
 	/**
 	 * 供外部使用的初始值。
