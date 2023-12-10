@@ -55,15 +55,8 @@ public abstract class AbstractLastModifiedService implements LastModifiedService
 	@Override
 	public boolean isModified(String name, long lastModified)
 	{
-		if (LAST_MODIFIED_UNSET == lastModified || LAST_MODIFIED_INIT == lastModified)
-			return true;
-
 		long v = getLastModified(name);
-
-		if (LAST_MODIFIED_UNSET == v || LAST_MODIFIED_INIT == v)
-			return true;
-		else
-			return (v != lastModified);
+		return (v != lastModified);
 	}
 
 	/**

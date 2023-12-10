@@ -39,18 +39,8 @@ public class SimpleLastModifiedServiceTest
 			SimpleLastModifiedService service = new SimpleLastModifiedService();
 
 			assertTrue(service.isModified(name, LastModifiedService.LAST_MODIFIED_INIT));
-			assertTrue(service.isModified(name, LastModifiedService.LAST_MODIFIED_UNSET));
+			assertFalse(service.isModified(name, LastModifiedService.LAST_MODIFIED_UNSET));
 			assertTrue(service.isModified(name, System.currentTimeMillis()));
-		}
-
-		{
-			SimpleLastModifiedService service = new SimpleLastModifiedService();
-
-			service.setLastModified(name, LastModifiedService.LAST_MODIFIED_INIT);
-			assertTrue(service.isModified(name, LastModifiedService.LAST_MODIFIED_INIT));
-
-			service.setLastModified(name, LastModifiedService.LAST_MODIFIED_UNSET);
-			assertTrue(service.isModified(name, LastModifiedService.LAST_MODIFIED_UNSET));
 		}
 
 		{
