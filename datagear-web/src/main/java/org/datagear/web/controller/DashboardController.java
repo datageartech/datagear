@@ -1045,7 +1045,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 *            重定向的看板资源名，允许为{@code null}，格式为："abc.html"、"def/def.js"、"detail/detail.html?param=0"
 	 * @throws Exception
 	 */
-	@RequestMapping("/auth/{id}")
+	@RequestMapping({ "/auth/{id}", "/auth/{id}/**" })
 	public String showAuth(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id,
 			@RequestParam(value = DASHBOARD_SHOW_AUTH_PARAM_NAME, required = false) String name) throws Exception
@@ -1061,8 +1061,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			name = WebUtils.decodeURL(name);
 
 		String redirectPath = WebUtils.getContextPath(request) + "/dashboard/show/" + id + "/";
+		String submitAction = "authcheck";
+
 		if (!StringUtil.isEmpty(name))
+		{
 			redirectPath = FileUtil.concatPath(redirectPath, name, FileUtil.PATH_SEPARATOR_SLASH, false);
+		}
+
+		redirectPath = addSessionIdParamIfNeed(redirectPath, request);
+		submitAction = addSessionIdParamIfNeed(submitAction, request);
 
 		boolean authed = isShowAuthed(request, user, dashboardWidget);
 		
@@ -1073,7 +1080,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		authModel.put("authed", authed);
 		authModel.put("dashboardNameMask", StringUtil.mask(dashboardWidget.getName(), 2, 2, 6));
 		
-		setFormModel(model, authModel, "auth", "authcheck");
+		setFormModel(model, authModel, "auth", submitAction);
 		model.addAttribute("authed", authed);
 		model.addAttribute("redirectPath", redirectPath);
 
@@ -1179,14 +1186,18 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return manager.isAuthed(dashboardWidget.getId());
 	}
 
-	protected String buildShowAuthUrlForShowRequest(HttpServletRequest request, String id, String resName)
-			throws Exception
+	protected String buildShowAuthUrlForShowRequest(HttpServletRequest request, HttpServletResponse response, String id,
+			String resName) throws Exception
 	{
 		resName = appendRequestQueryString((resName == null ? "" : resName), request);
-
 		String authPath = WebUtils.getContextPath(request) + "/dashboard/auth/" + id + "/";
+		authPath = addSessionIdParamIfNeed(authPath, request);
+		authPath = addSafeSessionParamIfNeed(authPath, request);
+
 		if (!StringUtil.isEmpty(resName))
-			authPath += "?" + DASHBOARD_SHOW_AUTH_PARAM_NAME + "=" + WebUtils.encodeURL(resName);
+		{
+			authPath = WebUtils.addUrlParam(authPath, DASHBOARD_SHOW_AUTH_PARAM_NAME, WebUtils.encodeURL(resName));
+		}
 
 		return authPath;
 	}
@@ -1258,7 +1269,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		//如果末尾不加"/"，将会导致这些超链接路径错误
 		if(requestPath.indexOf(correctPath) < 0)
 		{
-			String redirectPath = appendRequestQueryString(correctPath, request);
+			String redirectPath = correctPath;
+			redirectPath = addSessionIdParamIfNeed(redirectPath, request);
+			redirectPath = appendRequestQueryString(redirectPath, request);
 			response.sendRedirect(redirectPath);
 		}
 		else
@@ -1268,7 +1281,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			if (!isShowAuthed(request, user, dashboardWidget))
 			{
-				String authPath = buildShowAuthUrlForShowRequest(request, id, "");
+				String authPath = buildShowAuthUrlForShowRequest(request, response, id, "");
 				response.sendRedirect(authPath);
 				return;
 			}
@@ -1280,7 +1293,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
 			{
 				String redirectPath = correctPath + WebUtils.encodePathURL(firstTemplate);
+				redirectPath = addSessionIdParamIfNeed(redirectPath, request);
 				redirectPath = appendRequestQueryString(redirectPath, request);
+
 				response.sendRedirect(redirectPath);
 			}
 			else
@@ -1310,14 +1325,33 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user, id);
 		String resName = resolvePathAfter(request, "/show/" + id + "/");
 
-		if (StringUtil.isEmpty(resName))
+		if (resName == null)
 			throw new FileNotFoundException(resName);
 
 		resName = WebUtils.decodeURL(resName);
 
+		// 对于“/show/xxxx/;jsessionid=xxxx”的请求，resName将会是空字符串
+		if (StringUtil.isEmpty(resName))
+		{
+			resName = dashboardWidget.getFirstTemplate();
+
+			// 如果首页模板是在嵌套路径下，则应重定向到具体路径，避免页面内以相对路径引用的资源找不到
+			int subPathSlashIdx = resName.indexOf(FileUtil.PATH_SEPARATOR_SLASH);
+			if (subPathSlashIdx > 0 && subPathSlashIdx < resName.length() - 1)
+			{
+				String redirectPath = WebUtils.getContextPath(request) + "/dashboard/show/" + id + "/"
+						+ WebUtils.encodePathURL(resName);
+				redirectPath = addSessionIdParamIfNeed(redirectPath, request);
+				redirectPath = appendRequestQueryString(redirectPath, request);
+
+				response.sendRedirect(redirectPath);
+				return;
+			}
+		}
+
 		if (!isShowAuthed(request, user, dashboardWidget))
 		{
-			String authPath = buildShowAuthUrlForShowRequest(request, id, resName);
+			String authPath = buildShowAuthUrlForShowRequest(request, response, id, resName);
 			response.sendRedirect(authPath);
 			return;
 		}
@@ -1960,10 +1994,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		WebContext webContext = createInitWebContext(request);
 
+		// 这里始终添加会话ID参数，避免旧版本未指定DASHBOARD_SHOW_PARAM_SAFE_SESSION参数的展示链接报错
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
 				addSessionIdParam("/dashboard/showData", request));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
 				addSessionIdParam("/dashboard/loadChart", request));
+
 		addHeartBeatValue(request, webContext);
 
 		return webContext;

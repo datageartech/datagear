@@ -1052,12 +1052,12 @@ public abstract class AbstractController extends MessageSourceSupport
 	}
 
 	/**
-	 * 解析请求路径中{@code pathPrefix}之后的路径名，如果路径不包含{@code pathPrefix}，则返回{@code null}。
+	 * 解析请求路径中{@code pathPrefix}之后的路径名。
 	 * 
 	 * @param request
 	 * @param pathPrefix
-	 *            为空或{@code null}，则返回整个请求路径
 	 * @return
+	 * @see {@linkplain WebUtils#resolvePathAfter(HttpServletRequest, String)}
 	 */
 	protected String resolvePathAfter(HttpServletRequest request, String pathPrefix)
 	{

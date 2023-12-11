@@ -494,29 +494,56 @@ public class WebUtils
 	}
 	
 	/**
-	 * 解析请求路径中{@code pathPrefix}之后的路径名，如果路径不包含{@code pathPrefix}，则返回{@code null}。
+	 * 解析请求路径中{@code pathPrefix}之后的路径名。
+	 * <p>
+	 * 返回的路径名不会包含路径参数，比如对于{@code "/a/b;jsessionid=156D0D8332"}将只会返回{@code "/a/b"}。
+	 * </p>
 	 * 
 	 * @param request
 	 * @param pathPrefix
 	 *            为空或{@code null}，则返回整个请求路径
-	 * @return
+	 * @return 返回{@code null}表明路径不包含{@code pathPrefix}
 	 */
 	public static String resolvePathAfter(HttpServletRequest request, String pathPrefix)
 	{
+		String re;
+
 		String uri = request.getRequestURI();
 
 		if (StringUtil.isEmpty(pathPrefix))
-			return uri;
+		{
+			re = uri;
+		}
+		else if (uri.endsWith(pathPrefix))
+		{
+			re = "";
+		}
+		else
+		{
+			int index = uri.indexOf(pathPrefix);
 
-		if (uri.endsWith(pathPrefix))
-			return "";
+			if (index < 0)
+			{
+				re = null;
+			}
+			else
+			{
+				re = uri.substring(index + pathPrefix.length());
+			}
+		}
 
-		int index = uri.indexOf(pathPrefix);
+		// 删除路径参数：/a/b;a=1;b=2
+		if (re != null)
+		{
+			int idx = re.indexOf(';');
 
-		if (index < 0)
-			return null;
+			if (idx >= 0)
+			{
+				re = re.substring(0, idx);
+			}
+		}
 
-		return uri.substring(index + pathPrefix.length());
+		return re;
 	}
 	
 	public static void setEnableDetectNewVersionRequest(HttpServletRequest request)
@@ -527,5 +554,27 @@ public class WebUtils
 	public static boolean isEnableDetectNewVersionRequest(HttpServletRequest request)
 	{
 		return Boolean.TRUE.equals(request.getAttribute("enableDetectNewVersion"));
+	}
+
+	/**
+	 * 为URL添加参数。
+	 * 
+	 * @param url
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	public static String addUrlParam(String url, String name, String value)
+	{
+		int qidx = url.indexOf('?');
+
+		if (qidx < 0)
+			url += "?";
+		else
+			url += "&";
+
+		url += name + "=" + value;
+
+		return url;
 	}
 }

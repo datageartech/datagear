@@ -158,6 +158,25 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板心跳频率：5分钟 */
 	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
 
+	/**
+	 * 看板展示URL的请求参数名：启用安全会话。
+	 * <p>
+	 * 当看板嵌入不同源的iframe时，cookie会被浏览器禁用，会导致无法保持会话，需要设置此参数启用安全会话。
+	 * </p>
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "SAFE_SESSION";
+
+	/**
+	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code true}。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE = "true";
+
+	/**
+	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code 1}。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1 = "1";
+
 	@Autowired
 	private DataSetParamValueConverter dataSetParamValueConverter;
 
@@ -528,9 +547,54 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
 		String heartbeatURL = "/dashboard" + HEARTBEAT_TAIL_URL;
-		heartbeatURL = addSessionIdParam(heartbeatURL, request.getSession().getId());
+
+		// 这里始终添加会话ID参数，避免旧版本未指定DASHBOARD_SHOW_PARAM_SAFE_SESSION参数的展示链接报错
+		heartbeatURL = addSessionIdParam(heartbeatURL, request);
 
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
+	}
+
+	/**
+	 * 如果是启用安全会话请求，则为URL添加会话ID参数；否则，直接返回{@code url}。
+	 * 
+	 * @param url
+	 * @param request
+	 * @return
+	 */
+	protected String addSessionIdParamIfNeed(String url, HttpServletRequest request)
+	{
+		if (isSafeSessionRequest(request))
+			return addSessionIdParam(url, request);
+		else
+			return url;
+	}
+
+	/**
+	 * 如果是启用安全会话请求，则为URL添加{@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}参数；否则，直接返回{@code url}。
+	 * 
+	 * @param url
+	 * @param request
+	 * @return
+	 */
+	protected String addSafeSessionParamIfNeed(String url, HttpServletRequest request)
+	{
+		if (isSafeSessionRequest(request))
+			return WebUtils.addUrlParam(url, DASHBOARD_SHOW_PARAM_SAFE_SESSION, DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE);
+		else
+			return url;
+	}
+
+	/**
+	 * 是否是启用安全会话请求。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected boolean isSafeSessionRequest(HttpServletRequest request)
+	{
+		String value = request.getParameter(DASHBOARD_SHOW_PARAM_SAFE_SESSION);
+		return (value != null && (DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE.equalsIgnoreCase(value)
+				|| DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1.equals(value)));
 	}
 
 	/**
@@ -550,7 +614,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
-	 * 为指定URL添加会话ID参数。
+	 * 为指定URL添加会话参数。
 	 * 
 	 * @param url
 	 * @param session
