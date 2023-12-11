@@ -19,9 +19,8 @@ package org.datagear.web.util.accesslatch;
 
 import java.util.concurrent.TimeUnit;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 
 /**
  * 简单访问频次控制器。
@@ -31,13 +30,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
  */
 public class SimpleAccessLatch extends AbstractAccessLatch
 {
-	/** 限定秒数：小于0 不限；0 不允许访问；大于0 限定过去秒数内 */
-	private final int seconds;
-
-	/** 限定次数：小于0 不限；0 不允许访问；大于0 限定次数 */
-	private final int frequency;
-
-	private final LoadingCache<String, AccessLog> _cache;
+	private final Cache<String, AccessLog> _cache;
 
 	/**
 	 * 创建
@@ -49,97 +42,49 @@ public class SimpleAccessLatch extends AbstractAccessLatch
 	 */
 	public SimpleAccessLatch(int seconds, int frequency)
 	{
-		super();
-		this.seconds = seconds;
-		this.frequency = frequency;
+		super(seconds, frequency);
 		this._cache = Caffeine.newBuilder()
-				.expireAfterAccess((this.seconds < 0 ? 60 : this.seconds * 2), TimeUnit.SECONDS)
-				.build(new CacheLoader<String, AccessLog>()
-				{
-					@Override
-					public AccessLog load(String key) throws Exception
-					{
-						return new AccessLog();
-					}
-				});
-	}
-
-	/**
-	 * 获取限定的过去秒数。
-	 * 
-	 * @return {@code <0 }表示不限
-	 */
-	public int getSeconds()
-	{
-		return seconds;
-	}
-
-	/**
-	 * 获取限定访问次数。
-	 * 
-	 * @return {@code <0 }表示不限
-	 */
-	public int getFrequency()
-	{
-		return frequency;
+				.expireAfterAccess((seconds < 0 ? 60 : seconds * 2), TimeUnit.SECONDS)
+				.build();
 	}
 
 	@Override
-	public int remain(String identity, String resource, long time)
+	public void setSeconds(int seconds)
 	{
-		if (this.seconds < 0 || this.frequency < 0)
-			return -1;
+		throw new UnsupportedOperationException();
+	}
 
-		AccessLog accessLog = getAccessLogNonNull(toAccessKey(identity, resource));
+	@Override
+	public void setFrequency(int frequency)
+	{
+		throw new UnsupportedOperationException();
+	}
 
-		synchronized (accessLog)
+	@Override
+	protected AccessLog getAccessLog(String accessKey, boolean nonNull)
+	{
+		if (nonNull)
 		{
-			time = time - this.seconds * 1000;
-			int count = accessLog.countAfterOrEq(time);
-			int remain = (this.frequency - count);
-
-			return (remain < 0 ? 0 : remain);
+			return this._cache.get(accessKey, (key) ->
+			{
+				return new AccessLog();
+			});
+		}
+		else
+		{
+			return this._cache.getIfPresent(accessKey);
 		}
 	}
 
 	@Override
-	public boolean access(String identity, String resource, long time)
+	protected void updateAccessLog(String accessKey, AccessLog accessLog)
 	{
-		if (this.seconds < 0 || this.frequency < 0)
-			return true;
-
-		long valveTime = time - this.seconds * 1000;
-
-		AccessLog accessLog = getAccessLogNonNull(toAccessKey(identity, resource));
-
-		synchronized (accessLog)
-		{
-			int count = accessLog.countAfterOrEq(valveTime);
-
-			if (count >= this.frequency)
-				return false;
-
-			accessLog.log(time);
-			accessLog.deleteBefore(valveTime);
-
-			return true;
-		}
+		this._cache.put(accessKey, accessLog);
 	}
 
 	@Override
-	public void clear(String identity, String resource)
+	protected void clearAccessLog(String accessKey)
 	{
-		this._cache.invalidate(toAccessKey(identity, resource));
-	}
-
-	protected String toAccessKey(String identity, String resource)
-	{
-		return identity + "_" + resource;
-	}
-
-	protected AccessLog getAccessLogNonNull(String accessKey)
-	{
-		AccessLog al = this._cache.get(accessKey);
-		return al;
+		this._cache.invalidate(accessKey);
 	}
 }
