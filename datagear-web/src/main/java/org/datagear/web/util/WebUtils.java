@@ -43,11 +43,6 @@ public class WebUtils
 {
 	public static final String COOKIE_PAGINATION_SIZE = "PAGINATION_PAGE_SIZE";
 
-	/**
-	 * Servlet规范中参数会话ID名称，当客户端不支持cookie时，则应使用此参数传递会话ID，格式为：/aa/bb;jsessionid=[id]
-	 */
-	public static final String PARAM_JSESSIONID = "jsessionid";
-
 	/** Servlet环境中存储操作消息的关键字 */
 	public static final String KEY_OPERATION_MESSAGE = "operationMessage";
 
@@ -397,21 +392,6 @@ public class WebUtils
 			return paramValue;
 
 		return defaultValue;
-	}
-
-	/**
-	 * 为指定URL添加{@linkplain #PARAM_JSESSIONID}参数。
-	 * <p>
-	 * 当要保持会话而客户端不支持cookie时，应使用此方法为URL添加会话ID参数。
-	 * </p>
-	 * 
-	 * @param url
-	 * @param sessionId
-	 * @return
-	 */
-	public static String addJsessionidParam(String url, String sessionId)
-	{
-		return url + ";" + PARAM_JSESSIONID + "=" + sessionId;
 	}
 
 	/**

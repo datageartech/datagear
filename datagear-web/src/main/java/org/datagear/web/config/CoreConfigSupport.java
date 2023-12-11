@@ -139,9 +139,11 @@ import org.datagear.web.util.DelegatingTextEncryptor;
 import org.datagear.web.util.DelegatingTextEncryptor.EncryptType;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
+import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SchemaTableCache;
+import org.datagear.web.util.SessionIdPathParamSpec;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
@@ -416,6 +418,20 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public LastModifiedService lastModifiedService()
 	{
 		SimpleLastModifiedService bean = new SimpleLastModifiedService();
+		return bean;
+	}
+
+	@Bean
+	public ExpiredSessionAttrManager expiredSessionAttrManager()
+	{
+		ExpiredSessionAttrManager bean = new ExpiredSessionAttrManager();
+		return bean;
+	}
+
+	@Bean
+	public SessionIdPathParamSpec sessionIdPathParamSpec()
+	{
+		SessionIdPathParamSpec bean = new SessionIdPathParamSpec();
 		return bean;
 	}
 

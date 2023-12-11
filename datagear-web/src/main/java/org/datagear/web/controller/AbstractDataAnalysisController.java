@@ -58,6 +58,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
+import org.datagear.web.util.SessionIdPathParamSpec;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +173,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	@Autowired
 	private ExpiredSessionAttrManager expiredSessionAttrManager;
 
+	@Autowired
+	private SessionIdPathParamSpec sessionIdPathParamSpec;
+
 	public AbstractDataAnalysisController()
 	{
 		super();
@@ -225,6 +229,16 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public void setExpiredSessionAttrManager(ExpiredSessionAttrManager expiredSessionAttrManager)
 	{
 		this.expiredSessionAttrManager = expiredSessionAttrManager;
+	}
+
+	public SessionIdPathParamSpec getSessionIdPathParamSpec()
+	{
+		return sessionIdPathParamSpec;
+	}
+
+	public void setSessionIdPathParamSpec(SessionIdPathParamSpec sessionIdPathParamSpec)
+	{
+		this.sessionIdPathParamSpec = sessionIdPathParamSpec;
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
@@ -514,7 +528,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
 		String heartbeatURL = "/dashboard" + HEARTBEAT_TAIL_URL;
-		heartbeatURL = addJsessionidParam(heartbeatURL, request.getSession().getId());
+		heartbeatURL = addSessionIdParam(heartbeatURL, request.getSession().getId());
 
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
 	}
@@ -530,9 +544,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param sessionId
 	 * @return
 	 */
-	protected String addJsessionidParam(String url, String sessionId)
+	protected String addSessionIdParam(String url, String sessionId)
 	{
-		return WebUtils.addJsessionidParam(url, sessionId);
+		return this.sessionIdPathParamSpec.addSessionId(url, sessionId);
 	}
 
 	/**
@@ -542,10 +556,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param session
 	 * @return
 	 */
-	protected String addJsessionidParam(String url, HttpServletRequest request)
+	protected String addSessionIdParam(String url, HttpServletRequest request)
 	{
-		String sessionId = request.getSession().getId();
-		return WebUtils.addJsessionidParam(url, sessionId);
+		return this.sessionIdPathParamSpec.addSessionId(url, request);
 	}
 
 	/**

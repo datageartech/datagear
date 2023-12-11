@@ -604,9 +604,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		WebContext webContext = createInitWebContext(request);
 
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addJsessionidParam("/chart/showData", request));
+				addSessionIdParam("/chart/showData", request));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addJsessionidParam("/dashboard/loadChart", request));
+				addSessionIdParam("/dashboard/loadChart", request));
 		addHeartBeatValue(request, webContext);
 
 		return webContext;
