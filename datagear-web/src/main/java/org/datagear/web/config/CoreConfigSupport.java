@@ -146,6 +146,7 @@ import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
 import org.datagear.web.util.accesslatch.IpLoginLatch;
+import org.datagear.web.util.accesslatch.SimpleAccessLatch;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -968,7 +969,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public IpLoginLatch ipLoginLatch()
 	{
-		AccessLatch accessLatch = new AccessLatch(getApplicationProperties().getIpLoginLatchSeconds(),
+		AccessLatch accessLatch = new SimpleAccessLatch(getApplicationProperties().getIpLoginLatchSeconds(),
 				getApplicationProperties().getIpLoginLatchFrequency());
 
 		IpLoginLatch bean = new IpLoginLatch(accessLatch);
@@ -979,7 +980,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public UsernameLoginLatch usernameLoginLatch()
 	{
-		AccessLatch accessLatch = new AccessLatch(getApplicationProperties().getUsernameLoginLatchSeconds(),
+		AccessLatch accessLatch = new SimpleAccessLatch(getApplicationProperties().getUsernameLoginLatchSeconds(),
 				getApplicationProperties().getUsernameLoginLatchFrequency());
 
 		UsernameLoginLatch bean = new UsernameLoginLatch(accessLatch);
