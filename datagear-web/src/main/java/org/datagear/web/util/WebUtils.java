@@ -495,44 +495,77 @@ public class WebUtils
 	
 	/**
 	 * 解析请求路径中{@code pathPrefix}之后的路径名。
-	 * <p>
-	 * 返回的路径名不会包含路径参数，比如对于{@code "/a/b;jsessionid=156D0D8332"}将只会返回{@code "/a/b"}。
-	 * </p>
 	 * 
 	 * @param request
+	 * @param pathPrefix
+	 * @return
+	 * @see {@linkplain #resolvePathAfter(String, String)}
+	 */
+	public static String resolvePathAfter(HttpServletRequest request, String pathPrefix)
+	{
+		return resolvePathAfter(request.getRequestURI(), pathPrefix);
+	}
+	
+	/**
+	 * 解析URL中{@code pathPrefix}之后的路径名。
+	 * <p>
+	 * 返回的路径名将会移除路径参数、请求参数、锚点参数，比如对于{@code "/a/b;jsessionid=156D0D8332?param=value#anchor"}将只会返回{@code "/a/b"}。
+	 * </p>
+	 * 
+	 * @param url
 	 * @param pathPrefix
 	 *            为空或{@code null}，则返回整个请求路径
 	 * @return 返回{@code null}表明路径不包含{@code pathPrefix}
 	 */
-	public static String resolvePathAfter(HttpServletRequest request, String pathPrefix)
+	public static String resolvePathAfter(String url, String pathPrefix)
 	{
 		String re;
 
-		String uri = request.getRequestURI();
-
 		if (StringUtil.isEmpty(pathPrefix))
 		{
-			re = uri;
+			re = url;
 		}
-		else if (uri.endsWith(pathPrefix))
+		else if (url.endsWith(pathPrefix))
 		{
 			re = "";
 		}
 		else
 		{
-			int index = uri.indexOf(pathPrefix);
+			int idx = url.indexOf(pathPrefix);
 
-			if (index < 0)
+			if (idx < 0)
 			{
 				re = null;
 			}
 			else
 			{
-				re = uri.substring(index + pathPrefix.length());
+				re = url.substring(idx + pathPrefix.length());
 			}
 		}
 
-		// 删除路径参数：/a/b;a=1;b=2
+		// 删除锚点“...#anchor”
+		if (re != null)
+		{
+			int idx = re.indexOf('#');
+
+			if (idx >= 0)
+			{
+				re = re.substring(0, idx);
+			}
+		}
+
+		// 删除请求参数“...?p=v”
+		if (re != null)
+		{
+			int idx = re.indexOf('?');
+
+			if (idx >= 0)
+			{
+				re = re.substring(0, idx);
+			}
+		}
+
+		// 删除路径参数“...;a=1;b=2”
 		if (re != null)
 		{
 			int idx = re.indexOf(';');
@@ -545,7 +578,7 @@ public class WebUtils
 
 		return re;
 	}
-	
+
 	public static void setEnableDetectNewVersionRequest(HttpServletRequest request)
 	{
 		request.setAttribute("enableDetectNewVersion", true);
@@ -557,7 +590,7 @@ public class WebUtils
 	}
 
 	/**
-	 * 为URL添加参数。
+	 * 为URL添加请求参数。
 	 * 
 	 * @param url
 	 * @param name
@@ -566,15 +599,30 @@ public class WebUtils
 	 */
 	public static String addUrlParam(String url, String name, String value)
 	{
-		int qidx = url.indexOf('?');
+		String re = url;
+
+		// 锚点
+		String anchor = null;
+
+		int aidx = url.indexOf('#');
+		if (aidx >= 0)
+		{
+			re = url.substring(0, aidx);
+			anchor = url.substring(aidx, url.length());
+		}
+
+		int qidx = re.indexOf('?');
 
 		if (qidx < 0)
-			url += "?";
+			re += "?";
 		else
-			url += "&";
+			re += "&";
 
-		url += name + "=" + value;
+		re += name + "=" + value;
 
-		return url;
+		if (anchor != null)
+			re += anchor;
+
+		return re;
 	}
 }

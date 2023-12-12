@@ -168,14 +168,24 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 			+ "SAFE_SESSION";
 
 	/**
+	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code 1}。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1 = "1";
+
+	/**
 	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code true}。
 	 */
 	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE = "true";
 
 	/**
-	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code 1}。
+	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code 0}。
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1 = "1";
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_0 = "0";
+
+	/**
+	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code false}。
+	 */
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_FALSE = "false";
 
 	@Autowired
 	private DataSetParamValueConverter dataSetParamValueConverter;
@@ -547,9 +557,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
 		String heartbeatURL = "/dashboard" + HEARTBEAT_TAIL_URL;
-
-		// 这里始终添加会话ID参数，避免旧版本未指定DASHBOARD_SHOW_PARAM_SAFE_SESSION参数的展示链接报错
-		heartbeatURL = addSessionIdParam(heartbeatURL, request);
+		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
 
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
 	}
@@ -564,7 +572,30 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected String addSessionIdParamIfNeed(String url, HttpServletRequest request)
 	{
 		if (isSafeSessionRequest(request))
+		{
 			return addSessionIdParam(url, request);
+		}
+		else
+			return url;
+	}
+
+	/**
+	 * 如果没有明确禁用安全会话请求，则为URL添加会话ID参数；否则，直接返回{@code url}。
+	 * <p>
+	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}是在4.7.0版本新加的特性，
+	 * 在之前版本，为了iframe嵌入，某些URL默认添加了会话ID参数，为了兼容，应仅在明确禁用安全会话时才移除这些URL中的会话ID参数。
+	 * </p>
+	 * 
+	 * @param url
+	 * @param request
+	 * @return
+	 */
+	protected String addSessionIdParamIfNotExplicitDisable(String url, HttpServletRequest request)
+	{
+		if (!isExplicitDisableSafeSessionRequest((request)))
+		{
+			return addSessionIdParam(url, request);
+		}
 		else
 			return url;
 	}
@@ -593,8 +624,29 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected boolean isSafeSessionRequest(HttpServletRequest request)
 	{
 		String value = request.getParameter(DASHBOARD_SHOW_PARAM_SAFE_SESSION);
-		return (value != null && (DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE.equalsIgnoreCase(value)
-				|| DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1.equals(value)));
+
+		if (value == null)
+			return false;
+
+		return (DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1.equals(value)
+				|| DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE.equalsIgnoreCase(value));
+	}
+
+	/**
+	 * 是否是明确禁用安全会话请求。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected boolean isExplicitDisableSafeSessionRequest(HttpServletRequest request)
+	{
+		String value = request.getParameter(DASHBOARD_SHOW_PARAM_SAFE_SESSION);
+
+		if (value == null)
+			return false;
+
+		return (DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_0.equals(value)
+				|| DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_FALSE.equalsIgnoreCase(value));
 	}
 
 	/**

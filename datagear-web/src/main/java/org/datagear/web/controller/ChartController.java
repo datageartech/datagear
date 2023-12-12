@@ -605,11 +605,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		WebContext webContext = createInitWebContext(request);
 
-		// 这里始终添加会话ID参数，避免旧版本未指定DASHBOARD_SHOW_PARAM_SAFE_SESSION参数的展示链接报错
 		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addSessionIdParam("/chart/showData", request));
+				addSessionIdParamIfNotExplicitDisable("/chart/showData", request));
 		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addSessionIdParam("/dashboard/loadChart", request));
+				addSessionIdParamIfNotExplicitDisable("/dashboard/loadChart", request));
 
 		addHeartBeatValue(request, webContext);
 
