@@ -143,14 +143,20 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "TEMPLATE_CONTENT";
 
-	/** 看板更新数据URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：更新数据URL名 */
 	public static final String DASHBOARD_UPDATE_URL_NAME = "updateDashboardURL";
 
-	/** 看板加载图表URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：加载图表URL名 */
 	public static final String DASHBOARD_LOAD_CHART_URL_NAME = "loadChartURL";
 
-	/** 看板心跳URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：心跳URL名 */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
+
+	/** 看板展示页{@linkplain WebContext}属性名：会话名 */
+	public static final String DASHBOARD_SESSION_NAME_NAME = "sessionName";
+
+	/** 看板展示页{@linkplain WebContext}属性名：会话值 */
+	public static final String DASHBOARD_SESSION_VALUE_NAME = "sessionValue";
 
 	/** 看板心跳URL后缀 */
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
@@ -162,6 +168,17 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * 看板展示URL的请求参数名：启用安全会话。
 	 * <p>
 	 * 当看板嵌入不同源的iframe时，cookie会被浏览器禁用，会导致无法保持会话，需要设置此参数启用安全会话。
+	 * </p>
+	 * <p>
+	 * 注意：这里的启用安全会话功能无法支持看板展示页面内的链接，如果需要这些链接支持安全会话，
+	 * 需要定义看板时使用JS为这些链接添加启用安全会话参数、会话信息参数（可通过{@linkplain #DASHBOARD_SESSION_NAME_NAME}、{@linkplain #DASHBOARD_SESSION_VALUE_NAME}获取会话信息），示例：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * &lt;a href="content.html;jsessionid=xxxxx?DG_SAFE_SESSION=1"&gt;看板超链接&lt;/a&gt;
+	 * <br>
+	 * &lt;script src="res/common.js;jsessionid=xxxxx"&gt;&lt;/script&gt;
+	 * </code>
 	 * </p>
 	 */
 	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
@@ -323,6 +340,13 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected WebContext createInitWebContext(HttpServletRequest request)
 	{
 		WebContext webContext = new WebContext(WebUtils.getContextPath(request));
+
+		// 如果是启用安全会话请求，则将会话信息返回给前端，前端需要构建安全会话链接时可能需要
+		if (isSafeSessionRequest(request))
+		{
+			webContext.addAttribute(DASHBOARD_SESSION_NAME_NAME, this.sessionIdPathParamSpec.getSessionIdParamName());
+			webContext.addAttribute(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdPathParamSpec.getSessionId(request));
+		}
 
 		return webContext;
 	}

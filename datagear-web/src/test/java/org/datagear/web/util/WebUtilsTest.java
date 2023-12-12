@@ -85,27 +85,67 @@ public class WebUtilsTest
 	public void addUrlParamTest()
 	{
 		{
-			String url = "/a/b";
-			String re = WebUtils.addUrlParam(url, "p", "v");
-			assertEquals("/a/b?p=v", re);
+			{
+				String url = "/a/b";
+				String re = WebUtils.addUrlParam(url, "p", "v");
+				assertEquals("/a/b?p=v", re);
+			}
+
+			{
+				String url = "/a/b?p0=v0";
+				String re = WebUtils.addUrlParam(url, "p", "v");
+				assertEquals("/a/b?p0=v0&p=v", re);
+			}
+
+			{
+				String url = "/a/b#anchor";
+				String re = WebUtils.addUrlParam(url, "p", "v");
+				assertEquals("/a/b?p=v#anchor", re);
+			}
+
+			{
+				String url = "/a/b?p0=v0#anchor";
+				String re = WebUtils.addUrlParam(url, "p", "v");
+				assertEquals("/a/b?p0=v0&p=v#anchor", re);
+			}
 		}
 
 		{
-			String url = "/a/b?p0=v0";
-			String re = WebUtils.addUrlParam(url, "p", "v");
-			assertEquals("/a/b?p0=v0&p=v", re);
-		}
+			{
+				String url = "/a/b";
+				String re = WebUtils.addUrlParam(url, null);
+				assertEquals("/a/b", re);
+			}
 
-		{
-			String url = "/a/b#anchor";
-			String re = WebUtils.addUrlParam(url, "p", "v");
-			assertEquals("/a/b?p=v#anchor", re);
-		}
+			{
+				String url = "/a/b";
+				String re = WebUtils.addUrlParam(url, "");
+				assertEquals("/a/b", re);
+			}
 
-		{
-			String url = "/a/b?p0=v0#anchor";
-			String re = WebUtils.addUrlParam(url, "p", "v");
-			assertEquals("/a/b?p0=v0&p=v#anchor", re);
+			{
+				String url = "/a/b#anchor";
+				String re = WebUtils.addUrlParam(url, "q=v");
+				assertEquals("/a/b?q=v#anchor", re);
+			}
+
+			{
+				String url = "/a/b";
+				String re = WebUtils.addUrlParam(url, "q=v");
+				assertEquals("/a/b?q=v", re);
+			}
+
+			{
+				String url = "/a/b?q0=v0";
+				String re = WebUtils.addUrlParam(url, "q=v");
+				assertEquals("/a/b?q0=v0&q=v", re);
+			}
+
+			{
+				String url = "/a/b?q0=v0#anchor";
+				String re = WebUtils.addUrlParam(url, "q=v");
+				assertEquals("/a/b?q0=v0&q=v#anchor", re);
+			}
 		}
 	}
 }

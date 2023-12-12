@@ -99,7 +99,7 @@ public class SessionIdPathParamSpec
 	 * @param request
 	 * @return
 	 */
-	protected String getSessionId(HttpServletRequest request)
+	public String getSessionId(HttpServletRequest request)
 	{
 		return request.getSession().getId();
 	}

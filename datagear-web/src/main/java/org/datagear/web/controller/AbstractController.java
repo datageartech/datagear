@@ -1074,16 +1074,7 @@ public abstract class AbstractController extends MessageSourceSupport
 	protected String appendRequestQueryString(String url, HttpServletRequest request)
 	{
 		String qs = request.getQueryString();
-
-		if (StringUtil.isEmpty(qs))
-			return url;
-
-		int qmIdx = url.lastIndexOf('?');
-
-		if (qmIdx < 0)
-			return url + "?" + qs;
-		else
-			return url + "&" + qs;
+		return WebUtils.addUrlParam(url, qs);
 	}
 	
 	/**

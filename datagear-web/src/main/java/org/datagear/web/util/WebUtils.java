@@ -599,6 +599,23 @@ public class WebUtils
 	 */
 	public static String addUrlParam(String url, String name, String value)
 	{
+		String paramString = name + "=" + value;
+		return addUrlParam(url, paramString);
+	}
+
+	/**
+	 * 为URL添加请求参数。
+	 * 
+	 * @param url
+	 * @param paramString
+	 *            允许{@code null}、空字符串，参数字符串，格式示例：{@code "param=value"}
+	 * @return
+	 */
+	public static String addUrlParam(String url, String paramString)
+	{
+		if (StringUtil.isEmpty(paramString))
+			return url;
+
 		String re = url;
 
 		// 锚点
@@ -618,7 +635,7 @@ public class WebUtils
 		else
 			re += "&";
 
-		re += name + "=" + value;
+		re += paramString;
 
 		if (anchor != null)
 			re += anchor;
