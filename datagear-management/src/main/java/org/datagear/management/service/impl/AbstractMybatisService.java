@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.User;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -32,7 +33,6 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.support.SqlSessionDaoSupport;
 
 /**
  * 抽象基于Mybatis的服务类。
@@ -40,7 +40,7 @@ import org.mybatis.spring.support.SqlSessionDaoSupport;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
+public abstract class AbstractMybatisService<T>
 {
 	public static final String DEFAULT_IDENTIFIER_QUOTE_KEY = "_iq_";
 
@@ -71,6 +71,8 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/** {@linkplain MbSqlDialect#funcNameModInt()}的MyBatis参数名 */
 	public static final String FUNC_NAME_MODINT = "_FUNC_MODINT";
 
+	private SqlSessionDaoSupportImpl sqlSessionDaoSupportImpl;
+
 	private MbSqlDialect dialect;
 
 	private String identifierQuoteKey = DEFAULT_IDENTIFIER_QUOTE_KEY;
@@ -83,15 +85,19 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	public AbstractMybatisService(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect)
 	{
 		super();
-		setSqlSessionFactory(sqlSessionFactory);
+		this.sqlSessionDaoSupportImpl = new SqlSessionDaoSupportImpl(sqlSessionFactory);
 		this.dialect = dialect;
+
+		this.sqlSessionDaoSupportImpl.afterPropertiesSet();
 	}
 
 	public AbstractMybatisService(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect)
 	{
 		super();
-		setSqlSessionTemplate(sqlSessionTemplate);
+		this.sqlSessionDaoSupportImpl = new SqlSessionDaoSupportImpl(sqlSessionTemplate);
 		this.dialect = dialect;
+
+		this.sqlSessionDaoSupportImpl.afterPropertiesSet();
 	}
 
 	public MbSqlDialect getDialect()
@@ -112,6 +118,16 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	public void setIdentifierQuoteKey(String identifierQuoteKey)
 	{
 		this.identifierQuoteKey = identifierQuoteKey;
+	}
+
+	protected SqlSessionDaoSupportImpl getSqlSessionDaoSupportImpl()
+	{
+		return sqlSessionDaoSupportImpl;
+	}
+
+	protected void setSqlSessionDaoSupportImpl(SqlSessionDaoSupportImpl sqlSessionDaoSupportImpl)
+	{
+		this.sqlSessionDaoSupportImpl = sqlSessionDaoSupportImpl;
 	}
 
 	/**
@@ -758,6 +774,11 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		addDialectParamsBase(parameter);
 
 		return getSqlSession().delete(toGlobalSqlId(statement), parameter);
+	}
+
+	protected SqlSession getSqlSession()
+	{
+		return getSqlSessionDaoSupportImpl().getSqlSession();
 	}
 
 	/**
