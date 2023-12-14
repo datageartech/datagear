@@ -58,7 +58,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
-import org.datagear.web.util.SessionIdPathParamSpec;
+import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,7 +220,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	private ExpiredSessionAttrManager expiredSessionAttrManager;
 
 	@Autowired
-	private SessionIdPathParamSpec sessionIdPathParamSpec;
+	private SessionIdParamResolver sessionIdParamResolver;
 
 	public AbstractDataAnalysisController()
 	{
@@ -277,14 +277,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		this.expiredSessionAttrManager = expiredSessionAttrManager;
 	}
 
-	public SessionIdPathParamSpec getSessionIdPathParamSpec()
+	public SessionIdParamResolver getSessionIdParamResolver()
 	{
-		return sessionIdPathParamSpec;
+		return sessionIdParamResolver;
 	}
 
-	public void setSessionIdPathParamSpec(SessionIdPathParamSpec sessionIdPathParamSpec)
+	public void setSessionIdParamResolver(SessionIdParamResolver sessionIdParamResolver)
 	{
-		this.sessionIdPathParamSpec = sessionIdPathParamSpec;
+		this.sessionIdParamResolver = sessionIdParamResolver;
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
@@ -344,8 +344,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		// 如果是启用安全会话请求，则将会话信息返回给前端，前端需要构建安全会话链接时可能需要
 		if (isSafeSessionRequest(request))
 		{
-			webContext.addAttribute(DASHBOARD_SESSION_NAME_NAME, this.sessionIdPathParamSpec.getSessionIdParamName());
-			webContext.addAttribute(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdPathParamSpec.getSessionId(request));
+			webContext.addAttribute(DASHBOARD_SESSION_NAME_NAME, this.sessionIdParamResolver.getSessionIdParamName());
+			webContext.addAttribute(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdParamResolver.getSessionId(request));
 		}
 
 		return webContext;
@@ -686,7 +686,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 */
 	protected String addSessionIdParam(String url, String sessionId)
 	{
-		return this.sessionIdPathParamSpec.addSessionId(url, sessionId);
+		return this.sessionIdParamResolver.addSessionId(url, sessionId);
 	}
 
 	/**
@@ -698,7 +698,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 */
 	protected String addSessionIdParam(String url, HttpServletRequest request)
 	{
-		return this.sessionIdPathParamSpec.addSessionId(url, request);
+		return this.sessionIdParamResolver.addSessionId(url, request);
 	}
 
 	/**

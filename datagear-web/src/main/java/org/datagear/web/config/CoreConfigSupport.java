@@ -143,7 +143,7 @@ import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SchemaTableCache;
-import org.datagear.web.util.SessionIdPathParamSpec;
+import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
@@ -429,9 +429,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SessionIdPathParamSpec sessionIdPathParamSpec()
+	public SessionIdParamResolver sessionIdParamResolver()
 	{
-		SessionIdPathParamSpec bean = new SessionIdPathParamSpec();
+		SessionIdParamResolver bean = new SessionIdParamResolver();
 		return bean;
 	}
 

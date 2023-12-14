@@ -20,16 +20,16 @@ package org.datagear.web.util;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 路径参数会话ID规范类。
+ * 会话ID参数处理类。
  * <p>
- * 当客户端不支持cookie时，应使用URL路径参数传递会话ID，格式示例：<br>
+ * 当客户端不支持cookie时，应使用URL参数传递会话ID，格式示例：<br>
  * <code>/aa/bb;jsessionid=【会话ID】?p0=v0</code>
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class SessionIdPathParamSpec
+public class SessionIdParamResolver
 {
 	/**
 	 * Servlet规范中的路径参数会话ID名
@@ -38,7 +38,7 @@ public class SessionIdPathParamSpec
 
 	private String sessionIdParamName = DEFAULT_SESSION_ID_PARAM_NAME;
 
-	public SessionIdPathParamSpec()
+	public SessionIdParamResolver()
 	{
 		super();
 	}
@@ -55,33 +55,6 @@ public class SessionIdPathParamSpec
 
 	/**
 	 * 为指定URL添加会话ID参数。
-	 * <p>
-	 * 当要保持会话而客户端不支持cookie时，应使用此方法为URL添加会话ID参数。
-	 * </p>
-	 * 
-	 * @param url
-	 * @param sessionId
-	 * @return
-	 */
-	public String addSessionId(String url, String sessionId)
-	{
-		int qidx = url.indexOf('?');
-
-		if (qidx < 0)
-		{
-			return url + ";" + this.sessionIdParamName + "=" + sessionId;
-		}
-		else
-		{
-			String sub0 = url.substring(0, qidx);
-			String sub1 = url.substring(qidx, url.length());
-
-			return sub0 + ";" + this.sessionIdParamName + "=" + sessionId + sub1;
-		}
-	}
-
-	/**
-	 * 为指定URL添加会话ID参数。
 	 * 
 	 * @param url
 	 * @param session
@@ -94,7 +67,45 @@ public class SessionIdPathParamSpec
 	}
 
 	/**
-	 * 获取请求的会话ID。
+	 * 为指定URL添加会话ID参数。
+	 * <p>
+	 * 当要保持会话而客户端不支持cookie时，应使用此方法为URL添加会话ID参数。
+	 * </p>
+	 * 
+	 * @param url
+	 * @param sessionId
+	 * @return
+	 */
+	public String addSessionId(String url, String sessionId)
+	{
+		int qidx = url.indexOf('?');
+		int aidx = url.indexOf('#');
+		int splitIdx = -1;
+
+		if (qidx >= 0)
+		{
+			splitIdx = qidx;
+		}
+		else if (aidx >= 0)
+		{
+			splitIdx = aidx;
+		}
+
+		if (splitIdx >= 0)
+		{
+			String sub0 = url.substring(0, splitIdx);
+			String sub1 = url.substring(splitIdx, url.length());
+
+			return sub0 + ";" + this.sessionIdParamName + "=" + sessionId + sub1;
+		}
+		else
+		{
+			return url + ";" + this.sessionIdParamName + "=" + sessionId;
+		}
+	}
+
+	/**
+	 * 获取当前会话ID，可用于{@linkplain #addSessionId(String, String)}。
 	 * 
 	 * @param request
 	 * @return
