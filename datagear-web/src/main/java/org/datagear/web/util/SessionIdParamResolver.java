@@ -67,7 +67,7 @@ public class SessionIdParamResolver
 	 */
 	public String addSessionId(String url, HttpServletRequest request)
 	{
-		String sessionId = getSessionId(request);
+		String sessionId = getAddableSessionId(request);
 		return addSessionId(url, sessionId);
 	}
 
@@ -110,12 +110,12 @@ public class SessionIdParamResolver
 	}
 
 	/**
-	 * 获取当前会话ID，可用于{@linkplain #addSessionId(String, String)}。
+	 * 获取可添加至URL参数的当前会话ID，用于{@linkplain #addSessionId(String, String)}、{@linkplain #addSessionId(String, HttpServletRequest)}。
 	 * 
 	 * @param request
 	 * @return
 	 */
-	public String getSessionId(HttpServletRequest request)
+	public String getAddableSessionId(HttpServletRequest request)
 	{
 		return request.getSession().getId();
 	}

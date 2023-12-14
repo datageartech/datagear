@@ -345,7 +345,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (isSafeSessionRequest(request))
 		{
 			webContext.addAttribute(DASHBOARD_SESSION_NAME_NAME, this.sessionIdParamResolver.getSessionIdParamName());
-			webContext.addAttribute(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdParamResolver.getSessionId(request));
+			webContext.addAttribute(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdParamResolver.getAddableSessionId(request));
 		}
 
 		return webContext;
