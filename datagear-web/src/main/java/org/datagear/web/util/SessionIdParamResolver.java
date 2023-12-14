@@ -17,7 +17,12 @@
 
 package org.datagear.web.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
+import org.datagear.util.StringUtil;
 
 /**
  * 会话ID参数处理类。
@@ -113,5 +118,71 @@ public class SessionIdParamResolver
 	public String getSessionId(HttpServletRequest request)
 	{
 		return request.getSession().getId();
+	}
+
+	/**
+	 * 解析客户端请求的会话ID。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public List<String> resolveSessionIds(HttpServletRequest request)
+	{
+		return resolveSessionIds(request.getRequestURI());
+	}
+
+	/**
+	 * 解析客户端请求的会话ID。
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public List<String> resolveSessionIds(String url)
+	{
+		List<String> re = new ArrayList<>(3);
+
+		int startIdx = url.indexOf(';');
+
+		if (startIdx < 0)
+			return re;
+
+		startIdx = startIdx + 1;
+
+		if (startIdx >= url.length())
+			return re;
+
+		int endIdx = url.indexOf('?', startIdx);
+
+		if (endIdx < 0)
+			endIdx = url.indexOf('#', startIdx);
+
+		if (endIdx < 0)
+			endIdx = url.length();
+		
+		if(endIdx <= startIdx)
+			return re;
+		
+		String pathParamStr = url.substring(startIdx, endIdx);
+		String[] pathParamStrs = StringUtil.split(pathParamStr, ";", false);
+
+		if (pathParamStrs == null || pathParamStrs.length == 0)
+			return re;
+
+		for (String pp : pathParamStrs)
+		{
+			int eqIdx = pp.indexOf('=');
+			if (eqIdx >= 0 && (eqIdx + 1) < pp.length())
+			{
+				String name = pp.substring(0, eqIdx);
+				String value = pp.substring(eqIdx + 1);
+
+				if (this.sessionIdParamName.equals(name) && !StringUtil.isEmpty(value))
+				{
+					re.add(value);
+				}
+			}
+		}
+
+		return re;
 	}
 }
