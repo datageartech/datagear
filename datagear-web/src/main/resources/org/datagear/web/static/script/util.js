@@ -894,13 +894,21 @@
 		name = encodeURIComponent(name);
 		value = encodeURIComponent(value);
 		
+		var anchor = "";
+		var aidx = url.indexOf('#');
+		if(aidx >= 0)
+		{
+			var tmpUrl = url.substring(0, aidx);
+			anchor = url.substring(aidx);
+			url = tmpUrl;
+		}
+		
 		var qidx = url.indexOf('?');
 		
 		if(multiple == true || qidx < 0)
 		{
 			var f = (qidx < 0 ? "?" : "&");
 			url = url + f + name + "=" + value;
-			return url;
 		}
 		else
 		{
@@ -910,15 +918,17 @@
 			{
 				var head = url.substring(0, start);
 				start = start+keyword.length;
-				var end = url.indexOf("&", start);
-				var tail = (end >= 0 ? url.substr(end) : "");
+				var endIdx = url.indexOf("&", start);
+				var tail = (endIdx >= 0 ? url.substr(endIdx) : "");
 				url = head + tail;
 			}
 			
-			url += "&" + name +"=" + value;
+			qidx = url.indexOf('?');
+			
+			url += (qidx == (url.length-1) ? "" : "&") + name +"=" + value;
 		}
 		
-		return url;
+		return url + anchor;
 	};
 	
 	/**
