@@ -20,6 +20,7 @@ package org.datagear.web.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.stereotype.Controller;
@@ -34,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ErrorController extends AbstractController
 {
+	public static final String STATUS_PARAM_NAME = "status";
+
 	public ErrorController()
 	{
 		super();
@@ -43,9 +46,36 @@ public class ErrorController extends AbstractController
 	public String handleError(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel)
 	{
+		Integer paramStatus = getStatusParamValue(request, response, springModel);
+		if (paramStatus != null)
+		{
+			response.setStatus(paramStatus);
+		}
+
 		OperationMessage operationMessage = getOptMsgForHttpError(request, response);
 		WebUtils.setOperationMessage(request, operationMessage);
 
 		return "/error";
+	}
+
+	protected Integer getStatusParamValue(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel)
+	{
+		Integer re = null;
+
+		String statusStr = request.getParameter(STATUS_PARAM_NAME);
+		if (!StringUtil.isEmpty(statusStr))
+		{
+			try
+			{
+				re = Integer.parseInt(statusStr);
+			}
+			catch (Exception e)
+			{
+				re = null;
+			}
+		}
+
+		return re;
 	}
 }
