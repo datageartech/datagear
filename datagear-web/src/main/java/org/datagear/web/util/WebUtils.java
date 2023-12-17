@@ -24,6 +24,7 @@ import java.util.Locale;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -137,7 +138,7 @@ public class WebUtils
 	 * 获取操作消息。
 	 * 
 	 * @param request
-	 * @return
+	 * @return {@code null}表示没有
 	 */
 	public static OperationMessage getOperationMessage(HttpServletRequest request)
 	{
@@ -154,6 +155,49 @@ public class WebUtils
 	public static void setOperationMessage(HttpServletRequest request, OperationMessage operationMessage)
 	{
 		request.setAttribute(KEY_OPERATION_MESSAGE, operationMessage);
+	}
+
+	/**
+	 * 移除操作消息。
+	 * 
+	 * @param request
+	 */
+	public static void removeOperationMessage(HttpServletRequest request)
+	{
+		request.removeAttribute(KEY_OPERATION_MESSAGE);
+	}
+
+	/**
+	 * 获取操作消息。
+	 * 
+	 * @param session
+	 * @return {@code null}表示没有
+	 */
+	public static OperationMessage getOperationMessage(HttpSession session)
+	{
+		return (OperationMessage) session.getAttribute(KEY_OPERATION_MESSAGE);
+	}
+
+	/**
+	 * 设置异常操作消息。
+	 * 
+	 * @param request
+	 * @param operationMessage
+	 * @return
+	 */
+	public static void setOperationMessage(HttpSession session, OperationMessage operationMessage)
+	{
+		session.setAttribute(KEY_OPERATION_MESSAGE, operationMessage);
+	}
+
+	/**
+	 * 移除操作消息。
+	 * 
+	 * @param session
+	 */
+	public static void removeOperationMessage(HttpSession session)
+	{
+		session.removeAttribute(KEY_OPERATION_MESSAGE);
 	}
 
 	/**

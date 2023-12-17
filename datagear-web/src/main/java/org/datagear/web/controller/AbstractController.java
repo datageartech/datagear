@@ -939,6 +939,16 @@ public abstract class AbstractController extends MessageSourceSupport
 	{
 		OperationMessage operationMessage = WebUtils.getOperationMessage(request);
 
+		// 尝试从session中取，并在之后移除
+		if (operationMessage == null)
+		{
+			HttpSession session = request.getSession();
+			operationMessage = WebUtils.getOperationMessage(session);
+			
+			if(operationMessage != null)
+				WebUtils.removeOperationMessage(session);
+		}
+
 		if (operationMessage == null)
 		{
 			Exception exception = null;
@@ -984,6 +994,16 @@ public abstract class AbstractController extends MessageSourceSupport
 	protected OperationMessage getOptMsgForHttpError(HttpServletRequest request, Integer statusCode)
 	{
 		OperationMessage operationMessage = WebUtils.getOperationMessage(request);
+
+		// 尝试从session中取，并在之后移除
+		if (operationMessage == null)
+		{
+			HttpSession session = request.getSession();
+			operationMessage = WebUtils.getOperationMessage(session);
+
+			if (operationMessage != null)
+				WebUtils.removeOperationMessage(session);
+		}
 
 		if (operationMessage == null)
 			operationMessage = buildOptMsgForHttpError(request, statusCode);
