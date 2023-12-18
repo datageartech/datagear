@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.AuthenticationUserGetter;
@@ -91,7 +92,13 @@ public class CustomFreeMarkerView extends FreeMarkerView
 		ApplicationProperties applicationProperties = applicationContext.getBean(ApplicationProperties.class);
 		AuthenticationUserGetter userGetter = applicationContext.getBean(AuthenticationUserGetter.class);
 
-		model.put(VAR_CURRENT_USER, userGetter.getUser());
+		// 当部署在Tomcat时（8.5.61），对于类似“/static/not-exists.js”、“/chart/not-exists”的请求，
+		// 在被导向至“/error”后，此时如果这里使用userGetter.getUser()会抛出空指针异常，
+		// 因此，这里改为采用userGetter.getUserNullable()，由页面自己处理null。
+		// 目前“/error”页面已改为不会用到用户信息，而其他页面没有发现null的情况。
+		User currentUser = userGetter.getUserNullable();
+
+		model.put(VAR_CURRENT_USER, currentUser);
 		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
 		
 		if(WebUtils.isEnableDetectNewVersionRequest(request))

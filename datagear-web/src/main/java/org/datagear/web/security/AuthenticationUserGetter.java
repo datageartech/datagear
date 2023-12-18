@@ -41,11 +41,24 @@ public class AuthenticationUserGetter
 	 * </p>
 	 * 
 	 * @return
+	 * @throws NullPointerException
+	 *             当未获取到时抛出此异常
 	 */
-	public User getUser()
+	public User getUser() throws NullPointerException
 	{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Authentication authentication = getAuthentication();
 		return getUser(authentication);
+	}
+
+	/**
+	 * 获取当前用户（认证用户或者匿名用户）。
+	 * 
+	 * @return {@code null}表示未取到
+	 */
+	public User getUserNullable()
+	{
+		Authentication authentication = getAuthenticationNullable();
+		return getUserNullable(authentication);
 	}
 
 	/**
@@ -56,14 +69,84 @@ public class AuthenticationUserGetter
 	 * 
 	 * @param authentication
 	 * @return
+	 * @throws NullPointerException
+	 *             当未获取到时抛出此异常
 	 */
-	public User getUser(Authentication authentication)
+	public User getUser(Authentication authentication) throws NullPointerException
+	{
+		User user = getUserInner(authentication);
+
+		if (user == null)
+			throw new NullPointerException("Null user in authentication");
+
+		return user;
+	}
+
+	/**
+	 * 从{@linkplain Authentication#getPrincipal()}中获取当前用户（认证用户或者匿名用户）。
+	 * <p>
+	 * 此方法不会返回{@code null}。
+	 * </p>
+	 * 
+	 * @param authentication
+	 *            允许{@code null}
+	 * @return
+	 * @throws NullPointerException
+	 *             当未获取到时抛出此异常
+	 */
+	public User getUserNullable(Authentication authentication)
+	{
+		return getUserInner(authentication);
+	}
+
+	/**
+	 * 获取当前{@linkplain Authentication}。
+	 * <p>
+	 * 此方法不会返回{@code null}。
+	 * </p>
+	 * 
+	 * @return
+	 * @throws NullPointerException
+	 *             当未获取到时抛出此异常
+	 */
+	public Authentication getAuthentication() throws NullPointerException
+	{
+		Authentication auth = getAuthenticationInner();
+
+		if (auth == null)
+			throw new NullPointerException("Null authentication");
+
+		return auth;
+	}
+
+	/**
+	 * 获取当前{@linkplain Authentication}。
+	 * 
+	 * @return {@code null}表示未取到
+	 */
+	public Authentication getAuthenticationNullable()
+	{
+		return getAuthenticationInner();
+	}
+
+	/**
+	 * 从{@linkplain Authentication#getPrincipal()}中获取当前用户（认证用户或者匿名用户）。
+	 * 
+	 * @param authentication
+	 *            允许{@code null}
+	 * @return {@code null}表示未取到
+	 */
+	protected User getUserInner(Authentication authentication)
 	{
 		User user = null;
 
-		Object principal = authentication.getPrincipal();
+		Object principal = (authentication == null ? null : authentication.getPrincipal());
 
-		if (principal instanceof User)
+		if (principal == null)
+		{
+			user = null;
+		}
+		else if (principal instanceof User)
 		{
 			user = (User) principal;
 		}
@@ -77,19 +160,26 @@ public class AuthenticationUserGetter
 			UserAwarePrincipal up = (UserAwarePrincipal) principal;
 			user = up.getPrincipalUser();
 		}
-
-		if (user == null)
-			throw new IllegalStateException();
+		else
+		{
+			user = getUserInnerExt(authentication, principal);
+		}
 
 		return user;
+	}
+
+	protected User getUserInnerExt(Authentication authentication, Object principal)
+	{
+		throw new UnsupportedOperationException(
+				"Unsupported get user from [" + (principal.getClass().getSimpleName()) + "]");
 	}
 
 	/**
 	 * 获取当前{@linkplain Authentication}。
 	 * 
-	 * @return
+	 * @return {@code null}表示未取到
 	 */
-	public Authentication getAuthentication()
+	protected Authentication getAuthenticationInner()
 	{
 		return SecurityContextHolder.getContext().getAuthentication();
 	}
