@@ -65,12 +65,9 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	private String driverEntityFileEncoding = DEFAULT_DRIVER_ENTITY_FILE_ENCODING;
 
 	private transient Map<String, PathDriverFactoryInfo> pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
-
 	private transient List<DriverEntity> driverEntities = null;
-
 	private transient File driverEntityInfoFile = null;
-
-	private transient long driverEntityInfoFileLastModified = -1;
+	private transient long prevLoadModified = -1;
 
 	public AbstractFileDriverEntityManager()
 	{
@@ -224,7 +221,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	@Override
 	public synchronized long getLastModified() throws DriverEntityManagerException
 	{
-		return this.driverEntityInfoFileLastModified;
+		return this.driverEntityInfoFile.lastModified();
 	}
 
 	@Override
@@ -746,7 +743,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		long thisModified = this.driverEntityInfoFile.lastModified();
 
-		if (thisModified == this.driverEntityInfoFileLastModified)
+		if (thisModified == this.prevLoadModified)
 			return false;
 
 		readDriverEntities();
@@ -825,7 +822,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			driverEntities = new ArrayList<DriverEntity>();
 
 		this.driverEntities = driverEntities;
-		this.driverEntityInfoFileLastModified = this.driverEntityInfoFile.lastModified();
+		this.prevLoadModified = this.driverEntityInfoFile.lastModified();
 	}
 
 	/**
