@@ -216,10 +216,12 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	public void register(ChartPlugin chartPlugin)
+	public boolean register(ChartPlugin chartPlugin)
 	{
-		super.register(chartPlugin);
+		boolean re = super.register(chartPlugin);
 		this.updateLastModified();
+
+		return re;
 	}
 
 	@Override

@@ -44,15 +44,14 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public void register(ChartPlugin chartPlugin)
+	public boolean register(ChartPlugin chartPlugin)
 	{
 		WriteLock writeLock = this.lock.writeLock();
 
 		try
 		{
 			writeLock.lock();
-
-			registerChartPlugin(chartPlugin);
+			return registerChartPlugin(chartPlugin);
 		}
 		finally
 		{

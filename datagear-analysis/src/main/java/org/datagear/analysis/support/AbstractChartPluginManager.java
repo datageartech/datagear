@@ -54,6 +54,18 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		this.chartPluginMap = chartPluginMap;
 	}
 
+	@Override
+	public boolean isRegisterable(ChartPlugin chartPlugin)
+	{
+		if (!isLegalChartPlugin(chartPlugin))
+			return false;
+
+		ChartPlugin old = this.chartPluginMap.get(chartPlugin.getId());
+		boolean canPut = canReplaceForSameId(chartPlugin, old);
+
+		return canPut;
+	}
+
 	/**
 	 * 注册一个{@linkplain ChartPlugin}。
 	 * <p>
@@ -67,16 +79,13 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	{
 		checkLegalChartPlugin(chartPlugin);
 
-		boolean put = true;
+		ChartPlugin old = this.chartPluginMap.get(chartPlugin.getId());
+		boolean canPut = canReplaceForSameId(chartPlugin, old);
 
-		ChartPlugin prev = this.chartPluginMap.get(chartPlugin.getId());
-		if (prev != null)
-			put = canReplaceForSameId(chartPlugin, prev);
-
-		if (put)
+		if (canPut)
 			this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
 
-		return put;
+		return canPut;
 	}
 
 	/**

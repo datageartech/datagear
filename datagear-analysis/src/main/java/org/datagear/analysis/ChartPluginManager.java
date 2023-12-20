@@ -28,11 +28,20 @@ import java.util.List;
 public interface ChartPluginManager
 {
 	/**
+	 * 是否可成功注册。
+	 * 
+	 * @param chartPlugin
+	 * @return {@code true} 是；{@code false} 否，比如版本号不够新
+	 */
+	boolean isRegisterable(ChartPlugin chartPlugin);
+
+	/**
 	 * 注册一个{@linkplain ChartPlugin}。
 	 * 
 	 * @param chartPlugin
+	 * @return {@code true} 注册成功；{@code false} 注册失败，比如版本号不够新
 	 */
-	void register(ChartPlugin chartPlugin);
+	boolean register(ChartPlugin chartPlugin);
 
 	/**
 	 * 移除指定ID的{@linkplain ChartPlugin}。
