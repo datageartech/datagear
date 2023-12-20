@@ -19,12 +19,18 @@ package org.datagear.analysis.support.html;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.support.ZipEntryChartPluginResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.SimpleLastModifiedService;
@@ -52,7 +58,6 @@ public class DirectoryHtmlChartPluginManagerTest
 		File uploadDirectory = FileUtil.getFile(root, "upload/", true);
 
 		HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
-		htmlChartPluginLoader.setTmpDirectory(tmpDirectory);
 
 		DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager = new DirectoryHtmlChartPluginManager(
 				managerDirectory, htmlChartPluginLoader, new SimpleLastModifiedService());
@@ -87,6 +92,23 @@ public class DirectoryHtmlChartPluginManagerTest
 			assertEquals(1, uploaded.size());
 			assertNotNull(plugin);
 			assertEquals("0.1.1", plugin.getVersion());
+
+			List<ChartPluginResource> resources = plugin.getResources();
+			assertEquals(1, resources.size());
+
+			Collections.sort(resources, new Comparator<ChartPluginResource>()
+			{
+				@Override
+				public int compare(ChartPluginResource o1, ChartPluginResource o2)
+				{
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+
+			assertTrue(resources.get(0) instanceof ZipEntryChartPluginResource);
+			assertEquals("plugin.json", resources.get(0).getName());
+			assertEquals(FileUtil.getFile(managerDirectory, "plugin.zip"),
+					((ZipEntryChartPluginResource) resources.get(0)).getZipFile());
 		}
 
 		{

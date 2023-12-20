@@ -201,12 +201,12 @@ public class DirectoryHtmlChartPluginManagerInitializer
 		
 						if (LOGGER.isDebugEnabled())
 							LOGGER.debug(
-									"The built-in chart plugin file [" + name + "] has been changed, reload is to be done");
+									"The built-in chart plugin file [" + name + "] changed, reload needed");
 					}
 					else
 					{
 						if (LOGGER.isDebugEnabled())
-							LOGGER.debug("The built-in chart plugin file [" + name + "] has no change, reload is ignored");
+							LOGGER.debug("The built-in chart plugin file [" + name + "] not change, reload ignored");
 					}
 				}
 			}
@@ -222,7 +222,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 			if (LOGGER.isInfoEnabled())
 			{
-				LOGGER.info("Reloaded the following " + plugins.size() + " built-in chart plugins :");
+				LOGGER.info("Reload the following " + plugins.size() + " built-in chart plugins :");
 				LOGGER.info(pluginIds.toString());
 			}
 

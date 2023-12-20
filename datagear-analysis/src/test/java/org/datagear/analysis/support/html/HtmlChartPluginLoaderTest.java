@@ -17,14 +17,21 @@
 
 package org.datagear.analysis.support.html;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.support.AbstractChartPluginManager;
+import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.support.FileChartPluginResource;
+import org.datagear.analysis.support.ZipEntryChartPluginResource;
 import org.datagear.util.FileUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,7 +50,6 @@ public class HtmlChartPluginLoaderTest
 	{
 		super();
 		this.htmlChartPluginLoader = new HtmlChartPluginLoader();
-		this.htmlChartPluginLoader.setTmpDirectory(FileUtil.getFile("target/tmp/", true));
 	}
 
 	@Test
@@ -54,6 +60,33 @@ public class HtmlChartPluginLoaderTest
 
 		HtmlChartPlugin plugin = this.htmlChartPluginLoader.load(directory);
 		Assert.assertEquals("plugin01", plugin.getId());
+		assertEquals("icon-01.png", plugin.getIconResourceName(ChartPlugin.DEFAULT_ICON_THEME_NAME));
+
+		assertTrue(plugin.getRenderer() instanceof StringJsChartRenderer);
+		StringJsChartRenderer renderer = (StringJsChartRenderer) plugin.getRenderer();
+		assertEquals(JsChartRenderer.CODE_TYPE_OBJECT, renderer.getCodeType());
+		assertEquals("{}", renderer.getCodeValue().trim());
+
+		List<ChartPluginResource> resources = plugin.getResources();
+		assertEquals(3, resources.size());
+
+		Collections.sort(resources, new Comparator<ChartPluginResource>()
+		{
+			@Override
+			public int compare(ChartPluginResource o1, ChartPluginResource o2)
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+
+		assertTrue(resources.get(0) instanceof FileChartPluginResource);
+		assertEquals("icon-01.png", resources.get(0).getName());
+
+		assertTrue(resources.get(1) instanceof FileChartPluginResource);
+		assertEquals("icons/icon-02.png", resources.get(1).getName());
+
+		assertTrue(resources.get(2) instanceof FileChartPluginResource);
+		assertEquals("plugin.json", resources.get(2).getName());
 	}
 
 	@Test
@@ -64,6 +97,35 @@ public class HtmlChartPluginLoaderTest
 
 		HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadZip(file);
 		Assert.assertEquals("plugin03", plugin.getId());
+
+		assertTrue(plugin.getRenderer() instanceof StringJsChartRenderer);
+		StringJsChartRenderer renderer = (StringJsChartRenderer) plugin.getRenderer();
+		assertEquals(JsChartRenderer.CODE_TYPE_OBJECT, renderer.getCodeType());
+		assertEquals("{}", renderer.getCodeValue().trim());
+
+		List<ChartPluginResource> resources = plugin.getResources();
+		assertEquals(3, resources.size());
+
+		Collections.sort(resources, new Comparator<ChartPluginResource>()
+		{
+			@Override
+			public int compare(ChartPluginResource o1, ChartPluginResource o2)
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+
+		assertTrue(resources.get(0) instanceof ZipEntryChartPluginResource);
+		assertEquals("icon-01.png", resources.get(0).getName());
+		assertEquals(file, ((ZipEntryChartPluginResource) resources.get(0)).getZipFile());
+
+		assertTrue(resources.get(1) instanceof ZipEntryChartPluginResource);
+		assertEquals("icons/icon-02.png", resources.get(1).getName());
+		assertEquals(file, ((ZipEntryChartPluginResource) resources.get(1)).getZipFile());
+
+		assertTrue(resources.get(2) instanceof ZipEntryChartPluginResource);
+		assertEquals("plugin.json", resources.get(2).getName());
+		assertEquals(file, ((ZipEntryChartPluginResource) resources.get(2)).getZipFile());
 	}
 
 	@Test
@@ -77,20 +139,29 @@ public class HtmlChartPluginLoaderTest
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
 
-		AbstractChartPluginManager.sort(list);
+		Assert.assertEquals(6, list.size());
 
-		Assert.assertEquals(5, list.size());
+		Collections.sort(list, new Comparator<HtmlChartPlugin>()
+		{
+			@Override
+			public int compare(HtmlChartPlugin o1, HtmlChartPlugin o2)
+			{
+				return o1.getId().compareTo(o2.getId());
+			}
+		});
 
 		{
 			HtmlChartPlugin plugin = list.get(0);
-			Assert.assertEquals("plugin05", plugin.getId());
-			StringJsChartRenderer chartRenderer = (StringJsChartRenderer)plugin.getRenderer();
-			Assert.assertEquals(" { render: function(chart){ } }", chartRenderer.getCodeValue());
+			Assert.assertEquals("plugin01", plugin.getId());
+
+			Map<String, String> icons = plugin.getIconResourceNames();
+			Assert.assertEquals(1, icons.size());
+			Assert.assertNotNull(icons.get(ChartPlugin.DEFAULT_ICON_THEME_NAME));
 		}
 
 		{
 			HtmlChartPlugin plugin = list.get(1);
-			Assert.assertEquals("plugin04", plugin.getId());
+			Assert.assertEquals("plugin02", plugin.getId());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
@@ -108,7 +179,7 @@ public class HtmlChartPluginLoaderTest
 
 		{
 			HtmlChartPlugin plugin = list.get(3);
-			Assert.assertEquals("plugin02", plugin.getId());
+			Assert.assertEquals("plugin04", plugin.getId());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
@@ -117,11 +188,18 @@ public class HtmlChartPluginLoaderTest
 
 		{
 			HtmlChartPlugin plugin = list.get(4);
-			Assert.assertEquals("plugin01", plugin.getId());
+			Assert.assertEquals("plugin05", plugin.getId());
+			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
+			assertEquals(JsChartRenderer.CODE_TYPE_OBJECT, chartRenderer.getCodeType());
+			Assert.assertEquals(" { render: function(chart){ } }", chartRenderer.getCodeValue());
+		}
 
-			Map<String, String> icons = plugin.getIconResourceNames();
-			Assert.assertEquals(1, icons.size());
-			Assert.assertNotNull(icons.get(ChartPlugin.DEFAULT_ICON_THEME_NAME));
+		{
+			HtmlChartPlugin plugin = list.get(5);
+			Assert.assertEquals("plugin06", plugin.getId());
+			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
+			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
+			Assert.assertTrue(chartRenderer.getCodeValue().contains("(function(localPlugin)"));
 		}
 	}
 }
