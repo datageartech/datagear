@@ -39,7 +39,6 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.LastModifiedService;
 import org.datagear.util.StringUtil;
-import org.datagear.util.version.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -630,16 +629,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		this._fileNameCheckTimeMap.put(fileName, new FileCheckTime(file));
 
 		return plugin;
-	}
-
-	@Override
-	protected boolean canReplaceForSameId(ChartPlugin my, Version myVersion, ChartPlugin old, Version oldVersion)
-	{
-		// 调试模式下总替换
-		if (LOGGER.isDebugEnabled())
-			return true;
-
-		return super.canReplaceForSameId(my, myVersion, old, oldVersion);
 	}
 
 	protected void inflateCagetory(HtmlChartPlugin plugin)

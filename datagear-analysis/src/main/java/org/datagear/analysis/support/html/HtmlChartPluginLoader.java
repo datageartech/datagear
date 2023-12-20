@@ -229,10 +229,10 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}，如果目录结构不合法，将返回{@code null}。
+	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param directory
-	 * @return
+	 * @return {@code null}表示目录结构不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin load(File directory) throws HtmlChartPluginLoadException
@@ -241,10 +241,10 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定ZIP文件加载单个{@linkplain HtmlChartPlugin}，如果ZIP文件结构不合法，将返回{@code null}。
+	 * 从指定ZIP文件加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param zip
-	 * @return
+	 * @return {@code null}表示ZIP结构不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin loadZip(File zip) throws HtmlChartPluginLoadException
@@ -253,11 +253,26 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定文件加载单个{@linkplain HtmlChartPlugin}，如果文件结构不合法，将返回{@code null}。
+	 * 从指定ZIP输入流加载单个{@linkplain HtmlChartPlugin}。
+	 * <p>
+	 * 注意：此方法不会初始化{@linkplain HtmlChartPlugin#getResources()}。
+	 * </p>
+	 * 
+	 * @param in
+	 * @return {@code null}表示ZIP结构不合法
+	 * @throws HtmlChartPluginLoadException
+	 */
+	public HtmlChartPlugin loadZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	{
+		return loadSingleForZipInputStream(in);
+	}
+
+	/**
+	 * 从指定文件加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param file
 	 *            插件文件夹、插件ZIP包
-	 * @return
+	 * @return {@code null}表示目录结构不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin loadFile(File file) throws HtmlChartPluginLoadException
@@ -335,7 +350,7 @@ public class HtmlChartPluginLoader
 	/**
 	 * 从指定ZIP加载单个{@linkplain HtmlChartPlugin}。
 	 * 
-	 * @param directory
+	 * @param zip
 	 * @return {@code null}表示文件不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
@@ -344,12 +359,62 @@ public class HtmlChartPluginLoader
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
 		ZipInputStream in = null;
-		JsDefContent jsDefContent = null;
 
 		try
 		{
 			in = IOUtil.getZipInputStream(zip);
+			plugin = loadSingleForZipInputStream(in);
+		}
+		catch (HtmlChartPluginLoadException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
 
+		if (plugin != null)
+		{
+			try
+			{
+				inflateChartPluginResources(plugin, zip);
+			}
+			catch (HtmlChartPluginLoadException e)
+			{
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw new HtmlChartPluginLoadException(e);
+			}
+		}
+
+		return plugin;
+	}
+
+	/**
+	 * 从指定ZIP输入流加载单个{@linkplain HtmlChartPlugin}。
+	 * <p>
+	 * 注意：此方法不会初始化{@linkplain HtmlChartPlugin#getResources()}。
+	 * </p>
+	 * 
+	 * @param in
+	 * @return {@code null}表示文件不合法
+	 * @throws HtmlChartPluginLoadException
+	 */
+	protected HtmlChartPlugin loadSingleForZipInputStream(ZipInputStream in) throws HtmlChartPluginLoadException
+	{
+		HtmlChartPlugin plugin = createHtmlChartPlugin();
+
+		JsDefContent jsDefContent = null;
+
+		try
+		{
 			ZipEntry zipEntry = null;
 			while ((zipEntry = in.getNextEntry()) != null)
 			{
@@ -380,19 +445,6 @@ public class HtmlChartPluginLoader
 		catch (HtmlChartPluginLoadException e)
 		{
 			throw e;
-		}
-		catch (Exception e)
-		{
-			throw new HtmlChartPluginLoadException(e);
-		}
-		finally
-		{
-			IOUtil.close(in);
-		}
-
-		try
-		{
-			inflateChartPluginResources(plugin, zip);
 		}
 		catch (Exception e)
 		{
