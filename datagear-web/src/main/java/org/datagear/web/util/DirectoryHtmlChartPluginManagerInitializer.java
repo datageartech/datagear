@@ -20,16 +20,13 @@ package org.datagear.web.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipInputStream;
 
-import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
@@ -65,9 +62,6 @@ public class DirectoryHtmlChartPluginManagerInitializer
 	/** 临时文件目录，用于存放临时文件 */
 	private File tmpDirectory;
 
-	/** 已载入过的图表插件上次修改时间信息存储文件 */
-	private File builtinChartPluginLastModifiedFile;
-
 	public DirectoryHtmlChartPluginManagerInitializer()
 	{
 		super();
@@ -75,13 +69,12 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 	public DirectoryHtmlChartPluginManagerInitializer(ResourcePatternResolver resourcePatternResolver,
 			DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager,
-			File tmpDirectory, File builtinChartPluginLastModifiedFile)
+			File tmpDirectory)
 	{
 		super();
 		this.resourcePatternResolver = resourcePatternResolver;
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
 		this.tmpDirectory = tmpDirectory;
-		this.builtinChartPluginLastModifiedFile = builtinChartPluginLastModifiedFile;
 	}
 
 	public ResourcePatternResolver getResourcePatternResolver()
@@ -124,16 +117,6 @@ public class DirectoryHtmlChartPluginManagerInitializer
 		this.tmpDirectory = tmpDirectory;
 	}
 
-	public File getBuiltinChartPluginLastModifiedFile()
-	{
-		return builtinChartPluginLastModifiedFile;
-	}
-
-	public void setBuiltinChartPluginLastModifiedFile(File builtinChartPluginLastModifiedFile)
-	{
-		this.builtinChartPluginLastModifiedFile = builtinChartPluginLastModifiedFile;
-	}
-
 	/**
 	 * 初始化。
 	 */
@@ -164,11 +147,11 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 	protected void loadHtmlChartPlugins() throws IOException
 	{
-		Map<String, Number> prevLastModifieds = prevLastModifieds();
-		Map<String, Number> thisLastModifieds = new HashMap<String, Number>();
+		HtmlChartPluginLoader htmlChartPluginLoader = this.directoryHtmlChartPluginManager.getHtmlChartPluginLoader();
 
-		File tmpDirectory = createTmpWorkDirectory();
-
+		int needRegisterCount = 0;
+		File tmpDirectory = null;
+		
 		for(String classpathPattern : this.classpathPatterns)
 		{
 			Resource[] resources = this.resourcePatternResolver.getResources(classpathPattern);
@@ -177,12 +160,29 @@ public class DirectoryHtmlChartPluginManagerInitializer
 			{
 				for (Resource resource : resources)
 				{
-					String name = resource.getFilename();
-					long thisLastModified = lastModified(resource);
-					Number prevLastModified = prevLastModifieds.get(name);
-		
-					if (prevLastModified == null || prevLastModified.longValue() != thisLastModified)
+					boolean needRegister = false;
+
+					ZipInputStream zin = null;
+					try
 					{
+						zin = IOUtil.getZipInputStream(resource.getInputStream());
+						HtmlChartPlugin plugin = htmlChartPluginLoader.loadZip(zin);
+						needRegister = this.directoryHtmlChartPluginManager.isRegisterable(plugin);
+					}
+					finally
+					{
+						IOUtil.close(zin);
+					}
+
+					String name = resource.getFilename();
+
+					if (needRegister)
+					{
+						needRegisterCount++;
+
+						if (tmpDirectory == null)
+							tmpDirectory = createTmpWorkDirectory();
+
 						File file = FileUtil.getFile(tmpDirectory, name);
 		
 						InputStream in = null;
@@ -197,8 +197,6 @@ public class DirectoryHtmlChartPluginManagerInitializer
 							IOUtil.close(in);
 						}
 		
-						thisLastModifieds.put(name, thisLastModified);
-		
 						if (LOGGER.isDebugEnabled())
 							LOGGER.debug(
 									"The built-in chart plugin file [" + name + "] changed, reload needed");
@@ -212,7 +210,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 			}
 		}
 
-		if (!thisLastModifieds.isEmpty())
+		if (needRegisterCount > 0)
 		{
 			Set<HtmlChartPlugin> plugins = this.directoryHtmlChartPluginManager.upload(tmpDirectory);
 
@@ -225,10 +223,6 @@ public class DirectoryHtmlChartPluginManagerInitializer
 				LOGGER.info("Reload the following " + plugins.size() + " built-in chart plugins :");
 				LOGGER.info(pluginIds.toString());
 			}
-
-			Map<String, Number> saveLastModifieds = new HashMap<String, Number>(prevLastModifieds);
-			saveLastModifieds.putAll(thisLastModifieds);
-			saveLastModifieds(saveLastModifieds);
 		}
 		else
 		{
@@ -240,66 +234,5 @@ public class DirectoryHtmlChartPluginManagerInitializer
 	protected File createTmpWorkDirectory() throws IOException
 	{
 		return FileUtil.generateUniqueDirectory(this.tmpDirectory);
-	}
-
-	/**
-	 * 获取上一次加载插件资源的时间。
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	protected Map<String, Number> prevLastModifieds()
-	{
-		Map<String, Number> map = new HashMap<String, Number>();
-
-		if (builtinChartPluginLastModifiedFile == null || !builtinChartPluginLastModifiedFile.exists())
-			return map;
-
-		Reader reader = null;
-		try
-		{
-			reader = IOUtil.getReader(this.builtinChartPluginLastModifiedFile, IOUtil.CHARSET_UTF_8);
-			map = JsonSupport.parseNonStardand(reader, Map.class);
-		}
-		catch(Throwable t)
-		{
-		}
-		finally
-		{
-			IOUtil.close(reader);
-		}
-
-		return map;
-	}
-
-	protected void saveLastModifieds(Map<String, Number> map)
-	{
-		String json = JsonSupport.generate(map, "{}");
-
-		Writer writer = null;
-		try
-		{
-			writer = IOUtil.getWriter(this.builtinChartPluginLastModifiedFile, IOUtil.CHARSET_UTF_8);
-			writer.write(json);
-		}
-		catch(Throwable t)
-		{
-		}
-		finally
-		{
-			IOUtil.close(writer);
-		}
-	}
-
-	protected long lastModified(Resource resource)
-	{
-		try
-		{
-			return resource.lastModified();
-		}
-		catch(Throwable t)
-		{
-			return System.currentTimeMillis();
-		}
 	}
 }
