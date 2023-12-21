@@ -19,7 +19,6 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * 抽象CSV数据集。
@@ -215,8 +215,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetProperty> resolveProperties(List<String> propertyNames,
-			List<Map<String, String>> data)
+	protected List<DataSetProperty> resolveProperties(List<String> propertyNames, List<Map<String, String>> data)
 			throws Throwable
 	{
 		int propertyLen = propertyNames.size();
@@ -225,27 +224,31 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 		for (String name : propertyNames)
 			properties.add(new DataSetProperty(name, DataSetProperty.DataType.STRING));
 	
-		// 根据数据格式，修订可能的数值类型：只有某一列的所有字符串都是数值格式，才认为是数值类型
+		// 根据数据格式，修订可能的数值类型：
+		// 如果某一列至少有一个非空字符串、且非空字符串都是数值格式，才认为是数值类型
 		if (data != null && data.size() > 0)
 		{
-			boolean[] isNumbers = new boolean[propertyLen];
-			Arrays.fill(isNumbers, true);
+			Boolean[] isNumbers = new Boolean[propertyLen];
 	
 			for (Map<String, String> row : data)
 			{
 				for (int i = 0; i < propertyLen; i++)
 				{
-					if (!isNumbers[i])
+					if (Boolean.FALSE.equals(isNumbers[i]))
 						continue;
 	
 					String value = row.get(propertyNames.get(i));
+
+					if (StringUtil.isEmpty(value))
+						continue;
+
 					isNumbers[i] = isNumberString(value);
 				}
 			}
 	
 			for (int i = 0; i < propertyLen; i++)
 			{
-				if (isNumbers[i])
+				if (Boolean.TRUE.equals(isNumbers[i]))
 					properties.get(i).setType(DataSetProperty.DataType.NUMBER);
 			}
 		}
