@@ -160,11 +160,14 @@ public class SecurityConfigSupport
 		configAccessForRole(http);
 		configAccessForSchemaGuard(http);
 		configAccessForAuthorization(http);
+		configAccessForError(http);
 		configAccessForLogin(http);
 		configAccessForRegister(http);
 		configAccessForResetPassword(http);
 		configAccessForChangeTheme(http);
 		configAccessForCheckCode(http);
+		configAccessForAbout(http);
+		configAccessForChangelog(http);
 		configAccessBeforeAllOther(http);
 
 		configAccessAllOther(http);
@@ -715,6 +718,17 @@ public class SecurityConfigSupport
 	}
 
 	/**
+	 * 配置错误页访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForError(HttpSecurity http) throws Exception
+	{
+		http.authorizeHttpRequests().antMatchers("/error/**").permitAll();
+	}
+
+	/**
 	 * 配置登录模块访问权限。
 	 * 
 	 * @param http
@@ -767,6 +781,28 @@ public class SecurityConfigSupport
 	protected void configAccessForCheckCode(HttpSecurity http) throws Exception
 	{
 		http.authorizeHttpRequests().antMatchers("/checkCode/**").permitAll();
+	}
+
+	/**
+	 * 配置关于页面访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForAbout(HttpSecurity http) throws Exception
+	{
+		http.authorizeHttpRequests().antMatchers("/about/**").permitAll();
+	}
+
+	/**
+	 * 配置日志页面访问权限。
+	 * 
+	 * @param http
+	 * @throws Exception
+	 */
+	protected void configAccessForChangelog(HttpSecurity http) throws Exception
+	{
+		http.authorizeHttpRequests().antMatchers("/changelog/**", "/changelogs/**").permitAll();
 	}
 
 	/**
