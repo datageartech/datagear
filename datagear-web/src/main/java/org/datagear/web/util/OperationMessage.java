@@ -18,6 +18,7 @@
 package org.datagear.web.util;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 
 /**
@@ -26,8 +27,10 @@ import java.io.StringWriter;
  * @author datagear@163.com
  *
  */
-public class OperationMessage
+public class OperationMessage implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 消息类型 */
 	private MessageType type = MessageType.SUCCESS;
 
