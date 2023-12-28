@@ -34,7 +34,7 @@ public class UnsupportedGetConnectionException extends ConnectionSourceException
 
 	public UnsupportedGetConnectionException(ConnectionOption connectionOption)
 	{
-		super("Get connection for [" + connectionOption + "] is not supported");
+		super("Get connection for [" + connectionOption.copyOfPsdMask() + "] is not supported");
 
 		this.connectionOption = connectionOption;
 	}

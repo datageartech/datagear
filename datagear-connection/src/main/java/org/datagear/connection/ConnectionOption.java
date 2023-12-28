@@ -70,15 +70,27 @@ public class ConnectionOption implements Serializable
 
 	public ConnectionOption(String url, String user, String password, Properties properties)
 	{
-		super();
-		this.url = url;
-		
-		if(properties != null)
-			this.properties.putAll(properties);
+		this(url, properties);
 		
 		//最后设置用户名、密码，避免被覆盖
 		setUser(user);
 		setPassword(password);
+	}
+
+	/**
+	 * 创建实例。
+	 * 
+	 * @param url
+	 * @param properties
+	 *            允许{@code null}
+	 */
+	public ConnectionOption(String url, Properties properties)
+	{
+		super();
+		this.url = url;
+
+		if (properties != null)
+			this.properties.putAll(properties);
 	}
 
 	public String getUrl()
@@ -146,6 +158,21 @@ public class ConnectionOption implements Serializable
 		this.properties.put(name, value);
 
 		return true;
+	}
+
+	/**
+	 * 复制，但是对密码脱敏处理。
+	 * 
+	 * @return
+	 */
+	public ConnectionOption copyOfPsdMask()
+	{
+		ConnectionOption co = new ConnectionOption(this.url, this.properties);
+
+		if (!StringUtil.isEmpty(co.getPassword()))
+			co.setPassword(StringUtil.mask(co.getPassword(), 1, 1, 3));
+
+		return co;
 	}
 
 	@Override

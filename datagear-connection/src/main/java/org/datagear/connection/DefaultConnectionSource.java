@@ -235,7 +235,7 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 
 					if (LOGGER.isDebugEnabled())
 						LOGGER.debug("Get prefered connection by cached [" + preferedDriverEntity + "] for ["
-								+ connectionOption + "]");
+								+ connectionOption.copyOfPsdMask() + "]");
 
 					return preferedConnection;
 				}
@@ -244,7 +244,7 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 			{
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug("Get null connection by cached no-prefered " + DriverEntity.class.getSimpleName()
-							+ " for [" + connectionOption + "]");
+							+ " for [" + connectionOption.copyOfPsdMask() + "]");
 
 				throw new UnsupportedGetConnectionException(connectionOption);
 			}
@@ -289,7 +289,7 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 				{
 					if (LOGGER.isErrorEnabled())
 						LOGGER.error("Get connection with [" + driverEntityDriver.getDriverEntity() + "]  for ["
-								+ connectionOption + "] error", e);
+								+ connectionOption.copyOfPsdMask() + "] error", e);
 				}
 			}
 		}
@@ -330,7 +330,7 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 			{
 				if (LOGGER.isErrorEnabled())
 					LOGGER.error("Get Driver with [" + driverEntity + "] for getting prefered connection for ["
-							+ connectionOption + "] error", t);
+							+ connectionOption.copyOfPsdMask() + "] error", t);
 			}
 
 			if (driver != null)
@@ -345,7 +345,8 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 				{
 					if (LOGGER.isErrorEnabled())
 						LOGGER.error("Check if url accepted with [" + driverEntity
-								+ "] for getting prefered connection for [" + connectionOption + "] error", t);
+								+ "] for getting prefered connection for [" + connectionOption.copyOfPsdMask()
+								+ "] error", t);
 				}
 
 				if (accept)
@@ -363,7 +364,8 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 					{
 						if (LOGGER.isErrorEnabled())
 							LOGGER.error("Check if [" + driverEntity
-									+ "] 's driver checked for getting prefered connection for [" + connectionOption
+									+ "] 's driver checked for getting prefered connection for ["
+									+ connectionOption.copyOfPsdMask()
 									+ "] error", t);
 					}
 				}
@@ -467,14 +469,18 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 			{
 				connection = getConnectionWithoutInternalDataSource(driver, url, properties);
 
-				LOGGER.debug("Got a connection without internal DataSource for {}, "
-						+ "because the internal DataSource can not support this driver", key);
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug(
+							"Got a connection without internal DataSource for {}, "
+									+ "because the internal DataSource can not support this driver",
+							key.copyOfPsdMask());
 			}
 			else
 			{
 				connection = dataSourceHolder.getDataSource().getConnection();
 
-				LOGGER.debug("Got a connection from the internal DataSource for {}", key);
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("Got a connection from the internal DataSource for {}", key.copyOfPsdMask());
 			}
 		}
 		catch (Throwable t)
@@ -496,8 +502,11 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 			}
 			else
 			{
-				LOGGER.debug("Get connection from the internal DataSource failed for {}, "
-						+ "now try without internal DataSource", key, t);
+				if (LOGGER.isDebugEnabled())
+				{
+					LOGGER.debug("Get connection from the internal DataSource failed for {}, "
+							+ "now try without internal DataSource", key.copyOfPsdMask(), t);
+				}
 
 				JdbcUtil.closeConnection(connection);
 
@@ -510,17 +519,23 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 					this.internalDataSourceCache.invalidate(key);
 					this.internalDataSourceCache.put(key, nonDataSourceHolder);
 
-					LOGGER.debug(
-							"Get connection success without internal DataSource for {}, "
-									+ "the internal DataSource does exactly not support this driver",
-							key);
+					if (LOGGER.isDebugEnabled())
+					{
+						LOGGER.debug(
+								"Get connection success without internal DataSource for {}, "
+										+ "the internal DataSource does exactly not support this driver",
+								key.copyOfPsdMask());
+					}
 				}
 				catch (Throwable e)
 				{
-					LOGGER.debug(
-							"Get connection fail without internal DataSource for {}, "
-									+ "the internal DataSource is not sure if support this driver",
-							key, e);
+					if (LOGGER.isDebugEnabled())
+					{
+						LOGGER.debug(
+								"Get connection fail without internal DataSource for {}, "
+										+ "the internal DataSource is not sure if support this driver",
+								key.copyOfPsdMask(), e);
+					}
 
 					JdbcUtil.closeConnection(connection);
 
@@ -566,7 +581,8 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 	{
 		DriverBasicDataSource re = new DriverBasicDataSource(driver, url, properties);
 
-		LOGGER.debug("Create internal data source for {}", ConnectionIdentity.valueOf(url, properties));
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Create internal data source for {}", new ConnectionOption(url, properties).copyOfPsdMask());
 
 		return re;
 	}
@@ -720,6 +736,19 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 		public Properties getProperties()
 		{
 			return properties;
+		}
+
+		/**
+		 * 复制，但是对密码脱敏处理。
+		 * 
+		 * @return
+		 */
+		public InternalDataSourceKey copyOfPsdMask()
+		{
+			ConnectionOption co = new ConnectionOption(this.url, this.properties);
+			co = co.copyOfPsdMask();
+
+			return new InternalDataSourceKey(this.driver, this.url, co.getProperties());
 		}
 
 		@Override
