@@ -568,3 +568,9 @@ ALTER TABLE DATAGEAR_DATA_SET_HTTP ADD COLUMN DS_ENCODE_URI VARCHAR(20);
 
 /*默认值应设为false，以保持旧版逻辑*/
 UPDATE DATAGEAR_DATA_SET_HTTP SET DS_ENCODE_URI='false' WHERE DS_ENCODE_URI IS NULL OR DS_ENCODE_URI = '';
+
+
+/*-----------------------------------------*/
+/*--version[4.7.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
