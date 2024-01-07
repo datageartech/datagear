@@ -28,8 +28,8 @@ var contextPath="${contextPath}";
 </script>
 <#-- 自定义应用根路径后，浏览器无法自动加载系统图标，所以这里明确指定 -->
 <link href="${contextPath}/favicon.ico?v=${Global.VERSION}" type="images/x-icon" rel="shortcut icon" />
-<link href="${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
-<link href="${contextPath}/static/lib/primevue@3.15.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/primevue@3.45.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
+<link href="${contextPath}/static/lib/primevue@3.45.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeicons@5.0.0/primeicons.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeflex@3.1.2/primeflex.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
@@ -46,46 +46,10 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/vue@3.2.36/vue.global.prod.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/core/core.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tabmenu/tabmenu.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/card/card.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/datatable/datatable.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/column/column.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/contextmenu/contextmenu.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/dialog/dialog.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/checkbox/checkbox.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/textarea/textarea.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/toast/toast.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/toastservice/toastservice.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/password/password.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/divider/divider.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/selectbutton/selectbutton.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/confirmdialog/confirmdialog.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/confirmationservice/confirmationservice.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/togglebutton/togglebutton.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/splitbutton/splitbutton.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tabview/tabview.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tabpanel/tabpanel.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/menu/menu.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/menubar/menubar.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/chip/chip.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/fileupload/fileupload.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/inlinemessage/inlinemessage.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/steps/steps.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/dataview/dataview.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/overlaypanel/overlaypanel.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/panel/panel.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/fieldset/fieldset.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/listbox/listbox.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tooltip/tooltip.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/colorpicker/colorpicker.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/tieredmenu/tieredmenu.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/splitter/splitter.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/splitterpanel/splitterpanel.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/radiobutton/radiobutton.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/progressbar/progressbar.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/multiselect/multiselect.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.15.0/treeselect/treeselect.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.0.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.1.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.2.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.3.js" type="text/javascript"></script>
 
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.js" type="text/javascript"></script>

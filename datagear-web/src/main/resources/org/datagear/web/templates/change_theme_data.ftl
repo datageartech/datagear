@@ -21,7 +21,7 @@
 	{
 		"changeElement": "#primevueCssLink",
 		"changeAttr": "href",
-		"changeValue": "${contextPath}/static/lib/primevue@3.15.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css"
+		"changeValue": "${contextPath}/static/lib/primevue@3.45.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css"
 	},
 	{
 		"changeElement": "#styleCssLink",
