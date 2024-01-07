@@ -32,6 +32,98 @@ import org.junit.Test;
 public class StringUtilTest
 {
 	@Test
+	public void splitTest()
+	{
+		{
+			String s = "abc,def";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("abc", actual[0]);
+			assertEquals("def", actual[1]);
+		}
+		{
+			String s = "ab,cd,ef";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(3, actual.length);
+			assertEquals("ab", actual[0]);
+			assertEquals("cd", actual[1]);
+			assertEquals("ef", actual[2]);
+		}
+		{
+			String s = "abc.def";
+			String[] actual = StringUtil.split(s, ".", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("abc", actual[0]);
+			assertEquals("def", actual[1]);
+		}
+		{
+			String s = "ab.cd.ef";
+			String[] actual = StringUtil.split(s, ".", true);
+
+			assertEquals(3, actual.length);
+			assertEquals("ab", actual[0]);
+			assertEquals("cd", actual[1]);
+			assertEquals("ef", actual[2]);
+		}
+
+		// 以分隔符开头
+		{
+			String s = ",abc";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(1, actual.length);
+			assertEquals("abc", actual[0]);
+		}
+		{
+			String s = ",ab,c";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("ab", actual[0]);
+			assertEquals("c", actual[1]);
+		}
+
+		// 以分隔符结尾
+		{
+			String s = "abc,";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(1, actual.length);
+			assertEquals("abc", actual[0]);
+		}
+		{
+			String s = "ab,c,";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("ab", actual[0]);
+			assertEquals("c", actual[1]);
+		}
+
+		// 连续分隔符
+		{
+			String s = "abc,,def";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("abc", actual[0]);
+			assertEquals("def", actual[1]);
+		}
+
+		// 无分隔符
+		{
+			String s = "abcdef";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(1, actual.length);
+			assertEquals(s, actual[0]);
+		}
+	}
+
+	@Test
 	public void escapeHtmlTest()
 	{
 		{

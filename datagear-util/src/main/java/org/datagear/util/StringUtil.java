@@ -21,11 +21,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * 字符串工具类。
@@ -157,30 +159,36 @@ public class StringUtil
 	 * 拆分字符串。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param splitter
 	 * @param trim
 	 * @return
 	 */
 	public static String[] split(String text, String splitter, boolean trim)
 	{
-		if (trim)
+		if (text == null)
 		{
-			text = text.trim();
-
-			if (text.isEmpty())
-				return new String[0];
+			return new String[0];
 		}
 
-		if (text.startsWith(splitter))
-			text = text.substring(splitter.length());
-		if (text.endsWith(splitter))
-			text = text.substring(0, text.length() - splitter.length());
+		StringTokenizer st = new StringTokenizer(text, splitter);
+		List<String> tokens = new ArrayList<>();
 
-		String[] array = text.split(splitter);
-		for (int i = 0; i < array.length; i++)
-			array[i] = (trim ? array[i].trim() : array[i]);
+		while (st.hasMoreTokens())
+		{
+			String token = st.nextToken();
+			if (trim)
+			{
+				token = token.trim();
+			}
 
-		return array;
+			if (token.length() > 0)
+			{
+				tokens.add(token);
+			}
+		}
+
+		return tokens.toArray(new String[tokens.size()]);
 	}
 
 	/**
