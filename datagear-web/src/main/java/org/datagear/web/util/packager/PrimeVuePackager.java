@@ -23,9 +23,12 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.util.FileUtil;
@@ -38,7 +41,7 @@ import org.datagear.util.StringUtil;
  * 此类将由<code>npm install -g primevue</code>下载的PrimeVue资源打包为本项目所需的传统JS、CSS资源。
  * </p>
  * <p>
- * 打包配置参考：{@linkplain #getPkgComponents()}、{@linkplain #isPkgPrimevueMinCss()}、{@linkplain #getPkgThemes()}。
+ * 打包配置参考：{@linkplain #getPkgComponents(File)}、{@linkplain #getPkgThemes(File)}。
  * </p>
  * 
  * @author datagear@163.com
@@ -46,11 +49,23 @@ import org.datagear.util.StringUtil;
  */
 public class PrimeVuePackager extends AbstractPackager
 {
+	private String srcEncoding = IOUtil.CHARSET_UTF_8;
+
 	private int pkgFileSizeThreshold = 500;
 
 	public PrimeVuePackager()
 	{
 		super();
+	}
+
+	public String getSrcEncoding()
+	{
+		return srcEncoding;
+	}
+
+	public void setSrcEncoding(String srcEncoding)
+	{
+		this.srcEncoding = srcEncoding;
 	}
 
 	public int getPkgFileSizeThreshold()
@@ -66,30 +81,30 @@ public class PrimeVuePackager extends AbstractPackager
 	/**
 	 * 执行打包。
 	 * 
-	 * @param src
+	 * @param primeVueDir
 	 *            由npm安装的PrimeVue资源目录
 	 * @param target
 	 *            生成传统JS、CSS资源的存储目录
 	 */
-	public void pkg(String src, String target) throws IOException
+	public void pkg(String primeVueDir, String target) throws IOException
 	{
-		pkg(new File(src), new File(target));
+		pkg(new File(primeVueDir), new File(target));
 	}
 
 	/**
 	 * 执行打包。
 	 * 
-	 * @param src
+	 * @param primeVueDir
 	 *            由npm安装的PrimeVue资源目录
 	 * @param target
 	 *            生成传统JS、CSS资源的存储目录
 	 */
-	public void pkg(File src, File target) throws IOException
+	public void pkg(File primeVueDir, File target) throws IOException
 	{
-		if (!src.exists() || !src.isDirectory())
+		if (!primeVueDir.exists() || !primeVueDir.isDirectory())
 			throw new IllegalArgumentException("[src] illegal");
 
-		File pkgInfo = FileUtil.getFile(src, "package.json");
+		File pkgInfo = FileUtil.getFile(primeVueDir, "package.json");
 
 		if (!pkgInfo.exists())
 			throw new IllegalArgumentException("[src] illegal");
@@ -107,35 +122,35 @@ public class PrimeVuePackager extends AbstractPackager
 
 		target = createTargetPkgFolder(target, version);
 
-		copyReadme(src, target);
-		copyLicense(src, target);
-		pkgComponent(src, target);
-		pkgResources(src, target);
+		copyReadme(primeVueDir, target);
+		copyLicense(primeVueDir, target);
+		pkgComponent(primeVueDir, target);
+		pkgResources(primeVueDir, target);
 		writePkgInfo(target);
 	}
 
 	/**
 	 * 打包<span>resources/</span>资源。
 	 * 
-	 * @param src
+	 * @param primeVueDir
 	 * @param target
 	 * @throws IOException
 	 */
-	protected void pkgResources(File src, File target) throws IOException
+	protected void pkgResources(File primeVueDir, File target) throws IOException
 	{
-		src = FileUtil.getFile(src, "resources");
-		target = FileUtil.getDirectory(target, src.getName(), true);
+		primeVueDir = FileUtil.getFile(primeVueDir, "resources");
+		target = FileUtil.getDirectory(target, primeVueDir.getName(), true);
 
 		if (isPkgPrimevueMinCss())
 		{
-			File file = FileUtil.getFile(src, "primevue.min.css");
+			File file = FileUtil.getFile(primeVueDir, "primevue.min.css");
 			IOUtil.copy(file, FileUtil.getFile(target, file.getName()));
 		}
 
-		File srcThemes = FileUtil.getDirectory(src, "themes", true);
+		File srcThemes = FileUtil.getDirectory(primeVueDir, "themes", true);
 		File targetThemes = FileUtil.getDirectory(target, srcThemes.getName(), true);
 
-		List<String> themes = getPkgThemes();
+		List<String> themes = getPkgThemes(primeVueDir);
 		for (String theme : themes)
 		{
 			IOUtil.copy(FileUtil.getDirectory(srcThemes, theme, false), FileUtil.getDirectory(targetThemes, theme));
@@ -145,21 +160,28 @@ public class PrimeVuePackager extends AbstractPackager
 	/**
 	 * 打包JS组件。
 	 * 
-	 * @param src
+	 * @param primeVueDir
 	 * @param target
 	 * @throws IOException
 	 */
-	protected void pkgComponent(File src, File target) throws IOException
+	protected void pkgComponent(File primeVueDir, File target) throws IOException
 	{
-		List<String> cmps = getPkgComponents();
+		List<String> cmps = getPkgComponents(primeVueDir);
+		List<String> fullCmps = resolveDependencyNames(primeVueDir, cmps);
 
 		List<File> files = new ArrayList<>();
 
-		for (String name : cmps)
+		for (int i = 0, len = fullCmps.size(); i < len; i++)
 		{
-			File cmpFolder = FileUtil.getDirectory(src, name);
-			File cmpFile = FileUtil.getFile(cmpFolder, name + ".min.js");
+			String cmpFilePath = componentNameToFilePath(fullCmps.get(i), true);
+			File cmpFile = FileUtil.getFile(primeVueDir, cmpFilePath);
+
+			if (!cmpFile.exists())
+				throw new IllegalArgumentException("Component file not found : " + cmpFilePath);
+
 			files.add(cmpFile);
+
+			println("[" + i + "] Resolved component file : " + cmpFilePath);
 		}
 
 		mergeFile(files, target, getPkgFileSizeThreshold(), (total, index) ->
@@ -181,27 +203,294 @@ public class PrimeVuePackager extends AbstractPackager
 	/**
 	 * 获取打包主题名。
 	 * 
+	 * @param primeVueDir
 	 * @return
 	 */
-	protected List<String> getPkgThemes()
+	protected List<String> getPkgThemes(File primeVueDir)
 	{
 		return Arrays.asList("saga-blue", "vela-blue");
 	}
 
-	protected List<String> getPkgComponents()
+	/**
+	 * 获取打包组件名。
+	 * <p>
+	 * 这里只需要返回最终要使用的组件名即可，依赖组件会自动识别和打包。
+	 * </p>
+	 * 
+	 * @param primeVueDir
+	 * @return
+	 */
+	protected List<String> getPkgComponents(File primeVueDir)
 	{
-		return Arrays.asList(
-				//
-				"core", "tabmenu", "card", "datatable", "column", //
-				"contextmenu", "dialog", "checkbox", "textarea", "toast", //
-				"toastservice", "password", "divider", "selectbutton", "confirmdialog", //
-				"confirmationservice", "togglebutton", "splitbutton", "tabview", "tabpanel", //
-				"menu", "menubar", "chip", "fileupload", "inlinemessage", //
-				"steps", "dataview", "overlaypanel", "panel", "fieldset", //
-				"listbox", "tooltip", "colorpicker", "tieredmenu", "splitter", //
-				"splitterpanel", "radiobutton", "progressbar", "multiselect", "treeselect" //
-		//
-		);
+		List<String> re = new ArrayList<>();
+
+		Set<String> excludes = getPkgExcludeComponents(primeVueDir);
+		File[] files = primeVueDir.listFiles();
+
+		for (File file : files)
+		{
+			String name = file.getName();
+			boolean isComponent = false;
+
+			if (!file.isDirectory())
+			{
+				isComponent = false;
+			}
+			else
+			{
+				String cmpPath = componentNameToFilePath(name, true);
+				File cmpFile = FileUtil.getFile(primeVueDir, cmpPath);
+
+				if (cmpFile.exists())
+				{
+					isComponent = true;
+				}
+				else
+				{
+					isComponent = false;
+				}
+			}
+
+			if (!isComponent)
+			{
+				println("[WARN] : [" + name + "] is ignored for resolving component");
+			}
+
+			if (isComponent && !excludes.contains(name))
+			{
+				re.add(name);
+			}
+		}
+
+		return re;
+	}
+
+	/**
+	 * 获取打包排除组件。
+	 * 
+	 * @param primeVueDir
+	 * @return
+	 */
+	protected Set<String> getPkgExcludeComponents(File primeVueDir)
+	{
+		return Collections.emptySet();
+	}
+
+	protected List<String> resolveDependencyNames(File primeVueDir, List<String> names)
+	{
+		List<String> re = new ArrayList<>();
+
+		Map<String, List<String>> dependencyMap = new HashMap<>();
+		resolveDependencyNames(primeVueDir, names, dependencyMap);
+		re.addAll(dependencyMap.keySet());
+
+		for (String n : dependencyMap.keySet())
+		{
+			println("[" + n + "] dependencies : " + dependencyMap.get(n));
+		}
+
+		int len = re.size();
+		for (int i = 0; i < len - 1; i++)
+		{
+			for (int j = 0; j < len - 1 - i; j++)
+			{
+				String a = re.get(j);
+				String b = re.get(j + 1);
+				List<String> ads = dependencyMap.get(a);
+				List<String> bds = dependencyMap.get(b);
+
+				if (ads == null)
+					ads = Collections.emptyList();
+				if (bds == null)
+					bds = Collections.emptyList();
+
+				int compare = 0;
+
+				if (ads.isEmpty() && bds.isEmpty())
+				{
+					compare = 0;
+				}
+				else if (ads.isEmpty())
+				{
+					compare = -1;
+				}
+				else if (bds.isEmpty())
+				{
+					compare = 1;
+				}
+				else
+				{
+					boolean adb = isDependency(dependencyMap, a, b);
+					boolean bda = isDependency(dependencyMap, b, a);
+
+					if (!adb && !bda)
+					{
+						compare = 0;
+					}
+					else if (adb)
+					{
+						compare = 1;
+					}
+					else if (bda)
+					{
+						compare = -1;
+					}
+					else
+					{
+						compare = 0;
+					}
+				}
+
+				if (compare >= 0)
+				{
+					re.set(j + 1, a);
+					re.set(j, b);
+				}
+			}
+		}
+
+		return re;
+	}
+
+	protected boolean isDependency(Map<String, List<String>> dependencyMap, String name, String dependency)
+	{
+		List<String> dependencies = dependencyMap.get(name);
+
+		if (dependencies == null || dependencies.isEmpty())
+			return false;
+
+		if (dependencies.contains(dependency))
+			return true;
+
+		for (String n : dependencies)
+		{
+			if (isDependency(dependencyMap, n, dependency))
+				return true;
+		}
+
+		return false;
+	}
+
+	protected void resolveDependencyNames(File primeVueDir, List<String> names, Map<String, List<String>> dependencyMap)
+	{
+		for (String name : names)
+		{
+			if (dependencyMap.containsKey(name))
+				continue;
+			
+			List<String> myDependencyNames = resolveDependencyNames(primeVueDir, name);
+			dependencyMap.put(name, myDependencyNames);
+
+			resolveDependencyNames(primeVueDir, myDependencyNames, dependencyMap);
+		}
+	}
+
+	/**
+	 * 解析指定组件的依赖组件。
+	 * 
+	 * @param primeVueDir
+	 * @param name
+	 * @return
+	 */
+	protected List<String> resolveDependencyNames(File primeVueDir, String name)
+	{
+		// 这里不使用"*.min.js"文件，因为这些文件里有可能没有定义以来参数
+		String path = componentNameToFilePath(name, false);
+		File file = FileUtil.getFile(primeVueDir, path);
+
+		StringBuilder functionCallParamStr = new StringBuilder();
+
+		Reader in = null;
+		try
+		{
+			in = IOUtil.getReader(file, getSrcEncoding());
+			int c = -1;
+			while ((c = in.read()) != -1)
+			{
+				// 只需要读取组件JS文件最后的函数调用参数即可
+				if (c == '(')
+				{
+					functionCallParamStr.delete(0, functionCallParamStr.length());
+				}
+
+				functionCallParamStr.appendCodePoint(c);
+			}
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+
+		String fcpstr = functionCallParamStr.toString();
+		int lb = fcpstr.indexOf('(');
+		int rb = (lb < 0 ? -1 : fcpstr.indexOf(')', lb + 1));
+
+		if (lb < 0 || rb < 0)
+			throw new IllegalArgumentException("Invalid component file : " + path);
+
+		fcpstr = fcpstr.substring(lb + 1, rb);
+		String[] params = StringUtil.split(fcpstr, ",", true);
+
+		List<String> re = new ArrayList<>(params.length);
+
+		for (String p : params)
+		{
+			// 仅处理PrimeVue依赖
+			if (p.startsWith("primevue."))
+			{
+				p = p.substring("primevue.".length());
+				re.add(p);
+			}
+		}
+
+		return re;
+	}
+
+	/**
+	 * 组件名转换至组件文件路径。
+	 * 
+	 * @param name
+	 *            组件名，比如：{@code "button"}、{@code "toast.style"}、{@code "icons.check"}
+	 * @param min
+	 *            是否转换为{@code "*.min.js"}
+	 * @return
+	 */
+	protected String componentNameToFilePath(String name, boolean min)
+	{
+		String path = null;
+
+		String[] nodes = StringUtil.split(name, ".", true);
+
+		if (nodes.length == 0)
+		{
+			path = null;
+		}
+		else if (nodes.length == 1)
+		{
+			path = nodes[0] + "/" + nodes[0] + (min ? ".min.js" : ".js");
+		}
+		else if (nodes.length == 2)
+		{
+			// icons.xxx
+			if ("icons".equals(nodes[0]))
+			{
+				path = "icons/" + nodes[1] + "/index" + (min ? ".min.js" : ".js");
+			}
+			// xxx.style
+			else if ("style".equals(nodes[1]))
+			{
+				path = nodes[0] + "/style/" + nodes[0] + nodes[1] + (min ? ".min.js" : ".js");
+			}
+		}
+
+		if (StringUtil.isEmpty(path))
+			throw new UnsupportedOperationException("Unsupported component name to file path for : " + name);
+
+		return path;
 	}
 
 	protected void copyReadme(File src, File target) throws IOException
@@ -301,6 +590,7 @@ public class PrimeVuePackager extends AbstractPackager
 		println("*****************************************");
 		println();
 
+		String dftSrc = "D:/node/node_modules/primevue";
 		String dftTarget = "target/primevuepkg";
 		String src = null;
 		String target = null;
@@ -308,6 +598,7 @@ public class PrimeVuePackager extends AbstractPackager
 		Scanner scanner = new Scanner(System.in);
 
 		println("请输入PrimeVue原始目录：");
+		println("要使用默认目录（" + dftSrc + "），请输入：d");
 
 		while (scanner.hasNextLine())
 		{
@@ -324,12 +615,17 @@ public class PrimeVuePackager extends AbstractPackager
 			else if (StringUtil.isEmpty(src))
 			{
 				src = input;
+				
+				if ("d".equalsIgnoreCase(src))
+					src = dftSrc;
+				
 				println("请输入PrimeVue打包目录：");
 				println("要使用默认打包目录（" + dftTarget + "），请输入：d");
 			}
 			else if(StringUtil.isEmpty(target))
 			{
 				target = input;
+				
 				if ("d".equalsIgnoreCase(target))
 					target = dftTarget;
 

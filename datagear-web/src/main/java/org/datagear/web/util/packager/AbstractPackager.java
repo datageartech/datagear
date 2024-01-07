@@ -128,6 +128,9 @@ public class AbstractPackager
 					sizeTotal = 0;
 				}
 			}
+
+			if (split.size() > 0)
+				re.add(split);
 		}
 
 		return re;
