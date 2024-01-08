@@ -31,7 +31,7 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/primevue@3.45.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
 <link href="${contextPath}/static/lib/primevue@3.45.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeicons@5.0.0/primeicons.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/lib/primeflex@3.1.2/primeflex.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/primeflex@3.3.1/primeflex.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.css" type="text/css" rel="stylesheet" />
