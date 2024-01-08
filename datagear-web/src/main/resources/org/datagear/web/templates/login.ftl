@@ -76,7 +76,7 @@
 							<p-button type="submit" label="<@spring.message code='login' />"></p-button>
 						</div>
 						<div class="page-form-foot flex-grow-0 pt-3 text-right text-color-secondary">
-							<p-checkbox id="${pid}remremberLogin" v-model="fm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>
+							<p-checkbox input-id="${pid}remremberLogin" v-model="fm.rememberMe" :binary="true" name="remremberLogin"></p-checkbox>
 							<label for="${pid}remremberLogin" class="ml-1"><@spring.message code='remremberLogin' /></label>
 							
 							<a href="${contextPath}/resetPassword" class="link text-color-secondary ml-3"><@spring.message code='forgetPassword' /></a>

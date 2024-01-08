@@ -112,7 +112,7 @@ dataSet_form_param_property_form.ftl
 						</p-button>
 					</div>
 					<div class="flex align-items-center ml-5">
-						<p-checkbox id="${pid}propertyAutoGen" v-model="pm.autoGenerateProperty" :binary="true"></p-checkbox>
+						<p-checkbox input-id="${pid}propertyAutoGen" v-model="pm.autoGenerateProperty" :binary="true"></p-checkbox>
 						<label for="${pid}propertyAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.properties.autoGenerate.desc' />">
 							<@spring.message code='autoGenerate' />
 						</label>

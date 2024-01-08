@@ -101,7 +101,7 @@ page_boolean_options.ftl
 				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
 						<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-							<p-checkbox :id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
+							<p-checkbox :input-id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
 							<label :for="'${pid}cpattr_'+cpa.name+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
 						</div>
 					</div>
