@@ -875,7 +875,7 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 				((DriverBasicDataSource) dataSource).close();
 
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("Close cache removed internal data source for {}", key);
+					LOGGER.debug("Close cache removed internal data source for {}", key.copyOfPsdMask());
 			}
 			catch (SQLException e)
 			{
