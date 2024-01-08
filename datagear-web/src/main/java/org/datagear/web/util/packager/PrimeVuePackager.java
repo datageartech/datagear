@@ -82,9 +82,9 @@ public class PrimeVuePackager extends AbstractPackager
 	 * 执行打包。
 	 * 
 	 * @param primeVueDir
-	 *            由npm安装的PrimeVue资源目录
+	 *            由npm安装的PrimeVue目录
 	 * @param target
-	 *            生成传统JS、CSS资源的存储目录
+	 *            打包目标存储目录
 	 */
 	public void pkg(String primeVueDir, String target) throws IOException
 	{
@@ -95,9 +95,9 @@ public class PrimeVuePackager extends AbstractPackager
 	 * 执行打包。
 	 * 
 	 * @param primeVueDir
-	 *            由npm安装的PrimeVue资源目录
+	 *            由npm安装的PrimeVue目录
 	 * @param target
-	 *            生成传统JS、CSS资源的存储目录
+	 *            打包目标存储目录
 	 */
 	public void pkg(File primeVueDir, File target) throws IOException
 	{
@@ -171,17 +171,23 @@ public class PrimeVuePackager extends AbstractPackager
 
 		List<File> files = new ArrayList<>();
 
+		println();
+		println("------------------------------");
+		println("Package components :");
+		println("------------------------------");
+
 		for (int i = 0, len = fullCmps.size(); i < len; i++)
 		{
-			String cmpFilePath = componentNameToFilePath(fullCmps.get(i), true);
-			File cmpFile = FileUtil.getFile(primeVueDir, cmpFilePath);
+			String name = fullCmps.get(i);
+			String path = componentNameToFilePath(name, true);
+			File file = FileUtil.getFile(primeVueDir, path);
 
-			if (!cmpFile.exists())
-				throw new IllegalArgumentException("Component file not found : " + cmpFilePath);
+			if (!file.exists())
+				throw new IllegalArgumentException("Component file not found : " + path);
 
-			files.add(cmpFile);
+			files.add(file);
 
-			println("[" + i + "] Resolved component file : " + cmpFilePath);
+			println("[" + (i + 1) + "] Package component : " + name + " , file : " + path);
 		}
 
 		mergeFile(files, target, getPkgFileSizeThreshold(), (total, index) ->
@@ -224,6 +230,11 @@ public class PrimeVuePackager extends AbstractPackager
 	{
 		List<String> re = new ArrayList<>();
 
+		println();
+		println("------------------------------");
+		println("Components :");
+		println("------------------------------");
+
 		Set<String> excludes = getPkgExcludeComponents(primeVueDir);
 		File[] files = primeVueDir.listFiles();
 
@@ -262,6 +273,12 @@ public class PrimeVuePackager extends AbstractPackager
 			}
 		}
 
+		for (int i = 0, len = re.size(); i < len; i++)
+		{
+			String n = re.get(i);
+			println("[" + (i + 1) + "] " + n);
+		}
+
 		return re;
 	}
 
@@ -276,6 +293,14 @@ public class PrimeVuePackager extends AbstractPackager
 		return Collections.emptySet();
 	}
 
+	/**
+	 * 解析组件及其所有依赖组件名，并按照依赖顺序排序（被依赖项靠前）。
+	 * 
+	 * @param primeVueDir
+	 * @param names
+	 *            组件名，比如：{@code "button"}、{@code "toast.style"}、{@code "icons.check"}
+	 * @return
+	 */
 	protected List<String> resolveDependencyNames(File primeVueDir, List<String> names)
 	{
 		List<String> re = new ArrayList<>();
@@ -284,9 +309,16 @@ public class PrimeVuePackager extends AbstractPackager
 		resolveDependencyNames(primeVueDir, names, dependencyMap);
 		re.addAll(dependencyMap.keySet());
 
+		println();
+		println("------------------------------");
+		println("Component dependencies :");
+		println("------------------------------");
+
+		int index = 0;
 		for (String n : dependencyMap.keySet())
 		{
-			println("[" + n + "] dependencies : " + dependencyMap.get(n));
+			println("[" + (index + 1) + "] " + n + " : " + dependencyMap.get(n));
+			index++;
 		}
 
 		int len = re.size();
@@ -341,6 +373,7 @@ public class PrimeVuePackager extends AbstractPackager
 					}
 				}
 
+				// 只要不是小于0，都应往后移
 				if (compare >= 0)
 				{
 					re.set(j + 1, a);
@@ -352,6 +385,38 @@ public class PrimeVuePackager extends AbstractPackager
 		return re;
 	}
 
+	/**
+	 * 解析组件及其所有依赖组件名，写入{@code dependencyMap}映射表。
+	 * 
+	 * @param primeVueDir
+	 * @param names
+	 *            组件名，比如：{@code "button"}、{@code "toast.style"}、{@code "icons.check"}
+	 * @param dependencyMap
+	 */
+	protected void resolveDependencyNames(File primeVueDir, List<String> names, Map<String, List<String>> dependencyMap)
+	{
+		for (String name : names)
+		{
+			if (dependencyMap.containsKey(name))
+				continue;
+
+			List<String> myDependencyNames = resolveDependencyNames(primeVueDir, name);
+			dependencyMap.put(name, myDependencyNames);
+
+			resolveDependencyNames(primeVueDir, myDependencyNames, dependencyMap);
+		}
+	}
+
+	/**
+	 * 判断组件是否依赖另一个组件。
+	 * 
+	 * @param dependencyMap
+	 * @param name
+	 *            组件名
+	 * @param dependency
+	 *            被依赖组件名
+	 * @return
+	 */
 	protected boolean isDependency(Map<String, List<String>> dependencyMap, String name, String dependency)
 	{
 		List<String> dependencies = dependencyMap.get(name);
@@ -371,20 +436,6 @@ public class PrimeVuePackager extends AbstractPackager
 		return false;
 	}
 
-	protected void resolveDependencyNames(File primeVueDir, List<String> names, Map<String, List<String>> dependencyMap)
-	{
-		for (String name : names)
-		{
-			if (dependencyMap.containsKey(name))
-				continue;
-			
-			List<String> myDependencyNames = resolveDependencyNames(primeVueDir, name);
-			dependencyMap.put(name, myDependencyNames);
-
-			resolveDependencyNames(primeVueDir, myDependencyNames, dependencyMap);
-		}
-	}
-
 	/**
 	 * 解析指定组件的依赖组件。
 	 * 
@@ -394,7 +445,7 @@ public class PrimeVuePackager extends AbstractPackager
 	 */
 	protected List<String> resolveDependencyNames(File primeVueDir, String name)
 	{
-		// 这里不使用"*.min.js"文件，因为这些文件里有可能没有定义以来参数
+		// 这里不使用"*.min.js"文件，因为这些文件里有可能没有定义依赖参数
 		String path = componentNameToFilePath(name, false);
 		File file = FileUtil.getFile(primeVueDir, path);
 
@@ -587,6 +638,7 @@ public class PrimeVuePackager extends AbstractPackager
 	{
 		println("*****************************************");
 		println("PrimeVue 打包工具");
+		println("要下载PrimeVue，先安装node（https://nodejs.org/），然后执行命令：npm install -g primevue");
 		println("*****************************************");
 		println();
 
