@@ -89,7 +89,7 @@
 							<p-datatable :value="fm.propertyPatterns" :scrollable="true"
 								v-model:selection="pm.selectedPropertyPatterns"
 								:resizable-columns="true" column-resize-mode="expand"
-								selection-mode="multiple" dataKey="name" striped-rows class="propertyPatterns-table table-sm">
+								selection-mode="multiple" data-key="name" striped-rows class="propertyPatterns-table table-sm">
 								<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 								<p-column field="namePattern" header="<@spring.message code='propertyNamePattern' />">
 								</p-column>

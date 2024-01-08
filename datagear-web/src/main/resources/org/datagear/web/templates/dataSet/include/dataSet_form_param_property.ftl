@@ -57,7 +57,7 @@ dataSet_form_param_property_form.ftl
 				<p-datatable :value="fm.params" :scrollable="true"
 					v-model:selection="pm.selectedParams"
 					:resizable-columns="true" column-resize-mode="expand"
-					selection-mode="multiple" dataKey="name" striped-rows class="params-table table-sm">
+					selection-mode="multiple" data-key="name" striped-rows class="params-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">
 					</p-column>
@@ -178,7 +178,7 @@ dataSet_form_param_property_form.ftl
 				<p-datatable :value="fm.properties" :scrollable="true"
 					v-model:selection="pm.selectedProperties"
 					:resizable-columns="true" column-resize-mode="expand"
-					selection-mode="multiple" dataKey="name" striped-rows class="properties-table table-sm">
+					selection-mode="multiple" data-key="name" striped-rows class="properties-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">
 					</p-column>
