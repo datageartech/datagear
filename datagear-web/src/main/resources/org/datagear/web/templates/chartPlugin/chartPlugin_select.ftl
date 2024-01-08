@@ -57,16 +57,18 @@
 				<div class="chart-plugins-scroller h-full overflow-auto">
 					<div class="chart-plugins-wrapper relative">
 						<div v-for="(ctrz, index) in pm.categorizations" :key="ctrz.category.name" :id="toCategorizationEleId(ctrz)" class="mb-3">
-							<p-dataview :value="pm.categorizations[index].chartPlugins" layout="grid">
+							<p-dataview :value="ctrz.chartPlugins" layout="grid">
 								<template #header>
 									{{formatCategoryNameLabel(ctrz)}}
 								</template>
 								<template #grid="slotProps">
-									<div class="col-12 md:col-4 p-3">
-										<div class="p-card p-3 cursor-pointer"
-											@click="onSelectChartPlugin(slotProps.data)"
-											:class="{'state-active': slotProps.data.id == pm.selectedChartPluginId }">
-											<div v-html="formatChartPlugin(slotProps.data)"></div>
+									<div class="grid">
+										<div v-for="cp in slotProps.items" class="col-12 md:col-4 p-3">
+											<div class="p-card p-3 cursor-pointer"
+												@click="onSelectChartPlugin(cp)"
+												:class="{'state-active': cp.id == pm.selectedChartPluginId }">
+												<div v-html="formatChartPlugin(cp)"></div>
+											</div>
 										</div>
 									</div>
 								</template>
