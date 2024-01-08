@@ -41,7 +41,7 @@ page_boolean_options.ftl
 				<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginAttribute.InputType.RADIO">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
 						<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-							<p-radiobutton :id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
+							<p-radiobutton :input-id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
 							<label :for="'${pid}cpattr_'+cpa.name+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
 						</div>
 					</div>

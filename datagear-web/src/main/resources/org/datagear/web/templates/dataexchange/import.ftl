@@ -46,22 +46,22 @@
 		<form id="${pid}form" action="#">
 			<div class="pl-5 pt-4 pb-2">
 				<div class="field-radiobutton">
-					<p-radiobutton id="${pid}vsc" name="dataType" value="csv" v-model="fm.dataType"></p-radiobutton>
+					<p-radiobutton input-id="${pid}vsc" name="dataType" value="csv" v-model="fm.dataType"></p-radiobutton>
 					<label for="${pid}vsc" style="min-width:8rem;"><@spring.message code='dataImport.dataType.csv' /></label>
 					<label for="${pid}vsc" class="ml-3 text-sm text-color-secondary"><@spring.message code='dataImport.dataType.csv.desc' /></label>
 				</div>
 				<div class="field-radiobutton pt-2">
-					<p-radiobutton id="${pid}excel" name="dataType" value="excel" v-model="fm.dataType"></p-radiobutton>
+					<p-radiobutton input-id="${pid}excel" name="dataType" value="excel" v-model="fm.dataType"></p-radiobutton>
 					<label for="${pid}excel" style="min-width:8rem;"><@spring.message code='dataImport.dataType.excel' /></label>
 					<label for="${pid}excel" class="ml-3 text-sm text-color-secondary"><@spring.message code='dataImport.dataType.excel.desc' /></label>
 				</div>
 				<div class="field-radiobutton pt-2">
-					<p-radiobutton id="${pid}sql" name="dataType" value="sql" v-model="fm.dataType"></p-radiobutton>
+					<p-radiobutton input-id="${pid}sql" name="dataType" value="sql" v-model="fm.dataType"></p-radiobutton>
 					<label for="${pid}sql" style="min-width:8rem;"><@spring.message code='dataImport.dataType.sql' /></label>
 					<label for="${pid}sql" class="ml-3 text-sm text-color-secondary"><@spring.message code='dataImport.dataType.sql.desc' /></label>
 				</div>
 				<div class="field-radiobutton pt-2">
-					<p-radiobutton id="${pid}json" name="dataType" value="json" v-model="fm.dataType"></p-radiobutton>
+					<p-radiobutton input-id="${pid}json" name="dataType" value="json" v-model="fm.dataType"></p-radiobutton>
 					<label for="${pid}json" style="min-width:8rem;"><@spring.message code='dataImport.dataType.json' /></label>
 					<label for="${pid}json" class="ml-3 text-sm text-color-secondary"><@spring.message code='dataImport.dataType.json.desc' /></label>
 				</div>
