@@ -951,14 +951,14 @@
 				{
 					return po.isSqlpadTabMenuOnTabMessage();
 				},
-				command: function()
+				command: function(e)
 				{
 					po.keepMessage(!po.keepMessage());
 					
 					if(po.keepMessage())
-						this.icon = "pi pi-check";
+						e.item.icon = "pi pi-check";
 					else
-						this.icon = "pi pi-times";
+						e.item.icon = "pi pi-times";
 				}
 			},
 			{
@@ -968,14 +968,14 @@
 				{
 					return po.isSqlpadTabMenuOnTabMessage();
 				},
-				command: function()
+				command: function(e)
 				{
 					po.keepResult(!po.keepResult());
 					
 					if(po.keepResult())
-						this.icon = "pi pi-check";
+						e.item.icon = "pi pi-check";
 					else
-						this.icon = "pi pi-times";
+						e.item.icon = "pi pi-times";
 				}
 			},
 			{

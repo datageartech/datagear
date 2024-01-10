@@ -59,27 +59,27 @@
 			{
 				label: "<@spring.message code='searchFilter.all' />",
 				value: "${DataPermissionEntityService.DATA_FILTER_VALUE_ALL}",
-				command: function()
+				command: function(e)
 				{
-					po.updateSearchFilterForMenuItem(this);
+					po.updateSearchFilterForMenuItem(e.item);
 					po.submitSearchForm();
 				}
 			},
 			{
 				label: "<@spring.message code='searchFilter.mine' />",
 				value: "${DataPermissionEntityService.DATA_FILTER_VALUE_MINE}",
-				command: function()
+				command: function(e)
 				{
-					po.updateSearchFilterForMenuItem(this);
+					po.updateSearchFilterForMenuItem(e.item);
 					po.submitSearchForm();
 				}
 			},
 			{
 				label: "<@spring.message code='searchFilter.other' />",
 				value: "${DataPermissionEntityService.DATA_FILTER_VALUE_OTHER}",
-				command: function()
+				command: function(e)
 				{
-					po.updateSearchFilterForMenuItem(this);
+					po.updateSearchFilterForMenuItem(e.item);
 					po.submitSearchForm();
 				}
 			}
