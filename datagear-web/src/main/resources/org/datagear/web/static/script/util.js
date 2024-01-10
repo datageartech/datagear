@@ -1587,6 +1587,9 @@
 			if($(".message-detail", $omp).length > 0)
 				message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
 			
+			//删除首尾空格，避免提示信息错行
+			message = message.trim();
+			
 			if(isSuccessResponse)
 			{
 				if(isTipSuccess)
