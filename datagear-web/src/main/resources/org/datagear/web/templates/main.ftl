@@ -91,7 +91,7 @@
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",
-					icon: 'pi pi-fw pi-folder',
+					icon: 'pi pi-fw pi-th-large',
 					url: po.concatContextPath("/analysisProject/pagingQuery"),
 					visible: po.modulePermissions.analysisProjectPermission.visible
 				},
