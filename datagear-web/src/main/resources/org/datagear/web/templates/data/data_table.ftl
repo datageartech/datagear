@@ -182,15 +182,15 @@
 				
 				if($.tableMeta.isBinaryColumn(column))
 				{
-					return "<div class='p-tag p-tag-warning opacity-60'>"+po.queryResultBinaryPlaceholder+"</div>";
+					return "<div class='p-tag p-tag-warning inline-block opacity-60'>"+po.queryResultBinaryPlaceholder+"</div>";
 				}
 				else if($.tableMeta.isClobColumn(column))
 				{
-					return "<div class='p-tag p-tag-warning opacity-60'>"+po.queryResultClobPlacholder+"</div>";
+					return "<div class='p-tag p-tag-warning inline-block opacity-60'>"+po.queryResultClobPlacholder+"</div>";
 				}
 				else if($.tableMeta.isSqlxmlColumn(column))
 				{
-					return "<div class='p-tag p-tag-warning opacity-60'>"+po.queryResultSqlXmlPlaceholder+"</div>";
+					return "<div class='p-tag p-tag-warning inline-block opacity-60'>"+po.queryResultSqlXmlPlaceholder+"</div>";
 				}
 				else
 					return $.escapeHtml($.truncateIf(value));

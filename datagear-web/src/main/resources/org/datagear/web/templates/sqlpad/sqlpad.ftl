@@ -559,7 +559,7 @@
 			
 			if(appendContent)
 			{
-				$("<div class='p-tag p-tag-info' />").html(msgData.content).appendTo(msgContentDiv);
+				$("<div class='p-tag p-tag-info inline-block' />").html(msgData.content).appendTo(msgContentDiv);
 				po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
 			}
 		}
@@ -589,7 +589,7 @@
 			
 			msgDiv.addClass("execution-finish");
 			
-			$("<div class='p-tag p-tag-success' />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo(msgContentDiv);
+			$("<div class='p-tag p-tag-success inline-block' />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo(msgContentDiv);
 			po.appendSQLExecutionStatMessage(msgContentDiv, msgData.sqlExecutionStat);
 			
 			po.executionStatus(po.executionStatusType.STOPPED);
@@ -1237,7 +1237,7 @@
 							+"</a>";
 				}
 				else
-					return "<div class='p-tag p-tag-warning opacity-60'>"+po.sqlResultBinaryPlaceholder+"</div>";
+					return "<div class='p-tag p-tag-warning inline-block opacity-60'>"+po.sqlResultBinaryPlaceholder+"</div>";
 			}
 			else if(value != renderValue)
 			{
@@ -1247,11 +1247,11 @@
 			}
 			else if(value == po.sqlResultClobPlacholder && $.tableMeta.isClobColumn(column))
 			{
-				return "<div class='p-tag p-tag-warning opacity-60'>"+po.sqlResultClobPlacholder+"</div>";
+				return "<div class='p-tag p-tag-warning inline-block opacity-60'>"+po.sqlResultClobPlacholder+"</div>";
 			}
 			else if(value == po.sqlResultSqlXmlPlaceholder && $.tableMeta.isSqlxmlColumn(column))
 			{
-				return "<div class='p-tag p-tag-warning opacity-60'>"+po.sqlResultSqlXmlPlaceholder+"</div>";
+				return "<div class='p-tag p-tag-warning inline-block opacity-60'>"+po.sqlResultSqlXmlPlaceholder+"</div>";
 			}
 			else
 				return $.escapeHtml(renderValue);
