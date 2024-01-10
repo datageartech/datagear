@@ -241,12 +241,16 @@ label.align-tip{
 }
 
 /*error菜单条目*/
+.p-contextmenu .p-error .p-menuitem-content,
 .p-contextmenu .p-error .p-menuitem-link,
 .p-contextmenu .p-error .p-menuitem-link .p-menuitem-text,
+.p-menu .p-error .p-menuitem-content,
 .p-menu .p-error .p-menuitem-link,
 .p-menu .p-error .p-menuitem-link .p-menuitem-text,
+.p-menubar .p-error .p-menuitem-content,
 .p-menubar .p-error .p-menuitem-link,
 .p-menubar .p-error .p-menuitem-link .p-menuitem-text,
+.p-tieredmenu .p-error .p-menuitem-content,
 .p-tieredmenu .p-error .p-menuitem-link,
 .p-tieredmenu .p-error .p-menuitem-link .p-menuitem-text{
 	color: inherit;
