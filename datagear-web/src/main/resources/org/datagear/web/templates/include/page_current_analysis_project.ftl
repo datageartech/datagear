@@ -31,7 +31,7 @@ page_search_form.ftl
 		class="p-button-text p-button-plain p-button-sm py-1 px-1 opacity-70"
 		@click="onClearCurrentAnalysisProject" v-if="pm.searchAnalysisProject.id != ''">
 	</p-button>
-	<p-button type="button" :label="pm.searchAnalysisProject.name" icon="pi pi-folder"
+	<p-button type="button" :label="pm.searchAnalysisProject.name" icon="pi pi-th-large"
 		class="ap-name-btn p-button-text p-button-plain p-button-sm text-left py-1 pl-1 pr-3"
 		@click="onSelectCurrentAnalysisProject">
 	</p-button>
