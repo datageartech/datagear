@@ -1246,8 +1246,8 @@
 	{
 		var pm = po.vuePageModel();
 		
-		if(pm.quickExecuteMenuItem)
-			pm.quickExecuteMenuItem.command();
+		if(pm.quickExecuteMenuItem && pm.quickExecuteMenuItem.commandExec)
+			pm.quickExecuteMenuItem.commandExec();
 	};
 	
 	po.veQuickExecuteMenuItem = function(menuItem)
@@ -1395,7 +1395,11 @@
 				class: "for-open-chart-panel",
 				insertType: insertType,
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1419,7 +1423,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control gridLayoutShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1437,7 +1445,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control flexLayoutShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1454,7 +1466,11 @@
 				label: "<@spring.message code='divElement' />",
 				insertType: insertType,
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1473,7 +1489,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control hxtitleShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1493,7 +1513,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control textElementShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1513,7 +1537,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control imageShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1533,7 +1561,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control hyperlinkShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1553,7 +1585,11 @@
 				insertType: insertType,
 				class: "ve-panel-show-control videoShown",
 				parentLabelPath: parentLabelPath,
-				command: function()
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
 				{
 					po.veQuickExecuteMenuItem(this);
 					
@@ -1703,7 +1739,11 @@
 							label: "<@spring.message code='bindOrReplaceChart' />",
 							class: "for-open-chart-panel",
 							parentLabelPath: "<@spring.message code='insert' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1747,7 +1787,11 @@
 							label: "<@spring.message code='globalStyle' />",
 							class: "ve-panel-show-control styleShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1769,7 +1813,11 @@
 							label: "<@spring.message code='globalChartTheme' />",
 							class: "ve-panel-show-control chartThemeShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1788,7 +1836,11 @@
 							label: "<@spring.message code='globalChartOptions' />",
 							class: "ve-panel-show-control chartOptionsShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1808,7 +1860,11 @@
 							label: "<@spring.message code='style' />",
 							class: "ve-panel-show-control styleShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1835,7 +1891,11 @@
 							label: "<@spring.message code='chartTheme' />",
 							class: "ve-panel-show-control chartThemeShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1857,7 +1917,11 @@
 							label: "<@spring.message code='chartAttribute' />",
 							class: "ve-panel-show-control chartAttrValuesShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1879,7 +1943,11 @@
 							label: "<@spring.message code='chartOptions' />",
 							class: "ve-panel-show-control chartOptionsShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1901,7 +1969,11 @@
 							label: "<@spring.message code='elementAttribute' />",
 							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
@@ -1949,7 +2021,11 @@
 							label: "<@spring.message code='textContent' />",
 							class: "ve-panel-show-control textElementShown",
 							parentLabelPath: "<@spring.message code='edit' />",
-							command: function()
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
 							{
 								po.veQuickExecuteMenuItem(this);
 								
