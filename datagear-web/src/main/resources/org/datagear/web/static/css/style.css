@@ -804,8 +804,8 @@ label.align-tip{
 	height: 5rem;
 }
 .chart-form-chart-attr-values .chart-attr-values-form .page-form-content{
-	width: 35vw;
-	height: 45vh;
+	min-width: 40vw;
+    max-width: 60vw;
 }
 
 .page-form-dashboard .p-tabview .p-tabview-panels{

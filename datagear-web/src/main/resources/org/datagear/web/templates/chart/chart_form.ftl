@@ -222,7 +222,6 @@
 				<div class="field-input col-12 md:col-9">
 					<div class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
-							aria:haspopup="true" aria-controls="${pid}attrValuesPanel"
 							:disabled="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
@@ -421,16 +420,13 @@
 			<div v-html="formatChartPluginDesc(fm.htmlChartPlugin)"></div>
 		</div>
 	</p-overlaypanel>
-	<p-overlaypanel ref="${pid}attrValuesPanelEle" append-to="body" id="${pid}attrValuesPanel" @show="onAttrValuesPanelShow">
-		<div class="pb-2">
-			<label class="text-lg font-bold">
-				<@spring.message code='chartAttribute' />
-			</label>
-		</div>
+	<!-- 这里使用对话框组件而非弹出面板组件，因为其内部存在下拉框等组件，使用弹出面板时会出现错位问题 -->
+	<p-dialog header="<@spring.message code='chartAttribute' />" append-to="body" position="center" :dismissable-mask="true"
+		v-model:visible="pm.attrValuesPanelShown" id="${pid}attrValuesPanel" @show="onAttrValuesPanelShow">
 		<div class="page page-form chart-form-chart-attr-values">
 			<#include "include/chart_attr_values_form.ftl">
 		</div>
-	</p-overlaypanel>
+	</p-dialog>
 	<p-overlaypanel ref="${pid}optionsPanelEle" append-to="body" id="${pid}optionsPanel" @show="onOptionsPanelShow">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
@@ -864,7 +860,8 @@
 			{ name: "<@spring.message code='string' />", value: "${ResultDataFormat.TYPE_STRING}" },
 			{ name: "<@spring.message code='number' />", value: "${ResultDataFormat.TYPE_NUMBER}" }
 		],
-		optionsFormModel: { options: "" }
+		optionsFormModel: { options: "" },
+		attrValuesPanelShown: false
 	});
 	
 	po.vueRef("${pid}dataSignsPanelEle", null);
@@ -872,7 +869,6 @@
 	po.vueRef("${pid}paramPanelEle", null);
 	po.vueRef("${pid}dataFormatPanelEle", null);
 	po.vueRef("${pid}htmlChartPluginDescEle", null);
-	po.vueRef("${pid}attrValuesPanelEle", null);
 	po.vueRef("${pid}optionsPanelEle", null);
 	
 	po.vueMethod(
@@ -1121,7 +1117,8 @@
 		
 		onShowAttrValuesPanel: function(e)
 		{
-			po.vueUnref("${pid}attrValuesPanelEle").toggle(e);
+			var pm = po.vuePageModel();
+			pm.attrValuesPanelShown = true;
 		},
 		
 		onAttrValuesPanelShow: function()
@@ -1135,7 +1132,7 @@
 				submitHandler: function(avs)
 				{
 					fm.attrValues = avs;
-					po.vueUnref("${pid}attrValuesPanelEle").hide();
+					pm.attrValuesPanelShown = false;
 				},
 				readonly: pm.isReadonlyAction
 			});
