@@ -436,7 +436,7 @@
 			localResMenuItems:
 			[
 				{
-					label: "设为模板",
+					label: "<@spring.message code='setAsTemplate' />",
 					command: function()
 					{
 						var resName = po.getSelectedLocalRes();
@@ -444,7 +444,7 @@
 					}
 				},
 				{
-					label: "设为主页模板",
+					label: "<@spring.message code='setAsHomeTemplate' />",
 					command: function()
 					{
 						var resName = po.getSelectedLocalRes();
@@ -452,7 +452,7 @@
 					}
 				},
 				{
-					label: "取消模板",
+					label: "<@spring.message code='unsetAsTemplate' />",
 					command: function()
 					{
 						var resName = po.getSelectedLocalRes();
