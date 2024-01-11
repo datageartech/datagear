@@ -65,7 +65,7 @@
 					</div>
 				</div>
 				<div class="flex-grow-1 flex justify-content-end" v-if="!pm.previewError">
-					<p-button icon="pi pi-comment" type="button"
+					<p-button icon="pi pi-info-circle" type="button"
 						aria:haspopup="true" aria-controls="${pid}previewTplResultPanel"
 						@click="togglePreviewTplResultPanel" class="p-button-secondary p-button-sm">
 					</p-button>
