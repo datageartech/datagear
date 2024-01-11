@@ -65,7 +65,7 @@
 					</div>
 				</div>
 				<div class="page-content flex-grow-1 overflow-auto">
-					<p-tree :value="pm.schemaNodes" selection-mode="multiple" meta-key-selection="true"
+					<p-tree :value="pm.schemaNodes" selection-mode="multiple" :meta-key-selection="true"
 						v-model:selection-keys="pm.selectedNodeKeys"
 						@node-expand="onSchemaNodeExpand" @node-select="onSchemaNodeSelect"
 						:loading="pm.loadingSchema" class="schema-tree h-full overflow-auto">

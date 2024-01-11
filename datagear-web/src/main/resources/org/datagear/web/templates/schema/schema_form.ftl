@@ -109,7 +109,7 @@
 							<p-datatable :value="fm.properties" :scrollable="true"
 								v-model:selection="pm.selectedProperties"
 								:resizable-columns="true" column-resize-mode="expand"
-								selection-mode="multiple" data-key="name" striped-rows class="properties-table table-sm">
+								selection-mode="multiple" :meta-key-selection="true" data-key="name" striped-rows class="properties-table table-sm">
 								<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 								<p-column field="name" header="<@spring.message code='propertyName' />">
 								</p-column>

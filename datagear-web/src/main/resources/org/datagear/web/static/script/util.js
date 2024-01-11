@@ -2532,6 +2532,12 @@ $.inflatePageManager = function(po)
 //填充page_table.ftl里JS对象的静态逻辑
 $.inflatePageTable = function(po)
 {
+	//获取页面表格组件元素
+	po.tableElement = function()
+	{
+		return po.element("p-datatable");
+	};
+	
 	//重写搜索表单提交处理函数
 	po.search = function(formData, resetPage)
 	{
@@ -2583,6 +2589,11 @@ $.inflatePageTable = function(po)
 		options = $.extend({ multiSortMeta: [], initData: true }, options);
 		
 		po.setupAction();
+		var selectionMode = (po.isQueryAction || po.isMultipleSelect ? "multiple" : "single");
+		
+		//统一设置表格特性
+		var tableEle = po.tableElement();
+		tableEle.attr(":meta-key-selection", "pm.metaKeySelection");
 		
 		var pm = po.vuePageModel(
 		{
@@ -2595,7 +2606,8 @@ $.inflatePageTable = function(po)
 			rowsPerPageOptions: po.rowsPerPageOptions,
 			totalRecords: 0,
 			loading: false,
-			selectionMode: ((po.isQueryAction || po.isMultipleSelect) ? "multiple" : "single"),
+			selectionMode: selectionMode,
+			metaKeySelection: (selectionMode == "multiple"),
 			multiSortMeta: options.multiSortMeta,
 			selectedItems: null
 		});

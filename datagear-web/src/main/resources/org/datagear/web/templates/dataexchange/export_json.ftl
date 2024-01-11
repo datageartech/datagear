@@ -63,7 +63,7 @@
 					<#include "include/export_table_head.ftl">
 					<div class="subdataexchange-table-wrapper flex-grow-1 overflow-auto pt-2">
 						<p-datatable :value="fm.subDataExchanges" :scrollable="true" scroll-height="flex"
-							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple"
+							v-model:selection="pm.selectedSubDataExchanges" selection-mode="multiple" :meta-key-selection="true"
 							:resizable-columns="true" column-resize-mode="expand"
 							:sortable="false" data-key="id" striped-rows class="table-sm">
 							<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
