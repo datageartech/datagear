@@ -62,6 +62,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -569,7 +570,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
-			setSessionDashboardInfo(request, new DashboardInfo(dashboard, false));
+			getSessionDashboardInfoSupport().setDashboardInfo(request, new DashboardInfo(dashboard, false));
 		}
 		finally
 		{
@@ -578,7 +579,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			ChartWidgetSourceContext.remove();
 		}
 
-		removeSessionDashboardInfoExpired(request);
+		getSessionDashboardInfoSupport().removeDashboardInfoExpired(request);
 	}
 
 	protected HtmlTitleHandler getShowChartHtmlTitleHandler(HttpServletRequest request, HttpServletResponse response,

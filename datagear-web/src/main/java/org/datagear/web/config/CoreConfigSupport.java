@@ -143,6 +143,7 @@ import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SchemaTableCache;
+import org.datagear.web.util.SessionDashboardInfoSupport;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
@@ -419,6 +420,15 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public ExpiredSessionAttrManager expiredSessionAttrManager()
 	{
 		ExpiredSessionAttrManager bean = new ExpiredSessionAttrManager();
+		return bean;
+	}
+
+	@Bean
+	public SessionDashboardInfoSupport sessionDashboardInfoSupport()
+	{
+		SessionDashboardInfoSupport bean = new SessionDashboardInfoSupport();
+		bean.setExpiredSessionAttrManager(this.expiredSessionAttrManager());
+
 		return bean;
 	}
 

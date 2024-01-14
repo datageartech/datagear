@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
@@ -47,17 +46,15 @@ import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
-import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
-import org.datagear.web.util.ExpiredSessionAttrManager;
-import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
+import org.datagear.web.util.SessionDashboardInfoSupport;
+import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
@@ -161,8 +158,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板心跳URL后缀 */
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
-	/** 看板心跳频率：5分钟 */
-	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
+	/** 看板心跳频率 */
+	public static final long HEARTBEAT_INTERVAL_MS = SessionDashboardInfoSupport.DASHBOARD_HEARTBEAT_INTERVAL_MS;
 
 	/**
 	 * 看板展示URL的请求参数名：启用安全会话。
@@ -217,7 +214,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	private ThemeSpec themeSpec;
 
 	@Autowired
-	private ExpiredSessionAttrManager expiredSessionAttrManager;
+	private SessionDashboardInfoSupport sessionDashboardInfoSupport;
 
 	@Autowired
 	private SessionIdParamResolver sessionIdParamResolver;
@@ -267,14 +264,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		this.themeSpec = themeSpec;
 	}
 
-	public ExpiredSessionAttrManager getExpiredSessionAttrManager()
+	public SessionDashboardInfoSupport getSessionDashboardInfoSupport()
 	{
-		return expiredSessionAttrManager;
+		return sessionDashboardInfoSupport;
 	}
 
-	public void setExpiredSessionAttrManager(ExpiredSessionAttrManager expiredSessionAttrManager)
+	public void setSessionDashboardInfoSupport(SessionDashboardInfoSupport sessionDashboardInfoSupport)
 	{
-		this.expiredSessionAttrManager = expiredSessionAttrManager;
+		this.sessionDashboardInfoSupport = sessionDashboardInfoSupport;
 	}
 
 	public SessionIdParamResolver getSessionIdParamResolver()
@@ -475,7 +472,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (StringUtil.isEmpty(form.getDashboardId()))
 			throw new IllegalInputException();
 
-		DashboardInfo dashboardInfo = getSessionDashboardInfo(request, form.getDashboardId());
+		DashboardInfo dashboardInfo = getSessionDashboardInfoSupport().getDashboardInfo(request,
+				form.getDashboardId());
 
 		if (dashboardInfo == null)
 			throw new IllegalInputException();
@@ -702,79 +700,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
-	 * 在会话中存储{@linkplain DashboardInfo}。
-	 * 
-	 * @param request
-	 * @param di
-	 */
-	protected void setSessionDashboardInfo(HttpServletRequest request, DashboardInfo di)
-	{
-		String name = toSessionNameForDashboardInfo(request, di.getDashboardId());
-		getExpiredSessionAttrManager().setAttr(request, name, di);
-	}
-
-	/**
-	 * 获取会话中存储的{@linkplain DashboardInfo}。
-	 * 
-	 * @param request
-	 * @param dashboardId
-	 * @return 返回{@code null}表示没有
-	 */
-	protected DashboardInfo getSessionDashboardInfo(HttpServletRequest request, String dashboardId)
-	{
-		String name = toSessionNameForDashboardInfo(request, dashboardId);
-		return getExpiredSessionAttrManager().getAttr(request, name);
-	}
-
-	/**
-	 * 为会话中的{@linkplain DashboardInfo}添加图表信息。
-	 * 
-	 * @param request
-	 * @param di
-	 * @param chartIdToChartWidgetIds
-	 */
-	protected void addSessionDashboardInfoCharts(HttpServletRequest request, DashboardInfo di,
-			Map<String, String> chartIdToChartWidgetIds)
-	{
-		di.putChartWidgetIds(chartIdToChartWidgetIds);
-
-		// 无论di是否已存储至会话，这里都应再执行存储，以为可能扩展的分布式会话提供支持
-		String name = toSessionNameForDashboardInfo(request, di.getDashboardId());
-		getExpiredSessionAttrManager().setAttr(request, name, di);
-	}
-
-	/**
-	 * 更新会话中的{@linkplain DashboardInfo}的访问时间。
-	 * 
-	 * @param request
-	 * @param dashboardId
-	 * @param time
-	 */
-	protected void updateSessionDashboardInfoAccess(HttpServletRequest request, String dashboardId, long time)
-	{
-		String name = toSessionNameForDashboardInfo(request, dashboardId);
-		getExpiredSessionAttrManager().updateAccessTime(request, name, time);
-	}
-
-	/**
-	 * 移除会话中过期的看板信息。
-	 * <p>
-	 * 需定时清理，防止会话中存储过多已过期的看板信息
-	 * </p>
-	 * 
-	 * @param request
-	 */
-	protected void removeSessionDashboardInfoExpired(HttpServletRequest request)
-	{
-		getExpiredSessionAttrManager().removeExpired(request, HEARTBEAT_INTERVAL_MS * 3, DashboardInfo.class);
-	}
-
-	protected String toSessionNameForDashboardInfo(HttpServletRequest request, String dashboardId)
-	{
-		return DashboardInfo.class.getSimpleName() + "-" + dashboardId;
-	}
-
-	/**
 	 * 看板查询表单。
 	 *
 	 */
@@ -809,98 +734,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public void setDashboardQuery(DashboardQuery dashboardQuery)
 		{
 			this.dashboardQuery = dashboardQuery;
-		}
-	}
-
-	protected static class DashboardInfo implements ExpiredSessionAttr
-	{
-		private static final long serialVersionUID = 1L;
-
-		/**看板ID*/
-		private final String dashboardId;
-		
-		/**看板部件ID*/
-		private final String dashboardWidgetId;
-
-		private final LoadableChartWidgets loadableChartWidgets;
-		
-		/** 图表ID-图表部件ID映射表 */
-		private final Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
-		
-		private final boolean showForEdit;
-
-		private volatile long lastAccessTime = 0;
-
-		public DashboardInfo(HtmlTplDashboard dashboard, boolean showForEdit)
-		{
-			this.dashboardId = dashboard.getId();
-			this.dashboardWidgetId = dashboard.getWidget().getId();
-			this.loadableChartWidgets = dashboard.getLoadableChartWidgets();
-			
-			if (dashboard.hasChart())
-			{
-				List<Chart> charts = dashboard.getCharts();
-				for (Chart chart : charts)
-					this.chartIdToChartWidgetIds.put(chart.getId(), ChartWidget.getChartWidgetId(chart));
-			}
-
-			this.showForEdit = showForEdit;
-			this.lastAccessTime = System.currentTimeMillis();
-		}
-
-		public String getDashboardId()
-		{
-			return dashboardId;
-		}
-
-		public String getDashboardWidgetId()
-		{
-			return dashboardWidgetId;
-		}
-		
-		/**
-		 * @return 可能为{@code null}
-		 */
-		public LoadableChartWidgets getLoadableChartWidgets()
-		{
-			return loadableChartWidgets;
-		}
-
-		public synchronized Map<String, String> getChartIdToChartWidgetIds()
-		{
-			return Collections.unmodifiableMap(chartIdToChartWidgetIds);
-		}
-
-		public boolean isShowForEdit()
-		{
-			return showForEdit;
-		}
-
-		public synchronized String getChartWidgetId(String chartId)
-		{
-			return this.chartIdToChartWidgetIds.get(chartId);
-		}
-
-		public synchronized void putChartWidgetId(String chartId, String chartWidgetId)
-		{
-			this.chartIdToChartWidgetIds.put(chartId, chartWidgetId);
-		}
-
-		public synchronized void putChartWidgetIds(Map<String, String> chartIdToChartWidgetIds)
-		{
-			this.chartIdToChartWidgetIds.putAll(chartIdToChartWidgetIds);
-		}
-
-		@Override
-		public long getLastAccessTime()
-		{
-			return this.lastAccessTime;
-		}
-
-		@Override
-		public void setLastAccessTime(long time)
-		{
-			this.lastAccessTime = time;
 		}
 	}
 

@@ -87,6 +87,7 @@ import org.datagear.web.controller.DashboardController.DashboardShowForEdit.Edit
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfoFilterHandler;
 import org.datagear.web.controller.DashboardController.DashboardShowForEdit.ShowHtmlFilterHandler;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1544,7 +1545,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			}
 			
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
-			setSessionDashboardInfo(request, new DashboardInfo(dashboard, isShowForEdit));
+			getSessionDashboardInfoSupport().setDashboardInfo(request, new DashboardInfo(dashboard, isShowForEdit));
 		}
 		finally
 		{
@@ -1553,7 +1554,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			ChartWidgetSourceContext.remove();
 		}
 
-		removeSessionDashboardInfoExpired(request);
+		getSessionDashboardInfoSupport().removeDashboardInfoExpired(request);
 	}
 
 	protected HtmlTitleHandler getShowDashboardHtmlTitleHandler(HttpServletRequest request,
@@ -1736,7 +1737,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		User user = getCurrentUser();
 
-		DashboardInfo dashboardInfo = getSessionDashboardInfo(request, dashboardId);
+		DashboardInfo dashboardInfo = getSessionDashboardInfoSupport().getDashboardInfo(request, dashboardId);
 
 		if (dashboardInfo == null)
 			throw new RecordNotFoundException();
@@ -1777,7 +1778,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			for (int i = 0; i < chartWidgets.length; i++)
 				chartIdToChartWidgetIds.put(charts[i].getId(), chartWidgets[i].getId());
 
-			addSessionDashboardInfoCharts(request, dashboardInfo, chartIdToChartWidgetIds);
+			getSessionDashboardInfoSupport().addDashboardInfoCharts(request, dashboardInfo, chartIdToChartWidgetIds);
 		}
 		finally
 		{
@@ -1886,8 +1887,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("dashboardId", dashboardId);
 		data.put("time", time);
 
-		updateSessionDashboardInfoAccess(request, dashboardId, time);
-		removeSessionDashboardInfoExpired(request);
+		getSessionDashboardInfoSupport().updateDashboardInfoAccess(request, dashboardId, time);
+		getSessionDashboardInfoSupport().removeDashboardInfoExpired(request);
 
 		return data;
 	}
