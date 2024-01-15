@@ -135,6 +135,50 @@ public class WebUtils
 	}
 
 	/**
+	 * 是否是HTTP协议。
+	 * 
+	 * @param scheme
+	 * @return
+	 */
+	public static boolean isHttpScheme(String scheme)
+	{
+		return "http".equalsIgnoreCase(scheme);
+	}
+
+	/**
+	 * 是否是HTTP协议。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isHttpScheme(HttpServletRequest request)
+	{
+		return isHttpScheme(request.getScheme());
+	}
+
+	/**
+	 * 是否是HTTPS协议。
+	 * 
+	 * @param scheme
+	 * @return
+	 */
+	public static boolean isSecureHttpScheme(String scheme)
+	{
+		return "https".equalsIgnoreCase(scheme);
+	}
+
+	/**
+	 * 是否是HTTPS协议。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isSecureHttpScheme(HttpServletRequest request)
+	{
+		return isSecureHttpScheme(request.getScheme());
+	}
+
+	/**
 	 * 获取操作消息。
 	 * 
 	 * @param request

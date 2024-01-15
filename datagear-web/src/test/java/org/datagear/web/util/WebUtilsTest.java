@@ -18,6 +18,8 @@
 package org.datagear.web.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -29,6 +31,22 @@ import org.junit.Test;
  */
 public class WebUtilsTest
 {
+	@Test
+	public void isHttpSchemeTest()
+	{
+		assertTrue(WebUtils.isHttpScheme("http"));
+		assertTrue(WebUtils.isHttpScheme("HTTP"));
+		assertFalse(WebUtils.isHttpScheme("https"));
+	}
+
+	@Test
+	public void isSecureHttpSchemeTest()
+	{
+		assertTrue(WebUtils.isSecureHttpScheme("https"));
+		assertTrue(WebUtils.isSecureHttpScheme("HTTPS"));
+		assertFalse(WebUtils.isSecureHttpScheme("http"));
+	}
+
 	@Test
 	public void resolvePathAfterTest()
 	{
