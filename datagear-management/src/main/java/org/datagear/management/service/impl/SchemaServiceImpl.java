@@ -128,13 +128,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public void add(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity);
-
-		if (this.textEncryptor != null)
-		{
-			entity = entity.clone();
-			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
-		}
-
 		super.add(user, entity);
 	}
 
@@ -142,13 +135,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public boolean update(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity);
-
-		if (this.textEncryptor != null)
-		{
-			entity = entity.clone();
-			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
-		}
-
 		return super.update(user, entity);
 	}
 
@@ -168,6 +154,30 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public int updateCreateUserId(String[] oldUserIds, String newUserId)
 	{
 		return super.updateCreateUserId(oldUserIds, newUserId);
+	}
+
+	@Override
+	protected void add(Schema entity, Map<String, Object> params)
+	{
+		if (this.textEncryptor != null)
+		{
+			entity = entity.clone();
+			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		}
+
+		super.add(entity, params);
+	}
+
+	@Override
+	protected boolean update(Schema entity, Map<String, Object> params)
+	{
+		if (this.textEncryptor != null)
+		{
+			entity = entity.clone();
+			entity.setPassword(this.textEncryptor.encrypt(entity.getPassword()));
+		}
+
+		return super.update(entity, params);
 	}
 
 	@Override
