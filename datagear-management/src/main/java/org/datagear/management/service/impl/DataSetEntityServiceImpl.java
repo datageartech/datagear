@@ -335,8 +335,15 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			addCsvFileDataSetEntity((CsvFileDataSetEntity) entity);
 		else if (entity instanceof HttpDataSetEntity)
 			addHttpDataSetEntity((HttpDataSetEntity) entity);
+		else
+			addExtDataSetEntity(entity, params);
 
 		saveDataSetChildren(entity);
+	}
+
+	protected boolean addExtDataSetEntity(DataSetEntity entity, Map<String, Object> params)
+	{
+		return true;
 	}
 
 	protected boolean addSqlDataSetEntity(SqlDataSetEntity entity)
@@ -419,12 +426,19 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = updateCsvFileDataSetEntity((CsvFileDataSetEntity) entity);
 			else if (entity instanceof HttpDataSetEntity)
 				success = updateHttpDataSetEntity((HttpDataSetEntity) entity);
+			else
+				success = updateExtDataSetEntity(entity, params);
 		}
 
 		if (success)
 			saveDataSetChildren(entity);
 
 		return success;
+	}
+
+	protected boolean updateExtDataSetEntity(DataSetEntity entity, Map<String, Object> params)
+	{
+		return true;
 	}
 
 	protected boolean updateSqlDataSetEntity(SqlDataSetEntity entity)
@@ -517,9 +531,16 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			entity = getCsvFileDataSetEntityById(entity.getId());
 		else if (DataSetEntity.DATA_SET_TYPE_Http.equals(entity.getDataSetType()))
 			entity = getHttpDataSetEntityById(entity.getId());
+		else
+			entity = getExtDataSetEntityById(entity, params);
 
 		inflateParamsAndProperties(entity);
 
+		return entity;
+	}
+
+	protected DataSetEntity getExtDataSetEntityById(DataSetEntity entity, Map<String, Object> params)
+	{
 		return entity;
 	}
 
