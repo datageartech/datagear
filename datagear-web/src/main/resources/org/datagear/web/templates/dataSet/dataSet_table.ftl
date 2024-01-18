@@ -87,6 +87,28 @@
 		multiSortMeta: [ {field: "createTime", order: -1} ]
 	});
 	
+	po.formatDataSetType = function(data)
+	{
+		var type = data.dataSetType;
+		
+		if("${DataSetEntity.DATA_SET_TYPE_SQL}" == type)
+			return "<@spring.message code='dataSetType.SQL' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_Excel}" == type)
+			return "<@spring.message code='dataSetType.Excel' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_CsvValue}" == type)
+			return "<@spring.message code='dataSetType.CsvValue' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_CsvFile}" == type)
+			return "<@spring.message code='dataSetType.CsvFile' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_JsonValue}" == type)
+			return "<@spring.message code='dataSetType.JsonValue' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_JsonFile}" == type)
+			return "<@spring.message code='dataSetType.JsonFile' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_Http}" == type)
+			return "<@spring.message code='dataSetType.Http' />";
+		else
+			return "";
+	};
+	
 	po.vuePageModel(
 	{
 		addMenuItems:
@@ -157,24 +179,7 @@
 	{
 		formatDataSetType: function(data)
 		{
-			var type = data.dataSetType;
-			
-			if("${DataSetEntity.DATA_SET_TYPE_SQL}" == type)
-				return "<@spring.message code='dataSetType.SQL' />";
-			else if("${DataSetEntity.DATA_SET_TYPE_Excel}" == type)
-				return "<@spring.message code='dataSetType.Excel' />";
-			else if("${DataSetEntity.DATA_SET_TYPE_CsvValue}" == type)
-				return "<@spring.message code='dataSetType.CsvValue' />";
-			else if("${DataSetEntity.DATA_SET_TYPE_CsvFile}" == type)
-				return "<@spring.message code='dataSetType.CsvFile' />";
-			else if("${DataSetEntity.DATA_SET_TYPE_JsonValue}" == type)
-				return "<@spring.message code='dataSetType.JsonValue' />";
-			else if("${DataSetEntity.DATA_SET_TYPE_JsonFile}" == type)
-				return "<@spring.message code='dataSetType.JsonFile' />";
-			else if("${DataSetEntity.DATA_SET_TYPE_Http}" == type)
-				return "<@spring.message code='dataSetType.Http' />";
-			else
-				return "";
+			return po.formatDataSetType(data);
 		},
 		
 		onAddMenuToggle: function(e)
