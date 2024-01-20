@@ -33,6 +33,8 @@ import org.datagear.analysis.RenderContext;
  */
 public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
+	public static final HtmlRenderContextScriptObjectWriter INSTANCE = new HtmlRenderContextScriptObjectWriter();
+
 	public HtmlRenderContextScriptObjectWriter()
 	{
 		super();

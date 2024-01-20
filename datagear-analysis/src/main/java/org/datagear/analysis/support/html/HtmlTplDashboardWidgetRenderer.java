@@ -104,7 +104,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	private AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new AttributeValueHtmlChartPlugin(
 			Global.PRODUCT_NAME_EN_LC + "HtmlChartPluginForGetWidgetException",
-			ChartDefinition.BUILTIN_ATTR_PREFIX + "EXCEPTION_MESSAGE");
+			ChartDefinition.BUILTIN_ATTR_PREFIX + "EXCEPTION_MESSAGE", HtmlChartPluginScriptObjectWriter.INSTANCE,
+			HtmlRenderContextScriptObjectWriter.INSTANCE, HtmlChartScriptObjectWriter.INSTANCE);
 
 	/** 默认JS看板工厂变量名 */
 	private String defaultDashboardFactoryVar = DEFAULT_DASHBOARD_FACTORY_VAR;

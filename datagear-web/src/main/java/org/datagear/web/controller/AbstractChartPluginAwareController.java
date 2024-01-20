@@ -41,6 +41,10 @@ import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
+import org.datagear.analysis.support.html.HtmlChartScriptObjectWriter;
+import org.datagear.analysis.support.html.HtmlRenderContextScriptObjectWriter;
+import org.datagear.analysis.support.html.JsChartRenderer;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.util.KeywordMatcher;
 import org.datagear.util.KeywordMatcher.MatchValue;
@@ -264,6 +268,33 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		public void setIconUrl(String iconUrl)
 		{
 			this.iconUrl = iconUrl;
+		}
+
+		@Override
+		public JsChartRenderer getRenderer()
+		{
+			return super.getRenderer();
+		}
+
+		@JsonIgnore
+		@Override
+		public HtmlChartPluginScriptObjectWriter getPluginWriter()
+		{
+			return super.getPluginWriter();
+		}
+
+		@JsonIgnore
+		@Override
+		public HtmlRenderContextScriptObjectWriter getRenderContextWriter()
+		{
+			return super.getRenderContextWriter();
+		}
+
+		@JsonIgnore
+		@Override
+		public HtmlChartScriptObjectWriter getChartWriter()
+		{
+			return super.getChartWriter();
 		}
 
 		@JsonIgnore

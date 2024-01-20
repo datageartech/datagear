@@ -52,11 +52,11 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 		super();
 	}
 
-	public AttributeValueHtmlChartPlugin(String id, String attrName)
+	public AttributeValueHtmlChartPlugin(String id, String attrName, HtmlChartPluginScriptObjectWriter pluginWriter,
+			HtmlRenderContextScriptObjectWriter renderContextWriter, HtmlChartScriptObjectWriter chartWriter)
 	{
-		super();
-		super.setId(id);
-		super.setNameLabel(new Label(AttributeValueHtmlChartPlugin.class.getSimpleName()));
+		super(id, new Label(AttributeValueHtmlChartPlugin.class.getSimpleName()), null, pluginWriter,
+				renderContextWriter, chartWriter);
 		super.setRenderer(buildJsChartRenderer(attrName));
 		this.attrName = attrName;
 	}

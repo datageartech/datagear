@@ -52,6 +52,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
+	public static final HtmlChartPluginScriptObjectWriter INSTANCE = new HtmlChartPluginScriptObjectWriter();
+
 	private String localRendererVarNameForInvode = Global.PRODUCT_NAME_EN_LC + "Renderer" + IDUtil.toStringOfMaxRadix();
 
 	public HtmlChartPluginScriptObjectWriter()

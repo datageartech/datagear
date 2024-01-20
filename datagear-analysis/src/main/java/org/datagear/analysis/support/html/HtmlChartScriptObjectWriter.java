@@ -37,6 +37,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
+	public static final HtmlChartScriptObjectWriter INSTANCE = new HtmlChartScriptObjectWriter();
+
 	public HtmlChartScriptObjectWriter()
 	{
 		super();
@@ -137,13 +139,19 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 
 		public ChartDataSetJson(ChartDataSet chartDataSet)
 		{
-			super(new DataSetJson(chartDataSet.getDataSet()));
+			super();
+			setDataSet(toDataSetJson(chartDataSet.getDataSet()));
 			setPropertySigns(chartDataSet.getPropertySigns());
 			setAlias(chartDataSet.getAlias());
 			setAttachment(chartDataSet.isAttachment());
 			setQuery(chartDataSet.getQuery());
 			setPropertyAliases(chartDataSet.getPropertyAliases());
 			setPropertyOrders(chartDataSet.getPropertyOrders());
+		}
+
+		protected DataSetJson toDataSetJson(DataSet dataSet)
+		{
+			return new DataSetJson(dataSet);
 		}
 
 		@JsonIgnore
