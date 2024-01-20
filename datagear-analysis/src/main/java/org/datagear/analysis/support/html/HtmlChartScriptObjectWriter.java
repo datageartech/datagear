@@ -69,7 +69,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 */
 	public void write(Writer out, HtmlChart chart, String renderContextVarName, String pluginVarName) throws IOException
 	{
-		chart = new HtmlChartJson(chart, renderContextVarName, pluginVarName);
+		chart = toHtmlChartJson(chart, renderContextVarName, pluginVarName);
 
 		out.write("var " + chart.getVarName() + "=");
 		writeNewLine(out);
@@ -103,9 +103,22 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	public void writeJson(Writer out, HtmlChart chart, String renderContextVarName, String pluginVarName)
 			throws IOException
 	{
-		chart = new HtmlChartJson(chart, renderContextVarName, pluginVarName);
+		chart = toHtmlChartJson(chart, renderContextVarName, pluginVarName);
 
 		writeJsonObject(out, chart);
+	}
+
+	/**
+	 * 转换为{@linkplain HtmlChartJson}。
+	 * 
+	 * @param chart
+	 * @param renderContextVarName
+	 * @param pluginVarName
+	 * @return
+	 */
+	protected HtmlChartJson toHtmlChartJson(HtmlChart chart, String renderContextVarName, String pluginVarName)
+	{
+		return new HtmlChartJson(chart, renderContextVarName, pluginVarName);
 	}
 
 	/**
@@ -121,9 +134,37 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		public HtmlChartJson(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
 		{
 			super(htmlChart);
-			setChartDataSets(ChartDataSetJson.valuesOf(htmlChart.getChartDataSets()));
-			setPlugin(new RefHtmlChartPlugin(pluginVarName));
-			setRenderContext(new RefRenderContext(renderContextVarName));
+			setChartDataSets(toChartDataSetJsons(htmlChart.getChartDataSets()));
+			setPlugin(toRefHtmlChartPlugin(pluginVarName));
+			setRenderContext(toRefRenderContext(renderContextVarName));
+		}
+
+		protected ChartDataSetJson[] toChartDataSetJsons(ChartDataSet[] chartDataSets)
+		{
+			if (chartDataSets == null)
+				return null;
+
+			ChartDataSetJson[] re = new ChartDataSetJson[chartDataSets.length];
+
+			for (int i = 0; i < chartDataSets.length; i++)
+				re[i] = toChartDataSetJson(chartDataSets[i]);
+
+			return re;
+		}
+
+		protected ChartDataSetJson toChartDataSetJson(ChartDataSet chartDataSet)
+		{
+			return new ChartDataSetJson(chartDataSet);
+		}
+
+		protected RefHtmlChartPlugin toRefHtmlChartPlugin(String pluginVarName)
+		{
+			return new RefHtmlChartPlugin(pluginVarName);
+		}
+
+		protected RefRenderContext toRefRenderContext(String renderContextVarName)
+		{
+			return new RefRenderContext(renderContextVarName);
 		}
 	}
 
@@ -160,19 +201,6 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			throw new UnsupportedOperationException();
 		}
-
-		public static ChartDataSetJson[] valuesOf(ChartDataSet[] chartDataSets)
-		{
-			if (chartDataSets == null)
-				return null;
-
-			ChartDataSetJson[] jsonDataSets = new ChartDataSetJson[chartDataSets.length];
-
-			for (int i = 0; i < chartDataSets.length; i++)
-				jsonDataSets[i] = new ChartDataSetJson(chartDataSets[i]);
-
-			return jsonDataSets;
-		}
 	}
 
 	/**
@@ -195,6 +223,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 				setDataFormat(((AbstractDataSet) dataSet).getDataFormat());
 		}
 
+		@JsonIgnore
 		@Override
 		public DataSetResult getResult(DataSetQuery query) throws DataSetException
 		{
