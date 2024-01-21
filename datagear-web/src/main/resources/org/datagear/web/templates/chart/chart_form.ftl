@@ -65,14 +65,14 @@
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}htmlChartPlugin" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}pluginVo" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='chartType' />
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div class="p-inputgroup">
-						<div id="${pid}htmlChartPlugin" class="input p-component p-inputtext border-round-left flex align-items-center">
-							<div class="flex-grow-0" v-html="formatChartPlugin(fm.htmlChartPlugin)"></div>
-							<div class="pl-1" v-if="fm.htmlChartPlugin && fm.htmlChartPlugin.descLabel && fm.htmlChartPlugin.descLabel.value">
+						<div id="${pid}pluginVo" class="input p-component p-inputtext border-round-left flex align-items-center">
+							<div class="flex-grow-0" v-html="formatChartPlugin(fm.pluginVo)"></div>
+							<div class="pl-1" v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
 								<p-button type="button" icon="pi pi-info-circle"
 									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text">
 								</p-button>
@@ -83,7 +83,7 @@
 						</p-button>
 					</div>
 		        	<div class="validate-msg">
-		        		<input name="htmlChartPlugin" required type="text" class="validate-proxy" />
+		        		<input name="pluginVo" required type="text" class="validate-proxy" />
 		        	</div>
 				</div>
 			</div>
@@ -222,10 +222,10 @@
 				<div class="field-input col-12 md:col-9">
 					<div class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
-							:disabled="!fm.htmlChartPlugin || !fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0"
+							:disabled="!fm.pluginVo || !fm.pluginVo.attributes || fm.pluginVo.attributes.length==0"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
-			        	<div class="desc text-color-secondary text-sm" v-if="fm.htmlChartPlugin && (!fm.htmlChartPlugin.attributes || fm.htmlChartPlugin.attributes.length==0)">
+			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && (!fm.pluginVo.attributes || fm.pluginVo.attributes.length==0)">
 			        		<@spring.message code='chart.attrValues.noAttrDefined' />
 			        	</div>
 		        	</div>
@@ -410,14 +410,14 @@
 			</div>
 		</div>
 	</p-overlaypanel>
-	<p-overlaypanel ref="${pid}htmlChartPluginDescEle" append-to="body" id="${pid}htmlChartPluginDesc">
+	<p-overlaypanel ref="${pid}pluginVoDescEle" append-to="body" id="${pid}pluginVoDesc">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
 				<@spring.message code='desc' />
 			</label>
 		</div>
 		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
-			<div v-html="formatChartPluginDesc(fm.htmlChartPlugin)"></div>
+			<div v-html="formatChartPluginDesc(fm.pluginVo)"></div>
 		</div>
 	</p-overlaypanel>
 	<!-- 这里使用对话框组件而非弹出面板组件，因为其内部存在下拉框等组件，使用弹出面板时会出现错位问题 -->
@@ -484,7 +484,7 @@
 		});
 		
 		//这里必须整理属性值，因为存在切换图表类型而不编辑图表属性的情况
-		var cpas = po.trimChartPluginAttributes(data.htmlChartPlugin ? data.htmlChartPlugin.attributes : null);
+		var cpas = po.trimChartPluginAttributes(data.pluginVo ? data.pluginVo.attributes : null);
 		data.attrValues = po.trimChartAttrValues(data.attrValues, cpas);
 		
 		var pm = po.vuePageModel();
@@ -498,7 +498,7 @@
 	
 	po.validateChartDataSetDataSign = function(chart)
 	{
-		var chartPlugin = chart.htmlChartPlugin;
+		var chartPlugin = chart.pluginVo;
 		var chartDataSets = (chart.chartDataSetVOs || []);
 		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
 		
@@ -571,7 +571,7 @@
 		var cdss = (chart.chartDataSetVOs || []);
 		$.each(cdss, function(idx, cds)
 		{
-			po.mergeChartDataSet(cds, chart.htmlChartPlugin);
+			po.mergeChartDataSet(cds, chart.pluginVo);
 		});
 	};
 
@@ -580,7 +580,7 @@
 		var cdss = (chart.chartDataSetVOs || []);
 		$.each(cdss, function(idx, cds)
 		{
-			po.unmergeChartDataSet(cds, chart.htmlChartPlugin);
+			po.unmergeChartDataSet(cds, chart.pluginVo);
 		});
 	};
 	
@@ -708,7 +708,7 @@
 	{
 		var re = true;
 		
-		var dsr = (chart.htmlChartPlugin ? chart.htmlChartPlugin.dataSetRange : null);
+		var dsr = (chart.pluginVo ? chart.pluginVo.dataSetRange : null);
 		var cdss = (chart.chartDataSetVOs || []);
 		var mainCount = 0;
 		var attachmentCount = 0;
@@ -771,7 +771,7 @@
 	
 	$.validator.addMethod("chartAttrValuesRequired", function(chart)
 	{
-		var cpas = (chart.htmlChartPlugin ? chart.htmlChartPlugin.attributes : null);
+		var cpas = (chart.pluginVo ? chart.pluginVo.attributes : null);
 		return po.validateChartAttrValuesRequired(cpas, chart.attrValues);
 	});
 	
@@ -842,7 +842,7 @@
 	
 	po.vuePageModel(
 	{
-		chartPluginDataSigns: (formModel.htmlChartPlugin ? (formModel.htmlChartPlugin.dataSigns || []) : []),
+		chartPluginDataSigns: (formModel.pluginVo ? (formModel.pluginVo.dataSigns || []) : []),
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
 		chartDataSetForSign: null,
@@ -868,7 +868,7 @@
 	po.vueRef("${pid}dataSignDetailPanelEle", null);
 	po.vueRef("${pid}paramPanelEle", null);
 	po.vueRef("${pid}dataFormatPanelEle", null);
-	po.vueRef("${pid}htmlChartPluginDescEle", null);
+	po.vueRef("${pid}pluginVoDescEle", null);
 	po.vueRef("${pid}optionsPanelEle", null);
 	
 	po.vueMethod(
@@ -916,7 +916,7 @@
 			po.handleOpenSelectAction("/chartPlugin/select", function(plugin)
 			{
 				var fm = po.vueFormModel();
-				fm.htmlChartPlugin = plugin;
+				fm.pluginVo = plugin;
 				po.unmergeChartCdss(fm);
 				po.mergeChartCdss(fm);
 				
@@ -1112,7 +1112,7 @@
 		
 		onShowChartPluginDesc: function(e)
 		{
-			po.vueUnref("${pid}htmlChartPluginDescEle").toggle(e);
+			po.vueUnref("${pid}pluginVoDescEle").toggle(e);
 		},
 		
 		onShowAttrValuesPanel: function(e)
@@ -1125,7 +1125,7 @@
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var chartPluginAttrs = po.vueRaw(fm.htmlChartPlugin ? (fm.htmlChartPlugin.attributes || []) : []);
+			var chartPluginAttrs = po.vueRaw(fm.pluginVo ? (fm.pluginVo.attributes || []) : []);
 			var attrValues = po.vueRaw(fm.attrValues);
 			po.setupChartAttrValuesForm(chartPluginAttrs, attrValues,
 			{

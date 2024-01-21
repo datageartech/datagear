@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
@@ -51,6 +52,8 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 
 	/** 图表部件渲染时的图表选项信息 */
 	public static final String ATTR_CHART_OPTIONS = BUILTIN_ATTR_PREFIX + "CHART_OPTIONS";
+
+	private HtmlChartPluginVo pluginVo;
 
 	/**
 	 * 图表选项。
@@ -107,14 +110,28 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		super.setChartDataSets(chartDataSetVOs);
 	}
 
-	public HtmlChartPlugin getHtmlChartPlugin()
+	public HtmlChartPluginVo getPluginVo()
 	{
-		return getPlugin();
+		return this.pluginVo;
 	}
 
-	public void setHtmlChartPlugin(HtmlChartPlugin htmlChartPlugin)
+	public void setPluginVo(HtmlChartPluginVo pluginVo)
 	{
-		setPlugin(htmlChartPlugin);
+		this.pluginVo = pluginVo;
+	}
+
+	@JsonIgnore
+	@Override
+	public HtmlChartPlugin getPlugin()
+	{
+		return super.getPlugin();
+	}
+
+	@JsonIgnore
+	@Override
+	public void setPlugin(ChartPlugin plugin)
+	{
+		super.setPlugin(plugin);
 	}
 
 	@Override
@@ -190,6 +207,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	 * 
 	 * @param attrValuesJson
 	 */
+	@JsonIgnore
 	@SuppressWarnings("unchecked")
 	public void setAttrValuesJson(String attrValuesJson)
 	{

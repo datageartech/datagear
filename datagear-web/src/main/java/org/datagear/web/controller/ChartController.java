@@ -50,6 +50,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.ChartDataSetVO;
+import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
@@ -289,7 +290,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		trimAnalysisProjectAwareEntityForSave(entity);
 
-		HtmlChartPlugin paramPlugin = entity.getHtmlChartPlugin();
+		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
 
 		if (isEmpty(entity.getId()))
 		{
@@ -310,7 +311,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 
 		// 返回参数不应该完全加载插件对象
-		entity.setHtmlChartPlugin(paramPlugin);
+		entity.setPluginVo(paramPlugin);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -626,18 +627,22 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		for (HtmlChartWidgetEntity entity : entities)
 		{
-			entity.setPlugin(toHtmlChartPluginView(entity.getPlugin(), themeName, locale));
+			entity.setPluginVo(toHtmlChartPluginView(entity.getPluginVo(), themeName, locale));
 		}
 	}
 
 	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
-		HtmlChartPlugin htmlChartPlugin = entity.getHtmlChartPlugin();
-
-		if (htmlChartPlugin != null)
+		// 如果插件不存在，应置为null
+		HtmlChartPluginVo pluginVo = entity.getPluginVo();
+		String pluginId = (pluginVo == null ? null : pluginVo.getId());
+		HtmlChartPlugin plugin = null;
+		if (!StringUtil.isEmpty(pluginId))
 		{
-			htmlChartPlugin = (HtmlChartPlugin) this.chartPluginManager.get(htmlChartPlugin.getId());
-			entity.setHtmlChartPlugin(htmlChartPlugin);
+			plugin = (HtmlChartPlugin) this.chartPluginManager.get(pluginId);
+			pluginVo = (plugin == null ? null
+					: new HtmlChartPluginVo(plugin.getId(), plugin.getNameLabel()));
+			entity.setPluginVo(pluginVo);
 		}
 
 		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
@@ -652,9 +657,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		}
 
 		Map<String, Object> attrValues = entity.getAttrValues();
-		if (attrValues != null && htmlChartPlugin != null)
+		if (attrValues != null && plugin != null)
 		{
-			attrValues = getChartPluginAttributeValueConverter().convert(attrValues, htmlChartPlugin.getAttributes());
+			attrValues = getChartPluginAttributeValueConverter().convert(attrValues, plugin.getAttributes());
 			entity.setAttrValues(attrValues);
 		}
 	}
@@ -676,16 +681,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (isBlank(chart.getName()))
 			throw new IllegalInputException();
 
-		if (isEmpty(chart.getPlugin()))
+		if (isEmpty(chart.getPluginVo()))
 			throw new IllegalInputException();
 	}
 	
 	protected void convertForFormModel(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
-		HtmlChartPlugin plugin = entity.getHtmlChartPlugin();
+		HtmlChartPlugin plugin = entity.getPluginVo();
 		
 		if(plugin != null)
-			entity.setPlugin(getHtmlChartPluginView(request, plugin.getId()));
+			entity.setPluginVo(getHtmlChartPluginView(request, plugin.getId()));
 		
 		entity.setChartDataSets(toChartDataSetViews(entity.getChartDataSets()));
 	}

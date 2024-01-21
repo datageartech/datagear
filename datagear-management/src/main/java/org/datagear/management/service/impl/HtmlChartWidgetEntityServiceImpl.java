@@ -43,6 +43,7 @@ import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.ChartDataSetVO;
+import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
@@ -366,21 +367,22 @@ public class HtmlChartWidgetEntityServiceImpl
 		if (entity == null)
 			return;
 
-		HtmlChartPlugin htmlChartPlugin = entity.getHtmlChartPlugin();
+		HtmlChartPluginVo pluginVo = entity.getPluginVo();
 
-		if (htmlChartPlugin != null)
+		if (pluginVo != null)
 		{
-			HtmlChartPlugin full = getHtmlChartPlugin(htmlChartPlugin.getId());
+			HtmlChartPlugin full = getHtmlChartPlugin(pluginVo.getId());
 
 			if (forAnalysis)
-				entity.setHtmlChartPlugin(full);
+				entity.setPlugin(full);
 			else
 			{
 				if (full != null)
 				{
-					htmlChartPlugin.setNameLabel(full.getNameLabel());
-					htmlChartPlugin.setDescLabel(full.getDescLabel());
-					htmlChartPlugin.setIconResourceNames(full.getIconResourceNames());
+					pluginVo.setId(full.getId());
+					pluginVo.setNameLabel(full.getNameLabel());
+					pluginVo.setDescLabel(full.getDescLabel());
+					pluginVo.setIconResourceNames(full.getIconResourceNames());
 				}
 			}
 		}

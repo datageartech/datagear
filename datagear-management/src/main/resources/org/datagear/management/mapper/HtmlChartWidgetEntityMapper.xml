@@ -12,7 +12,7 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.htmlChartPlugin.id}, #{entity.updateInterval}, #{entity.createUser.id},
+			#{entity.id}, #{entity.name}, #{entity.pluginVo.id}, #{entity.updateInterval}, #{entity.createUser.id},
 			#{entity.createTime}, #{entity.analysisProject.id, jdbcType=VARCHAR}, #{entity.resultDataFormat, jdbcType=VARCHAR},
 			#{entity.attrValuesJson, jdbcType=VARCHAR}, #{entity.options, jdbcType=VARCHAR} 
 			)
@@ -34,7 +34,7 @@
 	<update id="update">
 		UPDATE DATAGEAR_HTML_CHART_WIDGET SET
 			HCW_NAME = #{entity.name},
-			HCW_PLUGIN_ID = #{entity.htmlChartPlugin.id},
+			HCW_PLUGIN_ID = #{entity.pluginVo.id},
 			HCW_UPDATE_INTERVAL = #{entity.updateInterval},
 			HCW_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR},
 			HCW_RD_FORMAT = #{entity.resultDataFormat, jdbcType=VARCHAR},
@@ -191,7 +191,7 @@
 		SELECT
 			A.HCW_ID AS ${_iq_}id${_iq_},
 			A.HCW_NAME AS ${_iq_}name${_iq_},
-			A.HCW_PLUGIN_ID AS ${_iq_}htmlChartPlugin.id${_iq_},
+			A.HCW_PLUGIN_ID AS ${_iq_}pluginVo.id${_iq_},
 			A.HCW_PLUGIN_ID AS ${_iq_}chartPluginName${_iq_},/*默认设置为插件ID，避免页面排序报错*/
 			A.HCW_UPDATE_INTERVAL AS ${_iq_}updateInterval${_iq_},
 			A.HCW_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},

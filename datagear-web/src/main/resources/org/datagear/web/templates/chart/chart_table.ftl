@@ -64,7 +64,7 @@
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" class="col-id"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
-			<p-column field="htmlChartPlugin.id" header="<@spring.message code='type' />" :sortable="true" class="col-name">
+			<p-column field="pluginVo.id" header="<@spring.message code='type' />" :sortable="true" class="col-name">
 				<template #body="{data}">
 					<div v-html="formatChartPlugin(data)"></div>
 				</template>
@@ -184,7 +184,7 @@
 		},
 		formatChartPlugin: function(data)
 		{
-			return $.toChartPluginHtml(data.htmlChartPlugin, po.contextPath);
+			return $.toChartPluginHtml(data.pluginVo, po.contextPath);
 		},
 		onAdd: function()
 		{

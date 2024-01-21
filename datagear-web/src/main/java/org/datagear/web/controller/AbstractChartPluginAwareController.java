@@ -21,31 +21,22 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartDataSet;
-import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPluginAttribute;
-import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
-import org.datagear.analysis.support.html.HtmlChart;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
-import org.datagear.analysis.support.html.HtmlChartScriptObjectWriter;
-import org.datagear.analysis.support.html.HtmlRenderContextScriptObjectWriter;
-import org.datagear.analysis.support.html.JsChartRenderer;
 import org.datagear.management.domain.ChartDataSetVO;
+import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.util.KeywordMatcher;
 import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
@@ -243,7 +234,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class HtmlChartPluginView extends HtmlChartPlugin implements Serializable
+	public static class HtmlChartPluginView extends HtmlChartPluginVo implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -256,8 +247,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 		public HtmlChartPluginView(String id, Label nameLabel)
 		{
-			super.setId(id);
-			super.setNameLabel(nameLabel);
+			super(id, nameLabel);
 		}
 
 		public String getIconUrl()
@@ -268,81 +258,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		public void setIconUrl(String iconUrl)
 		{
 			this.iconUrl = iconUrl;
-		}
-
-		@Override
-		public JsChartRenderer getRenderer()
-		{
-			return super.getRenderer();
-		}
-
-		@JsonIgnore
-		@Override
-		public HtmlChartPluginScriptObjectWriter getPluginWriter()
-		{
-			return super.getPluginWriter();
-		}
-
-		@JsonIgnore
-		@Override
-		public HtmlRenderContextScriptObjectWriter getRenderContextWriter()
-		{
-			return super.getRenderContextWriter();
-		}
-
-		@JsonIgnore
-		@Override
-		public HtmlChartScriptObjectWriter getChartWriter()
-		{
-			return super.getChartWriter();
-		}
-
-		@JsonIgnore
-		@Override
-		public List<ChartPluginResource> getResources()
-		{
-			return super.getResources();
-		}
-
-		@JsonIgnore
-		@Override
-		public Map<String, String> getIconResourceNames()
-		{
-			return super.getIconResourceNames();
-		}
-
-		@JsonIgnore
-		@Override
-		public String getElementTagName()
-		{
-			return super.getElementTagName();
-		}
-
-		@JsonIgnore
-		@Override
-		public long getLastModified()
-		{
-			return super.getLastModified();
-		}
-
-		@JsonIgnore
-		@Override
-		public String getNewLine()
-		{
-			return super.getNewLine();
-		}
-
-		@Override
-		public int getOrder()
-		{
-			return super.getOrder();
-		}
-
-		@Override
-		public HtmlChart renderChart(ChartDefinition chartDefinition, RenderContext renderContext)
-				throws RenderException
-		{
-			throw new UnsupportedOperationException();
 		}
 	}
 
