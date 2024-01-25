@@ -17,6 +17,8 @@
 
 package org.datagear.analysis.support;
 
+import java.io.Serializable;
+
 import org.datagear.analysis.ChartResultError;
 
 /**
@@ -25,8 +27,10 @@ import org.datagear.analysis.ChartResultError;
  * @author datagear@163.com
  *
  */
-public class ChartResultErrorMessage
+public class ChartResultErrorMessage implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 错误类型 */
 	private String type = "";
 
