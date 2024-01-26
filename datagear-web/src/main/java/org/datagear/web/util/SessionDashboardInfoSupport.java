@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -212,6 +213,11 @@ public class SessionDashboardInfoSupport
 		public boolean isShowForEdit()
 		{
 			return showForEdit;
+		}
+
+		public synchronized Set<String> getChartIds()
+		{
+			return Collections.unmodifiableSet(this.chartIdToChartWidgetIds.keySet());
 		}
 
 		public synchronized String getChartWidgetId(String chartId)
