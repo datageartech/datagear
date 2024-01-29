@@ -1826,12 +1826,12 @@
 	 */
 	dashboardBase._updateChart = function(chart, chartResult)
 	{
-		var dataSetResults = (chartResult &&  chartResult.dataSetResults ? chartResult.dataSetResults : []);
-		
 		try
 		{
 			if(chart.isActive())
-				chart.update(dataSetResults);
+			{
+				this._doUpdateChart(chart, chartResult);
+			}
 			else
 				chartFactory.logException("chart '#"+chart.elementId+"' not active");
 		}
@@ -1841,6 +1841,12 @@
 			chart.status(chartStatusConst.UPDATE_ERROR);
 			chartFactory.logException(e);
 		}
+	};
+	
+	dashboardBase._doUpdateChart = function(chart, chartResult)
+	{
+		var dataSetResults = (chartResult &&  chartResult.dataSetResults ? chartResult.dataSetResults : []);
+		chart.update(dataSetResults);
 	};
 	
 	dashboardBase._setUpdateTime = function(chart, time)
