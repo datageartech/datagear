@@ -218,11 +218,6 @@
 	 */
 	dashboardFactory.LOAD_TIME = new Date().getTime();
 	
-	/**
-	 * 对于没有关联数据集的图表，是否仅执行本地更新操作，不等待服务端返回结果后再执行更新
-	 */
-	dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET = true;
-	
 	/**图表主题关联的看板表单实体ID*/
 	dashboardFactory._THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
 	
@@ -1539,8 +1534,7 @@
 			
 			if(this._isWaitForUpdate(chart, time))
 			{
-				if(dashboardFactory.LOCAL_UPDATE_IF_EMPTY_DATA_SET
-					&& (!chart.chartDataSets || chart.chartDataSets.length == 0))
+				if(this._isLocalChart(chart))
 				{
 					preUpdateLocals.push(chart);
 				}
@@ -1560,6 +1554,8 @@
 			}
 		}
 		
+		this._doHandleChartsLocal(preUpdateLocals);
+		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
 		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
 		
@@ -1568,14 +1564,17 @@
 			this._doHandleChartsAjax(url, preUpdateGroups[group]);
 		}
 		
-		this._doHandleChartsLocal(preUpdateLocals);
-		
 		var dashboard = this;
 		setTimeout(function()
 		{
 			dashboard._doHandleCharts();
 		},
 		dashboardFactory.HANDLE_CHART_INTERVAL_MS);
+	};
+	
+	dashboardBase._isLocalChart = function(chart)
+	{
+		return (!chart.chartDataSets || chart.chartDataSets.length == 0);
 	};
 	
 	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts)
