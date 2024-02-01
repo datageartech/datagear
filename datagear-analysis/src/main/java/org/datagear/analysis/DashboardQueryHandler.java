@@ -57,6 +57,7 @@ public abstract class DashboardQueryHandler
 			if (chart == null)
 				throw new IllegalArgumentException("Chart '" + chartId + "' not found");
 
+			// 如果没定义图表级结果数据格式，应使用看板级
 			if (chartQuery.getResultDataFormat() == null && query.getResultDataFormat() != null)
 			{
 				chartQuery = chartQuery.copy();
