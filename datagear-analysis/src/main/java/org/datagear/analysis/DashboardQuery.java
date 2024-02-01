@@ -55,6 +55,7 @@ public class DashboardQuery implements ResultDataFormatAware, Serializable
 	{
 		super();
 		this.chartQueries = query.chartQueries;
+		this.resultDataFormat = query.resultDataFormat;
 		this.suppressChartError = query.suppressChartError;
 	}
 
