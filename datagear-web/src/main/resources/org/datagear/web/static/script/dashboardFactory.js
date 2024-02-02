@@ -2480,7 +2480,7 @@
 	/**
 	 * 获取当前用户信息。
 	 * 
-	 * @returns 用户信息，格式参考：org.datagear.web.controller.AbstractDataAnalysisController.AnalysisUser
+	 * @returns 用户信息，格式参考：org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser
 	 */
 	dashboardBase.user = function()
 	{

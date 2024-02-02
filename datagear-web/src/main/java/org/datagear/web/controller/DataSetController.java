@@ -42,7 +42,6 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
-import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
@@ -72,7 +71,6 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebDashboardQueryConverter;
-import org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -104,7 +102,7 @@ public class DataSetController extends AbstractSchemaConnController
 	private File tempDirectory;
 
 	@Autowired
-	private DataSetParamValueConverter dataSetParamValueConverter;
+	private WebDashboardQueryConverter webDashboardQueryConverter;
 
 	@Autowired
 	private DataSetResDirectoryService dataSetResDirectoryService;
@@ -144,14 +142,14 @@ public class DataSetController extends AbstractSchemaConnController
 		this.tempDirectory = tempDirectory;
 	}
 
-	public DataSetParamValueConverter getDataSetParamValueConverter()
+	public WebDashboardQueryConverter getWebDashboardQueryConverter()
 	{
-		return dataSetParamValueConverter;
+		return webDashboardQueryConverter;
 	}
 
-	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
+	public void setWebDashboardQueryConverter(WebDashboardQueryConverter webDashboardQueryConverter)
 	{
-		this.dataSetParamValueConverter = dataSetParamValueConverter;
+		this.webDashboardQueryConverter = webDashboardQueryConverter;
 	}
 
 	public DataSetResDirectoryService getDataSetResDirectoryService()
@@ -1124,28 +1122,15 @@ public class DataSetController extends AbstractSchemaConnController
 	protected String resolveSqlTemplate(HttpServletRequest request, HttpServletResponse response, String source,
 			Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
-		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
-
-		DataSetQuery dataSetQuery = DataSetQuery.valueOf(converted);
-		setAnalysisUserParamValue(request, response, dataSetQuery);
-
+		DataSetQuery dataSetQuery = getWebDashboardQueryConverter().convert(paramValues, dataSetParams,
+				getCurrentUser());
 		return DataSetFmkTemplateResolvers.SQL.resolve(source, new TemplateContext(dataSetQuery.getParamValues()));
 	}
 
 	protected DataSetQuery convertDataSetQuery(HttpServletRequest request, HttpServletResponse response,
 			DataSetQuery dataSetQuery, DataSet dataSet)
 	{
-		DataSetQuery re = getDataSetParamValueConverter().convert(dataSetQuery, dataSet);
-		setAnalysisUserParamValue(request, response, re);
-
-		return re;
-	}
-
-	protected void setAnalysisUserParamValue(HttpServletRequest request, HttpServletResponse response,
-			DataSetQuery dataSetQuery)
-	{
-		WebDashboardQueryConverter.AnalysisUser analysisUser = WebDashboardQueryConverter.AnalysisUser.valueOf(getCurrentUser());
-		analysisUser.setParamValue(dataSetQuery);
+		return getWebDashboardQueryConverter().convert(dataSetQuery, dataSet, getCurrentUser());
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,

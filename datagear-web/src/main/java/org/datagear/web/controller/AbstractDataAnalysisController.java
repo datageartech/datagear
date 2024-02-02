@@ -19,7 +19,6 @@ package org.datagear.web.controller;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
 import org.datagear.analysis.ChartTheme;
@@ -35,11 +33,9 @@ import org.datagear.analysis.DashboardQuery;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
-import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.SimpleDashboardQueryHandler;
 import org.datagear.analysis.support.ChartWidget;
-import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
@@ -53,6 +49,7 @@ import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebDashboardQueryConverter;
+import org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -198,7 +195,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_FALSE = "false";
 
 	@Autowired
-	private DataSetParamValueConverter dataSetParamValueConverter;
+	private WebDashboardQueryConverter webDashboardQueryConverter;
 
 	@Autowired
 	private DashboardThemeSource dashboardThemeSource;
@@ -220,14 +217,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		super();
 	}
 
-	public DataSetParamValueConverter getDataSetParamValueConverter()
+	public WebDashboardQueryConverter getWebDashboardQueryConverter()
 	{
-		return dataSetParamValueConverter;
+		return webDashboardQueryConverter;
 	}
 
-	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
+	public void setWebDashboardQueryConverter(WebDashboardQueryConverter webDashboardQueryConverter)
 	{
-		this.dataSetParamValueConverter = dataSetParamValueConverter;
+		this.webDashboardQueryConverter = webDashboardQueryConverter;
 	}
 
 	public DashboardThemeSource getDashboardThemeSource()
@@ -288,7 +285,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		
 		Map<String, ?> paramValues = resolveDashboardShowParamValues(request);
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
-		WebDashboardQueryConverter.AnalysisUser analysisUser = WebDashboardQueryConverter.AnalysisUser.valueOf(getCurrentUser().cloneNoPassword());
+		AnalysisUser analysisUser = AnalysisUser.valueOf(getCurrentUser().cloneNoPassword());
 		
 		renderContext.putAttributes(paramValues);
 		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT, webContext);
@@ -474,12 +471,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		if (dashboardInfo == null)
 			throw new IllegalInputException();
 
-		WebDashboardQueryConverter.AnalysisUser analysisUser = WebDashboardQueryConverter.AnalysisUser.valueOf(getCurrentUser());
-
 		DashboardQuery dashboardQuery = form.getDashboardQuery();
 		Map<String, HtmlChartWidget> chartWidgets = getChartWidgets(dashboardInfo, form.getDashboardQuery(), renderer);
 
-		DashboardQuery queriesConverted = convertDashboardQuery(dashboardQuery, chartWidgets, analysisUser);
+		DashboardQuery queriesConverted = convertDashboardQuery(dashboardQuery, chartWidgets, getCurrentUser());
 
 		SimpleDashboardQueryHandler dqh = new SimpleDashboardQueryHandler(chartWidgets);
 
@@ -515,61 +510,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	protected DashboardQuery convertDashboardQuery(DashboardQuery query,
-			Map<String, ? extends ChartWidget> chartWidgets, WebDashboardQueryConverter.AnalysisUser analysisUser)
+			Map<String, ? extends ChartWidget> chartWidgets, User user)
 	{
-		if (query == null)
-			return new DashboardQuery();
-		
-		List<String> analysisRoleNames = analysisUser.getEnabledRoleNames();
-
-		Map<String, ChartQuery> chartQueries = query.getChartQueries();
-		Map<String, ChartQuery> chartQueriesRe = new HashMap<String, ChartQuery>(chartQueries.size());
-
-		for (Map.Entry<String, ChartQuery> entry : chartQueries.entrySet())
-		{
-			String chartId = entry.getKey();
-			ChartQuery chartQuery = entry.getValue();
-			ChartWidget chartWidget = chartWidgets.get(chartId);
-
-			// 忽略未找到的ChartWidget
-			if (chartWidget != null)
-			{
-				ChartDataSet[] chartDataSets = chartWidget.getChartDataSets();
-				List<DataSetQuery> dataSetQueries = chartQuery.getDataSetQueries();
-
-				ChartQuery chartQueryRe = null;
-
-				if (chartDataSets == null || chartDataSets.length == 0 || dataSetQueries == null
-						|| dataSetQueries.isEmpty())
-				{
-					chartQueryRe = chartQuery;
-				}
-				else
-				{
-					List<DataSetQuery> dataSetQueriesRe = new ArrayList<DataSetQuery>(dataSetQueries.size());
-
-					for (int j = 0; j < chartDataSets.length; j++)
-					{
-						DataSetQuery dataSetQueryRe = dataSetQueries.get(j);
-						dataSetQueryRe = getDataSetParamValueConverter().convert(dataSetQueryRe,
-								chartDataSets[j].getDataSet(), true);
-						analysisUser.setParamValue(dataSetQueryRe, analysisRoleNames);
-
-						dataSetQueriesRe.add(dataSetQueryRe);
-					}
-
-					chartQueryRe = chartQuery.copy();
-					chartQueryRe.setDataSetQueries(dataSetQueriesRe);
-				}
-
-				chartQueriesRe.put(chartId, chartQueryRe);
-			}
-		}
-		
-		DashboardQuery queryRe = query.copy();
-		queryRe.setChartQueries(chartQueriesRe);
-
-		return queryRe;
+		return getWebDashboardQueryConverter().convert(query, chartWidgets, user);
 	}
 
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)

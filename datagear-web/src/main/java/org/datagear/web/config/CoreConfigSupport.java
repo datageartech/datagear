@@ -33,6 +33,7 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.TplDashboardWidgetResManager;
+import org.datagear.analysis.support.DashboardQueryConverter;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
@@ -146,6 +147,7 @@ import org.datagear.web.util.SchemaTableCache;
 import org.datagear.web.util.SessionDashboardInfoSupport;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
+import org.datagear.web.util.WebDashboardQueryConverter;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
 import org.datagear.web.util.accesslatch.IpLoginLatch;
@@ -627,6 +629,20 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return bean;
 	}
 	
+	@Bean
+	public DashboardQueryConverter dashboardQueryConverter()
+	{
+		DashboardQueryConverter bean = new DashboardQueryConverter(this.dataSetParamValueConverter());
+		return bean;
+	}
+
+	@Bean
+	public WebDashboardQueryConverter webDashboardQueryConverter()
+	{
+		WebDashboardQueryConverter bean = new WebDashboardQueryConverter(this.dashboardQueryConverter());
+		return bean;
+	}
+
 	@Bean
 	public DashboardThemeSource dashboardThemeSource()
 	{

@@ -102,7 +102,7 @@ public class WebDashboardQueryConverter
 			AnalysisUser analysisUser)
 	{
 		DashboardQuery re = this.dashboardQueryConverter.convert(query, chartDefs);
-		inflateAnalysisUser(query, analysisUser);
+		inflateAnalysisUser(re, analysisUser);
 
 		return re;
 	}
@@ -132,9 +132,21 @@ public class WebDashboardQueryConverter
 	public DataSetQuery convert(DataSetQuery dataSetQuery, DataSet dataSet, AnalysisUser analysisUser)
 	{
 		DataSetQuery re = getDataSetParamValueConverter().convert(dataSetQuery, dataSet);
-		inflateAnalysisUser(dataSetQuery, analysisUser);
+		inflateAnalysisUser(re, analysisUser);
 
 		return re;
+	}
+
+	/**
+	 * 转换{@linkplain DataSetQuery}。
+	 * 
+	 * @param dataSetQuery
+	 * @param dataSet
+	 * @return
+	 */
+	public DataSetQuery convert(DataSetQuery dataSetQuery, DataSet dataSet)
+	{
+		return getDataSetParamValueConverter().convert(dataSetQuery, dataSet);
 	}
 
 	/**
@@ -162,11 +174,23 @@ public class WebDashboardQueryConverter
 	public DataSetQuery convert(Map<String, ?> paramValues, Collection<? extends DataSetParam> dataSetParams,
 			AnalysisUser analysisUser)
 	{
-		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
-		DataSetQuery dataSetQuery = DataSetQuery.valueOf(converted);
-		inflateAnalysisUser(dataSetQuery, analysisUser);
+		Map<String, ?> converted = convert(paramValues, dataSetParams);
+		DataSetQuery re = DataSetQuery.valueOf(converted);
+		inflateAnalysisUser(re, analysisUser);
 
-		return dataSetQuery;
+		return re;
+	}
+
+	/**
+	 * 转换参数。
+	 * 
+	 * @param paramValues
+	 * @param dataSetParams
+	 * @return
+	 */
+	public Map<String, ?> convert(Map<String, ?> paramValues, Collection<? extends DataSetParam> dataSetParams)
+	{
+		return getDataSetParamValueConverter().convert(paramValues, dataSetParams);
 	}
 
 	/**

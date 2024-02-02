@@ -651,7 +651,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			for (ChartDataSetVO vo : chartDataSetVOs)
 			{
 				DataSetQuery query = vo.getQuery();
-				query = getDataSetParamValueConverter().convert(query, vo.getDataSet());
+				query = getWebDashboardQueryConverter().convert(query, vo.getDataSet());
 				vo.setQuery(query);
 			}
 		}
