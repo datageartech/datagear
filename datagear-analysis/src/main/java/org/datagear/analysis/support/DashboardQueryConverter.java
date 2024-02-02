@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
@@ -31,12 +30,12 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetQuery;
 
 /**
- * 抽象{@linkplain DashboardQuery}转换器。
+ * {@linkplain DashboardQuery}转换器。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class DashboardQueryConverter
+public class DashboardQueryConverter
 {
 	private DataSetParamValueConverter dataSetParamValueConverter;
 
@@ -69,9 +68,11 @@ public abstract class DashboardQueryConverter
 	 * 
 	 * @param query
 	 *            允许{@code null}
+	 * @param chartDefs
+	 *            {@linkplain DashboardQuery#getChartQueries()}的图表ID-{@linkplain ChartDefinition}映射表
 	 * @return
 	 */
-	public DashboardQuery convert(DashboardQuery query)
+	public DashboardQuery convert(DashboardQuery query, Map<String, ? extends ChartDefinition> chartDefs)
 	{
 		if (query == null)
 			return new DashboardQuery();
@@ -83,7 +84,7 @@ public abstract class DashboardQueryConverter
 		{
 			String chartId = entry.getKey();
 			ChartQuery chartQuery = entry.getValue();
-			ChartDefinition chartDef = getChartDefinition(chartId);
+			ChartDefinition chartDef = chartDefs.get(chartId);
 
 			// 忽略未找到的
 			if (chartDef == null)
@@ -133,13 +134,4 @@ public abstract class DashboardQueryConverter
 	{
 		return getDataSetParamValueConverter().convert(dataSetQuery, dataSet, true);
 	}
-
-	/**
-	 * 获取指定图表ID对应的{@linkplain ChartDefinition}。
-	 * 
-	 * @param chartId
-	 *            {@linkplain Chart#getId()}
-	 * @return 允许返回{@code null}
-	 */
-	protected abstract ChartDefinition getChartDefinition(String chartId);
 }

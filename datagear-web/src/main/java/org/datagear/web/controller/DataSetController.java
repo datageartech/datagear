@@ -70,8 +70,9 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.web.controller.AbstractDataAnalysisController.AnalysisUser;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.util.WebDashboardQueryConverter;
+import org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -1143,7 +1144,7 @@ public class DataSetController extends AbstractSchemaConnController
 	protected void setAnalysisUserParamValue(HttpServletRequest request, HttpServletResponse response,
 			DataSetQuery dataSetQuery)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(getCurrentUser());
+		WebDashboardQueryConverter.AnalysisUser analysisUser = WebDashboardQueryConverter.AnalysisUser.valueOf(getCurrentUser());
 		analysisUser.setParamValue(dataSetQuery);
 	}
 
