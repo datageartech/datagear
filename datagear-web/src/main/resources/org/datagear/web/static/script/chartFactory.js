@@ -1303,20 +1303,7 @@
 		if(!this.statusDestroying())
 			throw new Error("chart is illegal state for doDestroy()");
 		
-		var $element = this.elementJquery();
-		
-		$element.removeClass(this.themeStyleName());
-		$element.removeClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
-		$element.removeClass("dg-chart-beautify-scrollbar");
-		$element.removeClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
-		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
-		
-		//应在这里先销毁图表元素内部创建的元素，
-		//因为renderer.destroy()可能会清空图表元素（比如echarts.dispose()函数）
-		this._destroySetting();
-		
-		var theme = this._themeNonNull();
-		chartFactory.removeThemeRefEntity(theme, this.id);
+		this._doDestroy();
 		
 		var renderer = this.renderer();
 		
@@ -1341,17 +1328,34 @@
 		}
 		
 		this.internal(null);
-		
 		//最后清空扩展属性值，因为上面逻辑可能会使用到
 		this._clearExtValue();
 		
 		this.statusDestroyed(true);
 	};
 	
+	chartBase._doDestroy = function()
+	{
+		var $element = this.elementJquery();
+		
+		$element.removeClass(this.themeStyleName());
+		$element.removeClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
+		$element.removeClass("dg-chart-beautify-scrollbar");
+		$element.removeClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
+		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, null);
+		
+		//应在这里先销毁图表元素内部创建的元素，
+		//因为renderer.destroy()可能会清空图表元素（比如echarts.dispose()函数）
+		this._doDestroySetting();
+		
+		var theme = this._themeNonNull();
+		chartFactory.removeThemeRefEntity(theme, this.id);
+	};
+	
 	/**
 	 * 销毁图表交互设置。
 	 */
-	chartBase._destroySetting = function()
+	chartBase._doDestroySetting = function()
 	{
 		if(chartFactory.chartSetting && chartFactory.chartSetting.unbindChartSettingPanelEvent)
 			chartFactory.chartSetting.unbindChartSettingPanelEvent(this);
