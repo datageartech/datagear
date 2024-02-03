@@ -126,8 +126,6 @@ import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
-import org.datagear.web.json.jackson.FormatterDeserializer;
-import org.datagear.web.json.jackson.FormatterSerializer;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.AuthenticationUserGetter;
@@ -319,42 +317,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public ObjectMapperBuilder objectMapperBuilder()
 	{
-		ObjectMapperBuilder bean = createObjectMapperBuilder();
-
-		FormatterSerializer<java.sql.Date> sqlDateSerializer = new FormatterSerializer<java.sql.Date>(
-				this.sqlDateFormatter());
-		FormatterSerializer<java.sql.Time> sqlTimeSerializer = new FormatterSerializer<java.sql.Time>(
-				this.sqlTimeFormatter());
-		FormatterSerializer<java.sql.Timestamp> sqlTimestampSerializer = new FormatterSerializer<java.sql.Timestamp>(
-				this.sqlTimestampFormatter());
-		FormatterSerializer<java.util.Date> dateSerializer = new FormatterSerializer<java.util.Date>(
-				this.dateFormatter());
-
-		bean.addJsonSerializer(java.sql.Date.class, sqlDateSerializer);
-		bean.addJsonSerializer(java.sql.Time.class, sqlTimeSerializer);
-		bean.addJsonSerializer(java.sql.Timestamp.class, sqlTimestampSerializer);
-		bean.addJsonSerializer(java.util.Date.class, dateSerializer);
-
-		FormatterDeserializer<java.sql.Date> sqlDateDeserializer = new FormatterDeserializer<java.sql.Date>(
-				java.sql.Date.class, this.sqlDateFormatter());
-		FormatterDeserializer<java.sql.Time> sqlTimeDeserializer = new FormatterDeserializer<java.sql.Time>(
-				java.sql.Time.class, this.sqlTimeFormatter());
-		FormatterDeserializer<java.sql.Timestamp> sqlTimestampDeserializer = new FormatterDeserializer<java.sql.Timestamp>(
-				java.sql.Timestamp.class, this.sqlTimestampFormatter());
-		FormatterDeserializer<java.util.Date> dateDeserializer = new FormatterDeserializer<java.util.Date>(
-				java.sql.Timestamp.class, this.dateFormatter());
-
-		bean.addJsonDeserializer(java.sql.Date.class, sqlDateDeserializer);
-		bean.addJsonDeserializer(java.sql.Time.class, sqlTimeDeserializer);
-		bean.addJsonDeserializer(java.sql.Timestamp.class, sqlTimestampDeserializer);
-		bean.addJsonDeserializer(java.util.Date.class, dateDeserializer);
-
+		ObjectMapperBuilder bean = new ObjectMapperBuilder();
 		return bean;
-	}
-
-	protected ObjectMapperBuilder createObjectMapperBuilder()
-	{
-		return new ObjectMapperBuilder();
 	}
 
 	@Bean

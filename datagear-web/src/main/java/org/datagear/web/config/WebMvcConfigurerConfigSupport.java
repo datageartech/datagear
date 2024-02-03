@@ -171,7 +171,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 			}
 		}
 
-		ObjectMapper objectMapper = this.coreConfig.objectMapperBuilder().build();
+		ObjectMapper objectMapper = this.coreConfig.objectMapperBuilder().std().build();
 		MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 
 		if (oldIndex > -1)

@@ -73,10 +73,12 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
 	{
 		this.objectMapperBuilder = objectMapperBuilder;
-		this._objectMapper = this.objectMapperBuilder.build();
-		this._objectMapperForEscapeHtml = this.objectMapperBuilder.buildForEscapeHtml();
-		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
-		this._objectMapperForEscapeHtmlAndBigNumberToString = this.objectMapperBuilder.buildForEscapeHtmlAndBigNumberToString();
+		this._objectMapper = this.objectMapperBuilder.std().build();
+		this._objectMapperForEscapeHtml = this.objectMapperBuilder.std().escapeHtml().build();
+		this._objectMapperForBigNumberToString = this.objectMapperBuilder.std().bigNumberToString()
+				.build();
+		this._objectMapperForEscapeHtmlAndBigNumberToString = this.objectMapperBuilder.std().escapeHtml()
+				.bigNumberToString().build();
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapperForEscapeHtml);
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapperForBigNumberToString);

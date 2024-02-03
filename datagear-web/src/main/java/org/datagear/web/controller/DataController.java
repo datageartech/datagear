@@ -183,8 +183,9 @@ public class DataController extends AbstractSchemaConnTableController
 	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
 	{
 		this.objectMapperBuilder = objectMapperBuilder;
-		this._objectMapper = this.objectMapperBuilder.build();
-		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
+		this._objectMapper = this.objectMapperBuilder.std().build();
+		this._objectMapperForBigNumberToString = this.objectMapperBuilder.std().bigNumberToString()
+				.build();
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/pagingQuery")

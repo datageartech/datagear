@@ -161,7 +161,8 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
 	{
 		this.objectMapperBuilder = objectMapperBuilder;
-		this._objectMapperForBigNumberToString = this.objectMapperBuilder.buildForBigNumberToString();
+		this._objectMapperForBigNumberToString = this.objectMapperBuilder.std().bigNumberToString()
+				.build();
 	}
 
 	@RequestMapping("/{schemaId}")
