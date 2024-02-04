@@ -1155,6 +1155,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	protected void initCacheServices(ApplicationContext context)
 	{
 		initAbstractMybatisEntityServiceCaches(context);
+		initDataSetEntityServiceCache(context);
 		initHtmlTplDashboardWidgetHtmlRendererCaches(context);
 		initSchemaTableCache(context);
 	}
@@ -1185,6 +1186,27 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 				AbstractMybatisDataPermissionEntityService<?, ?> dpes = (AbstractMybatisDataPermissionEntityService<?, ?>) es;
 				dpes.setPermissionCache(getCache(cacheManager, cacheName + "Permission"));
 				dpes.setPermissionCacheMaxLength(getApplicationProperties().getPermissionCacheMaxLength());
+			}
+		}
+	}
+
+	protected void initDataSetEntityServiceCache(ApplicationContext context)
+	{
+		CacheManager cacheManager = getCacheManager(context);
+
+		Map<String, DataSetEntityService> entityServices = context.getBeansOfType(DataSetEntityService.class);
+
+		for (Map.Entry<String, DataSetEntityService> entry : entityServices.entrySet())
+		{
+			// 缓存名应是固定不变的，避免多次重启导致占用过多缓存名
+			String cacheName = entry.getKey();
+
+			DataSetEntityService bean = entry.getValue();
+
+			if (bean instanceof DataSetEntityServiceImpl)
+			{
+				((DataSetEntityServiceImpl) bean)
+						.setDataSetResourceDataCache(getCache(cacheManager, cacheName + "DataSetResDataCache"));
 			}
 		}
 	}
