@@ -26,6 +26,7 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
+import org.datagear.analysis.support.DataFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -218,9 +219,16 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
 			setMutableModel(dataSet.isMutableModel());
 			setParams(dataSet.getParams());
-			
-			if(dataSet instanceof AbstractDataSet)
-				setDataFormat(((AbstractDataSet) dataSet).getDataFormat());
+		}
+
+		/**
+		 * JSON输出不需要底层数据转换格式信息
+		 */
+		@JsonIgnore
+		@Override
+		public DataFormat getDataFormat()
+		{
+			return super.getDataFormat();
 		}
 
 		@JsonIgnore

@@ -28,6 +28,7 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
+import org.datagear.analysis.support.DataFormat;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.AnalysisProject;
@@ -319,7 +320,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (entity instanceof SummaryDataSetEntity)
 			throw new IllegalArgumentException();
 
-		super.add(entity, params);
+		super.add(toAddDataSetEntity(entity), params);
 
 		if (entity instanceof SqlDataSetEntity)
 			addSqlDataSetEntity((SqlDataSetEntity) entity);
@@ -339,6 +340,17 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			addExtDataSetEntity(entity, params);
 
 		saveDataSetChildren(entity);
+	}
+
+	protected SummaryDataSetEntity toAddDataSetEntity(DataSetEntity entity)
+	{
+		SummaryDataSetEntity re = new SummaryDataSetEntity(entity);
+
+		// 不保存默认数据格式，避免占用存储空间
+		if (DataFormat.DEFAULT.equals(re.getDataFormat()))
+			re.setDataFormat(null);
+
+		return re;
 	}
 
 	protected boolean addExtDataSetEntity(DataSetEntity entity, Map<String, Object> params)
@@ -408,7 +420,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (entity instanceof SummaryDataSetEntity)
 			throw new IllegalArgumentException();
 
-		boolean success = super.update(entity, params);
+		boolean success = super.update(toUpdateDataSetEntity(entity), params);
 
 		if (success)
 		{
@@ -434,6 +446,17 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			saveDataSetChildren(entity);
 
 		return success;
+	}
+
+	protected SummaryDataSetEntity toUpdateDataSetEntity(DataSetEntity entity)
+	{
+		SummaryDataSetEntity re = new SummaryDataSetEntity(entity);
+
+		// 不保存默认数据格式，避免占用存储空间
+		if (DataFormat.DEFAULT.equals(re.getDataFormat()))
+			re.setDataFormat(null);
+
+		return re;
 	}
 
 	protected boolean updateExtDataSetEntity(DataSetEntity entity, Map<String, Object> params)
@@ -636,6 +659,10 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	{
 		inflateAnalysisProjectAwareEntity(obj, this.analysisProjectService);
 		inflateCreateUserEntity(obj, this.userService);
+
+		// 设置默认数据格式
+		if (obj.getDataFormat() == null)
+			obj.setDataFormat(DataFormat.DEFAULT);
 
 		if (obj instanceof DirectoryFileDataSetEntity)
 			inflateDirectoryFileDataSetEntity((DirectoryFileDataSetEntity) obj, this.dataSetResDirectoryService);

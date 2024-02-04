@@ -56,13 +56,25 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 		this.createTime = new Date();
 	}
 
-	@SuppressWarnings("unchecked")
 	public SummaryDataSetEntity(String id, String name, String dataSetType, User createUser)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name, Collections.emptyList());
 		this.dataSetType = dataSetType;
-		this.createTime = new Date();
 		this.createUser = createUser;
+		this.createTime = new Date();
+	}
+
+	public SummaryDataSetEntity(DataSetEntity dataSetEntity)
+	{
+		super(dataSetEntity.getId(), dataSetEntity.getName(), dataSetEntity.getProperties());
+		setMutableModel(dataSetEntity.isMutableModel());
+		setParams(dataSetEntity.getParams());
+		setDataFormat(dataSetEntity.getDataFormat());
+		this.dataSetType = dataSetEntity.getDataSetType();
+		this.createUser = dataSetEntity.getCreateUser();
+		this.createTime = dataSetEntity.getCreateTime();
+		this.dataPermission = dataSetEntity.getDataPermission();
+		this.analysisProject = dataSetEntity.getAnalysisProject();
 	}
 
 	@Override

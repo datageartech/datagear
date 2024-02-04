@@ -33,6 +33,7 @@ dataSet_form_preview.ftl
 		dataSet.analysisProject = (dataSet.analysisProject == null ? {} : dataSet.analysisProject);
 		dataSet.properties = (dataSet.properties == null ? [] : dataSet.properties);
 		dataSet.params = (dataSet.params == null ? [] : dataSet.params);
+		dataSet.dataFormat = (dataSet.dataFormat == null ? {} : dataSet.dataFormat);
 	};
 	
 	po.createWorkspaceEditor = function(dom, options)

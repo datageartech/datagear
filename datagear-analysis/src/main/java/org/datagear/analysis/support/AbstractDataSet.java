@@ -55,8 +55,8 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 	private List<DataSetParam> params = Collections.emptyList();
 
-	/** 数据格式 */
-	private DataFormat dataFormat = new DataFormat();
+	/** 底层数据转换格式 */
+	private DataFormat dataFormat = DataFormat.DEFAULT;
 
 	public AbstractDataSet()
 	{
@@ -132,7 +132,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 获取数据格式。
+	 * 获取底层数据转换格式。
 	 * 
 	 * @return
 	 */
@@ -142,7 +142,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 设置数据格式。
+	 * 设置底层数据转换格式。
 	 * <p>
 	 * 当数据集属性{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}与底层数据源（数据库、CSV、JSON等）不匹配时，
 	 * 可设置此数据格式，用于支持类型转换。
@@ -459,7 +459,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		DataFormat dataFormat = getDataFormat();
 		if (dataFormat == null)
-			dataFormat = new DataFormat();
+			dataFormat = DataFormat.DEFAULT;
 
 		DataSetPropertyValueConverter converter = new DataSetPropertyValueConverter(dataFormat);
 

@@ -23,6 +23,7 @@ import java.util.List;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.DataFormat;
 
 /**
  * 数据集实体接口。
@@ -91,6 +92,20 @@ public interface DataSetEntity
 	 * @param dataSetType
 	 */
 	void setDataSetType(String dataSetType);
+
+	/**
+	 * 获取底层数据格式。
+	 * 
+	 * @return
+	 */
+	DataFormat getDataFormat();
+
+	/**
+	 * 设置底层数据格式。
+	 * 
+	 * @param dataFormat
+	 */
+	void setDataFormat(DataFormat dataFormat);
 
 	/**
 	 * 获取创建时间。

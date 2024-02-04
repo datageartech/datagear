@@ -29,8 +29,36 @@ public class DataFormat extends DateNumberFormat
 {
 	private static final long serialVersionUID = 1L;
 
+	public static DataFormat DEFAULT = new DataFormat();
+
+	static
+	{
+		DEFAULT.setDateFormat(DEFAULT_DATE_FORMAT);
+		DEFAULT.setTimeFormat(DEFAULT_TIME_FORMAT);
+		DEFAULT.setTimestampFormat(DEFAULT_TIMESTAMP_FORMAT);
+		DEFAULT.setNumberFormat(DEFAULT_NUMBER_FORMAT);
+	}
+
 	public DataFormat()
 	{
 		super();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return super.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		return true;
 	}
 }
