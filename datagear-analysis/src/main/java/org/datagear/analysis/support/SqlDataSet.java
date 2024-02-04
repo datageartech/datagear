@@ -130,8 +130,8 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+			throws DataSetException
 	{
 		String sql = resolveTemplateSql(getSql(), query);
 
@@ -171,7 +171,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			try
 			{
 				ResultSet rs = qrs.getResultSet();
-				ResolvedDataSetResult result = resolveResult(cn, rs, query, properties, resolveProperties);
+				ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveProperties);
 
 				dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
 			}
@@ -230,14 +230,12 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * @param cn
 	 * @param rs
 	 * @param query
-	 * @param properties
-	 *            允许为{@code null}
 	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs,
-			DataSetQuery query, List<DataSetProperty> properties, boolean resolveProperties) throws Throwable
+	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, DataSetQuery query,
+			boolean resolveProperties) throws Throwable
 	{
 		List<DataSetProperty> rawProperties =(resolveProperties ? new ArrayList<DataSetProperty>() : Collections.emptyList());
 		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query, resolveProperties, rawProperties);
@@ -245,7 +243,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		if(resolveProperties)
 			calibrateProperties(rawProperties, rawData);
 		
-		return resolveResult(query, rawData, rawProperties, properties, resolveProperties);
+		return resolveResult(query, rawData, rawProperties);
 	}
 
 	/**

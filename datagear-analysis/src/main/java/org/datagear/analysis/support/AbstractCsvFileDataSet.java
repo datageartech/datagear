@@ -67,8 +67,7 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 	}
 
 	@Override
-	protected CsvFileDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties)
+	protected CsvFileDataSetResource getResource(DataSetQuery query)
 			throws Throwable
 	{
 		File file = getCsvFile(query);

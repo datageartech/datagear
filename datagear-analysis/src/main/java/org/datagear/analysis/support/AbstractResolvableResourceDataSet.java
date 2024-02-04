@@ -19,7 +19,6 @@ package org.datagear.analysis.support;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
@@ -85,22 +84,21 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	/**
 	 * 解析结果。
 	 * <p>
-	 * 如果{@linkplain #getResource(DataSetQuery, List, boolean)}返回有{@linkplain DataSetResource#hasResolvedTemplate()}，
+	 * 如果{@linkplain #getResource(DataSetQuery)}返回有{@linkplain DataSetResource#hasResolvedTemplate()}，
 	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
 	 * </p>
 	 */
 	@Override
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws DataSetException
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties) throws DataSetException
 	{
 		T resource = null;
 
 		try
 		{
-			resource = getResource(query, properties, resolveProperties);
-			ResourceData resourceData = getResourceData(resource);
+			resource = getResource(query);
+			ResourceData resourceData = getResourceData(resource, resolveProperties);
 
-			ResolvedDataSetResult result = resolveResult(query, properties, resolveProperties, resourceData);
+			ResolvedDataSetResult result = resolveResult(query, resourceData, resolveProperties);
 
 			if (resource.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
@@ -122,23 +120,34 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 * 获取资源数据。
 	 * 
 	 * @param resource
+	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData getResourceData(T resource) throws Throwable
+	protected ResourceData getResourceData(T resource, boolean resolveProperties) throws Throwable
 	{
 		if (!resource.isIdempotent() || this.cache == null)
-			return resolveResourceData(resource);
+			return resolveResourceData(resource, resolveProperties);
 
-		ValueWrapper vw = getCacheResourceData(resource);
-		ResourceData rd = (vw == null ? null : (ResourceData) vw.get());
+		ResourceData rd = null;
 
-		if (rd != null)
-			return rd;
+		if (resolveProperties)
+		{
+			rd = resolveResourceData(resource, true);
+			// 缓存中无需存储属性信息
+			setCacheResourceData(resource, new ResourceData(rd.getData(), null));
+		}
+		else
+		{
+			ValueWrapper vw = getCacheResourceData(resource);
+			rd = (vw == null ? null : (ResourceData) vw.get());
 
-		rd = resolveResourceData(resource);
-
-		setCacheResourceData(resource, rd);
+			if (rd == null)
+			{
+				rd = resolveResourceData(resource, false);
+				setCacheResourceData(resource, rd);
+			}
+		}
 
 		return rd;
 	}
@@ -182,41 +191,39 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param properties        允许为{@code null}
-	 * @param resolveProperties
 	 * @param resourceData
+	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties, ResourceData resourceData) throws Throwable
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, ResourceData resourceData,
+			boolean resolveProperties) throws Throwable
 	{
-		List<DataSetProperty> resProperties = resourceData.getProperties();
 		Object resData = resourceData.getData();
+		List<DataSetProperty> resProperties = (resolveProperties ? resourceData.getProperties() : null);
 
-		return resolveResult(query, resData, resProperties, properties, resolveProperties);
+		return resolveResult(query, resData, resProperties);
 	}
 
 	/**
 	 * 获取资源。
 	 * 
 	 * @param query
-	 * @param properties
-	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract T getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws Throwable;
+	protected abstract T getResource(DataSetQuery query) throws Throwable;
 
 	/**
 	 * 解析资源数据。
 	 * 
 	 * @param resource
+	 * @param resolveProperties
+	 *            是否同时解析并设置{@linkplain ResourceData#setProperties(List)}，如果为{@code true}，返回{@linkplain ResourceData#getProperties()}不应为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract ResourceData resolveResourceData(T resource) throws Throwable;
+	protected abstract ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable;
 
 	/**
 	 * 数据集资源。
@@ -314,18 +321,24 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 
 		private Object data = null;
 
-		private List<DataSetProperty> properties = Collections.emptyList();
+		private List<DataSetProperty> properties = null;
 
 		public ResourceData()
 		{
 			super();
 		}
 
+		public ResourceData(Object data)
+		{
+			super();
+			this.data = data;
+		}
+
 		public ResourceData(Object data, List<DataSetProperty> properties)
 		{
 			super();
 			this.data = data;
-			setProperties(properties);
+			this.properties = properties;
 		}
 
 		/**
@@ -352,7 +365,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		 * 返回值及其内容不应被修改，因为可能会缓存。
 		 * </p>
 		 * 
-		 * @return
+		 * @return 为{@code null}表示未设置
 		 */
 		public List<DataSetProperty> getProperties()
 		{
@@ -361,7 +374,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 
 		public void setProperties(List<DataSetProperty> properties)
 		{
-			this.properties = (properties == null ? Collections.emptyList() : Collections.unmodifiableList(properties));
+			this.properties = properties;
 		}
 
 		/**

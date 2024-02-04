@@ -62,7 +62,7 @@ public class AbstractResolvableDataSetTest
 		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
 		Collections.addAll(properties, id, name, date);
 
-		properties = dataSet.mergeDataSetProperties(properties, propertiesMerged);
+		properties = dataSet.mergeProperties(properties, propertiesMerged);
 
 		assertEquals(4, properties.size());
 
@@ -94,8 +94,8 @@ public class AbstractResolvableDataSetTest
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected ResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-				boolean resolveProperties) throws DataSetException
+		protected ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+				throws DataSetException
 		{
 			throw new UnsupportedOperationException();
 		}

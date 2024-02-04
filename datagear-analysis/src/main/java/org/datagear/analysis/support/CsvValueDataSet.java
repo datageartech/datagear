@@ -89,8 +89,7 @@ public class CsvValueDataSet extends AbstractCsvDataSet<CsvValueDataSetResource>
 	}
 
 	@Override
-	protected CsvValueDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws Throwable
+	protected CsvValueDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		String csv = resolveTemplateCsv(this.value, query);
 		return new CsvValueDataSetResource(csv, getNameRow());

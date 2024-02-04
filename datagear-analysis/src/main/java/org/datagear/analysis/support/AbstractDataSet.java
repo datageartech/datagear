@@ -229,13 +229,16 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	/**
 	 * 解析结果。
 	 * 
-	 * @param rawData    允许为{@code null}
+	 * @param rawData
+	 *            允许为{@code null}
 	 * @param properties
-	 * @param fetchSize  获取条数，小于{@code 0}表示全部
-	 * @param format     允许为{@code null}
+	 * @param fetchSize
+	 *            获取条数，小于{@code 0}表示全部
+	 * @param format
+	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
-	 * @see {@link #resolveResultData(Object, List, ResultDataFormat)}
+	 * @see {@link #resolveResultData(Object, List, int, ResultDataFormat)}
 	 */
 	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetProperty> properties,
 			int fetchSize, ResultDataFormat format) throws Throwable

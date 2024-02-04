@@ -58,8 +58,7 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	}
 
 	@Override
-	protected ExcelFileDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws Throwable
+	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		File file = getExcelFile(query);
 		

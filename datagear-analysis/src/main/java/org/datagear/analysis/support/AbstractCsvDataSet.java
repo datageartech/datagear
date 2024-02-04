@@ -99,7 +99,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource) throws Throwable
+	protected ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable
 	{
 		Reader reader = null;
 
@@ -112,7 +112,11 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 
 			List<String> propertyNames = resolvePropertyNames(resource, csvRecords);
 			List<Map<String, String>> data = resolveData(resource, propertyNames, csvRecords);
-			List<DataSetProperty> properties = resolveProperties(propertyNames, data);
+
+			List<DataSetProperty> properties = null;
+
+			if (resolveProperties)
+				properties = resolveProperties(propertyNames, data);
 
 			return new ResourceData(data, properties);
 		}

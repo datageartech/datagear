@@ -248,12 +248,12 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource) throws Throwable
+	protected ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable
 	{
 		if (resource.isXls())
-			return resolveExcelResourceDataForXls(resource);
+			return resolveExcelResourceDataForXls(resource, resolveProperties);
 		else
-			return resolveExcelResourceDataForXlsx(resource);
+			return resolveExcelResourceDataForXlsx(resource, resolveProperties);
 	}
 
 	/**
@@ -263,7 +263,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected ResourceData resolveExcelResourceDataForXls(T resource)
+	protected ResourceData resolveExcelResourceDataForXls(T resource, boolean resolveProperties)
 			throws DataSetException
 	{
 		InputStream in = null;
@@ -277,7 +277,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
 			Sheet sheet = resource.getDataSheet(wb);
 
-			return resolveExcelResourceDataForSheet(resource, sheet);
+			return resolveExcelResourceDataForSheet(resource, sheet, resolveProperties);
 		}
 		catch (DataSetException e)
 		{
@@ -302,7 +302,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForXlsx(T resource) throws Throwable
+	protected ResourceData resolveExcelResourceDataForXlsx(T resource, boolean resolveProperties) throws Throwable
 	{
 		InputStream in = null;
 		OPCPackage pkg = null;
@@ -315,7 +315,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			wb = new XSSFWorkbook(pkg);
 			Sheet sheet = resource.getDataSheet(wb);
 
-			return resolveExcelResourceDataForSheet(resource, sheet);
+			return resolveExcelResourceDataForSheet(resource, sheet, resolveProperties);
 		}
 		catch (DataSetException e)
 		{
@@ -336,14 +336,13 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	/**
 	 * 解析sheet数据。
 	 * 
-	 * @param query
+	 * @param resource
 	 * @param sheet
-	 * @param properties
 	 * @param resolveProperties
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForSheet(T resource, Sheet sheet)
+	protected ResourceData resolveExcelResourceDataForSheet(T resource, Sheet sheet, boolean resolveProperties)
 			throws Throwable
 	{
 		List<Row> excelRows = new ArrayList<Row>();
@@ -352,9 +351,15 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			excelRows.add(row);
 
 		List<ExcelPropertyInfo> propertyInfos = resolvePropertyInfos(resource, excelRows);
-		List<String> rawDataPropertyNames = toPropertyNames(propertyInfos);
 		List<Map<String, Object>> data = resolveData(resource, propertyInfos, excelRows);
-		List<DataSetProperty> properties = resolveProperties(rawDataPropertyNames, data);
+
+		List<DataSetProperty> properties = null;
+
+		if (resolveProperties)
+		{
+			List<String> rawDataPropertyNames = toPropertyNames(propertyInfos);
+			properties = resolveProperties(rawDataPropertyNames, data);
+		}
 
 		return new ResourceData(data, properties);
 	}

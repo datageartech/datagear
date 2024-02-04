@@ -59,10 +59,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	public DataSetResult getResult(DataSetQuery query) throws DataSetException
 	{
 		checkRequiredParamValues(query);
-
-		List<DataSetProperty> properties = getProperties();
-		ResolvedDataSetResult result = resolveResult(query, properties, false);
-
+		ResolvedDataSetResult result = resolveResult(query, false);
 		return result.getResult();
 	}
 
@@ -70,47 +67,43 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	public ResolvedDataSetResult resolve(DataSetQuery query) throws DataSetException
 	{
 		checkRequiredParamValues(query);
-
-		List<DataSetProperty> properties = getProperties();
-
-		return resolveResult(query, properties, true);
+		return resolveResult(query, true);
 	}
 
 	/**
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param properties
-	 *            允许为{@code null}
 	 * @param resolveProperties
-	 *            是否从数据中解析{@linkplain DataSetProperty}，如果为{@code true}，将解析且合并{@code properties}参数，
-	 *            并设置为{@linkplain ResolvedDataSetResult#setProperties(List)}；如果为{@code false}，
-	 *            将把{@code properties}参数直接设置为{@linkplain ResolvedDataSetResult#setProperties(List)}
+	 *            是否从数据中解析{@linkplain DataSetProperty}，如果为{@code true}，
+	 *            应解析并设置{@linkplain ResolvedDataSetResult#setProperties(List)}
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query,
-			List<DataSetProperty> properties, boolean resolveProperties) throws DataSetException;
+	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+			throws DataSetException;
 
 	/**
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param rawData           允许为{@code null}
-	 * @param rawProperties     允许为{@code null}
-	 * @param properties        允许为{@code null}
-	 * @param resolveProperties
+	 * @param rawData
+	 *            允许为{@code null}
+	 * @param rawDataProperties
+	 *            允许为{@code null}，如果不为空，将与{@linkplain #getProperties()}合并后作为解析基础，否则，仅以{@linkplain #getProperties()}作为解析基础
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(DataSetQuery query, Object rawData,
-			List<DataSetProperty> rawProperties, List<DataSetProperty> properties, boolean resolveProperties)
-			throws Throwable
+			List<DataSetProperty> rawDataProperties) throws Throwable
 	{
-		if (resolveProperties)
-			properties = mergeDataSetProperties(rawProperties, properties);
+		List<DataSetProperty> properties = getProperties();
 
-		properties = (properties == null ? Collections.emptyList() : properties);
+		if (properties == null)
+			properties = Collections.emptyList();
+
+		if (rawDataProperties != null && !rawDataProperties.isEmpty())
+			properties = mergeProperties(rawDataProperties, properties);
 
 		return resolveResult(rawData, properties, query.getResultFetchSize(), query.getResultDataFormat());
 	}
@@ -120,28 +113,30 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * <p>
 	 * 将合并列表的{@linkplain DataSetProperty#getType()}、{@linkplain DataSetProperty#getLabel()}、
 	 * {@linkplain DataSetProperty#getDefaultValue()}合并至基础列表里的同名项，多余项则直接添加，
-	 * 同时根据{@code merged}里的排序对{@code dataSetProperties}重排，返回一个新的列表。
+	 * 同时根据{@code merge}里的排序对{@code dataSetProperties}重排，返回一个新的列表。
 	 * </p>
 	 * 
-	 * @param dataSetProperties 基础列表，不会被修改，允许为{@code null}
-	 * @param merged            合并列表，不会被修改，允许为{@code null}
+	 * @param base
+	 *            允许为{@code null}，基础列表
+	 * @param merge
+	 *            允许为{@code null}，合并列表
 	 * @return
 	 */
-	protected List<DataSetProperty> mergeDataSetProperties(List<? extends DataSetProperty> dataSetProperties,
-			List<? extends DataSetProperty> merged)
+	protected List<DataSetProperty> mergeProperties(List<? extends DataSetProperty> base,
+			List<? extends DataSetProperty> merge)
 	{
-		if (dataSetProperties == null)
-			dataSetProperties = Collections.emptyList();
-		if (merged == null)
-			merged = Collections.emptyList();
+		if (base == null)
+			base = Collections.emptyList();
+		if (merge == null)
+			merge = Collections.emptyList();
 
-		List<DataSetProperty> dps = new ArrayList<DataSetProperty>(dataSetProperties.size());
-		for (DataSetProperty dataSetProperty : dataSetProperties)
+		List<DataSetProperty> dps = new ArrayList<DataSetProperty>(base.size());
+		for (DataSetProperty dataSetProperty : base)
 			dps.add(dataSetProperty.clone());
 
 		for (DataSetProperty dp : dps)
 		{
-			DataSetProperty mp = NameAwareUtil.find(merged, dp.getName());
+			DataSetProperty mp = NameAwareUtil.find(merge, dp.getName());
 			
 			if(mp != null)
 			{
@@ -153,13 +148,13 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 			}
 		}
 
-		for (DataSetProperty mp : merged)
+		for (DataSetProperty mp : merge)
 		{
 			if (NameAwareUtil.find(dps, mp.getName()) == null)
 				dps.add(mp);
 		}
 
-		final List<? extends DataSetProperty> mergedFinal = merged;
+		final List<? extends DataSetProperty> mergedFinal = merge;
 
 		dps.sort(new Comparator<DataSetProperty>()
 		{

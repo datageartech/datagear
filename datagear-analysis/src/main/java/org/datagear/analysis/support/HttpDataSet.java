@@ -378,8 +378,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+			throws DataSetException
 	{
 		String uri = null;
 		String headerContent = null;
@@ -395,7 +395,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			headerContent = setHttpHeaders(request, query);
 			requestContent = setHttpEntity(request, query);
 
-			JsonResponseHandler responseHandler = new JsonResponseHandler(query, properties, resolveProperties,
+			JsonResponseHandler responseHandler = new JsonResponseHandler(query, getProperties(), resolveProperties,
 					getResponseDataJsonPath());
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
@@ -761,8 +761,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 
 		@Override
-		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-				boolean resolveProperties) throws Throwable
+		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query) throws Throwable
 		{
 			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), this.responseJsonReader);
 		}

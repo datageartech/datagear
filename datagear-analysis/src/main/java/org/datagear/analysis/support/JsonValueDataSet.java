@@ -77,8 +77,7 @@ public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResour
 	}
 
 	@Override
-	protected JsonValueDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws Throwable
+	protected JsonValueDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		String json = resolveTemplateJson(this.value, query);
 		return new JsonValueDataSetResource(json, getDataJsonPath());

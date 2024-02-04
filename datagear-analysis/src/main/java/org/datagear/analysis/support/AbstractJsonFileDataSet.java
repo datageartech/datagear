@@ -67,8 +67,7 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 	}
 
 	@Override
-	protected JsonFileDataSetResource getResource(DataSetQuery query, List<DataSetProperty> properties,
-			boolean resolveProperties) throws Throwable
+	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		File file = getJsonFile(query);
 		return new JsonFileDataSetResource("", getDataJsonPath(), getEncoding(), file.getAbsolutePath(),

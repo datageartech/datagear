@@ -99,7 +99,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource) throws Throwable
+	protected ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable
 	{
 		Reader reader = null;
 
@@ -108,7 +108,10 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			reader = resource.getReader();
 
 			Object data = resolveData(reader, resource.getDataJsonPath());
-			List<DataSetProperty> properties = resolveProperties(data);
+			List<DataSetProperty> properties = null;
+
+			if (resolveProperties)
+				properties = resolveProperties(data);
 
 			return new ResourceData(data, properties);
 		}
