@@ -86,6 +86,8 @@ public class ObjectMapperBuilder
 	{
 		ObjectMapper objectMapper = JsonSupport.create();
 		JsonSupport.setWriteJsonFeatures(objectMapper);
+
+		// 读必须设置为支持非规范格式
 		JsonSupport.setReadNonStandardJsonFeatures(objectMapper);
 		
 		//必须忽略没有setter的属性，因为请求提交的JSON可能会包含这样的属性
