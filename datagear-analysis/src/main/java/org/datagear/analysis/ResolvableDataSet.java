@@ -32,8 +32,11 @@ public interface ResolvableDataSet extends DataSet
 {
 	/**
 	 * 解析{@linkplain ResolvedDataSetResult}。
+	 * <p>
+	 * 返回的{@linkplain ResolvedDataSetResult#getProperties()}是从数据中解析的信息。
+	 * </p>
 	 * 
-	 * @param query 应是已通过{@linkplain #isReady(DataSetQuery)}校验的（可能为{@code null}）
+	 * @param query
 	 * @return
 	 * @throws DataSetException
 	 */
