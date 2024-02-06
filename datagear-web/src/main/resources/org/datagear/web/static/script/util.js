@@ -144,7 +144,6 @@
 							};
 							const onDialogHide = function()
 							{
-								$._callBeforeDialogCloseCallbacks(rootEle);
 							};
 							const onDialogAfterHide = function()
 							{
@@ -268,14 +267,15 @@
 	$.bindBeforeCloseDialogCallback = function(ele, name, callback)
 	{
 		var dialogEle = $.getInDialog(ele);
+		var appEle = $("#"+ dialogEle.attr("app-ele-id"));
 		
-		if(dialogEle && dialogEle.length > 0)
+		if(appEle && appEle.length > 0)
 		{
-			var callbacks = dialogEle.data("beforeCloseCallbacks");
+			var callbacks = appEle.data("beforeCloseCallbacks");
 			if(!callbacks)
 			{
 				callbacks = {};
-				dialogEle.data("beforeCloseCallbacks", callbacks);
+				appEle.data("beforeCloseCallbacks", callbacks);
 			}
 			
 			callbacks[name] = callback;
@@ -299,20 +299,14 @@
 	
 	$._callBeforeDialogCloseCallbacks = function(appEle)
 	{
-		var dialogEleId = appEle.attr("dialog-ele-id");
+		var beforeCloseCallbacks = appEle.data("beforeCloseCallbacks");
 		
-		if(dialogEleId)
+		if(beforeCloseCallbacks)
 		{
-			var dialogEle = $("#"+ appEle.attr("dialog-ele-id"));
-			var beforeCloseCallbacks = dialogEle.data("beforeCloseCallbacks");
-			
-			if(beforeCloseCallbacks)
+			$.each(beforeCloseCallbacks, function(name, callback)
 			{
-				$.each(beforeCloseCallbacks, function(name, callback)
-				{
-					callback();
-				});
-			}
+				callback();
+			});
 		}
 	};
 	
@@ -320,7 +314,6 @@
 	{
 		var dialogApp = appEle.data("dialogApp");
 		var dialogVm = appEle.data("dialogVm");
-		var dialogEleId = appEle.attr("dialog-ele-id");
 		
 		$._callBeforeDialogCloseCallbacks(appEle);
 		
