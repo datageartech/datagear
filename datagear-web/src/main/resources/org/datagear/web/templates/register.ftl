@@ -55,8 +55,8 @@
 								</label>
 						        <div class="field-input col-12 md:col-9">
 						        	<p-password id="${pid}password" v-model="fm.user.password" class="input w-full"
-						        		input-class="w-full" toggle-mask :feedback="false"
-						        		name="password" required maxlength="50" autocomplete="new-password">
+						        		input-class="w-full" toggle-mask :feedback="false" required
+						        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
 						        	</p-password>
 						        </div>
 							</div>
@@ -66,8 +66,8 @@
 								</label>
 						        <div class="field-input col-12 md:col-9">
 						        	<p-password id="${pid}confirmPassword" v-model="fm.user.confirmPassword" class="input w-full"
-						        		input-class="w-full" toggle-mask :feedback="false"
-						        		name="confirmPassword" required maxlength="50" autocomplete="new-password">
+						        		input-class="w-full" toggle-mask :feedback="false" required
+						        		:pt="{input:{root:{name:'confirmPassword',maxlength:'50',autocomplete:'new-password'}}}">
 						        	</p-password>
 						        </div>
 							</div>
