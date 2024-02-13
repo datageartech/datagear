@@ -17,8 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.Serializable;
-
 import org.datagear.analysis.ChartResultError;
 
 /**
@@ -27,26 +25,33 @@ import org.datagear.analysis.ChartResultError;
  * @author datagear@163.com
  *
  */
-public class ChartResultErrorMessage implements Serializable
+public class ChartResultErrorMessage extends ErrorMessage
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 错误类型 */
-	private String type = "";
-
-	/** 错误消息 */
-	private String message = "";
 
 	public ChartResultErrorMessage()
 	{
 		super();
 	}
 
+	public ChartResultErrorMessage(String message)
+	{
+		super(message);
+	}
+
 	public ChartResultErrorMessage(String type, String message)
 	{
-		super();
-		this.type = type;
-		this.message = message;
+		super(type, message);
+	}
+
+	public ChartResultErrorMessage(Throwable throwable)
+	{
+		super(throwable);
+	}
+
+	public ChartResultErrorMessage(Throwable throwable, boolean rootCauseMessage)
+	{
+		super(throwable, rootCauseMessage);
 	}
 
 	public ChartResultErrorMessage(ChartResultError error)
@@ -56,45 +61,6 @@ public class ChartResultErrorMessage implements Serializable
 
 	public ChartResultErrorMessage(ChartResultError error, boolean rootCauseMessage)
 	{
-		Throwable throwable = error.getThrowable();
-
-		if (throwable != null)
-		{
-			this.type = throwable.getClass().getSimpleName();
-
-			if (rootCauseMessage)
-			{
-				Throwable cause = throwable;
-
-				while (cause.getCause() != null)
-					cause = cause.getCause();
-
-				this.message = cause.getMessage();
-			}
-			else
-			{
-				this.message = throwable.getMessage();
-			}
-		}
-	}
-
-	public String getType()
-	{
-		return type;
-	}
-
-	public void setType(String type)
-	{
-		this.type = type;
-	}
-
-	public String getMessage()
-	{
-		return message;
-	}
-
-	public void setMessage(String message)
-	{
-		this.message = message;
+		super(error.getThrowable(), rootCauseMessage);
 	}
 }
