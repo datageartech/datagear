@@ -101,6 +101,8 @@
 	po.previewUrl = "#";
 	//需实现
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet){};
+	
+	po.previewColumnAllFieldName = $.uid();
 
 	po.toPreviewFingerprint = function(dataSet)
 	{
@@ -199,11 +201,9 @@
 			previewColumns.push({ name: p.name, label: p.name, style: "" });	
 		});
 		
-		var columnAllFieldName = null;
 		if(fm.mutableModel)
 		{
-			columnAllFieldName = $.uid();
-			previewColumns.push({ name: columnAllFieldName, label: "<@spring.message code='dataSet.mutableModelDataDetail' />", style: "min-width:25rem;" });
+			previewColumns.push({ name: po.previewColumnAllFieldName, label: "<@spring.message code='dataSet.mutableModelDataDetail' />", style: "min-width:25rem;" });
 		}
 		
 		pm.previewColumns = previewColumns;
@@ -214,7 +214,7 @@
 		{
 			$.each(pm.previewResultDatas, function(idx, rd)
 			{
-				rd[columnAllFieldName] = $.toJsonString(rd);
+				rd[po.previewColumnAllFieldName] = $.toJsonString(rd);
 			});
 		}
 	};
