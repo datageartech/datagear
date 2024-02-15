@@ -66,7 +66,7 @@
 <script>
 (function(po)
 {
-	po.setupAjaxTable("/user/pagingQueryData",
+	po.setupAjaxTable("${queryDataUrl}",
 	{
 		multiSortMeta: [ {field: "createTime", order: -1} ]
 	});

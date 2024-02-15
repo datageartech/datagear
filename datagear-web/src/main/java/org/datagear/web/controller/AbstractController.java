@@ -115,6 +115,8 @@ public abstract class AbstractController extends MessageSourceSupport
 	public static final String SUBMIT_ACTION_SAVE_IMPORT = "saveImport";
 	public static final String SUBMIT_ACTION_NONE = "#";
 
+	public static final String KEY_QUERY_DATA_URL = "queryDataUrl";
+
 	public static final String KEY_FORM_MODEL = "formModel";
 	
 	public static final String KEY_IS_MULTIPLE_SELECT = "isMultipleSelect";
@@ -231,6 +233,17 @@ public abstract class AbstractController extends MessageSourceSupport
 		return entity;
 	}
 	
+	/**
+	 * 设置查询数据URL。
+	 * 
+	 * @param model
+	 * @param url
+	 */
+	protected void setQueryDataUrl(Model model, String url)
+	{
+		model.addAttribute(KEY_QUERY_DATA_URL, url);
+	}
+
 	/**
 	 * 设置当前用户是否只能执行只读操作。
 	 * 

@@ -561,7 +561,8 @@ label.align-tip{
 
 .p-dialog .page-foot,
 .page-main-panel .page-foot,
-.p-tabview-panels .page-foot{
+.p-tabview-panels .page-foot,
+.page-hide-foot .page-foot{
 	display: none;
 }
 

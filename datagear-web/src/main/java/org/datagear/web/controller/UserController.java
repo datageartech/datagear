@@ -261,15 +261,19 @@ public class UserController extends AbstractController
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
+		setQueryDataUrl(model, "/user/pagingQueryData");
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyAction(model);
+
 		return "/user/user_table";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		setQueryDataUrl(model, "/user/pagingQueryData");
 		setSelectAction(request, model);
+
 		return "/user/user_table";
 	}
 
