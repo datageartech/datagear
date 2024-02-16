@@ -219,7 +219,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	public boolean updateIgnoreRole(User user)
 	{
 		Map<String, Object> params = buildParamMap();
-		params.put("ignoreRole", true);
+		setIgnoreUpdateRoleParam(params, true);
 
 		return update(user, params);
 	}
@@ -263,8 +263,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 
 		boolean updated = super.update(entity, params);
 
-		Boolean ignoreRole = (Boolean) params.get("ignoreRole");
-		if (ignoreRole == null || !ignoreRole.booleanValue())
+		if (!isIgnoreUpdateRoleParam(params))
 		{
 			saveUserRoles(entity);
 
@@ -273,6 +272,17 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 		}
 
 		return updated;
+	}
+
+	protected boolean isIgnoreUpdateRoleParam(Map<String, Object> params)
+	{
+		Boolean ignore = (Boolean) params.get("ignoreUpdateRole");
+		return (ignore != null && ignore.booleanValue());
+	}
+
+	protected void setIgnoreUpdateRoleParam(Map<String, Object> params, boolean ignore)
+	{
+		params.put("ignoreUpdateRole", ignore);
 	}
 
 	@Override
