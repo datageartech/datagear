@@ -131,21 +131,31 @@ public class UserController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		User user = new User();
+		User user = prepareAddUser(request, model);
+		setAddUserRoles(request, model, user);
+		setFormModel(model, user, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
+		return "/user/user_form";
+	}
+
+	protected User prepareAddUser(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		return new User();
+	}
+
+	protected void setAddUserRoles(HttpServletRequest request, org.springframework.ui.Model model, User user)
+	{
 		Set<Role> dftRoles = this.roleSpec.buildRolesByIds(this.applicationProperties.getDefaultRoleAdd(), true);
 		Set<Role> addRoles = new HashSet<Role>(dftRoles.size());
+
 		for (Role r : dftRoles)
 		{
 			Role role = this.roleService.getById(r.getId());
 			if (role != null)
 				addRoles.add(role);
 		}
+
 		user.setRoles(addRoles);
-
-		setFormModel(model, user, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
-
-		return "/user/user_form";
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
