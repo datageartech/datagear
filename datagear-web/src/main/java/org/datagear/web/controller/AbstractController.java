@@ -40,6 +40,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.EntityService;
+import org.datagear.management.util.DataPermissionSpec;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
@@ -134,6 +135,9 @@ public abstract class AbstractController extends MessageSourceSupport
 	@Autowired
 	private AuthenticationUserGetter authenticationUserGetter;
 
+	@Autowired
+	private DataPermissionSpec dataPermissionSpec;
+
 	public AbstractController()
 	{
 		super();
@@ -174,6 +178,16 @@ public abstract class AbstractController extends MessageSourceSupport
 	public void setAuthenticationUserGetter(AuthenticationUserGetter authenticationUserGetter)
 	{
 		this.authenticationUserGetter = authenticationUserGetter;
+	}
+
+	public DataPermissionSpec getDataPermissionSpec()
+	{
+		return dataPermissionSpec;
+	}
+
+	public void setDataPermissionSpec(DataPermissionSpec dataPermissionSpec)
+	{
+		this.dataPermissionSpec = dataPermissionSpec;
 	}
 
 	protected User getCurrentUser()
@@ -461,19 +475,6 @@ public abstract class AbstractController extends MessageSourceSupport
 			pagingQuery = new DataFilterPagingQuery(pq.getPage(), pq.getPageSize(), pq.getKeyword(), pq.getCondition());
 			pagingQuery.setNotLike(pq.isNotLike());
 		}
-
-		String value = pagingQuery.getDataFilter();
-
-		if (DataPermissionEntityService.DATA_FILTER_VALUE_MINE.equalsIgnoreCase(value))
-			value = DataPermissionEntityService.DATA_FILTER_VALUE_MINE;
-		else if (DataPermissionEntityService.DATA_FILTER_VALUE_OTHER.equalsIgnoreCase(value))
-			value = DataPermissionEntityService.DATA_FILTER_VALUE_OTHER;
-		else if (DataPermissionEntityService.DATA_FILTER_VALUE_ALL.equalsIgnoreCase(value))
-			value = DataPermissionEntityService.DATA_FILTER_VALUE_ALL;
-		else
-			value = DataPermissionEntityService.DATA_FILTER_VALUE_ALL;
-
-		pagingQuery.setDataFilter(value);
 
 		return pagingQuery;
 	}

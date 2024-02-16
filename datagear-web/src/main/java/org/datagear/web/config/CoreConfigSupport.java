@@ -96,6 +96,7 @@ import org.datagear.management.service.impl.SchemaGuardServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserServiceImpl;
+import org.datagear.management.util.DataPermissionSpec;
 import org.datagear.management.util.RoleSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
@@ -434,6 +435,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public AuthenticationUserGetter authenticationUserGetter()
 	{
 		AuthenticationUserGetter bean = new AuthenticationUserGetter();
+		return bean;
+	}
+
+	@Bean
+	public DataPermissionSpec dataPermissionSpec()
+	{
+		DataPermissionSpec bean = new DataPermissionSpec();
 		return bean;
 	}
 
@@ -1051,6 +1059,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		ApplicationContext context = event.getApplicationContext();
 
+		initDataPermissionSpecAwares(context);
 		initAuthorizationResourceServices(context);
 		initAuthorizationListenerAwares(context);
 		initAnalysisProjectAuthorizationListenerAwares(context);
@@ -1103,6 +1112,19 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		InvalidPatternSqlValidator bean = new InvalidPatternSqlValidator(patterns);
 
 		return bean;
+	}
+
+	@SuppressWarnings("rawtypes")
+	protected void initDataPermissionSpecAwares(ApplicationContext context)
+	{
+		Map<String, AbstractMybatisDataPermissionEntityService> entityServices = context
+				.getBeansOfType(AbstractMybatisDataPermissionEntityService.class);
+
+		for (Map.Entry<String, AbstractMybatisDataPermissionEntityService> entry : entityServices.entrySet())
+		{
+			AbstractMybatisDataPermissionEntityService<?, ?> dpes = entry.getValue();
+			dpes.setDataPermissionSpec(this.dataPermissionSpec());
+		}
 	}
 
 	@SuppressWarnings("rawtypes")

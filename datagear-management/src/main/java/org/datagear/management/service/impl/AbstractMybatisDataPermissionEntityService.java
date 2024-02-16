@@ -34,6 +34,7 @@ import org.datagear.management.service.AnalysisProjectAwareEntityService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.DataPermissionSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -69,6 +70,8 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * 每条记录权限缓存存储的最多用户权限数。
 	 */
 	private int permissionCacheMaxLength = 10;
+
+	private DataPermissionSpec dataPermissionSpec = new DataPermissionSpec();
 
 	public AbstractMybatisDataPermissionEntityService()
 	{
@@ -127,6 +130,16 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	public void setPermissionCacheMaxLength(int permissionCacheMaxLength)
 	{
 		this.permissionCacheMaxLength = permissionCacheMaxLength;
+	}
+
+	public DataPermissionSpec getDataPermissionSpec()
+	{
+		return dataPermissionSpec;
+	}
+
+	public void setDataPermissionSpec(DataPermissionSpec dataPermissionSpec)
+	{
+		this.dataPermissionSpec = dataPermissionSpec;
 	}
 
 	@Override
@@ -293,8 +306,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 	protected void setDataFilterParam(Map<String, Object> params, String dataFilter)
 	{
-		if (!StringUtil.isEmpty(dataFilter))
-			params.put("_dataFilter", dataFilter);
+		this.dataPermissionSpec.setFilterParam(params, dataFilter);
 	}
 
 	protected PagingData<T> pagingQueryForAnalysisProjectId(User user, PagingQuery pagingQuery, String dataFilter,
@@ -523,7 +535,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return;
 
-		User user = (User) params.get(DATA_PERMISSION_PARAM_CURRENT_USER);
+		User user = this.dataPermissionSpec.getParamCurrentUser(params);
 
 		if (user == null)
 			return;
@@ -630,12 +642,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	protected void addDataPermissionParameters(Map<String, Object> params, User user, String resourceType,
 			boolean resourceHasCreator)
 	{
-		params.put(DATA_PERMISSION_PARAM_CURRENT_USER, user);
-		params.put(DATA_PERMISSION_PARAM_RESOURCE_TYPE, resourceType);
-		params.put(DATA_PERMISSION_PARAM_RESOURCE_HAS_CREATOR, resourceHasCreator);
-		params.put(DATA_PERMISSION_PARAM_MIN_READ_PERMISSION, Authorization.PERMISSION_READ_START);
-		params.put(DATA_PERMISSION_PARAM_MAX_PERMISSION, Authorization.PERMISSION_MAX);
-		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, Authorization.PERMISSION_NONE_START);
+		this.dataPermissionSpec.setParams(params, user, resourceType, resourceHasCreator);
 	}
 
 	/**
