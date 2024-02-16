@@ -17,9 +17,13 @@
 
 package org.datagear.management.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
 
@@ -33,6 +37,9 @@ public class DataPermissionSpec
 {
 	/** 数据权限参数：当前用户，参考：{@code commonDataPermissionSqls.xml} */
 	public static final String PARAM_CURRENT_USER = "DP_CURRENT_USER";
+
+	/** 数据权限参数：当前用户的角色ID集合，参考：{@code commonDataPermissionSqls.xml} */
+	public static final String PARAM_ROLE_IDS = "DP_ROLE_IDS";
 
 	/** 数据权限参数：资源类型，参考：{@code commonDataPermissionSqls.xml} */
 	public static final String PARAM_RESOURCE_TYPE = "DP_RESOURCE_TYPE";
@@ -79,11 +86,46 @@ public class DataPermissionSpec
 	public void setParams(Map<String, Object> params, User user, String resourceType, boolean resourceHasCreator)
 	{
 		params.put(PARAM_CURRENT_USER, user);
+		setRoleIdsParam(params, user);
 		params.put(PARAM_RESOURCE_TYPE, resourceType);
 		params.put(PARAM_RESOURCE_HAS_CREATOR, resourceHasCreator);
 		params.put(PARAM_MIN_READ_PERMISSION, Authorization.PERMISSION_READ_START);
 		params.put(PARAM_MAX_PERMISSION, Authorization.PERMISSION_MAX);
 		params.put(PARAM_UNSET_PERMISSION, Authorization.PERMISSION_NONE_START);
+	}
+
+	/**
+	 * 设置角色ID集参数。
+	 * <p>
+	 * 通过SQL实现此逻辑有点复杂，而且可能影响查询性能， 因此在这里以编程方式实现，可以提高数据权限查询性能。
+	 * </p>
+	 * 
+	 * @param params
+	 * @param user
+	 */
+	protected void setRoleIdsParam(Map<String, Object> params, User user)
+	{
+		Set<Role> roles = user.getRoles();
+
+		if (roles == null || roles.isEmpty())
+			return;
+
+		List<String> roleIds = new ArrayList<>(roles.size());
+
+		for (Role role : roles)
+		{
+			// 必须是启用的
+			if (role.isEnabled())
+			{
+				roleIds.add(role.getId());
+			}
+		}
+
+		// 为空置为null，简化SQL层判断逻辑
+		if (roleIds.isEmpty())
+			roleIds = null;
+
+		params.put(PARAM_ROLE_IDS, roleIds);
 	}
 
 	/**

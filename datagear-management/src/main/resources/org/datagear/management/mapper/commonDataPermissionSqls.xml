@@ -17,6 +17,7 @@
 		
 		查询参数：
 		DP_CURRENT_USER 必填，当前查询用户，类型：org.datagear.management.domain.User
+		DP_ROLE_IDS 选填，当前查询用户的角色ID集合，类型：String集合
 		DP_RESOURCE_TYPE 必填，授权资源类型，类型：String
 		DP_RESOURCE_HAS_CREATOR 选填，资源表是否有创建用户，默认为false，类型：Boolean
 		DP_MAX_PERMISSION 必填，最大权限值，类型：int
@@ -112,23 +113,16 @@
 				<choose><when test="DP_CURRENT_USER.anonymous == true">
 				OR AUTH.AUTH_PRINCIPAL_TYPE = 'ANONYMOUS'
 				</when><otherwise>
+				<if test="DP_ROLE_IDS != null">
 				OR
 				(
 					AUTH.AUTH_PRINCIPAL_TYPE = 'ROLE'
 					AND AUTH.AUTH_PRINCIPAL IN
-					(
-						SELECT
-							RO.ROLE_ID
-						FROM
-							DATAGEAR_ROLE_USER RU
-						INNER JOIN
-							DATAGEAR_ROLE RO
-						ON
-							RU.RU_ROLE_ID = RO.ROLE_ID
-						WHERE
-							RU.RU_USER_ID = '${DP_CURRENT_USER.id}' AND RO.ROLE_ENABLED = 'true'
-					)
+					<foreach item="item" index="index" collection="DP_ROLE_IDS" open="(" separator="," close=")">
+					'${item}'
+					</foreach>
 				)
+				</if>
 				OR (AUTH.AUTH_PRINCIPAL_TYPE = 'USER' AND AUTH.AUTH_PRINCIPAL = '${DP_CURRENT_USER.id}')
 				</otherwise></choose>
 			)
