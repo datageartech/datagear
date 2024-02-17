@@ -75,7 +75,7 @@
 					<include refid="commonDataPermission.userOnResourceTypePermissionQueryView" />
 				) PQV
 			ON
-				(PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}' AND PQV.AUTH_RESOURCE = IDQV.DP_AUTH_DATA_ID)
+				PQV.AUTH_RESOURCE = IDQV.DP_AUTH_DATA_ID
 			) IDPQV
 		GROUP BY
 			IDPQV.DATA_ID
