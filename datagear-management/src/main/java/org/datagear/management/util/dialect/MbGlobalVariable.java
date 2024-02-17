@@ -17,41 +17,59 @@
 
 package org.datagear.management.util.dialect;
 
+import java.util.Properties;
+
 /**
- * SQL Server 方言。
+ * Mybatis全局变量。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlserverMbSqlDialect extends MbSqlDialect
+public class MbGlobalVariable
 {
-	public SqlserverMbSqlDialect()
+	/**
+	 * 变量名：MAX函数
+	 */
+	public static final String VAR_FUNC_MAX = "FUNC_MAX";
+
+	/**
+	 * 变量名：整数取余函数
+	 */
+	public static final String VAR_FUNC_MODINT = "FUNC_MODINT";
+
+	public MbGlobalVariable()
 	{
 		super();
-		setGlobalVariable(new SqlserverMbGlobalVariable());
 	}
 
-	public SqlserverMbSqlDialect(String identifierQuote)
+	/**
+	 * 填充全局变量。
+	 * 
+	 * @param variables
+	 */
+	public void inflate(Properties variables)
 	{
-		super(identifierQuote);
-		setGlobalVariable(new SqlserverMbGlobalVariable());
+		variables.put(VAR_FUNC_MAX, funcMax());
+		variables.put(VAR_FUNC_MODINT, funcModInt());
 	}
 
-	@Override
-	public boolean supportsPaging()
+	/**
+	 * MAX函数名。
+	 * 
+	 * @return
+	 */
+	public String funcMax()
 	{
-		return false;
+		return "MAX";
 	}
 
-	@Override
-	public String pagingSqlHead(int index, int fetchSize)
+	/**
+	 * 求余函数名。
+	 * 
+	 * @return
+	 */
+	public String funcModInt()
 	{
-		return null;
-	}
-
-	@Override
-	public String pagingSqlFoot(int index, int fetchSize)
-	{
-		return null;
+		return "DATAGEAR_FUNC_MODINT";
 	}
 }

@@ -476,6 +476,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		bean.setTypeHandlers(new TypeHandler<?>[] { new LiteralBooleanTypeHandler(), new DataFormatTypeHandler(),
 				new ResultDataFormatTypeHandler() });
 		
+		MbSqlDialect dialect = this.mbSqlDialect();
+		bean.setConfigurationProperties(dialect.getGlobalVariables());
+
 		return bean;
 	}
 	
@@ -500,10 +503,15 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		String dialectName = getApplicationProperties().getDatasourceDialect();
 
-		MbSqlDialectBuilder builder = new MbSqlDialectBuilder();
+		MbSqlDialectBuilder builder = createMbSqlDialectBuilder();
 		builder.setDialectName(dialectName);
 
 		return builder;
+	}
+
+	protected MbSqlDialectBuilder createMbSqlDialectBuilder()
+	{
+		return new MbSqlDialectBuilder();
 	}
 
 	@Bean

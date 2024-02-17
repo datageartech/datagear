@@ -89,7 +89,7 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 		param.put("schemaId", schemaId);
 		param.put("userId", userId);
 
-		addDialectParamsPagingQuery(param, 0, HISTORY_REMAIN);
+		setPagingQueryParams(param, 0, HISTORY_REMAIN);
 
 		// 如果不支持分页，则删除30天以前的历史
 		if (!getDialect().supportsPaging())
@@ -104,7 +104,7 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 
 	protected void addOrderCreateTimeDesc(Map<String, Object> params)
 	{
-		params.put(QUERY_PARAM_ORDER, toQuoteIdentifier("createTime") + " DESC");
+		params.put(MbSqlDialect.VAR_QUERY_ORDER, toQuoteIdentifier("createTime") + " DESC");
 	}
 
 	@Override

@@ -18,40 +18,35 @@
 package org.datagear.management.util.dialect;
 
 /**
- * SQL Server 方言。
+ * SQL Server Mybatis全局变量。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlserverMbSqlDialect extends MbSqlDialect
+public class SqlserverMbGlobalVariable extends MbGlobalVariable
 {
-	public SqlserverMbSqlDialect()
+	public static final String DEFAULT_FUNC_PREFIX = "dbo.";
+
+	private String funcPrefix = DEFAULT_FUNC_PREFIX;
+
+	public SqlserverMbGlobalVariable()
 	{
 		super();
-		setGlobalVariable(new SqlserverMbGlobalVariable());
 	}
 
-	public SqlserverMbSqlDialect(String identifierQuote)
+	public String getFuncPrefix()
 	{
-		super(identifierQuote);
-		setGlobalVariable(new SqlserverMbGlobalVariable());
+		return funcPrefix;
 	}
 
-	@Override
-	public boolean supportsPaging()
+	public void setFuncPrefix(String funcPrefix)
 	{
-		return false;
+		this.funcPrefix = funcPrefix;
 	}
 
 	@Override
-	public String pagingSqlHead(int index, int fetchSize)
+	public String funcModInt()
 	{
-		return null;
-	}
-
-	@Override
-	public String pagingSqlFoot(int index, int fetchSize)
-	{
-		return null;
+		return getFuncPrefix() + super.funcModInt();
 	}
 }

@@ -83,6 +83,12 @@ public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 	}
 
 	@Override
+	protected String getDialectClassDisplayName()
+	{
+		return MbSqlDialect.class.getSimpleName();
+	}
+
+	@Override
 	protected DerbyMbSqlDialect buildDerbyDialect(Connection cn) throws SQLException
 	{
 		return new DerbyMbSqlDialect(getIdentifierQuote(cn));
@@ -110,12 +116,6 @@ public class MbSqlDialectBuilder extends AbstractDbDialectBuilder<MbSqlDialect>
 	protected SqlserverMbSqlDialect buildSqlserverDialect(Connection cn) throws SQLException
 	{
 		return new SqlserverMbSqlDialect(getIdentifierQuote(cn));
-	}
-
-	@Override
-	protected String getDialectClassDisplayName()
-	{
-		return MbSqlDialect.class.getSimpleName();
 	}
 
 	protected DefaultMbSqlDialect buildDefaultDialect(Connection cn) throws SQLException
