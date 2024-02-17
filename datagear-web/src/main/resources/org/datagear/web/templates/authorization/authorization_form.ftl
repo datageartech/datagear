@@ -44,12 +44,12 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}principalName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='${resourceMeta.authPrincipalLabel}' />
 				</label>
 		        <div class="field-input col-12 md:col-9" style="min-height:2.5rem;">
 		        	<div class="p-inputgroup" v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_USER}'">
-			        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input"
+			        	<p-inputtext id="${pid}principalNameUser" v-model="fm.principalName" type="text" class="input"
 			        		name="principalName" required maxlength="200" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectUser"
@@ -58,7 +58,7 @@
 		        	</div>
 		        	
 		        	<div class="p-inputgroup" v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_ROLE}'">
-			        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input"
+			        	<p-inputtext id="${pid}principalNameRole" v-model="fm.principalName" type="text" class="input"
 			        		name="principalName" required maxlength="200" readonly="readonly">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />" @click="onSelectRole"
@@ -66,12 +66,12 @@
 			        	</p-button>
 		        	</div>
 		        	
-		        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}principalNameAnonymous" v-model="fm.principalName" type="text" class="input w-full"
 		        		v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_ANONYMOUS}'"
 		        		name="principalName" required maxlength="200" readonly="readonly">
 		        	</p-inputtext>
 		        	
-		        	<p-inputtext id="${pid}principalName" v-model="fm.principalName" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}principalNameAll" v-model="fm.principalName" type="text" class="input w-full"
 		        		v-show="fm.principalType == '${Authorization.PRINCIPAL_TYPE_ALL}'"
 		        		name="principalName" required maxlength="200" readonly="readonly">
 		        	</p-inputtext>
