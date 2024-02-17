@@ -498,17 +498,6 @@
 				}
 			},
 			{
-				label: "<@spring.message code='delete' />",
-				visible: function()
-				{
-					return !po.isReadonlyAction;
-				},
-				command: function()
-				{
-					po.handleDeleteAction("/schema/delete");
-				}
-			},
-			{
 				label: "<@spring.message code='autherization' />",
 				visible: function()
 				{
@@ -520,6 +509,18 @@
 					{
 						po.openTableDialog("/authorization/${Schema.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(schema.id)+"/query");
 					});
+				}
+			},
+			{
+				label: "<@spring.message code='delete' />",
+				visible: function()
+				{
+					return !po.isReadonlyAction;
+				},
+				class: "p-error",
+				command: function()
+				{
+					po.handleDeleteAction("/schema/delete");
 				}
 			},
 			{ separator: true },
