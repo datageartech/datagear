@@ -85,6 +85,22 @@
 		return "/authorization/${resourceMeta.resourceType}/" + encodeURIComponent("${resource?js_string?no_esc}") + "/" + action;
 	};
 	
+	po.formatPrincipalType = function(auth)
+	{
+		var pt = auth.principalType;
+		
+		if(pt == "${Authorization.PRINCIPAL_TYPE_USER}")
+			return "<@spring.message code='authorization.principalType.USER' />";
+		else if(pt == "${Authorization.PRINCIPAL_TYPE_ROLE}")
+			return "<@spring.message code='authorization.principalType.ROLE' />";
+		else if(pt == "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}")
+			return "<@spring.message code='authorization.principalType.ANONYMOUS' />";
+		else if(pt == "${Authorization.PRINCIPAL_TYPE_ALL}")
+			return "<@spring.message code='authorization.principalType.ALL' />";
+		else
+			return pt;
+	};
+	
 	po.vuePageModel(
 	{
 		enableSetEnable: po.enableSetEnable,
@@ -100,18 +116,7 @@
 	{
 		formatPrincipalType: function(data)
 		{
-			var pt = data.principalType;
-			
-			if(pt == "${Authorization.PRINCIPAL_TYPE_USER}")
-				return "<@spring.message code='authorization.principalType.USER' />";
-			else if(pt == "${Authorization.PRINCIPAL_TYPE_ROLE}")
-				return "<@spring.message code='authorization.principalType.ROLE' />";
-			else if(pt == "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}")
-				return "<@spring.message code='authorization.principalType.ANONYMOUS' />";
-			else if(pt == "${Authorization.PRINCIPAL_TYPE_ALL}")
-				return "<@spring.message code='authorization.principalType.ALL' />";
-			else
-				return "";
+			return po.formatPrincipalType(data);
 		},
 		formatEnabled: function(data)
 		{
