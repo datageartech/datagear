@@ -1463,6 +1463,7 @@
 				label: "<@spring.message code='chartTipCreate' />",
 				insertType: insertType,
 				parentLabelPath: parentLabelPath,
+				visible: po.enableInsertNewChart,
 				command: function(e)
 				{
 					e.item.commandExec();
@@ -1833,6 +1834,7 @@
 						{
 							label: "<@spring.message code='bindOrReplaceChartTipCreate' />",
 							parentLabelPath: "<@spring.message code='insert' />",
+							visible: po.enableInsertNewChart,
 							command: function(e)
 							{
 								e.item.commandExec();
