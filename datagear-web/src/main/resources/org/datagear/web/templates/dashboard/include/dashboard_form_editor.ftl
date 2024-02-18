@@ -22,6 +22,7 @@
 依赖：
 
 -->
+<#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <p-tabview v-model:active-index="pm.resContentTabs.activeIndex"
 	:scrollable="true" @tab-change="onResourceContentTabChange"
 	@tab-click="onResourceContentTabClick" class="contextmenu-tabview light-tabview"
@@ -43,9 +44,14 @@
 					</p-selectbutton>
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
-					<p-button label="<@spring.message code='insertChart' />" class="p-button-sm for-open-chart-panel"
-						@click="onInsertCodeEditorChart($event, tab)" v-if="tab.isTemplate">
-					</p-button>
+					<span class="p-buttonset">
+						<p-button icon="pi pi-list" label="<@spring.message code='selectChart' />" severity="secondary" class="p-button-sm for-open-chart-panel" title="<@spring.message code='dashboard.insertChart.select' />"
+							@click="onInsertCodeEditorChart($event, tab, false)" v-if="tab.isTemplate">
+						</p-button>
+						<p-button icon="pi pi-plus" label="<@spring.message code='createChart' />" severity="secondary" class="p-button-sm for-open-chart-panel" title="<@spring.message code='dashboard.insertChart.create' />"
+							@click="onInsertCodeEditorChart($event, tab, true)" v-if="tab.isTemplate && pm.enableInsertNewChart">
+						</p-button>
+					</span>
 					<p-menubar :model="pm.codeEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
@@ -97,6 +103,7 @@
 {
 	po.currentUserId = "${currentUser.id!}";
 	po.defaultTemplateName = "${defaultTempalteName}";
+	po.enableInsertNewChart = ("${(enableInsertNewChart!true)?string('true', 'false')}"  == "true");
 	
 	//实现重命名操作后编辑器更新逻辑
 	po.updateEditorResNames = function(renames)
@@ -128,6 +135,23 @@
 			}
 		});
 		*/
+	};
+	
+	po.getCurrentAnalysisProjectId = function()
+	{
+		var fm = po.vueFormModel();
+		return (fm.analysisProject ? fm.analysisProject.id : null);
+	};
+	
+	po.addCurrentAnalysisProjectIdParam = function(url)
+	{
+		var paramName = "${AbstractController.KEY_ANALYSIS_PROJECT_ID}";
+		var paramValue = po.getCurrentAnalysisProjectId();
+		
+		if(paramValue)
+			return $.addParam(url, paramName, paramValue);
+		else
+			return url;
 	};
 	
 	po.resContentTabId = function(resName)
@@ -1623,6 +1647,7 @@
 				{ name: "<@spring.message code='dashboard.templateEditMode.code' />", value: "code" },
 				{ name: "<@spring.message code='dashboard.templateEditMode.visual' />", value: "visual" }
 			],
+			enableInsertNewChart: po.enableInsertNewChart,
 			resContentTabs:
 			{
 				items: [],
@@ -2174,12 +2199,35 @@
 				po.initVisualDashboardEditor(tab);
 			},
 			
-			onInsertCodeEditorChart: function(e, tab)
+			onInsertCodeEditorChart: function(e, tab, create)
 			{
-				po.showSelectChartDialog(function(chartWidgets)
+				create = (create == null ? false: create);
+				
+				if(create)
 				{
-					po.insertCodeEditorChart(tab, chartWidgets);
-				});
+					po.open(po.addCurrentAnalysisProjectIdParam("/chart/add?disableSaveShow=true"),
+					{
+						width: "70vw",
+						pageParam:
+						{
+							submitSuccess: function(chartWidget)
+							{
+								if(!chartWidget)
+									return;
+								
+								chartWidget = [ chartWidget ];
+								po.insertCodeEditorChart(tab, chartWidget);
+							}
+						}
+					});
+				}
+				else
+				{
+					po.showSelectChartDialog(function(chartWidgets)
+					{
+						po.insertCodeEditorChart(tab, chartWidgets);
+					});
+				}
 			},
 			
 			formatVeElePathDisplayName: function(elePath)

@@ -220,6 +220,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		addAttributeForWriteJson(model, "chartPluginVO", null);
 		model.addAttribute("initResultDataFormat", createDefaultResultDataFormat());
 		model.addAttribute("enableResultDataFormat", false);
+		setDisableSaveShowAttr(request, response, model);
 
 		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 
@@ -235,6 +236,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 		convertForFormModel(chart, request);
 		setResultDataFormatModel(chart, model);
+		setDisableSaveShowAttr(request, response, model);
 
 		setFormModel(model, chart, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 		
@@ -275,6 +277,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		chart.setId(null);
 		convertForFormModel(chart, request);
 		setResultDataFormatModel(chart, model);
+		setDisableSaveShowAttr(request, response, model);
 
 		setFormModel(model, chart, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		
@@ -668,6 +671,30 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			HtmlChartWidgetEntity entity)
 	{
 		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+	}
+
+	protected boolean setDisableSaveShowAttr(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		boolean disable = isDisableSaveShow(request, response, model);
+		model.addAttribute("disableSaveShow", disable);
+
+		return disable;
+	}
+
+	/**
+	 * 是否在图表表单页面禁用【保存并展示】功能按钮。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	protected boolean isDisableSaveShow(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		String pv = request.getParameter("disableSaveShow");
+		return ("1".equals(pv) || "true".equals(pv));
 	}
 
 	protected ResultDataFormat createDefaultResultDataFormat()

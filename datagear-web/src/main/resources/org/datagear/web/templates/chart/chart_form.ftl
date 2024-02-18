@@ -277,7 +277,7 @@
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
-			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow"></p-button>
+			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow" v-if="!pm.disableSaveShow"></p-button>
 		</div>
 	</form>
 	<p-overlaypanel ref="${pid}dataSignsPanelEle" append-to="body"
@@ -462,6 +462,7 @@
 (function(po)
 {
 	po.submitUrl = "/chart/"+po.submitAction;
+	po.disableSaveShow = ("${(disableSaveShow!false)?string('true', 'false')}"  == "true");
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -842,6 +843,7 @@
 	
 	po.vuePageModel(
 	{
+		disableSaveShow: po.disableSaveShow,
 		chartPluginDataSigns: (formModel.pluginVo ? (formModel.pluginVo.dataSigns || []) : []),
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,

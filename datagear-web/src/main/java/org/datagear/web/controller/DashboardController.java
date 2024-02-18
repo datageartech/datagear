@@ -280,6 +280,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		
 		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
+		setEnableInsertNewChartAttr(request, response, model);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -294,6 +295,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		
 		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
+		setEnableInsertNewChartAttr(request, response, model);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -313,8 +315,32 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
 		model.addAttribute("copySourceId", id);
+		setEnableInsertNewChartAttr(request, response, model);
 
 		return "/dashboard/dashboard_form";
+	}
+
+	protected boolean setEnableInsertNewChartAttr(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		boolean enable = isEnableInsertNewChart(request, response, model);
+		model.addAttribute("enableInsertNewChart", enable);
+
+		return enable;
+	}
+
+	/**
+	 * 是否在看板表单页面启用【插入图表】功能按钮。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	protected boolean isEnableInsertNewChart(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		return true;
 	}
 
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
