@@ -48,7 +48,7 @@
 						<p-button icon="pi pi-list" label="<@spring.message code='selectChart' />" severity="secondary" class="p-button-sm for-open-chart-panel" title="<@spring.message code='dashboard.insertChart.select' />"
 							@click="onInsertCodeEditorChart($event, tab, false)" v-if="tab.isTemplate">
 						</p-button>
-						<p-button icon="pi pi-plus" label="<@spring.message code='createChart' />" severity="secondary" class="p-button-sm for-open-chart-panel" title="<@spring.message code='dashboard.insertChart.create' />"
+						<p-button icon="pi pi-plus" label="<@spring.message code='createChart' />" severity="secondary" class="p-button-sm" title="<@spring.message code='dashboard.insertChart.create' />"
 							@click="onInsertCodeEditorChart($event, tab, true)" v-if="tab.isTemplate && pm.enableInsertNewChart">
 						</p-button>
 					</span>
@@ -1410,12 +1410,30 @@
 		iframe.css("transform", "scale("+scale+")");
 	};
 	
+	po.openAddChartPanel = function(callback)
+	{
+		po.open(po.addCurrentAnalysisProjectIdParam("/chart/add?disableSaveShow=true"),
+		{
+			width: "70vw",
+			pageParam:
+			{
+				submitSuccess: function(chartWidget)
+				{
+					if(!chartWidget)
+						return;
+					
+					callback(chartWidget);
+				}
+			}
+		});
+	};
+	
 	po.buildTplVisualInsertMenuItems = function(insertType, parentLabelPath)
 	{
 		var items =
 		[
 			{
-				label: "<@spring.message code='chart' />",
+				label: "<@spring.message code='chartTipSelect' />",
 				class: "for-open-chart-panel",
 				insertType: insertType,
 				parentLabelPath: parentLabelPath,
@@ -1437,6 +1455,33 @@
 						po.showSelectChartDialog(function(chartWidgets)
 						{
 							po.insertVeChart(chartWidgets);
+						});
+					}
+				}
+			},
+			{
+				label: "<@spring.message code='chartTipCreate' />",
+				insertType: insertType,
+				parentLabelPath: parentLabelPath,
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
+				{
+					po.veQuickExecuteMenuItem(this);
+					
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						if(!dashboardEditor.checkInsertChart(this.insertType))
+							return;
+						
+						po.veCurrentInsertType = this.insertType;
+						po.openAddChartPanel(function(chartWidget)
+						{
+							chartWidget = [ chartWidget ];
+							po.insertVeChart(chartWidget);
 						});
 					}
 				}
@@ -1761,7 +1806,7 @@
 					items:
 					[
 						{
-							label: "<@spring.message code='bindOrReplaceChart' />",
+							label: "<@spring.message code='bindOrReplaceChartTipSelect' />",
 							class: "for-open-chart-panel",
 							parentLabelPath: "<@spring.message code='insert' />",
 							command: function(e)
@@ -1781,6 +1826,31 @@
 									po.showSelectChartDialog(function(chartWidgets)
 									{
 										po.bindOrReplaceVeChart(chartWidgets);
+									});
+								}
+							}
+						},
+						{
+							label: "<@spring.message code='bindOrReplaceChartTipCreate' />",
+							parentLabelPath: "<@spring.message code='insert' />",
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkBindChart())
+										return;
+									
+									po.openAddChartPanel(function(chartWidget)
+									{
+										chartWidget = [ chartWidget ];
+										po.bindOrReplaceVeChart(chartWidget);
 									});
 								}
 							}
@@ -2205,20 +2275,10 @@
 				
 				if(create)
 				{
-					po.open(po.addCurrentAnalysisProjectIdParam("/chart/add?disableSaveShow=true"),
+					po.openAddChartPanel(function(chartWidget)
 					{
-						width: "70vw",
-						pageParam:
-						{
-							submitSuccess: function(chartWidget)
-							{
-								if(!chartWidget)
-									return;
-								
-								chartWidget = [ chartWidget ];
-								po.insertCodeEditorChart(tab, chartWidget);
-							}
-						}
+						chartWidget = [ chartWidget ];
+						po.insertCodeEditorChart(tab, chartWidget);
 					});
 				}
 				else
