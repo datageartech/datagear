@@ -1182,10 +1182,10 @@
 		if(results == null)
 			throw new Error("[results] required");
 		
-		var append = this.updateAppend();
-		if(append && append.beforeListener)
+		var appendent = this.updateAppendent();
+		if(appendent && appendent.beforeListener)
 		{
-			results = this._appendUpdateResults(results, append);
+			results = this._appendUpdateResults(results, appendent);
 		}
 		
 		this.statusUpdating(true);
@@ -1210,10 +1210,10 @@
 		if(!this.statusUpdating())
 			throw new Error("chart is illegal state for doUpdate()");
 		
-		var append = this.updateAppend();
-		if(append && !append.beforeListener)
+		var appendent = this.updateAppendent();
+		if(appendent && !appendent.beforeListener)
 		{
-			results = this._appendUpdateResults(results, append);
+			results = this._appendUpdateResults(results, appendent);
 		}
 		
 		//先保存结果，确保updateResults()在渲染器的update函数作用域内可用
@@ -1237,9 +1237,9 @@
 	};
 	
 	//使用上次更新结果数据追加新的结果数据
-	chartBase._appendUpdateResults = function(results, append)
+	chartBase._appendUpdateResults = function(results, appendent)
 	{
-		if(!append)
+		if(!appendent)
 			return results;
 		
 		var old = this.updateResults();
@@ -1248,7 +1248,7 @@
 			return results;
 		
 		var newResults = [];
-		var newDataSize = append.size;
+		var newDataSize = appendent.size;
 		
 		for(var i=0; i<(results ? results.length : 0); i++)
 		{
@@ -1267,7 +1267,9 @@
 				newData = newData.slice(newData.length - newDataSize);
 			}
 			
-			newResults[i] = { data: newData };
+			//采用$.extend()方式，可保留results[i]的其他属性
+			newResults[i] = $.extend({}, results[i]);
+			newResults[i].data = newData;
 		}
 		
 		return newResults;
@@ -4097,12 +4099,15 @@
 	/**
 	 * 获取/设置更新追加模式。
 	 * 更新追加模式是指：每次调用chart.update()更新图表时，使用上次的数据追加合并新数据更新图表。
+	 * 对于获取操作，如果未设置、或者设置为null，将会读取图表选项里的dgUpdateAppendent作为返回值。
 	 * 
-	 * @param append 可选，要设置的追加模式，格式为：
+	 * @param appendent 可选，要设置的追加模式，格式为：
 	 * 					//等同于下面的：{ size: 10, beforeListener: false }
 	 * 					true、
 	 * 					//禁用
 	 * 					false、
+	 * 					//重置
+	 * 					null、
 	 * 					//等同于下面的：{ size: 数值, beforeListener: false }
 	 * 					数值、
 	 * 					//具体追加模式
@@ -4113,51 +4118,50 @@
 	 * 
 	 * @since 4.8.0
 	 */
-	chartBase.updateAppend = function(append)
+	chartBase.updateAppendent = function(appendent)
 	{
-		if(append === undefined)
+		if(appendent === undefined)
 		{
-			var re = this._updateAppend;
+			var re = this._updateAppendent;
 			
-			//支持在图表选项里使用dgUpdateAppend定义追加模式
-			if(re === undefined)
+			//支持在图表选项里使用dgUpdateAppendent定义追加模式
+			if(re == null)
 			{
 				var renderOptions = this.renderOptions();
-				re = (renderOptions ? renderOptions["dgUpdateAppend"] : undefined);
-				if(re === undefined)
+				re = (renderOptions ? renderOptions["dgUpdateAppendent"] : undefined);
+				if(re == null)
 				{
 					var options = this.options();
-					re = (options ? options["dgUpdateAppend"] : undefined);
+					re = (options ? options["dgUpdateAppendent"] : undefined);
 				}
 			}
 			
-			return this._formatUpdateAppend(re);
+			return this._formatUpdateAppendent(re);
 		}
 		else
 		{
-			append = this._formatUpdateAppend(re);
-			this._updateAppend = append;
+			//允许设置为null，这样读取时可支持再次从图表选项里读
+			appendent = (appendent == null ? null : this._formatUpdateAppendent(appendent));
+			this._updateAppendent = appendent;
 		}
 	};
 	
-	chartBase._formatUpdateAppend = function(append)
+	chartBase._formatUpdateAppendent = function(appendent)
 	{
-		var re = null;
-		
-		if(append == null)
+		if(appendent == null)
 		{
-			re = false;
+			appendent = false;
 		}
-		else if(append === true)
+		else if(appendent === true)
 		{
-			re = { size: 10, beforeListener: false };
+			appendent = { size: 10, beforeListener: false };
 		}
-		else if(chartFactory.isNumber(append))
+		else if(chartFactory.isNumber(appendent))
 		{
-			re = { size: append, beforeListener: false };
+			appendent = { size: appendent, beforeListener: false };
 		}
 		
-		return (re == null ? false : re);
+		return appendent;
 	};
 	
 	//-------------
