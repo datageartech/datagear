@@ -243,6 +243,7 @@
 		{name: "themeStyleName", value: "themeStyleName()", displayName: "themeStyleName() ", displayComment: "chart", categories: ["chart"]},
 		{name: "themeStyleSheet", value: "themeStyleSheet(", displayName: "themeStyleSheet() ", displayComment: "chart", categories: ["chart"]},
 		{name: "update", value: "update(", displayName: "update() ", displayComment: "chart", categories: ["chart"]},
+		{name: "updateAppendMode", value: "updateAppendMode(", displayName: "updateAppendMode() ", displayComment: "chart", categories: ["chart"]},
 		{name: "updateGroup", value: "updateGroup(", displayName: "updateGroup() ", displayComment: "chart", categories: ["chart"]},
 		{name: "updateInterval", value: "updateInterval", displayName: "updateInterval ", displayComment: "chart", categories: ["chart"]},
 		{name: "updateResults", value: "updateResults(", displayName: "updateResults() ", displayComment: "chart", categories: ["chart"]},

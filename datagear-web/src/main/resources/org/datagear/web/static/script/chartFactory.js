@@ -1182,10 +1182,10 @@
 		if(results == null)
 			throw new Error("[results] required");
 		
-		var appendent = this.updateAppendent();
-		if(appendent && appendent.beforeListener)
+		var appendMode = this.updateAppendMode();
+		if(appendMode && appendMode.beforeListener)
 		{
-			results = this._appendUpdateResults(results, appendent);
+			results = this._appendUpdateResults(results, appendMode);
 		}
 		
 		this.statusUpdating(true);
@@ -1210,10 +1210,10 @@
 		if(!this.statusUpdating())
 			throw new Error("chart is illegal state for doUpdate()");
 		
-		var appendent = this.updateAppendent();
-		if(appendent && !appendent.beforeListener)
+		var appendMode = this.updateAppendMode();
+		if(appendMode && !appendMode.beforeListener)
 		{
-			results = this._appendUpdateResults(results, appendent);
+			results = this._appendUpdateResults(results, appendMode);
 		}
 		
 		//先保存结果，确保updateResults()在渲染器的update函数作用域内可用
@@ -1237,9 +1237,9 @@
 	};
 	
 	//使用上次更新结果数据追加新的结果数据
-	chartBase._appendUpdateResults = function(results, appendent)
+	chartBase._appendUpdateResults = function(results, appendMode)
 	{
-		if(!appendent)
+		if(!appendMode)
 			return results;
 		
 		var old = this.updateResults();
@@ -1248,7 +1248,7 @@
 			return results;
 		
 		var newResults = [];
-		var newDataSize = appendent.size;
+		var newDataSize = appendMode.size;
 		
 		for(var i=0; i<(results ? results.length : 0); i++)
 		{
@@ -4099,9 +4099,9 @@
 	/**
 	 * 获取/设置更新追加模式。
 	 * 更新追加模式是指：每次调用chart.update()更新图表时，使用上次的数据追加合并新数据更新图表。
-	 * 对于获取操作，如果未设置、或者设置为null，将会读取图表选项里的dgUpdateAppendent作为返回值。
+	 * 对于获取操作，如果未设置、或者设置为null，将会读取图表选项里的dgUpdateAppendMode作为返回值。
 	 * 
-	 * @param appendent 可选，要设置的追加模式，格式为：
+	 * @param appendMode 可选，要设置的追加模式，格式为：
 	 * 					//等同于下面的：{ size: 10, beforeListener: false }
 	 * 					true、
 	 * 					//禁用
@@ -4118,50 +4118,50 @@
 	 * 
 	 * @since 4.8.0
 	 */
-	chartBase.updateAppendent = function(appendent)
+	chartBase.updateAppendMode = function(appendMode)
 	{
-		if(appendent === undefined)
+		if(appendMode === undefined)
 		{
-			var re = this._updateAppendent;
+			var re = this._updateAppendMode;
 			
-			//支持在图表选项里使用dgUpdateAppendent定义追加模式
+			//支持在图表选项里使用dgUpdateAppendMode定义追加模式
 			if(re == null)
 			{
 				var renderOptions = this.renderOptions();
-				re = (renderOptions ? renderOptions["dgUpdateAppendent"] : undefined);
+				re = (renderOptions ? renderOptions["dgUpdateAppendMode"] : undefined);
 				if(re == null)
 				{
 					var options = this.options();
-					re = (options ? options["dgUpdateAppendent"] : undefined);
+					re = (options ? options["dgUpdateAppendMode"] : undefined);
 				}
 			}
 			
-			return this._formatUpdateAppendent(re);
+			return this._formatUpdateAppendMode(re);
 		}
 		else
 		{
 			//允许设置为null，这样读取时可支持再次从图表选项里读
-			appendent = (appendent == null ? null : this._formatUpdateAppendent(appendent));
-			this._updateAppendent = appendent;
+			appendMode = (appendMode == null ? null : this._formatUpdateAppendMode(appendMode));
+			this._updateAppendMode = appendMode;
 		}
 	};
 	
-	chartBase._formatUpdateAppendent = function(appendent)
+	chartBase._formatUpdateAppendMode = function(appendMode)
 	{
-		if(appendent == null)
+		if(appendMode == null)
 		{
-			appendent = false;
+			appendMode = false;
 		}
-		else if(appendent === true)
+		else if(appendMode === true)
 		{
-			appendent = { size: 10, beforeListener: false };
+			appendMode = { size: 10, beforeListener: false };
 		}
-		else if(chartFactory.isNumber(appendent))
+		else if(chartFactory.isNumber(appendMode))
 		{
-			appendent = { size: appendent, beforeListener: false };
+			appendMode = { size: appendMode, beforeListener: false };
 		}
 		
-		return appendent;
+		return appendMode;
 	};
 	
 	//-------------
