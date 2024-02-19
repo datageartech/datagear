@@ -1182,6 +1182,12 @@
 		if(results == null)
 			throw new Error("[results] required");
 		
+		var append = this.updateAppend();
+		if(append && append.beforeListener)
+		{
+			results = this._appendUpdateResults(results, append);
+		}
+		
 		this.statusUpdating(true);
 		
 		var doUpdate = true;
@@ -1204,6 +1210,12 @@
 		if(!this.statusUpdating())
 			throw new Error("chart is illegal state for doUpdate()");
 		
+		var append = this.updateAppend();
+		if(append && !append.beforeListener)
+		{
+			results = this._appendUpdateResults(results, append);
+		}
+		
 		//先保存结果，确保updateResults()在渲染器的update函数作用域内可用
 		this.updateResults(results);
 		
@@ -1222,6 +1234,43 @@
 		
 		if(!async)
 			this.statusUpdated(true);
+	};
+	
+	//使用上次更新结果数据追加新的结果数据
+	chartBase._appendUpdateResults = function(results, append)
+	{
+		if(!append)
+			return results;
+		
+		var old = this.updateResults();
+		
+		if(old == null || old.length == 0)
+			return results;
+		
+		var newResults = [];
+		var newDataSize = append.size;
+		
+		for(var i=0; i<(results ? results.length : 0); i++)
+		{
+			var oldData = (old[i] ? old[i].data : []);
+			oldData = (oldData == null ? [] : oldData);
+			oldData = ($.isArray(oldData) ? oldData : [ oldData ]);
+			
+			var resultData = (results[i] ? results[i].data : []);
+			resultData = (resultData == null ? [] : resultData);
+			resultData = ($.isArray(resultData) ? resultData : [ resultData ]);
+			
+			var newData = oldData.concat(resultData);
+			
+			if(newData.length > newDataSize)
+			{
+				newData = newData.slice(newData.length - newDataSize);
+			}
+			
+			newResults[i] = { data: newData };
+		}
+		
+		return newResults;
 	};
 	
 	/**
@@ -4043,6 +4092,72 @@
 	{
 		var theme = this._themeNonNull();
 		return chartFactory.themeGradualColor(theme, factor);
+	};
+	
+	/**
+	 * 获取/设置更新追加模式。
+	 * 更新追加模式是指：每次调用chart.update()更新图表时，使用上次的数据追加合并新数据更新图表。
+	 * 
+	 * @param append 可选，要设置的追加模式，格式为：
+	 * 					//等同于下面的：{ size: 10, beforeListener: false }
+	 * 					true、
+	 * 					//禁用
+	 * 					false、
+	 * 					//等同于下面的：{ size: 数值, beforeListener: false }
+	 * 					数值、
+	 * 					//具体追加模式
+	 * 					//size：数据窗口大小，追加后保留的最大数据数目（新数据优先）
+	 * 					//beforeListener：是否在图表监听器的onUpdate前追加，否则，将在之后追加
+	 * 					{ size: 10, beforeListener: false }
+	 * @returns 更新追加模式，格式为：{ size: 数值, beforeListener: true、false }、false 表示没有禁用追加模式
+	 * 
+	 * @since 4.8.0
+	 */
+	chartBase.updateAppend = function(append)
+	{
+		if(append === undefined)
+		{
+			var re = this._updateAppend;
+			
+			//支持在图表选项里使用dgUpdateAppend定义追加模式
+			if(re === undefined)
+			{
+				var renderOptions = this.renderOptions();
+				re = (renderOptions ? renderOptions["dgUpdateAppend"] : undefined);
+				if(re === undefined)
+				{
+					var options = this.options();
+					re = (options ? options["dgUpdateAppend"] : undefined);
+				}
+			}
+			
+			return this._formatUpdateAppend(re);
+		}
+		else
+		{
+			append = this._formatUpdateAppend(re);
+			this._updateAppend = append;
+		}
+	};
+	
+	chartBase._formatUpdateAppend = function(append)
+	{
+		var re = null;
+		
+		if(append == null)
+		{
+			re = false;
+		}
+		else if(append === true)
+		{
+			re = { size: 10, beforeListener: false };
+		}
+		else if(chartFactory.isNumber(append))
+		{
+			re = { size: append, beforeListener: false };
+		}
+		
+		return (re == null ? false : re);
 	};
 	
 	//-------------
