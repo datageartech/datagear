@@ -80,7 +80,6 @@ import org.datagear.dataexchange.support.SqlDataImport;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.meta.SimpleTable;
-import org.datagear.meta.TableType;
 import org.datagear.meta.TableUtil;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.Dialect;
@@ -1505,9 +1504,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				Connection cn = getConnection();
-
-				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
-				tables = TableType.filterUserDataEntityTables(cn, getDbMetaResolver(), tables);
+				List<SimpleTable> tables = getDbMetaResolver().getEntityTables(cn);
 
 				return TableUtil.namesOf(tables, true);
 			}

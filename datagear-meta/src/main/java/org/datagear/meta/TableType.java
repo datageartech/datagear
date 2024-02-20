@@ -17,12 +17,6 @@
 
 package org.datagear.meta;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.datagear.meta.resolver.DBMetaResolver;
-
 /**
  * 表类型。
  * <p>
@@ -72,49 +66,5 @@ public class TableType
 			return TableType.SYNONYM;
 		else
 			return tableType;
-	}
-
-	/**
-	 * 过滤保留用户数据表。
-	 * 
-	 * @param cn
-	 * @param dbMetaResolver
-	 * @param tables
-	 * @return
-	 */
-	public static List<SimpleTable> filterUserDataTables(Connection cn, DBMetaResolver dbMetaResolver,
-			List<SimpleTable> tables)
-	{
-		List<SimpleTable> re = new ArrayList<>(tables.size());
-
-		for (SimpleTable table : tables)
-		{
-			if (dbMetaResolver.isUserDataTable(cn, table))
-				re.add(table);
-		}
-
-		return re;
-	}
-
-	/**
-	 * 过滤保留用户数据实体表。
-	 * 
-	 * @param cn
-	 * @param dbMetaResolver
-	 * @param tables
-	 * @return
-	 */
-	public static List<SimpleTable> filterUserDataEntityTables(Connection cn, DBMetaResolver dbMetaResolver,
-			List<SimpleTable> tables)
-	{
-		List<SimpleTable> re = new ArrayList<>(tables.size());
-
-		for (SimpleTable table : tables)
-		{
-			if (dbMetaResolver.isUserDataEntityTable(cn, table))
-				re.add(table);
-		}
-
-		return re;
 	}
 }

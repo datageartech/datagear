@@ -77,31 +77,45 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
-	public List<SimpleTable> getSimpleTables(Connection cn) throws DBMetaResolverException
+	public List<SimpleTable> getTables(Connection cn) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
-		return resolver.getSimpleTables(cn);
+		return resolver.getTables(cn);
 	}
 
 	@Override
-	public SimpleTable getRandomSimpleTable(Connection cn) throws DBMetaResolverException
+	public List<SimpleTable> getDataTables(Connection cn) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
-		return resolver.getRandomSimpleTable(cn);
+		return resolver.getDataTables(cn);
 	}
 
 	@Override
-	public boolean isUserDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	public List<SimpleTable> getEntityTables(Connection cn) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
-		return resolver.isUserDataTable(cn, table);
+		return resolver.getEntityTables(cn);
 	}
 
 	@Override
-	public boolean isUserDataEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	public SimpleTable getRandomDataTable(Connection cn) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
-		return resolver.isUserDataEntityTable(cn, table);
+		return resolver.getRandomDataTable(cn);
+	}
+
+	@Override
+	public boolean isDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.isDataTable(cn, table);
+	}
+
+	@Override
+	public boolean isEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.isEntityTable(cn, table);
 	}
 
 	@Override
@@ -161,7 +175,7 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
-	public List<String[]> getImportTables(Connection cn, String... tableNames)
+	public List<String[]> getImportTables(Connection cn, String... tableNames) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
 		return resolver.getImportTables(cn, tableNames);

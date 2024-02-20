@@ -68,7 +68,7 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 	@Test
 	public void getSimpleTablesTest() throws Exception
 	{
-		List<SimpleTable> simpleTables = this.genericDBMetaResolver.getSimpleTables(this.connection);
+		List<SimpleTable> simpleTables = this.genericDBMetaResolver.getTables(this.connection);
 
 		assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
 		assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));

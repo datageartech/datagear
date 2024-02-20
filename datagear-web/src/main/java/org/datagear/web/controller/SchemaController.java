@@ -34,7 +34,6 @@ import org.datagear.management.service.impl.SaveSchemaPermissionDeniedException;
 import org.datagear.management.util.GuardEntity;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
-import org.datagear.meta.TableType;
 import org.datagear.meta.TableUtil;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
@@ -315,9 +314,8 @@ public class SchemaController extends AbstractSchemaConnTableController
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				Connection cn = getConnection();
-
-				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
-				return TableType.filterUserDataTables(cn, getDbMetaResolver(), tables);
+				List<SimpleTable> tables = getDbMetaResolver().getDataTables(cn);
+				return tables;
 			}
 
 		}.execute();

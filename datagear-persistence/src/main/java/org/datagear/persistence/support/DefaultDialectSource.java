@@ -233,7 +233,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 	 */
 	protected TestInfo buildTestInfo(Connection cn, DatabaseMetaData databaseMetaData)
 	{
-		SimpleTable table = this.dbMetaResolver.getRandomSimpleTable(cn);
+		SimpleTable table = this.dbMetaResolver.getRandomDataTable(cn);
 
 		if (table == null)
 			return null;

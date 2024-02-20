@@ -29,7 +29,6 @@ import org.datagear.management.domain.User;
 import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
-import org.datagear.meta.TableType;
 import org.datagear.meta.TableUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,9 +69,9 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 				checkReadTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
+				List<SimpleTable> tables = getDbMetaResolver().getDataTables(cn);
 
-				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
-				return TableType.filterUserDataTables(cn, getDbMetaResolver(), tables);
+				return tables;
 			}
 
 		}.execute();

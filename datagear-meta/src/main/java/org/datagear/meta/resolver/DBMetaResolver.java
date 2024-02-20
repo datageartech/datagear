@@ -46,30 +46,54 @@ public interface DBMetaResolver
 	Database getDatabase(Connection cn) throws DBMetaResolverException;
 
 	/**
-	 * 获取所有{@linkplain SimpleTable}。
+	 * 获取当前连接用户的所有表。
 	 * 
 	 * @param cn
 	 * @return
 	 * @throws DBMetaResolverException
 	 */
-	List<SimpleTable> getSimpleTables(Connection cn) throws DBMetaResolverException;
+	List<SimpleTable> getTables(Connection cn) throws DBMetaResolverException;
 
 	/**
-	 * 随机获取一个{@linkplain SimpleTable}。
+	 * 获取当前连接用户的所有数据表。
 	 * <p>
-	 * 返回表的{@linkplain #isUserEntityDataTable(SimpleTable)}应为{@code true}。
+	 * 返回表的{@linkplain #isDataTable(Connection, SimpleTable)}为{@code true}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	List<SimpleTable> getDataTables(Connection cn) throws DBMetaResolverException;
+
+	/**
+	 * 获取当前连接用户的所有实体表。
+	 * <p>
+	 * 返回表的{@linkplain #isEntityTable(Connection, SimpleTable)}为{@code true}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	List<SimpleTable> getEntityTables(Connection cn) throws DBMetaResolverException;
+
+	/**
+	 * 随机获取当前连接用户的一个数据表。
+	 * <p>
+	 * 返回表的{@linkplain #isDataTable(Connection, SimpleTable)}应为{@code true}。
 	 * </p>
 	 * 
 	 * @param cn
 	 * @return 可能返回{@code null}
 	 * @throws DBMetaResolverException
 	 */
-	SimpleTable getRandomSimpleTable(Connection cn) throws DBMetaResolverException;
+	SimpleTable getRandomDataTable(Connection cn) throws DBMetaResolverException;
 
 	/**
-	 * 是否是用户数据表。
+	 * 是否是数据表。
 	 * <p>
-	 * 用户数据表是用户可创建，且包含数据的表。
+	 * 数据表是指可查询数据的表，比如：表、视图、别名、同义词。
 	 * </p>
 	 * 
 	 * @param cn
@@ -77,12 +101,12 @@ public interface DBMetaResolver
 	 * @return
 	 * @throws DBMetaResolverException
 	 */
-	boolean isUserDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
+	boolean isDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
 
 	/**
-	 * 是否是用户数据实体表。
+	 * 是否是实体表。
 	 * <p>
-	 * 用户数据实体表是用户可创建，且真实存储数据的表（非视图、别名、同义词）。
+	 * 实体表是指可查询、可写入数据的表（非视图、别名、同义词）。
 	 * </p>
 	 * 
 	 * @param cn
@@ -90,7 +114,7 @@ public interface DBMetaResolver
 	 * @return
 	 * @throws DBMetaResolverException
 	 */
-	boolean isUserDataEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
+	boolean isEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
 
 	/**
 	 * 获取准确表名。
@@ -184,6 +208,7 @@ public interface DBMetaResolver
 	 * @param tableNames
 	 *            元素允许为{@code null}
 	 * @return
+	 * @throws DBMetaResolverException
 	 */
-	List<String[]> getImportTables(Connection cn, String... tableNames);
+	List<String[]> getImportTables(Connection cn, String... tableNames) throws DBMetaResolverException;
 }

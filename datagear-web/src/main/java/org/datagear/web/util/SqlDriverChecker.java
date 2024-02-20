@@ -68,7 +68,7 @@ public class SqlDriverChecker extends AbstractDriverChecker
 		{
 			cn = getConnection(driver, connectionOption);
 
-			SimpleTable simpleTable = this.dbMetaResolver.getRandomSimpleTable(cn);
+			SimpleTable simpleTable = this.dbMetaResolver.getRandomDataTable(cn);
 
 			// 如果不包含任何表，则可认为校验通过
 			if (simpleTable == null)
