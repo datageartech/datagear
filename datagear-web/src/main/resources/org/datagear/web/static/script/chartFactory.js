@@ -4120,7 +4120,7 @@
 	 */
 	chartBase.updateAppendMode = function(appendMode)
 	{
-		if(appendMode === undefined)
+		if(arguments.length == 0)
 		{
 			var re = this._updateAppendMode;
 			
