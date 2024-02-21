@@ -137,10 +137,13 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		List<SimpleTable> re = new ArrayList<>(tables.size());
 
-		for (SimpleTable table : tables)
+		List<Boolean> dts = isDataTables(cn, tables);
+		for (int i = 0, len = tables.size(); i < len; i++)
 		{
-			if (isDataTable(cn, table))
-				re.add(table);
+			if (Boolean.TRUE.equals(dts.get(i)))
+			{
+				re.add(tables.get(i));
+			}
 		}
 
 		return re;
@@ -153,10 +156,13 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		List<SimpleTable> re = new ArrayList<>(tables.size());
 
-		for (SimpleTable table : tables)
+		List<Boolean> dts = isEntityTables(cn, tables);
+		for (int i = 0, len = tables.size(); i < len; i++)
 		{
-			if (isEntityTable(cn, table))
-				re.add(table);
+			if (Boolean.TRUE.equals(dts.get(i)))
+			{
+				re.add(tables.get(i));
+			}
 		}
 
 		return re;
@@ -191,6 +197,12 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	}
 
 	@Override
+	public List<Boolean> isDataTables(Connection cn, List<? extends SimpleTable> tables) throws DBMetaResolverException
+	{
+		return this.tableTypeResolver.isDataTables(cn, tables);
+	}
+
+	@Override
 	public boolean isEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
 	{
 		return this.tableTypeResolver.isEntityTable(cn, table);
@@ -198,6 +210,13 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 	@Override
 	public boolean[] isEntityTables(Connection cn, SimpleTable[] tables) throws DBMetaResolverException
+	{
+		return this.tableTypeResolver.isEntityTables(cn, tables);
+	}
+
+	@Override
+	public List<Boolean> isEntityTables(Connection cn, List<? extends SimpleTable> tables)
+			throws DBMetaResolverException
 	{
 		return this.tableTypeResolver.isEntityTables(cn, tables);
 	}

@@ -128,6 +128,20 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 	}
 
 	@Override
+	public List<Boolean> isDataTables(Connection cn, List<? extends SimpleTable> tables) throws DBMetaResolverException
+	{
+		List<Boolean> re = new ArrayList<>(tables.size());
+
+		DbTableTypeSpec dts = getMatchedDbTableTypeSpec(cn);
+		for (SimpleTable table : tables)
+		{
+			re.add(isDataTable(cn, table, dts));
+		}
+
+		return re;
+	}
+
+	@Override
 	public boolean isEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
 	{
 		DbTableTypeSpec dts = getMatchedDbTableTypeSpec(cn);
@@ -143,6 +157,21 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 		for (int i = 0; i < tables.length; i++)
 		{
 			re[i] = isEntityTable(cn, tables[i], dts);
+		}
+
+		return re;
+	}
+
+	@Override
+	public List<Boolean> isEntityTables(Connection cn, List<? extends SimpleTable> tables)
+			throws DBMetaResolverException
+	{
+		List<Boolean> re = new ArrayList<>(tables.size());
+
+		DbTableTypeSpec dts = getMatchedDbTableTypeSpec(cn);
+		for (SimpleTable table : tables)
+		{
+			re.add(isEntityTable(cn, table, dts));
 		}
 
 		return re;

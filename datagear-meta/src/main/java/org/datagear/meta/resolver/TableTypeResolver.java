@@ -18,6 +18,7 @@
 package org.datagear.meta.resolver;
 
 import java.sql.Connection;
+import java.util.List;
 
 import org.datagear.meta.SimpleTable;
 
@@ -65,6 +66,19 @@ public interface TableTypeResolver
 	boolean[] isDataTables(Connection cn, SimpleTable[] tables) throws DBMetaResolverException;
 
 	/**
+	 * 是否是数据表。
+	 * <p>
+	 * 数据表是指可查询数据的表，比如：表、视图、别名、同义词。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param tables
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	List<Boolean> isDataTables(Connection cn, List<? extends SimpleTable> tables) throws DBMetaResolverException;
+
+	/**
 	 * 是否是实体表。
 	 * <p>
 	 * 实体表是指可查询、可写入数据的表（非视图、别名、同义词）。
@@ -89,4 +103,17 @@ public interface TableTypeResolver
 	 * @throws DBMetaResolverException
 	 */
 	boolean[] isEntityTables(Connection cn, SimpleTable[] tables) throws DBMetaResolverException;
+
+	/**
+	 * 是否是实体表。
+	 * <p>
+	 * 实体表是指可查询、可写入数据的表（非视图、别名、同义词）。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param tables
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	List<Boolean> isEntityTables(Connection cn, List<? extends SimpleTable> tables) throws DBMetaResolverException;
 }
