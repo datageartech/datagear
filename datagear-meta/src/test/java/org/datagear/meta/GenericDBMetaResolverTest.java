@@ -24,10 +24,19 @@ import static org.hamcrest.collection.ArrayMatching.hasItemInArray;
 import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.datagear.meta.resolver.DbTableTypeSpec;
+import org.datagear.meta.resolver.DefaultTableTypeResolver;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
@@ -66,12 +75,105 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 	}
 
 	@Test
-	public void getSimpleTablesTest() throws Exception
+	public void getTablesTest() throws Exception
 	{
 		List<SimpleTable> simpleTables = this.genericDBMetaResolver.getTables(this.connection);
 
 		assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
 		assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));
+	}
+
+	@Test
+	public void getDataTablesTest() throws Exception
+	{
+		// 无DbTableTypeSpec
+		{
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver();
+
+			List<SimpleTable> simpleTables = resolver.getDataTables(this.connection);
+
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));
+		}
+
+		// 有DbTableTypeSpec
+		{
+			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
+			dbTableTypeSpecs
+					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Arrays.asList("TABLE")));
+			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
+
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
+
+			List<SimpleTable> simpleTables = resolver.getDataTables(this.connection);
+
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));
+		}
+		{
+			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
+			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Arrays.asList("none")));
+			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
+
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
+
+			List<SimpleTable> simpleTables = resolver.getDataTables(this.connection);
+
+			assertTrue(simpleTables.isEmpty());
+		}
+	}
+
+	@Test
+	public void getEntityTablesTest() throws Exception
+	{
+		// 无DbTableTypeSpec
+		{
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver();
+
+			List<SimpleTable> simpleTables = resolver.getEntityTables(this.connection);
+
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));
+		}
+
+		// 有DbTableTypeSpec
+		{
+			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
+			dbTableTypeSpecs
+					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
+							Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("TABLE")));
+			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
+
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
+
+			List<SimpleTable> simpleTables = resolver.getEntityTables(this.connection);
+
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
+			assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));
+		}
+		{
+			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
+			dbTableTypeSpecs
+					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
+							Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("none")));
+			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
+
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
+
+			List<SimpleTable> simpleTables = resolver.getEntityTables(this.connection);
+
+			assertTrue(simpleTables.isEmpty());
+		}
 	}
 
 	@Test
@@ -103,5 +205,74 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 		assertThat(columns[1].getName(), equalToIgnoringCase("NAME"));
 		assertThat(columns[2].getName(), equalToIgnoringCase("HEAD_IMG"));
 		assertThat(columns[3].getName(), equalToIgnoringCase("INTRODUCTION"));
+	}
+
+	@Test
+	public void getTableTypesTest() throws Exception
+	{
+		// 无DbTableTypeSpec
+		{
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver();
+
+			String[] types = resolver.getTableTypes(connection);
+
+			assertNotNull(types);
+
+			List<String> typeList = Arrays.stream(types).map((t) -> t.toUpperCase()).collect(Collectors.toList());
+
+			assertTrue(typeList.contains("TABLE"));
+			assertTrue(typeList.contains("VIEW"));
+		}
+
+		// 有DbTableTypeSpec
+		{
+			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
+			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Arrays.asList("TABLE")));
+			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
+
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
+
+			String[] types = resolver.getTableTypes(connection);
+
+			assertNotNull(types);
+
+			List<String> typeList = Arrays.stream(types).map((t) -> t.toUpperCase()).collect(Collectors.toList());
+
+			assertEquals(1, typeList.size());
+			assertTrue(typeList.contains("TABLE"));
+		}
+	}
+
+	@Test
+	public void isDataTableTest() throws Exception
+	{
+		// 无DbTableTypeSpec
+		{
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver();
+
+			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "table")));
+			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", null)));
+			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "unknown")));
+		}
+
+		// 有DbTableTypeSpec
+		{
+			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
+			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("*view*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(),
+					Arrays.asList("*table*", "null", "*unknown*")));
+			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
+
+			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
+
+			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "table")));
+			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "A-TABLE-B")));
+			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", null)));
+			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "unknown")));
+			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "view")));
+		}
 	}
 }

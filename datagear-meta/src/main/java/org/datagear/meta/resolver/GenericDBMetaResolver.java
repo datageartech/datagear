@@ -20,6 +20,7 @@ package org.datagear.meta.resolver;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.datagear.connection.ConnectionOption;
@@ -48,15 +49,34 @@ import org.datagear.meta.resolver.support.MySqlDevotedDBMetaResolver;
  */
 public class GenericDBMetaResolver implements DBMetaResolver
 {
-	private List<DevotedDBMetaResolver> devotedDBMetaResolvers = null;
+	private List<DevotedDBMetaResolver> devotedDBMetaResolvers = Collections.emptyList();
 
 	public GenericDBMetaResolver()
 	{
+		this(null);
+	}
+
+	/**
+	 * 创建默认实例。
+	 * 
+	 * @param tableTypeResolver
+	 *            允许{@code null}
+	 */
+	public GenericDBMetaResolver(TableTypeResolver tableTypeResolver)
+	{
 		super();
 
+		MySqlDevotedDBMetaResolver r0 = new MySqlDevotedDBMetaResolver();
+		if (tableTypeResolver != null)
+			r0.setTableTypeResolver(tableTypeResolver);
+
+		WildcardDevotedDBMetaResolver r1 = new WildcardDevotedDBMetaResolver();
+		if (tableTypeResolver != null)
+			r1.setTableTypeResolver(tableTypeResolver);
+
 		this.devotedDBMetaResolvers = new ArrayList<>();
-		this.devotedDBMetaResolvers.add(new MySqlDevotedDBMetaResolver());
-		this.devotedDBMetaResolvers.add(new WildcardDevotedDBMetaResolver());
+		this.devotedDBMetaResolvers.add(r0);
+		this.devotedDBMetaResolvers.add(r1);
 	}
 
 	public List<DevotedDBMetaResolver> getDevotedDBMetaResolvers()
