@@ -34,7 +34,7 @@ import org.datagear.meta.Table;
  * @author datagear@163.com
  *
  */
-public interface DBMetaResolver
+public interface DBMetaResolver extends TableTypeResolver
 {
 	/**
 	 * 获取{@linkplain Database}。
@@ -89,32 +89,6 @@ public interface DBMetaResolver
 	 * @throws DBMetaResolverException
 	 */
 	SimpleTable getRandomDataTable(Connection cn) throws DBMetaResolverException;
-
-	/**
-	 * 是否是数据表。
-	 * <p>
-	 * 数据表是指可查询数据的表，比如：表、视图、别名、同义词。
-	 * </p>
-	 * 
-	 * @param cn
-	 * @param table
-	 * @return
-	 * @throws DBMetaResolverException
-	 */
-	boolean isDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
-
-	/**
-	 * 是否是实体表。
-	 * <p>
-	 * 实体表是指可查询、可写入数据的表（非视图、别名、同义词）。
-	 * </p>
-	 * 
-	 * @param cn
-	 * @param table
-	 * @return
-	 * @throws DBMetaResolverException
-	 */
-	boolean isEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
 
 	/**
 	 * 获取准确表名。

@@ -256,7 +256,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 
 			DatabaseMetaData metaData = cn.getMetaData();
 
-			String[] tableTypes = getTableTypes(cn, metaData);
+			String[] tableTypes = getTableTypes(cn);
 
 			ResultSet rs = getTableResulSet(cn, metaData, catalog, schema, null, tableTypes);
 

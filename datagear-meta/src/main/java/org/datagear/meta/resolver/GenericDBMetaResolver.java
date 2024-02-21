@@ -105,6 +105,13 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
+	public String[] getTableTypes(Connection cn) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getTableTypes(cn);
+	}
+
+	@Override
 	public boolean isDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
@@ -112,10 +119,24 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
+	public boolean[] isDataTables(Connection cn, SimpleTable[] tables) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.isDataTables(cn, tables);
+	}
+
+	@Override
 	public boolean isEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
 		return resolver.isEntityTable(cn, table);
+	}
+
+	@Override
+	public boolean[] isEntityTables(Connection cn, SimpleTable[] tables) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.isEntityTables(cn, tables);
 	}
 
 	@Override
