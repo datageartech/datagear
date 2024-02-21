@@ -37,11 +37,11 @@ public class DbTableTypeSpec implements Serializable
 	/** 表类型 */
 	private List<String> tables = Collections.emptyList();
 
-	/** 数据表类型模式 */
-	private List<String> dataPatterns = Collections.emptyList();
+	/** 数据表类型 */
+	private List<String> datas = Collections.emptyList();
 
-	/** 实体表类型模式 */
-	private List<String> entityPatterns = Collections.emptyList();
+	/** 实体表类型 */
+	private List<String> entites = Collections.emptyList();
 
 	public DbTableTypeSpec()
 	{
@@ -61,21 +61,21 @@ public class DbTableTypeSpec implements Serializable
 		this.tables = tables;
 	}
 
-	public DbTableTypeSpec(String dbPattern, List<String> tables, List<String> dataPatterns)
+	public DbTableTypeSpec(String dbPattern, List<String> tables, List<String> datas)
 	{
 		super();
 		this.dbPattern = dbPattern;
 		this.tables = tables;
-		this.dataPatterns = dataPatterns;
+		this.datas = datas;
 	}
 
-	public DbTableTypeSpec(String dbPattern, List<String> tables, List<String> dataPatterns, List<String> entityPatterns)
+	public DbTableTypeSpec(String dbPattern, List<String> tables, List<String> datas, List<String> entites)
 	{
 		super();
 		this.dbPattern = dbPattern;
 		this.tables = tables;
-		this.dataPatterns = dataPatterns;
-		this.entityPatterns = entityPatterns;
+		this.datas = datas;
+		this.entites = entites;
 	}
 
 	public String getDbPattern()
@@ -104,18 +104,18 @@ public class DbTableTypeSpec implements Serializable
 	}
 
 	/**
-	 * 获取数据表类型模式。
+	 * 获取数据表类型。
 	 * 
 	 * @return 空列表表示未定义
 	 */
-	public List<String> getDataPatterns()
+	public List<String> getDatas()
 	{
-		return dataPatterns;
+		return datas;
 	}
 
-	public void setDataPatterns(List<String> dataPatterns)
+	public void setDataPatterns(List<String> datas)
 	{
-		this.dataPatterns = dataPatterns;
+		this.datas = datas;
 	}
 
 	/**
@@ -123,14 +123,20 @@ public class DbTableTypeSpec implements Serializable
 	 * 
 	 * @return 空列表表示未定义
 	 */
-	public List<String> getEntityPatterns()
+	public List<String> getEntities()
 	{
-		return entityPatterns;
+		return entites;
 	}
 
-	public void setEntityPatterns(List<String> entityPatterns)
+	public void setEntities(List<String> entites)
 	{
-		this.entityPatterns = entityPatterns;
+		this.entites = entites;
 	}
 
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [dbPattern=" + dbPattern + ", tables=" + tables + ", datas=" + datas
+				+ ", entites=" + entites + "]";
+	}
 }

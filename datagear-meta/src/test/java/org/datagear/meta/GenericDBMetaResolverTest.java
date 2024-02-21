@@ -101,8 +101,8 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
 			dbTableTypeSpecs
-					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("TABLE", "VIEW")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Arrays.asList("TABLE")));
+					.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(), Arrays.asList("TABLE")));
 			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
@@ -115,8 +115,8 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Arrays.asList("TABLE", "VIEW")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Arrays.asList("none")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Arrays.asList("none")));
 			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
@@ -145,9 +145,9 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
 			dbTableTypeSpecs
-					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
+					.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Collections.emptyList(),
 							Arrays.asList("TABLE", "VIEW")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(), Collections.emptyList(),
 					Arrays.asList("TABLE")));
 			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
@@ -162,9 +162,9 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
 			dbTableTypeSpecs
-					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
+					.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Collections.emptyList(),
 							Arrays.asList("TABLE", "VIEW")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(), Collections.emptyList(),
 					Arrays.asList("none")));
 			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
@@ -228,8 +228,8 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Arrays.asList("TABLE", "VIEW")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Arrays.asList("TABLE")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Arrays.asList("TABLE")));
 			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
@@ -261,17 +261,17 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("*view*")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(),
-					Arrays.asList("*table*", "null", "*unknown*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Arrays.asList("view")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(),
+					Arrays.asList("table", "NULL", "unknown")));
 			tableTypeResolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			GenericDBMetaResolver resolver = new GenericDBMetaResolver(tableTypeResolver);
 
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "table")));
-			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "A-TABLE-B")));
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", null)));
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "unknown")));
+			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "A-TABLE-B")));
 			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "view")));
 		}
 	}

@@ -77,8 +77,8 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Arrays.asList("TABLE", "VIEW")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Arrays.asList("TABLE")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Arrays.asList("TABLE", "VIEW")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Arrays.asList("TABLE")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			String[] types = resolver.getTableTypes(connection);
@@ -124,20 +124,18 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
 			dbTableTypeSpecs
-					.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("*view*")));
+					.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Arrays.asList("view")));
 			dbTableTypeSpecs
-					.add(new DbTableTypeSpec("mysql", Collections.emptyList(),
-							Arrays.asList("*table*", "null", "*unknown*")));
+					.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(),
+							Arrays.asList("table", "null", "unknown")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "TABLE")));
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "table")));
-			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "A-TABLE-B")));
-			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "a-table-b")));
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", null)));
-			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "SYSTEM TABLE")));
 			assertTrue(resolver.isDataTable(connection, new SimpleTable("test", "unknown")));
 
+			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "A-TABLE-B")));
 			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "view")));
 			assertFalse(resolver.isDataTable(connection, new SimpleTable("test", "VIEW")));
 		}
@@ -165,9 +163,9 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("*view*")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(),
-					Arrays.asList("*table*", "null", "*unknown*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Arrays.asList("view")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(),
+					Arrays.asList("table", "NULL", "unknown")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			boolean[] re = resolver.isDataTables(connection,
@@ -178,7 +176,7 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 
 			assertTrue(re[0]);
 			assertTrue(re[1]);
-			assertTrue(re[2]);
+			assertFalse(re[2]);
 			assertTrue(re[3]);
 			assertTrue(re[4]);
 			assertFalse(re[5]);
@@ -209,9 +207,9 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Arrays.asList("*view*")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(),
-					Arrays.asList("*table*", "null", "*unknown*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Arrays.asList("view")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(),
+					Arrays.asList("table", "NULL", "unknown")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			List<Boolean> re = resolver.isDataTables(connection,
@@ -222,7 +220,7 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 
 			assertTrue(re.get(0));
 			assertTrue(re.get(1));
-			assertTrue(re.get(2));
+			assertFalse(re.get(2));
 			assertTrue(re.get(3));
 			assertTrue(re.get(4));
 			assertFalse(re.get(5));
@@ -262,20 +260,19 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
-					Arrays.asList("*view*")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
-					Arrays.asList("*table*", "null", "*unknown*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("view")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("table", "NULL", "unknown")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", "TABLE")));
 			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", "table")));
-			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", "A-TABLE-B")));
-			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", "a-table-b")));
 			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", null)));
-			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", "SYSTEM TABLE")));
 			assertTrue(resolver.isEntityTable(connection, new SimpleTable("test", "unknown")));
 
+			assertFalse(resolver.isEntityTable(connection, new SimpleTable("test", "A-TABLE-B")));
+			assertFalse(resolver.isEntityTable(connection, new SimpleTable("test", "a-table-b")));
 			assertFalse(resolver.isEntityTable(connection, new SimpleTable("test", "view")));
 			assertFalse(resolver.isEntityTable(connection, new SimpleTable("test", "VIEW")));
 		}
@@ -299,10 +296,10 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
-					Arrays.asList("*view*")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
-					Arrays.asList("*table*", "null", "*unknown*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("view")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("table", "NULL", "unknown")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			boolean[] re = resolver.isEntityTables(connection,
@@ -333,10 +330,10 @@ public class DefaultTableTypeResolverTest extends DBTestSupport
 		{
 			DefaultTableTypeResolver resolver = new DefaultTableTypeResolver();
 			List<DbTableTypeSpec> dbTableTypeSpecs = new ArrayList<>();
-			dbTableTypeSpecs.add(new DbTableTypeSpec("oracle", Collections.emptyList(), Collections.emptyList(),
-					Arrays.asList("*view*")));
-			dbTableTypeSpecs.add(new DbTableTypeSpec("mysql", Collections.emptyList(), Collections.emptyList(),
-					Arrays.asList("*table*", "null", "*unknown*")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*oracle*", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("view")));
+			dbTableTypeSpecs.add(new DbTableTypeSpec("*mysql*", Collections.emptyList(), Collections.emptyList(),
+					Arrays.asList("table", "NULL", "unknown")));
 			resolver.setDbTableTypeSpecs(dbTableTypeSpecs);
 
 			List<Boolean> re = resolver.isEntityTables(connection, Arrays.asList(new SimpleTable("test", "TABLE"),

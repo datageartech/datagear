@@ -51,7 +51,7 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 	/**
 	 * 空表类型的匹配文本。
 	 */
-	protected static final String BLANK_TABLE_TYPE_MATCH_TEXT = "null";
+	public static final String BLANK_TABLE_TYPE_MATCH_TEXT = "NULL";
 
 	private AsteriskPatternMatcher asteriskPatternMatcher = new AsteriskPatternMatcher(true);
 
@@ -216,7 +216,7 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 	protected boolean isDataTable(Connection cn, SimpleTable table, DbTableTypeSpec dts) throws DBMetaResolverException
 	{
 		String tableType = table.getType();
-		List<String> patterns = (dts == null ? null : dts.getDataPatterns());
+		List<String> patterns = (dts == null ? null : dts.getDatas());
 
 		if (!StringUtil.isEmpty(patterns))
 		{
@@ -224,7 +224,7 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 			if (StringUtil.isBlank(tableType))
 				tableType = BLANK_TABLE_TYPE_MATCH_TEXT;
 
-			return isMatched(patterns, tableType);
+			return containsIgnoreCase(patterns, tableType);
 		}
 		else
 		{
@@ -261,7 +261,7 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 			throws DBMetaResolverException
 	{
 		String tableType = table.getType();
-		List<String> patterns = (dts == null ? null : dts.getEntityPatterns());
+		List<String> patterns = (dts == null ? null : dts.getEntities());
 
 		if (!StringUtil.isEmpty(patterns))
 		{
@@ -269,7 +269,7 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 			if (StringUtil.isBlank(tableType))
 				tableType = BLANK_TABLE_TYPE_MATCH_TEXT;
 
-			return isMatched(patterns, tableType);
+			return containsIgnoreCase(patterns, tableType);
 		}
 		else
 		{
@@ -301,11 +301,11 @@ public class DefaultTableTypeResolver implements TableTypeResolver
 		}
 	}
 
-	protected boolean isMatched(List<String> patterns, String text)
+	protected boolean containsIgnoreCase(List<String> list, String text)
 	{
-		for (String pattern : patterns)
+		for (String ele : list)
 		{
-			if (this.asteriskPatternMatcher.matches(pattern, text))
+			if (ele.equalsIgnoreCase(text))
 				return true;
 		}
 
