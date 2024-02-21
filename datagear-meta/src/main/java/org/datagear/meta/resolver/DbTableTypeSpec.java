@@ -113,7 +113,7 @@ public class DbTableTypeSpec implements Serializable
 		return datas;
 	}
 
-	public void setDataPatterns(List<String> datas)
+	public void setDatas(List<String> datas)
 	{
 		this.datas = datas;
 	}

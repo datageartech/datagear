@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.meta.resolver.DbTableTypeSpec;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -221,6 +222,9 @@ public abstract class ApplicationProperties implements Serializable
 
 	/** 跨域请求配置列表 */
 	private List<CrossOriginProperties> crossOriginPropertiess = Collections.emptyList();
+
+	/** 数据库表类型配置列表 */
+	private List<DbTableTypeSpec> dbTableTypeSpecs = Collections.emptyList();
 
 	public ApplicationProperties()
 	{
@@ -712,5 +716,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setCrossOriginPropertiess(List<? extends CrossOriginProperties> crossOriginPropertiess)
 	{
 		this.crossOriginPropertiess = (List<CrossOriginProperties>) crossOriginPropertiess;
+	}
+
+	public List<DbTableTypeSpec> getDbTableTypeSpecs()
+	{
+		return dbTableTypeSpecs;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void setDbTableTypeSpecs(List<? extends DbTableTypeSpec> dbTableTypeSpecs)
+	{
+		this.dbTableTypeSpecs = (List<DbTableTypeSpec>) dbTableTypeSpecs;
 	}
 }

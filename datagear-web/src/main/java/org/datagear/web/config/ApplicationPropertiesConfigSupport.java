@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.meta.resolver.DbTableTypeSpec;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -100,6 +101,13 @@ public class ApplicationPropertiesConfigSupport
 	}
 
 	@Bean
+	@ConfigurationProperties("dbmeta.tabletypes")
+	public List<DbTableTypeSpec> dbTableTypeSpecs()
+	{
+		return new ArrayList<DbTableTypeSpec>();
+	}
+
+	@Bean
 	public ApplicationProperties applicationProperties()
 	{
 		ApplicationProperties bean = createApplicationProperties();
@@ -111,6 +119,7 @@ public class ApplicationPropertiesConfigSupport
 		bean.setDsmanagerSqlpadEditInvalidSqlKeywords(this.dsmanagerSqlpadEditInvalidSqlKeywords());
 		bean.setDsmanagerSqlpadDeleteInvalidSqlKeywords(this.dsmanagerSqlpadDeleteInvalidSqlKeywords());
 		bean.setCrossOriginPropertiess(this.crossOriginPropertiess());
+		bean.setDbTableTypeSpecs(this.dbTableTypeSpecs());
 
 		return bean;
 	}

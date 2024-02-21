@@ -104,6 +104,7 @@ import org.datagear.management.util.typehandlers.DataFormatTypeHandler;
 import org.datagear.management.util.typehandlers.LiteralBooleanTypeHandler;
 import org.datagear.management.util.typehandlers.ResultDataFormatTypeHandler;
 import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.meta.resolver.DefaultTableTypeResolver;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.PersistenceManager;
@@ -530,7 +531,10 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public DBMetaResolver dbMetaResolver()
 	{
-		GenericDBMetaResolver bean = new GenericDBMetaResolver();
+		DefaultTableTypeResolver tableTypeResolver = new DefaultTableTypeResolver();
+		tableTypeResolver.setDbTableTypeSpecs(getApplicationProperties().getDbTableTypeSpecs());
+
+		GenericDBMetaResolver bean = new GenericDBMetaResolver(tableTypeResolver);
 		return bean;
 	}
 
