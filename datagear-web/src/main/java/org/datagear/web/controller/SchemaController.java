@@ -17,7 +17,10 @@
 
 package org.datagear.web.controller;
 
+import java.io.Serializable;
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +35,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaGuardService;
 import org.datagear.management.service.impl.SaveSchemaPermissionDeniedException;
 import org.datagear.management.util.GuardEntity;
+import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableUtil;
@@ -379,6 +383,40 @@ public class SchemaController extends AbstractSchemaConnTableController
 		
 		return "/schema/schema_dbtable_meta";
 	}
+
+	@RequestMapping("/dbinfo")
+	public String viewDbMeta(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Throwable
+	{
+		User user = getCurrentUser();
+		Schema schema = getByIdForView(getSchemaService(), user, id);
+
+		DatabaseInfo di = new DatabaseInfo();
+
+		Connection cn = null;
+		try
+		{
+			cn = getSchemaConnection(schema);
+			Database db = getDbMetaResolver().getDatabase(cn);
+			String[] tableTypes = getDbMetaResolver().getTableTypes(cn);
+
+			// 不显示较为敏感的版本信息
+			// di.setVersion(db.getProductVersion());
+			// di.setDriverVersion(db.getDriverVersion());
+
+			di.setName(db.getProductName());
+			di.setDriverName(db.getDriverName());
+			di.setTableTypes(tableTypes == null ? Collections.emptyList() : Arrays.asList(tableTypes));
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+
+		setFormModel(springModel, di, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
+		return "/schema/schema_dbinfo";
+	}
 	
 	/**
 	 * 处理展示。
@@ -395,6 +433,80 @@ public class SchemaController extends AbstractSchemaConnTableController
 				// 清除密码，避免传输至客户端引起安全问题。
 				schema.clearPassword();
 			}
+		}
+	}
+
+	public static class DatabaseInfo implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 数据库产品名 */
+		private String name = null;
+
+		private String version = null;
+
+		/** 驱动名 */
+		private String driverName = null;
+
+		/** 驱动版本 */
+		private String driverVersion = null;
+
+		/** 表类型 */
+		private List<String> tableTypes = null;
+
+		public DatabaseInfo()
+		{
+			super();
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public String getVersion()
+		{
+			return version;
+		}
+
+		public void setVersion(String version)
+		{
+			this.version = version;
+		}
+
+		public String getDriverName()
+		{
+			return driverName;
+		}
+
+		public void setDriverName(String driverName)
+		{
+			this.driverName = driverName;
+		}
+
+		public String getDriverVersion()
+		{
+			return driverVersion;
+		}
+
+		public void setDriverVersion(String driverVersion)
+		{
+			this.driverVersion = driverVersion;
+		}
+
+		public List<String> getTableTypes()
+		{
+			return tableTypes;
+		}
+
+		public void setTableTypes(List<String> tableTypes)
+		{
+			this.tableTypes = tableTypes;
 		}
 	}
 }

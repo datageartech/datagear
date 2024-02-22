@@ -556,6 +556,17 @@
 						po.showSchemaTab(schemaNode.schema, tabName, "<@spring.message code='module.exportData' />", po.schemaTabTypeExportData);
 					});
 				}
+			},
+			{ separator: true },
+			{
+				label: "<@spring.message code='schema.dbinfo' />",
+				command: function()
+				{
+					po.executeOnFirstAwareSchemaNode(function(schemaNode)
+					{
+						po.handleAddAction("/schema/dbinfo?id="+encodeURIComponent(schemaNode.schemaId));
+					});
+				}
 			}
 		],
 		schemaTabMenuItems:
