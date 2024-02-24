@@ -39,24 +39,9 @@ import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
  */
 public class SessionDashboardInfoSupport
 {
-	/** 看板心跳频率：5分钟 */
-	public static final long DASHBOARD_HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
-
-	private ExpiredSessionAttrManager expiredSessionAttrManager = new ExpiredSessionAttrManager();
-
 	public SessionDashboardInfoSupport()
 	{
 		super();
-	}
-
-	public ExpiredSessionAttrManager getExpiredSessionAttrManager()
-	{
-		return expiredSessionAttrManager;
-	}
-
-	public void setExpiredSessionAttrManager(ExpiredSessionAttrManager expiredSessionAttrManager)
-	{
-		this.expiredSessionAttrManager = expiredSessionAttrManager;
 	}
 
 	/**
@@ -68,7 +53,7 @@ public class SessionDashboardInfoSupport
 	public void setDashboardInfo(HttpServletRequest request, DashboardInfo di)
 	{
 		String name = toSessionNameForDashboardInfo(di.getDashboardId());
-		getExpiredSessionAttrManager().setAttr(request, name, di);
+		request.getSession().setAttribute(name, di);
 	}
 
 	/**
@@ -81,7 +66,19 @@ public class SessionDashboardInfoSupport
 	public DashboardInfo getDashboardInfo(HttpServletRequest request, String dashboardId)
 	{
 		String name = toSessionNameForDashboardInfo(dashboardId);
-		return getExpiredSessionAttrManager().getAttr(request, name);
+		return (DashboardInfo) request.getSession().getAttribute(name);
+	}
+
+	/**
+	 * 移除会话中存储的{@linkplain DashboardInfo}。
+	 * 
+	 * @param request
+	 * @param dashboardId
+	 */
+	public void removeDashboardInfo(HttpServletRequest request, String dashboardId)
+	{
+		String name = toSessionNameForDashboardInfo(dashboardId);
+		request.getSession().removeAttribute(name);
 	}
 
 	/**
@@ -97,47 +94,7 @@ public class SessionDashboardInfoSupport
 		di.putChartWidgetIds(chartIdToChartWidgetIds);
 
 		// 无论di是否已存储至会话，这里都应再执行存储，以为可能扩展的分布式会话提供支持
-		String name = toSessionNameForDashboardInfo(di.getDashboardId());
-		getExpiredSessionAttrManager().setAttr(request, name, di);
-	}
-
-	/**
-	 * 更新会话中的{@linkplain DashboardInfo}的访问时间。
-	 * 
-	 * @param request
-	 * @param dashboardId
-	 * @param time
-	 */
-	public void updateDashboardInfoAccess(HttpServletRequest request, String dashboardId, long time)
-	{
-		String name = toSessionNameForDashboardInfo(dashboardId);
-		getExpiredSessionAttrManager().updateAccessTime(request, name, time);
-	}
-
-	/**
-	 * 移除会话中过期的看板信息。
-	 * <p>
-	 * 需定时清理，防止会话中存储过多已过期的看板信息
-	 * </p>
-	 * 
-	 * @param request
-	 */
-	public void removeDashboardInfoExpired(HttpServletRequest request, int expiredMs)
-	{
-		getExpiredSessionAttrManager().removeExpired(request, expiredMs, DashboardInfo.class);
-	}
-
-	/**
-	 * 移除会话中过期的看板信息。
-	 * <p>
-	 * 需定时清理，防止会话中存储过多已过期的看板信息
-	 * </p>
-	 * 
-	 * @param request
-	 */
-	public void removeDashboardInfoExpired(HttpServletRequest request)
-	{
-		getExpiredSessionAttrManager().removeExpired(request, DASHBOARD_HEARTBEAT_INTERVAL_MS * 3, DashboardInfo.class);
+		setDashboardInfo(request, di);
 	}
 
 	public String toSessionNameForDashboardInfo(String dashboardId)

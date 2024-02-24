@@ -582,8 +582,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
-
-		getSessionDashboardInfoSupport().removeDashboardInfoExpired(request);
 	}
 
 	protected HtmlTitleHandler getShowChartHtmlTitleHandler(HttpServletRequest request, HttpServletResponse response,
@@ -616,6 +614,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				addSessionIdParamIfNotExplicitDisable("/dashboard/loadChart", request));
 
 		addHeartBeatValue(request, webContext);
+		addUnloadValue(request, webContext);
 
 		return webContext;
 	}

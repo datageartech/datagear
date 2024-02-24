@@ -45,7 +45,7 @@
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._renderForms函数说明。
  * 
  */
-(function(global)
+(function(global, window)
 {
 	/**图表工厂*/
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
@@ -201,6 +201,17 @@
 				dashboardIdParamName: "dashboardId",
 				//org.datagear.web.controller.AbstractDataAnalysisController.HEARTBEAT_INTERVAL_MS
 				interval: 1000 * 60 * 5
+			});
+	
+	/**
+	 * 卸载配置，需与后台保持一致。
+	 */
+	dashboardFactory.unloadConfig = (dashboardFactory.unloadConfig ||
+			{
+				//org.datagear.web.controller.AbstractDataAnalysisController.DASHBOARD_UNLOAD_URL_NAME
+				urlAttrName: "unloadURL",
+				//org.datagear.web.controller.DashboardController.UNLOAD_PARAM_DASHBOARD_ID
+				dashboardIdParamName: "dashboardId"
 			});
 	
 	/**
@@ -824,6 +835,7 @@
 		this._initListener();
 		this._initMapURLs();
 		this._initChartResizeHandler();
+		this._initUnloadDashboardHandler();
 		this._initCharts();
 		
 		this.statusInited(true);
@@ -925,6 +937,30 @@
 		};
 		
 		$window.on("resize", this._windowResizeHandler);
+	};
+	
+	dashboardBase._initUnloadDashboardHandler = function()
+	{
+		var $window = $(window);
+		
+		//解绑之前的，确保此函数可重复调用
+		if(this._windowBeforeunloadHandler)
+			$window.off("beforeunload", this._windowBeforeunloadHandler);
+		
+		var thisDashboard = this;
+		this._windowBeforeunloadHandler = function()
+		{
+			var renderContext = thisDashboard.renderContext;
+			var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+			var unloadURL = webContext.attributes[dashboardFactory.unloadConfig.urlAttrName];
+			unloadURL = chartFactory.toWebContextPathURL(webContext, unloadURL);
+			var data = {};
+			data[dashboardFactory.unloadConfig.dashboardIdParamName] = thisDashboard.id;
+			
+			$.post(unloadURL, data);
+		}
+		
+		$window.on("beforeunload", this._windowBeforeunloadHandler);
 	};
 	
 	dashboardBase._initCharts = function()
@@ -3246,4 +3282,4 @@
 	
 	dashboardFactory.addBuiltinChartMaps(dftBuiltinChartMaps);
 })
-(this);
+(this, window);

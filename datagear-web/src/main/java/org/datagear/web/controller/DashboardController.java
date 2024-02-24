@@ -123,6 +123,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	/** 看板心跳参数：看板ID */
 	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = "dashboardId";
 
+	/** 看板卸载参数：看板ID */
+	public static final String UNLOAD_PARAM_DASHBOARD_ID = "dashboardId";
+
 	/**
 	 * 看板页面中服务端日期JS变量名：{@code _DATAGEAR_SERVER_TIME}
 	 */
@@ -1579,8 +1582,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
-
-		getSessionDashboardInfoSupport().removeDashboardInfoExpired(request);
 	}
 
 	protected HtmlTitleHandler getShowDashboardHtmlTitleHandler(HttpServletRequest request,
@@ -1913,8 +1914,31 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("dashboardId", dashboardId);
 		data.put("time", time);
 
-		getSessionDashboardInfoSupport().updateDashboardInfoAccess(request, dashboardId, time);
-		getSessionDashboardInfoSupport().removeDashboardInfoExpired(request);
+		return data;
+	}
+
+	/**
+	 * 看板卸载。
+	 * <p>
+	 * 看板页面关闭后，应卸载后台看板数据。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param dashboardId
+	 * @return
+	 * @throws Throwable
+	 */
+	@RequestMapping(value = UNLOAD_TAIL_URL, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> unloadDashboard(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(UNLOAD_PARAM_DASHBOARD_ID) String dashboardId) throws Throwable
+	{
+		Map<String, Object> data = new HashMap<>();
+		data.put("unload", true);
+		data.put("dashboardId", dashboardId);
+
+		getSessionDashboardInfoSupport().removeDashboardInfo(request, dashboardId);
 
 		return data;
 	}
@@ -2027,6 +2051,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				addSessionIdParamIfNotExplicitDisable("/dashboard/loadChart", request));
 
 		addHeartBeatValue(request, webContext);
+		addUnloadValue(request, webContext);
 
 		return webContext;
 	}

@@ -395,8 +395,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public SessionDashboardInfoSupport sessionDashboardInfoSupport()
 	{
 		SessionDashboardInfoSupport bean = new SessionDashboardInfoSupport();
-		bean.setExpiredSessionAttrManager(this.expiredSessionAttrManager());
-
 		return bean;
 	}
 

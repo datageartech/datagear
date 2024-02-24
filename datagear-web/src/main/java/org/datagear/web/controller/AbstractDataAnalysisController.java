@@ -142,6 +142,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板展示页{@linkplain WebContext}属性名：心跳URL名 */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
 
+	/** 看板展示页{@linkplain WebContext}属性名：销毁URL名 */
+	public static final String DASHBOARD_UNLOAD_URL_NAME = "unloadURL";
+
 	/** 看板展示页{@linkplain WebContext}属性名：会话名 */
 	public static final String DASHBOARD_SESSION_NAME_NAME = "sessionName";
 
@@ -151,8 +154,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板心跳URL后缀 */
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
+	/** 看板卸载URL后缀 */
+	public static final String UNLOAD_TAIL_URL = "/unload";
+
 	/** 看板心跳频率 */
-	public static final long HEARTBEAT_INTERVAL_MS = SessionDashboardInfoSupport.DASHBOARD_HEARTBEAT_INTERVAL_MS;
+	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
 
 	/**
 	 * 看板展示URL的请求参数名：启用安全会话。
@@ -521,6 +527,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
 
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
+	}
+
+	protected void addUnloadValue(HttpServletRequest request, WebContext webContext)
+	{
+		String heartbeatURL = "/dashboard" + UNLOAD_TAIL_URL;
+		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
+
+		webContext.addAttribute(DASHBOARD_UNLOAD_URL_NAME, heartbeatURL);
 	}
 
 	/**

@@ -353,6 +353,8 @@ public class SecurityConfigSupport
 				"/dashboard/authcheck/**",
 				// 看板心跳
 				"/dashboard/heartbeat*",
+				// 看板卸载
+				"/dashboard/unload*",
 
 				// 旧版图表和看板展示
 				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
