@@ -1248,7 +1248,7 @@
 			return results;
 		
 		var newResults = [];
-		var newDataSize = appendMode.size;
+		var newDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, results) : appendMode.size);
 		
 		for(var i=0; i<(results ? results.length : 0); i++)
 		{
@@ -4110,10 +4110,13 @@
 	 * 					null、
 	 * 					//等同于下面的：{ size: 数值, beforeListener: false }
 	 * 					数值、
+	 * 					//等同于下面的：{ size: 函数, beforeListener: false }
+	 * 					function(chart, results){ return 数值; }、
 	 * 					//具体追加模式
-	 * 					//size：数据窗口大小，追加后保留的最大数据数目（新数据优先）
+	 * 					//size：数据窗口大小，追加后保留的最大数据数目（新数据优先），
+	 * 					//      可以是具体数值，也可以是数值计算函数：function(chart, results){ return 数值; }
 	 * 					//beforeListener：是否在图表监听器的onUpdate前追加，否则，将在之后追加
-	 * 					{ size: 10, beforeListener: false }
+	 * 					{ size: 数值或者函数, beforeListener: false }
 	 * @returns 更新追加模式，格式为：{ size: 数值, beforeListener: true、false }、false 表示没有禁用追加模式
 	 * 
 	 * @since 4.8.0
@@ -4157,6 +4160,10 @@
 			appendMode = { size: 10, beforeListener: false };
 		}
 		else if(chartFactory.isNumber(appendMode))
+		{
+			appendMode = { size: appendMode, beforeListener: false };
+		}
+		else if($.isFunction(appendMode))
 		{
 			appendMode = { size: appendMode, beforeListener: false };
 		}
