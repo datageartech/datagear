@@ -1,6 +1,6 @@
 <#--
  *
- * Copyright 2018-2023 datagear.tech
+ * Copyright 2018-2024 datagear.tech
  *
  * This file is part of DataGear.
  *
@@ -86,7 +86,7 @@
 			<div class="field grid mb-0">
 		        <div class="col-12 text-color-secondary text-sm overflow-auto">
 <pre>
-Copyright 2018-2023 datagear.tech
+Copyright 2018-2024 datagear.tech
 
 DataGear is free software: you can redistribute it and/or modify it under the terms of
 the GNU Lesser General Public License as published by the Free Software Foundation,

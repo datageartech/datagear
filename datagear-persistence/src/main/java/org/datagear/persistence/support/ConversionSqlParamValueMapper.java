@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023 datagear.tech
+ * Copyright 2018-2024 datagear.tech
  *
  * This file is part of DataGear.
  *
