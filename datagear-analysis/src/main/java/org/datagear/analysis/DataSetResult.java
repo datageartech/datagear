@@ -38,6 +38,12 @@ public class DataSetResult implements Serializable
 		super();
 	}
 
+	/**
+	 * 创建实例。
+	 * 
+	 * @param data
+	 *            应符合{@linkplain #getData()}规范
+	 */
 	public DataSetResult(Object data)
 	{
 		super();
@@ -45,18 +51,24 @@ public class DataSetResult implements Serializable
 	}
 
 	/**
-	 * 获取数据对象。
+	 * 获取数据。
 	 * <p>
-	 * 数据对象应是普通JavaBean、 {@linkplain Map}对象，或者是它们的数组、集合。
+	 * 数据应是普通JavaBean、 {@linkplain Map}对象，或者是它们的数组、集合。
 	 * </p>
 	 * 
-	 * @return 数据对象，为{@code null}表示无数据
+	 * @return 数据，为{@code null}表示无数据
 	 */
 	public Object getData()
 	{
 		return this.data;
 	}
 
+	/**
+	 * 设置数据。
+	 * 
+	 * @param data
+	 *            应符合{@linkplain #getData()}规范
+	 */
 	public void setData(Object data)
 	{
 		this.data = data;
