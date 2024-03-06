@@ -34,11 +34,21 @@ public class TemplateResolvedDataSetResult extends ResolvedDataSetResult
 	private static final long serialVersionUID = 1L;
 
 	/** 已解析的模板 */
-	private String templateResult;
+	private String templateResult = null;
 
 	public TemplateResolvedDataSetResult()
 	{
 		super();
+	}
+
+	public TemplateResolvedDataSetResult(DataSetResult result)
+	{
+		super(result);
+	}
+
+	public TemplateResolvedDataSetResult(DataSetResult result, List<DataSetProperty> properties)
+	{
+		super(result, properties);
 	}
 
 	public TemplateResolvedDataSetResult(DataSetResult result, List<DataSetProperty> properties, String templateResult)

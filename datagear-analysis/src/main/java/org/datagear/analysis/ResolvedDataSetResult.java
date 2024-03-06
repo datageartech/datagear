@@ -18,6 +18,7 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,10 +33,16 @@ public class ResolvedDataSetResult implements Serializable
 
 	private DataSetResult result;
 
-	private List<DataSetProperty> properties;
+	private List<DataSetProperty> properties = Collections.emptyList();
 
 	public ResolvedDataSetResult()
 	{
+	}
+
+	public ResolvedDataSetResult(DataSetResult result)
+	{
+		super();
+		this.result = result;
 	}
 
 	public ResolvedDataSetResult(DataSetResult result, List<DataSetProperty> properties)
