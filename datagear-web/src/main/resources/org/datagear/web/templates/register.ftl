@@ -45,7 +45,7 @@
 								</label>
 						        <div class="field-input col-12 md:col-9">
 						        	<p-inputtext id="${pid}name" v-model="fm.user.name" type="text" class="input w-full"
-						        		name="name" required maxlength="20" autofocus>
+						        		name="name" required maxlength="50" autofocus>
 						        	</p-inputtext>
 						        </div>
 							</div>
