@@ -75,6 +75,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析普通文本。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param params
 	 * @return
 	 */
@@ -87,6 +88,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析普通文本。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param context
 	 * @return
 	 */
@@ -99,6 +101,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析CSV。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param params
 	 * @return
 	 */
@@ -111,6 +114,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析CSV。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param context
 	 * @return
 	 */
@@ -123,6 +127,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析JSON。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param params
 	 * @return
 	 */
@@ -135,6 +140,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析CSV。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param context
 	 * @return
 	 */
@@ -147,6 +153,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析SQL。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param params
 	 * @return
 	 */
@@ -159,6 +166,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析SQL。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param context
 	 * @return
 	 */
@@ -171,6 +179,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析XML。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param params
 	 * @return
 	 */
@@ -183,6 +192,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 解析XML。
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param context
 	 * @return
 	 */
@@ -196,13 +206,14 @@ public final class DataSetFmkTemplateResolvers
 	 * 
 	 * @param resolver
 	 * @param text
+	 *            允许{@code null}
 	 * @param params
 	 * @return
 	 */
 	protected static String resolveNullable(DataSetFmkTemplateResolver resolver, String text, Map<String, ?> params)
 	{
-		if (text == null)
-			return null;
+		if (text == null || text.isEmpty())
+			return text;
 
 		return resolver.resolve(text, params);
 	}
@@ -212,13 +223,14 @@ public final class DataSetFmkTemplateResolvers
 	 * 
 	 * @param resolver
 	 * @param text
+	 *            允许{@code null}
 	 * @param context
 	 * @return
 	 */
 	protected static String resolveNullable(DataSetFmkTemplateResolver resolver, String text, TemplateContext context)
 	{
-		if (text == null)
-			return null;
+		if (text == null || text.isEmpty())
+			return text;
 
 		return resolver.resolve(text, context);
 	}

@@ -19,6 +19,7 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -210,8 +211,12 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 
 	/**
 	 * 解析{@linkplain DataSetProperty}。
+	 * <p>
+	 * 注意：此方法只能识别{@linkplain Map}、{@code Collection<Map>}、{@code Map[]}类型的数据，其他类型将返回空列表。
+	 * </p>
 	 * 
-	 * @param data 允许为{@code null}，JSON对象、JSON对象数组、JSON对象列表
+	 * @param data
+	 *            允许{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
@@ -220,32 +225,51 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	{
 		if (data == null)
 		{
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 		else if (data instanceof Map<?, ?>)
 		{
 			return resolveJsonObjProperties((Map<String, ?>) data);
 		}
-		else if (data instanceof List<?>)
+		else if (data instanceof Collection<?>)
 		{
-			List<?> list = (List<?>) data;
+			Collection<?> collection = (Collection<?>) data;
 
-			if (list.size() == 0)
-				return Collections.EMPTY_LIST;
-			else
-				return resolveJsonObjProperties((Map<String, ?>) list.get(0));
+			Object ele = null;
+
+			for (Object obj : collection)
+			{
+				if (obj != null)
+				{
+					ele = obj;
+					break;
+				}
+			}
+
+			return resolveProperties(ele);
 		}
 		else if (data instanceof Object[])
 		{
 			Object[] array = (Object[]) data;
 
-			if (array.length == 0)
-				return Collections.EMPTY_LIST;
-			else
-				return resolveJsonObjProperties((Map<String, ?>) array[0]);
+			Object ele = null;
+
+			for (Object obj : array)
+			{
+				if (obj != null)
+				{
+					ele = obj;
+					break;
+				}
+			}
+
+			return resolveProperties(ele);
 		}
 		else
-			throw new UnsupportedJsonResultDataException("Result data must be object or object array/list");
+		{
+			// 对于不支持的类型应返回空列表而非抛出异常
+			return Collections.emptyList();
+		}
 	}
 
 	/**

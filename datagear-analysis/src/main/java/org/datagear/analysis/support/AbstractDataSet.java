@@ -518,6 +518,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * </ol>
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param query
 	 * @return
 	 */
@@ -537,6 +538,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * </ol>
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param query
 	 * @return
 	 */
@@ -556,6 +558,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * </ol>
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param query
 	 * @return
 	 */
@@ -575,6 +578,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * </ol>
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param query
 	 * @return
 	 */
@@ -594,6 +598,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * </ol>
 	 * 
 	 * @param text
+	 *            允许{@code null}
 	 * @param query
 	 * @return
 	 */
