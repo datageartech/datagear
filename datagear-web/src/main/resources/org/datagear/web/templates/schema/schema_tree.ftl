@@ -559,6 +559,23 @@
 			},
 			{ separator: true },
 			{
+				label: "<@spring.message code='refresh' />",
+				command: function()
+				{
+					po.executeOnFirstAwareSchemaNode(function(schemaNode)
+					{
+						po.loadTableNodes(schemaNode);
+					});
+				}
+			},
+			{
+				label: "<@spring.message code='reload' />",
+				command: function()
+				{
+					po.loadSchemaNodes();
+				}
+			},
+			{
 				label: "<@spring.message code='schema.dbinfo' />",
 				command: function()
 				{
