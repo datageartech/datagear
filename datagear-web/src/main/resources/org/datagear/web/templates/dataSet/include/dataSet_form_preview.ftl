@@ -229,7 +229,10 @@
 		pm.previewPanelShow = true;
 		
 		var er = $.getResponseJson(jqXHR);
-		pm.previewTplResult = (er && er.data ? er.data : jqXHR.statusText);
+		var msg = (er && er.data ? er.data : null);
+		msg = (msg ? msg : (er && er.message ? er.message : ""));
+		
+		pm.previewTplResult = msg;
 	};
 	
 	po.handlePreviewInvalidForm = function()
