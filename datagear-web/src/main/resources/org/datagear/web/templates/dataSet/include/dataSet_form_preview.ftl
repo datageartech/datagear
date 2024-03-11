@@ -190,6 +190,7 @@
 		if(!fm.mutableModel && !pm.isReadonlyAction && pm.autoGenerateProperty)
 		{
 			fm.properties = response.properties;
+			pm.selectedProperties = [];
 			
 			if(po._prevPreviewFingerprint)
 				po._prevPreviewFingerprint.properties = $.extend(true, [], response.properties);
