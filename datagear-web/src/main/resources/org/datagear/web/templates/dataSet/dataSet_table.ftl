@@ -45,7 +45,7 @@
 				icon="pi pi-chevron-down" icon-pos="right" aria-haspopup="true" aria-controls="${pid}addMenu"
 				@click="onAddMenuToggle" v-if="!pm.isReadonlyAction">
 			</p-button>
-			<p-menu id="${pid}addMenu" ref="addMenuEle" :model="pm.addMenuItems" :popup="true" v-if="!pm.isReadonlyAction"></p-menu>
+			<p-tieredmenu id="${pid}addMenu" ref="addMenuEle" :model="pm.addMenuItems" :popup="true" v-if="!pm.isReadonlyAction"></p-tieredmenu>
 			
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='share' />" @click="onShare" v-if="!pm.isReadonlyAction"></p-button>
@@ -121,27 +121,6 @@
 				}
 			},
 			{
-				label: "<@spring.message code='dataSetType.CsvValue' />",
-				command: function()
-				{
-					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForCsvValue"), {width: "70vw"});
-				}
-			},
-			{
-				label: "<@spring.message code='dataSetType.CsvFile' />",
-				command: function()
-				{
-					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForCsvFile"), {width: "70vw"});
-				}
-			},
-			{
-				label: "<@spring.message code='dataSetType.Excel' />",
-				command: function()
-				{
-					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForExcel"), {width: "70vw"});
-				}
-			},
-			{
 				label: "<@spring.message code='dataSetType.Http' />",
 				command: function()
 				{
@@ -149,18 +128,51 @@
 				}
 			},
 			{
-				label: "<@spring.message code='dataSetType.JsonValue' />",
-				command: function()
-				{
-					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonValue"), {width: "70vw"});
-				}
+				label: "<@spring.message code='text' />",
+				items:
+				[
+					{
+						label: "<@spring.message code='dataSetType.CsvValue' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForCsvValue"), {width: "70vw"});
+						}
+					},
+					{
+						label: "<@spring.message code='dataSetType.JsonValue' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonValue"), {width: "70vw"});
+						}
+					}
+				]
 			},
 			{
-				label: "<@spring.message code='dataSetType.JsonFile' />",
-				command: function()
-				{
-					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonFile"), {width: "70vw"});
-				}
+				label: "<@spring.message code='file' />",
+				items:
+				[
+					{
+						label: "<@spring.message code='dataSetType.CsvFile' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForCsvFile"), {width: "70vw"});
+						}
+					},
+					{
+						label: "<@spring.message code='dataSetType.Excel' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForExcel"), {width: "70vw"});
+						}
+					},
+					{
+						label: "<@spring.message code='dataSetType.JsonFile' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonFile"), {width: "70vw"});
+						}
+					}
+				]
 			},
 			{ separator: true },
 			{
