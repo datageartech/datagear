@@ -523,6 +523,7 @@ public class StringUtil
 	 * 解码URL。
 	 * 
 	 * @param url
+	 *            允许{@code null}
 	 * @param encoding
 	 * @return
 	 * @throws UnsupportedEncodingException
@@ -536,9 +537,34 @@ public class StringUtil
 	}
 
 	/**
+	 * 解码URL。
+	 * <p>
+	 * 此方法内部出现的{@linkplain UnsupportedEncodingException}异常将被包裹为{@linkplain UnsupportedOperationException}。
+	 * </p>
+	 * 
+	 * @param url
+	 *            允许{@code null}
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedOperationException
+	 */
+	public static String decodeURLUnchecked(String url, String encoding) throws UnsupportedOperationException
+	{
+		try
+		{
+			return decodeURL(url, encoding);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new UnsupportedOperationException(e);
+		}
+	}
+
+	/**
 	 * 编码URL。
 	 * 
 	 * @param url
+	 *            允许{@code null}
 	 * @param encoding
 	 * @return
 	 * @throws UnsupportedEncodingException
@@ -549,6 +575,30 @@ public class StringUtil
 			return null;
 
 		return URLEncoder.encode(url, encoding);
+	}
+
+	/**
+	 * 编码URL。
+	 * <p>
+	 * 此方法内部出现的{@linkplain UnsupportedEncodingException}异常将被包裹为{@linkplain UnsupportedOperationException}。
+	 * </p>
+	 * 
+	 * @param url
+	 *            允许{@code null}
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedOperationException
+	 */
+	public static String encodeURLUnchecked(String url, String encoding) throws UnsupportedOperationException
+	{
+		try
+		{
+			return encodeURL(url, encoding);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new UnsupportedOperationException(e);
+		}
 	}
 
 	/**
@@ -596,6 +646,33 @@ public class StringUtil
 		}
 
 		return re.toString();
+	}
+
+	/**
+	 * 编码路径URL。
+	 * <p>
+	 * 将字符串中除了'/'的字符都进行URL编码。
+	 * </p>
+	 * <p>
+	 * 此方法内部出现的{@linkplain UnsupportedEncodingException}异常将被包裹为{@linkplain UnsupportedOperationException}。
+	 * </p>
+	 * 
+	 * @param url
+	 *            允许{@code null}
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedOperationException
+	 */
+	public static String encodePathURLUnchecked(String url, String encoding) throws UnsupportedOperationException
+	{
+		try
+		{
+			return encodePathURL(url, encoding);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new UnsupportedOperationException(e);
+		}
 	}
 
 	/**
