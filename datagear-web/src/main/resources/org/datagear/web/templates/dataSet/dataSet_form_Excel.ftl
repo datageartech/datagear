@@ -1,6 +1,6 @@
 <#--
  *
- * Copyright 2018-2024 datagear.tech
+ * Copyright 2018-present datagear.tech
  *
  * This file is part of DataGear.
  *
