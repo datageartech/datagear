@@ -2309,7 +2309,7 @@
 		po.vueRef("${pid}chartPanelEle", null);
 		
 		//po.showResContentTab()里不能获取到创建的DOM元素，所以采用此方案
-		po.vueWatch(pm.resContentTabs, function(oldVal, newVal)
+		po.vueWatch(pm.resContentTabs, function(newVal, oldVal)
 		{
 			var newItems = newVal.items;
 			var newActiveIndex = newVal.activeIndex;

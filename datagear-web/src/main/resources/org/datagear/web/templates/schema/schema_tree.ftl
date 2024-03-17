@@ -759,7 +759,7 @@
 	});
 	
 	//po.showSchemaTab()里不能里可获取到创建的DOM元素，所以采用此方案
-	po.vueWatch(po.vuePageModel().schemaTabs, function(oldVal, newVal)
+	po.vueWatch(po.vuePageModel().schemaTabs, function(newVal, oldVal)
 	{
 		var items = newVal.items;
 		var activeIndex = newVal.activeIndex;
