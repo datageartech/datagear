@@ -85,10 +85,10 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		HtmlChartPlugin chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
 
 		this.htmlChartWidget01 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_01, "chart-widget-01",
-				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, chartPlugin);
 
 		this.htmlChartWidget02 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_02, "chart-widget-02",
-				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, chartPlugin);
 
 		this.resManager = new FileTplDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");

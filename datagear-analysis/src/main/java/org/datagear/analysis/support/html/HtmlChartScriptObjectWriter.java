@@ -20,7 +20,7 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetQuery;
@@ -135,27 +135,27 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		public HtmlChartJson(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
 		{
 			super(htmlChart);
-			setChartDataSets(toChartDataSetJsons(htmlChart.getChartDataSets()));
+			setDataSetBinds(toDataSetBindJsons(htmlChart.getDataSetBinds()));
 			setPlugin(toRefHtmlChartPlugin(pluginVarName));
 			setRenderContext(toRefRenderContext(renderContextVarName));
 		}
 
-		protected ChartDataSetJson[] toChartDataSetJsons(ChartDataSet[] chartDataSets)
+		protected DataSetBindJson[] toDataSetBindJsons(DataSetBind[] dataSetBinds)
 		{
-			if (chartDataSets == null)
+			if (dataSetBinds == null)
 				return null;
 
-			ChartDataSetJson[] re = new ChartDataSetJson[chartDataSets.length];
+			DataSetBindJson[] re = new DataSetBindJson[dataSetBinds.length];
 
-			for (int i = 0; i < chartDataSets.length; i++)
-				re[i] = toChartDataSetJson(chartDataSets[i]);
+			for (int i = 0; i < dataSetBinds.length; i++)
+				re[i] = toDataSetBindJson(dataSetBinds[i]);
 
 			return re;
 		}
 
-		protected ChartDataSetJson toChartDataSetJson(ChartDataSet chartDataSet)
+		protected DataSetBindJson toDataSetBindJson(DataSetBind dataSetBind)
 		{
-			return new ChartDataSetJson(chartDataSet);
+			return new DataSetBindJson(dataSetBind);
 		}
 
 		protected RefHtmlChartPlugin toRefHtmlChartPlugin(String pluginVarName)
@@ -170,25 +170,25 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * 用于输出JSON的{@linkplain ChartDataSet}。
+	 * 用于输出JSON的{@linkplain DataSetBind}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class ChartDataSetJson extends ChartDataSet
+	protected static class DataSetBindJson extends DataSetBind
 	{
 		private static final long serialVersionUID = 1L;
 
-		public ChartDataSetJson(ChartDataSet chartDataSet)
+		public DataSetBindJson(DataSetBind dataSetBind)
 		{
 			super();
-			setDataSet(toDataSetJson(chartDataSet.getDataSet()));
-			setPropertySigns(chartDataSet.getPropertySigns());
-			setAlias(chartDataSet.getAlias());
-			setAttachment(chartDataSet.isAttachment());
-			setQuery(chartDataSet.getQuery());
-			setPropertyAliases(chartDataSet.getPropertyAliases());
-			setPropertyOrders(chartDataSet.getPropertyOrders());
+			setDataSet(toDataSetJson(dataSetBind.getDataSet()));
+			setPropertySigns(dataSetBind.getPropertySigns());
+			setAlias(dataSetBind.getAlias());
+			setAttachment(dataSetBind.isAttachment());
+			setQuery(dataSetBind.getQuery());
+			setPropertyAliases(dataSetBind.getPropertyAliases());
+			setPropertyOrders(dataSetBind.getPropertyOrders());
 		}
 
 		protected DataSetJson toDataSetJson(DataSet dataSet)

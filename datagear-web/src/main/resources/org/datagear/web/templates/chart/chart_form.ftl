@@ -88,22 +88,22 @@
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}chartDataSetVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+				<label for="${pid}dataSetBindVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='chart.cds.desc' />">
 					<@spring.message code='module.dataSet' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<div id="${pid}chartDataSetVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="(cds, cdsIdx) in fm.chartDataSetVOs" :key="cdsIdx" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
+					<div id="${pid}dataSetBindVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
+						<p-panel v-for="(cds, cdsIdx) in fm.dataSetBindVOs" :key="cdsIdx" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
-									@click="onMoveUpChartDataSet($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+									@click="onMoveUpDataSetBind($event, cdsIdx)" v-if="!pm.isReadonlyAction">
 								</p-button>
 								<p-button icon="pi pi-arrow-down" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
-									@click="onMoveDownChartDataSet($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+									@click="onMoveDownDataSetBind($event, cdsIdx)" v-if="!pm.isReadonlyAction">
 								</p-button>
 								<p-button icon="pi pi-times" class="p-button-sm p-button-secondary p-button-rounded p-button-text p-button-danger mr-5"
-									@click="onDeleteChartDataSet($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+									@click="onDeleteDataSetBind($event, cdsIdx)" v-if="!pm.isReadonlyAction">
 								</p-button>
 							</template>
 							<div>
@@ -477,7 +477,7 @@
 		var data = action.options.data;
 		po.unmergeChartCdss(data);
 		
-		var cdss = (data.chartDataSetVOs || []);
+		var cdss = (data.dataSetBindVOs || []);
 		$.each(cdss, function(idx, cds)
 		{
 			cds.summaryDataSetEntity = cds.dataSet;
@@ -497,10 +497,10 @@
 		action.options.saveAndShowAction = po.inSaveAndShowAction();
 	};
 	
-	po.validateChartDataSetDataSign = function(chart)
+	po.validateDataSetBindDataSign = function(chart)
 	{
 		var chartPlugin = chart.pluginVo;
-		var chartDataSets = (chart.chartDataSetVOs || []);
+		var dataSetBinds = (chart.dataSetBindVOs || []);
 		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
 		
 		if(!dataSigns)
@@ -514,14 +514,14 @@
 				requiredSigns.push(dataSign);
 		});
 		
-		for(var i=0; i<chartDataSets.length; i++)
+		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var chartDataSet = chartDataSets[i];
+			var dataSetBind = dataSetBinds[i];
 			
-			if(chartDataSet.attachment == true)
+			if(dataSetBind.attachment == true)
 				continue;
 			
-			var properties = (chartDataSet.dataSet.properties || []);
+			var properties = (dataSetBind.dataSet.properties || []);
 			
 			for(var j=0; j<requiredSigns.length; j++)
 			{
@@ -542,7 +542,7 @@
 				
 				if(!contains)
 				{
-					var invalidInfo = { dataSet: chartDataSet.dataSet, dataSign: requiredSign };
+					var invalidInfo = { dataSet: dataSetBind.dataSet, dataSign: requiredSign };
 					return invalidInfo;
 				}
 			}
@@ -551,9 +551,9 @@
 		return true;
 	};
 	
-	po.isChartDataSetSigned = function(chartDataSet, dataSign)
+	po.isDataSetBindSigned = function(dataSetBind, dataSign)
 	{
-		var properties = (chartDataSet.dataSet.properties || []);
+		var properties = (dataSetBind.dataSet.properties || []);
 		
 		for(var i=0; i<properties.length; i++)
 		{
@@ -569,25 +569,25 @@
 	
 	po.mergeChartCdss = function(chart)
 	{
-		var cdss = (chart.chartDataSetVOs || []);
+		var cdss = (chart.dataSetBindVOs || []);
 		$.each(cdss, function(idx, cds)
 		{
-			po.mergeChartDataSet(cds, chart.pluginVo);
+			po.mergeDataSetBind(cds, chart.pluginVo);
 		});
 	};
 
 	po.unmergeChartCdss = function(chart)
 	{
-		var cdss = (chart.chartDataSetVOs || []);
+		var cdss = (chart.dataSetBindVOs || []);
 		$.each(cdss, function(idx, cds)
 		{
-			po.unmergeChartDataSet(cds, chart.pluginVo);
+			po.unmergeDataSetBind(cds, chart.pluginVo);
 		});
 	};
 	
-	po.mergeChartDataSet = function(chartDataSet, chartPlugin)
+	po.mergeDataSetBind = function(dataSetBind, chartPlugin)
 	{
-		var dataSet = chartDataSet.dataSet;
+		var dataSet = dataSetBind.dataSet;
 		var properties = (dataSet ? dataSet.properties : []);
 		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
@@ -595,7 +595,7 @@
 		{
 			var signs = [];
 			
-			var propertySigns = (chartDataSet.propertySigns[property.name] || []);
+			var propertySigns = (dataSetBind.propertySigns[property.name] || []);
 			$.each(propertySigns, function(psIdx, ps)
 			{
 				var inArrayIdx = $.inArrayById(dataSigns, ps, "name");
@@ -606,15 +606,15 @@
 			property.cdsInfo =
 			{
 				signs: signs,
-				alias: chartDataSet.propertyAliases[property.name],
-				order: chartDataSet.propertyOrders[property.name]
+				alias: dataSetBind.propertyAliases[property.name],
+				order: dataSetBind.propertyOrders[property.name]
 			};
 		});
 	};
 	
-	po.unmergeChartDataSet = function(chartDataSet, chartPlugin)
+	po.unmergeDataSetBind = function(dataSetBind, chartPlugin)
 	{
-		var dataSet = chartDataSet.dataSet;
+		var dataSet = dataSetBind.dataSet;
 		var properties = (dataSet ? dataSet.properties : []);
 		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
@@ -632,11 +632,11 @@
 			});
 			
 			if(propertySigns.length > 0)
-				chartDataSet.propertySigns[property.name] = propertySigns;
+				dataSetBind.propertySigns[property.name] = propertySigns;
 			else
-				chartDataSet.propertySigns[property.name] = undefined;
-			chartDataSet.propertyAliases[property.name] = cdsInfo.alias;
-			chartDataSet.propertyOrders[property.name] = cdsInfo.order;
+				dataSetBind.propertySigns[property.name] = undefined;
+			dataSetBind.propertyAliases[property.name] = cdsInfo.alias;
+			dataSetBind.propertyOrders[property.name] = cdsInfo.order;
 			
 			property.cdsInfo = undefined;
 		});
@@ -650,20 +650,20 @@
 			return dataSign.name;
 	};
 
-	po.inflateParamPanel = function(chartDataSet)
+	po.inflateParamPanel = function(dataSetBind)
 	{
 		var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}paramPanel", document.body));
 		var pm = po.vuePageModel();
 		
-		if(!chartDataSet.query)
-			chartDataSet.query = {};
+		if(!dataSetBind.query)
+			dataSetBind.query = {};
 		
 		var formOptions = $.extend(
 		{
 			submitText: "<@spring.message code='confirm' />",
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
-			paramValues: po.vueRaw(chartDataSet.query.paramValues),
+			paramValues: po.vueRaw(dataSetBind.query.paramValues),
 			readonly: pm.isReadonlyAction,
 			render: function()
 			{
@@ -673,7 +673,7 @@
 			submit: function()
 			{
 				var paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
-				chartDataSet.query.paramValues = paramValues;
+				dataSetBind.query.paramValues = paramValues;
 				
 				po.vueUnref("${pid}paramPanelEle").hide();
 			}
@@ -682,13 +682,13 @@
 		chartFactory.chartSetting.removeDatetimePickerRoot();
 		wrapper.empty();
 		
-		var params = $.extend(true, [], po.vueRaw(chartDataSet.dataSet.params));
+		var params = $.extend(true, [], po.vueRaw(dataSetBind.dataSet.params));
 		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
 	};
 	
 	$.validator.addMethod("dspDataSignRequired", function(chart, element)
 	{
-		var re = po.validateChartDataSetDataSign(chart);
+		var re = po.validateDataSetBindDataSign(chart);
 		
 		if(re == true)
 		{
@@ -697,7 +697,7 @@
 		}
 		else
 		{
-			var msg = $.validator.format("<@spring.message code='chart.checkChartDataSetDataSign.required' />",
+			var msg = $.validator.format("<@spring.message code='chart.checkDataSetBindDataSign.required' />",
 						re.dataSet.name, po.formatDataSignLabel(re.dataSign));
 			$(element).data("invalidMsg", msg);
 			
@@ -710,7 +710,7 @@
 		var re = true;
 		
 		var dsr = (chart.pluginVo ? chart.pluginVo.dataSetRange : null);
-		var cdss = (chart.chartDataSetVOs || []);
+		var cdss = (chart.dataSetBindVOs || []);
 		var mainCount = 0;
 		var attachmentCount = 0;
 		
@@ -778,9 +778,9 @@
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
-	formModel.chartDataSetVOs = (formModel.chartDataSetVOs == null ? [] : formModel.chartDataSetVOs);
+	formModel.dataSetBindVOs = (formModel.dataSetBindVOs == null ? [] : formModel.dataSetBindVOs);
 	formModel.plugin = undefined;
-	formModel.chartDataSets = undefined;
+	formModel.dataSetBinds = undefined;
 	formModel.attrValues = (formModel.attrValues || {});
 	po.mergeChartCdss(formModel);
 	
@@ -847,7 +847,7 @@
 		chartPluginDataSigns: (formModel.pluginVo ? (formModel.pluginVo.dataSigns || []) : []),
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
-		chartDataSetForSign: null,
+		dataSetBindForSign: null,
 		dataSetPropertyForSign: null,
 		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
 		updateIntervalTypeOptions:
@@ -948,42 +948,42 @@
 							attachment: false
 						};
 						
-						po.mergeChartDataSet(cds);
-						fm.chartDataSetVOs.push(cds);
+						po.mergeDataSetBind(cds);
+						fm.dataSetBindVOs.push(cds);
 					});
 				});
 			});
 		},
 		
-		onMoveUpChartDataSet: function(e, cdsIdx)
+		onMoveUpDataSetBind: function(e, cdsIdx)
 		{
 			var fm = po.vueFormModel();
 			if(cdsIdx > 0)
 			{
-				var prev = fm.chartDataSetVOs[cdsIdx - 1];
-				fm.chartDataSetVOs[cdsIdx - 1] = fm.chartDataSetVOs[cdsIdx];
-				fm.chartDataSetVOs[cdsIdx] = prev;
+				var prev = fm.dataSetBindVOs[cdsIdx - 1];
+				fm.dataSetBindVOs[cdsIdx - 1] = fm.dataSetBindVOs[cdsIdx];
+				fm.dataSetBindVOs[cdsIdx] = prev;
 			}
 		},
 		
-		onMoveDownChartDataSet: function(e, cdsIdx)
+		onMoveDownDataSetBind: function(e, cdsIdx)
 		{
 			var fm = po.vueFormModel();
-			if((cdsIdx + 1) < fm.chartDataSetVOs.length)
+			if((cdsIdx + 1) < fm.dataSetBindVOs.length)
 			{
-				var next = fm.chartDataSetVOs[cdsIdx + 1];
-				fm.chartDataSetVOs[cdsIdx + 1] = fm.chartDataSetVOs[cdsIdx];
-				fm.chartDataSetVOs[cdsIdx] = next;
+				var next = fm.dataSetBindVOs[cdsIdx + 1];
+				fm.dataSetBindVOs[cdsIdx + 1] = fm.dataSetBindVOs[cdsIdx];
+				fm.dataSetBindVOs[cdsIdx] = next;
 			}
 		},
 		
-		onDeleteChartDataSet: function(e, cdsIdx)
+		onDeleteDataSetBind: function(e, cdsIdx)
 		{
 			var fm = po.vueFormModel();
-			fm.chartDataSetVOs.splice(cdsIdx, 1);
+			fm.dataSetBindVOs.splice(cdsIdx, 1);
 		},
 		
-		onShowDataSignPanel: function(e, chartDataSet, dataSetProperty)
+		onShowDataSignPanel: function(e, dataSetBind, dataSetProperty)
 		{
 			var pm = po.vuePageModel();
 			
@@ -991,7 +991,7 @@
 			po.vueUnref("${pid}dataSignsPanelEle").hide();
 			po.vueNextTick(function()
 			{
-				pm.chartDataSetForSign = chartDataSet;
+				pm.dataSetBindForSign = dataSetBind;
 				pm.dataSetPropertyForSign = dataSetProperty;
 				
 				po.vueUnref("${pid}dataSignsPanelEle").show(e);
@@ -1039,12 +1039,12 @@
 		{
 			var pm = po.vuePageModel();
 			
-			if(pm.chartDataSetForSign && pm.dataSetPropertyForSign)
+			if(pm.dataSetBindForSign && pm.dataSetPropertyForSign)
 			{
-				if(!dataSign.multiple && po.isChartDataSetSigned(pm.chartDataSetForSign, dataSign))
+				if(!dataSign.multiple && po.isDataSetBindSigned(pm.dataSetBindForSign, dataSign))
 				{
 					var msg = $.validator.format("<@spring.message code='chart.dataSetHasDataSign' />",
-							pm.chartDataSetForSign.dataSet.name, po.formatDataSignLabel(dataSign));
+							pm.dataSetBindForSign.dataSet.name, po.formatDataSignLabel(dataSign));
 					
 					$.tipWarn(msg);
 					return;
@@ -1084,16 +1084,16 @@
 			}
 		},
 		
-		onShowParamPanel: function(e, chartDataSet)
+		onShowParamPanel: function(e, dataSetBind)
 		{
-			po._currentChartDataSetForParam = chartDataSet;
+			po._currentDataSetBindForParam = dataSetBind;
 			po.vueUnref("${pid}paramPanelEle").toggle(e);
 		},
 		
 		onParamPanelShow: function(e)
 		{
-			if(po._currentChartDataSetForParam)
-				po.inflateParamPanel(po._currentChartDataSetForParam);
+			if(po._currentDataSetBindForParam)
+				po.inflateParamPanel(po._currentDataSetBindForParam);
 		},
 		
 		onParamPanelHide: function(e)
@@ -1102,9 +1102,9 @@
 			chartFactory.chartSetting.destroyDataSetParamValueForm(wrapper);
 		},
 		
-		onClearParamValues: function(e, chartDataSet)
+		onClearParamValues: function(e, dataSetBind)
 		{
-			chartDataSet.query.paramValues = {};
+			dataSetBind.query.paramValues = {};
 		},
 		
 		onShowDataFormatPanel: function(e)

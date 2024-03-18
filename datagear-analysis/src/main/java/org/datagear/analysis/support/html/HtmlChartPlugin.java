@@ -47,7 +47,7 @@ import org.datagear.util.i18n.Label;
  * 	varName : "[图表变量名]",
  * 	plugin : [图表插件变量名],
  * 	renderContext : [渲染上下文变量名],
- * 	chartDataSets : [{...}, ...]
+ * 	dataSetBinds : [{...}, ...]
  * };
  * [图表插件变量名].renderer.render([图表变量名]);
  * &lt;/script&gt;

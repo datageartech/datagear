@@ -19,7 +19,7 @@ package org.datagear.management.domain;
 
 import java.io.Serializable;
 
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetResult;
 import org.springframework.beans.BeanUtils;
@@ -27,21 +27,21 @@ import org.springframework.beans.BeanUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * {@linkplain ChartDataSet}值对象。
+ * {@linkplain DataSetBind}值对象。
  * 
  * @author datagear@163.com
  *
  */
-public class ChartDataSetVO extends ChartDataSet implements CloneableEntity, Serializable
+public class DataSetBindVO extends DataSetBind implements CloneableEntity, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public ChartDataSetVO()
+	public DataSetBindVO()
 	{
 		super();
 	}
 
-	public ChartDataSetVO(DataSet dataSet)
+	public DataSetBindVO(DataSet dataSet)
 	{
 		super(dataSet);
 	}
@@ -64,9 +64,9 @@ public class ChartDataSetVO extends ChartDataSet implements CloneableEntity, Ser
 	}
 
 	@Override
-	public ChartDataSetVO clone()
+	public DataSetBindVO clone()
 	{
-		ChartDataSetVO entity = new ChartDataSetVO();
+		DataSetBindVO entity = new DataSetBindVO();
 		BeanUtils.copyProperties(this, entity);
 
 		return entity;

@@ -30,7 +30,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DataSet;
@@ -48,7 +48,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
 import org.datagear.management.domain.Authorization;
-import org.datagear.management.domain.ChartDataSetVO;
+import org.datagear.management.domain.DataSetBindVO;
 import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
@@ -251,26 +251,26 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
 		setNullAnalysisProjectIfNoPermission(user, chart, getAnalysisProjectService());
 
-		ChartDataSet[] chartDataSets = chart.getChartDataSets();
-		if (chartDataSets != null)
+		DataSetBind[] dataSetBinds = chart.getDataSetBinds();
+		if (dataSetBinds != null)
 		{
-			List<ChartDataSet> chartDataSetsPermited = new ArrayList<ChartDataSet>(chartDataSets.length);
+			List<DataSetBind> dataSetBindsPermited = new ArrayList<DataSetBind>(dataSetBinds.length);
 
-			for (int i = 0; i < chartDataSets.length; i++)
+			for (int i = 0; i < dataSetBinds.length; i++)
 			{
-				ChartDataSet chartDataSet = chartDataSets[i];
-				DataSet dataSet = (chartDataSet == null ? null : chartDataSet.getDataSet());
+				DataSetBind dataSetBind = dataSetBinds[i];
+				DataSet dataSet = (dataSetBind == null ? null : dataSetBind.getDataSet());
 				int permission = (dataSet != null ? getDataSetEntityService().getPermission(user, dataSet.getId())
 						: Authorization.PERMISSION_NONE_START);
 
 				// 只添加有权限的
 				if (Authorization.canRead(permission))
 				{
-					chartDataSetsPermited.add(chartDataSet);
+					dataSetBindsPermited.add(dataSetBind);
 				}
 			}
 
-			chartDataSets = chartDataSetsPermited.toArray(new ChartDataSet[chartDataSetsPermited.size()]);
+			dataSetBinds = dataSetBindsPermited.toArray(new DataSetBind[dataSetBindsPermited.size()]);
 		}
 
 		chart.setId(null);
@@ -645,10 +645,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			entity.setPluginVo(pluginVo);
 		}
 
-		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
-		if (chartDataSetVOs != null)
+		DataSetBindVO[] dataSetBindVOs = entity.getDataSetBindVOs();
+		if (dataSetBindVOs != null)
 		{
-			for (ChartDataSetVO vo : chartDataSetVOs)
+			for (DataSetBindVO vo : dataSetBindVOs)
 			{
 				DataSetQuery query = vo.getQuery();
 				query = getWebDashboardQueryConverter().convert(query, vo.getDataSet());
@@ -716,7 +716,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if(plugin != null)
 			entity.setPluginVo(getHtmlChartPluginView(request, plugin.getId()));
 		
-		entity.setChartDataSets(toChartDataSetViews(entity.getChartDataSets()));
+		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
 	}
 	
 	protected void setResultDataFormatModel(HtmlChartWidgetEntity entity, org.springframework.ui.Model model)

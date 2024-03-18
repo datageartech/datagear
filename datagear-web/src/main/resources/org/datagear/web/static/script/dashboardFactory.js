@@ -697,7 +697,7 @@
 		var msg = {};
 		if(!this.isDataSetParamValueReady(msg))
 		{
-			chartFactory.logException("chart '#"+this.elementId+"' chartDataSets["+msg.chartDataSetIndex+"] "
+			chartFactory.logException("chart '#"+this.elementId+"' chartDataSets["+msg.dataSetBindIndex+"] "
 										+"'s ["+msg.paramName+"] param value required");
 			return;
 		}

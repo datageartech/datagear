@@ -25,7 +25,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
@@ -35,7 +35,7 @@ import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categoriz
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.management.domain.ChartDataSetVO;
+import org.datagear.management.domain.DataSetBindVO;
 import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.util.KeywordMatcher;
 import org.datagear.util.KeywordMatcher.MatchValue;
@@ -215,15 +215,15 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return "/chartPlugin/icon/" + plugin.getId();
 	}
 
-	protected ChartDataSetView[] toChartDataSetViews(ChartDataSet[] chartDataSets)
+	protected DataSetBindView[] toDataSetBindViews(DataSetBind[] dataSetBinds)
 	{
-		if (chartDataSets == null)
+		if (dataSetBinds == null)
 			return null;
 
-		ChartDataSetView[] views = new ChartDataSetView[chartDataSets.length];
+		DataSetBindView[] views = new DataSetBindView[dataSetBinds.length];
 
-		for (int i = 0; i < chartDataSets.length; i++)
-			views[i] = new ChartDataSetView(chartDataSets[i]);
+		for (int i = 0; i < dataSetBinds.length; i++)
+			views[i] = new DataSetBindView(dataSetBinds[i]);
 
 		return views;
 	}
@@ -262,30 +262,30 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	}
 
 	/**
-	 * {@linkplain ChartDataSet}视图对象。
+	 * {@linkplain DataSetBind}视图对象。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class ChartDataSetView extends ChartDataSetVO
+	public static class DataSetBindView extends DataSetBindVO
 	{
 		private static final long serialVersionUID = 1L;
 
-		public ChartDataSetView()
+		public DataSetBindView()
 		{
 			super();
 		}
 
-		public ChartDataSetView(ChartDataSet chartDataSet)
+		public DataSetBindView(DataSetBind dataSetBind)
 		{
 			super();
-			setDataSet(ProfileDataSet.valueOf(chartDataSet.getDataSet()));
-			setPropertySigns(chartDataSet.getPropertySigns());
-			setAlias(chartDataSet.getAlias());
-			setAttachment(chartDataSet.isAttachment());
-			setQuery(chartDataSet.getQuery());
-			setPropertyAliases(chartDataSet.getPropertyAliases());
-			setPropertyOrders(chartDataSet.getPropertyOrders());
+			setDataSet(ProfileDataSet.valueOf(dataSetBind.getDataSet()));
+			setPropertySigns(dataSetBind.getPropertySigns());
+			setAlias(dataSetBind.getAlias());
+			setAttachment(dataSetBind.isAttachment());
+			setQuery(dataSetBind.getQuery());
+			setPropertyAliases(dataSetBind.getPropertyAliases());
+			setPropertyOrders(dataSetBind.getPropertyOrders());
 		}
 
 		@JsonIgnore

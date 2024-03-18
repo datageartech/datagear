@@ -369,14 +369,14 @@
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section{
+.dg-chart-setting-box .dg-chart-setting-panel .dg-datasetbind-section{
 	border-width: 1px;
 	border-style: solid;
 	padding: 0.5em 0.5em;
 	margin: 0.5em 0;
 	border-radius: 3px;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section-head{
+.dg-chart-setting-box .dg-chart-setting-panel .dg-datasetbind-section-head{
 	font-weight: bold;
 	overflow: hidden;
 	white-space: nowrap;

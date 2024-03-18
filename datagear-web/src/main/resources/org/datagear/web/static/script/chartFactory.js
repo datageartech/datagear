@@ -317,8 +317,8 @@
 	 *				  plugin: {...},
 	 *				  //可选，名称
 	 *				  name: "...",
-	 *				  //可选，图表数据集数组
-	 *				  chartDataSets: [...],
+	 *				  //可选，数据集绑定数组
+	 *				  dataSetBinds: [...],
 	 *				  //可选，更新间隔
 	 *				  updateInterval: 数值,
 	 *				  //可选，图表结果数据格式
@@ -343,23 +343,30 @@
 	chartFactory._initChartBaseProperties = function(chart)
 	{
 		chart.name = (chart.name || "");
-		chart.chartDataSets = (chart.chartDataSets || []);
 		chart.updateInterval = (chart.updateInterval == null ? -1 : chart.updateInterval);
-		for(var i=0; i<chart.chartDataSets.length; i++)
+		chart.dataSetBinds = (chart.dataSetBinds || []);
+		for(var i=0; i<chart.dataSetBinds.length; i++)
 		{
-			var cds = chart.chartDataSets[i];
+			var cds = chart.dataSetBinds[i];
 			cds.propertySigns = (cds.propertySigns || {});
 			cds.alias = (cds.alias == null ?  "" : cds.alias);
 			cds.attachment = (cds.attachment == true ? true : false);
 			cds.query = (cds.query || {});
 			cds.query.paramValues = (cds.query.paramValues || {});
-			//为chartDataSets元素添加index属性，便于后续根据其索引获取结果集等信息
+			//为dataSetBinds元素添加index属性，便于后续根据其索引获取结果集等信息
 			cds.index = i;
 			
-			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+			// < @deprecated 兼容2.4.0版本的dataSetBinds.paramValues，将在未来版本移除，已被dataSetBinds.query.paramValues取代
 			cds.paramValues = cds.query.paramValues;
-			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+			// > @deprecated 兼容2.4.0版本的dataSetBinds.paramValues，将在未来版本移除，已被dataSetBinds.query.paramValues取代
 		}
+		
+		chart._dataSetBinds = (chart.dataSetBinds || []);
+		delete chart.dataSetBinds;
+		
+		// < @deprecated 兼容4.7.0版本的chart.chartDataSets，将在未来版本移除，已被chart._dataSetBinds取代
+		chart.chartDataSets = chart._dataSetBinds;
+		// > @deprecated 兼容4.7.0版本的chart.chartDataSets，将在未来版本移除，已被chart._dataSetBinds取代
 		
 		chart._attrValues = (chart.attrValues || {});
 		
@@ -1850,20 +1857,20 @@
 	/**
 	 * 判断图表的所有数据集参数值是否准备就绪，即：所有必填参数值都不为null。
 	 * 
-	 * @param msg 可选，格式应为：{}, 当校验参数值未齐备时用于写入必填参数信息：{ chartDataSetIndex: 数值, paramName: 参数名 }
+	 * @param msg 可选，格式应为：{}, 当校验参数值未齐备时用于写入必填参数信息：{ dataSetBindIndex: 数值, paramName: 参数名 }
 	 */
 	chartBase.isDataSetParamValueReady = function(msg)
 	{
-		var chartDataSets = (this.chartDataSets || []);
+		var dataSetBinds = this.dataSetBinds();
 		
-		for(var i=0; i<chartDataSets.length; i++)
+		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var dataSet = chartDataSets[i].dataSet;
+			var dataSet = dataSetBinds[i].dataSet;
 			
 			if(!dataSet.params || dataSet.params.length == 0)
 				continue;
 			
-			var paramValues = chartDataSets[i].query.paramValues;
+			var paramValues = dataSetBinds[i].query.paramValues;
 			
 			for(var j=0; j<dataSet.params.length; j++)
 			{
@@ -1873,7 +1880,7 @@
 				{
 					if(msg != null)
 					{
-						msg.chartDataSetIndex = i;
+						msg.dataSetBindIndex = i;
 						msg.paramName = dsp.name;
 					}
 					
@@ -1885,14 +1892,14 @@
 		return true;
 	};
 	
-	chartBase._chartDataSetOf = function(chartDataSet, nullable)
+	chartBase._dataSetBindOf = function(dataSetBind, nullable)
 	{
 		nullable = (nullable == null ? false : nullable);
 		
-		var re = (chartFactory.isNumber(chartDataSet) ? this.chartDataSetAt(chartDataSet) : chartDataSet);
+		var re = (chartFactory.isNumber(dataSetBind) ? this.dataSetBindAt(dataSetBind) : dataSetBind);
 		
 		if(!nullable && re == null)
-			throw new Error("chart data set not found for : " + chartDataSet);
+			throw new Error("DataSetBind not found for : " + dataSetBind);
 		
 		return re;
 	};
@@ -1911,18 +1918,18 @@
 	/**
 	 * 获取/设置指定数据集单个参数值。
 	 * 
-	 * @param chartDataSet 指定图表数据集对象、图表数据集索引
+	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param name 参数名、参数索引
 	 * @param value 可选，要设置的参数值，不设置则执行获取操作
 	 */
-	chartBase.dataSetParamValue = function(chartDataSet, name, value)
+	chartBase.dataSetParamValue = function(dataSetBind, name, value)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		//参数索引
-		if(typeof(name) == "number")
+		if(chartFactory.isNumber(name))
 		{
-			var dataSet = chartDataSet.dataSet;
+			var dataSet = dataSetBind.dataSet;
 			
 			if(!dataSet.params || dataSet.params.length <= name)
 				throw new Error("no data set param defined at index : "+name);
@@ -1930,10 +1937,10 @@
 			name = dataSet.params[name].name;
 		}
 		
-		var paramValues = chartDataSet.query.paramValues;
+		var paramValues = dataSetBind.query.paramValues;
 		
-		if(chartDataSet._originalParamValues == null)
-			chartDataSet._originalParamValues = $.extend({}, paramValues);
+		if(dataSetBind._originalParamValues == null)
+			dataSetBind._originalParamValues = $.extend({}, paramValues);
 		
 		if(value === undefined)
 			return paramValues[name];
@@ -1955,18 +1962,18 @@
 	/**
 	 * 获取/设置指定数据集参数值集。
 	 * 
-	 * @param chartDataSet 指定图表数据集或其索引
+	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
 	 * @param inflate 可选，设置操作是否仅填充在paramValues中出现的参数值，而保留旧参数值，默认值为：false
 	 */
-	chartBase.dataSetParamValues = function(chartDataSet, paramValues, inflate)
+	chartBase.dataSetParamValues = function(dataSetBind, paramValues, inflate)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		var paramValuesCurrent = chartDataSet.query.paramValues;
+		var paramValuesCurrent = dataSetBind.query.paramValues;
 		
-		if(chartDataSet._originalParamValues == null)
-			chartDataSet._originalParamValues = $.extend({}, paramValuesCurrent);
+		if(dataSetBind._originalParamValues == null)
+			dataSetBind._originalParamValues = $.extend({}, paramValuesCurrent);
 		
 		if(paramValues === undefined)
 			return paramValuesCurrent;
@@ -1976,7 +1983,7 @@
 			
 			if($.isArray(paramValues))
 			{
-				var params = (chartDataSet.dataSet.params || []);
+				var params = (dataSetBind.dataSet.params || []);
 				var len = Math.min(params.length, paramValues.length);
 				var paramValuesObj = {};
 				
@@ -1995,12 +2002,12 @@
 			}
 			else
 			{
-				chartDataSet.query.paramValues = paramValues;
+				dataSetBind.query.paramValues = paramValues;
 			}
 			
-			// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
-			chartDataSet.paramValues = chartDataSet.query.paramValues;
-			// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+			// < @deprecated 兼容2.4.0版本的dataSetBind.paramValues，将在未来版本移除，已被dataSetBind.query.paramValues取代
+			dataSetBind.paramValues = dataSetBind.query.paramValues;
+			// > @deprecated 兼容2.4.0版本的dataSetBind.paramValues，将在未来版本移除，已被dataSetBind.query.paramValues取代
 		}
 	};
 	
@@ -2015,20 +2022,20 @@
 	/**
 	 * 重置指定数据集参数值集。
 	 * 
-	 * @param chartDataSet 指定图表数据集或其索引
+	 * @param dataSetBind 指定数据集绑定或其索引
 	 */
-	chartBase.resetDataSetParamValues = function(chartDataSet)
+	chartBase.resetDataSetParamValues = function(dataSetBind)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		if(chartDataSet._originalParamValues == null)
+		if(dataSetBind._originalParamValues == null)
 			return;
 		
-		chartDataSet.query.paramValues = $.extend({}, chartDataSet._originalParamValues);
+		dataSetBind.query.paramValues = $.extend({}, dataSetBind._originalParamValues);
 		
-		// < @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
-		chartDataSet.paramValues = chartDataSet.query.paramValues;
-		// > @deprecated 兼容2.4.0版本的chartDataSet.paramValues，将在未来版本移除，已被chartDataSet.query.paramValues取代
+		// < @deprecated 兼容2.4.0版本的dataSetBind.paramValues，将在未来版本移除，已被dataSetBind.query.paramValues取代
+		dataSetBind.paramValues = dataSetBind.query.paramValues;
+		// > @deprecated 兼容2.4.0版本的dataSetBind.paramValues，将在未来版本移除，已被dataSetBind.query.paramValues取代
 	};
 	
 	/**
@@ -2129,123 +2136,23 @@
 	};
 	
 	/**
-	 * 获取主件图表数据集对象数组，它们的用途是绘制图表。
-	 * 
-	 * @return []，空数组表示没有主件图表数据集
-	 */
-	chartBase.chartDataSetsMain = function()
-	{
-		var re = [];
-		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			if(chartDataSets[i].attachment)
-				continue;
-			
-			re.push(chartDataSets[i]);
-		}
-		
-		return re;
-	};
-	
-	/**
-	 * 获取附件图表数据集对象数组，它们的用途不是绘制图表。
-	 * 
-	 * @return []，空数组表示没有附件图表数据集
-	 */
-	chartBase.chartDataSetsAttachment = function()
-	{
-		var re = [];
-		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			if(chartDataSets[i].attachment)
-			{
-				re.push(chartDataSets[i]);
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
-	 * 获取指定索引的图表数据集对象，没有则返回undefined。
-	 * 
-	 * @param index
-	 */
-	chartBase.chartDataSetAt = function(index)
-	{
-		return (!this.chartDataSets || this.chartDataSets.length <= index ? undefined : this.chartDataSets[index]);
-	};
-	
-	/**
-	 * 获取第一个主件图表数据集对象。
-	 * 主件图表数据集的用途是绘制图表。
-	 * 
-	 * @return 未找到时返回null
-	 * @since 3.0.0
-	 */
-	chartBase.chartDataSetMain = function()
-	{
-		var re = undefined;
-		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			if(!chartDataSets[i].attachment)
-			{
-				re = chartDataSets[i];
-				break;
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
-	 * 获取第一个附件图表数据集对象。
-	 * 附件图表数据集的用途不是绘制图表。
-	 * 
-	 * @return 未找到时返回null
-	 * @since 3.0.0
-	 */
-	chartBase.chartDataSetAttachment = function()
-	{
-		var re = undefined;
-		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			if(chartDataSets[i].attachment)
-			{
-				re = chartDataSets[i];
-				break;
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
 	 * 获取指定标记的数据集属性，没有则返回undefined。
 	 * 
-	 * @param chartDataSet 图表数据集、索引
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 数据标记对象、标记名称
 	 * @param nonEmpty 可选，参考chartBase.dataSetPropertiesOfSign的nonEmpty参数
 	 * @return {...}、undefined
 	 */
-	chartBase.dataSetPropertyOfSign = function(chartDataSet, dataSign, nonEmpty)
+	chartBase.dataSetPropertyOfSign = function(dataSetBind, dataSign, nonEmpty)
 	{
-		var properties = this.dataSetPropertiesOfSign(chartDataSet, dataSign, false, nonEmpty);
+		var properties = this.dataSetPropertiesOfSign(dataSetBind, dataSign, false, nonEmpty);
 		return (properties.length > 0 ? properties[0] : undefined);
 	};
 	
 	/**
 	 * 获取指定标记的数据集属性数组。
 	 * 
-	 * @param chartDataSet 图表数据集、索引
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 数据标记对象、标记名称
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
@@ -2253,9 +2160,9 @@
 	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
 	 * @return [...]
 	 */
-	chartBase.dataSetPropertiesOfSign = function(chartDataSet, dataSign, sort, nonEmpty)
+	chartBase.dataSetPropertiesOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		sort = (sort === undefined ? true : sort);
 		nonEmpty = (nonEmpty == null ? "auto" : nonEmpty);
 		
@@ -2264,9 +2171,9 @@
 		if(dataSign == null)
 			return re;
 		
-		dataSetProperties = this.dataSetProperties(chartDataSet, sort);
+		dataSetProperties = this.dataSetProperties(dataSetBind, sort);
 		var dataSignName = (chartFactory.isString(dataSign) ? dataSign : dataSign.name);
-		var propertySigns = (chartDataSet.propertySigns || {});
+		var propertySigns = (dataSetBind.propertySigns || {});
 		
 		var signPropertyNames = [];
 		
@@ -2330,14 +2237,14 @@
 	};
 	
 	/**
-	 * 返回指定图表数据集对应的数据集结果，没有则返回undefined。
+	 * 返回指定数据集绑定对应的数据集结果，没有则返回undefined。
 	 * 
 	 * @param results
-	 * @param chartDataSet
+	 * @param dataSetBind
 	 */
-	chartBase.resultOf = function(results, chartDataSet)
+	chartBase.resultOf = function(results, dataSetBind)
 	{
-		return this.resultAt(results, chartDataSet.index);
+		return this.resultAt(results, dataSetBind.index);
 	};
 	
 	/**
@@ -2356,17 +2263,17 @@
 	};
 	
 	/**
-	 * 获取/设置指定图表数据集对应的数据集结果对象包含的数据。
+	 * 获取/设置指定数据集绑定对应的数据集结果对象包含的数据。
 	 * 
 	 * @param results
-	 * @param chartDataSet
+	 * @param dataSetBind
 	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
 	 * @return 要获取的数据集结果数据，没有则返回null
 	 * @since 3.0.0
 	 */
-	chartBase.resultDataOf = function(results, chartDataSet, data)
+	chartBase.resultDataOf = function(results, dataSetBind, data)
 	{
-		var result = this.resultOf(results, chartDataSet);
+		var result = this.resultOf(results, dataSetBind);
 		return this.resultData(result, data);
 	};
 	
@@ -2389,16 +2296,16 @@
 	};
 	
 	/**
-	 * 获取指定图表数据集对应的数据集结果对象包含的数据对象数组。
+	 * 获取指定数据集绑定对应的数据集结果对象包含的数据对象数组。
 	 * 
 	 * @param results
-	 * @param chartDataSet
+	 * @param dataSetBind
 	 * @return 不会为null的数组
 	 * @since 3.0.0
 	 */
-	chartBase.resultDatasOf = function(results, chartDataSet)
+	chartBase.resultDatasOf = function(results, dataSetBind)
 	{
-		var result = this.resultOf(results, chartDataSet);
+		var result = this.resultOf(results, dataSetBind);
 		return this.resultDatas(result);
 	};
 	
@@ -3176,27 +3083,27 @@
 	/**
 	 * 获取/设置数据集别名。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetAlias = function(chartDataSet, alias)
+	chartBase.dataSetAlias = function(dataSetBind, alias)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		if(alias === undefined)
 		{
-			if(chartDataSet.alias)
-				return chartDataSet.alias;
+			if(dataSetBind.alias)
+				return dataSetBind.alias;
 			
-			var dataSet = (chartDataSet.dataSet || chartDataSet);
+			var dataSet = (dataSetBind.dataSet || dataSetBind);
 			
 			return (dataSet ? (dataSet.name || "") : "");
 		}
 		else
 		{
-			chartDataSet.alias = alias;
+			dataSetBind.alias = alias;
 		}
 	};
 	
@@ -3207,30 +3114,30 @@
 	 * 属性默认具有与其索引相同的排序值；
 	 * 当两个属性具有相同排序值时，设置了propertyOrders中排序值的那个属性靠前排（前置插入），否则，属性索引小的那个靠前排。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
-	 * @param sort 可选，当chartDataSet是图表数据集时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
+	 * @param dataSetBind 数据集绑定或其索引、数据集
+	 * @param sort 可选，当dataSetBind是数据集绑定时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @returns 数据集属性数组，返回空数组表示没有属性
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetProperties = function(chartDataSet, sort)
+	chartBase.dataSetProperties = function(dataSetBind, sort)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		sort = (sort === undefined ? true : sort);
 		
 		var properties = null;
-		var isDataSet = (chartDataSet.properties !== undefined);
+		var isDataSet = (dataSetBind.properties !== undefined);
 		
 		if(isDataSet)
-			properties = chartDataSet.properties;
+			properties = dataSetBind.properties;
 		else
-			properties = (chartDataSet.dataSet ? chartDataSet.dataSet.properties : null);
+			properties = (dataSetBind.dataSet ? dataSetBind.dataSet.properties : null);
 		
 		properties = (properties || []);
 		
 		if(isDataSet || !sort)
 			return properties;
 		
-		var propertyOrders = chartDataSet.propertyOrders;
+		var propertyOrders = dataSetBind.propertyOrders;
 		
 		if(!propertyOrders)
 			return properties;
@@ -3275,14 +3182,14 @@
 	/**
 	 * 获取指定标识的数据集属性。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
+	 * @param dataSetBind 数据集绑定或其索引、数据集
 	 * @param info 数据集属性标识，可以是属性名、属性索引
 	 * @returns 数据集属性，没有找到则返回undefined
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetProperty = function(chartDataSet, info)
+	chartBase.dataSetProperty = function(dataSetBind, info)
 	{
-		var properties = this.dataSetProperties(chartDataSet, false);
+		var properties = this.dataSetProperties(dataSetBind, false);
 		
 		if(!properties)
 			return undefined;
@@ -3302,26 +3209,26 @@
 	/**
 	 * 获取/设置数据集属性别名。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetPropertyAlias = function(chartDataSet, dataSetProperty, alias)
+	chartBase.dataSetPropertyAlias = function(dataSetBind, dataSetProperty, alias)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		if(chartFactory.isStringOrNumber(dataSetProperty))
-			dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+			dataSetProperty = this.dataSetProperty(dataSetBind, dataSetProperty);
 		
 		if(alias === undefined)
 		{
 			if(!dataSetProperty)
 				return "";
 			
-			alias =  (chartDataSet.propertyAliases ?
-							chartDataSet.propertyAliases[dataSetProperty.name] : null);
+			alias =  (dataSetBind.propertyAliases ?
+							dataSetBind.propertyAliases[dataSetProperty.name] : null);
 			
 			if(!alias)
 				alias = (dataSetProperty.label ||  dataSetProperty.name);
@@ -3330,25 +3237,25 @@
 		}
 		else
 		{
-			if(!chartDataSet.propertyAliases)
-				chartDataSet.propertyAliases = {};
+			if(!dataSetBind.propertyAliases)
+				dataSetBind.propertyAliases = {};
 			
-			chartDataSet.propertyAliases[dataSetProperty.name] = alias;
+			dataSetBind.propertyAliases[dataSetProperty.name] = alias;
 		}
 	};
 	
 	/**
 	 * 获取/设置数据集属性排序值。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
 	 * @param order 可选，要设置的排序数值，不设置则执行获取操作
 	 * @returns 要获取的排序数值，没有设置过则返回null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetPropertyOrder = function(chartDataSet, dataSetProperty, order)
+	chartBase.dataSetPropertyOrder = function(dataSetBind, dataSetProperty, order)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		var name = null;
 		
@@ -3357,42 +3264,42 @@
 		else
 		{
 			if(chartFactory.isNumber(dataSetProperty))
-				dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+				dataSetProperty = this.dataSetProperty(dataSetBind, dataSetProperty);
 			
 			name = (dataSetProperty ? dataSetProperty.name : null);
 		}
 		
 		if(order === undefined)
 		{
-			return (chartDataSet.propertyOrders ?
-							chartDataSet.propertyOrders[name] : undefined);
+			return (dataSetBind.propertyOrders ?
+							dataSetBind.propertyOrders[name] : undefined);
 		}
 		else
 		{
-			if(!chartDataSet.propertyOrders)
-				chartDataSet.propertyOrders = {};
+			if(!dataSetBind.propertyOrders)
+				dataSetBind.propertyOrders = {};
 			
-			chartDataSet.propertyOrders[name] = order;
+			dataSetBind.propertyOrders[name] = order;
 		}
 	};
 	
 	/**
 	 * 获取数据集参数数组。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
+	 * @param dataSetBind 数据集绑定或其索引、数据集
 	 * @returns 数据集参数数组，空数组表示没有参数
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetParams = function(chartDataSet)
+	chartBase.dataSetParams = function(dataSetBind)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		var params = null;
 		
-		if(chartDataSet.params !== undefined)
-			params = chartDataSet.params;
+		if(dataSetBind.params !== undefined)
+			params = dataSetBind.params;
 		else
-			params = (chartDataSet.dataSet ? chartDataSet.dataSet.params : null);
+			params = (dataSetBind.dataSet ? dataSetBind.dataSet.params : null);
 		
 		return (params || []);
 	};
@@ -3400,14 +3307,14 @@
 	/**
 	 * 获取指定标识的数据集参数。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值、数据集
+	 * @param dataSetBind 数据集绑定或其索引、数据集
 	 * @param info 数据集参数标识，可以是参数名、参数索引
 	 * @returns 数据集参数，没有找到则返回undefined
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetParam = function(chartDataSet, info)
+	chartBase.dataSetParam = function(dataSetBind, info)
 	{
-		var params = this.dataSetParams(chartDataSet);
+		var params = this.dataSetParams(dataSetBind);
 		
 		if(!params)
 			return undefined;
@@ -3431,10 +3338,10 @@
 	 */
 	chartBase.hasDataSetParam = function()
 	{
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var params = chartDataSets[i].dataSet.params;
+			var params = dataSetBinds[i].dataSet.params;
 			
 			if(params && params.length > 0)
 				return true;
@@ -3530,15 +3437,15 @@
 	/**
 	 * 获取/设置指定数据集属性标记。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSetProperty 数据集属性、属性名、属性索引
 	 * @param dataSign 可选，要设置的数据标记对象、对象数组，或者名称字符串、字符串数组，或者null，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetPropertySign = function(chartDataSet, dataSetProperty, dataSign)
+	chartBase.dataSetPropertySign = function(dataSetBind, dataSetProperty, dataSign)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		var name = null;
 		
@@ -3547,43 +3454,43 @@
 		else
 		{
 			if(chartFactory.isNumber(dataSetProperty))
-				dataSetProperty = this.dataSetProperty(chartDataSet, dataSetProperty);
+				dataSetProperty = this.dataSetProperty(dataSetBind, dataSetProperty);
 			
 			name = (dataSetProperty ? dataSetProperty.name : null);
 		}
 		
 		if(dataSign === undefined)
 		{
-			return (chartDataSet.propertySigns ?
-							chartDataSet.propertySigns[name] : undefined);
+			return (dataSetBind.propertySigns ?
+							dataSetBind.propertySigns[name] : undefined);
 		}
 		else
 		{
-			if(!chartDataSet.propertySigns)
-				chartDataSet.propertySigns = {};
+			if(!dataSetBind.propertySigns)
+				dataSetBind.propertySigns = {};
 			
 			dataSign = this._trimDataSetPropertySign(dataSign);
-			chartDataSet.propertySigns[name] = dataSign;
+			dataSetBind.propertySigns[name] = dataSign;
 		}
 	};
 	
 	/**
 	 * 获取/设置数据集属性标记映射表。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 数据标记对象、对象数组，或者名称字符串、字符串数组，或者null, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
 	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetPropertySigns = function(chartDataSet, signs, increment)
+	chartBase.dataSetPropertySigns = function(dataSetBind, signs, increment)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
 		increment = (increment == null ? true : increment);
 		
 		if(signs === undefined)
 		{
-			return (chartDataSet.propertySigns || {});
+			return (dataSetBind.propertySigns || {});
 		}
 		else
 		{
@@ -3598,12 +3505,12 @@
 				}
 			}
 			
-			if(!chartDataSet.propertySigns || !increment)
-				chartDataSet.propertySigns = trimSigns;
+			if(!dataSetBind.propertySigns || !increment)
+				dataSetBind.propertySigns = trimSigns;
 			else
 			{
 				for(var p in trimSigns)
-					chartDataSet.propertySigns[p] = trimSigns[p];
+					dataSetBind.propertySigns[p] = trimSigns[p];
 			}
 		}
 	};
@@ -3630,42 +3537,42 @@
 	};
 	
 	/**
-	 * 判断给定图表数据集是否是易变模型的。
+	 * 判断给定数据集绑定是否是易变模型的。
 	 * 
-	 * @param chartDataSet 图表数据集、图表数据集索引数值
+	 * @param dataSetBind 数据集绑定或其索引
 	 * @returns true、false
 	 * @since 3.0.0
 	 */
-	chartBase.isMutableModel = function(chartDataSet)
+	chartBase.isMutableModel = function(dataSetBind)
 	{
-		chartDataSet = this._chartDataSetOf(chartDataSet);
-		return (chartDataSet.dataSet.mutableModel == true);
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		return (dataSetBind.dataSet.mutableModel == true);
 	};
 	
 	/**
-	 * 获取/设置多条图表展示数据的原始数据索引（图表ID、图表数据集索引、结果数据索引）。
+	 * 获取/设置多条图表展示数据的原始数据索引（图表ID、数据集绑定索引、结果数据索引）。
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
 	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始数据索引信息，以支持在后续的交互、事件处理中获取它们。
 	 * 
 	 * @param data 展示数据数组，格式为：[ ... ]，元素格式允许为：{ ... }、[ ... ]，对于设置操作，当元素是对象时，将为其添加一个额外属性；
 	 * 			   当元素是数组时，如果末尾元素已是原始数据索引对象，替换；否则，追加
-	 * @param chartDataSetIndex 要设置的图表数据集对象（自动取其索引）、图表数据集对象数组（自动取其索引）、图表数据集索引数值、索引数值数组
+	 * @param chartDataSetIndex 要设置的数据集绑定对象（自动取其索引）、数据集绑定对象数组（自动取其索引）、数据集绑定索引数值、索引数值数组
 	 * @param resultDataIndex 要设置的结果数据索引，格式为：
-	 *                        当chartDataSetIndex是图表数据集对象、索引数值时：
+	 *                        当chartDataSetIndex是数据集绑定对象、索引数值时：
 	 *                        数值、数值数组
-	 *                        当chartDataSetIndex是图表数据集对象数组、索引数值数组时：
+	 *                        当chartDataSetIndex是数据集绑定对象数组、索引数值数组时：
 	 *                        数值，表示chartDataSetIndex数组每个元素的结果数据索引都是此数值
 	 *                        数组（元素可以是数值、数值数组），与chartDataSetIndex数组元素一一对应
 	 *                        默认值为：0
 	 * @param autoIncrement 可选，
-	 *                      当chartDataSetIndex是图表数据集对象、图表数据集索引数值且resultDataIndex是数值时，是否自动递增resultDataIndex；
-	 *                      当chartDataSetIndex是图表数据集对象数组、图表数据集索引数值数组且其元素对应位置的resultDataIndex是数值时，是否自动递增resultDataIndex。
+	 *                      当chartDataSetIndex是数据集绑定对象、数据集绑定索引数值且resultDataIndex是数值时，是否自动递增resultDataIndex；
+	 *                      当chartDataSetIndex是数据集绑定对象数组、数据集绑定索引数值数组且其元素对应位置的resultDataIndex是数值时，是否自动递增resultDataIndex。
 	 *                      默认值为：true
 	 * @returns 要获取的原始数据索引数组(元素可能为null），原始数据索引对象格式为：
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
-	 *										//图表数据集索引，格式为：数值、数值数组
+	 *										//数据集绑定索引，格式为：数值、数值数组
 	 *										chartDataSetIndex: ...,
 	 *										//结果数据索引，格式为：
 	 *                                      //当chartDataSetIndex是数值时：
@@ -3785,7 +3692,7 @@
 	};
 	
 	/**
-	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、图表数据集索引、结果数据索引）。
+	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、数据集绑定索引、结果数据索引）。
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
 	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始数据索引，以支持在后续的交互、事件处理中获取它们。
 	 * 
@@ -3820,7 +3727,7 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始数据索引（图表ID、图表数据集索引、结果数据索引），即：chartEvent.originalDataIndex。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据索引（图表ID、数据集绑定索引、结果数据索引），即：chartEvent.originalDataIndex。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
 	 * @param originalDataIndex 要设置的原始数据索引对象、数组，通常是chartBase.originalDataIndex()或chartBase.originalDataIndexes()函数的返回值
@@ -4119,7 +4026,7 @@
 	 * 					{ size: 数值或者函数, beforeListener: false }
 	 * @returns 更新追加模式，格式为：{ size: 数值, beforeListener: true、false }、false 表示没有禁用追加模式
 	 * 
-	 * @since 4.8.0
+	 * @since 5.0.0
 	 */
 	chartBase.updateAppendMode = function(appendMode)
 	{
@@ -4170,10 +4077,190 @@
 		
 		return appendMode;
 	};
+		
+	/**
+	 * 获取全部数据集绑定数组。
+	 * 
+	 * @return []，空数组表示没有数据集绑定
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBinds = function()
+	{
+		return (this._dataSetBinds || []);
+	};
+	
+	/**
+	 * 获取主件数据集绑定数组，它们的用途是绘制图表。
+	 * 
+	 * @return []，空数组表示没有主件数据集绑定
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindsMain = function()
+	{
+		var re = [];
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			if(dataSetBinds[i].attachment)
+				continue;
+			
+			re.push(dataSetBinds[i]);
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取附件数据集绑定数组，它们的用途不是绘制图表。
+	 * 
+	 * @return []，空数组表示没有附件数据集绑定
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindsAttachment = function()
+	{
+		var re = [];
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			if(dataSetBinds[i].attachment)
+			{
+				re.push(dataSetBinds[i]);
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取指定索引的数据集绑定。
+	 * 
+	 * @return 数据集绑定，null表示没有
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindAt = function(index)
+	{
+		var dataSetBinds = this.dataSetBinds();
+		return dataSetBinds[index];
+	};
+	
+	/**
+	 * 获取第一个主件数据集绑定。
+	 * 主件数据集绑定的用途是绘制图表。
+	 * 
+	 * @return 未找到时返回null
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindMain = function()
+	{
+		var re = undefined;
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			if(!dataSetBinds[i].attachment)
+			{
+				re = dataSetBinds[i];
+				break;
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取第一个附件数据集绑定对象。
+	 * 附件数据集绑定的用途不是绘制图表。
+	 * 
+	 * @return 未找到时返回null
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindAttachment = function()
+	{
+		var re = undefined;
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			if(dataSetBinds[i].attachment)
+			{
+				re = dataSetBinds[i];
+				break;
+			}
+		}
+		
+		return re;
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	/**
+	 * 获取主件数据集绑定对象数组，它们的用途是绘制图表。
+	 * 
+	 * @return []，空数组表示没有主件数据集绑定
+	 */
+	chartBase.chartDataSetsMain = function()
+	{
+		return this.dataSetBindsMain();
+	};
+	// > @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsAttachment()
+	/**
+	 * 获取附件数据集绑定对象数组，它们的用途不是绘制图表。
+	 * 
+	 * @return []，空数组表示没有附件数据集绑定
+	 */
+	chartBase.chartDataSetsAttachment = function()
+	{
+		return this.dataSetBindsAttachment();
+	};
+	// > @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsAttachment()
+	
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindAt()
+	/**
+	 * 获取指定索引的数据集绑定对象，没有则返回undefined。
+	 * 
+	 * @param index
+	 */
+	chartBase.chartDataSetAt = function(index)
+	{
+		return this.dataSetBindAt(index);
+	};
+	// > @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindAt()
+	
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindMain()
+	/**
+	 * 获取第一个主件数据集绑定对象。
+	 * 主件数据集绑定的用途是绘制图表。
+	 * 
+	 * @return 未找到时返回null
+	 * @since 3.0.0
+	 */
+	chartBase.chartDataSetMain = function()
+	{
+		return this.dataSetBindMain();
+	};
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindMain()
+	
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindAttachment()
+	/**
+	 * 获取第一个附件数据集绑定对象。
+	 * 附件数据集绑定的用途不是绘制图表。
+	 * 
+	 * @return 未找到时返回null
+	 * @since 3.0.0
+	 */
+	chartBase.chartDataSetAttachment = function()
+	{
+		return this.dataSetBindAttachment();
+	};
+	// > @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindAttachment()
 	
 	// < @deprecated 兼容4.3.1版本的API，将在未来版本移除，请使用chartBase.themeGradualColor()
 	/**
@@ -4247,14 +4334,14 @@
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.eventOriginalDataIndex()
 	/**
-	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始图表数据集索引（chartEvent.originalChartDataSetIndex）。
+	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始数据集绑定索引（chartEvent.originalChartDataSetIndex）。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalChartDataSetIndex 可选，要设置的原始图表数据集索引，格式应为：
-	 *                                  当图表事件数据是对象时：图表数据集索引数值、图表数据集索引数值数组
-	 *                                  当图表事件数据是对象数组时：数组，其元素可能为图表数据集索引数值、图表数据集索引数值数组
-	 *                                  其中，图表数据集索引数值允许为null，因为图表事件数据可能并非由图表结果数据构建
-	 * @returns 要获取的原始图表数据集索引，未设置则返回null
+	 * @param originalChartDataSetIndex 可选，要设置的原始数据集绑定索引，格式应为：
+	 *                                  当图表事件数据是对象时：数据集绑定索引数值、数据集绑定索引数值数组
+	 *                                  当图表事件数据是对象数组时：数组，其元素可能为数据集绑定索引数值、数据集绑定索引数值数组
+	 *                                  其中，数据集绑定索引数值允许为null，因为图表事件数据可能并非由图表结果数据构建
+	 * @returns 要获取的原始数据集绑定索引，未设置则返回null
 	 */
 	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
 	{
@@ -4270,7 +4357,7 @@
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
 	 * @param originalResultDataIndex 可选，要设置的原始数据集结果数据索引，格式应为：
 	 *                                与chartBase.eventOriginalChartDataSetIndex(chartEvent)返回值格式一致，
-	 *                                只是每一个图表数据集索引数值可能对应一个数据集结果数据索引数值、也可能对应一个数据集结果数据索引数值数组
+	 *                                只是每一个数据集绑定索引数值可能对应一个数据集结果数据索引数值、也可能对应一个数据集结果数据索引数值数组
 	 * @returns 要获取的原始数据集结果数据索引，未设置则返回null
 	 */
 	chartBase.eventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
@@ -4282,10 +4369,10 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始结果数据索引。
+	 * 图表事件支持函数：设置图表事件对象的原始数据集绑定索引、原始数据、原始结果数据索引。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalInfo 图表数据对象、数组，或者原始信息对象、数组（格式参考：chartBase.originalInfo函数返回值），或者原始图表数据集索引数值（用于兼容旧版API）
+	 * @param originalInfo 图表数据对象、数组，或者原始信息对象、数组（格式参考：chartBase.originalInfo函数返回值），或者原始数据集绑定索引数值（用于兼容旧版API）
 	 * @param originalResultDataIndex 可选，当originalInfo是索引数值时的原始数据索引，格式可以是：数值、数值数组
 	 */
 	chartBase.eventOriginalInfo = function(chartEvent, originalInfo, originalResultDataIndex)
@@ -4359,11 +4446,11 @@
 	
 	// < @deprecated 兼容3.0.1版本的API，将在未来版本移除，请使用chartBase.originalDataIndex()、chartBase.originalDataIndexes()
 	/**
-	 * 获取/设置指定数据对象的原始信息属性值，包括：图表ID、图表数据集索引、结果数据索引。
+	 * 获取/设置指定数据对象的原始信息属性值，包括：图表ID、数据集绑定索引、结果数据索引。
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]，当是数组时，设置操作将为每个元素单独设置原始信息
-	 * @param chartDataSetIndex 要设置的图表数据集索引数值、图表数据集对象（自动取其索引数值），或者它们的数组
+	 * @param chartDataSetIndex 要设置的数据集绑定索引数值、数据集绑定对象（自动取其索引数值），或者它们的数组
 	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：
 	 *                        当chartDataSetIndex不是数组时：
 	 *                        数值、数值数组
@@ -4379,7 +4466,7 @@
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
-	 *										//图表数据集索引数值、数值数组
+	 *										//数据集绑定索引数值、数值数组
 	 *										chartDataSetIndex: ...,
 	 *										//结果数据索引，格式为：
 	 *                                      //当chartDataSetIndex不是数组时：
@@ -4574,11 +4661,11 @@
 	};
 	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultDatasOf()
 	
-	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMain()、chartDataSetAttachment()取代
+	// < @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.dataSetBindMain()、dataSetBindAttachment()取代
 	/**
-	 * 获取第一个主件或者附件图表数据集对象。
+	 * 获取第一个主件或者附件数据集绑定对象。
 	 * 
-	 * @param attachment 可选，true 获取第一个附件图表数据集；false 获取第一个主件图表数据集。默认值为：false
+	 * @param attachment 可选，true 获取第一个附件数据集绑定；false 获取第一个主件数据集绑定。默认值为：false
 	 * @return {...} 或  undefined
 	 */
 	chartBase.chartDataSetFirst = function(attachment)
@@ -4587,21 +4674,21 @@
 		
 		var re = undefined;
 		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
+		var dataSetBinds = this.dataSetBinds;
+		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var isAttachment = chartDataSets[i].attachment;
+			var isAttachment = dataSetBinds[i].attachment;
 			
 			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
 			{
-				re = chartDataSets[i];
+				re = dataSetBinds[i];
 				break;
 			}
 		}
 		
 		return re;
 	};
-	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.chartDataSetMain()、chartDataSetAttachment()取代
+	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，已被chartBase.dataSetBindMain()、dataSetBindAttachment()取代
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.hasDataSetParam()取代
 	/**
@@ -4633,13 +4720,13 @@
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetAlias()取代
 	/**
-	 * 获取指定图表数据集对象名称，它不会返回null。
+	 * 获取指定数据集绑定对象名称，它不会返回null。
 	 * 
-	 * @param chartDataSet 图表数据集对象
+	 * @param dataSetBind 数据集绑定对象
 	 */
-	chartBase.chartDataSetName = function(chartDataSet)
+	chartBase.chartDataSetName = function(dataSetBind)
 	{
-		return this.dataSetAlias(chartDataSet);
+		return this.dataSetAlias(dataSetBind);
 	};
 	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetAlias()取代
 	
@@ -4779,15 +4866,15 @@
 	};
 	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.renderer取代
 	
-	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartDataSets取代
+	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.dataSetBinds()取代
 	/**
-	 * 获取所有图表数据集对象数组。
+	 * 获取所有数据集绑定对象数组。
 	 */
 	chartBase.chartDataSetsNonNull = function()
 	{
-		return (this.chartDataSets || []);
+		return this.dataSetBinds();
 	};
-	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.chartDataSets取代
+	// > @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.dataSetBinds()取代
 	
 	// < @deprecated 兼容2.3.0版本的API，将在未来版本移除，已被chartBase.name取代
 	/**
@@ -4814,21 +4901,21 @@
 	
 	// < @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
 	/**
-	 * 获取指定图表数据集参数值对象。
+	 * 获取指定数据集绑定参数值对象。
 	 */
-	chartBase.getDataSetParamValues = function(chartDataSet)
+	chartBase.getDataSetParamValues = function(dataSetBind)
 	{
-		return this.dataSetParamValues(chartDataSet);
+		return this.dataSetParamValues(dataSetBind);
 	};
 	// > @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
 	
 	// < @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
 	/**
-	 * 设置指定图表数据集多个参数值。
+	 * 设置指定数据集绑定多个参数值。
 	 */
-	chartBase.setDataSetParamValues = function(chartDataSet, paramValues)
+	chartBase.setDataSetParamValues = function(dataSetBind, paramValues)
 	{
-		this.dataSetParamValues(chartDataSet, paramValues);
+		this.dataSetParamValues(dataSetBind, paramValues);
 	};
 	// > @deprecated 兼容1.8.1版本的API，将在未来版本移除，已被chartBase.dataSetParamValues取代
 	
@@ -4888,11 +4975,11 @@
 	};
 	
 	/**
-	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、图表数据集索引、结果数据索引）。
+	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、数据集绑定索引、结果数据索引）。
 	 * 
 	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
 	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
-	 * @param chartDataSetIndex 图表数据集索引数值、数值数组
+	 * @param chartDataSetIndex 数据集绑定索引数值、数值数组
 	 * @param resultDataIndex 图表数据集结果数据索引数值、数值数组、数值数组的数组
 	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
 	 * @since 3.1.0

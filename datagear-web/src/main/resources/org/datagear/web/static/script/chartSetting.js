@@ -1646,7 +1646,7 @@
 					}
 				},
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-chartdataset-section",
+					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-datasetbind-section",
 					value:
 					{
 						"color": color,
@@ -1727,9 +1727,9 @@
 				
 				var myTitle = chartSetting.evalChartDataSetPanelTitle(chart, chartDataSets, i);
 				
-				var $fp = $("<div class='dg-chartdataset-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
-				var $head = $("<div class='dg-chartdataset-section-head' />").html(myTitle).appendTo($fp);
-				var $content = $("<div class='dg-chartdataset-section-content' />").appendTo($fp);
+				var $fp = $("<div class='dg-datasetbind-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
+				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
 				chartSetting.renderDataSetParamValueForm($content, params,
 				{
 					chartTheme: chart.theme(),
@@ -1752,7 +1752,7 @@
 				var validateOk = true;
 				var paramValuess = [];
 				
-				$(".dg-chartdataset-section", $panelContent).each(function()
+				$(".dg-datasetbind-section", $panelContent).each(function()
 				{
 					if(!validateOk)
 						return;
@@ -1792,7 +1792,7 @@
 			//先显示，避免布局计算错误
 			$panel.show();
 			
-			$(".dg-chartdataset-section", $panel).each(function()
+			$(".dg-datasetbind-section", $panel).each(function()
 			{
 				var chartDataSetIndex = $(this).data("chartDataSetIndex");
 				var $form = chartSetting.getDataSetParamValueForm(this);
@@ -1871,9 +1871,9 @@
 			{
 				var myTitle = chartSetting.evalChartDataSetPanelTitle(chart, chartDataSets, i);
 				
-				var $fp = $("<div class='dg-chartdataset-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
-				var $head = $("<div class='dg-chartdataset-section-head' />").html(myTitle).appendTo($fp);
-				var $content = $("<div class='dg-chartdataset-section-content' />").appendTo($fp);
+				var $fp = $("<div class='dg-datasetbind-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
+				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
 				
 				var tableId = chartSetting.initChartDataSetDataTable(chart, chartDataSets, i, $content);
 				
@@ -1885,7 +1885,7 @@
 			//先显示，避免布局计算错误
 			$panel.show();
 			
-			$(".dg-chartdataset-section", $panel).each(function()
+			$(".dg-datasetbind-section", $panel).each(function()
 			{
 				var chartDataSetIndex = $(this).data("chartDataSetIndex");
 				var tableId = $(this).data("chartDataTableId");
@@ -1898,7 +1898,7 @@
 		chartSetting.adjustChartSetingPanelPosition($panel);
 		
 		//当设置完所有表格后再重新调整，避免出现列头未对齐、固定列鼠标悬浮不起作用等问题
-		$(".dg-chartdataset-section", $panel).each(function()
+		$(".dg-datasetbind-section", $panel).each(function()
 		{
 			var tableId = $(this).data("chartDataTableId");
 			var dataTable = $("#"+tableId, this).DataTable();

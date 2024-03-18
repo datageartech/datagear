@@ -19,7 +19,7 @@ package org.datagear.analysis.support;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
@@ -54,9 +54,9 @@ public class ChartWidget extends ChartDefinition
 		super();
 	}
 
-	public ChartWidget(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin plugin)
+	public ChartWidget(String id, String name, DataSetBind[] dataSetBinds, ChartPlugin plugin)
 	{
-		super(id, name, chartDataSets);
+		super(id, name, dataSetBinds);
 		this.plugin = plugin;
 	}
 

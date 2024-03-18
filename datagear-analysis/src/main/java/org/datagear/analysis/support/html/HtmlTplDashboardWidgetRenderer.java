@@ -482,7 +482,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t)
 	{
 		HtmlChartWidget widget = new HtmlChartWidget(this.htmlChartWidgetIdForGetException, "HtmlChartWidgetForWidgetException",
-				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart widget '"
 				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
@@ -497,7 +497,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	protected HtmlChartWidget createHtmlChartWidgetForNotFound(String notFoundWidgetId)
 	{
 		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForNotFound, "HtmlChartWidgetForWidgetNotFound",
-				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(),
 				"Chart widget '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
@@ -512,7 +512,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	protected HtmlChartWidget createHtmlChartWidgetForPluginNull(ChartWidget chartWidget)
 	{
 		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForPluginNull, "HtmlChartWidgetForWidgetPluginNull",
-				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, this.htmlChartPluginForGetWidgetException);
 
 		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart plugin is null");
 

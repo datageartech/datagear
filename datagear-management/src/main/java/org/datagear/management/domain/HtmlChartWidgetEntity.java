@@ -48,7 +48,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "Chart";
 
-	protected static final ChartDataSetVO[] EMPTY_CHART_DATA_VO_SET = new ChartDataSetVO[0];
+	protected static final DataSetBindVO[] EMPTY_CHART_DATA_VO_SET = new DataSetBindVO[0];
 
 	/** 图表部件渲染时的图表选项信息 */
 	public static final String ATTR_CHART_OPTIONS = BUILTIN_ATTR_PREFIX + "CHART_OPTIONS";
@@ -77,14 +77,14 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	public HtmlChartWidgetEntity()
 	{
 		super();
-		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
+		super.setDataSetBinds(EMPTY_CHART_DATA_VO_SET);
 	}
 
-	public HtmlChartWidgetEntity(String id, String name, ChartDataSetVO[] chartDataSets, HtmlChartPlugin chartPlugin,
+	public HtmlChartWidgetEntity(String id, String name, DataSetBindVO[] dataSetBinds, HtmlChartPlugin chartPlugin,
 			User createUser)
 	{
-		super(id, name, chartDataSets, chartPlugin);
-		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
+		super(id, name, dataSetBinds, chartPlugin);
+		super.setDataSetBinds(EMPTY_CHART_DATA_VO_SET);
 		this.createUser = createUser;
 	}
 
@@ -98,14 +98,14 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		this.options = options;
 	}
 
-	public ChartDataSetVO[] getChartDataSetVOs()
+	public DataSetBindVO[] getDataSetBindVOs()
 	{
-		return (ChartDataSetVO[]) super.getChartDataSets();
+		return (DataSetBindVO[]) super.getDataSetBinds();
 	}
 
-	public void setChartDataSetVOs(ChartDataSetVO[] chartDataSetVOs)
+	public void setDataSetBindVOs(DataSetBindVO[] dataSetBindVOs)
 	{
-		super.setChartDataSets(chartDataSetVOs);
+		super.setDataSetBinds(dataSetBindVOs);
 	}
 
 	public HtmlChartPluginVo getPluginVo()
@@ -234,18 +234,18 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		HtmlChartWidgetEntity entity = new HtmlChartWidgetEntity();
 		BeanUtils.copyProperties(this, entity);
 
-		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
+		DataSetBindVO[] dataSetBindVOs = entity.getDataSetBindVOs();
 
-		if (chartDataSetVOs != null && chartDataSetVOs.length != 0)
+		if (dataSetBindVOs != null && dataSetBindVOs.length != 0)
 		{
-			ChartDataSetVO[] cloned = new ChartDataSetVO[chartDataSetVOs.length];
+			DataSetBindVO[] cloned = new DataSetBindVO[dataSetBindVOs.length];
 
-			for (int i = 0; i < chartDataSetVOs.length; i++)
+			for (int i = 0; i < dataSetBindVOs.length; i++)
 			{
-				cloned[i] = chartDataSetVOs[i].clone();
+				cloned[i] = dataSetBindVOs[i].clone();
 			}
 
-			entity.setChartDataSetVOs(cloned);
+			entity.setDataSetBindVOs(cloned);
 		}
 
 		Map<String, Object> attrValues = this.getAttrValues();

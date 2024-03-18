@@ -18,7 +18,7 @@
 package org.datagear.analysis.support.html;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderContext;
@@ -44,10 +44,10 @@ public class HtmlChart extends Chart
 		super();
 	}
 
-	public HtmlChart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin plugin,
+	public HtmlChart(String id, String name, DataSetBind[] dataSetBinds, ChartPlugin plugin,
 			RenderContext renderContext, String elementId, String varName)
 	{
-		super(id, name, chartDataSets, plugin, renderContext);
+		super(id, name, dataSetBinds, plugin, renderContext);
 		this.elementId = elementId;
 		this.varName = varName;
 	}

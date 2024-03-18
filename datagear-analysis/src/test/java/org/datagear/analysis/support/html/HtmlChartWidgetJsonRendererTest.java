@@ -46,10 +46,10 @@ public class HtmlChartWidgetJsonRendererTest
 		HtmlChartPlugin chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
 
 		this.htmlChartWidget01 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_01, "chart-widget-01-name",
-				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, chartPlugin);
 
 		this.htmlChartWidget02 = new HtmlChartWidget(HTML_CHART_WIDGET_ID_02, "chart-widget-02-name",
-				ChartDefinition.EMPTY_CHART_DATA_SET, chartPlugin);
+				ChartDefinition.EMPTY_DATA_SET_BINDS, chartPlugin);
 		
 		this.htmlChartWidgetJsonRenderer = new HtmlChartWidgetJsonRenderer();
 	}
@@ -63,7 +63,7 @@ public class HtmlChartWidgetJsonRendererTest
 		
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"name\":\"chart-widget-01-name\""));
-		assertTrue(json.contains("\"chartDataSets\":[]"));
+		assertTrue(json.contains("\"dataSetBinds\":[]"));
 		assertTrue(json.contains("\"attrValues\":{\"DG_CHART_WIDGET\":{\"id\":\""+HTML_CHART_WIDGET_ID_01+"\"}}"));
 		assertTrue(json.contains("\"updateInterval\":-1"));
 		assertTrue(json.contains("\"plugin\":{\"id\": \"pie-chart\"}"));

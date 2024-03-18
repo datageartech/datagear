@@ -23,15 +23,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 图表数据集。
+ * 数据集绑定。
  * <p>
- * 此类描述图表关联的某个{@linkplain DataSet}、及相关设置信息。
+ * 此类描述图表关联绑定的某个{@linkplain DataSet}、及相关设置信息。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChartDataSet implements Serializable
+public class DataSetBind implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -56,12 +56,12 @@ public class ChartDataSet implements Serializable
 	/** 数据集属性排序 */
 	private Map<String, ? extends Number> propertyOrders = Collections.emptyMap();
 
-	public ChartDataSet()
+	public DataSetBind()
 	{
 		super();
 	}
 
-	public ChartDataSet(DataSet dataSet)
+	public DataSetBind(DataSet dataSet)
 	{
 		super();
 		this.dataSet = dataSet;

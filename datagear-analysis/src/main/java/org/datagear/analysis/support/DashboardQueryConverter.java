@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
 import org.datagear.analysis.DashboardQuery;
@@ -90,10 +90,10 @@ public class DashboardQueryConverter
 			if (chartDef == null)
 				continue;
 
-			ChartDataSet[] chartDataSets = chartDef.getChartDataSets();
+			DataSetBind[] dataSetBinds = chartDef.getDataSetBinds();
 			List<DataSetQuery> dataSetQueries = chartQuery.getDataSetQueries();
 
-			int chartDataSetsLen = (chartDataSets == null ? 0 : chartDataSets.length);
+			int dataSetBindsLen = (dataSetBinds == null ? 0 : dataSetBinds.length);
 			int dataSetQueriesLen = (dataSetQueries == null ? 0 : dataSetQueries.size());
 
 			ChartQuery chartQueryRe = chartQuery.copy();
@@ -104,10 +104,10 @@ public class DashboardQueryConverter
 
 			List<DataSetQuery> dataSetQueriesRe = new ArrayList<DataSetQuery>(dataSetQueriesLen);
 
-			for (int i = 0; i < chartDataSetsLen; i++)
+			for (int i = 0; i < dataSetBindsLen; i++)
 			{
 				DataSetQuery dataSetQuery = (i >= dataSetQueriesLen ? null : dataSetQueries.get(i));
-				DataSetQuery dataSetQueryRe = convertDataSetQuery(dataSetQuery, chartDataSets[i].getDataSet());
+				DataSetQuery dataSetQueryRe = convertDataSetQuery(dataSetQuery, dataSetBinds[i].getDataSet());
 
 				dataSetQueriesRe.add(dataSetQueryRe);
 			}
