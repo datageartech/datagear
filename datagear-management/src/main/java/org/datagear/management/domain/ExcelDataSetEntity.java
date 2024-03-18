@@ -59,7 +59,7 @@ public class ExcelDataSetEntity extends AbstractExcelFileDataSet implements Dire
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;

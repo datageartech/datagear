@@ -39,7 +39,7 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -49,14 +49,12 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	public SqlDataSetEntity()
 	{
 		super();
-		this.createTime = new Date();
 	}
 
 	public SqlDataSetEntity(String id, String name, List<DataSetProperty> properties,
 			SchemaConnectionFactory connectionFactory, String sql, User createUser)
 	{
 		super(id, name, properties, connectionFactory, sql);
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 

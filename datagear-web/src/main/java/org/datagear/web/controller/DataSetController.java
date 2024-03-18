@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -455,8 +454,7 @@ public class DataSetController extends AbstractSchemaConnController
 			DataSetEntity entity)
 	{
 		entity.setId(IDUtil.randomIdOnTime20());
-		entity.setCreateUser(user.cloneNoPassword());
-		entity.setCreateTime(new Date());
+		inflateCreateUserAndTime(entity, user);
 	}
 
 	@RequestMapping("/copy")

@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class SchemaGuard extends AbstractStringIdEntity implements CloneableEntity
+public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -79,7 +79,7 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 	private boolean enabled = true;
 
 	/** 创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	public SchemaGuard()
 	{
@@ -215,11 +215,13 @@ public class SchemaGuard extends AbstractStringIdEntity implements CloneableEnti
 		this.enabled = enabled;
 	}
 
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

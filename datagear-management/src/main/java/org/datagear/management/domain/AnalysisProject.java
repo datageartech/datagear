@@ -28,7 +28,7 @@ import org.springframework.beans.BeanUtils;
  *
  */
 public class AnalysisProject extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, CloneableEntity
+		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class AnalysisProject extends AbstractStringIdEntity
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
@@ -93,11 +93,13 @@ public class AnalysisProject extends AbstractStringIdEntity
 		this.createUser = createUser;
 	}
 
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

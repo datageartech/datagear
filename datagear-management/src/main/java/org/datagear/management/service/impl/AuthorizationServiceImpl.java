@@ -130,7 +130,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisEntityService<Strin
 		if (resourceService == null)
 			return false;
 
-		DataPermissionEntity<?> resourceEntity = resourceService.getByStringId(user, resourceId);
+		DataPermissionEntity resourceEntity = resourceService.getByStringId(user, resourceId);
 
 		if (resourceEntity == null)
 			return false;

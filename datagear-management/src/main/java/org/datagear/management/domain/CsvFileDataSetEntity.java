@@ -59,7 +59,7 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -79,7 +79,6 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 		this.directory = directory;
 		this.fileName = fileName;
 		this.displayName = displayName;
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 

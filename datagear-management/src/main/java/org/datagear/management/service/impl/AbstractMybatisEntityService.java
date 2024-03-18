@@ -325,7 +325,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 *            允许为{@code null}
 	 * @param service
 	 */
-	protected void inflateCreateUserEntity(CreateUserEntity<?> entity, UserService service)
+	protected void inflateCreateUserEntity(CreateUserEntity entity, UserService service)
 	{
 		User user = (entity == null ? null : entity.getCreateUser());
 
@@ -346,7 +346,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 * @param entity  允许为{@code null}
 	 * @param service
 	 */
-	protected void inflateAnalysisProjectAwareEntity(AnalysisProjectAwareEntity<?> entity,
+	protected void inflateAnalysisProjectAwareEntity(AnalysisProjectAwareEntity entity,
 			AnalysisProjectService service)
 	{
 		AnalysisProject ap = (entity == null ? null : entity.getAnalysisProject());

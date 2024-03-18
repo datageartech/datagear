@@ -35,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public class Schema extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, CloneableEntity
+		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class Schema extends AbstractStringIdEntity
 	private User createUser;
 
 	/** 此模式的创建时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	/** 数据库驱动程序路径名 */
 	private DriverEntity driverEntity = null;
@@ -160,16 +160,13 @@ public class Schema extends AbstractStringIdEntity
 		this.createUser = createUser;
 	}
 
-	public boolean hasCreateTime()
-	{
-		return (this.createTime != null);
-	}
-
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

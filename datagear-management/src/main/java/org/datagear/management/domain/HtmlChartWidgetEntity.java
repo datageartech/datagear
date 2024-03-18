@@ -40,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public class HtmlChartWidgetEntity extends HtmlChartWidget
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>,
+		implements Entity<String>, CreateUserEntity, DataPermissionEntity, AnalysisProjectAwareEntity,
 		CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
@@ -67,7 +67,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -78,7 +78,6 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	{
 		super();
 		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
-		this.createTime = new Date();
 	}
 
 	public HtmlChartWidgetEntity(String id, String name, ChartDataSetVO[] chartDataSets, HtmlChartPlugin chartPlugin,
@@ -87,7 +86,6 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		super(id, name, chartDataSets, chartPlugin);
 		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
 		this.createUser = createUser;
-		this.createTime = new Date();
 	}
 
 	public String getOptions()
@@ -146,11 +144,13 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 		this.createUser = createUser;
 	}
 
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

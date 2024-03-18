@@ -174,6 +174,7 @@ public class UserController extends AbstractController
 		user.setId(IDUtil.randomIdOnTime20());
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
+		inflateCreateTime(user);
 
 		saveAddUser(user);
 

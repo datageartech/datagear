@@ -89,7 +89,7 @@ public class DataSetResDirectoryController extends AbstractController
 		User user = getCurrentUser();
 
 		dataSetResDirectory.setId(IDUtil.randomIdOnTime20());
-		dataSetResDirectory.setCreateUser(user);
+		inflateCreateUserAndTime(dataSetResDirectory, user);
 
 		this.dataSetResDirectoryService.add(dataSetResDirectory);
 

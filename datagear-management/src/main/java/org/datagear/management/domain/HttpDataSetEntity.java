@@ -39,7 +39,7 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, Clo
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -49,13 +49,11 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, Clo
 	public HttpDataSetEntity()
 	{
 		super();
-		this.createTime = new Date();
 	}
 
 	public HttpDataSetEntity(String id, String name, HttpClient httpClient, String uri, User createUser)
 	{
 		super(id, name, httpClient, uri);
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 
@@ -63,7 +61,6 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, Clo
 			String uri, User createUser)
 	{
 		super(id, name, properties, httpClient, uri);
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 

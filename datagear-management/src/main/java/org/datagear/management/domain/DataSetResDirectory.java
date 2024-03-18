@@ -31,7 +31,7 @@ import org.springframework.beans.BeanUtils;
  *
  */
 public class DataSetResDirectory extends AbstractStringIdEntity
-		implements CreateUserEntity<String>, DataPermissionEntity<String>, CloneableEntity
+		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -51,7 +51,7 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	private User createUser;
 
 	/** 此模式的创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -111,11 +111,13 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 		this.createUser = createUser;
 	}
 
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

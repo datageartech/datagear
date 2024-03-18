@@ -83,7 +83,7 @@ public class AnalysisProjectController extends AbstractController
 		User user = getCurrentUser();
 
 		analysisProject.setId(IDUtil.randomIdOnTime20());
-		analysisProject.setCreateUser(user);
+		inflateCreateUserAndTime(analysisProject, user);
 
 		this.analysisProjectService.add(analysisProject);
 

@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -279,7 +278,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setTemplates(new String[0]);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
-		dashboard.setCreateTime(null);
 		
 		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
@@ -313,7 +311,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		setNullAnalysisProjectIfNoPermission(user, dashboard, getAnalysisProjectService());
 
 		dashboard.setId(IDUtil.randomIdOnTime20());
-		dashboard.setCreateTime(null);
+		inflateCreateTime(dashboard, null);
 		
 		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		setFormPageAttributes(model);
@@ -380,8 +378,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (form.isSaveAdd())
 		{
-			dashboard.setCreateUser(user);
-			dashboard.setCreateTime(new Date());
+			inflateCreateUserAndTime(dashboard, user);
 			this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
 			if (form.hasCopySourceId())
@@ -406,8 +403,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.setName(dashboard.getName());
 		data.setTemplates(templates);
 		data.setTemplateEncoding(dashboard.getTemplateEncoding());
-		data.setCreateUser(dashboard.getCreateUser());
-		data.setCreateTime(dashboard.getCreateTime());
+		inflateCreateUserAndTime(data, dashboard.getCreateUser(), dashboard.getCreateTime());
 		data.setAnalysisProject(dashboard.getAnalysisProject());
 
 		return optSuccessDataResponseEntity(request, data);
@@ -909,7 +905,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new IllegalInputException();
 
 		dashboard.setId(IDUtil.randomIdOnTime20());
-		dashboard.setCreateUser(user);
+		inflateCreateUserAndTime(dashboard, user);
 
 		trimAnalysisProjectAwareEntityForSave(dashboard);
 

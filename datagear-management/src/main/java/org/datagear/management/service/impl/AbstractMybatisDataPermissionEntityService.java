@@ -29,6 +29,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataIdPermission;
 import org.datagear.management.domain.DataPermissionEntity;
+import org.datagear.management.domain.Entity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectAwareEntityService;
 import org.datagear.management.service.AuthorizationService;
@@ -51,7 +52,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends DataPermissionEntity<ID>>
+public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends DataPermissionEntity & Entity<ID>>
 		extends AbstractMybatisEntityService<ID, T> implements DataPermissionEntityService<ID, T>
 {
 	private AuthorizationService authorizationService;

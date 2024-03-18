@@ -25,7 +25,7 @@ import java.util.Date;
  * @author datagear@163.com
  *
  */
-public class SqlHistory extends AbstractStringIdEntity
+public class SqlHistory extends AbstractStringIdEntity implements CreateTimeEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -39,7 +39,7 @@ public class SqlHistory extends AbstractStringIdEntity
 	private String userId;
 
 	/** SQL时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	public SqlHistory()
 	{
@@ -84,11 +84,13 @@ public class SqlHistory extends AbstractStringIdEntity
 		this.userId = userId;
 	}
 
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

@@ -31,7 +31,7 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class User extends AbstractStringIdEntity implements CloneableEntity
+public class User extends AbstractStringIdEntity implements CreateTimeEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -57,7 +57,7 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 	private boolean anonymous = false;
 
 	/** 此模式的创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	/** 角色集 */
 	private Set<Role> roles = Collections.emptySet();
@@ -139,11 +139,13 @@ public class User extends AbstractStringIdEntity implements CloneableEntity
 		this.anonymous = anonymous;
 	}
 
+	@Override
 	public Date getCreateTime()
 	{
 		return createTime;
 	}
 
+	@Override
 	public void setCreateTime(Date createTime)
 	{
 		this.createTime = createTime;

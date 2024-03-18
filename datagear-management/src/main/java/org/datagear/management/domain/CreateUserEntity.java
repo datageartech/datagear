@@ -21,10 +21,8 @@ package org.datagear.management.domain;
  * 带有创建用户信息的实体。
  * 
  * @author datagear@163.com
- *
- * @param <ID>
  */
-public interface CreateUserEntity<ID> extends Entity<ID>
+public interface CreateUserEntity extends CreateTimeEntity
 {
 	/**
 	 * 获取创建用户。

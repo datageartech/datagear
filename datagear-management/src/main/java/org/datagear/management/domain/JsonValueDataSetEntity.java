@@ -38,7 +38,7 @@ public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetE
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -48,14 +48,12 @@ public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetE
 	public JsonValueDataSetEntity()
 	{
 		super();
-		this.createTime = new Date();
 	}
 
 	public JsonValueDataSetEntity(String id, String name, List<DataSetProperty> properties, String value,
 			User createUser)
 	{
 		super(id, name, properties, value);
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 

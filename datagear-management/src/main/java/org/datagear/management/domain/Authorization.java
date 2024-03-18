@@ -308,7 +308,7 @@ public class Authorization extends AbstractStringIdEntity implements CloneableEn
 	 * @param currentUser
 	 * @return
 	 */
-	public static boolean canAuthorize(DataPermissionEntity<?> entity, User currentUser)
+	public static boolean canAuthorize(DataPermissionEntity entity, User currentUser)
 	{
 		if (currentUser.isAdmin())
 			return true;
@@ -319,10 +319,10 @@ public class Authorization extends AbstractStringIdEntity implements CloneableEn
 		if (!Authorization.canDelete(entity.getDataPermission()))
 			return false;
 
-		if (!(entity instanceof CreateUserEntity<?>))
+		if (!(entity instanceof CreateUserEntity))
 			return false;
 
-		CreateUserEntity<?> createUserEntity = (CreateUserEntity<?>) entity;
+		CreateUserEntity createUserEntity = (CreateUserEntity) entity;
 
 		if (createUserEntity.getCreateUser() == null)
 			return false;

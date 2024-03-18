@@ -18,6 +18,7 @@
 package org.datagear.management.service.impl;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.Map;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.domain.CreateTimeEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
@@ -113,10 +115,26 @@ public abstract class AbstractMybatisService<T>
 	protected void add(T entity, Map<String, Object> params)
 	{
 		checkAddInput(entity);
+		inflateCreateTime(entity);
 
 		params.put("entity", entity);
 
 		insertMybatis("insert", params);
+	}
+
+	protected boolean inflateCreateTime(Object entity)
+	{
+		if (entity instanceof CreateTimeEntity)
+		{
+			CreateTimeEntity ct = (CreateTimeEntity) entity;
+
+			if (ct.getCreateTime() == null)
+			{
+				ct.setCreateTime(new Date());
+			}
+		}
+
+		return false;
 	}
 
 	/**

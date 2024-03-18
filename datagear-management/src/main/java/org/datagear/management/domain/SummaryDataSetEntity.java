@@ -44,7 +44,7 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 
 	private User createUser;
 
-	private Date createTime;
+	private Date createTime = null;
 
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
@@ -53,7 +53,6 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 	public SummaryDataSetEntity()
 	{
 		super();
-		this.createTime = new Date();
 	}
 
 	public SummaryDataSetEntity(String id, String name, String dataSetType, User createUser)
@@ -61,7 +60,6 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 		super(id, name, Collections.emptyList());
 		this.dataSetType = dataSetType;
 		this.createUser = createUser;
-		this.createTime = new Date();
 	}
 
 	public SummaryDataSetEntity(DataSetEntity dataSetEntity)

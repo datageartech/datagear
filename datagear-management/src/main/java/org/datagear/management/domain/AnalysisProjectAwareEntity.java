@@ -23,7 +23,7 @@ package org.datagear.management.domain;
  * @author datagear@163.com
  *
  */
-public interface AnalysisProjectAwareEntity<ID> extends Entity<ID>
+public interface AnalysisProjectAwareEntity
 {
 	/**
 	 * {@linkplain AnalysisProject}关联实体类的级联数据权限参数：资源类型，

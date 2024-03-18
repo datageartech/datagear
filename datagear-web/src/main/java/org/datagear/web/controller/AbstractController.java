@@ -20,6 +20,7 @@ package org.datagear.web.controller;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,8 @@ import javax.servlet.http.HttpSession;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.domain.CreateTimeEntity;
+import org.datagear.management.domain.CreateUserEntity;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
@@ -215,7 +218,8 @@ public abstract class AbstractController extends MessageSourceSupport
 		return entity;
 	}
 
-	protected <ID, T extends DataPermissionEntity<ID>> T getByIdForEdit(DataPermissionEntityService<ID, T> service,
+	protected <ID, T extends DataPermissionEntity & Entity<ID>> T getByIdForEdit(
+			DataPermissionEntityService<ID, T> service,
 			User user, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getByIdForEdit(user, id);
@@ -226,7 +230,8 @@ public abstract class AbstractController extends MessageSourceSupport
 		return entity;
 	}
 
-	protected <ID, T extends DataPermissionEntity<ID>> T getByIdForView(DataPermissionEntityService<ID, T> service,
+	protected <ID, T extends DataPermissionEntity & Entity<ID>> T getByIdForView(
+			DataPermissionEntityService<ID, T> service,
 			User user, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getById(user, id);
@@ -247,6 +252,65 @@ public abstract class AbstractController extends MessageSourceSupport
 		return entity;
 	}
 	
+	/**
+	 * 设置创建时间。
+	 * 
+	 * @param entity
+	 *            允许{@code null}
+	 */
+	protected void inflateCreateTime(CreateTimeEntity entity)
+	{
+		inflateCreateTime(entity, new java.util.Date());
+	}
+
+	/**
+	 * 设置创建时间。
+	 * 
+	 * @param entity
+	 *            允许{@code null}
+	 * @param time
+	 *            允许{@code null}
+	 */
+	protected void inflateCreateTime(CreateTimeEntity entity, Date time)
+	{
+		if (entity == null)
+			return;
+
+		entity.setCreateTime(time);
+	}
+
+	/**
+	 * 设置创建用户、时间。
+	 * 
+	 * @param entity
+	 *            允许{@code null}
+	 * @param user
+	 *            允许{@code null}
+	 */
+	protected void inflateCreateUserAndTime(CreateUserEntity entity, User user)
+	{
+		inflateCreateUserAndTime(entity, user, new Date());
+	}
+
+	/**
+	 * 设置创建用户、时间。
+	 * 
+	 * @param entity
+	 *            允许{@code null}
+	 * @param user
+	 *            允许{@code null}
+	 * @param time
+	 *            允许{@code null}
+	 */
+	protected void inflateCreateUserAndTime(CreateUserEntity entity, User user, Date time)
+	{
+		if (entity == null)
+			return;
+
+		entity.setCreateUser((user == null ? null : user.cloneNoPassword()));
+		entity.setCreateTime(time);
+	}
+
 	/**
 	 * 设置查询数据URL。
 	 * 
@@ -324,7 +388,7 @@ public abstract class AbstractController extends MessageSourceSupport
 	}
 
 	protected void setRequestAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
-			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity<?> entity)
+			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity entity)
 	{
 		entity.setAnalysisProject(getRequestAnalysisProject(request, response, analysisProjectService));
 	}
@@ -366,7 +430,7 @@ public abstract class AbstractController extends MessageSourceSupport
 	 * 
 	 * @param entity
 	 */
-	protected void trimAnalysisProjectAwareEntityForSave(AnalysisProjectAwareEntity<?> entity)
+	protected void trimAnalysisProjectAwareEntityForSave(AnalysisProjectAwareEntity entity)
 	{
 		if (entity == null)
 			return;
@@ -404,7 +468,7 @@ public abstract class AbstractController extends MessageSourceSupport
 	 * @param service
 	 */
 	protected void setNullAnalysisProjectIfNoPermission(User user,
-			AnalysisProjectAwareEntity<?> entity, AnalysisProjectService service)
+			AnalysisProjectAwareEntity entity, AnalysisProjectService service)
 	{
 		AnalysisProject analysisProject = entity.getAnalysisProject();
 		int apPermission = (analysisProject != null

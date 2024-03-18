@@ -159,7 +159,11 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 		User user = getByIdNoPassword(id);
 
 		if (user != null)
+		{
+			user.setCreateTime(null);
 			user.setRoles(null);
+			user.setEmail(null);
+		}
 
 		return user;
 	}

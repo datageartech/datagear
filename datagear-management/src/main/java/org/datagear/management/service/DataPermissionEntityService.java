@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
+import org.datagear.management.domain.Entity;
 import org.datagear.management.domain.User;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -34,7 +35,7 @@ import org.datagear.persistence.Query;
  * @param <ID>
  * @param <T>
  */
-public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<ID>>
+public interface DataPermissionEntityService<ID, T extends DataPermissionEntity & Entity<ID>>
 		extends EntityService<ID, T>, AuthorizationListener
 {
 	/**

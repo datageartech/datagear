@@ -38,7 +38,7 @@ public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEnt
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime;
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -48,14 +48,12 @@ public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEnt
 	public CsvValueDataSetEntity()
 	{
 		super();
-		this.createTime = new Date();
 	}
 
 	public CsvValueDataSetEntity(String id, String name, List<DataSetProperty> properties, String value,
 			User createUser)
 	{
 		super(id, name, properties, value);
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 

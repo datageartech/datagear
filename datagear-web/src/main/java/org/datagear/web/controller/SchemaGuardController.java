@@ -85,6 +85,7 @@ public class SchemaGuardController extends AbstractController
 		checkSaveEntity(schemaGuard);
 
 		schemaGuard.setId(IDUtil.randomIdOnTime20());
+		inflateCreateTime(schemaGuard);
 
 		this.schemaGuardService.add(schemaGuard);
 

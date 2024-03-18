@@ -28,7 +28,6 @@
 			ELSE USR.USER_REAL_NAME
 		END) AS ${_iq_}createUser.realName${_iq_},
 		(CASE WHEN USR.USER_IS_ADMIN IS NULL THEN '0' ELSE USR.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
-		(CASE WHEN USR.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
-		USR.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
+		(CASE WHEN USR.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_}
 	</sql>
 </mapper>

@@ -32,7 +32,7 @@ import org.datagear.analysis.support.DataFormat;
  *
  */
 public interface DataSetEntity
-		extends DataSet, CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>
+		extends Entity<String>, DataSet, CreateUserEntity, DataPermissionEntity, AnalysisProjectAwareEntity
 {
 	/** 授权资源类型 */
 	String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
@@ -112,6 +112,7 @@ public interface DataSetEntity
 	 * 
 	 * @return
 	 */
+	@Override
 	Date getCreateTime();
 
 	/**
@@ -119,5 +120,6 @@ public interface DataSetEntity
 	 * 
 	 * @param createTime
 	 */
+	@Override
 	void setCreateTime(Date createTime);
 }

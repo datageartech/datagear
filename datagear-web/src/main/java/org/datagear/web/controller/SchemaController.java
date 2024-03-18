@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
-import org.datagear.management.domain.DataPermissionAware;
+import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaGuardService;
@@ -114,9 +113,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		Schema schema = getByIdForView(getSchemaService(), user, id);
 		schema.setId(null);
 		schema.clearPassword();
-		schema.setCreateUser(null);
-		schema.setCreateTime(null);
-		schema.setDataPermission(DataPermissionAware.PERMISSION_NOT_LOADED);
+		schema.setDataPermission(DataPermissionEntity.PERMISSION_NOT_LOADED);
 		
 		setFormModel(model, schema, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		return "/schema/schema_form";
@@ -133,8 +130,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			throw new IllegalInputException();
 
 		schema.setId(IDUtil.randomIdOnTime20());
-		schema.setCreateTime(new Date());
-		schema.setCreateUser(user.cloneNoPassword());
+		inflateCreateUserAndTime(schema, user);
 
 		getSchemaService().add(user, schema);
 

@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -298,8 +297,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (isEmpty(entity.getId()))
 		{
 			entity.setId(IDUtil.randomIdOnTime20());
-			entity.setCreateUser(user.cloneNoPassword());
-			entity.setCreateTime(new Date());
+			inflateCreateUserAndTime(entity, user);
 			inflateHtmlChartWidgetEntity(entity, request);
 
 			checkSaveEntity(entity);

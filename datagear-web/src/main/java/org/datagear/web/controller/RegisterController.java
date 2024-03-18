@@ -17,8 +17,6 @@
 
 package org.datagear.web.controller;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -148,7 +146,7 @@ public class RegisterController extends AbstractController
 		user.setId(IDUtil.randomIdOnTime20());
 		user.setAdmin(false);
 		user.setAnonymous(false);
-		user.setCreateTime(new Date());
+		inflateCreateTime(user);
 
 		if (this.userService.getByNameNoPassword(user.getName()) != null)
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists",

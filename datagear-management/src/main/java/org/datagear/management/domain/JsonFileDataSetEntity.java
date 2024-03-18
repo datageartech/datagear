@@ -59,7 +59,7 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	private User createUser;
 
 	/** 创建时间 */
-	private Date createTime = new Date();
+	private Date createTime = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
@@ -69,7 +69,6 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	public JsonFileDataSetEntity()
 	{
 		super();
-		this.createTime = new Date();
 	}
 
 	public JsonFileDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory,
@@ -90,7 +89,6 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 		this.fileSourceType = FILE_SOURCE_TYPE_SERVER;
 		this.dataSetResDirectory = dataSetResDirectory;
 		this.dataSetResFileName = dataSetResFileName;
-		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 
