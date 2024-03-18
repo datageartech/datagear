@@ -307,7 +307,7 @@ public abstract class AbstractController extends MessageSourceSupport
 		if (entity == null)
 			return;
 
-		entity.setCreateUser((user == null ? null : user.cloneNoPassword()));
+		entity.setCreateUser((user == null ? null : user.cloneSimple()));
 		entity.setCreateTime(time);
 	}
 

@@ -203,7 +203,7 @@ public class User extends AbstractStringIdEntity implements CreateTimeEntity, Cl
 	}
 
 	/**
-	 * 拷贝对象，排除密码。
+	 * 拷贝，排除密码。
 	 * 
 	 * @return
 	 */
@@ -211,6 +211,25 @@ public class User extends AbstractStringIdEntity implements CreateTimeEntity, Cl
 	{
 		User entity = clone();
 		entity.clearPassword();
+
+		return entity;
+	}
+
+	/**
+	 * 拷贝，仅包含用户基本信息（ID、用户名、姓名）， {@linkplain #getPassword()}为{@code null}、
+	 * {@linkplain getRoles()}、{@linkplain #getEmail()}}为空、
+	 * {@linkplain #getCreateTime()}为{@code null}。
+	 * 
+	 * @return
+	 */
+	public User cloneSimple()
+	{
+		User entity = clone();
+
+		entity.clearPassword();
+		entity.setRoles(Collections.emptySet());
+		entity.setEmail("");
+		entity.setCreateTime(null);
 
 		return entity;
 	}

@@ -160,9 +160,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 
 		if (user != null)
 		{
-			user.setCreateTime(null);
-			user.setRoles(null);
-			user.setEmail(null);
+			user = user.cloneSimple();
 		}
 
 		return user;
@@ -174,7 +172,9 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 		User user = getByNameNoPassword(name);
 
 		if (user != null)
-			user.setRoles(null);
+		{
+			user = user.cloneSimple();
+		}
 
 		return user;
 	}
