@@ -4674,7 +4674,7 @@
 		
 		var re = undefined;
 		
-		var dataSetBinds = this.dataSetBinds;
+		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
 			var isAttachment = dataSetBinds[i].attachment;
