@@ -697,7 +697,7 @@
 		var msg = {};
 		if(!this.isDataSetParamValueReady(msg))
 		{
-			chartFactory.logException("chart '#"+this.elementId+"' chartDataSets["+msg.dataSetBindIndex+"] "
+			chartFactory.logException("chart '#"+this.elementId+"' dataSetBinds["+msg.dataSetBindIndex+"] "
 										+"'s ["+msg.paramName+"] param value required");
 			return;
 		}
@@ -1610,7 +1610,8 @@
 	
 	dashboardBase._isLocalChart = function(chart)
 	{
-		return (!chart.chartDataSets || chart.chartDataSets.length == 0);
+		var dataSetBinds = chart.dataSetBinds();
+		return (dataSetBinds.length == 0);
 	};
 	
 	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts)
@@ -1982,10 +1983,10 @@
 				if(chartQuery.resultDataFormat == null)
 					chartQuery.resultDataFormat = this.resultDataFormat();
 				
-				var chartDataSets = (chart.chartDataSets || []);
-				for(var j=0; j<chartDataSets.length; j++)
+				var dataSetBinds = chart.dataSetBinds();
+				for(var j=0; j<dataSetBinds.length; j++)
 				{
-					var dataSetQuery = (chartDataSets[j].query || {});
+					var dataSetQuery = (dataSetBinds[j].query || {});
 					chartQuery.dataSetQueries.push(dataSetQuery);
 				}
 				
@@ -2600,9 +2601,9 @@
 	 *										//当inflate为true时，chartId对应的图表对象
 	 *										chart: 图表对象,
 	 *										//当inflate为true时，resultDataIndex对应的原始结果数据，格式为：
-	 *                                      //当chartDataSetIndex是数值时：
+	 *                                      //当dataSetBindIndex是数值时：
 	 *                                      //对象、对象数组
-	 *                                      //当chartDataSetIndex是数值数组时：
+	 *                                      //当dataSetBindIndex是数值数组时：
 	 *                                      //数组（元素可能是对象、对象数组）
 	 *										resultData: 结果数据
 	 *									}
@@ -2937,27 +2938,27 @@
 			{
 				//不能修改原对象
 				originalInfo = $.extend(true, {}, originalInfo);
-				var chartDataSetIndex = originalInfo.chartDataSetIndex;
+				var dataSetBindIndex = originalInfo.chartDataSetIndex;
 				var resultDataIndex = originalInfo.resultDataIndex;
 				
 				var chart = this.chartOf(originalInfo.chartId);
 				var resultData = undefined;
 				
-				if(chart != null && chartDataSetIndex != null)
+				if(chart != null && dataSetBindIndex != null)
 				{
-					if($.isArray(chartDataSetIndex))
+					if($.isArray(dataSetBindIndex))
 					{
 						resultData = [];
 						
-						for(var j=0; j<chartDataSetIndex.length; j++)
+						for(var j=0; j<dataSetBindIndex.length; j++)
 						{
-							var result = chart.resultAt(chart.updateResults(), chartDataSetIndex[j]);
+							var result = chart.resultAt(chart.updateResults(), dataSetBindIndex[j]);
 							resultData[j] = chart.resultDataElement(result, (resultDataIndex ? resultDataIndex[j] : null));
 						}
 					}
 					else
 					{
-						var result = chart.resultAt(chart.updateResults(), chartDataSetIndex);
+						var result = chart.resultAt(chart.updateResults(), dataSetBindIndex);
 						resultData = chart.resultDataElement(result, resultDataIndex);
 					}
 				}

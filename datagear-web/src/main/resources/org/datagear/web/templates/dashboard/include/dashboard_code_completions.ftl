@@ -123,7 +123,7 @@
 		{name: "dataSetBindAt", value: "dataSetBindAt(", displayName: "dataSetBindAt() ", displayComment: "chart", categories: ["chart"]},
 		{name: "dataSetBindAttachment", value: "dataSetBindAttachment()", displayName: "dataSetBindAttachment() ", displayComment: "chart", categories: ["chart"]},
 		{name: "dataSetBindMain", value: "dataSetBindMain()", displayName: "dataSetBindMain() ", displayComment: "chart", categories: ["chart"]},
-		{name: "dataSetBinds", value: "dataSetBinds", displayName: "dataSetBinds ", displayComment: "chart", categories: ["chart"]},
+		{name: "dataSetBinds", value: "dataSetBinds()", displayName: "dataSetBinds() ", displayComment: "chart", categories: ["chart"]},
 		{name: "dataSetBindsAttachment", value: "dataSetBindsAttachment()", displayName: "dataSetBindsAttachment() ", displayComment: "chart", categories: ["chart"]},
 		{name: "dataSetBindsMain", value: "dataSetBindsMain()", displayName: "dataSetBindsMain() ", displayComment: "chart", categories: ["chart"]},
 		{name: "dataSetParam", value: "dataSetParam(", displayName: "dataSetParam() ", displayComment: "chart", categories: ["chart"]},

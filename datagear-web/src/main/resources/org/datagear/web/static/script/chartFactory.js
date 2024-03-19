@@ -3556,34 +3556,34 @@
 	 * 
 	 * @param data 展示数据数组，格式为：[ ... ]，元素格式允许为：{ ... }、[ ... ]，对于设置操作，当元素是对象时，将为其添加一个额外属性；
 	 * 			   当元素是数组时，如果末尾元素已是原始数据索引对象，替换；否则，追加
-	 * @param chartDataSetIndex 要设置的数据集绑定对象（自动取其索引）、数据集绑定对象数组（自动取其索引）、数据集绑定索引数值、索引数值数组
+	 * @param dataSetBindIndex 要设置的数据集绑定对象（自动取其索引）、数据集绑定对象数组（自动取其索引）、数据集绑定索引数值、索引数值数组
 	 * @param resultDataIndex 要设置的结果数据索引，格式为：
-	 *                        当chartDataSetIndex是数据集绑定对象、索引数值时：
+	 *                        当dataSetBindIndex是数据集绑定对象、索引数值时：
 	 *                        数值、数值数组
-	 *                        当chartDataSetIndex是数据集绑定对象数组、索引数值数组时：
-	 *                        数值，表示chartDataSetIndex数组每个元素的结果数据索引都是此数值
-	 *                        数组（元素可以是数值、数值数组），与chartDataSetIndex数组元素一一对应
+	 *                        当dataSetBindIndex是数据集绑定对象数组、索引数值数组时：
+	 *                        数值，表示dataSetBindIndex数组每个元素的结果数据索引都是此数值
+	 *                        数组（元素可以是数值、数值数组），与dataSetBindIndex数组元素一一对应
 	 *                        默认值为：0
 	 * @param autoIncrement 可选，
-	 *                      当chartDataSetIndex是数据集绑定对象、数据集绑定索引数值且resultDataIndex是数值时，是否自动递增resultDataIndex；
-	 *                      当chartDataSetIndex是数据集绑定对象数组、数据集绑定索引数值数组且其元素对应位置的resultDataIndex是数值时，是否自动递增resultDataIndex。
+	 *                      当dataSetBindIndex是数据集绑定对象、数据集绑定索引数值且resultDataIndex是数值时，是否自动递增resultDataIndex；
+	 *                      当dataSetBindIndex是数据集绑定对象数组、数据集绑定索引数值数组且其元素对应位置的resultDataIndex是数值时，是否自动递增resultDataIndex。
 	 *                      默认值为：true
 	 * @returns 要获取的原始数据索引数组(元素可能为null），原始数据索引对象格式为：
 	 *									{
 	 *										//图表ID
 	 *										chartId: "...",
 	 *										//数据集绑定索引，格式为：数值、数值数组
-	 *										chartDataSetIndex: ...,
+	 *										dataSetBindIndex: ...,
 	 *										//结果数据索引，格式为：
-	 *                                      //当chartDataSetIndex是数值时：
+	 *                                      //当dataSetBindIndex是数值时：
 	 *                                      //数值、数值数组
-	 *                                      //当chartDataSetIndex是数值数组时：
+	 *                                      //当dataSetBindIndex是数值数组时：
 	 *                                      //数组（元素可能是数值、数值数组）
 	 *										resultDataIndex: ...
 	 *									}
 	 * @since 3.1.0
 	 */
-	chartBase.originalDataIndexes = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
+	chartBase.originalDataIndexes = function(data, dataSetBindIndex, resultDataIndex, autoIncrement)
 	{
 		//获取
 		if(arguments.length <= 1)
@@ -3601,7 +3601,7 @@
 			if(data == null)
 				return;
 			
-			//(data, chartDataSetIndex, true)、(data, chartDataSetIndex, false)
+			//(data, dataSetBindIndex, true)、(data, dataSetBindIndex, false)
 			if(resultDataIndex === true || resultDataIndex === false)
 			{
 				autoIncrement = resultDataIndex;
@@ -3609,25 +3609,25 @@
 			}
 			resultDataIndex = (resultDataIndex === undefined ? 0 : resultDataIndex);
 			
-			var isCdsiArray = $.isArray(chartDataSetIndex);
+			var isCdsiArray = $.isArray(dataSetBindIndex);
 			
 			if(isCdsiArray)
 			{
 				var cdsiNew = [];
 				
-				for(var i=0; i<chartDataSetIndex.length; i++)
+				for(var i=0; i<dataSetBindIndex.length; i++)
 				{
-					cdsiNew[i] = (chartDataSetIndex[i] != null && chartDataSetIndex[i].index !== undefined ?
-									chartDataSetIndex[i].index : chartDataSetIndex[i]);
+					cdsiNew[i] = (dataSetBindIndex[i] != null && dataSetBindIndex[i].index !== undefined ?
+									dataSetBindIndex[i].index : dataSetBindIndex[i]);
 				}
 				
-				chartDataSetIndex = cdsiNew;
+				dataSetBindIndex = cdsiNew;
 				
 				if(!$.isArray(resultDataIndex))
 				{
 					var rdiNew = [];
 					
-					for(var i=0; i<chartDataSetIndex.length; i++)
+					for(var i=0; i<dataSetBindIndex.length; i++)
 						rdiNew[i] = resultDataIndex;
 					
 					resultDataIndex = rdiNew;
@@ -3635,12 +3635,12 @@
 			}
 			else
 			{
-				chartDataSetIndex = (chartDataSetIndex != null && chartDataSetIndex.index !== undefined ?
-										chartDataSetIndex.index : chartDataSetIndex);
+				dataSetBindIndex = (dataSetBindIndex != null && dataSetBindIndex.index !== undefined ?
+										dataSetBindIndex.index : dataSetBindIndex);
 			}
 			
 			autoIncrement = (autoIncrement === undefined ? true : autoIncrement);
-			var isRdiNumber = (typeof(resultDataIndex) == "number");
+			var isRdiNumber = chartFactory.isNumber(resultDataIndex);
 			
 			var needAutoIncrementEle = (autoIncrement == true && $.isArray(resultDataIndex));
 			if(needAutoIncrementEle == true)
@@ -3650,7 +3650,7 @@
 				//任一元素是数值的话，才需要自增处理
 				for(var i=0; i<resultDataIndex.length; i++)
 				{
-					if(typeof(resultDataIndex[i]) == "number")
+					if(chartFactory.isNumber(resultDataIndex[i]))
 					{
 						needAutoIncrementEle = true;
 						break;
@@ -3680,13 +3680,13 @@
 						for(var j=0; j<resultDataIndex.length; j++)
 						{
 							resultDataIndexMy[j] = resultDataIndex[j];
-							if(typeof(resultDataIndexMy[j]) == "number")
+							if(chartFactory.isNumber(resultDataIndexMy[j]))
 								resultDataIndexMy[j] = resultDataIndexMy[j] + i;
 						}
 					}
 				}
 				
-				this._originalDataIndex(data[i], chartDataSetIndex, resultDataIndexMy);
+				this._originalDataIndex(data[i], dataSetBindIndex, resultDataIndexMy);
 			}
 		}
 	};
@@ -3698,12 +3698,12 @@
 	 * 
 	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
 	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
-	 * @param chartDataSetIndex 同chartBase.originalDataIndexes()函数的chartDataSetIndex参数
+	 * @param dataSetBindIndex 同chartBase.originalDataIndexes()函数的dataSetBindIndex参数
 	 * @param resultDataIndex 同chartBase.originalDataIndexes()函数的resultDataIndex参数
 	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
 	 * @since 3.1.0
 	 */
-	chartBase.originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
+	chartBase.originalDataIndex = function(data, dataSetBindIndex, resultDataIndex)
 	{
 		//获取
 		if(arguments.length <= 1)
@@ -3713,17 +3713,17 @@
 		else
 		{
 			data = [ data ];
-			this.originalDataIndexes(data, chartDataSetIndex, resultDataIndex, false);
+			this.originalDataIndexes(data, dataSetBindIndex, resultDataIndex, false);
 		}
 	};
 	
 	//获取/设置单条图表展示数据的原始数据索引
-	chartBase._originalDataIndex = function(data, chartDataSetIndex, resultDataIndex)
+	chartBase._originalDataIndex = function(data, dataSetBindIndex, resultDataIndex)
 	{
 		if(arguments.length <= 1)
 			return chartFactory.originalDataIndex(data);
 		else
-			chartFactory.originalDataIndex(data, this.id, chartDataSetIndex, resultDataIndex);
+			chartFactory.originalDataIndex(data, this.id, dataSetBindIndex, resultDataIndex);
 	};
 	
 	/**
@@ -3752,14 +3752,14 @@
 			// < @deprecated 兼容3.0.1版本的chartEvent.originalChartDataSetIndex、originalResultDataIndex结构，将在未来版本移除
 			var isArray = $.isArray(originalDataIndex);
 			var originalDataIndexAry = (isArray ? originalDataIndex : [ originalDataIndex ]);
-			var originalChartDataSetIndex = [];
+			var originalDataSetBindIndex = [];
 			var originalResultDataIndex = [];
 			for(var i=0; i<originalDataIndexAry.length; i++)
 			{
-				originalChartDataSetIndex[i] = originalDataIndexAry[i].chartDataSetIndex;
+				originalDataSetBindIndex[i] = originalDataIndexAry[i].dataSetBindIndex;
 				originalResultDataIndex[i] = originalDataIndexAry[i].resultDataIndex;
 			}
-			chartEvent["originalChartDataSetIndex"] = (isArray ? originalChartDataSetIndex : originalChartDataSetIndex[0]);
+			chartEvent["originalChartDataSetIndex"] = (isArray ? originalDataSetBindIndex : originalDataSetBindIndex[0]);
 			chartEvent["originalResultDataIndex"] = (isArray ? originalResultDataIndex : originalResultDataIndex[0]);
 			// > @deprecated 兼容3.0.1版本的chartEvent.originalChartDataSetIndex、originalResultDataIndex结构，将在未来版本移除
 		}
@@ -4337,18 +4337,18 @@
 	 * 图表事件支持函数：获取/设置图表事件数据（chartBase.eventData(chartEvent)返回值）对应的原始数据集绑定索引（chartEvent.originalChartDataSetIndex）。
 	 * 
 	 * @param chartEvent 图表事件对象，格式应为：{ ... }
-	 * @param originalChartDataSetIndex 可选，要设置的原始数据集绑定索引，格式应为：
+	 * @param originalDataSetBindIndex 可选，要设置的原始数据集绑定索引，格式应为：
 	 *                                  当图表事件数据是对象时：数据集绑定索引数值、数据集绑定索引数值数组
 	 *                                  当图表事件数据是对象数组时：数组，其元素可能为数据集绑定索引数值、数据集绑定索引数值数组
 	 *                                  其中，数据集绑定索引数值允许为null，因为图表事件数据可能并非由图表结果数据构建
 	 * @returns 要获取的原始数据集绑定索引，未设置则返回null
 	 */
-	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
+	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalDataSetBindIndex)
 	{
-		if(originalChartDataSetIndex === undefined)
+		if(originalDataSetBindIndex === undefined)
 			return chartEvent["originalChartDataSetIndex"];
 		else
-			chartEvent["originalChartDataSetIndex"] = originalChartDataSetIndex;
+			chartEvent["originalChartDataSetIndex"] = originalDataSetBindIndex;
 	};
 	
 	/**
@@ -4450,17 +4450,17 @@
 	 * 图表渲染器在构建用于渲染图表的内部数据对象时，应使用此函数设置其原始信息，以支持在后续的交互、事件处理中获取这些原始信息。
 	 * 
 	 * @param data 数据对象、数据对象数组，格式为：{ ... }、[ { ... }, ... ]，当是数组时，设置操作将为每个元素单独设置原始信息
-	 * @param chartDataSetIndex 要设置的数据集绑定索引数值、数据集绑定对象（自动取其索引数值），或者它们的数组
+	 * @param dataSetBindIndex 要设置的数据集绑定索引数值、数据集绑定对象（自动取其索引数值），或者它们的数组
 	 * @param resultDataIndex 可选，要设置的结果数据索引，格式为：
-	 *                        当chartDataSetIndex不是数组时：
+	 *                        当dataSetBindIndex不是数组时：
 	 *                        数值、数值数组
-	 *                        当chartDataSetIndex是数组时：
-	 *                        数值，表示chartDataSetIndex数组每个元素的结果数据索引都是此数值
-	 *                        数组（元素可以是数值、数值数组），表示chartDataSetIndex数组每个元素的结果数据索引是此数组对应位置的元素
+	 *                        当dataSetBindIndex是数组时：
+	 *                        数值，表示dataSetBindIndex数组每个元素的结果数据索引都是此数值
+	 *                        数组（元素可以是数值、数值数组），表示dataSetBindIndex数组每个元素的结果数据索引是此数组对应位置的元素
 	 *                        默认值为：0
 	 * @param autoIncrement 可选，当data是数组时：
-	 *                      当chartDataSetIndex不是数组且resultDataIndex是数值时，设置时是否自动递增resultDataIndex；
-	 *                      当chartDataSetIndex是数组且其元素对应位置的结果数据索引是数值时，是否自动递增这个结果数据索引是数值。
+	 *                      当dataSetBindIndex不是数组且resultDataIndex是数值时，设置时是否自动递增resultDataIndex；
+	 *                      当dataSetBindIndex是数组且其元素对应位置的结果数据索引是数值时，是否自动递增这个结果数据索引是数值。
 	 *                      默认值为：true
 	 * @returns 要获取的原始信息属性值(可能为null），格式为：
 	 *									{
@@ -4477,7 +4477,7 @@
 	 *									}
 	 *									当data是数组时，将返回此结构的数组
 	 */
-	chartBase.originalInfo = function(data, chartDataSetIndex, resultDataIndex, autoIncrement)
+	chartBase.originalInfo = function(data, dataSetBindIndex, resultDataIndex, autoIncrement)
 	{
 		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
 		
@@ -4504,7 +4504,7 @@
 			if(data == null)
 				return;
 			
-			//(data, chartDataSetIndex, true)、(data, chartDataSetIndex, false)
+			//(data, dataSetBindIndex, true)、(data, dataSetBindIndex, false)
 			if(resultDataIndex === true || resultDataIndex === false)
 			{
 				autoIncrement = resultDataIndex;
@@ -4513,25 +4513,25 @@
 			
 			resultDataIndex = (resultDataIndex === undefined ? 0 : resultDataIndex);
 			
-			var isCdsiArray = $.isArray(chartDataSetIndex);
+			var isCdsiArray = $.isArray(dataSetBindIndex);
 			
 			if(isCdsiArray)
 			{
 				var cdsiNew = [];
 				
-				for(var i=0; i<chartDataSetIndex.length; i++)
+				for(var i=0; i<dataSetBindIndex.length; i++)
 				{
-					cdsiNew[i] = (chartDataSetIndex[i] != null && chartDataSetIndex[i].index !== undefined ?
-									chartDataSetIndex[i].index : chartDataSetIndex[i]);
+					cdsiNew[i] = (dataSetBindIndex[i] != null && dataSetBindIndex[i].index !== undefined ?
+									dataSetBindIndex[i].index : dataSetBindIndex[i]);
 				}
 				
-				chartDataSetIndex = cdsiNew;
+				dataSetBindIndex = cdsiNew;
 				
 				if(!$.isArray(resultDataIndex))
 				{
 					var rdiNew = [];
 					
-					for(var i=0; i<chartDataSetIndex.length; i++)
+					for(var i=0; i<dataSetBindIndex.length; i++)
 						rdiNew[i] = resultDataIndex;
 					
 					resultDataIndex = rdiNew;
@@ -4539,8 +4539,8 @@
 			}
 			else
 			{
-				chartDataSetIndex = (chartDataSetIndex != null && chartDataSetIndex.index !== undefined ?
-										chartDataSetIndex.index : chartDataSetIndex);
+				dataSetBindIndex = (dataSetBindIndex != null && dataSetBindIndex.index !== undefined ?
+										dataSetBindIndex.index : dataSetBindIndex);
 			}
 			
 			if(isDataArray)
@@ -4569,7 +4569,7 @@
 					var originalInfo =
 					{
 						"chartId": this.id,
-						"chartDataSetIndex": chartDataSetIndex
+						"chartDataSetIndex": dataSetBindIndex
 					};
 					
 					if(!autoIncrement)
@@ -4606,7 +4606,7 @@
 				var originalInfo =
 				{
 					"chartId": this.id,
-					"chartDataSetIndex": chartDataSetIndex,
+					"chartDataSetIndex": dataSetBindIndex,
 					"resultDataIndex": resultDataIndex
 				};
 				
@@ -4629,10 +4629,10 @@
 		
 		var index = undefined;
 		
-		var chartDataSets = this.chartDataSets;
-		for(var i=0; i<chartDataSets.length; i++)
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var isAttachment = chartDataSets[i].attachment;
+			var isAttachment = dataSetBinds[i].attachment;
 			
 			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
 			{
@@ -4947,24 +4947,24 @@
 		for(var i=0; i<originalDataIndexAry.length; i++)
 		{
 			var odi = originalDataIndexAry[i];
-			var chartDataSetIndex = odi.chartDataSetIndex;
+			var dataSetBindIndex = odi.dataSetBindIndex;
 			var resultDataIndex = odi.resultDataIndex;
 			var results = chart.updateResults();
 			var originalDataMy = null;
 			
-			if($.isArray(chartDataSetIndex))
+			if($.isArray(dataSetBindIndex))
 			{
 				originalDataMy = [];
 				
-				for(var j=0; j<chartDataSetIndex.length; j++)
+				for(var j=0; j<dataSetBindIndex.length; j++)
 				{
-					var result = chart.resultAt(results, chartDataSetIndex[j]);
+					var result = chart.resultAt(results, dataSetBindIndex[j]);
 					originalDataMy[j] = chart.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
 				}
 			}
 			else
 			{
-				var result = chart.resultAt(results, chartDataSetIndex);
+				var result = chart.resultAt(results, dataSetBindIndex);
 				originalDataMy = chart.resultDataElement(result, resultDataIndex);
 			}
 			
@@ -4979,12 +4979,12 @@
 	 * 
 	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
 	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
-	 * @param chartDataSetIndex 数据集绑定索引数值、数值数组
+	 * @param dataSetBindIndex 数据集绑定索引数值、数值数组
 	 * @param resultDataIndex 图表数据集结果数据索引数值、数值数组、数值数组的数组
 	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
 	 * @since 3.1.0
 	 */
-	chartFactory.originalDataIndex = function(data, chartId, chartDataSetIndex, resultDataIndex)
+	chartFactory.originalDataIndex = function(data, chartId, dataSetBindIndex, resultDataIndex)
 	{
 		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
 		var isArray = $.isArray(data);
@@ -4995,7 +4995,7 @@
 			if(isArray)
 			{
 				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				return (tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined 
+				return (tailEle && tailEle["chartId"] !== undefined && tailEle["dataSetBindIndex"] !== undefined 
 							? tailEle : undefined);
 			}
 			else
@@ -5006,16 +5006,20 @@
 			var originalIdx =
 			{
 				"chartId": chartId,
-				"chartDataSetIndex": chartDataSetIndex,
+				"dataSetBindIndex": dataSetBindIndex,
 				"resultDataIndex": resultDataIndex
 			};
+			
+			// < @deprecated 兼容4.7.0版本的originalIdx.chartDataSetIndex，将在未来版本移除，已被originalIdx.dataSetBindIndex取代
+			originalIdx.chartDataSetIndex = originalIdx.dataSetBindIndex;
+			// > @deprecated 兼容4.7.0版本的originalIdx.chartDataSetIndex，将在未来版本移除，已被originalIdx.dataSetBindIndex取代
 			
 			if(isArray)
 			{
 				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
 				
 				//替换
-				if(tailEle && tailEle["chartId"] !== undefined && tailEle["chartDataSetIndex"] !== undefined)
+				if(tailEle && tailEle["chartId"] !== undefined && tailEle["dataSetBindIndex"] !== undefined)
 				{
 					data[data.length - 1] = originalIdx;
 				}

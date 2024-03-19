@@ -1690,7 +1690,7 @@
 	chartSetting.openChartSettingParamPanel = function($box, chart)
 	{
 		var $chart = chart.elementJquery();
-		var chartDataSets = chart.chartDataSets;
+		var dataSetBinds = chart.dataSetBinds();
 		
 		var $panel = $(".dg-chart-setting-param-panel", $box);
 		
@@ -1718,16 +1718,16 @@
 			
 			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent, $panelFoot);
 			
-			for(var i=0; i<chartDataSets.length; i++)
+			for(var i=0; i<dataSetBinds.length; i++)
 			{
-				var params = chart.dataSetParams(chartDataSets[i]);
+				var params = chart.dataSetParams(dataSetBinds[i]);
 				
 				if(!params || params.length == 0)
 					continue;
 				
-				var myTitle = chartSetting.evalChartDataSetPanelTitle(chart, chartDataSets, i);
+				var myTitle = chartSetting.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
-				var $fp = $("<div class='dg-datasetbind-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
 				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
 				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
 				chartSetting.renderDataSetParamValueForm($content, params,
@@ -1765,7 +1765,7 @@
 						validateOk = false;
 					else
 					{
-						var myIndex = $this.data("chartDataSetIndex");
+						var myIndex = $this.data("dataSetBindIndex");
 						var myParamValues = chartSetting.getDataSetParamValueObj($form);
 						paramValuess.push({ index : myIndex, paramValues: myParamValues });
 					}
@@ -1776,7 +1776,7 @@
 					$thisButton.removeClass("dg-param-value-form-invalid");
 					
 					for(var i=0; i<paramValuess.length; i++)
-						chartSetting.chartDataSetParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues);
+						chartSetting.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues);
 					
 					if(chartSetting.closeChartSettingParamPanelOnSubmit)
 						chartSetting.closeChartSettingParamPanel(chart);
@@ -1794,20 +1794,20 @@
 			
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
-				var chartDataSetIndex = $(this).data("chartDataSetIndex");
+				var dataSetBindIndex = $(this).data("dataSetBindIndex");
 				var $form = chartSetting.getDataSetParamValueForm(this);
 				
-				chartSetting.setDataSetParamValueObj($form, chart.dataSetParamValues(chartDataSetIndex));
+				chartSetting.setDataSetParamValueObj($form, chart.dataSetParamValues(dataSetBindIndex));
 			});
 		}
 		
 		chartSetting.adjustChartSetingPanelPosition($panel);
 	};
 	
-	chartSetting.chartDataSetParamValues = function(chart, chartDataSetIndex, paramValues)
+	chartSetting.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues)
 	{
 		//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
-		chart.dataSetParamValues(chartDataSetIndex, paramValues, true);
+		chart.dataSetParamValues(dataSetBindIndex, paramValues, true);
 	};
 	
 	/**
@@ -1840,7 +1840,7 @@
 	{
 		var $chart = chart.elementJquery();
 		
-		var chartDataSets = chart.chartDataSets;
+		var dataSetBinds = chart.dataSetBinds();
 		
 		var $panel = $(".dg-chart-setting-data-panel", $box);
 		
@@ -1867,15 +1867,15 @@
 			chartSetting.setChartSettingDataPanelThemeStyle(chart, $panel);
 			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
 			
-			for(var i=0; i<chartDataSets.length; i++)
+			for(var i=0; i<dataSetBinds.length; i++)
 			{
-				var myTitle = chartSetting.evalChartDataSetPanelTitle(chart, chartDataSets, i);
+				var myTitle = chartSetting.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
-				var $fp = $("<div class='dg-datasetbind-section' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
 				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
 				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
 				
-				var tableId = chartSetting.initChartDataSetDataTable(chart, chartDataSets, i, $content);
+				var tableId = chartSetting.initDataSetBindDataTable(chart, dataSetBinds, i, $content);
 				
 				$fp.data("chartDataTableId", tableId);
 			}
@@ -1887,11 +1887,11 @@
 			
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
-				var chartDataSetIndex = $(this).data("chartDataSetIndex");
+				var dataSetBindIndex = $(this).data("dataSetBindIndex");
 				var tableId = $(this).data("chartDataTableId");
 				var $dataTable = $("#"+tableId, this);
 				
-				chartSetting.updateChartSettingDataTableData(chart, chartDataSets, chartDataSetIndex, $dataTable);
+				chartSetting.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, $dataTable);
 			});
 		}
 		
@@ -1930,11 +1930,11 @@
 		return ($panel.length == 0 || $panel.is(":hidden"));
 	};
 	
-	chartSetting.initChartDataSetDataTable = function(chart, chartDataSets, index, $parent)
+	chartSetting.initDataSetBindDataTable = function(chart, dataSetBinds, index, $parent)
 	{
-		var chartDataSet = chartDataSets[index];
-		var dataSetProperties = chart.dataSetProperties(chartDataSet);
-		var propertySigns = (chart.dataSetPropertySigns(chartDataSet) || {});
+		var dataSetBind = dataSetBinds[index];
+		var dataSetProperties = chart.dataSetProperties(dataSetBind);
+		var propertySigns = (chart.dataSetPropertySigns(dataSetBind) || {});
 		var dataSigns = (chart.plugin && chart.plugin.dataSigns ? chart.plugin.dataSigns : []);
 		var signProperties = [];
 		
@@ -1968,7 +1968,7 @@
 		{
 			var column =
 			{
-				title: chartSetting.evalChartDataSetDataTableColumnTitle(chart, chartDataSet, signProperties[i], propertySigns, dataSigns),
+				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signProperties[i], propertySigns, dataSigns),
 				data: signProperties[i].name,
 				defaultContent: "",
 				orderable: false,
@@ -1989,7 +1989,7 @@
 			columns.push(column);
 		}
 		
-		if(chart.isMutableModel(chartDataSet))
+		if(chart.isMutableModel(dataSetBind))
 		{
 			columns.push(
 			{
@@ -2051,9 +2051,9 @@
 		return tableId;
 	};
 	
-	chartSetting.evalChartDataSetDataTableColumnTitle = function(chart, chartDataSet, dataSetProperty, propertySigns, dataSigns)
+	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetProperty, propertySigns, dataSigns)
 	{
-		var title = chart.dataSetPropertyAlias(chartDataSet, dataSetProperty);
+		var title = chart.dataSetPropertyAlias(dataSetBind, dataSetProperty);
 		
 		var name = dataSetProperty.name;
 		var signs = propertySigns[name];
@@ -2173,7 +2173,7 @@
 		});
 	};
 	
-	chartSetting.updateChartSettingDataTableData = function(chart, chartDataSets, index, $dataTable)
+	chartSetting.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $dataTable)
 	{
 		var results = chart.updateResults();
 		var result = chart.resultAt(results, index);
@@ -2204,11 +2204,11 @@
 		dataTable.draw();
 	};
 	
-	chartSetting.evalChartDataSetPanelTitle = function(chart, chartDataSets, index)
+	chartSetting.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
 	{
-		var title = (chartDataSets.length > 1 ? (index+1)+". " : "") + chart.dataSetAlias(chartDataSets[index]);
-		if(title != chartDataSets[index].dataSet.name)
-			title += " ("+chartDataSets[index].dataSet.name+")";
+		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + chart.dataSetAlias(dataSetBinds[index]);
+		if(title != dataSetBinds[index].dataSet.name)
+			title += " ("+dataSetBinds[index].dataSet.name+")";
 		
 		return title;
 	};
