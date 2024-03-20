@@ -242,6 +242,9 @@
 	/** 内置图表选项：处理图表更新选项 */
 	chartFactory.OPTION_PROCESS_UPDATE_OPTIONS = "processUpdateOptions";
 	
+	/** 内置图表选项：更新追加模式 */
+	chartFactory.OPTION_UPDATE_APPEND_MODE = "dgUpdateAppendMode";
+	
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
 	
@@ -439,6 +442,7 @@
 		this.statusIniting(true);
 		
 		this._initForPre();
+		
 		this._initOptions();
 		this._initTheme();
 		this._initListener();
@@ -448,6 +452,8 @@
 		this._initEventHandlers();
 		this._initRenderer();
 		this._initAttrValues();
+		this._initUpdateAppendMode();
+		
 		this._initForPost();
 		
 		this.statusInited(true);
@@ -765,6 +771,16 @@
 		attrValues = $.extend(true, {}, this.attrValuesOrigin(), attrValues);
 		
 		this.attrValues(attrValues);
+	};
+	
+	/**
+	 * 初始化更新追加模式。
+	 */
+	chartBase._initUpdateAppendMode = function()
+	{
+		var options = this.options();
+		var mode = (options ? options[chartFactory.OPTION_UPDATE_APPEND_MODE] : null);
+		this.updateAppendMode(mode);
 	};
 	
 	/**
@@ -4006,15 +4022,11 @@
 	/**
 	 * 获取/设置更新追加模式。
 	 * 更新追加模式是指：每次调用chart.update()更新图表时，使用上次的数据追加合并新数据更新图表。
-	 * 对于获取操作，如果未设置、或者设置为null，将会读取图表选项里的dgUpdateAppendMode作为返回值。
+	 * 图表初始化时，会使用图表选项里的dgUpdateAppendMode选项设置。
 	 * 
 	 * @param appendMode 可选，要设置的追加模式，格式为：
 	 * 					//等同于下面的：{ size: 10, beforeListener: false }
 	 * 					true、
-	 * 					//禁用
-	 * 					false、
-	 * 					//重置
-	 * 					null、
 	 * 					//等同于下面的：{ size: 数值, beforeListener: false }
 	 * 					数值、
 	 * 					//等同于下面的：{ size: 函数, beforeListener: false }
@@ -4024,7 +4036,7 @@
 	 * 					//      可以是具体数值，也可以是数值计算函数：function(chart, results){ return 数值; }
 	 * 					//beforeListener：是否在图表监听器的onUpdate前追加，否则，将在之后追加
 	 * 					{ size: 数值或者函数, beforeListener: false }
-	 * @returns 更新追加模式，格式为：{ size: 数值, beforeListener: true、false }、false 表示没有禁用追加模式
+	 * @returns 更新追加模式，格式为：{ size: 数值, beforeListener: true、false }、null 表示没有开启追加模式
 	 * 
 	 * @since 5.0.0
 	 */
@@ -4032,52 +4044,27 @@
 	{
 		if(arguments.length == 0)
 		{
-			var re = this._updateAppendMode;
-			
-			//支持在图表选项里使用dgUpdateAppendMode定义追加模式
-			if(re == null)
-			{
-				var renderOptions = this.renderOptions();
-				re = (renderOptions ? renderOptions["dgUpdateAppendMode"] : undefined);
-				if(re == null)
-				{
-					var options = this.options();
-					re = (options ? options["dgUpdateAppendMode"] : undefined);
-				}
-			}
-			
-			return this._formatUpdateAppendMode(re);
+			return this._updateAppendMode;
 		}
 		else
 		{
-			//允许设置为null，这样读取时可支持再次从图表选项里读
-			appendMode = (appendMode == null ? null : this._formatUpdateAppendMode(appendMode));
+			if(appendMode === true)
+			{
+				appendMode = { size: 10, beforeListener: false };
+			}
+			else if(chartFactory.isNumber(appendMode))
+			{
+				appendMode = { size: appendMode, beforeListener: false };
+			}
+			else if($.isFunction(appendMode))
+			{
+				appendMode = { size: appendMode, beforeListener: false };
+			}
+			
 			this._updateAppendMode = appendMode;
 		}
 	};
 	
-	chartBase._formatUpdateAppendMode = function(appendMode)
-	{
-		if(appendMode == null)
-		{
-			appendMode = false;
-		}
-		else if(appendMode === true)
-		{
-			appendMode = { size: 10, beforeListener: false };
-		}
-		else if(chartFactory.isNumber(appendMode))
-		{
-			appendMode = { size: appendMode, beforeListener: false };
-		}
-		else if($.isFunction(appendMode))
-		{
-			appendMode = { size: appendMode, beforeListener: false };
-		}
-		
-		return appendMode;
-	};
-		
 	/**
 	 * 获取全部数据集绑定数组。
 	 * 
