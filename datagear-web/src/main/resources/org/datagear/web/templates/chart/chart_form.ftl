@@ -90,7 +90,7 @@
 			<div class="field grid">
 				<label for="${pid}dataSetBindVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='chart.cds.desc' />">
-					<@spring.message code='module.dataSet' />
+					<@spring.message code='dataSetBind' />
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}dataSetBindVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
