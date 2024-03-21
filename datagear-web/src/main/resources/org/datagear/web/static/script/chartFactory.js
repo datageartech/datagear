@@ -4183,12 +4183,13 @@
 	 */
 	chartBase.contextURL = function(url)
 	{
-		if(!this._isRenderContextInited())
+		var webContext = this._renderContextAttrWebContext();
+		
+		if(!webContext)
 		{
 			throw new Error("chart is illegal state for contextURL(url)");
 		}
 		
-		var webContext = this._renderContextAttrWebContext();
 		return chartFactory.toWebContextPathURL(webContext, url);
 	};
 	

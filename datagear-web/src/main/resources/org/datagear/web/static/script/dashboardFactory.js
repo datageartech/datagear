@@ -249,9 +249,9 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
-		this._initStartHeartBeatIfNot(dashboard);
 		this._initDashboardBaseProperties(dashboard);
 		$.extend(dashboard, this.dashboardBase);
+		this._initStartHeartBeatIfNot(dashboard);
 		
 		this._initRenderContext(dashboard);
 		
@@ -351,10 +351,9 @@
 			return;
 		
 		//开启心跳，避免会话超时
-		var renderContext = dashboard.renderContext;
-		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
-		var heartbeatURL = chartFactory.toWebContextPathURL(webContext, webContext.attributes.heartbeatURL);
-		this.startHeartBeat(heartbeatURL, dashboard.id);
+		var webContext = chartFactory.renderContextAttrWebContext(dashboard.renderContext);
+		var heartbeatURL = dashboard.contextURL(webContext.attributes.heartbeatURL);
+		dashboardFactory.startHeartBeat(heartbeatURL, dashboard.id);
 		
 		dashboardFactory._initStartHeartBeat = true;
 	};
@@ -953,7 +952,7 @@
 			var renderContext = thisDashboard.renderContext;
 			var webContext = chartFactory.renderContextAttrWebContext(renderContext);
 			var unloadURL = webContext.attributes[dashboardFactory.unloadConfig.urlAttrName];
-			unloadURL = chartFactory.toWebContextPathURL(webContext, unloadURL);
+			unloadURL = thisDashboard.contextURL(unloadURL);
 			var data = {};
 			data[dashboardFactory.unloadConfig.dashboardIdParamName] = thisDashboard.id;
 			
@@ -1593,7 +1592,7 @@
 		this._doHandleChartsLocal(preUpdateLocals);
 		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.updateDashboardURL);
+		var url = this.contextURL(webContext.attributes.updateDashboardURL);
 		
 		for(var group in preUpdateGroups)
 		{
@@ -2351,7 +2350,7 @@
 		}
 		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
-		var url = chartFactory.toWebContextPathURL(webContext, webContext.attributes.loadChartURL);
+		var url = this.contextURL(webContext.attributes.loadChartURL);
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		
 		var dashboard = this;
@@ -2856,6 +2855,27 @@
 		this._destroyForms();
 		
 		this.statusDestroyed(true);
+	};
+	
+	/**
+	 * 为以"/"开头的URL添加系统根路径前缀，否则，将直接返回原URL。
+	 * 当需要访问系统内其他功能模块的资源时，应为其URL添加系统根路径前缀。
+	 * 
+	 * @param url 可选，要处理的URL
+	 * @return 添加后的新URL，如果没有url参数，将返回系统根路径
+	 * @since 5.0.0
+	 */
+	dashboardBase.contextURL = function(url)
+	{
+		var renderContext = this.renderContext;
+		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+		
+		if(!webContext)
+		{
+			throw new Error("dashboard is illegal state for contextURL(url)");
+		}
+		
+		return chartFactory.toWebContextPathURL(webContext, url);
 	};
 	
 	//-------------
