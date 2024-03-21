@@ -938,7 +938,8 @@ DataGear版本更新日志
 
 重构：【图表数据集】概念和设计重构为【数据集绑定】；
 新增：看板编辑页面新增插入新建图表功能；
-重构：图表JS对象新增chart.dataSetBind*()函数，替换已弃用的chart.chartDataSet*()函数；
+新增：看板/图表JS对象新增contextURL()函数，用于支持获取系统内其他模块资源的访问URL；
+新增：图表JS对象新增chart.dataSetBind*()函数，替换已弃用的chart.chartDataSet*()函数；
 新增：图表JS对象新增chart.updateAppendMode()函数，用于设置图表追加更新模式；
 新增：系统配置文件新增dbmeta.tabletypes*数据源表类型配置项，用于解决某些数据库无法加载表的问题；
 新增；数据源管理右键菜单新增【数据库信息】功能，可查看数据库名称、表类型信息；
