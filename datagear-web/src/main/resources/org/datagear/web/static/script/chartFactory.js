@@ -2514,18 +2514,12 @@
 	 */
 	chartBase.mapURL = function(name)
 	{
-		if(!this._isRenderContextInited())
-			throw new Error("chart is illegal state for mapURL(name)");
-		
 		var url = chartMapURLs[name];
 		
 		if(!url && typeof(chartMapURLs.mapURL) == "function")
 			url = chartMapURLs.mapURL(name);
 		
-		url = (url || name);
-		
-		var webContext = this._renderContextAttrWebContext();
-		url = chartFactory.toWebContextPathURL(webContext, url);
+		url = this.contextURL(url || name);
 		
 		return url;
 	};
@@ -3847,10 +3841,8 @@
 		
 		name = (name || "");
 		
-		var webContext = this._renderContextAttrWebContext();
-		
 		var url = "/chartPlugin/resource/"+encodeURIComponent(this.plugin.id)+"/"+name;
-		url = chartFactory.toWebContextPathURL(webContext, url);
+		url = this.contextURL(url);
 		
 		return url;
 	};
@@ -4123,6 +4115,7 @@
 	/**
 	 * 获取指定索引的数据集绑定。
 	 * 
+	 * @param index
 	 * @return 数据集绑定，null表示没有
 	 * @since 5.0.0
 	 */
@@ -4178,6 +4171,25 @@
 		}
 		
 		return re;
+	};
+	
+	/**
+	 * 为以"/"开头的URL添加系统根路径前缀，否则，将直接返回原URL。
+	 * 当需要访问系统内其他功能模块的资源时，应为其URL添加系统根路径前缀。
+	 * 
+	 * @param url 可选，要处理的URL
+	 * @return 添加后的新URL，如果没有url参数，将返回系统根路径
+	 * @since 5.0.0
+	 */
+	chartBase.contextURL = function(url)
+	{
+		if(!this._isRenderContextInited())
+		{
+			throw new Error("chart is illegal state for contextURL(url)");
+		}
+		
+		var webContext = this._renderContextAttrWebContext();
+		return chartFactory.toWebContextPathURL(webContext, url);
 	};
 	
 	
@@ -5400,19 +5412,33 @@
 	};
 	
 	/**
-	 * 将给定URL转换为web上下文路径URL。
+	 * 为指定URL添加系统根路径前缀。
+	 * 只有当URL以"/"开头时才会添加系统根路径前缀，否则，将直接返回原URL。
+	 * 当需要访问系统内其他功能模块的资源时，应为其URL添加系统根路径前缀。
 	 * 
 	 * @param webContext web上下文
-	 * @param url 待转换的URL
+	 * @param url 可选，要处理的URL
+	 * @return 添加后的新URL，如果未设置url参数，将返回系统根路径
 	 */
 	chartFactory.toWebContextPathURL = function(webContext, url)
 	{
 		var contextPath = webContext.contextPath;
 		
-		if(url.indexOf("/") == 0)
-			url = contextPath + url;
-		
-		return url;
+		// (webContext)
+		if(url === undefined)
+		{
+			return contextPath;
+		}
+		// (webContext, url)
+		else
+		{
+			if(url != null && url !== "" && url.charAt(0) == "/")
+			{
+				url = contextPath + url;
+			}
+			
+			return url;
+		}
 	};
 	
 	/**
