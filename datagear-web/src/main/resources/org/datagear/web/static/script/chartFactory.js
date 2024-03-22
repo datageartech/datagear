@@ -372,6 +372,7 @@
 		// > @deprecated 兼容4.7.0版本的chart.chartDataSets，将在未来版本移除，已被chart._dataSetBinds取代
 		
 		chart._attrValues = (chart.attrValues || {});
+		chart._options = (chart._options || {});
 		
 		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
 		chart._widget = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
@@ -804,13 +805,23 @@
 	 * 图表渲染器应使用此函数获取并应用图表选项，另参考chart.inflateRenderOptions()、chart.inflateUpdateOptions()。
 	 * 
 	 * @param options 可选，要设置的图表选项，没有则执行获取操作
+	 * @returns 要获取的图表选项，格式为：{ ... }，不会为null
 	 */
 	chartBase.options = function(options)
 	{
 		if(options === undefined)
+		{
 			return this._options;
+		}
 		else
+		{
+			if(options == null)
+			{
+				throw new Error("[options] required");
+			}
+			
 			this._options = options;
+		}
 	};
 	
 	/**
@@ -826,7 +837,9 @@
 	chartBase.theme = function(theme)
 	{
 		if(theme === undefined)
+		{
 			return this._theme;
+		}
 		else
 		{
 			if(theme == null)
