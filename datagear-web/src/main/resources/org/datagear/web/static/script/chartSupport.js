@@ -2276,7 +2276,7 @@
 					id: 0,
 		            type: "map",
 					//这里必须设置map，不然渲染会报错，update中会特殊处理
-					map: (chart.map() || chartSupport.defaultMapName())
+					map: chartSupport.renderChartMapName(chart)
 		        }
 			]
 		},
@@ -2496,7 +2496,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || chartSupport.defaultMapName())
+				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -2684,7 +2684,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || chartSupport.defaultMapName())
+				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -2967,7 +2967,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || chartSupport.defaultMapName())
+				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -3166,7 +3166,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || chartSupport.defaultMapName())
+				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -3350,7 +3350,7 @@
 				//将在update中设置：
 				//map
 				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: (chart.map() || chartSupport.defaultMapName())
+				map: chartSupport.renderChartMapName(chart)
 			},
 			visualMap:
 			{
@@ -9283,6 +9283,15 @@
 			
 			return extractor;
 		}
+	};
+	
+	/**
+	 * 获取渲染图表初始地图名。
+	 * 此方法必须返回非空值，不然图表渲染会报错。
+	 */
+	chartSupport.renderChartMapName = function(chart)
+	{
+		return (chart.map() || chartSupport.defaultMapName());
 	};
 	
 	/**
