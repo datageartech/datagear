@@ -8757,8 +8757,7 @@
 	};
 	
 	/**
-	 * 获取/设置ECharts地图图表的地图名option。
-	 * 注意：获取操作不会读取chart.map()
+	 * 获取/设置ECharts地图图表选项中的地图名。
 	 *
 	 * @param chart
 	 * @param options
@@ -8771,9 +8770,13 @@
 		if(map === undefined)
 		{
 			if(isGeo)
+			{
 				map = (options.geo ? options.geo.map : null);
+			}
 			else
+			{
 				map = (options.series && options.series.length > 0 ? options.series[0].map : null);
+			}
 			
 			return map;
 		}
@@ -8802,7 +8805,16 @@
 	{
 		isGeo = (isGeo === undefined ? (options.geo != null) : isGeo);
 		
-		var map = (chart.map() || chartSupport.echartsMapChartMapOption(chart, options, isGeo));
+		var map = null;
+		
+		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+		map = chart.map();
+		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+		
+		if(!map)
+		{
+			map = chartSupport.echartsMapChartMapOption(chart, options, isGeo)
+		}
 		
 		if(!map)
 			throw new Error("[map] option must be set");
@@ -8832,8 +8844,10 @@
 		var updateMap = chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo);
 		var presetMap = chartFactory.extValueBuiltin(chart, "presetMap");
 		
+		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		if(!updateMap)
 			updateMap = chart.map();
+		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		
 		if(!updateMap)
 			updateMap = presetMap;
@@ -9291,7 +9305,18 @@
 	 */
 	chartSupport.renderChartMapName = function(chart)
 	{
-		return (chart.map() || chartSupport.defaultMapName());
+		var map = null;
+		
+		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+		map = chart.map();
+		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+		
+		if(!map)
+		{
+			map = chartSupport.defaultMapName();
+		}
+		
+		return map;
 	};
 	
 	/**

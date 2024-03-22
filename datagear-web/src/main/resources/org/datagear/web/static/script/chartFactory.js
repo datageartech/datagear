@@ -649,7 +649,9 @@
 	{
 		var map = this.elementJquery().attr(elementAttrConst.MAP);
 		
+		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		this.map(map);
+		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 	};
 	
 	/**
@@ -895,25 +897,6 @@
 			return this._listener;
 		else
 			this._listener = listener;
-	};
-	
-	/**
-	 * 获取/设置图表地图名。
-	 * 此函数用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
-	 * 
-	 * 图表初始化时会使用图表元素的"dg-chart-map"属性值执行设置操作。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应使用此函数获取并应用图表地图。
-	 * 
-	 * @param map 可选，要设置的地图名，没有则执行获取操作
-	 */
-	chartBase.map = function(map)
-	{
-		if(map === undefined)
-			return this._map;
-		else
-			this._map = map;
 	};
 	
 	/**
@@ -4197,6 +4180,27 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，因为与底层图表组件本身的地图设置选项功能重复，容易引起混淆
+	/**
+	 * 获取/设置图表地图名。
+	 * 此函数用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
+	 * 
+	 * 图表初始化时会使用图表元素的"dg-chart-map"属性值执行设置操作。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应使用此函数获取并应用图表地图。
+	 * 
+	 * @param map 可选，要设置的地图名，没有则执行获取操作
+	 */
+	chartBase.map = function(map)
+	{
+		if(map === undefined)
+			return this._map;
+		else
+			this._map = map;
+	};
+	// > @deprecated 兼容4.7.0版本的API，将在未来版本移除，因为与底层图表组件本身的地图设置选项功能重复，容易引起混淆
 	
 	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
 	/**

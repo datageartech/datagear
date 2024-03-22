@@ -182,7 +182,6 @@
 		{name: "listener", value: "listener(", displayName: "listener() ", displayComment: "chart", categories: ["chart"]},
 		{name: "loadMap", value: "loadMap(", displayName: "loadMap() ", displayComment: "chart", categories: ["chart"]},
 		{name: "manualRender", value: "manualRender(", displayName: "manualRender() ", displayComment: "chart", categories: ["chart"]},
-		{name: "map", value: "map(", displayName: "map() ", displayComment: "chart", categories: ["chart"]},
 		{name: "mapURL", value: "mapURL(", displayName: "mapURL() ", displayComment: "chart", categories: ["chart"]},
 		{name: "name", value: "name", displayName: "name ", displayComment: "chart", categories: ["chart"]},
 		{name: "off", value: "off(", displayName: "off() ", displayComment: "chart", categories: ["chart"]},
