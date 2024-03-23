@@ -8756,140 +8756,323 @@
 		return undefined;
 	};
 	
-	/**
-	 * 获取/设置ECharts地图图表选项中的地图名。
-	 *
-	 * @param chart
-	 * @param options
-	 * @param isGeo 是否GEO地图坐标系（options.geo.map）而非地图系列（series.type="map"）
-	 * @param map 可选，要设置的地图名
-	 * @returns 获取操作时的地图名
-	 */
-	chartSupport.echartsMapChartMapOption = function(chart, options, isGeo, map)
+	chartSupport.echartsMapChartInit = function(chart, options)
 	{
-		if(map === undefined)
-		{
-			if(isGeo)
-			{
-				map = (options.geo ? options.geo.map : null);
-			}
-			else
-			{
-				map = (options.series && options.series.length > 0 ? options.series[0].map : null);
-			}
-			
-			return map;
-		}
-		else
-		{
-			if(isGeo)
-			{
-				if(!options.geo)
-					options.geo = {};
-				
-				options.geo.map = map;
-			}
-			else
-			{
-				if(!options.series)
-					options.series = [];
-				if(!options.series[0])
-					options.series[0] = {};
-				
-				options.series[0].map = map;
-			}
-		}
-	};
-	
-	chartSupport.echartsMapChartInit = function(chart, options, isGeo)
-	{
-		isGeo = (isGeo === undefined ? (options.geo != null) : isGeo);
-		
-		var map = null;
-		
 		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		map = chart.map();
+		var map = chart.map();
+		if(map)
+		{
+			chartSupport.echartsSetMapOption(options, map, true);
+		}
 		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		
-		if(!map)
-		{
-			map = chartSupport.echartsMapChartMapOption(chart, options, isGeo)
-		}
-		
-		if(!map)
-			throw new Error("[map] option must be set");
-		
-		chartSupport.echartsMapChartMapOption(chart, options, isGeo, map);
-		
-		if(chart.echartsMapRegistered(map))
+		chartSupport.echartsMapChartLoadMaps(chart, options, function()
 		{
 			chart.echartsInit(options);
 			chart.statusRendered(true);
-		}
-		else
-		{
-			chart.echartsLoadMap(map, function()
-			{
-				chart.echartsInit(options);
-				chart.statusRendered(true);
-			});
-		}
+		});
 	};
 	
-	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions, isGeo)
+	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions)
 	{
-		isGeo = (isGeo === undefined ? (renderOptions.geo != null) : isGeo);
-		
-		var renderMap = chartSupport.echartsMapChartMapOption(chart, renderOptions, isGeo);
-		var updateMap = chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo);
-		var presetMap = chartFactory.extValueBuiltin(chart, "presetMap");
-		
 		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		if(!updateMap)
-			updateMap = chart.map();
+		var map = chart.map();
+		if(map)
+		{
+			chartSupport.echartsSetMapOption(updateOptions, map, false);
+		}
 		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		
-		if(!updateMap)
-			updateMap = presetMap;
+		var updateMapOptions = chartSupport.echartsGetMapOptions(updateOptions);
 		
 		updateOptions = chart.inflateUpdateOptions(results, updateOptions, function(updateOptions)
 		{
-			//inflateUpdateOptions()会将地图设置为renderMap，所以这里需要再次设置为updateMap
-			if(updateMap && updateMap != renderMap)
+			//inflateUpdateOptions()会将地图设置为renderOptions里的项，所以这里需要再次设置为updateMap
+			$.extend(true, updateOptions, updateMapOptions);
+			
+			var renderMaps = chartSupport.echartsGetMapsDistinct(renderOptions);
+			var updateMaps = chartSupport.echartsGetMapsDistinct(updateOptions);
+			var mapChanged = (renderMaps.length !== updateMaps.length);
+			
+			if(!mapChanged)
 			{
-				chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo, updateMap);
-				
-				//要重置缩放比例和中心位置，不然会出现些地图无法显示的情况				
-				if(isGeo)
+				for(var i=0; i<renderMaps.length; i++)
 				{
-					updateOptions.geo.center = null;
-					updateOptions.geo.zoom = 1;//此项非必须
+					if(renderMaps[i] != updateMaps[i])
+					{
+						mapChanged = true;
+						break;
+					}
 				}
-				else
-				{
-					updateOptions.series[0].center = null;
-					updateOptions.series[0].zoom = 1;//此项非必须
-				}
+			}
+			
+			if(mapChanged)
+			{
+				chartSupport.echartsResetMapSettings(updateOptions);
 			}
 		});
 		
-		var map = chartSupport.echartsMapChartMapOption(chart, updateOptions, isGeo);
-		
-		if(map)
-			chartFactory.extValueBuiltin(chart, "presetMap", map);
-		
-		//更新地图未设置或者已注册
-		if(!map || chart.echartsMapRegistered(map))
+		chartSupport.echartsMapChartLoadMaps(chart, updateOptions, function()
 		{
 			chartSupport.echartsOptionsReplaceMerge(chart, updateOptions);
 			chart.statusUpdated(true);
-		}
-		else
+		});
+	};
+	
+	//仅提取ECharts地图类图表选项中的非空地图名信息，并且保持原结构
+	chartSupport.echartsGetMapOptions = function(echartsOptions)
+	{
+		var re = {};
+		
+		var geo = echartsOptions.geo;
+		var series = echartsOptions.series;
+		
+		if(geo)
 		{
-			chart.echartsLoadMap(map, function()
+			if($.isArray(geo))
 			{
-				chartSupport.echartsOptionsReplaceMerge(chart, updateOptions);
-				chart.statusUpdated(true);
+				re.geo = [];
+				
+				for(var i=0; i<geo.length; i++)
+				{
+					re.geo[i] = (geo[i].map ? { map: geo[i].map } : {});
+				}
+			}
+			else
+			{
+				re.geo = (geo.map ? { map: geo.map } : {});
+			}
+		}
+		
+		if(series)
+		{
+			if($.isArray(series))
+			{
+				re.series = [];
+				
+				for(var i=0; i<series.length; i++)
+				{
+					re.series[i] = (series[i].type == "map" && series[i].map ? { map: series[i].map } : {});
+				}
+			}
+			else
+			{
+				re.series = (series.type == "map" && series.map ? { map: series.map } : {});
+			}
+		}
+		
+		return re;
+	};
+	
+	//仅提取ECharts地图类图表选项中的不重复地图名信息
+	chartSupport.echartsGetMapsDistinct = function(echartsOptions)
+	{
+		var re = [];
+		
+		var maps = [];
+		var geo = echartsOptions.geo;
+		var series = echartsOptions.series;
+		
+		if(geo)
+		{
+			if($.isArray(geo))
+			{
+				for(var i=0; i<geo.length; i++)
+				{
+					if(geo[i].map)
+					{
+						maps.push(geo[i].map);
+					}
+				}
+			}
+			else
+			{
+				if(geo.map)
+				{
+					maps.push(geo.map);
+				}
+			}
+		}
+		
+		if(series)
+		{
+			if($.isArray(series))
+			{
+				for(var i=0; i<series.length; i++)
+				{
+					if(series[i].type == "map" && series[i].map)
+					{
+						maps.push(series[i].map);
+					}
+				}
+			}
+			else
+			{
+				if(series.type == "map" && series.map)
+				{
+					maps.push(series.map);
+				}
+			}
+		}
+		
+		chartSupport.appendDistinct(re, maps);
+		
+		return re;
+	};
+	
+	//设置ECharts地图类图表选项中的地图名
+	chartSupport.echartsSetMapOption = function(echartsOptions, map, force)
+	{
+		var geo = echartsOptions.geo;
+		var series = echartsOptions.series;
+		
+		if(geo)
+		{
+			if($.isArray(geo))
+			{
+				for(var i=0; i<geo.length; i++)
+				{
+					if(geo[i].map == null || force)
+					{
+						geo[i].map = map;
+					}
+				}
+			}
+			else
+			{
+				if(geo.map == null || force)
+				{
+					geo.map = map;
+				}
+			}
+		}
+		
+		if(series)
+		{
+			if($.isArray(series))
+			{
+				for(var i=0; i<series.length; i++)
+				{
+					if(series[i].type == "map" && (series[i].map == null || force))
+					{
+						series[i].map = map;
+					}
+				}
+			}
+			else
+			{
+				if(series.type == "map" && (series.map == null || force))
+				{
+					series.map = map;
+				}
+			}
+		}
+	};
+	
+	//重置ECharts地图类图表的中心位置、缩放比例
+	chartSupport.echartsResetMapSettings = function(echartsOptions)
+	{
+		var geo = echartsOptions.geo;
+		var series = echartsOptions.series;
+		
+		if(geo)
+		{
+			if($.isArray(geo))
+			{
+				for(var i=0; i<geo.length; i++)
+				{
+					geo[i].center = null;
+					geo[i].zoom = 1;
+				}
+			}
+			else
+			{
+				geo.center = null;
+				geo.zoom = 1;
+			}
+		}
+		
+		if(series)
+		{
+			if($.isArray(series))
+			{
+				for(var i=0; i<series.length; i++)
+				{
+					if(series[i].type == "map")
+					{
+						series[i].center = null;
+						series[i].zoom = 1;
+					}
+				}
+			}
+			else
+			{
+				if(series.type == "map")
+				{
+					series.center = null;
+					series.zoom = 1;
+				}
+			}
+		}
+	};
+	
+	//加载ECharts地图类图表中的所有地图，并在全部加载完成后调用callbak
+	chartSupport.echartsMapChartLoadMaps = function(chart, options, callback)
+	{
+		var maps = chartSupport.echartsGetMapsDistinct(options);
+		var needLoads = [];
+		
+		for(var i=0; i<maps.length; i++)
+		{
+			if(!chart.echartsMapRegistered(maps[i]))
+			{
+				needLoads.push(maps[i]);
+			}
+		}
+		
+		if(needLoads.length == 0)
+		{
+			callback();
+			return;
+		}
+		
+		var callbackInvoked = false;
+		var loadeds = {};
+		
+		var newCallback = function(context)
+		{
+			loadeds[context.needLoadName] = true;
+			
+			var loadedCount = 0;
+			
+			for(var p in loadeds)
+			{
+				if(loadeds[p] == true)
+				{
+					loadedCount ++;
+				}
+			}
+			
+			if(loadedCount == needLoads.length && !callbackInvoked)
+			{
+				callbackInvoked = true;
+				callback();
+			}
+		};
+		
+		for(var i=0; i<needLoads.length; i++)
+		{
+			chart.echartsLoadMap(needLoads[i],
+			{
+				needLoadName: needLoads[i],
+				success: function()
+				{
+					newCallback(this);
+				},
+				error: function()
+				{
+					newCallback(this);
+				}
 			});
 		}
 	};
