@@ -36,6 +36,11 @@
 	global.chartSupport = chartSupport;
 	// > @deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
 	
+	//内置地图类图表的地图选项名
+	//默认的ECharts地图类图表配置地图名稍微麻烦，
+	//所有这里的内置图表都支持此快捷方式设置地图名选项
+	chartSupport.OPTIONS_MAP = "dgMap";
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, options)
@@ -2282,7 +2287,7 @@
 		},
 		options);
 		
-		chartSupport.echartsMapChartInit(chart, options);
+		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
 	chartSupport.mapUpdate = function(chart, results)
@@ -2512,7 +2517,7 @@
 		},
 		options);
 		
-		chartSupport.echartsMapChartInit(chart, options);
+		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
 	chartSupport._mapScatterUpdate = function(chart, results)
@@ -2707,7 +2712,7 @@
 		},
 		options);
 		
-		chartSupport.echartsMapChartInit(chart, options);
+		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
 	chartSupport.mapGraphUpdate = function(chart, results)
@@ -2984,7 +2989,7 @@
 		},
 		options);
 		
-		chartSupport.echartsMapChartInit(chart, options);
+		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
 	chartSupport.mapLinesUpdate = function(chart, results)
@@ -3183,7 +3188,7 @@
 		},
 		options);
 		
-		chartSupport.echartsMapChartInit(chart, options);
+		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
 	chartSupport.mapFlylineUpdate = function(chart, results)
@@ -3379,7 +3384,7 @@
 		},
 		options);
 		
-		chartSupport.echartsMapChartInit(chart, options);
+		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
 	chartSupport.mapHeatmapUpdate = function(chart, results)
@@ -8756,15 +8761,22 @@
 		return undefined;
 	};
 	
-	chartSupport.echartsMapChartInit = function(chart, options)
+	//渲染ECharts地图类图表
+	chartSupport.echartsMapChartRender = function(chart, options)
 	{
+		var map = options[chartSupport.OPTIONS_MAP];
+		
 		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		var map = chart.map();
+		if(!map)
+		{
+			map = chart.map();
+		}
+		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+		
 		if(map)
 		{
 			chartSupport.echartsSetMapOption(options, map, true);
 		}
-		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		
 		chartSupport.echartsMapChartLoadMaps(chart, options, function()
 		{
@@ -8773,16 +8785,9 @@
 		});
 	};
 	
+	//更新ECharts地图类图表
 	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions)
 	{
-		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		var map = chart.map();
-		if(map)
-		{
-			chartSupport.echartsSetMapOption(updateOptions, map, false);
-		}
-		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		
 		var updateMapOptions = chartSupport.echartsGetMapOptions(updateOptions);
 		
 		updateOptions = chart.inflateUpdateOptions(results, updateOptions, function(updateOptions)
