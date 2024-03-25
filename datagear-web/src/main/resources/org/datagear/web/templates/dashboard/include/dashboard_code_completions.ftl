@@ -36,8 +36,6 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-listener' />", categories: ["body", "div"]},
 		{name: "dg-chart-manual-render", value: "dg-chart-manual-render=\"true\"",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-manual-render' />", categories: ["div"]},
-		{name: "dg-chart-map",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", categories: ["div"]},
 		{name: "dg-chart-map-urls",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", categories: ["body"]},
 		{name: "dg-chart-on-",

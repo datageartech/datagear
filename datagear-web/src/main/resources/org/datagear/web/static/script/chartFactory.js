@@ -36,8 +36,6 @@
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chartBase.listener函数参数说明。
  * 
- * 此图表工厂支持为图表元素添加elementAttrConst.MAP属性来设置地图图表的地图名。
- * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.ECHARTS_THEME属性来设置图表ECharts主题名。
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_SETTING属性，用于禁用图表交互设置功能，
@@ -195,9 +193,6 @@
 	
 	/**图表监听器*/
 	elementAttrConst.LISTENER = "dg-chart-listener";
-	
-	/**图表地图*/
-	elementAttrConst.MAP = "dg-chart-map";
 	
 	/**图表ECharts主题*/
 	elementAttrConst.ECHARTS_THEME = "dg-echarts-theme";
@@ -447,7 +442,11 @@
 		this._initOptions();
 		this._initTheme();
 		this._initListener();
+		
+		// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
 		this._initMap();
+		// > @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
+		
 		this._initEchartsThemeName();
 		this._initDisableSetting();
 		this._initEventHandlers();
@@ -640,19 +639,6 @@
 		}
 		
 		return chartFactory._PREV_BODY_LISTENER;
-	};
-	
-	/**
-	 * 初始化图表的地图名。
-	 * 此函数从图表元素的elementAttrConst.MAP属性获取图表地图名。
-	 */
-	chartBase._initMap = function()
-	{
-		var map = this.elementJquery().attr(elementAttrConst.MAP);
-		
-		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		this.map(map);
-		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 	};
 	
 	/**
@@ -4193,6 +4179,24 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
+	/**图表地图*/
+	elementAttrConst.MAP = "dg-chart-map";
+	
+	/**
+	 * 初始化图表的地图名。
+	 * 此函数从图表元素的elementAttrConst.MAP属性获取图表地图名。
+	 */
+	chartBase._initMap = function()
+	{
+		var map = this.elementJquery().attr(elementAttrConst.MAP);
+		
+		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+		this.map(map);
+		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
+	};
+	// > @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
 	
 	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，因为与底层图表组件本身的地图设置选项功能重复，容易引起混淆
 	/**
