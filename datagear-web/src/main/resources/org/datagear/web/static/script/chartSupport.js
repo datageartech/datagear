@@ -2279,13 +2279,18 @@
 				//设初值以免渲染报错
 				{
 					id: 0,
-		            type: "map",
-					//这里必须设置map，不然渲染会报错，update中会特殊处理
-					map: chartSupport.renderChartMapName(chart)
+		            type: "map"
+					//将在下面和update中设置：
+					//map
 		        }
 			]
 		},
-		options);
+		options,
+		null,
+		function(renderOptions, chart)
+		{
+			chartSupport.echartsMapChartInitMap(chart, renderOptions);
+		});
 		
 		chartSupport.echartsMapChartRender(chart, options);
 	};
@@ -2497,11 +2502,9 @@
 			geo:
 			{
 				id: 0,
-				roam: true,
-				//将在update中设置：
+				roam: true
+				//将在下面和update中设置：
 				//map
-				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -2515,7 +2518,12 @@
 				}
 			]
 		},
-		options);
+		options,
+		null,
+		function(renderOptions, chart)
+		{
+			chartSupport.echartsMapChartInitMap(chart, renderOptions);
+		});
 		
 		chartSupport.echartsMapChartRender(chart, options);
 	};
@@ -2685,11 +2693,9 @@
 			geo:
 			{
 				id: 0,
-				roam: true,
-				//将在update中设置：
+				roam: true
+				//将在下面和update中设置：
 				//map
-				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -2710,7 +2716,12 @@
 				}
 			]
 		},
-		options);
+		options,
+		null,
+		function(renderOptions, chart)
+		{
+			chartSupport.echartsMapChartInitMap(chart, renderOptions);
+		});
 		
 		chartSupport.echartsMapChartRender(chart, options);
 	};
@@ -2968,11 +2979,9 @@
 			geo:
 			{
 				id: 0,
-				roam: true,
-				//将在update中设置：
+				roam: true
+				//将在下面和update中设置：
 				//map
-				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -2987,7 +2996,12 @@
 				}
 			]
 		},
-		options);
+		options,
+		null,
+		function(renderOptions, chart)
+		{
+			chartSupport.echartsMapChartInitMap(chart, renderOptions);
+		});
 		
 		chartSupport.echartsMapChartRender(chart, options);
 	};
@@ -3167,11 +3181,9 @@
 			geo:
 			{
 				id: 0,
-				roam: true,
-				//将在update中设置：
+				roam: true
+				//将在下面和update中设置：
 				//map
-				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: chartSupport.renderChartMapName(chart)
 			},
 			series:
 			[
@@ -3186,7 +3198,12 @@
 				}
 			]
 		},
-		options);
+		options,
+		null,
+		function(renderOptions, chart)
+		{
+			chartSupport.echartsMapChartInitMap(chart, renderOptions);
+		});
 		
 		chartSupport.echartsMapChartRender(chart, options);
 	};
@@ -3351,11 +3368,9 @@
 			geo:
 			{
 				id: 0,
-				roam: true,
-				//将在update中设置：
+				roam: true
+				//将在下面和update中设置：
 				//map
-				//这里必须设置map，不然渲染会报错，update中会特殊处理
-				map: chartSupport.renderChartMapName(chart)
 			},
 			visualMap:
 			{
@@ -3382,7 +3397,12 @@
 				}
 			]
 		},
-		options);
+		options,
+		null,
+		function(renderOptions, chart)
+		{
+			chartSupport.echartsMapChartInitMap(chart, renderOptions);
+		});
 		
 		chartSupport.echartsMapChartRender(chart, options);
 	};
@@ -8761,8 +8781,8 @@
 		return undefined;
 	};
 	
-	//渲染ECharts地图类图表
-	chartSupport.echartsMapChartRender = function(chart, options)
+	//初始化ECharts地图类图表的地图选项
+	chartSupport.echartsMapChartInitMap = function(chart, options)
 	{
 		var map = options[chartSupport.OPTIONS_MAP];
 		
@@ -8773,11 +8793,18 @@
 		}
 		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		
-		if(map)
+		//必须设置初始map，不然渲染会报错
+		if(!map)
 		{
-			chartSupport.echartsSetMapOption(options, map, true);
+			map = chartSupport.defaultMapName();
 		}
 		
+		chartSupport.echartsSetMapOption(options, map, true);
+	};
+	
+	//渲染ECharts地图类图表
+	chartSupport.echartsMapChartRender = function(chart, options)
+	{
 		chartSupport.echartsMapChartLoadMaps(chart, options, function()
 		{
 			chart.echartsInit(options);
@@ -9485,26 +9512,6 @@
 			
 			return extractor;
 		}
-	};
-	
-	/**
-	 * 获取渲染图表初始地图名。
-	 * 此方法必须返回非空值，不然图表渲染会报错。
-	 */
-	chartSupport.renderChartMapName = function(chart)
-	{
-		var map = null;
-		
-		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		map = chart.map();
-		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-		
-		if(!map)
-		{
-			map = chartSupport.defaultMapName();
-		}
-		
-		return map;
 	};
 	
 	/**
