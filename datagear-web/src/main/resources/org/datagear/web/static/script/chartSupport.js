@@ -8799,7 +8799,9 @@
 			map = chartSupport.defaultMapName();
 		}
 		
-		chartSupport.echartsSetMapOption(options, map, true);
+		//不应替换原始地图名
+		var coverOriginalMap = false;
+		chartSupport.echartsSetMapOption(options, map, coverOriginalMap);
 	};
 	
 	//渲染ECharts地图类图表
