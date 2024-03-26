@@ -2500,12 +2500,14 @@
 				//data
 			},
 			geo:
-			{
-				id: 0,
-				roam: true
-				//将在下面和update中设置：
-				//map
-			},
+			[
+				{
+					id: 0,
+					roam: true
+					//将在下面和update中设置：
+					//map
+				}
+			],
 			series:
 			[
 				//将在update中设置：
@@ -2514,7 +2516,8 @@
 				{
 					id: 0,
 					type: scatterType,
-					coordinateSystem: "geo"
+					coordinateSystem: "geo",
+					geoIndex: 0
 				}
 			]
 		},
@@ -2600,7 +2603,7 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = { id: 0, map: map };
+			options.geo = [ { id: 0, map: map } ];
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -2691,12 +2694,14 @@
 				//data
 			},
 			geo:
-			{
-				id: 0,
-				roam: true
-				//将在下面和update中设置：
-				//map
-			},
+			[
+				{
+					id: 0,
+					roam: true
+					//将在下面和update中设置：
+					//map
+				}
+			],
 			series:
 			[
 				{
@@ -2708,6 +2713,7 @@
 					id: 0,
 					type: "graph",
 			        coordinateSystem: "geo",
+					geoIndex: 0,
 			        layout: "none",
 					tooltip:
 					{
@@ -2864,7 +2870,7 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = { id: 0, map: map };
+			options.geo = [ { id: 0, map: map } ];
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 		
@@ -2977,12 +2983,14 @@
 				//data
 			},
 			geo:
-			{
-				id: 0,
-				roam: true
-				//将在下面和update中设置：
-				//map
-			},
+			[
+				{
+					id: 0,
+					roam: true
+					//将在下面和update中设置：
+					//map
+				}
+			],
 			series:
 			[
 				//将在update中设置：
@@ -2992,6 +3000,7 @@
 					id: 0,
 					type: "lines",
 					coordinateSystem: "geo",
+					geoIndex: 0,
 					polyline: true
 				}
 			]
@@ -3086,7 +3095,7 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = { id: 0, map: map };
+			options.geo = [ { id: 0, map: map } ];
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -3179,12 +3188,14 @@
 				//data
 			},
 			geo:
-			{
-				id: 0,
-				roam: true
-				//将在下面和update中设置：
-				//map
-			},
+			[
+				{
+					id: 0,
+					roam: true
+					//将在下面和update中设置：
+					//map
+				}
+			],
 			series:
 			[
 				//将在update中设置：
@@ -3194,6 +3205,7 @@
 					id: 0,
 					type: "lines",
 					coordinateSystem: "geo",
+					geoIndex: 0,
 					polyline: false
 				}
 			]
@@ -3287,7 +3299,7 @@
 		var options = { legend: {id: 0, data: categoryNames}, series: series };
 		
 		if(map)
-			options.geo = { id: 0, map: map };
+			options.geo = [ { id: 0, map: map } ];
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -3366,12 +3378,14 @@
 		        text: chart.name
 		    },
 			geo:
-			{
-				id: 0,
-				roam: true
-				//将在下面和update中设置：
-				//map
-			},
+			[
+				{
+					id: 0,
+					roam: true
+					//将在下面和update中设置：
+					//map
+				}
+			],
 			visualMap:
 			{
 				//将在update中设置：
@@ -3392,6 +3406,7 @@
 					id: 0,
 					type: "heatmap",
 					coordinateSystem: "geo",
+					geoIndex: 0,
 					pointSize: 5,
 					blurSize: 6
 				}
@@ -3465,7 +3480,7 @@
 		chartSupport.trimNumberRange(options.visualMap);
 		
 		if(map)
-			options.geo = { id: 0, map: map };
+			options.geo = [ { id: 0, map: map } ];
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
