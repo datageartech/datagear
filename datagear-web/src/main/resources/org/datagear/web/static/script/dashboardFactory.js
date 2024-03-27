@@ -74,7 +74,7 @@
 	/** 内置地图 */
 	var builtinChartMaps = (dashboardFactory.builtinChartMaps || (dashboardFactory.builtinChartMaps = []));
 	
-	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/lib/echarts-map/"));
+	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/lib/geojson/"));
 	
 	//----------------------------------------
 	// chartStatusConst开始
