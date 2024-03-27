@@ -3546,8 +3546,7 @@
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
 	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始数据索引信息，以支持在后续的交互、事件处理中获取它们。
 	 * 
-	 * @param data 展示数据数组，格式为：[ ... ]，元素格式允许为：{ ... }、[ ... ]，对于设置操作，当元素是对象时，将为其添加一个额外属性；
-	 * 			   当元素是数组时，如果末尾元素已是原始数据索引对象，替换；否则，追加
+	 * @param data 展示数据数组，格式为：[ ... ]，元素格式允许为：{ ... }、[ ... ]
 	 * @param dataSetBindIndex 要设置的数据集绑定对象（自动取其索引）、数据集绑定对象数组（自动取其索引）、数据集绑定索引数值、索引数值数组
 	 * @param resultDataIndex 要设置的结果数据索引，格式为：
 	 *                        当dataSetBindIndex是数据集绑定对象、索引数值时：
@@ -3688,8 +3687,7 @@
 	 * 图表展示数据是指由图表数据集结果数据转换而得，用于渲染图表的数据。
 	 * 图表渲染器在构建图表展示数据时，应使用此函数设置其原始数据索引，以支持在后续的交互、事件处理中获取它们。
 	 * 
-	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
-	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
+	 * @param data 展示数据，格式为：{ ... }、[ ... ]
 	 * @param dataSetBindIndex 同chartBase.originalDataIndexes()函数的dataSetBindIndex参数
 	 * @param resultDataIndex 同chartBase.originalDataIndexes()函数的resultDataIndex参数
 	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
@@ -4998,8 +4996,7 @@
 	/**
 	 * 获取/设置单条图表展示数据的原始数据索引（图表ID、数据集绑定索引、结果数据索引）。
 	 * 
-	 * @param data 展示数据，格式为：{ ... }、[ ... ]，对于设置操作，当展示数据是对象时，将为其添加一个额外属性；
-	 * 			   当展示数据是数组时，如果末尾元素已是索引信息对象，则替换；否则，追加一个元素
+	 * @param data 展示数据，格式为：{ ... }、[ ... ]
 	 * @param dataSetBindIndex 数据集绑定索引数值、数值数组
 	 * @param resultDataIndex 图表数据集结果数据索引数值、数值数组、数值数组的数组
 	 * @returns 要获取的原始数据索引(可能为null），格式参考chartBase.originalDataIndexes()函数返回值
@@ -5008,19 +5005,11 @@
 	chartFactory.originalDataIndex = function(data, chartId, dataSetBindIndex, resultDataIndex)
 	{
 		var pname = chartFactory._ORIGINAL_DATA_INDEX_PROP_NAME;
-		var isArray = $.isArray(data);
 		
 		//获取
 		if(arguments.length <= 1)
 		{
-			if(isArray)
-			{
-				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				return (tailEle && tailEle["chartId"] !== undefined && tailEle["dataSetBindIndex"] !== undefined 
-							? tailEle : undefined);
-			}
-			else
-				return (data == null ? undefined : data[pname]);
+			return (data == null ? undefined : data[pname]);
 		}
 		else
 		{
@@ -5035,20 +5024,8 @@
 			originalIdx.chartDataSetIndex = originalIdx.dataSetBindIndex;
 			// > @deprecated 兼容4.7.0版本的originalIdx.chartDataSetIndex，将在未来版本移除，已被originalIdx.dataSetBindIndex取代
 			
-			if(isArray)
-			{
-				var tailEle = (data.length > 0 ? data[data.length - 1] : null);
-				
-				//替换
-				if(tailEle && tailEle["chartId"] !== undefined && tailEle["dataSetBindIndex"] !== undefined)
-				{
-					data[data.length - 1] = originalIdx;
-				}
-				else
-					data.push(originalIdx);
-			}
-			else
-				data[pname] = originalIdx;
+			//无需区分是否数组，因为数组也可以这样设置属性
+			data[pname] = originalIdx;
 		}
 	};
 	
