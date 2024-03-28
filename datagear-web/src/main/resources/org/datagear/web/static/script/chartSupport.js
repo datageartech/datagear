@@ -2500,14 +2500,12 @@
 				//data
 			},
 			geo:
-			[
-				{
-					id: 0,
-					roam: true
-					//将在下面和update中设置：
-					//map
-				}
-			],
+			{
+				id: 0,
+				roam: true
+				//将在下面和update中设置：
+				//map
+			},
 			series:
 			[
 				//将在update中设置：
@@ -2603,7 +2601,10 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = [ { id: 0, map: map } ];
+		{
+			var geoOption = { id: 0, map: map };
+			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -2694,14 +2695,12 @@
 				//data
 			},
 			geo:
-			[
-				{
-					id: 0,
-					roam: true
-					//将在下面和update中设置：
-					//map
-				}
-			],
+			{
+				id: 0,
+				roam: true
+				//将在下面和update中设置：
+				//map
+			},
 			series:
 			[
 				{
@@ -2870,7 +2869,10 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = [ { id: 0, map: map } ];
+		{
+			var geoOption = { id: 0, map: map };
+			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 		
@@ -2983,14 +2985,12 @@
 				//data
 			},
 			geo:
-			[
-				{
-					id: 0,
-					roam: true
-					//将在下面和update中设置：
-					//map
-				}
-			],
+			{
+				id: 0,
+				roam: true
+				//将在下面和update中设置：
+				//map
+			},
 			series:
 			[
 				//将在update中设置：
@@ -3095,7 +3095,10 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		
 		if(map)
-			options.geo = [ { id: 0, map: map } ];
+		{
+			var geoOption = { id: 0, map: map };
+			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -3188,14 +3191,12 @@
 				//data
 			},
 			geo:
-			[
-				{
-					id: 0,
-					roam: true
-					//将在下面和update中设置：
-					//map
-				}
-			],
+			{
+				id: 0,
+				roam: true
+				//将在下面和update中设置：
+				//map
+			},
 			series:
 			[
 				//将在update中设置：
@@ -3299,7 +3300,10 @@
 		var options = { legend: {id: 0, data: categoryNames}, series: series };
 		
 		if(map)
-			options.geo = [ { id: 0, map: map } ];
+		{
+			var geoOption = { id: 0, map: map };
+			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -3378,14 +3382,12 @@
 		        text: chart.name
 		    },
 			geo:
-			[
-				{
-					id: 0,
-					roam: true
-					//将在下面和update中设置：
-					//map
-				}
-			],
+			{
+				id: 0,
+				roam: true
+				//将在下面和update中设置：
+				//map
+			},
 			visualMap:
 			{
 				//将在update中设置：
@@ -3480,7 +3482,10 @@
 		chartSupport.trimNumberRange(options.visualMap);
 		
 		if(map)
-			options.geo = [ { id: 0, map: map } ];
+		{
+			var geoOption = { id: 0, map: map };
+			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
 	};
@@ -9540,6 +9545,21 @@
 	{
 		//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
 		return "china";
+	};
+	
+	chartSupport.setUpdateOptionsPropAdaptArray = function(renderOptions, updateOptions, name, value)
+	{
+		var renderValue = renderOptions[name];
+		var isRenderArray = $.isArray(renderValue);
+		var isUpdateArray = $.isArray(value);
+		
+		//如果选项选项是数组，更新选项不是，应把更新选项包裹为数组
+		if(isRenderArray && !isUpdateArray)
+		{
+			value = [ value ];
+		}
+		
+		updateOptions[name] = value;
 	};
 	
 	//---------------------------------------------------------
