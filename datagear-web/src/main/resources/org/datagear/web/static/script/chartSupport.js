@@ -206,6 +206,8 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
+		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
@@ -440,6 +442,8 @@
 		
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
+		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -695,6 +699,7 @@
 							}
 						});
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -879,6 +884,7 @@
 						chartSupport.inflateAxisDataExtractors.property("name"));
 		
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -1179,6 +1185,7 @@
 		
 		var options = { series : [ { id: 0, type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -1478,6 +1485,8 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
+		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
@@ -1728,6 +1737,7 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -1921,6 +1931,7 @@
 		var series = [ { id: 0, type: "radar", data: seriesData } ];
 		var options = { legend: {id: 0, data: legendData}, radar: {id: 0, indicator: indicatorData}, series: series };
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -2192,6 +2203,7 @@
 		var series = [ {id: 0, type: "funnel", name: seriesName, min: dataRange.min, max: dataRange.max, data: seriesData, sort: dg.sort } ];
 		var options = { legend: { id: 0, data: legendData }, series: series };
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -2602,8 +2614,7 @@
 		
 		if(map)
 		{
-			var geoOption = { id: 0, map: map };
-			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+			options.geo = { id: 0, map: map };
 		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
@@ -2870,8 +2881,7 @@
 		
 		if(map)
 		{
-			var geoOption = { id: 0, map: map };
-			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+			options.geo = { id: 0, map: map };
 		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
@@ -3096,8 +3106,7 @@
 		
 		if(map)
 		{
-			var geoOption = { id: 0, map: map };
-			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+			options.geo = { id: 0, map: map };
 		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
@@ -3301,8 +3310,7 @@
 		
 		if(map)
 		{
-			var geoOption = { id: 0, map: map };
-			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+			options.geo = { id: 0, map: map };
 		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
@@ -3483,8 +3491,7 @@
 		
 		if(map)
 		{
-			var geoOption = { id: 0, map: map };
-			chartSupport.setUpdateOptionsPropAdaptArray(renderOptions, options, "geo", geoOption);
+			options.geo = { id: 0, map: map };
 		}
 		
 		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
@@ -3644,6 +3651,7 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.property("name"));
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -3850,6 +3858,7 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.yAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(1), false);
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -3940,6 +3949,7 @@
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "tree" }) ] };
 		chartSupport.treeInflateUpdateOptions(chart, options, renderOptions);
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -4083,7 +4093,11 @@
 	
 	chartSupport.treemapUpdate = function(chart, results)
 	{
+		var renderOptions= chart.renderOptions();
+		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "treemap" }) ] };
+		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -4175,7 +4189,11 @@
 	
 	chartSupport.sunburstUpdate = function(chart, results)
 	{
+		var renderOptions= chart.renderOptions();
+		
 		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "sunburst" }) ] };
+		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -4457,7 +4475,9 @@
 		}
 		
 		var options = { series: [ { id: 0, type: "sankey", name: seriesName, data: seriesData, links: seriesLinks } ] };
+		
 		chartSupport.sankeyInflateUpdateOptions(chart, options, renderOptions);
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartFactory.extValueBuiltin(chart, "sankeySeriesData", seriesData);
@@ -4755,6 +4775,7 @@
 		
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		chartSupport.graphInflateUpdateOptions(chart, options, min, max, symbolSizeMax, symbolSizeMin, renderOptions);
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartFactory.extValueBuiltin(chart, "graphSeriesData", seriesData);
@@ -5089,6 +5110,7 @@
 							}
 						});
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -5285,6 +5307,7 @@
 		
 		var options = { series: [ {id: 0, type: "wordCloud", name: seriesName, data: seriesData} ] };
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -5468,6 +5491,8 @@
 		}
 		
 		var options = { series: [ {id: 0, type: "liquidFill", data: seriesData, shape: dg.shape } ] };
+		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -5654,6 +5679,7 @@
 		var options = { legend: {id: 0, data: categoryNames}, parallelAxis: parallelAxis, series: series };
 		
 		chartSupport.parallelTrimAxisMinMax(options);
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -5968,6 +5994,7 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.singleAxis,
 						chartSupport.inflateAxisDataExtractors.element(0));
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(results, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -6223,6 +6250,8 @@
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
+		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
@@ -6469,6 +6498,8 @@
 		
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
+		
+		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
 		options = chart.inflateUpdateOptions(results, options, function(options)
 		{
@@ -8837,6 +8868,8 @@
 	//更新ECharts地图类图表
 	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions)
 	{
+		chartSupport.adaptArrayPropsForUpdateOptions(updateOptions, renderOptions);
+		
 		var updateMapOptions = chartSupport.echartsGetMapOptions(updateOptions);
 		
 		updateOptions = chart.inflateUpdateOptions(results, updateOptions, function(updateOptions)
@@ -9547,19 +9580,23 @@
 		return "china";
 	};
 	
-	chartSupport.setUpdateOptionsPropAdaptArray = function(renderOptions, updateOptions, name, value)
+	chartSupport.adaptArrayPropsForUpdateOptions = function(updateOptions, renderOptions)
 	{
-		var renderValue = renderOptions[name];
-		var isRenderArray = $.isArray(renderValue);
-		var isUpdateArray = $.isArray(value);
-		
-		//如果选项选项是数组，更新选项不是，应把更新选项包裹为数组
-		if(isRenderArray && !isUpdateArray)
+		for(var name in updateOptions)
 		{
-			value = [ value ];
+			var renderValue = renderOptions[name];
+			var updateValue = updateOptions[name];
+			var isRenderArray = $.isArray(renderValue);
+			var isUpdateArray = $.isArray(updateValue);
+			
+			//如果渲染选项是数组，更新选项不是，应把更新选项包裹为数组
+			if(isRenderArray && !isUpdateArray)
+			{
+				updateValue = [ updateValue ];
+			}
+			
+			updateOptions[name] = updateValue;
 		}
-		
-		updateOptions[name] = value;
 	};
 	
 	//---------------------------------------------------------
