@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
 
 /**
@@ -51,6 +52,7 @@ public class HtmlTplDashboardImportResolver
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER = "chartPluginManager";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE = "dashboardStyle";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR = "dashboardEditor";
+	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON = "favicon";
 
 	/**
 	 * 看板展示模式：展示
@@ -87,6 +89,12 @@ public class HtmlTplDashboardImportResolver
 		String cssPrefix = staticPrefix + "/css";
 		String scriptPrefix = staticPrefix + "/script";
 
+		// favicon
+		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
+				"<link type=\"images/x-icon\" href=\"" + contextPath + "/favicon.ico?v=" + Global.VERSION
+						+ "\" rel=\"shortcut icon\" " + HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR
+						+ "=\"" + BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON + "\" />"));
+
 		// CSS
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
 						libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
@@ -98,7 +106,7 @@ public class HtmlTplDashboardImportResolver
 		if (isModelEdit(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
-					WebUtils.getContextPath(request) + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
+					contextPath + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
 		}
 
 		// JS
@@ -130,7 +138,7 @@ public class HtmlTplDashboardImportResolver
 		if (isModelEdit(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
-					WebUtils.getContextPath(request) + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
+					contextPath + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
 		}
 
 		return impts;
