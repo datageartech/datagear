@@ -29,17 +29,12 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
 import org.datagear.util.IOUtil;
-import org.datagear.util.StringUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
-import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 /**
  * 抽象JSON数据集。
@@ -51,10 +46,6 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		implements ResolvableDataSet
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 使用Jackson的{@code JSONPath}配置 */
-	protected static final Configuration JACKSON_JSON_PATH_CONFIGURATION = Configuration.builder()
-			.jsonProvider(new JacksonJsonProvider()).mappingProvider(new JacksonMappingProvider()).build();
 
 	/** 数据JSON路径 */
 	private String dataJsonPath = "";
@@ -143,32 +134,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			return null;
 	
 		Object data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
-	
-		if (data != null && !StringUtil.isEmpty(dataJsonPath))
-		{
-			String stdDataJsonPath = dataJsonPath.trim();
-	
-			if (!StringUtil.isEmpty(stdDataJsonPath))
-			{
-				// 转换"stores[0].books"、"[1].stores"简化模式为规范的JSONPath
-				if (!stdDataJsonPath.startsWith("$"))
-				{
-					if (stdDataJsonPath.startsWith("["))
-						stdDataJsonPath = "$" + stdDataJsonPath;
-					else
-						stdDataJsonPath = "$." + stdDataJsonPath;
-				}
-	
-				try
-				{
-					data = JsonPath.compile(stdDataJsonPath).read(data, JACKSON_JSON_PATH_CONFIGURATION);
-				}
-				catch(Throwable t)
-				{
-					throw new ReadJsonDataPathException(dataJsonPath, t);
-				}
-			}
-		}
+		data = getJsonPathSupport().resolve(data, dataJsonPath);
 	
 		return data;
 	}
@@ -311,6 +277,11 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	protected ObjectMapper getObjectMapperNonStardand()
 	{
 		return JsonSupport.getObjectMapperNonStardand();
+	}
+
+	protected JsonPathSupport getJsonPathSupport()
+	{
+		return JsonPathSupport.INSTANCE;
 	}
 
 	/**
