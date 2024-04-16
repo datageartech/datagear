@@ -54,8 +54,8 @@
 								</label>
 						        <div class="field-input col-10">
 						        	<p-password id="${pid}password" v-model="fm.password" toggle-mask :feedback="false"
-						        		input-class="w-full" class="input w-full" autofocus
-						        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'off'}}}">
+						        		input-class="w-full" class="input w-full"
+						        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'off',autofocus:'autofocus'}}}">
 						        	</p-password>
 						        </div>
 							</div>
