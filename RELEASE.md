@@ -12,10 +12,12 @@
 
 5. 将当前分支合并至主干；
 
-6. 以主干新建新版本开发分支，分支名为`dev-*`；
+### 新建开发分支流程
 
-7. 切换至新版本开发分支，修改`pom.xml`文件中的`version`标签内的版本号为下一个版本；
+1. 以主干新建新版本开发分支，分支名为`dev-*`；
 
-8. 执行统一修改版本号的maven命令：`mvn -N versions:update-child-modules antrun:run` ；
+2. 切换至新版本开发分支，修改`pom.xml`文件中的`version`标签内的版本号为下一个版本；
 
-9. 提交并推送新版本开发分支。
+3. 执行统一修改版本号的maven命令：`mvn -N versions:update-child-modules antrun:run` ；
+
+4. 提交并推送新版本开发分支。
