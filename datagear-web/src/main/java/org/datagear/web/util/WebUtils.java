@@ -389,7 +389,9 @@ public class WebUtils
 	public static boolean isAjaxRequest(HttpServletRequest request)
 	{
 		// 是否ajax请求，jquery库ajax可以使用此方案判断
-		boolean ajaxRequest = (request.getHeader("x-requested-with") != null);
+		String head = request.getHeader("x-requested-with");
+		boolean ajaxRequest = "XMLHttpRequest".equalsIgnoreCase(head);
+
 		return ajaxRequest;
 	}
 
