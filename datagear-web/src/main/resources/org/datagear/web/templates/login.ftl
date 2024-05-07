@@ -116,6 +116,17 @@
 		success: function(response)
 		{
 			po.handleLoginSuccess(response);
+		},
+		error: function(jqXHR)
+		{
+			if(!po.disableLoginCheckCode)
+			{
+				var msg = $.getResponseJson(jqXHR);
+				if(msg && msg.code && msg.code == "checkCodeError")
+				{
+					po.element(".checkCodeImg").click();
+				}
+			}
 		}
 	});
 	

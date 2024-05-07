@@ -121,6 +121,14 @@
 		success: function()
 		{
 			(window.top ? window.top : window).location.href="${contextPath}/register/success";
+		},
+		error: function(jqXHR)
+		{
+			var msg = $.getResponseJson(jqXHR);
+			if(msg && msg.code && msg.code == "checkCodeError")
+			{
+				po.element(".checkCodeImg").click();
+			}
 		}
 	},
 	function()
