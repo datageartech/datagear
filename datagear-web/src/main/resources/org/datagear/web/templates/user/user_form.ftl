@@ -42,31 +42,6 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid" v-if="!pm.isReadonlyAction">
-				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='password' />
-				</label>
-		        <div class="field-input col-12 md:col-9">
-		        	<p-password id="${pid}password" v-model="fm.password" class="input w-full"
-		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.isAddAction"
-		        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
-		        	</p-password>
-		        	<div class="desc text-color-secondary">
-		        		<small><@spring.message code='wontModifyIfEmpty' /></small>
-		        	</div>
-		        </div>
-			</div>
-			<div class="field grid" v-if="!pm.isReadonlyAction">
-				<label for="${pid}confirmPassword" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='confirmPassword' />
-				</label>
-		        <div class="field-input col-12 md:col-9">
-		        	<p-password id="${pid}confirmPassword" v-model="fm.confirmPassword" class="input w-full"
-		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.isAddAction"
-		        		:pt="{input:{root:{name:'confirmPassword',maxlength:'50',autocomplete:'new-password'}}}">
-		        	</p-password>
-		        </div>
-			</div>
 			<div class="field grid">
 				<label for="${pid}realName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='realName' />
@@ -115,12 +90,6 @@
 {
 	po.submitUrl = "/user/"+po.submitAction;
 	po.disableRoles = ("${(disableRoles!false)?string('true', 'false')}"  == "true");
-
-	po.beforeSubmitForm = function(action)
-	{
-		var data = action.options.data;
-		data.confirmPassword = undefined;
-	};
 	
 	po.vuePageModel(
 	{
@@ -128,21 +97,7 @@
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
-	po.setupForm(formModel, {}, function()
-	{
-		var options =
-		{
-			rules:
-			{
-				"confirmPassword":
-				{
-					"equalTo" : po.elementOfName("password")
-				}
-			}
-		};
-		
-		return options;
-	});
+	po.setupForm(formModel);
 	
 	po.vueMethod(
 	{

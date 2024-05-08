@@ -30,9 +30,6 @@
 	<update id="update">
 		UPDATE DATAGEAR_USER SET
 			USER_NAME = #{entity.name},
-			<if test="entity.password != null and entity.password != ''">
-			USER_PASSWORD = #{entity.password},
-			</if>
 			USER_REAL_NAME = #{entity.realName},
 			USER_EMAIL = #{entity.email},
 			USER_IS_ADMIN = #{entity.admin, jdbcType=VARCHAR}

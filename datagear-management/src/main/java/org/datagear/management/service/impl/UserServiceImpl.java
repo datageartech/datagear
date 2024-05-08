@@ -267,16 +267,6 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	@Override
 	protected boolean update(User entity, Map<String, Object> params)
 	{
-		String password = entity.getPassword();
-
-		if (password != null && !password.isEmpty())
-		{
-			if (this.passwordEncoder != null)
-				entity.setPassword(this.passwordEncoder.encode(password));
-		}
-		else
-			entity.setPassword(null);
-
 		boolean updated = super.update(entity, params);
 
 		if (!isIgnoreUpdateRoleParam(params))
