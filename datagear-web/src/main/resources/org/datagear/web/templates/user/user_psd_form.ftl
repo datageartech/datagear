@@ -42,6 +42,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
+			<#if enableOldPassword>
 			<div class="field grid">
 				<label for="${pid}oldPassword" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='oldPassword' />
@@ -53,6 +54,7 @@
 		        	</p-password>
 		        </div>
 			</div>
+			</#if>
 			<div class="field grid">
 				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='newPassword' />
@@ -60,7 +62,7 @@
 		        <div class="field-input col-12 md:col-9">
 		        	<p-password id="${pid}password" v-model="fm.password" class="input w-full"
 		        		input-class="w-full" toggle-mask :feedback="false" required
-		        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
+		        		:pt="{input:{root:{name:'password',maxlength:'50'<#if !enableOldPassword>,autofocus:'true'</#if>,autocomplete:'new-password'}}}">
 		        	</p-password>
 		        </div>
 			</div>
@@ -86,6 +88,7 @@
 (function(po)
 {
 	po.submitUrl = "/user/"+po.submitAction;
+	po.enableOldPassword = ("${(enableOldPassword!true)?string('true', 'false')}"  == "true");
 
 	po.beforeSubmitForm = function(action)
 	{

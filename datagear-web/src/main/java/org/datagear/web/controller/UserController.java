@@ -216,6 +216,36 @@ public class UserController extends AbstractController
 		return optSuccessDataResponseEntity(request, user);
 	}
 
+	@RequestMapping("/editPsd")
+	public String editPassword(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id)
+	{
+		User user = this.userService.getByIdSimple(id);
+
+		if (user == null)
+			throw new RecordNotFoundException();
+
+		user = user.cloneNoPassword();
+
+		setFormModel(model, toEditPsdForm(user), "editPassword", "saveEditPsd");
+		model.addAttribute("enableOldPassword", false);
+
+		return "/user/user_psd_form";
+	}
+
+	@RequestMapping(value = "/saveEditPsd", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditPassword(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody EditPsdForm form)
+	{
+		if (isEmpty(form.getId()) || isBlank(form.getPassword()))
+			throw new IllegalInputException();
+
+		this.userService.updatePasswordById(form.getId(), form.getPassword(), true);
+
+		return optSuccessResponseEntity(request);
+	}
+
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
@@ -353,8 +383,9 @@ public class UserController extends AbstractController
 			throw new RecordNotFoundException();
 
 		setFormModel(model, toPersonalEditPsdForm(user), "editPassword", "savePersonalPsd");
+		model.addAttribute("enableOldPassword", true);
 
-		return "/user/user_personal_psd_form";
+		return "/user/user_psd_form";
 	}
 
 	@RequestMapping(value = "/savePersonalPsd", produces = CONTENT_TYPE_JSON)
@@ -375,11 +406,15 @@ public class UserController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
+	protected EditPsdForm toEditPsdForm(User user)
+	{
+		EditPsdForm fm = new EditPsdForm(user.getId(), user.getName());
+		return fm;
+	}
+
 	protected PersonalEditPsdForm toPersonalEditPsdForm(User user)
 	{
-		PersonalEditPsdForm fm = new PersonalEditPsdForm();
-		fm.setName(user.getName());
-
+		PersonalEditPsdForm fm = new PersonalEditPsdForm(user.getId(), user.getName());
 		return fm;
 	}
 
@@ -454,22 +489,38 @@ public class UserController extends AbstractController
 		}
 	}
 
-	public static class PersonalEditPsdForm implements ControllerForm
+	public static class EditPsdForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
+
+		private String id;
 
 		/** 用户名 */
 		private String name;
 
-		/** 旧密码 */
-		private String oldPassword;
-
 		/** 新密码 */
 		private String password;
 
-		public PersonalEditPsdForm()
+		public EditPsdForm()
 		{
 			super();
+		}
+
+		public EditPsdForm(String id, String name)
+		{
+			super();
+			this.id = id;
+			this.name = name;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
 		}
 
 		public String getName()
@@ -482,16 +533,6 @@ public class UserController extends AbstractController
 			this.name = name;
 		}
 
-		public String getOldPassword()
-		{
-			return oldPassword;
-		}
-
-		public void setOldPassword(String oldPassword)
-		{
-			this.oldPassword = oldPassword;
-		}
-
 		public String getPassword()
 		{
 			return password;
@@ -500,6 +541,34 @@ public class UserController extends AbstractController
 		public void setPassword(String password)
 		{
 			this.password = password;
+		}
+	}
+
+	public static class PersonalEditPsdForm extends EditPsdForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 旧密码 */
+		private String oldPassword;
+
+		public PersonalEditPsdForm()
+		{
+			super();
+		}
+
+		public PersonalEditPsdForm(String id, String name)
+		{
+			super(id, name);
+		}
+
+		public String getOldPassword()
+		{
+			return oldPassword;
+		}
+
+		public void setOldPassword(String oldPassword)
+		{
+			this.oldPassword = oldPassword;
 		}
 	}
 }

@@ -39,6 +39,7 @@
 			
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
+			<p-button label="<@spring.message code='editPassword' />" @click="onEditPsd" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isReadonlyAction"></p-button>
 		</div>
@@ -81,6 +82,11 @@
 		onEdit: function()
 		{
 			po.handleOpenOfAction("/user/edit");
+		},
+
+		onEditPsd: function()
+		{
+			po.handleOpenOfAction("/user/editPsd");
 		},
 		
 		onView: function()
