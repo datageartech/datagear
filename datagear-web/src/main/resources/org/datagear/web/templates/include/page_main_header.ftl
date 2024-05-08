@@ -129,6 +129,11 @@ User currentUser
 				url: po.concatContextPath("/user/personalSet"),
 				command: function(e){ po.openSysMenuDialog(e, false); }
 			},
+			{
+				label: "<@spring.message code='module.editPassword' />",
+				url: po.concatContextPath("/user/personalPsd"),
+				command: function(e){ po.openSysMenuDialog(e, false); }
+			},
 			{ separator: true }
 		]);
 	}

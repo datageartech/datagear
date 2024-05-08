@@ -95,6 +95,15 @@ public interface UserService extends EntityService<String, User>
 	boolean updateIgnoreRole(User user);
 
 	/**
+	 * 用户密码是否正确。
+	 * 
+	 * @param id
+	 * @param password
+	 * @return
+	 */
+	boolean isPasswordMatchById(String id, String password);
+
+	/**
 	 * 更新用户密码。
 	 * 
 	 * @param id

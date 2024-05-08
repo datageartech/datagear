@@ -341,6 +341,48 @@ public class UserController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
+	@RequestMapping("/personalPsd")
+	public String personalPsd(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
+	{
+		User operator = getCurrentUser();
+
+		User user = this.userService.getByIdSimple(operator.getId());
+
+		if (user == null)
+			throw new RecordNotFoundException();
+
+		setFormModel(model, toPersonalEditPsdForm(user), "editPassword", "savePersonalPsd");
+
+		return "/user/user_personal_psd_form";
+	}
+
+	@RequestMapping(value = "/savePersonalPsd", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> savePersonalPsd(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody PersonalEditPsdForm form)
+	{
+		if (isBlank(form.getOldPassword()) || isBlank(form.getPassword()))
+			throw new IllegalInputException();
+
+		User operator = getCurrentUser();
+
+		if (!this.userService.isPasswordMatchById(operator.getId(), form.getOldPassword()))
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "oldPasswordError");
+
+		this.userService.updatePasswordById(operator.getId(), form.getPassword(), true);
+
+		return optSuccessResponseEntity(request);
+	}
+
+	protected PersonalEditPsdForm toPersonalEditPsdForm(User user)
+	{
+		PersonalEditPsdForm fm = new PersonalEditPsdForm();
+		fm.setName(user.getName());
+
+		return fm;
+	}
+
 	protected void saveAddUser(User user)
 	{
 		this.userService.add(user);
@@ -409,6 +451,55 @@ public class UserController extends AbstractController
 		public void setMigrateToId(String migrateToId)
 		{
 			this.migrateToId = migrateToId;
+		}
+	}
+
+	public static class PersonalEditPsdForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 用户名 */
+		private String name;
+
+		/** 旧密码 */
+		private String oldPassword;
+
+		/** 新密码 */
+		private String password;
+
+		public PersonalEditPsdForm()
+		{
+			super();
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public String getOldPassword()
+		{
+			return oldPassword;
+		}
+
+		public void setOldPassword(String oldPassword)
+		{
+			this.oldPassword = oldPassword;
+		}
+
+		public String getPassword()
+		{
+			return password;
+		}
+
+		public void setPassword(String password)
+		{
+			this.password = password;
 		}
 	}
 }

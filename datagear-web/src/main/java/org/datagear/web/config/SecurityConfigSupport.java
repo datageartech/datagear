@@ -649,7 +649,8 @@ public class SecurityConfigSupport
 	protected ModuleAccess userModuleAccess()
 	{
 		UrlsAccess other = new UrlsAccess(userAuthorizationManager(),
-				"/user/personalSet", "/user/savePersonalSet", "/user/select", "/user/pagingQueryData");
+				"/user/personalSet", "/user/savePersonalSet", "/user/personalPsd", "/user/savePersonalPsd",
+				"/user/select", "/user/pagingQueryData");
 
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/user/**");
 

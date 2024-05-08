@@ -205,6 +205,18 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User>
 	}
 
 	@Override
+	public boolean isPasswordMatchById(String id, String password)
+	{
+		Map<String, Object> params = buildParamMap();
+		params.put("id", id);
+
+		String nowPassword = selectOneMybatis("getPasswordById", params);
+
+		return (this.passwordEncoder != null ? this.passwordEncoder.matches(password, nowPassword)
+				: password.equals(nowPassword));
+	}
+
+	@Override
 	public boolean updatePasswordById(String id, String newPassword, boolean encrypt)
 	{
 		if (encrypt && this.passwordEncoder != null)
