@@ -134,6 +134,7 @@ public class UserController extends AbstractController
 		User user = prepareAddUser(request, model);
 		setAddUserRoles(request, model, user);
 		setFormModel(model, user, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		model.addAttribute("enablePassword", true);
 
 		return "/user/user_form";
 	}

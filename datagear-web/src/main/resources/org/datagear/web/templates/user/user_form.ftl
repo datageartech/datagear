@@ -42,24 +42,24 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid" v-if="pm.isAddAction">
+			<div class="field grid" v-if="pm.enablePassword">
 				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='password' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-password id="${pid}password" v-model="fm.password" class="input w-full"
-		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.isAddAction"
+		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.enablePassword"
 		        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
 		        	</p-password>
 		        </div>
 			</div>
-			<div class="field grid" v-if="pm.isAddAction">
+			<div class="field grid" v-if="pm.enablePassword">
 				<label for="${pid}confirmPassword" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='confirmPassword' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-password id="${pid}confirmPassword" v-model="fm.confirmPassword" class="input w-full"
-		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.isAddAction"
+		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.enablePassword"
 		        		:pt="{input:{root:{name:'confirmPassword',maxlength:'50',autocomplete:'new-password'}}}">
 		        	</p-password>
 		        </div>
@@ -112,6 +112,7 @@
 {
 	po.submitUrl = "/user/"+po.submitAction;
 	po.disableRoles = ("${(disableRoles!false)?string('true', 'false')}"  == "true");
+	po.enablePassword = ("${(enablePassword!false)?string('true', 'false')}"  == "true");
 
 	po.beforeSubmitForm = function(action)
 	{
@@ -121,7 +122,8 @@
 	
 	po.vuePageModel(
 	{
-		disableRoles: po.disableRoles
+		disableRoles: po.disableRoles,
+		enablePassword: po.enablePassword
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -129,7 +131,7 @@
 	{
 		var options = {};
 		
-		if(po.isAddAction)
+		if(po.enablePassword)
 		{
 			options =
 			{
