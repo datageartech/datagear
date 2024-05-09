@@ -342,6 +342,7 @@ public class UserController extends AbstractController
 			throw new RecordNotFoundException();
 
 		model.addAttribute("disableRoles", true);
+		model.addAttribute("disableEditName", getApplicationProperties().isDisablePersonalSetName());
 		setFormModel(model, user, "personalSet", "savePersonalSet");
 
 		return "/user/user_form";
@@ -356,13 +357,20 @@ public class UserController extends AbstractController
 			throw new IllegalInputException();
 
 		User operator = getCurrentUser();
-
 		user.setId(operator.getId());
 
-		User namedUser = this.userService.getByNameNoPassword(user.getName());
+		if (getApplicationProperties().isDisablePersonalSetName())
+		{
+			User u = getByIdForView(this.userService, user.getId());
+			user.setName(u.getName());
+		}
+		else
+		{
+			User namedUser = this.userService.getByNameNoPassword(user.getName());
 
-		if (namedUser != null && !namedUser.getId().equals(user.getId()))
-			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+			if (namedUser != null && !namedUser.getId().equals(user.getId()))
+				return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+		}
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));

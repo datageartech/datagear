@@ -94,6 +94,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${disableDetectNewVersion}")
 	private boolean disableDetectNewVersion;
 
+	/** 是否禁用个人设置修改用户名 */
+	@Value("${disablePersonalSetName}")
+	private boolean disablePersonalSetName;
+
 	/** 默认角色：注册用户 */
 	@Value("${defaultRole.register}")
 	private String defaultRoleRegister;
@@ -375,6 +379,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setDisableDetectNewVersion(boolean disableDetectNewVersion)
 	{
 		this.disableDetectNewVersion = disableDetectNewVersion;
+	}
+
+	public boolean isDisablePersonalSetName()
+	{
+		return disablePersonalSetName;
+	}
+
+	protected void setDisablePersonalSetName(boolean disablePersonalSetName)
+	{
+		this.disablePersonalSetName = disablePersonalSetName;
 	}
 
 	public String getDefaultRoleRegister()

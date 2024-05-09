@@ -38,7 +38,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}name" v-model="fm.name" type="text" class="input w-full"
-		        		name="name" required maxlength="50" autofocus>
+		        		name="name" required maxlength="50" :autofocus="!pm.disableEditName" :readonly="pm.disableEditName">
 		        	</p-inputtext>
 		        </div>
 			</div>
@@ -70,7 +70,7 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}realName" v-model="fm.realName" type="text" class="input w-full"
-		        		name="realName" maxlength="50">
+		        		name="realName" maxlength="50" :autofocus="pm.disableEditName && !pm.enablePassword">
 		        	</p-inputtext>
 		        </div>
 			</div>
@@ -113,6 +113,7 @@
 	po.submitUrl = "/user/"+po.submitAction;
 	po.disableRoles = ("${(disableRoles!false)?string('true', 'false')}"  == "true");
 	po.enablePassword = ("${(enablePassword!false)?string('true', 'false')}"  == "true");
+	po.disableEditName = ("${(disableEditName!false)?string('true', 'false')}"  == "true");
 
 	po.beforeSubmitForm = function(action)
 	{
@@ -123,7 +124,8 @@
 	po.vuePageModel(
 	{
 		disableRoles: po.disableRoles,
-		enablePassword: po.enablePassword
+		enablePassword: po.enablePassword,
+		disableEditName: po.disableEditName
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
