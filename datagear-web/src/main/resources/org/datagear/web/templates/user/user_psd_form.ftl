@@ -64,6 +64,9 @@
 		        		input-class="w-full" toggle-mask :feedback="false" required
 		        		:pt="{input:{root:{name:'password',maxlength:'50'<#if !enableOldPassword>,autofocus:'true'</#if>,autocomplete:'new-password'}}}">
 		        	</p-password>
+		        	<div class="desc text-color-secondary" v-if="pm.userPasswordStrengthTip != ''">
+		        		<small>{{pm.userPasswordStrengthTip}}</small>
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
@@ -89,12 +92,18 @@
 {
 	po.submitUrl = "/user/"+po.submitAction;
 	po.enableOldPassword = ("${(enableOldPassword!true)?string('true', 'false')}"  == "true");
+	po.userPasswordStrengthTip = "${userPasswordStrengthTip}";
 
 	po.beforeSubmitForm = function(action)
 	{
 		var data = action.options.data;
 		data.confirmPassword = undefined;
 	};
+
+	po.vuePageModel(
+	{
+		userPasswordStrengthTip: po.userPasswordStrengthTip
+	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupForm(formModel, {}, function()
@@ -103,6 +112,10 @@
 		{
 			rules:
 			{
+				"password":
+				{
+					"pattern" : ${userPasswordStrengthRegex}
+				},
 				"confirmPassword":
 				{
 					"equalTo" : po.elementOfName("password")

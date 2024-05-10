@@ -121,6 +121,7 @@ public class RegisterController extends AbstractController
 		User user = new User();
 		setFormModel(model, user, "register", "doRegister");
 		WebUtils.setEnableDetectNewVersionRequest(request);
+		setUserPasswordStrengthInfo(model);
 		
 		return "/register";
 	}
@@ -176,6 +177,14 @@ public class RegisterController extends AbstractController
 	protected void addRegisterUser(User user)
 	{
 		this.userService.add(user);
+	}
+
+	protected void setUserPasswordStrengthInfo(org.springframework.ui.Model model)
+	{
+		ApplicationProperties properties = getApplicationProperties();
+
+		model.addAttribute("userPasswordStrengthRegex", properties.getUserPasswordStrengthRegex());
+		model.addAttribute("userPasswordStrengthTip", properties.getUserPasswordStrengthTip());
 	}
 
 	public static class RegisterForm implements ControllerForm

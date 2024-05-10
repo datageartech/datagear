@@ -51,6 +51,9 @@
 		        		input-class="w-full" toggle-mask :feedback="false" :required="pm.enablePassword"
 		        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
 		        	</p-password>
+		        	<div class="desc text-color-secondary" v-if="pm.userPasswordStrengthTip != ''">
+		        		<small>{{pm.userPasswordStrengthTip}}</small>
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid" v-if="pm.enablePassword">
@@ -114,6 +117,7 @@
 	po.disableRoles = ("${(disableRoles!false)?string('true', 'false')}"  == "true");
 	po.enablePassword = ("${(enablePassword!false)?string('true', 'false')}"  == "true");
 	po.disableEditName = ("${(disableEditName!false)?string('true', 'false')}"  == "true");
+	po.userPasswordStrengthTip = "${userPasswordStrengthTip}";
 
 	po.beforeSubmitForm = function(action)
 	{
@@ -125,7 +129,8 @@
 	{
 		disableRoles: po.disableRoles,
 		enablePassword: po.enablePassword,
-		disableEditName: po.disableEditName
+		disableEditName: po.disableEditName,
+		userPasswordStrengthTip: po.userPasswordStrengthTip
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -139,6 +144,10 @@
 			{
 				rules:
 				{
+					"password":
+					{
+						"pattern" : ${userPasswordStrengthRegex}
+					},
 					"confirmPassword":
 					{
 						"equalTo" : po.elementOfName("password")

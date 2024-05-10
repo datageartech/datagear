@@ -44,7 +44,8 @@
 		max: $.validator.format("<@spring.message code='validation.max' />"),
 		maxlength: $.validator.format("<@spring.message code='validation.maxlength' />"),
 		minlength: $.validator.format("<@spring.message code='validation.minlength' />"),
-		integer: "<@spring.message code='validation.integer' />"
+		integer: "<@spring.message code='validation.integer' />",
+		pattern: "<@spring.message code='validation.pattern' />"
 	};
 })
 (${pid});

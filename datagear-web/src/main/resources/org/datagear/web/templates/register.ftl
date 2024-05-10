@@ -58,6 +58,9 @@
 						        		input-class="w-full" toggle-mask :feedback="false" required
 						        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
 						        	</p-password>
+						        	<div class="desc text-color-secondary" v-if="pm.userPasswordStrengthTip != ''">
+						        		<small>{{pm.userPasswordStrengthTip}}</small>
+						        	</div>
 						        </div>
 							</div>
 							<div class="field grid">
@@ -108,12 +111,18 @@
 (function(po)
 {
 	po.submitUrl = "/register/doRegister";
+	po.userPasswordStrengthTip = "${userPasswordStrengthTip}";
 
 	po.beforeSubmitForm = function(action)
 	{
 		var user = action.options.data.user;
 		user.confirmPassword = undefined;
 	};
+
+	po.vuePageModel(
+	{
+		userPasswordStrengthTip: po.userPasswordStrengthTip
+	});
 	
 	po.setupForm({user: {}},
 	{
@@ -137,6 +146,10 @@
 		{
 			rules:
 			{
+				"password":
+				{
+					"pattern" : ${userPasswordStrengthRegex}
+				},
 				"confirmPassword":
 				{
 					"equalTo" : po.elementOfName("password")

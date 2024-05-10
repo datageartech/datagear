@@ -135,6 +135,7 @@ public class UserController extends AbstractController
 		setAddUserRoles(request, model, user);
 		setFormModel(model, user, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 		model.addAttribute("enablePassword", true);
+		setUserPasswordStrengthInfo(model);
 
 		return "/user/user_form";
 	}
@@ -192,6 +193,7 @@ public class UserController extends AbstractController
 			throw new RecordNotFoundException();
 
 		setFormModel(model, user, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setUserPasswordStrengthInfo(model);
 
 		return "/user/user_form";
 	}
@@ -230,6 +232,7 @@ public class UserController extends AbstractController
 
 		setFormModel(model, toEditPsdForm(user), "editPassword", "saveEditPsd");
 		model.addAttribute("enableOldPassword", false);
+		setUserPasswordStrengthInfo(model);
 
 		return "/user/user_psd_form";
 	}
@@ -257,6 +260,7 @@ public class UserController extends AbstractController
 			throw new RecordNotFoundException();
 
 		setFormModel(model, user, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setUserPasswordStrengthInfo(model);
 
 		return "/user/user_form";
 	}
@@ -344,6 +348,7 @@ public class UserController extends AbstractController
 		model.addAttribute("disableRoles", true);
 		model.addAttribute("disableEditName", getApplicationProperties().isDisablePersonalSetName());
 		setFormModel(model, user, "personalSet", "savePersonalSet");
+		setUserPasswordStrengthInfo(model);
 
 		return "/user/user_form";
 	}
@@ -393,6 +398,7 @@ public class UserController extends AbstractController
 
 		setFormModel(model, toPersonalEditPsdForm(user), "editPassword", "savePersonalPsd");
 		model.addAttribute("enableOldPassword", true);
+		setUserPasswordStrengthInfo(model);
 
 		return "/user/user_psd_form";
 	}
@@ -413,6 +419,14 @@ public class UserController extends AbstractController
 		this.userService.updatePasswordById(operator.getId(), form.getPassword(), true);
 
 		return optSuccessResponseEntity(request);
+	}
+
+	protected void setUserPasswordStrengthInfo(org.springframework.ui.Model model)
+	{
+		ApplicationProperties properties = getApplicationProperties();
+
+		model.addAttribute("userPasswordStrengthRegex", properties.getUserPasswordStrengthRegex());
+		model.addAttribute("userPasswordStrengthTip", properties.getUserPasswordStrengthTip());
 	}
 
 	protected EditPsdForm toEditPsdForm(User user)

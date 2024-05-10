@@ -28,6 +28,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
@@ -60,6 +61,9 @@ public class ResetPasswordController extends AbstractController
 	public static final String STEP_FINISH = "finish";
 
 	@Autowired
+	private ApplicationProperties applicationProperties;
+
+	@Autowired
 	private UserService userService;
 
 	@Autowired
@@ -71,6 +75,16 @@ public class ResetPasswordController extends AbstractController
 	public ResetPasswordController()
 	{
 		super();
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
 	}
 
 	public UserService getUserService()
@@ -116,6 +130,7 @@ public class ResetPasswordController extends AbstractController
 
 		model.addAttribute("step", toResetPasswordStepView(request, response, resetPasswordStep));
 		WebUtils.setEnableDetectNewVersionRequest(request);
+		setUserPasswordStrengthInfo(model);
 
 		return "/reset_password";
 	}
@@ -275,6 +290,14 @@ public class ResetPasswordController extends AbstractController
 		re.setPassword(null);
 
 		return re;
+	}
+
+	protected void setUserPasswordStrengthInfo(org.springframework.ui.Model model)
+	{
+		ApplicationProperties properties = getApplicationProperties();
+
+		model.addAttribute("userPasswordStrengthRegex", properties.getUserPasswordStrengthRegex());
+		model.addAttribute("userPasswordStrengthTip", properties.getUserPasswordStrengthTip());
 	}
 
 	/**

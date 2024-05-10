@@ -110,6 +110,9 @@
 								        		input-class="w-full" toggle-mask :feedback="false" required autofocus
 								        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
 								        	</p-password>
+								        	<div class="desc text-color-secondary" v-if="pm.userPasswordStrengthTip != ''">
+								        		<small>{{pm.userPasswordStrengthTip}}</small>
+								        	</div>
 								        </div>
 									</div>
 									<div class="field grid">
@@ -159,6 +162,7 @@
 {
 	po.submitUrl = "/resetPassword/${step.action}";
 	po.isStepSetNewPassword = ("${step.step}" == "3");
+	po.userPasswordStrengthTip = "${userPasswordStrengthTip}";
 
 	po.beforeSubmitForm = function(action)
 	{
@@ -189,7 +193,8 @@
 				label: "<@spring.message code='resetPassword.step.finish' />",
 				class: "step-4"
 			}
-		]
+		],
+		userPasswordStrengthTip: po.userPasswordStrengthTip
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=step />);
@@ -208,6 +213,10 @@
 			rules:
 			{
 				<#if step.step == 3>
+				"password":
+				{
+					"pattern" : ${userPasswordStrengthRegex}
+				},
 				"confirmPassword":
 				{
 					"equalTo" : po.elementOfName("password")

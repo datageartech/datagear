@@ -98,6 +98,14 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${disablePersonalSetName}")
 	private boolean disablePersonalSetName;
 
+	/** 用户密码强度JavaScript语法正则表达式 */
+	@Value("${userPasswordStrengthRegex}")
+	private String userPasswordStrengthRegex;
+
+	/** 用户密码强度输入提示信息 */
+	@Value("${userPasswordStrengthTip}")
+	private String userPasswordStrengthTip;
+
 	/** 默认角色：注册用户 */
 	@Value("${defaultRole.register}")
 	private String defaultRoleRegister;
@@ -389,6 +397,26 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setDisablePersonalSetName(boolean disablePersonalSetName)
 	{
 		this.disablePersonalSetName = disablePersonalSetName;
+	}
+
+	public String getUserPasswordStrengthRegex()
+	{
+		return userPasswordStrengthRegex;
+	}
+
+	protected void setUserPasswordStrengthRegex(String userPasswordStrengthRegex)
+	{
+		this.userPasswordStrengthRegex = userPasswordStrengthRegex;
+	}
+
+	public String getUserPasswordStrengthTip()
+	{
+		return userPasswordStrengthTip;
+	}
+
+	protected void setUserPasswordStrengthTip(String userPasswordStrengthTip)
+	{
+		this.userPasswordStrengthTip = userPasswordStrengthTip;
 	}
 
 	public String getDefaultRoleRegister()
