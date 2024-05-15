@@ -61,6 +61,13 @@ public class AsteriskPatternSupportTest
 		}
 
 		{
+			List<String> params = Arrays.asList("*uuu*", "regex:^\\w+e\\w+$");
+			String actual = aps.findKeyMatched(map, params, true);
+
+			assertEquals("ddeeff", actual);
+		}
+
+		{
 			List<String> params = Arrays.asList("*uuu*", "*vvvv*");
 			String actual = aps.findKeyMatched(map, params, true);
 
@@ -84,6 +91,7 @@ public class AsteriskPatternSupportTest
 		map.put("*b*", "aabbcc");
 		map.put("*e*", "ddeeff");
 		map.put("*h*", "gghhii");
+		map.put("regex:^\\d+z\\d+$", "zzzzzz");
 
 		{
 			List<String> params = Arrays.asList("abc", "def");
@@ -97,6 +105,13 @@ public class AsteriskPatternSupportTest
 			String actual = aps.findKeyMatched(map, params, false);
 
 			assertEquals("ddeeff", actual);
+		}
+
+		{
+			List<String> params = Arrays.asList("uuu", "6z6");
+			String actual = aps.findKeyMatched(map, params, false);
+
+			assertEquals("zzzzzz", actual);
 		}
 
 		{

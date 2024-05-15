@@ -158,6 +158,43 @@ public class AsteriskPatternMatcherTest
 			assertFalse(matcher.matches(pattern, "a"));
 			assertFalse(matcher.matches(pattern, "abc"));
 		}
+
+		{
+			String pattern = "asterisk:";
+
+			assertTrue(matcher.matches(pattern, ""));
+			assertFalse(matcher.matches(pattern, "a"));
+			assertFalse(matcher.matches(pattern, "abc"));
+		}
+		{
+			String pattern = "asterisk:abc*";
+
+			assertTrue(matcher.matches(pattern, "abc"));
+			assertTrue(matcher.matches(pattern, "abcdef"));
+			assertFalse(matcher.matches(pattern, "ac"));
+		}
+
+		{
+			String pattern = "regex:";
+
+			assertTrue(matcher.matches(pattern, ""));
+			assertFalse(matcher.matches(pattern, "a"));
+			assertFalse(matcher.matches(pattern, "abc"));
+		}
+		{
+			String pattern = "regex:^abc$";
+
+			assertTrue(matcher.matches(pattern, "abc"));
+			assertFalse(matcher.matches(pattern, "abcdef"));
+			assertFalse(matcher.matches(pattern, "ac"));
+		}
+		{
+			String pattern = "regex:^abc\\d+$";
+
+			assertTrue(matcher.matches(pattern, "abc1"));
+			assertFalse(matcher.matches(pattern, "Abc1"));
+			assertFalse(matcher.matches(pattern, "abcdef"));
+		}
 	}
 
 	@Test
@@ -187,6 +224,23 @@ public class AsteriskPatternMatcherTest
 			assertTrue(matcher.matches(pattern, "aBc"));
 			assertFalse(matcher.matches(pattern, "abcdef"));
 			assertFalse(matcher.matches(pattern, "defabc"));
+		}
+
+		{
+			String pattern = "asterisk:abc";
+
+			assertTrue(matcher.matches(pattern, "abc"));
+			assertTrue(matcher.matches(pattern, "aBc"));
+			assertFalse(matcher.matches(pattern, "abcdef"));
+			assertFalse(matcher.matches(pattern, "defabc"));
+		}
+
+		{
+			String pattern = "regex:^abc\\d+$";
+
+			assertTrue(matcher.matches(pattern, "abc1"));
+			assertTrue(matcher.matches(pattern, "Abc1"));
+			assertFalse(matcher.matches(pattern, "abcdef"));
 		}
 	}
 }
