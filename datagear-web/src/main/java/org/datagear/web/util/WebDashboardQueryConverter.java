@@ -81,7 +81,7 @@ public class WebDashboardQueryConverter
 	 */
 	public DashboardQuery convert(DashboardQuery query, Map<String, ? extends ChartDefinition> chartDefs, User user)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(user);
+		AnalysisUser analysisUser = toAnalysisUser(user);
 		return convert(query, chartDefs, analysisUser);
 	}
 
@@ -117,7 +117,7 @@ public class WebDashboardQueryConverter
 	 */
 	public DataSetQuery convert(DataSetQuery dataSetQuery, DataSet dataSet, User user)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(user);
+		AnalysisUser analysisUser = toAnalysisUser(user);
 		return convert(dataSetQuery, dataSet, analysisUser);
 	}
 
@@ -159,7 +159,7 @@ public class WebDashboardQueryConverter
 	 */
 	public DataSetQuery convert(Map<String, ?> paramValues, Collection<? extends DataSetParam> dataSetParams, User user)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(user);
+		AnalysisUser analysisUser = toAnalysisUser(user);
 		return convert(paramValues, dataSetParams, analysisUser);
 	}
 
@@ -225,7 +225,7 @@ public class WebDashboardQueryConverter
 	 */
 	public void inflateAnalysisUser(DataSetQuery query, User user)
 	{
-		AnalysisUser analysisUser = AnalysisUser.valueOf(user);
+		AnalysisUser analysisUser = toAnalysisUser(user);
 		inflateAnalysisUser(query, analysisUser);
 	}
 
@@ -239,6 +239,17 @@ public class WebDashboardQueryConverter
 	{
 		List<String> analysisRoleNames = analysisUser.getEnabledRoleNames();
 		analysisUser.setParamValue(query, analysisRoleNames);
+	}
+
+	/**
+	 * 将{@linkplain User}转换为{@linkplain AnalysisUser}。
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public AnalysisUser toAnalysisUser(User user)
+	{
+		return new AnalysisUser(user);
 	}
 
 	protected DataSetParamValueConverter getDataSetParamValueConverter()
@@ -299,10 +310,10 @@ public class WebDashboardQueryConverter
 		private boolean anonymous = false;
 	
 		/** 角色集 */
-		private List<WebDashboardQueryConverter.AnalysisRole> roles = Collections.emptyList();
+		private List<AnalysisRole> roles = Collections.emptyList();
 	
 		public AnalysisUser(String id, String name, String realName, boolean admin, boolean anonymous,
-				List<WebDashboardQueryConverter.AnalysisRole> roles)
+				List<AnalysisRole> roles)
 		{
 			super();
 			this.id = id;
@@ -316,7 +327,7 @@ public class WebDashboardQueryConverter
 		public AnalysisUser(User user)
 		{
 			this(user.getId(), user.getName(), user.getRealName(), user.isAdmin(), user.isAnonymous(),
-					WebDashboardQueryConverter.AnalysisRole.valueOf(user.getRoles()));
+					AnalysisRole.valueOf(user.getRoles()));
 		}
 	
 		public String getId()
@@ -469,17 +480,6 @@ public class WebDashboardQueryConverter
 			}
 	
 			return roleNames;
-		}
-	
-		/**
-		 * 构建{@linkplain AnalysisUser}。
-		 * 
-		 * @param user
-		 * @return
-		 */
-		public static AnalysisUser valueOf(User user)
-		{
-			return new AnalysisUser(user);
 		}
 	}
 

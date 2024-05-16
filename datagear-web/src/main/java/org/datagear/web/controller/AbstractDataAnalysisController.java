@@ -291,7 +291,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		
 		Map<String, ?> paramValues = resolveDashboardShowParamValues(request);
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
-		AnalysisUser analysisUser = AnalysisUser.valueOf(getCurrentUser().cloneNoPassword());
+		AnalysisUser analysisUser = getWebDashboardQueryConverter().toAnalysisUser(getCurrentUser().cloneNoPassword());
 		
 		renderContext.putAttributes(paramValues);
 		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT, webContext);
