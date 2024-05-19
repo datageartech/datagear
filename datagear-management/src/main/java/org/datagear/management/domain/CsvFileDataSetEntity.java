@@ -234,7 +234,7 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	@Override
 	protected File getCsvFile(DataSetQuery query) throws Throwable
 	{
-		return FILE_SUPPORT.getFile(this, query);
+		return getFileForDataSetQuery(query);
 	}
 
 	@Override

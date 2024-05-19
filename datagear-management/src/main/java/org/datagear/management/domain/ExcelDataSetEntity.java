@@ -234,7 +234,7 @@ public class ExcelDataSetEntity extends AbstractExcelFileDataSet implements Dire
 	@Override
 	protected File getExcelFile(DataSetQuery query) throws Throwable
 	{
-		return FILE_SUPPORT.getFile(this, query);
+		return getFileForDataSetQuery(query);
 	}
 
 	@Override

@@ -138,30 +138,32 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 	 */
 	String resolveTemplateFileName(String fileName, DataSetQuery query);
 
-	FileSupport FILE_SUPPORT = new FileSupport();
-
-	class FileSupport
+	/**
+	 * 获取文件。
+	 * 
+	 * @param query
+	 * @return
+	 * @throws Throwable
+	 */
+	default File getFileForDataSetQuery(DataSetQuery query) throws Throwable
 	{
-		public File getFile(DirectoryFileDataSetEntity entity, DataSetQuery query) throws Throwable
+		File file = null;
+
+		if (FILE_SOURCE_TYPE_UPLOAD.equals(getFileSourceType()))
 		{
-			File file = null;
-
-			if (FILE_SOURCE_TYPE_UPLOAD.equals(entity.getFileSourceType()))
-			{
-				file = FileUtil.getFile(entity.getDirectory(), entity.getFileName());
-			}
-			else if (FILE_SOURCE_TYPE_SERVER.equals(entity.getFileSourceType()))
-			{
-				// 服务器端文件名允许参数化
-				String fileName = entity.resolveTemplateFileName(entity.getDataSetResFileName(), query);
-
-				File directory = FileUtil.getDirectory(entity.getDataSetResDirectory().getDirectory(), false);
-				file = FileUtil.getFile(directory, fileName, false);
-			}
-			else
-				throw new IllegalStateException("Unknown file source type :" + entity.getFileSourceType());
-
-			return file;
+			file = FileUtil.getFile(getDirectory(), getFileName());
 		}
+		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
+		{
+			// 服务器端文件名允许参数化
+			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+
+			File directory = FileUtil.getDirectory(getDataSetResDirectory().getDirectory(), false);
+			file = FileUtil.getFile(directory, fileName, false);
+		}
+		else
+			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
+
+		return file;
 	}
 }

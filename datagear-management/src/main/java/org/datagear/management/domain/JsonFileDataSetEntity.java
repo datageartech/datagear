@@ -234,7 +234,7 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	@Override
 	protected File getJsonFile(DataSetQuery query) throws Throwable
 	{
-		return FILE_SUPPORT.getFile(this, query);
+		return getFileForDataSetQuery(query);
 	}
 
 	@Override
