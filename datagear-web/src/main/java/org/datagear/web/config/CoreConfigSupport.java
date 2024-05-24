@@ -70,7 +70,7 @@ import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
-import org.datagear.management.service.DataSetResDirectoryService;
+import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
@@ -88,7 +88,7 @@ import org.datagear.management.service.impl.BundleAnalysisProjectAuthorizationLi
 import org.datagear.management.service.impl.BundleAuthorizationListener;
 import org.datagear.management.service.impl.DashboardShareSetServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
-import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
+import org.datagear.management.service.impl.FileSourceServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
@@ -743,7 +743,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.authorizationService(), this.connectionSource(), this.schemaService(),
-				this.analysisProjectService(), this.userService(), this.dataSetResDirectoryService(),
+				this.analysisProjectService(), this.userService(), this.fileSourceService(),
 				this.dataSetRootDirectory(), this.httpClient());
 
 		return bean;
@@ -871,9 +871,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public DataSetResDirectoryService dataSetResDirectoryService()
+	public FileSourceService fileSourceService()
 	{
-		DataSetResDirectoryService bean = new DataSetResDirectoryServiceImpl(this.sqlSessionFactory(),
+		FileSourceService bean = new FileSourceServiceImpl(this.sqlSessionFactory(),
 				this.mbSqlDialect(), this.authorizationService(), this.userService());
 		return bean;
 	}

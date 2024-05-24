@@ -12,7 +12,7 @@
 		VALUES
 			(
 				#{entity.id}, #{entity.fileName, jdbcType=VARCHAR}, #{entity.encoding}, #{entity.displayName, jdbcType=VARCHAR}, #{entity.dataJsonPath},
-				#{entity.fileSourceType}, #{entity.dataSetResDirectory.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
+				#{entity.fileSourceType}, #{entity.fileSource.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
 			)
 	</insert>
 	
@@ -23,7 +23,7 @@
 			DS_DISPLAY_NAME = #{entity.displayName, jdbcType=VARCHAR},
 			DS_DATA_JSON_PATH = #{entity.dataJsonPath},
 			DS_FILE_SOURCE_TYPE = #{entity.fileSourceType},
-			DS_DSRD_ID = #{entity.dataSetResDirectory.id, jdbcType=VARCHAR},
+			DS_DSRD_ID = #{entity.fileSource.id, jdbcType=VARCHAR},
 			DS_DSRD_FILE_NAME = #{entity.dataSetResFileName}
 		WHERE
 			DS_ID = #{entity.id}
@@ -37,9 +37,9 @@
 			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_},
 			T2.DS_DATA_JSON_PATH AS ${_iq_}dataJsonPath${_iq_},
 			T2.DS_FILE_SOURCE_TYPE AS ${_iq_}fileSourceType${_iq_},
-			T2.DS_DSRD_ID AS ${_iq_}dataSetResDirectory.id${_iq_},
+			T2.DS_DSRD_ID AS ${_iq_}fileSource.id${_iq_},
 			T2.DS_DSRD_FILE_NAME AS ${_iq_}dataSetResFileName${_iq_},
-			DSRD.DD_DIRECTORY AS ${_iq_}dataSetResDirectory.directory${_iq_}
+			DSRD.DD_DIRECTORY AS ${_iq_}fileSource.directory${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
 		INNER JOIN

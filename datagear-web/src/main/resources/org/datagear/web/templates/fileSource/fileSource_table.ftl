@@ -16,14 +16,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign DataSetResDirectory=statics['org.datagear.management.domain.DataSetResDirectory']>
+<#assign FileSource=statics['org.datagear.management.domain.FileSource']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
-	<@spring.message code='module.dataSetResDirectory' />
+	<@spring.message code='module.fileSource' />
 	<#include "../include/html_request_action_suffix.ftl">
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
@@ -70,9 +70,9 @@
 {
 	po.isShowDirectory = ("${(isShowDirectory!true)?string('true', 'false')}"  == "true");
 	
-	po.setupAjaxTable("/dataSetResDirectory/pagingQueryData",
+	po.setupAjaxTable("/fileSource/pagingQueryData",
 	{
-		multiSortMeta: [ {field: "directory", order: 1} ]
+		multiSortMeta: [ {field: "name", order: 0} ]
 	});
 	
 	po.vuePageModel(
@@ -84,30 +84,30 @@
 	{
 		onAdd: function()
 		{
-			po.handleAddAction("/dataSetResDirectory/add");
+			po.handleAddAction("/fileSource/add");
 		},
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dataSetResDirectory/edit");
+			po.handleOpenOfAction("/fileSource/edit");
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dataSetResDirectory/view");
+			po.handleOpenOfAction("/fileSource/view");
 		},
 
 		onShare: function()
 		{
 			po.executeOnSelect(function(entity)
 			{
-				po.openTableDialog("/authorization/${DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/query");
+				po.openTableDialog("/authorization/${FileSource.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/query");
 			});
 		},
 		
 		onDelete: function()
 		{
-			po.handleDeleteAction("/dataSetResDirectory/delete");
+			po.handleDeleteAction("/fileSource/delete");
 		},
 		
 		onSelect: function()

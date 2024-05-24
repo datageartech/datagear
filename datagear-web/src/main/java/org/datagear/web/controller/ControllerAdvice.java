@@ -216,10 +216,10 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(DataSetResDirectoryNotFoundException.class)
+	@ExceptionHandler(FileSourceDirectoryNotFoundException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleDataSetResDirectoryNotFoundException(HttpServletRequest request, HttpServletResponse response,
-			DataSetResDirectoryNotFoundException exception)
+	public String handleFileSourceDirectoryNotFoundException(HttpServletRequest request, HttpServletResponse response,
+			FileSourceDirectoryNotFoundException exception)
 	{
 		setOptMsgForThrowable(request, exception, exception.getDirectory());
 		return getErrorView(request, response);

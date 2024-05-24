@@ -580,3 +580,6 @@ UPDATE DATAGEAR_DATA_SET_HTTP SET DS_ENCODE_URI='false' WHERE DS_ENCODE_URI IS N
 /*--version[5.1.0], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
 
+/*2024-05-24*/
+/*DataSetResDirectory重构为FileSource*/
+UPDATE DATAGEAR_AUTHORIZATION SET AUTH_RESOURCE_TYPE='FileSource' WHERE AUTH_RESOURCE_TYPE = 'DataSetDirectory';

@@ -48,9 +48,9 @@ import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
-import org.datagear.management.domain.DataSetResDirectory;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.ExcelDataSetEntity;
+import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.HttpDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
@@ -61,7 +61,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
-import org.datagear.management.service.DataSetResDirectoryService;
+import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
@@ -104,7 +104,7 @@ public class DataSetController extends AbstractSchemaConnController
 	private WebDashboardQueryConverter webDashboardQueryConverter;
 
 	@Autowired
-	private DataSetResDirectoryService dataSetResDirectoryService;
+	private FileSourceService fileSourceService;
 
 	public DataSetController()
 	{
@@ -151,14 +151,14 @@ public class DataSetController extends AbstractSchemaConnController
 		this.webDashboardQueryConverter = webDashboardQueryConverter;
 	}
 
-	public DataSetResDirectoryService getDataSetResDirectoryService()
+	public FileSourceService getFileSourceService()
 	{
-		return dataSetResDirectoryService;
+		return fileSourceService;
 	}
 
-	public void setDataSetResDirectoryService(DataSetResDirectoryService dataSetResDirectoryService)
+	public void setFileSourceService(FileSourceService fileSourceService)
 	{
-		this.dataSetResDirectoryService = dataSetResDirectoryService;
+		this.fileSourceService = fileSourceService;
 	}
 
 	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_SQL)
@@ -490,15 +490,15 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) dataSet;
 
-			DataSetResDirectory dataSetResDirectory = dataSetEntity.getDataSetResDirectory();
-			int permission = (dataSetResDirectory != null
-					? getDataSetResDirectoryService().getPermission(user, dataSetResDirectory.getId())
+			FileSource fileSource = dataSetEntity.getFileSource();
+			int permission = (fileSource != null
+					? getFileSourceService().getPermission(user, fileSource.getId())
 					: Authorization.PERMISSION_NONE_START);
 
 			// 没有读权限，应将服务端文件信息设为null
 			if (!Authorization.canRead(permission))
 			{
-				dataSetEntity.setDataSetResDirectory(null);
+				dataSetEntity.setFileSource(null);
 				dataSetEntity.setDataSetResFileName(null);
 			}
 
@@ -1025,9 +1025,9 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			DirectoryFileDataSetEntity dfDataSetEntity = ((DirectoryFileDataSetEntity) entity);
 			dfDataSetEntity.setDirectory(null);
-			DataSetResDirectory dataSetResDirectory = dfDataSetEntity.getDataSetResDirectory();
-			if (dataSetResDirectory != null)
-				dataSetResDirectory.setDirectory(null);
+			FileSource fileSource = dfDataSetEntity.getFileSource();
+			if (fileSource != null)
+				fileSource.setDirectory(null);
 		}
 		
 		if(entity instanceof HttpDataSetEntity)
@@ -1099,11 +1099,11 @@ public class DataSetController extends AbstractSchemaConnController
 		else
 			dataSet.setDirectory(getTempDataSetDirectory());
 		
-		DataSetResDirectory dsr = dataSet.getDataSetResDirectory();
+		FileSource dsr = dataSet.getFileSource();
 		if(dsr != null && !isEmpty(dsr.getId()))
 		{
-			dsr = this.dataSetResDirectoryService.getById(user, dsr.getId());
-			dataSet.setDataSetResDirectory(dsr);
+			dsr = this.fileSourceService.getById(user, dsr.getId());
+			dataSet.setFileSource(dsr);
 		}
 	}
 

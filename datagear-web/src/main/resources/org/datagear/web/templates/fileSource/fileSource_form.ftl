@@ -22,7 +22,7 @@
 <head>
 <#include "../include/html_head.ftl">
 <title>
-	<@spring.message code='module.dataSetResDirectory' />
+	<@spring.message code='module.fileSource' />
 	<#include "../include/html_request_action_suffix.ftl">
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
@@ -44,7 +44,7 @@
 			</div>
 			<div class="field grid" v-if="pm.isShowDirectory">
 				<label for="${pid}directory" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					 title="<@spring.message code='dataSetResDirectory.directory.desc' />">
+					 title="<@spring.message code='fileSource.directory.desc' />">
 					<@spring.message code='directory' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -74,7 +74,7 @@
 (function(po)
 {
 	po.isShowDirectory = ("${(isShowDirectory!true)?string('true', 'false')}"  == "true");
-	po.submitUrl = "/dataSetResDirectory/"+po.submitAction;
+	po.submitUrl = "/fileSource/"+po.submitAction;
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.setupForm(formModel);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.datagear.management.domain.DataSetResDirectory">
+<mapper namespace="org.datagear.management.domain.FileSource">
 
 	<insert id="insert">
 		INSERT INTO DATAGEAR_DSR_DIRECTORY
@@ -39,7 +39,7 @@
 			DD_ID = #{id}
 	</delete>
 	
-	<select id="getById" resultType="org.datagear.management.domain.DataSetResDirectory">
+	<select id="getById" resultType="org.datagear.management.domain.FileSource">
 		SELECT
 			T.*
 		FROM
@@ -62,7 +62,7 @@
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
 	
-	<select id="query" resultType="org.datagear.management.domain.DataSetResDirectory">
+	<select id="query" resultType="org.datagear.management.domain.FileSource">
 		SELECT
 			T.*
 		FROM
@@ -81,7 +81,7 @@
 			<include refid="queryCondition" />
 	</select>
 	
-	<select id="pagingQuery" resultType="org.datagear.management.domain.DataSetResDirectory">
+	<select id="pagingQuery" resultType="org.datagear.management.domain.FileSource">
 		<include refid="common.pagingQueryHead" />
 			SELECT
 				T.*
@@ -146,7 +146,6 @@
 		AND
 		(
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}directory${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}desc${_iq_} LIKE #{queryKeyword}
 		)
 		</if>

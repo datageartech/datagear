@@ -444,7 +444,7 @@ public abstract class AbstractController extends MessageSourceSupport
 
 	/**
 	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
-	 * 如果dataSetResDirectory.id为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}或其ID为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
 	 * 
 	 * @param entity
 	 */
@@ -453,11 +453,11 @@ public abstract class AbstractController extends MessageSourceSupport
 		if (entity == null)
 			return;
 
-		if (entity.getDataSetResDirectory() == null)
+		if (entity.getFileSource() == null)
 			return;
 
-		if (isEmpty(entity.getDataSetResDirectory().getId()))
-			entity.setDataSetResDirectory(null);
+		if (isEmpty(entity.getFileSource().getId()))
+			entity.setFileSource(null);
 	}
 
 	/**

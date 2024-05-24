@@ -26,13 +26,13 @@ import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CloneableEntity;
 import org.datagear.management.domain.CreateUserEntity;
-import org.datagear.management.domain.DataSetResDirectory;
+import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.CreateUserEntityService;
-import org.datagear.management.service.DataSetResDirectoryService;
+import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.EntityService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -357,20 +357,20 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	/**
-	 * 如果{@linkplain DirectoryFileDataSetEntity#getDataSetResDirectory()}不为空，
-	 * 则使用{@linkplain DataSetResDirectoryService#getById(String)}对其进行更新。
+	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}不为空，
+	 * 则使用{@linkplain FileSourceService#getById(String)}对其进行更新。
 	 * 
 	 * @param entity  允许为{@code null}
 	 * @param service
 	 */
 	protected void inflateDirectoryFileDataSetEntity(DirectoryFileDataSetEntity entity,
-			DataSetResDirectoryService service)
+			FileSourceService service)
 	{
-		DataSetResDirectory dsd = (entity == null ? null : entity.getDataSetResDirectory());
+		FileSource dsd = (entity == null ? null : entity.getFileSource());
 		String dsdId = (dsd == null ? null : dsd.getId());
 
 		if (!StringUtil.isEmpty(dsdId))
-			entity.setDataSetResDirectory(service.getById(dsdId));
+			entity.setFileSource(service.getById(dsdId));
 	}
 
 	/**

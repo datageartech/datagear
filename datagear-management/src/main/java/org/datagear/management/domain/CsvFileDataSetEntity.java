@@ -49,10 +49,10 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	/** 展示名 */
 	private String displayName = "";
 
-	/** 服务器端文件所在的目录 */
-	private DataSetResDirectory dataSetResDirectory = null;
+	/** 服务器端文件源 */
+	private FileSource fileSource = null;
 
-	/** 服务器端文件的文件名（相对于{@linkplain #getDataSetResDirectory()}） */
+	/** 服务器端文件的文件名（相对于{@linkplain #getFileSource()}） */
 	private String dataSetResFileName = "";
 
 	/** 创建用户 */
@@ -83,11 +83,11 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	}
 
 	public CsvFileDataSetEntity(String id, String name, List<DataSetProperty> properties,
-			DataSetResDirectory dataSetResDirectory, String dataSetResFileName, User createUser)
+			FileSource fileSource, String dataSetResFileName, User createUser)
 	{
 		super(id, name, properties);
 		this.fileSourceType = FILE_SOURCE_TYPE_SERVER;
-		this.dataSetResDirectory = dataSetResDirectory;
+		this.fileSource = fileSource;
 		this.dataSetResFileName = dataSetResFileName;
 		this.createUser = createUser;
 	}
@@ -141,15 +141,15 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	}
 
 	@Override
-	public DataSetResDirectory getDataSetResDirectory()
+	public FileSource getFileSource()
 	{
-		return dataSetResDirectory;
+		return fileSource;
 	}
 
 	@Override
-	public void setDataSetResDirectory(DataSetResDirectory dataSetResDirectory)
+	public void setFileSource(FileSource fileSource)
 	{
-		this.dataSetResDirectory = dataSetResDirectory;
+		this.fileSource = fileSource;
 	}
 
 	@Override

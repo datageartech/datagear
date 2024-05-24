@@ -49,7 +49,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
-import org.datagear.management.service.DataSetResDirectoryService;
+import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
@@ -81,7 +81,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private UserService userService;
 
-	private DataSetResDirectoryService dataSetResDirectoryService;
+	private FileSourceService fileSourceService;
 
 	/** 数据集文件存储根目录 */
 	private File dataSetRootDirectory;
@@ -104,7 +104,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			AuthorizationService authorizationService,
 			ConnectionSource connectionSource, SchemaService schemaService,
 			AnalysisProjectService analysisProjectService,
-			UserService userService, DataSetResDirectoryService dataSetResDirectoryService,
+			UserService userService, FileSourceService fileSourceService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
@@ -112,7 +112,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.schemaService = schemaService;
 		this.analysisProjectService = analysisProjectService;
 		this.userService = userService;
-		this.dataSetResDirectoryService = dataSetResDirectoryService;
+		this.fileSourceService = fileSourceService;
 		setDataSetRootDirectory(dataSetRootDirectory);
 		this.httpClient = httpClient;
 	}
@@ -121,7 +121,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			AuthorizationService authorizationService,
 			ConnectionSource connectionSource, SchemaService schemaService,
 			AnalysisProjectService analysisProjectService,
-			UserService userService, DataSetResDirectoryService dataSetResDirectoryService,
+			UserService userService, FileSourceService fileSourceService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
@@ -129,7 +129,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.schemaService = schemaService;
 		this.analysisProjectService = analysisProjectService;
 		this.userService = userService;
-		this.dataSetResDirectoryService = dataSetResDirectoryService;
+		this.fileSourceService = fileSourceService;
 		setDataSetRootDirectory(dataSetRootDirectory);
 		this.httpClient = httpClient;
 	}
@@ -174,14 +174,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.userService = userService;
 	}
 
-	public DataSetResDirectoryService getDataSetResDirectoryService()
+	public FileSourceService getFileSourceService()
 	{
-		return dataSetResDirectoryService;
+		return fileSourceService;
 	}
 
-	public void setDataSetResDirectoryService(DataSetResDirectoryService dataSetResDirectoryService)
+	public void setFileSourceService(FileSourceService fileSourceService)
 	{
-		this.dataSetResDirectoryService = dataSetResDirectoryService;
+		this.fileSourceService = fileSourceService;
 	}
 
 	public File getDataSetRootDirectory()
@@ -665,7 +665,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			obj.setDataFormat(DataFormat.DEFAULT);
 
 		if (obj instanceof DirectoryFileDataSetEntity)
-			inflateDirectoryFileDataSetEntity((DirectoryFileDataSetEntity) obj, this.dataSetResDirectoryService);
+			inflateDirectoryFileDataSetEntity((DirectoryFileDataSetEntity) obj, this.fileSourceService);
 
 		if (obj instanceof SqlDataSetEntity)
 		{

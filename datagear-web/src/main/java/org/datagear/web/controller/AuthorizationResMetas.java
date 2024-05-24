@@ -19,7 +19,7 @@ package org.datagear.web.controller;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.DataSetEntity;
-import org.datagear.management.domain.DataSetResDirectory;
+import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.Schema;
@@ -65,7 +65,7 @@ public class AuthorizationResMetas
 		registerSchema();
 		registerAnalysisProject();
 		registerDataSet();
-		registerDataSetResDirectory();
+		registerFileSource();
 		registerChart();
 		registerDashboard();
 	}
@@ -110,11 +110,11 @@ public class AuthorizationResMetas
 	}
 
 	/**
-	 * 注册数据集资源目录授权资源元信息。
+	 * 注册文件源授权资源元信息。
 	 */
-	protected void registerDataSetResDirectory()
+	protected void registerFileSource()
 	{
-		this.authorizationResMetaManager.registerForShare(DataSetResDirectory.AUTHORIZATION_RESOURCE_TYPE);
+		this.authorizationResMetaManager.registerForShare(FileSource.AUTHORIZATION_RESOURCE_TYPE);
 	}
 	
 	/**

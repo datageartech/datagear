@@ -22,21 +22,21 @@ import java.util.Date;
 import org.springframework.beans.BeanUtils;
 
 /**
- * 数据集资源目录实体。
+ * 文件源。
  * <p>
- * 文件类数据集允许选择服务器端文件，需要限定用户可访问的服务端目录，此类即用于定义访问目录。
+ * 文件源对应一个服务器端目录，文件类数据集可以选择和使用文件源对应目录内的文件。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetResDirectory extends AbstractStringIdEntity
+public class FileSource extends AbstractStringIdEntity
 		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
 	/** 授权资源类型 */
-	public static final String AUTHORIZATION_RESOURCE_TYPE = "DataSetDirectory";
+	public static final String AUTHORIZATION_RESOURCE_TYPE = "FileSource";
 
 	/**名称*/
 	private String name;
@@ -56,12 +56,12 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	public DataSetResDirectory()
+	public FileSource()
 	{
 		super();
 	}
 
-	public DataSetResDirectory(String id, String name, String directory, User createuUser)
+	public FileSource(String id, String name, String directory, User createuUser)
 	{
 		super(id);
 		this.name = name;
@@ -143,9 +143,9 @@ public class DataSetResDirectory extends AbstractStringIdEntity
 	}
 
 	@Override
-	public DataSetResDirectory clone()
+	public FileSource clone()
 	{
-		DataSetResDirectory entity = new DataSetResDirectory();
+		FileSource entity = new FileSource();
 		BeanUtils.copyProperties(this, entity);
 
 		return entity;

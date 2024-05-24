@@ -168,8 +168,8 @@ User currentUser
 				items:
 				[
 					{
-						label: "<@spring.message code='module.dataSetResDirectory' />",
-						url: po.concatContextPath("/dataSetResDirectory/pagingQuery"),
+						label: "<@spring.message code='module.fileSource' />",
+						url: po.concatContextPath("/fileSource/pagingQuery"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{

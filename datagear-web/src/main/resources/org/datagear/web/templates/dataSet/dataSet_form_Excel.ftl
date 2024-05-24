@@ -135,7 +135,7 @@
 	{
 		fingerprint.fileSourceType = dataSet.fileSourceType;
 		fingerprint.fileName = dataSet.fileName;
-		fingerprint.dataSetResDirectoryId = dataSet.dataSetResDirectory.id;
+		fingerprint.fileSourceId = dataSet.fileSource.id;
 		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
 		fingerprint.sheetName = dataSet.sheetName;
 		fingerprint.sheetIndex = dataSet.sheetIndex;
@@ -152,7 +152,7 @@
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
-	formModel.dataSetResDirectory = (!formModel.dataSetResDirectory ? {} : formModel.dataSetResDirectory);
+	formModel.fileSource = (!formModel.fileSource ? {} : formModel.fileSource);
 	po.inflateDataSetModel(formModel);
 	
 	po.originalFileName = (formModel.fileName || "");

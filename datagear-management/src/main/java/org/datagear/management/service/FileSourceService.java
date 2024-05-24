@@ -17,16 +17,16 @@
 
 package org.datagear.management.service;
 
-import org.datagear.management.domain.DataSetResDirectory;
+import org.datagear.management.domain.FileSource;
 
 /**
- * {@linkplain DataSetResDirectory}业务服务接口。
+ * {@linkplain FileSource}业务服务接口。
  * 
  * @author datagear@163.com
  *
  */
-public interface DataSetResDirectoryService
-		extends DataPermissionEntityService<String, DataSetResDirectory>, CreateUserEntityService
+public interface FileSourceService
+		extends DataPermissionEntityService<String, FileSource>, CreateUserEntityService
 {
 
 }

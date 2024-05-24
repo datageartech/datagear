@@ -23,16 +23,16 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.DataSetResDirectory;
+import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.DataSetResDirectoryService;
+import org.datagear.management.service.FileSourceService;
 import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.OperationMessage;
+import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -42,58 +42,58 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * 数据集资源目录控制器。
+ * {@linkplain FileSource}控制器。
  * 
  * @author datagear@163.com
  *
  */
 @Controller
-@RequestMapping("/dataSetResDirectory")
-public class DataSetResDirectoryController extends AbstractController
+@RequestMapping("/fileSource")
+public class FileSourceController extends AbstractController
 {
 	@Autowired
-	private DataSetResDirectoryService dataSetResDirectoryService;
+	private FileSourceService fileSourceService;
 
-	public DataSetResDirectoryController()
+	public FileSourceController()
 	{
 		super();
 	}
 
-	public DataSetResDirectoryService getDataSetResDirectoryService()
+	public FileSourceService getFileSourceService()
 	{
-		return dataSetResDirectoryService;
+		return fileSourceService;
 	}
 
-	public void setDataSetResDirectoryService(DataSetResDirectoryService dataSetResDirectoryService)
+	public void setFileSourceService(FileSourceService fileSourceService)
 	{
-		this.dataSetResDirectoryService = dataSetResDirectoryService;
+		this.fileSourceService = fileSourceService;
 	}
 
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		DataSetResDirectory dataSetResDirectory = new DataSetResDirectory();
+		FileSource fileSource = new FileSource();
 
-		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, fileSource, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		return "/dataSetResDirectory/dataSetResDirectory_form";
+		return "/fileSource/fileSource_form";
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DataSetResDirectory dataSetResDirectory)
+			@RequestBody FileSource fileSource)
 	{
-		checkSaveEntity(dataSetResDirectory);
+		checkSaveEntity(fileSource);
 
 		User user = getCurrentUser();
 
-		dataSetResDirectory.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(dataSetResDirectory, user);
+		fileSource.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(fileSource, user);
 
-		this.dataSetResDirectoryService.add(dataSetResDirectory);
+		this.fileSourceService.add(fileSource);
 
-		return optSuccessDataResponseEntity(request, dataSetResDirectory);
+		return optSuccessDataResponseEntity(request, fileSource);
 	}
 
 	@RequestMapping("/edit")
@@ -101,25 +101,25 @@ public class DataSetResDirectoryController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DataSetResDirectory dataSetResDirectory = getByIdForEdit(this.dataSetResDirectoryService, user, id);
+		FileSource fileSource = getByIdForEdit(this.fileSourceService, user, id);
 
-		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, fileSource, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
-		return "/dataSetResDirectory/dataSetResDirectory_form";
+		return "/fileSource/fileSource_form";
 	}
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DataSetResDirectory dataSetResDirectory)
+			@RequestBody FileSource fileSource)
 	{
-		checkSaveEntity(dataSetResDirectory);
+		checkSaveEntity(fileSource);
 
 		User user = getCurrentUser();
 
-		this.dataSetResDirectoryService.update(user, dataSetResDirectory);
+		this.fileSourceService.update(user, fileSource);
 
-		return optSuccessDataResponseEntity(request, dataSetResDirectory);
+		return optSuccessDataResponseEntity(request, fileSource);
 	}
 
 	@RequestMapping("/view")
@@ -127,15 +127,15 @@ public class DataSetResDirectoryController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DataSetResDirectory dataSetResDirectory = getByIdForView(this.dataSetResDirectoryService, user, id);
+		FileSource fileSource = getByIdForView(this.fileSourceService, user, id);
 
-		setFormModel(model, dataSetResDirectory, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, fileSource, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		boolean isShowDirectory = setIsShowDirectory(request, model);
 		
 		if(!isShowDirectory)
-			dataSetResDirectory.setDirectory(null);
+			fileSource.setDirectory(null);
 		
-		return "/dataSetResDirectory/dataSetResDirectory_form";
+		return "/fileSource/fileSource_form";
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -148,7 +148,7 @@ public class DataSetResDirectoryController extends AbstractController
 		for (int i = 0; i < ids.length; i++)
 		{
 			String id = ids[i];
-			this.dataSetResDirectoryService.deleteById(user, id);
+			this.fileSourceService.deleteById(user, id);
 		}
 
 		return optSuccessResponseEntity(request);
@@ -162,7 +162,7 @@ public class DataSetResDirectoryController extends AbstractController
 		setIsShowDirectory(request, model);
 		setReadonlyAction(model);
 		
-		return "/dataSetResDirectory/dataSetResDirectory_table";
+		return "/fileSource/fileSource_table";
 	}
 
 	@RequestMapping(value = "/select")
@@ -171,24 +171,26 @@ public class DataSetResDirectoryController extends AbstractController
 		setSelectAction(request, model);
 		setIsShowDirectory(request, model);
 		
-		return "/dataSetResDirectory/dataSetResDirectory_table";
+		return "/fileSource/fileSource_table";
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<DataSetResDirectory> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+	public PagingData<FileSource> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+			final org.springframework.ui.Model springModel,
+			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam)
 			throws Exception
 	{
 		User user = getCurrentUser();
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
-		PagingData<DataSetResDirectory> pagingData = this.dataSetResDirectoryService.pagingQuery(user, pagingQuery);
+		PagingData<FileSource> pagingData = this.fileSourceService.pagingQuery(user, pagingQuery,
+				pagingQuery.getDataFilter());
 
 		if(!isShowDirectory(request))
 		{
-			List<DataSetResDirectory> items = pagingData.getItems();
-			for(DataSetResDirectory item : items)
+			List<FileSource> items = pagingData.getItems();
+			for(FileSource item : items)
 				item.setDirectory(null);
 		}
 		
@@ -203,8 +205,8 @@ public class DataSetResDirectoryController extends AbstractController
 	{
 		User user = getCurrentUser();
 
-		DataSetResDirectory dataSetResDirectory =  getByIdForView(this.dataSetResDirectoryService, user, id);
-		File directory = FileUtil.getDirectory(dataSetResDirectory.getDirectory(), false);
+		FileSource fileSource =  getByIdForView(this.fileSourceService, user, id);
+		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
 		
 		if(!StringUtil.isEmpty(subPath))
 			directory = FileUtil.getDirectory(directory, subPath, false);
@@ -212,15 +214,15 @@ public class DataSetResDirectoryController extends AbstractController
 		return FileUtil.getFileInfos(directory);
 	}
 	
-	protected void checkSaveEntity(DataSetResDirectory dataSetResDirectory)
+	protected void checkSaveEntity(FileSource fileSource)
 	{
-		if (isBlank(dataSetResDirectory.getDirectory()))
+		if (isBlank(fileSource.getDirectory()))
 			throw new IllegalInputException();
 
-		File directory = FileUtil.getDirectory(dataSetResDirectory.getDirectory(), false);
+		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
 
 		if (!directory.exists())
-			throw new DataSetResDirectoryNotFoundException(dataSetResDirectory.getDirectory());
+			throw new FileSourceDirectoryNotFoundException(fileSource.getDirectory());
 	}
 	
 	protected boolean setIsShowDirectory(HttpServletRequest request, org.springframework.ui.Model model)

@@ -152,7 +152,7 @@ public class SecurityConfigSupport
 		configAccessForChart(http);
 		configAccessForDashboard(http);
 		configAccessForChartPlugin(http);
-		configAccessForDataSetResDirectory(http);
+		configAccessForFileSource(http);
 		configAccessForDashboardGlobalRes(http);
 		configAccessForDriverEntity(http);
 		configAccessForSchemaUrlBuilder(http);
@@ -550,23 +550,22 @@ public class SecurityConfigSupport
 	}
 
 	/**
-	 * 配置数据集资源目录模块访问权限。
+	 * 配置文件源模块访问权限。
 	 * 
 	 * @param http
 	 * @throws Exception
 	 */
-	protected void configAccessForDataSetResDirectory(HttpSecurity http) throws Exception
+	protected void configAccessForFileSource(HttpSecurity http) throws Exception
 	{
-		configAccessForModuleAccess(http, dataSetResDirectoryModuleAccess());
+		configAccessForModuleAccess(http, fileSourceModuleAccess());
 	}
 
-	protected ModuleAccess dataSetResDirectoryModuleAccess()
+	protected ModuleAccess fileSourceModuleAccess()
 	{
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/dataSetResDirectory/view", "/dataSetResDirectory/select",
-				"/dataSetResDirectory/pagingQueryData", "/dataSetResDirectory/listFiles");
+				"/fileSource/view", "/fileSource/select", "/fileSource/pagingQueryData", "/fileSource/listFiles");
 
-		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/dataSetResDirectory/**");
+		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/fileSource/**");
 
 		return new ModuleAccess(read, edit);
 	}

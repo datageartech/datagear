@@ -17,39 +17,39 @@
 
 package org.datagear.web.controller;
 
-import org.datagear.management.domain.DataSetResDirectory;
+import org.datagear.management.domain.FileSource;
 
 /**
- * {@linkplain DataSetResDirectory#getDirectory()}未找到异常。
+ * {@linkplain FileSource#getDirectory()}未找到异常。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetResDirectoryNotFoundException extends IllegalInputException
+public class FileSourceDirectoryNotFoundException extends IllegalInputException
 {
 	private static final long serialVersionUID = 1L;
 
 	private String directory;
 
-	public DataSetResDirectoryNotFoundException(String directory)
+	public FileSourceDirectoryNotFoundException(String directory)
 	{
-		super();
+		super("Directory '" + directory + "' not found");
 		this.directory = directory;
 	}
 
-	public DataSetResDirectoryNotFoundException(String directory, String message)
+	public FileSourceDirectoryNotFoundException(String directory, String message)
 	{
 		super(message);
 		this.directory = directory;
 	}
 
-	public DataSetResDirectoryNotFoundException(String directory, Throwable cause)
+	public FileSourceDirectoryNotFoundException(String directory, Throwable cause)
 	{
 		super(cause);
 		this.directory = directory;
 	}
 
-	public DataSetResDirectoryNotFoundException(String directory, String message, Throwable cause)
+	public FileSourceDirectoryNotFoundException(String directory, String message, Throwable cause)
 	{
 		super(message, cause);
 		this.directory = directory;
