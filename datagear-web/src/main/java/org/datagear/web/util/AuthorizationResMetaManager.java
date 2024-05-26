@@ -15,13 +15,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.controller;
+package org.datagear.web.util;
 
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.management.domain.Authorization;
+import org.datagear.web.controller.AuthorizationController;
 
 /**
  * 授权资源元信息管理器。

@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.controller;
+package org.datagear.web.util;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.DataSetEntity;
