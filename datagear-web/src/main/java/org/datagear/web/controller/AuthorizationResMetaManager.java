@@ -87,6 +87,36 @@ public class AuthorizationResMetaManager
 	}
 
 	/**
+	 * 注册读传递【读-读、读-写、读-删除、无】授权功能{@linkplain ResourceMeta}。
+	 * <p>
+	 * 对记录本身只有读权限，对记录所表示的所有子级数据有读、写、删除权限（需要编程处理）。
+	 * </p>
+	 * 
+	 * @param resourceType
+	 * @param transferReadLabelDesc
+	 * @param transferEditLabelDesc
+	 * @param transferDeleteLabelDesc
+	 */
+	public void registerForReadTransfer(String resourceType, String transferReadLabelDesc, String transferEditLabelDesc,
+			String transferDeleteLabelDesc)
+	{
+		PermissionMeta read = PermissionMeta.valueOfRead(Authorization.PERMISSION_READ_TRANSFER_READ);
+		read.setPermissionLabelDesc(transferReadLabelDesc);
+
+		PermissionMeta edit = PermissionMeta.valueOfEdit(Authorization.PERMISSION_READ_TRANSFER_EDIT);
+		edit.setPermissionLabelDesc(transferEditLabelDesc);
+
+		PermissionMeta delete = PermissionMeta.valueOfDelete(Authorization.PERMISSION_READ_TRANSFER_DELETE);
+		delete.setPermissionLabelDesc(transferDeleteLabelDesc);
+
+		PermissionMeta none = PermissionMeta.valueOfNone();
+
+		ResourceMeta resourceMeta = new ResourceMeta(resourceType, PermissionMeta.valuesOf(read, edit, delete, none));
+
+		register(resourceMeta);
+	}
+
+	/**
 	 * 获取{@linkplain ResourceMeta}。
 	 * <p>
 	 * 没有，则返回{@code null}。

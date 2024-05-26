@@ -29,7 +29,7 @@ import org.springframework.beans.BeanUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * 数据库模式实体。
+ * 数据源实体。
  * 
  * @author datagear@163.com
  *
@@ -50,13 +50,13 @@ public class Schema extends AbstractStringIdEntity
 	 */
 
 	/** 数据源内的表数据权限：读取 */
-	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ_START;
+	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ_TRANSFER_READ;
 
 	/** 数据源内的表数据权限：编辑 */
-	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ_START + 4;
+	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ_TRANSFER_EDIT;
 
 	/** 数据源内的表数据权限：删除 */
-	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ_START + 8;
+	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ_TRANSFER_DELETE;
 
 	/*------------------------------------------------------*/
 

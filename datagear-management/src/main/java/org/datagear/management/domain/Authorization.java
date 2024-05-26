@@ -73,6 +73,35 @@ public class Authorization extends AbstractStringIdEntity implements CloneableEn
 
 	/*------------------------------------------------------*/
 
+	/**
+	 * 读传递权限：读取
+	 * <p>
+	 * 某些模块，对某条记录授予读权限时，不是要授权记录本身，而是要授权记录所表示的子级数据，
+	 * 所以，这里扩展了{@linkplain #PERMISSION_READ_START}权限，用于标识此权限值。
+	 * </p>
+	 */
+	public static final int PERMISSION_READ_TRANSFER_READ = Authorization.PERMISSION_READ_START;
+
+	/**
+	 * 读传递权限：编辑
+	 * <p>
+	 * 某些模块，对某条记录授予编辑权限时，不是要授权记录本身，而是要授权记录所表示的子级数据，
+	 * 所以，这里扩展了{@linkplain #PERMISSION_READ_START}权限，用于标识此权限值。
+	 * </p>
+	 */
+	public static final int PERMISSION_READ_TRANSFER_EDIT = 24;
+
+	/**
+	 * 读传递权限：删除
+	 * <p>
+	 * 某些模块，对某条记录授予删除权限时，不是要授权记录本身，而是要授权记录所表示的子级数据，
+	 * 所以，这里扩展了{@linkplain #PERMISSION_READ_START}权限，用于标识此权限值。
+	 * </p>
+	 */
+	public static final int PERMISSION_READ_TRANSFER_DELETE = 28;
+
+	/*------------------------------------------------------*/
+
 	/** 授权资源 */
 	private String resource;
 
