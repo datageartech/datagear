@@ -37,9 +37,18 @@ public class ResultFileInfo extends FileInfo
 
 	public static final String FIELD_NAME = "name";
 
+	public static final String FIELD_DISPLAY_NAME = "displayName";
+
 	public static final String FIELD_BYTES = "bytes";
 
+	public static final String FIELD_SIZE = "size";
+
 	public static final String FIELD_LAST_MODIFIED = "lastModified";
+
+	public static final String FIELD_DISPLAY_LAST_MODIFIED = "displayLastModified";
+
+	/** 相对于根目录的完整路径 */
+	private String path;
 
 	/** 上次修改时间 */
 	private long lastModified = 0;
@@ -52,31 +61,46 @@ public class ResultFileInfo extends FileInfo
 		super();
 	}
 
-	public ResultFileInfo(String name)
+	public ResultFileInfo(String path, String name)
 	{
 		super(name);
+		this.path = FileUtil.trimPath(path, FileUtil.PATH_SEPARATOR_SLASH);
 	}
 
-	public ResultFileInfo(String name, boolean directory)
+	public ResultFileInfo(String path, String name, boolean directory)
 	{
 		super(name, directory);
+		this.path = FileUtil.trimPath(path, FileUtil.PATH_SEPARATOR_SLASH);
 		super.setDisplayName(FileUtil.toDisplayPath(name, directory));
 	}
 
-	public ResultFileInfo(String name, boolean directory, long bytes, long lastModified)
+	public ResultFileInfo(String path, String name, boolean directory, long bytes, long lastModified)
 	{
 		super(name, directory, bytes);
+		this.path = FileUtil.trimPath(path, FileUtil.PATH_SEPARATOR_SLASH);
 		super.setDisplayName(FileUtil.toDisplayPath(name, directory));
 		this.lastModified = lastModified;
 		this.displayLastModified = toDisplayLastModified(lastModified);
 	}
 
-	public ResultFileInfo(String name, boolean directory, long bytes, long lastModified, String displayLastModified)
+	public ResultFileInfo(String path, String name, boolean directory, long bytes, long lastModified,
+			String displayLastModified)
 	{
 		super(name, directory, bytes);
+		this.path = FileUtil.trimPath(path, FileUtil.PATH_SEPARATOR_SLASH);
 		super.setDisplayName(FileUtil.toDisplayPath(name, directory));
 		this.lastModified = lastModified;
 		this.displayLastModified = displayLastModified;
+	}
+
+	public String getPath()
+	{
+		return path;
+	}
+
+	public void setPath(String path)
+	{
+		this.path = path;
 	}
 
 	public long getLastModified()

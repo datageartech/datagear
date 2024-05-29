@@ -72,7 +72,7 @@ public class FileInfo implements Serializable, Comparable<FileInfo>
 		this.directory = directory;
 		this.bytes = bytes;
 		this.displayName = name;
-		this.size = toPrettySize(bytes);
+		this.size = (directory ? "" : toPrettySize(bytes));
 	}
 
 	public String getName()

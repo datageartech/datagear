@@ -87,7 +87,8 @@ public class DirectoryQuerySupportTest
 		{
 			DirectoryQuery query = new DirectoryQuery("query", DirectoryQuery.nameAscOrder(),
 					DirectoryQuery.QUERY_RANGE_DESCENDANT);
-			List<ResultFileInfo> fileInfos = qs.query(query, "dirquery");
+			query.setPath("dirquery");
+			List<ResultFileInfo> fileInfos = qs.query(query);
 
 			assertTrue(fileInfos.size() == 3);
 			assertEquals("DirectoryPagingQuery.java", fileInfos.get(0).getName());
@@ -104,8 +105,9 @@ public class DirectoryQuerySupportTest
 		// 子目录内
 		{
 			DirectoryPagingQuery query = new DirectoryPagingQuery(1, "query", DirectoryQuery.nameAscOrder());
+			query.setPath("dirquery");
 			query.setPageSize(2);
-			PagingData<ResultFileInfo> pd = qs.pagingQuery(query, "dirquery");
+			PagingData<ResultFileInfo> pd = qs.pagingQuery(query);
 			List<ResultFileInfo> fileInfos = pd.getItems();
 
 			assertTrue(fileInfos.size() == 2);
@@ -114,8 +116,9 @@ public class DirectoryQuerySupportTest
 		}
 		{
 			DirectoryPagingQuery query = new DirectoryPagingQuery(2, "query", DirectoryQuery.nameAscOrder());
+			query.setPath("dirquery");
 			query.setPageSize(2);
-			PagingData<ResultFileInfo> pd = qs.pagingQuery(query, "dirquery");
+			PagingData<ResultFileInfo> pd = qs.pagingQuery(query);
 			List<ResultFileInfo> fileInfos = pd.getItems();
 
 			assertTrue(fileInfos.size() == 1);

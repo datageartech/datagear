@@ -97,27 +97,14 @@ public class DirectoryQuerySupport
 	}
 
 	/**
-	 * 在{@linkplain #getDirectory()}内分页查询。
+	 * 在{@linkplain #getDirectory()}子路径内分页查询。
 	 * 
 	 * @param query
 	 * @return
 	 */
 	public PagingData<ResultFileInfo> pagingQuery(DirectoryPagingQuery query)
 	{
-		return pagingQuery(query, null);
-	}
-
-	/**
-	 * 在{@linkplain #getDirectory()}子路径内分页查询。
-	 * 
-	 * @param query
-	 * @param subPath
-	 *            允许{@code null}
-	 * @return
-	 */
-	public PagingData<ResultFileInfo> pagingQuery(DirectoryPagingQuery query, String subPath)
-	{
-		List<ResultFileInfo> fileInfos = query(query, subPath);
+		List<ResultFileInfo> fileInfos = query(query);
 
 		PagingData<ResultFileInfo> re = new PagingData<>(query.getPage(), fileInfos.size(), query.getPageSize());
 		re.setItems(fileInfos.subList(re.getStartIndex(), re.getEndIndex()));
@@ -126,30 +113,17 @@ public class DirectoryQuerySupport
 	}
 
 	/**
-	 * 在{@linkplain #getDirectory()}内分页查询。
+	 * 在{@linkplain #getDirectory()}子路径内查询。
 	 * 
 	 * @param query
 	 * @return
 	 */
 	public List<ResultFileInfo> query(DirectoryQuery query)
 	{
-		return query(query, null);
-	}
-
-	/**
-	 * 在{@linkplain #getDirectory()}子路径内查询。
-	 * 
-	 * @param query
-	 * @param subPath
-	 *            允许{@code null}
-	 * @return
-	 */
-	public List<ResultFileInfo> query(DirectoryQuery query, String subPath)
-	{
 		File base = this.directory;
 
-		if (!StringUtil.isEmpty(subPath))
-			base = FileUtil.getFile(base, subPath);
+		if (!StringUtil.isEmpty(query.getPath()))
+			base = FileUtil.getFile(base, query.getPath());
 
 		if (!base.exists() || !base.isDirectory())
 			return Collections.emptyList();
@@ -200,6 +174,7 @@ public class DirectoryQuerySupport
 
 	protected ResultFileInfo toResultFileInfo(File directory, File subFile)
 	{
+		String path = FileUtil.getRelativePath(getDirectory(), subFile);
 		String name = FileUtil.getRelativePath(directory, subFile);
 		long length = 0;
 		long lastModified = 0;
@@ -214,7 +189,7 @@ public class DirectoryQuerySupport
 			lastModified = subFile.lastModified();
 		}
 
-		return new ResultFileInfo(name, subFile.isDirectory(), length, lastModified);
+		return new ResultFileInfo(path, name, subFile.isDirectory(), length, lastModified);
 	}
 
 	/**
@@ -306,15 +281,18 @@ public class DirectoryQuerySupport
 
 			int re = 0;
 
-			if (ResultFileInfo.FIELD_NAME.equalsIgnoreCase(name))
+			if (ResultFileInfo.FIELD_NAME.equalsIgnoreCase(name)
+					|| ResultFileInfo.FIELD_DISPLAY_NAME.equalsIgnoreCase(name))
 			{
 				re = o1.getName().compareToIgnoreCase(o2.getName());
 			}
-			else if (ResultFileInfo.FIELD_BYTES.equalsIgnoreCase(name))
+			else if (ResultFileInfo.FIELD_BYTES.equalsIgnoreCase(name)
+					|| ResultFileInfo.FIELD_SIZE.equalsIgnoreCase(name))
 			{
 				re = Long.valueOf(o1.getBytes()).compareTo(o2.getBytes());
 			}
-			else if (ResultFileInfo.FIELD_LAST_MODIFIED.equalsIgnoreCase(name))
+			else if (ResultFileInfo.FIELD_LAST_MODIFIED.equalsIgnoreCase(name)
+					|| ResultFileInfo.FIELD_DISPLAY_LAST_MODIFIED.equalsIgnoreCase(name))
 			{
 				re = Long.valueOf(o1.getLastModified()).compareTo(o2.getLastModified());
 			}

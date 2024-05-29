@@ -46,6 +46,9 @@ public class DirectoryQuery extends KeywordQuery
 	/** 查询范围 */
 	private String queryRange = QUERY_RANGE_CHILDREN;
 
+	/** 查询目录 */
+	private String path = null;
+
 	public DirectoryQuery()
 	{
 		super();
@@ -89,12 +92,23 @@ public class DirectoryQuery extends KeywordQuery
 		this.queryRange = queryRange;
 	}
 
+	public String getPath()
+	{
+		return path;
+	}
+
+	public void setPath(String path)
+	{
+		this.path = path;
+	}
+
 	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((order == null) ? 0 : order.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		result = prime * result + ((queryRange == null) ? 0 : queryRange.hashCode());
 		return result;
 	}
@@ -116,6 +130,13 @@ public class DirectoryQuery extends KeywordQuery
 		}
 		else if (!order.equals(other.order))
 			return false;
+		if (path == null)
+		{
+			if (other.path != null)
+				return false;
+		}
+		else if (!path.equals(other.path))
+			return false;
 		if (queryRange == null)
 		{
 			if (other.queryRange != null)
@@ -124,6 +145,13 @@ public class DirectoryQuery extends KeywordQuery
 		else if (!queryRange.equals(other.queryRange))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [keyword=" + getKeyword() + ", order=" + order + ", queryRange="
+				+ queryRange + ", path=" + path + "]";
 	}
 
 	public static Order nameAscOrder()
