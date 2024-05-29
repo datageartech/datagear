@@ -179,7 +179,7 @@ User currentUser
 					},
 					{
 						label: "<@spring.message code='module.dashboardGlobalRes' />",
-						url: po.concatContextPath("/dashboardGlobalRes/query"),
+						url: po.concatContextPath("/dashboardGlobalRes/pagingQuery"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]

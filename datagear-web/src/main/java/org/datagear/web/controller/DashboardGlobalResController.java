@@ -35,12 +35,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.KeywordMatcher;
 import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
+import org.datagear.util.dirquery.DirectoryPagingQuery;
+import org.datagear.util.dirquery.DirectoryQuerySupport;
+import org.datagear.util.dirquery.ResultFileInfo;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.config.CoreConfigSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -369,23 +372,30 @@ public class DashboardGlobalResController extends AbstractController implements 
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/query")
-	public String query(HttpServletRequest request, org.springframework.ui.Model model)
+	@RequestMapping("/pagingQuery")
+	public String pagingQuery(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyAction(model);
 		return "/dashboardGlobalRes/dashboardGlobalRes_table";
 	}
 
-	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<DashboardGlobalResItem> queryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+	public PagingData<ResultFileInfo> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+			final org.springframework.ui.Model springModel,
+			@RequestBody(required = false) DirectoryPagingQuery pagingQueryParam)
 			throws Exception
 	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		final DirectoryPagingQuery pagingQuery = inflateDirectoryPagingQuery(request, pagingQueryParam);
+		DirectoryQuerySupport qs = getDirectoryQuerySupport();
 
-		return findDashboardGlobalResItems(pagingQuery.getKeyword());
+		return qs.pagingQuery(pagingQuery);
+	}
+
+	protected DirectoryQuerySupport getDirectoryQuerySupport()
+	{
+		return new DirectoryQuerySupport(getDashboardGlobalResRootDirectory());
 	}
 
 	protected List<DashboardGlobalResItem> findDashboardGlobalResItems(String keyword)

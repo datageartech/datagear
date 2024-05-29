@@ -584,7 +584,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess dashboardGlobalResModuleAccess()
 	{
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/dashboardGlobalRes/queryData");
+				"/dashboardGlobalRes/select", "/dashboardGlobalRes/pagingQueryData");
 
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/dashboardGlobalRes/**");
 

@@ -32,7 +32,7 @@
 <div id="${pid}" class="page page-manager page-table h-full flex flex-column overflow-auto">
 	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
-			<#include "../include/page_search_form.ftl">
+			<#include "../include/page_search_form_directory.ftl">
 		</div>
 		<div class="operations col-12 flex gap-1 flex-wrap md:justify-content-end" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
@@ -47,13 +47,18 @@
 	</div>
 	<div class="page-content flex-grow-1 overflow-auto">
 		<p-datatable :value="pm.items" :scrollable="true" scroll-height="flex"
-			:loading="pm.loading" :lazy="true"
+			:paginator="pm.paginator" :paginator-template="pm.paginatorTemplate" :first="pm.pageRecordIndex"
+			:rows="pm.rowsPerPage" :current-page-report-template="pm.pageReportTemplate"
+			:rows-per-page-options="pm.rowsPerPageOptions" :loading="pm.loading"
+			:lazy="true" :total-records="pm.totalRecords" @page="onPaginator($event)"
 			sort-mode="multiple" :multi-sort-meta="pm.multiSortMeta" @sort="onSort($event)"
 			:resizable-columns="true" column-resize-mode="expand"
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" data-key="path" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="path" header="<@spring.message code='id' />" :hidden="true"></p-column>
-			<p-column field="path" header="<@spring.message code='path' />"></p-column>
+			<p-column field="displayName" header="<@spring.message code='name' />" :sortable="true" class="col-desc"></p-column>
+			<p-column field="size" header="<@spring.message code='size' />" :sortable="true" class="col-row-number"></p-column>
+			<p-column field="displayLastModified" header="<@spring.message code='modifyDate' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
 	</div>
 	<#include "../include/page_foot.ftl">
@@ -66,9 +71,11 @@
 	po.inflateEntityActionIdPropName = "path";
 	po.inflateEntityActionIdParamName = "path";
 	
-	po.setupAjaxTable("/dashboardGlobalRes/queryData",
+	po.isMultipleQueryOrder = function(){ return false; };
+	
+	po.setupAjaxTable("/dashboardGlobalRes/pagingQueryData",
 	{
-		multiSortMeta: []
+		multiSortMeta: [ {field: "displayName", order: 1} ]
 	});
 	
 	po.vueMethod(

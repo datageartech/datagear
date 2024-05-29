@@ -48,6 +48,7 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.dirquery.DirectoryPagingQuery;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.security.AuthenticationSecurity;
@@ -603,25 +604,83 @@ public abstract class AbstractController extends MessageSourceSupport
 		if (pagingQuery == null)
 		{
 			pagingQuery = new PagingQuery();
+			Integer pageSize = resolveCookiePageSize(request, cookiePaginationSize);
 
-			if (!isEmpty(cookiePaginationSize))
-			{
-				try
-				{
-					String pss = WebUtils.getCookieValue(request, cookiePaginationSize);
-
-					if (!isEmpty(pss))
-						pagingQuery.setPageSize(Integer.parseInt(pss));
-				}
-				catch (Exception e)
-				{
-				}
-			}
+			if (pageSize != null)
+				pagingQuery.setPageSize(pageSize);
 		}
 
 		return pagingQuery;
 	}
-	
+
+	/**
+	 * 检查并补充{@linkplain DirectoryPagingQuery}。
+	 * 
+	 * @param request
+	 * @param pagingQuery
+	 *            允许为{@code null}
+	 * @return 不会为{@code null}
+	 */
+	protected DirectoryPagingQuery inflateDirectoryPagingQuery(HttpServletRequest request,
+			DirectoryPagingQuery pagingQuery)
+	{
+		return inflateDirectoryPagingQuery(request, pagingQuery, WebUtils.COOKIE_PAGINATION_SIZE);
+	}
+
+	/**
+	 * 检查并补充{@linkplain DirectoryPagingQuery}。
+	 * 
+	 * @param request
+	 * @param pagingQuery
+	 *            允许为{@code null}
+	 * @param cookiePaginationSize
+	 *            允许为{@code null}
+	 * @return 不会为{@code null}
+	 */
+	protected DirectoryPagingQuery inflateDirectoryPagingQuery(HttpServletRequest request,
+			DirectoryPagingQuery pagingQuery, String cookiePaginationSize)
+	{
+		if (pagingQuery == null)
+		{
+			pagingQuery = new DirectoryPagingQuery();
+			Integer pageSize = resolveCookiePageSize(request, cookiePaginationSize);
+
+			if (pageSize != null)
+				pagingQuery.setPageSize(pageSize);
+		}
+
+		return pagingQuery;
+	}
+
+	/**
+	 * 解析Cookie中的页大小。
+	 * 
+	 * @param request
+	 * @param cookiePageSize
+	 *            允许为{@code null}
+	 * @return {@code null}表示未解析到
+	 */
+	protected Integer resolveCookiePageSize(HttpServletRequest request, String cookiePageSize)
+	{
+		Integer pageSize = null;
+
+		if (!isEmpty(cookiePageSize))
+		{
+			try
+			{
+				String pss = WebUtils.getCookieValue(request, cookiePageSize);
+
+				if (!isEmpty(pss))
+					pageSize = Integer.parseInt(pss);
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
+		return pageSize;
+	}
+
 	/**
 	 * 为异常设置{@linkplain OperationMessage}。
 	 * <p>

@@ -2609,20 +2609,26 @@ $.inflatePageTable = function(po)
 		{
 			onPaginator: function(e)
 			{
-				po.ajaxTableQuery({ page: e.page+1, pageSize: e.rows, orders: po.sortMetaToOrders(e.multiSortMeta) });
+				var query = { page: e.page+1, pageSize: e.rows };
+				$.extend(query, po.buildQueryForOrder(e.multiSortMeta));
+				
+				po.ajaxTableQuery(query);
 				po.loadAjaxTable();
 			},
 			onSort: function(e)
 			{
-				po.ajaxTableQuery({ orders: po.sortMetaToOrders(e.multiSortMeta) });
+				po.ajaxTableQuery(po.buildQueryForOrder(e.multiSortMeta));
 				po.loadAjaxTable();
 			}
 		});
 		
+		var query = { page: 1, pageSize: po.rowsPerPage };
+		$.extend(query, po.buildQueryForOrder(options.multiSortMeta));
+		
 		po.ajaxTableAttr(
 		{
 			url: url,
-			query: { page: 1, pageSize: po.rowsPerPage, orders: po.sortMetaToOrders(options.multiSortMeta) }
+			query: query
 		});
 		
 		if(options.initData)
@@ -2634,6 +2640,25 @@ $.inflatePageTable = function(po)
 		}
 		
 		return pm;
+	};
+	
+	po.isMultipleQueryOrder = function(){ return true; };
+	
+	po.buildQueryForOrder = function(multiSortMeta)
+	{
+		var qo = {};
+		
+		if(po.isMultipleQueryOrder())
+		{
+			qo.orders = po.sortMetaToOrders(multiSortMeta);
+		}
+		else
+		{
+			var orders = po.sortMetaToOrders(multiSortMeta);
+			qo.order = (orders ? orders[0] : undefined);
+		}
+		
+		return qo;
 	};
 	
 	po.ajaxTableQuery = function(query)
