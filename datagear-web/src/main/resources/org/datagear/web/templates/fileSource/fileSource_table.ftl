@@ -57,8 +57,7 @@
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
-			<p-column field="directory" header="<@spring.message code='directory' />" :sortable="true" class="col-name" v-if="pm.isShowDirectory"></p-column>
-			<p-column field="desc" header="<@spring.message code='desc' />" :sortable="true" class=""></p-column>
+			<p-column field="desc" header="<@spring.message code='desc' />" :sortable="true" class="col-desc col-last"></p-column>
 		</p-datatable>
 	</div>
 	<#include "../include/page_foot.ftl">
