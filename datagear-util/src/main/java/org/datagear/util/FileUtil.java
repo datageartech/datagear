@@ -675,6 +675,29 @@ public class FileUtil
 	}
 
 	/**
+	 * 转换为展示路径。
+	 * <p>
+	 * 分隔符统一采用{@linkplain #PATH_SEPARATOR_SLASH}，目录末尾统一添加{@linkplain #PATH_SEPARATOR_SLASH}。
+	 * </p>
+	 * 
+	 * @param path
+	 * @param directory
+	 * @return
+	 */
+	public static String toDisplayPath(String path, boolean directory)
+	{
+		if (StringUtil.isEmpty(path))
+			return path;
+		
+		path = trimPath(path, PATH_SEPARATOR_SLASH);
+		
+		if(directory && !path.endsWith(PATH_SEPARATOR_SLASH))
+			path += PATH_SEPARATOR_SLASH;
+
+		return path;
+	}
+
+	/**
 	 * 是否包含上行路径（{@code ../}、{@code ..\}）。
 	 * 
 	 * @param path

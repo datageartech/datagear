@@ -17,8 +17,10 @@
 
 package org.datagear.persistence;
 
-import java.io.Serializable;
 import java.util.Arrays;
+
+import org.datagear.util.StringUtil;
+import org.datagear.util.query.KeywordQuery;
 
 /**
  * 查询。
@@ -26,12 +28,9 @@ import java.util.Arrays;
  * @author datagear@163.com
  *
  */
-public class Query implements Serializable
+public class Query extends KeywordQuery
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 查询关键字 */
-	private String keyword;
 
 	/** 查询条件 */
 	private String condition;
@@ -44,33 +43,23 @@ public class Query implements Serializable
 
 	public Query()
 	{
+		super();
 	}
 
 	public Query(String keyword)
 	{
-		this.keyword = keyword;
+		super(keyword);
 	}
 
 	public Query(String keyword, String condition)
 	{
-		super();
-		this.keyword = keyword;
+		super(keyword);
 		this.condition = condition;
 	}
 
 	public boolean hasKeyword()
 	{
-		return (this.keyword != null && !this.keyword.isEmpty());
-	}
-
-	public String getKeyword()
-	{
-		return keyword;
-	}
-
-	public void setKeyword(String keyword)
-	{
-		this.keyword = keyword;
+		return !StringUtil.isEmpty(getKeyword());
 	}
 
 	public boolean isNotLike()
@@ -114,9 +103,44 @@ public class Query implements Serializable
 	}
 
 	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((condition == null) ? 0 : condition.hashCode());
+		result = prime * result + (notLike ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(orders);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Query other = (Query) obj;
+		if (condition == null)
+		{
+			if (other.condition != null)
+				return false;
+		}
+		else if (!condition.equals(other.condition))
+			return false;
+		if (notLike != other.notLike)
+			return false;
+		if (!Arrays.equals(orders, other.orders))
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [keyword=" + keyword + ", condition=" + condition + ", orders="
+		return getClass().getSimpleName() + " [keyword=" + getKeyword() + ", condition=" + condition + ", orders="
 				+ Arrays.toString(orders) + ", notLike=" + notLike + "]";
 	}
 }

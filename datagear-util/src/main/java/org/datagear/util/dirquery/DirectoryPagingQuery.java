@@ -15,9 +15,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util.dirquery;
+package org.datagear.util.dirquery;
 
-import org.datagear.persistence.PagingQuery;
+import org.datagear.util.query.Order;
+import org.datagear.util.query.Paging;
 
 /**
  * 目录分页查询。
@@ -25,57 +26,53 @@ import org.datagear.persistence.PagingQuery;
  * @author datagear@163.com
  *
  */
-public class DirectoryPagingQuery extends PagingQuery
+public class DirectoryPagingQuery extends DirectoryQuery
 {
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 查询范围：本级
-	 */
-	public static final String QUERY_RANGE_CHILDREN = "children";
-
-	/**
-	 * 查询范围：全级
-	 */
-	public static final String QUERY_RANGE_DESCENDANT = "descendant";
-
-	/**
-	 * 查询范围。
-	 */
-	private String queryRange = QUERY_RANGE_CHILDREN;
+	/** 分页信息 */
+	private Paging paging = new Paging();
 
 	public DirectoryPagingQuery()
 	{
 		super();
 	}
 
-	public DirectoryPagingQuery(int page)
+	public DirectoryPagingQuery(int page, String keyword)
 	{
-		super(page);
+		super(keyword);
+		this.paging.setPage(page);
 	}
 
-	public DirectoryPagingQuery(int page, int pageSize)
+	public DirectoryPagingQuery(int page, String keyword, Order order)
 	{
-		super(page, pageSize);
+		super(keyword, order);
+		this.paging.setPage(page);
 	}
 
-	public DirectoryPagingQuery(int page, int pageSize, String keyword)
+	public DirectoryPagingQuery(int page, String keyword, Order order, String queryRange)
 	{
-		super(page, pageSize, keyword);
+		super(keyword, order, queryRange);
+		this.paging.setPage(page);
 	}
 
-	public DirectoryPagingQuery(int page, int pageSize, String keyword, String condition)
+	public int getPage()
 	{
-		super(page, pageSize, keyword, condition);
+		return this.paging.getPage();
 	}
 
-	public String getQueryRange()
+	public void setPage(int page)
 	{
-		return queryRange;
+		this.paging.setPage(page);
 	}
 
-	public void setQueryRange(String queryRange)
+	public int getPageSize()
 	{
-		this.queryRange = queryRange;
+		return this.paging.getPageSize();
+	}
+
+	public void setPageSize(int pageSize)
+	{
+		this.paging.setPageSize(pageSize);
 	}
 }

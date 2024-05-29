@@ -15,12 +15,15 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util.dirquery;
+package org.datagear.util.dirquery;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import org.datagear.util.FileInfo;
+import org.datagear.util.FileUtil;
 
 /**
  * 查询结果文件信息。
@@ -31,6 +34,12 @@ import org.datagear.util.FileInfo;
 public class ResultFileInfo extends FileInfo
 {
 	private static final long serialVersionUID = 1L;
+
+	public static final String FIELD_NAME = "name";
+
+	public static final String FIELD_BYTES = "bytes";
+
+	public static final String FIELD_LAST_MODIFIED = "lastModified";
 
 	/** 上次修改时间 */
 	private long lastModified = 0;
@@ -51,11 +60,13 @@ public class ResultFileInfo extends FileInfo
 	public ResultFileInfo(String name, boolean directory)
 	{
 		super(name, directory);
+		super.setDisplayName(FileUtil.toDisplayPath(name, directory));
 	}
 
 	public ResultFileInfo(String name, boolean directory, long bytes, long lastModified)
 	{
 		super(name, directory, bytes);
+		super.setDisplayName(FileUtil.toDisplayPath(name, directory));
 		this.lastModified = lastModified;
 		this.displayLastModified = toDisplayLastModified(lastModified);
 	}
@@ -63,6 +74,7 @@ public class ResultFileInfo extends FileInfo
 	public ResultFileInfo(String name, boolean directory, long bytes, long lastModified, String displayLastModified)
 	{
 		super(name, directory, bytes);
+		super.setDisplayName(FileUtil.toDisplayPath(name, directory));
 		this.lastModified = lastModified;
 		this.displayLastModified = displayLastModified;
 	}
@@ -99,7 +111,8 @@ public class ResultFileInfo extends FileInfo
 			return "";
 
 		Instant instant = Instant.ofEpochMilli(lastModified);
-		return LAST_MODIFIED_FORMATTER.format(instant);
+		LocalDateTime dt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+		return LAST_MODIFIED_FORMATTER.format(dt);
 	}
 
 	public static final DateTimeFormatter LAST_MODIFIED_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
