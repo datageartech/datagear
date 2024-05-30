@@ -127,19 +127,26 @@ public class DashboardGlobalResController extends AbstractController implements 
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam(value = "dir", required = false) String dir)
 			throws Exception
 	{
-		setFormModel(model, new DashboardGlobalResSaveForm(), REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		DashboardGlobalResSaveForm form = new DashboardGlobalResSaveForm();
+		form.setSavePath(FileUtil.toDisplayPath(dir, true));
+
+		setFormModel(model, form, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		model.addAttribute("defaultDir", FileUtil.toDisplayPath(dir, true));
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
 
 	@RequestMapping("/upload")
-	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
+	public String upload(HttpServletRequest request, org.springframework.ui.Model model,
+			@RequestParam(value = "dir", required = false) String dir)
 	{
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+		model.addAttribute("defaultDir", FileUtil.toDisplayPath(dir, true));
 
 		setFormAction(model, REQUEST_ACTION_UPLOAD, SUBMIT_ACTION_SAVE_UPLOAD);
 

@@ -24,18 +24,24 @@
 <form id="${pid}searchForm" @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
 		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100"></p-inputtext>
-		<p-button type="button" :label="pm.searchFilterLabel"
-			 aria-haspopup="true" aria-controls="${pid}searchFilterMenu"
-			@click="onToggleSearchFilterMenu">
+		<p-button type="button" :label="pm.dirQueryRangeLabel"
+			 aria-haspopup="true" aria-controls="${pid}dirQueryRangeMenu"
+			@click="onToggleDirQueryRangeMenu">
 		</p-button>
 		<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
 	</div>
-	<p-menu id="${pid}searchFilterMenu" ref="${pid}searchFilterMenuEle" :model="pm.searchFilterMenuItems" :popup="true"></p-menu>
+	<p-menu id="${pid}dirQueryRangeMenu" ref="${pid}dirQueryRangeMenuEle" :model="pm.dirQueryRangeMenuItems" :popup="true"></p-menu>
 </form>
 <script>
 (function(po)
 {
 	po.search = function(formData){ /*需实现*/ };
+	
+	//整合page_directory_breadcrumb.ftl功能
+	po.handleDirBreadcrumbCommand = function(item)
+	{
+		po.submitSearchFormForQueryPath(item.path);
+	};
 	
 	po.submitSearchForm = function()
 	{
@@ -43,25 +49,47 @@
 		po.search(param);
 	};
 	
-	po.updateSearchFilterForMenuItem = function(menuItem)
+	po.submitSearchFormForQueryPath = function(path)
+	{
+		po.updateDirQueryPath(path);
+		po.submitSearchForm();
+	};
+	
+	po.getDirQueryPath = function()
+	{
+		var pm = po.vuePageModel();
+		return (pm.searchForm["path"] || "");
+	};
+	
+	po.updateDirQueryRangeForMenuItem = function(menuItem)
 	{
 		var pm = po.vuePageModel();
 		pm.searchForm["queryRange"] = menuItem.value;
-		pm.searchFilterLabel = menuItem.label;
+		pm.dirQueryRangeLabel = menuItem.label;
+	};
+	
+	po.updateDirQueryPath = function(path)
+	{
+		var pm = po.vuePageModel();
+		pm.searchForm["path"] = path;
+		
+		//整合page_directory_breadcrumb.ftl功能
+		if(po.updateDirBreadcrumb)
+			po.updateDirBreadcrumb(path);
 	};
 	
 	po.vuePageModel(
 	{
 		searchForm: { keyword: "", "queryRange": "${DirectoryQuery.QUERY_RANGE_CHILDREN}" },
-		searchFilterLabel: "<@spring.message code='selfLevel' />",
-		searchFilterMenuItems:
+		dirQueryRangeLabel: "<@spring.message code='selfLevel' />",
+		dirQueryRangeMenuItems:
 		[
 			{
 				label: "<@spring.message code='selfLevel' />",
 				value: "${DirectoryQuery.QUERY_RANGE_CHILDREN}",
 				command: function(e)
 				{
-					po.updateSearchFilterForMenuItem(e.item);
+					po.updateDirQueryRangeForMenuItem(e.item);
 					po.submitSearchForm();
 				}
 			},
@@ -70,14 +98,14 @@
 				value: "${DirectoryQuery.QUERY_RANGE_DESCENDANT}",
 				command: function(e)
 				{
-					po.updateSearchFilterForMenuItem(e.item);
+					po.updateDirQueryRangeForMenuItem(e.item);
 					po.submitSearchForm();
 				}
 			}
 		]
 	});
 	
-	po.vueRef("${pid}searchFilterMenuEle", null);
+	po.vueRef("${pid}dirQueryRangeMenuEle", null);
 	
 	po.vueMethod(
 	{
@@ -86,9 +114,14 @@
 			po.submitSearchForm();
 		},
 		
-		onToggleSearchFilterMenu: function(e)
+		submitSearchFormForQueryPath: function(path)
 		{
-			po.vueUnref("${pid}searchFilterMenuEle").toggle(e);
+			po.submitSearchFormForQueryPath(path);
+		},
+		
+		onToggleDirQueryRangeMenu: function(e)
+		{
+			po.vueUnref("${pid}dirQueryRangeMenuEle").toggle(e);
 		}
 	});
 })

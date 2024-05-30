@@ -2282,7 +2282,8 @@ $.inflatePageObj = function(po)
         "p-splitterpanel": primevue.splitterpanel,
         "p-progressbar": primevue.progressbar,
 		"p-multiselect": primevue.multiselect,
-		"p-treeselect": primevue.treeselect
+		"p-treeselect": primevue.treeselect,
+		"p-breadcrumb": primevue.breadcrumb
 	};
 	
 	//vue挂载

@@ -31,6 +31,9 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-manager page-table h-full flex flex-column overflow-auto">
 	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
+		<div class="col-12 mb-1">
+			<#include "../include/page_directory_breadcrumb.ftl">
+		</div>
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
 			<#include "../include/page_search_form_directory.ftl">
 		</div>
@@ -56,7 +59,16 @@
 			v-model:selection="pm.selectedItems" :selection-mode="pm.selectionMode" data-key="path" striped-rows>
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="path" header="<@spring.message code='id' />" :hidden="true"></p-column>
-			<p-column field="displayName" header="<@spring.message code='name' />" :sortable="true" class="col-desc"></p-column>
+			<p-column field="displayName" header="<@spring.message code='name' />" :sortable="true" class="col-desc">
+				<template #body="{data}">
+					<div class="underline" v-if="data.directory">
+						<span @click="submitSearchFormForQueryPath(data.path)">{{data.displayName}}</span>
+					</div>
+					<div v-else>
+						{{data.displayName}}
+					</div>
+				</template>
+			</p-column>
 			<p-column field="size" header="<@spring.message code='size' />" :sortable="true" class="col-row-number"></p-column>
 			<p-column field="displayLastModified" header="<@spring.message code='modifyDate' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>
@@ -82,12 +94,14 @@
 	{
 		onAdd: function()
 		{
-			po.handleAddAction("/dashboardGlobalRes/add", { width: "70vw" });
+			var dir = po.getDirQueryPath();
+			po.handleAddAction("/dashboardGlobalRes/add?dir=" + encodeURIComponent(dir), { width: "70vw" });
 		},
 
 		onUpload: function()
 		{
-			po.handleAddAction("/dashboardGlobalRes/upload");
+			var dir = po.getDirQueryPath();
+			po.handleAddAction("/dashboardGlobalRes/upload?dir=" + encodeURIComponent(dir));
 		},
 		
 		onEdit: function()

@@ -38,7 +38,7 @@
 					<@spring.message code='savePath' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}savePath" v-model="fm.savePath" type="text" class="input w-full"
+		        	<p-inputtext id="${pid}savePath" v-model="fm.savePath" type="text" class="input w-full validate-normalizer"
 		        		name="savePath" required maxlength="200" autofocus>
 		        	</p-inputtext>
 		        </div>
@@ -65,6 +65,7 @@
 (function(po)
 {
 	po.submitUrl = "/dashboardGlobalRes/"+po.submitAction;
+	po.defaultDir = "${defaultDir!''}";
 	
 	po.beforeSubmitForm = function(action)
 	{
@@ -72,7 +73,17 @@
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
-	po.setupForm(formModel, { closeAfterSubmit: false });
+	po.setupForm(formModel, { closeAfterSubmit: false },
+	{
+		customNormalizers:
+		{
+			savePath: function()
+			{
+				var fm = po.vueFormModel();
+				return (fm.savePath == po.defaultDir ? "" : fm.savePath);
+			}
+		}
+	});
 	
 	po.vueMounted(function()
 	{

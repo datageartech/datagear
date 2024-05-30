@@ -97,6 +97,7 @@
 (function(po)
 {
 	po.submitUrl = "/dashboardGlobalRes/"+po.submitAction;
+	po.defaultDir = "${defaultDir!''}";
 	
 	var availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
 	
@@ -115,6 +116,9 @@
 			savePath: function()
 			{
 				var fm = po.vueFormModel();
+				
+				if(fm.savePath == po.defaultDir)
+					return "";
 				
 				if(fm.autoUnzip && $.isZipFile(fm.fileName))
 					return (fm.savePath || "savePathValidatePlaceholder");
@@ -139,7 +143,7 @@
 			
 			po.uploadFileOnUploaded(e);
 			fm.fileName = response.fileName;
-			fm.savePath = response.fileName;
+			fm.savePath = po.defaultDir + response.fileName;
 			fm.filePath = response.filePath;
 		}
 	});
