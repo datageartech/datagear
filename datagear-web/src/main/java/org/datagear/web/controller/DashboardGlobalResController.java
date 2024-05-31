@@ -387,6 +387,13 @@ public class DashboardGlobalResController extends AbstractController implements 
 		return "/dashboardGlobalRes/dashboardGlobalRes_table";
 	}
 
+	@RequestMapping("/select")
+	public String select(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		setSelectAction(request, model);
+		return "/dashboardGlobalRes/dashboardGlobalRes_table";
+	}
+
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<ResultFileInfo> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
