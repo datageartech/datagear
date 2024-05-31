@@ -460,13 +460,6 @@
 					}
 				},
 				{
-					label: "<@spring.message code='refresh' />",
-					command: function()
-					{
-						po.refreshLocalRes();
-					}
-				},
-				{
 					label: "<@spring.message code='rename' />",
 					command: function(e)
 					{
@@ -480,6 +473,13 @@
 							e.originalEvent.stopPropagation();
 							po.elementOfId("${pid}renameResBtn").click();
 						}
+					}
+				},
+				{
+					label: "<@spring.message code='refresh' />",
+					command: function()
+					{
+						po.refreshLocalRes();
 					}
 				},
 				{ separator: true },
