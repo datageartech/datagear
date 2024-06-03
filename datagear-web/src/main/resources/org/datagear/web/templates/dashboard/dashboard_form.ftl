@@ -205,7 +205,6 @@
 			if(!po.isPersistedDashboard())
 			{
 				po._isPersistedDashboard = true;
-				po.refreshGlobalRes();
 			}
 			
 			var options = this;

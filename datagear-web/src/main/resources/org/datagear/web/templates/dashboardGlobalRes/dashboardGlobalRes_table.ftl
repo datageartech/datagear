@@ -120,7 +120,17 @@
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dashboardGlobalRes/view", { target: "_blank" });
+			var viewCallback = po.pageParam("onView");
+			
+			if(!viewCallback)
+				po.handleOpenOfAction("/dashboardGlobalRes/view", { target: "_blank" });
+			else
+			{
+				po.executeOnSelect(function(entity)
+				{
+					viewCallback(entity);
+				});
+			}
 		},
 		
 		onDownload: function()

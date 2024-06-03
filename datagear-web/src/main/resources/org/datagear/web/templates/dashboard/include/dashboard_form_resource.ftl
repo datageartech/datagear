@@ -23,7 +23,16 @@
 
 -->
 <p-tabview class="light-tabview" @tab-change="onResourceTabChange">
-	<p-tabpanel header="<@spring.message code='localResource' />">
+	<p-tabpanel>
+		<template #header>
+			<span class="p-tabview-title">
+				<span><@spring.message code='localResource' /></span>
+				<span class="pl-3 text-color for-open-global-res-panel" @click="onShowGlobalRes"
+					title="<@spring.message code='dashboard.viewAndCopyGlobalResNameToClipboard' />">
+					<@spring.message code='globalResource' />（${dashboardGlobalResUrlPrefix}）
+				</span>
+			</span>
+		</template>
 		<div class="local-resource-list-wrapper resource-list-wrapper flex flex-column p-component p-inputtext">
 			<div class="flex-grow-0 text-xs">
 				<div class="flex justify-content-between">
@@ -89,44 +98,6 @@
 			</div>
 		</div>
 	</p-tabpanel>
-	<p-tabpanel header="<@spring.message code='globalResource' />">
-		<div class="global-resource-list-wrapper resource-list-wrapper flex flex-column p-component p-inputtext">
-			<div class="flex-grow-0 text-xs">
-				<div class="flex justify-content-between">
-					<div>
-						<div class="p-inputgroup">
-							<p-inputtext type="text" v-model="pm.globalRes.searchKeyword" class="text-sm p-0 px-1" style="width:5rem;"
-								@keydown.enter.prevent="onSearchGlobalRes">
-							</p-inputtext>
-							<p-button type="button" icon="pi pi-search" class="p-button-secondary p-button-sm"
-								@click="onSearchGlobalRes"></p-button>
-						</div>
-					</div>
-					<div>
-						<div class="p-buttonset">
-							<p-button type="button" icon="pi pi-copy" class="p-button-secondary"
-								@click="onCopyGlobalResToClipboard"
-								title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"
-								v-if="!pm.isReadonlyAction">
-							</p-button>
-							<p-button type="button" icon="pi pi-external-link" class="p-button-secondary"
-								@click="onOpenSelectedGlobalRes"
-								title="<@spring.message code='dashboard.openResource.desc' />">
-							</p-button>
-						</div>
-					</div>
-				</div>
-			</div>
-			<p-divider align="left" class="flex-grow-0 my-2 divider-z-0 text-sm"><b>${dashboardGlobalResUrlPrefix}</b></p-divider>
-			<div class="flex-grow-1 overflow-auto">
-				<p-tree :value="pm.globalRes.resourceNodes"
-					selection-mode="single" v-model:selection-keys="pm.globalRes.selectedNodeKeys"
-					@node-select="onGlobalResNodeSelect"
-					class="border-none white-space-nowrap overflow-x-auto bg-none">
-				</p-tree>
-			</div>
-		</div>
-	</p-tabpanel>
 </p-tabview>
 <script>
 (function(po)
@@ -170,30 +141,75 @@
 			pm.localRes.selectedNode = null;
 		});
 	};
-	
-	po.refreshGlobalRes = function()
+
+	po.showSelectGlobalResDialog = function()
 	{
-		if(!po.checkPersistedDashboard())
-			return;
+		var dialog = po.selectGlobalResDialog();
 		
-		var pm = po.vuePageModel();
-		
-		po.ajaxJson("/dashboardGlobalRes/queryData", 
+		if(dialog.length == 0)
 		{
-			data: { keyword: pm.globalRes.searchKeyword },
-			success: function(response)
+			po.openTableDialog("/dashboardGlobalRes/select",
 			{
-				var resNames = [];
-				$.each(response, function(idx, gr)
+				modal: false,
+				closable: false,
+				styleClass: "dashboard-select-global-res-wrapper table-sm",
+				templateHeader: "<span class='p-dialog-title'><@spring.message code='module.dashboardGlobalRes' /> - <@spring.message code='select' /></span>"
+								+"<div class='dialog-btns p-dialog-header-icons'>"
+								+"	<p-button type='button' icon='pi pi-times' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
+								+"</div>",
+				width: "45vw",
+				position: "right",
+				onSetup: function(setup)
 				{
-					resNames.push(gr.path);
-				});
-				
-				pm.globalRes.resourceNodes = po.resNamesToTree(resNames);
-				pm.globalRes.selectedNodeKeys = null;
-				pm.globalRes.selectedNode = null;
-			}
-		});
+					setup.onCustomHide = function()
+					{
+						po.hideSelectGlobalResDialog();
+					};
+				},
+				pageParam:
+				{
+					select: function(res)
+					{
+						po.copyToClipboard(po.toGlobalResUrl(res.path));
+						
+						po.hideSelectGlobalResDialog();
+						return false;
+					},
+					onView: function(res)
+					{
+						window.open(po.showUrl(po.toGlobalResUrl(res.path)));
+					}
+				}
+			});
+		}
+		else
+		{
+			var dialogMask = dialog.parent();
+			dialogMask.removeClass("opacity-hide");
+		}
+	};
+	
+	po.hideSelectGlobalResDialog = function()
+	{
+		var dialog = po.selectGlobalResDialog();
+		var dialogMask = dialog.parent();
+		dialogMask.addClass("opacity-hide");
+	};
+	
+	po.closeSelectGlobalResDialog = function()
+	{
+		var dialog = po.selectGlobalResDialog();
+		$.closeDialog(dialog);
+	};
+	
+	po.toGlobalResUrl = function(path)
+	{
+		return po.dashboardGlobalResUrlPrefix + path;
+	};
+	
+	po.selectGlobalResDialog = function()
+	{
+		return $(".dashboard-select-global-res-wrapper", document.body);
 	};
 	
 	po.openSelectedLocalRes = function()
@@ -207,13 +223,6 @@
 		if(sr)
 			window.open(po.showUrl(sr), fm.id+"/"+sr);
 	};
-
-	po.openSelectedGlobalRes = function()
-	{
-		var gr = po.getSelectedGlobalRes();
-		if(gr)
-			window.open(po.showUrl(gr));
-	};
 	
 	po.getSelectedLocalRes = function()
 	{
@@ -224,16 +233,6 @@
 			return localRes.selectedTemplate;
 		else if(localRes.selectedNodeKeys && localRes.selectedNode)
 			return localRes.selectedNode.fullPath;
-		else
-			return null;
-	};
-	
-	po.getSelectedGlobalRes = function()
-	{
-		var pm = po.vuePageModel();
-		
-		if(pm.globalRes.selectedNode)
-			return po.dashboardGlobalResUrlPrefix + pm.globalRes.selectedNode.fullPath;
 		else
 			return null;
 	};
@@ -426,13 +425,6 @@
 				selectedNodeKeys: null,
 				selectedNode: null
 			},
-			globalRes:
-			{
-				resourceNodes: null,
-				selectedNodeKeys: null,
-				selectedNode: null,
-				searchKeyword: ""
-			},
 			localResMenuItems:
 			[
 				{
@@ -521,16 +513,7 @@
 		
 		po.vueMethod(
 		{
-			onResourceTabChange: function(e)
-			{
-				if(e.index == 1)
-				{
-					var pm = po.vuePageModel();
-					
-					if(!pm.globalRes.resourceNodes)
-						po.refreshGlobalRes();
-				}
-			},
+			onResourceTabChange: function(e){},
 			
 			onChangeTemplateListItem: function(e)
 			{
@@ -576,25 +559,12 @@
 				po.vueUnref("${pid}localResMenuEle").toggle(e);
 			},
 			
-			onSearchGlobalRes: function()
+			onShowGlobalRes: function(e)
 			{
-				po.refreshGlobalRes();
-			},
-
-			onGlobalResNodeSelect: function(node)
-			{
-				var pm = po.vuePageModel();
-				pm.globalRes.selectedNode = node;
-			},
-			
-			onCopyGlobalResToClipboard: function(e)
-			{
-				po.copyToClipboard(po.getSelectedGlobalRes());
-			},
-			
-			onOpenSelectedGlobalRes: function(e)
-			{
-				po.openSelectedGlobalRes();
+				if(!po.checkPersistedDashboard())
+					return;
+				
+				po.showSelectGlobalResDialog();
 			},
 			
 			onToggleAddResPanel: function(e)
@@ -699,6 +669,21 @@
 		po.vueRef("${pid}addResPanelEle", null);
 		po.vueRef("${pid}uploadResPanelEle", null);
 		po.vueRef("${pid}renameResPanelEle", null);
+
+		po.beforeClose("closeSelectGlobalResDialog", function()
+		{
+			po.closeSelectGlobalResDialog();
+		});
+
+		po.element().click(function(e)
+		{
+			var targetEle = $(e.target);
+			
+			if(targetEle.hasClass("for-open-global-res-panel") || targetEle.closest(".for-open-global-res-panel").length > 0)
+				;//保持选择图表对话框
+			else
+				po.hideSelectGlobalResDialog();
+		});
 	};
 })
 (${pid});

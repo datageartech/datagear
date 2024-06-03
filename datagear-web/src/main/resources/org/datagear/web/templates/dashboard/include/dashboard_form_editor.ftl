@@ -715,7 +715,7 @@
 				styleClass: "dashboard-select-chart-wrapper table-sm",
 				templateHeader: "<span class='p-dialog-title'><@spring.message code='module.chart' /> - <@spring.message code='select' /></span>"
 								+"<div class='dialog-btns p-dialog-header-icons'>"
-								+"	<p-button type='button' icon='pi pi-minus' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
+								+"	<p-button type='button' icon='pi pi-times' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
 								+"</div>",
 				width: "50vw",
 				position: "right",
@@ -2344,13 +2344,13 @@
 		po.element().click(function(e)
 		{
 			var targetEle = $(e.target);
-			
+
 			if(targetEle.hasClass("for-open-chart-panel") || targetEle.closest(".for-open-chart-panel").length > 0)
 				;//保持选择图表对话框
 			else
 				po.hideSelectChartDialog();
 			
-			//隐藏其他对话框
+			//确保同时只有一个对话框显示
 			var vePanelShowControlEle = targetEle;
 			if(!vePanelShowControlEle.hasClass("ve-panel-show-control"))
 				vePanelShowControlEle = targetEle.closest(".ve-panel-show-control");
