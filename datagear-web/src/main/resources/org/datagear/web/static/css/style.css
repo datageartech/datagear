@@ -869,6 +869,12 @@ label.align-tip{
 .page-form-dashboard .p-menubar.ve-menubar .p-submenu-list > .p-menuitem-active > .p-submenu-list{
 	top: -430%;
 }
+.dashboard-select-chart-wrapper > .p-dialog-header .p-dialog-header-icons{
+	display: none;
+}
+.dashboard-select-chart-wrapper > .p-dialog-header .dialog-btns{
+	display: block;
+}
 .dashboard-select-chart-wrapper .page-manager .page-content{
 	height: 50vh;
 }

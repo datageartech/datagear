@@ -36,6 +36,8 @@
 	 *              dialog: true,
 	 *              //当dialog=true时，是否作为模态框
 	 * 				modal: true,
+	 *              //当dialog=true时，是否可关闭
+	 * 				closable: true,
 	 *              //当dialog=true时，对话框标题
 	 * 				title: undefined,
 	 *              //当dialog=true时，对话框宽度
@@ -46,6 +48,10 @@
 	 * 				position: "center",
 	 *              //当dialog=true时，对话框位置
 	 * 				onShow: function(dialogEle){},
+	 *              //当dialog=true时，对话框头部自定义HTML模板
+	 * 				templateHeader: "",
+	 *              //当dialog=true时，对话框setup回调函数
+	 * 				onSetup: function(setupObj){},
 	 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
 	 * 				pageParam : undefined,
 	 * 				//其他$.ajax参数
@@ -101,8 +107,9 @@
 					const rootEle = $("<div id='"+rootEleId+"' dialog-ele-id='"+dialogEleId+"' />").appendTo(container);
 					
 					rootEle.addClass("vue-app-dialog");
-					$("<p-dialog />").attr("id", dialogEleId).attr("app-ele-id", rootEleId)
-								.attr(":header", "model.header").attr("v-model:visible", "model.visible").attr(":modal", options.modal)
+					const pdialogEle = $("<p-dialog></p-dialog>").attr("id", dialogEleId).attr("app-ele-id", rootEleId)
+								.attr(":header", "model.header").attr("v-model:visible", "model.visible")
+								.attr("v-model:closable", "model.closable").attr(":modal", options.modal)
 								.attr("v-on:show", "onDialogShow").attr("v-on:after-hide", "onDialogAfterHide")
 								.attr("v-on:hide", "onDialogHide")
 								.attr(":close-on-escape", "false")
@@ -110,6 +117,11 @@
 								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS + " " + options.styleClass)
 								.attr("position", options.position)
 								.appendTo(rootEle);
+					
+					if(options.templateHeader)
+					{
+						pdialogEle.prepend("<template #header>"+options.templateHeader+"</template>");
+					}
 					
 					var dialogApp =
 					{
@@ -119,7 +131,8 @@
 							{
 								header: (options.title || " "),
 								visible: true,
-								width: options.width
+								width: options.width,
+								closable: options.closable
 							});
 							
 							const onDialogShow = function()
@@ -150,9 +163,15 @@
 								$._destroyDialogApp(rootEle);
 							};
 							
-							return {model, onDialogShow, onDialogHide, onDialogAfterHide};
+							const setupObj = {model, onDialogShow, onDialogHide, onDialogAfterHide};
+							
+							if(options.onSetup)
+								options.onSetup(setupObj);
+							
+							return setupObj;
 						},
-						components: { "p-dialog": primevue.dialog }
+						components: $.vueComponents(),
+						
 					};
 					
 					dialogApp = Vue.createApp(dialogApp);
@@ -1959,6 +1978,53 @@ $.fn.extend(
 
 (function($, undefined)
 {
+	
+$.vueComponents = function()
+{
+	var components =
+	{
+		"p-tabmenu": primevue.tabmenu,
+		"p-button": primevue.button,
+		"p-datatable": primevue.datatable,
+		"p-column": primevue.column,
+		"p-inputtext": primevue.inputtext,
+		"p-checkbox": primevue.checkbox,
+		"p-textarea": primevue.textarea,
+		"p-card": primevue.card,
+		"p-dialog": primevue.dialog,
+		"p-password": primevue.password,
+		"p-divider": primevue.divider,
+		"p-selectbutton": primevue.selectbutton,
+		"p-dropdown": primevue.dropdown,
+		"p-togglebutton": primevue.togglebutton,
+		"p-radiobutton": primevue.radiobutton,
+		"p-splitbutton": primevue.splitbutton,
+		"p-tree": primevue.tree,
+		"p-tabview": primevue.tabview,
+		"p-tabpanel": primevue.tabpanel,
+		"p-menu": primevue.menu,
+		"p-menubar": primevue.menubar,
+		"p-tieredmenu": primevue.tieredmenu,
+		"p-chip": primevue.chip,
+		"p-fileupload": primevue.fileupload,
+		"p-inlinemessage": primevue.inlinemessage,
+		"p-steps": primevue.steps,
+		"p-dataview": primevue.dataview,
+		"p-overlaypanel": primevue.overlaypanel,
+		"p-panel": primevue.panel,
+		"p-fieldset": primevue.fieldset,
+		"p-listbox": primevue.listbox,
+		"p-colorpicker": primevue.colorpicker,
+		"p-splitter": primevue.splitter,
+        "p-splitterpanel": primevue.splitterpanel,
+        "p-progressbar": primevue.progressbar,
+		"p-multiselect": primevue.multiselect,
+		"p-treeselect": primevue.treeselect,
+		"p-breadcrumb": primevue.breadcrumb
+	};
+	
+	return components;
+};
 
 //填充page_obj.ftl里JS对象的静态逻辑
 $.inflatePageObj = function(po)
@@ -2244,47 +2310,7 @@ $.inflatePageObj = function(po)
 	//vue的mounted回调函数
 	po._vueMounted = [];
 	//vue组件
-	po._vueComponents =
-	{
-		"p-tabmenu": primevue.tabmenu,
-		"p-button": primevue.button,
-		"p-datatable": primevue.datatable,
-		"p-column": primevue.column,
-		"p-inputtext": primevue.inputtext,
-		"p-checkbox": primevue.checkbox,
-		"p-textarea": primevue.textarea,
-		"p-card": primevue.card,
-		"p-dialog": primevue.dialog,
-		"p-password": primevue.password,
-		"p-divider": primevue.divider,
-		"p-selectbutton": primevue.selectbutton,
-		"p-dropdown": primevue.dropdown,
-		"p-togglebutton": primevue.togglebutton,
-		"p-radiobutton": primevue.radiobutton,
-		"p-splitbutton": primevue.splitbutton,
-		"p-tree": primevue.tree,
-		"p-tabview": primevue.tabview,
-		"p-tabpanel": primevue.tabpanel,
-		"p-menu": primevue.menu,
-		"p-menubar": primevue.menubar,
-		"p-tieredmenu": primevue.tieredmenu,
-		"p-chip": primevue.chip,
-		"p-fileupload": primevue.fileupload,
-		"p-inlinemessage": primevue.inlinemessage,
-		"p-steps": primevue.steps,
-		"p-dataview": primevue.dataview,
-		"p-overlaypanel": primevue.overlaypanel,
-		"p-panel": primevue.panel,
-		"p-fieldset": primevue.fieldset,
-		"p-listbox": primevue.listbox,
-		"p-colorpicker": primevue.colorpicker,
-		"p-splitter": primevue.splitter,
-        "p-splitterpanel": primevue.splitterpanel,
-        "p-progressbar": primevue.progressbar,
-		"p-multiselect": primevue.multiselect,
-		"p-treeselect": primevue.treeselect,
-		"p-breadcrumb": primevue.breadcrumb
-	};
+	po._vueComponents = $.vueComponents();
 	
 	//vue挂载
 	po.vueMount = function(app)

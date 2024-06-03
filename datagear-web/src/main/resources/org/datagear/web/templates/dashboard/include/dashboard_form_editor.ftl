@@ -711,12 +711,24 @@
 			},
 			{
 				modal: false,
+				closable: false,
 				styleClass: "dashboard-select-chart-wrapper table-sm",
+				templateHeader: "<span class='p-dialog-title'><@spring.message code='module.chart' /> - <@spring.message code='select' /></span>"
+								+"<div class='dialog-btns p-dialog-header-icons'>"
+								+"	<p-button type='button' icon='pi pi-times' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
+								+"</div>",
 				width: "50vw",
 				position: "right",
 				onShow: function(dialog)
 				{
 					dialog.data("dashboardSelectChartHandler", selectHandler);
+				},
+				onSetup: function(setup)
+				{
+					setup.onCustomHide = function()
+					{
+						po.hideSelectChartDialog();
+					};
 				}
 			});
 		}
