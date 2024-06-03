@@ -700,7 +700,7 @@
 			po.handleOpenSelectAction("/chart/select?multiple",
 			function(chartWidgets)
 			{
-				var myDialog = $(".dashboard-select-chart-wrapper", document.body);
+				var myDialog = po.selectChartDialog();
 				var handler = myDialog.data("dashboardSelectChartHandler");
 				
 				if(handler)
@@ -715,7 +715,7 @@
 				styleClass: "dashboard-select-chart-wrapper table-sm",
 				templateHeader: "<span class='p-dialog-title'><@spring.message code='module.chart' /> - <@spring.message code='select' /></span>"
 								+"<div class='dialog-btns p-dialog-header-icons'>"
-								+"	<p-button type='button' icon='pi pi-times' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
+								+"	<p-button type='button' icon='pi pi-minus' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
 								+"</div>",
 				width: "50vw",
 				position: "right",
