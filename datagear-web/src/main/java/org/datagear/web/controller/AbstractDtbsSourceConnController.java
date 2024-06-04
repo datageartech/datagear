@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractSchemaConnController extends AbstractController
+public abstract class AbstractDtbsSourceConnController extends AbstractController
 {
 	@Autowired
 	private DtbsSourceService dtbsSourceService;
@@ -53,7 +53,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 	private DtbsSourceConnectionSupport dtbsSourceConnectionSupport = new DtbsSourceConnectionSupport();
 
-	public AbstractSchemaConnController()
+	public AbstractDtbsSourceConnController()
 	{
 		super();
 	}
@@ -92,20 +92,20 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 * 获取指定用户有读权限的{@linkplain DtbsSource}。
 	 * 
 	 * @param user
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @return
 	 * @throws PermissionDeniedException
 	 * @throws DtbsSourceNotFoundException
 	 */
-	protected DtbsSource getSchemaForUserNotNull(User user, String schemaId)
+	protected DtbsSource getDtbsSourceForUserNotNull(User user, String dtbsSourceId)
 			throws PermissionDeniedException, DtbsSourceNotFoundException
 	{
-		DtbsSource schema = this.dtbsSourceService.getById(user, schemaId);
+		DtbsSource dtbsSource = this.dtbsSourceService.getById(user, dtbsSourceId);
 
-		if (schema == null)
-			throw new DtbsSourceNotFoundException(schemaId);
+		if (dtbsSource == null)
+			throw new DtbsSourceNotFoundException(dtbsSourceId);
 
-		return schema;
+		return dtbsSource;
 	}
 
 	/**
@@ -113,68 +113,69 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 * 
 	 * @param request
 	 * @param response
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @return
 	 * @throws PermissionDeniedException
 	 * @throws DtbsSourceNotFoundException
 	 */
-	protected DtbsSource getSchemaForUserNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
+	protected DtbsSource getDtbsSourceForUserNotNull(HttpServletRequest request, HttpServletResponse response,
+			String dtbsSourceId)
 			throws PermissionDeniedException, DtbsSourceNotFoundException
 	{
 		User user = getCurrentUser();
 
-		DtbsSource schema = this.dtbsSourceService.getById(user, schemaId);
+		DtbsSource dtbsSource = this.dtbsSourceService.getById(user, dtbsSourceId);
 
-		if (schema == null)
-			throw new DtbsSourceNotFoundException(schemaId);
+		if (dtbsSource == null)
+			throw new DtbsSourceNotFoundException(dtbsSourceId);
 
-		return schema;
+		return dtbsSource;
 	}
 
 	/**
 	 * 获取{@linkplain DtbsSource}。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @return
 	 * @throws DtbsSourceNotFoundException
 	 */
-	protected DtbsSource getSchemaNotNull(String schemaId) throws DtbsSourceNotFoundException
+	protected DtbsSource getDtbsSourceNotNull(String dtbsSourceId) throws DtbsSourceNotFoundException
 	{
-		DtbsSource schema = this.dtbsSourceService.getById(schemaId);
+		DtbsSource dtbsSource = this.dtbsSourceService.getById(dtbsSourceId);
 
-		if (schema == null)
-			throw new DtbsSourceNotFoundException(schemaId);
+		if (dtbsSource == null)
+			throw new DtbsSourceNotFoundException(dtbsSourceId);
 
-		return schema;
+		return dtbsSource;
 	}
 
 	/**
 	 * 获取指定{@linkplain DtbsSource}的{@linkplain Connection}。
 	 * 
-	 * @param schema
+	 * @param dtbsSource
 	 * @return
 	 * @throws ConnectionSourceException
 	 */
-	protected Connection getSchemaConnection(DtbsSource schema) throws ConnectionSourceException
+	protected Connection getDtbsSourceConnection(DtbsSource dtbsSource) throws ConnectionSourceException
 	{
-		return this.dtbsSourceConnectionSupport.getSchemaConnection(this.connectionSource, schema);
+		return this.dtbsSourceConnectionSupport.getDtbsSourceConnection(this.connectionSource, dtbsSource);
 	}
 
-	protected void checkReadTableDataPermission(DtbsSource schema, User user)
+	protected void checkReadTableDataPermission(DtbsSource dtbsSource, User user)
 	{
-		if (!DtbsSource.canReadTableData(schema.getDataPermission()))
+		if (!DtbsSource.canReadTableData(dtbsSource.getDataPermission()))
 			throw new PermissionDeniedException();
 	}
 
-	protected void checkEditTableDataPermission(DtbsSource schema, User user)
+	protected void checkEditTableDataPermission(DtbsSource dtbsSource, User user)
 	{
-		if (!DtbsSource.canEditTableData(schema.getDataPermission()))
+		if (!DtbsSource.canEditTableData(dtbsSource.getDataPermission()))
 			throw new PermissionDeniedException();
 	}
 
-	protected void checkDeleteTableDataPermission(DtbsSource schema, User user)
+	protected void checkDeleteTableDataPermission(DtbsSource dtbsSource, User user)
 	{
-		if (!DtbsSource.canDeleteTableData(schema.getDataPermission()))
+		if (!DtbsSource.canDeleteTableData(dtbsSource.getDataPermission()))
 			throw new PermissionDeniedException();
 	}
 
@@ -187,7 +188,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 * @author datagear@163.com
 	 *
 	 */
-	protected abstract class AbstractSchemaConnExecutor
+	protected abstract class AbstractDtbsSourceConnExecutor
 	{
 		private HttpServletRequest request;
 
@@ -195,9 +196,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		private org.springframework.ui.Model springModel;
 
-		private String schemaId;
+		private String dtbsSourceId;
 
-		private DtbsSource _schema;
+		private DtbsSource _dtbsSource;
 
 		private Connection _cn;
 
@@ -205,26 +206,26 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		private boolean customCommit = false;
 
-		public AbstractSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, boolean readonly)
+		public AbstractDtbsSourceConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, boolean readonly)
 		{
 			super();
 			this.request = request;
 			this.response = response;
 			this.springModel = springModel;
-			this.schemaId = schemaId;
+			this.dtbsSourceId = dtbsSourceId;
 			this.readonly = readonly;
 			this.customCommit = false;
 		}
 
-		public AbstractSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, boolean readonly, boolean customCommit)
+		public AbstractDtbsSourceConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, boolean readonly, boolean customCommit)
 		{
 			super();
 			this.request = request;
 			this.response = response;
 			this.springModel = springModel;
-			this.schemaId = schemaId;
+			this.dtbsSourceId = dtbsSourceId;
 			this.readonly = readonly;
 			this.customCommit = customCommit;
 		}
@@ -233,10 +234,10 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		{
 			try
 			{
-				this._schema = getSchemaForUserNotNull(request, response, schemaId);
-				springModel.addAttribute("schema", this._schema);
+				this._dtbsSource = getDtbsSourceForUserNotNull(request, response, dtbsSourceId);
+				springModel.addAttribute("dtbsSource", this._dtbsSource);
 
-				doExecute(request, response, springModel, this._schema);
+				doExecute(request, response, springModel, this._dtbsSource);
 
 				if (!customCommit)
 					commitConnection();
@@ -267,7 +268,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		{
 			if (this._cn == null)
 			{
-				this._cn = getSchemaConnection(this._schema);
+				this._cn = getDtbsSourceConnection(this._dtbsSource);
 				JdbcUtil.setAutoCommitIfSupports(this._cn, false);
 				JdbcUtil.setReadonlyIfSupports(this._cn, this.readonly);
 			}
@@ -300,11 +301,11 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * @param request
 		 * @param response
 		 * @param springModel
-		 * @param schema
+		 * @param dtbsSource
 		 * @throws Throwable
 		 */
 		protected abstract void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable;
 		
 		/**
 		 * 获取{@linkplain DtbsSource}。
@@ -314,14 +315,14 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * 
 		 * @return
 		 */
-		public DtbsSource getSchema()
+		public DtbsSource getDtbsSource()
 		{
-			return this._schema;
+			return this._dtbsSource;
 		}
 	}
 
 	/**
-	 * 返回值{@linkplain AbstractSchemaConnExecutor}。
+	 * 返回值{@linkplain AbstractDtbsSourceConnExecutor}。
 	 * <p>
 	 * 注意：此类并非线程安全的。
 	 * </p>
@@ -330,20 +331,20 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 *
 	 * @param <T>
 	 */
-	protected abstract class ReturnSchemaConnExecutor<T> extends AbstractSchemaConnExecutor
+	protected abstract class ReturnDtbsSourceConnExecutor<T> extends AbstractDtbsSourceConnExecutor
 	{
 		private T returnValue;
 
-		public ReturnSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, boolean readonly)
+		public ReturnDtbsSourceConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, readonly);
+			super(request, response, springModel, dtbsSourceId, readonly);
 		}
 
-		public ReturnSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, boolean readonly, boolean customCommit)
+		public ReturnDtbsSourceConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, boolean readonly, boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, readonly, customCommit);
+			super(request, response, springModel, dtbsSourceId, readonly, customCommit);
 		}
 
 		public T execute() throws Throwable
@@ -354,9 +355,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
 		{
-			this.returnValue = execute(request, response, springModel, schema);
+			this.returnValue = execute(request, response, springModel, dtbsSource);
 		}
 
 		/**
@@ -368,15 +369,15 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * @param request
 		 * @param response
 		 * @param springModel
-		 * @param schema
+		 * @param dtbsSource
 		 * @return
 		 */
 		protected abstract T execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable;
 	}
 
 	/**
-	 * 无返回值{@linkplain AbstractSchemaConnExecutor}。
+	 * 无返回值{@linkplain AbstractDtbsSourceConnExecutor}。
 	 * <p>
 	 * 注意：此类并非线程安全的。
 	 * </p>
@@ -385,18 +386,18 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 *
 	 * @param <T>
 	 */
-	protected abstract class VoidSchemaConnExecutor extends AbstractSchemaConnExecutor
+	protected abstract class VoidDtbsSourceConnExecutor extends AbstractDtbsSourceConnExecutor
 	{
-		public VoidSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, boolean readonly)
+		public VoidDtbsSourceConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, readonly);
+			super(request, response, springModel, dtbsSourceId, readonly);
 		}
 
-		public VoidSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, boolean readonly, boolean customCommit)
+		public VoidDtbsSourceConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, boolean readonly, boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, readonly, customCommit);
+			super(request, response, springModel, dtbsSourceId, readonly, customCommit);
 		}
 
 		public void execute() throws Throwable
@@ -406,9 +407,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
 		{
-			execute(request, response, springModel, schema);
+			execute(request, response, springModel, dtbsSource);
 		}
 
 		/**
@@ -420,11 +421,11 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * @param request
 		 * @param response
 		 * @param springModel
-		 * @param schema
+		 * @param dtbsSource
 		 * @return
 		 */
 		protected abstract void execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable;
 	}
 
 	/**
@@ -433,29 +434,29 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 * @author datagear@163.com
 	 *
 	 */
-	protected class SchemaDataSource implements DataSource
+	protected class DtbsSourceDataSource implements DataSource
 	{
-		private DtbsSource schema;
+		private DtbsSource dtbsSource;
 
-		public SchemaDataSource()
+		public DtbsSourceDataSource()
 		{
 			super();
 		}
 
-		public SchemaDataSource(DtbsSource schema)
+		public DtbsSourceDataSource(DtbsSource dtbsSource)
 		{
 			super();
-			this.schema = schema;
+			this.dtbsSource = dtbsSource;
 		}
 
-		public DtbsSource getSchema()
+		public DtbsSource getDtbsSource()
 		{
-			return schema;
+			return dtbsSource;
 		}
 
-		public void setSchema(DtbsSource schema)
+		public void setDtbsSource(DtbsSource dtbsSource)
 		{
-			this.schema = schema;
+			this.dtbsSource = dtbsSource;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -504,7 +505,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		@Override
 		public Connection getConnection() throws SQLException
 		{
-			return getSchemaConnection(this.schema);
+			return getDtbsSourceConnection(this.dtbsSource);
 		}
 
 		@Override

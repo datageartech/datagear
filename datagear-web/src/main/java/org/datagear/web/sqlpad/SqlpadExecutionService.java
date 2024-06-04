@@ -234,7 +234,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 	 */
 	protected Connection getSchemaConnection(DtbsSource schema) throws ConnectionSourceException
 	{
-		return this.dtbsSourceConnectionSupport.getSchemaConnection(this.connectionSource, schema);
+		return this.dtbsSourceConnectionSupport.getDtbsSourceConnection(this.connectionSource, schema);
 	}
 
 	/**

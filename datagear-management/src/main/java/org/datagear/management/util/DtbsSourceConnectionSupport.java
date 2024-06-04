@@ -45,23 +45,23 @@ public class DtbsSourceConnectionSupport
 	 * 获取指定{@linkplain DtbsSource}的{@linkplain Connection}。
 	 * 
 	 * @param connectionSource
-	 * @param schema
+	 * @param dtbsSource
 	 * @return
 	 * @throws ConnectionSourceException
 	 */
-	public Connection getSchemaConnection(ConnectionSource connectionSource, DtbsSource schema)
+	public Connection getDtbsSourceConnection(ConnectionSource connectionSource, DtbsSource dtbsSource)
 			throws ConnectionSourceException
 	{
 		Connection cn = null;
 		
 		Properties properties = null;
 		
-		if(schema.hasProperty())
+		if(dtbsSource.hasProperty())
 		{
 			properties = new Properties();
 			
-			List<DtbsSourceProperty> schemaProperties = schema.getProperties();
-			for(DtbsSourceProperty sp : schemaProperties)
+			List<DtbsSourceProperty> dtbsSourceProperties = dtbsSource.getProperties();
+			for(DtbsSourceProperty sp : dtbsSourceProperties)
 			{
 				String name = sp.getName();
 				String value = sp.getValue();
@@ -71,12 +71,12 @@ public class DtbsSourceConnectionSupport
 			}
 		}
 		
-		ConnectionOption connectionOption = ConnectionOption.valueOf(schema.getUrl(), schema.getUser(),
-				schema.getPassword(), properties);
+		ConnectionOption connectionOption = ConnectionOption.valueOf(dtbsSource.getUrl(), dtbsSource.getUser(),
+				dtbsSource.getPassword(), properties);
 
-		if (schema.hasDriverEntity())
+		if (dtbsSource.hasDriverEntity())
 		{
-			DriverEntity driverEntity = schema.getDriverEntity();
+			DriverEntity driverEntity = dtbsSource.getDriverEntity();
 
 			cn = connectionSource.getConnection(driverEntity, connectionOption);
 		}

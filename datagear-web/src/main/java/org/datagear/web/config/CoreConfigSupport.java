@@ -140,10 +140,10 @@ import org.datagear.web.util.DelegatingTextEncryptor;
 import org.datagear.web.util.DelegatingTextEncryptor.EncryptType;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
+import org.datagear.web.util.DtbsSourceTableCache;
 import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
-import org.datagear.web.util.DtbsSourceTableCache;
 import org.datagear.web.util.SessionDashboardInfoSupport;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
@@ -366,9 +366,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public File schemaUrlBuilderScriptFile()
+	public File dtbsSourceUrlBuilderScriptFile()
 	{
-		return FileUtil.getFile(getApplicationProperties().getSchemaUrlBuilderScriptFile());
+		return FileUtil.getFile(getApplicationProperties().getDtbsSourceUrlBuilderScriptFile());
 	}
 
 	@Bean
@@ -566,10 +566,10 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public DtbsSourceTableCache schemaTableCache()
+	public DtbsSourceTableCache dtbsSourceTableCache()
 	{
 		DtbsSourceTableCache bean = new DtbsSourceTableCache();
-		bean.setTableCacheMaxLength(getApplicationProperties().getSchemaTableCacheMaxLength());
+		bean.setTableCacheMaxLength(getApplicationProperties().getDtbsSourceTableCacheMaxLength());
 
 		return bean;
 	}
@@ -676,18 +676,18 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		DtbsSourceServiceImpl bean = new DtbsSourceServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.authorizationService(), this.driverEntityManager(), this.userService(),
 				this.dtbsSourceGuardService());
-		bean.setTextEncryptor(this.schemaPsdEncryptor());
+		bean.setTextEncryptor(this.dtbsSourcePsdEncryptor());
 
 		return bean;
 	}
 
-	protected TextEncryptor schemaPsdEncryptor()
+	protected TextEncryptor dtbsSourcePsdEncryptor()
 	{
 		ApplicationProperties properties = getApplicationProperties();
-		EncryptType encryptType = (properties.isSchemaPsdCryptoEnabled() ? EncryptType.STD : EncryptType.NOOP);
+		EncryptType encryptType = (properties.isDtbsSourcePsdCryptoEnabled() ? EncryptType.STD : EncryptType.NOOP);
 
 		DelegatingTextEncryptor bean = new DelegatingTextEncryptor(encryptType,
-				properties.getSchemaPsdCryptoSecretKey(), properties.getSchemaPsdCryptoSalt());
+				properties.getDtbsSourcePsdCryptoSecretKey(), properties.getDtbsSourcePsdCryptoSalt());
 		// 这里必须设置为安全解密，不然如果配置里改了密钥、盐值，会导致相关功能解密报错而无法使用
 		bean.setSafeDecrypt(true);
 		// 这里应设置安全解密返回随机字符串，因为使用固定的默认值不安全
@@ -1190,13 +1190,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		initAbstractMybatisEntityServiceCaches(context);
 		initDataSetEntityServiceCache(context);
 		initHtmlTplDashboardWidgetHtmlRendererCaches(context);
-		initSchemaTableCache(context);
+		initDtbsSourceTableCache(context);
 	}
 
-	protected void initSchemaTableCache(ApplicationContext context)
+	protected void initDtbsSourceTableCache(ApplicationContext context)
 	{
 		CacheManager cacheManager = getCacheManager(context);
-		this.schemaTableCache().setCache(getCache(cacheManager, DtbsSourceTableCache.class.getSimpleName()));
+		this.dtbsSourceTableCache().setCache(getCache(cacheManager, DtbsSourceTableCache.class.getSimpleName()));
 	}
 
 	@SuppressWarnings("rawtypes")

@@ -16,14 +16,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign SchemaGuard=statics['org.datagear.management.domain.SchemaGuard']>
+<#assign DtbsSourceGuard=statics['org.datagear.management.domain.DtbsSourceGuard']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
-	<@spring.message code='module.schemaGuard' />
+	<@spring.message code='module.dtbsSourceGuard' />
 	<#include "../include/html_request_action_suffix.ftl">
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
@@ -45,7 +45,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}pattern" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='schemaGuard.pattern.desc' />">
+					title="<@spring.message code='dtbsSourceGuard.pattern.desc' />">
 					<@spring.message code='urlPattern' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -56,7 +56,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}userPattern" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='schemaGuard.userPattern.desc' />">
+					title="<@spring.message code='dtbsSourceGuard.userPattern.desc' />">
 					<@spring.message code='usernamePattern' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -67,8 +67,8 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}propertyPatterns" class="field-label col-12 mb-2"
-					title="<@spring.message code='schemaGuard.propertyPatterns.desc' />">
-					<@spring.message code='schemaGuard.propertyPatterns' />
+					title="<@spring.message code='dtbsSourceGuard.propertyPatterns.desc' />">
+					<@spring.message code='dtbsSourceGuard.propertyPatterns' />
 				</label>
 				<div class="field-input col-12">
 					<div class="p-component p-inputtext">
@@ -102,8 +102,8 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}propertiesMatchMode" class="field-label col-12 mb-2"
-					title="<@spring.message code='schemaGuard.propertiesMatchMode.desc' />">
-					<@spring.message code='schemaGuard.propertiesMatchMode' />
+					title="<@spring.message code='dtbsSourceGuard.propertiesMatchMode.desc' />">
+					<@spring.message code='dtbsSourceGuard.propertiesMatchMode' />
 				</label>
 		        <div class="field-input col-12">
 		        	<p-selectbutton id="${pid}propertiesMatchMode" v-model="fm.propertiesMatchMode" :options="pm.propertiesMatchModeOptions"
@@ -113,8 +113,8 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}emptyPropertyPatternsForAll" class="field-label col-12 mb-2"
-					title="<@spring.message code='schemaGuard.emptyPropertyPatternsForAll.desc' />">
-					<@spring.message code='schemaGuard.emptyPropertyPatternsForAll' />
+					title="<@spring.message code='dtbsSourceGuard.emptyPropertyPatternsForAll.desc' />">
+					<@spring.message code='dtbsSourceGuard.emptyPropertyPatternsForAll' />
 				</label>
 		        <div class="field-input col-12">
 		        	<p-selectbutton id="${pid}emptyPropertyPatternsForAll" v-model="fm.emptyPropertyPatternsForAll" :options="pm.booleanOptions"
@@ -124,7 +124,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}permitted" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='schemaGuard.permitted.desc' />">
+					title="<@spring.message code='dtbsSourceGuard.permitted.desc' />">
 					<@spring.message code='isPermit' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -135,7 +135,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}priority" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='schemaGuard.priority.desc' />">
+					title="<@spring.message code='dtbsSourceGuard.priority.desc' />">
 					<@spring.message code='priority' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -167,7 +167,7 @@
 				<div class="page-form-content flex-grow-1 px-2 py-1 panel-content-size-xs-minw overflow-y-auto">
 					<div class="field grid">
 						<label for="${pid}ppFormNamePattern" class="field-label col-12 mb-2"
-							title="<@spring.message code='schemaGuard.propertyNamePattern.desc' />">
+							title="<@spring.message code='dtbsSourceGuard.propertyNamePattern.desc' />">
 							<@spring.message code='propertyNamePattern' />
 						</label>
 						<div class="field-input col-12">
@@ -178,7 +178,7 @@
 					</div>
 					<div class="field grid">
 						<label for="${pid}ppFormValuePattern" class="field-label col-12 mb-2"
-							title="<@spring.message code='schemaGuard.propertyValuePattern.desc' />">
+							title="<@spring.message code='dtbsSourceGuard.propertyValuePattern.desc' />">
 							<@spring.message code='propertyValuePattern' />
 						</label>
 						<div class="field-input col-12">
@@ -201,7 +201,7 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/schemaGuard/"+po.submitAction;
+	po.submitUrl = "/dtbsSourceGuard/"+po.submitAction;
 	
 	po.showPropertyPatternFormPanel = function(action, data, submitHandler)
 	{
@@ -213,7 +213,7 @@
 				po.vueRaw(data));
 		
 		var pm = po.vuePageModel();
-		pm.propertyPatternForm.title = "<@spring.message code='schemaGuard.propertyPatterns' />" + " - " + action;
+		pm.propertyPatternForm.title = "<@spring.message code='dtbsSourceGuard.propertyPatterns' />" + " - " + action;
 		pm.propertyPatternForm.data = data;
 		pm.propertyPatternForm.submitHandler = submitHandler;
 		pm.propertyPatternForm.show = true;
@@ -242,8 +242,8 @@
 		},
 		propertiesMatchModeOptions:
 		[
-			{name: "<@spring.message code='schemaGuard.propertiesMatchMode.ANY' />", value: "${SchemaGuard.PROPERTIES_MATCH_MODE_ANY}"},
-			{name: "<@spring.message code='schemaGuard.propertiesMatchMode.ALL' />", value: "${SchemaGuard.PROPERTIES_MATCH_MODE_ALL}"}
+			{name: "<@spring.message code='dtbsSourceGuard.propertiesMatchMode.ANY' />", value: "${DtbsSourceGuard.PROPERTIES_MATCH_MODE_ANY}"},
+			{name: "<@spring.message code='dtbsSourceGuard.propertiesMatchMode.ALL' />", value: "${DtbsSourceGuard.PROPERTIES_MATCH_MODE_ALL}"}
 		]
 	});
 	

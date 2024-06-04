@@ -74,9 +74,9 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${dataSetRootDirectory}")
 	private String dataSetRootDirectory;
 
-	/** 数据编辑界面自定义URL构建器脚本文件 */
-	@Value("${schemaUrlBuilderScriptFile}")
-	private String schemaUrlBuilderScriptFile;
+	/** 数据源编辑界面自定义URL构建器脚本文件 */
+	@Value("${dtbsSourceUrlBuilderScriptFile}")
+	private String dtbsSourceUrlBuilderScriptFile;
 
 	/** 是否禁用匿名用户访问系统 */
 	@Value("${disableAnonymous}")
@@ -147,16 +147,16 @@ public abstract class ApplicationProperties implements Serializable
 	private String datasourceDialect;
 
 	/** 数据源密码加密是否启用 */
-	@Value("${schemaPsd.crypto.enabled}")
-	private boolean schemaPsdCryptoEnabled;
+	@Value("${dtbsSourcePsd.crypto.enabled}")
+	private boolean dtbsSourcePsdCryptoEnabled;
 
 	/** 数据源密码加密密钥 */
-	@Value("${schemaPsd.crypto.secretKey}")
-	private String schemaPsdCryptoSecretKey;
+	@Value("${dtbsSourcePsd.crypto.secretKey}")
+	private String dtbsSourcePsdCryptoSecretKey;
 
 	/** 数据源密码加密盐值 */
-	@Value("${schemaPsd.crypto.salt}")
-	private String schemaPsdCryptoSalt;
+	@Value("${dtbsSourcePsd.crypto.salt}")
+	private String dtbsSourcePsdCryptoSalt;
 
 	/** 看板分享密码加密是否启用 */
 	@Value("${dashboardSharePsd.crypto.enabled}")
@@ -207,8 +207,8 @@ public abstract class ApplicationProperties implements Serializable
 	private int permissionCacheMaxLength;
 
 	/** 数据源缓存表信息最大个数 */
-	@Value("${schemaTableCacheMaxLength}")
-	private int schemaTableCacheMaxLength;
+	@Value("${dtbsSourceTableCacheMaxLength}")
+	private int dtbsSourceTableCacheMaxLength;
 
 	/** 数据集缓存数据的最大条目数 */
 	@Value("${dataSetCacheMaxLength}")
@@ -339,14 +339,14 @@ public abstract class ApplicationProperties implements Serializable
 		this.dataSetRootDirectory = dataSetRootDirectory;
 	}
 
-	public String getSchemaUrlBuilderScriptFile()
+	public String getDtbsSourceUrlBuilderScriptFile()
 	{
-		return schemaUrlBuilderScriptFile;
+		return dtbsSourceUrlBuilderScriptFile;
 	}
 
-	protected void setSchemaUrlBuilderScriptFile(String schemaUrlBuilderScriptFile)
+	protected void setDtbsSourceUrlBuilderScriptFile(String dtbsSourceUrlBuilderScriptFile)
 	{
-		this.schemaUrlBuilderScriptFile = schemaUrlBuilderScriptFile;
+		this.dtbsSourceUrlBuilderScriptFile = dtbsSourceUrlBuilderScriptFile;
 	}
 
 	public boolean isDisableAnonymous()
@@ -519,34 +519,34 @@ public abstract class ApplicationProperties implements Serializable
 		this.datasourceDialect = datasourceDialect;
 	}
 
-	public boolean isSchemaPsdCryptoEnabled()
+	public boolean isDtbsSourcePsdCryptoEnabled()
 	{
-		return schemaPsdCryptoEnabled;
+		return dtbsSourcePsdCryptoEnabled;
 	}
 
-	protected void setSchemaPsdCryptoEnabled(boolean schemaPsdCryptoEnabled)
+	protected void setDtbsSourcePsdCryptoEnabled(boolean dtbsSourcePsdCryptoEnabled)
 	{
-		this.schemaPsdCryptoEnabled = schemaPsdCryptoEnabled;
+		this.dtbsSourcePsdCryptoEnabled = dtbsSourcePsdCryptoEnabled;
 	}
 
-	public String getSchemaPsdCryptoSecretKey()
+	public String getDtbsSourcePsdCryptoSecretKey()
 	{
-		return schemaPsdCryptoSecretKey;
+		return dtbsSourcePsdCryptoSecretKey;
 	}
 
-	protected void setSchemaPsdCryptoSecretKey(String schemaPsdCryptoSecretKey)
+	protected void setDtbsSourcePsdCryptoSecretKey(String dtbsSourcePsdCryptoSecretKey)
 	{
-		this.schemaPsdCryptoSecretKey = schemaPsdCryptoSecretKey;
+		this.dtbsSourcePsdCryptoSecretKey = dtbsSourcePsdCryptoSecretKey;
 	}
 
-	public String getSchemaPsdCryptoSalt()
+	public String getDtbsSourcePsdCryptoSalt()
 	{
-		return schemaPsdCryptoSalt;
+		return dtbsSourcePsdCryptoSalt;
 	}
 
-	protected void setSchemaPsdCryptoSalt(String schemaPsdCryptoSalt)
+	protected void setDtbsSourcePsdCryptoSalt(String dtbsSourcePsdCryptoSalt)
 	{
-		this.schemaPsdCryptoSalt = schemaPsdCryptoSalt;
+		this.dtbsSourcePsdCryptoSalt = dtbsSourcePsdCryptoSalt;
 	}
 
 	public boolean isDashboardSharePsdCryptoEnabled()
@@ -669,14 +669,14 @@ public abstract class ApplicationProperties implements Serializable
 		this.permissionCacheMaxLength = permissionCacheMaxLength;
 	}
 
-	public int getSchemaTableCacheMaxLength()
+	public int getDtbsSourceTableCacheMaxLength()
 	{
-		return schemaTableCacheMaxLength;
+		return dtbsSourceTableCacheMaxLength;
 	}
 
-	protected void setSchemaTableCacheMaxLength(int schemaTableCacheMaxLength)
+	protected void setDtbsSourceTableCacheMaxLength(int dtbsSourceTableCacheMaxLength)
 	{
-		this.schemaTableCacheMaxLength = schemaTableCacheMaxLength;
+		this.dtbsSourceTableCacheMaxLength = dtbsSourceTableCacheMaxLength;
 	}
 
 	public int getDataSetCacheMaxLength()

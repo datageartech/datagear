@@ -39,8 +39,8 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-		        		<p-inputtext id="${pid}dataSource" v-model="fm.shmConFactory.schema.title" type="text" class="input"
-			        		readonly="readonly" name="shmConFactory.schema.title" required maxlength="200">
+		        		<p-inputtext id="${pid}dataSource" v-model="fm.dtbsConFactory.schema.title" type="text" class="input"
+			        		readonly="readonly" name="dtbsConFactory.schema.title" required maxlength="200">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />"
 			        		@click="onSelectSchema" v-if="!pm.isReadonlyAction">
@@ -85,7 +85,7 @@
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
-		fingerprint.schemaId = dataSet.shmConFactory.schema.id;
+		fingerprint.schemaId = dataSet.dtbsConFactory.schema.id;
 		fingerprint.sql = dataSet.sql;
 	};
 	
@@ -102,13 +102,13 @@
 	po.getSqlEditorSchemaId = function()
 	{
 		var fm = po.vueFormModel();
-		return fm.shmConFactory.schema.id;
+		return fm.dtbsConFactory.schema.id;
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
-	formModel.shmConFactory = (formModel.shmConFactory == null ? { schema: {} } : formModel.shmConFactory);
-	formModel.shmConFactory.schema = (formModel.shmConFactory.schema == null ? {} : formModel.shmConFactory.schema);
+	formModel.dtbsConFactory = (formModel.dtbsConFactory == null ? { schema: {} } : formModel.dtbsConFactory);
+	formModel.dtbsConFactory.schema = (formModel.dtbsConFactory.schema == null ? {} : formModel.dtbsConFactory.schema);
 	
 	po.setupForm(formModel,
 	{
@@ -136,7 +136,7 @@
 			po.handleOpenSelectAction("/schema/select", function(schema)
 			{
 				var fm = po.vueFormModel();
-				fm.shmConFactory.schema = schema;
+				fm.dtbsConFactory.schema = schema;
 			});
 		}
 	});

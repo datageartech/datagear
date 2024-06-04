@@ -157,8 +157,8 @@ User currentUser
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
-						label: "<@spring.message code='module.schemaGuard' />",
-						url: po.concatContextPath("/schemaGuard/query"),
+						label: "<@spring.message code='module.dtbsSourceGuard' />",
+						url: po.concatContextPath("/dtbsSourceGuard/query"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]

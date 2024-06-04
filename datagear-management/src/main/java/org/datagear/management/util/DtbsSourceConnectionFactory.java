@@ -37,18 +37,18 @@ public class DtbsSourceConnectionFactory extends DtbsSourceConnectionSupport imp
 
 	private transient ConnectionSource connectionSource;
 
-	private DtbsSource schema;
+	private DtbsSource dtbsSource;
 
 	public DtbsSourceConnectionFactory()
 	{
 		super();
 	}
 
-	public DtbsSourceConnectionFactory(ConnectionSource connectionSource, DtbsSource schema)
+	public DtbsSourceConnectionFactory(ConnectionSource connectionSource, DtbsSource dtbsSource)
 	{
 		super();
 		this.connectionSource = connectionSource;
-		this.schema = schema;
+		this.dtbsSource = dtbsSource;
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -61,20 +61,20 @@ public class DtbsSourceConnectionFactory extends DtbsSourceConnectionSupport imp
 		this.connectionSource = connectionSource;
 	}
 
-	public DtbsSource getSchema()
+	public DtbsSource getDtbsSource()
 	{
-		return schema;
+		return dtbsSource;
 	}
 
-	public void setSchema(DtbsSource schema)
+	public void setDtbsSource(DtbsSource dtbsSource)
 	{
-		this.schema = schema;
+		this.dtbsSource = dtbsSource;
 	}
 
 	@Override
 	public Connection get() throws Exception
 	{
-		return super.getSchemaConnection(this.connectionSource, this.schema);
+		return super.getDtbsSourceConnection(this.connectionSource, this.dtbsSource);
 	}
 
 	@Override

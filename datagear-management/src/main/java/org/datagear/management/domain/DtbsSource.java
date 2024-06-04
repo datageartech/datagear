@@ -246,8 +246,8 @@ public class DtbsSource extends AbstractStringIdEntity
 		}
 		else
 		{
-			DtbsSourceProperty[] schemaProperties = JsonSupport.parse(json, DtbsSourceProperty[].class, null);
-			setProperties(Arrays.asList(schemaProperties));
+			DtbsSourceProperty[] properties = JsonSupport.parse(json, DtbsSourceProperty[].class, null);
+			setProperties(Arrays.asList(properties));
 		}
 	}
 

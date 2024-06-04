@@ -55,14 +55,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * 模式管理控制器。
+ * {@linkplain DtbsSource}控制器。
  * 
  * @author datagear@163.com
  *
  */
 @Controller
 @RequestMapping("/schema")
-public class DtbsSourceController extends AbstractSchemaConnTableController
+public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 {
 	public static final String COOKIE_PAGINATION_SIZE = "SCHEMA_PAGINATION_PAGE_SIZE";
 
@@ -166,7 +166,7 @@ public class DtbsSourceController extends AbstractSchemaConnTableController
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
 				&& (!StringUtil.isEquals(schema.getUrl(), old.getUrl()) || !StringUtil.isEquals(schema.getUser(), old.getUser())))
-			getSchemaTableCache().invalidate(schema.getId());
+			getDtbsSourceTableCache().invalidate(schema.getId());
 
 		return optSuccessDataResponseEntity(request, schema);
 	}
@@ -198,7 +198,7 @@ public class DtbsSourceController extends AbstractSchemaConnTableController
 
 			// 清除缓存
 			if (deleted)
-				getSchemaTableCache().invalidate(id);
+				getDtbsSourceTableCache().invalidate(id);
 		}
 
 		return optSuccessResponseEntity(request);
@@ -342,7 +342,7 @@ public class DtbsSourceController extends AbstractSchemaConnTableController
 			@RequestParam(value = "reload", required = false) Boolean forceReload) throws Throwable
 	{
 		if (Boolean.TRUE.equals(forceReload))
-			getSchemaTableCache().invalidate(schemaId, tableName);
+			getDtbsSourceTableCache().invalidate(schemaId, tableName);
 
 		ReturnSchemaConnTableExecutor<Table> executor = new ReturnSchemaConnTableExecutor<Table>(request, response,
 				springModel, schemaId, tableName, true)

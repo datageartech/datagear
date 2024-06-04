@@ -254,7 +254,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			
 			if(connectionFactory != null)
 			{
-				connectionFactory = new DtbsSourceConnectionFactory(this.connectionSource, connectionFactory.getSchema());
+				connectionFactory = new DtbsSourceConnectionFactory(this.connectionSource, connectionFactory.getDtbsSource());
 				sqlDataSetEntity.setConnectionFactory(connectionFactory);
 			}
 
@@ -672,11 +672,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			SqlDataSetEntity entity = (SqlDataSetEntity) obj;
 
 			DtbsSourceConnectionFactory connectionFactory = entity.getConnectionFactory();
-			DtbsSource schema = (connectionFactory == null ? null : connectionFactory.getSchema());
-			String schemaId = (schema == null ? null : schema.getId());
+			DtbsSource dtbsSource = (connectionFactory == null ? null : connectionFactory.getDtbsSource());
+			String dtbsSourceId = (dtbsSource == null ? null : dtbsSource.getId());
 
-			if (!StringUtil.isEmpty(schemaId))
-				connectionFactory.setSchema(this.dtbsSourceService.getById(schemaId));
+			if (!StringUtil.isEmpty(dtbsSourceId))
+				connectionFactory.setDtbsSource(this.dtbsSourceService.getById(dtbsSourceId));
 		}
 
 		return super.postProcessGet(obj);

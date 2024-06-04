@@ -79,7 +79,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Controller
 @RequestMapping("/data")
-public class DataController extends AbstractSchemaConnTableController
+public class DataController extends AbstractDtbsSourceConnTableController
 {
 	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
 
@@ -188,21 +188,21 @@ public class DataController extends AbstractSchemaConnTableController
 				.build();
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/pagingQuery")
+	@RequestMapping("/{dtbsSourceId}/{tableName}/pagingQuery")
 	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value="reloadTable", required = false) Boolean reloadTable) throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidDtbsSourceConnTableExecutor(request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 
@@ -218,21 +218,21 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_table";
 	}
 	
-	@RequestMapping("/{schemaId}/{tableName}/select")
+	@RequestMapping("/{dtbsSourceId}/{tableName}/select")
 	public String select(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidDtbsSourceConnTableExecutor(request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 
@@ -246,9 +246,9 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_table";
 	}
 	
-	@RequestMapping(value = "/{schemaId}/{tableName}/pagingQueryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	public void pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			final org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery paramData)
 			throws Throwable
 	{
@@ -257,14 +257,14 @@ public class DataController extends AbstractSchemaConnTableController
 
 		final DefaultLOBRowMapper rowMapper = buildQueryDefaultLOBRowMapper();
 
-		ReturnSchemaConnTableExecutor<PagingData<Row>> executor = new ReturnSchemaConnTableExecutor<PagingData<Row>>(
-				request, response, springModel, schemaId, tableName, true)
+		ReturnDtbsSourceConnTableExecutor<PagingData<Row>> executor = new ReturnDtbsSourceConnTableExecutor<PagingData<Row>>(
+				request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected PagingData<Row> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				PagingData<Row> pagingData = persistenceManager.pagingQuery(getConnection(), null, table, pagingQuery,
 						rowMapper);
@@ -280,24 +280,25 @@ public class DataController extends AbstractSchemaConnTableController
 		this._objectMapperForBigNumberToString.writeValue(out, pagingData);
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/getQuerySql", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/getQuerySql", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, ?> getQuerySql(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			final org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody(required = false) Query paramData)
 			throws Throwable
 	{
 		final User user = getCurrentUser();
 		final Query query = (paramData == null ? new Query() : paramData);
 
-		String sql = new ReturnSchemaConnTableExecutor<String>(request, response, springModel, schemaId, tableName,
+		String sql = new ReturnDtbsSourceConnTableExecutor<String>(request, response, springModel, dtbsSourceId,
+				tableName,
 				true)
 		{
 			@Override
 			protected String execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				return persistenceManager.getQuerySql(getConnection(), table, query);
 			}
@@ -310,19 +311,19 @@ public class DataController extends AbstractSchemaConnTableController
 		return map;
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/add")
+	@RequestMapping("/{dtbsSourceId}/{tableName}/add")
 	public String add(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = getCurrentUser();
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidDtbsSourceConnTableExecutor(request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkEditTableDataPermission(dtbsSource, user);
 
 				Row formModel = new Row();
 				setFormModel(springModel, formModel, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
@@ -334,24 +335,25 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveAdd", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = getCurrentUser();
 		
 		Row row = convertToRow(paramData);
 
-		Row savedRow = new ReturnSchemaConnTableExecutor<Row>(request, response, springModel, schemaId, tableName,
+		Row savedRow = new ReturnDtbsSourceConnTableExecutor<Row>(request, response, springModel, dtbsSourceId,
+				tableName,
 				false)
 		{
 			@Override
 			protected Row execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkEditTableDataPermission(dtbsSource, user);
 				
 				return persistenceManager.insert(getConnection(), null, table, row,
 						buildSaveSingleSqlParamValueMapper());
@@ -361,9 +363,9 @@ public class DataController extends AbstractSchemaConnTableController
 		return optSuccessDataResponseEntity(request, savedRow);
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/edit")
+	@RequestMapping("/{dtbsSourceId}/{tableName}/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = getCurrentUser();
@@ -371,13 +373,13 @@ public class DataController extends AbstractSchemaConnTableController
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
 
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidDtbsSourceConnTableExecutor(request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkEditTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 
@@ -397,10 +399,10 @@ public class DataController extends AbstractSchemaConnTableController
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveEdit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
 			@RequestBody Map<String, ?> paramData) throws Throwable
@@ -409,14 +411,15 @@ public class DataController extends AbstractSchemaConnTableController
 		final Row originalRow = convertToRow((Map<String, ?>) paramData.get("originalData"));
 		final Row updateRow = convertToRow((Map<String, ?>) paramData.get("data"));
 
-		Row updatedRow = new ReturnSchemaConnTableExecutor<Row>(request, response, springModel, schemaId, tableName,
+		Row updatedRow = new ReturnDtbsSourceConnTableExecutor<Row>(request, response, springModel, dtbsSourceId,
+				tableName,
 				false)
 		{
 			@Override
 			protected Row execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkEditTableDataPermission(dtbsSource, user);
 
 				Row myUpdateRow = removeBlobPlacehoderValue(table, updateRow);
 
@@ -434,10 +437,10 @@ public class DataController extends AbstractSchemaConnTableController
 		return optSuccessDataResponseEntity(request, updatedRow);
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/delete", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
 			@RequestBody List<Map<String, ?>> paramData) throws Throwable
@@ -445,14 +448,14 @@ public class DataController extends AbstractSchemaConnTableController
 		final User user = getCurrentUser();
 		final Row[] rows = convertToRows(paramData);
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
-				request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnDtbsSourceConnTableExecutor<ResponseEntity<OperationMessage>>(
+				request, response, springModel, dtbsSourceId, tableName, false)
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkEditTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
@@ -472,9 +475,9 @@ public class DataController extends AbstractSchemaConnTableController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/view")
+	@RequestMapping("/{dtbsSourceId}/{tableName}/view")
 	public String view(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = getCurrentUser();
@@ -482,13 +485,13 @@ public class DataController extends AbstractSchemaConnTableController
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
 
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidDtbsSourceConnTableExecutor(request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 
@@ -513,16 +516,16 @@ public class DataController extends AbstractSchemaConnTableController
 	 * @param request
 	 * @param response
 	 * @param springModel
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param tableName
 	 * @return
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/{schemaId}/{tableName}/savess", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/savess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savess(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> params) throws Throwable
 	{
 		final User user = getCurrentUser();
@@ -531,14 +534,14 @@ public class DataController extends AbstractSchemaConnTableController
 		final Row[] addRows = convertToRows((List<Map<String, ?>>) params.get("adds"));
 		final Row[] deleteRows = convertToRows((List<Map<String, ?>>) params.get("deletes"));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
-				request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnDtbsSourceConnTableExecutor<ResponseEntity<OperationMessage>>(
+				request, response, springModel, dtbsSourceId, tableName, false)
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkEditTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
@@ -548,7 +551,7 @@ public class DataController extends AbstractSchemaConnTableController
 				int expectedDeleteCount = (deleteRows == null ? 0 : deleteRows.length);
 
 				if (expectedDeleteCount > 0)
-					checkDeleteTableDataPermission(schema, user);
+					checkDeleteTableDataPermission(dtbsSource, user);
 
 				ConversionSqlParamValueMapper paramValueMapper = buildSaveSingleSqlParamValueMapper();
 
@@ -596,10 +599,10 @@ public class DataController extends AbstractSchemaConnTableController
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/{schemaId}/{tableName}/getColumnValuess", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/getColumnValuess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<List<Object>> getColumnValuess(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> params) throws Throwable
 	{
 		final User user = getCurrentUser();
@@ -613,14 +616,14 @@ public class DataController extends AbstractSchemaConnTableController
 		rowMapper.setReadActualBinaryRows(0);
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
 
-		List<List<Object>> columnValuess = new ReturnSchemaConnTableExecutor<List<List<Object>>>(request, response,
-				springModel, schemaId, tableName, true)
+		List<List<Object>> columnValuess = new ReturnDtbsSourceConnTableExecutor<List<List<Object>>>(request, response,
+				springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected List<List<Object>> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
@@ -642,9 +645,9 @@ public class DataController extends AbstractSchemaConnTableController
 		return columnValuess;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/downloadColumnValue")
+	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/downloadColumnValue")
 	public void downloadColumnValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName, @RequestParam("data") String rowJsonStr,
 			@RequestParam("columnName") final String columnName) throws Throwable
 	{
@@ -658,14 +661,14 @@ public class DataController extends AbstractSchemaConnTableController
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_NONE);
 		rowMapper.setBinaryDirectory(getDataBinaryTmpDirectory());
 
-		Object columnValue = new ReturnSchemaConnTableExecutor<Object>(request, response, springModel, schemaId,
+		Object columnValue = new ReturnDtbsSourceConnTableExecutor<Object>(request, response, springModel, dtbsSourceId,
 				tableName, true)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 

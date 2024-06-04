@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  *
  */
 @Controller
-@RequestMapping("/schemaGuard")
+@RequestMapping("/dtbsSourceGuard")
 public class DtbsSourceGuardController extends AbstractController
 {
 	@Autowired
@@ -68,62 +68,62 @@ public class DtbsSourceGuardController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		DtbsSourceGuard schemaGuard = new DtbsSourceGuard();
-		schemaGuard.setUserPattern(AsteriskPatternMatcher.ALL_PATTERN);
-		schemaGuard.setPermitted(false);
+		DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard();
+		dtbsSourceGuard.setUserPattern(AsteriskPatternMatcher.ALL_PATTERN);
+		dtbsSourceGuard.setPermitted(false);
 
-		setFormModel(model, schemaGuard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, dtbsSourceGuard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		return "/schemaGuard/schemaGuard_form";
+		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSourceGuard schemaGuard)
+			@RequestBody DtbsSourceGuard dtbsSourceGuard)
 	{
-		checkSaveEntity(schemaGuard);
+		checkSaveEntity(dtbsSourceGuard);
 
-		schemaGuard.setId(IDUtil.randomIdOnTime20());
-		inflateCreateTime(schemaGuard);
+		dtbsSourceGuard.setId(IDUtil.randomIdOnTime20());
+		inflateCreateTime(dtbsSourceGuard);
 
-		this.dtbsSourceGuardService.add(schemaGuard);
+		this.dtbsSourceGuardService.add(dtbsSourceGuard);
 
-		return optSuccessDataResponseEntity(request, schemaGuard);
+		return optSuccessDataResponseEntity(request, dtbsSourceGuard);
 	}
 
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		DtbsSourceGuard schemaGuard = getByIdForEdit(this.dtbsSourceGuardService, id);
+		DtbsSourceGuard dtbsSourceGuard = getByIdForEdit(this.dtbsSourceGuardService, id);
 
-		setFormModel(model, schemaGuard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, dtbsSourceGuard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
-		return "/schemaGuard/schemaGuard_form";
+		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSourceGuard schemaGuard)
+			@RequestBody DtbsSourceGuard dtbsSourceGuard)
 	{
-		checkSaveEntity(schemaGuard);
+		checkSaveEntity(dtbsSourceGuard);
 
-		this.dtbsSourceGuardService.update(schemaGuard);
+		this.dtbsSourceGuardService.update(dtbsSourceGuard);
 
-		return optSuccessDataResponseEntity(request, schemaGuard);
+		return optSuccessDataResponseEntity(request, dtbsSourceGuard);
 	}
 
 	@RequestMapping("/view")
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		DtbsSourceGuard schemaGuard = getByIdForView(this.dtbsSourceGuardService, id);
+		DtbsSourceGuard dtbsSourceGuard = getByIdForView(this.dtbsSourceGuardService, id);
 
-		setFormModel(model, schemaGuard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, dtbsSourceGuard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
-		return "/schemaGuard/schemaGuard_form";
+		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -142,7 +142,7 @@ public class DtbsSourceGuardController extends AbstractController
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyAction(model);
-		return "/schemaGuard/schemaGuard_table";
+		return "/dtbsSourceGuard/dtbsSourceGuard_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
@@ -153,15 +153,15 @@ public class DtbsSourceGuardController extends AbstractController
 	{
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
-		List<DtbsSourceGuard> schemaGuards = this.dtbsSourceGuardService.query(pagingQuery);
-		DtbsSourceGuard.sortByPriority(schemaGuards);
+		List<DtbsSourceGuard> dtbsSourceGuards = this.dtbsSourceGuardService.query(pagingQuery);
+		DtbsSourceGuard.sortByPriority(dtbsSourceGuards);
 
-		return schemaGuards;
+		return dtbsSourceGuards;
 	}
 
-	protected void checkSaveEntity(DtbsSourceGuard schemaGuard)
+	protected void checkSaveEntity(DtbsSourceGuard dtbsSourceGuard)
 	{
-		if (isBlank(schemaGuard.getName()) || isBlank(schemaGuard.getPattern()))
+		if (isBlank(dtbsSourceGuard.getName()) || isBlank(dtbsSourceGuard.getPattern()))
 			throw new IllegalInputException();
 	}
 
@@ -170,7 +170,7 @@ public class DtbsSourceGuardController extends AbstractController
 	{
 		setFormAction(model, "test", "testExecute");
 
-		return "/schemaGuard/schemaGuard_test";
+		return "/dtbsSourceGuard/dtbsSourceGuard_test";
 	}
 
 	@RequestMapping(value = "/testExecute", produces = CONTENT_TYPE_JSON)

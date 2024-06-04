@@ -33,7 +33,7 @@ public class SqlHistory extends AbstractStringIdEntity implements CreateTimeEnti
 	private String sql;
 
 	/** 数据源ID */
-	private String schemaId;
+	private String dtbsSourceId;
 
 	/** 用户ID */
 	private String userId;
@@ -46,11 +46,11 @@ public class SqlHistory extends AbstractStringIdEntity implements CreateTimeEnti
 		super();
 	}
 
-	public SqlHistory(String id, String sql, String schemaId, String userId)
+	public SqlHistory(String id, String sql, String dtbsSourceId, String userId)
 	{
 		super(id);
 		this.sql = sql;
-		this.schemaId = schemaId;
+		this.dtbsSourceId = dtbsSourceId;
 		this.userId = userId;
 	}
 
@@ -64,14 +64,14 @@ public class SqlHistory extends AbstractStringIdEntity implements CreateTimeEnti
 		this.sql = sql;
 	}
 
-	public String getSchemaId()
+	public String getDtbsSourceId()
 	{
-		return schemaId;
+		return dtbsSourceId;
 	}
 
-	public void setSchemaId(String schemaId)
+	public void setDtbsSourceId(String dtbsSourceId)
 	{
-		this.schemaId = schemaId;
+		this.dtbsSourceId = dtbsSourceId;
 	}
 
 	public String getUserId()

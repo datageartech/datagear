@@ -16,7 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign Schema=statics['org.datagear.management.domain.Schema']>
+<#assign Schema=statics['org.datagear.management.domain.DtbsSource']>
 <#include "../../include/page_obj.ftl">
 <script type="text/javascript">
 (function(po)

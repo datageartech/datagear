@@ -192,19 +192,19 @@ public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntitySe
 	}
 
 	@Override
-	protected DtbsSource postProcessGet(DtbsSource schema)
+	protected DtbsSource postProcessGet(DtbsSource entity)
 	{
-		inflateCreateUserEntity(schema, this.userService);
+		inflateCreateUserEntity(entity, this.userService);
 
-		if (schema.hasDriverEntity())
+		if (entity.hasDriverEntity())
 		{
-			String did = schema.getDriverEntity().getId();
+			String did = entity.getDriverEntity().getId();
 
 			if (!StringUtil.isEmpty(did))
-				schema.setDriverEntity(this.driverEntityManager.get(did));
+				entity.setDriverEntity(this.driverEntityManager.get(did));
 		}
 
-		return super.postProcessGet(schema);
+		return super.postProcessGet(entity);
 	}
 
 	@Override
@@ -221,9 +221,9 @@ public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntitySe
 	 * @param url
 	 * @throws SaveDtbsSourcePermissionDeniedException
 	 */
-	protected void checkSaveUrlPermission(User user, DtbsSource schema) throws SaveDtbsSourcePermissionDeniedException
+	protected void checkSaveUrlPermission(User user, DtbsSource dtbsSource) throws SaveDtbsSourcePermissionDeniedException
 	{
-		if (this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(schema)))
+		if (this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(dtbsSource)))
 			return;
 
 		throw new SaveDtbsSourcePermissionDeniedException();

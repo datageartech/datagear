@@ -33,15 +33,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractSchemaConnTableController extends AbstractSchemaConnController
+public abstract class AbstractDtbsSourceConnTableController extends AbstractDtbsSourceConnController
 {
 	@Autowired
 	private DBMetaResolver dbMetaResolver;
 
 	@Autowired
-	private DtbsSourceTableCache schemaTableCache;
+	private DtbsSourceTableCache dtbsSourceTableCache;
 
-	public AbstractSchemaConnTableController()
+	public AbstractDtbsSourceConnTableController()
 	{
 		super();
 	}
@@ -56,14 +56,14 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		this.dbMetaResolver = dbMetaResolver;
 	}
 
-	public DtbsSourceTableCache getSchemaTableCache()
+	public DtbsSourceTableCache getDtbsSourceTableCache()
 	{
-		return schemaTableCache;
+		return dtbsSourceTableCache;
 	}
 
-	public void setSchemaTableCache(DtbsSourceTableCache schemaTableCache)
+	public void setDtbsSourceTableCache(DtbsSourceTableCache dtbsSourceTableCache)
 	{
-		this.schemaTableCache = schemaTableCache;
+		this.dtbsSourceTableCache = dtbsSourceTableCache;
 	}
 
 	/**
@@ -72,36 +72,36 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 	 * @author datagear@163.com
 	 *
 	 */
-	protected abstract class AbstractSchemaConnTableExecutor extends AbstractSchemaConnExecutor
+	protected abstract class AbstractDtbsSourceConnTableExecutor extends AbstractDtbsSourceConnExecutor
 	{
 		private String tableName;
 
-		public AbstractSchemaConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
+		public AbstractDtbsSourceConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, String tableName, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, readonly);
+			super(request, response, springModel, dtbsSourceId, readonly);
 			this.tableName = tableName;
 		}
 
-		public AbstractSchemaConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
+		public AbstractDtbsSourceConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, String tableName, boolean readonly,
 				boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, readonly, customCommit);
+			super(request, response, springModel, dtbsSourceId, readonly, customCommit);
 			this.tableName = tableName;
 		}
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
 		{
 			springModel.addAttribute("tableName", this.tableName);
 
-			Table table = getSchemaTableCache().get(schema.getId(), this.tableName);
+			Table table = getDtbsSourceTableCache().get(dtbsSource.getId(), this.tableName);
 			if (table == null)
 			{
 				table = getDbMetaResolver().getTable(getConnection(), this.tableName);
-				getSchemaTableCache().put(schema.getId(), table);
+				getDtbsSourceTableCache().put(dtbsSource.getId(), table);
 			}
 
 			if (!table.hasColumn())
@@ -109,7 +109,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 
 			springModel.addAttribute("table", table);
 
-			doExecute(request, response, springModel, schema, table);
+			doExecute(request, response, springModel, dtbsSource, table);
 		}
 
 		/**
@@ -121,36 +121,36 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		 * @param request
 		 * @param response
 		 * @param springModel
-		 * @param schema
+		 * @param dtbsSource
 		 * @param table
 		 * @throws Throwable
 		 */
 		protected abstract void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable;
 	}
 
 	/**
-	 * 返回值{@linkplain AbstractSchemaConnTableExecutor}。
+	 * 返回值{@linkplain AbstractDtbsSourceConnTableExecutor}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 * @param <T>
 	 */
-	protected abstract class ReturnSchemaConnTableExecutor<T> extends AbstractSchemaConnTableExecutor
+	protected abstract class ReturnDtbsSourceConnTableExecutor<T> extends AbstractDtbsSourceConnTableExecutor
 	{
 		private T returnValue;
 
-		public ReturnSchemaConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
+		public ReturnDtbsSourceConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, String tableName, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly);
+			super(request, response, springModel, dtbsSourceId, tableName, readonly);
 		}
 
-		public ReturnSchemaConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
+		public ReturnDtbsSourceConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, String tableName, boolean readonly,
 				boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly, customCommit);
+			super(request, response, springModel, dtbsSourceId, tableName, readonly, customCommit);
 		}
 
 		public T execute() throws Throwable
@@ -161,9 +161,9 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 		{
-			this.returnValue = execute(request, response, springModel, schema, table);
+			this.returnValue = execute(request, response, springModel, dtbsSource, table);
 		}
 
 		/**
@@ -175,34 +175,34 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		 * @param request
 		 * @param response
 		 * @param springModel
-		 * @param schema
+		 * @param dtbsSource
 		 * @param table
 		 * @return
 		 */
 		protected abstract T execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable;
 	}
 
 	/**
-	 * 无返回值{@linkplain AbstractSchemaConnTableExecutor}。
+	 * 无返回值{@linkplain AbstractDtbsSourceConnTableExecutor}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 * @param <T>
 	 */
-	protected abstract class VoidSchemaConnTableExecutor extends AbstractSchemaConnTableExecutor
+	protected abstract class VoidDtbsSourceConnTableExecutor extends AbstractDtbsSourceConnTableExecutor
 	{
-		public VoidSchemaConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
+		public VoidDtbsSourceConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, String tableName, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly);
+			super(request, response, springModel, dtbsSourceId, tableName, readonly);
 		}
 
-		public VoidSchemaConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
+		public VoidDtbsSourceConnTableExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String dtbsSourceId, String tableName, boolean readonly,
 				boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly, customCommit);
+			super(request, response, springModel, dtbsSourceId, tableName, readonly, customCommit);
 		}
 
 		public void execute() throws Throwable
@@ -212,9 +212,9 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable
 		{
-			execute(request, response, springModel, schema, table);
+			execute(request, response, springModel, dtbsSource, table);
 		}
 
 		/**
@@ -226,11 +226,11 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		 * @param request
 		 * @param response
 		 * @param springModel
-		 * @param schema
+		 * @param dtbsSource
 		 * @param table
 		 * @return
 		 */
 		protected abstract void execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Throwable;
 	}
 }

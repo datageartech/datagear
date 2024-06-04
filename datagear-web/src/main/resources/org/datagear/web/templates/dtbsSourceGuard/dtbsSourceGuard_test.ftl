@@ -22,7 +22,7 @@
 <head>
 <#include "../include/html_head.ftl">
 <title>
-	<@spring.message code='module.schemaGuard' />
+	<@spring.message code='module.dtbsSourceGuard' />
 	<#include "../include/html_request_action_suffix.ftl">
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
@@ -148,7 +148,7 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/schemaGuard/"+po.submitAction;
+	po.submitUrl = "/dtbsSourceGuard/"+po.submitAction;
 
 	po.showPropertyFormPanel = function(action, data, submitHandler)
 	{

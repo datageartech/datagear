@@ -59,22 +59,22 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 	}
 
 	@Override
-	public void addForRemain(String schemaId, String userId, List<String> sqls)
+	public void addForRemain(String dtbsSourceId, String userId, List<String> sqls)
 	{
 		for (int i = 0, len = sqls.size(); i < len; i++)
 		{
-			SqlHistory sqlHistory = new SqlHistory(IDUtil.randomIdOnTime20(), sqls.get(i), schemaId, userId);
+			SqlHistory sqlHistory = new SqlHistory(IDUtil.randomIdOnTime20(), sqls.get(i), dtbsSourceId, userId);
 			add(sqlHistory);
 		}
 
-		deleteExpired(schemaId, userId, HISTORY_REMAIN);
+		deleteExpired(dtbsSourceId, userId, HISTORY_REMAIN);
 	}
 
 	@Override
-	public PagingData<SqlHistory> pagingQueryByUserId(String schemaId, String userId, PagingQuery pagingQuery)
+	public PagingData<SqlHistory> pagingQueryByUserId(String dtbsSourceId, String userId, PagingQuery pagingQuery)
 	{
 		Map<String, Object> params = buildParamMap();
-		params.put("schemaId", schemaId);
+		params.put("dtbsSourceId", dtbsSourceId);
 		params.put("userId", userId);
 
 		if (isEmpty(pagingQuery.getOrders()))
@@ -83,10 +83,10 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 		return pagingQuery(pagingQuery, params, true);
 	}
 
-	protected int deleteExpired(String schemaId, String userId, int maximum)
+	protected int deleteExpired(String dtbsSourceId, String userId, int maximum)
 	{
 		Map<String, Object> param = buildParamMap();
-		param.put("schemaId", schemaId);
+		param.put("dtbsSourceId", dtbsSourceId);
 		param.put("userId", userId);
 
 		setPagingQueryParams(param, 0, HISTORY_REMAIN);

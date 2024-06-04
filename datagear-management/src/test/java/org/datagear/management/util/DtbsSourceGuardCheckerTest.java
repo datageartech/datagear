@@ -39,7 +39,8 @@ public class DtbsSourceGuardCheckerTest
 {
 	private DtbsSourceGuardChecker dtbsSourceGuardChecker = new DtbsSourceGuardChecker();
 
-	private List<DtbsSourceProperty> schemaProperties = Arrays.asList(new DtbsSourceProperty("firstProperty", "123"),
+	private List<DtbsSourceProperty> dtbsSourceProperties = Arrays.asList(
+			new DtbsSourceProperty("firstProperty", "123"),
 			new DtbsSourceProperty("secondProperty", "456"));
 
 	@Test
@@ -129,13 +130,13 @@ public class DtbsSourceGuardCheckerTest
 					new DtbsSourceGuard("2", "2", "*", true));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
-					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root", schemaProperties)));
+					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root", dtbsSourceProperties)));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root")));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
-					new GuardEntity("jdbc:mysql://192.168.1.2:3306/test", "root", schemaProperties)));
+					new GuardEntity("jdbc:mysql://192.168.1.2:3306/test", "root", dtbsSourceProperties)));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://127.0.0.1:3306/test", "root")));
@@ -154,13 +155,13 @@ public class DtbsSourceGuardCheckerTest
 					new DtbsSourceGuard("3", "3", "*", true));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
-					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root", schemaProperties)));
+					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root", dtbsSourceProperties)));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root")));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
-					new GuardEntity("jdbc:mysql://192.168.1.2:3306/test", "root", schemaProperties)));
+					new GuardEntity("jdbc:mysql://192.168.1.2:3306/test", "root", dtbsSourceProperties)));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://127.0.0.1:3306/test", "root")));
@@ -283,7 +284,7 @@ public class DtbsSourceGuardCheckerTest
 					new GuardEntity("", "")));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", schemaProperties)));
+					new GuardEntity("", "", dtbsSourceProperties)));
 		}
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
@@ -293,7 +294,7 @@ public class DtbsSourceGuardCheckerTest
 					new GuardEntity("", "")));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", schemaProperties)));
+					new GuardEntity("", "", dtbsSourceProperties)));
 		}
 
 		// 目标属性列表为空
@@ -312,7 +313,7 @@ public class DtbsSourceGuardCheckerTest
 					Arrays.asList(new DtbsSourcePropertyPattern("*first*"), new DtbsSourcePropertyPattern("*second*")));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", schemaProperties)));
+					new GuardEntity("", "", dtbsSourceProperties)));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "",
@@ -329,7 +330,7 @@ public class DtbsSourceGuardCheckerTest
 			dtbsSourceGuard.setPropertiesMatchMode(DtbsSourceGuard.PROPERTIES_MATCH_MODE_ANY);
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", schemaProperties)));
+					new GuardEntity("", "", dtbsSourceProperties)));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "",
@@ -344,7 +345,7 @@ public class DtbsSourceGuardCheckerTest
 			dtbsSourceGuard.setPropertiesMatchMode(DtbsSourceGuard.PROPERTIES_MATCH_MODE_ALL);
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", schemaProperties)));
+					new GuardEntity("", "", dtbsSourceProperties)));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("firstProperty", "123")))));
@@ -363,7 +364,7 @@ public class DtbsSourceGuardCheckerTest
 					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("firstProperty", "root")))));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", schemaProperties)));
+					new GuardEntity("", "", dtbsSourceProperties)));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("firstProperty", "123")))));

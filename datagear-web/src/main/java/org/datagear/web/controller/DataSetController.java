@@ -89,7 +89,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/dataSet")
-public class DataSetController extends AbstractSchemaConnController
+public class DataSetController extends AbstractDtbsSourceConnController
 {
 	@Autowired
 	private DataSetEntityService dataSetEntityService;
@@ -478,8 +478,8 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) dataSet;
 			DtbsSourceConnectionFactory connectionFactory = dataSetEntity.getConnectionFactory();
-			DtbsSource schema = (connectionFactory == null ? null : connectionFactory.getSchema());
-			int permission = (schema != null ? getDtbsSourceService().getPermission(user, schema.getId())
+			DtbsSource dtbsSource = (connectionFactory == null ? null : connectionFactory.getDtbsSource());
+			int permission = (dtbsSource != null ? getDtbsSourceService().getPermission(user, dtbsSource.getId())
 					: Authorization.PERMISSION_NONE_START);
 
 			// 没有读权限，应置为null
@@ -857,19 +857,20 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = getCurrentUser();
 
 		SqlDataSetEntity dataSet = preview.getDataSet();
-		DtbsSourceConnectionFactory connFactory = dataSet.getShmConFactory();
-		DtbsSource schema = (connFactory == null ? null : connFactory.getSchema());
-		String schemaId = (schema == null ? null : schema.getId());
+		DtbsSourceConnectionFactory connFactory = dataSet.getDtbsConFactory();
+		DtbsSource dtbsSource = (connFactory == null ? null : connFactory.getDtbsSource());
+		String dtbsSourceId = (dtbsSource == null ? null : dtbsSource.getId());
 		
-		if(StringUtil.isEmpty(schemaId))
+		if (StringUtil.isEmpty(dtbsSourceId))
 			throw new IllegalInputException();
 
 		// 新建时操作时未创建数据集
 		boolean notFound = checkDataSetEntityIdReadPermission(user, dataSet.getId());
 		// 如果数据集已创建，则使用数据集权限；如果数据集未创建，则需使用数据源权限
-		schema = (notFound ? getSchemaForUserNotNull(user, schemaId) : getSchemaNotNull(schemaId));
+		dtbsSource = (notFound ? getDtbsSourceForUserNotNull(user, dtbsSourceId) : getDtbsSourceNotNull(dtbsSourceId));
 
-		DtbsSourceConnectionFactory connectionFactory = new DtbsSourceConnectionFactory(getConnectionSource(), schema);
+		DtbsSourceConnectionFactory connectionFactory = new DtbsSourceConnectionFactory(getConnectionSource(),
+				dtbsSource);
 		dataSet.setConnectionFactory(connectionFactory);
 		dataSet.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
 
@@ -1009,13 +1010,13 @@ public class DataSetController extends AbstractSchemaConnController
 		if(entity instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity sqlDataSetEntity = ((SqlDataSetEntity) entity);
-			sqlDataSetEntity.clearSchemaPassword();
+			sqlDataSetEntity.clearDtbsSourcePassword();
 			sqlDataSetEntity.setSqlValidator(null);
 			
 			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
 			if(connectionFactory != null)
 			{
-				connectionFactory = new DtbsSourceConnectionFactory(connectionFactory.getConnectionSource(), connectionFactory.getSchema());
+				connectionFactory = new DtbsSourceConnectionFactory(connectionFactory.getConnectionSource(), connectionFactory.getDtbsSource());
 				connectionFactory.setConnectionSource(null);
 				sqlDataSetEntity.setConnectionFactory(connectionFactory);
 			}
@@ -1142,10 +1143,10 @@ public class DataSetController extends AbstractSchemaConnController
 		if (isEmpty(dataSet.getConnectionFactory()))
 			throw new IllegalInputException();
 
-		if (isEmpty(dataSet.getConnectionFactory().getSchema()))
+		if (isEmpty(dataSet.getConnectionFactory().getDtbsSource()))
 			throw new IllegalInputException();
 
-		if (isEmpty(dataSet.getConnectionFactory().getSchema().getId()))
+		if (isEmpty(dataSet.getConnectionFactory().getDtbsSource().getId()))
 			throw new IllegalInputException();
 
 		if (isBlank(dataSet.getSql()))

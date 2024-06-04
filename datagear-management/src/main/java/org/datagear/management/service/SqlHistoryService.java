@@ -34,19 +34,19 @@ public interface SqlHistoryService extends EntityService<String, SqlHistory>
 	/**
 	 * 添加{@linkplain SqlHistory}，并删除过期历史。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param userId
 	 * @param sqls
 	 */
-	void addForRemain(String schemaId, String userId, List<String> sqls);
+	void addForRemain(String dtbsSourceId, String userId, List<String> sqls);
 
 	/**
 	 * 分页查询。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param userId
 	 * @param pagingQuery
 	 * @return
 	 */
-	PagingData<SqlHistory> pagingQueryByUserId(String schemaId, String userId, PagingQuery pagingQuery);
+	PagingData<SqlHistory> pagingQueryByUserId(String dtbsSourceId, String userId, PagingQuery pagingQuery);
 }

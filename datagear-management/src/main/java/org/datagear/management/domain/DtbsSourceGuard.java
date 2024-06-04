@@ -278,10 +278,10 @@ public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTim
 		if (dtbsSourceGuards == null)
 			return;
 
-		Collections.sort(dtbsSourceGuards, SCHEMA_GUARD_PRIORITY_COMPARATOR);
+		Collections.sort(dtbsSourceGuards, GUARD_PRIORITY_COMPARATOR);
 	}
 
-	private static final Comparator<DtbsSourceGuard> SCHEMA_GUARD_PRIORITY_COMPARATOR = new Comparator<DtbsSourceGuard>()
+	private static final Comparator<DtbsSourceGuard> GUARD_PRIORITY_COMPARATOR = new Comparator<DtbsSourceGuard>()
 	{
 		@Override
 		public int compare(DtbsSourceGuard o1, DtbsSourceGuard o2)

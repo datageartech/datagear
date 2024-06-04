@@ -145,8 +145,8 @@ public class SecurityConfigSupport
 		
 		configAccessForStatic(http);
 		configAccessForShowChartAndDashboard(http);
-		configAccessForSchema(http);
-		configAccessForSchemaData(http);
+		configAccessForDtbsSource(http);
+		configAccessForDtbsSourceData(http);
 		configAccessForAnalysisProject(http);
 		configAccessForDataSet(http);
 		configAccessForChart(http);
@@ -155,7 +155,7 @@ public class SecurityConfigSupport
 		configAccessForFileSource(http);
 		configAccessForDashboardGlobalRes(http);
 		configAccessForDriverEntity(http);
-		configAccessForSchemaUrlBuilder(http);
+		configAccessForDtbsSourceUrlBuilder(http);
 		configAccessForUser(http);
 		configAccessForRole(http);
 		configAccessForDtbsSourceGuard(http);
@@ -491,18 +491,18 @@ public class SecurityConfigSupport
 	 * @param http
 	 * @throws Exception
 	 */
-	protected void configAccessForSchema(HttpSecurity http) throws Exception
+	protected void configAccessForDtbsSource(HttpSecurity http) throws Exception
 	{
-		configAccessForModuleAccess(http, schemaModuleAccess());
+		configAccessForModuleAccess(http, dtbsSourceModuleAccess());
 	}
 
-	protected ModuleAccess schemaModuleAccess()
+	protected ModuleAccess dtbsSourceModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/schema/add", "/schema/saveAdd", "/schema/edit",
-				"/schema/saveEdit", "/schema/delete");
+				"/dtbsSource/add", "/dtbsSource/saveAdd", "/dtbsSource/edit", "/dtbsSource/saveEdit",
+				"/dtbsSource/delete");
 
-		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/schema/**");
+		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/dtbsSource/**");
 
 		return new ModuleAccess(edit, read);
 	}
@@ -513,12 +513,12 @@ public class SecurityConfigSupport
 	 * @param http
 	 * @throws Exception
 	 */
-	protected void configAccessForSchemaData(HttpSecurity http) throws Exception
+	protected void configAccessForDtbsSourceData(HttpSecurity http) throws Exception
 	{
-		configAccessForModuleAccess(http, schemaDataModuleAccess());
+		configAccessForModuleAccess(http, dtbsSourceDataModuleAccess());
 	}
 
-	protected ModuleAccess schemaDataModuleAccess()
+	protected ModuleAccess dtbsSourceDataModuleAccess()
 	{
 		// 数据源数据管理、导入导出、SQL工作台、SQL编辑器
 		// 用户针对数据源数据的所有操作都已受其所属数据源权限控制，所以不必再引入数据管理员/数据分析员权限
@@ -619,17 +619,17 @@ public class SecurityConfigSupport
 	 * @param http
 	 * @throws Exception
 	 */
-	protected void configAccessForSchemaUrlBuilder(HttpSecurity http) throws Exception
+	protected void configAccessForDtbsSourceUrlBuilder(HttpSecurity http) throws Exception
 	{
-		configAccessForModuleAccess(http, schemaUrlBuilderModuleAccess());
+		configAccessForModuleAccess(http, dtbsSourceUrlBuilderModuleAccess());
 	}
 
-	protected ModuleAccess schemaUrlBuilderModuleAccess()
+	protected ModuleAccess dtbsSourceUrlBuilderModuleAccess()
 	{
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/schemaUrlBuilder/build");
+				"/dtbsSourceUrlBuilder/build");
 
-		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/schemaUrlBuilder/**");
+		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/dtbsSourceUrlBuilder/**");
 
 		return new ModuleAccess(read, edit);
 	}

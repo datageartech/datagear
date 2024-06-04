@@ -69,9 +69,9 @@ public class GuardEntity implements Serializable
 		this.properties = properties;
 	}
 
-	public GuardEntity(DtbsSource schema)
+	public GuardEntity(DtbsSource dtbsSource)
 	{
-		this(schema.getUrl(), schema.getUser(), schema.getProperties());
+		this(dtbsSource.getUrl(), dtbsSource.getUser(), dtbsSource.getProperties());
 	}
 
 	public String getUrl()

@@ -126,7 +126,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/dataexchange")
-public class DataExchangeController extends AbstractSchemaConnController
+public class DataExchangeController extends AbstractDtbsSourceConnController
 {
 	public static final Pattern TABLE_NAME_QUERY_PATTERN = Pattern.compile("^\\s*\\S+\\s*$", Pattern.CASE_INSENSITIVE);
 
@@ -251,38 +251,40 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.expiredBatchDataExchangeInfoMs = expiredBatchDataExchangeInfoMs;
 	}
 
-	@RequestMapping("/{schemaId}/import")
+	@RequestMapping("/{dtbsSourceId}/import")
 	public String impt(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId)
+			throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 
 		return "/dataexchange/import";
 	}
 
-	@RequestMapping("/{schemaId}/import/csv")
+	@RequestMapping("/{dtbsSourceId}/import/csv")
 	public String imptCsv(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId)
+			throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 
@@ -305,22 +307,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import_csv";
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/csv/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/csv/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DataImportFileInfo> imptCsvUploadFile(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("file") MultipartFile multipartFile,
 			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding)
 			throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+		return uploadImportFile(request, response, dtbsSourceId, dataExchangeId, multipartFile, zipFileNameEncoding,
 				new CsvFileFilter());
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/csv/doImport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/csv/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptCsvDoImport(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody DefaultTextValueFileBatchDataImportForm form) throws Throwable
 	{
 		form.check();
@@ -333,11 +335,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
@@ -367,11 +369,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 			dds.add(dd);
 		}
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
 				Connection cn = getConnection();
 
@@ -391,19 +393,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{schemaId}/import/sql")
+	@RequestMapping("/{dtbsSourceId}/import/sql")
 	public String imptSql(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId)
+			throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 		
@@ -423,21 +426,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import_sql";
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/sql/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/sql/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DataImportFileInfo> imptSqlUploadFile(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("file") MultipartFile multipartFile,
 			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+		return uploadImportFile(request, response, dtbsSourceId, dataExchangeId, multipartFile, zipFileNameEncoding,
 				new SqlFileFilter());
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/sql/doImport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/sql/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptSqlDoImport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataImportForm form)
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestBody SqlFileBatchDataImportForm form)
 			throws Exception
 	{
 		form.check();
@@ -450,11 +453,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
@@ -497,19 +500,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{schemaId}/import/json")
+	@RequestMapping("/{dtbsSourceId}/import/json")
 	public String imptJson(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId)
+			throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 		
@@ -534,21 +538,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import_json";
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/json/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/json/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DataImportFileInfo> imptJsonUploadFile(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("file") MultipartFile multipartFile,
 			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+		return uploadImportFile(request, response, dtbsSourceId, dataExchangeId, multipartFile, zipFileNameEncoding,
 				new JsonFileFilter());
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/json/doImport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/json/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptJsonDoImport(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody JsonFileBatchDataImportForm form) throws Throwable
 	{
 		form.check();
@@ -563,11 +567,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
@@ -599,11 +603,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
 		{
-			new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+			new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 			{
 				@Override
 				protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-						DtbsSource schema) throws Throwable
+						DtbsSource dtbsSource) throws Throwable
 				{
 					Connection cn = getConnection();
 
@@ -629,19 +633,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{schemaId}/import/excel")
+	@RequestMapping("/{dtbsSourceId}/import/excel")
 	public String imptExcel(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId)
+			throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 
@@ -664,21 +669,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import_excel";
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/excel/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/excel/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DataImportFileInfo> imptExcelUploadFile(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("file") MultipartFile multipartFile,
 			@RequestParam(value = "zipFileNameEncoding", required = false) String zipFileNameEncoding) throws Exception
 	{
-		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, zipFileNameEncoding,
+		return uploadImportFile(request, response, dtbsSourceId, dataExchangeId, multipartFile, zipFileNameEncoding,
 				new ExcelFileFilter());
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/excel/doImport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/import/excel/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptExcelDoImport(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody DefaultTextValueFileBatchDataImportForm form) throws Throwable
 	{
 		form.check();
@@ -691,11 +696,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>(subDataExchangeForms.size());
@@ -724,11 +729,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 			dds.add(dd);
 		}
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
 				Connection cn = getConnection();
 
@@ -753,22 +758,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 * 
 	 * @param request
 	 * @param response
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param dataExchangeId
 	 * @param subDataExchangeId
 	 * @throws Throwable
 	 */
-	@RequestMapping(value = "/{schemaId}/viewLog")
+	@RequestMapping(value = "/{dtbsSourceId}/viewLog")
 	public String viewLog(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("subDataExchangeId") String subDataExchangeId) throws Throwable
 	{
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
 			}
 		}.execute();
@@ -784,14 +789,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 * 
 	 * @param request
 	 * @param response
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param dataExchangeId
 	 * @param subDataExchangeId
 	 * @throws Throwable
 	 */
-	@RequestMapping(value = "/{schemaId}/getLogContent")
+	@RequestMapping(value = "/{dtbsSourceId}/getLogContent")
 	public void getLogContent(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("subDataExchangeId") String subDataExchangeId) throws Throwable
 	{
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -820,9 +825,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	@RequestMapping("/{schemaId}/export")
+	@RequestMapping("/{dtbsSourceId}/export")
 	public String expt(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
 			//@RequestParam(value="query", required = false) String[] queries,
 			@RequestParam(value="queryScript", required = false) String queryScript,
@@ -833,13 +838,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 
@@ -867,9 +872,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export";
 	}
 
-	@RequestMapping("/{schemaId}/export/csv")
+	@RequestMapping("/{dtbsSourceId}/export/csv")
 	public String exptCsv(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId
 			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
 			//@RequestParam(value="query", required = false) String[] queries
 			) throws Throwable
@@ -879,13 +884,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -910,10 +915,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_csv";
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/csv/doExport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/export/csv/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptCsvDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody DefaultTextFileBatchDataExportForm form)
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestBody DefaultTextFileBatchDataExportForm form)
 			throws Exception
 	{
 		form.check();
@@ -926,11 +931,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -969,9 +974,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{schemaId}/export/excel")
+	@RequestMapping("/{dtbsSourceId}/export/excel")
 	public String exptExcel(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId
 			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
 			//@RequestParam(value="query", required = false) String[] queries
 			) throws Throwable
@@ -981,13 +986,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -1013,10 +1018,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_excel";
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/excel/doExport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/export/excel/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptExcelDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody DefaultTextFileBatchDataExportForm form)
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestBody DefaultTextFileBatchDataExportForm form)
 			throws Exception
 	{
 		form.check();
@@ -1029,11 +1034,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 
 		Locale locale = getLocale(request);
 
@@ -1072,9 +1077,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{schemaId}/export/sql")
+	@RequestMapping("/{dtbsSourceId}/export/sql")
 	public String exptSql(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId
 			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
 			//@RequestParam(value="query", required = false) String[] queries
 			) throws Throwable
@@ -1084,13 +1089,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -1120,10 +1125,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_sql";
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/sql/doExport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/export/sql/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptSqlDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody SqlFileBatchDataExportForm form)
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestBody SqlFileBatchDataExportForm form)
 			throws Exception
 	{
 		form.check();
@@ -1136,11 +1141,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -1179,9 +1184,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/{schemaId}/export/json")
+	@RequestMapping("/{dtbsSourceId}/export/json")
 	public String exptJson(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId
 			//XXX 不能使用这里的注解参数方式，因为其中包含的','，会被拆分为数组
 			//@RequestParam(value="query", required = false) String[] queries
 			) throws Throwable
@@ -1191,13 +1196,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 		
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 				springModel.addAttribute(DataController.KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
@@ -1223,10 +1228,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_json";
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/json/doExport", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/export/json/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> exptJsonDoExport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestBody JsonFileBatchDataExportForm form)
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestBody JsonFileBatchDataExportForm form)
 			throws Exception
 	{
 		form.check();
@@ -1241,11 +1246,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource dtbsSource = getDtbsSourceForUserNotNull(user, dtbsSourceId);
 
-		checkDeleteTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(dtbsSource, user);
 
-		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new DtbsSourceDataSource(dtbsSource));
 		Locale locale = getLocale(request);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<>();
@@ -1284,22 +1289,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/download")
+	@RequestMapping(value = "/{dtbsSourceId}/export/download")
 	@ResponseBody
 	public void exptDownload(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("fileName") String fileName) throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 
@@ -1322,22 +1327,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/downloadAll")
+	@RequestMapping(value = "/{dtbsSourceId}/export/downloadAll")
 	@ResponseBody
 	public void exptDownloadAll(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("fileName") String fileName) throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					DtbsSource schema) throws Throwable
+					DtbsSource dtbsSource) throws Throwable
 			{
-				checkDeleteTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(dtbsSource, user);
 			}
 		}.execute();
 
@@ -1358,10 +1363,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	@RequestMapping(value = "/{schemaId}/message", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/message", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Object> message(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam(value = "messageCount", required = false) Integer messageCount) throws Throwable
 	{
@@ -1404,7 +1409,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	protected List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
-			String schemaId, String dataExchangeId, MultipartFile multipartFile, String zipFileNameEncoding,
+			String dtbsSourceId, String dataExchangeId, MultipartFile multipartFile, String zipFileNameEncoding,
 			FileFilter fileFilter) throws Exception
 	{
 		List<DataImportFileInfo> fileInfos = new ArrayList<>();
@@ -1491,17 +1496,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return TABLE_NAME_QUERY_PATTERN.matcher(query).matches();
 	}
 
-	@RequestMapping(value = "/{schemaId}/getAllTableNames", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/getAllTableNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<String> getAllTableNames(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId)
+			throws Throwable
 	{
-		List<String> tableNames = new ReturnSchemaConnExecutor<List<String>>(request, response, springModel,
-				schemaId, true)
+		List<String> tableNames = new ReturnDtbsSourceConnExecutor<List<String>>(request, response, springModel,
+				dtbsSourceId, true)
 		{
 			@Override
 			protected List<String> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
 			{
 				Connection cn = getConnection();
 				List<SimpleTable> tables = getDbMetaResolver().getEntityTables(cn);
@@ -1514,10 +1520,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return tableNames;
 	}
 
-	@RequestMapping(value = "/{schemaId}/cancel")
+	@RequestMapping(value = "/{dtbsSourceId}/cancel")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> cancel(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId,
+			@PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody CancelDataExchangeForm form) throws Exception
 	{
 		if (isEmpty(form.getDataExchangeId()))

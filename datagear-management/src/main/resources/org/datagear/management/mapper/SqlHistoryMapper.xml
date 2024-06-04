@@ -10,14 +10,14 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.sql}, #{entity.schemaId}, #{entity.userId}
+			#{entity.id}, #{entity.sql}, #{entity.dtbsSourceId}, #{entity.userId}
 			)
 	</insert>
 	
 	<update id="update">
 		UPDATE DATAGEAR_SQL_HISTORY SET
 			SQLHIS_SQL = #{entity.sql},
-			SQLHIS_SCHEMA_ID = #{entity.schemaId},
+			SQLHIS_SCHEMA_ID = #{entity.dtbsSourceId},
 			SQLHIS_USER_ID = #{entity.userId}
 		WHERE
 			SQLHIS_ID = #{entity.id}
@@ -32,7 +32,7 @@
 	<delete id="deleteExpired">
 		DELETE FROM DATAGEAR_SQL_HISTORY
 		WHERE
-			SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId}
+			SQLHIS_SCHEMA_ID = #{dtbsSourceId} AND SQLHIS_USER_ID = #{userId}
 			<choose><when test="_pagingQuerySupported == true">
 			AND SQLHIS_ID NOT IN
 			(
@@ -46,7 +46,7 @@
 							FROM
 								DATAGEAR_SQL_HISTORY T
 							WHERE
-								SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId}
+								SQLHIS_SCHEMA_ID = #{dtbsSourceId} AND SQLHIS_USER_ID = #{userId}
 							ORDER BY
 								SQLHIS_CREATE_TIME DESC
 						<include refid="common.pagingQueryFoot" />
@@ -101,7 +101,7 @@
 		SELECT
 			A.SQLHIS_ID AS ${_iq_}id${_iq_},
 			A.SQLHIS_SQL AS ${_iq_}sql${_iq_},
-			A.SQLHIS_SCHEMA_ID AS ${_iq_}schemaId${_iq_},
+			A.SQLHIS_SCHEMA_ID AS ${_iq_}dtbsSourceId${_iq_},
 			A.SQLHIS_USER_ID AS ${_iq_}userId${_iq_},
 			A.SQLHIS_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM
@@ -110,8 +110,8 @@
 	
 	<sql id="queryCondition">
 		1 = 1
-		<if test="schemaId != null">
-		AND ${_iq_}schemaId${_iq_} = #{schemaId}
+		<if test="dtbsSourceId != null">
+		AND ${_iq_}dtbsSourceId${_iq_} = #{dtbsSourceId}
 		</if>
 		<if test="userId != null">
 		AND ${_iq_}userId${_iq_} = #{userId}

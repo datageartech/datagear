@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/sqlEditor")
-public class SqlEditorController extends AbstractSchemaConnTableController
+public class SqlEditorController extends AbstractDtbsSourceConnTableController
 {
 	public SqlEditorController()
 	{

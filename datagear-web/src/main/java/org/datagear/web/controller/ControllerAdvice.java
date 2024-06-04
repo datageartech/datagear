@@ -155,7 +155,7 @@ public class ControllerAdvice extends AbstractController
 
 	@ExceptionHandler(DtbsSourceNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public String handleControllerSchemaNotFoundException(HttpServletRequest request, HttpServletResponse response,
+	public String handleControllerDtbsSourceNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			DtbsSourceNotFoundException exception)
 	{
 		setOptMsgForThrowable(request, exception);

@@ -22,7 +22,7 @@
 <head>
 <#include "../include/html_head.ftl">
 <title>
-	<@spring.message code='module.schemaGuard' />
+	<@spring.message code='module.dtbsSourceGuard' />
 	<#include "../include/html_request_action_suffix.ftl">
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
@@ -68,7 +68,7 @@
 	</div>
 	<div class="flex-grow-0">
 		<div class="flex justify-content-center align-items-center text-color-secondary">
-			<small><@spring.message code='schemaGuard.table.desc' /></small>
+			<small><@spring.message code='dtbsSourceGuard.table.desc' /></small>
 		</div>
 	</div>
 	<#include "../include/page_foot.ftl">
@@ -79,7 +79,7 @@
 <script>
 (function(po)
 {
-	po.setupAjaxTable("/schemaGuard/queryData",
+	po.setupAjaxTable("/dtbsSourceGuard/queryData",
 	{
 		multiSortMeta: []
 	});
@@ -96,22 +96,22 @@
 		},
 		onAdd: function()
 		{
-			po.handleAddAction("/schemaGuard/add");
+			po.handleAddAction("/dtbsSourceGuard/add");
 		},
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/schemaGuard/edit");
+			po.handleOpenOfAction("/dtbsSourceGuard/edit");
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/schemaGuard/view");
+			po.handleOpenOfAction("/dtbsSourceGuard/view");
 		},
 		
 		onDelete: function()
 		{
-			po.handleDeleteAction("/schemaGuard/delete");
+			po.handleDeleteAction("/dtbsSourceGuard/delete");
 		},
 		
 		onSelect: function()
@@ -121,7 +121,7 @@
 		
 		onTest: function()
 		{
-			po.open("/schemaGuard/test");
+			po.open("/dtbsSourceGuard/test");
 		}
 	});
 })

@@ -25,7 +25,7 @@
 (function($, undefined)
 {
 	var tableMeta = ($.tableMeta || ($.tableMeta = {}));
-	tableMeta.schemaTableCache = (tableMeta.schemaTableCache || (tableMeta.schemaTableCache = {}));
+	tableMeta.dtbsSourceTableCache = (tableMeta.dtbsSourceTableCache || (tableMeta.dtbsSourceTableCache = {}));
 	
 	//PersistenceSupport.supportsSqlType支持的SQL类型
 	tableMeta.Types=
@@ -612,13 +612,13 @@
 		
 		_getCachedTable : function(schemaId, tableName)
 		{
-			var tables = (this.schemaTableCache[schemaId] || (this.schemaTableCache[schemaId] = {}));
+			var tables = (this.dtbsSourceTableCache[schemaId] || (this.dtbsSourceTableCache[schemaId] = {}));
 			return tables[tableName];
 		},
 		
 		_setCachedTable : function(schemaId, table)
 		{
-			var tables = (this.schemaTableCache[schemaId] || (this.schemaTableCache[schemaId] = {}));
+			var tables = (this.dtbsSourceTableCache[schemaId] || (this.dtbsSourceTableCache[schemaId] = {}));
 			tables[table.name] = table;
 		},
 		

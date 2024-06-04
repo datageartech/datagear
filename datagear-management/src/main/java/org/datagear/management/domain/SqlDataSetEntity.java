@@ -80,12 +80,12 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	 * 注意：
 	 * </p>
 	 * <p>
-	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setShmConFactory(DtbsSourceConnectionFactory)}。
+	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setDtbsConFactory(DtbsSourceConnectionFactory)}。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	public DtbsSourceConnectionFactory getShmConFactory()
+	public DtbsSourceConnectionFactory getDtbsConFactory()
 	{
 		return getConnectionFactory();
 	}
@@ -102,11 +102,11 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	 * 此方法名不应过长，某些数据库对标识符长度有限制，过长可能导致底层ORM的SQL语法错误（比如Oracle-12.2及以下版本限定标识符最长30个字符）。
 	 * </p>
 	 * 
-	 * @param schemaConnectionFactory
+	 * @param connectionFactory
 	 */
-	public void setShmConFactory(DtbsSourceConnectionFactory schemaConnectionFactory)
+	public void setDtbsConFactory(DtbsSourceConnectionFactory connectionFactory)
 	{
-		setConnectionFactory(schemaConnectionFactory);
+		setConnectionFactory(connectionFactory);
 	}
 
 	@Override
@@ -170,12 +170,12 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 		this.analysisProject = analysisProject;
 	}
 	
-	public void clearSchemaPassword()
+	public void clearDtbsSourcePassword()
 	{
 		DtbsSourceConnectionFactory connectionFactory = getConnectionFactory();
-		DtbsSource schema = (connectionFactory == null ? null : connectionFactory.getSchema());
-		if(schema != null)
-			schema.clearPassword();
+		DtbsSource dtbsSource = (connectionFactory == null ? null : connectionFactory.getDtbsSource());
+		if(dtbsSource != null)
+			dtbsSource.clearPassword();
 	}
 
 	@Override
