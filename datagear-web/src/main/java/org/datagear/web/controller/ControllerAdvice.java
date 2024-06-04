@@ -47,7 +47,7 @@ import org.datagear.connection.URLNotAcceptedException;
 import org.datagear.connection.UnsupportedGetConnectionException;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.impl.SaveSchemaPermissionDeniedException;
+import org.datagear.management.service.impl.SaveDtbsSourcePermissionDeniedException;
 import org.datagear.meta.resolver.DBMetaResolverException;
 import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.NonUniqueResultException;
@@ -153,10 +153,10 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(SchemaNotFoundException.class)
+	@ExceptionHandler(DtbsSourceNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public String handleControllerSchemaNotFoundException(HttpServletRequest request, HttpServletResponse response,
-			SchemaNotFoundException exception)
+			DtbsSourceNotFoundException exception)
 	{
 		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
@@ -547,10 +547,10 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(SaveSchemaPermissionDeniedException.class)
+	@ExceptionHandler(SaveDtbsSourcePermissionDeniedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleServiceSaveSchemaPermissionDeniedException(HttpServletRequest request,
-			HttpServletResponse response, SaveSchemaPermissionDeniedException exception)
+	public String handleServiceSaveDtbsSourcePermissionDeniedException(HttpServletRequest request,
+			HttpServletResponse response, SaveDtbsSourcePermissionDeniedException exception)
 	{
 		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);

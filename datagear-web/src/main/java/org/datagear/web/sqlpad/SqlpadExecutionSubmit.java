@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.persistence.RowMapper;
 import org.datagear.util.SqlScriptParser.SqlStatement;
@@ -41,7 +41,7 @@ public class SqlpadExecutionSubmit
 
 	private User user;
 
-	private Schema schema;
+	private DtbsSource schema;
 
 	private String sqlpadId;
 
@@ -73,7 +73,7 @@ public class SqlpadExecutionSubmit
 				from.locale);
 	}
 
-	public SqlpadExecutionSubmit(User user, Schema schema, String sqlpadId, File sqlpadFileDirectory,
+	public SqlpadExecutionSubmit(User user, DtbsSource schema, String sqlpadId, File sqlpadFileDirectory,
 			List<SqlStatement> sqlStatements, CommitMode commitMode, ExceptionHandleMode exceptionHandleMode,
 			Integer overTimeThreashold, int resultsetFetchSize, RowMapper resultsetRowMapper, Locale locale)
 	{
@@ -101,12 +101,12 @@ public class SqlpadExecutionSubmit
 		this.user = user;
 	}
 
-	public Schema getSchema()
+	public DtbsSource getSchema()
 	{
 		return schema;
 	}
 
-	public void setSchema(Schema schema)
+	public void setSchema(DtbsSource schema)
 	{
 		this.schema = schema;
 	}

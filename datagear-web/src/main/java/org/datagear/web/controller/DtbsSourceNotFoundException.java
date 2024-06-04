@@ -15,39 +15,34 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.management.service.impl;
+package org.datagear.web.controller;
 
-import javax.xml.validation.Schema;
-
-import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.domain.DtbsSource;
 
 /**
- * 无权保存{@linkplain Schema}异常。
+ * 未找到指定{@linkplain DtbsSource}异常。
  * 
  * @author datagear@163.com
  *
  */
-public class SaveSchemaPermissionDeniedException extends PermissionDeniedException
+public class DtbsSourceNotFoundException extends ControllerException
 {
 	private static final long serialVersionUID = 1L;
 
-	public SaveSchemaPermissionDeniedException()
+	private String schemaId;
+
+	public DtbsSourceNotFoundException(String schemaId)
 	{
-		super();
+		this(schemaId, null);
 	}
 
-	public SaveSchemaPermissionDeniedException(String message)
+	public DtbsSourceNotFoundException(String schemaId, Throwable cause)
 	{
-		super(message);
+		super("No Schema found for id [" + schemaId + "]", cause);
 	}
 
-	public SaveSchemaPermissionDeniedException(Throwable cause)
+	public String getSchemaId()
 	{
-		super(cause);
-	}
-
-	public SaveSchemaPermissionDeniedException(String message, Throwable cause)
-	{
-		super(message, cause);
+		return schemaId;
 	}
 }

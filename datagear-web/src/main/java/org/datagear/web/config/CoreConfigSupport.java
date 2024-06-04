@@ -70,12 +70,12 @@ import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.DtbsSourceGuardService;
+import org.datagear.management.service.DtbsSourceService;
 import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
-import org.datagear.management.service.SchemaGuardService;
-import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.service.impl.AbstractMybatisDataPermissionEntityService;
@@ -88,12 +88,12 @@ import org.datagear.management.service.impl.BundleAnalysisProjectAuthorizationLi
 import org.datagear.management.service.impl.BundleAuthorizationListener;
 import org.datagear.management.service.impl.DashboardShareSetServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
+import org.datagear.management.service.impl.DtbsSourceGuardServiceImpl;
+import org.datagear.management.service.impl.DtbsSourceServiceImpl;
 import org.datagear.management.service.impl.FileSourceServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
-import org.datagear.management.service.impl.SchemaGuardServiceImpl;
-import org.datagear.management.service.impl.SchemaServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserServiceImpl;
 import org.datagear.management.util.DataPermissionSpec;
@@ -143,7 +143,7 @@ import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
-import org.datagear.web.util.SchemaTableCache;
+import org.datagear.web.util.DtbsSourceTableCache;
 import org.datagear.web.util.SessionDashboardInfoSupport;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
@@ -566,9 +566,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SchemaTableCache schemaTableCache()
+	public DtbsSourceTableCache schemaTableCache()
 	{
-		SchemaTableCache bean = new SchemaTableCache();
+		DtbsSourceTableCache bean = new DtbsSourceTableCache();
 		bean.setTableCacheMaxLength(getApplicationProperties().getSchemaTableCacheMaxLength());
 
 		return bean;
@@ -671,10 +671,11 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SchemaService schemaService()
+	public DtbsSourceService dtbsSourceService()
 	{
-		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.authorizationService(), this.driverEntityManager(), this.userService(), this.schemaGuardService());
+		DtbsSourceServiceImpl bean = new DtbsSourceServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+				this.authorizationService(), this.driverEntityManager(), this.userService(),
+				this.dtbsSourceGuardService());
 		bean.setTextEncryptor(this.schemaPsdEncryptor());
 
 		return bean;
@@ -696,9 +697,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SchemaGuardService schemaGuardService()
+	public DtbsSourceGuardService dtbsSourceGuardService()
 	{
-		SchemaGuardServiceImpl bean = new SchemaGuardServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
+		DtbsSourceGuardServiceImpl bean = new DtbsSourceGuardServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
 				this.lastModifiedService());
 
 		return bean;
@@ -742,7 +743,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	protected DataSetEntityServiceImpl createDataSetEntityServiceImpl()
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.mbSqlDialect(),
-				this.authorizationService(), this.connectionSource(), this.schemaService(),
+				this.authorizationService(), this.connectionSource(), this.dtbsSourceService(),
 				this.analysisProjectService(), this.userService(), this.fileSourceService(),
 				this.dataSetRootDirectory(), this.httpClient());
 
@@ -1195,7 +1196,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	protected void initSchemaTableCache(ApplicationContext context)
 	{
 		CacheManager cacheManager = getCacheManager(context);
-		this.schemaTableCache().setCache(getCache(cacheManager, SchemaTableCache.class.getSimpleName()));
+		this.schemaTableCache().setCache(getCache(cacheManager, DtbsSourceTableCache.class.getSimpleName()));
 	}
 
 	@SuppressWarnings("rawtypes")

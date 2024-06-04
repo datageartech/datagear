@@ -20,23 +20,23 @@ package org.datagear.management.util;
 import java.util.Collections;
 import java.util.List;
 
-import org.datagear.management.domain.SchemaGuard;
-import org.datagear.management.domain.SchemaProperty;
-import org.datagear.management.domain.SchemaPropertyPattern;
+import org.datagear.management.domain.DtbsSourceGuard;
+import org.datagear.management.domain.DtbsSourceProperty;
+import org.datagear.management.domain.DtbsSourcePropertyPattern;
 import org.datagear.util.AsteriskPatternMatcher;
 import org.datagear.util.StringUtil;
 
 /**
- * {@linkplain SchemaGuard}校验类。
+ * {@linkplain DtbsSourceGuard}校验类。
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaGuardChecker
+public class DtbsSourceGuardChecker
 {
 	private AsteriskPatternMatcher asteriskPatternMatcher = new AsteriskPatternMatcher(true);
 
-	public SchemaGuardChecker()
+	public DtbsSourceGuardChecker()
 	{
 		super();
 	}
@@ -54,26 +54,26 @@ public class SchemaGuardChecker
 	/**
 	 * 是否准许。
 	 * 
-	 * @param schemaGuards
+	 * @param dtbsSourceGuards
 	 * @param guardEntity
 	 * @return
 	 */
-	public boolean isPermitted(List<SchemaGuard> schemaGuards, GuardEntity guardEntity)
+	public boolean isPermitted(List<DtbsSourceGuard> dtbsSourceGuards, GuardEntity guardEntity)
 	{
-		// 默认应为true，比如当没有定义任何SchemaGuard时
+		// 默认应为true，比如当没有定义任何DtbsSourceGuard时
 		boolean permitted = true;
 
-		for (SchemaGuard schemaGuard : schemaGuards)
+		for (DtbsSourceGuard dtbsSourceGuard : dtbsSourceGuards)
 		{
-			if (!schemaGuard.isEnabled())
+			if (!dtbsSourceGuard.isEnabled())
 				continue;
 
-			boolean matches = isUrlMatched(schemaGuard, guardEntity) && isUserMatched(schemaGuard, guardEntity)
-					&& isPropertiesMatched(schemaGuard, guardEntity);
+			boolean matches = isUrlMatched(dtbsSourceGuard, guardEntity) && isUserMatched(dtbsSourceGuard, guardEntity)
+					&& isPropertiesMatched(dtbsSourceGuard, guardEntity);
 
 			if (matches)
 			{
-				permitted = schemaGuard.isPermitted();
+				permitted = dtbsSourceGuard.isPermitted();
 				break;
 			}
 		}
@@ -81,34 +81,35 @@ public class SchemaGuardChecker
 		return permitted;
 	}
 
-	protected boolean isUrlMatched(SchemaGuard schemaGuard, GuardEntity guardEntity)
+	protected boolean isUrlMatched(DtbsSourceGuard dtbsSourceGuard, GuardEntity guardEntity)
 	{
-		String pattern = (StringUtil.isEmpty(schemaGuard.getPattern()) ? AsteriskPatternMatcher.ALL_PATTERN
-				: schemaGuard.getPattern());
+		String pattern = (StringUtil.isEmpty(dtbsSourceGuard.getPattern()) ? AsteriskPatternMatcher.ALL_PATTERN
+				: dtbsSourceGuard.getPattern());
 		String url = (guardEntity.getUrl() == null ? "" : guardEntity.getUrl());
 
 		return this.asteriskPatternMatcher.matches(pattern, url);
 	}
 
-	protected boolean isUserMatched(SchemaGuard schemaGuard, GuardEntity guardEntity)
+	protected boolean isUserMatched(DtbsSourceGuard dtbsSourceGuard, GuardEntity guardEntity)
 	{
-		String pattern = (StringUtil.isEmpty(schemaGuard.getUserPattern()) ? AsteriskPatternMatcher.ALL_PATTERN
-				: schemaGuard.getUserPattern());
+		String pattern = (StringUtil.isEmpty(dtbsSourceGuard.getUserPattern()) ? AsteriskPatternMatcher.ALL_PATTERN
+				: dtbsSourceGuard.getUserPattern());
 		String user = (guardEntity.getUser() == null ? "" : guardEntity.getUser());
 
 		return this.asteriskPatternMatcher.matches(pattern, user);
 	}
 
-	protected boolean isPropertiesMatched(SchemaGuard schemaGuard, GuardEntity guardEntity)
+	protected boolean isPropertiesMatched(DtbsSourceGuard dtbsSourceGuard, GuardEntity guardEntity)
 	{
-		List<SchemaPropertyPattern> patterns = (schemaGuard.getPropertyPatterns() == null ? Collections.emptyList()
-				: schemaGuard.getPropertyPatterns());
-		List<SchemaProperty> properties = (guardEntity.getProperties() == null ? Collections.emptyList()
+		List<DtbsSourcePropertyPattern> patterns = (dtbsSourceGuard.getPropertyPatterns() == null
+				? Collections.emptyList()
+				: dtbsSourceGuard.getPropertyPatterns());
+		List<DtbsSourceProperty> properties = (guardEntity.getProperties() == null ? Collections.emptyList()
 				: guardEntity.getProperties());
 
 		if (patterns.isEmpty())
 		{
-			if(schemaGuard.isEmptyPropertyPatternsForAll())
+			if (dtbsSourceGuard.isEmptyPropertyPatternsForAll())
 				return true;
 			else
 				return properties.isEmpty();
@@ -117,13 +118,13 @@ public class SchemaGuardChecker
 		if (properties.isEmpty())
 			return false;
 
-		String pmm = schemaGuard.getPropertiesMatchMode();
+		String pmm = dtbsSourceGuard.getPropertiesMatchMode();
 		if (StringUtil.isEmpty(pmm))
-			pmm = SchemaGuard.PROPERTIES_MATCH_MODE_ANY;
+			pmm = DtbsSourceGuard.PROPERTIES_MATCH_MODE_ANY;
 
-		if (SchemaGuard.PROPERTIES_MATCH_MODE_ANY.equalsIgnoreCase(pmm))
+		if (DtbsSourceGuard.PROPERTIES_MATCH_MODE_ANY.equalsIgnoreCase(pmm))
 		{
-			for (SchemaPropertyPattern pattern : patterns)
+			for (DtbsSourcePropertyPattern pattern : patterns)
 			{
 				String namePattern = (StringUtil.isEmpty(pattern.getNamePattern()) ? AsteriskPatternMatcher.ALL_PATTERN
 						: pattern.getNamePattern());
@@ -133,7 +134,7 @@ public class SchemaGuardChecker
 
 				boolean myMatches = false;
 
-				for (SchemaProperty p : properties)
+				for (DtbsSourceProperty p : properties)
 				{
 					if (this.asteriskPatternMatcher.matches(namePattern, p.getName())
 							&& this.asteriskPatternMatcher.matches(valuePattern, p.getValue()))
@@ -149,9 +150,9 @@ public class SchemaGuardChecker
 
 			return false;
 		}
-		else if (SchemaGuard.PROPERTIES_MATCH_MODE_ALL.equalsIgnoreCase(pmm))
+		else if (DtbsSourceGuard.PROPERTIES_MATCH_MODE_ALL.equalsIgnoreCase(pmm))
 		{
-			for (SchemaPropertyPattern pattern : patterns)
+			for (DtbsSourcePropertyPattern pattern : patterns)
 			{
 				String namePattern = (StringUtil.isEmpty(pattern.getNamePattern()) ? AsteriskPatternMatcher.ALL_PATTERN
 						: pattern.getNamePattern());
@@ -161,7 +162,7 @@ public class SchemaGuardChecker
 
 				boolean myMatches = false;
 
-				for (SchemaProperty p : properties)
+				for (DtbsSourceProperty p : properties)
 				{
 					if (this.asteriskPatternMatcher.matches(namePattern, p.getName())
 							&& this.asteriskPatternMatcher.matches(valuePattern, p.getValue()))

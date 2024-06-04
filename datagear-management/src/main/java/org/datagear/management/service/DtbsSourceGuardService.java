@@ -17,24 +17,24 @@
 
 package org.datagear.management.service;
 
-import org.datagear.management.domain.SchemaGuard;
+import org.datagear.management.domain.DtbsSourceGuard;
 import org.datagear.management.domain.User;
 import org.datagear.management.util.GuardEntity;
 import org.datagear.util.AsteriskPatternMatcher;
 
 /**
- * {@linkplain SchemaGuard}业务服务接口。
+ * {@linkplain DtbsSourceGuard}业务服务接口。
  * 
  * @author datagear@163.com
  *
  */
-public interface SchemaGuardService extends EntityService<String, SchemaGuard>
+public interface DtbsSourceGuardService extends EntityService<String, DtbsSourceGuard>
 {
 	/**
 	 * 是否允许创建指定的{@linkplain GuardEntity}。
 	 * <p>
 	 * 实现类应支持{@linkplain AsteriskPatternMatcher}匹配规则，
-	 * 并且，如果没有定义任何{@linkplain SchemaGuard}，应返回{@code true}。
+	 * 并且，如果没有定义任何{@linkplain DtbsSourceGuard}，应返回{@code true}。
 	 * </p>
 	 * 
 	 * @param guardEntity

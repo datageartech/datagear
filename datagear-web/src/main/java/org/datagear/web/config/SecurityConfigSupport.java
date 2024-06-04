@@ -158,7 +158,7 @@ public class SecurityConfigSupport
 		configAccessForSchemaUrlBuilder(http);
 		configAccessForUser(http);
 		configAccessForRole(http);
-		configAccessForSchemaGuard(http);
+		configAccessForDtbsSourceGuard(http);
 		configAccessForAuthorization(http);
 		configAccessForError(http);
 		configAccessForLogin(http);
@@ -683,14 +683,14 @@ public class SecurityConfigSupport
 	 * @param http
 	 * @throws Exception
 	 */
-	protected void configAccessForSchemaGuard(HttpSecurity http) throws Exception
+	protected void configAccessForDtbsSourceGuard(HttpSecurity http) throws Exception
 	{
-		configAccessForModuleAccess(http, schemaGuardModuleAccess());
+		configAccessForModuleAccess(http, dtbsSourceGuardModuleAccess());
 	}
 
-	protected ModuleAccess schemaGuardModuleAccess()
+	protected ModuleAccess dtbsSourceGuardModuleAccess()
 	{
-		UrlsAccess ua = new UrlsAccess(adminAuthorizationManager(), "/schemaGuard/**");
+		UrlsAccess ua = new UrlsAccess(adminAuthorizationManager(), "/dtbsSourceGuard/**");
 
 		return new ModuleAccess(ua);
 	}

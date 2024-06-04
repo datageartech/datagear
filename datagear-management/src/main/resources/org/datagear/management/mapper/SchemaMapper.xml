@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.datagear.management.domain.Schema">
+<mapper namespace="org.datagear.management.domain.DtbsSource">
 
 	<insert id="insert">
 		INSERT INTO DATAGEAR_SCHEMA
@@ -44,7 +44,7 @@
 			SCHEMA_ID = #{id}
 	</delete>
 	
-	<select id="getById" resultType="org.datagear.management.domain.Schema">
+	<select id="getById" resultType="org.datagear.management.domain.DtbsSource">
 		SELECT
 			T.*
 		FROM
@@ -67,7 +67,7 @@
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
 	
-	<select id="query" resultType="org.datagear.management.domain.Schema">
+	<select id="query" resultType="org.datagear.management.domain.DtbsSource">
 		SELECT
 			T.*
 		FROM
@@ -86,7 +86,7 @@
 			<include refid="queryCondition" />
 	</select>
 	
-	<select id="pagingQuery" resultType="org.datagear.management.domain.Schema">
+	<select id="pagingQuery" resultType="org.datagear.management.domain.DtbsSource">
 		<include refid="common.pagingQueryHead" />
 			SELECT
 				T.*

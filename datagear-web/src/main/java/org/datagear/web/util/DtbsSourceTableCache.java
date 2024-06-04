@@ -17,7 +17,7 @@
 
 package org.datagear.web.util;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.meta.Table;
 import org.datagear.util.StringUtil;
 import org.datagear.util.cache.CollectionCacheValue;
@@ -30,19 +30,19 @@ import org.springframework.cache.Cache.ValueWrapper;
  * @author datagear@163.com
  *
  */
-public class SchemaTableCache
+public class DtbsSourceTableCache
 {
 	private Cache cache;
 
 	/** 每个数据源最多缓存表数目 */
 	private int tableCacheMaxLength = 10;
 
-	public SchemaTableCache()
+	public DtbsSourceTableCache()
 	{
 		super();
 	}
 
-	public SchemaTableCache(Cache cache)
+	public DtbsSourceTableCache(Cache cache)
 	{
 		super();
 		this.cache = cache;
@@ -120,7 +120,7 @@ public class SchemaTableCache
 	}
 
 	/**
-	 * 清除指定{@linkplain Schema} ID的所有{@linkplain Table}缓存。
+	 * 清除指定{@linkplain DtbsSource} ID的所有{@linkplain Table}缓存。
 	 * 
 	 * @param schemaId
 	 */

@@ -20,15 +20,15 @@ package org.datagear.management.domain;
 import java.io.Serializable;
 
 /**
- * 数据库模式属性。
+ * 数据源属性。
  * <p>
- * 数据库JDBC连接属性。
+ * 数据源JDBC连接属性。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaProperty implements Serializable
+public class DtbsSourceProperty implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -38,12 +38,12 @@ public class SchemaProperty implements Serializable
 	/**属性值*/
 	private String value;
 
-	public SchemaProperty()
+	public DtbsSourceProperty()
 	{
 		super();
 	}
 
-	public SchemaProperty(String name, String value)
+	public DtbsSourceProperty(String name, String value)
 	{
 		super();
 		this.name = name;

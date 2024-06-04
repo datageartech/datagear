@@ -25,31 +25,31 @@ import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
-import org.datagear.management.domain.Schema;
-import org.datagear.management.domain.SchemaProperty;
+import org.datagear.management.domain.DtbsSource;
+import org.datagear.management.domain.DtbsSourceProperty;
 import org.datagear.util.StringUtil;
 
 /**
- * {@linkplain Schema}数据库连接支持类。
+ * {@linkplain DtbsSource}数据库连接支持类。
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaConnectionSupport
+public class DtbsSourceConnectionSupport
 {
-	public SchemaConnectionSupport()
+	public DtbsSourceConnectionSupport()
 	{
 	}
 
 	/**
-	 * 获取指定{@linkplain Schema}的{@linkplain Connection}。
+	 * 获取指定{@linkplain DtbsSource}的{@linkplain Connection}。
 	 * 
 	 * @param connectionSource
 	 * @param schema
 	 * @return
 	 * @throws ConnectionSourceException
 	 */
-	public Connection getSchemaConnection(ConnectionSource connectionSource, Schema schema)
+	public Connection getSchemaConnection(ConnectionSource connectionSource, DtbsSource schema)
 			throws ConnectionSourceException
 	{
 		Connection cn = null;
@@ -60,8 +60,8 @@ public class SchemaConnectionSupport
 		{
 			properties = new Properties();
 			
-			List<SchemaProperty> schemaProperties = schema.getProperties();
-			for(SchemaProperty sp : schemaProperties)
+			List<DtbsSourceProperty> schemaProperties = schema.getProperties();
+			for(DtbsSourceProperty sp : schemaProperties)
 			{
 				String name = sp.getName();
 				String value = sp.getValue();

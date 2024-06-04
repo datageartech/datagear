@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.DtbsSourceService;
 import org.datagear.management.service.RoleService;
-import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.RoleSpec;
 import org.datagear.persistence.PagingData;
@@ -65,7 +65,7 @@ public class UserController extends AbstractController
 	private RoleService roleService;
 
 	@Autowired
-	private SchemaService schemaService;
+	private DtbsSourceService dtbsSourceService;
 
 	@Autowired
 	private ApplicationProperties applicationProperties;
@@ -98,14 +98,14 @@ public class UserController extends AbstractController
 		this.roleService = roleService;
 	}
 
-	public SchemaService getSchemaService()
+	public DtbsSourceService getDtbsSourceService()
 	{
-		return schemaService;
+		return dtbsSourceService;
 	}
 
-	public void setSchemaService(SchemaService schemaService)
+	public void setDtbsSourceService(DtbsSourceService dtbsSourceService)
 	{
-		this.schemaService = schemaService;
+		this.dtbsSourceService = dtbsSourceService;
 	}
 
 	public ApplicationProperties getApplicationProperties()

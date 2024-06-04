@@ -37,22 +37,22 @@ import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.HttpDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
-import org.datagear.management.domain.Schema;
-import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.SummaryDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.DtbsSourceService;
 import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.DtbsSourceConnectionFactory;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -75,7 +75,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private ConnectionSource connectionSource;
 
-	private SchemaService schemaService;
+	private DtbsSourceService dtbsSourceService;
 
 	private AnalysisProjectService analysisProjectService;
 
@@ -102,14 +102,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			ConnectionSource connectionSource, SchemaService schemaService,
+			ConnectionSource connectionSource, DtbsSourceService dtbsSourceService,
 			AnalysisProjectService analysisProjectService,
 			UserService userService, FileSourceService fileSourceService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.connectionSource = connectionSource;
-		this.schemaService = schemaService;
+		this.dtbsSourceService = dtbsSourceService;
 		this.analysisProjectService = analysisProjectService;
 		this.userService = userService;
 		this.fileSourceService = fileSourceService;
@@ -119,14 +119,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService,
-			ConnectionSource connectionSource, SchemaService schemaService,
+			ConnectionSource connectionSource, DtbsSourceService dtbsSourceService,
 			AnalysisProjectService analysisProjectService,
 			UserService userService, FileSourceService fileSourceService,
 			File dataSetRootDirectory, HttpClient httpClient)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.connectionSource = connectionSource;
-		this.schemaService = schemaService;
+		this.dtbsSourceService = dtbsSourceService;
 		this.analysisProjectService = analysisProjectService;
 		this.userService = userService;
 		this.fileSourceService = fileSourceService;
@@ -144,14 +144,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.connectionSource = connectionSource;
 	}
 
-	public SchemaService getSchemaService()
+	public DtbsSourceService getDtbsSourceService()
 	{
-		return schemaService;
+		return dtbsSourceService;
 	}
 
-	public void setSchemaService(SchemaService schemaService)
+	public void setDtbsSourceService(DtbsSourceService dtbsSourceService)
 	{
-		this.schemaService = schemaService;
+		this.dtbsSourceService = dtbsSourceService;
 	}
 
 	public AnalysisProjectService getAnalysisProjectService()
@@ -250,11 +250,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (entity instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity sqlDataSetEntity = (SqlDataSetEntity) entity;
-			SchemaConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
+			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
 			
 			if(connectionFactory != null)
 			{
-				connectionFactory = new SchemaConnectionFactory(this.connectionSource, connectionFactory.getSchema());
+				connectionFactory = new DtbsSourceConnectionFactory(this.connectionSource, connectionFactory.getSchema());
 				sqlDataSetEntity.setConnectionFactory(connectionFactory);
 			}
 
@@ -671,12 +671,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		{
 			SqlDataSetEntity entity = (SqlDataSetEntity) obj;
 
-			SchemaConnectionFactory connectionFactory = entity.getConnectionFactory();
-			Schema schema = (connectionFactory == null ? null : connectionFactory.getSchema());
+			DtbsSourceConnectionFactory connectionFactory = entity.getConnectionFactory();
+			DtbsSource schema = (connectionFactory == null ? null : connectionFactory.getSchema());
 			String schemaId = (schema == null ? null : schema.getId());
 
 			if (!StringUtil.isEmpty(schemaId))
-				connectionFactory.setSchema(this.schemaService.getById(schemaId));
+				connectionFactory.setSchema(this.dtbsSourceService.getById(schemaId));
 		}
 
 		return super.postProcessGet(obj);

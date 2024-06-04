@@ -21,8 +21,8 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import org.datagear.management.domain.Schema;
-import org.datagear.management.domain.SchemaProperty;
+import org.datagear.management.domain.DtbsSource;
+import org.datagear.management.domain.DtbsSourceProperty;
 
 /**
  * 数据源防护对象。
@@ -41,7 +41,7 @@ public class GuardEntity implements Serializable
 	private String user = "";
 
 	/** 数据源连接属性 */
-	private List<SchemaProperty> properties = Collections.emptyList();
+	private List<DtbsSourceProperty> properties = Collections.emptyList();
 
 	public GuardEntity()
 	{
@@ -61,7 +61,7 @@ public class GuardEntity implements Serializable
 		this.user = user;
 	}
 
-	public GuardEntity(String url, String user, List<SchemaProperty> properties)
+	public GuardEntity(String url, String user, List<DtbsSourceProperty> properties)
 	{
 		super();
 		this.url = url;
@@ -69,7 +69,7 @@ public class GuardEntity implements Serializable
 		this.properties = properties;
 	}
 
-	public GuardEntity(Schema schema)
+	public GuardEntity(DtbsSource schema)
 	{
 		this(schema.getUrl(), schema.getUser(), schema.getProperties());
 	}
@@ -94,12 +94,12 @@ public class GuardEntity implements Serializable
 		this.user = user;
 	}
 
-	public List<SchemaProperty> getProperties()
+	public List<DtbsSourceProperty> getProperties()
 	{
 		return properties;
 	}
 
-	public void setProperties(List<SchemaProperty> properties)
+	public void setProperties(List<DtbsSourceProperty> properties)
 	{
 		this.properties = properties;
 	}

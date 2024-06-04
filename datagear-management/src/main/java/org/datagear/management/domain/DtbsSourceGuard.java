@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEntity, CloneableEntity
+public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTimeEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -56,7 +56,7 @@ public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEnt
 	private String userPattern = "";
 
 	/** 连接属性匹配模式，{@code null}、空列表匹配所有 */
-	private List<SchemaPropertyPattern> propertyPatterns = Collections.emptyList();
+	private List<DtbsSourcePropertyPattern> propertyPatterns = Collections.emptyList();
 
 	/**
 	 * 当{@linkplain #propertyPatterns}为空时，是否匹配任意连接属性，否则将仅匹配空连接属性。
@@ -81,24 +81,24 @@ public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEnt
 	/** 创建时间 */
 	private Date createTime = null;
 
-	public SchemaGuard()
+	public DtbsSourceGuard()
 	{
 		super();
 	}
 
-	public SchemaGuard(String id)
+	public DtbsSourceGuard(String id)
 	{
 		super(id);
 	}
 
-	public SchemaGuard(String id, String name, String pattern)
+	public DtbsSourceGuard(String id, String name, String pattern)
 	{
 		super(id);
 		this.name = name;
 		this.pattern = pattern;
 	}
 
-	public SchemaGuard(String id, String name, String pattern, boolean permitted)
+	public DtbsSourceGuard(String id, String name, String pattern, boolean permitted)
 	{
 		super(id);
 		this.name = name;
@@ -106,7 +106,7 @@ public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEnt
 		this.permitted = permitted;
 	}
 
-	public SchemaGuard(String id, String name, String pattern, String userPattern)
+	public DtbsSourceGuard(String id, String name, String pattern, String userPattern)
 	{
 		super(id);
 		this.name = name;
@@ -114,7 +114,7 @@ public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEnt
 		this.userPattern = userPattern;
 	}
 
-	public SchemaGuard(String id, String name, String pattern, String userPattern, boolean permitted)
+	public DtbsSourceGuard(String id, String name, String pattern, String userPattern, boolean permitted)
 	{
 		super(id);
 		this.name = name;
@@ -155,12 +155,12 @@ public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEnt
 	}
 
 	@Nullable
-	public List<SchemaPropertyPattern> getPropertyPatterns()
+	public List<DtbsSourcePropertyPattern> getPropertyPatterns()
 	{
 		return propertyPatterns;
 	}
 
-	public void setPropertyPatterns(List<SchemaPropertyPattern> propertyPatterns)
+	public void setPropertyPatterns(List<DtbsSourcePropertyPattern> propertyPatterns)
 	{
 		this.propertyPatterns = propertyPatterns;
 	}
@@ -254,37 +254,37 @@ public class SchemaGuard extends AbstractStringIdEntity implements CreateTimeEnt
 		}
 		else
 		{
-			SchemaPropertyPattern[] propertyPatterns = JsonSupport.parse(json, SchemaPropertyPattern[].class, null);
+			DtbsSourcePropertyPattern[] propertyPatterns = JsonSupport.parse(json, DtbsSourcePropertyPattern[].class, null);
 			setPropertyPatterns(Arrays.asList(propertyPatterns));
 		}
 	}
 
 	@Override
-	public SchemaGuard clone()
+	public DtbsSourceGuard clone()
 	{
-		SchemaGuard entity = new SchemaGuard();
+		DtbsSourceGuard entity = new DtbsSourceGuard();
 		BeanUtils.copyProperties(this, entity);
 
 		return entity;
 	}
 
 	/**
-	 * 将{@linkplain SchemaGuard}列表按照优先级排序，{@linkplain SchemaGuard#getPriority()}越大越靠前、{@linkplain SchemaGuard#getCreateTime()}越新越靠前。
+	 * 将{@linkplain DtbsSourceGuard}列表按照优先级排序，{@linkplain DtbsSourceGuard#getPriority()}越大越靠前、{@linkplain DtbsSourceGuard#getCreateTime()}越新越靠前。
 	 * 
-	 * @param schemaGuards
+	 * @param dtbsSourceGuards
 	 */
-	public static void sortByPriority(List<? extends SchemaGuard> schemaGuards)
+	public static void sortByPriority(List<? extends DtbsSourceGuard> dtbsSourceGuards)
 	{
-		if (schemaGuards == null)
+		if (dtbsSourceGuards == null)
 			return;
 
-		Collections.sort(schemaGuards, SCHEMA_GUARD_PRIORITY_COMPARATOR);
+		Collections.sort(dtbsSourceGuards, SCHEMA_GUARD_PRIORITY_COMPARATOR);
 	}
 
-	private static final Comparator<SchemaGuard> SCHEMA_GUARD_PRIORITY_COMPARATOR = new Comparator<SchemaGuard>()
+	private static final Comparator<DtbsSourceGuard> SCHEMA_GUARD_PRIORITY_COMPARATOR = new Comparator<DtbsSourceGuard>()
 	{
 		@Override
-		public int compare(SchemaGuard o1, SchemaGuard o2)
+		public int compare(DtbsSourceGuard o1, DtbsSourceGuard o2)
 		{
 			// 优先级越高越靠前
 			int p = Integer.valueOf(o2.priority).compareTo(o1.priority);

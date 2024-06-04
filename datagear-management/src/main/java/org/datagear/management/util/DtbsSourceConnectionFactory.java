@@ -15,36 +15,36 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.management.domain;
+package org.datagear.management.util;
 
 import java.io.Serializable;
 import java.sql.Connection;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.management.util.SchemaConnectionSupport;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
- * 封装{@linkplain Schema}的{@linkplain ConnectionFactory}。
+ * 封装{@linkplain DtbsSource}的{@linkplain ConnectionFactory}。
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaConnectionFactory extends SchemaConnectionSupport implements ConnectionFactory, Serializable
+public class DtbsSourceConnectionFactory extends DtbsSourceConnectionSupport implements ConnectionFactory, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	private transient ConnectionSource connectionSource;
 
-	private Schema schema;
+	private DtbsSource schema;
 
-	public SchemaConnectionFactory()
+	public DtbsSourceConnectionFactory()
 	{
 		super();
 	}
 
-	public SchemaConnectionFactory(ConnectionSource connectionSource, Schema schema)
+	public DtbsSourceConnectionFactory(ConnectionSource connectionSource, DtbsSource schema)
 	{
 		super();
 		this.connectionSource = connectionSource;
@@ -61,12 +61,12 @@ public class SchemaConnectionFactory extends SchemaConnectionSupport implements 
 		this.connectionSource = connectionSource;
 	}
 
-	public Schema getSchema()
+	public DtbsSource getSchema()
 	{
 		return schema;
 	}
 
-	public void setSchema(Schema schema)
+	public void setSchema(DtbsSource schema)
 	{
 		this.schema = schema;
 	}

@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.SqlDataSet;
+import org.datagear.management.util.DtbsSourceConnectionFactory;
 import org.datagear.util.resource.ConnectionFactory;
 import org.springframework.beans.BeanUtils;
 
@@ -52,45 +53,45 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	}
 
 	public SqlDataSetEntity(String id, String name, List<DataSetProperty> properties,
-			SchemaConnectionFactory connectionFactory, String sql, User createUser)
+			DtbsSourceConnectionFactory connectionFactory, String sql, User createUser)
 	{
 		super(id, name, properties, connectionFactory, sql);
 		this.createUser = createUser;
 	}
 
 	@Override
-	public SchemaConnectionFactory getConnectionFactory()
+	public DtbsSourceConnectionFactory getConnectionFactory()
 	{
-		return (SchemaConnectionFactory) super.getConnectionFactory();
+		return (DtbsSourceConnectionFactory) super.getConnectionFactory();
 	}
 
 	@Override
 	public void setConnectionFactory(ConnectionFactory connectionFactory)
 	{
-		if (connectionFactory != null && !(connectionFactory instanceof SchemaConnectionFactory))
+		if (connectionFactory != null && !(connectionFactory instanceof DtbsSourceConnectionFactory))
 			throw new IllegalArgumentException();
 
 		super.setConnectionFactory(connectionFactory);
 	}
 
 	/**
-	 * 获取{@linkplain SchemaConnectionFactory}。
+	 * 获取{@linkplain DtbsSourceConnectionFactory}。
 	 * <p>
 	 * 注意：
 	 * </p>
 	 * <p>
-	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setShmConFactory(SchemaConnectionFactory)}。
+	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setShmConFactory(DtbsSourceConnectionFactory)}。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	public SchemaConnectionFactory getShmConFactory()
+	public DtbsSourceConnectionFactory getShmConFactory()
 	{
 		return getConnectionFactory();
 	}
 
 	/**
-	 * 设置{@linkplain SchemaConnectionFactory}。
+	 * 设置{@linkplain DtbsSourceConnectionFactory}。
 	 * <p>
 	 * 注意：
 	 * </p>
@@ -103,7 +104,7 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	 * 
 	 * @param schemaConnectionFactory
 	 */
-	public void setShmConFactory(SchemaConnectionFactory schemaConnectionFactory)
+	public void setShmConFactory(DtbsSourceConnectionFactory schemaConnectionFactory)
 	{
 		setConnectionFactory(schemaConnectionFactory);
 	}
@@ -171,8 +172,8 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	
 	public void clearSchemaPassword()
 	{
-		SchemaConnectionFactory connectionFactory = getConnectionFactory();
-		Schema schema = (connectionFactory == null ? null : connectionFactory.getSchema());
+		DtbsSourceConnectionFactory connectionFactory = getConnectionFactory();
+		DtbsSource schema = (connectionFactory == null ? null : connectionFactory.getSchema());
 		if(schema != null)
 			schema.clearPassword();
 	}

@@ -29,10 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.DataPermissionEntity;
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaGuardService;
-import org.datagear.management.service.impl.SaveSchemaPermissionDeniedException;
+import org.datagear.management.service.DtbsSourceGuardService;
+import org.datagear.management.service.impl.SaveDtbsSourcePermissionDeniedException;
 import org.datagear.management.util.GuardEntity;
 import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
@@ -62,7 +62,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/schema")
-public class SchemaController extends AbstractSchemaConnTableController
+public class DtbsSourceController extends AbstractSchemaConnTableController
 {
 	public static final String COOKIE_PAGINATION_SIZE = "SCHEMA_PAGINATION_PAGE_SIZE";
 
@@ -70,9 +70,9 @@ public class SchemaController extends AbstractSchemaConnTableController
 	private DriverEntityManager driverEntityManager;
 
 	@Autowired
-	private SchemaGuardService schemaGuardService;
+	private DtbsSourceGuardService dtbsSourceGuardService;
 
-	public SchemaController()
+	public DtbsSourceController()
 	{
 		super();
 	}
@@ -87,20 +87,20 @@ public class SchemaController extends AbstractSchemaConnTableController
 		this.driverEntityManager = driverEntityManager;
 	}
 
-	public SchemaGuardService getSchemaGuardService()
+	public DtbsSourceGuardService getDtbsSourceGuardService()
 	{
-		return schemaGuardService;
+		return dtbsSourceGuardService;
 	}
 
-	public void setSchemaGuardService(SchemaGuardService schemaGuardService)
+	public void setDtbsSourceGuardService(DtbsSourceGuardService dtbsSourceGuardService)
 	{
-		this.schemaGuardService = schemaGuardService;
+		this.dtbsSourceGuardService = dtbsSourceGuardService;
 	}
 
 	@RequestMapping("/add")
 	public String add(org.springframework.ui.Model model)
 	{
-		Schema schema = new Schema();
+		DtbsSource schema = new DtbsSource();
 		setFormModel(model, schema, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/schema/schema_form";
@@ -110,7 +110,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public String copy(org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		Schema schema = getByIdForView(getSchemaService(), user, id);
+		DtbsSource schema = getByIdForView(getDtbsSourceService(), user, id);
 		schema.setId(null);
 		schema.clearPassword();
 		schema.setDataPermission(DataPermissionEntity.PERMISSION_NOT_LOADED);
@@ -122,7 +122,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody Schema schema)
+			@RequestBody DtbsSource schema)
 	{
 		User user = getCurrentUser();
 
@@ -132,7 +132,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		schema.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(schema, user);
 
-		getSchemaService().add(user, schema);
+		getDtbsSourceService().add(user, schema);
 
 		return optSuccessDataResponseEntity(request, schema);
 	}
@@ -142,7 +142,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		Schema schema = getByIdForEdit(getSchemaService(), user, id);
+		DtbsSource schema = getByIdForEdit(getDtbsSourceService(), user, id);
 		schema.clearPassword();
 		
 		setFormModel(model, schema, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
@@ -152,16 +152,16 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody Schema schema)
+			@RequestBody DtbsSource schema)
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		Schema old = getSchemaService().getById(schema.getId());
+		DtbsSource old = getDtbsSourceService().getById(schema.getId());
 
-		boolean updated = getSchemaService().update(user, schema);
+		boolean updated = getDtbsSourceService().update(user, schema);
 
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
@@ -176,7 +176,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		Schema schema = getByIdForView(getSchemaService(), user, id);
+		DtbsSource schema = getByIdForView(getDtbsSourceService(), user, id);
 		schema.clearPassword();
 
 		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
@@ -194,7 +194,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		{
 			String id = ids[i];
 
-			boolean deleted = getSchemaService().deleteById(user, id);
+			boolean deleted = getDtbsSourceService().deleteById(user, id);
 
 			// 清除缓存
 			if (deleted)
@@ -221,13 +221,13 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<Schema> queryData(HttpServletRequest request, HttpServletResponse response,
+	public List<DtbsSource> queryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
+		List<DtbsSource> schemas = getDtbsSourceService().query(user, pagingQuery);
 		processForUI(request, schemas);
 
 		return schemas;
@@ -235,13 +235,13 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<Schema> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<DtbsSource> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		PagingData<Schema> pagingData = getSchemaService().pagingQuery(user, pagingQuery);
+		PagingData<DtbsSource> pagingData = getDtbsSourceService().pagingQuery(user, pagingQuery);
 		processForUI(request, pagingData.getItems());
 
 		return pagingData;
@@ -250,15 +250,15 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/testConnection", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> testConnection(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody Schema schema) throws Exception
+			@RequestBody DtbsSource schema) throws Exception
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		if (!this.schemaGuardService.isPermitted(user, new GuardEntity(schema)))
-			throw new SaveSchemaPermissionDeniedException();
+		if (!this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(schema)))
+			throw new SaveDtbsSourcePermissionDeniedException();
 
 		// 用户选定驱动程序时
 		if (!isEmpty(schema.getDriverEntity()) && !isEmpty(schema.getDriverEntity().getId()))
@@ -283,7 +283,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<Schema> list(HttpServletRequest request, HttpServletResponse response,
+	public List<DtbsSource> list(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody PagingQuery pagingQueryParam)
 	{
 		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
@@ -292,7 +292,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
 
-		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
+		List<DtbsSource> schemas = getDtbsSourceService().query(user, pagingQuery);
 		processForUI(request, schemas);
 
 		return schemas;
@@ -311,7 +311,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
 			{
 				Connection cn = getConnection();
 				List<SimpleTable> tables = getDbMetaResolver().getDataTables(cn);
@@ -349,7 +349,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Exception
 			{
 				return table;
 			}
@@ -367,7 +367,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Exception
 			{
 				return table;
 			}
@@ -385,7 +385,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
-		Schema schema = getByIdForView(getSchemaService(), user, id);
+		DtbsSource schema = getByIdForView(getDtbsSourceService(), user, id);
 
 		DatabaseInfo di = new DatabaseInfo();
 
@@ -420,11 +420,11 @@ public class SchemaController extends AbstractSchemaConnTableController
 	 * @param request
 	 * @param schemas
 	 */
-	protected void processForUI(HttpServletRequest request, List<Schema> schemas)
+	protected void processForUI(HttpServletRequest request, List<DtbsSource> schemas)
 	{
 		if (schemas != null && !schemas.isEmpty())
 		{
-			for (Schema schema : schemas)
+			for (DtbsSource schema : schemas)
 			{
 				// 清除密码，避免传输至客户端引起安全问题。
 				schema.clearPassword();

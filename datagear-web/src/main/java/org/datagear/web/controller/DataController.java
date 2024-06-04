@@ -33,7 +33,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
@@ -200,7 +200,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -230,7 +230,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -262,7 +262,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected PagingData<Row> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -295,7 +295,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected String execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -320,7 +320,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
@@ -349,7 +349,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected Row execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 				
@@ -375,7 +375,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
@@ -414,7 +414,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected Row execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
@@ -450,7 +450,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
@@ -486,7 +486,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -536,7 +536,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
@@ -618,7 +618,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected List<List<Object>> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -663,7 +663,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 

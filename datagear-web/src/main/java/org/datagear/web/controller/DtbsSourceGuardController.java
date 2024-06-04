@@ -22,8 +22,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.SchemaGuard;
-import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.domain.DtbsSourceGuard;
+import org.datagear.management.service.DtbsSourceGuardService;
 import org.datagear.management.util.GuardEntity;
 import org.datagear.util.AsteriskPatternMatcher;
 import org.datagear.util.IDUtil;
@@ -38,37 +38,37 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * {@linkplain SchemaGuard}控制器。
+ * {@linkplain DtbsSourceGuard}控制器。
  * 
  * @author datagear@163.com
  *
  */
 @Controller
 @RequestMapping("/schemaGuard")
-public class SchemaGuardController extends AbstractController
+public class DtbsSourceGuardController extends AbstractController
 {
 	@Autowired
-	private SchemaGuardService schemaGuardService;
+	private DtbsSourceGuardService dtbsSourceGuardService;
 
-	public SchemaGuardController()
+	public DtbsSourceGuardController()
 	{
 		super();
 	}
 
-	public SchemaGuardService getSchemaGuardService()
+	public DtbsSourceGuardService getDtbsSourceGuardService()
 	{
-		return schemaGuardService;
+		return dtbsSourceGuardService;
 	}
 
-	public void setSchemaGuardService(SchemaGuardService schemaGuardService)
+	public void setDtbsSourceGuardService(DtbsSourceGuardService dtbsSourceGuardService)
 	{
-		this.schemaGuardService = schemaGuardService;
+		this.dtbsSourceGuardService = dtbsSourceGuardService;
 	}
 
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		SchemaGuard schemaGuard = new SchemaGuard();
+		DtbsSourceGuard schemaGuard = new DtbsSourceGuard();
 		schemaGuard.setUserPattern(AsteriskPatternMatcher.ALL_PATTERN);
 		schemaGuard.setPermitted(false);
 
@@ -80,14 +80,14 @@ public class SchemaGuardController extends AbstractController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SchemaGuard schemaGuard)
+			@RequestBody DtbsSourceGuard schemaGuard)
 	{
 		checkSaveEntity(schemaGuard);
 
 		schemaGuard.setId(IDUtil.randomIdOnTime20());
 		inflateCreateTime(schemaGuard);
 
-		this.schemaGuardService.add(schemaGuard);
+		this.dtbsSourceGuardService.add(schemaGuard);
 
 		return optSuccessDataResponseEntity(request, schemaGuard);
 	}
@@ -96,7 +96,7 @@ public class SchemaGuardController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		SchemaGuard schemaGuard = getByIdForEdit(this.schemaGuardService, id);
+		DtbsSourceGuard schemaGuard = getByIdForEdit(this.dtbsSourceGuardService, id);
 
 		setFormModel(model, schemaGuard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
@@ -106,11 +106,11 @@ public class SchemaGuardController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SchemaGuard schemaGuard)
+			@RequestBody DtbsSourceGuard schemaGuard)
 	{
 		checkSaveEntity(schemaGuard);
 
-		this.schemaGuardService.update(schemaGuard);
+		this.dtbsSourceGuardService.update(schemaGuard);
 
 		return optSuccessDataResponseEntity(request, schemaGuard);
 	}
@@ -119,7 +119,7 @@ public class SchemaGuardController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		SchemaGuard schemaGuard = getByIdForView(this.schemaGuardService, id);
+		DtbsSourceGuard schemaGuard = getByIdForView(this.dtbsSourceGuardService, id);
 
 		setFormModel(model, schemaGuard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
@@ -131,7 +131,7 @@ public class SchemaGuardController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody String[] ids)
 	{
-		this.schemaGuardService.deleteByIds(ids);
+		this.dtbsSourceGuardService.deleteByIds(ids);
 
 		return optSuccessResponseEntity(request);
 	}
@@ -147,19 +147,19 @@ public class SchemaGuardController extends AbstractController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<SchemaGuard> queryData(HttpServletRequest request, HttpServletResponse response,
+	public List<DtbsSourceGuard> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
-		List<SchemaGuard> schemaGuards = this.schemaGuardService.query(pagingQuery);
-		SchemaGuard.sortByPriority(schemaGuards);
+		List<DtbsSourceGuard> schemaGuards = this.dtbsSourceGuardService.query(pagingQuery);
+		DtbsSourceGuard.sortByPriority(schemaGuards);
 
 		return schemaGuards;
 	}
 
-	protected void checkSaveEntity(SchemaGuard schemaGuard)
+	protected void checkSaveEntity(DtbsSourceGuard schemaGuard)
 	{
 		if (isBlank(schemaGuard.getName()) || isBlank(schemaGuard.getPattern()))
 			throw new IllegalInputException();
@@ -178,7 +178,7 @@ public class SchemaGuardController extends AbstractController
 	public ResponseEntity<OperationMessage> testExecute(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody GuardEntity form)
 	{
-		boolean permitted = this.schemaGuardService.isPermitted(form);
+		boolean permitted = this.dtbsSourceGuardService.isPermitted(form);
 		return optSuccessDataResponseEntity(request, permitted);
 	}
 }

@@ -17,7 +17,7 @@
 
 package org.datagear.web.sqlpad;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.util.sqlvalidator.DatabaseProfile;
@@ -86,20 +86,20 @@ public class SqlPermissionValidator
 	 * @param databaseProfile
 	 * @return
 	 */
-	public SqlValidation validate(User user, Schema schema, SqlStatement sqlStatement, DatabaseProfile databaseProfile)
+	public SqlValidation validate(User user, DtbsSource schema, SqlStatement sqlStatement, DatabaseProfile databaseProfile)
 	{
 		String sql = sqlStatement.getSql();
 		int permission = schema.getDataPermission();
 
-		if (Schema.isDeleteTableDataPermission(permission))
+		if (DtbsSource.isDeleteTableDataPermission(permission))
 		{
 			return this.deletePermissionSqlValidator.validate(sql, databaseProfile);
 		}
-		else if (Schema.isEditTableDataPermission(permission))
+		else if (DtbsSource.isEditTableDataPermission(permission))
 		{
 			return this.editPermissionSqlValidator.validate(sql, databaseProfile);
 		}
-		else if (Schema.isReadTableDataPermission(permission))
+		else if (DtbsSource.isReadTableDataPermission(permission))
 		{
 			return this.readPermissionSqlValidator.validate(sql, databaseProfile);
 		}

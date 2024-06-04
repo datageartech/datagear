@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class Schema extends AbstractStringIdEntity
+public class DtbsSource extends AbstractStringIdEntity
 		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
@@ -84,17 +84,17 @@ public class Schema extends AbstractStringIdEntity
 	private DriverEntity driverEntity = null;
 	
 	/**属性列表*/
-	private List<SchemaProperty> properties = null;
+	private List<DtbsSourceProperty> properties = null;
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	public Schema()
+	public DtbsSource()
 	{
 		super();
 	}
 
-	public Schema(String id, String title, String url, String user, String password)
+	public DtbsSource(String id, String title, String url, String user, String password)
 	{
 		super(id);
 		this.title = title;
@@ -177,12 +177,12 @@ public class Schema extends AbstractStringIdEntity
 		return (this.properties != null && !this.properties.isEmpty());
 	}
 
-	public List<SchemaProperty> getProperties()
+	public List<DtbsSourceProperty> getProperties()
 	{
 		return properties;
 	}
 
-	public void setProperties(List<SchemaProperty> properties)
+	public void setProperties(List<DtbsSourceProperty> properties)
 	{
 		this.properties = properties;
 	}
@@ -246,15 +246,15 @@ public class Schema extends AbstractStringIdEntity
 		}
 		else
 		{
-			SchemaProperty[] schemaProperties = JsonSupport.parse(json, SchemaProperty[].class, null);
+			DtbsSourceProperty[] schemaProperties = JsonSupport.parse(json, DtbsSourceProperty[].class, null);
 			setProperties(Arrays.asList(schemaProperties));
 		}
 	}
 
 	@Override
-	public Schema clone()
+	public DtbsSource clone()
 	{
-		Schema entity = new Schema();
+		DtbsSource entity = new DtbsSource();
 		BeanUtils.copyProperties(this, entity);
 
 		return entity;

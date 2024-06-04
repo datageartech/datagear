@@ -29,16 +29,16 @@ import javax.sql.DataSource;
 
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.DtbsSourceService;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.SchemaService;
-import org.datagear.management.util.SchemaConnectionSupport;
+import org.datagear.management.util.DtbsSourceConnectionSupport;
 import org.datagear.util.JdbcUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 抽象{@linkplain Schema}连接控制器。
+ * 抽象{@linkplain DtbsSource}连接控制器。
  * 
  * @author datagear@163.com
  *
@@ -46,26 +46,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class AbstractSchemaConnController extends AbstractController
 {
 	@Autowired
-	private SchemaService schemaService;
+	private DtbsSourceService dtbsSourceService;
 
 	@Autowired
 	private ConnectionSource connectionSource;
 
-	private SchemaConnectionSupport schemaConnectionSupport = new SchemaConnectionSupport();
+	private DtbsSourceConnectionSupport dtbsSourceConnectionSupport = new DtbsSourceConnectionSupport();
 
 	public AbstractSchemaConnController()
 	{
 		super();
 	}
 
-	public SchemaService getSchemaService()
+	public DtbsSourceService getDtbsSourceService()
 	{
-		return schemaService;
+		return dtbsSourceService;
 	}
 
-	public void setSchemaService(SchemaService schemaService)
+	public void setDtbsSourceService(DtbsSourceService dtbsSourceService)
 	{
-		this.schemaService = schemaService;
+		this.dtbsSourceService = dtbsSourceService;
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -78,103 +78,103 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		this.connectionSource = connectionSource;
 	}
 
-	public SchemaConnectionSupport getSchemaConnectionSupport()
+	public DtbsSourceConnectionSupport getDtbsSourceConnectionSupport()
 	{
-		return schemaConnectionSupport;
+		return dtbsSourceConnectionSupport;
 	}
 
-	public void setSchemaConnectionSupport(SchemaConnectionSupport schemaConnectionSupport)
+	public void setDtbsSourceConnectionSupport(DtbsSourceConnectionSupport dtbsSourceConnectionSupport)
 	{
-		this.schemaConnectionSupport = schemaConnectionSupport;
+		this.dtbsSourceConnectionSupport = dtbsSourceConnectionSupport;
 	}
 
 	/**
-	 * 获取指定用户有读权限的{@linkplain Schema}。
+	 * 获取指定用户有读权限的{@linkplain DtbsSource}。
 	 * 
 	 * @param user
 	 * @param schemaId
 	 * @return
 	 * @throws PermissionDeniedException
-	 * @throws SchemaNotFoundException
+	 * @throws DtbsSourceNotFoundException
 	 */
-	protected Schema getSchemaForUserNotNull(User user, String schemaId)
-			throws PermissionDeniedException, SchemaNotFoundException
+	protected DtbsSource getSchemaForUserNotNull(User user, String schemaId)
+			throws PermissionDeniedException, DtbsSourceNotFoundException
 	{
-		Schema schema = this.schemaService.getById(user, schemaId);
+		DtbsSource schema = this.dtbsSourceService.getById(user, schemaId);
 
 		if (schema == null)
-			throw new SchemaNotFoundException(schemaId);
+			throw new DtbsSourceNotFoundException(schemaId);
 
 		return schema;
 	}
 
 	/**
-	 * 获取当前用户有读权限的{@linkplain Schema}。
+	 * 获取当前用户有读权限的{@linkplain DtbsSource}。
 	 * 
 	 * @param request
 	 * @param response
 	 * @param schemaId
 	 * @return
 	 * @throws PermissionDeniedException
-	 * @throws SchemaNotFoundException
+	 * @throws DtbsSourceNotFoundException
 	 */
-	protected Schema getSchemaForUserNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
-			throws PermissionDeniedException, SchemaNotFoundException
+	protected DtbsSource getSchemaForUserNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
+			throws PermissionDeniedException, DtbsSourceNotFoundException
 	{
 		User user = getCurrentUser();
 
-		Schema schema = this.schemaService.getById(user, schemaId);
+		DtbsSource schema = this.dtbsSourceService.getById(user, schemaId);
 
 		if (schema == null)
-			throw new SchemaNotFoundException(schemaId);
+			throw new DtbsSourceNotFoundException(schemaId);
 
 		return schema;
 	}
 
 	/**
-	 * 获取{@linkplain Schema}。
+	 * 获取{@linkplain DtbsSource}。
 	 * 
 	 * @param schemaId
 	 * @return
-	 * @throws SchemaNotFoundException
+	 * @throws DtbsSourceNotFoundException
 	 */
-	protected Schema getSchemaNotNull(String schemaId) throws SchemaNotFoundException
+	protected DtbsSource getSchemaNotNull(String schemaId) throws DtbsSourceNotFoundException
 	{
-		Schema schema = this.schemaService.getById(schemaId);
+		DtbsSource schema = this.dtbsSourceService.getById(schemaId);
 
 		if (schema == null)
-			throw new SchemaNotFoundException(schemaId);
+			throw new DtbsSourceNotFoundException(schemaId);
 
 		return schema;
 	}
 
 	/**
-	 * 获取指定{@linkplain Schema}的{@linkplain Connection}。
+	 * 获取指定{@linkplain DtbsSource}的{@linkplain Connection}。
 	 * 
 	 * @param schema
 	 * @return
 	 * @throws ConnectionSourceException
 	 */
-	protected Connection getSchemaConnection(Schema schema) throws ConnectionSourceException
+	protected Connection getSchemaConnection(DtbsSource schema) throws ConnectionSourceException
 	{
-		return this.schemaConnectionSupport.getSchemaConnection(this.connectionSource, schema);
+		return this.dtbsSourceConnectionSupport.getSchemaConnection(this.connectionSource, schema);
 	}
 
-	protected void checkReadTableDataPermission(Schema schema, User user)
+	protected void checkReadTableDataPermission(DtbsSource schema, User user)
 	{
-		if (!Schema.canReadTableData(schema.getDataPermission()))
+		if (!DtbsSource.canReadTableData(schema.getDataPermission()))
 			throw new PermissionDeniedException();
 	}
 
-	protected void checkEditTableDataPermission(Schema schema, User user)
+	protected void checkEditTableDataPermission(DtbsSource schema, User user)
 	{
-		if (!Schema.canEditTableData(schema.getDataPermission()))
+		if (!DtbsSource.canEditTableData(schema.getDataPermission()))
 			throw new PermissionDeniedException();
 	}
 
-	protected void checkDeleteTableDataPermission(Schema schema, User user)
+	protected void checkDeleteTableDataPermission(DtbsSource schema, User user)
 	{
-		if (!Schema.canDeleteTableData(schema.getDataPermission()))
+		if (!DtbsSource.canDeleteTableData(schema.getDataPermission()))
 			throw new PermissionDeniedException();
 	}
 
@@ -197,7 +197,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		private String schemaId;
 
-		private Schema _schema;
+		private DtbsSource _schema;
 
 		private Connection _cn;
 
@@ -256,7 +256,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		/**
 		 * 获取当前连接。
 		 * <p>
-		 * 注意：如果此方法在{@linkplain #doExecute(HttpServletRequest, HttpServletResponse, org.springframework.ui.Model, Schema)}内调用，
+		 * 注意：如果此方法在{@linkplain #doExecute(HttpServletRequest, HttpServletResponse, org.springframework.ui.Model, DtbsSource)}内调用，
 		 * 则不需关闭连接，否则，需自行关闭连接。
 		 * </p>
 		 * 
@@ -304,17 +304,17 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * @throws Throwable
 		 */
 		protected abstract void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable;
 		
 		/**
-		 * 获取{@linkplain Schema}。
+		 * 获取{@linkplain DtbsSource}。
 		 * <p>
 		 *  只有在执行完成后才不会返回{@code null}。
 		 * </p>
 		 * 
 		 * @return
 		 */
-		public Schema getSchema()
+		public DtbsSource getSchema()
 		{
 			return this._schema;
 		}
@@ -354,7 +354,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
 		{
 			this.returnValue = execute(request, response, springModel, schema);
 		}
@@ -372,7 +372,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * @return
 		 */
 		protected abstract T execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable;
 	}
 
 	/**
@@ -406,7 +406,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
 		{
 			execute(request, response, springModel, schema);
 		}
@@ -424,7 +424,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 * @return
 		 */
 		protected abstract void execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable;
 	}
 
 	/**
@@ -435,25 +435,25 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 */
 	protected class SchemaDataSource implements DataSource
 	{
-		private Schema schema;
+		private DtbsSource schema;
 
 		public SchemaDataSource()
 		{
 			super();
 		}
 
-		public SchemaDataSource(Schema schema)
+		public SchemaDataSource(DtbsSource schema)
 		{
 			super();
 			this.schema = schema;
 		}
 
-		public Schema getSchema()
+		public DtbsSource getSchema()
 		{
 			return schema;
 		}
 
-		public void setSchema(Schema schema)
+		public void setSchema(DtbsSource schema)
 		{
 			this.schema = schema;
 		}

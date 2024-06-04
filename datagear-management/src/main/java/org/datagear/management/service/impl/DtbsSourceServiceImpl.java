@@ -21,12 +21,12 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.connection.DriverEntityManager;
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.DtbsSourceGuardService;
+import org.datagear.management.service.DtbsSourceService;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.SchemaGuardService;
-import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.GuardEntity;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -35,47 +35,47 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
- * {@linkplain SchemaService}实现类。
+ * {@linkplain DtbsSourceService}实现类。
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityService<String, Schema>
-		implements SchemaService
+public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntityService<String, DtbsSource>
+		implements DtbsSourceService
 {
-	protected static final String SQL_NAMESPACE = Schema.class.getName();
+	protected static final String SQL_NAMESPACE = DtbsSource.class.getName();
 
 	private DriverEntityManager driverEntityManager;
 
 	private UserService userService;
 
-	private SchemaGuardService schemaGuardService;
+	private DtbsSourceGuardService dtbsSourceGuardService;
 
 	private TextEncryptor textEncryptor = null;
 
-	public SchemaServiceImpl()
+	public DtbsSourceServiceImpl()
 	{
 		super();
 	}
 
-	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+	public DtbsSourceServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			AuthorizationService authorizationService, DriverEntityManager driverEntityManager, UserService userService,
-			SchemaGuardService schemaGuardService)
+			DtbsSourceGuardService dtbsSourceGuardService)
 	{
 		super(sqlSessionFactory, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
 		this.userService = userService;
-		this.schemaGuardService = schemaGuardService;
+		this.dtbsSourceGuardService = dtbsSourceGuardService;
 	}
 
-	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+	public DtbsSourceServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			AuthorizationService authorizationService, DriverEntityManager driverEntityManager, UserService userService,
-			SchemaGuardService schemaGuardService)
+			DtbsSourceGuardService dtbsSourceGuardService)
 	{
 		super(sqlSessionTemplate, dialect, authorizationService);
 		this.driverEntityManager = driverEntityManager;
 		this.userService = userService;
-		this.schemaGuardService = schemaGuardService;
+		this.dtbsSourceGuardService = dtbsSourceGuardService;
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -98,14 +98,14 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 		this.userService = userService;
 	}
 
-	public SchemaGuardService getSchemaGuardService()
+	public DtbsSourceGuardService getStbsSourceGuardService()
 	{
-		return schemaGuardService;
+		return dtbsSourceGuardService;
 	}
 
-	public void setSchemaGuardService(SchemaGuardService schemaGuardService)
+	public void setStbsSourceGuardService(DtbsSourceGuardService dtbsSourceGuardService)
 	{
-		this.schemaGuardService = schemaGuardService;
+		this.dtbsSourceGuardService = dtbsSourceGuardService;
 	}
 
 	public TextEncryptor getTextEncryptor()
@@ -121,25 +121,25 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	public String getResourceType()
 	{
-		return Schema.AUTHORIZATION_RESOURCE_TYPE;
+		return DtbsSource.AUTHORIZATION_RESOURCE_TYPE;
 	}
 
 	@Override
-	public void add(User user, Schema entity) throws PermissionDeniedException
+	public void add(User user, DtbsSource entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity);
 		super.add(user, entity);
 	}
 
 	@Override
-	public boolean update(User user, Schema entity) throws PermissionDeniedException
+	public boolean update(User user, DtbsSource entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity);
 		return super.update(user, entity);
 	}
 
 	@Override
-	public Schema getByStringId(User user, String id) throws PermissionDeniedException
+	public DtbsSource getByStringId(User user, String id) throws PermissionDeniedException
 	{
 		return super.getById(user, id);
 	}
@@ -157,7 +157,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected void add(Schema entity, Map<String, Object> params)
+	protected void add(DtbsSource entity, Map<String, Object> params)
 	{
 		if (this.textEncryptor != null)
 		{
@@ -169,7 +169,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected boolean update(Schema entity, Map<String, Object> params)
+	protected boolean update(DtbsSource entity, Map<String, Object> params)
 	{
 		if (this.textEncryptor != null)
 		{
@@ -181,9 +181,9 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected Schema getByIdFromDB(String id, Map<String, Object> params)
+	protected DtbsSource getByIdFromDB(String id, Map<String, Object> params)
 	{
-		Schema entity = super.getByIdFromDB(id, params);
+		DtbsSource entity = super.getByIdFromDB(id, params);
 
 		if (this.textEncryptor != null && entity != null)
 			entity.setPassword(this.textEncryptor.decrypt(entity.getPassword()));
@@ -192,7 +192,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected Schema postProcessGet(Schema schema)
+	protected DtbsSource postProcessGet(DtbsSource schema)
 	{
 		inflateCreateUserEntity(schema, this.userService);
 
@@ -208,25 +208,25 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected void checkInput(Schema entity)
+	protected void checkInput(DtbsSource entity)
 	{
 		if (isBlank(entity.getId()) || isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalArgumentException();
 	}
 
 	/**
-	 * 校验用户是否有权保存指定URL的{@linkplain Schema}。
+	 * 校验用户是否有权保存指定URL的{@linkplain DtbsSource}。
 	 * 
 	 * @param user
 	 * @param url
-	 * @throws SaveSchemaPermissionDeniedException
+	 * @throws SaveDtbsSourcePermissionDeniedException
 	 */
-	protected void checkSaveUrlPermission(User user, Schema schema) throws SaveSchemaPermissionDeniedException
+	protected void checkSaveUrlPermission(User user, DtbsSource schema) throws SaveDtbsSourcePermissionDeniedException
 	{
-		if (this.schemaGuardService.isPermitted(user, new GuardEntity(schema)))
+		if (this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(schema)))
 			return;
 
-		throw new SaveSchemaPermissionDeniedException();
+		throw new SaveDtbsSourcePermissionDeniedException();
 	}
 
 	@Override

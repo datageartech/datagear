@@ -23,63 +23,63 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.datagear.management.domain.SchemaGuard;
+import org.datagear.management.domain.DtbsSourceGuard;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaGuardService;
+import org.datagear.management.service.DtbsSourceGuardService;
+import org.datagear.management.util.DtbsSourceGuardChecker;
 import org.datagear.management.util.GuardEntity;
-import org.datagear.management.util.SchemaGuardChecker;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.Query;
 import org.datagear.util.LastModifiedService;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
- * {@linkplain SchemaGuardService}实现类。
+ * {@linkplain DtbsSourceGuardService}实现类。
  * 
  * @author datagear@163.com
  *
  */
-public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String, SchemaGuard>
-		implements SchemaGuardService
+public class DtbsSourceGuardServiceImpl extends AbstractMybatisEntityService<String, DtbsSourceGuard>
+		implements DtbsSourceGuardService
 {
-	protected static final String SQL_NAMESPACE = SchemaGuard.class.getName();
+	protected static final String SQL_NAMESPACE = DtbsSourceGuard.class.getName();
 
-	protected static final String LAST_MODIFIED_NAME = SchemaGuardService.class.getName();
+	protected static final String LAST_MODIFIED_NAME = DtbsSourceGuardService.class.getName();
 
-	private SchemaGuardChecker schemaGuardChecker = new SchemaGuardChecker();
+	private DtbsSourceGuardChecker dtbsSourceGuardChecker = new DtbsSourceGuardChecker();
 
 	private LastModifiedService lastModifiedService;
 
-	private volatile List<SchemaGuard> _schemaGuards = Collections.emptyList();
-	private volatile long _schemaGuardsLastModified = LastModifiedService.LAST_MODIFIED_INIT;
+	private volatile List<DtbsSourceGuard> _dtbsSourceGuards = Collections.emptyList();
+	private volatile long _dtbsSourceGuardsLastModified = LastModifiedService.LAST_MODIFIED_INIT;
 
-	public SchemaGuardServiceImpl()
+	public DtbsSourceGuardServiceImpl()
 	{
 		super();
 	}
 
-	public SchemaGuardServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
+	public DtbsSourceGuardServiceImpl(SqlSessionFactory sqlSessionFactory, MbSqlDialect dialect,
 			LastModifiedService lastModifiedService)
 	{
 		super(sqlSessionFactory, dialect);
 		this.lastModifiedService = lastModifiedService;
 	}
 
-	public SchemaGuardServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
+	public DtbsSourceGuardServiceImpl(SqlSessionTemplate sqlSessionTemplate, MbSqlDialect dialect,
 			LastModifiedService lastModifiedService)
 	{
 		super(sqlSessionTemplate, dialect);
 		this.lastModifiedService = lastModifiedService;
 	}
 
-	public SchemaGuardChecker getSchemaGuardChecker()
+	public DtbsSourceGuardChecker getDtbsSourceGuardChecker()
 	{
-		return schemaGuardChecker;
+		return dtbsSourceGuardChecker;
 	}
 
-	public void setSchemaGuardChecker(SchemaGuardChecker schemaGuardChecker)
+	public void setDtbsSourceGuardChecker(DtbsSourceGuardChecker dtbsSourceGuardChecker)
 	{
-		this.schemaGuardChecker = schemaGuardChecker;
+		this.dtbsSourceGuardChecker = dtbsSourceGuardChecker;
 	}
 
 	public LastModifiedService getLastModifiedService()
@@ -95,16 +95,16 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 	@Override
 	public boolean isPermitted(GuardEntity guardEntity)
 	{
-		if (this.lastModifiedService.isModified(LAST_MODIFIED_NAME, this._schemaGuardsLastModified))
+		if (this.lastModifiedService.isModified(LAST_MODIFIED_NAME, this._dtbsSourceGuardsLastModified))
 		{
-			this._schemaGuardsLastModified = this.lastModifiedService.getLastModified(LAST_MODIFIED_NAME);
+			this._dtbsSourceGuardsLastModified = this.lastModifiedService.getLastModified(LAST_MODIFIED_NAME);
 
-			List<SchemaGuard> schemaGuards = query("getAll", new Query(), buildParamMap(), true);
-			SchemaGuard.sortByPriority(schemaGuards);
-			this._schemaGuards = Collections.unmodifiableList(new ArrayList<SchemaGuard>(schemaGuards));
+			List<DtbsSourceGuard> dtbsSourceGuards = query("getAll", new Query(), buildParamMap(), true);
+			DtbsSourceGuard.sortByPriority(dtbsSourceGuards);
+			this._dtbsSourceGuards = Collections.unmodifiableList(new ArrayList<DtbsSourceGuard>(dtbsSourceGuards));
 		}
 
-		return this.schemaGuardChecker.isPermitted(this._schemaGuards, guardEntity);
+		return this.dtbsSourceGuardChecker.isPermitted(this._dtbsSourceGuards, guardEntity);
 	}
 
 	@Override
@@ -117,10 +117,10 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 	}
 
 	@Override
-	protected boolean update(SchemaGuard entity, Map<String, Object> params)
+	protected boolean update(DtbsSourceGuard entity, Map<String, Object> params)
 	{
 		boolean re = super.update(entity, params);
-		updateSchemaGuardsLastModified();
+		updateDtbsSourceGuardsLastModified();
 
 		return re;
 	}
@@ -129,16 +129,16 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
 		boolean re = super.deleteById(id, params);
-		updateSchemaGuardsLastModified();
+		updateDtbsSourceGuardsLastModified();
 
 		return re;
 	}
 
 	@Override
-	protected void add(SchemaGuard entity, Map<String, Object> params)
+	protected void add(DtbsSourceGuard entity, Map<String, Object> params)
 	{
 		super.add(entity, params);
-		updateSchemaGuardsLastModified();
+		updateDtbsSourceGuardsLastModified();
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class SchemaGuardServiceImpl extends AbstractMybatisEntityService<String,
 		return SQL_NAMESPACE;
 	}
 
-	protected void updateSchemaGuardsLastModified()
+	protected void updateDtbsSourceGuardsLastModified()
 	{
 		this.lastModifiedService.setLastModifiedNow(LAST_MODIFIED_NAME);
 	}

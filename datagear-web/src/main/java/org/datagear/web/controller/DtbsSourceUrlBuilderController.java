@@ -51,7 +51,7 @@ import org.springframework.web.context.ServletContextAware;
  */
 @Controller
 @RequestMapping("/schemaUrlBuilder")
-public class SchemaUrlBuilderController extends AbstractController implements ServletContextAware
+public class DtbsSourceUrlBuilderController extends AbstractController implements ServletContextAware
 {
 	public static final String DB_URL_BUILDER_ENCODING = IOUtil.CHARSET_UTF_8;
 
@@ -60,7 +60,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	@Autowired
 	private File schemaUrlBuilderScriptFile;
 
-	public SchemaUrlBuilderController()
+	public DtbsSourceUrlBuilderController()
 	{
 		super();
 	}

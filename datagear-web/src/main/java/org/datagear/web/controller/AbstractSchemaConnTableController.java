@@ -20,11 +20,11 @@ package org.datagear.web.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.NoColumnDefinedException;
-import org.datagear.web.util.SchemaTableCache;
+import org.datagear.web.util.DtbsSourceTableCache;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -39,7 +39,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 	private DBMetaResolver dbMetaResolver;
 
 	@Autowired
-	private SchemaTableCache schemaTableCache;
+	private DtbsSourceTableCache schemaTableCache;
 
 	public AbstractSchemaConnTableController()
 	{
@@ -56,12 +56,12 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		this.dbMetaResolver = dbMetaResolver;
 	}
 
-	public SchemaTableCache getSchemaTableCache()
+	public DtbsSourceTableCache getSchemaTableCache()
 	{
 		return schemaTableCache;
 	}
 
-	public void setSchemaTableCache(SchemaTableCache schemaTableCache)
+	public void setSchemaTableCache(DtbsSourceTableCache schemaTableCache)
 	{
 		this.schemaTableCache = schemaTableCache;
 	}
@@ -93,7 +93,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
 		{
 			springModel.addAttribute("tableName", this.tableName);
 
@@ -126,7 +126,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		 * @throws Throwable
 		 */
 		protected abstract void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable;
 	}
 
 	/**
@@ -161,7 +161,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 		{
 			this.returnValue = execute(request, response, springModel, schema, table);
 		}
@@ -180,7 +180,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		 * @return
 		 */
 		protected abstract T execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable;
 	}
 
 	/**
@@ -212,7 +212,7 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable
 		{
 			execute(request, response, springModel, schema, table);
 		}
@@ -231,6 +231,6 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 		 * @return
 		 */
 		protected abstract void execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable;
+				org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Throwable;
 	}
 }

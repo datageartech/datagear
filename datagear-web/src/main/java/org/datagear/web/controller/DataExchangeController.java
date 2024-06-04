@@ -77,7 +77,7 @@ import org.datagear.dataexchange.support.JsonDataImportOption;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataExportOption;
 import org.datagear.dataexchange.support.SqlDataImport;
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.TableUtil;
@@ -261,7 +261,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -280,7 +280,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -333,7 +333,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -371,7 +371,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				Connection cn = getConnection();
 
@@ -401,7 +401,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -450,7 +450,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -507,7 +507,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -563,7 +563,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -603,7 +603,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 				@Override
 				protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-						Schema schema) throws Throwable
+						DtbsSource schema) throws Throwable
 				{
 					Connection cn = getConnection();
 
@@ -639,7 +639,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -691,7 +691,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -728,7 +728,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				Connection cn = getConnection();
 
@@ -768,7 +768,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 			}
 		}.execute();
@@ -837,7 +837,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -883,7 +883,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 
@@ -926,7 +926,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -985,7 +985,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 
@@ -1029,7 +1029,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -1088,7 +1088,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 
@@ -1136,7 +1136,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -1195,7 +1195,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 
@@ -1241,7 +1241,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 
@@ -1297,7 +1297,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -1335,7 +1335,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkDeleteTableDataPermission(schema, user);
 			}
@@ -1501,7 +1501,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			@Override
 			protected List<String> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
 			{
 				Connection cn = getConnection();
 				List<SimpleTable> tables = getDbMetaResolver().getEntityTables(cn);

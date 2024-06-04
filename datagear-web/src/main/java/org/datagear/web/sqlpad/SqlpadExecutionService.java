@@ -34,10 +34,10 @@ import java.util.concurrent.Executors;
 
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
-import org.datagear.management.util.SchemaConnectionSupport;
+import org.datagear.management.util.DtbsSourceConnectionSupport;
 import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
@@ -72,7 +72,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	private SqlPermissionValidator sqlPermissionValidator = null;
 
-	private SchemaConnectionSupport schemaConnectionSupport = new SchemaConnectionSupport();
+	private DtbsSourceConnectionSupport dtbsSourceConnectionSupport = new DtbsSourceConnectionSupport();
 
 	private ExecutorService _executorService = Executors.newCachedThreadPool();
 
@@ -154,14 +154,14 @@ public class SqlpadExecutionService extends PersistenceSupport
 		this.sqlPermissionValidator = sqlPermissionValidator;
 	}
 
-	public SchemaConnectionSupport getSchemaConnectionSupport()
+	public DtbsSourceConnectionSupport getDtbsSourceConnectionSupport()
 	{
-		return schemaConnectionSupport;
+		return dtbsSourceConnectionSupport;
 	}
 
-	public void setSchemaConnectionSupport(SchemaConnectionSupport schemaConnectionSupport)
+	public void setDtbsSourceConnectionSupport(DtbsSourceConnectionSupport dtbsSourceConnectionSupport)
 	{
-		this.schemaConnectionSupport = schemaConnectionSupport;
+		this.dtbsSourceConnectionSupport = dtbsSourceConnectionSupport;
 	}
 
 	/**
@@ -226,15 +226,15 @@ public class SqlpadExecutionService extends PersistenceSupport
 	}
 
 	/**
-	 * 获取指定{@linkplain Schema}的{@linkplain Connection}。
+	 * 获取指定{@linkplain DtbsSource}的{@linkplain Connection}。
 	 * 
 	 * @param schema
 	 * @return
 	 * @throws ConnectionSourceException
 	 */
-	protected Connection getSchemaConnection(Schema schema) throws ConnectionSourceException
+	protected Connection getSchemaConnection(DtbsSource schema) throws ConnectionSourceException
 	{
-		return this.schemaConnectionSupport.getSchemaConnection(this.connectionSource, schema);
+		return this.dtbsSourceConnectionSupport.getSchemaConnection(this.connectionSource, schema);
 	}
 
 	/**

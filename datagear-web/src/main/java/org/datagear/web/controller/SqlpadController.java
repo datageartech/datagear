@@ -30,7 +30,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
@@ -176,7 +176,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+					DtbsSource schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 			}
@@ -209,7 +209,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	{
 		final User user = getCurrentUser();
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkReadTableDataPermission(schema, user);
 
@@ -308,7 +308,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		{
 			@Override
 			protected SqlSelectResult execute(HttpServletRequest request, HttpServletResponse response,
-					Model springModel, Schema schema) throws Throwable
+					Model springModel, DtbsSource schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -394,7 +394,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	{
 		final User user = getCurrentUser();
 
-		Schema schema = getSchemaForUserNotNull(user, schemaId);
+		DtbsSource schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkDeleteTableDataPermission(schema, user);
 

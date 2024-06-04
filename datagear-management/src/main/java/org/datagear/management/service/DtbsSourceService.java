@@ -17,14 +17,14 @@
 
 package org.datagear.management.service;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 
 /**
- * {@linkplain Schema}业务服务接口。
+ * {@linkplain DtbsSource}业务服务接口。
  * 
  * @author datagear@163.com
  *
  */
-public interface SchemaService extends DataPermissionEntityService<String, Schema>, CreateUserEntityService
+public interface DtbsSourceService extends DataPermissionEntityService<String, DtbsSource>, CreateUserEntityService
 {
 }

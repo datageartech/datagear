@@ -49,13 +49,12 @@ import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.HttpDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
-import org.datagear.management.domain.Schema;
-import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
@@ -63,6 +62,7 @@ import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.util.DtbsSourceConnectionFactory;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
@@ -477,9 +477,9 @@ public class DataSetController extends AbstractSchemaConnController
 		if (dataSet instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) dataSet;
-			SchemaConnectionFactory connectionFactory = dataSetEntity.getConnectionFactory();
-			Schema schema = (connectionFactory == null ? null : connectionFactory.getSchema());
-			int permission = (schema != null ? getSchemaService().getPermission(user, schema.getId())
+			DtbsSourceConnectionFactory connectionFactory = dataSetEntity.getConnectionFactory();
+			DtbsSource schema = (connectionFactory == null ? null : connectionFactory.getSchema());
+			int permission = (schema != null ? getDtbsSourceService().getPermission(user, schema.getId())
 					: Authorization.PERMISSION_NONE_START);
 
 			// 没有读权限，应置为null
@@ -857,8 +857,8 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = getCurrentUser();
 
 		SqlDataSetEntity dataSet = preview.getDataSet();
-		SchemaConnectionFactory connFactory = dataSet.getShmConFactory();
-		Schema schema = (connFactory == null ? null : connFactory.getSchema());
+		DtbsSourceConnectionFactory connFactory = dataSet.getShmConFactory();
+		DtbsSource schema = (connFactory == null ? null : connFactory.getSchema());
 		String schemaId = (schema == null ? null : schema.getId());
 		
 		if(StringUtil.isEmpty(schemaId))
@@ -869,7 +869,7 @@ public class DataSetController extends AbstractSchemaConnController
 		// 如果数据集已创建，则使用数据集权限；如果数据集未创建，则需使用数据源权限
 		schema = (notFound ? getSchemaForUserNotNull(user, schemaId) : getSchemaNotNull(schemaId));
 
-		SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
+		DtbsSourceConnectionFactory connectionFactory = new DtbsSourceConnectionFactory(getConnectionSource(), schema);
 		dataSet.setConnectionFactory(connectionFactory);
 		dataSet.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
 
@@ -1012,10 +1012,10 @@ public class DataSetController extends AbstractSchemaConnController
 			sqlDataSetEntity.clearSchemaPassword();
 			sqlDataSetEntity.setSqlValidator(null);
 			
-			SchemaConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
+			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
 			if(connectionFactory != null)
 			{
-				connectionFactory = new SchemaConnectionFactory(connectionFactory.getConnectionSource(), connectionFactory.getSchema());
+				connectionFactory = new DtbsSourceConnectionFactory(connectionFactory.getConnectionSource(), connectionFactory.getSchema());
 				connectionFactory.setConnectionSource(null);
 				sqlDataSetEntity.setConnectionFactory(connectionFactory);
 			}

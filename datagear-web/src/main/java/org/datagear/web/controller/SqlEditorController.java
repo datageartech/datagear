@@ -24,7 +24,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
@@ -64,7 +64,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 		{
 			@Override
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -100,7 +100,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 			{
 				@Override
 				protected Table execute(HttpServletRequest request, HttpServletResponse response,
-						org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
+						org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Exception
 				{
 					checkReadTableDataPermission(schema, user);
 
