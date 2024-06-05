@@ -1,9 +1,26 @@
-org.datagear.management.domain.Schema
-org.datagear.management.domain.DtbsSource
 
+org.datagear.web.controller.SqlpadController
+org.datagear.web.controller.DtbsSourceSqlpadController
+
+/sqlpad
+/dtbsSourceSqlpad
 
 --
 
+org.datagear.web.controller.DataController
+org.datagear.web.controller.DtbsSourceDataController
+
+/data
+/dtbsSourceData
+
+org.datagear.web.controller.DataExchangeController
+org.datagear.web.controller.DtbsSourceExchangeController
+
+/dataexchange
+/dtbsSourceExchange
+
+org.datagear.management.domain.Schema
+org.datagear.management.domain.DtbsSource
 
 org.datagear.management.domain.SchemaConnectionFactory
 org.datagear.management.util.DtbsSourceConnectionFactory

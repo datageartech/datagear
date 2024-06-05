@@ -81,15 +81,16 @@ public class SqlPermissionValidator
 	 * 检查用户是否有执行指定SQL的权限。
 	 * 
 	 * @param user
-	 * @param schema
+	 * @param dtbsSource
 	 * @param sqlStatement
 	 * @param databaseProfile
 	 * @return
 	 */
-	public SqlValidation validate(User user, DtbsSource schema, SqlStatement sqlStatement, DatabaseProfile databaseProfile)
+	public SqlValidation validate(User user, DtbsSource dtbsSource, SqlStatement sqlStatement,
+			DatabaseProfile databaseProfile)
 	{
 		String sql = sqlStatement.getSql();
-		int permission = schema.getDataPermission();
+		int permission = dtbsSource.getDataPermission();
 
 		if (DtbsSource.isDeleteTableDataPermission(permission))
 		{

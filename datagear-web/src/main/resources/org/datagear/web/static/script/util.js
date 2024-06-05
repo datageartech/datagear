@@ -3152,7 +3152,7 @@ $.inflatePageCodeEditor = function(po)
 $.inflatePageSqlEditor = function(po)
 {
 	//获取数据源ID
-	po.getSqlEditorSchemaId = function(){ /*需实现*/ };
+	po.getSqlEditorDtbsSourceId = function(){ /*需实现*/ };
 	
 	//SQL提示缓存
 	po.sqlHintCache =
@@ -3185,17 +3185,17 @@ $.inflatePageSqlEditor = function(po)
 		return options;
 	};
 	
-	po.sqlEditorHintTableAjaxOptions = function(schemaId)
+	po.sqlEditorHintTableAjaxOptions = function(dtbsSourceId)
 	{
-		var options = { url: po.concatContextPath("/sqlEditor/"+schemaId+"/findTableNames") };
+		var options = { url: po.concatContextPath("/sqlEditor/"+dtbsSourceId+"/findTableNames") };
 		return options;
 	};
 	
-	po.sqlEditorHintColumnAjaxOptions = function(schemaId, tableName)
+	po.sqlEditorHintColumnAjaxOptions = function(dtbsSourceId, tableName)
 	{
 		var options =
 		{
-			url: po.concatContextPath("/sqlEditor/"+schemaId+"/findColumns"),
+			url: po.concatContextPath("/sqlEditor/"+dtbsSourceId+"/findColumns"),
 			data: { table: tableName }
 		};
 		
@@ -3209,10 +3209,10 @@ $.inflatePageSqlEditor = function(po)
 		var mode = (codeEditor.getModeAt(cursor) || {});
 		var token = (codeEditor.getTokenAt(cursor) || {});
 		
-		var schemaId = po.getSqlEditorSchemaId();
+		var dtbsSourceId = po.getSqlEditorDtbsSourceId();
 		
 		//关键字token、分号token不应提示
-		if(!schemaId || token.type == "keyword" || po.isTokenSemicolonOrAfter(codeEditor, doc, cursor, token))
+		if(!dtbsSourceId || token.type == "keyword" || po.isTokenSemicolonOrAfter(codeEditor, doc, cursor, token))
 		{
 			callback();
 			return;
@@ -3280,7 +3280,7 @@ $.inflatePageSqlEditor = function(po)
 							po.sqlHintCache.ajaxRunning = false;
 						}
 					},
-					po.sqlEditorHintTableAjaxOptions(schemaId));
+					po.sqlEditorHintTableAjaxOptions(dtbsSourceId));
 					
 					$.ajax(ajaxOptions);
 				}
@@ -3331,7 +3331,7 @@ $.inflatePageSqlEditor = function(po)
 							po.sqlHintCache.ajaxRunning = false;
 						}
 					},
-					po.sqlEditorHintColumnAjaxOptions(schemaId, hintInfo.tableName));
+					po.sqlEditorHintColumnAjaxOptions(dtbsSourceId, hintInfo.tableName));
 					
 					$.ajax(ajaxOptions);
 				}

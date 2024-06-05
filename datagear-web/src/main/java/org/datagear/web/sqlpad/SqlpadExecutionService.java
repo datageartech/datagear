@@ -45,7 +45,7 @@ import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.util.sqlvalidator.DatabaseProfile;
 import org.datagear.util.sqlvalidator.SqlValidation;
-import org.datagear.web.controller.SqlpadController.SqlpadFileDirectory;
+import org.datagear.web.controller.DtbsSourceSqlpadController.SqlpadFileDirectory;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.msg.Message;
@@ -228,13 +228,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 	/**
 	 * 获取指定{@linkplain DtbsSource}的{@linkplain Connection}。
 	 * 
-	 * @param schema
+	 * @param dtbsSource
 	 * @return
 	 * @throws ConnectionSourceException
 	 */
-	protected Connection getSchemaConnection(DtbsSource schema) throws ConnectionSourceException
+	protected Connection getDtbsSourceConnection(DtbsSource dtbsSource) throws ConnectionSourceException
 	{
-		return this.dtbsSourceConnectionSupport.getDtbsSourceConnection(this.connectionSource, schema);
+		return this.dtbsSourceConnectionSupport.getDtbsSourceConnection(this.connectionSource, dtbsSource);
 	}
 
 	/**
@@ -525,7 +525,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 			try
 			{
-				cn = getSchemaConnection(getSchema());
+				cn = getDtbsSourceConnection(getDtbsSource());
 				JdbcUtil.setAutoCommitIfSupports(cn, false);
 				JdbcUtil.setReadonlyIfSupports(cn, false);
 				st = createStatement(cn);
@@ -560,7 +560,8 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 					SqlStatement sqlStatement = getSqlStatements().get(i);
 					SqlValidation sqlValidation = (sqlPermissionValidator == null ? null
-							: sqlPermissionValidator.validate(getUser(), getSchema(), sqlStatement, databaseProfile));
+							: sqlPermissionValidator.validate(getUser(), getDtbsSource(), sqlStatement,
+									databaseProfile));
 
 					if (sqlValidation != null && !sqlValidation.isValid())
 					{
@@ -631,7 +632,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			User user = getUser();
 			
 			if (!user.isAnonymous() && !sqlHistories.isEmpty())
-				SqlpadExecutionService.this.sqlHistoryService.addForRemain(getSchema().getId(), user.getId(),
+				SqlpadExecutionService.this.sqlHistoryService.addForRemain(getDtbsSource().getId(), user.getId(),
 						sqlHistories);
 		}
 

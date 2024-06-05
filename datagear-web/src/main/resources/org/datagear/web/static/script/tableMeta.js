@@ -491,18 +491,18 @@
 		/**
 		 * 加载表的URL。
 		 * 
-		 * @param schemaId
+		 * @param dtbsSourceId
 		 * @param tableName
 		 * @param reload 是否让后台重新载入
 		 */
-		loadTableUrl : function(schemaId, tableName, reload)
+		loadTableUrl : function(dtbsSourceId, tableName, reload)
 		{
 			var url = "";
 			
 			if(typeof(contextPath) != "undefined")
 				url += contextPath;
 			
-			url = url + "/schema/" + encodeURIComponent(schemaId) +"/table/" + encodeURIComponent(tableName);
+			url = url + "/dtbsSource/" + encodeURIComponent(dtbsSourceId) +"/table/" + encodeURIComponent(tableName);
 			
 			if(reload)
 				url = url +"?reload=1";
@@ -513,53 +513,53 @@
 		/**
 		 * 在指定表上执行callback操作。
 		 * 
-		 * @param schemaId
+		 * @param dtbsSourceId
 		 * @param tableName
 		 * @param callback
 		 */
-		on : function(schemaId, tableName, callback)
+		on : function(dtbsSourceId, tableName, callback)
 		{
-			this._on(schemaId, tableName, callback, false);
+			this._on(dtbsSourceId, tableName, callback, false);
 		},
 		
 		/**
 		 * 获取指定名称的表对象。
 		 * 
-		 * @param schemaId
+		 * @param dtbsSourceId
 		 * @param tableName
 		 */
-		get : function(schemaId, tableName)
+		get : function(dtbsSourceId, tableName)
 		{
-			return this._getCachedTable(schemaId, tableName);
+			return this._getCachedTable(dtbsSourceId, tableName);
 		},
 		
 		/**
 		 * 载入指定名称的表对象。
 		 * 
-		 * @param schemaId
+		 * @param dtbsSourceId
 		 * @param tableName
 		 * @param callback
 		 */
-		load : function(schemaId, tableName, callback)
+		load : function(dtbsSourceId, tableName, callback)
 		{
-			this._on(schemaId, tableName, callback, true);
+			this._on(dtbsSourceId, tableName, callback, true);
 		},
 		
 		/**
 		 * 在指定表上执行callback。
 		 * 
-		 * @param schemaId
+		 * @param dtbsSourceId
 		 * @param tableName 表名
 		 * @param callback || options callback：载入回调函数，格式为：function(table){ ... }，options：ajax请求options
 		 * @param reload 是否让后台重新载入
 		 */
-		_on : function(schemaId, tableName, callback, reload)
+		_on : function(dtbsSourceId, tableName, callback, reload)
 		{
-			var table = this._getCachedTable(schemaId, tableName);
+			var table = this._getCachedTable(dtbsSourceId, tableName);
 			
 			if(table == null || reload)
 			{
-				var loadUrl = this.loadTableUrl(schemaId, tableName, reload);
+				var loadUrl = this.loadTableUrl(dtbsSourceId, tableName, reload);
 				
 				var _this = this;
 				
@@ -568,7 +568,7 @@
 					$.getJSON(loadUrl, function(table)
 					{
 						_this._inflateColumnInfo(table);
-						_this._setCachedTable(schemaId, table);
+						_this._setCachedTable(dtbsSourceId, table);
 						
 						if(callback != undefined)
 							callback(table);
@@ -588,7 +588,7 @@
 					options.success = function(table, textStatus, jqXHR)
 					{
 						_this._inflateColumnInfo(table);
-						_this._setCachedTable(schemaId, table);
+						_this._setCachedTable(dtbsSourceId, table);
 						
 						if(originalSuccessCallback)
 							originalSuccessCallback.call(this, table, textStatus, jqXHR);
@@ -610,15 +610,15 @@
 			}
 		},
 		
-		_getCachedTable : function(schemaId, tableName)
+		_getCachedTable : function(dtbsSourceId, tableName)
 		{
-			var tables = (this.dtbsSourceTableCache[schemaId] || (this.dtbsSourceTableCache[schemaId] = {}));
+			var tables = (this.dtbsSourceTableCache[dtbsSourceId] || (this.dtbsSourceTableCache[dtbsSourceId] = {}));
 			return tables[tableName];
 		},
 		
-		_setCachedTable : function(schemaId, table)
+		_setCachedTable : function(dtbsSourceId, table)
 		{
-			var tables = (this.dtbsSourceTableCache[schemaId] || (this.dtbsSourceTableCache[schemaId] = {}));
+			var tables = (this.dtbsSourceTableCache[dtbsSourceId] || (this.dtbsSourceTableCache[dtbsSourceId] = {}));
 			tables[table.name] = table;
 		},
 		

@@ -84,10 +84,10 @@
 			items:
 			[
 				{
-					label: "<@spring.message code='module.schema' />",
+					label: "<@spring.message code='module.dtbsSource' />",
 					icon: 'pi pi-fw pi-database',
-					url: po.concatContextPath("/schema/query"),
-					visible: po.modulePermissions.schemaPermission.visible
+					url: po.concatContextPath("/dtbsSource/query"),
+					visible: po.modulePermissions.dtbsSourcePermission.visible
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",

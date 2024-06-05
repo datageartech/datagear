@@ -44,13 +44,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * 模式JDBC连接URL构建器控制器。
+ * 数据源JDBC连接URL构建器控制器。
  * 
  * @author datagear@163.com
  *
  */
 @Controller
-@RequestMapping("/schemaUrlBuilder")
+@RequestMapping("/dtbsSourceUrlBuilder")
 public class DtbsSourceUrlBuilderController extends AbstractController implements ServletContextAware
 {
 	public static final String DB_URL_BUILDER_ENCODING = IOUtil.CHARSET_UTF_8;
@@ -58,7 +58,7 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 	private ServletContext servletContext;
 
 	@Autowired
-	private File schemaUrlBuilderScriptFile;
+	private File dtbsSourceUrlBuilderScriptFile;
 
 	public DtbsSourceUrlBuilderController()
 	{
@@ -76,14 +76,14 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 		this.servletContext = servletContext;
 	}
 
-	public File getSchemaUrlBuilderScriptFile()
+	public File getDtbsSourceUrlBuilderScriptFile()
 	{
-		return schemaUrlBuilderScriptFile;
+		return dtbsSourceUrlBuilderScriptFile;
 	}
 
-	public void setSchemaUrlBuilderScriptFile(File schemaUrlBuilderScriptFile)
+	public void setDtbsSourceUrlBuilderScriptFile(File dtbsSourceUrlBuilderScriptFile)
 	{
-		this.schemaUrlBuilderScriptFile = schemaUrlBuilderScriptFile;
+		this.dtbsSourceUrlBuilderScriptFile = dtbsSourceUrlBuilderScriptFile;
 	}
 
 	@RequestMapping("/set")
@@ -94,7 +94,7 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 		
 		setFormModel(model, form, "set", "saveSet");
 
-		return "/schemaUrlBuilder/schemaUrlBuilder_set";
+		return "/dtbsSourceUrlBuilder/dtbsSourceUrlBuilder_set";
 	}
 
 	@RequestMapping(value = "/saveSet", produces = CONTENT_TYPE_JSON)
@@ -117,11 +117,11 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 		model.addAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
 		setFormAction(model, "preview", SUBMIT_ACTION_NONE);
 		
-		return "/schemaUrlBuilder/schemaUrlBuilder_build";
+		return "/dtbsSourceUrlBuilder/dtbsSourceUrlBuilder_build";
 	}
 
 	@RequestMapping("/build")
-	public String buildSchemaUrl(HttpServletRequest request, org.springframework.ui.Model model,
+	public String buildDtbsSourceUrl(HttpServletRequest request, org.springframework.ui.Model model,
 			@RequestParam(value = "url", required = false) String url) throws IOException
 	{
 		model.addAttribute("scriptCode", getUrlBuilderScript());
@@ -129,7 +129,7 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 		model.addAttribute("url", url);
 		setFormAction(model, "build", SUBMIT_ACTION_NONE);
 		
-		return "/schemaUrlBuilder/schemaUrlBuilder_build";
+		return "/dtbsSourceUrlBuilder/dtbsSourceUrlBuilder_build";
 	}
 
 	protected void saveCustomScript(String scriptCode) throws IOException
@@ -142,7 +142,7 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 		if (scriptCode.endsWith(","))
 			scriptCode = scriptCode.substring(0, scriptCode.length() - 1);
 
-		Writer out = IOUtil.getWriter(this.schemaUrlBuilderScriptFile, DB_URL_BUILDER_ENCODING);
+		Writer out = IOUtil.getWriter(this.dtbsSourceUrlBuilderScriptFile, DB_URL_BUILDER_ENCODING);
 
 		try
 		{
@@ -168,10 +168,10 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 	 */
 	protected String getCustomUrlBuilderScript() throws IOException
 	{
-		if (this.schemaUrlBuilderScriptFile == null || !this.schemaUrlBuilderScriptFile.exists())
+		if (this.dtbsSourceUrlBuilderScriptFile == null || !this.dtbsSourceUrlBuilderScriptFile.exists())
 			return "";
 
-		Reader reader = IOUtil.getReader(this.schemaUrlBuilderScriptFile, DB_URL_BUILDER_ENCODING);
+		Reader reader = IOUtil.getReader(this.dtbsSourceUrlBuilderScriptFile, DB_URL_BUILDER_ENCODING);
 
 		return IOUtil.readString(reader, true);
 	}

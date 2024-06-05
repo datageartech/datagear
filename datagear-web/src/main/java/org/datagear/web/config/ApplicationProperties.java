@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * 系统配置信息。
  * <p>
- * 对应{@code or./datagear.web.application.properties}中的配置项。
+ * 对应{@code org/datagear/web/application.properties}中的配置项。
  * </p>
  * 
  * @author datagear@163.com

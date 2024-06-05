@@ -626,13 +626,13 @@ label.align-tip{
 	margin-bottom: 0.5rem;
 }
 
-.page-manager-schema .p-tree.schema-tree .p-tree-wrapper,
-.page-manager-schema .p-tree.schema-tree .p-tree-wrapper .p-tree-container{
+.page-manager-dtbsSource .p-tree.dtbsSource-tree .p-tree-wrapper,
+.page-manager-dtbsSource .p-tree.dtbsSource-tree .p-tree-wrapper .p-tree-container{
 	height: 100% !important;
 	overflow: auto;
 }
 
-.page-form-schema .properties-wrapper .properties-table .p-datatable-wrapper{
+.page-form-dtbsSource .properties-wrapper .properties-table .p-datatable-wrapper{
 	min-height: 5rem;
 }
 
@@ -644,11 +644,11 @@ label.align-tip{
 }
 
 /*数据源URL构建器编辑页面*/
-.page-form-schema-ub .code-editor-wrapper{
+.page-form-dtbsSource-ub .code-editor-wrapper{
 	/*屏幕高度 - 表单foot高度 - 其他元素高度*/
 	height: calc(100vh - 5rem - 7rem);
 }
-.p-dialog .page-form-schema-ub .code-editor-wrapper{
+.p-dialog .page-form-dtbsSource-ub .code-editor-wrapper{
 	/*对话框高度 - 表单foot高度 - 对话框header高度*/
 	height: calc(90vh - 5rem - 6rem - 7rem);
 }

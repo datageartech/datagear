@@ -29,7 +29,7 @@ public class ModulePermissions implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private ModulePermission schemaPermission;
+	private ModulePermission dtbsSourcePermission;
 
 	private ModulePermission analysisProjectPermission;
 
@@ -44,25 +44,25 @@ public class ModulePermissions implements Serializable
 		super();
 	}
 
-	public ModulePermissions(ModulePermission schemaPermission, ModulePermission analysisProjectPermission,
+	public ModulePermissions(ModulePermission dtbsSourcePermission, ModulePermission analysisProjectPermission,
 			ModulePermission dataSetPermission, ModulePermission chartPermission, ModulePermission dashboardPermission)
 	{
 		super();
-		this.schemaPermission = schemaPermission;
+		this.dtbsSourcePermission = dtbsSourcePermission;
 		this.analysisProjectPermission = analysisProjectPermission;
 		this.dataSetPermission = dataSetPermission;
 		this.chartPermission = chartPermission;
 		this.dashboardPermission = dashboardPermission;
 	}
 
-	public ModulePermission getSchemaPermission()
+	public ModulePermission getDtbsSourcePermission()
 	{
-		return schemaPermission;
+		return dtbsSourcePermission;
 	}
 
-	public void setSchemaPermission(ModulePermission schemaPermission)
+	public void setDtbsSourcePermission(ModulePermission dtbsSourcePermission)
 	{
-		this.schemaPermission = schemaPermission;
+		this.dtbsSourcePermission = dtbsSourcePermission;
 	}
 
 	public ModulePermission getAnalysisProjectPermission()

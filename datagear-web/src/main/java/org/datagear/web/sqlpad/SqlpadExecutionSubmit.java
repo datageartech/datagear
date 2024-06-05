@@ -41,7 +41,7 @@ public class SqlpadExecutionSubmit
 
 	private User user;
 
-	private DtbsSource schema;
+	private DtbsSource dtbsSource;
 
 	private String sqlpadId;
 
@@ -68,18 +68,18 @@ public class SqlpadExecutionSubmit
 
 	public SqlpadExecutionSubmit(SqlpadExecutionSubmit from)
 	{
-		this(from.user, from.schema, from.sqlpadId, from.sqlpadFileDirectory, from.sqlStatements, from.commitMode,
+		this(from.user, from.dtbsSource, from.sqlpadId, from.sqlpadFileDirectory, from.sqlStatements, from.commitMode,
 				from.exceptionHandleMode, from.overTimeThreashold, from.resultsetFetchSize, from.resultsetRowMapper,
 				from.locale);
 	}
 
-	public SqlpadExecutionSubmit(User user, DtbsSource schema, String sqlpadId, File sqlpadFileDirectory,
+	public SqlpadExecutionSubmit(User user, DtbsSource dtbsSource, String sqlpadId, File sqlpadFileDirectory,
 			List<SqlStatement> sqlStatements, CommitMode commitMode, ExceptionHandleMode exceptionHandleMode,
 			Integer overTimeThreashold, int resultsetFetchSize, RowMapper resultsetRowMapper, Locale locale)
 	{
 		super();
 		this.user = user;
-		this.schema = schema;
+		this.dtbsSource = dtbsSource;
 		this.sqlpadId = sqlpadId;
 		this.sqlpadFileDirectory = sqlpadFileDirectory;
 		this.sqlStatements = sqlStatements;
@@ -101,14 +101,14 @@ public class SqlpadExecutionSubmit
 		this.user = user;
 	}
 
-	public DtbsSource getSchema()
+	public DtbsSource getDtbsSource()
 	{
-		return schema;
+		return dtbsSource;
 	}
 
-	public void setSchema(DtbsSource schema)
+	public void setDtbsSource(DtbsSource dtbsSource)
 	{
-		this.schema = schema;
+		this.dtbsSource = dtbsSource;
 	}
 
 	public String getSqlpadId()

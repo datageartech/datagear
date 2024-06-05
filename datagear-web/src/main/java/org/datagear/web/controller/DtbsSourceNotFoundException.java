@@ -29,20 +29,20 @@ public class DtbsSourceNotFoundException extends ControllerException
 {
 	private static final long serialVersionUID = 1L;
 
-	private String schemaId;
+	private String dtbsSourceId;
 
-	public DtbsSourceNotFoundException(String schemaId)
+	public DtbsSourceNotFoundException(String dtbsSourceId)
 	{
-		this(schemaId, null);
+		this(dtbsSourceId, null);
 	}
 
-	public DtbsSourceNotFoundException(String schemaId, Throwable cause)
+	public DtbsSourceNotFoundException(String dtbsSourceId, Throwable cause)
 	{
-		super("No Schema found for id [" + schemaId + "]", cause);
+		super("No DtbsSource found for id [" + dtbsSourceId + "]", cause);
 	}
 
-	public String getSchemaId()
+	public String getDtbsSourceId()
 	{
-		return schemaId;
+		return dtbsSourceId;
 	}
 }

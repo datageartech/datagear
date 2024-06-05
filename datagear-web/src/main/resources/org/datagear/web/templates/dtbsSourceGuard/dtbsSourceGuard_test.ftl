@@ -34,7 +34,7 @@
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}url" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='schema.url.desc' />">
+					title="<@spring.message code='dtbsSource.url.desc' />">
 					<@spring.message code='url' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -42,7 +42,7 @@
 			        	<p-inputtext id="${pid}url" v-model="fm.url" type="text" class="input"
 			        		name="url" required maxlength="2000" placeholder="jdbc:">
 			        	</p-inputtext>
-			        	<p-button type="button" label="<@spring.message code='help' />" @click="onBuildSchemaUrl"
+			        	<p-button type="button" label="<@spring.message code='help' />" @click="onBuildDtbsSourceUrl"
 			        		class="p-button-secondary">
 			        	</p-button>
 		        	</div>
@@ -50,7 +50,7 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}user" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='schema.username.desc' />">
+					title="<@spring.message code='dtbsSource.username.desc' />">
 					<@spring.message code='username' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
@@ -61,8 +61,8 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}properties" class="field-label col-12 mb-2"
-					title="<@spring.message code='schema.properties.desc' />">
-					<@spring.message code='schema.properties' />
+					title="<@spring.message code='dtbsSource.properties.desc' />">
+					<@spring.message code='dtbsSource.properties' />
 				</label>
 				<div class="field-input col-12">
 					<div class="p-component p-inputtext">
@@ -160,7 +160,7 @@
 				po.vueRaw(data));
 		
 		var pm = po.vuePageModel();
-		pm.propertyForm.title = "<@spring.message code='schema.properties' />" + " - " + action;
+		pm.propertyForm.title = "<@spring.message code='dtbsSource.properties' />" + " - " + action;
 		pm.propertyForm.data = data;
 		pm.propertyForm.submitHandler = submitHandler;
 		pm.propertyForm.show = true;
@@ -205,11 +205,11 @@
 	
 	po.vueMethod(
 	{
-		onBuildSchemaUrl: function()
+		onBuildDtbsSourceUrl: function()
 		{
 			var fm = po.vueFormModel();
 			
-			po.open("/schemaUrlBuilder/build",
+			po.open("/dtbsSourceUrlBuilder/build",
 			{
 				data: {url: fm.url},
 				contentType: $.CONTENT_TYPE_FORM,

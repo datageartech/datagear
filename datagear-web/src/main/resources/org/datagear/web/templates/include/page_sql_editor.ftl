@@ -25,7 +25,7 @@ page_code_editor.ftl
 
 变量：
 //数据源ID，不允许为null
-po.getSqlEditorSchemaId
+po.getSqlEditorDtbsSourceId
 -->
 <script type="text/javascript">
 (function(po)

@@ -19,10 +19,10 @@ package org.datagear.web.util;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
-import org.datagear.management.domain.DtbsSource;
 
 /**
  * 授权资源元信息集。
@@ -60,7 +60,7 @@ public class AuthorizationResMetas
 	 */
 	public void register()
 	{
-		registerSchema();
+		registerDtbsSource();
 		registerAnalysisProject();
 		registerDataSet();
 		registerFileSource();
@@ -71,11 +71,11 @@ public class AuthorizationResMetas
 	/**
 	 * 注册数据源授权资源元信息。
 	 */
-	protected void registerSchema()
+	protected void registerDtbsSource()
 	{
 		this.authorizationResMetaManager.registerForReadTransfer(DtbsSource.AUTHORIZATION_RESOURCE_TYPE,
-				"schema.auth.permission.read.desc", "schema.auth.permission.edit.desc",
-				"schema.auth.permission.delete.desc");
+				"dtbsSource.auth.permission.read.desc", "dtbsSource.auth.permission.edit.desc",
+				"dtbsSource.auth.permission.delete.desc");
 	}
 	
 	/**

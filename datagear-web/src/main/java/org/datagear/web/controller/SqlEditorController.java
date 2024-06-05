@@ -51,22 +51,22 @@ public class SqlEditorController extends AbstractDtbsSourceConnTableController
 		super();
 	}
 
-	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/findTableNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<String> findTableNames(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
 		final User user = getCurrentUser();
 
-		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
-				schemaId, true)
+		List<SimpleTable> tables = new ReturnDtbsSourceConnExecutor<List<SimpleTable>>(request, response, springModel,
+				dtbsSourceId, true)
 		{
 			@Override
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
 			{
-				checkReadTableDataPermission(schema, user);
+				checkReadTableDataPermission(dtbsSource, user);
 
 				Connection cn = getConnection();
 				List<SimpleTable> tables = getDbMetaResolver().getDataTables(cn);
@@ -83,10 +83,10 @@ public class SqlEditorController extends AbstractDtbsSourceConnTableController
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/{schemaId}/findColumns", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/findColumns", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Column> findColumns(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestParam("table") final String table,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
@@ -96,13 +96,14 @@ public class SqlEditorController extends AbstractDtbsSourceConnTableController
 
 		try
 		{
-			tableObj = new ReturnSchemaConnTableExecutor<Table>(request, response, springModel, schemaId, table, true)
+			tableObj = new ReturnDtbsSourceConnTableExecutor<Table>(request, response, springModel, dtbsSourceId, table,
+					true)
 			{
 				@Override
 				protected Table execute(HttpServletRequest request, HttpServletResponse response,
-						org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Exception
+						org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Exception
 				{
-					checkReadTableDataPermission(schema, user);
+					checkReadTableDataPermission(dtbsSource, user);
 
 					return table;
 				}

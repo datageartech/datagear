@@ -71,13 +71,13 @@ public class DtbsSourceTableCache
 	/**
 	 * 获取{@linkplain Table}。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param tableName
 	 * @return 返回{@code null}表示没有缓存
 	 */
-	public Table get(String schemaId, String tableName)
+	public Table get(String dtbsSourceId, String tableName)
 	{
-		ValueWrapper vw = this.cache.get(schemaId);
+		ValueWrapper vw = this.cache.get(dtbsSourceId);
 		TableCacheValue tcv = (vw == null ? null : (TableCacheValue) vw.get());
 
 		return (tcv == null ? null : tcv.get(tableName));
@@ -86,12 +86,12 @@ public class DtbsSourceTableCache
 	/**
 	 * 将{@linkplain Table}添加至缓存。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param table
 	 */
-	public void put(String schemaId, Table table)
+	public void put(String dtbsSourceId, Table table)
 	{
-		ValueWrapper vw = this.cache.get(schemaId);
+		ValueWrapper vw = this.cache.get(dtbsSourceId);
 		TableCacheValue tcv = (vw == null ? null : (TableCacheValue) vw.get());
 
 		if (tcv == null)
@@ -99,34 +99,34 @@ public class DtbsSourceTableCache
 
 		tcv.add(table, this.tableCacheMaxLength);
 
-		this.cache.put(schemaId, tcv);
+		this.cache.put(dtbsSourceId, tcv);
 	}
 
 	/**
 	 * 删除指定名称{@linkplain Table}缓存。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 * @param tableName
 	 */
-	public void invalidate(String schemaId, String tableName)
+	public void invalidate(String dtbsSourceId, String tableName)
 	{
-		ValueWrapper vw = this.cache.get(schemaId);
+		ValueWrapper vw = this.cache.get(dtbsSourceId);
 		TableCacheValue tcv = (vw == null ? null : (TableCacheValue) vw.get());
 
 		if (tcv != null)
 			tcv.remove(tableName);
 
-		this.cache.put(schemaId, tcv);
+		this.cache.put(dtbsSourceId, tcv);
 	}
 
 	/**
 	 * 清除指定{@linkplain DtbsSource} ID的所有{@linkplain Table}缓存。
 	 * 
-	 * @param schemaId
+	 * @param dtbsSourceId
 	 */
-	public void invalidate(String schemaId)
+	public void invalidate(String dtbsSourceId)
 	{
-		this.cache.evict(schemaId);
+		this.cache.evict(dtbsSourceId);
 	}
 
 	public static class TableCacheValue extends CollectionCacheValue<Table>

@@ -178,13 +178,14 @@ public class AuthenticationSecurity
 		boolean operator = hasDataManager(auth);
 		boolean visible = accessor;
 
-		ModulePermission schemaPermission = new ModulePermission(accessor, operator, visible);
+		ModulePermission dtbsSourcePermission = new ModulePermission(accessor, operator, visible);
 		ModulePermission analysisProjectPermission = new ModulePermission(accessor, operator, visible);
 		ModulePermission dataSetPermission = new ModulePermission(accessor, operator, visible);
 		ModulePermission chartPermission = new ModulePermission(accessor, operator, visible);
 		ModulePermission dashboardPermission = new ModulePermission(accessor, operator, visible);
 
-		return new ModulePermissions(schemaPermission, analysisProjectPermission, dataSetPermission, chartPermission,
+		return new ModulePermissions(dtbsSourcePermission, analysisProjectPermission, dataSetPermission,
+				chartPermission,
 				dashboardPermission);
 	}
 

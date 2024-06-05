@@ -61,10 +61,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
  *
  */
 @Controller
-@RequestMapping("/schema")
+@RequestMapping("/dtbsSource")
 public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 {
-	public static final String COOKIE_PAGINATION_SIZE = "SCHEMA_PAGINATION_PAGE_SIZE";
+	public static final String COOKIE_PAGINATION_SIZE = "DTBSSOURCE_PAGING_SIZE";
 
 	@Autowired
 	private DriverEntityManager driverEntityManager;
@@ -100,41 +100,41 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping("/add")
 	public String add(org.springframework.ui.Model model)
 	{
-		DtbsSource schema = new DtbsSource();
-		setFormModel(model, schema, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		DtbsSource dtbsSource = new DtbsSource();
+		setFormModel(model, dtbsSource, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		return "/schema/schema_form";
+		return "/dtbsSource/dtbsSource_form";
 	}
 
 	@RequestMapping("/copy")
 	public String copy(org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DtbsSource schema = getByIdForView(getDtbsSourceService(), user, id);
-		schema.setId(null);
-		schema.clearPassword();
-		schema.setDataPermission(DataPermissionEntity.PERMISSION_NOT_LOADED);
+		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
+		dtbsSource.setId(null);
+		dtbsSource.clearPassword();
+		dtbsSource.setDataPermission(DataPermissionEntity.PERMISSION_NOT_LOADED);
 		
-		setFormModel(model, schema, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
-		return "/schema/schema_form";
+		setFormModel(model, dtbsSource, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+		return "/dtbsSource/dtbsSource_form";
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSource schema)
+			@RequestBody DtbsSource dtbsSource)
 	{
 		User user = getCurrentUser();
 
-		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
+		if (isBlank(dtbsSource.getTitle()) || isBlank(dtbsSource.getUrl()))
 			throw new IllegalInputException();
 
-		schema.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(schema, user);
+		dtbsSource.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(dtbsSource, user);
 
-		getDtbsSourceService().add(user, schema);
+		getDtbsSourceService().add(user, dtbsSource);
 
-		return optSuccessDataResponseEntity(request, schema);
+		return optSuccessDataResponseEntity(request, dtbsSource);
 	}
 
 	@RequestMapping("/edit")
@@ -142,33 +142,34 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DtbsSource schema = getByIdForEdit(getDtbsSourceService(), user, id);
-		schema.clearPassword();
+		DtbsSource dtbsSource = getByIdForEdit(getDtbsSourceService(), user, id);
+		dtbsSource.clearPassword();
 		
-		setFormModel(model, schema, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
-		return "/schema/schema_form";
+		setFormModel(model, dtbsSource, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		return "/dtbsSource/dtbsSource_form";
 	}
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSource schema)
+			@RequestBody DtbsSource dtbsSource)
 	{
-		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
+		if (isBlank(dtbsSource.getTitle()) || isBlank(dtbsSource.getUrl()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		DtbsSource old = getDtbsSourceService().getById(schema.getId());
+		DtbsSource old = getDtbsSourceService().getById(dtbsSource.getId());
 
-		boolean updated = getDtbsSourceService().update(user, schema);
+		boolean updated = getDtbsSourceService().update(user, dtbsSource);
 
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
-				&& (!StringUtil.isEquals(schema.getUrl(), old.getUrl()) || !StringUtil.isEquals(schema.getUser(), old.getUser())))
-			getDtbsSourceTableCache().invalidate(schema.getId());
+				&& (!StringUtil.isEquals(dtbsSource.getUrl(), old.getUrl())
+						|| !StringUtil.isEquals(dtbsSource.getUser(), old.getUser())))
+			getDtbsSourceTableCache().invalidate(dtbsSource.getId());
 
-		return optSuccessDataResponseEntity(request, schema);
+		return optSuccessDataResponseEntity(request, dtbsSource);
 	}
 
 	@RequestMapping("/view")
@@ -176,11 +177,11 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DtbsSource schema = getByIdForView(getDtbsSourceService(), user, id);
-		schema.clearPassword();
+		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
+		dtbsSource.clearPassword();
 
-		setFormModel(model, schema, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
-		return "/schema/schema_form";
+		setFormModel(model, dtbsSource, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		return "/dtbsSource/dtbsSource_form";
 	}
 	
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -209,14 +210,14 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyAction(model);
-		return "/schema/schema_tree";
+		return "/dtbsSource/dtbsSource_tree";
 	}
 
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		setSelectAction(request, model);
-		return "/schema/schema_table";
+		return "/dtbsSource/dtbsSource_table";
 	}
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
@@ -227,10 +228,10 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		List<DtbsSource> schemas = getDtbsSourceService().query(user, pagingQuery);
-		processForUI(request, schemas);
+		List<DtbsSource> dtbsSources = getDtbsSourceService().query(user, pagingQuery);
+		processForUI(request, dtbsSources);
 
-		return schemas;
+		return dtbsSources;
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -250,35 +251,35 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping(value = "/testConnection", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> testConnection(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSource schema) throws Exception
+			@RequestBody DtbsSource dtbsSource) throws Exception
 	{
-		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
+		if (isBlank(dtbsSource.getTitle()) || isBlank(dtbsSource.getUrl()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		if (!this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(schema)))
+		if (!this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(dtbsSource)))
 			throw new SaveDtbsSourcePermissionDeniedException();
 
 		// 用户选定驱动程序时
-		if (!isEmpty(schema.getDriverEntity()) && !isEmpty(schema.getDriverEntity().getId()))
+		if (!isEmpty(dtbsSource.getDriverEntity()) && !isEmpty(dtbsSource.getDriverEntity().getId()))
 		{
-			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
-			schema.setDriverEntity(driverEntity);
+			DriverEntity driverEntity = this.driverEntityManager.get(dtbsSource.getDriverEntity().getId());
+			dtbsSource.setDriverEntity(driverEntity);
 		}
 
 		Connection cn = null;
 
 		try
 		{
-			cn = getSchemaConnection(schema);
+			cn = getDtbsSourceConnection(dtbsSource);
 		}
 		finally
 		{
 			JdbcUtil.closeConnection(cn);
 		}
 
-		return optSuccessDataResponseEntity(request, "schema.testConnection.ok");
+		return optSuccessDataResponseEntity(request, "dtbsSource.testConnection.ok");
 	}
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
@@ -292,26 +293,26 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
 
-		List<DtbsSource> schemas = getDtbsSourceService().query(user, pagingQuery);
-		processForUI(request, schemas);
+		List<DtbsSource> dtbsSources = getDtbsSourceService().query(user, pagingQuery);
+		processForUI(request, dtbsSources);
 
-		return schemas;
+		return dtbsSources;
 	}
 
-	@RequestMapping(value = "/{schemaId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
 
-		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
-				schemaId, true)
+		List<SimpleTable> tables = new ReturnDtbsSourceConnExecutor<List<SimpleTable>>(request, response, springModel,
+				dtbsSourceId, true)
 		{
 			@Override
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema) throws Throwable
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
 			{
 				Connection cn = getConnection();
 				List<SimpleTable> tables = getDbMetaResolver().getDataTables(cn);
@@ -334,22 +335,23 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/{schemaId}/table/{tableName}", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{dtbsSourceId}/table/{tableName}", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Table getTable(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = "reload", required = false) Boolean forceReload) throws Throwable
 	{
 		if (Boolean.TRUE.equals(forceReload))
-			getDtbsSourceTableCache().invalidate(schemaId, tableName);
+			getDtbsSourceTableCache().invalidate(dtbsSourceId, tableName);
 
-		ReturnSchemaConnTableExecutor<Table> executor = new ReturnSchemaConnTableExecutor<Table>(request, response,
-				springModel, schemaId, tableName, true)
+		ReturnDtbsSourceConnTableExecutor<Table> executor = new ReturnDtbsSourceConnTableExecutor<Table>(request,
+				response,
+				springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Exception
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Exception
 			{
 				return table;
 			}
@@ -358,16 +360,18 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		return executor.execute();
 	}
 
-	@RequestMapping("/{schemaId}/tableMeta/{tableName}")
+	@RequestMapping("/{dtbsSourceId}/tableMeta/{tableName}")
 	public String viewTableMeta(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("dtbsSourceId") String dtbsSourceId, @PathVariable("tableName") String tableName)
+			throws Throwable
 	{
-		ReturnSchemaConnTableExecutor<Table> executor = new ReturnSchemaConnTableExecutor<Table>(request, response,
-				springModel, schemaId, tableName, true)
+		ReturnDtbsSourceConnTableExecutor<Table> executor = new ReturnDtbsSourceConnTableExecutor<Table>(request,
+				response,
+				springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource schema, Table table) throws Exception
+					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Exception
 			{
 				return table;
 			}
@@ -377,7 +381,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		
 		setFormModel(springModel, table, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
-		return "/schema/schema_dbtable_meta";
+		return "/dtbsSource/dtbsSource_dbtable_meta";
 	}
 
 	@RequestMapping("/dbinfo")
@@ -385,14 +389,14 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
-		DtbsSource schema = getByIdForView(getDtbsSourceService(), user, id);
+		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
 
 		DatabaseInfo di = new DatabaseInfo();
 
 		Connection cn = null;
 		try
 		{
-			cn = getSchemaConnection(schema);
+			cn = getDtbsSourceConnection(dtbsSource);
 			Database db = getDbMetaResolver().getDatabase(cn);
 			String[] tableTypes = getDbMetaResolver().getTableTypes(cn);
 
@@ -411,23 +415,23 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		setFormModel(springModel, di, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
-		return "/schema/schema_dbinfo";
+		return "/dtbsSource/dtbsSource_dbinfo";
 	}
 	
 	/**
 	 * 处理展示。
 	 * 
 	 * @param request
-	 * @param schemas
+	 * @param dtbsSources
 	 */
-	protected void processForUI(HttpServletRequest request, List<DtbsSource> schemas)
+	protected void processForUI(HttpServletRequest request, List<DtbsSource> dtbsSources)
 	{
-		if (schemas != null && !schemas.isEmpty())
+		if (dtbsSources != null && !dtbsSources.isEmpty())
 		{
-			for (DtbsSource schema : schemas)
+			for (DtbsSource dtbsSource : dtbsSources)
 			{
 				// 清除密码，避免传输至客户端引起安全问题。
-				schema.clearPassword();
+				dtbsSource.clearPassword();
 			}
 		}
 	}

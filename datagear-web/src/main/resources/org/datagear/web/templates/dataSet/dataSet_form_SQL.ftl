@@ -39,11 +39,11 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-		        		<p-inputtext id="${pid}dataSource" v-model="fm.dtbsConFactory.schema.title" type="text" class="input"
-			        		readonly="readonly" name="dtbsConFactory.schema.title" required maxlength="200">
+		        		<p-inputtext id="${pid}dataSource" v-model="fm.dtbsConFactory.dtbsSource.title" type="text" class="input"
+			        		readonly="readonly" name="dtbsConFactory.dtbsSource.title" required maxlength="200">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />"
-			        		@click="onSelectSchema" v-if="!pm.isReadonlyAction">
+			        		@click="onSelectDtbsSource" v-if="!pm.isReadonlyAction">
 			        	</p-button>
 		        	</div>
 		        </div>
@@ -85,7 +85,7 @@
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
-		fingerprint.schemaId = dataSet.dtbsConFactory.schema.id;
+		fingerprint.dtbsSourceId = dataSet.dtbsConFactory.dtbsSource.id;
 		fingerprint.sql = dataSet.sql;
 	};
 	
@@ -99,16 +99,16 @@
 			return false;
 	};
 	
-	po.getSqlEditorSchemaId = function()
+	po.getSqlEditorDtbsSourceId = function()
 	{
 		var fm = po.vueFormModel();
-		return fm.dtbsConFactory.schema.id;
+		return fm.dtbsConFactory.dtbsSource.id;
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
-	formModel.dtbsConFactory = (formModel.dtbsConFactory == null ? { schema: {} } : formModel.dtbsConFactory);
-	formModel.dtbsConFactory.schema = (formModel.dtbsConFactory.schema == null ? {} : formModel.dtbsConFactory.schema);
+	formModel.dtbsConFactory = (formModel.dtbsConFactory == null ? { dtbsSource: {} } : formModel.dtbsConFactory);
+	formModel.dtbsConFactory.dtbsSource = (formModel.dtbsConFactory.dtbsSource == null ? {} : formModel.dtbsConFactory.dtbsSource);
 	
 	po.setupForm(formModel,
 	{
@@ -131,12 +131,12 @@
 	
 	po.vueMethod(
 	{
-		onSelectSchema: function()
+		onSelectDtbsSource: function()
 		{
-			po.handleOpenSelectAction("/schema/select", function(schema)
+			po.handleOpenSelectAction("/dtbsSource/select", function(dtbsSource)
 			{
 				var fm = po.vueFormModel();
-				fm.dtbsConFactory.schema = schema;
+				fm.dtbsConFactory.dtbsSource = dtbsSource;
 			});
 		}
 	});

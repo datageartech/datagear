@@ -152,8 +152,8 @@ User currentUser
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
-						label: "<@spring.message code='module.schemaUrlBuilder' />",
-						url: po.concatContextPath("/schemaUrlBuilder/set"),
+						label: "<@spring.message code='module.dtbsSourceUrlBuilder' />",
+						url: po.concatContextPath("/dtbsSourceUrlBuilder/set"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
