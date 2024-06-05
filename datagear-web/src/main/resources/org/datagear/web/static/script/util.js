@@ -3187,7 +3187,7 @@ $.inflatePageSqlEditor = function(po)
 	
 	po.sqlEditorHintTableAjaxOptions = function(dtbsSourceId)
 	{
-		var options = { url: po.concatContextPath("/sqlEditor/"+dtbsSourceId+"/findTableNames") };
+		var options = { url: po.concatContextPath("/dtbsSourceSqlEditor/"+dtbsSourceId+"/findTableNames") };
 		return options;
 	};
 	
@@ -3195,7 +3195,7 @@ $.inflatePageSqlEditor = function(po)
 	{
 		var options =
 		{
-			url: po.concatContextPath("/sqlEditor/"+dtbsSourceId+"/findColumns"),
+			url: po.concatContextPath("/dtbsSourceSqlEditor/"+dtbsSourceId+"/findColumns"),
 			data: { table: tableName }
 		};
 		

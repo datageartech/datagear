@@ -43,10 +43,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
  *
  */
 @Controller
-@RequestMapping("/sqlEditor")
-public class SqlEditorController extends AbstractDtbsSourceConnTableController
+@RequestMapping("/dtbsSourceSqlEditor")
+public class DtbsSourceSqlEditorController extends AbstractDtbsSourceConnTableController
 {
-	public SqlEditorController()
+	public DtbsSourceSqlEditorController()
 	{
 		super();
 	}

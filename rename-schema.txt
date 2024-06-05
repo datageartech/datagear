@@ -1,11 +1,19 @@
 
+
+--
+
+
+org.datagear.web.controller.SqlEditorController
+org.datagear.web.controller.DtbsSourceSqlEditorController
+
+/sqlEditor
+/dtbsSourceSqlEditor
+
 org.datagear.web.controller.SqlpadController
 org.datagear.web.controller.DtbsSourceSqlpadController
 
 /sqlpad
 /dtbsSourceSqlpad
-
---
 
 org.datagear.web.controller.DataController
 org.datagear.web.controller.DtbsSourceDataController
