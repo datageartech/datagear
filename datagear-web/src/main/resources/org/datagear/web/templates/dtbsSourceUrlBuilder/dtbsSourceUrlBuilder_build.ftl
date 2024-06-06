@@ -52,13 +52,14 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}host" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+				<label for="${pid}hostName" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='hostNameOrIp' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-inputtext id="${pid}host" v-model="fm.host" type="text" class="input w-full"
-		        		name="host" maxlength="200">
+		        	<p-inputtext id="${pid}hostName" v-model="fm.hostName" type="text" class="input w-full"
+		        		name="hostName" maxlength="200">
 		        	</p-inputtext>
+		        	<!-- 上面不能使用：name="host"，会导致打开下拉框时死循环报错 -->
 		        </div>
 			</div>
 			<div class="field grid">
@@ -142,7 +143,8 @@
 	po.submitForm = function()
 	{
 		var fm = po.vueFormModel();
-		var url = $.dtbsSourceUrlBuilder.build(fm.dbType, fm);
+		var value = { host: fm.hostName, port: fm.port, name: fm.name };
+		var url = $.dtbsSourceUrlBuilder.build(fm.dbType, value);
 		
 		if(po.isPreviewAction)
 			fm.previewResult = url;
@@ -152,7 +154,7 @@
 	var formModel =
 	{
 		dbType: urlDbType,
-		host: (urlValue && urlValue.host ? urlValue.host : ""),
+		hostName: (urlValue && urlValue.host ? urlValue.host : ""),
 		port: (urlValue && urlValue.port ? urlValue.port : ""),
 		name: (urlValue && urlValue.name ? urlValue.name : ""),
 		previewResult: " "
@@ -183,8 +185,8 @@
 			var dftValue = $.dtbsSourceUrlBuilder.defaultValue(dbType);
 			
 			var fm = po.vueFormModel();
-			if(!fm.host)
-				fm.host = (dftValue.host || "");
+			if(!fm.hostName)
+				fm.hostName = (dftValue.host || "");
 			if(!fm.port)
 				fm.port = (dftValue.port || "");
 			if(!fm.name)
