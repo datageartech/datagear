@@ -288,6 +288,12 @@
 			}
 		});
 		
+		po.vueMounted(function()
+		{
+			//聚焦第一个输入框
+			po.element(":input:not([readonly],[disabled]):first", po.form()).focus();
+		});
+		
 		po.vueMount();
 	});
 })
