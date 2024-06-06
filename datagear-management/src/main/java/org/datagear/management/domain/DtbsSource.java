@@ -74,6 +74,9 @@ public class DtbsSource extends AbstractStringIdEntity
 	/** 连接密码 */
 	private String password;
 
+	/** 模式名，留空则默认 */
+	private String schemaName = null;
+
 	/** 此模式的创建用户 */
 	private User createUser;
 
@@ -141,6 +144,16 @@ public class DtbsSource extends AbstractStringIdEntity
 	public void setPassword(String password)
 	{
 		this.password = password;
+	}
+
+	public String getSchemaName()
+	{
+		return schemaName;
+	}
+
+	public void setSchemaName(String schemaName)
+	{
+		this.schemaName = schemaName;
 	}
 
 	public boolean hasCreateUser()
@@ -305,7 +318,8 @@ public class DtbsSource extends AbstractStringIdEntity
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [title=" + title + ", url=" + url + ", user=" + user + ", createUser="
-				+ createUser + ", createTime=" + createTime + ", driverEntity=" + driverEntity + "]";
+		return getClass().getSimpleName() + " [title=" + title + ", url=" + url + ", user=" + user + ", schemaName="
+				+ schemaName + ", createUser=" + createUser + ", createTime=" + createTime + ", driverEntity="
+				+ driverEntity + "]";
 	}
 }

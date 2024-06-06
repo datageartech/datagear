@@ -7,11 +7,13 @@
 		INSERT INTO DATAGEAR_SCHEMA
 			(
 			SCHEMA_ID, SCHEMA_TITLE, SCHEMA_URL, SCHEMA_USER, SCHEMA_PASSWORD,
+			SCHEMA_SCHM_NAME,
 			SCHEMA_PROPERTIES, DRIVER_ENTITY_ID, SCHEMA_CREATE_USER_ID, SCHEMA_CREATE_TIME
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.title}, #{entity.url}, #{entity.user, jdbcType=VARCHAR}, #{entity.password, jdbcType=VARCHAR},
+			#{entity.schemaName, jdbcType=VARCHAR},
 			#{entity.propertiesJson, jdbcType=VARCHAR}, #{entity.driverEntity.id, jdbcType=VARCHAR}, #{entity.createUser.id}, #{entity.createTime}
 			)
 	</insert>
@@ -22,6 +24,7 @@
 			SCHEMA_URL = #{entity.url},
 			SCHEMA_USER = #{entity.user, jdbcType=VARCHAR},
 			SCHEMA_PASSWORD = #{entity.password, jdbcType=VARCHAR},
+			SCHEMA_SCHM_NAME = #{entity.schemaName, jdbcType=VARCHAR},
 			SCHEMA_PROPERTIES = #{entity.propertiesJson, jdbcType=VARCHAR},
 			DRIVER_ENTITY_ID = #{entity.driverEntity.id, jdbcType=VARCHAR}
 		WHERE
@@ -135,6 +138,7 @@
 			A.SCHEMA_URL AS ${_iq_}url${_iq_},
 			A.SCHEMA_USER AS ${_iq_}user${_iq_},
 			A.SCHEMA_PASSWORD AS ${_iq_}password${_iq_},
+			A.SCHEMA_SCHM_NAME AS ${_iq_}schemaName${_iq_},
 			A.SCHEMA_CREATE_TIME AS ${_iq_}createTime${_iq_},
 			A.SCHEMA_PROPERTIES AS ${_iq_}propertiesJson${_iq_},
 			A.DRIVER_ENTITY_ID AS ${_iq_}driverEntity.id${_iq_},

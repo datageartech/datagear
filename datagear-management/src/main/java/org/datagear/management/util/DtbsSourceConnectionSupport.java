@@ -18,15 +18,18 @@
 package org.datagear.management.util;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.ibatis.datasource.DataSourceException;
 import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.DtbsSourceProperty;
+import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 
 /**
@@ -37,6 +40,8 @@ import org.datagear.util.StringUtil;
  */
 public class DtbsSourceConnectionSupport
 {
+	protected static final String INTERNAL_SCHEMA_PROPERTY_NAME = Global.NAME_SHORT_UCUS + "INTERNAL_SCHEMA_NAME";
+
 	public DtbsSourceConnectionSupport()
 	{
 	}
@@ -54,12 +59,10 @@ public class DtbsSourceConnectionSupport
 	{
 		Connection cn = null;
 		
-		Properties properties = null;
+		Properties properties = new Properties();
 		
 		if(dtbsSource.hasProperty())
 		{
-			properties = new Properties();
-			
 			List<DtbsSourceProperty> dtbsSourceProperties = dtbsSource.getProperties();
 			for(DtbsSourceProperty sp : dtbsSourceProperties)
 			{
@@ -71,18 +74,38 @@ public class DtbsSourceConnectionSupport
 			}
 		}
 		
+		String schemaName = dtbsSource.getSchemaName();
+		boolean emptySchemaName = StringUtil.isEmpty(schemaName);
+
+		// 必须添加此连接属性，不然会获取到其他数据库模式的连接
+		if (!emptySchemaName)
+		{
+			properties.put(INTERNAL_SCHEMA_PROPERTY_NAME, schemaName);
+		}
+
 		ConnectionOption connectionOption = ConnectionOption.valueOf(dtbsSource.getUrl(), dtbsSource.getUser(),
 				dtbsSource.getPassword(), properties);
 
 		if (dtbsSource.hasDriverEntity())
 		{
 			DriverEntity driverEntity = dtbsSource.getDriverEntity();
-
 			cn = connectionSource.getConnection(driverEntity, connectionOption);
 		}
 		else
 		{
 			cn = connectionSource.getConnection(connectionOption);
+		}
+
+		if (!emptySchemaName)
+		{
+			try
+			{
+				cn.setSchema(dtbsSource.getSchemaName());
+			}
+			catch (SQLException e)
+			{
+				throw new DataSourceException(e);
+			}
 		}
 
 		return cn;

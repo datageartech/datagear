@@ -86,6 +86,17 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}schemaName" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dtbsSource.schemaName.desc' />">
+					<@spring.message code='schemaName' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}schemaName" v-model="fm.schemaName" type="text" class="input w-full"
+		        		name="schemaName" maxlength="100">
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}properties" class="field-label col-12 mb-2"
 					title="<@spring.message code='dtbsSource.properties.desc' />">
 					<@spring.message code='dtbsSource.properties' />
