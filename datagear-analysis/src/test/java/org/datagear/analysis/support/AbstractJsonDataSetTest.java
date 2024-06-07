@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.junit.Test;
 
@@ -45,31 +45,31 @@ public class AbstractJsonDataSetTest
 		dataSet.setDataJsonPath("path0.path1[0].path2");
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
 		assertEquals(jsonString, result.getTemplateResult());
 
 		{
-			assertEquals(3, properties.size());
+			assertEquals(3, fields.size());
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(2);
+				DataSetField property = fields.get(2);
 				assertEquals("size", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 		}
 

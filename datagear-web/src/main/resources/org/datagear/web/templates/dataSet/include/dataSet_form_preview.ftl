@@ -109,7 +109,7 @@
 		var fingerprint = {};
 		
 		fingerprint.mutableModel = dataSet.mutableModel;
-		fingerprint.properties = $.extend(true, [], dataSet.properties);
+		fingerprint.fields = $.extend(true, [], dataSet.fields);
 		fingerprint.params = $.extend(true, [], dataSet.params);
 		fingerprint.dataFormat = $.extend(true, {}, dataSet.dataFormat);
 		
@@ -189,15 +189,15 @@
 		
 		if(!fm.mutableModel && !pm.isReadonlyAction && pm.autoGenerateProperty)
 		{
-			fm.properties = response.properties;
+			fm.fields = response.fields;
 			pm.selectedProperties = [];
 			
 			if(po._prevPreviewFingerprint)
-				po._prevPreviewFingerprint.properties = $.extend(true, [], response.properties);
+				po._prevPreviewFingerprint.fields = $.extend(true, [], response.fields);
 		}
 		
 		var previewColumns = [];
-		$.each(fm.properties, function(i, p)
+		$.each(fm.fields, function(i, p)
 		{
 			previewColumns.push({ name: p.name, label: p.name, style: "" });	
 		});

@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.Reader;
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
 import org.datagear.analysis.support.AbstractCsvFileDataSet.CsvFileDataSetResource;
@@ -51,9 +51,9 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 		super(id, name);
 	}
 
-	public AbstractCsvFileDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractCsvFileDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	public String getEncoding()

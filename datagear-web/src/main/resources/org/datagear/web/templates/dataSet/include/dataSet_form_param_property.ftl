@@ -86,8 +86,8 @@ dataSet_form_param_property_form.ftl
 	</div>
 </div>
 <div class="field grid">
-	<label for="${pid}properties" class="field-label col-12 mb-2"
-		title="<@spring.message code='dataSet.properties.desc' />">
+	<label for="${pid}fields" class="field-label col-12 mb-2"
+		title="<@spring.message code='dataSet.fields.desc' />">
 		<@spring.message code='property' />
 	</label>
 	<div class="field-input col-12">
@@ -113,7 +113,7 @@ dataSet_form_param_property_form.ftl
 					</div>
 					<div class="flex align-items-center ml-5">
 						<p-checkbox input-id="${pid}propertyAutoGen" v-model="pm.autoGenerateProperty" :binary="true"></p-checkbox>
-						<label for="${pid}propertyAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.properties.autoGenerate.desc' />">
+						<label for="${pid}propertyAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.fields.autoGenerate.desc' />">
 							<@spring.message code='autoGenerate' />
 						</label>
 					</div>
@@ -174,11 +174,11 @@ dataSet_form_param_property_form.ftl
 					</p-overlaypanel>
 				</div>
 			</div>
-			<div id="${pid}properties" class="properties-wrapper input w-full overflow-auto">
-				<p-datatable :value="fm.properties" :scrollable="true"
+			<div id="${pid}fields" class="fields-wrapper input w-full overflow-auto">
+				<p-datatable :value="fm.fields" :scrollable="true"
 					v-model:selection="pm.selectedProperties"
 					:resizable-columns="true" column-resize-mode="expand"
-					selection-mode="multiple" :meta-key-selection="true" data-key="name" striped-rows class="properties-table table-sm">
+					selection-mode="multiple" :meta-key-selection="true" data-key="name" striped-rows class="fields-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
 					<p-column field="name" header="<@spring.message code='name' />" class="col-name">
 					</p-column>
@@ -277,17 +277,17 @@ dataSet_form_param_property_form.ftl
 		{
 			var fm = po.vueFormModel();
 			
-			po.showDataSetPropertyForm("<@spring.message code='add' />", {}, function(dsp)
+			po.showDataSetFieldForm("<@spring.message code='add' />", {}, function(dsp)
 			{
-				if(po.hasDuplicateNameNoCase(fm.properties, dsp.name))
+				if(po.hasDuplicateNameNoCase(fm.fields, dsp.name))
 				{
 					$.tipInfo("<@spring.message code='propertyNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
-				fm.properties.push(dsp);
+				fm.fields.push(dsp);
 			},
-			fm.properties);
+			fm.fields);
 		},
 		onEditProperty: function(e)
 		{
@@ -298,19 +298,19 @@ dataSet_form_param_property_form.ftl
 			
 			var fm = po.vueFormModel();
 			var dsp = pm.selectedProperties[0];
-			var dspIdx = $.inArrayById(fm.properties, dsp.name, "name");
+			var dspIdx = $.inArrayById(fm.fields, dsp.name, "name");
 			
-			po.showDataSetPropertyForm("<@spring.message code='edit' />", dsp, function(dsp)
+			po.showDataSetFieldForm("<@spring.message code='edit' />", dsp, function(dsp)
 			{
-				if(po.hasDuplicateNameNoCase(fm.properties, dsp.name, dspIdx))
+				if(po.hasDuplicateNameNoCase(fm.fields, dsp.name, dspIdx))
 				{
 					$.tipInfo("<@spring.message code='propertyNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
-				fm.properties[dspIdx] = dsp;
+				fm.fields[dspIdx] = dsp;
 			},
-			fm.properties);
+			fm.fields);
 		},
 		onMoveUpParam: function(e)
 		{
@@ -345,7 +345,7 @@ dataSet_form_param_property_form.ftl
 			var pm = po.vuePageModel();
 			var sps = $.wrapAsArray(po.vueRaw(pm.selectedProperties));
 			var spNames = $.propertyValue(sps, "name");
-			$.moveUpById(fm.properties, spNames, "name");
+			$.moveUpById(fm.fields, spNames, "name");
 		},
 		onMoveDownProperty: function(e)
 		{
@@ -353,7 +353,7 @@ dataSet_form_param_property_form.ftl
 			var pm = po.vuePageModel();
 			var sps = $.wrapAsArray(po.vueRaw(pm.selectedProperties));
 			var spNames = $.propertyValue(sps, "name");
-			$.moveDownById(fm.properties, spNames, "name");
+			$.moveDownById(fm.fields, spNames, "name");
 		},
 		onDeleteProperty: function(e)
 		{
@@ -363,7 +363,7 @@ dataSet_form_param_property_form.ftl
 			
 			$.each(sps, function(idx, sp)
 			{
-				$.removeById(fm.properties, sp.name, "name");
+				$.removeById(fm.fields, sp.name, "name");
 			});
 		},
 		toggleDataSourceFormatPanel: function(e)

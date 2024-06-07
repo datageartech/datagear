@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
@@ -56,9 +56,9 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		super(id, name);
 	}
 
-	public AbstractResolvableResourceDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractResolvableResourceDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	public Cache getCache()
@@ -101,7 +101,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			ResolvedDataSetResult result = resolveResult(query, resourceData, resolveProperties);
 
 			if (resource.hasResolvedTemplate())
-				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
+				result = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
 						resource.getResolvedTemplate());
 
 			return result;
@@ -200,7 +200,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			boolean resolveProperties) throws Throwable
 	{
 		Object resData = resourceData.getData();
-		List<DataSetProperty> resProperties = (resolveProperties ? resourceData.getProperties() : null);
+		List<DataSetField> resProperties = (resolveProperties ? resourceData.getFields() : null);
 
 		return resolveResult(query, resData, resProperties);
 	}
@@ -219,7 +219,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 * 
 	 * @param resource
 	 * @param resolveProperties
-	 *            是否同时解析并设置{@linkplain ResourceData#setProperties(List)}，如果为{@code true}，返回{@linkplain ResourceData#getProperties()}不应为{@code null}
+	 *            是否同时解析并设置{@linkplain ResourceData#setFields(List)}，如果为{@code true}，返回{@linkplain ResourceData#getFields()}不应为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
@@ -321,7 +321,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 
 		private Object data = null;
 
-		private List<DataSetProperty> properties = null;
+		private List<DataSetField> fields = null;
 
 		public ResourceData()
 		{
@@ -334,11 +334,11 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 			this.data = data;
 		}
 
-		public ResourceData(Object data, List<DataSetProperty> properties)
+		public ResourceData(Object data, List<DataSetField> fields)
 		{
 			super();
 			this.data = data;
-			this.properties = properties;
+			this.fields = fields;
 		}
 
 		/**
@@ -360,21 +360,21 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		}
 
 		/**
-		 * 获取{@linkplain DataSetProperty}列表。
+		 * 获取{@linkplain DataSetField}列表。
 		 * <p>
 		 * 返回值及其内容不应被修改，因为可能会缓存。
 		 * </p>
 		 * 
 		 * @return 为{@code null}表示未设置
 		 */
-		public List<DataSetProperty> getProperties()
+		public List<DataSetField> getFields()
 		{
-			return properties;
+			return fields;
 		}
 
-		public void setProperties(List<DataSetProperty> properties)
+		public void setFields(List<DataSetField> fields)
 		{
-			this.properties = properties;
+			this.fields = fields;
 		}
 
 		/**

@@ -1934,14 +1934,14 @@
 	{
 		var dataSetBind = dataSetBinds[index];
 		var dataSetProperties = chart.dataSetProperties(dataSetBind);
-		var propertySigns = (chart.dataSetPropertySigns(dataSetBind) || {});
+		var fieldSigns = (chart.dataSetPropertySigns(dataSetBind) || {});
 		var dataSigns = (chart.plugin && chart.plugin.dataSigns ? chart.plugin.dataSigns : []);
 		var signProperties = [];
 		
 		for(var i=0; i<dataSetProperties.length; i++)
 		{
 			var name = dataSetProperties[i].name;
-			var signs = propertySigns[name];
+			var signs = fieldSigns[name];
 			
 			if(signs != null && signs.length > 0)
 			{
@@ -1968,7 +1968,7 @@
 		{
 			var column =
 			{
-				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signProperties[i], propertySigns, dataSigns),
+				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signProperties[i], fieldSigns, dataSigns),
 				data: signProperties[i].name,
 				defaultContent: "",
 				orderable: false,
@@ -2051,12 +2051,12 @@
 		return tableId;
 	};
 	
-	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetProperty, propertySigns, dataSigns)
+	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetProperty, fieldSigns, dataSigns)
 	{
 		var title = chart.dataSetPropertyAlias(dataSetBind, dataSetProperty);
 		
 		var name = dataSetProperty.name;
-		var signs = propertySigns[name];
+		var signs = fieldSigns[name];
 		
 		if(signs != null && signs.length > 0)
 		{

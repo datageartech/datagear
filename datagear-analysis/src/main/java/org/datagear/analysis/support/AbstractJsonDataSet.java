@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
@@ -60,9 +60,9 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		super(id, name);
 	}
 
-	public AbstractJsonDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractJsonDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	public String getDataJsonPath()
@@ -91,7 +91,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable
+	protected ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable
 	{
 		Reader reader = null;
 
@@ -100,12 +100,12 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			reader = resource.getReader();
 
 			Object data = resolveData(reader, resource.getDataJsonPath());
-			List<DataSetProperty> properties = null;
+			List<DataSetField> fields = null;
 
-			if (resolveProperties)
-				properties = resolveProperties(data);
+			if (resolveFields)
+				fields = resolveFields(data);
 
-			return new ResourceData(data, properties);
+			return new ResourceData(data, fields);
 		}
 		finally
 		{
@@ -176,7 +176,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	}
 
 	/**
-	 * 解析{@linkplain DataSetProperty}。
+	 * 解析{@linkplain DataSetField}。
 	 * <p>
 	 * 注意：此方法只能识别{@linkplain Map}、{@code Collection<Map>}、{@code Map[]}类型的数据，其他类型将返回空列表。
 	 * </p>
@@ -187,7 +187,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<DataSetProperty> resolveProperties(Object data) throws Throwable
+	protected List<DataSetField> resolveFields(Object data) throws Throwable
 	{
 		if (data == null)
 		{
@@ -195,7 +195,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		}
 		else if (data instanceof Map<?, ?>)
 		{
-			return resolveJsonObjProperties((Map<String, ?>) data);
+			return resolveJsonObjFields((Map<String, ?>) data);
 		}
 		else if (data instanceof Collection<?>)
 		{
@@ -212,7 +212,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 				}
 			}
 
-			return resolveProperties(ele);
+			return resolveFields(ele);
 		}
 		else if (data instanceof Object[])
 		{
@@ -229,7 +229,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 				}
 			}
 
-			return resolveProperties(ele);
+			return resolveFields(ele);
 		}
 		else
 		{
@@ -239,15 +239,15 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	}
 
 	/**
-	 * 解析{@linkplain DataSetProperty}。
+	 * 解析{@linkplain DataSetField}。
 	 * 
 	 * @param jsonObj
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetProperty> resolveJsonObjProperties(Map<String, ?> jsonObj) throws Throwable
+	protected List<DataSetField> resolveJsonObjFields(Map<String, ?> jsonObj) throws Throwable
 	{
-		List<DataSetProperty> properties = new ArrayList<>();
+		List<DataSetField> fields = new ArrayList<>();
 
 		if (jsonObj == null)
 		{
@@ -258,20 +258,20 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			for (Map.Entry<String, ?> entry : jsonObj.entrySet())
 			{
 				Object value = entry.getValue();
-				String type = DataSetProperty.DataType.resolveDataType(value);
+				String type = DataSetField.DataType.resolveDataType(value);
 
-				DataSetProperty property = new DataSetProperty(entry.getKey(), type);
+				DataSetField field = new DataSetField(entry.getKey(), type);
 
 				// JSON数值只有NUMBER类型
-				if (DataSetProperty.DataType.INTEGER.equals(property.getType())
-						|| DataSetProperty.DataType.DECIMAL.equals(property.getType()))
-					property.setType(DataSetProperty.DataType.NUMBER);
+				if (DataSetField.DataType.INTEGER.equals(field.getType())
+						|| DataSetField.DataType.DECIMAL.equals(field.getType()))
+					field.setType(DataSetField.DataType.NUMBER);
 
-				properties.add(property);
+				fields.add(field);
 			}
 		}
 
-		return properties;
+		return fields;
 	}
 
 	protected ObjectMapper getObjectMapperNonStardand()

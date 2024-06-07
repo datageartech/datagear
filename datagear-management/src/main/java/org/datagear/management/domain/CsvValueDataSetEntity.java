@@ -20,7 +20,7 @@ package org.datagear.management.domain;
 import java.util.Date;
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.CsvValueDataSet;
 import org.springframework.beans.BeanUtils;
 
@@ -50,10 +50,10 @@ public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEnt
 		super();
 	}
 
-	public CsvValueDataSetEntity(String id, String name, List<DataSetProperty> properties, String value,
+	public CsvValueDataSetEntity(String id, String name, List<DataSetField> fields, String value,
 			User createUser)
 	{
-		super(id, name, properties, value);
+		super(id, name, fields, value);
 		this.createUser = createUser;
 	}
 

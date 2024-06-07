@@ -26,7 +26,7 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.DataFormat;
 import org.datagear.analysis.support.ProfileDataSet;
@@ -575,9 +575,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		Map<String, Object> params = buildParamMap();
 		params.put("dataSetId", dataSetEntity.getId());
 
-		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
-		List<DataSetProperty> dataSetProperties = DataSetPropertyPO.to(propertyPOs);
-		dataSetEntity.setProperties(dataSetProperties);
+		List<DataSetFieldPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
+		List<DataSetField> dataSetProperties = DataSetFieldPO.to(propertyPOs);
+		dataSetEntity.setFields(dataSetProperties);
 
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", params);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
@@ -698,11 +698,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	protected void saveDataSetChildren(DataSetEntity entity)
 	{
-		saveDataSetPropertyPOs(entity);
+		saveDataSetFieldPOs(entity);
 		saveDataSetParamPOs(entity);
 	}
 
-	protected void saveDataSetPropertyPOs(DataSetEntity entity)
+	protected void saveDataSetFieldPOs(DataSetEntity entity)
 	{
 		if (entity == null)
 			return;
@@ -712,11 +712,11 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		deleteMybatis("deletePropertyPOs", delParams);
 
-		List<DataSetPropertyPO> pos = DataSetPropertyPO.from(entity);
+		List<DataSetFieldPO> pos = DataSetFieldPO.from(entity);
 
 		if (!pos.isEmpty())
 		{
-			for (DataSetPropertyPO relation : pos)
+			for (DataSetFieldPO relation : pos)
 			{
 				Map<String, Object> insertParams = buildParamMap();
 				insertParams.put("entity", relation);
@@ -813,41 +813,41 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		}
 	}
 
-	public static class DataSetPropertyPO extends DataSetChildPO<DataSetProperty>
+	public static class DataSetFieldPO extends DataSetChildPO<DataSetField>
 	{
-		public DataSetPropertyPO()
+		public DataSetFieldPO()
 		{
 			super();
 		}
 
-		public DataSetPropertyPO(String dataSetId, DataSetProperty child, int order)
+		public DataSetFieldPO(String dataSetId, DataSetField child, int order)
 		{
 			super(dataSetId, child, order);
 		}
 
 		@Override
-		public DataSetProperty getChild()
+		public DataSetField getChild()
 		{
 			return super.getChild();
 		}
 
 		@Override
-		public void setChild(DataSetProperty child)
+		public void setChild(DataSetField child)
 		{
 			super.setChild(child);
 		}
 
-		public static List<DataSetPropertyPO> from(DataSet dataSet)
+		public static List<DataSetFieldPO> from(DataSet dataSet)
 		{
-			List<DataSetPropertyPO> pos = new ArrayList<>();
+			List<DataSetFieldPO> pos = new ArrayList<>();
 
-			List<DataSetProperty> properties = dataSet.getProperties();
+			List<DataSetField> fields = dataSet.getFields();
 
-			if (properties != null)
+			if (fields != null)
 			{
-				for (int i = 0; i < properties.size(); i++)
+				for (int i = 0; i < fields.size(); i++)
 				{
-					DataSetPropertyPO po = new DataSetPropertyPO(dataSet.getId(), properties.get(i), i);
+					DataSetFieldPO po = new DataSetFieldPO(dataSet.getId(), fields.get(i), i);
 					pos.add(po);
 				}
 			}

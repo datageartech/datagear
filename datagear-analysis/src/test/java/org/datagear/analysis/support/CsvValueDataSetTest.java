@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.junit.Test;
@@ -41,15 +41,15 @@ public class CsvValueDataSetTest
 	@Test
 	public void getResultTest_hasParam()
 	{
-		List<DataSetProperty> properties = new ArrayList<>();
-		properties.add(new DataSetProperty("name", DataSetProperty.DataType.STRING));
-		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
-		properties.add(new DataSetProperty("size", DataSetProperty.DataType.NUMBER));
+		List<DataSetField> fields = new ArrayList<>();
+		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
+		fields.add(new DataSetField("value", DataSetField.DataType.NUMBER));
+		fields.add(new DataSetField("size", DataSetField.DataType.NUMBER));
 
 		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", properties, "name, value, size \n aaa, 11, ${size}");
+		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", fields, "name, value, size \n aaa, 11, ${size}");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 
@@ -76,15 +76,15 @@ public class CsvValueDataSetTest
 	@Test
 	public void getResultTest_hasParam_convertPropertyValue()
 	{
-		List<DataSetProperty> properties = new ArrayList<>();
-		properties.add(new DataSetProperty("name", DataSetProperty.DataType.STRING));
-		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
-		properties.add(new DataSetProperty("size", DataSetProperty.DataType.STRING));
+		List<DataSetField> fields = new ArrayList<>();
+		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
+		fields.add(new DataSetField("value", DataSetField.DataType.NUMBER));
+		fields.add(new DataSetField("size", DataSetField.DataType.STRING));
 
 		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", properties, "name, value, size \n aaa, 11, ${size}");
+		CsvValueDataSet dataSet = new CsvValueDataSet("a", "a", fields, "name, value, size \n aaa, 11, ${size}");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 
@@ -132,7 +132,7 @@ public class CsvValueDataSetTest
 		paramValues.put("size", size);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
@@ -141,24 +141,24 @@ public class CsvValueDataSetTest
 				+ "\"" + nameEscape + "\"" + ", " + value + ", " + size, result.getTemplateResult());
 
 		{
-			assertEquals(3, properties.size());
+			assertEquals(3, fields.size());
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(2);
+				DataSetField property = fields.get(2);
 				assertEquals("size", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 		}
 

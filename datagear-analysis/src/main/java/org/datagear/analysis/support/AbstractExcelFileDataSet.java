@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractExcelDataSet.ExcelDataSetResource;
 import org.datagear.analysis.support.AbstractExcelFileDataSet.ExcelFileDataSetResource;
@@ -52,9 +52,9 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 		super(id, name);
 	}
 
-	public AbstractExcelFileDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractExcelFileDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	@Override

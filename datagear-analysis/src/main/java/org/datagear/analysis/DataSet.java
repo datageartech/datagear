@@ -37,7 +37,7 @@ public interface DataSet extends Identifiable
 	/**
 	 * 是否是易变模型。
 	 * <p>
-	 * 即{@linkplain #getResult(DataSetQuery)}返回数据的结构并不是固定不变、可由{@linkplain #getProperties()}描述的。
+	 * {@linkplain #getResult(DataSetQuery)}返回数据的结构并不是固定不变，也不是可以由{@linkplain #getFields()}描述的。
 	 * </p>
 	 * 
 	 * @return
@@ -45,22 +45,19 @@ public interface DataSet extends Identifiable
 	boolean isMutableModel();
 
 	/**
-	 * 获取属性列表。
-	 * <p>
-	 * 属性列表描述{@linkplain #getResult(DataSetQuery)}返回的{@linkplain DataSetResult#getData()}的对象结构。
-	 * </p>
+	 * 获取{@linkplain DataSetField}列表。
 	 * 
-	 * @return 属性列表，返回空列表则表示无属性
+	 * @return 返回空列表则表示没有
 	 */
-	List<DataSetProperty> getProperties();
+	List<DataSetField> getFields();
 
 	/**
-	 * 获取指定名称的属性，没有则返回{@code null}。
+	 * 获取指定名称的{@linkplain DataSetField}，没有则返回{@code null}。
 	 * 
 	 * @param name
 	 * @return
 	 */
-	DataSetProperty getProperty(String name);
+	DataSetField getField(String name);
 
 	/**
 	 * 获取参数列表。
@@ -80,15 +77,15 @@ public interface DataSet extends Identifiable
 	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * <p>
-	 * 如果{@linkplain #isMutableModel()}为{@code false}，那么返回结果中的数据项属性不应超出{@linkplain #getProperties()}的范围，
+	 * 如果{@linkplain #isMutableModel()}为{@code false}，那么返回结果中的数据项属性不应超出{@linkplain #getFields()}的范围，
 	 * 避免暴露底层数据源不期望暴露的数据；
-	 * 如果{@linkplain #isMutableModel()}为{@code true}，则返回结果中的数据项属性不受{@linkplain #getProperties()}范围限制。
+	 * 如果{@linkplain #isMutableModel()}为{@code true}，则返回结果中的数据项属性不受{@linkplain #getFields()}范围限制。
 	 * </p>
 	 * <p>
-	 * 如果返回结果中的数据项属性在{@linkplain #getProperties()}中有对应，当数据项属性值为{@code null}时，应使用{@linkplain DataSetProperty#getDefaultValue()}的值。
+	 * 如果返回结果中的数据项属性在{@linkplain #getFields()}中有对应，当数据项属性值为{@code null}时，应使用{@linkplain DataSetField#getDefaultValue()}的值。
 	 * </p>
 	 * <p>
-	 * 返回结果中的数据项属性值应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
+	 * 返回结果中的数据项属性值应已转换为与{@linkplain #getFields()}的{@linkplain DataSetField#getType()}类型一致。
 	 * </p>
 	 * 
 	 * @param query

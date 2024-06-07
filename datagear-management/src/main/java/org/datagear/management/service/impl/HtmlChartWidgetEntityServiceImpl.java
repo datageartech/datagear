@@ -29,12 +29,12 @@ import java.util.Set;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.AbstractIdentifiable;
-import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
@@ -343,12 +343,12 @@ public class HtmlChartWidgetEntityServiceImpl
 		IdDataSet dataSet = new IdDataSet(relation.getDataSetId());
 
 		DataSetBindVO dataSetBind = new DataSetBindVO(dataSet);
-		dataSetBind.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
+		dataSetBind.setFieldSigns(toFieldSigns(relation.getFieldSignsJson()));
 		dataSetBind.setAlias(relation.getAlias());
 		dataSetBind.setAttachment(relation.isAttachment());
 		dataSetBind.setQuery(toDataSetQuery(relation.getQueryJson()));
-		dataSetBind.setPropertyAliases(toPropertyAliases(relation.getPropertyAliasesJson()));
-		dataSetBind.setPropertyOrders(toPropertyOrders(relation.getPropertyOrdersJson()));
+		dataSetBind.setFieldAliases(toFieldAliases(relation.getFieldAliasesJson()));
+		dataSetBind.setFieldOrders(toFieldOrders(relation.getFieldOrdersJson()));
 
 		return dataSetBind;
 	}
@@ -421,12 +421,12 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<String, Set<String>> toPropertySigns(String json)
+	protected Map<String, Set<String>> toFieldSigns(String json)
 	{
 		if (StringUtil.isEmpty(json))
 			return Collections.EMPTY_MAP;
 
-		Map<String, Set<String>> propertySigns = new HashMap<>();
+		Map<String, Set<String>> fieldSigns = new HashMap<>();
 
 		Map<String, Object> jsonMap = JsonSupport.parse(json, Map.class, null);
 		if (jsonMap == null)
@@ -455,14 +455,14 @@ public class HtmlChartWidgetEntityServiceImpl
 				}
 			}
 
-			propertySigns.put(entry.getKey(), signs);
+			fieldSigns.put(entry.getKey(), signs);
 		}
 
-		return propertySigns;
+		return fieldSigns;
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<String, String> toPropertyAliases(String json)
+	protected Map<String, String> toFieldAliases(String json)
 	{
 		if (StringUtil.isEmpty(json))
 			return Collections.EMPTY_MAP;
@@ -476,7 +476,7 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<String, Number> toPropertyOrders(String json)
+	protected Map<String, Number> toFieldOrders(String json)
 	{
 		if (StringUtil.isEmpty(json))
 			return Collections.EMPTY_MAP;
@@ -523,20 +523,20 @@ public class HtmlChartWidgetEntityServiceImpl
 		{
 			DataSetBind dataSetBind = dataSetBinds[i];
 
-			String propertySignsJson = JsonSupport.generate(dataSetBind.getPropertySigns(), "");
+			String fieldSignsJson = JsonSupport.generate(dataSetBind.getFieldSigns(), "");
 			String queryJson = JsonSupport.generate(dataSetBind.getQuery(), "");
-			String propertyAliasesJson = JsonSupport.generate(dataSetBind.getPropertyAliases(), "");
-			String propertyOrdersJson = JsonSupport.generate(dataSetBind.getPropertyOrders(), "");
+			String fieldAliasesJson = JsonSupport.generate(dataSetBind.getFieldAliases(), "");
+			String fieldOrdersJson = JsonSupport.generate(dataSetBind.getFieldOrders(), "");
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(entity.getId(),
 					dataSetBind.getDataSet().getId(),
 					i + 1);
-			relation.setPropertySignsJson(propertySignsJson);
+			relation.setFieldSignsJson(fieldSignsJson);
 			relation.setAlias(dataSetBind.getAlias());
 			relation.setAttachment(dataSetBind.isAttachment());
 			relation.setQueryJson(queryJson);
-			relation.setPropertyAliasesJson(propertyAliasesJson);
-			relation.setPropertyOrdersJson(propertyOrdersJson);
+			relation.setFieldAliasesJson(fieldAliasesJson);
+			relation.setFieldOrdersJson(fieldOrdersJson);
 
 			list.add(relation);
 		}
@@ -556,7 +556,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		private String dataSetId;
 
-		private String propertySignsJson;
+		private String fieldSignsJson;
 
 		private String alias;
 
@@ -564,9 +564,9 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		private String queryJson;
 
-		private String propertyAliasesJson;
+		private String fieldAliasesJson;
 
-		private String propertyOrdersJson;
+		private String fieldOrdersJson;
 
 		private int order;
 
@@ -603,14 +603,14 @@ public class HtmlChartWidgetEntityServiceImpl
 			this.dataSetId = dataSetId;
 		}
 
-		public String getPropertySignsJson()
+		public String getFieldSignsJson()
 		{
-			return propertySignsJson;
+			return fieldSignsJson;
 		}
 
-		public void setPropertySignsJson(String propertySignsJson)
+		public void setFieldSignsJson(String fieldSignsJson)
 		{
-			this.propertySignsJson = propertySignsJson;
+			this.fieldSignsJson = fieldSignsJson;
 		}
 
 		public String getAlias()
@@ -643,24 +643,24 @@ public class HtmlChartWidgetEntityServiceImpl
 			this.queryJson = queryJson;
 		}
 
-		public String getPropertyAliasesJson()
+		public String getFieldAliasesJson()
 		{
-			return propertyAliasesJson;
+			return fieldAliasesJson;
 		}
 
-		public void setPropertyAliasesJson(String propertyAliasesJson)
+		public void setFieldAliasesJson(String fieldAliasesJson)
 		{
-			this.propertyAliasesJson = propertyAliasesJson;
+			this.fieldAliasesJson = fieldAliasesJson;
 		}
 
-		public String getPropertyOrdersJson()
+		public String getFieldOrdersJson()
 		{
-			return propertyOrdersJson;
+			return fieldOrdersJson;
 		}
 
-		public void setPropertyOrdersJson(String propertyOrdersJson)
+		public void setFieldOrdersJson(String fieldOrdersJson)
 		{
-			this.propertyOrdersJson = propertyOrdersJson;
+			this.fieldOrdersJson = fieldOrdersJson;
 		}
 
 		public int getOrder()
@@ -701,13 +701,13 @@ public class HtmlChartWidgetEntityServiceImpl
 		}
 
 		@Override
-		public List<DataSetProperty> getProperties()
+		public List<DataSetField> getFields()
 		{
 			return Collections.emptyList();
 		}
 
 		@Override
-		public DataSetProperty getProperty(String name)
+		public DataSetField getField(String name)
 		{
 			return null;
 		}

@@ -107,7 +107,7 @@
 								</p-button>
 							</template>
 							<div>
-								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.properties" :key="dpIdx" :legend="formatDspFieldsetName(dp)" class="fieldset-sm mb-3">
+								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.fields" :key="dpIdx" :legend="formatDspFieldsetName(dp)" class="fieldset-sm mb-3">
 									<div class="field grid mb-2">
 										<label :for="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 											title="<@spring.message code='chart.cds.dataSign.desc' />">
@@ -521,16 +521,16 @@
 			if(dataSetBind.attachment == true)
 				continue;
 			
-			var properties = (dataSetBind.dataSet.properties || []);
+			var fields = (dataSetBind.dataSet.fields || []);
 			
 			for(var j=0; j<requiredSigns.length; j++)
 			{
 				var requiredSign = requiredSigns[j];
 				var contains = false;
 				
-				for(var k=0; k<properties.length; k++)
+				for(var k=0; k<fields.length; k++)
 				{
-					var property = properties[k];
+					var property = fields[k];
 					var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
 					
 					if($.inArrayById(signs, requiredSign.name, "name") > -1)
@@ -553,11 +553,11 @@
 	
 	po.isDataSetBindSigned = function(dataSetBind, dataSign)
 	{
-		var properties = (dataSetBind.dataSet.properties || []);
+		var fields = (dataSetBind.dataSet.fields || []);
 		
-		for(var i=0; i<properties.length; i++)
+		for(var i=0; i<fields.length; i++)
 		{
-			var property = properties[i];
+			var property = fields[i];
 			var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
 			
 			if($.inArrayById(signs, dataSign.name, "name") > -1)
@@ -588,15 +588,15 @@
 	po.mergeDataSetBind = function(dataSetBind, chartPlugin)
 	{
 		var dataSet = dataSetBind.dataSet;
-		var properties = (dataSet ? dataSet.properties : []);
+		var fields = (dataSet ? dataSet.fields : []);
 		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
-		$.each(properties, function(idx, property)
+		$.each(fields, function(idx, property)
 		{
 			var signs = [];
 			
-			var propertySigns = (dataSetBind.propertySigns[property.name] || []);
-			$.each(propertySigns, function(psIdx, ps)
+			var fieldSigns = (dataSetBind.fieldSigns[property.name] || []);
+			$.each(fieldSigns, function(psIdx, ps)
 			{
 				var inArrayIdx = $.inArrayById(dataSigns, ps, "name");
 				if(inArrayIdx >= 0)
@@ -606,8 +606,8 @@
 			property.cdsInfo =
 			{
 				signs: signs,
-				alias: dataSetBind.propertyAliases[property.name],
-				order: dataSetBind.propertyOrders[property.name]
+				alias: dataSetBind.fieldAliases[property.name],
+				order: dataSetBind.fieldOrders[property.name]
 			};
 		});
 	};
@@ -615,28 +615,28 @@
 	po.unmergeDataSetBind = function(dataSetBind, chartPlugin)
 	{
 		var dataSet = dataSetBind.dataSet;
-		var properties = (dataSet ? dataSet.properties : []);
+		var fields = (dataSet ? dataSet.fields : []);
 		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
-		$.each(properties, function(idx, property)
+		$.each(fields, function(idx, property)
 		{
 			var cdsInfo = (property.cdsInfo || {});
 			var signs = (cdsInfo.signs || []);
 			
-			var propertySigns = [];
+			var fieldSigns = [];
 			$.each(signs, function(psIdx, sign)
 			{
 				var inArrayIdx = $.inArrayById(dataSigns, sign.name, "name");
 				if(inArrayIdx >= 0)
-					propertySigns.push(sign.name);
+					fieldSigns.push(sign.name);
 			});
 			
-			if(propertySigns.length > 0)
-				dataSetBind.propertySigns[property.name] = propertySigns;
+			if(fieldSigns.length > 0)
+				dataSetBind.fieldSigns[property.name] = fieldSigns;
 			else
-				dataSetBind.propertySigns[property.name] = undefined;
-			dataSetBind.propertyAliases[property.name] = cdsInfo.alias;
-			dataSetBind.propertyOrders[property.name] = cdsInfo.order;
+				dataSetBind.fieldSigns[property.name] = undefined;
+			dataSetBind.fieldAliases[property.name] = cdsInfo.alias;
+			dataSetBind.fieldOrders[property.name] = cdsInfo.order;
 			
 			property.cdsInfo = undefined;
 		});
@@ -848,7 +848,7 @@
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
 		dataSetBindForSign: null,
-		dataSetPropertyForSign: null,
+		dataSetFieldForSign: null,
 		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
 		updateIntervalTypeOptions:
 		[
@@ -893,9 +893,9 @@
 			return po.formatDataSignLabel(dataSign);
 		},
 		
-		formatDspFieldsetName: function(dataSetProperty)
+		formatDspFieldsetName: function(dataSetField)
 		{
-			return "<@spring.message code='propertyWithColon' />" + dataSetProperty.name;
+			return "<@spring.message code='propertyWithColon' />" + dataSetField.name;
 		},
 		
 		onDeleteAnalysisProject: function()
@@ -942,9 +942,9 @@
 						var cds =
 						{
 							dataSet: dataSet,
-							propertySigns: {},
-							propertyAliases: {},
-							propertyOrders: {},
+							fieldSigns: {},
+							fieldAliases: {},
+							fieldOrders: {},
 							attachment: false
 						};
 						
@@ -983,7 +983,7 @@
 			fm.dataSetBindVOs.splice(cdsIdx, 1);
 		},
 		
-		onShowDataSignPanel: function(e, dataSetBind, dataSetProperty)
+		onShowDataSignPanel: function(e, dataSetBind, dataSetField)
 		{
 			var pm = po.vuePageModel();
 			
@@ -992,7 +992,7 @@
 			po.vueNextTick(function()
 			{
 				pm.dataSetBindForSign = dataSetBind;
-				pm.dataSetPropertyForSign = dataSetProperty;
+				pm.dataSetFieldForSign = dataSetField;
 				
 				po.vueUnref("${pid}dataSignsPanelEle").show(e);
 			});
@@ -1039,7 +1039,7 @@
 		{
 			var pm = po.vuePageModel();
 			
-			if(pm.dataSetBindForSign && pm.dataSetPropertyForSign)
+			if(pm.dataSetBindForSign && pm.dataSetFieldForSign)
 			{
 				if(!dataSign.multiple && po.isDataSetBindSigned(pm.dataSetBindForSign, dataSign))
 				{
@@ -1050,7 +1050,7 @@
 					return;
 				}
 				
-				var signs = pm.dataSetPropertyForSign.cdsInfo.signs;
+				var signs = pm.dataSetFieldForSign.cdsInfo.signs;
 				
 				if($.inArrayById(signs, dataSign.name, "name") < 0)
 					signs.push(dataSign);
@@ -1059,9 +1059,9 @@
 			}
 		},
 		
-		onRemoveDataSign: function(dataSetProperty, dataSigName)
+		onRemoveDataSign: function(dataSetField, dataSigName)
 		{
-			var signs = dataSetProperty.cdsInfo.signs;
+			var signs = dataSetField.cdsInfo.signs;
 			$.removeById(signs, dataSigName, "name");
 		},
 		

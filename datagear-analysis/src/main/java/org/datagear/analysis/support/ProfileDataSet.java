@@ -41,7 +41,7 @@ public class ProfileDataSet extends AbstractDataSet
 
 	public ProfileDataSet(DataSet dataSet)
 	{
-		super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
+		super(dataSet.getId(), dataSet.getName(), dataSet.getFields());
 		setMutableModel(dataSet.isMutableModel());
 		setParams(dataSet.getParams());
 	}

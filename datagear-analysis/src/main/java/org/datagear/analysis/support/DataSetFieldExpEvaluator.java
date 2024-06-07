@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.util.StringUtil;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.AccessException;
@@ -50,9 +50,9 @@ import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
 import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 /**
- * {@linkplain DataSetProperty#getExpression()}表达式计算器。
+ * {@linkplain DataSetField#getExpression()}表达式计算器。
  * <p>
- * 此类用于计算{@linkplain DataSet#getProperties()}的{@linkplain DataSetProperty#getExpression()}表达式的值，支持诸如：
+ * 此类用于计算{@linkplain DataSet#getFields()}的{@linkplain DataSetField#getExpression()}表达式的值，支持诸如：
  * </p>
  * <p>
  * <code>"(属性名A + 属性名B)*2 - 属性名C/3"</code>
@@ -111,7 +111,7 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * </p>
  * <p>
  * 对于{@linkplain #eval(List, List, ValueSetter)}方法，
- * 表达式中的{@code 属性名}可以是{@code properties}列表中任意的{@linkplain DataSetProperty#getName()}，取值规范如下所示：
+ * 表达式中的{@code 属性名}可以是{@code fields}列表中任意的{@linkplain DataSetField#getName()}，取值规范如下所示：
  * </p>
  * <p>
  * <ol>
@@ -138,9 +138,9 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpEvaluator
+public class DataSetFieldExpEvaluator
 {
-	public static final DataSetPropertyExpEvaluator DEFAULT = new DataSetPropertyExpEvaluator();
+	public static final DataSetFieldExpEvaluator DEFAULT = new DataSetFieldExpEvaluator();
 
 	/**
 	 * 表达式解析器。
@@ -152,7 +152,7 @@ public class DataSetPropertyExpEvaluator
 	
 	private ConversionService conversionService = null;
 
-	public DataSetPropertyExpEvaluator()
+	public DataSetFieldExpEvaluator()
 	{
 		super();
 	}
@@ -183,9 +183,9 @@ public class DataSetPropertyExpEvaluator
 	 * @param expression
 	 * @param data
 	 * @return
-	 * @throws DataSetPropertyExpEvaluatorException
+	 * @throws DataSetFieldExpEvaluatorException
 	 */
-	public Object eval(String expression, Object data) throws DataSetPropertyExpEvaluatorException
+	public Object eval(String expression, Object data) throws DataSetFieldExpEvaluatorException
 	{
 		try
 		{
@@ -194,13 +194,13 @@ public class DataSetPropertyExpEvaluator
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalSingle(exp, context, data);
 		}
-		catch (DataSetPropertyExpEvaluatorException e)
+		catch (DataSetFieldExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorException(t);
+			throw new DataSetFieldExpEvaluatorException(t);
 		}
 	}
 
@@ -208,12 +208,12 @@ public class DataSetPropertyExpEvaluator
 	 * 计算表达式的值。
 	 * 
 	 * @param property
-	 *            {@linkplain DataSetProperty#getExpression()}不应为空
+	 *            {@linkplain DataSetField#getExpression()}不应为空
 	 * @param datas
 	 * @return
-	 * @throws DataSetPropertyExpEvaluatorException
+	 * @throws DataSetFieldExpEvaluatorException
 	 */
-	public Object[] eval(String expression, Object[] datas) throws DataSetPropertyExpEvaluatorException
+	public Object[] eval(String expression, Object[] datas) throws DataSetFieldExpEvaluatorException
 	{
 		try
 		{
@@ -222,13 +222,13 @@ public class DataSetPropertyExpEvaluator
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalArray(exp, context, datas);
 		}
-		catch (DataSetPropertyExpEvaluatorException e)
+		catch (DataSetFieldExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorException(t);
+			throw new DataSetFieldExpEvaluatorException(t);
 		}
 	}
 
@@ -238,9 +238,9 @@ public class DataSetPropertyExpEvaluator
 	 * @param expression
 	 * @param datas
 	 * @return
-	 * @throws DataSetPropertyExpEvaluatorException
+	 * @throws DataSetFieldExpEvaluatorException
 	 */
-	public List<Object> eval(String expression, List<?> datas) throws DataSetPropertyExpEvaluatorException
+	public List<Object> eval(String expression, List<?> datas) throws DataSetFieldExpEvaluatorException
 	{
 		try
 		{
@@ -249,41 +249,41 @@ public class DataSetPropertyExpEvaluator
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalList(exp, context, datas);
 		}
-		catch (DataSetPropertyExpEvaluatorException e)
+		catch (DataSetFieldExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorException(t);
+			throw new DataSetFieldExpEvaluatorException(t);
 		}
 	}
 
 	/**
-	 * 统一计算和设置{@linkplain DataSetProperty#getExpression()}的值。
+	 * 统一计算和设置{@linkplain DataSetField#getExpression()}的值。
 	 * <p>
-	 * 这里统一处理表达式计算，使得{@linkplain DataSetProperty#getExpression()}可具有更灵活的支持规范，
-	 * 具体参考此类说明：{@linkplain DataSetPropertyExpEvaluator}。
+	 * 这里统一处理表达式计算，使得{@linkplain DataSetField#getExpression()}可具有更灵活的支持规范，
+	 * 具体参考此类说明：{@linkplain DataSetFieldExpEvaluator}。
 	 * </p>
 	 * 
-	 * @param properties
+	 * @param fields
 	 * @param datas
 	 * @param valueSetter
 	 * @returns {@code true} 执行了计算和设置；{@code false}
-	 *          未执行计算和设置，因为{@code properties}中没有需计算的
-	 * @throws DataSetPropertyExpEvaluatorException
+	 *          未执行计算和设置，因为{@code fields}中没有需计算的
+	 * @throws DataSetFieldExpEvaluatorException
 	 */
-	public <T> boolean eval(List<DataSetProperty> properties, List<T> datas, ValueSetter<? super T> valueSetter)
-			throws DataSetPropertyExpEvaluatorException
+	public <T> boolean eval(List<DataSetField> fields, List<T> datas, ValueSetter<? super T> valueSetter)
+			throws DataSetFieldExpEvaluatorException
 	{
-		int plen = properties.size();
+		int plen = fields.size();
 		List<Expression> expressions = new ArrayList<Expression>(plen);
-		int count = parseExpressions(properties, expressions);
+		int count = parseExpressions(fields, expressions);
 		
 		if (count < 1)
 			return false;
 
-		DataSetProperty property = null;
+		DataSetField property = null;
 
 		try
 		{
@@ -294,7 +294,7 @@ public class DataSetPropertyExpEvaluator
 				// 必须按顺序计算，确保表达式中的属性取值逻辑符合规范
 				for (int i = 0; i < plen; i++)
 				{
-					property = properties.get(i);
+					property = fields.get(i);
 					Expression expression = expressions.get(i);
 
 					if (expression != null)
@@ -307,33 +307,33 @@ public class DataSetPropertyExpEvaluator
 
 			return true;
 		}
-		catch (DataSetPropertyExpEvaluatorException e)
+		catch (DataSetFieldExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorException(t, (property == null ? "" : property.getName()));
+			throw new DataSetFieldExpEvaluatorException(t, (property == null ? "" : property.getName()));
 		}
 	}
 
 	/**
 	 * 解析表达式对象。
 	 * 
-	 * @param properties
+	 * @param fields
 	 * @param expressions
 	 *            用于写入表达式的列表，如果某个元素为{@code null}，表示不是计算属性
 	 * @returns 计算属性的个数
-	 * @throws DataSetPropertyExpEvaluatorException
+	 * @throws DataSetFieldExpEvaluatorException
 	 */
-	protected int parseExpressions(List<DataSetProperty> properties, List<Expression> expressions)
-			throws DataSetPropertyExpEvaluatorException
+	protected int parseExpressions(List<DataSetField> fields, List<Expression> expressions)
+			throws DataSetFieldExpEvaluatorException
 	{
 		int count = 0;
 		
-		for(DataSetProperty p : properties)
+		for(DataSetField p : fields)
 		{
-			if (isEvaluatedProperty(p))
+			if (isEvaluatedField(p))
 			{
 				Expression expression = parseExpression(p);
 				expressions.add(expression);
@@ -347,9 +347,9 @@ public class DataSetPropertyExpEvaluator
 		return count;
 	}
 
-	protected boolean isEvaluatedProperty(DataSetProperty property)
+	protected boolean isEvaluatedField(DataSetField field)
 	{
-		return (property.isEvaluated() && !StringUtil.isEmpty(property.getExpression()));
+		return (field.isEvaluated() && !StringUtil.isEmpty(field.getExpression()));
 	}
 
 	protected Object[] doEvalArray(Expression expression, EvaluationContext context, Object[] datas) throws Throwable
@@ -382,20 +382,20 @@ public class DataSetPropertyExpEvaluator
 		return expression.getValue(context, data);
 	}
 
-	protected Expression parseExpression(DataSetProperty property)
-			throws DataSetPropertyExpEvaluatorParseException, DataSetPropertyExpEvaluatorException
+	protected Expression parseExpression(DataSetField property)
+			throws DataSetFieldExpEvaluatorParseException, DataSetFieldExpEvaluatorException
 	{
 		try
 		{
 			return parseExpression(property.getExpression());
 		}
-		catch (DataSetPropertyExpEvaluatorException e)
+		catch (DataSetFieldExpEvaluatorException e)
 		{
 			throw e;
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetPropertyExpEvaluatorParseException(t, property.getName());
+			throw new DataSetFieldExpEvaluatorParseException(t, property.getName());
 		}
 	}
 
@@ -422,7 +422,7 @@ public class DataSetPropertyExpEvaluator
 	/**
 	 * 校验Spel表达式是否合法。
 	 * <p>
-	 * Spel没有提供更细粒度的表达式控制配置，所以这里通过判断{@linkplain SpelNode}的类型来禁用某些{@linkplain DataSetPropertyExpEvaluator}表达式规范无关的语法，
+	 * Spel没有提供更细粒度的表达式控制配置，所以这里通过判断{@linkplain SpelNode}的类型来禁用某些{@linkplain DataSetFieldExpEvaluator}表达式规范无关的语法，
 	 * 以避免安全问题。
 	 * </p>
 	 * 
@@ -517,11 +517,11 @@ public class DataSetPropertyExpEvaluator
 		 * @param value
 		 *            计算结果值
 		 */
-		void set(DataSetProperty property, int propertyIndex, T data, Object value);
+		void set(DataSetField property, int propertyIndex, T data, Object value);
 	}
 	
 	/**
-	 * 支持{@linkplain DataSetPropertyExpEvaluator}表达式规范的{@linkplain Map}访问器。
+	 * 支持{@linkplain DataSetFieldExpEvaluator}表达式规范的{@linkplain Map}访问器。
 	 * <p>
 	 * 此类对{@linkplain Map}的访问规范包括：
 	 * </p>

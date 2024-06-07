@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.util.FileUtil;
 
@@ -60,12 +60,12 @@ public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet
 	/**
 	 * @param id
 	 * @param name
-	 * @param properties
+	 * @param fields
 	 */
-	public ExcelDirectoryFileDataSet(String id, String name, List<DataSetProperty> properties, File directory,
+	public ExcelDirectoryFileDataSet(String id, String name, List<DataSetField> fields, File directory,
 			String fileName)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.directory = directory;
 		this.fileName = fileName;
 	}

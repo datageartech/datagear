@@ -5767,7 +5767,7 @@
 						parallelAxis.push(axis);
 					else
 					{
-						//后续数据集属性按照order插入到parallelAxis的适当位置，
+						//后续数据集字段按照order插入到parallelAxis的适当位置，
 						//使得在多数据集情况时，也可自由调整坐标轴的顺序
 						var order = chart.dataSetPropertyOrder(dataSetBind, vp);
 						if(order != null)
@@ -8263,7 +8263,7 @@
 	};
 	
 	/**
-	 * 计算指定数据集属性的坐标轴类型。
+	 * 计算指定数据集字段的坐标轴类型。
 	 */
 	chartSupport.evalDataSetPropertyAxisType = function(chart, dataSetProperty)
 	{
@@ -8376,7 +8376,7 @@
 	};
 	
 	/**
-	 * 指定数据集属性数据是否字符串类型。
+	 * 指定数据集字段数据是否字符串类型。
 	 */
 	chartSupport.isDataTypeString = function(dataSetProperty)
 	{
@@ -8385,7 +8385,7 @@
 	};
 	
 	/**
-	 * 指定数据集属性数据是否数值类型。
+	 * 指定数据集字段数据是否数值类型。
 	 */
 	chartSupport.isDataTypeNumber = function(dataSetProperty)
 	{
@@ -8396,7 +8396,7 @@
 	};
 	
 	/**
-	 * 指定数据集属性数据是否日期、时间、时间戳类型。
+	 * 指定数据集字段数据是否日期、时间、时间戳类型。
 	 */
 	chartSupport.isDataTypeAboutDate = function(dataSetProperty)
 	{
@@ -8407,7 +8407,7 @@
 	};
 	
 	/**
-	 * 指定数据集属性数据是否日期类型。
+	 * 指定数据集字段数据是否日期类型。
 	 */
 	chartSupport.isDataTypeDate = function(dataSetProperty)
 	{
@@ -8416,7 +8416,7 @@
 	};
 	
 	/**
-	 * 指定数据集属性数据是否时间类型。
+	 * 指定数据集字段数据是否时间类型。
 	 */
 	chartSupport.isDataTypeTime = function(dataSetProperty)
 	{
@@ -8425,7 +8425,7 @@
 	};
 	
 	/**
-	 * 指定数据集属性数据是否时间戳类型。
+	 * 指定数据集字段数据是否时间戳类型。
 	 */
 	chartSupport.isDataTypeTimestamp = function(dataSetProperty)
 	{

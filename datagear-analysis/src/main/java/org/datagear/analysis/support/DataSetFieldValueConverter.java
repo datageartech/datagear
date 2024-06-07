@@ -25,14 +25,14 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
-import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetProperty.DataType;
+import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.DataSetField.DataType;
 import org.datagear.util.StringUtil;
 
 /**
- * {@linkplain DataSetProperty}值转换器。
+ * {@linkplain DataSetField}值转换器。
  * <p>
- * 它支持将对象转换为{@linkplain DataSetProperty.DataType}类型的值。
+ * 它支持将对象转换为{@linkplain DataSetField.DataType}类型的值。
  * </p>
  * <p>
  * 此类不是线程安全的。
@@ -41,7 +41,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyValueConverter extends DataValueConverter
+public class DataSetFieldValueConverter extends DataValueConverter
 {
 	private DataFormat dataFormat;
 
@@ -60,13 +60,13 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 	private SimpleDateFormat _timestampFormat = null;
 	private DecimalFormat _numberFormat = null;
 
-	public DataSetPropertyValueConverter()
+	public DataSetFieldValueConverter()
 	{
 		super();
 		setDataFormat(new DataFormat());
 	}
 
-	public DataSetPropertyValueConverter(DataFormat dataFormat)
+	public DataSetFieldValueConverter(DataFormat dataFormat)
 	{
 		super();
 		setDataFormat(dataFormat);

@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.DataFormat;
 
 /**
@@ -66,11 +66,11 @@ public interface DataSetEntity
 	void setName(String name);
 
 	/**
-	 * 设置属性集。
+	 * 设置{@linkplain DataSetField}集。
 	 * 
-	 * @param properties
+	 * @param fields
 	 */
-	void setProperties(List<DataSetProperty> properties);
+	void setFields(List<DataSetField> fields);
 
 	/**
 	 * 设置参数集。

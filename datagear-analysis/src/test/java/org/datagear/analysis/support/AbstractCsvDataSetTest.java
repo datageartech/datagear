@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.CsvValueDataSet.CsvValueDataSetResource;
 import org.junit.Test;
 
@@ -67,11 +67,11 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetProperty> properties = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
 
-			assertEquals(2, properties.size());
-			assertEquals(DataSetProperty.DataType.STRING, properties.get(0).getType());
-			assertEquals(DataSetProperty.DataType.NUMBER, properties.get(1).getType());
+			assertEquals(2, fields.size());
+			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
+			assertEquals(DataSetField.DataType.NUMBER, fields.get(1).getType());
 		}
 
 		// 全部是空
@@ -97,11 +97,11 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetProperty> properties = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
 
-			assertEquals(2, properties.size());
-			assertEquals(DataSetProperty.DataType.STRING, properties.get(0).getType());
-			assertEquals(DataSetProperty.DataType.STRING, properties.get(1).getType());
+			assertEquals(2, fields.size());
+			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
+			assertEquals(DataSetField.DataType.STRING, fields.get(1).getType());
 		}
 
 		// 除了空之外都是数值
@@ -127,11 +127,11 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetProperty> properties = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
 
-			assertEquals(2, properties.size());
-			assertEquals(DataSetProperty.DataType.STRING, properties.get(0).getType());
-			assertEquals(DataSetProperty.DataType.NUMBER, properties.get(1).getType());
+			assertEquals(2, fields.size());
+			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
+			assertEquals(DataSetField.DataType.NUMBER, fields.get(1).getType());
 		}
 
 		// 除了空之外都是字符串
@@ -157,11 +157,11 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetProperty> properties = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
 
-			assertEquals(2, properties.size());
-			assertEquals(DataSetProperty.DataType.STRING, properties.get(0).getType());
-			assertEquals(DataSetProperty.DataType.STRING, properties.get(1).getType());
+			assertEquals(2, fields.size());
+			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
+			assertEquals(DataSetField.DataType.STRING, fields.get(1).getType());
 		}
 	}
 }

@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractCsvFileDataSet;
 import org.datagear.analysis.support.CsvDirectoryFileDataSet;
@@ -71,10 +71,10 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 		super();
 	}
 
-	public CsvFileDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory,
+	public CsvFileDataSetEntity(String id, String name, List<DataSetField> fields, File directory,
 			String fileName, String displayName, User createUser)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.fileSourceType = FILE_SOURCE_TYPE_UPLOAD;
 		this.directory = directory;
 		this.fileName = fileName;
@@ -82,10 +82,10 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 		this.createUser = createUser;
 	}
 
-	public CsvFileDataSetEntity(String id, String name, List<DataSetProperty> properties,
+	public CsvFileDataSetEntity(String id, String name, List<DataSetField> fields,
 			FileSource fileSource, String dataSetResFileName, User createUser)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.fileSourceType = FILE_SOURCE_TYPE_SERVER;
 		this.fileSource = fileSource;
 		this.dataSetResFileName = dataSetResFileName;

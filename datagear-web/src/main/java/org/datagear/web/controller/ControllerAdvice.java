@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.support.DataSetPropertyExpEvaluatorException;
-import org.datagear.analysis.support.DataSetPropertyExpEvaluatorParseException;
+import org.datagear.analysis.support.DataSetFieldExpEvaluatorException;
+import org.datagear.analysis.support.DataSetFieldExpEvaluatorParseException;
 import org.datagear.analysis.support.DataSetSourceParseException;
 import org.datagear.analysis.support.DataValueConvertionException;
 import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonException;
@@ -527,20 +527,20 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(DataSetPropertyExpEvaluatorParseException.class)
+	@ExceptionHandler(DataSetFieldExpEvaluatorParseException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleAnalysisDataSetPropertyExpEvaluatorParseException(HttpServletRequest request,
-			HttpServletResponse response, DataSetPropertyExpEvaluatorParseException exception)
+	public String handleAnalysisDataSetFieldExpEvaluatorParseException(HttpServletRequest request,
+			HttpServletResponse response, DataSetFieldExpEvaluatorParseException exception)
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
 				exception.getPropertyName(), getRootMessage(exception));
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(DataSetPropertyExpEvaluatorException.class)
+	@ExceptionHandler(DataSetFieldExpEvaluatorException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleAnalysisDataSetPropertyExpEvaluatorException(HttpServletRequest request,
-			HttpServletResponse response, DataSetPropertyExpEvaluatorException exception)
+	public String handleAnalysisDataSetFieldExpEvaluatorException(HttpServletRequest request,
+			HttpServletResponse response, DataSetFieldExpEvaluatorException exception)
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
 				exception.getPropertyName(), getRootMessage(exception));

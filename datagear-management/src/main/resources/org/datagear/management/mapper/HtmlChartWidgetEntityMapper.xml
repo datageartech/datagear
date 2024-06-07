@@ -26,8 +26,8 @@
 			)
 		VALUES
 			(
-			#{entity.widgetId}, #{entity.dataSetId}, #{entity.propertySignsJson, jdbcType=VARCHAR}, #{entity.alias, jdbcType=VARCHAR}, #{entity.attachment, jdbcType=VARCHAR},
-			#{entity.queryJson, jdbcType=VARCHAR}, #{entity.propertyAliasesJson, jdbcType=VARCHAR}, #{entity.propertyOrdersJson, jdbcType=VARCHAR}, #{entity.order}
+			#{entity.widgetId}, #{entity.dataSetId}, #{entity.fieldSignsJson, jdbcType=VARCHAR}, #{entity.alias, jdbcType=VARCHAR}, #{entity.attachment, jdbcType=VARCHAR},
+			#{entity.queryJson, jdbcType=VARCHAR}, #{entity.fieldAliasesJson, jdbcType=VARCHAR}, #{entity.fieldOrdersJson, jdbcType=VARCHAR}, #{entity.order}
 			)
 	</insert>
 	
@@ -79,12 +79,12 @@
 		SELECT
 			HCW_ID AS ${_iq_}widgetId${_iq_},
 			DS_ID AS ${_iq_}dataSetId${_iq_},
-			DS_PROPERTY_SIGNS AS ${_iq_}propertySignsJson${_iq_},
+			DS_PROPERTY_SIGNS AS ${_iq_}fieldSignsJson${_iq_},
 			DS_ALIAS AS ${_iq_}alias${_iq_},
 			DS_ATTACHMENT AS ${_iq_}attachment${_iq_},
 			DS_QUERY AS ${_iq_}queryJson${_iq_},
-			DS_PROPERTY_ALIASES AS ${_iq_}propertyAliasesJson${_iq_},
-			DS_PROPERTY_ORDERS AS ${_iq_}propertyOrdersJson${_iq_},
+			DS_PROPERTY_ALIASES AS ${_iq_}fieldAliasesJson${_iq_},
+			DS_PROPERTY_ORDERS AS ${_iq_}fieldOrdersJson${_iq_},
 			DS_ORDER AS ${_iq_}order${_iq_}
 		FROM
 			DATAGEAR_HCW_DS

@@ -21,7 +21,7 @@ import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
 import org.datagear.analysis.support.JsonValueDataSet.JsonValueDataSetResource;
@@ -53,9 +53,9 @@ public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResour
 		this.value = value;
 	}
 
-	public JsonValueDataSet(String id, String name, List<DataSetProperty> properties, String value)
+	public JsonValueDataSet(String id, String name, List<DataSetField> fields, String value)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.value = value;
 	}
 

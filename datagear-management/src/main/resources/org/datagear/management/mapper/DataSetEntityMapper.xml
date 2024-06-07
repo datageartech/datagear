@@ -92,7 +92,7 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
-	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetPropertyPO">
+	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetFieldPO">
 		SELECT
 			PROP_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PROP_NAME AS ${_iq_}child.name${_iq_},

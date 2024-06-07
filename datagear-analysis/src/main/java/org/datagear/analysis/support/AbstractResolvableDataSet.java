@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.NameAwareUtil;
@@ -50,9 +50,9 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 		super(id, name, Collections.emptyList());
 	}
 
-	public AbstractResolvableDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractResolvableDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	@Override
@@ -75,8 +75,8 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 
 	 * @param query
 	 * @param resolveProperties
-	 *            是否从数据中解析{@linkplain DataSetProperty}，如果为{@code true}，
-	 *            应解析并设置{@linkplain ResolvedDataSetResult#setProperties(List)}
+	 *            是否从数据中解析{@linkplain DataSetField}，如果为{@code true}，
+	 *            应解析并设置{@linkplain ResolvedDataSetResult#setFields(List)}
 	 * @return
 	 * @throws DataSetException
 	 */
@@ -89,30 +89,30 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * @param query
 	 * @param rawData
 	 *            允许为{@code null}
-	 * @param rawDataProperties
-	 *            允许为{@code null}，如果不为空，将与{@linkplain #getProperties()}合并后作为解析基础，否则，仅以{@linkplain #getProperties()}作为解析基础
+	 * @param rawDataFields
+	 *            允许为{@code null}，如果不为空，将与{@linkplain #getFields()}合并后作为解析基础，否则，仅以{@linkplain #getFields()}作为解析基础
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(DataSetQuery query, Object rawData,
-			List<DataSetProperty> rawDataProperties) throws Throwable
+			List<DataSetField> rawDataFields) throws Throwable
 	{
-		List<DataSetProperty> properties = getProperties();
+		List<DataSetField> fields = getFields();
 
-		if (properties == null)
-			properties = Collections.emptyList();
+		if (fields == null)
+			fields = Collections.emptyList();
 
-		if (rawDataProperties != null && !rawDataProperties.isEmpty())
-			properties = mergeProperties(rawDataProperties, properties);
+		if (rawDataFields != null && !rawDataFields.isEmpty())
+			fields = mergeFields(rawDataFields, fields);
 
-		return resolveResult(rawData, properties, query.getResultFetchSize(), query.getResultDataFormat());
+		return resolveResult(rawData, fields, query.getResultFetchSize(), query.getResultDataFormat());
 	}
 
 	/**
-	 * 合并{@linkplain DataSetProperty}。
+	 * 合并{@linkplain DataSetField}。
 	 * <p>
-	 * 将合并列表的{@linkplain DataSetProperty#getType()}、{@linkplain DataSetProperty#getLabel()}、
-	 * {@linkplain DataSetProperty#getDefaultValue()}合并至基础列表里的同名项，多余项则直接添加，
+	 * 将合并列表的{@linkplain DataSetField#getType()}、{@linkplain DataSetField#getLabel()}、
+	 * {@linkplain DataSetField#getDefaultValue()}合并至基础列表里的同名项，多余项则直接添加，
 	 * 同时根据{@code merge}里的排序对{@code dataSetProperties}重排，返回一个新的列表。
 	 * </p>
 	 * 
@@ -122,21 +122,21 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 *            允许为{@code null}，合并列表
 	 * @return
 	 */
-	protected List<DataSetProperty> mergeProperties(List<? extends DataSetProperty> base,
-			List<? extends DataSetProperty> merge)
+	protected List<DataSetField> mergeFields(List<? extends DataSetField> base,
+			List<? extends DataSetField> merge)
 	{
 		if (base == null)
 			base = Collections.emptyList();
 		if (merge == null)
 			merge = Collections.emptyList();
 
-		List<DataSetProperty> dps = new ArrayList<DataSetProperty>(base.size());
-		for (DataSetProperty dataSetProperty : base)
-			dps.add(dataSetProperty.clone());
+		List<DataSetField> dps = new ArrayList<DataSetField>(base.size());
+		for (DataSetField field : base)
+			dps.add(field.clone());
 
-		for (DataSetProperty dp : dps)
+		for (DataSetField dp : dps)
 		{
-			DataSetProperty mp = NameAwareUtil.find(merge, dp.getName());
+			DataSetField mp = NameAwareUtil.find(merge, dp.getName());
 			
 			if(mp != null)
 			{
@@ -148,18 +148,18 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 			}
 		}
 
-		for (DataSetProperty mp : merge)
+		for (DataSetField mp : merge)
 		{
 			if (NameAwareUtil.find(dps, mp.getName()) == null)
 				dps.add(mp);
 		}
 
-		final List<? extends DataSetProperty> mergedFinal = merge;
+		final List<? extends DataSetField> mergedFinal = merge;
 
-		dps.sort(new Comparator<DataSetProperty>()
+		dps.sort(new Comparator<DataSetField>()
 		{
 			@Override
-			public int compare(DataSetProperty o1, DataSetProperty o2)
+			public int compare(DataSetField o1, DataSetField o2)
 			{
 				// 优先按照merged列表中的顺序重排
 				int o1Idx = NameAwareUtil.findIndex(mergedFinal, o1.getName());

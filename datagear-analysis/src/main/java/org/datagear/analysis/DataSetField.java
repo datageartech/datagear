@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * 数据集属性信息。
+ * 数据集字段信息。
  * <p>
  * 此类描述{@linkplain DataSet#getResult(DataSetQuery)}返回的{@linkplain DataSetResult#getData()}元素的属性信息。
  * </p>
@@ -29,7 +29,7 @@ import java.math.BigInteger;
  * @author datagear@163.com
  *
  */
-public class DataSetProperty extends AbstractNameTypeAware implements Cloneable
+public class DataSetField extends AbstractNameTypeAware implements Cloneable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,23 +45,23 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable
 	/** 计算表达式 */
 	private String expression = null;
 
-	public DataSetProperty()
+	public DataSetField()
 	{
 		super();
 	}
 
-	public DataSetProperty(String name, String type)
+	public DataSetField(String name, String type)
 	{
 		super(name, type);
 	}
 
-	public DataSetProperty(DataSetProperty property)
+	public DataSetField(DataSetField field)
 	{
-		super(property.getName(), property.getType());
-		this.label = property.label;
-		this.defaultValue = property.defaultValue;
-		this.evaluated = property.evaluated;
-		this.expression = property.expression;
+		super(field.getName(), field.getType());
+		this.label = field.label;
+		this.defaultValue = field.defaultValue;
+		this.evaluated = field.evaluated;
+		this.expression = field.expression;
 	}
 
 	public boolean hasLabel()
@@ -134,9 +134,9 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable
 	}
 
 	@Override
-	public DataSetProperty clone()
+	public DataSetField clone()
 	{
-		return new DataSetProperty(this);
+		return new DataSetField(this);
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class DataSetProperty extends AbstractNameTypeAware implements Cloneable
 	}
 
 	/**
-	 * {@linkplain DataSetProperty#getType()}类型枚举。
+	 * {@linkplain DataSetField#getType()}类型枚举。
 	 * 
 	 * @author datagear@163.com
 	 *

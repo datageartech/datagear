@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.junit.Test;
@@ -43,33 +43,33 @@ public class AbstractResolvableDataSetTest
 	{
 		TestAbstractResolvableDataSet dataSet = new TestAbstractResolvableDataSet();
 
-		DataSetProperty idMerged = new DataSetProperty("id", DataSetProperty.DataType.INTEGER);
+		DataSetField idMerged = new DataSetField("id", DataSetField.DataType.INTEGER);
 		idMerged.setLabel("Label-id");
 		idMerged.setDefaultValue("41");
-		DataSetProperty nameMerged = new DataSetProperty("name", DataSetProperty.DataType.STRING);
+		DataSetField nameMerged = new DataSetField("name", DataSetField.DataType.STRING);
 		nameMerged.setLabel("Label-name");
-		DataSetProperty dateMerged = new DataSetProperty("date", DataSetProperty.DataType.DATE);
+		DataSetField dateMerged = new DataSetField("date", DataSetField.DataType.DATE);
 		nameMerged.setLabel("Label-date");
-		DataSetProperty valueMerged = new DataSetProperty("value", DataSetProperty.DataType.NUMBER);
+		DataSetField valueMerged = new DataSetField("value", DataSetField.DataType.NUMBER);
 		valueMerged.setLabel("Label-value");
 
-		List<DataSetProperty> propertiesMerged = Arrays.asList(idMerged, nameMerged, dateMerged, valueMerged);
+		List<DataSetField> fieldsMerged = Arrays.asList(idMerged, nameMerged, dateMerged, valueMerged);
 
-		DataSetProperty id = new DataSetProperty("id", DataSetProperty.DataType.UNKNOWN);
-		DataSetProperty date = new DataSetProperty("date", DataSetProperty.DataType.UNKNOWN);
-		DataSetProperty name = new DataSetProperty("name", DataSetProperty.DataType.UNKNOWN);
+		DataSetField id = new DataSetField("id", DataSetField.DataType.UNKNOWN);
+		DataSetField date = new DataSetField("date", DataSetField.DataType.UNKNOWN);
+		DataSetField name = new DataSetField("name", DataSetField.DataType.UNKNOWN);
 
-		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
-		Collections.addAll(properties, id, name, date);
+		List<DataSetField> fields = new ArrayList<DataSetField>();
+		Collections.addAll(fields, id, name, date);
 
-		properties = dataSet.mergeProperties(properties, propertiesMerged);
+		fields = dataSet.mergeFields(fields, fieldsMerged);
 
-		assertEquals(4, properties.size());
+		assertEquals(4, fields.size());
 
-		DataSetProperty p0 = properties.get(0);
-		DataSetProperty p1 = properties.get(1);
-		DataSetProperty p2 = properties.get(2);
-		DataSetProperty p3 = properties.get(3);
+		DataSetField p0 = fields.get(0);
+		DataSetField p1 = fields.get(1);
+		DataSetField p2 = fields.get(2);
+		DataSetField p3 = fields.get(3);
 
 		assertEquals(idMerged.getName(), p0.getName());
 		assertEquals(idMerged.getType(), p0.getType());

@@ -280,12 +280,12 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		{
 			super();
 			setDataSet(ProfileDataSet.valueOf(dataSetBind.getDataSet()));
-			setPropertySigns(dataSetBind.getPropertySigns());
+			setFieldSigns(dataSetBind.getFieldSigns());
 			setAlias(dataSetBind.getAlias());
 			setAttachment(dataSetBind.isAttachment());
 			setQuery(dataSetBind.getQuery());
-			setPropertyAliases(dataSetBind.getPropertyAliases());
-			setPropertyOrders(dataSetBind.getPropertyOrders());
+			setFieldAliases(dataSetBind.getFieldAliases());
+			setFieldOrders(dataSetBind.getFieldOrders());
 		}
 
 		@JsonIgnore

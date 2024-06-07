@@ -346,7 +346,7 @@
 		for(var i=0; i<chart.dataSetBinds.length; i++)
 		{
 			var cds = chart.dataSetBinds[i];
-			cds.propertySigns = (cds.propertySigns || {});
+			cds.fieldSigns = (cds.fieldSigns || {});
 			cds.alias = (cds.alias == null ?  "" : cds.alias);
 			cds.attachment = (cds.attachment == true ? true : false);
 			cds.query = (cds.query || {});
@@ -357,6 +357,18 @@
 			// < @deprecated 兼容2.4.0版本的dataSetBinds.paramValues，将在未来版本移除，已被dataSetBinds.query.paramValues取代
 			cds.paramValues = cds.query.paramValues;
 			// > @deprecated 兼容2.4.0版本的dataSetBinds.paramValues，将在未来版本移除，已被dataSetBinds.query.paramValues取代
+			
+			// < @deprecated 兼容5.0.0版本的DataSetBind.propertySigns，将在未来版本移除，已被DataSetBind.fieldSigns取代
+			cds.propertySigns = cds.fieldSigns;
+			// > @deprecated 兼容5.0.0版本的DataSetBind.propertySigns，将在未来版本移除，已被DataSetBind.fieldSigns取代
+			
+			// < @deprecated 兼容5.0.0版本的DataSetBind.propertyAliases，将在未来版本移除，已被DataSetBind.fieldAliases取代
+			cds.propertyAliases = cds.fieldAliases;
+			// > @deprecated 兼容5.0.0版本的DataSetBind.propertyAliases，将在未来版本移除，已被DataSetBind.fieldAliases取代
+			
+			// < @deprecated 兼容5.0.0版本的DataSetBind.propertyOrders，将在未来版本移除，已被DataSetBind.fieldOrders取代
+			cds.propertyOrders = cds.fieldOrders;
+			// > @deprecated 兼容5.0.0版本的DataSetBind.propertyOrders，将在未来版本移除，已被DataSetBind.fieldOrders取代
 		}
 		
 		chart._dataSetBinds = (chart.dataSetBinds || []);
@@ -2134,7 +2146,7 @@
 	};
 	
 	/**
-	 * 获取指定标记的数据集属性，没有则返回undefined。
+	 * 获取指定标记的数据集字段，没有则返回undefined。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 数据标记对象、标记名称
@@ -2148,7 +2160,7 @@
 	};
 	
 	/**
-	 * 获取指定标记的数据集属性数组。
+	 * 获取指定标记的数据集字段数组。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 数据标记对象、标记名称
@@ -2171,13 +2183,13 @@
 		
 		dataSetProperties = this.dataSetProperties(dataSetBind, sort);
 		var dataSignName = (chartFactory.isString(dataSign) ? dataSign : dataSign.name);
-		var propertySigns = (dataSetBind.propertySigns || {});
+		var fieldSigns = (dataSetBind.fieldSigns || {});
 		
 		var signPropertyNames = [];
 		
-		for(var pname in propertySigns)
+		for(var pname in fieldSigns)
 		{
-			var mySigns = (propertySigns[pname] || []);
+			var mySigns = (fieldSigns[pname] || []);
 			
 			for(var i=0; i<mySigns.length; i++)
 			{
@@ -2326,7 +2338,7 @@
 	 * 将数据集结果数据的行对象按照指定properties顺序转换为行值数组。
 	 * 
 	 * @param result 数据集结果对象
-	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
+	 * @param properties 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 可选，行索引，默认为0
 	 * @param count 可选，获取的最多行数，默认为全部
 	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
@@ -2387,7 +2399,7 @@
 	 * 将数据集结果数据的行对象按照指定properties顺序转换为列值数组。
 	 * 
 	 * @param result 数据集结果对象
-	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
+	 * @param properties 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
 	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
@@ -2476,7 +2488,7 @@
 	 * 获取数据集结果数据指定属性、指定行的单元格值，没有则返回undefined。
 	 * 
 	 * @param result 数据集结果对象
-	 * @param property 数据集属性对象、属性名
+	 * @param property 数据集字段对象、字段名
 	 * @param row 行索引，可选，默认为0
 	 */
 	chartBase.resultCell = function(result, property, row)
@@ -3100,15 +3112,15 @@
 	};
 	
 	/**
-	 * 获取数据集属性数组。
+	 * 获取数据集字段数组。
 	 * 返回数组排序遵循如下规则：
 	 * 排序值越小越靠前；
 	 * 属性默认具有与其索引相同的排序值；
-	 * 当两个属性具有相同排序值时，设置了propertyOrders中排序值的那个属性靠前排（前置插入），否则，属性索引小的那个靠前排。
+	 * 当两个属性具有相同排序值时，设置了fieldOrders中排序值的那个属性靠前排（前置插入），否则，属性索引小的那个靠前排。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
-	 * @param sort 可选，当dataSetBind是数据集绑定时，是否依据其propertyOrders对返回结果进行重排序，true 是；false 否。默认值为：true
-	 * @returns 数据集属性数组，返回空数组表示没有属性
+	 * @param sort 可选，当dataSetBind是数据集绑定时，是否依据其fieldOrders对返回结果进行重排序，true 是；false 否。默认值为：true
+	 * @returns 数据集字段数组，返回空数组表示没有
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetProperties = function(dataSetBind, sort)
@@ -3129,9 +3141,9 @@
 		if(isDataSet || !sort)
 			return properties;
 		
-		var propertyOrders = dataSetBind.propertyOrders;
+		var fieldOrders = dataSetBind.fieldOrders;
 		
-		if(!propertyOrders)
+		if(!fieldOrders)
 			return properties;
 		
 		var pos = [];
@@ -3139,7 +3151,7 @@
 		for(var i=0; i<properties.length; i++)
 		{
 			var p = properties[i];
-			pos[i] = { property: p, order: propertyOrders[p.name], index: i };
+			pos[i] = { property: p, order: fieldOrders[p.name], index: i };
 		}
 		
 		pos.sort(function(a, b)
@@ -3172,11 +3184,11 @@
 	};
 	
 	/**
-	 * 获取指定标识的数据集属性。
+	 * 获取指定标识的数据集字段。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
-	 * @param info 数据集属性标识，可以是属性名、属性索引
-	 * @returns 数据集属性，没有找到则返回undefined
+	 * @param info 数据集字段标识，可以是字段名、字段索引
+	 * @returns 数据集字段，没有找到则返回undefined
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetProperty = function(dataSetBind, info)
@@ -3199,10 +3211,10 @@
 	};
 	
 	/**
-	 * 获取/设置数据集属性别名。
+	 * 获取/设置数据集字段别名。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetProperty 数据集属性、属性名、属性索引
+	 * @param dataSetProperty 数据集字段、字段名、字段索引
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
@@ -3219,8 +3231,8 @@
 			if(!dataSetProperty)
 				return "";
 			
-			alias =  (dataSetBind.propertyAliases ?
-							dataSetBind.propertyAliases[dataSetProperty.name] : null);
+			alias =  (dataSetBind.fieldAliases ?
+							dataSetBind.fieldAliases[dataSetProperty.name] : null);
 			
 			if(!alias)
 				alias = (dataSetProperty.label ||  dataSetProperty.name);
@@ -3229,18 +3241,18 @@
 		}
 		else
 		{
-			if(!dataSetBind.propertyAliases)
-				dataSetBind.propertyAliases = {};
+			if(!dataSetBind.fieldAliases)
+				dataSetBind.fieldAliases = {};
 			
-			dataSetBind.propertyAliases[dataSetProperty.name] = alias;
+			dataSetBind.fieldAliases[dataSetProperty.name] = alias;
 		}
 	};
 	
 	/**
-	 * 获取/设置数据集属性排序值。
+	 * 获取/设置数据集字段排序值。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetProperty 数据集属性、属性名、属性索引
+	 * @param dataSetProperty 数据集字段、字段名、字段索引
 	 * @param order 可选，要设置的排序数值，不设置则执行获取操作
 	 * @returns 要获取的排序数值，没有设置过则返回null
 	 * @since 2.10.0
@@ -3263,15 +3275,15 @@
 		
 		if(order === undefined)
 		{
-			return (dataSetBind.propertyOrders ?
-							dataSetBind.propertyOrders[name] : undefined);
+			return (dataSetBind.fieldOrders ?
+							dataSetBind.fieldOrders[name] : undefined);
 		}
 		else
 		{
-			if(!dataSetBind.propertyOrders)
-				dataSetBind.propertyOrders = {};
+			if(!dataSetBind.fieldOrders)
+				dataSetBind.fieldOrders = {};
 			
-			dataSetBind.propertyOrders[name] = order;
+			dataSetBind.fieldOrders[name] = order;
 		}
 	};
 	
@@ -3427,10 +3439,10 @@
 	};
 	
 	/**
-	 * 获取/设置指定数据集属性标记。
+	 * 获取/设置指定数据集字段标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetProperty 数据集属性、属性名、属性索引
+	 * @param dataSetProperty 数据集字段、字段名、字段索引
 	 * @param dataSign 可选，要设置的数据标记对象、对象数组，或者名称字符串、字符串数组，或者null，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
@@ -3453,26 +3465,26 @@
 		
 		if(dataSign === undefined)
 		{
-			return (dataSetBind.propertySigns ?
-							dataSetBind.propertySigns[name] : undefined);
+			return (dataSetBind.fieldSigns ?
+							dataSetBind.fieldSigns[name] : undefined);
 		}
 		else
 		{
-			if(!dataSetBind.propertySigns)
-				dataSetBind.propertySigns = {};
+			if(!dataSetBind.fieldSigns)
+				dataSetBind.fieldSigns = {};
 			
 			dataSign = this._trimDataSetPropertySign(dataSign);
-			dataSetBind.propertySigns[name] = dataSign;
+			dataSetBind.fieldSigns[name] = dataSign;
 		}
 	};
 	
 	/**
-	 * 获取/设置数据集属性标记映射表。
+	 * 获取/设置数据集字段标记映射表。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集属性名: 数据标记对象、对象数组，或者名称字符串、字符串数组，或者null, ... }，不设置则执行获取操作
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 数据标记对象、对象数组，或者名称字符串、字符串数组，或者null, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
-	 * @returns 要获取的标记映射表，格式为：{ 数据集属性名: 标记名字符串数组、null, ... }，不会为null
+	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
 	 */
 	chartBase.dataSetPropertySigns = function(dataSetBind, signs, increment)
@@ -3482,7 +3494,7 @@
 		
 		if(signs === undefined)
 		{
-			return (dataSetBind.propertySigns || {});
+			return (dataSetBind.fieldSigns || {});
 		}
 		else
 		{
@@ -3497,12 +3509,12 @@
 				}
 			}
 			
-			if(!dataSetBind.propertySigns || !increment)
-				dataSetBind.propertySigns = trimSigns;
+			if(!dataSetBind.fieldSigns || !increment)
+				dataSetBind.fieldSigns = trimSigns;
 			else
 			{
 				for(var p in trimSigns)
-					dataSetBind.propertySigns[p] = trimSigns[p];
+					dataSetBind.fieldSigns[p] = trimSigns[p];
 			}
 		}
 	};
@@ -4721,7 +4733,7 @@
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetPropertyAlias()取代
 	/**
-	 * 获取数据集属性标签，它不会返回null。
+	 * 获取数据集字段标签，它不会返回null。
 	 *  
 	 * @param dataSetProperty
 	 * @returns "..."

@@ -45,7 +45,7 @@ import org.apache.hc.core5.http.io.HttpRequestHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.util.IOUtil;
@@ -245,26 +245,26 @@ public class HttpDataSetTest
 		paramValues.put("param", "pv");
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 		String templateResult = result.getTemplateResult();
 
 		{
-			assertEquals(2, properties.size());
+			assertEquals(2, fields.size());
 
 			assertTrue(templateResult.contains("param=pv"));
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 		}
 
@@ -296,11 +296,11 @@ public class HttpDataSetTest
 		dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_GET);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
-		assertEquals(2, properties.size());
+		assertEquals(2, fields.size());
 		assertEquals(2, data.size());
 	}
 
@@ -313,11 +313,11 @@ public class HttpDataSetTest
 		dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_POST);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
-		assertEquals(2, properties.size());
+		assertEquals(2, fields.size());
 		assertEquals(2, data.size());
 	}
 
@@ -340,26 +340,26 @@ public class HttpDataSetTest
 		paramValues.put("param", pv1);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 		String templateResult = result.getTemplateResult();
 
 		{
-			assertEquals(2, properties.size());
+			assertEquals(2, fields.size());
 
 			assertTrue(templateResult.contains("value: \"" + pv1JsonStr + "\""));
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 		}
 
@@ -402,26 +402,26 @@ public class HttpDataSetTest
 		paramValues.put("param", pv1);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 		String templateResult = result.getTemplateResult();
 
 		{
-			assertEquals(2, properties.size());
+			assertEquals(2, fields.size());
 
 			assertTrue(templateResult.contains("value: \"" + pv1JsonStr + "\""));
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 		}
 
@@ -463,26 +463,26 @@ public class HttpDataSetTest
 		paramValues.put("param", pv1);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 		String templateResult = result.getTemplateResult();
 
 		{
-			assertEquals(2, properties.size());
+			assertEquals(2, fields.size());
 
 			assertTrue(templateResult.contains("value1=" + pv1));
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("contentType", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 		}
 
@@ -522,28 +522,28 @@ public class HttpDataSetTest
 		paramValues.put("v2", v2);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 		String templateResult = result.getTemplateResult();
 
 		{
-			assertEquals(2, properties.size());
+			assertEquals(2, fields.size());
 
 			assertTrue(templateResult.contains("<v0>" + v0 + "</v0>"));
 			assertTrue(templateResult.contains("<v1>" + v1 + "</v1>"));
 			assertTrue(templateResult.contains("<v2>" + v2Escape + "</v2>"));
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("contentType", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 		}
 
@@ -577,26 +577,26 @@ public class HttpDataSetTest
 		paramValues.put("param", pv1);
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 		String templateResult = result.getTemplateResult();
 
 		{
-			assertEquals(2, properties.size());
+			assertEquals(2, fields.size());
 
 			assertTrue(templateResult.contains("value: '" + pv1 + "'"));
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 		}
 

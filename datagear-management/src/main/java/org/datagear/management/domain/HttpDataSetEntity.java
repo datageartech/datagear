@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.hc.client5.http.classic.HttpClient;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.HttpDataSet;
 import org.springframework.beans.BeanUtils;
 
@@ -57,10 +57,10 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, Clo
 		this.createUser = createUser;
 	}
 
-	public HttpDataSetEntity(String id, String name, List<DataSetProperty> properties, HttpClient httpClient,
+	public HttpDataSetEntity(String id, String name, List<DataSetField> fields, HttpClient httpClient,
 			String uri, User createUser)
 	{
-		super(id, name, properties, httpClient, uri);
+		super(id, name, fields, httpClient, uri);
 		this.createUser = createUser;
 	}
 

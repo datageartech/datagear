@@ -33,19 +33,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.DataSetPropertyExpEvaluator.ValueSetter;
+import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.support.DataSetFieldExpEvaluator.ValueSetter;
 import org.junit.Test;
 
 /**
- * {@linkplain DataSetPropertyExpEvaluator}单元测试类。
+ * {@linkplain DataSetFieldExpEvaluator}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpEvaluatorTest
+public class DataSetFieldExpEvaluatorTest
 {
-	private DataSetPropertyExpEvaluator evaluator = new DataSetPropertyExpEvaluator();
+	private DataSetFieldExpEvaluator evaluator = new DataSetFieldExpEvaluator();
 
 	@Test
 	public void evalTest() throws Throwable
@@ -257,7 +257,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("([\"special'\"name\"] + 2) * 3", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -273,7 +273,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("(['special\\'\"name'] + 2) * 3", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -289,7 +289,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("(中文关键字 + 中文对象.d) * width * height-2", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -311,7 +311,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("age = 33", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -328,7 +328,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("['age'] = 33", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -347,7 +347,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("map.age = 33", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -366,7 +366,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("['map']['age'] = 33", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -385,7 +385,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("bean.d = 33", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -405,7 +405,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("size()", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -422,7 +422,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("string.length()", data);
 			}
-			catch(DataSetPropertyExpEvaluatorException e)
+			catch(DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -439,7 +439,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("string.toUpperCase()", data);
 			}
-			catch(DataSetPropertyExpEvaluatorException e)
+			catch(DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -457,7 +457,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("T(java.lang.Math).random()", data);
 			}
-			catch(DataSetPropertyExpEvaluatorException e)
+			catch(DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -475,7 +475,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("new java.lang.String()", data);
 			}
-			catch(DataSetPropertyExpEvaluatorException e)
+			catch(DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -491,7 +491,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("{1,2,3}", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -507,7 +507,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("{a:1,b:2,c:3}", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -525,7 +525,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("@bean", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -544,7 +544,7 @@ public class DataSetPropertyExpEvaluatorTest
 			{
 				this.evaluator.eval("width > 0 ? new java.lang.String('b') : {1,2,3}", data);
 			}
-			catch (DataSetPropertyExpEvaluatorException e)
+			catch (DataSetFieldExpEvaluatorException e)
 			{
 				exception = e.getMessage();
 			}
@@ -554,7 +554,7 @@ public class DataSetPropertyExpEvaluatorTest
 	}
 
 	@Test
-	public void evalTest_List_DataSetProperty()
+	public void evalTest_List_DataSetField()
 	{
 		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
 
@@ -565,12 +565,12 @@ public class DataSetPropertyExpEvaluatorTest
 
 		Collections.addAll(datas, data);
 
-		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
+		List<DataSetField> fields = new ArrayList<DataSetField>();
 		{
-			DataSetProperty p0 = new DataSetProperty("v0", DataSetProperty.DataType.INTEGER);
-			DataSetProperty p1 = new DataSetProperty("v1", DataSetProperty.DataType.INTEGER);
-			DataSetProperty p2 = new DataSetProperty("v2", DataSetProperty.DataType.INTEGER);
-			DataSetProperty p3 = new DataSetProperty("v3", DataSetProperty.DataType.INTEGER);
+			DataSetField p0 = new DataSetField("v0", DataSetField.DataType.INTEGER);
+			DataSetField p1 = new DataSetField("v1", DataSetField.DataType.INTEGER);
+			DataSetField p2 = new DataSetField("v2", DataSetField.DataType.INTEGER);
+			DataSetField p3 = new DataSetField("v3", DataSetField.DataType.INTEGER);
 
 			p1.setEvaluated(true);
 			p1.setExpression("v0 + v1 + v2");
@@ -581,13 +581,13 @@ public class DataSetPropertyExpEvaluatorTest
 			p3.setEvaluated(true);
 			p3.setExpression("v0 + v1 + v2");
 
-			Collections.addAll(properties, p0, p1, p2, p3);
+			Collections.addAll(fields, p0, p1, p2, p3);
 		}
 
-		this.evaluator.eval(properties, datas, new ValueSetter<Map<String, Object>>()
+		this.evaluator.eval(fields, datas, new ValueSetter<Map<String, Object>>()
 		{
 			@Override
-			public void set(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
+			public void set(DataSetField property, int propertyIndex, Map<String, Object> data, Object value)
 			{
 				data.put(property.getName(), value);
 			}
@@ -600,7 +600,7 @@ public class DataSetPropertyExpEvaluatorTest
 	}
 
 	@Test
-	public void evalTest_List_DataSetProperty_noExpression()
+	public void evalTest_List_DataSetField_noExpression()
 	{
 		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
 
@@ -610,18 +610,18 @@ public class DataSetPropertyExpEvaluatorTest
 
 		Collections.addAll(datas, data);
 
-		List<DataSetProperty> properties = new ArrayList<DataSetProperty>();
+		List<DataSetField> fields = new ArrayList<DataSetField>();
 		{
-			DataSetProperty p0 = new DataSetProperty("v0", DataSetProperty.DataType.INTEGER);
-			DataSetProperty p1 = new DataSetProperty("s0", DataSetProperty.DataType.STRING);
+			DataSetField p0 = new DataSetField("v0", DataSetField.DataType.INTEGER);
+			DataSetField p1 = new DataSetField("s0", DataSetField.DataType.STRING);
 
-			Collections.addAll(properties, p0, p1);
+			Collections.addAll(fields, p0, p1);
 		}
 
-		boolean evaled = this.evaluator.eval(properties, datas, new ValueSetter<Map<String, Object>>()
+		boolean evaled = this.evaluator.eval(fields, datas, new ValueSetter<Map<String, Object>>()
 		{
 			@Override
-			public void set(DataSetProperty property, int propertyIndex, Map<String, Object> data, Object value)
+			public void set(DataSetField property, int propertyIndex, Map<String, Object> data, Object value)
 			{
 				data.put(property.getName(), value);
 			}

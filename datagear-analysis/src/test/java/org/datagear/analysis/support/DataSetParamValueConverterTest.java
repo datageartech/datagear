@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.junit.Test;
 
@@ -45,15 +45,15 @@ public class DataSetParamValueConverterTest
 	{
 		super();
 
-		List<DataSetProperty> properties = new ArrayList<>();
-		properties.add(new DataSetProperty("name", DataSetProperty.DataType.STRING));
+		List<DataSetField> fields = new ArrayList<>();
+		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
 
 		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("name", DataSetParam.DataType.STRING, true));
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 		params.add(new DataSetParam("enable", DataSetParam.DataType.BOOLEAN, true));
 
-		CsvValueDataSet dataSet = new CsvValueDataSet("test", "test", properties, "name \n aaa");
+		CsvValueDataSet dataSet = new CsvValueDataSet("test", "test", fields, "name \n aaa");
 		dataSet.setParams(params);
 		dataSet.setNameRow(1);
 

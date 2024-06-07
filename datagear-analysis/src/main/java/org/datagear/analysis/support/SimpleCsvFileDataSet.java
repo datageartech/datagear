@@ -20,7 +20,7 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 
 /**
@@ -50,9 +50,9 @@ public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet
 		this.file = file;
 	}
 
-	public SimpleCsvFileDataSet(String id, String name, List<DataSetProperty> properties, File file)
+	public SimpleCsvFileDataSet(String id, String name, List<DataSetField> fields, File file)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.file = file;
 	}
 

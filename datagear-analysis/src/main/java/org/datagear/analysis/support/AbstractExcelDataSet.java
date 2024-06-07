@@ -36,7 +36,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.AbstractExcelDataSet.ExcelDataSetResource;
 import org.datagear.analysis.support.RangeExpResolver.IndexRange;
 import org.datagear.analysis.support.RangeExpResolver.Range;
@@ -101,9 +101,9 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		super(id, name);
 	}
 
-	public AbstractExcelDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractExcelDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	/**
@@ -353,15 +353,15 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		List<ExcelPropertyInfo> propertyInfos = resolvePropertyInfos(resource, excelRows);
 		List<Map<String, Object>> data = resolveData(resource, propertyInfos, excelRows);
 
-		List<DataSetProperty> properties = null;
+		List<DataSetField> fields = null;
 
 		if (resolveProperties)
 		{
 			List<String> rawDataPropertyNames = toPropertyNames(propertyInfos);
-			properties = resolveProperties(rawDataPropertyNames, data);
+			fields = resolveFields(rawDataPropertyNames, data);
 		}
 
-		return new ResourceData(data, properties);
+		return new ResourceData(data, fields);
 	}
 
 	/**
@@ -443,21 +443,21 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	}
 
 	/**
-	 * 解析{@linkplain DataSetProperty}。
+	 * 解析{@linkplain DataSetField}。
 	 * 
 	 * @param rawDataPropertyNames
 	 * @param rawData              允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetProperty> resolveProperties(List<String> rawDataPropertyNames,
+	protected List<DataSetField> resolveFields(List<String> rawDataPropertyNames,
 			List<Map<String, Object>> rawData) throws Throwable
 	{
 		int propertyLen = rawDataPropertyNames.size();
-		List<DataSetProperty> properties = new ArrayList<>(propertyLen);
+		List<DataSetField> fields = new ArrayList<>(propertyLen);
 
 		for (String name : rawDataPropertyNames)
-			properties.add(new DataSetProperty(name, DataSetProperty.DataType.UNKNOWN));
+			fields.add(new DataSetField(name, DataSetField.DataType.UNKNOWN));
 
 		if (rawData != null && rawData.size() > 0)
 		{
@@ -467,9 +467,9 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 				for (int i = 0; i < propertyLen; i++)
 				{
-					DataSetProperty property = properties.get(i);
+					DataSetField property = fields.get(i);
 
-					if (!DataSetProperty.DataType.UNKNOWN.equals(property.getType()))
+					if (!DataSetField.DataType.UNKNOWN.equals(property.getType()))
 					{
 						resolvedPropertyTypeCount++;
 						continue;
@@ -486,7 +486,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			}
 		}
 
-		return properties;
+		return fields;
 	}
 
 	/**

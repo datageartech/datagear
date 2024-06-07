@@ -27,7 +27,7 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
 import org.datagear.util.IOUtil;
@@ -62,9 +62,9 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 		super(id, name);
 	}
 
-	public AbstractCsvDataSet(String id, String name, List<DataSetProperty> properties)
+	public AbstractCsvDataSet(String id, String name, List<DataSetField> fields)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 	}
 
 	/**
@@ -113,12 +113,12 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			List<String> propertyNames = resolvePropertyNames(resource, csvRecords);
 			List<Map<String, String>> data = resolveData(resource, propertyNames, csvRecords);
 
-			List<DataSetProperty> properties = null;
+			List<DataSetField> fields = null;
 
 			if (resolveProperties)
-				properties = resolveProperties(propertyNames, data);
+				fields = resolveProperties(propertyNames, data);
 
-			return new ResourceData(data, properties);
+			return new ResourceData(data, fields);
 		}
 		finally
 		{
@@ -212,21 +212,21 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	}
 
 	/**
-	 * 解析{@linkplain DataSetProperty}。
+	 * 解析{@linkplain DataSetField}。
 	 * 
 	 * @param propertyNames
 	 * @param data              允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetProperty> resolveProperties(List<String> propertyNames, List<Map<String, String>> data)
+	protected List<DataSetField> resolveProperties(List<String> propertyNames, List<Map<String, String>> data)
 			throws Throwable
 	{
 		int propertyLen = propertyNames.size();
-		List<DataSetProperty> properties = new ArrayList<>(propertyLen);
+		List<DataSetField> fields = new ArrayList<>(propertyLen);
 	
 		for (String name : propertyNames)
-			properties.add(new DataSetProperty(name, DataSetProperty.DataType.STRING));
+			fields.add(new DataSetField(name, DataSetField.DataType.STRING));
 	
 		// 根据数据格式，修订可能的数值类型：
 		// 如果某一列至少有一个非空字符串、且非空字符串都是数值格式，才认为是数值类型
@@ -253,11 +253,11 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			for (int i = 0; i < propertyLen; i++)
 			{
 				if (Boolean.TRUE.equals(isNumbers[i]))
-					properties.get(i).setType(DataSetProperty.DataType.NUMBER);
+					fields.get(i).setType(DataSetField.DataType.NUMBER);
 			}
 		}
 	
-		return properties;
+		return fields;
 	}
 
 	/**

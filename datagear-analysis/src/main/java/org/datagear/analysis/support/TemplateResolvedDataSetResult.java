@@ -19,7 +19,7 @@ package org.datagear.analysis.support;
 
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 
@@ -46,14 +46,14 @@ public class TemplateResolvedDataSetResult extends ResolvedDataSetResult
 		super(result);
 	}
 
-	public TemplateResolvedDataSetResult(DataSetResult result, List<DataSetProperty> properties)
+	public TemplateResolvedDataSetResult(DataSetResult result, List<DataSetField> fields)
 	{
-		super(result, properties);
+		super(result, fields);
 	}
 
-	public TemplateResolvedDataSetResult(DataSetResult result, List<DataSetProperty> properties, String templateResult)
+	public TemplateResolvedDataSetResult(DataSetResult result, List<DataSetField> fields, String templateResult)
 	{
-		super(result, properties);
+		super(result, fields);
 		this.templateResult = templateResult;
 	}
 

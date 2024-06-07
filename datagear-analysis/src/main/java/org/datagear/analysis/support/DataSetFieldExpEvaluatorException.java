@@ -20,50 +20,50 @@ package org.datagear.analysis.support;
 import org.datagear.analysis.DataSetException;
 
 /**
- * {@linkplain DataSetPropertyExpEvaluator}异常。
+ * {@linkplain DataSetFieldExpEvaluator}异常。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpEvaluatorException extends DataSetException
+public class DataSetFieldExpEvaluatorException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
 	private String propertyName = "";
 
-	public DataSetPropertyExpEvaluatorException()
+	public DataSetFieldExpEvaluatorException()
 	{
 		super();
 	}
 
-	public DataSetPropertyExpEvaluatorException(String message)
+	public DataSetFieldExpEvaluatorException(String message)
 	{
 		super(message);
 	}
 
-	public DataSetPropertyExpEvaluatorException(String message, String propertyName)
+	public DataSetFieldExpEvaluatorException(String message, String propertyName)
 	{
 		super(message);
 		this.propertyName = propertyName;
 	}
 
-	public DataSetPropertyExpEvaluatorException(Throwable cause)
+	public DataSetFieldExpEvaluatorException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public DataSetPropertyExpEvaluatorException(Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorException(Throwable cause, String propertyName)
 	{
 		super(cause);
 		this.propertyName = propertyName;
 	}
 
-	public DataSetPropertyExpEvaluatorException(String message, Throwable cause)
+	public DataSetFieldExpEvaluatorException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}
 
-	public DataSetPropertyExpEvaluatorException(String message, Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorException(String message, Throwable cause, String propertyName)
 	{
 		super(message, cause);
 		this.propertyName = propertyName;

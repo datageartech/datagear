@@ -46,7 +46,7 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
@@ -167,9 +167,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		this.uri = uri;
 	}
 
-	public HttpDataSet(String id, String name, List<DataSetProperty> properties, HttpClient httpClient, String uri)
+	public HttpDataSet(String id, String name, List<DataSetField> fields, HttpClient httpClient, String uri)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.httpClient = httpClient;
 		this.uri = uri;
 	}
@@ -395,12 +395,12 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			headerContent = setHttpHeaders(request, query);
 			requestContent = setHttpEntity(request, query);
 
-			JsonResponseHandler responseHandler = new JsonResponseHandler(query, getProperties(), resolveProperties,
+			JsonResponseHandler responseHandler = new JsonResponseHandler(query, getFields(), resolveProperties,
 					getResponseDataJsonPath());
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
-			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
+			return new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
 					buildResolvedTemplate(uri, headerContent, requestContent));
 		}
 		catch (DataSetException e)
@@ -618,7 +618,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	{
 		private DataSetQuery dataSetQuery;
 
-		private List<DataSetProperty> properties;
+		private List<DataSetField> fields;
 
 		private boolean resolveProperties;
 
@@ -629,12 +629,12 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			super();
 		}
 
-		public JsonResponseHandler(DataSetQuery dataSetQuery, List<DataSetProperty> properties,
+		public JsonResponseHandler(DataSetQuery dataSetQuery, List<DataSetField> fields,
 				boolean resolveProperties, String responseDataJsonPath)
 		{
 			super();
 			this.dataSetQuery = dataSetQuery;
-			this.properties = (properties == null ? Collections.emptyList() : properties);
+			this.fields = (fields == null ? Collections.emptyList() : fields);
 			this.resolveProperties = resolveProperties;
 			this.responseDataJsonPath = responseDataJsonPath;
 		}
@@ -649,14 +649,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			this.dataSetQuery = dataSetQuery;
 		}
 
-		public List<DataSetProperty> getProperties()
+		public List<DataSetField> getFields()
 		{
-			return properties;
+			return fields;
 		}
 
-		public void setProperties(List<DataSetProperty> properties)
+		public void setFields(List<DataSetField> fields)
 		{
-			this.properties = properties;
+			this.fields = fields;
 		}
 
 		public boolean isResolveProperties()
@@ -700,17 +700,17 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 			if (this.resolveProperties)
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader,
+				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.fields, reader,
 						this.responseDataJsonPath);
 				return jsonDataSet.resolve(this.dataSetQuery);
 			}
 			else
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader,
+				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.fields, reader,
 						this.responseDataJsonPath);
 
 				DataSetResult result = jsonDataSet.getResult(this.dataSetQuery);
-				return new ResolvedDataSetResult(result, this.properties);
+				return new ResolvedDataSetResult(result, this.fields);
 			}
 		}
 
@@ -752,10 +752,10 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			super.setDataJsonPath(responseDataJsonPath);
 		}
 
-		public HttpResponseJsonDataSet(List<DataSetProperty> properties, Reader responseJsonReader,
+		public HttpResponseJsonDataSet(List<DataSetField> fields, Reader responseJsonReader,
 				String responseDataJsonPath)
 		{
-			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName(), properties);
+			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName(), fields);
 			this.responseJsonReader = responseJsonReader;
 			super.setDataJsonPath(responseDataJsonPath);
 		}

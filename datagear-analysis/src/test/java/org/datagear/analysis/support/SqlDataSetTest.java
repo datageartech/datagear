@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.util.JdbcUtil;
@@ -77,9 +77,9 @@ public class SqlDataSetTest extends DBTestSupport
 
 			String sql = "SELECT ID, NAME FROM T_ACCOUNT <#if id??>WHERE ID = ${id} AND NAME != '${name}'</#if>";
 
-			List<DataSetProperty> dataSetProperties = Arrays.asList(
-					new DataSetProperty("ID", DataSetProperty.DataType.INTEGER),
-					new DataSetProperty("NAME", DataSetProperty.DataType.STRING));
+			List<DataSetField> dataSetProperties = Arrays.asList(
+					new DataSetField("ID", DataSetField.DataType.INTEGER),
+					new DataSetField("NAME", DataSetField.DataType.STRING));
 
 			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataSetParam.DataType.STRING, true),
 					new DataSetParam("name", DataSetParam.DataType.STRING, true));
@@ -145,9 +145,9 @@ public class SqlDataSetTest extends DBTestSupport
 
 			String sql = "SELECT ID, NAME FROM T_ACCOUNT WHERE NAME='${name}'";
 
-			List<DataSetProperty> dataSetProperties = Arrays.asList(
-					new DataSetProperty("ID", DataSetProperty.DataType.INTEGER),
-					new DataSetProperty("NAME", DataSetProperty.DataType.STRING));
+			List<DataSetField> dataSetProperties = Arrays.asList(
+					new DataSetField("ID", DataSetField.DataType.INTEGER),
+					new DataSetField("NAME", DataSetField.DataType.STRING));
 
 			List<DataSetParam> dataSetParams = Arrays
 					.asList(new DataSetParam("name", DataSetParam.DataType.STRING, true));

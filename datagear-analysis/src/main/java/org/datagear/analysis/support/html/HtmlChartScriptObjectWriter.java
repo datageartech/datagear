@@ -183,12 +183,12 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			super();
 			setDataSet(toDataSetJson(dataSetBind.getDataSet()));
-			setPropertySigns(dataSetBind.getPropertySigns());
+			setFieldSigns(dataSetBind.getFieldSigns());
 			setAlias(dataSetBind.getAlias());
 			setAttachment(dataSetBind.isAttachment());
 			setQuery(dataSetBind.getQuery());
-			setPropertyAliases(dataSetBind.getPropertyAliases());
-			setPropertyOrders(dataSetBind.getPropertyOrders());
+			setFieldAliases(dataSetBind.getFieldAliases());
+			setFieldOrders(dataSetBind.getFieldOrders());
 		}
 
 		protected DataSetJson toDataSetJson(DataSet dataSet)
@@ -216,7 +216,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 
 		public DataSetJson(DataSet dataSet)
 		{
-			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
+			super(dataSet.getId(), dataSet.getName(), dataSet.getFields());
 			setMutableModel(dataSet.isMutableModel());
 			setParams(dataSet.getParams());
 		}

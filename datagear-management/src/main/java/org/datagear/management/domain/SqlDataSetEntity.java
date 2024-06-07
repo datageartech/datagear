@@ -20,7 +20,7 @@ package org.datagear.management.domain;
 import java.util.Date;
 import java.util.List;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.management.util.DtbsSourceConnectionFactory;
 import org.datagear.util.resource.ConnectionFactory;
@@ -52,10 +52,10 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 		super();
 	}
 
-	public SqlDataSetEntity(String id, String name, List<DataSetProperty> properties,
+	public SqlDataSetEntity(String id, String name, List<DataSetField> fields,
 			DtbsSourceConnectionFactory connectionFactory, String sql, User createUser)
 	{
-		super(id, name, properties, connectionFactory, sql);
+		super(id, name, fields, connectionFactory, sql);
 		this.createUser = createUser;
 	}
 

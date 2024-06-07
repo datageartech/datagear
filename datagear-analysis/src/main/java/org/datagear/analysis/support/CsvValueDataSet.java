@@ -21,7 +21,7 @@ import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractCsvDataSet.CsvDataSetResource;
 import org.datagear.analysis.support.CsvValueDataSet.CsvValueDataSetResource;
@@ -54,9 +54,9 @@ public class CsvValueDataSet extends AbstractCsvDataSet<CsvValueDataSetResource>
 		this.value = value;
 	}
 
-	public CsvValueDataSet(String id, String name, List<DataSetProperty> properties, String value)
+	public CsvValueDataSet(String id, String name, List<DataSetField> fields, String value)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.value = value;
 	}
 

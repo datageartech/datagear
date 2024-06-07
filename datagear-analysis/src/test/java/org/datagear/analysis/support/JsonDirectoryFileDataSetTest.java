@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
@@ -46,13 +46,13 @@ public class JsonDirectoryFileDataSetTest
 	@Test
 	public void getResultTest()
 	{
-		List<DataSetProperty> properties = new ArrayList<>();
-		properties.add(new DataSetProperty("name", DataSetProperty.DataType.STRING));
-		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
-		properties.add(new DataSetProperty("尺寸", DataSetProperty.DataType.NUMBER));
-		properties.add(new DataSetProperty("date", DataSetProperty.DataType.STRING));
+		List<DataSetField> fields = new ArrayList<>();
+		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
+		fields.add(new DataSetField("value", DataSetField.DataType.NUMBER));
+		fields.add(new DataSetField("尺寸", DataSetField.DataType.NUMBER));
+		fields.add(new DataSetField("date", DataSetField.DataType.STRING));
 
-		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", properties, DIRECTORY,
+		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", fields, DIRECTORY,
 				"JsonDirectoryFileDataSetTest-0.json");
 
 		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf());
@@ -94,13 +94,13 @@ public class JsonDirectoryFileDataSetTest
 	@Test
 	public void getResultTest_convertPropertyValue()
 	{
-		List<DataSetProperty> properties = new ArrayList<>();
-		properties.add(new DataSetProperty("name", DataSetProperty.DataType.STRING));
-		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
-		properties.add(new DataSetProperty("尺寸", DataSetProperty.DataType.NUMBER));
-		properties.add(new DataSetProperty("date", DataSetProperty.DataType.DATE));
+		List<DataSetField> fields = new ArrayList<>();
+		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
+		fields.add(new DataSetField("value", DataSetField.DataType.NUMBER));
+		fields.add(new DataSetField("尺寸", DataSetField.DataType.NUMBER));
+		fields.add(new DataSetField("date", DataSetField.DataType.DATE));
 
-		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", properties, DIRECTORY,
+		JsonDirectoryFileDataSet dataSet = new JsonDirectoryFileDataSet("a", "a", fields, DIRECTORY,
 				"JsonDirectoryFileDataSetTest-0.json");
 
 		DataSetResult result = dataSet.getResult(DataSetQuery.valueOf());
@@ -148,35 +148,35 @@ public class JsonDirectoryFileDataSetTest
 				"JsonDirectoryFileDataSetTest-0.json");
 
 		ResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
-		List<DataSetProperty> properties = result.getProperties();
+		List<DataSetField> fields = result.getFields();
 		@SuppressWarnings("unchecked")
 		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
 
 		{
-			assertEquals(4, properties.size());
+			assertEquals(4, fields.size());
 
 			{
-				DataSetProperty property = properties.get(0);
+				DataSetField property = fields.get(0);
 				assertEquals("name", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(1);
+				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(2);
+				DataSetField property = fields.get(2);
 				assertEquals("尺寸", property.getName());
-				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.NUMBER, property.getType());
 			}
 
 			{
-				DataSetProperty property = properties.get(3);
+				DataSetField property = fields.get(3);
 				assertEquals("date", property.getName());
-				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+				assertEquals(DataSetField.DataType.STRING, property.getType());
 			}
 		}
 

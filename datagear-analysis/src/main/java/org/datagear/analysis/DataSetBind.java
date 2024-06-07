@@ -38,8 +38,8 @@ public class DataSetBind implements Serializable
 	/** 数据集 */
 	private DataSet dataSet;
 
-	/** 数据集属性标记映射表 */
-	private Map<String, Set<String>> propertySigns = Collections.emptyMap();
+	/** 数据集字段标记映射表 */
+	private Map<String, Set<String>> fieldSigns = Collections.emptyMap();
 
 	/** 数据集别名 */
 	private String alias = "";
@@ -50,11 +50,11 @@ public class DataSetBind implements Serializable
 	/** 数据集查询 */
 	private DataSetQuery query = null;
 
-	/** 数据集属性别名映射表 */
-	private Map<String, String> propertyAliases = Collections.emptyMap();
+	/** 数据集字段别名映射表 */
+	private Map<String, String> fieldAliases = Collections.emptyMap();
 
-	/** 数据集属性排序 */
-	private Map<String, ? extends Number> propertyOrders = Collections.emptyMap();
+	/** 数据集字段排序 */
+	private Map<String, ? extends Number> fieldOrders = Collections.emptyMap();
 
 	public DataSetBind()
 	{
@@ -78,19 +78,19 @@ public class DataSetBind implements Serializable
 	}
 
 	/**
-	 * 获取数据集属性标记映射表，其关键字是{@linkplain #getDataSet()}的{@linkplain DataSetProperty#getName()}、
+	 * 获取字段标记映射表，其关键字是{@linkplain #getDataSet()}的{@linkplain DataSetField#getName()}、
 	 * 值则{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}的{@linkplain DataSign#getName()}集合。
 	 * 
 	 * @return
 	 */
-	public Map<String, Set<String>> getPropertySigns()
+	public Map<String, Set<String>> getFieldSigns()
 	{
-		return propertySigns;
+		return fieldSigns;
 	}
 
-	public void setPropertySigns(Map<String, Set<String>> propertySigns)
+	public void setFieldSigns(Map<String, Set<String>> fieldSigns)
 	{
-		this.propertySigns = propertySigns;
+		this.fieldSigns = fieldSigns;
 	}
 
 	/**
@@ -139,24 +139,24 @@ public class DataSetBind implements Serializable
 		this.query = query;
 	}
 
-	public Map<String, String> getPropertyAliases()
+	public Map<String, String> getFieldAliases()
 	{
-		return propertyAliases;
+		return fieldAliases;
 	}
 
-	public void setPropertyAliases(Map<String, String> propertyAliases)
+	public void setFieldAliases(Map<String, String> fieldAliases)
 	{
-		this.propertyAliases = propertyAliases;
+		this.fieldAliases = fieldAliases;
 	}
 
-	public Map<String, ? extends Number> getPropertyOrders()
+	public Map<String, ? extends Number> getFieldOrders()
 	{
-		return propertyOrders;
+		return fieldOrders;
 	}
 
-	public void setPropertyOrders(Map<String, ? extends Number> propertyOrders)
+	public void setFieldOrders(Map<String, ? extends Number> fieldOrders)
 	{
-		this.propertyOrders = propertyOrders;
+		this.fieldOrders = fieldOrders;
 	}
 
 	/**

@@ -64,7 +64,7 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 
 	public SummaryDataSetEntity(DataSetEntity dataSetEntity)
 	{
-		super(dataSetEntity.getId(), dataSetEntity.getName(), dataSetEntity.getProperties());
+		super(dataSetEntity.getId(), dataSetEntity.getName(), dataSetEntity.getFields());
 		setMutableModel(dataSetEntity.isMutableModel());
 		setParams(dataSetEntity.getParams());
 		setDataFormat(dataSetEntity.getDataFormat());

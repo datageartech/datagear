@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 
 /**
@@ -51,9 +51,9 @@ public class SimpleExcelDataSet extends AbstractExcelFileDataSet
 		this.file = file;
 	}
 
-	public SimpleExcelDataSet(String id, String name, List<DataSetProperty> properties, File file)
+	public SimpleExcelDataSet(String id, String name, List<DataSetField> fields, File file)
 	{
-		super(id, name, properties);
+		super(id, name, fields);
 		this.file = file;
 	}
 

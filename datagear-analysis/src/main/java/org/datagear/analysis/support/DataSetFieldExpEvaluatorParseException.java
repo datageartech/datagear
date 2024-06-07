@@ -18,46 +18,46 @@
 package org.datagear.analysis.support;
 
 /**
- * {@linkplain DataSetPropertyExpEvaluator}解析异常。
+ * {@linkplain DataSetFieldExpEvaluator}解析异常。
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetPropertyExpEvaluatorParseException extends DataSetPropertyExpEvaluatorException
+public class DataSetFieldExpEvaluatorParseException extends DataSetFieldExpEvaluatorException
 {
 	private static final long serialVersionUID = 1L;
 
-	public DataSetPropertyExpEvaluatorParseException()
+	public DataSetFieldExpEvaluatorParseException()
 	{
 		super();
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(String message, String propertyName)
+	public DataSetFieldExpEvaluatorParseException(String message, String propertyName)
 	{
 		super(message, propertyName);
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(String message, Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorParseException(String message, Throwable cause, String propertyName)
 	{
 		super(message, cause, propertyName);
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(String message, Throwable cause)
+	public DataSetFieldExpEvaluatorParseException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(String message)
+	public DataSetFieldExpEvaluatorParseException(String message)
 	{
 		super(message);
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorParseException(Throwable cause, String propertyName)
 	{
 		super(cause, propertyName);
 	}
 
-	public DataSetPropertyExpEvaluatorParseException(Throwable cause)
+	public DataSetFieldExpEvaluatorParseException(Throwable cause)
 	{
 		super(cause);
 	}

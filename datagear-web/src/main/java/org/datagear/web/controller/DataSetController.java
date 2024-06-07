@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
@@ -1274,12 +1274,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			}
 		}
 
-		List<DataSetProperty> properties = dataSet.getProperties();
-		if (properties != null)
+		List<DataSetField> fields = dataSet.getFields();
+		if (fields != null)
 		{
 			Set<String> names = new HashSet<>();
 
-			for (DataSetProperty property : properties)
+			for (DataSetField property : fields)
 			{
 				String name = property.getName();
 

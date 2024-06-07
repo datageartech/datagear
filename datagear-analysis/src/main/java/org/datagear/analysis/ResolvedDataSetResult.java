@@ -33,7 +33,7 @@ public class ResolvedDataSetResult implements Serializable
 
 	private DataSetResult result;
 
-	private List<DataSetProperty> properties = Collections.emptyList();
+	private List<DataSetField> fields = Collections.emptyList();
 
 	public ResolvedDataSetResult()
 	{
@@ -45,11 +45,11 @@ public class ResolvedDataSetResult implements Serializable
 		this.result = result;
 	}
 
-	public ResolvedDataSetResult(DataSetResult result, List<DataSetProperty> properties)
+	public ResolvedDataSetResult(DataSetResult result, List<DataSetField> fields)
 	{
 		super();
 		this.result = result;
-		this.properties = properties;
+		this.fields = fields;
 	}
 
 	public DataSetResult getResult()
@@ -62,13 +62,13 @@ public class ResolvedDataSetResult implements Serializable
 		this.result = result;
 	}
 
-	public List<DataSetProperty> getProperties()
+	public List<DataSetField> getFields()
 	{
-		return properties;
+		return fields;
 	}
 
-	public void setProperties(List<DataSetProperty> properties)
+	public void setFields(List<DataSetField> fields)
 	{
-		this.properties = properties;
+		this.fields = fields;
 	}
 }
