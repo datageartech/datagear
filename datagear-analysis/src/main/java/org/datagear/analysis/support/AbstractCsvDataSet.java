@@ -99,7 +99,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable
+	protected ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable
 	{
 		Reader reader = null;
 
@@ -110,13 +110,13 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			CSVParser csvParser = buildCSVParser(reader);
 			List<CSVRecord> csvRecords = csvParser.getRecords();
 
-			List<String> propertyNames = resolvePropertyNames(resource, csvRecords);
-			List<Map<String, String>> data = resolveData(resource, propertyNames, csvRecords);
+			List<String> fieldNames = resolveFieldNames(resource, csvRecords);
+			List<Map<String, String>> data = resolveData(resource, fieldNames, csvRecords);
 
 			List<DataSetField> fields = null;
 
-			if (resolveProperties)
-				fields = resolveProperties(propertyNames, data);
+			if (resolveFields)
+				fields = resolveFields(fieldNames, data);
 
 			return new ResourceData(data, fields);
 		}
@@ -127,17 +127,17 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	}
 
 	/**
-	 * 解析属性名。
+	 * 解析字段名。
 	 * 
 	 * @param resource
 	 * @param csvRecords
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<String> resolvePropertyNames(CsvDataSetResource resource,
+	protected List<String> resolveFieldNames(CsvDataSetResource resource,
 			List<CSVRecord> csvRecords) throws Throwable
 	{
-		List<String> propertyNames = null;
+		List<String> fieldNames = null;
 
 		for (int i = 0, len = csvRecords.size(); i < len; i++)
 		{
@@ -146,22 +146,22 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			if (resource.isNameRow(i))
 			{
 				int size = csvRecord.size();
-				propertyNames = new ArrayList<String>(csvRecord.size());
+				fieldNames = new ArrayList<String>(csvRecord.size());
 
 				for (int j = 0; j < size; j++)
-					propertyNames.add(csvRecord.get(j));
+					fieldNames.add(csvRecord.get(j));
 
 				break;
 			}
 			else
 			{
-				if (propertyNames == null)
+				if (fieldNames == null)
 				{
 					int size = csvRecord.size();
-					propertyNames = new ArrayList<String>(csvRecord.size());
+					fieldNames = new ArrayList<String>(csvRecord.size());
 
 					for (int j = 0; j < size; j++)
-						propertyNames.add(Integer.toString(j + 1));
+						fieldNames.add(Integer.toString(j + 1));
 				}
 
 				if (resource.isAfterNameRow(i))
@@ -169,22 +169,22 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			}
 		}
 
-		if (propertyNames == null)
-			propertyNames = Collections.emptyList();
+		if (fieldNames == null)
+			fieldNames = Collections.emptyList();
 
-		return propertyNames;
+		return fieldNames;
 	}
 
 	/**
 	 * 解析数据。
 	 * 
 	 * @param resource
-	 * @param propertyNames
+	 * @param fieldNames
 	 * @param csvRecords
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Map<String, String>> resolveData(CsvDataSetResource resource, List<String> propertyNames,
+	protected List<Map<String, String>> resolveData(CsvDataSetResource resource, List<String> fieldNames,
 			List<CSVRecord> csvRecords) throws Throwable
 	{
 		List<Map<String, String>> data = new ArrayList<>();
@@ -197,9 +197,9 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			Map<String, String> row = new HashMap<>();
 
 			CSVRecord csvRecord = csvRecords.get(i);
-			for (int j = 0, jlen = Math.min(csvRecord.size(), propertyNames.size()); j < jlen; j++)
+			for (int j = 0, jlen = Math.min(csvRecord.size(), fieldNames.size()); j < jlen; j++)
 			{
-				String name = propertyNames.get(j);
+				String name = fieldNames.get(j);
 				String value = csvRecord.get(j);
 
 				row.put(name, value);
@@ -214,34 +214,34 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	/**
 	 * 解析{@linkplain DataSetField}。
 	 * 
-	 * @param propertyNames
+	 * @param fieldNames
 	 * @param data              允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetField> resolveProperties(List<String> propertyNames, List<Map<String, String>> data)
+	protected List<DataSetField> resolveFields(List<String> fieldNames, List<Map<String, String>> data)
 			throws Throwable
 	{
-		int propertyLen = propertyNames.size();
-		List<DataSetField> fields = new ArrayList<>(propertyLen);
+		int fieldLen = fieldNames.size();
+		List<DataSetField> fields = new ArrayList<>(fieldLen);
 	
-		for (String name : propertyNames)
+		for (String name : fieldNames)
 			fields.add(new DataSetField(name, DataSetField.DataType.STRING));
 	
 		// 根据数据格式，修订可能的数值类型：
 		// 如果某一列至少有一个非空字符串、且非空字符串都是数值格式，才认为是数值类型
 		if (data != null && data.size() > 0)
 		{
-			Boolean[] isNumbers = new Boolean[propertyLen];
+			Boolean[] isNumbers = new Boolean[fieldLen];
 	
 			for (Map<String, String> row : data)
 			{
-				for (int i = 0; i < propertyLen; i++)
+				for (int i = 0; i < fieldLen; i++)
 				{
 					if (Boolean.FALSE.equals(isNumbers[i]))
 						continue;
 	
-					String value = row.get(propertyNames.get(i));
+					String value = row.get(fieldNames.get(i));
 
 					if (StringUtil.isEmpty(value))
 						continue;
@@ -250,7 +250,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 				}
 			}
 	
-			for (int i = 0; i < propertyLen; i++)
+			for (int i = 0; i < fieldLen; i++)
 			{
 				if (Boolean.TRUE.equals(isNumbers[i]))
 					fields.get(i).setType(DataSetField.DataType.NUMBER);

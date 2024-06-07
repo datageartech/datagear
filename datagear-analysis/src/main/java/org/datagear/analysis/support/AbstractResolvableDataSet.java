@@ -74,13 +74,13 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param resolveProperties
+	 * @param resolveFields
 	 *            是否从数据中解析{@linkplain DataSetField}，如果为{@code true}，
 	 *            应解析并设置{@linkplain ResolvedDataSetResult#setFields(List)}
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+	protected abstract ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveFields)
 			throws DataSetException;
 
 	/**
@@ -113,7 +113,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * <p>
 	 * 将合并列表的{@linkplain DataSetField#getType()}、{@linkplain DataSetField#getLabel()}、
 	 * {@linkplain DataSetField#getDefaultValue()}合并至基础列表里的同名项，多余项则直接添加，
-	 * 同时根据{@code merge}里的排序对{@code dataSetProperties}重排，返回一个新的列表。
+	 * 同时根据{@code merge}里的排序对{@code base}重排，返回一个新的列表。
 	 * </p>
 	 * 
 	 * @param base

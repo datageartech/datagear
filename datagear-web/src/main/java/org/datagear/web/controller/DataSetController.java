@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
@@ -1279,13 +1279,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		{
 			Set<String> names = new HashSet<>();
 
-			for (DataSetField property : fields)
+			for (DataSetField field : fields)
 			{
-				String name = property.getName();
+				String name = field.getName();
 
 				if(isEmpty(name))
 				{
-					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "propertyNameRequired");
+					return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "fieldNameRequired");
 				}
 				else
 				{
@@ -1296,7 +1296,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 					if (names.contains(upperCaseName))
 					{
 						return optFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-								"propertyNameMustBeUniqueIgnoreCase");
+								"fieldNameMustBeUniqueIgnoreCase");
 					}
 					else
 						names.add(upperCaseName);

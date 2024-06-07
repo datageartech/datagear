@@ -187,10 +187,10 @@
 		pm.previewError = false;
 		pm.previewPanelShow = true;
 		
-		if(!fm.mutableModel && !pm.isReadonlyAction && pm.autoGenerateProperty)
+		if(!fm.mutableModel && !pm.isReadonlyAction && pm.autoGenerateField)
 		{
 			fm.fields = response.fields;
-			pm.selectedProperties = [];
+			pm.selectedFields = [];
 			
 			if(po._prevPreviewFingerprint)
 				po._prevPreviewFingerprint.fields = $.extend(true, [], response.fields);

@@ -7,6 +7,12 @@ org.datagear.analysis.DataSetField
 org.datagear.analysis.DataSet.properties
 org.datagear.analysis.DataSet.fields
 
+org.datagear.analysis.DataSet.Properties
+org.datagear.analysis.DataSet.Fields
+
+org.datagear.analysis.DataSet.Property
+org.datagear.analysis.DataSet.Field
+
 org.datagear.analysis.DataSet.getProperties
 org.datagear.analysis.DataSet.getFields
 
@@ -60,3 +66,21 @@ org.datagear.analysis.DataSetBind.getFieldOrders
 
 org.datagear.analysis.DataSetBind.setPropertyOrders
 org.datagear.analysis.DataSetBind.setFieldOrders
+
+propertyNameRequired
+fieldNameRequired
+
+propertyNameMustBeUniqueIgnoreCase
+fieldNameMustBeUniqueIgnoreCase
+
+dataSet_form_param_property_form.ftl
+dataSet_form_param_field_form.ftl
+
+dataSet_form_param_property.ftl
+dataSet_form_param_field.ftl
+
+insertPropName
+insertFieldName
+
+sqWhileDqPropNameInExpIsIllegal
+sqWhileDqFieldNameInExpIsIllegal

@@ -25,8 +25,8 @@ import java.util.Map;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.DataFormat;
 import org.datagear.analysis.support.ProfileDataSet;
@@ -557,7 +557,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		else
 			entity = getExtDataSetEntityById(entity, params);
 
-		inflateParamsAndProperties(entity);
+		inflateParamsAndFields(entity);
 
 		return entity;
 	}
@@ -567,7 +567,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		return entity;
 	}
 
-	protected void inflateParamsAndProperties(DataSetEntity dataSetEntity)
+	protected void inflateParamsAndFields(DataSetEntity dataSetEntity)
 	{
 		if (dataSetEntity == null)
 			return;
@@ -575,9 +575,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		Map<String, Object> params = buildParamMap();
 		params.put("dataSetId", dataSetEntity.getId());
 
-		List<DataSetFieldPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
-		List<DataSetField> dataSetProperties = DataSetFieldPO.to(propertyPOs);
-		dataSetEntity.setFields(dataSetProperties);
+		List<DataSetFieldPO> fieldPOs = selectListMybatis("getFieldPOs", params);
+		List<DataSetField> fields = DataSetFieldPO.to(fieldPOs);
+		dataSetEntity.setFields(fields);
 
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", params);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
@@ -710,7 +710,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		Map<String, Object> delParams = buildParamMap();
 		delParams.put("dataSetId", entity.getId());
 
-		deleteMybatis("deletePropertyPOs", delParams);
+		deleteMybatis("deleteFieldPOs", delParams);
 
 		List<DataSetFieldPO> pos = DataSetFieldPO.from(entity);
 
@@ -721,7 +721,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				Map<String, Object> insertParams = buildParamMap();
 				insertParams.put("entity", relation);
 
-				insertMybatis("insertPropertyPO", insertParams);
+				insertMybatis("insertFieldPO", insertParams);
 			}
 		}
 	}

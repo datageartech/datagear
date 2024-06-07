@@ -74,7 +74,7 @@ public class JsonValueDataSetTest
 	}
 
 	@Test
-	public void getResultTest_hasParam_convertPropertyValue()
+	public void getResultTest_hasParam_convertFieldValue()
 	{
 		List<DataSetField> fields = new ArrayList<>();
 		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
@@ -137,9 +137,9 @@ public class JsonValueDataSetTest
 			assertEquals(3, fields.size());
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
@@ -149,9 +149,9 @@ public class JsonValueDataSetTest
 			}
 
 			{
-				DataSetField property = fields.get(2);
-				assertEquals("size", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				DataSetField field = fields.get(2);
+				assertEquals("size", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 		}
 

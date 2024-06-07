@@ -765,7 +765,7 @@ label.align-tip{
 	height: 50vh;
 }
 .page-form-dataSet .params-wrapper .params-table .p-datatable-wrapper,
-.page-form-dataSet .properties-wrapper .properties-table .p-datatable-wrapper{
+.page-form-dataSet .fields-wrapper .fields-table .p-datatable-wrapper{
 	min-height: 20vh;
 }
 

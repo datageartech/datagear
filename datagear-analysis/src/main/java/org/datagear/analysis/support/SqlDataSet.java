@@ -130,7 +130,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveFields)
 			throws DataSetException
 	{
 		String sql = resolveTemplateSql(getSql(), query);
@@ -171,7 +171,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			try
 			{
 				ResultSet rs = qrs.getResultSet();
-				ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveProperties);
+				ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveFields);
 
 				dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(), sql);
 			}
@@ -230,20 +230,20 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * @param cn
 	 * @param rs
 	 * @param query
-	 * @param resolveProperties
+	 * @param resolveFields
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, DataSetQuery query,
-			boolean resolveProperties) throws Throwable
+			boolean resolveFields) throws Throwable
 	{
-		List<DataSetField> rawProperties =(resolveProperties ? new ArrayList<DataSetField>() : Collections.emptyList());
-		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query, resolveProperties, rawProperties);
+		List<DataSetField> rawFields = (resolveFields ? new ArrayList<DataSetField>() : Collections.emptyList());
+		List<Map<String, ?>> rawData = resolveRawData(cn, rs, query, resolveFields, rawFields);
 		
-		if(resolveProperties)
-			calibrateFields(rawProperties, rawData);
+		if (resolveFields)
+			calibrateFields(rawFields, rawData);
 		
-		return resolveResult(query, rawData, rawProperties);
+		return resolveResult(query, rawData, rawFields);
 	}
 
 	/**
@@ -276,13 +276,13 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		
 		@JDBCCompatiblity("应在遍历ResultSet数据前读取ResultSetMetaData信息解析数据集字段，"
 				+ "因为某些驱动在遍历数据后读取ResultSetMetaData会报【ResultSet已关闭】的错误（比如DB2-9.7的db2jcc4.jar驱动）")
-		boolean resolvePropertiesHere = resolveFields;
-		if (resolvePropertiesHere)
+		boolean resolveFieldsHere = resolveFields;
+		if (resolveFieldsHere)
 		{
 			for (int i = 0; i < colNames.length; i++)
 			{
-				DataSetField property = new DataSetField(colNames[i], fieldTypes[i]);
-				fields.add(property);
+				DataSetField field = new DataSetField(colNames[i], fieldTypes[i]);
+				fields.add(field);
 			}
 		}
 		
@@ -345,13 +345,13 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		
 		Map<String, ?> row0 = data.get(0);
 		
-		for (DataSetField property : fields)
+		for (DataSetField field : fields)
 		{
-			boolean resolveTypeByValue = DataType.UNKNOWN.equals(property.getType());
+			boolean resolveTypeByValue = DataType.UNKNOWN.equals(field.getType());
 
 			if (resolveTypeByValue)
 			{
-				property.setType(resolvePropertyDataType(row0.get(property.getName())));
+				field.setType(resolveFieldDataType(row0.get(field.getName())));
 			}
 		}
 	}

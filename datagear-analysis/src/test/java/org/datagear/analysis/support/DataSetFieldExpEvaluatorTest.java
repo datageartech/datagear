@@ -587,9 +587,9 @@ public class DataSetFieldExpEvaluatorTest
 		this.evaluator.eval(fields, datas, new ValueSetter<Map<String, Object>>()
 		{
 			@Override
-			public void set(DataSetField property, int propertyIndex, Map<String, Object> data, Object value)
+			public void set(DataSetField field, int fieldIndex, Map<String, Object> data, Object value)
 			{
-				data.put(property.getName(), value);
+				data.put(field.getName(), value);
 			}
 		});
 
@@ -621,9 +621,9 @@ public class DataSetFieldExpEvaluatorTest
 		boolean evaled = this.evaluator.eval(fields, datas, new ValueSetter<Map<String, Object>>()
 		{
 			@Override
-			public void set(DataSetField property, int propertyIndex, Map<String, Object> data, Object value)
+			public void set(DataSetField field, int fieldIndex, Map<String, Object> data, Object value)
 			{
-				data.put(property.getName(), value);
+				data.put(field.getName(), value);
 			}
 		});
 

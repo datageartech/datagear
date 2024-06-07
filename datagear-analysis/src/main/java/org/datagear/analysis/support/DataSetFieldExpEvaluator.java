@@ -207,7 +207,7 @@ public class DataSetFieldExpEvaluator
 	/**
 	 * 计算表达式的值。
 	 * 
-	 * @param property
+	 * @param expression
 	 *            {@linkplain DataSetField#getExpression()}不应为空
 	 * @param datas
 	 * @return
@@ -283,7 +283,7 @@ public class DataSetFieldExpEvaluator
 		if (count < 1)
 			return false;
 
-		DataSetField property = null;
+		DataSetField field = null;
 
 		try
 		{
@@ -294,13 +294,13 @@ public class DataSetFieldExpEvaluator
 				// 必须按顺序计算，确保表达式中的属性取值逻辑符合规范
 				for (int i = 0; i < plen; i++)
 				{
-					property = fields.get(i);
+					field = fields.get(i);
 					Expression expression = expressions.get(i);
 
 					if (expression != null)
 					{
 						Object value = doEvalSingle(expression, context, data);
-						valueSetter.set(property, i, data, value);
+						valueSetter.set(field, i, data, value);
 					}
 				}
 			}
@@ -313,7 +313,7 @@ public class DataSetFieldExpEvaluator
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetFieldExpEvaluatorException(t, (property == null ? "" : property.getName()));
+			throw new DataSetFieldExpEvaluatorException(t, (field == null ? "" : field.getName()));
 		}
 	}
 
@@ -382,12 +382,12 @@ public class DataSetFieldExpEvaluator
 		return expression.getValue(context, data);
 	}
 
-	protected Expression parseExpression(DataSetField property)
+	protected Expression parseExpression(DataSetField field)
 			throws DataSetFieldExpEvaluatorParseException, DataSetFieldExpEvaluatorException
 	{
 		try
 		{
-			return parseExpression(property.getExpression());
+			return parseExpression(field.getExpression());
 		}
 		catch (DataSetFieldExpEvaluatorException e)
 		{
@@ -395,7 +395,7 @@ public class DataSetFieldExpEvaluator
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetFieldExpEvaluatorParseException(t, property.getName());
+			throw new DataSetFieldExpEvaluatorParseException(t, field.getName());
 		}
 	}
 
@@ -510,14 +510,14 @@ public class DataSetFieldExpEvaluator
 		/**
 		 * 设置计算结果值。
 		 * 
-		 * @param property
-		 * @params propertyIndex
+		 * @param field
+		 * @params fieldIndex
 		 * @param data
 		 *            待设置{@code value}的数据对象
 		 * @param value
 		 *            计算结果值
 		 */
-		void set(DataSetField property, int propertyIndex, T data, Object value);
+		void set(DataSetField field, int fieldIndex, T data, Object value);
 	}
 	
 	/**

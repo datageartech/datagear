@@ -2150,13 +2150,13 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 数据标记对象、标记名称
-	 * @param nonEmpty 可选，参考chartBase.dataSetPropertiesOfSign的nonEmpty参数
+	 * @param nonEmpty 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
 	 * @return {...}、undefined
 	 */
-	chartBase.dataSetPropertyOfSign = function(dataSetBind, dataSign, nonEmpty)
+	chartBase.dataSetFieldOfSign = function(dataSetBind, dataSign, nonEmpty)
 	{
-		var properties = this.dataSetPropertiesOfSign(dataSetBind, dataSign, false, nonEmpty);
-		return (properties.length > 0 ? properties[0] : undefined);
+		var fields = this.dataSetFieldsOfSign(dataSetBind, dataSign, false, nonEmpty);
+		return (fields.length > 0 ? fields[0] : undefined);
 	};
 	
 	/**
@@ -2170,7 +2170,7 @@
 	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
 	 * @return [...]
 	 */
-	chartBase.dataSetPropertiesOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
+	chartBase.dataSetFieldsOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		sort = (sort === undefined ? true : sort);
@@ -2181,11 +2181,11 @@
 		if(dataSign == null)
 			return re;
 		
-		dataSetProperties = this.dataSetProperties(dataSetBind, sort);
+		var dataSetFields = this.dataSetFields(dataSetBind, sort);
 		var dataSignName = (chartFactory.isString(dataSign) ? dataSign : dataSign.name);
 		var fieldSigns = (dataSetBind.fieldSigns || {});
 		
-		var signPropertyNames = [];
+		var signFieldNames = [];
 		
 		for(var pname in fieldSigns)
 		{
@@ -2195,18 +2195,18 @@
 			{
 				if(mySigns[i] == dataSignName)
 				{
-					signPropertyNames.push(pname);
+					signFieldNames.push(pname);
 					break;
 				}
 			}
 		}
 		
-		for(var i=0; i<dataSetProperties.length; i++)
+		for(var i=0; i<dataSetFields.length; i++)
 		{
-			for(var j=0; j<signPropertyNames.length; j++)
+			for(var j=0; j<signFieldNames.length; j++)
 			{
-				if(dataSetProperties[i].name == signPropertyNames[j])
-					re.push(dataSetProperties[i]);
+				if(dataSetFields[i].name == signFieldNames[j])
+					re.push(dataSetFields[i]);
 			}
 		}
 		
@@ -2217,7 +2217,7 @@
 		}
 		
 		if(nonEmpty && re.length == 0)
-			throw new Error("data set property with '"+dataSignName+"' sign required");
+			throw new Error("DataSetField with '"+dataSignName+"' sign required");
 		
 		return re;
 	};
@@ -2323,31 +2323,31 @@
 	 * 获取数据集结果数据的行对象指定属性值。
 	 * 
 	 * @param rowObj 行对象
-	 * @param property 属性对象、属性名
+	 * @param field 数据集字段对象、字段名
 	 */
-	chartBase.resultRowCell = function(rowObj, property)
+	chartBase.resultRowCell = function(rowObj, field)
 	{
-		if(!rowObj || !property)
+		if(!rowObj || !field)
 			return undefined;
 		
-		var name = (property.name || property);
+		var name = (field.name || field);
 		return rowObj[name];
 	};
 	
 	/**
-	 * 将数据集结果数据的行对象按照指定properties顺序转换为行值数组。
+	 * 将数据集结果数据的行对象按照指定fields顺序转换为行值数组。
 	 * 
 	 * @param result 数据集结果对象
-	 * @param properties 数据集字段对象数组、字段名数组、字段对象、字段名
+	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 可选，行索引，默认为0
 	 * @param count 可选，获取的最多行数，默认为全部
-	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
+	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
 	 */
-	chartBase.resultRowArrays = function(result, properties, row, count)
+	chartBase.resultRowArrays = function(result, fields, row, count)
 	{
 		var re = [];
 		
-		if(!result || !properties)
+		if(!result || !fields)
 			return re;
 		
 		var datas = this.resultDatas(result);
@@ -2357,16 +2357,16 @@
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if($.isArray(properties))
+		if($.isArray(fields))
 		{
 			for(var i=row; i< getCount; i++)
 			{
 				var rowObj = datas[i];
 				var rowVal = [];
 				
-				for(var j=0; j<properties.length; j++)
+				for(var j=0; j<fields.length; j++)
 				{
-					var p = properties[j];
+					var p = fields[j];
 					
 					var name = (p ? (p.name || p) : undefined);
 					if(!name)
@@ -2380,7 +2380,7 @@
 		}
 		else
 		{
-			var name = (properties ? (properties.name || properties) : undefined);
+			var name = (fields ? (fields.name || fields) : undefined);
 			
 			if(name)
 			{
@@ -2396,19 +2396,19 @@
 	};
 	
 	/**
-	 * 将数据集结果数据的行对象按照指定properties顺序转换为列值数组。
+	 * 将数据集结果数据的行对象按照指定fields顺序转换为列值数组。
 	 * 
 	 * @param result 数据集结果对象
-	 * @param properties 数据集字段对象数组、字段名数组、字段对象、字段名
+	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
-	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
+	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
 	 */
-	chartBase.resultColumnArrays = function(result, properties, row, count)
+	chartBase.resultColumnArrays = function(result, fields, row, count)
 	{
 		var re = [];
 
-		if(!result || !properties)
+		if(!result || !fields)
 			return re;
 		
 		var datas = this.resultDatas(result);
@@ -2418,11 +2418,11 @@
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if($.isArray(properties))
+		if($.isArray(fields))
 		{
-			for(var i=0; i<properties.length; i++)
+			for(var i=0; i<fields.length; i++)
 			{
-				var p = properties[i];
+				var p = fields[i];
 				
 				var name = (p ? (p.name || p) : undefined);
 				if(!name)
@@ -2438,7 +2438,7 @@
 		}
 		else
 		{
-			var name = (properties ? (properties.name || properties) : undefined);
+			var name = (fields ? (fields.name || fields) : undefined);
 
 			if(name)
 			{
@@ -2457,45 +2457,45 @@
 	 * 获取数据集结果数据的名称/值对象数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
-	 * @param nameProperty 名称属性对象、属性名
-	 * @param valueProperty 值属性对象、属性名、数组
+	 * @param nameField 名称数据集字段对象、字段名
+	 * @param valueField 值数据集字段对象、字段名、数组
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{name: ..., value: ...}, ...]
 	 */
-	chartBase.resultNameValueObjects = function(result, nameProperty, valueProperty, row, count)
+	chartBase.resultNameValueObjects = function(result, nameField, valueField, row, count)
 	{
-		var propertyMap ={ "name": nameProperty, "value": valueProperty };
-		return this.resultMapObjects(result, propertyMap, row, count);
+		var fieldMap ={ "name": nameField, "value": valueField };
+		return this.resultMapObjects(result, fieldMap, row, count);
 	};
 	
 	/**
 	 * 获取数据集结果数据的值对象数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
-	 * @param valueProperty 值属性对象、属性名、数组
+	 * @param valueField 值数据集字段对象、字段名、数组
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{value: ...}, ...]
 	 */
-	chartBase.resultValueObjects = function(result, valueProperty, row, count)
+	chartBase.resultValueObjects = function(result, valueField, row, count)
 	{
-		var propertyMap ={ "value": valueProperty };
-		return this.resultMapObjects(result, propertyMap, row, count);
+		var fieldMap ={ "value": valueField };
+		return this.resultMapObjects(result, fieldMap, row, count);
 	};
 	
 	/**
 	 * 获取数据集结果数据指定属性、指定行的单元格值，没有则返回undefined。
 	 * 
 	 * @param result 数据集结果对象
-	 * @param property 数据集字段对象、字段名
+	 * @param field 数据集字段对象、字段名
 	 * @param row 行索引，可选，默认为0
 	 */
-	chartBase.resultCell = function(result, property, row)
+	chartBase.resultCell = function(result, field, row)
 	{
 		row = (row || 0);
 		
-		var re = this.resultRowArrays(result, property, row, 1);
+		var re = this.resultRowArrays(result, field, row, 1);
 		
 		return (re.length > 0 ? re[0] : undefined);
 	};
@@ -3123,35 +3123,35 @@
 	 * @returns 数据集字段数组，返回空数组表示没有
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetProperties = function(dataSetBind, sort)
+	chartBase.dataSetFields = function(dataSetBind, sort)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		sort = (sort === undefined ? true : sort);
 		
-		var properties = null;
-		var isDataSet = (dataSetBind.properties !== undefined);
+		var fields = null;
+		var isDataSet = (dataSetBind.fields !== undefined);
 		
 		if(isDataSet)
-			properties = dataSetBind.properties;
+			fields = dataSetBind.fields;
 		else
-			properties = (dataSetBind.dataSet ? dataSetBind.dataSet.properties : null);
+			fields = (dataSetBind.dataSet ? dataSetBind.dataSet.fields : null);
 		
-		properties = (properties || []);
+		fields = (fields || []);
 		
 		if(isDataSet || !sort)
-			return properties;
+			return fields;
 		
 		var fieldOrders = dataSetBind.fieldOrders;
 		
 		if(!fieldOrders)
-			return properties;
+			return fields;
 		
 		var pos = [];
 		
-		for(var i=0; i<properties.length; i++)
+		for(var i=0; i<fields.length; i++)
 		{
-			var p = properties[i];
-			pos[i] = { property: p, order: fieldOrders[p.name], index: i };
+			var p = fields[i];
+			pos[i] = { field: p, order: fieldOrders[p.name], index: i };
 		}
 		
 		pos.sort(function(a, b)
@@ -3178,7 +3178,7 @@
 		var re = [];
 		
 		for(var i=0; i<pos.length; i++)
-			re[i] = pos[i].property;
+			re[i] = pos[i].field;
 		
 		return re;
 	};
@@ -3191,20 +3191,20 @@
 	 * @returns 数据集字段，没有找到则返回undefined
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetProperty = function(dataSetBind, info)
+	chartBase.dataSetField = function(dataSetBind, info)
 	{
-		var properties = this.dataSetProperties(dataSetBind, false);
+		var fields = this.dataSetFields(dataSetBind, false);
 		
-		if(!properties)
+		if(!fields)
 			return undefined;
 		
 		if(chartFactory.isNumber(info))
-			return properties[info];
+			return fields[info];
 		
-		for(var i=0; i<properties.length; i++)
+		for(var i=0; i<fields.length; i++)
 		{
-			if(properties[i].name == info)
-				return properties[i];
+			if(fields[i].name == info)
+				return fields[i];
 		}
 		
 		return undefined;
@@ -3214,28 +3214,28 @@
 	 * 获取/设置数据集字段别名。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetProperty 数据集字段、字段名、字段索引
+	 * @param dataSetField 数据集字段、字段名、字段索引
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetPropertyAlias = function(dataSetBind, dataSetProperty, alias)
+	chartBase.dataSetFieldAlias = function(dataSetBind, dataSetField, alias)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		if(chartFactory.isStringOrNumber(dataSetProperty))
-			dataSetProperty = this.dataSetProperty(dataSetBind, dataSetProperty);
+		if(chartFactory.isStringOrNumber(dataSetField))
+			dataSetField = this.dataSetField(dataSetBind, dataSetField);
 		
 		if(alias === undefined)
 		{
-			if(!dataSetProperty)
+			if(!dataSetField)
 				return "";
 			
 			alias =  (dataSetBind.fieldAliases ?
-							dataSetBind.fieldAliases[dataSetProperty.name] : null);
+							dataSetBind.fieldAliases[dataSetField.name] : null);
 			
 			if(!alias)
-				alias = (dataSetProperty.label ||  dataSetProperty.name);
+				alias = (dataSetField.label ||  dataSetField.name);
 			
 			return (alias || "");
 		}
@@ -3244,7 +3244,7 @@
 			if(!dataSetBind.fieldAliases)
 				dataSetBind.fieldAliases = {};
 			
-			dataSetBind.fieldAliases[dataSetProperty.name] = alias;
+			dataSetBind.fieldAliases[dataSetField.name] = alias;
 		}
 	};
 	
@@ -3252,25 +3252,25 @@
 	 * 获取/设置数据集字段排序值。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetProperty 数据集字段、字段名、字段索引
+	 * @param dataSetField 数据集字段、字段名、字段索引
 	 * @param order 可选，要设置的排序数值，不设置则执行获取操作
 	 * @returns 要获取的排序数值，没有设置过则返回null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetPropertyOrder = function(dataSetBind, dataSetProperty, order)
+	chartBase.dataSetFieldOrder = function(dataSetBind, dataSetField, order)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		var name = null;
 		
-		if(chartFactory.isString(dataSetProperty))
-			name = dataSetProperty;
+		if(chartFactory.isString(dataSetField))
+			name = dataSetField;
 		else
 		{
-			if(chartFactory.isNumber(dataSetProperty))
-				dataSetProperty = this.dataSetProperty(dataSetBind, dataSetProperty);
+			if(chartFactory.isNumber(dataSetField))
+				dataSetField = this.dataSetField(dataSetBind, dataSetField);
 			
-			name = (dataSetProperty ? dataSetProperty.name : null);
+			name = (dataSetField ? dataSetField.name : null);
 		}
 		
 		if(order === undefined)
@@ -3358,13 +3358,13 @@
 	 * 获取数据集结果数据经属性映射后的对象数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
-	 * @param propertyMap 返回对象属性映射表，格式为：{ 返回对象属性名: 数据集结果数据属性对象、属性名、属性数组、属性名数组 }
+	 * @param fieldMap 返回对象属性映射表，格式为：{ 返回对象属性名: 数据集结果数据属性对象、属性名、属性数组、属性名数组 }
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{"...": ..., "...": ...}, ...]
 	 * @since 2.10.0
 	 */
-	chartBase.resultMapObjects = function(result, propertyMap, row, count)
+	chartBase.resultMapObjects = function(result, fieldMap, row, count)
 	{
 		var re = [];
 		
@@ -3373,17 +3373,17 @@
 		count = (count == null ? datas.length : (count < datas.length ? count : datas.length));
 		
 		var propIsArray = {};
-		for(var opn in propertyMap)
-			propIsArray[opn] = $.isArray(propertyMap[opn]);
+		for(var opn in fieldMap)
+			propIsArray[opn] = $.isArray(fieldMap[opn]);
 		
 		for(var i=row; i<count; i++)
 		{
 			var di = datas[i];
 			var obj = (di == null ? null : {});
 			
-			for(var opn in propertyMap)
+			for(var opn in fieldMap)
 			{
-				var dp = propertyMap[opn];
+				var dp = fieldMap[opn];
 				
 				if(dp == null){}
 				else if(propIsArray[opn])
@@ -3442,25 +3442,25 @@
 	 * 获取/设置指定数据集字段标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetProperty 数据集字段、字段名、字段索引
+	 * @param dataSetField 数据集字段、字段名、字段索引
 	 * @param dataSign 可选，要设置的数据标记对象、对象数组，或者名称字符串、字符串数组，或者null，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetPropertySign = function(dataSetBind, dataSetProperty, dataSign)
+	chartBase.dataSetFieldSign = function(dataSetBind, dataSetField, dataSign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
 		var name = null;
 		
-		if(chartFactory.isString(dataSetProperty))
-			name = dataSetProperty;
+		if(chartFactory.isString(dataSetField))
+			name = dataSetField;
 		else
 		{
-			if(chartFactory.isNumber(dataSetProperty))
-				dataSetProperty = this.dataSetProperty(dataSetBind, dataSetProperty);
+			if(chartFactory.isNumber(dataSetField))
+				dataSetField = this.dataSetField(dataSetBind, dataSetField);
 			
-			name = (dataSetProperty ? dataSetProperty.name : null);
+			name = (dataSetField ? dataSetField.name : null);
 		}
 		
 		if(dataSign === undefined)
@@ -3473,7 +3473,7 @@
 			if(!dataSetBind.fieldSigns)
 				dataSetBind.fieldSigns = {};
 			
-			dataSign = this._trimDataSetPropertySign(dataSign);
+			dataSign = this._trimDataSetFieldSign(dataSign);
 			dataSetBind.fieldSigns[name] = dataSign;
 		}
 	};
@@ -3487,7 +3487,7 @@
 	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetPropertySigns = function(dataSetBind, signs, increment)
+	chartBase.dataSetFieldSigns = function(dataSetBind, signs, increment)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		increment = (increment == null ? true : increment);
@@ -3504,7 +3504,7 @@
 			{
 				for(var p in signs)
 				{
-					var ps = this._trimDataSetPropertySign(signs[p]);
+					var ps = this._trimDataSetFieldSign(signs[p]);
 					trimSigns[p] = ps;
 				}
 			}
@@ -3519,7 +3519,7 @@
 		}
 	};
 	
-	chartBase._trimDataSetPropertySign = function(dataSign)
+	chartBase._trimDataSetFieldSign = function(dataSign)
 	{
 		if(dataSign == null)
 			return null;
@@ -4190,6 +4190,85 @@
 	// < 已弃用函数 start
 	//-------------
 	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetPropertyOfSign = function(dataSetBind, dataSign, nonEmpty)
+	{
+		return this.dataSetFieldOfSign(dataSetBind, dataSign, nonEmpty);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetPropertiesOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
+	{
+		return this.dataSetFieldsOfSign(dataSetBind, dataSign, sort, nonEmpty);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetProperties = function(dataSetBind, sort)
+	{
+		return this.dataSetFields(dataSetBind, sort);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetProperty = function(dataSetBind, info)
+	{
+		return this.dataSetField(dataSetBind, info);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetPropertyAlias = function(dataSetBind, dataSetField, alias)
+	{
+		return this.dataSetFieldAlias(dataSetBind, dataSetField, alias);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetPropertyOrder = function(dataSetBind, dataSetField, order)
+	{
+		return this.dataSetFieldOrder(dataSetBind, dataSetField, order);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetPropertySign = function(dataSetBind, dataSetField, dataSign)
+	{
+		return this.dataSetFieldSign(dataSetBind, dataSetField, dataSign);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	chartBase.dataSetPropertySigns = function(dataSetBind, signs, increment)
+	{
+		return this.dataSetFieldSigns(dataSetBind, signs, increment);
+	};
+	
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	
+	
 	// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
 	/**图表地图*/
 	elementAttrConst.MAP = "dg-chart-map";
@@ -4731,23 +4810,23 @@
 	};
 	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.hasDataSetParam()取代
 	
-	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetPropertyAlias()取代
+	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetFieldAlias()取代
 	/**
 	 * 获取数据集字段标签，它不会返回null。
-	 *  
-	 * @param dataSetProperty
+	 * 
+	 * @param dataSetField
 	 * @returns "..."
 	 */
-	chartBase.dataSetPropertyLabel = function(dataSetProperty)
+	chartBase.dataSetPropertyLabel = function(dataSetField)
 	{
-		if(!dataSetProperty)
+		if(!dataSetField)
 			return "";
 		
-		var label = (dataSetProperty.label ||  dataSetProperty.name);
+		var label = (dataSetField.label ||  dataSetField.name);
 		
 		return (label || "");
 	};
-	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetPropertyAlias()取代
+	// > @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetFieldAlias()取代
 	
 	// < @deprecated 兼容2.9.0版本的API，将在未来版本移除，已被chartBase.dataSetAlias()取代
 	/**

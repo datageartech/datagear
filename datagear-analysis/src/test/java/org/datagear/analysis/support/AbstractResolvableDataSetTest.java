@@ -39,7 +39,7 @@ import org.junit.Test;
 public class AbstractResolvableDataSetTest
 {
 	@Test
-	public void mergeDataSetPropertiesTest()
+	public void mergeDataSetFieldsTest()
 	{
 		TestAbstractResolvableDataSet dataSet = new TestAbstractResolvableDataSet();
 
@@ -94,7 +94,7 @@ public class AbstractResolvableDataSetTest
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+		protected ResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveFields)
 				throws DataSetException
 		{
 			throw new UnsupportedOperationException();

@@ -278,11 +278,11 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 			for (int i = 0; i < plen; i++)
 			{
-				DataSetField property = fields.get(i);
+				DataSetField field = fields.get(i);
 
-				String name = property.getName();
+				String name = field.getName();
 				Object value = rowRaw.get(name);
-				value = convertToPropertyDataType(converter, value, property);
+				value = convertToFieldDataType(converter, value, field);
 				
 				//无论是否计算属性，这里都应设置默认值
 				if(value == null)
@@ -311,14 +311,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		evaluator.eval(fields, data, new ValueSetter<Map<String, Object>>()
 		{
 			@Override
-			public void set(DataSetField property, int propertyIndex, Map<String, Object> data, Object value)
+			public void set(DataSetField field, int fieldIndex, Map<String, Object> data, Object value)
 			{
-				value = convertToPropertyDataType(converter, value, property);
+				value = convertToFieldDataType(converter, value, field);
 				
 				if (value == null)
-					value = defaultValues.get(propertyIndex);
+					value = defaultValues.get(fieldIndex);
 				
-				data.put(property.getName(), value);
+				data.put(field.getName(), value);
 			}
 		});
 	}
@@ -335,8 +335,8 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			for (int i = 0; i < plen; i++)
 			{
-				DataSetField property = fields.get(i);
-				String name = property.getName();
+				DataSetField field = fields.get(i);
+				String name = field.getName();
 				Object value = row.get(name);
 				Object fv = formatter.format(value);
 				
@@ -359,7 +359,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		for (DataSetField p : fields)
 		{
 			Object defaultValue = p.getDefaultValue();
-			defaultValue = convertToPropertyDataType(converter, defaultValue, p);
+			defaultValue = convertToFieldDataType(converter, defaultValue, p);
 			defaultValues.add(defaultValue);
 		}
 
@@ -393,13 +393,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 如果{@code names}某元素没有对应的{@linkplain DataSetField}，返回列表对应元素位置将为{@code null}。
 	 * </p>
 	 * 
-	 * @param dataSetProperties
+	 * @param fields
 	 * @param names
 	 * @return
 	 */
-	protected List<DataSetField> findDataSetProperties(List<DataSetField> dataSetProperties, String[] names)
+	protected List<DataSetField> findDataSetFields(List<DataSetField> fields, String[] names)
 	{
-		return findDataSetProperties(dataSetProperties, Arrays.asList(names));
+		return findDataSetFields(fields, Arrays.asList(names));
 	}
 
 	/**
@@ -408,43 +408,43 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 如果{@code names}某元素没有对应的{@linkplain DataSetField}，返回列表对应元素位置将为{@code null}。
 	 * </p>
 	 * 
-	 * @param dataSetProperties
+	 * @param fields
 	 * @param names
 	 * @return
 	 */
-	protected List<DataSetField> findDataSetProperties(List<DataSetField> dataSetProperties, List<String> names)
+	protected List<DataSetField> findDataSetFields(List<DataSetField> fields, List<String> names)
 	{
-		return NameAwareUtil.finds(dataSetProperties, names);
+		return NameAwareUtil.finds(fields, names);
 	}
 
 	/**
 	 * 将源对象转换为指定{@linkplain DataSetField.DataType}类型的对象。
 	 * <p>
-	 * 如果{@code property}为{@code null}，则什么也不做直接返回。
+	 * 如果{@code field}为{@code null}，则什么也不做直接返回。
 	 * </p>
 	 * 
 	 * @param converter
 	 * @param source
 	 *            允许为{@code null}
-	 * @param property
+	 * @param field
 	 *            允许为{@code null}
 	 * @return
 	 */
-	protected Object convertToPropertyDataType(DataSetFieldValueConverter converter, Object source,
-			DataSetField property)
+	protected Object convertToFieldDataType(DataSetFieldValueConverter converter, Object source,
+			DataSetField field)
 	{
-		if (property == null)
+		if (field == null)
 			return source;
 
 		if (source == null)
 			return null;
 		
-		String propertyType = property.getType();
+		String fieldType = field.getType();
 		
-		if (propertyType == null || DataSetField.DataType.UNKNOWN.equals(propertyType))
+		if (fieldType == null || DataSetField.DataType.UNKNOWN.equals(fieldType))
 			return source;
 
-		return converter.convert(source, property);
+		return converter.convert(source, field);
 	}
 
 	/**
@@ -476,7 +476,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param value
 	 * @return
 	 */
-	protected String resolvePropertyDataType(Object value)
+	protected String resolveFieldDataType(Object value)
 	{
 		return DataSetField.DataType.resolveDataType(value);
 	}

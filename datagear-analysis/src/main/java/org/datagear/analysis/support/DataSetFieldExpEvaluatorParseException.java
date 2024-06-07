@@ -32,14 +32,14 @@ public class DataSetFieldExpEvaluatorParseException extends DataSetFieldExpEvalu
 		super();
 	}
 
-	public DataSetFieldExpEvaluatorParseException(String message, String propertyName)
+	public DataSetFieldExpEvaluatorParseException(String message, String fieldName)
 	{
-		super(message, propertyName);
+		super(message, fieldName);
 	}
 
-	public DataSetFieldExpEvaluatorParseException(String message, Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorParseException(String message, Throwable cause, String fieldName)
 	{
-		super(message, cause, propertyName);
+		super(message, cause, fieldName);
 	}
 
 	public DataSetFieldExpEvaluatorParseException(String message, Throwable cause)
@@ -52,9 +52,9 @@ public class DataSetFieldExpEvaluatorParseException extends DataSetFieldExpEvalu
 		super(message);
 	}
 
-	public DataSetFieldExpEvaluatorParseException(Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorParseException(Throwable cause, String fieldName)
 	{
-		super(cause, propertyName);
+		super(cause, fieldName);
 	}
 
 	public DataSetFieldExpEvaluatorParseException(Throwable cause)

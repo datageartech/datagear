@@ -77,14 +77,14 @@ public class SqlDataSetTest extends DBTestSupport
 
 			String sql = "SELECT ID, NAME FROM T_ACCOUNT <#if id??>WHERE ID = ${id} AND NAME != '${name}'</#if>";
 
-			List<DataSetField> dataSetProperties = Arrays.asList(
+			List<DataSetField> dataSetFields = Arrays.asList(
 					new DataSetField("ID", DataSetField.DataType.INTEGER),
 					new DataSetField("NAME", DataSetField.DataType.STRING));
 
 			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataSetParam.DataType.STRING, true),
 					new DataSetParam("name", DataSetParam.DataType.STRING, true));
 
-			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetFields, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);
 			sqlDataSet.setSqlValidator(createSqlValidator());
 
@@ -145,14 +145,14 @@ public class SqlDataSetTest extends DBTestSupport
 
 			String sql = "SELECT ID, NAME FROM T_ACCOUNT WHERE NAME='${name}'";
 
-			List<DataSetField> dataSetProperties = Arrays.asList(
+			List<DataSetField> dataSetFields = Arrays.asList(
 					new DataSetField("ID", DataSetField.DataType.INTEGER),
 					new DataSetField("NAME", DataSetField.DataType.STRING));
 
 			List<DataSetParam> dataSetParams = Arrays
 					.asList(new DataSetParam("name", DataSetParam.DataType.STRING, true));
 
-			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetFields, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);
 			sqlDataSet.setSqlValidator(createSqlValidator());
 

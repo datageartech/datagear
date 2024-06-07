@@ -92,7 +92,7 @@ public class JsonDirectoryFileDataSetTest
 	}
 
 	@Test
-	public void getResultTest_convertPropertyValue()
+	public void getResultTest_convertFieldValue()
 	{
 		List<DataSetField> fields = new ArrayList<>();
 		fields.add(new DataSetField("name", DataSetField.DataType.STRING));
@@ -156,27 +156,27 @@ public class JsonDirectoryFileDataSetTest
 			assertEquals(4, fields.size());
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(2);
-				assertEquals("尺寸", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				DataSetField field = fields.get(2);
+				assertEquals("尺寸", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(3);
-				assertEquals("date", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(3);
+				assertEquals("date", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 

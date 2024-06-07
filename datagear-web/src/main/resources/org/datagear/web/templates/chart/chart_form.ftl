@@ -130,7 +130,7 @@
 									</div>
 									<div class="field grid mb-2">
 										<label :for="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-											title="<@spring.message code='chart.cds.propertyAlias.desc' />">
+											title="<@spring.message code='chart.cds.fieldAlias.desc' />">
 											<@spring.message code='alias' />
 										</label>
 										<div class="field-input col-12 md:col-9">
@@ -141,7 +141,7 @@
 									</div>
 									<div class="field grid mb-2">
 										<label :for="'${pid}cdspidSort_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-											title="<@spring.message code='chart.cds.propertyOrder.desc' />">
+											title="<@spring.message code='chart.cds.fieldOrder.desc' />">
 											<@spring.message code='sort' />
 										</label>
 										<div class="field-input col-12 md:col-9">
@@ -530,8 +530,8 @@
 				
 				for(var k=0; k<fields.length; k++)
 				{
-					var property = fields[k];
-					var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
+					var field = fields[k];
+					var signs = (field.cdsInfo ? (field.cdsInfo.signs || []) : []);
 					
 					if($.inArrayById(signs, requiredSign.name, "name") > -1)
 					{
@@ -557,8 +557,8 @@
 		
 		for(var i=0; i<fields.length; i++)
 		{
-			var property = fields[i];
-			var signs = (property.cdsInfo ? (property.cdsInfo.signs || []) : []);
+			var field = fields[i];
+			var signs = (field.cdsInfo ? (field.cdsInfo.signs || []) : []);
 			
 			if($.inArrayById(signs, dataSign.name, "name") > -1)
 				return true;
@@ -591,11 +591,11 @@
 		var fields = (dataSet ? dataSet.fields : []);
 		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
-		$.each(fields, function(idx, property)
+		$.each(fields, function(idx, field)
 		{
 			var signs = [];
 			
-			var fieldSigns = (dataSetBind.fieldSigns[property.name] || []);
+			var fieldSigns = (dataSetBind.fieldSigns[field.name] || []);
 			$.each(fieldSigns, function(psIdx, ps)
 			{
 				var inArrayIdx = $.inArrayById(dataSigns, ps, "name");
@@ -603,11 +603,11 @@
 					signs.push(dataSigns[inArrayIdx]);
 			});
 			
-			property.cdsInfo =
+			field.cdsInfo =
 			{
 				signs: signs,
-				alias: dataSetBind.fieldAliases[property.name],
-				order: dataSetBind.fieldOrders[property.name]
+				alias: dataSetBind.fieldAliases[field.name],
+				order: dataSetBind.fieldOrders[field.name]
 			};
 		});
 	};
@@ -618,9 +618,9 @@
 		var fields = (dataSet ? dataSet.fields : []);
 		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
-		$.each(fields, function(idx, property)
+		$.each(fields, function(idx, field)
 		{
-			var cdsInfo = (property.cdsInfo || {});
+			var cdsInfo = (field.cdsInfo || {});
 			var signs = (cdsInfo.signs || []);
 			
 			var fieldSigns = [];
@@ -632,13 +632,13 @@
 			});
 			
 			if(fieldSigns.length > 0)
-				dataSetBind.fieldSigns[property.name] = fieldSigns;
+				dataSetBind.fieldSigns[field.name] = fieldSigns;
 			else
-				dataSetBind.fieldSigns[property.name] = undefined;
-			dataSetBind.fieldAliases[property.name] = cdsInfo.alias;
-			dataSetBind.fieldOrders[property.name] = cdsInfo.order;
+				dataSetBind.fieldSigns[field.name] = undefined;
+			dataSetBind.fieldAliases[field.name] = cdsInfo.alias;
+			dataSetBind.fieldOrders[field.name] = cdsInfo.order;
 			
-			property.cdsInfo = undefined;
+			field.cdsInfo = undefined;
 		});
 	};
 	
@@ -895,7 +895,7 @@
 		
 		formatDspFieldsetName: function(dataSetField)
 		{
-			return "<@spring.message code='propertyWithColon' />" + dataSetField.name;
+			return "<@spring.message code='fieldWithColon' />" + dataSetField.name;
 		},
 		
 		onDeleteAnalysisProject: function()

@@ -26,7 +26,7 @@ page_simple_form.ftl
 -->
 <#assign ParamDataType=statics['org.datagear.analysis.DataSetParam$DataType']>
 <#assign ParamInputType=statics['org.datagear.analysis.DataSetParam$InputType']>
-<#assign PropertyDataType=statics['org.datagear.analysis.DataSetField$DataType']>
+<#assign FieldDataType=statics['org.datagear.analysis.DataSetField$DataType']>
 <p-dialog :header="pm.dataSetParamForm.title" append-to="body"
 	position="center" :dismissable-mask="true" :modal="true"
 	v-model:visible="pm.dataSetParamForm.show" @show="onDataSetParamFormPanelShow">
@@ -173,9 +173,9 @@ page_simple_form.ftl
 						</p-textarea>
 						<div class="mt-1" v-if="pm.dataSetFieldForm.data.evaluated">
 							<p-tabview class="xs-tabview text-color-secondary text-sm">
-								<p-tabpanel header="<@spring.message code='insertPropName' />">
+								<p-tabpanel header="<@spring.message code='insertFieldName' />">
 									<div>
-										<p-button v-for="p in pm.dataSetFieldForm.avaliableProperties" :key="p.name"
+										<p-button v-for="p in pm.dataSetFieldForm.avaliableFields" :key="p.name"
 											type="button" :label="p.name"
 											@click="onInsertExpPropName(p.name)" class="p-button-secondary p-button-sm mr-1 mt-1">
 										</p-button>
@@ -278,21 +278,21 @@ page_simple_form.ftl
 		pm.dataSetParamForm.show = true;
 	};
 
-	po.showDataSetFieldForm = function(action, data, submitHandler, avaliableProperties)
+	po.showDataSetFieldForm = function(action, data, submitHandler, avaliableFields)
 	{
 		data = $.extend(true,
 				{
 					name: "",
-					type: "${PropertyDataType.STRING}",
+					type: "${FieldDataType.STRING}",
 					evaluated: false
 				},
 				po.vueRaw(data));
 		
 		var pm = po.vuePageModel();
-		pm.dataSetFieldForm.title = "<@spring.message code='property' />" + " - " + action;
+		pm.dataSetFieldForm.title = "<@spring.message code='field' />" + " - " + action;
 		pm.dataSetFieldForm.data = data;
 		pm.dataSetFieldForm.submitHandler = submitHandler;
-		pm.dataSetFieldForm.avaliableProperties = avaliableProperties;
+		pm.dataSetFieldForm.avaliableFields = avaliableFields;
 		pm.dataSetFieldForm.show = true;
 	};
 	
@@ -311,7 +311,7 @@ page_simple_form.ftl
 			title: "",
 			data: {},
 			submitHandler: null,
-			avaliableProperties: []
+			avaliableFields: []
 		},
 		dataSetParamDataTypeOptions:
 		[
@@ -332,15 +332,15 @@ page_simple_form.ftl
 		],
 		dataSetFieldTypeOptions:
 		[
-			{name: "<@spring.message code='dataSetField.DataType.STRING' />", value: "${PropertyDataType.STRING}"},
-			{name: "<@spring.message code='dataSetField.DataType.NUMBER' />", value: "${PropertyDataType.NUMBER}"},
-			{name: "<@spring.message code='dataSetField.DataType.INTEGER' />", value: "${PropertyDataType.INTEGER}"},
-			{name: "<@spring.message code='dataSetField.DataType.DECIMAL' />", value: "${PropertyDataType.DECIMAL}"},
-			{name: "<@spring.message code='dataSetField.DataType.DATE' />", value: "${PropertyDataType.DATE}"},
-			{name: "<@spring.message code='dataSetField.DataType.TIME' />", value: "${PropertyDataType.TIME}"},
-			{name: "<@spring.message code='dataSetField.DataType.TIMESTAMP' />", value: "${PropertyDataType.TIMESTAMP}"},
-			{name: "<@spring.message code='dataSetField.DataType.BOOLEAN' />", value: "${PropertyDataType.BOOLEAN}"},
-			{name: "<@spring.message code='dataSetField.DataType.UNKNOWN' />", value: "${PropertyDataType.UNKNOWN}"}
+			{name: "<@spring.message code='dataSetField.DataType.STRING' />", value: "${FieldDataType.STRING}"},
+			{name: "<@spring.message code='dataSetField.DataType.NUMBER' />", value: "${FieldDataType.NUMBER}"},
+			{name: "<@spring.message code='dataSetField.DataType.INTEGER' />", value: "${FieldDataType.INTEGER}"},
+			{name: "<@spring.message code='dataSetField.DataType.DECIMAL' />", value: "${FieldDataType.DECIMAL}"},
+			{name: "<@spring.message code='dataSetField.DataType.DATE' />", value: "${FieldDataType.DATE}"},
+			{name: "<@spring.message code='dataSetField.DataType.TIME' />", value: "${FieldDataType.TIME}"},
+			{name: "<@spring.message code='dataSetField.DataType.TIMESTAMP' />", value: "${FieldDataType.TIMESTAMP}"},
+			{name: "<@spring.message code='dataSetField.DataType.BOOLEAN' />", value: "${FieldDataType.BOOLEAN}"},
+			{name: "<@spring.message code='dataSetField.DataType.UNKNOWN' />", value: "${FieldDataType.UNKNOWN}"}
 		]
 	});
 	
@@ -416,7 +416,7 @@ page_simple_form.ftl
 			
 			if(hasSq && hasDq)
 			{
-				$.tipWarn("<@spring.message code='sqWhileDqPropNameInExpIsIllegal' />");
+				$.tipWarn("<@spring.message code='sqWhileDqFieldNameInExpIsIllegal' />");
 				return;
 			}
 			
@@ -446,12 +446,12 @@ page_simple_form.ftl
 		{
 			return po.formatBooleanValue(data.required);
 		},
-		formatPropertyType: function(data)
+		formatFieldType: function(data)
 		{
 			var pm = po.vuePageModel();
 			return $.findNameByValue(pm.dataSetFieldTypeOptions, data.type);
 		},
-		formatPropertyEvaludated: function(data)
+		formatFieldEvaludated: function(data)
 		{
 			return po.formatBooleanValue(data.evaluated);
 		},

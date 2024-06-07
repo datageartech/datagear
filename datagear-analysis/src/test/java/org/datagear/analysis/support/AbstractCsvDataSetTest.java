@@ -38,11 +38,11 @@ import org.junit.Test;
 public class AbstractCsvDataSetTest
 {
 	@Test
-	public void resolvePropertiesTest() throws Throwable
+	public void resolveFieldsTest() throws Throwable
 	{
 		AbstractCsvDataSet<CsvValueDataSetResource> ds = new CsvValueDataSet();
 
-		List<String> propertyNames = Arrays.asList("name", "value");
+		List<String> fieldNames = Arrays.asList("name", "value");
 
 		// 全部是数值
 		{
@@ -67,7 +67,7 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveFields(fieldNames, data);
 
 			assertEquals(2, fields.size());
 			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
@@ -97,7 +97,7 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveFields(fieldNames, data);
 
 			assertEquals(2, fields.size());
 			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
@@ -127,7 +127,7 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveFields(fieldNames, data);
 
 			assertEquals(2, fields.size());
 			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());
@@ -157,7 +157,7 @@ public class AbstractCsvDataSetTest
 				data.add(row);
 			}
 
-			List<DataSetField> fields = ds.resolveProperties(propertyNames, data);
+			List<DataSetField> fields = ds.resolveFields(fieldNames, data);
 
 			assertEquals(2, fields.size());
 			assertEquals(DataSetField.DataType.STRING, fields.get(0).getType());

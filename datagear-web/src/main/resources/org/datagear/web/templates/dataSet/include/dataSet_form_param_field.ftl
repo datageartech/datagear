@@ -20,7 +20,7 @@
 数据集参数、属性输入项
 
 依赖：
-dataSet_form_param_property_form.ftl
+dataSet_form_param_field_form.ftl
 
 -->
 <div class="field grid">
@@ -88,7 +88,7 @@ dataSet_form_param_property_form.ftl
 <div class="field grid">
 	<label for="${pid}fields" class="field-label col-12 mb-2"
 		title="<@spring.message code='dataSet.fields.desc' />">
-		<@spring.message code='property' />
+		<@spring.message code='field' />
 	</label>
 	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
@@ -96,24 +96,24 @@ dataSet_form_param_property_form.ftl
 				<div class="flex">
 					<div class="h-opts">
 						<p-button type="button" label="<@spring.message code='add' />"
-							@click="onAddProperty" class="p-button-secondary p-button-sm">
+							@click="onAddField" class="p-button-secondary p-button-sm">
 						</p-button>
 						<p-button type="button" label="<@spring.message code='edit' />"
-							@click="onEditProperty" class="p-button-secondary p-button-sm">
+							@click="onEditField" class="p-button-secondary p-button-sm">
 						</p-button>
 						<p-button type="button" label="<@spring.message code='moveUp' />"
-							@click="onMoveUpProperty" class="p-button-secondary p-button-sm">
+							@click="onMoveUpField" class="p-button-secondary p-button-sm">
 						</p-button>
 						<p-button type="button" label="<@spring.message code='moveDown' />"
-							@click="onMoveDownProperty" class="p-button-secondary p-button-sm">
+							@click="onMoveDownField" class="p-button-secondary p-button-sm">
 						</p-button>
 						<p-button type="button" label="<@spring.message code='delete' />"
-							@click="onDeleteProperty" class="p-button-danger p-button-sm">
+							@click="onDeleteField" class="p-button-danger p-button-sm">
 						</p-button>
 					</div>
 					<div class="flex align-items-center ml-5">
-						<p-checkbox input-id="${pid}propertyAutoGen" v-model="pm.autoGenerateProperty" :binary="true"></p-checkbox>
-						<label for="${pid}propertyAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.fields.autoGenerate.desc' />">
+						<p-checkbox input-id="${pid}fieldAutoGen" v-model="pm.autoGenerateField" :binary="true"></p-checkbox>
+						<label for="${pid}fieldAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.fields.autoGenerate.desc' />">
 							<@spring.message code='autoGenerate' />
 						</label>
 					</div>
@@ -176,7 +176,7 @@ dataSet_form_param_property_form.ftl
 			</div>
 			<div id="${pid}fields" class="fields-wrapper input w-full overflow-auto">
 				<p-datatable :value="fm.fields" :scrollable="true"
-					v-model:selection="pm.selectedProperties"
+					v-model:selection="pm.selectedFields"
 					:resizable-columns="true" column-resize-mode="expand"
 					selection-mode="multiple" :meta-key-selection="true" data-key="name" striped-rows class="fields-table table-sm">
 					<p-column selection-mode="multiple" :frozen="true" class="col-check"></p-column>
@@ -184,7 +184,7 @@ dataSet_form_param_property_form.ftl
 					</p-column>
 					<p-column field="type" header="<@spring.message code='type' />" class="col-name">
 						<template #body="{data}">
-							{{formatPropertyType(data)}}
+							{{formatFieldType(data)}}
 						</template>
 					</p-column>
 					<p-column field="label" header="<@spring.message code='displayName' />" class="col-name">
@@ -193,7 +193,7 @@ dataSet_form_param_property_form.ftl
 					</p-column>
 					<p-column field="evaluated" header="<@spring.message code='enableExpression' />" class="col-name">
 						<template #body="{data}">
-							{{formatPropertyEvaludated(data)}}
+							{{formatFieldEvaludated(data)}}
 						</template>
 					</p-column>
 					<p-column field="expression" header="<@spring.message code='expression' />" class="col-name">
@@ -209,8 +209,8 @@ dataSet_form_param_property_form.ftl
 	po.vuePageModel(
 	{
 		selectedParams: [],
-		selectedProperties: [],
-		autoGenerateProperty: true
+		selectedFields: [],
+		autoGenerateField: true
 	});
 	
 	po.vueRef("${pid}dataSourceFormatPanelEle", null);
@@ -273,7 +273,7 @@ dataSet_form_param_property_form.ftl
 				fm.params[dspIdx] = dsp;
 			});
 		},
-		onAddProperty: function(e)
+		onAddField: function(e)
 		{
 			var fm = po.vueFormModel();
 			
@@ -281,7 +281,7 @@ dataSet_form_param_property_form.ftl
 			{
 				if(po.hasDuplicateNameNoCase(fm.fields, dsp.name))
 				{
-					$.tipInfo("<@spring.message code='propertyNameMustBeUniqueIgnoreCase' />");
+					$.tipInfo("<@spring.message code='fieldNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
@@ -289,22 +289,22 @@ dataSet_form_param_property_form.ftl
 			},
 			fm.fields);
 		},
-		onEditProperty: function(e)
+		onEditField: function(e)
 		{
 			var pm = po.vuePageModel();
 			
-			if(!pm.selectedProperties || pm.selectedProperties.length == 0)
+			if(!pm.selectedFields || pm.selectedFields.length == 0)
 				return;
 			
 			var fm = po.vueFormModel();
-			var dsp = pm.selectedProperties[0];
+			var dsp = pm.selectedFields[0];
 			var dspIdx = $.inArrayById(fm.fields, dsp.name, "name");
 			
 			po.showDataSetFieldForm("<@spring.message code='edit' />", dsp, function(dsp)
 			{
 				if(po.hasDuplicateNameNoCase(fm.fields, dsp.name, dspIdx))
 				{
-					$.tipInfo("<@spring.message code='propertyNameMustBeUniqueIgnoreCase' />");
+					$.tipInfo("<@spring.message code='fieldNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
@@ -339,27 +339,27 @@ dataSet_form_param_property_form.ftl
 				$.removeById(fm.params, sp.name, "name");
 			});
 		},
-		onMoveUpProperty: function(e)
+		onMoveUpField: function(e)
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var sps = $.wrapAsArray(po.vueRaw(pm.selectedProperties));
+			var sps = $.wrapAsArray(po.vueRaw(pm.selectedFields));
 			var spNames = $.propertyValue(sps, "name");
 			$.moveUpById(fm.fields, spNames, "name");
 		},
-		onMoveDownProperty: function(e)
+		onMoveDownField: function(e)
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var sps = $.wrapAsArray(po.vueRaw(pm.selectedProperties));
+			var sps = $.wrapAsArray(po.vueRaw(pm.selectedFields));
 			var spNames = $.propertyValue(sps, "name");
 			$.moveDownById(fm.fields, spNames, "name");
 		},
-		onDeleteProperty: function(e)
+		onDeleteField: function(e)
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var sps = $.wrapAsArray(po.vueRaw(pm.selectedProperties));
+			var sps = $.wrapAsArray(po.vueRaw(pm.selectedFields));
 			
 			$.each(sps, function(idx, sp)
 			{

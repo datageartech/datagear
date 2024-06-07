@@ -256,15 +256,15 @@ public class HttpDataSetTest
 			assertTrue(templateResult.contains("param=pv"));
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 		}
 
@@ -351,15 +351,15 @@ public class HttpDataSetTest
 			assertTrue(templateResult.contains("value: \"" + pv1JsonStr + "\""));
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 
@@ -413,15 +413,15 @@ public class HttpDataSetTest
 			assertTrue(templateResult.contains("value: \"" + pv1JsonStr + "\""));
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 
@@ -474,15 +474,15 @@ public class HttpDataSetTest
 			assertTrue(templateResult.contains("value1=" + pv1));
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("contentType", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("contentType", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 
@@ -535,15 +535,15 @@ public class HttpDataSetTest
 			assertTrue(templateResult.contains("<v2>" + v2Escape + "</v2>"));
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("contentType", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("contentType", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 
@@ -588,15 +588,15 @@ public class HttpDataSetTest
 			assertTrue(templateResult.contains("value: '" + pv1 + "'"));
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 

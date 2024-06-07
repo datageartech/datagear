@@ -17,7 +17,7 @@
 			)
 	</insert>
 	
-	<insert id="insertPropertyPO">
+	<insert id="insertFieldPO">
 		INSERT INTO DATAGEAR_DATA_SET_PROP
 			(
 			PROP_DS_ID, PROP_NAME, PROP_TYPE, PROP_LABEL,
@@ -71,7 +71,7 @@
 			DS_ID = #{id}
 	</delete>
 	
-	<delete id="deletePropertyPOs">
+	<delete id="deleteFieldPOs">
 		DELETE FROM DATAGEAR_DATA_SET_PROP
 		WHERE
 			PROP_DS_ID = #{dataSetId}
@@ -92,7 +92,7 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
-	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetFieldPO">
+	<select id="getFieldPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetFieldPO">
 		SELECT
 			PROP_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PROP_NAME AS ${_iq_}child.name${_iq_},

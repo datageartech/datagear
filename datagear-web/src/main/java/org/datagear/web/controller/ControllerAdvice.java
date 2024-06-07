@@ -533,7 +533,7 @@ public class ControllerAdvice extends AbstractController
 			HttpServletResponse response, DataSetFieldExpEvaluatorParseException exception)
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
-				exception.getPropertyName(), getRootMessage(exception));
+				exception.getFieldName(), getRootMessage(exception));
 		return getErrorView(request, response);
 	}
 
@@ -543,7 +543,7 @@ public class ControllerAdvice extends AbstractController
 			HttpServletResponse response, DataSetFieldExpEvaluatorException exception)
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
-				exception.getPropertyName(), getRootMessage(exception));
+				exception.getFieldName(), getRootMessage(exception));
 		return getErrorView(request, response);
 	}
 

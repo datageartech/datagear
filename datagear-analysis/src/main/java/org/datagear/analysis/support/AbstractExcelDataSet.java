@@ -248,12 +248,12 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource, boolean resolveProperties) throws Throwable
+	protected ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable
 	{
 		if (resource.isXls())
-			return resolveExcelResourceDataForXls(resource, resolveProperties);
+			return resolveExcelResourceDataForXls(resource, resolveFields);
 		else
-			return resolveExcelResourceDataForXlsx(resource, resolveProperties);
+			return resolveExcelResourceDataForXlsx(resource, resolveFields);
 	}
 
 	/**
@@ -263,7 +263,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected ResourceData resolveExcelResourceDataForXls(T resource, boolean resolveProperties)
+	protected ResourceData resolveExcelResourceDataForXls(T resource, boolean resolveFields)
 			throws DataSetException
 	{
 		InputStream in = null;
@@ -277,7 +277,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
 			Sheet sheet = resource.getDataSheet(wb);
 
-			return resolveExcelResourceDataForSheet(resource, sheet, resolveProperties);
+			return resolveExcelResourceDataForSheet(resource, sheet, resolveFields);
 		}
 		catch (DataSetException e)
 		{
@@ -302,7 +302,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForXlsx(T resource, boolean resolveProperties) throws Throwable
+	protected ResourceData resolveExcelResourceDataForXlsx(T resource, boolean resolveFields) throws Throwable
 	{
 		InputStream in = null;
 		OPCPackage pkg = null;
@@ -315,7 +315,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			wb = new XSSFWorkbook(pkg);
 			Sheet sheet = resource.getDataSheet(wb);
 
-			return resolveExcelResourceDataForSheet(resource, sheet, resolveProperties);
+			return resolveExcelResourceDataForSheet(resource, sheet, resolveFields);
 		}
 		catch (DataSetException e)
 		{
@@ -338,11 +338,11 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * 
 	 * @param resource
 	 * @param sheet
-	 * @param resolveProperties
+	 * @param resolveFields
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForSheet(T resource, Sheet sheet, boolean resolveProperties)
+	protected ResourceData resolveExcelResourceDataForSheet(T resource, Sheet sheet, boolean resolveFields)
 			throws Throwable
 	{
 		List<Row> excelRows = new ArrayList<Row>();
@@ -350,32 +350,32 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		for (Row row : sheet)
 			excelRows.add(row);
 
-		List<ExcelPropertyInfo> propertyInfos = resolvePropertyInfos(resource, excelRows);
-		List<Map<String, Object>> data = resolveData(resource, propertyInfos, excelRows);
+		List<ExcelFieldInfo> fieldInfos = resolveFieldInfos(resource, excelRows);
+		List<Map<String, Object>> data = resolveData(resource, fieldInfos, excelRows);
 
 		List<DataSetField> fields = null;
 
-		if (resolveProperties)
+		if (resolveFields)
 		{
-			List<String> rawDataPropertyNames = toPropertyNames(propertyInfos);
-			fields = resolveFields(rawDataPropertyNames, data);
+			List<String> rawDataFieldNames = toFieldNames(fieldInfos);
+			fields = resolveFields(rawDataFieldNames, data);
 		}
 
 		return new ResourceData(data, fields);
 	}
 
 	/**
-	 * 解析属性信息。
+	 * 解析字段信息。
 	 * 
 	 * @param resource
 	 * @param excelRows
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<ExcelPropertyInfo> resolvePropertyInfos(T resource, List<Row> excelRows)
+	protected List<ExcelFieldInfo> resolveFieldInfos(T resource, List<Row> excelRows)
 			throws Throwable
 	{
-		List<ExcelPropertyInfo> propertyInfos = null;
+		List<ExcelFieldInfo> fieldInfos = null;
 
 		for (int i = 0, len = excelRows.size(); i < len; i++)
 		{
@@ -383,7 +383,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 			if (resource.isNameRow(i))
 			{
-				propertyInfos = new ArrayList<ExcelPropertyInfo>();
+				fieldInfos = new ArrayList<ExcelFieldInfo>();
 
 				short minColIdx = row.getFirstCellNum(), maxColIdx = row.getLastCellNum();
 				for (short colIdx = minColIdx; colIdx < maxColIdx; colIdx++)
@@ -408,7 +408,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 						if (StringUtil.isEmpty(name))
 							name = CellReference.convertNumToColString(colIdx);
 
-						propertyInfos.add(new ExcelPropertyInfo(name, colIdx));
+						fieldInfos.add(new ExcelFieldInfo(name, colIdx));
 					}
 				}
 
@@ -416,9 +416,9 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			}
 			else if (resource.isDataRow(i))
 			{
-				if (propertyInfos == null)
+				if (fieldInfos == null)
 				{
-					propertyInfos = new ArrayList<ExcelPropertyInfo>();
+					fieldInfos = new ArrayList<ExcelFieldInfo>();
 
 					short minColIdx = row.getFirstCellNum(), maxColIdx = row.getLastCellNum();
 					for (short colIdx = minColIdx; colIdx < maxColIdx; colIdx++)
@@ -426,7 +426,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 						if (resource.isDataColumn(colIdx))
 						{
 							String name = CellReference.convertNumToColString(colIdx);
-							propertyInfos.add(new ExcelPropertyInfo(name, colIdx));
+							fieldInfos.add(new ExcelFieldInfo(name, colIdx));
 						}
 					}
 				}
@@ -436,52 +436,52 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			}
 		}
 
-		if (propertyInfos == null)
-			propertyInfos = Collections.emptyList();
+		if (fieldInfos == null)
+			fieldInfos = Collections.emptyList();
 
-		return propertyInfos;
+		return fieldInfos;
 	}
 
 	/**
 	 * 解析{@linkplain DataSetField}。
 	 * 
-	 * @param rawDataPropertyNames
+	 * @param rawDataFieldNames
 	 * @param rawData              允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetField> resolveFields(List<String> rawDataPropertyNames,
+	protected List<DataSetField> resolveFields(List<String> rawDataFieldNames,
 			List<Map<String, Object>> rawData) throws Throwable
 	{
-		int propertyLen = rawDataPropertyNames.size();
-		List<DataSetField> fields = new ArrayList<>(propertyLen);
+		int fieldLen = rawDataFieldNames.size();
+		List<DataSetField> fields = new ArrayList<>(fieldLen);
 
-		for (String name : rawDataPropertyNames)
+		for (String name : rawDataFieldNames)
 			fields.add(new DataSetField(name, DataSetField.DataType.UNKNOWN));
 
 		if (rawData != null && rawData.size() > 0)
 		{
 			for (Map<String, Object> row : rawData)
 			{
-				int resolvedPropertyTypeCount = 0;
+				int resolvedFieldTypeCount = 0;
 
-				for (int i = 0; i < propertyLen; i++)
+				for (int i = 0; i < fieldLen; i++)
 				{
-					DataSetField property = fields.get(i);
+					DataSetField field = fields.get(i);
 
-					if (!DataSetField.DataType.UNKNOWN.equals(property.getType()))
+					if (!DataSetField.DataType.UNKNOWN.equals(field.getType()))
 					{
-						resolvedPropertyTypeCount++;
+						resolvedFieldTypeCount++;
 						continue;
 					}
 
-					Object value = row.get(rawDataPropertyNames.get(i));
+					Object value = row.get(rawDataFieldNames.get(i));
 
 					if (value != null)
-						property.setType(resolvePropertyDataType(value));
+						field.setType(resolveFieldDataType(value));
 				}
 
-				if (resolvedPropertyTypeCount == propertyLen)
+				if (resolvedFieldTypeCount == fieldLen)
 					break;
 			}
 		}
@@ -493,17 +493,17 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * 解析数据。
 	 * 
 	 * @param resource
-	 * @param propertyInfos
+	 * @param fieldInfos
 	 * @param excelRows
 	 * @return
 	 * @throws Throwable
 	 */
 	protected List<Map<String, Object>> resolveData(T resource,
-			List<ExcelPropertyInfo> propertyInfos, List<Row> excelRows) throws Throwable
+			List<ExcelFieldInfo> fieldInfos, List<Row> excelRows) throws Throwable
 	{
 		List<Map<String, Object>> data = new ArrayList<>();
 
-		Map<Short, String> cellNumPropertyNames = toCellNumPropertyNames(propertyInfos);
+		Map<Short, String> cellNumFieldNames = toCellNumFieldNames(fieldInfos);
 
 		for (int i = 0, len = excelRows.size(); i < len; i++)
 		{
@@ -520,7 +520,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 				if (resource.isDataColumn(colIdx))
 				{
 					Cell cell = excelRow.getCell(colIdx);
-					String name = cellNumPropertyNames.get(colIdx);
+					String name = cellNumFieldNames.get(colIdx);
 					Object value = resolveCellValue(cell);
 					row.put(name, value);
 				}
@@ -532,21 +532,21 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		return data;
 	}
 
-	protected Map<Short, String> toCellNumPropertyNames(List<ExcelPropertyInfo> propertyInfos)
+	protected Map<Short, String> toCellNumFieldNames(List<ExcelFieldInfo> fieldInfos)
 	{
 		Map<Short, String> re = new HashMap<Short, String>();
 
-		for (ExcelPropertyInfo epi : propertyInfos)
+		for (ExcelFieldInfo epi : fieldInfos)
 			re.put(epi.getCellIdx(), epi.getName());
 
 		return re;
 	}
 
-	protected List<String> toPropertyNames(List<ExcelPropertyInfo> propertyInfos)
+	protected List<String> toFieldNames(List<ExcelFieldInfo> fieldInfos)
 	{
-		List<String> re = new ArrayList<String>(propertyInfos.size());
+		List<String> re = new ArrayList<String>(fieldInfos.size());
 
-		for (ExcelPropertyInfo epi : propertyInfos)
+		for (ExcelFieldInfo epi : fieldInfos)
 			re.add(epi.getName());
 
 		return re;
@@ -611,7 +611,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		return cellValue;
 	}
 	
-	protected static class ExcelPropertyInfo
+	protected static class ExcelFieldInfo
 	{
 		/** 属性名 */
 		private final String name;
@@ -621,7 +621,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		 */
 		private final short cellIdx;
 
-		public ExcelPropertyInfo(String name, short cellIdx)
+		public ExcelFieldInfo(String name, short cellIdx)
 		{
 			super();
 			this.name = name;

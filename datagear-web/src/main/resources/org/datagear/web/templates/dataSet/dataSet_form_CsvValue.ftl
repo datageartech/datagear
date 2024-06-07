@@ -58,14 +58,14 @@
 					</p-inputtext>
 				</div>
 			</div>
-			<#include "include/dataSet_form_param_property.ftl">
+			<#include "include/dataSet_form_param_field.ftl">
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<#include "include/dataSet_form_preview.ftl">
 			<p-button type="submit" label="<@spring.message code='save' />" class="hide-if-readonly"></p-button>
 		</div>
 	</form>
-	<#include "include/dataSet_form_param_property_form.ftl">
+	<#include "include/dataSet_form_param_field_form.ftl">
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">

@@ -102,21 +102,21 @@ public class CsvDirectoryFileDataSetTest
 			assertEquals(3, fields.size());
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("name", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(2);
-				assertEquals("尺寸", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				DataSetField field = fields.get(2);
+				assertEquals("尺寸", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 		}
 
@@ -164,21 +164,21 @@ public class CsvDirectoryFileDataSetTest
 			assertEquals(3, fields.size());
 
 			{
-				DataSetField property = fields.get(0);
-				assertEquals("1", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(0);
+				assertEquals("1", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(1);
-				assertEquals("2", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(1);
+				assertEquals("2", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 
 			{
-				DataSetField property = fields.get(2);
-				assertEquals("3", property.getName());
-				assertEquals(DataSetField.DataType.STRING, property.getType());
+				DataSetField field = fields.get(2);
+				assertEquals("3", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
 			}
 		}
 

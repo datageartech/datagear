@@ -34,7 +34,7 @@ public class DataSetFieldNotFoundException extends DataSetException
 
 	public DataSetFieldNotFoundException(String name)
 	{
-		super("Property [" + name + "] not found");
+		super("Field [" + name + "] not found");
 		this.name = name;
 	}
 

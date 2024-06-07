@@ -378,7 +378,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	}
 
 	@Override
-	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveProperties)
+	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveFields)
 			throws DataSetException
 	{
 		String uri = null;
@@ -395,7 +395,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			headerContent = setHttpHeaders(request, query);
 			requestContent = setHttpEntity(request, query);
 
-			JsonResponseHandler responseHandler = new JsonResponseHandler(query, getFields(), resolveProperties,
+			JsonResponseHandler responseHandler = new JsonResponseHandler(query, getFields(), resolveFields,
 					getResponseDataJsonPath());
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
@@ -620,7 +620,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 		private List<DataSetField> fields;
 
-		private boolean resolveProperties;
+		private boolean resolveFields;
 
 		private String responseDataJsonPath;
 
@@ -630,12 +630,12 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 
 		public JsonResponseHandler(DataSetQuery dataSetQuery, List<DataSetField> fields,
-				boolean resolveProperties, String responseDataJsonPath)
+				boolean resolveFields, String responseDataJsonPath)
 		{
 			super();
 			this.dataSetQuery = dataSetQuery;
 			this.fields = (fields == null ? Collections.emptyList() : fields);
-			this.resolveProperties = resolveProperties;
+			this.resolveFields = resolveFields;
 			this.responseDataJsonPath = responseDataJsonPath;
 		}
 
@@ -659,14 +659,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			this.fields = fields;
 		}
 
-		public boolean isResolveProperties()
+		public boolean isResolveFields()
 		{
-			return resolveProperties;
+			return resolveFields;
 		}
 
-		public void setResolveProperties(boolean resolveProperties)
+		public void setResolveFields(boolean resolveFields)
 		{
-			this.resolveProperties = resolveProperties;
+			this.resolveFields = resolveFields;
 		}
 
 		public String getResponseDataJsonPath()
@@ -698,7 +698,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 				reader = IOUtil.getReader(entity.getContent(), contentCharset);
 			}
 
-			if (this.resolveProperties)
+			if (this.resolveFields)
 			{
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.fields, reader,
 						this.responseDataJsonPath);

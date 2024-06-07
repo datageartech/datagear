@@ -29,7 +29,7 @@ public class DataSetFieldExpEvaluatorException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
-	private String propertyName = "";
+	private String fieldName = "";
 
 	public DataSetFieldExpEvaluatorException()
 	{
@@ -41,10 +41,10 @@ public class DataSetFieldExpEvaluatorException extends DataSetException
 		super(message);
 	}
 
-	public DataSetFieldExpEvaluatorException(String message, String propertyName)
+	public DataSetFieldExpEvaluatorException(String message, String fieldName)
 	{
 		super(message);
-		this.propertyName = propertyName;
+		this.fieldName = fieldName;
 	}
 
 	public DataSetFieldExpEvaluatorException(Throwable cause)
@@ -52,10 +52,10 @@ public class DataSetFieldExpEvaluatorException extends DataSetException
 		super(cause);
 	}
 
-	public DataSetFieldExpEvaluatorException(Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorException(Throwable cause, String fieldName)
 	{
 		super(cause);
-		this.propertyName = propertyName;
+		this.fieldName = fieldName;
 	}
 
 	public DataSetFieldExpEvaluatorException(String message, Throwable cause)
@@ -63,19 +63,19 @@ public class DataSetFieldExpEvaluatorException extends DataSetException
 		super(message, cause);
 	}
 
-	public DataSetFieldExpEvaluatorException(String message, Throwable cause, String propertyName)
+	public DataSetFieldExpEvaluatorException(String message, Throwable cause, String fieldName)
 	{
 		super(message, cause);
-		this.propertyName = propertyName;
+		this.fieldName = fieldName;
 	}
 
-	public String getPropertyName()
+	public String getFieldName()
 	{
-		return propertyName;
+		return fieldName;
 	}
 
-	protected void setPropertyName(String propertyName)
+	protected void setFieldName(String fieldName)
 	{
-		this.propertyName = propertyName;
+		this.fieldName = fieldName;
 	}
 }
