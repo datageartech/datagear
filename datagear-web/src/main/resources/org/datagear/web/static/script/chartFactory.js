@@ -369,6 +369,13 @@
 			// < @deprecated 兼容5.0.0版本的DataSetBind.propertyOrders，将在未来版本移除，已被DataSetBind.fieldOrders取代
 			cds.propertyOrders = cds.fieldOrders;
 			// > @deprecated 兼容5.0.0版本的DataSetBind.propertyOrders，将在未来版本移除，已被DataSetBind.fieldOrders取代
+			
+			// < @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
+			if(cds.dataSet)
+			{
+				cds.dataSet.properties = cds.dataSet.fields
+			}
+			// > @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
 		}
 		
 		chart._dataSetBinds = (chart.dataSetBinds || []);
@@ -4190,83 +4197,83 @@
 	// < 已弃用函数 start
 	//-------------
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOfSign()
 	
 	chartBase.dataSetPropertyOfSign = function(dataSetBind, dataSign, nonEmpty)
 	{
 		return this.dataSetFieldOfSign(dataSetBind, dataSign, nonEmpty);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOfSign()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsOfSign()
 	
 	chartBase.dataSetPropertiesOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
 	{
 		return this.dataSetFieldsOfSign(dataSetBind, dataSign, sort, nonEmpty);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsOfSign()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFields()
 	
 	chartBase.dataSetProperties = function(dataSetBind, sort)
 	{
 		return this.dataSetFields(dataSetBind, sort);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFields()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetField()
 	
 	chartBase.dataSetProperty = function(dataSetBind, info)
 	{
 		return this.dataSetField(dataSetBind, info);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetField()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldAlias()
 	
 	chartBase.dataSetPropertyAlias = function(dataSetBind, dataSetField, alias)
 	{
 		return this.dataSetFieldAlias(dataSetBind, dataSetField, alias);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldAlias()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOrder()
 	
 	chartBase.dataSetPropertyOrder = function(dataSetBind, dataSetField, order)
 	{
 		return this.dataSetFieldOrder(dataSetBind, dataSetField, order);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOrder()
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSign()
 	
 	chartBase.dataSetPropertySign = function(dataSetBind, dataSetField, dataSign)
 	{
 		return this.dataSetFieldSign(dataSetBind, dataSetField, dataSign);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSign()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSigns()
 	
 	chartBase.dataSetPropertySigns = function(dataSetBind, signs, increment)
 	{
 		return this.dataSetFieldSigns(dataSetBind, signs, increment);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetBindsMain()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSigns()
 	
 	
 	// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项

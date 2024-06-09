@@ -71,8 +71,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -92,13 +92,13 @@
 			},
 			xAxis: {
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				boundaryGap: false
 			},
 			yAxis: {
-				name: (vps.length == 1 ? chart.dataSetPropertyAlias(dataSetBind, vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetFieldAlias(dataSetBind, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -135,12 +135,12 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			if(cp)
 			{
-				var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				var categoryNames = [];
 				var categoryDatasMap = {};
@@ -174,7 +174,7 @@
 			}
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 				
 				for(var j=0; j<vps.length; j++)
 				{
@@ -281,8 +281,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -303,15 +303,15 @@
 			xAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				boundaryGap: true
 			},
 			yAxis:
 			{
 				id: 0,
-				name: (vps.length == 1 ? chart.dataSetPropertyAlias(dataSetBind, vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetFieldAlias(dataSetBind, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -361,12 +361,12 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			if(cp)
 			{
-				var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				var categoryNames = [];
 				var categoryDatasMap = {};
@@ -401,7 +401,7 @@
 			}
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 				
 				for(var j=0; j<vps.length; j++)
 				{
@@ -556,14 +556,14 @@
 		{
 			var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
 			var dataSignNames = options.dg.dataSignNames;
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			
 			if(options.dg.axisType == "angle")
 			{
 				options.angleAxis =
 				{
 					id: 0,
-					type: chartSupport.evalDataSetPropertyAxisType(chart, np)
+					type: chartSupport.evalDataSetFieldAxisType(chart, np)
 					
 					//将在update中设置：
 					//data
@@ -578,9 +578,9 @@
 				options.radiusAxis =
 				{
 					id: 0,
-					name: chart.dataSetPropertyAlias(dataSetBind, np),
+					name: chart.dataSetFieldAlias(dataSetBind, np),
 					nameGap: 20,
-					type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+					type: chartSupport.evalDataSetFieldAxisType(chart, np),
 			        z: 10
 					
 					//将在update中设置：
@@ -614,12 +614,12 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			if(cp)
 			{
-				var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				var categoryNames = [];
 				var categoryDatasMap = {};
@@ -650,7 +650,7 @@
 			}
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 				
 				for(var j=0; j<vps.length; j++)
 				{
@@ -832,9 +832,9 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			var propertyMap = {"name": np, "value": vp};
 			if(cp)
@@ -1136,7 +1136,7 @@
 			
 			if(min == null)
 			{
-				var minp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.min);
+				var minp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min);
 				if(minp)
 				{
 					var minpv = chart.resultColumnArrays(result, minp);
@@ -1146,7 +1146,7 @@
 			
 			if(max == null)
 			{
-				var maxp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.max);
+				var maxp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
 				if(maxp)
 				{
 					var maxpv = chart.resultColumnArrays(result, maxp);
@@ -1154,7 +1154,7 @@
 				}
 			}
 			
-			var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			var vpsvs = chart.resultRowArrays(result, vps);
 			
 			for(var j=0; j<vpsvs.length; j++)
@@ -1163,7 +1163,7 @@
 				
 				for(var k=0; k<vRow.length; k++)
 				{
-					var vpn = chart.dataSetPropertyAlias(dataSetBind,vps[k]);
+					var vpn = chart.dataSetFieldAlias(dataSetBind,vps[k]);
 					var data = { name: vpn, value: vRow[k] };
 					chart.originalDataIndex(data, dataSetBind, j);
 					
@@ -1356,8 +1356,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -1378,15 +1378,15 @@
 			xAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, vp),
+				name: chart.dataSetFieldAlias(dataSetBind, vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -1427,12 +1427,12 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			if(cp)
 			{
-				var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				var categoryNames = [];
 				var categoryDatasMap = {};
@@ -1458,7 +1458,7 @@
 			}
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 				
 				for(var j=0; j<vps.length; j++)
 				{
@@ -1621,8 +1621,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -1642,15 +1642,15 @@
 			xAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, vp),
+				name: chart.dataSetFieldAlias(dataSetBind, vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -1691,10 +1691,10 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
-			var wp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.weight);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			var propertyMap = { "value": (wp ? [np, vp, wp] : [np, vp]) };
 			
 			if(cp)
@@ -1869,7 +1869,7 @@
 			var dataSetBind = dataSetBinds[i];
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var ip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.item);
+			var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.item);
 			
 			//行式雷达网数据，必设置【雷达网条目名称】标记
 			//一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
@@ -1946,9 +1946,9 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var ip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.item);
-		var np = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.name);
-		var mp = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.max);
+		var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.item);
+		var np = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
+		var mp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.max);
 		var indicatorLen = Math.min(np.length, mp.length);
 		
 		for(var i=0; i<indicatorLen; i++)
@@ -1964,7 +1964,7 @@
 		//多行式雷达网
 		else if(indicatorLen == 1)
 		{
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			var categoryNames = [];
 			var categoryDatasMap = {};
@@ -1993,7 +1993,7 @@
 		{
 			var iv = chart.resultColumnArrays(result, ip);
 			var nv = chart.resultRowArrays(result, np);
-			var vp = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			var vv = chart.resultRowArrays(result, vp);
 			var dataLen = Math.min(np.length, vp.length);
 			
@@ -2017,9 +2017,9 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 		var nv = chart.resultColumnArrays(result, np);
-		var mp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.max);
+		var mp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
 		var mv = chart.resultColumnArrays(result, mp);
 		var indicatorLen = Math.min(nv.length, mv.length);
 		
@@ -2029,7 +2029,7 @@
 			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
 		}
 		
-		var vp = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+		var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 		var vv = chart.resultColumnArrays(result, vp);
 		
 		var resultDataIndex = [];
@@ -2038,7 +2038,7 @@
 		
 		for(var i=0; i<vp.length; i++)
 		{
-			var name = chart.dataSetPropertyAlias(dataSetBind, vp[i]);
+			var name = chart.dataSetFieldAlias(dataSetBind, vp[i]);
 			var mySeries = { name: name, data: [], dataSetBindIndex: dataSetBind.index, resultDataIndex: resultDataIndex };
 			
 			for(var j=0; j<nv.length; j++)
@@ -2185,9 +2185,9 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var npv = chart.resultColumnArrays(result, np);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
 			chart.originalDataIndexes(data, dataSetBind);
@@ -2330,8 +2330,8 @@
 			if(!map)
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
 			chart.originalDataIndexes(data, dataSetBind);
@@ -2567,11 +2567,11 @@
 			if(!map)
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var lop = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.longitude);
-			var lap = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.latitude);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var lop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.longitude);
+			var lap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.latitude);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			var propertyMap = { "name": np, "value": (vp ? [lop, lap, vp] : [lop, lap]) };
 			
 			if(cp)
@@ -2774,18 +2774,18 @@
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
 			
-			var sip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceId);
-			var slop = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceLongitude);
-			var slap = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceLatitude);
-			var snp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceName);
-			var scp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceCategory);
-			var svp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceValue);
-			var tip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetId);
-			var tlop = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetLongitude);
-			var tlap = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetLatitude);
-			var tnp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetName);
-			var tcp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetCategory);
-			var tvp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetValue);
+			var sip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceId);
+			var slop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLongitude);
+			var slap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLatitude);
+			var snp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceName);
+			var scp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceCategory);
+			var svp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceValue);
+			var tip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetId);
+			var tlop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLongitude);
+			var tlap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLatitude);
+			var tnp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetName);
+			var tcp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetCategory);
+			var tvp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetValue);
 			
 			var data = chart.resultDatas(result);
 			
@@ -3047,9 +3047,9 @@
 			if(!map)
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var lop = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.longitude);
-			var lap = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.latitude);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var lop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.longitude);
+			var lap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.latitude);
 			
 			var data = null;
 			if(np)
@@ -3251,14 +3251,14 @@
 			if(!map)
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vps = [
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceLongitude),
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceLatitude),
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetLongitude),
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetLatitude),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLongitude),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLatitude),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLongitude),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLatitude),
 					];
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			var propertyMap = { "name": np, "coords": vps };
 			if(cp)
@@ -3456,9 +3456,9 @@
 			if(!map)
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
-			var wp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.weight);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
 			
 			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
 			
@@ -3554,7 +3554,7 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -3578,9 +3578,9 @@
 				//data
 				
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				boundaryGap: true,
 				splitLine: {show:false}
 			},
@@ -3630,14 +3630,14 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			
 			var data = chart.resultNameValueObjects(result, np,
 					[
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.open),
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.close),
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.min),
-						chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.max)
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.open),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.close),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min),
+						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max)
 					]);
 			
 			chart.originalDataIndexes(data, dataSetBind);
@@ -3722,8 +3722,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 		
 		var chartEle = chart.elementJquery();
 		var vmItemWidth = parseInt(chartEle.height()/20);
@@ -3753,9 +3753,9 @@
 				//data
 				
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				splitArea: { show: true }
 			},
 			yAxis:
@@ -3764,9 +3764,9 @@
 				//data
 				
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, vp),
+				name: chart.dataSetFieldAlias(dataSetBind, vp),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
+				type: chartSupport.evalDataSetFieldAxisType(chart, vp),
 				splitArea: { show: true }
 			},
 			visualMap:
@@ -3827,9 +3827,9 @@
 			
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
-			var wp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.weight);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
 			
 			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
 			
@@ -4260,10 +4260,10 @@
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var ip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.id);
-			var pp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.parent);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.id);
+			var pp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.parent);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			var data = chart.resultDatas(result);
 			
@@ -4424,11 +4424,11 @@
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
 			
-			var snp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceName);
-			var svp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceValue);
-			var tnp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetName);
-			var tvp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetValue);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var snp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceName);
+			var svp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceValue);
+			var tnp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetName);
+			var tvp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetValue);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			var data = chart.resultDatas(result);
 			
@@ -4677,15 +4677,15 @@
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
 			
-			var sip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceId);
-			var snp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceName);
-			var scp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceCategory);
-			var svp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.sourceValue);
-			var tip = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetId);
-			var tnp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetName);
-			var tcp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetCategory);
-			var tvp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.targetValue);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var sip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceId);
+			var snp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceName);
+			var scp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceCategory);
+			var svp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceValue);
+			var tip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetId);
+			var tnp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetName);
+			var tcp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetCategory);
+			var tvp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetValue);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			var data = chart.resultDatas(result);
 			
@@ -4903,7 +4903,7 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -4924,9 +4924,9 @@
 			xAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				boundaryGap: true,
 				splitLine: { show: false }
 			},
@@ -4986,9 +4986,9 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var minp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.min);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var minp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			//箱形数据集
 			if(minp)
@@ -4996,10 +4996,10 @@
 				var vp =
 				[
 					minp,
-					chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.lower),
-					chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.median),
-					chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.upper),
-					chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.max)
+					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.lower),
+					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.median),
+					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.upper),
+					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max)
 				];
 				var propertyMap = { name: np, value: vp };
 				if(cp)
@@ -5036,7 +5036,7 @@
 			{
 				if(cp)
 				{
-					var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+					var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 					
 					var categoryNames = [];
 					var categoryDatasMap = {};
@@ -5067,7 +5067,7 @@
 				}
 				else
 				{
-					var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+					var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 					
 					for(var j=0; j<vps.length; j++)
 					{
@@ -5281,8 +5281,8 @@
 			var dataSetBind = dataSetBinds[i];
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
@@ -5434,8 +5434,8 @@
 			
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var nps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.name);
-			var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
+			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			var npsNone = (nps==null || nps.length==0);
 			
 			if(!npsNone && nps.length!=vps.length)
@@ -5452,7 +5452,7 @@
 					var ra = ras[j];
 					for(var k=0; k<ra.length; k++)
 					{
-						var sv = { name: chart.dataSetPropertyAlias(dataSetBind, vps[k]), value: ra[k] };
+						var sv = { name: chart.dataSetFieldAlias(dataSetBind, vps[k]), value: ra[k] };
 						chart.originalDataIndex(sv, dataSetBind, j);
 						data.push(sv);
 					}
@@ -5604,11 +5604,11 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			var propertyMap =
 			{
-				"name": chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name),
+				"name": chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name),
 				"value": valuePropertyNamess[i]
 			};
 			
@@ -5743,20 +5743,20 @@
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
 			var dataSetBind = dataSetBinds[i];
-			var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			
 			for(var j=0; j<vps.length; j++)
 			{
 				var vp = vps[j];
 				//使用alias而非name作为坐标轴名，因为alias是可编辑得，使得用户可以自定义坐标轴
-				var axisName = chart.dataSetPropertyAlias(dataSetBind, vp);
+				var axisName = chart.dataSetFieldAlias(dataSetBind, vp);
 				
 				if(chartSupport.findInArray(parallelAxis, axisName, "name") < 0)
 				{
 					var axis =
 					{
 						name: axisName,
-						type: chartSupport.evalDataSetPropertyAxisType(chart, vp),
+						type: chartSupport.evalDataSetFieldAxisType(chart, vp),
 						nameGap: 5
 					};
 					
@@ -5769,7 +5769,7 @@
 					{
 						//后续数据集字段按照order插入到parallelAxis的适当位置，
 						//使得在多数据集情况时，也可自由调整坐标轴的顺序
-						var order = chart.dataSetPropertyOrder(dataSetBind, vp);
+						var order = chart.dataSetFieldOrder(dataSetBind, vp);
 						if(order != null)
 						{
 							if(order < 0)
@@ -5812,14 +5812,14 @@
 			var dataSetBind = dataSetBinds[i];
 			var valuePropertyNames = [];
 			
-			var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			
 			for(var j=0; j<parallelAxis.length; j++)
 			{
 				var idx = chartSupport.findInArray(vps, parallelAxis[j].name,
 							function(vp)
 							{
-								return chart.dataSetPropertyAlias(dataSetBind, vp);
+								return chart.dataSetFieldAlias(dataSetBind, vp);
 							});
 				
 				valuePropertyNames[j] = (idx < 0 ? placeholderName : vps[idx].name);
@@ -5877,7 +5877,7 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -5899,7 +5899,7 @@
 			singleAxis:
 			{
 				id: 0,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				//ECharts-5.3.2版本主题配置不起作用，所以这里配置
 				"left": "10%",
 	            "top": "24%",
@@ -5939,12 +5939,12 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			if(cp)
 			{
-				var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				//主题河流图只支持[ name, value, category ]格式的数据条目
 				var data = chart.resultRowArrays(result, [ np, vp, cp ]);
@@ -5963,7 +5963,7 @@
 			}
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 				
 				for(var j=0; j<vps.length; j++)
 				{
@@ -6080,8 +6080,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -6106,15 +6106,15 @@
 			xAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				splitLine: { show: false }
 			},
 			yAxis:
 			{
 				id: 0,
-				name: (vps.length == 1 ? chart.dataSetPropertyAlias(dataSetBind, vps[0]) : ""),
+				name: (vps.length == 1 ? chart.dataSetFieldAlias(dataSetBind, vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -6168,12 +6168,12 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var cp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.category);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
 			if(cp)
 			{
-				var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				var categoryNames = [];
 				var categoryDatasMap = {};
@@ -6208,7 +6208,7 @@
 			}
 			else
 			{
-				var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 				
 				for(var j=0; j<vps.length; j++)
 				{
@@ -6335,8 +6335,8 @@
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -6357,15 +6357,15 @@
 			xAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, np),
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				nameGap: 5,
-				type: chartSupport.evalDataSetPropertyAxisType(chart, np),
+				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				splitLine: { show: false }
 			},
 			yAxis:
 			{
 				id: 0,
-				name: chart.dataSetPropertyAlias(dataSetBind, vp),
+				name: chart.dataSetFieldAlias(dataSetBind, vp),
 				nameGap: 5,
 				type: "value",
 				splitLine: { show: false }
@@ -6417,8 +6417,8 @@
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var np = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.name);
-			var vp = chart.dataSetPropertyOfSign(dataSetBind, dataSignNames.value);
+			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
+			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 			var data = chart.resultValueObjects(result, [np, vp]);
@@ -6586,13 +6586,13 @@
 		var cps = chartSupport.tableGetColumnProperties(chart, dataSetBind, dataSignNames.column);
 		
 		if(!cps || cps.length == 0)
-			throw new Error("DataSetProperty required in ["+chart.dataSetAlias(dataSetBind)+"] for rendering table");
+			throw new Error("DataSetField required in ["+chart.dataSetAlias(dataSetBind)+"] for rendering table");
 		
 		for(var i=0; i<cps.length; i++)
 		{
 			var column =
 			{
-				title: chart.dataSetPropertyAlias(dataSetBind, cps[i]),
+				title: chart.dataSetFieldAlias(dataSetBind, cps[i]),
 				data: cps[i].name,
 				defaultContent: "",
 				orderable: true,
@@ -6961,9 +6961,9 @@
 	
 	chartSupport.tableGetColumnProperties = function(chart, dataSetBind, columnDataSignName)
 	{
-		var cps = chart.dataSetPropertiesOfSign(dataSetBind, columnDataSignName);
+		var cps = chart.dataSetFieldsOfSign(dataSetBind, columnDataSignName);
 		if(!cps || cps.length == 0)
-			cps = chart.dataSetProperties(dataSetBind);
+			cps = chart.dataSetFields(dataSetBind);
 		
 		return cps;
 	};
@@ -7654,8 +7654,8 @@
 			
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var nps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.name);
-			var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
+			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			var hasNps = (nps && nps.length > 0);
 			
 			if(hasNps && nps.length != vps.length)
@@ -7669,7 +7669,7 @@
 			if(!hasNps)
 			{
 				for(var j=0; j<vps.length; j++)
-					vpNames[j] = chart.dataSetPropertyAlias(dataSetBind, vps[j]);
+					vpNames[j] = chart.dataSetFieldAlias(dataSetBind, vps[j]);
 			}
 			
 			for(var j=0; j<valuess.length; j++)
@@ -7909,8 +7909,8 @@
 			
 			var result = chart.resultOf(results, dataSetBind);
 			
-			var nps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.name);
-			var vps = chart.dataSetPropertiesOfSign(dataSetBind, dataSignNames.value);
+			var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
+			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			var hasNps = (nps && nps.length > 0);
 			
 			if(hasNps && nps.length != vps.length)
@@ -8239,8 +8239,8 @@
 	//    公用函数开始
 	//---------------------------------------------------------
 	
-	//org.datagear.analysis.DataSetProperty.DataType
-	chartSupport.DataSetPropertyDataType =
+	//org.datagear.analysis.DataSetField.DataType
+	chartSupport.DataSetFieldDataType =
 	{
 		STRING: "STRING",
 		BOOLEAN: "BOOLEAN",
@@ -8265,15 +8265,15 @@
 	/**
 	 * 计算指定数据集字段的坐标轴类型。
 	 */
-	chartSupport.evalDataSetPropertyAxisType = function(chart, dataSetProperty)
+	chartSupport.evalDataSetFieldAxisType = function(chart, dataSetField)
 	{
 		var type = "category";
 		
-		if(chartSupport.isDataTypeNumber(dataSetProperty))
+		if(chartSupport.isDataTypeNumber(dataSetField))
 		{
 			type = "value";
 		}
-		else if(chartSupport.isDataTypeAboutDate(dataSetProperty))
+		else if(chartSupport.isDataTypeAboutDate(dataSetField))
 		{
 			var resultDataFormat = chart.resultDataFormat();
 			if(!resultDataFormat)
@@ -8281,17 +8281,17 @@
 			
 			if(resultDataFormat)
 			{
-				if(chartSupport.isDataTypeDate(dataSetProperty)
+				if(chartSupport.isDataTypeDate(dataSetField)
 					&& resultDataFormat.dateType == chartSupport.ResultDataFormatType.NUMBER)
 				{
 					type = "time";
 				}
-				else if(chartSupport.isDataTypeTime(dataSetProperty)
+				else if(chartSupport.isDataTypeTime(dataSetField)
 					&& resultDataFormat.timeType == chartSupport.ResultDataFormatType.NUMBER)
 				{
 					type = "time";
 				}
-				else if(chartSupport.isDataTypeTimestamp(dataSetProperty)
+				else if(chartSupport.isDataTypeTimestamp(dataSetField)
 					&& resultDataFormat.timestampType == chartSupport.ResultDataFormatType.NUMBER)
 				{
 					type = "time";
@@ -8378,59 +8378,59 @@
 	/**
 	 * 指定数据集字段数据是否字符串类型。
 	 */
-	chartSupport.isDataTypeString = function(dataSetProperty)
+	chartSupport.isDataTypeString = function(dataSetField)
 	{
-		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.STRING);
+		var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
+		return (dataType == chartSupport.DataSetFieldDataType.STRING);
 	};
 	
 	/**
 	 * 指定数据集字段数据是否数值类型。
 	 */
-	chartSupport.isDataTypeNumber = function(dataSetProperty)
+	chartSupport.isDataTypeNumber = function(dataSetField)
 	{
-		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.NUMBER
-				|| dataType == chartSupport.DataSetPropertyDataType.INTEGER
-				|| dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
+		var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
+		return (dataType == chartSupport.DataSetFieldDataType.NUMBER
+				|| dataType == chartSupport.DataSetFieldDataType.INTEGER
+				|| dataType == chartSupport.DataSetFieldDataType.DECIMAL);
 	};
 	
 	/**
 	 * 指定数据集字段数据是否日期、时间、时间戳类型。
 	 */
-	chartSupport.isDataTypeAboutDate = function(dataSetProperty)
+	chartSupport.isDataTypeAboutDate = function(dataSetField)
 	{
-		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.DATE
-				|| dataType == chartSupport.DataSetPropertyDataType.TIME
-				|| dataType == chartSupport.DataSetPropertyDataType.TIMESTAMP);
+		var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
+		return (dataType == chartSupport.DataSetFieldDataType.DATE
+				|| dataType == chartSupport.DataSetFieldDataType.TIME
+				|| dataType == chartSupport.DataSetFieldDataType.TIMESTAMP);
 	};
 	
 	/**
 	 * 指定数据集字段数据是否日期类型。
 	 */
-	chartSupport.isDataTypeDate = function(dataSetProperty)
+	chartSupport.isDataTypeDate = function(dataSetField)
 	{
-		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.DATE);
+		var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
+		return (dataType == chartSupport.DataSetFieldDataType.DATE);
 	};
 	
 	/**
 	 * 指定数据集字段数据是否时间类型。
 	 */
-	chartSupport.isDataTypeTime = function(dataSetProperty)
+	chartSupport.isDataTypeTime = function(dataSetField)
 	{
-		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.TIME);
+		var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
+		return (dataType == chartSupport.DataSetFieldDataType.TIME);
 	};
 	
 	/**
 	 * 指定数据集字段数据是否时间戳类型。
 	 */
-	chartSupport.isDataTypeTimestamp = function(dataSetProperty)
+	chartSupport.isDataTypeTimestamp = function(dataSetField)
 	{
-		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.TIMESTAMP);
+		var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
+		return (dataType == chartSupport.DataSetFieldDataType.TIMESTAMP);
 	};
 	
 	/**
@@ -8657,11 +8657,11 @@
 		
 		if(dataSetBinds.length > 1 && valueProperties.length > 1)
 		{
-			legendName = dataSetAlias +"-" + chart.dataSetPropertyAlias(dataSetBind, valueProperties[valuePropertyIdx]);
+			legendName = dataSetAlias +"-" + chart.dataSetFieldAlias(dataSetBind, valueProperties[valuePropertyIdx]);
 		}
 		else if(valueProperties.length > 1)
 		{
-			legendName = chart.dataSetPropertyAlias(dataSetBind, valueProperties[valuePropertyIdx]);
+			legendName = chart.dataSetFieldAlias(dataSetBind, valueProperties[valuePropertyIdx]);
 		}
 		
 		return legendName;
@@ -8821,7 +8821,7 @@
 	 */
 	chartSupport.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, result, valueSign)
 	{
-		var vp = chart.dataSetPropertyOfSign(dataSetBind, valueSign);
+		var vp = chart.dataSetFieldOfSign(dataSetBind, valueSign);
 		
 		if(vp)
 		{

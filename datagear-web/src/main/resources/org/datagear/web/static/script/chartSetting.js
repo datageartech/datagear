@@ -1933,25 +1933,25 @@
 	chartSetting.initDataSetBindDataTable = function(chart, dataSetBinds, index, $parent)
 	{
 		var dataSetBind = dataSetBinds[index];
-		var dataSetProperties = chart.dataSetProperties(dataSetBind);
-		var fieldSigns = (chart.dataSetPropertySigns(dataSetBind) || {});
+		var dataSetFields = chart.dataSetFields(dataSetBind);
+		var fieldSigns = (chart.dataSetFieldSigns(dataSetBind) || {});
 		var dataSigns = (chart.plugin && chart.plugin.dataSigns ? chart.plugin.dataSigns : []);
-		var signProperties = [];
+		var signFields = [];
 		
-		for(var i=0; i<dataSetProperties.length; i++)
+		for(var i=0; i<dataSetFields.length; i++)
 		{
-			var name = dataSetProperties[i].name;
+			var name = dataSetFields[i].name;
 			var signs = fieldSigns[name];
 			
 			if(signs != null && signs.length > 0)
 			{
-				signProperties.push(dataSetProperties[i]);
+				signFields.push(dataSetFields[i]);
 			}
 		}
 		
 		//如果没有任何标记，则认为全部标记，比如表格图表
-		if(signProperties.length == 0)
-			signProperties = dataSetProperties;
+		if(signFields.length == 0)
+			signFields = dataSetFields;
 		
 		var columns = [];
 		
@@ -1964,12 +1964,12 @@
 			width: "4em"
 		});
 		
-		for(var i=0; i<signProperties.length; i++)
+		for(var i=0; i<signFields.length; i++)
 		{
 			var column =
 			{
-				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signProperties[i], fieldSigns, dataSigns),
-				data: signProperties[i].name,
+				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i], fieldSigns, dataSigns),
+				data: signFields[i].name,
 				defaultContent: "",
 				orderable: false,
 				searchable: false,
@@ -2051,11 +2051,11 @@
 		return tableId;
 	};
 	
-	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetProperty, fieldSigns, dataSigns)
+	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField, fieldSigns, dataSigns)
 	{
-		var title = chart.dataSetPropertyAlias(dataSetBind, dataSetProperty);
+		var title = chart.dataSetFieldAlias(dataSetBind, dataSetField);
 		
-		var name = dataSetProperty.name;
+		var name = dataSetField.name;
 		var signs = fieldSigns[name];
 		
 		if(signs != null && signs.length > 0)

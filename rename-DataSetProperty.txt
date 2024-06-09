@@ -84,3 +84,27 @@ insertFieldName
 
 sqWhileDqPropNameInExpIsIllegal
 sqWhileDqFieldNameInExpIsIllegal
+
+dataSetPropertySigns
+dataSetFieldSigns
+
+dataSetPropertySign
+dataSetFieldSign
+
+dataSetPropertyOrder
+dataSetFieldOrder
+
+dataSetPropertyAlias
+dataSetFieldAlias
+
+dataSetProperty
+dataSetField
+
+dataSetProperties
+dataSetFields
+
+dataSetPropertiesOfSign
+dataSetFieldsOfSign
+
+dataSetPropertyOfSign
+dataSetFieldOfSign
