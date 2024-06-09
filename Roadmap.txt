@@ -8,6 +8,7 @@
 	ok 看板全局资源管理页面改为采用目录导航加分页查询方式，便于展示和查询大量文件；
 	ok Schema重命名为DtbsSource；
 	ok 数据源支持设置模式名；
+	ok 数据集属性（DataSetProperty）重构为数据集字段（DataSetField）；
 	图表插件数据标记自动绑定；
 	
 待定：
