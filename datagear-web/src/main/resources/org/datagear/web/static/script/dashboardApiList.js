@@ -19,13 +19,13 @@
  * 看板API清单。
  * 
  * 依赖:
- * jquery.js
+ * 
  */
-(function($, undefined)
+(function(global)
 {
 
 //看板API补全清单
-$.dashboardApiCompletions =
+global.dashboardApiCompletions =
 [
 	//看板JS对象
 	{name: "addChart", value: "addChart(", displayName: "addChart()", displayComment: "dashboard", categories: ["dashboard"]},
@@ -209,4 +209,4 @@ $.dashboardApiCompletions =
 ];
 
 })
-(jQuery);
+(this);

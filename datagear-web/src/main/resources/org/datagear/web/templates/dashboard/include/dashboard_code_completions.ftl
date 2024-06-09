@@ -66,7 +66,7 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-code' />", categories: ["html", "script"]}
 	];
 	
-	po.codeEditorCompletionsJsFunction = $.dashboardApiCompletions;
+	po.codeEditorCompletionsJsFunction = window.dashboardApiCompletions;
 })
 (${pid});
 </script>
