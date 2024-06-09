@@ -844,6 +844,8 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
 		mapper.setConversionService(getConversionService());
 		mapper.setFilePathValueDirectory(getDataBinaryTmpDirectory());
+		mapper.setEnableSqlExpression(false);
+		mapper.setEnableVariableExpression(false);
 
 		return mapper;
 	}

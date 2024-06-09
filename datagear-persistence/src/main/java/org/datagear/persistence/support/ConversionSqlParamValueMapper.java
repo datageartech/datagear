@@ -54,6 +54,21 @@ import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.SpelNode;
+import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.expression.spel.ast.Assign;
+import org.springframework.expression.spel.ast.BeanReference;
+import org.springframework.expression.spel.ast.ConstructorReference;
+import org.springframework.expression.spel.ast.InlineList;
+import org.springframework.expression.spel.ast.InlineMap;
+import org.springframework.expression.spel.ast.MethodReference;
+import org.springframework.expression.spel.ast.Projection;
+import org.springframework.expression.spel.ast.QualifiedIdentifier;
+import org.springframework.expression.spel.ast.Selection;
+import org.springframework.expression.spel.ast.TypeReference;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
@@ -87,8 +102,17 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	public static final String PREFIX_BASE64 = "base64:";
 
 	protected static final VariableExpressionResolver DEFAULT_VARIABLE_EXPRESSION_RESOLVER = new VariableExpressionResolver();
+
 	protected static final SqlExpressionResolver DEFAULT_SQL_EXPRESSION_RESOLVER = new SqlExpressionResolver();
-	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser();
+
+	/**
+	 * 表达式解析器。
+	 * <p>
+	 * 这里考虑安全，明确禁止了它的{@code autoGrowNullReferences}、{@code autoGrowCollections}特性
+	 * </p>
+	 */
+	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser(
+			new SpelParserConfiguration(false, false));
 
 	/** 用于支持基本类型转换的转换服务类 */
 	private ConversionService conversionService = null;
@@ -339,7 +363,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		{
 			// 如果是表达式不合法，且列是文本类型，则忽略计算
 			if (JdbcUtil.isTextType(column.getType()))
-				expValue = expression.toString();
+				expValue = expression.getExpression();
 			else
 				throw new SqlParamValueVariableExpressionSyntaxException(table, column, value, expression.getContent(),
 						t);
@@ -347,13 +371,14 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		try
 		{
+			checkSpelExpression(spelExpression);
 			expValue = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
 		}
 		catch (Throwable t)
 		{
 			// 如果是表达式不合法，且列是文本类型，则忽略计算
 			if (JdbcUtil.isTextType(column.getType()))
-				expValue = expression.toString();
+				expValue = expression.getExpression();
 			else
 				throw new SqlParamValueVariableExpressionException(table, column, value, expression.getContent(), t);
 		}
@@ -362,6 +387,73 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		expressionEvaluationContext.putCachedValue(expression, expValue);
 
 		return expValue;
+	}
+
+	/**
+	 * 校验Spel表达式是否合法。
+	 * 
+	 * @param expression
+	 * @throws ParseException
+	 */
+	protected void checkSpelExpression(Expression expression) throws ParseException
+	{
+		if (!(expression instanceof SpelExpression))
+			return;
+
+		SpelExpression spelExpression = (SpelExpression) expression;
+		SpelNode spelNode = spelExpression.getAST();
+
+		checkSpelNode(spelExpression, spelNode);
+	}
+
+	/**
+	 * 校验Spel表达式是否合法。
+	 * <p>
+	 * Spel没有提供更细粒度的表达式控制配置，所以这里通过判断{@linkplain SpelNode}的类型来禁用某些无关的语法，以避免安全问题。
+	 * </p>
+	 * 
+	 * @param spelExpression
+	 * @param spelNode
+	 * @throws ParseException
+	 */
+	protected void checkSpelNode(SpelExpression spelExpression, SpelNode spelNode) throws ParseException
+	{
+		if (spelNode == null)
+			return;
+
+		boolean illegal = false;
+
+		// 表达式中不允许出现这些语法
+		if (spelNode instanceof Assign)
+			illegal = true;
+		else if (spelNode instanceof BeanReference)
+			illegal = true;
+		else if (spelNode instanceof ConstructorReference)
+			illegal = true;
+		else if (spelNode instanceof InlineList)
+			illegal = true;
+		else if (spelNode instanceof InlineMap)
+			illegal = true;
+		else if (spelNode instanceof MethodReference)
+			illegal = true;
+		else if (spelNode instanceof Projection)
+			illegal = true;
+		else if (spelNode instanceof QualifiedIdentifier)
+			illegal = true;
+		else if (spelNode instanceof Selection)
+			illegal = true;
+		else if (spelNode instanceof TypeReference)
+			illegal = true;
+
+		if (illegal)
+			throw new ParseException(spelNode.toStringAST(), spelNode.getStartPosition(), "illegal syntax");
+
+		int cc = spelNode.getChildCount();
+
+		for (int i = 0; i < cc; i++)
+		{
+			checkSpelNode(spelExpression, spelNode.getChild(i));
+		}
 	}
 
 	/**
