@@ -284,7 +284,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 				Object value = rowRaw.get(name);
 				value = convertToFieldDataType(converter, value, field);
 				
-				//无论是否计算属性，这里都应设置默认值
+				// 无论是否计算字段，这里都应设置默认值
 				if(value == null)
 					value = defaultValues.get(i);
 

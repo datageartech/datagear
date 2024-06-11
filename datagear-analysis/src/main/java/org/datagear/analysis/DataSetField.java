@@ -23,7 +23,7 @@ import java.math.BigInteger;
 /**
  * 数据集字段信息。
  * <p>
- * 此类描述{@linkplain DataSet#getResult(DataSetQuery)}返回的{@linkplain DataSetResult#getData()}元素的属性信息。
+ * 此类描述{@linkplain DataSet#getResult(DataSetQuery)}返回的{@linkplain DataSetResult#getData()}元素的字段信息。
  * </p>
  * 
  * @author datagear@163.com
@@ -82,7 +82,7 @@ public class DataSetField extends AbstractNameTypeAware implements Cloneable
 	/**
 	 * 获取默认值，可能为{@code null}。
 	 * <p>
-	 * 如果数据中此属性值为{@code null}，那么应该设置为此默认值。
+	 * 如果数据中此字段值为{@code null}，那么应该设置为此默认值。
 	 * </p>
 	 * <p>
 	 * 注意：此默认值类型不一定是期望的数据类型，应当先对其进行类型转换。

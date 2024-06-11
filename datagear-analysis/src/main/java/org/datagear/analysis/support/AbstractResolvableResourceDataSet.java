@@ -134,7 +134,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		if (resolveFields)
 		{
 			rd = resolveResourceData(resource, true);
-			// 缓存中无需存储属性信息
+			// 缓存中无需存储字段信息
 			setCacheResourceData(resource, new ResourceData(rd.getData(), null));
 		}
 		else

@@ -1289,7 +1289,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 				}
 				else
 				{
-					// 属性名限定为：不允许忽略大小写的重名。
+					// 字段名限定为：不允许忽略大小写的重名。
 					// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
 					String upperCaseName = name.toUpperCase();
 

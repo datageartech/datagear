@@ -553,9 +553,10 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	}
 
 	/**
-	 * 解析单元格属性值。
+	 * 解析单元格字段值。
 	 * 
-	 * @param cell 允许为{@code null}
+	 * @param cell
+	 *            允许为{@code null}
 	 * @return
 	 * @throws DataSetSourceParseException
 	 * @throws DataSetException
@@ -613,7 +614,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	
 	protected static class ExcelFieldInfo
 	{
-		/** 属性名 */
+		/** 字段名 */
 		private final String name;
 
 		/**

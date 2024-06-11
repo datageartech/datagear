@@ -77,15 +77,15 @@ public interface DataSet extends Identifiable
 	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * <p>
-	 * 如果{@linkplain #isMutableModel()}为{@code false}，那么返回结果中的数据项属性不应超出{@linkplain #getFields()}的范围，
+	 * 如果{@linkplain #isMutableModel()}为{@code false}，那么返回结果中的数据项字段不应超出{@linkplain #getFields()}的范围，
 	 * 避免暴露底层数据源不期望暴露的数据；
-	 * 如果{@linkplain #isMutableModel()}为{@code true}，则返回结果中的数据项属性不受{@linkplain #getFields()}范围限制。
+	 * 如果{@linkplain #isMutableModel()}为{@code true}，则返回结果中的数据项字段不受{@linkplain #getFields()}范围限制。
 	 * </p>
 	 * <p>
-	 * 如果返回结果中的数据项属性在{@linkplain #getFields()}中有对应，当数据项属性值为{@code null}时，应使用{@linkplain DataSetField#getDefaultValue()}的值。
+	 * 如果返回结果中的数据项字段在{@linkplain #getFields()}中有对应，当数据项字段值为{@code null}时，应使用{@linkplain DataSetField#getDefaultValue()}的值。
 	 * </p>
 	 * <p>
-	 * 返回结果中的数据项属性值应已转换为与{@linkplain #getFields()}的{@linkplain DataSetField#getType()}类型一致。
+	 * 返回结果中的数据项字段值应已转换为与{@linkplain #getFields()}的{@linkplain DataSetField#getType()}类型一致。
 	 * </p>
 	 * 
 	 * @param query

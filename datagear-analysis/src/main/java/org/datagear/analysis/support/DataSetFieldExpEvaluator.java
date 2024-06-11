@@ -55,7 +55,7 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * 此类用于计算{@linkplain DataSet#getFields()}的{@linkplain DataSetField#getExpression()}表达式的值，支持诸如：
  * </p>
  * <p>
- * <code>"(属性名A + 属性名B)*2 - 属性名C/3"</code>
+ * <code>"(字段名A + 字段名B)*2 - 字段名C/3"</code>
  * </p>
  * <p>
  * 的表达式计算。
@@ -65,11 +65,11 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * </p>
  * <p>
  * <ol>
- * <li>属性值：<br>
- * {@linkplain Map}简化语法：{@code 属性名}、{@code 属性名.属性名}<br>
- * {@linkplain Map}标准语法：{@code ['属性名']}、{@code ["属性名"]}、{@code 属性名['属性名']}、{@code 属性名["属性名"]}<br>
- * {@code JavaBean}：{@code 属性名}、{@code 属性名.属性名}<br>
- * {@linkplain List}、数组：{@code [索引数值]}、{@code 属性名[索引数值]}<br>
+ * <li>字段值：<br>
+ * {@linkplain Map}简化语法：{@code 字段名}、{@code 字段名.字段名}<br>
+ * {@linkplain Map}标准语法：{@code ['字段名']}、{@code ["字段名"]}、{@code 字段名['字段名']}、{@code 字段名["字段名"]}<br>
+ * {@code JavaBean}：{@code 字段名}、{@code 字段名.字段名}<br>
+ * {@linkplain List}、数组：{@code [索引数值]}、{@code 字段名[索引数值]}<br>
  * </li>
  * <li>数值计算：<br>
  * 加：{@code A + B}<br>
@@ -111,17 +111,17 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * </p>
  * <p>
  * 对于{@linkplain #eval(List, List, ValueSetter)}方法，
- * 表达式中的{@code 属性名}可以是{@code fields}列表中任意的{@linkplain DataSetField#getName()}，取值规范如下所示：
+ * 表达式中的{@code 字段名}可以是{@code fields}列表中任意的{@linkplain DataSetField#getName()}，取值规范如下所示：
  * </p>
  * <p>
  * <ol>
- * <li>非计算属性：{@code datas}元素对象的对应属性值<br>
+ * <li>非计算字段：{@code datas}元素对象的对应字段值<br>
  * </li>
- * <li>自身属性：{@code datas}元素对象的对应原始属性值<br>
+ * <li>自身字段：{@code datas}元素对象的对应原始字段值<br>
  * </li>
- * <li>前置计算属性：属性表达式计算结果值<br>
+ * <li>前置计算字段：字段表达式计算结果值<br>
  * </li>
- * <li>后置计算属性：{@code datas}元素对象的对应原始属性值<br>
+ * <li>后置计算字段：{@code datas}元素对象的对应原始字段值<br>
  * </li>
  * </ol>
  * </p>
@@ -129,7 +129,7 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
  * 表达式示例：
  * </p>
  * <p>
- * {@code "属性名A >= 属性名B ? (属性名C + 属性名D)/2 : (属性名E + 属性名F)*2"}
+ * {@code "字段名A >= 字段名B ? (字段名C + 字段名D)/2 : (字段名E + 字段名F)*2"}
  * </p>
  * <p>
  * 此类是线程安全的。
@@ -291,7 +291,7 @@ public class DataSetFieldExpEvaluator
 
 			for (T data : datas)
 			{
-				// 必须按顺序计算，确保表达式中的属性取值逻辑符合规范
+				// 必须按顺序计算，确保表达式中的字段取值逻辑符合规范
 				for (int i = 0; i < plen; i++)
 				{
 					field = fields.get(i);
@@ -322,8 +322,8 @@ public class DataSetFieldExpEvaluator
 	 * 
 	 * @param fields
 	 * @param expressions
-	 *            用于写入表达式的列表，如果某个元素为{@code null}，表示不是计算属性
-	 * @returns 计算属性的个数
+	 *            用于写入表达式的列表，如果某个元素为{@code null}，表示不是计算字段
+	 * @returns 计算字段的个数
 	 * @throws DataSetFieldExpEvaluatorException
 	 */
 	protected int parseExpressions(List<DataSetField> fields, List<Expression> expressions)
@@ -530,7 +530,7 @@ public class DataSetFieldExpEvaluator
 	 * </p>
 	 * <p>
 	 * 2.
-	 * 只允许访问{@linkplain Map}的关键字值，不允许访问{@linkplain Map}对象本身的属性（比如{@code size}属性）；
+	 * 只允许访问{@linkplain Map}的关键字值，不允许访问{@linkplain Map}对象本身的字段（比如{@code size}字段）；
 	 * </p>
 	 * <p>
 	 * 3. 只允许读操作，不允许写操作。
