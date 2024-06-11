@@ -51,7 +51,7 @@
 		        	<div id="${pid}driverLibrary" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
 		        		<p-chip v-for="dlf in pm.driverLibraryFiles.files" :key="dlf.key"
 		        			class="mb-2" :removable="!pm.isReadonlyAction" @remove="onRemovedLibraryFile($event, dlf.name)">
-		        			<a :href="genDownloadLibraryPath(dlf.name)" target="_blank" class="link">
+		        			<a :href="genDownloadLibraryPath(dlf.name)" target="_blank" class="link text-color">
 		        				{{dlf.name+' ('+dlf.size+')'}}
 		        			</a>
 		        		</p-chip>
