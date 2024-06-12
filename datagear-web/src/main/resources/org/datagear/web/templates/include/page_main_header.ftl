@@ -72,8 +72,8 @@ User currentUser
 		var latestVersion = window.DATA_GEAR_LATEST_VERSION;
 		var detectedVersion = $.cookie(po.detectedNewVersionCookieName);
 		
-		if(!latestVersion && localStorage && localStorage.getItem)
-			latestVersion = localStorage.getItem("DATA_GEAR_LATEST_VERSION");
+		if(!latestVersion && window.localStorage && window.localStorage.getItem)
+			latestVersion = window.localStorage.getItem("DATA_GEAR_LATEST_VERSION");
 		
 		latestVersion = (latestVersion || "");
 		
