@@ -124,9 +124,18 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	/**
 	 * 构建检测新版本的JS脚本，格式为：
 	 * <p>
+	 * http：
+	 * </p>
+	 * <p>
 	 * <code>
 	 * &lt;script src="http://www.datagear.tech/latest-version.js" type="text/javascript"&gt;&lt;/script&gt;
 	 * </code>
+	 * </p>
+	 * <p>
+	 * https：
+	 * </p>
+	 * <p>
+	 * 由于目前官网没有开通https服务，将直接返回空字符串：{@code ""}。
 	 * </p>
 	 * <p>
 	 * 如果{@code disableDetectNewVersion}为{@code true}，或者还未到达下一次检测时间，将直接返回空字符串：{@code ""}。
@@ -140,6 +149,11 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	{
 		String script = "";
 
+		// 由于浏览器安全限制，在https域内引用http资源可能导致整个页面不可用，
+		// 而目前官网没有开通https通道，所以这里暂时禁用此功能
+		if (WebUtils.isSecureHttpScheme(request))
+			return script;
+
 		if (!disableDetectNewVersion)
 		{
 			String resolved = WebUtils.getCookieValue(request, WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED);
@@ -147,7 +161,10 @@ public class CustomFreeMarkerView extends FreeMarkerView
 		}
 
 		if (!disableDetectNewVersion)
-			script = "<script src=\"" + WebUtils.LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
+		{
+			String src = WebUtils.LATEST_VERSION_SCRIPT_LOCATION;
+			script = "<script src=\"" + src + "\" type=\"text/javascript\"></script>";
+		}
 
 		return script;
 	}
