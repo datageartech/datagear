@@ -47,6 +47,9 @@ public final class Global
 
 	/** 官网 */
 	public static final String WEB_SITE = "http://www.datagear.tech";
+
+	/** 官网-https */
+	public static final String WEB_SITE_HTTPS = "https://www.datagear.tech";
 	
 	/** 带下划线的大写名称缩写 */
 	public static final String NAME_SHORT_UCUS = "DG_";

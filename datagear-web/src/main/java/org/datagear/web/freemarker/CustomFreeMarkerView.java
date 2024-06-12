@@ -22,9 +22,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.management.domain.User;
-import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.AuthenticationUserGetter;
+import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.datagear.web.util.WebUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -63,6 +63,12 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	/** 变量：访问Java静态变量关键字 */
 	public static final String VAR_STATICS = "statics";
 
+	/** 变量：检测到的新版本Cookie名 */
+	public static final String VAR_DETECT_NEW_VERSION_COOKIE_NAME = "detectedNewVersionCookieName";
+
+	/** 变量：检测新版本脚本 */
+	public static final String VAR_DETECT_NEW_VERSION_SCRIPT = "detectNewVersionScript";
+
 	private static final BeansWrapper BEANS_WRAPPER = new BeansWrapperBuilder(
 			Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
 
@@ -91,6 +97,8 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	{
 		ApplicationProperties applicationProperties = applicationContext.getBean(ApplicationProperties.class);
 		AuthenticationUserGetter userGetter = applicationContext.getBean(AuthenticationUserGetter.class);
+		DetectNewVersionScriptResolver detectNewVersionScriptResolver = applicationContext
+				.getBean(DetectNewVersionScriptResolver.class);
 
 		// 当部署在Tomcat时（8.5.61），对于类似“/static/not-exists.js”、“/chart/not-exists”的请求，
 		// 在被导向至“/error”后，此时如果这里使用userGetter.getUser()会抛出空指针异常，
@@ -100,72 +108,8 @@ public class CustomFreeMarkerView extends FreeMarkerView
 
 		model.put(VAR_CURRENT_USER, currentUser);
 		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
-		
-		if(WebUtils.isEnableDetectNewVersionRequest(request))
-			setDetectNewVersionScriptAttr(model, request, applicationProperties.isDisableDetectNewVersion());
-		else
-			setDetectNewVersionScriptAttr(model, request, true);
-	}
-
-	/**
-	 * 将检测新版本的JS脚本以{@code detectNewVersionScript}关键字存入{@code model}。
-	 * 
-	 * @param model
-	 * @param request
-	 * @param disableDetectNewVersion
-	 */
-	protected void setDetectNewVersionScriptAttr(Map<String, Object> model, HttpServletRequest request,
-			boolean disableDetectNewVersion)
-	{
-		String script = buildDetectNewVersionScript(request, disableDetectNewVersion);
-		model.put("detectNewVersionScript", script);
-	}
-
-	/**
-	 * 构建检测新版本的JS脚本，格式为：
-	 * <p>
-	 * http：
-	 * </p>
-	 * <p>
-	 * <code>
-	 * &lt;script src="http://www.datagear.tech/latest-version.js" type="text/javascript"&gt;&lt;/script&gt;
-	 * </code>
-	 * </p>
-	 * <p>
-	 * https：
-	 * </p>
-	 * <p>
-	 * 由于目前官网没有开通https服务，将直接返回空字符串：{@code ""}。
-	 * </p>
-	 * <p>
-	 * 如果{@code disableDetectNewVersion}为{@code true}，或者还未到达下一次检测时间，将直接返回空字符串：{@code ""}。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param disableDetectNewVersion
-	 * @return
-	 */
-	protected String buildDetectNewVersionScript(HttpServletRequest request, boolean disableDetectNewVersion)
-	{
-		String script = "";
-
-		// 由于浏览器安全限制，在https域内引用http资源可能导致整个页面不可用，
-		// 而目前官网没有开通https通道，所以这里暂时禁用此功能
-		if (WebUtils.isSecureHttpScheme(request))
-			return script;
-
-		if (!disableDetectNewVersion)
-		{
-			String resolved = WebUtils.getCookieValue(request, WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED);
-			disableDetectNewVersion = StringUtil.toBoolean(resolved);
-		}
-
-		if (!disableDetectNewVersion)
-		{
-			String src = WebUtils.LATEST_VERSION_SCRIPT_LOCATION;
-			script = "<script src=\"" + src + "\" type=\"text/javascript\"></script>";
-		}
-
-		return script;
+		model.put(VAR_DETECT_NEW_VERSION_COOKIE_NAME, detectNewVersionScriptResolver.getDetectedVersionCookieName());
+		model.put(VAR_DETECT_NEW_VERSION_SCRIPT, detectNewVersionScriptResolver.buildScriptIf(request,
+				applicationProperties.isDisableDetectNewVersion()));
 	}
 }

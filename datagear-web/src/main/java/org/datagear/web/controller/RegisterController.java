@@ -27,6 +27,7 @@ import org.datagear.management.util.RoleSpec;
 import org.datagear.util.IDUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.CheckCodeManager;
+import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class RegisterController extends AbstractController
 
 	@Autowired
 	private RoleSpec roleSpec;
+
+	@Autowired
+	private DetectNewVersionScriptResolver detectNewVersionScriptResolver;
 
 	public RegisterController()
 	{
@@ -108,6 +112,16 @@ public class RegisterController extends AbstractController
 		this.roleSpec = roleSpec;
 	}
 
+	public DetectNewVersionScriptResolver getDetectNewVersionScriptResolver()
+	{
+		return detectNewVersionScriptResolver;
+	}
+
+	public void setDetectNewVersionScriptResolver(DetectNewVersionScriptResolver detectNewVersionScriptResolver)
+	{
+		this.detectNewVersionScriptResolver = detectNewVersionScriptResolver;
+	}
+
 	@RequestMapping
 	public String register(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
@@ -120,7 +134,7 @@ public class RegisterController extends AbstractController
 
 		User user = new User();
 		setFormModel(model, user, "register", "doRegister");
-		WebUtils.setEnableDetectNewVersionRequest(request);
+		this.detectNewVersionScriptResolver.enableIf(request);
 		setUserPasswordStrengthInfo(model);
 		
 		return "/register";

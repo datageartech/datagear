@@ -27,6 +27,7 @@ User currentUser
 <#assign ThemeSpec=statics['org.datagear.web.util.ThemeSpec']>
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
+<#assign DetectNewVersionScriptResolver=statics['org.datagear.web.util.DetectNewVersionScriptResolver']>
 <div id="${pid}mainHeader" class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
 	<div class="grid grid-nogutter align-items-center">
 		<div id="sysLogoWrapper" class="logo-wrapper header-left col-fixed flex align-items-center pl-1">
@@ -64,19 +65,22 @@ User currentUser
 	po.isUserAnonymous = ("${currentUser.anonymous?string('true','false')}" == "true");
 	po.isUserAdmin = ("${currentUser.admin?string('true','false')}" == "true");
 	po.currentVersion = "${Global.VERSION}";
+	po.detectedNewVersionCookieName = "${detectedNewVersionCookieName}";
 	
 	po.newVersionDetected = function()
 	{
-		var detectedVersion = $.cookie("${Global.NAME_SHORT_UCUS}DETECTED_VERSION");
-		if(typeof(DATA_GEAR_LATEST_VERSION) != "undefined")
+		var latestVersion = window.DATA_GEAR_LATEST_VERSION;
+		var detectedVersion = $.cookie(po.detectedNewVersionCookieName);
+		
+		if(!latestVersion && localStorage && localStorage.getItem)
+			latestVersion = localStorage.getItem("DATA_GEAR_LATEST_VERSION");
+		
+		latestVersion = (latestVersion || "");
+		
+		if(detectedVersion != latestVersion)
 		{
-			$.cookie("${WebUtils.COOKIE_DETECT_NEW_VERSION_RESOLVED}", "true", {expires : 1, path : po.concatContextPath("/")});
-			
-			if(DATA_GEAR_LATEST_VERSION != detectedVersion)
-			{
-				detectedVersion = DATA_GEAR_LATEST_VERSION;
-				$.cookie("${Global.NAME_SHORT_UCUS}DETECTED_VERSION", detectedVersion, {expires : 100, path : po.concatContextPath("/")});
-			}
+			detectedVersion = latestVersion;
+			$.cookie(po.detectedNewVersionCookieName, detectedVersion, {expires : 3, path : po.concatContextPath("/")});
 		}
 		
 		if(!detectedVersion)

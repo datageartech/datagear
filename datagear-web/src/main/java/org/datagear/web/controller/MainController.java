@@ -28,7 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.util.IOUtil;
 import org.datagear.web.security.ModulePermissions;
-import org.datagear.web.util.WebUtils;
+import org.datagear.web.util.DetectNewVersionScriptResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,9 +48,22 @@ public class MainController extends AbstractController
 {
 	public static final String FAVICON_CLASS_PATH = "org/datagear/web/static/image/favicon.ico";
 
+	@Autowired
+	private DetectNewVersionScriptResolver detectNewVersionScriptResolver;
+
 	public MainController()
 	{
 		super();
+	}
+
+	public DetectNewVersionScriptResolver getDetectNewVersionScriptResolver()
+	{
+		return detectNewVersionScriptResolver;
+	}
+
+	public void setDetectNewVersionScriptResolver(DetectNewVersionScriptResolver detectNewVersionScriptResolver)
+	{
+		this.detectNewVersionScriptResolver = detectNewVersionScriptResolver;
 	}
 
 	/**
@@ -62,7 +76,7 @@ public class MainController extends AbstractController
 	@RequestMapping({ "", "/", "/index.html" })
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		WebUtils.setEnableDetectNewVersionRequest(request);
+		this.detectNewVersionScriptResolver.enableIf(request);
 		
 		ModulePermissions mps = getAuthenticationSecurity()
 				.resolveModulePermissions(getCurrentAuthentication());

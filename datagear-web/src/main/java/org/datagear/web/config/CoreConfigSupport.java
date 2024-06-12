@@ -138,6 +138,7 @@ import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DefaultMessageChannel;
 import org.datagear.web.util.DelegatingTextEncryptor;
 import org.datagear.web.util.DelegatingTextEncryptor.EncryptType;
+import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.DtbsSourceTableCache;
@@ -402,6 +403,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public SessionIdParamResolver sessionIdParamResolver()
 	{
 		SessionIdParamResolver bean = new SessionIdParamResolver();
+		return bean;
+	}
+
+	@Bean
+	public DetectNewVersionScriptResolver detectNewVersionScriptResolver()
+	{
+		DetectNewVersionScriptResolver bean = new DetectNewVersionScriptResolver();
 		return bean;
 	}
 

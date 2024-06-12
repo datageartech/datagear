@@ -111,11 +111,11 @@ label.align-tip{
 }
 
 .new-version-tip.p-button,
-.new-version-tip > .p-menuitem-link > .p-menuitem-text{
+.new-version-tip > .p-menuitem-content > .p-menuitem-link > span{
 	position: relative;
 }
 .new-version-tip.p-button::after,
-.new-version-tip > .p-menuitem-link > .p-menuitem-text::after{
+.new-version-tip > .p-menuitem-content > .p-menuitem-link > span::after{
 	content: "";
 	width: 8px;
 	height: 8px;
@@ -127,7 +127,7 @@ label.align-tip{
     top: 4px;
     right: 4px;
 }
-.new-version-tip > .p-menuitem-link > .p-menuitem-text::after{
+.new-version-tip > .p-menuitem-content > .p-menuitem-link > span::after{
 	top: -4px;
 	right: -8px;
 }

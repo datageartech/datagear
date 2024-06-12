@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.web.security.LoginCheckCodeErrorException;
+import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.AccessLatch;
@@ -94,6 +95,9 @@ public class LoginController extends AbstractController
 	@Autowired
 	private UsernameLoginLatch usernameLoginLatch;
 
+	@Autowired
+	private DetectNewVersionScriptResolver detectNewVersionScriptResolver;
+
 	private RequestCache requestCache = new HttpSessionRequestCache();
 
 	public LoginController()
@@ -121,6 +125,16 @@ public class LoginController extends AbstractController
 		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
+	public DetectNewVersionScriptResolver getDetectNewVersionScriptResolver()
+	{
+		return detectNewVersionScriptResolver;
+	}
+
+	public void setDetectNewVersionScriptResolver(DetectNewVersionScriptResolver detectNewVersionScriptResolver)
+	{
+		this.detectNewVersionScriptResolver = detectNewVersionScriptResolver;
+	}
+
 	public RequestCache getRequestCache()
 	{
 		return requestCache;
@@ -142,7 +156,7 @@ public class LoginController extends AbstractController
 		LoginForm form = createLoginForm(request, response, model);
 
 		setFormModel(model, form, "login", "doLogin");
-		WebUtils.setEnableDetectNewVersionRequest(request);
+		this.detectNewVersionScriptResolver.enableIf(request);
 		
 		return "/login";
 	}

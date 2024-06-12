@@ -29,8 +29,8 @@ import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.web.config.ApplicationProperties;
+import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebUtils;
 import org.datagear.web.util.accesslatch.UsernameLoginLatch;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +71,9 @@ public class ResetPasswordController extends AbstractController
 
 	@Autowired
 	private UsernameLoginLatch usernameLoginLatch;
+
+	@Autowired
+	private DetectNewVersionScriptResolver detectNewVersionScriptResolver;
 
 	public ResetPasswordController()
 	{
@@ -117,6 +120,16 @@ public class ResetPasswordController extends AbstractController
 		this.usernameLoginLatch = usernameLoginLatch;
 	}
 
+	public DetectNewVersionScriptResolver getDetectNewVersionScriptResolver()
+	{
+		return detectNewVersionScriptResolver;
+	}
+
+	public void setDetectNewVersionScriptResolver(DetectNewVersionScriptResolver detectNewVersionScriptResolver)
+	{
+		this.detectNewVersionScriptResolver = detectNewVersionScriptResolver;
+	}
+
 	@RequestMapping
 	public String resetPassword(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
@@ -129,7 +142,7 @@ public class ResetPasswordController extends AbstractController
 		}
 
 		model.addAttribute("step", toResetPasswordStepView(request, response, resetPasswordStep));
-		WebUtils.setEnableDetectNewVersionRequest(request);
+		this.detectNewVersionScriptResolver.enableIf(request);
 		setUserPasswordStrengthInfo(model);
 
 		return "/reset_password";

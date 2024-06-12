@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -49,12 +48,6 @@ public class WebUtils
 
 	/** 父页面ID关键字 */
 	public static final String KEY_PARENT_PAGE_ID = "ppid";
-
-	/** 最新版本脚本地址 */
-	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
-
-	/** Cookie中存储是否已执行过本次的检测新版本的名称 */
-	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = Global.NAME_SHORT_UCUS + "DETECT_NEW_VERSION_RESOLVED";
 
 	/**
 	 * 首页URL。
@@ -667,16 +660,6 @@ public class WebUtils
 		}
 
 		return re;
-	}
-
-	public static void setEnableDetectNewVersionRequest(HttpServletRequest request)
-	{
-		request.setAttribute("enableDetectNewVersion", true);
-	}
-	
-	public static boolean isEnableDetectNewVersionRequest(HttpServletRequest request)
-	{
-		return Boolean.TRUE.equals(request.getAttribute("enableDetectNewVersion"));
 	}
 
 	/**
