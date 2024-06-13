@@ -22,12 +22,13 @@
 变量：
 //当前用户，不允许为null
 User currentUser
+//检测新版本结果，不允许为null
+DetectResult detectNewVersionResult
 
 -->
 <#assign ThemeSpec=statics['org.datagear.web.util.ThemeSpec']>
 <#assign Global=statics['org.datagear.util.Global']>
 <#assign WebUtils=statics['org.datagear.web.util.WebUtils']>
-<#assign DetectNewVersionScriptResolver=statics['org.datagear.web.util.DetectNewVersionScriptResolver']>
 <div id="${pid}mainHeader" class="page-main-header flex-grow-0 p-card no-border text-primary py-1 border-noround-top border-noround-bottom">
 	<div class="grid grid-nogutter align-items-center">
 		<div id="sysLogoWrapper" class="logo-wrapper header-left col-fixed flex align-items-center pl-1">
@@ -64,13 +65,13 @@ User currentUser
 {
 	po.isUserAnonymous = ("${currentUser.anonymous?string('true','false')}" == "true");
 	po.isUserAdmin = ("${currentUser.admin?string('true','false')}" == "true");
-	po.currentVersion = "${Global.VERSION}";
-	po.detectedNewVersionCookieName = "${detectedNewVersionCookieName}";
 	
 	po.newVersionDetected = function()
 	{
+		var currentVersion = "${detectNewVersionResult.currentVersion}";
+		var detectedVersionCookieName = "${detectNewVersionResult.versionCookieName}";
 		var latestVersion = window.DATA_GEAR_LATEST_VERSION;
-		var detectedVersion = $.cookie(po.detectedNewVersionCookieName);
+		var detectedVersion = $.cookie(detectedVersionCookieName);
 		
 		if(!latestVersion && window.localStorage && window.localStorage.getItem)
 			latestVersion = window.localStorage.getItem("DATA_GEAR_LATEST_VERSION");
@@ -80,13 +81,13 @@ User currentUser
 		if(detectedVersion != latestVersion)
 		{
 			detectedVersion = latestVersion;
-			$.cookie(po.detectedNewVersionCookieName, detectedVersion, {expires : 3, path : po.concatContextPath("/")});
+			$.cookie(detectedVersionCookieName, detectedVersion, {expires : 3, path : po.concatContextPath("/")});
 		}
 		
 		if(!detectedVersion)
 			return false;
 		
-		return ($.compareVersion(detectedVersion, po.currentVersion) > 0);
+		return ($.compareVersion(detectedVersion, currentVersion) > 0);
 	};
 	
 	po.isNewVersionDetected = po.newVersionDetected();

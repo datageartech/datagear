@@ -410,6 +410,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DetectNewVersionScriptResolver detectNewVersionScriptResolver()
 	{
 		DetectNewVersionScriptResolver bean = new DetectNewVersionScriptResolver();
+		bean.setDisabled(getApplicationProperties().isDisableDetectNewVersion());
+
 		return bean;
 	}
 

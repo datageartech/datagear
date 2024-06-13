@@ -17,6 +17,8 @@
 
 package org.datagear.web.util;
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.util.Global;
@@ -38,6 +40,9 @@ public class DetectNewVersionScriptResolver
 	/** Cookie中用于存储检测到新版本的名称 */
 	private String detectedVersionCookieName = Global.NAME_SHORT_UCUS + "DETECTED_VERSION";
 
+	/** 是否禁用 */
+	private boolean disabled = false;
+
 	public DetectNewVersionScriptResolver()
 	{
 		super();
@@ -53,8 +58,21 @@ public class DetectNewVersionScriptResolver
 		this.detectedVersionCookieName = detectedVersionCookieName;
 	}
 
+	public boolean isDisabled()
+	{
+		return disabled;
+	}
+
+	public void setDisabled(boolean disabled)
+	{
+		this.disabled = disabled;
+	}
+
 	/**
-	 * 如果没有检测过新版本，将请求标记为：开启检测新版本功能。
+	 * 如果没有检测过新版本，尝试将将请求标记为：开启检测新版本功能。
+	 * <p>
+	 * 如果{@linkplain #isDisabled()}为{@code true}，将忽略。
+	 * </p>
 	 * <p>
 	 * 要使此功能起效，浏览器端应在检测新版本后设置{@linkplain #getDetectedVersionCookieName()}的值及有效期。
 	 * </p>
@@ -63,9 +81,18 @@ public class DetectNewVersionScriptResolver
 	 */
 	public boolean enableIf(HttpServletRequest request)
 	{
-		String detectedVersion = WebUtils.getCookieValue(request, getDetectedVersionCookieName());
-		// 允许detectedVersion为空字符串，表明已检测过但是没有检测到
-		boolean enable = (detectedVersion == null);
+		boolean enable;
+
+		if (this.isDisabled())
+		{
+			enable = false;
+		}
+		else
+		{
+			String detectedVersion = WebUtils.getCookieValue(request, getDetectedVersionCookieName());
+			// 允许detectedVersion为空字符串，表明已检测过但是没有检测到
+			enable = (detectedVersion == null);
+		}
 
 		request.setAttribute("enableDetectNewVersion", enable);
 
@@ -73,13 +100,20 @@ public class DetectNewVersionScriptResolver
 	}
 
 	/**
-	 * 将请求标记为：开启检测新版本功能
+	 * 尝试将请求标记为：开启检测新版本功能。
+	 * <p>
+	 * 如果{@linkplain #isDisabled()}为{@code true}，将忽略。
+	 * </p>
 	 * 
 	 * @param request
+	 * @return
 	 */
-	public void enable(HttpServletRequest request)
+	public boolean enable(HttpServletRequest request)
 	{
-		request.setAttribute("enableDetectNewVersion", true);
+		boolean enable = !this.isDisabled();
+		request.setAttribute("enableDetectNewVersion", enable);
+
+		return enable;
 	}
 
 	/**
@@ -94,12 +128,15 @@ public class DetectNewVersionScriptResolver
 	}
 
 	/**
-	 * 如果{@linkplain #isEnable(HttpServletRequest)}为{@code true}，则构建检测新版本的JS脚本，否则返回空字符串{@code ""}。
+	 * 构建{@linkplain DetectResult}。
+	 * <p>
+	 * 如果{@linkplain #isEnable(HttpServletRequest)}为{@code false}，返回{@linkplain DetectResult#getScript()}将是空字符串：{@code ""}。
+	 * </p>
 	 * 
 	 * @param request
 	 * @return
 	 */
-	public String buildScriptIf(HttpServletRequest request)
+	public DetectResult buildIf(HttpServletRequest request)
 	{
 		String script = "";
 
@@ -108,22 +145,19 @@ public class DetectNewVersionScriptResolver
 			script = buildScript(request);
 		}
 
-		return script;
+		return new DetectResult(getCurrentVersion(request), getDetectedVersionCookieName(), script);
 	}
 
 	/**
-	 * 如果{@code disable}为{@code true}，直接返回空字符串{@code ""}；否则，按照{@linkplain #buildScriptIf(HttpServletRequest)}的逻辑构建。
+	 * 构建{@linkplain DetectResult}。
 	 * 
 	 * @param request
-	 * @param disable
 	 * @return
 	 */
-	public String buildScriptIf(HttpServletRequest request, boolean disable)
+	public DetectResult build(HttpServletRequest request)
 	{
-		if (disable)
-			return "";
-
-		return buildScriptIf(request);
+		String script = buildScript(request);
+		return new DetectResult(getCurrentVersion(request), getDetectedVersionCookieName(), script);
 	}
 
 	/**
@@ -148,25 +182,100 @@ public class DetectNewVersionScriptResolver
 	 * @param request
 	 * @return
 	 */
-	public String buildScript(HttpServletRequest request)
+	protected String buildScript(HttpServletRequest request)
 	{
-		String src = latestVersionScriptLocation();
+		String src = getLatestVersionScriptLocation(request);
 
 		// 由于浏览器安全限制，在https域内不可以引用http资源，
 		// 所以这里要特殊处理，即便官网目前没有开通https服务
 		if (WebUtils.isSecureHttpScheme(request))
-			src = latestVersionScriptLocationHttps();
+			src = getLatestVersionScriptLocationHttps(request);
 
 		return "<script src=\"" + src + "\" type=\"text/javascript\" async></script>";
 	}
 
-	protected String latestVersionScriptLocation()
+	protected String getCurrentVersion(HttpServletRequest request)
+	{
+		return Global.VERSION;
+	}
+
+	protected String getLatestVersionScriptLocation(HttpServletRequest request)
 	{
 		return LATEST_VERSION_SCRIPT_LOCATION;
 	}
 
-	protected String latestVersionScriptLocationHttps()
+	protected String getLatestVersionScriptLocationHttps(HttpServletRequest request)
 	{
 		return LATEST_VERSION_SCRIPT_LOCATION_HTTPS;
+	}
+
+	/**
+	 * 检测结果。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class DetectResult implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 当前版本 */
+		private String currentVersion;
+
+		/** Cookie中用于存储检测到新版本的名称 */
+		private String versionCookieName;
+
+		/** 脚本 */
+		private String script = "";
+
+		public DetectResult()
+		{
+			super();
+		}
+
+		public DetectResult(String currentVersion, String versionCookieName)
+		{
+			super();
+			this.currentVersion = currentVersion;
+			this.versionCookieName = versionCookieName;
+		}
+
+		public DetectResult(String currentVersion, String versionCookieName, String script)
+		{
+			super();
+			this.currentVersion = currentVersion;
+			this.versionCookieName = versionCookieName;
+			this.script = script;
+		}
+
+		public String getCurrentVersion()
+		{
+			return currentVersion;
+		}
+
+		public void setCurrentVersion(String currentVersion)
+		{
+			this.currentVersion = currentVersion;
+		}
+
+		public String getVersionCookieName()
+		{
+			return versionCookieName;
+		}
+
+		public void setVersionCookieName(String versionCookieName)
+		{
+			this.versionCookieName = versionCookieName;
+		}
+
+		public String getScript()
+		{
+			return script;
+		}
+
+		public void setScript(String script)
+		{
+			this.script = script;
+		}
 	}
 }

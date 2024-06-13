@@ -63,11 +63,8 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	/** 变量：访问Java静态变量关键字 */
 	public static final String VAR_STATICS = "statics";
 
-	/** 变量：检测到的新版本Cookie名 */
-	public static final String VAR_DETECT_NEW_VERSION_COOKIE_NAME = "detectedNewVersionCookieName";
-
-	/** 变量：检测新版本脚本 */
-	public static final String VAR_DETECT_NEW_VERSION_SCRIPT = "detectNewVersionScript";
+	/** 变量：检测新版本结果 */
+	public static final String VAR_DETECT_NEW_VERSION_RESULT = "detectNewVersionResult";
 
 	private static final BeansWrapper BEANS_WRAPPER = new BeansWrapperBuilder(
 			Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
@@ -108,8 +105,6 @@ public class CustomFreeMarkerView extends FreeMarkerView
 
 		model.put(VAR_CURRENT_USER, currentUser);
 		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
-		model.put(VAR_DETECT_NEW_VERSION_COOKIE_NAME, detectNewVersionScriptResolver.getDetectedVersionCookieName());
-		model.put(VAR_DETECT_NEW_VERSION_SCRIPT, detectNewVersionScriptResolver.buildScriptIf(request,
-				applicationProperties.isDisableDetectNewVersion()));
+		model.put(VAR_DETECT_NEW_VERSION_RESULT, detectNewVersionScriptResolver.buildIf(request));
 	}
 }
