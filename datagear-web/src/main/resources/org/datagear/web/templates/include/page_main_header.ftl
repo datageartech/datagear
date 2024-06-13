@@ -70,6 +70,7 @@ DetectResult detectNewVersionResult
 	{
 		var latestVersionVar = "${detectNewVersionResult.latestVersionVar}";
 		var detectedVersionCookieName = "${detectNewVersionResult.versionCookieName}";
+		var detectedVersionCookieExpDays = parseInt("${detectNewVersionResult.versionCookieExpDays}");
 		var currentVersion = "${detectNewVersionResult.currentVersion}";
 		var detectedVersion = $.cookie(detectedVersionCookieName);
 		var latestVersion = "";
@@ -82,7 +83,7 @@ DetectResult detectNewVersionResult
 		if(detectedVersion != latestVersion)
 		{
 			detectedVersion = latestVersion;
-			$.cookie(detectedVersionCookieName, detectedVersion, {expires : 3, path : po.concatContextPath("/")});
+			$.cookie(detectedVersionCookieName, detectedVersion, {expires : detectedVersionCookieExpDays, path : po.concatContextPath("/")});
 		}
 		
 		if(!detectedVersion)
