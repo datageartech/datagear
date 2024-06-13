@@ -68,13 +68,14 @@ DetectResult detectNewVersionResult
 	
 	po.newVersionDetected = function()
 	{
-		var currentVersion = "${detectNewVersionResult.currentVersion}";
+		var latestVersionVar = "${detectNewVersionResult.latestVersionVar}";
 		var detectedVersionCookieName = "${detectNewVersionResult.versionCookieName}";
-		var latestVersion = window.DATA_GEAR_LATEST_VERSION;
+		var currentVersion = "${detectNewVersionResult.currentVersion}";
 		var detectedVersion = $.cookie(detectedVersionCookieName);
+		var latestVersion = "";
 		
-		if(!latestVersion && window.localStorage && window.localStorage.getItem)
-			latestVersion = window.localStorage.getItem("DATA_GEAR_LATEST_VERSION");
+		if(window.localStorage && window.localStorage.getItem)
+			latestVersion = window.localStorage.getItem(latestVersionVar);
 		
 		latestVersion = (latestVersion || "");
 		

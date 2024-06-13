@@ -145,7 +145,8 @@ public class DetectNewVersionScriptResolver
 			script = buildScript(request);
 		}
 
-		return new DetectResult(getCurrentVersion(request), getDetectedVersionCookieName(), script);
+		return new DetectResult(getLatestVersionVar(request), getDetectedVersionCookieName(),
+				getCurrentVersion(request), script);
 	}
 
 	/**
@@ -157,7 +158,8 @@ public class DetectNewVersionScriptResolver
 	public DetectResult build(HttpServletRequest request)
 	{
 		String script = buildScript(request);
-		return new DetectResult(getCurrentVersion(request), getDetectedVersionCookieName(), script);
+		return new DetectResult(getLatestVersionVar(request), getDetectedVersionCookieName(),
+				getCurrentVersion(request), script);
 	}
 
 	/**
@@ -194,16 +196,45 @@ public class DetectNewVersionScriptResolver
 		return "<script src=\"" + src + "\" type=\"text/javascript\" async></script>";
 	}
 
+	/**
+	 * 最新版脚本中的版本号变量名。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected String getLatestVersionVar(HttpServletRequest request)
+	{
+		return "DATA_GEAR_LATEST_VERSION";
+	}
+
+	/**
+	 * 获取当前版本号。
+	 * 
+	 * @param request
+	 * @return
+	 */
 	protected String getCurrentVersion(HttpServletRequest request)
 	{
 		return Global.VERSION;
 	}
 
+	/**
+	 * 获取最新版脚本链接。
+	 * 
+	 * @param request
+	 * @return
+	 */
 	protected String getLatestVersionScriptLocation(HttpServletRequest request)
 	{
 		return LATEST_VERSION_SCRIPT_LOCATION;
 	}
 
+	/**
+	 * 获取最新版脚本链接-https。
+	 * 
+	 * @param request
+	 * @return
+	 */
 	protected String getLatestVersionScriptLocationHttps(HttpServletRequest request)
 	{
 		return LATEST_VERSION_SCRIPT_LOCATION_HTTPS;
@@ -219,11 +250,14 @@ public class DetectNewVersionScriptResolver
 	{
 		private static final long serialVersionUID = 1L;
 
-		/** 当前版本 */
-		private String currentVersion;
+		/** 最新版变量名 */
+		private String latestVersionVar;
 
 		/** Cookie中用于存储检测到新版本的名称 */
 		private String versionCookieName;
+
+		/** 当前版本 */
+		private String currentVersion;
 
 		/** 脚本 */
 		private String script = "";
@@ -233,29 +267,31 @@ public class DetectNewVersionScriptResolver
 			super();
 		}
 
-		public DetectResult(String currentVersion, String versionCookieName)
+		public DetectResult(String latestVersionVar, String versionCookieName, String currentVersion)
 		{
 			super();
-			this.currentVersion = currentVersion;
+			this.latestVersionVar = latestVersionVar;
 			this.versionCookieName = versionCookieName;
+			this.currentVersion = currentVersion;
 		}
 
-		public DetectResult(String currentVersion, String versionCookieName, String script)
+		public DetectResult(String latestVersionVar, String versionCookieName, String currentVersion, String script)
 		{
 			super();
-			this.currentVersion = currentVersion;
+			this.latestVersionVar = latestVersionVar;
 			this.versionCookieName = versionCookieName;
+			this.currentVersion = currentVersion;
 			this.script = script;
 		}
 
-		public String getCurrentVersion()
+		public String getLatestVersionVar()
 		{
-			return currentVersion;
+			return latestVersionVar;
 		}
 
-		public void setCurrentVersion(String currentVersion)
+		public void setLatestVersionVar(String latestVersionVar)
 		{
-			this.currentVersion = currentVersion;
+			this.latestVersionVar = latestVersionVar;
 		}
 
 		public String getVersionCookieName()
@@ -266,6 +302,16 @@ public class DetectNewVersionScriptResolver
 		public void setVersionCookieName(String versionCookieName)
 		{
 			this.versionCookieName = versionCookieName;
+		}
+
+		public String getCurrentVersion()
+		{
+			return currentVersion;
+		}
+
+		public void setCurrentVersion(String currentVersion)
+		{
+			this.currentVersion = currentVersion;
 		}
 
 		public String getScript()
