@@ -71,7 +71,7 @@
 <script>
 (function(po)
 {
-	po.mainMenuCollapseCookieName="${Global.NAME_SHORT_UCUS}MAIN_MENU_COLLAPSE";
+	po.mainMenuCollapseName="${Global.NAME_SHORT_UCUS}MAIN_MENU_COLLAPSE";
 	po.modulePermissions = $.unescapeHtmlForJson(<@writeJson var=modulePermissions />);
 	
 	po.vuePageModel(
@@ -79,7 +79,7 @@
 		mainMenu:
 		{
 			active: -1,
-			collapse: ($.cookie(po.mainMenuCollapseCookieName) == "true"),
+			collapse: ($.localStorageItem(po.mainMenuCollapseName) === "true"),
 			//这里都使用根路径，因为需要支持拖拽新窗口打开
 			items:
 			[
@@ -123,9 +123,7 @@
 		{
 			var pm = po.vuePageModel();
 			pm.mainMenu.collapse = !pm.mainMenu.collapse;
-			
-			$.cookie(po.mainMenuCollapseCookieName, (pm.mainMenu.collapse ? "true" : "false"),
-					{ expires : 365, path: po.concatContextPath("/") });
+			$.localStorageItem(po.mainMenuCollapseName, (pm.mainMenu.collapse ? "true" : "false"));
 		},
 		onMainMenuTabChange: function(e)
 		{

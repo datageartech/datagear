@@ -1420,6 +1420,30 @@
 		return JSON.stringify(obj);
 	};
 	
+	/**
+	 * 获取/设置本地存储条目
+	 */
+	$.localStorageItem = function(name, value)
+	{
+		if(value === undefined)
+		{
+			if(window.localStorage && window.localStorage.getItem)
+				return window.localStorage.getItem(name);
+			else
+				return undefined;
+		}
+		else
+		{
+			if(window.localStorage && window.localStorage.setItem)
+			{
+				window.localStorage.setItem(name, value);
+				return true;
+			}
+			else
+				return false;
+		}
+	};
+	
 	/**ajax内容类型常量*/
 	$.CONTENT_TYPE_JSON = "application/json";
 	$.CONTENT_TYPE_FORM = "application/x-www-form-urlencoded";

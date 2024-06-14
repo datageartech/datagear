@@ -73,12 +73,7 @@ DetectResult detectNewVersionResult
 		var detectedVersionCookieExpDays = parseInt("${detectNewVersionResult.versionCookieExpDays}");
 		var currentVersion = "${detectNewVersionResult.currentVersion}";
 		var detectedVersion = $.cookie(detectedVersionCookieName);
-		var latestVersion = "";
-		
-		if(window.localStorage && window.localStorage.getItem)
-			latestVersion = window.localStorage.getItem(latestVersionVar);
-		
-		latestVersion = (latestVersion || "");
+		var latestVersion = ($.localStorageItem(latestVersionVar) || "");
 		
 		if(detectedVersion != latestVersion)
 		{
