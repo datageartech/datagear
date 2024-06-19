@@ -2892,7 +2892,13 @@ $.inflatePageForm = function(po)
 	
 	po.handleOpenSelectAction = function(url, callback, options)
 	{
-		options = (options || {});
+		options = $.extend(
+		{
+			width: "55vw",
+			position: "right"
+		},
+		(options || {}));
+		
 		options = $.extend(
 		{
 			pageParam:
