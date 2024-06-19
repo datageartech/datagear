@@ -26,16 +26,20 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.FileSourceService;
-import org.datagear.persistence.PagingData;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.dirquery.DirectoryPagingQuery;
+import org.datagear.util.dirquery.DirectoryQuerySupport;
+import org.datagear.util.dirquery.ResultFileInfo;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -70,7 +74,7 @@ public class FileSourceController extends AbstractController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, Model model)
 	{
 		FileSource fileSource = new FileSource();
 
@@ -97,7 +101,7 @@ public class FileSourceController extends AbstractController
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
@@ -123,7 +127,7 @@ public class FileSourceController extends AbstractController
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
@@ -166,7 +170,7 @@ public class FileSourceController extends AbstractController
 	}
 
 	@RequestMapping(value = "/select")
-	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setSelectAction(request, model);
 		setIsShowDirectory(request, model);
@@ -177,7 +181,7 @@ public class FileSourceController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<FileSource> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
+			final Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam)
 			throws Exception
 	{
@@ -214,6 +218,39 @@ public class FileSourceController extends AbstractController
 		return FileUtil.getFileInfos(directory);
 	}
 	
+	@RequestMapping(value = "/file/select")
+	public String fileSelect(HttpServletRequest request, HttpServletResponse response,
+			Model model, @RequestParam("id") String id)
+	{
+		setSelectAction(request, model);
+		setIsShowDirectory(request, model);
+		model.addAttribute("fileSourceId", id);
+
+		return "/fileSource/fileSource_file_table";
+	}
+
+	@RequestMapping(value = "/file/pagingQueryData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public PagingData<ResultFileInfo> filePagingQueryData(HttpServletRequest request, HttpServletResponse response,
+			Model springModel, @RequestParam("id") String id,
+			@RequestBody(required = false) DirectoryPagingQuery pagingQueryParam) throws Exception
+	{
+		User user = getCurrentUser();
+
+		final DirectoryPagingQuery pagingQuery = inflateDirectoryPagingQuery(request, pagingQueryParam);
+
+		FileSource fileSource = getByIdForView(this.fileSourceService, user, id);
+		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
+		DirectoryQuerySupport qs = getDirectoryQuerySupport(directory);
+
+		return qs.pagingQuery(pagingQuery);
+	}
+
+	protected DirectoryQuerySupport getDirectoryQuerySupport(File directory)
+	{
+		return new DirectoryQuerySupport(directory);
+	}
+
 	protected void checkSaveEntity(FileSource fileSource)
 	{
 		if (isBlank(fileSource.getDirectory()))

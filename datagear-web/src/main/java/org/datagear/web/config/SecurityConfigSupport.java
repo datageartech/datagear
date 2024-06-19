@@ -563,7 +563,8 @@ public class SecurityConfigSupport
 	protected ModuleAccess fileSourceModuleAccess()
 	{
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/fileSource/view", "/fileSource/select", "/fileSource/pagingQueryData", "/fileSource/listFiles");
+				"/fileSource/view", "/fileSource/select", "/fileSource/pagingQueryData", "/fileSource/file/select",
+				"/fileSource/file/pagingQueryData");
 
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/fileSource/**");
 
