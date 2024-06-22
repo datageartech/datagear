@@ -49,12 +49,12 @@
 	i18n.labelEleRequired = "不是文本标签元素";
 	i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
 	
-	//参考org.datagear.web.controller.DashboardController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
+	//参考org.datagear.web.controller.DashboardShowController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
 	
 	var BODY_CLASS_VISUAL_EDITOR = (editor.BODY_CLASS_VISUAL_EDITOR = "dg-show-ve");
 	
-	//参考org.datagear.web.controller.DashboardController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
+	//参考org.datagear.web.controller.DashboardShowController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
 	var ELEMENT_ATTR_VISUAL_EDIT_ID = (editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id");
 	
 	var ELEMENT_CLASS_SELECTED = (editor.ELEMENT_CLASS_SELECTED = "dg-show-ve-selected");
@@ -65,7 +65,7 @@
 	
 	var INSERT_ELE_FORMAT_FLAG = (editor.INSERT_ELE_FORMAT_FLAG = "<!--dg-format-flag-->");
 	
-	//参考org.datagear.web.controller.DashboardController.LOAD_CHART_FOR_EDITOR_PARAM
+	//参考org.datagear.web.controller.DashboardShowController.LOAD_CHART_FOR_EDITOR_PARAM
 	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
@@ -2564,7 +2564,7 @@
 	};
 	
 	//获取编辑HTML信息
-	//结构参考：org.datagear.web.controller.DashboardController.DashboardShowForEdit.EditHtmlInfo
+	//结构参考：org.datagear.web.controller.DashboardShowController.DashboardShowForEdit.EditHtmlInfo
 	editor._editHtmlInfo = function()
 	{
 		return this.dashboard.renderContextAttr(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);

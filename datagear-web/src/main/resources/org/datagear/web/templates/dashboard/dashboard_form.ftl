@@ -117,7 +117,7 @@
 		name = (name || "");
 		
 		var fm = po.vueFormModel();
-		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(fm.id)+"/"+name);
+		return po.concatContextPath("/dv/"+encodeURIComponent(fm.id)+"/"+name);
 	};
 
 	po.inSaveAndShowAction = function(val)

@@ -82,7 +82,7 @@
 	
 	po.buildShowURL = function(id)
 	{
-		return po.concatContextPath("/dashboard/show/"+encodeURIComponent(id)+"/");
+		return po.concatContextPath("/dv/"+encodeURIComponent(id)+"/");
 	};
 
 	po.buildIframeNestCode = function(url)

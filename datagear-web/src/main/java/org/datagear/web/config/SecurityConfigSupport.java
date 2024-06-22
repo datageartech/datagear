@@ -28,6 +28,8 @@ import java.util.Set;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.FormLoginConfgBean;
+import org.datagear.web.controller.AbstractDataAnalysisController;
+import org.datagear.web.controller.DashboardShowController;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.UserDetailsServiceImpl;
@@ -348,6 +350,11 @@ public class SecurityConfigSupport
 		UrlsAccess show = new UrlsAccess(authorizationManager,
 				// 图表展示
 				"/chart/show/**", "/chart/showData*",
+
+				// 看板展示
+				DashboardShowController.PATH_PREFIX + "/**",
+
+				// 兼容5.0.0版本的图表、看板展示URL，参考CompatibleController
 				// 看板展示
 				"/dashboard/show/**", "/dashboard/showData*", "/dashboard/loadChart*", "/dashboard/auth/**",
 				"/dashboard/authcheck/**",
@@ -356,8 +363,7 @@ public class SecurityConfigSupport
 				// 看板卸载
 				"/dashboard/unload*",
 
-				// 旧版图表和看板展示
-				// 用于兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
+				// 兼容2.6.0版本的图表、看板展示URL，参考CompatibleController
 				"/analysis/chart/show/**", "/analysis/dashboard/show/**");
 
 		return new ModuleAccess(showStatic, show);
@@ -368,7 +374,11 @@ public class SecurityConfigSupport
 		return new String[] {
 				// 图表插件
 				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
-				// 看板服务端时间
+				
+				//看板服务端时间
+				DashboardShowController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL,
+				
+				// 兼容5.0.0版本看板服务端时间
 				"/dashboard/serverTime.js"
 				//
 		};

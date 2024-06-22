@@ -26,6 +26,9 @@ import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
+import org.datagear.web.controller.AbstractDataAnalysisController;
+import org.datagear.web.controller.DashboardShowCompatController;
+import org.datagear.web.controller.DashboardShowController;
 
 /**
  * 看板展示请求的{@linkplain HtmlTplDashboardImport}加载列表处理器。
@@ -127,7 +130,7 @@ public class HtmlTplDashboardImportResolver
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
 				scriptPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME,
-						contextPath + "/dashboard/serverTime.js?v=" + rp));
+				contextPath + resolveServerTimePath(request) + "?v=" + rp));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,
 						scriptPrefix + "/chartSupport.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
@@ -142,6 +145,20 @@ public class HtmlTplDashboardImportResolver
 		}
 
 		return impts;
+	}
+
+	protected String resolveServerTimePath(HttpServletRequest request)
+	{
+		String requestPath = WebUtils.resolvePathAfter(request, "");
+
+		if (requestPath.startsWith(DashboardShowController.PATH_PREFIX))
+		{
+			return DashboardShowController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
+		}
+		else
+		{
+			return DashboardShowCompatController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
+		}
 	}
 
 	protected boolean isModelEdit(String mode)

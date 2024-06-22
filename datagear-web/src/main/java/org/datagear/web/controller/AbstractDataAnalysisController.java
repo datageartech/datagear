@@ -157,6 +157,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板卸载URL后缀 */
 	public static final String UNLOAD_TAIL_URL = "/unload";
 
+	/** 服务端时间URL后缀 */
+	public static final String SERVER_TIME_TAIL_URL = "/serverTime.js";
+
 	/** 看板心跳频率 */
 	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
 
@@ -521,20 +524,28 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return getWebDashboardQueryConverter().convert(query, chartWidgets, user);
 	}
 
-	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
+	protected void addUpdateDataValue(HttpServletRequest request, WebContext webContext, String updateDataURL)
 	{
-		String heartbeatURL = "/dashboard" + HEARTBEAT_TAIL_URL;
-		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
+		updateDataURL = addSessionIdParamIfNotExplicitDisable(updateDataURL, request);
+		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME, updateDataURL);
+	}
 
+	protected void addLoadChartValue(HttpServletRequest request, WebContext webContext, String loadChartURL)
+	{
+		loadChartURL = addSessionIdParamIfNotExplicitDisable(loadChartURL, request);
+		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME, loadChartURL);
+	}
+
+	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext, String heartbeatURL)
+	{
+		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
 		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
 	}
 
-	protected void addUnloadValue(HttpServletRequest request, WebContext webContext)
+	protected void addUnloadValue(HttpServletRequest request, WebContext webContext, String unloadURL)
 	{
-		String heartbeatURL = "/dashboard" + UNLOAD_TAIL_URL;
-		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
-
-		webContext.addAttribute(DASHBOARD_UNLOAD_URL_NAME, heartbeatURL);
+		unloadURL = addSessionIdParamIfNotExplicitDisable(unloadURL, request);
+		webContext.addAttribute(DASHBOARD_UNLOAD_URL_NAME, unloadURL);
 	}
 
 	/**

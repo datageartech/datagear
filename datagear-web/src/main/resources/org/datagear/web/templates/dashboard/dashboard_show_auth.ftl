@@ -16,7 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign ShowAuthCheckResponse=statics['org.datagear.web.controller.DashboardController$ShowAuthCheckResponse']>
+<#assign ShowAuthCheckResponse=statics['org.datagear.web.controller.DashboardShowController$ShowAuthCheckResponse']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -82,7 +82,7 @@
 <script>
 (function(po)
 {
-	po.submitUrl = "/dashboard/"+po.submitAction;
+	po.submitUrl = "${submitPath}";
 	po.redirectPath = "${redirectPath}";
 	
 	po.beforeSubmitForm = function(action)

@@ -30,10 +30,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.TplDashboardWidgetResManager;
@@ -606,13 +606,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		WebContext webContext = createInitWebContext(request);
 
-		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME,
-				addSessionIdParamIfNotExplicitDisable("/chart/showData", request));
-		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME,
-				addSessionIdParamIfNotExplicitDisable("/dashboard/loadChart", request));
-
-		addHeartBeatValue(request, webContext);
-		addUnloadValue(request, webContext);
+		addUpdateDataValue(request, webContext, "/chart/showData");
+		addLoadChartValue(request, webContext, "/dashboard/loadChart");
+		addHeartBeatValue(request, webContext, "/dashboard" + HEARTBEAT_TAIL_URL);
+		addUnloadValue(request, webContext, "/dashboard" + UNLOAD_TAIL_URL);
 
 		return webContext;
 	}

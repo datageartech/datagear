@@ -186,9 +186,9 @@
 	 */
 	dashboardFactory.loadChartConfig = (dashboardFactory.loadChartConfig ||
 			{
-				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_DASHBOARD_ID
+				//org.datagear.web.controller.DashboardShowController.LOAD_CHART_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
-				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_WIDGET_ID
+				//org.datagear.web.controller.DashboardShowController.LOAD_CHART_PARAM_CHART_WIDGET_ID
 				chartWidgetIdParamName: "chartWidgetId"
 			});
 	
@@ -197,7 +197,7 @@
 	 */
 	dashboardFactory.heartbeatConfig = (dashboardFactory.heartbeatConfig ||
 			{
-				//org.datagear.web.controller.DashboardController.HEARTBEAT_PARAM_DASHBOARD_ID
+				//org.datagear.web.controller.DashboardShowController.HEARTBEAT_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
 				//org.datagear.web.controller.AbstractDataAnalysisController.HEARTBEAT_INTERVAL_MS
 				interval: 1000 * 60 * 5
@@ -210,7 +210,7 @@
 			{
 				//org.datagear.web.controller.AbstractDataAnalysisController.DASHBOARD_UNLOAD_URL_NAME
 				urlAttrName: "unloadURL",
-				//org.datagear.web.controller.DashboardController.UNLOAD_PARAM_DASHBOARD_ID
+				//org.datagear.web.controller.DashboardShowController.UNLOAD_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId"
 			});
 	
@@ -2497,7 +2497,7 @@
 	 */
 	dashboardBase.serverDate = function(asMillisecond)
 	{
-		//参考org.datagear.web.controller.DashboardController.SERVERTIME_JS_VAR
+		//参考org.datagear.web.controller.DashboardShowController.SERVERTIME_JS_VAR
 		if(global._DATAGEAR_SERVER_TIME == null)
 			throw new Error("Get current server date is not supported");
 		
