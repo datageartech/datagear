@@ -128,26 +128,6 @@
 				}
 			},
 			{
-				label: "<@spring.message code='text' />",
-				items:
-				[
-					{
-						label: "<@spring.message code='dataSetType.CsvValue' />",
-						command: function()
-						{
-							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForCsvValue"), {width: "70vw"});
-						}
-					},
-					{
-						label: "<@spring.message code='dataSetType.JsonValue' />",
-						command: function()
-						{
-							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonValue"), {width: "70vw"});
-						}
-					}
-				]
-			},
-			{
 				label: "<@spring.message code='file' />",
 				items:
 				[
@@ -170,6 +150,26 @@
 						command: function()
 						{
 							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonFile"), {width: "70vw"});
+						}
+					}
+				]
+			},
+			{
+				label: "<@spring.message code='text' />",
+				items:
+				[
+					{
+						label: "<@spring.message code='dataSetType.CsvValue' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForCsvValue"), {width: "70vw"});
+						}
+					},
+					{
+						label: "<@spring.message code='dataSetType.JsonValue' />",
+						command: function()
+						{
+							po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dataSet/addForJsonValue"), {width: "70vw"});
 						}
 					}
 				]
