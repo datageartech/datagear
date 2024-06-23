@@ -27,8 +27,8 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
 import org.datagear.web.controller.AbstractDataAnalysisController;
-import org.datagear.web.controller.DashboardShowCompatController;
-import org.datagear.web.controller.DashboardShowController;
+import org.datagear.web.controller.DashboardVisualCompatController;
+import org.datagear.web.controller.DashboardVisualController;
 
 /**
  * 看板展示请求的{@linkplain HtmlTplDashboardImport}加载列表处理器。
@@ -151,13 +151,13 @@ public class HtmlTplDashboardImportResolver
 	{
 		String requestPath = WebUtils.resolvePathAfter(request, "");
 
-		if (requestPath.startsWith(DashboardShowController.PATH_PREFIX))
+		if (requestPath.startsWith(DashboardVisualController.PATH_PREFIX))
 		{
-			return DashboardShowController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
+			return DashboardVisualController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
 		}
 		else
 		{
-			return DashboardShowCompatController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
+			return DashboardVisualCompatController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
 		}
 	}
 

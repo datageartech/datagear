@@ -16,7 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign ShowAuthCheckResponse=statics['org.datagear.web.controller.DashboardShowController$ShowAuthCheckResponse']>
+<#assign ShowAuthCheckResponse=statics['org.datagear.web.controller.DashboardVisualController$ShowAuthCheckResponse']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>

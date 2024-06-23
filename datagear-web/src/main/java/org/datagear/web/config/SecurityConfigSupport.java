@@ -29,7 +29,7 @@ import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.FormLoginConfgBean;
 import org.datagear.web.controller.AbstractDataAnalysisController;
-import org.datagear.web.controller.DashboardShowController;
+import org.datagear.web.controller.DashboardVisualController;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.UserDetailsServiceImpl;
@@ -352,7 +352,7 @@ public class SecurityConfigSupport
 				"/chart/show/**", "/chart/showData*",
 
 				// 看板展示
-				DashboardShowController.PATH_PREFIX + "/**",
+				DashboardVisualController.PATH_PREFIX + "/**",
 
 				// 兼容5.0.0版本的图表、看板展示URL，参考CompatibleController
 				// 看板展示
@@ -376,7 +376,7 @@ public class SecurityConfigSupport
 				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
 				
 				//看板服务端时间
-				DashboardShowController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL,
+				DashboardVisualController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL,
 				
 				// 兼容5.0.0版本看板服务端时间
 				"/dashboard/serverTime.js"

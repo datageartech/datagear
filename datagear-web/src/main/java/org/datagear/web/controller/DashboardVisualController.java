@@ -73,9 +73,9 @@ import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.html.RedirectWriter;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.config.CoreConfigSupport;
-import org.datagear.web.controller.DashboardShowController.DashboardShowForEdit.EditHtmlInfo;
-import org.datagear.web.controller.DashboardShowController.DashboardShowForEdit.EditHtmlInfoFilterHandler;
-import org.datagear.web.controller.DashboardShowController.DashboardShowForEdit.ShowHtmlFilterHandler;
+import org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfo;
+import org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfoFilterHandler;
+import org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.ShowHtmlFilterHandler;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.WebUtils;
@@ -99,8 +99,8 @@ import org.springframework.web.context.request.WebRequest;
  *
  */
 @Controller
-@RequestMapping(DashboardShowController.PATH_PREFIX)
-public class DashboardShowController extends AbstractDataAnalysisController implements ServletContextAware
+@RequestMapping(DashboardVisualController.PATH_PREFIX)
+public class DashboardVisualController extends AbstractDataAnalysisController implements ServletContextAware
 {
 	/** 展示页路径前缀 */
 	public static final String PATH_PREFIX = "/dv";
@@ -159,7 +159,7 @@ public class DashboardShowController extends AbstractDataAnalysisController impl
 
 	private ServletContext servletContext;
 
-	public DashboardShowController()
+	public DashboardVisualController()
 	{
 		super();
 	}

@@ -44,13 +44,13 @@ import org.springframework.web.context.request.WebRequest;
  */
 @Deprecated
 @Controller
-@RequestMapping(DashboardShowCompatController.PATH_PREFIX)
-public class DashboardShowCompatController extends DashboardShowController implements ServletContextAware
+@RequestMapping(DashboardVisualCompatController.PATH_PREFIX)
+public class DashboardVisualCompatController extends DashboardVisualController implements ServletContextAware
 {
 	/** 展示页路径前缀 */
 	public static final String PATH_PREFIX = "/dashboard";
 
-	public DashboardShowCompatController()
+	public DashboardVisualCompatController()
 	{
 		super();
 	}
