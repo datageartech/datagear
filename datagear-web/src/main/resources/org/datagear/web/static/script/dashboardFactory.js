@@ -2497,7 +2497,7 @@
 	 */
 	dashboardBase.serverDate = function(asMillisecond)
 	{
-		//参考org.datagear.web.controller.DashboardVisualController.SERVERTIME_JS_VAR
+		//参考org.datagear.web.controller.ServerTimeJsController.SERVERTIME_JS_VAR
 		if(global._DATAGEAR_SERVER_TIME == null)
 			throw new Error("Get current server date is not supported");
 		

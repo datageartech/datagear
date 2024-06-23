@@ -795,7 +795,7 @@
 			
 			var options = this;
 			if(options.saveAndShowAction)
-				window.open(po.concatContextPath("/chart/show/"+encodeURIComponent(chart.id)+"/"), "show-chart-"+chart.id);
+				window.open(po.concatContextPath("/cv/"+encodeURIComponent(chart.id)+"/"), "show-chart-"+chart.id);
 		}
 	},
 	{

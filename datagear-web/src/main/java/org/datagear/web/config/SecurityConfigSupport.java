@@ -28,8 +28,6 @@ import java.util.Set;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.FormLoginConfgBean;
-import org.datagear.web.controller.AbstractDataAnalysisController;
-import org.datagear.web.controller.DashboardVisualController;
 import org.datagear.web.security.AnonymousAuthenticationFilterExt;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.UserDetailsServiceImpl;
@@ -348,13 +346,22 @@ public class SecurityConfigSupport
 		UrlsAccess showStatic = new UrlsAccess(authorizationManager, showChartAndDashboardStaticUrlPattern());
 
 		UrlsAccess show = new UrlsAccess(authorizationManager,
+
 				// 图表展示
-				"/chart/show/**", "/chart/showData*",
+				"/cv/**",
 
 				// 看板展示
-				DashboardVisualController.PATH_PREFIX + "/**",
+				"/dv/**",
 
-				// 兼容5.0.0版本的图表、看板展示URL，参考CompatibleController
+				// 兼容5.0.0版本的图表展示URL，参考ChartVisualCompatController
+				// 图表展示
+				"/chart/show/**", "/chart/showData*",
+				// 图表展示心跳
+				"/chart/heartbeat*",
+				// 图表展示卸载
+				"/chart/unload*",
+
+				// 兼容5.0.0版本的看板展示URL，参考DashboardVisualCompatController
 				// 看板展示
 				"/dashboard/show/**", "/dashboard/showData*", "/dashboard/loadChart*", "/dashboard/auth/**",
 				"/dashboard/authcheck/**",
@@ -373,14 +380,7 @@ public class SecurityConfigSupport
 	{
 		return new String[] {
 				// 图表插件
-				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**",
-				
-				//看板服务端时间
-				DashboardVisualController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL,
-				
-				// 兼容5.0.0版本看板服务端时间
-				"/dashboard/serverTime.js"
-				//
+				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**"
 		};
 	}
 

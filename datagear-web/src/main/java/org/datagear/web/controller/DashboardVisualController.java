@@ -112,15 +112,10 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	public static final String LOAD_CHART_PARAM_CHART_WIDGET_ID = "chartWidgetId";
 
 	/** 看板心跳参数：看板ID */
-	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = "dashboardId";
+	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = AbstractDataAnalysisController.HEARTBEAT_PARAM_DASHBOARD_ID;
 
 	/** 看板卸载参数：看板ID */
-	public static final String UNLOAD_PARAM_DASHBOARD_ID = "dashboardId";
-
-	/**
-	 * 看板页面中服务端日期JS变量名：{@code _DATAGEAR_SERVER_TIME}
-	 */
-	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN_UC + "_SERVER_TIME";
+	public static final String UNLOAD_PARAM_DASHBOARD_ID = AbstractDataAnalysisController.UNLOAD_PARAM_DASHBOARD_ID;
 
 	/**
 	 * 看板内置渲染上下文属性名：{@linkplain EditHtmlInfo}。
@@ -1080,14 +1075,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	public Map<String, Object> heartbeat(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(HEARTBEAT_PARAM_DASHBOARD_ID) String dashboardId) throws Throwable
 	{
-		long time = System.currentTimeMillis();
-
-		Map<String, Object> data = new HashMap<>();
-		data.put("heartbeat", true);
-		data.put("dashboardId", dashboardId);
-		data.put("time", time);
-
-		return data;
+		return super.handleHeartbeat(request, response, dashboardId);
 	}
 
 	/**
@@ -1107,28 +1095,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	public Map<String, Object> unloadDashboard(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(UNLOAD_PARAM_DASHBOARD_ID) String dashboardId) throws Throwable
 	{
-		Map<String, Object> data = new HashMap<>();
-		data.put("unload", true);
-		data.put("dashboardId", dashboardId);
-
-		getSessionDashboardInfoSupport().removeDashboardInfo(request, dashboardId);
-
-		return data;
-	}
-
-	@RequestMapping(SERVER_TIME_TAIL_URL)
-	public void serverTimeJs(HttpServletRequest request, HttpServletResponse response) throws Exception
-	{
-		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
-
-		PrintWriter out = response.getWriter();
-
-		out.println("(function(global)");
-		out.println("{");
-
-		out.println("global." + SERVERTIME_JS_VAR + "=" + new java.util.Date().getTime() + ";");
-
-		out.println("})(this);");
+		return super.handleUnloadDashboard(request, response, dashboardId);
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)

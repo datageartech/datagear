@@ -52,6 +52,7 @@ import org.datagear.web.util.WebDashboardQueryConverter;
 import org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 抽象数据分析控制器。
@@ -157,11 +158,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板卸载URL后缀 */
 	public static final String UNLOAD_TAIL_URL = "/unload";
 
-	/** 服务端时间URL后缀 */
-	public static final String SERVER_TIME_TAIL_URL = "/serverTime.js";
-
 	/** 看板心跳频率 */
 	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
+
+	/** 看板心跳参数：看板ID */
+	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = "dashboardId";
+
+	/** 看板卸载参数：看板ID */
+	public static final String UNLOAD_PARAM_DASHBOARD_ID = "dashboardId";
 
 	/**
 	 * 看板展示URL的请求参数名：启用安全会话。
@@ -284,6 +288,55 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public void setSessionIdParamResolver(SessionIdParamResolver sessionIdParamResolver)
 	{
 		this.sessionIdParamResolver = sessionIdParamResolver;
+	}
+
+	/**
+	 * 处理看板心跳。
+	 * <p>
+	 * 看板页面有停留较长时间再操作的场景，此时可能会因为会话超时导致操作失败，应添加心跳请求，避免会话超时。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param dashboardId
+	 * @return
+	 * @throws Throwable
+	 */
+	protected Map<String, Object> handleHeartbeat(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(HEARTBEAT_PARAM_DASHBOARD_ID) String dashboardId) throws Throwable
+	{
+		long time = System.currentTimeMillis();
+
+		Map<String, Object> data = new HashMap<>();
+		data.put("heartbeat", true);
+		data.put("dashboardId", dashboardId);
+		data.put("time", time);
+
+		return data;
+	}
+
+	/**
+	 * 看板卸载。
+	 * <p>
+	 * 看板页面关闭后，应卸载后台看板数据。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param dashboardId
+	 * @return
+	 * @throws Throwable
+	 */
+	protected Map<String, Object> handleUnloadDashboard(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(UNLOAD_PARAM_DASHBOARD_ID) String dashboardId) throws Throwable
+	{
+		Map<String, Object> data = new HashMap<>();
+		data.put("unload", true);
+		data.put("dashboardId", dashboardId);
+
+		getSessionDashboardInfoSupport().removeDashboardInfo(request, dashboardId);
+
+		return data;
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,

@@ -146,13 +146,6 @@ public class DashboardVisualCompatController extends DashboardVisualController i
 	}
 
 	@Override
-	@RequestMapping(SERVER_TIME_TAIL_URL)
-	public void serverTimeJs(HttpServletRequest request, HttpServletResponse response) throws Exception
-	{
-		super.serverTimeJs(request, response);
-	}
-
-	@Override
 	protected String resolveShowPath(HttpServletRequest request, String dashboardId)
 	{
 		return PATH_PREFIX + "/show/" + dashboardId + "/";

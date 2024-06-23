@@ -91,7 +91,7 @@
 	
 	po.buildShowURL = function(id)
 	{
-		return po.concatContextPath("/chart/show/"+encodeURIComponent(id)+"/");
+		return po.concatContextPath("/cv/"+encodeURIComponent(id)+"/");
 	};
 	
 	po.buildIframeNestCode = function(url)

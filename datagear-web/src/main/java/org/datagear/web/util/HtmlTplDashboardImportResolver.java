@@ -26,9 +26,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
-import org.datagear.web.controller.AbstractDataAnalysisController;
-import org.datagear.web.controller.DashboardVisualCompatController;
-import org.datagear.web.controller.DashboardVisualController;
+import org.datagear.web.controller.ServerTimeJsController;
 
 /**
  * 看板展示请求的{@linkplain HtmlTplDashboardImport}加载列表处理器。
@@ -130,7 +128,7 @@ public class HtmlTplDashboardImportResolver
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
 				scriptPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME,
-				contextPath + resolveServerTimePath(request) + "?v=" + rp));
+				contextPath + ServerTimeJsController.SERVER_TIME_URL + "?v=" + rp));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,
 						scriptPrefix + "/chartSupport.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
@@ -141,24 +139,10 @@ public class HtmlTplDashboardImportResolver
 		if (isModelEdit(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
-					contextPath + "/static/script/dashboardEditor.js?v=" + Global.VERSION));
+					scriptPrefix + "/dashboardEditor.js?v=" + Global.VERSION));
 		}
 
 		return impts;
-	}
-
-	protected String resolveServerTimePath(HttpServletRequest request)
-	{
-		String requestPath = WebUtils.resolvePathAfter(request, "");
-
-		if (requestPath.startsWith(DashboardVisualController.PATH_PREFIX))
-		{
-			return DashboardVisualController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
-		}
-		else
-		{
-			return DashboardVisualCompatController.PATH_PREFIX + AbstractDataAnalysisController.SERVER_TIME_TAIL_URL;
-		}
 	}
 
 	protected boolean isModelEdit(String mode)
