@@ -9,8 +9,8 @@
 	ok Schema重命名为DtbsSource；
 	ok 数据源支持设置模式名；
 	ok 数据集属性（DataSetProperty）重构为数据集字段（DataSetField）；
-	看板展示链接改为更简短的/dv/*前缀；
-	图表展示链接改为更简短的/cv/*前缀；
+	ok 看板展示链接改为更简短的/dv/*前缀；
+	ok 图表展示链接改为更简短的/cv/*前缀；
 	图表插件数据标记自动绑定；
 	
 待定：
