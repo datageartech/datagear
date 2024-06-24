@@ -2365,7 +2365,8 @@
 		var myAjaxOptions = $.extend(
 		{
 			url: url,
-			data: data
+			data: data,
+			type: "POST"
 		},
 		ajaxOptions);
 		
