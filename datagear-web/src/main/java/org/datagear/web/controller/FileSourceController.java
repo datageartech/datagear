@@ -114,7 +114,7 @@ public class FileSourceController extends AbstractController
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody FileSource fileSource)
 	{
 		checkSaveEntity(fileSource);
@@ -256,20 +256,27 @@ public class FileSourceController extends AbstractController
 		if (isBlank(fileSource.getDirectory()))
 			throw new IllegalInputException();
 
-		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
-
-		if (!directory.exists())
-			throw new FileSourceDirectoryNotFoundException(fileSource.getDirectory());
+		//这里不必校验目录是否存在，以增加功能灵活性
+		// File directory = FileUtil.getDirectory(fileSource.getDirectory(),
+		// false);
+		// if (!directory.exists())
+		// throw new
+		// FileSourceDirectoryNotFoundException(fileSource.getDirectory());
 	}
 	
 	protected boolean setIsShowDirectory(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		boolean isShowDirectory = isShowDirectory(request);
-		model.addAttribute("isShowDirectory", isShowDirectory);
+		setIsShowDirectory(request, model, isShowDirectory);
 		
 		return isShowDirectory;
 	}
 	
+	protected void setIsShowDirectory(HttpServletRequest request, Model model, boolean isShowDirectory)
+	{
+		model.addAttribute("isShowDirectory", isShowDirectory);
+	}
+
 	protected boolean isShowDirectory(HttpServletRequest request)
 	{
 		User user = getCurrentUser();
