@@ -26,10 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.FileSourceService;
-import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
-import org.datagear.util.StringUtil;
 import org.datagear.util.dirquery.DirectoryPagingQuery;
 import org.datagear.util.dirquery.DirectoryQuerySupport;
 import org.datagear.util.dirquery.ResultFileInfo;
@@ -199,23 +197,6 @@ public class FileSourceController extends AbstractController
 		}
 		
 		return pagingData;
-	}
-
-	@RequestMapping(value = "/listFiles", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public FileInfo[] listFiles(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestParam("id") String id,
-			@RequestParam(value="subPath", required = false) String subPath) throws Exception
-	{
-		User user = getCurrentUser();
-
-		FileSource fileSource =  getByIdForView(this.fileSourceService, user, id);
-		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
-		
-		if(!StringUtil.isEmpty(subPath))
-			directory = FileUtil.getDirectory(directory, subPath, false);
-		
-		return FileUtil.getFileInfos(directory);
 	}
 	
 	@RequestMapping(value = "/file/select")
