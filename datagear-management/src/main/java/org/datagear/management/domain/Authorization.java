@@ -317,6 +317,72 @@ public class Authorization extends AbstractStringIdEntity implements CloneableEn
 	}
 
 	/**
+	 * 是否是读传递权限：读取
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isReadTransferRead(int permission)
+	{
+		return (permission >= PERMISSION_READ_TRANSFER_READ && permission < PERMISSION_READ_TRANSFER_EDIT);
+	}
+
+	/**
+	 * 是否是读传递权限：编辑
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isReadTransferEdit(int permission)
+	{
+		return (permission >= PERMISSION_READ_TRANSFER_EDIT && permission < PERMISSION_READ_TRANSFER_DELETE);
+	}
+
+	/**
+	 * 是否是读传递权限：删除
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isReadTransferDelete(int permission)
+	{
+		return (permission >= PERMISSION_READ_TRANSFER_DELETE && permission < PERMISSION_EDIT_START);
+	}
+
+	/**
+	 * 是否至少有读传递权限：读取
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean canReadTransferRead(int permission)
+	{
+		return permission >= PERMISSION_READ_TRANSFER_READ;
+	}
+
+	/**
+	 * 是否至少有读传递权限：编辑
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean canReadTransferEdit(int permission)
+	{
+		return permission >= PERMISSION_READ_TRANSFER_EDIT;
+	}
+
+	/**
+	 * 是否至少有读传递权限：删除
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean canReadTransferDelete(int permission)
+	{
+		return permission >= PERMISSION_READ_TRANSFER_DELETE;
+	}
+
+	/**
 	 * 是否是合法的权限值，即不小于{@linkplain #PERMISSION_MIN}、且不大于{@linkplain #PERMISSION_MAX}。
 	 * 
 	 * @param permission
