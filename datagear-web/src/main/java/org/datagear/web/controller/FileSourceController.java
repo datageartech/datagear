@@ -132,7 +132,8 @@ public class FileSourceController extends AbstractController
 		FileSource fileSource = getByIdForView(this.fileSourceService, user, id);
 
 		setFormModel(model, fileSource, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
-		boolean isShowDirectory = setIsShowDirectory(request, model);
+		boolean isShowDirectory = isShowDirectory(request, user);
+		setIsShowDirectory(request, model, isShowDirectory);
 		
 		if(!isShowDirectory)
 			fileSource.setDirectory(null);
@@ -161,7 +162,6 @@ public class FileSourceController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
-		setIsShowDirectory(request, model);
 		setReadonlyAction(model);
 		
 		return "/fileSource/fileSource_table";
@@ -171,7 +171,6 @@ public class FileSourceController extends AbstractController
 	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setSelectAction(request, model);
-		setIsShowDirectory(request, model);
 		
 		return "/fileSource/fileSource_table";
 	}
@@ -189,12 +188,9 @@ public class FileSourceController extends AbstractController
 		PagingData<FileSource> pagingData = this.fileSourceService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());
 
-		if(!isShowDirectory(request))
-		{
-			List<FileSource> items = pagingData.getItems();
-			for(FileSource item : items)
-				item.setDirectory(null);
-		}
+		List<FileSource> items = pagingData.getItems();
+		for (FileSource item : items)
+			item.setDirectory(null);
 		
 		return pagingData;
 	}
@@ -204,7 +200,6 @@ public class FileSourceController extends AbstractController
 			Model model, @RequestParam("id") String id)
 	{
 		setSelectAction(request, model);
-		setIsShowDirectory(request, model);
 		model.addAttribute("fileSourceId", id);
 
 		return "/fileSource/fileSource_file_table";
@@ -245,22 +240,13 @@ public class FileSourceController extends AbstractController
 		// FileSourceDirectoryNotFoundException(fileSource.getDirectory());
 	}
 	
-	protected boolean setIsShowDirectory(HttpServletRequest request, org.springframework.ui.Model model)
-	{
-		boolean isShowDirectory = isShowDirectory(request);
-		setIsShowDirectory(request, model, isShowDirectory);
-		
-		return isShowDirectory;
-	}
-	
 	protected void setIsShowDirectory(HttpServletRequest request, Model model, boolean isShowDirectory)
 	{
 		model.addAttribute("isShowDirectory", isShowDirectory);
 	}
 
-	protected boolean isShowDirectory(HttpServletRequest request)
+	protected boolean isShowDirectory(HttpServletRequest request, User user)
 	{
-		User user = getCurrentUser();
 		return user.isAdmin();
 	}
 }

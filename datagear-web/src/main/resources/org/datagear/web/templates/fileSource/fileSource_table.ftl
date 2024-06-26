@@ -67,16 +67,9 @@
 <script>
 (function(po)
 {
-	po.isShowDirectory = ("${(isShowDirectory!true)?string('true', 'false')}"  == "true");
-	
 	po.setupAjaxTable("/fileSource/pagingQueryData",
 	{
 		multiSortMeta: [ {field: "name", order: 0} ]
-	});
-	
-	po.vuePageModel(
-	{
-		isShowDirectory: po.isShowDirectory
 	});
 	
 	po.vueMethod(
