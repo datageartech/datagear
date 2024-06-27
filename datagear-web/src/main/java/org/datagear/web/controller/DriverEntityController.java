@@ -199,19 +199,7 @@ public class DriverEntityController extends AbstractController
 
 		File importFile = FileUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
 
-		InputStream in = null;
-		OutputStream importFileOut = null;
-		try
-		{
-			in = multipartFile.getInputStream();
-			importFileOut = IOUtil.getOutputStream(importFile);
-			IOUtil.write(in, importFileOut);
-		}
-		finally
-		{
-			IOUtil.close(in);
-			IOUtil.close(importFileOut);
-		}
+		writeMultipartFile(multipartFile, importFile);
 
 		ZipInputStream importFileIn = IOUtil.getZipInputStream(importFile);
 

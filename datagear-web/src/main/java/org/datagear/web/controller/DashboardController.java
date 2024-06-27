@@ -469,19 +469,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		String fileName = multipartFile.getOriginalFilename();
 		File file = FileUtil.getFile(tmpDirectory, fileName);
 
-		InputStream in = null;
-		OutputStream out = null;
-		try
-		{
-			in = multipartFile.getInputStream();
-			out = IOUtil.getOutputStream(file);
-			IOUtil.write(in, out);
-		}
-		finally
-		{
-			IOUtil.close(in);
-			IOUtil.close(out);
-		}
+		writeMultipartFile(multipartFile, file);
 
 		String uploadFilePath = FileUtil.getRelativePath(this.tempDirectory, file);
 

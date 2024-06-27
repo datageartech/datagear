@@ -155,19 +155,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 
 		File zipFile = FileUtil.getFile(myTmpDirectory, zipFileName);
 
-		InputStream in = null;
-		OutputStream out = null;
-		try
-		{
-			in = multipartFile.getInputStream();
-			out = IOUtil.getOutputStream(zipFile);
-			IOUtil.write(in, out);
-		}
-		finally
-		{
-			IOUtil.close(in);
-			IOUtil.close(out);
-		}
+		writeMultipartFile(multipartFile, zipFile);
 
 		String pluginFileName = FileUtil.getRelativePath(this.tempDirectory, myTmpDirectory);
 

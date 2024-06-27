@@ -17,7 +17,10 @@
 
 package org.datagear.web.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -67,6 +70,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
 import freemarker.template.TemplateModel;
 
@@ -1382,5 +1386,59 @@ public abstract class AbstractController extends MessageSourceSupport
 		}
 
 		return exception;
+	}
+
+	/**
+	 * 写上传文件。
+	 * 
+	 * @param multipartFile
+	 * @param file
+	 * @throws IOException
+	 */
+	protected void writeMultipartFile(MultipartFile multipartFile, File file) throws IOException
+	{
+		InputStream in = null;
+		OutputStream out = null;
+
+		try
+		{
+			in = multipartFile.getInputStream();
+			out = IOUtil.getOutputStream(file);
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+	}
+
+	/**
+	 * 写上传文件。
+	 * 
+	 * @param multipartFile
+	 * @param out
+	 * @param closeOut
+	 * @throws IOException
+	 */
+	protected void writeMultipartFile(MultipartFile multipartFile, OutputStream out, boolean closeOut)
+			throws IOException
+	{
+		InputStream in = null;
+
+		try
+		{
+			in = multipartFile.getInputStream();
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+
+			if (closeOut)
+			{
+				IOUtil.close(out);
+			}
+		}
 	}
 }

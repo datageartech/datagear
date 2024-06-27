@@ -20,7 +20,6 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -689,16 +688,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		File tmpFile = FileUtil.generateUniqueFile(directory, FileUtil.getExtension(displayName));
 		String fileName = tmpFile.getName();
 
-		InputStream in = null;
-		try
-		{
-			in = multipartFile.getInputStream();
-			IOUtil.write(in, tmpFile);
-		}
-		finally
-		{
-			IOUtil.close(in);
-		}
+		writeMultipartFile(multipartFile, tmpFile);
 
 		Map<String, Object> results = new HashMap<>();
 		results.put("fileName", fileName);
