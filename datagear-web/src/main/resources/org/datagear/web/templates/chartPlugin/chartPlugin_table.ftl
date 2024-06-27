@@ -86,7 +86,7 @@
 	{
 		formatName: function(data)
 		{
-			return $.toChartPluginHtml(data, po.contextPath);
+			return $.toChartPluginHtml(data, po.contextPath, { justifyContent: "start" });
 		},
 		
 		onUpload: function()
