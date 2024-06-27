@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -681,6 +682,7 @@ public class FileUtil
 	 * </p>
 	 * 
 	 * @param path
+	 *            允许{@code null}
 	 * @param directory
 	 * @return
 	 */
@@ -942,5 +944,26 @@ public class FileUtil
 	{
 		if (!directory.exists())
 			directory.mkdirs();
+	}
+
+	/**
+	 * 移动文件。
+	 * <p>
+	 * 谨慎使用此方法，因为在Windows里，此方法不支持将文件移到不同的磁盘驱动器。
+	 * </p>
+	 * 
+	 * @param from
+	 * @param to
+	 * @return
+	 * @throws IOException
+	 */
+	public static File move(File from, File to) throws IOException
+	{
+		Path fp = from.toPath();
+		Path tp = to.toPath();
+
+		Path re = Files.move(fp, tp, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+
+		return re.toFile();
 	}
 }
