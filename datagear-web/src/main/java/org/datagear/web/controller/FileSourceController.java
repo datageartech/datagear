@@ -216,14 +216,14 @@ public class FileSourceController extends AbstractController
 		final DirectoryPagingQuery pagingQuery = inflateDirectoryPagingQuery(request, pagingQueryParam);
 
 		FileSource fileSource = getByIdForView(this.fileSourceService, user, id);
-		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
-		DirectoryQuerySupport qs = getDirectoryQuerySupport(directory);
+		DirectoryQuerySupport qs = getDirectoryQuerySupport(fileSource);
 
 		return qs.pagingQuery(pagingQuery);
 	}
 
-	protected DirectoryQuerySupport getDirectoryQuerySupport(File directory)
+	protected DirectoryQuerySupport getDirectoryQuerySupport(FileSource fileSource)
 	{
+		File directory = FileUtil.getDirectory(fileSource.getDirectory(), false);
 		return new DirectoryQuerySupport(directory);
 	}
 
