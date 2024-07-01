@@ -153,7 +153,7 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 		public Reader getReader() throws Throwable
 		{
 			File file = FileUtil.getFile(this.filePath);
-			return IOUtil.getReader(file, this.encoding);
+			return getReader(file, this.encoding);
 		}
 
 		@Override

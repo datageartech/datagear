@@ -17,6 +17,9 @@
 
 package org.datagear.analysis.support;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +30,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet.DataSetResource;
+import org.datagear.util.IOUtil;
 import org.datagear.util.cache.CommonCacheKey;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -277,6 +281,39 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		 * @return
 		 */
 		public abstract boolean isIdempotent();
+
+		/**
+		 * 获取输入流。
+		 * 
+		 * @param file
+		 * @param encoding
+		 * @return
+		 * @throws Throwable
+		 */
+		protected Reader getReader(File file, String encoding) throws Throwable
+		{
+			// 先校验以免泄露敏感信息
+			if (!file.exists())
+				throw new DataSetSourceFileNotFoundException(file.getName());
+
+			return IOUtil.getReader(file, encoding);
+		}
+
+		/**
+		 * 获取输入流。
+		 * 
+		 * @param file
+		 * @return
+		 * @throws Throwable
+		 */
+		protected InputStream getInputStream(File file) throws Throwable
+		{
+			// 先校验以免泄露敏感信息
+			if (!file.exists())
+				throw new DataSetSourceFileNotFoundException(file.getName());
+
+			return IOUtil.getInputStream(file);
+		}
 
 		@Override
 		public int hashCode()

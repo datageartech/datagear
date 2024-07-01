@@ -26,7 +26,6 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractExcelDataSet.ExcelDataSetResource;
 import org.datagear.analysis.support.AbstractExcelFileDataSet.ExcelFileDataSetResource;
 import org.datagear.util.FileUtil;
-import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
@@ -170,7 +169,7 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 		public InputStream getInputStream() throws Throwable
 		{
 			File file = FileUtil.getFile(this.filePath);
-			return IOUtil.getInputStream(file);
+			return getInputStream(file);
 		}
 
 		@Override
