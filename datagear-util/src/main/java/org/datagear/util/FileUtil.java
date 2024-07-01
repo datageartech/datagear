@@ -688,7 +688,7 @@ public class FileUtil
 	 */
 	public static String toDisplayPath(String path, boolean directory)
 	{
-		if (StringUtil.isEmpty(path))
+		if (path == null)
 			return path;
 		
 		path = trimPath(path, PATH_SEPARATOR_SLASH);

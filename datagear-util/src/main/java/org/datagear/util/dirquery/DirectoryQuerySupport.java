@@ -137,7 +137,7 @@ public class DirectoryQuerySupport
 		List<File> files = new ArrayList<>();
 
 		String keyword = resolveQueryKeyword(query);
-		searchInDirectory(directory, keyword, descendent, files);
+		searchInDirectory(directory, keyword, descendent, query.isOnlyDirectory(), files);
 
 		List<ResultFileInfo> re = toResultFileInfos(directory, files);
 		sortResultFileInfos(re, query.getOrder());
@@ -200,9 +200,11 @@ public class DirectoryQuerySupport
 	 * @param keyword
 	 *            {@code null}、{@code ""}匹配所有
 	 * @param descendent
+	 * @param onlyDirectory
 	 * @param result
 	 */
-	protected void searchInDirectory(File directory, String keyword, boolean descendent, List<File> result)
+	protected void searchInDirectory(File directory, String keyword, boolean descendent, boolean onlyDirectory,
+			List<File> result)
 	{
 		File[] children = directory.listFiles();
 		
@@ -211,13 +213,16 @@ public class DirectoryQuerySupport
 		
 		for (File child : children)
 		{
+			if (onlyDirectory && !child.isDirectory())
+				continue;
+
 			String name = child.getName();
 
 			if (matches(keyword, name))
 				result.add(child);
 
 			if (descendent && child.isDirectory())
-				searchInDirectory(child, keyword, true, result);
+				searchInDirectory(child, keyword, true, onlyDirectory, result);
 		}
 	}
 

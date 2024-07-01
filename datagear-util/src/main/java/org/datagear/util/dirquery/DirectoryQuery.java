@@ -49,6 +49,9 @@ public class DirectoryQuery extends KeywordQuery
 	/** 查询目录 */
 	private String path = null;
 
+	/** 是否只查询目录 */
+	private boolean onlyDirectory = false;
+
 	public DirectoryQuery()
 	{
 		super();
@@ -102,11 +105,22 @@ public class DirectoryQuery extends KeywordQuery
 		this.path = path;
 	}
 
+	public boolean isOnlyDirectory()
+	{
+		return onlyDirectory;
+	}
+
+	public void setOnlyDirectory(boolean onlyDirectory)
+	{
+		this.onlyDirectory = onlyDirectory;
+	}
+
 	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + (onlyDirectory ? 1231 : 1237);
 		result = prime * result + ((order == null) ? 0 : order.hashCode());
 		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		result = prime * result + ((queryRange == null) ? 0 : queryRange.hashCode());
@@ -123,6 +137,8 @@ public class DirectoryQuery extends KeywordQuery
 		if (getClass() != obj.getClass())
 			return false;
 		DirectoryQuery other = (DirectoryQuery) obj;
+		if (onlyDirectory != other.onlyDirectory)
+			return false;
 		if (order == null)
 		{
 			if (other.order != null)
@@ -151,7 +167,7 @@ public class DirectoryQuery extends KeywordQuery
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [keyword=" + getKeyword() + ", order=" + order + ", queryRange="
-				+ queryRange + ", path=" + path + "]";
+				+ queryRange + ", path=" + path + ", onlyDirectory=" + onlyDirectory + "]";
 	}
 
 	public static Order nameAscOrder()
