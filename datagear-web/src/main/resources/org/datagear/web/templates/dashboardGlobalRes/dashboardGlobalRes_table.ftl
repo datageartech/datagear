@@ -43,6 +43,8 @@
 			<p-button label="<@spring.message code='add' />" @click="onAdd" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='upload' />" @click="onUpload" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
+			<p-button label="<@spring.message code='rename' />" @click="onRename" v-if="!pm.isReadonlyAction"></p-button>
+			<p-button label="<@spring.message code='move' />" @click="onMove" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='download' />" @click="onDownload" v-if="!pm.isSelectAction"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isReadonlyAction"></p-button>
@@ -80,6 +82,9 @@
 <script>
 (function(po)
 {
+	po.i18n.confirmDeleteAsk = "<@spring.message code='confirmDeleteFileAsk' />";
+	
+	po.onlyDirectory = ("${(onlyDirectory!false)?string('true', 'false')}"  == "true");
 	po.inflateEntityActionIdPropName = "path";
 	po.inflateEntityActionIdParamName = "path";
 	
@@ -117,6 +122,16 @@
 				po.doOpenOfAction("/dashboardGlobalRes/edit", entity, { width: "70vw" });
 			});
 		},
+
+		onRename: function()
+		{
+			po.handleOpenOfAction("/dashboardGlobalRes/rename");
+		},
+		
+		onMove: function()
+		{
+			po.handleOpenOfAction("/dashboardGlobalRes/move");
+		},
 		
 		onView: function()
 		{
@@ -148,6 +163,12 @@
 			po.handleSelectAction();
 		}
 	});
+
+	if(po.onlyDirectory)
+	{
+		var pm = po.vuePageModel();
+		pm.searchForm.onlyDirectory = true;
+	}
 })
 (${pid});
 </script>

@@ -678,7 +678,10 @@ public class FileUtil
 	/**
 	 * 转换为展示路径。
 	 * <p>
-	 * 分隔符统一采用{@linkplain #PATH_SEPARATOR_SLASH}，目录末尾统一添加{@linkplain #PATH_SEPARATOR_SLASH}。
+	 * 分隔符统一采用{@code "/"}，目录末尾统一添加{@code "/"}。
+	 * </p>
+	 * <p>
+	 * 如果{@code path}为{@code null}或{@code ""}，将直接返回它。
 	 * </p>
 	 * 
 	 * @param path
@@ -688,12 +691,36 @@ public class FileUtil
 	 */
 	public static String toDisplayPath(String path, boolean directory)
 	{
+		return toDisplayPath(path, directory, false);
+	}
+
+	/**
+	 * 转换为展示路径。
+	 * <p>
+	 * 分隔符统一采用{@code "/"}，目录末尾统一添加{@code "/"}。
+	 * </p>
+	 * <p>
+	 * 如果{@code path}为{@code null}，将直接返回{@code null}；
+	 * 如果{@code path}为{@code ""}，且{@code directory}与{@code addSlashIfEmptyDir}都为{@code true}，将返回{@code "/"}，否则，将直接返回{@code ""}。
+	 * </p>
+	 * 
+	 * @param path
+	 *            允许{@code null}
+	 * @param directory
+	 * @param addSlashIfEmptyDir
+	 * @return
+	 */
+	public static String toDisplayPath(String path, boolean directory, boolean addSlashIfEmptyDir)
+	{
 		if (path == null)
 			return path;
-		
+
+		if (path.isEmpty())
+			return (directory && addSlashIfEmptyDir ? PATH_SEPARATOR_SLASH : "");
+
 		path = trimPath(path, PATH_SEPARATOR_SLASH);
-		
-		if(directory && !path.endsWith(PATH_SEPARATOR_SLASH))
+
+		if (directory && !path.endsWith(PATH_SEPARATOR_SLASH))
 			path += PATH_SEPARATOR_SLASH;
 
 		return path;
@@ -965,5 +992,19 @@ public class FileUtil
 		Path re = Files.move(fp, tp, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 
 		return re.toFile();
+	}
+
+	/**
+	 * 是否包含路径分隔符。
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static boolean hasPathSeparator(String path)
+	{
+		if (StringUtil.isEmpty(path))
+			return false;
+
+		return (path.indexOf(PATH_SEPARATOR_SLASH) >= 0 || path.indexOf(PATH_SEPARATOR_BACK_SLASH) >= 0);
 	}
 }

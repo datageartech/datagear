@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -131,11 +132,13 @@ public class DashboardGlobalResController extends AbstractController implements 
 			@RequestParam(value = "dir", required = false) String dir)
 			throws Exception
 	{
+		dir = FileUtil.toDisplayPath(dir, true);
+
 		DashboardGlobalResSaveForm form = new DashboardGlobalResSaveForm();
-		form.setSavePath(FileUtil.toDisplayPath(dir, true));
+		form.setSavePath(dir);
 
 		setFormModel(model, form, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
-		model.addAttribute("defaultDir", FileUtil.toDisplayPath(dir, true));
+		model.addAttribute("defaultDir", dir);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
@@ -144,9 +147,11 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String upload(HttpServletRequest request, org.springframework.ui.Model model,
 			@RequestParam(value = "dir", required = false) String dir)
 	{
+		dir = FileUtil.toDisplayPath(dir, true);
+
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
-		model.addAttribute("defaultDir", FileUtil.toDisplayPath(dir, true));
+		model.addAttribute("defaultDir", dir);
 
 		setFormAction(model, REQUEST_ACTION_UPLOAD, SUBMIT_ACTION_SAVE_UPLOAD);
 
@@ -272,6 +277,110 @@ public class DashboardGlobalResController extends AbstractController implements 
 		return optSuccessResponseEntity(request);
 	}
 
+	@RequestMapping("/rename")
+	public String rename(HttpServletRequest request, Model model, @RequestParam("path") String path)
+	{
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path, false);
+		FileRenameForm form = new FileRenameForm(path, file.getName());
+
+		setFormModel(model, form, REQUEST_ACTION_EDIT, "saveRename");
+
+		return "/dashboardGlobalRes/dashboardGlobalRes_rename";
+	}
+
+	@RequestMapping(value = "/saveRename", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveRename(HttpServletRequest request, Model model,
+			@RequestBody FileRenameForm form) throws Exception
+	{
+		if (isEmpty(form.getPath()) || isEmpty(form.getName()) || FileUtil.hasPathSeparator(form.getName()))
+			throw new IllegalInputException();
+
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, form.getPath(), false);
+
+		// 文件不存在忽略即可
+		if (file.exists())
+		{
+			File parent = file.getParentFile();
+			File newFile = FileUtil.getFile(parent, form.getName(), false);
+
+			if (newFile.exists())
+			{
+				return optFailResponseEntity(request, "file.error.targetFileExists");
+			}
+			else
+			{
+				FileUtil.move(file, newFile);
+			}
+		}
+
+		return optSuccessResponseEntity(request);
+	}
+
+	@RequestMapping("/move")
+	public String move(HttpServletRequest request, Model model, @RequestParam("path") String path)
+	{
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path, false);
+
+		String targetDir = path;
+		if (file.exists() && !file.isDirectory())
+		{
+			File parent = file.getParentFile();
+			targetDir = FileUtil.getRelativePath(this.dashboardGlobalResRootDirectory, parent);
+		}
+
+		targetDir = FileUtil.toDisplayPath(targetDir, true, true);
+
+		FileMoveForm form = new FileMoveForm(path, targetDir);
+
+		setFormModel(model, form, REQUEST_ACTION_EDIT, "saveMove");
+
+		return "/dashboardGlobalRes/dashboardGlobalRes_move";
+	}
+
+	@RequestMapping(value = "/saveMove", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveMove(HttpServletRequest request, Model model,
+			@RequestBody FileMoveForm form) throws Exception
+	{
+		if (isEmpty(form.getPath()) || isEmpty(form.getDirectory()))
+			throw new IllegalInputException();
+
+		if (FileUtil.toDisplayPath(form.getDirectory(), true, true)
+				.startsWith(FileUtil.toDisplayPath(form.getPath(), false)))
+		{
+			return optFailResponseEntity(request, "file.error.moveToSubDirNotAllowed");
+		}
+
+		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, form.getPath(), false);
+
+		// 文件不存在忽略即可
+		if (file.exists())
+		{
+			File parent = file.getParentFile();
+			File targetDirectory = FileUtil.getFile(this.dashboardGlobalResRootDirectory, form.getDirectory(), false);
+
+			if (!targetDirectory.exists())
+				targetDirectory = FileUtil.getDirectory(parent, form.getDirectory(), true);
+
+			if (!targetDirectory.isDirectory())
+			{
+				return optFailResponseEntity(request, "file.error.tagetFileNotDir");
+			}
+
+			File targetFile = FileUtil.getFile(targetDirectory, file.getName());
+
+			if (targetFile.exists())
+			{
+				return optFailResponseEntity(request, "file.error.fileExistsInTargetDir");
+			}
+
+			FileUtil.move(file, targetFile);
+		}
+
+		return optSuccessResponseEntity(request);
+	}
+
 	@RequestMapping("/view")
 	public void view(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			org.springframework.ui.Model model, @RequestParam("path") String path) throws Exception
@@ -376,9 +485,12 @@ public class DashboardGlobalResController extends AbstractController implements 
 	}
 
 	@RequestMapping("/select")
-	public String select(HttpServletRequest request, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, org.springframework.ui.Model model,
+			@RequestParam(value = "onlyDirectory", required = false) String onlyDirectory)
 	{
 		setSelectAction(request, model);
+		model.addAttribute("onlyDirectory", StringUtil.toBoolean(onlyDirectory));
+
 		return "/dashboardGlobalRes/dashboardGlobalRes_table";
 	}
 
@@ -619,6 +731,92 @@ public class DashboardGlobalResController extends AbstractController implements 
 		public void setInitSavePath(String initSavePath)
 		{
 			this.initSavePath = initSavePath;
+		}
+	}
+
+	public static class FileRenameForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 原路径 */
+		private String path;
+
+		/** 新名称 */
+		private String name;
+
+		public FileRenameForm()
+		{
+			super();
+		}
+
+		public FileRenameForm(String path, String name)
+		{
+			super();
+			this.path = path;
+			this.name = name;
+		}
+
+		public String getPath()
+		{
+			return path;
+		}
+
+		public void setPath(String path)
+		{
+			this.path = path;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+	}
+
+	public static class FileMoveForm implements ControllerForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		/** 原路径 */
+		private String path;
+
+		/** 目标目录 */
+		private String directory;
+
+		public FileMoveForm()
+		{
+			super();
+		}
+
+		public FileMoveForm(String path, String directory)
+		{
+			super();
+			this.path = path;
+			this.directory = directory;
+		}
+
+		public String getPath()
+		{
+			return path;
+		}
+
+		public void setPath(String path)
+		{
+			this.path = path;
+		}
+
+		public String getDirectory()
+		{
+			return directory;
+		}
+
+		public void setDirectory(String directory)
+		{
+			this.directory = directory;
 		}
 	}
 }
