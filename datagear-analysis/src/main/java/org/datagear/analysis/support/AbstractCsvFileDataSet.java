@@ -67,8 +67,11 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 	protected CsvFileDataSetResource getResource(DataSetQuery query)
 			throws Throwable
 	{
-		File file = getCsvFile(query);
-		return new CsvFileDataSetResource("", getNameRow(), getEncoding(), file.getAbsolutePath(), file.lastModified());
+		FileResolvedInfo fileInfo = getCsvFile(query);
+		File file = fileInfo.getFile();
+
+		return new CsvFileDataSetResource(fileInfo.getResolvedTemplate(), getNameRow(), getEncoding(),
+				file.getAbsolutePath(), file.lastModified());
 	}
 
 	/**
@@ -78,5 +81,5 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getCsvFile(DataSetQuery query) throws Throwable;
+	protected abstract FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable;
 }

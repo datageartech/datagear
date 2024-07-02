@@ -68,8 +68,8 @@ public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected File getJsonFile(DataSetQuery query) throws DataSetException
+	protected FileResolvedInfo getJsonFile(DataSetQuery query) throws DataSetException
 	{
-		return this.file;
+		return new FileResolvedInfo(this.file);
 	}
 }

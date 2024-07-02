@@ -25,6 +25,7 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractExcelFileDataSet;
 import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
+import org.datagear.analysis.support.FileResolvedInfo;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -232,7 +233,7 @@ public class ExcelDataSetEntity extends AbstractExcelFileDataSet implements Dire
 	}
 
 	@Override
-	protected File getExcelFile(DataSetQuery query) throws Throwable
+	protected FileResolvedInfo getExcelFile(DataSetQuery query) throws Throwable
 	{
 		return getFileForDataSetQuery(query);
 	}

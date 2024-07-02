@@ -17,6 +17,7 @@
 
 package org.datagear.analysis.support;
 
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -108,6 +109,12 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		catch(DataSetException e)
 		{
 			throw e;
+		}
+		// 需特殊处理此异常，避免泄露文件路径信息
+		catch (FileNotFoundException e)
+		{
+			throw new DataSetSourceFileNotFoundException("File not found",
+					(resource == null ? null : resource.getResolvedTemplate()));
 		}
 		catch(Throwable t)
 		{

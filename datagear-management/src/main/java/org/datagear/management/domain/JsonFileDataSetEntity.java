@@ -24,6 +24,7 @@ import java.util.List;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractJsonFileDataSet;
+import org.datagear.analysis.support.FileResolvedInfo;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 import org.springframework.beans.BeanUtils;
 
@@ -232,7 +233,7 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	}
 
 	@Override
-	protected File getJsonFile(DataSetQuery query) throws Throwable
+	protected FileResolvedInfo getJsonFile(DataSetQuery query) throws Throwable
 	{
 		return getFileForDataSetQuery(query);
 	}

@@ -66,9 +66,11 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 	@Override
 	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		File file = getJsonFile(query);
-		return new JsonFileDataSetResource("", getDataJsonPath(), getEncoding(), file.getAbsolutePath(),
-				file.lastModified());
+		FileResolvedInfo fileInfo = getJsonFile(query);
+		File file = fileInfo.getFile();
+
+		return new JsonFileDataSetResource(fileInfo.getResolvedTemplate(), getDataJsonPath(), getEncoding(),
+				file.getAbsolutePath(), file.lastModified());
 	}
 
 	/**
@@ -78,5 +80,5 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getJsonFile(DataSetQuery query) throws Throwable;
+	protected abstract FileResolvedInfo getJsonFile(DataSetQuery query) throws Throwable;
 }

@@ -67,8 +67,8 @@ public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet
 	}
 
 	@Override
-	protected File getCsvFile(DataSetQuery query) throws Throwable
+	protected FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable
 	{
-		return this.file;
+		return new FileResolvedInfo(this.file);
 	}
 }

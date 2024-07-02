@@ -86,9 +86,9 @@ public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected File getJsonFile(DataSetQuery query) throws DataSetException
+	protected FileResolvedInfo getJsonFile(DataSetQuery query) throws DataSetException
 	{
 		File jsonFile = FileUtil.getFile(this.directory, this.fileName);
-		return jsonFile;
+		return new FileResolvedInfo(jsonFile, this.fileName);
 	}
 }

@@ -25,6 +25,7 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractCsvFileDataSet;
 import org.datagear.analysis.support.CsvDirectoryFileDataSet;
+import org.datagear.analysis.support.FileResolvedInfo;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -232,7 +233,7 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	}
 
 	@Override
-	protected File getCsvFile(DataSetQuery query) throws Throwable
+	protected FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable
 	{
 		return getFileForDataSetQuery(query);
 	}

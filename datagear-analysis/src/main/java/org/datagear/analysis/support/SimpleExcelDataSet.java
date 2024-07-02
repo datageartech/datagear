@@ -58,8 +58,8 @@ public class SimpleExcelDataSet extends AbstractExcelFileDataSet
 	}
 
 	@Override
-	protected File getExcelFile(DataSetQuery query) throws DataSetException
+	protected FileResolvedInfo getExcelFile(DataSetQuery query) throws DataSetException
 	{
-		return this.file;
+		return new FileResolvedInfo(this.file);
 	}
 }

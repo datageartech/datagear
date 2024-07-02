@@ -85,9 +85,9 @@ public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet
 	}
 
 	@Override
-	protected File getCsvFile(DataSetQuery query) throws Throwable
+	protected FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable
 	{
-		File jsonFile = FileUtil.getFile(this.directory, this.fileName);
-		return jsonFile;
+		File file = FileUtil.getFile(this.directory, this.fileName);
+		return new FileResolvedInfo(file, this.fileName);
 	}
 }

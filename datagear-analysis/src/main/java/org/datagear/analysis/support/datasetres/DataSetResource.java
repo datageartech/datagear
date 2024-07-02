@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.Reader;
 
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
-import org.datagear.analysis.support.DataSetSourceFileNotFoundException;
 import org.datagear.util.IOUtil;
 import org.datagear.util.cache.CommonCacheKey;
 
@@ -92,10 +91,6 @@ public abstract class DataSetResource implements CommonCacheKey
 	 */
 	protected Reader getReader(File file, String encoding) throws Throwable
 	{
-		// 先校验以免泄露敏感信息
-		if (!file.exists())
-			throw new DataSetSourceFileNotFoundException(file.getName());
-
 		return IOUtil.getReader(file, encoding);
 	}
 
@@ -108,10 +103,6 @@ public abstract class DataSetResource implements CommonCacheKey
 	 */
 	protected InputStream getInputStream(File file) throws Throwable
 	{
-		// 先校验以免泄露敏感信息
-		if (!file.exists())
-			throw new DataSetSourceFileNotFoundException(file.getName());
-
 		return IOUtil.getInputStream(file);
 	}
 

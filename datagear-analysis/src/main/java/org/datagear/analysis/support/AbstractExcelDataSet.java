@@ -255,10 +255,9 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * 
 	 * @param resource
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForXls(T resource, boolean resolveFields)
-			throws DataSetException
+	protected ResourceData resolveExcelResourceDataForXls(T resource, boolean resolveFields) throws Throwable
 	{
 		InputStream in = null;
 		POIFSFileSystem poifs = null;
@@ -276,10 +275,6 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		catch (DataSetException e)
 		{
 			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetSourceParseException(t);
 		}
 		finally
 		{
@@ -314,10 +309,6 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		catch (DataSetException e)
 		{
 			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new DataSetSourceParseException(t);
 		}
 		finally
 		{

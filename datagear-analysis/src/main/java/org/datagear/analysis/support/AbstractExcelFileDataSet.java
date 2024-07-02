@@ -57,12 +57,14 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	@Override
 	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		File file = getExcelFile(query);
+		FileResolvedInfo fileInfo = getExcelFile(query);
+		File file = fileInfo.getFile();
 		
 		String sheetName = resolveTemplateSheetName(query);
 		
-		return new ExcelFileDataSetResource("", sheetName, getSheetIndex(), getNameRow(), getDataRowExp(),
-				getDataColumnExp(), (isForceXls() ? true : isXls(file)), file.getAbsolutePath(), file.lastModified());
+		return new ExcelFileDataSetResource(fileInfo.getResolvedTemplate(), sheetName, getSheetIndex(), getNameRow(),
+				getDataRowExp(), getDataColumnExp(), (isForceXls() ? true : isXls(file)), file.getAbsolutePath(),
+				file.lastModified());
 	}
 
 	protected String resolveTemplateSheetName(DataSetQuery query)
@@ -108,5 +110,5 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract File getExcelFile(DataSetQuery query) throws Throwable;
+	protected abstract FileResolvedInfo getExcelFile(DataSetQuery query) throws Throwable;
 }
