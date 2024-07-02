@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetField;
-import org.datagear.analysis.support.CsvValueDataSet.CsvValueDataSetResource;
+import org.datagear.analysis.support.datasetres.CsvValueDataSetResource;
 import org.junit.Test;
 
 /**

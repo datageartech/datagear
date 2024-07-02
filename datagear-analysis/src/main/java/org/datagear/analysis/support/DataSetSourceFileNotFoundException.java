@@ -42,13 +42,18 @@ public class DataSetSourceFileNotFoundException extends DataSetSourceParseExcept
 		super(cause);
 	}
 
+	public DataSetSourceFileNotFoundException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
+
 	public DataSetSourceFileNotFoundException(Throwable cause, String source)
 	{
 		super(cause, source);
 	}
 
-	public DataSetSourceFileNotFoundException(String message, Throwable cause)
+	public DataSetSourceFileNotFoundException(String message, String source)
 	{
-		super(message, cause);
+		super(message, source);
 	}
 }

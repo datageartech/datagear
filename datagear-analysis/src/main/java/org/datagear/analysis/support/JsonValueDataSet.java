@@ -17,15 +17,12 @@
 
 package org.datagear.analysis.support;
 
-import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
-import org.datagear.analysis.support.JsonValueDataSet.JsonValueDataSetResource;
-import org.datagear.util.IOUtil;
+import org.datagear.analysis.support.datasetres.JsonValueDataSetResource;
 
 /**
  * JSON字符串值数据集。
@@ -81,63 +78,5 @@ public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResour
 	{
 		String json = resolveTemplateJson(this.value, query);
 		return new JsonValueDataSetResource(json, getDataJsonPath());
-	}
-
-	/**
-	 * JSON文本值数据集资源。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class JsonValueDataSetResource extends JsonDataSetResource
-	{
-		private static final long serialVersionUID = 1L;
-
-		public JsonValueDataSetResource()
-		{
-			super();
-		}
-
-		public JsonValueDataSetResource(String resolvedTemplate, String dataJsonPath)
-		{
-			super(resolvedTemplate, dataJsonPath);
-		}
-
-		@Override
-		public Reader getReader() throws Throwable
-		{
-			return IOUtil.getReader(super.getResolvedTemplate());
-		}
-
-		@Override
-		public boolean isIdempotent()
-		{
-			return true;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return super.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (!super.equals(obj))
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			return true;
-		}
-
-		@Override
-		public String toString()
-		{
-			return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
-					+ getResolvedTemplate() + "]";
-		}
 	}
 }

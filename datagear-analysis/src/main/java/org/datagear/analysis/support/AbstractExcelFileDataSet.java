@@ -18,13 +18,11 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.support.AbstractExcelDataSet.ExcelDataSetResource;
-import org.datagear.analysis.support.AbstractExcelFileDataSet.ExcelFileDataSetResource;
+import org.datagear.analysis.support.datasetres.ExcelFileDataSetResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.StringUtil;
 
@@ -111,106 +109,4 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	 * @throws Throwable
 	 */
 	protected abstract File getExcelFile(DataSetQuery query) throws Throwable;
-
-	/**
-	 * Excel文件数据集资源。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class ExcelFileDataSetResource extends ExcelDataSetResource
-	{
-		private static final long serialVersionUID = 1L;
-
-		private String filePath;
-
-		private long lastModified;
-
-		public ExcelFileDataSetResource()
-		{
-			super();
-		}
-
-		public ExcelFileDataSetResource(String resolvedTemplate, String sheetName, int sheetIndex, int nameRow, String dataRowExp,
-				String dataColumnExp, boolean xls, String filePath, long lastModified)
-		{
-			super(resolvedTemplate, sheetName, sheetIndex, nameRow, dataRowExp, dataColumnExp, xls);
-			this.filePath = filePath;
-			this.lastModified = lastModified;
-		}
-
-		public String getFilePath()
-		{
-			return filePath;
-		}
-
-		public void setFilePath(String filePath)
-		{
-			this.filePath = filePath;
-		}
-
-		public long getLastModified()
-		{
-			return lastModified;
-		}
-
-		public void setLastModified(long lastModified)
-		{
-			this.lastModified = lastModified;
-		}
-
-		@Override
-		public boolean isIdempotent()
-		{
-			return true;
-		}
-
-		@Override
-		public InputStream getInputStream() throws Throwable
-		{
-			File file = FileUtil.getFile(this.filePath);
-			return getInputStream(file);
-		}
-
-		@Override
-		public int hashCode()
-		{
-			final int prime = 31;
-			int result = super.hashCode();
-			result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
-			result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (!super.equals(obj))
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ExcelFileDataSetResource other = (ExcelFileDataSetResource) obj;
-			if (filePath == null)
-			{
-				if (other.filePath != null)
-					return false;
-			}
-			else if (!filePath.equals(other.filePath))
-				return false;
-			if (lastModified != other.lastModified)
-				return false;
-			return true;
-		}
-
-		@Override
-		public String toString()
-		{
-			return getClass().getSimpleName() + " [filePath=" + filePath + ", lastModified=" + lastModified
-					+ ", sheetName=" + getSheetName() + ", sheetIndex=" + getSheetIndex() + ", nameRow=" + getNameRow()
-					+ ", dataRowExp=" + getDataRowExp() + ", dataColumnExp=" + getDataColumnExp() + ", xls=" + isXls()
-					+ ", resolvedTemplate=" + getResolvedTemplate() + "]";
-		}
-	}
 }

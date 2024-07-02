@@ -50,7 +50,7 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
+import org.datagear.analysis.support.datasetres.JsonDataSetResource;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;

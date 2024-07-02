@@ -27,7 +27,7 @@ import java.util.Map;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
-import org.datagear.analysis.support.AbstractJsonDataSet.JsonDataSetResource;
+import org.datagear.analysis.support.datasetres.JsonDataSetResource;
 import org.datagear.util.IOUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -282,74 +282,5 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	protected JsonPathSupport getJsonPathSupport()
 	{
 		return JsonPathSupport.INSTANCE;
-	}
-
-	/**
-	 * JSON数据集资源。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static abstract class JsonDataSetResource extends DataSetResource
-	{
-		private static final long serialVersionUID = 1L;
-		
-		private String dataJsonPath;
-
-		public JsonDataSetResource()
-		{
-			super();
-		}
-
-		public JsonDataSetResource(String resolvedTemplate, String dataJsonPath)
-		{
-			super(resolvedTemplate);
-			this.dataJsonPath = dataJsonPath;
-		}
-
-		public String getDataJsonPath()
-		{
-			return dataJsonPath;
-		}
-
-		/**
-		 * 获取JSON输入流。
-		 * <p>
-		 * 输入流应该在此方法内创建，而不应该在实例内创建，因为采用缓存后不会每次都调用此方法。
-		 * </p>
-		 * 
-		 * @return
-		 * @throws Throwable
-		 */
-		public abstract Reader getReader() throws Throwable;
-
-		@Override
-		public int hashCode()
-		{
-			final int prime = 31;
-			int result = super.hashCode();
-			result = prime * result + ((dataJsonPath == null) ? 0 : dataJsonPath.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (!super.equals(obj))
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			JsonDataSetResource other = (JsonDataSetResource) obj;
-			if (dataJsonPath == null)
-			{
-				if (other.dataJsonPath != null)
-					return false;
-			}
-			else if (!dataJsonPath.equals(other.dataJsonPath))
-				return false;
-			return true;
-		}
 	}
 }

@@ -57,6 +57,12 @@ public class DataSetSourceParseException extends DataSetException
 		this.source = source;
 	}
 
+	public DataSetSourceParseException(String message, String source)
+	{
+		super(message);
+		this.source = source;
+	}
+
 	public String getSource()
 	{
 		return source;
