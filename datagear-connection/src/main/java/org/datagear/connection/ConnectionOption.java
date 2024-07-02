@@ -175,6 +175,16 @@ public class ConnectionOption implements Serializable
 		return co;
 	}
 
+	/**
+	 * 获取脱敏处理的{@linkplain #getUrl()}。
+	 * 
+	 * @return
+	 */
+	public String urlOfMask()
+	{
+		return StringUtil.mask(getUrl(), 10, 6, 6);
+	}
+
 	@Override
 	public int hashCode()
 	{
