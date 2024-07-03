@@ -301,16 +301,13 @@ public class DashboardGlobalResController extends AbstractController implements 
 		// 文件不存在忽略即可
 		if (file.exists())
 		{
-			File parent = file.getParentFile();
-			File newFile = FileUtil.getFile(parent, form.getName(), false);
-
-			if (newFile.exists())
+			if (FileUtil.getSibling(file, form.getName()).exists())
 			{
 				return optFailResponseEntity(request, "file.error.targetFileExists");
 			}
 			else
 			{
-				FileUtil.move(file, newFile);
+				FileUtil.rename(file, form.getName());
 			}
 		}
 
@@ -357,25 +354,23 @@ public class DashboardGlobalResController extends AbstractController implements 
 		// 文件不存在忽略即可
 		if (file.exists())
 		{
-			File parent = file.getParentFile();
 			File targetDirectory = FileUtil.getFile(this.dashboardGlobalResRootDirectory, form.getDirectory(), false);
 
 			if (!targetDirectory.exists())
-				targetDirectory = FileUtil.getDirectory(parent, form.getDirectory(), true);
+				targetDirectory = FileUtil.getDirectory(this.dashboardGlobalResRootDirectory, form.getDirectory(),
+						true);
 
 			if (!targetDirectory.isDirectory())
 			{
 				return optFailResponseEntity(request, "file.error.tagetFileNotDir");
 			}
 
-			File targetFile = FileUtil.getFile(targetDirectory, file.getName());
-
-			if (targetFile.exists())
+			if (FileUtil.getFile(targetDirectory, file.getName()).exists())
 			{
 				return optFailResponseEntity(request, "file.error.fileExistsInTargetDir");
 			}
 
-			FileUtil.move(file, targetFile);
+			FileUtil.moveToDir(file, targetDirectory);
 		}
 
 		return optSuccessResponseEntity(request);

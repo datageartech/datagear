@@ -23,7 +23,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,6 +79,21 @@ public class FileUtil
 			rp = rp.substring(PATH_SEPARATOR.length());
 
 		return rp;
+	}
+
+	/**
+	 * 获取指定名称的同级文件。
+	 * 
+	 * @param file
+	 * @param name
+	 * @return
+	 */
+	public static File getSibling(File file, String name)
+	{
+		Path fp = file.toPath();
+		Path tp = fp.resolveSibling(name);
+
+		return tp.toFile();
 	}
 
 	/**
@@ -974,22 +988,49 @@ public class FileUtil
 	}
 
 	/**
-	 * 移动文件。
+	 * 重命名文件。
 	 * <p>
-	 * 谨慎使用此方法，因为在Windows里，此方法不支持将文件移到不同的磁盘驱动器。
+	 * 此方法不支持覆盖已有文件、不支持原子操作（避免底层不支持原子移动而报错）。
 	 * </p>
 	 * 
-	 * @param from
-	 * @param to
+	 * @param file
+	 * @param newName
 	 * @return
 	 * @throws IOException
 	 */
-	public static File move(File from, File to) throws IOException
+	public static File rename(File file, String newName) throws IOException
 	{
-		Path fp = from.toPath();
-		Path tp = to.toPath();
+		Path fp = file.toPath();
+		Path tp = fp.resolveSibling(newName);
 
-		Path re = Files.move(fp, tp, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		Files.move(fp, tp);
+
+		return tp.toFile();
+	}
+
+	/**
+	 * 移动文件至指定目录内。
+	 * <p>
+	 * 此方法不支持覆盖已有文件、不支持原子操作（避免底层不支持原子移动而报错）。
+	 * </p>
+	 * <p>
+	 * 注意：谨慎使用此方法，因为在Windows里，此方法不支持将文件移到不同的磁盘驱动器。
+	 * </p>
+	 * 
+	 * @param file
+	 * @param toDir
+	 *            目标目录，应是已存在的
+	 * @return
+	 * @throws IOException
+	 */
+	public static File moveToDir(File file, File toDir) throws IOException
+	{
+		File toFile = FileUtil.getFile(toDir, file.getName());
+
+		Path fp = file.toPath();
+		Path tp = toFile.toPath();
+
+		Path re = Files.move(fp, tp);
 
 		return re.toFile();
 	}
