@@ -23,8 +23,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -420,6 +424,48 @@ public class FileUtil
 			return new String[0];
 
 		return directory.list();
+	}
+
+	/**
+	 * 列出给定目录内的所有文件（包含子目录、子目录内文件）。
+	 * 
+	 * @param directory
+	 * @return 如果不是目录或者不存在，将返回空列表；元素按深度优先、名称排列
+	 */
+	public static List<File> listAll(File directory)
+	{
+		if (!directory.exists() || !directory.isDirectory())
+			return Collections.emptyList();
+
+		List<File> files = new ArrayList<>();
+		listAll(directory, files);
+
+		return files;
+	}
+
+	protected static void listAll(File directory, List<File> files)
+	{
+		File[] children = directory.listFiles();
+
+		if (children == null)
+			return;
+
+		Arrays.sort(children, new Comparator<File>()
+		{
+			@Override
+			public int compare(File o1, File o2)
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+
+		for (File child : children)
+		{
+			files.add(child);
+
+			if (child.isDirectory())
+				listAll(child, files);
+		}
 	}
 
 	/**
@@ -862,78 +908,6 @@ public class FileUtil
 	}
 	
 	/**
-	 * 重命名文件路径。
-	 * 
-	 * @param path 原文件路径
-	 * @param newPath 新文件路径，可以是原文件路径的上级路径、下级路径
-	 * @return 重命名清单，结构为：<code>新文件 -&gt; 原文件</code>
-	 * @throws IOException
-	 */
-	public static Map<File, File> renameTracked(File path, File newPath) throws IOException
-	{
-		Map<File, File> tracks = new HashMap<File, File>();
-		renameTracked(tracks, path, newPath);
-		
-		return tracks;
-	}
-	
-	protected static void renameTracked(Map<File, File> handledFiles, File path, File newPath) throws IOException
-	{
-		if(!path.exists() ||  path.equals(newPath))
-			return;
-		
-		if(path.isDirectory())
-		{
-			//在创建newPath前获取子文件，这样当newPath是需新建的path子目录时，可以将其忽略
-			File[] children = path.listFiles();
-			
-			if(!newPath.exists())
-				newPath.mkdirs();
-			
-			if(!newPath.isDirectory())
-				throw new IllegalArgumentException("Target file must be directory");
-			
-			handledFiles.put(newPath, path);
-			
-			for(File child : children)
-			{
-				if(!child.exists() || handledFiles.containsKey(child))
-					continue;
-				
-				File childNewFile = null;
-				
-				if(child.isDirectory())
-				{
-					childNewFile = getDirectory(newPath, child.getName(), true);
-				}
-				else
-				{
-					childNewFile = getFile(newPath, child.getName());
-				}
-				
-				renameTracked(handledFiles, child, childNewFile);
-			}
-			
-			if(path.listFiles().length == 0)
-				deleteFile(path);
-		}
-		else if(newPath.exists() && newPath.isDirectory())
-		{
-			newPath = getFile(newPath, path.getName());
-			renameTracked(handledFiles, path, newPath);
-		}
-		else
-		{
-			createParentIfNone(newPath);
-			
-			handledFiles.put(newPath, path);
-			
-			newPath = IOUtil.copy(path, newPath);
-			deleteFile(path);
-		}
-	}
-
-	/**
 	 * 获取文件自身的上次修改时间。
 	 * 
 	 * @param file
@@ -1029,6 +1003,36 @@ public class FileUtil
 
 		Path fp = file.toPath();
 		Path tp = toFile.toPath();
+
+		Path re = Files.move(fp, tp);
+
+		return re.toFile();
+	}
+
+	/**
+	 * 移动文件。
+	 * <p>
+	 * 此方法不支持覆盖已有文件、不支持原子操作（避免底层不支持原子移动而报错）。
+	 * </p>
+	 * <p>
+	 * 注意：谨慎使用此方法，因为在Windows里，此方法不支持将文件移到不同的磁盘驱动器。
+	 * </p>
+	 * 
+	 * @param from
+	 * @param to
+	 *            不存在的上级目录会自动创建
+	 * @return
+	 * @throws IOException
+	 */
+	public static File move(File from, File to) throws IOException
+	{
+		File toParent = to.getParentFile();
+
+		if (to != null)
+			mkdirsIfNot(toParent);
+
+		Path fp = from.toPath();
+		Path tp = to.toPath();
 
 		Path re = Files.move(fp, tp);
 

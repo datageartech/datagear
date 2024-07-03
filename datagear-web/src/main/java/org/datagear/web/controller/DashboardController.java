@@ -432,6 +432,16 @@ public class DashboardController extends AbstractDataAnalysisController
 		
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTplDashboardWidgetResManager();
+
+		if (dashboardWidgetResManager.exists(id, destName))
+		{
+			return optFailResponseEntity(request, "file.error.targetFileExists");
+		}
+
+		if (destName.startsWith(srcName) && destName.length() > srcName.length())
+		{
+			return optFailResponseEntity(request, "file.error.moveToSubDirNotAllowed");
+		}
 		
 		Map<String, String> renames = dashboardWidgetResManager.rename(id, srcName, destName);
 		

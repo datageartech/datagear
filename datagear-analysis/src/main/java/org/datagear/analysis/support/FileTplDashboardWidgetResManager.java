@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,8 +145,7 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 		if (!directory.exists())
 			return new ArrayList<>(0);
 
-		List<File> files = new ArrayList<>();
-		listAllDescendentFiles(directory, files);
+		List<File> files = listAllDescendentFiles(directory);
 
 		List<String> resources = new ArrayList<>(files.size());
 
@@ -188,8 +185,8 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 		if(!srcFile.exists())
 			return Collections.emptyMap();
 		
-		File destFile = FileUtil.getFile(idRoot, destName, true);
-		
+		File destFile = FileUtil.getFile(idRoot, destName);
+
 		Map<String, String> renames = renameResourceFile(idRoot, srcFile, destFile);
 		return renames;
 	}
@@ -198,11 +195,31 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 	{
 		Map<String, String> renames = new HashMap<String, String>();
 		
-		Map<File, File> tracks = FileUtil.renameTracked(srcFile, destFile);
+		Map<File, File> tracks = new HashMap<>();
+
+		if (!srcFile.isDirectory())
+		{
+			FileUtil.move(srcFile, destFile);
+			tracks.put(srcFile, destFile);
+		}
+		else
+		{
+			List<File> srcFiles = listAllDescendentFiles(srcFile);
+
+			FileUtil.move(srcFile, destFile);
+
+			for (File sf : srcFiles)
+			{
+				String relativePath = FileUtil.getRelativePath(srcFile, sf);
+				File df = FileUtil.getFile(destFile, relativePath);
+				tracks.put(sf, df);
+			}
+		}
+
 		for(Map.Entry<File, File> track : tracks.entrySet())
 		{
-			File dest = track.getKey();
-			File src = track.getValue();
+			File src = track.getKey();
+			File dest = track.getValue();
 			
 			if(dest.isDirectory())
 				continue;
@@ -213,29 +230,9 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 		return renames;
 	}
 
-	protected void listAllDescendentFiles(File directory, List<File> files)
+	protected List<File> listAllDescendentFiles(File directory)
 	{
-		if (!directory.exists())
-			return;
-
-		File[] children = directory.listFiles();
-
-		Arrays.sort(children, new Comparator<File>()
-		{
-			@Override
-			public int compare(File o1, File o2)
-			{
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
-
-		for (File child : children)
-		{
-			files.add(child);
-
-			if (child.isDirectory())
-				listAllDescendentFiles(child, files);
-		}
+		return FileUtil.listAll(directory);
 	}
 	
 	protected String trimResourceName(File idDirectory, File resource)
