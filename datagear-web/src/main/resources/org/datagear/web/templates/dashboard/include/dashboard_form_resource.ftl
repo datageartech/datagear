@@ -28,7 +28,7 @@
 			<span class="p-tabview-title">
 				<span><@spring.message code='localResource' /></span>
 				<span class="pl-3 text-color for-open-global-res-panel" @click="onShowGlobalRes"
-					title="<@spring.message code='dashboard.viewAndCopyGlobalResNameToClipboard' />">
+					title="<@spring.message code='dashboard.viewAndCopyGlobalResNameToClipboard' />" v-if="!pm.isReadonlyAction">
 					<@spring.message code='globalResource' />（${dashboardGlobalResUrlPrefix}）
 				</span>
 			</span>
