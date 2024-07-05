@@ -612,6 +612,13 @@
 		return val;
 	};
 	
+	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
+	$.focusOnFirstInput = function(ele)
+	{
+		var input = $(":input:not(:disabled,[readonly]):first", ele); 
+		input.focus();
+	};
+	
 	$.TYPEOF_STRING = "string";
 	$.TYPEOF_NUMBER = "number";
 	$.TYPEOF_BOOLEAN = "boolean";

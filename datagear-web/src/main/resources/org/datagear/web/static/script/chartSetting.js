@@ -1802,6 +1802,9 @@
 		}
 		
 		chartSetting.adjustChartSetingPanelPosition($panel);
+		
+		//聚焦至第一个可操作输入框
+		chartSetting.focusOnFirstInput($("form:first", $panel));
 	};
 	
 	chartSetting.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues)
@@ -2262,6 +2265,13 @@
 		if(initOptions.fixedColumns)
 			dataTable.fixedColumns.relayout();
 		*/
+	};
+	
+	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
+	chartSetting.focusOnFirstInput = function(ele)
+	{
+		var input = $(":input:not(:disabled,[readonly]):first", ele); 
+		input.focus();
 	};
 })
 (this);

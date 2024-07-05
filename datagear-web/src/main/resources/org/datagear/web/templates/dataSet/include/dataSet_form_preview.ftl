@@ -287,6 +287,7 @@
 			{
 				$("select, input[type='text'], textarea", this).addClass("p-inputtext p-component w-full");
 				$("button", this).addClass("p-button p-component");
+				$.focusOnFirstInput(this);
 			},
 			submit: function()
 			{
