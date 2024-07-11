@@ -34,12 +34,11 @@
 		var items = [];
 		var nodes = $.splitAsPath(path, false);
 		
+		var nodePath = "";
 		for(var i=0; i<nodes.length; i++)
 		{
-			var path = (i < 1 ? "" : items[i-1].label + "/");
-			path = path + nodes[i];
-			
-			items[i] = { label: nodes[i], path: path, command: function(e){ po.handleDirBreadcrumbCommand(e.item); } };
+			nodePath = nodePath + (nodePath == "" ? "" : "/") + nodes[i];
+			items[i] = { label: nodes[i], path: nodePath, command: function(e){ po.handleDirBreadcrumbCommand(e.item); } };
 		}
 		
 		var pm = po.vuePageModel();
