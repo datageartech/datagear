@@ -257,7 +257,7 @@ public class DetectNewVersionScriptResolver
 		private String versionCookieName;
 
 		/** Cookie中用于存储检测到新版本过期天数 */
-		private int versionCookieExpDays = 3;
+		private int versionCookieExpDays = 1;
 
 		/** 当前版本 */
 		private String currentVersion;
