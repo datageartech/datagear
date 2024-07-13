@@ -36,9 +36,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ServerTimeJsController extends AbstractController
 {
 	/**
-	 * 服务端日期JS变量名：{@code _DATAGEAR_SERVER_TIME}
+	 * 服务端日期JS变量名：{@code DATAGEAR_SERVER_TIME}
 	 */
-	public static final String SERVERTIME_JS_VAR = "_" + Global.PRODUCT_NAME_EN_UC + "_SERVER_TIME";
+	public static final String SERVERTIME_JS_VAR = Global.PRODUCT_NAME_EN_UC + "_SERVER_TIME";
 
 	/** 服务端时间URL */
 	public static final String SERVER_TIME_URL = "/static/script/serverTime.js";
