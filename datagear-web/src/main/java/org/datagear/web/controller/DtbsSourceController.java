@@ -166,8 +166,11 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
 				&& (!StringUtil.isEquals(dtbsSource.getUrl(), old.getUrl())
-						|| !StringUtil.isEquals(dtbsSource.getUser(), old.getUser())))
+						|| !StringUtil.isEquals(dtbsSource.getUser(), old.getUser())
+						|| !StringUtil.isEquals(dtbsSource.getSchemaName(), old.getSchemaName())))
+		{
 			getDtbsSourceTableCache().invalidate(dtbsSource.getId());
+		}
 
 		return optSuccessDataResponseEntity(request, dtbsSource);
 	}
