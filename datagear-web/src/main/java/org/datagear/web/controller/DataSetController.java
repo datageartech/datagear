@@ -904,7 +904,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(user, dataSet, originalFileName);
+		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -921,7 +921,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		ExcelDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(user, dataSet, originalFileName);
+		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -953,7 +953,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		CsvFileDataSetEntity dataSet = preview.getDataSet();
 		checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		setDirectoryFileDataSetDirectory(user, dataSet, originalFileName);
+		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -1081,7 +1081,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return true;
 	}
 
-	protected void setDirectoryFileDataSetDirectory(User user, DirectoryFileDataSetEntity dataSet, String originalFileName)
+	protected void setDirectoryFileDataSetForPreview(User user, DirectoryFileDataSetEntity dataSet, String originalFileName)
 	{
 		String fileName = dataSet.getFileName();
 
@@ -1093,7 +1093,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		FileSource dsr = dataSet.getFileSource();
 		if(dsr != null && !isEmpty(dsr.getId()))
 		{
-			dsr = this.fileSourceService.getById(user, dsr.getId());
+			dsr = this.fileSourceService.getById(dsr.getId());
 			dataSet.setFileSource(dsr);
 		}
 	}
