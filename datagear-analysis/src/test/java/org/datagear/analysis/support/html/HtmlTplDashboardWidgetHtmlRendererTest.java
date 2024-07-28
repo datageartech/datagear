@@ -1720,8 +1720,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	public void renderTest_forPerformance() throws Throwable
 	{
 		int loopCount = 10000;
-		long rawTimes = 0;
-		long enhanceTimes = 0;
+		double rawTimes = 0;
+		double enhanceTimes = 0;
 		
 		{
 			HtmlTplDashboardWidget dashboardWidget = createHtmlTplDashboardWidget(this.renderer);
@@ -1762,9 +1762,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			}
 		}
 		
-		double enhance = ((double)rawTimes)/enhanceTimes;
+		double enhance = rawTimes / enhanceTimes;
 		
-		assertTrue(enhance >= 1.0d);
+		assertTrue(enhance > 1.0d);
 		
 		System.out.println("-----------------------");
 		System.out.println("test count   : " + loopCount);
