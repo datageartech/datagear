@@ -190,10 +190,7 @@ public class ResetPasswordController extends AbstractController
 				|| isEmpty(resetPasswordStep.getCheckFileName()))
 			return optStepNotInSessionResponseEntity(request);
 
-		File checkFile = FileUtil.getFile(this.resetPasswordCheckFileDirectory, resetPasswordStep.getCheckFileName(),
-				false);
-
-		if (!checkFile.exists())
+		if (!hasCheckFile(resetPasswordStep.getCheckFileName()))
 			return optFailResponseEntity(request, "resetPassword.checkFileNotExists");
 
 		resetPasswordStep.setCheckOk(true);
@@ -202,6 +199,35 @@ public class ResetPasswordController extends AbstractController
 		setSessionResetPasswordStep(request, resetPasswordStep);
 
 		return optSuccessResponseEntity(request);
+	}
+
+	protected boolean hasCheckFile(String fileName)
+	{
+		File dir = this.resetPasswordCheckFileDirectory;
+
+		if (!dir.exists() || !dir.isDirectory())
+			return false;
+
+		File[] files = dir.listFiles();
+
+		if (files == null || files.length == 0)
+			return false;
+
+		for (File file : files)
+		{
+			String name = file.getName();
+
+			if (name.equalsIgnoreCase(fileName))
+				return true;
+
+			// 忽略扩展名后再校验
+			name = FileUtil.deleteExtension(name);
+
+			if (name.equalsIgnoreCase(fileName))
+				return true;
+		}
+
+		return false;
 	}
 
 	@RequestMapping(value = "/" + STEP_SET_NEW_PASSWORD, produces = CONTENT_TYPE_JSON)
