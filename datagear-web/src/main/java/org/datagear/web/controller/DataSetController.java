@@ -847,7 +847,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		SqlDataSetEntity dataSet = preview.getDataSet();
-		DtbsSourceConnectionFactory connFactory = dataSet.getDtbsConFactory();
+		DtbsSourceConnectionFactory connFactory = dataSet.getDtbsCnFty();
 		DtbsSource dtbsSource = (connFactory == null ? null : connFactory.getDtbsSource());
 		String dtbsSourceId = (dtbsSource == null ? null : dtbsSource.getId());
 		

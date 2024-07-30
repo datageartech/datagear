@@ -80,12 +80,12 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	 * 注意：
 	 * </p>
 	 * <p>
-	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setDtbsConFactory(DtbsSourceConnectionFactory)}。
+	 * 此方法与{@linkplain #getConnectionFactory()}功能一致，另参考{@linkplain #setDtbsCnFty(DtbsSourceConnectionFactory)}。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	public DtbsSourceConnectionFactory getDtbsConFactory()
+	public DtbsSourceConnectionFactory getDtbsCnFty()
 	{
 		return getConnectionFactory();
 	}
@@ -104,7 +104,7 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 	 * 
 	 * @param connectionFactory
 	 */
-	public void setDtbsConFactory(DtbsSourceConnectionFactory connectionFactory)
+	public void setDtbsCnFty(DtbsSourceConnectionFactory connectionFactory)
 	{
 		setConnectionFactory(connectionFactory);
 	}

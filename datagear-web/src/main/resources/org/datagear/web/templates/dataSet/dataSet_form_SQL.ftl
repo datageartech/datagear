@@ -39,8 +39,8 @@
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<div class="p-inputgroup">
-		        		<p-inputtext id="${pid}dataSource" v-model="fm.dtbsConFactory.dtbsSource.title" type="text" class="input"
-			        		readonly="readonly" name="dtbsConFactory.dtbsSource.title" required maxlength="200">
+		        		<p-inputtext id="${pid}dataSource" v-model="fm.dtbsCnFty.dtbsSource.title" type="text" class="input"
+			        		readonly="readonly" name="dtbsCnFty.dtbsSource.title" required maxlength="200">
 			        	</p-inputtext>
 			        	<p-button type="button" label="<@spring.message code='select' />"
 			        		@click="onSelectDtbsSource" v-if="!pm.isReadonlyAction">
@@ -85,7 +85,7 @@
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
-		fingerprint.dtbsSourceId = dataSet.dtbsConFactory.dtbsSource.id;
+		fingerprint.dtbsSourceId = dataSet.dtbsCnFty.dtbsSource.id;
 		fingerprint.sql = dataSet.sql;
 	};
 	
@@ -102,13 +102,13 @@
 	po.getSqlEditorDtbsSourceId = function()
 	{
 		var fm = po.vueFormModel();
-		return fm.dtbsConFactory.dtbsSource.id;
+		return fm.dtbsCnFty.dtbsSource.id;
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	po.inflateDataSetModel(formModel);
-	formModel.dtbsConFactory = (formModel.dtbsConFactory == null ? { dtbsSource: {} } : formModel.dtbsConFactory);
-	formModel.dtbsConFactory.dtbsSource = (formModel.dtbsConFactory.dtbsSource == null ? {} : formModel.dtbsConFactory.dtbsSource);
+	formModel.dtbsCnFty = (formModel.dtbsCnFty == null ? { dtbsSource: {} } : formModel.dtbsCnFty);
+	formModel.dtbsCnFty.dtbsSource = (formModel.dtbsCnFty.dtbsSource == null ? {} : formModel.dtbsCnFty.dtbsSource);
 	
 	po.setupForm(formModel,
 	{
@@ -136,7 +136,7 @@
 			po.handleOpenSelectAction("/dtbsSource/select", function(dtbsSource)
 			{
 				var fm = po.vueFormModel();
-				fm.dtbsConFactory.dtbsSource = dtbsSource;
+				fm.dtbsCnFty.dtbsSource = dtbsSource;
 			});
 		}
 	});
