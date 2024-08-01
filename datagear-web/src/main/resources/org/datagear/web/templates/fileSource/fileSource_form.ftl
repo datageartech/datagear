@@ -43,14 +43,16 @@
 		        </div>
 			</div>
 			<div class="field grid" v-if="pm.isShowDirectory">
-				<label for="${pid}directory" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					 title="<@spring.message code='fileSource.directory.desc' />">
+				<label for="${pid}directory" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='directory' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}directory" v-model="fm.directory" type="text" class="input w-full"
 		        		name="directory" required maxlength="300">
 		        	</p-inputtext>
+		        	<div class="desc text-color-secondary">
+		        		<small><@spring.message code='fileSource.directory.desc' /></small>
+		        	</div>
 		        </div>
 			</div>
 			<div class="field grid">
