@@ -587,3 +587,9 @@ UPDATE DATAGEAR_AUTHORIZATION SET AUTH_RESOURCE_TYPE='FileSource' WHERE AUTH_RES
 /*2024-06-06*/
 /*数据源表添加模式名列*/
 ALTER TABLE DATAGEAR_SCHEMA ADD COLUMN SCHEMA_SCHM_NAME VARCHAR(100);
+
+
+/*-----------------------------------------*/
+/*--version[5.2.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
