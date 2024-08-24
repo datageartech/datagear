@@ -286,8 +286,8 @@ public class ChartController extends AbstractChartPluginAwareController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping("/manage")
+	public String manage(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));

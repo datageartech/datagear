@@ -188,8 +188,8 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 				.build();
 	}
 
-	@RequestMapping("/{dtbsSourceId}/{tableName}/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping("/{dtbsSourceId}/{tableName}/manage")
+	public String manage(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value="reloadTable", required = false) Boolean reloadTable) throws Throwable

@@ -162,8 +162,8 @@ public class AnalysisProjectController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping("/manage")
+	public String manage(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);

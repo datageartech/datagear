@@ -411,7 +411,7 @@
 	po.toDtbsSourceTabUrl = function(tab)
 	{
 		if(tab.type == po.dtbsSourceTabTypeTable)
-			return "/dtbsSourceData/"+encodeURIComponent(tab.dtbsSourceId)+"/"+encodeURIComponent(tab.name)+"/pagingQuery";
+			return "/dtbsSourceData/"+encodeURIComponent(tab.dtbsSourceId)+"/"+encodeURIComponent(tab.name)+"/manage";
 		else if(tab.type == po.dtbsSourceTabTypeSqlpad)
 			return "/dtbsSourceSqlpad/"+encodeURIComponent(tab.dtbsSourceId);
 		else if(tab.type == po.dtbsSourceTabTypeImportData)

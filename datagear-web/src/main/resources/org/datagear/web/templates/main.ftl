@@ -86,31 +86,31 @@
 				{
 					label: "<@spring.message code='module.dtbsSource' />",
 					icon: 'pi pi-fw pi-database',
-					url: po.concatContextPath("/dtbsSource/query"),
+					url: po.concatContextPath("/dtbsSource/manage"),
 					visible: po.modulePermissions.dtbsSourcePermission.visible
 				},
 				{
 					label: "<@spring.message code='module.analysisProject' />",
 					icon: 'pi pi-fw pi-th-large',
-					url: po.concatContextPath("/analysisProject/pagingQuery"),
+					url: po.concatContextPath("/analysisProject/manage"),
 					visible: po.modulePermissions.analysisProjectPermission.visible
 				},
 				{
 					label: "<@spring.message code='module.dataSet' />",
 					icon: 'pi pi-fw pi-table',
-					url: po.concatContextPath("/dataSet/pagingQuery"),
+					url: po.concatContextPath("/dataSet/manage"),
 					visible: po.modulePermissions.dataSetPermission.visible
 				},
 				{
 					label: "<@spring.message code='module.chart' />",
 					icon: 'pi pi-fw pi-chart-line',
-					url: po.concatContextPath("/chart/pagingQuery"),
+					url: po.concatContextPath("/chart/manage"),
 					visible: po.modulePermissions.chartPermission.visible
 				},
 				{
 					label: "<@spring.message code='module.dashboard' />",
 					icon: 'pi pi-fw pi-images',
-					url: po.concatContextPath("/dashboard/pagingQuery"),
+					url: po.concatContextPath("/dashboard/manage"),
 					visible: po.modulePermissions.dashboardPermission.visible
 				}
 			]
