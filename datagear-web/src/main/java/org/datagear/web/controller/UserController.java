@@ -303,8 +303,8 @@ public class UserController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping("/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping("/manage")
+	public String manage(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
 		setQueryDataUrl(model, "/user/pagingQueryData");

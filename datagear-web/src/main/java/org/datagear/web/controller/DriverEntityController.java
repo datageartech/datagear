@@ -319,8 +319,8 @@ public class DriverEntityController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/query")
-	public String query(HttpServletRequest request, org.springframework.ui.Model model)
+	@RequestMapping(value = "/manage")
+	public String manage(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
 		setReadonlyAction(model);

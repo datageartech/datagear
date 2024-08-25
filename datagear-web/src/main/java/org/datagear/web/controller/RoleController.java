@@ -132,8 +132,8 @@ public class RoleController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = "/manage")
+	public String manage(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);

@@ -213,7 +213,7 @@
 		{
 			po.executeOnSelect(function(entity)
 			{
-				po.openTableDialog("/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/query");
+				po.openTableDialog("/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/manage");
 			});
 		},
 		

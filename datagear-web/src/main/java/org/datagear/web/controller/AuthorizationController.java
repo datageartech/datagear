@@ -31,9 +31,9 @@ import org.datagear.management.service.impl.EnumValueLabel;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.AuthorizationResMetaManager;
-import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.AuthorizationResMetaManager.PermissionMeta;
 import org.datagear.web.util.AuthorizationResMetaManager.ResourceMeta;
+import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -205,8 +205,8 @@ public class AuthorizationController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	@RequestMapping(value = "/{resourceType}/{resource}/query")
-	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	@RequestMapping(value = "/{resourceType}/{resource}/manage")
+	public String manage(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource)
 	{
 		User user = getCurrentUser();

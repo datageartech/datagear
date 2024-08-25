@@ -93,7 +93,7 @@
 		{
 			po.executeOnSelect(function(entity)
 			{
-				po.openTableDialog("/authorization/${FileSource.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/query");
+				po.openTableDialog("/authorization/${FileSource.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(entity.id)+"/manage");
 			});
 		},
 		

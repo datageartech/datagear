@@ -150,7 +150,7 @@ DetectResult detectNewVersionResult
 				[
 					{
 						label: "<@spring.message code='module.driverEntity' />",
-						url: po.concatContextPath("/driverEntity/query"),
+						url: po.concatContextPath("/driverEntity/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
@@ -160,7 +160,7 @@ DetectResult detectNewVersionResult
 					},
 					{
 						label: "<@spring.message code='module.dtbsSourceGuard' />",
-						url: po.concatContextPath("/dtbsSourceGuard/query"),
+						url: po.concatContextPath("/dtbsSourceGuard/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]
@@ -171,17 +171,17 @@ DetectResult detectNewVersionResult
 				[
 					{
 						label: "<@spring.message code='module.fileSource' />",
-						url: po.concatContextPath("/fileSource/pagingQuery"),
+						url: po.concatContextPath("/fileSource/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.chartPlugin' />",
-						url: po.concatContextPath("/chartPlugin/pagingQuery"),
+						url: po.concatContextPath("/chartPlugin/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.dashboardGlobalRes' />",
-						url: po.concatContextPath("/dashboardGlobalRes/pagingQuery"),
+						url: po.concatContextPath("/dashboardGlobalRes/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]
@@ -192,12 +192,12 @@ DetectResult detectNewVersionResult
 				[
 					{
 						label: "<@spring.message code='module.user' />",
-						url: po.concatContextPath("/user/pagingQuery"),
+						url: po.concatContextPath("/user/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					},
 					{
 						label: "<@spring.message code='module.role' />",
-						url: po.concatContextPath("/role/pagingQuery"),
+						url: po.concatContextPath("/role/manage"),
 						command: function(e){ po.openSysMenuDialog(e); }
 					}
 				]

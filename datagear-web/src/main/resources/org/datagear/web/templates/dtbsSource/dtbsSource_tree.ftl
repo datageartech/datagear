@@ -507,7 +507,7 @@
 				{
 					po.executeOnSelect(function(dtbsSource)
 					{
-						po.openTableDialog("/authorization/${DtbsSource.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(dtbsSource.id)+"/query");
+						po.openTableDialog("/authorization/${DtbsSource.AUTHORIZATION_RESOURCE_TYPE}/"+encodeURIComponent(dtbsSource.id)+"/manage");
 					});
 				}
 			},
