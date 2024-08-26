@@ -95,9 +95,9 @@ public class ApplicationPropertiesConfigSupport
 
 	@Bean
 	@ConfigurationProperties("cors")
-	public List<CrossOriginPropertiesImpl> crossOriginPropertiess()
+	public List<CrossOriginProperties> crossOriginPropertiess()
 	{
-		return new ArrayList<CrossOriginPropertiesImpl>();
+		return new ArrayList<CrossOriginProperties>();
 	}
 
 	@Bean
@@ -136,58 +136,6 @@ public class ApplicationPropertiesConfigSupport
 		public ApplicationPropertiesImpl()
 		{
 			super();
-		}
-	}
-
-	protected static class CrossOriginPropertiesImpl extends CrossOriginProperties
-	{
-		private static final long serialVersionUID = 1L;
-
-		public CrossOriginPropertiesImpl()
-		{
-			super();
-		}
-
-		@Override
-		public void setPaths(String[] paths)
-		{
-			super.setPaths(paths);
-		}
-
-		@Override
-		public void setAllowedOriginPatterns(String[] allowedOriginPatterns)
-		{
-			super.setAllowedOriginPatterns(allowedOriginPatterns);
-		}
-
-		@Override
-		public void setAllowedMethods(String[] allowedMethods)
-		{
-			super.setAllowedMethods(allowedMethods);
-		}
-
-		@Override
-		public void setAllowedHeaders(String[] allowedHeaders)
-		{
-			super.setAllowedHeaders(allowedHeaders);
-		}
-
-		@Override
-		public void setExposedHeaders(String[] exposedHeaders)
-		{
-			super.setExposedHeaders(exposedHeaders);
-		}
-
-		@Override
-		public void setAllowCredentials(boolean allowCredentials)
-		{
-			super.setAllowCredentials(allowCredentials);
-		}
-
-		@Override
-		public void setMaxAge(Long maxAge)
-		{
-			super.setMaxAge(maxAge);
 		}
 	}
 }

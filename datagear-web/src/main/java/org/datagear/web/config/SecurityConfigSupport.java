@@ -223,39 +223,20 @@ public class SecurityConfigSupport
 
 		for (CrossOriginProperties corsps : corsPropertiess)
 		{
-			String[] paths = corsps.getPaths();
+			List<String> paths = corsps.getPaths();
+			CorsConfiguration config = corsps.getConfig();
 
-			if (paths == null || paths.length == 0)
+			if (paths == null || paths.isEmpty() || config == null)
 				continue;
 
-			if (paths.length == 1 && SHOW_CHART_DASHBOARD_PATH_PLACEHOLDER.equalsIgnoreCase(paths[0]))
-				paths = resolveShowChartAndDashboardUrls();
+			if (paths.size() == 1 && SHOW_CHART_DASHBOARD_PATH_PLACEHOLDER.equalsIgnoreCase(paths.get(0)))
+			{
+				paths = new ArrayList<>();
+				Collections.addAll(paths, resolveShowChartAndDashboardUrls());
+			}
 
 			for (String path : paths)
-			{
-				CorsConfiguration coscfg = new CorsConfiguration();
-
-				if (corsps.getAllowedOrigins() != null && corsps.getAllowedOrigins().length > 0)
-					coscfg.setAllowedOriginPatterns(Arrays.asList(corsps.getAllowedOrigins()));
-				else if (corsps.getAllowedOriginPatterns() != null && corsps.getAllowedOriginPatterns().length > 0)
-					coscfg.setAllowedOriginPatterns(Arrays.asList(corsps.getAllowedOriginPatterns()));
-
-				if (corsps.getAllowedMethods() != null && corsps.getAllowedMethods().length > 0)
-					coscfg.setAllowedMethods(Arrays.asList(corsps.getAllowedMethods()));
-
-				if (corsps.getAllowedHeaders() != null && corsps.getAllowedHeaders().length > 0)
-					coscfg.setAllowedHeaders(Arrays.asList(corsps.getAllowedHeaders()));
-
-				if (corsps.getExposedHeaders() != null && corsps.getExposedHeaders().length > 0)
-					coscfg.setExposedHeaders(Arrays.asList(corsps.getExposedHeaders()));
-
-				coscfg.setAllowCredentials(corsps.isAllowCredentials());
-
-				if (corsps.getMaxAge() != null)
-					coscfg.setMaxAge(corsps.getMaxAge());
-
-				source.registerCorsConfiguration(path, coscfg);
-			}
+				source.registerCorsConfiguration(path, config);
 		}
 
 		return source;
