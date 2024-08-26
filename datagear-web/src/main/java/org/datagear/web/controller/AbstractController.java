@@ -106,7 +106,7 @@ public abstract class AbstractController extends MessageSourceSupport
 	public static final String ERROR_PAGE_URL = "/error";
 
 	public static final String KEY_REQUEST_ACTION = "requestAction";
-	public static final String REQUEST_ACTION_QUERY = "query";
+	public static final String REQUEST_ACTION_MANAGE = "manage";
 	public static final String REQUEST_ACTION_SELECT = "select";
 	public static final String REQUEST_ACTION_ADD = "add";
 	public static final String REQUEST_ACTION_EDIT = "edit";

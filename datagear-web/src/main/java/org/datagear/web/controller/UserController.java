@@ -308,7 +308,7 @@ public class UserController extends AbstractController
 			org.springframework.ui.Model model)
 	{
 		setQueryDataUrl(model, "/user/pagingQueryData");
-		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 
 		return "/user/user_table";

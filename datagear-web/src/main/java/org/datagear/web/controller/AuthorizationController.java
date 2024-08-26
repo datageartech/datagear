@@ -215,7 +215,7 @@ public class AuthorizationController extends AbstractController
 
 		setResourceMetaAttribute(model, resourceType);
 		model.addAttribute("resource", resource);
-		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model, false);
 
 		return "/authorization/authorization_table";

@@ -28,8 +28,8 @@ String action
 <script>
 (function(po)
 {
-	po.action = "${requestAction!AbstractController.REQUEST_ACTION_QUERY}";
-	po.isQueryAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_QUERY}") == 0);
+	po.action = "${requestAction!AbstractController.REQUEST_ACTION_MANAGE}";
+	po.isManageAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_MANAGE}") == 0);
 	po.isSelectAction = (po.action.indexOf("${AbstractController.REQUEST_ACTION_SELECT}") == 0);
 	po.isMultipleSelect = ("${(isMultipleSelect!false)?string('true','false')}" == "true");
 	po.isReadonlyAction = ("${(isReadonlyAction!false)?string('true','false')}" == "true");

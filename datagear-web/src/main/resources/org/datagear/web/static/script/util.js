@@ -2405,7 +2405,7 @@ $.inflatePageManager = function(po)
 		po.vuePageModel(
 		{
 			action: po.action,
-			isQueryAction: po.isQueryAction,
+			isManageAction: po.isManageAction,
 			isSelectAction: po.isSelectAction,
 			isMultipleSelect: po.isMultipleSelect,
 			isReadonlyAction: po.isReadonlyAction
@@ -2640,7 +2640,7 @@ $.inflatePageTable = function(po)
 		options = $.extend({ multiSortMeta: [], initData: true }, options);
 		
 		po.setupAction();
-		var selectionMode = (po.isQueryAction || po.isMultipleSelect ? "multiple" : "single");
+		var selectionMode = (po.isManageAction || po.isMultipleSelect ? "multiple" : "single");
 		
 		//统一设置表格特性
 		var tableEle = po.tableElement();

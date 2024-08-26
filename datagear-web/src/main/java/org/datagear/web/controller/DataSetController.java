@@ -806,7 +806,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String manage(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
 				getRequestAnalysisProject(request, response, getAnalysisProjectService()));

@@ -858,7 +858,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			org.springframework.ui.Model model)
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
-		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
 				getRequestAnalysisProject(request, response, getAnalysisProjectService()));

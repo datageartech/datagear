@@ -206,7 +206,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
 
-				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+				springModel.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				setReadonlyAction(springModel, table.isReadonly());
 				springModel.addAttribute("reloadTable", Boolean.TRUE.equals(reloadTable));

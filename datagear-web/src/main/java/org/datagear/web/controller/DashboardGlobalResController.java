@@ -474,7 +474,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/manage")
 	public String manage(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_QUERY);
+		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 		return "/dashboardGlobalRes/dashboardGlobalRes_table";
 	}
