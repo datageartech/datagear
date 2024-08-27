@@ -146,6 +146,13 @@
 										<include>startup.sh</include>
 									</includes>
 								</resource>
+								<resource>
+									<directory>src/dist/bin</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>lib/**/*</include>
+									</includes>
+								</resource>
 							</resources>
 						</configuration>
 					</execution>

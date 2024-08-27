@@ -1,7 +1,6 @@
 #!/bin/sh
 
 JAVA_HOME=$JAVA_HOME
-JAVA_OPTS=$JAVA_OPTS
 
 #this make application can run at other path
 DG_APP_HOME=$DG_APP_HOME
@@ -33,8 +32,10 @@ echo "  DataGear-v${project.version}  http://www.datagear.tech";
 echo ""
 
 if [ -n "$JAVA_HOME" ]; then
+	DG_JAVA_CMD="$JAVA_HOME/bin/java"
 	echo "$DG_ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 else
+	DG_JAVA_CMD="java"
 	java -version
 	echo ""
 	echo "$DG_ECHO_PREFIX using previous java runtime"
@@ -43,7 +44,7 @@ fi
 readAppPID()
 {
 	if [ -n "$JAVA_HOME" ]; then
-		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$DG_APP_NAME"`
+		JAVAPS=`$JAVA_HOME/bin/jps -lv | grep "$DG_APP_NAME"`
 		
 		if [ -n "$JAVAPS" ]; then
 			DG_APP_PID=`echo $JAVAPS | awk '{print $1}'`
@@ -69,11 +70,7 @@ if [ $DG_APP_PID -ne 0 ]; then
 else
 	echo "$DG_ECHO_PREFIX starting..."
 	
-	if [ -n "$JAVA_HOME" ]; then
-		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" $DG_SPRING_OPTS >/dev/null 2>&1 &
-	else
-		nohup java $JAVA_OPTS -jar "$DG_APP_FULL_NAME" $DG_SPRING_OPTS >/dev/null 2>&1 &
-	fi
+	nohup $DG_JAVA_CMD -cp $DG_APP_FULL_NAME -Dloader.home=$DG_APP_HOME -Dloader.path=$DG_APP_NAME!/WEB-INF/lib-provided,$DG_APP_NAME!/WEB-INF/lib,lib,$DG_APP_NAME!/WEB-INF/classes org.springframework.boot.loader.PropertiesLauncher $DG_SPRING_OPTS >/dev/null 2>&1 &
 	
 	readAppPID
 	

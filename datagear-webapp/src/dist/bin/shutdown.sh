@@ -20,7 +20,7 @@ fi
 readAppPID()
 {
 	if [ -n "$JAVA_HOME" ]; then
-		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$DG_APP_NAME"`
+		JAVAPS=`$JAVA_HOME/bin/jps -lv | grep "$DG_APP_NAME"`
 		
 		if [ -n "$JAVAPS" ]; then
 			DG_APP_PID=`echo $JAVAPS | awk '{print $1}'`
