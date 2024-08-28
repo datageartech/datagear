@@ -71,7 +71,6 @@
 .dg-chart-table .dg-chart-table-content table.dataTable tbody td{
 	padding: 0.5em 18px;
 	text-align: left;
-	white-space: nowrap;
 }
 .dg-chart-table .dg-chart-table-content table.dataTable td.dataTables_empty{
 	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
