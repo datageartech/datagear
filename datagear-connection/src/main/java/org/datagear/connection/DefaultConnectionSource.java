@@ -65,19 +65,9 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 {
 	private static Logger LOGGER = LoggerFactory.getLogger(DefaultConnectionSource.class);
 
-	/**
-	 * 默认内置数据源过期秒数。
-	 * <p>
-	 * 这里不应设置过长，因为{@linkplain #internalDataSourceCache}的关键字{@linkplain InternalDataSourceKey#getDriver()}，
-	 * 可能会因为对{@linkplain DriverEntityManager}的编辑而被新的类加载器加载，导致新的{@linkplain InternalDataSourceKey}与旧的不同，
-	 * 此时，旧的应尽早从缓存中删除释放。
-	 * </p>
-	 */
-	public static final int DEFAULT_INTERNAL_DS_EXPIRED_SECONDS = 60 * 10;
-
-	public static final int DEFAULT_CACHE_SIZE = 50;
-
 	private DriverEntityManager driverEntityManager;
+
+	private ConnectionSourceProperties conSrcProperties;
 
 	private DriverChecker driverChecker = new SimpleDriverChecker();
 
@@ -95,23 +85,16 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 
 	public DefaultConnectionSource(DriverEntityManager driverEntityManager)
 	{
-		this(driverEntityManager, null, null);
+		this(driverEntityManager, null);
 	}
 
-	public DefaultConnectionSource(DriverEntityManager driverEntityManager, Integer internalDsExpiredSeconds,
-			Integer maxCacheSize)
+	public DefaultConnectionSource(DriverEntityManager driverEntityManager, ConnectionSourceProperties properties)
 	{
 		super();
 		this.driverEntityManager = driverEntityManager;
-
-		if (internalDsExpiredSeconds == null)
-			internalDsExpiredSeconds = DEFAULT_INTERNAL_DS_EXPIRED_SECONDS;
-
-		if (maxCacheSize == null)
-			maxCacheSize = DEFAULT_CACHE_SIZE;
-
-		this.internalDataSourceCache = Caffeine.newBuilder().maximumSize(maxCacheSize)
-				.expireAfterAccess(internalDsExpiredSeconds, TimeUnit.SECONDS)
+		this.conSrcProperties = (properties == null ? new ConnectionSourceProperties() : properties);
+		this.internalDataSourceCache = Caffeine.newBuilder().maximumSize(this.conSrcProperties.getCacheMaxSize())
+				.expireAfterAccess(this.conSrcProperties.getCacheExpiredSeconds(), TimeUnit.SECONDS)
 				.scheduler(Scheduler.forScheduledExecutorService(Executors.newScheduledThreadPool(1)))
 				.removalListener(new DriverBasicDataSourceRemovalListener()).build();
 	}
@@ -149,6 +132,16 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 	protected Cache<InternalDataSourceKey, InternalDataSourceHolder> getInternalDataSourceCache()
 	{
 		return this.internalDataSourceCache;
+	}
+
+	protected ConnectionSourceProperties getConSrcProperties()
+	{
+		return conSrcProperties;
+	}
+
+	protected void setConSrcProperties(ConnectionSourceProperties conSrcProperties)
+	{
+		this.conSrcProperties = conSrcProperties;
 	}
 
 	/**
@@ -580,6 +573,21 @@ public class DefaultConnectionSource implements ConnectionSource, AutoCloseable
 	protected DataSource createInternalDataSource(Driver driver, String url, Properties properties)
 	{
 		DriverBasicDataSource re = new DriverBasicDataSource(driver, url, properties);
+
+		if (this.conSrcProperties.getInternalMaxTotal() != null)
+			re.setMaxTotal(this.conSrcProperties.getInternalMaxTotal());
+
+		if (this.conSrcProperties.getInternalMaxIdle() != null)
+			re.setMaxIdle(this.conSrcProperties.getInternalMaxIdle());
+
+		if (this.conSrcProperties.getInternalMinIdle() != null)
+			re.setMinIdle(this.conSrcProperties.getInternalMinIdle());
+
+		if (this.conSrcProperties.getInternalInitialSize() != null)
+			re.setInitialSize(this.conSrcProperties.getInternalInitialSize());
+
+		if (this.conSrcProperties.getInternalMaxWaitMillis() != null)
+			re.setMaxWaitMillis(this.conSrcProperties.getInternalMaxWaitMillis());
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Create internal data source for {}", new ConnectionOption(url, properties).copyOfPsdMask());

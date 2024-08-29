@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.connection.ConnectionSourceProperties;
 import org.datagear.meta.resolver.DbTableTypeSpec;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -108,6 +109,13 @@ public class ApplicationPropertiesConfigSupport
 	}
 
 	@Bean
+	@ConfigurationProperties("connectionsource")
+	public ConnectionSourceProperties connectionSourceProperties()
+	{
+		return new ConnectionSourceProperties();
+	}
+
+	@Bean
 	public ApplicationProperties applicationProperties()
 	{
 		ApplicationProperties bean = createApplicationProperties();
@@ -120,6 +128,7 @@ public class ApplicationPropertiesConfigSupport
 		bean.setDsmanagerSqlpadDeleteInvalidSqlKeywords(this.dsmanagerSqlpadDeleteInvalidSqlKeywords());
 		bean.setCrossOriginPropertiess(this.crossOriginPropertiess());
 		bean.setDbTableTypeSpecs(this.dbTableTypeSpecs());
+		bean.setConnectionSourceProperties(this.connectionSourceProperties());
 
 		return bean;
 	}

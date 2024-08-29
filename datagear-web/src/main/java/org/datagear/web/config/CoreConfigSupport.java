@@ -563,7 +563,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean(destroyMethod = "close")
 	public ConnectionSource connectionSource()
 	{
-		DefaultConnectionSource bean = new DefaultConnectionSource(this.driverEntityManager());
+		DefaultConnectionSource bean = new DefaultConnectionSource(this.driverEntityManager(),
+				getApplicationProperties().getConnectionSourceProperties());
 		bean.setDriverChecker(new SqlDriverChecker(this.dbMetaResolver()));
 
 		GenericPropertiesProcessor genericPropertiesProcessor = new GenericPropertiesProcessor();

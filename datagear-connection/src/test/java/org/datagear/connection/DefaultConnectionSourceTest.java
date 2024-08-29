@@ -31,6 +31,8 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.commons.pool2.impl.BaseObjectPoolConfig;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.datagear.connection.DefaultConnectionSource.DriverBasicDataSource;
 import org.datagear.connection.DefaultConnectionSource.InternalDataSourceHolder;
 import org.datagear.connection.DefaultConnectionSource.InternalDataSourceKey;
@@ -49,6 +51,7 @@ import org.junit.Test;
  */
 public class DefaultConnectionSourceTest extends DBTestSupport
 {
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getConnectionTest_DriverEntity_ConnectionOption() throws Exception
 	{
@@ -59,7 +62,11 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 		DriverEntity noneDriverEntity = getNoneDriverEntity();
 		ConnectionOption option = ConnectionOption.valueOf(getUrl(), getUser(), getPassword());
 
-		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, expiredSeconds, 5);
+		ConnectionSourceProperties conSrcProperties = new ConnectionSourceProperties();
+		conSrcProperties.setCacheMaxSize(5);
+		conSrcProperties.setCacheExpiredSeconds(expiredSeconds);
+
+		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, conSrcProperties);
 		ConcurrentMap<InternalDataSourceKey, InternalDataSourceHolder> map = cs.getInternalDataSourceCache().asMap();
 
 		try
@@ -136,6 +143,12 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 				assertNotNull(dbds);
 				assertFalse(dbds.isClosed());
 
+				assertEquals(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL, dbds.getMaxTotal());
+				assertEquals(GenericObjectPoolConfig.DEFAULT_MAX_IDLE, dbds.getMaxIdle());
+				assertEquals(GenericObjectPoolConfig.DEFAULT_MIN_IDLE, dbds.getMinIdle());
+				assertEquals(0, dbds.getInitialSize());
+				assertEquals(BaseObjectPoolConfig.DEFAULT_MAX_WAIT_MILLIS, dbds.getMaxWaitMillis());
+
 				Thread.sleep((expiredSeconds + 2) * 1000);
 
 				assertTrue(dbds.isClosed());
@@ -158,7 +171,11 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 		DriverEntity driverEntity = getDriverEntity();
 		ConnectionOption option = ConnectionOption.valueOf(getUrl(), getUser(), getPassword());
 
-		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, expiredSeconds, 5);
+		ConnectionSourceProperties conSrcProperties = new ConnectionSourceProperties();
+		conSrcProperties.setCacheMaxSize(5);
+		conSrcProperties.setCacheExpiredSeconds(expiredSeconds);
+
+		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, conSrcProperties);
 		ConcurrentMap<InternalDataSourceKey, InternalDataSourceHolder> internalDsMap = cs.getInternalDataSourceCache()
 				.asMap();
 		ConcurrentMap<String, PreferedDriverEntity> urlPreferedDriverEntities = cs.getUrlPreferedDriverEntities();
@@ -273,7 +290,11 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 		DriverEntity driverEntity = getDriverEntity();
 		ConnectionOption option = ConnectionOption.valueOf(getUrl(), getUser(), getPassword());
 
-		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, expiredSeconds, 5);
+		ConnectionSourceProperties conSrcProperties = new ConnectionSourceProperties();
+		conSrcProperties.setCacheMaxSize(5);
+		conSrcProperties.setCacheExpiredSeconds(expiredSeconds);
+
+		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, conSrcProperties);
 		ConcurrentMap<InternalDataSourceKey, InternalDataSourceHolder> internalDsMap = cs.getInternalDataSourceCache()
 				.asMap();
 		ConcurrentMap<String, PreferedDriverEntity> urlPreferedDriverEntities = cs.getUrlPreferedDriverEntities();
@@ -380,6 +401,80 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 		}
 	}
 
+	@Test
+	public void getConnectionTest_ConnectionSourceProperties() throws Exception
+	{
+		int expiredSeconds = 3;
+
+		XmlDriverEntityManager driverEntityManager = createDriverEntityManager("1");
+		DriverEntity driverEntity = getDriverEntity();
+		ConnectionOption option = ConnectionOption.valueOf(getUrl(), getUser(), getPassword());
+
+		ConnectionSourceProperties conSrcProperties = new ConnectionSourceProperties();
+		conSrcProperties.setCacheMaxSize(5);
+		conSrcProperties.setCacheExpiredSeconds(expiredSeconds);
+		conSrcProperties.setInternalMaxTotal(100);
+		conSrcProperties.setInternalMaxIdle(50);
+		conSrcProperties.setInternalMinIdle(20);
+		conSrcProperties.setInternalInitialSize(5);
+		conSrcProperties.setInternalMaxWaitMillis(500L);
+
+		TestDefaultConnectionSource cs = new TestDefaultConnectionSource(driverEntityManager, conSrcProperties);
+		ConcurrentMap<InternalDataSourceKey, InternalDataSourceHolder> map = cs.getInternalDataSourceCache().asMap();
+
+		try
+		{
+			Driver driver = driverEntityManager.getDriver(driverEntity);
+			InternalDataSourceKey key = new InternalDataSourceKey(driver, option.getUrl(), option.getProperties());
+			InternalDataSourceHolder dh = map.get(key);
+
+			assertTrue(map.isEmpty());
+			assertNull(dh);
+
+			{
+				Connection cn = null;
+
+				try
+				{
+					cn = cs.getConnection(driverEntity, option);
+
+					assertEquals(1, map.size());
+					assertNotNull(cn);
+				}
+				finally
+				{
+					JdbcUtil.closeConnection(cn);
+				}
+			}
+
+			// 超时后应关闭内部数据源
+			{
+				dh = map.get(key);
+				DriverBasicDataSource dbds = (dh == null ? null : (DriverBasicDataSource) dh.getDataSource());
+
+				assertNotNull(dh);
+				assertNotNull(dbds);
+				assertFalse(dbds.isClosed());
+
+				assertEquals(100, dbds.getMaxTotal());
+				assertEquals(50, dbds.getMaxIdle());
+				assertEquals(20, dbds.getMinIdle());
+				assertEquals(5, dbds.getInitialSize());
+				assertEquals(500, dbds.getMaxWaitMillis());
+
+				Thread.sleep((expiredSeconds + 2) * 1000);
+
+				assertTrue(dbds.isClosed());
+				assertTrue(map.isEmpty());
+			}
+		}
+		finally
+		{
+			IOUtil.close(cs);
+			driverEntityManager.releaseAll();
+		}
+	}
+
 	protected XmlDriverEntityManager createDriverEntityManager(String name) throws Exception
 	{
 		File directory = FileUtil.getDirectory("target/test/DefaultConnectionSourceTest/" + name);
@@ -406,10 +501,10 @@ public class DefaultConnectionSourceTest extends DBTestSupport
 
 	protected static class TestDefaultConnectionSource extends DefaultConnectionSource
 	{
-		public TestDefaultConnectionSource(DriverEntityManager driverEntityManager, Integer internalDsExpiredSeconds,
-				Integer maxCacheSize)
+		public TestDefaultConnectionSource(DriverEntityManager driverEntityManager,
+				ConnectionSourceProperties properties)
 		{
-			super(driverEntityManager, internalDsExpiredSeconds, maxCacheSize);
+			super(driverEntityManager, properties);
 		}
 	}
 }

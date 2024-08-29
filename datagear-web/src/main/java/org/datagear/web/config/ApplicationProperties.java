@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.connection.ConnectionSourceProperties;
 import org.datagear.meta.resolver.DbTableTypeSpec;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -237,6 +238,9 @@ public abstract class ApplicationProperties implements Serializable
 
 	/** 数据库表类型配置列表 */
 	private List<DbTableTypeSpec> dbTableTypeSpecs = Collections.emptyList();
+
+	/** 连接源配置项 */
+	private ConnectionSourceProperties connectionSourceProperties = new ConnectionSourceProperties();
 
 	public ApplicationProperties()
 	{
@@ -769,5 +773,15 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setDbTableTypeSpecs(List<? extends DbTableTypeSpec> dbTableTypeSpecs)
 	{
 		this.dbTableTypeSpecs = (List<DbTableTypeSpec>) dbTableTypeSpecs;
+	}
+
+	public ConnectionSourceProperties getConnectionSourceProperties()
+	{
+		return connectionSourceProperties;
+	}
+
+	protected void setConnectionSourceProperties(ConnectionSourceProperties connectionSourceProperties)
+	{
+		this.connectionSourceProperties = connectionSourceProperties;
 	}
 }
