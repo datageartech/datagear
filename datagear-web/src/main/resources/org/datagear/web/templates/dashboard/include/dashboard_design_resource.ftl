@@ -89,11 +89,11 @@
 				</p-listbox>
 			</div>
 			<p-divider align="left" class="flex-grow-0 my-2 divider-z-0 text-sm"><@spring.message code='allResources' /></p-divider>
-			<div class="flex-grow-1 overflow-auto">
+			<div class="flex-grow-1 overflow-auto relative">
 				<p-tree :value="pm.localRes.resourceNodes"
 					selection-mode="single" v-model:selection-keys="pm.localRes.selectedNodeKeys"
 					@node-select="onLocalResNodeSelect"
-					class="border-none white-space-nowrap overflow-x-auto bg-none">
+					class="border-none white-space-nowrap overflow-auto bg-none absolute">
 				</p-tree>
 			</div>
 		</div>
