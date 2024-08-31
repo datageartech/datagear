@@ -27,7 +27,7 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="h-screen m-0 p-1">
+<body class="p-card no-border h-screen m-0 p-1">
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form horizontal h-full page-dashboard-design">
 	<form id="${pid}form" class="flex flex-column h-full" :class="{readonly: pm.isReadonlyAction}">
