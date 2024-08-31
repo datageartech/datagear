@@ -760,10 +760,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	}
 
 	/**
-	 * 获取看板展示操作时使用的看板部件。
-	 * <p>
-	 * 如果是可视编辑请求，且记录不存在，此方法返回一个仿造看板部件，以解决展示操作时看板部件必须已存在的问题（当可视编辑模式时的新建看板操作）。
-	 * </p>
+	 * 获取看板展示时使用的看板部件。
 	 * 
 	 * @param request
 	 * @param user
@@ -784,25 +781,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 				.getHtmlTplDashboardWidget(user, id);
 
 		if (dashboardWidget == null)
-		{
-			// 可视编辑模式时的新增操作
-			if (isDashboardShowForEditParam(request))
-				dashboardWidget = createMockHtmlTplDashboardWidgetEntity(id, user);
-			else
 				throw new RecordNotFoundException();
-		}
-
-		return dashboardWidget;
-	}
-
-	protected HtmlTplDashboardWidgetEntity createMockHtmlTplDashboardWidgetEntity(String id, User createUser)
-	{
-		HtmlTplDashboardWidgetEntity dashboardWidget = new HtmlTplDashboardWidgetEntity(id,
-				HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES[0],
-				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer(),
-				this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager(), id, createUser);
-
-		dashboardWidget.setDataPermission(Authorization.PERMISSION_EDIT_START);
 
 		return dashboardWidget;
 	}
@@ -939,12 +918,8 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		boolean loadChartForEditor = StringUtil.toBoolean(loadChartForEditorStr);
 		loadChartForEditor = (dashboardInfo.isShowForEdit() && loadChartForEditor);
 
-		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidget(user, dashboardInfo.getDashboardWidgetId());
-
-		// 新建看板的可视编辑模式时还没有看板部件，这里需mock一个保证逻辑正确
-		if (dashboardWidget == null)
-			dashboardWidget = createMockHtmlTplDashboardWidgetEntity(dashboardInfo.getDashboardWidgetId(), user);
+		HtmlTplDashboardWidgetEntity dashboardWidget = getHtmlTplDashboardWidgetEntityForShow(request, user,
+				dashboardInfo.getDashboardWidgetId());
 
 		HtmlChartWidget[] chartWidgets = new HtmlChartWidget[chartWidgetIds.length];
 

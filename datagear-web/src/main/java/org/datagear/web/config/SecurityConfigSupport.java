@@ -396,11 +396,11 @@ public class SecurityConfigSupport
 	protected ModuleAccess dashboardModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/dashboard/add", "/dashboard/edit",
-				"/dashboard/save", "/dashboard/copy",
-				"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile",
-				"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import",
-				"/dashboard/uploadImportFile", "/dashboard/saveImport", "/dashboard/delete",
+				"/dashboard/add", "/dashboard/edit", "/dashboard/copy", "/dashboard/design", //
+				"/dashboard/saveAdd", "/dashboard/saveEdit", "/dashboard/saveDesign", //
+				"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile", //
+				"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import", //
+				"/dashboard/uploadImportFile", "/dashboard/saveImport", "/dashboard/delete", //
 				"/dashboard/shareSet", "/dashboard/saveShareSet", "/dashboard/export");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/dashboard/**");

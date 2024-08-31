@@ -25,9 +25,9 @@
 <#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
 <p-tabview v-model:active-index="pm.resContentTabs.activeIndex"
 	:scrollable="true" @tab-change="onResourceContentTabChange"
-	@tab-click="onResourceContentTabClick" class="contextmenu-tabview light-tabview"
-	:class="{'opacity-0': pm.resContentTabs.items.length == 0}">
-	<p-tabpanel v-for="tab in pm.resContentTabs.items" :key="tab.id" :header="tab.title">
+	@tab-click="onResourceContentTabClick" class="contextmenu-tabview light-tabview flex flex-column h-full"
+	:class="{'opacity-0': pm.resContentTabs.items.length == 0}" :pt="{navContainer:{'class':'flex-grow-0'},panelContainer:{'class':'flex-grow-1'}}">
+	<p-tabpanel v-for="tab in pm.resContentTabs.items" :key="tab.id" :header="tab.title" :pt="{root:{'class':'h-full'}}">
 		<template #header>
 			<p-button type="button" icon="pi pi-angle-down"
 				class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
@@ -35,8 +35,8 @@
 				aria-haspopup="true" aria-controls="${pid}resourceContentTabMenu">
 			</p-button>
 		</template>
-		<div :id="tab.id">
-			<div class="flex align-content-center justify-content-between">
+		<div :id="tab.id" class="flex flex-column h-full">
+			<div class="flex-grow-0 flex align-content-center justify-content-between">
 				<div>
 					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
 						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab)"
@@ -69,11 +69,11 @@
 					</p-menubar>
 				</div>
 			</div>
-			<div class="pt-1 relative">
-				<div class="code-editor-wrapper res-editor-wrapper p-component p-inputtext p-0 w-full absolute">
+			<div class="flex-grow-1 pt-1 relative">
+				<div class="code-editor-wrapper res-editor-wrapper p-component p-inputtext p-0 w-full h-full absolute">
 					<div :id="resCodeEditorEleId(tab)" class="code-editor"></div>
 				</div>
-				<div class="visual-editor-wrapper res-editor-wrapper opacity-hide p-component p-inputtext p-0 w-full absolute">
+				<div class="visual-editor-wrapper res-editor-wrapper opacity-hide p-component p-inputtext p-0 w-full h-full absolute">
 					<div class="visual-editor-ele-path-wrapper text-color-secondary text-sm">
 						<div class="ele-path white-space-nowrap">
 							<span v-for="(ep, epIdx) in tab.veElementPath" :key="epIdx">
@@ -234,7 +234,7 @@
 			
 			var tabPanel = po.elementOfId(tab.id);
 			var fm = po.vueFormModel();
-			var id = (po.isPersistedDashboard() ? fm.id : po.copySourceId);
+			var id = fm.id;
 			
 			po.ajax("/dashboard/getResourceContent",
 			{
@@ -447,7 +447,7 @@
 	
 	po.saveResInfo = function(resInfo)
 	{
-		if(!resInfo || !po.checkPersistedDashboard())
+		if(!resInfo)
 			return;
 		
 		var fm = po.vueFormModel();

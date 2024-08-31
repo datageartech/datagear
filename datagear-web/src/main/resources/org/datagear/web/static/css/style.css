@@ -601,7 +601,7 @@ label.align-tip{
 .page-form .page-form-content,
 .page-form form.readonly.show-foot .page-form-content{
 	/*屏幕高度 - 表单foot高度*/
-	max-height: calc(100vh - 5rem);
+	max-height: calc(100vh - 4.5rem);
 }
 .page-form form.readonly .page-form-content{
 	/*屏幕高度 - 底部留白高度*/
@@ -610,7 +610,7 @@ label.align-tip{
 .p-dialog .page-form .page-form-content,
 .p-dialog .page-form form.readonly.show-foot .page-form-content{
 	/*对话框高度 - 对话框header高度 - 表单foot高度*/
-	max-height: calc(90vh - 6rem - 5rem);
+	max-height: calc(90vh - 6rem - 4.5rem);
 }
 .p-dialog .page-form form.readonly .page-form-content{
 	/*对话框高度 - 对话框header高度 - 底部留白高度*/
@@ -821,34 +821,13 @@ label.align-tip{
     max-width: 60vw;
 }
 
-.page-form-dashboard .p-tabview .p-tabview-panels{
+.p-dialog .page-dashboard-design{
+	height: 70vh !important;
+}
+.page-dashboard-design .p-tabview .p-tabview-panels{
 	padding: 0.5rem 0 0 0;
 }
-.page-form-dashboard .resource-contents-wrapper{
-	/*屏幕高度 - 表单foot高度 - 间隙高度*/
-	height: calc(100vh - 5rem - 2.6rem);
-}
-.p-dialog .page-form-dashboard .resource-contents-wrapper{
-	/*对话框高度 - 表单foot高度 - 对话框header高度 - 其他元素高度*/
-	height: calc(90vh - 5rem - 6rem - 2.6rem);
-}
-.page-form-dashboard .resource-contents-wrapper .res-editor-wrapper{
-	/*.resource-contents-wrapper高度 - 按钮区高度*/
-	height: calc(100vh - 5rem - 2.6rem - 6rem);
-}
-.p-dialog .page-form-dashboard .resource-contents-wrapper .res-editor-wrapper{
-	/*.resource-contents-wrapper高度 - 按钮区高度*/
-	height: calc(90vh - 5rem - 6rem - 2.6rem - 6rem);
-}
-.page-form-dashboard .resource-contents-wrapper .resource-list-wrapper{
-	/*.resource-contents-wrapper高度 - 卡片高度*/
-	height: calc(100vh - 5rem - 2.6rem - 3.5rem);
-}
-.p-dialog .page-form-dashboard .resource-contents-wrapper .resource-list-wrapper{
-	/*.resource-contents-wrapper高度 - 卡片高度*/
-	height: calc(90vh - 5rem - 6rem - 2.6rem - 3.5rem);
-}
-.page-form-dashboard .res-editor-wrapper .visual-editor-ele-path-wrapper{
+.page-dashboard-design .res-editor-wrapper .visual-editor-ele-path-wrapper{
 	position: absolute;
 	left: 0.4rem;
 	top: 0.2rem;
@@ -856,7 +835,7 @@ label.align-tip{
 	z-index: 2;
 	overflow: hidden;
 }
-.page-form-dashboard .res-editor-wrapper .visual-editor-iframe-wrapper{
+.page-dashboard-design .res-editor-wrapper .visual-editor-iframe-wrapper{
 	position: absolute;
     left: 0;
     top: 1.3rem;
@@ -864,7 +843,7 @@ label.align-tip{
     bottom: 0;
     overflow: scroll;
 }
-.page-form-dashboard .res-editor-wrapper .visual-editor-iframe{
+.page-dashboard-design .res-editor-wrapper .visual-editor-iframe{
 	position: absolute;
     left: 0.3rem;
     top: 0.3rem;
@@ -873,11 +852,11 @@ label.align-tip{
     border-width: 0;
     background: #FFF;
 }
-.page-form-dashboard .p-menubar.ve-menubar .p-menuitem-link{
+.page-dashboard-design .p-menubar.ve-menubar .p-menuitem-link{
 	padding-top: 0.6rem;
 	padding-bottom: 0.6rem;
 }
-.page-form-dashboard .p-menubar.ve-menubar .p-submenu-list > .p-menuitem-active > .p-submenu-list{
+.page-dashboard-design .p-menubar.ve-menubar .p-submenu-list > .p-menuitem-active > .p-submenu-list{
 	top: -430%;
 }
 .dashboard-select-chart-wrapper > .p-dialog-header .p-dialog-header-icons{

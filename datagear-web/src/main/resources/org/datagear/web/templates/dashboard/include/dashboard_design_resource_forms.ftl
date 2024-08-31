@@ -19,7 +19,7 @@
 <#--
 看板资源表单面板HTML
 注意：
-这些HTML不能直接写在dashboard_form_resource.ftl内，
+这些HTML不能直接写在dashboard_design_resource.ftl内，
 因为会出现嵌套form，这里面板里的form元素会被vue解析剔除
 -->
 <p-overlaypanel ref="${pid}addResPanelEle" append-to="body"

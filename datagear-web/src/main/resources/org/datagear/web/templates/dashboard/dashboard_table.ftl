@@ -43,7 +43,8 @@
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect" v-if="pm.isSelectAction"></p-button>
 			
 			<p-splitbutton label="<@spring.message code='add' />" @click="onAdd" :model="pm.addBtnItems" v-if="!pm.isReadonlyAction"></p-splitbutton>
-			<p-splitbutton label="<@spring.message code='edit' />" @click="onEdit" :model="pm.editBtnItems" v-if="!pm.isReadonlyAction"></p-splitbutton>
+			<p-button label="<@spring.message code='edit' />" @click="onEdit" v-if="!pm.isReadonlyAction"></p-button>
+			<p-button label="<@spring.message code='design' />" @click="onDesign" v-if="!pm.isReadonlyAction"></p-button>
 			<div id="${pid}showBtnWrapper" class="inline-block white-space-nowrap flex-tieredmenu-wrapper">
 				<p-splitbutton label="<@spring.message code='show' />" @click="onShow" :model="pm.showBtnItems" append-to="#${pid}showBtnWrapper" v-if="!pm.isSelectAction"></p-splitbutton>
 			</div>
@@ -102,24 +103,10 @@
 		addBtnItems:
 		[
 			{
-				label: "<@spring.message code='addInNewWindow' />",
-				command: function()
-				{
-					po.open(po.addCurrentAnalysisProjectIdParam("/dashboard/add"), {target: "_blank"});
-				}
-			},
-			{
 				label: "<@spring.message code='copy' />",
 				command: function()
 				{
-					po.handleOpenOfAction("/dashboard/copy", {width: "90vw"});
-				}
-			},
-			{
-				label: "<@spring.message code='copyInNewWindow' />",
-				command: function()
-				{
-					po.handleOpenOfAction("/dashboard/copy", {target: "_blank"});
+					po.handleOpenOfAction("/dashboard/copy");
 				}
 			},
 			{
@@ -127,16 +114,6 @@
 				command: function()
 				{
 					po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dashboard/import"));
-				}
-			}
-		],
-		editBtnItems:
-		[
-			{
-				label: "<@spring.message code='editInNewWindow' />",
-				command: function()
-				{
-					po.handleOpenOfAction("/dashboard/edit", {target: "_blank"});
 				}
 			}
 		],
@@ -181,12 +158,20 @@
 	{
 		onAdd: function()
 		{
-			po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dashboard/add"), {width: "90vw"});
+			po.handleAddAction(po.addCurrentAnalysisProjectIdParam("/dashboard/add"));
 		},
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dashboard/edit", {width: "90vw"});
+			po.handleOpenOfAction("/dashboard/edit");
+		},
+		
+		onDesign: function()
+		{
+			po.executeOnSelect(function(entity)
+			{
+				window.open(po.concatContextPath("/dashboard/design?id="+encodeURIComponent(entity.id)));
+			});
 		},
 		
 		onView: function()

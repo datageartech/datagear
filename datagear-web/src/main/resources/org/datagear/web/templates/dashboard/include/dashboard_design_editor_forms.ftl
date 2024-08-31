@@ -19,7 +19,7 @@
 <#--
 看板编辑器表单面板HTML
 注意：
-这些HTML不能直接写在dashboard_form_editor.ftl内，
+这些HTML不能直接写在dashboard_design_editor.ftl内，
 因为会出现嵌套form，这里面板里的form元素会被vue解析剔除
 
 依赖：

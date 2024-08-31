@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -151,15 +152,37 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 		setRequestAnalysisProject(request, response, dashboard);
-		dashboard.setId(IDUtil.randomIdOnTime20());
-		dashboard.setTemplates(new String[0]);
+		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 		
-		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
-		setFormPageAttributes(model);
-		setEnableInsertNewChartAttr(request, response, model);
+		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dashboard/dashboard_form";
+	}
+
+	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "copySourceId", required = false) String copySourceId,
+			@RequestBody HtmlTplDashboardWidgetEntity entity) throws Exception
+	{
+		checkSaveEntity(entity);
+
+		User user = getCurrentUser();
+
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
+
+		this.htmlTplDashboardWidgetEntityService.add(entity);
+
+		if (!isEmpty(copySourceId))
+		{
+			TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+					.getTplDashboardWidgetResManager();
+			dashboardWidgetResManager.copyTo(copySourceId, entity.getId());
+		}
+
+		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", entity.getId()));
 	}
 
 	@RequestMapping("/edit")
@@ -170,11 +193,23 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		
-		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
-		setFormPageAttributes(model);
-		setEnableInsertNewChartAttr(request, response, model);
+		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		return "/dashboard/dashboard_form";
+	}
+
+	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HtmlTplDashboardWidgetEntity entity) throws Exception
+	{
+		checkSaveEntity(entity);
+
+		User user = getCurrentUser();
+
+		this.htmlTplDashboardWidgetEntityService.update(user, entity);
+
+		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", entity.getId()));
 	}
 
 	@RequestMapping("/copy")
@@ -186,15 +221,25 @@ public class DashboardController extends AbstractDataAnalysisController
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 		setNullAnalysisProjectIfNoPermission(user, dashboard, getAnalysisProjectService());
 
-		dashboard.setId(IDUtil.randomIdOnTime20());
-		inflateCreateTime(dashboard, null);
-		
-		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
-		setFormPageAttributes(model);
+		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		model.addAttribute("copySourceId", id);
-		setEnableInsertNewChartAttr(request, response, model);
 
 		return "/dashboard/dashboard_form";
+	}
+
+	@RequestMapping("/design")
+	public String design(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String id) throws Exception
+	{
+		User user = getCurrentUser();
+
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+
+		setFormModel(model, dashboard, "design", "saveDesign");
+		setFormPageAttributes(model);
+		setEnableInsertNewChartAttr(request, response, model);
+
+		return "/dashboard/dashboard_design_form";
 	}
 
 	protected boolean setEnableInsertNewChartAttr(HttpServletRequest request, HttpServletResponse response,
@@ -220,10 +265,10 @@ public class DashboardController extends AbstractDataAnalysisController
 		return true;
 	}
 
-	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveDesign", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody HtmlTplDashboardSaveForm form) throws Exception
+	public ResponseEntity<OperationMessage> saveDesign(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HtmlTplDashboardDesignForm form) throws Exception
 	{
 		if (isEmpty(form.getDashboard()) || isNull(form.getResourceNames()) || isNull(form.getResourceContents())
 				|| isNull(form.getResourceIsTemplates())
@@ -252,23 +297,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (firstTemplateIndex > -1)
 			dashboard.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
 
-		if (form.isSaveAdd())
-		{
-			inflateCreateUserAndTime(dashboard, user);
-			this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
-
-			if (form.hasCopySourceId())
-			{
-				TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-						.getTplDashboardWidgetResManager();
-
-				dashboardWidgetResManager.copyTo(form.getCopySourceId(), dashboard.getId());
-			}
-		}
-		else
-		{
-			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
-		}
+		this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
 
 		for (int i = 0; i < resourceNames.length; i++)
 			saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
@@ -804,7 +833,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		setFormModel(model, dashboard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		setFormPageAttributes(model);
 		
-		return "/dashboard/dashboard_form";
+		return "/dashboard/dashboard_design_form";
 	}
 
 	@RequestMapping("/export")
@@ -1016,12 +1045,12 @@ public class DashboardController extends AbstractDataAnalysisController
 		return templateEncoding;
 	}
 
-	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity widget)
+	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity entity)
 	{
-		if (isBlank(widget.getName()))
+		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
 
-		if (isEmpty(widget.getTemplates()))
+		if (isEmpty(entity.getTemplates()))
 			throw new IllegalInputException();
 	}
 
@@ -1181,7 +1210,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
-	public static class HtmlTplDashboardSaveForm implements ControllerForm
+	public static class HtmlTplDashboardDesignForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -1193,16 +1222,12 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		private boolean[] resourceIsTemplates;
 
-		private String copySourceId = "";
-
-		private boolean saveAdd = false;
-
-		public HtmlTplDashboardSaveForm()
+		public HtmlTplDashboardDesignForm()
 		{
 			super();
 		}
 
-		public HtmlTplDashboardSaveForm(HtmlTplDashboardWidgetEntity dashboard, String[] resourceNames,
+		public HtmlTplDashboardDesignForm(HtmlTplDashboardWidgetEntity dashboard, String[] resourceNames,
 				String[] resourceContents, boolean[] resourceIsTemplates)
 		{
 			super();
@@ -1250,31 +1275,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		public void setResourceIsTemplates(boolean[] resourceIsTemplates)
 		{
 			this.resourceIsTemplates = resourceIsTemplates;
-		}
-
-		public boolean hasCopySourceId()
-		{
-			return !StringUtil.isEmpty(this.copySourceId);
-		}
-
-		public String getCopySourceId()
-		{
-			return copySourceId;
-		}
-
-		public void setCopySourceId(String copySourceId)
-		{
-			this.copySourceId = copySourceId;
-		}
-
-		public boolean isSaveAdd()
-		{
-			return saveAdd;
-		}
-
-		public void setSaveAdd(boolean saveAdd)
-		{
-			this.saveAdd = saveAdd;
 		}
 	}
 

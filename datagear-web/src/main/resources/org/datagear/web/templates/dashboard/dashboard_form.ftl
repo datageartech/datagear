@@ -32,7 +32,7 @@
 <div id="${pid}" class="page page-form horizontal page-form-dashboard">
 	<form id="${pid}form" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
-			<div class="field grid" v-if="!pm.resourceContentWrapperFullSize">
+			<div class="field grid">
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='name' />
 				</label>
@@ -42,7 +42,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid" v-if="!pm.resourceContentWrapperFullSize">
+			<div class="field grid">
 				<label for="${pid}ownerProject" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='ownerProject' />
 				</label>
@@ -62,165 +62,51 @@
 					</div>
 				</div>
 			</div>
-			<div class="field grid mb-0">
-				<div class="field-label col-12 mb-2">
-					<div class="flex justify-content-between">
-						<div>
-							<span><@spring.message code='dashboardResource' /></span>
-							<span v-if="pm.resourceContentWrapperFullSize">
-								<span><@spring.message code='bracket.left' /></span>
-								<span>{{fm.name}}</span>
-								<span><@spring.message code='bracket.right' /></span>
-							</span>
-						</div>
-						<p-button type="button" :icon="pm.resourceContentWrapperFullSize ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"
-							class="p-button-xs p-button-secondary p-button-text p-button-rounded mr-1"
-							@click="onToggleResourceContentWrapperFullSize" title="<@spring.message code='showOrHideName' />">
-						</p-button>
-					</div>
-				</div>
-		        <div class="field-input col-12">
-		        	<div class="resource-contents-wrapper grid grid-nogutter flex-nowrap">
-		        		<div class="col-8 md:col-9 pr-1">
-		        			<#include "include/dashboard_form_editor.ftl">
-		        		</div>
-		        		<div class="col-4 md:col-3 pl-2">
-		        			<#include "include/dashboard_form_resource.ftl">
-		        		</div>
-		        	</div>
-		        </div>
-			</div>
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
-			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow"></p-button>
+			<p-button type="button" label="<@spring.message code='saveAndDesign' />" @click="onSaveAndDesign"></p-button>
 		</div>
 	</form>
-	<#include "include/dashboard_form_resource_forms.ftl">
-	<#include "include/dashboard_form_editor_forms.ftl">
-	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_form.ftl">
-<#include "../include/page_simple_form.ftl">
-<#include "../include/page_tabview.ftl">
-<#include "../include/page_code_editor.ftl">
-<#include "../include/page_boolean_options.ftl">
-<#include "include/dashboard_code_completions.ftl">
 <script>
 (function(po)
 {
 	po.submitUrl = "/dashboard/"+po.submitAction;
 	po.copySourceId = "${copySourceId!''}";
 	
-	po.showUrl = function(name)
-	{
-		name = (name || "");
-		
-		var fm = po.vueFormModel();
-		return po.concatContextPath("/dv/"+encodeURIComponent(fm.id)+"/"+name);
-	};
-
-	po.inSaveAndShowAction = function(val)
+	if(po.copySourceId)
+		po.submitUrl = $.addParam(po.submitUrl, "copySourceId", po.copySourceId);
+	
+	po.inSaveAndDesignAction = function(val)
 	{
 		if(val === undefined)
-			return (po._inSaveAndShowAction == true);
+			return (po._inSaveAndDesignAction == true);
 		
-		po._inSaveAndShowAction = val;
+		po._inSaveAndDesignAction = val;
 	};
 	
 	po.beforeSubmitForm = function(action)
 	{
-		var data = action.options.data;
-		var templateCount = (data.templates && data.templates.length != null ? data.templates.length : 0);
-		
-		//隐藏基本信息后无法自动校验名称，所以这里手动校验
-		if(!data.name)
-		{
-			$.tipInfo("<@spring.message code='dashboard.nameRequired' />");
-			return false;
-		}
-		
-		data =
-		{
-			dashboard: data,
-			resourceNames: [],
-			resourceContents: [],
-			resourceIsTemplates: [],
-			saveAdd: !po.isPersistedDashboard(),
-			copySourceId: (po.isPersistedDashboard() ? "" : po.copySourceId)
-		};
-		
-		var editResInfos = po.getEditResInfos();
-		$.each(editResInfos, function(idx, ei)
-		{
-			data.resourceNames.push(ei.name);
-			data.resourceContents.push(ei.content);
-			data.resourceIsTemplates.push(ei.isTemplate);
-			
-			if(ei.isTemplate)
-				templateCount += 1;
-		});
-		
-		if(templateCount == 0)
-		{
-			$.tipWarn("<@spring.message code='dashboard.atLeastOneTemplateRequired' />");
-			return false;
-		}
-		
-		action.options.data = data;
-		action.options.saveAndShowAction = po.inSaveAndShowAction();
-	};
-	
-	po.isPersistedDashboard = function()
-	{
-		if(!po.isAddAction && !po.isCopyAction)
-			return true;
-		
-		return (po._isPersistedDashboard == true);
-	};
-	
-	po.checkPersistedDashboard = function()
-	{
-		var fm = po.vueFormModel();
-		
-		if(!po.isPersistedDashboard() || !fm.id)
-		{
-			$.tipInfo("<@spring.message code='dashboard.saveRequired' />");
-			return false;
-		}
-		
-		return true;
+		action.options.inSaveAndDesignAction = po.inSaveAndDesignAction();
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
+	
 	po.setupForm(formModel,
 	{
-		closeAfterSubmit: false,
 		success: function(response)
 		{
-			po.updateTemplateList(response.data.templates);
-			po.refreshLocalRes();
-			
-			if(!po.isPersistedDashboard())
-			{
-				po._isPersistedDashboard = true;
-			}
+			var id = (response.data ? response.data.id : "");
 			
 			var options = this;
-			if(options.saveAndShowAction)
+			if(options.inSaveAndDesignAction)
 			{
-				var fm = po.vueFormModel();
-				var resInfo = po.getCurrentEditResInfo(true);
-				
-				window.open(po.showUrl(resInfo ? resInfo.name : ""), fm.id);
+				window.open(po.concatContextPath("/dashboard/design?id="+encodeURIComponent(id)));
 			}
 		}
-	});
-	
-	po.vuePageModel(
-	{
-		resourceContentWrapperFullSize: po.isEditAction
 	});
 	
 	po.vueMethod(
@@ -240,32 +126,18 @@
 			});
 		},
 		
-		onToggleResourceContentWrapperFullSize: function(e)
-		{
-			var pm = po.vuePageModel();
-			pm.resourceContentWrapperFullSize = !pm.resourceContentWrapperFullSize;
-		},
-		
-		onSaveAndShow: function(e)
+		onSaveAndDesign: function(e)
 		{
 			try
 			{
-				po.inSaveAndShowAction(true);
+				po.inSaveAndDesignAction(true);
 				po.form().submit();
 			}
 			finally
 			{
-				po.inSaveAndShowAction(false);
+				po.inSaveAndDesignAction(false);
 			}
 		}
-	});
-	
-	po.setupResourceList();
-	po.setupResourceEditor();
-	
-	po.vueMounted(function()
-	{
-		po.showFirstTemplateContent();
 	});
 })
 (${pid});

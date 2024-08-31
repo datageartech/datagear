@@ -22,8 +22,8 @@
 依赖：
 
 -->
-<p-tabview class="light-tabview" @tab-change="onResourceTabChange">
-	<p-tabpanel>
+<p-tabview class="light-tabview flex flex-column h-full" @tab-change="onResourceTabChange" :pt="{navContainer:{'class':'flex-grow-0'},panelContainer:{'class':'flex-grow-1'}}">
+	<p-tabpanel :pt="{root:{'class':'h-full'}}">
 		<template #header>
 			<span class="p-tabview-title">
 				<span><@spring.message code='localResource' /></span>
@@ -33,7 +33,7 @@
 				</span>
 			</span>
 		</template>
-		<div class="local-resource-list-wrapper resource-list-wrapper flex flex-column p-component p-inputtext">
+		<div class="local-resource-list-wrapper resource-list-wrapper flex flex-column p-component p-inputtext h-full">
 			<div class="flex-grow-0 text-xs">
 				<div class="flex justify-content-between">
 					<div>
@@ -290,7 +290,7 @@
 	
 	po.setResAsTemplate = function(name)
 	{
-		if(!name || !po.checkPersistedDashboard())
+		if(!name)
 			return;
 		
 		if(!$.isHtmlFile(name))
@@ -311,7 +311,7 @@
 	
 	po.setResAsFirstTemplate = function(name)
 	{
-		if(!name || !po.checkPersistedDashboard())
+		if(!name)
 			return;
 		
 		if(!$.isHtmlFile(name))
@@ -338,7 +338,7 @@
 	
 	po.setTemplateAsNormalRes = function(name)
 	{
-		if(!name || !po.checkPersistedDashboard())
+		if(!name)
 			return;
 		
 		var fm = po.vueFormModel();
@@ -374,7 +374,7 @@
 	
 	po.renameRes = function(srcName, destName)
 	{
-		if(!srcName || !destName || srcName == destName || !po.checkPersistedDashboard())
+		if(!srcName || !destName || srcName == destName)
 			return;
 		
 		var fm = po.vueFormModel();
@@ -392,7 +392,7 @@
 	
 	po.deleteRes = function(name)
 	{
-		if(!name || !po.checkPersistedDashboard())
+		if(!name)
 			return;
 		
 		var fm = po.vueFormModel();
@@ -561,9 +561,6 @@
 			
 			onShowGlobalRes: function(e)
 			{
-				if(!po.checkPersistedDashboard())
-					return;
-				
 				po.showSelectGlobalResDialog();
 			},
 			
@@ -592,9 +589,6 @@
 			
 			onToggleUploadResPanel: function(e)
 			{
-				if(!po.checkPersistedDashboard())
-					return;
-				
 				po.vueUnref("${pid}uploadResPanelEle").toggle(e);
 			},
 			
@@ -638,9 +632,6 @@
 			
 			onToggleRenameResPanel: function(e)
 			{
-				if(!po.checkPersistedDashboard())
-					return;
-				
 				po.vueUnref("${pid}renameResPanelEle").toggle(e);
 			},
 			
@@ -661,8 +652,7 @@
 		
 		po.vueMounted(function()
 		{
-			if(po.isPersistedDashboard())
-				po.refreshLocalRes();
+			po.refreshLocalRes();
 		});
 		
 		po.vueRef("${pid}localResMenuEle", null);
