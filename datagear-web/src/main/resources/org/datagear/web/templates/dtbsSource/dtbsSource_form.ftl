@@ -42,7 +42,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="!pm.hideSensitiveInfo">
 				<label for="${pid}url" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='dtbsSource.url.desc' />">
 					<@spring.message code='url' />
@@ -59,7 +59,7 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="!pm.hideSensitiveInfo">
 				<label for="${pid}user" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='dtbsSource.username.desc' />">
 					<@spring.message code='username' />
@@ -70,7 +70,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid" v-if="!pm.isReadonlyAction">
+			<div class="field grid" v-if="!pm.isReadonlyAction && !pm.hideSensitiveInfo">
 				<label for="${pid}password" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='dtbsSource.password.desc' />">
 					<@spring.message code='password' />
@@ -85,7 +85,7 @@
 		        	</div>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="!pm.hideSensitiveInfo">
 				<label for="${pid}schemaName" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='dtbsSource.schemaName.desc' />">
 					<@spring.message code='schemaName' />
@@ -96,7 +96,7 @@
 		        	</p-inputtext>
 		        </div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="!pm.hideSensitiveInfo">
 				<label for="${pid}properties" class="field-label col-12 mb-2"
 					title="<@spring.message code='dtbsSource.properties.desc' />">
 					<@spring.message code='dtbsSource.properties' />
@@ -218,6 +218,7 @@
 (function(po)
 {
 	po.submitUrl = "/dtbsSource/"+po.submitAction;
+	po.hideSensitiveInfo = ("${(hideSensitiveInfo!false)?string('true', 'false')}"  == "true");
 	
 	//XXX 没找到动vue动态启/禁用编辑表格的方法，暂时采用这个方式
 	if(!po.isReadonlyAction)
@@ -273,7 +274,8 @@
 			title: "",
 			data: {},
 			submitHandler: null
-		}
+		},
+		hideSensitiveInfo: po.hideSensitiveInfo
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);

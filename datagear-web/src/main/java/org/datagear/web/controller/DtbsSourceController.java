@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
+import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
@@ -110,13 +111,22 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	public String copy(org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
+		DtbsSource dtbsSource = getByIdForCopy(user, id);
+
+		setFormModel(model, dtbsSource, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+		return "/dtbsSource/dtbsSource_form";
+	}
+
+	protected DtbsSource getByIdForCopy(User user, String id)
+	{
+		// 数据源敏感信息较多，所以至少编辑权限才允许复制
+		DtbsSource dtbsSource = getByIdForEdit(getDtbsSourceService(), user, id);
+
 		dtbsSource.setId(null);
 		dtbsSource.clearPassword();
 		dtbsSource.setDataPermission(DataPermissionEntity.PERMISSION_NOT_LOADED);
 		
-		setFormModel(model, dtbsSource, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
-		return "/dtbsSource/dtbsSource_form";
+		return dtbsSource;
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -183,7 +193,14 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
 		dtbsSource.clearPassword();
 
+		boolean hideSensitiveInfo = !Authorization.canEdit(dtbsSource.getDataPermission());
+
+		if (hideSensitiveInfo)
+			clearSensitiveInfo(dtbsSource);
+
 		setFormModel(model, dtbsSource, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		model.addAttribute("hideSensitiveInfo", hideSensitiveInfo);
+
 		return "/dtbsSource/dtbsSource_form";
 	}
 	
@@ -433,13 +450,19 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		{
 			for (DtbsSource dtbsSource : dtbsSources)
 			{
-				// 敏感信息不应传输至客户端
-				dtbsSource.setUrl(null);
-				dtbsSource.setUser(null);
-				dtbsSource.setProperties(null);
-				dtbsSource.clearPassword();
+				clearSensitiveInfo(dtbsSource);
 			}
 		}
+	}
+
+	protected void clearSensitiveInfo(DtbsSource dtbsSource)
+	{
+		// 敏感信息不应传输至客户端
+		dtbsSource.setUrl(null);
+		dtbsSource.setUser(null);
+		dtbsSource.setProperties(null);
+		dtbsSource.setSchemaName(null);
+		dtbsSource.clearPassword();
 	}
 
 	public static class DatabaseInfo implements Serializable
