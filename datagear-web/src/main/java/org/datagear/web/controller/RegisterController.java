@@ -151,7 +151,10 @@ public class RegisterController extends AbstractController
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "registerDisabled");
 		
 		if (!this.checkCodeManager.isCheckCode(session, CHECK_CODE_MODULE_REGISTER, form.getCheckCode()))
+		{
+			this.checkCodeManager.removeCheckCode(session, CHECK_CODE_MODULE_REGISTER);
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "checkCodeError");
+		}
 
 		User user = form.getUser();
 

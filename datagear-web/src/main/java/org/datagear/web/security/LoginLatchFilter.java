@@ -146,6 +146,9 @@ public class LoginLatchFilter implements Filter
 
 			if (!this.checkCodeManager.isCheckCode(request.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN, cc))
 			{
+				// 应该废弃使用过的验证码
+				this.checkCodeManager.removeCheckCode(request.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN);
+
 				this.authenticationFailureHandlerExt.onAuthenticationFailure(request, response,
 						new LoginCheckCodeErrorException(), false);
 
@@ -170,6 +173,12 @@ public class LoginLatchFilter implements Filter
 		}
 
 		chain.doFilter(request, response);
+
+		// 应该废弃使用过的验证码
+		if (!this.applicationProperties.isDisableLoginCheckCode())
+		{
+			this.checkCodeManager.removeCheckCode(request.getSession(), LoginController.CHECK_CODE_MODULE_LOGIN);
+		}
 	}
 
 	protected String getLoginCheckCode(HttpServletRequest request)
