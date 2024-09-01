@@ -9126,24 +9126,38 @@
 		var callbackInvoked = false;
 		var loadeds = {};
 		
-		var newCallback = function(context)
+		var newCallback = function(context, success)
 		{
-			loadeds[context.needLoadName] = true;
+			loadeds[context.needLoadName] = success;
 			
-			var loadedCount = 0;
+			var finishCount = 0;
+			var errorNames = [];
 			
 			for(var p in loadeds)
 			{
-				if(loadeds[p] == true)
+				if(loadeds[p] != null)
 				{
-					loadedCount ++;
+					finishCount ++;
+				}
+				
+				if(loadeds[p] === false)
+				{
+					errorNames.push(p);
 				}
 			}
 			
-			if(loadedCount == needLoads.length && !callbackInvoked)
+			if(finishCount == needLoads.length && !callbackInvoked)
 			{
 				callbackInvoked = true;
-				callback();
+				
+				if(errorNames.length > 0)
+				{
+					throw new Error(errorNames + " map load failed");
+				}
+				else
+				{
+					callback();
+				}
 			}
 		};
 		
@@ -9154,11 +9168,11 @@
 				needLoadName: needLoads[i],
 				success: function()
 				{
-					newCallback(this);
+					newCallback(this, true);
 				},
 				error: function()
 				{
-					newCallback(this);
+					newCallback(this, false);
 				}
 			});
 		}
