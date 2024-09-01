@@ -232,7 +232,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<DtbsSource> dtbsSources = getDtbsSourceService().query(user, pagingQuery);
-		processForUI(request, dtbsSources);
+		processQueryResult(request, dtbsSources);
 
 		return dtbsSources;
 	}
@@ -246,7 +246,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<DtbsSource> pagingData = getDtbsSourceService().pagingQuery(user, pagingQuery);
-		processForUI(request, pagingData.getItems());
+		processQueryResult(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -297,7 +297,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
 
 		List<DtbsSource> dtbsSources = getDtbsSourceService().query(user, pagingQuery);
-		processForUI(request, dtbsSources);
+		processQueryResult(request, dtbsSources);
 
 		return dtbsSources;
 	}
@@ -422,18 +422,21 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	}
 	
 	/**
-	 * 处理展示。
+	 * 处理查询结果。
 	 * 
 	 * @param request
 	 * @param dtbsSources
 	 */
-	protected void processForUI(HttpServletRequest request, List<DtbsSource> dtbsSources)
+	protected void processQueryResult(HttpServletRequest request, List<DtbsSource> dtbsSources)
 	{
 		if (dtbsSources != null && !dtbsSources.isEmpty())
 		{
 			for (DtbsSource dtbsSource : dtbsSources)
 			{
-				// 清除密码，避免传输至客户端引起安全问题。
+				// 敏感信息不应传输至客户端
+				dtbsSource.setUrl(null);
+				dtbsSource.setUser(null);
+				dtbsSource.setProperties(null);
 				dtbsSource.clearPassword();
 			}
 		}
