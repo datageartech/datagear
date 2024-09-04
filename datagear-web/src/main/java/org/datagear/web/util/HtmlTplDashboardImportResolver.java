@@ -55,6 +55,14 @@ public class HtmlTplDashboardImportResolver
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR = "dashboardEditor";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON = "favicon";
 
+	public static final String PATH_STATIC = "/static";
+
+	public static final String PATH_LIB = "/static/lib";
+
+	public static final String PATH_CSS = "/static/css";
+
+	public static final String PATH_SCRIPT = "/static/script";
+
 	/**
 	 * 看板展示模式：展示
 	 */
@@ -71,7 +79,7 @@ public class HtmlTplDashboardImportResolver
 	}
 	
 	/**
-	 * 获取执行请求的{@linkplain HtmlTplDashboardImport}加载列表。
+	 * 获取请求的{@linkplain HtmlTplDashboardImport}加载列表。
 	 * 
 	 * @param request
 	 * @param mode
@@ -80,15 +88,32 @@ public class HtmlTplDashboardImportResolver
 	 */
 	public List<HtmlTplDashboardImport> resolve(HttpServletRequest request, String mode)
 	{
+		String contextPath = WebUtils.getContextPath(request);
+		String randomCode = "rc" + Long.toHexString(System.currentTimeMillis());
+
+		return resolve(request, mode, contextPath, randomCode);
+	}
+
+	/**
+	 * 获取请求的{@linkplain HtmlTplDashboardImport}加载列表。
+	 * 
+	 * @param request
+	 * @param mode
+	 *            参考{@linkplain #MODE_SHOW}、{@linkplain #MODE_EDIT}
+	 * @param contextPath
+	 *            应用根路径
+	 * @param randomCode
+	 *            随机码
+	 * @return
+	 */
+	protected List<HtmlTplDashboardImport> resolve(HttpServletRequest request, String mode, String contextPath,
+			String randomCode)
+	{
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
 
-		String contextPath = WebUtils.getContextPath(request);
-		String rp = "rc" + Long.toHexString(System.currentTimeMillis());
-
-		String staticPrefix = contextPath + "/static";
-		String libPrefix = staticPrefix + "/lib";
-		String cssPrefix = staticPrefix + "/css";
-		String scriptPrefix = staticPrefix + "/script";
+		String libPrefix = contextPath + PATH_LIB;
+		String cssPrefix = contextPath + PATH_CSS;
+		String scriptPrefix = contextPath + PATH_SCRIPT;
 
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
@@ -128,7 +153,7 @@ public class HtmlTplDashboardImportResolver
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
 				scriptPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME,
-				contextPath + ServerTimeJsController.SERVER_TIME_URL + "?v=" + rp));
+				contextPath + ServerTimeJsController.SERVER_TIME_URL + "?v=" + randomCode));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,
 						scriptPrefix + "/chartSupport.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
