@@ -6580,29 +6580,10 @@
 			hideVerticalScrollbar: true
 		};
 		
-		var columns = [];
+		var columns = chartSupport.tableGetFieldColumns(chart, dataSignNames.column);
 		
-		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
-		var cps = chartSupport.tableGetColumnProperties(chart, dataSetBind, dataSignNames.column);
-		
-		if(!cps || cps.length == 0)
-			throw new Error("DataSetField required in ["+chart.dataSetAlias(dataSetBind)+"] for rendering table");
-		
-		for(var i=0; i<cps.length; i++)
-		{
-			var column =
-			{
-				title: chart.dataSetFieldAlias(dataSetBind, cps[i]),
-				data: cps[i].name,
-				defaultContent: "",
-				orderable: true,
-				searchable: false,
-				//下面完善
-				render: undefined
-			};
-			
-			columns.push(column);
-		}
+		if(columns.length == 0)
+			throw new Error("Column required for rendering table in chart '"+chart.name+"'");
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -6939,10 +6920,10 @@
 		{
 			var columnData = [];
 			
-			var dataSetBind = chart.dataSetBindMain();
-			var cps = chartSupport.tableGetColumnProperties(chart, dataSetBind, dataSignNames.column);
-			for(var i=0; i<cps.length; i++)
-				columnData[i] = chartData[cps[i].name];
+			var columnDataSrc = dataTable.columns().dataSrc();
+			
+			for(var i=0; i<columnDataSrc.length; i++)
+				columnData[i] = chartData[columnDataSrc[i]];
 			
 			data[dataSignNames.column] = columnData;
 		}
@@ -6959,13 +6940,44 @@
 		return $(".dg-chart-table-content", chart.element());
 	};
 	
-	chartSupport.tableGetColumnProperties = function(chart, dataSetBind, columnDataSignName)
+	chartSupport.tableGetFieldColumns = function(chart, columnDataSignName)
 	{
-		var cps = chart.dataSetFieldsOfSign(dataSetBind, columnDataSignName);
-		if(!cps || cps.length == 0)
-			cps = chart.dataSetFields(dataSetBind);
+		var columns = [];
 		
-		return cps;
+		var dataSetBinds = chart.dataSetBindsMain();
+		
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var dataSetBind = dataSetBinds[i];
+			
+			var fields = chart.dataSetFieldsOfSign(dataSetBind, columnDataSignName);
+			if(!fields || fields.length == 0)
+				fields = chart.dataSetFields(dataSetBind);
+			
+			for(var j=0; j<fields.length; j++)
+			{
+				var field = fields[j];
+				var colIdx = chartSupport.findInArray(columns, field.name, "data");
+				
+				if(colIdx < 0)
+				{
+					var column =
+					{
+						title: chart.dataSetFieldAlias(dataSetBind, field),
+						data: field.name,
+						defaultContent: "",
+						orderable: true,
+						searchable: false,
+						//需后续完善
+						render: undefined
+					};
+					
+					columns.push(column);
+				}
+			}
+		}
+		
+		return columns;
 	};
 	
 	chartSupport.tableThemeStyleSheet = function(chart, options)
