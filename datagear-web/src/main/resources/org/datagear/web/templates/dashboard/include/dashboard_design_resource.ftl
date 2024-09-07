@@ -93,7 +93,7 @@
 				<p-tree :value="pm.localRes.resourceNodes"
 					selection-mode="single" v-model:selection-keys="pm.localRes.selectedNodeKeys"
 					@node-select="onLocalResNodeSelect"
-					class="border-none white-space-nowrap overflow-auto bg-none absolute">
+					class="border-none white-space-nowrap overflow-auto bg-none absolute w-full">
 				</p-tree>
 			</div>
 		</div>
