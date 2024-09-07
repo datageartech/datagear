@@ -121,11 +121,7 @@
 		{
 			if(!po.disableLoginCheckCode)
 			{
-				var msg = $.getResponseJson(jqXHR);
-				if(msg && msg.code && msg.code == "checkCodeError")
-				{
-					po.element(".checkCodeImg").click();
-				}
+				po.element(".checkCodeImg").click();
 			}
 		}
 	});
