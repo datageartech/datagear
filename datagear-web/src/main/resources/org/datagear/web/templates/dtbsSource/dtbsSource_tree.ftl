@@ -137,18 +137,29 @@
 		return re;
 	};
 	
-	po.loadDtbsSourceNodes = function()
+	po.loadDtbsSourceNodes = function(page)
 	{
+		page = (page == null ? 1 : page);
+		
 		var pm = po.vuePageModel();
 		var keyword = pm.searchForm.keyword;
 		
 		pm.loadingDtbsSource = true;
-		po.ajaxJson("/dtbsSource/list",
+		po.ajaxJson("/dtbsSource/pagingQueryData",
 		{
-			data: { keyword: keyword },
+			data: { keyword: keyword, pageSize: 50, page: page, orders: [ { name: "title", type: "ASC"} ] },
 			success: function(response)
 			{
-				pm.dtbsSourceNodes = po.dtbsSourcesToNodes(response);
+				var loadedNodes = po.dtbsSourcePagingDataToNodes(response);
+
+				if(page > 1)
+				{
+					po.removeIfTailNextPageNode(pm.dtbsSourceNodes);
+					pm.dtbsSourceNodes = pm.dtbsSourceNodes.concat(loadedNodes);
+				}
+				else
+					pm.dtbsSourceNodes = loadedNodes;
+				
 				pm.selectedNodeKeys = null;
 			},
 			complete: function()
@@ -178,11 +189,8 @@
 				
 				if(page > 1)
 				{
-					var children = dtbsSourceNode.children;
-					if(children[children.length-1].dataType = "loadMore")
-						children.pop();
-					
-					dtbsSourceNode.children = children.concat(loadedNodes);
+					po.removeIfTailNextPageNode(dtbsSourceNode.children);
+					dtbsSourceNode.children = dtbsSourceNode.children.concat(loadedNodes);
 				}
 				else
 					dtbsSourceNode.children = loadedNodes;
@@ -228,11 +236,11 @@
 			callback(dtbsSourceNode);
 	};
 	
-	po.dtbsSourcesToNodes = function(dtbsSources)
+	po.dtbsSourcePagingDataToNodes = function(pagingData)
 	{
 		var re = [];
 		
-		$.each(dtbsSources, function(idx, dtbsSource)
+		$.each(pagingData.items, function(idx, dtbsSource)
 		{
 			var label = dtbsSource.title;
 			
@@ -250,6 +258,15 @@
 				dtbsSource: dtbsSource
 			});
 		});
+		
+		//添加下一页节点
+		var nextPageNode = po.evalNextPageNode(pagingData, "dtbsSource", function(node)
+		{
+			node.dataType = "dtbsSourceLoadMore";
+		});
+		
+		if(nextPageNode)
+			re.push(nextPageNode);
 		
 		return re;
 	};
@@ -282,24 +299,49 @@
 		});
 		
 		//添加下一页节点
-		if(pagingData.page < pagingData.pages)
+		var nextPageNode = po.evalNextPageNode(pagingData, "table", function(node)
 		{
-			var showCount = (pagingData.page-1) * pagingData.pageSize + pagingData.items.length;
-			
-			re.push(
-			{
-				key: "next-page-for-"+pagingData.page,
-				label : "<@spring.message code='loadMore' /> (" + showCount + "/" + pagingData.total+")",
-				icon: "pi pi-arrow-down",
-				leaf: true,
-				styleClass: "font-bold",
-				dataType: "loadMore",
-				dtbsSourceId: dtbsSourceId,
-				nextPage: pagingData.page + 1
-			});
-		}
+			node.dataType = "tableLoadMore";
+			node.dtbsSourceId = dtbsSourceId;
+		});
+		
+		if(nextPageNode)
+			re.push(nextPageNode);
 		
 		return re;
+	};
+	
+	po.evalNextPageNode = function(pagingData, keyPrefix, callback)
+	{
+		if(pagingData.page >= pagingData.pages)
+			return null;
+		
+		var showCount = (pagingData.page-1) * pagingData.pageSize + pagingData.items.length;
+		
+		var node =
+		{
+			key: keyPrefix+"-next-page-for-"+pagingData.page,
+			label : "<@spring.message code='loadMore' /> (" + showCount + "/" + pagingData.total+")",
+			icon: "pi pi-arrow-down",
+			leaf: true,
+			styleClass: "font-bold",
+			nextPageNode: true,
+			nextPage: pagingData.page + 1
+		};
+		
+		if(callback)
+			callback(node);
+		
+		return node;
+	};
+	
+	po.removeIfTailNextPageNode = function(nodes)
+	{
+		if(!nodes || nodes.length < 1)
+			return;
+		
+		if(nodes[nodes.length-1].nextPageNode === true)
+			nodes.pop();
 	};
 	
 	po.getSelectedTableNodes = function()
@@ -697,7 +739,11 @@
 		
 		onDtbsSourceNodeSelect: function(node)
 		{
-			if(node.dataType == "loadMore")
+			if(node.dataType == "dtbsSourceLoadMore")
+			{
+				po.loadDtbsSourceNodes(node.nextPage);
+			}
+			else if(node.dataType == "tableLoadMore")
 			{
 				var myDtbsSourceNode = po.findDtbsSourceNode(node.dtbsSourceId);
 				po.loadTableNodes(myDtbsSourceNode, node.nextPage);
