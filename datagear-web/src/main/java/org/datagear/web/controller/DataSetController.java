@@ -999,7 +999,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if(entity instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity sqlDataSetEntity = ((SqlDataSetEntity) entity);
-			sqlDataSetEntity.clearDtbsSourcePassword();
+			sqlDataSetEntity.clearDtbsSourceSensitiveInfo();
 			sqlDataSetEntity.setSqlValidator(null);
 			
 			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();

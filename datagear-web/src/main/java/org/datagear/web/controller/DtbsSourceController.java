@@ -455,14 +455,12 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		}
 	}
 
-	protected void clearSensitiveInfo(DtbsSource dtbsSource)
+	protected void clearSensitiveInfo(DtbsSource entity)
 	{
-		// 敏感信息不应传输至客户端
-		dtbsSource.setUrl(null);
-		dtbsSource.setUser(null);
-		dtbsSource.setProperties(null);
-		dtbsSource.setSchemaName(null);
-		dtbsSource.clearPassword();
+		if (entity == null)
+			return;
+		
+		entity.clearSensitiveInfo();
 	}
 
 	public static class DatabaseInfo implements Serializable
