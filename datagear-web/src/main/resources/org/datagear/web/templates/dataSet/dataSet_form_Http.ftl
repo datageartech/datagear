@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign DataSetEntity=statics['org.datagear.management.domain.DataSetEntity']>
 <#assign HttpDataSet=statics['org.datagear.analysis.support.HttpDataSet']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
@@ -154,7 +155,7 @@
 (function(po)
 {
 	po.submitUrl = "/dataSet/"+po.submitAction;
-	po.previewUrl = "/dataSet/previewHttp";
+	po.previewUrl = "/dataSet/preview/${DataSetEntity.DATA_SET_TYPE_Http}";
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{

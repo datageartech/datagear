@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign DataSetEntity=statics['org.datagear.management.domain.DataSetEntity']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -65,7 +66,7 @@
 (function(po)
 {
 	po.submitUrl = "/dataSet/"+po.submitAction;
-	po.previewUrl = "/dataSet/previewJsonValue";
+	po.previewUrl = "/dataSet/preview/${DataSetEntity.DATA_SET_TYPE_JsonValue}";
 	
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{

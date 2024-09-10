@@ -160,14 +160,14 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		this.fileSourceService = fileSourceService;
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_SQL)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_SQL)
 	public String addForSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
 		SqlDataSetEntity dataSet = createDftSqlDataSetEntity(request, response, model);
 		setRequestAnalysisProject(request, response, dataSet);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -178,7 +178,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new SqlDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForSql(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SqlDataSetEntity dataSet)
@@ -199,14 +199,14 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonValue)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_JsonValue)
 	public String addForJsonValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
 		JsonValueDataSetEntity dataSet = createDftJsonValueDataSetEntity(request, response, model);
 		setRequestAnalysisProject(request, response, dataSet);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -217,7 +217,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new JsonValueDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForJsonValue(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
@@ -238,7 +238,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_JsonFile)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_JsonFile)
 	public String addForJsonFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
@@ -247,7 +247,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setRequestAnalysisProject(request, response, dataSet);
 
 		addAvailableCharsetNames(model);
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -258,7 +258,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new JsonFileDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForJsonFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody JsonFileDataSetEntity dataSet) throws Throwable
@@ -281,7 +281,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Excel)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_Excel)
 	public String addForExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
@@ -290,7 +290,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		dataSet.setNameRow(1);
 		setRequestAnalysisProject(request, response, dataSet);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -301,7 +301,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new ExcelDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForExcel(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody ExcelDataSetEntity dataSet) throws Throwable
@@ -324,7 +324,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvValue)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_CsvValue)
 	public String addForCsvValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
@@ -332,7 +332,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		dataSet.setNameRow(1);
 		setRequestAnalysisProject(request, response, dataSet);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -343,7 +343,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new CsvValueDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForCsvValue(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody CsvValueDataSetEntity dataSet)
@@ -364,7 +364,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_CsvFile)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_CsvFile)
 	public String addForCsvFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
@@ -374,7 +374,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setRequestAnalysisProject(request, response, dataSet);
 
 		addAvailableCharsetNames(model);
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -385,7 +385,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new CsvFileDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForCsvFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody CsvFileDataSetEntity dataSet) throws Throwable
@@ -408,7 +408,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping("/addFor" + DataSetEntity.DATA_SET_TYPE_Http)
+	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_Http)
 	public String addForHttp(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
@@ -417,7 +417,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		dataSet.setEncodeUri(true);
 
 		addAvailableCharsetNames(model);
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http);
+		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http);
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -428,7 +428,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return new HttpDataSetEntity();
 	}
 
-	@RequestMapping(value = "/saveAddFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForHttp(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HttpDataSetEntity dataSet)
@@ -465,7 +465,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
 		handlePageModelForCopy(request, response, model, user, dataSet);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_COPY, "saveAddFor" + dataSet.getDataSetType());
+		setFormModel(model, dataSet, REQUEST_ACTION_COPY, "saveAdd/" + dataSet.getDataSetType());
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -523,8 +523,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
 		handlePageModelForEdit(request, response, model, user, dataSet);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_EDIT,
-						"saveEditFor" + dataSet.getDataSetType());
+		setFormModel(model, dataSet, REQUEST_ACTION_EDIT, "saveEdit/" + dataSet.getDataSetType());
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -536,7 +535,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		addAvailableCharsetNamesIfNeed(model, entity);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForSql(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SqlDataSetEntity dataSet)
@@ -555,7 +554,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForJsonValue(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
@@ -574,7 +573,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForJsonFile(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody JsonFileDataSetEntity dataSet,
@@ -596,7 +595,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForExcel(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody ExcelDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
@@ -618,7 +617,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForCsvValue(HttpServletRequest request,
 			HttpServletResponse response, @RequestBody CsvValueDataSetEntity dataSet)
@@ -637,7 +636,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForCsvFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody CsvFileDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
@@ -659,7 +658,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForHttp(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody HttpDataSetEntity dataSet)
@@ -839,7 +838,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
@@ -878,7 +877,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 				resolveSqlParam.getDataSetParams());
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
@@ -893,7 +892,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview,
@@ -911,7 +910,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview,
@@ -928,7 +927,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewCsvValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
@@ -943,7 +942,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewCsvFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvFileDataSetEntityPreview preview,
@@ -960,7 +959,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return dataSet.resolve(query);
 	}
 
-	@RequestMapping(value = "/preview" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewHttp(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable

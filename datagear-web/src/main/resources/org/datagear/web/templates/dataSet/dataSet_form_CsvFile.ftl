@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign DataSetEntity=statics['org.datagear.management.domain.DataSetEntity']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -72,7 +73,7 @@
 	
 	po.previewUrl = function()
 	{
-		var url = "/dataSet/previewCsvFile";
+		var url = "/dataSet/preview/${DataSetEntity.DATA_SET_TYPE_CsvFile}";
 		url = $.addParam(url, "originalFileName", po.originalFileName);
 		
 		return url;

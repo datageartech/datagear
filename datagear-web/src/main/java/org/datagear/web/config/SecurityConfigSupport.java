@@ -444,8 +444,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess dataSetModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/dataSet/addFor*", "/dataSet/saveAddFor*",
-				"/dataSet/edit", "/dataSet/saveEditFor*",
+				"/dataSet/add/**", "/dataSet/saveAdd/**", "/dataSet/edit", "/dataSet/saveEdit/**",
 				"/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/dataSet/**");
