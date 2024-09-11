@@ -405,28 +405,17 @@
 .dg-chart-setting-box .dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
 	display: none;
 }
-.dg-chart-setting-box .dg-chart-setting-panel table.dataTable td.dataTables_empty{
-	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
+.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table{
+	border-collapse: collapse;
 }
-.dg-chart-setting-box .dg-chart-setting-panel table.dataTable thead th,
-.dg-chart-setting-box .dg-chart-setting-panel table.dataTable thead td{
-	padding: 0.41em 1em 0.41em 10px;
+.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table th,
+.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table td{
+	padding: 0.5em 1em 0.5em 10px;
 	text-align: left;
+}
+.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table thead th,
+.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table thead td{
 	white-space: nowrap;
-}
-.dg-chart-setting-box .dg-chart-setting-panel table.dataTable tbody th,
-.dg-chart-setting-box .dg-chart-setting-panel table.dataTable tbody td{
-	white-space: nowrap;
-}
-/*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
-.dg-chart-setting-box .dg-chart-setting-panel .DTFC_LeftBodyLiner,
-.dg-chart-setting-box .dg-chart-setting-panel .DTFC_RightBodyLiner{
-	overflow-x: hidden;
-}
-/*DataTables-1.11.3版本内置的jquery-ui CSS标题右上角会多一个白线，这里设置不可见*/
-.dg-chart-setting-box .dataTables_wrapper .dtfc-right-top-blocker{
-	opacity: 0;
-	filter: Alpha(Opacity=0);
 }
 
 /*datetimepicker组件扩展样式*/

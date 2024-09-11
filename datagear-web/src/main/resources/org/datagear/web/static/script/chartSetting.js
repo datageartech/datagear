@@ -1590,8 +1590,7 @@
 				{
 					if(!chartSetting.isChartSettingDataPanelClosed(chart))
 					{
-						//点击固定列的<td>，祖先元素竟然只能追溯到<table>！！！这里临时添加标识样式类名解决此问题！！！
-						if($(event.target).closest(".dg-chart-setting-box, .dataTableClassForFixedColumnAncestor").length == 0)
+						if($(event.target).closest(".dg-chart-setting-box").length == 0)
 							chartSetting.closeChartSettingDataPanel(chart);
 					}
 				});
@@ -1892,22 +1891,13 @@
 			{
 				var dataSetBindIndex = $(this).data("dataSetBindIndex");
 				var tableId = $(this).data("chartDataTableId");
-				var $dataTable = $("#"+tableId, this);
+				var $table = $("#"+tableId, this);
 				
-				chartSetting.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, $dataTable);
+				chartSetting.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, $table);
 			});
 		}
 		
 		chartSetting.adjustChartSetingPanelPosition($panel);
-		
-		//当设置完所有表格后再重新调整，避免出现列头未对齐、固定列鼠标悬浮不起作用等问题
-		$(".dg-datasetbind-section", $panel).each(function()
-		{
-			var tableId = $(this).data("chartDataTableId");
-			var dataTable = $("#"+tableId, this).DataTable();
-			
-			chartSetting.adjustColumn(dataTable);
-		});
 	};
 	
 	/**
@@ -1961,10 +1951,11 @@
 		columns.push(
 		{
 			title: chartSetting.labels.serialNumber,
-			orderable: false,
-			data: null,
-			defaultContent: "",
-			width: "4em"
+			style: "width:4em",
+			render: function(data, index)
+			{
+				return (index + 1);
+			}
 		});
 		
 		for(var i=0; i<signFields.length; i++)
@@ -1972,20 +1963,10 @@
 			var column =
 			{
 				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i], fieldSigns, dataSigns),
-				data: signFields[i].name,
-				defaultContent: "",
-				orderable: false,
-				searchable: false,
-				render: function(value, type, row, meta)
+				fieldName: signFields[i].name,
+				render: function(data)
 				{
-					//单元格展示绘制
-					if(type == "display")
-					{
-						return chartFactory.escapeHtml(value);
-					}
-					//其他绘制，比如排序
-					else
-						return value;
+					return chartFactory.escapeHtml(data[this.fieldName]);
 				}
 			};
 			
@@ -1997,59 +1978,33 @@
 			columns.push(
 			{
 				title: chartSetting.labels.dataDetail,
-				orderable: false,
-				data: null,
-				defaultContent: "",
-				render: function(value, type, row, meta)
+				render: function(data)
 				{
-					//单元格展示绘制
-					if(type == "display")
-					{
-						return chartFactory.toJsonString(row);
-					}
-					//其他绘制，比如排序
-					else
-						return value;
+					return chartFactory.toJsonString(data);
 				}
 			});
 		}
 		
-		var results = chart.updateResults();
-		var result = chart.resultAt(results, index);
-		var data = chart.resultDatas(result);
-		
-		var scrollY = chart.elementJquery().height()*2/5;
-		
-		var tableOptions =
-		{
-			"columns": columns,
-			"data" : data,
-			"ordering": false,
-			"scrollX": true,
-			"scrollY": scrollY,
-			"autoWidth": true,
-	        "scrollCollapse": false,
-	        "paging": false,
-	        "dom": "t",
-			"select" : { style : 'os' },
-			"searching" : false,
-			"fixedColumns": { leftColumns: 1 },
-			"language":
-		    {
-				"emptyTable": "",
-				"zeroRecords": ""
-			},
-			rowCallback: function(row, data, displayNum, displayIndex, dataIndex)
-			{
-				$("td:first", row).html(displayIndex+1);
-			}
-		};
-		
-		var table = $("<table width='100%' class='hover stripe dataTableClassForFixedColumnAncestor'></table>").appendTo($parent);
 		var tableId = chartFactory.uid();
-		table.attr("id", tableId);
 		
-		table.dataTable(tableOptions);
+		var table = $("<table width='100%' class='dg-chart-data-table'></table>");
+		table.attr("id", tableId);
+		table.data("tableColumns", columns);
+		
+		var thead = $("<thead />").appendTo(table);
+		var tr = $("<tr />").appendTo(thead);
+		
+		for(var i=0; i<columns.length; i++)
+		{
+			var th = $("<th />").html(columns[i].title).appendTo(tr);
+			if(columns[i].style)
+				th.attr("style", columns[i].style);
+		}
+		
+		$("<tbody />").appendTo(table);
+		table.appendTo($parent);
+		
+		chartSetting.updateChartSettingDataTableData(chart, dataSetBinds, index, table);
 		
 		return tableId;
 	};
@@ -2099,20 +2054,20 @@
 				{
 					name:
 					[
-						cssPrefix + " table.dataTable thead th",
-						cssPrefix + " table.dataTable thead td"
+						cssPrefix + " table.dg-chart-data-table thead th",
+						cssPrefix + " table.dg-chart-data-table thead td"
 					],
 					value:
 					{
 						"color": theme.color,
-						"background-color": bgColor + " !important"
+						"background-color": bgColor
 					}
 				},
 				{
 					name:
 					[
-						cssPrefix + " table.dataTable tbody tr",
-						cssPrefix + " table.dataTable tbody tr td",
+						cssPrefix + " table.dg-chart-data-table tbody tr",
+						cssPrefix + " table.dg-chart-data-table tbody tr td",
 					],
 					value:
 					{
@@ -2122,52 +2077,12 @@
 				{
 					name:
 					[
-						cssPrefix + " table.dataTable.stripe tbody tr.odd",
-						cssPrefix + " table.dataTable.stripe tbody tr.odd td"
+						cssPrefix + " table.dg-chart-data-table tbody tr:hover",
+						cssPrefix + " table.dg-chart-data-table tbody tr:hover td"
 					],
 					value:
 					{
-						"background-color": chart.themeGradualColor(0.1)
-					}
-				},
-				{
-					name:
-					[
-						cssPrefix + " table.dataTable.stripe tbody tr.even",
-						cssPrefix + " table.dataTable.stripe tbody tr.even td"
-					],
-					value:
-					{
-						"background-color": bgColor
-					}
-				},
-				{
-					name:
-					[
-						cssPrefix + " table.dataTable.hover tbody tr:hover",
-						cssPrefix + " table.dataTable.hover tbody tr:hover td"
-					],
-					value:
-					{
-						"background-color": chart.themeGradualColor(0.3)
-					}
-				},
-				{
-					name:
-					[
-						cssPrefix + " table.dataTable tbody tr.selected",
-						cssPrefix + " table.dataTable tbody tr.selected td",
-						cssPrefix + " table.dataTable.stripe tbody tr.odd.selected",
-						cssPrefix + " table.dataTable.stripe tbody tr.odd.selected td",
-						cssPrefix + " table.dataTable.stripe tbody tr.even.selected",
-						cssPrefix + " table.dataTable.stripe tbody tr.even.selected td",
-						cssPrefix + " table.dataTable.hover tbody tr:hover.selected",
-						cssPrefix + " table.dataTable.hover tbody tr:hover.selected td"
-					],
-					value:
-					{
-						"color": theme.highlightTheme.color,
-						"background-color": theme.highlightTheme.backgroundColor
+						"background-color": chart.themeGradualColor(0.2)
 					}
 				}
 			];
@@ -2176,35 +2091,27 @@
 		});
 	};
 	
-	chartSetting.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $dataTable)
+	chartSetting.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $table)
 	{
 		var results = chart.updateResults();
 		var result = chart.resultAt(results, index);
-		var data = chart.resultDatas(result);
+		var datas = chart.resultDatas(result);
+		var columns = ($table.data("tableColumns") || []);
 		
-		var dataTable = $dataTable.DataTable();
+		var tbody = $("> tbody", $table);
+		tbody.empty();
 		
-		var rows = dataTable.rows();
-		var removeRowIndexes = [];
-		var dataIndex = 0;
-		
-		rows.every(function(rowIndex)
+		for(var i=0; i<datas.length; i++)
 		{
-			if(dataIndex >= data.length)
-				removeRowIndexes.push(rowIndex);
-			else
-				this.data(data[dataIndex]);
+			var data = (datas[i] || {});
+			var tr = $("<tr />").appendTo(tbody);
 			
-			dataIndex++;
-		});
-		
-		for(; dataIndex<data.length; dataIndex++)
-			var row = dataTable.row.add(data[dataIndex]);
-		
-		if(removeRowIndexes.length > 0)
-			dataTable.rows(removeRowIndexes).remove();
-		
-		dataTable.draw();
+			for(var j=0; j<columns.length; j++)
+			{
+				var column = columns[j];
+				$("<td />").html(column.render(data, i)).appendTo(tr);
+			}
+		}
 	};
 	
 	chartSetting.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
@@ -2250,21 +2157,6 @@
 		$panel.css("left", position.left);
 		$panel.css("top", position.top);
 		$panel.css("right", "unset");
-	};
-	
-	chartSetting.adjustColumn = function(dataTable)
-	{
-		dataTable.columns.adjust();
-		
-		var initOptions = dataTable.init();
-		
-		if(initOptions.fixedHeader)
-			dataTable.fixedHeader.adjust();
-		
-		/*
-		if(initOptions.fixedColumns)
-			dataTable.fixedColumns.relayout();
-		*/
 	};
 	
 	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
