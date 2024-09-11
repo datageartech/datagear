@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign Global=statics['org.datagear.util.Global']>
 <#assign DtbsSource=statics['org.datagear.management.domain.DtbsSource']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
@@ -108,6 +109,9 @@
 	po.dtbsSourceTabTypeImportData = "importData";
 	po.dtbsSourceTabTypeExportData = "exportData";
 	
+	po.dtbsSourcePageSizeName = "${Global.NAME_SHORT_UCUS}DTBS_SOURCE_PAGE_SIZE";
+	po.dtbsSourceTablePageSizeName = "${Global.NAME_SHORT_UCUS}DTBS_SOURCE_TABLE_PAGE_SIZE";
+	
 	po.refresh = function()
 	{
 		po.loadDtbsSourceNodes();
@@ -147,7 +151,7 @@
 		pm.loadingDtbsSource = true;
 		po.ajaxJson("/dtbsSource/pagingQueryData",
 		{
-			data: { keyword: keyword, pageSize: 50, page: page, orders: [ { name: "title", type: "ASC"} ] },
+			data: { keyword: keyword, pageSize: ($.localStorageItem(po.dtbsSourcePageSizeName) || 50), page: page, orders: [ { name: "title", type: "ASC"} ] },
 			success: function(response)
 			{
 				var loadedNodes = po.dtbsSourcePagingDataToNodes(response);
@@ -182,7 +186,7 @@
 		pm.loadingDtbsSource = true;
 		po.ajaxJson("/dtbsSource/"+encodeURIComponent(dtbsSourceNode.dtbsSourceId)+"/pagingQueryTable",
 		{
-			data: { keyword: keyword, pageSize: 100, page: page },
+			data: { keyword: keyword, pageSize: ($.localStorageItem(po.dtbsSourceTablePageSizeName) || 100), page: page },
 			success: function(response)
 			{
 				var loadedNodes = po.tablePagingDataToNodes(dtbsSourceNode.dtbsSourceId, response);

@@ -39,7 +39,6 @@ import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableUtil;
-import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
@@ -65,8 +64,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/dtbsSource")
 public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 {
-	public static final String COOKIE_PAGINATION_SIZE = "DTBSSOURCE_PAGING_SIZE";
-
 	@Autowired
 	private DriverEntityManager driverEntityManager;
 
@@ -302,30 +299,13 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		return optSuccessDataResponseEntity(request, "dtbsSource.testConnection.ok");
 	}
 
-	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public List<DtbsSource> list(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody PagingQuery pagingQueryParam)
-	{
-		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
-
-		User user = getCurrentUser();
-
-		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
-
-		List<DtbsSource> dtbsSources = getDtbsSourceService().query(user, pagingQuery);
-		processQueryResult(request, dtbsSources);
-
-		return dtbsSources;
-	}
-
 	@RequestMapping(value = "/{dtbsSourceId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<SimpleTable> tables = new ReturnDtbsSourceConnExecutor<List<SimpleTable>>(request, response, springModel,
 				dtbsSourceId, true)
