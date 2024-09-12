@@ -202,17 +202,27 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody HtmlTplDashboardWidgetEntity entity) throws Exception
+			@RequestBody HtmlTplDashboardWidgetEntity form) throws Exception
 	{
-		checkSaveEntity(entity);
+		checkSaveEntity(form);
 
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAwareEntityForSave(entity);
+		trimAnalysisProjectAwareEntityForSave(form);
+
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user,
+				form.getId());
+		inflateSaveEditEntity(form, entity);
 
 		this.htmlTplDashboardWidgetEntityService.update(user, entity);
 
-		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", entity.getId()));
+		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", form.getId()));
+	}
+
+	protected void inflateSaveEditEntity(HtmlTplDashboardWidgetEntity form, HtmlTplDashboardWidgetEntity entity)
+	{
+		entity.setName(form.getName());
+		entity.setAnalysisProject(form.getAnalysisProject());
 	}
 
 	@RequestMapping("/copy")
