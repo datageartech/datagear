@@ -26,14 +26,14 @@ import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CloneableEntity;
 import org.datagear.management.domain.CreateUserEntity;
-import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
+import org.datagear.management.domain.FileSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.CreateUserEntityService;
-import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.EntityService;
+import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
@@ -227,11 +227,10 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	@Override
-	protected boolean update(T entity, Map<String, Object> params)
+	protected int update(String statement, T entity, Map<String, Object> params)
 	{
 		cacheEvict(entity.getId());
-
-		return super.update(entity, params);
+		return super.update(statement, entity, params);
 	}
 
 	/**

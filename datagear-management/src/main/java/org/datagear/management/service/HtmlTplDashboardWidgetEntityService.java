@@ -56,4 +56,13 @@ public interface HtmlTplDashboardWidgetEntityService
 	 * @throws PermissionDeniedException
 	 */
 	HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidget(User user, String id) throws PermissionDeniedException;
+
+	/**
+	 * 仅更新{@linkplain HtmlTplDashboardWidgetEntity#getTemplates()}、{@linkplain HtmlTplDashboardWidgetEntity#getTemplateEncoding()}。
+	 * 
+	 * @param user
+	 * @param entity
+	 * @throws PermissionDeniedException
+	 */
+	boolean updateTemplate(User user, HtmlTplDashboardWidgetEntity entity) throws PermissionDeniedException;
 }

@@ -37,6 +37,14 @@
 			HD_ID = #{entity.id}
 	</update>
 	
+	<update id="updateTemplate">
+		UPDATE DATAGEAR_HTML_DASHBOARD SET
+			HD_TEMPLATE = #{entity.templatesJson},
+			HD_TEMPLATE_ENCODING = #{entity.templateEncoding}
+		WHERE
+			HD_ID = #{entity.id}
+	</update>
+	
 	<update id="updateCreateUserId">
 		UPDATE DATAGEAR_HTML_DASHBOARD SET
 			HD_CREATE_USER_ID = #{newUserId}

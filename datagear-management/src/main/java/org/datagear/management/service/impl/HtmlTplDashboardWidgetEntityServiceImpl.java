@@ -100,6 +100,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 	}
 
+	@Override
 	public TplDashboardWidgetResManager getTplDashboardWidgetResManager()
 	{
 		return tplDashboardWidgetResManager;
@@ -180,6 +181,14 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	public void authorizationUpdated(String... analysisProjects)
 	{
 		permissionCacheInvalidate();
+	}
+
+	@Override
+	public boolean updateTemplate(User user, HtmlTplDashboardWidgetEntity entity) throws PermissionDeniedException
+	{
+		checkUpdatePermission(user, entity.getId());
+		int count = update("updateTemplate", entity, buildParamMap());
+		return (count > 0);
 	}
 
 	@Override

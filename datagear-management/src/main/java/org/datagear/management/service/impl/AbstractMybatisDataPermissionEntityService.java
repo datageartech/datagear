@@ -178,23 +178,35 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	@Override
 	public boolean update(User user, T entity) throws PermissionDeniedException
 	{
-		int permission = getPermission(user, entity.getId());
+		checkUpdatePermission(user, entity.getId());
+		return super.update(entity);
+	}
+
+	protected int checkUpdatePermission(User user, ID id) throws PermissionDeniedException
+	{
+		int permission = getPermission(user, id);
 
 		if (!Authorization.canEdit(permission))
 			throw new PermissionDeniedException();
 
-		return super.update(entity);
+		return permission;
 	}
 
 	@Override
 	public boolean deleteById(User user, ID id) throws PermissionDeniedException
+	{
+		checkDeletePermission(user, id);
+		return super.deleteById(id);
+	}
+
+	protected int checkDeletePermission(User user, ID id) throws PermissionDeniedException
 	{
 		int permission = getPermission(user, id);
 
 		if (!Authorization.canDelete(permission))
 			throw new PermissionDeniedException();
 
-		return super.deleteById(id);
+		return permission;
 	}
 
 	@Override

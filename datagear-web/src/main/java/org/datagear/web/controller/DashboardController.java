@@ -171,6 +171,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		User user = getCurrentUser();
 
 		entity.setId(IDUtil.randomIdOnTime20());
+		trimAnalysisProjectAwareEntityForSave(entity);
 		inflateCreateUserAndTime(entity, user);
 
 		this.htmlTplDashboardWidgetEntityService.add(entity);
@@ -206,6 +207,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		checkSaveEntity(entity);
 
 		User user = getCurrentUser();
+
+		trimAnalysisProjectAwareEntityForSave(entity);
 
 		this.htmlTplDashboardWidgetEntityService.update(user, entity);
 
@@ -289,7 +292,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		dashboard.setTemplates(templates);
 		trimAnalysisProjectAwareEntityForSave(dashboard);
 
-		if (isEmpty(dashboard.getId()) || isBlank(dashboard.getName()) || isEmpty(templates))
+		if (isEmpty(dashboard.getId()) || isEmpty(templates))
 			throw new IllegalInputException();
 
 		// 如果编辑了首页模板，则应重新解析编码
@@ -297,7 +300,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (firstTemplateIndex > -1)
 			dashboard.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
 
-		this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		this.htmlTplDashboardWidgetEntityService.updateTemplate(user, dashboard);
 
 		for (int i = 0; i < resourceNames.length; i++)
 			saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
@@ -325,12 +328,12 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity widget = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		templates = trimResourceNames(templates);
-		widget.setTemplates(templates);
+		entity.setTemplates(templates);
 
-		this.htmlTplDashboardWidgetEntityService.update(user, widget);
+		this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, templates);
 		return optSuccessDataResponseEntity(request, data);
@@ -412,9 +415,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		name = trimResourceName(name);
 		boolean isNameDirectory = FileUtil.isDirectoryName(name);
 		
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		
-		String[] templates = dashboard.getTemplates();
+		String[] templates = entity.getTemplates();
 		List<String> newTemplatesList = new ArrayList<String>(templates.length);
 		
 		for(String tpl : templates)
@@ -435,8 +438,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		
 		if (!Arrays.equals(templates, newTemplates))
 		{
-			dashboard.setTemplates(newTemplates);
-			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+			entity.setTemplates(newTemplates);
+			this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
@@ -490,7 +493,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (!Arrays.equals(templates, newTemplates))
 		{
 			dashboard.setTemplates(newTemplates);
-			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+			this.htmlTplDashboardWidgetEntityService.updateTemplate(user, dashboard);
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
@@ -595,7 +598,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		resourceName = trimResourceName(resourceName);
 		
@@ -603,16 +606,16 @@ public class DashboardController extends AbstractDataAnalysisController
 		boolean resourceExists = this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager()
 				.exists(id, resourceName);
 		
-		saveResourceContent(dashboard, resourceName, resourceContent);
+		saveResourceContent(entity, resourceName, resourceContent);
 
-		String[] templates = dashboard.getTemplates();
+		String[] templates = entity.getTemplates();
 		String[] newTemplates = mergeTemplates(templates, resourceName, Boolean.TRUE.equals(isTemplate));
 		templatesChanged = !Arrays.equals(templates, newTemplates);
 
 		if (templatesChanged)
 		{
-			dashboard.setTemplates(newTemplates);
-			this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+			entity.setTemplates(newTemplates);
+			this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
