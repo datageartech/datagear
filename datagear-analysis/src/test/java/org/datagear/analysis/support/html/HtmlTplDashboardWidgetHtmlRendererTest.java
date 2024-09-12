@@ -1788,12 +1788,12 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	{
 		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, templateReader, out);
 		renderContext.setDashboardTheme(SimpleDashboardThemeSource.THEME_LIGHT);
-		renderContext.setImportList(buildImportList());
+		renderContext.setImportBuilder(importBuilder());
 		
 		return renderContext;
 	}
 
-	protected List<HtmlTplDashboardImport> buildImportList()
+	protected SimpleHtmlTplDashboardImportBuilder importBuilder()
 	{
 		List<HtmlTplDashboardImport> list = new ArrayList<>();
 
@@ -1802,7 +1802,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		list.add(HtmlTplDashboardImport.valueOf("theme", IMPORT_CONTENT_THEME));
 		list.add(HtmlTplDashboardImport.valueOf("style", IMPORT_CONTENT_STYLE));
 
-		return list;
+		return new SimpleHtmlTplDashboardImportBuilder(list);
 	}
 
 	protected HtmlTplDashboardWidget createHtmlTplDashboardWidget()

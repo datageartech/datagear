@@ -143,12 +143,12 @@ import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.DtbsSourceTableCache;
 import org.datagear.web.util.ExpiredSessionAttrManager;
-import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.MessageChannel;
 import org.datagear.web.util.SessionDashboardInfoSupport;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.WebDashboardQueryConverter;
+import org.datagear.web.util.WebHtmlTplDashboardImportBuilderFactory;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
 import org.datagear.web.util.accesslatch.IpLoginLatch;
@@ -644,9 +644,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 	
 	@Bean
-	public HtmlTplDashboardImportResolver htmlTplDashboardImportResolver()
+	public WebHtmlTplDashboardImportBuilderFactory webHtmlTplDashboardImportBuilderFactory()
 	{
-		HtmlTplDashboardImportResolver bean = new HtmlTplDashboardImportResolver();
+		WebHtmlTplDashboardImportBuilderFactory bean = new WebHtmlTplDashboardImportBuilderFactory();
 		return bean;
 	}
 	

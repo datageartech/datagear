@@ -724,7 +724,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			writeDashboardThemeStyle(renderContext, dashboard);
 		}
 
-		List<HtmlTplDashboardImport> importList = renderContext.getImportList();
+		HtmlTplDashboardImportBuilder builder = renderContext.getImportBuilder();
+		List<HtmlTplDashboardImport> importList = (builder == null ? null : builder.build(renderContext, dashboard));
 
 		if (importList != null)
 		{

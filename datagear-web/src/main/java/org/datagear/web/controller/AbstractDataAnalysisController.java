@@ -20,7 +20,6 @@ package org.datagear.web.controller;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,18 +37,19 @@ import org.datagear.analysis.SimpleDashboardQueryHandler;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
-import org.datagear.analysis.support.html.HtmlTplDashboardImport;
+import org.datagear.analysis.support.html.HtmlTplDashboardImportBuilder;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
-import org.datagear.web.util.HtmlTplDashboardImportResolver;
 import org.datagear.web.util.SessionDashboardInfoSupport;
 import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebDashboardQueryConverter;
 import org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser;
+import org.datagear.web.util.WebHtmlTplDashboardImportBuilder;
+import org.datagear.web.util.WebHtmlTplDashboardImportBuilderFactory;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -214,7 +214,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	private DashboardThemeSource dashboardThemeSource;
 	
 	@Autowired
-	private HtmlTplDashboardImportResolver htmlTplDashboardImportResolver;
+	private WebHtmlTplDashboardImportBuilderFactory webHtmlTplDashboardImportBuilderFactory;
 	
 	@Autowired
 	private ThemeSpec themeSpec;
@@ -250,14 +250,15 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		this.dashboardThemeSource = dashboardThemeSource;
 	}
 
-	public HtmlTplDashboardImportResolver getHtmlTplDashboardImportResolver()
+	public WebHtmlTplDashboardImportBuilderFactory getWebHtmlTplDashboardImportBuilderFactory()
 	{
-		return htmlTplDashboardImportResolver;
+		return webHtmlTplDashboardImportBuilderFactory;
 	}
 
-	public void setHtmlTplDashboardImportResolver(HtmlTplDashboardImportResolver htmlTplDashboardImportResolver)
+	public void setWebHtmlTplDashboardImportBuilderFactory(
+			WebHtmlTplDashboardImportBuilderFactory webHtmlTplDashboardImportBuilderFactory)
 	{
-		this.htmlTplDashboardImportResolver = htmlTplDashboardImportResolver;
+		this.webHtmlTplDashboardImportBuilderFactory = webHtmlTplDashboardImportBuilderFactory;
 	}
 
 	public ThemeSpec getThemeSpec()
@@ -340,8 +341,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
-			String template, Writer responseWriter, WebContext webContext, List<HtmlTplDashboardImport> importList,
-			HtmlTitleHandler htmlTitleHandler) throws IOException
+			String template, Writer responseWriter, WebContext webContext, HtmlTplDashboardImportBuilder importBuilder,
+			HtmlTitleHandler titleHandler) throws IOException
 	{
 		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, responseWriter);
 		
@@ -354,9 +355,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME, dashboardTheme);
 		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
 		
-		renderContext.setImportList(importList);
+		renderContext.setImportBuilder(importBuilder);
+		;
 		renderContext.setDashboardTheme(dashboardTheme);
-		renderContext.setHtmlTitleHandler(htmlTitleHandler);
+		renderContext.setHtmlTitleHandler(titleHandler);
 
 		return renderContext;
 	}
@@ -367,9 +369,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param request
 	 * @return
 	 */
-	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImportsForShow(HttpServletRequest request)
+	protected WebHtmlTplDashboardImportBuilder buildWebHtmlTplDashboardImportBuilderForShow(HttpServletRequest request)
 	{
-		return this.htmlTplDashboardImportResolver.resolve(request, HtmlTplDashboardImportResolver.MODE_SHOW);
+		return this.webHtmlTplDashboardImportBuilderFactory.getBuilder(request,
+				WebHtmlTplDashboardImportBuilder.MODE_SHOW);
 	}
 
 	/**
@@ -378,9 +381,10 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param request
 	 * @return
 	 */
-	protected List<HtmlTplDashboardImport> buildHtmlTplDashboardImportsForEdit(HttpServletRequest request)
+	protected WebHtmlTplDashboardImportBuilder buildWebHtmlTplDashboardImportBuilderForEdit(HttpServletRequest request)
 	{
-		return this.htmlTplDashboardImportResolver.resolve(request, HtmlTplDashboardImportResolver.MODE_EDIT);
+		return this.webHtmlTplDashboardImportBuilderFactory.getBuilder(request,
+				WebHtmlTplDashboardImportBuilder.MODE_EDIT);
 	}
 
 	/**

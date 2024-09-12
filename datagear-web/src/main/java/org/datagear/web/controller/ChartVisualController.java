@@ -315,7 +315,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			HtmlTitleHandler htmlTitleHandler = getShowChartHtmlTitleHandler(request, response, user, chart);
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response,
 					dashboardWidget.getFirstTemplate(), out, createWebContext(request),
-					buildHtmlTplDashboardImportsForShow(request), htmlTitleHandler);
+					buildWebHtmlTplDashboardImportBuilderForShow(request), htmlTitleHandler);
 			renderContext.setTemplateReader(templateIn);
 			renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
 

@@ -31,7 +31,6 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -50,7 +49,6 @@ import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlChartWidgetJsonRenderer;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
-import org.datagear.analysis.support.html.HtmlTplDashboardImport;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
@@ -78,6 +76,7 @@ import org.datagear.web.controller.DashboardVisualController.DashboardShowForEdi
 import org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.ShowHtmlFilterHandler;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
+import org.datagear.web.util.WebHtmlTplDashboardImportBuilder;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -719,13 +718,14 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			response.setContentType(CONTENT_TYPE_HTML);
 			out = IOUtil.getBufferedWriter(response.getWriter());
 
-			List<HtmlTplDashboardImport> importList = (isShowForEdit ? buildHtmlTplDashboardImportsForEdit(request)
-					: buildHtmlTplDashboardImportsForShow(request));
+			WebHtmlTplDashboardImportBuilder importBuilder = (isShowForEdit
+					? buildWebHtmlTplDashboardImportBuilderForEdit(request)
+					: buildWebHtmlTplDashboardImportBuilderForShow(request));
 
 			HtmlTitleHandler htmlTitleHandler = getShowDashboardHtmlTitleHandler(request, response, currentUser,
 					dashboardWidget);
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, template, out,
-					createWebContext(request), importList, htmlTitleHandler);
+					createWebContext(request), importBuilder, htmlTitleHandler);
 
 			// 移除参数中的模板内容，一是它不应该传入页面，二是它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
 			renderContext.removeAttribute(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);

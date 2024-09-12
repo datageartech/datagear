@@ -22,19 +22,22 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardImport;
+import org.datagear.analysis.support.html.HtmlTplDashboardImportBuilder;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
 import org.datagear.web.controller.ServerTimeJsController;
 
 /**
- * 看板展示请求的{@linkplain HtmlTplDashboardImport}加载列表处理器。
+ * Web {@linkplain HtmlTplDashboardImportBuilder}。
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboardImportResolver
+public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportBuilder
 {
 	/**
 	 * 内置看板资源名，不要修改它们，因为它们可能会在看板模板中通过{@linkplain HtmlTplDashboardWidgetHtmlRenderer#DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT}设置。
@@ -73,40 +76,61 @@ public class HtmlTplDashboardImportResolver
 	 */
 	public static final String MODE_EDIT = "EDIT";
 
-	public HtmlTplDashboardImportResolver()
+	/** 请求 */
+	private HttpServletRequest request;
+
+	/** 模式 */
+	private String mode;
+
+	public WebHtmlTplDashboardImportBuilder()
 	{
 		super();
 	}
 	
-	/**
-	 * 获取请求的{@linkplain HtmlTplDashboardImport}加载列表。
-	 * 
-	 * @param request
-	 * @param mode
-	 *            参考{@linkplain #MODE_SHOW}、{@linkplain #MODE_EDIT}
-	 * @return
-	 */
-	public List<HtmlTplDashboardImport> resolve(HttpServletRequest request, String mode)
+	public WebHtmlTplDashboardImportBuilder(HttpServletRequest request, String mode)
+	{
+		super();
+		this.request = request;
+		this.mode = mode;
+	}
+
+	public HttpServletRequest getRequest()
+	{
+		return request;
+	}
+
+	public void setRequest(HttpServletRequest request)
+	{
+		this.request = request;
+	}
+
+	public String getMode()
+	{
+		return mode;
+	}
+
+	public void setMode(String mode)
+	{
+		this.mode = mode;
+	}
+
+	@Override
+	public List<HtmlTplDashboardImport> build(HtmlTplDashboardRenderContext renderContext, HtmlTplDashboard dashboard)
+	{
+		return build(renderContext, dashboard, this.request, this.mode);
+	}
+
+	protected List<HtmlTplDashboardImport> build(HtmlTplDashboardRenderContext renderContext,
+			HtmlTplDashboard dashboard, HttpServletRequest request, String mode)
 	{
 		String contextPath = WebUtils.getContextPath(request);
 		String randomCode = "rc" + Long.toHexString(System.currentTimeMillis());
 
-		return resolve(request, mode, contextPath, randomCode);
+		return build(renderContext, dashboard, request, mode, contextPath, randomCode);
 	}
 
-	/**
-	 * 获取请求的{@linkplain HtmlTplDashboardImport}加载列表。
-	 * 
-	 * @param request
-	 * @param mode
-	 *            参考{@linkplain #MODE_SHOW}、{@linkplain #MODE_EDIT}
-	 * @param contextPath
-	 *            应用根路径
-	 * @param randomCode
-	 *            随机码
-	 * @return
-	 */
-	protected List<HtmlTplDashboardImport> resolve(HttpServletRequest request, String mode, String contextPath,
+	protected List<HtmlTplDashboardImport> build(HtmlTplDashboardRenderContext renderContext,
+			HtmlTplDashboard dashboard, HttpServletRequest request, String mode, String contextPath,
 			String randomCode)
 	{
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
