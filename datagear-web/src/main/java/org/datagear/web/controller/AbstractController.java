@@ -431,7 +431,8 @@ public abstract class AbstractController extends MessageSourceSupport
 
 	/**
 	 * 整理保存时的{@linkplain AnalysisProjectAwareEntity}：
-	 * 如果analysisProject.id为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 如果{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}为{@code null}或其ID为空，
+	 * 则应将其改为{@code null}，因为存储时相关外键不允许空字符串
 	 * 
 	 * @param entity
 	 */
@@ -449,7 +450,8 @@ public abstract class AbstractController extends MessageSourceSupport
 
 	/**
 	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
-	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}或其ID为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}为{@code null}或其ID为空，
+	 * 则应将其改为{@code null}，因为存储时相关外键不允许空字符串
 	 * 
 	 * @param entity
 	 */
@@ -478,7 +480,7 @@ public abstract class AbstractController extends MessageSourceSupport
 		AnalysisProject analysisProject = entity.getAnalysisProject();
 		int apPermission = (analysisProject != null
 				? service.getPermission(user, analysisProject.getId())
-				: Authorization.PERMISSION_NONE_START);
+				: DataPermissionEntityService.PERMISSION_NOT_FOUND);
 
 		// 没有读权限，应置为null
 		if (!Authorization.canRead(apPermission))
