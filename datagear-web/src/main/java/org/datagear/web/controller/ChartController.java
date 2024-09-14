@@ -44,6 +44,7 @@ import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -79,6 +80,9 @@ public class ChartController extends AbstractChartPluginAwareController
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private AnalysisProjectAwareSupport analysisProjectAwareSupport;
 
 	private ChartPluginAttributeValueConverter chartPluginAttributeValueConverter = new ChartPluginAttributeValueConverter();
 
@@ -137,6 +141,16 @@ public class ChartController extends AbstractChartPluginAwareController
 		this.userService = userService;
 	}
 
+	public AnalysisProjectAwareSupport getAnalysisProjectAwareSupport()
+	{
+		return analysisProjectAwareSupport;
+	}
+
+	public void setAnalysisProjectAwareSupport(AnalysisProjectAwareSupport analysisProjectAwareSupport)
+	{
+		this.analysisProjectAwareSupport = analysisProjectAwareSupport;
+	}
+
 	public ChartPluginAttributeValueConverter getChartPluginAttributeValueConverter()
 	{
 		return chartPluginAttributeValueConverter;
@@ -187,7 +201,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		User user = getCurrentUser();
 
 		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
-		setNullAnalysisProjectIfNoPermission(user, chart, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.setNullIfNoPermission(user, chart, getAnalysisProjectService());
 
 		DataSetBind[] dataSetBinds = chart.getDataSetBinds();
 		if (dataSetBinds != null)
@@ -228,7 +242,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAwareEntityForSave(entity);
+		this.analysisProjectAwareSupport.trim(entity);
 
 		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
 

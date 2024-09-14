@@ -36,11 +36,9 @@ import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
-import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.CreateTimeEntity;
 import org.datagear.management.domain.CreateUserEntity;
 import org.datagear.management.domain.DataPermissionEntity;
-import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.Entity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
@@ -427,64 +425,6 @@ public abstract class AbstractController extends MessageSourceSupport
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * 整理保存时的{@linkplain AnalysisProjectAwareEntity}：
-	 * 如果{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}为{@code null}或其ID为空，
-	 * 则应将其改为{@code null}，因为存储时相关外键不允许空字符串
-	 * 
-	 * @param entity
-	 */
-	protected void trimAnalysisProjectAwareEntityForSave(AnalysisProjectAwareEntity entity)
-	{
-		if (entity == null)
-			return;
-
-		if (entity.getAnalysisProject() == null)
-			return;
-
-		if (isEmpty(entity.getAnalysisProject().getId()))
-			entity.setAnalysisProject(null);
-	}
-
-	/**
-	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
-	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}为{@code null}或其ID为空，
-	 * 则应将其改为{@code null}，因为存储时相关外键不允许空字符串
-	 * 
-	 * @param entity
-	 */
-	protected void trimDirectoryFileDataSetEntityForSave(DirectoryFileDataSetEntity entity)
-	{
-		if (entity == null)
-			return;
-
-		if (entity.getFileSource() == null)
-			return;
-
-		if (isEmpty(entity.getFileSource().getId()))
-			entity.setFileSource(null);
-	}
-
-	/**
-	 * 如果用户对{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}没有权限，则置为{@code null}。
-	 * 
-	 * @param user
-	 * @param entity
-	 * @param service
-	 */
-	protected void setNullAnalysisProjectIfNoPermission(User user,
-			AnalysisProjectAwareEntity entity, AnalysisProjectService service)
-	{
-		AnalysisProject analysisProject = entity.getAnalysisProject();
-		int apPermission = (analysisProject != null
-				? service.getPermission(user, analysisProject.getId())
-				: DataPermissionEntityService.PERMISSION_NOT_FOUND);
-
-		// 没有读权限，应置为null
-		if (!Authorization.canRead(apPermission))
-			entity.setAnalysisProject(null);
 	}
 
 	/**

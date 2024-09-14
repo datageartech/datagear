@@ -97,6 +97,7 @@ import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserServiceImpl;
 import org.datagear.management.util.DataPermissionSpec;
+import org.datagear.management.util.ManagementSupport;
 import org.datagear.management.util.RoleSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.management.util.dialect.MbSqlDialectBuilder;
@@ -132,6 +133,7 @@ import org.datagear.web.security.AuthenticationUserGetter;
 import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
+import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.AuthorizationResMetaManager;
 import org.datagear.web.util.AuthorizationResMetas;
 import org.datagear.web.util.CheckCodeManager;
@@ -451,6 +453,20 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DataPermissionSpec dataPermissionSpec()
 	{
 		DataPermissionSpec bean = new DataPermissionSpec();
+		return bean;
+	}
+
+	@Bean
+	public ManagementSupport managementSupport()
+	{
+		ManagementSupport bean = new ManagementSupport();
+		return bean;
+	}
+
+	@Bean
+	public AnalysisProjectAwareSupport analysisProjectAwareSupport()
+	{
+		AnalysisProjectAwareSupport bean = new AnalysisProjectAwareSupport(this.managementSupport());
 		return bean;
 	}
 

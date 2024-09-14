@@ -53,6 +53,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
+import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -90,6 +91,9 @@ public class DashboardController extends AbstractDataAnalysisController
 
 	@Autowired
 	private ApplicationProperties applicationProperties;
+
+	@Autowired
+	private AnalysisProjectAwareSupport analysisProjectAwareSupport;
 
 	public DashboardController()
 	{
@@ -147,6 +151,16 @@ public class DashboardController extends AbstractDataAnalysisController
 		this.applicationProperties = applicationProperties;
 	}
 
+	public AnalysisProjectAwareSupport getAnalysisProjectAwareSupport()
+	{
+		return analysisProjectAwareSupport;
+	}
+
+	public void setAnalysisProjectAwareSupport(AnalysisProjectAwareSupport analysisProjectAwareSupport)
+	{
+		this.analysisProjectAwareSupport = analysisProjectAwareSupport;
+	}
+
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
@@ -171,7 +185,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		User user = getCurrentUser();
 
 		entity.setId(IDUtil.randomIdOnTime20());
-		trimAnalysisProjectAwareEntityForSave(entity);
+		this.analysisProjectAwareSupport.trim(entity);
 		inflateCreateUserAndTime(entity, user);
 
 		this.htmlTplDashboardWidgetEntityService.add(entity);
@@ -208,7 +222,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAwareEntityForSave(form);
+		this.analysisProjectAwareSupport.trim(form);
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user,
 				form.getId());
@@ -232,7 +246,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		User user = getCurrentUser();
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
-		setNullAnalysisProjectIfNoPermission(user, dashboard, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.setNullIfNoPermission(user, dashboard, getAnalysisProjectService());
 
 		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		model.addAttribute("copySourceId", id);
@@ -300,7 +314,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		templates = mergeTemplates(templates, resourceNames, resourceIsTemplates);
 		dashboard.setTemplates(templates);
-		trimAnalysisProjectAwareEntityForSave(dashboard);
+		this.analysisProjectAwareSupport.trim(dashboard);
 
 		if (isEmpty(dashboard.getId()) || isEmpty(templates))
 			throw new IllegalInputException();
@@ -823,7 +837,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(dashboard, user);
 
-		trimAnalysisProjectAwareEntityForSave(dashboard);
+		this.analysisProjectAwareSupport.trim(dashboard);
 
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 

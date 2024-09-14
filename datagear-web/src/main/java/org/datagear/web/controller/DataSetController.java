@@ -67,6 +67,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebDashboardQueryConverter;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -104,6 +105,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 	@Autowired
 	private FileSourceService fileSourceService;
+
+	@Autowired
+	private AnalysisProjectAwareSupport analysisProjectAwareSupport;
 
 	public DataSetController()
 	{
@@ -160,6 +164,16 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		this.fileSourceService = fileSourceService;
 	}
 
+	public AnalysisProjectAwareSupport getAnalysisProjectAwareSupport()
+	{
+		return analysisProjectAwareSupport;
+	}
+
+	public void setAnalysisProjectAwareSupport(AnalysisProjectAwareSupport analysisProjectAwareSupport)
+	{
+		this.analysisProjectAwareSupport = analysisProjectAwareSupport;
+	}
+
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_SQL)
 	public String addForSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
@@ -192,7 +206,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 
@@ -231,7 +245,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 
@@ -272,7 +286,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
@@ -315,7 +329,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
@@ -357,7 +371,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 
@@ -399,7 +413,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
@@ -442,8 +456,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
-
+		this.analysisProjectAwareSupport.trim(dataSet);
 		this.dataSetEntityService.add(user, dataSet);
 		
 		return optSuccessDataResponseEntity(request, dataSet);
@@ -507,7 +520,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			dataSetEntity.setDisplayName(null);
 		}
 
-		setNullAnalysisProjectIfNoPermission(user, dataSet, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.setNullIfNoPermission(user, dataSet, getAnalysisProjectService());
 		dataSet.setId(null);
 
 		convertForFormModel(dataSet);
@@ -547,8 +560,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
-
+		this.analysisProjectAwareSupport.trim(dataSet);
 		this.dataSetEntityService.update(user, dataSet);
 		
 		return optSuccessDataResponseEntity(request, dataSet);
@@ -566,8 +578,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
-
+		this.analysisProjectAwareSupport.trim(dataSet);
 		this.dataSetEntityService.update(user, dataSet);
 		
 		return optSuccessDataResponseEntity(request, dataSet);
@@ -586,9 +597,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
-
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 		
@@ -608,9 +618,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
-
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 		
@@ -629,8 +638,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
-
+		this.analysisProjectAwareSupport.trim(dataSet);
 		this.dataSetEntityService.update(user, dataSet);
 		
 		return optSuccessDataResponseEntity(request, dataSet);
@@ -649,7 +657,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
+		this.analysisProjectAwareSupport.trim(dataSet);
 		trimDirectoryFileDataSetEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
@@ -670,8 +678,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		trimAnalysisProjectAwareEntityForSave(dataSet);
-
+		this.analysisProjectAwareSupport.trim(dataSet);
 		this.dataSetEntityService.update(user, dataSet);
 		
 		return optSuccessDataResponseEntity(request, dataSet);
@@ -1294,6 +1301,27 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		}
 
 		return null;
+	}
+
+	/**
+	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
+	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}为{@code null}或其ID为空，
+	 * 则应将其改为{@code null}，因为存储时相关外键不允许空字符串
+	 * 
+	 * @param entity
+	 */
+	protected void trimDirectoryFileDataSetEntityForSave(DirectoryFileDataSetEntity entity)
+	{
+		if (entity == null)
+			return;
+
+		FileSource fileSource = entity.getFileSource();
+
+		if (fileSource == null)
+			return;
+
+		if (isEmpty(fileSource.getId()))
+			entity.setFileSource(null);
 	}
 
 	public static class AbstractDataSetPreview<T extends DataSet> implements ControllerForm
