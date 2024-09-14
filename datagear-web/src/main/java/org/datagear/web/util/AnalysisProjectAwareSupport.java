@@ -17,13 +17,14 @@
 
 package org.datagear.web.util;
 
+import java.util.function.Function;
+
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
-import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.util.ManagementSupport;
 import org.datagear.management.util.RefPermissionDeniedException;
-import org.datagear.web.controller.RecordNotFoundException;
 
 /**
  * {@linkplain AnalysisProjectAwareEntity}支持类。
@@ -68,9 +69,9 @@ public class AnalysisProjectAwareSupport
 		this.managementSupport.trimRef(entity, (t) ->
 		{
 			return t.getAnalysisProject();
-		}, (t, r) ->
+		}, (t) ->
 		{
-			t.setAnalysisProject(r);
+			t.setAnalysisProject(null);
 		});
 	}
 
@@ -87,29 +88,29 @@ public class AnalysisProjectAwareSupport
 		this.managementSupport.setRefNullIfNoPermission(user, entity, (t) ->
 		{
 			return t.getAnalysisProject();
-		}, (t, r) ->
+		}, (t) ->
 		{
-			t.setAnalysisProject(r);
+			t.setAnalysisProject(null);
 		}, service);
 	}
 
 	/**
 	 * 校验{@linkplain AnalysisProjectAwareEntity}保存操作的{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}是否越权。
+	 * <p>
+	 * 另参考{@linkplain ManagementSupport#checkSaveRefPermission(User, Object, Object, Function, Function, DataPermissionEntityService)}
+	 * </p>
 	 * 
 	 * @param user
 	 * @param entity
-	 * @param exist
-	 *            允许{@code null}
+	 * @param persist
 	 * @param service
 	 * @throws RefPermissionDeniedException
-	 * @throws PermissionDeniedException
-	 * @throws RecordNotFoundException
 	 * 
 	 */
-	public void checkSavePermission(User user, AnalysisProjectAwareEntity entity, AnalysisProjectAwareEntity exist,
+	public void checkSavePermission(User user, AnalysisProjectAwareEntity entity, AnalysisProjectAwareEntity persist,
 			AnalysisProjectService service) throws RefPermissionDeniedException
 	{
-		this.managementSupport.checkSaveRefPermission(user, entity, exist, (t) ->
+		this.managementSupport.checkSaveRefPermission(user, entity, persist, (t) ->
 		{
 			return t.getAnalysisProject();
 		}, (r) ->

@@ -17,7 +17,7 @@
 
 package org.datagear.management.util;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.datagear.management.domain.Authorization;
@@ -52,7 +52,7 @@ public class ManagementSupport
 	 * @param getter
 	 * @param nullSetter
 	 */
-	public <T, R extends Entity<?>> void trimRef(T entity, Function<T, R> getter, BiConsumer<T, R> nullSetter)
+	public <T, R extends Entity<?>> void trimRef(T entity, Function<T, R> getter, Consumer<T> nullSetter)
 	{
 		if (entity == null)
 			return;
@@ -64,7 +64,7 @@ public class ManagementSupport
 
 		if (StringUtil.isEmpty(ref.getId()))
 		{
-			nullSetter.accept(entity, null);
+			nullSetter.accept(entity);
 		}
 	}
 
@@ -81,7 +81,7 @@ public class ManagementSupport
 	 * @param service
 	 */
 	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void setRefNullIfNoPermission(
-			User user, T entity, Function<T, R> getter, BiConsumer<T, R> nullSetter,
+			User user, T entity, Function<T, R> getter, Consumer<T> nullSetter,
 			DataPermissionEntityService<RID, R> service)
 	{
 		if (entity == null)
@@ -96,26 +96,26 @@ public class ManagementSupport
 
 		// 没有读权限，则置为null
 		if (!Authorization.canRead(permission))
-			nullSetter.accept(entity, null);
+			nullSetter.accept(entity);
 	}
 
 	/**
-	 * 校验保存操作对关联引用实体是否越权。
+	 * 校验添加保存/编辑保存操作对关联引用实体是否越权。
 	 * 
 	 * @param <T>
 	 * @param <RID>
 	 * @param <R>
 	 * @param user
 	 * @param entity
-	 * @param exist
-	 *            允许{@code null}
+	 * @param persist
+	 *            允许{@code null}，表示执行添加保存操作；，否则，表示执行编辑保存操作
 	 * @param getter
 	 * @param nameGetter
 	 * @param service
 	 * @throws RefPermissionDeniedException
 	 */
 	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void checkSaveRefPermission(User user,
-			T entity, T exist, Function<T, R> getter, Function<R, String> nameGetter,
+			T entity, T persist, Function<T, R> getter, Function<R, String> nameGetter,
 			DataPermissionEntityService<RID, R> service) throws RefPermissionDeniedException
 	{
 		if (entity == null)
@@ -132,10 +132,10 @@ public class ManagementSupport
 			return;
 
 		// 对于编辑操作，只要没有修改，不应校验
-		// 比如用户A编辑保存B分享的实体，应该保留B之前设置的有权限的关联实体
-		if (exist != null)
+		// 比如用户A编辑保存B分享的实体，应该保留B之前设置的有权限的关联实体C，即使A对C没有权限
+		if (persist != null)
 		{
-			R eref = getter.apply(exist);
+			R eref = getter.apply(persist);
 			RID erid = (eref == null ? null : eref.getId());
 
 			if (StringUtil.isEquals(rid, erid))
