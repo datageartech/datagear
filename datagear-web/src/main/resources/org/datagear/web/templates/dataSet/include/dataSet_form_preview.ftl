@@ -153,7 +153,7 @@
 			var previewQuery = pm.previewQuery;
 			po.trimPreviewQueryFetchSize(previewQuery);
 			
-			action.options.data = { dataSet: action.options.data, query: po.vueRaw(previewQuery) };
+			action.options.data = { dataSet: action.options.data, query: po.vueRaw(previewQuery), view: po.isViewAction };
 			
 			po._prevPreviewFingerprint = po.toPreviewFingerprint(action.options.data.dataSet);
 		}

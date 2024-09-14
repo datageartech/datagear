@@ -43,7 +43,6 @@ import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
-import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
@@ -57,10 +56,8 @@ import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
-import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.FileSourceService;
-import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.util.DtbsSourceConnectionFactory;
 import org.datagear.management.util.ManagementSupport;
 import org.datagear.persistence.PagingData;
@@ -845,8 +842,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
 	{
 		User user = getCurrentUser();
-
 		SqlDataSetEntity dataSet = preview.getDataSet();
+		
+		if(isEmpty(dataSet))
+			throw new IllegalInputException();
+		
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveSqlDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (SqlDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveSqlDataSetEntity(request, user, dataSet,
+					(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
+		
 		DtbsSourceConnectionFactory connFactory = dataSet.getDtbsCnFty();
 		DtbsSource dtbsSource = (connFactory == null ? null : connFactory.getDtbsSource());
 		String dtbsSourceId = (dtbsSource == null ? null : dtbsSource.getId());
@@ -854,10 +871,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (StringUtil.isEmpty(dtbsSourceId))
 			throw new IllegalInputException();
 
-		// 新建时操作时未创建数据集
-		boolean notFound = checkDataSetEntityIdReadPermission(user, dataSet.getId());
-		// 如果数据集已创建，则使用数据集权限；如果数据集未创建，则需使用数据源权限
-		dtbsSource = (notFound ? getDtbsSourceForUserNotNull(user, dtbsSourceId) : getDtbsSourceNotNull(dtbsSourceId));
+		dtbsSource = getDtbsSourceNotNull(dtbsSourceId);
 
 		DtbsSourceConnectionFactory connectionFactory = new DtbsSourceConnectionFactory(getConnectionSource(),
 				dtbsSource);
@@ -883,10 +897,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public TemplateResolvedDataSetResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
 			Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
 	{
-		final User user = getCurrentUser();
-
+		User user = getCurrentUser();
 		JsonValueDataSetEntity dataSet = preview.getDataSet();
-		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
+		if (isEmpty(dataSet))
+			throw new IllegalInputException();
+
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveJsonValueDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (JsonValueDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveJsonValueDataSetEntity(request, user, dataSet,
+					(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -901,9 +933,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			throws Throwable
 	{
 		final User user = getCurrentUser();
-
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
-		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
+		if (isEmpty(dataSet))
+			throw new IllegalInputException();
+
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveJsonFileDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (JsonFileDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveJsonFileDataSetEntity(request, user, dataSet,
+					(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
+
 		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -918,9 +969,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		final User user = getCurrentUser();
-
 		ExcelDataSetEntity dataSet = preview.getDataSet();
-		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
+		if (isEmpty(dataSet))
+			throw new IllegalInputException();
+
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveExcelDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (ExcelDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveExcelDataSetEntity(request, user, dataSet,
+					(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
+
 		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -934,9 +1004,27 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
 	{
 		final User user = getCurrentUser();
-
 		CsvValueDataSetEntity dataSet = preview.getDataSet();
-		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
+		if (isEmpty(dataSet))
+			throw new IllegalInputException();
+
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveCsvValueDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (CsvValueDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveCsvValueDataSetEntity(request, user, dataSet,
+					(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
 
@@ -950,9 +1038,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		final User user = getCurrentUser();
-
 		CsvFileDataSetEntity dataSet = preview.getDataSet();
-		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
+		if (isEmpty(dataSet))
+			throw new IllegalInputException();
+
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveCsvFileDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (CsvFileDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveCsvFileDataSetEntity(request, user, dataSet,
+					(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
+
 		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -966,9 +1073,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable
 	{
 		final User user = getCurrentUser();
-
 		HttpDataSetEntity dataSet = preview.getDataSet();
-		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
+		if (isEmpty(dataSet))
+			throw new IllegalInputException();
+
+		// 添加时
+		if (StringUtil.isEmpty(dataSet.getId()))
+		{
+			checkSaveHttpDataSetEntity(request, user, dataSet, null);
+		}
+		// 查看时
+		else if (preview.isView())
+		{
+			dataSet = (HttpDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+		}
+		// 编辑时
+		else
+		{
+			checkSaveHttpDataSetEntity(request, user, dataSet,
+					(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		}
+
 		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
@@ -1026,31 +1152,6 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		if (entity instanceof AbstractResolvableResourceDataSet<?>)
 			((AbstractResolvableResourceDataSet<?>) entity).setCache(null);
-	}
-
-	/**
-	 * 校验指定ID的读权限，
-	 * 
-	 * @param user
-	 * @param id
-	 *            允许为{@code null}
-	 * @return 返回{@code true}表明记录未找到
-	 */
-	protected boolean checkDataSetEntityIdReadPermission(User user, String id) throws PermissionDeniedException
-	{
-		boolean notFound = true;
-
-		if (!isEmpty(id))
-		{
-			int permission = this.dataSetEntityService.getPermission(user, id);
-
-			notFound = (DataPermissionEntityService.PERMISSION_NOT_FOUND == permission);
-
-			if (!notFound && !Authorization.canRead(permission))
-				throw new PermissionDeniedException();
-		}
-
-		return notFound;
 	}
 
 	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
@@ -1333,6 +1434,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		private DataSetQuery query;
 
+		/** 是否查看操作 */
+		private boolean view = false;
+
 		public AbstractDataSetPreview()
 		{
 			super();
@@ -1356,6 +1460,16 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		public void setQuery(DataSetQuery query)
 		{
 			this.query = query;
+		}
+
+		public boolean isView()
+		{
+			return view;
+		}
+
+		public void setView(boolean view)
+		{
+			this.view = view;
 		}
 	}
 
