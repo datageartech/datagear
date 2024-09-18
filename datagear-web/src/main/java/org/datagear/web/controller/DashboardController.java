@@ -245,7 +245,8 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
+		// 统一复制规则，至少有编辑权限才允许复制
+		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		this.analysisProjectAwareSupport.setNullIfNoPermission(user, dashboard, getAnalysisProjectService());
 
 		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);

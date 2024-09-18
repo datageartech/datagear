@@ -482,7 +482,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
+		// 敏感信息较多，至少有编辑权限才允许复制
+		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
 		handlePageModelForCopy(request, model, user, dataSet);
 
 		setFormModel(model, dataSet, REQUEST_ACTION_COPY, "saveAdd/" + dataSet.getDataSetType());

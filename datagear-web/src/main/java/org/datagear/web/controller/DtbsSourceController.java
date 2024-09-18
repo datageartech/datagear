@@ -116,7 +116,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 	protected DtbsSource getByIdForCopy(User user, String id)
 	{
-		// 数据源敏感信息较多，所以至少编辑权限才允许复制
+		// 敏感信息较多，至少有编辑权限才允许复制
 		DtbsSource dtbsSource = getByIdForEdit(getDtbsSourceService(), user, id);
 
 		dtbsSource.setId(null);

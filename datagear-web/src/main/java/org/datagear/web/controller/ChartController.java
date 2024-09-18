@@ -200,7 +200,8 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 
-		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
+		// 统一复制规则，至少有编辑权限才允许复制
+		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 		this.analysisProjectAwareSupport.setNullIfNoPermission(user, chart, getAnalysisProjectService());
 
 		DataSetBind[] dataSetBinds = chart.getDataSetBinds();
