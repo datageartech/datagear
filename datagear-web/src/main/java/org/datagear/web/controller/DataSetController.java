@@ -43,6 +43,7 @@ import org.datagear.analysis.support.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
@@ -211,7 +212,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
+		trimSqlDataSetEntity(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, dataSet, null);
 
@@ -248,7 +251,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, dataSet, null);
 
@@ -287,7 +291,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
+
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, dataSet, null);
 
 		if (responseEntity != null)
@@ -326,7 +333,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
+
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, dataSet, null);
 
 		if (responseEntity != null)
@@ -364,7 +374,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, dataSet, null);
 
@@ -404,7 +415,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
+
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, dataSet, null);
 
 		if (responseEntity != null)
@@ -443,7 +457,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, response, user, dataSet);
+		inflateSaveAddBaseInfo(request, user, dataSet);
+		trimAnalysisProjectAware(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, dataSet, null);
 
@@ -455,8 +470,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, dataSet);
 	}
 
-	protected void inflateSaveAddBaseInfo(HttpServletRequest request, HttpServletResponse response, User user,
-			DataSetEntity entity)
+	protected void inflateSaveAddBaseInfo(HttpServletRequest request, User user, DataSetEntity entity)
 	{
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
@@ -548,6 +562,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
+		trimAnalysisProjectAware(dataSet);
+		trimSqlDataSetEntity(dataSet);
+
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, dataSet,
 				(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
 
@@ -565,6 +582,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
 	{
 		User user = getCurrentUser();
+
+		trimAnalysisProjectAware(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, dataSet,
 				(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
@@ -584,6 +603,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		User user = getCurrentUser();
+
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, dataSet,
 				(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
@@ -605,6 +627,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
+
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, dataSet,
 				(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
 
@@ -624,6 +649,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
+		trimAnalysisProjectAware(dataSet);
+
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, dataSet,
 				(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
 
@@ -642,6 +669,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			throws Throwable
 	{
 		User user = getCurrentUser();
+
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, dataSet,
 				(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
@@ -663,6 +693,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestBody HttpDataSetEntity dataSet)
 	{
 		User user = getCurrentUser();
+
+		trimAnalysisProjectAware(dataSet);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, dataSet,
 				(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
@@ -847,6 +879,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if(isEmpty(dataSet))
 			throw new IllegalInputException();
 		
+		trimAnalysisProjectAware(dataSet);
+		trimSqlDataSetEntity(dataSet);
+
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
 		{
@@ -903,6 +938,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(dataSet))
 			throw new IllegalInputException();
 
+		trimAnalysisProjectAware(dataSet);
+
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
 		{
@@ -937,6 +974,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		if (isEmpty(dataSet))
 			throw new IllegalInputException();
+
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
 
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
@@ -974,6 +1014,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(dataSet))
 			throw new IllegalInputException();
 
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
+
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
 		{
@@ -1009,6 +1052,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(dataSet))
 			throw new IllegalInputException();
 
+		trimAnalysisProjectAware(dataSet);
+
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
 		{
@@ -1042,6 +1087,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		if (isEmpty(dataSet))
 			throw new IllegalInputException();
+
+		trimAnalysisProjectAware(dataSet);
+		trimDirectoryFileDataSetEntity(dataSet);
 
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
@@ -1077,6 +1125,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		if (isEmpty(dataSet))
 			throw new IllegalInputException();
+
+		trimAnalysisProjectAware(dataSet);
 
 		// 添加时
 		if (StringUtil.isEmpty(dataSet.getId()))
@@ -1226,11 +1276,6 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,
 			User user, SqlDataSetEntity dataSet, SqlDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getConnectionFactory()))
 			throw new IllegalInputException();
 
@@ -1243,33 +1288,46 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isBlank(dataSet.getSql()))
 			throw new IllegalInputException();
 
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
+
+		if (responseEntity != null)
+			return responseEntity;
+
+		this.managementSupport.checkSaveRefPermission(user, dataSet, persist, (t) ->
+		{
+			DtbsSourceConnectionFactory connFactory = dataSet.getDtbsCnFty();
+			return (connFactory == null ? null : connFactory.getDtbsSource());
+
+		}, (r) ->
+		{
+			return r.getTitle();
+
+		}, getDtbsSourceService());
+
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveJsonValueDataSetEntity(HttpServletRequest request,
 			User user, JsonValueDataSetEntity dataSet, JsonValueDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getValue()))
 			throw new IllegalInputException();
 
-		return null;
+		return checkSaveEntity(request, user, dataSet, persist);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveJsonFileDataSetEntity(HttpServletRequest request,
 			User user, JsonFileDataSetEntity dataSet, JsonFileDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
+
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, dataSet, persist);
+
+		if (re != null)
+			return re;
+
+		checkFileSourceSaveRefPermission(request, user, dataSet, persist);
 
 		return null;
 	}
@@ -1277,13 +1335,15 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	protected ResponseEntity<OperationMessage> checkSaveExcelDataSetEntity(HttpServletRequest request,
 			User user, ExcelDataSetEntity dataSet, ExcelDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
+
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, dataSet, persist);
+
+		if (re != null)
+			return re;
+
+		checkFileSourceSaveRefPermission(request, user, dataSet, persist);
 
 		return null;
 	}
@@ -1291,27 +1351,24 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	protected ResponseEntity<OperationMessage> checkSaveCsvValueDataSetEntity(HttpServletRequest request,
 			User user, CsvValueDataSetEntity dataSet, CsvValueDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getValue()))
 			throw new IllegalInputException();
 
-		return null;
+		return checkSaveEntity(request, user, dataSet, persist);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveCsvFileDataSetEntity(HttpServletRequest request,
 			User user, CsvFileDataSetEntity dataSet, CsvFileDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
+
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, dataSet, persist);
+
+		if (re != null)
+			return re;
+
+		checkFileSourceSaveRefPermission(request, user, dataSet, persist);
 
 		return null;
 	}
@@ -1319,15 +1376,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	protected ResponseEntity<OperationMessage> checkSaveHttpDataSetEntity(HttpServletRequest request,
 			User user, HttpDataSetEntity dataSet, HttpDataSetEntity persist)
 	{
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
-
-		if (responseEntity != null)
-			return responseEntity;
-
 		if (isEmpty(dataSet.getUri()))
 			throw new IllegalInputException();
 
-		return null;
+		return checkSaveEntity(request, user, dataSet, persist);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
@@ -1335,13 +1387,6 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		if (isBlank(dataSet.getName()))
 			throw new IllegalInputException();
-
-		this.analysisProjectAwareSupport.trim(dataSet);
-
-		if (dataSet instanceof DirectoryFileDataSetEntity)
-		{
-			trimDirectoryFileDataSetEntityForSave((DirectoryFileDataSetEntity) dataSet);
-		}
 
 		List<DataSetParam> params = dataSet.getParams();
 		if (params != null)
@@ -1408,14 +1453,20 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return null;
 	}
 
-	/**
-	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
-	 * 如果{@linkplain DirectoryFileDataSetEntity#getFileSource()}为{@code null}或其ID为空，
-	 * 则应将其改为{@code null}，因为存储时相关外键不允许空字符串
-	 * 
-	 * @param entity
-	 */
-	protected void trimDirectoryFileDataSetEntityForSave(DirectoryFileDataSetEntity entity)
+	protected void trimSqlDataSetEntity(SqlDataSetEntity entity)
+	{
+		this.managementSupport.trimRef(entity, (t) ->
+		{
+			DtbsSourceConnectionFactory connFactory = t.getDtbsCnFty();
+			return (connFactory == null ? null : connFactory.getDtbsSource());
+
+		}, (t) ->
+		{
+			t.setDtbsCnFty(null);
+		});
+	}
+
+	protected void trimDirectoryFileDataSetEntity(DirectoryFileDataSetEntity entity)
 	{
 		this.managementSupport.trimRef(entity, (t) ->
 		{
@@ -1424,6 +1475,25 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		{
 			t.setFileSource(null);
 		});
+	}
+
+	protected void trimAnalysisProjectAware(AnalysisProjectAwareEntity entity)
+	{
+		this.analysisProjectAwareSupport.trim(entity);
+	}
+
+	protected void checkFileSourceSaveRefPermission(HttpServletRequest request, User user,
+			DirectoryFileDataSetEntity dataSet, DirectoryFileDataSetEntity persist)
+	{
+		this.managementSupport.checkSaveRefPermission(user, dataSet, persist, (t) ->
+		{
+			return t.getFileSource();
+
+		}, (r) ->
+		{
+			return r.getName();
+
+		}, getFileSourceService());
 	}
 
 	public static class AbstractDataSetPreview<T extends DataSet> implements ControllerForm
