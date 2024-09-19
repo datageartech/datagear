@@ -1449,7 +1449,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			}
 		}
 
-		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
+		checkAnalysisProjectSaveRefPermission(request, user, dataSet, persist);
 
 		return null;
 	}
@@ -1481,6 +1481,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	protected void trimAnalysisProjectAware(AnalysisProjectAwareEntity entity)
 	{
 		this.analysisProjectAwareSupport.trim(entity);
+	}
+
+	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
+			AnalysisProjectAwareEntity dataSet, AnalysisProjectAwareEntity persist)
+	{
+		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
 	}
 
 	protected void checkFileSourceSaveRefPermission(HttpServletRequest request, User user,

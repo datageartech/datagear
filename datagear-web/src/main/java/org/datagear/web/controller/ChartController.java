@@ -26,14 +26,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.support.ChartPluginAttributeValueConverter;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataSetBindVO;
+import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
@@ -41,6 +42,7 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.ManagementSupport;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
@@ -51,6 +53,7 @@ import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -80,6 +83,9 @@ public class ChartController extends AbstractChartPluginAwareController
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ManagementSupport managementSupport;
 
 	@Autowired
 	private AnalysisProjectAwareSupport analysisProjectAwareSupport;
@@ -141,6 +147,16 @@ public class ChartController extends AbstractChartPluginAwareController
 		this.userService = userService;
 	}
 
+	public ManagementSupport getManagementSupport()
+	{
+		return managementSupport;
+	}
+
+	public void setManagementSupport(ManagementSupport managementSupport)
+	{
+		this.managementSupport = managementSupport;
+	}
+
 	public AnalysisProjectAwareSupport getAnalysisProjectAwareSupport()
 	{
 		return analysisProjectAwareSupport;
@@ -163,7 +179,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
 		setRequestAnalysisProject(request, response, chart);
@@ -189,10 +205,13 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
-		this.analysisProjectAwareSupport.trim(entity);
+		trimAnalysisProjectAware(entity);
 		inflateHtmlChartWidgetEntity(entity, request);
 
-		checkSaveEntity(entity);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
+
+		if (re != null)
+			return re;
 
 		this.htmlChartWidgetEntityService.add(user, entity);
 
@@ -203,7 +222,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
@@ -227,10 +246,14 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
 
-		this.analysisProjectAwareSupport.trim(entity);
+		trimAnalysisProjectAware(entity);
 		inflateHtmlChartWidgetEntity(entity, request);
 
-		checkSaveEntity(entity);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity,
+				(HtmlChartWidgetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+
+		if (re != null)
+			return re;
 
 		this.htmlChartWidgetEntityService.update(user, entity);
 
@@ -241,16 +264,29 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/copy")
-	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@RequestParam("id") String id)
+	public String copy(HttpServletRequest request, HttpServletResponse response, Model model,
+			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
 		// 统一复制规则，至少有编辑权限才允许复制
-		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-		this.analysisProjectAwareSupport.setNullIfNoPermission(user, chart, getAnalysisProjectService());
+		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 
-		DataSetBind[] dataSetBinds = chart.getDataSetBinds();
+		handlePageModelForCopy(request, model, user, entity);
+		setResultDataFormatModel(entity, model);
+		setDisableSaveShowAttr(request, response, model);
+
+		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+
+		return "/chart/chart_form";
+	}
+
+	protected void handlePageModelForCopy(HttpServletRequest request, Model model, User user,
+			HtmlChartWidgetEntity entity) throws Exception
+	{
+		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
+
+		DataSetBind[] dataSetBinds = entity.getDataSetBinds();
 		if (dataSetBinds != null)
 		{
 			List<DataSetBind> dataSetBindsPermited = new ArrayList<DataSetBind>(dataSetBinds.length);
@@ -258,32 +294,36 @@ public class ChartController extends AbstractChartPluginAwareController
 			for (int i = 0; i < dataSetBinds.length; i++)
 			{
 				DataSetBind dataSetBind = dataSetBinds[i];
-				DataSet dataSet = (dataSetBind == null ? null : dataSetBind.getDataSet());
-				int permission = (dataSet != null ? getDataSetEntityService().getPermission(user, dataSet.getId())
-						: Authorization.PERMISSION_NONE_START);
+				
+				if (dataSetBind == null)
+					continue;
 
-				// 只添加有权限的
-				if (Authorization.canRead(permission))
+				this.managementSupport.setRefNullIfNoPermission(user, dataSetBind, (t) ->
+				{
+					return (DataSetEntity) t.getDataSet();
+
+				}, (t) ->
+				{
+					t.setDataSet(null);
+
+				}, getDataSetEntityService());
+				
+				if (dataSetBind.getDataSet() != null)
 				{
 					dataSetBindsPermited.add(dataSetBind);
 				}
 			}
 
 			dataSetBinds = dataSetBindsPermited.toArray(new DataSetBind[dataSetBindsPermited.size()]);
+			entity.setDataSetBinds(dataSetBinds);
 		}
 
-		chart.setId(null);
-		convertForFormModel(chart, request);
-		setResultDataFormatModel(chart, model);
-		setDisableSaveShowAttr(request, response, model);
-
-		setFormModel(model, chart, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
-		
-		return "/chart/chart_form";
+		entity.setId(null);
+		convertForFormModel(entity, request);
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
@@ -314,8 +354,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/manage")
-	public String manage(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+	public String manage(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
@@ -327,7 +366,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping(value = "/select")
-	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
@@ -340,8 +379,8 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartWidgetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
+			Model springModel, @RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam)
+			throws Exception
 	{
 		User user = getCurrentUser();
 		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
@@ -381,6 +420,53 @@ public class ChartController extends AbstractChartPluginAwareController
 		}
 		
 		return re;
+	}
+
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+			HtmlChartWidgetEntity entity, HtmlChartWidgetEntity persist)
+	{
+		if (isBlank(entity.getName()))
+			throw new IllegalInputException();
+
+		if (isEmpty(entity.getPluginVo()))
+			throw new IllegalInputException();
+
+		checkAnalysisProjectSaveRefPermission(request, user, entity, persist);
+
+		DataSetBind[] dsbs = entity.getDataSetBinds();
+		DataSetBind[] persistDsbs = (persist == null ? null : persist.getDataSetBinds());
+
+		if (dsbs != null && dsbs.length > 0)
+		{
+			for (int i = 0; i < dsbs.length; i++)
+			{
+				DataSetBind dsb = dsbs[i];
+				DataSetBind persistDsb = (persistDsbs == null || i >= persistDsbs.length ? null : persistDsbs[i]);
+
+				this.managementSupport.checkSaveRefPermission(user, dsb, persistDsb, (t) ->
+				{
+					return (DataSetEntity) t.getDataSet();
+
+				}, (r) ->
+				{
+					return r.getName();
+
+				}, getDataSetEntityService());
+			}
+		}
+
+		return null;
+	}
+
+	protected void trimAnalysisProjectAware(AnalysisProjectAwareEntity entity)
+	{
+		this.analysisProjectAwareSupport.trim(entity);
+	}
+
+	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
+			AnalysisProjectAwareEntity dataSet, AnalysisProjectAwareEntity persist)
+	{
+		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
 	}
 
 	protected void setChartPluginView(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
@@ -436,8 +522,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
-	protected boolean setDisableSaveShowAttr(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+	protected boolean setDisableSaveShowAttr(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		boolean disable = isDisableSaveShow(request, response, model);
 		model.addAttribute("disableSaveShow", disable);
@@ -453,8 +538,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	 * @param model
 	 * @return
 	 */
-	protected boolean isDisableSaveShow(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+	protected boolean isDisableSaveShow(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		String pv = request.getParameter("disableSaveShow");
 		return ("1".equals(pv) || "true".equals(pv));
@@ -464,15 +548,6 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		ResultDataFormat rdf = new ResultDataFormat();
 		return rdf;
-	}
-
-	protected void checkSaveEntity(HtmlChartWidgetEntity chart)
-	{
-		if (isBlank(chart.getName()))
-			throw new IllegalInputException();
-
-		if (isEmpty(chart.getPluginVo()))
-			throw new IllegalInputException();
 	}
 	
 	protected void convertForFormModel(HtmlChartWidgetEntity entity, HttpServletRequest request)
@@ -485,7 +560,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
 	}
 	
-	protected void setResultDataFormatModel(HtmlChartWidgetEntity entity, org.springframework.ui.Model model)
+	protected void setResultDataFormatModel(HtmlChartWidgetEntity entity, Model model)
 	{
 		addAttributeForWriteJson(model, "initResultDataFormat",
 				(entity.getResultDataFormat() != null ? entity.getResultDataFormat() : createDefaultResultDataFormat()));
