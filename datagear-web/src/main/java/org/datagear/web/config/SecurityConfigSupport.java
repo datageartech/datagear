@@ -422,8 +422,8 @@ public class SecurityConfigSupport
 	protected ModuleAccess chartModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/chart/add", "/chart/edit", "/chart/copy",
-				"/chart/save", "/chart/delete");
+				"/chart/add", "/chart/saveAdd", "/chart/edit", "/chart/saveEdit", //
+				"/chart/copy", "/chart/delete");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/chart/**");
 
@@ -467,8 +467,7 @@ public class SecurityConfigSupport
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
 				"/analysisProject/add", "/analysisProject/saveAdd",
-				"/analysisProject/edit",
-				"/analysisProject/saveEdit", "/analysisProject/delete");
+				"/analysisProject/edit", "/analysisProject/saveEdit", "/analysisProject/delete");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/analysisProject/**");
 

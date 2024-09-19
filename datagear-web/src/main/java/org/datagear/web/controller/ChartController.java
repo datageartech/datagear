@@ -173,9 +173,33 @@ public class ChartController extends AbstractChartPluginAwareController
 		model.addAttribute("enableResultDataFormat", false);
 		setDisableSaveShowAttr(request, response, model);
 
-		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/chart/chart_form";
+	}
+
+	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HtmlChartWidgetEntity entity)
+	{
+		User user = getCurrentUser();
+
+		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
+
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
+		this.analysisProjectAwareSupport.trim(entity);
+		inflateHtmlChartWidgetEntity(entity, request);
+
+		checkSaveEntity(entity);
+
+		this.htmlChartWidgetEntityService.add(user, entity);
+
+		// 返回参数不应该完全加载插件对象
+		entity.setPluginVo(paramPlugin);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
@@ -189,9 +213,31 @@ public class ChartController extends AbstractChartPluginAwareController
 		setResultDataFormatModel(chart, model);
 		setDisableSaveShowAttr(request, response, model);
 
-		setFormModel(model, chart, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
+		setFormModel(model, chart, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		return "/chart/chart_form";
+	}
+
+	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HtmlChartWidgetEntity entity)
+	{
+		User user = getCurrentUser();
+
+		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
+
+		this.analysisProjectAwareSupport.trim(entity);
+		inflateHtmlChartWidgetEntity(entity, request);
+
+		checkSaveEntity(entity);
+
+		this.htmlChartWidgetEntityService.update(user, entity);
+
+		// 返回参数不应该完全加载插件对象
+		entity.setPluginVo(paramPlugin);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/copy")
@@ -234,40 +280,6 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormModel(model, chart, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE);
 		
 		return "/chart/chart_form";
-	}
-
-	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody HtmlChartWidgetEntity entity)
-	{
-		User user = getCurrentUser();
-
-		this.analysisProjectAwareSupport.trim(entity);
-
-		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
-
-		if (isEmpty(entity.getId()))
-		{
-			entity.setId(IDUtil.randomIdOnTime20());
-			inflateCreateUserAndTime(entity, user);
-			inflateHtmlChartWidgetEntity(entity, request);
-
-			checkSaveEntity(entity);
-
-			this.htmlChartWidgetEntityService.add(user, entity);
-		}
-		else
-		{
-			inflateHtmlChartWidgetEntity(entity, request);
-			checkSaveEntity(entity);
-			this.htmlChartWidgetEntityService.update(user, entity);
-		}
-
-		// 返回参数不应该完全加载插件对象
-		entity.setPluginVo(paramPlugin);
-		
-		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
