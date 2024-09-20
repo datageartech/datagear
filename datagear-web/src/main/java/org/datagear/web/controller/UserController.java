@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -129,23 +130,26 @@ public class UserController extends AbstractController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, Model model)
 	{
-		User user = prepareAddUser(request, model);
-		setAddUserRoles(request, model, user);
-		setFormModel(model, user, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		User entity = createAdd(request, model);
+
+		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 		model.addAttribute("enablePassword", true);
-		setUserPasswordStrengthInfo(model);
+		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
 	}
 
-	protected User prepareAddUser(HttpServletRequest request, org.springframework.ui.Model model)
+	protected User createAdd(HttpServletRequest request, Model model)
 	{
-		return new User();
+		User entity = new User();
+		setAddUserRoles(request, model, entity);
+
+		return entity;
 	}
 
-	protected void setAddUserRoles(HttpServletRequest request, org.springframework.ui.Model model, User user)
+	protected void setAddUserRoles(HttpServletRequest request, Model model, User entity)
 	{
 		Set<Role> dftRoles = this.roleSpec.buildRolesByIds(this.applicationProperties.getDefaultRoleAdd(), true);
 		Set<Role> addRoles = new HashSet<Role>(dftRoles.size());
@@ -157,43 +161,46 @@ public class UserController extends AbstractController
 				addRoles.add(role);
 		}
 
-		user.setRoles(addRoles);
+		entity.setRoles(addRoles);
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody User user)
+			@RequestBody User entity)
 	{
-		if (isBlank(user.getName()) || isBlank(user.getPassword()))
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
+
+		if (re != null)
+			return re;
+
+		if (isBlank(entity.getPassword()))
 			throw new IllegalInputException();
 
-		User namedUser = this.userService.getByNameNoPassword(user.getName());
+		User namedEntity = this.userService.getByNameNoPassword(entity.getName());
 
-		if (namedUser != null)
-			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+		if (namedEntity != null)
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", entity.getName());
 
-		user.setId(IDUtil.randomIdOnTime20());
+		entity.setId(IDUtil.randomIdOnTime20());
 		// 禁用新建管理员账号功能
-		user.setAdmin(User.isAdminUser(user));
-		inflateCreateTime(user);
+		entity.setAdmin(User.isAdminUser(entity));
+		inflateCreateTime(entity);
 
-		saveAddUser(user);
+		saveAddUser(entity);
 
-		return optSuccessDataResponseEntity(request, user);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
-		User user = this.userService.getByIdNoPassword(id);
+		User entity = getByIdForEdit(this.userService, id);
+		convertToFormModel(request, model, entity);
 
-		if (user == null)
-			throw new RecordNotFoundException();
-
-		setFormModel(model, user, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
-		setUserPasswordStrengthInfo(model);
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
 	}
@@ -201,38 +208,36 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody User user)
+			@RequestBody User entity)
 	{
-		if (isBlank(user.getName()))
-			throw new IllegalInputException();
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
-		User namedUser = this.userService.getByNameNoPassword(user.getName());
+		if (re != null)
+			return re;
 
-		if (namedUser != null && !namedUser.getId().equals(user.getId()))
-			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+		User namedEntity = this.userService.getByNameNoPassword(entity.getName());
+
+		if (namedEntity != null && !namedEntity.getId().equals(entity.getId()))
+			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", entity.getName());
 
 		// 禁用新建管理员账号功能
-		user.setAdmin(User.isAdminUser(user));
+		entity.setAdmin(User.isAdminUser(entity));
 
-		saveEditUser(user);
+		saveEditUser(entity);
 
-		return optSuccessDataResponseEntity(request, user);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/editPsd")
 	public String editPassword(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id)
+			Model model, @RequestParam("id") String id)
 	{
-		User user = this.userService.getByIdSimple(id);
+		User entity = this.userService.getByIdSimple(id);
+		checkNonNullEntity(entity);
 
-		if (user == null)
-			throw new RecordNotFoundException();
-
-		user = user.cloneNoPassword();
-
-		setFormModel(model, toEditPsdForm(user), "editPassword", "saveEditPsd");
+		setFormModel(model, toEditPsdForm(entity), "editPassword", "saveEditPsd");
 		model.addAttribute("enableOldPassword", false);
-		setUserPasswordStrengthInfo(model);
+		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_psd_form";
 	}
@@ -251,22 +256,20 @@ public class UserController extends AbstractController
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
-		User user = this.userService.getByIdNoPassword(id);
+		User entity = getByIdForView(this.userService, id);
+		convertToFormModel(request, model, entity);
 
-		if (user == null)
-			throw new RecordNotFoundException();
-
-		setFormModel(model, user, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
-		setUserPasswordStrengthInfo(model);
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
 	}
 
 	@RequestMapping("/delete")
-	public String delete(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String delete(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String[] ids)
 	{
 		if (isEmpty(ids))
@@ -305,7 +308,7 @@ public class UserController extends AbstractController
 
 	@RequestMapping("/manage")
 	public String manage(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		setQueryDataUrl(model, "/user/pagingQueryData");
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
@@ -315,7 +318,7 @@ public class UserController extends AbstractController
 	}
 
 	@RequestMapping(value = "/select")
-	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setQueryDataUrl(model, "/user/pagingQueryData");
 		setSelectAction(request, model);
@@ -326,29 +329,30 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<User> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			final Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
 			throws Exception
 	{
 		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+
 		PagingData<User> pagingData = this.userService.pagingQuery(pagingQuery);
+		handleQueryData(request, pagingData.getItems());
+
 		return pagingData;
 	}
 
 	@RequestMapping("/personalSet")
 	public String personalSet(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
-		User operator = getCurrentUser();
+		User user = getCurrentUser();
 
-		User user = this.userService.getByIdNoPassword(operator.getId());
-
-		if (user == null)
-			throw new RecordNotFoundException();
+		User entity = this.userService.getByIdNoPassword(user.getId());
+		checkNonNullEntity(entity);
 
 		model.addAttribute("disableRoles", true);
 		model.addAttribute("disableEditName", getApplicationProperties().isDisablePersonalSetName());
-		setFormModel(model, user, "personalSet", "savePersonalSet");
-		setUserPasswordStrengthInfo(model);
+		setFormModel(model, entity, "personalSet", "savePersonalSet");
+		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
 	}
@@ -356,49 +360,48 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/savePersonalSet", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savePersonalSet(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody User user)
+			@RequestBody User entity)
 	{
-		if (isBlank(user.getName()))
+		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
 
-		User operator = getCurrentUser();
-		user.setId(operator.getId());
+		User user = getCurrentUser();
+
+		entity.setId(user.getId());
 
 		if (getApplicationProperties().isDisablePersonalSetName())
 		{
-			User u = getByIdForView(this.userService, user.getId());
-			user.setName(u.getName());
+			User persist = getByIdForView(this.userService, entity.getId());
+			entity.setName(persist.getName());
 		}
 		else
 		{
-			User namedUser = this.userService.getByNameNoPassword(user.getName());
+			User namedEntity = this.userService.getByNameNoPassword(entity.getName());
 
-			if (namedUser != null && !namedUser.getId().equals(user.getId()))
-				return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", user.getName());
+			if (namedEntity != null && !namedEntity.getId().equals(entity.getId()))
+				return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", entity.getName());
 		}
 
 		// 禁用新建管理员账号功能
-		user.setAdmin(User.isAdminUser(user));
+		entity.setAdmin(User.isAdminUser(entity));
 
-		savePersonalSetUser(user);
+		savePersonalSetUser(entity);
 
 		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/personalPsd")
 	public String personalPsd(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
-		User operator = getCurrentUser();
+		User user = getCurrentUser();
 
-		User user = this.userService.getByIdSimple(operator.getId());
+		User entity = this.userService.getByIdSimple(user.getId());
+		checkNonNullEntity(entity);
 
-		if (user == null)
-			throw new RecordNotFoundException();
-
-		setFormModel(model, toPersonalEditPsdForm(user), "editPassword", "savePersonalPsd");
+		setFormModel(model, toPersonalEditPsdForm(entity), "editPassword", "savePersonalPsd");
 		model.addAttribute("enableOldPassword", true);
-		setUserPasswordStrengthInfo(model);
+		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_psd_form";
 	}
@@ -411,17 +414,36 @@ public class UserController extends AbstractController
 		if (isBlank(form.getOldPassword()) || isBlank(form.getPassword()))
 			throw new IllegalInputException();
 
-		User operator = getCurrentUser();
+		User user = getCurrentUser();
 
-		if (!this.userService.isPasswordMatchById(operator.getId(), form.getOldPassword()))
+		if (!this.userService.isPasswordMatchById(user.getId(), form.getOldPassword()))
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "oldPasswordError");
 
-		this.userService.updatePasswordById(operator.getId(), form.getPassword(), true);
+		this.userService.updatePasswordById(user.getId(), form.getPassword(), true);
 
 		return optSuccessResponseEntity(request);
 	}
 
-	protected void setUserPasswordStrengthInfo(org.springframework.ui.Model model)
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User entity)
+	{
+		if (isBlank(entity.getName()))
+			throw new IllegalInputException();
+
+		return null;
+	}
+
+	protected void convertToFormModel(HttpServletRequest request, Model model, User entity)
+	{
+		entity.clearPassword();
+	}
+
+	protected void handleQueryData(HttpServletRequest request, List<User> items)
+	{
+		for (User item : items)
+			item.clearPassword();
+	}
+
+	protected void setUserPasswordStrengthInfo(HttpServletRequest request, Model model)
 	{
 		ApplicationProperties properties = getApplicationProperties();
 
@@ -429,38 +451,38 @@ public class UserController extends AbstractController
 		model.addAttribute("userPasswordStrengthTip", properties.getUserPasswordStrengthTip());
 	}
 
-	protected EditPsdForm toEditPsdForm(User user)
+	protected EditPsdForm toEditPsdForm(User entity)
 	{
-		EditPsdForm fm = new EditPsdForm(user.getId(), user.getName());
+		EditPsdForm fm = new EditPsdForm(entity.getId(), entity.getName());
 		return fm;
 	}
 
-	protected PersonalEditPsdForm toPersonalEditPsdForm(User user)
+	protected PersonalEditPsdForm toPersonalEditPsdForm(User entity)
 	{
-		PersonalEditPsdForm fm = new PersonalEditPsdForm(user.getId(), user.getName());
+		PersonalEditPsdForm fm = new PersonalEditPsdForm(entity.getId(), entity.getName());
 		return fm;
 	}
 
-	protected void saveAddUser(User user)
+	protected void saveAddUser(User entity)
 	{
-		this.userService.add(user);
+		this.userService.add(entity);
 	}
 
-	protected void saveEditUser(User user)
+	protected void saveEditUser(User entity)
 	{
-		this.userService.update(user);
+		this.userService.update(entity);
 	}
 
-	protected void savePersonalSetUser(User user)
+	protected void savePersonalSetUser(User entity)
 	{
-		this.userService.updateIgnoreRole(user);
+		this.userService.updateIgnoreRole(entity);
 	}
 
-	protected List<Role> toUserRolesList(User user)
+	protected List<Role> toUserRolesList(User entity)
 	{
 		List<Role> list = new ArrayList<Role>();
 
-		Set<Role> roles = (user == null ? null : user.getRoles());
+		Set<Role> roles = (entity == null ? null : entity.getRoles());
 		if (roles != null)
 			list.addAll(roles);
 

@@ -17,6 +17,8 @@
 
 package org.datagear.web.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +32,7 @@ import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,86 +67,101 @@ public class AnalysisProjectController extends AbstractController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, Model model)
 	{
-		AnalysisProject analysisProject = new AnalysisProject();
+		AnalysisProject analysisProject = createAdd(request, model);
 
 		setFormModel(model, analysisProject, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/analysisProject/analysisProject_form";
 	}
 
+	protected AnalysisProject createAdd(HttpServletRequest request, Model model)
+	{
+		return new AnalysisProject();
+	}
+
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody AnalysisProject analysisProject)
+			@RequestBody AnalysisProject entity)
 	{
-		checkSaveEntity(analysisProject);
-
 		User user = getCurrentUser();
 
-		analysisProject.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(analysisProject, user);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
-		this.analysisProjectService.add(analysisProject);
+		if (re != null)
+			return re;
 
-		return optSuccessDataResponseEntity(request, analysisProject);
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
+
+		this.analysisProjectService.add(entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		AnalysisProject analysisProject = getByIdForEdit(this.analysisProjectService, user, id);
+
+		AnalysisProject entity = getByIdForEdit(this.analysisProjectService, user, id);
+		convertToFormModel(request, model, entity);
 		
-		setFormModel(model, analysisProject, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		return "/analysisProject/analysisProject_form";
 	}
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody AnalysisProject analysisProject)
+			@RequestBody AnalysisProject entity)
 	{
-		checkSaveEntity(analysisProject);
-
 		User user = getCurrentUser();
 
-		this.analysisProjectService.update(user, analysisProject);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
-		return optSuccessDataResponseEntity(request, analysisProject);
+		if (re != null)
+			return re;
+
+		this.analysisProjectService.update(user, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		AnalysisProject analysisProject = getByIdForView(this.analysisProjectService, user, id);
 
-		setFormModel(model, analysisProject, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		AnalysisProject entity = getByIdForView(this.analysisProjectService, user, id);
+		convertToFormModel(request, model, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/analysisProject/analysisProject_form";
 	}
 
 	@RequestMapping(value = "/getByIdSilently", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public AnalysisProject getByIdSilently(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id)
+			Model model, @RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
 
-		AnalysisProject analysisProject = null;
+		AnalysisProject entity = null;
 
 		try
 		{
-			analysisProject = this.analysisProjectService.getById(user, id);
+			entity = this.analysisProjectService.getById(user, id);
 		}
 		catch (Throwable t)
 		{
 		}
 
-		return analysisProject;
+		return entity;
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -164,7 +182,7 @@ public class AnalysisProjectController extends AbstractController
 
 	@RequestMapping("/manage")
 	public String manage(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
@@ -172,7 +190,7 @@ public class AnalysisProjectController extends AbstractController
 	}
 
 	@RequestMapping(value = "/select")
-	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setSelectAction(request, model);
 		return "/analysisProject/analysisProject_table";
@@ -181,7 +199,7 @@ public class AnalysisProjectController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<AnalysisProject> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
+			final Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = getCurrentUser();
@@ -189,13 +207,25 @@ public class AnalysisProjectController extends AbstractController
 
 		PagingData<AnalysisProject> pagingData = this.analysisProjectService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());
+		handleQueryData(request, pagingData.getItems());
 
 		return pagingData;
 	}
 
-	protected void checkSaveEntity(AnalysisProject analysisProject)
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+			AnalysisProject entity)
 	{
-		if (isBlank(analysisProject.getName()))
+		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
+
+		return null;
+	}
+
+	protected void convertToFormModel(HttpServletRequest request, Model model, AnalysisProject entity)
+	{
+	}
+
+	protected void handleQueryData(HttpServletRequest request, List<AnalysisProject> items)
+	{
 	}
 }

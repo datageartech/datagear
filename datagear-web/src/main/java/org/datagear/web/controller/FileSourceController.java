@@ -74,28 +74,36 @@ public class FileSourceController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		FileSource fileSource = new FileSource();
+		FileSource entity = createAdd(request, model);
 
-		setFormModel(model, fileSource, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/fileSource/fileSource_form";
+	}
+
+	protected FileSource createAdd(HttpServletRequest request, Model model)
+	{
+		return new FileSource();
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody FileSource fileSource)
+			@RequestBody FileSource entity)
 	{
-		checkSaveEntity(fileSource);
-
 		User user = getCurrentUser();
 
-		fileSource.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(fileSource, user);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
-		this.fileSourceService.add(fileSource);
+		if (re != null)
+			return re;
 
-		return optSuccessDataResponseEntity(request, fileSource);
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
+
+		this.fileSourceService.add(entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
@@ -103,9 +111,11 @@ public class FileSourceController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		FileSource fileSource = getByIdForEdit(this.fileSourceService, user, id);
 
-		setFormModel(model, fileSource, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		FileSource entity = getByIdForEdit(this.fileSourceService, user, id);
+		convertToFormModel(request, model, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		return "/fileSource/fileSource_form";
 	}
@@ -113,15 +123,18 @@ public class FileSourceController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody FileSource fileSource)
+			@RequestBody FileSource entity)
 	{
-		checkSaveEntity(fileSource);
-
 		User user = getCurrentUser();
 
-		this.fileSourceService.update(user, fileSource);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
-		return optSuccessDataResponseEntity(request, fileSource);
+		if (re != null)
+			return re;
+
+		this.fileSourceService.update(user, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
@@ -129,16 +142,23 @@ public class FileSourceController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		FileSource fileSource = getByIdForView(this.fileSourceService, user, id);
 
-		setFormModel(model, fileSource, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		FileSource entity = getByIdForView(this.fileSourceService, user, id);
+		convertToFormModel(request, model, entity);
+		handleViewShowDirectory(request, model, user, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
+		return "/fileSource/fileSource_form";
+	}
+
+	protected void handleViewShowDirectory(HttpServletRequest request, Model model, User user, FileSource entity)
+	{
 		boolean isShowDirectory = isShowDirectory(request, user);
 		setIsShowDirectory(request, model, isShowDirectory);
 		
 		if(!isShowDirectory)
-			fileSource.setDirectory(null);
-		
-		return "/fileSource/fileSource_form";
+			entity.setDirectory(null);
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -159,7 +179,7 @@ public class FileSourceController extends AbstractController
 
 	@RequestMapping("/manage")
 	public String manage(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
@@ -187,10 +207,7 @@ public class FileSourceController extends AbstractController
 
 		PagingData<FileSource> pagingData = this.fileSourceService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());
-
-		List<FileSource> items = pagingData.getItems();
-		for (FileSource item : items)
-			item.setDirectory(null);
+		handleQueryData(request, pagingData.getItems());
 		
 		return pagingData;
 	}
@@ -227,7 +244,8 @@ public class FileSourceController extends AbstractController
 		return new DirectoryQuerySupport(directory);
 	}
 
-	protected void checkSaveEntity(FileSource fileSource)
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+			FileSource fileSource)
 	{
 		if (isBlank(fileSource.getDirectory()))
 			throw new IllegalInputException();
@@ -238,6 +256,8 @@ public class FileSourceController extends AbstractController
 		// if (!directory.exists())
 		// throw new
 		// FileSourceDirectoryNotFoundException(fileSource.getDirectory());
+
+		return null;
 	}
 	
 	protected void setIsShowDirectory(HttpServletRequest request, Model model, boolean isShowDirectory)
@@ -248,5 +268,15 @@ public class FileSourceController extends AbstractController
 	protected boolean isShowDirectory(HttpServletRequest request, User user)
 	{
 		return user.isAdmin();
+	}
+
+	protected void convertToFormModel(HttpServletRequest request, Model model, FileSource entity)
+	{
+	}
+
+	protected void handleQueryData(HttpServletRequest request, List<FileSource> items)
+	{
+		for (FileSource item : items)
+			item.setDirectory(null);
 	}
 }

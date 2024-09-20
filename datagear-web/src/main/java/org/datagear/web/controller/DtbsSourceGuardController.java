@@ -32,6 +32,7 @@ import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -66,39 +67,50 @@ public class DtbsSourceGuardController extends AbstractController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, Model model)
 	{
-		DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard();
-		dtbsSourceGuard.setUserPattern(AsteriskPatternMatcher.ALL_PATTERN);
-		dtbsSourceGuard.setPermitted(false);
+		DtbsSourceGuard entity = createAdd(request, model);
 
-		setFormModel(model, dtbsSourceGuard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dtbsSourceGuard/dtbsSourceGuard_form";
+	}
+
+	protected DtbsSourceGuard createAdd(HttpServletRequest request, Model model)
+	{
+		DtbsSourceGuard entity = new DtbsSourceGuard();
+		entity.setUserPattern(AsteriskPatternMatcher.ALL_PATTERN);
+		entity.setPermitted(false);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSourceGuard dtbsSourceGuard)
+			@RequestBody DtbsSourceGuard entity)
 	{
-		checkSaveEntity(dtbsSourceGuard);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
-		dtbsSourceGuard.setId(IDUtil.randomIdOnTime20());
-		inflateCreateTime(dtbsSourceGuard);
+		if (re != null)
+			return re;
 
-		this.dtbsSourceGuardService.add(dtbsSourceGuard);
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateTime(entity);
 
-		return optSuccessDataResponseEntity(request, dtbsSourceGuard);
+		this.dtbsSourceGuardService.add(entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
-		DtbsSourceGuard dtbsSourceGuard = getByIdForEdit(this.dtbsSourceGuardService, id);
+		DtbsSourceGuard entity = getByIdForEdit(this.dtbsSourceGuardService, id);
+		convertToFormModel(request, model, entity);
 
-		setFormModel(model, dtbsSourceGuard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
@@ -106,22 +118,26 @@ public class DtbsSourceGuardController extends AbstractController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSourceGuard dtbsSourceGuard)
+			@RequestBody DtbsSourceGuard entity)
 	{
-		checkSaveEntity(dtbsSourceGuard);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
-		this.dtbsSourceGuardService.update(dtbsSourceGuard);
+		if (re != null)
+			return re;
 
-		return optSuccessDataResponseEntity(request, dtbsSourceGuard);
+		this.dtbsSourceGuardService.update(entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
-		DtbsSourceGuard dtbsSourceGuard = getByIdForView(this.dtbsSourceGuardService, id);
+		DtbsSourceGuard entity = getByIdForView(this.dtbsSourceGuardService, id);
+		convertToFormModel(request, model, entity);
 
-		setFormModel(model, dtbsSourceGuard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
 		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
@@ -138,7 +154,7 @@ public class DtbsSourceGuardController extends AbstractController
 
 	@RequestMapping("/manage")
 	public String manage(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
@@ -148,25 +164,19 @@ public class DtbsSourceGuardController extends AbstractController
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DtbsSourceGuard> queryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
+			final Model springModel,
 			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
-		List<DtbsSourceGuard> dtbsSourceGuards = this.dtbsSourceGuardService.query(pagingQuery);
-		DtbsSourceGuard.sortByPriority(dtbsSourceGuards);
+		List<DtbsSourceGuard> items = this.dtbsSourceGuardService.query(pagingQuery);
+		handleQueryData(request, items);
 
-		return dtbsSourceGuards;
-	}
-
-	protected void checkSaveEntity(DtbsSourceGuard dtbsSourceGuard)
-	{
-		if (isBlank(dtbsSourceGuard.getName()) || isBlank(dtbsSourceGuard.getPattern()))
-			throw new IllegalInputException();
+		return items;
 	}
 
 	@RequestMapping("/test")
-	public String test(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String test(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setFormAction(model, "test", "testExecute");
 
@@ -180,5 +190,22 @@ public class DtbsSourceGuardController extends AbstractController
 	{
 		boolean permitted = this.dtbsSourceGuardService.isPermitted(form);
 		return optSuccessDataResponseEntity(request, permitted);
+	}
+
+	protected void convertToFormModel(HttpServletRequest request, Model model, DtbsSourceGuard entity)
+	{
+	}
+
+	protected void handleQueryData(HttpServletRequest request, List<DtbsSourceGuard> items)
+	{
+		DtbsSourceGuard.sortByPriority(items);
+	}
+
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, DtbsSourceGuard entity)
+	{
+		if (isBlank(entity.getName()) || isBlank(entity.getPattern()))
+			throw new IllegalInputException();
+
+		return null;
 	}
 }

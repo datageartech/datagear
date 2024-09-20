@@ -214,9 +214,7 @@ public abstract class AbstractController extends MessageSourceSupport
 	protected <ID, T extends Entity<ID>> T getByIdForEdit(EntityService<ID, T> service, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getById(id);
-
-		if (entity == null)
-			throw new RecordNotFoundException();
+		checkNonNullEntity(entity);
 
 		return entity;
 	}
@@ -226,9 +224,7 @@ public abstract class AbstractController extends MessageSourceSupport
 			User user, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getByIdForEdit(user, id);
-
-		if (entity == null)
-			throw new RecordNotFoundException();
+		checkNonNullEntity(entity);
 
 		return entity;
 	}
@@ -238,9 +234,7 @@ public abstract class AbstractController extends MessageSourceSupport
 			User user, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getById(user, id);
-
-		if (entity == null)
-			throw new RecordNotFoundException();
+		checkNonNullEntity(entity);
 
 		return entity;
 	}
@@ -248,13 +242,17 @@ public abstract class AbstractController extends MessageSourceSupport
 	protected <ID, T extends Entity<ID>> T getByIdForView(EntityService<ID, T> service, ID id) throws RecordNotFoundException
 	{
 		T entity = service.getById(id);
-
-		if (entity == null)
-			throw new RecordNotFoundException();
+		checkNonNullEntity(entity);
 
 		return entity;
 	}
 	
+	protected void checkNonNullEntity(Object entity) throws RecordNotFoundException
+	{
+		if (entity == null)
+			throw new RecordNotFoundException();
+	}
+
 	/**
 	 * 设置创建时间。
 	 * 

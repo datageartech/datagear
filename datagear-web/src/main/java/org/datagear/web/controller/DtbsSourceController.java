@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Authorization;
-import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DtbsSourceGuardService;
@@ -48,6 +47,7 @@ import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -96,106 +96,112 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	}
 
 	@RequestMapping("/add")
-	public String add(org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, Model model)
 	{
-		DtbsSource dtbsSource = new DtbsSource();
+		DtbsSource dtbsSource = createAdd(request, model);
+
 		setFormModel(model, dtbsSource, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
 
+	protected DtbsSource createAdd(HttpServletRequest request, Model model)
+	{
+		return new DtbsSource();
+	}
+
 	@RequestMapping("/copy")
-	public String copy(org.springframework.ui.Model model, @RequestParam("id") String id)
+	public String copy(HttpServletRequest request, Model model, @RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
-		DtbsSource dtbsSource = getByIdForCopy(user, id);
 
-		setFormModel(model, dtbsSource, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+		// 敏感信息较多，至少有编辑权限才允许复制
+		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
+		handleCopyFormModel(request, model, user, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		return "/dtbsSource/dtbsSource_form";
 	}
 
-	protected DtbsSource getByIdForCopy(User user, String id)
+	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user, DtbsSource entity)
+			throws Exception
 	{
-		// 敏感信息较多，至少有编辑权限才允许复制
-		DtbsSource dtbsSource = getByIdForEdit(getDtbsSourceService(), user, id);
-
-		dtbsSource.setId(null);
-		dtbsSource.clearPassword();
-		dtbsSource.setDataPermission(DataPermissionEntity.PERMISSION_NOT_LOADED);
-		
-		return dtbsSource;
+		entity.setId(null);
+		convertToFormModel(request, model, entity);
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSource dtbsSource)
+			@RequestBody DtbsSource entity)
 	{
 		User user = getCurrentUser();
 
-		if (isBlank(dtbsSource.getTitle()) || isBlank(dtbsSource.getUrl()))
+		if (isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalInputException();
 
-		dtbsSource.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(dtbsSource, user);
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
 
-		getDtbsSourceService().add(user, dtbsSource);
+		getDtbsSourceService().add(user, entity);
 
-		return optSuccessDataResponseEntity(request, dtbsSource);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DtbsSource dtbsSource = getByIdForEdit(getDtbsSourceService(), user, id);
-		dtbsSource.clearPassword();
 		
-		setFormModel(model, dtbsSource, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
+		convertToFormModel(request, model, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		return "/dtbsSource/dtbsSource_form";
 	}
 
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSource dtbsSource)
+			@RequestBody DtbsSource entity)
 	{
-		if (isBlank(dtbsSource.getTitle()) || isBlank(dtbsSource.getUrl()))
+		if (isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		DtbsSource old = getDtbsSourceService().getById(dtbsSource.getId());
+		DtbsSource persist = getDtbsSourceService().getById(entity.getId());
 
-		boolean updated = getDtbsSourceService().update(user, dtbsSource);
+		boolean updated = getDtbsSourceService().update(user, entity);
 
 		// 如果URL或者用户变更了，则需要清除缓存
-		if (updated && old != null
-				&& (!StringUtil.isEquals(dtbsSource.getUrl(), old.getUrl())
-						|| !StringUtil.isEquals(dtbsSource.getUser(), old.getUser())
-						|| !StringUtil.isEquals(dtbsSource.getSchemaName(), old.getSchemaName())))
+		if (updated && persist != null
+				&& (!StringUtil.isEquals(entity.getUrl(), persist.getUrl())
+						|| !StringUtil.isEquals(entity.getUser(), persist.getUser())
+						|| !StringUtil.isEquals(entity.getSchemaName(), persist.getSchemaName())))
 		{
-			getDtbsSourceTableCache().invalidate(dtbsSource.getId());
+			getDtbsSourceTableCache().invalidate(entity.getId());
 		}
 
-		return optSuccessDataResponseEntity(request, dtbsSource);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
-		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
-		dtbsSource.clearPassword();
 
-		boolean hideSensitiveInfo = !Authorization.canEdit(dtbsSource.getDataPermission());
+		DtbsSource entity = getByIdForView(getDtbsSourceService(), user, id);
+		convertToFormModel(request, model, entity);
+
+		boolean hideSensitiveInfo = !Authorization.canEdit(entity.getDataPermission());
 
 		if (hideSensitiveInfo)
-			clearSensitiveInfo(dtbsSource);
+			clearSensitiveInfo(entity);
 
-		setFormModel(model, dtbsSource, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		model.addAttribute("hideSensitiveInfo", hideSensitiveInfo);
 
 		return "/dtbsSource/dtbsSource_form";
@@ -223,7 +229,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	}
 
 	@RequestMapping(value = "/manage")
-	public String manage(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String manage(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
@@ -231,7 +237,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	}
 
 	@RequestMapping(value = "/select")
-	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setSelectAction(request, model);
 		return "/dtbsSource/dtbsSource_table";
@@ -245,10 +251,10 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		User user = getCurrentUser();
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		List<DtbsSource> dtbsSources = getDtbsSourceService().query(user, pagingQuery);
-		processQueryResult(request, dtbsSources);
+		List<DtbsSource> items = getDtbsSourceService().query(user, pagingQuery);
+		handleQueryData(request, items);
 
-		return dtbsSources;
+		return items;
 	}
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
@@ -260,7 +266,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<DtbsSource> pagingData = getDtbsSourceService().pagingQuery(user, pagingQuery);
-		processQueryResult(request, pagingData.getItems());
+		handleQueryData(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -268,28 +274,28 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping(value = "/testConnection", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> testConnection(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DtbsSource dtbsSource) throws Exception
+			@RequestBody DtbsSource entity) throws Exception
 	{
-		if (isBlank(dtbsSource.getTitle()) || isBlank(dtbsSource.getUrl()))
+		if (isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		if (!this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(dtbsSource)))
+		if (!this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(entity)))
 			throw new SaveDtbsSourcePermissionDeniedException();
 
 		// 用户选定驱动程序时
-		if (!isEmpty(dtbsSource.getDriverEntity()) && !isEmpty(dtbsSource.getDriverEntity().getId()))
+		if (!isEmpty(entity.getDriverEntity()) && !isEmpty(entity.getDriverEntity().getId()))
 		{
-			DriverEntity driverEntity = this.driverEntityManager.get(dtbsSource.getDriverEntity().getId());
-			dtbsSource.setDriverEntity(driverEntity);
+			DriverEntity driverEntity = this.driverEntityManager.get(entity.getDriverEntity().getId());
+			entity.setDriverEntity(driverEntity);
 		}
 
 		Connection cn = null;
 
 		try
 		{
-			cn = getDtbsSourceConnection(dtbsSource);
+			cn = getDtbsSourceConnection(entity);
 		}
 		finally
 		{
@@ -302,17 +308,17 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping(value = "/{dtbsSourceId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
+			Model model, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
-		List<SimpleTable> tables = new ReturnDtbsSourceConnExecutor<List<SimpleTable>>(request, response, springModel,
+		List<SimpleTable> tables = new ReturnDtbsSourceConnExecutor<List<SimpleTable>>(request, response, model,
 				dtbsSourceId, true)
 		{
 			@Override
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource dtbsSource) throws Throwable
+					Model springModel, DtbsSource dtbsSource) throws Throwable
 			{
 				Connection cn = getConnection();
 				List<SimpleTable> tables = getDbMetaResolver().getDataTables(cn);
@@ -338,7 +344,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping(value = "/{dtbsSourceId}/table/{tableName}", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Table getTable(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
+			Model model, @PathVariable("dtbsSourceId") String dtbsSourceId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = "reload", required = false) Boolean forceReload) throws Throwable
 	{
@@ -347,11 +353,11 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		ReturnDtbsSourceConnTableExecutor<Table> executor = new ReturnDtbsSourceConnTableExecutor<Table>(request,
 				response,
-				springModel, dtbsSourceId, tableName, true)
+				model, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Exception
+					Model springModel, DtbsSource dtbsSource, Table table) throws Exception
 			{
 				return table;
 			}
@@ -361,17 +367,17 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	}
 
 	@RequestMapping("/{dtbsSourceId}/tableMeta/{tableName}")
-	public String viewTableMeta(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model springModel,
+	public String viewTableMeta(HttpServletRequest request, HttpServletResponse response, Model model,
 			@PathVariable("dtbsSourceId") String dtbsSourceId, @PathVariable("tableName") String tableName)
 			throws Throwable
 	{
 		ReturnDtbsSourceConnTableExecutor<Table> executor = new ReturnDtbsSourceConnTableExecutor<Table>(request,
 				response,
-				springModel, dtbsSourceId, tableName, true)
+				model, dtbsSourceId, tableName, true)
 		{
 			@Override
 			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, DtbsSource dtbsSource, Table table) throws Exception
+					Model springModel, DtbsSource dtbsSource, Table table) throws Exception
 			{
 				return table;
 			}
@@ -379,14 +385,14 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		
 		Table table = executor.execute();
 		
-		setFormModel(springModel, table, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, table, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
 		return "/dtbsSource/dtbsSource_dbtable_meta";
 	}
 
 	@RequestMapping("/dbinfo")
 	public String viewDbMeta(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Throwable
+			Model model, @RequestParam("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
 		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
@@ -413,18 +419,23 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			JdbcUtil.closeConnection(cn);
 		}
 
-		setFormModel(springModel, di, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, di, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		return "/dtbsSource/dtbsSource_dbinfo";
 	}
 	
+	protected void convertToFormModel(HttpServletRequest request, Model model, DtbsSource entity)
+	{
+		entity.clearPassword();
+	}
+
 	/**
 	 * 处理查询结果。
 	 * 
 	 * @param request
 	 * @param dtbsSources
 	 */
-	protected void processQueryResult(HttpServletRequest request, List<DtbsSource> dtbsSources)
+	protected void handleQueryData(HttpServletRequest request, List<DtbsSource> dtbsSources)
 	{
 		if (dtbsSources != null && !dtbsSources.isEmpty())
 		{
