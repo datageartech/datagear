@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,6 +67,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.function.OnceSupplier;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebDashboardQueryConverter;
@@ -501,7 +503,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		{
 			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) entity;
 
-			this.managementSupport.setRefNullIfNoPermission(user, dataSetEntity, (t) ->
+			this.managementSupport.setRefNullIfDenied(user, dataSetEntity, (t) ->
 			{
 				DtbsSourceConnectionFactory connectionFactory = t.getConnectionFactory();
 				return (connectionFactory == null ? null : connectionFactory.getDtbsSource());
@@ -514,7 +516,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		{
 			DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) entity;
 
-			this.managementSupport.setRefNullIfNoPermission(user, dataSetEntity, (t) ->
+			this.managementSupport.setRefNullIfDenied(user, dataSetEntity, (t) ->
 			{
 				return t.getFileSource();
 
@@ -531,7 +533,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			dataSetEntity.setDisplayName(null);
 		}
 
-		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 		entity.setId(null);
 
 		convertToFormModel(request, model, entity);
@@ -564,7 +566,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimSqlDataSetEntity(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, entity,
-				(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -584,7 +589,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimAnalysisProjectAware(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, entity,
-				(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -606,7 +614,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimDirectoryFileDataSetEntity(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, entity,
-				(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -629,7 +640,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimDirectoryFileDataSetEntity(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, entity,
-				(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -650,7 +664,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimAnalysisProjectAware(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, entity,
-				(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -672,7 +689,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimDirectoryFileDataSetEntity(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, entity,
-				(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -695,7 +715,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		trimAnalysisProjectAware(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, entity,
-				(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (responseEntity != null)
 			return responseEntity;
@@ -892,8 +915,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveSqlDataSetEntity(request, user, entity,
-					(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 		
 		DtbsSourceConnectionFactory connFactory = entity.getDtbsCnFty();
@@ -950,8 +978,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveJsonValueDataSetEntity(request, user, entity,
-					(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
@@ -988,8 +1021,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveJsonFileDataSetEntity(request, user, entity,
-					(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 
 		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
@@ -1027,8 +1065,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveExcelDataSetEntity(request, user, entity,
-					(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 
 		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
@@ -1064,8 +1107,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveCsvValueDataSetEntity(request, user, entity,
-					(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
@@ -1101,8 +1149,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveCsvFileDataSetEntity(request, user, entity,
-					(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 
 		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
@@ -1138,8 +1191,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 编辑时
 		else
 		{
+			String id = entity.getId();
+
 			checkSaveHttpDataSetEntity(request, user, entity,
-					(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+					new OnceSupplier<>(() ->
+					{
+						return (HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, id);
+					}));
 		}
 
 		entity.setHttpClient(getDataSetEntityService().getHttpClient());
@@ -1271,7 +1329,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,
-			User user, SqlDataSetEntity entity, SqlDataSetEntity persist)
+			User user, SqlDataSetEntity entity, OnceSupplier<SqlDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getConnectionFactory()))
 			throw new IllegalInputException();
@@ -1290,7 +1348,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.managementSupport.checkSaveRefPermission(user, entity, persist, (t) ->
+		this.managementSupport.checkSaveRefSupplier(user, entity, persist, (t) ->
 		{
 			DtbsSourceConnectionFactory connFactory = entity.getDtbsCnFty();
 			return (connFactory == null ? null : connFactory.getDtbsSource());
@@ -1305,7 +1363,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveJsonValueDataSetEntity(HttpServletRequest request,
-			User user, JsonValueDataSetEntity entity, JsonValueDataSetEntity persist)
+			User user, JsonValueDataSetEntity entity, OnceSupplier<JsonValueDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getValue()))
 			throw new IllegalInputException();
@@ -1314,7 +1372,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveJsonFileDataSetEntity(HttpServletRequest request,
-			User user, JsonFileDataSetEntity entity, JsonFileDataSetEntity persist)
+			User user, JsonFileDataSetEntity entity, OnceSupplier<JsonFileDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getFileName()) && isEmpty(entity.getDataSetResFileName()))
 			throw new IllegalInputException();
@@ -1324,13 +1382,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (re != null)
 			return re;
 
-		checkFileSourceSaveRefPermission(request, user, entity, persist);
+		checkSaveRefFileSource(request, user, entity, persist);
 
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveExcelDataSetEntity(HttpServletRequest request,
-			User user, ExcelDataSetEntity entity, ExcelDataSetEntity persist)
+			User user, ExcelDataSetEntity entity, OnceSupplier<ExcelDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getFileName()) && isEmpty(entity.getDataSetResFileName()))
 			throw new IllegalInputException();
@@ -1340,13 +1398,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (re != null)
 			return re;
 
-		checkFileSourceSaveRefPermission(request, user, entity, persist);
+		checkSaveRefFileSource(request, user, entity, persist);
 
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveCsvValueDataSetEntity(HttpServletRequest request,
-			User user, CsvValueDataSetEntity entity, CsvValueDataSetEntity persist)
+			User user, CsvValueDataSetEntity entity, OnceSupplier<CsvValueDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getValue()))
 			throw new IllegalInputException();
@@ -1355,7 +1413,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveCsvFileDataSetEntity(HttpServletRequest request,
-			User user, CsvFileDataSetEntity entity, CsvFileDataSetEntity persist)
+			User user, CsvFileDataSetEntity entity, OnceSupplier<CsvFileDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getFileName()) && isEmpty(entity.getDataSetResFileName()))
 			throw new IllegalInputException();
@@ -1365,13 +1423,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (re != null)
 			return re;
 
-		checkFileSourceSaveRefPermission(request, user, entity, persist);
+		checkSaveRefFileSource(request, user, entity, persist);
 
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveHttpDataSetEntity(HttpServletRequest request,
-			User user, HttpDataSetEntity entity, HttpDataSetEntity persist)
+			User user, HttpDataSetEntity entity, OnceSupplier<HttpDataSetEntity> persist)
 	{
 		if (isEmpty(entity.getUri()))
 			throw new IllegalInputException();
@@ -1380,7 +1438,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
-			DataSetEntity entity, DataSetEntity persist)
+			DataSetEntity entity, OnceSupplier<? extends DataSetEntity> persist)
 	{
 		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
@@ -1445,7 +1503,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			}
 		}
 
-		checkAnalysisProjectSaveRefPermission(request, user, entity, persist);
+		checkSaveRefAnalysisProject(request, user, entity, persist);
 
 		return null;
 	}
@@ -1479,16 +1537,19 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		this.analysisProjectAwareSupport.trim(entity);
 	}
 
-	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
-			AnalysisProjectAwareEntity entity, AnalysisProjectAwareEntity persist)
+	@SuppressWarnings("unchecked")
+	protected void checkSaveRefAnalysisProject(HttpServletRequest request, User user,
+			AnalysisProjectAwareEntity dataSet, Supplier<? extends AnalysisProjectAwareEntity> persist)
 	{
-		this.analysisProjectAwareSupport.checkSavePermission(user, entity, persist, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.checkSaveSupplier(user, dataSet,
+				(Supplier<AnalysisProjectAwareEntity>) persist, getAnalysisProjectService());
 	}
 
-	protected void checkFileSourceSaveRefPermission(HttpServletRequest request, User user,
-			DirectoryFileDataSetEntity entity, DirectoryFileDataSetEntity persist)
+	@SuppressWarnings("unchecked")
+	protected void checkSaveRefFileSource(HttpServletRequest request, User user,
+			DirectoryFileDataSetEntity entity, Supplier<? extends DirectoryFileDataSetEntity> persist)
 	{
-		this.managementSupport.checkSaveRefPermission(user, entity, persist, (t) ->
+		this.managementSupport.checkSaveRefSupplier(user, entity, (Supplier<DirectoryFileDataSetEntity>) persist, (t) ->
 		{
 			return t.getFileSource();
 

@@ -48,6 +48,7 @@ import org.datagear.connection.UnsupportedGetConnectionException;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.impl.SaveDtbsSourcePermissionDeniedException;
+import org.datagear.management.util.RefPermissionDeniedException;
 import org.datagear.meta.resolver.DBMetaResolverException;
 import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.NonUniqueResultException;
@@ -553,6 +554,15 @@ public class ControllerAdvice extends AbstractController
 			HttpServletResponse response, SaveDtbsSourcePermissionDeniedException exception)
 	{
 		setOptMsgForThrowable(request, exception);
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(RefPermissionDeniedException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleServiceRefPermissionDeniedException(HttpServletRequest request, HttpServletResponse response,
+			RefPermissionDeniedException exception)
+	{
+		setOptMsgForThrowable(request, exception, exception.getRefName());
 		return getErrorView(request, response);
 	}
 

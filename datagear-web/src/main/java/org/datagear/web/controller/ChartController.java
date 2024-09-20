@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,7 @@ import org.datagear.management.util.ManagementSupport;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.function.OnceSupplier;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -255,7 +257,10 @@ public class ChartController extends AbstractChartPluginAwareController
 		inflateHtmlChartWidgetEntity(entity, request);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity,
-				(HtmlChartWidgetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
+				new OnceSupplier<>(() ->
+				{
+					return (HtmlChartWidgetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+				}));
 
 		if (re != null)
 			return re;
@@ -288,7 +293,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user,
 			HtmlChartWidgetEntity entity) throws Exception
 	{
-		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 
 		DataSetBind[] dataSetBinds = entity.getDataSetBinds();
 		if (dataSetBinds != null)
@@ -302,7 +307,7 @@ public class ChartController extends AbstractChartPluginAwareController
 				if (dataSetBind == null)
 					continue;
 
-				this.managementSupport.setRefNullIfNoPermission(user, dataSetBind, (t) ->
+				this.managementSupport.setRefNullIfDenied(user, dataSetBind, (t) ->
 				{
 					return (DataSetEntity) t.getDataSet();
 
@@ -432,7 +437,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
-			HtmlChartWidgetEntity entity, HtmlChartWidgetEntity persist)
+			HtmlChartWidgetEntity entity, OnceSupplier<HtmlChartWidgetEntity> persist)
 	{
 		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
@@ -440,10 +445,10 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (isEmpty(entity.getPluginVo()))
 			throw new IllegalInputException();
 
-		checkAnalysisProjectSaveRefPermission(request, user, entity, persist);
+		checkSaveRefAnalysisProject(request, user, entity, persist);
 
 		DataSetBind[] dsbs = entity.getDataSetBinds();
-		DataSetBind[] persistDsbs = (persist == null ? null : persist.getDataSetBinds());
+		DataSetBind[] persistDsbs = (persist == null ? null : persist.get().getDataSetBinds());
 
 		if (dsbs != null && dsbs.length > 0)
 		{
@@ -452,7 +457,7 @@ public class ChartController extends AbstractChartPluginAwareController
 				DataSetBind dsb = dsbs[i];
 				DataSetBind persistDsb = (persistDsbs == null || i >= persistDsbs.length ? null : persistDsbs[i]);
 
-				this.managementSupport.checkSaveRefPermission(user, dsb, persistDsb, (t) ->
+				this.managementSupport.checkSaveRef(user, dsb, persistDsb, (t) ->
 				{
 					return (DataSetEntity) t.getDataSet();
 
@@ -472,10 +477,12 @@ public class ChartController extends AbstractChartPluginAwareController
 		this.analysisProjectAwareSupport.trim(entity);
 	}
 
-	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
-			AnalysisProjectAwareEntity dataSet, AnalysisProjectAwareEntity persist)
+	@SuppressWarnings("unchecked")
+	protected void checkSaveRefAnalysisProject(HttpServletRequest request, User user,
+			AnalysisProjectAwareEntity dataSet, Supplier<? extends AnalysisProjectAwareEntity> persist)
 	{
-		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.checkSaveSupplier(user, dataSet,
+				(Supplier<AnalysisProjectAwareEntity>) persist, getAnalysisProjectService());
 	}
 
 	protected void setChartPluginView(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)

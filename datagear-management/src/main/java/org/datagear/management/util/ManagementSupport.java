@@ -19,6 +19,7 @@ package org.datagear.management.util;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
@@ -80,7 +81,7 @@ public class ManagementSupport
 	 * @param nullSetter
 	 * @param service
 	 */
-	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void setRefNullIfNoPermission(
+	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void setRefNullIfDenied(
 			User user, T entity, Function<T, R> getter, Consumer<T> nullSetter,
 			DataPermissionEntityService<RID, R> service)
 	{
@@ -108,14 +109,40 @@ public class ManagementSupport
 	 * @param user
 	 * @param entity
 	 * @param persist
-	 *            允许{@code null}，表示执行添加保存操作；，否则，表示执行编辑保存操作
+	 *            允许{@code null}，表示执行添加保存操作；否则，表示执行编辑保存操作
 	 * @param getter
 	 * @param nameGetter
 	 * @param service
 	 * @throws RefPermissionDeniedException
 	 */
-	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void checkSaveRefPermission(User user,
-			T entity, T persist, Function<T, R> getter, Function<R, String> nameGetter,
+	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void checkSaveRef(User user, T entity,
+			T persist, Function<T, R> getter, Function<R, String> nameGetter,
+			DataPermissionEntityService<RID, R> service) throws RefPermissionDeniedException
+	{
+		checkSaveRefSupplier(user, entity, () ->
+		{
+			return persist;
+
+		}, getter, nameGetter, service);
+	}
+
+	/**
+	 * 校验添加保存/编辑保存操作对关联引用实体是否越权。
+	 * 
+	 * @param <T>
+	 * @param <RID>
+	 * @param <R>
+	 * @param user
+	 * @param entity
+	 * @param persist
+	 *            允许{@code null}、返回{@code null}，表示执行添加保存操作；否则，表示执行编辑保存操作
+	 * @param getter
+	 * @param nameGetter
+	 * @param service
+	 * @throws RefPermissionDeniedException
+	 */
+	public <T, RID, R extends DataPermissionEntity & Entity<RID>> void checkSaveRefSupplier(User user, T entity,
+			Supplier<T> persist, Function<T, R> getter, Function<R, String> nameGetter,
 			DataPermissionEntityService<RID, R> service) throws RefPermissionDeniedException
 	{
 		if (entity == null)
@@ -130,12 +157,14 @@ public class ManagementSupport
 
 		if (rid == null)
 			return;
+		
+		T persistEntity = (persist == null ? null : persist.get());
 
 		// 对于编辑操作，只要没有修改，不应校验
 		// 比如用户A编辑保存B分享的实体，应该保留B之前设置的有权限的关联实体C，即使A对C没有权限
-		if (persist != null)
+		if (persistEntity != null)
 		{
-			R eref = getter.apply(persist);
+			R eref = getter.apply(persistEntity);
 			RID erid = (eref == null ? null : eref.getId());
 
 			if (StringUtil.isEquals(rid, erid))

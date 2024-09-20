@@ -18,6 +18,7 @@
 package org.datagear.web.util;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.User;
@@ -69,6 +70,7 @@ public class AnalysisProjectAwareSupport
 		this.managementSupport.trimRef(entity, (t) ->
 		{
 			return t.getAnalysisProject();
+
 		}, (t) ->
 		{
 			t.setAnalysisProject(null);
@@ -82,22 +84,24 @@ public class AnalysisProjectAwareSupport
 	 * @param entity
 	 * @param service
 	 */
-	public void setNullIfNoPermission(User user, AnalysisProjectAwareEntity entity,
+	public void setRefNullIfDenied(User user, AnalysisProjectAwareEntity entity,
 			AnalysisProjectService service)
 	{
-		this.managementSupport.setRefNullIfNoPermission(user, entity, (t) ->
+		this.managementSupport.setRefNullIfDenied(user, entity, (t) ->
 		{
 			return t.getAnalysisProject();
+
 		}, (t) ->
 		{
 			t.setAnalysisProject(null);
+
 		}, service);
 	}
 
 	/**
 	 * 校验{@linkplain AnalysisProjectAwareEntity}保存操作的{@linkplain AnalysisProjectAwareEntity#getAnalysisProject()}是否越权。
 	 * <p>
-	 * 另参考{@linkplain ManagementSupport#checkSaveRefPermission(User, Object, Object, Function, Function, DataPermissionEntityService)}
+	 * 另参考{@linkplain ManagementSupport#checkSaveRefSupplier(User, Object, Supplier, Function, Function, DataPermissionEntityService)}
 	 * </p>
 	 * 
 	 * @param user
@@ -105,17 +109,19 @@ public class AnalysisProjectAwareSupport
 	 * @param persist
 	 * @param service
 	 * @throws RefPermissionDeniedException
-	 * 
 	 */
-	public void checkSavePermission(User user, AnalysisProjectAwareEntity entity, AnalysisProjectAwareEntity persist,
-			AnalysisProjectService service) throws RefPermissionDeniedException
+	public void checkSaveSupplier(User user, AnalysisProjectAwareEntity entity,
+			Supplier<AnalysisProjectAwareEntity> persist, AnalysisProjectService service)
+			throws RefPermissionDeniedException
 	{
-		this.managementSupport.checkSaveRefPermission(user, entity, persist, (t) ->
+		this.managementSupport.checkSaveRefSupplier(user, entity, persist, (t) ->
 		{
 			return t.getAnalysisProject();
+
 		}, (r) ->
 		{
 			return r.getName();
+
 		}, service);
 	}
 }

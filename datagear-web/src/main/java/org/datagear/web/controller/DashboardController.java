@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -53,6 +54,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.function.OnceSupplier;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
@@ -237,15 +239,17 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		trimAnalysisProjectAware(entity);
 
-		HtmlTplDashboardWidgetEntity persist = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user,
-				entity.getId());
+		OnceSupplier<HtmlTplDashboardWidgetEntity> persist = new OnceSupplier<>(() ->
+		{
+			return getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, entity.getId());
+		});
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, persist);
 
 		if (re != null)
 			return re;
 
-		inflateSaveEditEntity(entity, persist);
+		inflateSaveEditEntity(entity, persist.get());
 
 		this.htmlTplDashboardWidgetEntityService.update(user, entity);
 
@@ -278,7 +282,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user,
 			HtmlTplDashboardWidgetEntity entity) throws Exception
 	{
-		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 
 		entity.setId(null);
 		convertToFormModel(request, model, entity);
@@ -1114,7 +1118,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
-			HtmlTplDashboardWidgetEntity entity, HtmlTplDashboardWidgetEntity persist)
+			HtmlTplDashboardWidgetEntity entity, OnceSupplier<HtmlTplDashboardWidgetEntity> persist)
 	{
 		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
@@ -1122,7 +1126,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (isEmpty(entity.getTemplates()))
 			throw new IllegalInputException();
 
-		checkAnalysisProjectSaveRefPermission(request, user, entity, persist);
+		checkSaveRefAnalysisProject(request, user, entity, persist);
 
 		return null;
 	}
@@ -1132,10 +1136,12 @@ public class DashboardController extends AbstractDataAnalysisController
 		this.analysisProjectAwareSupport.trim(entity);
 	}
 
-	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
-			AnalysisProjectAwareEntity dataSet, AnalysisProjectAwareEntity persist)
+	@SuppressWarnings("unchecked")
+	protected void checkSaveRefAnalysisProject(HttpServletRequest request, User user,
+			AnalysisProjectAwareEntity dataSet, Supplier<? extends AnalysisProjectAwareEntity> persist)
 	{
-		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.checkSaveSupplier(user, dataSet,
+				(Supplier<AnalysisProjectAwareEntity>) persist, getAnalysisProjectService());
 	}
 
 	/**
