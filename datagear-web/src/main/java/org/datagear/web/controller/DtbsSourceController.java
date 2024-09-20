@@ -137,8 +137,10 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	{
 		User user = getCurrentUser();
 
-		if (isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
-			throw new IllegalInputException();
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
+
+		if (re != null)
+			return re;
 
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
@@ -166,10 +168,12 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody DtbsSource entity)
 	{
-		if (isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
-			throw new IllegalInputException();
-
 		User user = getCurrentUser();
+
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
+
+		if (re != null)
+			return re;
 
 		DtbsSource persist = getDtbsSourceService().getById(entity.getId());
 
@@ -422,6 +426,15 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		setFormModel(model, di, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		return "/dtbsSource/dtbsSource_dbinfo";
+	}
+
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+			DtbsSource entity)
+	{
+		if (isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
+			throw new IllegalInputException();
+
+		return null;
 	}
 	
 	protected void convertToFormModel(HttpServletRequest request, Model model, DtbsSource entity)
