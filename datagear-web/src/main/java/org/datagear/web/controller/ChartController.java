@@ -181,7 +181,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
+		HtmlChartWidgetEntity chart = createAdd(request, model);
 		setRequestAnalysisProject(request, response, chart);
 
 		addAttributeForWriteJson(model, "chartPluginVO", null);
@@ -192,6 +192,11 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/chart/chart_form";
+	}
+
+	protected HtmlChartWidgetEntity createAdd(HttpServletRequest request, Model model)
+	{
+		return new HtmlChartWidgetEntity();
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -227,12 +232,12 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 		
-		HtmlChartWidgetEntity chart = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-		convertForFormModel(chart, request);
-		setResultDataFormatModel(chart, model);
+		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
+		convertToFormModel(request, model, entity);
+		setResultDataFormatModel(request, model, entity);
 		setDisableSaveShowAttr(request, response, model);
 
-		setFormModel(model, chart, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		return "/chart/chart_form";
 	}
@@ -271,9 +276,8 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		// 统一复制规则，至少有编辑权限才允许复制
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-
-		handlePageModelForCopy(request, model, user, entity);
-		setResultDataFormatModel(entity, model);
+		handleCopyFormModel(request, model, user, entity);
+		setResultDataFormatModel(request, model, entity);
 		setDisableSaveShowAttr(request, response, model);
 
 		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
@@ -281,7 +285,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		return "/chart/chart_form";
 	}
 
-	protected void handlePageModelForCopy(HttpServletRequest request, Model model, User user,
+	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user,
 			HtmlChartWidgetEntity entity) throws Exception
 	{
 		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
@@ -319,7 +323,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		}
 
 		entity.setId(null);
-		convertForFormModel(entity, request);
+		convertToFormModel(request, model, entity);
 	}
 
 	@RequestMapping("/view")
@@ -328,11 +332,11 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 
-		HtmlChartWidgetEntity chart = getByIdForView(this.htmlChartWidgetEntityService, user, id);
-		convertForFormModel(chart, request);
-		setResultDataFormatModel(chart, model);
+		HtmlChartWidgetEntity entity = getByIdForView(this.htmlChartWidgetEntityService, user, id);
+		convertToFormModel(request, model, entity);
+		setResultDataFormatModel(request, model, entity);
 
-		setFormModel(model, chart, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		
 		return "/chart/chart_form";
 	}
@@ -379,17 +383,22 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartWidgetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			Model springModel, @RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam)
+			Model model, @RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam)
 			throws Exception
 	{
 		User user = getCurrentUser();
-		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
+		APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		setChartPluginView(request, pagingData.getItems());
+		handleQueryData(request, pagingData.getItems());
 
 		return pagingData;
+	}
+
+	protected void handleQueryData(HttpServletRequest request, List<HtmlChartWidgetEntity> items)
+	{
+		setChartPluginView(request, items);
 	}
 
 	@RequestMapping(value = "/hasReadPermission", produces = CONTENT_TYPE_JSON)
@@ -550,7 +559,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		return rdf;
 	}
 	
-	protected void convertForFormModel(HtmlChartWidgetEntity entity, HttpServletRequest request)
+	protected void convertToFormModel(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
 	{
 		HtmlChartPlugin plugin = entity.getPluginVo();
 		
@@ -560,7 +569,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
 	}
 	
-	protected void setResultDataFormatModel(HtmlChartWidgetEntity entity, Model model)
+	protected void setResultDataFormatModel(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
 	{
 		addAttributeForWriteJson(model, "initResultDataFormat",
 				(entity.getResultDataFormat() != null ? entity.getResultDataFormat() : createDefaultResultDataFormat()));

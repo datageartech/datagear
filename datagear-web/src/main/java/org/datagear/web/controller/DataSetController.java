@@ -188,286 +188,289 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_SQL)
-	public String addForSql(HttpServletRequest request, HttpServletResponse response,
+	public String addSql(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		SqlDataSetEntity dataSet = createDftSqlDataSetEntity(request, response, model);
-		setRequestAnalysisProject(request, response, dataSet);
+		SqlDataSetEntity entity = createAddSql(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected SqlDataSetEntity createDftSqlDataSetEntity(HttpServletRequest request, HttpServletResponse response,
-			Model model)
+	protected SqlDataSetEntity createAddSql(HttpServletRequest request, Model model)
 	{
 		return new SqlDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForSql(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SqlDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveAddSql(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody SqlDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
-		trimSqlDataSetEntity(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
+		trimSqlDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
+		this.dataSetEntityService.add(user, entity);
 
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_JsonValue)
-	public String addForJsonValue(HttpServletRequest request, HttpServletResponse response,
+	public String addJsonValue(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		JsonValueDataSetEntity dataSet = createDftJsonValueDataSetEntity(request, response, model);
-		setRequestAnalysisProject(request, response, dataSet);
+		JsonValueDataSetEntity entity = createAddJsonValue(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected JsonValueDataSetEntity createDftJsonValueDataSetEntity(HttpServletRequest request,
-			HttpServletResponse response, Model model)
+	protected JsonValueDataSetEntity createAddJsonValue(HttpServletRequest request, Model model)
 	{
 		return new JsonValueDataSetEntity();
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForJsonValue(HttpServletRequest request,
-			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveAddJsonValue(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody JsonValueDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
+		this.dataSetEntityService.add(user, entity);
 
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_JsonFile)
-	public String addForJsonFile(HttpServletRequest request, HttpServletResponse response,
+	public String addJsonFile(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		JsonFileDataSetEntity dataSet = createDftJsonFileDataSetEntity(request, response, model);
-		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
-		setRequestAnalysisProject(request, response, dataSet);
+		JsonFileDataSetEntity entity = createAddJsonFile(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
 		addAvailableCharsetNames(model);
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected JsonFileDataSetEntity createDftJsonFileDataSetEntity(HttpServletRequest request,
-			HttpServletResponse response, Model model)
+	protected JsonFileDataSetEntity createAddJsonFile(HttpServletRequest request, Model model)
 	{
-		return new JsonFileDataSetEntity();
+		JsonFileDataSetEntity entity = new JsonFileDataSetEntity();
+		entity.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForJsonFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody JsonFileDataSetEntity dataSet) throws Throwable
+	public ResponseEntity<OperationMessage> saveAddJsonFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody JsonFileDataSetEntity entity) throws Throwable
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
-		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
+		this.dataSetEntityService.add(user, entity);
+		copyToDirectoryFileDataSetEntityDirectoryIf(entity, "");
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_Excel)
-	public String addForExcel(HttpServletRequest request, HttpServletResponse response,
+	public String addExcel(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		ExcelDataSetEntity dataSet = createDftExcelDataSetEntity(request, response, model);
-		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
-		dataSet.setNameRow(1);
-		setRequestAnalysisProject(request, response, dataSet);
+		ExcelDataSetEntity entity = createAddExcel(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected ExcelDataSetEntity createDftExcelDataSetEntity(HttpServletRequest request, HttpServletResponse response,
-			Model model)
+	protected ExcelDataSetEntity createAddExcel(HttpServletRequest request, Model model)
 	{
-		return new ExcelDataSetEntity();
+		ExcelDataSetEntity entity = new ExcelDataSetEntity();
+		entity.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
+		entity.setNameRow(1);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForExcel(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody ExcelDataSetEntity dataSet) throws Throwable
+	public ResponseEntity<OperationMessage> saveAddExcel(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody ExcelDataSetEntity entity) throws Throwable
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
-		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
+		this.dataSetEntityService.add(user, entity);
+		copyToDirectoryFileDataSetEntityDirectoryIf(entity, "");
 
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_CsvValue)
-	public String addForCsvValue(HttpServletRequest request, HttpServletResponse response,
+	public String addCsvValue(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		CsvValueDataSetEntity dataSet = createDftCsvValueDataSetEntity(request, response, model);
-		dataSet.setNameRow(1);
-		setRequestAnalysisProject(request, response, dataSet);
+		CsvValueDataSetEntity entity = createAddCsvValue(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected CsvValueDataSetEntity createDftCsvValueDataSetEntity(HttpServletRequest request,
-			HttpServletResponse response, Model model)
+	protected CsvValueDataSetEntity createAddCsvValue(HttpServletRequest request, Model model)
 	{
-		return new CsvValueDataSetEntity();
+		CsvValueDataSetEntity entity = new CsvValueDataSetEntity();
+		entity.setNameRow(1);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForCsvValue(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody CsvValueDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveAddCsvValue(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody CsvValueDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
+		this.dataSetEntityService.add(user, entity);
 
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_CsvFile)
-	public String addForCsvFile(HttpServletRequest request, HttpServletResponse response,
+	public String addCsvFile(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		CsvFileDataSetEntity dataSet = createDftCsvFileDataSetEntity(request, response, model);
-		dataSet.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
-		dataSet.setNameRow(1);
-		setRequestAnalysisProject(request, response, dataSet);
+		CsvFileDataSetEntity entity = createAddCsvFile(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
 		addAvailableCharsetNames(model);
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected CsvFileDataSetEntity createDftCsvFileDataSetEntity(HttpServletRequest request,
-			HttpServletResponse response, Model model)
+	protected CsvFileDataSetEntity createAddCsvFile(HttpServletRequest request, Model model)
 	{
-		return new CsvFileDataSetEntity();
+		CsvFileDataSetEntity entity = new CsvFileDataSetEntity();
+		entity.setFileSourceType(DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD);
+		entity.setNameRow(1);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForCsvFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody CsvFileDataSetEntity dataSet) throws Throwable
+	public ResponseEntity<OperationMessage> saveAddCsvFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody CsvFileDataSetEntity entity) throws Throwable
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
-		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
+		this.dataSetEntityService.add(user, entity);
+		copyToDirectoryFileDataSetEntityDirectoryIf(entity, "");
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/add/" + DataSetEntity.DATA_SET_TYPE_Http)
-	public String addForHttp(HttpServletRequest request, HttpServletResponse response,
+	public String addHttp(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
-		HttpDataSetEntity dataSet = createDftHttpDataSetEntity(request, response, model);
-		setRequestAnalysisProject(request, response, dataSet);
-		dataSet.setEncodeUri(true);
+		HttpDataSetEntity entity = createAddHttp(request, model);
+		setRequestAnalysisProject(request, response, entity);
 
 		addAvailableCharsetNames(model);
-		setFormModel(model, dataSet, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http);
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected HttpDataSetEntity createDftHttpDataSetEntity(HttpServletRequest request, HttpServletResponse response,
-			Model model)
+	protected HttpDataSetEntity createAddHttp(HttpServletRequest request, Model model)
 	{
-		return new HttpDataSetEntity();
+		HttpDataSetEntity entity = new HttpDataSetEntity();
+		entity.setEncodeUri(true);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddForHttp(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody HttpDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveAddHttp(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HttpDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		inflateSaveAddBaseInfo(request, user, dataSet);
-		trimAnalysisProjectAware(dataSet);
+		inflateSaveAddBaseInfo(request, user, entity);
+		trimAnalysisProjectAware(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, dataSet, null);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, entity, null);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.add(user, dataSet);
+		this.dataSetEntityService.add(user, entity);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	protected void inflateSaveAddBaseInfo(HttpServletRequest request, User user, DataSetEntity entity)
@@ -483,20 +486,20 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		// 敏感信息较多，至少有编辑权限才允许复制
-		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
-		handlePageModelForCopy(request, model, user, dataSet);
+		DataSetEntity entity = getByIdForEdit(this.dataSetEntityService, user, id);
+		handleCopyFormModel(request, model, user, entity);
 
-		setFormModel(model, dataSet, REQUEST_ACTION_COPY, "saveAdd/" + dataSet.getDataSetType());
+		setFormModel(model, entity, REQUEST_ACTION_COPY, "saveAdd/" + entity.getDataSetType());
 
-		return buildFormView(dataSet.getDataSetType());
+		return buildFormView(entity.getDataSetType());
 	}
 
-	protected void handlePageModelForCopy(HttpServletRequest request, Model model, User user, DataSetEntity dataSet)
+	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user, DataSetEntity entity)
 			throws Throwable
 	{
-		if (dataSet instanceof SqlDataSetEntity)
+		if (entity instanceof SqlDataSetEntity)
 		{
-			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) dataSet;
+			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) entity;
 
 			this.managementSupport.setRefNullIfNoPermission(user, dataSetEntity, (t) ->
 			{
@@ -507,9 +510,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 				t.setConnectionFactory(null);
 			}, getDtbsSourceService());
 		}
-		else if (dataSet instanceof DirectoryFileDataSetEntity)
+		else if (entity instanceof DirectoryFileDataSetEntity)
 		{
-			DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) dataSet;
+			DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) entity;
 
 			this.managementSupport.setRefNullIfNoPermission(user, dataSetEntity, (t) ->
 			{
@@ -528,11 +531,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			dataSetEntity.setDisplayName(null);
 		}
 
-		this.analysisProjectAwareSupport.setNullIfNoPermission(user, dataSet, getAnalysisProjectService());
-		dataSet.setId(null);
+		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
+		entity.setId(null);
 
-		convertForFormModel(dataSet);
-		addAvailableCharsetNamesIfNeed(model, dataSet);
+		convertToFormModel(request, model, entity);
+		addAvailableCharsetNamesIfNeed(model, entity);
 	}
 
 	@RequestMapping("/edit")
@@ -541,171 +544,165 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		DataSetEntity dataSet = getByIdForEdit(this.dataSetEntityService, user, id);
-		handlePageModelForEdit(request, response, model, user, dataSet);
-
-		setFormModel(model, dataSet, REQUEST_ACTION_EDIT, "saveEdit/" + dataSet.getDataSetType());
-
-		return buildFormView(dataSet.getDataSetType());
-	}
-
-	protected void handlePageModelForEdit(HttpServletRequest request, HttpServletResponse response,
-			Model model, User user, DataSetEntity entity) throws Throwable
-	{
-		convertForFormModel(entity);
+		DataSetEntity entity = getByIdForEdit(this.dataSetEntityService, user, id);
+		convertToFormModel(request, model, entity);
 		addAvailableCharsetNamesIfNeed(model, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, "saveEdit/" + entity.getDataSetType());
+
+		return buildFormView(entity.getDataSetType());
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForSql(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody SqlDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveEditSql(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody SqlDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
-		trimSqlDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimSqlDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, dataSet,
-				(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, entity,
+				(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.update(user, dataSet);
+		this.dataSetEntityService.update(user, entity);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForJsonValue(HttpServletRequest request,
-			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveEditJsonValue(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody JsonValueDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
+		trimAnalysisProjectAware(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, dataSet,
-				(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, entity,
+				(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.update(user, dataSet);
+		this.dataSetEntityService.update(user, entity);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForJsonFile(HttpServletRequest request,
-			HttpServletResponse response, @RequestBody JsonFileDataSetEntity dataSet,
+	public ResponseEntity<OperationMessage> saveEditJsonFile(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody JsonFileDataSetEntity entity,
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, dataSet,
-				(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, entity,
+				(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.update(user, dataSet);
-		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
+		this.dataSetEntityService.update(user, entity);
+		copyToDirectoryFileDataSetEntityDirectoryIf(entity, originalFileName);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForExcel(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody ExcelDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
+	public ResponseEntity<OperationMessage> saveEditExcel(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody ExcelDataSetEntity entity, @RequestParam("originalFileName") String originalFileName)
 			throws Throwable
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, dataSet,
-				(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, entity,
+				(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.update(user, dataSet);
-		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
+		this.dataSetEntityService.update(user, entity);
+		copyToDirectoryFileDataSetEntityDirectoryIf(entity, originalFileName);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForCsvValue(HttpServletRequest request,
-			HttpServletResponse response, @RequestBody CsvValueDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveEditCsvValue(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody CsvValueDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
+		trimAnalysisProjectAware(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, dataSet,
-				(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, entity,
+				(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.update(user, dataSet);
+		this.dataSetEntityService.update(user, entity);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForCsvFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody CsvFileDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
+	public ResponseEntity<OperationMessage> saveEditCsvFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody CsvFileDataSetEntity entity, @RequestParam("originalFileName") String originalFileName)
 			throws Throwable
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, dataSet,
-				(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, entity,
+				(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
 
 
-		this.dataSetEntityService.update(user, dataSet);
-		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
+		this.dataSetEntityService.update(user, entity);
+		copyToDirectoryFileDataSetEntityDirectoryIf(entity, originalFileName);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/saveEdit/" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForHttp(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody HttpDataSetEntity dataSet)
+	public ResponseEntity<OperationMessage> saveEditHttp(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HttpDataSetEntity entity)
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(dataSet);
+		trimAnalysisProjectAware(entity);
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, dataSet,
-				(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, entity,
+				(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.dataSetEntityService.update(user, dataSet);
+		this.dataSetEntityService.update(user, entity);
 		
-		return optSuccessDataResponseEntity(request, dataSet);
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
@@ -733,12 +730,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
+		DataSetEntity entity = getByIdForView(this.dataSetEntityService, user, id);
 
-		if (!(dataSet instanceof DirectoryFileDataSetEntity))
+		if (!(entity instanceof DirectoryFileDataSetEntity))
 			throw new IllegalInputException();
 
-		DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) dataSet;
+		DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) entity;
 
 		// 服务端文件允许参数化文件名因而无法再这里下载文件，即便如此，也可能保存着用户之前编辑的上传文件而允许下载，所以不应启用下面的逻辑
 		// if
@@ -769,19 +766,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		DataSetEntity dataSet = getByIdForView(this.dataSetEntityService, user, id);
-		handlePageModelForView(request, response, model, user, dataSet);
-
-		setFormModel(model, dataSet, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
-
-		return buildFormView(dataSet.getDataSetType());
-	}
-
-	protected void handlePageModelForView(HttpServletRequest request, HttpServletResponse response,
-			Model model, User user, DataSetEntity entity) throws Throwable
-	{
-		convertForFormModel(entity);
+		DataSetEntity entity = getByIdForView(this.dataSetEntityService, user, id);
+		convertToFormModel(request, model, entity);
 		addAvailableCharsetNamesIfNeed(model, entity);
+
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
+		return buildFormView(entity.getDataSetType());
 	}
 
 	@RequestMapping(value = "/getProfileDataSetByIds", produces = CONTENT_TYPE_JSON)
@@ -865,8 +856,13 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		PagingData<DataSetEntity> pagingData = this.dataSetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
+		handleQueryData(request, pagingData.getItems());
 
 		return pagingData;
+	}
+
+	protected void handleQueryData(HttpServletRequest request, List<DataSetEntity> items)
+	{
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
@@ -875,32 +871,32 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
 	{
 		User user = getCurrentUser();
-		SqlDataSetEntity dataSet = preview.getDataSet();
+		SqlDataSetEntity entity = preview.getDataSet();
 		
-		if(isEmpty(dataSet))
+		if(isEmpty(entity))
 			throw new IllegalInputException();
 		
-		trimAnalysisProjectAware(dataSet);
-		trimSqlDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimSqlDataSetEntity(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveSqlDataSetEntity(request, user, dataSet, null);
+			checkSaveSqlDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (SqlDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (SqlDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveSqlDataSetEntity(request, user, dataSet,
-					(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveSqlDataSetEntity(request, user, entity,
+					(SqlDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 		
-		DtbsSourceConnectionFactory connFactory = dataSet.getDtbsCnFty();
+		DtbsSourceConnectionFactory connFactory = entity.getDtbsCnFty();
 		DtbsSource dtbsSource = (connFactory == null ? null : connFactory.getDtbsSource());
 		String dtbsSourceId = (dtbsSource == null ? null : dtbsSource.getId());
 		
@@ -911,12 +907,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		DtbsSourceConnectionFactory connectionFactory = new DtbsSourceConnectionFactory(getConnectionSource(),
 				dtbsSource);
-		dataSet.setConnectionFactory(connectionFactory);
-		dataSet.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
+		entity.setConnectionFactory(connectionFactory);
+		entity.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 
 	@RequestMapping(value = "/resolveSql", produces = CONTENT_TYPE_HTML)
@@ -934,33 +930,33 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
 	{
 		User user = getCurrentUser();
-		JsonValueDataSetEntity dataSet = preview.getDataSet();
+		JsonValueDataSetEntity entity = preview.getDataSet();
 
-		if (isEmpty(dataSet))
+		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(dataSet);
+		trimAnalysisProjectAware(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveJsonValueDataSetEntity(request, user, dataSet, null);
+			checkSaveJsonValueDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (JsonValueDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (JsonValueDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveJsonValueDataSetEntity(request, user, dataSet,
-					(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveJsonValueDataSetEntity(request, user, entity,
+					(JsonValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
@@ -971,36 +967,36 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			throws Throwable
 	{
 		final User user = getCurrentUser();
-		JsonFileDataSetEntity dataSet = preview.getDataSet();
+		JsonFileDataSetEntity entity = preview.getDataSet();
 
-		if (isEmpty(dataSet))
+		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveJsonFileDataSetEntity(request, user, dataSet, null);
+			checkSaveJsonFileDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (JsonFileDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (JsonFileDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveJsonFileDataSetEntity(request, user, dataSet,
-					(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveJsonFileDataSetEntity(request, user, entity,
+					(JsonFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 
-		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
+		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
@@ -1010,36 +1006,36 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		final User user = getCurrentUser();
-		ExcelDataSetEntity dataSet = preview.getDataSet();
+		ExcelDataSetEntity entity = preview.getDataSet();
 
-		if (isEmpty(dataSet))
+		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveExcelDataSetEntity(request, user, dataSet, null);
+			checkSaveExcelDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (ExcelDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (ExcelDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveExcelDataSetEntity(request, user, dataSet,
-					(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveExcelDataSetEntity(request, user, entity,
+					(ExcelDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 
-		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
+		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
@@ -1048,33 +1044,33 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
 	{
 		final User user = getCurrentUser();
-		CsvValueDataSetEntity dataSet = preview.getDataSet();
+		CsvValueDataSetEntity entity = preview.getDataSet();
 
-		if (isEmpty(dataSet))
+		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(dataSet);
+		trimAnalysisProjectAware(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveCsvValueDataSetEntity(request, user, dataSet, null);
+			checkSaveCsvValueDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (CsvValueDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (CsvValueDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveCsvValueDataSetEntity(request, user, dataSet,
-					(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveCsvValueDataSetEntity(request, user, entity,
+					(CsvValueDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
@@ -1084,36 +1080,36 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		final User user = getCurrentUser();
-		CsvFileDataSetEntity dataSet = preview.getDataSet();
+		CsvFileDataSetEntity entity = preview.getDataSet();
 
-		if (isEmpty(dataSet))
+		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(dataSet);
-		trimDirectoryFileDataSetEntity(dataSet);
+		trimAnalysisProjectAware(entity);
+		trimDirectoryFileDataSetEntity(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveCsvFileDataSetEntity(request, user, dataSet, null);
+			checkSaveCsvFileDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (CsvFileDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (CsvFileDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveCsvFileDataSetEntity(request, user, dataSet,
-					(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveCsvFileDataSetEntity(request, user, entity,
+					(CsvFileDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 
-		setDirectoryFileDataSetForPreview(user, dataSet, originalFileName);
+		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
@@ -1122,35 +1118,35 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable
 	{
 		final User user = getCurrentUser();
-		HttpDataSetEntity dataSet = preview.getDataSet();
+		HttpDataSetEntity entity = preview.getDataSet();
 
-		if (isEmpty(dataSet))
+		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(dataSet);
+		trimAnalysisProjectAware(entity);
 
 		// 添加时
-		if (StringUtil.isEmpty(dataSet.getId()))
+		if (StringUtil.isEmpty(entity.getId()))
 		{
-			checkSaveHttpDataSetEntity(request, user, dataSet, null);
+			checkSaveHttpDataSetEntity(request, user, entity, null);
 		}
 		// 查看时
 		else if (preview.isView())
 		{
-			dataSet = (HttpDataSetEntity) getByIdForView(getDataSetEntityService(), user, dataSet.getId());
+			entity = (HttpDataSetEntity) getByIdForView(getDataSetEntityService(), user, entity.getId());
 		}
 		// 编辑时
 		else
 		{
-			checkSaveHttpDataSetEntity(request, user, dataSet,
-					(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, dataSet.getId()));
+			checkSaveHttpDataSetEntity(request, user, entity,
+					(HttpDataSetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId()));
 		}
 
-		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
+		entity.setHttpClient(getDataSetEntityService().getHttpClient());
 
-		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), dataSet);
+		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 
-		return dataSet.resolve(query);
+		return entity.resolve(query);
 	}
 	
 	protected void addAvailableCharsetNamesIfNeed(Model model, DataSetEntity entity)
@@ -1172,7 +1168,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return names;
 	}
 
-	protected void convertForFormModel(DataSetEntity entity)
+	protected void convertToFormModel(HttpServletRequest request, Model model, DataSetEntity entity)
 	{
 		if(entity instanceof SqlDataSetEntity)
 		{
@@ -1233,20 +1229,20 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return true;
 	}
 
-	protected void setDirectoryFileDataSetForPreview(User user, DirectoryFileDataSetEntity dataSet, String originalFileName)
+	protected void setDirectoryFileDataSetForPreview(User user, DirectoryFileDataSetEntity entity, String originalFileName)
 	{
-		String fileName = dataSet.getFileName();
+		String fileName = entity.getFileName();
 
-		if (!isEmpty(dataSet.getId()) && !isEmpty(originalFileName) && originalFileName.equals(fileName))
-			dataSet.setDirectory(getDataSetEntityService().getDataSetDirectory(dataSet.getId()));
+		if (!isEmpty(entity.getId()) && !isEmpty(originalFileName) && originalFileName.equals(fileName))
+			entity.setDirectory(getDataSetEntityService().getDataSetDirectory(entity.getId()));
 		else
-			dataSet.setDirectory(getTempDataSetDirectory());
+			entity.setDirectory(getTempDataSetDirectory());
 		
-		FileSource dsr = dataSet.getFileSource();
+		FileSource dsr = entity.getFileSource();
 		if(dsr != null && !isEmpty(dsr.getId()))
 		{
 			dsr = this.fileSourceService.getById(dsr.getId());
-			dataSet.setFileSource(dsr);
+			entity.setFileSource(dsr);
 		}
 	}
 
@@ -1275,28 +1271,28 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveSqlDataSetEntity(HttpServletRequest request,
-			User user, SqlDataSetEntity dataSet, SqlDataSetEntity persist)
+			User user, SqlDataSetEntity entity, SqlDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getConnectionFactory()))
+		if (isEmpty(entity.getConnectionFactory()))
 			throw new IllegalInputException();
 
-		if (isEmpty(dataSet.getConnectionFactory().getDtbsSource()))
+		if (isEmpty(entity.getConnectionFactory().getDtbsSource()))
 			throw new IllegalInputException();
 
-		if (isEmpty(dataSet.getConnectionFactory().getDtbsSource().getId()))
+		if (isEmpty(entity.getConnectionFactory().getDtbsSource().getId()))
 			throw new IllegalInputException();
 
-		if (isBlank(dataSet.getSql()))
+		if (isBlank(entity.getSql()))
 			throw new IllegalInputException();
 
-		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, dataSet, persist);
+		ResponseEntity<OperationMessage> responseEntity = checkSaveEntity(request, user, entity, persist);
 
 		if (responseEntity != null)
 			return responseEntity;
 
-		this.managementSupport.checkSaveRefPermission(user, dataSet, persist, (t) ->
+		this.managementSupport.checkSaveRefPermission(user, entity, persist, (t) ->
 		{
-			DtbsSourceConnectionFactory connFactory = dataSet.getDtbsCnFty();
+			DtbsSourceConnectionFactory connFactory = entity.getDtbsCnFty();
 			return (connFactory == null ? null : connFactory.getDtbsSource());
 
 		}, (r) ->
@@ -1309,87 +1305,87 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveJsonValueDataSetEntity(HttpServletRequest request,
-			User user, JsonValueDataSetEntity dataSet, JsonValueDataSetEntity persist)
+			User user, JsonValueDataSetEntity entity, JsonValueDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getValue()))
+		if (isEmpty(entity.getValue()))
 			throw new IllegalInputException();
 
-		return checkSaveEntity(request, user, dataSet, persist);
+		return checkSaveEntity(request, user, entity, persist);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveJsonFileDataSetEntity(HttpServletRequest request,
-			User user, JsonFileDataSetEntity dataSet, JsonFileDataSetEntity persist)
+			User user, JsonFileDataSetEntity entity, JsonFileDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
+		if (isEmpty(entity.getFileName()) && isEmpty(entity.getDataSetResFileName()))
 			throw new IllegalInputException();
 
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, dataSet, persist);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, persist);
 
 		if (re != null)
 			return re;
 
-		checkFileSourceSaveRefPermission(request, user, dataSet, persist);
+		checkFileSourceSaveRefPermission(request, user, entity, persist);
 
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveExcelDataSetEntity(HttpServletRequest request,
-			User user, ExcelDataSetEntity dataSet, ExcelDataSetEntity persist)
+			User user, ExcelDataSetEntity entity, ExcelDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
+		if (isEmpty(entity.getFileName()) && isEmpty(entity.getDataSetResFileName()))
 			throw new IllegalInputException();
 
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, dataSet, persist);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, persist);
 
 		if (re != null)
 			return re;
 
-		checkFileSourceSaveRefPermission(request, user, dataSet, persist);
+		checkFileSourceSaveRefPermission(request, user, entity, persist);
 
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveCsvValueDataSetEntity(HttpServletRequest request,
-			User user, CsvValueDataSetEntity dataSet, CsvValueDataSetEntity persist)
+			User user, CsvValueDataSetEntity entity, CsvValueDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getValue()))
+		if (isEmpty(entity.getValue()))
 			throw new IllegalInputException();
 
-		return checkSaveEntity(request, user, dataSet, persist);
+		return checkSaveEntity(request, user, entity, persist);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveCsvFileDataSetEntity(HttpServletRequest request,
-			User user, CsvFileDataSetEntity dataSet, CsvFileDataSetEntity persist)
+			User user, CsvFileDataSetEntity entity, CsvFileDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
+		if (isEmpty(entity.getFileName()) && isEmpty(entity.getDataSetResFileName()))
 			throw new IllegalInputException();
 
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, dataSet, persist);
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, persist);
 
 		if (re != null)
 			return re;
 
-		checkFileSourceSaveRefPermission(request, user, dataSet, persist);
+		checkFileSourceSaveRefPermission(request, user, entity, persist);
 
 		return null;
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveHttpDataSetEntity(HttpServletRequest request,
-			User user, HttpDataSetEntity dataSet, HttpDataSetEntity persist)
+			User user, HttpDataSetEntity entity, HttpDataSetEntity persist)
 	{
-		if (isEmpty(dataSet.getUri()))
+		if (isEmpty(entity.getUri()))
 			throw new IllegalInputException();
 
-		return checkSaveEntity(request, user, dataSet, persist);
+		return checkSaveEntity(request, user, entity, persist);
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
-			DataSetEntity dataSet, DataSetEntity persist)
+			DataSetEntity entity, DataSetEntity persist)
 	{
-		if (isBlank(dataSet.getName()))
+		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
 
-		List<DataSetParam> params = dataSet.getParams();
+		List<DataSetParam> params = entity.getParams();
 		if (params != null)
 		{
 			Set<String> names = new HashSet<>();
@@ -1419,7 +1415,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			}
 		}
 
-		List<DataSetField> fields = dataSet.getFields();
+		List<DataSetField> fields = entity.getFields();
 		if (fields != null)
 		{
 			Set<String> names = new HashSet<>();
@@ -1449,7 +1445,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			}
 		}
 
-		checkAnalysisProjectSaveRefPermission(request, user, dataSet, persist);
+		checkAnalysisProjectSaveRefPermission(request, user, entity, persist);
 
 		return null;
 	}
@@ -1484,15 +1480,15 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	}
 
 	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
-			AnalysisProjectAwareEntity dataSet, AnalysisProjectAwareEntity persist)
+			AnalysisProjectAwareEntity entity, AnalysisProjectAwareEntity persist)
 	{
-		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
+		this.analysisProjectAwareSupport.checkSavePermission(user, entity, persist, getAnalysisProjectService());
 	}
 
 	protected void checkFileSourceSaveRefPermission(HttpServletRequest request, User user,
-			DirectoryFileDataSetEntity dataSet, DirectoryFileDataSetEntity persist)
+			DirectoryFileDataSetEntity entity, DirectoryFileDataSetEntity persist)
 	{
-		this.managementSupport.checkSaveRefPermission(user, dataSet, persist, (t) ->
+		this.managementSupport.checkSaveRefPermission(user, entity, persist, (t) ->
 		{
 			return t.getFileSource();
 
