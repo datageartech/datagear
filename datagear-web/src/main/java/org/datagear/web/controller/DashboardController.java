@@ -41,6 +41,7 @@ import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.DashboardShareSet;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -61,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -162,16 +164,23 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
-		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
-		setRequestAnalysisProject(request, response, dashboard);
-		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
-		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
+		HtmlTplDashboardWidgetEntity entity = createAdd(request, model);
+		setRequestAnalysisProject(request, response, entity);
 		
-		setFormModel(model, dashboard, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		return "/dashboard/dashboard_form";
+	}
+
+	protected HtmlTplDashboardWidgetEntity createAdd(HttpServletRequest request, Model model)
+	{
+		HtmlTplDashboardWidgetEntity entity = new HtmlTplDashboardWidgetEntity();
+		entity.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
+		entity.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -180,18 +189,23 @@ public class DashboardController extends AbstractDataAnalysisController
 			@RequestParam(value = "copySourceId", required = false) String copySourceId,
 			@RequestBody HtmlTplDashboardWidgetEntity entity) throws Exception
 	{
-		checkSaveEntity(entity);
-
 		User user = getCurrentUser();
 
 		entity.setId(IDUtil.randomIdOnTime20());
-		this.analysisProjectAwareSupport.trim(entity);
+		trimAnalysisProjectAware(entity);
 		inflateCreateUserAndTime(entity, user);
+
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
+
+		if (re != null)
+			return re;
 
 		this.htmlTplDashboardWidgetEntityService.add(entity);
 
 		if (!isEmpty(copySourceId))
 		{
+			getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, copySourceId);
+
 			TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 					.getTplDashboardWidgetResManager();
 			dashboardWidgetResManager.copyTo(copySourceId, entity.getId());
@@ -201,14 +215,15 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	@RequestMapping("/edit")
-	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		convertToFormModel(request, model, entity);
 		
-		setFormModel(model, dashboard, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -216,54 +231,69 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody HtmlTplDashboardWidgetEntity form) throws Exception
+			@RequestBody HtmlTplDashboardWidgetEntity entity) throws Exception
 	{
-		checkSaveEntity(form);
-
 		User user = getCurrentUser();
 
-		this.analysisProjectAwareSupport.trim(form);
+		trimAnalysisProjectAware(entity);
 
-		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user,
-				form.getId());
-		inflateSaveEditEntity(form, entity);
+		HtmlTplDashboardWidgetEntity persist = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user,
+				entity.getId());
+
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, persist);
+
+		if (re != null)
+			return re;
+
+		inflateSaveEditEntity(entity, persist);
 
 		this.htmlTplDashboardWidgetEntityService.update(user, entity);
 
-		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", form.getId()));
+		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", entity.getId()));
 	}
 
-	protected void inflateSaveEditEntity(HtmlTplDashboardWidgetEntity form, HtmlTplDashboardWidgetEntity entity)
+	protected void inflateSaveEditEntity(HtmlTplDashboardWidgetEntity entity, HtmlTplDashboardWidgetEntity persist)
 	{
-		entity.setName(form.getName());
-		entity.setAnalysisProject(form.getAnalysisProject());
+		// 设置不允许修改的项
+		entity.setTemplates(persist.getTemplates());
+		entity.setTemplateEncoding(persist.getTemplateEncoding());
 	}
 
 	@RequestMapping("/copy")
-	public String copy(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String copy(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
 		// 统一复制规则，至少有编辑权限才允许复制
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
-		this.analysisProjectAwareSupport.setNullIfNoPermission(user, dashboard, getAnalysisProjectService());
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		handleCopyFormModel(request, model, user, entity);
 
-		setFormModel(model, dashboard, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		model.addAttribute("copySourceId", id);
 
 		return "/dashboard/dashboard_form";
 	}
 
+	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user,
+			HtmlTplDashboardWidgetEntity entity) throws Exception
+	{
+		this.analysisProjectAwareSupport.setNullIfNoPermission(user, entity, getAnalysisProjectService());
+
+		entity.setId(null);
+		convertToFormModel(request, model, entity);
+	}
+
 	@RequestMapping("/design")
-	public String design(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String design(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		convertToFormModel(request, model, entity);
 
-		setFormModel(model, dashboard, "design", "saveDesign");
+		setFormModel(model, entity, "design", "saveDesign");
 		setFormPageAttributes(model);
 		setEnableInsertNewChartAttr(request, response, model);
 
@@ -271,7 +301,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	protected boolean setEnableInsertNewChartAttr(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		boolean enable = isEnableInsertNewChart(request, response, model);
 		model.addAttribute("enableInsertNewChart", enable);
@@ -288,7 +318,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	 * @return
 	 */
 	protected boolean isEnableInsertNewChart(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		return true;
 	}
@@ -306,38 +336,38 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = form.getDashboard();
+		HtmlTplDashboardWidgetEntity entity = form.getDashboard();
 
-		String[] templates = trimResourceNames(dashboard.getTemplates());
+		String[] templates = trimResourceNames(entity.getTemplates());
 		String[] resourceNames = trimResourceNames(form.getResourceNames());
 		String[] resourceContents = form.getResourceContents();
 		boolean[] resourceIsTemplates = form.getResourceIsTemplates();
 
 		templates = mergeTemplates(templates, resourceNames, resourceIsTemplates);
-		dashboard.setTemplates(templates);
-		this.analysisProjectAwareSupport.trim(dashboard);
+		entity.setTemplates(templates);
+		trimAnalysisProjectAware(entity);
 
-		if (isEmpty(dashboard.getId()) || isEmpty(templates))
+		if (isEmpty(entity.getId()) || isEmpty(templates))
 			throw new IllegalInputException();
 
 		// 如果编辑了首页模板，则应重新解析编码
 		int firstTemplateIndex = StringUtil.search(resourceNames, templates[0]);
 		if (firstTemplateIndex > -1)
-			dashboard.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
+			entity.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
 
-		this.htmlTplDashboardWidgetEntityService.updateTemplate(user, dashboard);
+		this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
 
 		for (int i = 0; i < resourceNames.length; i++)
-			saveResourceContent(dashboard, resourceNames[i], resourceContents[i]);
+			saveResourceContent(entity, resourceNames[i], resourceContents[i]);
 
 		// 返回部分基本信息
 		HtmlTplDashboardWidgetEntity data = new HtmlTplDashboardWidgetEntity();
-		data.setId(dashboard.getId());
-		data.setName(dashboard.getName());
+		data.setId(entity.getId());
+		data.setName(entity.getName());
 		data.setTemplates(templates);
-		data.setTemplateEncoding(dashboard.getTemplateEncoding());
-		inflateCreateUserAndTime(data, dashboard.getCreateUser(), dashboard.getCreateTime());
-		data.setAnalysisProject(dashboard.getAnalysisProject());
+		data.setTemplateEncoding(entity.getTemplateEncoding());
+		inflateCreateUserAndTime(data, entity.getCreateUser(), entity.getCreateTime());
+		data.setAnalysisProject(entity.getAnalysisProject());
 
 		return optSuccessDataResponseEntity(request, data);
 	}
@@ -345,7 +375,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/saveTemplateNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveTemplateNames(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestBody String[] templates)
+			Model model, @RequestParam("id") String id, @RequestBody String[] templates)
 			throws Exception
 	{
 		if (isEmpty(templates))
@@ -367,7 +397,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/getResourceContent", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> getResourceContent(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id,
+			Model model, @RequestParam("id") String id,
 			@RequestParam("resourceName") String resourceName) throws Exception
 	{
 		User user = getCurrentUser();
@@ -378,10 +408,10 @@ public class DashboardController extends AbstractDataAnalysisController
 		data.put("id", id);
 		data.put("resourceName", resourceName);
 		
-		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+		HtmlTplDashboardWidgetEntity entity = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 		boolean exists = false;
 		
-		if (widget == null)
+		if (entity == null)
 		{
 			exists = false;
 			data.put("resourceContent", null);
@@ -391,7 +421,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			exists = this.htmlTplDashboardWidgetEntityService.getTplDashboardWidgetResManager().exists(id, resourceName);
 			
 			if(exists)
-				data.put("resourceContent", readResourceContent(widget, resourceName));
+				data.put("resourceContent", readResourceContent(entity, resourceName));
 		}
 		
 		data.put("resourceExists", exists);
@@ -400,7 +430,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		{
 			HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 					.getHtmlTplDashboardWidgetRenderer();
-			String templateEnding = (widget == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : widget.getTemplateEncoding());
+			String templateEnding = (entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
 			String templateContent = renderer.simpleTemplateContent(templateEnding);
 
 			data.put("defaultTemplateContent", templateContent);
@@ -412,19 +442,19 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/listResources", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<String> listResources(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id) throws Exception
+			Model model, @RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+		HtmlTplDashboardWidgetEntity entity = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
-		if (dashboard == null)
+		if (entity == null)
 			return new ArrayList<>(0);
 
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTplDashboardWidgetResManager();
 
-		List<String> resources = dashboardWidgetResManager.list(dashboard.getId());
+		List<String> resources = dashboardWidgetResManager.list(entity.getId());
 
 		return resources;
 	}
@@ -432,7 +462,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/deleteResource", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> deleteResource(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("name") String name)
+			Model model, @RequestParam("id") String id, @RequestParam("name") String name)
 			throws Exception
 	{
 		User user = getCurrentUser();
@@ -474,7 +504,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/renameResource", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> renameResource(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("srcName") String srcName,
+			Model model, @RequestParam("id") String id, @RequestParam("srcName") String srcName,
 			@RequestParam("destName") String destName)
 			throws Exception
 	{
@@ -483,9 +513,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		srcName = trimResourceName(srcName);
 		destName = trimResourceName(destName);
 		
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		
-		String[] templates = dashboard.getTemplates();
+		String[] templates = entity.getTemplates();
 		
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTplDashboardWidgetResManager();
@@ -517,8 +547,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		
 		if (!Arrays.equals(templates, newTemplates))
 		{
-			dashboard.setTemplates(newTemplates);
-			this.htmlTplDashboardWidgetEntityService.updateTemplate(user, dashboard);
+			entity.setTemplates(newTemplates);
+			this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
 		}
 
 		Map<String, Object> data = buildDashboardIdTemplatesHashMap(id, newTemplates);
@@ -651,7 +681,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	@RequestMapping("/import")
-	public String impt(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String impt(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		DashboardImportForm form = new DashboardImportForm();
 		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
@@ -824,61 +854,62 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
-		dashboard.setTemplateSplit(form.getTemplate());
-		dashboard.setTemplateEncoding(templateEncoding);
-		dashboard.setName(form.getName());
+		HtmlTplDashboardWidgetEntity entity = new HtmlTplDashboardWidgetEntity();
+		entity.setTemplateSplit(form.getTemplate());
+		entity.setTemplateEncoding(templateEncoding);
+		entity.setName(form.getName());
 
 		if (!isEmpty(form.getAnalysisProject()))
-			dashboard.setAnalysisProject(form.getAnalysisProject());
+			entity.setAnalysisProject(form.getAnalysisProject());
 
-		if (isBlank(dashboard.getName()) || isEmpty(dashboard.getTemplates()))
+		if (isBlank(entity.getName()) || isEmpty(entity.getTemplates()))
 			throw new IllegalInputException();
 
-		dashboard.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(dashboard, user);
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
 
-		this.analysisProjectAwareSupport.trim(dashboard);
+		this.analysisProjectAwareSupport.trim(entity);
 
-		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
+		this.htmlTplDashboardWidgetEntityService.add(user, entity);
 
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTplDashboardWidgetResManager();
 
-		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
+		dashboardWidgetResManager.copyFrom(entity.getId(), uploadDirectory);
 
 		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/view")
-	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
+		convertToFormModel(request, model, entity);
 
-		setFormModel(model, dashboard, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		setFormPageAttributes(model);
 		
 		return "/dashboard/dashboard_design_form";
 	}
 
 	@RequestMapping("/export")
-	public void export(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public void export(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
+		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTplDashboardWidgetResManager();
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
-		dashboardWidgetResManager.copyTo(dashboard.getId(), tmpDirectory);
+		dashboardWidgetResManager.copyTo(entity.getId(), tmpDirectory);
 
-		setDownloadResponseHeader(request, response, dashboard.getName() + ".zip");
+		setDownloadResponseHeader(request, response, entity.getName() + ".zip");
 		response.setContentType(CONTENT_TYPE_OCTET_STREAM);
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
@@ -912,7 +943,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 	@RequestMapping("/manage")
 	public String manage(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+			Model model)
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
@@ -924,7 +955,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	@RequestMapping(value = "/select")
-	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
@@ -937,7 +968,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQueryData(HttpServletRequest request,
-			HttpServletResponse response, final org.springframework.ui.Model springModel,
+			HttpServletResponse response, final Model springModel,
 			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = getCurrentUser();
@@ -945,12 +976,17 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
 				pagingQuery, pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
+		handleQueryData(request, pagingData.getItems());
 
 		return pagingData;
 	}
+
+	protected void handleQueryData(HttpServletRequest request, List<HtmlTplDashboardWidgetEntity> items)
+	{
+	}
 	
 	@RequestMapping("/shareSet")
-	public String shareSet(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public String shareSet(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
@@ -990,7 +1026,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		return optSuccessResponseEntity(request);
 	}
 	
-	protected void setFormPageAttributes(org.springframework.ui.Model model)
+	protected void setFormPageAttributes(Model model)
 	{
 		model.addAttribute("dashboardGlobalResUrlPrefix",
 				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
@@ -999,6 +1035,10 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+	}
+
+	protected void convertToFormModel(HttpServletRequest request, Model model, HtmlTplDashboardWidgetEntity entity)
+	{
 	}
 
 	protected Map<String, Object> buildDashboardIdTemplatesHashMap(String id, String[] templates)
@@ -1073,13 +1113,29 @@ public class DashboardController extends AbstractDataAnalysisController
 		return templateEncoding;
 	}
 
-	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity entity)
+	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+			HtmlTplDashboardWidgetEntity entity, HtmlTplDashboardWidgetEntity persist)
 	{
 		if (isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		if (isEmpty(entity.getTemplates()))
 			throw new IllegalInputException();
+
+		checkAnalysisProjectSaveRefPermission(request, user, entity, persist);
+
+		return null;
+	}
+
+	protected void trimAnalysisProjectAware(AnalysisProjectAwareEntity entity)
+	{
+		this.analysisProjectAwareSupport.trim(entity);
+	}
+
+	protected void checkAnalysisProjectSaveRefPermission(HttpServletRequest request, User user,
+			AnalysisProjectAwareEntity dataSet, AnalysisProjectAwareEntity persist)
+	{
+		this.analysisProjectAwareSupport.checkSavePermission(user, dataSet, persist, getAnalysisProjectService());
 	}
 
 	/**
