@@ -67,7 +67,11 @@
 				</template>
 			</p-column>
 			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
-			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-desc" style="min-width:25em;"></p-column>
+			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-last">
+				<template #body="{data}">
+					<div v-html="formatDesc(data)"></div>
+				</template>
+			</p-column>
 		</p-datatable>
 	</div>
 	<#include "../include/page_foot.ftl">
@@ -87,6 +91,12 @@
 		formatName: function(data)
 		{
 			return $.toChartPluginHtml(data, po.contextPath, { justifyContent: "start" });
+		},
+		
+		formatDesc: function(data)
+		{
+			var desc = (data.descLabel ? data.descLabel.value : "");
+			return $.truncateIf(desc);
 		},
 		
 		onUpload: function()
