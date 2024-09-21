@@ -168,10 +168,11 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+
 		HtmlTplDashboardWidgetEntity entity = createAdd(request, model);
 		setRequestAnalysisProject(request, response, entity);
-		
-		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -221,11 +222,11 @@ public class DashboardController extends AbstractDataAnalysisController
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		convertToFormModel(request, model, entity);
-		
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -268,12 +269,12 @@ public class DashboardController extends AbstractDataAnalysisController
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 
 		// 统一复制规则，至少有编辑权限才允许复制
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		handleCopyFormModel(request, model, user, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity);
 		model.addAttribute("copySourceId", id);
 
 		return "/dashboard/dashboard_form";
@@ -293,11 +294,11 @@ public class DashboardController extends AbstractDataAnalysisController
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, "design", "saveDesign");
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, "design", "saveDesign");
+		setFormModel(model, entity);
 		setFormPageAttributes(model);
 		setEnableInsertNewChartAttr(request, response, model);
 
@@ -687,11 +688,12 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping("/import")
 	public String impt(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
+
 		DashboardImportForm form = new DashboardImportForm();
 		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		form.setAnalysisProject(getRequestAnalysisProject(request, response, getAnalysisProjectService()));
-
-		setFormModel(model, form, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
+		setFormModel(model, form);
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dashboard/dashboard_import";
@@ -889,11 +891,11 @@ public class DashboardController extends AbstractDataAnalysisController
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 		setFormPageAttributes(model);
 		
 		return "/dashboard/dashboard_design_form";
@@ -994,6 +996,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, "shareSet", "saveShareSet");
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
@@ -1007,8 +1010,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		}
 
 		dashboardShareSet.setPassword("");
-
-		setFormModel(model, dashboardShareSet, "shareSet", "saveShareSet");
+		setFormModel(model, dashboardShareSet);
 
 		return "/dashboard/dashboard_share_set";
 	}

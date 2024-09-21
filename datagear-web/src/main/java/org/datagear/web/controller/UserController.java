@@ -132,9 +132,10 @@ public class UserController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		User entity = createAdd(request, model);
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		User entity = createAdd(request, model);
+		setFormModel(model, entity);
 		model.addAttribute("enablePassword", true);
 		setUserPasswordStrengthInfo(request, model);
 
@@ -196,10 +197,11 @@ public class UserController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+
 		User entity = getByIdForEdit(this.userService, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity);
 		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
@@ -232,10 +234,11 @@ public class UserController extends AbstractController
 	public String editPassword(HttpServletRequest request, HttpServletResponse response,
 			Model model, @RequestParam("id") String id)
 	{
+		setFormAction(model, "editPassword", "saveEditPsd");
+
 		User entity = this.userService.getByIdSimple(id);
 		checkNonNullEntity(entity);
-
-		setFormModel(model, toEditPsdForm(entity), "editPassword", "saveEditPsd");
+		setFormModel(model, toEditPsdForm(entity));
 		model.addAttribute("enableOldPassword", false);
 		setUserPasswordStrengthInfo(request, model);
 
@@ -259,10 +262,11 @@ public class UserController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
 		User entity = getByIdForView(this.userService, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
@@ -275,9 +279,10 @@ public class UserController extends AbstractController
 		if (isEmpty(ids))
 			throw new IllegalInputException();
 
-		List<User> users = this.userService.getByIdsSimple(ids, true);
+		setFormAction(model, REQUEST_ACTION_DELETE, "deleteDo");
 
-		setFormModel(model, users, REQUEST_ACTION_DELETE, "deleteDo");
+		List<User> users = this.userService.getByIdsSimple(ids, true);
+		setFormModel(model, users);
 
 		return "/user/user_delete";
 	}
@@ -345,13 +350,13 @@ public class UserController extends AbstractController
 			Model model)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, "personalSet", "savePersonalSet");
 
 		User entity = this.userService.getByIdNoPassword(user.getId());
 		checkNonNullEntity(entity);
-
 		model.addAttribute("disableRoles", true);
 		model.addAttribute("disableEditName", getApplicationProperties().isDisablePersonalSetName());
-		setFormModel(model, entity, "personalSet", "savePersonalSet");
+		setFormModel(model, entity);
 		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
@@ -395,11 +400,11 @@ public class UserController extends AbstractController
 			Model model)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, "editPassword", "savePersonalPsd");
 
 		User entity = this.userService.getByIdSimple(user.getId());
 		checkNonNullEntity(entity);
-
-		setFormModel(model, toPersonalEditPsdForm(entity), "editPassword", "savePersonalPsd");
+		setFormModel(model, toPersonalEditPsdForm(entity));
 		model.addAttribute("enableOldPassword", true);
 		setUserPasswordStrengthInfo(request, model);
 

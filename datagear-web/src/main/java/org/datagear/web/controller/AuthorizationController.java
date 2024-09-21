@@ -89,15 +89,15 @@ public class AuthorizationController extends AbstractController
 			@PathVariable("resourceType") String resourceType, @PathVariable("resource") String resource)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
 		Authorization authorization =new Authorization("", resource, resourceType, "",
 				Authorization.PRINCIPAL_TYPE_USER, resourceMeta.getPermissionMetas()[0].getPermission());
-
 		model.addAttribute("permissionMetas", resourceMeta.getPermissionMetas());
-		setFormModel(model, authorization, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, authorization);
 
 		return "/authorization/authorization_form";
 	}
@@ -130,6 +130,7 @@ public class AuthorizationController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -139,7 +140,7 @@ public class AuthorizationController extends AbstractController
 		Authorization authorization = getByIdForEdit(this.authorizationService, id);
 
 		model.addAttribute("permissionMetas", resourceMeta.getPermissionMetas());
-		setFormModel(model, authorization, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, authorization);
 
 		return "/authorization/authorization_form";
 	}
@@ -175,6 +176,7 @@ public class AuthorizationController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		checkIsAllowAuthorization(user, resourceType, resource);
 
@@ -184,7 +186,7 @@ public class AuthorizationController extends AbstractController
 		Authorization authorization = getByIdForView(this.authorizationService, id);
 
 		model.addAttribute("permissionMetas", resourceMeta.getPermissionMetas());
-		setFormModel(model, authorization, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, authorization);
 
 		return "/authorization/authorization_form";
 	}

@@ -277,6 +277,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 			throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, "import", "doImport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -300,7 +301,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
-		setFormModel(springModel, formModel, "import", "doImport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
@@ -399,6 +400,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 			throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, "import", "doImport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -419,7 +421,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setFileEncoding(Charset.defaultCharset().name());
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		
-		setFormModel(springModel, formModel, "import", "doImport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
@@ -506,6 +508,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 			throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, "import", "doImport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -531,7 +534,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
-		setFormModel(springModel, formModel, "import", "doImport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
@@ -639,6 +642,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 			throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, "import", "doImport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -662,7 +666,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		formModel.setDependentNumberAuto(getMessage(request, "auto"));
 
-		setFormModel(springModel, formModel, "import", "doImport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
 
@@ -883,6 +887,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		queries = (queries == null ? new String[0] : queries);
 		
 		final User user = getCurrentUser();
+		setFormAction(springModel, "export", "doExport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -907,7 +912,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
 
-		setFormModel(springModel, formModel, "export", "doExport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "queries", queries);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
@@ -985,6 +990,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		queries = (queries == null ? new String[0] : queries);
 		
 		final User user = getCurrentUser();
+		setFormAction(springModel, "export", "doExport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -1009,7 +1015,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(IOUtil.CHARSET_UTF_8);
 
-		setFormModel(springModel, formModel, "export", "doExport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "queries", queries);
 		//占位，避免页面空指针
@@ -1088,6 +1094,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		queries = (queries == null ? new String[0] : queries);
 		
 		final User user = getCurrentUser();
+		setFormAction(springModel, "export", "doExport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -1117,7 +1124,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
 
-		setFormModel(springModel, formModel, "export", "doExport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "queries", queries);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());
@@ -1195,6 +1202,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		queries = (queries == null ? new String[0] : queries);
 		
 		final User user = getCurrentUser();
+		setFormAction(springModel, "export", "doExport");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -1220,7 +1228,7 @@ public class DtbsSourceExchangeController extends AbstractDtbsSourceConnControll
 		formModel.setExportOption(exportOption);
 		formModel.setFileEncoding(Charset.defaultCharset().name());
 
-		setFormModel(springModel, formModel, "export", "doExport");
+		setFormModel(springModel, formModel);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		addAttributeForWriteJson(springModel, "queries", queries);
 		addAttributeForWriteJson(springModel, "availableCharsetNames", getAvailableCharsetNames());

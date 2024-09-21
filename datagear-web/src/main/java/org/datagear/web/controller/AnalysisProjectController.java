@@ -69,9 +69,10 @@ public class AnalysisProjectController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		AnalysisProject analysisProject = createAdd(request, model);
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		setFormModel(model, analysisProject, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		AnalysisProject entity = createAdd(request, model);
+		setFormModel(model, entity);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -106,11 +107,12 @@ public class AnalysisProjectController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		AnalysisProject entity = getByIdForEdit(this.analysisProjectService, user, id);
 		convertToFormModel(request, model, entity);
+		setFormModel(model, entity);
 		
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		return "/analysisProject/analysisProject_form";
 	}
 
@@ -136,11 +138,12 @@ public class AnalysisProjectController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		AnalysisProject entity = getByIdForView(this.analysisProjectService, user, id);
 		convertToFormModel(request, model, entity);
+		setFormModel(model, entity);
 
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		return "/analysisProject/analysisProject_form";
 	}
 

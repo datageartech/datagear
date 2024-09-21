@@ -163,6 +163,25 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 		return new SimpleWrapperTemplateModel(obj);
 	}
 
+	/**
+	 * 获取由{@linkplain #toWriteJsonTemplateModel(Object)}包装的原始对象。
+	 * 
+	 * @param <T>
+	 * @param templateModel
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T fromWriteJsonTemplateModel(Object templateModel)
+	{
+		if (templateModel == null)
+			return null;
+
+		if (!(templateModel instanceof WrapperTemplateModel))
+			throw new UnsupportedOperationException("Unsupported type");
+
+		return (T) ((WrapperTemplateModel) templateModel).getWrappedObject();
+	}
+
 	protected static class SimpleWrapperTemplateModel implements WrapperTemplateModel
 	{
 		private Object object;

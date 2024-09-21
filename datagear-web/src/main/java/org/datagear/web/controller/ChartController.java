@@ -183,15 +183,15 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+
 		HtmlChartWidgetEntity chart = createAdd(request, model);
 		setRequestAnalysisProject(request, response, chart);
-
 		addAttributeForWriteJson(model, "chartPluginVO", null);
 		model.addAttribute("initResultDataFormat", createDefaultResultDataFormat());
 		model.addAttribute("enableResultDataFormat", false);
 		setDisableSaveShowAttr(request, response, model);
-
-		setFormModel(model, chart, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, chart);
 
 		return "/chart/chart_form";
 	}
@@ -233,13 +233,13 @@ public class ChartController extends AbstractChartPluginAwareController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 		convertToFormModel(request, model, entity);
 		setResultDataFormatModel(request, model, entity);
 		setDisableSaveShowAttr(request, response, model);
-
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity);
 		
 		return "/chart/chart_form";
 	}
@@ -278,14 +278,14 @@ public class ChartController extends AbstractChartPluginAwareController
 			@RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 
 		// 统一复制规则，至少有编辑权限才允许复制
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
 		handleCopyFormModel(request, model, user, entity);
 		setResultDataFormatModel(request, model, entity);
 		setDisableSaveShowAttr(request, response, model);
-
-		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
+		setFormModel(model, entity);
 
 		return "/chart/chart_form";
 	}
@@ -336,12 +336,12 @@ public class ChartController extends AbstractChartPluginAwareController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlChartWidgetEntity entity = getByIdForView(this.htmlChartWidgetEntityService, user, id);
 		convertToFormModel(request, model, entity);
 		setResultDataFormatModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 		
 		return "/chart/chart_form";
 	}

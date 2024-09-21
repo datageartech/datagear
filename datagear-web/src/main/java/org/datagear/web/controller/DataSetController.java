@@ -193,10 +193,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addSql(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL);
+
 		SqlDataSetEntity entity = createAddSql(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -231,10 +232,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addJsonValue(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue);
+
 		JsonValueDataSetEntity entity = createAddJsonValue(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -268,11 +270,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addJsonFile(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile);
+
 		JsonFileDataSetEntity entity = createAddJsonFile(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
 		addAvailableCharsetNames(model);
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -311,10 +314,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addExcel(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel);
+
 		ExcelDataSetEntity entity = createAddExcel(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -354,10 +358,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addCsvValue(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue);
+
 		CsvValueDataSetEntity entity = createAddCsvValue(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -394,11 +399,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addCsvFile(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile);
+
 		CsvFileDataSetEntity entity = createAddCsvFile(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
 		addAvailableCharsetNames(model);
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -438,11 +444,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	public String addHttp(HttpServletRequest request, HttpServletResponse response,
 			Model model)
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http);
+
 		HttpDataSetEntity entity = createAddHttp(request, model);
 		setRequestAnalysisProject(request, response, entity);
-
 		addAvailableCharsetNames(model);
-		setFormModel(model, entity, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -489,9 +496,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		// 敏感信息较多，至少有编辑权限才允许复制
 		DataSetEntity entity = getByIdForEdit(this.dataSetEntityService, user, id);
+		setFormAction(model, REQUEST_ACTION_COPY, "saveAdd/" + entity.getDataSetType());
 		handleCopyFormModel(request, model, user, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_COPY, "saveAdd/" + entity.getDataSetType());
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -547,10 +554,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		DataSetEntity entity = getByIdForEdit(this.dataSetEntityService, user, id);
+		setFormAction(model, REQUEST_ACTION_EDIT, "saveEdit/" + entity.getDataSetType());
 		convertToFormModel(request, model, entity);
 		addAvailableCharsetNamesIfNeed(model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, "saveEdit/" + entity.getDataSetType());
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -788,12 +795,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			@RequestParam("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		DataSetEntity entity = getByIdForView(this.dataSetEntityService, user, id);
 		convertToFormModel(request, model, entity);
 		addAvailableCharsetNamesIfNeed(model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}

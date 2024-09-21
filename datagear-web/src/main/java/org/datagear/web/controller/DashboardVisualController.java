@@ -248,6 +248,8 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			@RequestParam(value = DASHBOARD_SHOW_AUTH_PARAM_NAME, required = false) String name) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, "auth", "authcheck");
+
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, id);
 
@@ -277,7 +279,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		authModel.put("authed", authed);
 		authModel.put("dashboardNameMask", StringUtil.mask(dashboardWidget.getName(), 2, 2, 6));
 
-		setFormModel(model, authModel, "auth", "authcheck");
+		setFormModel(model, authModel);
 		model.addAttribute("authed", authed);
 		model.addAttribute("submitPath", submitPath);
 		model.addAttribute("redirectPath", redirectPath);

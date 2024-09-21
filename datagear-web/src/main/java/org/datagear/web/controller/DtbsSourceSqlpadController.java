@@ -171,6 +171,7 @@ public class DtbsSourceSqlpadController extends AbstractDtbsSourceConnController
 			@RequestParam(value="sql", required = false) String sql) throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, "sqlpad", "execute");
 
 		new VoidDtbsSourceConnExecutor(request, response, springModel, dtbsSourceId, true)
 		{
@@ -188,7 +189,7 @@ public class DtbsSourceSqlpadController extends AbstractDtbsSourceConnController
 		if(!isEmpty(sql))
 			form.setSql(sql);
 		
-		setFormModel(springModel, form, "sqlpad", "execute");
+		setFormModel(springModel, form);
 		springModel.addAttribute("sqlResultRowMapper", buildDefaultLOBRowMapper());
 
 		return "/dtbsSourceSqlpad/dtbsSourceSqlpad";

@@ -132,8 +132,10 @@ public class RegisterController extends AbstractController
 			return ERROR_PAGE_URL;
 		}
 
-		User user = new User();
-		setFormModel(model, user, "register", "doRegister");
+		setFormAction(model, "register", "doRegister");
+
+		User entity = new User();
+		setFormModel(model, entity);
 		this.detectNewVersionScriptResolver.enableIf(request);
 		setUserPasswordStrengthInfo(model);
 		

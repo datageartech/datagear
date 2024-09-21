@@ -68,9 +68,10 @@ public class RoleController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		Role entity = createAdd(request, model);
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		Role entity = createAdd(request, model);
+		setFormModel(model, entity);
 
 		return "/role/role_form";
 	}
@@ -101,10 +102,11 @@ public class RoleController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+
 		Role entity = getByIdForEdit(this.roleService, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity);
 		
 		return "/role/role_form";
 	}
@@ -128,10 +130,11 @@ public class RoleController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
 		Role entity = getByIdForView(this.roleService, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 		
 		return "/role/role_form";
 	}

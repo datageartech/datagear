@@ -153,9 +153,10 @@ public class LoginController extends AbstractController
 	@RequestMapping
 	public String login(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		LoginForm form = createLoginForm(request, response, model);
+		setFormAction(model, "login", "doLogin");
 
-		setFormModel(model, form, "login", "doLogin");
+		LoginForm form = createLoginForm(request, response, model);
+		setFormModel(model, form);
 		this.detectNewVersionScriptResolver.enableIf(request);
 		
 		return "/login";

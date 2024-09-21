@@ -98,9 +98,10 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		DtbsSource dtbsSource = createAdd(request, model);
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		setFormModel(model, dtbsSource, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		DtbsSource entity = createAdd(request, model);
+		setFormModel(model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
@@ -114,12 +115,13 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	public String copy(HttpServletRequest request, Model model, @RequestParam("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 
 		// 敏感信息较多，至少有编辑权限才允许复制
 		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
 		handleCopyFormModel(request, model, user, entity);
+		setFormModel(model, entity);
 
-		setFormModel(model, entity, REQUEST_ACTION_COPY, SUBMIT_ACTION_SAVE_ADD);
 		return "/dtbsSource/dtbsSource_form";
 	}
 
@@ -155,11 +157,12 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
 		convertToFormModel(request, model, entity);
+		setFormModel(model, entity);
 
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		return "/dtbsSource/dtbsSource_form";
 	}
 
@@ -196,6 +199,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		DtbsSource entity = getByIdForView(getDtbsSourceService(), user, id);
 		boolean hideSensitiveInfo = !canViewDetail(request, model, user, entity);
@@ -204,7 +208,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		if (hideSensitiveInfo)
 			clearSensitiveInfo(entity);
 
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 		model.addAttribute("hideSensitiveInfo", hideSensitiveInfo);
 
 		return "/dtbsSource/dtbsSource_form";
@@ -385,6 +389,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			@PathVariable("dtbsSourceId") String dtbsSourceId, @PathVariable("tableName") String tableName)
 			throws Throwable
 	{
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
 		ReturnDtbsSourceConnTableExecutor<Table> executor = new ReturnDtbsSourceConnTableExecutor<Table>(request,
 				response,
 				model, dtbsSourceId, tableName, true)
@@ -398,8 +404,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		};
 		
 		Table table = executor.execute();
-		
-		setFormModel(model, table, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, table);
 		
 		return "/dtbsSource/dtbsSource_dbtable_meta";
 	}
@@ -409,8 +414,9 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			Model model, @RequestParam("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
-		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
+		DtbsSource dtbsSource = getByIdForView(getDtbsSourceService(), user, id);
 		DatabaseInfo di = new DatabaseInfo();
 
 		Connection cn = null;
@@ -433,7 +439,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			JdbcUtil.closeConnection(cn);
 		}
 
-		setFormModel(model, di, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, di);
 
 		return "/dtbsSource/dtbsSource_dbinfo";
 	}

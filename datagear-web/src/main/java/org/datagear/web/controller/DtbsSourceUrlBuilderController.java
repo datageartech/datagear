@@ -89,10 +89,11 @@ public class DtbsSourceUrlBuilderController extends AbstractController implement
 	@RequestMapping("/set")
 	public String set(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model) throws IOException
 	{
+		setFormAction(model, "set", "saveSet");
+
 		SaveScriptCodeForm form = new SaveScriptCodeForm();
 		form.setCode(getUrlBuilderScript());
-		
-		setFormModel(model, form, "set", "saveSet");
+		setFormModel(model, form);
 
 		return "/dtbsSourceUrlBuilder/dtbsSourceUrlBuilder_set";
 	}

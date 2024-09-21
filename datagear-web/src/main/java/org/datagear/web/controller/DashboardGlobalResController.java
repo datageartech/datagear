@@ -132,12 +132,13 @@ public class DashboardGlobalResController extends AbstractController implements 
 			@RequestParam(value = "dir", required = false) String dir)
 			throws Exception
 	{
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+
 		dir = FileUtil.toDisplayPath(dir, true);
 
 		DashboardGlobalResSaveForm form = new DashboardGlobalResSaveForm();
 		form.setSavePath(dir);
-
-		setFormModel(model, form, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE);
+		setFormModel(model, form);
 		model.addAttribute("defaultDir", dir);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
@@ -223,6 +224,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("path") String path) throws Exception
 	{
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
+
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path);
 
 		if (!file.exists())
@@ -235,8 +238,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		formModel.setSavePath(path);
 		formModel.setInitSavePath(path);
 		formModel.setResourceContent(resourceContent);
-		
-		setFormModel(model, formModel, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE);
+		setFormModel(model, formModel);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_form";
 	}
@@ -280,10 +282,12 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/rename")
 	public String rename(HttpServletRequest request, Model model, @RequestParam("path") String path)
 	{
+		setFormAction(model, REQUEST_ACTION_EDIT, "saveRename");
+
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path, false);
 		FileRenameForm form = new FileRenameForm(path, file.getName());
 
-		setFormModel(model, form, REQUEST_ACTION_EDIT, "saveRename");
+		setFormModel(model, form);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_rename";
 	}
@@ -317,6 +321,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@RequestMapping("/move")
 	public String move(HttpServletRequest request, Model model, @RequestParam("path") String path)
 	{
+		setFormAction(model, REQUEST_ACTION_EDIT, "saveMove");
+
 		File file = FileUtil.getFile(this.dashboardGlobalResRootDirectory, path, false);
 
 		String targetDir = path;
@@ -327,10 +333,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 		}
 
 		targetDir = FileUtil.toDisplayPath(targetDir, true, true);
-
 		FileMoveForm form = new FileMoveForm(path, targetDir);
-
-		setFormModel(model, form, REQUEST_ACTION_EDIT, "saveMove");
+		setFormModel(model, form);
 
 		return "/dashboardGlobalRes/dashboardGlobalRes_move";
 	}

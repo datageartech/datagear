@@ -317,6 +317,8 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+
 		new VoidDtbsSourceConnTableExecutor(request, response, springModel, dtbsSourceId, tableName, true)
 		{
 			@Override
@@ -326,7 +328,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 				checkEditTableDataPermission(dtbsSource, user);
 
 				Row formModel = new Row();
-				setFormModel(springModel, formModel, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+				setFormModel(springModel, formModel);
 			}
 		}.execute();
 
@@ -369,6 +371,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		final Row row = convertToRow(paramData);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
@@ -389,7 +392,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 				if (myRow == null)
 					throw new RecordNotFoundException();
 
-				setFormModel(springModel, myRow, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+				setFormModel(springModel, myRow);
 			}
 		}.execute();
 
@@ -481,6 +484,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = getCurrentUser();
+		setFormAction(springModel, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 		final Row row = convertToRow(paramData);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
@@ -501,7 +505,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 				if (formModel == null)
 					throw new RecordNotFoundException();
 
-				setFormModel(springModel, formModel, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+				setFormModel(springModel, formModel);
 			}
 		}.execute();
 

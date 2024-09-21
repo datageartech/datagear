@@ -69,9 +69,10 @@ public class DtbsSourceGuardController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		DtbsSourceGuard entity = createAdd(request, model);
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		DtbsSourceGuard entity = createAdd(request, model);
+		setFormModel(model, entity);
 
 		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
@@ -107,10 +108,11 @@ public class DtbsSourceGuardController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+
 		DtbsSourceGuard entity = getByIdForEdit(this.dtbsSourceGuardService, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity);
 		
 		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}
@@ -134,10 +136,11 @@ public class DtbsSourceGuardController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id)
 	{
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
 		DtbsSourceGuard entity = getByIdForView(this.dtbsSourceGuardService, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 		
 		return "/dtbsSourceGuard/dtbsSourceGuard_form";
 	}

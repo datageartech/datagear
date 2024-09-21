@@ -74,9 +74,10 @@ public class FileSourceController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, Model model)
 	{
-		FileSource entity = createAdd(request, model);
+		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		setFormModel(model, entity, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
+		FileSource entity = createAdd(request, model);
+		setFormModel(model, entity);
 
 		return "/fileSource/fileSource_form";
 	}
@@ -111,11 +112,11 @@ public class FileSourceController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		FileSource entity = getByIdForEdit(this.fileSourceService, user, id);
 		convertToFormModel(request, model, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
+		setFormModel(model, entity);
 		
 		return "/fileSource/fileSource_form";
 	}
@@ -142,12 +143,12 @@ public class FileSourceController extends AbstractController
 			@RequestParam("id") String id)
 	{
 		User user = getCurrentUser();
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		FileSource entity = getByIdForView(this.fileSourceService, user, id);
 		convertToFormModel(request, model, entity);
 		handleViewShowDirectory(request, model, user, entity);
-
-		setFormModel(model, entity, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+		setFormModel(model, entity);
 
 		return "/fileSource/fileSource_form";
 	}

@@ -371,16 +371,26 @@ public abstract class AbstractController extends MessageSourceSupport
 		return readonly;
 	}
 
-	protected void setFormModel(Model model, Object formModel, String requestAction, String submitAction)
+	protected String getFormAction(Model model)
 	{
-		addAttributeForWriteJson(model, KEY_FORM_MODEL, formModel);
-		setFormAction(model, requestAction, submitAction);
+		return (String) model.getAttribute(KEY_REQUEST_ACTION);
 	}
-	
+
 	protected void setFormAction(Model model, String requestAction, String submitAction)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, requestAction);
 		model.addAttribute(KEY_SUBMIT_ACTION, submitAction);
+	}
+
+	protected <T> T getFormModel(Model model)
+	{
+		Object fm = model.getAttribute(KEY_FORM_MODEL);
+		return fromWriteJsonTemplateModel(fm);
+	}
+
+	protected void setFormModel(Model model, Object formModel)
+	{
+		addAttributeForWriteJson(model, KEY_FORM_MODEL, formModel);
 	}
 
 	protected void addAttributeForWriteJson(Model model, String name, Object value)
@@ -813,9 +823,7 @@ public abstract class AbstractController extends MessageSourceSupport
 		if (isJsonResponse)
 		{
 			OperationMessage operationMessage = getOptMsgForHttpError(request, response);
-
-			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE,
-					WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(operationMessage));
+			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE, toWriteJsonTemplateModel(operationMessage));
 
 			response.setContentType(CONTENT_TYPE_JSON);
 		}
@@ -1133,6 +1141,18 @@ public abstract class AbstractController extends MessageSourceSupport
 	protected TemplateModel toWriteJsonTemplateModel(Object object)
 	{
 		return WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(object);
+	}
+
+	/**
+	 * 获取由{@linkplain #toWriteJsonTemplateModel(Object)}转换的原始对象。
+	 * 
+	 * @param <T>
+	 * @param templateModel
+	 * @return
+	 */
+	protected <T> T fromWriteJsonTemplateModel(Object templateModel)
+	{
+		return WriteJsonTemplateDirectiveModel.fromWriteJsonTemplateModel(templateModel);
 	}
 
 	/**
