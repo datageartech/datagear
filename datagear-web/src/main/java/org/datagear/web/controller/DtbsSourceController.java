@@ -198,9 +198,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		User user = getCurrentUser();
 
 		DtbsSource entity = getByIdForView(getDtbsSourceService(), user, id);
+		boolean hideSensitiveInfo = !canViewDetail(request, model, user, entity);
 		convertToFormModel(request, model, entity);
-
-		boolean hideSensitiveInfo = !Authorization.canEdit(entity.getDataPermission());
 
 		if (hideSensitiveInfo)
 			clearSensitiveInfo(entity);
@@ -209,6 +208,17 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		model.addAttribute("hideSensitiveInfo", hideSensitiveInfo);
 
 		return "/dtbsSource/dtbsSource_form";
+	}
+
+	protected boolean canViewDetail(HttpServletRequest request, Model model, User user, DtbsSource entity)
+	{
+		if (user.isAnonymous())
+			return false;
+
+		if (!Authorization.canEdit(entity.getDataPermission()))
+			return false;
+
+		return true;
 	}
 	
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
