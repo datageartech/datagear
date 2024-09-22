@@ -220,7 +220,7 @@
 					<@spring.message code='chartAttribute' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<div class="flex align-items-center">
+					<div id="${pid}attrValues" class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
 							:disabled="!fm.pluginVo || !fm.pluginVo.attributes || fm.pluginVo.attributes.length==0"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
@@ -240,7 +240,7 @@
 					<@spring.message code='chartOptions' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<div class="flex align-items-center">
+					<div id="${pid}options" class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
 							aria:haspopup="true" aria-controls="${pid}optionsPanel"
 							@click="onShowOptionsPanel" class="p-button-secondary mr-2">
