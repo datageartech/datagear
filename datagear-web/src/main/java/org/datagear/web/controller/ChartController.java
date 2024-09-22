@@ -259,7 +259,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity,
 				new OnceSupplier<>(() ->
 				{
-					return (HtmlChartWidgetEntity) getByIdForEdit(getDataSetEntityService(), user, entity.getId());
+					return getByIdForEdit(getHtmlChartWidgetEntityService(), user, entity.getId());
 				}));
 
 		if (re != null)
