@@ -109,6 +109,9 @@ label.align-tip{
 .border-1px-transparent{
 	border: 1px solid transparent;
 }
+.white-space-pre-wrap{
+	white-space: pre-wrap;
+}
 
 .new-version-tip.p-button,
 .new-version-tip > .p-menuitem-content > .p-menuitem-link > span{

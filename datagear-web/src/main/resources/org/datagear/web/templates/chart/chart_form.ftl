@@ -417,7 +417,7 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
-			<div v-text="formatChartPluginDesc(fm.pluginVo)"></div>
+			<div class="white-space-pre-wrap" v-text="formatChartPluginDesc(fm.pluginVo)"></div>
 		</div>
 	</p-overlaypanel>
 	<!-- 这里使用对话框组件而非弹出面板组件，因为其内部存在下拉框等组件，使用弹出面板时会出现错位问题 -->
