@@ -41,6 +41,8 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_ORDER = "order";
 	String PROPERTY_CATEGORIES = "categories";
 	String PROPERTY_CATEGORY_ORDERS = "categoryOrders";
+	String PROPERTY_AUTHOR = "author";
+	String PROPERTY_ISSUE_DATE = "issueDate";
 
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";
@@ -177,4 +179,24 @@ public interface ChartPlugin extends Identifiable, Labeled
 	 * @return
 	 */
 	List<Integer> getCategoryOrders();
+
+	/**
+	 * 获取作者。
+	 * <p>
+	 * 返回{@code null}或空字符串表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	String getAuthor();
+
+	/**
+	 * 获取发布日期。
+	 * <p>
+	 * 返回{@code null}或空字符串表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	String getIssueDate();
 }

@@ -211,5 +211,7 @@
 			order: 51
 		}
 	],
-	categoryOrders: [ 41, 51 ]
+	categoryOrders: [ 41, 51 ],
+	author: "test",
+	issueDate: "2024-09-01"
 }

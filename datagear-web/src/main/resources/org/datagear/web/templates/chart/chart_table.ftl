@@ -170,7 +170,7 @@
 		},
 		formatChartPlugin: function(data)
 		{
-			return $.toChartPluginHtml(data.pluginVo, po.contextPath);
+			return $.toChartPluginHtml(data.pluginVo, po.contextPath, { justifyContent: "start" });
 		},
 		onAdd: function()
 		{

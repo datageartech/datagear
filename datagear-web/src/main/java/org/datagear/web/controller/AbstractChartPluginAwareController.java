@@ -25,9 +25,9 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.DashboardTheme;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver;
@@ -184,6 +184,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		pluginView.setCategories(Category.clone(chartPlugin.getCategories(), locale));
 		pluginView.setCategoryOrders(chartPlugin.getCategoryOrders());
 		pluginView.setAttributes(ChartPluginAttribute.clone(chartPlugin.getAttributes(), locale));
+		pluginView.setAuthor(chartPlugin.getAuthor());
+		pluginView.setIssueDate(chartPlugin.getIssueDate());
 
 		return pluginView;
 	}

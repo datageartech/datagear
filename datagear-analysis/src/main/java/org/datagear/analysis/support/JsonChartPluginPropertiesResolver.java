@@ -83,6 +83,8 @@ public class JsonChartPluginPropertiesResolver
 	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
 	public static final String JSON_PROPERTY_CATEGORIES = ChartPlugin.PROPERTY_CATEGORIES;
 	public static final String JSON_PROPERTY_CATEGORY_ORDERS = ChartPlugin.PROPERTY_CATEGORY_ORDERS;
+	public static final String JSON_PROPERTY_AUTHOR = ChartPlugin.PROPERTY_AUTHOR;
+	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 
 	/**
@@ -109,14 +111,14 @@ public class JsonChartPluginPropertiesResolver
 	 */
 	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Map<String, ?> properties)
 	{
-		chartPlugin.setId((String) properties.get(JSON_PROPERTY_ID));
+		chartPlugin.setId(convertToString(properties.get(JSON_PROPERTY_ID)));
 		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
 		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
 		chartPlugin.setAttributes(convertToAttributes(properties.get(JSON_PROPERTY_ATTRIBUTES)));
 		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS)));
 		chartPlugin.setDataSetRange(convertToDataSetRange(properties.get(JSON_PROPERTY_DATA_SET_RANGE)));
-		chartPlugin.setVersion((String) properties.get(JSON_PROPERTY_VERSION));
+		chartPlugin.setVersion(convertToString(properties.get(JSON_PROPERTY_VERSION)));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
 
 		Object categoriesObj = properties.get(JSON_PROPERTY_CATEGORIES);
@@ -126,6 +128,9 @@ public class JsonChartPluginPropertiesResolver
 
 		chartPlugin.setCategoryOrders(
 				convertToCategoryOrders(properties.get(JSON_PROPERTY_CATEGORY_ORDERS), chartPlugin.getOrder()));
+
+		chartPlugin.setAuthor(convertToString(properties.get(JSON_PROPERTY_AUTHOR)));
+		chartPlugin.setIssueDate(convertToString(properties.get(JSON_PROPERTY_ISSUE_DATE)));
 	}
 
 	/**
@@ -872,6 +877,16 @@ public class JsonChartPluginPropertiesResolver
 					"Convert object [" + obj + "] to [" + Integer.class.getName() + "] is not supported");
 	}
 	
+	protected String convertToString(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof String)
+			return (String) obj;
+		else
+			return obj.toString();
+	}
+
 	protected Label createLabel()
 	{
 		return new Label();

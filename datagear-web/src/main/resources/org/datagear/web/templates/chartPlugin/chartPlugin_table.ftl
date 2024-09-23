@@ -67,6 +67,8 @@
 				</template>
 			</p-column>
 			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
+			<p-column field="author" header="<@spring.message code='author' />" class="col-name"></p-column>
+			<p-column field="issueDate" header="<@spring.message code='issueDate' />" class="col-datetime"></p-column>
 			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-last">
 				<template #body="{data}">
 					<div v-html="formatDesc(data)"></div>

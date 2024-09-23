@@ -61,9 +61,13 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private int order = 0;
 
-	private List<Category> categories = Collections.emptyList();;
+	private List<Category> categories = Collections.emptyList();
 
-	private List<Integer> categoryOrders = Collections.emptyList();;
+	private List<Integer> categoryOrders = Collections.emptyList();
+
+	private String author = "";
+
+	private String issueDate = "";
 
 	public AbstractChartPlugin()
 	{
@@ -269,5 +273,27 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	public void setCategoryOrders(List<Integer> categoryOrders)
 	{
 		this.categoryOrders = categoryOrders;
+	}
+
+	@Override
+	public String getAuthor()
+	{
+		return author;
+	}
+
+	public void setAuthor(String author)
+	{
+		this.author = author;
+	}
+
+	@Override
+	public String getIssueDate()
+	{
+		return issueDate;
+	}
+
+	public void setIssueDate(String issueDate)
+	{
+		this.issueDate = issueDate;
 	}
 }

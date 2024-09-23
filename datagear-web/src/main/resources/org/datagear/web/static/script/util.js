@@ -1860,7 +1860,8 @@
 			//是否竖向排版
 			vertical: false,
 			//横向对齐方式："start"、"center"、"end"
-			justifyContent: "center"
+			justifyContent: "center",
+			showAuthor: false
 		},
 		options);
 		
@@ -1878,6 +1879,11 @@
 			name = $.escapeHtml(name);
 			
 			html += "<div class='plugin-name'>"+name+"</div>";
+			
+			if(options.showAuthor)
+			{
+				html += "<div class='plugin-author text-color-secondary'><small>"+(chartPlugin.author ? $.escapeHtml(chartPlugin.author) : "")+"</small></div>";
+			}
 		}
 		
 		html += "</div>"
