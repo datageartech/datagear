@@ -531,7 +531,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess chartPluginModuleAccess()
 	{
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/chartPlugin/select", "/chartPlugin/selectData");
+				"/chartPlugin/view", "/chartPlugin/select", "/chartPlugin/selectData");
 
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/chartPlugin/**");
 

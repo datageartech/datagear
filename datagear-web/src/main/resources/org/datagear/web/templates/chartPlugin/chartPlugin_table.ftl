@@ -39,6 +39,7 @@
 			
 			<p-button label="<@spring.message code='upload' />" @click="onUpload" v-if="!pm.isReadonlyAction"></p-button>
 			<p-button label="<@spring.message code='download' />" @click="onDownload" v-if="!pm.isSelectAction"></p-button>
+			<p-button label="<@spring.message code='view' />" @click="onView" :class="{'p-button-secondary': pm.isSelectAction}"></p-button>
 			<p-button label="<@spring.message code='delete' />" @click="onDelete" class="p-button-danger" v-if="!pm.isReadonlyAction"></p-button>
 		</div>
 	</div>
@@ -71,7 +72,7 @@
 			<p-column field="issueDate" header="<@spring.message code='issueDate' />" class="col-datetime"></p-column>
 			<p-column field="descLabel.value" header="<@spring.message code='desc' />" class="col-last">
 				<template #body="{data}">
-					<div v-html="formatDesc(data)"></div>
+					<div v-text="formatDesc(data)"></div>
 				</template>
 			</p-column>
 		</p-datatable>
@@ -109,6 +110,11 @@
 		onDownload: function()
 		{
 			po.handleOpenOfsAction("/chartPlugin/download", { target: "_blank" });
+		},
+		
+		onView: function()
+		{
+			po.handleOpenOfAction("/chartPlugin/view");
 		},
 		
 		onDelete: function()

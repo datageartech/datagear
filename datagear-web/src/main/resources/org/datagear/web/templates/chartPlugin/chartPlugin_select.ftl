@@ -36,6 +36,7 @@
 		</div>
 		<div class="operations col-12 flex gap-1 flex-wrap md:justify-content-end" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect"></p-button>
+			<p-button label="<@spring.message code='view' />" @click="onView" class="p-button-secondary"></p-button>
 		</div>
 	</div>
 	<div class="page-content flex-grow-1 overflow-auto">
@@ -219,6 +220,11 @@
 		onSelect: function()
 		{
 			po.handleSelectAction();
+		},
+		
+		onView: function()
+		{
+			po.handleOpenOfAction("/chartPlugin/view");
 		}
 	});
 
