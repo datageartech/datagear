@@ -18,11 +18,15 @@
 package org.datagear.web.util;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
@@ -34,12 +38,15 @@ import org.datagear.util.IOUtil;
  */
 public class ChartPluginZipTool
 {
+	protected static Pattern VERSION_REG_NO_QUOTE = Pattern.compile("version\\s*\\:\\s*\\\"[^\\\"]+\\\"");
+	protected static Pattern VERSION_REG_QUOTE = Pattern.compile("\\\"version\\\"\\s*\\:\\s*\\\"[^\\\"]+\\\"");
+
 	/**
 	 * 将指定目录下的所有图表插件文件夹压缩为ZIP文件。
 	 * 
 	 * @param directory
 	 */
-	public static void zip(File directory) throws IOException
+	public void zip(File directory) throws Exception
 	{
 		File[] files = directory.listFiles();
 
@@ -68,7 +75,7 @@ public class ChartPluginZipTool
 			println("Zip [" + file.getName() + "] to [" + zipFile.getName() + "]");
 		}
 
-		println("Zip total : " + count);
+		println("Zip total : " + count + " / " + files.length);
 	}
 
 	/**
@@ -77,7 +84,7 @@ public class ChartPluginZipTool
 	 * @param directory
 	 * @param deleteAfterUnzip
 	 */
-	public static void unzip(File directory, boolean deleteAfterUnzip) throws IOException
+	public void unzip(File directory, boolean deleteAfterUnzip) throws Exception
 	{
 		File[] files = directory.listFiles();
 
@@ -108,7 +115,205 @@ public class ChartPluginZipTool
 			println("Unzip [" + file.getName() + "] to [" + myDirectory.getName() + "]");
 		}
 
-		println("Unzip total : " + count);
+		println("Unzip total : " + count + " / " + files.length);
+	}
+
+	/**
+	 * 修改指定目录下所有插件的版本号。
+	 * 
+	 * @param directory
+	 * @param newVersion
+	 * @throws Exception
+	 */
+	public void updateVersion(File directory, String newVersion) throws Exception
+	{
+		File[] files = directory.listFiles();
+
+		if (files == null)
+			return;
+
+		int updateCount = 0;
+		for (File file : files)
+		{
+			if (!file.isDirectory())
+				continue;
+
+			File pf = getPluginJsonFile(file);
+
+			if (!pf.exists())
+				continue;
+			
+			String pfPath = file.getName() + "/" + pf.getName();
+
+			String str = readString(pf);
+			boolean replaced = false;
+
+			{
+				int count = matchesCount(str, VERSION_REG_NO_QUOTE);
+
+				if (count == 1)
+				{
+					str = replaceAll(str, VERSION_REG_NO_QUOTE, "version: \"" + newVersion + "\"");
+					replaced = true;
+				}
+				else if (count > 1)
+				{
+					throw new IllegalStateException(
+							count + " matches found in : " + pfPath);
+				}
+			}
+
+			if (!replaced)
+			{
+				int count = matchesCount(str, VERSION_REG_QUOTE);
+
+				if (count == 1)
+				{
+					str = replaceAll(str, VERSION_REG_QUOTE, "\"version\": \"" + newVersion + "\"");
+					replaced = true;
+				}
+				else if (count > 1)
+				{
+					throw new IllegalStateException(
+							count + " matches found in : " + pfPath);
+				}
+			}
+
+			if (replaced)
+			{
+				writeString(pf, str);
+				println("Update version to \"" + newVersion + "\" for [" + pfPath + "]");
+				updateCount++;
+			}
+		}
+
+		println("Update version total : " + updateCount + " / " + files.length);
+	}
+
+	protected int matchesCount(String str, Pattern pattern)
+	{
+		Matcher m = pattern.matcher(str);
+
+		int count = 0;
+
+		while (m.find() == true)
+			count++;
+
+		return count;
+	}
+
+	protected String replaceAll(String str, Pattern pattern, String text)
+	{
+		Matcher m = pattern.matcher(str);
+		return m.replaceAll(text);
+	}
+
+	/**
+	 * 创建{@code renderer.js}文件规范。
+	 * 
+	 * @param directory
+	 */
+	public void createRendererJs(File directory) throws Exception
+	{
+		File[] files = directory.listFiles();
+
+		if (files == null)
+			return;
+		
+		String content = "(function(plugin)" + "\n" //
+				+ "{" + "\n" //
+				+ "\t" + "var r=" + "\n" //
+				+ "\t" + "{};" + "\n" //
+				+ "\t" + "" + "\n" //
+				+ "\t" + "return r;" + "\n" //
+				+ "})" + "\n" //
+				+ "(plugin);";
+
+		int count = 0;
+		for (File file : files)
+		{
+			if (!file.isDirectory())
+				continue;
+
+			File rf = getRendererJsFile(file);
+
+			if (rf.exists())
+				continue;
+
+			createRendererJsFile(file, content);
+			count++;
+
+			println("Create [" + rf.getName() + "] for : " + file.getName());
+		}
+
+		println("Create " + HtmlChartPluginLoader.FILE_NAME_RENDERER + " version total : " + count + " / "
+				+ files.length);
+	}
+
+	protected void createRendererJsFile(File directory, String content) throws Exception
+	{
+		File file = getRendererJsFile(directory);
+		
+		if(file.exists())
+			throw new IllegalStateException("[" + file.getName() + "] exists");
+
+		Reader in = null;
+		Writer out = null;
+
+		try
+		{
+			in = IOUtil.getReader(content);
+			out = IOUtil.getWriter(file, IOUtil.CHARSET_UTF_8);
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+	}
+
+	protected String readString(File file) throws Exception
+	{
+		Reader in = null;
+
+		try
+		{
+			in = IOUtil.getReader(file, IOUtil.CHARSET_UTF_8);
+			return IOUtil.readString(in, false);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+	}
+
+	protected void writeString(File file, String content) throws Exception
+	{
+		Reader in = null;
+		Writer out = null;
+
+		try
+		{
+			in = IOUtil.getReader(content);
+			out = IOUtil.getWriter(file, IOUtil.CHARSET_UTF_8);
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+	}
+
+	protected File getRendererJsFile(File directory)
+	{
+		return FileUtil.getFile(directory, HtmlChartPluginLoader.FILE_NAME_RENDERER);
+	}
+
+	protected File getPluginJsonFile(File directory)
+	{
+		return FileUtil.getFile(directory, HtmlChartPluginLoader.FILE_NAME_PLUGIN);
 	}
 
 	protected static void println(Object o)
@@ -127,6 +332,7 @@ public class ChartPluginZipTool
 
 	public static void main(String[] args) throws Exception
 	{
+		ChartPluginZipTool tool = new ChartPluginZipTool();
 		File directory = FileUtil.getDirectory("target/chart-plugins", true);
 
 		println("*****************************************");
@@ -134,6 +340,8 @@ public class ChartPluginZipTool
 		println("Print:");
 		println("1 : for unzip");
 		println("2 : for zip");
+		println("3 : for replace version");
+		println("4 : for create " + HtmlChartPluginLoader.FILE_NAME_RENDERER);
 		println("clean : for clean");
 		println("*****************************************");
 		println("");
@@ -154,11 +362,21 @@ public class ChartPluginZipTool
 			}
 			else if ("1".equals(input))
 			{
-				unzip(directory, true);
+				tool.unzip(directory, true);
 			}
 			else if ("2".equals(input))
 			{
-				zip(directory);
+				tool.zip(directory);
+			}
+			else if ("3".equals(input))
+			{
+				println("Input new version :");
+				String version = scanner.nextLine().trim();
+				tool.updateVersion(directory, version);
+			}
+			else if ("4".equals(input))
+			{
+				tool.createRendererJs(directory);
 			}
 			else if ("clean".equals(input))
 			{
