@@ -157,7 +157,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 					public String[] get(HtmlChartPluginView t)
 					{
 						return new String[] { (t.getNameLabel() == null ? null : t.getNameLabel().getValue()),
-								(t.getDescLabel() == null ? null : t.getDescLabel().getValue()) };
+						(t.getDescLabel() == null ? null : t.getDescLabel().getValue()), t.getAuthor() };
 					}
 				});
 	}
