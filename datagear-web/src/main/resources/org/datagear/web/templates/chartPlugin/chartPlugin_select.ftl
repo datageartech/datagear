@@ -65,9 +65,9 @@
 								<template #grid="slotProps">
 									<div class="grid">
 										<div v-for="cp in slotProps.items" class="col-12 md:col-4 p-3">
-											<div class="p-card p-3 cursor-pointer"
+											<div class="p-card p-3 cursor-pointer hover:surface-50"
 												@click="onSelectChartPlugin(cp)"
-												:class="{'state-active': cp.id == pm.selectedChartPluginId }">
+												:class="{'state-active surface-50 text-color': cp.id == pm.selectedChartPluginId }">
 												<div v-html="formatChartPlugin(cp)"></div>
 											</div>
 										</div>
