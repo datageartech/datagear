@@ -271,6 +271,7 @@ dataSet_form_param_field_form.ftl
 				}
 				
 				fm.params[dspIdx] = dsp;
+				pm.selectedParams = [];
 			});
 		},
 		onAddField: function(e)
@@ -309,6 +310,7 @@ dataSet_form_param_field_form.ftl
 				}
 				
 				fm.fields[dspIdx] = dsp;
+				pm.selectedFields = [];
 			},
 			fm.fields);
 		},
