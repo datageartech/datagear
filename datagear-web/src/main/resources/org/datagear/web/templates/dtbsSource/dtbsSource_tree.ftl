@@ -76,10 +76,14 @@
 		</div>
 		<div class="dtbsSource-tabs-wrapper col-9 pl-3 pt-1 overflow-auto">
 			<p-tabview v-model:active-index="pm.dtbsSourceTabs.activeIndex" :scrollable="true" @tab-change="onDtbsSourceTabChange"
-				@tab-click="onDtbsSourceTabClick" class="contextmenu-tabview light-tabview h-full flex-tabview flex flex-column overflow-auto" :class="{'opacity-0': pm.dtbsSourceTabs.items.length == 0}">
-				<p-tabpanel v-for="tab in pm.dtbsSourceTabs.items" :key="tab.id">
+				@tab-click="onDtbsSourceTabClick" class="contextmenu-tabview light-tabview hide-default-title h-full flex-tabview flex flex-column overflow-auto" :class="{'opacity-0': pm.dtbsSourceTabs.items.length == 0}">
+				<!--
+				注意：p-tabpanel组件必须设置header属性，且值不能重复，否则，删除前置卡片会导致后后置卡片重绘。
+				所以，这里将header设置为id，并使用hide-default-title样式类自定义标题
+				-->
+				<p-tabpanel v-for="tab in pm.dtbsSourceTabs.items" :key="tab.id" :header="tab.id">
 					<template #header>
-						<span class="p-tabview-title" :title="tab.desc">{{tab.title}}</span>
+						<span class="p-tabview-title custom-title" :title="tab.desc">{{tab.title}}</span>
 						<p-button type="button" icon="pi pi-angle-down"
 							class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
 							@click="onDtbsSourceTabMenuToggle($event, tab)" aria-haspopup="true" aria-controls="${pid}dtbsSourceTabMenu">
@@ -412,12 +416,14 @@
 	
 	po.loadDtbsSourceTab = function(tab, forceLoad, loadUrl)
 	{
-		var panel = po.elementOfId(tab.id);
-		var expectLoad = (panel.prop("loaded") !== true || forceLoad);
+		var loadStatus = tab.loadStatus;
+		var needLoad = (forceLoad || (loadStatus != "loaded" && loadStatus != "loading"));
 		
-		if(expectLoad && panel.prop("loading") !== true)
+		if(needLoad)
 		{
-			panel.prop("loading", true);
+			tab.loadStatus = "loading";
+			
+			var panel = po.elementOfId(tab.id);
 			panel.empty();
 			
 			var loadingDiv = null;
@@ -438,13 +444,10 @@
 					fullUrl: true,
 					target: panel,
 					dialog: false,
-					success: function()
-					{
-						panel.prop("loaded", true);
-					},
+					success: function(){},
 					complete: function()
 					{
-						panel.prop("loading", false);
+						tab.loadStatus = "loaded";
 						
 						if(loadingDiv)
 							loadingDiv.remove();

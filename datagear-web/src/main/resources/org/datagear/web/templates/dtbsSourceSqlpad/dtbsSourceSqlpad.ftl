@@ -108,9 +108,14 @@
 						</p-button>
 					</div>
 					<p-tabview v-model:active-index="pm.sqlpadTabs.activeIndex" :scrollable="true" @tab-change="onSqlpadTabChange"
-						@tab-click="onSqlpadTabClick" class="contextmenu-tabview light-tabview relative h-full" :class="{'opacity-0': pm.sqlpadTabs.items.length == 0}">
-						<p-tabpanel v-for="tab in pm.sqlpadTabs.items" :key="tab.id" :header="tab.title">
+						@tab-click="onSqlpadTabClick" class="contextmenu-tabview light-tabview hide-default-title relative h-full" :class="{'opacity-0': pm.sqlpadTabs.items.length == 0}">
+						<!--
+						注意：p-tabpanel组件必须设置header属性，且值不能重复，否则，删除前置卡片会导致后后置卡片重绘。
+						所以，这里将header设置为id，并使用hide-default-title样式类自定义标题
+						-->
+						<p-tabpanel v-for="tab in pm.sqlpadTabs.items" :key="tab.id" :header="tab.id">
 							<template #header>
+								<span class="p-tabview-title custom-title">{{tab.title}}</span>
 								<p-button type="button" icon="pi pi-angle-down"
 									class="context-menu-btn p-button-xs p-button-secondary p-button-text p-button-rounded"
 									@click="onSqlpadTabMenuToggle($event, tab)" aria-haspopup="true" aria-controls="${pid}sqlpadTabMenu">

@@ -191,6 +191,9 @@ label.align-tip{
 .p-tabview.xs-tabview .p-tabview-panels{
 	padding: 0.3rem;
 }
+.p-tabview.hide-default-title .p-tabview-nav li .p-tabview-title:not(.custom-title){
+	display: none;
+}
 
 /*竖向tabmenu*/
 .p-tabmenu.vertical-tabmenu{
