@@ -185,13 +185,8 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		HtmlChartWidgetEntity chart = createAdd(request, model);
-		setRequestAnalysisProject(request, response, chart);
-		addAttributeForWriteJson(model, "chartPluginVO", null);
-		model.addAttribute("initResultDataFormat", createDefaultResultDataFormat());
-		model.addAttribute("enableResultDataFormat", false);
-		setDisableSaveShowAttr(request, response, model);
-		setFormModel(model, chart);
+		HtmlChartWidgetEntity entity = createAdd(request, model);
+		prepareFormAttr(request, model, entity);
 
 		return "/chart/chart_form";
 	}
@@ -208,12 +203,9 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 
-		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
-
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
-		trimAnalysisProjectAware(entity);
-		inflateHtmlChartWidgetEntity(entity, request);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
 
@@ -222,8 +214,7 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		this.htmlChartWidgetEntityService.add(user, entity);
 
-		// 返回参数不应该完全加载插件对象
-		entity.setPluginVo(paramPlugin);
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -236,10 +227,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-		convertToFormModel(request, model, entity);
-		setResultDataFormatModel(request, model, entity);
-		setDisableSaveShowAttr(request, response, model);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 		
 		return "/chart/chart_form";
 	}
@@ -251,10 +239,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 
-		HtmlChartPluginVo paramPlugin = entity.getPluginVo();
-
-		trimAnalysisProjectAware(entity);
-		inflateHtmlChartWidgetEntity(entity, request);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -267,8 +252,7 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		this.htmlChartWidgetEntityService.update(user, entity);
 
-		// 返回参数不应该完全加载插件对象
-		entity.setPluginVo(paramPlugin);
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -282,17 +266,17 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		// 统一复制规则，至少有编辑权限才允许复制
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-		handleCopyFormModel(request, model, user, entity);
-		setResultDataFormatModel(request, model, entity);
-		setDisableSaveShowAttr(request, response, model);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
+		toCopyResponseData(request, model, entity);
 
 		return "/chart/chart_form";
 	}
 
-	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user,
-			HtmlChartWidgetEntity entity) throws Exception
+	protected void toCopyResponseData(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
+			throws Exception
 	{
+		User user = getCurrentUser();
+
 		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 
 		DataSetBind[] dataSetBinds = entity.getDataSetBinds();
@@ -328,7 +312,6 @@ public class ChartController extends AbstractChartPluginAwareController
 		}
 
 		entity.setId(null);
-		convertToFormModel(request, model, entity);
 	}
 
 	@RequestMapping("/view")
@@ -339,9 +322,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlChartWidgetEntity entity = getByIdForView(this.htmlChartWidgetEntityService, user, id);
-		convertToFormModel(request, model, entity);
-		setResultDataFormatModel(request, model, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 		
 		return "/chart/chart_form";
 	}
@@ -369,7 +350,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, getAnalysisProjectService()));
 		
 		return "/chart/chart_table";
 	}
@@ -380,7 +361,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, getAnalysisProjectService()));
 		
 		return "/chart/chart_table";
 	}
@@ -396,14 +377,9 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
-	}
-
-	protected void handleQueryData(HttpServletRequest request, List<HtmlChartWidgetEntity> items)
-	{
-		setChartPluginView(request, items);
 	}
 
 	@RequestMapping(value = "/hasReadPermission", produces = CONTENT_TYPE_JSON)
@@ -532,15 +508,15 @@ public class ChartController extends AbstractChartPluginAwareController
 		}
 	}
 
-	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+	protected void setRequestAnalysisProject(HttpServletRequest request,
 			HtmlChartWidgetEntity entity)
 	{
-		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+		setRequestAnalysisProjectIfValid(request, this.analysisProjectService, entity);
 	}
 
-	protected boolean setDisableSaveShowAttr(HttpServletRequest request, HttpServletResponse response, Model model)
+	protected boolean setDisableSaveShowAttr(HttpServletRequest request, Model model)
 	{
-		boolean disable = isDisableSaveShow(request, response, model);
+		boolean disable = isDisableSaveShow(request, model);
 		model.addAttribute("disableSaveShow", disable);
 
 		return disable;
@@ -550,11 +526,10 @@ public class ChartController extends AbstractChartPluginAwareController
 	 * 是否在图表表单页面禁用【保存并展示】功能按钮。
 	 * 
 	 * @param request
-	 * @param response
 	 * @param model
 	 * @return
 	 */
-	protected boolean isDisableSaveShow(HttpServletRequest request, HttpServletResponse response, Model model)
+	protected boolean isDisableSaveShow(HttpServletRequest request, Model model)
 	{
 		String pv = request.getParameter("disableSaveShow");
 		return ("1".equals(pv) || "true".equals(pv));
@@ -566,7 +541,20 @@ public class ChartController extends AbstractChartPluginAwareController
 		return rdf;
 	}
 	
-	protected void convertToFormModel(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
+	protected void prepareFormAttr(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
+	{
+		// 仅添加操作需要设置
+		if (REQUEST_ACTION_ADD.equals(getRequestAction(model)))
+			setRequestAnalysisProject(request, entity);
+
+		setResultDataFormatModel(request, model, entity);
+		setDisableSaveShowAttr(request, model);
+
+		toFormResponseData(request, entity);
+		setFormModel(model, entity);
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, HtmlChartWidgetEntity entity)
 	{
 		HtmlChartPlugin plugin = entity.getPluginVo();
 		
@@ -574,6 +562,17 @@ public class ChartController extends AbstractChartPluginAwareController
 			entity.setPluginVo(getHtmlChartPluginView(request, plugin.getId()));
 		
 		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<HtmlChartWidgetEntity> items)
+	{
+		setChartPluginView(request, items);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, HtmlChartWidgetEntity entity)
+	{
+		trimAnalysisProjectAware(entity);
+		inflateHtmlChartWidgetEntity(entity, request);
 	}
 	
 	protected void setResultDataFormatModel(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)

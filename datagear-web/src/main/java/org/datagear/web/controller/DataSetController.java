@@ -196,8 +196,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_SQL);
 
 		SqlDataSetEntity entity = createAddSql(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -215,7 +214,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 		trimSqlDataSetEntity(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, entity, null);
@@ -224,6 +223,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.add(user, entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -235,8 +236,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonValue);
 
 		JsonValueDataSetEntity entity = createAddJsonValue(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -254,7 +254,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, entity, null);
 
@@ -262,6 +262,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.add(user, entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -273,9 +275,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_JsonFile);
 
 		JsonFileDataSetEntity entity = createAddJsonFile(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		addAvailableCharsetNames(model);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -296,8 +296,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, entity, null);
 
@@ -306,6 +305,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.dataSetEntityService.add(user, entity);
 		copyToDirectoryFileDataSetEntityDirectoryIf(entity, "");
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -317,8 +318,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Excel);
 
 		ExcelDataSetEntity entity = createAddExcel(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -340,8 +340,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, entity, null);
 
@@ -350,6 +349,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.dataSetEntityService.add(user, entity);
 		copyToDirectoryFileDataSetEntityDirectoryIf(entity, "");
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -361,8 +362,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvValue);
 
 		CsvValueDataSetEntity entity = createAddCsvValue(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -383,7 +383,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, entity, null);
 
@@ -391,6 +391,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.add(user, entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -402,9 +404,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_CsvFile);
 
 		CsvFileDataSetEntity entity = createAddCsvFile(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		addAvailableCharsetNames(model);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -426,8 +426,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, entity, null);
 
@@ -436,6 +435,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.dataSetEntityService.add(user, entity);
 		copyToDirectoryFileDataSetEntityDirectoryIf(entity, "");
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -447,9 +448,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_ADD, "saveAdd/" + DataSetEntity.DATA_SET_TYPE_Http);
 
 		HttpDataSetEntity entity = createAddHttp(request, model);
-		setRequestAnalysisProject(request, response, entity);
-		addAvailableCharsetNames(model);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -470,7 +469,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		User user = getCurrentUser();
 
 		inflateSaveAddBaseInfo(request, user, entity);
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, entity, null);
 
@@ -478,6 +477,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.add(user, entity);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -497,15 +498,18 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		// 敏感信息较多，至少有编辑权限才允许复制
 		DataSetEntity entity = getByIdForEdit(this.dataSetEntityService, user, id);
 		setFormAction(model, REQUEST_ACTION_COPY, "saveAdd/" + entity.getDataSetType());
-		handleCopyFormModel(request, model, user, entity);
-		setFormModel(model, entity);
+
+		prepareFormAttr(request, model, entity);
+		toCopyResponseData(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
 
-	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user, DataSetEntity entity)
+	protected void toCopyResponseData(HttpServletRequest request, Model model, DataSetEntity entity)
 			throws Throwable
 	{
+		User user = getCurrentUser();
+
 		if (entity instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity dataSetEntity = (SqlDataSetEntity) entity;
@@ -514,9 +518,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			{
 				DtbsSourceConnectionFactory connectionFactory = t.getConnectionFactory();
 				return (connectionFactory == null ? null : connectionFactory.getDtbsSource());
+
 			}, (t) ->
 			{
 				t.setConnectionFactory(null);
+
 			}, getDtbsSourceService());
 		}
 		else if (entity instanceof DirectoryFileDataSetEntity)
@@ -542,9 +548,6 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 		entity.setId(null);
-
-		convertToFormModel(request, model, entity);
-		addAvailableCharsetNamesIfNeed(model, entity);
 	}
 
 	@RequestMapping("/edit")
@@ -555,9 +558,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		DataSetEntity entity = getByIdForEdit(this.dataSetEntityService, user, id);
 		setFormAction(model, REQUEST_ACTION_EDIT, "saveEdit/" + entity.getDataSetType());
-		convertToFormModel(request, model, entity);
-		addAvailableCharsetNamesIfNeed(model, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -569,7 +570,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 		trimSqlDataSetEntity(entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveSqlDataSetEntity(request, user, entity,
@@ -583,6 +584,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.dataSetEntityService.update(user, entity);
 		
+		toFormResponseData(request, entity);
+
 		return optSuccessDataResponseEntity(request, entity);
 	}
 
@@ -593,7 +596,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonValueDataSetEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -605,6 +608,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.update(user, entity);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -617,8 +622,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveJsonFileDataSetEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -631,6 +635,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.dataSetEntityService.update(user, entity);
 		copyToDirectoryFileDataSetEntityDirectoryIf(entity, originalFileName);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -643,8 +649,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveExcelDataSetEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -657,6 +662,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		this.dataSetEntityService.update(user, entity);
 		copyToDirectoryFileDataSetEntityDirectoryIf(entity, originalFileName);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -668,7 +675,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvValueDataSetEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -680,6 +687,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.update(user, entity);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -692,8 +701,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveCsvFileDataSetEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -704,10 +712,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (responseEntity != null)
 			return responseEntity;
 
-
-
 		this.dataSetEntityService.update(user, entity);
 		copyToDirectoryFileDataSetEntityDirectoryIf(entity, originalFileName);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -719,7 +727,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> responseEntity = checkSaveHttpDataSetEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -731,63 +739,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 			return responseEntity;
 
 		this.dataSetEntityService.update(user, entity);
+
+		toFormResponseData(request, entity);
 		
 		return optSuccessDataResponseEntity(request, entity);
-	}
-
-	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
-	{
-		File directory = getTempDataSetDirectory();
-		String displayName = multipartFile.getOriginalFilename();
-		File tmpFile = FileUtil.generateUniqueFile(directory, FileUtil.getExtension(displayName));
-		String fileName = tmpFile.getName();
-
-		writeMultipartFile(multipartFile, tmpFile);
-
-		Map<String, Object> results = new HashMap<>();
-		results.put("fileName", fileName);
-		results.put("displayName", displayName);
-
-		return results;
-	}
-
-	@RequestMapping(value = "/downloadFile")
-	public void downloadFile(HttpServletRequest request, HttpServletResponse response, @RequestParam("id") String id)
-			throws Exception
-	{
-		User user = getCurrentUser();
-
-		DataSetEntity entity = getByIdForView(this.dataSetEntityService, user, id);
-
-		if (!(entity instanceof DirectoryFileDataSetEntity))
-			throw new IllegalInputException();
-
-		DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) entity;
-
-		// 服务端文件允许参数化文件名因而无法再这里下载文件，即便如此，也可能保存着用户之前编辑的上传文件而允许下载，所以不应启用下面的逻辑
-		// if
-		// (!DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD.equals(dataSetEntity.getFileSourceType()))
-		// throw new IllegalInputException();
-
-		if (isEmpty(dataSetEntity.getFileName()))
-			throw new FileNotFoundException();
-
-		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(dataSetEntity.getId());
-		File entityFile = FileUtil.getFile(dataSetDirectory, dataSetEntity.getFileName());
-
-		if (!entityFile.exists())
-			throw new FileNotFoundException();
-
-		String displayName = dataSetEntity.getDisplayName();
-
-		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
-		setDownloadResponseHeader(request, response, displayName);
-		OutputStream out = response.getOutputStream();
-
-		IOUtil.write(entityFile, out);
 	}
 
 	@RequestMapping("/view")
@@ -798,9 +753,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		DataSetEntity entity = getByIdForView(this.dataSetEntityService, user, id);
-		convertToFormModel(request, model, entity);
-		addAvailableCharsetNamesIfNeed(model, entity);
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 
 		return buildFormView(entity.getDataSetType());
 	}
@@ -860,7 +813,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, getAnalysisProjectService()));
 		
 		return "/dataSet/dataSet_table";
 	}
@@ -870,7 +823,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		setSelectAction(request, model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, getAnalysisProjectService()));
 		
 		return "/dataSet/dataSet_table";
 	}
@@ -886,13 +839,64 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		PagingData<DataSetEntity> pagingData = this.dataSetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
 	}
 
-	protected void handleQueryData(HttpServletRequest request, List<DataSetEntity> items)
+	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
+		File directory = getTempDataSetDirectory();
+		String displayName = multipartFile.getOriginalFilename();
+		File tmpFile = FileUtil.generateUniqueFile(directory, FileUtil.getExtension(displayName));
+		String fileName = tmpFile.getName();
+
+		writeMultipartFile(multipartFile, tmpFile);
+
+		Map<String, Object> results = new HashMap<>();
+		results.put("fileName", fileName);
+		results.put("displayName", displayName);
+
+		return results;
+	}
+
+	@RequestMapping(value = "/downloadFile")
+	public void downloadFile(HttpServletRequest request, HttpServletResponse response, @RequestParam("id") String id)
+			throws Exception
+	{
+		User user = getCurrentUser();
+
+		DataSetEntity entity = getByIdForView(this.dataSetEntityService, user, id);
+
+		if (!(entity instanceof DirectoryFileDataSetEntity))
+			throw new IllegalInputException();
+
+		DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) entity;
+
+		// 服务端文件允许参数化文件名因而无法再这里下载文件，即便如此，也可能保存着用户之前编辑的上传文件而允许下载，所以不应启用下面的逻辑
+		// if
+		// (!DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD.equals(dataSetEntity.getFileSourceType()))
+		// throw new IllegalInputException();
+
+		if (isEmpty(dataSetEntity.getFileName()))
+			throw new FileNotFoundException();
+
+		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(dataSetEntity.getId());
+		File entityFile = FileUtil.getFile(dataSetDirectory, dataSetEntity.getFileName());
+
+		if (!entityFile.exists())
+			throw new FileNotFoundException();
+
+		String displayName = dataSetEntity.getDisplayName();
+
+		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
+		setDownloadResponseHeader(request, response, displayName);
+		OutputStream out = response.getOutputStream();
+
+		IOUtil.write(entityFile, out);
 	}
 
 	@RequestMapping(value = "/preview/" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
@@ -905,8 +909,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		
 		if(isEmpty(entity))
 			throw new IllegalInputException();
-		
-		trimAnalysisProjectAware(entity);
+
+		inflateSaveEntity(request, entity);
 		trimSqlDataSetEntity(entity);
 
 		// 添加时
@@ -970,7 +974,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		// 添加时
 		if (StringUtil.isEmpty(entity.getId()))
@@ -1012,8 +1016,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		// 添加时
 		if (StringUtil.isEmpty(entity.getId()))
@@ -1056,8 +1059,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		// 添加时
 		if (StringUtil.isEmpty(entity.getId()))
@@ -1099,7 +1101,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		// 添加时
 		if (StringUtil.isEmpty(entity.getId()))
@@ -1140,8 +1142,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(entity);
-		trimDirectoryFileDataSetEntity(entity);
+		inflateSaveEntity(request, entity);
 
 		// 添加时
 		if (StringUtil.isEmpty(entity.getId()))
@@ -1183,7 +1184,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity))
 			throw new IllegalInputException();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, entity);
 
 		// 添加时
 		if (StringUtil.isEmpty(entity.getId()))
@@ -1213,6 +1214,64 @@ public class DataSetController extends AbstractDtbsSourceConnController
 
 		return entity.resolve(query);
 	}
+
+	protected void prepareFormAttr(HttpServletRequest request, Model model, DataSetEntity entity)
+	{
+		// 仅添加操作需要设置
+		if (REQUEST_ACTION_ADD.equals(getRequestAction(model)))
+			setRequestAnalysisProject(request, entity);
+
+		addAvailableCharsetNamesIfNeed(model, entity);
+
+		toFormResponseData(request, entity);
+		setFormModel(model, entity);
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, DataSetEntity entity)
+	{
+		if (entity instanceof SqlDataSetEntity)
+		{
+			SqlDataSetEntity sqlDataSetEntity = ((SqlDataSetEntity) entity);
+			sqlDataSetEntity.clearDtbsSourceSensitiveInfo();
+			sqlDataSetEntity.setSqlValidator(null);
+
+			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
+			if (connectionFactory != null)
+			{
+				connectionFactory = new DtbsSourceConnectionFactory(connectionFactory.getConnectionSource(),
+						connectionFactory.getDtbsSource());
+				connectionFactory.setConnectionSource(null);
+				sqlDataSetEntity.setConnectionFactory(connectionFactory);
+			}
+		}
+
+		if (entity instanceof DirectoryFileDataSetEntity)
+		{
+			DirectoryFileDataSetEntity dfDataSetEntity = ((DirectoryFileDataSetEntity) entity);
+			dfDataSetEntity.setDirectory(null);
+			FileSource fileSource = dfDataSetEntity.getFileSource();
+			if (fileSource != null)
+				fileSource.setDirectory(null);
+		}
+
+		if (entity instanceof HttpDataSetEntity)
+			((HttpDataSetEntity) entity).setHttpClient(null);
+
+		if (entity instanceof AbstractResolvableResourceDataSet<?>)
+			((AbstractResolvableResourceDataSet<?>) entity).setCache(null);
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<DataSetEntity> items)
+	{
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, DataSetEntity entity)
+	{
+		trimAnalysisProjectAware(entity);
+
+		if (entity instanceof DirectoryFileDataSetEntity)
+			trimDirectoryFileDataSetEntity((DirectoryFileDataSetEntity) entity);
+	}
 	
 	protected void addAvailableCharsetNamesIfNeed(Model model, DataSetEntity entity)
 	{
@@ -1233,43 +1292,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return names;
 	}
 
-	protected void convertToFormModel(HttpServletRequest request, Model model, DataSetEntity entity)
+	protected void setRequestAnalysisProject(HttpServletRequest request, DataSetEntity entity)
 	{
-		if(entity instanceof SqlDataSetEntity)
-		{
-			SqlDataSetEntity sqlDataSetEntity = ((SqlDataSetEntity) entity);
-			sqlDataSetEntity.clearDtbsSourceSensitiveInfo();
-			sqlDataSetEntity.setSqlValidator(null);
-			
-			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
-			if(connectionFactory != null)
-			{
-				connectionFactory = new DtbsSourceConnectionFactory(connectionFactory.getConnectionSource(), connectionFactory.getDtbsSource());
-				connectionFactory.setConnectionSource(null);
-				sqlDataSetEntity.setConnectionFactory(connectionFactory);
-			}
-		}
-		
-		if(entity instanceof DirectoryFileDataSetEntity)
-		{
-			DirectoryFileDataSetEntity dfDataSetEntity = ((DirectoryFileDataSetEntity) entity);
-			dfDataSetEntity.setDirectory(null);
-			FileSource fileSource = dfDataSetEntity.getFileSource();
-			if (fileSource != null)
-				fileSource.setDirectory(null);
-		}
-		
-		if(entity instanceof HttpDataSetEntity)
-			((HttpDataSetEntity) entity).setHttpClient(null);
-
-		if (entity instanceof AbstractResolvableResourceDataSet<?>)
-			((AbstractResolvableResourceDataSet<?>) entity).setCache(null);
-	}
-
-	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
-			DataSetEntity entity)
-	{
-		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+		setRequestAnalysisProjectIfValid(request, this.analysisProjectService, entity);
 	}
 
 	protected boolean copyToDirectoryFileDataSetEntityDirectoryIf(DirectoryFileDataSetEntity entity,

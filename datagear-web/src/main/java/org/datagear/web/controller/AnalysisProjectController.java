@@ -72,7 +72,6 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		AnalysisProject entity = createAdd(request, model);
-		toFormResponseData(request, entity);
 		prepareFormAttr(request, model, entity);
 
 		return "/analysisProject/analysisProject_form";
@@ -90,13 +89,14 @@ public class AnalysisProjectController extends AbstractController
 	{
 		User user = getCurrentUser();
 
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
+		inflateSaveEntity(request, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
 		if (re != null)
 			return re;
-
-		entity.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(entity, user);
 
 		this.analysisProjectService.add(entity);
 
@@ -113,7 +113,6 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		AnalysisProject entity = getByIdForEdit(this.analysisProjectService, user, id);
-		toFormResponseData(request, entity);
 		prepareFormAttr(request, model, entity);
 		
 		return "/analysisProject/analysisProject_form";
@@ -125,6 +124,8 @@ public class AnalysisProjectController extends AbstractController
 			@RequestBody AnalysisProject entity)
 	{
 		User user = getCurrentUser();
+
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
@@ -146,7 +147,6 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		AnalysisProject entity = getByIdForView(this.analysisProjectService, user, id);
-		toFormResponseData(request, entity);
 		prepareFormAttr(request, model, entity);
 
 		return "/analysisProject/analysisProject_form";
@@ -228,7 +228,7 @@ public class AnalysisProjectController extends AbstractController
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
 			AnalysisProject entity)
 	{
-		if (isBlank(entity.getName()))
+		if (isBlank(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		return null;
@@ -236,6 +236,7 @@ public class AnalysisProjectController extends AbstractController
 
 	protected void prepareFormAttr(HttpServletRequest request, Model model, AnalysisProject entity)
 	{
+		toFormResponseData(request, entity);
 		setFormModel(model, entity);
 	}
 
@@ -244,6 +245,10 @@ public class AnalysisProjectController extends AbstractController
 	}
 
 	protected void toQueryResponseData(HttpServletRequest request, List<AnalysisProject> items)
+	{
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, AnalysisProject entity)
 	{
 	}
 }

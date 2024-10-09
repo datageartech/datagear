@@ -171,7 +171,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		HtmlTplDashboardWidgetEntity entity = createAdd(request, model);
-		setRequestAnalysisProject(request, response, entity);
+		setRequestAnalysisProject(request, entity);
 		setFormModel(model, entity);
 
 		return "/dashboard/dashboard_form";
@@ -692,7 +692,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		DashboardImportForm form = new DashboardImportForm();
 		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
-		form.setAnalysisProject(getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+		form.setAnalysisProject(getRequestAnalysisProject(request, getAnalysisProjectService()));
 		setFormModel(model, form);
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 
@@ -955,7 +955,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, getAnalysisProjectService()));
 		
 		return "/dashboard/dashboard_table";
 	}
@@ -966,7 +966,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		model.addAttribute("serverURL", WebUtils.getServerURL(request));
 		setSelectAction(request, model);
 		addAttributeForWriteJson(model, KEY_CURRENT_ANALYSIS_PROJECT,
-				getRequestAnalysisProject(request, response, getAnalysisProjectService()));
+				getRequestAnalysisProject(request, getAnalysisProjectService()));
 		
 		return "/dashboard/dashboard_table";
 	}
@@ -1296,10 +1296,10 @@ public class DashboardController extends AbstractDataAnalysisController
 		return resourceName;
 	}
 
-	protected void setRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+	protected void setRequestAnalysisProject(HttpServletRequest request,
 			HtmlTplDashboardWidgetEntity entity)
 	{
-		setRequestAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
+		setRequestAnalysisProjectIfValid(request, this.analysisProjectService, entity);
 	}
 
 	public static class HtmlTplDashboardDesignForm implements ControllerForm

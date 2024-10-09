@@ -371,15 +371,20 @@ public abstract class AbstractController extends MessageSourceSupport
 		return readonly;
 	}
 
-	protected String getFormAction(Model model)
+	protected void setFormAction(Model model, String requestAction, String submitAction)
+	{
+		setRequestAction(model, requestAction);
+		model.addAttribute(KEY_SUBMIT_ACTION, submitAction);
+	}
+
+	protected String getRequestAction(Model model)
 	{
 		return (String) model.getAttribute(KEY_REQUEST_ACTION);
 	}
 
-	protected void setFormAction(Model model, String requestAction, String submitAction)
+	protected void setRequestAction(Model model, String requestAction)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, requestAction);
-		model.addAttribute(KEY_SUBMIT_ACTION, submitAction);
 	}
 
 	protected <T> T getFormModel(Model model)
@@ -398,22 +403,21 @@ public abstract class AbstractController extends MessageSourceSupport
 		model.addAttribute(name, toWriteJsonTemplateModel(value));
 	}
 
-	protected void setRequestAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
-			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity entity)
+	protected void setRequestAnalysisProjectIfValid(HttpServletRequest request,
+			AnalysisProjectService service, AnalysisProjectAwareEntity entity)
 	{
-		entity.setAnalysisProject(getRequestAnalysisProject(request, response, analysisProjectService));
+		entity.setAnalysisProject(getRequestAnalysisProject(request, service));
 	}
 
 	/**
 	 * 获取请求中的{@linkplain AnalysisProject}，没有则返回{@code null}。
 	 * 
 	 * @param request
-	 * @param response
-	 * @param analysisProjectService
+	 * @param service
 	 * @return
 	 */
-	protected AnalysisProject getRequestAnalysisProject(HttpServletRequest request, HttpServletResponse response,
-			AnalysisProjectService analysisProjectService)
+	protected AnalysisProject getRequestAnalysisProject(HttpServletRequest request,
+			AnalysisProjectService service)
 	{
 		User user = getCurrentUser();
 
@@ -427,7 +431,7 @@ public abstract class AbstractController extends MessageSourceSupport
 		
 		try
 		{
-			return analysisProjectService.getById(user, analysisId);
+			return service.getById(user, analysisId);
 		}
 		catch (Throwable t)
 		{
