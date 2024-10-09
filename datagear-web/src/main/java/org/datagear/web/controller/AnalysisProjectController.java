@@ -72,7 +72,8 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		AnalysisProject entity = createAdd(request, model);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		prepareFormAttr(request, model, entity);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -99,6 +100,8 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.add(entity);
 
+		toFormResponseData(request, entity);
+
 		return optSuccessDataResponseEntity(request, entity);
 	}
 
@@ -110,8 +113,8 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		AnalysisProject entity = getByIdForEdit(this.analysisProjectService, user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		prepareFormAttr(request, model, entity);
 		
 		return "/analysisProject/analysisProject_form";
 	}
@@ -130,6 +133,8 @@ public class AnalysisProjectController extends AbstractController
 
 		this.analysisProjectService.update(user, entity);
 
+		toFormResponseData(request, entity);
+
 		return optSuccessDataResponseEntity(request, entity);
 	}
 
@@ -141,8 +146,8 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		AnalysisProject entity = getByIdForView(this.analysisProjectService, user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		prepareFormAttr(request, model, entity);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -162,6 +167,11 @@ public class AnalysisProjectController extends AbstractController
 		}
 		catch (Throwable t)
 		{
+		}
+
+		if (entity != null)
+		{
+			toFormResponseData(request, entity);
 		}
 
 		return entity;
@@ -210,7 +220,7 @@ public class AnalysisProjectController extends AbstractController
 
 		PagingData<AnalysisProject> pagingData = this.analysisProjectService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -224,11 +234,16 @@ public class AnalysisProjectController extends AbstractController
 		return null;
 	}
 
-	protected void convertToFormModel(HttpServletRequest request, Model model, AnalysisProject entity)
+	protected void prepareFormAttr(HttpServletRequest request, Model model, AnalysisProject entity)
+	{
+		setFormModel(model, entity);
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, AnalysisProject entity)
 	{
 	}
 
-	protected void handleQueryData(HttpServletRequest request, List<AnalysisProject> items)
+	protected void toQueryResponseData(HttpServletRequest request, List<AnalysisProject> items)
 	{
 	}
 }

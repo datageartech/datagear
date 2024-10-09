@@ -101,7 +101,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		DtbsSource entity = createAdd(request, model);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		prepareFormAttr(request, model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
@@ -119,17 +120,16 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		// 敏感信息较多，至少有编辑权限才允许复制
 		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
-		handleCopyFormModel(request, model, user, entity);
-		setFormModel(model, entity);
+		toCopyResponseModel(request, entity);
+		prepareFormAttr(request, model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
 
-	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user, DtbsSource entity)
-			throws Exception
+	protected void toCopyResponseModel(HttpServletRequest request, DtbsSource entity) throws Exception
 	{
+		toFormResponseData(request, entity);
 		entity.setId(null);
-		convertToFormModel(request, model, entity);
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -146,8 +146,9 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
-
 		getDtbsSourceService().add(user, entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -160,8 +161,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		prepareFormAttr(request, model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
@@ -191,6 +192,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 			getDtbsSourceTableCache().invalidate(entity.getId());
 		}
 
+		toFormResponseData(request, entity);
+
 		return optSuccessDataResponseEntity(request, entity);
 	}
 
@@ -203,12 +206,12 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		DtbsSource entity = getByIdForView(getDtbsSourceService(), user, id);
 		boolean hideSensitiveInfo = !canViewDetail(request, model, user, entity);
-		convertToFormModel(request, model, entity);
+		toFormResponseData(request, entity);
 
 		if (hideSensitiveInfo)
 			clearSensitiveInfo(entity);
 
-		setFormModel(model, entity);
+		prepareFormAttr(request, model, entity);
 		model.addAttribute("hideSensitiveInfo", hideSensitiveInfo);
 
 		return "/dtbsSource/dtbsSource_form";
@@ -270,7 +273,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<DtbsSource> items = getDtbsSourceService().query(user, pagingQuery);
-		handleQueryData(request, items);
+		toQueryResponseData(request, items);
 
 		return items;
 	}
@@ -284,7 +287,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<DtbsSource> pagingData = getDtbsSourceService().pagingQuery(user, pagingQuery);
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -453,18 +456,17 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		return null;
 	}
 	
-	protected void convertToFormModel(HttpServletRequest request, Model model, DtbsSource entity)
+	protected void prepareFormAttr(HttpServletRequest request, Model model, DtbsSource entity)
+	{
+		setFormModel(model, entity);
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, DtbsSource entity)
 	{
 		entity.clearPassword();
 	}
 
-	/**
-	 * 处理查询结果。
-	 * 
-	 * @param request
-	 * @param dtbsSources
-	 */
-	protected void handleQueryData(HttpServletRequest request, List<DtbsSource> dtbsSources)
+	protected void toQueryResponseData(HttpServletRequest request, List<DtbsSource> dtbsSources)
 	{
 		if (dtbsSources != null && !dtbsSources.isEmpty())
 		{
