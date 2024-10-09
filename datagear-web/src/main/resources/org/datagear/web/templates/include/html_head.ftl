@@ -55,7 +55,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/vue@3.4.5/vue.global.prod.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/vue@3.2.47/vue.global.prod.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.0.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.1.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.2.js" type="text/javascript"></script>
