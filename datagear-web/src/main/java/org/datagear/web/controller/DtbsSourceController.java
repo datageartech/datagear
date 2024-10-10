@@ -101,14 +101,15 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		DtbsSource entity = createAdd(request, model);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
 
 	protected DtbsSource createAdd(HttpServletRequest request, Model model)
 	{
-		return new DtbsSource();
+		return createInstance();
 	}
 
 	@RequestMapping("/copy")
@@ -119,14 +120,16 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		// 敏感信息较多，至少有编辑权限才允许复制
 		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
-		prepareFormAttr(request, model, entity);
-		toCopyResponseData(request, entity);
+		toCopyResponseData(request, user, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
 
-	protected void toCopyResponseData(HttpServletRequest request, DtbsSource entity) throws Exception
+	protected void toCopyResponseData(HttpServletRequest request, User user, DtbsSource entity)
+			throws Exception
 	{
+		toFormResponseData(request, entity);
 		entity.setId(null);
 	}
 
@@ -139,7 +142,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
-		inflateSaveEntity(request, entity);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
@@ -161,7 +164,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		DtbsSource entity = getByIdForEdit(getDtbsSourceService(), user, id);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/dtbsSource/dtbsSource_form";
 	}
@@ -173,7 +177,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveEntity(request, entity);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
@@ -206,7 +210,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		DtbsSource entity = getByIdForView(getDtbsSourceService(), user, id);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		boolean hideSensitiveInfo = !canViewDetail(request, model, user, entity);
 		if (hideSensitiveInfo)
@@ -458,10 +463,13 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		return null;
 	}
 	
-	protected void prepareFormAttr(HttpServletRequest request, Model model, DtbsSource entity)
+	protected void setFormPageAttr(HttpServletRequest request, Model model, DtbsSource entity)
 	{
-		toFormResponseData(request, entity);
 		setFormModel(model, entity);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, User user, DtbsSource entity)
+	{
 	}
 
 	protected void toFormResponseData(HttpServletRequest request, DtbsSource entity)
@@ -480,16 +488,17 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		}
 	}
 
-	protected void inflateSaveEntity(HttpServletRequest request, DtbsSource entity)
-	{
-	}
-
 	protected void clearSensitiveInfo(DtbsSource entity)
 	{
 		if (entity == null)
 			return;
 		
 		entity.clearSensitiveInfo();
+	}
+
+	protected DtbsSource createInstance()
+	{
+		return new DtbsSource();
 	}
 
 	public static class DatabaseInfo implements Serializable

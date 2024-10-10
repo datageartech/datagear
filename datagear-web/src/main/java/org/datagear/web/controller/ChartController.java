@@ -186,14 +186,16 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		HtmlChartWidgetEntity entity = createAdd(request, model);
-		prepareFormAttr(request, model, entity);
+		setRequestAnalysisProject(request, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/chart/chart_form";
 	}
 
 	protected HtmlChartWidgetEntity createAdd(HttpServletRequest request, Model model)
 	{
-		return new HtmlChartWidgetEntity();
+		return createInstance();
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -205,7 +207,7 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
-		inflateSaveEntity(request, entity);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
 
@@ -227,7 +229,8 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 		
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 		
 		return "/chart/chart_form";
 	}
@@ -239,7 +242,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveEntity(request, entity);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity,
 				new OnceSupplier<>(() ->
@@ -266,17 +269,15 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		// 统一复制规则，至少有编辑权限才允许复制
 		HtmlChartWidgetEntity entity = getByIdForEdit(this.htmlChartWidgetEntityService, user, id);
-		prepareFormAttr(request, model, entity);
-		toCopyResponseData(request, model, entity);
+		toCopyResponseData(request, user, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/chart/chart_form";
 	}
 
-	protected void toCopyResponseData(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
+	protected void toCopyResponseData(HttpServletRequest request, User user, HtmlChartWidgetEntity entity)
 			throws Exception
 	{
-		User user = getCurrentUser();
-
 		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 
 		DataSetBind[] dataSetBinds = entity.getDataSetBinds();
@@ -311,6 +312,7 @@ public class ChartController extends AbstractChartPluginAwareController
 			entity.setDataSetBinds(dataSetBinds);
 		}
 
+		toFormResponseData(request, entity);
 		entity.setId(null);
 	}
 
@@ -322,7 +324,8 @@ public class ChartController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlChartWidgetEntity entity = getByIdForView(this.htmlChartWidgetEntityService, user, id);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 		
 		return "/chart/chart_form";
 	}
@@ -461,22 +464,17 @@ public class ChartController extends AbstractChartPluginAwareController
 				(Supplier<AnalysisProjectAwareEntity>) persist, getAnalysisProjectService());
 	}
 
-	protected void setChartPluginView(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
+	protected void setFormPageAttr(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
 	{
-		if (entities == null)
-			return;
-
-		Locale locale = WebUtils.getLocale(request);
-		String themeName = resolveChartPluginIconThemeName(request);
-
-		for (HtmlChartWidgetEntity entity : entities)
-		{
-			entity.setPluginVo(toHtmlChartPluginView(entity.getPluginVo(), themeName, locale));
-		}
+		setFormModel(model, entity);
+		setResultDataFormatModel(request, model, entity);
+		setDisableSaveShowAttr(request, model);
 	}
 
-	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, HttpServletRequest request)
+	protected void inflateSaveEntity(HttpServletRequest request, User user, HtmlChartWidgetEntity entity)
 	{
+		trimAnalysisProjectAware(entity);
+
 		// 如果插件不存在，应置为null
 		HtmlChartPluginVo pluginVo = entity.getPluginVo();
 		String pluginId = (pluginVo == null ? null : pluginVo.getId());
@@ -484,8 +482,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (!StringUtil.isEmpty(pluginId))
 		{
 			plugin = (HtmlChartPlugin) this.chartPluginManager.get(pluginId);
-			pluginVo = (plugin == null ? null
-					: new HtmlChartPluginVo(plugin.getId(), plugin.getNameLabel()));
+			pluginVo = (plugin == null ? null : new HtmlChartPluginVo(plugin.getId(), plugin.getNameLabel()));
 			entity.setPluginVo(pluginVo);
 		}
 
@@ -508,8 +505,28 @@ public class ChartController extends AbstractChartPluginAwareController
 		}
 	}
 
-	protected void setRequestAnalysisProject(HttpServletRequest request,
-			HtmlChartWidgetEntity entity)
+	protected void toFormResponseData(HttpServletRequest request, HtmlChartWidgetEntity entity)
+	{
+		HtmlChartPlugin plugin = entity.getPluginVo();
+
+		if (plugin != null)
+			entity.setPluginVo(getHtmlChartPluginView(request, plugin.getId()));
+
+		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<HtmlChartWidgetEntity> items)
+	{
+		Locale locale = WebUtils.getLocale(request);
+		String themeName = resolveChartPluginIconThemeName(request);
+
+		for (HtmlChartWidgetEntity entity : items)
+		{
+			entity.setPluginVo(toHtmlChartPluginView(entity.getPluginVo(), themeName, locale));
+		}
+	}
+
+	protected void setRequestAnalysisProject(HttpServletRequest request, HtmlChartWidgetEntity entity)
 	{
 		setRequestAnalysisProjectIfValid(request, this.analysisProjectService, entity);
 	}
@@ -534,52 +551,22 @@ public class ChartController extends AbstractChartPluginAwareController
 		String pv = request.getParameter("disableSaveShow");
 		return ("1".equals(pv) || "true".equals(pv));
 	}
-
-	protected ResultDataFormat createDefaultResultDataFormat()
-	{
-		ResultDataFormat rdf = new ResultDataFormat();
-		return rdf;
-	}
-	
-	protected void prepareFormAttr(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
-	{
-		// 仅添加操作需要设置
-		if (REQUEST_ACTION_ADD.equals(getRequestAction(model)))
-			setRequestAnalysisProject(request, entity);
-
-		setResultDataFormatModel(request, model, entity);
-		setDisableSaveShowAttr(request, model);
-
-		toFormResponseData(request, entity);
-		setFormModel(model, entity);
-	}
-
-	protected void toFormResponseData(HttpServletRequest request, HtmlChartWidgetEntity entity)
-	{
-		HtmlChartPlugin plugin = entity.getPluginVo();
-		
-		if(plugin != null)
-			entity.setPluginVo(getHtmlChartPluginView(request, plugin.getId()));
-		
-		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
-	}
-
-	protected void toQueryResponseData(HttpServletRequest request, List<HtmlChartWidgetEntity> items)
-	{
-		setChartPluginView(request, items);
-	}
-
-	protected void inflateSaveEntity(HttpServletRequest request, HtmlChartWidgetEntity entity)
-	{
-		trimAnalysisProjectAware(entity);
-		inflateHtmlChartWidgetEntity(entity, request);
-	}
 	
 	protected void setResultDataFormatModel(HttpServletRequest request, Model model, HtmlChartWidgetEntity entity)
 	{
 		addAttributeForWriteJson(model, "initResultDataFormat",
-				(entity.getResultDataFormat() != null ? entity.getResultDataFormat() : createDefaultResultDataFormat()));
+				(entity.getResultDataFormat() != null ? entity.getResultDataFormat() : createResultDataFormat()));
 		model.addAttribute("enableResultDataFormat", (entity.getResultDataFormat() != null));
+	}
+
+	protected HtmlChartWidgetEntity createInstance()
+	{
+		return new HtmlChartWidgetEntity();
+	}
+
+	protected ResultDataFormat createResultDataFormat()
+	{
+		return new ResultDataFormat();
 	}
 	
 	public static class HasReadPermissionForm implements ControllerForm

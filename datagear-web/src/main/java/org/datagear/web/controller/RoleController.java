@@ -71,14 +71,15 @@ public class RoleController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		Role entity = createAdd(request, model);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/role/role_form";
 	}
 
 	protected Role createAdd(HttpServletRequest request, Model model)
 	{
-		return new Role();
+		return createInstance();
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -86,6 +87,8 @@ public class RoleController extends AbstractController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody Role entity)
 	{
+		inflateSaveEntity(request, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
 		if (re != null)
@@ -94,6 +97,8 @@ public class RoleController extends AbstractController
 		entity.setId(IDUtil.randomIdOnTime20());
 
 		this.roleService.add(entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -105,8 +110,8 @@ public class RoleController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		Role entity = getByIdForEdit(this.roleService, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 		
 		return "/role/role_form";
 	}
@@ -116,12 +121,16 @@ public class RoleController extends AbstractController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody Role entity)
 	{
+		inflateSaveEntity(request, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
 		if (re != null)
 			return re;
 
 		this.roleService.update(entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -133,8 +142,8 @@ public class RoleController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		Role entity = getByIdForView(this.roleService, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 		
 		return "/role/role_form";
 	}
@@ -173,7 +182,7 @@ public class RoleController extends AbstractController
 		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<Role> pagingData = this.roleService.pagingQuery(pagingQuery);
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -186,11 +195,25 @@ public class RoleController extends AbstractController
 		return null;
 	}
 
-	protected void convertToFormModel(HttpServletRequest request, Model model, Role entity)
+	protected void setFormPageAttr(HttpServletRequest request, Model model, Role entity)
+	{
+		setFormModel(model, entity);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, Role entity)
 	{
 	}
 
-	protected void handleQueryData(HttpServletRequest request, List<Role> items)
+	protected void toFormResponseData(HttpServletRequest request, Role entity)
 	{
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<Role> items)
+	{
+	}
+
+	protected Role createInstance()
+	{
+		return new Role();
 	}
 }

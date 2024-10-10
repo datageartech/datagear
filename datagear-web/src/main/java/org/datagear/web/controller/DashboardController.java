@@ -26,7 +26,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -172,14 +171,15 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		HtmlTplDashboardWidgetEntity entity = createAdd(request, model);
 		setRequestAnalysisProject(request, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/dashboard/dashboard_form";
 	}
 
 	protected HtmlTplDashboardWidgetEntity createAdd(HttpServletRequest request, Model model)
 	{
-		HtmlTplDashboardWidgetEntity entity = new HtmlTplDashboardWidgetEntity();
+		HtmlTplDashboardWidgetEntity entity = createInstance();
 		entity.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		entity.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 
@@ -195,8 +195,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		User user = getCurrentUser();
 
 		entity.setId(IDUtil.randomIdOnTime20());
-		trimAnalysisProjectAware(entity);
 		inflateCreateUserAndTime(entity, user);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
 
@@ -214,7 +214,9 @@ public class DashboardController extends AbstractDataAnalysisController
 			dashboardWidgetResManager.copyTo(copySourceId, entity.getId());
 		}
 
-		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", entity.getId()));
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/edit")
@@ -225,8 +227,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/dashboard/dashboard_form";
 	}
@@ -238,7 +240,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		User user = getCurrentUser();
 
-		trimAnalysisProjectAware(entity);
+		inflateSaveEntity(request, user, entity);
 
 		OnceSupplier<HtmlTplDashboardWidgetEntity> persist = new OnceSupplier<>(() ->
 		{
@@ -250,14 +252,16 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (re != null)
 			return re;
 
-		inflateSaveEditEntity(entity, persist.get());
+		mergeSaveEditEntity(entity, persist.get());
 
 		this.htmlTplDashboardWidgetEntityService.update(user, entity);
 
-		return optSuccessDataResponseEntity(request, Collections.singletonMap("id", entity.getId()));
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 
-	protected void inflateSaveEditEntity(HtmlTplDashboardWidgetEntity entity, HtmlTplDashboardWidgetEntity persist)
+	protected void mergeSaveEditEntity(HtmlTplDashboardWidgetEntity entity, HtmlTplDashboardWidgetEntity persist)
 	{
 		// 设置不允许修改的项
 		entity.setTemplates(persist.getTemplates());
@@ -273,20 +277,20 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		// 统一复制规则，至少有编辑权限才允许复制
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
-		handleCopyFormModel(request, model, user, entity);
-		setFormModel(model, entity);
+		toCopyResponseData(request, model, user, entity);
+		setFormPageAttr(request, model, entity);
 		model.addAttribute("copySourceId", id);
 
 		return "/dashboard/dashboard_form";
 	}
 
-	protected void handleCopyFormModel(HttpServletRequest request, Model model, User user,
+	protected void toCopyResponseData(HttpServletRequest request, Model model, User user,
 			HtmlTplDashboardWidgetEntity entity) throws Exception
 	{
 		this.analysisProjectAwareSupport.setRefNullIfDenied(user, entity, getAnalysisProjectService());
 
+		toFormResponseData(request, entity);
 		entity.setId(null);
-		convertToFormModel(request, model, entity);
 	}
 
 	@RequestMapping("/design")
@@ -297,35 +301,11 @@ public class DashboardController extends AbstractDataAnalysisController
 		setFormAction(model, "design", "saveDesign");
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
-		setFormPageAttributes(model);
-		setEnableInsertNewChartAttr(request, response, model);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
+		setDesignPageAttr(request, model);
 
 		return "/dashboard/dashboard_design_form";
-	}
-
-	protected boolean setEnableInsertNewChartAttr(HttpServletRequest request, HttpServletResponse response,
-			Model model)
-	{
-		boolean enable = isEnableInsertNewChart(request, response, model);
-		model.addAttribute("enableInsertNewChart", enable);
-
-		return enable;
-	}
-
-	/**
-	 * 是否在看板表单页面启用【插入图表】功能按钮。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @return
-	 */
-	protected boolean isEnableInsertNewChart(HttpServletRequest request, HttpServletResponse response,
-			Model model)
-	{
-		return true;
 	}
 
 	@RequestMapping(value = "/saveDesign", produces = CONTENT_TYPE_JSON)
@@ -337,44 +317,49 @@ public class DashboardController extends AbstractDataAnalysisController
 				|| isNull(form.getResourceIsTemplates())
 				|| form.getResourceNames().length != form.getResourceContents().length
 				|| form.getResourceContents().length != form.getResourceIsTemplates().length)
+		{
 			throw new IllegalInputException();
+		}
 
 		User user = getCurrentUser();
 
-		HtmlTplDashboardWidgetEntity entity = form.getDashboard();
+		form.setResourceNames(trimResourceNames(form.getResourceNames()));
 
+		HtmlTplDashboardWidgetEntity entity = form.getDashboard();
+		inflateSaveDesignEntity(request, user, form, entity);
+
+		if (isEmpty(entity.getId()) || isEmpty(entity.getTemplates()))
+			throw new IllegalInputException();
+
+		this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
+
+		String[] resourceNames = form.getResourceNames();
+		String[] resourceContents = form.getResourceContents();
+
+		for (int i = 0; i < resourceNames.length; i++)
+			saveResourceContent(entity, resourceNames[i], resourceContents[i]);
+
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
+	}
+
+	protected void inflateSaveDesignEntity(HttpServletRequest request, User user, HtmlTplDashboardDesignForm form,
+			HtmlTplDashboardWidgetEntity entity) throws Exception
+	{
 		String[] templates = trimResourceNames(entity.getTemplates());
-		String[] resourceNames = trimResourceNames(form.getResourceNames());
+		String[] resourceNames = form.getResourceNames();
 		String[] resourceContents = form.getResourceContents();
 		boolean[] resourceIsTemplates = form.getResourceIsTemplates();
 
 		templates = mergeTemplates(templates, resourceNames, resourceIsTemplates);
 		entity.setTemplates(templates);
-		trimAnalysisProjectAware(entity);
-
-		if (isEmpty(entity.getId()) || isEmpty(templates))
-			throw new IllegalInputException();
 
 		// 如果编辑了首页模板，则应重新解析编码
 		int firstTemplateIndex = StringUtil.search(resourceNames, templates[0]);
 		if (firstTemplateIndex > -1)
 			entity.setTemplateEncoding(resolveTemplateEncoding(resourceContents[firstTemplateIndex]));
 
-		this.htmlTplDashboardWidgetEntityService.updateTemplate(user, entity);
-
-		for (int i = 0; i < resourceNames.length; i++)
-			saveResourceContent(entity, resourceNames[i], resourceContents[i]);
-
-		// 返回部分基本信息
-		HtmlTplDashboardWidgetEntity data = new HtmlTplDashboardWidgetEntity();
-		data.setId(entity.getId());
-		data.setName(entity.getName());
-		data.setTemplates(templates);
-		data.setTemplateEncoding(entity.getTemplateEncoding());
-		inflateCreateUserAndTime(data, entity.getCreateUser(), entity.getCreateTime());
-		data.setAnalysisProject(entity.getAnalysisProject());
-
-		return optSuccessDataResponseEntity(request, data);
 	}
 
 	@RequestMapping(value = "/saveTemplateNames", produces = CONTENT_TYPE_JSON)
@@ -837,6 +822,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (isEmpty(form.getName()) || isEmpty(form.getTemplate()) || isEmpty(form.getDashboardFileName()))
 			throw new IllegalInputException();
 
+		User user = getCurrentUser();
 		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, form.getDashboardFileName(), false);
 
 		if (!uploadDirectory.exists())
@@ -856,25 +842,13 @@ public class DashboardController extends AbstractDataAnalysisController
 						"dashboard.import.templateFileNotExists", fileName);
 		}
 
-		String templateEncoding = resolveTemplateEncoding(FileUtil.getFile(uploadDirectory, templates[0]));
+		HtmlTplDashboardWidgetEntity entity = createInstance();
+		inflateSaveImportEntity(request, user, form, uploadDirectory, templates, entity);
 
-		User user = getCurrentUser();
+		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
 
-		HtmlTplDashboardWidgetEntity entity = new HtmlTplDashboardWidgetEntity();
-		entity.setTemplateSplit(form.getTemplate());
-		entity.setTemplateEncoding(templateEncoding);
-		entity.setName(form.getName());
-
-		if (!isEmpty(form.getAnalysisProject()))
-			entity.setAnalysisProject(form.getAnalysisProject());
-
-		if (isBlank(entity.getName()) || isEmpty(entity.getTemplates()))
-			throw new IllegalInputException();
-
-		entity.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(entity, user);
-
-		this.analysisProjectAwareSupport.trim(entity);
+		if (re != null)
+			return re;
 
 		this.htmlTplDashboardWidgetEntityService.add(user, entity);
 
@@ -883,7 +857,23 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		dashboardWidgetResManager.copyFrom(entity.getId(), uploadDirectory);
 
-		return optSuccessResponseEntity(request);
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
+	}
+
+	protected void inflateSaveImportEntity(HttpServletRequest request, User user, DashboardImportForm form,
+			File uploadDirectory, String[] templates, HtmlTplDashboardWidgetEntity entity) throws Exception
+	{
+		String templateEncoding = resolveTemplateEncoding(FileUtil.getFile(uploadDirectory, templates[0]));
+
+		entity.setId(IDUtil.randomIdOnTime20());
+		entity.setTemplateSplit(form.getTemplate());
+		entity.setTemplateEncoding(templateEncoding);
+		entity.setName(form.getName());
+		entity.setAnalysisProject(form.getAnalysisProject());
+		inflateCreateUserAndTime(entity, user);
+		inflateSaveEntity(request, user, entity);
 	}
 
 	@RequestMapping("/view")
@@ -894,9 +884,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlTplDashboardWidgetEntity entity = getByIdForView(this.htmlTplDashboardWidgetEntityService, user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
-		setFormPageAttributes(model);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
+		setDesignPageAttr(request, model);
 		
 		return "/dashboard/dashboard_design_form";
 	}
@@ -982,13 +972,9 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
 				pagingQuery, pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
-	}
-
-	protected void handleQueryData(HttpServletRequest request, List<HtmlTplDashboardWidgetEntity> items)
-	{
 	}
 	
 	@RequestMapping("/shareSet")
@@ -1032,7 +1018,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		return optSuccessResponseEntity(request);
 	}
 	
-	protected void setFormPageAttributes(Model model)
+	protected void setDesignPageAttr(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("dashboardGlobalResUrlPrefix",
 				(StringUtil.isEmpty(this.applicationProperties.getDashboardGlobalResUrlPrefix()) ? ""
@@ -1041,10 +1027,51 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute("zipFileNameEncodingDefault", IOUtil.CHARSET_UTF_8);
+
+		setEnableInsertNewChartAttr(request, model);
 	}
 
-	protected void convertToFormModel(HttpServletRequest request, Model model, HtmlTplDashboardWidgetEntity entity)
+	protected boolean setEnableInsertNewChartAttr(HttpServletRequest request, Model model)
 	{
+		boolean enable = isEnableInsertNewChart(request, model);
+		model.addAttribute("enableInsertNewChart", enable);
+
+		return enable;
+	}
+
+	/**
+	 * 是否在看板表单页面启用【插入图表】功能按钮。
+	 * 
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	protected boolean isEnableInsertNewChart(HttpServletRequest request, Model model)
+	{
+		return true;
+	}
+
+	protected void setFormPageAttr(HttpServletRequest request, Model model, HtmlTplDashboardWidgetEntity entity)
+	{
+		setFormModel(model, entity);
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, HtmlTplDashboardWidgetEntity entity)
+	{
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<HtmlTplDashboardWidgetEntity> items)
+	{
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, User user, HtmlTplDashboardWidgetEntity entity)
+	{
+		trimAnalysisProjectAware(entity);
+	}
+
+	protected HtmlTplDashboardWidgetEntity createInstance()
+	{
+		return new HtmlTplDashboardWidgetEntity();
 	}
 
 	protected Map<String, Object> buildDashboardIdTemplatesHashMap(String id, String[] templates)

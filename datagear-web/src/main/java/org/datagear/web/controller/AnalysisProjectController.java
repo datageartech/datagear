@@ -72,14 +72,15 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		AnalysisProject entity = createAdd(request, model);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/analysisProject/analysisProject_form";
 	}
 
 	protected AnalysisProject createAdd(HttpServletRequest request, Model model)
 	{
-		return new AnalysisProject();
+		return createInstance();
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -91,7 +92,7 @@ public class AnalysisProjectController extends AbstractController
 
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
-		inflateSaveEntity(request, entity);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
@@ -113,7 +114,8 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		AnalysisProject entity = getByIdForEdit(this.analysisProjectService, user, id);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 		
 		return "/analysisProject/analysisProject_form";
 	}
@@ -125,7 +127,7 @@ public class AnalysisProjectController extends AbstractController
 	{
 		User user = getCurrentUser();
 
-		inflateSaveEntity(request, entity);
+		inflateSaveEntity(request, user, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
@@ -147,7 +149,8 @@ public class AnalysisProjectController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		AnalysisProject entity = getByIdForView(this.analysisProjectService, user, id);
-		prepareFormAttr(request, model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/analysisProject/analysisProject_form";
 	}
@@ -212,8 +215,7 @@ public class AnalysisProjectController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<AnalysisProject> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			Model springModel, @RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = getCurrentUser();
 		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
@@ -234,10 +236,13 @@ public class AnalysisProjectController extends AbstractController
 		return null;
 	}
 
-	protected void prepareFormAttr(HttpServletRequest request, Model model, AnalysisProject entity)
+	protected void setFormPageAttr(HttpServletRequest request, Model model, AnalysisProject entity)
 	{
-		toFormResponseData(request, entity);
 		setFormModel(model, entity);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, User user, AnalysisProject entity)
+	{
 	}
 
 	protected void toFormResponseData(HttpServletRequest request, AnalysisProject entity)
@@ -248,7 +253,8 @@ public class AnalysisProjectController extends AbstractController
 	{
 	}
 
-	protected void inflateSaveEntity(HttpServletRequest request, AnalysisProject entity)
+	protected AnalysisProject createInstance()
 	{
+		return new AnalysisProject();
 	}
 }
