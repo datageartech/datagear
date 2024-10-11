@@ -132,15 +132,17 @@ public class DriverEntityController extends AbstractController
 	{
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
-		DriverEntity driverEntity = createAdd(request, model);
-		setFormModel(model, driverEntity);
+		DriverEntity entity = createAdd(request, model);
+
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/driverEntity/driverEntity_form";
 	}
 
 	protected DriverEntity createAdd(HttpServletRequest request, Model model)
 	{
-		DriverEntity entity = new DriverEntity();
+		DriverEntity entity = createInstance();
 		entity.setId(IDUtil.randomIdOnTime20());
 
 		return entity;
@@ -154,6 +156,8 @@ public class DriverEntityController extends AbstractController
 	{
 		DriverEntity entity = form.getDriverEntity();
 		String[] driverLibraryFileNames = form.getDriverLibraryFileNames();
+
+		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
@@ -185,6 +189,8 @@ public class DriverEntityController extends AbstractController
 				}
 			}
 		}
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -286,9 +292,10 @@ public class DriverEntityController extends AbstractController
 
 		DriverEntity entity = this.driverEntityManager.get(id);
 		checkNonNullEntity(entity);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
 		
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
+
 		return "/driverEntity/driverEntity_form";
 	}
 
@@ -299,12 +306,16 @@ public class DriverEntityController extends AbstractController
 	{
 		DriverEntity entity = form.getDriverEntity();
 
+		inflateSaveEntity(request, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
 		if (re != null)
 			return re;
 
 		this.driverEntityManager.update(entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -316,9 +327,10 @@ public class DriverEntityController extends AbstractController
 
 		DriverEntity entity = this.driverEntityManager.get(id);
 		checkNonNullEntity(entity);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
 		
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
+
 		return "/driverEntity/driverEntity_form";
 	}
 
@@ -356,7 +368,7 @@ public class DriverEntityController extends AbstractController
 
 		List<DriverEntity> items = this.driverEntityManager.getAll();
 		items = findByKeyword(items, pagingQuery.getKeyword());
-		handleQueryData(request, items);
+		toQueryResponseData(request, items);
 
 		return items;
 	}
@@ -505,18 +517,10 @@ public class DriverEntityController extends AbstractController
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, DriverEntity entity)
 	{
-		if (isBlank(entity.getId()) || isBlank(entity.getDriverClassName()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getDriverClassName()))
 			throw new IllegalInputException();
 
 		return null;
-	}
-
-	protected void convertToFormModel(HttpServletRequest request, Model model, DriverEntity entity)
-	{
-	}
-
-	protected void handleQueryData(HttpServletRequest request, List<DriverEntity> items)
-	{
 	}
 
 	protected void resolveDriverClassNames(File file, List<String> driverClassNames)
@@ -588,6 +592,28 @@ public class DriverEntityController extends AbstractController
 	protected File getDriverEntityTmpDirectory()
 	{
 		return FileUtil.getDirectory(this.tempDirectory, "driverEntity", true);
+	}
+
+	protected void setFormPageAttr(HttpServletRequest request, Model model, DriverEntity entity)
+	{
+		setFormModel(model, entity);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, DriverEntity entity)
+	{
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, DriverEntity entity)
+	{
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<DriverEntity> items)
+	{
+	}
+
+	protected DriverEntity createInstance()
+	{
+		return new DriverEntity();
 	}
 
 	/**

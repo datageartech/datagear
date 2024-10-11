@@ -39,6 +39,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -151,7 +152,7 @@ public class LoginController extends AbstractController
 	 * @return
 	 */
 	@RequestMapping
-	public String login(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	public String login(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		setFormAction(model, "login", "doLogin");
 
@@ -162,8 +163,7 @@ public class LoginController extends AbstractController
 		return "/login";
 	}
 
-	protected LoginForm createLoginForm(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
+	protected LoginForm createLoginForm(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		LoginForm form = new LoginForm();
 		form.setName(resolveLoginUsername(request, response));
