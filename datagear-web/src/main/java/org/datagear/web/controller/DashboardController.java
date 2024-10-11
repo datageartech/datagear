@@ -986,38 +986,50 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		HtmlTplDashboardWidgetEntity dashboard = getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, id);
 
-		DashboardShareSet dashboardShareSet = this.dashboardShareSetService.getById(id);
+		DashboardShareSet entity = this.dashboardShareSetService.getById(id);
 
-		if (dashboardShareSet == null)
-		{
-			dashboardShareSet = new DashboardShareSet(dashboard.getId());
-			dashboardShareSet.setEnablePassword(false);
-			dashboardShareSet.setAnonymousPassword(false);
-		}
+		if (entity == null)
+			entity = createDashboardShareSet(dashboard);
 
-		dashboardShareSet.setPassword("");
-		setFormModel(model, dashboardShareSet);
+		toFormResponseData(request, entity);
+		setFormModel(model, entity);
 
 		return "/dashboard/dashboard_share_set";
+	}
+
+	protected DashboardShareSet createDashboardShareSet(HtmlTplDashboardWidgetEntity dashboard)
+	{
+		DashboardShareSet entity = new DashboardShareSet(dashboard.getId());
+		entity.setEnablePassword(false);
+		entity.setAnonymousPassword(false);
+
+		return entity;
 	}
 
 	@RequestMapping(value = "/saveShareSet", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveShareSet(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DashboardShareSet form) throws Exception
+			@RequestBody DashboardShareSet entity) throws Exception
 	{
-		if (isEmpty(form.getId()))
+		if (isEmpty(entity.getId()))
 			throw new IllegalInputException();
 
 		User user = getCurrentUser();
 
-		getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, form.getId());
+		getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, entity.getId());
 
-		this.dashboardShareSetService.save(form);
+		this.dashboardShareSetService.save(entity);
 
-		return optSuccessResponseEntity(request);
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
 	}
 	
+	protected void toFormResponseData(HttpServletRequest request, DashboardShareSet entity)
+	{
+		entity.setPassword("");
+	}
+
 	protected void setDesignPageAttr(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("dashboardGlobalResUrlPrefix",
@@ -1149,7 +1161,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
 			HtmlTplDashboardWidgetEntity entity, OnceSupplier<HtmlTplDashboardWidgetEntity> persist)
 	{
-		if (isBlank(entity.getName()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		if (isEmpty(entity.getTemplates()))

@@ -87,14 +87,13 @@ public class RoleController extends AbstractController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody Role entity)
 	{
+		entity.setId(IDUtil.randomIdOnTime20());
 		inflateSaveEntity(request, entity);
 
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
 		if (re != null)
 			return re;
-
-		entity.setId(IDUtil.randomIdOnTime20());
 
 		this.roleService.add(entity);
 
@@ -189,7 +188,7 @@ public class RoleController extends AbstractController
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, Role entity)
 	{
-		if (isBlank(entity.getName()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		return null;

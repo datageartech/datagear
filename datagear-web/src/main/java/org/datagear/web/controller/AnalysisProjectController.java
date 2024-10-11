@@ -230,7 +230,7 @@ public class AnalysisProjectController extends AbstractController
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
 			AnalysisProject entity)
 	{
-		if (isBlank(entity.getId()) || isBlank(entity.getName()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		return null;

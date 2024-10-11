@@ -457,7 +457,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
 			DtbsSource entity)
 	{
-		if (isBlank(entity.getId()) || isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalInputException();
 
 		return null;

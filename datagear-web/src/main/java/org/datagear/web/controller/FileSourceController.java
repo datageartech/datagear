@@ -77,14 +77,15 @@ public class FileSourceController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		FileSource entity = createAdd(request, model);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/fileSource/fileSource_form";
 	}
 
 	protected FileSource createAdd(HttpServletRequest request, Model model)
 	{
-		return new FileSource();
+		return createInstance();
 	}
 
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
@@ -94,15 +95,18 @@ public class FileSourceController extends AbstractController
 	{
 		User user = getCurrentUser();
 
+		entity.setId(IDUtil.randomIdOnTime20());
+		inflateCreateUserAndTime(entity, user);
+		inflateSaveEntity(request, user, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
 		if (re != null)
 			return re;
 
-		entity.setId(IDUtil.randomIdOnTime20());
-		inflateCreateUserAndTime(entity, user);
-
 		this.fileSourceService.add(entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -115,8 +119,8 @@ public class FileSourceController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		FileSource entity = getByIdForEdit(this.fileSourceService, user, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 		
 		return "/fileSource/fileSource_form";
 	}
@@ -128,12 +132,16 @@ public class FileSourceController extends AbstractController
 	{
 		User user = getCurrentUser();
 
+		inflateSaveEntity(request, user, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
 
 		if (re != null)
 			return re;
 
 		this.fileSourceService.update(user, entity);
+
+		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
 	}
@@ -146,14 +154,14 @@ public class FileSourceController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		FileSource entity = getByIdForView(this.fileSourceService, user, id);
-		convertToFormModel(request, model, entity);
-		handleViewShowDirectory(request, model, user, entity);
-		setFormModel(model, entity);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
+		setViewPageAttr(request, model, user, entity);
 
 		return "/fileSource/fileSource_form";
 	}
 
-	protected void handleViewShowDirectory(HttpServletRequest request, Model model, User user, FileSource entity)
+	protected void setViewPageAttr(HttpServletRequest request, Model model, User user, FileSource entity)
 	{
 		boolean isShowDirectory = isShowDirectory(request, user);
 		setIsShowDirectory(request, model, isShowDirectory);
@@ -208,7 +216,7 @@ public class FileSourceController extends AbstractController
 
 		PagingData<FileSource> pagingData = this.fileSourceService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 		
 		return pagingData;
 	}
@@ -246,9 +254,9 @@ public class FileSourceController extends AbstractController
 	}
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
-			FileSource fileSource)
+			FileSource entity)
 	{
-		if (isBlank(fileSource.getDirectory()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getDirectory()))
 			throw new IllegalInputException();
 
 		//这里不必校验目录是否存在，以增加功能灵活性
@@ -271,13 +279,27 @@ public class FileSourceController extends AbstractController
 		return user.isAdmin();
 	}
 
-	protected void convertToFormModel(HttpServletRequest request, Model model, FileSource entity)
+	protected void setFormPageAttr(HttpServletRequest request, Model model, FileSource entity)
+	{
+		setFormModel(model, entity);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, User user, FileSource entity)
 	{
 	}
 
-	protected void handleQueryData(HttpServletRequest request, List<FileSource> items)
+	protected void toFormResponseData(HttpServletRequest request, FileSource entity)
+	{
+	}
+
+	protected void toQueryResponseData(HttpServletRequest request, List<FileSource> items)
 	{
 		for (FileSource item : items)
 			item.setDirectory(null);
+	}
+
+	protected FileSource createInstance()
+	{
+		return new FileSource();
 	}
 }

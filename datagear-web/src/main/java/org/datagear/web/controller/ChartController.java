@@ -418,7 +418,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
 			HtmlChartWidgetEntity entity, OnceSupplier<HtmlChartWidgetEntity> persist)
 	{
-		if (isBlank(entity.getName()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		if (isEmpty(entity.getPluginVo()))

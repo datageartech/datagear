@@ -182,6 +182,11 @@ public class RegisterController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
+	protected void addRegisterUser(User user)
+	{
+		this.userService.add(user);
+	}
+
 	@RequestMapping("/success")
 	public String registerSuccess(HttpServletRequest request)
 	{
@@ -191,11 +196,6 @@ public class RegisterController extends AbstractController
 			return "redirect:/register";
 		else
 			return "/register_success";
-	}
-
-	protected void addRegisterUser(User user)
-	{
-		this.userService.add(user);
 	}
 
 	protected void setUserPasswordStrengthInfo(org.springframework.ui.Model model)

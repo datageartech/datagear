@@ -121,22 +121,21 @@ public class UserController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_ADD, SUBMIT_ACTION_SAVE_ADD);
 
 		User entity = createAdd(request, model);
-		setFormModel(model, entity);
+		setFormPageAttr(request, model, entity);
 		model.addAttribute("enablePassword", true);
-		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
 	}
 
 	protected User createAdd(HttpServletRequest request, Model model)
 	{
-		User entity = new User();
-		setAddUserRoles(request, model, entity);
+		User entity = createInstance();
+		setAddUserRoles(request, entity);
 
 		return entity;
 	}
 
-	protected void setAddUserRoles(HttpServletRequest request, Model model, User entity)
+	protected void setAddUserRoles(HttpServletRequest request, User entity)
 	{
 		Set<Role> dftRoles = this.roleSpec.buildRolesByIds(this.applicationProperties.getDefaultRoleAdd(), true);
 		Set<Role> addRoles = new HashSet<Role>(dftRoles.size());
@@ -156,6 +155,12 @@ public class UserController extends AbstractController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody User entity)
 	{
+		entity.setId(IDUtil.randomIdOnTime20());
+		// 禁用新建管理员账号功能
+		entity.setAdmin(User.isAdminUser(entity));
+		inflateCreateTime(entity);
+		inflateSaveEntity(request, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
 		if (re != null)
@@ -169,14 +174,16 @@ public class UserController extends AbstractController
 		if (namedEntity != null)
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", entity.getName());
 
-		entity.setId(IDUtil.randomIdOnTime20());
-		// 禁用新建管理员账号功能
-		entity.setAdmin(User.isAdminUser(entity));
-		inflateCreateTime(entity);
-
 		saveAddUser(entity);
 
+		toFormResponseData(request, entity);
+
 		return optSuccessDataResponseEntity(request, entity);
+	}
+
+	protected void saveAddUser(User entity)
+	{
+		this.userService.add(entity);
 	}
 
 	@RequestMapping("/edit")
@@ -186,9 +193,8 @@ public class UserController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
 
 		User entity = getByIdForEdit(this.userService, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
-		setUserPasswordStrengthInfo(request, model);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/user/user_form";
 	}
@@ -198,6 +204,10 @@ public class UserController extends AbstractController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody User entity)
 	{
+		// 禁用新建管理员账号功能
+		entity.setAdmin(User.isAdminUser(entity));
+		inflateSaveEntity(request, entity);
+
 		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
 
 		if (re != null)
@@ -208,12 +218,16 @@ public class UserController extends AbstractController
 		if (namedEntity != null && !namedEntity.getId().equals(entity.getId()))
 			return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", entity.getName());
 
-		// 禁用新建管理员账号功能
-		entity.setAdmin(User.isAdminUser(entity));
-
 		saveEditUser(entity);
 
+		toFormResponseData(request, entity);
+
 		return optSuccessDataResponseEntity(request, entity);
+	}
+
+	protected void saveEditUser(User entity)
+	{
+		this.userService.update(entity);
 	}
 
 	@RequestMapping("/editPsd")
@@ -224,7 +238,11 @@ public class UserController extends AbstractController
 
 		User entity = this.userService.getByIdSimple(id);
 		checkNonNullEntity(entity);
-		setFormModel(model, toEditPsdForm(entity));
+
+		EditPsdForm form = toEditPsdForm(entity);
+		toFormResponseData(request, form);
+
+		setFormModel(model, form);
 		model.addAttribute("enableOldPassword", false);
 		setUserPasswordStrengthInfo(request, model);
 
@@ -234,14 +252,21 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/saveEditPsd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditPassword(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody EditPsdForm form)
+			@RequestBody EditPsdForm entity)
 	{
-		if (isEmpty(form.getId()) || isBlank(form.getPassword()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getPassword()))
 			throw new IllegalInputException();
 
-		this.userService.updatePasswordById(form.getId(), form.getPassword(), true);
+		this.userService.updatePasswordById(entity.getId(), entity.getPassword(), true);
 
-		return optSuccessResponseEntity(request);
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, EditPsdForm entity)
+	{
+		entity.setPassword("");
 	}
 
 	@RequestMapping("/view")
@@ -251,9 +276,8 @@ public class UserController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		User entity = getByIdForView(this.userService, id);
-		convertToFormModel(request, model, entity);
-		setFormModel(model, entity);
-		setUserPasswordStrengthInfo(request, model);
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
 
 		return "/user/user_form";
 	}
@@ -268,6 +292,12 @@ public class UserController extends AbstractController
 		setFormAction(model, REQUEST_ACTION_DELETE, "deleteDo");
 
 		List<User> users = this.userService.getByIdsSimple(ids, true);
+
+		for (User user : users)
+		{
+			toFormResponseData(request, user);
+		}
+
 		setFormModel(model, users);
 
 		return "/user/user_delete";
@@ -326,7 +356,7 @@ public class UserController extends AbstractController
 		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<User> pagingData = this.userService.pagingQuery(pagingQuery);
-		handleQueryData(request, pagingData.getItems());
+		toQueryResponseData(request, pagingData.getItems());
 
 		return pagingData;
 	}
@@ -340,10 +370,12 @@ public class UserController extends AbstractController
 
 		User entity = this.userService.getByIdNoPassword(user.getId());
 		checkNonNullEntity(entity);
+
+		toFormResponseData(request, entity);
+		setFormPageAttr(request, model, entity);
+
 		model.addAttribute("disableRoles", true);
 		model.addAttribute("disableEditName", getApplicationProperties().isDisablePersonalSetName());
-		setFormModel(model, entity);
-		setUserPasswordStrengthInfo(request, model);
 
 		return "/user/user_form";
 	}
@@ -359,6 +391,9 @@ public class UserController extends AbstractController
 		User user = getCurrentUser();
 
 		entity.setId(user.getId());
+		// 禁用新建管理员账号功能
+		entity.setAdmin(User.isAdminUser(entity));
+		inflateSaveEntity(request, entity);
 
 		if (getApplicationProperties().isDisablePersonalSetName())
 		{
@@ -373,12 +408,16 @@ public class UserController extends AbstractController
 				return optFailResponseEntity(request, HttpStatus.BAD_REQUEST, "usernameExists", entity.getName());
 		}
 
-		// 禁用新建管理员账号功能
-		entity.setAdmin(User.isAdminUser(entity));
-
 		savePersonalSetUser(entity);
 
-		return optSuccessResponseEntity(request);
+		toFormResponseData(request, entity);
+
+		return optSuccessDataResponseEntity(request, entity);
+	}
+
+	protected void savePersonalSetUser(User entity)
+	{
+		this.userService.updateIgnoreRole(entity);
 	}
 
 	@RequestMapping("/personalPsd")
@@ -390,6 +429,7 @@ public class UserController extends AbstractController
 
 		User entity = this.userService.getByIdSimple(user.getId());
 		checkNonNullEntity(entity);
+
 		setFormModel(model, toPersonalEditPsdForm(entity));
 		model.addAttribute("enableOldPassword", true);
 		setUserPasswordStrengthInfo(request, model);
@@ -417,21 +457,36 @@ public class UserController extends AbstractController
 
 	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User entity)
 	{
-		if (isBlank(entity.getName()))
+		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
 		return null;
 	}
 
-	protected void convertToFormModel(HttpServletRequest request, Model model, User entity)
+	protected void setFormPageAttr(HttpServletRequest request, Model model, User entity)
+	{
+		setFormModel(model, entity);
+		setUserPasswordStrengthInfo(request, model);
+	}
+
+	protected void inflateSaveEntity(HttpServletRequest request, User entity)
+	{
+	}
+
+	protected void toFormResponseData(HttpServletRequest request, User entity)
 	{
 		entity.clearPassword();
 	}
 
-	protected void handleQueryData(HttpServletRequest request, List<User> items)
+	protected void toQueryResponseData(HttpServletRequest request, List<User> items)
 	{
 		for (User item : items)
 			item.clearPassword();
+	}
+
+	protected User createInstance()
+	{
+		return new User();
 	}
 
 	protected void setUserPasswordStrengthInfo(HttpServletRequest request, Model model)
@@ -452,21 +507,6 @@ public class UserController extends AbstractController
 	{
 		PersonalEditPsdForm fm = new PersonalEditPsdForm(entity.getId(), entity.getName());
 		return fm;
-	}
-
-	protected void saveAddUser(User entity)
-	{
-		this.userService.add(entity);
-	}
-
-	protected void saveEditUser(User entity)
-	{
-		this.userService.update(entity);
-	}
-
-	protected void savePersonalSetUser(User entity)
-	{
-		this.userService.updateIgnoreRole(entity);
 	}
 
 	protected List<Role> toUserRolesList(User entity)
