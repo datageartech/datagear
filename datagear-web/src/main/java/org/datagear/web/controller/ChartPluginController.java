@@ -408,8 +408,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 				"var chartPluginManager = (chartFactory.chartPluginManager || (chartFactory.chartPluginManager = {}));");
 		out.println("chartPluginManager.plugins = (chartPluginManager.plugins || {});");
 
+		// @deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除
 		out.println();
-		out.println("//@deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除");
 		out.println("global.chartPluginManager = chartPluginManager;");
 		
 		out.println();
@@ -423,7 +423,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 
 			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar, locale);
 
-			out.println("//@deprecated 兼容4.0.0版本的"+HtmlChartPlugin.PROPERTY_RENDERER_OLD+"属性名，未来版本会移除");
+			// @deprecated
+			// 兼容4.0.0版本的"+HtmlChartPlugin.PROPERTY_RENDERER_OLD+"属性名，未来版本会移除
 			out.println(pluginVar + "."+ HtmlChartPlugin.PROPERTY_RENDERER_OLD +" = " + pluginVar + "."+ HtmlChartPlugin.PROPERTY_RENDERER +";");
 			
 			out.println("chartPluginManager.plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "

@@ -125,6 +125,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		{
 			writeHtmlChartRendererCodeValue(out, renderer);
 			out.write(";");
+			writeNewLine(out);
 		}
 		else if (JsChartRenderer.CODE_TYPE_INVOKE.equals(codeType))
 		{
@@ -143,8 +144,6 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		}
 		else
 			throw new IOException("Unsupported JsChartRenderer code type : " + codeType);
-
-		writeNewLine(out);
 	}
 
 	protected void writeHtmlChartRendererCodeValue(Writer out, JsChartRenderer renderer) throws IOException
