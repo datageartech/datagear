@@ -265,6 +265,12 @@ DetectResult detectNewVersionResult
 					target: "_blank"
 				}
 			]
+		},
+		{
+			label: "<@spring.message code='enterpriseVersion' />",
+			class: "p-button p-component p-button-warning enerprise-menuitem",
+			url: "${statics['org.datagear.util.Global'].WEB_SITE}/pro/",
+			target: "_blank"
 		}
 	]);
 	

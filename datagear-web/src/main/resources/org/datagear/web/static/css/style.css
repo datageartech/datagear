@@ -494,6 +494,18 @@ label.align-tip{
 	overflow: auto !important;
 }
 
+.p-menuitem.enerprise-menuitem{
+	width: 100%;
+	padding: 0;
+}
+.p-menuitem.enerprise-menuitem .p-menuitem-content{
+	color: inherit;
+	background: none !important;
+}
+.p-menuitem.enerprise-menuitem .p-menuitem-link{
+	color: inherit;
+}
+
 /*横向操作组*/
 .h-opts > *{
 	margin-left: 0.15em;
