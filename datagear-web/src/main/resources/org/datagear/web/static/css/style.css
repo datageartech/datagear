@@ -494,19 +494,10 @@ label.align-tip{
 	overflow: auto !important;
 }
 
-.p-menuitem.enterprise-menuitem{
-	width: 100%;
-	padding: 0;
-}
-.p-menuitem.enterprise-menuitem .p-menuitem-content{
-	color: inherit;
-	background: none !important;
-	width: 100%;
-	text-align: left;
-}
-.p-menuitem.enterprise-menuitem .p-menuitem-link{
-	color: inherit;
-	width: 100%;
+/*企业版菜单项*/
+.p-menuitem.enterprise-menuitem .p-menuitem-link span{
+	padding: 0.3em 1em;
+	border-radius: 1em;
 }
 
 /*横向操作组*/

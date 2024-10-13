@@ -26,3 +26,9 @@
 
 /*代码编辑器*/
 .cm-s-custom span.cm-attribute { color: var(--blue-600); }
+
+/*企业版菜单项*/
+.p-menuitem.enterprise-menuitem .p-menuitem-link span{
+	background-color: #FFE082;
+    color: #121212;
+}
