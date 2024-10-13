@@ -494,16 +494,19 @@ label.align-tip{
 	overflow: auto !important;
 }
 
-.p-menuitem.enerprise-menuitem{
+.p-menuitem.enterprise-menuitem{
 	width: 100%;
 	padding: 0;
 }
-.p-menuitem.enerprise-menuitem .p-menuitem-content{
+.p-menuitem.enterprise-menuitem .p-menuitem-content{
 	color: inherit;
 	background: none !important;
+	width: 100%;
+	text-align: left;
 }
-.p-menuitem.enerprise-menuitem .p-menuitem-link{
+.p-menuitem.enterprise-menuitem .p-menuitem-link{
 	color: inherit;
+	width: 100%;
 }
 
 /*横向操作组*/
