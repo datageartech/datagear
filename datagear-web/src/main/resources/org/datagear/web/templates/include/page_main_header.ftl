@@ -250,7 +250,7 @@ DetectResult detectNewVersionResult
 				},
 				{
 					label: "<@spring.message code='module.documentation' />",
-					url: "${statics['org.datagear.util.Global'].WEB_SITE}/documentation/",
+					url: "${Global.WEB_SITE}/documentation/",
 					target: "_blank"
 				},
 				{
@@ -261,7 +261,7 @@ DetectResult detectNewVersionResult
 				{
 					label: "<@spring.message code='module.downloadLatestVersion' />",
 					class: po.newVersionDetectedTipClassName,
-					url: "${statics['org.datagear.util.Global'].WEB_SITE}",
+					url: "${Global.WEB_SITE}",
 					target: "_blank"
 				}
 			]
@@ -269,7 +269,7 @@ DetectResult detectNewVersionResult
 		{
 			label: "<@spring.message code='enterpriseVersion' />",
 			class: "enterprise-menuitem",
-			url: "${statics['org.datagear.util.Global'].WEB_SITE}/pro/",
+			url: "${Global.WEB_SITE}/pro/",
 			target: "_blank"
 		}
 	]);
