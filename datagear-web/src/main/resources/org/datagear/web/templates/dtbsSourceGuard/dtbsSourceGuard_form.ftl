@@ -273,6 +273,7 @@
 			po.showPropertyPatternFormPanel("<@spring.message code='edit' />", pp, function(pp)
 			{
 				fm.propertyPatterns[ppIdx] = pp;
+				pm.selectedPropertyPatterns = [];
 			});
 		},
 		
@@ -285,6 +286,7 @@
 			$.each(pps, function(idx, pp)
 			{
 				$.removeById(fm.propertyPatterns, pp.namePattern, "namePattern");
+				pm.selectedPropertyPatterns = [];
 			});
 		},
 		

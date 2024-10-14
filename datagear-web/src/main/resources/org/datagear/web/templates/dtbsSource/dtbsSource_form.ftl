@@ -342,6 +342,7 @@
 			po.showPropertyFormPanel("<@spring.message code='edit' />", sp, function(sp)
 			{
 				fm.properties[spIdx] = sp;
+				pm.selectedProperties = [];
 			});
 		},
 		
@@ -354,6 +355,7 @@
 			$.each(sps, function(idx, sp)
 			{
 				$.removeById(fm.properties, sp.name, "name");
+				pm.selectedProperties = [];
 			});
 		},
 		

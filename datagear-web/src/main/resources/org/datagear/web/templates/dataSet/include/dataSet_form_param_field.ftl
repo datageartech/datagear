@@ -339,6 +339,7 @@ dataSet_form_param_field_form.ftl
 			$.each(sps, function(idx, sp)
 			{
 				$.removeById(fm.params, sp.name, "name");
+				pm.selectedParams = [];
 			});
 		},
 		onMoveUpField: function(e)
@@ -366,6 +367,7 @@ dataSet_form_param_field_form.ftl
 			$.each(sps, function(idx, sp)
 			{
 				$.removeById(fm.fields, sp.name, "name");
+				pm.selectedFields = [];
 			});
 		},
 		toggleDataSourceFormatPanel: function(e)
