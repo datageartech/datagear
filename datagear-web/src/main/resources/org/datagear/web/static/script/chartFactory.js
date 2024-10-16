@@ -7152,6 +7152,157 @@
 		return theme;
 	};
 	
+	/**
+	 * 加载指定图表插件渲染器依赖库（plugin.renderer.depends），并在加载后执行回调函数。
+	 * 插件渲染器结构：
+	 * {
+	 *   depends: 依赖库对象、[ 依赖库对象, ... ],
+	 *   //其他渲染器属性
+	 *   ...
+	 * }
+	 * 其中，依赖库对象结构为：
+	 * {
+	 *   //库名称，应尽量使用库本身定义的全局名称
+	 *   name: "...",
+	 *   //可选，别名
+	 *   alias: "..."、[ "...", ... ],
+	 *   //版本号
+	 *   version: "x.x.x",
+	 *   //库源
+	 *   source:
+	 *   //库源URL
+	 *   "..."、
+	 *   //库源对象
+	 *   {
+	 *     //库源URL
+	 *     //以"/"开头表示应用内路径
+	 *     //以"http://"、"https://"开头表示绝对路径
+	 *     //否则，表示插件资源路径
+	 *     url: "lib0/b.css",
+	 *     //可选，库源类型，自动识别JS、CSS
+	 *     type: "css",
+	 *     //可选，在此依赖库范围内加载顺序，越小越先加载，相同顺序的并行加载，默认为：0、或者所在数组的下标
+	 *     order: 数值
+	 *   }、
+	 *   //库源URL/对象数组
+	 *   [ "...", { ... }, ... ],
+	 *   //可选，依赖库名称/数组
+	 *   depends: "..."、[ "..."、... ],
+	 *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。
+	 *   //默认值是：如果this.name或者this.alias已在window下存在，返回true；否则，返回false。
+	 *   loaded: function(){ ... },
+	 *   //可选，校验已加载此名称库的版本是否兼容此图表渲染器，返回false或者抛出异常表明不兼容
+	 *   //默认值是：function(lib){ return true; }
+	 *   check: function(lib){ ... }
+	 * }
+	 * 
+	 * @param chart
+	 * @param callback 加载完成回调函数
+	 * @param contextCharts 可变参数，上下文图表数组，对于相同名称的库，将在chart、contextCharts中加载最新版本那个
+	 */
+	chartFactory.loadDepends = function(chart, callback, contextCharts)
+	{
+		var plugin = chart.plugin;
+		var loaded = chartFactory.pluginDependsLoaded(plugin);
+		
+		if(loaded)
+		{
+			callback(chart);
+		}
+		
+		var libs = plugin.renderer.depends;
+		
+		if(libs == null || libs.length == 0)
+		{
+			chartFactory.pluginDependsLoaded(plugin, true);
+			callback(chart);
+		}
+		
+		if(!$.isArray(libs))
+			libs = [ libs ];
+		
+		for(var i=0; i<libs.length; i++)
+		{
+			var lib = libs[i];
+			
+			if(!chartFactory.pluginLibLoaded(lib))
+			{
+				//TODO
+			}
+		}
+	};
+	
+	//获取/设置插件所有依赖库是否都已加载
+	chartFactory.pluginDependsLoaded = function(plugin, loaded)
+	{
+		var loadeds = chartFactory._PLUGIN_DEPENDS_LOADEDS;
+		
+		if(loaded === undefined)
+		{
+			return (loadeds[plugin.id] == true);
+		}
+		else
+		{
+			loadeds[plugin.id] = loaded;
+		}
+	};
+	
+	//获取/设置插件指定依赖库是否已加载
+	chartFactory.pluginLibLoaded = function(lib, loaded)
+	{
+		var loadeds = chartFactory._PLUGIN_LIB_LOADEDS;
+		
+		if(loaded === undefined)
+		{
+			if(loadeds[lib.name] == true)
+				return true;
+			
+			var alias = lib.alias;
+			
+			if(alias != null)
+			{
+				if(chartFactory.isString(alias) && loadeds[alias] == true)
+				{
+					return true;
+				}
+				else
+				{
+					for(var i=0; i<alias.length; i++)
+					{
+						if(loadeds[alias[i]] == true)
+							return true;
+					}
+				}
+			}
+			
+			return false;
+		}
+		else
+		{
+			loadeds[lib.name] = loaded;
+			
+			var alias = lib.alias;
+			
+			if(alias != null)
+			{
+				if(chartFactory.isString(alias))
+				{
+					loadeds[alias] = loaded;
+				}
+				else
+				{
+					for(var i=0; i<alias.length; i++)
+					{
+						loadeds[alias[i]] = loaded;
+					}
+				}
+			}
+		}
+	};
+	
+	chartFactory._PLUGIN_DEPENDS_LOADEDS = {};
+	chartFactory._PLUGIN_LIB_LOADEDS = {};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
