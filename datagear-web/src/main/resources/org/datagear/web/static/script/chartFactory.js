@@ -7203,30 +7203,160 @@
 	chartFactory.loadDepends = function(chart, callback, contextCharts)
 	{
 		var plugin = chart.plugin;
-		var libs = plugin.renderer.depends;
+		var libs = (plugin && plugin.renderer ? plugin.renderer.depends : null);
 		
 		if(libs == null || libs.length == 0)
 		{
-			callback(chart);
+			callback();
 		}
 		
 		if(chartFactory.pluginDependsLoaded(plugin))
 		{
-			callback(chart);
+			callback();
 		}
+		
+		var callback1 = function()
+		{
+			chartFactory.pluginDependsLoaded(plugin, true);
+			callback();
+		};
 		
 		if(!$.isArray(libs))
 			libs = [ libs ];
 		
+		var unloads = [];
+		
 		for(var i=0; i<libs.length; i++)
 		{
-			var lib = libs[i];
-			
-			if(!chartFactory.pluginLibLoaded(lib))
+			if(!chartFactory.pluginLibLoaded(libs[i]))
 			{
-				//TODO
+				unloads.push(libs[i]);
 			}
 		}
+		
+		if(unloads.length == 0)
+		{
+			callback1();
+		}
+		else
+		{
+			for(var i=2; i<arguments.length; i++)
+			{
+				contextCharts = arguments[i];
+				
+				if(!$.isArray(contextCharts))
+					contextCharts = [ contextCharts ];
+				
+				chartFactory.inflateLatestLib(unloads, contextCharts);
+			}
+			
+			//TODO
+		}
+	};
+	
+	//将libs数组中的库替换为最新版本
+	chartFactory.inflateLatestLib = function(libs, charts)
+	{
+		for(var i=0; i<libs; i++)
+		{
+			for(var j=0; j<charts.length; j++)
+			{
+				var plugin = charts[i].plugin;
+				var myLibs = (plugin && plugin.renderer ? plugin.renderer.depends : null);
+				
+				if(myLibs != null)
+				{
+					if(!$.isArray(myLibs))
+					{
+						if(chartFactory.isSameLib(libs[i], myLibs)
+							&& chartFactory.compareVersion(libs[i].version, myLibs.version) < 0)
+						{
+							libs[i] = myLibs;
+						}
+					}
+					else
+					{
+						for(var k=0; k<myLibs.length; k++)
+						{
+							if(chartFactory.isSameLib(libs[i], myLibs[k])
+								&& chartFactory.compareVersion(libs[i].version, myLibs[k].version) < 0)
+							{
+								libs[i] = myLibs[k];
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+	
+	//比较插件依赖库是否相同，只要name、alias有交集，就认为相同
+	chartFactory.isSameLib = function(baseLib, compareLib)
+	{
+		// name - name
+		if(baseLib.name == compareLib.name)
+			return true;
+		
+		var baseAliasStr = (baseLib.alias != null && chartFactory.isString(baseLib.alias));
+		var compareAliasStr = (compareLib.alias != null && chartFactory.isString(compareLib.alias));
+		
+		// alias - name
+		if(baseLib.alias != null)
+		{
+			if(baseAliasStr)
+			{
+				if(baseLib.alias == compareLib.name)
+					return true;
+			}
+			else if(chartFactory.indexInArray(baseLib.alias, compareLib.name) > -1)
+			{
+				return true;
+			}
+		}
+		
+		// name - alias
+		if(compareLib.alias != null)
+		{
+			if(compareAliasStr)
+			{
+				if(baseLib.name == compareLib.alias)
+					return true;
+			}
+			else if(chartFactory.indexInArray(compareLib.alias, baseLib.name) > -1)
+			{
+				return true;
+			}
+		}
+		
+		// alias - alias
+		if(baseLib.alias != null && compareLib.alias != null)
+		{
+			if(baseAliasStr && compareAliasStr)
+			{
+				if(baseLib.alias == compareLib.alias)
+					return true;
+			}
+			else if(baseAliasStr)
+			{
+				if(chartFactory.indexInArray(compareLib.alias, baseLib.alias) > -1)
+					return true;
+			}
+			else if(compareAliasStr)
+			{
+				if(chartFactory.indexInArray(baseLib.alias, compareLib.alias) > -1)
+					return true;
+			}
+			else
+			{
+				for(var i=0; i<baseLib.alias; i++)
+				{
+					if(chartFactory.indexInArray(compareLib.alias, baseLib.alias[i]) > -1)
+						return true;
+				}
+			}
+		}
+		
+		return false;
 	};
 	
 	//获取/设置插件所有依赖库是否都已加载
@@ -7299,6 +7429,41 @@
 	
 	chartFactory._PLUGIN_DEPENDS_LOADEDS = {};
 	chartFactory._PLUGIN_LIB_LOADEDS = {};
+	
+	/**
+	 * 在数组中查找元素，返回其索引
+	 * 
+	 * @param array
+	 * @param value
+	 * @returns 索引数值，-1 表示没有找到
+	 */
+	chartFactory.indexInArray = function(array, value)
+	{
+		if(array == null)
+			return -1;
+		
+		for(var i=0; i<array.length; i++)
+		{
+			if(array[i] == value)
+			{
+				return i;
+			}
+		}
+		
+		return -1;
+	};
+	
+	/**
+	 * 比较版本号。
+	 * 
+	 * @param va
+	 * @param vb
+	 * @returns -1 va低于vb；0 va等于vb；1 va高于vb
+	 */
+	chartFactory.compareVersion = function(va, vb)
+	{
+		//TODO
+	};
 	
 	//-------------
 	// < 已弃用函数 start
