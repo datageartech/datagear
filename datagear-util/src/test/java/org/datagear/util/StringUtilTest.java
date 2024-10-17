@@ -311,6 +311,88 @@ public class StringUtilTest
 	}
 
 	@Test
+	public void maskEmailTest()
+	{
+
+		{
+			String s = null;
+			String actual = StringUtil.maskEmail(s, 2, 2, 2);
+			assertEquals("**", actual);
+		}
+
+		{
+			String s = "";
+			String actual = StringUtil.maskEmail(s, 2, 2, 2);
+			assertEquals("**", actual);
+		}
+
+		{
+			String s = "a";
+			String actual = StringUtil.maskEmail(s, 2, 2, 2);
+			assertEquals("a**", actual);
+		}
+
+		{
+			String s = "abcdef";
+			String actual = StringUtil.maskEmail(s, 2, 2, 2);
+			assertEquals("ab**ef", actual);
+		}
+
+		{
+			String s = "abcdef@test.com";
+			String actual = StringUtil.maskEmail(s, 2, 2, 2);
+			assertEquals("ab**ef@test.com", actual);
+		}
+	}
+
+	@Test
+	public void maskJdbcUrlTest()
+	{
+
+		{
+			String s = null;
+			String actual = StringUtil.maskJdbcUrl(s, 2, 2, 2);
+			assertEquals("**", actual);
+		}
+
+		{
+			String s = "";
+			String actual = StringUtil.maskJdbcUrl(s, 2, 2, 2);
+			assertEquals("**", actual);
+		}
+
+		{
+			String s = "a";
+			String actual = StringUtil.maskJdbcUrl(s, 2, 2, 2);
+			assertEquals("a**", actual);
+		}
+
+		{
+			String s = "abcdef";
+			String actual = StringUtil.maskJdbcUrl(s, 2, 2, 2);
+			assertEquals("ab**ef", actual);
+		}
+
+		{
+			String s = "jdbc:abc";
+			String actual = StringUtil.maskJdbcUrl(s, 2, 2, 2);
+			assertEquals("jdbc:ab**c", actual);
+		}
+
+		{
+			String s = "jdbc:abc:def";
+			String actual = StringUtil.maskJdbcUrl(s, 2, 2, 2);
+			assertEquals("jdbc:abc:de**f", actual);
+		}
+
+		{
+			String s = "jdbc:mysql://127.0.0.1?test";
+			String actual = StringUtil.maskJdbcUrl(s, 3, 3, 3);
+			assertEquals("jdbc:mysql://1***est", actual);
+		}
+	}
+
+	@Test
 	public void toBooleanTest_String() throws Exception
 	{
 		{

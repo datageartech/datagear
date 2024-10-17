@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
-import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DtbsSourceGuardService;
@@ -213,26 +212,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		toFormResponseData(request, entity);
 		setFormPageAttr(request, model, entity);
 
-		boolean hideSensitiveInfo = !canViewDetail(request, model, user, entity);
-		if (hideSensitiveInfo)
-		{
-			clearSensitiveInfo(entity);
-		}
-
-		model.addAttribute("hideSensitiveInfo", hideSensitiveInfo);
-
 		return "/dtbsSource/dtbsSource_form";
-	}
-
-	protected boolean canViewDetail(HttpServletRequest request, Model model, User user, DtbsSource entity)
-	{
-		if (user.isAnonymous())
-			return false;
-
-		if (!Authorization.canEdit(entity.getDataPermission()))
-			return false;
-
-		return true;
 	}
 	
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -483,17 +463,9 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		{
 			for (DtbsSource dtbsSource : dtbsSources)
 			{
-				clearSensitiveInfo(dtbsSource);
+				dtbsSource.clearPassword();
 			}
 		}
-	}
-
-	protected void clearSensitiveInfo(DtbsSource entity)
-	{
-		if (entity == null)
-			return;
-		
-		entity.clearSensitiveInfo();
 	}
 
 	protected DtbsSource createInstance()

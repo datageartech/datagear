@@ -454,6 +454,7 @@ public class StringUtil
 	 * 脱敏处理字符串，生成类似{@code "abc****def"}的字符串。
 	 * 
 	 * @param str
+	 *            允许{@code null}
 	 * @param prefixCount
 	 * @param suffixCount
 	 * @param maskCount
@@ -497,6 +498,7 @@ public class StringUtil
 	 * 脱敏处理邮箱字符串中的用户名部分（{@linkplain '@'}之前），生成类似{@code "abc****def"}的字符串。
 	 * 
 	 * @param email
+	 *            允许{@code null}
 	 * @param prefixCount
 	 * @param suffixCount
 	 * @param maskCount
@@ -504,6 +506,9 @@ public class StringUtil
 	 */
 	public static String maskEmail(String email, int prefixCount, int suffixCount, int maskCount)
 	{
+		if (email == null)
+			return mask(email, prefixCount, suffixCount, maskCount);
+
 		String prefix = email;
 		String suffix = "";
 		
@@ -515,6 +520,48 @@ public class StringUtil
 		}
 
 		prefix = mask(prefix, prefixCount, suffixCount, maskCount);
+
+		return prefix + suffix;
+	}
+
+	/**
+	 * 脱敏处理JDBC URL字符串。
+	 * 
+	 * @param url
+	 *            允许{@code null}
+	 * @param prefixCount
+	 * @param suffixCount
+	 * @param maskCount
+	 * @return
+	 */
+	public static String maskJdbcUrl(String url, int prefixCount, int suffixCount, int maskCount)
+	{
+		if (url == null)
+			return mask(url, prefixCount, suffixCount, maskCount);
+
+		String prefix = "";
+		String suffix = url;
+
+		// JDBC规范格式：jdbc:<subprotocol>:<subname>
+		// 这里仅对<subname>脱敏处理
+
+		int idx = url.indexOf(':');
+
+		if (idx > 0)
+		{
+			int idx2 = url.indexOf(':', idx + 1);
+
+			if (idx2 > idx)
+				idx = idx2;
+		}
+
+		if (idx > 0 && idx < url.length())
+		{
+			prefix = url.substring(0, idx + 1);
+			suffix = url.substring(idx + 1);
+		}
+
+		suffix = mask(suffix, prefixCount, suffixCount, maskCount);
 
 		return prefix + suffix;
 	}

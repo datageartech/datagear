@@ -170,14 +170,6 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity, Clone
 		this.analysisProject = analysisProject;
 	}
 	
-	public void clearDtbsSourceSensitiveInfo()
-	{
-		DtbsSourceConnectionFactory connectionFactory = getConnectionFactory();
-		DtbsSource dtbsSource = (connectionFactory == null ? null : connectionFactory.getDtbsSource());
-		if(dtbsSource != null)
-			dtbsSource.clearSensitiveInfo();
-	}
-
 	@Override
 	public SqlDataSetEntity clone()
 	{

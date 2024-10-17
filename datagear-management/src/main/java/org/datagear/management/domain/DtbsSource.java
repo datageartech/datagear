@@ -274,23 +274,6 @@ public class DtbsSource extends AbstractStringIdEntity
 	}
 
 	/**
-	 * 清除敏感信息，包括：
-	 * <p>
-	 * {@linkplain #getUrl()}、{@linkplain #getUser()}、{@linkplain #getPassword()}、
-	 * {@linkplain #getProperties()}、{@linkplain #getSchemaName()}。
-	 * </p>
-	 */
-	public void clearSensitiveInfo()
-	{
-		// 敏感信息不应传输至客户端
-		setUrl(null);
-		setUser(null);
-		setPassword(null);
-		setProperties(null);
-		setSchemaName(null);
-	}
-
-	/**
 	 * 清除敏感信息：密码。
 	 */
 	public void clearPassword()

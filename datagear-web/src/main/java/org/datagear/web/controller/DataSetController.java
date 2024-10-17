@@ -1249,16 +1249,18 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (entity instanceof SqlDataSetEntity)
 		{
 			SqlDataSetEntity sqlDataSetEntity = ((SqlDataSetEntity) entity);
-			sqlDataSetEntity.clearDtbsSourceSensitiveInfo();
 			sqlDataSetEntity.setSqlValidator(null);
 
-			DtbsSourceConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
-			if (connectionFactory != null)
+			DtbsSourceConnectionFactory connFactory = sqlDataSetEntity.getConnectionFactory();
+			if (connFactory != null)
 			{
-				connectionFactory = new DtbsSourceConnectionFactory(connectionFactory.getConnectionSource(),
-						connectionFactory.getDtbsSource());
-				connectionFactory.setConnectionSource(null);
-				sqlDataSetEntity.setConnectionFactory(connectionFactory);
+				DtbsSource dtbsSource = connFactory.getDtbsSource();
+				if (dtbsSource != null)
+					dtbsSource.clearPassword();
+
+				connFactory = new DtbsSourceConnectionFactory(connFactory.getConnectionSource(), dtbsSource);
+				connFactory.setConnectionSource(null);
+				sqlDataSetEntity.setConnectionFactory(connFactory);
 			}
 		}
 
