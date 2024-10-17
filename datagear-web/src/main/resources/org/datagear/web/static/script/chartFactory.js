@@ -7203,18 +7203,15 @@
 	chartFactory.loadDepends = function(chart, callback, contextCharts)
 	{
 		var plugin = chart.plugin;
-		var loaded = chartFactory.pluginDependsLoaded(plugin);
-		
-		if(loaded)
-		{
-			callback(chart);
-		}
-		
 		var libs = plugin.renderer.depends;
 		
 		if(libs == null || libs.length == 0)
 		{
-			chartFactory.pluginDependsLoaded(plugin, true);
+			callback(chart);
+		}
+		
+		if(chartFactory.pluginDependsLoaded(plugin))
+		{
 			callback(chart);
 		}
 		
