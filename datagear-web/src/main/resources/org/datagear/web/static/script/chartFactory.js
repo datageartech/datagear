@@ -7175,7 +7175,6 @@
 		return theme;
 	};
 	
-	
 	/**
 	 * 加载库，并在加载后执行回调函数。
 	 * 库对象结构为：
@@ -7201,10 +7200,7 @@
 	 *   depends: "..."、[ "..."、... ],
 	 *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。
 	 *   //默认值是：如果this.name已在window下存在，返回true；否则，返回false。
-	 *   loaded: function(){ ... },
-	 *   //可选，校验已加载此名称库的版本是否兼容此图表渲染器，返回false或者抛出异常表明不兼容
-	 *   //默认值是：function(version, lib){ return true; }
-	 *   check: function(version, lib){ ... }
+	 *   loaded: function(){ ... }
 	 * }
 	 * 
 	 * @param lib 库对象、数组
