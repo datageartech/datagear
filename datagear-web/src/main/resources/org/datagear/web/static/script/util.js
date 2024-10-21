@@ -829,54 +829,57 @@
 	};
 	
 	/**
-	 * 比较两个版本号。
-	 * > 1：v0高于v1；= 0：v0等于v1；< 0：v0小于v1。
+	 * 比较版本号。
+	 * 支持版本号格式示例：
+	 * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
 	 * 
-	 * @param v0
 	 * @param v1
+	 * @param v2
+	 * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
 	 */
-	$.compareVersion = function(v0, v1)
+	$.compareVersion = function(v1, v2)
 	{
-		var vv0 = $.resolveVersion(v0);
-		var vv1 = $.resolveVersion(v1);
+		var b1 = "";
+		var b2 = "";
 		
-		for(var i=0; i<Math.max(vv0.length,vv1.length); i++)
+		var bIdx1 = v1.indexOf("-");
+		if(bIdx1 > 0)
 		{
-			if(vv0[i] > vv1[i])
+			b1 = (bIdx1 >= v1.length - 1 ? "" : v1.substring(bIdx1 + 1));
+			v1 = v1.substring(0, bIdx1);
+		}
+		
+		var bIdx2 = v2.indexOf("-");
+		if(bIdx2 > 0)
+		{
+			b2 = (bIdx2 >= v2.length - 1 ? "" : v2.substring(bIdx2 + 1));
+			v2 = v2.substring(0, bIdx2);
+		}
+		
+		var v1ds = v1.split(".");
+		var v2ds = v2.split(".");
+		
+		for(var i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
+		{
+			var num1 = (v1ds[i] == null ? 0 : parseInt(v1ds[i]));
+			var num2 = (v2ds[i] == null ? 0 : parseInt(v2ds[i]));
+			
+			if(num1 > num2)
+			{
 				return 1;
-			else if(vv0[i] < vv1[i])
+			}
+			else if(num1 < num2)
+			{
 				return -1;
+			}
 		}
 		
-		return 0;
-	};
-	
-	/**
-	 * 解析版本号字符串（格式为：1.0, 1.1.0, 1.1.0-build），返回包含各分段的数组。
-	 */
-	$.resolveVersion = function(version)
-	{
-		version = (version || "");
-		
-		var ary = [0, 0, 0, ""];
-		
-		var bidx = version.indexOf("-");
-		if(bidx > -1)
-		{
-			if((bidx+1) < version.length)
-				ary[3] = version.substring(bidx+1);
-			version = version.substring(0, bidx);
-		}
-		
-		var vs = version.split(".");
-		for(var i=0; i< Math.min(3, vs.length); i++)
-		{
-			var v = parseInt(vs[i]);
-			if(!isNaN(v))
-				ary[i] = v;
-		}
-		
-		return ary;
+		if(b1 > b2)
+			return 1;
+		else if(b1 < b2)
+			return -1;
+		else
+			return 0;
 	};
 	
 	/**
