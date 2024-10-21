@@ -7297,7 +7297,7 @@
 					}
 					else
 					{
-						chartFactory.logException("No lib found with name '"+dependName+"'");
+						chartFactory.logException("No lib found for name '"+dependName+"', load ignored");
 					}
 				}
 				
@@ -7312,7 +7312,28 @@
 	//根据依赖优先级排序库，被依赖库靠前
 	chartFactory.sortLibsByDepends = function(libs)
 	{
-		//TODO
+		for(var i=0, len=libs.length; i<len-1; i++)
+		{
+			for (var j = 0; j < len - 1 - i; j++)
+			{
+				//libs[j+1]是否依赖libs[j]
+				var dj = (libs[j+1].depends != null && chartFactory.resolveSameLibName(libs[j+1].depends, libs[j].name) != null);
+				if(!dj)
+				{
+					var tmp = libs[j];
+					libs[j] = libs[j+1];
+					libs[j+1] = tmp;
+				}
+			}
+		}
+		
+		libs.sort(function(la, lb)
+		{
+			if(la.depends != null && chartFactory.resolveSameLibName(la.depends, lb.name) != null)
+				return 1;
+			else
+				return -1;
+		});
 	};
 	
 	chartFactory.loadLibInner = function(libs, callback)
@@ -7451,17 +7472,72 @@
 	};
 	
 	/**
-	 * 比较版本号。
+	 * 比较库版本号。
 	 * 
-	 * @param name
-	 * @param va
-	 * @param vb
-	 * @returns -1 va低于vb；0 va等于vb；1 va高于vb
+	 * @param name 库名
+	 * @param v1
+	 * @param v2
+	 * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
 	 */
-	chartFactory.compareLibVersion = function(name, va, vb)
+	chartFactory.compareLibVersion = function(name, v1, v2)
 	{
-		//TODO
-		return 0;
+		return chartFactory.compareVersion(v1, v2);
+	};
+	
+	/**
+	 * 比较版本号。
+	 * 支持版本号格式示例：
+	 * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
+	 * 
+	 * 此函数原封不动地拷贝自util.js中的$.compareVersion函数
+	 * 
+	 * @param v1
+	 * @param v2
+	 * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
+	 */
+	chartFactory.compareVersion = function(v1, v2)
+	{
+		var b1 = "";
+		var b2 = "";
+		
+		var bIdx1 = v1.indexOf("-");
+		if(bIdx1 > 0)
+		{
+			b1 = (bIdx1 >= v1.length - 1 ? "" : v1.substring(bIdx1 + 1));
+			v1 = v1.substring(0, bIdx1);
+		}
+		
+		var bIdx2 = v2.indexOf("-");
+		if(bIdx2 > 0)
+		{
+			b2 = (bIdx2 >= v2.length - 1 ? "" : v2.substring(bIdx2 + 1));
+			v2 = v2.substring(0, bIdx2);
+		}
+		
+		var v1ds = v1.split(".");
+		var v2ds = v2.split(".");
+		
+		for(var i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
+		{
+			var num1 = (v1ds[i] == null ? 0 : parseInt(v1ds[i]));
+			var num2 = (v2ds[i] == null ? 0 : parseInt(v2ds[i]));
+			
+			if(num1 > num2)
+			{
+				return 1;
+			}
+			else if(num1 < num2)
+			{
+				return -1;
+			}
+		}
+		
+		if(b1 > b2)
+			return 1;
+		else if(b1 < b2)
+			return -1;
+		else
+			return 0;
 	};
 	
 	//查找第一个同名的库索引
