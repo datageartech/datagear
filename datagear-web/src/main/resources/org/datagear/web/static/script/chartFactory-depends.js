@@ -77,7 +77,8 @@
 		}
 		else
 		{
-			//TODO
+			chartFactory.sortLibsByDepends(unloadeds);
+			chartFactory.loadLibInner(unloadeds, callback);
 		}
 	};
 	
@@ -157,6 +158,79 @@
 				}
 			}
 		}
+	};
+	
+	//根据依赖优先级排序库，被依赖库靠前
+	chartFactory.sortLibsByDepends = function(libs)
+	{
+		//TODO
+	};
+	
+	chartFactory.loadLibInner = function(libs, callback)
+	{
+		var deferreds = [];
+		
+		for(var i=0; i<libs.length; i++)
+		{
+			var stateObj = chartFactory.libState(libs[i], false);
+			
+			//TODO 处理【加载中】互斥状态
+			if(!stateObj.loaded)
+			{
+				var source = stateObj.lib.source;
+				var srcDfds = stateObj.sourceLoadedDeferreds;
+				
+				if(source != null)
+				{
+					if(!$.isArray(source))
+						source = [ source ];
+					
+					for(var j=0; j<source.length; j++)
+					{
+						chartFactory.loadSingleLibSource(source[j], srcDfds[j]);
+					}
+				}
+			}
+			
+			deferreds.push(stateObj.loadedDeferred);
+		}
+		
+		$.when.apply($, deferreds).always(function(){ callback(); });
+	};
+	
+	chartFactory.loadSingleLibSource = function(source, deferred)
+	{
+		if(deferred.state != "pending")
+			return;
+		
+		if(chartFactory.isString(source))
+		{
+			source = { url: source, type: chartFactory.resolveLibSourceType(source) };
+		}
+		
+		var ele;
+		
+		if(source.type == "js")
+		{
+			ele = $("<script src=\""+source.url+"\" type=\"text/javascript\"></script>");
+		}
+		else if(source.type == "css")
+		{
+			ele = $("<link href=\"\" type=\"text/css\" rel=\"stylesheet\" />");
+		}
+		else
+		{
+			chartFactory.logException("Unknown lib source type '"+source.type+"'");
+		}
+		
+		var target = (document.head ? document.head : document.body);
+		ele.on("load", function(){ deferred.resolve(); }).appendTo(target);
+	};
+	
+	chartFactory.resolveLibSourceType = function(url)
+	{
+		//TODO
+		return "js";
 	};
 	
 	//查找最新版的库
@@ -308,43 +382,69 @@
 		}
 		else
 		{
-			if(chartFactory.isString(lib.name))
+			var stateObj = chartFactory.libState(lib);
+			
+			if(stateObj != null)
 			{
-				var stateObj = states[lib.name];
-				
 				//对于已存在的，不允许将loaded状态改为false
-				if(stateObj)
+				if(loaded === true)
 				{
-					if(loaded === true)
-						stateObj.loaded = loaded;
-				}
-				else
-				{
-					states[lib.name] = { lib: lib, loaded: loaded, loadedDeferred: $.Deferred() };
+					stateObj.loaded = loaded;
 				}
 			}
 			else
 			{
-				var stateObj = { lib: lib, loaded: loaded, loadedDeferred: $.Deferred() };
+				stateObj = chartFactory.createLibState(lib, loaded);
 				
-				for(var i=0; i<lib.name.length; i++)
+				if(chartFactory.isString(lib.name))
 				{
-					var name = lib.name[i];
-					var stateObj = states[name];
-				
-					//对于已存在的，不允许将loaded状态改为false
-					if(stateObj)
+					states[lib.name] = stateObj;
+				}
+				else
+				{
+					for(var i=0; i<lib.name.length; i++)
 					{
-						if(loaded === true)
-							stateObj.loaded = loaded;
-					}
-					else
-					{
-						states[name] = stateObj;
+						states[lib.name[i]] = stateObj;
 					}
 				}
 			}
+			
+			return stateObj;
 		}
+	};
+	
+	chartFactory.createLibState = function(lib, loaded)
+	{
+		//即使loaded为true，也应设置loadedDeferred、sourceLoadedDeferreds，
+		//确保其在异步调用中结构完整
+		var stateObj =
+		{
+			lib: lib,
+			loaded: loaded,
+			loadedDeferred: $.Deferred(),
+			sourceLoadedDeferreds: []
+		};
+		
+		stateObj.loadedDeferred.always(function(){ stateObj.loaded = true; });
+		
+		var source = stateObj.lib.source;
+		var sourceLen = (source == null ? 0 : ($.isArray(source) ? source.length : 1));
+		
+		if(sourceLen == 0)
+		{
+			stateObj.loadedDeferred.resolve();
+		}
+		else
+		{
+			for(var i=0; i<sourceLen; i++)
+			{
+				stateObj.sourceLoadedDeferreds[i] = $.Deferred();
+			}
+			
+			$.when.apply($, stateObj.sourceLoadedDeferreds).always(function(){ stateObj.loadedDeferred.resolve(); });
+		}
+		
+		return stateObj;
 	};
 	
 	//库及其状态，这些库是从chartFactory.loadLib()函数的contextLibs中选定的最新版库，键值结构：库名 -> 库信息。
@@ -385,6 +485,7 @@
 	chartFactory.compareVersion = function(name, va, vb)
 	{
 		//TODO
+		return 0;
 	};
 })
 (this);
