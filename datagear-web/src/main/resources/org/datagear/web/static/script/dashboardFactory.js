@@ -836,7 +836,7 @@
 		this._initChartResizeHandler();
 		this._initUnloadDashboardHandler();
 		this._initCharts();
-		this._registerAllPluginLib();
+		this._registerRendererDepends();
 		
 		this.statusInited(true);
 	};
@@ -1002,7 +1002,7 @@
 		}
 	};
 	
-	dashboardBase._registerAllPluginLib = function()
+	dashboardBase._registerRendererDepends = function()
 	{
 		if(!this.charts)
 			return;
