@@ -836,6 +836,7 @@
 		this._initChartResizeHandler();
 		this._initUnloadDashboardHandler();
 		this._initCharts();
+		this._registerAllPluginLib();
 		
 		this.statusInited(true);
 	};
@@ -1001,6 +1002,23 @@
 		}
 	};
 	
+	dashboardBase._registerAllPluginLib = function()
+	{
+		if(!this.charts)
+			return;
+		
+		for(var i=0; i<this.charts.length; i++)
+		{
+			var chart = this.charts[i];
+			this._registerRendererDepend(chart);
+		}
+	};
+	
+	dashboardBase._registerRendererDepend = function(chart)
+	{
+		chartFactory.registerRendererDepend(chart);
+	};
+	
 	/**
 	 * 获取/设置初始看板监听器。
 	 * 看板监听器格式为：
@@ -1153,6 +1171,7 @@
 		//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 		
 		this.charts = this.charts.concat(chart);
+		this._registerRendererDepend(chart);
 		
 		return true;
 	};

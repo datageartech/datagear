@@ -839,6 +839,9 @@
 	 */
 	$.compareVersion = function(v1, v2)
 	{
+		if(v1 === v2)
+			return 0;
+		
 		var b1 = "";
 		var b2 = "";
 		

@@ -1056,6 +1056,24 @@
 		
 		this.statusRendering(true);
 		
+		var depend = this._renderDepend();
+		
+		if(depend)
+		{
+			var thisChart = this;
+			chartFactory.loadLib(depend, function()
+			{
+				thisChart._renderInner();
+			});
+		}
+		else
+		{
+			this._renderInner();
+		}
+	};
+	
+	chartBase._renderInner = function()
+	{
 		var doRender = true;
 		
 		var listener = this.listener();
@@ -1066,6 +1084,18 @@
 		{
 			this.doRender();
 		}
+	};
+	
+	chartBase._renderDepend = function()
+	{
+		//优先取
+		var depend = chartFactory.rendererDepend(this.renderer());
+		
+		//次要取
+		if(depend == null)
+			depend = chartFactory.rendererDepend(this.plugin.renderer);
+		
+		return depend;
 	};
 	
 	/**
@@ -6113,6 +6143,9 @@
 	 */
 	chartFactory.compareVersion = function(v1, v2)
 	{
+		if(v1 === v2)
+			return 0;
+		
 		var b1 = "";
 		var b2 = "";
 		
@@ -7520,7 +7553,10 @@
 			var contextLib = contextLibs[i];
 			var name = chartFactory.resolveSameLibName(latestLib.name, contextLib.name);
 			
-			if(name != null && chartFactory.compareLibVersion(name, latestLib.version, contextLib.version) < 0)
+			if(name == null)
+				continue;
+			
+			if(chartFactory.compareLibVersion(name, latestLib.version, contextLib.version) <= 0)
 			{
 				latestLib = contextLib;
 			}
@@ -7741,36 +7777,56 @@
 	chartFactory.LIB_STATE_LOADED = "loaded";
 	
 	/**
-	 * 注册图表插件依赖库（chart.plugin.renderer.depends），已注册过的将会被忽略。
-	 * chart.plugin.renderer.depends结构：
-	 * 库对象、[ 库对象, ... ]
+	 * 注册全局渲染器依赖库，已注册过的渲染器将会被忽略。
+	 * renderer.depend格式：
+	 * 库对象、[ 库对象, ... ]、function(){ return 库对象、[ 库对象, ... ]; }
 	 * 
-	 * 注意，这里的库对象的库源URL（source.url）规范有所不同：
+	 * 库对象结构同chartFactory.loadLib()函数的库对象结构相同，不过，这里库对象的库源URL（source.url）规范有所不同：
 	 * 以"/"开头：表示应用内路径；
 	 * 以"http://"、"https://"开头：表示绝对路径；
 	 * 其他：表示插件资源路径
 	 * 
 	 * @param chart
 	 */
-	chartFactory.registerGlobalPluginLib = function(chart)
+	chartFactory.registerRendererDepend = function(chart)
+	{
+		chartFactory.registerPluginRendererDepend(chart);
+		chartFactory.registerChartRendererDepend(chart);
+	};
+	
+	/**
+	 * 注册全局插件渲染器依赖库（chart.plugin.renderer.depend），已注册过的插件渲染器将会被忽略。
+	 * chart.plugin.renderer.depend格式：
+	 * 库对象、[ 库对象, ... ]、function(){ return 库对象、[ 库对象, ... ]; }
+	 * 
+	 * 库对象结构同chartFactory.loadLib()函数的库对象结构相同。
+	 * 注意：这里库对象的库源URL（source.url）规范有所不同：
+	 * 以"/"开头：表示应用内路径；
+	 * 以"http://"、"https://"开头：表示绝对路径；
+	 * 其他：表示插件资源路径
+	 * 
+	 * @param chart
+	 */
+	chartFactory.registerPluginRendererDepend = function(chart)
 	{
 		var plugin = (chart ? chart.plugin : null);
-		var depends = (plugin && plugin.renderer ? plugin.renderer.depends : null);
+		var renderer = (plugin ? plugin.renderer : null);
+		var depend = chartFactory.rendererDepend(renderer);
 		
-		if(!plugin || !depends)
+		if(!plugin || !renderer || !depend)
 			return;
 		
-		if(chartFactory.GLOBAL_LIB_PLUGINS[plugin.id])
+		if(chartFactory.rendererDependRegistered(renderer))
 			return;
 		
-		chartFactory.GLOBAL_LIB_PLUGINS[plugin.id] = true;
+		chartFactory.rendererDependRegistered(renderer, true);
 		
-		if(!$.isArray(depends))
-			depends = [ depends ];
+		if(!$.isArray(depend))
+			depend = [ depend ];
 		
-		for(var i=0; i<depends.length; i++)
+		for(var i=0; i<depend.length; i++)
 		{
-			var dpd = $.extend(true, {}, depends[i]);
+			var dpd = $.extend(true, {}, depend[i]);
 			
 			//将库源转换为绝对路径
 			if(dpd.source)
@@ -7789,6 +7845,102 @@
 			}
 			
 			chartFactory.GLOBAL_LIBS.push(dpd);
+		}
+	};
+	
+	/**
+	 * 注册全局图表渲染器依赖库chart.renderer().depend，已注册过的插件渲染器将会被忽略。
+	 * chart.renderer().depend格式：
+	 * 库对象、[ 库对象, ... ]、function(){ return 库对象、[ 库对象, ... ]; }
+	 * 
+	 * 库对象结构同chartFactory.loadLib()函数的库对象结构相同。
+	 * 注意：这里库对象的库源URL（source.url）应该时可以直接加载的。
+	 * 
+	 * @param chart
+	 */
+	chartFactory.registerChartRendererDepend = function(chart)
+	{
+		var renderer = (chart ? chart.renderer() : null);
+		var depend = chartFactory.rendererDepend(renderer);
+		
+		if(!renderer || !depend)
+			return;
+		
+		if(chartFactory.rendererDependRegistered(renderer))
+			return;
+		
+		chartFactory.rendererDependRegistered(renderer, true);
+		
+		if(!$.isArray(depend))
+			depend = [ depend ];
+		
+		for(var i=0; i<depend.length; i++)
+		{
+			chartFactory.GLOBAL_LIBS.push(depend[i]);
+		}
+	};
+	
+	//获取/设置渲染器依赖库是否已注册
+	chartFactory.rendererDependRegistered = function(renderer, set)
+	{
+		if(renderer == null)
+			return false;
+		
+		var registereds = chartFactory.REGISTERED_DEPEND_RENDERERS;
+		
+		if(set === undefined)
+		{
+			for(var i=0; i<registereds.length; i++)
+			{
+				if(registereds[i] === renderer)
+					return true;
+			}
+			
+			return false;
+		}
+		else
+		{
+			if(set === true)
+			{
+				registereds.push(renderer);
+			}
+		}
+	};
+	
+	/**
+	 * 获取插件渲染器依赖库。
+	 */
+	chartFactory.pluginRendererDepend = function(plugin)
+	{
+		if(!plugin)
+			return null;
+		
+		return chartFactory.rendererDepend(plugin.renderer);
+	};
+	
+	/**
+	 * 获取插件渲染器依赖库。
+	 * 
+	 * @returns 返回undefined表示未定义
+	 */
+	chartFactory.rendererDepend = function(renderer)
+	{
+		if(!renderer || renderer.depend === undefined)
+		{
+			return undefined;
+		}
+		
+		if(renderer.depend == null)
+		{
+			return null;
+		}
+		else if($.isFunction(renderer.depend))
+		{
+			return renderer.depend();
+		}
+		else
+		{
+			return renderer.depend;
 		}
 	};
 	
@@ -7828,8 +7980,8 @@
 	//全局库，元素结构同chartFactory.loadLib的库结构
 	chartFactory.GLOBAL_LIBS = [];
 	
-	//已注册全局库的插件映射表，键值结构：插件ID -> true/false
-	chartFactory.GLOBAL_LIB_PLUGINS = {};
+	//已注册依赖库的插件渲染器数组
+	chartFactory.REGISTERED_DEPEND_RENDERERS = [];
 	
 	//以http://或者https://开头的正则表达式
 	chartFactory.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
