@@ -6100,6 +6100,62 @@
 		return -1;
 	};
 	
+	/**
+	 * 比较版本号。
+	 * 支持版本号格式示例：
+	 * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
+	 * 
+	 * 此函数原封不动地拷贝自util.js中的$.compareVersion函数
+	 * 
+	 * @param v1
+	 * @param v2
+	 * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
+	 */
+	chartFactory.compareVersion = function(v1, v2)
+	{
+		var b1 = "";
+		var b2 = "";
+		
+		var bIdx1 = v1.indexOf("-");
+		if(bIdx1 > 0)
+		{
+			b1 = (bIdx1 >= v1.length - 1 ? "" : v1.substring(bIdx1 + 1));
+			v1 = v1.substring(0, bIdx1);
+		}
+		
+		var bIdx2 = v2.indexOf("-");
+		if(bIdx2 > 0)
+		{
+			b2 = (bIdx2 >= v2.length - 1 ? "" : v2.substring(bIdx2 + 1));
+			v2 = v2.substring(0, bIdx2);
+		}
+		
+		var v1ds = v1.split(".");
+		var v2ds = v2.split(".");
+		
+		for(var i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
+		{
+			var num1 = (v1ds[i] == null ? 0 : parseInt(v1ds[i]));
+			var num2 = (v2ds[i] == null ? 0 : parseInt(v2ds[i]));
+			
+			if(num1 > num2)
+			{
+				return 1;
+			}
+			else if(num1 < num2)
+			{
+				return -1;
+			}
+		}
+		
+		if(b1 > b2)
+			return 1;
+		else if(b1 < b2)
+			return -1;
+		else
+			return 0;
+	};
+	
 	/**内置名字标识片段*/
 	chartFactory._BUILT_IN_NAME_PART = "datagear";
 	
@@ -7205,10 +7261,12 @@
 	 * 
 	 * @param lib 库对象、数组
 	 * @param callback 加载完成回调函数
-	 * @param contextLibs 上下文库数组，对于相同名称的库，将在contextLibs中加载最新版本那个
+	 * @param contextLibs 可选，上下文库数组，对于相同名称的库，将在contextLibs中加载最新版本那个，默认值：chartFactory.GLOBAL_LIBS
 	 */
 	chartFactory.loadLib = function(lib, callback, contextLibs)
 	{
+		contextLibs = (contextLibs == null ? chartFactory.GLOBAL_LIBS : contextLibs);
+		
 		if(!lib)
 		{
 			callback();
@@ -7484,62 +7542,6 @@
 		return chartFactory.compareVersion(v1, v2);
 	};
 	
-	/**
-	 * 比较版本号。
-	 * 支持版本号格式示例：
-	 * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
-	 * 
-	 * 此函数原封不动地拷贝自util.js中的$.compareVersion函数
-	 * 
-	 * @param v1
-	 * @param v2
-	 * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
-	 */
-	chartFactory.compareVersion = function(v1, v2)
-	{
-		var b1 = "";
-		var b2 = "";
-		
-		var bIdx1 = v1.indexOf("-");
-		if(bIdx1 > 0)
-		{
-			b1 = (bIdx1 >= v1.length - 1 ? "" : v1.substring(bIdx1 + 1));
-			v1 = v1.substring(0, bIdx1);
-		}
-		
-		var bIdx2 = v2.indexOf("-");
-		if(bIdx2 > 0)
-		{
-			b2 = (bIdx2 >= v2.length - 1 ? "" : v2.substring(bIdx2 + 1));
-			v2 = v2.substring(0, bIdx2);
-		}
-		
-		var v1ds = v1.split(".");
-		var v2ds = v2.split(".");
-		
-		for(var i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
-		{
-			var num1 = (v1ds[i] == null ? 0 : parseInt(v1ds[i]));
-			var num2 = (v2ds[i] == null ? 0 : parseInt(v2ds[i]));
-			
-			if(num1 > num2)
-			{
-				return 1;
-			}
-			else if(num1 < num2)
-			{
-				return -1;
-			}
-		}
-		
-		if(b1 > b2)
-			return 1;
-		else if(b1 < b2)
-			return -1;
-		else
-			return 0;
-	};
-	
 	//查找第一个同名的库索引
 	chartFactory.libIndex = function(libs, name)
 	{
@@ -7638,7 +7640,7 @@
 	 */
 	chartFactory.libState = function(lib, nonNull)
 	{
-		var states = chartFactory._LIB_STATES;
+		var states = chartFactory.LIB_STATES;
 		
 		if(nonNull !== true)
 		{
@@ -7729,7 +7731,7 @@
 	};
 	
 	//库及其状态，键值结构：库名 -> 库信息。
-	chartFactory._LIB_STATES = {};
+	chartFactory.LIB_STATES = {};
 	
 	//库状态：初始化
 	chartFactory.LIB_STATE_INIT = "init";
@@ -7737,6 +7739,100 @@
 	chartFactory.LIB_STATE_LOADING = "loading";
 	//库状态：加载完成
 	chartFactory.LIB_STATE_LOADED = "loaded";
+	
+	/**
+	 * 注册图表插件依赖库（chart.plugin.renderer.depends），已注册过的将会被忽略。
+	 * chart.plugin.renderer.depends结构：
+	 * 库对象、[ 库对象, ... ]
+	 * 
+	 * 注意，这里的库对象的库源URL（source.url）规范有所不同：
+	 * 以"/"开头：表示应用内路径；
+	 * 以"http://"、"https://"开头：表示绝对路径；
+	 * 其他：表示插件资源路径
+	 * 
+	 * @param chart
+	 */
+	chartFactory.registerGlobalPluginLib = function(chart)
+	{
+		var plugin = (chart ? chart.plugin : null);
+		var depends = (plugin && plugin.renderer ? plugin.renderer.depends : null);
+		
+		if(!plugin || !depends)
+			return;
+		
+		if(chartFactory.GLOBAL_LIB_PLUGINS[plugin.id])
+			return;
+		
+		chartFactory.GLOBAL_LIB_PLUGINS[plugin.id] = true;
+		
+		if(!$.isArray(depends))
+			depends = [ depends ];
+		
+		for(var i=0; i<depends.length; i++)
+		{
+			var dpd = $.extend(true, {}, depends[i]);
+			
+			//将库源转换为绝对路径
+			if(dpd.source)
+			{
+				if($.isArray(dpd.source))
+				{
+					for(var j=0; j<dpd.source.length; j++)
+					{
+						dpd.source[j] = chartFactory.resolvePluginSingleLibSource(chart, dpd.source[j]);
+					}
+				}
+				else
+				{
+					dpd.source = chartFactory.resolvePluginSingleLibSource(chart, dpd.source);
+				}
+			}
+			
+			chartFactory.GLOBAL_LIBS.push(dpd);
+		}
+	};
+	
+	//将图表插件的依赖库url解析为可直接加载的绝对路径
+	chartFactory.resolvePluginSingleLibSource = function(chart, libSource)
+	{
+		var isStr = chartFactory.isString(libSource);
+		var url = (isStr ? libSource : libSource.url);
+		
+		if(!url)
+			return libSource;
+		
+		//相对应用根路径的
+		if(url.indexOf("/") == 0)
+		{
+			url = chart.contextURL(url);
+		}
+		//绝对路径
+		else if(chartFactory.HTTP_S_PREFIX_REGEX.test(url))
+		{
+			url = url;
+		}
+		//插件内路径
+		else
+		{
+			url = chart.pluginResourceURL(url);
+		}
+		
+		if(isStr)
+			libSource = url;
+		else
+			libSource.url = url;
+		
+		return libSource;
+	};
+	
+	//全局库，元素结构同chartFactory.loadLib的库结构
+	chartFactory.GLOBAL_LIBS = [];
+	
+	//已注册全局库的插件映射表，键值结构：插件ID -> true/false
+	chartFactory.GLOBAL_LIB_PLUGINS = {};
+	
+	//以http://或者https://开头的正则表达式
+	chartFactory.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
 	
 	//-------------
 	// < 已弃用函数 start
