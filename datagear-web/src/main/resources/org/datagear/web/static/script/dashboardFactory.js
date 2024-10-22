@@ -836,7 +836,7 @@
 		this._initChartResizeHandler();
 		this._initUnloadDashboardHandler();
 		this._initCharts();
-		this._registerRendererDepends();
+		this._registerRendererLibs();
 		
 		this.statusInited(true);
 	};
@@ -1002,7 +1002,7 @@
 		}
 	};
 	
-	dashboardBase._registerRendererDepends = function()
+	dashboardBase._registerRendererLibs = function()
 	{
 		if(!this.charts)
 			return;
@@ -1010,13 +1010,13 @@
 		for(var i=0; i<this.charts.length; i++)
 		{
 			var chart = this.charts[i];
-			this._registerRendererDepend(chart);
+			this._registerRendererLib(chart);
 		}
 	};
 	
-	dashboardBase._registerRendererDepend = function(chart)
+	dashboardBase._registerRendererLib = function(chart)
 	{
-		chartFactory.registerRendererDepend(chart);
+		chartFactory.registerRendererLib(chart);
 	};
 	
 	/**
@@ -1171,7 +1171,7 @@
 		//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 		
 		this.charts = this.charts.concat(chart);
-		this._registerRendererDepend(chart);
+		this._registerRendererLib(chart);
 		
 		return true;
 	};
