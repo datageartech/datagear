@@ -7925,17 +7925,17 @@
 		{
 			for(var i=0; i<lib.source.length; i++)
 			{
-				lib.source[i] = chartFactory.trimPluginRendererLibSingleSourceUrl(chart, lib.source[i]);
+				lib.source[i] = chartFactory.trimPluginRendererLibSourceUrl(chart, lib.source[i]);
 			}
 		}
 		else
 		{
-			lib.source = chartFactory.trimPluginRendererLibSingleSourceUrl(chart, lib.source);
+			lib.source = chartFactory.trimPluginRendererLibSourceUrl(chart, lib.source);
 		}
 	};
 	
 	//将图表插件的依赖库url解析为可直接加载的绝对路径
-	chartFactory.trimPluginRendererLibSingleSourceUrl = function(chart, singleSource)
+	chartFactory.trimPluginRendererLibSourceUrl = function(chart, singleSource)
 	{
 		var isStr = chartFactory.isString(singleSource);
 		var url = (isStr ? singleSource : singleSource.url);
