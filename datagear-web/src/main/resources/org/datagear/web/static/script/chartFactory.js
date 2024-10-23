@@ -7543,23 +7543,24 @@
 	//查找最新版的库
 	chartFactory.findLatestLib = function(contextLibs, lib)
 	{
-		var latestLib = lib;
-		
 		for(var i=0; i<contextLibs.length; i++)
 		{
 			var contextLib = contextLibs[i];
-			var name = chartFactory.resolveSameLibName(latestLib.name, contextLib.name);
+			var name = chartFactory.resolveSameLibName(lib.name, contextLib.name);
 			
 			if(name == null)
 				continue;
 			
-			if(chartFactory.compareLibVersion(name, latestLib.version, contextLib.version) < 0)
+			//只有找到更高版本号的才替换，否则应该优先使用传入的lib参数
+			var lower = (chartFactory.compareLibVersion(name, lib.version, contextLib.version) < 0);
+			
+			if(lower)
 			{
-				latestLib = contextLib;
+				lib = contextLib;
 			}
 		}
 		
-		return latestLib;
+		return lib;
 	};
 	
 	/**
@@ -7721,13 +7722,15 @@
 	
 	chartFactory.createLibState = function(lib, state)
 	{
+		//应深度复制lib，避免可能的修改导致状态错乱
+		lib = chartFactory.deepCloneLib(lib);
 		state = (state == null ? chartFactory.LIB_STATE_INIT : state);
 		
 		//无论state是何状态，都应设置loadedDeferred、sourceLoadedDeferreds，
 		//确保其在异步调用中结构完整
 		var stateObj =
 		{
-			//同chartFactory.loadLib()函数的库对象结构
+			//库对象
 			lib: lib,
 			//库状态，参考：chartFactory.LIB_STATE_*
 			state: state,
@@ -7761,6 +7764,30 @@
 		}
 		
 		return stateObj;
+	};
+	
+	chartFactory.deepCloneLib = function(lib)
+	{
+		if(!lib)
+			return lib;
+		
+		if($.isArray(lib))
+		{
+			var newLibs = [];
+			
+			for(var i=0; i<lib.length; i++)
+			{
+				var newLib = $.extend(true, {}, lib[i]);
+				newLibs.push(newLib);
+			}
+			
+			return newLibs;
+		}
+		else
+		{
+			var newLib = $.extend(true, {}, lib);
+			return newLib;
+		}
 	};
 	
 	//库及其状态，键值结构：库名 -> 库信息。
@@ -7848,26 +7875,21 @@
 		if(!lib)
 			return lib;
 		
+		lib = chartFactory.deepCloneLib(lib);
+		
 		if($.isArray(lib))
 		{
-			var newLibs = [];
-			
 			for(var i=0; i<lib.length; i++)
 			{
-				var newLib = $.extend(true, {}, lib[i]);
-				chartFactory.trimPluginRendererLibSource(chart, newLib);
-				newLibs.push(newLib);
+				chartFactory.trimPluginRendererLibSource(chart, lib[i]);
 			}
-			
-			return newLibs;
 		}
 		else
 		{
-			var newLib = $.extend(true, {}, lib);
-			chartFactory.trimPluginRendererLibSource(chart, newLib);
-			
-			return newLib;
+			chartFactory.trimPluginRendererLibSource(chart, lib);
 		}
+		
+		return lib;
 	};
 	
 	chartFactory.trimPluginRendererLibSource = function(chart, lib)
