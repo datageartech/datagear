@@ -1004,14 +1004,7 @@
 	
 	dashboardBase._registerRendererLibs = function()
 	{
-		if(!this.charts)
-			return;
-		
-		for(var i=0; i<this.charts.length; i++)
-		{
-			var chart = this.charts[i];
-			this._registerRendererLib(chart);
-		}
+		chartFactory.registerRendererLibs(this.charts);
 	};
 	
 	dashboardBase._registerRendererLib = function(chart)

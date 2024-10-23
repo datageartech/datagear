@@ -7293,7 +7293,7 @@
 	 *   //可选，依赖库名称/数组
 	 *   depend: "..."、[ "..."、... ],
 	 *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。
-	 *   //默认值是：如果this.name已在window下存在，返回true；否则，返回false。
+	 *   //默认值是：如果this.name已在window下已定义，返回true；否则，返回false。
 	 *   loaded: function(){ ... }
 	 * }
 	 * 
@@ -7599,13 +7599,13 @@
 		{
 			if(chartFactory.isString(lib.name))
 			{
-				return (window[lib.name] != null);
+				return (window[lib.name] !== undefined);
 			}
 			else
 			{
 				for(var i=0; i<lib.name.length; i++)
 				{
-					if(window[lib.name[i]] != null)
+					if(window[lib.name[i]] !== undefined)
 					{
 						return true;
 					}
@@ -7803,12 +7803,36 @@
 	/**
 	 * 全局注册渲染器依赖库。
 	 * 
+	 * @param chart 图表数组
+	 */
+	chartFactory.registerRendererLibs = function(charts)
+	{
+		if(!charts)
+			return;
+		
+		//图表渲染器在看板页面定义，所以依赖库应该优先注册，优先使用
+		//具体参考chartFactory.registerGlobalLib()函数规则
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			chartFactory.registerChartRendererLib(charts[i]);
+		}
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			chartFactory.registerPluginRendererLib(charts[i]);
+		}
+	};
+	
+	/**
+	 * 全局注册渲染器依赖库。
+	 * 
 	 * @param chart
 	 */
 	chartFactory.registerRendererLib = function(chart)
 	{
-		//图表渲染器在看板页面定义，所以依赖库应该优先使用，优先注册，
-		//具体参考chartFactory.registerGlobalLib()函数
+		//图表渲染器在看板页面定义，所以依赖库应该优先注册，优先使用
+		//具体参考chartFactory.registerGlobalLib()函数规则
 		
 		chartFactory.registerChartRendererLib(chart);
 		chartFactory.registerPluginRendererLib(chart);
