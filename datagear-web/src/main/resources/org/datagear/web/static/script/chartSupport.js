@@ -9135,56 +9135,32 @@
 			return;
 		}
 		
-		var callbackInvoked = false;
-		var loadeds = {};
+		var loadedDeferreds = [];
 		
-		var newCallback = function(context, success)
+		for(var i=0; i<needLoads.length; i++)
 		{
-			loadeds[context.needLoadName] = success;
-			
-			var finishCount = 0;
-			var errorNames = [];
-			
-			for(var p in loadeds)
-			{
-				if(loadeds[p] != null)
-				{
-					finishCount ++;
-				}
-				
-				if(loadeds[p] === false)
-				{
-					errorNames.push(p);
-				}
-			}
-			
-			if(finishCount == needLoads.length && !callbackInvoked)
-			{
-				callbackInvoked = true;
-				
-				if(errorNames.length > 0)
-				{
-					throw new Error(errorNames + " map load failed");
-				}
-				else
-				{
-					callback();
-				}
-			}
-		};
+			loadedDeferreds[i] = $.Deferred();
+		}
+		
+		$.when.apply($, loadedDeferreds).done(function()
+		{
+			callback();
+		});
 		
 		for(var i=0; i<needLoads.length; i++)
 		{
 			chart.echartsLoadMap(needLoads[i],
 			{
-				needLoadName: needLoads[i],
+				needLoadMap: needLoads[i],
+				mapLoadedDeferred: loadedDeferreds[i],
 				success: function()
 				{
-					newCallback(this, true);
+					this.mapLoadedDeferred.resolve();
 				},
-				error: function()
+				error: function(jqXHR, textStatus, errorThrown)
 				{
-					newCallback(this, false);
+					this.mapLoadedDeferred.reject();
+					chartFactory.logException("Load map '"+this.needLoadMap+"' error : " + (errorThrown || textStatus));
 				}
 			});
 		}
