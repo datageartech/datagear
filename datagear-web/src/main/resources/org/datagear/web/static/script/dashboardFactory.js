@@ -280,6 +280,16 @@
 	dashboardFactory._initChartOverwriteIfNone = function(chart)
 	{
 		//确保只会执行一次
+		if(chart._contextChartsSuperByDbd == null)
+		{
+			chart._contextChartsSuperByDbd = chart._contextCharts;
+			chart._contextCharts = function()
+			{
+				return this.dashboard.charts;
+			};
+		}
+		
+		//确保只会执行一次
 		if(chart._initForPostSuperByDbd == null)
 		{
 			chart._initForPostSuperByDbd = chart._initForPost;
@@ -836,7 +846,6 @@
 		this._initChartResizeHandler();
 		this._initUnloadDashboardHandler();
 		this._initCharts();
-		this._registerRendererLibs();
 		
 		this.statusInited(true);
 	};
@@ -1002,16 +1011,6 @@
 		}
 	};
 	
-	dashboardBase._registerRendererLibs = function()
-	{
-		chartFactory.registerRendererLibs(this.charts);
-	};
-	
-	dashboardBase._registerRendererLib = function(chart)
-	{
-		chartFactory.registerRendererLib(chart);
-	};
-	
 	/**
 	 * 获取/设置初始看板监听器。
 	 * 看板监听器格式为：
@@ -1164,7 +1163,6 @@
 		//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 		
 		this.charts = this.charts.concat(chart);
-		this._registerRendererLib(chart);
 		
 		return true;
 	};

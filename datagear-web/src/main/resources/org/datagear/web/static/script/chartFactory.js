@@ -1062,16 +1062,24 @@
 		
 		if(lib)
 		{
+			var contextCharts = this._contextCharts();
 			var thisChart = this;
+			
 			chartFactory.loadLib(lib, function()
 			{
 				thisChart._renderInner();
-			});
+			},
+			contextCharts);
 		}
 		else
 		{
 			this._renderInner();
 		}
+	};
+	
+	chartBase._contextCharts = function()
+	{
+		return [];
 	};
 	
 	chartBase._renderInner = function()
@@ -7299,11 +7307,11 @@
 	 * 
 	 * @param lib 库对象、数组
 	 * @param callback 加载完成回调函数
-	 * @param contextLibs 可选，上下文库数组，对于相同名称的库，将在contextLibs中加载最新版本那个，默认值：chartFactory.GLOBAL_LIBS
+	 * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
 	 */
-	chartFactory.loadLib = function(lib, callback, contextLibs)
+	chartFactory.loadLib = function(lib, callback, contextCharts)
 	{
-		contextLibs = (contextLibs == null ? chartFactory.GLOBAL_LIBS : contextLibs);
+		contextCharts = (contextCharts == null ? [] : contextCharts);
 		
 		if(!lib)
 		{
@@ -7314,7 +7322,7 @@
 			lib = [ lib ];
 		
 		var unloadeds = [];
-		chartFactory.inflateUnloadedLibs(contextLibs, lib, unloadeds);
+		chartFactory.inflateUnloadedLibs(contextCharts, lib, unloadeds);
 		
 		if(unloadeds.length == 0)
 		{
@@ -7328,7 +7336,7 @@
 	};
 	
 	//填充所有待加载库，填充后，unloadeds中都是最新版本库，且都包含依赖库
-	chartFactory.inflateUnloadedLibs = function(contextLibs, libs, unloadeds)
+	chartFactory.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 	{
 		for(var i=0; i<libs.length; i++)
 		{
@@ -7345,12 +7353,14 @@
 				continue;
 			}
 			
-			var latestLib = chartFactory.findLatestLib(contextLibs, lib);
+			var latestLib = chartFactory.findLatestLibInCharts(contextCharts, lib);
 			
 			if(latestLib !== lib)
 			{
 				if(chartFactory.isLibLoadedInEnv(latestLib))
 				{
+					//如果最新版已在环境中加载，应将其状态设为loaded，以减少后续加载操作的搜索步骤
+					chartFactory.libState(latestLib, true, chartFactory.LIB_STATE_LOADED);
 					continue;
 				}
 				
@@ -7385,11 +7395,14 @@
 					if(chartFactory.libIndex(libs, dependName) > -1)
 						continue;
 					
-					var libIdx = chartFactory.libIndex(contextLibs, dependName);
+					if(chartFactory.libIndex(dependLibs, dependName) > -1)
+						continue;
 					
-					if(libIdx > -1)
+					var dependLib = chartFactory.findFirstLibInCharts(contextCharts, dependName);
+					
+					if(dependLib != null)
 					{
-						dependLibs.push(contextLibs[libIdx]);
+						dependLibs.push(dependLib);
 					}
 					else
 					{
@@ -7399,7 +7412,7 @@
 				
 				if(dependLibs.length > 0)
 				{
-					chartFactory.inflateUnloadedLibs(contextLibs, dependLibs, unloadeds);
+					chartFactory.inflateUnloadedLibs(contextCharts, dependLibs, unloadeds);
 				}
 			}
 		}
@@ -7541,26 +7554,144 @@
 	chartFactory.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 	
 	//查找最新版的库
-	chartFactory.findLatestLib = function(contextLibs, lib)
+	chartFactory.findLatestLibInCharts = function(charts, lib)
 	{
-		for(var i=0; i<contextLibs.length; i++)
+		if(charts == null)
+			return lib;
+		
+		var rendererLatestLib = lib;
+		var pluginLatestLib = lib;
+		var pluginLatestLibChart = null;
+		
+		for(var i=0; i<charts.length; i++)
 		{
-			var contextLib = contextLibs[i];
-			var name = chartFactory.resolveSameLibName(lib.name, contextLib.name);
+			var chart = charts[i];
+			var renderer = chart.renderer();
+			var rendererLib = chartFactory.rendererLib(renderer);
+			rendererLatestLib = chartFactory.findLatestLibInLibs(rendererLib, rendererLatestLib);
+		}
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			var pluginRenderer = (chart.plugin ? chart.plugin.renderer : null);
+			var rendererLib = chartFactory.rendererLib(pluginRenderer);
+			var myPluginLatestLib = chartFactory.findLatestLibInLibs(rendererLib, pluginLatestLib);
 			
-			if(name == null)
-				continue;
-			
-			//只有找到更高版本号的才替换，否则应该优先使用传入的lib参数
-			var lower = (chartFactory.compareLibVersion(name, lib.version, contextLib.version) < 0);
-			
-			if(lower)
+			if(myPluginLatestLib !== pluginLatestLib)
 			{
-				lib = contextLib;
+				pluginLatestLib = myPluginLatestLib;
+				pluginLatestLibChart = chart;
 			}
 		}
 		
-		return lib;
+		//图表渲染器在看板页面定义，所以其依赖库应该优先使用
+		var latestLib = chartFactory.resolveLatestLibByBase(rendererLatestLib, pluginLatestLib);
+		
+		//如果是插件依赖库，需要转换为可用依赖库
+		if(latestLib !== lib && latestLib === pluginLatestLib && pluginLatestLibChart != null)
+		{
+			latestLib = chartFactory.convertPluginRendererLib(pluginLatestLibChart, latestLib);
+		}
+		
+		return latestLib;
+	};
+	
+	chartFactory.findLatestLibInLibs = function(libs, lib)
+	{
+		if(libs == null)
+			return lib;
+		
+		var latestLib = lib;
+		
+		if($.isArray(libs))
+		{
+			for(var i=0; i<libs.length; i++)
+			{
+				latestLib = chartFactory.resolveLatestLibByBase(latestLib, libs[i]);
+			}
+		}
+		else
+		{
+			latestLib = chartFactory.resolveLatestLibByBase(latestLib, libs);
+		}
+		
+		return latestLib;
+	};
+	
+	//如果compareLib与baseLib同名，且版本更高，返回compareLib；否则，返回baseLib
+	chartFactory.resolveLatestLibByBase = function(baseLib, compareLib)
+	{
+		if(compareLib == null)
+			return baseLib;
+		
+		var latestLib = baseLib;
+		
+		var name = chartFactory.resolveSameLibName(baseLib.name, compareLib.name);
+		
+		if(name != null)
+		{
+			//只有找到更高版本号的才替换，否则应该优先使用传入的lib参数
+			var lower = (chartFactory.compareLibVersion(name, baseLib.version, compareLib.version) < 0);
+			
+			if(lower)
+			{
+				latestLib = compareLib;
+			}
+		}
+		
+		return latestLib;
+	};
+	
+	//查找第一个库
+	chartFactory.findFirstLibInCharts = function(charts, name)
+	{
+		if(charts == null)
+			return null;
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			var renderer = chart.renderer();
+			var rendererLib = chartFactory.rendererLib(renderer);
+			var firstLib = chartFactory.findFirstLibInLibs(rendererLib, name);
+			
+			if(firstLib != null)
+				return firstLib;
+			
+			var pluginRenderer = (chart.plugin ? chart.plugin.renderer : null);
+			rendererLib = chartFactory.rendererLib(pluginRenderer);
+			firstLib = chartFactory.findFirstLibInLibs(rendererLib, name);
+			
+			//插件依赖库需要转换为可用依赖库
+			if(firstLib != null)
+				return chartFactory.convertPluginRendererLib(chart, firstLib);
+		}
+		
+		return null;
+	};
+	
+	//查找第一个库
+	chartFactory.findFirstLibInLibs = function(libs, name)
+	{
+		if(libs == null)
+			return null;
+		
+		if($.isArray(libs))
+		{
+			for(var i=0; i<libs.length; i++)
+			{
+				if(chartFactory.resolveSameLibName(libs[i].name, name))
+					return libs[i];
+			}
+		}
+		else
+		{
+			if(chartFactory.resolveSameLibName(libs.name, name))
+					return libs;
+		}
+		
+		return null;
 	};
 	
 	/**
@@ -7670,9 +7801,10 @@
 	 * 获取库状态信息。
 	 * 
 	 * @param lib 库对象
-	 * @param nonNull 可选，是否返回非null。
+	 * @param nonNull 可选，是否返回非null
+	 * @param createState 当要返回nonNull时，需要创建的状态
 	 */
-	chartFactory.libState = function(lib, nonNull)
+	chartFactory.libState = function(lib, nonNull, createState)
 	{
 		var states = chartFactory.LIB_STATES;
 		
@@ -7701,7 +7833,7 @@
 			
 			if(stateObj == null)
 			{
-				stateObj = chartFactory.createLibState(lib);
+				stateObj = chartFactory.createLibState(lib, createState);
 				
 				if(chartFactory.isString(lib.name))
 				{
@@ -7763,6 +7895,14 @@
 			$.when.apply($, stateObj.sourceLoadedDeferreds).always(function(){ stateObj.loadedDeferred.resolve(); });
 		}
 		
+		if(state == chartFactory.LIB_STATE_LOADED)
+		{
+			for(var i=0; i<sourceLen; i++)
+			{
+				stateObj.sourceLoadedDeferreds[i].resolve();
+			}
+		}
+		
 		return stateObj;
 	};
 	
@@ -7799,100 +7939,6 @@
 	chartFactory.LIB_STATE_LOADING = "loading";
 	//库状态：加载完成
 	chartFactory.LIB_STATE_LOADED = "loaded";
-	
-	/**
-	 * 全局注册渲染器依赖库。
-	 * 
-	 * @param chart 图表数组
-	 */
-	chartFactory.registerRendererLibs = function(charts)
-	{
-		if(!charts)
-			return;
-		
-		//图表渲染器在看板页面定义，所以依赖库应该优先注册，优先使用
-		//具体参考chartFactory.registerGlobalLib()函数规则
-		
-		for(var i=0; i<charts.length; i++)
-		{
-			chartFactory.registerChartRendererLib(charts[i]);
-		}
-		
-		for(var i=0; i<charts.length; i++)
-		{
-			chartFactory.registerPluginRendererLib(charts[i]);
-		}
-	};
-	
-	/**
-	 * 全局注册渲染器依赖库。
-	 * 
-	 * @param chart
-	 */
-	chartFactory.registerRendererLib = function(chart)
-	{
-		//图表渲染器在看板页面定义，所以依赖库应该优先注册，优先使用
-		//具体参考chartFactory.registerGlobalLib()函数规则
-		
-		chartFactory.registerChartRendererLib(chart);
-		chartFactory.registerPluginRendererLib(chart);
-	};
-	
-	/**
-	 * 全局注册图表渲染器依赖库：chart.renderer().depend，
-	 * 支持的depend格式参考chartFactory.rendererLib()函数说明。
-	 * 这里的depend中的库对象结构与chartFactory.loadLib()函数的库对象结构相同。
-	 * 注意：由于chart.renderer()是在看板页面定义的，所以它的depend中库对象的库源URL（source.url）应是可以直接加载的。
-	 * 
-	 * @param chart
-	 */
-	chartFactory.registerChartRendererLib = function(chart)
-	{
-		var renderer = (chart ? chart.renderer() : null);
-		var lib = chartFactory.rendererLib(renderer);
-		
-		if(!renderer || !lib)
-			return;
-		
-		if(!$.isArray(lib))
-			lib = [ lib ];
-		
-		for(var i=0; i<lib.length; i++)
-		{
-			chartFactory.registerGlobalLib(lib[i]);
-		}
-	};
-	
-	/**
-	 * 全局注册插件渲染器依赖库：chart.plugin.renderer.depend，
-	 * 支持的depend格式参考chartFactory.rendererLib()函数说明。
-	 * 这里的depend中的库对象结构与chartFactory.loadLib()函数的库对象结构相同。
-	 * 注意：由于chart.plugin.renderer是在插件中定义的，所以它的depend中库对象的库源URL（source.url）规范有所不同：
-	 * 1、以"/"开头：表示应用内路径；
-	 * 2、以"http://"、"https://"开头：表示绝对路径；
-	 * 3、其他：表示插件资源路径
-	 * 
-	 * @param chart
-	 */
-	chartFactory.registerPluginRendererLib = function(chart)
-	{
-		var plugin = (chart ? chart.plugin : null);
-		var renderer = (plugin ? plugin.renderer : null);
-		var lib = chartFactory.rendererLib(renderer);
-		
-		if(!plugin || !renderer || !lib)
-			return;
-		
-		lib = chartFactory.convertPluginRendererLib(chart, lib);
-		
-		if(!$.isArray(lib))
-			lib = [ lib ];
-		
-		for(var i=0; i<lib.length; i++)
-		{
-			chartFactory.registerGlobalLib(lib[i]);
-		}
-	};
 	
 	chartFactory.convertPluginRendererLib = function(chart, lib)
 	{
@@ -7993,37 +8039,6 @@
 			return renderer.depend;
 		}
 	};
-	
-	/**
-	 * 注册全局依赖库。
-	 * 如果已存在同名称、且相同或较新版本号的库，新注册将被忽略。
-	 * 
-	 * @param lib
-	 */
-	chartFactory.registerGlobalLib = function(lib)
-	{
-		if(!lib)
-			return false;
-		
-		var libs = chartFactory.GLOBAL_LIBS;
-		
-		for(var i=0; i<libs.length; i++)
-		{
-			var name = chartFactory.resolveSameLibName(libs[i].name, lib.name);
-			
-			if(name && chartFactory.compareLibVersion(name, libs[i].version, lib.version) >= 0)
-			{
-				return false;
-			}
-		}
-		
-		libs.push(lib);
-		
-		return true;
-	};
-	
-	//全局库，元素结构同chartFactory.loadLib的库结构
-	chartFactory.GLOBAL_LIBS = [];
 	
 	//以http://或者https://开头的正则表达式
 	chartFactory.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
