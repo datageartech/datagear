@@ -648,6 +648,9 @@ label.align-tip{
 	height: 6rem;
 	margin-bottom: 0.5rem;
 }
+.plugin-info.block .plugin-author{
+	min-height: 1.5em;
+}
 
 .page-manager-dtbsSource .p-tree.dtbsSource-tree .p-tree-wrapper,
 .page-manager-dtbsSource .p-tree.dtbsSource-tree .p-tree-wrapper .p-tree-container{
