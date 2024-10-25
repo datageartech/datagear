@@ -68,6 +68,7 @@
 				</template>
 			</p-column>
 			<p-column field="version" header="<@spring.message code='version' />" class="col-version"></p-column>
+			<p-column field="platformVersion" header="<@spring.message code='platformVersionRequirement' />" class="col-version"></p-column>
 			<p-column field="author" header="<@spring.message code='author' />" class="col-name"></p-column>
 			<!-- 不重要信息，在查看操作里显示即可
 			<p-column field="issueDate" header="<@spring.message code='issueDate' />" class="col-datetime"></p-column>

@@ -85,6 +85,7 @@ public class JsonChartPluginPropertiesResolver
 	public static final String JSON_PROPERTY_CATEGORY_ORDERS = ChartPlugin.PROPERTY_CATEGORY_ORDERS;
 	public static final String JSON_PROPERTY_AUTHOR = ChartPlugin.PROPERTY_AUTHOR;
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
+	public static final String JSON_PROPERTY_PLATFORM_VERSION = ChartPlugin.PROPERTY_PLATFORM_VERSION;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 
 	/**
@@ -131,6 +132,7 @@ public class JsonChartPluginPropertiesResolver
 
 		chartPlugin.setAuthor(convertToString(properties.get(JSON_PROPERTY_AUTHOR)));
 		chartPlugin.setIssueDate(convertToString(properties.get(JSON_PROPERTY_ISSUE_DATE)));
+		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
 	}
 
 	/**

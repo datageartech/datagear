@@ -69,6 +69,8 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private String issueDate = "";
 
+	private String platformVersion = "";
+
 	public AbstractChartPlugin()
 	{
 	}
@@ -295,5 +297,16 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	public void setIssueDate(String issueDate)
 	{
 		this.issueDate = issueDate;
+	}
+
+	@Override
+	public String getPlatformVersion()
+	{
+		return platformVersion;
+	}
+
+	public void setPlatformVersion(String platformVersion)
+	{
+		this.platformVersion = platformVersion;
 	}
 }

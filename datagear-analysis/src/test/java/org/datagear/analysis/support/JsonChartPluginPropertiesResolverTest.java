@@ -339,6 +339,19 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
+	public void resolveChartPluginPropertiesTest_platformVersion() throws IOException
+	{
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-platformVersion.json");
+
+		TestChartPlugin chartPlugin = new TestChartPlugin();
+		jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+				IOUtil.CHARSET_UTF_8);
+
+		assertEquals("5.2.0", chartPlugin.getPlatformVersion());
+	}
+
+	@Test
 	public void resolveChartPluginPropertiesTest_dataSetRange() throws IOException
 	{
 		{

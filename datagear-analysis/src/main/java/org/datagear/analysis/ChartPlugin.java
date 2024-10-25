@@ -43,6 +43,7 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_CATEGORY_ORDERS = "categoryOrders";
 	String PROPERTY_AUTHOR = "author";
 	String PROPERTY_ISSUE_DATE = "issueDate";
+	String PROPERTY_PLATFORM_VERSION = "platformVersion";
 
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";
@@ -199,4 +200,23 @@ public interface ChartPlugin extends Identifiable, Labeled
 	 * @return
 	 */
 	String getIssueDate();
+
+	/**
+	 * 获取支持的平台版本。
+	 * <p>
+	 * 比如：
+	 * </p>
+	 * <p>
+	 * 5.0.0+ 表示需要5.0.0及以上版本；
+	 * </p>
+	 * <p>
+	 * 5.0.0- 表示需要5.0.0及以下版本
+	 * </p>
+	 * <p>
+	 * 返回{@code null}或空字符串表示没有限制。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	String getPlatformVersion();
 }

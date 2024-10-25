@@ -63,6 +63,17 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}platformVersion" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chartPlugin.platformVersion.desc' />">
+					<@spring.message code='platformVersionRequirement' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}platformVersion" v-model="fm.platformVersion" type="text" class="input w-full"
+		        		name="platformVersion" maxlength="50">
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}author" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='author' />
 				</label>
