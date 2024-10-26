@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
-import org.datagear.connection.DriverEntityManagerException;
 import org.datagear.connection.DriverLibraryInfo;
-import org.datagear.connection.XmlDriverEntityManager;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
@@ -193,75 +190,6 @@ public class DriverEntityController extends AbstractController
 		toFormResponseData(request, entity);
 
 		return optSuccessDataResponseEntity(request, entity);
-	}
-
-	@RequestMapping("/import")
-	public String importDriverEntity(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model)
-	{
-		model.addAttribute("importId", IDUtil.uuid());
-
-		return "/driverEntity/driverEntity_import";
-	}
-
-	@RequestMapping(value = "/uploadImportFile", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public List<DriverEntity> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("importId") String importId, @RequestParam("file") MultipartFile multipartFile)
-			throws Exception
-	{
-		File directory = getTempImportDirectory(importId, true);
-
-		FileUtil.clearDirectory(directory);
-
-		File importFile = FileUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
-
-		writeMultipartFile(multipartFile, importFile);
-
-		ZipInputStream importFileIn = IOUtil.getZipInputStream(importFile);
-
-		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
-
-		try
-		{
-			driverEntityManager.init();
-
-			return driverEntityManager.readDriverEntitiesFromZip(importFileIn);
-		}
-		catch (DriverEntityManagerException e)
-		{
-			throw new IllegalImportDriverEntityFileFormatException(e);
-		}
-		finally
-		{
-			IOUtil.close(importFileIn);
-			driverEntityManager.releaseAll();
-		}
-	}
-
-	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody DriverEntitySaveImportForm form)
-			throws Exception
-	{
-		String importId = form.getImportId();
-		String[] driverEntityIds = form.getDriverEntityIds();
-
-		if (isEmpty(importId) || isNull(driverEntityIds))
-			throw new IllegalInputException();
-
-		File directory = getTempImportDirectory(importId, false);
-		File importFile = FileUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
-
-		if (!importFile.exists())
-			throw new IllegalInputException("import file for [" + importId + "] not exists");
-
-		ZipInputStream in = IOUtil.getZipInputStream(importFile);
-
-		this.driverEntityManager.importFromZip(in, driverEntityIds);
-
-		return optSuccessResponseEntity(request);
 	}
 
 	@RequestMapping(value = "/export")
