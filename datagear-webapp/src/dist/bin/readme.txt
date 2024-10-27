@@ -13,17 +13,17 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 	startup.bat
 	
 	打开浏览器，输入服务地址：
-	http://[IP地址]:50401
+	http://【IP地址】:50401
 	开始使用。
 
 官网：
 	http://www.datagear.tech
 
-文档：
-	http://www.datagear.tech/documentation
+入门：
+	http://www.datagear.tech/quickstart/
 
-示例：
-	https://my.oschina.net/u/4035217
+文档：
+	http://www.datagear.tech/documentation/
 
 源码：
 	https://gitee.com/datagear/datagear

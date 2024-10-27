@@ -9,11 +9,11 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 官网：
 	http://www.datagear.tech
 
-文档：
-	http://www.datagear.tech/documentation
+入门：
+	http://www.datagear.tech/quickstart/
 
-示例：
-	https://my.oschina.net/u/4035217
+文档：
+	http://www.datagear.tech/documentation/
 
 源码：
 	https://gitee.com/datagear/datagear
