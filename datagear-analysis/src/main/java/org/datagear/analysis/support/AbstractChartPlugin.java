@@ -67,6 +67,8 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private String author = "";
 
+	private String contact = "";
+
 	private String issueDate = "";
 
 	private String platformVersion = "";
@@ -286,6 +288,17 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	public void setAuthor(String author)
 	{
 		this.author = author;
+	}
+
+	@Override
+	public String getContact()
+	{
+		return contact;
+	}
+
+	public void setContact(String contact)
+	{
+		this.contact = contact;
 	}
 
 	@Override

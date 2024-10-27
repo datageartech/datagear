@@ -1867,6 +1867,7 @@
 			vertical: false,
 			//横向对齐方式："start"、"center"、"end"
 			justifyContent: "center",
+			showVersion: false,
 			showAuthor: false
 		},
 		options);
@@ -1885,6 +1886,11 @@
 			name = $.escapeHtml(name);
 			
 			html += "<div class='plugin-name'>"+name+"</div>";
+			
+			if(options.showVersion)
+			{
+				html += "<div class='plugin-version text-color-secondary'><small>"+(chartPlugin.version ? $.escapeHtml(chartPlugin.version) : "")+"</small></div>";
+			}
 			
 			if(options.showAuthor)
 			{

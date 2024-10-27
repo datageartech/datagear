@@ -197,7 +197,7 @@
 		
 		formatChartPlugin: function(chartPlugin)
 		{
-			return $.toChartPluginHtml(chartPlugin, po.contextPath, {vertical:true, showAuthor:true});
+			return $.toChartPluginHtml(chartPlugin, po.contextPath, {vertical:true, showVersion:true, showAuthor:true});
 		},
 		
 		onCategoryMenuItemChange: function(e)

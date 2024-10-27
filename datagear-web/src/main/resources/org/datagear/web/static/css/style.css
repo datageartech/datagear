@@ -648,6 +648,7 @@ label.align-tip{
 	height: 6rem;
 	margin-bottom: 0.5rem;
 }
+.plugin-info.block .plugin-version,
 .plugin-info.block .plugin-author{
 	min-height: 1.5em;
 }

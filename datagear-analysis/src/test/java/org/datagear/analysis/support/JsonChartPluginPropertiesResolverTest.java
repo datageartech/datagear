@@ -352,6 +352,22 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
+	public void resolveChartPluginPropertiesTest_contact() throws IOException
+	{
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-contact.json");
+
+		TestChartPlugin chartPlugin = new TestChartPlugin();
+		jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+				IOUtil.CHARSET_UTF_8);
+
+		assertEquals("contact", chartPlugin.getId());
+		assertEquals("test", chartPlugin.getAuthor());
+		assertEquals("test@dgtest.com", chartPlugin.getContact());
+		assertEquals("2024-09-01", chartPlugin.getIssueDate());
+	}
+
+	@Test
 	public void resolveChartPluginPropertiesTest_dataSetRange() throws IOException
 	{
 		{

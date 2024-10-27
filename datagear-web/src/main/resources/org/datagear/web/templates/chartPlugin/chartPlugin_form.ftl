@@ -84,6 +84,16 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}contact" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='contact' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}contact" v-model="fm.contact" type="text" class="input w-full"
+		        		name="contact" maxlength="100">
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}issueDate" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='issueDate' />
 				</label>

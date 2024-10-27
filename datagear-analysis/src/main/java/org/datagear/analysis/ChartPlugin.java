@@ -42,6 +42,7 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_CATEGORIES = "categories";
 	String PROPERTY_CATEGORY_ORDERS = "categoryOrders";
 	String PROPERTY_AUTHOR = "author";
+	String PROPERTY_CONTACT = "contact";
 	String PROPERTY_ISSUE_DATE = "issueDate";
 	String PROPERTY_PLATFORM_VERSION = "platformVersion";
 
@@ -190,6 +191,16 @@ public interface ChartPlugin extends Identifiable, Labeled
 	 * @return
 	 */
 	String getAuthor();
+
+	/**
+	 * 获取作者联系方式。
+	 * <p>
+	 * 返回{@code null}或空字符串表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	String getContact();
 
 	/**
 	 * 获取发布日期。
