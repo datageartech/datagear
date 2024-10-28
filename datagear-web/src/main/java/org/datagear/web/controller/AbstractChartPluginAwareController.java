@@ -17,15 +17,24 @@
 
 package org.datagear.web.controller;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.Category;
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttribute;
+import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetResult;
@@ -35,8 +44,11 @@ import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categoriz
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
+import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.management.domain.DataSetBindVO;
 import org.datagear.management.domain.HtmlChartPluginVo;
+import org.datagear.util.IOUtil;
 import org.datagear.util.KeywordMatcher;
 import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
@@ -44,6 +56,8 @@ import org.datagear.util.i18n.Label;
 import org.datagear.util.i18n.LabelUtil;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.request.WebRequest;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -53,7 +67,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class AbstractChartPluginAwareController extends AbstractDataAnalysisController
+public class AbstractChartPluginAwareController extends AbstractDataAnalysisController implements ServletContextAware
 {
 	@Autowired
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
@@ -61,6 +75,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	private ChartPluginCategorizationResolver chartPluginCategorizationResolver = new ChartPluginCategorizationResolver();
 
 	private KeywordMatcher keywordMatcher = new KeywordMatcher();
+
+	private ServletContext servletContext;
 
 	public AbstractChartPluginAwareController()
 	{
@@ -98,9 +114,67 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		this.keywordMatcher = keywordMatcher;
 	}
 
+	public ServletContext getServletContext()
+	{
+		return servletContext;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext)
+	{
+		this.servletContext = servletContext;
+	}
+
 	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginView> chartPluginVOs)
 	{
 		return this.chartPluginCategorizationResolver.resolve(chartPluginVOs);
+	}
+
+	protected void writeChartPluginResource(HttpServletRequest request, HttpServletResponse response,
+			WebRequest webRequest, ChartPlugin chartPlugin, ChartPluginResource resource) throws Exception
+	{
+		if (resource == null)
+		{
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		long lastModified = resource.getLastModified();
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		setContentTypeByName(request, response, servletContext, resource.getName());
+		setCacheControlNoCache(response);
+
+		InputStream in = null;
+		OutputStream out = response.getOutputStream();
+
+		try
+		{
+			in = resource.getInputStream();
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+	}
+
+	protected Set<HtmlChartPlugin> resolveHtmlChartPlugins(File directory)
+	{
+		Set<HtmlChartPlugin> loaded = Collections.emptySet();
+
+		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
+
+		try
+		{
+			loaded = loader.loadAll(directory);
+		}
+		catch (HtmlChartPluginLoadException e)
+		{
+		}
+
+		return loaded;
 	}
 
 	/**

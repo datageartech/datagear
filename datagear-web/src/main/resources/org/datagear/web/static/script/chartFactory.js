@@ -3878,12 +3878,15 @@
 	 */
 	chartBase.pluginResourceURL = function(name)
 	{
-		if(!this._isRenderContextInited())
-			throw new Error("chart is illegal state for pluginResourceURL(name)");
-		
 		name = (name || "");
 		
-		var url = "/chartPlugin/resource/"+encodeURIComponent(this.plugin.id)+"/"+name;
+		var webContext = this._renderContextAttrWebContext();
+		
+		if(!webContext)
+			throw new Error("chart is illegal state for pluginResourceURL(name)");
+		
+		var urlPrefix = webContext.attributes.pluginResUrlPrefix;
+		var url = urlPrefix+"/"+encodeURIComponent(this.plugin.id)+"/"+name;
 		url = this.contextURL(url);
 		
 		return url;

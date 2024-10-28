@@ -1083,6 +1083,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		addLoadChartValue(request, webContext, resolveLoadChartPath(request));
 		addHeartBeatValue(request, webContext, resolveHeartbeatPath(request));
 		addUnloadValue(request, webContext, resolveUnloadPath(request));
+		addPluginResUrlPrefixValue(request, webContext, resolvePluginResPathPrefix(request));
 
 		return webContext;
 	}

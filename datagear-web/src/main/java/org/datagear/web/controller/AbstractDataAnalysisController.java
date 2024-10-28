@@ -146,6 +146,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板展示页{@linkplain WebContext}属性名：销毁URL名 */
 	public static final String DASHBOARD_UNLOAD_URL_NAME = "unloadURL";
 
+	/** 看板展示页{@linkplain WebContext}属性名：插件资源URL前缀 */
+	public static final String DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME = "pluginResUrlPrefix";
+
 	/** 看板展示页{@linkplain WebContext}属性名：会话名 */
 	public static final String DASHBOARD_SESSION_NAME_NAME = "sessionName";
 
@@ -603,6 +606,23 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	{
 		unloadURL = addSessionIdParamIfNotExplicitDisable(unloadURL, request);
 		webContext.addAttribute(DASHBOARD_UNLOAD_URL_NAME, unloadURL);
+	}
+
+	protected void addPluginResUrlPrefixValue(HttpServletRequest request, WebContext webContext,
+			String pluginResUrlPrefix)
+	{
+		webContext.addAttribute(DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME, pluginResUrlPrefix);
+	}
+
+	/**
+	 * 解析插件资源路径前缀。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected String resolvePluginResPathPrefix(HttpServletRequest request)
+	{
+		return "/vres/plugin/resource";
 	}
 
 	/**

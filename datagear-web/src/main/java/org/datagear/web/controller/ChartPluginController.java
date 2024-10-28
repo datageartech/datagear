@@ -18,11 +18,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,7 +27,6 @@ import java.util.Set;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,9 +36,6 @@ import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categoriz
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
-import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
@@ -60,7 +52,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,17 +63,10 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/chartPlugin")
-public class ChartPluginController extends AbstractChartPluginAwareController implements ServletContextAware
+public class ChartPluginController extends AbstractChartPluginAwareController
 {
 	@Autowired
 	private File tempDirectory;
-
-	@Autowired
-	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
-
-	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
-
-	private ServletContext servletContext;
 
 	public ChartPluginController()
 	{
@@ -97,39 +81,6 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
-	}
-
-	public HtmlTplDashboardWidgetEntityService getHtmlTplDashboardWidgetEntityService()
-	{
-		return htmlTplDashboardWidgetEntityService;
-	}
-
-	public void setHtmlTplDashboardWidgetEntityService(
-			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
-	{
-		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
-	}
-
-	public HtmlChartPluginScriptObjectWriter getHtmlChartPluginScriptObjectWriter()
-	{
-		return htmlChartPluginScriptObjectWriter;
-	}
-
-	public void setHtmlChartPluginScriptObjectWriter(
-			HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter)
-	{
-		this.htmlChartPluginScriptObjectWriter = htmlChartPluginScriptObjectWriter;
-	}
-
-	public ServletContext getServletContext()
-	{
-		return servletContext;
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext)
-	{
-		this.servletContext = servletContext;
 	}
 
 	@RequestMapping("/upload")
@@ -309,22 +260,22 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 	@RequestMapping("/icon/{pluginId:.+}")
 	public void chartPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("pluginId") String pluginId,
-			@RequestParam(value="tmpPluginFileName", required = false) String tmpPluginFileName) throws Exception
+			@RequestParam(value = "tmpPluginFileName", required = false) String tmpPluginFileName) throws Exception
 	{
 		ChartPlugin chartPlugin = null;
-		
-		if(isEmpty(tmpPluginFileName))
+
+		if (isEmpty(tmpPluginFileName))
 			chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
 		else
 		{
 			File tmpPluginFile = FileUtil.getFile(this.tempDirectory, tmpPluginFileName, false);
-			
-			if(tmpPluginFile.exists())
+
+			if (tmpPluginFile.exists())
 			{
 				Set<HtmlChartPlugin> plugins = resolveHtmlChartPlugins(tmpPluginFile);
-				for(HtmlChartPlugin p : plugins)
+				for (HtmlChartPlugin p : plugins)
 				{
-					if(pluginId.equals(p.getId()))
+					if (pluginId.equals(p.getId()))
 					{
 						chartPlugin = p;
 						break;
@@ -333,152 +284,18 @@ public class ChartPluginController extends AbstractChartPluginAwareController im
 			}
 		}
 
-		if(chartPlugin == null)
+		if (chartPlugin == null)
 		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		
+
 		String themeName = resolveChartPluginIconThemeName(request);
 		String iconResName = chartPlugin.getIconResourceName(themeName);
-		ChartPluginResource iconResource = (StringUtil.isEmpty(iconResName) ? null :  chartPlugin.getResource(iconResName));
-		
+		ChartPluginResource iconResource = (StringUtil.isEmpty(iconResName) ? null
+				: chartPlugin.getResource(iconResName));
+
 		writeChartPluginResource(request, response, webRequest, chartPlugin, iconResource);
-	}
-
-	@RequestMapping("/resource/{pluginId:.+}/**")
-	public void chartPluginResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			@PathVariable("pluginId") String pluginId) throws Exception
-	{
-		ChartPlugin chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
-		
-		if(chartPlugin == null)
-		{
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-		
-		String resName = resolvePathAfter(request, "/resource/" + pluginId + "/");
-		// 处理可能的中文资源名
-		resName = WebUtils.decodeURL(resName);
-		
-		ChartPluginResource resource = chartPlugin.getResource(resName);
-		
-		writeChartPluginResource(request, response, webRequest, chartPlugin, resource);
-	}
-
-	@RequestMapping("/chartPluginManager.js")
-	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
-			throws Exception
-	{
-		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
-		List<HtmlChartPlugin> htmlChartPlugins = new ArrayList<>(plugins.size());
-		long lastModified = -1;
-
-		if (plugins != null)
-		{
-			for (HtmlChartPlugin plugin : plugins)
-			{
-				htmlChartPlugins.add(plugin);
-				lastModified = Math.max(lastModified, plugin.getLastModified());
-			}
-		}
-
-		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
-				.getHtmlTplDashboardWidgetRenderer();
-
-		HtmlChartPlugin htmlChartPluginForGetWidgetException = renderer.getHtmlChartPluginForGetWidgetException();
-		htmlChartPlugins.add(htmlChartPluginForGetWidgetException);
-		lastModified = Math.max(lastModified, htmlChartPluginForGetWidgetException.getLastModified());
-
-		if (webRequest.checkNotModified(lastModified))
-			return;
-
-		Locale locale = WebUtils.getLocale(request);
-		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
-		setCacheControlNoCache(response);
-
-		PrintWriter out = response.getWriter();
-
-		out.println("(function(global)");
-		out.println("{");
-
-		out.println("var chartFactory = (global.chartFactory || (global.chartFactory = {}));");
-		out.println(
-				"var chartPluginManager = (chartFactory.chartPluginManager || (chartFactory.chartPluginManager = {}));");
-		out.println("chartPluginManager.plugins = (chartPluginManager.plugins || {});");
-
-		// @deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除
-		out.println();
-		out.println("global.chartPluginManager = chartPluginManager;");
-		
-		out.println();
-		out.println("chartPluginManager.get = function(id){ return this.plugins[id]; };");
-		out.println();
-
-		for (int i = 0, len = htmlChartPlugins.size(); i < len; i++)
-		{
-			HtmlChartPlugin plugin = htmlChartPlugins.get(i);
-			String pluginVar = "plugin" + i;
-
-			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar, locale);
-
-			// @deprecated
-			// 兼容4.0.0版本的"+HtmlChartPlugin.PROPERTY_RENDERER_OLD+"属性名，未来版本会移除
-			out.println(pluginVar + "."+ HtmlChartPlugin.PROPERTY_RENDERER_OLD +" = " + pluginVar + "."+ HtmlChartPlugin.PROPERTY_RENDERER +";");
-			
-			out.println("chartPluginManager.plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
-					+ pluginVar + ";");
-		}
-
-		out.println("})(this);");
-	}
-	
-	protected void writeChartPluginResource(HttpServletRequest request, HttpServletResponse response,
-			WebRequest webRequest, ChartPlugin chartPlugin, ChartPluginResource resource) throws Exception
-	{
-		if (resource == null)
-		{
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-
-		long lastModified = resource.getLastModified();
-		if (webRequest.checkNotModified(lastModified))
-			return;
-
-		setContentTypeByName(request, response, servletContext, resource.getName());
-		setCacheControlNoCache(response);
-
-		InputStream in = null;
-		OutputStream out = response.getOutputStream();
-
-		try
-		{
-			in = resource.getInputStream();
-			IOUtil.write(in, out);
-		}
-		finally
-		{
-			IOUtil.close(in);
-		}
-	}
-
-	protected Set<HtmlChartPlugin> resolveHtmlChartPlugins(File directory)
-	{
-		Set<HtmlChartPlugin> loaded = Collections.emptySet();
-
-		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
-		
-		try
-		{
-			loaded = loader.loadAll(directory);
-		}
-		catch (HtmlChartPluginLoadException e)
-		{
-		}
-		
-		return loaded;
 	}
 
 	public static class saveUploadForm implements ControllerForm

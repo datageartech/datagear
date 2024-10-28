@@ -183,7 +183,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
 						scriptPrefix + "/chartSetting.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
-				contextPath + "/chartPlugin/chartPluginManager.js?v=" + Global.VERSION));
+				contextPath + "/vres/plugin/chartPluginManager.js?v=" + Global.VERSION));
 
 		if (isModelEdit(mode))
 		{

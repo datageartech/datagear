@@ -359,10 +359,7 @@ public class SecurityConfigSupport
 	
 	protected String[] showChartAndDashboardStaticUrlPattern()
 	{
-		return new String[] {
-				// 图表插件
-				"/chartPlugin/chartPluginManager.js", "/chartPlugin/icon/*", "/chartPlugin/resource/**"
-		};
+		return new String[] { "/vres/**" };
 	}
 
 	protected AuthorizationManager<RequestAuthorizationContext> showChartAndDashboardAuthorizationManager()
@@ -531,7 +528,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess chartPluginModuleAccess()
 	{
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/chartPlugin/view", "/chartPlugin/select", "/chartPlugin/selectData");
+				"/chartPlugin/view", "/chartPlugin/select", "/chartPlugin/selectData", "/chartPlugin/icon/**");
 
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/chartPlugin/**");
 
