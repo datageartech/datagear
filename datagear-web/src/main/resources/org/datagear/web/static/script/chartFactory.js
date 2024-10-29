@@ -48,6 +48,7 @@
  * 此图表工厂要求图表插件的图表渲染器（chartBase.plugin.renderer）格式为：
  * {
  *   //可选，渲染器依赖库，具体结构参考chartFactory.loadLib()函数说明
+ *   //注意库源URL规范不同，具体参考chartFactory.trimPluginRendererLibSourceUrl()函数说明
  *   depend: { ... }、[ {...}, ... ]、function(){ return { ... }、[ {...}, ... ]; }
  *   //可选，渲染图表函数是否是异步函数，默认为false
  *   asyncRender: true、false、function(chart){ ...; return true 或者 false; }
@@ -2570,7 +2571,7 @@
 	
 	/**
 	 * 加载指定名称的地图资源（通常是*.json、*.svg）。
-	 * 注意：如果地图类图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate为true，
+	 * 注意：如果在图表渲染器的render/update函数中调用此函数，应该首先设置其的asyncRender/asyncUpdate为true，
 	 * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
 	 * 
 	 * @param name 地图名称
@@ -4236,6 +4237,21 @@
 		}
 		
 		return chartFactory.toWebContextPathURL(webContext, url);
+	};
+	
+	/**
+	 * 加载库，并在全部加载完成后（无论是否成功）执行回调函数。
+	 * 注意：如果在图表渲染器的render/update函数中调用此函数，应该首先设置其asyncRender/asyncUpdate为true，
+	 * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
+	 * 
+	 * @param lib 库对象、数组，结构参考chartFactory.loadLib()函数说明，注意，其中库源URL应是可以直接加载的
+	 * @param callback 加载完成后回调函数（无论是否成功都将执行），格式参考chartFactory.loadLib()函数说明
+	 * @since 5.2.0
+	 */
+	chartBase.loadLib = function(lib, callback)
+	{
+		var contextCharts = this._contextCharts();
+		chartFactory.loadLib(lib,  callback, contextCharts);
 	};
 	
 	
@@ -7281,7 +7297,7 @@
 	};
 	
 	/**
-	 * 加载库，并在加载完成后（无论是否成功）执行回调函数。
+	 * 加载库，并在全部加载完成后（无论是否成功）执行回调函数。
 	 * 库对象结构为：
 	 * {
 	 *   //库名称，应尽量使用库本身定义的全局名称
@@ -7309,7 +7325,7 @@
 	 * }
 	 * 
 	 * @param lib 库对象、数组
-	 * @param callback 加载完成后回调函数（无论是否成功都将执行）
+	 * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
 	 * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
 	 */
 	chartFactory.loadLib = function(lib, callback, contextCharts)
