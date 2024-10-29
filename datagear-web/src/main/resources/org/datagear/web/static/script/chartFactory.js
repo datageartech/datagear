@@ -7281,7 +7281,7 @@
 	};
 	
 	/**
-	 * 加载库，并在加载后执行回调函数。
+	 * 加载库，并在加载完成后（无论是否成功）执行回调函数。
 	 * 库对象结构为：
 	 * {
 	 *   //库名称，应尽量使用库本身定义的全局名称
@@ -7309,7 +7309,7 @@
 	 * }
 	 * 
 	 * @param lib 库对象、数组
-	 * @param callback 加载完成回调函数
+	 * @param callback 加载完成后回调函数（无论是否成功都将执行）
 	 * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
 	 */
 	chartFactory.loadLib = function(lib, callback, contextCharts)
@@ -7502,25 +7502,42 @@
 	{
 		var ele = document.createElement("script");
 		
-        ele.src = source.url;
-        ele.type = "text/javascript";
-        ele.onload = function(){ deferred.resolve(); };
-        ele.onerror = function(){ deferred.resolve(); };
-        
-        document.head.appendChild(ele);
+		ele.src = source.url;
+		ele.type = "text/javascript";
+		ele.onload = function(){ deferred.resolve(); };
+		ele.onerror = function(){ deferred.resolve(); };
+		
+		chartFactory.addLibSourceEleToDoc(ele);
 	};
 	
 	chartFactory.loadSingleCssLibSource = function(source, deferred)
 	{
 		var ele = document.createElement("link");
 		
-        ele.href = source.url;
-        ele.type = "text/css";
-        ele.rel = "stylesheet";
-        ele.onload = function(){ deferred.resolve(); };
-        ele.onerror = function(){ deferred.resolve(); };
-        
-        document.head.appendChild(ele);
+		ele.href = source.url;
+		ele.type = "text/css";
+		ele.rel = "stylesheet";
+		ele.onload = function(){ deferred.resolve(); };
+		ele.onerror = function(){ deferred.resolve(); };
+		
+		chartFactory.addLibSourceEleToDoc(ele);
+	};
+	
+	chartFactory.addLibSourceEleToDoc = function(ele)
+	{
+		var head = document.head;
+		
+		if(!head)
+			head = $("head").get(0);
+		
+		if(head && head.appendChild)
+		{
+			head.appendChild(ele);
+		}
+		else
+		{
+			$(document.body).prepend(ele);
+		}
 	};
 	
 	chartFactory.resolveLibSourceType = function(url)
