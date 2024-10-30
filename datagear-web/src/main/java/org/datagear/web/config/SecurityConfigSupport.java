@@ -319,9 +319,6 @@ public class SecurityConfigSupport
 
 	protected ModuleAccess showChartAndDashboardModuleAccess()
 	{
-		// 展示图表和看板
-		// 注意：无论系统是否允许匿名用户访问，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
-
 		AuthorizationManager<RequestAuthorizationContext> authorizationManager = showChartAndDashboardAuthorizationManager();
 		
 		UrlsAccess showStatic = new UrlsAccess(authorizationManager, showChartAndDashboardStaticUrlPattern());
@@ -362,6 +359,14 @@ public class SecurityConfigSupport
 		return new String[] { "/vres/**" };
 	}
 
+	/**
+	 * 获取图表展示和看板展示功能权限控制。
+	 * <p>
+	 * 注意：除非{@linkplain ApplicationProperties#isDisableShowAnonymous()}为{@code true}，它们都应允许匿名用户访问，用于支持外部系统iframe嵌套场景
+	 * </p>
+	 * 
+	 * @return
+	 */
 	protected AuthorizationManager<RequestAuthorizationContext> showChartAndDashboardAuthorizationManager()
 	{
 		ApplicationProperties properties = getCoreConfig().getApplicationProperties();
@@ -527,12 +532,16 @@ public class SecurityConfigSupport
 
 	protected ModuleAccess chartPluginModuleAccess()
 	{
-		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(),
-				"/chartPlugin/view", "/chartPlugin/select", "/chartPlugin/selectData", "/chartPlugin/icon/**");
+		AuthorizationManager<RequestAuthorizationContext> dataAnalystAuthManager = dataAnalystAuthorizationManager();
+
+		UrlsAccess icon = new UrlsAccess(dataAnalystAuthManager, "/chartPlugin/icon/**");
+
+		UrlsAccess read = new UrlsAccess(dataAnalystAuthManager,
+				"/chartPlugin/view", "/chartPlugin/select", "/chartPlugin/selectData");
 
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/chartPlugin/**");
 
-		return new ModuleAccess(read, edit);
+		return new ModuleAccess(icon, read, edit);
 	}
 
 	/**
