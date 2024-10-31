@@ -40,11 +40,13 @@ public class RefPermissionDeniedException extends PermissionDeniedException
 	public RefPermissionDeniedException(String refName)
 	{
 		super("Permission denied for : " + refName);
+		this.refName = refName;
 	}
 
 	public RefPermissionDeniedException(String refName, Throwable cause)
 	{
 		super("Permission denied for : " + refName, cause);
+		this.refName = refName;
 	}
 
 	public String getRefName()
