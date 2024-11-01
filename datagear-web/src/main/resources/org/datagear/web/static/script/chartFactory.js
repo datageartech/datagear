@@ -4245,11 +4245,13 @@
 	 * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
 	 * 
 	 * @param lib 库对象、数组，结构参考chartFactory.loadLib()函数说明，注意，其中库源URL应是可以直接加载的
-	 * @param callback 加载完成后回调函数（无论是否成功都将执行），格式参考chartFactory.loadLib()函数说明
+	 * @param callback 可选，加载完成后回调函数（无论是否成功都将执行），格式参考chartFactory.loadLib()函数说明
 	 * @since 5.2.0
 	 */
 	chartBase.loadLib = function(lib, callback)
 	{
+		callback = (callback ? callback : function(){});
+		
 		var contextCharts = this._contextCharts();
 		chartFactory.loadLib(lib,  callback, contextCharts);
 	};
