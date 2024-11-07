@@ -1606,7 +1606,7 @@
 		
 		for(var group in preUpdateGroups)
 		{
-			this._doHandleChartsAjax(url, preUpdateGroups[group]);
+			this._doHandleChartsAjax(url, preUpdateGroups[group], group);
 		}
 		
 		var dashboard = this;
@@ -1623,7 +1623,7 @@
 		return (dataSetBinds.length == 0);
 	};
 	
-	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts)
+	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts, group)
 	{
 		if(!preUpdateCharts || preUpdateCharts.length == 0)
 			return;
@@ -1640,10 +1640,14 @@
 			type : "POST",
 			url : url,
 			data : JSON.stringify(data),
-			success : function(dashboardResult)
+			success : function(dashboardResult, textStatus, jqXHR)
 			{
-				var chartResults = (dashboardResult.chartResults || {});
-				var chartResultErrorMessages = (dashboardResult.chartResultErrorMessages || {});
+				dashboardResult = (dashboardResult ? dashboardResult : {});
+				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
+				dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
+				
+				var chartResults = dashboardResult.chartResults;
+				var chartErrors = dashboardResult.chartErrors;
 				
 				// < @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
 				if(chartResults)
@@ -1671,13 +1675,13 @@
 				var updateTime = chartFactory.currentDateMs();
 				
 				dashboard._updateCharts(chartResults);
-				dashboard._handleChartResultErrors(chartResultErrorMessages);
+				dashboard._handleChartResultErrors(chartErrors);
 				
 				dashboard._setUpdateTime(preUpdateCharts, updateTime);				
 				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
 			},
-			error : function()
+			error : function(jqXHR, textStatus, errorThrown)
 			{
 				var updateTime = chartFactory.currentDateMs();
 				
@@ -1685,6 +1689,10 @@
 				dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
 				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
+			},
+			complete: function(jqXHR, textStatus)
+			{
+				
 			}
 		});
 	};
@@ -1792,14 +1800,14 @@
 	/**
 	 * 处理看板图表结果错误。
 	 * 
-	 * @param chartResultErrorMessages [图表ID-图表结果错误]映射表
+	 * @param chartErrors [图表ID-图表结果错误]映射表
 	 */
-	dashboardBase._handleChartResultErrors = function(chartResultErrorMessages)
+	dashboardBase._handleChartResultErrors = function(chartErrors)
 	{
-		if(!chartResultErrorMessages)
+		if(!chartErrors)
 			return;
 		
-		for(var chartId in chartResultErrorMessages)
+		for(var chartId in chartErrors)
 		{
 			var chart = this.chartOf(chartId);
 			
@@ -1810,8 +1818,7 @@
 			{
 				//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
 				chart.status(chartStatusConst.UPDATE_ERROR);
-				
-				this._handleChartResultError(chart, chartResultErrorMessages[chartId]);
+				this._handleChartResultError(chart, chartErrors[chartId]);
 			}
 			catch(e)
 			{
@@ -1824,20 +1831,20 @@
 	 * 处理看板图表结果错误。
 	 * 
 	 * @param chart 图表对象
-	 * @param chartResultErrorMessage 图表结果错误信息对象
+	 * @param errorMessage 图表结果错误信息对象
 	 */
-	dashboardBase._handleChartResultError = function(chart, chartResultErrorMessage)
+	dashboardBase._handleChartResultError = function(chart, errorMessage)
 	{
 		var chartListener = chart.listener();
 		
 		if(chartListener && chartListener.updateError)
 		{
-			chartListener.updateError(chart, chartResultErrorMessage);
+			chartListener.updateError(chart, errorMessage);
 		}
 		else
 		{
-			var errorType = (chartResultErrorMessage ? chartResultErrorMessage.type : "Error");
-			var errorMessage = (chartResultErrorMessage ? chartResultErrorMessage.message : "Chart result error");
+			var errorType = (errorMessage ? errorMessage.type : "Error");
+			var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
 			
 			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
 		}
@@ -1995,7 +2002,8 @@
 				var dataSetBinds = chart.dataSetBinds();
 				for(var j=0; j<dataSetBinds.length; j++)
 				{
-					var dataSetQuery = (dataSetBinds[j].query || {});
+					//这里需要深度拷贝，因为后续可能会被修改
+					var dataSetQuery = $.extend(true, {}, dataSetBinds[j].query);
 					chartQuery.dataSetQueries.push(dataSetQuery);
 				}
 				
