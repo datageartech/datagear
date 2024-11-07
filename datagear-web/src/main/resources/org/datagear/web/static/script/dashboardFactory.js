@@ -1606,7 +1606,14 @@
 		
 		for(var group in preUpdateGroups)
 		{
-			this._doHandleChartsAjax(url, preUpdateGroups[group], group);
+			try
+			{
+				this._doHandleChartsAjax(url, preUpdateGroups[group], group);
+			}
+			catch(e)
+			{
+				chartFactory.logException(e);
+			}
 		}
 		
 		var dashboard = this;
@@ -1633,6 +1640,9 @@
 		this._setInUpdateAjax(preUpdateCharts, true);
 		this._startChartRefreshData(preUpdateCharts);
 		
+		//dashboard.listener.onFetch(charts, query);
+		//charts.listener.onFetch(chart, query);
+		
 		var dashboard = this;
 		
 		$.ajax({
@@ -1645,6 +1655,9 @@
 				dashboardResult = (dashboardResult ? dashboardResult : {});
 				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
 				dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
+				
+				//dashboard.listener.fetchComplete(charts, query, xhr, textStatus);
+				//charts.listener.fetchComplete(chart, query, xhr, textStatus);
 				
 				var chartResults = dashboardResult.chartResults;
 				var chartErrors = dashboardResult.chartErrors;
@@ -1675,24 +1688,29 @@
 				var updateTime = chartFactory.currentDateMs();
 				
 				dashboard._updateCharts(chartResults);
-				dashboard._handleChartResultErrors(chartErrors);
+				dashboard._handleChartResultErrors(chartErrors, true);
 				
 				dashboard._setUpdateTime(preUpdateCharts, updateTime);				
 				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
+				
+				//dashboard.listener.fetchSuccess(charts, query, dashboardResult, textStatus, xhr);
 			},
 			error : function(jqXHR, textStatus, errorThrown)
 			{
 				var updateTime = chartFactory.currentDateMs();
 				
+				//dashboard.listener.fetchComplete(charts, query, xhr, textStatus);
+				//charts.listener.fetchComplete(chart, query, xhr, textStatus);
+				
+				dashboard._handleChartsAjaxError(preUpdateCharts, jqXHR, textStatus, errorThrown);
+				
 				dashboard._setUpdateTime(preUpdateCharts, updateTime);
 				dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
 				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
 				dashboard._setInUpdateAjax(preUpdateCharts, false);
-			},
-			complete: function(jqXHR, textStatus)
-			{
 				
+				//dashboard.listener.fetchError(charts, query, xhr, textStatus, errorThrown);
 			}
 		});
 	};
@@ -1797,12 +1815,29 @@
 		}
 	};
 	
+	dashboardBase._handleChartsAjaxError = function(charts, jqXHR, textStatus, errorThrown)
+	{
+		//结构参考dashboardBase._handleChartResultError()函数
+		var errorMessage = { message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
+		var chartErrors = {};
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chartId = charts[i].id;
+			chartErrors[chartId] = errorMessage;
+		}
+		
+		this._handleChartResultErrors(chartErrors, false);
+		chartFactory.logException("Fetch charts data error : " + errorMessage.message);
+	};
+	
 	/**
 	 * 处理看板图表结果错误。
 	 * 
 	 * @param chartErrors [图表ID-图表结果错误]映射表
+	 * @param logIfNone 如果没有chart.listener().updateError，是否输出默认日志
 	 */
-	dashboardBase._handleChartResultErrors = function(chartErrors)
+	dashboardBase._handleChartResultErrors = function(chartErrors, logIfNone)
 	{
 		if(!chartErrors)
 			return;
@@ -1818,7 +1853,7 @@
 			{
 				//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
 				chart.status(chartStatusConst.UPDATE_ERROR);
-				this._handleChartResultError(chart, chartErrors[chartId]);
+				this._handleChartResultError(chart, chartErrors[chartId], logIfNone);
 			}
 			catch(e)
 			{
@@ -1832,8 +1867,9 @@
 	 * 
 	 * @param chart 图表对象
 	 * @param errorMessage 图表结果错误信息对象
+	 * @param logIfNone 如果没有chart.listener().updateError，是否输出默认日志
 	 */
-	dashboardBase._handleChartResultError = function(chart, errorMessage)
+	dashboardBase._handleChartResultError = function(chart, errorMessage, logIfNone)
 	{
 		var chartListener = chart.listener();
 		
@@ -1843,10 +1879,12 @@
 		}
 		else
 		{
-			var errorType = (errorMessage ? errorMessage.type : "Error");
-			var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
-			
-			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
+			if(logIfNone)
+			{
+				var errorType = (errorMessage ? errorMessage.type : "Error");
+				var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
+				chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
+			}
 		}
 	};
 	
