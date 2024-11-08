@@ -1630,91 +1630,6 @@
 		return (dataSetBinds.length == 0);
 	};
 	
-	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts, group)
-	{
-		if(!preUpdateCharts || preUpdateCharts.length == 0)
-			return;
-		
-		var data = this._buildUpdateDashboardAjaxData(preUpdateCharts);
-		
-		this._setInUpdateAjax(preUpdateCharts, true);
-		this._startChartRefreshData(preUpdateCharts);
-		
-		//dashboard.listener.onFetch(charts, query);
-		//charts.listener.onFetch(chart, query);
-		
-		var dashboard = this;
-		
-		$.ajax({
-			contentType : "application/json",
-			type : "POST",
-			url : url,
-			data : JSON.stringify(data),
-			success : function(dashboardResult, textStatus, jqXHR)
-			{
-				dashboardResult = (dashboardResult ? dashboardResult : {});
-				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
-				dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
-				
-				//dashboard.listener.fetchComplete(charts, query, xhr, textStatus);
-				//charts.listener.fetchComplete(chart, query, xhr, textStatus);
-				
-				var chartResults = dashboardResult.chartResults;
-				var chartErrors = dashboardResult.chartErrors;
-				
-				// < @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
-				if(chartResults)
-				{
-					for(var chartId in chartResults)
-					{
-						var chartResult = (chartResults[chartId] || {});
-						var dataSetResults = (chartResult ? chartResult.dataSetResults : []);
-						
-						for(var i=0; i<dataSetResults.length; i++)
-						{
-							if(dataSetResults[i] && dataSetResults[i].data != null)
-							{
-								var resultDatas = dataSetResults[i].data;
-								if(resultDatas != null && !$.isArray(resultDatas))
-									resultDatas = [ resultDatas ];
-								
-								dataSetResults[i].datas = resultDatas;
-							}
-						}
-					}
-				}
-				//> @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
-				
-				var updateTime = chartFactory.currentDateMs();
-				
-				dashboard._updateCharts(chartResults);
-				dashboard._handleChartResultErrors(chartErrors, true);
-				
-				dashboard._setUpdateTime(preUpdateCharts, updateTime);				
-				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
-				dashboard._setInUpdateAjax(preUpdateCharts, false);
-				
-				//dashboard.listener.fetchSuccess(charts, query, dashboardResult, textStatus, xhr);
-			},
-			error : function(jqXHR, textStatus, errorThrown)
-			{
-				var updateTime = chartFactory.currentDateMs();
-				
-				//dashboard.listener.fetchComplete(charts, query, xhr, textStatus);
-				//charts.listener.fetchComplete(chart, query, xhr, textStatus);
-				
-				dashboard._handleChartsAjaxError(preUpdateCharts, jqXHR, textStatus, errorThrown);
-				
-				dashboard._setUpdateTime(preUpdateCharts, updateTime);
-				dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
-				dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
-				dashboard._setInUpdateAjax(preUpdateCharts, false);
-				
-				//dashboard.listener.fetchError(charts, query, xhr, textStatus, errorThrown);
-			}
-		});
-	};
-	
 	dashboardBase._doHandleChartsLocal = function(preUpdateCharts)
 	{
 		if(!preUpdateCharts || preUpdateCharts.length == 0)
@@ -1815,32 +1730,161 @@
 		}
 	};
 	
-	dashboardBase._handleChartsAjaxError = function(charts, jqXHR, textStatus, errorThrown)
+	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts, group)
 	{
-		//结构参考dashboardBase._handleChartResultError()函数
-		var errorMessage = { message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
-		var chartErrors = {};
+		if(!preUpdateCharts || preUpdateCharts.length == 0)
+			return;
+		
+		this._setInUpdateAjax(preUpdateCharts, true);
+		this._startChartRefreshData(preUpdateCharts);
+		
+		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
+		var dashboard = this;
+		
+		//这里不允许异常中断
+		chartFactory.executeSilently(function()
+		{
+			dashboard._execListenerOnFetch(preUpdateCharts, dashboardQueryForm);
+		});
+		
+		$.ajax({
+			contentType : "application/json",
+			type : "POST",
+			url : url,
+			data : JSON.stringify(dashboardQueryForm),
+			success : function(dashboardResult)
+			{
+				dashboardResult = (dashboardResult ? dashboardResult : {});
+				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
+				dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
+				
+				var chartResults = dashboardResult.chartResults;
+				
+				// < @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+				for(var chartId in chartResults)
+				{
+					var chartResult = (chartResults[chartId] || {});
+					var dataSetResults = (chartResult ? chartResult.dataSetResults : []);
+					
+					for(var i=0; i<dataSetResults.length; i++)
+					{
+						if(dataSetResults[i] && dataSetResults[i].data != null)
+						{
+							var resultDatas = dataSetResults[i].data;
+							if(resultDatas != null && !$.isArray(resultDatas))
+								resultDatas = [ resultDatas ];
+							
+							dataSetResults[i].datas = resultDatas;
+						}
+					}
+				}
+				//> @deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+				
+				var updateTime = chartFactory.currentDateMs();
+				
+				try
+				{
+					dashboard._handleChartsAjaxSuccess(preUpdateCharts, dashboardResult);
+				}
+				finally
+				{
+					dashboard._setUpdateTime(preUpdateCharts, updateTime);				
+					dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
+					dashboard._setInUpdateAjax(preUpdateCharts, false);
+				}
+			},
+			error : function(jqXHR, textStatus, errorThrown)
+			{
+				var updateTime = chartFactory.currentDateMs();
+				
+				try
+				{
+					dashboard._handleChartsAjaxError(preUpdateCharts, jqXHR, textStatus, errorThrown)
+				}
+				finally
+				{
+					dashboard._setUpdateTime(preUpdateCharts, updateTime);
+					dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
+					dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
+					dashboard._setInUpdateAjax(preUpdateCharts, false);
+				}
+			}
+		});
+	};
+	
+	//执行监听器的onFetch回调函数
+	dashboardBase._execListenerOnFetch = function(charts, dashboardQueryForm)
+	{
+		var dashboardQueryParamName = dashboardFactory.updateDashboardConfig.dashboardQueryParamName;
+		var dashboardQuery = dashboardQueryForm[dashboardQueryParamName];
+		var chartQueries = dashboardQuery.chartQueries;
+		
+		var dashboard = this;
+		var listener = this.listener();
+		
+		if(listener && listener.onFetch)
+		{
+			chartFactory.executeSilently(function()
+			{
+				listener.onFetch(dashboard, charts, dashboardQuery);
+			});
+		}
 		
 		for(var i=0; i<charts.length; i++)
 		{
-			var chartId = charts[i].id;
-			chartErrors[chartId] = errorMessage;
+			var chart = charts[i];
+			var chartListener = chart.listener();
+			
+			if(chartListener && chartListener.onFetch)
+			{
+				var chartId = chart.id;
+				var chartQuery = chartQueries[chartId];
+				
+				chartFactory.executeSilently(function()
+				{
+					chartListener.onFetch(chart, chartQuery);
+				});
+			}
 		}
-		
-		this._handleChartResultErrors(chartErrors, false);
-		chartFactory.logException("Fetch charts data error : " + errorMessage.message);
 	};
 	
-	/**
-	 * 处理看板图表结果错误。
-	 * 
-	 * @param chartErrors [图表ID-图表结果错误]映射表
-	 * @param logIfNone 如果没有chart.listener().updateError，是否输出默认日志
-	 */
-	dashboardBase._handleChartResultErrors = function(chartErrors, logIfNone)
+	dashboardBase._handleChartsAjaxSuccess = function(charts, dashboardResult)
 	{
-		if(!chartErrors)
-			return;
+		var dashboard = this;
+		var listener = this.listener();
+		
+		if(listener && listener.fetchSuccess)
+		{
+			chartFactory.executeSilently(function()
+			{
+				listener.fetchSuccess(dashboard, charts, dashboardResult);
+			});
+		}
+		
+		var chartResults = dashboardResult.chartResults;
+		
+		for(var chartId in chartResults)
+		{
+			var chart = this.chartOf(chartId);
+			
+			if(!chart)
+				continue;
+			
+			chartFactory.executeSilently(function()
+			{
+				var chartResult = chartResults[chartId];
+				var chartListener = chart.listener();
+				
+				if(chartListener && chartListener.fetchSuccess)
+				{
+					chartListener.fetchSuccess(chart, chartResult);
+				}
+				
+				dashboard._updateChart(chart, chartResult);
+			});
+		}
+		
+		var chartErrors = dashboardResult.chartErrors;
 		
 		for(var chartId in chartErrors)
 		{
@@ -1849,33 +1893,91 @@
 			if(!chart)
 				continue;
 			
-			try
+			chartFactory.executeSilently(function()
 			{
-				//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
-				chart.status(chartStatusConst.UPDATE_ERROR);
-				this._handleChartResultError(chart, chartErrors[chartId], logIfNone);
-			}
-			catch(e)
+				dashboard._handleChartAjaxError(chart, chartErrors[chartId], true);
+			});
+		}
+		
+		if(listener && listener.fetchUpdate)
+		{
+			chartFactory.executeSilently(function()
 			{
-				chartFactory.logException(e);
-			}
+				listener.fetchUpdate(dashboard, charts, dashboardResult);
+			});
 		}
 	};
 	
+	dashboardBase._handleChartsAjaxError = function(charts, xhr, textStatus, errorThrown)
+	{
+		//结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+		var errorMessage = { type: "Error", message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
+		
+		var dashboard = this;
+		var listener = this.listener();
+		var logException = false;
+		
+		if(listener && listener.fetchError)
+		{
+			logException = false;
+			
+			chartFactory.executeSilently(function()
+			{
+				listener.fetchError(dashboard, errorMessage, charts);
+			});
+		}
+		else
+		{
+			logException = true;
+		}
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			
+			chartFactory.executeSilently(function()
+			{
+				dashboard._handleChartAjaxError(chart, errorMessage, false);
+			});
+		}
+		
+		if(logException)
+		{
+			chartFactory.logException("Fetch charts data error : " + errorMessage.message);
+		}
+	};
+	
+	dashboardBase._handleChartAjaxError = function(chart, errorMessage, logIfNone)
+	{
+		if(!chart)
+			return;
+		
+		//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+		chart.status(chartStatusConst.UPDATE_ERROR);
+		
+		this._handleChartResultError(chart, errorMessage, logIfNone);
+	};
+	
 	/**
-	 * 处理看板图表结果错误。
+	 * 处理图表结果错误。
 	 * 
 	 * @param chart 图表对象
-	 * @param errorMessage 图表结果错误信息对象
-	 * @param logIfNone 如果没有chart.listener().updateError，是否输出默认日志
+	 * @param errorMessage 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+	 * @param logIfNone 可选，如果没有chart.listener().updateError，是否输出默认日志，默认为：true
 	 */
 	dashboardBase._handleChartResultError = function(chart, errorMessage, logIfNone)
 	{
+		logIfNone = (logIfNone == null ? true : logIfNone);
+		
+		if(!chart)
+			return;
+		
 		var chartListener = chart.listener();
 		
 		if(chartListener && chartListener.updateError)
 		{
 			chartListener.updateError(chart, errorMessage);
+			return;
 		}
 		else
 		{
@@ -1885,27 +1987,6 @@
 				var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
 				chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
 			}
-		}
-	};
-	
-	/**
-	 * 更新看板的图表数据。
-	 * 
-	 * @param chartResults [图表ID-图表结果]映射表
-	 */
-	dashboardBase._updateCharts = function(chartResults)
-	{
-		if(!chartResults)
-			return;
-		
-		for(var chartId in chartResults)
-		{
-			var chart = this.chartOf(chartId);
-			
-			if(!chart)
-				continue;
-			
-			this._updateChart(chart, chartResults[chartId]);
 		}
 	};
 	
@@ -2019,8 +2100,14 @@
 	{
 		var updateDashboardConfig = dashboardFactory.updateDashboardConfig;
 		
+		var globalResultDataFormat = this.resultDataFormat();
+		
+		//这里需要深度拷贝，因为后续可能会被修改
+		if(globalResultDataFormat)
+			globalResultDataFormat = $.extend(true, {}, globalResultDataFormat);
+		
 		var dashboardQueryForm = {};
-		var dashboardQuery = { chartQueries: {}, resultDataFormat: this.resultDataFormat(), suppressChartError: true };
+		var dashboardQuery = { chartQueries: {}, resultDataFormat: globalResultDataFormat, suppressChartError: true };
 		
 		dashboardQueryForm[updateDashboardConfig.dashboardIdParamName] = this.id;
 		dashboardQueryForm[updateDashboardConfig.dashboardQueryParamName] = dashboardQuery;
@@ -2034,8 +2121,15 @@
 				
 				var chartQuery = { dataSetQueries: [], resultDataFormat: chart.resultDataFormat() };
 				
-				if(chartQuery.resultDataFormat == null)
-					chartQuery.resultDataFormat = this.resultDataFormat();
+				if(chartQuery.resultDataFormat)
+				{
+					//这里需要深度拷贝，因为后续可能会被修改
+					chartQuery.resultDataFormat = $.extend(true, {}, chartQuery.resultDataFormat);
+				}
+				else
+				{
+					chartQuery.resultDataFormat = globalResultDataFormat;
+				}
 				
 				var dataSetBinds = chart.dataSetBinds();
 				for(var j=0; j<dataSetBinds.length; j++)

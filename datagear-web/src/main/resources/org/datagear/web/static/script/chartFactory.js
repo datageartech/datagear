@@ -5666,6 +5666,31 @@
 	};
 	
 	/**
+	 * 静默执行函数。
+	 * 
+	 * @param func 函数
+	 * @param exceptionHandler 可选，异常处理函数
+	 */
+	chartFactory.executeSilently = function(func, exceptionHandler)
+	{
+		try
+		{
+			return func();
+		}
+		catch(e)
+		{
+			if(exceptionHandler)
+			{
+				exceptionHandler(e);
+			}
+			else
+			{
+				chartFactory.logException(e);
+			}
+		}
+	};
+	
+	/**
 	 * 将指定名称转换为合法的CSS样式属性名
 	 * 例如："backgroundColor" 将被转换为 "background-color"
 	 */
