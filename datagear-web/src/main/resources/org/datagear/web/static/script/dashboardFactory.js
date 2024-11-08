@@ -1838,7 +1838,7 @@
 			if(chartListener && chartListener.onFetch)
 			{
 				var chartId = chart.id;
-				var chartQuery = chartQueries[chartId];
+				var chartQuery = (chartQueries[chartId] || {});
 				
 				chartFactory.executeSilently(function()
 				{
@@ -1872,7 +1872,7 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				var chartResult = chartResults[chartId];
+				var chartResult = (chartResults[chartId] || {});
 				var chartListener = chart.listener();
 				
 				if(chartListener && chartListener.fetchSuccess)
@@ -1895,7 +1895,8 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				dashboard._handleChartAjaxError(chart, chartErrors[chartId], true);
+				var chartError = (chartErrors[chartId] || {});
+				dashboard._handleChartAjaxError(chart, chartError, true);
 			});
 		}
 		
@@ -1923,7 +1924,7 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				listener.fetchError(dashboard, errorMessage, charts);
+				listener.fetchError(dashboard, charts, errorMessage);
 			});
 		}
 		else
@@ -1952,7 +1953,7 @@
 		if(!chart)
 			return;
 		
-		//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+		//必须设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
 		chart.status(chartStatusConst.UPDATE_ERROR);
 		
 		this._handleChartResultError(chart, errorMessage, logIfNone);
@@ -1974,19 +1975,25 @@
 		
 		var chartListener = chart.listener();
 		
+		if(chartListener && chartListener.fetchError)
+		{
+			chartListener.fetchError(chart, errorMessage);
+			return;
+		}
+		
+		// < @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 		if(chartListener && chartListener.updateError)
 		{
 			chartListener.updateError(chart, errorMessage);
 			return;
 		}
-		else
+		// > @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
+		
+		if(logIfNone)
 		{
-			if(logIfNone)
-			{
-				var errorType = (errorMessage ? errorMessage.type : "Error");
-				var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
-				chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
-			}
+			var errorType = (errorMessage ? errorMessage.type : "Error");
+			var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
+			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
 		}
 	};
 	
