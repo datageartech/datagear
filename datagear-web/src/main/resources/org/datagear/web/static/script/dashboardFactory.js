@@ -1015,20 +1015,22 @@
 	 * 获取/设置初始看板监听器。
 	 * 看板监听器格式为：
 	 * {
-	 *   //可选，渲染看板完成回调函数
+	 *   //可选，渲染看板后置回调函数
 	 *   render: function(dashboard){ ... },
-	 *   //可选，渲染图表完成回调函数
-	 *   renderChart: function(dashboard, chart){ ... },
-	 *   //可选，更新图表数据完成回调函数
-	 *   updateChart: function(dashboard, chart, results){ ... },
+	 *   //可选，销毁看板后置回调函数
+	 *   destroy: function(dashboard){ ... },
 	 *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
 	 *   onRender: function(dashboard){ ... },
-	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
-	 *   onRenderChart: function(dashboard, chart){ ... },
-	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
-	 *   onUpdateChart: function(dashboard, chart, results){ ... },
-	 *   //可选，更新图表数据出错处理函数
-	 *   updateChartError: function(dashboard, chart, error){ ... }
+	 *   //可选，销毁看板前置回调函数，返回false将阻止销毁看板
+	 *   onDestroy: function(dashboard){ ... },
+	 *   //可选，从服务端加载数据前置回调函数
+	 *   onFetch: function(dashboard, fetchContext){ ... },
+	 *   //可选，从服务端加载数据成功回调函数，将在相关图表逻辑执行前调用
+	 *   fetchSuccess: function(dashboard, result, fetchContext){ ... },
+	 *   //可选，从服务端加载数据出错回调函数，将在相关图表逻辑执行前调用
+	 *   fetchError: function(dashboard, error, fetchContext){ ... },
+	 *   //可选，从服务端加载数据完成回调函数，将在fetchSuccess/fetchError后、且相关图表逻辑都执行完后调用
+	 *   fetchComplete: function(dashboard, fetchContext){ ... }
 	 * }
 	 * 
 	 * 看板初始化时会使用<body>元素的"dg-dashboard-listener"属性值执行设置操作。
@@ -1738,13 +1740,25 @@
 		this._setInUpdateAjax(preUpdateCharts, true);
 		this._startChartRefreshData(preUpdateCharts);
 		
-		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
 		var dashboard = this;
+		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
+		var dashboardQueryParamName = dashboardFactory.updateDashboardConfig.dashboardQueryParamName;
+		var dashboardQuery = dashboardQueryForm[dashboardQueryParamName];
+		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
+		var fetchContext =
+		{
+			charts: preUpdateCharts,
+			query: dashboardQuery,
+			//此次请求的XMLHttpRequest，将在后续设置
+			xhr: undefined,
+			//此次请求是否成功，将在后续设置
+			success: undefined
+		};
 		
 		//这里不允许异常中断
 		chartFactory.executeSilently(function()
 		{
-			dashboard._execListenerOnFetch(preUpdateCharts, dashboardQueryForm);
+			dashboard._execListenerOnFetch(fetchContext);
 		});
 		
 		$.ajax({
@@ -1752,7 +1766,7 @@
 			type : "POST",
 			url : url,
 			data : JSON.stringify(dashboardQueryForm),
-			success : function(dashboardResult)
+			success : function(dashboardResult, textStatus, jqXHR)
 			{
 				dashboardResult = (dashboardResult ? dashboardResult : {});
 				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
@@ -1784,7 +1798,7 @@
 				
 				try
 				{
-					dashboard._handleChartsAjaxSuccess(preUpdateCharts, dashboardResult);
+					dashboard._handleChartsAjaxSuccess(fetchContext, dashboardResult, jqXHR);
 				}
 				finally
 				{
@@ -1799,7 +1813,7 @@
 				
 				try
 				{
-					dashboard._handleChartsAjaxError(preUpdateCharts, jqXHR, textStatus, errorThrown)
+					dashboard._handleChartsAjaxError(fetchContext, jqXHR, textStatus, errorThrown)
 				}
 				finally
 				{
@@ -1813,20 +1827,19 @@
 	};
 	
 	//执行监听器的onFetch回调函数
-	dashboardBase._execListenerOnFetch = function(charts, dashboardQueryForm)
+	dashboardBase._execListenerOnFetch = function(fetchContext)
 	{
-		var dashboardQueryParamName = dashboardFactory.updateDashboardConfig.dashboardQueryParamName;
-		var dashboardQuery = dashboardQueryForm[dashboardQueryParamName];
-		var chartQueries = dashboardQuery.chartQueries;
-		
 		var dashboard = this;
 		var listener = this.listener();
+		var charts = fetchContext.charts;
+		var dashboardQuery = fetchContext.query;
+		var chartQueries = dashboardQuery.chartQueries;
 		
 		if(listener && listener.onFetch)
 		{
 			chartFactory.executeSilently(function()
 			{
-				listener.onFetch(dashboard, charts, dashboardQuery);
+				listener.onFetch(dashboard, fetchContext);
 			});
 		}
 		
@@ -1848,20 +1861,23 @@
 		}
 	};
 	
-	dashboardBase._handleChartsAjaxSuccess = function(charts, dashboardResult)
+	dashboardBase._handleChartsAjaxSuccess = function(fetchContext, dashboardResult, xhr)
 	{
+		fetchContext.xhr = xhr;
+		fetchContext.success = true;
+		
 		var dashboard = this;
 		var listener = this.listener();
+		var chartResults = dashboardResult.chartResults;
+		var chartErrors = dashboardResult.chartErrors;
 		
 		if(listener && listener.fetchSuccess)
 		{
 			chartFactory.executeSilently(function()
 			{
-				listener.fetchSuccess(dashboard, charts, dashboardResult);
+				listener.fetchSuccess(dashboard, dashboardResult, fetchContext);
 			});
 		}
-		
-		var chartResults = dashboardResult.chartResults;
 		
 		for(var chartId in chartResults)
 		{
@@ -1884,8 +1900,6 @@
 			});
 		}
 		
-		var chartErrors = dashboardResult.chartErrors;
-		
 		for(var chartId in chartErrors)
 		{
 			var chart = this.chartOf(chartId);
@@ -1900,22 +1914,25 @@
 			});
 		}
 		
-		if(listener && listener.fetchUpdate)
+		if(listener && listener.fetchComplete)
 		{
 			chartFactory.executeSilently(function()
 			{
-				listener.fetchUpdate(dashboard, charts, dashboardResult);
+				listener.fetchComplete(dashboard, fetchContext);
 			});
 		}
 	};
 	
-	dashboardBase._handleChartsAjaxError = function(charts, xhr, textStatus, errorThrown)
+	dashboardBase._handleChartsAjaxError = function(fetchContext, xhr, textStatus, errorThrown)
 	{
-		//结构参考：org.datagear.analysis.support.ChartResultErrorMessage
-		var errorMessage = { type: "Error", message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
+		fetchContext.xhr = xhr;
+		fetchContext.success = false;
 		
 		var dashboard = this;
 		var listener = this.listener();
+		var charts = fetchContext.charts;
+		//结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+		var error = { type: "Error", message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
 		var logException = false;
 		
 		if(listener && listener.fetchError)
@@ -1924,7 +1941,7 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				listener.fetchError(dashboard, charts, errorMessage);
+				listener.fetchError(dashboard, error, fetchContext);
 			});
 		}
 		else
@@ -1938,17 +1955,25 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				dashboard._handleChartAjaxError(chart, errorMessage, false);
+				dashboard._handleChartAjaxError(chart, error, false);
+			});
+		}
+		
+		if(listener && listener.fetchComplete)
+		{
+			chartFactory.executeSilently(function()
+			{
+				listener.fetchComplete(dashboard, fetchContext);
 			});
 		}
 		
 		if(logException)
 		{
-			chartFactory.logException("Fetch charts data error : " + errorMessage.message);
+			chartFactory.logException("Fetch charts data error : " + error.message);
 		}
 	};
 	
-	dashboardBase._handleChartAjaxError = function(chart, errorMessage, logIfNone)
+	dashboardBase._handleChartAjaxError = function(chart, error, logIfNone)
 	{
 		if(!chart)
 			return;
@@ -1956,17 +1981,17 @@
 		//必须设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
 		chart.status(chartStatusConst.UPDATE_ERROR);
 		
-		this._handleChartResultError(chart, errorMessage, logIfNone);
+		this._handleChartResultError(chart, error, logIfNone);
 	};
 	
 	/**
 	 * 处理图表结果错误。
 	 * 
 	 * @param chart 图表对象
-	 * @param errorMessage 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
-	 * @param logIfNone 可选，如果没有chart.listener().updateError，是否输出默认日志，默认为：true
+	 * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+	 * @param logIfNone 可选，如果chart.listener()没有定义fetchError/updateError，是否输出默认日志，默认为：true
 	 */
-	dashboardBase._handleChartResultError = function(chart, errorMessage, logIfNone)
+	dashboardBase._handleChartResultError = function(chart, error, logIfNone)
 	{
 		logIfNone = (logIfNone == null ? true : logIfNone);
 		
@@ -1977,23 +2002,23 @@
 		
 		if(chartListener && chartListener.fetchError)
 		{
-			chartListener.fetchError(chart, errorMessage);
+			chartListener.fetchError(chart, error);
 			return;
 		}
 		
 		// < @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 		if(chartListener && chartListener.updateError)
 		{
-			chartListener.updateError(chart, errorMessage);
+			chartListener.updateError(chart, error);
 			return;
 		}
 		// > @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 		
 		if(logIfNone)
 		{
-			var errorType = (errorMessage ? errorMessage.type : "Error");
-			var errorMessage = (errorMessage ? errorMessage.message : "Chart result error");
-			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + errorType + " : " + errorMessage);
+			var type = (error ? error.type : "Error");
+			var message = (error ? error.message : "Chart result error");
+			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + type + " : " + message);
 		}
 	};
 	
