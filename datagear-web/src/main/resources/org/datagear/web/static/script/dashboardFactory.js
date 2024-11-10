@@ -40,7 +40,15 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
  * 
- * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加图表更新数据出错处理函数：{ updateError: function(chart, error){ ... } }
+ * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加如下处理函数：
+ * {
+ *   //可选，加载数据前置回调函数
+ *   onFetch: function(chart, chartQuery){ ... },
+ *   //可选，加载数据回调成功函数
+ *   fetchSuccess: function(chart, chartResult){ ... },
+ *   //可选，加载数据出错回调函数
+ *   fetchError: function(chart, error){ ... }
+ * }
  * 
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._renderForms函数说明。
  * 
@@ -88,6 +96,9 @@
 	
 	/**图表状态：更新出错*/
 	chartStatusConst.UPDATE_ERROR = "UPDATE_ERROR";
+	
+	/**图表状态：等待更新*/
+	chartStatusConst.WAIT_UPDATE = "WAIT_UPDATE";
 	
 	//----------------------------------------
 	// chartStatusConst结束
@@ -1603,22 +1614,22 @@
 		
 		this._doHandleChartsLocal(preUpdateLocals);
 		
+		var dashboard = this;
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
 		var url = this.contextURL(webContext.attributes.updateDashboardURL);
+		var groupContext =
+		{
+			groups: preUpdateGroups
+		};
 		
 		for(var group in preUpdateGroups)
 		{
-			try
+			chartFactory.executeSilently(function()
 			{
-				this._doHandleChartsAjax(url, preUpdateGroups[group], group);
-			}
-			catch(e)
-			{
-				chartFactory.logException(e);
-			}
+				dashboard._doHandleChartsAjax(url, group, preUpdateGroups[group], groupContext);
+			});
 		}
 		
-		var dashboard = this;
 		setTimeout(function()
 		{
 			dashboard._doHandleCharts();
@@ -1642,7 +1653,7 @@
 		
 		for(var i=0; i<preUpdateCharts.length; i++)
 		{
-			this._updateChart(preUpdateCharts[i], {});
+			this._updateChart(preUpdateCharts[i], {}, true);
 		}
 		
 		this._setUpdateTime(preUpdateCharts, updateTime);			
@@ -1659,6 +1670,7 @@
 	
 	/**
 	 * 给定图表是否在等待更新数据。
+	 * 如果返回true，图表状态将被设置为chartStatusConst.WAIT_UPDATE，后续除非图表更新完成，都将返回false。
 	 */
 	dashboardBase._isWaitForUpdate = function(chart, currentTime)
 	{
@@ -1667,8 +1679,12 @@
 		if(currentTime == null)
 			currentTime = chartFactory.currentDateMs();
 		
+		if(chart.status() == chartStatusConst.WAIT_UPDATE)
+		{
+			wait = false;
+		}
 		//图表正处于更新数据ajax中
-		if(chart._inUpdateAjax())
+		else if(chart._inUpdateAjax())
 		{
 			wait = false;
 		}
@@ -1704,10 +1720,8 @@
 		
 		if(wait)
 		{
-			//wait为true时，图表状态可能并不符合chart.update()要求（比如chartStatusConst.UPDATE_ERROR），
-			//所以这里需要校验设置
-			if(!chart.statusRendered() && !chart.statusPreUpdate() && !chart.statusUpdated())
-				chart.statusPreUpdate(true);
+			//应立即设置为WAIT_UPDATE状态，避免并发逻辑出错
+			chart.status(chartStatusConst.WAIT_UPDATE);
 		}
 		
 		return wait;
@@ -1732,7 +1746,7 @@
 		}
 	};
 	
-	dashboardBase._doHandleChartsAjax = function(url, preUpdateCharts, group)
+	dashboardBase._doHandleChartsAjax = function(url, group, preUpdateCharts, groupContext)
 	{
 		if(!preUpdateCharts || preUpdateCharts.length == 0)
 			return;
@@ -1747,8 +1761,10 @@
 		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 		var fetchContext =
 		{
+			group: group,
 			charts: preUpdateCharts,
 			query: dashboardQuery,
+			groupContext: groupContext,
 			//此次请求的XMLHttpRequest，将在后续设置
 			xhr: undefined,
 			//此次请求是否成功，将在后续设置
@@ -1896,7 +1912,7 @@
 					chartListener.fetchSuccess(chart, chartResult);
 				}
 				
-				dashboard._updateChart(chart, chartResult);
+				dashboard._updateChart(chart, chartResult, true);
 			});
 		}
 		
@@ -2027,13 +2043,24 @@
 	 * 
 	 * @param chart 图表对象
 	 * @param chartResult 图表结果对象
+	 * @param force 可选，是否强制更新，默认值：false
 	 */
-	dashboardBase._updateChart = function(chart, chartResult)
+	dashboardBase._updateChart = function(chart, chartResult, force)
 	{
+		force = (force === true);
+		
 		try
 		{
 			if(chart.isActive())
 			{
+				if(force)
+				{
+					if(!chart.statusRendered() && !chart.statusPreUpdate() && !chart.statusUpdated())
+					{
+						chart.statusPreUpdate(true);
+					}
+				}
+				
 				this._doUpdateChart(chart, chartResult);
 			}
 			else
