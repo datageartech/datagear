@@ -97,8 +97,8 @@
 	/**图表状态：更新出错*/
 	chartStatusConst.UPDATE_ERROR = "UPDATE_ERROR";
 	
-	/**图表状态：等待更新*/
-	chartStatusConst.WAIT_UPDATE = "WAIT_UPDATE";
+	/**图表状态：正在处理更新*/
+	chartStatusConst.HANDLING_UPDATE = "HANDLING_UPDATE";
 	
 	//----------------------------------------
 	// chartStatusConst结束
@@ -224,11 +224,6 @@
 				//org.datagear.web.controller.DashboardVisualController.UNLOAD_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId"
 			});
-	
-	/**
-	 * 更新图表数据ajax请求的重试秒数，当更新图表数据ajax请求出错后，会在过这些秒后重试请求。
-	 */
-	dashboardFactory.UPDATE_AJAX_RETRY_SECONDS = 5;
 	
 	/**
 	 * 循环监视处理图表状态间隔毫秒数。
@@ -735,26 +730,6 @@
 	chartBase._updateTime = function(time)
 	{
 		return chartFactory.extValueBuiltin(this, "updateTime", time);
-	};
-	
-	chartBase._inUpdateAjax = function(inAjax)
-	{
-		return chartFactory.extValueBuiltin(this, "inUpdateAjax", inAjax);
-	};
-	
-	chartBase._updateAjaxErrorTime = function(time)
-	{
-		return chartFactory.extValueBuiltin(this, "updateAjaxErrorTime", time);
-	};
-	
-	chartBase._inUpdateAjaxErrorTime = function(time)
-	{
-		var errorTime = this._updateAjaxErrorTime();
-		
-		if(errorTime == null)
-			return false;
-		
-		return ((time - errorTime) <= dashboardFactory.UPDATE_AJAX_RETRY_SECONDS*1000);
 	};
 	
 	chartBase._requestRefreshData = function()
@@ -1649,15 +1624,20 @@
 			return;
 		
 		var updateTime = chartFactory.currentDateMs();
-		this._startChartRefreshData(preUpdateCharts);
+		this._startChartsRefreshData(preUpdateCharts);
 		
-		for(var i=0; i<preUpdateCharts.length; i++)
+		try
 		{
-			this._updateChart(preUpdateCharts[i], {}, true);
+			for(var i=0; i<preUpdateCharts.length; i++)
+			{
+				this._updateChart(preUpdateCharts[i], {}, true);
+			}
 		}
-		
-		this._setUpdateTime(preUpdateCharts, updateTime);			
-		this._finishChartRefreshDataIfMatch(preUpdateCharts);
+		finally
+		{
+			this._setChartsUpdateTime(preUpdateCharts, updateTime);			
+			this._finishChartsRefreshDataIfMatch(preUpdateCharts);
+		}
 	};
 	
 	/**
@@ -1670,7 +1650,7 @@
 	
 	/**
 	 * 给定图表是否在等待更新数据。
-	 * 如果返回true，图表状态将被设置为chartStatusConst.WAIT_UPDATE，后续除非图表更新完成，都将返回false。
+	 * 如果返回true，图表状态将被设置为chartStatusConst.HANDLING_UPDATE，后续除非图表更新完成，都将返回false。
 	 */
 	dashboardBase._isWaitForUpdate = function(chart, currentTime)
 	{
@@ -1679,21 +1659,9 @@
 		if(currentTime == null)
 			currentTime = chartFactory.currentDateMs();
 		
-		if(chart.status() == chartStatusConst.WAIT_UPDATE)
-		{
-			wait = false;
-		}
-		//图表正处于更新数据ajax中
-		else if(chart._inUpdateAjax())
-		{
-			wait = false;
-		}
-		else if(chart._isRequestRefreshData())
-		{
-			wait = true;
-		}
-		//图表更新ajax请求出错后，应等待一段时间后再尝试，避免频繁发送ajax请求
-		else if(chart._inUpdateAjaxErrorTime(currentTime))
+		var status = chart.status();
+		
+		if(status == chartStatusConst.HANDLING_UPDATE)
 		{
 			wait = false;
 		}
@@ -1701,8 +1669,12 @@
 		{
 			wait = true;
 		}
+		else if(chart._isRequestRefreshData())
+		{
+			wait = true;
+		}
 		else if(chart.updateInterval > -1
-					&& (chart.statusUpdated() || chart.status() == chartStatusConst.UPDATE_ERROR))
+					&& (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
 		{
 			var updateInterval = chart.updateInterval;
 			var prevUpdateTime = chart._updateTime();
@@ -1720,8 +1692,8 @@
 		
 		if(wait)
 		{
-			//应立即设置为WAIT_UPDATE状态，避免并发逻辑出错
-			chart.status(chartStatusConst.WAIT_UPDATE);
+			//应立即设置为HANDLING_UPDATE状态，避免并发逻辑出错
+			chart.status(chartStatusConst.HANDLING_UPDATE);
 		}
 		
 		return wait;
@@ -1751,8 +1723,7 @@
 		if(!preUpdateCharts || preUpdateCharts.length == 0)
 			return;
 		
-		this._setInUpdateAjax(preUpdateCharts, true);
-		this._startChartRefreshData(preUpdateCharts);
+		this._startChartsRefreshData(preUpdateCharts);
 		
 		var dashboard = this;
 		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
@@ -1818,9 +1789,8 @@
 				}
 				finally
 				{
-					dashboard._setUpdateTime(preUpdateCharts, updateTime);				
-					dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
-					dashboard._setInUpdateAjax(preUpdateCharts, false);
+					dashboard._setChartsUpdateTime(preUpdateCharts, updateTime);				
+					dashboard._finishChartsRefreshDataIfMatch(preUpdateCharts);
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown)
@@ -1833,10 +1803,8 @@
 				}
 				finally
 				{
-					dashboard._setUpdateTime(preUpdateCharts, updateTime);
-					dashboard._setUpdateAjaxErrorTime(preUpdateCharts, updateTime);
-					dashboard._finishChartRefreshDataIfMatch(preUpdateCharts);
-					dashboard._setInUpdateAjax(preUpdateCharts, false);
+					dashboard._setChartsUpdateTime(preUpdateCharts, updateTime);
+					dashboard._finishChartsRefreshDataIfMatch(preUpdateCharts);
 				}
 			}
 		});
@@ -1994,9 +1962,8 @@
 		if(!chart)
 			return;
 		
-		//必须设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+		//必须设置为更新出错状态
 		chart.status(chartStatusConst.UPDATE_ERROR);
-		
 		this._handleChartResultError(chart, error, logIfNone);
 	};
 	
@@ -2042,7 +2009,7 @@
 	 * 更新指定图表。
 	 * 
 	 * @param chart 图表对象
-	 * @param chartResult 图表结果对象
+	 * @param chartResult 图表结果对象，参考：org.datagear.analysis.ChartResult
 	 * @param force 可选，是否强制更新，默认值：false
 	 */
 	dashboardBase._updateChart = function(chart, chartResult, force)
@@ -2080,76 +2047,34 @@
 		chart.update(dataSetResults);
 	};
 	
-	dashboardBase._setUpdateTime = function(chart, time)
+	dashboardBase._setChartsUpdateTime = function(charts, time)
 	{
-		try
+		chartFactory.executeSilently(function()
 		{
-			chart = ($.isArray(chart) ? chart : [ chart ]);
-			
-			for(var i=0; i<chart.length; i++)
-				chart[i]._updateTime(time);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-		}
-	};
-	
-	dashboardBase._setInUpdateAjax = function(chart, inAjax)
-	{
-		try
-		{
-			chart = ($.isArray(chart) ? chart : [ chart ]);
-			
-			for(var i=0; i<chart.length; i++)
-				chart[i]._inUpdateAjax(inAjax);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-		}
-	};
-	
-	dashboardBase._startChartRefreshData = function(chart)
-	{
-		chart = ($.isArray(chart) ? chart : [ chart ]);
-		
-		for(var i=0; i<chart.length; i++)
-		{
-			chart[i]._startRefreshData();
-		}
-	};
-	
-	dashboardBase._finishChartRefreshDataIfMatch = function(chart)
-	{
-		chart = ($.isArray(chart) ? chart : [ chart ]);
-		
-		for(var i=0; i<chart.length; i++)
-		{
-			try
+			for(var i=0; i<charts.length; i++)
 			{
-				chart[i]._finishRefreshDataIfMatch();
+				charts[i]._updateTime(time);
 			}
-			catch(e)
-			{
-				chartFactory.logException(e);
-			}
+		});
+	};
+	
+	dashboardBase._startChartsRefreshData = function(charts)
+	{
+		for(var i=0; i<charts.length; i++)
+		{
+			charts[i]._startRefreshData();
 		}
 	};
 	
-	dashboardBase._setUpdateAjaxErrorTime = function(chart, errorTime)
+	dashboardBase._finishChartsRefreshDataIfMatch = function(charts)
 	{
-		try
+		chartFactory.executeSilently(function()
 		{
-			chart = ($.isArray(chart) ? chart : [ chart ]);
-			
-			for(var i=0; i<chart.length; i++)
-				chart[i]._updateAjaxErrorTime(errorTime);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-		}
+			for(var i=0; i<charts.length; i++)
+			{
+				charts[i]._finishRefreshDataIfMatch();
+			}
+		});
 	};
 	
 	/**
