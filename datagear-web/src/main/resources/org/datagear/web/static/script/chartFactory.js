@@ -5644,6 +5644,33 @@
 	};
 	
 	/**
+	 * 给URL追加参数。
+	 * 
+	 * @param url
+	 * @param name 参数名
+	 * @param value 参数值
+	 */
+	chartFactory.appendUrlParam = function(url, name, value)
+	{
+		name = encodeURIComponent(name);
+		value = encodeURIComponent(value);
+		
+		var anchor = "";
+		var aidx = url.indexOf('#');
+		if(aidx >= 0)
+		{
+			var tmpUrl = url.substring(0, aidx);
+			anchor = url.substring(aidx);
+			url = tmpUrl;
+		}
+		
+		var qidx = url.indexOf('?');
+		url += (qidx < 0 ? "?" : "&") + name + "=" + value;
+		
+		return url + anchor;
+	};
+	
+	/**
 	 * 执行JS代码。
 	 * 
 	 * @param str JS代码
