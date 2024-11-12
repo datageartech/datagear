@@ -1753,8 +1753,7 @@
 		
 		var dashboard = this;
 		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
-		var dashboardQueryParamName = dashboardFactory.updateDashboardConfig.dashboardQueryParamName;
-		var dashboardQuery = dashboardQueryForm[dashboardQueryParamName];
+		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
 		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 		var fetchContext =
 		{
@@ -2120,7 +2119,7 @@
 		var dashboardQuery = { chartQueries: {}, resultDataFormat: globalResultDataFormat, suppressChartError: true };
 		
 		dashboardQueryForm[updateDashboardConfig.dashboardIdParamName] = this.id;
-		dashboardQueryForm[updateDashboardConfig.dashboardQueryParamName] = dashboardQuery;
+		this._dashboardQueryOfForm(dashboardQueryForm, dashboardQuery);
 		
 		if(charts && charts.length)
 		{
@@ -2154,6 +2153,20 @@
 		}
 		
 		return dashboardQueryForm;
+	};
+	
+	dashboardBase._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQuery)
+	{
+		var dashboardQueryParamName = dashboardFactory.updateDashboardConfig.dashboardQueryParamName;
+		
+		if(dashboardQuery === undefined)
+		{
+			return dashboardQueryForm[dashboardQueryParamName];
+		}
+		else
+		{
+			dashboardQueryForm[dashboardQueryParamName] = dashboardQuery;
+		}
 	};
 	
 	/**
