@@ -1036,12 +1036,16 @@
 	 *   //可选，销毁看板前置回调函数，返回false将阻止销毁看板
 	 *   onDestroy: function(dashboard){ ... },
 	 *   //可选，从服务端加载数据前置回调函数
+	 *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
 	 *   onFetch: function(dashboard, fetchContext){ ... },
 	 *   //可选，从服务端加载数据成功回调函数，将在相关图表逻辑执行前调用
+	 *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
 	 *   fetchSuccess: function(dashboard, result, fetchContext){ ... },
 	 *   //可选，从服务端加载数据出错回调函数，将在相关图表逻辑执行前调用
+	 *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
 	 *   fetchError: function(dashboard, error, fetchContext){ ... },
 	 *   //可选，从服务端加载数据完成回调函数，将在fetchSuccess/fetchError后、且相关图表逻辑都执行完后调用
+	 *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
 	 *   fetchComplete: function(dashboard, fetchContext){ ... }
 	 * }
 	 * 
@@ -1838,12 +1842,13 @@
 	//执行监听器的onFetch回调函数
 	dashboardBase._execListenerOnFetch = function(fetchContext)
 	{
-		var dashboard = this;
-		var listener = this.listener();
 		var charts = fetchContext.charts;
 		var dashboardQuery = fetchContext.query;
 		var chartQueries = dashboardQuery.chartQueries;
 		
+		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
+		var dashboard = this;
+		var listener = this.listener();
 		if(listener && listener.onFetch)
 		{
 			chartFactory.executeSilently(function()
@@ -1851,6 +1856,7 @@
 				listener.onFetch(dashboard, fetchContext);
 			});
 		}
+		*/
 		
 		for(var i=0; i<charts.length; i++)
 		{
@@ -1876,10 +1882,11 @@
 		fetchContext.success = true;
 		
 		var dashboard = this;
-		var listener = this.listener();
 		var chartResults = dashboardResult.chartResults;
 		var chartErrors = dashboardResult.chartErrors;
 		
+		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
+		var listener = this.listener();
 		if(listener && listener.fetchSuccess)
 		{
 			chartFactory.executeSilently(function()
@@ -1887,6 +1894,7 @@
 				listener.fetchSuccess(dashboard, dashboardResult, fetchContext);
 			});
 		}
+		*/
 		
 		for(var chartId in chartResults)
 		{
@@ -1918,11 +1926,12 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				var chartError = (chartErrors[chartId] || {});
-				dashboard._handleChartAjaxError(chart, chartError, true);
+				var error = (chartErrors[chartId] || {});
+				dashboard._handleChartAjaxError(chart, error, true);
 			});
 		}
 		
+		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
 		if(listener && listener.fetchComplete)
 		{
 			chartFactory.executeSilently(function()
@@ -1930,6 +1939,7 @@
 				listener.fetchComplete(dashboard, fetchContext);
 			});
 		}
+		*/
 	};
 	
 	dashboardBase._handleChartsAjaxError = function(fetchContext, xhr, textStatus, errorThrown)
@@ -1938,12 +1948,13 @@
 		fetchContext.success = false;
 		
 		var dashboard = this;
-		var listener = this.listener();
 		var charts = fetchContext.charts;
 		//结构参考：org.datagear.analysis.support.ChartResultErrorMessage
 		var error = { type: "Error", message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
-		var logException = false;
+		var logException = true;
 		
+		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
+		var listener = this.listener();
 		if(listener && listener.fetchError)
 		{
 			logException = false;
@@ -1957,6 +1968,7 @@
 		{
 			logException = true;
 		}
+		*/
 		
 		for(var i=0; i<charts.length; i++)
 		{
@@ -1968,6 +1980,7 @@
 			});
 		}
 		
+		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
 		if(listener && listener.fetchComplete)
 		{
 			chartFactory.executeSilently(function()
@@ -1975,6 +1988,7 @@
 				listener.fetchComplete(dashboard, fetchContext);
 			});
 		}
+		*/
 		
 		if(logException)
 		{
@@ -1984,12 +1998,7 @@
 	
 	dashboardBase._handleChartAjaxError = function(chart, error, logIfNone)
 	{
-		if(!chart)
-			return;
-		
-		//必须设置为更新出错状态
-		chart.status(chartStatusConst.UPDATE_ERROR);
-		this._handleChartResultError(chart, error, logIfNone);
+		this._handleChartResultError(chart, error, true, logIfNone);
 	};
 	
 	/**
@@ -1997,14 +2006,20 @@
 	 * 
 	 * @param chart 图表对象
 	 * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+	 * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
 	 * @param logIfNone 可选，如果chart.listener()没有定义fetchError，是否输出默认日志，默认为：true
 	 */
-	dashboardBase._handleChartResultError = function(chart, error, logIfNone)
+	dashboardBase._handleChartResultError = function(chart, error, setErrorStatus, logIfNone)
 	{
 		logIfNone = (logIfNone == null ? true : logIfNone);
 		
 		if(!chart)
 			return;
+		
+		if(setErrorStatus)
+		{
+			chart.status(chartStatusConst.UPDATE_ERROR);
+		}
 		
 		var chartListener = chart.listener();
 		
