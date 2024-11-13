@@ -44,10 +44,8 @@
  * {
  *   //可选，加载数据前置回调函数
  *   onFetch: function(chart, chartQuery){ ... },
- *   //可选，加载数据回调成功函数
- *   fetchSuccess: function(chart, chartResult){ ... },
- *   //可选，加载数据出错回调函数
- *   fetchError: function(chart, error){ ... }
+ *   //可选，更新数据出错回调函数
+ *   updateError: function(chart, error){ ... }
  * }
  * 
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._renderForms函数说明。
@@ -329,23 +327,6 @@
 								return dl.onFetch(chart, chartQuery);
 						};
 						
-						chartListener.fetchSuccess = function(chart, chartResult)
-						{
-							var dl = this._findListenerOfFunc("fetchSuccess");
-							
-							if(dl)
-								return dl.fetchSuccess(chart, chartResult);
-						};
-						
-						chartListener.fetchError = function(chart, error)
-						{
-							var dl = this._findListenerOfFunc("fetchError");
-							
-							if(dl)
-								return dl.fetchError(chart, error);
-						};
-						
-						// < @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 						chartListener.updateError = function(chart, error)
 						{
 							var dl = this._findListenerOfFunc("updateError");
@@ -353,7 +334,6 @@
 							if(dl)
 								return dl.updateError(chart, error);
 						};
-						// > @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 					}
 				}
 			};
@@ -1656,6 +1636,22 @@
 		var updateTime = chartFactory.currentDateMs();
 		this._startChartsRefreshData(preUpdateCharts);
 		
+		var dashboard = this;
+		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
+		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
+		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
+		var fetchContext =
+		{
+			charts: preUpdateCharts,
+			query: dashboardQuery
+		};
+		
+		//这里不允许异常中断
+		chartFactory.executeSilently(function()
+		{
+			dashboard._execListenerOnFetch(fetchContext);
+		});
+		
 		try
 		{
 			for(var i=0; i<preUpdateCharts.length; i++)
@@ -1906,13 +1902,6 @@
 			chartFactory.executeSilently(function()
 			{
 				var chartResult = (chartResults[chartId] || {});
-				var chartListener = chart.listener();
-				
-				if(chartListener && chartListener.fetchSuccess)
-				{
-					chartListener.fetchSuccess(chart, chartResult);
-				}
-				
 				dashboard._updateChart(chart, chartResult, true);
 			});
 		}
@@ -2007,7 +1996,7 @@
 	 * @param chart 图表对象
 	 * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
 	 * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
-	 * @param logIfNone 可选，如果chart.listener()没有定义fetchError，是否输出默认日志，默认为：true
+	 * @param logIfNone 可选，如果chart.listener()没有定义updateError，是否输出默认日志，默认为：true
 	 */
 	dashboardBase._handleChartResultError = function(chart, error, setErrorStatus, logIfNone)
 	{
@@ -2023,19 +2012,11 @@
 		
 		var chartListener = chart.listener();
 		
-		if(chartListener && chartListener.fetchError)
-		{
-			chartListener.fetchError(chart, error);
-			return;
-		}
-		
-		// < @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 		if(chartListener && chartListener.updateError)
 		{
 			chartListener.updateError(chart, error);
 			return;
 		}
-		// > @deprecated 兼容5.1.0版本的dg-chart-listener的updateError功能，将在未来版本移除
 		
 		if(logIfNone)
 		{
