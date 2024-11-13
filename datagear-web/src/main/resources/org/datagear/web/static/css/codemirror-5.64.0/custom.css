@@ -26,7 +26,7 @@
 .cm-s-custom span.cm-bracket { color: var(--primary-600); }
 
 .cm-s-custom .CodeMirror-matchingbracket { outline:1px solid var(--surface-300); color: var(--text-color) !important; }
-.cm-s-custom .CodeMirror-matchingtag{ background: var(--surface-300); }
+.cm-s-custom .CodeMirror-matchingtag{ background: var(--surface-100); }
 
 .CodeMirror-hints.custom {
   background-color: var(--surface-d) !important;
@@ -45,3 +45,9 @@
 .CodeMirror-foldmarker{
 	color: var(--text-color);
 }
+
+.CodeMirror-selected { background: var(--surface-border); }
+.CodeMirror-focused .CodeMirror-selected { background: var(--surface-border); }
+.CodeMirror-crosshair { cursor: crosshair; }
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: var(--surface-border); }
+.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: var(--surface-border); }
