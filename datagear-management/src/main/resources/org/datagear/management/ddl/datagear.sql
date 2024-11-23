@@ -593,3 +593,9 @@ ALTER TABLE DATAGEAR_SCHEMA ADD COLUMN SCHEMA_SCHM_NAME VARCHAR(100);
 /*--version[5.2.0], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
 
+
+
+/*-----------------------------------------*/
+/*--version[5.3.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
