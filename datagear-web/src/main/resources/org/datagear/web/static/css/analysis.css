@@ -39,10 +39,6 @@
 /*表格图表*/
 .dg-chart-table{}
 .dg-chart-table .dg-chart-table-title{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
 	padding-top: 0.1em;
 	padding-bottom: 0.1em;
 	box-sizing: border-box;
@@ -63,7 +59,7 @@
 	display: none;
 }
 .dg-chart-table.dg-hide-title .dg-chart-table-content{
-	top: 0.1em;
+	top: 1px;
 }
 .dg-chart-table .dg-chart-table-content table.dataTable thead th,
 .dg-chart-table .dg-chart-table-content table.dataTable thead td,

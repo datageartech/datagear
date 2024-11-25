@@ -6774,14 +6774,15 @@
 		if(options.carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
 		
-		if(!options.title || !options.title.show)
+		if(!options.title.show)
 			chartEle.addClass("dg-hide-title");
 		
 		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(chartEle);
 		if(options.titleStyle)
 			chart.elementStyle(chartTitle, options.titleStyle);
 		
-		var chartContent = $("<div class='dg-chart-table-content' />").css("top", chartTitle.outerHeight(true)).appendTo(chartEle);
+		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
+		chartContent.css("top", (options.title.show ? chartTitle.outerHeight(true) : 0));
 		var table = $("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
 						.appendTo(chartContent);
 		var tableId = chart.id+"-table";
