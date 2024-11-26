@@ -1124,11 +1124,10 @@
 		var theme = this._themeNonNull();
 		
 		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
+		//必须添加相对定位样式
+		$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
 		chartFactory.addThemeRefEntity(theme, this.id);
 		this._createChartThemeCssIfNon();
-		//如果图表元素不可作为相对定位的父元素，则设置，便于子元素在图表元素内处理定位
-		if(chartFactory.isStaticPosition($element))
-			$element.addClass(chartFactory._KEY_CHART_ELEMENT_STYLE_FOR_RELATIVE);
 		$element.addClass(this.themeStyleName());
 		
 		var options = this.options();
@@ -6053,23 +6052,6 @@
 			
 			$(this).remove();
 		});
-	};
-	
-	/**
-	 * 元素是否是"position:static"的。
-	 */
-	chartFactory.isStaticPosition = function(ele)
-	{
-		ele = $(ele);
-		
-		var p = ele.css("position");
-		
-		if(!p || p == "static")
-			return true;
-		else if(p == "inherit")
-			return this.isStaticPosition(ele.parent());
-		else
-			return false;
 	};
 	
 	/**
