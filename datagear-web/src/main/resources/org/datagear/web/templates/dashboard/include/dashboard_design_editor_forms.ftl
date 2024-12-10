@@ -1144,11 +1144,11 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridRowGap" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridRowGap.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridRowGap' />
-									<span class="text-color-secondary text-sm ml-1">grid-row-gap</span>
+									<span class="text-color-secondary text-sm ml-1">row-gap</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleGridRowGap" v-model="pm.vepms.style['grid-row-gap']" type="text"
-										class="input w-full" name="grid-row-gap">
+									<p-inputtext id="${pid}veStyleGridRowGap" v-model="pm.vepms.style['row-gap']" type="text"
+										class="input w-full" name="row-gap">
 									</p-inputtext>
 								</div>
 							</div>
@@ -1156,11 +1156,11 @@ page_boolean_options.ftl
 								<label for="${pid}veStyleGridColumnGap" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridColumnGap.desc' />">
 									<@spring.message code='dashboard.veditor.style.gridColumnGap' />
-									<span class="text-color-secondary text-sm ml-1">grid-column-gap</span>
+									<span class="text-color-secondary text-sm ml-1">column-gap</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleGridColumnGap" v-model="pm.vepms.style['grid-column-gap']" type="text"
-										class="input w-full" name="grid-column-gap">
+									<p-inputtext id="${pid}veStyleGridColumnGap" v-model="pm.vepms.style['column-gap']" type="text"
+										class="input w-full" name="column-gap">
 									</p-inputtext>
 								</div>
 							</div>
