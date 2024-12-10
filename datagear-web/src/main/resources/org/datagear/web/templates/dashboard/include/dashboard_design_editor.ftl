@@ -1198,33 +1198,6 @@
 		if(!dashboardEditor)
 			return false;
 		
-		if(po.isDisplayGrid(model.display))
-		{
-			model['align-items'] = model['align-items-grid'];
-			model['justify-content'] = model['justify-content-grid'];
-			model['align-content'] = model['align-content-grid'];
-		}
-		else if(po.isDisplayFlex(model.display))
-		{
-			model['align-items'] = model['align-items-flex'];
-			model['justify-content'] = model['justify-content-flex'];
-			model['align-content'] = model['align-content-flex'];
-		}
-		
-		if(dashboardEditor.isGridItemElement())
-			model['align-self'] = model['align-self-grid'];
-		else if(dashboardEditor.isFlexItemElement())
-			model['align-self'] = model['align-self-flex'];
-		
-		model['align-items-grid'] = null;
-		model['justify-content-grid'] = null;
-		model['align-content-grid'] = null;
-		model['align-self-grid'] = null;
-		model['align-items-flex'] = null;
-		model['justify-content-flex'] = null;
-		model['align-content-flex'] = null;
-		model['align-self-flex'] = null;
-		
 		try
 		{
 			if(global)
@@ -1258,28 +1231,6 @@
 	po.convertToVeStyleFormModel = function(styleModel)
 	{
 		styleModel = $.extend({ syncChartTheme: true }, styleModel);
-		
-		if(po.isDisplayGrid(styleModel.display))
-		{
-			styleModel['align-items-grid'] = styleModel['align-items'];
-			styleModel['justify-content-grid'] = styleModel['justify-content'];
-			styleModel['align-content-grid'] = styleModel['align-content'];
-		}
-		else if(po.isDisplayFlex(styleModel.display))
-		{
-			styleModel['align-items-flex'] = styleModel['align-items'];
-			styleModel['justify-content-flex'] = styleModel['justify-content'];
-			styleModel['align-content-flex'] = styleModel['align-content'];
-		}
-		
-		if(styleModel.isGridItemElement)
-			styleModel['align-self-grid'] = styleModel['align-self'];
-		else if(styleModel.isFlexItemElement)
-			styleModel['align-self-flex'] = styleModel['align-self'];
-		
-		styleModel.isGridItemElement = undefined;
-		styleModel.isFlexItemElement = undefined;
-		
 		return styleModel;
 	};
 	
@@ -1989,8 +1940,6 @@
 										return;
 									
 									var styleModel = dashboardEditor.getElementStyle();
-									styleModel.isGridItemElement = dashboardEditor.isGridItemElement();
-									styleModel.isFlexItemElement = dashboardEditor.isFlexItemElement();
 									styleModel = po.convertToVeStyleFormModel(styleModel);
 									
 									po.showVeStylePanel(function(model)

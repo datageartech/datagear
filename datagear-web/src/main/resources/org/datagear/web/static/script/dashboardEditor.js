@@ -572,9 +572,8 @@
 	{
 		ele = this._currentElement(ele, true);
 		var parent = ele.parent();
-		var display = (parent.css("display") || "");
 		
-		return /^(grid|inline-grid)$/i.test(display);
+		return this._isDisplayGrid(parent.css("display"));
 	};
 	
 	/**
@@ -586,9 +585,8 @@
 	{
 		ele = this._currentElement(ele, true);
 		var parent = ele.parent();
-		var display = (parent.css("display") || "");
 		
-		return /^(flex|inline-flex)$/i.test(display);
+		return this._isDisplayFlex(parent.css("display"));
 	};
 	
 	/**
@@ -698,7 +696,7 @@
 	/**
 	 * 插入弹性布局元素。
 	 * 
-	 * @param gridAttr 网格设置，格式为：{ items: 数值或数值字符串, direction: "...", fillParent: 布尔值或布尔值字符串 }
+	 * @param flexAttr 网格设置，格式为：{ items: 数值或数值字符串, direction: "...", fillParent: 布尔值或布尔值字符串 }
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
@@ -2791,10 +2789,15 @@
 				selected: this._isSelectedElement(ele),
 				id: editEle.attr("id"),
 				className: editEle.attr("class"),
+				cssDisplay: ele.css("display"),
 				visualEditId: editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
 			};
 			
 			var displayName = pathInfo.tagName;
+			
+			if(this._isDisplayGrid(pathInfo.cssDisplay) || this._isDisplayFlex(pathInfo.cssDisplay))
+				displayName += "("+pathInfo.cssDisplay+")";
+			
 			if(pathInfo.id)
 				displayName += "#"+pathInfo.id;
 			else if(pathInfo.className)
@@ -2812,5 +2815,22 @@
 		
 		return paths.reverse();
 	};
+	
+	editor._isDisplayGrid = function(display)
+	{
+		if(!display)
+			return false;
+		
+		return /^(grid|inline-grid)$/i.test(display);
+	};
+	
+	editor._isDisplayFlex = function(display)
+	{
+		if(!display)
+			return false;
+		
+		return /^(flex|inline-flex)$/i.test(display);
+	};
+	
 })
 (this);

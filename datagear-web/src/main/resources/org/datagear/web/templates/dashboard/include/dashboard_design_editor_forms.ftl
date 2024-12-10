@@ -1232,8 +1232,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">align-items</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleGridAlignItems" v-model="pm.vepms.style['align-items-grid']" type="text"
-										class="help-target input w-full" name="align-items-grid">
+									<p-inputtext id="${pid}veStyleGridAlignItems" v-model="pm.vepms.style['align-items']" type="text"
+										class="help-target input w-full" name="align-items">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="start">
@@ -1257,8 +1257,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">justify-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleGridJustifyContent" v-model="pm.vepms.style['justify-content-grid']" type="text"
-										class="help-target input w-full" name="justify-content-grid">
+									<p-inputtext id="${pid}veStyleGridJustifyContent" v-model="pm.vepms.style['justify-content']" type="text"
+										class="help-target input w-full" name="justify-content">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="start">
@@ -1293,8 +1293,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">align-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleGridAlignContent" v-model="pm.vepms.style['align-content-grid']" type="text"
-										class="help-target input w-full" name="align-content-grid">
+									<p-inputtext id="${pid}veStyleGridAlignContent" v-model="pm.vepms.style['align-content']" type="text"
+										class="help-target input w-full" name="align-content">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="start">
@@ -1477,8 +1477,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">align-self</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleGridAlignSelf" v-model="pm.vepms.style['align-self-grid']" type="text"
-										class="help-target input w-full" name="align-self-grid">
+									<p-inputtext id="${pid}veStyleGridAlignSelf" v-model="pm.vepms.style['align-self']" type="text"
+										class="help-target input w-full" name="align-self">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="start">
@@ -1558,8 +1558,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">justify-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleFlexJustifyContent" v-model="pm.vepms.style['justify-content-flex']" type="text"
-										class="help-target input w-full" name="justify-content-flex">
+									<p-inputtext id="${pid}veStyleFlexJustifyContent" v-model="pm.vepms.style['justify-content']" type="text"
+										class="help-target input w-full" name="justify-content">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
@@ -1588,8 +1588,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">align-items</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleFlexAlignItems" v-model="pm.vepms.style['align-items-flex']" type="text"
-										class="help-target input w-full" name="align-items-flex">
+									<p-inputtext id="${pid}veStyleFlexAlignItems" v-model="pm.vepms.style['align-items']" type="text"
+										class="help-target input w-full" name="align-items">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
@@ -1616,8 +1616,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">align-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleFlexAlignContent" v-model="pm.vepms.style['align-content-flex']" type="text"
-										class="help-target input w-full" name="align-content-flex">
+									<p-inputtext id="${pid}veStyleFlexAlignContent" v-model="pm.vepms.style['align-content']" type="text"
+										class="help-target input w-full" name="align-content">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
@@ -1702,8 +1702,8 @@ page_boolean_options.ftl
 									<span class="text-color-secondary text-sm ml-1">align-self</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleFlexAlignSelf" v-model="pm.vepms.style['align-self-flex']" type="text"
-										class="help-target input w-full" name="align-self-flex">
+									<p-inputtext id="${pid}veStyleFlexAlignSelf" v-model="pm.vepms.style['align-self']" type="text"
+										class="help-target input w-full" name="align-self">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
 										<p-button type="button" class="help-src p-button-secondary" help-value="flex-start">
