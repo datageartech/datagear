@@ -2155,13 +2155,6 @@
 				delete nowStyleObj[name];
 			else
 			{
-				if(name == "background-image")
-				{
-					//不是"url(...)"格式
-					if(/^url\(/i.test(value) != true)
-						value = "url(" + value +")"
-				}
-				
 				nowStyleObj[name] = value;
 			}
 		}
@@ -2174,114 +2167,10 @@
 	
 	editor._getElementStyleObj = function(ele)
 	{
-		var newStyleObj = {};
-		
 		var styleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele));
+		styleObj.className = (ele.attr("class") || "");
 		
-		//先处理复合css，因为它们应是低优先级
-		for(var p in styleObj)
-		{
-			if(p == "inset")
-			{
-				this._resolveSetStyleInset(newStyleObj, styleObj[p]);
-			}
-			else if(p == "background")
-			{
-				this._resolveSetStyleBackground(newStyleObj, styleObj[p]);
-			}
-		}
-		
-		for(var p in styleObj)
-		{
-			if(this._editableElementStyles[p] && styleObj[p])
-				newStyleObj[p] = styleObj[p];
-		}
-		
-		newStyleObj.className = (ele.attr("class") || "");
-		
-		return newStyleObj;
-	};
-	
-	//将css的background属性转换为background-color、background-image等属性
-	editor._resolveSetStyleBackground = function(styleObj, background)
-	{
-		if(!background)
-			return;
-		
-		var ary = background.split(" ");
-		var beforePositionSizeSplitter = true;
-		var bgPositionCount = 0, bgSizeCount = 0;
-		
-		for(var i=0; i<ary.length; i++)
-		{
-			var v = ary[i];
-			
-			// "background-position / background-size"
-			if("/" == v)
-			{
-				beforePositionSizeSplitter = false;
-			}
-			else if(/^url\(/i.test(v))
-			{
-				styleObj["background-image"] = v;
-			}
-			else if(/^(\#|rgb)/.test(v))
-			{
-				styleObj["background-color"] = v;
-			}
-			else if(/^(no\-repeat|repeat|repeat\-x|repeat\-y)$/i.test(v))
-			{
-				styleObj["background-repeat"] = v;
-			}
-			else if(beforePositionSizeSplitter && bgPositionCount < 2 && (/^(left|right|top|bottom|center)$/i.test(v) || /^\d/.test(v)))
-			{
-				styleObj["background-position"] = (bgPositionCount == 0 ? v : styleObj["background-position"]+" "+v);
-				bgPositionCount++;
-			}
-			else if(!beforePositionSizeSplitter && bgSizeCount < 2 && (/^(auto|cover|contain)$/i.test(v) || /^\d/.test(v)))
-			{
-				styleObj["background-size"] = (bgSizeCount == 0 ? v : styleObj["background-size"]+" "+v);
-				bgSizeCount++;
-			}
-			// 颜色单词
-			else if(i == 0 && !styleObj["background-color"] && /^[a-zA-Z]/.test(v))
-			{
-				styleObj["background-color"] = v;
-			}
-		}
-	};
-	
-	//将css的inset属性转换为top、left、right、bottom属性
-	editor._resolveSetStyleInset = function(styleObj, inset)
-	{
-		if(!inset)
-			return;
-		
-		var ary = inset.split(" ");
-		
-		if(ary.length == 0)
-			return;
-		
-		if(ary.length == 1)
-		{
-			ary[1] = ary[0];
-			ary[2] = ary[0];
-			ary[3] = ary[0];
-		}
-		else if(ary.length == 2)
-		{
-			ary[2] = ary[0];
-			ary[3] = ary[1];
-		}
-		else if(ary.length == 3)
-		{
-			ary[3] = ary[1];
-		}
-		
-		styleObj["top"] = ary[0];
-		styleObj["right"] = ary[1];
-		styleObj["bottom"] = ary[2];
-		styleObj["left"] = ary[3];
+		return styleObj;
 	};
 	
 	editor._editableElementStyles =
