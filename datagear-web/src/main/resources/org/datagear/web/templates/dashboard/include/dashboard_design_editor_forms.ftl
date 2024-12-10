@@ -1227,12 +1227,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleAlignItemsGrid" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.alignItemsGrid' />
+								<label for="${pid}veStyleGridAlignItems" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.gridAlignItems' />
 									<span class="text-color-secondary text-sm ml-1">align-items</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleAlignItemsGrid" v-model="pm.vepms.style['align-items-grid']" type="text"
+									<p-inputtext id="${pid}veStyleGridAlignItems" v-model="pm.vepms.style['align-items-grid']" type="text"
 										class="help-target input w-full" name="align-items-grid">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1252,12 +1252,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleJustifyContentGrid" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.justifyContentGrid' />
+								<label for="${pid}veStyleGridJustifyContent" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.gridJustifyContent' />
 									<span class="text-color-secondary text-sm ml-1">justify-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleJustifyContentGrid" v-model="pm.vepms.style['justify-content-grid']" type="text"
+									<p-inputtext id="${pid}veStyleGridJustifyContent" v-model="pm.vepms.style['justify-content-grid']" type="text"
 										class="help-target input w-full" name="justify-content-grid">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1288,12 +1288,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleAlignContentGrid" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.alignContentGrid' />
+								<label for="${pid}veStyleGridAlignContent" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.gridAlignContent' />
 									<span class="text-color-secondary text-sm ml-1">align-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleAlignContentGrid" v-model="pm.vepms.style['align-content-grid']" type="text"
+									<p-inputtext id="${pid}veStyleGridAlignContent" v-model="pm.vepms.style['align-content-grid']" type="text"
 										class="help-target input w-full" name="align-content-grid">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1472,12 +1472,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleAlignSelfGrid" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.alignSelfGrid' />
+								<label for="${pid}veStyleGridAlignSelf" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.gridAlignSelf' />
 									<span class="text-color-secondary text-sm ml-1">align-self</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleAlignSelfGrid" v-model="pm.vepms.style['align-self-grid']" type="text"
+									<p-inputtext id="${pid}veStyleGridAlignSelf" v-model="pm.vepms.style['align-self-grid']" type="text"
 										class="help-target input w-full" name="align-self-grid">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1553,12 +1553,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleJustifyContentFlex" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.justifyContentFlex' />
+								<label for="${pid}veStyleFlexJustifyContent" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.flexJustifyContent' />
 									<span class="text-color-secondary text-sm ml-1">justify-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleJustifyContentFlex" v-model="pm.vepms.style['justify-content-flex']" type="text"
+									<p-inputtext id="${pid}veStyleFlexJustifyContent" v-model="pm.vepms.style['justify-content-flex']" type="text"
 										class="help-target input w-full" name="justify-content-flex">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1583,12 +1583,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleAlignItemsFlex" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.alignItemsFlex' />
+								<label for="${pid}veStyleFlexAlignItems" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.flexAlignItems' />
 									<span class="text-color-secondary text-sm ml-1">align-items</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleAlignItemsFlex" v-model="pm.vepms.style['align-items-flex']" type="text"
+									<p-inputtext id="${pid}veStyleFlexAlignItems" v-model="pm.vepms.style['align-items-flex']" type="text"
 										class="help-target input w-full" name="align-items-flex">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1611,12 +1611,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleAlignContentFlex" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.alignContentFlex' />
+								<label for="${pid}veStyleFlexAlignContent" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.flexAlignContent' />
 									<span class="text-color-secondary text-sm ml-1">align-content</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleAlignContentFlex" v-model="pm.vepms.style['align-content-flex']" type="text"
+									<p-inputtext id="${pid}veStyleFlexAlignContent" v-model="pm.vepms.style['align-content-flex']" type="text"
 										class="help-target input w-full" name="align-content-flex">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
@@ -1697,12 +1697,12 @@ page_boolean_options.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleAlignSelfFlex" class="field-label col-12 mb-2">
-									<@spring.message code='dashboard.veditor.style.alignSelfFlex' />
+								<label for="${pid}veStyleFlexAlignSelf" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.flexAlignSelf' />
 									<span class="text-color-secondary text-sm ml-1">align-self</span>
 								</label>
 								<div class="field-input col-12">
-									<p-inputtext id="${pid}veStyleAlignSelfFlex" v-model="pm.vepms.style['align-self-flex']" type="text"
+									<p-inputtext id="${pid}veStyleFlexAlignSelf" v-model="pm.vepms.style['align-self-flex']" type="text"
 										class="help-target input w-full" name="align-self-flex">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
