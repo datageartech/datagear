@@ -122,8 +122,25 @@ page_boolean_options.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veFlexLayoutItems" v-model="pm.vepms.flexLayout.items" type="text"
-							class="input w-full" name="items" maxlength="10" autofocus>
+							class="help-target input w-full" name="items" maxlength="10" autofocus>
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="1">
+								<@spring.message code='dashboard.veditor.flexLayout.items.1' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="2">
+								<@spring.message code='dashboard.veditor.flexLayout.items.2' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="3">
+								<@spring.message code='dashboard.veditor.flexLayout.items.3' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="4">
+								<@spring.message code='dashboard.veditor.flexLayout.items.4' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="5">
+								<@spring.message code='dashboard.veditor.flexLayout.items.5' />
+							</p-button>
+						</div>
 					</div>
 				</div>
 				<div class="field grid">
