@@ -1094,11 +1094,14 @@ page_boolean_options.ftl
 					</p-tabpanel>
 					<p-tabpanel header="<@spring.message code='gridLayout' />">
 						<div class="ve-style-tabpanel-content px-2 overflow-y-auto">
-							<p-divider align="center">
-								<label class="text-lg font-bold" title="<@spring.message code='dashboard.veditor.styleSubType.gridContainer.desc' />">
+							<p-divider align="center" class="mb-1">
+								<label class="text-lg font-bold">
 									<@spring.message code='gridContainer' />
 								</label>
 							</p-divider>
+							<div class="text-color-secondary text-sm text-center mb-3">
+								<@spring.message code='dashboard.veditor.styleSubType.gridContainer.desc' />
+							</div>
 							<div class="field grid">
 								<label for="${pid}veStyleGridTemplateRows" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridTemplateRows.desc' />">
@@ -1398,11 +1401,14 @@ page_boolean_options.ftl
 									</div>
 								</div>
 							</div>
-							<p-divider align="center">
-								<label class="text-lg font-bold" title="<@spring.message code='dashboard.veditor.styleSubType.gridItem.desc' />">
+							<p-divider align="center" class="mb-1">
+								<label class="text-lg font-bold">
 									<@spring.message code='gridItem' />
 								</label>
 							</p-divider>
+							<div class="text-color-secondary text-sm text-center mb-3">
+								<@spring.message code='dashboard.veditor.styleSubType.gridItem.desc' />
+							</div>
 							<div class="field grid">
 								<label for="${pid}veStyleGridRowStart" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.gridRowStart.desc' />">
@@ -1517,11 +1523,14 @@ page_boolean_options.ftl
 					</p-tabpanel>
 					<p-tabpanel header="<@spring.message code='flexLayout' />">
 						<div class="ve-style-tabpanel-content px-2 overflow-y-auto">
-							<p-divider align="center">
-								<label class="text-lg font-bold" title="<@spring.message code='dashboard.veditor.styleSubType.flexContainer.desc' />">
+							<p-divider align="center" class="mb-1">
+								<label class="text-lg font-bold">
 									<@spring.message code='flexContainer' />
 								</label>
 							</p-divider>
+							<div class="text-color-secondary text-sm text-center mb-3">
+								<@spring.message code='dashboard.veditor.styleSubType.flexContainer.desc' />
+							</div>
 							<div class="field grid">
 								<label for="${pid}veStyleFlexDirection" class="field-label col-12 mb-2">
 									<@spring.message code='dashboard.veditor.style.flexDirection' />
@@ -1660,11 +1669,14 @@ page_boolean_options.ftl
 									</div>
 								</div>
 							</div>
-							<p-divider align="center">
-								<label class="text-lg font-bold" title="<@spring.message code='dashboard.veditor.styleSubType.flexItem.desc' />">
+							<p-divider align="center" class="mb-1">
+								<label class="text-lg font-bold">
 									<@spring.message code='flexItem' />
 								</label>
 							</p-divider>
+							<div class="text-color-secondary text-sm text-center mb-3">
+								<@spring.message code='dashboard.veditor.styleSubType.flexItem.desc' />
+							</div>
 							<div class="field grid">
 								<label for="${pid}veStyleOrder" class="field-label col-12 mb-2"
 									title="<@spring.message code='dashboard.veditor.style.order.desc' />">
