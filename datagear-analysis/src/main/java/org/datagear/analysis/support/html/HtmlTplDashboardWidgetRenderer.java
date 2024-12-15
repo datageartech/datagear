@@ -947,7 +947,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * @param template
 	 * @return
 	 */
-	protected static HtmlTplDashboard createDashboard(HtmlTplDashboardWidget dashboardWidget, RenderContext renderContext,
+	protected HtmlTplDashboard createDashboard(HtmlTplDashboardWidget dashboardWidget, RenderContext renderContext,
 			String dashboardId, String template)
 	{
 		HtmlTplDashboard dashboard = new HtmlTplDashboard();
@@ -957,6 +957,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		dashboard.setWidget(dashboardWidget);
 		dashboard.setRenderContext(renderContext);
 		dashboard.setCharts(new ArrayList<Chart>());
+		dashboard.setVersion(dashboardWidget.getVersion());
 
 		return dashboard;
 	}

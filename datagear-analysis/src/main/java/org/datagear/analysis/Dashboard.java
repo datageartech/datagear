@@ -41,6 +41,8 @@ public class Dashboard extends DashboardQueryHandler implements Identifiable, Se
 
 	private List<Chart> charts = Collections.emptyList();
 
+	private String version = "";
+
 	public Dashboard()
 	{
 		super();
@@ -112,6 +114,16 @@ public class Dashboard extends DashboardQueryHandler implements Identifiable, Se
 		}
 
 		return null;
+	}
+
+	public String getVersion()
+	{
+		return version;
+	}
+
+	public void setVersion(String version)
+	{
+		this.version = version;
 	}
 
 	@Override

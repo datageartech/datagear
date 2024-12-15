@@ -90,6 +90,7 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 					new TplDashboardWidgetJson(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
+			setVersion(dashboard.getVersion());
 			
 			LoadableChartWidgets lcws = dashboard.getLoadableChartWidgets();
 			setLoadableChartWidgets(lcws == null ? null : new LoadableChartWidgetsJson(lcws));

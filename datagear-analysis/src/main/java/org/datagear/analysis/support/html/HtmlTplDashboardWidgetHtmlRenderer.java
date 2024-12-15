@@ -442,7 +442,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected DashboardFilterContext doRenderDashboard(HtmlTplDashboardWidget dashboardWidget,
 			HtmlTplDashboardRenderContext renderContext) throws RenderException, IOException
 	{
-		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, nextDashboardId());
+		HtmlTplDashboard dashboard = createDashboard(dashboardWidget, renderContext, nextDashboardId(),
+				renderContext.getTemplate());
+		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, dashboard);
 		DashboardFilterHandler filterHandler = new DashboardFilterHandler(context);
 		
 		getHtmlFilter().filter(renderContext.getTemplateReader(), filterHandler);
@@ -454,8 +456,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta)
 			throws RenderException, IOException
 	{
+		HtmlTplDashboard dashboard = createDashboard(dashboardWidget, renderContext, nextDashboardId(),
+				renderContext.getTemplate());
 		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, dashboardMeta,
-				nextDashboardId());
+				dashboard);
 		IndexedDashboardFilterHandler filterHandler = new IndexedDashboardFilterHandler(context);
 		
 		getHtmlFilter().filter(renderContext.getTemplateReader(), filterHandler);
@@ -1198,27 +1202,18 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		private final TplDashboardMeta dashboardMeta;
 		private final HtmlTplDashboard dashboard;
 		
-		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext, String dashboardId)
+		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget,
+				HtmlTplDashboardRenderContext renderContext, HtmlTplDashboard dashboard)
 		{
 			super();
 			this.dashboardWidget = dashboardWidget;
 			this.renderContext = renderContext;
-			this.dashboard = createDashboard(dashboardWidget, renderContext, dashboardId, renderContext.getTemplate());
 			this.dashboardMeta = new TplDashboardMeta();
+			this.dashboard = dashboard;
 		}
 
-		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext,
-										TplDashboardMeta dashboardMeta, String dashboardId)
-		{
-			super();
-			this.dashboardWidget = dashboardWidget;
-			this.renderContext = renderContext;
-			this.dashboardMeta = dashboardMeta;
-			this.dashboard = createDashboard(dashboardWidget, renderContext, dashboardId, renderContext.getTemplate());
-		}
-
-		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta,
-				HtmlTplDashboard dashboard)
+		public DashboardFilterContext(HtmlTplDashboardWidget dashboardWidget,
+				HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta, HtmlTplDashboard dashboard)
 		{
 			super();
 			this.dashboardWidget = dashboardWidget;
