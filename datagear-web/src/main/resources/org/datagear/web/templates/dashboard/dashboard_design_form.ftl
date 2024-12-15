@@ -35,6 +35,7 @@
 			<div class="field grid flex-grow-0 mb-1">
 				<label class="field-label col-12 mb-0">
 					{{fm.name}}
+					<span class="text-color-secondary ml-2">v<small>{{fm.version}}</small></span>
 				</label>
 			</div>
 			<div class="field grid mb-0 flex-grow-1 flex flex-column">

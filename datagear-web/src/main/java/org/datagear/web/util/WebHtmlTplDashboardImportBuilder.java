@@ -29,6 +29,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
+import org.datagear.web.analysis.DashboardVersion;
 import org.datagear.web.controller.ServerTimeJsController;
 
 /**
@@ -135,6 +136,8 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	{
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
 
+		boolean buildExtraLib = isBuildExtraLib(dashboard);
+
 		String libPrefix = contextPath + PATH_LIB;
 		String cssPrefix = contextPath + PATH_CSS;
 		String scriptPrefix = contextPath + PATH_SCRIPT;
@@ -146,30 +149,41 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 						+ "=\"" + BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON + "\" />"));
 
 		// CSS
-		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
-						libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
+
+		if (buildExtraLib)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
+					libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
+		}
+
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE,
 				cssPrefix + "/analysis.css?v=" + Global.VERSION));
 		
-		if (isModelEdit(mode))
+		if (isEditMode(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
 					contextPath + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
 		}
 
 		// JS
+
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
 				libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
 				libPrefix + "/echarts-5.4.3/echarts.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD,
-				libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_LIQUIDFILL,
-				libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
-						libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
+
+		if (buildExtraLib)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD,
+					libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_LIQUIDFILL,
+					libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
+					libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
+		}
+
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY,
@@ -185,7 +199,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
 				contextPath + "/vres/plugin/chartPluginManager.js?v=" + Global.VERSION));
 
-		if (isModelEdit(mode))
+		if (isEditMode(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
 					scriptPrefix + "/dashboardEditor.js?v=" + Global.VERSION));
@@ -194,8 +208,22 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		return impts;
 	}
 
-	protected boolean isModelEdit(String mode)
+	protected boolean isEditMode(String mode)
 	{
 		return MODE_EDIT.equals(mode);
+	}
+
+	/**
+	 * 是否在内置看板资源中包含附加库。
+	 * <p>
+	 * 为了兼容旧版的看板，需要内置看板资源包含附加库，具体参考{@linkplain DashboardVersion}。
+	 * </p>
+	 * 
+	 * @param dashboard
+	 * @return
+	 */
+	protected boolean isBuildExtraLib(HtmlTplDashboard dashboard)
+	{
+		return DashboardVersion.isVersion_1_0(dashboard.getVersion());
 	}
 }

@@ -54,6 +54,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
+import org.datagear.web.analysis.DashboardVersion;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
@@ -182,6 +183,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		HtmlTplDashboardWidgetEntity entity = createInstance();
 		entity.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		entity.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
+		entity.setVersion(DashboardVersion.V_2_0);
 
 		return entity;
 	}
@@ -675,13 +677,21 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		setFormAction(model, REQUEST_ACTION_IMPORT, SUBMIT_ACTION_SAVE_IMPORT);
 
-		DashboardImportForm form = new DashboardImportForm();
+		DashboardImportForm form = createImportForm(request, model);
 		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		form.setAnalysisProject(getRequestAnalysisProject(request, getAnalysisProjectService()));
+		form.setVersion(DashboardVersion.V_2_0);
+
 		setFormModel(model, form);
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
 
 		return "/dashboard/dashboard_import";
+	}
+
+	protected DashboardImportForm createImportForm(HttpServletRequest request, Model model)
+	{
+		DashboardImportForm form = new DashboardImportForm();
+		return form;
 	}
 
 	@RequestMapping(value = "/uploadImportFile", produces = CONTENT_TYPE_JSON)
@@ -872,6 +882,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		entity.setTemplateEncoding(templateEncoding);
 		entity.setName(form.getName());
 		entity.setAnalysisProject(form.getAnalysisProject());
+		entity.setVersion(form.getVersion());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
 	}
@@ -1423,6 +1434,8 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		private AnalysisProject analysisProject;
 
+		private String version;
+
 		public DashboardImportForm()
 		{
 			super();
@@ -1476,6 +1489,16 @@ public class DashboardController extends AbstractDataAnalysisController
 		public void setAnalysisProject(AnalysisProject analysisProject)
 		{
 			this.analysisProject = analysisProject;
+		}
+
+		public String getVersion()
+		{
+			return version;
+		}
+
+		public void setVersion(String version)
+		{
+			this.version = version;
 		}
 	}
 }

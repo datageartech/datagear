@@ -56,4 +56,15 @@ public class DashboardVersion
 	 * </p>
 	 */
 	public static final String V_2_0 = "2.0";
+
+	/**
+	 * 是否{@linkplain #V_1_0}版本。
+	 * 
+	 * @param version
+	 * @return
+	 */
+	public static boolean isVersion_1_0(String version)
+	{
+		return V_1_0.equals(version);
+	}
 }
