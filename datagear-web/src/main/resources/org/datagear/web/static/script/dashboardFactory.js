@@ -360,11 +360,13 @@
 		dashboard._template = dashboard.template;
 		dashboard._varName = dashboard.varName;
 		dashboard._loadableChartWidgets = dashboard.loadableChartWidgets;
+		dashboard._version = dashboard.version;
 		
 		delete dashboard.widget;
 		delete dashboard.template;
 		delete dashboard.varName;
 		delete dashboard.loadableChartWidgets;
+		delete dashboard.version;
 	};
 	
 	dashboardFactory._initStartHeartBeatIfNot = function(dashboard)
@@ -3046,6 +3048,18 @@
 		}
 		
 		return chartFactory.toWebContextPathURL(webContext, url);
+	};
+	
+	/**
+	 * 获取版本。
+	 * 具体参考：org.datagear.web.analysis.DashboardVersion
+	 * 
+	 * @return 版本号，目前只有：1.0、2.0
+	 * @since 5.3.0
+	 */
+	dashboardBase.version = function()
+	{
+		return (this._version == "1.0" ? this._version : "2.0");
 	};
 	
 	//-------------
