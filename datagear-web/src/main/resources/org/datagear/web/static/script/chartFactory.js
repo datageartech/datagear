@@ -55,10 +55,10 @@
  *   //必选，渲染图表函数
  *   render: function(chart){ ... },
  *   //可选，更新图表数据函数是否是异步函数，默认为false
- *   asyncUpdate: true、false、function(chart, results){ ...; return true 或者 false; }
+ *   asyncUpdate: true、false、function(chart, chartResult){ ...; return true 或者 false; }
  *   //必选，更新图表数据函数
- *   //results 要更新的图表数据
- *   update: function(chart, results){ ... },
+ *   //chartResult 要更新的图表结果
+ *   update: function(chart, chartResult){ ... },
  *   //可选，调整图表尺寸函数
  *   resize: function(chart){ ... },
  *   //可选，绑定图表事件处理函数
@@ -90,7 +90,7 @@
  *   
  *   asyncUpdate: true,
  *   
- *   update: function(chart, results)
+ *   update: function(chart, chartResult)
  *   {
  *     $.get("...", function()
  *     {
@@ -599,12 +599,12 @@
 					if(dl)
 						return dl.render(chart);
 				},
-				update: function(chart, results)
+				update: function(chart, chartResult)
 				{
 					var dl = this._findListenerOfFunc("update");
 					
 					if(dl)
-						return dl.update(chart, results);
+						return dl.update(chart, chartResult);
 				},
 				destroy: function(chart)
 				{
@@ -620,12 +620,12 @@
 					if(dl)
 						return dl.onRender(chart);
 				},
-				onUpdate: function(chart, results)
+				onUpdate: function(chart, chartResult)
 				{
 					var dl = this._findListenerOfFunc("onUpdate");
 					
 					if(dl)
-						return dl.onUpdate(chart, results);
+						return dl.onUpdate(chart, chartResult);
 				},
 				onDestroy: function(chart)
 				{
@@ -897,13 +897,13 @@
 	 *   //可选，渲染图表完成回调函数
 	 *   render: function(chart){ ... },
 	 *   //可选，更新图表数据完成回调函数
-	 *   update: function(chart, results){ ... },
+	 *   update: function(chart, chartResult){ ... },
 	 *   //可选，销毁图表完成回调函数
 	 *   destroy: function(chart){ ... },
 	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
 	 *   onRender: function(chart){ ... },
 	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
-	 *   onUpdate: function(chart, results){ ... },
+	 *   onUpdate: function(chart, chartResult){ ... },
 	 *   //可选，销毁图表前置回调函数，返回false将阻止销毁图表
 	 *   onDestroy: function(chart){ ... }
 	 * }
@@ -2286,54 +2286,69 @@
 	};
 	
 	/**
+	 * 获取数据集结果数组。
+	 * 
+	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
+	 */
+	chartBase._dataSetResults = function(chartResult)
+	{
+		//如果是数组，直接返回，用于支持看板版本1.0
+		if($.isArray(chartResult))
+			return chartResult;
+		else
+			return (chartResult ? chartResult.dataSetResults : undefined);
+	};
+	
+	/**
 	 * 返回指定索引的数据集结果，没有则返回undefined。
 	 * 
-	 * @param results
+	 * @param chartResult 图表结果
 	 * @param index
 	 */
-	chartBase.resultAt = function(results, index)
+	chartBase.resultAt = function(chartResult, index)
 	{
-		return (!results || results.length <= index ? undefined : results[index]);
+		var dataSetResults = this._dataSetResults(chartResult);
+		return (!dataSetResults || dataSetResults.length <= index ? undefined : dataSetResults[index]);
 	};
 	
 	/**
 	 * 返回指定数据集绑定对应的数据集结果，没有则返回undefined。
 	 * 
-	 * @param results
+	 * @param chartResult 图表结果
 	 * @param dataSetBind
 	 */
-	chartBase.resultOf = function(results, dataSetBind)
+	chartBase.resultOf = function(chartResult, dataSetBind)
 	{
-		return this.resultAt(results, dataSetBind.index);
+		return this.resultAt(chartResult, dataSetBind.index);
 	};
 	
 	/**
 	 * 获取/设置数据集结果对象包含的数据。
 	 * 
-	 * @param result 数据集结果对象
+	 * @param dataSetResult 数据集结果
 	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
 	 * @return 要获取的数据集结果数据，没有则返回null
 	 */
-	chartBase.resultData = function(result, data)
+	chartBase.resultData = function(dataSetResult, data)
 	{
 		if(data === undefined)
-			return (result ? result.data : undefined);
+			return (dataSetResult ? dataSetResult.data : undefined);
 		else
-			result.data = data;
+			dataSetResult.data = data;
 	};
 	
 	/**
 	 * 获取/设置指定数据集绑定对应的数据集结果对象包含的数据。
 	 * 
-	 * @param results
+	 * @param chartResult 图表结果
 	 * @param dataSetBind
 	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
 	 * @return 要获取的数据集结果数据，没有则返回null
 	 * @since 3.0.0
 	 */
-	chartBase.resultDataOf = function(results, dataSetBind, data)
+	chartBase.resultDataOf = function(chartResult, dataSetBind, data)
 	{
-		var result = this.resultOf(results, dataSetBind);
+		var result = this.resultOf(chartResult, dataSetBind);
 		return this.resultData(result, data);
 	};
 	
@@ -2341,38 +2356,38 @@
 	 * 获取数据集结果的数据对象数组。
 	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
 	 * 
-	 * @param result 数据集结果对象
+	 * @param dataSetResult 数据集结果
 	 * @return 不会为null的数组
 	 */
-	chartBase.resultDatas = function(result)
+	chartBase.resultDatas = function(dataSetResult)
 	{
-		if(result == null || result.data == null)
+		if(dataSetResult == null || dataSetResult.data == null)
 			return [];
 		
-		if($.isArray(result.data))
-			return result.data;
+		if($.isArray(dataSetResult.data))
+			return dataSetResult.data;
 		
-		return [ result.data ];
+		return [ dataSetResult.data ];
 	};
 	
 	/**
 	 * 获取指定数据集绑定对应的数据集结果对象包含的数据对象数组。
 	 * 
-	 * @param results
+	 * @param chartResult 图表结果
 	 * @param dataSetBind
 	 * @return 不会为null的数组
 	 * @since 3.0.0
 	 */
-	chartBase.resultDatasOf = function(results, dataSetBind)
+	chartBase.resultDatasOf = function(chartResult, dataSetBind)
 	{
-		var result = this.resultOf(results, dataSetBind);
-		return this.resultDatas(result);
+		var dataSetResult = this.resultOf(chartResult, dataSetBind);
+		return this.resultDatas(dataSetResult);
 	};
 	
 	/**
 	 * 获取数据集结果数据的行对象指定属性值。
 	 * 
-	 * @param rowObj 行对象
+	 * @param rowObj 行对象，格式为：{ ... }
 	 * @param field 数据集字段对象、字段名
 	 */
 	chartBase.resultRowCell = function(rowObj, field)
@@ -2387,20 +2402,20 @@
 	/**
 	 * 将数据集结果数据的行对象按照指定fields顺序转换为行值数组。
 	 * 
-	 * @param result 数据集结果对象
+	 * @param dataSetResult 数据集结果
 	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 可选，行索引，默认为0
 	 * @param count 可选，获取的最多行数，默认为全部
 	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
 	 */
-	chartBase.resultRowArrays = function(result, fields, row, count)
+	chartBase.resultRowArrays = function(dataSetResult, fields, row, count)
 	{
 		var re = [];
 		
-		if(!result || !fields)
+		if(!dataSetResult || !fields)
 			return re;
 		
-		var datas = this.resultDatas(result);
+		var datas = this.resultDatas(dataSetResult);
 		
 		row = (row || 0);
 		var getCount = datas.length;
@@ -2448,20 +2463,20 @@
 	/**
 	 * 将数据集结果数据的行对象按照指定fields顺序转换为列值数组。
 	 * 
-	 * @param result 数据集结果对象
+	 * @param dataSetResult 数据集结果
 	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
 	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
 	 */
-	chartBase.resultColumnArrays = function(result, fields, row, count)
+	chartBase.resultColumnArrays = function(dataSetResult, fields, row, count)
 	{
 		var re = [];
 
-		if(!result || !fields)
+		if(!dataSetResult || !fields)
 			return re;
 		
-		var datas = this.resultDatas(result);
+		var datas = this.resultDatas(dataSetResult);
 		
 		row = (row || 0);
 		var getCount = datas.length;
@@ -2506,46 +2521,46 @@
 	/**
 	 * 获取数据集结果数据的名称/值对象数组。
 	 * 
-	 * @param result 数据集结果对象、对象数组
+	 * @param dataSetResult 数据集结果
 	 * @param nameField 名称数据集字段对象、字段名
 	 * @param valueField 值数据集字段对象、字段名、数组
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{name: ..., value: ...}, ...]
 	 */
-	chartBase.resultNameValueObjects = function(result, nameField, valueField, row, count)
+	chartBase.resultNameValueObjects = function(dataSetResult, nameField, valueField, row, count)
 	{
 		var fieldMap ={ "name": nameField, "value": valueField };
-		return this.resultMapObjects(result, fieldMap, row, count);
+		return this.resultMapObjects(dataSetResult, fieldMap, row, count);
 	};
 	
 	/**
 	 * 获取数据集结果数据的值对象数组。
 	 * 
-	 * @param result 数据集结果对象、对象数组
+	 * @param dataSetResult 数据集结果
 	 * @param valueField 值数据集字段对象、字段名、数组
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{value: ...}, ...]
 	 */
-	chartBase.resultValueObjects = function(result, valueField, row, count)
+	chartBase.resultValueObjects = function(dataSetResult, valueField, row, count)
 	{
 		var fieldMap ={ "value": valueField };
-		return this.resultMapObjects(result, fieldMap, row, count);
+		return this.resultMapObjects(dataSetResult, fieldMap, row, count);
 	};
 	
 	/**
-	 * 获取数据集结果数据指定属性、指定行的单元格值，没有则返回undefined。
+	 * 获取数据集结果数据指定字段、指定行的单元格值，没有则返回undefined。
 	 * 
-	 * @param result 数据集结果对象
+	 * @param dataSetResult 数据集结果
 	 * @param field 数据集字段对象、字段名
 	 * @param row 行索引，可选，默认为0
 	 */
-	chartBase.resultCell = function(result, field, row)
+	chartBase.resultCell = function(dataSetResult, field, row)
 	{
 		row = (row || 0);
 		
-		var re = this.resultRowArrays(result, field, row, 1);
+		var re = this.resultRowArrays(dataSetResult, field, row, 1);
 		
 		return (re.length > 0 ? re[0] : undefined);
 	};
@@ -3002,16 +3017,16 @@
 	/**
 	 * 获取数据集结果数据指定索引的元素。
 	 * 
-	 * @param result 数据集结果对象
+	 * @param dataSetResult 数据集结果
 	 * @param index 索引数值、数值数组
 	 * @return 数据对象、据对象数组，当result、index为null时，将返回null
 	 */
-	chartBase.resultDataElement = function(result, index)
+	chartBase.resultDataElement = function(dataSetResult, index)
 	{
-		if(result == null || result.data == null || index == null)
+		if(dataSetResult == null || dataSetResult.data == null || index == null)
 			return undefined;
 		
-		var datas = this.resultDatas(result);
+		var datas = this.resultDatas(dataSetResult);
 		
 		if(!$.isArray(index))
 			return datas[index];
@@ -3407,18 +3422,18 @@
 	/**
 	 * 获取数据集结果数据经属性映射后的对象数组。
 	 * 
-	 * @param result 数据集结果对象、对象数组
+	 * @param dataSetResult 数据集结果
 	 * @param fieldMap 返回对象属性映射表，格式为：{ 返回对象属性名: 数据集结果数据属性对象、属性名、属性数组、属性名数组 }
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{"...": ..., "...": ...}, ...]
 	 * @since 2.10.0
 	 */
-	chartBase.resultMapObjects = function(result, fieldMap, row, count)
+	chartBase.resultMapObjects = function(dataSetResult, fieldMap, row, count)
 	{
 		var re = [];
 		
-		var datas = this.resultDatas(result);
+		var datas = this.resultDatas(dataSetResult);
 		row = (row == null ? 0 : row);
 		count = (count == null ? datas.length : (count < datas.length ? count : datas.length));
 		
@@ -4800,10 +4815,10 @@
 	/**
 	 * 返回第一个主件或者附件数据集结果，没有则返回undefined。
 	 * 
-	 * @param results
+	 * @param chartResult 图表结果
 	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
 	 */
-	chartBase.resultFirst = function(results, attachment)
+	chartBase.resultFirst = function(chartResult, attachment)
 	{
 		attachment = (attachment == null ? false : attachment);
 		
@@ -4821,7 +4836,7 @@
 			}
 		}
 		
-		return (index == null ? undefined : this.resultAt(results, index));
+		return (index == null ? undefined : this.resultAt(chartResult, index));
 	};
 	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
 	
@@ -4830,14 +4845,14 @@
 	 * 获取第一个主件或者附件数据集结果的数据对象数组。
 	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
 	 * 
-	 * @param results 数据集结果数组
+	 * @param chartResult 图表结果
 	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
 	 * @return 不会为null的数组
 	 */
-	chartBase.resultDatasFirst = function(results, attachment)
+	chartBase.resultDatasFirst = function(chartResult, attachment)
 	{
-		var result = this.resultFirst(results, attachment);
-		return this.resultDatas(result);
+		var dataSetResult = this.resultFirst(chartResult, attachment);
+		return this.resultDatas(dataSetResult);
 	};
 	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultDatasOf()
 	
