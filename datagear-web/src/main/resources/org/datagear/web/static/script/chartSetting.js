@@ -2093,8 +2093,8 @@
 	
 	chartSetting.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $table)
 	{
-		var results = chart.updateResults();
-		var result = chart.resultAt(results, index);
+		var chartResult = chart.updateResult();
+		var result = chart.resultAt(chartResult, index);
 		var datas = chart.resultDatas(result);
 		var columns = ($table.data("tableColumns") || []);
 		

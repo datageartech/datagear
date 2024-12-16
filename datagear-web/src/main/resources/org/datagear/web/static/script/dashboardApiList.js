@@ -204,7 +204,7 @@ global.dashboardApiCompletions =
 	{name: "updateAppendMode", value: "updateAppendMode(", displayName: "updateAppendMode() ", displayComment: "chart", categories: ["chart"]},
 	{name: "updateGroup", value: "updateGroup(", displayName: "updateGroup() ", displayComment: "chart", categories: ["chart"]},
 	{name: "updateInterval", value: "updateInterval", displayName: "updateInterval ", displayComment: "chart", categories: ["chart"]},
-	{name: "updateResults", value: "updateResults(", displayName: "updateResults() ", displayComment: "chart", categories: ["chart"]},
+	{name: "updateResult", value: "updateResult(", displayName: "updateResult() ", displayComment: "chart", categories: ["chart"]},
 	{name: "widgetId", value: "widgetId()", displayName: "widgetId() ", displayComment: "chart", categories: ["chart"]}
 ];
 

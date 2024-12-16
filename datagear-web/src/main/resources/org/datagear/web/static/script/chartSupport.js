@@ -118,7 +118,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.lineUpdate = function(chart, results)
+	chartSupport.lineUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -133,7 +133,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
@@ -208,7 +208,7 @@
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
-		options = chart.inflateUpdateOptions(results, options, function(options)
+		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
 		});
@@ -344,7 +344,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.barUpdate = function(chart, results)
+	chartSupport.barUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -359,7 +359,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
@@ -445,7 +445,7 @@
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
-		options = chart.inflateUpdateOptions(results, options, function(options)
+		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
 		});
@@ -596,7 +596,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.barPolarUpdate = function(chart, results)
+	chartSupport.barPolarUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -612,7 +612,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
@@ -700,7 +700,7 @@
 						});
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -816,7 +816,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.pieUpdate = function(chart, results)
+	chartSupport.pieUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -830,7 +830,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
@@ -885,7 +885,7 @@
 		
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -1115,7 +1115,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.gaugeUpdate = function(chart, results)
+	chartSupport.gaugeUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -1132,7 +1132,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			if(min == null)
 			{
@@ -1186,7 +1186,7 @@
 		var options = { series : [ { id: 0, type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -1275,9 +1275,9 @@
 		chartSupport._scatterRender(chart, options, "scatter");
 	};
 	
-	chartSupport.scatterUpdate = function(chart, results)
+	chartSupport.scatterUpdate = function(chart, chartResult)
 	{
-		chartSupport._scatterUpdate(chart, results);
+		chartSupport._scatterUpdate(chart, chartResult);
 	};
 
 	chartSupport.scatterResize = function(chart)
@@ -1305,9 +1305,9 @@
 		chartSupport._scatterRender(chart, options, "effectScatter");
 	};
 	
-	chartSupport.scatterRippleUpdate = function(chart, results)
+	chartSupport.scatterRippleUpdate = function(chart, chartResult)
 	{
-		chartSupport._scatterUpdate(chart, results);
+		chartSupport._scatterUpdate(chart, chartResult);
 	};
 
 	chartSupport.scatterRippleResize = function(chart)
@@ -1406,7 +1406,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport._scatterUpdate = function(chart, results)
+	chartSupport._scatterUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -1425,7 +1425,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
@@ -1487,7 +1487,7 @@
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
-		options = chart.inflateUpdateOptions(results, options, function(options)
+		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
 		});
@@ -1539,9 +1539,9 @@
 		chartSupport._scatterCoordRender(chart, options, "scatter");
 	};
 	
-	chartSupport.scatterCoordUpdate = function(chart, results)
+	chartSupport.scatterCoordUpdate = function(chart, chartResult)
 	{
-		chartSupport._scatterCoordUpdate(chart, results);
+		chartSupport._scatterCoordUpdate(chart, chartResult);
 	};
 	
 	chartSupport.scatterCoordResize = function(chart)
@@ -1569,9 +1569,9 @@
 		chartSupport._scatterCoordRender(chart, options, "effectScatter");
 	};
 	
-	chartSupport.scatterCoordRippleUpdate = function(chart, results)
+	chartSupport.scatterCoordRippleUpdate = function(chart, chartResult)
 	{
-		chartSupport._scatterCoordUpdate(chart, results);
+		chartSupport._scatterCoordUpdate(chart, chartResult);
 	};
 	
 	chartSupport.scatterCoordRippleResize = function(chart)
@@ -1670,7 +1670,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport._scatterCoordUpdate = function(chart, results)
+	chartSupport._scatterCoordUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -1689,7 +1689,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
@@ -1738,7 +1738,7 @@
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -1847,7 +1847,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.radarUpdate = function(chart, results)
+	chartSupport.radarUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -1867,7 +1867,7 @@
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
 			var dataSetBind = dataSetBinds[i];
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.item);
 			
@@ -1877,14 +1877,14 @@
 			//相同条目名的多行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*1
 			if(ip)
 			{
-				chartSupport.radarUpdateTmpSeriesForRowMode(chart, results, renderOptions,
+				chartSupport.radarUpdateTmpSeriesForRowMode(chart, chartResult, renderOptions,
 						dataSetBind, result, indicatorData, tmpSeries)
 			}
 			//列式雷达网数据
 			//一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
 			else
 			{
-				chartSupport.radarUpdateTmpSeriesForColumnMode(chart, results, renderOptions,
+				chartSupport.radarUpdateTmpSeriesForColumnMode(chart, chartResult, renderOptions,
 						dataSetBind, result, indicatorData, tmpSeries)
 			}
 		}
@@ -1932,7 +1932,7 @@
 		var options = { legend: {id: 0, data: legendData}, radar: {id: 0, indicator: indicatorData}, series: series };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 		
@@ -1940,7 +1940,7 @@
 	};
 	
 	//行式雷达网数据处理
-	chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, results, renderOptions,
+	chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, chartResult, renderOptions,
 			dataSetBind, result, indicatorData, series)
 	{
 		var dg = renderOptions.dg;
@@ -2011,7 +2011,7 @@
 		}
 	};
 	
-	chartSupport.radarUpdateTmpSeriesForColumnMode = function(chart, results, renderOptions,
+	chartSupport.radarUpdateTmpSeriesForColumnMode = function(chart, chartResult, renderOptions,
 			dataSetBind, result, indicatorData, series)
 	{
 		var dg = renderOptions.dg;
@@ -2166,7 +2166,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.funnelUpdate = function(chart, results)
+	chartSupport.funnelUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -2183,7 +2183,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var npv = chart.resultColumnArrays(result, np);
@@ -2204,7 +2204,7 @@
 		var options = { legend: { id: 0, data: legendData }, series: series };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -2307,7 +2307,7 @@
 		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
-	chartSupport.mapUpdate = function(chart, results)
+	chartSupport.mapUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -2324,7 +2324,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
 			if(!map)
@@ -2354,7 +2354,7 @@
 		if(map)
 			options.series[0].map = map;
 		
-		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+		chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	};
 	
 	chartSupport.mapResize = function(chart)
@@ -2406,9 +2406,9 @@
 		chartSupport._mapScatterRender(chart, options, "scatter");
 	};
 	
-	chartSupport.mapScatterUpdate = function(chart, results)
+	chartSupport.mapScatterUpdate = function(chart, chartResult)
 	{
-		chartSupport._mapScatterUpdate(chart, results);
+		chartSupport._mapScatterUpdate(chart, chartResult);
 	};
 	
 	chartSupport.mapScatterResize = function(chart)
@@ -2436,9 +2436,9 @@
 		chartSupport._mapScatterRender(chart, options, "effectScatter");
 	};
 	
-	chartSupport.mapScatterRippleUpdate = function(chart, results)
+	chartSupport.mapScatterRippleUpdate = function(chart, chartResult)
 	{
-		chartSupport._mapScatterUpdate(chart, results);
+		chartSupport._mapScatterUpdate(chart, chartResult);
 	};
 	
 	chartSupport.mapScatterRippleResize = function(chart)
@@ -2541,7 +2541,7 @@
 		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
-	chartSupport._mapScatterUpdate = function(chart, results)
+	chartSupport._mapScatterUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -2561,7 +2561,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
 			if(!map)
@@ -2617,7 +2617,7 @@
 			options.geo = { id: 0, map: map };
 		}
 		
-		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+		chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	};
 	
 	chartSupport._mapScatterResize = function(chart)
@@ -2742,7 +2742,7 @@
 		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
-	chartSupport.mapGraphUpdate = function(chart, results)
+	chartSupport.mapGraphUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -2765,7 +2765,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
 			if(!map)
@@ -2884,7 +2884,7 @@
 			options.geo = { id: 0, map: map };
 		}
 		
-		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+		chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 		
 		chartFactory.extValueBuiltin(chart, "mapGraphSeriesData", seriesData);
 	};
@@ -3025,7 +3025,7 @@
 		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
-	chartSupport.mapLinesUpdate = function(chart, results)
+	chartSupport.mapLinesUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -3041,7 +3041,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
 			if(!map)
@@ -3109,7 +3109,7 @@
 			options.geo = { id: 0, map: map };
 		}
 		
-		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+		chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	};
 	
 	chartSupport.mapLinesResize = function(chart)
@@ -3230,7 +3230,7 @@
 		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
-	chartSupport.mapFlylineUpdate = function(chart, results)
+	chartSupport.mapFlylineUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -3245,7 +3245,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
 			if(!map)
@@ -3313,7 +3313,7 @@
 			options.geo = { id: 0, map: map };
 		}
 		
-		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+		chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	};
 	
 	chartSupport.mapFlylineResize = function(chart)
@@ -3432,7 +3432,7 @@
 		chartSupport.echartsMapChartRender(chart, options);
 	};
 	
-	chartSupport.mapHeatmapUpdate = function(chart, results)
+	chartSupport.mapHeatmapUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -3450,7 +3450,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
 			if(!map)
@@ -3494,7 +3494,7 @@
 			options.geo = { id: 0, map: map };
 		}
 		
-		chartSupport.echartsMapChartUpdate(chart, results, options, renderOptions);
+		chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	};
 	
 	chartSupport.mapHeatmapResize = function(chart)
@@ -3613,7 +3613,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.candlestickUpdate = function(chart, results)
+	chartSupport.candlestickUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -3628,7 +3628,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			
@@ -3652,7 +3652,7 @@
 						chartSupport.inflateAxisDataExtractors.property("name"));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -3809,7 +3809,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.heatmapUpdate = function(chart, results)
+	chartSupport.heatmapUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -3825,7 +3825,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
@@ -3859,7 +3859,7 @@
 						chartSupport.inflateAxisDataExtractors.valueElement(1), false);
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -3942,15 +3942,15 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.treeUpdate = function(chart, results)
+	chartSupport.treeUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "tree" }) ] };
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "tree" }) ] };
 		chartSupport.treeInflateUpdateOptions(chart, options, renderOptions);
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -4091,14 +4091,14 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.treemapUpdate = function(chart, results)
+	chartSupport.treemapUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "treemap" }) ] };
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "treemap" }) ] };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -4187,14 +4187,14 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.sunburstUpdate = function(chart, results)
+	chartSupport.sunburstUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, results, { id: 0, type: "sunburst" }) ] };
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "sunburst" }) ] };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -4238,7 +4238,7 @@
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
-	chartSupport.buildTreeNodeSeries = function(chart, results, initSeries)
+	chartSupport.buildTreeNodeSeries = function(chart, chartResult, initSeries)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -4255,7 +4255,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
@@ -4403,7 +4403,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.sankeyUpdate = function(chart, results)
+	chartSupport.sankeyUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -4419,7 +4419,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
@@ -4478,7 +4478,7 @@
 		
 		chartSupport.sankeyInflateUpdateOptions(chart, options, renderOptions);
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartFactory.extValueBuiltin(chart, "sankeySeriesData", seriesData);
 		
@@ -4650,7 +4650,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.graphUpdate = function(chart, results)
+	chartSupport.graphUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -4672,7 +4672,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			if(!seriesName)
 				seriesName = chart.dataSetAlias(dataSetBind);
@@ -4776,7 +4776,7 @@
 		var options = { legend: {id: 0, data: legendData}, series: series };
 		chartSupport.graphInflateUpdateOptions(chart, options, min, max, symbolSizeMax, symbolSizeMin, renderOptions);
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartFactory.extValueBuiltin(chart, "graphSeriesData", seriesData);
 		
@@ -4966,7 +4966,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.boxplotUpdate = function(chart, results)
+	chartSupport.boxplotUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -4984,7 +4984,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var minp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min);
@@ -5111,7 +5111,7 @@
 						});
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -5264,7 +5264,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.wordcloudUpdate = function(chart, results)
+	chartSupport.wordcloudUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -5279,7 +5279,7 @@
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
 			var dataSetBind = dataSetBinds[i];
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
@@ -5308,7 +5308,7 @@
 		var options = { series: [ {id: 0, type: "wordCloud", name: seriesName, data: seriesData} ] };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -5418,7 +5418,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.liquidfillUpdate = function(chart, results)
+	chartSupport.liquidfillUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -5432,7 +5432,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
 			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
@@ -5493,7 +5493,7 @@
 		var options = { series: [ {id: 0, type: "liquidFill", data: seriesData, shape: dg.shape } ] };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -5586,7 +5586,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.parallelUpdate = function(chart, results)
+	chartSupport.parallelUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -5602,7 +5602,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
 			
@@ -5680,7 +5680,7 @@
 		
 		chartSupport.parallelTrimAxisMinMax(options);
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -5922,7 +5922,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.themeRiverUpdate = function(chart, results)
+	chartSupport.themeRiverUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -5937,7 +5937,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
@@ -5995,7 +5995,7 @@
 						chartSupport.inflateAxisDataExtractors.element(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
-		options = chart.inflateUpdateOptions(results, options);
+		options = chart.inflateUpdateOptions(chartResult, options);
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
 	};
@@ -6147,7 +6147,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.pictorialBarUpdate = function(chart, results)
+	chartSupport.pictorialBarUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -6166,7 +6166,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
@@ -6252,7 +6252,7 @@
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
-		options = chart.inflateUpdateOptions(results, options, function(options)
+		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
 		});
@@ -6399,7 +6399,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.pictorialBarProgressUpdate = function(chart, results)
+	chartSupport.pictorialBarProgressUpdate = function(chart, chartResult)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -6415,7 +6415,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
@@ -6501,7 +6501,7 @@
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		
-		options = chart.inflateUpdateOptions(results, options, function(options)
+		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
 			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
 		});
@@ -6817,7 +6817,7 @@
 		chart.internal(dataTable);
 	};
 	
-	chartSupport.tableUpdate = function(chart, results)
+	chartSupport.tableUpdate = function(chart, chartResult)
 	{
 		var renderOptions = chart.renderOptions();
 		var dataTable = chart.internal();
@@ -6831,7 +6831,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			var resultDatas = chart.resultDatas(result);
 			
 			//复制，避免污染原始数据
@@ -6845,7 +6845,7 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		
-		updateOptions = chart.inflateUpdateOptions(results, updateOptions);
+		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
 		
 		chartSupport.tableAddDataTableData(dataTable, updateOptions.data, 0);
 		chartSupport.tableAdjustColumn(chart.internal());
@@ -7646,7 +7646,7 @@
 		chart.internal(chart.element());
 	};
 	
-	chartSupport.labelUpdate = function(chart, results)
+	chartSupport.labelUpdate = function(chart, chartResult)
 	{
 		var renderOptions = chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -7665,7 +7665,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
 			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
@@ -7700,7 +7700,7 @@
 			}
 		}
 		
-		updateOptions = chart.inflateUpdateOptions(results, updateOptions);
+		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
 		
 		for(var i=0; i<updateOptions.data.length; i++)
 		{
@@ -7897,7 +7897,7 @@
 		chart.internal($select[0]);
 	};
 	
-	chartSupport.selectUpdate = function(chart, results)
+	chartSupport.selectUpdate = function(chart, chartResult)
 	{
 		var renderOptions = chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -7920,7 +7920,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
 			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
@@ -7948,7 +7948,7 @@
 			}
 		}
 		
-		updateOptions = chart.inflateUpdateOptions(results, updateOptions);
+		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
 		var data = updateOptions.data;
 		
 		if(renderOptions.prepend)
@@ -8094,7 +8094,7 @@
 		$("<div class='dg-chart-rawdata-content' />").appendTo(ele);
 	};
 	
-	chartSupport.rawDataUpdate = function(chart, results)
+	chartSupport.rawDataUpdate = function(chart, chartResult)
 	{
 		var ele = chart.elementJquery();
 		var $content = $("> .dg-chart-rawdata-content", ele);
@@ -8106,7 +8106,7 @@
 		{
 			var dataSetBind = dataSetBinds[i];
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
-			var result = chart.resultOf(results, dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
 			var datas = chart.resultDatas(result);
 			
 			var $ds = $("<div class='dg-chart-rawdata-ds' />").appendTo($content);
@@ -8164,7 +8164,7 @@
 		}
 	};
 	
-	chartSupport.customAsyncUpdate = function(chart, results)
+	chartSupport.customAsyncUpdate = function(chart, chartResult)
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
@@ -8172,23 +8172,23 @@
 			return false;
 		
 		if(typeof(customRenderer.asyncUpdate) == "function")
-			return customRenderer.asyncUpdate(chart, results);
+			return customRenderer.asyncUpdate(chart, chartResult);
 		
 		return (customRenderer.asyncUpdate == true);
 	};
 	
-	chartSupport.customUpdate = function(chart, results)
+	chartSupport.customUpdate = function(chart, chartResult)
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
 		//如果未定义，则采用默认方式，避免空白页，又可以让用户浏览和调试数据
 		if(!customRenderer)
 		{
-			chartSupport.rawDataUpdate(chart, results);
+			chartSupport.rawDataUpdate(chart, chartResult);
 		}
 		else
 		{
-			customRenderer.update(chart, results);
+			customRenderer.update(chart, chartResult);
 		}
 	};
 	
@@ -8879,13 +8879,13 @@
 	};
 	
 	//更新ECharts地图类图表
-	chartSupport.echartsMapChartUpdate = function(chart, results, updateOptions, renderOptions)
+	chartSupport.echartsMapChartUpdate = function(chart, chartResult, updateOptions, renderOptions)
 	{
 		chartSupport.adaptArrayPropsForUpdateOptions(updateOptions, renderOptions);
 		
 		var updateMapOptions = chartSupport.echartsGetMapOptions(updateOptions);
 		
-		updateOptions = chart.inflateUpdateOptions(results, updateOptions, function(updateOptions)
+		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions, function(updateOptions)
 		{
 			//inflateUpdateOptions()会将地图设置为renderOptions里的项，所以这里需要再次设置为updateMap
 			$.extend(true, updateOptions, updateMapOptions);

@@ -1236,23 +1236,25 @@
 	 * 
 	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此函数才会执行。
 	 * 
-	 * @param results 可选，图表数据集结果，如果不设置，将使用this.updateResults()的返回值
+	 * @param chartResult 可选，图表结果，如果不设置，将使用this.updateResult()的返回值
 	 */
-	chartBase.update = function(results)
+	chartBase.update = function(chartResult)
 	{
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			throw new Error("chart is illegal state for update()");
 		
-		if(arguments.length == 0)
-			results = this.updateResults();
+		if(chartResult === undefined)
+			chartResult = this.updateResult();
+		else
+			chartResult = this._toChartResult(chartResult);
 		
-		if(results == null)
-			throw new Error("[results] required");
+		if(chartResult == null)
+			throw new Error("[chartResult] required");
 		
 		var appendMode = this.updateAppendMode();
 		if(appendMode && appendMode.beforeListener)
 		{
-			results = this._appendUpdateResults(results, appendMode);
+			chartResult = this._appendUpdateResult(chartResult, appendMode);
 		}
 		
 		this.statusUpdating(true);
@@ -1261,42 +1263,44 @@
 		
 		var listener = this.listener();
 		if(listener && listener.onUpdate)
-			doUpdate = listener.onUpdate(this, results);
+			doUpdate = listener.onUpdate(this, this._toCallbackResultParam(chartResult));
 		
 		if(doUpdate != false)
 		{
-			this.doUpdate(results);
+			this.doUpdate(chartResult);
 		}
 	};
 	
 	/**
 	 * 调用底层图表渲染器的update函数，执行更新数据。
 	 */
-	chartBase.doUpdate = function(results)
+	chartBase.doUpdate = function(chartResult)
 	{
 		if(!this.statusUpdating())
 			throw new Error("chart is illegal state for doUpdate()");
+			
+		chartResult = this._toChartResult(chartResult);
 		
 		var appendMode = this.updateAppendMode();
 		if(appendMode && !appendMode.beforeListener)
 		{
-			results = this._appendUpdateResults(results, appendMode);
+			chartResult = this._appendUpdateResult(chartResult, appendMode);
 		}
 		
-		//先保存结果，确保updateResults()在渲染器的update函数作用域内可用
-		this.updateResults(results);
+		//先保存结果，确保updateResult()在渲染器的update函数作用域内可用
+		this.updateResult(chartResult);
 		
-		var async = this.isAsyncUpdate(results);
+		var async = this.isAsyncUpdate(chartResult);
 		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.update)
 		{
-			renderer.update(this, results);
+			renderer.update(this, this._toCallbackResultParam(chartResult));
 		}
 		else
 		{
-			this.plugin.renderer.update(this, results);
+			this.plugin.renderer.update(this, this._toCallbackResultParam(chartResult));
 		}
 		
 		if(!async)
@@ -1304,54 +1308,47 @@
 	};
 	
 	//使用上次更新结果数据追加新的结果数据
-	chartBase._appendUpdateResults = function(results, appendMode)
+	chartBase._appendUpdateResult = function(chartResult, appendMode)
 	{
 		if(!appendMode)
-			return results;
+			return chartResult;
 		
-		var old = this.updateResults();
+		var oldChartResult = this.updateResult();
 		
-		if(old == null || old.length == 0)
-			return results;
+		if(oldChartResult == null)
+			return chartResult;
 		
-		var newResults = [];
-		var newDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, results) : appendMode.size);
+		var olds = (this._dataSetResults(oldChartResult) || []);
+		var nows = (this._dataSetResults(chartResult) || []);
 		
-		for(var i=0; i<(results ? results.length : 0); i++)
+		var merges = [];
+		var mergeDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, this._toCallbackResultParam(chartResult)) : appendMode.size);
+		
+		for(var i=0; i<nows.length; i++)
 		{
-			var oldData = (old[i] ? old[i].data : []);
+			var oldData = (olds[i] ? olds[i].data : []);
 			oldData = (oldData == null ? [] : oldData);
 			oldData = ($.isArray(oldData) ? oldData : [ oldData ]);
 			
-			var resultData = (results[i] ? results[i].data : []);
-			resultData = (resultData == null ? [] : resultData);
-			resultData = ($.isArray(resultData) ? resultData : [ resultData ]);
+			var nowData = (nows[i] ? nows[i].data : []);
+			nowData = (nowData == null ? [] : nowData);
+			nowData = ($.isArray(nowData) ? nowData : [ nowData ]);
 			
-			var newData = oldData.concat(resultData);
+			var mergeData = oldData.concat(nowData);
 			
-			if(newData.length > newDataSize)
+			if(mergeData.length > mergeDataSize)
 			{
-				newData = newData.slice(newData.length - newDataSize);
+				mergeData = mergeData.slice(mergeData.length - mergeDataSize);
 			}
 			
-			//采用$.extend()方式，可保留results[i]的其他属性
-			newResults[i] = $.extend({}, results[i]);
-			newResults[i].data = newData;
+			//采用$.extend()方式，可保留nows[i]的其他属性
+			merges[i] = $.extend({}, nows[i]);
+			merges[i].data = mergeData;
 		}
 		
-		return newResults;
-	};
-	
-	/**
-	 * 获取/设置图表此次更新的结果数据。
-	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
-	 * 
-	 * @param results 可选，要设置的更新结果数据
-	 * @returns 要获取的更新结果数据，没有则返回null
-	 */
-	chartBase.updateResults = function(results)
-	{
-		return chartFactory.extValueBuiltin(this, "updateResults", results);
+		chartResult.dataSetResults = merges;
+		
+		return chartResult;
 	};
 	
 	/**
@@ -1488,45 +1485,59 @@
 		
 		if(renderer && renderer.asyncRender !== undefined)
 		{
-			if(typeof(renderer.asyncRender) == "function")
+			if($.isFunction(renderer.asyncRender))
+			{
 				return renderer.asyncRender(this);
-			
-			return (renderer.asyncRender == true);
+			}
+			else
+				return (renderer.asyncRender == true);
 		}
 		
-		if(this.plugin.renderer.asyncRender == undefined)
+		if(this.plugin.renderer.asyncRender === undefined)
+		{
 			return false;
+		}
 		
-		if(typeof(this.plugin.renderer.asyncRender) == "function")
+		if($.isFunction(this.plugin.renderer.asyncRender))
+		{
 			return this.plugin.renderer.asyncRender(this);
-		
-		return (this.plugin.renderer.asyncRender == true);
+		}
+		else
+			return (this.plugin.renderer.asyncRender == true);
 	};
 	
 	/**
 	 * 图表的update函数是否是异步的。
 	 * 
-	 * @param results 图表数据集结果
+	 * @param chartResult 图表结果
 	 */
-	chartBase.isAsyncUpdate = function(results)
+	chartBase.isAsyncUpdate = function(chartResult)
 	{
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.asyncUpdate !== undefined)
 		{
-			if(typeof(renderer.asyncUpdate) == "function")
-				return renderer.asyncUpdate(this, results);
-			
-			return (renderer.asyncUpdate == true);
+			if($.isFunction(renderer.asyncUpdate))
+			{
+				return renderer.asyncUpdate(this, this._toCallbackResultParam(chartResult));
+			}
+			else
+				return (renderer.asyncUpdate == true);
 		}
 		
-		if(this.plugin.renderer.asyncUpdate == undefined)
+		if(this.plugin.renderer.asyncUpdate === undefined)
+		{
 			return false;
+		}
 		
-		if(typeof(this.plugin.renderer.asyncUpdate) == "function")
-			return this.plugin.renderer.asyncUpdate(this, results);
-		
-		return (this.plugin.renderer.asyncUpdate == true);
+		if($.isFunction(this.plugin.renderer.asyncUpdate))
+		{
+			return this.plugin.renderer.asyncUpdate(this, this._toCallbackResultParam(chartResult));
+		}
+		else
+		{
+			return (this.plugin.renderer.asyncUpdate == true);
+		}
 	};
 	
 	/**
@@ -1714,7 +1725,9 @@
 	{
 		var listener = this.listener();
 		if(listener && listener.update)
-			listener.update(this, this.updateResults());
+		{
+			listener.update(this, this._toCallbackResultParam(this.updateResult()));
+		}
 	};
 	
 	/**
@@ -2292,11 +2305,55 @@
 	 */
 	chartBase._dataSetResults = function(chartResult)
 	{
-		//如果是数组，直接返回，用于支持看板版本1.0
+		//是数据集结果数组，直接返回，用于支持看板版本1.0
 		if($.isArray(chartResult))
 			return chartResult;
 		else
 			return (chartResult ? chartResult.dataSetResults : undefined);
+	};
+	
+	/**
+	 * 转换为图表结果（org.datagear.analysis.ChartResult）
+	 * 
+	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
+	 */
+	chartBase._toChartResult = function(chartResult)
+	{
+		//是数据集结果数组，包装处理，用于支持看板版本1.0
+		if($.isArray(chartResult))
+		{
+			var re = { dataSetResults: chartResult };
+			return re;
+		}
+		else
+			return chartResult;
+	};
+	
+	/**
+	 * 转换为图表结果（org.datagear.analysis.ChartResult）
+	 * 
+	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
+	 */
+	chartBase._toChartResult = function(chartResult)
+	{
+		//是数据集结果数组，包装处理，用于支持看板版本1.0
+		if($.isArray(chartResult))
+		{
+			var re = { dataSetResults: chartResult };
+			return re;
+		}
+		else
+			return chartResult;
+	};
+	
+	/**
+	 * 将图表结果（org.datagear.analysis.ChartResult）转换为回调函数参数。
+	 * 
+	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
+	 */
+	chartBase._toCallbackResultParam = function(chartResult)
+	{
+		return chartResult;
 	};
 	
 	/**
@@ -2829,45 +2886,47 @@
 	 * 填充指定图表更新选项。
 	 * 
 	 * 此函数先将renderOptions中与updateOptions的同名项高优先级深度合并至updateOptions，然后调用可选的beforeProcessHandler，
-	 * 最后，如果renderOptions或者chart.renderOptions()中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, results){ ... }），
+	 * 最后，如果renderOptions或者chart.renderOptions()中有定义processUpdateOptions函数（格式为：function(updateOptions, chart, chartResult){ ... }），
 	 * 则调用它们两个的其中一个（renderOptions优先）。
 	 * 
 	 * 图表渲染器应该在其update()中使用此函数构建图表更新选项，然后使用它执行图表更新逻辑，以符合图表API规范。
 	 * 
-	 * @param results 图表更新结果
+	 * @param chartResult 图表结果
 	 * @param updateOptions 可选，待填充的更新选项，通常由图表渲染器update函数内部生成，格式为：{ ... }，默认为空对象：{}
 	 * @param renderOptions 可选，图表的渲染选项，格式为：{ ... }，默认为：chart.renderOptions()
 	 * @param beforeProcessHandler 可选，renderOptions.processUpdateOptions调用前处理函数，
-								   格式为：function(updateOptions, chart, results){ ... }, 默认为：undefined
+								   格式为：function(updateOptions, chart, chartResult){ ... }, 默认为：undefined
 	 * @returns updateOptions
 	 */
-	chartBase.inflateUpdateOptions = function(results, updateOptions, renderOptions, beforeProcessHandler)
+	chartBase.inflateUpdateOptions = function(chartResult, updateOptions, renderOptions, beforeProcessHandler)
 	{
-		//(results)
+		chartResult = this._toCallbackResultParam(chartResult);
+		
+		//(chartResult)
 		if(arguments.length == 1)
 			;
 		else if(arguments.length == 2)
 		{
-			//(results, beforeProcessHandler)
+			//(chartResult, beforeProcessHandler)
 			if($.isFunction(updateOptions))
 			{
 				beforeProcessHandler = updateOptions;
 				updateOptions = undefined;
 				renderOptions = undefined;
 			}
-			//(results, updateOptions)
+			//(chartResult, updateOptions)
 			else
 				;
 		}
 		else if(arguments.length == 3)
 		{
-			//(results, updateOptions, beforeProcessHandler)
+			//(chartResult, updateOptions, beforeProcessHandler)
 			if($.isFunction(renderOptions))
 			{
 				beforeProcessHandler = renderOptions;
 				renderOptions = undefined;
 			}
-			//(results, updateOptions, renderOptions)
+			//(chartResult, updateOptions, renderOptions)
 			else
 				;
 		}
@@ -2892,18 +2951,18 @@
 		// > @deprecated 兼容2.6.0版本的chart.optionsUpdate()
 		
 		if(beforeProcessHandler != null)
-			beforeProcessHandler(updateOptions, this, results);
+			beforeProcessHandler(updateOptions, this, chartResult);
 		
 		//最后调用processUpdateOptions
 		if(renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS])
 		{
-			renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, results);
+			renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, chartResult);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
 		else if(chartRenderOptions && renderOptions !== chartRenderOptions
 					&& chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS])
 		{
-			chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, results);
+			chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, chartResult);
 		}
 		
 		return updateOptions;
@@ -3090,7 +3149,7 @@
 	 *       return { name: " .result-data-count", value: { color: chart.theme().color } };
 	 *     });
 	 *   },
-	 *   update: function(chart, results)
+	 *   update: function(chart, chartResult)
 	 *   {
 	 *     $(".result-data-count", chart.elementJquery()).text(chart.resultDatas(...).length);
 	 *   }
@@ -4082,10 +4141,10 @@
 	 * 					//等同于下面的：{ size: 数值, beforeListener: false }
 	 * 					数值、
 	 * 					//等同于下面的：{ size: 函数, beforeListener: false }
-	 * 					function(chart, results){ return 数值; }、
+	 * 					function(chart, chartResult){ return 数值; }、
 	 * 					//具体追加模式
 	 * 					//size：数据窗口大小，追加后保留的最大数据数目（新数据优先），
-	 * 					//      可以是具体数值，也可以是数值计算函数：function(chart, results){ return 数值; }
+	 * 					//      可以是具体数值，也可以是数值计算函数：function(chart, chartResult){ return 数值; }
 	 * 					//beforeListener：是否在图表监听器的onUpdate前追加，否则，将在之后追加
 	 * 					{ size: 数值或者函数, beforeListener: false }
 	 * @returns 更新追加模式，格式为：{ size: 数值, beforeListener: true、false }、null 表示没有开启追加模式
@@ -4270,10 +4329,49 @@
 		chartFactory.loadLib(lib,  callback, contextCharts);
 	};
 	
+	/**
+	 * 获取/设置图表此次更新的结果数据。
+	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
+	 * 
+	 * @param chartResult 可选，要设置的更新图表结果
+	 * @returns 要获取的更新图表结果，没有则返回null
+	 */
+	chartBase.updateResult = function(chartResult)
+	{
+		if(chartResult === undefined)
+			return chartFactory.extValueBuiltin(this, "updateResult");
+		else
+			chartFactory.extValueBuiltin(this, "updateResult", chartResult);
+	};
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.updateResult()
+	
+	/**
+	 * 获取/设置图表此次更新的结果。
+	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
+	 * 
+	 * @param chartResult 可选，要设置的更新图表结果
+	 * @returns 要获取的更新数据集结果数组，没有则返回null
+	 */
+	chartBase.updateResults = function(chartResult)
+	{
+		if(chartResult === undefined)
+		{
+			var chartResult = this.updateResult();
+			return this._dataSetResults(chartResult);
+		}
+		else
+		{
+			chartResult = this._toChartResult(chartResult);
+			this.updateResult(chartResult);
+		}
+	};
+	
+	// > @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.updateResult()
 	
 	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOfSign()
 	
@@ -4576,7 +4674,7 @@
 		var ordi = null;
 		var odata = null;
 		
-		var updateResults = this.updateResults();
+		var chartResult = this.updateResult();
 		
 		if(originalInfo == null)
 		{
@@ -4586,7 +4684,7 @@
 			ocdsi = originalInfo;
 			ordi = originalResultDataIndex;
 			
-			odata = this.resultDataElement(this.resultAt(updateResults, ocdsi), ordi);
+			odata = this.resultDataElement(this.resultAt(chartResult, ocdsi), ordi);
 		}
 		else
 		{
@@ -4617,11 +4715,11 @@
 					odata[i] = [];
 					
 					for(var j=0; j<myOcdsi.length; j++)
-						odata[i][j] = this.resultDataElement(this.resultAt(updateResults, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
+						odata[i][j] = this.resultDataElement(this.resultAt(chartResult, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
 				}
 				else
 				{
-					odata[i] = this.resultDataElement(this.resultAt(updateResults, myOcdsi), myOrdi);
+					odata[i] = this.resultDataElement(this.resultAt(chartResult, myOcdsi), myOrdi);
 				}
 			}
 			
@@ -5144,7 +5242,7 @@
 			var odi = originalDataIndexAry[i];
 			var dataSetBindIndex = odi.dataSetBindIndex;
 			var resultDataIndex = odi.resultDataIndex;
-			var results = chart.updateResults();
+			var chartResult = chart.updateResult();
 			var originalDataMy = null;
 			
 			if($.isArray(dataSetBindIndex))
@@ -5153,13 +5251,13 @@
 				
 				for(var j=0; j<dataSetBindIndex.length; j++)
 				{
-					var result = chart.resultAt(results, dataSetBindIndex[j]);
+					var result = chart.resultAt(chartResult, dataSetBindIndex[j]);
 					originalDataMy[j] = chart.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
 				}
 			}
 			else
 			{
-				var result = chart.resultAt(results, dataSetBindIndex);
+				var result = chart.resultAt(chartResult, dataSetBindIndex);
 				originalDataMy = chart.resultDataElement(result, resultDataIndex);
 			}
 			

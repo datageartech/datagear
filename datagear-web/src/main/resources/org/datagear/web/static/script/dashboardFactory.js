@@ -798,6 +798,20 @@
 			this._manualRender = manualRender;
 	};
 	
+	//重写函数，用于支持看板版本1.0，此函数不应返回null，确保相关回调无需处理null
+	chartBase._toCallbackResultParam = function(chartResult)
+	{
+		var version = this.dashboard.version();
+		if(version == "1.0")
+		{
+			return (this._dataSetResults(chartResult) || []);
+		}
+		else
+		{
+			return (chartResult || {});
+		}
+	};
+	
 	//----------------------------------------
 	// chartBase扩展结束
 	//----------------------------------------
@@ -1052,7 +1066,7 @@
 			chartListener.render = undefined;
 		
 		if(listener && listener.updateChart)
-			chartListener.update = function(chart, results){ listener.updateChart(chart.dashboard, chart, results); };
+			chartListener.update = function(chart, chartResult){ listener.updateChart(chart.dashboard, chart, chartResult); };
 		else
 			chartListener.update = undefined;
 		
@@ -1062,7 +1076,7 @@
 			chartListener.onRender = undefined;
 		
 		if(listener && listener.onUpdateChart)
-			chartListener.onUpdate = function(chart, results){ return listener.onUpdateChart(chart.dashboard, chart, results); };
+			chartListener.onUpdate = function(chart, chartResult){ return listener.onUpdateChart(chart.dashboard, chart, chartResult); };
 		else
 			chartListener.onUpdate = undefined;
 		
@@ -2066,8 +2080,7 @@
 	
 	dashboardBase._doUpdateChart = function(chart, chartResult)
 	{
-		var dataSetResults = (chartResult &&  chartResult.dataSetResults ? chartResult.dataSetResults : []);
-		chart.update(dataSetResults);
+		chart.update(chartResult);
 	};
 	
 	dashboardBase._setChartsUpdateTime = function(charts, time)
@@ -3156,13 +3169,13 @@
 						
 						for(var j=0; j<dataSetBindIndex.length; j++)
 						{
-							var result = chart.resultAt(chart.updateResults(), dataSetBindIndex[j]);
+							var result = chart.resultAt(chart.updateResult(), dataSetBindIndex[j]);
 							resultData[j] = chart.resultDataElement(result, (resultDataIndex ? resultDataIndex[j] : null));
 						}
 					}
 					else
 					{
-						var result = chart.resultAt(chart.updateResults(), dataSetBindIndex);
+						var result = chart.resultAt(chart.updateResult(), dataSetBindIndex);
 						resultData = chart.resultDataElement(result, resultDataIndex);
 					}
 				}
