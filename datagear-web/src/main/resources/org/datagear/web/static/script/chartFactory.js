@@ -2357,26 +2357,45 @@
 	};
 	
 	/**
-	 * 返回指定索引的数据集结果，没有则返回undefined。
+	 * 获取/设置图表结果包含的指定索引的数据集结果。
 	 * 
 	 * @param chartResult 图表结果
 	 * @param index
+	 * @param dataSetResult 可选，要设置的数据集结果
+	 * @return 要获取的数据集结果，没有则返回undefined
 	 */
-	chartBase.resultAt = function(chartResult, index)
+	chartBase.resultAt = function(chartResult, index, dataSetResult)
 	{
 		var dataSetResults = this._dataSetResults(chartResult);
-		return (!dataSetResults || dataSetResults.length <= index ? undefined : dataSetResults[index]);
+		
+		if(dataSetResult === undefined)
+		{
+			return (!dataSetResults || dataSetResults.length <= index ? undefined : dataSetResults[index]);
+		}
+		else
+		{
+			dataSetResults[index] = dataSetResult;
+		}
 	};
 	
 	/**
-	 * 返回指定数据集绑定对应的数据集结果，没有则返回undefined。
+	 * 获取/设置图表结果包含的指定数据集绑定对应的数据集结果。
 	 * 
 	 * @param chartResult 图表结果
 	 * @param dataSetBind
+	 * @param dataSetResult 可选，要设置的数据集结果
+	 * @return 要获取的数据集结果，没有则返回undefined
 	 */
-	chartBase.resultOf = function(chartResult, dataSetBind)
+	chartBase.resultOf = function(chartResult, dataSetBind, dataSetResult)
 	{
-		return this.resultAt(chartResult, dataSetBind.index);
+		if(dataSetResult === undefined)
+		{
+			return this.resultAt(chartResult, dataSetBind.index);
+		}
+		else
+		{
+			this.resultAt(chartResult, dataSetBind.index, dataSetResult);
+		}
 	};
 	
 	/**
