@@ -1244,20 +1244,23 @@
 			throw new Error("chart is illegal state for update()");
 		
 		if(chartResult === undefined)
+		{
 			chartResult = this.updateResult();
+		}
+		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		else
+		{
 			chartResult = this._toChartResult(chartResult);
+		}
+		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		
-		if(chartResult == null)
-			throw new Error("[chartResult] required");
+		this.statusUpdating(true);
 		
 		var appendMode = this.updateAppendMode();
 		if(appendMode && appendMode.beforeListener)
 		{
 			chartResult = this._appendUpdateResult(chartResult, appendMode);
 		}
-		
-		this.statusUpdating(true);
 		
 		var doUpdate = true;
 		
@@ -1278,8 +1281,10 @@
 	{
 		if(!this.statusUpdating())
 			throw new Error("chart is illegal state for doUpdate()");
-			
+		
+		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		chartResult = this._toChartResult(chartResult);
+		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		
 		var appendMode = this.updateAppendMode();
 		if(appendMode && !appendMode.beforeListener)
@@ -1291,7 +1296,6 @@
 		this.updateResult(chartResult);
 		
 		var async = this.isAsyncUpdate(chartResult);
-		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.update)
@@ -1513,6 +1517,10 @@
 	 */
 	chartBase.isAsyncUpdate = function(chartResult)
 	{
+		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		chartResult = this._toChartResult(chartResult);
+		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.asyncUpdate !== undefined)
@@ -2299,17 +2307,20 @@
 	};
 	
 	/**
-	 * 获取数据集结果数组。
+	 * 获取图表结果包含的数据集结果数组。
 	 * 
 	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
 	 */
 	chartBase._dataSetResults = function(chartResult)
 	{
-		//是数据集结果数组，直接返回，用于支持看板版本1.0
+		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		if($.isArray(chartResult))
+		{
 			return chartResult;
-		else
-			return (chartResult ? chartResult.dataSetResults : undefined);
+		}
+		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		
+		return (chartResult ? chartResult.dataSetResults : undefined);
 	};
 	
 	/**
@@ -2319,31 +2330,14 @@
 	 */
 	chartBase._toChartResult = function(chartResult)
 	{
-		//是数据集结果数组，包装处理，用于支持看板版本1.0
+		// 数据集结果数组
 		if($.isArray(chartResult))
 		{
 			var re = { dataSetResults: chartResult };
 			return re;
 		}
-		else
-			return chartResult;
-	};
-	
-	/**
-	 * 转换为图表结果（org.datagear.analysis.ChartResult）
-	 * 
-	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
-	 */
-	chartBase._toChartResult = function(chartResult)
-	{
-		//是数据集结果数组，包装处理，用于支持看板版本1.0
-		if($.isArray(chartResult))
-		{
-			var re = { dataSetResults: chartResult };
-			return re;
-		}
-		else
-			return chartResult;
+		
+		return chartResult;
 	};
 	
 	/**
@@ -4370,22 +4364,22 @@
 	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.updateResult()
 	
 	/**
-	 * 获取/设置图表此次更新的结果。
+	 * 获取/设置图表此次更新的数据集结果数组。
 	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
 	 * 
-	 * @param chartResult 可选，要设置的更新图表结果
-	 * @returns 要获取的更新数据集结果数组，没有则返回null
+	 * @param dataSetResults 可选，要设置的数据集结果数组
+	 * @returns 要获取的数据集结果数组，没有则返回null
 	 */
-	chartBase.updateResults = function(chartResult)
+	chartBase.updateResults = function(dataSetResults)
 	{
-		if(chartResult === undefined)
+		if(dataSetResults === undefined)
 		{
 			var chartResult = this.updateResult();
 			return this._dataSetResults(chartResult);
 		}
 		else
 		{
-			chartResult = this._toChartResult(chartResult);
+			var chartResult = this._toChartResult(dataSetResults);
 			this.updateResult(chartResult);
 		}
 	};
