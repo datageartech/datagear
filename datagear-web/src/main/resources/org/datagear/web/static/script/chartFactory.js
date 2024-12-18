@@ -1236,7 +1236,7 @@
 	 * 
 	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此函数才会执行。
 	 * 
-	 * @param chartResult 可选，图表结果，如果不设置，将使用this.updateResult()的返回值
+	 * @param chartResult 可选，图表结果、数据集结果数组，如果不设置，将使用this.updateResult()的返回值
 	 */
 	chartBase.update = function(chartResult)
 	{
@@ -1247,12 +1247,9 @@
 		{
 			chartResult = this.updateResult();
 		}
-		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
-		else
-		{
-			chartResult = this._toChartResult(chartResult);
-		}
-		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		
+		//内部统一结构
+		chartResult = this._toChartResult(chartResult);
 		
 		this.statusUpdating(true);
 		
@@ -1276,15 +1273,16 @@
 	
 	/**
 	 * 调用底层图表渲染器的update函数，执行更新数据。
+	 * 
+	 * @param chartResult 图表结果、数据集结果数组
 	 */
 	chartBase.doUpdate = function(chartResult)
 	{
 		if(!this.statusUpdating())
 			throw new Error("chart is illegal state for doUpdate()");
 		
-		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		//内部统一结构
 		chartResult = this._toChartResult(chartResult);
-		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		
 		var appendMode = this.updateAppendMode();
 		if(appendMode && !appendMode.beforeListener)
@@ -1311,16 +1309,14 @@
 			this.statusUpdated(true);
 	};
 	
-	//使用上次更新结果数据追加新的结果数据
+	//将上次更新结果前置合并至给定图表的结果
+	//只要设置了appendMode，此方法旧不会返回null，确保后续不会出现空指针问题
 	chartBase._appendUpdateResult = function(chartResult, appendMode)
 	{
 		if(!appendMode)
 			return chartResult;
 		
 		var oldChartResult = this.updateResult();
-		
-		if(oldChartResult == null)
-			return chartResult;
 		
 		var olds = (this._dataSetResults(oldChartResult) || []);
 		var nows = (this._dataSetResults(chartResult) || []);
@@ -1330,13 +1326,8 @@
 		
 		for(var i=0; i<nows.length; i++)
 		{
-			var oldData = (olds[i] ? olds[i].data : []);
-			oldData = (oldData == null ? [] : oldData);
-			oldData = ($.isArray(oldData) ? oldData : [ oldData ]);
-			
-			var nowData = (nows[i] ? nows[i].data : []);
-			nowData = (nowData == null ? [] : nowData);
-			nowData = ($.isArray(nowData) ? nowData : [ nowData ]);
+			var oldData = this.resultDatas(olds[i]);
+			var nowData = this.resultDatas(nows[i]);
 			
 			var mergeData = oldData.concat(nowData);
 			
@@ -1349,6 +1340,9 @@
 			merges[i] = $.extend({}, nows[i]);
 			merges[i].data = mergeData;
 		}
+		
+		if(chartResult == null)
+			chartResult = {};
 		
 		chartResult.dataSetResults = merges;
 		
@@ -1513,13 +1507,12 @@
 	/**
 	 * 图表的update函数是否是异步的。
 	 * 
-	 * @param chartResult 图表结果
+	 * @param chartResult 图表结果、数据集结果数组
 	 */
 	chartBase.isAsyncUpdate = function(chartResult)
 	{
-		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		//内部统一结构
 		chartResult = this._toChartResult(chartResult);
-		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		
 		var renderer = this.renderer();
 		
@@ -2307,18 +2300,20 @@
 	};
 	
 	/**
-	 * 获取图表结果包含的数据集结果数组。
+	 * 获取数据集结果数组。
 	 * 
 	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
 	 */
 	chartBase._dataSetResults = function(chartResult)
 	{
-		// < @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
+		if(chartResult == null)
+			return chartResult;
+		
+		// 数据集结果数组
 		if($.isArray(chartResult))
 		{
 			return chartResult;
 		}
-		// > @deprecated 兼容5.2.0版本chartResult是数据集结果数组的情况，将在未来版本移除
 		
 		return (chartResult ? chartResult.dataSetResults : undefined);
 	};
@@ -2330,6 +2325,9 @@
 	 */
 	chartBase._toChartResult = function(chartResult)
 	{
+		if(chartResult == null)
+			return chartResult;
+		
 		// 数据集结果数组
 		if($.isArray(chartResult))
 		{
@@ -2353,42 +2351,50 @@
 	/**
 	 * 获取/设置图表结果包含的指定索引的数据集结果。
 	 * 
-	 * @param chartResult 图表结果
-	 * @param index
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @param index 索引数值
 	 * @param dataSetResult 可选，要设置的数据集结果
 	 * @return 要获取的数据集结果，没有则返回undefined
 	 */
 	chartBase.resultAt = function(chartResult, index, dataSetResult)
 	{
-		var dataSetResults = this._dataSetResults(chartResult);
-		
 		if(dataSetResult === undefined)
 		{
-			return (!dataSetResults || dataSetResults.length <= index ? undefined : dataSetResults[index]);
+			return this.resultOf(chartResult, index);
 		}
 		else
 		{
-			dataSetResults[index] = dataSetResult;
+			this.resultOf(chartResult, index, dataSetResult);
 		}
 	};
 	
 	/**
 	 * 获取/设置图表结果包含的指定数据集绑定对应的数据集结果。
 	 * 
-	 * @param chartResult 图表结果
-	 * @param dataSetBind
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @param dataSetBind 数据集绑定、索引数值
 	 * @param dataSetResult 可选，要设置的数据集结果
 	 * @return 要获取的数据集结果，没有则返回undefined
 	 */
 	chartBase.resultOf = function(chartResult, dataSetBind, dataSetResult)
 	{
+		var dataSetResults = this._dataSetResults(chartResult);
+		var index = (chartFactory.isNumber(dataSetBind) ? dataSetBind : (dataSetBind != null ? dataSetBind.index : undefined));
+		
 		if(dataSetResult === undefined)
 		{
-			return this.resultAt(chartResult, dataSetBind.index);
+			return (dataSetResults ? dataSetResults[index] : undefined);
 		}
 		else
 		{
-			this.resultAt(chartResult, dataSetBind.index, dataSetResult);
+			//是图表结果，检查并初始化结构
+			if(chartResult && !$.isArray(chartResult) && dataSetResults == null)
+			{
+				dataSetResults = [];
+				chartResult.dataSetResults = dataSetResults;
+			}
+			
+			dataSetResults[index] = dataSetResult;
 		}
 	};
 	
@@ -2410,21 +2416,36 @@
 	/**
 	 * 获取/设置指定数据集绑定对应的数据集结果对象包含的数据。
 	 * 
-	 * @param chartResult 图表结果
-	 * @param dataSetBind
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @param dataSetBind 数据集绑定、索引数值
 	 * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
 	 * @return 要获取的数据集结果数据，没有则返回null
 	 * @since 3.0.0
 	 */
 	chartBase.resultDataOf = function(chartResult, dataSetBind, data)
 	{
-		var result = this.resultOf(chartResult, dataSetBind);
-		return this.resultData(result, data);
+		var dataSetResult = this.resultOf(chartResult, dataSetBind);
+		
+		if(data === undefined)
+		{
+			return this.resultData(dataSetResult);
+		}
+		else
+		{
+			//中间对象为null时，应该先初始化
+			if(dataSetResult == null)
+			{
+				dataSetResult = {};
+				this.resultOf(chartResult, dataSetBind, dataSetResult);
+			}
+			
+			this.resultData(dataSetResult, data);
+		}
 	};
 	
 	/**
-	 * 获取数据集结果的数据对象数组。
-	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
+	 * 获取数据集结果包含的数据对象数组。
+	 * 如果dataSetResult为null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
 	 * 
 	 * @param dataSetResult 数据集结果
 	 * @return 不会为null的数组
@@ -2443,8 +2464,8 @@
 	/**
 	 * 获取指定数据集绑定对应的数据集结果对象包含的数据对象数组。
 	 * 
-	 * @param chartResult 图表结果
-	 * @param dataSetBind
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @param dataSetBind 数据集绑定、索引数值
 	 * @return 不会为null的数组
 	 * @since 3.0.0
 	 */
@@ -2904,7 +2925,7 @@
 	 * 
 	 * 图表渲染器应该在其update()中使用此函数构建图表更新选项，然后使用它执行图表更新逻辑，以符合图表API规范。
 	 * 
-	 * @param chartResult 图表结果
+	 * @param chartResult 图表结果、数据集结果数组
 	 * @param updateOptions 可选，待填充的更新选项，通常由图表渲染器update函数内部生成，格式为：{ ... }，默认为空对象：{}
 	 * @param renderOptions 可选，图表的渲染选项，格式为：{ ... }，默认为：chart.renderOptions()
 	 * @param beforeProcessHandler 可选，renderOptions.processUpdateOptions调用前处理函数，
@@ -4346,15 +4367,19 @@
 	 * 获取/设置图表此次更新的结果数据。
 	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
 	 * 
-	 * @param chartResult 可选，要设置的更新图表结果
-	 * @returns 要获取的更新图表结果，没有则返回null
+	 * @param chartResult 可选，要设置的图表结果、数据集结果数组
+	 * @returns 要获取的图表结果，没有则返回null
+	 * @since 5.3.0
 	 */
 	chartBase.updateResult = function(chartResult)
 	{
 		if(chartResult === undefined)
 			return chartFactory.extValueBuiltin(this, "updateResult");
 		else
+		{
+			chartResult = this._toChartResult(chartResult);
 			chartFactory.extValueBuiltin(this, "updateResult", chartResult);
+		}
 	};
 	
 	//-------------
@@ -4379,8 +4404,7 @@
 		}
 		else
 		{
-			var chartResult = this._toChartResult(dataSetResults);
-			this.updateResult(chartResult);
+			this.updateResult(dataSetResults);
 		}
 	};
 	
