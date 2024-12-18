@@ -798,17 +798,17 @@
 			this._manualRender = manualRender;
 	};
 	
-	//重写函数，用于支持看板版本1.0，此函数不应返回null，确保相关回调无需处理null
+	//重写函数，用于支持看板版本1.0，此函数不应做非null校验和处理，避免干扰原始参数
 	chartBase._toCallbackResultParam = function(chartResult)
 	{
 		var version = this.dashboard.version();
 		if(version == "1.0")
 		{
-			return (this._dataSetResults(chartResult) || []);
+			return this._dataSetResults(chartResult);
 		}
 		else
 		{
-			return (chartResult || {});
+			return chartResult;
 		}
 	};
 	
@@ -1672,7 +1672,12 @@
 		{
 			for(var i=0; i<preUpdateCharts.length; i++)
 			{
-				this._updateChart(preUpdateCharts[i], {}, true);
+				var chart = preUpdateCharts[i];
+				var chartResult = {};
+				//设置空数据集结果数组，避免后续出现空指针异常
+				chart.results(chartResult, []);
+				
+				this._updateChart(chart, chartResult, true);
 			}
 		}
 		finally
