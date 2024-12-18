@@ -804,7 +804,7 @@
 		var version = this.dashboard.version();
 		if(version == "1.0")
 		{
-			return this._dataSetResults(chartResult);
+			return this.results(chartResult);
 		}
 		else
 		{

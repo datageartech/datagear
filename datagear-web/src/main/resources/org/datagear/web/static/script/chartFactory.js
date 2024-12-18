@@ -1318,13 +1318,14 @@
 		
 		var oldChartResult = this.updateResult();
 		
-		var olds = (this._dataSetResults(oldChartResult) || []);
-		var nows = (this._dataSetResults(chartResult) || []);
+		var olds = (this.results(oldChartResult) || []);
+		var nows = (this.results(chartResult) || []);
 		
 		var merges = [];
 		var mergeDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, this._toCallbackResultParam(chartResult)) : appendMode.size);
+		var mergesLength = Math.max(olds.length, nows.length);
 		
-		for(var i=0; i<nows.length; i++)
+		for(var i=0; i<mergesLength; i++)
 		{
 			var oldData = this.resultDatas(olds[i]);
 			var nowData = this.resultDatas(nows[i]);
@@ -2300,25 +2301,6 @@
 	};
 	
 	/**
-	 * 获取数据集结果数组。
-	 * 
-	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
-	 */
-	chartBase._dataSetResults = function(chartResult)
-	{
-		if(chartResult == null)
-			return chartResult;
-		
-		// 数据集结果数组
-		if($.isArray(chartResult))
-		{
-			return chartResult;
-		}
-		
-		return this.results(chartResult);
-	};
-	
-	/**
 	 * 转换为图表结果（org.datagear.analysis.ChartResult）
 	 * 
 	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
@@ -2331,7 +2313,9 @@
 		// 数据集结果数组
 		if($.isArray(chartResult))
 		{
-			var re = { dataSetResults: chartResult };
+			var re = {};
+			this.results(re, chartResult);
+			
 			return re;
 		}
 		
@@ -2358,7 +2342,7 @@
 	 */
 	chartBase.resultOf = function(chartResult, dataSetBind, dataSetResult)
 	{
-		var dataSetResults = this._dataSetResults(chartResult);
+		var dataSetResults = this.results(chartResult);
 		var index = (chartFactory.isNumber(dataSetBind) ? dataSetBind : (dataSetBind != null ? dataSetBind.index : undefined));
 		
 		if(dataSetResult === undefined)
@@ -4365,7 +4349,7 @@
 	/**
 	 * 获取/设置图表结果包含的数据集结果数组。
 	 * 
-	 * @param chartResult 图表结果
+	 * @param chartResult 图表结果、数据集结果数组（仅获取时）
 	 * @param dataSetResults 可选，要设置的数据集结果数组
 	 * @returns 要获取的数据集结果数组，没有则返回null
 	 * @since 5.3.0
@@ -4373,7 +4357,21 @@
 	chartBase.results = function(chartResult, dataSetResults)
 	{
 		if(dataSetResults === undefined)
-			return (chartResult != null ? chartResult.dataSetResults : undefined);
+		{
+			if(chartResult == null)
+			{
+				return undefined;
+			}
+			// 数据集结果数组
+			else if($.isArray(chartResult))
+			{
+				return chartResult;
+			}
+			else
+			{
+				return chartResult.dataSetResults;
+			}
+		}
 		else
 		{
 			chartResult.dataSetResults = dataSetResults;
@@ -4422,7 +4420,7 @@
 		if(dataSetResults === undefined)
 		{
 			var chartResult = this.updateResult();
-			return this._dataSetResults(chartResult);
+			return this.results(chartResult);
 		}
 		else
 		{
