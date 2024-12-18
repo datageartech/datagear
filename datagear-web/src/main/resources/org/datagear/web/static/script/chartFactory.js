@@ -1344,7 +1344,7 @@
 		if(chartResult == null)
 			chartResult = {};
 		
-		chartResult.dataSetResults = merges;
+		this.results(chartResult, merges);
 		
 		return chartResult;
 	};
@@ -2315,7 +2315,7 @@
 			return chartResult;
 		}
 		
-		return (chartResult ? chartResult.dataSetResults : undefined);
+		return this.results(chartResult);
 	};
 	
 	/**
@@ -2371,7 +2371,7 @@
 			if(chartResult && !$.isArray(chartResult) && dataSetResults == null)
 			{
 				dataSetResults = [];
-				chartResult.dataSetResults = dataSetResults;
+				this.results(chartResult, dataSetResults);
 			}
 			
 			dataSetResults[index] = dataSetResult;
@@ -4359,6 +4359,24 @@
 		{
 			chartResult = this._toChartResult(chartResult);
 			chartFactory.extValueBuiltin(this, "updateResult", chartResult);
+		}
+	};
+	
+	/**
+	 * 获取/设置图表结果包含的数据集结果数组。
+	 * 
+	 * @param chartResult 图表结果
+	 * @param dataSetResults 可选，要设置的数据集结果数组
+	 * @returns 要获取的数据集结果数组，没有则返回null
+	 * @since 5.3.0
+	 */
+	chartBase.results = function(chartResult, dataSetResults)
+	{
+		if(dataSetResults === undefined)
+			return (chartResult != null ? chartResult.dataSetResults : undefined);
+		else
+		{
+			chartResult.dataSetResults = dataSetResults;
 		}
 	};
 	
