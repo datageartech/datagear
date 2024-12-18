@@ -2349,26 +2349,6 @@
 	};
 	
 	/**
-	 * 获取/设置图表结果包含的指定索引的数据集结果。
-	 * 
-	 * @param chartResult 图表结果、数据集结果数组
-	 * @param index 索引数值
-	 * @param dataSetResult 可选，要设置的数据集结果
-	 * @return 要获取的数据集结果，没有则返回undefined
-	 */
-	chartBase.resultAt = function(chartResult, index, dataSetResult)
-	{
-		if(dataSetResult === undefined)
-		{
-			return this.resultOf(chartResult, index);
-		}
-		else
-		{
-			this.resultOf(chartResult, index, dataSetResult);
-		}
-	};
-	
-	/**
 	 * 获取/设置图表结果包含的指定数据集绑定对应的数据集结果。
 	 * 
 	 * @param chartResult 图表结果、数据集结果数组
@@ -4386,6 +4366,30 @@
 	// < 已弃用函数 start
 	//-------------
 	
+	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
+	
+	/**
+	 * 获取/设置图表结果包含的指定索引的数据集结果。
+	 * 
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @param index 索引数值
+	 * @param dataSetResult 可选，要设置的数据集结果
+	 * @return 要获取的数据集结果，没有则返回undefined
+	 */
+	chartBase.resultAt = function(chartResult, index, dataSetResult)
+	{
+		if(dataSetResult === undefined)
+		{
+			return this.resultOf(chartResult, index);
+		}
+		else
+		{
+			this.resultOf(chartResult, index, dataSetResult);
+		}
+	};
+	
+	// > @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
+	
 	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.updateResult()
 	
 	/**
@@ -4721,7 +4725,7 @@
 			ocdsi = originalInfo;
 			ordi = originalResultDataIndex;
 			
-			odata = this.resultDataElement(this.resultAt(chartResult, ocdsi), ordi);
+			odata = this.resultDataElement(this.resultOf(chartResult, ocdsi), ordi);
 		}
 		else
 		{
@@ -4752,11 +4756,11 @@
 					odata[i] = [];
 					
 					for(var j=0; j<myOcdsi.length; j++)
-						odata[i][j] = this.resultDataElement(this.resultAt(chartResult, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
+						odata[i][j] = this.resultDataElement(this.resultOf(chartResult, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
 				}
 				else
 				{
-					odata[i] = this.resultDataElement(this.resultAt(chartResult, myOcdsi), myOrdi);
+					odata[i] = this.resultDataElement(this.resultOf(chartResult, myOcdsi), myOrdi);
 				}
 			}
 			
@@ -4971,7 +4975,7 @@
 			}
 		}
 		
-		return (index == null ? undefined : this.resultAt(chartResult, index));
+		return (index == null ? undefined : this.resultOf(chartResult, index));
 	};
 	// > @deprecated 兼容2.13.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
 	
@@ -5288,13 +5292,13 @@
 				
 				for(var j=0; j<dataSetBindIndex.length; j++)
 				{
-					var result = chart.resultAt(chartResult, dataSetBindIndex[j]);
+					var result = chart.resultOf(chartResult, dataSetBindIndex[j]);
 					originalDataMy[j] = chart.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
 				}
 			}
 			else
 			{
-				var result = chart.resultAt(chartResult, dataSetBindIndex);
+				var result = chart.resultOf(chartResult, dataSetBindIndex);
 				originalDataMy = chart.resultDataElement(result, resultDataIndex);
 			}
 			

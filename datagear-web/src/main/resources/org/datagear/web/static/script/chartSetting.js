@@ -2094,7 +2094,7 @@
 	chartSetting.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $table)
 	{
 		var chartResult = chart.updateResult();
-		var result = chart.resultAt(chartResult, index);
+		var result = chart.resultOf(chartResult, index);
 		var datas = chart.resultDatas(result);
 		var columns = ($table.data("tableColumns") || []);
 		

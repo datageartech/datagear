@@ -3169,13 +3169,13 @@
 						
 						for(var j=0; j<dataSetBindIndex.length; j++)
 						{
-							var result = chart.resultAt(chart.updateResult(), dataSetBindIndex[j]);
+							var result = chart.resultOf(chart.updateResult(), dataSetBindIndex[j]);
 							resultData[j] = chart.resultDataElement(result, (resultDataIndex ? resultDataIndex[j] : null));
 						}
 					}
 					else
 					{
-						var result = chart.resultAt(chart.updateResult(), dataSetBindIndex);
+						var result = chart.resultOf(chart.updateResult(), dataSetBindIndex);
 						resultData = chart.resultDataElement(result, resultDataIndex);
 					}
 				}
