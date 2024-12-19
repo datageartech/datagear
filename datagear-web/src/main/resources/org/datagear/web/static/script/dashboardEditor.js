@@ -2795,8 +2795,10 @@
 			
 			var displayName = pathInfo.tagName;
 			
-			if(this._isDisplayGrid(pathInfo.cssDisplay) || this._isDisplayFlex(pathInfo.cssDisplay))
-				displayName += "("+pathInfo.cssDisplay+")";
+			if(this._isDisplayGrid(pathInfo.cssDisplay))
+				displayName += "(grid)";
+			else if(this._isDisplayFlex(pathInfo.cssDisplay))
+				displayName += "(flex)";
 			
 			if(pathInfo.id)
 				displayName += "#"+pathInfo.id;
