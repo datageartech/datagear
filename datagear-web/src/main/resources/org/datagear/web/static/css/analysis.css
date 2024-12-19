@@ -39,6 +39,10 @@
 /*表格图表*/
 .dg-chart-table{}
 .dg-chart-table .dg-chart-table-title{
+	position: absolute;/*必须设置，不然元素竖向无法贴顶对齐*/
+	left: 0;
+	top: 0;
+	right: 0;
 	padding-top: 0.1em;
 	padding-bottom: 0.1em;
 	box-sizing: border-box;
@@ -50,16 +54,16 @@
 }
 .dg-chart-table .dg-chart-table-content{
 	position: absolute;
-	left: 1px;
+	left: 0;
 	top: 1.6em;
-	right: 1px;
-	bottom: 1px;
+	right: 0;
+	bottom: 0;
 }
 .dg-chart-table.dg-hide-title .dg-chart-table-title{
 	display: none;
 }
 .dg-chart-table.dg-hide-title .dg-chart-table-content{
-	top: 1px;
+	top: 0;
 }
 .dg-chart-table .dg-chart-table-content table.dataTable thead th,
 .dg-chart-table .dg-chart-table-content table.dataTable thead td,
