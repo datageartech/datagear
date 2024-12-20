@@ -65,44 +65,44 @@
 .dg-chart-table.dg-hide-title .dg-chart-table-content{
 	top: 0;
 }
-.dg-chart-table .dg-chart-table-content table.dataTable thead th,
-.dg-chart-table .dg-chart-table-content table.dataTable thead td,
-.dg-chart-table .dg-chart-table-content table.dataTable tbody th,
-.dg-chart-table .dg-chart-table-content table.dataTable tbody td{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th,
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead td,
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable tbody td{
 	padding: 0.5em 18px;
 	text-align: left;
 }
-.dg-chart-table .dg-chart-table-content table.dataTable td.dataTables_empty{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable td.dataTables_empty{
 	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
 }
-.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_info{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_info{
 	padding-top: 0.5em;
 }
-.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_length{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_length{
 	float: none;
 	margin-left: 1em;
 	display: inline-block;
 	padding-top: 0.5em;
 }
-.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button{
 	padding: 0.2em 0.41em;
 }
-.dg-chart-table .dg-chart-table-content .dataTables_wrapper .dataTables_length select{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_length select{
 	margin-left: 0.2em;
 	margin-right: 0.2em;
 }
 /*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
-.dg-chart-table .dg-chart-table-content .DTFC_LeftBodyLiner,
-.dg-chart-table .dg-chart-table-content .DTFC_RightBodyLiner{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .DTFC_LeftBodyLiner,
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .DTFC_RightBodyLiner{
 	overflow-x: hidden;
 }
 /*DataTables-1.11.3版本内置的jquery-ui CSS标题右上角会多一个白线，这里设置不可见*/
-.dg-chart-table .dataTables_wrapper .dtfc-right-top-blocker{
+.dg-chart-table.dg-table-v1 .dataTables_wrapper .dtfc-right-top-blocker{
 	opacity: 0;
 	filter: Alpha(Opacity=0);
 }
 /*排序图标*/
-.dg-chart-table .dg-chart-table-content table.dataTable thead th.sorting div.DataTables_sort_wrapper span{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th.sorting div.DataTables_sort_wrapper span{
 	position: absolute;
 	top: 50%;
 	margin-top: -2px;
@@ -113,7 +113,7 @@
 	opacity: 0.6;
 	filter: Alpha(Opacity=60);
 }
-.dg-chart-table .dg-chart-table-content table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
 	width: 0;
 	height: 0;
 	margin-top: -3px;
@@ -124,7 +124,7 @@
 	opacity: 1;
 	filter: Alpha(Opacity=100);
 }
-.dg-chart-table .dg-chart-table-content table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
+.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
 	width: 0;
 	height: 0;
 	margin-top: -3px;
@@ -134,6 +134,16 @@
 	background: none;
 	opacity: 1;
 	filter: Alpha(Opacity=100);
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container > .dt-scroll{
+	min-height: 100%;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable thead th,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable thead td,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable tbody td{
+	text-align: left;
 }
 
 /*标签卡图表*/

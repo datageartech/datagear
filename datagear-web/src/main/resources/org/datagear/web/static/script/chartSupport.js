@@ -6559,6 +6559,7 @@
 		var dataSignNames = options.dg.dataSignNames;
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-table");
+		chartEle.addClass(chartSupport.tableIsV1() ? "dg-table-v1" : "dg-table-v2");
 		
 		//默认轮播配置
 		var carouselConfig =
@@ -6794,12 +6795,12 @@
 		
 		if(evalHeight)
 		{
-			chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
 		}
 		
 		if(options.carousel.enable && options.carousel.hideVerticalScrollbar != false)
 		{
-			var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
+			var tableBody = chartSupport.tableGetScrollBody(chart, chartContent);
 			tableBody.css("overflow-y", "hidden");
 		}
 		
@@ -6862,7 +6863,7 @@
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
 		
-		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+		chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
 		chartSupport.tableAdjustColumn(dataTable);
 	};
 	
@@ -6872,6 +6873,8 @@
 		
 		chartSupport.tableStopCarousel(chart);
 		chartEle.removeClass("dg-chart-table");
+		chartEle.removeClass("dg-table-v1");
+		chartEle.removeClass("dg-table-v2");
 		chartEle.removeClass("dg-hide-title");
 		chartEle.removeClass("dg-chart-table-carousel");
 		chartEle.removeClass("dg-chart-beautify-scrollbar");
@@ -6979,6 +6982,36 @@
 		}
 		
 		return columns;
+	};
+	
+	chartSupport.tableInternalVersion = function()
+	{
+		if(typeof(DataTable) != "undefined")
+			return (DataTable.version || "");
+		else
+			return "";
+	};
+	
+	chartSupport.tableIsV1 = function()
+	{
+		var v = chartSupport.tableInternalVersion();
+		return (v != null && /^1\./.test(v));
+	};
+	
+	chartSupport.tableGetScrollHead = function(chart, $chartContent)
+	{
+		if(chartSupport.tableIsV1())
+			return $(".dataTables_scrollHead", $chartContent);
+		else
+			return $(".dt-scroll-head", $chartContent);
+	};
+	
+	chartSupport.tableGetScrollBody = function(chart, $chartContent)
+	{
+		if(chartSupport.tableIsV1())
+			return $(".dataTables_scrollBody", $chartContent);
+		else
+			return $(".dt-scroll-body", $chartContent);
 	};
 	
 	chartSupport.tableThemeStyleSheet = function(chart, options)
@@ -7243,14 +7276,14 @@
 			to["background"] = (important ? chartSupport.cssValueImportant(from["background"]) : from["background"]);
 	};
 	
-	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
+	chartSupport.tableEvalDataTableBodyHeight = function(chart, $chartContent, dataTable)
 	{
 		var chartContentHeight = $chartContent.height();
 		var container = $(dataTable.table().container());
 		var containerHeight = container.outerHeight(true);
-		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
+		var tableHeader = chartSupport.tableGetScrollHead(chart, $chartContent);
 		var tableHeaderHeight = tableHeader.outerHeight(true);
-		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
+		var tableBody = chartSupport.tableGetScrollBody(chart, $chartContent);
 		var fixedColumnContainer = tableBody.closest(".DTFC_ScrollWrapper");
 		var tableBodyHeight = chartContentHeight - tableHeaderHeight;
 		tableBody.css("height", tableBodyHeight);
@@ -7317,6 +7350,7 @@
 			dataTable.fixedColumns.relayout();
 		*/
 	};
+	
 	/**
 	 * 表格准备轮播。
 	 */
@@ -7330,7 +7364,7 @@
 		if(rowCount == 0)
 			return;
 		
-		var scrollBody = $(".dataTables_scrollBody", chartContent);
+		var scrollBody = chartSupport.tableGetScrollBody(chart, chartContent);
 		var scrollTable = $(".dataTable", scrollBody);
 		
 		var scrollBodyHeight = scrollBody.height();
@@ -7366,7 +7400,7 @@
 		
 		var rowCount = dataTable.rows().indexes().length;
 		
-		var scrollBody = $(".dataTables_scrollBody", chartContent);
+		var scrollBody = chartSupport.tableGetScrollBody(chart, chartContent);
 		var scrollTable = $(".dataTable", scrollBody);
 		
 		//空表格，或者，"auto"且行数未溢出时不轮播
