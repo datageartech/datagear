@@ -6765,12 +6765,6 @@
 			}
 		}
 		
-		var evalBodyHeight = (isV1 && options.scrollY == null);
-		
-		//临时设一个较小值，后面会重新计算
-		if(evalBodyHeight)
-			options.scrollY = 4;
-		
 		chartSupport.tableThemeStyleSheet(chart, options);
 		
 		if(options.carousel.enable)
@@ -6801,7 +6795,7 @@
 		
 		var dataTable = table.DataTable();
 		
-		if(evalBodyHeight)
+		if(options.scrollY == null && isV1)
 		{
 			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
 		}
@@ -6872,8 +6866,7 @@
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
 		
-		var evalBodyHeight = (renderOptions.scrollY == null && chartSupport.tableIsV1());
-		if(evalBodyHeight)
+		if(renderOptions.scrollY == null && chartSupport.tableIsV1())
 		{
 			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
 		}
