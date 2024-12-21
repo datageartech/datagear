@@ -45,6 +45,15 @@
 	font-weight: bold;
 	text-align: center;
 }
+.dg-chart-table.dg-hide-title .dg-chart-table-title{
+	display: none;
+}
+.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable thead th,
+.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable thead td,
+.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable tbody td{
+	white-space: nowrap;
+}
 .dg-chart-table.dg-table-v1 .dg-chart-table-title{
 	position: absolute;/*必须设置，不然元素竖向无法贴顶对齐*/
 	left: 0;
@@ -60,9 +69,6 @@
 	top: 1.6em;
 	right: 0;
 	bottom: 0;
-}
-.dg-chart-table.dg-hide-title .dg-chart-table-title{
-	display: none;
 }
 .dg-chart-table.dg-table-v1.dg-hide-title .dg-chart-table-content{
 	top: 0;
@@ -159,6 +165,20 @@
 	flex-direction: column;
 	overflow: auto;
 }
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row{
+	margin: 0.1em 0;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row:first-child{
+	margin-top: 0;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table{
+	overflow: auto;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell .dt-scroll{
+	height: 100%;
+	overflow: auto;
+}
 .dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-head{
 	flex: 0 0 auto;
 }
@@ -196,6 +216,13 @@
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current:hover{
 	background: none;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging{
+	padding: 0 0.2rem;
 }
 
 /*标签卡图表*/

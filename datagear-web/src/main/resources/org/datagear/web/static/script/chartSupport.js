@@ -6616,6 +6616,8 @@
 			disableStripe: false,
 			//是否禁用悬浮样式效果
 			disableHover: false,
+			//是否表格文本不换行
+			enableWrapText: false,
 			
 			//DataTable配置项
 			"columns": columns,
@@ -6634,8 +6636,11 @@
 		    {
 				"emptyTable": "",
 				"zeroRecords": "",
+				"search": "搜索",
 				"lengthMenu": "每页_MENU_条",
 				"info": "共_TOTAL_条，当前_START_-_END_条",
+				"infoEmpty": "无数据",
+				"infoFiltered": "_TOTAL_条",
 				"paginate":
 				{
 					"first": "首页",
@@ -6653,10 +6658,26 @@
 		{
 			//完善分页选项
 			options.paging = (options.paging != null ? options.paging : false);
-			options.info = (options.info != null ? options.info :
-									(options.paging ? true : false));
-			options.dom = (options.dom != null ? options.dom :
-									(options.paging ? "tilpr" : "t"));
+			options.info = (options.info != null ? options.info : (options.paging ? true : false));
+			
+			if(isV1)
+			{
+				options.dom = (options.dom != null ? options.dom : (options.paging ? "tilpr" : "t"));
+			}
+			else
+			{
+				var dftLayout = undefined;
+				
+				if(options.paging)
+				{
+					dftLayout = (dftLayout == null ? {} : dftLayout);
+					dftLayout.topStart = null;
+					dftLayout.bottomStart = ["info","pageLength"];
+					dftLayout.bottomEnd = "paging";
+				}
+				
+				options.layout = (options.layout != null ? options.layout : dftLayout);
+			}
 			
 			//完善轮播选项
 			if(options.carousel == null)
@@ -6772,6 +6793,9 @@
 		
 		if(!options.title.show)
 			chartEle.addClass("dg-hide-title");
+			
+		if(options.enableWrapText)
+			chartEle.addClass("dg-text-nowrap");
 		
 		var eleWrapper = (isV1 ? chartEle : $("<div class='dg-chart-ele-wrapper' />").appendTo(chartEle));
 		
@@ -6797,7 +6821,7 @@
 		
 		if(options.scrollY == null && isV1)
 		{
-			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
+			chartSupport.tableEvalBodyHeightV1(chart, chartContent, dataTable);
 		}
 		
 		if(options.carousel.enable && options.carousel.hideVerticalScrollbar != false)
@@ -6868,7 +6892,7 @@
 		
 		if(renderOptions.scrollY == null && chartSupport.tableIsV1())
 		{
-			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
+			chartSupport.tableEvalBodyHeightV1(chart, chartContent, dataTable);
 		}
 		
 		chartSupport.tableAdjustColumn(dataTable);
@@ -6879,15 +6903,11 @@
 		var chartEle = chart.elementJquery();
 		
 		chartSupport.tableStopCarousel(chart);
-		chartEle.removeClass("dg-chart-table");
-		chartEle.removeClass("dg-table-v1");
-		chartEle.removeClass("dg-table-v2");
-		chartEle.removeClass("dg-hide-title");
-		chartEle.removeClass("dg-chart-table-carousel");
-		chartEle.removeClass("dg-chart-beautify-scrollbar");
+		chartEle.removeClass("dg-chart-table dg-table-v1 dg-table-v2 dg-hide-title dg-text-nowrap dg-chart-table-carousel");
 		chartEle.removeClass(chart.extValue(chartFactory.builtinPropName("TableChartLocalStyleName")));
 		$(".dg-chart-table-title", chartEle).remove();
 		$(".dg-chart-table-content", chartEle).remove();
+		$(".dg-chart-ele-wrapper", chartEle).remove();
 	};
 	
 	chartSupport.tableOn = function(chart, eventType, handler)
@@ -7412,7 +7432,7 @@
 			to["background"] = (important ? chartSupport.cssValueImportant(from["background"]) : from["background"]);
 	};
 	
-	chartSupport.tableEvalDataTableBodyHeight = function(chart, $chartContent, dataTable)
+	chartSupport.tableEvalBodyHeightV1 = function(chart, $chartContent, dataTable)
 	{
 		var chartContentHeight = $chartContent.height();
 		var container = $(dataTable.table().container());
