@@ -246,6 +246,9 @@
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
 	
+	/** 看板引入库标识属性，同：org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR */
+	chartFactory.LIB_ATTR_IMPORT_NAME = "dg-import-name";
+	
 	/**
 	 * 图表属性值集中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.ATTR_CHART_OPTIONS
 	 */
@@ -6096,7 +6099,6 @@
 			.attr("dg-generated-style", "true").attr("type", "text/css").text(cssText);
 		
 		var $head = $("head:first");
-		
 		var $lastGenStyle = $("style[dg-generated-style]:last", $head);
 		
 		//后插入的优先级应高于先插入的
@@ -6106,25 +6108,7 @@
 			return;
 		}
 		
-		var $lastImport = $("[dg-import-name]:last", $head);
-		
-		//优先级应高于导入的资源
-		if($lastImport.length > 0)
-		{
-			$lastImport.after($style);
-			return;
-		}
-		
-		var $lastLink = $("link:last", $head);
-		
-		//优先级应高于link的css
-		if($lastLink.length > 0)
-		{
-			$lastLink.after($style);
-			return;
-		}
-		
-		$head.prepend($style);
+		chartFactory.insertEleAfterBuiltInImport($head, $style);
 	};
 	
 	/**
@@ -6137,6 +6121,31 @@
 		var style = document.getElementById(id);
 		
 		return (style != null && style.type == "text/css");
+	};
+	
+	//将元素紧跟插入在内置引入库之后
+	//某些元素的优先级应高于内置引入库但是低于看板内定义的引入库，需要通过此函数插入
+	chartFactory.insertEleAfterBuiltInImport = function($head, ele)
+	{
+		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
+		
+		//优先级应高于导入的资源
+		if($lastImport.length > 0)
+		{
+			$lastImport.after(ele);
+			return;
+		}
+		
+		var $lastLink = $("link:last", $head);
+		
+		//优先级应高于link的css
+		if($lastLink.length > 0)
+		{
+			$lastLink.after(ele);
+			return;
+		}
+		
+		$head.prepend(ele);
 	};
 	
 	/**
@@ -7684,7 +7693,7 @@
 					
 					for(var j=0; j<source.length; j++)
 					{
-						chartFactory.loadSingleLibSource(source[j], srcDfds[j]);
+						chartFactory.loadSingleLibSource(libs[i], source[j], srcDfds[j]);
 					}
 				}
 			}
@@ -7695,7 +7704,7 @@
 		$.when.apply($, deferreds).always(function(){ callback(); });
 	};
 	
-	chartFactory.loadSingleLibSource = function(source, deferred)
+	chartFactory.loadSingleLibSource = function(lib, source, deferred)
 	{
 		if(deferred.state() !== "pending")
 			return;
@@ -7707,11 +7716,11 @@
 		
 		if(source.type == "js")
 		{
-			chartFactory.loadSingleJsLibSource(source, deferred);
+			chartFactory.loadSingleJsLibSource(lib, source, deferred);
 		}
 		else if(source.type == "css")
 		{
-			chartFactory.loadSingleCssLibSource(source, deferred);
+			chartFactory.loadSingleCssLibSource(lib, source, deferred);
 		}
 		else
 		{
@@ -7720,7 +7729,7 @@
 		}
 	};
 	
-	chartFactory.loadSingleJsLibSource = function(source, deferred)
+	chartFactory.loadSingleJsLibSource = function(lib, source, deferred)
 	{
 		var ele = document.createElement("script");
 		
@@ -7729,10 +7738,10 @@
 		ele.onload = function(){ deferred.resolve(); };
 		ele.onerror = function(){ deferred.resolve(); };
 		
-		chartFactory.addLibSourceEleToDoc(ele);
+		chartFactory.addLibSourceEleToDoc(lib, ele);
 	};
 	
-	chartFactory.loadSingleCssLibSource = function(source, deferred)
+	chartFactory.loadSingleCssLibSource = function(lib, source, deferred)
 	{
 		var ele = document.createElement("link");
 		
@@ -7742,24 +7751,17 @@
 		ele.onload = function(){ deferred.resolve(); };
 		ele.onerror = function(){ deferred.resolve(); };
 		
-		chartFactory.addLibSourceEleToDoc(ele);
+		chartFactory.addLibSourceEleToDoc(lib, ele);
 	};
 	
-	chartFactory.addLibSourceEleToDoc = function(ele)
+	chartFactory.addLibSourceEleToDoc = function(lib, ele)
 	{
-		var head = document.head;
+		//需要添加此属性标识，以确保chart.themeStyleSheet()创建的样式表在依赖库之后
+		$(ele).attr(chartFactory.LIB_ATTR_IMPORT_NAME, lib.name);
 		
-		if(!head)
-			head = $("head").get(0);
-		
-		if(head && head.appendChild)
-		{
-			head.appendChild(ele);
-		}
-		else
-		{
-			$(document.body).prepend(ele);
-		}
+		var head = $("head:first")[0];
+		//这里不能使用$的API，会无法正常执行绑定事件
+		head.appendChild(ele);
 	};
 	
 	chartFactory.resolveLibSourceType = function(url)

@@ -6559,7 +6559,8 @@
 		var dataSignNames = options.dg.dataSignNames;
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-table");
-		chartEle.addClass(chartSupport.tableIsV1() ? "dg-table-v1" : "dg-table-v2");
+		var isV1 = chartSupport.tableIsV1();
+		chartEle.addClass(isV1 ? "dg-table-v1" : "dg-table-v2");
 		
 		//默认轮播配置
 		var carouselConfig =
@@ -6666,7 +6667,7 @@
 			{
 				carouselConfig.enable = options.carousel;
 			}
-			else if(typeof(options.carousel) == "number" || $.isFunction(options.carousel))
+			else if(chartFactory.isNumber(options.carousel) || $.isFunction(options.carousel))
 			{
 				carouselConfig.enable = true;
 				carouselConfig.interval = options.carousel;
@@ -6764,10 +6765,10 @@
 			}
 		}
 		
-		var evalHeight = (options.scrollY == null);
+		var evalBodyHeight = (isV1 && options.scrollY == null);
 		
 		//临时设一个较小值，后面会重新计算
-		if(evalHeight)
+		if(evalBodyHeight)
 			options.scrollY = 4;
 		
 		chartSupport.tableThemeStyleSheet(chart, options);
@@ -6778,12 +6779,19 @@
 		if(!options.title.show)
 			chartEle.addClass("dg-hide-title");
 		
-		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(chartEle);
+		var eleWrapper = (isV1 ? chartEle : $("<div class='dg-chart-ele-wrapper' />").appendTo(chartEle));
+		
+		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(eleWrapper);
 		if(options.titleStyle)
 			chart.elementStyle(chartTitle, options.titleStyle);
 		
-		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
-		chartContent.css("top", (options.title.show ? chartTitle.outerHeight(true) : 0));
+		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(eleWrapper);
+		
+		if(isV1)
+		{
+			chartContent.css("top", (options.title.show ? chartTitle.outerHeight(true) : 0));
+		}
+		
 		var table = $("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
 						.appendTo(chartContent);
 		var tableId = chart.id+"-table";
@@ -6793,7 +6801,7 @@
 		
 		var dataTable = table.DataTable();
 		
-		if(evalHeight)
+		if(evalBodyHeight)
 		{
 			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
 		}
@@ -6860,10 +6868,16 @@
 	
 	chartSupport.tableResize = function(chart)
 	{
+		var renderOptions= chart.renderOptions();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
 		
-		chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
+		var evalBodyHeight = (renderOptions.scrollY == null && chartSupport.tableIsV1());
+		if(evalBodyHeight)
+		{
+			chartSupport.tableEvalDataTableBodyHeight(chart, chartContent, dataTable);
+		}
+		
 		chartSupport.tableAdjustColumn(dataTable);
 	};
 	
@@ -7078,7 +7092,10 @@
 					cellOdd: {},
 					cellEven: {},
 					cellHover: {},
-					cellSelected: {}
+					cellSelected:
+					{
+						"color": theme.highlightTheme.color
+					}
 				}
 			};
 			
@@ -7128,6 +7145,8 @@
 			
 			//样式要加".dg-chart-table-content"限定，因为图表的数据透视表功能也采用的是DataTable组件，可能会处在同一个表格图表div内
 			var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
+			var qualifierV1 = (isLocalStyle ? "." + name : "") + ".dg-table-v1 .dg-chart-table-content";
+			var qualifierV2 = (isLocalStyle ? "." + name : "") + ".dg-table-v2 .dg-chart-table-content";
 			
 			var css=
 			[
@@ -7163,36 +7182,76 @@
 					value: chart.styleString(tableStyle.body.cell)
 				},
 				{
-					name: qualifier + " table.dataTable.stripe tbody tr.odd",
+					name:
+					[
+						qualifierV1 + " table.dataTable.stripe tbody tr.odd",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(odd)"
+					],
 					value: chart.styleString(tableStyle.body.rowOdd)
 				},
 				{
-					name: qualifier + " table.dataTable.stripe tbody tr.odd td",
+					name:
+					[
+						qualifierV1 + " table.dataTable.stripe tbody tr.odd td",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(odd)>*"
+					],
 					value: chart.styleString(tableStyle.body.cellOdd)
 				},
 				{
-					name: qualifier + " table.dataTable.stripe tbody tr.even",
+					name:
+					[
+						qualifierV1 + " table.dataTable.stripe tbody tr.even",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(even)"
+					],
 					value: chart.styleString(tableStyle.body.rowEven)
 				},
 				{
-					name: qualifier + " table.dataTable.stripe tbody tr.even td",
+					name:
+					[
+						qualifierV1 + " table.dataTable.stripe tbody tr.even td",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(even)>*"
+					],
 					value: chart.styleString(tableStyle.body.cellEven)
 				},
 				{
-					name: qualifier + " table.dataTable.hover tbody tr:hover",
+					name:
+					[
+						qualifier + " table.dataTable.hover tbody tr:hover",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.odd:hover",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.even:hover",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover"
+					],
 					value: chart.styleString(tableStyle.body.rowHover)
 				},
 				{
-					name: qualifier + " table.dataTable.hover tbody tr:hover td",
+					name:
+					[
+						qualifier + " table.dataTable.hover tbody tr:hover td",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.odd:hover td",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.even:hover td",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover>*",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover>*",
+					],
 					value: chart.styleString(tableStyle.body.cellHover)
 				},
 				{
 					name:
 					[
 						qualifier + " table.dataTable tbody tr.selected",
-						qualifier + " table.dataTable.stripe tbody tr.odd.selected",
-						qualifier + " table.dataTable.stripe tbody tr.even.selected",
-						qualifier + " table.dataTable.hover tbody tr:hover.selected"
+						qualifier + " table.dataTable.hover tbody tr:hover.selected",
+						qualifierV1 + " table.dataTable.stripe tbody tr.odd.selected",
+						qualifierV1 + " table.dataTable.stripe tbody tr.even.selected",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(odd).selected",
+						qualifierV2 + " table.dataTable.display>tbody>tr:nth-child(odd).selected",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(even).selected",
+						qualifierV2 + " table.dataTable.display>tbody>tr:nth-child(even).selected",
+						
+						qualifier + " table.dataTable.hover tbody tr:hover.selected",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.odd:hover.selected",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.even:hover.selected",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected"
 					],
 					value: chart.styleString(tableStyle.body.rowSelected)
 				},
@@ -7202,19 +7261,30 @@
 						qualifier + " table.dataTable tbody tr.selected td",
 						qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
 						qualifier + " table.dataTable.stripe tbody tr.even.selected td",
-						qualifier + " table.dataTable.hover tbody tr:hover.selected td"
+						qualifier + " table.dataTable.hover tbody tr:hover.selected td",
+						qualifierV2 + " table.dataTable>tbody>tr.selected>*",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(odd).selected>*",
+						qualifierV2 + " table.dataTable.display>tbody>tr:nth-child(odd).selected>*",
+						qualifierV2 + " table.dataTable.stripe>tbody>tr:nth-child(even).selected>*",
+						qualifierV2 + " table.dataTable.display>tbody>tr:nth-child(even).selected>*",
+						
+						qualifier + " table.dataTable.hover tbody tr:hover.selected td",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.odd:hover.selected td",
+						qualifierV1 + " table.dataTable.hover.stripe tbody tr.even:hover.selected td",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected>*",
+						qualifierV2 + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected>*",
 					],
 					value: chart.styleString(tableStyle.body.cellSelected)
 				},
 				{
-					name: qualifier + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span",
+					name: qualifierV1 + " table.dataTable thead th.sorting div.DataTables_sort_wrapper span",
 					value:
 					{
 						"background": headColor
 					}
 				},
 				{
-					name: qualifier + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span",
+					name: qualifierV1 + " table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span",
 					value:
 					{
 						"border-bottom-color": headColor,
@@ -7222,7 +7292,7 @@
 					}
 				},
 				{
-					name: qualifier + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span",
+					name: qualifierV1 + " table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span",
 					value:
 					{
 						"border-top-color": headColor,
@@ -7230,18 +7300,91 @@
 					}
 				},
 				{
-					name: qualifier + " .dataTables_wrapper .dataTables_length select",
+					name:
+					[
+						qualifierV1 + " .dataTables_wrapper .dataTables_length select",
+						qualifierV2 + " .dt-container .dt-length select"
+					],
 					value:
 					{
 						color: theme.color
 					}
 				},
 				{
-					name: qualifier + " .dataTables_wrapper .dataTables_length select option",
+					name:
+					[
+						qualifierV1 + " .dataTables_wrapper .dataTables_length select option",
+						qualifierV2 + " .dt-container .dt-length select option"
+					],
 					value:
 					{
 						color: theme.color,
 						"background-color": chart.themeGradualColor(0)
+					}
+				},
+				{
+					name: qualifierV2 + " .dt-container .dt-scroll-body",
+					value:
+					{
+						color: theme.color
+					}
+				},
+				{
+					name:
+					[
+						qualifierV2 + " table.dataTable>thead>tr>th",
+						qualifierV2 + " table.dataTable>thead>tr>td"
+					],
+					value:
+					{
+						"border-bottom-color": chart.themeGradualColor(0)
+					}
+				},
+				{
+					name: qualifierV2 + " table.dataTable.dtfc-scrolling-left tr>.dtfc-fixed-left::after",
+					value:
+					{
+						"box-shadow": "inset 10px 0 8px -8px " + chart.themeGradualColor(0.2)
+					}
+				},
+				{
+					name: qualifierV2 + " table.dataTable.dtfc-scrolling-right tr>.dtfc-fixed-right::after",
+					value:
+					{
+						"box-shadow": "inset -10px 0 8px -8px " + chart.themeGradualColor(0.2)
+					}
+				},
+				{
+					name:
+					[
+						qualifierV2 + " .dt-container div.dt-scroll div.dtfc-top-blocker",
+						qualifierV2 + " .dt-container div.dt-scroll div.dtfc-bottom-blocker",
+						qualifierV2 + " .dt-container div.dtfh-floatingparent div.dtfc-top-blocker",
+						qualifierV2 + " .dt-container div.dtfh-floatingparent div.dtfc-bottom-blocker"
+					],
+					value:
+					{
+						"background-color": (tableStyle.head && tableStyle.head.row ? tableStyle.head.row["background-color"] : rowBgColor)
+					}
+				},
+				{
+					name: qualifierV2 + " div.dt-container .dt-paging .dt-paging-button:hover:not(.current)",
+					value:
+					{
+						"color": theme.highlightTheme.color +" !important",
+						"background": theme.highlightTheme.backgroundColor
+					}
+				},
+				{
+					name:
+					[
+						qualifierV2 + " div.dt-container .dt-paging .dt-paging-button.current",
+						qualifierV2 + " div.dt-container .dt-paging .dt-paging-button.current:hover",
+						qualifierV2 + " div.dt-container .dt-input"
+					],
+					value:
+					{
+						"border-color": theme.borderColor
 					}
 				}
 			];

@@ -39,20 +39,22 @@
 /*表格图表*/
 .dg-chart-table{}
 .dg-chart-table .dg-chart-table-title{
-	position: absolute;/*必须设置，不然元素竖向无法贴顶对齐*/
-	left: 0;
-	top: 0;
-	right: 0;
 	padding-top: 0.1em;
 	padding-bottom: 0.1em;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 	font-size: 1.1em;
 	font-weight: bold;
 	text-align: center;
 }
-.dg-chart-table .dg-chart-table-content{
+.dg-chart-table.dg-table-v1 .dg-chart-table-title{
+	position: absolute;/*必须设置，不然元素竖向无法贴顶对齐*/
+	left: 0;
+	top: 0;
+	right: 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.dg-chart-table.dg-table-v1 .dg-chart-table-content{
 	position: absolute;
 	left: 0;
 	top: 1.6em;
@@ -62,7 +64,7 @@
 .dg-chart-table.dg-hide-title .dg-chart-table-title{
 	display: none;
 }
-.dg-chart-table.dg-hide-title .dg-chart-table-content{
+.dg-chart-table.dg-table-v1.dg-hide-title .dg-chart-table-content{
 	top: 0;
 }
 .dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th,
@@ -135,9 +137,35 @@
 	opacity: 1;
 	filter: Alpha(Opacity=100);
 }
+.dg-chart-table.dg-table-v2{}
+.dg-chart-table.dg-table-v2 .dg-chart-ele-wrapper{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content{
+	flex-grow: 1;
+	overflow: auto;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container > .dt-scroll{
-	min-height: 100%;
+.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll{
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-head{
+	flex: 0 0 auto;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-body{
+	flex-grow: 1;
+	overflow: auto;
+	border-bottom-width: 0;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable thead th,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable thead td,
@@ -145,9 +173,35 @@
 .dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable tbody td{
 	text-align: left;
 }
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable>tbody>tr.selected>*,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.hover>tbody>tr.selected:hover>*,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr.selected:hover>*,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.hover>tbody>tr:hover>*,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr:hover>*,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.stripe>tbody>tr:nth-child(odd)>*,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr:nth-child(odd)>*{
+	box-shadow: none !important;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:hover,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:active{
+	color: inherit !important;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled{
+	opacity: 0.6;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button:hover{
+	 border-color: transparent;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current:hover{
+	background: none;
+}
 
 /*标签卡图表*/
-.dg-chart-label{}
+.dg-chart-label{
+	box-sizing: border-box;
+}
 .dg-chart-label.dg-hide-name .label-name,
 .dg-chart-label .dg-hide-name .label-name{
 	display: none !important;/*防止被dg-chart-label-inline样式覆盖*/
