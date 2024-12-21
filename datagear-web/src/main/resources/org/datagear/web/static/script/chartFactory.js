@@ -7759,9 +7759,26 @@
 		//需要添加此属性标识，以确保chart.themeStyleSheet()创建的样式表在依赖库之后
 		$(ele).attr(chartFactory.LIB_ATTR_IMPORT_NAME, lib.name);
 		
-		var head = $("head:first")[0];
+		var $head = $("head:first");
+		var headEle = $head[0];
+		var beforeEle = null;
+		
+		//优先插入在内置引入库之后
+		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
+		if($lastImport.length > 0)
+		{
+			var $next = $lastImport.next();
+			if($next.length > 0)
+			{
+				beforeEle = $next[0];
+			}
+		}
+		
 		//这里不能使用$的API，会无法正常执行绑定事件
-		head.appendChild(ele);
+		if(beforeEle != null)
+			headEle.insertBefore(ele, beforeEle);
+		else
+			headEle.appendChild(ele);
 	};
 	
 	chartFactory.resolveLibSourceType = function(url)
