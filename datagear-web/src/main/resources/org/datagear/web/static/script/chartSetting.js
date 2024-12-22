@@ -30,6 +30,7 @@
 {
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 	var chartSetting = (chartFactory.chartSetting || (chartFactory.chartSetting = {}));
+	var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
 	
 	// < @deprecated 兼容1.8.1版本的window.chartSetting变量名，未来版本会移除
 	global.chartForm = chartSetting;
@@ -80,6 +81,9 @@
 	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
 	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
+	
+	//参数表单提交前回调函数选项名，以支持自定义提交前置处理逻辑
+	builtinOptionNames.onParamFormSubmit = "onParamFormSubmit";
 	
 	/**
 	 * 渲染数据集参数值表单。
@@ -1777,10 +1781,24 @@
 					for(var i=0; i<paramValuess.length; i++)
 						chartSetting.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues);
 					
-					if(chartSetting.closeChartSettingParamPanelOnSubmit)
-						chartSetting.closeChartSettingParamPanel(chart);
+					var doRefresh = true;
+					var renderOptions = chart.renderOptions();
 					
-					chart.refreshData();
+					//执行提交前回调
+					if(renderOptions && renderOptions[builtinOptionNames.onParamFormSubmit])
+					{
+						doRefresh = renderOptions[builtinOptionNames.onParamFormSubmit](chart);
+					}
+					
+					if(doRefresh !== false)
+					{
+						if(chartSetting.closeChartSettingParamPanelOnSubmit)
+						{
+							chartSetting.closeChartSettingParamPanel(chart);
+						}
+						
+						chart.refreshData();
+					}
 				}
 				else
 					$thisButton.addClass("dg-param-value-form-invalid");

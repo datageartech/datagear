@@ -140,6 +140,9 @@
 	/** 渲染上下文属性名常量 */
 	var renderContextAttrConst = (chartFactory.renderContextAttrConst || (chartFactory.renderContextAttrConst = {}));
 	
+	/**内置图表选项名*/
+	var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
+	
 	//----------------------------------------
 	// chartStatusConst开始
 	//----------------------------------------
