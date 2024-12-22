@@ -6091,8 +6091,14 @@
 	
 	/**
 	 * 设置指定ID的样式表css文本。
-	 * 如果样式表不存在，将会自动创建，且会插入<head>中的靠前位置，确保其css效果优先级低于用户定义的css。
-	 *
+	 * 如果样式表不存在，将会自动创建，并插入至<head>中。
+	 * 插入规则：
+	 * 一级优先：插入在最后一个生成样式表之后，确保新生成样式表可以覆盖全部旧生成样式表；
+	 * 二级优先：插入在最后一个看板引入库（dg-import-name）之后，确保全部生成样式表可以覆盖全部引入库中的样式表；
+	 * 三级优先：插入在第一个用户引入<link>元素之前，确保看板内用户引入的<link>样式表可以覆盖全部生成样式表；
+	 * 四级优先：插入在第一个用户定义<style>元素之前，确保看板内用户定义的<style>样式表可以覆盖全部生成样式表；
+	 * 五级优先：插入在<head>末尾。
+	 * 
 	 * @param styleId 样式表元素ID
 	 * @param cssText css文本内容
 	 */
@@ -6110,16 +6116,39 @@
 			.attr("dg-generated-style", "true").attr("type", "text/css").text(cssText);
 		
 		var $head = $("head:first");
-		var $lastGenStyle = $("style[dg-generated-style]:last", $head);
 		
-		//后插入的优先级应高于先插入的
+		var $lastGenStyle = $("style[dg-generated-style]:last", $head);
 		if($lastGenStyle.length > 0)
 		{
 			$lastGenStyle.after($style);
 			return;
 		}
 		
-		chartFactory.insertEleAfterBuiltInImport($head, $style);
+		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
+		
+		if($lastImport.length > 0)
+		{
+			$lastImport.after($style);
+			return;
+		}
+		
+		var $firstLink = $("link:first", $head);
+		
+		if($firstLink.length > 0)
+		{
+			$firstLink.before($style);
+			return;
+		}
+		
+		var $firstStyle = $("style:first", $head);
+		
+		if($firstStyle.length > 0)
+		{
+			$firstStyle.before($style);
+			return;
+		}
+		
+		$head.append($style);
 	};
 	
 	/**
@@ -6132,31 +6161,6 @@
 		var style = document.getElementById(id);
 		
 		return (style != null && style.type == "text/css");
-	};
-	
-	//将元素紧跟插入在内置引入库之后
-	//某些元素的优先级应高于内置引入库但是低于看板内定义的引入库，需要通过此函数插入
-	chartFactory.insertEleAfterBuiltInImport = function($head, ele)
-	{
-		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
-		
-		//优先级应高于导入的资源
-		if($lastImport.length > 0)
-		{
-			$lastImport.after(ele);
-			return;
-		}
-		
-		var $lastLink = $("link:last", $head);
-		
-		//优先级应高于link的css
-		if($lastLink.length > 0)
-		{
-			$lastLink.after(ele);
-			return;
-		}
-		
-		$head.prepend(ele);
 	};
 	
 	/**
@@ -7765,16 +7769,24 @@
 		chartFactory.addLibSourceEleToDoc(lib, ele);
 	};
 	
+	/**
+	 * 在DOM中插入依赖库源。
+	 * 插入规则：
+	 * 一级优先：插入在最后一个看板引入库（dg-import-name）之后、且为其添加dg-import-name属性，
+	 * 			确保其可以使用之前依赖库和内置引入库、且可以被全部生成样式表覆盖（参考chartFactory.styleSheetText()函数说明）；
+	 * 二级优先：插入在<head>末尾。
+	 * 
+	 * @param styleId 样式表元素ID
+	 * @param cssText css文本内容
+	 */
 	chartFactory.addLibSourceEleToDoc = function(lib, ele)
 	{
-		//需要添加此属性标识，以确保chart.themeStyleSheet()创建的样式表在依赖库之后
 		$(ele).attr(chartFactory.LIB_ATTR_IMPORT_NAME, lib.name);
 		
 		var $head = $("head:first");
 		var headEle = $head[0];
 		var beforeEle = null;
 		
-		//优先插入在内置引入库之后
 		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
 		if($lastImport.length > 0)
 		{
