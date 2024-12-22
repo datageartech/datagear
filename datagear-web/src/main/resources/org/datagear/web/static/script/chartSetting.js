@@ -1782,12 +1782,12 @@
 						chartSetting.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues);
 					
 					var doRefresh = true;
-					var renderOptions = chart.renderOptions();
+					var chartOptions = chart.options();
 					
 					//执行提交前回调
-					if(renderOptions && renderOptions[builtinOptionNames.onParamFormSubmit])
+					if(chartOptions && chartOptions[builtinOptionNames.onParamFormSubmit])
 					{
-						doRefresh = renderOptions[builtinOptionNames.onParamFormSubmit](chart);
+						doRefresh = chartOptions[builtinOptionNames.onParamFormSubmit](chart);
 					}
 					
 					if(doRefresh !== false)

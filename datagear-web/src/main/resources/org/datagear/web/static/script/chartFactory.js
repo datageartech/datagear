@@ -140,7 +140,7 @@
 	/** 渲染上下文属性名常量 */
 	var renderContextAttrConst = (chartFactory.renderContextAttrConst || (chartFactory.renderContextAttrConst = {}));
 	
-	/**内置图表选项名*/
+	/**内置图表选项名定义，所有内置图表选项名都应定义于此，便于因名字冲突需要重新定义*/
 	var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
 	
 	//----------------------------------------
@@ -234,17 +234,14 @@
 	// renderContextAttrConst结束
 	//----------------------------------------
 	
-	/** 内置图表选项：是否美化滚动条 */
-	chartFactory.OPTION_BEAUTIFY_SCROLLBAR = "beautifyScrollbar";
-	
-	/** 内置图表选项：处理图表渲染选项 */
-	chartFactory.OPTION_PROCESS_RENDER_OPTIONS = "processRenderOptions";
-	
-	/** 内置图表选项：处理图表更新选项 */
-	chartFactory.OPTION_PROCESS_UPDATE_OPTIONS = "processUpdateOptions";
-	
-	/** 内置图表选项：更新追加模式 */
-	chartFactory.OPTION_UPDATE_APPEND_MODE = "dgUpdateAppendMode";
+	/** 内置图表选项名：是否美化滚动条 */
+	builtinOptionNames.beautifyScrollbar = "beautifyScrollbar";
+	/** 内置图表选项名：处理图表渲染选项 */
+	builtinOptionNames.processRenderOptions = "processRenderOptions";
+	/** 内置图表选项名：处理图表更新选项 */
+	builtinOptionNames.processUpdateOptions = "processUpdateOptions";
+	/** 内置图表选项名：更新追加模式 */
+	builtinOptionNames.updateAppendMode = "updateAppendMode";
 	
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
@@ -796,7 +793,15 @@
 	chartBase._initUpdateAppendMode = function()
 	{
 		var options = this.options();
-		var mode = (options ? options[chartFactory.OPTION_UPDATE_APPEND_MODE] : null);
+		var mode = (options ? options[builtinOptionNames.updateAppendMode] : null);
+		
+		// < @deprecated 兼容5.2.0版本的dgUpdateAppendMode选项，将在未来版本移除
+		if(mode == null)
+		{
+			mode = (options ? options["dgUpdateAppendMode"] : null);
+		}
+		// > @deprecated 兼容5.2.0版本的dgUpdateAppendMode选项，将在未来版本移除
+		
 		this.updateAppendMode(mode);
 	};
 	
@@ -825,6 +830,9 @@
 	{
 		if(options === undefined)
 		{
+			if(this._options == null)
+				this._options = {};
+			
 			return this._options;
 		}
 		else
@@ -1137,7 +1145,7 @@
 		$element.addClass(this.themeStyleName());
 		
 		var options = this.options();
-		if(!options || options[chartFactory.OPTION_BEAUTIFY_SCROLLBAR] != false)
+		if(!options || options[builtinOptionNames.beautifyScrollbar] != false)
 			$element.addClass("dg-chart-beautify-scrollbar");
 		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
@@ -2878,8 +2886,8 @@
 			beforeProcessHandler(renderOptions, this);
 		
 		//最后调用processRenderOptions
-		if(renderOptions[chartFactory.OPTION_PROCESS_RENDER_OPTIONS])
-			renderOptions[chartFactory.OPTION_PROCESS_RENDER_OPTIONS](renderOptions, this);
+		if(renderOptions[builtinOptionNames.processRenderOptions])
+			renderOptions[builtinOptionNames.processRenderOptions](renderOptions, this);
 		
 		this.renderOptions(renderOptions);
 		
@@ -2958,15 +2966,15 @@
 			beforeProcessHandler(updateOptions, this, chartResult);
 		
 		//最后调用processUpdateOptions
-		if(renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS])
+		if(renderOptions[builtinOptionNames.processUpdateOptions])
 		{
-			renderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, chartResult);
+			renderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResult);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
 		else if(chartRenderOptions && renderOptions !== chartRenderOptions
-					&& chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS])
+					&& chartRenderOptions[builtinOptionNames.processUpdateOptions])
 		{
-			chartRenderOptions[chartFactory.OPTION_PROCESS_UPDATE_OPTIONS](updateOptions, this, chartResult);
+			chartRenderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResult);
 		}
 		
 		return updateOptions;
@@ -4137,7 +4145,7 @@
 	/**
 	 * 获取/设置更新追加模式。
 	 * 更新追加模式是指：每次调用chart.update()更新图表时，使用上次的数据追加合并新数据更新图表。
-	 * 图表初始化时，会使用图表选项里的dgUpdateAppendMode选项设置。
+	 * 图表初始化时，会使用图表选项里的updateAppendMode选项设置。
 	 * 
 	 * @param appendMode 可选，要设置的追加模式，格式为：
 	 * 					//等同于下面的：{ size: 10, beforeListener: false }
