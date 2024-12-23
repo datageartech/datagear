@@ -6579,7 +6579,9 @@
 			//是否在鼠标悬停时暂停轮播
 			pauseOnHover: true,
 			//是否隐藏纵向滚动条
-			hideVerticalScrollbar: true
+			hideVerticalScrollbar: true,
+			//溢出删除个数，小于这个数的轮播溢出行数，不会执行删除操作
+			overflowCount: 2
 		};
 		
 		var columns = chartSupport.tableGetFieldColumns(chart, dataSignNames.column);
@@ -7567,6 +7569,7 @@
 		if(chartEle.data("tableCarouselStatus") == "stop")
 			return;
 		
+		var carouselConfig = renderOptions.carousel;
 		var doCarousel = true;
 		
 		//元素隐藏时会因为高度计算有问题导致浏览器卡死，所以隐藏式不实际执行轮播
@@ -7582,69 +7585,57 @@
 			}
 			
 			//不采用设置滚动高度的方式（scrollBody.scrollTop()），因为会出现影响整个页面滚动高度的情况
-			var scrollTop = scrollTable.css("margin-top");
-			scrollTop = (scrollTop.indexOf("px") == scrollTop.length - 2 ? scrollTop.substring(0, scrollTop.length - 2) : scrollTop);
-			scrollTop = (Math.abs(parseInt(scrollTop)) || 0);
+			var scrollTop = parseInt(scrollTable.css("margin-top"));
+			scrollTop = (Math.abs(scrollTop) || 0);
 			
+			var tableBody = dataTable.table().body();
 			var currentRow = null;
 			var currentRowHeight = null;
 			var currentRowVisibleHeight = null;
 			
+			var offset = 0;
 			var removeRowIndexes = [];
 			var addRowDatas = [];
+			var doRemove = false;
+			var $checkRow = $("> tr:first", tableBody);
+			var tmpOffset = 0;
 			
-			var offset = 0;
-			var idx = 0;
 			while(true)
 			{
-				var row0 = dataTable.row(idx);
-				var $row0 = $(row0.node());
-				var row0Height = $row0.outerHeight(true);
-				
-				//第一行仍可见
-				if(scrollTop < (offset + row0Height))
+				if($checkRow.length == 0 || removeRowIndexes.length >= carouselConfig.overflowCount)
 				{
-					currentRow = row0.node();
-					currentRowHeight = row0Height;
-					currentRowVisibleHeight = offset + row0Height - scrollTop;
-					
+					offset += tmpOffset;
+					doRemove = true;
 					break;
 				}
 				
-				var row1 = dataTable.row(idx+1);
-				var $row1 = $(row1.node());
-				var row1Height = $row1.outerHeight(true);
+				var rowHeight = $checkRow.outerHeight(true);
+				tmpOffset += rowHeight;
 				
-				//第二行仍可见
-				if(scrollTop < (offset + row0Height + row1Height))
+				if(scrollTop < tmpOffset)
 				{
-					currentRow = row1.node();
-					currentRowHeight = row1Height;
-					currentRowVisibleHeight = offset + row0Height + row1Height - scrollTop;
-					
+					currentRow = $checkRow[0];
+					currentRowHeight = rowHeight;
+					currentRowVisibleHeight = tmpOffset - scrollTop;
 					break;
 				}
 				
-				//必须同时移除两行，不然奇偶行会变化，导致颜色交替重绘
-				removeRowIndexes.push(idx);
-				removeRowIndexes.push(idx+1);
-				addRowDatas.push(row0.data());
-				addRowDatas.push(row1.data());
-				
-				offset += row0Height + row1Height;
-				idx += 2;
+				var dtRow = dataTable.row($checkRow);
+				removeRowIndexes.push(dtRow.index());
+				addRowDatas.push(dtRow.data());
+				$checkRow = $checkRow.next();
 			}
 			
 			var needDraw = false;
 			
-			if(removeRowIndexes.length > 0)
+			if(doRemove && removeRowIndexes.length > 0)
 			{
 				dataTable.rows(removeRowIndexes).remove();
 				scrollTop = scrollTop - offset;
 				needDraw = true;
 			}
 			
-			if(addRowDatas.length > 0)
+			if(doRemove && addRowDatas.length > 0)
 			{
 				dataTable.rows.add(addRowDatas);
 				needDraw = true;
@@ -7653,23 +7644,23 @@
 			if(needDraw)
 				dataTable.draw();
 			
-			var span = ($.isFunction(renderOptions.carousel.span) ?
-					renderOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : renderOptions.carousel.span);
+			var span = ($.isFunction(carouselConfig.span) ?
+					carouselConfig.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carouselConfig.span);
 			
 			scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
 		}
 		
 		var interval = null;
 		
-		if(!$.isFunction(renderOptions.carousel.interval))
+		if(!$.isFunction(carouselConfig.interval))
 		{
-			interval = renderOptions.carousel.interval;
+			interval = carouselConfig.interval;
 		}
 		else
 		{
 			if(doCarousel)
 			{
-				interval = renderOptions.carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
+				interval = carouselConfig.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
 			}
 			else
 			{
