@@ -7495,7 +7495,8 @@
 	{
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
-		var rowCount = dataTable.rows().indexes().length;
+		var rowIndexes = dataTable.rows().indexes();
+		var rowCount = rowIndexes.length;
 		
 		//空表格
 		if(rowCount == 0)
@@ -7517,7 +7518,7 @@
 			//必须成倍添加数据，避免出现轮播次序混乱
 			for(var i=0; i<rowCount; i++)
 			{
-				var addData = dataTable.row(i).data();
+				var addData = dataTable.row(rowIndexes[i]).data();
 				dataTable.row.add(addData);
 			}
 			
@@ -7534,7 +7535,6 @@
 		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
-		
 		var rowCount = dataTable.rows().indexes().length;
 		
 		var scrollBody = chartSupport.tableGetScrollBody(chart, chartContent);
@@ -7589,9 +7589,9 @@
 			scrollTop = (Math.abs(scrollTop) || 0);
 			
 			var tableBody = dataTable.table().body();
-			var currentRow = null;
-			var currentRowHeight = null;
-			var currentRowVisibleHeight = null;
+			var currentRow = undefined;
+			var currentRowHeight = undefined;
+			var currentRowVisibleHeight = undefined;
 			
 			var offset = 0;
 			var removeRowIndexes = [];
@@ -7602,6 +7602,10 @@
 			
 			while(true)
 			{
+				currentRow = $checkRow[0];
+				currentRowHeight = $checkRow.outerHeight(true);
+				currentRowVisibleHeight = currentRowHeight;
+				
 				if($checkRow.length == 0 || removeRowIndexes.length >= carouselConfig.overflowCount)
 				{
 					offset += tmpOffset;
@@ -7609,13 +7613,10 @@
 					break;
 				}
 				
-				var rowHeight = $checkRow.outerHeight(true);
-				tmpOffset += rowHeight;
+				tmpOffset += currentRowHeight;
 				
 				if(scrollTop < tmpOffset)
 				{
-					currentRow = $checkRow[0];
-					currentRowHeight = rowHeight;
 					currentRowVisibleHeight = tmpOffset - scrollTop;
 					break;
 				}
