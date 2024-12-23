@@ -7370,27 +7370,6 @@
 				{
 					name:
 					[
-						qualifierV2 + " .dt-container div.dt-scroll div.dtfc-top-blocker",
-						qualifierV2 + " .dt-container div.dt-scroll div.dtfc-bottom-blocker",
-						qualifierV2 + " .dt-container div.dtfh-floatingparent div.dtfc-top-blocker",
-						qualifierV2 + " .dt-container div.dtfh-floatingparent div.dtfc-bottom-blocker"
-					],
-					value:
-					{
-						"background-color": (tableStyle.head && tableStyle.head.row ? tableStyle.head.row["background-color"] : rowBgColor)
-					}
-				},
-				{
-					name: qualifierV2 + " div.dt-container .dt-paging .dt-paging-button:hover:not(.current)",
-					value:
-					{
-						"color": theme.highlightTheme.color +" !important",
-						"background": theme.highlightTheme.backgroundColor
-					}
-				},
-				{
-					name:
-					[
 						qualifierV2 + " div.dt-container .dt-paging .dt-paging-button.current",
 						qualifierV2 + " div.dt-container .dt-paging .dt-paging-button.current:hover",
 						qualifierV2 + " div.dt-container .dt-input"

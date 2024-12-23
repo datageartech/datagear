@@ -164,6 +164,7 @@
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
+	flex-grow: 1;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row{
 	margin: 0.1em 0;
@@ -172,6 +173,7 @@
 	margin-top: 0;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table{
+	flex-grow: 1;
 	overflow: auto;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell,
@@ -202,28 +204,44 @@
 .dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr:nth-child(odd)>*{
 	box-shadow: none !important;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:hover,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:active{
-	color: inherit !important;
-}
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled{
-	opacity: 0.6;
-}
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button:hover{
-	 border-color: transparent;
-}
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current:hover{
-	background: none;
-}
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging{
 	padding: 0 0.2rem;
+	opacity: 0.8;
 }
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button{
+	opacity: 0.8;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button:hover{
+	border-color: transparent;
+	background: none;
+    color: inherit !important;
+    opacity: 1;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:hover,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:active{
+    color: inherit !important;
+	opacity: 0.5;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current:hover{
+	background: none;
+}
+/* < 解决开启右侧固定列后，表头列不对齐的问题 */
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-scroll div.dtfc-top-blocker,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-scroll div.dtfc-bottom-blocker,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dtfh-floatingparent div.dtfc-top-blocker,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dtfh-floatingparent div.dtfc-bottom-blocker{
+	display: none !important;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-scroll .dt-scroll-head .dt-scroll-headInner{
+	padding-left: 0 !important;
+}
+/* > 解决开启右侧固定列后，表头列不对齐的问题 */
 
 /*标签卡图表*/
 .dg-chart-label{
