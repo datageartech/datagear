@@ -468,9 +468,9 @@
 		this._initTheme();
 		this._initListener();
 		
-		// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
+		// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport中的builtinOptionNames.mapName图表选项
 		this._initMap();
-		// > @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
+		// > @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport中的builtinOptionNames.mapName图表选项
 		
 		this._initEchartsThemeName();
 		this._initDisableSetting();
@@ -4523,7 +4523,7 @@
 	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSigns()
 	
 	
-	// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
+	// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport中的builtinOptionNames.mapName图表选项
 	/**图表地图*/
 	elementAttrConst.MAP = "dg-chart-map";
 	
@@ -4539,7 +4539,7 @@
 		this.map(map);
 		// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 	};
-	// > @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport.OPTIONS_MAP图表选项
+	// > @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport中的builtinOptionNames.mapName图表选项
 	
 	// < @deprecated 兼容4.7.0版本的API，将在未来版本移除，因为与底层图表组件本身的地图设置选项功能重复，容易引起混淆
 	/**

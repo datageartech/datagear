@@ -31,6 +31,7 @@
 {
 	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 	var chartSupport = (chartFactory.chartSupport || (chartFactory.chartSupport = {}));
+	var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
 	
 	// < @deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
 	global.chartSupport = chartSupport;
@@ -39,7 +40,7 @@
 	//内置地图类图表的地图选项名
 	//默认的ECharts地图类图表配置地图名稍微麻烦，
 	//所有这里的内置图表都支持此快捷方式设置地图名选项
-	chartSupport.OPTIONS_MAP = "dgMap";
+	builtinOptionNames.mapName = "mapName";
 	
 	//折线图
 	
@@ -9009,7 +9010,14 @@
 	//初始化ECharts地图类图表的地图选项
 	chartSupport.echartsMapChartInitMap = function(chart, options)
 	{
-		var map = options[chartSupport.OPTIONS_MAP];
+		var map = options[builtinOptionNames.mapName];
+		
+		// < @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本随之一起移除
+		if(!map)
+		{
+			map = options["dgMap"];
+		}
+		// > @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本随之一起移除
 		
 		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		if(!map)
