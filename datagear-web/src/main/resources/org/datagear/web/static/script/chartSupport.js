@@ -42,6 +42,9 @@
 	//所有这里的内置图表都支持此快捷方式设置地图名选项
 	builtinOptionNames.mapName = "mapName";
 	
+	//内置类目轴数据排序配置选项名
+	builtinOptionNames.sortAxisData = "sortAxisData";
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, options)
@@ -62,11 +65,7 @@
 				area: false,
 				//阶梯：true, false, "start", "middle", "end"
 				step: false
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -272,11 +271,7 @@
 				stackGroup: true,
 				//是否横向
 				horizontal: false
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -509,11 +504,7 @@
 				stackGroup: true,
 				//坐标类型：radius（径向）、angle（角度）
 				axisType: "radius",
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -776,11 +767,7 @@
 				ring: false,
 				//当splitDataSet=false且数据集无category标记时，是否玫瑰图
 				rose: false
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -1347,11 +1334,7 @@
 				symbolSizeMin: undefined,
 				//散点图类型："scatter"、"effectScatter"
 				scatterType: scatterType
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -1612,11 +1595,7 @@
 				symbolSizeMin: undefined,
 				//散点图类型："scatter"、"effectScatter"
 				scatterType: scatterType
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -1799,11 +1778,7 @@
 				//value 数值
 				//max 最大值
 				dataSignNames: { item: "item", name: "name", value: "value", max: "max" }
-			},
-			
-			//扩展配置项，轴数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -1862,7 +1837,7 @@
 		
 		//临时series，series[i]表示一条雷达网，series[i].name是雷达网名称，
 		//series[i].data[i].name是雷达指标名、series[i].data[i].value雷达指标值
-		//这样可以使用已有的排序逻辑，从而支持dgSortAxisData特性
+		//这样可以使用已有的排序逻辑，从而支持sortAxisData特性
 		var tmpSeries = [];
 		
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -1890,7 +1865,7 @@
 			}
 		}
 		
-		if(renderOptions.dgSortAxisData)
+		if(chartSupport.sortAxisDataOptionValue(renderOptions))
 		{
 			var tmpAxisData = [];
 			$.each(indicatorData, function(i, indicator)
@@ -1900,7 +1875,7 @@
 			
 			var tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
 			
-			chartSupport.dgSortAxisDataForUpdateOptions(renderOptions, tmpOptions, tmpOptions.tmpAxis,
+			chartSupport.sortAxisDataForUpdateOptions(renderOptions, tmpOptions, tmpOptions.tmpAxis,
 							true, true, chartSupport.inflateAxisDataExtractors.property("name"));
 			
 			indicatorData.sort(function(a, b)
@@ -3545,11 +3520,7 @@
 			dg:
 			{
 				dataSignNames: { name: "name", open: "open", close: "close", min: "min", max: "max" }
-			},
-			
-			//扩展配置项，数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -3713,11 +3684,7 @@
 				//value 数值
 				//weight 热力值
 				dataSignNames: { name: "name", value: "value", weight: "weight" }
-			},
-			
-			//扩展配置项，轴数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -4894,11 +4861,7 @@
 				symbolSizeMax: undefined,
 				//最小数据标记像素数
 				symbolSizeMin: undefined,
-			},
-			
-			//扩展配置项，轴数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -5867,12 +5830,7 @@
 				//value 河流数值，当标记category时单选，否则可多选，每一列作为一条河流
 				//category 可选，类别，不同类别绘制为不同系列
 				dataSignNames: { name: "name", value: "value", category: "category" }
-			},
-			
-			//扩展配置项，轴数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			//主题河流图的"desc"效果与预期不符，不建议使用
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -6071,11 +6029,7 @@
 				symbolRepeat: true,
 				//柱条间距
 				barGap: "100%"
-			},
-			
-			//扩展配置项，轴数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -6326,11 +6280,7 @@
 				barGap: "-100%",
 				//最大值
 				max: 100,
-			},
-			
-			//扩展配置项，轴数据排序方式
-			//格式参考chartSupport.inflateAxisDataForEchartsUpdateOptions()函数的renderOptions参数说明
-			dgSortAxisData: false
+			}
 		},
 		options);
 		
@@ -9036,12 +8986,12 @@
 	{
 		var map = options[builtinOptionNames.mapName];
 		
-		// < @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本随之一起移除
+		// < @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本移除
 		if(!map)
 		{
 			map = options["dgMap"];
 		}
-		// > @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本随之一起移除
+		// > @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本移除
 		
 		// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
 		if(!map)
@@ -9582,7 +9532,7 @@
 	/**
 	 * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
 	 * 
-	 * @param renderOptions 渲染选项，renderOptions.dgSortAxisData配置项可以控制数据排序方式，格式为：
+	 * @param renderOptions 渲染选项，其中的builtinOptionNames.sortAxisData配置项可以控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
 	 *						自定义排序函数：function(a, b){}；
@@ -9590,7 +9540,7 @@
 	 *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
 	 * @param updateOptions 更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
 	 * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
-	 * @param valueExtractor 轴数据值提取器，格式同chartSupport.dgSortAxisDataForUpdateOptions的valueExtractor参数
+	 * @param valueExtractor 轴数据值提取器，格式同chartSupport.sortAxisDataForUpdateOptions的valueExtractor参数
 	 * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
 	 */
 	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor, sortSeriesData)
@@ -9629,14 +9579,14 @@
 		
 		updateAxis.data = axisData;
 		
-		chartSupport.dgSortAxisDataForUpdateOptions(renderOptions, updateOptions, updateAxis,
+		chartSupport.sortAxisDataForUpdateOptions(renderOptions, updateOptions, updateAxis,
 					true, sortSeriesData, valueExtractors);
 	};
 	
 	/**
-	 * 依据renderOptions.dgSortAxisData对updateAxis.data、updateOptions.series[i].data进行排序。
+	 * 依据renderOptions中的排序配置对updateAxis.data、updateOptions.series[i].data进行排序。
 	 * 
-	 * @param renderOptions 渲染选项，renderOptions.dgSortAxisData配置项用于控制数据排序方式，格式为：
+	 * @param renderOptions 渲染选项，其中的builtinOptionNames.sortAxisData配置项用于控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
 	 *						自定义排序函数：function(a, b){}；
@@ -9654,21 +9604,21 @@
 	 *						[ ... ]
 	 *						其元素索引与updateOptions.series[i]索引对应
 	 */
-	chartSupport.dgSortAxisDataForUpdateOptions = function(renderOptions, updateOptions, updateAxis,
+	chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOptions, updateAxis,
 					sortAxisData, sortSeriesData, valueExtractor)
 	{
 		if(!sortAxisData && !sortSeriesData)
 			return;
 		
-		var dgSortAxisData = renderOptions.dgSortAxisData;
+		var sortHandler = chartSupport.sortAxisDataOptionValue(renderOptions);
 		
-		if(chartFactory.isString(dgSortAxisData))
+		if(chartFactory.isString(sortHandler))
 		{
-			dgSortAxisData = dgSortAxisData.toLowerCase();
+			sortHandler = sortHandler.toLowerCase();
 			
-			if(dgSortAxisData == "asc")
+			if(sortHandler == "asc")
 			{
-				dgSortAxisData = function(a, b)
+				sortHandler = function(a, b)
 				{
 					if(a == b)
 						return 0;
@@ -9676,9 +9626,9 @@
 						return (a < b ? -1 : 1);
 				};
 			}
-			else if(dgSortAxisData == "desc")
+			else if(sortHandler == "desc")
 			{
-				dgSortAxisData = function(a, b)
+				sortHandler = function(a, b)
 				{
 					if(a == b)
 						return 0;
@@ -9692,9 +9642,9 @@
 		var isValueExtractorFunc = $.isFunction(valueExtractor);
 		var isValueExtractorAry = (!isValueExtractorFunc && $.isArray(valueExtractor));
 		
-		if($.isFunction(dgSortAxisData))
+		if($.isFunction(sortHandler))
 		{
-			axisData.sort(dgSortAxisData);
+			axisData.sort(sortHandler);
 			
 			if(sortSeriesData)
 			{
@@ -9732,6 +9682,23 @@
 				});
 			}
 		}
+	};
+	
+	chartSupport.sortAxisDataOptionValue = function(options)
+	{
+		if(!options)
+			return null;
+		
+		var value = options[builtinOptionNames.sortAxisData];
+		
+		// < @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
+		if(value == null)
+		{
+			value = options["dgSortAxisData"];
+		}
+		// > @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
+		
+		return value;
 	};
 	
 	chartSupport.inflateAxisDataExtractors =
