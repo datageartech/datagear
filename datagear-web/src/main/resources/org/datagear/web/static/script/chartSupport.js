@@ -6659,25 +6659,27 @@
 		},
 		options, null, function(options)
 		{
-			//完善分页选项
-			options.paging = (options.paging != null ? options.paging : false);
-			options.info = (options.info != null ? options.info : (options.paging ? true : false));
+			//开启分页后，默认开启info
+			options.info = (options.info != null ? options.info : options.paging);
 			
 			if(isV1)
 			{
-				options.dom = (options.dom != null ? options.dom : (options.paging ? "tilpr" : "t"));
+				if(options.dom == null)
+				{
+					options.dom = "t";
+					options.dom = (options.paging ? (options.dom + "ilpr") : options.dom);
+					options.dom = (options.buttons ? ("B" + options.dom) : options.dom);
+				}
 			}
 			else
 			{
-				var dftLayout = undefined;
-				
-				if(options.paging)
+				var dftLayout =
 				{
-					dftLayout = (dftLayout == null ? {} : dftLayout);
-					dftLayout.topStart = null;
-					dftLayout.bottomStart = ["info","pageLength"];
-					dftLayout.bottomEnd = "paging";
-				}
+					topStart: (options.buttons ? "buttons" : null),
+					topEnd: (options.searching ? "search" : null),
+					bottomStart: (options.info ? "info" : null),
+					bottomEnd: (options.paging ? ["pageLength", "paging"] : null)
+				};
 				
 				options.layout = (options.layout != null ? options.layout : dftLayout);
 			}
@@ -7380,6 +7382,28 @@
 					value:
 					{
 						"border-color": theme.borderColor
+					}
+				},
+				{
+					name:
+					[
+						qualifierV2 + " div.dt-container div.dt-buttons>.dt-button",
+						qualifierV2 + " div.dt-container div.dt-buttons>div.dt-button-split .dt-button"
+					],
+					value:
+					{
+						"border-color": theme.borderColor
+					}
+				},
+				{
+					name:
+					[
+						qualifierV2 + " div.dt-container div.dt-buttons>.dt-button:focus:not(.disabled)",
+						qualifierV2 + " div.dt-container div.dt-buttons>div.dt-button-split .dt-button:focus:not(.disabled)"
+					],
+					value:
+					{
+						"outline": "2px solid " + theme.borderColor
 					}
 				}
 			];
