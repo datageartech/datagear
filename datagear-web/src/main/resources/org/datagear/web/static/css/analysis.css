@@ -204,20 +204,26 @@
 .dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr:nth-child(odd)>*{
 	box-shadow: none !important;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging{
-	padding: 0.1em 0.2rem;
-	opacity: 0.8;
-}
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-buttons{
 	padding: 0.1em 0.2rem;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-buttons>.dt-button,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-buttons>div.dt-button-split .dt-button{
 	padding: 0.3em 1em;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging{
+	padding: 0.1em 0.2rem;
+}
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
+.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button{
+	opacity: 0.8;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button:hover{
 	border-color: transparent;
