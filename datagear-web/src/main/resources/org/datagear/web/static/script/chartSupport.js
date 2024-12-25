@@ -6572,6 +6572,7 @@
 				"info": "共_TOTAL_条，当前_START_-_END_条",
 				"infoEmpty": "无数据",
 				"infoFiltered": "_TOTAL_条",
+				"loadingRecords": "加载中...",
 				"paginate":
 				{
 					"first": "首页",
@@ -6736,7 +6737,6 @@
 	chartSupport.tableUpdate = function(chart, chartResult)
 	{
 		var renderOptions = chart.renderOptions();
-		var dataTable = chart.internal();
 		var chartEle = chart.elementJquery();
 		
 		var dataSetBinds = chart.dataSetBindsMain();
@@ -6763,7 +6763,7 @@
 		
 		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
 		
-		chartSupport.tableUpdateAddData(chart, chartResult, updateOptions, 0);
+		chartSupport.tableUpdateInternalData(chart, chartResult, updateOptions);
 		
 		if(renderOptions.carousel.enable)
 		{
@@ -7420,29 +7420,27 @@
 		}
 	};
 	
-	chartSupport.tableUpdateAddData = function(chart, chartResult, updateOptions, startRowIndex)
+	chartSupport.tableUpdateInternalData = function(chart, chartResult, updateOptions)
 	{
 		var dataTable = chart.internal();
 		var rows = dataTable.rows();
 		var datas = updateOptions.data;
 		var removeRowIndexes = [];
+		var startRowIndex = 0;
 		var dataIndex = 0;
 		
-		if(startRowIndex != null)
+		rows.every(function(rowIndex)
 		{
-			rows.every(function(rowIndex)
-			{
-				if(rowIndex < startRowIndex)
-					return;
-				
-				if(dataIndex >= datas.length)
-					removeRowIndexes.push(rowIndex);
-				else
-					this.data(datas[dataIndex]);
-				
-				dataIndex++;
-			});
-		}
+			if(rowIndex < startRowIndex)
+				return;
+			
+			if(dataIndex >= datas.length)
+				removeRowIndexes.push(rowIndex);
+			else
+				this.data(datas[dataIndex]);
+			
+			dataIndex++;
+		});
 		
 		for(; dataIndex<datas.length; dataIndex++)
 			dataTable.row.add(datas[dataIndex]);
