@@ -1977,32 +1977,6 @@
 							}
 						},
 						{
-							label: "<@spring.message code='chartAttribute' />",
-							class: "ve-panel-show-control chartAttrValuesShown",
-							parentLabelPath: "<@spring.message code='edit' />",
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
-								{
-									if(!dashboardEditor.checkSetElementChartAttrValues())
-										return;
-									
-									po.showVeChartAttrValuesPanel(function(model)
-									{
-										return po.setVeElementChartAttrValues(model);
-									},
-									dashboardEditor.getElementChartAttrValues(), this.label);
-								}
-							}
-						},
-						{
 							label: "<@spring.message code='chartOptions' />",
 							class: "ve-panel-show-control chartOptionsShown",
 							parentLabelPath: "<@spring.message code='edit' />",
@@ -2025,6 +1999,32 @@
 										return po.setVeChartOptions(model, false);
 									},
 									{ value: dashboardEditor.getElementChartOptions() }, false);
+								}
+							}
+						},
+						{
+							label: "<@spring.message code='chartAttribute' />",
+							class: "ve-panel-show-control chartAttrValuesShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementChartAttrValues())
+										return;
+									
+									po.showVeChartAttrValuesPanel(function(model)
+									{
+										return po.setVeElementChartAttrValues(model);
+									},
+									dashboardEditor.getElementChartAttrValues(), this.label);
 								}
 							}
 						},
