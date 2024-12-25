@@ -45,6 +45,9 @@
 	//内置类目轴数据排序配置选项名
 	builtinOptionNames.sortAxisData = "sortAxisData";
 	
+	//内置表格的更新底层组件回调函数选项名
+	builtinOptionNames.updateInternal = "updateInternal";
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, options)
@@ -7422,6 +7425,15 @@
 	
 	chartSupport.tableUpdateInternalData = function(chart, chartResult, updateOptions)
 	{
+		var renderOptions = chart.renderOptions();
+		
+		//自定义更新底层组件数据，当启用serverSide后，需要自定义调用其ajax配置项的callback更新数据，而非这里
+		if(renderOptions[builtinOptionNames.updateInternal] != null)
+		{
+			renderOptions[builtinOptionNames.updateInternal](updateOptions, chart, chartResult);
+			return;
+		}
+		
 		var dataTable = chart.internal();
 		var rows = dataTable.rows();
 		var datas = updateOptions.data;
