@@ -1591,7 +1591,12 @@
 				styleTheme.backgroundColor = bgColor;
 			
 			if(bgColor && bgColor != "transparent")
-				styleTheme.actualBackgroundColor = bgColor;
+			{
+				//应忽略透明度
+				var chartBgColor = chartFactory.parseColor(bgColor);
+				chartBgColor.a = undefined;
+				styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(chartBgColor, true);
+			}
 			
 			//从元素的css中取才能获取字体尺寸像素数
 			if(fontSize != null && fontSize != "")

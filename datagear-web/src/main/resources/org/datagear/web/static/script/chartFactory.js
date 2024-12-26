@@ -5998,7 +5998,7 @@
 	/**
 	 * 将颜色转换为6位HEX字符串。
 	 * 
-	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"rgb(255,255,255)"
+	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"#FFFFFF80"、"rgb(255,255,255)"、"rgba(255,255,255, 0.5)"
 	 * @param prefix 可选，是否添加"#"前缀
 	 * @returns 6位HEX字符串，格式示例："FFFFFF"
 	 */
@@ -6016,28 +6016,31 @@
 		var r = new Number(color.r).toString(16);
 		var g = new Number(color.g).toString(16);
 		var b = new Number(color.b).toString(16);
+		var a = (color.a != null ? new Number(parseInt(color.a*255)).toString(16) : undefined);
 		
 		color = (prefix ? "#" : "") + (r.length == 1 ? "0"+r : r)
 					 + (g.length == 1 ? "0"+g : g)
-					  + (b.length == 1 ? "0"+b : b);
+					 + (b.length == 1 ? "0"+b : b)
+					 + (a != null ? (a.length == 1 ? "0"+a : a) : "");
 		
 		return color;
 	};
 	
 	/**
 	 * 解析颜色对象。
-	 * 将颜色字符串解析为{r: number, g: number, b: number}格式的对象。
+	 * 将颜色字符串解析为{r: number, g: number, b: number, a: number}格式的对象。
 	 * 
-	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"rgb(255,255,255)"
+	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"#FFFFFF80"、"rgb(255,255,255)"、"rgba(255,255,255, 0.5)"
 	 */
 	chartFactory.parseColor = function(color)
 	{
-		var re = {r: 0, g: 0, b: 0};
+		//默认a值应为undefined
+		var re = {r: 0, g: 0, b: 0, a: undefined};
 		
 		if(!color)
 			return re;
 		
-		//是颜色名称，则通过元素css函数转换
+		//是颜色名称（red、green、yellow等），则通过元素css函数转换
 		if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
 		{
 			var elementId = (chartFactory._ELEMENT_ID_FOR_CVT_COLOR == null ?
@@ -6052,7 +6055,7 @@
 			color = $colorEle.css("color");
 		}
 		
-		// #FFF、#FFFFFF
+		// #FFF、#FFFFFF、#FFFFFFFF
 		if(color.charAt(0) == '#')
 		{
 			color = color.substring(1);
@@ -6066,8 +6069,10 @@
 				re.g = parseInt(color.substr(2, 2), 16);
 			if(color.length >= 6)
 				re.b = parseInt(color.substr(4, 2), 16);
+			if(color.length >= 8)
+				re.a = parseInt(color.substr(6, 2), 16)/255;
 		}
-		// rgb()
+		// rgb()、rgba()
 		else
 		{
 			var si = color.indexOf("(");
@@ -6083,6 +6088,8 @@
 					re.g = parseInt(color[1]);
 				if(color.length >= 3)
 					re.b = parseInt(color[2]);
+				if(color.length >= 4)
+					re.a = parseFloat(color[3]);
 			}
 		}
 		
