@@ -6798,6 +6798,9 @@
 				"lineStyle" : {
 					"width" : 2
 				},
+				"label": {
+					"color": chartTheme.color
+				},
 				"symbol" : "circle",
 				"symbolSize" : 8,
 				"smooth" : false,
@@ -6838,8 +6841,7 @@
 					"barBorderWidth" : 0,
 					"barBorderColor" : chartTheme.borderColor
 				},
-				"label":
-				{
+				"label": {
 					"color": chartTheme.color
 				},
 				"emphasis" : {
@@ -6858,8 +6860,7 @@
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor
 				},
-				"label":
-				{
+				"label": {
 					"color": chartTheme.color
 				},
 				"emphasis" :
@@ -6885,6 +6886,9 @@
 					"borderColor" : chartTheme.borderColor,
 					"shadowBlur" : 3,
 					"shadowColor" : shadowColor
+				},
+				"label": {
+					"color": chartTheme.color
 				},
 				"emphasis" : {
 					"itemStyle" : {
