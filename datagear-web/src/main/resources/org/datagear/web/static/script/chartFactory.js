@@ -6076,21 +6076,41 @@
 		else
 		{
 			var si = color.indexOf("(");
-			var ei = (si >= 0 ? color.indexOf(")", si+1) : -1);
+			var ei = (si >= 0 ? color.lastIndexOf(")") : -1);
 			
 			if(ei > si)
 			{
-				color = color.substring(si+1, ei).split(",");
+				color = color.substring(si+1, ei);
 				
-				if(color.length >= 1)
-					re.r = parseInt(color[0]);
-				if(color.length >= 2)
-					re.g = parseInt(color[1]);
-				if(color.length >= 3)
-					re.b = parseInt(color[2]);
-				if(color.length >= 4)
-					re.a = parseFloat(color[3]);
+				//以逗号分隔
+				if(color.indexOf(",") >= 0)
+				{
+					color = color.split(",");
+				}
+				//以空格分隔
+				else if(color.indexOf(" ") >= 0)
+				{
+					color = color.split(" ");
+					
+					//rbg(r g b / a)
+					if(color.length >= 4 && color[3] == "/")
+					{
+						color[3] = color[4];
+						color[4] = null;
+					}
+				}
 			}
+			else
+				color = [];
+			
+			if(color.length >= 1)
+				re.r = parseInt(color[0]);
+			if(color.length >= 2)
+				re.g = parseInt(color[1]);
+			if(color.length >= 3)
+				re.b = parseInt(color[2]);
+			if(color.length >= 4 && color[3] != null)
+				re.a = parseFloat(color[3]);
 		}
 		
 		return re;
