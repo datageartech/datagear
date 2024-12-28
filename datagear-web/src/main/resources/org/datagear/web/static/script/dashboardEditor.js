@@ -645,15 +645,25 @@
 		//不能使用"<div />"，生成的源码格式不对
 		var div = $("<div></div>");
 		
-		var styleStr = "display:grid;";
+		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		var isBodyParent = insertParentEle.is("body");
 		
 		if(gridAttr.fillParent === "true" || gridAttr.fillParent === true)
-			styleStr += "position:absolute;left:0;top:0;right:0;bottom:0;";
-		else if(insertParentEle.is("body"))
+		{
+			if(isBodyParent)
+			{
+				this._setElementStyle(insertParentEle, this._fillParentStyleByAbsolute());
+			}
+			
+			styleStr += "width:100%;height:100%;";
+		}
+		else if(isBodyParent)
 			styleStr += "width:100%;height:300px;";
 		else
 			styleStr += "width:100%;height:100%;";
+		
+		styleStr += "display:grid;";
 		
 		if(rows > 0)
 			styleStr += "grid-template-rows:repeat("+rows+", 1fr);";
@@ -710,16 +720,26 @@
 		//不能使用"<div />"，生成的源码格式不对
 		var div = $("<div></div>");
 		
-		var styleStr = "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
-						+"justify-content:space-between;align-items:stretch;";
+		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		var isBodyParent = insertParentEle.is("body");
 		
 		if(flexAttr.fillParent === "true" || flexAttr.fillParent === true)
-			styleStr += "position:absolute;left:0;top:0;right:0;bottom:0;";
-		else if(insertParentEle.is("body"))
+		{
+			if(isBodyParent)
+			{
+				this._setElementStyle(insertParentEle, this._fillParentStyleByAbsolute());
+			}
+			
+			styleStr += "width:100%;height:100%;";
+		}
+		else if(isBodyParent)
 			styleStr += "width:100%;height:300px;";
 		else
 			styleStr += "width:100%;height:100%;";
+		
+		styleStr += "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
+						+"justify-content:space-between;align-items:stretch;";
 		
 		div.attr("style", styleStr);
 		
@@ -1977,6 +1997,17 @@
 		
 		var ele = this._editElement($(document.body));
 		return this._getElementChartOptions(ele);
+	};
+	
+	editor._fillParentStyleByAbsolute = function()
+	{
+		var re =
+		{
+			position: "absolute", left: "0", top: "0", right: "0", bottom: "0",
+			padding: "0", margin: "0", "box-sizing": "border-box"
+		};
+		
+		return re;
 	};
 	
 	editor._reRenderDashboard = function(chart)
