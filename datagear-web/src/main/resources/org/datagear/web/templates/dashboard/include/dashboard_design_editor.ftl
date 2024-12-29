@@ -1200,6 +1200,8 @@
 		
 		try
 		{
+			po._syncChartTheme = model.syncChartTheme;
+			
 			if(global)
 				dashboardEditor.setGlobalStyle(model);
 			else
@@ -1230,7 +1232,7 @@
 	
 	po.convertToVeStyleFormModel = function(styleModel)
 	{
-		styleModel = $.extend({ syncChartTheme: true }, styleModel);
+		styleModel = $.extend({ syncChartTheme: (po._syncChartTheme != null ? po._syncChartTheme : true) }, styleModel);
 		return styleModel;
 	};
 	
