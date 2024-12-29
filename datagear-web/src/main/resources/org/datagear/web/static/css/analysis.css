@@ -71,10 +71,10 @@
 }
 .dg-chart-table.dg-table-v1 .dg-chart-table-content{
 	position: absolute;
-	left: 0;
+	left: 1px;
 	top: 1.6em;
-	right: 0;
-	bottom: 0;
+	right: 1px;
+	bottom: 1px;
 }
 .dg-chart-table.dg-table-v1.dg-hide-title .dg-chart-table-content{
 	top: 0;
@@ -152,10 +152,10 @@
 .dg-chart-table.dg-table-v2{}
 .dg-chart-table.dg-table-v2 .dg-chart-ele-wrapper{
 	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
+	left: 1px;
+	top: 1px;
+	right: 1px;
+	bottom: 1px;
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
