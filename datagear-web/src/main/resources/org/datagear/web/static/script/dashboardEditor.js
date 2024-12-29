@@ -1600,27 +1600,50 @@
 		var bgColor = styleObj['background-color'];
 		var fontSize = styleObj['font-size'];
 		
-		if(color || bgColor || fontSize != null)
+		if(color != null || bgColor != null || fontSize != null)
 		{
-			if(color)
+			if(color != null)
 				styleTheme.color = color;
 			
-			//只有之前设置了图表背景色且不是透明的才需要同步
-			if(bgColor && nowTheme && nowTheme.backgroundColor
-					&& nowTheme.backgroundColor != "transparent")
-				styleTheme.backgroundColor = bgColor;
+			//无需同步图表元素背景色，因为背景色会自动继承
+			//styleTheme.backgroundColor = bgColor;
 			
-			if(bgColor && bgColor != "transparent")
+			if(bgColor != null)
 			{
-				//应忽略透明度
-				var chartBgColor = chartFactory.parseColor(bgColor);
-				chartBgColor.a = undefined;
-				styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(chartBgColor, true);
+				if(bgColor == "")
+				{
+					styleTheme.actualBackgroundColor = "";
+				}
+				else
+				{
+					var bgColorObj = chartFactory.parseColor(bgColor);
+					
+					//未设透明度、或者透明度大于0.5才同步
+					if(bgColorObj.a == null || bgColorObj.a > 0.5)
+					{
+						//应忽略透明度
+						bgColorObj.a = undefined;
+						styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
+					}
+					else
+					{
+						styleTheme.actualBackgroundColor = "";
+					}
+				}
 			}
 			
-			//从元素的css中取才能获取字体尺寸像素数
-			if(fontSize != null && fontSize != "")
-				styleTheme.fontSize = styleEle.css("font-size");
+			if(fontSize != null)
+			{
+				if(fontSize == "")
+				{
+					styleTheme.fontSize = "";
+				}
+				else
+				{
+					//从元素的css中取才能获取字体尺寸像素数
+					styleTheme.fontSize = styleEle.css("font-size");
+				}
+			}
 		}
 		
 		if(!nowTheme)
@@ -1629,9 +1652,8 @@
 		}
 		else
 		{
-			nowTheme.color = (styleTheme.color ? styleTheme.color : undefined);
-			nowTheme.backgroundColor = (styleTheme.backgroundColor ? styleTheme.backgroundColor : undefined);
-			nowTheme.actualBackgroundColor = (styleTheme.actualBackgroundColor ? styleTheme.actualBackgroundColor : undefined);
+			nowTheme.color = (styleTheme.color != null ? styleTheme.color : undefined);
+			nowTheme.actualBackgroundColor = (styleTheme.actualBackgroundColor != null ? styleTheme.actualBackgroundColor : undefined);
 			nowTheme.fontSize = (styleTheme.fontSize != null ? styleTheme.fontSize : undefined);
 			
 			return nowTheme;
