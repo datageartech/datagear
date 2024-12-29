@@ -17,13 +17,19 @@
 
 @CHARSET "UTF-8";
 
-/*图表展示页面的图表元素样式*/
-.dg-chart-for-show-chart{
+/*图表展示页面样式*/
+.dg-dashboard-for-show-chart{
 	position: absolute !important;
 	left: 0 !important;
 	top: 0 !important;
 	right: 0 !important;
 	bottom: 0 !important;
+	margin: 0 !important;
+	padding: 6px !important;
+	box-sizing: border-box !important;
+}
+/*图表展示页面样式*/
+.dg-chart-for-show-chart{
 	width: 100% !important;
 	height: 100% !important;
 }

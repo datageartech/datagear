@@ -37,6 +37,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
+import org.datagear.analysis.support.html.SimpleHtmlTplOption;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
@@ -300,11 +301,17 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			// 图表展示页面应禁用异步加载功能，避免越权访问隐患
 			String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
 					+ LoadableChartWidgets.PATTERN_NONE + "\"";
-			String simpleTemplate = this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent(new String[] { id },
-					htmlAttr, IOUtil.CHARSET_UTF_8, htmlTitle,
-					this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName(), "",
-					"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName(),
-					"dg-chart-disable-setting=\"false\"");
+			SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
+			tplOption.setHtmlAttr(htmlAttr);
+			tplOption.setCharset(IOUtil.CHARSET_UTF_8);
+			tplOption.setTitle(htmlTitle);
+			tplOption.setBodyStyleName(
+					this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName() + " dg-dashboard-for-show-chart");
+			tplOption.setChartWidgetIds(new String[] { id });
+			tplOption.setChartEleStyleName(
+					"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName());
+			tplOption.setChartEleAttr("dg-chart-disable-setting=\"false\"");
+			String simpleTemplate = this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplate(tplOption);
 			templateIn = IOUtil.getReader(simpleTemplate);
 
 			String responseEncoding = dashboardWidget.getTemplateEncoding();

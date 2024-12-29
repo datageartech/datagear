@@ -315,9 +315,44 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	}
 
 	@Override
-	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
+	public String simpleTemplate(SimpleHtmlTplOption option)
 	{
-		return simpleTemplateContent(chartWidgetId, "", htmlCharset, "", "", "", "", "");
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("<!DOCTYPE html>\n");
+		sb.append("<html" + (StringUtil.isEmpty(option.getHtmlAttr()) ? "" : " " + option.getHtmlAttr()) + ">\n");
+		sb.append("<head>\n");
+
+		if (!StringUtil.isEmpty(option.getCharset()))
+			sb.append("<meta charset=\"" + option.getCharset() + "\">\n");
+
+		sb.append("<title>" + (StringUtil.isEmpty(option.getTitle()) ? "" : option.getTitle()) + "</title>\n");
+		sb.append("</head>\n");
+		sb.append("<body"
+				+ (StringUtil.isEmpty(option.getBodyStyleName()) ? "" : " class=\"" + option.getBodyStyleName() + "\"")
+				+ (StringUtil.isEmpty(option.getBodyAttr()) ? "" : " " + option.getBodyAttr()) //
+				+ " " + ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\"");//
+		sb.append(">\n");
+		sb.append("\n");
+
+		if (option.getChartWidgetIds() != null)
+		{
+			for (String cwi : option.getChartWidgetIds())
+			{
+				sb.append("  ");
+				sb.append("<div"
+						+ " " + getAttrNameChartWidget() + "=\"" + cwi + "\""
+						+ (StringUtil.isEmpty(option.getChartEleStyleName()) ? ""
+								: " class=\"" + option.getChartEleStyleName() + "\"")
+						+ (StringUtil.isEmpty(option.getChartEleAttr()) ? "" : " " + option.getChartEleAttr()) //
+						+ "></div>\n");
+			}
+		}
+
+		sb.append("</body>\n");
+		sb.append("</html>");
+
+		return sb.toString();
 	}
 
 	/**

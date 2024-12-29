@@ -428,13 +428,12 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	public abstract HtmlTplDashboard render(HtmlTplDashboardWidget dashboardWidget, HtmlTplDashboardRenderContext renderContext) throws RenderException;
 	
 	/**
-	 * 生成基本的模板内容。
+	 * 生成简单HTML模板。
 	 * 
-	 * @param htmlCharset
-	 * @param chartWidgetId
+	 * @param option
 	 * @return
 	 */
-	public abstract String simpleTemplateContent(String htmlCharset, String... chartWidgetId);
+	public abstract String simpleTemplate(SimpleHtmlTplOption option);
 
 	/**
 	 * 获取用于渲染指定ID图表的{@linkplain ChartWidget}。

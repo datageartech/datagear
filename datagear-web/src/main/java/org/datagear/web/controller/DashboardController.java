@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.SimpleHtmlTplOption;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.DashboardShareSet;
@@ -423,7 +424,9 @@ public class DashboardController extends AbstractDataAnalysisController
 			HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 					.getHtmlTplDashboardWidgetRenderer();
 			String templateEnding = (entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
-			String templateContent = renderer.simpleTemplateContent(templateEnding);
+			SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
+			tplOption.setCharset(templateEnding);
+			String templateContent = renderer.simpleTemplate(tplOption);
 
 			data.put("defaultTemplateContent", templateContent);
 		}
