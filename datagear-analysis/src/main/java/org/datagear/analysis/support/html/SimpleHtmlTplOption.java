@@ -46,6 +46,11 @@ public class SimpleHtmlTplOption implements Serializable
 	private String title = "";
 
 	/**
+	 * <code>&lt;style&gt;</code>元素内容
+	 */
+	private String style = "";
+
+	/**
 	 * <code>&lt;body&gt;</code>元素样式类名
 	 */
 	private String bodyStyleName = "";
@@ -119,6 +124,16 @@ public class SimpleHtmlTplOption implements Serializable
 		this.title = title;
 	}
 
+	public String getStyle()
+	{
+		return style;
+	}
+
+	public void setStyle(String style)
+	{
+		this.style = style;
+	}
+
 	public String getBodyStyleName()
 	{
 		return bodyStyleName;
@@ -173,8 +188,8 @@ public class SimpleHtmlTplOption implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [htmlAttr=" + htmlAttr + ", charset=" + charset + ", title=" + title
-				+ ", bodyStyleName=" + bodyStyleName + ", bodyAttr=" + bodyAttr + ", chartWidgetIds="
-				+ Arrays.toString(chartWidgetIds) + ", chartEleStyleName=" + chartEleStyleName + ", chartEleAttr="
-				+ chartEleAttr + "]";
+				+ ", style=" + style + ", bodyStyleName=" + bodyStyleName + ", bodyAttr=" + bodyAttr
+				+ ", chartWidgetIds=" + Arrays.toString(chartWidgetIds) + ", chartEleStyleName=" + chartEleStyleName
+				+ ", chartEleAttr=" + chartEleAttr + "]";
 	}
 }

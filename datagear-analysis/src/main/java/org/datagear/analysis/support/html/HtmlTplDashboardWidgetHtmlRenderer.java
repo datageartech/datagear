@@ -327,6 +327,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			sb.append("<meta charset=\"" + option.getCharset() + "\">\n");
 
 		sb.append("<title>" + (StringUtil.isEmpty(option.getTitle()) ? "" : option.getTitle()) + "</title>\n");
+
+		if (!StringUtil.isEmpty(option.getStyle()))
+		{
+			sb.append("<style  type=\"text/css\">\n");
+			sb.append(option.getStyle());
+			sb.append("</style>\n");
+		}
+
 		sb.append("</head>\n");
 		sb.append("<body"
 				+ (StringUtil.isEmpty(option.getBodyStyleName()) ? "" : " class=\"" + option.getBodyStyleName() + "\"")

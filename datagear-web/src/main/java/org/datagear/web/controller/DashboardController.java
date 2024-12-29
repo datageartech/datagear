@@ -426,6 +426,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			String templateEnding = (entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
 			SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
 			tplOption.setCharset(templateEnding);
+			tplOption.setStyle("*, ::after, ::before { box-sizing: border-box; }\n");
 			String templateContent = renderer.simpleTemplate(tplOption);
 
 			data.put("defaultTemplateContent", templateContent);
