@@ -653,7 +653,7 @@
 		{
 			if(isBodyParent)
 			{
-				this._setElementStyle(insertParentEle, this._fillParentStyleByAbsolute());
+				this._setElementStyle(insertParentEle, this._fillBodyStyleByAbsolute());
 			}
 			
 			styleStr += "width:100%;height:100%;";
@@ -728,7 +728,7 @@
 		{
 			if(isBodyParent)
 			{
-				this._setElementStyle(insertParentEle, this._fillParentStyleByAbsolute());
+				this._setElementStyle(insertParentEle, this._fillBodyStyleByAbsolute());
 			}
 			
 			styleStr += "width:100%;height:100%;";
@@ -1997,6 +1997,15 @@
 		
 		var ele = this._editElement($(document.body));
 		return this._getElementChartOptions(ele);
+	};
+	
+	editor._fillBodyStyleByAbsolute = function()
+	{
+		var re = this._fillParentStyleByAbsolute();
+		//设置默认内边距，贴边效果不佳
+		re.padding = "6px";
+		
+		return re;
 	};
 	
 	editor._fillParentStyleByAbsolute = function()
