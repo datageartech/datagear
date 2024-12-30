@@ -223,6 +223,7 @@
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging{
 	padding: 0.1em 0.2rem;
+	font-size: 0.9em;
 }
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
 .dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
