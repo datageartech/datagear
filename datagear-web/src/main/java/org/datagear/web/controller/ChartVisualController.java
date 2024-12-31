@@ -295,22 +295,8 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		try
 		{
 			String id = chart.getId();
-			String htmlTitle = chart.getName();
 			HtmlTplDashboardWidget dashboardWidget = buildHtmlTplDashboardWidget(id);
-
-			// 图表展示页面应禁用异步加载功能，避免越权访问隐患
-			String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
-					+ LoadableChartWidgets.PATTERN_NONE + "\"";
-			SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
-			tplOption.setHtmlAttr(htmlAttr);
-			tplOption.setCharset(IOUtil.CHARSET_UTF_8);
-			tplOption.setTitle(htmlTitle);
-			tplOption.setBodyStyleName(
-					this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName() + " dg-dashboard-for-show-chart");
-			tplOption.setChartWidgetIds(new String[] { id });
-			tplOption.setChartEleStyleName(
-					"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName());
-			tplOption.setChartEleAttr("dg-chart-disable-setting=\"false\"");
+			SimpleHtmlTplOption tplOption = buildShowSimpleHtmlTplOption(chart, dashboardWidget);
 			String simpleTemplate = this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplate(tplOption);
 			templateIn = IOUtil.getReader(simpleTemplate);
 
@@ -335,6 +321,29 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
+	}
+
+	protected SimpleHtmlTplOption buildShowSimpleHtmlTplOption(HtmlChartWidgetEntity entity,
+			HtmlTplDashboardWidget dashboardWidget)
+	{
+		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
+		String htmlTitle = entity.getName();
+		// 图表展示页面应禁用异步加载功能，避免越权访问隐患
+		String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
+				+ LoadableChartWidgets.PATTERN_NONE + "\"";
+		tplOption.setHtmlAttr(htmlAttr);
+		tplOption.setCharset(IOUtil.CHARSET_UTF_8);
+		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果
+		tplOption.setStyle("html { height: 100%; }\n");
+		tplOption.setTitle(htmlTitle);
+		tplOption.setBodyStyleName(
+				this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName() + " dg-dashboard-for-show-chart");
+		tplOption.setChartWidgetIds(new String[] { entity.getId() });
+		tplOption.setChartEleStyleName(
+				"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName());
+		tplOption.setChartEleAttr("dg-chart-disable-setting=\"false\"");
+
+		return tplOption;
 	}
 
 	protected HtmlTitleHandler getShowChartHtmlTitleHandler(HttpServletRequest request, HttpServletResponse response,
