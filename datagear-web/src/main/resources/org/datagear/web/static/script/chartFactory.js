@@ -5948,6 +5948,9 @@
 		{
 			var index = parseInt((gcs.length-1) * factor);
 			
+			index = (index < 0 ? 0 : index);
+			index = (index >= gcs.length ? gcs.length - 1 : index);
+			
 			if(index == 0 && factor > 0)
 				index = 1;
 			
@@ -6760,7 +6763,7 @@
 	{
 		var axisColor = chartFactory.themeGradualColor(chartTheme, 0.7);
 		var axisScaleLineColor = chartFactory.themeGradualColor(chartTheme, 0.35);
-		var areaColor0 = chartFactory.themeGradualColor(chartTheme, 0.15);
+		var areaColor0 = chartFactory.themeGradualColor(chartTheme, 0.1);
 		var areaBorderColor0 = chartFactory.themeGradualColor(chartTheme, 0.3);
 		var areaColor1 = chartFactory.themeGradualColor(chartTheme, 0.25);
 		var areaBorderColor1 = chartFactory.themeGradualColor(chartTheme, 0.5);

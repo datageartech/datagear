@@ -77,8 +77,8 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 	static
 	{
 		THEME_LIGHT.getChartTheme().setGradient(20);
-		THEME_DARK.getChartTheme().setGradient(10);
-		THEME_GREEN.getChartTheme().setGradient(10);
+		THEME_DARK.getChartTheme().setGradient(20);
+		THEME_GREEN.getChartTheme().setGradient(20);
 	}
 
 	private List<DashboardTheme> dashboardThemes;
