@@ -6760,7 +6760,6 @@
 	{
 		var axisColor = chartFactory.themeGradualColor(chartTheme, 0.7);
 		var axisScaleLineColor = chartFactory.themeGradualColor(chartTheme, 0.35);
-		var areaColorCloestBg = chartFactory.themeGradualColor(chartTheme, 0);
 		var areaColor0 = chartFactory.themeGradualColor(chartTheme, 0.15);
 		var areaBorderColor0 = chartFactory.themeGradualColor(chartTheme, 0.3);
 		var areaColor1 = chartFactory.themeGradualColor(chartTheme, 0.25);
@@ -7185,7 +7184,7 @@
 			"map" : {
 				"roam" : true,
 				"itemStyle" : {
-					"areaColor" : areaColorCloestBg,
+					"areaColor" : areaBorderColor0,
 					"borderColor" : areaBorderColor1,
 					"borderWidth" : 0.5
 				},
@@ -7225,7 +7224,7 @@
 			},
 			"geo" : {
 				"itemStyle" : {
-					"areaColor" : areaColorCloestBg,
+					"areaColor" : areaBorderColor0,
 					"borderColor" : areaBorderColor1,
 					"borderWidth" : 0.5
 				},
