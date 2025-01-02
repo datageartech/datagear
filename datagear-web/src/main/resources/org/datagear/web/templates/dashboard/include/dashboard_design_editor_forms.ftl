@@ -24,7 +24,7 @@
 
 依赖：
 page_boolean_options.ftl
-
+page_palette.ftl
 -->
 <form id="${pid}visualEditorLoadForm" action="#" method="POST" style="display:none;">
 	<input type="hidden" name="DG_EDIT_TEMPLATE" value="true" />
@@ -517,10 +517,8 @@ page_boolean_options.ftl
 							<p-inputtext id="${pid}veChartThemeFgColor" v-model="pm.vepms.chartTheme.color" type="text"
 								class="input flex-grow-1 mr-1" name="color" autofocus>
 							</p-inputtext>
-							<p-colorpicker v-model="pm.vepmChartThemeProxy.color"
-								default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-								@change="onVeChartThemeColorPickerChange($event, 'color')">
-							</p-colorpicker>
+							<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.color || '#FFFFFF')}" class="border-0"
+								@click="showPalettePanel($event, pm.vepms.chartTheme, 'color')"></p-button>
 						</div>
 					</div>
 				</div>
@@ -533,10 +531,8 @@ page_boolean_options.ftl
 							<p-inputtext id="${pid}veChartThemeBgColor" v-model="pm.vepms.chartTheme.backgroundColor" type="text"
 								class="input flex-grow-1 mr-1" name="backgroundColor">
 							</p-inputtext>
-							<p-colorpicker v-model="pm.vepmChartThemeProxy.backgroundColor"
-								default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-								@change="onVeChartThemeColorPickerChange($event, 'backgroundColor')">
-							</p-colorpicker>
+							<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.backgroundColor || '#FFFFFF')}" class="border-0"
+								@click="showPalettePanel($event, pm.vepms.chartTheme, 'backgroundColor')"></p-button>
 						</div>
 					</div>
 				</div>
@@ -550,10 +546,8 @@ page_boolean_options.ftl
 							<p-inputtext id="${pid}veChartThemeActualBgColor" v-model="pm.vepms.chartTheme.actualBackgroundColor" type="text"
 								class="input flex-grow-1 mr-1" name="actualBackgroundColor">
 							</p-inputtext>
-							<p-colorpicker v-model="pm.vepmChartThemeProxy.actualBackgroundColor"
-								default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-								@change="onVeChartThemeColorPickerChange($event, 'actualBackgroundColor')">
-							</p-colorpicker>
+							<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.actualBackgroundColor || '#FFFFFF')}" class="border-0"
+								@click="showPalettePanel($event, pm.vepms.chartTheme, 'actualBackgroundColor')"></p-button>
 						</div>
 					</div>
 				</div>
@@ -574,15 +568,13 @@ page_boolean_options.ftl
 						<@spring.message code='dashboard.veditor.chartTheme.graphColors' />
 					</label>
 					<div class="field-input col-12">
-						<div v-for="(gc, gcIdx) in pm.vepmChartThemeProxy.graphColors" :key="gcIdx">
+						<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphColors" :key="gcIdx">
 							<div class="flex mb-1">
 								<p-inputtext id="${pid}veChartThemeGraphColors" v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
 									class="input flex-grow-1 mr-1" name="graphColors">
 								</p-inputtext>
-								<p-colorpicker v-model="pm.vepmChartThemeProxy.graphColors[gcIdx]"
-									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
-									@change="onVeChartThemeColorPickerChange($event, 'graphColors', gcIdx)">
-								</p-colorpicker>
+								<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.graphColors[gcIdx] || '#FFFFFF')}" class="border-0 mr-1"
+									@click="showPalettePanel($event, pm.vepms.chartTheme.graphColors, gcIdx)"></p-button>
 								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
 									@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
 								</p-button>
@@ -599,15 +591,13 @@ page_boolean_options.ftl
 						<@spring.message code='dashboard.veditor.chartTheme.graphRangeColors' />
 					</label>
 					<div class="field-input col-12">
-						<div v-for="(gc, gcIdx) in pm.vepmChartThemeProxy.graphRangeColors" :key="gcIdx">
+						<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphRangeColors" :key="gcIdx">
 							<div class="flex mb-1">
 								<p-inputtext id="${pid}veChartThemeGraphRangeColors" v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
 									class="input flex-grow-1 mr-1" name="graphRangeColors">
 								</p-inputtext>
-								<p-colorpicker v-model="pm.vepmChartThemeProxy.graphRangeColors[gcIdx]"
-									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
-									@change="onVeChartThemeColorPickerChange($event, 'graphRangeColors', gcIdx)">
-								</p-colorpicker>
+								<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.graphRangeColors[gcIdx] || '#FFFFFF')}" class="border-0 mr-1"
+									@click="showPalettePanel($event, pm.vepms.chartTheme.graphRangeColors, gcIdx)"></p-button>
 								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
 									@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
 								</p-button>
@@ -646,10 +636,8 @@ page_boolean_options.ftl
 										<p-inputtext id="${pid}veStyleColor" v-model="pm.vepms.style.color" type="text"
 											class="input flex-grow-1 mr-1" name="color" autofocus>
 										</p-inputtext>
-										<p-colorpicker v-model="pm.vepmStyleProxy.color"
-											default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-											@change="onVeStyleColorPickerChange($event, 'color')">
-										</p-colorpicker>
+										<p-button type="button" :style="{'background-color':(pm.vepms.style.color || '#FFFFFF')}" class="border-0"
+											@click="showPalettePanel($event, pm.vepms.style, 'color')"></p-button>
 									</div>
 								</div>
 							</div>
@@ -664,10 +652,8 @@ page_boolean_options.ftl
 										<p-inputtext id="${pid}veStyleBgColor" v-model="pm.vepms.style['background-color']" type="text"
 											class="input flex-grow-1 mr-1" name="background-color">
 										</p-inputtext>
-										<p-colorpicker v-model="pm.vepmStyleProxy['background-color']"
-											default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-											@change="onVeStyleColorPickerChange($event, 'background-color')">
-										</p-colorpicker>
+										<p-button type="button" :style="{'background-color':(pm.vepms.style['background-color'] || '#FFFFFF')}" class="border-0"
+											@click="showPalettePanel($event, pm.vepms.style, 'background-color')"></p-button>
 									</div>
 								</div>
 							</div>
@@ -807,10 +793,8 @@ page_boolean_options.ftl
 										<p-inputtext id="${pid}veStyleBorderColor" v-model="pm.vepms.style['border-color']" type="text"
 											class="input flex-grow-1 mr-1" name="border-color">
 										</p-inputtext>
-										<p-colorpicker v-model="pm.vepmStyleProxy['border-color']"
-											default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-											@change="onVeStyleColorPickerChange($event, 'border-color')">
-										</p-colorpicker>
+										<p-button type="button" :style="{'background-color':(pm.vepms.style['border-color'] || '#FFFFFF')}" class="border-0"
+											@click="showPalettePanel($event, pm.vepms.style, 'border-color')"></p-button>
 									</div>
 								</div>
 							</div>
@@ -1930,39 +1914,6 @@ page_boolean_options.ftl
 		return re;
 	};
 	
-	po.cssColorsToHexStrs = function(cssColors)
-	{
-		if(!cssColors)
-			return [];
-		
-		var re = [];
-		
-		$.each(cssColors, function(i, cssColor)
-		{
-			re.push(po.cssColorToHexStr(cssColor));
-		});
-		
-		return re;
-	};
-	
-	po.cssColorToHexStr = function(cssColor)
-	{
-		if(!cssColor)
-			return "";
-		else
-			return chartFactory.colorToHexStr(cssColor, true);
-	};
-	
-	po.hexStrToCssColor = function(hexStr, dftCssColor)
-	{
-		if(!hexStr)
-			return dftCssColor;
-		else if(hexStr.charAt(0) != '#')
-			return "#" + hexStr;
-		else
-			return hexStr;
-	};
-	
 	//重写chart_attr_values_form.ftl中的函数
 	po.getChartPluginAttributeInputOptionsForMap = function(asTree)
 	{
@@ -2072,7 +2023,6 @@ page_boolean_options.ftl
 		var pm = po.vuePageModel();
 		pm.veshs.chartTheme = submitHandler;
 		pm.vepms.chartTheme = $.extend(true, po.veDftChartThemeModel(), model);
-		pm.vepmChartThemeProxy = $.extend(true, po.veDftChartThemeModel(), po.cssColorToHexStrChartTheme(model));
 		if(title)
 			pm.vepts.chartTheme = title;
 		pm.vepss.chartThemeShown = true;
@@ -2083,7 +2033,6 @@ page_boolean_options.ftl
 		var pm = po.vuePageModel();
 		pm.veshs.style = submitHandler;
 		pm.vepms.style = $.extend(true, {}, model);
-		pm.vepmStyleProxy = $.extend(true, {}, po.cssColorToHexStrStyle(model));
 		if(title)
 			pm.vepts.style = title;
 		pm.vepss.styleShown = true;
@@ -2166,8 +2115,6 @@ page_boolean_options.ftl
 				{ name: "50%", value: 50 },
 				{ name: "25%", value: 25 }
 			],
-			vepmChartThemeProxy: po.veDftChartThemeModel(),
-			vepmStyleProxy: {},
 			veStyleTabviewActiveIndex: 0,
 			hxtitleTypeOptions:
 			[
@@ -2391,59 +2338,32 @@ page_boolean_options.ftl
 					if(pm.veshs.chartTheme(pm.vepms.chartTheme) !== false)
 					{
 						pm.vepms.chartTheme = po.veDftChartThemeModel();
-						pm.vepmChartThemeProxy = po.veDftChartThemeModel();
 						pm.vepss.chartThemeShown = false;
 					}
 				});
 			},
 			
-			onVeChartThemeColorPickerChange: function(e, propName, idx)
-			{
-				var proxy = pm.vepmChartThemeProxy;
-				var chartTheme = pm.vepms.chartTheme;
-				
-				//XXX 使用e.value在第一次时返回的值不是新值！？
-				var pickColor = (idx != null ? proxy[propName][idx] : proxy[propName]);
-				
-				if(idx != null)
-					chartTheme[propName][idx] = po.hexStrToCssColor(pickColor, chartTheme[propName][idx]);
-				else
-					chartTheme[propName] = po.hexStrToCssColor(pickColor, chartTheme[propName]);
-			},
-			
 			onVeChartThemeAddGraphColor: function()
 			{
-				var proxy = pm.vepmChartThemeProxy;
 				var chartTheme = pm.vepms.chartTheme;
-				
-				proxy.graphColors.push("");
 				chartTheme.graphColors.push("");
 			},
 			
 			onVeChartThemeAddGraphRangeColor: function()
 			{
-				var proxy = pm.vepmChartThemeProxy;
 				var chartTheme = pm.vepms.chartTheme;
-				
-				proxy.graphRangeColors.push("");
 				chartTheme.graphRangeColors.push("");
 			},
 			
 			onVeChartThemeRemoveGraphColor: function(e, idx)
 			{
-				var proxy = pm.vepmChartThemeProxy;
 				var chartTheme = pm.vepms.chartTheme;
-				
-				proxy.graphColors.splice(idx, 1);
 				chartTheme.graphColors.splice(idx, 1);
 			},
 			
 			onVeChartThemeRemoveGraphRangeColor: function(e, idx)
 			{
-				var proxy = pm.vepmChartThemeProxy;
 				var chartTheme = pm.vepms.chartTheme;
-				
-				proxy.graphRangeColors.splice(idx, 1);
 				chartTheme.graphRangeColors.splice(idx, 1);
 			},
 			
@@ -2458,23 +2378,11 @@ page_boolean_options.ftl
 					if(pm.veshs.style(pm.vepms.style) !== false)
 					{
 						pm.vepms.style = {};
-						pm.vepmStyleProxy = {};
 						pm.vepss.styleShown = false;
 					}
 				});
 			},
 			
-			onVeStyleColorPickerChange: function(e, propName)
-			{
-				var proxy = pm.vepmStyleProxy;
-				var style = pm.vepms.style;
-				
-				//XXX 使用e.value在第一次时返回的值不是新值！？
-				var pickColor = proxy[propName];
-				
-				style[propName] = po.hexStrToCssColor(pickColor, style[propName]);
-			},
-
 			onShowOptionsOriginPanel: function(e)
 			{
 				po.vueUnref("${pid}optionsOriginPanelEle").toggle(e);

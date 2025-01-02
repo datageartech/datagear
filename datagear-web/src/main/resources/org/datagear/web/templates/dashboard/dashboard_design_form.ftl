@@ -58,6 +58,7 @@
 	</form>
 	<#include "include/dashboard_design_resource_forms.ftl">
 	<#include "include/dashboard_design_editor_forms.ftl">
+	<#include "../include/page_palette.ftl">
 	<#include "../include/page_copy_to_clipboard.ftl">
 </div>
 <#include "../include/page_form.ftl">
@@ -168,6 +169,7 @@
 	
 	po.setupResourceList();
 	po.setupResourceEditor();
+	po.setupPalette();
 	
 	po.vueMounted(function()
 	{

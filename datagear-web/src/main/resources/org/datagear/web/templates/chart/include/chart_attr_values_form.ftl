@@ -111,15 +111,13 @@ page_boolean_options.ftl
 				</div>
 				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.COLOR">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.inputPayload.multiple">
-						<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.colorProxy[cpa.name]" :key="colorIdx">
+						<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
 							<div class="flex mb-1">
 								<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
 									class="input flex-grow-1 mr-1">
 								</p-inputtext>
-								<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[cpa.name][colorIdx]"
-									default-color="FFFFFF" class="flex-grow-0 preview-h-full mr-3"
-									@change="onChartAttrValuesFormColorPickerChange($event, cpa.name, colorIdx)">
-								</p-colorpicker>
+								<p-button type="button" :style="{'background-color':(pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx] || '#FFFFFF')}" class="border-0 mr-1"
+									@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
 								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
 									@click="onChartAttrValuesFormRemoveColor($event, cpa.name, colorIdx)"
 									v-if="!pm.chartAttrValuesForm.readonly">
@@ -134,10 +132,8 @@ page_boolean_options.ftl
 						<p-inputtext :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
 							class="input flex-grow-1 mr-1" maxlength="100">
 						</p-inputtext>
-						<p-colorpicker v-model="pm.chartAttrValuesForm.colorProxy[cpa.name]"
-							default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-							@change="onChartAttrValuesFormColorPickerChange($event, cpa.name)">
-						</p-colorpicker>
+						<p-button type="button" :style="{'background-color':(pm.chartAttrValuesForm.attrValues[cpa.name] || '#FFFFFF')}" class="border-0"
+							@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues, cpa.name)"></p-button>
 					</div>
 		        	<div class="validate-msg" v-if="cpa.required">
 		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
@@ -583,43 +579,6 @@ page_boolean_options.ftl
 		return re;
 	};
 	
-	po.toChartAttrValuesFormColorProxy = function(attrValues, cpas)
-	{
-		attrValues = (attrValues || {});
-		
-		var colorProxy = {};
-		
-		$.each(cpas, function(i, cpa)
-		{
-			var inputType = cpa.inputType;
-			var inputPayload = cpa.inputPayload;
-			
-			if(inputType == po.ChartPluginAttribute.InputType.COLOR)
-			{
-				var v = attrValues[cpa.name];
-				if(v)
-				{
-					if($.isArray(v))
-					{
-						var vNew = [];
-						$.each(v, function(j, vj)
-						{
-							vNew.push(chartFactory.colorToHexStr(vj));
-						});
-						
-						v = vNew;
-					}
-					else
-						v = chartFactory.colorToHexStr(v);
-					
-					colorProxy[cpa.name] = v;
-				}
-			}
-		});
-		
-		return colorProxy;
-	};
-	
 	po.validateChartAttrValuesRequired = function(cpas, attrValues)
 	{
 		if(!cpas)
@@ -649,8 +608,7 @@ page_boolean_options.ftl
 			groups: [],
 			attrValues: {},
 			readonly: false,
-			buttons: [],
-			colorProxy: {}
+			buttons: []
 		}
 	});
 	
@@ -702,32 +660,10 @@ page_boolean_options.ftl
 		var formValues = po.toChartAttrValuesFormModel(attrValues, cpas);
 		
 		pm.chartAttrValuesForm.attrValues = formValues;
-		pm.chartAttrValuesForm.colorProxy = po.toChartAttrValuesFormColorProxy(pm.chartAttrValuesForm.attrValues, pm.chartAttrValuesForm.attributes);
 	};
 	
 	po.vueMethod(
 	{
-		onChartAttrValuesFormColorPickerChange: function(e, propName, idx)
-		{
-			var pm = po.vuePageModel();
-			var proxy = pm.chartAttrValuesForm.colorProxy;
-			var attrValues = pm.chartAttrValuesForm.attrValues;
-			
-			//XXX 使用e.value在第一次时返回的值不是新值！？
-			var pickColor = (idx != null ? "#"+proxy[propName][idx] : "#"+proxy[propName]);
-			
-			if(idx != null)
-			{
-				pickColor = (pickColor ? pickColor : attrValues[propName][idx]);
-				attrValues[propName][idx] = chartFactory.colorToHexStr(pickColor, true);
-			}
-			else
-			{
-				pickColor = (pickColor ? pickColor : attrValues[propName]);
-				attrValues[propName] = chartFactory.colorToHexStr(pickColor, true);
-			}
-		},
-		
 		onChartAttrValuesFormAddValue: function(propName)
 		{
 			var pm = po.vuePageModel();
@@ -750,25 +686,18 @@ page_boolean_options.ftl
 		onChartAttrValuesFormAddColor: function(propName)
 		{
 			var pm = po.vuePageModel();
-			var proxy = pm.chartAttrValuesForm.colorProxy;
 			var attrValues = pm.chartAttrValuesForm.attrValues;
 			
-			if(!proxy[propName])
-				proxy[propName] = [];
 			if(!attrValues[propName])
 				attrValues[propName] = [];
 			
-			proxy[propName].push("");
 			attrValues[propName].push("");
 		},
 		
 		onChartAttrValuesFormRemoveColor: function(e, propName, idx)
 		{
 			var pm = po.vuePageModel();
-			var proxy = pm.chartAttrValuesForm.colorProxy;
 			var attrValues = pm.chartAttrValuesForm.attrValues;
-			
-			proxy[propName].splice(idx, 1);
 			attrValues[propName].splice(idx, 1);
 		}
 	});
