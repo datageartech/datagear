@@ -2577,7 +2577,7 @@
 			for(var i=0; i<obj.length; i++)
 			{
 				var vstr = this._serializeForAttrValue(obj[i]);
-				if(vstr != null && vstr != "")
+				if(vstr != null && vstr !== "")
 				{
 					if(str != "[")
 						str += ",";
@@ -2597,7 +2597,7 @@
 			for(var p in obj)
 			{
 				var vstr = this._serializeForAttrValue(obj[p]);
-				if(vstr != null && vstr != "")
+				if(vstr != null && vstr !== "")
 				{
 					if(str != "{")
 						str += ",";
