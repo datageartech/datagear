@@ -25,8 +25,8 @@
 			<div v-for="(groupColors, groupIndex) in pm.palette.colors"
 				class="flex flex-wrap" style="gap:1px;">
 				<div v-for="(color, colorIndex) in groupColors.colors" :title="color"
-					class="border-1 border-round-sm cursor-pointer surface-border hover:border-500" style="padding:1px;"
-					:class="{'border-500': (pm.palette.value == color)}"
+					class="border-1 border-round-sm cursor-pointer" style="padding:1px;"
+					:class="(pm.palette.value == color ? 'border-700' : 'surface-border hover:border-500')"
 					@click="onSelectPaletteColor(color, index)">
 					<div :style="{background: color}" style="width:1.2rem;height:1.2rem;" class="border-round-sm">
 					</div>
@@ -34,13 +34,26 @@
 			</div>
 		</div>
 	</div>
-	<div class="flex justify-content-end align-items-center pt-2">
-		<div class="text-color-secondary"><small>更多颜色：</small></div>
-		<div>
-			<p-colorpicker v-model="pm.palette.pickerValue" :pt="{input:{'style':'padding:0.2rem;'}}"
-				default-color="FFFFFF" class="flex-grow-0 preview-h-full"
-				@change="onSelectPaletteColorPicker($event)">
-			</p-colorpicker>
+	<div class="flex justify-content-between align-items-center gap-1 pt-2">
+		<div class="flex align-items-center" style="gap:1px;">
+			<div v-for="(color, colorIndex) in pm.palette.pureColors" :title="color"
+				class="border-1 border-round-sm cursor-pointer" style="padding:1px;"
+				:class="(pm.palette.value == color ? 'border-700' : 'surface-border hover:border-500')"
+				@click="onSelectPaletteColor(color, index)">
+				<div :style="{background: color}" style="width:1.2rem;height:1.2rem;" class="border-round-sm">
+				</div>
+			</div>
+		</div>
+		<div class="flex align-items-center">
+			<div class="text-color-secondary">
+				<small><@spring.message code='moreOfColon' /></small>
+			</div>
+			<div>
+				<p-colorpicker v-model="pm.palette.pickerValue" :pt="{input:{'style':'padding:0.2rem;'}}"
+					default-color="FFFFFF" class="flex-grow-0 preview-h-full"
+					@change="onSelectPaletteColorPicker($event)">
+				</p-colorpicker>
+			</div>
 		</div>
 	</div>
 </p-overlaypanel>
@@ -107,6 +120,7 @@
 			palette:
 			{
 				colors: $.paletteColors,
+				pureColors: [ "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FF00FF", "#FFFF00", "#00FFFF", "#000000" ],
 				modelObj: null,
 				modelProp: null,
 				value: null,
