@@ -20,7 +20,7 @@
 调色板
 -->
 <p-overlaypanel ref="${pid}palettePanelEle" append-to="body" id="${pid}palettePanel" @show="onPalettePanelShow">
-	<div class="overflow-auto pr-2" style="max-width:60vw; max-height:40vh;">
+	<div class="panel-content-size-mh30vh overflow-auto pr-2">
 		<div class="flex flex-column" style="gap:1px;">
 			<div v-for="(groupColors, groupIndex) in pm.palette.colors"
 				class="flex flex-wrap" style="gap:1px;">
