@@ -116,7 +116,7 @@ page_boolean_options.ftl
 								<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
 									class="input flex-grow-1 mr-1">
 								</p-inputtext>
-								<p-button type="button" :style="{'background-color':(pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx] || '#FFFFFF')}" class="border-0 mr-1"
+								<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
 									@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
 								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
 									@click="onChartAttrValuesFormRemoveColor($event, cpa.name, colorIdx)"
@@ -132,7 +132,7 @@ page_boolean_options.ftl
 						<p-inputtext :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
 							class="input flex-grow-1 mr-1" maxlength="100">
 						</p-inputtext>
-						<p-button type="button" :style="{'background-color':(pm.chartAttrValuesForm.attrValues[cpa.name] || '#FFFFFF')}" class="border-0"
+						<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name]}" class="palette-btn surface-border"
 							@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues, cpa.name)"></p-button>
 					</div>
 		        	<div class="validate-msg" v-if="cpa.required">

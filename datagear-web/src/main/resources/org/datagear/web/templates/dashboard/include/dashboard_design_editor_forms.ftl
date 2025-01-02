@@ -517,7 +517,7 @@ page_palette.ftl
 							<p-inputtext id="${pid}veChartThemeFgColor" v-model="pm.vepms.chartTheme.color" type="text"
 								class="input flex-grow-1 mr-1" name="color" autofocus>
 							</p-inputtext>
-							<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.color || '#FFFFFF')}" class="border-0"
+							<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.color}" class="palette-btn surface-border"
 								@click="showPalettePanel($event, pm.vepms.chartTheme, 'color')"></p-button>
 						</div>
 					</div>
@@ -531,7 +531,7 @@ page_palette.ftl
 							<p-inputtext id="${pid}veChartThemeBgColor" v-model="pm.vepms.chartTheme.backgroundColor" type="text"
 								class="input flex-grow-1 mr-1" name="backgroundColor">
 							</p-inputtext>
-							<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.backgroundColor || '#FFFFFF')}" class="border-0"
+							<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.backgroundColor}" class="palette-btn surface-border"
 								@click="showPalettePanel($event, pm.vepms.chartTheme, 'backgroundColor')"></p-button>
 						</div>
 					</div>
@@ -546,7 +546,7 @@ page_palette.ftl
 							<p-inputtext id="${pid}veChartThemeActualBgColor" v-model="pm.vepms.chartTheme.actualBackgroundColor" type="text"
 								class="input flex-grow-1 mr-1" name="actualBackgroundColor">
 							</p-inputtext>
-							<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.actualBackgroundColor || '#FFFFFF')}" class="border-0"
+							<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.actualBackgroundColor}" class="palette-btn surface-border"
 								@click="showPalettePanel($event, pm.vepms.chartTheme, 'actualBackgroundColor')"></p-button>
 						</div>
 					</div>
@@ -573,7 +573,7 @@ page_palette.ftl
 								<p-inputtext id="${pid}veChartThemeGraphColors" v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
 									class="input flex-grow-1 mr-1" name="graphColors">
 								</p-inputtext>
-								<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.graphColors[gcIdx] || '#FFFFFF')}" class="border-0 mr-1"
+								<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphColors[gcIdx]}" class="palette-btn surface-border mr-1"
 									@click="showPalettePanel($event, pm.vepms.chartTheme.graphColors, gcIdx)"></p-button>
 								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
 									@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
@@ -596,7 +596,7 @@ page_palette.ftl
 								<p-inputtext id="${pid}veChartThemeGraphRangeColors" v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
 									class="input flex-grow-1 mr-1" name="graphRangeColors">
 								</p-inputtext>
-								<p-button type="button" :style="{'background-color':(pm.vepms.chartTheme.graphRangeColors[gcIdx] || '#FFFFFF')}" class="border-0 mr-1"
+								<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphRangeColors[gcIdx]}" class="palette-btn surface-border mr-1"
 									@click="showPalettePanel($event, pm.vepms.chartTheme.graphRangeColors, gcIdx)"></p-button>
 								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
 									@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
@@ -636,7 +636,7 @@ page_palette.ftl
 										<p-inputtext id="${pid}veStyleColor" v-model="pm.vepms.style.color" type="text"
 											class="input flex-grow-1 mr-1" name="color" autofocus>
 										</p-inputtext>
-										<p-button type="button" :style="{'background-color':(pm.vepms.style.color || '#FFFFFF')}" class="border-0"
+										<p-button type="button" :style="{'background-color': pm.vepms.style.color}" class="palette-btn surface-border"
 											@click="showPalettePanel($event, pm.vepms.style, 'color')"></p-button>
 									</div>
 								</div>
@@ -652,7 +652,7 @@ page_palette.ftl
 										<p-inputtext id="${pid}veStyleBgColor" v-model="pm.vepms.style['background-color']" type="text"
 											class="input flex-grow-1 mr-1" name="background-color">
 										</p-inputtext>
-										<p-button type="button" :style="{'background-color':(pm.vepms.style['background-color'] || '#FFFFFF')}" class="border-0"
+										<p-button type="button" :style="{'background-color':pm.vepms.style['background-color']}" class="palette-btn surface-border"
 											@click="showPalettePanel($event, pm.vepms.style, 'background-color')"></p-button>
 									</div>
 								</div>
@@ -793,7 +793,7 @@ page_palette.ftl
 										<p-inputtext id="${pid}veStyleBorderColor" v-model="pm.vepms.style['border-color']" type="text"
 											class="input flex-grow-1 mr-1" name="border-color">
 										</p-inputtext>
-										<p-button type="button" :style="{'background-color':(pm.vepms.style['border-color'] || '#FFFFFF')}" class="border-0"
+										<p-button type="button" :style="{'background-color': pm.vepms.style['border-color']}" class="palette-btn surface-border"
 											@click="showPalettePanel($event, pm.vepms.style, 'border-color')"></p-button>
 									</div>
 								</div>

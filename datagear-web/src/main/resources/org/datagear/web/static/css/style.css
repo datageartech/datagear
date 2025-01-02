@@ -168,6 +168,9 @@ label.align-tip{
 .text-xs.p-button{
 	font-size: .75rem;
 }
+.palette-btn{
+	background-color: #FFFFFF;
+}
 
 /*带更多菜单按钮的tabview*/
 .p-tabview.contextmenu-tabview .p-tabview-nav-container .p-tabview-nav-link{
