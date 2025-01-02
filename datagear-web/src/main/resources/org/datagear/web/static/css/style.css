@@ -789,6 +789,12 @@ label.align-tip{
 .panel-content-size-xs-minw{
 	min-width: 35vw;
 }
+.panel-content-size-mh30vh{
+	max-height: 30vh;
+}
+.panel-content-size-mh40vh{
+	max-height: 40vh;
+}
 
 /*数据集编辑页*/
 .page-form-dataSet .code-editor-wrapper{

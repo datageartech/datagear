@@ -568,16 +568,18 @@ page_palette.ftl
 						<@spring.message code='dashboard.veditor.chartTheme.graphColors' />
 					</label>
 					<div class="field-input col-12">
-						<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphColors" :key="gcIdx">
-							<div class="flex mb-1">
-								<p-inputtext id="${pid}veChartThemeGraphColors" v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
-									class="input flex-grow-1 mr-1" name="graphColors">
-								</p-inputtext>
-								<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphColors[gcIdx]}" class="palette-btn surface-border mr-1"
-									@click="showPalettePanel($event, pm.vepms.chartTheme.graphColors, gcIdx)"></p-button>
-								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-									@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
-								</p-button>
+						<div id="${pid}veChartThemeGraphColors" class="">
+							<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphColors" :key="gcIdx">
+								<div class="flex mb-1">
+									<p-inputtext v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
+										class="input flex-grow-1 mr-1" name="graphColors">
+									</p-inputtext>
+									<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphColors[gcIdx]}" class="palette-btn surface-border mr-1"
+										@click="showPalettePanel($event, pm.vepms.chartTheme.graphColors, gcIdx)"></p-button>
+									<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
+										@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
+									</p-button>
+								</div>
 							</div>
 						</div>
 						<div class="mt-1">
@@ -591,16 +593,18 @@ page_palette.ftl
 						<@spring.message code='dashboard.veditor.chartTheme.graphRangeColors' />
 					</label>
 					<div class="field-input col-12">
-						<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphRangeColors" :key="gcIdx">
-							<div class="flex mb-1">
-								<p-inputtext id="${pid}veChartThemeGraphRangeColors" v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
-									class="input flex-grow-1 mr-1" name="graphRangeColors">
-								</p-inputtext>
-								<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphRangeColors[gcIdx]}" class="palette-btn surface-border mr-1"
-									@click="showPalettePanel($event, pm.vepms.chartTheme.graphRangeColors, gcIdx)"></p-button>
-								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-									@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
-								</p-button>
+						<div id="${pid}veChartThemeGraphRangeColors" class="">
+							<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphRangeColors" :key="gcIdx">
+								<div class="flex mb-1">
+									<p-inputtext v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
+										class="input flex-grow-1 mr-1" name="graphRangeColors">
+									</p-inputtext>
+									<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphRangeColors[gcIdx]}" class="palette-btn surface-border mr-1"
+										@click="showPalettePanel($event, pm.vepms.chartTheme.graphRangeColors, gcIdx)"></p-button>
+									<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
+										@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
+									</p-button>
+								</div>
 							</div>
 						</div>
 						<div class="mt-1">
