@@ -453,6 +453,7 @@
 			</form>
 		</div>
 	</p-overlaypanel>
+	<#include "../include/page_palette.ftl">
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">
@@ -1188,6 +1189,8 @@
 			}
 		}
 	});
+	
+	po.setupPalette();
 })
 (${pid});
 </script>

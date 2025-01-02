@@ -21,6 +21,7 @@
 
 依赖：
 page_boolean_options.ftl
+page_palette.ftl
 -->
 <#assign ChartPluginAttributeType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
 <#assign ChartPluginAttributeInputType=statics['org.datagear.analysis.ChartPluginAttribute$InputType']>
