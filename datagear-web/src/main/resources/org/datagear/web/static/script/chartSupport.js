@@ -7035,7 +7035,7 @@
 			if(!isV1)
 			{
 				rowBgColor ="rgba(0,0,0,0)";
-				rowOddBgColor = chart.themeGradualColor(0.5) + "0F";
+				rowOddBgColor = chart.themeGradualColor(0.5) + "09";
 			}
 			
 			var tableStyle =
