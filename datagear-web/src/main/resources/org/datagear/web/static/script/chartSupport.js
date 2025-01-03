@@ -7007,6 +7007,7 @@
 	
 	chartSupport.tableThemeStyleSheet = function(chart, options)
 	{
+		var isV1 = chartSupport.tableIsV1();
 		var name = chartFactory.builtinPropName("TableChart");
 		var isLocalStyle = (options.tableStyle != null);
 		var forceUpdate = false;
@@ -7026,9 +7027,16 @@
 		{
 			var theme = chart.theme();
 			
-			//行应该使用实际背景色，因为backgroundColor可能是透明的，当使用它设置固定列时，
-			//横向滚动时固定列无法遮挡其他滚动列
+			//使用实际背景色可以避免当backgroundColor是透明时，设置固定列后横向滚动时固定列无法遮挡其他滚动列的问题
 			var rowBgColor = theme.actualBackgroundColor;
+			var rowOddBgColor = chart.themeGradualColor(0);
+			
+			//V2版本通过透明度控制奇偶行颜色，这样可以适配任意背景，不过仍会出现固定列后横向滚动无法遮挡的问题（用户可以自定义颜色解决）
+			if(!isV1)
+			{
+				rowBgColor ="rgba(0,0,0,0)";
+				rowOddBgColor = chart.themeGradualColor(0.5) + "0F";
+			}
 			
 			var tableStyle =
 			{
@@ -7038,6 +7046,7 @@
 					row:
 					{
 						"color": theme.color,
+						//必须设置背景色，不然会是组件默认背景色无法适配图表主题
 						"background-color": rowBgColor
 					},
 					cell: {}
@@ -7046,14 +7055,18 @@
 				{
 					row:
 					{
-						"color": theme.color
+						"color": theme.color,
+						//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+						"background-color": rowBgColor
 					},
 					rowOdd:
 					{
-						"background-color": chart.themeGradualColor(0)
+						//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+						"background-color": rowOddBgColor
 					},
 					rowEven:
 					{
+						//必须设置背景色，不然会是组件默认背景色无法适配图表主题
 						"background-color": rowBgColor
 					},
 					rowHover:
