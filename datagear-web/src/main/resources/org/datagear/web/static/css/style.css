@@ -881,8 +881,11 @@ label.align-tip{
 	padding-top: 0.6rem;
 	padding-bottom: 0.6rem;
 }
-.page-dashboard-design .p-menubar.ve-menubar .p-submenu-list > .p-menuitem-active > .p-submenu-list{
+.page-dashboard-design .p-menubar.ve-menubar .ve-insert-menuitem .p-submenu-list > .p-menuitem-active > .p-submenu-list{
 	top: -430%;
+}
+.page-dashboard-design .p-menubar.ve-menubar .ve-edit-menuitem .p-submenu-list > .p-menuitem-active > .p-submenu-list{
+	top: -200%;
 }
 .dashboard-select-chart-wrapper > .p-dialog-header .p-dialog-header-icons{
 	display: none;

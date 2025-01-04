@@ -553,6 +553,26 @@
 	};
 	
 	/**
+	 * 是否有选中元素。
+	 * 
+	 * @param checkTip 没有选中时，是否提示，默认为：true
+	 */
+	editor.hasSelectedElement = function(checkTip)
+	{
+		checkTip = (checkTip == null ? true : checkTip);
+		
+		ele = this._currentElement(null, true);
+		var re = (this._isEmptyElement(ele) != true);
+		
+		if(!re && checkTip)
+		{
+			this.tipInfo(i18n.selectedElementRequired);
+		}
+		
+		return re;
+	};
+	
+	/**
 	 * 是否是图表元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
