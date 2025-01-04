@@ -6213,6 +6213,29 @@
 	};
 	
 	/**
+	 * 生成下一个元素ID。
+	 */
+	chartFactory.nextEleId = function(prefix)
+	{
+		prefix = (prefix == null ? "id" : prefix);
+		
+		if(this._nextEleIdSeq == null)
+			this._nextEleIdSeq = 1;
+		
+		var seqStr = "" + this._nextEleIdSeq;
+		var preLen = (5 - seqStr.length);
+		
+		for(var i=0; i<preLen; i++)
+		{
+			seqStr = "0" + seqStr;
+		}
+		
+		this._nextEleIdSeq += 1;
+		
+		return prefix + seqStr;
+	};
+	
+	/**
 	 * 获取当前日期毫秒数。
 	 */
 	chartFactory.currentDateMs = function()
