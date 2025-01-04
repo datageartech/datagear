@@ -2238,62 +2238,6 @@
 		return styleObj;
 	};
 	
-	editor._editableElementStyles =
-	{
-		"color": true,
-		"background-color": true,
-		"background-image": true,
-		"background-position": true,
-		"background-size": true,
-		"background-repeat": true,
-		"border-width": true,
-		"border-color": true,
-		"border-style": true,
-		"border-radius": true,
-		"box-shadow": true,
-		"display": true,
-		"width": true,
-		"height": true,
-		"padding": true,
-		"margin": true,
-		"box-sizing": true,
-		"position": true,
-		"left": true,
-		"top": true,
-		"right": true,
-		"bottom": true,
-		"z-index": true,
-		"flex-direction": true,
-		"flex-wrap": true,
-		"justify-content": true,
-		"align-items": true,
-		"order": true,
-		"flex-grow": true,
-		"flex-shrink": true,
-		"flex-basis": true,
-		"align-self": true,
-		"align-content": true,
-		"grid-template-columns": true,
-		"grid-template-rows": true,
-		"column-gap": true,
-		"row-gap": true,
-		"grid-template-areas": true,
-		"grid-auto-flow": true,
-		"justify-items": true,
-		"grid-auto-columns": true,
-		"grid-auto-rows": true,
-		"grid-column-start": true,
-		"grid-column-end": true,
-		"grid-row-start": true,
-		"grid-row-end": true,
-		"grid-area": true,
-		"justify-self": true,
-		"font-family": true,
-		"font-size": true,
-		"font-weight": true,
-		"text-align": true
-	};
-	
 	//设置元素文本内容
 	editor._setElementText = function(ele, text, sync)
 	{

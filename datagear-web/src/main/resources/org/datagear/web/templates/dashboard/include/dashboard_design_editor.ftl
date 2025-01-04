@@ -1214,22 +1214,6 @@
 		}
 	};
 	
-	po.isDisplayGrid = function(display)
-	{
-		if(!display)
-			return false;
-		
-		return /^(grid|inline-grid)$/i.test(display);
-	};
-	
-	po.isDisplayFlex = function(display)
-	{
-		if(!display)
-			return false;
-		
-		return /^(flex|inline-flex)$/i.test(display);
-	};
-	
 	po.convertToVeStyleFormModel = function(styleModel)
 	{
 		styleModel = $.extend({ syncChartTheme: (po._syncChartTheme != null ? po._syncChartTheme : true) }, styleModel);

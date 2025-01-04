@@ -954,8 +954,28 @@ page_palette.ftl
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStylePadding" v-model="pm.vepms.style['padding']" type="text"
-										class="input w-full" name="padding">
+										class="help-target input w-full" name="padding">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											3px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											5px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											10px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="0 1rem">
+											0 1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem 0">
+											1rem 0
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
@@ -966,8 +986,28 @@ page_palette.ftl
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleMargin" v-model="pm.vepms.style['margin']" type="text"
-										class="input w-full" name="margin">
+										class="help-target input w-full" name="margin">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											3px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											5px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											10px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="0 1rem">
+											0 1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem 0">
+											1rem 0
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
@@ -1150,26 +1190,66 @@ page_palette.ftl
 							</div>
 							<div class="field grid">
 								<label for="${pid}veStyleGridRowGap" class="field-label col-12 mb-2"
-									title="<@spring.message code='dashboard.veditor.style.gridRowGap.desc' />">
-									<@spring.message code='dashboard.veditor.style.gridRowGap' />
+									title="<@spring.message code='dashboard.veditor.style.rowGap.desc' />">
+									<@spring.message code='dashboard.veditor.style.rowGap' />
 									<span class="text-color-secondary text-sm ml-1">row-gap</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridRowGap" v-model="pm.vepms.style['row-gap']" type="text"
-										class="input w-full" name="row-gap">
+										class="help-target input w-full" name="row-gap">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											3px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											5px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											10px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+											2rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+											3rem
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
 								<label for="${pid}veStyleGridColumnGap" class="field-label col-12 mb-2"
-									title="<@spring.message code='dashboard.veditor.style.gridColumnGap.desc' />">
-									<@spring.message code='dashboard.veditor.style.gridColumnGap' />
+									title="<@spring.message code='dashboard.veditor.style.columnGap.desc' />">
+									<@spring.message code='dashboard.veditor.style.columnGap' />
 									<span class="text-color-secondary text-sm ml-1">column-gap</span>
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleGridColumnGap" v-model="pm.vepms.style['column-gap']" type="text"
-										class="input w-full" name="column-gap">
+										class="help-target input w-full" name="column-gap">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											3px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											5px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											10px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+											2rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+											3rem
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
@@ -1653,6 +1733,70 @@ page_palette.ftl
 										</p-button>
 										<p-button type="button" class="help-src p-button-secondary" help-value="stretch">
 											<@spring.message code='dashboard.veditor.style.flexAligns.stretch' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexRowGap" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.rowGap.desc' />">
+									<@spring.message code='dashboard.veditor.style.rowGap' />
+									<span class="text-color-secondary text-sm ml-1">row-gap</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexRowGap" v-model="pm.vepms.style['row-gap']" type="text"
+										class="help-target input w-full" name="row-gap">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											3px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											5px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											10px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+											2rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+											3rem
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFlexColumnGap" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.style.columnGap.desc' />">
+									<@spring.message code='dashboard.veditor.style.columnGap' />
+									<span class="text-color-secondary text-sm ml-1">column-gap</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFlexColumnGap" v-model="pm.vepms.style['column-gap']" type="text"
+										class="help-target input w-full" name="column-gap">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+											3px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+											5px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+											10px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+											2rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+											3rem
 										</p-button>
 									</div>
 								</div>
