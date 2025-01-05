@@ -721,7 +721,16 @@
 	/**
 	 * 插入网格布局元素。
 	 * 
-	 * @param gridAttr 网格设置，格式为：{ rows: 数值或数值字符串, columns: 数值或数值字符串, fillParent: 布尔值或布尔值字符串 }
+	 * @param gridAttr 网格设置，格式为：
+	 * 					{
+	 * 						rows: 数值或数值字符串,
+	 * 						columns: 数值或数值字符串,
+	 * 						fillParent: 布尔值或布尔值字符串,
+	 * 						rowHeightDivide: "avg"、"custom",
+	 * 						rowHeights: [ "", ... ],
+	 * 						colWidthDivide: "avg"、"custom",
+	 * 						colWidths: [ "", ... ]
+	 * 					}
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
 	 */
@@ -757,9 +766,28 @@
 		styleStr += "display:grid;";
 		
 		if(rows > 0)
-			styleStr += "grid-template-rows:repeat("+rows+", 1fr);";
+		{
+			if(gridAttr.rowHeightDivide == "custom" && gridAttr.rowHeights && gridAttr.rowHeights.length > 0)
+			{
+				styleStr += "grid-template-rows:"+gridAttr.rowHeights.join(" ")+";";
+			}
+			else
+			{
+				styleStr += "grid-template-rows:repeat("+rows+", 1fr);";
+			}
+		}
+		
 		if(columns > 0)
-			styleStr += "grid-template-columns:repeat("+columns+", 1fr);";
+		{
+			if(gridAttr.colWidthDivide == "custom" && gridAttr.colWidths && gridAttr.colWidths.length > 0)
+			{
+				styleStr += "grid-template-columns:"+gridAttr.colWidths.join(" ")+";";
+			}
+			else
+			{
+				styleStr += "grid-template-columns:repeat("+columns+", 1fr);";
+			}
+		}
 		
 		div.attr("style", styleStr);
 		

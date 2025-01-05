@@ -764,6 +764,24 @@
 		return ($.isArray(obj) ? obj : [ obj ]);
 	};
 	
+	//整理数组至指定长度
+	$.trimArrayLen = function(array, len, initValue)
+	{
+		len = (len == null ? 0 : len);
+		
+		while(array.length < len)
+		{
+			array.push(initValue);
+		}
+		
+		while(array.length > len)
+		{
+			array.pop();
+		}
+		
+		return array;
+	};
+	
 	/**
 	 * 生成一个唯一ID
 	 * 
@@ -1356,6 +1374,108 @@
 			re[i] = array[i][name];
 		
 		return (isArray? re : re[0]);
+	};
+	
+	/**
+	 * 获取/设置指定属性路径的值。
+	 * 
+	 * @param obj
+	 * @param propPath
+	 * @param value
+	 */
+	$.propPathValue = function(obj, propPath, value)
+	{
+		var setOpt = (value !== undefined);
+		
+		if(setOpt && obj == null)
+			return;
+		
+		var propArray = $.splitPropPath(propPath);
+		var parent = obj;
+		
+		for(var i=0; i<propArray.length; i++)
+		{
+			if(parent == null && !setOpt)
+				return null;
+			
+			var pn = propArray[i];
+			var isEle = (pn.length >= 3 && pn.charAt(0) == '[' && pn.charAt(pn.length-1) == ']' );
+			var eleIdx = (isEle ? parseInt(pn.substring(1, pn.length-1)) : null);
+			var pv = parent[(isEle ? eleIdx : pn)];
+			
+			if(i == (propArray.length - 1))
+			{
+				if(!setOpt)
+				{
+					return pv;
+				}
+				else
+				{
+					parent[(isEle ? eleIdx : pn)] = value;
+				}
+			}
+			else
+			{
+				//设置操作，补全中间对象
+				if(setOpt && pv == null)
+				{
+					var pnNext = propArray[i+1];
+					var isPnNextEle = (pnNext.length >= 3 && pnNext.charAt(0) == '[' && pnNext.charAt(pnNext.length-1) == ']' );
+					pv = (isPnNextEle ? [] : {});
+					parent[(isEle ? eleIdx : pn)] = pv;
+				}
+				
+				parent = pv;
+			}
+		}
+	};
+	
+	/**
+	 * 拆分属性路径字符串为数组。
+	 * 
+	 * @param str 属性路径字符串，格式为："a.b[0].c"，拆分为：["a", "b", "[0]", "c"]
+	 */
+	$.splitPropPath = function(str)
+	{
+		var array = [];
+		
+		var ele = "";
+		for(var i=0; i<str.length; i++)
+		{
+			var c = str.charAt(i);
+			
+			if(c == '\\')
+			{
+				if((i + 1) < str.length)
+					ele += str.charAt(i+1);
+				i+=1;
+			}
+			else if(c == '.')
+			{
+				if(ele)
+					array.push(ele);
+				ele = "";
+			}
+			else if(c == '[')
+			{
+				if(ele)
+					array.push(ele);
+				ele = c;
+			}
+			else if(c == ']')
+			{
+				if(ele)
+					array.push(ele+c);
+				ele = "";
+			}
+			else
+				ele += c;
+		}
+		
+		if(ele)
+			array.push(ele);
+		
+		return array;
 	};
 	
 	/**

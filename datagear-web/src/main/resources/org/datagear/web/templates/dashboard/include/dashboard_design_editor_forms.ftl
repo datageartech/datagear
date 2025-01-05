@@ -65,6 +65,61 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid">
+					<label for="${pid}veGridLayoutRowHeightDivide" class="field-label col-12 mb-2">
+						<@spring.message code='rowHeightDivide' />
+					</label>
+					<div class="field-input col-12">
+						<div id="${pid}veGridLayoutRowHeightDivide">
+							<p-selectbutton id="${pid}veGridLayoutRowHeightDivideSel" v-model="pm.vepms.gridLayout.rowHeightDivide"
+								:options="pm.gridLayoutDivideOptions" option-label="name" option-value="value" class="input w-full">
+							</p-selectbutton>
+							<div v-if="pm.vepms.gridLayout.rowHeightDivide == 'custom'" class="mt-2">
+								<div v-for="rnum in pm.vepms.gridLayout.rowHeights.length" class="field-input mb-2">
+									<div class="flex align-items-center">
+										<div class="px-3"><@spring.message code='row' /> {{rnum}}</div>
+										<div class="flex-grow-1">
+											<p-inputtext v-model="pm.vepms.gridLayout.rowHeights[rnum-1]" type="text"
+												:name="'rowHeights['+(rnum-1)+']'"  class="help-target input w-full">
+											</p-inputtext>
+											<div class="p-buttonset mt-1 text-sm">
+												<p-button type="button" class="help-src p-button-secondary" help-value="2em">
+													2em
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="3em">
+													3em
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="20%">
+													20%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="25%">
+													25%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+													30%
+												</p-button>
+											</div>
+											<div class="p-buttonset mt-1 text-sm">
+												<p-button type="button" class="help-src p-button-secondary" help-value="1fr">
+													1fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="2fr">
+													2fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="3fr">
+													3fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+													auto
+												</p-button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
 					<label for="${pid}veGridLayoutColumns" class="field-label col-12 mb-2">
 						<@spring.message code='columnCount' />
 					</label>
@@ -88,6 +143,61 @@ page_palette.ftl
 							<p-button type="button" class="help-src p-button-secondary" help-value="5">
 								<@spring.message code='dashboard.veditor.gridLayout.columns.5c' />
 							</p-button>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veGridLayoutColWidthDivide" class="field-label col-12 mb-2">
+						<@spring.message code='columnWidthDivide' />
+					</label>
+					<div class="field-input col-12">
+						<div id="${pid}veGridLayoutColWidthDivide">
+							<p-selectbutton id="${pid}veGridLayoutColWidthDivideSel" v-model="pm.vepms.gridLayout.colWidthDivide"
+								:options="pm.gridLayoutDivideOptions" option-label="name" option-value="value" class="input w-full">
+							</p-selectbutton>
+							<div v-if="pm.vepms.gridLayout.colWidthDivide == 'custom'" class="mt-2">
+								<div v-for="rnum in pm.vepms.gridLayout.colWidths.length" class="field-input mb-2">
+									<div class="flex align-items-center">
+										<div class="px-3"><@spring.message code='column' /> {{rnum}}</div>
+										<div class="flex-grow-1">
+											<p-inputtext v-model="pm.vepms.gridLayout.colWidths[rnum-1]" type="text"
+												:name="'colWidths['+(rnum-1)+']'" class="help-target input w-full">
+											</p-inputtext>
+											<div class="p-buttonset mt-1 text-sm">
+												<p-button type="button" class="help-src p-button-secondary" help-value="2em">
+													2em
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="3em">
+													3em
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="20%">
+													20%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="25%">
+													25%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+													30%
+												</p-button>
+											</div>
+											<div class="p-buttonset mt-1 text-sm">
+												<p-button type="button" class="help-src p-button-secondary" help-value="1fr">
+													1fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="2fr">
+													2fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="3fr">
+													3fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+													auto
+												</p-button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -2050,7 +2160,7 @@ page_palette.ftl
 	
 	po.initVePanelHelperSrc = function(form, formModel)
 	{
-		po.element(".help-src", form).click(function()
+		$(form).on("click", ".help-src", function()
 		{
 			var $this = $(this);
 			var helpValue = ($this.attr("help-value") || "");
@@ -2058,9 +2168,12 @@ page_palette.ftl
 			var targetName = helpTarget.attr("name");
 			
 			if(targetName)
-				formModel[targetName] = helpValue;
+				$.propPathValue(formModel, targetName, helpValue);
+			else
+				helpTarget.val(helpValue);
 			
-			helpTarget.focus();
+			//不自动聚焦了，总会激活浏览器自动补全框，影响操作
+			//helpTarget.focus();
 		});
 	};
 	
@@ -2261,7 +2374,7 @@ page_palette.ftl
 			//可视编辑操作对话框表单模型
 			vepms:
 			{
-				gridLayout: { fillParent: false },
+				gridLayout: { fillParent: false, rowHeightDivide: "avg", rowHeights: [], colWidthDivide: "avg", colWidths: [] },
 				flexLayout: { fillParent: false },
 				hxtitle: { type: "h1", content: "" },
 				textElement: { content: "" },
@@ -2309,7 +2422,12 @@ page_palette.ftl
 				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h5' />", value: "h5" },
 				{ name: "<@spring.message code='dashboard.veditor.hxtitle.type.h6' />", value: "h6" }
 			],
-			veChartOptionsPanelForGlobal: false
+			veChartOptionsPanelForGlobal: false,
+			gridLayoutDivideOptions:
+			[
+				{ name: "<@spring.message code='dashboard.veditor.gridLayout.divide.avg' />", value: "avg" },
+				{ name: "<@spring.message code='dashboard.veditor.gridLayout.divide.custom' />", value: "custom" }
+			]
 		});
 		
 		var pm = po.vuePageModel();
@@ -2330,7 +2448,7 @@ page_palette.ftl
 				{
 					if(po.insertVeGridLayout(pm.vepms.gridLayout) !== false)
 					{
-						pm.vepms.gridLayout = { fillParent: false };
+						pm.vepms.gridLayout = { fillParent: false, rowHeightDivide: "avg", rowHeights: [], colWidthDivide: "avg", colWidths: [] };
 						pm.vepss.gridLayoutShown = false;
 					}
 				});
@@ -2611,8 +2729,25 @@ page_palette.ftl
 						pm.vepss.eleIdShown = false;
 					}
 				});
-			},
-			
+			}
+		});
+		
+		po.vueWatch(function()
+		{
+			return pm.vepms.gridLayout.rows;
+		},
+		function(newVal, oldVal)
+		{
+			$.trimArrayLen(pm.vepms.gridLayout.rowHeights, pm.vepms.gridLayout.rows, "auto");
+		});
+
+		po.vueWatch(function()
+		{
+			return pm.vepms.gridLayout.columns;
+		},
+		function(newVal, oldVal)
+		{
+			$.trimArrayLen(pm.vepms.gridLayout.colWidths, pm.vepms.gridLayout.columns, "auto");
 		});
 	};
 })
