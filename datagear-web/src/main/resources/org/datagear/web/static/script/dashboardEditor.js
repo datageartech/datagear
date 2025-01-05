@@ -1314,7 +1314,7 @@
 		{
 			var chartWidget = chartWidgets[i];
 			
-			var chartDiv = $("<div id=\""+this._nextEleId()+"\"></div>");
+			var chartDiv = $("<div></div>");
 			
 			//先设style，与源码模式一致
 			if(styleStr)
@@ -2500,11 +2500,6 @@
 	editor._nextVisualEditId = function()
 	{
 		return chartFactory.uid();
-	};
-	
-	editor._nextEleId = function()
-	{
-		return chartFactory.nextEleId("eidv");
 	};
 	
 	/**

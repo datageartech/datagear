@@ -833,7 +833,7 @@
 		else
 		{
 			for(var i=0; i<chartWidgets.length; i++)
-				code += "<div id=\""+chartFactory.nextEleId("eids")+"\" style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartWidgets[i].id+"\"><!--"+chartWidgets[i].name+"--></div>\n";
+				code += "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartWidgets[i].id+"\"><!--"+chartWidgets[i].name+"--></div>\n";
 		}
 		
 		po.insertCodeText(codeEditor, cursor, code);
