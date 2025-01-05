@@ -1507,6 +1507,108 @@
 	};
 	
 	/**
+	 * 获取<body>元素属性
+	 * 
+	 * @param name 属性名
+	 */
+	editor.getGlobalAttr = function(name)
+	{
+		var ele = this._editElement($(document.body));
+		return ele.attr(name);
+	};
+	
+	/**
+	 * 设置<body>元素属性
+	 * 
+	 * @param name 属性名
+	 * @param value 属性值
+	 */
+	editor.setGlobalAttr = function(name, value)
+	{
+		var body = $(document.body);
+		
+		if(chartFactory.isNullOrEmpty(value))
+		{
+			this._removeElementAttr(body, name);
+		}
+		else
+		{
+			this._setElementAttr(body, name, value);
+		}
+	};
+	
+	/**
+	 * 获取元素属性。
+	 * 
+	 * @param name 属性名
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.getElementAttr = function(name, ele)
+	{
+		ele = this._editElement(this._currentElement(ele, true));
+		return ele.attr(name);
+	};
+	
+	/**
+	 * 校验setElementAttr操作。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkSetElementAttr = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		return true;
+	};
+	
+	/**
+	 * 设置元素属性
+	 * 
+	 * @param name 属性名
+	 * @param value 属性值
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.setElementAttr = function(name, value, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.checkSetElementAttr(ele))
+			return;
+		
+		if(chartFactory.isNullOrEmpty(value))
+		{
+			this._removeElementAttr(ele, name);
+		}
+		else
+		{
+			this._setElementAttr(ele, name, value);
+		}
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(chart)
+		{
+			//ID属性需要特殊处理，图表对象必须同步设置elementId
+			if(/^\s*id\s*$/i.test(name))
+			{
+				var idVal = ele.attr("id");
+				
+				if(!idVal)
+				{
+					idVal = chartFactory.uid();
+					ele.attr("id", idVal);
+				}
+				
+				chart.elementId = idVal;
+			}
+			
+			this._reRenderChart(chart);
+		}
+	};
+	
+	/**
 	 * 校验deleteElement操作。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素

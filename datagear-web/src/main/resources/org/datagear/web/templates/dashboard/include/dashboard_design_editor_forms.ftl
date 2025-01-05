@@ -1994,6 +1994,30 @@ page_palette.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.eleId" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.eleIdShown" @show="onVeEleIdPanelShow">
+	<div class="page page-form">
+		<form id="${pid}veEleIdForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veEleIdValue" class="field-label col-12 mb-2">
+						<@spring.message code='id' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veEleIdValue" v-model="pm.vepms.eleId.value" type="text"
+							class="input w-full" name="value" autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <p-overlaypanel ref="${pid}optionsOriginPanelEle" append-to="body" id="${pid}optionsOriginPanel" @show="onOptionsOriginPanelShow">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
@@ -2185,6 +2209,14 @@ page_palette.ftl
 			pm.vepts.style = title;
 		pm.vepss.styleShown = true;
 	};
+
+	po.showVeEleIdPanel = function(submitHandler, model)
+	{
+		var pm = po.vuePageModel();
+		pm.veshs.eleId = submitHandler;
+		pm.vepms.eleId = $.extend(true, {}, model);
+		pm.vepss.eleIdShown = true;
+	};
 	
 	po.setupResourceEditorForms = function()
 	{
@@ -2207,6 +2239,7 @@ page_palette.ftl
 				chartAttrValuesShown: false,
 				chartThemeShown: false,
 				styleShown: false,
+				eleIdShown: false
 			},
 			//可视编辑操作对话框标题
 			vepts:
@@ -2222,7 +2255,8 @@ page_palette.ftl
 				chartOptions: "<@spring.message code='chartOptions' />",
 				chartOptions: "<@spring.message code='chartAttribute' />",
 				chartTheme: "<@spring.message code='chartTheme' />",
-				style: "<@spring.message code='style' />"
+				style: "<@spring.message code='style' />",
+				eleId: "<@spring.message code='elementId' />"
 			},
 			//可视编辑操作对话框表单模型
 			vepms:
@@ -2238,7 +2272,8 @@ page_palette.ftl
 				chartOptions: { value: "" },
 				chartAttrValues: {},
 				chartTheme: po.veDftChartThemeModel(),
-				style: {}
+				style: {},
+				eleId: {}
 			},
 			//可视编辑操作对话框提交处理函数
 			veshs:
@@ -2251,7 +2286,8 @@ page_palette.ftl
 				chartOptions: function(model){},
 				chartAttrValues: function(model){},
 				chartTheme: function(model){},
-				style: function(model){}
+				style: function(model){},
+				eleId: function(model){}
 			},
 			veGridLayoutPanelShowFillParent: false,
 			veFlexLayoutPanelShowFillParent: false,
@@ -2561,7 +2597,22 @@ page_palette.ftl
 				po.setCodeTextTimeout(codeEditor, (optionsOrigin || ""), true);
 				
 				po.setupSimpleForm(form, {}, function(){});
-			}
+			},
+			
+			onVeEleIdPanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veEleIdForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.eleId, function()
+				{
+					if(pm.veshs.eleId(pm.vepms.eleId) !== false)
+					{
+						pm.vepms.eleId = {};
+						pm.vepss.eleIdShown = false;
+					}
+				});
+			},
+			
 		});
 	};
 })

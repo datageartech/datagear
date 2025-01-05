@@ -1249,6 +1249,24 @@
 		styleModel = $.extend({ syncChartTheme: (po._syncChartTheme != null ? po._syncChartTheme : true) }, styleModel);
 		return styleModel;
 	};
+
+	po.setVeEleId = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			dashboardEditor.setElementAttr("id", model.value);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
 	
 	po.veQuickExecute = function(tab)
 	{
@@ -2148,6 +2166,32 @@
 										return po.updateVeTextElement(model);
 									},
 									{ content: dashboardEditor.getElementText() });
+								}
+							}
+						},
+						{
+							label: "<@spring.message code='elementId' />",
+							class: "ve-panel-show-control eleIdShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetElementAttr())
+										return;
+									
+									po.showVeEleIdPanel(function(model)
+									{
+										return po.setVeEleId(model);
+									},
+									{ value: dashboardEditor.getElementAttr("id") });
 								}
 							}
 						},
