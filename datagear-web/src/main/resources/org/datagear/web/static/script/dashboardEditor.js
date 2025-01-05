@@ -2343,6 +2343,7 @@
 			this._setElementStyleNoSync(editEle, styleObj);
 		}
 		
+		this._reSelectElementIf(ele);
 		this.changeFlag(true);
 	};
 	
@@ -2356,6 +2357,7 @@
 		
 		if(removeClassName)
 			ele.removeClass(removeClassName);
+		
 		if(sync)
 		{
 			if(!className)
@@ -2367,9 +2369,15 @@
 		if(className)
 		{
 			ele.addClass(className);
+			
 			if(sync)
+			{
 				editEle.addClass(className);
+			}
 		}
+		
+		this._reSelectElementIf(ele);
+		this.changeFlag(true);
 	};
 	
 	editor._setElementStyleNoSync = function(ele, styleObj)
@@ -2419,6 +2427,7 @@
 			editEle.text(text);
 		}
 		
+		this._reSelectElementIf(ele);
 		this.changeFlag(true);
 	};
 	
@@ -2435,6 +2444,7 @@
 			editEle.attr(name, value);
 		}
 		
+		this._reSelectElementIf(ele);
 		this.changeFlag(true);
 	};
 	
@@ -2451,7 +2461,29 @@
 			editEle.removeAttr(name);
 		}
 		
+		this._reSelectElementIf(ele);
 		this.changeFlag(true);
+	};
+	
+	editor._reSelectElementIf = function(ele)
+	{
+		if(this._isEmptyElement(ele))
+			return false;
+		
+		var currentEle = this._currentElement(null, true);
+		
+		if(this._isEmptyElement(currentEle))
+			return false;
+		
+		if($(ele)[0] === currentEle[0])
+		{
+			this.selectElement(ele);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	};
 	
 	editor._currentElement = function(currentEle, excludeBody)
