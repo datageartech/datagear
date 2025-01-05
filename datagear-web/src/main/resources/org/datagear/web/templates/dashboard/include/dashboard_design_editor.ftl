@@ -142,12 +142,33 @@
 		*/
 	};
 	
-	po.copyPasteContent = function(content)
+	po.copyPasteContent = function(type, value, tip, check)
 	{
-		if(content === undefined)
+		if(type === undefined)
+		{
 			return po._copyPasteContent;
+		}
 		else
-			po._copyPasteContent = content;
+		{
+			if(check !== false)
+			{
+				if(!type || !value)
+				{
+					$.tipInfo("<@spring.message code='noCopyContent' />");
+					po._copyPasteContent = null;
+					return false;
+				}
+			}
+			
+			po._copyPasteContent = { type: type, value: value };
+			
+			if(tip !== false)
+			{
+				$.tipSuccess("<@spring.message code='copied' />");
+			}
+			
+			return true;
+		}
 	};
 	
 	po.getCurrentAnalysisProjectId = function()
@@ -588,6 +609,7 @@
 			dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
 			dashboardEditor.i18n.selectedElementRequired="<@spring.message code='dashboard.opt.tip.selectedElementRequired' />";
 			dashboardEditor.i18n.selectedNotChartElement="<@spring.message code='dashboard.opt.tip.selectedNotChartElement' />";
+			dashboardEditor.i18n.selectedNotHasChartElement="<@spring.message code='dashboard.opt.tip.selectedNotHasChartElement' />";
 			dashboardEditor.i18n.noSelectableNextElement="<@spring.message code='dashboard.opt.tip.noSelectableNextElement' />";
 			dashboardEditor.i18n.noSelectablePrevElement="<@spring.message code='dashboard.opt.tip.noSelectablePrevElement' />";
 			dashboardEditor.i18n.noSelectableChildElement="<@spring.message code='dashboard.opt.tip.noSelectableChildElement' />";
@@ -1392,16 +1414,29 @@
 	
 	po.veEditPasteContent = function(dashboardEditor, content)
 	{
-		if(!dashboardEditor.hasSelectedElement())
-			return;
-		
-		if(content.indexOf("style:") == 0)
+		if(!content || !content.type || !content.value)
 		{
-			content = content.substr("style:".length);
-			content = chartFactory.evalSilently(content, {});
-			content = po.convertToVeStyleFormModel(content);
-			dashboardEditor.setElementStyle(content);
-		};
+			$.tipInfo("<@spring.message code='noPasteContent' />");
+			return;
+		}
+		
+		if(content.type == "style")
+		{
+			var value = po.convertToVeStyleFormModel(content.value);
+			dashboardEditor.setElementStyle(value);
+		}
+		else if(content.type == "chartTheme")
+		{
+			dashboardEditor.setElementChartTheme(content.value);
+		}
+		else if(content.type == "chartOptions")
+		{
+			dashboardEditor.setElementChartOptions(content.value);
+		}
+		else if(content.type == "chartAttrValues")
+		{
+			dashboardEditor.setElementChartAttrValues(content.value);
+		}
 	};
 	
 	po.buildTplVisualInsertMenuItems = function(insertType, parentLabelPath)
@@ -2116,13 +2151,14 @@
 								}
 							}
 						},
+						{ separator: true },
 						{
-							label: "<@spring.message code='copyPasteOfSlash' />",
+							label: "<@spring.message code='copy' />",
 							items:
 							[
 								{
-									label: "<@spring.message code='copyStyle' />",
-									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copyPasteOfSlash' />"],
+									label: "<@spring.message code='style' />",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copy' />"],
 									command: function(e)
 									{
 										e.item.commandExec();
@@ -2134,18 +2170,17 @@
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
 										{
-											if(!dashboardEditor.hasSelectedElement())
+											if(!dashboardEditor.checkSelectedElement())
 												return;
 											
-											var styleModel = dashboardEditor.getElementStyle();
-											po.copyPasteContent("style:" + chartFactory.toJsonString(styleModel));
-											$.tipSuccess("<@spring.message code='copied' />");
+											var copyValue = dashboardEditor.getElementStyle();
+											po.copyPasteContent("style", copyValue);
 										}
 									}
 								},
 								{
-									label: "<@spring.message code='copyChartTheme' />",
-									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copyPasteOfSlash' />"],
+									label: "<@spring.message code='chartTheme' />",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copy' />"],
 									command: function(e)
 									{
 										e.item.commandExec();
@@ -2157,55 +2192,77 @@
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
 										{
-											
-										}
-									}
-								},
-								{
-									label: "<@spring.message code='copyChartOptions' />",
-									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copyPasteOfSlash' />"],
-									command: function(e)
-									{
-										e.item.commandExec();
-									},
-									commandExec: function()
-									{
-										po.veQuickExecuteMenuItem(this);
-										
-										var dashboardEditor = po.visualDashboardEditorByTab();
-										if(dashboardEditor)
-										{
-											
-										}
-									}
-								},
-								{
-									label: "<@spring.message code='paste' />",
-									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copyPasteOfSlash' />"],
-									command: function(e)
-									{
-										e.item.commandExec();
-									},
-									commandExec: function()
-									{
-										po.veQuickExecuteMenuItem(this);
-										
-										var dashboardEditor = po.visualDashboardEditorByTab();
-										if(dashboardEditor)
-										{
-											var pasteContent = po.copyPasteContent();
-											
-											if(!pasteContent)
-											{
-												$.tipInfo("<@spring.message code='noPasteContent' />");
+											if(!dashboardEditor.checkChartElement())
 												return;
-											}
 											
-											po.veEditPasteContent(dashboardEditor, pasteContent);
+											var copyValue = dashboardEditor.getElementChartTheme();
+											po.copyPasteContent("chartTheme", copyValue);
+										}
+									}
+								},
+								{
+									label: "<@spring.message code='chartOptions' />",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copy' />"],
+									command: function(e)
+									{
+										e.item.commandExec();
+									},
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkChartElement())
+												return;
+											
+											var copyValue = dashboardEditor.getElementChartOptions();
+											po.copyPasteContent("chartOptions", copyValue);
+										}
+									}
+								},
+								{
+									label: "<@spring.message code='chartAttribute' />",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='copy' />"],
+									command: function(e)
+									{
+										e.item.commandExec();
+									},
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkAttrChartElement())
+												return; 
+											
+											var copyValue = dashboardEditor.getElementChartAttrValues();
+											po.copyPasteContent("chartAttrValues", copyValue);
 										}
 									}
 								}
 							]
+						},
+						{
+							label: "<@spring.message code='paste' />",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									po.veEditPasteContent(dashboardEditor, po.copyPasteContent());
+								}
+							}
 						}
 					]
 				},

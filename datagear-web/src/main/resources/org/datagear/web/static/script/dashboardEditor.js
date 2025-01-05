@@ -39,6 +39,7 @@
 	i18n.canEditOnlyTextElement = "仅可编辑纯文本元素";
 	i18n.selectedElementRequired = "请选择要操作的元素";
 	i18n.selectedNotChartElement = "选定元素不是图表元素";
+	i18n.selectedNotHasChartElement = "选定元素不是图表元素，也未包含任何图表元素";
 	i18n.noSelectableNextElement="没有可选择的下一个元素";
 	i18n.noSelectablePrevElement="没有可选择的上一个元素";
 	i18n.noSelectableChildElement="没有可选择的子元素";
@@ -553,23 +554,93 @@
 	};
 	
 	/**
-	 * 是否有选中元素。
-	 * 
-	 * @param checkTip 没有选中时，是否提示，默认为：true
+	 * 校验是否有选中元素。
 	 */
-	editor.hasSelectedElement = function(checkTip)
+	editor.checkSelectedElement = function()
 	{
-		checkTip = (checkTip == null ? true : checkTip);
-		
 		ele = this._currentElement(null, true);
-		var re = (this._isEmptyElement(ele) != true);
 		
-		if(!re && checkTip)
+		if(this._isEmptyElement(ele))
 		{
 			this.tipInfo(i18n.selectedElementRequired);
+			return false;
 		}
 		
-		return re;
+		return true;
+	};
+	
+	/**
+	 * 校验元素本身或其子元素是否有图表元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkHasChartElement = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chartEles = this._getChartElements(ele);
+		
+		if(this._isEmptyElement(chartEles))
+		{
+			this.tipInfo(i18n.selectedNotHasChartElement);
+			return false;
+		}
+		
+		return true;
+	};
+	
+	/**
+	 * 校验是否图表元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkChartElement = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		return true;
+	};
+	
+	/**
+	 * 校验是否定义了图表插件属性的图表元素。
+	 * 
+	 * @param ele 可选，元素，默认为：当前选中元素
+	 */
+	editor.checkAttrChartElement = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		if(!chart)
+		{
+			this.tipInfo(i18n.selectedNotChartElement);
+			return false;
+		}
+		
+		var cpas = chart.pluginAttributes();
+		if(cpas == null || cpas.length == 0)
+		{
+			this.tipInfo(i18n.chartPluginNoAttrDefined);
+			return false;
+		}
+		
+		return true;
 	};
 	
 	/**
@@ -1687,12 +1758,7 @@
 	 */
 	editor.checkSetElementChartTheme = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		
-		if(!this._checkNotEmptyElement(ele))
-			return false;
-		
-		return true;
+		return this.checkHasChartElement(ele);
 	};
 	
 	/**
@@ -1763,10 +1829,13 @@
 			return null;
 		
 		var chart = this.dashboard.renderedChart(ele);
-		if(!chart)
-			return null;
+		var attrValues = (chart ? chart.attrValues() : null);
 		
-		return chart.attrValues();
+		//应复制一份，避免被不可预料的修改
+		if(attrValues != null)
+			attrValues = $.extend(true, {}, attrValues);
+		
+		return attrValues;
 	};
 	
 	/**
@@ -1869,26 +1938,7 @@
 	 */
 	editor.checkSetElementChartAttrValues = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		
-		if(!this._checkNotEmptyElement(ele))
-			return false;
-		
-		var chart = this.dashboard.renderedChart(ele);
-		if(!chart)
-		{
-			this.tipInfo(i18n.selectedNotChartElement);
-			return false;
-		}
-		
-		var cpas = chart.pluginAttributes();
-		if(cpas == null || cpas.length == 0)
-		{
-			this.tipInfo(i18n.chartPluginNoAttrDefined);
-			return false;
-		}
-		
-		return true;
+		return this.checkAttrChartElement(ele);
 	};
 	
 	/**
@@ -1952,12 +2002,7 @@
 	 */
 	editor.checkSetElementChartOptions = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		
-		if(!this._checkNotEmptyElement(ele))
-			return false;
-		
-		return true;
+		return this.checkHasChartElement(ele);
 	};
 	
 	/**
@@ -2438,7 +2483,13 @@
 	
 	editor._isEmptyElement = function(ele)
 	{
-		return (ele == null || ele.length == 0);
+		if(ele == null)
+			return true;
+		
+		if(ele.length != null && ele.length == 0)
+			return true;
+		
+		return false;
 	};
 	
 	editor._getVisualEditId = function($ele)
