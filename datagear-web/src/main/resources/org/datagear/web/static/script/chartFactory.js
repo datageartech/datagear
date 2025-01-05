@@ -6209,7 +6209,7 @@
 		var time = (this._uid_time == null ? (this._uid_time = chartFactory.currentDateMs().toString(16)) : this._uid_time);
 		this._uid_seq++;
 		
-		return this._BUILT_IN_NAME_PART + time + seq;
+		return "dgid" + time + seq;
 	};
 	
 	/**
