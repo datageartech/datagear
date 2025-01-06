@@ -1825,7 +1825,7 @@
 		var nowTheme = this._getElementChartTheme(chartEle);
 		var styleTheme = {};
 		
-		var color = styleObj.color;
+		var color = styleObj['color'];
 		var bgColor = styleObj['background-color'];
 		var fontSize = styleObj['font-size'];
 		
@@ -2416,12 +2416,23 @@
 		this.changeFlag(true);
 	};
 	
-	editor._setElementStyleNoSync = function(ele, styleObj)
+	editor._setElementStyleNoSync = function(ele, styleObj, strictSet)
 	{
 		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
 		//它们应该被保留，且不能同步至对应的编辑元素上
 		
+		//默认严格设置模式，这样才能支持删除styleObj中未出现的样式
+		strictSet = (strictSet == null ? true : strictSet);
+		
 		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele) || "");
+		
+		if(strictSet)
+		{
+			for(var editableName in this._editableElementStyles)
+			{
+				delete nowStyleObj[editableName];
+			}
+		}
 		
 		for(var name in styleObj)
 		{
@@ -2447,6 +2458,62 @@
 		styleObj.className = (ele.attr("class") || "");
 		
 		return styleObj;
+	};
+	
+	editor._editableElementStyles =
+	{
+		"color": true,
+		"background-color": true,
+		"background-image": true,
+		"background-size": true,
+		"background-repeat": true,
+		"background-position": true,
+		"border-width": true,
+		"border-color": true,
+		"border-style": true,
+		"border-radius": true,
+		"box-shadow": true,
+		"display": true,
+		"width": true,
+		"height": true,
+		"padding": true,
+		"margin": true,
+		"box-sizing": true,
+		"position": true,
+		"left": true,
+		"top": true,
+		"right": true,
+		"bottom": true,
+		"z-index": true,
+		"grid-template-rows": true,
+		"grid-template-columns": true,
+		"row-gap": true,
+		"column-gap": true,
+		"grid-template-areas": true,
+		"grid-auto-flow": true,
+		"justify-items": true,
+		"align-items": true,
+		"justify-content": true,
+		"align-content": true,
+		"grid-auto-rows": true,
+		"grid-auto-columns": true,
+		"grid-row-start": true,
+		"grid-row-end": true,
+		"grid-column-start": true,
+		"grid-column-end": true,
+		"grid-area": true,
+		"justify-self": true,
+		"align-self": true,
+		"flex-direction": true,
+		"flex-wrap": true,
+		"order": true,
+		"flex-grow": true,
+		"flex-shrink": true,
+		"flex-basis": true,
+		"font-size": true,
+		"text-align": true,
+		"font-weight": true,
+		"font-family": true
 	};
 	
 	//设置元素文本内容
