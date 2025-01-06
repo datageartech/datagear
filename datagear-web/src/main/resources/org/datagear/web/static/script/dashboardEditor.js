@@ -1823,56 +1823,35 @@
 	editor._evalElementChartThemeByStyleObj = function(chartEle, styleEle, styleObj)
 	{
 		var nowTheme = this._getElementChartTheme(chartEle);
-		var styleTheme = {};
+		var styleTheme = { color: null, actualBackgroundColor: null, fontSize: null };
 		
 		var color = styleObj['color'];
 		var bgColor = styleObj['background-color'];
 		var fontSize = styleObj['font-size'];
 		
-		if(color != null || bgColor != null || fontSize != null)
+		if(!chartFactory.isNullOrEmpty(color))
+			styleTheme.color = color;
+		
+		//始终将图表元素的背景色置为null，因为背景色会自动继承父级元素
+		styleTheme.backgroundColor = null;
+		
+		if(!chartFactory.isNullOrEmpty(bgColor))
 		{
-			if(color != null)
-				styleTheme.color = color;
+			var bgColorObj = chartFactory.parseColor(bgColor);
 			
-			//无需同步图表元素背景色，因为背景色会自动继承
-			//styleTheme.backgroundColor = bgColor;
-			
-			if(bgColor != null)
+			//未设透明度、或者透明度大于0.5才同步
+			if(bgColorObj.a == null || bgColorObj.a > 0.5)
 			{
-				if(bgColor == "")
-				{
-					styleTheme.actualBackgroundColor = "";
-				}
-				else
-				{
-					var bgColorObj = chartFactory.parseColor(bgColor);
-					
-					//未设透明度、或者透明度大于0.5才同步
-					if(bgColorObj.a == null || bgColorObj.a > 0.5)
-					{
-						//应忽略透明度
-						bgColorObj.a = undefined;
-						styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
-					}
-					else
-					{
-						styleTheme.actualBackgroundColor = "";
-					}
-				}
+				//应忽略透明度
+				bgColorObj.a = undefined;
+				styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
 			}
-			
-			if(fontSize != null)
-			{
-				if(fontSize == "")
-				{
-					styleTheme.fontSize = "";
-				}
-				else
-				{
-					//从元素的css中取才能获取字体尺寸像素数
-					styleTheme.fontSize = styleEle.css("font-size");
-				}
-			}
+		}
+		
+		if(!chartFactory.isNullOrEmpty(fontSize))
+		{
+			//从元素的css中取才能获取字体尺寸像素数
+			styleTheme.fontSize = styleEle.css("font-size");
 		}
 		
 		if(!nowTheme)
@@ -1881,9 +1860,10 @@
 		}
 		else
 		{
-			nowTheme.color = (styleTheme.color != null ? styleTheme.color : undefined);
-			nowTheme.actualBackgroundColor = (styleTheme.actualBackgroundColor != null ? styleTheme.actualBackgroundColor : undefined);
-			nowTheme.fontSize = (styleTheme.fontSize != null ? styleTheme.fontSize : undefined);
+			nowTheme.color = styleTheme.color;
+			nowTheme.backgroundColor = styleTheme.backgroundColor;
+			nowTheme.actualBackgroundColor = styleTheme.actualBackgroundColor;
+			nowTheme.fontSize = styleTheme.fontSize;
 			
 			return nowTheme;
 		}
@@ -2106,7 +2086,7 @@
 		
 		var eleAttrValue = this._serializeForAttrValue(attrValuesMerge);
 		
-		if(eleAttrValue == "{}")
+		if(this._isEmptyJsonObjStr(eleAttrValue))
 			this._removeElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, true);
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue, true);
@@ -2311,6 +2291,7 @@
 		
 		if(chartFactory.isString(chartTheme.graphColors))
 			chartTheme.graphColors = this._spitIgnoreEmpty(chartTheme.graphColors);
+		
 		if(chartFactory.isString(chartTheme.graphRangeColors))
 			chartTheme.graphRangeColors = this._spitIgnoreEmpty(chartTheme.graphRangeColors);
 		
@@ -2342,25 +2323,13 @@
 		{
 			var v = mergedChartTheme[p];
 			
-			if(v == null)
-				;
-			else if(chartFactory.isString(v))
-			{
-				if(v != "")
-					trim[p] = v;
-			}
-			else if($.isArray(v))
-			{
-				if(v.length > 0)
-					trim[p] = v;
-			}
-			else
+			if(!chartFactory.isNullOrEmpty(v))
 				trim[p] = v;
 		}
 		
 		var attrValue = this._serializeForAttrValue(trim);
 		
-		if(attrValue == "{}")
+		if(this._isEmptyJsonObjStr(attrValue))
 			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME, sync);
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue, sync);
@@ -2940,6 +2909,14 @@
 		}
 		else
 			return (a == b);
+	};
+	
+	editor._isEmptyJsonObjStr = function(str)
+	{
+		if(chartFactory.isNullOrEmpty(str))
+			return true;
+		
+		return /^\s*\{\s*\}\s*$/i.test(str);
 	};
 	
 	/**
