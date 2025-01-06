@@ -1902,8 +1902,6 @@ page_palette.ftl
 										<p-button type="button" class="help-src p-button-secondary" help-value="center">
 											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
 										</p-button>
-									</div>
-									<div class="p-buttonset text-sm" style="margin-top:1px;">
 										<p-button type="button" class="help-src p-button-secondary" help-value="space-between">
 											<@spring.message code='dashboard.veditor.style.flexAligns.space-between' />
 										</p-button>
@@ -1960,8 +1958,6 @@ page_palette.ftl
 										<p-button type="button" class="help-src p-button-secondary" help-value="center">
 											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
 										</p-button>
-									</div>
-									<div class="p-buttonset text-sm" style="margin-top:1px;">
 										<p-button type="button" class="help-src p-button-secondary" help-value="space-between">
 											<@spring.message code='dashboard.veditor.style.flexAligns.space-between' />
 										</p-button>
@@ -2113,8 +2109,6 @@ page_palette.ftl
 										<p-button type="button" class="help-src p-button-secondary" help-value="center">
 											<@spring.message code='dashboard.veditor.style.flexAligns.center' />
 										</p-button>
-									</div>
-									<div class="p-buttonset text-sm" style="margin-top:1px;">
 										<p-button type="button" class="help-src p-button-secondary" help-value="baseline">
 											<@spring.message code='dashboard.veditor.style.flexAligns.baseline' />
 										</p-button>
