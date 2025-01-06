@@ -98,7 +98,7 @@ page_palette.ftl
 													auto
 												</p-button>
 											</div>
-											<div class="p-buttonset mt-1 text-sm">
+											<div class="p-buttonset text-sm" style="margin-top:1px;">
 												<p-button type="button" class="help-src p-button-secondary" help-value="20%">
 													20%
 												</p-button>
@@ -189,7 +189,7 @@ page_palette.ftl
 													auto
 												</p-button>
 											</div>
-											<div class="p-buttonset mt-1 text-sm">
+											<div class="p-buttonset text-sm" style="margin-top:1px;">
 												<p-button type="button" class="help-src p-button-secondary" help-value="1fr">
 													1fr
 												</p-button>
@@ -1116,8 +1116,25 @@ page_palette.ftl
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleWdith" v-model="pm.vepms.style['width']" type="text"
-										class="input w-full" name="width">
+										class="help-target input w-full" name="width">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="25%">
+											25%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+											50%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="75%">
+											75%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+											100%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+											auto
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
@@ -1128,8 +1145,42 @@ page_palette.ftl
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleHeight" v-model="pm.vepms.style['height']" type="text"
-										class="input w-full" name="height">
+										class="help-target input w-full" name="height">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+											2rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+											3rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="50px">
+											50px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+											100px
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+											300px
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="25%">
+											25%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+											50%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="75%">
+											75%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+											100%
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+											auto
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
@@ -2088,8 +2139,39 @@ page_palette.ftl
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleFontSize" v-model="pm.vepms.style['font-size']" type="text"
-										class="input w-full" name="font-size">
+										class="help-target input w-full" name="font-size">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="0.75rem">
+											0.75rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="0.875rem">
+											0.875rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+											1rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1.25rem">
+											1.25rem
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="1.5rem">
+											1.5rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1.75rem">
+											1.75rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+											2rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2.5rem">
+											2.5rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+											3rem
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
