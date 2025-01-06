@@ -67,7 +67,7 @@
 				</div>
 				<div class="page-content flex-grow-1 overflow-auto">
 					<p-tree :value="pm.dtbsSourceNodes" selection-mode="multiple" :meta-key-selection="true"
-						v-model:selection-keys="pm.selectedNodeKeys"
+						v-model:selection-keys="pm.selectedNodeKeys" v-model:expanded-keys="pm.expandedNodeKeys"
 						@node-expand="onDtbsSourceNodeExpand" @node-select="onDtbsSourceNodeSelect"
 						:loading="pm.loadingDtbsSource" class="dtbsSource-tree h-full overflow-auto">
 					</p-tree>
@@ -150,7 +150,7 @@
 		page = (page == null ? 1 : page);
 		
 		var pm = po.vuePageModel();
-		var keyword = pm.searchForm.keyword;
+		var keyword = (pm.searchType == "dtbsSource" ? pm.searchForm.keyword : undefined);
 		
 		pm.loadingDtbsSource = true;
 		po.ajaxJson("/dtbsSource/pagingQueryData",
@@ -177,15 +177,16 @@
 		});
 	};
 	
-	po.loadTableNodes = function(dtbsSourceNode, page)
+	po.loadTableNodes = function(dtbsSourceNode, page, autoExpand)
 	{
 		page = (page == null ? 1 : page);
+		autoExpand = (autoExpand == null ? false : autoExpand);
 		
 		if(!dtbsSourceNode)
 			return;
 		
 		var pm = po.vuePageModel();
-		var keyword = pm.searchForm.keyword;
+		var keyword = (pm.searchType != "dtbsSource" ? pm.searchForm.keyword : undefined);
 		
 		pm.loadingDtbsSource = true;
 		po.ajaxJson("/dtbsSource/"+encodeURIComponent(dtbsSourceNode.dtbsSourceId)+"/pagingQueryTable",
@@ -202,6 +203,14 @@
 				}
 				else
 					dtbsSourceNode.children = loadedNodes;
+				
+				if(autoExpand)
+				{
+					if(!pm.expandedNodeKeys)
+						pm.expandedNodeKeys = {};
+					
+					pm.expandedNodeKeys[dtbsSourceNode.key] = true;
+				}
 			},
 			complete: function()
 			{
@@ -510,6 +519,7 @@
 		loadingDtbsSource: false,
 		dtbsSourceNodes: null,
 		selectedNodeKeys: null,
+		expandedNodeKeys: null,
 		dtbsSourceTabs:
 		{
 			items: [],
@@ -613,7 +623,7 @@
 				{
 					po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
 					{
-						po.loadTableNodes(dtbsSourceNode);
+						po.loadTableNodes(dtbsSourceNode, 1, true);
 					});
 				}
 			},
@@ -731,7 +741,7 @@
 			{
 				po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
 				{
-					po.loadTableNodes(dtbsSourceNode);
+					po.loadTableNodes(dtbsSourceNode, 1, true);
 				});
 			}
 		},
