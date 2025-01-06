@@ -43,7 +43,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veGridLayoutRows" v-model="pm.vepms.gridLayout.rows" type="text"
-							class="help-target input w-full" name="rows" maxlength="10" autofocus>
+							class="help-target input w-full" name="rows" required maxlength="10" autofocus>
 						</p-inputtext>
 						<div class="p-buttonset mt-1 text-sm">
 							<p-button type="button" class="help-src p-button-secondary" help-value="1">
@@ -134,7 +134,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veGridLayoutColumns" v-model="pm.vepms.gridLayout.columns" type="text"
-							class="help-target input w-full" name="columns" maxlength="10">
+							class="help-target input w-full" name="columns" required maxlength="10">
 						</p-inputtext>
 						<div class="p-buttonset mt-1 text-sm">
 							<p-button type="button" class="help-src p-button-secondary" help-value="1">
@@ -308,7 +308,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veFlexLayoutItems" v-model="pm.vepms.flexLayout.items" type="text"
-							class="help-target input w-full" name="items" maxlength="10" autofocus>
+							class="help-target input w-full" name="items" required maxlength="10" autofocus>
 						</p-inputtext>
 						<div class="p-buttonset mt-1 text-sm">
 							<p-button type="button" class="help-src p-button-secondary" help-value="1">
