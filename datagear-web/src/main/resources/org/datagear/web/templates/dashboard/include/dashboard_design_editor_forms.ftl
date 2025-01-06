@@ -88,17 +88,29 @@ page_palette.ftl
 												<p-button type="button" class="help-src p-button-secondary" help-value="3em">
 													3em
 												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="4em">
+													4em
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="5em">
+													5em
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+													auto
+												</p-button>
+											</div>
+											<div class="p-buttonset mt-1 text-sm">
 												<p-button type="button" class="help-src p-button-secondary" help-value="20%">
 													20%
-												</p-button>
-												<p-button type="button" class="help-src p-button-secondary" help-value="25%">
-													25%
 												</p-button>
 												<p-button type="button" class="help-src p-button-secondary" help-value="30%">
 													30%
 												</p-button>
-											</div>
-											<div class="p-buttonset mt-1 text-sm">
+												<p-button type="button" class="help-src p-button-secondary" help-value="40%">
+													40%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+													50%
+												</p-button>
 												<p-button type="button" class="help-src p-button-secondary" help-value="1fr">
 													1fr
 												</p-button>
@@ -107,9 +119,6 @@ page_palette.ftl
 												</p-button>
 												<p-button type="button" class="help-src p-button-secondary" help-value="3fr">
 													3fr
-												</p-button>
-												<p-button type="button" class="help-src p-button-secondary" help-value="auto">
-													auto
 												</p-button>
 											</div>
 										</div>
@@ -164,20 +173,20 @@ page_palette.ftl
 												:name="'colWidths['+(rnum-1)+']'" class="help-target input w-full">
 											</p-inputtext>
 											<div class="p-buttonset mt-1 text-sm">
-												<p-button type="button" class="help-src p-button-secondary" help-value="2em">
-													2em
-												</p-button>
-												<p-button type="button" class="help-src p-button-secondary" help-value="3em">
-													3em
-												</p-button>
 												<p-button type="button" class="help-src p-button-secondary" help-value="20%">
 													20%
 												</p-button>
-												<p-button type="button" class="help-src p-button-secondary" help-value="25%">
-													25%
-												</p-button>
 												<p-button type="button" class="help-src p-button-secondary" help-value="30%">
 													30%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="40%">
+													40%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+													50%
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+													auto
 												</p-button>
 											</div>
 											<div class="p-buttonset mt-1 text-sm">
@@ -190,14 +199,81 @@ page_palette.ftl
 												<p-button type="button" class="help-src p-button-secondary" help-value="3fr">
 													3fr
 												</p-button>
-												<p-button type="button" class="help-src p-button-secondary" help-value="auto">
-													auto
+												<p-button type="button" class="help-src p-button-secondary" help-value="4fr">
+													4fr
+												</p-button>
+												<p-button type="button" class="help-src p-button-secondary" help-value="5fr">
+													5fr
 												</p-button>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veGridLayoutRowGap" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.style.rowGap.desc' />">
+						<@spring.message code='dashboard.veditor.style.rowGap' />
+						<span class="text-color-secondary text-sm ml-1">row-gap</span>
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veGridLayoutRowGap" v-model="pm.vepms.gridLayout.rowGap" type="text"
+							class="help-target input w-full" name="rowGap">
+						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+								3px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+								5px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+								10px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+								1rem
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+								2rem
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+								3rem
+							</p-button>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veGridLayoutColumnGap" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.style.columnGap.desc' />">
+						<@spring.message code='dashboard.veditor.style.columnGap' />
+						<span class="text-color-secondary text-sm ml-1">column-gap</span>
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veGridLayoutColumnGap" v-model="pm.vepms.gridLayout.columnGap" type="text"
+							class="help-target input w-full" name="columnGap">
+						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="3px">
+								3px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="5px">
+								5px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="10px">
+								10px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="1rem">
+								1rem
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
+								2rem
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="3rem">
+								3rem
+							</p-button>
 						</div>
 					</div>
 				</div>
@@ -2738,16 +2814,20 @@ page_palette.ftl
 		},
 		function(newVal, oldVal)
 		{
-			$.trimArrayLen(pm.vepms.gridLayout.rowHeights, pm.vepms.gridLayout.rows, "auto");
+			//默认不使用"auto"，内部插入元素后会导致尺寸变化
+			var dftValue = "1fr";
+			$.trimArrayLen(pm.vepms.gridLayout.rowHeights, pm.vepms.gridLayout.rows, dftValue);
 		});
-
+		
 		po.vueWatch(function()
 		{
 			return pm.vepms.gridLayout.columns;
 		},
 		function(newVal, oldVal)
 		{
-			$.trimArrayLen(pm.vepms.gridLayout.colWidths, pm.vepms.gridLayout.columns, "auto");
+			//默认不使用"auto"，内部插入元素后会导致尺寸变化
+			var dftValue = "1fr";
+			$.trimArrayLen(pm.vepms.gridLayout.colWidths, pm.vepms.gridLayout.columns, dftValue);
 		});
 	};
 })

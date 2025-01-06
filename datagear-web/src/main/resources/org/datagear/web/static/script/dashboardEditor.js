@@ -729,7 +729,9 @@
 	 * 						rowHeightDivide: "avg"、"custom",
 	 * 						rowHeights: [ "", ... ],
 	 * 						colWidthDivide: "avg"、"custom",
-	 * 						colWidths: [ "", ... ]
+	 * 						colWidths: [ "", ... ],
+	 * 						rowGap: "...",
+	 * 						columnGap: "..."
 	 * 					}
 	 * @param insertType 可选，参考insertElement函数的insertType参数
 	 * @param refEle 可选，参考insertElement函数的refEle参数
@@ -788,6 +790,12 @@
 				styleStr += "grid-template-columns:repeat("+columns+", 1fr);";
 			}
 		}
+		
+		if(!chartFactory.isNullOrEmpty(gridAttr.rowGap))
+			styleStr += "row-gap:"+gridAttr.rowGap+";";
+		
+		if(!chartFactory.isNullOrEmpty(gridAttr.columnGap))
+			styleStr += "column-gap:"+gridAttr.columnGap+";";
 		
 		div.attr("style", styleStr);
 		
