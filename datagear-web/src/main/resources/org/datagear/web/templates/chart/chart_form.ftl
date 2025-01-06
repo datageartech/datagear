@@ -72,16 +72,23 @@
 					<div class="p-inputgroup">
 						<div id="${pid}pluginVo" class="input p-component p-inputtext border-round-left flex align-items-center">
 							<div class="flex-grow-0" v-html="formatChartPlugin(fm.pluginVo)"></div>
-							<div class="pl-1" v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
-								<p-button type="button" icon="pi pi-info-circle"
-									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text">
-								</p-button>
-							</div>
 						</div>
 						<p-button type="button" label="<@spring.message code='select' />"
 							@click="onSelectChartPlugin" v-if="!pm.isReadonlyAction">
 						</p-button>
 					</div>
+		        	<div class="desc text-color-secondary pt-1">
+		        		<div class="flex flex-row align-items-center gap-1" v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
+		        			<div class="white-space-nowrap overflow-hidden text-overflow-ellipsis" style="max-width:80%;">
+		        				<small>{{fm.pluginVo.descLabel.value}}</small>
+		        			</div>
+		        			<div>
+		        				<p-button type="button" icon="pi pi-info-circle" size="small"
+									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text p-1">
+								</p-button>
+		        			</div>
+		        		</div>
+		        	</div>
 		        	<div class="validate-msg">
 		        		<input name="pluginVo" required type="text" class="validate-proxy" />
 		        	</div>
