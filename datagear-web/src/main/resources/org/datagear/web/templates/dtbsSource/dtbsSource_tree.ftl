@@ -39,15 +39,12 @@
 					<div class="col">
 						<form @submit.prevent="onSearch" class="py-1">
 							<div class="p-inputgroup">
-								<div class="p-input-icon-left flex-grow-1">
-									<i class="cursor-pointer" @click="onToggleSearchType"
-										:class="pm.searchType=='dtbsSource' ? 'pi pi-database' : 'pi pi-file'"
-										title="<@spring.message code='switchSearchMode' />">
-									</i>
-									<p-inputtext type="text" v-model="pm.searchForm.keyword" class="w-full h-full border-noround-right"></p-inputtext>
-								</div>
-								<p-button type="submit" icon="pi pi-search" class="px-4"></p-button>
+								<p-inputtext type="text" v-model="pm.searchForm.keyword" class="flex-grow-1"></p-inputtext>
+								<p-button type="button" :icon="pm.searchType=='dtbsSource' ? 'pi pi-database' : 'pi pi-file'"
+									aria-haspopup="true" aria-controls="${pid}searchTypeMenu" @click="onToggleSearchTypeMenu"></p-button>
+								<p-button type="submit" icon="pi pi-search"></p-button>
 							</div>
+							<p-menu id="${pid}searchTypeMenu" ref="${pid}searchTypeMenuEle" :model="pm.searchTypeMenuItems" :popup="true"></p-menu>
 						</form>
 					</div>
 					<div class="col-fixed text-right">
@@ -145,6 +142,27 @@
 		return re;
 	};
 	
+	po.searchByType = function(type)
+	{
+		if(type === undefined)
+		{
+			var pm = po.vuePageModel();
+			type = pm.searchType;
+		}
+		
+		if(type == "dtbsSource")
+		{
+			po.loadDtbsSourceNodes();
+		}
+		else if(type == "table")
+		{
+			po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
+			{
+				po.loadTableNodes(dtbsSourceNode, 1, true);
+			});
+		}
+	};
+	
 	po.loadDtbsSourceNodes = function(page)
 	{
 		page = (page == null ? 1 : page);
@@ -169,6 +187,7 @@
 					pm.dtbsSourceNodes = loadedNodes;
 				
 				pm.selectedNodeKeys = null;
+				pm.expandedNodeKeys = {};
 			},
 			complete: function()
 			{
@@ -205,12 +224,7 @@
 					dtbsSourceNode.children = loadedNodes;
 				
 				if(autoExpand)
-				{
-					if(!pm.expandedNodeKeys)
-						pm.expandedNodeKeys = {};
-					
 					pm.expandedNodeKeys[dtbsSourceNode.key] = true;
-				}
 			},
 			complete: function()
 			{
@@ -516,10 +530,33 @@
 	{
 		searchForm:{ keyword: "" },
 		searchType: "dtbsSource",
+		searchTypeMenuItems:
+		[
+			{
+				label: "<@spring.message code='dtbsSource.searchSource' />",
+				icon: "pi pi-database",
+				command: function(e)
+				{
+					var pm = po.vuePageModel();
+					pm.searchType = "dtbsSource";
+					po.searchByType();
+				}
+			},
+			{
+				label: "<@spring.message code='dtbsSource.searchTable' />",
+				icon: "pi pi-file",
+				command: function(e)
+				{
+					var pm = po.vuePageModel();
+					pm.searchType = "table";
+					po.searchByType();
+				}
+			}
+		],
 		loadingDtbsSource: false,
 		dtbsSourceNodes: null,
 		selectedNodeKeys: null,
-		expandedNodeKeys: null,
+		expandedNodeKeys: {},
 		dtbsSourceTabs:
 		{
 			items: [],
@@ -726,6 +763,7 @@
 		]
 	});
 	
+	po.vueRef("${pid}searchTypeMenuEle", null);
 	po.vueRef("${pid}dtbsSourceTabMenuEle", null);
 	po.vueRef("${pid}dtbsSourceOptMenuEle", null);
 	
@@ -733,17 +771,7 @@
 	{
 		onSearch: function()
 		{
-			var pm = po.vuePageModel();
-			
-			if(pm.searchType == "dtbsSource")
-				po.loadDtbsSourceNodes();
-			else if(pm.searchType == "table")
-			{
-				po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
-				{
-					po.loadTableNodes(dtbsSourceNode, 1, true);
-				});
-			}
+			po.searchByType();
 		},
 		
 		onDtbsSourceNodeExpand: function(node)
@@ -776,10 +804,9 @@
 		
 		onDtbsSourceTabClick: function(e){},
 		
-		onToggleSearchType: function()
+		onToggleSearchTypeMenu: function(e)
 		{
-			var pm = po.vuePageModel();
-			pm.searchType = (pm.searchType == "dtbsSource" ? "table" : "dtbsSource");
+			po.vueUnref("${pid}searchTypeMenuEle").toggle(e);
 		},
 		
 		onToggleDtbsSourceOptMenu: function(e)
