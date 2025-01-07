@@ -866,14 +866,13 @@
 			styleStr += "width:100%;height:100%;";
 		
 		styleStr += "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
-						+"justify-content:space-between;align-items:stretch;";
+						+"justify-content:space-around;align-items:center;align-content:space-around;";
 		
 		div.attr("style", styleStr);
 		
 		for(var i=0; i<items; i++)
 		{
-			var itemDiv = $("<div></div>");
-			itemDiv.attr("style", "flex-grow:1;");
+			var itemDiv = $("<div style=\"padding:1rem 2rem;\"></div>");
 			this._insertElement(div, itemDiv, "append");
 		}
 		
