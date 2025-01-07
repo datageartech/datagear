@@ -82,7 +82,7 @@
 				</div>
 			</div>
 			<p-divider align="left" class="flex-grow-0 my-2 divider-z-0 text-sm"><@spring.message code='template' /></p-divider>
-			<div class="flex-grow-0" style="height:5rem;">
+			<div class="flex-grow-0" style="height:6rem;">
 				<p-listbox v-model="pm.localRes.selectedTemplate" :options="fm.templates"
 					empty-message="<@spring.message code='none' />"
 					@change="onChangeTemplateListItem" class="h-full overflow-auto border-none bg-none">
