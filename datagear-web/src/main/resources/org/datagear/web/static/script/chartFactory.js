@@ -2021,7 +2021,7 @@
 			var dataSet = dataSetBind.dataSet;
 			
 			if(!dataSet.params || dataSet.params.length <= name)
-				throw new Error("no data set param defined at index : "+name);
+				throw new Error("chart '#"+this.elementId+"' "+dataSetBind.index+"-th dataSetBind has no param defined at index : "+name);
 			
 			name = dataSet.params[name].name;
 		}
@@ -6396,7 +6396,7 @@
 	//是否为null、undefined、空字符串、空数组
 	chartFactory.isNullOrEmpty = function(v)
 	{
-		return (v == null || v === "" || v.length == 0);
+		return (v == null || v === "" || (v.length !== undefined && v.length === 0));
 	};
 	
 	/**

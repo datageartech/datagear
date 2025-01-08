@@ -1436,21 +1436,19 @@
 		config);
 		
 		//构建用于批量设置数据集参数值的对象
-		var batchSet = undefined;
+		var batchSet = { target: [], data: {} };
+		
 		if(config.link)
 		{
 			var link = config.link;
 			
 			//转换简写格式
-			if(typeof(link) == "string" || $.isArray(link))
+			if(chartFactory.isString(link) || $.isArray(link))
 				link = { target: link };
 			
-			batchSet =
-			{
-				target: link.target,
-				//新构建data对象，因为可能会在下面被修改
-				data: (link.data ? $.extend({}, link.data) : {})
-			};
+			batchSet.target = link.target;
+			//新构建data对象，因为可能会在下面被修改
+			batchSet.data = (link.data ? $.extend({}, link.data) : {});
 		}
 		
 		var items = [];
@@ -1464,7 +1462,7 @@
 		{
 			var item = sourceItems[i];
 			
-			if(typeof(item) == "string")
+			if(chartFactory.isString(item))
 				item = { name: item };
 			else
 				//确保不影响初始对象
@@ -1479,12 +1477,11 @@
 				defaultValues[item.name] = item.value;
 			
 			//合并输入项的link设置
-			if(item.link != null && batchSet && batchSet.data)
+			if(item.link != null)
 				batchSet.data[item.name] = item.link;
 		}
 		
-		if(batchSet)
-			form.data(bindBatchSetName, batchSet);
+		form.data(bindBatchSetName, batchSet);
 		
 		config.paramValues = defaultValues;
 		config.chartTheme = globalTheme;
@@ -2578,7 +2575,7 @@
 	 * 
 	 * 批量设置对象格式为：
 	 * {
-	 *   //必选，要设置的目标图表元素ID、图表ID、看板图表数组索引，或者它们的数组
+	 *   //可选，要设置的目标图表元素ID、图表ID、看板图表数组索引，或者它们的数组
 	 *   target: "..."、["...", ...],
 	 *   
 	 *   //可选，要设置的参数值映射表，没有则不设置任何参数值
@@ -2593,8 +2590,8 @@
 	 * 
 	 * 图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
 	 * {
-	 *   //可选，目标图表在批量设置对象的target数组中的索引数值，默认为：0
-	 *   chart: ...,
+	 *   //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
+	 *   chart: 数值、"...",
 	 *   
 	 *   //可选，目标图表数据集数组的索引数值，默认为：0
 	 *   dataSet: ...,
@@ -2618,47 +2615,53 @@
 	{
 		sourceValueContext = (sourceValueContext === undefined ? sourceData : sourceValueContext);
 		
+		var targets = (batchSet.target == null ? [] : ($.isArray(batchSet.target) ? batchSet.target : [ batchSet.target ]));
 		var targetCharts = [];
 		
-		var targets = ($.isArray(batchSet.target) ? batchSet.target : [ batchSet.target ]);
 		for(var i=0; i<targets.length; i++)
+		{
 			targetCharts[i] = this.chartOf(targets[i]);
+			
+			if(targetCharts[i] == null)
+				throw new Error("No chart found for : " + targets[i]);
+		}
 		
-		var map = (batchSet.data || {});
-		var hasGetValueFunc = (typeof(sourceData.getValue) == "function");
+		var dataMap = (batchSet.data || {});
+		var hasGetValueFunc = $.isFunction(sourceData.getValue);
 		
 		var sourceValueContextArgs = [ "place-holder-for-source-value" ];
 		sourceValueContextArgs = sourceValueContextArgs.concat($.isArray(sourceValueContext) ? sourceValueContext : [ sourceValueContext ]);
 		
-		for(var name in map)
+		for(var name in dataMap)
 		{
 			var dataValue = (hasGetValueFunc ? sourceData.getValue(name)
 					: dashboardFactory.getPropertyPathValue(sourceData, name));
 			
-			var indexes = map[name];
+			var indexes = dataMap[name];
+			
 			if(!$.isArray(indexes))
 				indexes = [ indexes ];
 			
 			for(var i=0; i<indexes.length; i++)
 			{
 				var indexObj = indexes[i];
-				var indexObjType = typeof(indexObj);
 				
 				var chartIdx = 0;
 				var dataSetIdx = 0;
 				var param = 0;
 				var paramValue = null;
 				
-				if(indexObjType == "number" || indexObjType == "string")
+				//参数名/索引号
+				if(chartFactory.isStringOrNumber(indexObj))
 				{
 					param = indexObj;
 					paramValue = dataValue;
 				}
 				else
 				{
-					chartIdx = (indexObj.chart != null ? indexObj.chart : 0);
-					dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : 0);
-					param = (indexObj.param != null ? indexObj.param : 0);
+					chartIdx = (indexObj.chart != null ? indexObj.chart : chartIdx);
+					dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : dataSetIdx);
+					param = (indexObj.param != null ? indexObj.param : param);
 					
 					if(indexObj.value)
 					{
@@ -2669,7 +2672,25 @@
 						paramValue = dataValue;
 				}
 				
-				targetCharts[chartIdx].dataSetParamValue(dataSetIdx, param, paramValue);
+				var targetChart = null;
+				
+				//优先使用batchSet.target中的索引号
+				if(chartFactory.isNumber(chartIdx) && targets[chartIdx] != null)
+				{
+					targetChart = targetCharts[chartIdx];
+				}
+				else
+				{
+					targetChart = this.chartOf(chartIdx);
+					
+					if(targetChart == null)
+						throw new Error("No chart found for : " + chartIdx);
+					
+					if(chartFactory.indexInArray(targetCharts, targetChart) < 0)
+						targetCharts.push(targetChart);
+				}
+				
+				targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
 			}
 		}
 		
