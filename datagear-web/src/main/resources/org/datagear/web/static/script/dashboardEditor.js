@@ -105,13 +105,15 @@
 	//初始化交互控制
 	editor._initInteraction = function()
 	{
+		var thisEditor = this;
+		
 		$(function()
 		{
 			$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR);
 			
 			$(document.body).on("click", function(event)
 			{
-				editor._removeElementClassNewInsert();
+				thisEditor._removeElementClassNewInsert();
 				
 				var target = $(event.target);
 				var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
@@ -119,31 +121,31 @@
 				
 				if(veEle.length == 0)
 				{
-					editor.deselectElement();
+					thisEditor.deselectElement();
 				}
 				else
 				{
-					if(!editor._isSelectableElement(veEle))
+					if(!thisEditor._isSelectableElement(veEle))
 					{
-						editor.deselectElement();
+						thisEditor.deselectElement();
 					}
-					else if(editor._isSelectedElement(veEle))
+					else if(thisEditor._isSelectedElement(veEle))
 					{
 						//再次点击选中元素，不取消选择
 					}
 					else
 					{
-						editor.selectElement(veEle);
+						thisEditor.selectElement(veEle);
 					}
 				}
 				
-				if(editor.clickCallback)
-					editor.clickCallback(event);
+				if(thisEditor.clickCallback)
+					thisEditor.clickCallback(event);
 			});
 			
 			$(window).on("beforeunload", function()
 			{
-				editor.beforeunloadCallback();
+				thisEditor.beforeunloadCallback();
 			});
 		});
 	};
@@ -428,6 +430,7 @@
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectablePrevElement);
+			
 			return false;
 		}
 		
@@ -472,6 +475,7 @@
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableChildElement);
+			
 			return false;
 		}
 		
@@ -504,6 +508,7 @@
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableParentElement);
+			
 			return false;
 		}
 		
@@ -520,7 +525,8 @@
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableParentElement);
-			return;
+			
+			return false;
 		}
 		
 		return this.selectElement(target);
@@ -707,11 +713,12 @@
 			return false;
 		
 		var canInsert = true;
+		var thisEditor = this;
 		
 		//只有还未插入任何可选择元素时，才可以插入填满父容器元素
 		insertParentEle.children().each(function()
 		{
-			if(editor._isSelectableElement($(this)))
+			if(thisEditor._isSelectableElement($(this)))
 				canInsert = false;
 		});
 		
@@ -995,7 +1002,7 @@
 		if(!this.isImage(ele))
 		{
 			this.tipInfo(i18n.imgEleRequired);
-			return;
+			return false;
 		}
 		
 		var eleStyle = { width: imgAttr.width, height: imgAttr.height };
@@ -1080,7 +1087,7 @@
 		if(!this.isHyperlink(ele))
 		{
 			this.tipInfo(i18n.hyperlinkEleRequired);
-			return;
+			return false;
 		}
 		
 		this._setElementText(ele, (hyperlinkAttr.content || hyperlinkAttr.href || ""));
@@ -1169,7 +1176,7 @@
 		if(!this.isVideo(ele))
 		{
 			this.tipInfo(i18n.videoEleRequired);
-			return;
+			return false;
 		}
 		
 		var eleStyle = { width: videoAttr.width, height: videoAttr.height };
@@ -1286,7 +1293,7 @@
 		if(!this.isLabel(ele))
 		{
 			this.tipInfo(i18n.labelEleRequired);
-			return;
+			return false;
 		}
 		
 		this._setElementText(ele, (labelAttr.content || ""));
@@ -1335,7 +1342,7 @@
 		
 		//图表元素内部不允许再插入图表元素
 		if(!this.checkInsertChart(insertType, refEle))
-			return;
+			return false;
 		
 		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
@@ -1407,7 +1414,7 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkBindChart(ele))
-			return;
+			return false;
 		
 		if(this.isChartElement(ele))
 		{
@@ -1449,7 +1456,7 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkUnbindChart(ele))
-			return;
+			return false;
 		
 		this.dashboard.removeChart(ele);
 		this._removeElementAttr(ele, chartFactory.elementAttrConst.WIDGET);
@@ -1536,7 +1543,7 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementText(ele))
-			return;
+			return false;
 		
 		this._setElementText(ele, text);
 	};
@@ -1611,7 +1618,7 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementAttr(ele))
-			return;
+			return false;
 		
 		if(chartFactory.isNullOrEmpty(value))
 		{
@@ -1668,22 +1675,33 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkDeleteElement(ele))
-			return;
+			return false;
 		
-		var iframeEle = this._editElement(ele);
+		var editEle = this._editElement(ele);
 		
 		//应先删除元素包含的所有图表
 		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
 		chartEles.each(function()
 		{
-			editor.dashboard.removeChart(this);
+			thisEditor.dashboard.removeChart(this);
 		});
 		
 		var selEle = (this._isSelectedElement(ele) ? ele : this._selectedElement(ele));
 		this.deselectElement(selEle);
 		
+		//删除后默认选中临近元素
+		if(!this.selectNextElement(ele, false))
+		{
+			if(!this.selectPrevElement(ele, false))
+			{
+				this.selectParentElement(ele, false);
+			}
+		}
+		
 		ele.remove();
-		iframeEle.remove();
+		editEle.remove();
 		
 		this.changeFlag(true);
 	};
@@ -1714,7 +1732,7 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementStyle(ele))
-			return;
+			return false;
 		
 		var so = this._spitStyleAndOption(styleObj);
 		
@@ -1722,18 +1740,20 @@
 		this._setElementClass(ele, so.option.className);
 		
 		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
 		chartEles.each(function()
 		{
 			if(so.option.syncChartTheme)
 			{
 				var thisEle = $(this);
-				var chartTheme = editor._evalElementChartThemeByStyleObj(thisEle, ele, so.style);
-				editor.setElementChartTheme(chartTheme, thisEle);
+				var chartTheme = thisEditor._evalElementChartThemeByStyleObj(thisEle, ele, so.style);
+				thisEditor.setElementChartTheme(chartTheme, thisEle);
 			}
 			else
 			{
-				var renderedChart = editor.dashboard.renderedChart(this);
-				editor._resizeChart(renderedChart);
+				var renderedChart = thisEditor.dashboard.renderedChart(this);
+				thisEditor._resizeChart(renderedChart);
 			}
 		});
 	};
@@ -1889,16 +1909,18 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementChartTheme(ele))
-			return;
+			return false;
 		
 		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
 		chartEles.each(function()
 		{
 			var thisEle = $(this);
 			
-			editor._setElementChartTheme(thisEle, chartTheme);
-			var chart = editor.dashboard.renderedChart(thisEle);
-			editor._reRenderChart(chart);
+			thisEditor._setElementChartTheme(thisEle, chartTheme);
+			var chart = thisEditor.dashboard.renderedChart(thisEle);
+			thisEditor._reRenderChart(chart);
 		});
 	};
 	
@@ -2070,7 +2092,7 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementChartAttrValues(ele))
-			return;
+			return false;
 		
 		var chart = this.dashboard.renderedChart(ele);
 		var attrValuesOrigin = (chart.attrValuesOrigin() || {});
@@ -2133,16 +2155,18 @@
 		ele = this._currentElement(ele, true);
 		
 		if(!this.checkSetElementChartOptions(ele))
-			return;
+			return false;
 		
 		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
 		chartEles.each(function()
 		{
 			var thisEle = $(this);
 			
-			editor._setElementChartOptions(thisEle, chartOptionsStr);
-			var chart = editor.dashboard.renderedChart(thisEle);
-			editor._reRenderChart(chart);
+			thisEditor._setElementChartOptions(thisEle, chartOptionsStr);
+			var chart = thisEditor.dashboard.renderedChart(thisEle);
+			thisEditor._reRenderChart(chart);
 		});
 	};
 	
@@ -2577,10 +2601,12 @@
 		
 		if(children.length < 1)
 			return;
+		
+		var thisEditor = this;
 			
 		children.each(function()
 		{
-			editor._addVisualEditIdAttr($(this));
+			thisEditor._addVisualEditIdAttr($(this));
 		});
 	};
 	
@@ -2887,7 +2913,7 @@
 			
 			for(var i=0; i<a.length; i++)
 			{
-				if(!editor._deepEqualsForJson(a[i], b[i]))
+				if(!this._deepEqualsForJson(a[i], b[i]))
 					return false;
 			}
 			
@@ -2900,7 +2926,7 @@
 			
 			for(var p in a)
 			{
-				if(!editor._deepEqualsForJson(a[p], b[p]))
+				if(!this._deepEqualsForJson(a[p], b[p]))
 					return false;
 			}
 			
