@@ -1988,7 +1988,7 @@
 		var re = (chartFactory.isNumber(dataSetBind) ? this.dataSetBindAt(dataSetBind) : dataSetBind);
 		
 		if(!nullable && re == null)
-			throw new Error("DataSetBind not found for : " + dataSetBind);
+			throw new Error("no dataSetBind found for : " + dataSetBind);
 		
 		return re;
 	};
@@ -2296,7 +2296,7 @@
 		}
 		
 		if(nonEmpty && re.length == 0)
-			throw new Error("DataSetField with '"+dataSignName+"' sign required");
+			throw new Error("no dataSetField found for sign '"+dataSignName+"'");
 		
 		return re;
 	};

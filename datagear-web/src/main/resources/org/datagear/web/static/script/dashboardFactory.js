@@ -2203,14 +2203,14 @@
 		element = chartFactory.toJqueryObj(element);
 		
 		if(this._loadingChartElement(element))
-			throw new Error("The element is loading chart");
+			throw new Error("the element is loading chart");
 		
 		if(this.renderedChart(element) != null)
-			throw new Error("The element has been rendered as chart");
+			throw new Error("the element has been rendered as chart");
 		
 		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
 		if(this.chartOf(element) != null)
-			throw new Error("There is a chart for this element");
+			throw new Error("there is a chart on this element");
 		
 		if(!chartFactory.isString(chartWidgetId))
 		{
@@ -2292,14 +2292,14 @@
 		for(var i=0; i<element.length; i++)
 		{
 			if(this._loadingChartElement(element[i]))
-				throw new Error("The "+i+"-th element is loading chart");
+				throw new Error("the "+i+"-th element is loading chart");
 			
 			if(this.renderedChart(element[i]) != null)
-				throw new Error("The "+i+"-th element has been rendered as chart");
+				throw new Error("the "+i+"-th element has been rendered as chart");
 			
 			//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
 			if(this.chartOf(element[i]) != null)
-				throw new Error("There is a chart on the "+i+"-th element");
+				throw new Error("there is a chart on the "+i+"-th element");
 		}
 		
 		if(!chartFactory.isString(chartWidgetId) && !$.isArray(chartWidgetId))
@@ -2623,7 +2623,7 @@
 			targetCharts[i] = this.chartOf(targets[i]);
 			
 			if(targetCharts[i] == null)
-				throw new Error("No chart found for : " + targets[i]);
+				throw new Error("no chart found for : " + targets[i]);
 		}
 		
 		var dataMap = (batchSet.data || {});
@@ -2684,7 +2684,7 @@
 					targetChart = this.chartOf(chartIdx);
 					
 					if(targetChart == null)
-						throw new Error("No chart found for : " + chartIdx);
+						throw new Error("no chart found for : " + chartIdx);
 					
 					if(chartFactory.indexInArray(targetCharts, targetChart) < 0)
 						targetCharts.push(targetChart);
@@ -2709,7 +2709,7 @@
 	{
 		//参考org.datagear.web.controller.ServerTimeJsController.SERVERTIME_JS_VAR
 		if(global.DATAGEAR_SERVER_TIME == null)
-			throw new Error("Get current server date is not supported");
+			throw new Error("get current server date is not supported");
 		
 		var cct = chartFactory.currentDateMs();
 		var cst = global.DATAGEAR_SERVER_TIME + (cct - dashboardFactory.LOAD_TIME);
@@ -3356,7 +3356,7 @@
 				var name = names[j];
 				
 				if(ukChartMapNames[name])
-					throw new Error("Duplicate built-in chart map name : " + name);
+					throw new Error("duplicate built-in chart map name : " + name);
 				
 				ukChartMapNames[name] = true;
 				
@@ -3365,7 +3365,7 @@
 			}
 			
 			if(!adcodeInNames)
-				throw new Error("The adcode ["+cm.adcode+"] must be added to [names]");
+				throw new Error("the adcode ["+cm.adcode+"] must be added to [names]");
 			
 			builtinChartMaps.push(cm);
 		}
