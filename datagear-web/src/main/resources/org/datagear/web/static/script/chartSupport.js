@@ -7751,7 +7751,7 @@
 			//是否以flex布局展示标签
 			//弹性布局：true 是、居中间隔；false 否；"around" 居中间隔；"start" 左对齐；"end" 右对齐；"center" 居中；"between" 贴边间隔； 
 			flex: false,
-			//是否标签值在前
+			//是否标签值在标签名之前展示
 			valueFirst: false,
 			//是否隐藏标签名
 			hideName: false,
