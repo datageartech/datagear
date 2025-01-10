@@ -1608,7 +1608,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='textLabel' /> <label>",
+				label: "<@spring.message code='textElement' /> <label>",
 				insertType: insertType,
 				class: "ve-panel-show-control textElementShown",
 				parentLabelPath: parentLabelPath,
