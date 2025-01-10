@@ -756,20 +756,27 @@ page_palette.ftl
 					<div class="field-input col-12">
 						<div id="${pid}veChartThemeGraphColors" class="">
 							<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphColors" :key="gcIdx">
-								<div class="flex mb-1">
-									<p-inputtext v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
-										class="input flex-grow-1 mr-1" name="graphColors">
-									</p-inputtext>
-									<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphColors[gcIdx]}" class="palette-btn surface-border mr-1"
-										@click="showPalettePanel($event, pm.vepms.chartTheme.graphColors, gcIdx)"></p-button>
-									<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-										@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
-									</p-button>
+								<div class="flex mb-1 gap-2">
+									<div class="flex-grow-1 flex">
+										<p-inputtext v-model="pm.vepms.chartTheme.graphColors[gcIdx]" type="text"
+											class="input flex-grow-1 mr-1" name="graphColors">
+										</p-inputtext>
+										<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphColors[gcIdx]}" class="palette-btn surface-border"
+											@click="showPalettePanel($event, pm.vepms.chartTheme.graphColors, gcIdx)"></p-button>
+									</div>
+									<div class="flex gap-1">
+										<p-button type="button" icon="pi pi-plus" severity="secondary"
+											@click="onVeChartThemeInsertGraphColor($event, gcIdx)">
+										</p-button>
+										<p-button type="button" icon="pi pi-minus" severity="danger"
+											@click="onVeChartThemeRemoveGraphColor($event, gcIdx)">
+										</p-button>
+									</div>
 								</div>
 							</div>
 						</div>
 						<div class="mt-1">
-							<p-button type="button" icon="pi pi-plus" @click="onVeChartThemeAddGraphColor"></p-button>
+							<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onVeChartThemeAddGraphColor"></p-button>
 						</div>
 					</div>
 				</div>
@@ -781,20 +788,27 @@ page_palette.ftl
 					<div class="field-input col-12">
 						<div id="${pid}veChartThemeGraphRangeColors" class="">
 							<div v-for="(gc, gcIdx) in pm.vepms.chartTheme.graphRangeColors" :key="gcIdx">
-								<div class="flex mb-1">
-									<p-inputtext v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
-										class="input flex-grow-1 mr-1" name="graphRangeColors">
-									</p-inputtext>
-									<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphRangeColors[gcIdx]}" class="palette-btn surface-border mr-1"
-										@click="showPalettePanel($event, pm.vepms.chartTheme.graphRangeColors, gcIdx)"></p-button>
-									<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-										@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
-									</p-button>
+								<div class="flex mb-1 gap-2">
+									<div class="flex-grow-1 flex">
+										<p-inputtext v-model="pm.vepms.chartTheme.graphRangeColors[gcIdx]" type="text"
+											class="input flex-grow-1 mr-1" name="graphRangeColors">
+										</p-inputtext>
+										<p-button type="button" :style="{'background-color': pm.vepms.chartTheme.graphRangeColors[gcIdx]}" class="palette-btn surface-border"
+											@click="showPalettePanel($event, pm.vepms.chartTheme.graphRangeColors, gcIdx)"></p-button>
+									</div>
+									<div class="flex gap-1">
+										<p-button type="button" icon="pi pi-plus" severity="secondary"
+											@click="onVeChartThemeInsertGraphRangeColor($event, gcIdx)">
+										</p-button>
+										<p-button type="button" icon="pi pi-minus" severity="danger"
+											@click="onVeChartThemeRemoveGraphRangeColor($event, gcIdx)">
+										</p-button>
+									</div>
 								</div>
 							</div>
 						</div>
 						<div class="mt-1">
-							<p-button type="button" icon="pi pi-plus" @click="onVeChartThemeAddGraphRangeColor"></p-button>
+							<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onVeChartThemeAddGraphRangeColor"></p-button>
 						</div>
 					</div>
 				</div>
@@ -2809,10 +2823,24 @@ page_palette.ftl
 				chartTheme.graphRangeColors.push("");
 			},
 			
+			onVeChartThemeInsertGraphColor: function(e, idx)
+			{
+				var chartTheme = pm.vepms.chartTheme;
+				//不在idx+1位置插入，这样无法在第一个之前插入
+				chartTheme.graphColors.splice(idx, 0, "");
+			},
+			
 			onVeChartThemeRemoveGraphColor: function(e, idx)
 			{
 				var chartTheme = pm.vepms.chartTheme;
 				chartTheme.graphColors.splice(idx, 1);
+			},
+
+			onVeChartThemeInsertGraphRangeColor: function(e, idx)
+			{
+				var chartTheme = pm.vepms.chartTheme;
+				//不在idx+1位置插入，这样无法在第一个之前插入
+				chartTheme.graphRangeColors.splice(idx, 0, "");
 			},
 			
 			onVeChartThemeRemoveGraphRangeColor: function(e, idx)
