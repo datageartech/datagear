@@ -392,7 +392,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veHxtitleContent" v-model="pm.vepms.hxtitle.content"
-							class="input w-full" name="content" autofocus>
+							class="input w-full" name="content" required autofocus>
 						</p-textarea>
 					</div>
 				</div>
@@ -437,7 +437,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veTextElementContent" v-model="pm.vepms.textElement.content"
-							class="input w-full" style="height:20vh;" name="content" autofocus>
+							class="input w-full" style="height:20vh;" name="content" required autofocus>
 						</p-textarea>
 					</div>
 				</div>
@@ -462,7 +462,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veImageSrc" v-model="pm.vepms.image.src" type="text"
-							class="input w-full" name="src" autofocus>
+							class="input w-full" name="src" required autofocus>
 						</p-inputtext>
 					</div>
 				</div>
@@ -509,7 +509,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veHyperlinkHref" v-model="pm.vepms.hyperlink.href" type="text"
-							class="input w-full" name="href" autofocus>
+							class="input w-full" name="href" required autofocus>
 						</p-inputtext>
 					</div>
 				</div>
