@@ -670,7 +670,7 @@
 		ele = this._currentElement(ele, true);
 		var parent = ele.parent();
 		
-		return this._isDisplayGrid(parent.css("display"));
+		return this._isDisplayGrid(parent);
 	};
 	
 	/**
@@ -683,7 +683,7 @@
 		ele = this._currentElement(ele, true);
 		var parent = ele.parent();
 		
-		return this._isDisplayFlex(parent.css("display"));
+		return this._isDisplayFlex(parent);
 	};
 	
 	/**
@@ -879,7 +879,7 @@
 		
 		for(var i=0; i<items; i++)
 		{
-			var itemDiv = $("<div style=\"padding:1rem 2rem;\"></div>");
+			var itemDiv = $("<div style=\"padding:1rem;\"></div>");
 			this._insertElement(div, itemDiv, "append");
 		}
 		
@@ -916,8 +916,12 @@
 		
 		if(insertParentEle.is("body"))
 			styleStr = "width:100%;height:100px;";
+		else if(this._isDisplayGrid(insertParentEle))
+			styleStr = "padding:1rem;";
+		else if(this._isDisplayFlex(insertParentEle))
+			styleStr = "padding:1rem;";
 		else
-			styleStr = "width:100px;height:100px;";
+			styleStr = "width:5em;height:3em;";
 		
 		div.attr("style", styleStr);
 		
@@ -2746,6 +2750,10 @@
 		},
 		options);
 		
+		var bgColorNew = chartFactory.parseColor(options.selectedBorderColor);
+		bgColorNew.a = 0.1;
+		bgColorNew = chartFactory.colorToHexStr(bgColorNew, true);
+		
 		chartFactory.styleSheetText("dg-show-ve-style",
 			  "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" *["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]{\n"
@@ -2760,6 +2768,7 @@
 			+ "."+BODY_CLASS_VISUAL_EDITOR+" ."+ELEMENT_CLASS_NEW_INSERT+",\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_NEW_INSERT+"{\n"
 			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
+			+ "  background-color: " + bgColorNew + ";"
 			+ "\n}");
 	};
 	
@@ -3141,6 +3150,8 @@
 	
 	editor._isDisplayGrid = function(display)
 	{
+		display = this._displayCssValue(display);
+		
 		if(!display)
 			return false;
 		
@@ -3149,10 +3160,26 @@
 	
 	editor._isDisplayFlex = function(display)
 	{
+		display = this._displayCssValue(display);
+		
 		if(!display)
 			return false;
 		
 		return /^(flex|inline-flex)$/i.test(display);
+	};
+	
+	editor._displayCssValue = function(display)
+	{
+		if(!display)
+			return display;
+		
+		//是DOM元素
+		if(!chartFactory.isStringOrNumber(display))
+		{
+			display = display.css("display");
+		}
+		
+		return display;
 	};
 	
 })
