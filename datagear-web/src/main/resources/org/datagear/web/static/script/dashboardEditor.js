@@ -113,8 +113,6 @@
 			
 			$(document.body).on("click", function(event)
 			{
-				thisEditor._removeElementClassNewInsert();
-				
 				var target = $(event.target);
 				var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
 									target.closest("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]"));
@@ -308,12 +306,11 @@
 		if(chartFactory.isString(ele))
 			ele = $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+ele+"']");
 		
-		this._removeElementClassNewInsert();
-		
 		this.deselectElement();
 		
 		if(ele && ele.length > 0)
 		{
+			this._removeElementClassNewInsert(ele);
 			this._selectElement(ele);
 			
 			if(this.selectElementCallback)
@@ -333,8 +330,6 @@
 	editor.deselectElement = function(ele)
 	{
 		ele = this._currentElement(ele, true);
-		
-		this._removeElementClassNewInsert();
 		
 		if(ele.length > 0)
 		{
@@ -363,9 +358,6 @@
 		}
 		
 		tip = (tip == null ? true : tip);
-		
-		this._removeElementClassNewInsert();
-		
 		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
@@ -409,9 +401,6 @@
 		}
 		
 		tip = (tip == null ? true : tip);
-		
-		this._removeElementClassNewInsert();
-		
 		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
@@ -454,9 +443,6 @@
 		}
 		
 		tip = (tip == null ? true : tip);
-		
-		this._removeElementClassNewInsert();
-		
 		ele = this._currentElement(ele);
 		var firstChild = $("> *:first", ele);
 		
@@ -499,9 +485,6 @@
 		}
 		
 		tip = (tip == null ? true : tip);
-		
-		this._removeElementClassNewInsert();
-		
 		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
@@ -2707,13 +2690,9 @@
 		$ele.removeClass(ELEMENT_CLASS_SELECTED);
 	};
 	
-	editor._removeElementClassNewInsert = function()
+	editor._removeElementClassNewInsert = function($ele)
 	{
-		if(this._hasElementClassNewInsert)
-		{
-			$("."+ELEMENT_CLASS_NEW_INSERT).removeClass(ELEMENT_CLASS_NEW_INSERT);
-			this._hasElementClassNewInsert = false;
-		}
+		$ele.removeClass(ELEMENT_CLASS_NEW_INSERT);
 	};
 	
 	editor._isEmptyElement = function(ele)
