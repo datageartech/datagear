@@ -795,7 +795,7 @@
 				this._insertElement(div, $("<div></div>"), "append");
 		}
 		
-		this.insertElement(div, insertType, refEle);
+		this.insertElement(div, insertType, refEle, true, true);
 	};
 	
 	/**
@@ -866,7 +866,7 @@
 			this._insertElement(div, itemDiv, "append");
 		}
 		
-		this.insertElement(div, insertType, refEle);
+		this.insertElement(div, insertType, refEle, true, true);
 	};
 	
 	/**
@@ -908,7 +908,7 @@
 		
 		div.attr("style", styleStr);
 		
-		this.insertElement(div, insertType, refEle);
+		this.insertElement(div, insertType, refEle, true, true);
 	};
 	
 	/**
@@ -1456,12 +1456,14 @@
 	 * @param insertType 可选，插入类型："after"、"before"、"append"、"prepend"，默认为："after"
 	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
 	 * @param sync 可选，是否将插入操作同步至编辑iframe中，默认为：true
+	 * @param highlight 可选，是否为元素添加高亮样式，默认为：false
 	 */
-	editor.insertElement = function(insertEle, insertType, refEle, sync)
+	editor.insertElement = function(insertEle, insertType, refEle, sync, highlight)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
 		sync = (sync == null ? true : sync);
+		highlight = (highlight == null ? false : highlight);
 		
 		if(chartFactory.isString(insertEle))
 			insertEle = $(insertEle);
@@ -1477,10 +1479,11 @@
 			this._insertElement(editEle, insertEleClone, insertType);
 		}
 		
-		insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
-		$("*", insertEle).addClass(ELEMENT_CLASS_NEW_INSERT);
-		
-		this._hasElementClassNewInsert = true;
+		if(highlight)
+		{
+			insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
+			$("*", insertEle).addClass(ELEMENT_CLASS_NEW_INSERT);
+		}
 		
 		this.changeFlag(true);
 	};
