@@ -1562,7 +1562,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='divElement' />",
+				label: "<@spring.message code='divElement' /> <div>",
 				insertType: insertType,
 				parentLabelPath: parentLabelPath,
 				command: function(e)
@@ -1584,7 +1584,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='titleElement' />",
+				label: "<@spring.message code='titleElement' /> <h1>-<h6>",
 				insertType: insertType,
 				class: "ve-panel-show-control hxtitleShown",
 				parentLabelPath: parentLabelPath,
@@ -1608,7 +1608,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='textElement' />",
+				label: "<@spring.message code='textLabel' /> <label>",
 				insertType: insertType,
 				class: "ve-panel-show-control textElementShown",
 				parentLabelPath: parentLabelPath,
@@ -1632,7 +1632,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='image' />",
+				label: "<@spring.message code='image' /> <img>",
 				insertType: insertType,
 				class: "ve-panel-show-control imageShown",
 				parentLabelPath: parentLabelPath,
@@ -1656,7 +1656,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='hyperlink' />",
+				label: "<@spring.message code='hyperlink' /> <a>",
 				insertType: insertType,
 				class: "ve-panel-show-control hyperlinkShown",
 				parentLabelPath: parentLabelPath,
@@ -1680,7 +1680,7 @@
 				}
 			},
 			{
-				label: "<@spring.message code='video' />",
+				label: "<@spring.message code='video' /> <video>",
 				insertType: insertType,
 				class: "ve-panel-show-control videoShown",
 				parentLabelPath: parentLabelPath,

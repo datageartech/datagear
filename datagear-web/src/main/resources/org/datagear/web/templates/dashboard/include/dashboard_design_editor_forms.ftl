@@ -2526,7 +2526,7 @@ page_palette.ftl
 				gridLayout: "<@spring.message code='gridLayout' />",
 				flexLayout: "<@spring.message code='flexLayout' />",
 				hxtitle: "<@spring.message code='titleElement' />",
-				textElement: "<@spring.message code='textElement' />",
+				textElement: "<@spring.message code='textLabel' />",
 				image: "<@spring.message code='image' />",
 				hyperlink: "<@spring.message code='hyperlink' />",
 				video: "<@spring.message code='video' />",
