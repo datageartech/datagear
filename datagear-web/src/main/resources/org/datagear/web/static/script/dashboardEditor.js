@@ -520,7 +520,7 @@
 		if(!$ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID))
 			return false;
 		
-		var tagName = ($ele[0].tagName || "").toLowerCase();
+		var tagName = ($ele[0] && $ele[0].tagName ? $ele[0].tagName : "").toLowerCase();
 		
 		if(chartFactory.isNullOrEmpty(tagName))
 			return false;
@@ -534,10 +534,13 @@
 		if($ele.is(":hidden"))
 			return false;
 		
-		//没有尺寸的也忽略
+		//没有尺寸的不再忽略，因为插入元素没填内容时，元素本身可能没有尺寸，
+		//这样会导致无法选中元素后编辑
+		/*
 		var w = $ele.outerWidth(), h = $ele.outerHeight();
 		if(w == null || w <= 0 || h == null || h <= 0)
 			return false;
+		*/
 		
 		return true;
 	};
