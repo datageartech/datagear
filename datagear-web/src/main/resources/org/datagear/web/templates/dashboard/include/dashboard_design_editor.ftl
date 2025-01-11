@@ -2014,82 +2014,88 @@
 							}
 						},
 						{
-							label: "<@spring.message code='chartTheme' />",
-							class: "ve-panel-show-control chartThemeShown",
-							parentLabelPath: "<@spring.message code='edit' />",
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
+							label: "<@spring.message code='chart' />",
+							items:
+							[
 								{
-									if(!dashboardEditor.checkSetElementChartTheme())
-										return;
-									
-									po.showVeChartThemePanel(function(model)
+									label: "<@spring.message code='chartTheme' />",
+									class: "ve-panel-show-control chartThemeShown",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='chart' />"],
+									command: function(e)
 									{
-										return po.setVeChartTheme(model, false);
+										e.item.commandExec();
 									},
-									dashboardEditor.getElementChartTheme(), this.label);
-								}
-							}
-						},
-						{
-							label: "<@spring.message code='chartOptions' />",
-							class: "ve-panel-show-control chartOptionsShown",
-							parentLabelPath: "<@spring.message code='edit' />",
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkSetElementChartTheme())
+												return;
+											
+											po.showVeChartThemePanel(function(model)
+											{
+												return po.setVeChartTheme(model, false);
+											},
+											dashboardEditor.getElementChartTheme(), this.label);
+										}
+									}
+								},
 								{
-									if(!dashboardEditor.checkSetElementChartOptions())
-										return;
-									
-									po.showVeChartOptionsPanel(function(model)
+									label: "<@spring.message code='chartOptions' />",
+									class: "ve-panel-show-control chartOptionsShown",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='chart' />"],
+									command: function(e)
 									{
-										return po.setVeChartOptions(model, false);
+										e.item.commandExec();
 									},
-									{ value: dashboardEditor.getElementChartOptions() }, false);
-								}
-							}
-						},
-						{
-							label: "<@spring.message code='chartAttribute' />",
-							class: "ve-panel-show-control chartAttrValuesShown",
-							parentLabelPath: "<@spring.message code='edit' />",
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkSetElementChartOptions())
+												return;
+											
+											po.showVeChartOptionsPanel(function(model)
+											{
+												return po.setVeChartOptions(model, false);
+											},
+											{ value: dashboardEditor.getElementChartOptions() }, false);
+										}
+									}
+								},
 								{
-									if(!dashboardEditor.checkSetElementChartAttrValues())
-										return;
-									
-									po.showVeChartAttrValuesPanel(function(model)
+									label: "<@spring.message code='chartAttribute' />",
+									class: "ve-panel-show-control chartAttrValuesShown",
+									parentLabelPath: ["<@spring.message code='edit' />", "<@spring.message code='chart' />"],
+									command: function(e)
 									{
-										return po.setVeElementChartAttrValues(model);
+										e.item.commandExec();
 									},
-									dashboardEditor.getElementChartAttrValues(), this.label);
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkSetElementChartAttrValues())
+												return;
+											
+											po.showVeChartAttrValuesPanel(function(model)
+											{
+												return po.setVeElementChartAttrValues(model);
+											},
+											dashboardEditor.getElementChartAttrValues(), this.label);
+										}
+									}
 								}
-							}
+							]
 						},
 						{
 							label: "<@spring.message code='elementAttribute' />",
