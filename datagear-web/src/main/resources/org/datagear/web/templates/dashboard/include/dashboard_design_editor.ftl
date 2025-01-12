@@ -2216,6 +2216,7 @@
 									commandExec: function()
 									{
 										po.veQuickExecuteMenuItem(this);
+										po.copyPasteContent(null, null, false, false);
 										
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
@@ -2238,6 +2239,7 @@
 									commandExec: function()
 									{
 										po.veQuickExecuteMenuItem(this);
+										po.copyPasteContent(null, null, false, false);
 										
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
@@ -2260,6 +2262,7 @@
 									commandExec: function()
 									{
 										po.veQuickExecuteMenuItem(this);
+										po.copyPasteContent(null, null, false, false);
 										
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
@@ -2282,6 +2285,7 @@
 									commandExec: function()
 									{
 										po.veQuickExecuteMenuItem(this);
+										po.copyPasteContent(null, null, false, false);
 										
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
