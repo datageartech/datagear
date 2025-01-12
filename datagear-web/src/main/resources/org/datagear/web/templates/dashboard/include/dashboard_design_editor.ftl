@@ -1230,8 +1230,6 @@
 		
 		try
 		{
-			po._syncChartTheme = model.syncChartTheme;
-			
 			if(global)
 				dashboardEditor.setGlobalStyle(model);
 			else
@@ -1244,12 +1242,6 @@
 		}
 	};
 	
-	po.convertToVeStyleFormModel = function(styleModel)
-	{
-		styleModel = $.extend({ syncChartTheme: (po._syncChartTheme != null ? po._syncChartTheme : true) }, styleModel);
-		return styleModel;
-	};
-
 	po.setVeEleId = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
@@ -1440,8 +1432,7 @@
 		
 		if(content.type == "style")
 		{
-			var value = po.convertToVeStyleFormModel(content.value);
-			dashboardEditor.setElementStyle(value);
+			dashboardEditor.setElementStyle(content.value);
 		}
 		else if(content.type == "chartTheme")
 		{
@@ -1927,7 +1918,7 @@
 								if(dashboardEditor)
 								{
 									var styleModel = dashboardEditor.getGlobalStyle();
-									styleModel = po.convertToVeStyleFormModel(styleModel);
+									styleModel.syncChartTheme = true;
 									
 									po.showVeStylePanel(function(model)
 									{
@@ -2003,7 +1994,7 @@
 										return;
 									
 									var styleModel = dashboardEditor.getElementStyle();
-									styleModel = po.convertToVeStyleFormModel(styleModel);
+									styleModel.syncChartTheme = false;
 									
 									po.showVeStylePanel(function(model)
 									{
@@ -2225,6 +2216,8 @@
 												return;
 											
 											var copyValue = dashboardEditor.getElementStyle();
+											copyValue.syncChartTheme = false;
+											
 											po.copyPasteContent("style", copyValue);
 										}
 									}

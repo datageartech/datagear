@@ -2299,23 +2299,23 @@ page_palette.ftl
 									</p-inputtext>
 								</div>
 							</div>
-							<div class="field grid mb-0">
-								<label for="${pid}veStyleSyncChartTheme" class="field-label col-12 mb-2"
-									 title="<@spring.message code='dashboard.veditor.style.syncChartTheme.desc' />">
-									<@spring.message code='dashboard.veditor.style.syncChartTheme' />
-								</label>
-								<div class="field-input col-12">
-									<p-selectbutton v-model="pm.vepms.style['syncChartTheme']" :options="pm.booleanOptions"
-										option-label="name" option-value="value" class="input">
-									</p-selectbutton>
-								</div>
-							</div>
 						</div>
 					</p-tabpanel>
 				</p-tabview>
 			</div>
-			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
-				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			<div class="page-form-foot flex-grow-0 pt-2">
+				<div class="grid">
+					<div class="col-4 flex justify-content-end align-items-center">
+						<p-checkbox input-id="${pid}styleSyncChartTheme" v-model="pm.vepms.style['syncChartTheme']" :binary="true"></p-checkbox>
+						<label for="${pid}styleSyncChartTheme" class="ml-1" title="<@spring.message code='dashboard.veditor.style.syncChartTheme.desc' />">
+							<@spring.message code='dashboard.veditor.style.syncChartTheme' />
+						</label>
+					</div>
+					<div class="col-4 flex justify-content-center">
+						<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+					</div>
+					<div class="col-4"></div>
+				</div>
 			</div>
 		</form>
 	</div>
