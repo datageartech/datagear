@@ -1262,6 +1262,29 @@ page_palette.ftl
 								</div>
 							</div>
 							<div class="field grid">
+								<label for="${pid}veStyleOverflow" class="field-label col-12 mb-2"
+									 title="<@spring.message code='dashboard.veditor.style.overflow.desc' />">
+									<@spring.message code='dashboard.veditor.style.overflow' />
+									<span class="text-color-secondary text-sm ml-1">overflow</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleOverflow" v-model="pm.vepms.style['overflow']" type="text"
+										class="help-target input w-full" name="overflow">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+											<@spring.message code='dashboard.veditor.style.overflow.auto' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="hidden">
+											<@spring.message code='dashboard.veditor.style.overflow.hidden' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="visible">
+											<@spring.message code='dashboard.veditor.style.overflow.visible' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
 								<label for="${pid}veStyleBoxSizing" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.boxSizing.desc' />">
 									<@spring.message code='dashboard.veditor.style.boxSizing' />
@@ -2219,6 +2242,34 @@ page_palette.ftl
 										</p-button>
 										<p-button type="button" class="help-src p-button-secondary" help-value="bold">
 											<@spring.message code='dashboard.veditor.style.fontWeight.bold' />
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleFontWeight" class="field-label col-12 mb-2">
+									<@spring.message code='dashboard.veditor.style.lineHeight' />
+									<span class="text-color-secondary text-sm ml-1">line-height</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleFontWeight" v-model="pm.vepms.style['line-height']" type="text"
+										class="help-target input w-full" name="line-height">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="normal">
+											normal
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="1.5em">
+											1.5em
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2em">
+											2em
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="2.5em">
+											2.5em
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="3em">
+											3em
 										</p-button>
 									</div>
 								</div>

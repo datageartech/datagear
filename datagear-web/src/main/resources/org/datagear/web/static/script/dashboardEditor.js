@@ -2463,6 +2463,7 @@
 		"height": true,
 		"padding": true,
 		"margin": true,
+		"overflow": true,
 		"box-sizing": true,
 		"position": true,
 		"left": true,
@@ -2498,7 +2499,8 @@
 		"font-size": true,
 		"text-align": true,
 		"font-weight": true,
-		"font-family": true
+		"font-family": true,
+		"line-height": true
 	};
 	
 	//设置元素文本内容
