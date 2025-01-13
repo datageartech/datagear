@@ -748,7 +748,7 @@
 		{
 			if(isBodyParent)
 			{
-				this._setElementStyle(insertParentEle, this._fillBodyStyleByAbsolute());
+				this._setElementStyleAppend(insertParentEle, this._fillBodyStyleByAbsolute());
 			}
 			
 			styleStr += "width:100%;height:100%;";
@@ -848,7 +848,7 @@
 		{
 			if(isBodyParent)
 			{
-				this._setElementStyle(insertParentEle, this._fillBodyStyleByAbsolute());
+				this._setElementStyleAppend(insertParentEle, this._fillBodyStyleByAbsolute());
 			}
 			
 			styleStr += "width:100%;height:100%;";
@@ -998,7 +998,7 @@
 		var eleStyle = { width: imgAttr.width, height: imgAttr.height };
 		
 		this._setElementAttr(ele, "src", (imgAttr.src || ""));
-		this._setElementStyle(ele, eleStyle);
+		this._setElementStyleAppend(ele, eleStyle);
 	};
 	
 	/**
@@ -1172,7 +1172,7 @@
 		var eleStyle = { width: videoAttr.width, height: videoAttr.height };
 		
 		this._setElementAttr(ele, "src", (videoAttr.src || ""));
-		this._setElementStyle(ele, eleStyle);
+		this._setElementStyleAppend(ele, eleStyle);
 	};
 	
 	/**
@@ -2351,17 +2351,22 @@
 			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue, sync);
 	};
 	
-	editor._setElementStyle = function(ele, styleObj, sync)
+	editor._setElementStyleAppend = function(ele, styleObj, sync)
+	{
+		this._setElementStyle(ele, styleObj, sync, false);
+	};
+	
+	editor._setElementStyle = function(ele, styleObj, sync, strictSet)
 	{
 		styleObj = (styleObj || {});
 		sync = (sync == null ? true : sync);
 		
-		this._setElementStyleNoSync(ele, styleObj);
+		this._setElementStyleNoSync(ele, styleObj, strictSet);
 		
 		if(sync)
 		{
 			var editEle = this._editElement(ele);
-			this._setElementStyleNoSync(editEle, styleObj);
+			this._setElementStyleNoSync(editEle, styleObj, strictSet);
 		}
 		
 		this._reSelectElementIf(ele);
