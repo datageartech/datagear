@@ -1422,6 +1422,44 @@
 		});
 	};
 	
+	po.veEditElementAttribute = function(dashboardEditor)
+	{
+		if(dashboardEditor.isImage())
+		{
+			po.showVeImagePanel(function(model)
+			{
+				return po.updateVeImage(model);
+			},
+			dashboardEditor.getImageAttr());
+		}
+		else if(dashboardEditor.isHyperlink())
+		{
+			po.showVeHyperlinkPanel(function(model)
+			{
+				return po.updateVeHyperlink(model);
+			},
+			dashboardEditor.getHyperlinkAttr());
+		}
+		else if(dashboardEditor.isVideo())
+		{
+			po.showVeVideoPanel(function(model)
+			{
+				return po.updateVeVideo(model);
+			},
+			dashboardEditor.getVideoAttr());
+		}
+		else if(dashboardEditor.isLabel())
+		{
+			po.showVeTextElementPanel(function(model)
+			{
+				return po.updateVeTextElement(model);
+			},
+			dashboardEditor.getLabelAttr());
+		}
+		else
+			$.tipInfo("<@spring.message code='dashboard.opt.edit.eleAttr.eleRequired' />");
+	};
+	
 	po.veEditPasteContent = function(dashboardEditor, content)
 	{
 		if(!content || !content.type || !content.value)
@@ -2089,58 +2127,6 @@
 							]
 						},
 						{
-							label: "<@spring.message code='elementAttribute' />",
-							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown",
-							parentLabelPath: "<@spring.message code='edit' />",
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
-								{
-									if(dashboardEditor.isImage())
-									{
-										po.showVeImagePanel(function(model)
-										{
-											return po.updateVeImage(model);
-										},
-										dashboardEditor.getImageAttr());
-									}
-									else if(dashboardEditor.isHyperlink())
-									{
-										po.showVeHyperlinkPanel(function(model)
-										{
-											return po.updateVeHyperlink(model);
-										},
-										dashboardEditor.getHyperlinkAttr());
-									}
-									else if(dashboardEditor.isVideo())
-									{
-										po.showVeVideoPanel(function(model)
-										{
-											return po.updateVeVideo(model);
-										},
-										dashboardEditor.getVideoAttr());
-									}
-									else if(dashboardEditor.isLabel())
-									{
-										po.showVeTextElementPanel(function(model)
-										{
-											return po.updateVeTextElement(model);
-										},
-										dashboardEditor.getLabelAttr());
-									}
-									else
-										$.tipInfo("<@spring.message code='dashboard.opt.edit.eleAttr.eleRequired' />");
-								}
-							}
-						},
-						{
 							label: "<@spring.message code='textContent' />",
 							class: "ve-panel-show-control textElementShown",
 							parentLabelPath: "<@spring.message code='edit' />",
@@ -2163,6 +2149,25 @@
 										return po.updateVeTextElement(model);
 									},
 									{ content: dashboardEditor.getElementText() });
+								}
+							}
+						},
+						{
+							label: "<@spring.message code='elementAttribute' />",
+							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown",
+							parentLabelPath: "<@spring.message code='edit' />",
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									po.veEditElementAttribute(dashboardEditor);
 								}
 							}
 						},
