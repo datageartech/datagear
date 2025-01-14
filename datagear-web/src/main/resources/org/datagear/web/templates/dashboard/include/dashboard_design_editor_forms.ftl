@@ -2304,17 +2304,17 @@ page_palette.ftl
 				</p-tabview>
 			</div>
 			<div class="page-form-foot flex-grow-0 pt-2">
-				<div class="grid">
-					<div class="col-4 flex justify-content-end align-items-center">
-						<p-checkbox input-id="${pid}styleSyncChartTheme" v-model="pm.vepms.style['syncChartTheme']" :binary="true"></p-checkbox>
+				<div class="flex">
+					<div class="flex-shink-1"  style="flex-basis:50%;">
+					</div>
+					<div class="flex-grow-0 flex-shink-0 flex justify-content-center px-3">
+						<p-button type="submit" label="<@spring.message code='confirm' />" class="white-space-nowrap"></p-button>
+					</div>
+					<div class="flex-shink-1 flex justify-content-start align-items-center" style="flex-basis:50%;"><p-checkbox input-id="${pid}styleSyncChartTheme" v-model="pm.vepms.style['syncChartTheme']" :binary="true"></p-checkbox>
 						<label for="${pid}styleSyncChartTheme" class="ml-1" title="<@spring.message code='dashboard.veditor.style.syncChartTheme.desc' />">
 							<@spring.message code='dashboard.veditor.style.syncChartTheme' />
 						</label>
 					</div>
-					<div class="col-4 flex justify-content-center">
-						<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
-					</div>
-					<div class="col-4"></div>
 				</div>
 			</div>
 		</form>
