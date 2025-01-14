@@ -1849,15 +1849,10 @@
 		
 		if(!chartFactory.isNullOrEmpty(bgColor))
 		{
+			//应忽略透明度
 			var bgColorObj = chartFactory.parseColor(bgColor);
-			
-			//未设透明度、或者透明度大于0.5才同步
-			if(bgColorObj.a == null || bgColorObj.a > 0.5)
-			{
-				//应忽略透明度
-				bgColorObj.a = undefined;
-				styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
-			}
+			bgColorObj.a = undefined;
+			styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
 		}
 		
 		if(!chartFactory.isNullOrEmpty(fontSize))
