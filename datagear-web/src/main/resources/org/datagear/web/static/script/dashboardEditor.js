@@ -64,8 +64,7 @@
 	
 	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
-	var INSERT_ELE_FLAG_START = (editor.INSERT_ELE_FLAG_START = "\n<!--dgInsertFlagStart-->\n");
-	var INSERT_ELE_FLAG_END = (editor.INSERT_ELE_FLAG_END = "\n<!--dgInsertFlagEnd-->\n");
+	var INSERT_ELE_FORMAT_FLAG = (editor.INSERT_ELE_FORMAT_FLAG = "<!--dgInsertFmtFlag-->");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.LOAD_CHART_FOR_EDITOR_PARAM
 	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
@@ -171,21 +170,13 @@
 		var eidRegex1 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']/gi;
 		editBodyHtml = editBodyHtml.replace(eidRegex1, "");
 		
-		//处理插入元素后又删除元素遗留的多余格式符：INSERT_ELE_FLAG_START...INSERT_ELE_FLAG_END
-		var insertFlagRegex0 = /\n\<\!\-\-dgInsertFlagStart\-\-\>\s*\<\!\-\-dgInsertFlagEnd\-\-\>\n/gi;
-		editBodyHtml = editBodyHtml.replace(insertFlagRegex0, "");
+		//处理插入元素后又删除元素遗留的多余格式符：INSERT_ELE_FORMAT_FLAG...INSERT_ELE_FORMAT_FLAG
+		var insertFormatRegex0 = /\<\!\-\-dgInsertFmtFlag\-\-\>(\s*\<\!\-\-dgInsertFmtFlag\-\-\>)+/gi;
+		editBodyHtml = editBodyHtml.replace(insertFormatRegex0, "");
 		
-		//处理连续插入元素时的格式符：INSERT_ELE_FLAG_END...INSERT_ELE_FLAG_START
-		var insertFlagRegex1 = /\n\<\!\-\-dgInsertFlagEnd\-\-\>\s*\<\!\-\-dgInsertFlagStart\-\-\>\n/gi;
-		editBodyHtml = editBodyHtml.replace(insertFlagRegex1, "\n");
-		
-		//处理插入元素时的格式符：INSERT_ELE_FLAG_START
-		var insertFlagRegex2 = /\n*\<\!\-\-dgInsertFlagStart\-\-\>\n/gi;
-		editBodyHtml = editBodyHtml.replace(insertFlagRegex2, "\n");
-		
-		//处理插入元素时的格式符：INSERT_ELE_FLAG_END
-		var insertFlagRegex3 = /\n\<\!\-\-dgInsertFlagEnd\-\-\>\n*/gi;
-		editBodyHtml = editBodyHtml.replace(insertFlagRegex3, "\n");
+		//处理插入元素时的格式符：INSERT_ELE_FORMAT_FLAG
+		var insertFormatRegex1 = /\<\!\-\-dgInsertFmtFlag\-\-\>/gi;
+		editBodyHtml = editBodyHtml.replace(insertFormatRegex1, "");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
@@ -1488,7 +1479,7 @@
 		{
 			var editEle = this._editElement(refEle);
 			var insertEleClone = insertEle.clone();
-			this._insertElement(editEle, insertEleClone, insertType);
+			this._insertElement(editEle, insertEleClone, insertType, true);
 		}
 		
 		if(highlight)
@@ -2614,44 +2605,85 @@
 		});
 	};
 	
-	editor._insertElement = function(refEle, insertEle, insertType)
+	editor._insertElement = function(refEle, insertEle, insertType, isEditHtml)
 	{
+		isEditHtml = (isEditHtml == null ? false : isEditHtml);
+		
+		var eleLevel = this._evalElementLevel(refEle, isEditHtml);
+		
 		if(insertType == "after")
 		{
-			refEle.after(INSERT_ELE_FLAG_START);
+			refEle.after(INSERT_ELE_FORMAT_FLAG);
 			refEle.after(insertEle);
-			refEle.after(INSERT_ELE_FLAG_END);
+			refEle.after("\n" + this._genFormatTabs(eleLevel));
+			refEle.after(INSERT_ELE_FORMAT_FLAG);
 		}
 		else if(insertType == "before")
 		{
-			refEle.before(INSERT_ELE_FLAG_START);
+			refEle.before(INSERT_ELE_FORMAT_FLAG);
+			refEle.before("\n" + this._genFormatTabs(eleLevel));
 			refEle.before(insertEle);
-			refEle.before(INSERT_ELE_FLAG_END);
+			refEle.before(INSERT_ELE_FORMAT_FLAG);
 		}
 		else if(insertType == "append")
 		{
-			refEle.append(INSERT_ELE_FLAG_START);
-			refEle.append(insertEle);
-			refEle.append(INSERT_ELE_FLAG_END);
+			var children = refEle.children();
+			
+			if(this._isEmptyElement(children))
+			{
+				var innerHtml = refEle.prop("innerHTML");
+				var needNewline = (!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n');
+				
+				refEle.append(INSERT_ELE_FORMAT_FLAG);
+				refEle.append((needNewline ? "\n" : "") + this._genFormatTabs(eleLevel+1));
+				refEle.append(insertEle);
+				refEle.append(INSERT_ELE_FORMAT_FLAG);
+				
+				refEle.append("\n" + this._genFormatTabs(eleLevel));
+			}
+			else
+			{
+				this._insertElement($(children[children.length-1]), insertEle, "after", isEditHtml);
+			}
 		}
 		else if(insertType == "prepend")
 		{
-			refEle.prepend(INSERT_ELE_FLAG_END);
+			refEle.prepend(INSERT_ELE_FORMAT_FLAG);
 			refEle.prepend(insertEle);
-			refEle.prepend(INSERT_ELE_FLAG_START);
+			refEle.prepend("\n" + this._genFormatTabs(eleLevel+1));
+			refEle.prepend(INSERT_ELE_FORMAT_FLAG);
+			
+			if(refEle.children().length == 1)
+				refEle.append("\n" + this._genFormatTabs(eleLevel));
 		}
 	};
 	
-	editor._evalElementChildFormatPrefix = function(ele)
+	editor._genFormatTabs = function(count)
 	{
-		var innerHtml = refEle.prop("innerHTML");
+		var re = "";
 		
-		if(!innerHtml)
-			return "";
+		for(var i=0; i<count; i++)
+			re += "\t";
 		
-		//TODO
+		return re;
+	};
+	
+	editor._evalElementLevel = function(ele, isEditHtml)
+	{
+		isEditHtml = (isEditHtml == null ? false : isEditHtml);
 		
-		return "";
+		var level = 0;
+		
+		while(!this._isEmptyElement(ele) && !ele.is("body"))
+		{
+			level += 1;
+			ele = ele.parent();
+		}
+		
+		if(level > 0 && isEditHtml)
+			level -= 1;
+		
+		return level;
 	};
 	
 	editor._trimInsertType = function(refEle, insertType)
