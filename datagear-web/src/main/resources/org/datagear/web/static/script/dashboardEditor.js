@@ -64,7 +64,8 @@
 	
 	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
-	var INSERT_ELE_FORMAT_FLAG = (editor.INSERT_ELE_FORMAT_FLAG = "<!--dg-format-flag-->");
+	var INSERT_ELE_FLAG_START = (editor.INSERT_ELE_FLAG_START = "\n<!--dgInsertFlagStart-->\n");
+	var INSERT_ELE_FLAG_END = (editor.INSERT_ELE_FLAG_END = "\n<!--dgInsertFlagEnd-->\n");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.LOAD_CHART_FOR_EDITOR_PARAM
 	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
@@ -170,13 +171,21 @@
 		var eidRegex1 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']/gi;
 		editBodyHtml = editBodyHtml.replace(eidRegex1, "");
 		
-		//删除插入元素后又删除元素遗留的多余格式符
-		var insertFormatRegex0 = /\n\<\!\-\-dg\-format\-flag\-\-\>\n\s*(\n\<\!\-\-dg\-format\-flag\-\-\>\n)+/gi;
-		editBodyHtml = editBodyHtml.replace(insertFormatRegex0, "\n");
+		//处理插入元素后又删除元素遗留的多余格式符：INSERT_ELE_FLAG_START...INSERT_ELE_FLAG_END
+		var insertFlagRegex0 = /\n\<\!\-\-dgInsertFlagStart\-\-\>\s*\<\!\-\-dgInsertFlagEnd\-\-\>\n/gi;
+		editBodyHtml = editBodyHtml.replace(insertFlagRegex0, "");
 		
-		//删除插入元素时的格式符
-		var insertFormatRegex1 = /\n\<\!\-\-dg\-format\-flag\-\-\>\n/gi;
-		editBodyHtml = editBodyHtml.replace(insertFormatRegex1, "\n");
+		//处理连续插入元素时的格式符：INSERT_ELE_FLAG_END...INSERT_ELE_FLAG_START
+		var insertFlagRegex1 = /\n\<\!\-\-dgInsertFlagEnd\-\-\>\s*\<\!\-\-dgInsertFlagStart\-\-\>\n/gi;
+		editBodyHtml = editBodyHtml.replace(insertFlagRegex1, "\n");
+		
+		//处理插入元素时的格式符：INSERT_ELE_FLAG_START
+		var insertFlagRegex2 = /\n*\<\!\-\-dgInsertFlagStart\-\-\>\n/gi;
+		editBodyHtml = editBodyHtml.replace(insertFlagRegex2, "\n");
+		
+		//处理插入元素时的格式符：INSERT_ELE_FLAG_END
+		var insertFlagRegex3 = /\n\<\!\-\-dgInsertFlagEnd\-\-\>\n*/gi;
+		editBodyHtml = editBodyHtml.replace(insertFlagRegex3, "\n");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
@@ -2609,36 +2618,40 @@
 	{
 		if(insertType == "after")
 		{
+			refEle.after(INSERT_ELE_FLAG_START);
 			refEle.after(insertEle);
-			
-			refEle.after("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
+			refEle.after(INSERT_ELE_FLAG_END);
 		}
 		else if(insertType == "before")
 		{
+			refEle.before(INSERT_ELE_FLAG_START);
 			refEle.before(insertEle);
-			
-			refEle.before("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
+			refEle.before(INSERT_ELE_FLAG_END);
 		}
 		else if(insertType == "append")
 		{
-			var innerHtml = refEle.prop("innerHTML");
-			if(!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n')
-				refEle.append("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
-			
+			refEle.append(INSERT_ELE_FLAG_START);
 			refEle.append(insertEle);
-			
-			refEle.append("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
+			refEle.append(INSERT_ELE_FLAG_END);
 		}
 		else if(insertType == "prepend")
 		{
-			var innerHtml = refEle.prop("innerHTML");
-			if(!innerHtml || innerHtml.charAt(0) != '\n')
-				refEle.prepend("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
-			
+			refEle.prepend(INSERT_ELE_FLAG_END);
 			refEle.prepend(insertEle);
-			
-			refEle.prepend("\n"+INSERT_ELE_FORMAT_FLAG+"\n");
+			refEle.prepend(INSERT_ELE_FLAG_START);
 		}
+	};
+	
+	editor._evalElementChildFormatPrefix = function(ele)
+	{
+		var innerHtml = refEle.prop("innerHTML");
+		
+		if(!innerHtml)
+			return "";
+		
+		//TODO
+		
+		return "";
 	};
 	
 	editor._trimInsertType = function(refEle, insertType)
