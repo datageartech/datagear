@@ -64,7 +64,8 @@
 	
 	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
-	var INSERT_ELE_FORMAT_FLAG = (editor.INSERT_ELE_FORMAT_FLAG = "<!--dgInsertFmtFlag-->");
+	var INSERT_ELE_FORMAT_START = (editor.INSERT_ELE_FORMAT_START = "<!--dgInsertFmtStart-->");
+	var INSERT_ELE_FORMAT_END = (editor.INSERT_ELE_FORMAT_END = "<!--dgInsertFmtEnd-->");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.LOAD_CHART_FOR_EDITOR_PARAM
 	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
@@ -170,13 +171,17 @@
 		var eidRegex1 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']/gi;
 		editBodyHtml = editBodyHtml.replace(eidRegex1, "");
 		
-		//处理插入元素后又删除元素遗留的多余格式符：INSERT_ELE_FORMAT_FLAG...INSERT_ELE_FORMAT_FLAG
-		var insertFormatRegex0 = /\<\!\-\-dgInsertFmtFlag\-\-\>(\s*\<\!\-\-dgInsertFmtFlag\-\-\>)+/gi;
+		//处理插入元素后又删除元素遗留的多个连续格式符：INSERT_ELE_FORMAT_START...INSERT_ELE_FORMAT_END
+		var insertFormatRegex0 = /(\<\!\-\-dgInsertFmtStart\-\-\>\s*\<\!\-\-dgInsertFmtEnd\-\-\>){2,}/gi;
 		editBodyHtml = editBodyHtml.replace(insertFormatRegex0, "");
 		
-		//处理插入元素时的格式符：INSERT_ELE_FORMAT_FLAG
-		var insertFormatRegex1 = /\<\!\-\-dgInsertFmtFlag\-\-\>/gi;
+		//处理插入元素时的格式符：INSERT_ELE_FORMAT_START
+		var insertFormatRegex1 = /\<\!\-\-dgInsertFmtStart\-\-\>/gi;
 		editBodyHtml = editBodyHtml.replace(insertFormatRegex1, "");
+		
+		//处理插入元素时的格式符：INSERT_ELE_FORMAT_END
+		var insertFormatRegex2 = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
+		editBodyHtml = editBodyHtml.replace(insertFormatRegex2, "");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
@@ -2598,7 +2603,7 @@
 			return;
 		
 		var thisEditor = this;
-			
+		
 		children.each(function()
 		{
 			thisEditor._addVisualEditIdAttr($(this));
@@ -2613,17 +2618,13 @@
 		
 		if(insertType == "after")
 		{
-			refEle.after(INSERT_ELE_FORMAT_FLAG);
 			refEle.after(insertEle);
-			refEle.after("\n" + this._genFormatTabs(eleLevel));
-			refEle.after(INSERT_ELE_FORMAT_FLAG);
+			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == "before")
 		{
-			refEle.before(INSERT_ELE_FORMAT_FLAG);
-			refEle.before("\n" + this._genFormatTabs(eleLevel));
 			refEle.before(insertEle);
-			refEle.before(INSERT_ELE_FORMAT_FLAG);
+			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == "append")
 		{
@@ -2631,15 +2632,10 @@
 			
 			if(this._isEmptyElement(children))
 			{
-				var innerHtml = refEle.prop("innerHTML");
-				var needNewline = (!innerHtml || innerHtml.charAt(innerHtml.length-1) != '\n');
-				
-				refEle.append(INSERT_ELE_FORMAT_FLAG);
-				refEle.append((needNewline ? "\n" : "") + this._genFormatTabs(eleLevel+1));
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel+1) + INSERT_ELE_FORMAT_END);
 				refEle.append(insertEle);
-				refEle.append(INSERT_ELE_FORMAT_FLAG);
 				
-				refEle.append("\n" + this._genFormatTabs(eleLevel));
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
 			}
 			else
 			{
@@ -2648,13 +2644,20 @@
 		}
 		else if(insertType == "prepend")
 		{
-			refEle.prepend(INSERT_ELE_FORMAT_FLAG);
-			refEle.prepend(insertEle);
-			refEle.prepend("\n" + this._genFormatTabs(eleLevel+1));
-			refEle.prepend(INSERT_ELE_FORMAT_FLAG);
+			var needTailFormat = false;
 			
-			if(refEle.children().length == 1)
-				refEle.append("\n" + this._genFormatTabs(eleLevel));
+			var children = refEle.children();
+			if(this._isEmptyElement(children))
+			{
+				var innerHtml = refEle.prop("innerHTML");
+				var needTailFormat = (!innerHtml || /\n\s*$/.test(innerHtml) == false);
+			}
+			
+			refEle.prepend(insertEle);
+			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel+1) + INSERT_ELE_FORMAT_END);
+			
+			if(needTailFormat)
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
 		}
 	};
 	
