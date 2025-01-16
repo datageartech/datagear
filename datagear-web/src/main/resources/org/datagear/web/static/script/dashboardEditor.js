@@ -2614,17 +2614,17 @@
 	{
 		isEditHtml = (isEditHtml == null ? false : isEditHtml);
 		
-		var eleLevel = this._evalElementLevel(refEle, isEditHtml);
+		var refEleLevel = this._evalElementLevel(refEle, isEditHtml);
 		
 		if(insertType == "after")
 		{
 			refEle.after(insertEle);
-			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
+			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == "before")
 		{
 			refEle.before(insertEle);
-			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
+			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == "append")
 		{
@@ -2632,14 +2632,21 @@
 			
 			if(this._isEmptyElement(children))
 			{
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel+1) + INSERT_ELE_FORMAT_END);
+				var innerHtml = this._innerHTML(refEle);
+				if(this._isAllEmptyOrInsertFormat(innerHtml))
+				{
+					this._innerHTML(refEle, "");
+				}
+				
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
 				refEle.append(insertEle);
 				
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 			}
 			else
 			{
 				this._insertElement($(children[children.length-1]), insertEle, "after", isEditHtml);
+				return;
 			}
 		}
 		else if(insertType == "prepend")
@@ -2649,16 +2656,39 @@
 			var children = refEle.children();
 			if(this._isEmptyElement(children))
 			{
-				var innerHtml = refEle.prop("innerHTML");
-				var needTailFormat = (!innerHtml || /\n\s*$/.test(innerHtml) == false);
+				var innerHtml = this._innerHTML(refEle);
+				needTailFormat = chartFactory.isNullOrEmpty(innerHtml);
 			}
 			
 			refEle.prepend(insertEle);
-			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel+1) + INSERT_ELE_FORMAT_END);
+			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
 			
 			if(needTailFormat)
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(eleLevel) + INSERT_ELE_FORMAT_END);
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
+		else
+			throw new Error("Unsupported insert type : " + insertType);
+		
+		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
+		if(isEditHtml)
+		{
+			var myInnerHtml = this._innerHTML(insertEle);
+			if(myInnerHtml)
+			{
+				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
+				var toText = this._genFormatTabs(this._evalElementLevel(insertEle, isEditHtml)-1) + INSERT_ELE_FORMAT_END;
+				myInnerHtml = myInnerHtml.replace(fromText, toText);
+				this._innerHTML(insertEle, myInnerHtml);
+			}
+		}
+	};
+	
+	editor._innerHTML = function(ele, html)
+	{
+		if(html === undefined)
+			return ele.prop("innerHTML");
+		else
+			ele.prop("innerHTML", html);
 	};
 	
 	editor._genFormatTabs = function(count)
@@ -2687,6 +2717,20 @@
 			level -= 1;
 		
 		return level;
+	};
+	
+	editor._isAllEmptyOrInsertFormat = function(text)
+	{
+		if(chartFactory.isNullOrEmpty(text))
+			return true;
+		
+		if(/^\s*$/.test(text))
+			return true;
+		
+		if(/^(\s*\<\!\-\-((dgInsertFmtStart)|(dgInsertFmtEnd))\-\-\>\s*)*$/i.test(text))
+			return true;
+		
+		return false;
 	};
 	
 	editor._trimInsertType = function(refEle, insertType)
