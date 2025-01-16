@@ -66,6 +66,7 @@
 	
 	var INSERT_ELE_FORMAT_START = (editor.INSERT_ELE_FORMAT_START = "<!--dgInsertFmtStart-->");
 	var INSERT_ELE_FORMAT_END = (editor.INSERT_ELE_FORMAT_END = "<!--dgInsertFmtEnd-->");
+	var DELETE_ELE_FORMAT_FLAG = (editor.DELETE_ELE_FORMAT_FLAG = "<!--dgDeleteFmtFlag-->");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.LOAD_CHART_FOR_EDITOR_PARAM
 	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
@@ -171,8 +172,8 @@
 		var eidRegex1 = /\s?dg\-visual\-edit\-id\=["'][^"']*["']/gi;
 		editBodyHtml = editBodyHtml.replace(eidRegex1, "");
 		
-		//处理插入元素后又删除元素遗留的多个连续格式符：INSERT_ELE_FORMAT_START...INSERT_ELE_FORMAT_END
-		var insertFormatRegex0 = /(\<\!\-\-dgInsertFmtStart\-\-\>\s*\<\!\-\-dgInsertFmtEnd\-\-\>){2,}/gi;
+		//处理插入元素后又删除元素遗留的格式符：INSERT_ELE_FORMAT_START...INSERT_ELE_FORMAT_END...DELETE_ELE_FORMAT_FLAG
+		var insertFormatRegex0 = /\<\!\-\-dgInsertFmtStart\-\-\>\s*\<\!\-\-dgInsertFmtEnd\-\-\>\s*<\!\-\-dgDeleteFmtFlag\-\-\>/gi;
 		editBodyHtml = editBodyHtml.replace(insertFormatRegex0, "");
 		
 		//处理插入元素时的格式符：INSERT_ELE_FORMAT_START
@@ -182,6 +183,10 @@
 		//处理插入元素时的格式符：INSERT_ELE_FORMAT_END
 		var insertFormatRegex2 = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
 		editBodyHtml = editBodyHtml.replace(insertFormatRegex2, "");
+		
+		//处理删除元素时的格式符：DELETE_ELE_FORMAT_FLAG
+		var deleteFormatRegex0 = /\s*\<\!\-\-dgDeleteFmtFlag\-\-\>/gi;
+		editBodyHtml = editBodyHtml.replace(deleteFormatRegex0, "");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
 		return this._unescapeEditHtml(editedHtml);
@@ -1699,9 +1704,15 @@
 		}
 		
 		ele.remove();
-		editEle.remove();
+		this._deleteEditEle(editEle);
 		
 		this.changeFlag(true);
+	};
+	
+	editor._deleteEditEle = function(editEle)
+	{
+		editEle.before(DELETE_ELE_FORMAT_FLAG);
+		editEle.remove();
 	};
 	
 	/**
@@ -2633,7 +2644,7 @@
 			if(this._isEmptyElement(children))
 			{
 				var innerHtml = this._innerHTML(refEle);
-				if(this._isAllEmptyOrInsertFormat(innerHtml))
+				if(this._isOnlyEmptyOrFormat(innerHtml))
 				{
 					this._innerHTML(refEle, "");
 				}
@@ -2651,19 +2662,23 @@
 		}
 		else if(insertType == "prepend")
 		{
-			var needTailFormat = false;
+			var insertTailFormat = false;
 			
 			var children = refEle.children();
 			if(this._isEmptyElement(children))
 			{
 				var innerHtml = this._innerHTML(refEle);
-				needTailFormat = chartFactory.isNullOrEmpty(innerHtml);
+				if(this._isOnlyEmptyOrFormat(innerHtml))
+				{
+					insertTailFormat = true;
+					this._innerHTML(refEle, "");
+				}
 			}
 			
 			refEle.prepend(insertEle);
 			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
 			
-			if(needTailFormat)
+			if(insertTailFormat)
 				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else
@@ -2719,7 +2734,7 @@
 		return level;
 	};
 	
-	editor._isAllEmptyOrInsertFormat = function(text)
+	editor._isOnlyEmptyOrFormat = function(text)
 	{
 		if(chartFactory.isNullOrEmpty(text))
 			return true;
@@ -2727,7 +2742,7 @@
 		if(/^\s*$/.test(text))
 			return true;
 		
-		if(/^(\s*\<\!\-\-((dgInsertFmtStart)|(dgInsertFmtEnd))\-\-\>\s*)*$/i.test(text))
+		if(/^(\s*\<\!\-\-((dgInsertFmtStart)|(dgInsertFmtEnd)|(dgDeleteFmtFlag))\-\-\>\s*)*$/i.test(text))
 			return true;
 		
 		return false;
