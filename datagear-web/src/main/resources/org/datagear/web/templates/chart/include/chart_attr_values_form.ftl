@@ -66,21 +66,29 @@ page_palette.ftl
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
 						v-else-if="cpa.inputPayload.multiple == pm.ChartPluginAttribute.MultipleRepeat">
 						<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
-							<div class="flex mb-1">
-								<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-									class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
-								</p-treeselect>
-								<p-dropdown :id="'${pid}cpattr_'+cpa.name+'_'+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
-									option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
-								</p-dropdown>
-								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-									@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)"
-									v-if="!pm.chartAttrValuesForm.readonly">
-								</p-button>
+							<div class="flex mb-1 gap-2">
+								<div class="flex-grow-1 flex">
+									<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+										class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
+									</p-treeselect>
+									<p-dropdown :id="'${pid}cpattr_'+cpa.name+'_'+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
+										option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
+									</p-dropdown>
+								</div>
+								<div class="flex gap-1">
+									<p-button type="button" icon="pi pi-plus" severity="secondary"
+										@click="onChartAttrValuesFormInsertValue($event, cpa.name, svIdx)"
+										v-if="!pm.chartAttrValuesForm.readonly">
+									</p-button>
+									<p-button type="button" icon="pi pi-minus" severity="danger"
+										@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)"
+										v-if="!pm.chartAttrValuesForm.readonly">
+									</p-button>
+								</div>
 							</div>
 						</div>
 						<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-							<p-button type="button" icon="pi pi-plus" @click="onChartAttrValuesFormAddValue(cpa.name)"></p-button>
+							<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormAddValue(cpa.name)"></p-button>
 						</div>
 					</div>
 					<div v-else>
@@ -113,20 +121,28 @@ page_palette.ftl
 				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.COLOR">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.inputPayload.multiple">
 						<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
-							<div class="flex mb-1">
-								<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
-									class="input flex-grow-1 mr-1">
-								</p-inputtext>
-								<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
-									@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
-								<p-button type="button" label="<@spring.message code='delete' />" class="p-button-danger"
-									@click="onChartAttrValuesFormRemoveColor($event, cpa.name, colorIdx)"
-									v-if="!pm.chartAttrValuesForm.readonly">
-								</p-button>
+							<div class="flex mb-1 gap-2">
+								<div class="flex-grow-1 flex">
+									<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
+										class="input flex-grow-1 mr-1">
+									</p-inputtext>
+									<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
+										@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
+								</div>
+								<div class="flex gap-1">
+									<p-button type="button" icon="pi pi-plus" severity="secondary"
+										@click="onChartAttrValuesFormInsertColor($event, cpa.name, colorIdx)"
+										v-if="!pm.chartAttrValuesForm.readonly">
+									</p-button>
+									<p-button type="button" icon="pi pi-minus" severity="danger"
+										@click="onChartAttrValuesFormRemoveColor($event, cpa.name, colorIdx)"
+										v-if="!pm.chartAttrValuesForm.readonly">
+									</p-button>
+								</div>
 							</div>
 						</div>
 						<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-							<p-button type="button" icon="pi pi-plus" @click="onChartAttrValuesFormAddColor(cpa.name)"></p-button>
+							<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormAddColor(cpa.name)"></p-button>
 						</div>
 					</div>
 					<div class="flex" v-else>
@@ -680,8 +696,15 @@ page_palette.ftl
 		{
 			var pm = po.vuePageModel();
 			var attrValues = pm.chartAttrValuesForm.attrValues;
-			
 			attrValues[propName].splice(idx, 1);
+		},
+		
+		onChartAttrValuesFormInsertValue: function(e, propName, idx)
+		{
+			var pm = po.vuePageModel();
+			var attrValues = pm.chartAttrValuesForm.attrValues;
+			//不在idx+1位置插入，这样无法在第一个之前插入
+			attrValues[propName].splice(idx, 0, "");
 		},
 		
 		onChartAttrValuesFormAddColor: function(propName)
@@ -700,6 +723,14 @@ page_palette.ftl
 			var pm = po.vuePageModel();
 			var attrValues = pm.chartAttrValuesForm.attrValues;
 			attrValues[propName].splice(idx, 1);
+		},
+		
+		onChartAttrValuesFormInsertColor: function(e, propName, idx)
+		{
+			var pm = po.vuePageModel();
+			var attrValues = pm.chartAttrValuesForm.attrValues;
+			//不在idx+1位置插入，这样无法在第一个之前插入
+			attrValues[propName].splice(idx, 0, "");
 		}
 	});
 })

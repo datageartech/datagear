@@ -839,11 +839,10 @@ label.align-tip{
 	justify-content: flex-start;
 }
 .chart-attr-values-form .page-form-content textarea{
-	height: 5rem;
+	height: 6rem;
 }
 .chart-form-chart-attr-values .chart-attr-values-form .page-form-content{
-	min-width: 40vw;
-    max-width: 60vw;
+	width: 40vw;
 }
 
 .p-dialog .page-dashboard-design{
@@ -908,8 +907,7 @@ label.align-tip{
 	height: calc(90vh - 5rem - 6rem - 4rem);
 }
 .dashboard-form-chart-attr-values .chart-attr-values-form .page-form-content{
-	min-width: 40vw;
-    max-width: 60vw;
+	width: 40vw;
 }
 
 .current-analysis-project-wrapper .ap-name-btn{
