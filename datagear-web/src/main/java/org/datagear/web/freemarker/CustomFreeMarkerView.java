@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.management.domain.User;
+import org.datagear.util.Global;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.AuthenticationUserGetter;
 import org.datagear.web.util.DetectNewVersionScriptResolver;
@@ -114,6 +115,6 @@ public class CustomFreeMarkerView extends FreeMarkerView
 
 	protected String clientCacheCode(HttpServletRequest request)
 	{
-		return "111";
+		return Global.VERSION;
 	}
 }

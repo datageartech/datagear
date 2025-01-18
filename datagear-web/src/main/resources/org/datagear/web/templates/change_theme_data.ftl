@@ -26,6 +26,6 @@
 	{
 		"changeElement": "#styleCssLink",
 		"changeAttr": "href",
-		"changeValue": "${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css"
+		"changeValue": "${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css?v=${clientCacheCode}"
 	}
 ]
