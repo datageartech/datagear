@@ -2375,6 +2375,16 @@ page_palette.ftl
 		return re;
 	};
 	
+	po.veDftGridLayoutModel = function()
+	{
+		var re =
+		{
+			fillParent: false, rowHeightDivide: "avg", rowHeights: [], rowGap: "10px",
+			colWidthDivide: "avg", colWidths: [], columnGap: "10px"
+		};
+		return re;
+	};
+	
 	po.initVePanelHelperSrc = function(form, formModel)
 	{
 		$(form).on("click", ".help-src", function()
@@ -2591,7 +2601,7 @@ page_palette.ftl
 			//可视编辑操作对话框表单模型
 			vepms:
 			{
-				gridLayout: { fillParent: false, rowHeightDivide: "avg", rowHeights: [], colWidthDivide: "avg", colWidths: [] },
+				gridLayout: po.veDftGridLayoutModel(),
 				flexLayout: { fillParent: false },
 				hxtitle: { type: "h1", content: "" },
 				textElement: { content: "" },
@@ -2665,7 +2675,7 @@ page_palette.ftl
 				{
 					if(po.insertVeGridLayout(pm.vepms.gridLayout) !== false)
 					{
-						pm.vepms.gridLayout = { fillParent: false, rowHeightDivide: "avg", rowHeights: [], colWidthDivide: "avg", colWidths: [] };
+						pm.vepms.gridLayout = po.veDftGridLayoutModel();
 						pm.vepss.gridLayoutShown = false;
 					}
 				});
