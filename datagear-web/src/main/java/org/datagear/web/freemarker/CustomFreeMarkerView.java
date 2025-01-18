@@ -48,6 +48,9 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	/** 变量：应用根路径 */
 	public static final String VAR_CONTEXT_PATH = "contextPath";
 
+	/** 变量：客户端缓存码 */
+	public static final String VAR_CLIENT_CACHE_CODE = "clientCacheCode";
+
 	/** 变量：页面ID关键字 */
 	public static final String VAR_PAGE_ID = "pid";
 
@@ -82,6 +85,7 @@ public class CustomFreeMarkerView extends FreeMarkerView
 		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
 		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
 		model.put(VAR_CONTEXT_PATH, WebUtils.getContextPath(request));
+		model.put(VAR_CLIENT_CACHE_CODE, clientCacheCode(request));
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
 		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
 
@@ -106,5 +110,10 @@ public class CustomFreeMarkerView extends FreeMarkerView
 		model.put(VAR_CURRENT_USER, currentUser);
 		model.put(VAR_CONFIG_PROPERTIES, applicationProperties);
 		model.put(VAR_DETECT_NEW_VERSION_RESULT, detectNewVersionScriptResolver.buildIf(request));
+	}
+
+	protected String clientCacheCode(HttpServletRequest request)
+	{
+		return "111";
 	}
 }

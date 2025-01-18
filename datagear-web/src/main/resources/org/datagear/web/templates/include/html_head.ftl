@@ -37,7 +37,7 @@ DetectResult detectNewVersionResult
 var contextPath="${contextPath}";
 </script>
 <#-- 自定义应用根路径后，浏览器无法自动加载系统图标，所以这里明确指定 -->
-<link href="${contextPath}/favicon.ico?v=${Global.VERSION}" type="images/x-icon" rel="shortcut icon" />
+<link href="${contextPath}/favicon.ico?v=${clientCacheCode}" type="images/x-icon" rel="shortcut icon" />
 <link href="${contextPath}/static/lib/primevue@3.45.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
 <link href="${contextPath}/static/lib/primevue@3.45.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeicons@6.0.1/primeicons.css" type="text/css" rel="stylesheet" />
@@ -46,10 +46,10 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/hint/show-hint.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/addon/fold/foldgutter.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/analysis.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/style.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css?v=${Global.VERSION}" type="text/css" rel="stylesheet" id="styleCssLink" />
+<link href="${contextPath}/static/css/analysis.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/style.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/codemirror-5.64.0/custom.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" id="styleCssLink" />
 
 <script src="${contextPath}/static/lib/jquery-3.7.1/jquery-3.7.1.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/jquery.validate.min.js" type="text/javascript"></script>
@@ -78,12 +78,12 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/codemirror-5.64.0/mode/sql/sql.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/util.js?v=${Global.VERSION}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dtbsSourceUrlBuilder.js?v=${Global.VERSION}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/tableMeta.js?v=${Global.VERSION}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/chartFactory.js?v=${Global.VERSION}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/chartSetting.js?v=${Global.VERSION}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dashboardFactory.js?v=${Global.VERSION}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dashboardApiList.js?v=${Global.VERSION}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/util.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/dtbsSourceUrlBuilder.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/tableMeta.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/chartFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/chartSetting.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/dashboardFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/dashboardApiList.js?v=${clientCacheCode}" type="text/javascript"></script>
 ${detectNewVersionResult.script?no_esc}
 </#if>
