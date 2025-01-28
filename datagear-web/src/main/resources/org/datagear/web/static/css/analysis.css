@@ -545,10 +545,27 @@
 }
 
 /*datetimepicker组件扩展样式*/
+.xdsoft_datetimepicker{
+	border-radius: 3px;
+}
+.xdsoft_datetimepicker .xdsoft_datepicker{
+	width: unset;
+}
+.xdsoft_datetimepicker .xdsoft_calendar table{
+	border-collapse: separate;
+	border-spacing: 1px;
+}
 .xdsoft_datetimepicker .xdsoft_calendar td,
 .xdsoft_datetimepicker .xdsoft_calendar th{
 	background: none;
     border-width: 0;
+	border-radius: 3px;
+}
+.xdsoft_datetimepicker .xdsoft_calendar td>div{
+	padding: 7px 9px;
+}
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{
+	border-radius: 3px;
 }
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{
 	background: none;

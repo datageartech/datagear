@@ -701,11 +701,23 @@ label.align-tip{
 	border-color: var(--surface-border);
 	box-shadow: 0px 0px 6px var(--surface-600);
 	-webkit-box-shadow: 0px 0px 6px var(--surface-600);
+	border-radius: 3px;
+}
+.xdsoft_datetimepicker .xdsoft_datepicker{
+	width: unset;
+}
+.xdsoft_datetimepicker .xdsoft_calendar table{
+	border-collapse: separate;
+	border-spacing: 1px;
 }
 /*前景色*/
 .xdsoft_datetimepicker .xdsoft_calendar td,
 .xdsoft_datetimepicker .xdsoft_calendar th{
 	color: var(--text-color);
+	border-radius: 3px;
+}
+.xdsoft_datetimepicker .xdsoft_calendar td>div{
+	padding: 7px 9px;
 }
 /*按钮*/
 .xdsoft_datetimepicker .xdsoft_label i,
@@ -729,6 +741,7 @@ label.align-tip{
 /*时间框*/
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{
 	border-color: var(--surface-border);
+	border-radius: 3px;
 }
 /*时间条目*/
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{
