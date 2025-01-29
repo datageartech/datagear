@@ -172,7 +172,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
 				libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
-				libPrefix + "/echarts-5.5.1/echarts.min.js"));
+				libPrefix + "/echarts-5.6.0/echarts.min.js"));
 
 		if (buildExtraLib)
 		{
