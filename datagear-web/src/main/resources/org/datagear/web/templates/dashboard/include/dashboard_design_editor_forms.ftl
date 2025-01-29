@@ -473,8 +473,31 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veImageWdith" v-model="pm.vepms.image.width" type="text"
-							class="input w-full" name="width">
+							class="help-target input w-full" name="width">
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+								100px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+								300px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="500px">
+								500px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+								30%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+								50%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+								100%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+								auto
+							</p-button>
+						</div>
 					</div>
 				</div>
 				<div class="field grid">
@@ -484,8 +507,31 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veImageHeight" v-model="pm.vepms.image.height" type="text"
-							class="input w-full" name="height">
+							class="help-target input w-full" name="height">
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+								100px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+								300px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="500px">
+								500px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+								30%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+								50%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+								100%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+								auto
+							</p-button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -573,8 +619,28 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veVideoWdith" v-model="pm.vepms.video.width" type="text"
-							class="input w-full" name="width">
+							class="help-target input w-full" name="width">
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+								100px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+								300px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="500px">
+								500px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+								30%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+								50%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+								100%
+							</p-button>
+						</div>
 					</div>
 				</div>
 				<div class="field grid">
@@ -584,8 +650,28 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veVideoHeight" v-model="pm.vepms.video.height" type="text"
-							class="input w-full" name="height">
+							class="help-target input w-full" name="height">
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+								100px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+								300px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="500px">
+								500px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+								30%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+								50%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+								100%
+							</p-button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -2369,8 +2455,28 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veIframeWdith" v-model="pm.vepms.iframe.width" type="text"
-							class="input w-full" name="width">
+							class="help-target input w-full" name="width">
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+								100px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+								300px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="500px">
+								500px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+								30%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+								50%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+								100%
+							</p-button>
+						</div>
 					</div>
 				</div>
 				<div class="field grid">
@@ -2380,8 +2486,28 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veIframeHeight" v-model="pm.vepms.iframe.height" type="text"
-							class="input w-full" name="height">
+							class="help-target input w-full" name="height">
 						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="100px">
+								100px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="300px">
+								300px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="500px">
+								500px
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="30%">
+								30%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="50%">
+								50%
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="100%">
+								100%
+							</p-button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -2434,13 +2560,13 @@ page_palette.ftl
 	
 	po.veDftVideoModel = function()
 	{
-		var re = { width: "100px", height: "100px" };
+		var re = {};
 		return re;
 	};
 	
 	po.veDftIframeModel = function()
 	{
-		var re = { width: "100px", height: "100px" };
+		var re = {};
 		return re;
 	};
 	
@@ -2801,6 +2927,8 @@ page_palette.ftl
 			{
 				var form = po.elementOfId("${pid}veImageForm", document.body);
 				
+				po.initVePanelHelperSrc(form, pm.vepms.image);
+				
 				po.setupSimpleForm(form, pm.vepms.image, function()
 				{
 					if(pm.veshs.image(pm.vepms.image) !== false)
@@ -2830,6 +2958,8 @@ page_palette.ftl
 			onVeVideoPanelShow: function()
 			{
 				var form = po.elementOfId("${pid}veVideoForm", document.body);
+				
+				po.initVePanelHelperSrc(form, pm.vepms.video);
 				
 				po.setupSimpleForm(form, pm.vepms.video, function()
 				{
@@ -3046,6 +3176,8 @@ page_palette.ftl
 			onVeIframePanelShow: function()
 			{
 				var form = po.elementOfId("${pid}veIframeForm", document.body);
+				
+				po.initVePanelHelperSrc(form, pm.vepms.iframe);
 				
 				po.setupSimpleForm(form, pm.vepms.iframe, function()
 				{
