@@ -2345,6 +2345,53 @@ page_palette.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.iframe" append-to="body"
+	position="center" :dismissable-mask="true"
+	v-model:visible="pm.vepss.iframeShown" @show="onVeIframePanelShow">
+	<div class="page page-form">
+		<form id="${pid}veIframeForm" class="flex flex-column">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veIframeSrc" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.iframe.src.desc' />">
+						<@spring.message code='url' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veIframeSrc" v-model="pm.vepms.iframe.src" type="text"
+							class="input w-full" name="src" autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veIframeWdith" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.iframe.width.desc' />">
+						<@spring.message code='width' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veIframeWdith" v-model="pm.vepms.iframe.width" type="text"
+							class="input w-full" name="width">
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veIframeHeight" class="field-label col-12 mb-2"
+						 title="<@spring.message code='dashboard.veditor.iframe.height.desc' />">
+						<@spring.message code='height' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veIframeHeight" v-model="pm.vepms.iframe.height" type="text"
+							class="input w-full" name="height">
+						</p-inputtext>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <p-overlaypanel ref="${pid}optionsOriginPanelEle" append-to="body" id="${pid}optionsOriginPanel" @show="onOptionsOriginPanelShow">
 	<div class="pb-2">
 		<label class="text-lg font-bold">
@@ -2382,6 +2429,18 @@ page_palette.ftl
 			fillParent: false, rowHeightDivide: "avg", rowHeights: [], rowGap: "10px",
 			colWidthDivide: "avg", colWidths: [], columnGap: "10px"
 		};
+		return re;
+	};
+	
+	po.veDftVideoModel = function()
+	{
+		var re = { width: "100px", height: "100px" };
+		return re;
+	};
+	
+	po.veDftIframeModel = function()
+	{
+		var re = { width: "100px", height: "100px" };
 		return re;
 	};
 	
@@ -2496,7 +2555,7 @@ page_palette.ftl
 	{
 		var pm = po.vuePageModel();
 		pm.veshs.video = submitHandler;
-		pm.vepms.video = $.extend(true, {}, model);
+		pm.vepms.video = $.extend(true, po.veDftVideoModel(), model);
 		pm.vepss.videoShown = true;
 	};
 	
@@ -2558,6 +2617,14 @@ page_palette.ftl
 		pm.vepss.eleIdShown = true;
 	};
 	
+	po.showVeIframePanel = function(submitHandler, model)
+	{
+		var pm = po.vuePageModel();
+		pm.veshs.iframe = submitHandler;
+		pm.vepms.iframe = $.extend(true, po.veDftIframeModel(), model);
+		pm.vepss.iframeShown = true;
+	};
+	
 	po.setupResourceEditorForms = function()
 	{
 		po.vueRef("${pid}optionsOriginPanelEle", null);
@@ -2579,7 +2646,8 @@ page_palette.ftl
 				chartAttrValuesShown: false,
 				chartThemeShown: false,
 				styleShown: false,
-				eleIdShown: false
+				eleIdShown: false,
+				iframeShown: false
 			},
 			//可视编辑操作对话框标题
 			vepts:
@@ -2596,7 +2664,8 @@ page_palette.ftl
 				chartOptions: "<@spring.message code='chartAttribute' />",
 				chartTheme: "<@spring.message code='chartTheme' />",
 				style: "<@spring.message code='style' />",
-				eleId: "<@spring.message code='elementId' />"
+				eleId: "<@spring.message code='elementId' />",
+				iframe: "<@spring.message code='iframe' />"
 			},
 			//可视编辑操作对话框表单模型
 			vepms:
@@ -2607,13 +2676,14 @@ page_palette.ftl
 				textElement: { content: "" },
 				image: {},
 				hyperlink: {},
-				video: {},
+				video: po.veDftVideoModel(),
 				dashboardSize: { scale: "auto" },
 				chartOptions: { value: "" },
 				chartAttrValues: {},
 				chartTheme: po.veDftChartThemeModel(),
 				style: {},
-				eleId: {}
+				eleId: {},
+				iframe: po.veDftIframeModel()
 			},
 			//可视编辑操作对话框提交处理函数
 			veshs:
@@ -2627,7 +2697,8 @@ page_palette.ftl
 				chartAttrValues: function(model){},
 				chartTheme: function(model){},
 				style: function(model){},
-				eleId: function(model){}
+				eleId: function(model){},
+				iframe: function(model){}
 			},
 			veGridLayoutPanelShowFillParent: false,
 			veFlexLayoutPanelShowFillParent: false,
@@ -2764,7 +2835,7 @@ page_palette.ftl
 				{
 					if(pm.veshs.video(pm.vepms.video) !== false)
 					{
-						pm.vepms.video = {};
+						pm.vepms.video = po.veDftVideoModel();
 						pm.vepss.videoShown = false;
 					}
 				});
@@ -2968,6 +3039,20 @@ page_palette.ftl
 					{
 						pm.vepms.eleId = {};
 						pm.vepss.eleIdShown = false;
+					}
+				});
+			},
+
+			onVeIframePanelShow: function()
+			{
+				var form = po.elementOfId("${pid}veIframeForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.iframe, function()
+				{
+					if(pm.veshs.iframe(pm.vepms.iframe) !== false)
+					{
+						pm.vepms.iframe = po.veDftIframeModel();
+						pm.vepss.iframeShown = false;
 					}
 				});
 			}

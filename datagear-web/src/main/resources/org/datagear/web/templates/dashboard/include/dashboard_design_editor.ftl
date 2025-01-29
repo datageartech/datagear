@@ -588,6 +588,7 @@
 			dashboardEditor.i18n.imgEleRequired = "<@spring.message code='dashboard.opt.tip.imgEleRequired' />";
 			dashboardEditor.i18n.hyperlinkEleRequired = "<@spring.message code='dashboard.opt.tip.hyperlinkEleRequired' />";
 			dashboardEditor.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
+			dashboardEditor.i18n.iframeEleRequired = "<@spring.message code='dashboard.opt.tip.iframeEleRequired' />";
 			dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
 			dashboardEditor.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
 			dashboardEditor.tipInfo = function(msg)
@@ -1231,6 +1232,43 @@
 		}
 	};
 	
+	po.insertVeIframe = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertIframe(insertType))
+			return false;
+		
+		try
+		{
+			dashboardEditor.insertIframe(model, po.veCurrentInsertType);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
+	po.updateVeIframe = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor)
+			return false;
+		
+		try
+		{
+			dashboardEditor.setIframeAttr(model);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
 	po.veQuickExecute = function(tab)
 	{
 		var pm = po.vuePageModel();
@@ -1426,6 +1464,14 @@
 				return po.updateVeTextElement(model);
 			},
 			dashboardEditor.getLabelAttr());
+		}
+		else if(dashboardEditor.isIframe())
+		{
+			po.showVeIframePanel(function(model)
+			{
+				return po.updateVeIframe(model);
+			},
+			dashboardEditor.getIframeAttr());
 		}
 		else
 			$.tipInfo("<@spring.message code='dashboard.opt.edit.eleAttr.eleRequired' />");
@@ -1673,6 +1719,30 @@
 						po.showVeVideoPanel(function(model)
 						{
 							return po.insertVeVideo(model);
+						});
+					}
+				}
+			},
+			{
+				label: "<@spring.message code='iframe' /> <iframe>",
+				insertType: insertType,
+				class: "ve-panel-show-control iframeShown",
+				parentLabelPath: parentLabelPath,
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
+				{
+					po.veQuickExecuteMenuItem(this);
+					
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						po.showVeIframePanel(function(model)
+						{
+							return po.insertVeIframe(model);
 						});
 					}
 				}
@@ -2099,7 +2169,7 @@
 						},
 						{
 							label: "<@spring.message code='elementAttribute' />",
-							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown",
+							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown iframeShown",
 							parentLabelPath: "<@spring.message code='edit' />",
 							command: function(e)
 							{

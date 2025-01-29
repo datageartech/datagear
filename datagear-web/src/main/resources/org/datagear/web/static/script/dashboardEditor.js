@@ -47,6 +47,7 @@
 	i18n.imgEleRequired = "不是图片元素";
 	i18n.hyperlinkEleRequired = "不是超链接元素";
 	i18n.videoEleRequired = "不是视频元素";
+	i18n.iframeEleRequired = "不是内嵌框体元素";
 	i18n.labelEleRequired = "不是文本标签元素";
 	i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
 	
@@ -1182,6 +1183,93 @@
 		var eleStyle = { width: videoAttr.width, height: videoAttr.height };
 		
 		this._setElementAttr(ele, "src", (videoAttr.src || ""));
+		this._setElementStyleAppend(ele, eleStyle);
+	};
+	
+	/**
+	 * 校验insertIframe操作。
+	 * 
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.checkInsertIframe = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入iframe元素。
+	 * 
+	 * @param iframeAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param insertType 可选，参考insertElement函数的insertType参数
+	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 */
+	editor.insertIframe = function(iframeAttr, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var ele = $("<iframe></iframe>");
+		
+		this.insertElement(ele, insertType, refEle);
+		this.setIframeAttr(iframeAttr, ele);
+	};
+	
+	/**
+	 * 是否是iframe元素。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.isIframe = function(ele)
+	{
+		ele = this._currentElement(ele);
+		return ele.is("iframe");
+	};
+	
+	/**
+	 * 获取iframe元素属性。
+	 * 
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.getIframeAttr = function(ele)
+	{
+		ele = this._currentElement(ele);
+		
+		var attrObj = {};
+		
+		if(!this.isIframe(ele))
+			return attrObj;
+		
+		ele = this._editElement(ele);
+		
+		var eleStyle = this.getElementStyle(ele);
+		
+		attrObj.src = (ele.attr("src") || "");
+		attrObj.width = eleStyle.width;
+		attrObj.height = eleStyle.height;
+		
+		return attrObj;
+	};
+	
+	/**
+	 * 设置iframe元素属性。
+	 * 
+	 * @param iframeAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param ele 可选，参考insertElement函数的refEle参数
+	 */
+	editor.setIframeAttr = function(iframeAttr, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.isIframe(ele))
+		{
+			this.tipInfo(i18n.iframeEleRequired);
+			return false;
+		}
+		
+		var eleStyle = { width: iframeAttr.width, height: iframeAttr.height };
+		
+		this._setElementAttr(ele, "src", (iframeAttr.src || ""));
 		this._setElementStyleAppend(ele, eleStyle);
 	};
 	
