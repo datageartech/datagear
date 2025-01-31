@@ -104,7 +104,8 @@ DetectResult detectNewVersionResult
 	
 	po.changeTheme = function(themeName)
 	{
-		po.getJson("/changeThemeData?theme=" + themeName, function(data)
+		//WebMvcConfigurerConfigSupport.THEME_PARAM
+		po.getJson("/changeThemeData?THEME=" + themeName, function(data)
 		{
 			$.each(data, function(idx, item)
 			{

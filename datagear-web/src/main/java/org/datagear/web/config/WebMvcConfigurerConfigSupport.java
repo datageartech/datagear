@@ -95,6 +95,10 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	/** 系统主题配置基础前缀 */
 	public static final String THEME_SOURCE_BASENAME_PREFIX = "org.datagear.web.theme.";
 
+	public static final String THEME_PARAM = "THEME";
+
+	public static final String LOCALE_PARAM = "LOCALE";
+
 	private CoreConfigSupport coreConfig;
 
 	@Autowired
@@ -136,23 +140,40 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
-		ThemeChangeInterceptor themeChangeInterceptor = createThemeChangeInterceptor();
-		registry.addInterceptor(themeChangeInterceptor).addPathPatterns("/changeThemeData");
+		addThemeChangeInterceptor(registry);
+		addLocaleChangeInterceptor(registry);
+	}
 
+	protected void addThemeChangeInterceptor(InterceptorRegistry registry)
+	{
+		ThemeChangeInterceptor themeChangeInterceptor = createThemeChangeInterceptor();
+		// 拦截所有请求，便于外部系统嵌入任意功能页面时都可以设置主题
+		registry.addInterceptor(themeChangeInterceptor).addPathPatterns("/**");
+	}
+
+	protected void addLocaleChangeInterceptor(InterceptorRegistry registry)
+	{
 		LocaleChangeInterceptor localeChangeInterceptor = createLocaleChangeInterceptor();
-		// 忽略非法语言，避免抛出异常
-		localeChangeInterceptor.setIgnoreInvalidLocale(true);
-		registry.addInterceptor(localeChangeInterceptor).addPathPatterns("/changeLocale");
+		// 拦截所有请求，便于外部系统嵌入任意功能页面时都可以设置语言
+		registry.addInterceptor(localeChangeInterceptor).addPathPatterns("/**");
 	}
 
 	protected ThemeChangeInterceptor createThemeChangeInterceptor()
 	{
-		return new ThemeChangeInterceptor();
+		ThemeChangeInterceptor interceptor = new ThemeChangeInterceptor();
+		interceptor.setParamName(THEME_PARAM);
+
+		return interceptor;
 	}
 
 	protected LocaleChangeInterceptor createLocaleChangeInterceptor()
 	{
-		return new LocaleChangeInterceptor();
+		LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+		interceptor.setParamName(LOCALE_PARAM);
+		// 忽略非法语言，避免抛出异常
+		interceptor.setIgnoreInvalidLocale(true);
+
+		return interceptor;
 	}
 
 	@Override
