@@ -912,13 +912,13 @@
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
 		if(insertParentEle.is("body"))
-			styleStr = "width:100%;height:100px;";
+			styleStr = "width:100%;height:300px;";
 		else if(this._isDisplayGrid(insertParentEle))
 			styleStr = "padding:1rem;";
 		else if(this._isDisplayFlex(insertParentEle))
 			styleStr = "padding:1rem;";
 		else
-			styleStr = "width:5em;height:3em;";
+			styleStr = "width:100%;height:3em;";
 		
 		div.attr("style", styleStr);
 		
