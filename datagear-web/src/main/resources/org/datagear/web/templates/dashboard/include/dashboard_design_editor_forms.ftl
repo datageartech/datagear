@@ -2552,8 +2552,8 @@ page_palette.ftl
 	{
 		var re =
 		{
-			fillParent: false, rowHeightDivide: "avg", rowHeights: [], rowGap: "10px",
-			colWidthDivide: "avg", colWidths: [], columnGap: "10px"
+			fillParent: false, rowHeightDivide: "avg", rowHeights: [], rowGap: "5px",
+			colWidthDivide: "avg", colWidths: [], columnGap: "5px"
 		};
 		return re;
 	};

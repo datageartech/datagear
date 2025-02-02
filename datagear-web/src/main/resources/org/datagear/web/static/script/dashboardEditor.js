@@ -762,12 +762,12 @@
 				this._setElementStyleAppend(insertParentEle, this._fillBodyStyleByAbsolute());
 			}
 			
-			styleStr += "width:100%;height:100%;";
+			styleStr += "height:100%;";
 		}
 		else if(isBodyParent)
-			styleStr += "width:100%;height:300px;";
+			styleStr += "height:300px;";
 		else
-			styleStr += "width:100%;height:100%;";
+			styleStr += "height:100%;";
 		
 		styleStr += "display:grid;";
 		
@@ -862,12 +862,12 @@
 				this._setElementStyleAppend(insertParentEle, this._fillBodyStyleByAbsolute());
 			}
 			
-			styleStr += "width:100%;height:100%;";
+			styleStr += "height:100%;";
 		}
 		else if(isBodyParent)
-			styleStr += "width:100%;height:300px;";
+			styleStr += "height:300px;";
 		else
-			styleStr += "width:100%;height:100%;";
+			styleStr += "height:100%;";
 		
 		styleStr += "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
 						+"justify-content:space-around;align-items:center;align-content:space-around;";
@@ -876,7 +876,7 @@
 		
 		for(var i=0; i<items; i++)
 		{
-			var itemDiv = $("<div style=\"padding:1rem;\"></div>");
+			var itemDiv = $("<div></div>");
 			this._insertElement(div, itemDiv, "append");
 		}
 		
@@ -912,15 +912,16 @@
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
 		
 		if(insertParentEle.is("body"))
-			styleStr = "width:100%;height:300px;";
+			styleStr = "height:300px;";
 		else if(this._isDisplayGrid(insertParentEle))
-			styleStr = "padding:1rem;";
+			styleStr = "";
 		else if(this._isDisplayFlex(insertParentEle))
-			styleStr = "padding:1rem;";
+			styleStr = "";
 		else
-			styleStr = "width:100%;height:3em;";
+			styleStr = "";
 		
-		div.attr("style", styleStr);
+		if(styleStr)
+			div.attr("style", styleStr);
 		
 		this.insertElement(div, insertType, refEle, true, true);
 	};
@@ -2323,7 +2324,7 @@
 	{
 		var re = this._fillParentStyleByAbsolute();
 		//设置默认内边距，贴边效果不佳
-		re.padding = "6px";
+		re.padding = "3px";
 		
 		return re;
 	};
@@ -2895,7 +2896,11 @@
 	
 	editor._removeElementClassNewInsert = function($ele)
 	{
-		$ele.removeClass(ELEMENT_CLASS_NEW_INSERT);
+		while($ele != null && $ele.length > 0)
+		{
+			$ele.removeClass(ELEMENT_CLASS_NEW_INSERT);
+			$ele = $ele.parent();
+		}
 	};
 	
 	editor._isEmptyElement = function(ele)

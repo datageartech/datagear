@@ -26,4 +26,9 @@
 	filter: Alpha(Opacity=100) !important;
 }
 .dg-show-ve .dg-show-ve-new-insert{}
+.dg-show-ve .dg-show-ve-new-insert:empty{
+	/*设置最小尺寸，避免无法点击选中*/
+	min-width: 2rem;
+	min-height: 2rem;
+}
 .dg-show-ve.dg-show-ve-boundary{}
