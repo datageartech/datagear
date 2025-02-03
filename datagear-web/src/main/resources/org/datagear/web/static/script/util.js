@@ -1553,6 +1553,41 @@
 		return JSON.stringify(obj);
 	};
 	
+	$.replaceAllSubStr = function(str, subStr, replacement)
+	{
+		if(str == null)
+			return str;
+		
+		if(str.replaceAll !== undefined)
+		{
+			str = str.replaceAll(subStr, replacement);
+		}
+		else
+		{
+			//兼容旧版浏览器
+			while(str.indexOf(subStr) >= 0)
+				str = str.replace(subStr, replacement);
+		}
+		
+		return str;
+	};
+	
+	$.trimStr = function(str)
+	{
+		if(str == null)
+			return str;
+		
+		if(str.trim !== undefined)
+		{
+			return str.trim();
+		}
+		else
+		{
+			//兼容旧版浏览器
+			return str.replace(/^\s+|\s+$/gm, "");
+		}
+	};
+	
 	/**
 	 * 获取/设置本地存储条目
 	 */
