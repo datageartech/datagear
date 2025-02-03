@@ -99,7 +99,7 @@
 	padding-top: 0.5em;
 }
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button{
-	padding: 0.2em 0.41em;
+	padding: 0.2em 0.5em;
 }
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_length select{
 	margin-left: 0.2em;
@@ -357,26 +357,27 @@
 /*数据集参数值表单*/
 .dg-dspv-form{}
 .dg-dspv-form .dg-dspv-form-content{
-	padding: 0.41em 0.41em;
+	padding: 0.4rem 0.4rem;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item{
-	padding-top: 0.35em;
-	padding-bottom: 0.35em;
+	padding-top: 0.35rem;
+	padding-bottom: 0.35rem;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label{
-	padding-bottom: 0.2em;
+	padding-bottom: 0.2rem;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label label{
 	/*添加这个样式可以使下面的提示图标居中显示*/
 	display: flex;
     align-items: center;
+    padding-right: 0.3rem;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label label[title]::after{
 	display: inline-block;
 	content: "?";
-	margin-left: 0.1em;
+	margin-left: 0.1rem;
 	font-size: 0.8em;
-	margin-top: 0.1em;
+	margin-top: 0.1rem;
 	width: 1em;
 	height: 1em;
 	text-align: center;
@@ -390,7 +391,7 @@
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-checkbox-wrapper{
 	white-space: nowrap;
 	display: inline-block;
-	padding-right: 0.41em;
+	padding-right: 0.5rem;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value input[type=text],
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value textarea,
@@ -400,7 +401,7 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	padding: 0.3em 0.3em;
+	padding: 0.4rem 0.3rem;
 	border-radius: 3px;
 	border-width: 1px;
 	border-style: solid;
@@ -413,14 +414,14 @@
 	border-color: red !important;
 }
 .dg-dspv-form .dg-dspv-form-foot{
-	padding-top: 0.3em;
+	padding-top: 0.3rem;
 	text-align: center;
 }
 .dg-dspv-form button,
 .dg-dspv-form input[type=button],
 .dg-dspv-form input[type=submit],
 .dg-dspv-form .button{
-	padding: 0.41em 2em;
+	padding: 0.5rem 2rem;
 	border-radius: 3px;
 	border-width: 1px;
 	border-style: solid;
@@ -445,7 +446,7 @@
 .dg-chart-setting-box .dg-chart-setting-button{
 	font-size: 0.8em !important;
 	padding: 0.1em 0.2em !important;
-	margin: 0 0 0 0.41em !important;
+	margin: 0 0 0 0.5em !important;
 	border-width: 1px;
 	border-style: solid;
 }
@@ -454,7 +455,7 @@
 	right: 0;
 	border-width: 1px;
 	border-style: solid;
-	padding: 0.41em 0.8em 0.6em 0.8em;
+	padding: 0.5em 0.8em 0.6em 0.8em;
 	user-select: text;
 	-webkit-user-select: text;
 	z-index: 100;
@@ -469,7 +470,7 @@
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
 	font-weight: bold;
 	white-space: nowrap;
-	padding-bottom: 0.41em;
+	padding-bottom: 0.5em;
 	display: flex;
     justify-content: space-between;
     align-items: center;
@@ -479,7 +480,7 @@
 	font-size: 0.9em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
-	padding-top: 0.41em;
+	padding-top: 0.5em;
 	text-align: center;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button,
@@ -654,10 +655,11 @@
 	display: inline;
 }
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item{
-	padding-right: 0.8em;
+	padding-right: 1rem;
 }
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-foot{
-	padding-left: 0.41em;
+	padding-left: 0.5rem;
+	padding-top: 0;
 }
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item .dg-dspv-form-item-label,
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item .dg-dspv-form-item-value{
@@ -674,8 +676,8 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	padding-left: 0.41em;
-	padding-right: 0.41em;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }
 /*三列表单：dg-col-3*/
 .dg-dashboard-form.dg-dspv-form.dg-col-3 .dg-dspv-form-item{
@@ -684,8 +686,8 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	padding-left: 0.41em;
-	padding-right: 0.41em;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }
 /*四列表单：dg-col-4*/
 .dg-dashboard-form.dg-dspv-form.dg-col-4 .dg-dspv-form-item{
@@ -694,8 +696,8 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	padding-left: 0.41em;
-	padding-right: 0.41em;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }
 /*五列表单：dg-col-5*/
 .dg-dashboard-form.dg-dspv-form.dg-col-5 .dg-dspv-form-item{
@@ -704,8 +706,8 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	padding-left: 0.41em;
-	padding-right: 0.41em;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }
 /*条目单行：dg-item-inline*/
 .dg-dashboard-form.dg-dspv-form.dg-item-inline .dg-dspv-form-item .dg-dspv-form-item-label,
