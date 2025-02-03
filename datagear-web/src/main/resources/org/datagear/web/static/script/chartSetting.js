@@ -297,7 +297,10 @@
 				
 				var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
 				var submitHandler = thisForm.data(submitHandlerKey);
-				thisForm.off("submit", submitHandler);
+				
+				if(submitHandler != null)
+					thisForm.off("submit", submitHandler);
+				
 				thisForm.empty();
 			}
 		});

@@ -1398,7 +1398,6 @@
 		this._assertAlive();
 		
 		form = chartFactory.toJqueryObj(form)
-		
 		form.addClass("dg-dashboard-form");
 		
 		if(!config)
@@ -1487,8 +1486,17 @@
 		config.chartTheme = globalTheme;
 		
 		chartFactory.addThemeRefEntity(globalTheme, dashboardFactory._THEME_REF_DASHBOARD_FORM_ID);
-		
 		chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
+	};
+	
+	/**
+	 * 销毁看板表单。
+	 * 
+	 * @param form 看板表单元素
+	 */
+	dashboardBase.destroyForm = function(form)
+	{
+		this._destroyForm(form);
 	};
 	
 	/**
@@ -2789,13 +2797,26 @@
 	{
 		var $forms = $("form[dg-dashboard-form]", document.body);
 		
+		var thisDashboard = this;
 		$forms.each(function()
 		{
-			chartFactory.chartSetting.destroyDataSetParamValueForm(this);
+			thisDashboard._destroyForm(this);
 		});
 		
 		var globalTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
 		chartFactory.removeThemeRefEntity(globalTheme, dashboardFactory._THEME_REF_DASHBOARD_FORM_ID);
+	};
+	
+	dashboardBase._destroyForm = function(form)
+	{
+		try
+		{
+			chartFactory.chartSetting.destroyDataSetParamValueForm(form);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+		}
 	};
 	
 	/**
