@@ -574,7 +574,7 @@
 		if(dashboardEditor && !dashboardEditor._OVERWRITE_BY_CONTEXT)
 		{
 			dashboardEditor._OVERWRITE_BY_CONTEXT = true;
-			po.extendVeDashboardEditor(tab, ifmWindow, dashboardEditor);
+			po.extendVeDashboardEditor(tab, visualEditorIfm, ifmWindow, dashboardEditor);
 		}
 		
 		if(dashboardEditor)
@@ -585,7 +585,7 @@
 		}
 	};
 	
-	po.extendVeDashboardEditor = function(veTab, ifmWindow, dashboardEditor)
+	po.extendVeDashboardEditor = function(veTab, veIframe, ifmWindow, dashboardEditor)
 	{
 		dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
 		dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
@@ -633,9 +633,9 @@
 			tab.veElementPath = [];
 			
 			//保存编辑HTML、变更状态，用于刷新操作后恢复页面状态
-			visualEditorIfm.data("veEditedHtml", this.editedHtml());
-			visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
-			visualEditorIfm.data("veChangeFlag", this.changeFlag());
+			veIframe.data("veEditedHtml", this.editedHtml());
+			veIframe.data("veEnableElementBoundary", this.enableElementBoundary());
+			veIframe.data("veChangeFlag", this.changeFlag());
 		};
 		
 		dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;

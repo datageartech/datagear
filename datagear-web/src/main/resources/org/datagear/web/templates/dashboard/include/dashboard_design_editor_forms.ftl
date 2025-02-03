@@ -2570,7 +2570,7 @@ page_palette.ftl
 		return re;
 	};
 	
-	po.initVePanelHelperSrc = function(form, formModel)
+	po.initVePanelHelperSrc = function(form, formModel, helpValueHandler)
 	{
 		$(form).on("click", ".help-src", function()
 		{
@@ -2578,6 +2578,15 @@ page_palette.ftl
 			var helpValue = ($this.attr("help-value") || "");
 			var helpTarget = po.element(".help-target", $this.closest(".field-input"));
 			var targetName = helpTarget.attr("name");
+			
+			if(helpValueHandler != null)
+			{
+				var newHelpValue = helpValueHandler(form, formModel, helpValue, targetName);
+				if(newHelpValue !== false)
+				{
+					helpValue = newHelpValue;
+				}
+			}
 			
 			if(targetName)
 				$.propPathValue(formModel, targetName, helpValue);
