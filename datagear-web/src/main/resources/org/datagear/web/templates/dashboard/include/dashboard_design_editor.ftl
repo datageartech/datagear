@@ -574,54 +574,7 @@
 		if(dashboardEditor && !dashboardEditor._OVERWRITE_BY_CONTEXT)
 		{
 			dashboardEditor._OVERWRITE_BY_CONTEXT = true;
-			
-			dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
-			dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
-			dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
-			dashboardEditor.i18n.selectedElementRequired="<@spring.message code='dashboard.opt.tip.selectedElementRequired' />";
-			dashboardEditor.i18n.selectedNotChartElement="<@spring.message code='dashboard.opt.tip.selectedNotChartElement' />";
-			dashboardEditor.i18n.selectedNotHasChartElement="<@spring.message code='dashboard.opt.tip.selectedNotHasChartElement' />";
-			dashboardEditor.i18n.noSelectableNextElement="<@spring.message code='dashboard.opt.tip.noSelectableNextElement' />";
-			dashboardEditor.i18n.noSelectablePrevElement="<@spring.message code='dashboard.opt.tip.noSelectablePrevElement' />";
-			dashboardEditor.i18n.noSelectableChildElement="<@spring.message code='dashboard.opt.tip.noSelectableChildElement' />";
-			dashboardEditor.i18n.noSelectableParentElement="<@spring.message code='dashboard.opt.tip.noSelectableParentElement' />";
-			dashboardEditor.i18n.imgEleRequired = "<@spring.message code='dashboard.opt.tip.imgEleRequired' />";
-			dashboardEditor.i18n.hyperlinkEleRequired = "<@spring.message code='dashboard.opt.tip.hyperlinkEleRequired' />";
-			dashboardEditor.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
-			dashboardEditor.i18n.iframeEleRequired = "<@spring.message code='dashboard.opt.tip.iframeEleRequired' />";
-			dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
-			dashboardEditor.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
-			dashboardEditor.tipInfo = function(msg)
-			{
-				$.tipInfo(msg);
-			};
-			dashboardEditor.clickCallback = function()
-			{
-				//关闭可能已显示的面板
-				po.element().click();
-			};
-			dashboardEditor.selectElementCallback = function(ele)
-			{
-				var tab = po.getCurrentEditTab();
-				tab.veElementPath = this.getElementPath(ele);
-			};
-			dashboardEditor.deselectElementCallback = function()
-			{
-				var tab = po.getCurrentEditTab();
-				tab.veElementPath = [];
-			};
-			dashboardEditor.beforeunloadCallback = function()
-			{
-				var tab = po.getCurrentEditTab();
-				tab.veElementPath = [];
-				
-				//保存编辑HTML、变更状态，用于刷新操作后恢复页面状态
-				visualEditorIfm.data("veEditedHtml", this.editedHtml());
-				visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
-				visualEditorIfm.data("veChangeFlag", this.changeFlag());
-			};
-			
-			dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
+			po.extendVeDashboardEditor(tab, ifmWindow, dashboardEditor);
 		}
 		
 		if(dashboardEditor)
@@ -630,6 +583,62 @@
 			dashboardEditor.changeFlag(visualEditorIfm.data("veChangeFlag"));
 			//XXX 这里无法恢复选中状态，因为每次重新加载后可视编辑ID会重新生成
 		}
+	};
+	
+	po.extendVeDashboardEditor = function(veTab, ifmWindow, dashboardEditor)
+	{
+		dashboardEditor.i18n.insertInsideChartOnChartEleDenied="<@spring.message code='dashboard.opt.tip.insertInsideChartOnChartEleDenied' />";
+		dashboardEditor.i18n.selectElementForSetChart="<@spring.message code='dashboard.opt.tip.selectElementForSetChart' />";
+		dashboardEditor.i18n.canEditOnlyTextElement="<@spring.message code='dashboard.opt.tip.canOnlyEditTextElement' />";
+		dashboardEditor.i18n.selectedElementRequired="<@spring.message code='dashboard.opt.tip.selectedElementRequired' />";
+		dashboardEditor.i18n.selectedNotChartElement="<@spring.message code='dashboard.opt.tip.selectedNotChartElement' />";
+		dashboardEditor.i18n.selectedNotHasChartElement="<@spring.message code='dashboard.opt.tip.selectedNotHasChartElement' />";
+		dashboardEditor.i18n.noSelectableNextElement="<@spring.message code='dashboard.opt.tip.noSelectableNextElement' />";
+		dashboardEditor.i18n.noSelectablePrevElement="<@spring.message code='dashboard.opt.tip.noSelectablePrevElement' />";
+		dashboardEditor.i18n.noSelectableChildElement="<@spring.message code='dashboard.opt.tip.noSelectableChildElement' />";
+		dashboardEditor.i18n.noSelectableParentElement="<@spring.message code='dashboard.opt.tip.noSelectableParentElement' />";
+		dashboardEditor.i18n.imgEleRequired = "<@spring.message code='dashboard.opt.tip.imgEleRequired' />";
+		dashboardEditor.i18n.hyperlinkEleRequired = "<@spring.message code='dashboard.opt.tip.hyperlinkEleRequired' />";
+		dashboardEditor.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
+		dashboardEditor.i18n.iframeEleRequired = "<@spring.message code='dashboard.opt.tip.iframeEleRequired' />";
+		dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
+		dashboardEditor.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
+		
+		dashboardEditor.tipInfo = function(msg)
+		{
+			$.tipInfo(msg);
+		};
+		
+		dashboardEditor.clickCallback = function()
+		{
+			//关闭可能已显示的面板
+			po.element().click();
+		};
+		
+		dashboardEditor.selectElementCallback = function(ele)
+		{
+			var tab = po.getCurrentEditTab();
+			tab.veElementPath = this.getElementPath(ele);
+		};
+		
+		dashboardEditor.deselectElementCallback = function()
+		{
+			var tab = po.getCurrentEditTab();
+			tab.veElementPath = [];
+		};
+		
+		dashboardEditor.beforeunloadCallback = function()
+		{
+			var tab = po.getCurrentEditTab();
+			tab.veElementPath = [];
+			
+			//保存编辑HTML、变更状态，用于刷新操作后恢复页面状态
+			visualEditorIfm.data("veEditedHtml", this.editedHtml());
+			visualEditorIfm.data("veEnableElementBoundary", this.enableElementBoundary());
+			visualEditorIfm.data("veChangeFlag", this.changeFlag());
+		};
+		
+		dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
 	};
 	
 	po.visualDashboardEditorByIframe = function(visualEditorIfm)
