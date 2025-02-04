@@ -2009,7 +2009,8 @@
 									{
 										return po.setVeChartTheme(model, true);
 									},
-									dashboardEditor.getGlobalChartTheme(), this.label);
+									dashboardEditor.getGlobalChartTheme(),
+									"<@spring.message code='globalChartTheme' /> dg-chart-theme");
 								}
 							}
 						},
@@ -2032,7 +2033,9 @@
 									{
 										return po.setVeChartOptions(model, true);
 									},
-									{ value: dashboardEditor.getGlobalChartOptions() }, true);
+									{ value: dashboardEditor.getGlobalChartOptions() },
+									"<@spring.message code='globalChartOptions' /> dg-chart-options",
+									true);
 								}
 							}
 						},
@@ -2092,7 +2095,8 @@
 											{
 												return po.setVeChartTheme(model, false);
 											},
-											dashboardEditor.getElementChartTheme(), this.label);
+											dashboardEditor.getElementChartTheme(),
+											"<@spring.message code='chartTheme' /> dg-chart-theme");
 										}
 									}
 								},
@@ -2118,7 +2122,9 @@
 											{
 												return po.setVeChartOptions(model, false);
 											},
-											{ value: dashboardEditor.getElementChartOptions() }, false);
+											{ value: dashboardEditor.getElementChartOptions() },
+											"<@spring.message code='chartOptions' /> dg-chart-options",
+											false);
 										}
 									}
 								},
@@ -2144,7 +2150,7 @@
 											{
 												return po.setVeElementChartAttrValues(model);
 											},
-											dashboardEditor.getElementChartAttrValues(), this.label);
+											dashboardEditor.getElementChartAttrValues());
 										}
 									}
 								}

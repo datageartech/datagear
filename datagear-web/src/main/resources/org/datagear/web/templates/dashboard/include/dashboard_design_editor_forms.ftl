@@ -2710,17 +2710,14 @@ page_palette.ftl
 		pm.vepss.chartAttrValuesShown = true;
 	};
 	
-	po.showVeChartOptionsPanel = function(submitHandler, model, global)
+	po.showVeChartOptionsPanel = function(submitHandler, model, title, global)
 	{
-		global = (global == null ? false : global);
-		
 		var pm = po.vuePageModel();
 		pm.veshs.chartOptions = submitHandler;
 		pm.vepms.chartOptions = $.extend(true, {}, model);
-		pm.vepts.chartOptions = (global ? "<@spring.message code='globalChartOptions' />"
-				: "<@spring.message code='chartOptions' />");
+		if(title)
+			pm.vepts.chartOptions = title;
 		pm.veChartOptionsPanelForGlobal = global;
-		
 		pm.vepss.chartOptionsShown = true;
 	};
 	
@@ -2796,7 +2793,7 @@ page_palette.ftl
 				video: "<@spring.message code='video' />",
 				dashboardSize: "<@spring.message code='dashboardSize' />",
 				chartOptions: "<@spring.message code='chartOptions' />",
-				chartOptions: "<@spring.message code='chartAttribute' />",
+				chartAttrValues: "<@spring.message code='chartAttribute' /> dg-chart-attr-values",
 				chartTheme: "<@spring.message code='chartTheme' />",
 				style: "<@spring.message code='style' />",
 				eleId: "<@spring.message code='elementId' />",
