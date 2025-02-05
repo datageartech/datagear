@@ -2570,7 +2570,7 @@ page_palette.ftl
 		return re;
 	};
 	
-	po.initVePanelHelperSrc = function(form, formModel, helpValueHandler)
+	po.initVePanelHelperSrc = function(form, formModel, helpValueHandler, helpTargetHandler)
 	{
 		$(form).on("click", ".help-src", function()
 		{
@@ -2588,10 +2588,17 @@ page_palette.ftl
 				}
 			}
 			
-			if(targetName)
-				$.propPathValue(formModel, targetName, helpValue);
+			if(helpTargetHandler != null)
+			{
+				helpTargetHandler(form, formModel, helpValue, targetName);
+			}
 			else
-				helpTarget.val(helpValue);
+			{
+				if(targetName)
+					$.propPathValue(formModel, targetName, helpValue);
+				else
+					helpTarget.val(helpValue);
+			}
 			
 			//不自动聚焦了，总会激活浏览器自动补全框，影响操作
 			//helpTarget.focus();
