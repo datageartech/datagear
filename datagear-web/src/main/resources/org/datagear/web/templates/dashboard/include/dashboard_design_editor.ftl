@@ -1440,7 +1440,7 @@
 		});
 	};
 	
-	po.veEditElementAttribute = function(dashboardEditor)
+	po.veEditElementSetting = function(dashboardEditor)
 	{
 		if(dashboardEditor.isImage())
 		{
@@ -2183,7 +2183,7 @@
 							}
 						},
 						{
-							label: "<@spring.message code='elementAttribute' />",
+							label: "<@spring.message code='elementSetting' />",
 							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown iframeShown",
 							parentLabelPath: "<@spring.message code='edit' />",
 							command: function(e)
@@ -2197,7 +2197,7 @@
 								var dashboardEditor = po.visualDashboardEditorByTab();
 								if(dashboardEditor)
 								{
-									po.veEditElementAttribute(dashboardEditor);
+									po.veEditElementSetting(dashboardEditor);
 								}
 							}
 						},
