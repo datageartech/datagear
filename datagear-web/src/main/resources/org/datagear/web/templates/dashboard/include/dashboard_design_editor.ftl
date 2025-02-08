@@ -726,7 +726,7 @@
 				return false;
 			},
 			{
-				modal: false,
+				modal: true,
 				closable: false,
 				styleClass: "dashboard-select-chart-wrapper table-sm",
 				templateHeader: "<span class='p-dialog-title'><@spring.message code='module.chart' /> - <@spring.message code='select' /></span>"

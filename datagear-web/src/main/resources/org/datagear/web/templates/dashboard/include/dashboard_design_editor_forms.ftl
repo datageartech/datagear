@@ -32,8 +32,7 @@ page_palette.ftl
 </form>
 
 <p-dialog :header="pm.vepts.gridLayout" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.gridLayoutShown" @show="onVeGridLayoutPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.gridLayoutShown" @show="onVeGridLayoutPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veGridLayoutForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -297,8 +296,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.flexLayout" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.flexLayoutShown" @show="onVeFlexLayoutPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.flexLayoutShown" @show="onVeFlexLayoutPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veFlexLayoutForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -368,8 +366,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.hxtitle" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.hxtitleShown" @show="onVeHxtitlePanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.hxtitleShown" @show="onVeHxtitlePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veHxtitleForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -426,8 +423,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.textElement" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.textElementShown" @show="onVeTextElementPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.textElementShown" @show="onVeTextElementPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veTextElementForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -450,8 +446,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.image" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.imageShown" @show="onVeImagePanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.imageShown" @show="onVeImagePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veImageForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -543,8 +538,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.hyperlink" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.hyperlinkShown" @show="onVeHyperlinkPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.hyperlinkShown" @show="onVeHyperlinkPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veHyperlinkForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -596,8 +590,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.video" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.videoShown" @show="onVeVideoPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.videoShown" @show="onVeVideoPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veVideoForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -683,8 +676,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.dashboardSize" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.dashboardSizeShown" @show="onVeDashboardSizePanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.dashboardSizeShown" @show="onVeDashboardSizePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veDashboardSizeForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -736,16 +728,14 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.chartAttrValues" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.chartAttrValuesShown" @show="onVeChartAttrValuesPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.chartAttrValuesShown" @show="onVeChartAttrValuesPanelShow">
 	<div class="page page-form dashboard-form-chart-attr-values">
 		<#include "../../chart/include/chart_attr_values_form.ftl">
 	</div>
 </p-dialog>
 
 <p-dialog :header="pm.vepts.chartOptions" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veChartOptionsForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto" style="min-width:40vw;max-width:60vw;">
@@ -775,8 +765,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.chartTheme" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.chartThemeShown" @show="onVeChartThemePanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.chartThemeShown" @show="onVeChartThemePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veChartThemeForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -907,7 +896,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.style" append-to="body"
-	position="center" :dismissable-mask="true" class="dashboard-ve-style-panel"
+	position="center" :modal="true"  class="dashboard-ve-style-panel"
 	v-model:visible="pm.vepss.styleShown" @show="onVeStylePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veStyleForm" class="flex flex-column">
@@ -2408,8 +2397,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.eleId" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.eleIdShown" @show="onVeEleIdPanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.eleIdShown" @show="onVeEleIdPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veEleIdForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
@@ -2432,8 +2420,7 @@ page_palette.ftl
 </p-dialog>
 
 <p-dialog :header="pm.vepts.iframe" append-to="body"
-	position="center" :dismissable-mask="true"
-	v-model:visible="pm.vepss.iframeShown" @show="onVeIframePanelShow">
+	position="center" :modal="true" v-model:visible="pm.vepss.iframeShown" @show="onVeIframePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veIframeForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
