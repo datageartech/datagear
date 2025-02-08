@@ -603,6 +603,7 @@
 		dashboardEditor.i18n.iframeEleRequired = "<@spring.message code='dashboard.opt.tip.iframeEleRequired' />";
 		dashboardEditor.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
 		dashboardEditor.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
+		dashboardEditor.i18n.bindChartElementMustBeDiv = "<@spring.message code='dashboard.opt.tip.bindChartElementMustBeDiv' />";
 		
 		dashboardEditor.tipInfo = function(msg)
 		{

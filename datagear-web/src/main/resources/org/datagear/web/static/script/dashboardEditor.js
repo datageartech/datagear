@@ -50,6 +50,7 @@
 	i18n.iframeEleRequired = "不是内嵌框体元素";
 	i18n.labelEleRequired = "不是文本标签元素";
 	i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
+	i18n.bindChartElementMustBeDiv = "绑定图表的元素必须是<div>元素";
 	
 	//参考org.datagear.web.controller.DashboardVisualController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
 	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
@@ -1485,6 +1486,15 @@
 		
 		if(!this._checkNotEmptyElement(ele))
 			return false;
+		
+		var editEle = this._editElement(ele);
+		
+		//绑定图表的元素需要是div
+		if(this._isEmptyElement(editEle) || !editEle.is("div"))
+		{
+			this.tipInfo(i18n.bindChartElementMustBeDiv);
+			return false;
+		}
 		
 		return true;
 	};
