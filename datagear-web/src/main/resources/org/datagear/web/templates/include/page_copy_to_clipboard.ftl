@@ -23,35 +23,53 @@
 <script>
 (function(po)
 {
-	po.copyToClipboard = function(content)
+	po.copyToClipboard = function(content, btnEle)
 	{
-		po.clipboardContent(content);
-		po.elementOfId("${pid}copyToClipboardBtn").click();
+		btnEle = (btnEle == null ? po.elementOfId("${pid}copyToClipboardBtn") : btnEle);
+		
+		po.clipboardContent(btnEle, content);
+		btnEle.click();
 	};
 	
-	po.clipboardContent = function(content)
+	po.clipboardContent = function(btnEle, content)
 	{
 		if(content === undefined)
-			return (po._clipboardContent || "");
+			return (btnEle.data("COPY_TO_CLIPBOARD_CONTENT") || "");
+		else
+			btnEle.data("COPY_TO_CLIPBOARD_CONTENT", content);
+	};
+	
+	po.initCopyToClipboard = function(containerEle, btnEle, successTip)
+	{
+		containerEle = $(containerEle);
+		btnEle = $(btnEle);
+		successTip = (successTip == null ? true : successTip);
 		
-		po._clipboardContent = content;
+		var clipboard = new ClipboardJS(btnEle[0],
+		{
+			//需要设置container，不然在对话框中打开页面后复制不起作用
+			container: containerEle[0],
+			text: function(trigger)
+			{
+				return po.clipboardContent(btnEle);
+			}
+		});
+		
+		if(successTip)
+		{
+			clipboard.on('success', function(e)
+			{
+				$.tipSuccess(successTip === true ? "<@spring.message code='copyToClipboardSuccess' />" : successTip);
+			});
+		}
+		
+		return clipboard;
 	};
 	
 	po.vueMounted(function()
 	{
-		var clipboard = new ClipboardJS(po.elementOfId("${pid}copyToClipboardBtn")[0],
-		{
-			//需要设置container，不然在对话框中打开页面后复制不起作用
-			container: po.element()[0],
-			text: function(trigger)
-			{
-				return po.clipboardContent();
-			}
-		});
-		clipboard.on('success', function(e)
-		{
-			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
-		});
+		po.initCopyToClipboard(po.element(), po.elementOfId("${pid}copyToClipboardBtn"),
+				"<@spring.message code='copyToClipboardSuccess' />");
 	});
 })
 (${pid});
