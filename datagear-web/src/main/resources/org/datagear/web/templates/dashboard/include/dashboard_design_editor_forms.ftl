@@ -369,7 +369,7 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.hxtitleShown" @show="onVeHxtitlePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veHxtitleForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+			<div class="page-form-content size-30vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}veHxtitleType" class="field-label col-12 mb-2">
 						<@spring.message code='type' />
@@ -389,7 +389,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veHxtitleContent" v-model="pm.vepms.hxtitle.content"
-							class="input w-full" name="content" autofocus>
+							class="input w-full size-10vh" name="content" autofocus>
 						</p-textarea>
 					</div>
 				</div>
@@ -426,14 +426,14 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.textElementShown" @show="onVeTextElementPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veTextElementForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+			<div class="page-form-content size-30vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}veTextElementContent" class="field-label col-12 mb-2">
 						<@spring.message code='textContent' />
 					</label>
 					<div class="field-input col-12">
 						<p-textarea id="${pid}veTextElementContent" v-model="pm.vepms.textElement.content"
-							class="input w-full" style="height:20vh;" name="content" autofocus>
+							class="input w-full size-20vh" name="content" autofocus>
 						</p-textarea>
 					</div>
 				</div>
@@ -541,7 +541,7 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.hyperlinkShown" @show="onVeHyperlinkPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veHyperlinkForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+			<div class="page-form-content size-30vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}veHyperlinkHref" class="field-label col-12 mb-2"
 						 title="<@spring.message code='dashboard.veditor.hyperlink.href.desc' />">
@@ -738,10 +738,10 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veChartOptionsForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto" style="min-width:40vw;max-width:60vw;">
+			<div class="page-form-content size-40vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<div class="field-input col-12">
-						<div id="${pid}veChartOptionsContent" class="code-editor-wrapper input p-component p-inputtext w-full" style="height:30vh;">
+						<div id="${pid}veChartOptionsContent" class="code-editor-wrapper size-30vh input p-component p-inputtext w-full">
 							<div id="${pid}veChartOptionsCodeEditor" class="code-editor"></div>
 						</div>
 			        	<div class="desc text-color-secondary">
@@ -768,7 +768,7 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.chartThemeShown" @show="onVeChartThemePanelShow">
 	<div class="page page-form">
 		<form id="${pid}veChartThemeForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+			<div class="page-form-content size-30vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}veChartThemeFgColor" class="field-label col-12 mb-2">
 						<@spring.message code='fgColor' />
@@ -2400,7 +2400,7 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.eleIdShown" @show="onVeEleIdPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veEleIdForm" class="flex flex-column">
-			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+			<div class="page-form-content size-20vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<label for="${pid}veEleIdValue" class="field-label col-12 mb-2">
 						<@spring.message code='id' />

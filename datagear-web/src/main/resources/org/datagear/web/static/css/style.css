@@ -808,6 +808,42 @@ label.align-tip{
 .panel-content-size-mh40vh{
 	max-height: 40vh;
 }
+.size-10vw{
+	width: 10vw;
+}
+.size-20vw{
+	width: 20vw;
+}
+.size-30vw{
+	width: 30vw;
+}
+.size-40vw{
+	width: 40vw;
+}
+.size-50vw{
+	width: 50vw;
+}
+.size-60vw{
+	width: 60vw;
+}
+.size-10vh{
+	height: 10vh;
+}
+.size-20vh{
+	height: 20vh;
+}
+.size-30vh{
+	height: 30vh;
+}
+.size-40vh{
+	height: 40vh;
+}
+.size-50vh{
+	height: 50vh;
+}
+.size-60vh{
+	height: 60vh;
+}
 
 /*数据集编辑页*/
 .page-form-dataSet .code-editor-wrapper{
