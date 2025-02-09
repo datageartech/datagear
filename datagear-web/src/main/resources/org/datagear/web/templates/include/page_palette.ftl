@@ -152,8 +152,7 @@
 			onSelectPaletteColorPicker: function(e)
 			{
 				this.onSelectPaletteColor(po.hexStrToCssColor(pm.palette.pickerValue));
-			},
-			
+			}
 		});
 	};
 })
