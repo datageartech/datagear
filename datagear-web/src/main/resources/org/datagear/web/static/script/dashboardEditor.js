@@ -2947,12 +2947,16 @@
 		},
 		options);
 		
+		chartFactory.styleSheetText("dg-show-ve-style", this._buildPageStyleText(options));
+	};
+	
+	editor._buildPageStyleText = function(options)
+	{
 		var bgColorNew = chartFactory.parseColor(options.selectedBorderColor);
 		bgColorNew.a = 0.1;
 		bgColorNew = chartFactory.colorToHexStr(bgColorNew, true);
 		
-		chartFactory.styleSheetText("dg-show-ve-style",
-			  "\n"
+		var re = "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" *["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]{\n"
 			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ",0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "\n}"
@@ -2966,7 +2970,9 @@
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" ."+ELEMENT_CLASS_NEW_INSERT+"{\n"
 			+ "  box-shadow: inset 0 0 1px 1px " + options.selectedBorderColor + ";"
 			+ "  background-color: " + bgColorNew + ";"
-			+ "\n}");
+			+ "\n}";
+		
+		return re;
 	};
 	
 	//获取编辑HTML信息
