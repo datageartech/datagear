@@ -738,7 +738,7 @@ page_palette.ftl
 	position="center" :modal="true" v-model:visible="pm.vepss.chartOptionsShown" @show="onVeChartOptionsPanelShow">
 	<div class="page page-form">
 		<form id="${pid}veChartOptionsForm" class="flex flex-column">
-			<div class="page-form-content size-40vw flex-grow-1 px-2 py-1 overflow-y-auto">
+			<div class="page-form-content size-50vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
 					<div class="field-input col-12">
 						<div id="${pid}veChartOptionsContent" class="code-editor-wrapper size-30vh input p-component p-inputtext w-full">
