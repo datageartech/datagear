@@ -120,7 +120,7 @@
 	po.i18n["delete"] = "<@spring.message code='delete' />";
 	po.i18n.editResUnsupport = "<@spring.message code='dashboard.editResUnsupport' />";
 	
-	//dashboardDesignPage.js
+	//dashboardDesign.js
 	$.inflateDashboardDesignResource(po);
 })
 (${pid});

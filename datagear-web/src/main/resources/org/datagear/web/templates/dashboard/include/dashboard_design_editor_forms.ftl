@@ -2556,7 +2556,7 @@ page_palette.ftl
 	po.i18n["dashboard.veditor.gridLayout.divide.custom"] = "<@spring.message code='dashboard.veditor.gridLayout.divide.custom' />";
 	po.i18n.resetToOrigin = "<@spring.message code='resetToOrigin' />";
 	
-	//dashboardDesignPage.js
+	//dashboardDesign.js
 	$.inflateDashboardDesignEditorForms(po);
 })
 (${pid});

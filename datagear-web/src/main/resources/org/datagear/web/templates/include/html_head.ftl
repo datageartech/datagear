@@ -85,7 +85,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/chartSetting.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/dashboardFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/dashboardApiList.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/page.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dashboardDesignPage.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/pages/include/page.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/pages/dashboard/include/dashboardDesign.js?v=${clientCacheCode}" type="text/javascript"></script>
 ${detectNewVersionResult.script?no_esc}
 </#if>
