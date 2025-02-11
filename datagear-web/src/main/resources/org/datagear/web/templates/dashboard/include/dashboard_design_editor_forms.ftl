@@ -2626,6 +2626,19 @@ page_palette.ftl
 		return re;
 	};
 	
+	po.veCodeEditoJsonOptions = function()
+	{
+		var editorOptions =
+		{
+			value: "",
+			matchBrackets: true,
+			autoCloseBrackets: true,
+			mode: {name: "javascript", json: true}
+		};
+		
+		return editorOptions;
+	};
+	
 	po.showVeGridLayoutPanel = function(showFillParent)
 	{
 		showFillParent = (showFillParent == null ? false : showFillParent);
@@ -3036,15 +3049,8 @@ page_palette.ftl
 				var form = po.elementOfId("${pid}veChartOptionsForm", document.body);
 				var codeEditorEle = po.elementOfId("${pid}veChartOptionsCodeEditor", form);
 				
-				var editorOptions =
-				{
-					value: "",
-					matchBrackets: true,
-					autoCloseBrackets: true,
-					mode: {name: "javascript", json: true}
-				};
-				
 				codeEditorEle.empty();
+				var editorOptions = po.veCodeEditoJsonOptions();
 				var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
 				po.setCodeTextTimeout(codeEditor, (pm.vepms.chartOptions.value || ""), true);
 				
@@ -3143,16 +3149,8 @@ page_palette.ftl
 				var form = po.elementOfId("${pid}optionsOriginForm", document.body);
 				var codeEditorEle = po.elementOfId("${pid}optionsContentCodeEditor", form);
 				
-				var editorOptions =
-				{
-					value: "",
-					matchBrackets: true,
-					autoCloseBrackets: true,
-					mode: {name: "javascript", json: true},
-					readOnly: true
-				};
-				
 				codeEditorEle.empty();
+				var editorOptions = po.veCodeEditoJsonOptions();
 				var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
 				po.setCodeTextTimeout(codeEditor, (optionsOrigin || ""), true);
 				
