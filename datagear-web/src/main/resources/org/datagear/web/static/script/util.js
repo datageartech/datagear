@@ -2406,7 +2406,12 @@ $.inflatePageObj = function(po)
 	//获取页面内以页面ID为前缀的元素
 	po.elementOfPidPrefix = function(idSuffix, parent)
 	{
-		return this.element("#"+(this.pid+idSuffix), parent);
+		return this.element("#"+po.concatPid(idSuffix), parent);
+	};
+	
+	po.concatPid = function(suffix)
+	{
+		return (this.pid + suffix);
 	};
 	
 	//获取页面内指定name的元素
