@@ -16,7 +16,7 @@
  */
 
 /**
- * 看板设计页面函数集。
+ * 看板设计页面JS对象函数集。
  * 直接在页面中定义这些函数导致页面尺寸过大加载较慢。
  * 
  * 依赖:
@@ -3039,6 +3039,584 @@ $.inflateDashboardDesignEditorForms = function(po)
 			//默认不使用"auto"，内部插入元素后会导致尺寸变化
 			var dftValue = "1fr";
 			$.trimArrayLen(pm.vepms.gridLayout.colWidths, pm.vepms.gridLayout.columns, dftValue);
+		});
+	};
+};
+
+
+//填充看板设计页面资源管理JS对象
+//依赖：
+//dashboard_design_resource.ftl
+//dashboard_design_resource_forms.ftl
+$.inflateDashboardDesignResource = function(po)
+{
+	po.isResTemplate = function(name)
+	{
+		var fm = po.vueFormModel();
+		return ($.inArray(name, fm.templates) > -1);
+	};
+	
+	po.resNamesToTree = function(names)
+	{
+		var tree = $.toPathTree(names,
+		{
+			created: function(node)
+			{
+				node.key = node.fullPath;
+				node.label = node.name;
+			}
+		});
+		
+		return tree;
+	};
+	
+	po.refreshLocalRes = function()
+	{
+		var fm = po.vueFormModel();
+		
+		if(!fm.id)
+			return;
+		
+		po.getJson("/dashboard/listResources", { id: fm.id }, function(response)
+		{
+			var pm = po.vuePageModel();
+			pm.localRes.resourceNodes = po.resNamesToTree(response);
+			pm.localRes.selectedNodeKeys = null;
+			pm.localRes.selectedNode = null;
+		});
+	};
+
+	po.showSelectGlobalResDialog = function()
+	{
+		var dialog = po.selectGlobalResDialog();
+		
+		if(dialog.length == 0)
+		{
+			po.openTableDialog("/dashboardGlobalRes/select",
+			{
+				modal: false,
+				closable: false,
+				styleClass: "dashboard-select-global-res-wrapper table-sm",
+				templateHeader: "<span class='p-dialog-title'>"+po.i18n.dashboardGlobalRes+" - "+po.i18n.select+"</span>"
+								+"<div class='dialog-btns p-dialog-header-icons'>"
+								+"	<p-button type='button' icon='pi pi-times' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
+								+"</div>",
+				width: "45vw",
+				position: "right",
+				onSetup: function(setup)
+				{
+					setup.onCustomHide = function()
+					{
+						po.hideSelectGlobalResDialog();
+					};
+				},
+				pageParam:
+				{
+					select: function(res)
+					{
+						po.copyToClipboard(po.toGlobalResUrl(res.path));
+						
+						po.hideSelectGlobalResDialog();
+						return false;
+					},
+					onView: function(res)
+					{
+						window.open(po.showUrl(po.toGlobalResUrl(res.path)));
+					}
+				}
+			});
+		}
+		else
+		{
+			var dialogMask = dialog.parent();
+			dialogMask.removeClass("opacity-hide");
+		}
+	};
+	
+	po.hideSelectGlobalResDialog = function()
+	{
+		var dialog = po.selectGlobalResDialog();
+		var dialogMask = dialog.parent();
+		dialogMask.addClass("opacity-hide");
+	};
+	
+	po.closeSelectGlobalResDialog = function()
+	{
+		var dialog = po.selectGlobalResDialog();
+		$.closeDialog(dialog);
+	};
+	
+	po.toGlobalResUrl = function(path)
+	{
+		return po.dashboardGlobalResUrlPrefix + path;
+	};
+	
+	po.selectGlobalResDialog = function()
+	{
+		return $(".dashboard-select-global-res-wrapper", document.body);
+	};
+	
+	po.openSelectedLocalRes = function()
+	{
+		var fm = po.vueFormModel();
+		
+		if(!fm.id)
+			return;
+		
+		var sr = po.getSelectedLocalRes();
+		if(sr)
+			window.open(po.showUrl(sr), fm.id+"/"+sr);
+	};
+	
+	po.getSelectedLocalRes = function()
+	{
+		var pm = po.vuePageModel();
+		var localRes = pm.localRes;
+		
+		if(localRes.selectedTemplate)
+			return localRes.selectedTemplate;
+		else if(localRes.selectedNodeKeys && localRes.selectedNode)
+			return localRes.selectedNode.fullPath;
+		else
+			return null;
+	};
+	
+	po.addRes = function(name)
+	{
+		if(!name)
+			return false;
+		
+		if($.isDirectoryFile(name))
+		{
+			$.tipInfo(po.i18n.illegalSaveAddResourceName);
+			return false;
+		}
+		
+		var isTemplate = $.isHtmlFile(name);
+		po.showResContentTab(name, isTemplate);
+		
+		return true;
+	};
+	
+	po.uploadRes = function(uploadModel)
+	{
+		if(!uploadModel.filePath)
+			return false;
+		
+		var fm = po.vueFormModel();
+		
+		po.post("/dashboard/saveUploadResourceFile",
+		{
+			id: fm.id,
+			resourceFilePath: uploadModel.filePath,
+			resourceName: (uploadModel.savePath || ""),
+			autoUnzip: uploadModel.autoUnzip,
+			zipFileNameEncoding: uploadModel.zipFileNameEncoding
+		},
+		function(response)
+		{
+			po.vueUnref(po.concatPid("uploadResPanelEle")).hide();
+			
+			var pm = po.vuePageModel();
+			pm.uploadResModel.savePath = "";
+			pm.uploadResModel.filePath = "";
+			pm.uploadResModel.autoUnzip = false;
+			po.clearFileuploadInfo();
+			po.refreshLocalRes();
+		});
+	};
+	
+	po.updateTemplateList = function(templates)
+	{
+		var fm = po.vueFormModel();
+		fm.templates = templates;
+	};
+	
+	po.setResAsTemplate = function(name)
+	{
+		if(!name)
+			return;
+		
+		if(!$.isHtmlFile(name))
+		{
+	 		$.tipInfo(po.i18n.setResAsTemplateUnsupport);
+	 		return;
+		}
+		
+		var fm = po.vueFormModel();
+		var templates = po.vueRaw(fm.templates);
+		
+		if($.inArray(name, templates) < 0)
+		{
+			templates.push(name);
+			po.saveTemplateNames(templates);
+		}
+	};
+	
+	po.setResAsFirstTemplate = function(name)
+	{
+		if(!name)
+			return;
+		
+		if(!$.isHtmlFile(name))
+		{
+	 		$.tipInfo(po.i18n.setResAsTemplateUnsupport);
+	 		return;
+		}
+		
+		var fm = po.vueFormModel();
+		var templates = po.vueRaw(fm.templates);
+		var idx = $.inArray(name, templates);
+		
+		if(idx == 0)
+			return;
+		else
+		{
+			if(idx > 0)
+				templates.splice(idx, 1);
+			
+			templates.unshift(name);
+			po.saveTemplateNames(templates);
+		}
+	};
+	
+	po.setTemplateAsNormalRes = function(name)
+	{
+		if(!name)
+			return;
+		
+		var fm = po.vueFormModel();
+		var templates = po.vueRaw(fm.templates);
+		var idx = $.inArray(name, templates);
+		
+		if(idx > -1)
+		{
+			if(templates.length < 2)
+			{
+				$.tipWarn(po.i18n.atLeastOneTemplateRequired);
+				return;
+			}
+			
+			templates.splice(idx, 1);
+			po.saveTemplateNames(templates);
+		}
+	};
+	
+	po.saveTemplateNames = function(templates)
+	{
+		var fm = po.vueFormModel();
+		
+		po.ajaxJson("/dashboard/saveTemplateNames?id="+encodeURIComponent(fm.id),
+		{
+			data: templates,
+			success: function(response)
+			{
+				po.updateTemplateList(response.data.templates);
+			}
+		});
+	};
+	
+	po.renameRes = function(srcName, destName)
+	{
+		if(!srcName || !destName || srcName == destName)
+			return;
+		
+		var fm = po.vueFormModel();
+		
+		po.post("/dashboard/renameResource", { id: fm.id, srcName: srcName, destName: destName},
+		function(response)
+		{
+			po.updateTemplateList(response.data.templates);
+			po.refreshLocalRes();
+			
+			if(po.updateEditorResNames)
+				po.updateEditorResNames(response.data.renames);
+		});
+	};
+	
+	po.deleteRes = function(name)
+	{
+		if(!name)
+			return;
+		
+		var fm = po.vueFormModel();
+		var templates = fm.templates;
+		var idx = $.inArray(name, templates);
+		
+		if(idx > -1 && templates.length < 2)
+		{
+			$.tipWarn(po.i18n.atLeastOneTemplateRequired);
+			return;
+		}
+		
+		po.post("/dashboard/deleteResource", { id: fm.id, name: name},
+		function(response)
+		{
+			po.updateTemplateList(response.data.templates);
+			po.refreshLocalRes();
+		});
+	};
+	
+	po.setupResourceList = function()
+	{
+		po.vuePageModel(
+		{
+			availableCharsetNames: po.availableCharsetNames,
+			localRes:
+			{
+				selectedTemplate: null,
+				resourceNodes: null,
+				selectedNodeKeys: null,
+				selectedNode: null
+			},
+			localResMenuItems:
+			[
+				{
+					label: po.i18n.setAsTemplate,
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						po.setResAsTemplate(resName);
+					}
+				},
+				{
+					label: po.i18n.setAsHomeTemplate,
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						po.setResAsFirstTemplate(resName);
+					}
+				},
+				{
+					label: po.i18n.unsetAsTemplate,
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						po.setTemplateAsNormalRes(resName);
+					}
+				},
+				{
+					label: po.i18n.rename,
+					command: function(e)
+					{
+						var resName = po.getSelectedLocalRes();
+						if(resName)
+						{
+							var pm = po.vuePageModel();
+							pm.renameResModel.srcName = resName;
+							pm.renameResModel.destName = resName;
+							
+							e.originalEvent.stopPropagation();
+							po.elementOfPidPrefix("renameResBtn").click();
+						}
+					}
+				},
+				{
+					label: po.i18n.refresh,
+					command: function()
+					{
+						po.refreshLocalRes();
+					}
+				},
+				{ separator: true },
+				{
+					label: po.i18n["delete"],
+					class: "p-error",
+					command: function()
+					{
+						var resName = po.getSelectedLocalRes();
+						
+						if(resName)
+						{
+							po.confirmDelete(function()
+							{
+								po.deleteRes(resName);
+							});
+						}
+					}
+				}
+			],
+			addResModel:
+			{
+				resName: null
+			},
+			uploadResModel:
+			{
+				url: po.concatContextPath("/dashboard/uploadResourceFile"),
+				filePath: null,
+				savePath: null,
+				autoUnzip: false,
+				zipFileNameEncoding: "${zipFileNameEncodingDefault}"
+			},
+			renameResModel:
+			{
+				srcName: null,
+				destName: null
+			}
+		});
+		
+		po.vueMethod(
+		{
+			onResourceTabChange: function(e){},
+			
+			onChangeTemplateListItem: function(e)
+			{
+				var pm = po.vuePageModel();
+				pm.localRes.selectedNodeKeys = null;
+				pm.localRes.selectedNode = null;
+			},
+			
+			onLocalResNodeSelect: function(node)
+			{
+				var pm = po.vuePageModel();
+				pm.localRes.selectedNode = node;
+				pm.localRes.selectedTemplate = null;
+			},
+			
+			onCopyLocalResToClipboard: function(e)
+			{
+				po.copyToClipboard(po.getSelectedLocalRes());
+			},
+			
+			onOpenSelectedLocalRes: function(e)
+			{
+				po.openSelectedLocalRes();
+			},
+			
+			onEditSelectedLocalRes: function(e)
+			{
+				var res = po.getSelectedLocalRes();
+				if(res)
+				{
+				 	if(!$.isTextFile(res))
+				 	{
+				 		$.tipInfo(po.i18n.editResUnsupport);
+				 		return;
+				 	}
+				 	else
+						po.showResContentTab(res);
+				}
+			},
+			
+			toggleLocalResMenu: function(e)
+			{
+				po.vueUnref(po.concatPid("localResMenuEle")).toggle(e);
+			},
+			
+			onShowGlobalRes: function(e)
+			{
+				po.showSelectGlobalResDialog();
+			},
+			
+			onToggleAddResPanel: function(e)
+			{
+				var pm = po.vuePageModel();
+				po.vueUnref(po.concatPid("addResPanelEle")).toggle(e);
+			},
+			
+			onAddResPanelShow: function(e)
+			{
+				var pm = po.vuePageModel();
+				var panel = po.elementOfPidPrefix("addResPanel", document.body);
+				var form = po.elementOfPidPrefix("addResForm", panel);
+				po.elementOfPidPrefix("addResName", form).focus();
+				
+				po.setupSimpleForm(form, pm.addResModel, function()
+				{
+					if(po.addRes(pm.addResModel.resName))
+					{
+						po.vueUnref(po.concatPid("addResPanelEle")).hide();
+						pm.addResModel.resName = "";
+					}
+				});
+			},
+			
+			onToggleUploadResPanel: function(e)
+			{
+				po.vueUnref(po.concatPid("uploadResPanelEle")).toggle(e);
+			},
+			
+			onUploadResPanelShow: function(e)
+			{
+				var pm = po.vuePageModel();
+				var panel = po.elementOfPidPrefix("uploadResPanel", document.body);
+				var form = po.elementOfPidPrefix("uploadResForm", panel);
+				
+				po.setupSimpleForm(form, pm.uploadResModel,
+				{
+					customNormalizers:
+					{
+						savePath: function()
+						{
+							if(pm.uploadResModel.autoUnzip && $.isZipFile(pm.uploadResModel.filePath))
+								return (pm.uploadResModel.savePath || "savePathValidatePlaceholder");
+							else
+								return pm.uploadResModel.savePath;
+						}
+					},
+					submitHandler: function()
+					{
+						po.uploadRes(pm.uploadResModel);
+					}
+				});
+			},
+			
+			onResUploaded: function(e)
+			{
+				var pm = po.vuePageModel();
+				var response = $.getResponseJson(e.xhr);
+				
+				po.uploadFileOnUploaded(e);
+				
+				var sr = po.getSelectedLocalRes();
+				
+				pm.uploadResModel.savePath = ($.isDirectoryFile(sr) ? sr + response.fileName : response.fileName);
+				pm.uploadResModel.filePath = response.uploadFilePath;
+			},
+			
+			onToggleRenameResPanel: function(e)
+			{
+				po.vueUnref(po.concatPid("renameResPanelEle")).toggle(e);
+			},
+			
+			onRenameResPanelShow: function(e)
+			{
+				var pm = po.vuePageModel();
+				var panel = po.elementOfPidPrefix("renameResPanel", document.body);
+				var form = po.elementOfPidPrefix("renameResForm", panel);
+				po.elementOfPidPrefix("destResName", form).focus();
+				
+				po.setupSimpleForm(form, pm.renameResModel, function()
+				{
+					po.renameRes(pm.renameResModel.srcName, pm.renameResModel.destName);
+					po.vueUnref(po.concatPid("renameResPanelEle")).hide();
+				});
+			}
+		});
+		
+		po.vueMounted(function()
+		{
+			po.refreshLocalRes();
+		});
+		
+		po.vueRef(po.concatPid("localResMenuEle"), null);
+		po.vueRef(po.concatPid("addResPanelEle"), null);
+		po.vueRef(po.concatPid("uploadResPanelEle"), null);
+		po.vueRef(po.concatPid("renameResPanelEle"), null);
+
+		po.beforeClose("closeSelectGlobalResDialog", function()
+		{
+			po.closeSelectGlobalResDialog();
+		});
+
+		po.element().click(function(e)
+		{
+			var targetEle = $(e.target);
+			
+			if(targetEle.hasClass("for-open-global-res-panel") || targetEle.closest(".for-open-global-res-panel").length > 0)
+				;//保持选择图表对话框
+			else
+				po.hideSelectGlobalResDialog();
 		});
 	};
 };

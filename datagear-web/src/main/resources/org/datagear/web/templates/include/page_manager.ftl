@@ -37,6 +37,7 @@ String action
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='pleaseSelectAtLeastOne' />";
 	
+	//page.js
 	$.inflatePageManager(po);
 })
 (${pid});

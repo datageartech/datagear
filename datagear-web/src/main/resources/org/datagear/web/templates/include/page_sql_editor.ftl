@@ -30,6 +30,7 @@ po.getSqlEditorDtbsSourceId
 <script type="text/javascript">
 (function(po)
 {
+	//page.js
 	$.inflatePageSqlEditor(po);
 })
 (${pid});

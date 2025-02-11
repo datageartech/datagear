@@ -25,6 +25,7 @@ page_manager.ftl
 <script>
 (function(po)
 {
+	//page.js
 	$.inflatePageTable(po);
 })
 (${pid});

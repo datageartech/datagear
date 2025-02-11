@@ -26,6 +26,7 @@ page_obj.ftl
 <script type="text/javascript">
 (function(po)
 {
+	//page.js
 	$.inflatePageCodeEditor(po);
 })
 (${pid});

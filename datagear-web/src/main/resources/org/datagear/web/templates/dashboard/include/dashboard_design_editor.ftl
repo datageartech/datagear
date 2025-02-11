@@ -183,7 +183,7 @@
 	po.i18n.elementBoundary = "<@spring.message code='elementBoundary' />";
 	po.i18n.refresh = "<@spring.message code='refresh' />";
 	
-	//dashboardDesign.js
+	//dashboardDesignPage.js
 	$.inflateDashboardDesignEditor(po);
 })
 (${pid});

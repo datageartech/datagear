@@ -44,6 +44,7 @@ String action
 		return po.elementOfId("${pid}form");
 	};
 	
+	//page.js
 	$.inflatePageForm(po);
 })
 (${pid});

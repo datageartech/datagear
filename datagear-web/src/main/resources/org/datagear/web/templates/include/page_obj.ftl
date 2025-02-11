@@ -45,5 +45,6 @@ var ${pid} =
 	}
 };
 
+//page.js
 $.inflatePageObj(${pid});
 </script>
