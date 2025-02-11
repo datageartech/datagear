@@ -3446,7 +3446,7 @@ $.inflateDashboardDesignResource = function(po)
 				filePath: null,
 				savePath: null,
 				autoUnzip: false,
-				zipFileNameEncoding: "${zipFileNameEncodingDefault}"
+				zipFileNameEncoding: po.zipFileNameEncodingDefault
 			},
 			renameResModel:
 			{

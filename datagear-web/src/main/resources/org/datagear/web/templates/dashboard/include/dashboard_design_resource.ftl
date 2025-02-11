@@ -104,6 +104,7 @@
 {
 	po.dashboardGlobalResUrlPrefix = "${dashboardGlobalResUrlPrefix}";
 	po.availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
+	po.zipFileNameEncodingDefault = "${zipFileNameEncodingDefault}";
 	po.i18n = (po.i18n || (po.i18n = {}));
 	
 	po.i18n.dashboardGlobalRes = "<@spring.message code='module.dashboardGlobalRes' />";
