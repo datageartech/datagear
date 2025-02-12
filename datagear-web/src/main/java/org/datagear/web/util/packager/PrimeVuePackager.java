@@ -601,39 +601,6 @@ public class PrimeVuePackager extends AbstractPackager
 		}
 	}
 
-	protected static void print(Object o)
-	{
-		String str = "NULL";
-
-		if (o == null)
-			;
-		else if (o instanceof String)
-			str = (String) o;
-		else
-			str = o.toString();
-
-		System.out.print(str);
-	}
-
-	protected static void println(Object o)
-	{
-		String str = "NULL";
-
-		if (o == null)
-			;
-		else if (o instanceof String)
-			str = (String) o;
-		else
-			str = o.toString();
-
-		System.out.println(str);
-	}
-
-	protected static void println()
-	{
-		System.out.println();
-	}
-
 	public static void main(String[] args) throws Exception
 	{
 		println("*****************************************");

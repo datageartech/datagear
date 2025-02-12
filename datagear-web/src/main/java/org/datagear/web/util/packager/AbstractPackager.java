@@ -135,4 +135,52 @@ public class AbstractPackager
 
 		return re;
 	}
+
+	protected List<File> toFiles(String baseDir, List<String> paths)
+	{
+		List<File> files = new ArrayList<>(paths.size());
+
+		File parent = FileUtil.getDirectory(baseDir, false);
+		
+		for (String path : paths)
+		{
+			File file = FileUtil.getFile(parent, path);
+			files.add(file);
+		}
+
+		return files;
+	}
+
+	protected static void print(Object o)
+	{
+		String str = "NULL";
+
+		if (o == null)
+			;
+		else if (o instanceof String)
+			str = (String) o;
+		else
+			str = o.toString();
+
+		System.out.print(str);
+	}
+
+	protected static void println(Object o)
+	{
+		String str = "NULL";
+
+		if (o == null)
+			;
+		else if (o instanceof String)
+			str = (String) o;
+		else
+			str = o.toString();
+
+		System.out.println(str);
+	}
+
+	protected static void println()
+	{
+		System.out.println();
+	}
 }
