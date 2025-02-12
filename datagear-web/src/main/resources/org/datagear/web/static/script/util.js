@@ -2179,3 +2179,1007 @@ $.fn.extend(
 
 })
 (jQuery);
+
+
+/**
+ * 数据库JDBC连接URL构建工具。
+ */
+(function($, undefined)
+{
+	var dtbsSourceUrlBuilder = ($.dtbsSourceUrlBuilder || ($.dtbsSourceUrlBuilder={}));
+	var builders = (dtbsSourceUrlBuilder.builders || (dtbsSourceUrlBuilder.builders={}));
+	
+	dtbsSourceUrlBuilder.TEMPLATE_HOST="{host}";
+	dtbsSourceUrlBuilder.TEMPLATE_PORT="{port}";
+	dtbsSourceUrlBuilder.TEMPLATE_NAME="{name}";
+	
+	/**
+	 * 列出所有构建器信息。
+	 */
+	dtbsSourceUrlBuilder.list = function()
+	{
+		var infoArray = [];
+		
+		var builders = $.dtbsSourceUrlBuilder.builders;
+		
+		for(var dbType in builders)
+		{
+			var builder = builders[dbType];
+			
+			infoArray.push({ "dbType" : dbType, "dbDesc" : (builder.dbDesc || dbType), "order" : builder.order });
+		}
+		
+		infoArray.sort(function(a, b)
+		{
+			if(a.order != undefined && b.order != undefined)
+				return a.order - b.order;
+			else if(a.order != undefined)
+				return -1;
+			else
+				return 1;
+		});
+		
+		return infoArray;
+	};
+	
+	/**
+	 * 构建JDBC连接URL。
+	 * 
+	 * @param dbType 数据库类型标识
+	 * @param value URL值对象
+	 */
+	dtbsSourceUrlBuilder.build = function(dbType, value)
+	{
+		var builder = $.dtbsSourceUrlBuilder.builders[dbType];
+		
+		if(!builder)
+			return "";
+		
+		if(builder.build) 
+			return builder.build(value);
+		else if(builder.template)
+			return $.dtbsSourceUrlBuilder._resolveUrl(builder.template, value);
+		else
+			return "";
+	};
+	
+	/**
+	 * 由JDBC连接URL解析连接信息。
+	 * 返回对象格式：{ dbType : "", value : { host : "", port : "", name : "" } }。
+	 * 如果无法解析，返回null。
+	 * 
+	 * @param url JDBC连接URL
+	 */
+	dtbsSourceUrlBuilder.extract = function(url)
+	{
+		var builders = $.dtbsSourceUrlBuilder.builders;
+		
+		for(var dbType in builders)
+		{
+			var builder = builders[dbType];
+			
+			var value = null;
+			
+			if(builder.extract) 
+				value = builder.extract(url);
+			else if(builder.template)
+				value = $.dtbsSourceUrlBuilder._resolveValue(builder.template, url);
+			
+			if(value != null)
+				return { dbType : dbType, value : value };
+		}
+		
+		return null;
+	};
+	
+	/**
+	 * 获取数据库的默认URL值对象。
+	 * 
+	 * @param dbType 数据库类型标识
+	 */
+	dtbsSourceUrlBuilder.defaultValue = function(dbType)
+	{
+		var builder = $.dtbsSourceUrlBuilder.builders[dbType];
+		
+		if(!builder)
+			return {};
+		
+		return builder.defaultValue;
+	};
+	
+	/**
+	 * 是否包含指定数据库类型标识的构建器。
+	 * 
+	 * @param dbType 数据库类型标识
+	 */
+	dtbsSourceUrlBuilder.contains = function(dbType)
+	{
+		return ($.dtbsSourceUrlBuilder.builders[dbType] != undefined);
+	};
+	
+	/**
+	 * 添加一个构建器。
+	 * 
+	 * @param builder 构建器，可以有两种格式：
+	 * 1.
+	 * {
+	 *   //必选，数据库类型
+	 *   dbType : "...",
+	 *   
+	 *   //必选，模板
+	 *   template : "...{host}...{port}...{name}...",
+	 *   
+	 *   //可选，默认值
+	 *   defaultValue : { host : "...", port : "...", name : "" },
+	 *   
+	 *   //可选，数据库描述
+	 *   dbDesc : "...",
+	 *   
+	 *   //可选，展示排序
+	 *   order : 9
+	 * }
+	 * 
+	 * 2.
+	 * {
+	 *   //必选，数据库类型
+	 *   dbType : "...",
+	 *   
+	 *   //必选，由{ host : "...", port : "...", name : "" }值对象构建URL的函数
+	 *   build : function(value){ ... },
+	 *   
+	 *   //必选，由URL构建{ host : "...", port : "...", name : "" }值对象的函数
+	 *   extract : function(url){ ... },
+	 *   
+	 *   //可选，默认值
+	 *   defaultValue : { host : "...", port : "...", name : "" },
+	 *   
+	 *   //可选，数据库描述
+	 *   dbDesc : "...",
+	 *   
+	 *   //可选，展示排序
+	 *   order : 9
+	 * }
+	 */
+	dtbsSourceUrlBuilder.add = function(builder)
+	{
+		var re = [];
+		
+		var order = 0;
+		
+		for(var i= 0; i<arguments.length; i++)
+		{
+			var ele = arguments[i];
+			
+			if(!$.isArray(ele))
+				ele = [ ele ];
+			
+			for(var j=0; j<ele.length; j++)
+			{
+				var myBuilder = ele[j];
+				
+				if(myBuilder && myBuilder.dbType)
+				{
+					if(myBuilder.order == undefined)
+						myBuilder.order = order;
+					
+					$.dtbsSourceUrlBuilder.builders[myBuilder.dbType] = myBuilder;
+					
+					re.push(myBuilder);
+					order++;
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 删除所有构建器。
+	 */
+	dtbsSourceUrlBuilder.clear = function()
+	{
+		var builders = $.dtbsSourceUrlBuilder.builders;
+		
+		var removed = [];
+		
+		for(var dbType in builders)
+			removed.push(dbType);
+		
+		for(var i=0; i< removed.length; i++)
+			delete builders[removed[i]];
+	};
+	
+	dtbsSourceUrlBuilder.sortByDbType = function(builders)
+	{
+		if(!builders || builders.length == 0)
+			return;
+			
+		builders.sort(function(ba, bb)
+		{
+			var baType = (ba ? ba.dbType : "");
+			var bbType = (bb ? bb.dbType : "");
+			
+			if(baType < bbType)
+				return -1;
+			else if(baType > bbType)
+				return 1;
+			else
+				return 0;
+		});
+	};
+	
+	/**
+	 * 由数据库URL模板解析URL。
+	 * 
+	 * @param template 数据库URL模板
+	 * @param value 要替换的值
+	 */
+	dtbsSourceUrlBuilder._resolveUrl = function(template, value)
+	{
+		return template.replace($.dtbsSourceUrlBuilder.TEMPLATE_HOST, value.host)
+			.replace($.dtbsSourceUrlBuilder.TEMPLATE_PORT, value.port)
+			.replace($.dtbsSourceUrlBuilder.TEMPLATE_NAME, value.name);
+	};
+	
+	/**
+	 * 由数据库URL解析URL值对象。
+	 * 
+	 * @param template 数据库URL模板
+	 * @param url 数据库URL
+	 */
+	dtbsSourceUrlBuilder._resolveValue = function(template, url)
+	{
+		if(!url)
+			return null;
+		
+		var varInfo = null;
+		
+		var varInfos = ($.dtbsSourceUrlBuilder.templateVarInfos || ($.dtbsSourceUrlBuilder.templateVarInfos = {}));
+		varInfo = varInfos[template];
+		
+		if(!varInfo)
+		{
+			varInfo = $.dtbsSourceUrlBuilder._resolveVarInfo(template);
+			varInfos[template] = varInfo;
+		}
+		
+		var value = null;
+		
+		url = $.trim(url);
+		
+		for(var i=0; i<varInfo.length; i++)
+		{
+			if(!url)
+				break;
+			
+			var varEle = varInfo[i];
+			
+			var varName = varEle.name;
+			var prefix = varEle.prefix;
+			var suffix = (!varEle.suffix && i<varInfo.length-1 ? varInfo[i+1].prefix : varEle.suffix);
+			
+			var varValue = null;
+			
+			if(prefix)
+			{
+				if(url.indexOf(prefix) != 0)
+					return null;
+				
+				url = url.substring(prefix.length);
+			}
+			
+			if(suffix)
+			{
+				var endIndex = url.indexOf(suffix);
+				
+				if(endIndex < 0)
+					return null;
+				
+				varValue = url.substring(0, endIndex);
+				url = url.substring(endIndex);
+			}
+			else
+			{
+				varValue = url;
+				url = null;
+			}
+			
+			if(varValue != null)
+			{
+				if(!value)
+					value = {};
+				
+				value[varName] = varValue;
+			}
+		}
+		
+		return value;
+	};
+	
+	/**
+	 * 解析模板字符串中的变量信息。
+	 */
+	dtbsSourceUrlBuilder._resolveVarInfo = function(template)
+	{
+		var varInfo = [];
+		
+		var prefix = "";
+		
+		var i=0;
+		for(; i<template.length; i++)
+		{
+			var c = template.charAt(i);
+			
+			if(c == '{')
+			{
+				var varName = "";
+				
+				var j=i+1;
+				for(; j<template.length; j++)
+				{
+					var cj = template.charAt(j);
+					
+					if(cj == '}')
+						break;
+					
+					varName += cj;
+				}
+				
+				//仅处理{host}, {port}, {name}变量
+				if(varName == "host" || varName == "port" || varName =="name")
+				{
+					varInfo.push({ name : varName, prefix : (prefix == "" ? null : prefix) });
+					prefix = "";
+				}
+				else
+				{
+					prefix += template.substring(i, j+1);
+				}
+				
+				i=j;
+			}
+			else
+			{
+				prefix += c;
+			}
+		}
+		
+		//最后的普通字符串作为最后一个元素的suffix
+		if(prefix != "" && varInfo.length > 0)
+			varInfo[varInfo.length - 1].suffix = prefix;
+		
+		return varInfo;
+	};
+})
+(jQuery);
+
+
+/**
+ * 表元信息工具函数库。
+ */
+(function($, undefined)
+{
+	var tableMeta = ($.tableMeta || ($.tableMeta = {}));
+	tableMeta.dtbsSourceTableCache = (tableMeta.dtbsSourceTableCache || (tableMeta.dtbsSourceTableCache = {}));
+	
+	//PersistenceSupport.supportsSqlType支持的SQL类型
+	tableMeta.Types=
+	{
+		TINYINT: -6, SMALLINT: 5, INTEGER: 4, BIGINT: -5, REAL: 7, FLOAT: 6,
+		DOUBLE: 8, DECIMAL: 3, NUMERIC: 2, BIT: -7, BOOLEAN: 16, CHAR: 1,
+		VARCHAR: 12, LONGVARCHAR: -1, BINARY: -2, VARBINARY: -3, LONGVARBINARY: -4,
+		DATE: 91, TIME: 92, TIME_WITH_TIMEZONE: 2013, TIMESTAMP: 93, TIMESTAMP_WITH_TIMEZONE: 2014,
+		CLOB: 2005, BLOB: 2004, NCHAR: -15, NVARCHAR: -9, LONGNVARCHAR: -16, NCLOB: 2011, SQLXML: 2009
+	};
+	
+	$.extend(tableMeta,
+	{
+		/**
+		 * 获取指定列/列数组。
+		 * 
+		 * @param table
+		 * @param index 列索引、列名称、数组
+		 */
+		column : function(table, index)
+		{
+			var isArray = $.isArray(index);
+			
+			var re = [];
+			var indexes = (isArray ? index : [index]);
+			
+			for(var i=0; i<indexes.length; i++)
+			{
+				index = indexes[i];
+				
+				if(typeof(index) == "string")
+					index = this.columnIndex(table, index);
+	
+				if(index < 0)
+					throw new Error("No column for ["+index+"]");
+				
+				re.push(table.columns[index]);
+			}
+			
+			return (isArray ? re : re[0]);
+		},
+		
+		/**
+		 * 获取列索引。
+		 */
+		columnIndex : function(table, columnName)
+		{
+			var columns=table.columns;
+			for(var i=0; i<columns.length; i++)
+			{
+				if(columns[i].name == columnName)
+					return i;
+			}
+			
+			return -1;
+		},
+		
+		/**
+		 * 获取/设置列值。
+		 * 
+		 * @param obj 必选，对象
+		 * @param column 必选，列对象或者列名
+		 * @parma value 可选，列值
+		 */
+		columnValue : function(obj, column, value)
+		{
+			if(obj == undefined || obj == null)
+				throw new Error("[obj] must be defined");
+			
+			column = (column.name || column);
+			
+			var isGet = (arguments.length == 2);
+			
+			if(isGet)
+				return obj[column];
+			else
+				obj[column] = value;
+		},
+		
+		/**
+		 * 如果列导入外键，则返回ImportKey对象，否则返回false。
+		 */
+		columnImportKey: function(table, column)
+		{
+			if(!table.importKeys)
+				return false;
+			
+			var name = (column.name || column);
+			
+			for(var i=0; i<table.importKeys.length; i++)
+			{
+				var importKey = table.importKeys[i];
+				if($.inArray(name, importKey.columnNames) > -1)
+					return importKey;
+			}
+			
+			return false;
+		},
+		
+		/**
+		 * 获取导入键的本表对象。
+		 * 
+		 * @param importKey
+		 * @param primaryObj 主表对象
+		 */
+		fromImportKeyPrimary: function(importKey, primaryObj)
+		{
+			var re = {};
+			
+			var primaryNames = importKey.primaryColumnNames;
+			var myNames = importKey.columnNames;
+			
+			for(var i=0; i<primaryNames.length; i++)
+			{
+				var value = primaryObj[primaryNames[i]];
+				
+				//在某些情况（比如先将主表以大写命名语句创建加载至系统缓存，之后又以小写命名语句重新创建主表和外键表，而不刷新主表），
+				//会出现primaryNames与primaryObj属性名大小写不一致的情况，所以这里如果没取到，再使用忽略大小写的方式重试一次
+				if(value === undefined)
+				{
+					for(var p in primaryObj)
+					{
+						if(p.toLowerCase() == primaryNames[i].toLowerCase())
+						{
+							value = primaryObj[p];
+							break;
+						}
+					}
+				}
+				
+				if(value == undefined)
+				{
+					value = null;
+				}
+				
+				re[myNames[i]] = value;
+			}
+			
+			return re;
+		},
+		
+		/**
+		 * 获取导入键的主表对象。
+		 * 
+		 * @param importKey
+		 * @param obj 本表对象
+		 */
+		toImportKeyPrimary: function(importKey, obj)
+		{
+			var re = {};
+			
+			var myNames = importKey.columnNames;
+			var primaryNames = importKey.primaryColumnNames;
+			
+			for(var i=0; i<myNames.length; i++)
+			{
+				var value = obj[myNames[i]];
+				if(value == undefined)
+					value = null;
+				
+				re[primaryNames[i]] = value;
+			}
+			
+			return re;
+		},
+		
+		/**
+		 * 创建指定表的实例对象。
+		 * 
+		 * @param table 表
+		 * @param data 可选，待填充的实例对象
+		 */
+		instance : function(table, data)
+		{
+			data = (data || {});
+			
+			for(var i=0; i<table.columns.length; i++)
+			{
+				var column=table.columns[i];
+				
+				if(data[column.name] != undefined)
+					continue;
+				
+				//如果没有默认值，明确赋值为null，避免某些页面逻辑错误（比如DataTable的cell().data()会取值为""空字符串）
+				data[column.name] = null;
+				
+				//不设置默认值了，因为默认值可能仅是数据库级的标识，比如Mysql的"CURRENT_TIMESTAMP"
+				//data[column.name] = (column.defaultValue != undefined ? column.defaultValue : null);
+			}
+			
+			return data;
+		},
+		
+		/**
+		 * 尽量获取能够唯一确定记录的数据对象。
+		 */
+		uniqueRecordData: function(table, row)
+		{
+			var columns;
+			
+			if(table.primaryKey)
+				columns = this.column(table, table.primaryKey.columnNames);
+			else if(table.uniqueKeys && table.uniqueKeys.length > 0)
+				columns = this.column(table, table.uniqueKeys[0].columnNames);
+			else
+			{
+				columns = [];
+				var Types = this.Types;
+				for(var i=0; i<table.columns.length; i++)
+				{
+					var column = table.columns[i];
+					var type = column.type;
+					//与DefaultPersistenceManager.getColumnsMaybeUniqueRecord(Table)保持一致
+					if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type || Types.CHAR == type
+							|| Types.DATE == type || Types.DECIMAL == type || Types.DOUBLE == type || Types.FLOAT == type
+							|| Types.BINARY == type || Types.VARBINARY == type || Types.INTEGER == type || Types.NULL == type
+							|| Types.NUMERIC == type || Types.REAL == type || Types.SMALLINT == type || Types.TIME == type
+							|| Types.TIME_WITH_TIMEZONE == type || Types.TIMESTAMP == type
+							|| Types.TIMESTAMP_WITH_TIMEZONE == type || Types.TINYINT == type || Types.VARCHAR == type)
+						columns.push(column);
+				}
+			}
+			
+			var re = [];
+			
+			var rows = ($.isArray(row) ? row : [row]);
+			for(var i=0; i<rows.length; i++)
+			{
+				var data = {};
+				var myRow = rows[i];
+				for(var j=0; j<columns.length; j++)
+				{
+					var name = columns[j].name;
+					data[name] = (myRow[name] == null ? null : myRow[name]);
+				}
+				
+				re.push(data);
+			}
+			
+			return ($.isArray(row) ? re : re[0]);
+		},
+		
+		isBinaryColumnValueHex: function(value)
+		{
+			value = this.valueOfLabeledValue(value);
+			return (value ? value.indexOf(this.binaryColumnValueHexPrefix) == 0 : false);
+		},
+		
+		binaryColumnValueHexPrefix: "hex:",
+		
+		isBinaryColumnValueBase64: function(value)
+		{
+			value = this.valueOfLabeledValue(value);
+			return (value ? value.indexOf(this.binaryColumnValueBase64Prefix) == 0 : false);
+		},
+		
+		binaryColumnValueBase64Prefix: "base64:",
+		
+		isBinaryColumnValueFile: function(value)
+		{
+			value = this.valueOfLabeledValue(value);
+			return (value ? value.indexOf(this.binaryColumnValueFilePrefix) == 0 : false);
+		},
+		
+		binaryColumnValueFileContent: function(value)
+		{
+			if(!this.isBinaryColumnValueFile(value))
+				return value;
+			
+			value = this.valueOfLabeledValue(value);
+			return value.substr(this.binaryColumnValueFilePrefix.length);
+		},
+		
+		binaryColumnValueFilePrefix: "file:",
+		
+		/**
+		 * 是否支持指定列的持久化操作，参考PersistenceSupport.supportsSqlType()。
+		 */
+		supportsColumn: function(column)
+		{
+			var type = column.type;
+			
+			for(var p in this.Types)
+			{
+				if(this.Types[p] == type)
+					return true;
+			}
+			
+			return false;
+		},
+		
+		isNumberColumn: function(column)
+		{
+			var Types = this.Types;
+			var sqlType = column.type;
+			
+			switch (sqlType)
+			{
+				case Types.TINYINT:
+				case Types.SMALLINT:
+				case Types.INTEGER:
+				case Types.BIGINT:
+				case Types.REAL:
+				case Types.FLOAT:
+				case Types.DOUBLE:
+				case Types.DECIMAL:
+				case Types.NUMERIC:
+					return true;
+				default:
+					return false;
+			}
+		},
+		
+		isBinaryColumn: function(column)
+		{
+			var type = column.type;
+			
+			return (type == this.Types.BINARY || type == this.Types.VARBINARY
+						|| type == this.Types.LONGVARBINARY || type == this.Types.BLOB);
+		},
+		
+		isTextColumn: function(column)
+		{
+			var type = column.type;
+			
+			return (type == this.Types.CHAR || type == this.Types.VARCHAR
+					 || type == this.Types.LONGVARCHAR || type == this.Types.CLOB
+					 || type == this.Types.NCHAR || type == this.Types.NVARCHAR
+					 || type == this.Types.LONGNVARCHAR|| type == this.Types.NCLOB
+					 || type == this.Types.SQLXML);
+		},
+		
+		isClobColumn: function(column)
+		{
+			var type = column.type;
+			
+			return (type == this.Types.LONGVARCHAR
+						|| type == this.Types.CLOB
+						|| type == this.Types.LONGNVARCHAR
+						|| type == this.Types.NCLOB);
+		},
+		
+		isSqlxmlColumn: function(column)
+		{
+			var type = column.type;
+			return (type == this.Types.SQLXML);
+		},
+		
+		isDateColumn: function(column)
+		{
+			return (column.type == this.Types.DATE);
+		},
+
+		isTimeColumn: function(column)
+		{
+			var type = column.type;
+			return (type == this.Types.TIME || type == this.Types.TIME_WITH_TIMEZONE);
+		},
+
+		isTimestampColumn: function(column)
+		{
+			var type = column.type;
+			return (type == this.Types.TIMESTAMP || type == this.Types.TIMESTAMP_WITH_TIMEZONE);
+		},
+		
+		isBooleanColumn: function(column)
+		{
+			var type = column.type;
+			return (type == this.Types.BIT || type == this.Types.BOOLEAN);
+		},
+		
+		/**
+		 * 指定列是否是必填项。
+		 */
+		isRequiredColumn: function(column)
+		{
+			return (!column.nullable && !column.autoincrement);
+		},
+		
+		/**
+		 * 是否支持关键字查询的列。
+		 */
+		isKeywordSearchColumn: function(column)
+		{
+			return (column.searchableType == "ONLY_LIKE" || column.searchableType == "ALL"
+						|| this.isNumberColumn(column));
+		},
+		
+		/**
+		 * 获取展示HTML。
+		 * 
+		 * @param tableOrColumn
+		 * @param tagName 可选，HTML标签名
+		 * @param className 可选，自定义样式类名
+		 */
+		displayInfoHtml : function(tableOrColumn, tagName, className)
+		{
+			tagName = (tagName || "span");
+			return "<"+tagName+" class='display-info " + (className ? className : "") + "' title='"+$.escapeHtml(tableOrColumn.comment || "")+"'>"
+						+$.escapeHtml(tableOrColumn.name)+"</"+tagName+">";
+		},
+		
+		/**
+		 * 是否是标签值对象：{value: ..., label: "..."}。
+		 */
+		isLabeledValue : function(value)
+		{
+			return $.isPlainObject(value) && value.hasOwnProperty("value") && value.hasOwnProperty("label");
+		},
+		
+		/**
+		 * 构建标签值对象。
+		 */
+		toLabeledValue : function(value, label)
+		{
+			return { "value" : value, "label" : label };
+		},
+		
+		/**
+		 * 获取标签值对象的值。
+		 */
+		valueOfLabeledValue : function(value)
+		{
+			return (this.isLabeledValue(value) ? value.value : value);
+		},
+		
+		/**
+		 * 获取标签值对象的标签。
+		 */
+		labelOfLabeledValue : function(value)
+		{
+			return (this.isLabeledValue(value) ? value.label : undefined);
+		},
+		
+		/**
+		 * 移除对象/数组的标签值对象特性。
+		 */
+		removeLabeledValueFeature : function(data)
+		{
+			if(!data)
+				return;
+			
+			var datas = ($.isArray(data) ? data : [data]);
+			
+			for(var i=0; i<datas.length; i++)
+			{
+				var ele = datas[i];
+				for(var p in ele)
+				{
+					var v = ele[p];
+					var vv = this.valueOfLabeledValue(v);
+					if(vv !== v)
+						ele[p] = vv;
+				}
+			}
+			
+			return data;
+		}
+	});
+	
+	$.extend(tableMeta,
+	{
+		/**
+		 * 加载表的URL。
+		 * 
+		 * @param dtbsSourceId
+		 * @param tableName
+		 * @param reload 是否让后台重新载入
+		 */
+		loadTableUrl : function(dtbsSourceId, tableName, reload)
+		{
+			var url = "";
+			
+			if(typeof(contextPath) != "undefined")
+				url += contextPath;
+			
+			url = url + "/dtbsSource/" + encodeURIComponent(dtbsSourceId) +"/table/" + encodeURIComponent(tableName);
+			
+			if(reload)
+				url = url +"?reload=1";
+			
+			return url;
+		},
+		
+		/**
+		 * 在指定表上执行callback操作。
+		 * 
+		 * @param dtbsSourceId
+		 * @param tableName
+		 * @param callback
+		 */
+		on : function(dtbsSourceId, tableName, callback)
+		{
+			this._on(dtbsSourceId, tableName, callback, false);
+		},
+		
+		/**
+		 * 获取指定名称的表对象。
+		 * 
+		 * @param dtbsSourceId
+		 * @param tableName
+		 */
+		get : function(dtbsSourceId, tableName)
+		{
+			return this._getCachedTable(dtbsSourceId, tableName);
+		},
+		
+		/**
+		 * 载入指定名称的表对象。
+		 * 
+		 * @param dtbsSourceId
+		 * @param tableName
+		 * @param callback
+		 */
+		load : function(dtbsSourceId, tableName, callback)
+		{
+			this._on(dtbsSourceId, tableName, callback, true);
+		},
+		
+		/**
+		 * 在指定表上执行callback。
+		 * 
+		 * @param dtbsSourceId
+		 * @param tableName 表名
+		 * @param callback || options callback：载入回调函数，格式为：function(table){ ... }，options：ajax请求options
+		 * @param reload 是否让后台重新载入
+		 */
+		_on : function(dtbsSourceId, tableName, callback, reload)
+		{
+			var table = this._getCachedTable(dtbsSourceId, tableName);
+			
+			if(table == null || reload)
+			{
+				var loadUrl = this.loadTableUrl(dtbsSourceId, tableName, reload);
+				
+				var _this = this;
+				
+				if($.isFunction(callback))
+				{
+					$.getJSON(loadUrl, function(table)
+					{
+						_this._inflateColumnInfo(table);
+						_this._setCachedTable(dtbsSourceId, table);
+						
+						if(callback != undefined)
+							callback(table);
+					});
+				}
+				else if($.isPlainObject(callback))
+				{
+					var options = callback;
+					
+					if(!options.url)
+						options.url = loadUrl;
+					
+					if(!options.dataType)
+						options.dataType = "json";
+					
+					var originalSuccessCallback = options.success;
+					options.success = function(table, textStatus, jqXHR)
+					{
+						_this._inflateColumnInfo(table);
+						_this._setCachedTable(dtbsSourceId, table);
+						
+						if(originalSuccessCallback)
+							originalSuccessCallback.call(this, table, textStatus, jqXHR);
+					};
+					
+					$.ajax(options);
+				}
+				else
+					throw new Error("Unknown function parameter type");
+			}
+			else
+			{
+				if($.isFunction(callback))
+					callback(table);
+				else if($.isPlainObject(callback))
+					callback.success(table);
+				else
+					throw new Error("Unknown function parameter type");
+			}
+		},
+		
+		_getCachedTable : function(dtbsSourceId, tableName)
+		{
+			var tables = (this.dtbsSourceTableCache[dtbsSourceId] || (this.dtbsSourceTableCache[dtbsSourceId] = {}));
+			return tables[tableName];
+		},
+		
+		_setCachedTable : function(dtbsSourceId, table)
+		{
+			var tables = (this.dtbsSourceTableCache[dtbsSourceId] || (this.dtbsSourceTableCache[dtbsSourceId] = {}));
+			tables[table.name] = table;
+		},
+		
+		_inflateColumnInfo: function(table)
+		{
+			var columns = (table.columns || []);
+			$.each(columns, function(i, column)
+			{
+				column.isRequired = $.tableMeta.isRequiredColumn(column);
+				column.isSupported = $.tableMeta.supportsColumn(column);
+				column.isRenderAsTextarea = ($.tableMeta.isClobColumn(column) ||
+											(column.size && column.size > $.tableMeta.columnAsTextareaLength
+												&& $.tableMeta.isTextColumn(column)));
+				column.isImportKey = $.tableMeta.columnImportKey(table, column);
+				column.isBinary = $.tableMeta.isBinaryColumn(column);
+				
+				if($.tableMeta.isDateColumn(column))
+					column.isDate = true;
+				else if($.tableMeta.isTimeColumn(column))
+					column.isTime = true;
+				else if($.tableMeta.isTimestampColumn(column))
+					column.isTimestamp = true;
+			});
+		},
+		
+		columnAsTextareaLength : 101,
+	});
+})
+(jQuery);
