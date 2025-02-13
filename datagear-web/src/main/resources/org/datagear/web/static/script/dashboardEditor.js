@@ -685,10 +685,68 @@
 	};
 	
 	/**
+	 * 获取元素节点路径信息。
+	 */
+	editor.getElementPath = function(ele)
+	{
+		ele = $(ele);
+		
+		var paths = [];
+		
+		while(true)
+		{
+			if(ele.length == 0)
+				break;
+			
+			var isBody =  ele.is("body");
+			
+			if(!this._isSelectableElement(ele) && !isBody)
+			{
+				ele = ele.parent();
+				continue;
+			}
+			
+			var editEle = this._editElement(ele);
+			var pathInfo =
+			{
+				tagName: (ele[0].tagName || "").toLowerCase(),
+				selected: this._isSelectedElement(ele),
+				id: editEle.attr("id"),
+				className: editEle.attr("class"),
+				cssDisplay: ele.css("display"),
+				visualEditId: editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
+			};
+			
+			var displayName = pathInfo.tagName;
+			
+			if(this._isDisplayGrid(pathInfo.cssDisplay))
+				displayName += "(grid)";
+			else if(this._isDisplayFlex(pathInfo.cssDisplay))
+				displayName += "(flex)";
+			
+			if(pathInfo.id)
+				displayName += "#"+pathInfo.id;
+			else if(pathInfo.className)
+				displayName += "."+pathInfo.className;
+			
+			pathInfo.displayName = displayName;
+			
+			paths.push(pathInfo);
+			
+			if(isBody)
+				break;
+			else
+				ele = ele.parent();
+		}
+		
+		return paths.reverse();
+	};
+	
+	/**
 	 * 校验网格布局元素。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertGridLayout = function(insertType, refEle)
 	{
@@ -698,8 +756,8 @@
 	/**
 	 * 是否可以插入填满父元素的网格布局元素。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.canInsertFillParentGridLayout = function(insertType, refEle)
 	{
@@ -738,8 +796,8 @@
 	 * 						rowGap: "...",
 	 * 						columnGap: "..."
 	 * 					}
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertGridLayout = function(gridAttr, insertType, refEle)
 	{
@@ -807,17 +865,17 @@
 		for(var i=0; i<rows; i++)
 		{
 			for(var j=0; j<columns; j++)
-				this._insertElement(div, $("<div></div>"), "append");
+				this._insertElementNoSync(div, $("<div></div>"), "append");
 		}
 		
-		this.insertElement(div, insertType, refEle, true, true);
+		this._insertElement(div, insertType, refEle, true);
 	};
 	
 	/**
 	 * 校验插入弹性布局元素。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertFlexLayout = function(insertType, refEle)
 	{
@@ -827,8 +885,8 @@
 	/**
 	 * 是否可以插入填满父元素的弹性布局元素。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.canInsertFillParentFlexLayout = function(insertType, refEle)
 	{
@@ -839,8 +897,8 @@
 	 * 插入弹性布局元素。
 	 * 
 	 * @param flexAttr 网格设置，格式为：{ items: 数值或数值字符串, direction: "...", fillParent: 布尔值或布尔值字符串 }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertFlexLayout = function(flexAttr, insertType, refEle)
 	{
@@ -878,17 +936,17 @@
 		for(var i=0; i<items; i++)
 		{
 			var itemDiv = $("<div></div>");
-			this._insertElement(div, itemDiv, "append");
+			this._insertElementNoSync(div, itemDiv, "append");
 		}
 		
-		this.insertElement(div, insertType, refEle, true, true);
+		this._insertElement(div, insertType, refEle, true);
 	};
 	
 	/**
 	 * 校验insertDiv操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertDiv = function(insertType, refEle)
 	{
@@ -898,8 +956,8 @@
 	/**
 	 * 插入div元素。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertDiv = function(insertType, refEle)
 	{
@@ -924,14 +982,14 @@
 		if(styleStr)
 			div.attr("style", styleStr);
 		
-		this.insertElement(div, insertType, refEle, true, true);
+		this._insertElement(div, insertType, refEle, true);
 	};
 	
 	/**
 	 * 校验insertImage操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertImage = function(insertType, refEle)
 	{
@@ -941,9 +999,9 @@
 	/**
 	 * 插入图片元素。
 	 * 
-	 * @param imgAttr 图片设置，格式为：{ src: "", width: ..., height: ... }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param imgAttr 参考_setImageAttr()函数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertImage = function(imgAttr, insertType, refEle)
 	{
@@ -952,14 +1010,14 @@
 		
 		var img = $("<img>");
 		
-		this.insertElement(img, insertType, refEle);
-		this.setImageAttr(imgAttr, img);
+		this._insertElement(img, insertType, refEle);
+		this._setImageAttr(imgAttr, img);
 	};
 	
 	/**
 	 * 元素是否是图片。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.isImage = function(ele)
 	{
@@ -970,7 +1028,7 @@
 	/**
 	 * 获取图片元素属性。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.getImageAttr = function(ele)
 	{
@@ -994,11 +1052,19 @@
 	
 	/**
 	 * 设置图片元素属性。
-	 * 
-	 * @param imgAttr 图片设置，格式为：{ src: "", width: ..., height: ... }
-	 * @param ele 可选，参考insertElement函数的refEle参数
 	 */
 	editor.setImageAttr = function(imgAttr, ele)
+	{
+		return this._setImageAttr(imgAttr, ele);
+	};
+	
+	/**
+	 * 设置图片元素属性。
+	 * 
+	 * @param imgAttr 图片设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor._setImageAttr = function(imgAttr, ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -1017,8 +1083,8 @@
 	/**
 	 * 校验insertHyperlink操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertHyperlink = function(insertType, refEle)
 	{
@@ -1028,9 +1094,9 @@
 	/**
 	 * 插入超链接元素。
 	 * 
-	 * @param hyperlinkAttr 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param hyperlinkAttr 参考_setHyperlinkAttr()函数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertHyperlink = function(hyperlinkAttr, insertType, refEle)
 	{
@@ -1039,14 +1105,14 @@
 		
 		var a = $("<a></a>");
 		
-		this.insertElement(a, insertType, refEle);
-		this.setHyperlinkAttr(hyperlinkAttr, a);
+		this._insertElement(a, insertType, refEle);
+		this._setHyperlinkAttr(hyperlinkAttr, a);
 	};
 	
 	/**
 	 * 元素是否是超链接。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.isHyperlink = function(ele)
 	{
@@ -1057,7 +1123,7 @@
 	/**
 	 * 获取超链接元素属性。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.getHyperlinkAttr = function(ele)
 	{
@@ -1079,11 +1145,19 @@
 	
 	/**
 	 * 设置超链接元素属性。
-	 * 
-	 * @param hyperlinkAttr 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
-	 * @param ele 可选，参考insertElement函数的refEle参数
 	 */
 	editor.setHyperlinkAttr = function(hyperlinkAttr, ele)
+	{
+		return this._setHyperlinkAttr(hyperlinkAttr, ele);
+	};
+	
+	/**
+	 * 设置超链接元素属性。
+	 * 
+	 * @param hyperlinkAttr 超链接设置，格式为：{ content: "...", href: "...", target: "..." }
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor._setHyperlinkAttr = function(hyperlinkAttr, ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -1104,8 +1178,8 @@
 	/**
 	 * 校验insertVideo操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertVideo = function(insertType, refEle)
 	{
@@ -1115,9 +1189,9 @@
 	/**
 	 * 插入视频元素。
 	 * 
-	 * @param videoAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param videoAttr 参考_setVideoAttr()函数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertVideo = function(videoAttr, insertType, refEle)
 	{
@@ -1126,14 +1200,14 @@
 		
 		var ele = $("<video controls=\"controls\"></video>");
 		
-		this.insertElement(ele, insertType, refEle);
-		this.setVideoAttr(videoAttr, ele);
+		this._insertElement(ele, insertType, refEle);
+		this._setVideoAttr(videoAttr, ele);
 	};
 	
 	/**
 	 * 是否是视频元素。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.isVideo = function(ele)
 	{
@@ -1144,7 +1218,7 @@
 	/**
 	 * 获取视频元素属性。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.getVideoAttr = function(ele)
 	{
@@ -1168,11 +1242,19 @@
 	
 	/**
 	 * 设置视频元素属性。
-	 * 
-	 * @param videoAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
-	 * @param ele 可选，参考insertElement函数的refEle参数
 	 */
 	editor.setVideoAttr = function(videoAttr, ele)
+	{
+		return this._setVideoAttr(videoAttr, ele);
+	};
+	
+	/**
+	 * 设置视频元素属性。
+	 * 
+	 * @param videoAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor._setVideoAttr = function(videoAttr, ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -1191,8 +1273,8 @@
 	/**
 	 * 校验insertIframe操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertIframe = function(insertType, refEle)
 	{
@@ -1202,9 +1284,9 @@
 	/**
 	 * 插入iframe元素。
 	 * 
-	 * @param iframeAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param iframeAttr 参考_setIframeAttr()函数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertIframe = function(iframeAttr, insertType, refEle)
 	{
@@ -1213,14 +1295,14 @@
 		
 		var ele = $("<iframe></iframe>");
 		
-		this.insertElement(ele, insertType, refEle);
-		this.setIframeAttr(iframeAttr, ele);
+		this._insertElement(ele, insertType, refEle);
+		this._setIframeAttr(iframeAttr, ele);
 	};
 	
 	/**
 	 * 是否是iframe元素。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.isIframe = function(ele)
 	{
@@ -1231,7 +1313,7 @@
 	/**
 	 * 获取iframe元素属性。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.getIframeAttr = function(ele)
 	{
@@ -1255,11 +1337,19 @@
 	
 	/**
 	 * 设置iframe元素属性。
-	 * 
-	 * @param iframeAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
-	 * @param ele 可选，参考insertElement函数的refEle参数
 	 */
 	editor.setIframeAttr = function(iframeAttr, ele)
+	{
+		return this._setIframeAttr(iframeAttr, ele);
+	};
+	
+	/**
+	 * 设置iframe元素属性。
+	 * 
+	 * @param iframeAttr 视频设置，格式为：{ src: "", width: ..., height: ... }
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor._setIframeAttr = function(iframeAttr, ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -1278,8 +1368,8 @@
 	/**
 	 * 校验insertHxtitle操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertHxtitle = function(insertType, refEle)
 	{
@@ -1290,8 +1380,8 @@
 	 * 插入h1-h6元素。
 	 * 
 	 * @param model 标题模型，格式为：{ type: "h1到h6", content: "", textAlign: "" }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertHxtitle = function(model, insertType, refEle)
 	{
@@ -1306,14 +1396,14 @@
 		
 		ele.html(model.content || "");
 		
-		this.insertElement(ele, insertType, refEle);
+		this._insertElement(ele, insertType, refEle);
 	};
 	
 	/**
 	 * 校验insertLabel操作。
 	 * 
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.checkInsertLabel = function(insertType, refEle)
 	{
@@ -1324,8 +1414,8 @@
 	 * 插入标签元素。
 	 * 
 	 * @param labelAttr 标签设置，格式为：{ content: "" }
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertLabel = function(labelAttr, insertType, refEle)
 	{
@@ -1335,13 +1425,13 @@
 		var ele = $("<label></label>");
 		ele.html(labelAttr.content || "");
 		
-		this.insertElement(ele, insertType, refEle);
+		this._insertElement(ele, insertType, refEle);
 	};
 	
 	/**
 	 * 是否是标签元素。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.isLabel = function(ele)
 	{
@@ -1352,7 +1442,7 @@
 	/**
 	 * 获取标签元素属性。
 	 * 
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.getLabelAttr = function(ele)
 	{
@@ -1374,7 +1464,7 @@
 	 * 设置标签元素属性。
 	 * 
 	 * @param labelAttr 标签设置，格式为：{ content: "..." }
-	 * @param ele 可选，参考insertElement函数的refEle参数
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.setLabelAttr = function(labelAttr, ele)
 	{
@@ -1417,8 +1507,8 @@
 	 * 插入图表。
 	 * 
 	 * @param chartWidgets 要插入的图表部件对象、数组
-	 * @param insertType 可选，参考insertElement函数的insertType参数
-	 * @param refEle 可选，参考insertElement函数的refEle参数
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
 	editor.insertChart = function(chartWidgets, insertType, refEle)
 	{
@@ -1455,24 +1545,10 @@
 			chartDiv.attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
 						.html("<!--"+chartWidget.name+"-->");
 			
-			this.insertElement(chartDiv, insertType, refEle);
+			this._insertElement(chartDiv, insertType, refEle);
 		}
 		
 		this.dashboard.loadUnsolvedCharts(this._buildLoadChartAjaxOptions());
-	};
-	
-	editor._getInsertParentElement = function(refEle, insertType)
-	{
-		var insertParentEle = null;
-		
-		if(refEle.is("body"))
-			insertParentEle = refEle;
-		else if("after" == insertType || "before" == insertType)
-			insertParentEle = refEle.parent();
-		else
-			insertParentEle = refEle;
-		
-		return insertParentEle;
 	};
 	
 	/**
@@ -1559,45 +1635,6 @@
 		
 		this.dashboard.removeChart(ele);
 		this._removeElementAttr(ele, chartFactory.elementAttrConst.WIDGET);
-	};
-	
-	/**
-	 * 插入元素。
-	 * 
-	 * @param insertEle 要插入的jq元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
-	 * @param insertType 可选，插入类型："after"、"before"、"append"、"prepend"，默认为："after"
-	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
-	 * @param sync 可选，是否将插入操作同步至编辑iframe中，默认为：true
-	 * @param highlight 可选，是否为元素添加高亮样式，默认为：false
-	 */
-	editor.insertElement = function(insertEle, insertType, refEle, sync, highlight)
-	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
-		sync = (sync == null ? true : sync);
-		highlight = (highlight == null ? false : highlight);
-		
-		if(chartFactory.isString(insertEle))
-			insertEle = $(insertEle);
-		
-		this._addVisualEditIdAttr(insertEle);
-		
-		this._insertElement(refEle, insertEle, insertType);
-		
-		if(sync)
-		{
-			var editEle = this._editElement(refEle);
-			var insertEleClone = insertEle.clone();
-			this._insertElement(editEle, insertEleClone, insertType, true);
-		}
-		
-		if(highlight)
-		{
-			insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
-			$("*", insertEle).addClass(ELEMENT_CLASS_NEW_INSERT);
-		}
-		
-		this.changeFlag(true);
 	};
 	
 	/**
@@ -1745,10 +1782,9 @@
 					ele.attr("id", idVal);
 				}
 				
-				chart.elementId = idVal;
+				this._updateChartElementId(chart, idVal);
+				this._reRenderChart(chart);
 			}
-			
-			this._reRenderChart(chart);
 		}
 	};
 	
@@ -1779,8 +1815,6 @@
 		if(!this.checkDeleteElement(ele))
 			return false;
 		
-		var editEle = this._editElement(ele);
-		
 		//应先删除元素包含的所有图表
 		var chartEles = this._getChartElements(ele);
 		var thisEditor = this;
@@ -1802,16 +1836,7 @@
 			}
 		}
 		
-		ele.remove();
-		this._deleteEditEle(editEle);
-		
-		this.changeFlag(true);
-	};
-	
-	editor._deleteEditEle = function(editEle)
-	{
-		editEle.before(DELETE_ELE_FORMAT_FLAG);
-		editEle.remove();
+		this._deleteElement(ele);
 	};
 	
 	/**
@@ -1866,18 +1891,6 @@
 		});
 	};
 	
-	editor._resizeChart = function(chart)
-	{
-		if(!chart)
-			return;
-		
-		try
-		{
-			chart.resize();
-		}
-		catch(e){}
-	};
-	
 	/**
 	 * 获取元素样式对象。
 	 * 
@@ -1924,71 +1937,6 @@
 	{
 		var ele = this._editElement($(document.body));
 		return this._getElementStyleObj(ele);
-	};
-	
-	editor._spitStyleAndOption = function(styleObj)
-	{
-		var optionObj =
-		{
-			syncChartTheme: (styleObj.syncChartTheme == true || styleObj.syncChartTheme == "true"),
-			className: styleObj.className
-		};
-		
-		var plainStyleObj = $.extend({}, styleObj);
-		plainStyleObj.syncChartTheme = undefined;
-		plainStyleObj.className = undefined;
-		
-		var re =
-		{
-			style: plainStyleObj,
-			option: optionObj
-		};
-		
-		return re;
-	};
-	
-	editor._evalElementChartThemeByStyleObj = function(chartEle, styleEle, styleObj)
-	{
-		var nowTheme = this._getElementChartTheme(chartEle);
-		var styleTheme = { color: null, actualBackgroundColor: null, fontSize: null };
-		
-		var color = styleObj['color'];
-		var bgColor = styleObj['background-color'];
-		var fontSize = styleObj['font-size'];
-		
-		if(!chartFactory.isNullOrEmpty(color))
-			styleTheme.color = color;
-		
-		//始终将图表元素的背景色置为null，因为背景色会自动继承父级元素
-		styleTheme.backgroundColor = null;
-		
-		if(!chartFactory.isNullOrEmpty(bgColor))
-		{
-			//应忽略透明度
-			var bgColorObj = chartFactory.parseColor(bgColor);
-			bgColorObj.a = undefined;
-			styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
-		}
-		
-		if(!chartFactory.isNullOrEmpty(fontSize))
-		{
-			//从元素的css中取才能获取字体尺寸像素数
-			styleTheme.fontSize = styleEle.css("font-size");
-		}
-		
-		if(!nowTheme)
-		{
-			return styleTheme;
-		}
-		else
-		{
-			nowTheme.color = styleTheme.color;
-			nowTheme.backgroundColor = styleTheme.backgroundColor;
-			nowTheme.actualBackgroundColor = styleTheme.actualBackgroundColor;
-			nowTheme.fontSize = styleTheme.fontSize;
-			
-			return nowTheme;
-		}
 	};
 	
 	/**
@@ -2211,9 +2159,9 @@
 		var eleAttrValue = this._serializeForAttrValue(attrValuesMerge);
 		
 		if(this._isEmptyJsonObjStr(eleAttrValue))
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, true);
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES);
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue, true);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue);
 		
 		this._reRenderChart(chart);
 	};
@@ -2367,38 +2315,34 @@
 		}
 	};
 	
-	editor._setElementChartOptions = function(ele, chartOptionsStr, sync)
+	editor._resizeChart = function(chart)
+	{
+		if(!chart)
+			return;
+		
+		try
+		{
+			chart.resize();
+		}
+		catch(e){}
+	};
+	
+	editor._setElementChartOptions = function(ele, chartOptionsStr)
 	{
 		if(!chartOptionsStr)
 		{
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, sync);
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.OPTIONS);
 			return;
 		}
 		
 		var attrValue = (chartOptionsStr ? chartOptionsStr : "{}");
-		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue, sync);
+		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue);
 	};
 	
 	editor._getElementChartOptions = function(ele)
 	{
 		var optionsStr = ele.attr(chartFactory.elementAttrConst.OPTIONS);
 		return optionsStr;
-	};
-	
-	/**
-	 * 校验元素不为空。
-	 *
-	 * @param ele
-	 */
-	editor._checkNotEmptyElement = function(ele)
-	{
-		if(this._isEmptyElement(ele))
-		{
-			this.tipInfo(i18n.selectedElementRequired);
-			return false;
-		}
-		
-		return true;
 	};
 	
 	editor._getElementChartTheme = function(ele)
@@ -2411,7 +2355,7 @@
 		return chartFactory.evalSilently(themeStr, {});
 	};
 	
-	editor._setElementChartTheme = function(ele, chartTheme, sync)
+	editor._setElementChartTheme = function(ele, chartTheme)
 	{
 		chartTheme = $.extend(true, {}, chartTheme); 
 		
@@ -2456,37 +2400,101 @@
 		var attrValue = this._serializeForAttrValue(trim);
 		
 		if(this._isEmptyJsonObjStr(attrValue))
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME, sync);
+			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME);
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue, sync);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue);
 	};
 	
-	editor._setElementStyleAppend = function(ele, styleObj, sync)
+	/**
+	 * 更新图表元素ID。
+	 */
+	editor._updateChartElementId = function(chart, elementId)
 	{
-		this._setElementStyle(ele, styleObj, sync, false);
+		chart.elementId = elementId;
 	};
 	
-	editor._setElementStyle = function(ele, styleObj, sync, strictSet)
+	/**
+	 * 插入元素，同时同步至编辑HTML中。
+	 * 
+	 * @param insertEle 要插入的jq元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
+	 * @param insertType 可选，插入类型："after"、"before"、"append"、"prepend"，默认为："after"
+	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
+	 * @param highlight 可选，是否为元素添加高亮样式，默认为：false
+	 */
+	editor._insertElement = function(insertEle, insertType, refEle, highlight)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		highlight = (highlight == null ? false : highlight);
+		
+		if(chartFactory.isString(insertEle))
+			insertEle = $(insertEle);
+		
+		this._addVisualEditIdAttr(insertEle);
+		
+		this._insertElementNoSync(refEle, insertEle, insertType);
+		
+		//同步至编辑HTML中
+		var editEle = this._editElement(refEle);
+		var insertEleClone = insertEle.clone();
+		this._insertElementNoSync(editEle, insertEleClone, insertType, true);
+		
+		if(highlight)
+		{
+			insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
+			$("*", insertEle).addClass(ELEMENT_CLASS_NEW_INSERT);
+		}
+		
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 删除元素，同时同步至编辑HTML中。
+	 */
+	editor._deleteElement = function(ele)
+	{
+		var editEle = this._editElement(ele);
+		
+		editEle.before(DELETE_ELE_FORMAT_FLAG);
+		editEle.remove();
+		
+		ele.before(DELETE_ELE_FORMAT_FLAG);
+		ele.remove();
+		
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 追加设置元素style属性，同时同步至编辑HTML中。
+	 */
+	editor._setElementStyleAppend = function(ele, styleObj)
+	{
+		this._setElementStyle(ele, styleObj, false);
+	};
+	
+	/**
+	 * 设置元素style属性，同时同步至编辑HTML中。
+	 */
+	editor._setElementStyle = function(ele, styleObj, strictSet)
 	{
 		styleObj = (styleObj || {});
-		sync = (sync == null ? true : sync);
 		
 		this._setElementStyleNoSync(ele, styleObj, strictSet);
 		
-		if(sync)
-		{
-			var editEle = this._editElement(ele);
-			this._setElementStyleNoSync(editEle, styleObj, strictSet);
-		}
+		//同步至编辑HTML中
+		var editEle = this._editElement(ele);
+		this._setElementStyleNoSync(editEle, styleObj, strictSet);
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
 	};
 	
-	editor._setElementClass = function(ele, className, sync)
+	/**
+	 * 设置元素class属性，同时同步至编辑HTML中。
+	 */
+	editor._setElementClass = function(ele, className)
 	{
 		className = (className || "");
-		sync = (sync == null ? true : sync);
 		
 		var editEle = this._editElement(ele);
 		var removeClassName = editEle.attr("class");
@@ -2494,26 +2502,145 @@
 		if(removeClassName)
 			ele.removeClass(removeClassName);
 		
-		if(sync)
-		{
-			if(!className)
-				editEle.removeAttr("class");
-			else
-				editEle.removeClass(removeClassName);
-		}
+		//同步至编辑HTML中
+		if(!className)
+			editEle.removeAttr("class");
+		else
+			editEle.removeClass(removeClassName);
 		
 		if(className)
 		{
 			ele.addClass(className);
-			
-			if(sync)
-			{
-				editEle.addClass(className);
-			}
+			//同步至编辑HTML中
+			editEle.addClass(className);
 		}
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
+	};
+	
+	/**
+	 * 设置元素文本内容，同时同步至编辑HTML中。
+	 */
+	editor._setElementText = function(ele, text)
+	{
+		text = (text || "");
+		
+		ele.text(text);
+		
+		//同步至编辑HTML中
+		var editEle = this._editElement(ele);
+		editEle.text(text);
+		
+		this._reSelectElementIf(ele);
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 设置元素属性，同时同步至编辑HTML中。
+	 */
+	editor._setElementAttr = function(ele, name, value)
+	{
+		ele.attr(name, value);
+		
+		//同步至编辑HTML中
+		var editEle = this._editElement(ele);
+		editEle.attr(name, value);
+		
+		this._reSelectElementIf(ele);
+		this.changeFlag(true);
+	};
+	
+	/**
+	 * 删除元素属性，同时同步至编辑HTML中。
+	 */
+	editor._removeElementAttr = function(ele, name)
+	{
+		ele.removeAttr(name);
+		
+		//同步至编辑HTML中
+		var editEle = this._editElement(ele);
+		editEle.removeAttr(name);
+		
+		this._reSelectElementIf(ele);
+		this.changeFlag(true);
+	};
+	
+	editor._insertElementNoSync = function(refEle, insertEle, insertType, isEditHtml)
+	{
+		isEditHtml = (isEditHtml == null ? false : isEditHtml);
+		
+		var refEleLevel = this._evalElementLevel(refEle, isEditHtml);
+		
+		if(insertType == "after")
+		{
+			refEle.after(insertEle);
+			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+		}
+		else if(insertType == "before")
+		{
+			refEle.before(insertEle);
+			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+		}
+		else if(insertType == "append")
+		{
+			var children = refEle.children();
+			
+			if(this._isEmptyElement(children))
+			{
+				var innerHtml = this._innerHTML(refEle);
+				if(this._isOnlyEmptyOrFormat(innerHtml))
+				{
+					this._innerHTML(refEle, "");
+				}
+				
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
+				refEle.append(insertEle);
+				
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+			}
+			else
+			{
+				this._insertElementNoSync($(children[children.length-1]), insertEle, "after", isEditHtml);
+				return;
+			}
+		}
+		else if(insertType == "prepend")
+		{
+			var insertTailFormat = false;
+			
+			var children = refEle.children();
+			if(this._isEmptyElement(children))
+			{
+				var innerHtml = this._innerHTML(refEle);
+				if(this._isOnlyEmptyOrFormat(innerHtml))
+				{
+					insertTailFormat = true;
+					this._innerHTML(refEle, "");
+				}
+			}
+			
+			refEle.prepend(insertEle);
+			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
+			
+			if(insertTailFormat)
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+		}
+		else
+			throw new Error("Unsupported insert type : " + insertType);
+		
+		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
+		if(isEditHtml)
+		{
+			var myInnerHtml = this._innerHTML(insertEle);
+			if(myInnerHtml)
+			{
+				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
+				var toText = this._genFormatTabs(this._evalElementLevel(insertEle, isEditHtml)-1) + INSERT_ELE_FORMAT_END;
+				myInnerHtml = myInnerHtml.replace(fromText, toText);
+				this._innerHTML(insertEle, myInnerHtml);
+			}
+		}
 	};
 	
 	editor._setElementStyleNoSync = function(ele, styleObj, strictSet)
@@ -2618,56 +2745,69 @@
 		"line-height": true
 	};
 	
-	//设置元素文本内容
-	editor._setElementText = function(ele, text, sync)
+	editor._spitStyleAndOption = function(styleObj)
 	{
-		text = (text || "");
-		sync = (sync == null ? true : sync);
-		
-		ele.text(text);
-		
-		if(sync)
+		var optionObj =
 		{
-			var editEle = this._editElement(ele);
-			editEle.text(text);
-		}
+			syncChartTheme: (styleObj.syncChartTheme == true || styleObj.syncChartTheme == "true"),
+			className: styleObj.className
+		};
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
+		var plainStyleObj = $.extend({}, styleObj);
+		plainStyleObj.syncChartTheme = undefined;
+		plainStyleObj.className = undefined;
+		
+		var re =
+		{
+			style: plainStyleObj,
+			option: optionObj
+		};
+		
+		return re;
 	};
 	
-	//设置元素属性
-	editor._setElementAttr = function(ele, name, value, sync)
+	editor._evalElementChartThemeByStyleObj = function(chartEle, styleEle, styleObj)
 	{
-		sync = (sync == null ? true : sync);
+		var nowTheme = this._getElementChartTheme(chartEle);
+		var styleTheme = { color: null, actualBackgroundColor: null, fontSize: null };
 		
-		ele.attr(name, value);
+		var color = styleObj['color'];
+		var bgColor = styleObj['background-color'];
+		var fontSize = styleObj['font-size'];
 		
-		if(sync)
+		if(!chartFactory.isNullOrEmpty(color))
+			styleTheme.color = color;
+		
+		//始终将图表元素的背景色置为null，因为背景色会自动继承父级元素
+		styleTheme.backgroundColor = null;
+		
+		if(!chartFactory.isNullOrEmpty(bgColor))
 		{
-			var editEle = this._editElement(ele);
-			editEle.attr(name, value);
+			//应忽略透明度
+			var bgColorObj = chartFactory.parseColor(bgColor);
+			bgColorObj.a = undefined;
+			styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
 		}
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
-	};
-	
-	//删除元素属性
-	editor._removeElementAttr = function(ele, name, sync)
-	{
-		sync = (sync == null ? true : sync);
-		
-		ele.removeAttr(name);
-		
-		if(sync)
+		if(!chartFactory.isNullOrEmpty(fontSize))
 		{
-			var editEle = this._editElement(ele);
-			editEle.removeAttr(name);
+			//从元素的css中取才能获取字体尺寸像素数
+			styleTheme.fontSize = styleEle.css("font-size");
 		}
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
+		if(!nowTheme)
+		{
+			return styleTheme;
+		}
+		else
+		{
+			nowTheme.color = styleTheme.color;
+			nowTheme.backgroundColor = styleTheme.backgroundColor;
+			nowTheme.actualBackgroundColor = styleTheme.actualBackgroundColor;
+			nowTheme.fontSize = styleTheme.fontSize;
+			
+			return nowTheme;
+		}
 	};
 	
 	editor._reSelectElementIf = function(ele)
@@ -2720,83 +2860,6 @@
 		});
 	};
 	
-	editor._insertElement = function(refEle, insertEle, insertType, isEditHtml)
-	{
-		isEditHtml = (isEditHtml == null ? false : isEditHtml);
-		
-		var refEleLevel = this._evalElementLevel(refEle, isEditHtml);
-		
-		if(insertType == "after")
-		{
-			refEle.after(insertEle);
-			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-		}
-		else if(insertType == "before")
-		{
-			refEle.before(insertEle);
-			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-		}
-		else if(insertType == "append")
-		{
-			var children = refEle.children();
-			
-			if(this._isEmptyElement(children))
-			{
-				var innerHtml = this._innerHTML(refEle);
-				if(this._isOnlyEmptyOrFormat(innerHtml))
-				{
-					this._innerHTML(refEle, "");
-				}
-				
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
-				refEle.append(insertEle);
-				
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-			}
-			else
-			{
-				this._insertElement($(children[children.length-1]), insertEle, "after", isEditHtml);
-				return;
-			}
-		}
-		else if(insertType == "prepend")
-		{
-			var insertTailFormat = false;
-			
-			var children = refEle.children();
-			if(this._isEmptyElement(children))
-			{
-				var innerHtml = this._innerHTML(refEle);
-				if(this._isOnlyEmptyOrFormat(innerHtml))
-				{
-					insertTailFormat = true;
-					this._innerHTML(refEle, "");
-				}
-			}
-			
-			refEle.prepend(insertEle);
-			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
-			
-			if(insertTailFormat)
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-		}
-		else
-			throw new Error("Unsupported insert type : " + insertType);
-		
-		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
-		if(isEditHtml)
-		{
-			var myInnerHtml = this._innerHTML(insertEle);
-			if(myInnerHtml)
-			{
-				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
-				var toText = this._genFormatTabs(this._evalElementLevel(insertEle, isEditHtml)-1) + INSERT_ELE_FORMAT_END;
-				myInnerHtml = myInnerHtml.replace(fromText, toText);
-				this._innerHTML(insertEle, myInnerHtml);
-			}
-		}
-	};
-	
 	editor._innerHTML = function(ele, html)
 	{
 		if(html === undefined)
@@ -2827,6 +2890,7 @@
 			ele = ele.parent();
 		}
 		
+		//编辑HTML做了转换，多内嵌了一层，参考editor._toEditIframeBodyHtml()函数，所以这里要减一层
 		if(level > 0 && isEditHtml)
 			level -= 1;
 		
@@ -2845,6 +2909,20 @@
 			return true;
 		
 		return false;
+	};
+	
+	editor._getInsertParentElement = function(refEle, insertType)
+	{
+		var insertParentEle = null;
+		
+		if(refEle.is("body"))
+			insertParentEle = refEle;
+		else if("after" == insertType || "before" == insertType)
+			insertParentEle = refEle.parent();
+		else
+			insertParentEle = refEle;
+		
+		return insertParentEle;
 	};
 	
 	editor._trimInsertType = function(refEle, insertType)
@@ -2911,6 +2989,17 @@
 			$ele.removeClass(ELEMENT_CLASS_NEW_INSERT);
 			$ele = $ele.parent();
 		}
+	};
+	
+	editor._checkNotEmptyElement = function(ele)
+	{
+		if(this._isEmptyElement(ele))
+		{
+			this.tipInfo(i18n.selectedElementRequired);
+			return false;
+		}
+		
+		return true;
 	};
 	
 	editor._isEmptyElement = function(ele)
@@ -3291,64 +3380,6 @@
 		};
 		
 		return re;
-	};
-	
-	/**
-	 * 获取元素节点路径信息。
-	 */
-	editor.getElementPath = function(ele)
-	{
-		ele = $(ele);
-		
-		var paths = [];
-		
-		while(true)
-		{
-			if(ele.length == 0)
-				break;
-			
-			var isBody =  ele.is("body");
-			
-			if(!this._isSelectableElement(ele) && !isBody)
-			{
-				ele = ele.parent();
-				continue;
-			}
-			
-			var editEle = this._editElement(ele);
-			var pathInfo =
-			{
-				tagName: (ele[0].tagName || "").toLowerCase(),
-				selected: this._isSelectedElement(ele),
-				id: editEle.attr("id"),
-				className: editEle.attr("class"),
-				cssDisplay: ele.css("display"),
-				visualEditId: editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
-			};
-			
-			var displayName = pathInfo.tagName;
-			
-			if(this._isDisplayGrid(pathInfo.cssDisplay))
-				displayName += "(grid)";
-			else if(this._isDisplayFlex(pathInfo.cssDisplay))
-				displayName += "(flex)";
-			
-			if(pathInfo.id)
-				displayName += "#"+pathInfo.id;
-			else if(pathInfo.className)
-				displayName += "."+pathInfo.className;
-			
-			pathInfo.displayName = displayName;
-			
-			paths.push(pathInfo);
-			
-			if(isBody)
-				break;
-			else
-				ele = ele.parent();
-		}
-		
-		return paths.reverse();
 	};
 	
 	editor._isDisplayGrid = function(display)
