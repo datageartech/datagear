@@ -235,36 +235,24 @@
 	};
 	
 	//页面点击回调函数，格式为：function(event){}
-	editor.clickCallback = function(event)
-	{
-		
-	};
+	editor.clickCallback = function(event){};
 	
 	/**
 	 * 选择元素回调函数。
 	 * 
 	 * @param ele JQ元素
 	 */
-	editor.selectElementCallback = function(ele)
-	{
-		
-	};
+	editor.selectElementCallback = function(ele){};
 	
 	/**
 	 * 取消选择元素回调函数。
 	 * 
 	 * @param ele JQ元素
 	 */
-	editor.deselectElementCallback = function(ele)
-	{
-		
-	};
+	editor.deselectElementCallback = function(ele){};
 	
 	//页面卸载前回调函数，比如：保存编辑HTML
-	editor.beforeunloadCallback = function()
-	{
-		
-	};
+	editor.beforeunloadCallback = function(){};
 	
 	/**
 	 * 获取/设置元素边界线启用禁用/状态。
@@ -322,7 +310,7 @@
 		
 		this.deselectElement();
 		
-		if(ele && ele.length > 0)
+		if(!this._isEmptyElement(ele))
 		{
 			this._removeElementClassNewInsert(ele);
 			this._selectElement(ele);
@@ -345,7 +333,7 @@
 	{
 		ele = this._currentElement(ele, true);
 		
-		if(ele.length > 0)
+		if(!this._isEmptyElement(ele))
 		{
 			this._deselectElement(ele);
 			
@@ -380,13 +368,13 @@
 		var target = ele;
 		while((target = target.next()))
 		{
-			if(target.length == 0 || this._isSelectableElement(target))
+			if(this._isEmptyElement(target) || this._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(target.length == 0)
+		if(!this._isEmptyElement(target))
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableNextElement);
@@ -423,13 +411,13 @@
 		var target = ele;
 		while((target = target.prev()))
 		{
-			if(target.length == 0 || this._isSelectableElement(target))
+			if(this._isEmptyElement(target) || this._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(target.length == 0)
+		if(this._isEmptyElement(target))
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectablePrevElement);
@@ -463,7 +451,7 @@
 		var target = firstChild;
 		while(true)
 		{
-			if(target.length == 0 || this._isSelectableElement(target))
+			if(this._isEmptyElement(target) || this._isSelectableElement(target))
 			{
 				break;
 			}
@@ -471,7 +459,7 @@
 			target = target.next();
 		}
 		
-		if(target.length == 0)
+		if(this._isEmptyElement(target))
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableChildElement);
@@ -512,13 +500,13 @@
 		var target = ele;
 		while((target = target.parent()))
 		{
-			if(target.length == 0 || target.is("body") || this._isSelectableElement(target))
+			if(this._isEmptyElement(target) || target.is("body") || this._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(target.is("body") || target.length == 0)
+		if(target.is("body") || this._isEmptyElement(target))
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableParentElement);
@@ -697,7 +685,7 @@
 		
 		while(true)
 		{
-			if(ele.length == 0)
+			if(this._isEmptyElement(ele))
 				break;
 			
 			var isBody =  ele.is("body");
@@ -1660,7 +1648,7 @@
 	editor.bindChart = function(chartWidget, ele)
 	{
 		if(!chartWidget)
-			return;
+			return false;
 		
 		ele = this._currentElement(ele, true);
 		
@@ -1744,7 +1732,7 @@
 		
 		var firstChild = $("> *:first-child", ele);
 		
-		if(firstChild.length > 0)
+		if(!this._isEmptyElement(firstChild))
 		{
 			this.tipInfo(i18n.canEditOnlyTextElement);
 			return false;
@@ -2033,7 +2021,7 @@
 		if(so.option.syncChartTheme)
 		{
 			var chartTheme = this._evalElementChartThemeByStyleObj($(document.body), $(document.body), so.style);
-			this.setGlobalChartTheme(chartTheme);
+			this._setGlobalChartTheme(chartTheme);
 		}
 		
 		return body;
@@ -2107,6 +2095,11 @@
 	 * @returns 元素
 	 */
 	editor.setGlobalChartTheme = function(chartTheme)
+	{
+		return this._setGlobalChartTheme(chartTheme);
+	};
+	
+	editor._setGlobalChartTheme = function(chartTheme)
 	{
 		var ele = $(document.body);
 		
