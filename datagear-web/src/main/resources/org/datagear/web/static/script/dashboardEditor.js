@@ -1854,12 +1854,12 @@
 			//ID属性需要特殊处理，图表对象必须同步设置elementId
 			if(/^\s*id\s*$/i.test(name))
 			{
-				var idVal = ele.attr("id");
+				var idVal = ele.attr(name);
 				
 				if(!idVal)
 				{
 					idVal = chartFactory.uid();
-					ele.attr("id", idVal);
+					this._setElementAttr(ele, name, idVal);
 				}
 				
 				this._updateChartElementId(chart, idVal);
@@ -2532,14 +2532,6 @@
 	};
 	
 	/**
-	 * 更新图表元素ID。
-	 */
-	editor._updateChartElementId = function(chart, elementId)
-	{
-		chart.elementId = elementId;
-	};
-	
-	/**
 	 * 插入元素，同时同步至编辑HTML中。
 	 * 
 	 * @param insertEle 要插入的jq元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
@@ -2581,10 +2573,10 @@
 		var editEle = this._editElement(ele);
 		
 		editEle.before(DELETE_ELE_FORMAT_FLAG);
-		editEle.remove();
+		this._deleteElementNoSync(editEle);
 		
 		ele.before(DELETE_ELE_FORMAT_FLAG);
-		ele.remove();
+		this._deleteElementNoSync(ele);
 		
 		this.changeFlag(true);
 	};
@@ -2625,19 +2617,19 @@
 		var removeClassName = editEle.attr("class");
 		
 		if(removeClassName)
-			ele.removeClass(removeClassName);
+			this._removeElementClassNoSync(ele, removeClassName);
 		
 		//同步至编辑HTML中
 		if(!className)
-			editEle.removeAttr("class");
+			this._removeElementAttrNoSync(editEle, "class");
 		else
-			editEle.removeClass(removeClassName);
+			this._removeElementClassNoSync(editEle, removeClassName);
 		
 		if(className)
 		{
-			ele.addClass(className);
+			this._addElementClassNoSync(ele, className);
 			//同步至编辑HTML中
-			editEle.addClass(className);
+			this._addElementClassNoSync(editEle, className);
 		}
 		
 		this._reSelectElementIf(ele);
@@ -2651,11 +2643,11 @@
 	{
 		text = (text || "");
 		
-		ele.text(text);
+		this._setElementTextNoSync(ele, text);
 		
 		//同步至编辑HTML中
 		var editEle = this._editElement(ele);
-		editEle.text(text);
+		this._setElementTextNoSync(editEle, text);
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
@@ -2666,11 +2658,11 @@
 	 */
 	editor._setElementAttr = function(ele, name, value)
 	{
-		ele.attr(name, value);
+		this._setElementAttrNoSync(ele, name, value);
 		
 		//同步至编辑HTML中
 		var editEle = this._editElement(ele);
-		editEle.attr(name, value);
+		this._setElementAttrNoSync(editEle, name, value);
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
@@ -2681,14 +2673,44 @@
 	 */
 	editor._removeElementAttr = function(ele, name)
 	{
-		ele.removeAttr(name);
+		this._removeElementAttrNoSync(ele, name);
 		
 		//同步至编辑HTML中
 		var editEle = this._editElement(ele);
-		editEle.removeAttr(name);
+		this._removeElementAttrNoSync(editEle, name);
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
+	};
+	
+	editor._updateChartElementId = function(chart, elementId)
+	{
+		chart.elementId = elementId;
+	};
+	
+	editor._addElementClassNoSync = function(ele, className)
+	{
+		ele.addClass(className);
+	};
+	
+	editor._removeElementClassNoSync = function(ele, className)
+	{
+		ele.removeClass(className);
+	};
+	
+	editor._setElementTextNoSync = function(ele, text)
+	{
+		ele.text(text);
+	};
+	
+	editor._setElementAttrNoSync = function(ele, name, value)
+	{
+		ele.attr(name, value);
+	};
+	
+	editor._removeElementAttrNoSync = function(ele, name)
+	{
+		ele.removeAttr(name);
 	};
 	
 	editor._insertElementNoSync = function(refEle, insertEle, insertType, isEditHtml)
@@ -2768,6 +2790,11 @@
 		}
 	};
 	
+	editor._deleteElementNoSync = function(ele)
+	{
+		ele.remove();
+	};
+	
 	editor._setElementStyleNoSync = function(ele, styleObj, strictSet)
 	{
 		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
@@ -2799,9 +2826,12 @@
 		}
 		
 		if($.isEmptyObject(nowStyleObj))
-			ele.removeAttr("style");
+			this._removeElementAttrNoSync(ele, "style");
 		else
-			chartFactory.elementStyle(ele, nowStyleObj);
+		{
+			var cssText = chartFactory.styleString(nowStyleObj);
+			this._setElementAttrNoSync(ele, "style", cssText);
+		}
 	};
 	
 	editor._getElementStyleObj = function(ele)
