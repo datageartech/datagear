@@ -264,7 +264,7 @@
 	{
 		var body = $(document.body);
 		
-		if(arguments.length == 0)
+		if(enable === undefined)
 			return body.hasClass(BODY_CLASS_ELEMENT_BOUNDARY);
 		
 		if(enable)
@@ -353,7 +353,7 @@
 	editor.selectNextElement = function(ele, tip)
 	{
 		//(true)、(false)
-		if(arguments.length == 1 && (ele === true || ele === false))
+		if(tip === undefined && (ele === true || ele === false))
 		{
 			tip = ele;
 			ele = undefined;
@@ -396,7 +396,7 @@
 	editor.selectPrevElement = function(ele, tip)
 	{
 		//(true)、(false)
-		if(arguments.length == 1 && (ele === true || ele === false))
+		if(tip === undefined && (ele === true || ele === false))
 		{
 			tip = ele;
 			ele = undefined;
@@ -438,7 +438,7 @@
 	editor.selectFirstChildElement = function(ele, tip)
 	{
 		//(true)、(false)
-		if(arguments.length == 1 && (ele === true || ele === false))
+		if(tip === undefined && (ele === true || ele === false))
 		{
 			tip = ele;
 			ele = undefined;
@@ -480,7 +480,7 @@
 	editor.selectParentElement = function(ele, tip)
 	{
 		//(true)、(false)
-		if(arguments.length == 1 && (ele === true || ele === false))
+		if(tip === undefined && (ele === true || ele === false))
 		{
 			tip = ele;
 			ele = undefined;
