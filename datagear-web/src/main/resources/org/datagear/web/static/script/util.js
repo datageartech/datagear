@@ -1589,6 +1589,49 @@
 	};
 	
 	/**
+	 * 静默执行函数。
+	 * 
+	 * @param func 函数
+	 * @param exceptionHandler 可选，异常处理函数
+	 */
+	$.executeSilently = function(func, exceptionHandler)
+	{
+		try
+		{
+			return func();
+		}
+		catch(e)
+		{
+			if(exceptionHandler)
+			{
+				return exceptionHandler(e);
+			}
+			else
+			{
+				$.logException(e);
+			}
+		}
+	};
+	
+	/**
+	 * 记录异常日志。
+	 * 
+	 * @param exception 异常对象、异常消息字符串
+	 */
+	$.logException = function(exception)
+	{
+		if(typeof(console) != "undefined")
+		{
+			if(console.error)
+				console.error(exception);
+			else if(console.warn)
+				console.warn(exception);
+			else if(console.info)
+				console.info(exception);
+		}
+	};
+	
+	/**
 	 * 获取/设置本地存储条目
 	 */
 	$.localStorageItem = function(name, value)

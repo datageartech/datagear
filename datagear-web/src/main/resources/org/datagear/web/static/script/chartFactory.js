@@ -5891,7 +5891,7 @@
 		{
 			if(exceptionHandler)
 			{
-				exceptionHandler(e);
+				return exceptionHandler(e);
 			}
 			else
 			{

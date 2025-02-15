@@ -809,15 +809,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !dashboardEditor.checkBindChart())
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.bindChart(chartWidgets ? chartWidgets[0] : null);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 		
 		po.tipChartPermissionIfNeed(chartWidgets);
 	};
@@ -830,15 +825,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertChart(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertChart(chartWidgets, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 		
 		po.tipChartPermissionIfNeed(chartWidgets);
 	};
@@ -851,15 +841,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertGridLayout(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertGridLayout(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.insertVeFlexLayout = function(model)
@@ -870,15 +855,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertFlexLayout(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertFlexLayout(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.insertVeHxtitle = function(model)
@@ -889,15 +869,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertHxtitle(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertHxtitle(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.insertVeTextElement = function(model)
@@ -908,15 +883,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertLabel(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertLabel(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.updateVeTextElement = function(model)
@@ -926,15 +896,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !dashboardEditor.checkSetElementText())
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setElementText(model.content);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.insertVeImage = function(model)
@@ -945,15 +910,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertImage(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertImage(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.updateVeImage = function(model)
@@ -963,15 +923,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setImageAttr(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.insertVeHyperlink = function(model)
@@ -982,15 +937,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertHyperlink(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertHyperlink(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.updateVeHyperlink = function(model)
@@ -1000,15 +950,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setHyperlinkAttr(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.insertVeVideo = function(model)
@@ -1019,15 +964,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertVideo(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertVideo(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.updateVeVideo = function(model)
@@ -1037,15 +977,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setVideoAttr(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.setVeChartOptions = function(model, global)
@@ -1055,18 +990,13 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			if(global)
 				dashboardEditor.setGlobalChartOptions(model.value);
 			else
 				dashboardEditor.setElementChartOptions(model.value);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 
 	po.setVeChartTheme = function(model, global)
@@ -1076,18 +1006,13 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			if(global)
 				dashboardEditor.setGlobalChartTheme(model);
 			else
 				dashboardEditor.setElementChartTheme(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.setVeElementChartAttrValues = function(model)
@@ -1097,15 +1022,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setElementChartAttrValues(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.setVeStyle = function(model, global)
@@ -1115,18 +1035,13 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			if(global)
 				dashboardEditor.setGlobalStyle(model);
 			else
 				dashboardEditor.setElementStyle(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.setVeEleId = function(model)
@@ -1136,15 +1051,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setElementAttr("id", model.value);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.insertVeIframe = function(model)
@@ -1155,15 +1065,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertIframe(insertType))
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.insertIframe(model, po.veCurrentInsertType);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.updateVeIframe = function(model)
@@ -1173,15 +1078,10 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor)
 			return false;
 		
-		try
+		$.executeSilently(function()
 		{
 			dashboardEditor.setIframeAttr(model);
-		}
-		catch(e)
-		{
-			chartFactory.logException(e);
-			return false;
-		}
+		});
 	};
 	
 	po.veQuickExecute = function(tab)

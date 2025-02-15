@@ -374,7 +374,7 @@
 			}
 		}
 		
-		if(!this._isEmptyElement(target))
+		if(this._isEmptyElement(target))
 		{
 			if(tip)
 				this.tipInfo(i18n.noSelectableNextElement);
