@@ -66,12 +66,19 @@
 	
 	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
+	var EDIT_BODY_CLASS_FLAG = (editor.EDIT_BODY_CLASS_FLAG = "dg-edit-body");
+	
 	var INSERT_ELE_FORMAT_START = (editor.INSERT_ELE_FORMAT_START = "<!--dgInsertFmtStart-->");
 	var INSERT_ELE_FORMAT_END = (editor.INSERT_ELE_FORMAT_END = "<!--dgInsertFmtEnd-->");
 	var DELETE_ELE_FORMAT_FLAG = (editor.DELETE_ELE_FORMAT_FLAG = "<!--dgDeleteFmtFlag-->");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.LOAD_CHART_FOR_EDITOR_PARAM
 	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
+	
+	var INSERT_TYPE_APPEND = (editor.INSERT_TYPE_APPEND = "append");
+	var INSERT_TYPE_PREPEND = (editor.INSERT_TYPE_PREPEND = "prepend");
+	var INSERT_TYPE_AFTER = (editor.INSERT_TYPE_AFTER = "after");
+	var INSERT_TYPE_BEFORE = (editor.INSERT_TYPE_BEFORE = "before");
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
@@ -857,7 +864,7 @@
 		for(var i=0; i<rows; i++)
 		{
 			for(var j=0; j<columns; j++)
-				this._insertElementNoSync(div, $("<div></div>"), "append");
+				this._insertElementFormat(div, $("<div></div>"), INSERT_TYPE_APPEND);
 		}
 		
 		this._insertElement(div, insertType, refEle, true);
@@ -932,7 +939,7 @@
 		for(var i=0; i<items; i++)
 		{
 			var itemDiv = $("<div></div>");
-			this._insertElementNoSync(div, itemDiv, "append");
+			this._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
 		}
 		
 		this._insertElement(div, insertType, refEle, true);
@@ -1545,7 +1552,7 @@
 		insertType = this._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
-		if(this.isChartElement(refEle) && (insertType == "append" || insertType == "prepend"))
+		if(this.isChartElement(refEle) && (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND))
 		{
 			this.tipInfo(i18n.insertInsideChartOnChartEleDenied);
 			return false;
@@ -2535,7 +2542,7 @@
 	 * 插入元素，同时同步至编辑HTML中。
 	 * 
 	 * @param insertEle 要插入的jq元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
-	 * @param insertType 可选，插入类型："after"、"before"、"append"、"prepend"，默认为："after"
+	 * @param insertType 可选，插入类型：INSERT_TYPE_*
 	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
 	 * @param highlight 可选，是否为元素添加高亮样式，默认为：false
 	 */
@@ -2549,12 +2556,12 @@
 			insertEle = $(insertEle);
 		
 		this._addVisualEditIdAttr(insertEle);
-		this._insertElementNoSync(refEle, insertEle, insertType);
+		this._insertElementFormat(refEle, insertEle, insertType);
 		
 		//同步至编辑HTML中
 		var editEle = this._editElement(refEle);
 		var insertEleClone = insertEle.clone();
-		this._insertElementNoSync(editEle, insertEleClone, insertType, true);
+		this._insertElementFormat(editEle, insertEleClone, insertType, true);
 		
 		if(highlight)
 		{
@@ -2596,14 +2603,53 @@
 	{
 		styleObj = (styleObj || {});
 		
-		this._setElementStyleNoSync(ele, styleObj, strictSet);
+		this._setElementStyleIfStrict(ele, styleObj, strictSet);
 		
 		//同步至编辑HTML中
 		var editEle = this._editElement(ele);
-		this._setElementStyleNoSync(editEle, styleObj, strictSet);
+		this._setElementStyleIfStrict(editEle, styleObj, strictSet);
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
+	};
+	
+	editor._setElementStyleIfStrict = function(ele, styleObj, strictSet)
+	{
+		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
+		//它们应该被保留，且不能同步至对应的编辑元素上
+		
+		//默认严格设置模式，这样才能支持删除styleObj中未出现的样式
+		strictSet = (strictSet == null ? true : strictSet);
+		
+		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele) || "");
+		
+		if(strictSet)
+		{
+			for(var editableName in this._editableElementStyles)
+			{
+				delete nowStyleObj[editableName];
+			}
+		}
+		
+		for(var name in styleObj)
+		{
+			var value = styleObj[name];
+			
+			if(chartFactory.isNullOrEmpty(value))
+				delete nowStyleObj[name];
+			else
+			{
+				nowStyleObj[name] = value;
+			}
+		}
+		
+		if($.isEmptyObject(nowStyleObj))
+			this._removeElementAttrNoSync(ele, "style");
+		else
+		{
+			var cssText = chartFactory.styleString(nowStyleObj);
+			this._setElementAttrNoSync(ele, "style", cssText);
+		}
 	};
 	
 	/**
@@ -2683,6 +2729,82 @@
 		this.changeFlag(true);
 	};
 	
+	editor._insertElementFormat = function(refEle, insertEle, insertType, isEditHtml)
+	{
+		isEditHtml = (isEditHtml == null ? false : isEditHtml);
+		
+		var refEleLevel = this._evalElementLevel(refEle, isEditHtml);
+		
+		if(insertType == INSERT_TYPE_AFTER)
+		{
+			this._insertElementAfterNoSync(refEle, insertEle);
+			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+		}
+		else if(insertType == INSERT_TYPE_BEFORE)
+		{
+			this._insertElementBeforeNoSync(refEle, insertEle);
+			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+		}
+		else if(insertType == INSERT_TYPE_APPEND)
+		{
+			var children = refEle.children();
+			
+			if(this._isEmptyElement(children))
+			{
+				var innerHtml = this._getInnerHTML(refEle);
+				if(this._isOnlyEmptyOrFormat(innerHtml))
+				{
+					this._setInnerHTMLNoSync(refEle, "");
+				}
+				
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
+				this._insertElementAppendNoSync(refEle, insertEle);
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+			}
+			else
+			{
+				this._insertElementFormat($(children[children.length-1]), insertEle, INSERT_TYPE_AFTER, isEditHtml);
+				return;
+			}
+		}
+		else if(insertType == INSERT_TYPE_PREPEND)
+		{
+			var insertTailFormat = false;
+			
+			var children = refEle.children();
+			if(this._isEmptyElement(children))
+			{
+				var innerHtml = this._getInnerHTML(refEle);
+				if(this._isOnlyEmptyOrFormat(innerHtml))
+				{
+					insertTailFormat = true;
+					this._setInnerHTMLNoSync(refEle, "");
+				}
+			}
+			
+			this._insertElementPrependNoSync(refEle, insertEle);
+			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
+			
+			if(insertTailFormat)
+				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+		}
+		else
+			throw new Error("Unsupported insert type : " + insertType);
+		
+		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
+		if(isEditHtml)
+		{
+			var myInnerHtml = this._getInnerHTML(insertEle);
+			if(myInnerHtml)
+			{
+				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
+				var toText = this._genFormatTabs(this._evalElementLevel(insertEle, isEditHtml)-1) + INSERT_ELE_FORMAT_END;
+				myInnerHtml = myInnerHtml.replace(fromText, toText);
+				this._setInnerHTMLNoSync(insertEle, myInnerHtml);
+			}
+		}
+	};
+	
 	editor._updateChartElementId = function(chart, elementId)
 	{
 		chart.elementId = elementId;
@@ -2713,81 +2835,24 @@
 		ele.removeAttr(name);
 	};
 	
-	editor._insertElementNoSync = function(refEle, insertEle, insertType, isEditHtml)
+	editor._insertElementAppendNoSync = function(refEle, insertEle)
 	{
-		isEditHtml = (isEditHtml == null ? false : isEditHtml);
-		
-		var refEleLevel = this._evalElementLevel(refEle, isEditHtml);
-		
-		if(insertType == "after")
-		{
-			refEle.after(insertEle);
-			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-		}
-		else if(insertType == "before")
-		{
-			refEle.before(insertEle);
-			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-		}
-		else if(insertType == "append")
-		{
-			var children = refEle.children();
-			
-			if(this._isEmptyElement(children))
-			{
-				var innerHtml = this._innerHTML(refEle);
-				if(this._isOnlyEmptyOrFormat(innerHtml))
-				{
-					this._innerHTML(refEle, "");
-				}
-				
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
-				refEle.append(insertEle);
-				
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-			}
-			else
-			{
-				this._insertElementNoSync($(children[children.length-1]), insertEle, "after", isEditHtml);
-				return;
-			}
-		}
-		else if(insertType == "prepend")
-		{
-			var insertTailFormat = false;
-			
-			var children = refEle.children();
-			if(this._isEmptyElement(children))
-			{
-				var innerHtml = this._innerHTML(refEle);
-				if(this._isOnlyEmptyOrFormat(innerHtml))
-				{
-					insertTailFormat = true;
-					this._innerHTML(refEle, "");
-				}
-			}
-			
-			refEle.prepend(insertEle);
-			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
-			
-			if(insertTailFormat)
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
-		}
-		else
-			throw new Error("Unsupported insert type : " + insertType);
-		
-		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
-		if(isEditHtml)
-		{
-			var myInnerHtml = this._innerHTML(insertEle);
-			if(myInnerHtml)
-			{
-				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
-				var toText = this._genFormatTabs(this._evalElementLevel(insertEle, isEditHtml)-1) + INSERT_ELE_FORMAT_END;
-				myInnerHtml = myInnerHtml.replace(fromText, toText);
-				this._innerHTML(insertEle, myInnerHtml);
-			}
-		}
+		refEle.append(insertEle);
+	};
+	
+	editor._insertElementPrependNoSync = function(refEle, insertEle)
+	{
+		refEle.prepend(insertEle);
+	};
+	
+	editor._insertElementAfterNoSync = function(refEle, insertEle)
+	{
+		refEle.after(insertEle);
+	};
+	
+	editor._insertElementBeforeNoSync = function(refEle, insertEle)
+	{
+		refEle.before(insertEle);
 	};
 	
 	editor._deleteElementNoSync = function(ele)
@@ -2795,51 +2860,9 @@
 		ele.remove();
 	};
 	
-	editor._setElementStyleNoSync = function(ele, styleObj, strictSet)
+	editor._setInnerHTMLNoSync = function(ele, html)
 	{
-		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
-		//它们应该被保留，且不能同步至对应的编辑元素上
-		
-		//默认严格设置模式，这样才能支持删除styleObj中未出现的样式
-		strictSet = (strictSet == null ? true : strictSet);
-		
-		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele) || "");
-		
-		if(strictSet)
-		{
-			for(var editableName in this._editableElementStyles)
-			{
-				delete nowStyleObj[editableName];
-			}
-		}
-		
-		for(var name in styleObj)
-		{
-			var value = styleObj[name];
-			
-			if(chartFactory.isNullOrEmpty(value))
-				delete nowStyleObj[name];
-			else
-			{
-				nowStyleObj[name] = value;
-			}
-		}
-		
-		if($.isEmptyObject(nowStyleObj))
-			this._removeElementAttrNoSync(ele, "style");
-		else
-		{
-			var cssText = chartFactory.styleString(nowStyleObj);
-			this._setElementAttrNoSync(ele, "style", cssText);
-		}
-	};
-	
-	editor._getElementStyleObj = function(ele)
-	{
-		var styleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele));
-		styleObj.className = (ele.attr("class") || "");
-		
-		return styleObj;
+		ele.prop("innerHTML", html);
 	};
 	
 	editor._editableElementStyles =
@@ -2898,6 +2921,19 @@
 		"font-weight": true,
 		"font-family": true,
 		"line-height": true
+	};
+	
+	editor._getInnerHTML = function(ele)
+	{
+		return ele.prop("innerHTML");
+	};
+	
+	editor._getElementStyleObj = function(ele)
+	{
+		var styleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele));
+		styleObj.className = (ele.attr("class") || "");
+		
+		return styleObj;
 	};
 	
 	editor._spitStyleAndOption = function(styleObj)
@@ -3018,14 +3054,6 @@
 		return veId;
 	};
 	
-	editor._innerHTML = function(ele, html)
-	{
-		if(html === undefined)
-			return ele.prop("innerHTML");
-		else
-			ele.prop("innerHTML", html);
-	};
-	
 	editor._genFormatTabs = function(count)
 	{
 		var re = "";
@@ -3075,7 +3103,7 @@
 		
 		if(refEle.is("body"))
 			insertParentEle = refEle;
-		else if("after" == insertType || "before" == insertType)
+		else if(INSERT_TYPE_AFTER == insertType || INSERT_TYPE_BEFORE == insertType)
 			insertParentEle = refEle.parent();
 		else
 			insertParentEle = refEle;
@@ -3085,16 +3113,16 @@
 	
 	editor._trimInsertType = function(refEle, insertType)
 	{
-		insertType = (!insertType ? "after" : insertType);
-		insertType = (insertType == "after" || insertType == "before"
-						|| insertType == "append" || insertType == "prepend" ? insertType : "after");
+		insertType = (!insertType ? INSERT_TYPE_AFTER : insertType);
+		insertType = (insertType == INSERT_TYPE_AFTER || insertType == INSERT_TYPE_BEFORE
+						|| insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? insertType : INSERT_TYPE_AFTER);
 		
 		if(refEle.is("body"))
 		{
-			if(insertType == "after")
-				insertType = "append";
-			else if(insertType == "before")
-				insertType = "prepend";
+			if(insertType == INSERT_TYPE_AFTER)
+				insertType = INSERT_TYPE_APPEND;
+			else if(insertType == INSERT_TYPE_BEFORE)
+				insertType = INSERT_TYPE_PREPEND;
 		}
 		
 		return insertType;
@@ -3432,7 +3460,7 @@
 			
 			var editDoc = this._editDocument();
 			editDoc.open();
-			editDoc.write("<!DOCTYPE html><html><head></head><body>");
+			editDoc.write("<!DOCTYPE html><html><head></head><body class='"+EDIT_BODY_CLASS_FLAG+"'>");
 			editDoc.write(editIframeBodyHtml);
 			editDoc.write("</body></html>");
 			editDoc.close();
