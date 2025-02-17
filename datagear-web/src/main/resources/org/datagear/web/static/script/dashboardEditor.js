@@ -2579,11 +2579,8 @@
 	{
 		var editEle = this._editElement(ele);
 		
-		editEle.before(DELETE_ELE_FORMAT_FLAG);
-		this._deleteElementNoSync(editEle);
-		
-		ele.before(DELETE_ELE_FORMAT_FLAG);
-		this._deleteElementNoSync(ele);
+		this._deleteElementFormat(editEle);
+		this._deleteElementFormat(ele);
 		
 		this.changeFlag(true);
 	};
@@ -2729,11 +2726,11 @@
 		this.changeFlag(true);
 	};
 	
-	editor._insertElementFormat = function(refEle, insertEle, insertType, isEditHtml)
+	editor._insertElementFormat = function(refEle, insertEle, insertType, formatInner)
 	{
-		isEditHtml = (isEditHtml == null ? false : isEditHtml);
+		formatInner = (formatInner == null ? false : formatInner);
 		
-		var refEleLevel = this._evalElementLevel(refEle, isEditHtml);
+		var refEleLevel = this._evalElementLevel(refEle);
 		
 		if(insertType == INSERT_TYPE_AFTER)
 		{
@@ -2763,7 +2760,7 @@
 			}
 			else
 			{
-				this._insertElementFormat($(children[children.length-1]), insertEle, INSERT_TYPE_AFTER, isEditHtml);
+				this._insertElementFormat($(children[children.length-1]), insertEle, INSERT_TYPE_AFTER, formatInner);
 				return;
 			}
 		}
@@ -2792,17 +2789,23 @@
 			throw new Error("Unsupported insert type : " + insertType);
 		
 		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
-		if(isEditHtml)
+		if(formatInner)
 		{
 			var myInnerHtml = this._getInnerHTML(insertEle);
 			if(myInnerHtml)
 			{
 				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
-				var toText = this._genFormatTabs(this._evalElementLevel(insertEle, isEditHtml)-1) + INSERT_ELE_FORMAT_END;
+				var toText = this._genFormatTabs(this._evalElementLevel(insertEle)-1) + INSERT_ELE_FORMAT_END;
 				myInnerHtml = myInnerHtml.replace(fromText, toText);
 				this._setInnerHTMLNoSync(insertEle, myInnerHtml);
 			}
 		}
+	};
+	
+	editor._deleteElementFormat = function(ele)
+	{
+		ele.before(DELETE_ELE_FORMAT_FLAG);
+		this._deleteElementNoSync(ele);
 	};
 	
 	editor._updateChartElementId = function(chart, elementId)
@@ -3064,10 +3067,8 @@
 		return re;
 	};
 	
-	editor._evalElementLevel = function(ele, isEditHtml)
+	editor._evalElementLevel = function(ele)
 	{
-		isEditHtml = (isEditHtml == null ? false : isEditHtml);
-		
 		var level = 0;
 		
 		while(!this._isEmptyElement(ele) && !ele.is("body"))
@@ -3077,7 +3078,7 @@
 		}
 		
 		//编辑HTML做了转换，多内嵌了一层，参考editor._toEditIframeBodyHtml()函数，所以这里要减一层
-		if(level > 0 && isEditHtml)
+		if(level > 0 && !this._isEmptyElement(ele) && ele.is("body") && ele.hasClass(EDIT_BODY_CLASS_FLAG))
 			level -= 1;
 		
 		return level;
