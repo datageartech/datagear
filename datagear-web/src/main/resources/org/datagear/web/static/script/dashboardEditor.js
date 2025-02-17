@@ -1615,7 +1615,8 @@
 			eles.push(chartDiv);
 		}
 		
-		this.dashboard.loadUnsolvedCharts(this._buildLoadChartAjaxOptions());
+		var loadChartsEle = (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? refEle : refEle.parent());
+		this._loadUnsolvedChartsInElement(loadChartsEle);
 		
 		return eles;
 	};
@@ -1855,26 +1856,40 @@
 			this._setElementAttr(ele, name, value);
 		}
 		
-		var chart = this.dashboard.renderedChart(ele);
-		if(chart)
-		{
-			//ID属性需要特殊处理，图表对象必须同步设置elementId
-			if(/^\s*id\s*$/i.test(name))
-			{
-				var idVal = ele.attr(name);
-				
-				if(!idVal)
-				{
-					idVal = chartFactory.uid();
-					this._setElementAttr(ele, name, idVal);
-				}
-				
-				this._updateChartElementId(chart, idVal);
-				this._reRenderChart(chart);
-			}
-		}
+		this._checkSetChartElementIdAttr(ele, name);
 		
 		return ele;
+	};
+	
+	//校验设置图表元素ID，图表元素必须有ID，且设置后必须更新图表的elementId属性
+	editor._checkSetChartElementIdAttr = function(ele, name, reRender)
+	{
+		reRender = (reRender == null ? true : reRender);
+		
+		var isIdAttr = /^\s*id\s*$/i.test(name);
+		
+		if(!isIdAttr)
+			return false;
+		
+		var chart = this.dashboard.renderedChart(ele);
+		
+		if(!chart)
+			return false;
+		
+		var idVal = ele.attr(name);
+		
+		if(!idVal)
+		{
+			idVal = chartFactory.uid();
+			this._setElementAttrNoSync(ele, name, idVal);
+		}
+		
+		this._updateChartElementId(chart, idVal);
+		
+		if(reRender)
+			this._reRenderChart(chart);
+			
+		return idVal;
 	};
 	
 	/**
@@ -1907,13 +1922,7 @@
 			return false;
 		
 		//应先删除元素包含的所有图表
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
-		
-		chartEles.each(function()
-		{
-			thisEditor.dashboard.removeChart(this);
-		});
+		this._removeChartsInElement(ele);
 		
 		var selEle = (this._isSelectedElement(ele) ? ele : this._selectedElement(ele));
 		this.deselectElement(selEle);
@@ -1976,15 +1985,12 @@
 			{
 				var thisEle = $(this);
 				var chartTheme = thisEditor._evalElementChartThemeByStyleObj(thisEle, ele, so.style);
-				
 				thisEditor._setElementChartTheme(thisEle, chartTheme);
-				var chart = thisEditor.dashboard.renderedChart(thisEle);
-				thisEditor._reRenderChart(chart);
+				thisEditor._reRenderChartsInElement(thisEle);
 			}
 			else
 			{
-				var renderedChart = thisEditor.dashboard.renderedChart(this);
-				thisEditor._resizeChart(renderedChart);
+				thisEditor._resizeChartsInElement(this);
 			}
 		});
 		
@@ -2074,10 +2080,8 @@
 		chartEles.each(function()
 		{
 			var thisEle = $(this);
-			
 			thisEditor._setElementChartTheme(thisEle, chartTheme);
-			var chart = thisEditor.dashboard.renderedChart(thisEle);
-			thisEditor._reRenderChart(chart);
+			thisEditor._reRenderChartsInElement(thisEle);
 		});
 		
 		return ele;
@@ -2339,10 +2343,8 @@
 		chartEles.each(function()
 		{
 			var thisEle = $(this);
-			
 			thisEditor._setElementChartOptions(thisEle, chartOptionsStr);
-			var chart = thisEditor.dashboard.renderedChart(thisEle);
-			thisEditor._reRenderChart(chart);
+			thisEditor._reRenderChartsInElement(thisEle);
 		});
 		
 		return ele;
@@ -2440,12 +2442,12 @@
 	
 	editor._reRenderChart = function(chart)
 	{
-		if(chart)
-		{
-			chart.destroy();
-			chart.init();
-			chart.render();
-		}
+		if(!chart)
+			return;
+		
+		chart.destroy();
+		chart.init();
+		chart.render();
 	};
 	
 	editor._resizeChart = function(chart)
@@ -2458,6 +2460,46 @@
 			chart.resize();
 		}
 		catch(e){}
+	};
+	
+	editor._reRenderChartsInElement = function(ele)
+	{
+		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
+		chartEles.each(function()
+		{
+			var chart = thisEditor.dashboard.renderedChart(this);
+			thisEditor._reRenderChart(chart);
+		});
+	};
+	
+	editor._resizeChartsInElement = function(ele)
+	{
+		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
+		chartEles.each(function()
+		{
+			var chart = thisEditor.dashboard.renderedChart(this);
+			thisEditor._resizeChart(chart);
+		});
+	};
+	
+	editor._removeChartsInElement = function(ele)
+	{
+		var chartEles = this._getChartElements(ele);
+		var thisEditor = this;
+		
+		chartEles.each(function()
+		{
+			thisEditor.dashboard.removeChart(this);
+		});
+	};
+	
+	editor._loadUnsolvedChartsInElement = function(ele)
+	{
+		this.dashboard.loadUnsolvedCharts(ele, this._buildLoadChartAjaxOptions());
 	};
 	
 	editor._setElementChartOptions = function(ele, chartOptionsStr)

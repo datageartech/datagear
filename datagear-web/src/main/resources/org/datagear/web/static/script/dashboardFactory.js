@@ -2386,7 +2386,7 @@
 	};
 	
 	/**
-	 * 将元素内所有设置了"dg-chart-widget"属性，且未初始化为图表的HTML元素异步加载为图表。
+	 * 将元素内（包括自身）所有设置了"dg-chart-widget"属性，且未初始化为图表的HTML元素异步加载为图表。
 	 * 如果没有需要加载的元素，将不会执行异步请求。
 	 * 
 	 * 支持调用方式：
@@ -2412,11 +2412,15 @@
 			element = undefined;
 		}
 		
-		element = (element == null ? document.body : chartFactory.toJqueryObj(element));
+		element = chartFactory.toJqueryObj(element == null ? document.body : element);
+		var hasAttr = element.attr(chartFactory.elementAttrConst.WIDGET);
 		
 		var unsolved = [];
 		
 		var subEles = $("["+chartFactory.elementAttrConst.WIDGET+"]", element);
+		if(hasAttr)
+			subEles = element.add(subEles);
+		
 		var dashboard = this;
 		
 		subEles.each(function()
