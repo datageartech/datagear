@@ -2433,7 +2433,7 @@
 		return re;
 	};
 	
-	editor._reRenderDashboard = function(chart)
+	editor._reRenderDashboard = function()
 	{
 		this.dashboard.destroy();
 		this.dashboard.init();
