@@ -2448,6 +2448,17 @@
 		});
 	};
 	
+	editor._renderChart = function(chart)
+	{
+		if(!chart)
+			return;
+		
+		chartFactory.executeSilently(function()
+		{
+			chart.render();
+		});
+	};
+	
 	editor._reRenderChart = function(chart)
 	{
 		if(!chart)
