@@ -2414,22 +2414,10 @@
 		
 		element = chartFactory.toJqueryObj(element == null ? document.body : element);
 		
-		var widgetEles = [];
+		var widgetEles = $(chartFactory.domsWithWidgetId(element));
 		var unsolved = [];
 		
-		//处理元素自身
-		element.each(function()
-		{
-			if(!chartFactory.isNullOrEmpty($(this).attr(chartFactory.elementAttrConst.WIDGET)))
-			{
-				widgetEles.push(this);
-			}
-		});
-		
-		//处理子自身
-		widgetEles = $(widgetEles).add($("["+chartFactory.elementAttrConst.WIDGET+"]", element));
 		var dashboard = this;
-		
 		widgetEles.each(function()
 		{
 			if(dashboard._loadingChartElement(this))

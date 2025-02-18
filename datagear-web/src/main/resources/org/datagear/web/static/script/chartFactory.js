@@ -5806,6 +5806,31 @@
 	};
 	
 	/**
+	 * 获取HTML元素自身或其子孙元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 * @returns DOM数组
+	 */
+	chartFactory.domsWithWidgetId = function(element)
+	{
+		element = $(element);
+		element = element.add($("["+chartFactory.elementAttrConst.WIDGET+"]", element));
+		
+		var widgetEles = [];
+		
+		//处理元素自身
+		element.each(function()
+		{
+			if(!chartFactory.isNullOrEmpty(chartFactory.elementWidgetId(this)))
+			{
+				widgetEles.push(this);
+			}
+		});
+		
+		return widgetEles;
+	};
+	
+	/**
 	 * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
 	 * 
 	 * @param element HTML元素、Jquery选择器、Jquery对象
