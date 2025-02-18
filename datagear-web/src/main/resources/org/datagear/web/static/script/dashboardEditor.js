@@ -1665,7 +1665,7 @@
 		
 		if(this.isChartElement(ele))
 		{
-			this.dashboard.removeChart(ele);
+			this._removeAndDestroyChart(ele);
 		}
 		
 		this._setElementAttr(ele, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
@@ -1709,7 +1709,7 @@
 		if(!this.checkUnbindChart(ele))
 			return false;
 		
-		this.dashboard.removeChart(ele);
+		this._removeAndDestroyChart(ele);
 		this._removeElementAttr(ele, chartFactory.elementAttrConst.WIDGET);
 		
 		return ele;
@@ -2439,9 +2439,13 @@
 	
 	editor._reRenderDashboard = function()
 	{
-		this.dashboard.destroy();
-		this.dashboard.init();
-		this.dashboard.render();
+		var dashboard = this.dashboard;
+		chartFactory.executeSilently(function()
+		{
+			dashboard.destroy();
+			dashboard.init();
+			dashboard.render();
+		});
 	};
 	
 	editor._reRenderChart = function(chart)
@@ -2449,9 +2453,12 @@
 		if(!chart)
 			return;
 		
-		chart.destroy();
-		chart.init();
-		chart.render();
+		chartFactory.executeSilently(function()
+		{
+			chart.destroy();
+			chart.init();
+			chart.render();
+		});
 	};
 	
 	editor._resizeChart = function(chart)
@@ -2459,11 +2466,22 @@
 		if(!chart)
 			return;
 		
-		try
+		chartFactory.executeSilently(function()
 		{
 			chart.resize();
-		}
-		catch(e){}
+		});
+	};
+	
+	editor._removeAndDestroyChart = function(chartInfo)
+	{
+		if(!chartInfo)
+			return;
+		
+		var dashboard = this.dashboard;
+		chartFactory.executeSilently(function()
+		{
+			dashboard.removeChart(chartInfo, true);
+		});
 	};
 	
 	editor._reRenderChartsInElement = function(ele)
@@ -2497,7 +2515,7 @@
 		
 		chartEles.each(function()
 		{
-			thisEditor.dashboard.removeChart(this);
+			thisEditor._removeAndDestroyChart(this);
 		});
 	};
 	
