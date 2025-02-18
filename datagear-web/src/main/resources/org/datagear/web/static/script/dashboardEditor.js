@@ -1921,7 +1921,15 @@
 		if(!this.checkDeleteElement(ele))
 			return false;
 		
-		//应先删除元素包含的所有图表
+		this._preDeleteElement(ele);
+		this._deleteElement(ele);
+		
+		return ele;
+	};
+	
+	editor._preDeleteElement = function(ele)
+	{
+		//应删除元素包含的所有图表
 		this._removeChartsInElement(ele);
 		
 		var selEle = (this._isSelectedElement(ele) ? ele : this._selectedElement(ele));
@@ -1935,10 +1943,6 @@
 				this.selectParentElement(ele, false);
 			}
 		}
-		
-		this._deleteElement(ele);
-		
-		return ele;
 	};
 	
 	/**
