@@ -2413,17 +2413,24 @@
 		}
 		
 		element = chartFactory.toJqueryObj(element == null ? document.body : element);
-		var hasAttr = element.attr(chartFactory.elementAttrConst.WIDGET);
 		
+		var widgetEles = [];
 		var unsolved = [];
 		
-		var subEles = $("["+chartFactory.elementAttrConst.WIDGET+"]", element);
-		if(hasAttr)
-			subEles = element.add(subEles);
+		//处理元素自身
+		element.each(function()
+		{
+			if(!chartFactory.isNullOrEmpty($(this).attr(chartFactory.elementAttrConst.WIDGET)))
+			{
+				widgetEles.push(this);
+			}
+		});
 		
+		//处理子自身
+		widgetEles = $(widgetEles).add($("["+chartFactory.elementAttrConst.WIDGET+"]", element));
 		var dashboard = this;
 		
-		subEles.each(function()
+		widgetEles.each(function()
 		{
 			if(dashboard._loadingChartElement(this))
 				return;
