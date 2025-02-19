@@ -2479,7 +2479,7 @@
 		//这里不应设置"dg-chart-widget"属性而破坏了元素的原生结构
 		//chartFactory.elementWidgetId(element, chartWidgetId);
 		
-		chartFactory.checkSetChartElementId(chart, element);
+		chartFactory.checkSetChartElementId(element, chart);
 		dashboardFactory._initChart(this, chart);
 	};
 	

@@ -5844,8 +5844,11 @@
 	/**
 	 * 校验设置图表元素ID。
 	 * 图表元素必须有ID，且要与图表中的元素ID同步。
+	 * 
+	 * @param element
+	 * @param chart 可选，要同步的图表
 	 */
-	chartFactory.checkSetChartElementId = function(chart, element)
+	chartFactory.checkSetChartElementId = function(element, chart)
 	{
 		element = $(element);
 		
@@ -5856,7 +5859,8 @@
 			element.attr("id", elementId);
 		}
 		
-		chart.elementId = elementId;
+		if(chart)
+			chart.elementId = elementId;
 		
 		return elementId;
 	};

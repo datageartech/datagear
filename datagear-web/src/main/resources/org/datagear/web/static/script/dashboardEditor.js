@@ -1858,13 +1858,13 @@
 			this._setElementAttr(ele, name, value);
 		}
 		
-		this._checkSetChartElementIdAttr(ele, name);
+		this._checkSetElementIdAttrForChart(ele, name);
 		
 		return ele;
 	};
 	
 	//校验设置图表元素ID，图表元素必须有ID，且设置后必须更新图表的elementId属性
-	editor._checkSetChartElementIdAttr = function(ele, name, reRender)
+	editor._checkSetElementIdAttrForChart = function(ele, name, reRender)
 	{
 		reRender = (reRender == null ? true : reRender);
 		
@@ -1878,7 +1878,7 @@
 		if(!chart)
 			return false;
 		
-		var id = chartFactory.checkSetChartElementId(chart, ele);
+		var id = chartFactory.checkSetChartElementId(ele, chart);
 		
 		if(reRender)
 			this._reRenderChart(chart);
