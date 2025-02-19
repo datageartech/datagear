@@ -5842,6 +5842,26 @@
 	};
 	
 	/**
+	 * 校验设置图表元素ID。
+	 * 图表元素必须有ID，且要与图表中的元素ID同步。
+	 */
+	chartFactory.checkSetChartElementId = function(chart, element)
+	{
+		element = $(element);
+		
+		var elementId = element.attr("id");
+		if(!elementId)
+		{
+			elementId = chartFactory.uid();
+			element.attr("id", elementId);
+		}
+		
+		chart.elementId = elementId;
+		
+		return elementId;
+	};
+	
+	/**
 	 * 获取Jquery对象。
 	 * 
 	 * @param element HTML元素、HTML元素数组、Jquery选择器、Jquery对象

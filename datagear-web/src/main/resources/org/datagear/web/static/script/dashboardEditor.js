@@ -335,12 +335,14 @@
 	 * 取消选中元素。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
+	 * @param force 可选，是否强制执行，默认为：false
 	 */
-	editor.deselectElement = function(ele)
+	editor.deselectElement = function(ele, force)
 	{
 		ele = this._currentElement(ele, true);
+		force = (force == null ? false : force);
 		
-		if(!this._isEmptyElement(ele))
+		if(!this._isEmptyElement(ele) || force)
 		{
 			this._deselectElement(ele);
 			
@@ -1199,7 +1201,7 @@
 		if(hyperlinkAttr.target)
 			this._setElementAttr(ele, "target", hyperlinkAttr.target);
 		else
-			this._removeElementAttr(ele, "target");
+			this._setElementAttr(ele, "target", null);
 			
 		return ele;
 	};
@@ -1710,7 +1712,7 @@
 			return false;
 		
 		this._removeAndDestroyChart(ele);
-		this._removeElementAttr(ele, chartFactory.elementAttrConst.WIDGET);
+		this._setElementAttr(ele, chartFactory.elementAttrConst.WIDGET, null);
 		
 		return ele;
 	};
@@ -1794,7 +1796,7 @@
 		
 		if(chartFactory.isNullOrEmpty(value))
 		{
-			this._removeElementAttr(body, name);
+			this._setElementAttr(body, name, null);
 		}
 		else
 		{
@@ -1849,7 +1851,7 @@
 		
 		if(chartFactory.isNullOrEmpty(value))
 		{
-			this._removeElementAttr(ele, name);
+			this._setElementAttr(ele, name, null);
 		}
 		else
 		{
@@ -1876,20 +1878,12 @@
 		if(!chart)
 			return false;
 		
-		var idVal = ele.attr(name);
-		
-		if(!idVal)
-		{
-			idVal = chartFactory.uid();
-			this._setElementAttrNoSync(ele, name, idVal);
-		}
-		
-		this._updateChartElementId(chart, idVal);
+		var id = chartFactory.checkSetChartElementId(chart, ele);
 		
 		if(reRender)
 			this._reRenderChart(chart);
-			
-		return idVal;
+		
+		return id;
 	};
 	
 	/**
@@ -2288,7 +2282,7 @@
 		var eleAttrValue = this._serializeForAttrValue(attrValuesMerge);
 		
 		if(this._isEmptyJsonObjStr(eleAttrValue))
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, null);
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue);
 		
@@ -2539,7 +2533,7 @@
 	{
 		if(!chartOptionsStr)
 		{
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.OPTIONS);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, null);
 			return;
 		}
 		
@@ -2608,7 +2602,7 @@
 		var attrValue = this._serializeForAttrValue(trim);
 		
 		if(this._isEmptyJsonObjStr(attrValue))
-			this._removeElementAttr(ele, chartFactory.elementAttrConst.THEME);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, null);
 		else
 			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue);
 	};
@@ -2716,7 +2710,7 @@
 		}
 		
 		if($.isEmptyObject(nowStyleObj))
-			this._removeElementAttrNoSync(ele, "style");
+			this._setElementAttrNoSync(ele, "style", null);
 		else
 		{
 			var cssText = chartFactory.styleString(nowStyleObj);
@@ -2739,7 +2733,7 @@
 		
 		//同步至编辑HTML中
 		if(!className)
-			this._removeElementAttrNoSync(editEle, "class");
+			this._setElementAttrNoSync(editEle, "class", null);
 		else
 			this._removeElementClassNoSync(editEle, removeClassName);
 		
@@ -2772,7 +2766,7 @@
 	};
 	
 	/**
-	 * 设置元素属性，同时同步至编辑HTML中。
+	 * 设置元素属性，同时同步至编辑HTML中，值为null时将移除属性。
 	 */
 	editor._setElementAttr = function(ele, name, value)
 	{
@@ -2781,21 +2775,6 @@
 		//同步至编辑HTML中
 		var editEle = this._editElement(ele);
 		this._setElementAttrNoSync(editEle, name, value);
-		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
-	};
-	
-	/**
-	 * 删除元素属性，同时同步至编辑HTML中。
-	 */
-	editor._removeElementAttr = function(ele, name)
-	{
-		this._removeElementAttrNoSync(ele, name);
-		
-		//同步至编辑HTML中
-		var editEle = this._editElement(ele);
-		this._removeElementAttrNoSync(editEle, name);
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
@@ -2883,11 +2862,6 @@
 		this._deleteElementNoSync(ele);
 	};
 	
-	editor._updateChartElementId = function(chart, elementId)
-	{
-		chart.elementId = elementId;
-	};
-	
 	editor._addElementClassNoSync = function(ele, className)
 	{
 		ele.addClass(className);
@@ -2905,12 +2879,11 @@
 	
 	editor._setElementAttrNoSync = function(ele, name, value)
 	{
-		ele.attr(name, value);
-	};
-	
-	editor._removeElementAttrNoSync = function(ele, name)
-	{
-		ele.removeAttr(name);
+		// value是""时不应移除
+		if(value == null)
+			ele.removeAttr(name);
+		else
+			ele.attr(name, value);
 	};
 	
 	editor._insertElementAppendNoSync = function(refEle, insertEle)
