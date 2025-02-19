@@ -80,6 +80,9 @@
 	var INSERT_TYPE_AFTER = (editor.INSERT_TYPE_AFTER = "after");
 	var INSERT_TYPE_BEFORE = (editor.INSERT_TYPE_BEFORE = "before");
 	
+	//HTML规范注释节点类型
+	var HTML_NODE_TYPE_COMMENT = (editor.HTML_NODE_TYPE_COMMENT = 8);
+	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
@@ -2842,18 +2845,30 @@
 		else
 			throw new Error("Unsupported insert type : " + insertType);
 		
-		//格式化内部元素，为元素内所有格式内容INSERT_ELE_FORMAT_END补齐前缀格式
+		//为所有内部元素补齐格式
 		if(formatInner)
 		{
-			var myInnerHtml = this._getInnerHTML(insertEle);
-			if(myInnerHtml)
-			{
-				var fromText = /\<\!\-\-dgInsertFmtEnd\-\-\>/gi;
-				var toText = this._genFormatTabs(this._evalElementLevel(insertEle)-1) + INSERT_ELE_FORMAT_END;
-				myInnerHtml = myInnerHtml.replace(fromText, toText);
-				this._setInnerHTMLNoSync(insertEle, myInnerHtml);
-			}
+			var tabsText = this._genFormatTabs(this._evalElementLevel(insertEle)-1);
+			this._appendElementSubFormat(insertEle, tabsText);
 		}
+	};
+	
+	editor._appendElementSubFormat = function(ele, tabsText)
+	{
+		//在每一个<!--dgInsertFmtEnd-->注释节点前插入格式文本
+		//注意：这里不应该使用替换HTML内容文本后再设置的方式，因为会新建DOM对象而导致旧DOM引用失效
+		ele.contents()
+			.filter(function()
+			{
+				return (this.nodeType == HTML_NODE_TYPE_COMMENT && this.nodeValue == "dgInsertFmtEnd");
+			})
+			.before(tabsText);
+		
+		var thisEditor = this;
+		ele.children().each(function()
+		{
+			thisEditor._appendElementSubFormat($(this), tabsText);
+		});
 	};
 	
 	editor._deleteElementFormat = function(ele)
