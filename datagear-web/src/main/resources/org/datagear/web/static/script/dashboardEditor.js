@@ -66,7 +66,8 @@
 	
 	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
-	var EDIT_BODY_CLASS_FLAG = (editor.EDIT_BODY_CLASS_FLAG = "dg-edit-body");
+	var SHOW_BODY_CLASS_FLAG = (editor.SHOW_BODY_CLASS_FLAG = "dg-show-html-body");
+	var EDIT_BODY_CLASS_FLAG = (editor.EDIT_BODY_CLASS_FLAG = "dg-edit-html-body");
 	
 	var INSERT_ELE_FORMAT_START = (editor.INSERT_ELE_FORMAT_START = "<!--dgInsertFmtStart-->");
 	var INSERT_ELE_FORMAT_END = (editor.INSERT_ELE_FORMAT_END = "<!--dgInsertFmtEnd-->");
@@ -123,7 +124,7 @@
 		
 		$(function()
 		{
-			$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR);
+			$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR).addClass(SHOW_BODY_CLASS_FLAG);
 			
 			$(document.body).on("click", function(event)
 			{
@@ -3196,17 +3197,7 @@
 	//注意：返回的图表元素中可能有还未渲染为图表的元素
 	editor._getChartElements = function(ele)
 	{
-		var chartEles = [];
-		
-		if(ele.attr(chartFactory.elementAttrConst.WIDGET))
-			chartEles.push(ele[0]);
-		
-		$("["+chartFactory.elementAttrConst.WIDGET+"]", ele).each(function()
-		{
-			chartEles.push(this);
-		});
-		
-		return $(chartEles);
+		return $(chartFactory.domsWithWidgetId(ele));
 	};
 	
 	editor._selectedElement = function(context)
