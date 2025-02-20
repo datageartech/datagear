@@ -468,6 +468,8 @@ $.inflateDashboardDesignEditor = function(po)
 				;
 			else
 			{
+				tab.veElementPath = [];
+				
 				//清空iframe后再显示，防止闪屏
 				po.iframeDocument(visualEditorIfm).write("");
 				
