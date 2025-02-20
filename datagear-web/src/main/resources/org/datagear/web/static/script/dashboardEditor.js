@@ -3196,17 +3196,7 @@
 	//注意：返回的图表元素中可能有还未渲染为图表的元素
 	editor._getChartElements = function(ele)
 	{
-		var chartEles = [];
-		
-		if(ele.attr(chartFactory.elementAttrConst.WIDGET))
-			chartEles.push(ele[0]);
-		
-		$("["+chartFactory.elementAttrConst.WIDGET+"]", ele).each(function()
-		{
-			chartEles.push(this);
-		});
-		
-		return $(chartEles);
+		return $(chartFactory.domsWithWidgetId(ele));
 	};
 	
 	editor._selectedElement = function(context)
