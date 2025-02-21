@@ -3135,15 +3135,28 @@
 	{
 		var level = 0;
 		
-		while(!this._isEmptyElement(ele) && !ele.is("body"))
+		var tmpEle = ele;
+		
+		while(!this._isEmptyElement(tmpEle) && !tmpEle.is("body"))
 		{
 			level += 1;
-			ele = ele.parent();
+			tmpEle = tmpEle.parent();
 		}
 		
-		//编辑HTML做了转换，多内嵌了一层，参考editor._toEditIframeBodyHtml()函数，所以这里要减一层
-		if(level > 0 && !this._isEmptyElement(ele) && ele.is("body") && ele.hasClass(EDIT_BODY_CLASS_FLAG))
-			level -= 1;
+		if(level > 0 && !this._isEmptyElement(tmpEle) && tmpEle.is("body"))
+		{
+			//编辑HTML做了转换，多内嵌了一层，参考editor._toEditIframeBodyHtml()函数，所以这里要减一层
+			if(tmpEle.hasClass(EDIT_BODY_CLASS_FLAG))
+			{
+				level -= 1;
+			}
+			//展示HTML内的元素，应根据对应的编辑HTML内元素计算层级，因为展示HTML内的可能是被自定义引入的UI库动态调整层级了
+			else if(tmpEle.hasClass(SHOW_BODY_CLASS_FLAG))
+			{
+				var editEle = this._editElement(ele);
+				level = this._evalElementLevel(editEle);
+			}
+		}
 		
 		return level;
 	};
