@@ -2272,8 +2272,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 	{
 		var re =
 		{
-			fillParent: false, rowHeightDivide: "avg", rowHeights: [], rowGap: "5px",
-			colWidthDivide: "avg", colWidths: [], columnGap: "5px"
+			fillParent: false, rowHeightDivide: "avg", rowHeights: [], rowGap: "10px",
+			colWidthDivide: "avg", colWidths: [], columnGap: "10px"
 		};
 		return re;
 	};
