@@ -38,8 +38,8 @@ var contextPath="${contextPath}";
 </script>
 <#-- 自定义应用根路径后，浏览器无法自动加载系统图标，所以这里明确指定 -->
 <link href="${contextPath}/favicon.ico?v=${clientCacheCode}" type="images/x-icon" rel="shortcut icon" />
-<link href="${contextPath}/static/lib/primevue@3.45.0/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
-<link href="${contextPath}/static/lib/primevue@3.45.0/resources/primevue.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/lib/primevue@3.34.1/resources/themes/<@spring.theme code='primevue.cssName' />/theme.css" type="text/css" rel="stylesheet" id="primevueCssLink" />
+<link href="${contextPath}/static/lib/primevue@3.34.1/resources/primevue.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeicons@6.0.1/primeicons.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/primeflex@3.3.1/primeflex.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
@@ -54,10 +54,10 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/jquery-validation-1.19.3/additional-methods.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/jquery.cookie-1.4.1/jquery.cookie.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/vue@3.2.47/vue.global.prod.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.0.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.1.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.2.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/primevue@3.45.0/primevue.min.3.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.34.1/primevue.min.0.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.34.1/primevue.min.1.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.34.1/primevue.min.2.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/primevue@3.34.1/primevue.min.3.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/pkg/codemirror-bundle.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>

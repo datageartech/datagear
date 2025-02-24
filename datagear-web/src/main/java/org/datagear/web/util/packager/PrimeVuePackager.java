@@ -43,6 +43,10 @@ import org.datagear.util.StringUtil;
  * <p>
  * 打包配置参考：{@linkplain #getPkgComponents(File)}、{@linkplain #getPkgThemes(File)}。
  * </p>
+ * <p>
+ * 注意：PrimveVue自3.35.0版本起的CSS中引入了@layer特性，只有Chrome 99+、Firefox 97+、Edge 99+才支持，
+ * 在低于这些版本的浏览器中，页面样式无法正常加载。
+ * </p>
  * 
  * @author datagear@163.com
  *
