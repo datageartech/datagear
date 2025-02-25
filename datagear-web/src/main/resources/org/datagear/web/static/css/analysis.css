@@ -587,8 +587,7 @@
 	position: relative;
 }
 .xdsoft_datetimepicker .xdsoft_prev:before,
-.xdsoft_datetimepicker .xdsoft_next:before,
-.xdsoft_datetimepicker .xdsoft_today_button:before{
+.xdsoft_datetimepicker .xdsoft_next:before{
     left: 0;
     position: absolute;
     top: 50%;
@@ -602,7 +601,16 @@
 	content: ">";
 }
 .xdsoft_datetimepicker .xdsoft_today_button:before{
-	content: "#";
+	content: "";
+    position: absolute;
+	left: 50%;
+    top: 50%;
+	margin-left: -0.43em;
+    margin-top: -0.42em;
+	width: 0.9em;
+	height: 0.9em;
+	border-radius: 10em;
+	background: #000000;
 }
 .xdsoft_timepicker .xdsoft_prev:before{
 	content: "<";

@@ -1082,12 +1082,18 @@
 					[
 						cssPrefix + " .xdsoft_label i",
 						cssPrefix + " .xdsoft_next",
-						cssPrefix + " .xdsoft_prev",
-						cssPrefix + " .xdsoft_today_button"
+						cssPrefix + " .xdsoft_prev"
 					],
 					value:
 					{
 						"color": color
+					}
+				},
+				{
+					name: cssPrefix + " .xdsoft_today_button:before" ,
+					value:
+					{
+						"background": color
 					}
 				},
 				//年、月
