@@ -439,21 +439,16 @@ $.inflateDashboardDesignEditor = function(po)
 		
 		if(tab.editMode == "code")
 		{
-			var changeFlag = codeEditorEle.data("changeFlag");
-			//初次由源码模式切换至可视编辑模式后，changeFlag会是1，
-			//但此时是不需要同步的，所以这里手动设置为1
-			if(changeFlag == null)
-				changeFlag = 1;
-			
+			var veChangeFlag = codeEditorEle.data("veChangeFlag");
 			var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
 			
 			//有修改
-			if(dashboardEditor && dashboardEditor.isChanged(changeFlag))
+			if(veChangeFlag != null && dashboardEditor && dashboardEditor.isChanged(veChangeFlag))
 			{
 				po.setCodeText(codeEditor, dashboardEditor.editedHtml());
 				
-				visualEditorIfmWrapper.data("changeFlag", codeEditor.changeGeneration());
-				codeEditorEle.data("changeFlag", dashboardEditor.changeFlag());
+				visualEditorIfmWrapper.data("codeChangeFlag", codeEditor.changeGeneration());
+				codeEditorEle.data("veChangeFlag", dashboardEditor.changeFlag());
 			}
 			
 			codeEditorWrapper.removeClass("opacity-hide");
@@ -461,20 +456,19 @@ $.inflateDashboardDesignEditor = function(po)
 		}
 		else
 		{
-			var changeFlag = visualEditorIfmWrapper.data("changeFlag");
+			var codeChangeFlag = visualEditorIfmWrapper.data("codeChangeFlag");
 			
-			//没有修改
-			if(changeFlag != null && codeEditor.isClean(changeFlag))
-				;
-			else
+			//有修改
+			if(codeChangeFlag == null || !codeEditor.isClean(codeChangeFlag))
 			{
 				tab.veElementPath = [];
 				
 				//清空iframe后再显示，防止闪屏
 				po.iframeDocument(visualEditorIfm).write("");
 				
-				visualEditorIfmWrapper.data("changeFlag", codeEditor.changeGeneration());
-				codeEditorEle.data("changeFlag", null);
+				visualEditorIfmWrapper.data("codeChangeFlag", codeEditor.changeGeneration());
+				//可视模式加载页面后的dashboardEditor.changeFlag()返回值是：1
+				codeEditorEle.data("veChangeFlag", 1);
 				
 				po.loadVisualEditorIframe(visualEditorIfm, tab.resName, (po.isReadonlyAction ? "" : po.getCodeText(codeEditor)));
 			}
