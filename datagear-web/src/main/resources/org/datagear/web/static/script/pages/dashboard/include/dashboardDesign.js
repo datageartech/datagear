@@ -106,6 +106,14 @@ $.inflateDashboardDesignEditor = function(po)
 		return tab.id + "visualEditor";
 	};
 	
+	po.codeEditorInstance = function(codeEditorEle, codeEditor)
+	{
+		if(codeEditor === undefined)
+			return codeEditorEle.data("codeEditorInstance");
+		else
+			codeEditorEle.data("codeEditorInstance", codeEditor);
+	};
+	
 	po.toResContentTab = function(resName, isTemplate)
 	{
 		if(isTemplate == null)
@@ -158,7 +166,6 @@ $.inflateDashboardDesignEditor = function(po)
 		{
 			tab.loadStatus = "loading";
 			
-			var tabPanel = po.elementOfId(tab.id);
 			var fm = po.vueFormModel();
 			var id = fm.id;
 			
@@ -176,6 +183,7 @@ $.inflateDashboardDesignEditor = function(po)
 						resourceContent = (response.defaultTemplateContent || "");
 					
 					po.setResContent(tab, resourceContent);
+					po.updateResSavedChangeFlag(tab);
 				},
 				complete: function()
 				{
@@ -189,7 +197,7 @@ $.inflateDashboardDesignEditor = function(po)
 	{
 		var tabPanel = po.elementOfId(tab.id);
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
-		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
 		
 		if(!codeEditor)
 		{
@@ -215,7 +223,7 @@ $.inflateDashboardDesignEditor = function(po)
 			}
 			
 			codeEditor = po.createCodeEditor(codeEditorEle, codeEditorOptions);
-			codeEditorEle.data("codeEditorInstance", codeEditor);
+			po.codeEditorInstance(codeEditorEle, codeEditor);
 			
 			if(tab.isTemplate)
 			{
@@ -230,7 +238,6 @@ $.inflateDashboardDesignEditor = function(po)
 					}
 				}
 				
-				var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
 				po.setVeDashboardSize(tab, {});
 			}
 		}
@@ -254,6 +261,39 @@ $.inflateDashboardDesignEditor = function(po)
 			return false;
 		else
 			return true;
+	};
+	
+	po.updateResSavedChangeFlag = function(tab)
+	{
+		tab.savedChangeFlag = po.getLatestResChangeFlag(tab);
+	};
+	
+	po.updateAllResSavedChangeFlags = function()
+	{
+		var pm = po.vuePageModel();
+		var items = pm.resContentTabs.items;
+		
+		$.each(items, function(idx, item)
+		{
+			po.updateResSavedChangeFlag(item);
+		});
+	};
+	
+	po.getLatestResChangeFlag = function(tab)
+	{
+		var tabPanel = po.elementOfId(tab.id);
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
+		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
+		var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
+		
+		var re =
+		{
+			code: codeEditor.changeGeneration(),
+			ve: (dashboardEditor ? dashboardEditor.changeFlag() : po.dftVeLoadedChangeFlag)
+		};
+		
+		return re;
 	};
 	
 	po.codeEditorHintHandler = function(codeEditor)
@@ -346,7 +386,7 @@ $.inflateDashboardDesignEditor = function(po)
 			if(tab.editMode == "code")
 			{
 				var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
-				var codeEditor = editorEle.data("codeEditorInstance");
+				var codeEditor = po.codeEditorInstance(editorEle);
 				info.content = po.getCodeText(codeEditor);
 			}
 			else
@@ -371,8 +411,10 @@ $.inflateDashboardDesignEditor = function(po)
 		return items[pm.resContentTabs.activeIndex];
 	};
 	
-	po.saveResInfo = function(resInfo)
+	po.saveResInfo = function(tab)
 	{
+		var resInfo = po.getEditResInfo(tab);
+		
 		if(!resInfo)
 			return;
 		
@@ -387,12 +429,77 @@ $.inflateDashboardDesignEditor = function(po)
 		},
 		function(response)
 		{
+			po.updateResSavedChangeFlag(tab);
+			
 			if(response.data.templatesChanged)
 				po.updateTemplateList(response.data.templates);
 			
 			if(!response.data.resourceExists)
 				po.refreshLocalRes();
 		});
+	};
+	
+	po.confirmCloseUnSavedRes = function(tabIndexes, acceptHandler)
+	{
+		var unsaveds = po.getUnSavedResTabs(tabIndexes);
+		
+		if(unsaveds.length == 0)
+		{
+			acceptHandler();
+		}
+		else
+		{
+			var msg = $.validator.format(po.i18n.confirmCloseWithUnsaved, po.getTabsResNameStr(unsaveds));
+			po.confirm({ message: msg, accept: acceptHandler });
+		}
+	};
+	
+	po.getTabsResNameStr = function(tabs)
+	{
+		var re = [];
+		
+		for(var i=0; i<tabs.length; i++)
+		{
+			re.push(tabs[i].resName);
+		}
+		
+		return re.join(", ");
+	};
+	
+	po.getUnSavedResTabs = function(tabIndexes)
+	{
+		var pm = po.vuePageModel();
+		var items = pm.resContentTabs.items;
+		
+		//默认全部
+		if(tabIndexes == null)
+		{
+			tabIndexes = [];
+			for(var i=0; i<items.length; i++)
+			{
+				tabIndexes.push(i);
+			}
+		}
+		
+		var re = [];
+		
+		for(var i=0; i<tabIndexes.length; i++)
+		{
+			var tab = items[tabIndexes[i]];
+			
+			if(!tab)
+				continue;
+			
+			var saved = (tab.savedChangeFlag || {});
+			var latest = po.getLatestResChangeFlag(tab);
+			
+			if(saved.code != latest.code || saved.ve != latest.ve)
+			{
+				re.push(tab);
+			}
+		}
+		
+		return re;
 	};
 	
 	po.searchInCodeEditor = function(tab)
@@ -403,7 +510,7 @@ $.inflateDashboardDesignEditor = function(po)
 			return;
 		
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
-		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
 		
 		var prevSearchText = codeEditorEle.data("prevSearchText");
 		var cursor = codeEditorEle.data("prevSearchCursor");
@@ -427,12 +534,16 @@ $.inflateDashboardDesignEditor = function(po)
 		}
 	};
 	
+	//可视模式加载页面后的dashboardEditor.changeFlag()初始值值，
+	//因为加载是异步执行，无法同步获取，所以这里明确定义
+	po.dftVeLoadedChangeFlag = 1;
+	
 	po.handleChangeEditMode = function(tab)
 	{
 		var tabPanel = po.elementOfId(tab.id);
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
 		var codeEditorWrapper = codeEditorEle.parent();
-		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
 		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
 		var visualEditorIfmWrapper = visualEditorIfm.parent();
 		var visualEditorWrapper = visualEditorIfmWrapper.parent();
@@ -467,8 +578,7 @@ $.inflateDashboardDesignEditor = function(po)
 				po.iframeDocument(visualEditorIfm).write("");
 				
 				visualEditorIfmWrapper.data("codeChangeFlag", codeEditor.changeGeneration());
-				//可视模式加载页面后的dashboardEditor.changeFlag()返回值是：1
-				codeEditorEle.data("veChangeFlag", 1);
+				codeEditorEle.data("veChangeFlag", po.dftVeLoadedChangeFlag);
 				
 				po.loadVisualEditorIframe(visualEditorIfm, tab.resName, (po.isReadonlyAction ? "" : po.getCodeText(codeEditor)));
 			}
@@ -482,8 +592,6 @@ $.inflateDashboardDesignEditor = function(po)
 	{
 		var tabPanel = po.elementOfId(tab.id);
 		var visualEditorIfm = po.elementOfId(po.resVisualEditorEleId(tab), tabPanel);
-		var visualEditorIfmWrapper = visualEditorIfm.parent();
-		var visualEditorWrapper = visualEditorIfmWrapper.parent();
 		
 		var ifmWindow = po.iframeWindow(visualEditorIfm);
 		var dashboardEditor = (ifmWindow && ifmWindow.dashboardFactory ? ifmWindow.dashboardFactory.dashboardEditor : null);
@@ -571,8 +679,6 @@ $.inflateDashboardDesignEditor = function(po)
 	
 	po.loadVisualEditorIframe = function(visualEditorIfm, templateName, templateContent)
 	{
-		var fm = po.vueFormModel();
-		
 		var form = po.elementOfPidPrefix("visualEditorLoadForm");
 		form.attr("action", po.showUrl(templateName));
 		form.attr("target", visualEditorIfm.attr("name"));
@@ -686,17 +792,13 @@ $.inflateDashboardDesignEditor = function(po)
 		
 		var tabPanel = po.elementOfId(tab.id);
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
-		var codeEditor = codeEditorEle.data("codeEditorInstance");
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
 		
 		var doc = codeEditor.getDoc();
 		var cursor = doc.getCursor();
-		
-		var dftSize = po.defaultInsertChartSize;
-		
 		var code = "";
 		
 		var chartId = chartWidgets[0].id;
-		var chartName = chartWidgets[0].name;
 		var text = po.getTemplatePrevTagText(codeEditor, cursor);
 		var textNext = po.getTemplateNextText(codeEditor, cursor);
 		
@@ -1128,8 +1230,7 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!editedHtml)
 		{
 			var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
-			var codeEditorWrapper = codeEditorEle.parent();
-			var codeEditor = codeEditorEle.data("codeEditorInstance");
+			var codeEditor = po.codeEditorInstance(codeEditorEle);
 			editedHtml = po.getCodeText(codeEditor);
 		}
 		if(!editedHtml)
@@ -1589,35 +1690,54 @@ $.inflateDashboardDesignEditor = function(po)
 					label: po.i18n.close,
 					command: function()
 					{
-						po.tabviewClose(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
+						var closeTabIndexes = po.tabviewIndexesOfClose(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						po.confirmCloseUnSavedRes(closeTabIndexes, function()
+						{
+							po.tabviewClose(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						});
 					}
 				},
 				{
 					label: po.i18n.closeOther,
 					command: function()
 					{
-						po.tabviewCloseOther(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
+						var closeTabIndexes = po.tabviewIndexesOfCloseOther(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						po.confirmCloseUnSavedRes(closeTabIndexes, function()
+						{
+							po.tabviewCloseOther(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						});
 					}
 				},
 				{
 					label: po.i18n.closeRight,
 					command: function()
 					{
-						po.tabviewCloseRight(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
+						var closeTabIndexes = po.tabviewIndexesOfCloseRight(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						po.confirmCloseUnSavedRes(closeTabIndexes, function()
+						{
+							po.tabviewCloseRight(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						});
 					}
 				},
 				{
 					label: po.i18n.closeLeft,
 					command: function()
 					{
-						po.tabviewCloseLeft(po.vuePageModel().resContentTabs, po.resourceContentTabMenuTargetId);
+						var closeTabIndexes = po.tabviewIndexesOfCloseLeft(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						po.confirmCloseUnSavedRes(closeTabIndexes, function()
+						{
+							po.tabviewCloseLeft(pm.resContentTabs, po.resourceContentTabMenuTargetId);
+						});
 					}
 				},
 				{
 					label: po.i18n.closeAll,
 					command: function()
 					{
-						po.tabviewCloseAll(po.vuePageModel().resContentTabs);
+						po.confirmCloseUnSavedRes(null, function()
+						{
+							po.tabviewCloseAll(pm.resContentTabs);
+						});
 					}
 				}
 			],
@@ -1627,8 +1747,7 @@ $.inflateDashboardDesignEditor = function(po)
 					label: po.i18n.save,
 					command: function(e)
 					{
-						var info = po.getEditResInfo(pm.resContentTabs.activeIndex);
-						po.saveResInfo(info);
+						po.saveResInfo(po.getCurrentEditTab());
 					}
 				}
 			],
@@ -2066,8 +2185,7 @@ $.inflateDashboardDesignEditor = function(po)
 					label: po.i18n.save,
 					command: function(e)
 					{
-						var info = po.getEditResInfo(pm.resContentTabs.activeIndex);
-						po.saveResInfo(info);
+						po.saveResInfo(po.getCurrentEditTab());
 					}
 				},
 				{

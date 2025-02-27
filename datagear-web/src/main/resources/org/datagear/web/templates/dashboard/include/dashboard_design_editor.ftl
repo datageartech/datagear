@@ -182,6 +182,7 @@
 	po.i18n.dashboardSize = "<@spring.message code='dashboardSize' />";
 	po.i18n.elementBoundary = "<@spring.message code='elementBoundary' />";
 	po.i18n.refresh = "<@spring.message code='refresh' />";
+	po.i18n.confirmCloseWithUnsaved= "<@spring.message code='confirmCloseWithUnsaved' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditor(po);

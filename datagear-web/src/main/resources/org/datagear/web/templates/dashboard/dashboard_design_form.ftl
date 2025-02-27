@@ -137,6 +137,7 @@
 		closeAfterSubmit: false,
 		success: function(response)
 		{
+			po.updateAllResSavedChangeFlags();
 			po.updateTemplateList(response.data.templates);
 			po.refreshLocalRes();
 			
