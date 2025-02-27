@@ -441,7 +441,7 @@ $.inflateDashboardDesignEditor = function(po)
 	
 	po.confirmCloseUnSavedRes = function(tabIndexes, acceptHandler)
 	{
-		var unsaveds = po.getUnSavedResTabs(tabIndexes);
+		var unsaveds = (po.isReadonlyAction ? [] : po.getUnSavedResTabs(tabIndexes));
 		
 		if(unsaveds.length == 0)
 		{
@@ -1664,9 +1664,37 @@ $.inflateDashboardDesignEditor = function(po)
 		return items;
 	};
 	
+	po.bindBeforeunloadForUnSavedRes = function()
+	{
+		if(po.isReadonlyAction)
+			return false;
+		
+		$(window).on("beforeunload", function(event)
+		{
+			var msg = undefined;
+			
+			var unsaveds = po.getUnSavedResTabs();
+			if(unsaveds.length > 0)
+			{
+				msg = $.validator.format(po.i18n.confirmCloseWithUnsaved, po.getTabsResNameStr(unsaveds));
+			}
+			
+			if(msg)
+			{
+				if(event && event.originalEvent)
+				{
+					event.originalEvent.returnValue = msg;
+				}
+				
+				return msg;
+			}
+		});
+	};
+	
 	po.setupResourceEditor = function()
 	{
 		po.setupResourceEditorForms();
+		po.bindBeforeunloadForUnSavedRes();
 		
 		var fm = po.vueFormModel();
 		var pm = po.vuePageModel();
