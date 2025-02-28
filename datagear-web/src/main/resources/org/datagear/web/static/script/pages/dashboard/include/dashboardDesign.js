@@ -619,12 +619,6 @@ $.inflateDashboardDesignEditor = function(po)
 			$.tipInfo(msg);
 		};
 		
-		dashboardEditor.clickCallback = function()
-		{
-			//关闭可能已显示的面板
-			po.element().click();
-		};
-		
 		dashboardEditor.selectElementCallback = function(ele)
 		{
 			var tab = po.getCurrentEditTab();
@@ -1452,7 +1446,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.gridLayout,
 				insertType: insertType,
-				class: "ve-panel-show-control gridLayoutShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1474,7 +1467,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.flexLayout,
 				insertType: insertType,
-				class: "ve-panel-show-control flexLayoutShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1518,7 +1510,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.titleElement + " <h1>-<h6>",
 				insertType: insertType,
-				class: "ve-panel-show-control hxtitleShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1542,7 +1533,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.textElement + " <label>",
 				insertType: insertType,
-				class: "ve-panel-show-control textElementShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1566,7 +1556,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.image + " <img>",
 				insertType: insertType,
-				class: "ve-panel-show-control imageShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1590,7 +1579,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.hyperlink + " <a>",
 				insertType: insertType,
-				class: "ve-panel-show-control hyperlinkShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1614,7 +1602,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.video + " <video>",
 				insertType: insertType,
-				class: "ve-panel-show-control videoShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1638,7 +1625,6 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				label: po.i18n.iframe + " <iframe>",
 				insertType: insertType,
-				class: "ve-panel-show-control iframeShown",
 				parentLabelPath: parentLabelPath,
 				command: function(e)
 				{
@@ -1915,7 +1901,6 @@ $.inflateDashboardDesignEditor = function(po)
 					[
 						{
 							label: po.i18n.globalStyle,
-							class: "ve-panel-show-control styleShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -1941,7 +1926,6 @@ $.inflateDashboardDesignEditor = function(po)
 						},
 						{
 							label: po.i18n.globalChartTheme,
-							class: "ve-panel-show-control chartThemeShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -1965,7 +1949,6 @@ $.inflateDashboardDesignEditor = function(po)
 						},
 						{
 							label: po.i18n.globalChartOptions,
-							class: "ve-panel-show-control chartOptionsShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -1991,7 +1974,6 @@ $.inflateDashboardDesignEditor = function(po)
 						{ separator: true },
 						{
 							label: po.i18n.style,
-							class: "ve-panel-show-control styleShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -2024,7 +2006,6 @@ $.inflateDashboardDesignEditor = function(po)
 							[
 								{
 									label: po.i18n.chartTheme,
-									class: "ve-panel-show-control chartThemeShown",
 									parentLabelPath: [po.i18n.edit, po.i18n.chart],
 									command: function(e)
 									{
@@ -2051,7 +2032,6 @@ $.inflateDashboardDesignEditor = function(po)
 								},
 								{
 									label: po.i18n.chartOptions,
-									class: "ve-panel-show-control chartOptionsShown",
 									parentLabelPath: [po.i18n.edit, po.i18n.chart],
 									command: function(e)
 									{
@@ -2079,7 +2059,6 @@ $.inflateDashboardDesignEditor = function(po)
 								},
 								{
 									label: po.i18n.chartAttribute,
-									class: "ve-panel-show-control chartAttrValuesShown",
 									parentLabelPath: [po.i18n.edit, po.i18n.chart],
 									command: function(e)
 									{
@@ -2107,7 +2086,6 @@ $.inflateDashboardDesignEditor = function(po)
 						},
 						{
 							label: po.i18n.textContent,
-							class: "ve-panel-show-control textElementShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -2133,7 +2111,6 @@ $.inflateDashboardDesignEditor = function(po)
 						},
 						{
 							label: po.i18n.elementSetting,
-							class: "ve-panel-show-control imageShown hyperlinkShown videoShown textElementShown iframeShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -2152,7 +2129,6 @@ $.inflateDashboardDesignEditor = function(po)
 						},
 						{
 							label: po.i18n.elementId,
-							class: "ve-panel-show-control eleIdShown",
 							parentLabelPath: po.i18n.edit,
 							command: function(e)
 							{
@@ -2222,7 +2198,6 @@ $.inflateDashboardDesignEditor = function(po)
 					[
 						{
 							label: po.i18n.dashboardSize,
-							class: "ve-panel-show-control dashboardSizeShown",
 							command: function()
 							{
 								var tab = po.getCurrentEditTab();
@@ -2362,37 +2337,6 @@ $.inflateDashboardDesignEditor = function(po)
 		po.beforeClose("closeSelectChartDialog", function()
 		{
 			po.closeSelectChartDialog();
-		});
-		
-		po.element().click(function(e)
-		{
-			var targetEle = $(e.target);
-
-			if(targetEle.hasClass("for-open-chart-panel") || targetEle.closest(".for-open-chart-panel").length > 0)
-				;//保持选择图表对话框
-			else
-				po.hideSelectChartDialog();
-			
-			//确保同时只有一个对话框显示
-			var vePanelShowControlEle = targetEle;
-			if(!vePanelShowControlEle.hasClass("ve-panel-show-control"))
-				vePanelShowControlEle = targetEle.closest(".ve-panel-show-control");
-			var pm = po.vuePageModel();
-			if(vePanelShowControlEle.length > 0)
-			{
-				$.each(pm.vepss, function(p, v)
-				{
-					if(v == true && !vePanelShowControlEle.hasClass(p))
-						pm.vepss[p] = false;
-				});
-			}
-			else
-			{
-				$.each(pm.vepss, function(p, v)
-				{
-					pm.vepss[p] = false;
-				});
-			}
 		});
 	};
 };
@@ -3136,7 +3080,7 @@ $.inflateDashboardDesignResource = function(po)
 		{
 			po.openTableDialog("/dashboardGlobalRes/select",
 			{
-				modal: false,
+				modal: true,
 				closable: false,
 				styleClass: "dashboard-select-global-res-wrapper table-sm",
 				templateHeader: "<span class='p-dialog-title'>"+po.i18n.dashboardGlobalRes+" - "+po.i18n.select+"</span>"
