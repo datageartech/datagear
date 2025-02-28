@@ -46,6 +46,8 @@
 	 * 				styleClass: "",
 	 *              //当dialog=true时，对话框位置
 	 * 				position: "center",
+	 *              //当dialog=true时，按ESC是否关闭对话框
+	 * 				closeOnEscape: false,
 	 *              //当dialog=true时，对话框位置
 	 * 				onShow: function(dialogEle){},
 	 *              //当dialog=true时，对话框头部自定义HTML模板
@@ -69,6 +71,7 @@
 			width: "60vw",
 			styleClass: "",
 			position: "center",
+			closeOnEscape: false,
 			onShow: null,
 			pageParam : undefined
 		},
@@ -112,7 +115,7 @@
 								.attr("v-model:closable", "model.closable").attr(":modal", options.modal)
 								.attr("v-on:show", "onDialogShow").attr("v-on:after-hide", "onDialogAfterHide")
 								.attr("v-on:hide", "onDialogHide")
-								.attr(":close-on-escape", "false")
+								.attr(":close-on-escape", options.closeOnEscape)
 								.attr(":style", "{width: model.width}")
 								.attr("class", "ajax-dialog " + $.PAGE_PARAM_BINDER_CLASS + " " + options.styleClass)
 								.attr("position", options.position)

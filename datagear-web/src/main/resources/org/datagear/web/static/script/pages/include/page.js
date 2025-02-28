@@ -1079,7 +1079,8 @@ $.inflatePageForm = function(po)
 		options = $.extend(
 		{
 			width: "55vw",
-			position: "right"
+			position: "right",
+			closeOnEscape: true
 		},
 		(options || {}));
 		
