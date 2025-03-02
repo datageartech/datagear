@@ -79,14 +79,12 @@
 					</div>
 		        	<div class="desc text-color-secondary pt-1">
 		        		<div class="flex flex-row align-items-center gap-1" v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
-		        			<div class="white-space-nowrap overflow-hidden text-overflow-ellipsis" style="max-width:80%;">
-		        				<small>{{fm.pluginVo.descLabel.value}}</small>
+		        			<div class="white-space-nowrap overflow-hidden text-overflow-ellipsis text-sm" style="max-width:90%;">
+		        				{{fm.pluginVo.descLabel.value}}
 		        			</div>
-		        			<div>
-		        				<p-button type="button" icon="pi pi-info-circle" size="small"
-									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text p-1">
-								</p-button>
-		        			</div>
+	        				<p-button type="button" icon="pi pi-angle-down" size="small" rounded
+								@click="onShowChartPluginDesc" class="p-button-secondary p-button-text p-1">
+							</p-button>
 		        		</div>
 		        	</div>
 		        	<div class="validate-msg">
