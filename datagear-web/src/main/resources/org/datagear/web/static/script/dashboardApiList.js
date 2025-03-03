@@ -33,7 +33,8 @@ global.dashboardApiCompletions =
 	{name: "chartOf", value: "chartOf(", displayName: "chartOf()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "charts", value: "charts", displayName: "charts", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "contextURL", value: "contextURL(", displayName: "contextURL()", displayComment: "dashboard", categories: ["dashboard"]},
-	{name: "destroy", value: "destroy()", displayName: "destroy()", displayComment: "dashboard", categories: ["dashboard"]},
+	{name: "destroy", value: "destroy(", displayName: "destroy()", displayComment: "dashboard", categories: ["dashboard"]},
+	{name: "destroyForm", value: "destroyForm()", displayName: "destroyForm()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "doDestroy", value: "doDestroy()", displayName: "doDestroy()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "doRender", value: "doRender()", displayName: "doRender()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "init", value: "init()", displayName: "init()", displayComment: "dashboard", categories: ["dashboard"]},
@@ -68,6 +69,7 @@ global.dashboardApiCompletions =
 	{name: "statusRendering", value: "statusRendering(", displayName: "statusRendering()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "stopHandleCharts", value: "stopHandleCharts()", displayName: "stopHandleCharts()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "user", value: "user()", displayName: "user()", displayComment: "dashboard", categories: ["dashboard"]},
+	{name: "version", value: "version()", displayName: "version()", displayComment: "dashboard", categories: ["dashboard"]},
 	
 	//图表JS对象
 	{name: "attrValue", value: "attrValue(", displayName: "attrValue() ", displayComment: "chart", categories: ["chart"]},
