@@ -1263,10 +1263,6 @@ $.inflatePageCodeEditor = function(po)
 		{
 			var comp = completions[i];
 			
-			//相同时不必列入提示，影响输入
-			if(namePrefix && namePrefix.length == comp.name.length)
-				continue;
-			
 			var nameLower = comp.name.toLowerCase();
 			
 			if(namePrefix && nameLower.indexOf(namePrefix) != 0)
