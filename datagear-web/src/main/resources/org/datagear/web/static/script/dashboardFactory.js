@@ -82,6 +82,9 @@
 	
 	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/lib/geojson/"));
 	
+	/** 看板版本常量，参考：org.datagear.web.analysis.DashboardVersion */
+	var dashboardVersion = (dashboardFactory.dashboardVersion || (dashboardFactory.dashboardVersion = { V_1_0: "1.0", V_2_0: "2.0" }));
+	
 	//----------------------------------------
 	// chartStatusConst开始
 	//----------------------------------------
@@ -797,17 +800,19 @@
 			this._manualRender = manualRender;
 	};
 	
-	//重写函数，用于支持看板版本1.0，此函数不应做非null校验和处理，避免干扰原始参数
-	chartBase._toCallbackResultParam = function(chartResult)
+	//重写函数，用于兼容看板版本，此函数不应做非null校验和处理，避免干扰原始参数
+	chartBase._toApiStdResult = function(chartResult)
 	{
 		var version = this.dashboard.version();
-		if(version == "1.0")
+		
+		if(version == dashboardVersion.V_1_0 || version == dashboardVersion.V_2_0)
 		{
 			return this.results(chartResult);
 		}
 		else
 		{
-			return chartResult;
+			//对于后续的其他看板版本，可能会修改
+			return this.results(chartResult);
 		}
 	};
 	
@@ -2089,6 +2094,7 @@
 	
 	dashboardBase._doUpdateChart = function(chart, chartResult)
 	{
+		chartResult = chart._toApiStdResult(chartResult);
 		chart.update(chartResult);
 	};
 	
@@ -3110,7 +3116,7 @@
 	 */
 	dashboardBase.version = function()
 	{
-		return (this._version == "1.0" ? this._version : "2.0");
+		return (this._version == dashboardVersion.V_1_0  ? this._version : dashboardVersion.V_2_0);
 	};
 	
 	//-------------

@@ -1277,7 +1277,7 @@
 		
 		var listener = this.listener();
 		if(listener && listener.onUpdate)
-			doUpdate = listener.onUpdate(this, this._toCallbackResultParam(chartResult));
+			doUpdate = listener.onUpdate(this, this._toApiStdResult(chartResult));
 		
 		if(doUpdate != false)
 		{
@@ -1312,11 +1312,11 @@
 		
 		if(renderer && renderer.update)
 		{
-			renderer.update(this, this._toCallbackResultParam(chartResult));
+			renderer.update(this, this._toApiStdResult(chartResult));
 		}
 		else
 		{
-			this.plugin.renderer.update(this, this._toCallbackResultParam(chartResult));
+			this.plugin.renderer.update(this, this._toApiStdResult(chartResult));
 		}
 		
 		if(!async)
@@ -1336,7 +1336,7 @@
 		var nows = (this.results(chartResult) || []);
 		
 		var merges = [];
-		var mergeDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, this._toCallbackResultParam(chartResult)) : appendMode.size);
+		var mergeDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, this._toApiStdResult(chartResult)) : appendMode.size);
 		var mergesLength = Math.max(olds.length, nows.length);
 		
 		for(var i=0; i<mergesLength; i++)
@@ -1535,7 +1535,7 @@
 		{
 			if($.isFunction(renderer.asyncUpdate))
 			{
-				return renderer.asyncUpdate(this, this._toCallbackResultParam(chartResult));
+				return renderer.asyncUpdate(this, this._toApiStdResult(chartResult));
 			}
 			else
 				return (renderer.asyncUpdate == true);
@@ -1548,7 +1548,7 @@
 		
 		if($.isFunction(this.plugin.renderer.asyncUpdate))
 		{
-			return this.plugin.renderer.asyncUpdate(this, this._toCallbackResultParam(chartResult));
+			return this.plugin.renderer.asyncUpdate(this, this._toApiStdResult(chartResult));
 		}
 		else
 		{
@@ -1742,7 +1742,7 @@
 		var listener = this.listener();
 		if(listener && listener.update)
 		{
-			listener.update(this, this._toCallbackResultParam(this.updateResult()));
+			listener.update(this, this._toApiStdResult(this.updateResult()));
 		}
 	};
 	
@@ -2337,11 +2337,12 @@
 	};
 	
 	/**
-	 * 将图表结果（org.datagear.analysis.ChartResult）转换为回调函数参数。
+	 * 将图表结果（org.datagear.analysis.ChartResult）转换为兼容此版本API规范的结构。
+	 * 在dashboardFactory.js将重写此函数，通过看板本版标识实现API规范兼容。
 	 * 
 	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
 	 */
-	chartBase._toCallbackResultParam = function(chartResult)
+	chartBase._toApiStdResult = function(chartResult)
 	{
 		return chartResult;
 	};
@@ -2912,7 +2913,7 @@
 	 */
 	chartBase.inflateUpdateOptions = function(chartResult, updateOptions, renderOptions, beforeProcessHandler)
 	{
-		chartResult = this._toCallbackResultParam(chartResult);
+		chartResult = this._toApiStdResult(chartResult);
 		
 		//(chartResult)
 		if(arguments.length == 1)
@@ -4347,7 +4348,7 @@
 	 * 
 	 * @param chartResult 可选，要设置的图表结果、数据集结果数组
 	 * @returns 要获取的图表结果，没有则返回null
-	 * @since 5.3.0
+	 * @since 5.3.0 此API暂不开放，因为5.3.0版本的开放API中没有用到chartResult设计概念
 	 */
 	chartBase.updateResult = function(chartResult)
 	{
@@ -4366,7 +4367,7 @@
 	 * @param chartResult 图表结果、数据集结果数组（仅获取时）
 	 * @param dataSetResults 可选，要设置的数据集结果数组
 	 * @returns 要获取的数据集结果数组，没有则返回null
-	 * @since 5.3.0
+	 * @since 5.3.0 此API暂不开放，因为5.3.0版本的开放API中没有用到chartResult设计概念
 	 */
 	chartBase.results = function(chartResult, dataSetResults)
 	{
