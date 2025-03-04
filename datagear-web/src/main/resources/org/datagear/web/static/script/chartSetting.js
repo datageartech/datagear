@@ -76,9 +76,6 @@
 		dataDetail: "数据明细"
 	});
 	
-	//是否在参数表单提交时关闭参数面板
-	chartSetting.closeChartSettingParamPanelOnSubmit = (chartSetting.closeChartSettingParamPanelOnSubmit || true);
-	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
 	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
 	
@@ -1799,9 +1796,25 @@
 						doRefresh = chartOptions[builtinOptionNames.onParamFormSubmit](chart);
 					}
 					
-					if(doRefresh !== false)
+					//不执行刷新
+					if(doRefresh === false || doRefresh == "break-show" || doRefresh == "break-hide")
 					{
-						if(chartSetting.closeChartSettingParamPanelOnSubmit)
+						if(doRefresh === false || doRefresh == "break-show")
+						{
+							//不关闭面板
+						}
+						else
+						{
+							chartSetting.closeChartSettingParamPanel(chart);
+						}
+					}
+					else
+					{
+						if(doRefresh == "continue-show")
+						{
+							//不关闭面板
+						}
+						else
 						{
 							chartSetting.closeChartSettingParamPanel(chart);
 						}
