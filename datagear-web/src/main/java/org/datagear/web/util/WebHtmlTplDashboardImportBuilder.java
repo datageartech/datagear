@@ -145,7 +145,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
 				"<link type=\"images/x-icon\" href=\"" + contextPath + "/favicon.ico?v=" + Global.VERSION
-						+ "\" rel=\"shortcut icon\" " + HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR
+						+ "\" rel=\"shortcut icon\" " + HtmlTplDashboardWidgetRenderer.DASHBOARD_LIB_NAME_ATTR
 						+ "=\"" + BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON + "\" />"));
 
 		// CSS

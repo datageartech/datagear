@@ -82,14 +82,17 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	public static final String DASHBOARD_ELEMENT_ATTR_PREFIX = "dg-";
 
-	public static final String DASHBOARD_IMPORT_ITEM_NAME_ATTR = DASHBOARD_ELEMENT_ATTR_PREFIX + "import-name";
+	/** {@code dg-lib-name} */
+	public static final String DASHBOARD_LIB_NAME_ATTR = DASHBOARD_ELEMENT_ATTR_PREFIX + "lib-name";
 
 	public static final String DEFAULT_DASHBOARD_FACTORY_VAR = "dashboardFactory";
 
 	public static final String DEFAULT_THEME_IMPORT_NAME = "dashboardThemeStyle";
 
+	/** {@code dg-dashboard} */
 	public static final String DEFAULT_DASHBOARD_STYLE_NAME = DASHBOARD_ELEMENT_ATTR_PREFIX + "dashboard";
 
+	/** {@code dg-chart} */
 	public static final String DEFAULT_CHART_STYLE_NAME = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart";
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
@@ -848,7 +851,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			return false;
 
 		out.write(
-				"<style type=\"text/css\" " + DASHBOARD_IMPORT_ITEM_NAME_ATTR + "=\"" + this.themeImportName + "\">");
+				"<style type=\"text/css\" " + DASHBOARD_LIB_NAME_ATTR + "=\"" + this.themeImportName + "\">");
 		writeNewLine(out);
 		out.write("." + this.dashboardStyleName + "{");
 		writeNewLine(out);

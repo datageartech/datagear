@@ -121,14 +121,18 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	public static final String HTML_TAG_TITLE_CLOSE = "</title>";
 
+	/** {@code dg-dashboard-var} */
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_VAR = DASHBOARD_ELEMENT_ATTR_PREFIX + "dashboard-var";
 
+	/** {@code dg-dashboard-factory} */
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_FACTORY = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-factory";
 
+	/** {@code dg-dashboard-unimport} */
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-unimport";
 
+	/** {@code dg-loadable-chart-widgets} */
 	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "loadable-chart-widgets";
 
@@ -139,11 +143,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-auto-render";
 
+	/** {@code dg-dashboard-code} */
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_CODE = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-code";
 
+	/** {@code dg-chart-widget} */
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
+	/** {@code dg-chart-auto-resize} */
 	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
 
 	public static final String DASHBOARD_CODE_ATTR_VALUE_INSTANCE = "instance";

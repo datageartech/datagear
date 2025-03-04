@@ -86,7 +86,7 @@ public class HtmlTplDashboardImport implements Serializable
 	public static HtmlTplDashboardImport valueOfLinkCss(String name, String href)
 	{
 		String content = "<link type=\"text/css\" href=\"" + href + "\" rel=\"stylesheet\" "
-				+ HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR + "=\"" + name + "\" />";
+				+ HtmlTplDashboardWidgetRenderer.DASHBOARD_LIB_NAME_ATTR + "=\"" + name + "\" />";
 
 		return new HtmlTplDashboardImport(name, content);
 	}
@@ -101,7 +101,7 @@ public class HtmlTplDashboardImport implements Serializable
 	public static HtmlTplDashboardImport valueOfJavaScript(String name, String src)
 	{
 		String content = "<script type=\"text/javascript\" src=\"" + src + "\" "
-				+ HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR + "=\"" + name + "\" ></script>";
+				+ HtmlTplDashboardWidgetRenderer.DASHBOARD_LIB_NAME_ATTR + "=\"" + name + "\" ></script>";
 
 		return new HtmlTplDashboardImport(name, content);
 	}

@@ -246,8 +246,8 @@
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
 	
-	/** 看板引入库标识属性，同：org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.DASHBOARD_IMPORT_ITEM_NAME_ATTR */
-	chartFactory.LIB_ATTR_IMPORT_NAME = "dg-import-name";
+	/** 看板引入库标识属性，同：org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.DASHBOARD_LIB_NAME_ATTR */
+	chartFactory.LIB_ATTR_NAME = "dg-lib-name";
 	
 	/**
 	 * 图表属性值集中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.ATTR_CHART_OPTIONS
@@ -6174,7 +6174,7 @@
 	 * 如果样式表不存在，将会自动创建，并插入至<head>中。
 	 * 插入规则：
 	 * 一级优先：插入在最后一个生成样式表之后，确保新生成样式表可以覆盖全部旧生成样式表；
-	 * 二级优先：插入在最后一个看板引入库（dg-import-name）之后，确保全部生成样式表可以覆盖全部引入库中的样式表；
+	 * 二级优先：插入在最后一个看板引入库（dg-lib-name）之后，确保全部生成样式表可以覆盖全部引入库中的样式表；
 	 * 三级优先：插入在第一个用户引入<link>元素之前，确保看板内用户引入的<link>样式表可以覆盖全部生成样式表；
 	 * 四级优先：插入在第一个用户定义<style>元素之前，确保看板内用户定义的<style>样式表可以覆盖全部生成样式表；
 	 * 五级优先：插入在<head>末尾。
@@ -6204,7 +6204,7 @@
 			return;
 		}
 		
-		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
+		var $lastImport = $("["+chartFactory.LIB_ATTR_NAME+"]:last", $head);
 		
 		if($lastImport.length > 0)
 		{
@@ -7856,7 +7856,7 @@
 	/**
 	 * 在DOM中插入依赖库源。
 	 * 插入规则：
-	 * 一级优先：插入在最后一个看板引入库（dg-import-name）之后、且为其添加dg-import-name属性，
+	 * 一级优先：插入在最后一个看板引入库（dg-lib-name）之后、且为其添加dg-lib-name属性，
 	 * 			确保其可以使用之前依赖库和内置引入库、且可以被全部生成样式表覆盖（参考chartFactory.styleSheetText()函数说明）；
 	 * 二级优先：插入在<head>末尾。
 	 * 
@@ -7865,13 +7865,13 @@
 	 */
 	chartFactory.addLibSourceEleToDoc = function(lib, ele)
 	{
-		$(ele).attr(chartFactory.LIB_ATTR_IMPORT_NAME, lib.name);
+		$(ele).attr(chartFactory.LIB_ATTR_NAME, lib.name);
 		
 		var $head = $("head:first");
 		var headEle = $head[0];
 		var beforeEle = null;
 		
-		var $lastImport = $("["+chartFactory.LIB_ATTR_IMPORT_NAME+"]:last", $head);
+		var $lastImport = $("["+chartFactory.LIB_ATTR_NAME+"]:last", $head);
 		if($lastImport.length > 0)
 		{
 			var $next = $lastImport.next();

@@ -1212,7 +1212,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	public static class DashboardShowForEdit
 	{
 		/**
-		 * 看板可视编辑时的内元素可视编辑ID属性名。
+		 * 看板可视编辑时的内元素可视编辑ID属性名：{@code dg-visual-edit-id}。
 		 */
 		public static final String ELEMENT_ATTR_VISUAL_EDIT_ID = HtmlTplDashboardWidgetRenderer.DASHBOARD_ELEMENT_ATTR_PREFIX
 				+ "visual-edit-id";
