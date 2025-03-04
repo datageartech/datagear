@@ -1020,15 +1020,15 @@ DataGear版本更新日志
 --v5.3.0
 -----------------------------------------
 
-新增：看板新增版本概念和相关功能（1.0、2.0），用于为兼容旧版看板逻辑提供支持；
+新增：看板新增版本概念和相关功能，用于为兼容旧版看板逻辑提供支持；
 新增：看板可视编辑模式新增插入iframe元素、编辑元素ID功能；
+新增：内置图表插件新增【基本表格V2】插件，替换已弃用的【基本表格V1】插件；
 新增：看板JS对象新增dashboard.version()函数，用于获取看板版本信息；
 新增：看板JS对象新增dashboard.destroyForm()函数，用于销毁看板表单；
-新增：内置图表插件新增【基本表格V2】插件，替换已弃用的【基本表格V1】插件；
 新增：内置图表选项新增onParamFormSubmit选项，用于在内置图表参数表单提交前执行回调；
-新增：内置标签卡图表选项新增valueFirst、hideName选项；
 新增：内置表格图表选项新增enableWrapText选项，用于设置表格内文本不换行；
 新增：内置表格图表选项新增updateInternal选项，用于为serverSide特性提供支持；
+新增：内置标签卡图表选项新增valueFirst、hideName选项；
 新增：内置地图类图表选项新增mapName选项，替换已弃用的dgMap选项；
 新增：内置图表选项新增sortAxisData选项，替换已弃用的dgSortAxisData选项；
 新增：内置图表选项新增updateAppendMode选项，替换已弃用的dgUpdateAppendMode选项；
