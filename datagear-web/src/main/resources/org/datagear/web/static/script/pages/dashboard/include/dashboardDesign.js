@@ -2031,6 +2031,31 @@ $.inflateDashboardDesignEditor = function(po)
 									}
 								},
 								{
+									label: po.i18n.chartAttribute,
+									parentLabelPath: [po.i18n.edit, po.i18n.chart],
+									command: function(e)
+									{
+										e.item.commandExec();
+									},
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkSetElementChartAttrValues())
+												return;
+											
+											po.showVeChartAttrValuesPanel(function(model)
+											{
+												return po.setVeElementChartAttrValues(model);
+											},
+											dashboardEditor.getElementChartAttrValues());
+										}
+									}
+								},
+								{
 									label: po.i18n.chartOptions,
 									parentLabelPath: [po.i18n.edit, po.i18n.chart],
 									command: function(e)
@@ -2054,31 +2079,6 @@ $.inflateDashboardDesignEditor = function(po)
 											{ value: dashboardEditor.getElementChartOptions() },
 											po.i18n.chartOptions + " dg-chart-options",
 											false);
-										}
-									}
-								},
-								{
-									label: po.i18n.chartAttribute,
-									parentLabelPath: [po.i18n.edit, po.i18n.chart],
-									command: function(e)
-									{
-										e.item.commandExec();
-									},
-									commandExec: function()
-									{
-										po.veQuickExecuteMenuItem(this);
-										
-										var dashboardEditor = po.visualDashboardEditorByTab();
-										if(dashboardEditor)
-										{
-											if(!dashboardEditor.checkSetElementChartAttrValues())
-												return;
-											
-											po.showVeChartAttrValuesPanel(function(model)
-											{
-												return po.setVeElementChartAttrValues(model);
-											},
-											dashboardEditor.getElementChartAttrValues());
 										}
 									}
 								}
