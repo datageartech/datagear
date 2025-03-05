@@ -1518,14 +1518,21 @@
 	};
 	
 	/**
-	 * 重新调整所有图表尺寸。
+	 * 重新调整所有活跃图表尺寸。
 	 */
 	dashboardBase.resizeAllCharts = function()
 	{
 		this._assertActive();
 		
 		for(var i=0; i<this.charts.length; i++)
-			this.charts[i].resize();
+		{
+			var chart = this.charts[i];
+			
+			if(chart.isActive())
+			{
+				chart.resize();
+			}
+		}
 	};
 	
 	/**
