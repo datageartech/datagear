@@ -41,7 +41,7 @@
 			</p-button>
 		</template>
 		<div :id="tab.id" class="flex flex-column h-full">
-			<div class="flex-grow-0 flex align-content-center justify-content-between">
+			<div class="flex-grow-0 flex align-items-center justify-content-between">
 				<div>
 					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
 						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab)"
@@ -49,14 +49,14 @@
 					</p-selectbutton>
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
-					<span class="p-buttonset">
+					<div class="p-buttonset flex align-items-stretch">
 						<p-button icon="pi pi-list" label="<@spring.message code='selectChart' />" severity="secondary" class="p-button-sm for-open-chart-panel" title="<@spring.message code='dashboard.insertChart.select' />"
 							@click="onInsertCodeEditorChart($event, tab, false)" v-if="tab.isTemplate">
 						</p-button>
 						<p-button icon="pi pi-plus" label="<@spring.message code='createChart' />" severity="secondary" class="p-button-sm" title="<@spring.message code='dashboard.insertChart.create' />"
 							@click="onInsertCodeEditorChart($event, tab, true)" v-if="tab.isTemplate && pm.enableInsertNewChart">
 						</p-button>
-					</span>
+					</div>
 					<p-menubar :model="pm.codeEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
