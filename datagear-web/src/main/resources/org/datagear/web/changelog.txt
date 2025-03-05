@@ -1024,6 +1024,8 @@ DataGear版本更新日志
 新增：看板可视编辑模式新增插入iframe元素、编辑元素ID功能；
 新增：内置图表插件新增【基本表格V2】插件，替换已弃用的【基本表格V1】插件；
 新增：看板JS对象新增dashboard.version()函数，用于获取看板版本信息；
+新增：看板JS对象新增dashboard.chartsIn()函数，用于获取指定元素内的所有图表；
+新增：看板JS对象新增dashboard.resizeChartsIn()函数，用于调整指定元素内的所有图表尺寸；
 新增：看板JS对象新增dashboard.destroyForm()函数，用于销毁看板表单；
 新增：内置图表选项新增onParamFormSubmit选项，用于在内置图表参数表单提交前执行回调；
 新增：内置表格图表选项新增enableWrapText选项，用于设置表格内文本不换行；
