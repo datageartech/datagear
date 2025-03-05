@@ -3119,6 +3119,39 @@
 		return (this._version == dashboardVersion.V_1_0  ? this._version : dashboardVersion.V_2_0);
 	};
 	
+	/**
+	 * 获取指定元素内（包括自身）包含的所有图表。
+	 *
+	 * @param element DOM元素、Jquery对象
+	 * @param active 可选，是否仅返回已完成渲染且未执行销毁的图表，true 是；false 否。默认值：false
+	 * @return [ ... ]
+	 * @since 5.3.0
+	 */
+	dashboardBase.chartsIn = function(element, active)
+	{
+		element = $(element);
+		active = (active == null ? false : active);
+		
+		element = element.add($("[id]", element));
+		
+		var re = [];
+		
+		var dashboard = this;
+		element.each(function()
+		{
+			var id = $(this).attr("id");
+			var chart = dashboard.chartOf(id);
+			
+			if(!chart)
+				return;
+			
+			if(!active || (active && chart.isActive()))
+				re.push(chart);
+		});
+		
+		return re;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
