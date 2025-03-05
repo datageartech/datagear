@@ -3152,6 +3152,25 @@
 		return re;
 	};
 	
+	/**
+	 * 重新调整指定元素内（包括自身）包含的所有图表尺寸。
+	 * 
+	 * @param element DOM元素、Jquery对象
+	 * @return 已调整尺寸的图表数组：[ ... ]
+	 * @since 5.3.0
+	 */
+	dashboardBase.resizeChartsIn = function(element)
+	{
+		var charts = this.chartsIn(element, true);
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			charts[i].resize();
+		}
+		
+		return charts;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
