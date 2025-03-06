@@ -3147,7 +3147,7 @@
 		element.each(function()
 		{
 			var id = $(this).attr("id");
-			var chart = dashboard.chartOf(id);
+			var chart = (id ? dashboard.chartOf(id) : null);
 			
 			if(!chart)
 				return;
