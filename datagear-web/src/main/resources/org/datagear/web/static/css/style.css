@@ -15,6 +15,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root{
+	--danger-color: red;
+}
+
  /*滚动条*/
  *::-webkit-scrollbar{
 	width: 0.8rem;
@@ -89,7 +93,7 @@ label.align-tip{
 	margin-right: 0.1rem;
 }
 .danger-text{
-	color: var(--red-500);
+	color: var(--danger-color);
 }
 .bg-none{
 	background-color: none !important;
@@ -265,7 +269,7 @@ label.align-tip{
 .p-tieredmenu .danger-menuitem .p-menuitem-content,
 .p-tieredmenu .danger-menuitem .p-menuitem-link,
 .p-tieredmenu .danger-menuitem .p-menuitem-link .p-menuitem-text{
-	color: var(--red-500) !important;
+	color: var(--danger-color) !important;
 }
 
 /*左侧弹出子菜单*/

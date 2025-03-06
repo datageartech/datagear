@@ -15,6 +15,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root{
+	--danger-color: #f44336; /*同p-error样式*/
+}
+
 .logo{
 	background-image: url(image/logo.png);
 }
