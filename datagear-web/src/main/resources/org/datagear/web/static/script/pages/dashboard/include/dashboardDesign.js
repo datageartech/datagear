@@ -2160,7 +2160,7 @@ $.inflateDashboardDesignEditor = function(po)
 					[
 						{
 							label: po.i18n.deleteElement,
-							class: "p-error",
+							class: "danger-menuitem",
 							command: function()
 							{
 								var dashboardEditor = po.visualDashboardEditorByTab();
@@ -2173,7 +2173,7 @@ $.inflateDashboardDesignEditor = function(po)
 						{ separator: true },
 						{
 							label: po.i18n.unbindChart,
-							class: "p-error",
+							class: "danger-menuitem",
 							command: function()
 							{
 								var dashboardEditor = po.visualDashboardEditorByTab();
@@ -3407,7 +3407,7 @@ $.inflateDashboardDesignResource = function(po)
 				{ separator: true },
 				{
 					label: po.i18n["delete"],
-					class: "p-error",
+					class: "danger-menuitem",
 					command: function()
 					{
 						var resName = po.getSelectedLocalRes();

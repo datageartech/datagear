@@ -88,6 +88,9 @@ label.align-tip{
 	margin-left: 0.1rem;
 	margin-right: 0.1rem;
 }
+.danger-text{
+	color: var(--red-500);
+}
 .bg-none{
 	background-color: none !important;
 	background: none !important;
@@ -249,20 +252,20 @@ label.align-tip{
 	margin-right: 0;
 }
 
-/*error菜单条目*/
-.p-contextmenu .p-error .p-menuitem-content,
-.p-contextmenu .p-error .p-menuitem-link,
-.p-contextmenu .p-error .p-menuitem-link .p-menuitem-text,
-.p-menu .p-error .p-menuitem-content,
-.p-menu .p-error .p-menuitem-link,
-.p-menu .p-error .p-menuitem-link .p-menuitem-text,
-.p-menubar .p-error .p-menuitem-content,
-.p-menubar .p-error .p-menuitem-link,
-.p-menubar .p-error .p-menuitem-link .p-menuitem-text,
-.p-tieredmenu .p-error .p-menuitem-content,
-.p-tieredmenu .p-error .p-menuitem-link,
-.p-tieredmenu .p-error .p-menuitem-link .p-menuitem-text{
-	color: inherit;
+/*危险操作菜单条目*/
+.p-contextmenu .danger-menuitem .p-menuitem-content,
+.p-contextmenu .danger-menuitem .p-menuitem-link,
+.p-contextmenu .danger-menuitem .p-menuitem-link .p-menuitem-text,
+.p-menu .danger-menuitem .p-menuitem-content,
+.p-menu .danger-menuitem .p-menuitem-link,
+.p-menu .danger-menuitem .p-menuitem-link .p-menuitem-text,
+.p-menubar .danger-menuitem .p-menuitem-content,
+.p-menubar .danger-menuitem .p-menuitem-link,
+.p-menubar .danger-menuitem .p-menuitem-link .p-menuitem-text,
+.p-tieredmenu .danger-menuitem .p-menuitem-content,
+.p-tieredmenu .danger-menuitem .p-menuitem-link,
+.p-tieredmenu .danger-menuitem .p-menuitem-link .p-menuitem-text{
+	color: var(--red-500) !important;
 }
 
 /*左侧弹出子菜单*/

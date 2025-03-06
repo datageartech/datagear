@@ -613,7 +613,7 @@
 				{
 					return !po.isReadonlyAction;
 				},
-				class: "p-error",
+				class: "danger-menuitem",
 				command: function()
 				{
 					po.handleDeleteAction("/dtbsSource/delete");

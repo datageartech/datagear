@@ -283,7 +283,7 @@ DetectResult detectNewVersionResult
 			{
 				label: "<@spring.message code='module.logout' />",
 				url: po.concatContextPath("/logout"),
-				class: "p-error"
+				class: "danger-menuitem"
 			}
 		]);
 	}
