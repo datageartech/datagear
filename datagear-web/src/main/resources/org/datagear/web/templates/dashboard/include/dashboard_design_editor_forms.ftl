@@ -947,8 +947,19 @@ page_palette.ftl
 								</label>
 								<div class="field-input col-12">
 									<p-inputtext id="${pid}veStyleBgImage" v-model="pm.vepms.style['background-image']" type="text"
-										class="input w-full" name="background-image">
+										class="help-target input w-full" name="background-image">
 									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="url(...)">
+											<@spring.message code='dashboard.veditor.style.bgImage.imgRes' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="linear-gradient(to bottom, yellow 0%, red 100%)">
+											<@spring.message code='dashboard.veditor.style.bgImage.linear' />
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="radial-gradient(circle at 50% 50%, yellow 0%, red 25%,  black 100%)">
+											<@spring.message code='dashboard.veditor.style.bgImage.radial' />
+										</p-button>
+									</div>
 								</div>
 							</div>
 							<div class="field grid">
