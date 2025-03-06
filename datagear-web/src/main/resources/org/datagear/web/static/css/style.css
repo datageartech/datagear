@@ -551,6 +551,15 @@ label.align-tip{
 .code-editor-wrapper .code-editor .CodeMirror{
 	height: 100%;
 }
+.CodeMirror-scroll,
+.CodeMirror-sizer,
+.CodeMirror-gutter,
+.CodeMirror-gutters,
+.CodeMirror-linenumber{
+	/* UI库的CSS会重设此项，导致对于内容较长的某行，即使滚动到头也不能显示全，所以这里必须强制恢复，详见codemirror.css */
+	-moz-box-sizing: content-box !important;
+	box-sizing: content-box !important;
+}
 .CodeMirror-hints{
 	/*防止在弹出对话框中的提示被遮挡*/
 	z-index: 999999;
