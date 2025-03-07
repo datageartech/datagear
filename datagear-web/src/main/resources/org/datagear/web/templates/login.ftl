@@ -56,7 +56,7 @@
 						        <div class="field-input col-12 md:col-9">
 						        	<p-password id="${pid}password" v-model="fm.password" toggle-mask :feedback="false"
 						        		input-class="w-full" class="input w-full" required
-						        		:pt="{input:{root:{name:'password',maxlength:'50'}}}">
+						        		:pt="{input:{name:'password',maxlength:'50'}}">
 						        	</p-password>
 						        </div>
 							</div>

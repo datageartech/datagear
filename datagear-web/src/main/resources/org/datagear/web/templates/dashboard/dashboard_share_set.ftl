@@ -60,7 +60,7 @@
 		        	<p-password id="${pid}password" v-model="fm.password" class="input w-full"
 		        		input-class="w-full" toggle-mask :feedback="false"
 		        		:required="fm.enablePassword"
-		        		:pt="{input:{root:{name:'password',maxlength:'20',autocomplete:'new-password'}}}">
+		        		:pt="{input:{name:'password',maxlength:'20',autocomplete:'new-password'}}">
 		        	</p-password>
 		        	<div class="desc text-color-secondary">
 		        		<small><@spring.message code='dashboardShareSet.password.input.desc' /></small>

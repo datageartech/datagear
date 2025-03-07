@@ -56,7 +56,7 @@
 						        <div class="field-input col-12 md:col-9">
 						        	<p-password id="${pid}password" v-model="fm.user.password" class="input w-full"
 						        		input-class="w-full" toggle-mask :feedback="false" required
-						        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'new-password'}}}">
+						        		:pt="{input:{name:'password',maxlength:'50',autocomplete:'new-password'}}">
 						        	</p-password>
 						        	<div class="desc text-color-secondary" v-if="pm.userPasswordStrengthTip != ''">
 						        		<small>{{pm.userPasswordStrengthTip}}</small>
@@ -70,7 +70,7 @@
 						        <div class="field-input col-12 md:col-9">
 						        	<p-password id="${pid}confirmPassword" v-model="fm.user.confirmPassword" class="input w-full"
 						        		input-class="w-full" toggle-mask :feedback="false" required
-						        		:pt="{input:{root:{name:'confirmPassword',maxlength:'50',autocomplete:'new-password'}}}">
+						        		:pt="{input:{name:'confirmPassword',maxlength:'50',autocomplete:'new-password'}}">
 						        	</p-password>
 						        </div>
 							</div>

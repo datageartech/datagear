@@ -55,7 +55,7 @@
 						        <div class="field-input col-10">
 						        	<p-password id="${pid}password" v-model="fm.password" toggle-mask :feedback="false"
 						        		input-class="w-full" class="input w-full"
-						        		:pt="{input:{root:{name:'password',maxlength:'50',autocomplete:'off',autofocus:'autofocus'}}}">
+						        		:pt="{input:{name:'password',maxlength:'50',autocomplete:'off',autofocus:'autofocus'}}">
 						        	</p-password>
 						        </div>
 							</div>

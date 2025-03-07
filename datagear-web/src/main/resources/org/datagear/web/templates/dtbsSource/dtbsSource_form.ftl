@@ -78,7 +78,7 @@
 		        <div class="field-input col-12 md:col-9">
 		        	<p-password id="${pid}password" v-model="fm.password" class="input w-full"
 		        		input-class="w-full" toggle-mask :feedback="false"
-		        		:pt="{input:{root:{name:'password',maxlength:'100',autocomplete:'new-password'}}}">
+		        		:pt="{input:{name:'password',maxlength:'100',autocomplete:'new-password'}}">
 		        	</p-password>
 		        	<div class="desc text-color-secondary">
 		        		<small><@spring.message code='dtbsSource.password.input.desc' /></small>
