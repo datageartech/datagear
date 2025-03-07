@@ -42,7 +42,7 @@
 		</template>
 		<div :id="tab.id" class="flex flex-column h-full">
 			<div class="flex-grow-0 flex align-items-center justify-content-between">
-				<div>
+				<div class="my-1">
 					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
 						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab)"
 						v-if="tab.isTemplate">
