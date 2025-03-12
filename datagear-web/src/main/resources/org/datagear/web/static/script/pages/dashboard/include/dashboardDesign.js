@@ -619,6 +619,12 @@ $.inflateDashboardDesignEditor = function(po)
 			$.tipInfo(msg);
 		};
 		
+		dashboardEditor.clickCallback = function()
+		{
+			//关闭可能已显示的菜单
+			po.element().click();
+		};
+		
 		dashboardEditor.selectElementCallback = function(ele)
 		{
 			var tab = po.getCurrentEditTab();
