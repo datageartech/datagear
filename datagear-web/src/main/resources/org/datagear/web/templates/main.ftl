@@ -50,16 +50,20 @@
 				</div>
 				<div id="${pid}mainPanels" class="page-main-panels col overflow-auto pb-0 pr-0">
 					<div id="${pid}mainPanelHome" class="page-main-panel p-card w-full h-full p-3 border-noround-bottom border-noround-right">
-						<div class="flex flex-column align-items-center justify-content-center h-full opacity-20">
-							<div class="py-1">
-								<@spring.message code='app.name' />
-							</div>
-							<div class="py-1">
-								<@spring.message code='app.shortDesc' />
-							</div>
-							<div class="py-1">
-								${Global.WEB_SITE}
-							</div>
+						<div class="flex flex-column align-items-center justify-content-center h-full">
+							<#if welcomeContent??>
+								${welcomeContent?no_esc}
+							<#else>
+								<div class="py-1 opacity-20">
+									<@spring.message code='app.name' />
+								</div>
+								<div class="py-1 opacity-20">
+									<@spring.message code='app.shortDesc' />
+								</div>
+								<div class="py-1 opacity-20">
+									${Global.WEB_SITE}
+								</div>
+							</#if>
 						</div>
 					</div>
 				</div>

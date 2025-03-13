@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
+import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.ModulePermissions;
 import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +51,24 @@ public class MainController extends AbstractController
 	public static final String FAVICON_CLASS_PATH = "org/datagear/web/static/image/favicon.ico";
 
 	@Autowired
+	private ApplicationProperties applicationProperties;
+
+	@Autowired
 	private DetectNewVersionScriptResolver detectNewVersionScriptResolver;
 
 	public MainController()
 	{
 		super();
+	}
+
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
 	}
 
 	public DetectNewVersionScriptResolver getDetectNewVersionScriptResolver()
@@ -82,6 +97,10 @@ public class MainController extends AbstractController
 				.resolveModulePermissions(getCurrentAuthentication());
 
 		addAttributeForWriteJson(model, "modulePermissions", mps);
+
+		String welcomeContent = getApplicationProperties().getWelcomeContent();
+		if (!StringUtil.isEmpty(welcomeContent))
+			model.addAttribute("welcomeContent", welcomeContent);
 
 		return "/main";
 	}

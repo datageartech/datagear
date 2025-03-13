@@ -215,6 +215,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${dataSetCacheMaxLength}")
 	private int dataSetCacheMaxLength;
 
+	/** 首页欢迎语 */
+	@Value("${welcomeContent}")
+	private String welcomeContent;
+
 	/** SQL数据集的SQL关键字黑名单 */
 	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
 
@@ -691,6 +695,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setDataSetCacheMaxLength(int dataSetCacheMaxLength)
 	{
 		this.dataSetCacheMaxLength = dataSetCacheMaxLength;
+	}
+
+	public String getWelcomeContent()
+	{
+		return welcomeContent;
+	}
+
+	protected void setWelcomeContent(String welcomeContent)
+	{
+		this.welcomeContent = welcomeContent;
 	}
 
 	public Map<String, String> getSqlDataSetInvalidSqlKeywords()
