@@ -40,38 +40,31 @@ public class FileMerger
 	}
 
 	/**
-	 * 合并目下的所有文件。
+	 * 将多个文件合并至一个文件。
 	 * 
 	 * @param directory
 	 * @param toFileName
 	 *            合并至文件的名称
 	 * @throws IOException
 	 */
-	public void merge(File directory, String toFileName) throws IOException
+	public void merge(File[] sources, File target) throws IOException
 	{
-		if (!directory.isDirectory())
-			throw new IllegalArgumentException();
-
-		File[] children = directory.listFiles();
-
-		File toFile = FileUtil.getFile(directory, toFileName);
-
 		OutputStream out = null;
 
 		try
 		{
-			out = IOUtil.getOutputStream(toFile);
+			out = IOUtil.getOutputStream(target);
 
-			for (File child : children)
+			for (File source : sources)
 			{
-				if (child.isDirectory())
+				if (source.isDirectory())
 					continue;
 
 				InputStream in = null;
 
 				try
 				{
-					in = IOUtil.getInputStream(child);
+					in = IOUtil.getInputStream(source);
 					IOUtil.write(in, out);
 				}
 				finally
@@ -89,11 +82,12 @@ public class FileMerger
 	public static void main(String[] args) throws Exception
 	{
 		File directory = null;
+		String sourceName = null;
 		String toFileName = null;
 
 		Scanner scanner = new Scanner(System.in);
 
-		println("Print directory to merge:");
+		println("Print merge base directory :");
 		while (scanner.hasNextLine())
 		{
 			String input = scanner.nextLine().trim();
@@ -108,7 +102,23 @@ public class FileMerger
 			if (directory != null)
 				break;
 			else
-				println("Print directory to merge:");
+				println("Print merge base directory :");
+		}
+
+		println("Print file names to merge, split by ',' :");
+		while (scanner.hasNextLine())
+		{
+			String input = scanner.nextLine().trim();
+
+			if (!StringUtil.isEmpty(input))
+			{
+				sourceName = input;
+			}
+
+			if (sourceName != null)
+				break;
+			else
+				println("Print file names to merge, split by ',' :");
 		}
 
 		println("Print the file name merge to:");
@@ -124,8 +134,20 @@ public class FileMerger
 
 		IOUtil.close(scanner);
 
+		String[] sourceNames = sourceName.split(",");
+		File[] sources = new File[sourceNames.length];
+
+		for (int i = 0; i < sourceNames.length; i++)
+		{
+			String sn = sourceNames[i].trim();
+			File sf = FileUtil.getFile(directory, sn.trim());
+			sources[i] = sf;
+		}
+
 		FileMerger fileMerger = new FileMerger();
-		fileMerger.merge(directory, toFileName);
+		fileMerger.merge(sources, FileUtil.getFile(directory, toFileName));
+
+		println("Merge finish.");
 	}
 
 	protected static void println(Object o)
