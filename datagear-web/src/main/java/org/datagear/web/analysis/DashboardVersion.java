@@ -17,20 +17,13 @@
 
 package org.datagear.web.analysis;
 
-import org.datagear.analysis.ChartResult;
-import org.datagear.analysis.DataSetResult;
-
 /**
  * 看板版本。
  * <p>
- * 在系统{@code 5.3.0}版本起，有以下不兼容的改动：
+ * 在系统{@code 5.3.0}版本起，看板有以下不兼容的改动：
  * </p>
  * <p>
  * 1、内置看板资源JS库中，移除了表格、水球图、词云图的依赖JS库，改为由插件依赖库实现，按需引入；
- * </p>
- * <p>
- * 2、图表渲染器的{@code update(chart, results)}、图表监听器的{@code update(chart, results)}、{@code onUpdate(chart, results)}的{@code results}参数名改为{@code chartResult}，
- * 类型由数组（{@linkplain DataSetResult}格式的数组）改为对象（{@linkplain ChartResult}对象）。
  * </p>
  * <p>
  * 为了兼容旧版本，需通过看板版本号区分处理。
