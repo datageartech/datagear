@@ -71,7 +71,7 @@ global.dashboardApiCompletions =
 	{name: "statusRendering", value: "statusRendering(", displayName: "statusRendering()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "stopHandleCharts", value: "stopHandleCharts()", displayName: "stopHandleCharts()", displayComment: "dashboard", categories: ["dashboard"]},
 	{name: "user", value: "user()", displayName: "user()", displayComment: "dashboard", categories: ["dashboard"]},
-	{name: "version", value: "version()", displayName: "version()", displayComment: "dashboard", categories: ["dashboard"]},
+	/*{name: "version", value: "version()", displayName: "version()", displayComment: "dashboard", categories: ["dashboard"]},*/
 	
 	//图表JS对象
 	{name: "attrValue", value: "attrValue(", displayName: "attrValue() ", displayComment: "chart", categories: ["chart"]},
