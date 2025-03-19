@@ -63,6 +63,7 @@
 					</div>
 				</div>
 			</div>
+			<!--
 			<div class="field grid">
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='dashboard.version' />
@@ -79,6 +80,7 @@
 		        	</div>
 		        </div>
 			</div>
+			-->
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
@@ -130,10 +132,6 @@
 	{
 		versionDropdownItems:
 		[
-			{
-				label: "${DashboardVersion.V_2_0}",
-				value: "${DashboardVersion.V_2_0}"
-			},
 			{
 				label: "${DashboardVersion.V_1_0}",
 				value: "${DashboardVersion.V_1_0}"

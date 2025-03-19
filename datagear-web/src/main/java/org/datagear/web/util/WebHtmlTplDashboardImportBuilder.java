@@ -29,7 +29,6 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
-import org.datagear.web.analysis.DashboardVersion;
 import org.datagear.web.controller.ServerTimeJsController;
 
 /**
@@ -136,8 +135,6 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	{
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
 
-		boolean buildExtraLib = isBuildExtraLib(dashboard);
-
 		String libPrefix = contextPath + PATH_LIB;
 		String cssPrefix = contextPath + PATH_CSS;
 		String scriptPrefix = contextPath + PATH_SCRIPT;
@@ -149,12 +146,6 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 						+ "=\"" + BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON + "\" />"));
 
 		// CSS
-
-		if (buildExtraLib)
-		{
-			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
-					libPrefix + "/DataTables-1.11.3/css/datatables.min.css"));
-		}
 
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
@@ -173,16 +164,6 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 				libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
 				libPrefix + "/echarts-5.6.0/echarts.min.js"));
-
-		if (buildExtraLib)
-		{
-			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_WORDCLOUD,
-					libPrefix + "/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"));
-			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS_LIQUIDFILL,
-					libPrefix + "/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"));
-			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DATATABLES,
-					libPrefix + "/DataTables-1.11.3/js/datatables.min.js"));
-		}
 
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
@@ -211,19 +192,5 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	protected boolean isEditMode(String mode)
 	{
 		return MODE_EDIT.equals(mode);
-	}
-
-	/**
-	 * 是否在内置看板资源中包含附加库。
-	 * <p>
-	 * 为了兼容旧版的看板，需要内置看板资源包含附加库，具体参考{@linkplain DashboardVersion}。
-	 * </p>
-	 * 
-	 * @param dashboard
-	 * @return
-	 */
-	protected boolean isBuildExtraLib(HtmlTplDashboard dashboard)
-	{
-		return DashboardVersion.isVersion_1_0(dashboard.getVersion());
 	}
 }

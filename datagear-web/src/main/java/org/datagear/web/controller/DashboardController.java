@@ -184,7 +184,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		HtmlTplDashboardWidgetEntity entity = createInstance();
 		entity.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		entity.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
-		entity.setVersion(DashboardVersion.V_2_0);
 
 		return entity;
 	}
@@ -692,7 +691,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		DashboardImportForm form = createImportForm(request, model);
 		form.setZipFileNameEncoding(IOUtil.CHARSET_UTF_8);
 		form.setAnalysisProject(getRequestAnalysisProject(request, getAnalysisProjectService()));
-		form.setVersion(DashboardVersion.V_2_0);
 
 		setFormModel(model, form);
 		addAttributeForWriteJson(model, "availableCharsetNames", getAvailableCharsetNames());
@@ -1102,6 +1100,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	protected void inflateSaveEntity(HttpServletRequest request, User user, HtmlTplDashboardWidgetEntity entity)
 	{
 		trimAnalysisProjectAware(entity);
+		entity.setVersion(DashboardVersion.V_1_0);
 	}
 
 	protected HtmlTplDashboardWidgetEntity createInstance()
