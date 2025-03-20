@@ -3109,14 +3109,12 @@
 	 * 具体参考：org.datagear.web.analysis.DashboardVersion
 	 * 
 	 * @return 版本号，目前只有：1.0、2.0
-	 * @since 5.3.0
+	 * @since 5.3.0 此API暂不开放，因为5.3.0版本的看板版本功能已禁用
 	 */
-	/*
 	dashboardBase.version = function()
 	{
 		return this._version;
 	};
-	*/
 	
 	/**
 	 * 获取指定元素内（包括自身）包含的所有图表。
