@@ -123,7 +123,7 @@
 			var options = this;
 			if(options.inSaveAndDesignAction)
 			{
-				window.open(po.concatContextPath("/dashboard/design?id="+encodeURIComponent(id)));
+				window.open(po.concatContextPath("/dashboard/design/"+encodeURIComponent(id)));
 			}
 		}
 	});

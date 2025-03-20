@@ -398,7 +398,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess dashboardModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/dashboard/add", "/dashboard/edit", "/dashboard/copy", "/dashboard/design", //
+				"/dashboard/add", "/dashboard/edit", "/dashboard/copy", "/dashboard/design/**", //
 				"/dashboard/saveAdd", "/dashboard/saveEdit", "/dashboard/saveDesign", //
 				"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile", //
 				"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import", //

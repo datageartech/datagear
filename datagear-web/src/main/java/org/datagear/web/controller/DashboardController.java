@@ -66,6 +66,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -295,9 +296,22 @@ public class DashboardController extends AbstractDataAnalysisController
 		entity.setId(null);
 	}
 
+	@RequestMapping("/design/{id}")
+	public String designByPath(HttpServletRequest request, HttpServletResponse response, Model model,
+			@PathVariable("id") String id) throws Exception
+	{
+		return designInner(request, response, model, id);
+	}
+
 	@RequestMapping("/design")
-	public String design(HttpServletRequest request, HttpServletResponse response, Model model,
+	public String designByParam(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String id) throws Exception
+	{
+		return designInner(request, response, model, id);
+	}
+
+	protected String designInner(HttpServletRequest request, HttpServletResponse response, Model model, String id)
+			throws Exception
 	{
 		User user = getCurrentUser();
 		setFormAction(model, "design", "saveDesign");

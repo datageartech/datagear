@@ -171,7 +171,7 @@
 		{
 			po.executeOnSelect(function(entity)
 			{
-				window.open(po.concatContextPath("/dashboard/design?id="+encodeURIComponent(entity.id)));
+				window.open(po.concatContextPath("/dashboard/design/"+encodeURIComponent(entity.id)));
 			});
 		},
 		
