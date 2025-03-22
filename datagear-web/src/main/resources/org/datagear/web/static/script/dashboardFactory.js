@@ -1485,19 +1485,10 @@
 	};
 	
 	/**
-	 * 销毁看板表单。
-	 * 
-	 * @param form 看板表单元素
-	 */
-	dashboardBase.destroyForm = function(form)
-	{
-		this._destroyForm(form);
-	};
-	
-	/**
 	 * 重新调整指定图表尺寸。
 	 * 
 	 * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+	 * @returns 图表对象
 	 */
 	dashboardBase.resizeChart = function(chartInfo)
 	{
@@ -1505,6 +1496,8 @@
 		
 		var chart = this.chartOf(chartInfo);
 		chart.resize();
+		
+		return chart;
 	};
 	
 	/**
@@ -3105,6 +3098,17 @@
 	};
 	
 	/**
+	 * 销毁元素内（包括自身）包含的所有看板表单。
+	 * 
+	 * @param form HTML元素、Jquery元素选择器、Jquery对象
+	 * @since 5.3.0
+	 */
+	dashboardBase.destroyForm = function(form)
+	{
+		this._destroyForm(form);
+	};
+	
+	/**
 	 * 获取版本。
 	 * 具体参考：org.datagear.web.analysis.DashboardVersion
 	 * 
@@ -3119,7 +3123,7 @@
 	/**
 	 * 获取指定元素内（包括自身）包含的所有图表。
 	 *
-	 * @param element DOM元素、Jquery对象
+	 * @param element DOM元素、Jquery元素选择器、Jquery对象
 	 * @param active 可选，是否仅返回已完成渲染且未执行销毁的图表，true 是；false 否。默认值：false
 	 * @return [ ... ]
 	 * @since 5.3.0
@@ -3152,7 +3156,7 @@
 	/**
 	 * 重新调整指定元素内（包括自身）包含的所有图表尺寸。
 	 * 
-	 * @param element DOM元素、Jquery对象
+	 * @param element DOM元素、Jquery元素选择器、Jquery对象
 	 * @return 已调整尺寸的图表数组：[ ... ]
 	 * @since 5.3.0
 	 */
