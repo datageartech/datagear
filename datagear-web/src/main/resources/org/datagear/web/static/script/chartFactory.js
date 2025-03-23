@@ -1365,6 +1365,26 @@
 	};
 	
 	/**
+	 * 获取/设置图表此次更新的数据集结果数组。
+	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
+	 * 
+	 * @param dataSetResults 可选，要设置的数据集结果数组
+	 * @returns 要获取的数据集结果数组，没有则返回null
+	 */
+	chartBase.updateResults = function(dataSetResults)
+	{
+		if(dataSetResults === undefined)
+		{
+			var chartResult = this.updateResult();
+			return this.results(chartResult);
+		}
+		else
+		{
+			this.updateResult(dataSetResults);
+		}
+	};
+	
+	/**
 	 * 重新调整图表尺寸。
 	 * 
 	 * 图表渲染器实现相关：
@@ -4420,30 +4440,6 @@
 	};
 	
 	// > @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
-	
-	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.updateResult()
-	
-	/**
-	 * 获取/设置图表此次更新的数据集结果数组。
-	 * 图表更新前会自动执行设置操作（通过chartBase.doUpdate()函数）。
-	 * 
-	 * @param dataSetResults 可选，要设置的数据集结果数组
-	 * @returns 要获取的数据集结果数组，没有则返回null
-	 */
-	chartBase.updateResults = function(dataSetResults)
-	{
-		if(dataSetResults === undefined)
-		{
-			var chartResult = this.updateResult();
-			return this.results(chartResult);
-		}
-		else
-		{
-			this.updateResult(dataSetResults);
-		}
-	};
-	
-	// > @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.updateResult()
 	
 	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOfSign()
 	
