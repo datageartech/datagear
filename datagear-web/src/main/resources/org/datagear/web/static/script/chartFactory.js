@@ -7856,8 +7856,8 @@
 	 * 			确保其可以使用之前依赖库和内置引入库、且可以被全部生成样式表覆盖（参考chartFactory.styleSheetText()函数说明）；
 	 * 二级优先：插入在<head>末尾。
 	 * 
-	 * @param styleId 样式表元素ID
-	 * @param cssText css文本内容
+	 * @param lib 库对象
+	 * @param ele 库对应的DOM对象
 	 */
 	chartFactory.addLibSourceEleToDoc = function(lib, ele)
 	{
