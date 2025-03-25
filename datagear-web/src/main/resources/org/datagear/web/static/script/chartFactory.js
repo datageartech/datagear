@@ -7807,9 +7807,9 @@
 		
 		var ready = true;
 		
-		for(var j=0; j<depend.length; j++)
+		for(var i=0; i<depend.length; i++)
 		{
-			var dependName = depend[j];
+			var dependName = depend[i];
 			var dependStateObj = chartFactory.libStateByName(dependName);
 			//没有找到依赖库也应认为已ready，因为通过HTML的<script>标签引入的库这里dependStateObj为null
 			ready = (dependStateObj == null || dependStateObj.state == chartFactory.LIB_STATE_LOADED);
