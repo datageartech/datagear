@@ -5,10 +5,11 @@
 待定：
 	
 	数据集支持修改类型；
+	SQL数据集支持执行insert/update/delete类型的SQL；
 	看板可视编辑模式绝对/相对定位元素可拖拽；
 	看板JS对象新增chart.updateOptions()函数；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
-	plugin.json添加assist:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
+	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
 	图表插件定义常用图表属性；
 	图表插件在线定义功能；
