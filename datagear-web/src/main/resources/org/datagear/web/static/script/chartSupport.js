@@ -6880,6 +6880,9 @@
 			overflowCount: 2
 		};
 		
+		//必须明确设置paging=false，因为底层表格组件的paging默认值为true
+		options.paging = (options.paging != null ? options.paging : false);
+		
 		//开启分页后，默认开启info
 		options.info = (options.info != null ? options.info : options.paging);
 		
