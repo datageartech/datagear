@@ -2507,14 +2507,13 @@
 		
 		var datas = this.resultDatas(dataSetResult);
 		
-		row = (row || 0);
-		var getCount = datas.length;
-		if(count != null && count < getCount)
-			getCount = count;
+		row = (row == null ? 0 : row);
+		var endIdx = (count == null ? datas.length : (row + count));
+		endIdx = (endIdx > datas.length ? datas.length : endIdx);
 		
 		if($.isArray(fields))
 		{
-			for(var i=row; i< getCount; i++)
+			for(var i=row; i<endIdx; i++)
 			{
 				var rowObj = datas[i];
 				var rowVal = [];
@@ -2539,7 +2538,7 @@
 			
 			if(name)
 			{
-				for(var i=row; i< getCount; i++)
+				for(var i=row; i<endIdx; i++)
 				{
 					var rowObj = datas[i];
 					re.push(rowObj[name]);
@@ -2568,10 +2567,9 @@
 		
 		var datas = this.resultDatas(dataSetResult);
 		
-		row = (row || 0);
-		var getCount = datas.length;
-		if(count != null && count < getCount)
-			getCount = count;
+		row = (row == null ? 0 : row);
+		var endIdx = (count == null ? datas.length : (row + count));
+		endIdx = (endIdx > datas.length ? datas.length : endIdx);
 		
 		if($.isArray(fields))
 		{
@@ -2585,7 +2583,7 @@
 				
 				var column = [];
 				
-				for(var j=row; j< getCount; j++)
+				for(var j=row; j<endIdx; j++)
 					column.push(datas[j][name]);
 				
 				re[i] = column;
@@ -2597,7 +2595,7 @@
 
 			if(name)
 			{
-				for(var i=row; i< getCount; i++)
+				for(var i=row; i<endIdx; i++)
 				{
 					var rowObj = datas[i];
 					re.push(rowObj[name]);
@@ -2648,7 +2646,7 @@
 	 */
 	chartBase.resultCell = function(dataSetResult, field, row)
 	{
-		row = (row || 0);
+		row = (row == null ? 0 : row);
 		
 		var re = this.resultRowArrays(dataSetResult, field, row, 1);
 		
