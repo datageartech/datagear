@@ -3525,13 +3525,14 @@
 		
 		var datas = this.resultDatas(dataSetResult);
 		row = (row == null ? 0 : row);
-		count = (count == null ? datas.length : (count < datas.length ? count : datas.length));
+		var endIdx = (count == null ? datas.length : (row + count));
+		endIdx = (endIdx > datas.length ? datas.length : endIdx);
 		
 		var propIsArray = {};
 		for(var opn in fieldMap)
 			propIsArray[opn] = $.isArray(fieldMap[opn]);
 		
-		for(var i=row; i<count; i++)
+		for(var i=row; i<endIdx; i++)
 		{
 			var di = datas[i];
 			var obj = (di == null ? null : {});
