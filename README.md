@@ -14,9 +14,9 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 
 系统主要功能包括：数据源管理、SQL工作台、数据导入/导出、项目管理、数据集管理、图表管理、看板管理、用户管理、角色管理、数据源驱动管理、图表插件管理等。
 
-## [DataGear 5.3.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 5.3.1 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
-## [DataGear企业版 1.4.0 正式发布，欢迎试用！](http://www.datagear.tech/pro/)
+## [DataGear企业版 1.4.1 正式发布，欢迎试用！](http://www.datagear.tech/pro/)
 
 # 特点
 
