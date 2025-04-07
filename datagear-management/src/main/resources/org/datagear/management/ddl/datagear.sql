@@ -610,3 +610,9 @@ UPDATE DATAGEAR_HTML_DASHBOARD SET HD_VERSION = '1.0' WHERE HD_VERSION IS NULL O
 /*--version[5.3.1], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
 
+
+
+/*-----------------------------------------*/
+/*--version[5.4.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
