@@ -17,8 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -28,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -37,20 +34,15 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.core5.http.ClassicHttpRequest;
-import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.datasetres.JsonDataSetResource;
+import org.datagear.analysis.support.httpresult.JsonHttpResultHandler;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -395,7 +387,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			headerContent = setHttpHeaders(request, query);
 			requestContent = setHttpEntity(request, query);
 
-			JsonResponseHandler responseHandler = new JsonResponseHandler(query, getFields(), resolveFields,
+			JsonHttpResultHandler responseHandler = new JsonHttpResultHandler(query, getFields(), resolveFields,
 					getResponseDataJsonPath());
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
@@ -612,200 +604,5 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected ObjectMapper getObjectMapperNonStardand()
 	{
 		return JsonSupport.getObjectMapperNonStardand();
-	}
-
-	protected static class JsonResponseHandler implements HttpClientResponseHandler<ResolvedDataSetResult>
-	{
-		private DataSetQuery dataSetQuery;
-
-		private List<DataSetField> fields;
-
-		private boolean resolveFields;
-
-		private String responseDataJsonPath;
-
-		public JsonResponseHandler()
-		{
-			super();
-		}
-
-		public JsonResponseHandler(DataSetQuery dataSetQuery, List<DataSetField> fields,
-				boolean resolveFields, String responseDataJsonPath)
-		{
-			super();
-			this.dataSetQuery = dataSetQuery;
-			this.fields = (fields == null ? Collections.emptyList() : fields);
-			this.resolveFields = resolveFields;
-			this.responseDataJsonPath = responseDataJsonPath;
-		}
-
-		public DataSetQuery getDataSetQuery()
-		{
-			return dataSetQuery;
-		}
-
-		public void setDataSetQuery(DataSetQuery dataSetQuery)
-		{
-			this.dataSetQuery = dataSetQuery;
-		}
-
-		public List<DataSetField> getFields()
-		{
-			return fields;
-		}
-
-		public void setFields(List<DataSetField> fields)
-		{
-			this.fields = fields;
-		}
-
-		public boolean isResolveFields()
-		{
-			return resolveFields;
-		}
-
-		public void setResolveFields(boolean resolveFields)
-		{
-			this.resolveFields = resolveFields;
-		}
-
-		public String getResponseDataJsonPath()
-		{
-			return responseDataJsonPath;
-		}
-
-		public void setResponseDataJsonPath(String responseDataJsonPath)
-		{
-			this.responseDataJsonPath = responseDataJsonPath;
-		}
-
-		@Override
-		public ResolvedDataSetResult handleResponse(ClassicHttpResponse response) throws HttpException, IOException
-		{
-			int code = response.getCode();
-			HttpEntity entity = response.getEntity();
-
-			if (code < 200 || code >= 300)
-				throw new HttpResponseException(code, response.getReasonPhrase());
-
-			Reader reader = null;
-
-			if (entity == null)
-				reader = IOUtil.getReader("");
-			else
-			{
-				Charset contentCharset = resolveCharset(entity, ContentType.APPLICATION_JSON.getCharset());
-				reader = IOUtil.getReader(entity.getContent(), contentCharset);
-			}
-
-			if (this.resolveFields)
-			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.fields, reader,
-						this.responseDataJsonPath);
-				return jsonDataSet.resolve(this.dataSetQuery);
-			}
-			else
-			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.fields, reader,
-						this.responseDataJsonPath);
-
-				DataSetResult result = jsonDataSet.getResult(this.dataSetQuery);
-				return new ResolvedDataSetResult(result, this.fields);
-			}
-		}
-
-		protected Charset resolveCharset(HttpEntity entity, Charset defaultCharset)
-		{
-			Charset contentCharset = null;
-
-			String contentTypeStr = entity.getContentType();
-
-			if (!StringUtil.isEmpty(contentTypeStr))
-			{
-				try
-				{
-					ContentType contentType = ContentType.parse(contentTypeStr);
-					contentCharset = contentType.getCharset();
-				}
-				catch (Throwable t)
-				{
-					LOGGER.warn("Default charset [" + defaultCharset + "] will be used because parse error", t);
-
-					contentCharset = defaultCharset;
-				}
-			}
-
-			return (contentCharset != null ? contentCharset : defaultCharset);
-		}
-	}
-
-	protected static class HttpResponseJsonDataSet extends AbstractJsonDataSet<HttpResponseJsonDataSetResource>
-	{
-		private static final long serialVersionUID = 1L;
-
-		private transient Reader responseJsonReader;
-
-		public HttpResponseJsonDataSet(Reader responseJsonReader, String responseDataJsonPath)
-		{
-			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName());
-			this.responseJsonReader = responseJsonReader;
-			super.setDataJsonPath(responseDataJsonPath);
-		}
-
-		public HttpResponseJsonDataSet(List<DataSetField> fields, Reader responseJsonReader,
-				String responseDataJsonPath)
-		{
-			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName(), fields);
-			this.responseJsonReader = responseJsonReader;
-			super.setDataJsonPath(responseDataJsonPath);
-		}
-
-		@Override
-		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query) throws Throwable
-		{
-			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), this.responseJsonReader);
-		}
-	}
-
-	protected static class HttpResponseJsonDataSetResource extends JsonDataSetResource
-	{
-		private static final long serialVersionUID = 1L;
-		
-		private transient Reader jsonReader;
-
-		public HttpResponseJsonDataSetResource()
-		{
-			super();
-		}
-
-		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, Reader jsonReader)
-		{
-			super(resolvedTemplate, dataJsonPath);
-			this.jsonReader = jsonReader;
-		}
-
-		public Reader getJsonReader()
-		{
-			return jsonReader;
-		}
-
-		@Override
-		public boolean isIdempotent()
-		{
-			return false;
-		}
-
-		@Override
-		public Reader getReader() throws Throwable
-		{
-			return this.jsonReader;
-		}
-
-		@Override
-		public String toString()
-		{
-			return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
-					+ getResolvedTemplate() + "]";
-		}
 	}
 }
