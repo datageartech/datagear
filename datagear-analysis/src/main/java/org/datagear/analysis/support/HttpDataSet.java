@@ -42,6 +42,7 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.httpresult.AbstractHttpResultHandler;
 import org.datagear.analysis.support.httpresult.JsonHttpResultHandler;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -381,16 +382,13 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		{
 			uri = resolveTemplateUri(query);
 			uri = encodeUriIfRequired(uri);
-
 			ClassicHttpRequest request = createHttpRequest(uri);
 
 			headerContent = setHttpHeaders(request, query);
 			requestContent = setHttpEntity(request, query);
 
-			JsonHttpResultHandler responseHandler = new JsonHttpResultHandler(query, getFields(), resolveFields,
-					getResponseDataJsonPath());
-
-			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
+			AbstractHttpResultHandler resultHandler = buildHttpResultHandler(query, resolveFields);
+			ResolvedDataSetResult result = this.httpClient.execute(request, resultHandler);
 
 			return new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
 					buildResolvedTemplate(uri, headerContent, requestContent));
@@ -403,6 +401,15 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		{
 			throw new DataSetSourceParseException(t, buildResolvedTemplate(uri, headerContent, requestContent));
 		}
+	}
+
+	protected AbstractHttpResultHandler buildHttpResultHandler(DataSetQuery query, boolean resolveFields)
+			throws Exception
+	{
+		JsonHttpResultHandler resultHandler = new JsonHttpResultHandler(query, getFields(), resolveFields,
+				getResponseDataJsonPath());
+
+		return resultHandler;
 	}
 
 	/**
