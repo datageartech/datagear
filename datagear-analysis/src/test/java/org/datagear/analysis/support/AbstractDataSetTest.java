@@ -369,6 +369,61 @@ public class AbstractDataSetTest
 		}
 	}
 
+	@Test
+	public void resolveTemplatePlainTest()
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+		DataSetQuery query = new DataSetQuery();
+		query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv");
+
+		String actual = dataSet.resolveTemplatePlain("tpl-${name}-tpl", query);
+		assertEquals("tpl-vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv-tpl", actual);
+	}
+
+	@Test
+	public void resolveTemplateCsvTest()
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+		DataSetQuery query = new DataSetQuery();
+		query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv");
+
+		String actual = dataSet.resolveTemplateCsv("tpl-${name}-tpl", query);
+		assertEquals("tpl-vvv-'a'-<b>-\"\"c\"\"-\t-\\r-\\n-vvv-tpl", actual);
+	}
+
+	@Test
+	public void resolveTemplateJsonTest()
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+		DataSetQuery query = new DataSetQuery();
+		query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv");
+
+		String actual = dataSet.resolveTemplateJson("tpl-${name}-tpl", query);
+		assertEquals("tpl-vvv-'a'-<b>-\\\"c\\\"-\t-\\r-\\n-vvv-tpl", actual);
+	}
+
+	@Test
+	public void resolveTemplateSqlTest()
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+		DataSetQuery query = new DataSetQuery();
+		query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv");
+
+		String actual = dataSet.resolveTemplateSql("tpl-${name}-tpl", query);
+		assertEquals("tpl-vvv-''a''-<b>-\"c\"-\t-\r-\n-vvv-tpl", actual);
+	}
+
+	@Test
+	public void resolveTemplateXmlTest()
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+		DataSetQuery query = new DataSetQuery();
+		query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-&-vvv");
+
+		String actual = dataSet.resolveTemplateXml("tpl-${name}-tpl", query);
+		assertEquals("tpl-vvv-&apos;a&apos;-&lt;b&gt;-&quot;c&quot;-\t-\r-\n-&amp;-vvv-tpl", actual);
+	}
+
 	private static class TestAbstractDataSet extends AbstractDataSet
 	{
 		private static final long serialVersionUID = 1L;

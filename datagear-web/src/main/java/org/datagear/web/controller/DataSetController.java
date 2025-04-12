@@ -1370,7 +1370,8 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	{
 		DataSetQuery dataSetQuery = getWebDashboardQueryConverter().convert(paramValues, dataSetParams,
 				getCurrentUser());
-		return DataSetFmkTemplateResolvers.SQL.resolve(source, new TemplateContext(dataSetQuery.getParamValues()));
+		return DataSetFmkTemplateResolvers.resolveSql(source, new TemplateContext(dataSetQuery.getParamValues()))
+				.getResult();
 	}
 
 	protected DataSetQuery convertDataSetQuery(HttpServletRequest request, HttpServletResponse response,

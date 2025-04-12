@@ -15,14 +15,13 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support;
+package org.datagear.analysis.support.datasettpl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolver;
 import org.junit.Test;
 
 /**
@@ -44,9 +43,9 @@ public class DataSetFmkTemplateResolverTest
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("name", "世界");
 			
-			String actual = resolver.resolve(text, params);
+			TemplateResult actual = resolver.resolve(text, params);
 			
-			assertEquals("hello, 世界 !", actual);
+			assertEquals("hello, 世界 !", actual.getResult());
 		}
 		
 		//验证【修复数据集参数化模板处理可能会丢失模板信息的BUG】
@@ -56,9 +55,9 @@ public class DataSetFmkTemplateResolverTest
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("value", "d");
 			
-			String actual = resolver.resolve(text, params);
+			TemplateResult actual = resolver.resolve(text, params);
 			
-			assertEquals("/a/b/c/d/", actual);
+			assertEquals("/a/b/c/d/", actual.getResult());
 		}
 	}
 }

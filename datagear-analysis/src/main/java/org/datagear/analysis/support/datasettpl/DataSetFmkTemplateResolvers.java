@@ -74,7 +74,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	public static String resolvePlain(String text, Map<String, ?> params)
+	public static TemplateResult resolvePlain(String text, Map<String, ?> params)
 	{
 		return resolveNullable(PLAIN, text, params);
 	}
@@ -87,7 +87,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	public static String resolvePlain(String text, TemplateContext context)
+	public static TemplateResult resolvePlain(String text, TemplateContext context)
 	{
 		return resolveNullable(PLAIN, text, context);
 	}
@@ -100,7 +100,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	public static String resolveCsv(String text, Map<String, ?> params)
+	public static TemplateResult resolveCsv(String text, Map<String, ?> params)
 	{
 		return resolveNullable(CSV, text, params);
 	}
@@ -113,7 +113,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	public static String resolveCsv(String text, TemplateContext context)
+	public static TemplateResult resolveCsv(String text, TemplateContext context)
 	{
 		return resolveNullable(CSV, text, context);
 	}
@@ -126,7 +126,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	public static String resolveJson(String text, Map<String, ?> params)
+	public static TemplateResult resolveJson(String text, Map<String, ?> params)
 	{
 		return resolveNullable(JSON, text, params);
 	}
@@ -139,7 +139,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	public static String resolveJson(String text, TemplateContext context)
+	public static TemplateResult resolveJson(String text, TemplateContext context)
 	{
 		return resolveNullable(JSON, text, context);
 	}
@@ -152,7 +152,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	public static String resolveSql(String text, Map<String, ?> params)
+	public static TemplateResult resolveSql(String text, Map<String, ?> params)
 	{
 		return resolveNullable(SQL, text, params);
 	}
@@ -165,7 +165,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	public static String resolveSql(String text, TemplateContext context)
+	public static TemplateResult resolveSql(String text, TemplateContext context)
 	{
 		return resolveNullable(SQL, text, context);
 	}
@@ -178,7 +178,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	public static String resolveXml(String text, Map<String, ?> params)
+	public static TemplateResult resolveXml(String text, Map<String, ?> params)
 	{
 		return resolveNullable(XML, text, params);
 	}
@@ -191,7 +191,7 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	public static String resolveXml(String text, TemplateContext context)
+	public static TemplateResult resolveXml(String text, TemplateContext context)
 	{
 		return resolveNullable(XML, text, context);
 	}
@@ -205,10 +205,11 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	protected static String resolveNullable(DataSetFmkTemplateResolver resolver, String text, Map<String, ?> params)
+	protected static TemplateResult resolveNullable(DataSetFmkTemplateResolver resolver, String text,
+			Map<String, ?> params)
 	{
 		if (text == null || text.isEmpty())
-			return text;
+			return new TemplateResult(text);
 
 		return resolver.resolve(text, params);
 	}
@@ -222,10 +223,11 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	protected static String resolveNullable(DataSetFmkTemplateResolver resolver, String text, TemplateContext context)
+	protected static TemplateResult resolveNullable(DataSetFmkTemplateResolver resolver, String text,
+			TemplateContext context)
 	{
 		if (text == null || text.isEmpty())
-			return text;
+			return new TemplateResult(text);
 
 		return resolver.resolve(text, context);
 	}

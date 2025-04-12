@@ -36,5 +36,5 @@ public interface TemplateResolver
 	 * @return
 	 * @throws TemplateResolverException
 	 */
-	String resolve(String template, TemplateContext templateContext) throws TemplateResolverException;
+	TemplateResult resolve(String template, TemplateContext templateContext) throws TemplateResolverException;
 }

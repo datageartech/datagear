@@ -127,19 +127,19 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	 * @return
 	 * @throws TemplateResolverException
 	 */
-	public String resolve(String template, Map<String, ?> paramValues) throws TemplateResolverException
+	public TemplateResult resolve(String template, Map<String, ?> paramValues) throws TemplateResolverException
 	{
 		return resolve(template, new TemplateContext(paramValues));
 	}
 
 	@Override
-	public String resolve(String template, TemplateContext templateContext) throws TemplateResolverException
+	public TemplateResult resolve(String template, TemplateContext templateContext) throws TemplateResolverException
 	{
 		String re = null;
 
 		Map<String, ?> values = templateContext.getValues();
 
-		ThreadLocaleTemplateLoader.setTemplate(template);
+		ThreadLocaleTemplateLoader.setTemplate(buildTemplateHolder(template, templateContext));
 
 		try
 		{
@@ -161,18 +161,74 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 			ThreadLocaleTemplateLoader.removeTemplate();
 		}
 
-		return re;
+		return new TemplateResult(re);
+	}
+
+	protected TemplateHolder buildTemplateHolder(String template, TemplateContext templateContext)
+	{
+		return new TemplateHolder(template);
 	}
 
 	/**
-	 * 使用{@linkplain ThreadLocaleTemplateLoader#setTemplate(String)}作为模板的{@linkplain TemplateLoader}。
+	 * 模板持有类。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class TemplateHolder
+	{
+		private final String template;
+
+		public TemplateHolder(String template)
+		{
+			super();
+			this.template = template;
+		}
+
+		public String getTemplate()
+		{
+			return template;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((template == null) ? 0 : template.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TemplateHolder other = (TemplateHolder) obj;
+			if (template == null)
+			{
+				if (other.template != null)
+					return false;
+			}
+			else if (!template.equals(other.template))
+				return false;
+			return true;
+		}
+	}
+
+	/**
+	 * 使用{@linkplain ThreadLocaleTemplateLoader#setTemplate(TemplateHolder)}作为模板的{@linkplain TemplateLoader}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
 	protected static class ThreadLocaleTemplateLoader implements TemplateLoader
 	{
-		protected static final ThreadLocal<String> TEMPLATE_THREAD_LOCAL = new ThreadLocal<String>();
+		protected static final ThreadLocal<TemplateHolder> TEMPLATE_THREAD_LOCAL = new ThreadLocal<TemplateHolder>();
 
 		protected static final long LAST_MODIFLED = System.currentTimeMillis();
 
@@ -205,12 +261,12 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		@Override
 		public Reader getReader(Object templateSource, String encoding) throws IOException
 		{
-			return new StringReader(((TemplateContentSource) templateSource).getTemplate());
+			return new StringReader(((TemplateContentSource) templateSource).getTemplateHolder().getTemplate());
 		}
 
-		public static void setTemplate(String template)
+		public static void setTemplate(TemplateHolder templateHolder)
 		{
-			TEMPLATE_THREAD_LOCAL.set(template);
+			TEMPLATE_THREAD_LOCAL.set(templateHolder);
 		}
 
 		public static void removeTemplate()
@@ -221,14 +277,14 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 		protected static class TemplateContentSource
 		{
 			private final String name;
-			private final String template;
+			private final TemplateHolder templateHolder;
 			private final long lastModified;
 
-			public TemplateContentSource(String name, String template, long lastModified)
+			public TemplateContentSource(String name, TemplateHolder templateHolder, long lastModified)
 			{
 				super();
 				this.name = name;
-				this.template = template;
+				this.templateHolder = templateHolder;
 				this.lastModified = lastModified;
 			}
 
@@ -237,9 +293,9 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 				return name;
 			}
 
-			public String getTemplate()
+			public TemplateHolder getTemplateHolder()
 			{
-				return template;
+				return templateHolder;
 			}
 
 			public long getLastModified()
@@ -254,7 +310,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 				int result = 1;
 				result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
 				result = prime * result + ((name == null) ? 0 : name.hashCode());
-				result = prime * result + ((template == null) ? 0 : template.hashCode());
+				result = prime * result + ((templateHolder == null) ? 0 : templateHolder.hashCode());
 				return result;
 			}
 
@@ -277,12 +333,12 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 				}
 				else if (!name.equals(other.name))
 					return false;
-				if (template == null)
+				if (templateHolder == null)
 				{
-					if (other.template != null)
+					if (other.templateHolder != null)
 						return false;
 				}
-				else if (!template.equals(other.template))
+				else if (!templateHolder.equals(other.templateHolder))
 					return false;
 				return true;
 			}

@@ -38,6 +38,7 @@ import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.support.DataSetFieldExpEvaluator.ValueSetter;
 import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.datasettpl.TemplateContext;
+import org.datagear.analysis.support.datasettpl.TemplateResult;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -511,6 +512,20 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 	/**
 	 * 解析模板：普通文本。
+	 * 
+	 * @param text
+	 *            允许{@code null}
+	 * @param query
+	 * @return
+	 * @see {@linkplain #resolveTemplateResultPlain(String, DataSetQuery)}
+	 */
+	protected String resolveTemplatePlain(String text, DataSetQuery query)
+	{
+		return resolveTemplateResultPlain(text, query).getResult();
+	}
+
+	/**
+	 * 解析模板：普通文本。
 	 * <p>
 	 * 注意：无论数据集是否有定义参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
 	 * </p>
@@ -524,9 +539,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTemplatePlain(String text, DataSetQuery query)
+	protected TemplateResult resolveTemplateResultPlain(String text, DataSetQuery query)
 	{
 		return DataSetFmkTemplateResolvers.resolvePlain(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：CSV。
+	 * 
+	 * @param text
+	 *            允许{@code null}
+	 * @param query
+	 * @return
+	 * @see {@linkplain #resolveTemplateResultCsv(String, DataSetQuery)}
+	 */
+	protected String resolveTemplateCsv(String text, DataSetQuery query)
+	{
+		return resolveTemplateResultCsv(text, query).getResult();
 	}
 
 	/**
@@ -544,9 +573,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTemplateCsv(String text, DataSetQuery query)
+	protected TemplateResult resolveTemplateResultCsv(String text, DataSetQuery query)
 	{
 		return DataSetFmkTemplateResolvers.resolveCsv(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：JSON。
+	 * 
+	 * @param text
+	 *            允许{@code null}
+	 * @param query
+	 * @return
+	 * @see {@linkplain #resolveTemplateResultJson(String, DataSetQuery)}
+	 */
+	protected String resolveTemplateJson(String text, DataSetQuery query)
+	{
+		return resolveTemplateResultJson(text, query).getResult();
 	}
 
 	/**
@@ -564,9 +607,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTemplateJson(String text, DataSetQuery query)
+	protected TemplateResult resolveTemplateResultJson(String text, DataSetQuery query)
 	{
 		return DataSetFmkTemplateResolvers.resolveJson(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：SQL。
+	 * 
+	 * @param text
+	 *            允许{@code null}
+	 * @param query
+	 * @return
+	 * @see {@linkplain #resolveTemplateResultSql(String, DataSetQuery)}
+	 */
+	protected String resolveTemplateSql(String text, DataSetQuery query)
+	{
+		return resolveTemplateResultSql(text, query).getResult();
 	}
 
 	/**
@@ -584,9 +641,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTemplateSql(String text, DataSetQuery query)
+	protected TemplateResult resolveTemplateResultSql(String text, DataSetQuery query)
 	{
 		return DataSetFmkTemplateResolvers.resolveSql(text, toTemplateContext(query));
+	}
+
+	/**
+	 * 解析模板：XML。
+	 * 
+	 * @param text
+	 *            允许{@code null}
+	 * @param query
+	 * @return
+	 * @see {@linkplain #resolveTemplateResultXml(String, DataSetQuery)}
+	 */
+	protected String resolveTemplateXml(String text, DataSetQuery query)
+	{
+		return resolveTemplateResultXml(text, query).getResult();
 	}
 
 	/**
@@ -604,7 +675,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	protected String resolveTemplateXml(String text, DataSetQuery query)
+	protected TemplateResult resolveTemplateResultXml(String text, DataSetQuery query)
 	{
 		return DataSetFmkTemplateResolvers.resolveXml(text, toTemplateContext(query));
 	}
