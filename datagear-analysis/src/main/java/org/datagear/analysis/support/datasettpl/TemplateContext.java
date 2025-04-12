@@ -15,27 +15,41 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support.fmk;
+package org.datagear.analysis.support.datasettpl;
 
-import freemarker.core.CommonMarkupOutputFormat;
-import freemarker.core.CommonTemplateMarkupOutputModel;
+import java.util.Map;
 
 /**
- * XML输出模型。
+ * 模板上下文。
+ * <p>
+ * 此类封装{@linkplain TemplateResolver}解析模板所需要的上下文信息。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class TemplateXmlOutputModel extends CommonTemplateMarkupOutputModel<TemplateXmlOutputModel>
+public class TemplateContext
 {
-	public TemplateXmlOutputModel(String plainTextContent, String markupContent)
+	Map<String, ?> values;
+
+	public TemplateContext()
 	{
-		super(plainTextContent, markupContent);
+		super();
 	}
 
-	@Override
-	public CommonMarkupOutputFormat<TemplateXmlOutputModel> getOutputFormat()
+	public TemplateContext(Map<String, ?> values)
 	{
-		return XmlOutputFormat.INSTANCE;
+		super();
+		this.values = values;
+	}
+
+	public Map<String, ?> getValues()
+	{
+		return values;
+	}
+
+	public void setValues(Map<String, ?> values)
+	{
+		this.values = values;
 	}
 }

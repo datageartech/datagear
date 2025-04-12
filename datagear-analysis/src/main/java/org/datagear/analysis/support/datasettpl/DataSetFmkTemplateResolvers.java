@@ -15,14 +15,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support;
+package org.datagear.analysis.support.datasettpl;
 
 import java.util.Map;
-
-import org.datagear.analysis.support.fmk.CsvOutputFormat;
-import org.datagear.analysis.support.fmk.JsonOutputFormat;
-import org.datagear.analysis.support.fmk.SqlOutputFormat;
-import org.datagear.analysis.support.fmk.XmlOutputFormat;
 
 /**
  * 常用{@linkplain DataSetFmkTemplateResolver}工具。

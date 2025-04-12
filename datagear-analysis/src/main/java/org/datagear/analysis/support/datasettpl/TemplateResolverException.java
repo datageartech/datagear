@@ -15,26 +15,37 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support;
+package org.datagear.analysis.support.datasettpl;
+
+import org.datagear.analysis.DataSetException;
 
 /**
- * 模板解析器。
- * <p>
- * 此类解析由模板语言（比如Freemarker）构建的字符串，并返回模板执行结果。
- * </p>
+ * {@linkplain TemplateResolver}异常。
  * 
  * @author datagear@163.com
  *
  */
-public interface TemplateResolver
+public class TemplateResolverException extends DataSetException
 {
-	/**
-	 * 解析。
-	 * 
-	 * @param template
-	 * @param templateContext
-	 * @return
-	 * @throws TemplateResolverException
-	 */
-	String resolve(String template, TemplateContext templateContext) throws TemplateResolverException;
+	private static final long serialVersionUID = 1L;
+
+	public TemplateResolverException()
+	{
+		super();
+	}
+
+	public TemplateResolverException(String message)
+	{
+		super(message);
+	}
+
+	public TemplateResolverException(Throwable cause)
+	{
+		super(cause);
+	}
+
+	public TemplateResolverException(String message, Throwable cause)
+	{
+		super(message, cause);
+	}
 }

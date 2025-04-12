@@ -15,37 +15,27 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support;
+package org.datagear.analysis.support.datasettpl;
 
-import org.datagear.analysis.DataSetException;
+import freemarker.core.CommonMarkupOutputFormat;
+import freemarker.core.CommonTemplateMarkupOutputModel;
 
 /**
- * {@linkplain TemplateResolver}异常。
+ * JSON输出模型。
  * 
  * @author datagear@163.com
  *
  */
-public class TemplateResolverException extends DataSetException
+public class TemplateJsonOutputModel extends CommonTemplateMarkupOutputModel<TemplateJsonOutputModel>
 {
-	private static final long serialVersionUID = 1L;
-
-	public TemplateResolverException()
+	public TemplateJsonOutputModel(String plainTextContent, String markupContent)
 	{
-		super();
+		super(plainTextContent, markupContent);
 	}
 
-	public TemplateResolverException(String message)
+	@Override
+	public CommonMarkupOutputFormat<TemplateJsonOutputModel> getOutputFormat()
 	{
-		super(message);
-	}
-
-	public TemplateResolverException(Throwable cause)
-	{
-		super(cause);
-	}
-
-	public TemplateResolverException(String message, Throwable cause)
-	{
-		super(message, cause);
+		return JsonOutputFormat.INSTANCE;
 	}
 }

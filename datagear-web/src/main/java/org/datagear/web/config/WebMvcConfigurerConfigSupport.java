@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolver;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.web.config.support.ClearCssCommentResourceTransformer;
@@ -238,8 +239,7 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 		Properties settings = new Properties();
 		settings.setProperty("datetime_format", org.datagear.util.DateFormat.DEFAULT_TIMESTAMP_FORMAT);
 		settings.setProperty("date_format", org.datagear.util.DateFormat.DEFAULT_DATE_FORMAT);
-		settings.setProperty("number_format",
-				org.datagear.analysis.support.DataSetFmkTemplateResolver.FREEMARKER_NUMBER_FORMAT_COMPUTER);
+		settings.setProperty("number_format", DataSetFmkTemplateResolver.FREEMARKER_NUMBER_FORMAT_COMPUTER);
 
 		// 开启自动转义功能，并设置默认转义格式为HTML，页面不再需要每个地方都转义
 		// ${content?html}

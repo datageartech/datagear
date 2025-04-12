@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support.fmk;
+package org.datagear.analysis.support.datasettpl;
 
 import freemarker.core.CommonMarkupOutputFormat;
 import freemarker.core.CommonTemplateMarkupOutputModel;

@@ -15,27 +15,26 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support.fmk;
-
-import freemarker.core.CommonMarkupOutputFormat;
-import freemarker.core.CommonTemplateMarkupOutputModel;
+package org.datagear.analysis.support.datasettpl;
 
 /**
- * JSON输出模型。
+ * 模板解析器。
+ * <p>
+ * 此类解析由模板语言（比如Freemarker）构建的字符串，并返回模板执行结果。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class TemplateJsonOutputModel extends CommonTemplateMarkupOutputModel<TemplateJsonOutputModel>
+public interface TemplateResolver
 {
-	public TemplateJsonOutputModel(String plainTextContent, String markupContent)
-	{
-		super(plainTextContent, markupContent);
-	}
-
-	@Override
-	public CommonMarkupOutputFormat<TemplateJsonOutputModel> getOutputFormat()
-	{
-		return JsonOutputFormat.INSTANCE;
-	}
+	/**
+	 * 解析。
+	 * 
+	 * @param template
+	 * @param templateContext
+	 * @return
+	 * @throws TemplateResolverException
+	 */
+	String resolve(String template, TemplateContext templateContext) throws TemplateResolverException;
 }

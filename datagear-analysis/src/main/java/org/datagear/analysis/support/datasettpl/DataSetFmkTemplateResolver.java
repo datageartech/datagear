@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.support;
+package org.datagear.analysis.support.datasettpl;
 
 import java.io.IOException;
 import java.io.Reader;
