@@ -20,7 +20,6 @@ package org.datagear.analysis.support.httpresult;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.core5.http.ClassicHttpResponse;
@@ -28,9 +27,9 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
-import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.HttpDataSet;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -46,9 +45,9 @@ public abstract class AbstractHttpResultHandler implements HttpClientResponseHan
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpResultHandler.class);
 
-	private DataSetQuery dataSetQuery;
+	private HttpDataSet dataSet;
 
-	private List<DataSetField> fields;
+	private DataSetQuery dataSetQuery;
 
 	private boolean resolveFields;
 
@@ -57,12 +56,22 @@ public abstract class AbstractHttpResultHandler implements HttpClientResponseHan
 		super();
 	}
 
-	public AbstractHttpResultHandler(DataSetQuery dataSetQuery, List<DataSetField> fields, boolean resolveFields)
+	public AbstractHttpResultHandler(HttpDataSet dataSet, DataSetQuery dataSetQuery, boolean resolveFields)
 	{
 		super();
+		this.dataSet = dataSet;
 		this.dataSetQuery = dataSetQuery;
-		this.fields = fields;
 		this.resolveFields = resolveFields;
+	}
+
+	public HttpDataSet getDataSet()
+	{
+		return dataSet;
+	}
+
+	public void setDataSet(HttpDataSet dataSet)
+	{
+		this.dataSet = dataSet;
 	}
 
 	public DataSetQuery getDataSetQuery()
@@ -73,16 +82,6 @@ public abstract class AbstractHttpResultHandler implements HttpClientResponseHan
 	public void setDataSetQuery(DataSetQuery dataSetQuery)
 	{
 		this.dataSetQuery = dataSetQuery;
-	}
-
-	public List<DataSetField> getFields()
-	{
-		return fields;
-	}
-
-	public void setFields(List<DataSetField> fields)
-	{
-		this.fields = fields;
 	}
 
 	public boolean isResolveFields()

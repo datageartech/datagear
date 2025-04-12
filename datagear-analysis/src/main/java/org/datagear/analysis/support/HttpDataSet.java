@@ -406,8 +406,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected AbstractHttpResultHandler buildHttpResultHandler(DataSetQuery query, boolean resolveFields)
 			throws Exception
 	{
-		JsonHttpResultHandler resultHandler = new JsonHttpResultHandler(query, getFields(), resolveFields,
-				getResponseDataJsonPath());
+		JsonHttpResultHandler resultHandler = new JsonHttpResultHandler(this, query, resolveFields);
 
 		return resultHandler;
 	}

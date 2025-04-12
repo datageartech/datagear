@@ -19,16 +19,15 @@ package org.datagear.analysis.support.httpresult;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpException;
-import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractJsonDataSet;
+import org.datagear.analysis.support.HttpDataSet;
 import org.datagear.analysis.support.datasetres.JsonDataSetResource;
 import org.datagear.util.IOUtil;
 
@@ -40,28 +39,14 @@ import org.datagear.util.IOUtil;
  */
 public class JsonHttpResultHandler extends AbstractHttpResultHandler
 {
-	private String responseDataJsonPath;
-
 	public JsonHttpResultHandler()
 	{
 		super();
 	}
 
-	public JsonHttpResultHandler(DataSetQuery dataSetQuery, List<DataSetField> fields,
-			boolean resolveFields, String responseDataJsonPath)
+	public JsonHttpResultHandler(HttpDataSet dataSet, DataSetQuery dataSetQuery, boolean resolveFields)
 	{
-		super(dataSetQuery, fields, resolveFields);
-		this.responseDataJsonPath = responseDataJsonPath;
-	}
-
-	public String getResponseDataJsonPath()
-	{
-		return responseDataJsonPath;
-	}
-
-	public void setResponseDataJsonPath(String responseDataJsonPath)
-	{
-		this.responseDataJsonPath = responseDataJsonPath;
+		super(dataSet, dataSetQuery, resolveFields);
 	}
 
 	@Override
@@ -69,22 +54,19 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 	{
 		HttpEntity entity = response.getEntity();
 		Reader reader = getReader(response, entity);
+		HttpDataSet dataSet = getDataSet();
+		HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(dataSet, reader);
 
 		try
 		{
 			if (this.isResolveFields())
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.getFields(), reader,
-						this.responseDataJsonPath);
 				return jsonDataSet.resolve(this.getDataSetQuery());
 			}
 			else
 			{
-				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.getFields(), reader,
-						this.responseDataJsonPath);
-
 				DataSetResult result = jsonDataSet.getResult(this.getDataSetQuery());
-				return new ResolvedDataSetResult(result, this.getFields());
+				return new ResolvedDataSetResult(result, dataSet.getFields());
 			}
 		}
 		finally
@@ -99,19 +81,15 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 
 		private transient Reader responseJsonReader;
 
-		public HttpResponseJsonDataSet(Reader responseJsonReader, String responseDataJsonPath)
+		public HttpResponseJsonDataSet(HttpDataSet dataSet, Reader responseJsonReader)
 		{
-			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName());
+			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName(),
+					dataSet.getFields());
+			setMutableModel(dataSet.isMutableModel());
+			setParams(dataSet.getParams());
+			setDataFormat(dataSet.getDataFormat());
+			super.setDataJsonPath(dataSet.getResponseDataJsonPath());
 			this.responseJsonReader = responseJsonReader;
-			super.setDataJsonPath(responseDataJsonPath);
-		}
-
-		public HttpResponseJsonDataSet(List<DataSetField> fields, Reader responseJsonReader,
-				String responseDataJsonPath)
-		{
-			super(HttpResponseJsonDataSet.class.getName(), HttpResponseJsonDataSet.class.getName(), fields);
-			this.responseJsonReader = responseJsonReader;
-			super.setDataJsonPath(responseDataJsonPath);
 		}
 
 		@Override
