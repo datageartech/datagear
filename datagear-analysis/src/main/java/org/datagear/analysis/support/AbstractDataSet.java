@@ -37,6 +37,7 @@ import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.ResultDataFormat;
 import org.datagear.analysis.support.DataSetFieldExpEvaluator.ValueSetter;
 import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolvers;
+import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.datagear.analysis.support.datasettpl.TemplateContext;
 import org.datagear.analysis.support.datasettpl.TemplateResult;
 
@@ -641,7 +642,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param query
 	 * @return
 	 */
-	protected TemplateResult resolveTemplateResultSql(String text, DataSetQuery query)
+	protected SqlTemplateResult resolveTemplateResultSql(String text, DataSetQuery query)
 	{
 		return DataSetFmkTemplateResolvers.resolveSql(text, toTemplateContext(query));
 	}

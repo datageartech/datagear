@@ -137,9 +137,10 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 	{
 		String re = null;
 
-		Map<String, ?> values = templateContext.getValues();
+		TemplateHolder templateHolder = buildTemplateHolder(template, templateContext);
+		ThreadLocaleTemplateLoader.setTemplate(templateHolder);
 
-		ThreadLocaleTemplateLoader.setTemplate(buildTemplateHolder(template, templateContext));
+		Map<String, ?> values = templateContext.getValues();
 
 		try
 		{
@@ -161,7 +162,12 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 			ThreadLocaleTemplateLoader.removeTemplate();
 		}
 
-		return new TemplateResult(re);
+		return buildTemplateResult(template, re, templateHolder);
+	}
+
+	protected TemplateResult buildTemplateResult(String template, String result, TemplateHolder templateHolder)
+	{
+		return new TemplateResult(result);
 	}
 
 	protected TemplateHolder buildTemplateHolder(String template, TemplateContext templateContext)
@@ -269,79 +275,84 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 			TEMPLATE_THREAD_LOCAL.set(templateHolder);
 		}
 
+		public static TemplateHolder getTemplate()
+		{
+			return TEMPLATE_THREAD_LOCAL.get();
+		}
+
 		public static void removeTemplate()
 		{
 			TEMPLATE_THREAD_LOCAL.remove();
 		}
+	}
 
-		protected static class TemplateContentSource
+	protected static class TemplateContentSource
+	{
+		private final String name;
+		private final TemplateHolder templateHolder;
+		private final long lastModified;
+
+		public TemplateContentSource(String name, TemplateHolder templateHolder, long lastModified)
 		{
-			private final String name;
-			private final TemplateHolder templateHolder;
-			private final long lastModified;
+			super();
+			this.name = name;
+			this.templateHolder = templateHolder;
+			this.lastModified = lastModified;
+		}
 
-			public TemplateContentSource(String name, TemplateHolder templateHolder, long lastModified)
-			{
-				super();
-				this.name = name;
-				this.templateHolder = templateHolder;
-				this.lastModified = lastModified;
-			}
+		public String getName()
+		{
+			return name;
+		}
 
-			public String getName()
-			{
-				return name;
-			}
+		public TemplateHolder getTemplateHolder()
+		{
+			return templateHolder;
+		}
 
-			public TemplateHolder getTemplateHolder()
-			{
-				return templateHolder;
-			}
+		public long getLastModified()
+		{
+			return lastModified;
+		}
 
-			public long getLastModified()
-			{
-				return lastModified;
-			}
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((templateHolder == null) ? 0 : templateHolder.hashCode());
+			return result;
+		}
 
-			@Override
-			public int hashCode()
-			{
-				final int prime = 31;
-				int result = 1;
-				result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
-				result = prime * result + ((name == null) ? 0 : name.hashCode());
-				result = prime * result + ((templateHolder == null) ? 0 : templateHolder.hashCode());
-				return result;
-			}
-
-			@Override
-			public boolean equals(Object obj)
-			{
-				if (this == obj)
-					return true;
-				if (obj == null)
-					return false;
-				if (getClass() != obj.getClass())
-					return false;
-				TemplateContentSource other = (TemplateContentSource) obj;
-				if (lastModified != other.lastModified)
-					return false;
-				if (name == null)
-				{
-					if (other.name != null)
-						return false;
-				}
-				else if (!name.equals(other.name))
-					return false;
-				if (templateHolder == null)
-				{
-					if (other.templateHolder != null)
-						return false;
-				}
-				else if (!templateHolder.equals(other.templateHolder))
-					return false;
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
 				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TemplateContentSource other = (TemplateContentSource) obj;
+			if (lastModified != other.lastModified)
+				return false;
+			if (name == null)
+			{
+				if (other.name != null)
+					return false;
 			}
+			else if (!name.equals(other.name))
+				return false;
+			if (templateHolder == null)
+			{
+				if (other.templateHolder != null)
+					return false;
+			}
+			else if (!templateHolder.equals(other.templateHolder))
+				return false;
+			return true;
 		}
 	}
 }

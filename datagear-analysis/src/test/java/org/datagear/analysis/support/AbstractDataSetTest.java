@@ -18,6 +18,8 @@
 package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResultDataFormat;
+import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.junit.Test;
 
 /**
@@ -406,11 +409,29 @@ public class AbstractDataSetTest
 	public void resolveTemplateSqlTest()
 	{
 		TestAbstractDataSet dataSet = new TestAbstractDataSet();
-		DataSetQuery query = new DataSetQuery();
-		query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv");
 
-		String actual = dataSet.resolveTemplateSql("tpl-${name}-tpl", query);
-		assertEquals("tpl-vvv-''a''-<b>-\"c\"-\t-\r-\n-vvv-tpl", actual);
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("name", "vvv-'a'-<b>-\"c\"-\t-\r-\n-vvv");
+
+			String actual = dataSet.resolveTemplateSql("tpl-${name}-tpl", query);
+			assertEquals("tpl-vvv-''a''-<b>-\"c\"-\t-\r-\n-vvv-tpl", actual);
+		}
+
+		// 预编译
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("name", "a'a");
+
+			SqlTemplateResult actual = dataSet.resolveTemplateResultSql("SELECT * FROM TABLE WHERE NAME = ${pc(name)}",
+					query);
+			List<Object> paramValues = actual.getParamValues();
+
+			assertEquals("SELECT * FROM TABLE WHERE NAME = ?", actual.getResult());
+			assertTrue(actual.isPrecompiled());
+			assertFalse(paramValues.isEmpty());
+			assertEquals("a'a", paramValues.get(0));
+		}
 	}
 
 	@Test

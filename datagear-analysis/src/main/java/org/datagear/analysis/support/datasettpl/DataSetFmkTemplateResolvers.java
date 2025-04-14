@@ -56,7 +56,7 @@ public final class DataSetFmkTemplateResolvers
 	 * 转义SQL特殊字符。
 	 * </p>
 	 */
-	public static final DataSetFmkTemplateResolver SQL = new DataSetFmkTemplateResolver(SqlOutputFormat.INSTANCE);
+	public static final DataSetFmkTemplateResolver SQL = new SqlDataSetFmkTemplateResolver();
 
 	/**
 	 * XML。
@@ -152,9 +152,9 @@ public final class DataSetFmkTemplateResolvers
 	 * @param params
 	 * @return
 	 */
-	public static TemplateResult resolveSql(String text, Map<String, ?> params)
+	public static SqlTemplateResult resolveSql(String text, Map<String, ?> params)
 	{
-		return resolveNullable(SQL, text, params);
+		return (SqlTemplateResult) resolveNullable(SQL, text, params);
 	}
 
 	/**
@@ -165,9 +165,9 @@ public final class DataSetFmkTemplateResolvers
 	 * @param context
 	 * @return
 	 */
-	public static TemplateResult resolveSql(String text, TemplateContext context)
+	public static SqlTemplateResult resolveSql(String text, TemplateContext context)
 	{
-		return resolveNullable(SQL, text, context);
+		return (SqlTemplateResult) resolveNullable(SQL, text, context);
 	}
 
 	/**
