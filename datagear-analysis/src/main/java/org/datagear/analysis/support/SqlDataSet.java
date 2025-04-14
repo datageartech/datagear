@@ -36,6 +36,7 @@ import org.datagear.analysis.DataSetField.DataType;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
@@ -133,7 +134,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected TemplateResolvedDataSetResult resolveResult(DataSetQuery query, boolean resolveFields)
 			throws DataSetException
 	{
-		String sql = resolveTemplateSql(getSql(), query);
+		SqlTemplateResult sqlTemplateResult = resolveTemplateResultSql(getSql(), query);
 
 		Connection cn = null;
 
@@ -148,32 +149,9 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 				throw new SqlDataSetConnectionException(t);
 			}
 
-			validateSql(cn, sql);
-
-			Sql sqlObj = Sql.valueOf(sql);
-
-			JdbcSupport jdbcSupport = getJdbcSupport();
-
-			QueryResultSet qrs = null;
-
 			try
 			{
-				qrs = jdbcSupport.executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
-			}
-			catch (Throwable t)
-			{
-				QueryResultSet.close(qrs);
-				throw new SqlDataSetSqlExecutionException(sql, t);
-			}
-
-			TemplateResolvedDataSetResult dataSetResult = null;
-
-			try
-			{
-				ResultSet rs = qrs.getResultSet();
-				ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveFields);
-
-				dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(), sql);
+				return resolveResult(cn, query, resolveFields, sqlTemplateResult);
 			}
 			catch (DataSetException e)
 			{
@@ -183,12 +161,6 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			{
 				throw new DataSetException(t);
 			}
-			finally
-			{
-				QueryResultSet.close(qrs);
-			}
-
-			return dataSetResult;
 		}
 		finally
 		{
@@ -204,6 +176,61 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 				}
 			}
 		}
+	}
+
+	protected TemplateResolvedDataSetResult resolveResult(Connection cn, DataSetQuery query, boolean resolveFields,
+			SqlTemplateResult sqlTemplateResult) throws Throwable
+	{
+		String sql = sqlTemplateResult.getResult();
+
+		// 对于已采用预编译语法的，不进行SQL防注入校验；未采用预编译语法的应该进行SQL防注入校验
+		if (!sqlTemplateResult.isPrecompiled())
+		{
+			validateSql(cn, sql);
+		}
+
+		Sql sqlObj = Sql.valueOf(sql);
+		JdbcSupport jdbcSupport = getJdbcSupport();
+
+		if (sqlTemplateResult.isPrecompiled())
+		{
+			// TODO 设置参数
+		}
+
+		QueryResultSet qrs = executeQuery(cn, sqlObj, jdbcSupport);
+
+		TemplateResolvedDataSetResult dataSetResult = null;
+
+		try
+		{
+			ResultSet rs = qrs.getResultSet();
+			ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveFields);
+			dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(), sql);
+		}
+		finally
+		{
+			QueryResultSet.close(qrs);
+		}
+
+		return dataSetResult;
+	}
+
+	protected QueryResultSet executeQuery(Connection cn, Sql sqlObj, JdbcSupport jdbcSupport)
+			throws SqlDataSetSqlExecutionException
+	{
+		QueryResultSet qrs = null;
+
+		try
+		{
+			qrs = jdbcSupport.executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
+		}
+		catch (Throwable t)
+		{
+			QueryResultSet.close(qrs);
+			throw new SqlDataSetSqlExecutionException(sqlObj.getSqlValue(), t);
+		}
+
+		return qrs;
 	}
 
 	/**
