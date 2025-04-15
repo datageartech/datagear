@@ -41,6 +41,10 @@
 .dg-position-relative{
 	position: relative;
 }
+.dg-opacity-hide{
+	opacity: 0 !important;
+	z-index: -99 !important;
+}
 
 /*表格图表*/
 .dg-chart-table{}
@@ -435,6 +439,9 @@
 	position: absolute;
 	right: 0.1em;
 	top: 0.1em;
+	display: flex;
+	flex-direction: row;
+	gap: 2px;
 }
 .dg-chart-setting-box .dg-chart-setting-panel,
 .dg-chart-setting-box button{
@@ -446,13 +453,12 @@
 .dg-chart-setting-box .dg-chart-setting-button{
 	font-size: 0.8em !important;
 	padding: 0.1em 0.2em !important;
-	margin: 0 0 0 0.5em !important;
+	margin: 0 !important;
 	border-width: 1px;
 	border-style: solid;
 }
 .dg-chart-setting-box .dg-chart-setting-panel{
 	position: absolute;
-	right: 0;
 	border-width: 1px;
 	border-style: solid;
 	padding: 0.5em 0.8em 0.6em 0.8em;

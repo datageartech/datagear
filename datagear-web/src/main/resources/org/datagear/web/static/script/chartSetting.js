@@ -1494,9 +1494,9 @@
 		
 		var $chart = chart.elementJquery();
 		
-		if(!$chart.attr("bind-chart-setting-panel-event"))
+		if(!$chart.data("dgChartSettingBindEvent"))
 		{
-			$chart.attr("bind-chart-setting-panel-event", "1");
+			$chart.data("dgChartSettingBindEvent", true);
 			
 			var mouseenterHandler = function(event)
 			{
@@ -1514,8 +1514,8 @@
 			
 			$chart.mouseenter(mouseenterHandler).mouseleave(mouseleaveHandler);
 			
-			$chart.data("chartSettingPanel-mouseenterHandler", mouseenterHandler);
-			$chart.data("chartSettingPanel-mouseleaveHandler", mouseleaveHandler);
+			$chart.data("dgChartSettingMouseEnterHandler", mouseenterHandler);
+			$chart.data("dgChartSettingMouseLeaveHandler", mouseleaveHandler);
 		}
 		
 		return true;
@@ -1526,10 +1526,11 @@
 		var disableSetting = chart.disableSetting();
 		
 		var $chart = chart.elementJquery();
-		var mouseenterHandler = $chart.data("chartSettingPanel-mouseenterHandler");
-		var mouseleaveHandler = $chart.data("chartSettingPanel-mouseleaveHandler");
+		var mouseenterHandler = $chart.data("dgChartSettingMouseEnterHandler");
+		var mouseleaveHandler = $chart.data("dgChartSettingMouseLeaveHandler");
 		
-		$chart.removeAttr("bind-chart-setting-panel-event");
+		$chart.removeData("dgChartSettingBindEvent");
+		
 		if(mouseenterHandler)
 			$chart.off("mouseenter", mouseenterHandler);
 		if(mouseleaveHandler)
@@ -1698,17 +1699,14 @@
 	 */
 	chartSetting.openChartSettingParamPanel = function($box, chart)
 	{
-		var $chart = chart.elementJquery();
 		var dataSetBinds = chart.dataSetBinds();
-		
 		var $panel = $(".dg-chart-setting-param-panel", $box);
 		
 		if($panel.length <= 0)
 		{
 			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-param-panel' />").appendTo($box);
 			
-			//先显示，避免布局计算错误
-			$panel.show();
+			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
@@ -1828,8 +1826,7 @@
 		}
 		else
 		{
-			//先显示，避免布局计算错误
-			$panel.show();
+			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
@@ -1840,7 +1837,7 @@
 			});
 		}
 		
-		chartSetting.adjustChartSetingPanelPosition($panel);
+		chartSetting.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-param-button", $box), chart);
 		
 		//聚焦至第一个可操作输入框
 		chartSetting.focusOnFirstInput($("form:first", $panel));
@@ -1880,18 +1877,14 @@
 	 */
 	chartSetting.openChartSettingDataPanel = function($box, chart)
 	{
-		var $chart = chart.elementJquery();
-		
 		var dataSetBinds = chart.dataSetBinds();
-		
 		var $panel = $(".dg-chart-setting-data-panel", $box);
 		
 		if($panel.length <= 0)
 		{
 			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-data-panel' />").appendTo($box);
 			
-			//先显示，避免布局计算错误
-			$panel.show();
+			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
@@ -1924,8 +1917,7 @@
 		}
 		else
 		{
-			//先显示，避免布局计算错误
-			$panel.show();
+			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
@@ -1937,7 +1929,7 @@
 			});
 		}
 		
-		chartSetting.adjustChartSetingPanelPosition($panel);
+		chartSetting.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-data-button", $box), chart);
 	};
 	
 	/**
@@ -2179,24 +2171,68 @@
 		$panelContent.css("max-height", wh*3/5 - fh);
 	};
 	
-	chartSetting.adjustChartSetingPanelPosition = function($panel)
+	chartSetting.showChartSetingPanelOpacityOut = function($box, $panel, chart)
 	{
-		var offset = $panel.offset();
+		//先透明显示，避免布局计算错误，后续调整位置后再移除透明
+		$panel.addClass("dg-opacity-hide")
+			.css("left", -999999).css("top", -999999).css("right", "unset").css("bottom", "unset")
+			.show();
+	};
+	
+	chartSetting.adjustChartSetingPanelPosition = function($box, $panel, $btn, chart)
+	{
+		var docWidth = $(document).width();
+		var docHeight = $(document).height();
 		
-		if(offset.left >= 0 && offset.top >= 0)
-			return;
+		var width = $panel.outerWidth();
+		var height = $panel.outerHeight();
 		
-		var position = $panel.position();
+		var btnWidth = $btn.outerWidth(true);
+		var btnHeight = $btn.outerHeight(true);
+		var btnOffset = $btn.offset();
+		var btnPosition = $btn.position();
 		
-		if(offset.left < 0)
-			position.left = position.left + Math.abs(offset.left) + 10;
+		var left = "unset";
+		var right = "unset";
+		var top = "unset";
+		var bottom = "unset";
 		
-		if(offset.top < 0)
-			position.top = position.top + Math.abs(offset.top);
+		//按钮右侧有足够空间
+		if((docWidth - btnOffset.left - btnWidth) > width)
+		{
+			left = btnPosition.left + btnWidth;
+		}
+		//按钮左侧有足够空间
+		else if(btnOffset.left > width)
+		{
+			left = btnPosition.left - width;
+		}
+		else
+		{
+			left = btnPosition.left - width/2;
+		}
 		
-		$panel.css("left", position.left);
-		$panel.css("top", position.top);
-		$panel.css("right", "unset");
+		//按钮底部有足够空间
+		if((docHeight - btnOffset.top - btnHeight) > height)
+		{
+			top = btnPosition.top + btnHeight;
+		}
+		//按钮上部有足够空间
+		else if(btnOffset.top > height)
+		{
+			bottom = btnPosition.top + btnHeight;
+		}
+		else
+		{
+			top = btnPosition.top - height/2;
+		}
+		
+		$panel.css("left", left);
+		$panel.css("top", top);
+		$panel.css("right", right);
+		$panel.css("bottom", bottom);
+		
+		$panel.removeClass("dg-opacity-hide");
 	};
 	
 	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
