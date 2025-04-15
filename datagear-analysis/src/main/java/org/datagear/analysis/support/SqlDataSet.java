@@ -42,6 +42,7 @@ import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
+import org.datagear.util.SqlParamValue;
 import org.datagear.util.SqlType;
 import org.datagear.util.resource.ConnectionFactory;
 import org.datagear.util.sqlvalidator.DatabaseProfile;
@@ -182,9 +183,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			SqlTemplateResult sqlTemplateResult) throws Throwable
 	{
 		String sql = sqlTemplateResult.getResult();
+		boolean precompiles = sqlTemplateResult.isPrecompiled();
 
 		// 对于已采用预编译语法的，不进行SQL防注入校验；未采用预编译语法的应该进行SQL防注入校验
-		if (!sqlTemplateResult.isPrecompiled())
+		if (!precompiles)
 		{
 			validateSql(cn, sql);
 		}
@@ -192,9 +194,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		Sql sqlObj = Sql.valueOf(sql);
 		JdbcSupport jdbcSupport = getJdbcSupport();
 
-		if (sqlTemplateResult.isPrecompiled())
+		if (precompiles)
 		{
-			// TODO 设置参数
+			List<SqlParamValue> spvs = jdbcSupport.toSqlParamValues(sqlTemplateResult.getParamValues());
+			sqlObj.param(spvs);
 		}
 
 		QueryResultSet qrs = executeQuery(cn, sqlObj, jdbcSupport);

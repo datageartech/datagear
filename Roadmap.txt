@@ -1,6 +1,6 @@
 下一版本：
 
-	SQL数据集支持SQL预编译语法，进而支持执行insert/update/delete类型的SQL；
+	ok SQL数据集支持SQL预编译语法；
 	HTTP数据集响应类型支持文本；
 	看板可视编辑模式绝对/相对定位元素可拖拽；
 	
