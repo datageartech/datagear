@@ -28,7 +28,7 @@ public class SqlParamValue
 	/** 参数值 */
 	private Object value;
 
-	/** 类型 */
+	/** JDBC类型 */
 	private int type;
 
 	public SqlParamValue()
