@@ -23,6 +23,8 @@ import static org.junit.Assert.assertNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -52,6 +54,44 @@ public class JdbcSupportTest
 			SqlParamValue spv = jdbcSupport.toSqlParamValue(v);
 			assertEquals(Types.VARCHAR, spv.getType());
 			assertEquals("a", spv.getValue());
+		}
+	}
+
+	@Test
+	public void toSqlParamValuesTest()
+	{
+		{
+			List<Object> vs = Arrays.asList("aaa", 3, true, null);
+			List<SqlParamValue> spvs = jdbcSupport.toSqlParamValues(vs);
+
+			assertEquals(Types.VARCHAR, spvs.get(0).getType());
+			assertEquals("aaa", spvs.get(0).getValue());
+
+			assertEquals(Types.INTEGER, spvs.get(1).getType());
+			assertEquals(3, spvs.get(1).getValue());
+
+			assertEquals(Types.BOOLEAN, spvs.get(2).getType());
+			assertEquals(true, spvs.get(2).getValue());
+
+			assertEquals(Types.NULL, spvs.get(3).getType());
+			assertNull(spvs.get(3).getValue());
+		}
+
+		{
+			Object[] vs = new Object[] { "aaa", 3, true, null };
+			List<SqlParamValue> spvs = jdbcSupport.toSqlParamValues(vs);
+
+			assertEquals(Types.VARCHAR, spvs.get(0).getType());
+			assertEquals("aaa", spvs.get(0).getValue());
+
+			assertEquals(Types.INTEGER, spvs.get(1).getType());
+			assertEquals(3, spvs.get(1).getValue());
+
+			assertEquals(Types.BOOLEAN, spvs.get(2).getType());
+			assertEquals(true, spvs.get(2).getValue());
+
+			assertEquals(Types.NULL, spvs.get(3).getType());
+			assertNull(spvs.get(3).getValue());
 		}
 	}
 

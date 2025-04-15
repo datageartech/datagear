@@ -1449,6 +1449,44 @@ public class JdbcSupport
 	}
 
 	/**
+	 * 将对象列表转换为{@linkplain SqlParamValue}列表。
+	 * 
+	 * @param objs
+	 * @return
+	 */
+	public List<SqlParamValue> toSqlParamValues(List<?> objs)
+	{
+		List<SqlParamValue> spvs = new ArrayList<>(objs.size());
+
+		for (Object obj : objs)
+		{
+			SqlParamValue spv = toSqlParamValue(obj);
+			spvs.add(spv);
+		}
+
+		return spvs;
+	}
+
+	/**
+	 * 将对象数组转换为{@linkplain SqlParamValue}列表。
+	 * 
+	 * @param objs
+	 * @return
+	 */
+	public List<SqlParamValue> toSqlParamValues(Object[] objs)
+	{
+		List<SqlParamValue> spvs = new ArrayList<>(objs.length);
+
+		for (Object obj : objs)
+		{
+			SqlParamValue spv = toSqlParamValue(obj);
+			spvs.add(spv);
+		}
+
+		return spvs;
+	}
+
+	/**
 	 * 获取指定对象的JDBC类型。
 	 * 
 	 * @param obj
