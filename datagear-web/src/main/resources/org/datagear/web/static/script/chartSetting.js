@@ -2184,8 +2184,10 @@
 		var docWidth = $(document).width();
 		var docHeight = $(document).height();
 		
-		var width = $panel.outerWidth();
-		var height = $panel.outerHeight();
+		var width = $panel.outerWidth(true);
+		var height = $panel.outerHeight(true);
+		var widthGap = width + 20;
+		var heightGap = height + 20;
 		
 		var btnWidth = $btn.outerWidth(true);
 		var btnHeight = $btn.outerHeight(true);
@@ -2198,12 +2200,12 @@
 		var bottom = "unset";
 		
 		//按钮右侧有足够空间
-		if((docWidth - btnOffset.left - btnWidth) > width)
+		if((docWidth - btnOffset.left - btnWidth) > widthGap)
 		{
 			left = btnPosition.left + btnWidth;
 		}
 		//按钮左侧有足够空间
-		else if(btnOffset.left > width)
+		else if(btnOffset.left > widthGap)
 		{
 			left = btnPosition.left - width;
 		}
@@ -2213,12 +2215,12 @@
 		}
 		
 		//按钮底部有足够空间
-		if((docHeight - btnOffset.top - btnHeight) > height)
+		if((docHeight - btnOffset.top - btnHeight) > heightGap)
 		{
 			top = btnPosition.top + btnHeight;
 		}
 		//按钮上部有足够空间
-		else if(btnOffset.top > height)
+		else if(btnOffset.top > heightGap)
 		{
 			bottom = btnPosition.top + btnHeight;
 		}
