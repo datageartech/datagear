@@ -31,6 +31,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.security.ModulePermissions;
 import org.datagear.web.util.DetectNewVersionScriptResolver;
+import org.datagear.web.util.WelcomeContentLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
@@ -55,6 +56,9 @@ public class MainController extends AbstractController
 
 	@Autowired
 	private DetectNewVersionScriptResolver detectNewVersionScriptResolver;
+
+	@Autowired
+	private WelcomeContentLoader welcomeContentLoader;
 
 	public MainController()
 	{
@@ -81,6 +85,16 @@ public class MainController extends AbstractController
 		this.detectNewVersionScriptResolver = detectNewVersionScriptResolver;
 	}
 
+	public WelcomeContentLoader getWelcomeContentLoader()
+	{
+		return welcomeContentLoader;
+	}
+
+	public void setWelcomeContentLoader(WelcomeContentLoader welcomeContentLoader)
+	{
+		this.welcomeContentLoader = welcomeContentLoader;
+	}
+
 	/**
 	 * 打开主页面。
 	 * 
@@ -98,7 +112,7 @@ public class MainController extends AbstractController
 
 		addAttributeForWriteJson(model, "modulePermissions", mps);
 
-		String welcomeContent = getApplicationProperties().getWelcomeContent();
+		String welcomeContent = this.welcomeContentLoader.load();
 		if (!StringUtil.isEmpty(welcomeContent))
 			model.addAttribute("welcomeContent", welcomeContent);
 

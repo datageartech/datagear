@@ -219,6 +219,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${welcomeContent}")
 	private String welcomeContent;
 
+	/** 首页欢迎语文件编码 */
+	@Value("${welcomeContentEncoding}")
+	private String welcomeContentEncoding;
+
 	/** SQL数据集的SQL关键字黑名单 */
 	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
 
@@ -705,6 +709,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setWelcomeContent(String welcomeContent)
 	{
 		this.welcomeContent = welcomeContent;
+	}
+
+	public String getWelcomeContentEncoding()
+	{
+		return welcomeContentEncoding;
+	}
+
+	protected void setWelcomeContentEncoding(String welcomeContentEncoding)
+	{
+		this.welcomeContentEncoding = welcomeContentEncoding;
 	}
 
 	public Map<String, String> getSqlDataSetInvalidSqlKeywords()

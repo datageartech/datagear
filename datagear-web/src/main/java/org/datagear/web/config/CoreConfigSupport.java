@@ -151,6 +151,7 @@ import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.WebDashboardQueryConverter;
 import org.datagear.web.util.WebHtmlTplDashboardImportBuilderFactory;
+import org.datagear.web.util.WelcomeContentLoader;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.datagear.web.util.accesslatch.AccessLatch;
 import org.datagear.web.util.accesslatch.IpLoginLatch;
@@ -273,6 +274,13 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	protected String[] getMessageSourceBasenames()
 	{
 		return new String[] { "org.datagear.web.i18n.message" };
+	}
+
+	@Bean
+	public WelcomeContentLoader welcomeContentLoader()
+	{
+		ApplicationProperties ps = getApplicationProperties();
+		return new WelcomeContentLoader(ps.getWelcomeContent(), ps.getWelcomeContentEncoding());
 	}
 
 	@Bean

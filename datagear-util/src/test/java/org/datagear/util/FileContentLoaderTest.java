@@ -17,10 +17,14 @@
 
 package org.datagear.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.Writer;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -32,32 +36,110 @@ import org.junit.Test;
 public class FileContentLoaderTest
 {
 	@Test
-	public void loadTest() throws Exception
+	public void loadTest_encoding_null() throws Exception
 	{
 		File file = FileUtil.getFile("target/test/FileContentLoaderTest/1.txt");
+		TestFileContentLoader loader = new TestFileContentLoader(file);
 
 		{
 			writeFile(file, "文件内容", null);
-			FileContentLoader loader = new FileContentLoader(file);
 
-			Assert.assertEquals("文件内容", loader.load());
+			assertEquals("文件内容", loader.load());
+			assertTrue(loader.isReadFromFile());
 
-			writeFile(file, "文件内容-1", null);
+			assertEquals("文件内容", loader.load());
+			assertFalse(loader.isReadFromFile());
 
-			Assert.assertEquals("文件内容-1", loader.load());
+			assertEquals("文件内容", loader.load());
+			assertFalse(loader.isReadFromFile());
 		}
+
+		{
+			Thread.sleep(3000);
+			writeFile(file, "文件内容-1", null);
+		}
+
+		{
+			assertEquals("文件内容-1", loader.load());
+			assertTrue(loader.isReadFromFile());
+
+			assertEquals("文件内容-1", loader.load());
+			assertFalse(loader.isReadFromFile());
+
+			assertEquals("文件内容-1", loader.load());
+			assertFalse(loader.isReadFromFile());
+		}
+	}
+
+	@Test
+	public void loadTest_encoding_utf8() throws Exception
+	{
+		File file = FileUtil.getFile("target/test/FileContentLoaderTest/1.txt");
+		TestFileContentLoader loader = new TestFileContentLoader(file, IOUtil.CHARSET_UTF_8);
 
 		{
 			writeFile(file, "文件内容UTF-8", IOUtil.CHARSET_UTF_8);
 
-			FileContentLoader loader = new FileContentLoader(file, IOUtil.CHARSET_UTF_8);
-			String actual = loader.load();
+			assertEquals("文件内容UTF-8", loader.load());
+			assertTrue(loader.isReadFromFile());
 
-			Assert.assertEquals("文件内容UTF-8", actual);
+			assertEquals("文件内容UTF-8", loader.load());
+			assertFalse(loader.isReadFromFile());
 
-			writeFile(file, "文件内容-1", IOUtil.CHARSET_UTF_8);
+			assertEquals("文件内容UTF-8", loader.load());
+			assertFalse(loader.isReadFromFile());
+		}
 
-			Assert.assertEquals("文件内容-1", loader.load());
+		{
+			Thread.sleep(3000);
+			writeFile(file, "文件内容-2", IOUtil.CHARSET_UTF_8);
+		}
+
+		{
+			assertEquals("文件内容-2", loader.load());
+			assertTrue(loader.isReadFromFile());
+
+			assertEquals("文件内容-2", loader.load());
+			assertFalse(loader.isReadFromFile());
+
+			assertEquals("文件内容-2", loader.load());
+			assertFalse(loader.isReadFromFile());
+		}
+	}
+
+	@Test
+	public void loadTest_cached_false() throws Exception
+	{
+		File file = FileUtil.getFile("target/test/FileContentLoaderTest/1.txt");
+		TestFileContentLoader loader = new TestFileContentLoader(file, null, false);
+
+		{
+			writeFile(file, "文件内容", null);
+
+			assertEquals("文件内容", loader.load());
+			assertTrue(loader.isReadFromFile());
+
+			assertEquals("文件内容", loader.load());
+			assertTrue(loader.isReadFromFile());
+
+			assertEquals("文件内容", loader.load());
+			assertTrue(loader.isReadFromFile());
+		}
+
+		{
+			Thread.sleep(3000);
+			writeFile(file, "文件内容-1", null);
+		}
+
+		{
+			assertEquals("文件内容-1", loader.load());
+			assertTrue(loader.isReadFromFile());
+
+			assertEquals("文件内容-1", loader.load());
+			assertTrue(loader.isReadFromFile());
+
+			assertEquals("文件内容-1", loader.load());
+			assertTrue(loader.isReadFromFile());
 		}
 	}
 
@@ -76,10 +158,60 @@ public class FileContentLoaderTest
 				out = IOUtil.getWriter(file, encoding);
 
 			out.write(content);
+			out.flush();
 		}
 		finally
 		{
 			IOUtil.close(out);
+		}
+	}
+
+	protected static class TestFileContentLoader extends FileContentLoader
+	{
+		private boolean readFromFile = false;
+
+		public TestFileContentLoader()
+		{
+			super();
+		}
+
+		public TestFileContentLoader(File file)
+		{
+			super(file);
+		}
+
+		public TestFileContentLoader(File file, String encoding)
+		{
+			super(file, encoding);
+		}
+
+		public TestFileContentLoader(File file, String encoding, boolean cached)
+		{
+			super(file, encoding, cached);
+		}
+
+		public boolean isReadFromFile()
+		{
+			return readFromFile;
+		}
+
+		public void setReadFromFile(boolean readFromFile)
+		{
+			this.readFromFile = readFromFile;
+		}
+
+		@Override
+		public String load() throws IOException
+		{
+			setReadFromFile(false);
+			return super.load();
+		}
+
+		@Override
+		protected String readFile(File file) throws IOException
+		{
+			setReadFromFile(true);
+			return super.readFile(file);
 		}
 	}
 }

@@ -111,8 +111,10 @@ public class FileContentLoader
 		}
 		else
 		{
-			if (this._prevReadContent == null || this._prevReadModfied != this.file.lastModified())
+			long lastModified = this.file.lastModified();
+			if (this._prevReadContent == null || this._prevReadModfied != lastModified)
 			{
+				this._prevReadModfied = lastModified;
 				this._prevReadContent = readFile(this.file);
 			}
 
