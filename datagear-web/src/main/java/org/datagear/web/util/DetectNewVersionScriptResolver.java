@@ -226,7 +226,7 @@ public class DetectNewVersionScriptResolver
 	 */
 	protected String getLatestVersionScriptLocation(HttpServletRequest request)
 	{
-		return LATEST_VERSION_SCRIPT_LOCATION;
+		return LATEST_VERSION_SCRIPT_LOCATION + "?v=" + getCurrentVersion(request);
 	}
 
 	/**
@@ -237,7 +237,7 @@ public class DetectNewVersionScriptResolver
 	 */
 	protected String getLatestVersionScriptLocationHttps(HttpServletRequest request)
 	{
-		return LATEST_VERSION_SCRIPT_LOCATION_HTTPS;
+		return LATEST_VERSION_SCRIPT_LOCATION_HTTPS + "?v=" + getCurrentVersion(request);
 	}
 
 	/**
