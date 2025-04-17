@@ -78,6 +78,17 @@
 	po.mainMenuCollapseName="${Global.NAME_SHORT_UCUS}MAIN_MENU_COLLAPSE";
 	po.modulePermissions = $.unescapeHtmlForJson(<@writeJson var=modulePermissions />);
 	
+	//定义系统自定义欢迎内容配置中可用的变量
+	po.vueReactive("welcome",
+	{
+		user:
+		{
+			name: "${(currentUser.name)?js_string?no_esc}", realName: "${(currentUser.realName)?js_string?no_esc}",
+			anonymous: ("${currentUser.anonymous?string('true','false')}" == "true"),
+			admin: ("${currentUser.admin?string('true','false')}" == "true")
+		}
+	});
+	
 	po.vuePageModel(
 	{
 		mainMenu:
