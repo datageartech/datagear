@@ -1826,84 +1826,6 @@
 	};
 	
 	/**
-	 * 绑定"click"事件处理函数。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持此特性。
-	 * 
-	 * @param handler 事件处理函数：function(chartEvent){}
-	 */
-	chartBase.onClick = function(handler)
-	{
-		this.on("click", handler);
-	};
-	
-	/**
-	 * 绑定"dblclick"事件处理函数。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持此特性。
-	 * 
-	 * @param handler 事件处理函数：function(chartEvent){}
-	 */
-	chartBase.onDblclick = function(handler)
-	{
-		this.on("dblclick", handler);
-	};
-	
-	/**
-	 * 绑定"mousedown"事件处理函数。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持此特性。
-	 * 
-	 * @param handler 事件处理函数：function(chartEvent){}
-	 */
-	chartBase.onMousedown = function(handler)
-	{
-		this.on("mousedown", handler);
-	};
-	
-	/**
-	 * 绑定"mouseup"事件处理函数。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持此特性。
-	 * 
-	 * @param handler 事件处理函数：function(chartEvent){}
-	 */
-	chartBase.onMouseup = function(handler)
-	{
-		this.on("mouseup", handler);
-	};
-	
-	/**
-	 * 绑定"mouseover"事件处理函数。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持此特性。
-	 * 
-	 * @param handler 事件处理函数：function(chartEvent){}
-	 */
-	chartBase.onMouseover = function(handler)
-	{
-		this.on("mouseover", handler);
-	};
-	
-	/**
-	 * 绑定"mouseout"事件处理函数。
-	 * 
-	 * 图表渲染器实现相关：
-	 * 图表渲染器应实现on函数，以支持此特性。
-	 * 
-	 * @param handler 事件处理函数：function(chartEvent){}
-	 */
-	chartBase.onMouseout = function(handler)
-	{
-		this.on("mouseout", handler);
-	};
-	
-	/**
 	 * 绑定事件处理函数。
 	 * 
 	 * 图表渲染器实现相关：
@@ -4415,6 +4337,88 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.on()
+	
+	/**
+	 * 绑定"click"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
+	 * @param handler 事件处理函数：function(chartEvent){}
+	 */
+	chartBase.onClick = function(handler)
+	{
+		this.on("click", handler);
+	};
+	
+	/**
+	 * 绑定"dblclick"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
+	 * @param handler 事件处理函数：function(chartEvent){}
+	 */
+	chartBase.onDblclick = function(handler)
+	{
+		this.on("dblclick", handler);
+	};
+	
+	/**
+	 * 绑定"mousedown"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
+	 * @param handler 事件处理函数：function(chartEvent){}
+	 */
+	chartBase.onMousedown = function(handler)
+	{
+		this.on("mousedown", handler);
+	};
+	
+	/**
+	 * 绑定"mouseup"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
+	 * @param handler 事件处理函数：function(chartEvent){}
+	 */
+	chartBase.onMouseup = function(handler)
+	{
+		this.on("mouseup", handler);
+	};
+	
+	/**
+	 * 绑定"mouseover"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
+	 * @param handler 事件处理函数：function(chartEvent){}
+	 */
+	chartBase.onMouseover = function(handler)
+	{
+		this.on("mouseover", handler);
+	};
+	
+	/**
+	 * 绑定"mouseout"事件处理函数。
+	 * 
+	 * 图表渲染器实现相关：
+	 * 图表渲染器应实现on函数，以支持此特性。
+	 * 
+	 * @param handler 事件处理函数：function(chartEvent){}
+	 */
+	chartBase.onMouseout = function(handler)
+	{
+		this.on("mouseout", handler);
+	};
+	
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.on()
 	
 	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
 	
