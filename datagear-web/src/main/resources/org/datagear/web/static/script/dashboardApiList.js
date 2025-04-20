@@ -153,6 +153,7 @@ global.dashboardApiCompletions =
 	{name: "originalDataIndex", value: "originalDataIndex(", displayName: "originalDataIndex() ", displayComment: "chart", categories: ["chart"]},
 	{name: "originalDataIndexes", value: "originalDataIndexes(", displayName: "originalDataIndexes() ", displayComment: "chart", categories: ["chart"]},
 	{name: "plugin", value: "plugin", displayName: "plugin ", displayComment: "chart", categories: ["chart"]},
+	{name: "pluginAddition", value: "pluginAddition()", displayName: "pluginAddition() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginAttributes", value: "pluginAttributes()", displayName: "pluginAttributes() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginResourceURL", value: "pluginResourceURL(", displayName: "pluginResourceURL() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginResources", value: "pluginResources()", displayName: "pluginResources() ", displayComment: "chart", categories: ["chart"]},

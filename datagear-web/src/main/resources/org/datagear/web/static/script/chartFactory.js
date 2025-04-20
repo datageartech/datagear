@@ -4334,6 +4334,18 @@
 		}
 	};
 	
+	/**
+	 * 获取图表插件附加属性值。
+	 * 
+	 * @param name 附加属性名
+	 * @returns 要获取的附加属性值，没有则返回null
+	 * @since 5.4.0
+	 */
+	chartBase.pluginAddition = function(name)
+	{
+		return (this.plugin && this.plugin.additions ? this.plugin.additions[name] : undefined);
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
