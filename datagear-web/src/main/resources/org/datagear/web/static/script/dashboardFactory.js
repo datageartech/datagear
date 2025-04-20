@@ -239,6 +239,9 @@
 	/**图表主题关联的看板表单实体ID*/
 	dashboardFactory._THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
 	
+	/**图表插件扩展属性：默认联动事件类型 */
+	dashboardFactory.PLUGIN_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
+	
 	/**
 	 * 初始化看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API，并设置状态：dashboard.statusPreInit(true)。
 	 * 
@@ -621,9 +624,7 @@
 		
 		for(var i=0; i<links.length; i++)
 		{
-			var myTriggers = (links[i].trigger || "click");
-			if(!$.isArray(myTriggers))
-				myTriggers = [ myTriggers ];
+			var myTriggers = this._resolveLinkTriggers(links[i]);
 			
 			for(var j=0; j<myTriggers.length; j++)
 			{
@@ -631,6 +632,24 @@
 					triggers.push(myTriggers[j]);
 			}
 		}
+		
+		return triggers;
+	};
+	
+	chartBase._resolveLinkTriggers = function(link)
+	{
+		var triggers = link.trigger;
+		
+		//从插件附加属性中取默认值
+		if(!triggers)
+			triggers = this.pluginAddition(dashboardFactory.PLUGIN_ADDITION_DTF_LINK_EVENT_TYPE);
+		
+		//默认值设为"click"
+		if(!triggers)
+			triggers = "click";
+		
+		if(!$.isArray(triggers))
+			triggers = [ triggers ];
 		
 		return triggers;
 	};
@@ -695,20 +714,10 @@
 		var eventType = chartEvent.type;
 		
 		if(!eventType)
-		{
 			return false;
-		}
-		else if(!link.trigger)
-		{
-			//默认为点击事件
-			return (eventType == "click");
-		}
-		else if($.isArray(link.trigger))
-		{
-			return ($.inArray(eventType, link.trigger) >= 0);
-		}
-		else
-			return (link.trigger == eventType);
+		
+		var triggers = this._resolveLinkTriggers(link);
+		return ($.inArray(eventType, triggers) >= 0);
 	};
 	
 	/**
