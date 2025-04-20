@@ -36,7 +36,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInputAware, Serializable
+public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInputAware, AdditionsAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -48,7 +48,7 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
 	public static final String PROPERTY_GROUP = "group";
-	public static final String PROPERTY_ADDITIONS = "additions";
+	public static final String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
 
 	/** 名称 */
 	private String name;
@@ -161,11 +161,7 @@ public class ChartPluginAttribute extends AbstractLabeled implements NameTypeInp
 		this.group = group;
 	}
 
-	/**
-	 * 获取扩展属性集。
-	 * 
-	 * @return 为{@code null}表示没有
-	 */
+	@Override
 	public Map<String, ?> getAdditions()
 	{
 		return additions;

@@ -55,6 +55,11 @@
 					'en' : 'X value desc',
 					'zh' : 'X值描述中文'
 				}
+			},
+			additions:
+			{
+				for: "field",
+				name: "x-val"
 			}
 		},
 		{
@@ -213,5 +218,7 @@
 	],
 	categoryOrders: [ 41, 51 ],
 	author: "test",
-	issueDate: "2024-09-01"
+	issueDate: "2024-09-01",
+	platformVersion: "5.3.0+",
+	additions: { name: "aaa", value: 3 }
 }

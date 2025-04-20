@@ -60,7 +60,12 @@ import org.datagear.util.i18n.Label;
  *   categories: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
  *   或者（兼容3.0.1版本格式）
  *   category: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
- *   categoryOrders: 整数值 或者 [ 整数值, 整数值, ... ]
+ *   categoryOrders: 整数值 或者 [ 整数值, 整数值, ... ],
+ *   author: "...",
+ *   contact: "...",
+ *   issueDate: "...",
+ *   platformVersion: "...",
+ *   additions: { "...": ..., ... }
  * }
  * </pre>
  * </code>
@@ -88,6 +93,7 @@ public class JsonChartPluginPropertiesResolver
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
 	public static final String JSON_PROPERTY_PLATFORM_VERSION = ChartPlugin.PROPERTY_PLATFORM_VERSION;
 	public static final String JSON_PROPERTY_ICONS = "icons";
+	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
 
 	/**
 	 * 3.0.1版本的单类别属性名，已在3.1.0版本中被{@linkplain #JSON_PROPERTY_CATEGORIES}代替。
@@ -135,6 +141,7 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setContact(convertToString(properties.get(JSON_PROPERTY_CONTACT)));
 		chartPlugin.setIssueDate(convertToString(properties.get(JSON_PROPERTY_ISSUE_DATE)));
 		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
+		chartPlugin.setAdditions(convertToAdditions(properties.get(JSON_PROPERTY_ADDITIONS)));
 	}
 
 	/**
@@ -319,6 +326,7 @@ public class JsonChartPluginPropertiesResolver
 			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
 			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
 			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
+			dataSign.setAdditions(convertToDataSignAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
 	
 			return dataSign;
 		}
@@ -339,6 +347,18 @@ public class JsonChartPluginPropertiesResolver
 		// 不要修改这里的默认值，因为会影响插件规范
 		boolean dftValue = false;
 		return convertToBoolean(v, dftValue);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, ?> convertToDataSignAdditions(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Map<?, ?>)
+			return (Map<String, ?>) obj;
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ DataSign.class.getName() + ".additions] is not supported");
 	}
 
 	/**
@@ -424,7 +444,7 @@ public class JsonChartPluginPropertiesResolver
 			attribute.setRequired(convertToAttributeRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
 			attribute.setInputType(convertToAttributeInputType(map.get(ChartPluginAttribute.PROPERTY_INPUT_TYPE)));
 			attribute.setInputPayload(convertToAttributeInputPayload(map.get(ChartPluginAttribute.PROPERTY_INPUT_PAYLOAD)));
-			attribute.setGroup(convertToGroup(map.get(ChartPluginAttribute.PROPERTY_GROUP)));
+			attribute.setGroup(convertToAttributeGroup(map.get(ChartPluginAttribute.PROPERTY_GROUP)));
 			attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
 
 			return attribute;
@@ -488,7 +508,7 @@ public class JsonChartPluginPropertiesResolver
 		return obj;
 	}
 
-	protected Group convertToGroup(Object obj)
+	protected Group convertToAttributeGroup(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -758,6 +778,18 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			orders.add(convertToInt(obj, defaultOrder));
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, ?> convertToAdditions(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Map<?, ?>)
+			return (Map<String, ?>) obj;
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ ChartPlugin.class.getName() + ".additions] is not supported");
 	}
 
 	/**

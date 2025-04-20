@@ -82,6 +82,9 @@ public class JsonChartPluginPropertiesResolverTest
 			assertEquals(2, chartPlugin.getCategories().size());
 			assertNotNull(chartPlugin.getCategoryOrders());
 			assertEquals(2, chartPlugin.getCategoryOrders().size());
+			assertEquals("test", chartPlugin.getAuthor());
+			assertEquals("2024-09-01", chartPlugin.getIssueDate());
+			assertEquals("5.3.0+", chartPlugin.getPlatformVersion());
 
 			{
 				Label nameLabel = chartPlugin.getNameLabel();
@@ -123,6 +126,11 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("X值描述", descLabel.getValue());
 				assertEquals("X value desc", descLabel.getValue(enLocale));
 				assertEquals("X值描述中文", descLabel.getValue(zhLocale));
+
+				Map<String, ?> additions = dataSign.getAdditions();
+				assertNotNull(additions);
+				assertEquals("field", additions.get("for"));
+				assertEquals("x-val", additions.get("name"));
 			}
 
 			{
@@ -141,6 +149,7 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("Y值描述", descLabel.getValue());
 				assertEquals("Y value desc", descLabel.getValue(enLocale));
 				assertEquals("Y值描述中文", descLabel.getValue(zhLocale));
+				assertNull(dataSign.getAdditions());
 			}
 
 			{
@@ -319,6 +328,13 @@ public class JsonChartPluginPropertiesResolverTest
 				List<Integer> categoryOrders = chartPlugin.getCategoryOrders();
 				assertEquals(41, categoryOrders.get(0).intValue());
 				assertEquals(51, categoryOrders.get(1).intValue());
+			}
+
+			{
+				Map<String, ?> additions = chartPlugin.getAdditions();
+				assertNotNull(additions);
+				assertEquals("aaa", additions.get("name"));
+				assertEquals(3, ((Number) additions.get("value")).intValue());
 			}
 		}
 	}

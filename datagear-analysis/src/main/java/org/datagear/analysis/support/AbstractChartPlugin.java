@@ -73,6 +73,8 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private String platformVersion = "";
 
+	private Map<String, ?> additions = null;
+
 	public AbstractChartPlugin()
 	{
 	}
@@ -321,5 +323,16 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	public void setPlatformVersion(String platformVersion)
 	{
 		this.platformVersion = platformVersion;
+	}
+
+	@Override
+	public Map<String, ?> getAdditions()
+	{
+		return additions;
+	}
+
+	public void setAdditions(Map<String, ?> additions)
+	{
+		this.additions = additions;
 	}
 }

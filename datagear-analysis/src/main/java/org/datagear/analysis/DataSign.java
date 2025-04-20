@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.LabelUtil;
@@ -35,7 +36,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class DataSign extends AbstractLabeled implements Serializable
+public class DataSign extends AbstractLabeled implements AdditionsAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -44,6 +45,7 @@ public class DataSign extends AbstractLabeled implements Serializable
 	public static final String PROPERTY_MULTIPLE = "multiple";
 	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
+	public static final String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
 
 	/** 名称 */
 	private String name;
@@ -53,6 +55,9 @@ public class DataSign extends AbstractLabeled implements Serializable
 
 	/** 数据集是否可有多个此标记 */
 	private boolean multiple;
+
+	/** 附加属性 */
+	private Map<String, ?> additions = null;
 
 	public DataSign()
 	{
@@ -97,6 +102,17 @@ public class DataSign extends AbstractLabeled implements Serializable
 		this.multiple = multiple;
 	}
 
+	@Override
+	public Map<String, ?> getAdditions()
+	{
+		return additions;
+	}
+
+	public void setAdditions(Map<String, ?> additions)
+	{
+		this.additions = additions;
+	}
+
 	/**
 	 * 复制为指定{@linkplain Locale}的对象。
 	 * 
@@ -106,6 +122,7 @@ public class DataSign extends AbstractLabeled implements Serializable
 	public DataSign clone(Locale locale)
 	{
 		DataSign target = new DataSign(this.name, this.required, this.multiple);
+		target.setAdditions(this.additions);
 		LabelUtil.concrete(this, target, locale);
 
 		return target;
@@ -115,7 +132,8 @@ public class DataSign extends AbstractLabeled implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", required=" + required + ", multiple="
-				+ multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel() + "]";
+				+ multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel() + ", additions="
+				+ additions + "]";
 	}
 
 	/**

@@ -28,7 +28,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public interface ChartPlugin extends Identifiable, Labeled
+public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 {
 	String PROPERTY_ID = "id";
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
@@ -45,6 +45,7 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_CONTACT = "contact";
 	String PROPERTY_ISSUE_DATE = "issueDate";
 	String PROPERTY_PLATFORM_VERSION = "platformVersion";
+	String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
 
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";
