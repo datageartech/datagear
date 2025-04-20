@@ -680,10 +680,21 @@
 			originalData: this.eventOriginalData(chartEvent),
 			getValue: function(name)
 			{
-				//需支持属性路径格式的name
-				var val = dashboardFactory.getPropertyPathValue(this.data, name);
-				if(val === undefined && this.originalData != null)
-					val = dashboardFactory.getPropertyPathValue(this.originalData, name);
+				var val = undefined;
+				
+				//当name为空时，应直接使用this.data
+				if(name == null || name == "")
+				{
+					val = this.data;
+				}
+				else
+				{
+					//需支持属性路径格式的name
+					val = dashboardFactory.getPropertyPathValue(this.data, name);
+					
+					if(val === undefined && this.originalData != null)
+						val = dashboardFactory.getPropertyPathValue(this.originalData, name);
+				}
 				
 				return val;
 			}
@@ -2639,8 +2650,20 @@
 		
 		for(var name in dataMap)
 		{
-			var dataValue = (hasGetValueFunc ? sourceData.getValue(name)
-					: dashboardFactory.getPropertyPathValue(sourceData, name));
+			var dataValue = undefined;
+			
+			if(hasGetValueFunc)
+			{
+				dataValue = sourceData.getValue(name);
+			}
+			else
+			{
+				//当name为空时，应直接使用sourceData
+				if(name == null || name == "")
+					dataValue = sourceData;
+				else
+					dataValue = dashboardFactory.getPropertyPathValue(sourceData, name);
+			}
 			
 			var indexes = dataMap[name];
 			
