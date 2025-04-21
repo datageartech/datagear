@@ -141,6 +141,12 @@ label.align-tip{
 	top: -4px;
 	right: -8px;
 }
+.new-version-tip .p-menuitem-link .tip-latest-version{
+    margin-left: 0.2em;
+    color: var(--red-500);
+    font-weight: bold;
+    font-size: 0.8em;
+}
 
 /*圆形按钮sm*/
 .p-button-sm.p-button.p-button-icon-only.p-button-rounded{

@@ -52,7 +52,7 @@ DetectResult detectNewVersionResult
 						class="p-button-sm p-button-text p-button-rounded text-primary"
 						:class="pm.newVersionDetectedTipClassName">
 					</p-button>
-					<p-tieredmenu id="${pid}sysMenu" ref="${pid}sysMenuEle" :model="pm.sysMenuItems" :popup="true"
+					<p-tieredmenu id="${pid}sysMenu" ref="${pid}sysMenuEle" :model="pm.sysMenuItems" :popup="true" @show="onSysMenuShow"
 						class="left-submenu-list">
 					</p-tieredmenu>
 				</div>
@@ -66,25 +66,32 @@ DetectResult detectNewVersionResult
 	po.isUserAnonymous = ("${currentUser.anonymous?string('true','false')}" == "true");
 	po.isUserAdmin = ("${currentUser.admin?string('true','false')}" == "true");
 	
+	po.detectedVersionInfo =
+	{
+		latestVersionVar : "${detectNewVersionResult.latestVersionVar}",
+		detectedVersionCookieName : "${detectNewVersionResult.versionCookieName}",
+		detectedVersionCookieExpDays : parseInt("${detectNewVersionResult.versionCookieExpDays}"),
+		currentVersion : "${detectNewVersionResult.currentVersion}"
+	};
+	
+	po.detectedVersionInfo.detectedVersion = $.cookie(po.detectedVersionInfo.detectedVersionCookieName);
+	po.detectedVersionInfo.latestVersion = ($.localStorageItem(po.detectedVersionInfo.latestVersionVar) || "");
+	
 	po.newVersionDetected = function()
 	{
-		var latestVersionVar = "${detectNewVersionResult.latestVersionVar}";
-		var detectedVersionCookieName = "${detectNewVersionResult.versionCookieName}";
-		var detectedVersionCookieExpDays = parseInt("${detectNewVersionResult.versionCookieExpDays}");
-		var currentVersion = "${detectNewVersionResult.currentVersion}";
-		var detectedVersion = $.cookie(detectedVersionCookieName);
-		var latestVersion = ($.localStorageItem(latestVersionVar) || "");
+		var dvi = po.detectedVersionInfo;
+		var detectedVersion = dvi.detectedVersion;
 		
-		if(detectedVersion != latestVersion)
+		if(detectedVersion != dvi.latestVersion)
 		{
-			detectedVersion = latestVersion;
-			$.cookie(detectedVersionCookieName, detectedVersion, {expires : detectedVersionCookieExpDays, path : po.concatContextPath("/")});
+			detectedVersion = dvi.latestVersion;
+			$.cookie(dvi.detectedVersionCookieName, detectedVersion, {expires : dvi.detectedVersionCookieExpDays, path : po.concatContextPath("/")});
 		}
 		
 		if(!detectedVersion)
 			return false;
 		
-		return ($.compareVersion(detectedVersion, currentVersion) > 0);
+		return ($.compareVersion(detectedVersion, dvi.currentVersion) > 0);
 	};
 	
 	po.isNewVersionDetected = po.newVersionDetected();
@@ -261,7 +268,7 @@ DetectResult detectNewVersionResult
 				},
 				{
 					label: "<@spring.message code='module.downloadLatestVersion' />",
-					class: po.newVersionDetectedTipClassName,
+					class: "item-download-latest-version " + po.newVersionDetectedTipClassName,
 					url: "${Global.WEB_SITE}",
 					target: "_blank"
 				}
@@ -299,6 +306,24 @@ DetectResult detectNewVersionResult
 		onSysMenuToggle: function(e)
 		{
 			po.vueUnref("${pid}sysMenuEle").toggle(e);
+		},
+		onSysMenuShow: function()
+		{
+			if(po.isNewVersionDetected)
+			{
+				var sysMenu = po.elementOfId("${pid}sysMenu", document.body);
+				var downloadLatestVersionItem = po.element(".item-download-latest-version", sysMenu);
+				if(downloadLatestVersionItem.length > 0)
+				{
+					var label = po.element(".p-menuitem-link > span", downloadLatestVersionItem);
+					var tipVersion = po.element(".tip-latest-version", label);
+					
+					if(tipVersion.length == 0)
+						tipVersion = $("<i class='tip-latest-version' />").appendTo(label);
+					
+					tipVersion.text("v"+po.detectedVersionInfo.latestVersion);
+				}
+			}
 		}
 	});
 	
