@@ -1257,10 +1257,12 @@
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			throw new Error("chart is illegal state for update()");
 		
+		// < @deprecated 兼容5.3.1版本的逻辑，将在未来版本移除，chartResult可能在后续逻辑中被修改，不应再次重复使用
 		if(chartResult === undefined)
 		{
 			chartResult = this.updateResult();
 		}
+		// > @deprecated 兼容5.3.1版本的逻辑，将在未来版本移除，chartResult可能在后续逻辑中被修改，不应再次重复使用
 		
 		//内部统一结构
 		chartResult = this._toChartResult(chartResult);
