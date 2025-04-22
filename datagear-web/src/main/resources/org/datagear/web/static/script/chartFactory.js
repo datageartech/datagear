@@ -5003,7 +5003,7 @@
 	/**
 	 * 返回第一个主件或者附件数据集结果，没有则返回undefined。
 	 * 
-	 * @param chartResult 图表结果
+	 * @param chartResult 图表结果、数据集结果数组
 	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
 	 */
 	chartBase.resultFirst = function(chartResult, attachment)
@@ -5033,7 +5033,7 @@
 	 * 获取第一个主件或者附件数据集结果的数据对象数组。
 	 * 如果数据对象是null，返回空数组：[]；如果数据对象是数组，则直接返回；否则，返回：[ 数据对象 ]。
 	 * 
-	 * @param chartResult 图表结果
+	 * @param chartResult 图表结果、数据集结果数组
 	 * @param attachment 可选，true 获取第一个附件图表数据集结果；false 获取第一个主件图表数据集结果。默认值为：false
 	 * @return 不会为null的数组
 	 */
