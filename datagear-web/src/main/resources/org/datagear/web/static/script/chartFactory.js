@@ -2855,8 +2855,6 @@
 	 */
 	chartBase.inflateUpdateOptions = function(chartResult, updateOptions, renderOptions, beforeProcessHandler)
 	{
-		chartResult = this._toApiStdResult(chartResult);
-		
 		//(chartResult)
 		if(arguments.length == 1)
 			;
@@ -2911,13 +2909,15 @@
 		//最后调用processUpdateOptions
 		if(renderOptions[builtinOptionNames.processUpdateOptions])
 		{
-			renderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResult);
+			var chartResultMy = this._toApiStdResult(chartResult);
+			renderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
 		else if(chartRenderOptions && renderOptions !== chartRenderOptions
 					&& chartRenderOptions[builtinOptionNames.processUpdateOptions])
 		{
-			chartRenderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResult);
+			var chartResultMy = this._toApiStdResult(chartResult);
+			chartRenderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
 		}
 		
 		return updateOptions;
