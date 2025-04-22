@@ -2098,6 +2098,7 @@
 	
 	dashboardBase._doUpdateChart = function(chart, chartResult)
 	{
+		chartResult = chart._toApiSpecResult(chartResult);
 		chart.update(chartResult);
 	};
 	
