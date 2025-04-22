@@ -1279,7 +1279,7 @@
 		
 		var listener = this.listener();
 		if(listener && listener.onUpdate)
-			doUpdate = listener.onUpdate(this, this._toApiStdResult(chartResult));
+			doUpdate = listener.onUpdate(this, this._toApiSpecResult(chartResult));
 		
 		if(doUpdate != false)
 		{
@@ -1314,11 +1314,11 @@
 		
 		if(renderer && renderer.update)
 		{
-			renderer.update(this, this._toApiStdResult(chartResult));
+			renderer.update(this, this._toApiSpecResult(chartResult));
 		}
 		else
 		{
-			this.plugin.renderer.update(this, this._toApiStdResult(chartResult));
+			this.plugin.renderer.update(this, this._toApiSpecResult(chartResult));
 		}
 		
 		if(!async)
@@ -1338,7 +1338,7 @@
 		var nows = (this.results(chartResult) || []);
 		
 		var merges = [];
-		var mergeDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, this._toApiStdResult(chartResult)) : appendMode.size);
+		var mergeDataSize = ($.isFunction(appendMode.size) ? appendMode.size(this, this._toApiSpecResult(chartResult)) : appendMode.size);
 		var mergesLength = Math.max(olds.length, nows.length);
 		
 		for(var i=0; i<mergesLength; i++)
@@ -1557,7 +1557,7 @@
 		{
 			if($.isFunction(renderer.asyncUpdate))
 			{
-				return renderer.asyncUpdate(this, this._toApiStdResult(chartResult));
+				return renderer.asyncUpdate(this, this._toApiSpecResult(chartResult));
 			}
 			else
 				return (renderer.asyncUpdate == true);
@@ -1570,7 +1570,7 @@
 		
 		if($.isFunction(this.plugin.renderer.asyncUpdate))
 		{
-			return this.plugin.renderer.asyncUpdate(this, this._toApiStdResult(chartResult));
+			return this.plugin.renderer.asyncUpdate(this, this._toApiSpecResult(chartResult));
 		}
 		else
 		{
@@ -1764,7 +1764,7 @@
 		var listener = this.listener();
 		if(listener && listener.update)
 		{
-			listener.update(this, this._toApiStdResult(this.updateResult()));
+			listener.update(this, this._toApiSpecResult(this.updateResult()));
 		}
 	};
 	
@@ -2282,13 +2282,14 @@
 	
 	/**
 	 * 将图表结果（org.datagear.analysis.ChartResult）转换为兼容此版本API规范的结构。
-	 * 在dashboardFactory.js将重写此函数，通过看板本版标识实现API规范兼容。
+	 * 此函数不应做非null校验和处理，避免干扰原始参数。
 	 * 
 	 * @param chartResult 图表结果（org.datagear.analysis.ChartResult）、数据集结果数组（org.datagear.analysis.DataSetResult）
 	 */
-	chartBase._toApiStdResult = function(chartResult)
+	chartBase._toApiSpecResult = function(chartResult)
 	{
-		return chartResult;
+		//目前版本的API都应返回数据集结果数组
+		return this.results(chartResult);
 	};
 	
 	/**
@@ -2909,14 +2910,14 @@
 		//最后调用processUpdateOptions
 		if(renderOptions[builtinOptionNames.processUpdateOptions])
 		{
-			var chartResultMy = this._toApiStdResult(chartResult);
+			var chartResultMy = this._toApiSpecResult(chartResult);
 			renderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
 		else if(chartRenderOptions && renderOptions !== chartRenderOptions
 					&& chartRenderOptions[builtinOptionNames.processUpdateOptions])
 		{
-			var chartResultMy = this._toApiStdResult(chartResult);
+			var chartResultMy = this._toApiSpecResult(chartResult);
 			chartRenderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
 		}
 		
@@ -4318,7 +4319,7 @@
 		{
 			if(chartResult == null)
 			{
-				return undefined;
+				return chartResult;
 			}
 			// 数据集结果数组
 			else if($.isArray(chartResult))

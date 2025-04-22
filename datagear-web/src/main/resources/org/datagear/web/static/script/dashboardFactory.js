@@ -820,12 +820,6 @@
 			this._manualRender = manualRender;
 	};
 	
-	//重写函数，用于兼容看板版本，此函数不应做非null校验和处理，避免干扰原始参数
-	chartBase._toApiStdResult = function(chartResult)
-	{
-		return this.results(chartResult);
-	};
-	
 	//----------------------------------------
 	// chartBase扩展结束
 	//----------------------------------------
@@ -2104,7 +2098,6 @@
 	
 	dashboardBase._doUpdateChart = function(chart, chartResult)
 	{
-		chartResult = chart._toApiStdResult(chartResult);
 		chart.update(chartResult);
 	};
 	
