@@ -4332,6 +4332,10 @@
 		}
 		else
 		{
+			//应禁止此操作，因为会引起读取操作歧义
+			if(chartResult && $.isArray(chartResult))
+				throw new Error("set results for array unsupported");
+			
 			chartResult.dataSetResults = dataSetResults;
 		}
 	};
