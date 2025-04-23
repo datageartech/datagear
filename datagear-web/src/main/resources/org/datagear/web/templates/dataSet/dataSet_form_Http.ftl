@@ -126,7 +126,7 @@
 					</p-dropdown>
 				</div>
 			</div>
-			<div class="field grid">
+			<div class="field grid" v-if="fm.responseContentType == pm.responseContentTypeOptions[0].value">
 				<label for="${pid}responseDataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='httpDataSet.responseDataJsonPath.desc' />">
 					<@spring.message code='responseJsonPath' />
@@ -226,7 +226,9 @@
 		requestContentCharsetOptions: $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />),
 		responseContentTypeOptions:
 		[
-			{name: "<@spring.message code='httpDataSet.responseContentType.JSON' />", value: "${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}"}
+			{name: "<@spring.message code='httpDataSet.responseContentType.JSON' />", value: "${HttpDataSet.RESPONSE_CONTENT_TYPE_JSON}"},
+			{name: "<@spring.message code='httpDataSet.responseContentType.TEXT' />", value: "${HttpDataSet.RESPONSE_CONTENT_TYPE_TEXT}"},
+			{name: "<@spring.message code='httpDataSet.responseContentType.BASE64' />", value: "${HttpDataSet.RESPONSE_CONTENT_TYPE_BASE64}"}
 		]
 	});
 	
