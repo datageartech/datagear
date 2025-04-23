@@ -44,6 +44,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.httpresult.AbstractHttpResultHandler;
 import org.datagear.analysis.support.httpresult.JsonHttpResultHandler;
+import org.datagear.analysis.support.httpresult.TextHttpResultHandler;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -102,9 +103,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public static final String REQUEST_CONTENT_TYPE_TEXT_XML = "TEXT_XML";
 
 	/**
-	 * 响应内容类型：JSON，对应的HTTP响应类型为：application/json
+	 * 响应内容类型：JSON
 	 */
 	public static final String RESPONSE_CONTENT_TYPE_JSON = "JSON";
+
+	/**
+	 * 响应内容类型：文本
+	 */
+	public static final String RESPONSE_CONTENT_TYPE_TEXT = "TEXT";
 
 	protected static final List<NameValuePair> NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON = new ArrayList<>(0);
 
@@ -145,7 +151,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/** 响应类型 */
 	private String responseContentType = RESPONSE_CONTENT_TYPE_JSON;
 
-	/** 响应数据的JSON路径 */
+	/**
+	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，响应数据的JSON路径
+	 */
 	private String responseDataJsonPath = "";
 
 	public HttpDataSet()
@@ -329,7 +337,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/**
 	 * 设置相应类型。
 	 * <p>
-	 * 目前仅支持{@linkplain #RESPONSE_CONTENT_TYPE_JSON}，且是默认值。
+	 * 目前支持参考{@code RESPONSE_CONTENT_TYPE_*}，{@linkplain #RESPONSE_CONTENT_TYPE_JSON}是默认值。
 	 * </p>
 	 * 
 	 * @param responseContentType
@@ -383,15 +391,13 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			uri = resolveTemplateUri(query);
 			uri = encodeUriIfRequired(uri);
 			ClassicHttpRequest request = createHttpRequest(uri);
-
 			headerContent = setHttpHeaders(request, query);
 			requestContent = setHttpEntity(request, query);
 
 			AbstractHttpResultHandler resultHandler = buildHttpResultHandler(query, resolveFields);
 			ResolvedDataSetResult result = this.httpClient.execute(request, resultHandler);
 
-			return new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
-					buildResolvedTemplate(uri, headerContent, requestContent));
+			return buildTemplateResolvedDataSetResult(result, uri, headerContent, requestContent);
 		}
 		catch (DataSetException e)
 		{
@@ -403,10 +409,26 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 	}
 
+	protected TemplateResolvedDataSetResult buildTemplateResolvedDataSetResult(ResolvedDataSetResult result, String uri,
+			String headerContent, String requestContent) throws Throwable
+	{
+		return new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
+				buildResolvedTemplate(uri, headerContent, requestContent));
+	}
+
 	protected AbstractHttpResultHandler buildHttpResultHandler(DataSetQuery query, boolean resolveFields)
 			throws Exception
 	{
-		JsonHttpResultHandler resultHandler = new JsonHttpResultHandler(this, query, resolveFields);
+		AbstractHttpResultHandler resultHandler;
+
+		if (RESPONSE_CONTENT_TYPE_TEXT.equalsIgnoreCase(getResponseContentType()))
+		{
+			resultHandler = new TextHttpResultHandler(this, query, resolveFields);
+		}
+		else
+		{
+			resultHandler = new JsonHttpResultHandler(this, query, resolveFields);
+		}
 
 		return resultHandler;
 	}

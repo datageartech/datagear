@@ -53,12 +53,14 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 	protected ResolvedDataSetResult doHandleResponse(ClassicHttpResponse response) throws HttpException, IOException
 	{
 		HttpEntity entity = response.getEntity();
-		Reader reader = getReader(response, entity);
 		HttpDataSet dataSet = getDataSet();
-		HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(dataSet, reader);
+		Reader reader = null;
 
 		try
 		{
+			reader = getReader(response, entity);
+			HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(dataSet, reader);
+
 			if (this.isResolveFields())
 			{
 				return jsonDataSet.resolve(this.getDataSetQuery());

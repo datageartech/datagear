@@ -44,8 +44,8 @@ import org.apache.hc.core5.http.impl.bootstrap.ServerBootstrap;
 import org.apache.hc.core5.http.io.HttpRequestHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.util.IOUtil;
@@ -668,6 +668,51 @@ public class HttpDataSetTest
 
 			assertEquals("p=中文", v);
 		}
+	}
+
+	@Test
+	public void resolveTest_responseContentType_TEXT() throws Throwable
+	{
+		String pv0 = "v0";
+		String pv1 = "参数值1";
+
+		List<DataSetParam> params = Arrays.asList(new DataSetParam("param", DataSetParam.DataType.NUMBER, true));
+		List<DataSetField> fields = Arrays.asList(new DataSetField("custom", DataSetField.DataType.STRING));
+		fields.get(0).setDefaultValue("vvv");
+
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testParam");
+		dataSet.setRequestContent("[ { name: \"" + PARAM_NAME_0 + "\", value: \"" + pv0 + "\" }, { name: \""
+				+ PARAM_NAME_1 + "\", value: \"${param}\" } ]");
+		dataSet.setParams(params);
+		dataSet.setFields(fields);
+		dataSet.setResponseContentType(HttpDataSet.RESPONSE_CONTENT_TYPE_TEXT);
+
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put("param", pv1);
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf(paramValues));
+		List<DataSetField> resultFields = result.getFields();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> data = (Map<String, Object>) result.getResult().getData();
+
+		assertEquals(2, resultFields.size());
+
+		{
+			DataSetField field = resultFields.get(0);
+			String expected = "[{\"name\":\"param0\",\"value\":\"v0\"},{\"name\":\"param1\",\"value\":\"参数值1\"}]";
+
+			assertEquals("value", field.getName());
+			assertEquals(DataSetField.DataType.STRING, field.getType());
+			assertEquals(expected, data.get("value"));
+		}
+		{
+			DataSetField field = resultFields.get(1);
+			assertEquals("custom", field.getName());
+			assertEquals(DataSetField.DataType.STRING, field.getType());
+			assertEquals("vvv", data.get("custom"));
+		}
+
 	}
 
 	protected static Map<String, String> parseRequestParams(ClassicHttpRequest request) throws IOException
