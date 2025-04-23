@@ -26,13 +26,16 @@ import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -1005,7 +1008,7 @@ public class JdbcSupport
 	 * @param cn
 	 * @param rs
 	 * @param column
-	 * @return
+	 * @return 当{@linkplain ResultSet#wasNull()}时将返回{@code null}
 	 * @throws SQLException
 	 */
 	@JDBCCompatiblity("某些驱动程序可能不支持ResultSet.getObject()方法，所以这里没有使用")
@@ -1018,186 +1021,211 @@ public class JdbcSupport
 			case Types.ARRAY:
 			{
 				value = rs.getArray(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.BIGINT:
 			{
-				value = getColumnValueForBigInt(cn, rs, columnName);
+				value = getColumnValueForBIGINT(cn, rs, columnName);
 				break;
 			}
 
 			case Types.BINARY:
 			{
 				value = rs.getBytes(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.BIT:
 			{
 				value = rs.getBoolean(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.BLOB:
 			{
 				value = rs.getBlob(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.BOOLEAN:
 			{
 				value = rs.getBoolean(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.CHAR:
 			{
 				value = rs.getString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.CLOB:
 			{
 				value = rs.getClob(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.DATALINK:
 			{
 				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.DATE:
 			{
 				value = rs.getDate(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.DECIMAL:
 			{
 				value = rs.getBigDecimal(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.DISTINCT:
 			{
 				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.DOUBLE:
 			{
-				value = getColumnValueForDouble(cn, rs, columnName);
+				value = getColumnValueForDOUBLE(cn, rs, columnName);
 				break;
 			}
 
 			case Types.FLOAT:
 			{
-				value = getColumnValueForFloat(cn, rs, columnName);
+				value = getColumnValueForFLOAT(cn, rs, columnName);
 				break;
 			}
 
 			case Types.INTEGER:
 			{
-				value = getColumnValueForInteger(cn, rs, columnName);
+				value = getColumnValueForINTEGER(cn, rs, columnName);
 				break;
 			}
 
 			case Types.JAVA_OBJECT:
 			{
 				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.LONGNVARCHAR:
 			{
 				value = rs.getNCharacterStream(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.LONGVARBINARY:
 			{
 				value = rs.getBinaryStream(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.LONGVARCHAR:
 			{
 				value = rs.getCharacterStream(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.NCHAR:
 			{
 				value = rs.getNString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.NCLOB:
 			{
 				value = rs.getNClob(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.NUMERIC:
 			{
 				value = rs.getBigDecimal(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.NVARCHAR:
 			{
 				value = rs.getNString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.OTHER:
 			{
 				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.REAL:
 			{
-				value = getColumnValueForFloat(cn, rs, columnName);
+				value = getColumnValueForFLOAT(cn, rs, columnName);
 				break;
 			}
 
 			case Types.REF:
 			{
 				value = rs.getRef(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.REF_CURSOR:
 			{
 				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.ROWID:
 			{
 				value = rs.getRowId(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.SMALLINT:
 			{
-				value = getColumnValueForSmallint(cn, rs, columnName);
+				value = getColumnValueForSMALLINT(cn, rs, columnName);
 				break;
 			}
 
 			case Types.SQLXML:
 			{
 				value = rs.getSQLXML(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.STRUCT:
 			{
 				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
@@ -1205,6 +1233,7 @@ public class JdbcSupport
 			case Types.TIME_WITH_TIMEZONE:
 			{
 				value = rs.getTime(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
@@ -1212,24 +1241,27 @@ public class JdbcSupport
 			case Types.TIMESTAMP_WITH_TIMEZONE:
 			{
 				value = rs.getTimestamp(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.TINYINT:
 			{
-				value = getColumnValueForTinyint(cn, rs, columnName);
+				value = getColumnValueForTINYINT(cn, rs, columnName);
 				break;
 			}
 
 			case Types.VARBINARY:
 			{
 				value = rs.getBytes(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
 			case Types.VARCHAR:
 			{
 				value = rs.getString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
 				break;
 			}
 
@@ -1240,8 +1272,491 @@ public class JdbcSupport
 			}
 		}
 
-		if (rs.wasNull())
-			value = null;
+		return value;
+	}
+
+	/**
+	 * 获取列值。
+	 * <p>
+	 * 对于{@linkplain Types#ARRAY}、{@linkplain Types#BLOB}、{@linkplain Types#CLOB}等复杂类型，
+	 * 将获取{@linkplain Object}、{@code byte[]}、{@linkplain String}等实际数据。
+	 * </p>
+	 * <p>
+	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“TABLE B-6 Type
+	 * Conversions Supported by ResultSet getter Methods”表，并且尽量使用其中的推荐方法。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param column
+	 * @return 当{@linkplain ResultSet#wasNull()}时将返回{@code null}
+	 * @throws SQLException
+	 */
+	@JDBCCompatiblity("某些驱动程序可能不支持ResultSet.getObject()方法，所以这里没有使用")
+	public Object getColumnValueExtract(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
+	{
+		Object value = null;
+
+		switch (sqlType)
+		{
+			case Types.ARRAY:
+			{
+				value = getColumnValueForARRAY(cn, rs, columnName);
+				break;
+			}
+
+			case Types.BIGINT:
+			{
+				value = getColumnValueForBIGINT(cn, rs, columnName);
+				break;
+			}
+
+			case Types.BINARY:
+			{
+				value = rs.getBytes(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.BIT:
+			{
+				value = rs.getBoolean(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.BLOB:
+			{
+				value = getColumnValueForBLOB(cn, rs, columnName);
+				break;
+			}
+
+			case Types.BOOLEAN:
+			{
+				value = rs.getBoolean(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.CHAR:
+			{
+				value = rs.getString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.CLOB:
+			{
+				value = getColumnValueForCLOB(cn, rs, columnName);
+
+				break;
+			}
+
+			case Types.DATALINK:
+			{
+				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.DATE:
+			{
+				value = rs.getDate(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.DECIMAL:
+			{
+				value = rs.getBigDecimal(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.DISTINCT:
+			{
+				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.DOUBLE:
+			{
+				value = getColumnValueForDOUBLE(cn, rs, columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.FLOAT:
+			{
+				value = getColumnValueForFLOAT(cn, rs, columnName);
+				break;
+			}
+
+			case Types.INTEGER:
+			{
+				value = getColumnValueForINTEGER(cn, rs, columnName);
+				break;
+			}
+
+			case Types.JAVA_OBJECT:
+			{
+				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.LONGNVARCHAR:
+			{
+				value = getColumnValueForLONGNVARCHAR(cn, rs, columnName);
+				break;
+			}
+
+			case Types.LONGVARBINARY:
+			{
+				value = getColumnValueForLONGVARBINARY(cn, rs, columnName);
+				break;
+			}
+
+			case Types.LONGVARCHAR:
+			{
+				value = getColumnValueForLONGVARCHAR(cn, rs, columnName);
+				break;
+			}
+
+			case Types.NCHAR:
+			{
+				value = rs.getNString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.NCLOB:
+			{
+				value = getColumnValueForNCLOB(cn, rs, columnName);
+				break;
+			}
+
+			case Types.NUMERIC:
+			{
+				value = rs.getBigDecimal(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.NVARCHAR:
+			{
+				value = rs.getNString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.OTHER:
+			{
+				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.REAL:
+			{
+				value = getColumnValueForFLOAT(cn, rs, columnName);
+				break;
+			}
+
+			case Types.REF:
+			{
+				value = getColumnValueForREF(cn, rs, columnName);
+				break;
+			}
+
+			case Types.REF_CURSOR:
+			{
+				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.ROWID:
+			{
+				value = getColumnValueForROWID(cn, rs, columnName);
+				break;
+			}
+
+			case Types.SMALLINT:
+			{
+				value = getColumnValueForSMALLINT(cn, rs, columnName);
+				break;
+			}
+
+			case Types.SQLXML:
+			{
+				value = getColumnValueForSQLXML(cn, rs, columnName);
+				break;
+			}
+
+			case Types.STRUCT:
+			{
+				value = rs.getObject(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.TIME:
+			case Types.TIME_WITH_TIMEZONE:
+			{
+				value = rs.getTime(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.TIMESTAMP:
+			case Types.TIMESTAMP_WITH_TIMEZONE:
+			{
+				value = rs.getTimestamp(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.TINYINT:
+			{
+				value = getColumnValueForTINYINT(cn, rs, columnName);
+				break;
+			}
+
+			case Types.VARBINARY:
+			{
+				value = rs.getBytes(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			case Types.VARCHAR:
+			{
+				value = rs.getString(columnName);
+				value = checkGotWasNull(cn, rs, columnName, value);
+				break;
+			}
+
+			default:
+			{
+				value = getColumnValueExtractExt(cn, rs, columnName, sqlType);
+				break;
+			}
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#ARRAY}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForARRAY(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		Array array = rs.getArray(columnName);
+		Object value = (array == null ? null : array.getArray());
+		return checkGotWasNull(cn, rs, columnName, value);
+	}
+
+	/**
+	 * 获取{@linkplain Types#BLOB}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForBLOB(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		byte[] value = null;
+
+		Blob blob = rs.getBlob(columnName);
+
+		if (!rs.wasNull())
+		{
+			InputStream in = blob.getBinaryStream();
+			value = readBytes(in);
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#CLOB}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForCLOB(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		String value = null;
+
+		Clob clob = rs.getClob(columnName);
+
+		if (!rs.wasNull())
+		{
+			Reader in = clob.getCharacterStream();
+			value = readString(in);
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#LONGNVARCHAR}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForLONGNVARCHAR(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		String value = null;
+
+		Reader in = rs.getNCharacterStream(columnName);
+
+		if (!rs.wasNull())
+			value = readString(in);
+		else
+			IOUtil.close(in);
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#LONGVARBINARY}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForLONGVARBINARY(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		byte[] value = null;
+
+		InputStream in = rs.getBinaryStream(columnName);
+
+		if (!rs.wasNull())
+			value = readBytes(in);
+		else
+			IOUtil.close(in);
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#LONGVARCHAR}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForLONGVARCHAR(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		String value = null;
+
+		Reader in = rs.getCharacterStream(columnName);
+
+		if (!rs.wasNull())
+			value = readString(in);
+		else
+			IOUtil.close(in);
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#NCLOB}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForNCLOB(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		String value = null;
+
+		NClob clob = rs.getNClob(columnName);
+
+		if (!rs.wasNull())
+		{
+			Reader in = clob.getCharacterStream();
+			value = readString(in);
+		}
+
+		return value;
+	}
+
+	/**
+	 * 获取{@linkplain Types#REF}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForREF(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		Ref ref = rs.getRef(columnName);
+		Object value = (ref == null ? null : ref.getObject());
+		return checkGotWasNull(cn, rs, columnName, value);
+	}
+
+	/**
+	 * 获取{@linkplain Types#ROWID}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForROWID(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		RowId rowId = rs.getRowId(columnName);
+		byte[] value = (rowId == null ? null : rowId.getBytes());
+		return checkGotWasNull(cn, rs, columnName, value);
+	}
+
+	/**
+	 * 获取{@linkplain Types#SQLXML}的值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueForSQLXML(Connection cn, ResultSet rs, String columnName) throws SQLException
+	{
+		String value = null;
+
+		SQLXML sqlxml = rs.getSQLXML(columnName);
+
+		if (!rs.wasNull())
+		{
+			Reader in = sqlxml.getCharacterStream();
+			value = readString(in);
+		}
 
 		return value;
 	}
@@ -1255,7 +1770,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForBigInt(Connection cn, ResultSet rs, String columnName)
+	protected Object getColumnValueForBIGINT(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1264,12 +1779,14 @@ public class JdbcSupport
 		{
 			// 优先使用JDBC规范中的推荐方法
 			value = rs.getLong(columnName);
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getLong()取值可能因为超出long类型值范围而报错，这里升级类型再次尝试")
 			BigDecimal bigValue = rs.getBigDecimal(columnName);
 			value = (bigValue == null ? null : bigValue.toBigInteger());
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 
 		return value;
@@ -1284,7 +1801,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForDouble(Connection cn, ResultSet rs, String columnName)
+	protected Object getColumnValueForDOUBLE(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1293,12 +1810,14 @@ public class JdbcSupport
 		{
 			// 优先使用JDBC规范中的推荐方法
 			value = rs.getDouble(columnName);
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("数据库中的值可能因为超出double类型值范围而报错，这里升级类型再次尝试")
 			BigDecimal bigValue = rs.getBigDecimal(columnName);
 			value = bigValue;
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 
 		return value;
@@ -1313,7 +1832,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForFloat(Connection cn, ResultSet rs, String columnName)
+	protected Object getColumnValueForFLOAT(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1322,11 +1841,12 @@ public class JdbcSupport
 		{
 			// 优先使用JDBC规范中的推荐方法
 			value = rs.getFloat(columnName);
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("数据库中的值可能因为超出float类型值范围而报错，这里升级类型再次尝试")
-			Object bigValue = getColumnValueForDouble(cn, rs, columnName);
+			Object bigValue = getColumnValueForDOUBLE(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1342,7 +1862,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForInteger(Connection cn, ResultSet rs, String columnName)
+	protected Object getColumnValueForINTEGER(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1351,11 +1871,12 @@ public class JdbcSupport
 		{
 			// 优先使用JDBC规范中的推荐方法
 			value = rs.getInt(columnName);
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getInt()取值可能因为超出int类型值范围而报错，这里升级类型再次尝试")
-			Object bigValue = getColumnValueForBigInt(cn, rs, columnName);
+			Object bigValue = getColumnValueForBIGINT(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1371,7 +1892,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForSmallint(Connection cn, ResultSet rs, String columnName)
+	protected Object getColumnValueForSMALLINT(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1380,11 +1901,12 @@ public class JdbcSupport
 		{
 			// 优先使用JDBC规范中的推荐方法
 			value = rs.getShort(columnName);
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getShort()取值可能因为超出short类型值范围而报错，这里升级类型再次尝试")
-			Object bigValue = getColumnValueForInteger(cn, rs, columnName);
+			Object bigValue = getColumnValueForINTEGER(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1400,7 +1922,7 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Object getColumnValueForTinyint(Connection cn, ResultSet rs, String columnName)
+	protected Object getColumnValueForTINYINT(Connection cn, ResultSet rs, String columnName)
 			throws SQLException
 	{
 		Object value = null;
@@ -1409,11 +1931,12 @@ public class JdbcSupport
 		{
 			// 优先使用JDBC规范中的推荐方法
 			value = rs.getByte(columnName);
+			value = checkGotWasNull(cn, rs, columnName, value);
 		}
 		catch (SQLException e)
 		{
 			@JDBCCompatiblity("某些数据库允许无符号整数类型，上述ResultSet.getByte()取值可能因为超出byte类型值范围而报错，这里升级类型再次尝试")
-			Object bigValue = getColumnValueForSmallint(cn, rs, columnName);
+			Object bigValue = getColumnValueForSMALLINT(cn, rs, columnName);
 			value = bigValue;
 		}
 
@@ -1421,7 +1944,10 @@ public class JdbcSupport
 	}
 
 	/**
-	 * 扩展获取列值。
+	 * 扩展{@linkplain #getColumnValue(Connection, ResultSet, String, int)}方法获取列值。
+	 * <p>
+	 * 注意：实现方法应在{@linkplain ResultSet#wasNull()}时返回{@code null}。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param rs
@@ -1432,7 +1958,74 @@ public class JdbcSupport
 	 */
 	protected Object getColumnValueExt(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
 	{
-		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value is not supported");
+		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value unsupported");
+	}
+
+	/**
+	 * 扩展{@linkplain #getColumnValueExtractExt(Connection, ResultSet, String, int)}方法获取列值。
+	 * <p>
+	 * 注意：实现方法应在{@linkplain ResultSet#wasNull()}时返回{@code null}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value unsupported");
+	}
+
+	/**
+	 * 校验获取列是否{@code null}。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param gotValue
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object checkGotWasNull(Connection cn, ResultSet rs, String columnName, Object gotValue)
+			throws SQLException
+	{
+		return (rs.wasNull() ? null : gotValue);
+	}
+
+	protected byte[] readBytes(InputStream in) throws SQLException
+	{
+		try
+		{
+			return IOUtil.readBytes(in, false);
+		}
+		catch (IOException e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+	}
+
+	protected String readString(Reader in) throws SQLException
+	{
+		try
+		{
+			return IOUtil.readString(in, false);
+		}
+		catch (IOException e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
 	}
 
 	/**
