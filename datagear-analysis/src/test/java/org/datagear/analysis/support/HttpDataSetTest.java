@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.impl.bootstrap.HttpServer;
 import org.apache.hc.core5.http.impl.bootstrap.ServerBootstrap;
 import org.apache.hc.core5.http.io.HttpRequestHandler;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.datagear.analysis.DataSetField;
@@ -68,6 +70,8 @@ public class HttpDataSetTest
 	protected static final String PARAM_NAME_0 = "param0";
 
 	protected static final String PARAM_NAME_1 = "param1";
+
+	protected static final byte[] BYTES = new byte[] { 9, 5, 36, 29, 16, 30, 98, 56 };
 
 	protected static HttpServer server;
 
@@ -213,6 +217,19 @@ public class HttpDataSetTest
 						StringEntity responseEntity = new StringEntity(
 								"{ q : '" + q + "' }",
 								ContentType.APPLICATION_JSON);
+						response.setEntity(responseEntity);
+					}
+				})
+				//
+				//
+				.register("/testGetBinary", new HttpRequestHandler()
+				{
+					@Override
+					public void handle(ClassicHttpRequest request, ClassicHttpResponse response, HttpContext context)
+							throws HttpException, IOException
+					{
+						ByteArrayEntity responseEntity = new ByteArrayEntity(BYTES,
+								ContentType.APPLICATION_OCTET_STREAM);
 						response.setEntity(responseEntity);
 					}
 				})
@@ -712,7 +729,40 @@ public class HttpDataSetTest
 			assertEquals(DataSetField.DataType.STRING, field.getType());
 			assertEquals("vvv", data.get("custom"));
 		}
+	}
 
+	@Test
+	public void resolveTest_responseContentType_BASE64() throws Throwable
+	{
+		List<DataSetField> fields = Arrays.asList(new DataSetField("custom", DataSetField.DataType.STRING));
+		fields.get(0).setDefaultValue("vvv");
+
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testGetBinary");
+		dataSet.setFields(fields);
+		dataSet.setResponseContentType(HttpDataSet.RESPONSE_CONTENT_TYPE_BASE64);
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
+		List<DataSetField> resultFields = result.getFields();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> data = (Map<String, Object>) result.getResult().getData();
+
+		assertEquals(2, resultFields.size());
+
+		{
+			DataSetField field = resultFields.get(0);
+			String expected = Base64.getEncoder().encodeToString(BYTES);
+
+			assertEquals("value", field.getName());
+			assertEquals(DataSetField.DataType.STRING, field.getType());
+			assertEquals(expected, data.get("value"));
+		}
+		{
+			DataSetField field = resultFields.get(1);
+			assertEquals("custom", field.getName());
+			assertEquals(DataSetField.DataType.STRING, field.getType());
+			assertEquals("vvv", data.get("custom"));
+		}
 	}
 
 	protected static Map<String, String> parseRequestParams(ClassicHttpRequest request) throws IOException

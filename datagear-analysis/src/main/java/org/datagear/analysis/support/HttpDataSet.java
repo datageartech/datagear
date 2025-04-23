@@ -43,6 +43,7 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.httpresult.AbstractHttpResultHandler;
+import org.datagear.analysis.support.httpresult.Base64HttpResultHandler;
 import org.datagear.analysis.support.httpresult.JsonHttpResultHandler;
 import org.datagear.analysis.support.httpresult.TextHttpResultHandler;
 import org.datagear.util.IOUtil;
@@ -111,6 +112,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	 * 响应内容类型：文本
 	 */
 	public static final String RESPONSE_CONTENT_TYPE_TEXT = "TEXT";
+
+	/**
+	 * 响应内容类型：Base64编码二进制
+	 */
+	public static final String RESPONSE_CONTENT_TYPE_BASE64 = "BASE64";
 
 	protected static final List<NameValuePair> NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON = new ArrayList<>(0);
 
@@ -424,6 +430,10 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		if (RESPONSE_CONTENT_TYPE_TEXT.equalsIgnoreCase(getResponseContentType()))
 		{
 			resultHandler = new TextHttpResultHandler(this, query, resolveFields);
+		}
+		else if (RESPONSE_CONTENT_TYPE_BASE64.equalsIgnoreCase(getResponseContentType()))
+		{
+			resultHandler = new Base64HttpResultHandler(this, query, resolveFields);
 		}
 		else
 		{

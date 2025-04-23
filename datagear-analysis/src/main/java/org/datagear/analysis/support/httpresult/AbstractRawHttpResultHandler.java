@@ -18,45 +18,58 @@
 package org.datagear.analysis.support.httpresult;
 
 import java.io.IOException;
-import java.io.Reader;
 
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpException;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.DataSetResultWrapper;
 import org.datagear.analysis.support.HttpDataSet;
-import org.datagear.util.IOUtil;
 
 /**
- * 文本 HTTP响应结果处理器。
+ * 原始数据HTTP响应结果处理器。
  * 
  * @author datagear@163.com
  *
  */
-public class TextHttpResultHandler extends AbstractRawHttpResultHandler
+public abstract class AbstractRawHttpResultHandler extends AbstractHttpResultHandler
 {
-	public TextHttpResultHandler()
+	public AbstractRawHttpResultHandler()
 	{
 		super();
 	}
 
-	public TextHttpResultHandler(HttpDataSet dataSet, DataSetQuery dataSetQuery, boolean resolveFields)
+	public AbstractRawHttpResultHandler(HttpDataSet dataSet, DataSetQuery dataSetQuery, boolean resolveFields)
 	{
 		super(dataSet, dataSetQuery, resolveFields);
 	}
 
 	@Override
-	protected Object readRawData(ClassicHttpResponse response) throws HttpException, IOException
+	protected ResolvedDataSetResult doHandleResponse(ClassicHttpResponse response) throws HttpException, IOException
 	{
-		Reader reader = null;
+		HttpDataSet dataSet = getDataSet();
+		DataSetResultWrapper resultWrapper = new DataSetResultWrapper(dataSet);
+		Object data = readRawData(response);
 
-		try
+		if (this.isResolveFields())
 		{
-			reader = getReader(response, response.getEntity());
-			return IOUtil.readString(reader, false);
+			return resultWrapper.resolveResult(data);
 		}
-		finally
+		else
 		{
-			IOUtil.close(reader);
+			DataSetResult result = resultWrapper.getResult(data);
+			return new ResolvedDataSetResult(result, dataSet.getFields());
 		}
 	}
+
+	/**
+	 * 从HTTP响应中读取原始数据。
+	 * 
+	 * @param response
+	 * @return
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	protected abstract Object readRawData(ClassicHttpResponse response) throws HttpException, IOException;
 }

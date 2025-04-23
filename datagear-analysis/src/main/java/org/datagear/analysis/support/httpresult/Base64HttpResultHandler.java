@@ -18,7 +18,8 @@
 package org.datagear.analysis.support.httpresult;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
+import java.util.Base64;
 
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpException;
@@ -27,19 +28,19 @@ import org.datagear.analysis.support.HttpDataSet;
 import org.datagear.util.IOUtil;
 
 /**
- * 文本 HTTP响应结果处理器。
+ * 编码为Base64的二进制HTTP响应结果处理器。
  * 
  * @author datagear@163.com
  *
  */
-public class TextHttpResultHandler extends AbstractRawHttpResultHandler
+public class Base64HttpResultHandler extends AbstractRawHttpResultHandler
 {
-	public TextHttpResultHandler()
+	public Base64HttpResultHandler()
 	{
 		super();
 	}
 
-	public TextHttpResultHandler(HttpDataSet dataSet, DataSetQuery dataSetQuery, boolean resolveFields)
+	public Base64HttpResultHandler(HttpDataSet dataSet, DataSetQuery dataSetQuery, boolean resolveFields)
 	{
 		super(dataSet, dataSetQuery, resolveFields);
 	}
@@ -47,16 +48,17 @@ public class TextHttpResultHandler extends AbstractRawHttpResultHandler
 	@Override
 	protected Object readRawData(ClassicHttpResponse response) throws HttpException, IOException
 	{
-		Reader reader = null;
+		InputStream in = null;
 
 		try
 		{
-			reader = getReader(response, response.getEntity());
-			return IOUtil.readString(reader, false);
+			in = response.getEntity().getContent();
+			byte[] bytes = IOUtil.readBytes(in, false);
+			return Base64.getEncoder().encodeToString(bytes);
 		}
 		finally
 		{
-			IOUtil.close(reader);
+			IOUtil.close(in);
 		}
 	}
 }
