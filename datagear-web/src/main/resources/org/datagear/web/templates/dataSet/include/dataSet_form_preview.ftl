@@ -45,8 +45,8 @@
 						</template>
 					</p-column>
 					<p-column v-for="col in pm.previewColumns"
-						:field="col.name" :header="col.label" :sortable="false" :style="col.style"
-						:key="col.name">
+						:field="col.name" :header="col.label" :sortable="false" :style="col.style" :key="col.name">
+						<template #body="slotProps">{{formatPreviewColValue(slotProps.data, slotProps.field)}}</template>
 					</p-column>
 				</p-datatable>
 				<p-textarea v-model="pm.previewTplResult" class="overflow-auto p-invalid w-full h-full" readonly
@@ -366,6 +366,17 @@
 		{
 			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
 			chartFactory.chartSetting.destroyDataSetParamValueForm(wrapper);
+		},
+		formatPreviewColValue: function(data, name)
+		{
+			var value = (data ? data[name] : "");
+			
+			if(value && $.isTypeString(value) && value.length > 1003)
+			{
+				value = value.substr(0, 1000) + "...";
+			}
+			
+			return value;
 		}
 	});
 
