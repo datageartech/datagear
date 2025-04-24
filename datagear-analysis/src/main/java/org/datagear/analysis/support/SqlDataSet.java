@@ -17,13 +17,13 @@
 
 package org.datagear.analysis.support;
 
-import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +37,6 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
-import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.QueryResultSet;
@@ -340,14 +339,21 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	{
 		Object value = jdbcSupport.getColumnValueExtract(cn, rs, columnName, sqlType);
 
-		// 对于大字符串类型，value可能是字符输入流，这里应转成字符串并关闭输入流，便于后续处理
-		if (value instanceof Reader)
+		if (value instanceof byte[])
 		{
-			Reader reader = (Reader) value;
-			value = IOUtil.readString(reader, true);
+			value = convertBytesColumnValue(cn, rs, columnName, sqlType, (byte[]) value);
 		}
 
 		return value;
+	}
+
+	protected Object convertBytesColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType, byte[] value)
+			throws Throwable
+	{
+		if (value == null)
+			return null;
+
+		return Base64.getEncoder().encodeToString(value);
 	}
 
 	/**
@@ -405,13 +411,6 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 		switch (type)
 		{
-			// 确定不支持的类型
-			case Types.BINARY:
-			case Types.BLOB:
-			case Types.LONGVARBINARY:
-			case Types.VARBINARY:
-				throw new SqlDataSetUnsupportedSqlTypeException(sqlType, columnName);
-
 			case Types.CHAR:
 			case Types.NCHAR:
 			case Types.VARCHAR:
@@ -469,11 +468,34 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 				break;
 			}
 
+			case Types.BINARY:
+			case Types.BLOB:
+			case Types.LONGVARBINARY:
+			case Types.VARBINARY:
+			{
+				dataType = getBinaryDataType();
+				break;
+			}
+
 			default:
+			{
 				dataType = DataType.UNKNOWN;
+				break;
+			}
 		}
 
 		return dataType;
+	}
+
+	/**
+	 * 获取二进制SQL类型的数据类型。
+	 * 
+	 * @return
+	 */
+	protected String getBinaryDataType()
+	{
+		// 二进制将被转换为Base64字符串
+		return DataType.STRING;
 	}
 
 	protected JdbcSupport getJdbcSupport()
