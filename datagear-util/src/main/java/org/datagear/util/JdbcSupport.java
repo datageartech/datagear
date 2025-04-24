@@ -1001,6 +1001,9 @@ public class JdbcSupport
 	/**
 	 * 获取列值。
 	 * <p>
+	 * 此方法不会对{@linkplain Types#ARRAY}、{@linkplain Types#BLOB}、{@linkplain Types#CLOB}等复杂类型进行数据提取和转换。
+	 * </p>
+	 * <p>
 	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“TABLE B-6 Type
 	 * Conversions Supported by ResultSet getter Methods”表，并且尽量使用其中的推荐方法。
 	 * </p>
@@ -1161,6 +1164,12 @@ public class JdbcSupport
 				break;
 			}
 
+			case Types.NULL:
+			{
+				value = null;
+				break;
+			}
+
 			case Types.NUMERIC:
 			{
 				value = rs.getBigDecimal(columnName);
@@ -1276,10 +1285,27 @@ public class JdbcSupport
 	}
 
 	/**
+	 * 扩展{@linkplain #getColumnValue(Connection, ResultSet, String, int)}方法获取列值。
+	 * <p>
+	 * 注意：实现方法应在{@linkplain ResultSet#wasNull()}时返回{@code null}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueExt(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
+	{
+		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value unsupported");
+	}
+
+	/**
 	 * 获取列值。
 	 * <p>
-	 * 对于{@linkplain Types#ARRAY}、{@linkplain Types#BLOB}、{@linkplain Types#CLOB}等复杂类型，
-	 * 将获取{@linkplain Object}、{@code byte[]}、{@linkplain String}等实际数据。
+	 * 此方法会对{@linkplain Types#ARRAY}、{@linkplain Types#BLOB}、{@linkplain Types#CLOB}等复杂类型进行数据提取和转换。
 	 * </p>
 	 * <p>
 	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“TABLE B-6 Type
@@ -1437,6 +1463,12 @@ public class JdbcSupport
 				break;
 			}
 
+			case Types.NULL:
+			{
+				value = null;
+				break;
+			}
+
 			case Types.NUMERIC:
 			{
 				value = rs.getBigDecimal(columnName);
@@ -1546,6 +1578,25 @@ public class JdbcSupport
 		}
 
 		return value;
+	}
+
+	/**
+	 * 扩展{@linkplain #getColumnValueExtract(Connection, ResultSet, String, int)}方法获取列值。
+	 * <p>
+	 * 注意：实现方法应在{@linkplain ResultSet#wasNull()}时返回{@code null}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnName
+	 * @param sqlType
+	 * @return
+	 * @throws SQLException
+	 */
+	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
+	{
+		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value unsupported");
 	}
 
 	/**
@@ -1941,43 +1992,6 @@ public class JdbcSupport
 		}
 
 		return value;
-	}
-
-	/**
-	 * 扩展{@linkplain #getColumnValue(Connection, ResultSet, String, int)}方法获取列值。
-	 * <p>
-	 * 注意：实现方法应在{@linkplain ResultSet#wasNull()}时返回{@code null}。
-	 * </p>
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @param columnName
-	 * @param sqlType
-	 * @return
-	 * @throws SQLException
-	 */
-	protected Object getColumnValueExt(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
-	{
-		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value unsupported");
-	}
-
-	/**
-	 * 扩展{@linkplain #getColumnValueExtractExt(Connection, ResultSet, String, int)}方法获取列值。
-	 * <p>
-	 * 注意：实现方法应在{@linkplain ResultSet#wasNull()}时返回{@code null}。
-	 * </p>
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @param columnName
-	 * @param sqlType
-	 * @return
-	 * @throws SQLException
-	 */
-	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, String columnName, int sqlType)
-			throws SQLException
-	{
-		throw new UnsupportedOperationException("Get JDBC [" + sqlType + "] type value unsupported");
 	}
 
 	/**
