@@ -329,7 +329,7 @@ public class PersistenceSupport extends JdbcSupport
 
 	public Object getColumnValue(Connection cn, ResultSet rs, Column column) throws SQLException
 	{
-		return getColumnValue(cn, rs, column.getName(), column.getType());
+		return getColumnValueExtract(cn, rs, column.getName(), column.getType());
 	}
 
 	public SqlParamValue createSqlParamValue(Column column, Object value)

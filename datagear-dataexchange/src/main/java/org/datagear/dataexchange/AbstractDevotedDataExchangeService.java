@@ -17,20 +17,12 @@
 
 package org.datagear.dataexchange;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.RowId;
 import java.sql.SQLException;
-import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -45,7 +37,6 @@ import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.PersistenceSupport;
-import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.NumberParserException;
 import org.datagear.util.SqlParamValue;
@@ -867,153 +858,6 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 		switch (sqlType)
 		{
-			case Types.LONGVARCHAR:
-			{
-				Reader reader = rs.getCharacterStream(columnName);
-
-				try
-				{
-					if (!rs.wasNull())
-						value = readToString(reader);
-				}
-				finally
-				{
-					IOUtil.close(reader);
-				}
-
-				break;
-			}
-
-			case Types.LONGVARBINARY:
-			{
-				InputStream in = rs.getBinaryStream(columnName);
-
-				try
-				{
-					if (!rs.wasNull())
-					{
-						value = readToBytes(in);
-					}
-				}
-				finally
-				{
-					IOUtil.close(in);
-				}
-
-				break;
-			}
-
-			case Types.CLOB:
-			{
-				Clob clob = rs.getClob(columnName);
-
-				if (!rs.wasNull())
-				{
-					Reader reader = clob.getCharacterStream();
-
-					try
-					{
-						value = readToString(reader);
-					}
-					finally
-					{
-						IOUtil.close(reader);
-					}
-				}
-
-				break;
-			}
-
-			case Types.BLOB:
-			{
-				Blob blob = rs.getBlob(columnName);
-
-				if (!rs.wasNull())
-				{
-					InputStream inputStream = blob.getBinaryStream();
-
-					try
-					{
-						value = readToBytes(inputStream);
-					}
-					finally
-					{
-						IOUtil.close(inputStream);
-					}
-				}
-
-				break;
-			}
-
-			case Types.LONGNVARCHAR:
-			{
-				Reader reader = rs.getNCharacterStream(columnName);
-
-				try
-				{
-					if (!rs.wasNull())
-						value = readToString(reader);
-				}
-				finally
-				{
-					IOUtil.close(reader);
-				}
-
-				break;
-			}
-
-			case Types.NCLOB:
-			{
-				NClob nclob = rs.getNClob(columnName);
-
-				if (!rs.wasNull())
-				{
-					Reader reader = nclob.getCharacterStream();
-
-					try
-					{
-						value = readToString(reader);
-					}
-					finally
-					{
-						IOUtil.close(reader);
-					}
-				}
-
-				break;
-			}
-
-			case Types.ROWID:
-			{
-				RowId rowId = rs.getRowId(columnName);
-
-				if (!rs.wasNull())
-					value = rowId.getBytes();
-
-				break;
-			}
-
-			case Types.SQLXML:
-			{
-				SQLXML sqlXml = rs.getSQLXML(columnName);
-
-				if (!rs.wasNull())
-				{
-					Reader reader = sqlXml.getCharacterStream();
-
-					try
-					{
-						value = readToString(reader);
-					}
-					finally
-					{
-						IOUtil.close(reader);
-					}
-				}
-
-				break;
-			}
-
 			case Types.ARRAY:
 			case Types.DATALINK:
 			case Types.DISTINCT:
@@ -1021,25 +865,31 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.OTHER:
 			case Types.REF:
 			case Types.REF_CURSOR:
+			case Types.STRUCT:
 			{
-				value = getColumnValueExt(cn, rs, columnName, sqlType);
-
+				value = getColumnValueExtractExt(cn, rs, columnName, sqlType);
 				break;
 			}
 
 			default:
-
-				value = super.getColumnValue(cn, rs, columnName, sqlType);
+			{
+				value = super.getColumnValueExtract(cn, rs, columnName, sqlType);
+				break;
+			}
 		}
-
-		if (rs.wasNull())
-			value = null;
 
 		return value;
 	}
 
 	@Override
 	protected Object getColumnValueExt(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
+	{
+		throw new UnsupportedSqlTypeException(sqlType);
+	}
+
+	@Override
+	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, String columnName, int sqlType)
+			throws SQLException
 	{
 		throw new UnsupportedSqlTypeException(sqlType);
 	}
@@ -1098,45 +948,6 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			valueStr = value.toString();
 
 		return valueStr;
-	}
-
-	/**
-	 * 将字节流读入字节数组。
-	 * 
-	 * @param in
-	 * @return
-	 * @throws IOException
-	 */
-	protected byte[] readToBytes(InputStream in) throws IOException
-	{
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-
-		byte[] buf = new byte[32];
-		int count = -1;
-		while ((count = in.read(buf)) > -1)
-			bout.write(buf, 0, count);
-
-		return bout.toByteArray();
-	}
-
-	/**
-	 * 将字符流读入字符串。
-	 * 
-	 * @param reader
-	 * @return
-	 * @throws IOException
-	 */
-	protected String readToString(Reader reader) throws IOException
-	{
-		StringBuilder sb = new StringBuilder();
-
-		char[] buf = new char[32];
-
-		int count = -1;
-		while ((count = reader.read(buf)) > -1)
-			sb.append(buf, 0, count);
-
-		return sb.toString();
 	}
 
 	/**

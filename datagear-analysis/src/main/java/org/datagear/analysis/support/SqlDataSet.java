@@ -338,7 +338,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType,
 			JdbcSupport jdbcSupport) throws Throwable
 	{
-		Object value = jdbcSupport.getColumnValue(cn, rs, columnName, sqlType);
+		Object value = jdbcSupport.getColumnValueExtract(cn, rs, columnName, sqlType);
 
 		// 对于大字符串类型，value可能是字符输入流，这里应转成字符串并关闭输入流，便于后续处理
 		if (value instanceof Reader)

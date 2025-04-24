@@ -22,10 +22,17 @@ import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import org.datagear.util.test.DBTestSupport;
 import org.junit.Test;
 
 
@@ -35,9 +42,170 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class JdbcSupportTest
+public class JdbcSupportTest extends DBTestSupport
 {
 	private JdbcSupport jdbcSupport = new JdbcSupport();
+
+	@SuppressWarnings("deprecation")
+	@Test
+	public void getColumnValueExtractTest() throws Exception
+	{
+		Connection cn = null;
+
+		int id = 999123456;
+		String name = "JdbcSupportTest";
+		long ms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2025-04-24 11:02:00").getTime();
+		Date date = new Date(ms);
+		Date dateTime = new Date(ms + 1000 * 60 * 60 * 60 * 72);
+		Time time = new Time(ms + 1000 * 60 * 60);
+		Timestamp timestamp = new Timestamp(ms + 1000 * 60 * 2);
+		byte[] blob = new byte[] { 33, 55, 66, 77, 88, 99, 12, 16, 32, 51, 63 };
+		String clob = "aaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccc";
+
+		try
+		{
+			cn = getConnection();
+
+			{
+				Sql sql = Sql.valueOf(
+						"INSERT INTO T_DATA_IMPORT (ID, NAME, COL_DATE, COL_DATETIME, COL_TIME, COL_TIMESTAMP, COL_BLOB, COL_CLOB) "
+								+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+
+				sql.param(jdbcSupport.toSqlParamValue(id));
+				sql.param(jdbcSupport.toSqlParamValue(name));
+				sql.param(jdbcSupport.toSqlParamValue(date));
+				sql.param(jdbcSupport.toSqlParamValue(dateTime));
+				sql.param(jdbcSupport.toSqlParamValue(time));
+				sql.param(jdbcSupport.toSqlParamValue(timestamp));
+				sql.param(jdbcSupport.toSqlParamValue(blob));
+				sql.param(jdbcSupport.toSqlParamValue(clob));
+
+				jdbcSupport.executeUpdate(cn, sql);
+			}
+
+			{
+				Sql sql = Sql.valueOf(
+						"SELECT ID, NAME, COL_DATE, COL_DATETIME, COL_TIME, COL_TIMESTAMP, COL_BLOB, COL_CLOB FROM T_DATA_IMPORT WHERE ID = ?");
+				sql.param(jdbcSupport.toSqlParamValue(id));
+
+				QueryResultSet re = jdbcSupport.executeQuery(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
+				ResultSet rs = re.getResultSet();
+				rs.next();
+
+				{
+					Number v = (Number) jdbcSupport.getColumnValueExtract(cn, rs, "ID", Types.INTEGER);
+					assertEquals(id, v.intValue());
+				}
+
+				{
+					String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, "NAME", Types.VARCHAR);
+					assertEquals(name, v);
+				}
+
+				{
+					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValueExtract(cn, rs, "COL_DATE", Types.DATE);
+					assertEquals(date.getYear(), v.getYear());
+					assertEquals(date.getMonth(), v.getMonth());
+					assertEquals(date.getDay(), v.getDay());
+				}
+
+				{
+					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValueExtract(cn, rs, "COL_DATETIME",
+							Types.DATE);
+					assertEquals(dateTime.getYear(), v.getYear());
+					assertEquals(dateTime.getMonth(), v.getMonth());
+					assertEquals(dateTime.getDay(), v.getDay());
+				}
+
+				{
+					Time v = (Time) jdbcSupport.getColumnValueExtract(cn, rs, "COL_TIME", Types.TIME);
+					assertEquals(time.getHours(), v.getHours());
+					assertEquals(time.getMinutes(), v.getMinutes());
+					assertEquals(time.getSeconds(), v.getSeconds());
+				}
+
+				{
+					Timestamp v = (Timestamp) jdbcSupport.getColumnValueExtract(cn, rs, "COL_TIMESTAMP",
+							Types.TIMESTAMP);
+					assertEquals(timestamp.getYear(), v.getYear());
+					assertEquals(timestamp.getMonth(), v.getMonth());
+					assertEquals(timestamp.getDay(), v.getDay());
+					assertEquals(timestamp.getHours(), v.getHours());
+					assertEquals(timestamp.getMinutes(), v.getMinutes());
+					assertEquals(timestamp.getSeconds(), v.getSeconds());
+				}
+
+				{
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, "COL_BLOB", Types.BLOB);
+						assertEquals(blob.length, v.length);
+						for (int i = 0; i < v.length; i++)
+						{
+							assertEquals(blob[i], v[i]);
+						}
+					}
+
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, "COL_BLOB", Types.BINARY);
+						assertEquals(blob.length, v.length);
+						for (int i = 0; i < v.length; i++)
+						{
+							assertEquals(blob[i], v[i]);
+						}
+					}
+
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, "COL_BLOB", Types.LONGVARBINARY);
+						assertEquals(blob.length, v.length);
+						for (int i = 0; i < v.length; i++)
+						{
+							assertEquals(blob[i], v[i]);
+						}
+					}
+
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, "COL_BLOB", Types.VARBINARY);
+						assertEquals(blob.length, v.length);
+						for (int i = 0; i < v.length; i++)
+						{
+							assertEquals(blob[i], v[i]);
+						}
+					}
+				}
+
+				{
+
+					{
+						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, "COL_CLOB", Types.CLOB);
+						assertEquals(clob, v);
+					}
+
+					{
+						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, "COL_CLOB", Types.LONGNVARCHAR);
+						assertEquals(clob, v);
+					}
+
+					{
+						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, "COL_CLOB", Types.LONGVARCHAR);
+						assertEquals(clob, v);
+					}
+
+					{
+						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, "COL_CLOB", Types.NCLOB);
+						assertEquals(clob, v);
+					}
+				}
+			}
+		}
+		finally
+		{
+			Sql sql = Sql.valueOf("DELETE FROM T_DATA_IMPORT WHERE ID = ?");
+			sql.param(jdbcSupport.toSqlParamValue(id));
+			jdbcSupport.executeUpdate(cn, sql);
+
+			IOUtil.close(cn);
+		}
+	};
 
 	@Test
 	public void toSqlParamValueTest()
