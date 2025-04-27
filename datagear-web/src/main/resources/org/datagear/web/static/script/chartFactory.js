@@ -4342,7 +4342,7 @@
 	};
 	
 	/**
-	 * 获取图表插件附加属性值。
+	 * 获取图表插件指定附加属性值。
 	 * 
 	 * @param name 附加属性名
 	 * @returns 要获取的附加属性值，没有则返回null
@@ -4350,7 +4350,50 @@
 	 */
 	chartBase.pluginAddition = function(name)
 	{
-		return (this.plugin && this.plugin.additions ? this.plugin.additions[name] : undefined);
+		return (this.plugin && this.plugin.additions ? this.plugin.additions[name] : null);
+	};
+	
+	/**
+	 * 获取图表插件所有数据标记。
+	 * 
+	 * @returns [ 数据标记, ... ]
+	 * @since 5.4.0
+	 */
+	chartBase.pluginDataSigns = function()
+	{
+		return (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : []);
+	};
+	
+	/**
+	 * 获取图表插件指定数据标记。
+	 * 
+	 * @param name 数据标记名称、索引数字
+	 * @returns 数据标记，没有则是null
+	 * @since 5.4.0
+	 */
+	chartBase.pluginDataSign = function(name)
+	{
+		if(!this.plugin || !this.plugin.dataSigns)
+			return null;
+		
+		var dataSigns = this.plugin.dataSigns;
+		
+		if(chartFactory.isNumber(name))
+		{
+			return dataSigns[name];
+		}
+		else
+		{
+			for(var i=0; i<dataSigns.length; i++)
+			{
+				if(dataSigns[i] && dataSigns[i].name == name)
+				{
+					return dataSigns[i];
+				}
+			}
+			
+			return null;
+		}
 	};
 	
 	//-------------

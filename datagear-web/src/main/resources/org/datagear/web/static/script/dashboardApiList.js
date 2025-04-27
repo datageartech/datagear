@@ -155,6 +155,8 @@ global.dashboardApiCompletions =
 	{name: "plugin", value: "plugin", displayName: "plugin ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginAddition", value: "pluginAddition(", displayName: "pluginAddition() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginAttributes", value: "pluginAttributes()", displayName: "pluginAttributes() ", displayComment: "chart", categories: ["chart"]},
+	{name: "pluginDataSign", value: "pluginDataSign(", displayName: "pluginDataSign() ", displayComment: "chart", categories: ["chart"]},
+	{name: "pluginDataSigns", value: "pluginDataSigns()", displayName: "pluginDataSigns() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginResourceURL", value: "pluginResourceURL(", displayName: "pluginResourceURL() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginResources", value: "pluginResources()", displayName: "pluginResources() ", displayComment: "chart", categories: ["chart"]},
 	{name: "refreshData", value: "refreshData()", displayName: "refreshData() ", displayComment: "chart", categories: ["chart"]},
