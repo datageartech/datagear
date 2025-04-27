@@ -6,7 +6,7 @@
 	
 待定：
 	
-	扩充图表数据标记概念，支持标记数据集（添加DataSign.target、DataSign.children字段）；
+	扩充图表数据标记概念，支持标记数据集（添加DataSign.target、DataSign.children字段，DataSetBind.fieldSigns中标记信息支持"数据集标记名.字段标记名"格式）；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
 	新增看板版本设计概念：1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数；
 	看板JS对象新增chart.updateOptions()函数；
