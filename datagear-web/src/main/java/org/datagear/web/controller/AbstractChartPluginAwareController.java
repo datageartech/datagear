@@ -358,6 +358,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		{
 			super();
 			setDataSet(ProfileDataSet.valueOf(dataSetBind.getDataSet()));
+			setDataSetSigns(dataSetBind.getDataSetSigns());
 			setFieldSigns(dataSetBind.getFieldSigns());
 			setAlias(dataSetBind.getAlias());
 			setAttachment(dataSetBind.isAttachment());

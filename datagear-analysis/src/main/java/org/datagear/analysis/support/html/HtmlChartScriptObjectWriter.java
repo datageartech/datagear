@@ -20,8 +20,8 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
@@ -183,6 +183,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			super();
 			setDataSet(toDataSetJson(dataSetBind.getDataSet()));
+			setDataSetSigns(dataSetBind.getDataSetSigns());
 			setFieldSigns(dataSetBind.getFieldSigns());
 			setAlias(dataSetBind.getAlias());
 			setAttachment(dataSetBind.isAttachment());

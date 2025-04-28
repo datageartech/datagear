@@ -1,0 +1,38 @@
+{
+	id : "dataSetSign",
+	nameLabel: "数据集标记",
+	dataSigns:
+	[
+		{
+			name: "field-01"
+		},
+		{
+			name: "dataSet-01",
+			target: "dataset",
+			required : false,
+			multiple : true,
+			children:
+			[
+				{
+					name: "name",
+					nameLabel : "数据集标记01-名称",
+					descLabel : "数据集标记01-名称-描述",
+					required : false,
+					multiple : true,
+					additions: { "a0": "v0", "a1": 3 }
+				},
+				{
+					name: "value",
+					nameLabel: "数据集标记01-值"
+				}
+			]
+		},
+		{
+			name: "value"
+		},
+		{
+			name: "dataSet-02",
+			target: "dataset"
+		}
+	]
+}

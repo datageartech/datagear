@@ -600,6 +600,101 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
+	public void resolveChartPluginPropertiesTest_5_4_0_dataSetSign() throws IOException
+	{
+		{
+			InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+					"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-5.4.0-dataSetSign.json");
+
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+					IOUtil.CHARSET_UTF_8);
+
+			assertEquals("dataSetSign", chartPlugin.getId());
+
+			{
+				Label nameLabel = chartPlugin.getNameLabel();
+				assertEquals("数据集标记", nameLabel.getValue());
+			}
+
+			List<DataSign> dataSigns = chartPlugin.getDataSigns();
+
+			{
+				DataSign dataSign = dataSigns.get(0);
+
+				assertEquals("field-01", dataSign.getName());
+				assertEquals(DataSign.TARGET_FIELD, dataSign.getTarget());
+				assertTrue(dataSign.isRequired());
+				assertFalse(dataSign.isMultiple());
+				assertNull(dataSign.getChildren());
+				assertNull(dataSign.getNameLabel());
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(1);
+
+				assertEquals("dataSet-01", dataSign.getName());
+				assertEquals(DataSign.TARGET_DATASET, dataSign.getTarget());
+				assertFalse(dataSign.isRequired());
+				assertTrue(dataSign.isMultiple());
+				assertNull(dataSign.getNameLabel());
+
+				List<DataSign> children = dataSign.getChildren();
+				assertNotNull(children);
+				assertEquals(2, children.size());
+
+				{
+					DataSign ds0 = children.get(0);
+
+					assertEquals("name", ds0.getName());
+					assertEquals(DataSign.TARGET_FIELD, ds0.getTarget());
+					assertFalse(ds0.isRequired());
+					assertTrue(ds0.isMultiple());
+					assertEquals("数据集标记01-名称", ds0.getNameLabel().getValue());
+					assertEquals("数据集标记01-名称-描述", ds0.getDescLabel().getValue());
+					assertNull(ds0.getChildren());
+
+					Map<String, ?> additions = ds0.getAdditions();
+					assertEquals("v0", additions.get("a0"));
+					assertEquals(3, ((Integer) additions.get("a1")).intValue());
+				}
+
+				{
+					DataSign ds1 = children.get(1);
+
+					assertEquals("value", ds1.getName());
+					assertEquals(DataSign.TARGET_FIELD, ds1.getTarget());
+					assertTrue(ds1.isRequired());
+					assertFalse(ds1.isMultiple());
+					assertEquals("数据集标记01-值", ds1.getNameLabel().getValue());
+				}
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(2);
+
+				assertEquals("value", dataSign.getName());
+				assertEquals(DataSign.TARGET_FIELD, dataSign.getTarget());
+				assertTrue(dataSign.isRequired());
+				assertFalse(dataSign.isMultiple());
+				assertNull(dataSign.getChildren());
+				assertNull(dataSign.getNameLabel());
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(3);
+
+				assertEquals("dataSet-02", dataSign.getName());
+				assertEquals(DataSign.TARGET_DATASET, dataSign.getTarget());
+				assertTrue(dataSign.isRequired());
+				assertFalse(dataSign.isMultiple());
+				assertNull(dataSign.getNameLabel());
+				assertNull(dataSign.getChildren());
+			}
+		}
+	}
+
+	@Test
 	public void convertToDataSetRangeTest()
 	{
 		{

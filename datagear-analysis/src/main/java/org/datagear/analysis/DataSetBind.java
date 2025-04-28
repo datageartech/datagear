@@ -38,6 +38,9 @@ public class DataSetBind implements Serializable
 	/** 数据集 */
 	private DataSet dataSet;
 
+	/** 数据集标记集合 */
+	private Set<String> dataSetSigns = Collections.emptySet();
+
 	/** 数据集字段标记映射表 */
 	private Map<String, Set<String>> fieldSigns = Collections.emptyMap();
 
@@ -77,17 +80,44 @@ public class DataSetBind implements Serializable
 		this.dataSet = dataSet;
 	}
 
+	public Set<String> getDataSetSigns()
+	{
+		return dataSetSigns;
+	}
+
 	/**
-	 * 获取字段标记映射表，其关键字是{@linkplain #getDataSet()}的{@linkplain DataSetField#getName()}、
-	 * 值则{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}的{@linkplain DataSign#getName()}集合。
+	 * 设置{@linkplain #getDataSet()}的标记，
+	 * <p>
+	 * 其元素应是{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}中
+	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getName()}集合。
+	 * </p>
 	 * 
-	 * @return
+	 * @param dataSetSigns
 	 */
+	public void setDataSetSigns(Set<String> dataSetSigns)
+	{
+		this.dataSetSigns = dataSetSigns;
+	}
+
 	public Map<String, Set<String>> getFieldSigns()
 	{
 		return fieldSigns;
 	}
 
+	/**
+	 * 设置字段标记映射表。
+	 * <p>
+	 * 其关键字是{@linkplain #getDataSet()}的{@linkplain DataSetField#getName()}，
+	 * 值集合元素则是{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}中
+	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_FIELD}的{@linkplain DataSign#getName()}，
+	 * 或者，是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}路径，
+	 * 格式为：<code>【数据集标记名】.【字段标记名】</code>，
+	 * 其中，<code>【数据集标记名】</code>是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getName()}，
+	 * <code>【字段标记名】</code>则是其{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}。
+	 * </p>
+	 * 
+	 * @param fieldSigns
+	 */
 	public void setFieldSigns(Map<String, Set<String>> fieldSigns)
 	{
 		this.fieldSigns = fieldSigns;

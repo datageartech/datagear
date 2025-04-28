@@ -124,7 +124,7 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
 		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
 		chartPlugin.setAttributes(convertToAttributes(properties.get(JSON_PROPERTY_ATTRIBUTES)));
-		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS)));
+		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS), null));
 		chartPlugin.setDataSetRange(convertToDataSetRange(properties.get(JSON_PROPERTY_DATA_SET_RANGE)));
 		chartPlugin.setVersion(convertToString(properties.get(JSON_PROPERTY_VERSION)));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
@@ -257,9 +257,11 @@ public class JsonChartPluginPropertiesResolver
 	 * </p>
 	 * 
 	 * @param obj
+	 * @param parent
+	 *            允许{@code null}
 	 * @return
 	 */
-	protected List<DataSign> convertToDataSigns(Object obj)
+	protected List<DataSign> convertToDataSigns(Object obj, DataSign parent)
 	{
 		if (obj == null)
 			return null;
@@ -271,7 +273,7 @@ public class JsonChartPluginPropertiesResolver
 	
 			for (Object ele : array)
 			{
-				DataSign dataSign = convertToDataSign(ele);
+				DataSign dataSign = convertToDataSign(ele, parent);
 	
 				if (dataSign != null)
 					dataSigns.add(dataSign);
@@ -288,13 +290,12 @@ public class JsonChartPluginPropertiesResolver
 			Object[] array = new Object[collection.size()];
 			collection.toArray(array);
 	
-			return convertToDataSigns(array);
+			return convertToDataSigns(array, parent);
 		}
 		else
 		{
 			Object[] array = new Object[] { obj };
-	
-			return convertToDataSigns(array);
+			return convertToDataSigns(array, parent);
 		}
 	}
 
@@ -302,9 +303,11 @@ public class JsonChartPluginPropertiesResolver
 	 * 将对象转换为{@linkplain DataSign}。
 	 * 
 	 * @param obj
+	 * @param parent
+	 *            允许{@code null}
 	 * @return
 	 */
-	protected DataSign convertToDataSign(Object obj)
+	protected DataSign convertToDataSign(Object obj, DataSign parent)
 	{
 		if (obj == null)
 			return null;
@@ -320,19 +323,44 @@ public class JsonChartPluginPropertiesResolver
 				return null;
 	
 			DataSign dataSign = createDataSign();
+
 			dataSign.setName(name);
-	
+			dataSign.setTarget(convertToDataSignTarget(map.get(DataSign.PROPERTY_TARGET), parent));
 			dataSign.setRequired(convertToDataSignRequired(map.get(DataSign.PROPERTY_REQUIRED)));
 			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
 			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
 			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
 			dataSign.setAdditions(convertToDataSignAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
+
+			dataSign.setChildren(convertToDataSigns(map.get(DataSign.PROPERTY_CHILDREN), dataSign));
 	
 			return dataSign;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ DataSign.class.getName() + "] is not supported");
+	}
+
+	protected String convertToDataSignTarget(Object v, DataSign parent)
+	{
+		String target;
+
+		if (parent != null)
+		{
+			// 子标记都是字段标记
+			target = DataSign.TARGET_FIELD;
+		}
+		else if (v != null && (v instanceof String) && DataSign.TARGET_DATASET.equalsIgnoreCase((String) v))
+		{
+			target = DataSign.TARGET_DATASET;
+		}
+		else
+		{
+			// 默认应为TARGET_FIELD，以兼容旧版设计
+			target = DataSign.TARGET_FIELD;
+		}
+
+		return target;
 	}
 
 	protected boolean convertToDataSignRequired(Object v)
