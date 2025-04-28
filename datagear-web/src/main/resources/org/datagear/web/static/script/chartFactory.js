@@ -3524,11 +3524,11 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param name 数据集字段名、字段索引、字段对象
-	 * @param dataSign 可选，要设置的标记字符串、字符串数组，或者数据标记对象、对象数组（取它们的名称），或者null，不设置则执行获取操作
+	 * @param sign 可选，要设置的标记字符串、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象、null，或者它们的数组，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetFieldSign = function(dataSetBind, name, dataSign)
+	chartBase.dataSetFieldSign = function(dataSetBind, name, sign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
@@ -3558,7 +3558,7 @@
 		if(name == null)
 			throw new Error("[name] required");
 		
-		if(dataSign === undefined)
+		if(sign === undefined)
 		{
 			return (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[name] : null);
 		}
@@ -3567,8 +3567,8 @@
 			if(!dataSetBind.fieldSigns)
 				dataSetBind.fieldSigns = {};
 			
-			dataSign = this._trimDataSetFieldSign(dataSign);
-			dataSetBind.fieldSigns[name] = dataSign;
+			sign = this._toDataSignFullnames(sign);
+			dataSetBind.fieldSigns[name] = sign;
 		}
 	};
 	
@@ -3576,7 +3576,7 @@
 	 * 获取/设置数据集字段标记映射表。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 数据标记对象、对象数组，或者名称字符串、字符串数组，或者null, ... }，不设置则执行获取操作
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 标记字符串、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象、null，或者它们的数组, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
 	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
@@ -3598,40 +3598,74 @@
 			{
 				for(var p in signs)
 				{
-					var ps = this._trimDataSetFieldSign(signs[p]);
+					var ps = this._toDataSignFullnames(signs[p]);
 					trimSigns[p] = ps;
 				}
 			}
 			
 			if(!dataSetBind.fieldSigns || !increment)
+			{
 				dataSetBind.fieldSigns = trimSigns;
+			}
 			else
 			{
 				for(var p in trimSigns)
+				{
 					dataSetBind.fieldSigns[p] = trimSigns[p];
+				}
 			}
 		}
 	};
 	
-	chartBase._trimDataSetFieldSign = function(dataSign)
+	chartBase._toDataSignFullnames = function(dataSigns)
 	{
-		if(dataSign == null)
+		if(dataSigns == null)
 			return null;
 		
-		if(!$.isArray(dataSign))
-			dataSign = [ dataSign ];
+		if(!$.isArray(dataSigns))
+			dataSigns = [ dataSigns ];
 		
-		var signNames = [];
+		var re = [];
 		
-		for(var i=0; i<dataSign.length; i++)
+		for(var i=0; i<dataSigns.length; i++)
 		{
-			var signName = (dataSign[i] && dataSign[i].name !== undefined ? dataSign[i].name : dataSign[i]);
+			var dsi = dataSigns[i];
+			var fullname = null;
 			
-			if(signName != null)
-				signNames.push(signName);
+			if(dsi == null)
+			{
+				fullname = null;
+			}
+			//标记全名
+			else if(chartFactory.isString(dsi))
+			{
+				fullname = dsi;
+			}
+			//插件数据标记数组索引
+			else if(chartFactory.isNumber(dsi))
+			{
+				fullname = this.pluginDataSignFullname(dsi);
+			}
+			//数据标记对象
+			else if(dsi.name !== undefined)
+			{
+				fullname = dsi.name;
+			}
+			//插件数据标记层级数组
+			else if($.isArray(dsi))
+			{
+				fullname = this.pluginDataSignFullname(dsi);
+			}
+			else
+			{
+				throw new Error("to dataSign fullname unsupported for : " + dsi);
+			}
+			
+			if(fullname != null)
+				re.push(fullname);
 		}
 		
-		return signNames;
+		return re;
 	};
 	
 	/**
@@ -4416,9 +4450,9 @@
 	/**
 	 * 获取图表插件指定数据标记全名。
 	 * 
-	 * @param name 数据标记名称、索引数字、数据标记对象，或者它们的数组（数组索引表示查找层级）
+	 * @param name 插件数据标记名、数据标记数组索引数值、数据标记对象，或者它们的层级数组（数组索引表示查找层级）
 	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.plugin.dataSigns
-	 * @returns 数据标记，没有则是null
+	 * @returns 标记全名，层级间以'.'分隔，没有则是null
 	 * @since 5.4.0
 	 */
 	chartBase.pluginDataSignFullname = function(name, dataSigns)
