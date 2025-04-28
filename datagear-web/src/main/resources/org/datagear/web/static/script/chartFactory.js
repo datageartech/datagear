@@ -3268,7 +3268,7 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
 	 * @param info 数据集字段标识，可以是字段名、字段索引
-	 * @returns 数据集字段，没有找到则返回undefined
+	 * @returns 数据集字段，没有找到则返回null
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetField = function(dataSetBind, info)
@@ -3276,7 +3276,7 @@
 		var fields = this.dataSetFields(dataSetBind, false);
 		
 		if(!fields)
-			return undefined;
+			return null;
 		
 		if(chartFactory.isNumber(info))
 			return fields[info];
@@ -3287,7 +3287,7 @@
 				return fields[i];
 		}
 		
-		return undefined;
+		return null;
 	};
 	
 	/**
@@ -3523,31 +3523,44 @@
 	 * 获取/设置指定数据集字段标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetField 数据集字段、字段名、字段索引
-	 * @param dataSign 可选，要设置的数据标记对象、对象数组，或者名称字符串、字符串数组，或者null，不设置则执行获取操作
+	 * @param name 数据集字段名、字段索引、字段对象
+	 * @param dataSign 可选，要设置的标记字符串、字符串数组，或者数据标记对象、对象数组（取它们的名称），或者null，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetFieldSign = function(dataSetBind, dataSetField, dataSign)
+	chartBase.dataSetFieldSign = function(dataSetBind, name, dataSign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		var name = null;
-		
-		if(chartFactory.isString(dataSetField))
-			name = dataSetField;
+		if(chartFactory.isString(name))
+		{
+		}
 		else
 		{
-			if(chartFactory.isNumber(dataSetField))
-				dataSetField = this.dataSetField(dataSetBind, dataSetField);
+			var dataSetField = null;
+			
+			if(chartFactory.isNumber(name))
+			{
+			 	dataSetField = this.dataSetField(dataSetBind, name);
+				
+				if(dataSetField == null)
+					throw new Error("no dataSetField found for : " + name);
+			}
+			else
+			{
+				//数据集字段对象
+				dataSetField = name;
+			}
 			
 			name = (dataSetField ? dataSetField.name : null);
 		}
 		
+		if(name == null)
+			throw new Error("[name] required");
+		
 		if(dataSign === undefined)
 		{
-			return (dataSetBind.fieldSigns ?
-							dataSetBind.fieldSigns[name] : undefined);
+			return (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[name] : null);
 		}
 		else
 		{
