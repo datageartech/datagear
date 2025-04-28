@@ -4367,16 +4367,17 @@
 	/**
 	 * 获取图表插件指定数据标记。
 	 * 
-	 * @param name 数据标记名称、索引数字
+	 * @param name 数据标记名称、索引数字、数据标记对象
+	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.plugin.dataSigns
 	 * @returns 数据标记，没有则是null
 	 * @since 5.4.0
 	 */
-	chartBase.pluginDataSign = function(name)
+	chartBase.pluginDataSign = function(name, dataSigns)
 	{
-		if(!this.plugin || !this.plugin.dataSigns)
-			return null;
+		dataSigns = (dataSigns === undefined ? (this.plugin ? this.plugin.dataSigns : null) : dataSigns);
 		
-		var dataSigns = this.plugin.dataSigns;
+		if(dataSigns == null)
+			return null;
 		
 		if(chartFactory.isNumber(name))
 		{
@@ -4384,6 +4385,9 @@
 		}
 		else
 		{
+			//数据标记对象
+			name = (name && name.name !== undefined ? name.name : name);
+			
 			for(var i=0; i<dataSigns.length; i++)
 			{
 				if(dataSigns[i] && dataSigns[i].name == name)
@@ -4393,6 +4397,49 @@
 			}
 			
 			return null;
+		}
+	};
+	
+	/**
+	 * 获取图表插件指定数据标记全名。
+	 * 
+	 * @param name 数据标记名称、索引数字、数据标记对象，或者它们的数组（数组索引表示查找层级）
+	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.plugin.dataSigns
+	 * @returns 数据标记，没有则是null
+	 * @since 5.4.0
+	 */
+	chartBase.pluginDataSignFullname = function(name, dataSigns)
+	{
+		if(chartFactory.isNullOrEmpty(name))
+			throw new Error("[name] required");
+		
+		var isArray = $.isArray(name);
+		
+		if(!isArray)
+		{
+			var dataSign = this.pluginDataSign(name, dataSigns);
+			
+			if(dataSign == null)
+				throw new Error("no dataSign found for : " + name);
+			
+			return dataSign.name;
+		}
+		else
+		{
+			var re = "";
+			
+			for(var i=0; i<name.length; i++)
+			{
+				var dataSign = this.pluginDataSign(name[i], dataSigns);
+				
+				if(dataSign == null)
+					throw new Error("no dataSign found for : name["+i+"]");
+				
+				re += (re ? ("." + dataSign.name) : dataSign.name);
+				dataSigns = (dataSign.children ? dataSign.children : []);
+			}
+			
+			return re;
 		}
 	};
 	
