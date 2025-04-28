@@ -74,7 +74,7 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 	 * 如果值为{@linkplain #TARGET_FIELD}，应仅用于标记{@linkplain DataSetBind#getDataSet()}所包含的{@linkplain DataSetField}。
 	 * </p>
 	 * <p>
-	 * 注意：默认值应设为{@linkplain #TARGET_FIELD}以兼容旧版逻辑。
+	 * 注意：默认值应设为{@linkplain #TARGET_FIELD}，以兼容旧版逻辑。
 	 * </p>
 	 */
 	private String target = TARGET_FIELD;
@@ -87,7 +87,7 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 
 	/**
 	 * 当{@linkplain #target}是{@linkplain #TARGET_DATASET}时的子{@linkplain DataSign}（可选），
-	 * 它们应只标记于已经标记过此{@linkplain DataSign}的{@linkplain DataSet}的{@linkplain DataSetField}。
+	 * 它们应只标记于已经标记过此{@linkplain DataSign}的{@linkplain DataSetBind#getDataSet()}所包含的{@linkplain DataSetField}。
 	 */
 	private List<DataSign> children = null;
 

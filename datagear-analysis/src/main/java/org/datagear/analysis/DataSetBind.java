@@ -110,10 +110,10 @@ public class DataSetBind implements Serializable
 	 * 其关键字是{@linkplain #getDataSet()}的{@linkplain DataSetField#getName()}，
 	 * 值集合元素则是{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}中
 	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_FIELD}的{@linkplain DataSign#getName()}，
-	 * 或者，是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}路径，
-	 * 格式为：<code>【数据集标记名】.【字段标记名】</code>，
-	 * 其中，<code>【数据集标记名】</code>是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getName()}，
-	 * <code>【字段标记名】</code>则是其{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}。
+	 * 或者，是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}全名，
+	 * 格式为：<code>"数据集标记名.字段标记名"</code>，
+	 * 其中，<code>数据集标记名</code>是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getName()}，
+	 * <code>字段标记名</code>则是其{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}。
 	 * </p>
 	 * 
 	 * @param fieldSigns
