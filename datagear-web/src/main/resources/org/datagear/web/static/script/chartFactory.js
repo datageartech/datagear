@@ -260,6 +260,11 @@
 	chartFactory._CHART_ATTR_VALUE_NAME_WIDGET = "DG_CHART_WIDGET";
 	
 	/**
+	 * 数据标记全名分隔符
+	 */
+	chartFactory.DATA_SIGN_FULLNAME_SEPARATOR = ".";
+	
+	/**
 	 * 初始化渲染上下文。
 	 * 将webContext直接存入渲染上下文，复制chartTheme后使用<body>上的dg-chart-theme填充相关属性后存入渲染上下文，
 	 * 之后可以通过:
@@ -2169,24 +2174,24 @@
 	};
 	
 	/**
-	 * 获取指定标记的数据集字段，没有则返回undefined。
+	 * 获取指定标记的数据集字段，没有则返回null。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 数据标记对象、标记名称
+	 * @param dataSign 标记全名、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象
 	 * @param nonEmpty 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
 	 * @return {...}、undefined
 	 */
 	chartBase.dataSetFieldOfSign = function(dataSetBind, dataSign, nonEmpty)
 	{
 		var fields = this.dataSetFieldsOfSign(dataSetBind, dataSign, false, nonEmpty);
-		return (fields.length > 0 ? fields[0] : undefined);
+		return (fields.length > 0 ? fields[0] : null);
 	};
 	
 	/**
 	 * 获取指定标记的数据集字段数组。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 数据标记对象、标记名称
+	 * @param dataSign 标记全名、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
 	 * 					   "auto" 依据dataSign的required判断，为true则要求非空，否则不要求；
@@ -2205,7 +2210,7 @@
 			return re;
 		
 		var dataSetFields = this.dataSetFields(dataSetBind, sort);
-		var dataSignName = (chartFactory.isString(dataSign) ? dataSign : dataSign.name);
+		var dataSignName = this._toDataSignFullname(dataSign);
 		var fieldSigns = (dataSetBind.fieldSigns || {});
 		
 		var signFieldNames = [];
@@ -2235,27 +2240,65 @@
 		
 		if(nonEmpty == "auto")
 		{
-			var dataSignObj = (chartFactory.isString(dataSign) ? this._dataSignOfName(dataSign) : dataSign);
+			var dataSignObj = this._resolveTailDataSign(dataSign);
 			nonEmpty = (dataSignObj ? dataSignObj.required : false);
 		}
 		
 		if(nonEmpty && re.length == 0)
-			throw new Error("no dataSetField found for sign '"+dataSignName+"'");
+			throw new Error("no dataSetField signed by : "+dataSignName);
 		
 		return re;
 	};
 	
-	chartBase._dataSignOfName = function(dataSignName)
+	chartBase._resolveTailDataSign = function(dataSign)
 	{
-		var dataSigns = (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : []);
+		if(dataSign == null)
+			return null;
 		
-		for(var i=0; i<dataSigns.length; i++)
+		var re = null;
+		
+		if(chartFactory.isString(dataSign))
 		{
-			if(dataSigns[i] && dataSigns[i].name == dataSignName)
-				return dataSigns[i];
+			//尝试数据标记名
+			re = this.pluginDataSign(dataSign);
+			
+			//标记全名
+			if(re == null)
+			{
+				re = this._resolveTailDataSign(dataSign.split(chartFactory.DATA_SIGN_FULLNAME_SEPARATOR));
+			}
+		}
+		//插件数据标记数组索引
+		else if(chartFactory.isNumber(dataSign))
+		{
+			re = this.pluginDataSign(dataSign);
+		}
+		//数据标记对象
+		else if(dataSign.name !== undefined)
+		{
+			re = dataSign;
+		}
+		//插件数据标记层级数组
+		else if($.isArray(dataSign))
+		{
+			var parents = undefined;
+			
+			for(var i=0; i<dataSign.length; i++)
+			{
+				var dsi = this.pluginDataSign(dataSign[i], parents);
+				
+				if(dsi == null)
+				{
+					re = null;
+					break;
+				}
+				
+				re = dsi;
+				parents = (dsi.children ? dsi.children : []);
+			}
 		}
 		
-		return undefined;
+		return re;
 	};
 	
 	/**
@@ -3630,42 +3673,49 @@
 		for(var i=0; i<dataSigns.length; i++)
 		{
 			var dsi = dataSigns[i];
-			var fullname = null;
-			
-			if(dsi == null)
-			{
-				fullname = null;
-			}
-			//标记全名
-			else if(chartFactory.isString(dsi))
-			{
-				fullname = dsi;
-			}
-			//插件数据标记数组索引
-			else if(chartFactory.isNumber(dsi))
-			{
-				fullname = this.pluginDataSignFullname(dsi);
-			}
-			//数据标记对象
-			else if(dsi.name !== undefined)
-			{
-				fullname = dsi.name;
-			}
-			//插件数据标记层级数组
-			else if($.isArray(dsi))
-			{
-				fullname = this.pluginDataSignFullname(dsi);
-			}
-			else
-			{
-				throw new Error("to dataSign fullname unsupported for : " + dsi);
-			}
+			var fullname = this._toDataSignFullname(dsi);
 			
 			if(fullname != null)
 				re.push(fullname);
 		}
 		
 		return re;
+	};
+	
+	chartBase._toDataSignFullname = function(dataSign)
+	{
+		var fullname = null;
+		
+		if(dataSign == null)
+		{
+			fullname = null;
+		}
+		//标记全名
+		else if(chartFactory.isString(dataSign))
+		{
+			fullname = dataSign;
+		}
+		//插件数据标记数组索引
+		else if(chartFactory.isNumber(dataSign))
+		{
+			fullname = this.pluginDataSignFullname(dataSign);
+		}
+		//数据标记对象
+		else if(dataSign.name !== undefined)
+		{
+			fullname = dataSign.name;
+		}
+		//插件数据标记层级数组
+		else if($.isArray(dataSign))
+		{
+			fullname = this.pluginDataSignFullname(dataSign);
+		}
+		else
+		{
+			throw new Error("to dataSign fullname unsupported for : " + dataSign);
+		}
+		
+		return fullname;
 	};
 	
 	/**
@@ -4482,7 +4532,7 @@
 				if(dataSign == null)
 					throw new Error("no dataSign found for : name["+i+"]");
 				
-				re += (re ? ("." + dataSign.name) : dataSign.name);
+				re += (re ? (chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + dataSign.name) : dataSign.name);
 				dataSigns = (dataSign.children ? dataSign.children : []);
 			}
 			
