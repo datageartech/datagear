@@ -112,6 +112,7 @@
 								</p-button>
 							</template>
 							<div>
+								<!-- 这里添加数据集标记设置框 -->
 								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.fields" :key="dpIdx" :legend="formatDspFieldsetName(dp)" class="fieldset-sm mb-3">
 									<div class="field grid mb-2">
 										<label :for="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
