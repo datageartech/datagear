@@ -2191,7 +2191,7 @@
 	 * 获取指定标记的数据集字段数组。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 标记全名、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象
+	 * @param dataSign 标记全名、插件数据标记数组索引数值、数据标记对象、插件数据标记层级数组
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
 	 * 					   "auto" 依据dataSign的required判断，为true则要求非空，否则不要求；
@@ -2210,7 +2210,7 @@
 			return re;
 		
 		var dataSetFields = this.dataSetFields(dataSetBind, sort);
-		var dataSignName = this._toDataSignFullname(dataSign);
+		var dataSignName = this.dataSignFullname(dataSign);
 		var fieldSigns = (dataSetBind.fieldSigns || {});
 		
 		var signFieldNames = [];
@@ -3567,7 +3567,7 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param name 数据集字段名、字段索引、字段对象
-	 * @param sign 可选，要设置的标记字符串、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象、null，或者它们的数组，不设置则执行获取操作
+	 * @param sign 可选，要设置的标记字符串、插件数据标记数组索引数值、数据标记对象、插件数据标记层级数组、null，或者它们的数组，不设置则执行获取操作
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
@@ -3610,7 +3610,7 @@
 			if(!dataSetBind.fieldSigns)
 				dataSetBind.fieldSigns = {};
 			
-			sign = this._toDataSignFullnames(sign);
+			sign = this._toDataFieldSignValues(sign);
 			dataSetBind.fieldSigns[name] = sign;
 		}
 	};
@@ -3619,7 +3619,7 @@
 	 * 获取/设置数据集字段标记映射表。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 标记字符串、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象、null，或者它们的数组, ... }，不设置则执行获取操作
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 标记字符串、插件数据标记数组索引数值、数据标记对象、插件数据标记层级数组、null，或者它们的数组, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
 	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
@@ -3641,7 +3641,7 @@
 			{
 				for(var p in signs)
 				{
-					var ps = this._toDataSignFullnames(signs[p]);
+					var ps = this._toDataFieldSignValues(signs[p]);
 					trimSigns[p] = ps;
 				}
 			}
@@ -3660,11 +3660,12 @@
 		}
 	};
 	
-	chartBase._toDataSignFullnames = function(dataSigns)
+	chartBase._toDataFieldSignValues = function(dataSigns)
 	{
 		if(dataSigns == null)
 			return null;
 		
+		//字段标记值应是数组
 		if(!$.isArray(dataSigns))
 			dataSigns = [ dataSigns ];
 		
@@ -3673,49 +3674,16 @@
 		for(var i=0; i<dataSigns.length; i++)
 		{
 			var dsi = dataSigns[i];
-			var fullname = this._toDataSignFullname(dsi);
+			var value = this.dataSignFullname(dsi);
 			
-			if(fullname != null)
-				re.push(fullname);
+			//标记数组不应包含null，也不应有重复项
+			if(value != null && chartFactory.indexInArray(re, value) < 0)
+			{
+				re.push(value);
+			}
 		}
 		
 		return re;
-	};
-	
-	chartBase._toDataSignFullname = function(dataSign)
-	{
-		var fullname = null;
-		
-		if(dataSign == null)
-		{
-			fullname = null;
-		}
-		//标记全名
-		else if(chartFactory.isString(dataSign))
-		{
-			fullname = dataSign;
-		}
-		//插件数据标记数组索引
-		else if(chartFactory.isNumber(dataSign))
-		{
-			fullname = this.pluginDataSignFullname(dataSign);
-		}
-		//数据标记对象
-		else if(dataSign.name !== undefined)
-		{
-			fullname = dataSign.name;
-		}
-		//插件数据标记层级数组
-		else if($.isArray(dataSign))
-		{
-			fullname = this.pluginDataSignFullname(dataSign);
-		}
-		else
-		{
-			throw new Error("to dataSign fullname unsupported for : " + dataSign);
-		}
-		
-		return fullname;
 	};
 	
 	/**
@@ -4465,13 +4433,13 @@
 	 * 获取图表插件指定数据标记。
 	 * 
 	 * @param name 数据标记名称、索引数字、数据标记对象
-	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.plugin.dataSigns
+	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
 	 * @returns 数据标记，没有则是null
 	 * @since 5.4.0
 	 */
 	chartBase.pluginDataSign = function(name, dataSigns)
 	{
-		dataSigns = (dataSigns === undefined ? (this.plugin ? this.plugin.dataSigns : null) : dataSigns);
+		dataSigns = (dataSigns === undefined ? this.pluginDataSigns() : dataSigns);
 		
 		if(dataSigns == null)
 			return null;
@@ -4498,42 +4466,84 @@
 	};
 	
 	/**
-	 * 获取图表插件指定数据标记全名。
+	 * 获取数据标记全名。
 	 * 
-	 * @param name 插件数据标记名、数据标记数组索引数值、数据标记对象，或者它们的层级数组（数组索引表示查找层级）
-	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.plugin.dataSigns
-	 * @returns 标记全名，层级间以'.'分隔，没有则是null
+	 * @param name 字符串全名、数据标记数组索引数值、数据标记对象，或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
+	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
+	 * @returns 标记全名，层级间以'.'分隔，可能是null
 	 * @since 5.4.0
 	 */
-	chartBase.pluginDataSignFullname = function(name, dataSigns)
+	chartBase.dataSignFullname = function(name, dataSigns)
 	{
-		if(chartFactory.isNullOrEmpty(name))
-			throw new Error("[name] required");
+		if(name == null)
+			return null;
+		
+		//字符串全名，直接返回
+		if(chartFactory.isString(name))
+			return name;
 		
 		var isArray = $.isArray(name);
 		
 		if(!isArray)
 		{
-			var dataSign = this.pluginDataSign(name, dataSigns);
+			var dataSign = null;
 			
-			if(dataSign == null)
-				throw new Error("no dataSign found for : " + name);
+			//插件数据标记数组索引数值
+			if(chartFactory.isNumber(name))
+			{
+				dataSign = this.pluginDataSign(name, dataSigns);
+				
+				if(dataSign == null)
+					throw new Error("no dataSign found for : " + name);
+				
+				return dataSign.name;
+			}
+			//数据标记对象
+			else if(name.name !== undefined)
+			{
+				dataSign = name;
+			}
 			
-			return dataSign.name;
+			return (dataSign ? dataSign.name : null);
 		}
 		else
 		{
 			var re = "";
 			
+			//默认查找数据标记数组，不能设为undefined，纤细参考this.pluginDataSign()函数
+			var dftDataSigns = [];
+			
 			for(var i=0; i<name.length; i++)
 			{
-				var dataSign = this.pluginDataSign(name[i], dataSigns);
+				var myPart = null;
+				
+				var ni = name[i];
+				var dataSign = this.pluginDataSign(ni, dataSigns);
 				
 				if(dataSign == null)
-					throw new Error("no dataSign found for : name["+i+"]");
+				{
+					if(ni == null || chartFactory.isString(ni))
+					{
+						myPart = ni;
+					}
+					//数据标记对象
+					else if(ni.name !== undefined)
+					{
+						myPart = ni.name;
+						dataSign = ni;
+					}
+					else
+					{
+						throw new Error("no dataSign found for : name["+i+"]");
+					}
+				}
+				else
+				{
+					myPart = dataSign.name;
+				}
 				
-				re += (re ? (chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + dataSign.name) : dataSign.name);
-				dataSigns = (dataSign.children ? dataSign.children : []);
+				re += (re ? (chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + myPart) : myPart);
+				dataSigns = (dataSign && dataSign.children ? dataSign.children : dftDataSigns);
 			}
 			
 			return re;
