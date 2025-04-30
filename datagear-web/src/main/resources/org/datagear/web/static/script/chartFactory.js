@@ -2218,15 +2218,10 @@
 		
 		for(var pname in fieldSigns)
 		{
-			var mySigns = (fieldSigns[pname] || []);
-			
-			for(var i=0; i<mySigns.length; i++)
+			var mySigns = fieldSigns[pname];
+			if(mySigns != null && chartFactory.indexInArray(mySigns, dataSignName) >= 0)
 			{
-				if(mySigns[i] == dataSignName)
-				{
-					signFieldNames.push(pname);
-					break;
-				}
+				signFieldNames.push(pname);
 			}
 		}
 		
@@ -3575,29 +3570,7 @@
 	chartBase.dataSetFieldSign = function(dataSetBind, name, sign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		
-		if(chartFactory.isString(name))
-		{
-		}
-		else
-		{
-			var dataSetField = null;
-			
-			if(chartFactory.isNumber(name))
-			{
-			 	dataSetField = this.dataSetField(dataSetBind, name);
-				
-				if(dataSetField == null)
-					throw new Error("no dataSetField found for : " + name);
-			}
-			else
-			{
-				//数据集字段对象
-				dataSetField = name;
-			}
-			
-			name = (dataSetField ? dataSetField.name : null);
-		}
+		name = this._dataSignKeyForField(dataSetBind, name);
 		
 		if(name == null)
 			throw new Error("[name] required");
@@ -3614,6 +3587,38 @@
 			sign = this._toDataFieldSignValues(sign);
 			dataSetBind.fieldSigns[name] = sign;
 		}
+	};
+	
+	chartBase._dataSignKeyForField = function(dataSetBind, name)
+	{
+		var re = null;
+		
+		if(chartFactory.isString(name))
+		{
+			re = name;
+		}
+		else
+		{
+			var dataSetField = null;
+			
+			//字段索引数值
+			if(chartFactory.isNumber(name))
+			{
+			 	dataSetField = this.dataSetField(dataSetBind, name);
+				
+				if(dataSetField == null)
+					throw new Error("no dataSetField found for : " + name);
+			}
+			//数据集字段对象
+			else
+			{
+				dataSetField = name;
+			}
+			
+			re = (dataSetField ? dataSetField.name : null);
+		}
+		
+		return re;
 	};
 	
 	/**
@@ -4591,6 +4596,33 @@
 		}
 		
 		return false;
+	};
+	
+	/**
+	 * 判断数据集字段是否有指定数据标记。
+	 * 
+	 * @param dataSetBind 数据集绑定或其索引
+	 * @param name 数据集字段名、字段索引、字段对象
+	 * @param sign 与this.dataSignFullname()函数参数相同
+	 * @returns true、false
+	 * @since 2.11.0
+	 */
+	chartBase.isDataSetFieldSigned = function(dataSetBind, name, sign)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		name = this._dataSignKeyForField(dataSetBind, name);
+		sign = this.dataSignFullname(sign);
+		
+		var mySigns = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[name] : null);
+		
+		if(mySigns == null)
+		{
+			return false;
+		}
+		else
+		{
+			return (chartFactory.indexInArray(mySigns, sign) >= 0);
+		}
 	};
 	
 	//-------------
