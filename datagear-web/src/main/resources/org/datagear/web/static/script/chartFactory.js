@@ -4564,6 +4564,35 @@
 		return (dataSetBind.attachment ? true : false);
 	};
 	
+	/**
+	 * 判断数据集绑定是否有指定数据标记。
+	 * 
+	 * @param dataSetBind 数据集绑定或其索引
+	 * @param sign 与this.dataSignFullname()函数参数相同
+	 * @returns true、false
+	 * @since 5.4.0
+	 */
+	chartBase.isDataSetBindSigned = function(dataSetBind, sign)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		
+		if(!dataSetBind.dataSetSigns)
+			return false;
+		
+		sign = this.dataSignFullname(sign);
+		
+		var dss = dataSetBind.dataSetSigns;
+		for(var i=0; i<dss.length; i++)
+		{
+			if(dss[i] == sign)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
