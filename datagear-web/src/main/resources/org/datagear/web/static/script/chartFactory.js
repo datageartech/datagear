@@ -357,6 +357,7 @@
 		for(var i=0; i<chart.dataSetBinds.length; i++)
 		{
 			var cds = chart.dataSetBinds[i];
+			cds.dataSetSigns = (cds.dataSetSigns || {});
 			cds.fieldSigns = (cds.fieldSigns || {});
 			cds.alias = (cds.alias == null ?  "" : cds.alias);
 			cds.attachment = (cds.attachment == true ? true : false);
@@ -2177,7 +2178,7 @@
 	 * 获取指定标记的数据集字段，没有则返回null。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 标记全名、插件数据标记数组索引数值、插件数据标记层级数组、数据标记对象
+	 * @param dataSign 与this.dataSignFullname()函数参数相同
 	 * @param nonEmpty 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
 	 * @return {...}、undefined
 	 */
@@ -2191,7 +2192,7 @@
 	 * 获取指定标记的数据集字段数组。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 标记全名、插件数据标记数组索引数值、数据标记对象、插件数据标记层级数组
+	 * @param dataSign 与this.dataSignFullname()函数参数相同
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
 	 * 					   "auto" 依据dataSign的required判断，为true则要求非空，否则不要求；
@@ -3567,7 +3568,7 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param name 数据集字段名、字段索引、字段对象
-	 * @param sign 可选，要设置的标记字符串、插件数据标记数组索引数值、数据标记对象、插件数据标记层级数组、null，或者它们的数组，不设置则执行获取操作
+	 * @param sign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
@@ -3619,7 +3620,7 @@
 	 * 获取/设置数据集字段标记映射表。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 标记字符串、插件数据标记数组索引数值、数据标记对象、插件数据标记层级数组、null，或者它们的数组, ... }，不设置则执行获取操作
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
 	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
@@ -4548,6 +4549,19 @@
 			
 			return re;
 		}
+	};
+	
+	/**
+	 * 判断是否附件数据集绑定。
+	 * 
+	 * @param dataSetBind 数据集绑定或其索引
+	 * @returns true、false
+	 * @since 5.4.0
+	 */
+	chartBase.isDataSetBindAttachment = function(dataSetBind)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		return (dataSetBind.attachment ? true : false);
 	};
 	
 	//-------------
