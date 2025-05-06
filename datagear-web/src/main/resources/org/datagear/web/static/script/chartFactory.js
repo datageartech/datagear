@@ -3608,51 +3608,6 @@
 		return re;
 	};
 	
-	/**
-	 * 获取/设置数据集字段标记映射表。
-	 * 
-	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
-	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
-	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
-	 * @since 2.11.0
-	 */
-	chartBase.dataSetFieldSigns = function(dataSetBind, signs, increment)
-	{
-		dataSetBind = this._dataSetBindOf(dataSetBind);
-		increment = (increment == null ? true : increment);
-		
-		if(signs === undefined)
-		{
-			return (dataSetBind.fieldSigns || {});
-		}
-		else
-		{
-			var trimSigns = {};
-			
-			if(signs)
-			{
-				for(var p in signs)
-				{
-					var ps = this._toDataSignValues(signs[p]);
-					trimSigns[p] = ps;
-				}
-			}
-			
-			if(!dataSetBind.fieldSigns || !increment)
-			{
-				dataSetBind.fieldSigns = trimSigns;
-			}
-			else
-			{
-				for(var p in trimSigns)
-				{
-					dataSetBind.fieldSigns[p] = trimSigns[p];
-				}
-			}
-		}
-	};
-	
 	chartBase._toDataSignValues = function(dataSigns)
 	{
 		if(dataSigns == null)
@@ -4625,9 +4580,73 @@
 		}
 	};
 	
+	/**
+	 * 获取/设置数据集字段标记映射表。
+	 * 
+	 * @param dataSetBind 数据集绑定或其索引
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
+	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
+	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
+	 * @since 5.4.0
+	 */
+	chartBase.dataSetFieldsSigns = function(dataSetBind, signs, increment)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		increment = (increment == null ? true : increment);
+		
+		if(signs === undefined)
+		{
+			return (dataSetBind.fieldSigns || {});
+		}
+		else
+		{
+			var trimSigns = {};
+			
+			if(signs)
+			{
+				for(var p in signs)
+				{
+					var ps = this._toDataSignValues(signs[p]);
+					trimSigns[p] = ps;
+				}
+			}
+			
+			if(!dataSetBind.fieldSigns || !increment)
+			{
+				dataSetBind.fieldSigns = trimSigns;
+			}
+			else
+			{
+				for(var p in trimSigns)
+				{
+					dataSetBind.fieldSigns[p] = trimSigns[p];
+				}
+			}
+		}
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsSigns()
+	
+	/**
+	 * 获取/设置数据集字段标记映射表。
+	 * 
+	 * @param dataSetBind 数据集绑定或其索引
+	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
+	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
+	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
+	 * @since 2.11.0
+	 */
+	chartBase.dataSetFieldSigns = function(dataSetBind, signs, increment)
+	{
+		return this.dataSetFieldsSigns(dataSetBind, signs, increment);
+	};
+	
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsSigns()
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.on()
 	
@@ -4711,6 +4730,7 @@
 	
 	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.on()
 	
+	
 	// < @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
 	
 	/**
@@ -4734,6 +4754,7 @@
 	};
 	
 	// > @deprecated 兼容5.2.0版本的API，将在未来版本移除，请使用chartBase.resultOf()
+	
 	
 	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOfSign()
 	
@@ -4794,6 +4815,7 @@
 	
 	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldOrder()
 	
+	
 	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSign()
 	
 	chartBase.dataSetPropertySign = function(dataSetBind, dataSetField, dataSign)
@@ -4804,14 +4826,14 @@
 	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSign()
 	
 	
-	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSigns()
+	// < @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsSigns()
 	
 	chartBase.dataSetPropertySigns = function(dataSetBind, signs, increment)
 	{
-		return this.dataSetFieldSigns(dataSetBind, signs, increment);
+		return this.dataSetFieldsSigns(dataSetBind, signs, increment);
 	};
 	
-	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldSigns()
+	// > @deprecated 兼容5.0.0版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsSigns()
 	
 	
 	// < @deprecated 兼容4.7.0版本的dg-chart-map功能，将在未来版本移除，请使用chartSupport中的builtinOptionNames.mapName图表选项
