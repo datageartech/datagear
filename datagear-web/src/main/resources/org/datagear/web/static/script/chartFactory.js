@@ -4557,27 +4557,27 @@
 	};
 	
 	/**
-	 * 判断是否附件数据集绑定。
+	 * 判断是否附件数据集。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @returns true、false
 	 * @since 5.4.0
 	 */
-	chartBase.isDataSetBindAttachment = function(dataSetBind)
+	chartBase.isDataSetAttachment = function(dataSetBind)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		return (dataSetBind.attachment ? true : false);
 	};
 	
 	/**
-	 * 判断数据集绑定是否有指定数据标记。
+	 * 判断数据集是否有指定数据标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param sign 与this.dataSignFullname()函数参数相同
 	 * @returns true、false
 	 * @since 5.4.0
 	 */
-	chartBase.isDataSetBindSigned = function(dataSetBind, sign)
+	chartBase.isDataSetSigned = function(dataSetBind, sign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
@@ -4605,7 +4605,7 @@
 	 * @param name 数据集字段名、字段索引、字段对象
 	 * @param sign 与this.dataSignFullname()函数参数相同
 	 * @returns true、false
-	 * @since 2.11.0
+	 * @since 5.4.0
 	 */
 	chartBase.isDataSetFieldSigned = function(dataSetBind, name, sign)
 	{
