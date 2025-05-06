@@ -357,7 +357,7 @@
 		for(var i=0; i<chart.dataSetBinds.length; i++)
 		{
 			var cds = chart.dataSetBinds[i];
-			cds.dataSetSigns = (cds.dataSetSigns || {});
+			cds.dataSetSigns = (cds.dataSetSigns || []);
 			cds.fieldSigns = (cds.fieldSigns || {});
 			cds.alias = (cds.alias == null ?  "" : cds.alias);
 			cds.attachment = (cds.attachment == true ? true : false);
@@ -3584,7 +3584,7 @@
 			if(!dataSetBind.fieldSigns)
 				dataSetBind.fieldSigns = {};
 			
-			sign = this._toDataFieldSignValues(sign);
+			sign = this._toDataSignValues(sign);
 			dataSetBind.fieldSigns[name] = sign;
 		}
 	};
@@ -3647,7 +3647,7 @@
 			{
 				for(var p in signs)
 				{
-					var ps = this._toDataFieldSignValues(signs[p]);
+					var ps = this._toDataSignValues(signs[p]);
 					trimSigns[p] = ps;
 				}
 			}
@@ -3666,7 +3666,7 @@
 		}
 	};
 	
-	chartBase._toDataFieldSignValues = function(dataSigns)
+	chartBase._toDataSignValues = function(dataSigns)
 	{
 		if(dataSigns == null)
 			return null;
@@ -4585,17 +4585,7 @@
 			return false;
 		
 		sign = this.dataSignFullname(sign);
-		
-		var dss = dataSetBind.dataSetSigns;
-		for(var i=0; i<dss.length; i++)
-		{
-			if(dss[i] == sign)
-			{
-				return true;
-			}
-		}
-		
-		return false;
+		return (chartFactory.indexInArray(dataSetBind.dataSetSigns, sign) >= 0);
 	};
 	
 	/**
@@ -4622,6 +4612,29 @@
 		else
 		{
 			return (chartFactory.indexInArray(mySigns, sign) >= 0);
+		}
+	};
+	
+	/**
+	 * 获取/设置数据集数据标记。
+	 * 
+	 * @param dataSetBind 数据集绑定或其索引
+	 * @param signs 可选，要设置的标记，与this.dataSignFullname()函数参数相同、或者其数组
+	 * @returns 标记数组、null
+	 * @since 5.4.0
+	 */
+	chartBase.dataSetSigns = function(dataSetBind, signs)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		
+		if(signs === undefined)
+		{
+			return dataSetBind.dataSetSigns;
+		}
+		else
+		{
+			signs = this._toDataSignValues(signs);
+			dataSetBind.dataSetSigns = signs;
 		}
 	};
 	
