@@ -2947,6 +2947,8 @@
 			chartRenderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
 		}
 		
+		this.updateOptions(updateOptions);
+		
 		return updateOptions;
 	};
 	
@@ -4623,6 +4625,21 @@
 				}
 			}
 		}
+	};
+	
+	/**
+	 * 获取/设置图表更新选项。
+	 * 
+	 * 图表渲染器可在其update()中使用此函保存图表更新选项，供后续图表监听器使用。
+	 * 调用chart.inflateUpdateOptions()后，会自动调用此函数设置图表更新选项。
+	 * 
+	 * @param updateOptions 可选，要设置的渲染选项对象，格式应为：{ ... }
+	 * @returns 要获取的图表更新选项，没有则返回null
+	 * @since 5.4.0
+	 */
+	chartBase.updateOptions = function(updateOptions)
+	{
+		return chartFactory.extValueBuiltin(this, "updateOptions", updateOptions);
 	};
 	
 	//-------------
