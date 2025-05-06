@@ -2212,25 +2212,12 @@
 		
 		var dataSetFields = this.dataSetFields(dataSetBind, sort);
 		var dataSignName = this.dataSignFullname(dataSign);
-		var fieldSigns = (dataSetBind.fieldSigns || {});
-		
-		var signFieldNames = [];
-		
-		for(var pname in fieldSigns)
-		{
-			var mySigns = fieldSigns[pname];
-			if(mySigns != null && chartFactory.indexInArray(mySigns, dataSignName) >= 0)
-			{
-				signFieldNames.push(pname);
-			}
-		}
 		
 		for(var i=0; i<dataSetFields.length; i++)
 		{
-			for(var j=0; j<signFieldNames.length; j++)
+			if(this.isDataSetFieldSigned(dataSetBind, dataSetFields[i], dataSignName))
 			{
-				if(dataSetFields[i].name == signFieldNames[j])
-					re.push(dataSetFields[i]);
+				re.push(dataSetFields[i]);
 			}
 		}
 		

@@ -103,6 +103,7 @@ global.dashboardApiCompletions =
 	{name: "dataSetParamValues", value: "dataSetParamValues(", displayName: "dataSetParamValues() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetParamValuesFirst", value: "dataSetParamValuesFirst(", displayName: "dataSetParamValuesFirst() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetParams", value: "dataSetParams(", displayName: "dataSetParams() ", displayComment: "chart", categories: ["chart"]},
+	{name: "dataSetSigns", value: "dataSetSigns(", displayName: "dataSetSigns() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSignFullname", value: "dataSignFullname(", displayName: "dataSignFullname() ", displayComment: "chart", categories: ["chart"]},
 	{name: "destroy", value: "destroy()", displayName: "destroy() ", displayComment: "chart", categories: ["chart"]},
 	{name: "disableSetting", value: "disableSetting(", displayName: "disableSetting() ", displayComment: "chart", categories: ["chart"]},
