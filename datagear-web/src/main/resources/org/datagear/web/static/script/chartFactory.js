@@ -1991,11 +1991,11 @@
 	 * 获取/设置第一个数据集参数值集。
 	 * 
 	 * @param paramValues 可选，要设置的参数名/值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
-	 * @param inflate 可选，设置操作是否仅填充在paramValues中出现的参数值，而保留旧参数值，默认值为：false
+	 * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
 	 */
-	chartBase.dataSetParamValuesFirst = function(paramValues, inflate)
+	chartBase.dataSetParamValuesFirst = function(paramValues, increment)
 	{
-		return this.dataSetParamValues(0, paramValues, inflate);
+		return this.dataSetParamValues(0, paramValues, increment);
 	};
 	
 	/**
@@ -2003,9 +2003,9 @@
 	 * 
 	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
-	 * @param inflate 可选，设置操作是否仅填充在paramValues中出现的参数值，而保留旧参数值，默认值为：false
+	 * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
 	 */
-	chartBase.dataSetParamValues = function(dataSetBind, paramValues, inflate)
+	chartBase.dataSetParamValues = function(dataSetBind, paramValues, increment)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
@@ -2018,7 +2018,7 @@
 			return paramValuesCurrent;
 		else
 		{
-			inflate = (inflate == null ? false : inflate);
+			increment = (increment == null ? false : increment);
 			
 			if($.isArray(paramValues))
 			{
@@ -2035,7 +2035,7 @@
 				paramValues = paramValuesObj;
 			}
 			
-			if(inflate)
+			if(increment)
 			{
 				$.extend(paramValuesCurrent, paramValues);
 			}
@@ -4524,11 +4524,8 @@
 	chartBase.isDataSetSigned = function(dataSetBind, sign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		
-		if(!dataSetBind.dataSetSigns)
-			return false;
-		
 		sign = this.dataSignFullname(sign);
+		
 		return (chartFactory.indexInArray(dataSetBind.dataSetSigns, sign) >= 0);
 	};
 	
@@ -4548,15 +4545,7 @@
 		sign = this.dataSignFullname(sign);
 		
 		var mySigns = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[name] : null);
-		
-		if(mySigns == null)
-		{
-			return false;
-		}
-		else
-		{
-			return (chartFactory.indexInArray(mySigns, sign) >= 0);
-		}
+		return (chartFactory.indexInArray(mySigns, sign) >= 0);
 	};
 	
 	/**
