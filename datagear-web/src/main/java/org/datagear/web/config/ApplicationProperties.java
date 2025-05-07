@@ -250,6 +250,9 @@ public abstract class ApplicationProperties implements Serializable
 	/** 连接源配置项 */
 	private ConnectionSourceProperties connectionSourceProperties = new ConnectionSourceProperties();
 
+	/** 校验码配置 */
+	private CheckCodeProperties checkCodeProperties = new CheckCodeProperties();
+
 	public ApplicationProperties()
 	{
 		super();
@@ -811,5 +814,15 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setConnectionSourceProperties(ConnectionSourceProperties connectionSourceProperties)
 	{
 		this.connectionSourceProperties = connectionSourceProperties;
+	}
+
+	public CheckCodeProperties getCheckCodeProperties()
+	{
+		return checkCodeProperties;
+	}
+
+	protected void setCheckCodeProperties(CheckCodeProperties checkCodeProperties)
+	{
+		this.checkCodeProperties = checkCodeProperties;
 	}
 }

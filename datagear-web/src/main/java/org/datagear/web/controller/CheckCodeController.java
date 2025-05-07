@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.util.StringUtil;
+import org.datagear.web.config.ApplicationProperties;
+import org.datagear.web.config.CheckCodeProperties;
 import org.datagear.web.util.CheckCodeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,12 +50,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/checkCode")
 public class CheckCodeController extends AbstractController
 {
-	protected static final int CODE_FONT_SIZE = 16;
-
 	protected static final int IMAGE_PADDING = 2;
 
 	@Autowired
 	private CheckCodeManager checkCodeManager;
+
+	@Autowired
+	private ApplicationProperties applicationProperties;
 
 	private volatile Font _drawFont = null;
 
@@ -72,6 +75,16 @@ public class CheckCodeController extends AbstractController
 		this.checkCodeManager = checkCodeManager;
 	}
 
+	public ApplicationProperties getApplicationProperties()
+	{
+		return applicationProperties;
+	}
+
+	public void setApplicationProperties(ApplicationProperties applicationProperties)
+	{
+		this.applicationProperties = applicationProperties;
+	}
+
 	@RequestMapping("")
 	public void index(HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, @RequestParam("m") String module) throws IOException
@@ -79,25 +92,43 @@ public class CheckCodeController extends AbstractController
 		if (!this.checkCodeManager.hasModule(module))
 			throw new IllegalInputException();
 
+		CheckCodeProperties properties = getCheckCodeProperties();
+
 		response.setHeader("Pragma", "No-cache");
 		response.setHeader("Cache-Control", "no-cache");
 		response.setDateHeader("Expires", 0);
+		response.setContentType("image/" + properties.getImageFormatName());
 
 		int codeLength = CheckCodeManager.CODE_LEN;
-		int height = CODE_FONT_SIZE + IMAGE_PADDING * 2;
-		int width = CODE_FONT_SIZE * codeLength + IMAGE_PADDING * 2;
+		int width = properties.getFontSize() * codeLength + IMAGE_PADDING * 2;
+		int height = properties.getFontSize() + IMAGE_PADDING * 2;
 		String code = this.checkCodeManager.generate();
+
+		if (properties.getImageWidth() > -1)
+		{
+			width = properties.getImageWidth();
+		}
+		if (properties.getImageHeight() > -1)
+		{
+			height = properties.getImageHeight();
+		}
 
 		BufferedImage image = createInitBufferedImage(width, height);
 		drawCheckCode(image, code);
 		this.checkCodeManager.setCheckCode(session, module, code);
 		image.getGraphics().dispose();
 
-		ImageIO.write(image, "png", response.getOutputStream());
+		ImageIO.write(image, properties.getImageFormatName(), response.getOutputStream());
+	}
+
+	protected CheckCodeProperties getCheckCodeProperties()
+	{
+		return getApplicationProperties().getCheckCodeProperties();
 	}
 
 	protected void drawCheckCode(BufferedImage image, String code)
 	{
+		CheckCodeProperties properties = getCheckCodeProperties();
 		Graphics g = image.getGraphics();
 		Font font = getDrawFont();
 
@@ -105,8 +136,19 @@ public class CheckCodeController extends AbstractController
 		g.setFont(font);
 		FontMetrics fontMetrics = g.getFontMetrics();
 		int codeWidth = fontMetrics.stringWidth(code);
+		int x = IMAGE_PADDING + (image.getWidth() - codeWidth) / 2;
+		int y = IMAGE_PADDING + fontMetrics.getAscent();
 
-		g.drawString(code, IMAGE_PADDING + (image.getWidth() - codeWidth) / 2, IMAGE_PADDING + fontMetrics.getAscent());
+		if (properties.getCodeLeft() > -1)
+		{
+			x = properties.getCodeLeft();
+		}
+		if (properties.getCodeTop() > -1)
+		{
+			y = properties.getCodeTop();
+		}
+
+		g.drawString(code, x, y);
 	}
 
 	protected BufferedImage createInitBufferedImage(int width, int height)
@@ -171,13 +213,14 @@ public class CheckCodeController extends AbstractController
 	{
 		if (this._drawFont == null)
 		{
+			CheckCodeProperties properties = getCheckCodeProperties();
 			Font font = null;
 
 			String name = getDrawFontName();
 
 			if (!StringUtil.isEmpty(name))
 			{
-				font = new Font(name, Font.BOLD, CODE_FONT_SIZE);
+				font = new Font(name, properties.getFontStyle(), properties.getFontSize());
 			}
 			else
 			{
@@ -204,16 +247,39 @@ public class CheckCodeController extends AbstractController
 	protected String getDrawFontName()
 	{
 		String name = "";
-		
-		//最优字体
-		String bestName = "Arial";
-		String bestNameLower = bestName.toLowerCase();
 
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		String[] avaNames = ge.getAvailableFontFamilyNames();
+		avaNames = (StringUtil.isEmpty(avaNames) ? new String[0] : avaNames);
 
-		if(avaNames != null && avaNames.length > 0)
+		CheckCodeProperties properties = getCheckCodeProperties();
+		String[] fontNames = properties.getFontNames();
+
+		if (!StringUtil.isEmpty(fontNames))
 		{
+			for (String fontName : fontNames)
+			{
+				for (String avaName : avaNames)
+				{
+					if (avaName.equalsIgnoreCase(fontName))
+					{
+						name = avaName;
+						break;
+					}
+				}
+
+				if (!StringUtil.isEmpty(name))
+					break;
+			}
+		}
+
+		// 自动选择字体
+		if (StringUtil.isEmpty(name))
+		{
+			// 最优字体
+			String bestName = "Arial";
+			String bestNameLower = bestName.toLowerCase();
+
 			for (String avaName : avaNames)
 			{
 				// 完全匹配
@@ -229,8 +295,8 @@ public class CheckCodeController extends AbstractController
 					name = avaName;
 				}
 			}
-			
-			if(StringUtil.isEmpty(name))
+
+			if (StringUtil.isEmpty(name))
 				name = avaNames[0];
 		}
 

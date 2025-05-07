@@ -89,10 +89,12 @@
 									<@spring.message code='checkCode' />
 								</label>
 						        <div class="field-input col-12 md:col-9">
-						        	<p-inputtext id="${pid}checkCode" v-model="fm.checkCode" type="text" class="input w-6"
-						        		name="checkCode" required maxlength="10">
-						        	</p-inputtext>
-						        	<img class="checkCodeImg ml-1 vertical-align-middle" style="height:1.5rem;" />
+						        	<div class="flex align-items-center gap-1">
+							        	<p-inputtext id="${pid}checkCode" v-model="fm.checkCode" type="text" class="input w-6"
+							        		name="checkCode" required maxlength="10">
+							        	</p-inputtext>
+							        	<img class="checkCodeImg" />
+						        	</div>
 						        </div>
 							</div>
 						</div>

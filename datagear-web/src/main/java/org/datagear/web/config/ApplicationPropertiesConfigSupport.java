@@ -116,6 +116,13 @@ public class ApplicationPropertiesConfigSupport
 	}
 
 	@Bean
+	@ConfigurationProperties("checkcode")
+	public CheckCodeProperties checkCodeProperties()
+	{
+		return new CheckCodeProperties();
+	}
+
+	@Bean
 	public ApplicationProperties applicationProperties()
 	{
 		ApplicationProperties bean = createApplicationProperties();
@@ -129,6 +136,7 @@ public class ApplicationPropertiesConfigSupport
 		bean.setCrossOriginPropertiess(this.crossOriginPropertiess());
 		bean.setDbTableTypeSpecs(this.dbTableTypeSpecs());
 		bean.setConnectionSourceProperties(this.connectionSourceProperties());
+		bean.setCheckCodeProperties(this.checkCodeProperties());
 
 		return bean;
 	}
