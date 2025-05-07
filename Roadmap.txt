@@ -27,6 +27,7 @@
 		chart.renderContext -> chart.renderContext()；
 		chart.updateInterval -> chart.updateInterval()；
 		chart.updateResults -> chart.updateResult()；
+		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
