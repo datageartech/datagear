@@ -4156,7 +4156,7 @@
 	 */
 	chartBase.dataSetBinds = function()
 	{
-		return (this._dataSetBinds || []);
+		return (this._dataSetBinds || (this._dataSetBinds = []));
 	};
 	
 	/**
@@ -4225,7 +4225,7 @@
 	 */
 	chartBase.dataSetBindMain = function()
 	{
-		var re = undefined;
+		var re = null;
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -4249,7 +4249,7 @@
 	 */
 	chartBase.dataSetBindAttachment = function()
 	{
-		var re = undefined;
+		var re = null;
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -4371,12 +4371,12 @@
 	/**
 	 * 获取图表插件所有数据标记。
 	 * 
-	 * @returns [ 数据标记, ... ]
+	 * @returns [ 数据标记, ... ]、null
 	 * @since 5.4.0
 	 */
 	chartBase.pluginDataSigns = function()
 	{
-		return (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : []);
+		return (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : null);
 	};
 	
 	/**
@@ -4553,7 +4553,7 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param signs 可选，要设置的标记，与this.dataSignFullname()函数参数相同、或者其数组
-	 * @returns 标记数组、null
+	 * @returns 标记数组，空数组表示没有
 	 * @since 5.4.0
 	 */
 	chartBase.dataSetSigns = function(dataSetBind, signs)
@@ -4562,12 +4562,12 @@
 		
 		if(signs === undefined)
 		{
-			return dataSetBind.dataSetSigns;
+			return (dataSetBind.dataSetSigns || (dataSetBind.dataSetSigns = []));
 		}
 		else
 		{
 			signs = this._toDataSignValues(signs);
-			dataSetBind.dataSetSigns = signs;
+			dataSetBind.dataSetSigns = (signs || []);
 		}
 	};
 	
