@@ -836,17 +836,12 @@
 	{
 		if(options === undefined)
 		{
-			if(this._options == null)
-				this._options = {};
-			
-			return this._options;
+			return (this._options || (this._options = {}));
 		}
 		else
 		{
 			if(options == null)
-			{
-				throw new Error("[options] required");
-			}
+				options = {};
 			
 			this._options = options;
 		}
@@ -861,20 +856,21 @@
 	 * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.themeGradualColor()。
 	 * 
 	 * @param theme 可选，要设置的图表主题，会被此函数修改，没有则执行获取操作
+	 * @returns 要获取的主题，不会为null
 	 */
 	chartBase.theme = function(theme)
 	{
+		if(!this._isRenderContextInited())
+			throw new Error("chart is illegal state for : theme(theme)");
+		
 		if(theme === undefined)
 		{
-			return this._theme;
+			return (this._theme || (this._theme = this._renderContextAttrChartTheme()));
 		}
 		else
 		{
 			if(theme == null)
-				throw new Error("[theme] required");
-			
-			if(!this._isRenderContextInited())
-				throw new Error("chart is illegal state for theme(theme)");
+				theme = {};
 			
 			var globalTheme = this._renderContextAttrChartTheme();
 			
@@ -931,6 +927,7 @@
 	 * 图表初始化时会使用图表元素的"dg-chart-listener"属性值执行设置操作。
 	 * 
 	 * @param listener 可选，要设置的监听器对象，没有则执行获取操作
+	 * @returns 要获取的监听器、null
 	 */
 	chartBase.listener = function(listener)
 	{
@@ -990,11 +987,15 @@
 		
 		if(setting === undefined)
 		{
-			return (this._disableSetting == null ? defaultSetting : this._disableSetting);
+			return (this._disableSetting || (this._disableSetting = defaultSetting));
 		}
 		else
 		{
-			if(setting == true || setting == "true")
+			if(setting == null)
+			{
+				setting = {};
+			}
+			else if(setting == true || setting == "true")
 			{
 				setting = {param: true, data: true};
 			}
@@ -1017,13 +1018,21 @@
 	 * 
 	 * @param eventHandlers 可选，要设置的初始事件处理函数数组，没有则执行获取操作。数组元素格式为：
 	 * 						{ eventType: "...", eventHandler: function(chartEvent){ ... } }
+	 * @returns 数组，不会null
 	 */
 	chartBase.eventHandlers = function(eventHandlers)
 	{
 		if(eventHandlers === undefined)
-			return this._eventHandlers;
+		{
+			return (this._eventHandlers || (this._eventHandlers = []));
+		}
 		else
+		{
+			if(eventHandlers == null)
+				eventHandlers = [];
+			
 			this._eventHandlers = eventHandlers;
+		}
 	};
 	
 	/**
@@ -1072,7 +1081,7 @@
 			this.init();
 		
 		if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
-			throw new Error("chart is illegal state for render()");
+			throw new Error("chart is illegal state for : render()");
 		
 		if(chartFactory.renderedChart(this.elementJquery()) != null)
 			throw new Error("element '#"+this.elementId+"' has been rendered as chart");
@@ -1138,7 +1147,7 @@
 	chartBase.doRender = function()
 	{
 		if(!this.statusRendering())
-			throw new Error("chart is illegal state for doRender()");
+			throw new Error("chart is illegal state for : doRender()");
 		
 		var $element = this.elementJquery();
 		var theme = this._themeNonNull();
@@ -1261,7 +1270,7 @@
 	chartBase.update = function(chartResult)
 	{
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
-			throw new Error("chart is illegal state for update()");
+			throw new Error("chart is illegal state for : update()");
 		
 		// < @deprecated 兼容5.3.1版本的逻辑，将在未来版本移除，chartResult可能在后续逻辑中被修改，不应再次重复使用
 		if(chartResult === undefined)
@@ -1301,7 +1310,7 @@
 	chartBase.doUpdate = function(chartResult)
 	{
 		if(!this.statusUpdating())
-			throw new Error("chart is illegal state for doUpdate()");
+			throw new Error("chart is illegal state for : doUpdate()");
 		
 		//内部统一结构
 		chartResult = this._toChartResult(chartResult);
@@ -1457,7 +1466,7 @@
 	chartBase.doDestroy = function()
 	{
 		if(!this.statusDestroying())
-			throw new Error("chart is illegal state for doDestroy()");
+			throw new Error("chart is illegal state for : doDestroy()");
 		
 		this._doDestroy();
 		
@@ -1857,7 +1866,7 @@
 			this.plugin.renderer.on(this, eventType, handler);
 		}
 		else
-			throw new Error("chart '#"+this.elementId+"' [renderer.on] undefined");
+			throw new Error("chart '#"+this.elementId+"' [renderer.on] required");
 	};
 	
 	/**
@@ -1890,7 +1899,7 @@
 			this.echartsOffEventHandler(eventType, handler);
 		}
 		else
-			throw new Error("chart '#"+this.elementId+"' [renderer.off] undefined");
+			throw new Error("chart '#"+this.elementId+"' [renderer.off] required");
 	};
 	
 	/**
@@ -2101,7 +2110,7 @@
 	 */
 	chartBase.elementJquery = function()
 	{
-		return $("#" + this.elementId);
+		return $(this.element());
 	};
 	
 	/**
@@ -2691,7 +2700,7 @@
 		var internal = this.internal();
 		
 		if(!this._isEchartsInstance(internal))
-			throw new Error("chart not ECharts");
+			throw new Error("chart is not ECharts");
 		
 		internal.setOption(options, opts);
 	};
@@ -3929,7 +3938,7 @@
 		var webContext = this._renderContextAttrWebContext();
 		
 		if(!webContext)
-			throw new Error("chart is illegal state for pluginResourceURL(name)");
+			throw new Error("chart is illegal state for : pluginResourceURL(name)");
 		
 		var urlPrefix = webContext.attributes.pluginResUrlPrefix;
 		var url = urlPrefix+"/"+encodeURIComponent(this.plugin.id)+"/"+name;
@@ -4278,7 +4287,7 @@
 		
 		if(!webContext)
 		{
-			throw new Error("chart is illegal state for contextURL(url)");
+			throw new Error("chart is illegal state for : contextURL(url)");
 		}
 		
 		return chartFactory.toWebContextPathURL(webContext, url);
@@ -4566,6 +4575,9 @@
 		}
 		else
 		{
+			if(signs == null)
+				signs = [];
+			
 			signs = this._toDataSignValues(signs);
 			dataSetBind.dataSetSigns = (signs || []);
 		}
