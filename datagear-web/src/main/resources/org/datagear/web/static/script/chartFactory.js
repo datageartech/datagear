@@ -2168,10 +2168,10 @@
 	chartBase.extValue = function(name, value)
 	{
 		if(value === undefined)
-			return (this._extValues ? this._extValues[name] : undefined);
+			return (this._extValues ? this._extValues[name] : null);
 		else
 		{
-			if(!this._extValues)
+			if(this._extValues == null)
 				this._extValues = {};
 			
 			this._extValues[name] = value;
@@ -2189,7 +2189,7 @@
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 与this.dataSignFullname()函数参数相同
 	 * @param nonEmpty 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
-	 * @return {...}、undefined
+	 * @return 数据集字段、null
 	 */
 	chartBase.dataSetFieldOfSign = function(dataSetBind, dataSign, nonEmpty)
 	{
@@ -2206,7 +2206,7 @@
 	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
 	 * 					   "auto" 依据dataSign的required判断，为true则要求非空，否则不要求；
 	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
-	 * @return [...]
+	 * @return []
 	 */
 	chartBase.dataSetFieldsOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
 	{
@@ -4160,7 +4160,7 @@
 	/**
 	 * 获取全部数据集绑定数组。
 	 * 
-	 * @return []，空数组表示没有数据集绑定
+	 * @returns []，空数组表示没有数据集绑定
 	 * @since 5.0.0
 	 */
 	chartBase.dataSetBinds = function()
@@ -4169,54 +4169,10 @@
 	};
 	
 	/**
-	 * 获取主件数据集绑定数组，它们的用途是绘制图表。
-	 * 
-	 * @return []，空数组表示没有主件数据集绑定
-	 * @since 5.0.0
-	 */
-	chartBase.dataSetBindsMain = function()
-	{
-		var re = [];
-		
-		var dataSetBinds = this.dataSetBinds();
-		for(var i=0; i<dataSetBinds.length; i++)
-		{
-			if(dataSetBinds[i].attachment)
-				continue;
-			
-			re.push(dataSetBinds[i]);
-		}
-		
-		return re;
-	};
-	
-	/**
-	 * 获取附件数据集绑定数组，它们的用途不是绘制图表。
-	 * 
-	 * @return []，空数组表示没有附件数据集绑定
-	 * @since 5.0.0
-	 */
-	chartBase.dataSetBindsAttachment = function()
-	{
-		var re = [];
-		
-		var dataSetBinds = this.dataSetBinds();
-		for(var i=0; i<dataSetBinds.length; i++)
-		{
-			if(dataSetBinds[i].attachment)
-			{
-				re.push(dataSetBinds[i]);
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
 	 * 获取指定索引的数据集绑定。
 	 * 
 	 * @param index
-	 * @return 数据集绑定，null表示没有
+	 * @returns 数据集绑定，null表示没有
 	 * @since 5.0.0
 	 */
 	chartBase.dataSetBindAt = function(index)
@@ -4226,23 +4182,94 @@
 	};
 	
 	/**
-	 * 获取第一个主件数据集绑定。
-	 * 主件数据集绑定的用途是绘制图表。
+	 * 获取主件数据集绑定数组，它们的用途是绘制图表。
 	 * 
-	 * @return 未找到时返回null
+	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @returns []，空数组表示没有主件数据集绑定
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindMain = function()
+	chartBase.dataSetBindsMain = function(sign)
 	{
-		var re = null;
+		var re = [];
+		
+		if(sign !== undefined)
+			sign = this.dataSignFullname(sign);
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			if(!dataSetBinds[i].attachment)
+			var dsb = dataSetBinds[i];
+			
+			if(!this.isDataSetAttachment(dsb))
 			{
-				re = dataSetBinds[i];
-				break;
+				if(sign === undefined || this.isDataSetSigned(dsb, sign))
+				{
+					re.push(dsb);
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取附件数据集绑定数组，它们的用途不是绘制图表。
+	 * 
+	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @returns []，空数组表示没有附件数据集绑定
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindsAttachment = function(sign)
+	{
+		var re = [];
+		
+		if(sign !== undefined)
+			sign = this.dataSignFullname(sign);
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var dsb = dataSetBinds[i];
+			
+			if(this.isDataSetAttachment(dsb))
+			{
+				if(sign === undefined || this.isDataSetSigned(dsb, sign))
+				{
+					re.push(dsb);
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取第一个主件数据集绑定。
+	 * 主件数据集绑定的用途是绘制图表。
+	 * 
+	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @returns 数据集绑定、null
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindMain = function(sign)
+	{
+		var re = null;
+		
+		if(sign !== undefined)
+			sign = this.dataSignFullname(sign);
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var dsb = dataSetBinds[i];
+			
+			if(!this.isDataSetAttachment(dsb))
+			{
+				if(sign === undefined || this.isDataSetSigned(dsb, sign))
+				{
+					re = dsb;
+					break;
+				}
 			}
 		}
 		
@@ -4253,20 +4280,29 @@
 	 * 获取第一个附件数据集绑定对象。
 	 * 附件数据集绑定的用途不是绘制图表。
 	 * 
-	 * @return 未找到时返回null
+	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @returns 数据集绑定、null
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindAttachment = function()
+	chartBase.dataSetBindAttachment = function(sign)
 	{
 		var re = null;
+		
+		if(sign !== undefined)
+			sign = this.dataSignFullname(sign);
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			if(dataSetBinds[i].attachment)
+			var dsb = dataSetBinds[i];
+			
+			if(this.isDataSetAttachment(dsb))
 			{
-				re = dataSetBinds[i];
-				break;
+				if(sign === undefined || this.isDataSetSigned(dsb, sign))
+				{
+					re = dsb;
+					break;
+				}
 			}
 		}
 		
@@ -4278,7 +4314,7 @@
 	 * 当需要访问系统内其他功能模块的资源时，应为其URL添加系统根路径前缀。
 	 * 
 	 * @param url 可选，要处理的URL
-	 * @return 添加后的新URL，如果没有url参数，将返回系统根路径
+	 * @returns 添加后的新URL，如果没有url参数，将返回系统根路径
 	 * @since 5.0.0
 	 */
 	chartBase.contextURL = function(url)
@@ -5327,7 +5363,7 @@
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var isAttachment = dataSetBinds[i].attachment;
+			var isAttachment = this.isDataSetAttachment(dataSetBinds[i]);
 			
 			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
 			{
@@ -5372,7 +5408,7 @@
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var isAttachment = dataSetBinds[i].attachment;
+			var isAttachment = this.isDataSetAttachment(dataSetBinds[i]);
 			
 			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
 			{

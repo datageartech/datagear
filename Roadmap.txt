@@ -3,7 +3,7 @@
 	扩充图表数据标记概念，支持标记数据集：
 		ok 添加DataSign.target、DataSign.children字段，DataSetBind.fieldSigns中标记信息支持"数据集标记名.字段标记名"格式）；
 		ok 图表JS对象新增chart.dataSetSigns()函数，用于设置数据集标记；
-		图表JS对象dataSetBind*()函数参数支持设置筛选数据标记；
+		ok 图表JS对象dataSetBind*()函数参数支持设置筛选数据标记；
 		图表编辑页面支持数据集标记功能；
 	ok SQL数据集支持SQL预编译语法；
 	ok HTTP数据集响应类型支持文本、Base64二进制；
@@ -15,11 +15,11 @@
 	DataSetResult添加additions功能，可将数据源数据对象中有用但无法的解析为字段的数据收集；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
-		图表监听器、chart.update()等的results参数结构改为chartResult；
+		图表监听器、chart.update()等的results参数结构改为chartResult（对象结构，易于扩展）；
 		dashboard.charts -> dashboard.charts()；
 		dashboard.renderContext -> dashboard.renderContext()；
 		chart.dashboard -> chart.owner()；
-		chart.dataSetFieldSign() -> chart.dataSetFieldSigns()；
+		chart.dataSetFieldSign() -> chart.dataSetFieldSigns()（因为是参数和返回值主要是数组）；
 		chart.elementId -> chart.elementId()；
 		chart.id -> chart.id()；
 		chart.name -> chart.name()；
@@ -27,7 +27,8 @@
 		chart.renderContext -> chart.renderContext()；
 		chart.updateInterval -> chart.updateInterval()；
 		chart.updateResults -> chart.updateResult()；
-		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数；
+		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数（几乎没用反而增加函数复杂度）；
+		chart.dataSetFieldOfSign()、chart.dataSetFieldsOfSign()函数移除nonEmpty参数（此函数不应处理这个逻辑）；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
