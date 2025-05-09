@@ -94,64 +94,64 @@
 			</div>
 			<div class="field grid">
 				<label for="${pid}dataSetBindVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='chart.cds.desc' />">
+					title="<@spring.message code='chart.dsb.desc' />">
 					<@spring.message code='dataSetBind' />
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}dataSetBindVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="(cds, cdsIdx) in fm.dataSetBindVOs" :key="cdsIdx" :header="cds.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
+						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx" :header="dsb.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
-									@click="onMoveUpDataSetBind($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+									@click="onMoveUpDataSetBind($event, dsbIdx)" v-if="!pm.isReadonlyAction">
 								</p-button>
 								<p-button icon="pi pi-arrow-down" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
-									@click="onMoveDownDataSetBind($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+									@click="onMoveDownDataSetBind($event, dsbIdx)" v-if="!pm.isReadonlyAction">
 								</p-button>
 								<p-button icon="pi pi-times" class="p-button-sm p-button-secondary p-button-rounded p-button-text p-button-danger mr-5"
-									@click="onDeleteDataSetBind($event, cdsIdx)" v-if="!pm.isReadonlyAction">
+									@click="onDeleteDataSetBind($event, dsbIdx)" v-if="!pm.isReadonlyAction">
 								</p-button>
 							</template>
 							<div>
 								<!-- 这里添加数据集标记设置框 -->
-								<p-fieldset v-for="(dp, dpIdx) in cds.dataSet.fields" :key="dpIdx" :legend="formatDspFieldsetName(dp)" class="fieldset-sm mb-3">
+								<p-fieldset v-for="(df, dfIdx) in dsb.dataSet.fields" :key="dfIdx" :legend="formatDspFieldsetName(df)" class="fieldset-sm mb-3">
 									<div class="field grid mb-2">
-										<label :for="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-											title="<@spring.message code='chart.cds.dataSign.desc' />">
+										<label :for="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.dsb.dataSign.desc' />">
 											<@spring.message code='sign' />
 										</label>
 										<div class="field-input col-12 md:col-9">
 											<div class="p-inputgroup">
-												<div :id="'${pid}cdspidSign_'+cdsIdx+'_'+dpIdx"
+												<div :id="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx"
 													class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
-													<p-chip v-for="sign in dp.cdsInfo.signs" :key="sign.name" :label="formatDataSignLabel(sign)" class="mb-2"
-														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSign(dp, sign.name)">
+													<p-chip v-for="sign in df.extDsbInfo.signs" :key="sign.extFullname" :label="sign.extLabel" class="mb-2"
+														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSign(df, sign.extFullname)">
 													</p-chip>
 												</div>
 												<p-button type="button" icon="pi pi-plus"
 													aria:haspopup="true" aria-controls="${pid}dataSignsPanel"
-													@click="onShowDataSignPanel($event, cds, dp)" v-if="!pm.isReadonlyAction">
+													@click="onShowDataSignPanel($event, dsb, df)" v-if="!pm.isReadonlyAction">
 												</p-button>
 											</div>
 										</div>
 									</div>
 									<div class="field grid mb-2">
-										<label :for="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-											title="<@spring.message code='chart.cds.fieldAlias.desc' />">
+										<label :for="'${pid}dsbpidAlias_'+dsbIdx+'_'+dfIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.dsb.fieldAlias.desc' />">
 											<@spring.message code='alias' />
 										</label>
 										<div class="field-input col-12 md:col-9">
-											<p-inputtext :id="'${pid}cdspidAlias_'+cdsIdx+'_'+dpIdx" v-model="dp.cdsInfo.alias" type="text"
-												class="input w-full" maxlength="50" :placeholder="dp.label ? dp.label : dp.name">
+											<p-inputtext :id="'${pid}dsbpidAlias_'+dsbIdx+'_'+dfIdx" v-model="df.extDsbInfo.alias" type="text"
+												class="input w-full" maxlength="50" :placeholder="df.label ? df.label : df.name">
 											</p-inputtext>
 										</div>
 									</div>
 									<div class="field grid mb-2">
-										<label :for="'${pid}cdspidSort_'+cdsIdx+'_'+dpIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-											title="<@spring.message code='chart.cds.fieldOrder.desc' />">
+										<label :for="'${pid}dsbpidSort_'+dsbIdx+'_'+dfIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.dsb.fieldOrder.desc' />">
 											<@spring.message code='sort' />
 										</label>
 										<div class="field-input col-12 md:col-9">
-											<p-inputtext :id="'${pid}cdspidSort_'+cdsIdx+'_'+dpIdx" v-model="dp.cdsInfo.order" type="text" class="input w-full" maxlength="50" :placeholder="dpIdx">
+											<p-inputtext :id="'${pid}dsbpidSort_'+dsbIdx+'_'+dfIdx" v-model="df.extDsbInfo.order" type="text" class="input w-full" maxlength="50" :placeholder="dfIdx">
 											</p-inputtext>
 										</div>
 									</div>
@@ -160,38 +160,38 @@
 							<p-divider type="dashed"></p-divider>
 							<div class="px-2">
 								<div class="field grid mb-2">
-									<label :for="'${pid}cdsAlias_'+cdsIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-										title="<@spring.message code='chart.cds.alias.desc' />">
+									<label :for="'${pid}dsbAlias_'+dsbIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+										title="<@spring.message code='chart.dsb.alias.desc' />">
 										<@spring.message code='alias' />
 									</label>
 									<div class="field-input col-12 md:col-9">
-										<p-inputtext :id="'${pid}cdsAlias_'+cdsIdx" v-model="cds.alias" type="text" class="input w-full" maxlength="50" :placeholder="cds.dataSet.name">
+										<p-inputtext :id="'${pid}dsbAlias_'+dsbIdx" v-model="dsb.alias" type="text" class="input w-full" maxlength="50" :placeholder="dsb.dataSet.name">
 										</p-inputtext>
 									</div>
 								</div>
 								<div class="field grid">
-									<label :for="'${pid}cdsAtchm_'+cdsIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-										title="<@spring.message code='chart.cds.attachment.desc' />">
+									<label :for="'${pid}dsbAtchm_'+dsbIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+										title="<@spring.message code='chart.dsb.attachment.desc' />">
 										<@spring.message code='attachment' />
 									</label>
 									<div class="field-input col-12 md:col-9">
-										<p-selectbutton :id="'${pid}cdsAtchm_'+cdsIdx" v-model="cds.attachment" :options="pm.booleanOptions"
+										<p-selectbutton :id="'${pid}dsbAtchm_'+dsbIdx" v-model="dsb.attachment" :options="pm.booleanOptions"
 											option-label="name" option-value="value" class="input w-full">
 										</p-selectbutton>
 									</div>
 								</div>
-								<div class="field grid" v-if="cds.dataSet.params.length > 0">
+								<div class="field grid" v-if="dsb.dataSet.params.length > 0">
 									<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
-										title="<@spring.message code='chart.cds.paramValue.desc' />">
+										title="<@spring.message code='chart.dsb.paramValue.desc' />">
 										<@spring.message code='parameter' />
 									</label>
 									<div class="field-input col-12 md:col-9 h-opts">
 										<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
 											aria:haspopup="true" aria-controls="${pid}paramPanel"
-											@click="onShowParamPanel($event, cds)" class="p-button-secondary">
+											@click="onShowParamPanel($event, dsb)" class="p-button-secondary">
 										</p-button>
 										<p-button type="button" label="<@spring.message code='clear' />"
-											@click="onClearParamValues($event, cds)" class="p-button-secondary p-button-danger"
+											@click="onClearParamValues($event, dsb)" class="p-button-secondary p-button-danger"
 											v-if="!pm.isReadonlyAction">
 										</p-button>
 									</div>
@@ -294,9 +294,9 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
-			<div v-for="ds in pm.chartPluginDataSigns" :key="ds.name" class="mb-2">
+			<div v-for="ds in pm.chartPluginDataSigns" :key="ds.extFullname" class="mb-2">
 				<div class="p-inputgroup">
-					<p-button type="button" :label="formatDataSignLabel(ds)" icon="pi pi-plus"
+					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus"
 						@click="onAddDataSign($event, ds)">
 					</p-button>
 					<p-button type="button" icon="pi pi-info-circle"
@@ -482,13 +482,13 @@
 	po.beforeSubmitForm = function(action)
 	{
 		var data = action.options.data;
-		po.unmergeChartCdss(data);
+		po.unmergeChartDsbs(data);
 		
-		var cdss = (data.dataSetBindVOs || []);
-		$.each(cdss, function(idx, cds)
+		var dsbs = (data.dataSetBindVOs || []);
+		$.each(dsbs, function(idx, dsb)
 		{
-			cds.summaryDataSetEntity = cds.dataSet;
-			cds.dataSet = undefined;
+			dsb.summaryDataSetEntity = dsb.dataSet;
+			dsb.dataSet = undefined;
 		});
 		
 		//这里必须整理属性值，因为存在切换图表类型而不编辑图表属性的情况
@@ -538,9 +538,9 @@
 				for(var k=0; k<fields.length; k++)
 				{
 					var field = fields[k];
-					var signs = (field.cdsInfo ? (field.cdsInfo.signs || []) : []);
+					var signs = (field.extDsbInfo ? (field.extDsbInfo.signs || []) : []);
 					
-					if($.inArrayById(signs, requiredSign.name, "name") > -1)
+					if($.inArrayById(signs, requiredSign.extFullname, "extFullname") > -1)
 					{
 						contains = true;
 						break;
@@ -558,37 +558,37 @@
 		return true;
 	};
 	
-	po.isDataSetBindSigned = function(dataSetBind, dataSign)
+	po.hasDataSetFieldSigned = function(dataSetBind, dataSign)
 	{
 		var fields = (dataSetBind.dataSet.fields || []);
 		
 		for(var i=0; i<fields.length; i++)
 		{
 			var field = fields[i];
-			var signs = (field.cdsInfo ? (field.cdsInfo.signs || []) : []);
+			var signs = (field.extDsbInfo ? (field.extDsbInfo.signs || []) : []);
 			
-			if($.inArrayById(signs, dataSign.name, "name") > -1)
+			if($.inArrayById(signs, dataSign.extFullname, "extFullname") > -1)
 				return true;
 		}
 		
 		return false;
 	};
 	
-	po.mergeChartCdss = function(chart)
+	po.mergeChartDsbs = function(chart)
 	{
-		var cdss = (chart.dataSetBindVOs || []);
-		$.each(cdss, function(idx, cds)
+		var dsbs = (chart.dataSetBindVOs || []);
+		$.each(dsbs, function(idx, dsb)
 		{
-			po.mergeDataSetBind(cds, chart.pluginVo);
+			po.mergeDataSetBind(dsb, chart.pluginVo);
 		});
 	};
 
-	po.unmergeChartCdss = function(chart)
+	po.unmergeChartDsbs = function(chart)
 	{
-		var cdss = (chart.dataSetBindVOs || []);
-		$.each(cdss, function(idx, cds)
+		var dsbs = (chart.dataSetBindVOs || []);
+		$.each(dsbs, function(idx, dsb)
 		{
-			po.unmergeDataSetBind(cds, chart.pluginVo);
+			po.unmergeDataSetBind(dsb, chart.pluginVo);
 		});
 	};
 	
@@ -596,21 +596,21 @@
 	{
 		var dataSet = dataSetBind.dataSet;
 		var fields = (dataSet ? dataSet.fields : []);
-		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = po.extDataSigns(chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
 		$.each(fields, function(idx, field)
 		{
 			var signs = [];
 			
 			var fieldSigns = (dataSetBind.fieldSigns[field.name] || []);
-			$.each(fieldSigns, function(psIdx, ps)
+			$.each(fieldSigns, function(fsIdx, fs)
 			{
-				var inArrayIdx = $.inArrayById(dataSigns, ps, "name");
-				if(inArrayIdx >= 0)
-					signs.push(dataSigns[inArrayIdx]);
+				var dataSign = po.findDataSignByFullname(dataSigns, fs, "extFullname");
+				if(dataSign != null)
+					signs.push(dataSign);
 			});
 			
-			field.cdsInfo =
+			field.extDsbInfo =
 			{
 				signs: signs,
 				alias: dataSetBind.fieldAliases[field.name],
@@ -623,36 +623,80 @@
 	{
 		var dataSet = dataSetBind.dataSet;
 		var fields = (dataSet ? dataSet.fields : []);
-		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = po.extDataSigns(chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
 		$.each(fields, function(idx, field)
 		{
-			var cdsInfo = (field.cdsInfo || {});
-			var signs = (cdsInfo.signs || []);
+			var extDsbInfo = (field.extDsbInfo || {});
+			var signs = (extDsbInfo.signs || []);
 			
 			var fieldSigns = [];
-			$.each(signs, function(psIdx, sign)
+			$.each(signs, function(fsIdx, sign)
 			{
-				var inArrayIdx = $.inArrayById(dataSigns, sign.name, "name");
-				if(inArrayIdx >= 0)
-					fieldSigns.push(sign.name);
+				if(po.findDataSignByFullname(dataSigns, sign.extFullname, "extFullname") != null)
+					fieldSigns.push(sign.extFullname);
 			});
 			
 			if(fieldSigns.length > 0)
 				dataSetBind.fieldSigns[field.name] = fieldSigns;
 			else
 				dataSetBind.fieldSigns[field.name] = undefined;
-			dataSetBind.fieldAliases[field.name] = cdsInfo.alias;
-			dataSetBind.fieldOrders[field.name] = cdsInfo.order;
+			dataSetBind.fieldAliases[field.name] = extDsbInfo.alias;
+			dataSetBind.fieldOrders[field.name] = extDsbInfo.order;
 			
-			field.cdsInfo = undefined;
+			field.extDsbInfo = undefined;
 		});
+	};
+	
+	po.extDataSigns = function(dataSigns, parent)
+	{
+		dataSigns = (dataSigns ? dataSigns : []);
+		parent = (parent == null ? null : parent);
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dsn = dataSigns[i];
+			
+			dsn.extFullname = (parent && parent.extFullname ? (parent.extFullname + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + dsn.name) : dsn.name);
+			dsn.extLabel = (parent && parent.extLabel ? (parent.extLabel + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
+			dsn.extParent = parent;
+			
+			if(dsn.children)
+				po.extDataSigns(dsn.children, dsn);
+		}
+		
+		return dataSigns;
+	};
+	
+	po.findDataSignByFullname = function(dataSigns, fullname)
+	{
+		if(!dataSigns)
+			return null;
+		
+		//应该先广度搜索、再深度搜索
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(dataSigns[i].extFullname == fullname)
+				return dataSigns[i];
+		}
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(dataSigns[i].children)
+			{
+				var d = po.findDataSignByFullname(dataSigns[i].children, fullname);
+				if(d != null)
+					return d;
+			}
+		}
+		
+		return null;
 	};
 	
 	po.formatDataSignLabel = function(dataSign)
 	{
 		if(dataSign.nameLabel && dataSign.nameLabel.value)
-			return dataSign.nameLabel.value + " ("+dataSign.name+")";
+			return dataSign.nameLabel.value + "("+dataSign.name+")";
 		else
 			return dataSign.name;
 	};
@@ -706,7 +750,7 @@
 		else
 		{
 			var msg = $.validator.format("<@spring.message code='chart.checkDataSetBindDataSign.required' />",
-						re.dataSet.name, po.formatDataSignLabel(re.dataSign));
+						re.dataSet.name, re.dataSign.extLabel);
 			$(element).data("invalidMsg", msg);
 			
 			return false;
@@ -718,13 +762,13 @@
 		var re = true;
 		
 		var dsr = (chart.pluginVo ? chart.pluginVo.dataSetRange : null);
-		var cdss = (chart.dataSetBindVOs || []);
+		var dsbs = (chart.dataSetBindVOs || []);
 		var mainCount = 0;
 		var attachmentCount = 0;
 		
-		$.each(cdss, function(i, cds)
+		$.each(dsbs, function(i, dsb)
 		{
-			if(cds.attachment)
+			if(dsb.attachment)
 				attachmentCount++;
 			else
 				mainCount++;
@@ -790,7 +834,7 @@
 	formModel.plugin = undefined;
 	formModel.dataSetBinds = undefined;
 	formModel.attrValues = (formModel.attrValues || {});
-	po.mergeChartCdss(formModel);
+	po.mergeChartDsbs(formModel);
 	
 	po.setupForm(formModel,
 	{
@@ -852,7 +896,7 @@
 	po.vuePageModel(
 	{
 		disableSaveShow: po.disableSaveShow,
-		chartPluginDataSigns: (formModel.pluginVo ? (formModel.pluginVo.dataSigns || []) : []),
+		chartPluginDataSigns:  po.extDataSigns(formModel.pluginVo ? formModel.pluginVo.dataSigns : []),
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
 		dataSetBindForSign: null,
@@ -896,11 +940,6 @@
 				return "<@spring.message code='emptyDesc' />";
 		},
 		
-		formatDataSignLabel: function(dataSign)
-		{
-			return po.formatDataSignLabel(dataSign);
-		},
-		
 		formatDspFieldsetName: function(dataSetField)
 		{
 			return "<@spring.message code='fieldWithColon' />" + dataSetField.name;
@@ -927,11 +966,11 @@
 			{
 				var fm = po.vueFormModel();
 				fm.pluginVo = plugin;
-				po.unmergeChartCdss(fm);
-				po.mergeChartCdss(fm);
+				po.unmergeChartDsbs(fm);
+				po.mergeChartDsbs(fm);
 				
 				var pm = po.vuePageModel();
-				pm.chartPluginDataSigns = (plugin.dataSigns || []);
+				pm.chartPluginDataSigns = po.extDataSigns(plugin.dataSigns);
 			});
 		},
 		
@@ -947,48 +986,49 @@
 					
 					$.each(dataSets, function(idx, dataSet)
 					{
-						var cds =
+						var dsb =
 						{
 							dataSet: dataSet,
+							dataSetSigns: [],
 							fieldSigns: {},
 							fieldAliases: {},
 							fieldOrders: {},
 							attachment: false
 						};
 						
-						po.mergeDataSetBind(cds);
-						fm.dataSetBindVOs.push(cds);
+						po.mergeDataSetBind(dsb);
+						fm.dataSetBindVOs.push(dsb);
 					});
 				});
 			});
 		},
 		
-		onMoveUpDataSetBind: function(e, cdsIdx)
+		onMoveUpDataSetBind: function(e, dsbIdx)
 		{
 			var fm = po.vueFormModel();
-			if(cdsIdx > 0)
+			if(dsbIdx > 0)
 			{
-				var prev = fm.dataSetBindVOs[cdsIdx - 1];
-				fm.dataSetBindVOs[cdsIdx - 1] = fm.dataSetBindVOs[cdsIdx];
-				fm.dataSetBindVOs[cdsIdx] = prev;
+				var prev = fm.dataSetBindVOs[dsbIdx - 1];
+				fm.dataSetBindVOs[dsbIdx - 1] = fm.dataSetBindVOs[dsbIdx];
+				fm.dataSetBindVOs[dsbIdx] = prev;
 			}
 		},
 		
-		onMoveDownDataSetBind: function(e, cdsIdx)
+		onMoveDownDataSetBind: function(e, dsbIdx)
 		{
 			var fm = po.vueFormModel();
-			if((cdsIdx + 1) < fm.dataSetBindVOs.length)
+			if((dsbIdx + 1) < fm.dataSetBindVOs.length)
 			{
-				var next = fm.dataSetBindVOs[cdsIdx + 1];
-				fm.dataSetBindVOs[cdsIdx + 1] = fm.dataSetBindVOs[cdsIdx];
-				fm.dataSetBindVOs[cdsIdx] = next;
+				var next = fm.dataSetBindVOs[dsbIdx + 1];
+				fm.dataSetBindVOs[dsbIdx + 1] = fm.dataSetBindVOs[dsbIdx];
+				fm.dataSetBindVOs[dsbIdx] = next;
 			}
 		},
 		
-		onDeleteDataSetBind: function(e, cdsIdx)
+		onDeleteDataSetBind: function(e, dsbIdx)
 		{
 			var fm = po.vueFormModel();
-			fm.dataSetBindVOs.splice(cdsIdx, 1);
+			fm.dataSetBindVOs.splice(dsbIdx, 1);
 		},
 		
 		onShowDataSignPanel: function(e, dataSetBind, dataSetField)
@@ -1014,7 +1054,7 @@
 			po.vueUnref("${pid}dataSignDetailPanelEle").hide();
 			po.vueNextTick(function()
 			{
-				pm.dataSignDetail.label = po.formatDataSignLabel(dataSign);
+				pm.dataSignDetail.label = dataSign.extLabel;
 				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
 				
 				po.vueUnref("${pid}dataSignDetailPanelEle").show(e);
@@ -1038,7 +1078,7 @@
 			var pm = po.vuePageModel();
 			if(pm.dataSignDetailShown)
 			{
-				pm.dataSignDetail.label = po.formatDataSignLabel(dataSign);
+				pm.dataSignDetail.label = dataSign.extLabel;
 				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
 			}
 		},
@@ -1049,18 +1089,18 @@
 			
 			if(pm.dataSetBindForSign && pm.dataSetFieldForSign)
 			{
-				if(!dataSign.multiple && po.isDataSetBindSigned(pm.dataSetBindForSign, dataSign))
+				if(!dataSign.multiple && po.hasDataSetFieldSigned(pm.dataSetBindForSign, dataSign))
 				{
-					var msg = $.validator.format("<@spring.message code='chart.dataSetHasDataSign' />",
-							pm.dataSetBindForSign.dataSet.name, po.formatDataSignLabel(dataSign));
+					var msg = $.validator.format("<@spring.message code='chart.dataSetHasFieldSign' />",
+							pm.dataSetBindForSign.dataSet.name, dataSign.extLabel);
 					
 					$.tipWarn(msg);
 					return;
 				}
 				
-				var signs = pm.dataSetFieldForSign.cdsInfo.signs;
+				var signs = pm.dataSetFieldForSign.extDsbInfo.signs;
 				
-				if($.inArrayById(signs, dataSign.name, "name") < 0)
+				if($.inArrayById(signs, dataSign.extFullname, "extFullname") < 0)
 					signs.push(dataSign);
 				
 				po.vueUnref("${pid}dataSignsPanelEle").hide();
@@ -1069,7 +1109,7 @@
 		
 		onRemoveDataSign: function(dataSetField, dataSigName)
 		{
-			var signs = dataSetField.cdsInfo.signs;
+			var signs = dataSetField.extDsbInfo.signs;
 			$.removeById(signs, dataSigName, "name");
 		},
 		
