@@ -18,6 +18,7 @@
 -->
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
 <#assign ChartPluginAttributeType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
+<#assign DataSign=statics['org.datagear.analysis.DataSign']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -112,19 +113,41 @@
 								</p-button>
 							</template>
 							<div>
-								<!-- 这里添加数据集标记设置框 -->
+								<div class="px-2" v-if="pm.pluginHasDataSetSign">
+									<div class="field grid mb-2">
+										<label :for="'${pid}dsbSign_'+dsbIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+											title="<@spring.message code='chart.dsb.dataSetSign.desc' />">
+											<@spring.message code='sign' />
+										</label>
+										<div class="field-input col-12 md:col-9">
+											<div class="p-inputgroup">
+												<div :id="'${pid}dsbSign_'+dsbIdx"
+													class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
+													<p-chip v-for="sign in dsb.extSignObjs" :key="sign.extFullname" :label="sign.extLabel" class="mb-2"
+														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetDataSign(dsb, sign.extFullname)">
+													</p-chip>
+												</div>
+												<p-button type="button" icon="pi pi-plus"
+													aria:haspopup="true" aria-controls="${pid}dataSignsPanel"
+													@click="onShowDataSignPanel($event, dsb)" v-if="!pm.isReadonlyAction">
+												</p-button>
+											</div>
+										</div>
+									</div>
+								</div>
+								
 								<p-fieldset v-for="(df, dfIdx) in dsb.dataSet.fields" :key="dfIdx" :legend="formatDspFieldsetName(df)" class="fieldset-sm mb-3">
 									<div class="field grid mb-2">
 										<label :for="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-											title="<@spring.message code='chart.dsb.dataSign.desc' />">
+											title="<@spring.message code='chart.dsb.fieldSign.desc' />">
 											<@spring.message code='sign' />
 										</label>
 										<div class="field-input col-12 md:col-9">
 											<div class="p-inputgroup">
 												<div :id="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx"
 													class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
-													<p-chip v-for="sign in df.extDsbInfo.signs" :key="sign.extFullname" :label="sign.extLabel" class="mb-2"
-														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSign(df, sign.extFullname)">
+													<p-chip v-for="sign in df.extDsbInfo.signObjs" :key="sign.extFullname" :label="sign.extLabel" class="mb-2"
+														:removable="!pm.isReadonlyAction" @remove="onRemoveFieldDataSign(df, sign.extFullname)">
 													</p-chip>
 												</div>
 												<p-button type="button" icon="pi pi-plus"
@@ -294,7 +317,7 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
-			<div v-for="ds in pm.chartPluginDataSigns" :key="ds.extFullname" class="mb-2">
+			<div v-for="ds in pm.candidateDataSigns" :key="ds.extFullname" class="mb-2">
 				<div class="p-inputgroup">
 					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus"
 						@click="onAddDataSign($event, ds)">
@@ -501,6 +524,8 @@
 		else
 			data.resultDataFormat = undefined;
 		
+		data.pluginVo = (data.pluginVo ? { id: data.pluginVo.id } : null);
+		
 		action.options.saveAndShowAction = po.inSaveAndShowAction();
 	};
 	
@@ -538,9 +563,9 @@
 				for(var k=0; k<fields.length; k++)
 				{
 					var field = fields[k];
-					var signs = (field.extDsbInfo ? (field.extDsbInfo.signs || []) : []);
+					var signObjs = (field.extDsbInfo ? (field.extDsbInfo.signObjs || []) : []);
 					
-					if($.inArrayById(signs, requiredSign.extFullname, "extFullname") > -1)
+					if($.inArrayById(signObjs, requiredSign.extFullname, "extFullname") > -1)
 					{
 						contains = true;
 						break;
@@ -565,9 +590,9 @@
 		for(var i=0; i<fields.length; i++)
 		{
 			var field = fields[i];
-			var signs = (field.extDsbInfo ? (field.extDsbInfo.signs || []) : []);
+			var signObjs = (field.extDsbInfo ? (field.extDsbInfo.signObjs || []) : []);
 			
-			if($.inArrayById(signs, dataSign.extFullname, "extFullname") > -1)
+			if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") > -1)
 				return true;
 		}
 		
@@ -596,45 +621,57 @@
 	{
 		var dataSet = dataSetBind.dataSet;
 		var fields = (dataSet ? dataSet.fields : []);
-		var dataSigns = po.extDataSigns(chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
 		$.each(fields, function(idx, field)
 		{
-			var signs = [];
+			var signObjs = [];
 			
 			var fieldSigns = (dataSetBind.fieldSigns[field.name] || []);
-			$.each(fieldSigns, function(fsIdx, fs)
+			$.each(fieldSigns, function(fsIdx, signName)
 			{
-				var dataSign = po.findDataSignByFullname(dataSigns, fs, "extFullname");
+				var dataSign = po.findDataSignByFullname(dataSigns, signName);
 				if(dataSign != null)
-					signs.push(dataSign);
+					signObjs.push(dataSign);
 			});
 			
 			field.extDsbInfo =
 			{
-				signs: signs,
+				signObjs: signObjs,
 				alias: dataSetBind.fieldAliases[field.name],
 				order: dataSetBind.fieldOrders[field.name]
 			};
 		});
+		
+		dataSetBind.extSignObjs = [];
+		
+		if(dataSetBind.dataSetSigns)
+		{
+			$.each(dataSetBind.dataSetSigns, function(idx, signName)
+			{
+				var dataSign = po.findDataSignByFullname(dataSigns, signName, false);
+				if(dataSign != null)
+					dataSetBind.extSignObjs.push(dataSign);
+			});
+		}
 	};
 	
 	po.unmergeDataSetBind = function(dataSetBind, chartPlugin)
 	{
 		var dataSet = dataSetBind.dataSet;
 		var fields = (dataSet ? dataSet.fields : []);
-		var dataSigns = po.extDataSigns(chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
 		
 		$.each(fields, function(idx, field)
 		{
 			var extDsbInfo = (field.extDsbInfo || {});
-			var signs = (extDsbInfo.signs || []);
+			var signObjs = (extDsbInfo.signObjs || []);
 			
 			var fieldSigns = [];
-			$.each(signs, function(fsIdx, sign)
+			$.each(signObjs, function(fsIdx, signObj)
 			{
-				if(po.findDataSignByFullname(dataSigns, sign.extFullname, "extFullname") != null)
-					fieldSigns.push(sign.extFullname);
+				if(po.findDataSignByFullname(dataSigns, signObj.extFullname) != null)
+					fieldSigns.push(signObj.extFullname);
 			});
 			
 			if(fieldSigns.length > 0)
@@ -646,6 +683,28 @@
 			
 			field.extDsbInfo = undefined;
 		});
+		
+		dataSetBind.dataSetSigns = [];
+		
+		if(dataSetBind.extSignObjs)
+		{
+			$.each(dataSetBind.extSignObjs, function(idx, signObj)
+			{
+				var dataSign = po.findDataSignByFullname(dataSigns, signObj.extFullname, false);
+				if(dataSign != null)
+					dataSetBind.dataSetSigns.push(signObj.extFullname);
+			});
+		}
+		
+		dataSetBind.extSignObjs = undefined;
+	};
+	
+	po.extPluginDataSigns = function(plugin)
+	{
+		if(!plugin)
+			return;
+		
+		plugin.dataSigns = po.extDataSigns(plugin.dataSigns);
 	};
 	
 	po.extDataSigns = function(dataSigns, parent)
@@ -659,7 +718,6 @@
 			
 			dsn.extFullname = (parent && parent.extFullname ? (parent.extFullname + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + dsn.name) : dsn.name);
 			dsn.extLabel = (parent && parent.extLabel ? (parent.extLabel + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
-			dsn.extParent = parent;
 			
 			if(dsn.children)
 				po.extDataSigns(dsn.children, dsn);
@@ -668,8 +726,28 @@
 		return dataSigns;
 	};
 	
-	po.findDataSignByFullname = function(dataSigns, fullname)
+	po.hasDataSetSign = function(plugin)
 	{
+		var dataSigns = (plugin ? plugin.dataSigns : null);
+		
+		if(!dataSigns)
+			return false;
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(!po.isDataSignTargetField(dataSigns[i]))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	};
+	
+	po.findDataSignByFullname = function(dataSigns, fullname, deepSearch)
+	{
+		deepSearch = (deepSearch == null ? true : deepSearch);
+		
 		if(!dataSigns)
 			return null;
 		
@@ -691,6 +769,60 @@
 		}
 		
 		return null;
+	};
+
+	po.evalCandidateDataSignsForDataSet = function(dataSigns, dsb)
+	{
+		var re = [];
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dsi = dataSigns[i];
+			
+			if(!po.isDataSignTargetField(dsi))
+			{
+				re.push(dsi);
+			}
+		}
+		
+		return re;
+	};
+	
+	po.evalCandidateDataSignsForField = function(dataSigns, dsb)
+	{
+		var re = [];
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dsi = dataSigns[i];
+			
+			if(po.isDataSignTargetField(dsi))
+			{
+				re.push(dsi);
+			}
+		}
+		
+		if(dsb.extSignObjs)
+		{
+			$.each(dsb.extSignObjs, function(idx, signObj)
+			{
+				var signObjChildren = (signObj.children || []);
+				for(var i=0; i<signObjChildren.length; i++)
+				{
+					if(po.isDataSignTargetField(signObjChildren[i]))
+					{
+						re.push(signObjChildren[i]);
+					}
+				}
+			});
+		}
+		
+		return re;
+	};
+	
+	po.isDataSignTargetField = function(dataSign)
+	{
+		return (dataSign.target == null || dataSign.target == "" || dataSign.target == "${DataSign.TARGET_FIELD}");
 	};
 	
 	po.formatDataSignLabel = function(dataSign)
@@ -829,6 +961,8 @@
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+	formModel.pluginVo = (formModel.pluginVo == null ? {} : formModel.pluginVo);
+	po.extPluginDataSigns(formModel.pluginVo);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	formModel.dataSetBindVOs = (formModel.dataSetBindVOs == null ? [] : formModel.dataSetBindVOs);
 	formModel.plugin = undefined;
@@ -896,9 +1030,11 @@
 	po.vuePageModel(
 	{
 		disableSaveShow: po.disableSaveShow,
-		chartPluginDataSigns:  po.extDataSigns(formModel.pluginVo ? formModel.pluginVo.dataSigns : []),
+		pluginHasDataSetSign: po.hasDataSetSign(formModel.pluginVo),
+		candidateDataSigns: [],
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
+		dataSignTarget: "field",
 		dataSetBindForSign: null,
 		dataSetFieldForSign: null,
 		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
@@ -964,13 +1100,15 @@
 		{
 			po.handleOpenSelectAction("/chartPlugin/select", function(plugin)
 			{
+				po.extPluginDataSigns(plugin);
+				
 				var fm = po.vueFormModel();
+				var pm = po.vuePageModel();
+				
 				fm.pluginVo = plugin;
 				po.unmergeChartDsbs(fm);
 				po.mergeChartDsbs(fm);
-				
-				var pm = po.vuePageModel();
-				pm.chartPluginDataSigns = po.extDataSigns(plugin.dataSigns);
+				pm.pluginHasDataSetSign = po.hasDataSetSign(fm.pluginVo);
 			});
 		},
 		
@@ -1033,14 +1171,21 @@
 		
 		onShowDataSignPanel: function(e, dataSetBind, dataSetField)
 		{
+			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
 			
 			//直接show会导致面板还停留在上一个元素上
 			po.vueUnref("${pid}dataSignsPanelEle").hide();
 			po.vueNextTick(function()
 			{
+				pm.dataSignTarget = (dataSetField != null ? "field" : "dataset");
 				pm.dataSetBindForSign = dataSetBind;
-				pm.dataSetFieldForSign = dataSetField;
+				pm.dataSetFieldForSign = (dataSetField != null ? dataSetField : null);
+				
+				if(dataSetField != null)
+					pm.candidateDataSigns = po.evalCandidateDataSignsForField(fm.pluginVo.dataSigns, dataSetBind);
+				else
+					pm.candidateDataSigns = po.evalCandidateDataSignsForDataSet(fm.pluginVo.dataSigns, dataSetBind);
 				
 				po.vueUnref("${pid}dataSignsPanelEle").show(e);
 			});
@@ -1087,30 +1232,51 @@
 		{
 			var pm = po.vuePageModel();
 			
-			if(pm.dataSetBindForSign && pm.dataSetFieldForSign)
+			if(pm.dataSignTarget == "dataset")
 			{
-				if(!dataSign.multiple && po.hasDataSetFieldSigned(pm.dataSetBindForSign, dataSign))
+				if(pm.dataSetBindForSign)
 				{
-					var msg = $.validator.format("<@spring.message code='chart.dataSetHasFieldSign' />",
-							pm.dataSetBindForSign.dataSet.name, dataSign.extLabel);
+					var signObjs = pm.dataSetBindForSign.extSignObjs;
 					
-					$.tipWarn(msg);
-					return;
+					if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") < 0)
+						signObjs.push(dataSign);
+					
+					po.vueUnref("${pid}dataSignsPanelEle").hide();
 				}
-				
-				var signs = pm.dataSetFieldForSign.extDsbInfo.signs;
-				
-				if($.inArrayById(signs, dataSign.extFullname, "extFullname") < 0)
-					signs.push(dataSign);
-				
-				po.vueUnref("${pid}dataSignsPanelEle").hide();
+			}
+			else if(pm.dataSignTarget == "field")
+			{
+				if(pm.dataSetBindForSign && pm.dataSetFieldForSign)
+				{
+					if(!dataSign.multiple && po.hasDataSetFieldSigned(pm.dataSetBindForSign, dataSign))
+					{
+						var msg = $.validator.format("<@spring.message code='chart.dataSetHasFieldSign' />",
+								pm.dataSetBindForSign.dataSet.name, dataSign.extLabel);
+						
+						$.tipWarn(msg);
+						return;
+					}
+					
+					var signObjs = pm.dataSetFieldForSign.extDsbInfo.signObjs;
+					
+					if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") < 0)
+						signObjs.push(dataSign);
+					
+					po.vueUnref("${pid}dataSignsPanelEle").hide();
+				}
 			}
 		},
-		
-		onRemoveDataSign: function(dataSetField, dataSigName)
+
+		onRemoveDataSetDataSign: function(dataSetBind, dataSigName)
 		{
-			var signs = dataSetField.extDsbInfo.signs;
-			$.removeById(signs, dataSigName, "name");
+			var signObjs = dataSetBind.extSignObjs;
+			$.removeById(signObjs, dataSigName, "extFullname");
+		},
+		
+		onRemoveFieldDataSign: function(dataSetField, dataSigName)
+		{
+			var signObjs = dataSetField.extDsbInfo.signObjs;
+			$.removeById(signObjs, dataSigName, "extFullname");
 		},
 		
 		onUpdateIntervalTypeChange: function(e)
