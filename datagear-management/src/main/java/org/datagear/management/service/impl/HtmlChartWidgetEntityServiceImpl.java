@@ -22,10 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.AbstractIdentifiable;
@@ -422,12 +420,12 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<String, Set<String>> toFieldSigns(String json)
+	protected Map<String, List<String>> toFieldSigns(String json)
 	{
 		if (StringUtil.isEmpty(json))
 			return Collections.EMPTY_MAP;
 
-		Map<String, Set<String>> fieldSigns = new HashMap<>();
+		Map<String, List<String>> fieldSigns = new HashMap<>();
 
 		Map<String, Object> jsonMap = JsonSupport.parse(json, Map.class, null);
 		if (jsonMap == null)
@@ -435,7 +433,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		for (Map.Entry<String, Object> entry : jsonMap.entrySet())
 		{
-			Set<String> signs = new HashSet<>();
+			List<String> signs = new ArrayList<>();
 
 			Object valueObj = entry.getValue();
 
@@ -491,17 +489,17 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Set<String> toDataSetSigns(String json)
+	protected List<String> toDataSetSigns(String json)
 	{
 		if (StringUtil.isEmpty(json))
-			return Collections.emptySet();
+			return Collections.emptyList();
 
 		Collection<String> signs = JsonSupport.parse(json, Collection.class, null);
 
 		if (signs == null)
-			return Collections.emptySet();
+			return Collections.emptyList();
 
-		Set<String> re = new HashSet<>(signs);
+		List<String> re = new ArrayList<>(signs);
 		return re;
 	}
 

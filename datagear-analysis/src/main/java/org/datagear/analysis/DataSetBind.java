@@ -19,8 +19,8 @@ package org.datagear.analysis;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 数据集绑定。
@@ -39,10 +39,10 @@ public class DataSetBind implements Serializable
 	private DataSet dataSet;
 
 	/** 数据集标记集合 */
-	private Set<String> dataSetSigns = Collections.emptySet();
+	private List<String> dataSetSigns = Collections.emptyList();
 
 	/** 数据集字段标记映射表 */
-	private Map<String, Set<String>> fieldSigns = Collections.emptyMap();
+	private Map<String, List<String>> fieldSigns = Collections.emptyMap();
 
 	/** 数据集别名 */
 	private String alias = "";
@@ -80,7 +80,7 @@ public class DataSetBind implements Serializable
 		this.dataSet = dataSet;
 	}
 
-	public Set<String> getDataSetSigns()
+	public List<String> getDataSetSigns()
 	{
 		return dataSetSigns;
 	}
@@ -94,12 +94,12 @@ public class DataSetBind implements Serializable
 	 * 
 	 * @param dataSetSigns
 	 */
-	public void setDataSetSigns(Set<String> dataSetSigns)
+	public void setDataSetSigns(List<String> dataSetSigns)
 	{
 		this.dataSetSigns = dataSetSigns;
 	}
 
-	public Map<String, Set<String>> getFieldSigns()
+	public Map<String, List<String>> getFieldSigns()
 	{
 		return fieldSigns;
 	}
@@ -118,7 +118,7 @@ public class DataSetBind implements Serializable
 	 * 
 	 * @param fieldSigns
 	 */
-	public void setFieldSigns(Map<String, Set<String>> fieldSigns)
+	public void setFieldSigns(Map<String, List<String>> fieldSigns)
 	{
 		this.fieldSigns = fieldSigns;
 	}
