@@ -100,7 +100,7 @@
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}dataSetBindVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx" :header="dsb.dataSet.name" :toggleable="true" class="p-card mb-2 no-panel-border">
+						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx" :header="formatDsbHeaderName(dsb)" :toggleable="true" class="p-card mb-2 no-panel-border">
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
 									@click="onMoveUpDataSetBind($event, dsbIdx)" v-if="!pm.isReadonlyAction">
@@ -113,7 +113,7 @@
 								</p-button>
 							</template>
 							<div>
-								<div class="px-2" v-if="pm.pluginHasDataSetSign">
+								<p-fieldset legend="<@spring.message code='dataSetSign' />" class="fieldset-sm fieldset-bold-legend mb-3" v-if="pm.pluginHasDataSetSign">
 									<div class="field grid mb-2">
 										<label :for="'${pid}dsbSign_'+dsbIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 											title="<@spring.message code='chart.dsb.dataSetSign.desc' />">
@@ -134,9 +134,9 @@
 											</div>
 										</div>
 									</div>
-								</div>
+								</p-fieldset>
 								
-								<p-fieldset v-for="(df, dfIdx) in dsb.dataSet.fields" :key="dfIdx" :legend="formatDspFieldsetName(df)" class="fieldset-sm mb-3">
+								<p-fieldset v-for="(df, dfIdx) in dsb.dataSet.fields" :key="dfIdx" :legend="formatDsfFieldsetName(df)" class="fieldset-sm mb-3">
 									<div class="field grid mb-2">
 										<label :for="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 											title="<@spring.message code='chart.dsb.fieldSign.desc' />">
@@ -238,7 +238,7 @@
 						</div>
 					</div>
 		        	<div class="validate-msg">
-		        		<input name="dspDataSignCheckVal" type="text" class="validate-normalizer" />
+		        		<input name="dataSetSignCheckVal" type="text" class="validate-normalizer" />
 		        		<input name="validateDataSetRangeVal" type="text" class="validate-normalizer" />
 		        	</div>
 				</div>
@@ -535,29 +535,53 @@
 		var dataSetBinds = (chart.dataSetBindVOs || []);
 		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
 		
-		if(!dataSigns)
+		if(dataSigns.length == 0)
 			return true;
 		
-		var requiredSigns = [];
+		var requiredDataSetSigns = po.evalCandidateDataSignsForDataSet(dataSigns);
+		requiredDataSetSigns = po.getRequiredDataSigns(requiredDataSetSigns);
 		
-		$.each(dataSigns, function(idx, dataSign)
+		for(var i=0; i<requiredDataSetSigns.length; i++)
 		{
-			if(dataSign.required == true)
-				requiredSigns.push(dataSign);
-		});
+			var requiredSign = requiredDataSetSigns[i];
+			var contains = false;
+			
+			for(var j=0; j<dataSetBinds.length; j++)
+			{
+				var dsb = dataSetBinds[j];
+				
+				if(dsb.attachment == true)
+					continue;
+				
+				if($.inArrayById(dsb.extSignObjs, requiredSign.extFullname, "extFullname") > -1)
+				{
+					contains = true;
+					break;
+				}
+			}
+			
+			if(!contains)
+			{
+				var invalidInfo = { type: "dataset", dataSign: requiredSign };
+				return invalidInfo;
+			}
+		}
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var dataSetBind = dataSetBinds[i];
+			var dsb = dataSetBinds[i];
 			
-			if(dataSetBind.attachment == true)
+			if(dsb.attachment == true)
 				continue;
 			
-			var fields = (dataSetBind.dataSet.fields || []);
+			var requiredFieldSigns = po.evalCandidateDataSignsForField(dataSigns, dsb);
+			requiredFieldSigns = po.getRequiredDataSigns(requiredFieldSigns);
 			
-			for(var j=0; j<requiredSigns.length; j++)
+			var fields = (dsb.dataSet.fields || []);
+			
+			for(var j=0; j<requiredFieldSigns.length; j++)
 			{
-				var requiredSign = requiredSigns[j];
+				var requiredSign = requiredFieldSigns[j];
 				var contains = false;
 				
 				for(var k=0; k<fields.length; k++)
@@ -574,13 +598,44 @@
 				
 				if(!contains)
 				{
-					var invalidInfo = { dataSet: dataSetBind.dataSet, dataSign: requiredSign };
+					var invalidInfo = {  type: "field", dataSet: dsb.dataSet, dataSign: requiredSign };
 					return invalidInfo;
 				}
 			}
 		}
 		
 		return true;
+	};
+	
+	po.getRequiredDataSigns = function(signObjs)
+	{
+		var re = [];
+		
+		if(signObjs)
+		{
+			$.each(signObjs, function(idx, signObj)
+			{
+				if(signObj.required == true)
+					re.push(signObj);
+			});
+		}
+		
+		return re;
+	};
+
+	po.hasDataSetSigned = function(dataSetBinds, dataSign)
+	{
+		dataSetBinds = (dataSetBinds == null ? [] : dataSetBinds);
+		
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var signObjs = dataSetBinds[i].extSignObjs;
+			
+			if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") > -1)
+				return true;
+		}
+		
+		return false;
 	};
 	
 	po.hasDataSetFieldSigned = function(dataSetBind, dataSign)
@@ -725,8 +780,8 @@
 		
 		return dataSigns;
 	};
-	
-	po.hasDataSetSign = function(plugin)
+
+	po.containsDataSetSign = function(plugin)
 	{
 		var dataSigns = (plugin ? plugin.dataSigns : null);
 		
@@ -771,7 +826,7 @@
 		return null;
 	};
 
-	po.evalCandidateDataSignsForDataSet = function(dataSigns, dsb)
+	po.evalCandidateDataSignsForDataSet = function(dataSigns)
 	{
 		var re = [];
 		
@@ -870,7 +925,7 @@
 		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
 	};
 	
-	$.validator.addMethod("dspDataSignRequired", function(chart, element)
+	$.validator.addMethod("dataSetSignRequired", function(chart, element)
 	{
 		var re = po.validateDataSetBindDataSign(chart);
 		
@@ -881,10 +936,19 @@
 		}
 		else
 		{
-			var msg = $.validator.format("<@spring.message code='chart.checkDataSetBindDataSign.required' />",
-						re.dataSet.name, re.dataSign.extLabel);
-			$(element).data("invalidMsg", msg);
+			var msg = "Unknown";
 			
+			if(re.type == "dataset")
+			{
+				msg = $.validator.format("<@spring.message code='chart.dataSetSign.required' />", re.dataSign.extLabel);
+			}
+			else if(re.type == "field")
+			{
+				msg = $.validator.format("<@spring.message code='chart.fieldSign.required' />",
+							re.dataSet.name, re.dataSign.extLabel);
+			}
+			
+			$(element).data("invalidMsg", msg);
 			return false;
 		}
 	});
@@ -988,13 +1052,13 @@
 		rules:
 		{
 			updateInterval: {"integer": true},
-			dspDataSignCheckVal: { "dspDataSignRequired": true },
+			dataSetSignCheckVal: { "dataSetSignRequired": true },
 			validateDataSetRangeVal: { "validateDataSetRange": true },
 			chartAttrValuesCheckVal: { "chartAttrValuesRequired": true }
 		},
 		customNormalizers:
 		{
-			dspDataSignCheckVal: function()
+			dataSetSignCheckVal: function()
 			{
 				return po.vueFormModel();
 			},
@@ -1009,9 +1073,9 @@
 		},
 		messages:
 		{
-			dspDataSignCheckVal:
+			dataSetSignCheckVal:
 			{
-				dspDataSignRequired: function(val, element)
+				dataSetSignRequired: function(val, element)
 				{
 					return $(element).data("invalidMsg");
 				}
@@ -1030,7 +1094,7 @@
 	po.vuePageModel(
 	{
 		disableSaveShow: po.disableSaveShow,
-		pluginHasDataSetSign: po.hasDataSetSign(formModel.pluginVo),
+		pluginHasDataSetSign: po.containsDataSetSign(formModel.pluginVo),
 		candidateDataSigns: [],
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
@@ -1076,7 +1140,12 @@
 				return "<@spring.message code='emptyDesc' />";
 		},
 		
-		formatDspFieldsetName: function(dataSetField)
+		formatDsbHeaderName: function(dataSetBind)
+		{
+			return "<@spring.message code='dataSetOfColon' />" + dataSetBind.dataSet.name;
+		},
+		
+		formatDsfFieldsetName: function(dataSetField)
 		{
 			return "<@spring.message code='fieldWithColon' />" + dataSetField.name;
 		},
@@ -1108,7 +1177,7 @@
 				fm.pluginVo = plugin;
 				po.unmergeChartDsbs(fm);
 				po.mergeChartDsbs(fm);
-				pm.pluginHasDataSetSign = po.hasDataSetSign(fm.pluginVo);
+				pm.pluginHasDataSetSign = po.containsDataSetSign(fm.pluginVo);
 			});
 		},
 		
@@ -1185,7 +1254,7 @@
 				if(dataSetField != null)
 					pm.candidateDataSigns = po.evalCandidateDataSignsForField(fm.pluginVo.dataSigns, dataSetBind);
 				else
-					pm.candidateDataSigns = po.evalCandidateDataSignsForDataSet(fm.pluginVo.dataSigns, dataSetBind);
+					pm.candidateDataSigns = po.evalCandidateDataSignsForDataSet(fm.pluginVo.dataSigns);
 				
 				po.vueUnref("${pid}dataSignsPanelEle").show(e);
 			});
@@ -1230,12 +1299,20 @@
 		
 		onAddDataSign: function(e, dataSign)
 		{
+			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
 			
 			if(pm.dataSignTarget == "dataset")
 			{
 				if(pm.dataSetBindForSign)
 				{
+					if(!dataSign.multiple && po.hasDataSetSigned(fm.dataSetBindVOs, dataSign))
+					{
+						var msg = $.validator.format("<@spring.message code='chart.dataSetWithSignExist' />", dataSign.extLabel);
+						$.tipWarn(msg);
+						return;
+					}
+					
 					var signObjs = pm.dataSetBindForSign.extSignObjs;
 					
 					if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") < 0)
@@ -1250,9 +1327,8 @@
 				{
 					if(!dataSign.multiple && po.hasDataSetFieldSigned(pm.dataSetBindForSign, dataSign))
 					{
-						var msg = $.validator.format("<@spring.message code='chart.dataSetHasFieldSign' />",
+						var msg = $.validator.format("<@spring.message code='chart.fieldWithSignExist' />",
 								pm.dataSetBindForSign.dataSet.name, dataSign.extLabel);
-						
 						$.tipWarn(msg);
 						return;
 					}

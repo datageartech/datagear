@@ -439,6 +439,9 @@ label.align-tip{
 	padding: 0.6rem;
 	padding-bottom: 0.1rem;
 }
+.p-fieldset.fieldset-bold-legend .p-fieldset-legend{
+	font-weight: bold;
+}
 .p-divider.divider-z-0 .p-divider-content{
 	z-index: 0 !important;
 }

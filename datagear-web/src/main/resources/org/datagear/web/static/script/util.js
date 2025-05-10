@@ -663,6 +663,9 @@
 	{
 		idPropName = (idPropName == null ? "id" : idPropName);
 		
+		if(array == null)
+			return -1;
+		
 		for(var i=0; i<array.length; i++)
 		{
 			if(array[i] && array[i][idPropName] == idValue)
