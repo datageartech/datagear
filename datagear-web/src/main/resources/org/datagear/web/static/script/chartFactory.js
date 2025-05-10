@@ -2232,63 +2232,12 @@
 		
 		if(nonEmpty == "auto")
 		{
-			var dataSignObj = this._resolveTailDataSign(dataSign);
-			nonEmpty = (dataSignObj ? dataSignObj.required : false);
+			var dataSignNodes = this.dataSignPathNodes(dataSign);
+			nonEmpty = (dataSignNodes && dataSignNodes.length > 0 ? dataSignNodes[dataSignNodes.length-1].required : false);
 		}
 		
 		if(nonEmpty && re.length == 0)
 			throw new Error("no dataSetField signed by : "+dataSignName);
-		
-		return re;
-	};
-	
-	chartBase._resolveTailDataSign = function(dataSign)
-	{
-		if(dataSign == null)
-			return null;
-		
-		var re = null;
-		
-		if(chartFactory.isString(dataSign))
-		{
-			//尝试数据标记名
-			re = this.pluginDataSign(dataSign);
-			
-			//标记全名
-			if(re == null)
-			{
-				re = this._resolveTailDataSign(dataSign.split(chartFactory.DATA_SIGN_FULLNAME_SEPARATOR));
-			}
-		}
-		//插件数据标记数组索引
-		else if(chartFactory.isNumber(dataSign))
-		{
-			re = this.pluginDataSign(dataSign);
-		}
-		//数据标记对象
-		else if(dataSign.name !== undefined)
-		{
-			re = dataSign;
-		}
-		//插件数据标记层级数组
-		else if($.isArray(dataSign))
-		{
-			var parents = undefined;
-			
-			for(var i=0; i<dataSign.length; i++)
-			{
-				var dsi = this.pluginDataSign(dataSign[i], parents);
-				
-				if(dsi == null)
-				{
-					re = null;
-					break;
-				}
-				
-				re = dsi;
-				parents = (dsi.children ? dsi.children : []);
-			}
-		}
 		
 		return re;
 	};
@@ -4543,6 +4492,74 @@
 			
 			return re;
 		}
+	};
+	
+	/**
+	 * 获取数据标记路径节点数组。
+	 * 
+	 * @param fullname 字符串全名、数据标记数组索引数值、数据标记对象，或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
+	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
+	 * @returns 数据标记数组，空数组表示任一级没找到
+	 * @since 5.4.0
+	 */
+	chartBase.dataSignPathNodes = function(fullname, dataSigns)
+	{
+		var re = [];
+		
+		if(fullname == null)
+			return re;
+		
+		if(chartFactory.isString(fullname))
+		{
+			//尝试作为数据标记名查找
+			var dataSign = this.pluginDataSign(fullname, dataSigns);
+			
+			if(dataSign != null)
+			{
+				re.push(dataSign);
+			}
+			//标记全名
+			else
+			{
+				re = this.dataSignPathNodes(fullname.split(chartFactory.DATA_SIGN_FULLNAME_SEPARATOR), dataSigns);
+			}
+		}
+		//插件数据标记层级数组
+		else if($.isArray(fullname))
+		{
+			for(var i=0; i<fullname.length; i++)
+			{
+				var dataSign = this.pluginDataSign(fullname[i], dataSigns);
+				
+				if(dataSign == null)
+				{
+					re = [];
+					break;
+				}
+				else
+				{
+					re.push(dataSign);
+					dataSigns = (dataSign.children ? dataSign.children : []);
+				}
+			}
+		}
+		//插件数据标记数组索引
+		else if(chartFactory.isNumber(fullname))
+		{
+			var dataSign = this.pluginDataSign(fullname, dataSigns);
+			
+			if(dataSign != null)
+			{
+				re.push(dataSign);
+			}
+		}
+		//数据标记对象
+		else if(fullname.name !== undefined)
+		{
+			re.push(fullname);
+		}
+		
+		return re;
 	};
 	
 	/**
