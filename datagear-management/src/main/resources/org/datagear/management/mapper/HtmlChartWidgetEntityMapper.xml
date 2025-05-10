@@ -22,12 +22,14 @@
 		INSERT INTO DATAGEAR_HCW_DS
 			(
 			HCW_ID, DS_ID, DS_PROPERTY_SIGNS, DS_ALIAS, DS_ATTACHMENT,
-			DS_QUERY, DS_PROPERTY_ALIASES, DS_PROPERTY_ORDERS, DS_ORDER
+			DS_QUERY, DS_PROPERTY_ALIASES, DS_PROPERTY_ORDERS, DS_ORDER,
+			DS_DATASET_SIGNS
 			)
 		VALUES
 			(
 			#{entity.widgetId}, #{entity.dataSetId}, #{entity.fieldSignsJson, jdbcType=VARCHAR}, #{entity.alias, jdbcType=VARCHAR}, #{entity.attachment, jdbcType=VARCHAR},
-			#{entity.queryJson, jdbcType=VARCHAR}, #{entity.fieldAliasesJson, jdbcType=VARCHAR}, #{entity.fieldOrdersJson, jdbcType=VARCHAR}, #{entity.order}
+			#{entity.queryJson, jdbcType=VARCHAR}, #{entity.fieldAliasesJson, jdbcType=VARCHAR}, #{entity.fieldOrdersJson, jdbcType=VARCHAR}, #{entity.order},
+			#{entity.dataSetSignsJson, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -85,7 +87,8 @@
 			DS_QUERY AS ${_iq_}queryJson${_iq_},
 			DS_PROPERTY_ALIASES AS ${_iq_}fieldAliasesJson${_iq_},
 			DS_PROPERTY_ORDERS AS ${_iq_}fieldOrdersJson${_iq_},
-			DS_ORDER AS ${_iq_}order${_iq_}
+			DS_ORDER AS ${_iq_}order${_iq_},
+			DS_DATASET_SIGNS AS ${_iq_}dataSetSignsJson${_iq_}
 		FROM
 			DATAGEAR_HCW_DS
 		WHERE

@@ -700,7 +700,12 @@
 	{
 		var idx = $.inArrayById(array, idValue, idPropName);
 		if(idx >= 0)
-			array.splice(idx, 1);
+		{
+			var dels = array.splice(idx, 1);
+			return (dels ? dels[0] : undefined);
+		}
+		
+		return undefined;
 	};
 	
 	$.addById = function(array, eleOrEles, idPropName)

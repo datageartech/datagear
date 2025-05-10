@@ -1346,7 +1346,22 @@
 		onRemoveDataSetDataSign: function(dataSetBind, dataSigName)
 		{
 			var signObjs = dataSetBind.extSignObjs;
-			$.removeById(signObjs, dataSigName, "extFullname");
+			var removed = $.removeById(signObjs, dataSigName, "extFullname");
+			
+			if(removed && removed.children)
+			{
+				var fields = (dataSetBind.dataSet.fields || []);
+				
+				for(var i =0; i<removed.children.length; i++)
+				{
+					var signObjChild = removed.children[i];
+					
+					for(var j=0; j<fields.length; j++)
+					{
+						$.removeById(fields[j].extDsbInfo.signObjs, signObjChild.extFullname, "extFullname");
+					}
+				}
+			}
 		},
 		
 		onRemoveFieldDataSign: function(dataSetField, dataSigName)

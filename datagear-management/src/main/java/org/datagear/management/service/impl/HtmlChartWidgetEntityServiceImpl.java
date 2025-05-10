@@ -349,6 +349,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		dataSetBind.setQuery(toDataSetQuery(relation.getQueryJson()));
 		dataSetBind.setFieldAliases(toFieldAliases(relation.getFieldAliasesJson()));
 		dataSetBind.setFieldOrders(toFieldOrders(relation.getFieldOrdersJson()));
+		dataSetBind.setDataSetSigns(toDataSetSigns(relation.getDataSetSignsJson()));
 
 		return dataSetBind;
 	}
@@ -489,6 +490,21 @@ public class HtmlChartWidgetEntityServiceImpl
 		return orders;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected Set<String> toDataSetSigns(String json)
+	{
+		if (StringUtil.isEmpty(json))
+			return Collections.emptySet();
+
+		Collection<String> signs = JsonSupport.parse(json, Collection.class, null);
+
+		if (signs == null)
+			return Collections.emptySet();
+
+		Set<String> re = new HashSet<>(signs);
+		return re;
+	}
+
 	protected DataSetQuery toDataSetQuery(String json)
 	{
 		DataSetQuery query = null;
@@ -527,16 +543,17 @@ public class HtmlChartWidgetEntityServiceImpl
 			String queryJson = JsonSupport.generate(dataSetBind.getQuery(), "");
 			String fieldAliasesJson = JsonSupport.generate(dataSetBind.getFieldAliases(), "");
 			String fieldOrdersJson = JsonSupport.generate(dataSetBind.getFieldOrders(), "");
+			String dataSetSignsJson = JsonSupport.generate(dataSetBind.getDataSetSigns(), "");
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(entity.getId(),
-					dataSetBind.getDataSet().getId(),
-					i + 1);
+					dataSetBind.getDataSet().getId(), i + 1);
 			relation.setFieldSignsJson(fieldSignsJson);
 			relation.setAlias(dataSetBind.getAlias());
 			relation.setAttachment(dataSetBind.isAttachment());
 			relation.setQueryJson(queryJson);
 			relation.setFieldAliasesJson(fieldAliasesJson);
 			relation.setFieldOrdersJson(fieldOrdersJson);
+			relation.setDataSetSignsJson(dataSetSignsJson);
 
 			list.add(relation);
 		}
@@ -569,6 +586,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		private String fieldOrdersJson;
 
 		private int order;
+
+		private String dataSetSignsJson;
 
 		public WidgetDataSetRelation()
 		{
@@ -671,6 +690,16 @@ public class HtmlChartWidgetEntityServiceImpl
 		public void setOrder(int order)
 		{
 			this.order = order;
+		}
+
+		public String getDataSetSignsJson()
+		{
+			return dataSetSignsJson;
+		}
+
+		public void setDataSetSignsJson(String dataSetSignsJson)
+		{
+			this.dataSetSignsJson = dataSetSignsJson;
 		}
 	}
 
