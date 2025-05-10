@@ -4365,12 +4365,12 @@
 	/**
 	 * 获取图表插件所有数据标记。
 	 * 
-	 * @returns [ 数据标记, ... ]、null
+	 * @returns []，空数组表示没有
 	 * @since 5.4.0
 	 */
 	chartBase.pluginDataSigns = function()
 	{
-		return (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : null);
+		return (this.plugin && this.plugin.dataSigns ? this.plugin.dataSigns : []);
 	};
 	
 	/**

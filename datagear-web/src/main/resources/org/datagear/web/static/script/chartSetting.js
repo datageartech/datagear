@@ -1960,7 +1960,7 @@
 		var dataSetBind = dataSetBinds[index];
 		var dataSetFields = chart.dataSetFields(dataSetBind);
 		var fieldSigns = (chart.dataSetFieldsSigns(dataSetBind) || {});
-		var dataSigns = (chart.pluginDataSigns() || []);
+		var dataSigns = chart.pluginDataSigns();
 		var signFields = [];
 		
 		for(var i=0; i<dataSetFields.length; i++)
