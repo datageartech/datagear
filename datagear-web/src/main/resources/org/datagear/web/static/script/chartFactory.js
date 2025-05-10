@@ -1947,7 +1947,7 @@
 		var re = (chartFactory.isNumber(dataSetBind) ? this.dataSetBindAt(dataSetBind) : dataSetBind);
 		
 		if(!nullable && re == null)
-			throw new Error("no dataSetBind found for : " + dataSetBind);
+			throw new Error("no DataSetBind found for : " + dataSetBind);
 		
 		return re;
 	};
@@ -1980,7 +1980,7 @@
 			var dataSet = dataSetBind.dataSet;
 			
 			if(!dataSet.params || dataSet.params.length <= name)
-				throw new Error("chart '#"+this.elementId+"' "+dataSetBind.index+"-th dataSetBind has no param defined at index : "+name);
+				throw new Error("chart '#"+this.elementId+"' "+dataSetBind.index+"-th DataSetBind has no param at index : "+name);
 			
 			name = dataSet.params[name].name;
 		}
@@ -2188,13 +2188,13 @@
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param dataSign 与this.dataSignFullname()函数参数相同
-	 * @param nonEmpty 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
+	 * @param nonNull 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
 	 * @return 数据集字段、null
 	 */
-	chartBase.dataSetFieldOfSign = function(dataSetBind, dataSign, nonEmpty)
+	chartBase.dataSetFieldOfSign = function(dataSetBind, dataSign, nonNull)
 	{
-		var fields = this.dataSetFieldsOfSign(dataSetBind, dataSign, false, nonEmpty);
-		return (fields.length > 0 ? fields[0] : null);
+		var re = this._dataSetFieldsOfSign(dataSetBind, dataSign, 1, false, nonNull);
+		return (re.length > 0 ? re[0] : null);
 	};
 	
 	/**
@@ -2209,6 +2209,11 @@
 	 * @return []
 	 */
 	chartBase.dataSetFieldsOfSign = function(dataSetBind, dataSign, sort, nonEmpty)
+	{
+		return this._dataSetFieldsOfSign(dataSetBind, dataSign, -1, sort, nonEmpty);
+	};
+	
+	chartBase._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort, nonEmpty)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		sort = (sort === undefined ? true : sort);
@@ -2227,6 +2232,9 @@
 			if(this.isDataSetFieldSigned(dataSetBind, dataSetFields[i], dataSignName))
 			{
 				re.push(dataSetFields[i]);
+				
+				if(count > -1 && re.length >= count)
+					break;
 			}
 		}
 		
@@ -2237,7 +2245,7 @@
 		}
 		
 		if(nonEmpty && re.length == 0)
-			throw new Error("no dataSetField signed by : "+dataSignName);
+			throw new Error("DataSetField signed by '"+dataSignName+"' required");
 		
 		return re;
 	};
@@ -2282,16 +2290,16 @@
 	 * @param chartResult 图表结果、数据集结果数组
 	 * @param dataSetBind 数据集绑定、索引数值
 	 * @param dataSetResult 可选，要设置的数据集结果
-	 * @return 要获取的数据集结果，没有则返回undefined
+	 * @return 要获取的数据集结果，没有则返回null
 	 */
 	chartBase.resultOf = function(chartResult, dataSetBind, dataSetResult)
 	{
 		var dataSetResults = this.results(chartResult);
-		var index = (chartFactory.isNumber(dataSetBind) ? dataSetBind : (dataSetBind != null ? dataSetBind.index : undefined));
+		var index = (chartFactory.isNumber(dataSetBind) ? dataSetBind : (dataSetBind != null ? dataSetBind.index : null));
 		
 		if(dataSetResult === undefined)
 		{
-			return (dataSetResults ? dataSetResults[index] : undefined);
+			return (dataSetResults ? dataSetResults[index] : null);
 		}
 		else
 		{
@@ -3554,7 +3562,7 @@
 			 	dataSetField = this.dataSetField(dataSetBind, name);
 				
 				if(dataSetField == null)
-					throw new Error("no dataSetField found for : " + name);
+					throw new Error("no DataSetField found for : " + name);
 			}
 			//数据集字段对象
 			else
@@ -4438,7 +4446,7 @@
 				dataSign = this.pluginDataSign(name, dataSigns);
 				
 				if(dataSign == null)
-					throw new Error("no dataSign found for : " + name);
+					throw new Error("no DataSign found for : " + name);
 				
 				return dataSign.name;
 			}
@@ -4478,7 +4486,7 @@
 					}
 					else
 					{
-						throw new Error("no dataSign found for : name["+i+"]");
+						throw new Error("no DataSign found for : name["+i+"]");
 					}
 				}
 				else
