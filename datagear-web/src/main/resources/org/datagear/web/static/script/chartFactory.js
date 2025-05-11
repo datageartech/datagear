@@ -2803,7 +2803,7 @@
 	 */
 	chartBase.inflateRenderOptions = function(renderOptions, beforeProcessHandler)
 	{
-		if(arguments.length == 1)
+		if(beforeProcessHandler === undefined)
 		{
 			//(beforeProcessHandler)
 			if($.isFunction(renderOptions))
@@ -4217,6 +4217,25 @@
 	 */
 	chartBase.dataSetBindsAttachment = function(sign)
 	{
+		return this._dataSetBindsAttachment(-1, sign);
+	};
+	
+	/**
+	 * 获取第一个附件数据集绑定对象。
+	 * 附件数据集绑定的用途不是绘制图表。
+	 * 
+	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @returns 数据集绑定、null
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindAttachment = function(sign)
+	{
+		var re = this._dataSetBindsAttachment(1, sign);
+		return (re.length > 0 ? re[0] : null);
+	};
+	
+	chartBase._dataSetBindsAttachment = function(count, sign)
+	{
 		var re = [];
 		
 		if(sign !== undefined)
@@ -4232,39 +4251,9 @@
 				if(sign === undefined || this.isDataSetSigned(dsb, sign))
 				{
 					re.push(dsb);
-				}
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
-	 * 获取第一个附件数据集绑定对象。
-	 * 附件数据集绑定的用途不是绘制图表。
-	 * 
-	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
-	 * @returns 数据集绑定、null
-	 * @since 5.0.0
-	 */
-	chartBase.dataSetBindAttachment = function(sign)
-	{
-		var re = null;
-		
-		if(sign !== undefined)
-			sign = this.dataSignFullname(sign);
-		
-		var dataSetBinds = this.dataSetBinds();
-		for(var i=0; i<dataSetBinds.length; i++)
-		{
-			var dsb = dataSetBinds[i];
-			
-			if(this.isDataSetAttachment(dsb))
-			{
-				if(sign === undefined || this.isDataSetSigned(dsb, sign))
-				{
-					re = dsb;
-					break;
+					
+					if(count > -1 && re.length >= count)
+						break;
 				}
 			}
 		}
