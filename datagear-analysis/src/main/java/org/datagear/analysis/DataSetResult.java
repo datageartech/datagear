@@ -26,12 +26,20 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetResult implements Serializable
+public class DataSetResult implements AdditionsAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	/** 结果数据对象 */
-	private Object data;
+	private Object data = null;
+
+	/**
+	 * 附加数据集合。
+	 * <p>
+	 * {@linkplain DataSet}的数据源中除了结果数据，可能还有附加数据，应写入此映射表中。
+	 * </p>
+	 */
+	private Map<String, ?> additions = null;
 
 	public DataSetResult()
 	{
@@ -72,5 +80,16 @@ public class DataSetResult implements Serializable
 	public void setData(Object data)
 	{
 		this.data = data;
+	}
+
+	@Override
+	public Map<String, ?> getAdditions()
+	{
+		return additions;
+	}
+
+	public void setAdditions(Map<String, ?> additions)
+	{
+		this.additions = additions;
 	}
 }
