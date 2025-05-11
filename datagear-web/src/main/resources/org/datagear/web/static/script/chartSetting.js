@@ -1959,16 +1959,12 @@
 	{
 		var dataSetBind = dataSetBinds[index];
 		var dataSetFields = chart.dataSetFields(dataSetBind);
-		var fieldSigns = (chart.dataSetFieldsSigns(dataSetBind) || {});
-		var dataSigns = chart.pluginDataSigns();
 		var signFields = [];
 		
 		for(var i=0; i<dataSetFields.length; i++)
 		{
-			var name = dataSetFields[i].name;
-			var signs = fieldSigns[name];
-			
-			if(signs != null && signs.length > 0)
+			var signs = (chart.dataSetFieldSign(dataSetBind, dataSetFields[i]) || []);
+			if(signs.length > 0)
 			{
 				signFields.push(dataSetFields[i]);
 			}
@@ -1994,7 +1990,7 @@
 		{
 			var column =
 			{
-				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i], fieldSigns, dataSigns),
+				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i]),
 				fieldName: signFields[i].name,
 				render: function(data)
 				{
@@ -2041,34 +2037,20 @@
 		return tableId;
 	};
 	
-	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField, fieldSigns, dataSigns)
+	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField)
 	{
 		var title = chart.dataSetFieldAlias(dataSetBind, dataSetField);
+		title = (title == dataSetField.name ? title : title + "-" + dataSetField.name);
+		var signs = (chart.dataSetFieldSign(dataSetBind, dataSetField) || []);
+		var signInfo = "";
 		
-		var name = dataSetField.name;
-		var signs = fieldSigns[name];
-		
-		if(signs != null && signs.length > 0)
+		for(var i=0; i<signs.length; i++)
 		{
-			var signName = signs[0];
-			
-			for(var i=0; i<dataSigns.length; i++)
-			{
-				if(dataSigns[i].name == signName)
-				{
-					if(dataSigns[i].nameLabel && dataSigns[i].nameLabel.value)
-					{
-						signName = dataSigns[i].nameLabel.value +"("+signName+")";
-					}
-					
-					break;
-				}
-			}
-			
-			title = "<a title='"+chartFactory.escapeHtml(title)+"'>"+chartFactory.escapeHtml(signName)+"</a>";
+			if(signs[i])
+				signInfo += (signInfo ? "," + signs[i] : signs[i]);
 		}
 		
-		return title;
+		return (signInfo ? title + " (" + signInfo +")" : title);
 	};
 	
 	chartSetting.setChartSettingDataPanelThemeStyle = function(chart, $panel)
