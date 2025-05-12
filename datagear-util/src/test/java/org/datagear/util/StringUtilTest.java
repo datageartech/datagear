@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Test;
 
 /**
@@ -34,6 +36,27 @@ public class StringUtilTest
 	@Test
 	public void splitTest()
 	{
+		{
+			String s = null;
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(0, actual.length);
+		}
+
+		{
+			String s = "";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(0, actual.length);
+		}
+
+		{
+			String s = ",,,,";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(0, actual.length);
+		}
+
 		{
 			String s = "abc,def";
 			String[] actual = StringUtil.split(s, ",", true);
@@ -112,6 +135,14 @@ public class StringUtilTest
 			assertEquals("abc", actual[0]);
 			assertEquals("def", actual[1]);
 		}
+		{
+			String s = "abc,, , def";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("abc", actual[0]);
+			assertEquals("def", actual[1]);
+		}
 
 		// 无分隔符
 		{
@@ -120,6 +151,97 @@ public class StringUtilTest
 
 			assertEquals(1, actual.length);
 			assertEquals(s, actual[0]);
+		}
+
+		// 有空格
+		{
+			String s = " abc , def ";
+			String[] actual = StringUtil.split(s, ",", true);
+
+			assertEquals(2, actual.length);
+			assertEquals("abc", actual[0]);
+			assertEquals("def", actual[1]);
+		}
+		{
+			String s = " abc , def ";
+			String[] actual = StringUtil.split(s, ",", false);
+
+			assertEquals(2, actual.length);
+			assertEquals(" abc ", actual[0]);
+			assertEquals(" def ", actual[1]);
+		}
+	}
+
+	@Test
+	public void splitWithTrimTest()
+	{
+		{
+			String s = " abc , def ";
+			List<String> actual = StringUtil.splitWithTrim(s, ",");
+
+			assertEquals(2, actual.size());
+			assertEquals("abc", actual.get(0));
+			assertEquals("def", actual.get(1));
+		}
+	}
+
+	@Test
+	public void splitWithEscape()
+	{
+		{
+			String s = " abc , def ";
+			List<String> actual = StringUtil.splitWithEscape(s, ',', true);
+
+			assertEquals(2, actual.size());
+			assertEquals("abc", actual.get(0));
+			assertEquals("def", actual.get(1));
+		}
+
+		{
+			String s = " abc ,,  , def ";
+			List<String> actual = StringUtil.splitWithEscape(s, ',', true);
+
+			assertEquals(2, actual.size());
+			assertEquals("abc", actual.get(0));
+			assertEquals("def", actual.get(1));
+		}
+
+		{
+			String s = " abc , def ";
+			List<String> actual = StringUtil.splitWithEscape(s, ',', false);
+
+			assertEquals(2, actual.size());
+			assertEquals(" abc ", actual.get(0));
+			assertEquals(" def ", actual.get(1));
+		}
+
+		{
+			String s = " abc ,,  , def ";
+			List<String> actual = StringUtil.splitWithEscape(s, ',', false);
+
+			assertEquals(3, actual.size());
+			assertEquals(" abc ", actual.get(0));
+			assertEquals("  ", actual.get(1));
+			assertEquals(" def ", actual.get(2));
+		}
+
+		{
+			String s = " abc \\,, def ";
+			List<String> actual = StringUtil.splitWithEscape(s, ',', true);
+
+			assertEquals(2, actual.size());
+			assertEquals("abc ,", actual.get(0));
+			assertEquals("def", actual.get(1));
+		}
+
+		{
+			String s = " abc, \\,, def ";
+			List<String> actual = StringUtil.splitWithEscape(s, ',', true);
+
+			assertEquals(3, actual.size());
+			assertEquals("abc", actual.get(0));
+			assertEquals(",", actual.get(1));
+			assertEquals("def", actual.get(2));
 		}
 	}
 

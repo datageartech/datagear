@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -156,7 +155,7 @@ public class StringUtil
 	}
 
 	/**
-	 * 拆分字符串。
+	 * 简单拆分字符串，空片段将被忽略。
 	 * 
 	 * @param text
 	 *            允许{@code null}
@@ -166,10 +165,29 @@ public class StringUtil
 	 */
 	public static String[] split(String text, String splitter, boolean trim)
 	{
-		if (text == null)
-		{
-			return new String[0];
-		}
+		List<String> re = splitOfList(text, splitter, trim);
+		return re.toArray(new String[re.size()]);
+	}
+
+	/**
+	 * 拆分字符串，空片段将被忽略，并删除元素两边的空格。
+	 * <p>
+	 * 如果{@code s}为{@code null}，返回空列表。
+	 * </p>
+	 * 
+	 * @param str
+	 * @param splitter
+	 * @return
+	 */
+	public static List<String> splitWithTrim(String str, String splitter)
+	{
+		return splitOfList(str, splitter, true);
+	}
+
+	protected static List<String> splitOfList(String text, String splitter, boolean trim)
+	{
+		if (isEmpty(text))
+			return Collections.emptyList();
 
 		StringTokenizer st = new StringTokenizer(text, splitter);
 		List<String> tokens = new ArrayList<>();
@@ -178,17 +196,84 @@ public class StringUtil
 		{
 			String token = st.nextToken();
 			if (trim)
-			{
 				token = token.trim();
-			}
 
-			if (token.length() > 0)
+			// 忽略空片段
+			if (!token.isEmpty())
 			{
 				tokens.add(token);
 			}
 		}
 
-		return tokens.toArray(new String[tokens.size()]);
+		return tokens;
+	}
+
+	/**
+	 * 分隔字符串同时处理'\'转义，空片段将被忽略。
+	 * <p>
+	 * 如果{@code s}为{@code null}、{@code ""}，返回空列表。
+	 * </p>
+	 * 
+	 * @param str
+	 *            允许{@code null}
+	 * @param splitter
+	 *            分隔符
+	 * @param trim
+	 *            是否删除片段首尾空格
+	 * @return
+	 */
+	public static List<String> splitWithEscape(String str, char splitter, boolean trim)
+	{
+		if (splitter == '\\')
+			throw new IllegalArgumentException("Splitter must not be '\\'");
+
+		if (isEmpty(str))
+			return Collections.emptyList();
+
+		List<String> re = new ArrayList<>();
+
+		char[] cs = str.toCharArray();
+		StringBuilder segment = new StringBuilder();
+		boolean escapeMode = false;
+
+		for (int i = 0; i < cs.length; i++)
+		{
+			char c = cs[i];
+
+			if (escapeMode)
+			{
+				segment.append(c);
+				escapeMode = false;
+			}
+			else if (c == '\\')
+			{
+				escapeMode = true;
+			}
+			else if (c == splitter)
+			{
+				String sv = segment.toString();
+				if (trim)
+					sv = sv.trim();
+
+				if (!sv.isEmpty())
+					re.add(sv);
+
+				segment.setLength(0);
+			}
+			else
+			{
+				segment.append(c);
+			}
+		}
+
+		String sv = segment.toString();
+		if (trim)
+			sv = sv.trim();
+
+		if (!sv.isEmpty())
+			re.add(sv);
+
+		return re;
 	}
 
 	/**
@@ -397,29 +482,6 @@ public class StringUtil
 			sb.append("\"");
 
 		return sb.toString();
-	}
-
-	/**
-	 * 拆分字符串，并删除元素两边的空格。
-	 * <p>
-	 * 如果{@code s}为{@code null}，返回空列表。
-	 * </p>
-	 * 
-	 * @param str
-	 * @param splitter
-	 * @return
-	 */
-	public static List<String> splitWithTrim(String str, String splitter)
-	{
-		if (str == null)
-			return Collections.emptyList();
-
-		String[] strs = str.split(splitter);
-
-		for (int i = 0; i < strs.length; i++)
-			strs[i] = strs[i].trim();
-
-		return Arrays.asList(strs);
 	}
 
 	/**
