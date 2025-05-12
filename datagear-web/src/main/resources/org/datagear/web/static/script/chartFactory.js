@@ -4139,45 +4139,32 @@
 	};
 	
 	/**
-	 * 获取主件数据集绑定数组，它们的用途是绘制图表。
+	 * 获取全部主件数据集绑定，它们的用途是绘制图表。
 	 * 
-	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
-	 * @param nonEmpty 可选，需要设置sign参数，是否要求返回数组非空并且在为空时抛出异常，
-	 * 					   "auto" 依据sign的required判断，为true则要求非空，否则不要求；
-	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
 	 * @returns []，空数组表示没有主件数据集绑定
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindsMain = function(sign, nonEmpty)
+	chartBase.dataSetBindsMain = function()
 	{
-		return this._dataSetBindsMain(-1, sign, nonEmpty);
+		return this._dataSetBindsMain(-1);
 	};
 	
 	/**
 	 * 获取第一个主件数据集绑定。
 	 * 主件数据集绑定的用途是绘制图表。
 	 * 
-	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
-	 * @param nonNull 可选，与this.dataSetBindsMain()函数的nonEmpty参数相同
 	 * @returns 数据集绑定、null
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindMain = function(sign, nonNull)
+	chartBase.dataSetBindMain = function()
 	{
-		var re = this._dataSetBindsMain(1, sign, nonNull);
+		var re = this._dataSetBindsMain(1);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
-	chartBase._dataSetBindsMain = function(count, sign, nonEmpty)
+	chartBase._dataSetBindsMain = function(count)
 	{
-		nonEmpty = (nonEmpty == null ? "auto" : nonEmpty);
-		
 		var re = [];
-		
-		var signFullname = sign;
-		
-		if(signFullname !== undefined)
-			signFullname = this.dataSignFullname(sign);
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -4186,24 +4173,12 @@
 			
 			if(!this.isDataSetAttachment(dsb))
 			{
-				if(signFullname === undefined || this.isDataSetSigned(dsb, signFullname))
-				{
-					re.push(dsb);
-					
-					if(count > -1 && re.length >= count)
-						break;
-				}
+				re.push(dsb);
+				
+				if(count > -1 && re.length >= count)
+					break;
 			}
 		}
-		
-		if(sign !== undefined && nonEmpty == "auto")
-		{
-			var dataSignNodes = this.dataSignPathNodes(sign);
-			nonEmpty = (dataSignNodes && dataSignNodes.length > 0 ? dataSignNodes[dataSignNodes.length-1].required : false);
-		}
-		
-		if(nonEmpty && re.length == 0)
-			throw new Error("DataSetBind signed by '"+signFullname+"' required");
 		
 		return re;
 	};
@@ -4211,35 +4186,30 @@
 	/**
 	 * 获取附件数据集绑定数组，它们的用途不是绘制图表。
 	 * 
-	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
 	 * @returns []，空数组表示没有附件数据集绑定
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindsAttachment = function(sign)
+	chartBase.dataSetBindsAttachment = function()
 	{
-		return this._dataSetBindsAttachment(-1, sign);
+		return this._dataSetBindsAttachment(-1);
 	};
 	
 	/**
 	 * 获取第一个附件数据集绑定对象。
 	 * 附件数据集绑定的用途不是绘制图表。
 	 * 
-	 * @param sign 可选，筛选数据集标记，与this.dataSignFullname()函数参数相同
 	 * @returns 数据集绑定、null
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindAttachment = function(sign)
+	chartBase.dataSetBindAttachment = function()
 	{
-		var re = this._dataSetBindsAttachment(1, sign);
+		var re = this._dataSetBindsAttachment(1);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
-	chartBase._dataSetBindsAttachment = function(count, sign)
+	chartBase._dataSetBindsAttachment = function(count)
 	{
 		var re = [];
-		
-		if(sign !== undefined)
-			sign = this.dataSignFullname(sign);
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -4248,13 +4218,10 @@
 			
 			if(this.isDataSetAttachment(dsb))
 			{
-				if(sign === undefined || this.isDataSetSigned(dsb, sign))
-				{
-					re.push(dsb);
-					
-					if(count > -1 && re.length >= count)
-						break;
-				}
+				re.push(dsb);
+				
+				if(count > -1 && re.length >= count)
+					break;
 			}
 		}
 		
@@ -4697,6 +4664,73 @@
 	chartBase.updateOptions = function(updateOptions)
 	{
 		return chartFactory.extValueBuiltin(this, "updateOptions", updateOptions);
+	};
+	
+	/**
+	 * 获取指定数据标记的主件数据集绑定数组，它们的用途是绘制图表。
+	 * 
+	 * @param sign 筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @param nonEmpty 可选，需要设置sign参数，是否要求返回数组非空并且在为空时抛出异常，
+	 * 					   "auto" 依据sign的required判断，为true则要求非空，否则不要求；
+	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
+	 * @returns []，空数组表示没有主件数据集绑定
+	 * @since 5.4.0
+	 */
+	chartBase.dataSetBindsMainOfSign = function(sign, nonEmpty)
+	{
+		return this._dataSetBindsMainOfSign(-1, sign, nonEmpty);
+	};
+	
+	/**
+	 * 获取指定数据标记的第一个主件数据集绑定。
+	 * 主件数据集绑定的用途是绘制图表。
+	 * 
+	 * @param sign 筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @param nonNull 可选，与this.dataSetBindsMain()函数的nonEmpty参数相同
+	 * @returns 数据集绑定、null
+	 * @since 5.0.0
+	 */
+	chartBase.dataSetBindMainOfSign = function(sign, nonNull)
+	{
+		var re = this._dataSetBindsMainOfSign(1, sign, nonNull);
+		return (re.length > 0 ? re[0] : null);
+	};
+	
+	chartBase._dataSetBindsMainOfSign = function(count, sign, nonEmpty)
+	{
+		nonEmpty = (nonEmpty == null ? "auto" : nonEmpty);
+		
+		var re = [];
+		
+		var signFullname = this.dataSignFullname(sign);
+		
+		var dataSetBinds = this.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var dsb = dataSetBinds[i];
+			
+			if(!this.isDataSetAttachment(dsb))
+			{
+				if(this.isDataSetSigned(dsb, signFullname))
+				{
+					re.push(dsb);
+					
+					if(count > -1 && re.length >= count)
+						break;
+				}
+			}
+		}
+		
+		if(nonEmpty == "auto")
+		{
+			var dataSignNodes = this.dataSignPathNodes(sign);
+			nonEmpty = (dataSignNodes && dataSignNodes.length > 0 ? dataSignNodes[dataSignNodes.length-1].required : false);
+		}
+		
+		if(nonEmpty && re.length == 0)
+			throw new Error("DataSetBind signed by '"+signFullname+"' required");
+		
+		return re;
 	};
 	
 	//-------------
