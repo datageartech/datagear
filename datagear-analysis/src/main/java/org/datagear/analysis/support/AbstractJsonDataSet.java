@@ -28,6 +28,7 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.datasetres.JsonDataSetResource;
+import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -91,7 +92,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable
+	protected ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
 		Reader reader = null;
 
@@ -105,7 +106,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			if (resolveFields)
 				fields = resolveFields(data);
 
-			return new ResourceData(data, fields);
+			return toResourceResult(data, fields);
 		}
 		finally
 		{

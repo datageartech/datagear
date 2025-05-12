@@ -30,6 +30,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.datasetres.CsvDataSetResource;
+import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
@@ -99,7 +100,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable
+	protected ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
 		Reader reader = null;
 
@@ -118,7 +119,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			if (resolveFields)
 				fields = resolveFields(fieldNames, data);
 
-			return new ResourceData(data, fields);
+			return toResourceResult(data, fields);
 		}
 		finally
 		{

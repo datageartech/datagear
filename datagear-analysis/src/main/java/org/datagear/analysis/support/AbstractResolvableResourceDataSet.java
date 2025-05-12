@@ -18,16 +18,17 @@
 package org.datagear.analysis.support;
 
 import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.datasetres.DataSetResource;
+import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
@@ -96,7 +97,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		try
 		{
 			resource = getResource(query);
-			ResourceData resourceData = getResourceData(resource, resolveFields);
+			ResourceResult resourceData = getResourceResult(resource, resolveFields);
 
 			ResolvedDataSetResult result = resolveResult(query, resourceData, resolveFields);
 
@@ -123,49 +124,59 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	}
 
 	/**
-	 * 获取资源数据。
+	 * 获取资源结果。
 	 * 
 	 * @param resource
 	 * @param resolveFields
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData getResourceData(T resource, boolean resolveFields) throws Throwable
+	protected ResourceResult getResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
 		if (!resource.isIdempotent() || this.cache == null)
-			return resolveResourceData(resource, resolveFields);
+			return resolveResourceResult(resource, resolveFields);
 
-		ResourceData rd = null;
+		ResourceResult rr = null;
 
 		if (resolveFields)
 		{
-			rd = resolveResourceData(resource, true);
-			// 缓存中无需存储字段信息
-			setCacheResourceData(resource, new ResourceData(rd.getData(), null));
+			rr = resolveResourceResult(resource, true);
+			ResourceResult cacheRr = toCacheResourceResult(rr);
+			setCacheResourceResult(resource, cacheRr);
 		}
 		else
 		{
-			ValueWrapper vw = getCacheResourceData(resource);
-			rd = (vw == null ? null : (ResourceData) vw.get());
+			ValueWrapper vw = getCacheResourceResult(resource);
+			rr = (vw == null ? null : (ResourceResult) vw.get());
 
-			if (rd == null)
+			if (rr == null)
 			{
-				rd = resolveResourceData(resource, false);
-				setCacheResourceData(resource, rd);
+				rr = resolveResourceResult(resource, false);
+				setCacheResourceResult(resource, rr);
 			}
 		}
 
-		return rd;
+		return rr;
+	}
+
+	protected ResourceResult toCacheResourceResult(ResourceResult result) throws Throwable
+	{
+		ResolvedDataSetResult dr = result.getResult();
+		// 缓存中无需存储字段信息
+		ResolvedDataSetResult cacheDr = new ResolvedDataSetResult(dr.getResult());
+		ResourceResult cacheRr = new ResourceResult(cacheDr);
+
+		return cacheRr;
 	}
 
 	/**
-	 * 从缓存中获取数据。
+	 * 从缓存中获取。
 	 * 
 	 * @param resource
 	 * @return 可能为{@code null}
 	 * @throws Throwable
 	 */
-	protected ValueWrapper getCacheResourceData(T resource) throws Throwable
+	protected ValueWrapper getCacheResourceResult(T resource) throws Throwable
 	{
 		if (this.cache == null)
 			return null;
@@ -174,22 +185,22 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	}
 
 	/**
-	 * 将数据存入缓存。
+	 * 缓存。
 	 * 
 	 * @param resource
-	 * @param data
+	 * @param result
 	 * @return
 	 * @throws Throwable
 	 */
-	protected boolean setCacheResourceData(T resource, ResourceData data) throws Throwable
+	protected boolean setCacheResourceResult(T resource, ResourceResult result) throws Throwable
 	{
 		if (this.cache == null)
 			return false;
 
-		if (data != null && data.dataSize() > this.dataCacheMaxLength)
+		if (result != null && result.dataSize() > this.dataCacheMaxLength)
 			return false;
 
-		this.cache.put(resource, data);
+		this.cache.put(resource, result);
 		return true;
 	}
 
@@ -197,18 +208,32 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param resourceData
+	 * @param result
 	 * @param resolveFields
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, ResourceData resourceData,
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, ResourceResult result,
 			boolean resolveFields) throws Throwable
 	{
-		Object resData = resourceData.getData();
-		List<DataSetField> resFields = (resolveFields ? resourceData.getFields() : null);
+		ResolvedDataSetResult rdr = result.getResult();
+		DataSetResult dr = rdr.getResult();
 
-		return resolveResult(query, resData, resFields);
+		return resolveResult(query, dr.getData(), (resolveFields ? rdr.getFields() : null));
+	}
+
+	protected ResourceResult toResourceResult(Object data, List<DataSetField> fields) throws Throwable
+	{
+		return toResourceResult(data, null, fields);
+	}
+
+	protected ResourceResult toResourceResult(Object data, Map<String, ?> additions, List<DataSetField> fields)
+			throws Throwable
+	{
+		DataSetResult dr = new DataSetResult(data);
+		dr.setAdditions(additions);
+		ResolvedDataSetResult rdr = new ResolvedDataSetResult(dr, fields);
+		return new ResourceResult(rdr);
 	}
 
 	/**
@@ -221,102 +246,14 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	protected abstract T getResource(DataSetQuery query) throws Throwable;
 
 	/**
-	 * 解析资源数据。
+	 * 解析资源结果。
 	 * 
 	 * @param resource
 	 * @param resolveFields
-	 *            是否同时解析并设置{@linkplain ResourceData#setFields(List)}，如果为{@code true}，返回{@linkplain ResourceData#getFields()}不应为{@code null}
+	 *            是否同时解析并设置{@linkplain ResourceResult#getResult()}的{@linkplain ResolvedDataSetResult#getFields()}，
+	 *            如果为{@code true}，返回的{@linkplain ResolvedDataSetResult#getFields()}不应为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable;
-
-	/**
-	 * 数据集资源数据。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 * @param <T>
-	 */
-	public static class ResourceData implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private Object data = null;
-
-		private List<DataSetField> fields = null;
-
-		public ResourceData()
-		{
-			super();
-		}
-
-		public ResourceData(Object data)
-		{
-			super();
-			this.data = data;
-		}
-
-		public ResourceData(Object data, List<DataSetField> fields)
-		{
-			super();
-			this.data = data;
-			this.fields = fields;
-		}
-
-		/**
-		 * 获取数据。
-		 * <p>
-		 * 返回值及其内容不应被修改，因为可能会缓存。
-		 * </p>
-		 * 
-		 * @return 为{@code null}表示无数据
-		 */
-		public Object getData()
-		{
-			return data;
-		}
-
-		public void setData(Object data)
-		{
-			this.data = data;
-		}
-
-		/**
-		 * 获取{@linkplain DataSetField}列表。
-		 * <p>
-		 * 返回值及其内容不应被修改，因为可能会缓存。
-		 * </p>
-		 * 
-		 * @return 为{@code null}表示未设置
-		 */
-		public List<DataSetField> getFields()
-		{
-			return fields;
-		}
-
-		public void setFields(List<DataSetField> fields)
-		{
-			this.fields = fields;
-		}
-
-		/**
-		 * 获取当{@linkplain #getData()}是数组、集合时的长度。
-		 * 
-		 * @return {@code -1}表示不是数组、集合
-		 */
-		public int dataSize()
-		{
-			if (this.data == null)
-				return -1;
-
-			if (this.data instanceof Collection<?>)
-				return ((Collection<?>) this.data).size();
-
-			if (this.data instanceof Object[])
-				return ((Object[]) this.data).length;
-
-			return -1;
-		}
-	}
+	protected abstract ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable;
 }

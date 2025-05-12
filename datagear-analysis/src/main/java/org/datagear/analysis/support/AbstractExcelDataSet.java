@@ -37,6 +37,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.support.datasetres.ExcelDataSetResource;
+import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -242,22 +243,22 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	}
 
 	@Override
-	protected ResourceData resolveResourceData(T resource, boolean resolveFields) throws Throwable
+	protected ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
 		if (resource.isXls())
-			return resolveExcelResourceDataForXls(resource, resolveFields);
+			return resolveResourceResultForXls(resource, resolveFields);
 		else
-			return resolveExcelResourceDataForXlsx(resource, resolveFields);
+			return resolveResourceResultForXlsx(resource, resolveFields);
 	}
 
 	/**
-	 * 解析{@code ExcelResourceData}。
+	 * 解析Excel结果。
 	 * 
 	 * @param resource
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForXls(T resource, boolean resolveFields) throws Throwable
+	protected ResourceResult resolveResourceResultForXls(T resource, boolean resolveFields) throws Throwable
 	{
 		InputStream in = null;
 		POIFSFileSystem poifs = null;
@@ -270,7 +271,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
 			Sheet sheet = resource.getDataSheet(wb);
 
-			return resolveExcelResourceDataForSheet(resource, sheet, resolveFields);
+			return resolveResourceResultForSheet(resource, sheet, resolveFields);
 		}
 		catch (DataSetException e)
 		{
@@ -285,13 +286,13 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	}
 
 	/**
-	 * 解析{@code ExcelResourceData}。
+	 * 解析Excel结果。
 	 * 
 	 * @param resource
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForXlsx(T resource, boolean resolveFields) throws Throwable
+	protected ResourceResult resolveResourceResultForXlsx(T resource, boolean resolveFields) throws Throwable
 	{
 		InputStream in = null;
 		OPCPackage pkg = null;
@@ -304,7 +305,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			wb = new XSSFWorkbook(pkg);
 			Sheet sheet = resource.getDataSheet(wb);
 
-			return resolveExcelResourceDataForSheet(resource, sheet, resolveFields);
+			return resolveResourceResultForSheet(resource, sheet, resolveFields);
 		}
 		catch (DataSetException e)
 		{
@@ -327,7 +328,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResourceData resolveExcelResourceDataForSheet(T resource, Sheet sheet, boolean resolveFields)
+	protected ResourceResult resolveResourceResultForSheet(T resource, Sheet sheet, boolean resolveFields)
 			throws Throwable
 	{
 		List<Row> excelRows = new ArrayList<Row>();
@@ -346,7 +347,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 			fields = resolveFields(rawDataFieldNames, data);
 		}
 
-		return new ResourceData(data, fields);
+		return toResourceResult(data, fields);
 	}
 
 	/**
