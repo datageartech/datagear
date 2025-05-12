@@ -34,6 +34,9 @@ import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 抽象资源{@linkplain ResolvableDataSet}。
+ * <p>
+ * 从相同资源解析而得的结果通常是不变的，此类用于处理这种场景，通过缓存以提升性能。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -141,8 +144,7 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		if (resolveFields)
 		{
 			rr = resolveResourceResult(resource, true);
-			ResourceResult cacheRr = toCacheResourceResult(rr);
-			setCacheResourceResult(resource, cacheRr);
+			setCacheResourceResult(resource, rr);
 		}
 		else
 		{
@@ -200,7 +202,9 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		if (result != null && result.dataSize() > this.dataCacheMaxLength)
 			return false;
 
-		this.cache.put(resource, result);
+		ResourceResult cacheRr = toCacheResourceResult(result);
+		this.cache.put(resource, cacheRr);
+
 		return true;
 	}
 
