@@ -4688,7 +4688,7 @@
 	 * @param sign 筛选数据集标记，与this.dataSignFullname()函数参数相同
 	 * @param nonNull 可选，与this.dataSetBindsMain()函数的nonEmpty参数相同
 	 * @returns 数据集绑定、null
-	 * @since 5.0.0
+	 * @since 5.4.0
 	 */
 	chartBase.dataSetBindMainOfSign = function(sign, nonNull)
 	{
