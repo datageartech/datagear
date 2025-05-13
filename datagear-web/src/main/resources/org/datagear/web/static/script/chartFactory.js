@@ -3511,7 +3511,7 @@
 	 * @param dataSetBind 数据集绑定或其索引
 	 * @param field 数据集字段名、字段索引、字段对象
 	 * @param sign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
-	 * @returns 要获取的标记名字符串数组、null
+	 * @returns 要获取的标记名字符串数组，空数组表示没有
 	 * @since 2.11.0
 	 */
 	chartBase.dataSetFieldSign = function(dataSetBind, field, sign)
@@ -3524,7 +3524,10 @@
 		
 		if(sign === undefined)
 		{
-			return (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[fieldName] : null);
+			var re = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[fieldName] : null);
+			re = (re == null ? [] : re);
+			
+			return re;
 		}
 		else
 		{
@@ -3575,7 +3578,7 @@
 	chartBase._toDataSignValues = function(dataSigns)
 	{
 		if(dataSigns == null)
-			return null;
+			return [];
 		
 		//字段标记值应是数组
 		if(!$.isArray(dataSigns))
@@ -4552,9 +4555,8 @@
 	chartBase.isDataSetSigned = function(dataSetBind, dataSign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		dataSign = this.dataSignFullname(dataSign);
-		
 		var dss = this.dataSetSigns(dataSetBind);
+		dataSign = this.dataSignFullname(dataSign);
 		
 		//此情况应返回true，用于支持查找没有任何标记的数据集绑定
 		if(dataSign == null && (dss == null || dss.length == 0))
@@ -4574,20 +4576,14 @@
 	 */
 	chartBase.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
 	{
-		dataSetBind = this._dataSetBindOf(dataSetBind);
-		var fieldName = this._fieldNameOf(dataSetBind, field);
+		var fieldSigns = this.dataSetFieldSign(dataSetBind, field);
 		dataSign = this.dataSignFullname(dataSign);
 		
-		if(fieldName == null)
-			throw new Error("[field] required");
-		
-		var dss = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[fieldName] : null);
-		
 		//此情况应返回true，用于支持查找没有任何标记的数据集字段
-		if(dataSign == null && (dss == null || dss.length == 0))
+		if(dataSign == null && (fieldSigns == null || fieldSigns.length == 0))
 			return true;
 		
-		return (chartFactory.indexInArray(dss, dataSign) >= 0);
+		return (chartFactory.indexInArray(fieldSigns, dataSign) >= 0);
 	};
 	
 	/**
@@ -4608,11 +4604,8 @@
 		}
 		else
 		{
-			if(dataSigns == null)
-				dataSigns = [];
-			
 			dataSigns = this._toDataSignValues(dataSigns);
-			dataSetBind.dataSetSigns = (dataSigns || []);
+			dataSetBind.dataSetSigns = dataSigns;
 		}
 	};
 	
