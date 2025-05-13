@@ -2092,7 +2092,7 @@
 				html += "<div class='plugin-icon' style='background-image:url("+contextPath+$.escapeHtml(chartPlugin.iconUrl)+")'></div>";
 			
 			var name = (chartPlugin.nameLabel ? (chartPlugin.nameLabel.value || chartPlugin.id) : chartPlugin.id);
-			name = $.escapeHtml(name);
+			name = $.escapeHtml(name || "");
 			
 			html += "<div class='plugin-name'>"+name+"</div>";
 			
