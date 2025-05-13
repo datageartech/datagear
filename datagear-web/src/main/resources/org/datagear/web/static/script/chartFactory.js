@@ -3261,23 +3261,23 @@
 	 * 获取指定标识的数据集字段。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
-	 * @param info 数据集字段标识，可以是字段名、字段索引
+	 * @param fieldInfo 数据集字段名、字段索引
 	 * @returns 数据集字段，没有找到则返回null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetField = function(dataSetBind, info)
+	chartBase.dataSetField = function(dataSetBind, fieldInfo)
 	{
 		var fields = this.dataSetFields(dataSetBind, false);
 		
 		if(!fields)
 			return null;
 		
-		if(chartFactory.isNumber(info))
-			return fields[info];
+		if(chartFactory.isNumber(fieldInfo))
+			return fields[fieldInfo];
 		
 		for(var i=0; i<fields.length; i++)
 		{
-			if(fields[i].name == info)
+			if(fields[i].name == fieldInfo)
 				return fields[i];
 		}
 		
@@ -3288,28 +3288,28 @@
 	 * 获取/设置数据集字段别名。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetField 数据集字段、字段名、字段索引
+	 * @param field 数据集字段、字段名、字段索引
 	 * @param alias 可选，要设置的别名，不设置则执行获取操作
 	 * @returns 要获取的别名，不会为null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetFieldAlias = function(dataSetBind, dataSetField, alias)
+	chartBase.dataSetFieldAlias = function(dataSetBind, field, alias)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		if(chartFactory.isStringOrNumber(dataSetField))
-			dataSetField = this.dataSetField(dataSetBind, dataSetField);
+		if(chartFactory.isStringOrNumber(field))
+			field = this.dataSetField(dataSetBind, field);
+		
+		if(field == null)
+			throw new Error("[field] required");
 		
 		if(alias === undefined)
 		{
-			if(!dataSetField)
-				return "";
-			
 			alias =  (dataSetBind.fieldAliases ?
-							dataSetBind.fieldAliases[dataSetField.name] : null);
+							dataSetBind.fieldAliases[field.name] : null);
 			
 			if(!alias)
-				alias = (dataSetField.label ||  dataSetField.name);
+				alias = (field.label ||  field.name);
 			
 			return (alias || "");
 		}
@@ -3318,7 +3318,7 @@
 			if(!dataSetBind.fieldAliases)
 				dataSetBind.fieldAliases = {};
 			
-			dataSetBind.fieldAliases[dataSetField.name] = alias;
+			dataSetBind.fieldAliases[field.name] = alias;
 		}
 	};
 	
@@ -3326,38 +3326,30 @@
 	 * 获取/设置数据集字段排序值。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSetField 数据集字段、字段名、字段索引
+	 * @param field 数据集字段、字段名、字段索引
 	 * @param order 可选，要设置的排序数值，不设置则执行获取操作
 	 * @returns 要获取的排序数值，没有设置过则返回null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetFieldOrder = function(dataSetBind, dataSetField, order)
+	chartBase.dataSetFieldOrder = function(dataSetBind, field, order)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
+		var fieldName = this._fieldNameOf(dataSetBind, field);
 		
-		var name = null;
-		
-		if(chartFactory.isString(dataSetField))
-			name = dataSetField;
-		else
-		{
-			if(chartFactory.isNumber(dataSetField))
-				dataSetField = this.dataSetField(dataSetBind, dataSetField);
-			
-			name = (dataSetField ? dataSetField.name : null);
-		}
+		if(fieldName == null)
+			throw new Error("[field] required");
 		
 		if(order === undefined)
 		{
 			return (dataSetBind.fieldOrders ?
-							dataSetBind.fieldOrders[name] : undefined);
+							dataSetBind.fieldOrders[fieldName] : null);
 		}
 		else
 		{
 			if(!dataSetBind.fieldOrders)
 				dataSetBind.fieldOrders = {};
 			
-			dataSetBind.fieldOrders[name] = order;
+			dataSetBind.fieldOrders[fieldName] = order;
 		}
 	};
 	
@@ -3386,27 +3378,27 @@
 	 * 获取指定标识的数据集参数。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
-	 * @param info 数据集参数标识，可以是参数名、参数索引
-	 * @returns 数据集参数，没有找到则返回undefined
+	 * @param paramInfo 数据集参数名、参数索引
+	 * @returns 数据集参数，没有找到则返回null
 	 * @since 2.10.0
 	 */
-	chartBase.dataSetParam = function(dataSetBind, info)
+	chartBase.dataSetParam = function(dataSetBind, paramInfo)
 	{
 		var params = this.dataSetParams(dataSetBind);
 		
 		if(!params)
-			return undefined;
+			return null;
 		
-		if(chartFactory.isNumber(info))
-			return params[info];
+		if(chartFactory.isNumber(paramInfo))
+			return params[paramInfo];
 		
 		for(var i=0; i<params.length; i++)
 		{
-			if(params[i].name == info)
+			if(params[i].name == paramInfo)
 				return params[i];
 		}
 		
-		return undefined;
+		return null;
 	};
 	
 	/**
