@@ -2187,7 +2187,7 @@
 	 * 获取指定标记的数据集字段，没有则返回null。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 与this.dataSignFullname()函数参数相同
+	 * @param dataSign 与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集字段
 	 * @param nonNull 可选，参考chartBase.dataSetFieldsOfSign的nonEmpty参数
 	 * @return 数据集字段、null
 	 */
@@ -2201,7 +2201,7 @@
 	 * 获取指定标记的数据集字段数组。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param dataSign 与this.dataSignFullname()函数参数相同
+	 * @param dataSign 与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集字段
 	 * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
 	 * @param nonEmpty 可选（设置时需指定sort参数），是否要求返回数组非空并且在为空时抛出异常，
 	 * 					   "auto" 依据dataSign的required判断，为true则要求非空，否则不要求；
@@ -3517,22 +3517,22 @@
 	 * 获取/设置指定数据集字段标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param name 数据集字段名、字段索引、字段对象
+	 * @param field 数据集字段名、字段索引、字段对象
 	 * @param sign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
 	 * @returns 要获取的标记名字符串数组、null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetFieldSign = function(dataSetBind, name, sign)
+	chartBase.dataSetFieldSign = function(dataSetBind, field, sign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		name = this._dataSignKeyForField(dataSetBind, name);
+		var fieldName = this._fieldNameOf(dataSetBind, field);
 		
-		if(name == null)
-			throw new Error("[name] required");
+		if(fieldName == null)
+			throw new Error("[field] required");
 		
 		if(sign === undefined)
 		{
-			return (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[name] : null);
+			return (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[fieldName] : null);
 		}
 		else
 		{
@@ -3540,34 +3540,38 @@
 				dataSetBind.fieldSigns = {};
 			
 			sign = this._toDataSignValues(sign);
-			dataSetBind.fieldSigns[name] = sign;
+			dataSetBind.fieldSigns[fieldName] = sign;
 		}
 	};
 	
-	chartBase._dataSignKeyForField = function(dataSetBind, name)
+	chartBase._fieldNameOf = function(dataSetBind, field)
 	{
 		var re = null;
 		
-		if(chartFactory.isString(name))
+		if(field == null)
 		{
-			re = name;
+			re = null;
+		}
+		else if(chartFactory.isString(field))
+		{
+			re = field;
 		}
 		else
 		{
 			var dataSetField = null;
 			
 			//字段索引数值
-			if(chartFactory.isNumber(name))
+			if(chartFactory.isNumber(field))
 			{
-			 	dataSetField = this.dataSetField(dataSetBind, name);
+			 	dataSetField = this.dataSetField(dataSetBind, field);
 				
 				if(dataSetField == null)
-					throw new Error("no DataSetField found for : " + name);
+					throw new Error("no DataSetField found for : " + field);
 			}
 			//数据集字段对象
 			else
 			{
-				dataSetField = name;
+				dataSetField = field;
 			}
 			
 			re = (dataSetField ? dataSetField.name : null);
@@ -4549,60 +4553,74 @@
 	 * 判断数据集是否有指定数据标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param sign 与this.dataSignFullname()函数参数相同
+	 * @param dataSign 与this.dataSignFullname()函数参数相同
 	 * @returns true、false
 	 * @since 5.4.0
 	 */
-	chartBase.isDataSetSigned = function(dataSetBind, sign)
+	chartBase.isDataSetSigned = function(dataSetBind, dataSign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		sign = this.dataSignFullname(sign);
+		dataSign = this.dataSignFullname(dataSign);
 		
-		return (chartFactory.indexInArray(dataSetBind.dataSetSigns, sign) >= 0);
+		var dss = this.dataSetSigns(dataSetBind);
+		
+		//此情况应返回true，用于支持查找没有任何标记的数据集绑定
+		if(dataSign == null && (dss == null || dss.length == 0))
+			return true;
+		
+		return (chartFactory.indexInArray(dss, dataSign) >= 0);
 	};
 	
 	/**
 	 * 判断数据集字段是否有指定数据标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param name 数据集字段名、字段索引、字段对象
-	 * @param sign 与this.dataSignFullname()函数参数相同
+	 * @param field 数据集字段名、字段索引、字段对象
+	 * @param dataSign 与this.dataSignFullname()函数参数相同
 	 * @returns true、false
 	 * @since 5.4.0
 	 */
-	chartBase.isDataSetFieldSigned = function(dataSetBind, name, sign)
+	chartBase.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		name = this._dataSignKeyForField(dataSetBind, name);
-		sign = this.dataSignFullname(sign);
+		var fieldName = this._fieldNameOf(dataSetBind, field);
+		dataSign = this.dataSignFullname(dataSign);
 		
-		var mySigns = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[name] : null);
-		return (chartFactory.indexInArray(mySigns, sign) >= 0);
+		if(fieldName == null)
+			throw new Error("[field] required");
+		
+		var dss = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[fieldName] : null);
+		
+		//此情况应返回true，用于支持查找没有任何标记的数据集字段
+		if(dataSign == null && (dss == null || dss.length == 0))
+			return true;
+		
+		return (chartFactory.indexInArray(dss, dataSign) >= 0);
 	};
 	
 	/**
 	 * 获取/设置数据集数据标记。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的标记，与this.dataSignFullname()函数参数相同、或者其数组
+	 * @param dataSigns 可选，要设置的标记，与this.dataSignFullname()函数参数相同、或者其数组
 	 * @returns 标记数组，空数组表示没有
 	 * @since 5.4.0
 	 */
-	chartBase.dataSetSigns = function(dataSetBind, signs)
+	chartBase.dataSetSigns = function(dataSetBind, dataSigns)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		if(signs === undefined)
+		if(dataSigns === undefined)
 		{
 			return (dataSetBind.dataSetSigns || (dataSetBind.dataSetSigns = []));
 		}
 		else
 		{
-			if(signs == null)
-				signs = [];
+			if(dataSigns == null)
+				dataSigns = [];
 			
-			signs = this._toDataSignValues(signs);
-			dataSetBind.dataSetSigns = (signs || []);
+			dataSigns = this._toDataSignValues(dataSigns);
+			dataSetBind.dataSetSigns = (dataSigns || []);
 		}
 	};
 	
@@ -4610,17 +4628,17 @@
 	 * 获取/设置数据集字段标记映射表。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
+	 * @param dataSigns 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：false
 	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 5.4.0
 	 */
-	chartBase.dataSetFieldsSigns = function(dataSetBind, signs, increment)
+	chartBase.dataSetFieldsSigns = function(dataSetBind, dataSigns, increment)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		increment = (increment == null ? false : increment);
 		
-		if(signs === undefined)
+		if(dataSigns === undefined)
 		{
 			return (dataSetBind.fieldSigns || (dataSetBind.fieldSigns = {}));
 		}
@@ -4628,11 +4646,11 @@
 		{
 			var trimSigns = {};
 			
-			if(signs)
+			if(dataSigns)
 			{
-				for(var p in signs)
+				for(var p in dataSigns)
 				{
-					var ps = this._toDataSignValues(signs[p]);
+					var ps = this._toDataSignValues(dataSigns[p]);
 					trimSigns[p] = ps;
 				}
 			}
@@ -4669,40 +4687,40 @@
 	/**
 	 * 获取指定数据标记的主件数据集绑定数组，它们的用途是绘制图表。
 	 * 
-	 * @param sign 筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @param dataSign 筛选数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @param nonEmpty 可选，需要设置sign参数，是否要求返回数组非空并且在为空时抛出异常，
 	 * 					   "auto" 依据sign的required判断，为true则要求非空，否则不要求；
 	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
 	 * @returns []，空数组表示没有主件数据集绑定
 	 * @since 5.4.0
 	 */
-	chartBase.dataSetBindsMainOfSign = function(sign, nonEmpty)
+	chartBase.dataSetBindsMainOfSign = function(dataSign, nonEmpty)
 	{
-		return this._dataSetBindsMainOfSign(-1, sign, nonEmpty);
+		return this._dataSetBindsMainOfSign(-1, dataSign, nonEmpty);
 	};
 	
 	/**
 	 * 获取指定数据标记的第一个主件数据集绑定。
 	 * 主件数据集绑定的用途是绘制图表。
 	 * 
-	 * @param sign 筛选数据集标记，与this.dataSignFullname()函数参数相同
+	 * @param dataSign 筛选数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @param nonNull 可选，与this.dataSetBindsMain()函数的nonEmpty参数相同
 	 * @returns 数据集绑定、null
 	 * @since 5.4.0
 	 */
-	chartBase.dataSetBindMainOfSign = function(sign, nonNull)
+	chartBase.dataSetBindMainOfSign = function(dataSign, nonNull)
 	{
-		var re = this._dataSetBindsMainOfSign(1, sign, nonNull);
+		var re = this._dataSetBindsMainOfSign(1, dataSign, nonNull);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
-	chartBase._dataSetBindsMainOfSign = function(count, sign, nonEmpty)
+	chartBase._dataSetBindsMainOfSign = function(count, dataSign, nonEmpty)
 	{
 		nonEmpty = (nonEmpty == null ? "auto" : nonEmpty);
 		
 		var re = [];
 		
-		var signFullname = this.dataSignFullname(sign);
+		var signFullname = this.dataSignFullname(dataSign);
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -4723,7 +4741,7 @@
 		
 		if(nonEmpty == "auto")
 		{
-			var dataSignNodes = this.dataSignPathNodes(sign);
+			var dataSignNodes = this.dataSignPathNodes(dataSign);
 			nonEmpty = (dataSignNodes && dataSignNodes.length > 0 ? dataSignNodes[dataSignNodes.length-1].required : false);
 		}
 		
@@ -4743,14 +4761,14 @@
 	 * 获取/设置数据集字段标记映射表。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
-	 * @param signs 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
+	 * @param dataSigns 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
 	 * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：true
 	 * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
 	 * @since 2.11.0
 	 */
-	chartBase.dataSetFieldSigns = function(dataSetBind, signs, increment)
+	chartBase.dataSetFieldSigns = function(dataSetBind, dataSigns, increment)
 	{
-		return this.dataSetFieldsSigns(dataSetBind, signs, (increment == null ? true : increment));
+		return this.dataSetFieldsSigns(dataSetBind, dataSigns, (increment == null ? true : increment));
 	};
 	
 	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsSigns()
