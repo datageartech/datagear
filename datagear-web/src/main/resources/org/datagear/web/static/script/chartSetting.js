@@ -1488,15 +1488,16 @@
 	chartSetting.bindChartSettingPanelEvent = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
+		var noNeedParam = (disableSetting.param == true || !chart.hasDataSetParam());
 		
-		if(disableSetting.param == true && disableSetting.data == true)
+		if(noNeedParam && disableSetting.data == true)
 			return false;
 		
 		var $chart = chart.elementJquery();
 		
-		if(!$chart.data("dgChartSettingBindEvent"))
+		if(!$chart.data("dgChartSettingHasBindEvent"))
 		{
-			$chart.data("dgChartSettingBindEvent", true);
+			$chart.data("dgChartSettingHasBindEvent", true);
 			
 			var mouseenterHandler = function(event)
 			{
@@ -1523,13 +1524,11 @@
 	
 	chartSetting.unbindChartSettingPanelEvent = function(chart)
 	{
-		var disableSetting = chart.disableSetting();
-		
 		var $chart = chart.elementJquery();
 		var mouseenterHandler = $chart.data("dgChartSettingMouseEnterHandler");
 		var mouseleaveHandler = $chart.data("dgChartSettingMouseLeaveHandler");
 		
-		$chart.removeData("dgChartSettingBindEvent");
+		$chart.removeData("dgChartSettingHasBindEvent");
 		
 		if(mouseenterHandler)
 			$chart.off("mouseenter", mouseenterHandler);
