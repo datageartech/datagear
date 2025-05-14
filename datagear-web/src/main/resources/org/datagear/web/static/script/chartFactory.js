@@ -2013,6 +2013,7 @@
 	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
 	 * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
+	 * @returns 要获取的参数值集，不会null
 	 */
 	chartBase.dataSetParamValues = function(dataSetBind, paramValues, increment)
 	{
@@ -2024,10 +2025,11 @@
 			dataSetBind._originalParamValues = $.extend({}, paramValuesCurrent);
 		
 		if(paramValues === undefined)
-			return paramValuesCurrent;
+			return (paramValuesCurrent || (dataSetBind.query.paramValues = {}));
 		else
 		{
 			increment = (increment == null ? false : increment);
+			paramValues = (paramValues || {});
 			
 			if($.isArray(paramValues))
 			{
@@ -2224,14 +2226,14 @@
 		if(dataSign == null)
 			return re;
 		
-		var dataSetFields = this.dataSetFields(dataSetBind, sort);
+		var fields = this.dataSetFields(dataSetBind, sort);
 		var dataSignName = this.dataSignFullname(dataSign);
 		
-		for(var i=0; i<dataSetFields.length; i++)
+		for(var i=0; i<fields.length; i++)
 		{
-			if(this.isDataSetFieldSigned(dataSetBind, dataSetFields[i], dataSignName))
+			if(this.isDataSetFieldSigned(dataSetBind, fields[i], dataSignName))
 			{
-				re.push(dataSetFields[i]);
+				re.push(fields[i]);
 				
 				if(count > -1 && re.length >= count)
 					break;
@@ -3261,27 +3263,53 @@
 	 * 获取指定标识的数据集字段。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
-	 * @param fieldInfo 数据集字段名、字段索引
+	 * @param fieldInfo 数据集字段名、字段索引、字段对象
 	 * @returns 数据集字段，没有找到则返回null
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetField = function(dataSetBind, fieldInfo)
 	{
+		return this._dataSetFieldOf(dataSetBind, fieldInfo, true);
+	};
+	
+	chartBase._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
+	{
+		nullable = (nullable == null ? false : nullable);
+		
+		//字段对象
+		if(fieldInfo && fieldInfo.name !== undefined)
+			return fieldInfo;
+		
+		var re = null;
+		
 		var fields = this.dataSetFields(dataSetBind, false);
 		
 		if(!fields)
-			return null;
-		
-		if(chartFactory.isNumber(fieldInfo))
-			return fields[fieldInfo];
-		
-		for(var i=0; i<fields.length; i++)
 		{
-			if(fields[i].name == fieldInfo)
-				return fields[i];
+			re = null;
+		}
+		//索引数值
+		else if(chartFactory.isNumber(fieldInfo))
+		{
+			re = fields[fieldInfo];
+		}
+		else
+		{
+			//字段名
+			for(var i=0; i<fields.length; i++)
+			{
+				if(fields[i].name == fieldInfo)
+				{
+					re = fields[i];
+					break;
+				}
+			}
 		}
 		
-		return null;
+		if(!nullable && re == null)
+			throw new Error("no DataSetField found for : " + fieldInfo);
+		
+		return re;
 	};
 	
 	/**
@@ -3296,12 +3324,7 @@
 	chartBase.dataSetFieldAlias = function(dataSetBind, field, alias)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		
-		if(chartFactory.isStringOrNumber(field))
-			field = this.dataSetField(dataSetBind, field);
-		
-		if(field == null)
-			throw new Error("[field] required");
+		field = this._dataSetFieldOf(dataSetBind, field);
 		
 		if(alias === undefined)
 		{
@@ -3334,22 +3357,19 @@
 	chartBase.dataSetFieldOrder = function(dataSetBind, field, order)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		var fieldName = this._fieldNameOf(dataSetBind, field);
-		
-		if(fieldName == null)
-			throw new Error("[field] required");
+		field = this._dataSetFieldOf(dataSetBind, field);
 		
 		if(order === undefined)
 		{
 			return (dataSetBind.fieldOrders ?
-							dataSetBind.fieldOrders[fieldName] : null);
+							dataSetBind.fieldOrders[field.name] : null);
 		}
 		else
 		{
 			if(!dataSetBind.fieldOrders)
 				dataSetBind.fieldOrders = {};
 			
-			dataSetBind.fieldOrders[fieldName] = order;
+			dataSetBind.fieldOrders[field.name] = order;
 		}
 	};
 	
@@ -3378,27 +3398,35 @@
 	 * 获取指定标识的数据集参数。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引、数据集
-	 * @param paramInfo 数据集参数名、参数索引
+	 * @param paramInfo 数据集参数名、参数索引、参数对象
 	 * @returns 数据集参数，没有找到则返回null
 	 * @since 2.10.0
 	 */
 	chartBase.dataSetParam = function(dataSetBind, paramInfo)
 	{
+		//参数对象
+		if(paramInfo && paramInfo.name !== undefined)
+			return paramInfo;
+		
 		var params = this.dataSetParams(dataSetBind);
 		
 		if(!params)
 			return null;
 		
 		if(chartFactory.isNumber(paramInfo))
-			return params[paramInfo];
-		
-		for(var i=0; i<params.length; i++)
 		{
-			if(params[i].name == paramInfo)
-				return params[i];
+			return params[paramInfo];
 		}
-		
-		return null;
+		else
+		{
+			for(var i=0; i<params.length; i++)
+			{
+				if(params[i].name == paramInfo)
+					return params[i];
+			}
+			
+			return null;
+		}
 	};
 	
 	/**
@@ -3517,10 +3545,8 @@
 	chartBase.dataSetFieldSign = function(dataSetBind, field, sign)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		var fieldName = this._fieldNameOf(dataSetBind, field);
-		
-		if(fieldName == null)
-			throw new Error("[field] required");
+		field = this._dataSetFieldOf(dataSetBind, field);
+		var fieldName = field.name;
 		
 		if(sign === undefined)
 		{
@@ -3537,42 +3563,6 @@
 			sign = this._toDataSignValues(sign);
 			dataSetBind.fieldSigns[fieldName] = sign;
 		}
-	};
-	
-	chartBase._fieldNameOf = function(dataSetBind, field)
-	{
-		var re = null;
-		
-		if(field == null)
-		{
-			re = null;
-		}
-		else if(chartFactory.isString(field))
-		{
-			re = field;
-		}
-		else
-		{
-			var dataSetField = null;
-			
-			//字段索引数值
-			if(chartFactory.isNumber(field))
-			{
-			 	dataSetField = this.dataSetField(dataSetBind, field);
-				
-				if(dataSetField == null)
-					throw new Error("no DataSetField found for : " + field);
-			}
-			//数据集字段对象
-			else
-			{
-				dataSetField = field;
-			}
-			
-			re = (dataSetField ? dataSetField.name : null);
-		}
-		
-		return re;
 	};
 	
 	chartBase._toDataSignValues = function(dataSigns)
