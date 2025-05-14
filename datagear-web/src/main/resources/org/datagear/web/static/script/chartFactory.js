@@ -356,36 +356,36 @@
 		chart.dataSetBinds = (chart.dataSetBinds || []);
 		for(var i=0; i<chart.dataSetBinds.length; i++)
 		{
-			var cds = chart.dataSetBinds[i];
-			cds.dataSetSigns = (cds.dataSetSigns || []);
-			cds.fieldSigns = (cds.fieldSigns || {});
-			cds.alias = (cds.alias == null ?  "" : cds.alias);
-			cds.attachment = (cds.attachment == true ? true : false);
-			cds.query = (cds.query || {});
-			cds.query.paramValues = (cds.query.paramValues || {});
+			var dsb = chart.dataSetBinds[i];
+			dsb.dataSetSigns = (dsb.dataSetSigns || []);
+			dsb.fieldSigns = (dsb.fieldSigns || {});
+			dsb.alias = (dsb.alias == null ?  "" : dsb.alias);
+			dsb.attachment = (dsb.attachment == true ? true : false);
+			dsb.query = (dsb.query || {});
+			dsb.query.paramValues = (dsb.query.paramValues || {});
 			//为dataSetBinds元素添加index属性，便于后续根据其索引获取结果集等信息
-			cds.index = i;
+			dsb.index = i;
 			
 			// < @deprecated 兼容2.4.0版本的dataSetBinds.paramValues，将在未来版本移除，已被dataSetBinds.query.paramValues取代
-			cds.paramValues = cds.query.paramValues;
+			dsb.paramValues = dsb.query.paramValues;
 			// > @deprecated 兼容2.4.0版本的dataSetBinds.paramValues，将在未来版本移除，已被dataSetBinds.query.paramValues取代
 			
 			// < @deprecated 兼容5.0.0版本的DataSetBind.propertySigns，将在未来版本移除，已被DataSetBind.fieldSigns取代
-			cds.propertySigns = cds.fieldSigns;
+			dsb.propertySigns = dsb.fieldSigns;
 			// > @deprecated 兼容5.0.0版本的DataSetBind.propertySigns，将在未来版本移除，已被DataSetBind.fieldSigns取代
 			
 			// < @deprecated 兼容5.0.0版本的DataSetBind.propertyAliases，将在未来版本移除，已被DataSetBind.fieldAliases取代
-			cds.propertyAliases = cds.fieldAliases;
+			dsb.propertyAliases = dsb.fieldAliases;
 			// > @deprecated 兼容5.0.0版本的DataSetBind.propertyAliases，将在未来版本移除，已被DataSetBind.fieldAliases取代
 			
 			// < @deprecated 兼容5.0.0版本的DataSetBind.propertyOrders，将在未来版本移除，已被DataSetBind.fieldOrders取代
-			cds.propertyOrders = cds.fieldOrders;
+			dsb.propertyOrders = dsb.fieldOrders;
 			// > @deprecated 兼容5.0.0版本的DataSetBind.propertyOrders，将在未来版本移除，已被DataSetBind.fieldOrders取代
 			
 			// < @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
-			if(cds.dataSet)
+			if(dsb.dataSet)
 			{
-				cds.dataSet.properties = cds.dataSet.fields
+				dsb.dataSet.properties = dsb.dataSet.fields
 			}
 			// > @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
 		}
@@ -461,10 +461,10 @@
 			throw new Error("chart element '#"+this.elementId+"' required");
 		
 		if(!this.statusPreInit() && !this.statusDestroyed())
-			throw new Error("chart is illegal state for init()");
+			throw new Error("chart is illegal state for : init()");
 		
 		if(!this._isRenderContextInited())
-			throw new Error("chart is illegal state for init()");
+			throw new Error("chart is illegal state for : init()");
 		
 		this.statusIniting(true);
 		
@@ -861,7 +861,7 @@
 	chartBase.theme = function(theme)
 	{
 		if(!this._isRenderContextInited())
-			throw new Error("chart is illegal state for : theme(theme)");
+			throw new Error("chart is illegal state for : theme()");
 		
 		if(theme === undefined)
 		{
@@ -891,19 +891,6 @@
 			
 			this._theme = theme;
 		}
-	};
-	
-	/**
-	 * 获取非空图表主题。
-	 */
-	chartBase._themeNonNull = function()
-	{
-		var theme = this.theme();
-		
-		if(theme == null)
-			throw new Error("[chart.theme()] required");
-		
-		return theme;
 	};
 	
 	/**
@@ -1150,7 +1137,7 @@
 			throw new Error("chart is illegal state for : doRender()");
 		
 		var $element = this.elementJquery();
-		var theme = this._themeNonNull();
+		var theme = this.theme();
 		
 		$element.addClass(chartFactory.CHART_STYLE_NAME_FOR_INDICATION);
 		//必须添加相对定位样式
@@ -1184,7 +1171,7 @@
 	
 	chartBase._createChartThemeCssIfNon = function()
 	{
-		var theme = this._themeNonNull();
+		var theme = this.theme();
 		var thumbBgColor = this.themeGradualColor(0.2);
 		
 		this.themeStyleSheet(chartFactory.builtinPropName("Chart"), function()
@@ -1513,7 +1500,7 @@
 		//因为renderer.destroy()可能会清空图表元素（比如echarts.dispose()函数）
 		this._doDestroySetting();
 		
-		var theme = this._themeNonNull();
+		var theme = this.theme();
 		chartFactory.removeThemeRefEntity(theme, this.id);
 	};
 	
@@ -3063,7 +3050,7 @@
 	 */
 	chartBase.themeStyleName = function()
 	{
-		var theme = this._themeNonNull();
+		var theme = this.theme();
 		
 		// < @deprecated 兼容4.3.1版本的chartBase.themeStyleName(theme)格式，将在未来版本移除
 		if(arguments[0] != null)
@@ -3115,7 +3102,7 @@
 	 */
 	chartBase.themeStyleSheet = function(name, css, force)
 	{
-		var theme = this._themeNonNull();
+		var theme = this.theme();
 		
 		// < @deprecated 兼容4.3.1版本的chartBase.themeStyleSheet(theme, ...)格式，将在未来版本移除
 		if(name != null && !chartFactory.isString(name))
@@ -3518,7 +3505,7 @@
 		//从ChartTheme构建ECharts主题
 		if(!themeName)
 		{
-			var theme = this._themeNonNull();
+			var theme = this.theme();
 			themeName = theme[chartFactory._KEY_REGISTERED_ECHARTS_THEME_NAME];
 			
 			if(!themeName)
@@ -4053,7 +4040,7 @@
 	 */
 	chartBase.themeGradualColor = function(factor)
 	{
-		var theme = this._themeNonNull();
+		var theme = this.theme();
 		return chartFactory.themeGradualColor(theme, factor);
 	};
 	
@@ -5060,7 +5047,7 @@
 			factor = undefined;
 		}
 		
-		theme = (theme == null ? this._themeNonNull() : theme);
+		theme = (theme == null ? this.theme() : theme);
 		
 		return chartFactory.themeGradualColor(theme, factor);
 	};
@@ -8172,7 +8159,7 @@
 					}
 					else
 					{
-						chartFactory.logException("No lib found for name '"+dependName+"', load ignored");
+						chartFactory.logException("no lib found for name : '"+dependName+"', load ignored");
 					}
 				}
 				
