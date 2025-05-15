@@ -385,7 +385,7 @@
 			// < @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
 			if(dsb.dataSet)
 			{
-				dsb.dataSet.properties = dsb.dataSet.fields
+				dsb.dataSet.properties = dsb.dataSet.fields;
 			}
 			// > @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
 		}
@@ -1900,23 +1900,23 @@
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var dataSet = dataSetBinds[i].dataSet;
+			var params = this.dataSetParams(dataSetBinds[i]);
 			
-			if(!dataSet.params || dataSet.params.length == 0)
+			if(!params || params.length == 0)
 				continue;
 			
-			var paramValues = dataSetBinds[i].query.paramValues;
+			var paramValues = (this.dataSetParamValues(dataSetBinds[i]) || {});
 			
-			for(var j=0; j<dataSet.params.length; j++)
+			for(var j=0; j<params.length; j++)
 			{
-				var dsp = dataSet.params[j];
+				var param = params[j];
 				
-				if((dsp.required == true || dsp.required == "true") && paramValues[dsp.name] == null)
+				if((param.required == true || param.required == "true") && paramValues[param.name] == null)
 				{
 					if(msg != null)
 					{
 						msg.dataSetBindIndex = i;
-						msg.paramName = dsp.name;
+						msg.paramName = param.name;
 					}
 					
 					return false;
@@ -1931,7 +1931,17 @@
 	{
 		nullable = (nullable == null ? false : nullable);
 		
-		var re = (chartFactory.isNumber(dataSetBind) ? this.dataSetBindAt(dataSetBind) : dataSetBind);
+		//数据集绑定对象
+		if(dataSetBind && dataSetBind.dataSet !== undefined)
+			return dataSetBind;
+		
+		var re = dataSetBind;
+		
+		//索引数值
+		if(chartFactory.isNumber(dataSetBind))
+		{
+			re = this.dataSetBindAt(dataSetBind);
+		}
 		
 		if(!nullable && re == null)
 			throw new Error("no DataSetBind found for : " + dataSetBind);
@@ -1960,27 +1970,21 @@
 	chartBase.dataSetParamValue = function(dataSetBind, name, value)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		
-		//参数索引
-		if(chartFactory.isNumber(name))
-		{
-			var dataSet = dataSetBind.dataSet;
-			
-			if(!dataSet.params || dataSet.params.length <= name)
-				throw new Error("chart '#"+this.elementId+"' "+dataSetBind.index+"-th DataSetBind has no param at index : "+name);
-			
-			name = dataSet.params[name].name;
-		}
-		
-		var paramValues = dataSetBind.query.paramValues;
-		
-		if(dataSetBind._originalParamValues == null)
-			dataSetBind._originalParamValues = $.extend({}, paramValues);
+		var param = this._dataSetParamOf(dataSetBind, name);
+		name = param.name;
 		
 		if(value === undefined)
+		{
+			var paramValues = this.dataSetParamValues(dataSetBind);
 			return paramValues[name];
+		}
 		else
-			paramValues[name] = value;
+		{
+			var myParamValues = {};
+			myParamValues[name] = value;
+			
+			this.dataSetParamValues(dataSetBind, myParamValues, true);
+		}
 	};
 	
 	/**
@@ -2020,7 +2024,7 @@
 			
 			if($.isArray(paramValues))
 			{
-				var params = (dataSetBind.dataSet.params || []);
+				var params = this.dataSetParams(dataSetBind);
 				var len = Math.min(params.length, paramValues.length);
 				var paramValuesObj = {};
 				
@@ -3022,12 +3026,14 @@
 	chartBase.resultDataElement = function(dataSetResult, index)
 	{
 		if(dataSetResult == null || dataSetResult.data == null || index == null)
-			return undefined;
+			return null;
 		
 		var datas = this.resultDatas(dataSetResult);
 		
 		if(!$.isArray(index))
+		{
 			return datas[index];
+		}
 		else
 		{
 			var re = [];
@@ -3373,10 +3379,16 @@
 		
 		var params = null;
 		
+		//数据集
 		if(dataSetBind.params !== undefined)
+		{
 			params = dataSetBind.params;
+		}
+		//数据集绑定
 		else
+		{
 			params = (dataSetBind.dataSet ? dataSetBind.dataSet.params : null);
+		}
 		
 		return (params || []);
 	};
@@ -3391,29 +3403,47 @@
 	 */
 	chartBase.dataSetParam = function(dataSetBind, paramInfo)
 	{
+		return this._dataSetParamOf(dataSetBind, paramInfo, true);
+	};
+	
+	chartBase._dataSetParamOf = function(dataSetBind, paramInfo, nullable)
+	{
+		nullable = (nullable == null ? false : nullable);
+		
 		//参数对象
 		if(paramInfo && paramInfo.name !== undefined)
 			return paramInfo;
 		
+		var re = null;
+		
 		var params = this.dataSetParams(dataSetBind);
 		
 		if(!params)
-			return null;
-		
-		if(chartFactory.isNumber(paramInfo))
 		{
-			return params[paramInfo];
+			re =  null;
+		}
+		//索引数值
+		else if(chartFactory.isNumber(paramInfo))
+		{
+			re = params[paramInfo];
 		}
 		else
 		{
+			//参数名
 			for(var i=0; i<params.length; i++)
 			{
 				if(params[i].name == paramInfo)
-					return params[i];
+				{
+					re = params[i];
+					break;
+				}
 			}
-			
-			return null;
 		}
+		
+		if(!nullable && re == null)
+			throw new Error("no DataSetParam found for : " + paramInfo);
+		
+		return re;
 	};
 	
 	/**
@@ -3426,7 +3456,7 @@
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var params = dataSetBinds[i].dataSet.params;
+			var params = this.dataSetParams(dataSetBinds[i]);
 			
 			if(params && params.length > 0)
 				return true;
@@ -3439,7 +3469,7 @@
 	 * 获取数据集结果数据经属性映射后的对象数组。
 	 * 
 	 * @param dataSetResult 数据集结果
-	 * @param fieldMap 返回对象属性映射表，格式为：{ 返回对象属性名: 数据集结果数据属性对象、属性名、属性数组、属性名数组 }
+	 * @param fieldMap 返回对象属性映射表，格式为：{ 返回对象字段名: 数据集字段对象、字段名、字段数组、字段名数组 }
 	 * @param row 可选，行索引，以0开始，默认为0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
 	 * @return [{"...": ..., "...": ...}, ...]
