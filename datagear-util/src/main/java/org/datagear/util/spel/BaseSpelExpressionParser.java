@@ -17,6 +17,9 @@
 
 package org.datagear.util.spel;
 
+import java.util.Map;
+
+import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -35,6 +38,8 @@ import org.springframework.expression.spel.ast.Selection;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 /**
  * 基础Spel表达式解析器。
@@ -47,7 +52,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  */
 public class BaseSpelExpressionParser
 {
-	public static final BaseSpelExpressionParser INSTANCE = new BaseSpelExpressionParser();
+	public static final BaseSpelExpressionParser DEFAULT = new BaseSpelExpressionParser();
 
 	/**
 	 * 表达式解析器。
@@ -118,10 +123,9 @@ public class BaseSpelExpressionParser
 	 * @param expression
 	 * @param root
 	 * @return
-	 * @throws ParseException
 	 * @throws EvaluationException
 	 */
-	public Object getValue(Expression expression, Object root) throws ParseException, EvaluationException
+	public Object getValue(Expression expression, Object root) throws EvaluationException
 	{
 		return expression.getValue(root);
 	}
@@ -153,10 +157,9 @@ public class BaseSpelExpressionParser
 	 * @param expression
 	 * @param context
 	 * @return
-	 * @throws ParseException
 	 * @throws EvaluationException
 	 */
-	public Object getValue(Expression expression, EvaluationContext context) throws ParseException, EvaluationException
+	public Object getValue(Expression expression, EvaluationContext context) throws EvaluationException
 	{
 		return expression.getValue(context);
 	}
@@ -189,13 +192,53 @@ public class BaseSpelExpressionParser
 	 * @param expression
 	 * @param context
 	 * @return
-	 * @throws ParseException
 	 * @throws EvaluationException
 	 */
 	public Object getValue(Expression expression, EvaluationContext context, Object root)
-			throws ParseException, EvaluationException
+			throws EvaluationException
 	{
 		return expression.getValue(context, root);
+	}
+
+	/**
+	 * 构建只读的、{@linkplain Map}简化的{@linkplain EvaluationContext}。
+	 * 
+	 * @see {@linkplain #readonlyMapSimplifyContext(ConversionService)}
+	 * @return
+	 */
+	public EvaluationContext readonlyMapSimplifyContext()
+	{
+		return readonlyMapSimplifyContext(null);
+	}
+
+	/**
+	 * 构建只读的、{@linkplain Map}简化的{@linkplain EvaluationContext}。
+	 * <p>
+	 * {@linkplain Map}简化：
+	 * </p>
+	 * <p>
+	 * 访问{@linkplain Map}可以使用简化的{@code "key"}、{@linkplain "map.key"}、{@linkplain "[0].key"}语法，
+	 * 也可以使用默认的{@code "['key']"}、{@linkplain "map['key']"}、{@linkplain "[0]['key']"}语法。
+	 * </p>
+	 * <p>
+	 * 但是，注意：{@code "size"}表达式将访问{@code "size"}关键字的值而非{@linkplain Map}的{@linkplain Map#size()}。
+	 * </p>
+	 * 
+	 * @param conversionService
+	 *            允许{@code null}
+	 * @return
+	 */
+	public EvaluationContext readonlyMapSimplifyContext(ConversionService conversionService)
+	{
+		// 注意：这里Builder构造方法参数的ReadonlyMapAccessor必须在DataBindingPropertyAccessor之前，
+		// 才能使得"map.size"表达式优先访问"size"关键字的值而非map的大小
+		SimpleEvaluationContext.Builder builder = new SimpleEvaluationContext.Builder(new ReadonlyMapAccessor(),
+				DataBindingPropertyAccessor.forReadOnlyAccess());
+
+		if (conversionService != null)
+			builder.withConversionService(conversionService);
+
+		return builder.build();
 	}
 
 	/**

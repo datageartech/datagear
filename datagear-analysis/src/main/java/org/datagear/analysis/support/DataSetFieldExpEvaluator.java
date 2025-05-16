@@ -24,30 +24,10 @@ import java.util.Map;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetField;
 import org.datagear.util.StringUtil;
+import org.datagear.util.spel.BaseSpelExpressionParser;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.ParseException;
-import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.ast.Assign;
-import org.springframework.expression.spel.ast.BeanReference;
-import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.InlineList;
-import org.springframework.expression.spel.ast.InlineMap;
-import org.springframework.expression.spel.ast.MethodReference;
-import org.springframework.expression.spel.ast.Projection;
-import org.springframework.expression.spel.ast.QualifiedIdentifier;
-import org.springframework.expression.spel.ast.Selection;
-import org.springframework.expression.spel.ast.TypeReference;
-import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.DataBindingPropertyAccessor;
-import org.springframework.expression.spel.support.SimpleEvaluationContext;
 
 /**
  * {@linkplain DataSetField#getExpression()}表达式计算器。
@@ -142,14 +122,8 @@ public class DataSetFieldExpEvaluator
 {
 	public static final DataSetFieldExpEvaluator DEFAULT = new DataSetFieldExpEvaluator();
 
-	/**
-	 * 表达式解析器。
-	 * <p>
-	 * 这里考虑安全，明确禁止了它的{@code autoGrowNullReferences}、{@code autoGrowCollections}特性
-	 * </p>
-	 */
-	private ExpressionParser expressionParser = new SpelExpressionParser(new SpelParserConfiguration(false, false));
-	
+	private BaseSpelExpressionParser spelExpressionParser = BaseSpelExpressionParser.DEFAULT;
+
 	private ConversionService conversionService = null;
 
 	public DataSetFieldExpEvaluator()
@@ -157,14 +131,14 @@ public class DataSetFieldExpEvaluator
 		super();
 	}
 
-	public ExpressionParser getExpressionParser()
+	public BaseSpelExpressionParser getSpelExpressionParser()
 	{
-		return expressionParser;
+		return spelExpressionParser;
 	}
 
-	public void setExpressionParser(ExpressionParser expressionParser)
+	public void setSpelExpressionParser(BaseSpelExpressionParser spelExpressionParser)
 	{
-		this.expressionParser = expressionParser;
+		this.spelExpressionParser = spelExpressionParser;
 	}
 
 	public ConversionService getConversionService()
@@ -189,7 +163,7 @@ public class DataSetFieldExpEvaluator
 	{
 		try
 		{
-			Expression exp = parseExpression(expression);
+			Expression exp = this.spelExpressionParser.parseExpression(expression);
 
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalSingle(exp, context, data);
@@ -217,7 +191,7 @@ public class DataSetFieldExpEvaluator
 	{
 		try
 		{
-			Expression exp = parseExpression(expression);
+			Expression exp = this.spelExpressionParser.parseExpression(expression);
 
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalArray(exp, context, datas);
@@ -244,7 +218,7 @@ public class DataSetFieldExpEvaluator
 	{
 		try
 		{
-			Expression exp = parseExpression(expression);
+			Expression exp = this.spelExpressionParser.parseExpression(expression);
 
 			EvaluationContext context = buildEvaluationContext();
 			return doEvalList(exp, context, datas);
@@ -379,7 +353,7 @@ public class DataSetFieldExpEvaluator
 
 	protected Object doEvalSingle(Expression expression, EvaluationContext context, Object data) throws Throwable
 	{
-		return expression.getValue(context, data);
+		return this.spelExpressionParser.getValue(expression, context, data);
 	}
 
 	protected Expression parseExpression(DataSetField field)
@@ -387,7 +361,7 @@ public class DataSetFieldExpEvaluator
 	{
 		try
 		{
-			return parseExpression(field.getExpression());
+			return this.spelExpressionParser.parseExpression(field.getExpression());
 		}
 		catch (DataSetFieldExpEvaluatorException e)
 		{
@@ -399,104 +373,9 @@ public class DataSetFieldExpEvaluator
 		}
 	}
 
-	protected Expression parseExpression(String expression) throws Throwable
-	{
-		Expression exp = this.expressionParser.parseExpression(expression);
-
-		checkPermission(exp);
-
-		return exp;
-	}
-
-	protected void checkPermission(Expression expression) throws Throwable
-	{
-		if (!(expression instanceof SpelExpression))
-			return;
-
-		SpelExpression spelExpression = (SpelExpression) expression;
-		SpelNode spelNode = spelExpression.getAST();
-
-		checkSpelNode(spelExpression, spelNode);
-	}
-
-	/**
-	 * 校验Spel表达式是否合法。
-	 * <p>
-	 * Spel没有提供更细粒度的表达式控制配置，所以这里通过判断{@linkplain SpelNode}的类型来禁用某些{@linkplain DataSetFieldExpEvaluator}表达式规范无关的语法，
-	 * 以避免安全问题。
-	 * </p>
-	 * 
-	 * @param spelExpression
-	 * @param spelNode
-	 * @throws Throwable
-	 */
-	protected void checkSpelNode(SpelExpression spelExpression, SpelNode spelNode) throws Throwable
-	{
-		if (spelNode == null)
-			return;
-
-		boolean illegal = false;
-
-		// 表达式中不允许出现这些语法
-		if (spelNode instanceof Assign)
-			illegal = true;
-		else if (spelNode instanceof BeanReference)
-			illegal = true;
-		else if (spelNode instanceof ConstructorReference)
-			illegal = true;
-		else if (spelNode instanceof InlineList)
-			illegal = true;
-		else if (spelNode instanceof InlineMap)
-			illegal = true;
-		else if (spelNode instanceof MethodReference)
-			illegal = true;
-		else if (spelNode instanceof Projection)
-			illegal = true;
-		else if (spelNode instanceof QualifiedIdentifier)
-			illegal = true;
-		else if (spelNode instanceof Selection)
-			illegal = true;
-		else if (spelNode instanceof TypeReference)
-			illegal = true;
-		
-		if(illegal)
-			throw new ParseException(spelNode.toStringAST(), spelNode.getStartPosition(), "illegal syntax");
-
-		int cc = spelNode.getChildCount();
-
-		for (int i = 0; i < cc; i++)
-		{
-			checkSpelNode(spelExpression, spelNode.getChild(i));
-		}
-	}
-
-	/**
-	 * 构建支持此类的表达式语法规范的的计算上下文。
-	 * <p>
-	 * Spring表达式对于{@linkplain Map}的默认访问语法为：{@code map['key']}，而数据集的结果数据几乎都是{@code Map}类型的，
-	 * 这样会导致定义表达式会较繁琐且不够直观。
-	 * </p>
-	 * <p>
-	 * 因而，此方法返回的{@linkplain EvaluationContext}做了特殊处理，除了支持{@code map['key']}的标准语法，
-	 * 还支持以{@code map.key}的简化语法访问{@linkplain Map}，从而简化表达式定义。
-	 * </p>
-	 * <p>
-	 * 另外，为了安全性，返回的{@linkplain EvaluationContext}禁用了数据写入、方法调用、类型引用表达式支持。
-	 * </p>
-	 * 
-	 * @return
-	 */
 	protected EvaluationContext buildEvaluationContext()
 	{
-		//注意：这里Builder构造方法参数的MapAccessor必须在DataBindingPropertyAccessor之前，
-		//才能使得"map.size"表达式优先访问"size"关键字的值而非map的大小
-		SimpleEvaluationContext.Builder builder = new SimpleEvaluationContext.Builder(new MapAccessor(),
-				DataBindingPropertyAccessor.forReadOnlyAccess());
-		
-		if(this.conversionService != null)
-			builder.withConversionService(this.conversionService);
-		
-		return builder.build();
+		return this.spelExpressionParser.readonlyMapSimplifyContext(this.conversionService);
 	}
 
 	/**
@@ -518,63 +397,5 @@ public class DataSetFieldExpEvaluator
 		 *            计算结果值
 		 */
 		void set(DataSetField field, int fieldIndex, T data, Object value);
-	}
-	
-	/**
-	 * 支持{@linkplain DataSetFieldExpEvaluator}表达式规范的{@linkplain Map}访问器。
-	 * <p>
-	 * 此类对{@linkplain Map}的访问规范包括：
-	 * </p>
-	 * <p>
-	 * 1. 支持以{@code map.key}的语法访问关键字值；
-	 * </p>
-	 * <p>
-	 * 2.
-	 * 只允许访问{@linkplain Map}的关键字值，不允许访问{@linkplain Map}对象本身的字段（比如{@code size}字段）；
-	 * </p>
-	 * <p>
-	 * 3. 只允许读操作，不允许写操作。
-	 * </p>
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected static class MapAccessor implements PropertyAccessor
-	{
-		public MapAccessor()
-		{
-			super();
-		}
-
-		@Override
-		public Class<?>[] getSpecificTargetClasses()
-		{
-			return new Class<?>[] {Map.class};
-		}
-
-		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException
-		{
-			return (target instanceof Map);
-		}
-
-		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException
-		{
-			Object value = ((Map<?, ?>) target).get(name);
-			return new TypedValue(value);
-		}
-
-		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException
-		{
-			return false;
-		}
-
-		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException
-		{
-			throw new UnsupportedOperationException();
-		}
 	}
 }

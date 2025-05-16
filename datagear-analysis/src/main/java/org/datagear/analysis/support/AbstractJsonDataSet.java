@@ -343,6 +343,6 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 
 	protected BaseSpelExpressionParser getBaseSpelExpressionParser()
 	{
-		return BaseSpelExpressionParser.INSTANCE;
+		return BaseSpelExpressionParser.DEFAULT;
 	}
 }

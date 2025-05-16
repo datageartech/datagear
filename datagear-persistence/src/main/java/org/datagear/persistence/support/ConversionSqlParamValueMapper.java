@@ -52,24 +52,9 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
+import org.datagear.util.spel.BaseSpelExpressionParser;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ParseException;
-import org.springframework.expression.spel.SpelNode;
-import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.ast.Assign;
-import org.springframework.expression.spel.ast.BeanReference;
-import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.InlineList;
-import org.springframework.expression.spel.ast.InlineMap;
-import org.springframework.expression.spel.ast.MethodReference;
-import org.springframework.expression.spel.ast.Projection;
-import org.springframework.expression.spel.ast.QualifiedIdentifier;
-import org.springframework.expression.spel.ast.Selection;
-import org.springframework.expression.spel.ast.TypeReference;
-import org.springframework.expression.spel.standard.SpelExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * 支持类型转换的{@linkplain SqlParamValueMapper}。
@@ -105,15 +90,6 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 	protected static final SqlExpressionResolver DEFAULT_SQL_EXPRESSION_RESOLVER = new SqlExpressionResolver();
 
-	/**
-	 * 表达式解析器。
-	 * <p>
-	 * 这里考虑安全，明确禁止了它的{@code autoGrowNullReferences}、{@code autoGrowCollections}特性
-	 * </p>
-	 */
-	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser(
-			new SpelParserConfiguration(false, false));
-
 	/** 用于支持基本类型转换的转换服务类 */
 	private ConversionService conversionService = null;
 
@@ -133,7 +109,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	private SqlExpressionResolver sqlExpressionResolver = DEFAULT_SQL_EXPRESSION_RESOLVER;
 
 	/** 变量表达式计算器 */
-	private SpelExpressionParser spelExpressionParser = DEFAULT_SPEL_EXPRESSION_PARSER;
+	private BaseSpelExpressionParser spelExpressionParser = BaseSpelExpressionParser.DEFAULT;
 
 	/** 表达式计算上下文 */
 	private ExpressionEvaluationContext expressionEvaluationContext = new ExpressionEvaluationContext();
@@ -213,12 +189,12 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		this.sqlExpressionResolver = sqlExpressionResolver;
 	}
 
-	public SpelExpressionParser getSpelExpressionParser()
+	public BaseSpelExpressionParser getSpelExpressionParser()
 	{
 		return spelExpressionParser;
 	}
 
-	public void setSpelExpressionParser(SpelExpressionParser spelExpressionParser)
+	public void setSpelExpressionParser(BaseSpelExpressionParser spelExpressionParser)
 	{
 		this.spelExpressionParser = spelExpressionParser;
 	}
@@ -316,12 +292,12 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	 * @param column
 	 * @param value
 	 * @param expressions
-	 * @param expressionEvaluationContext
+	 * @param evalContext
 	 * @return
 	 * @throws Throwable
 	 */
 	protected String evaluateVariableExpressions(Connection cn, Table table, Column column, String value,
-			List<NameExpression> expressions, ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
+			List<NameExpression> expressions, ExpressionEvaluationContext evalContext) throws Throwable
 	{
 		List<Object> expressionValues = new ArrayList<>(expressions.size());
 
@@ -329,15 +305,15 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		{
 			NameExpression expression = expressions.get(i);
 
-			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
-			if (expressionEvaluationContext.containsCachedValue(expressionKey))
+			String expressionKey = evalContext.getCachedKey(expression);
+			if (evalContext.containsCachedValue(expressionKey))
 			{
-				Object expValue = expressionEvaluationContext.getCachedValue(expressionKey);
+				Object expValue = evalContext.getCachedValue(expressionKey);
 				expressionValues.add(expValue);
 			}
 			else
 			{
-				evaluateVariableExpression(cn, table, column, value, expression, expressionEvaluationContext,
+				evaluateVariableExpression(cn, table, column, value, expression, evalContext,
 						expressionValues);
 			}
 		}
@@ -348,7 +324,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	}
 
 	protected Object evaluateVariableExpression(Connection cn, Table table, Column column, String value,
-			NameExpression expression, ExpressionEvaluationContext expressionEvaluationContext,
+			NameExpression expression, ExpressionEvaluationContext evalContext,
 			List<Object> expressionValues) throws Throwable
 	{
 		Object expValue;
@@ -371,8 +347,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		try
 		{
-			checkSpelExpression(spelExpression);
-			expValue = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
+			expValue = this.spelExpressionParser.getValue(spelExpression, evalContext.getVariableExpressionBean());
 		}
 		catch (Throwable t)
 		{
@@ -384,76 +359,9 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		}
 
 		expressionValues.add(expValue);
-		expressionEvaluationContext.putCachedValue(expression, expValue);
+		evalContext.putCachedValue(expression, expValue);
 
 		return expValue;
-	}
-
-	/**
-	 * 校验Spel表达式是否合法。
-	 * 
-	 * @param expression
-	 * @throws ParseException
-	 */
-	protected void checkSpelExpression(Expression expression) throws ParseException
-	{
-		if (!(expression instanceof SpelExpression))
-			return;
-
-		SpelExpression spelExpression = (SpelExpression) expression;
-		SpelNode spelNode = spelExpression.getAST();
-
-		checkSpelNode(spelExpression, spelNode);
-	}
-
-	/**
-	 * 校验Spel表达式是否合法。
-	 * <p>
-	 * Spel没有提供更细粒度的表达式控制配置，所以这里通过判断{@linkplain SpelNode}的类型来禁用某些无关的语法，以避免安全问题。
-	 * </p>
-	 * 
-	 * @param spelExpression
-	 * @param spelNode
-	 * @throws ParseException
-	 */
-	protected void checkSpelNode(SpelExpression spelExpression, SpelNode spelNode) throws ParseException
-	{
-		if (spelNode == null)
-			return;
-
-		boolean illegal = false;
-
-		// 表达式中不允许出现这些语法
-		if (spelNode instanceof Assign)
-			illegal = true;
-		else if (spelNode instanceof BeanReference)
-			illegal = true;
-		else if (spelNode instanceof ConstructorReference)
-			illegal = true;
-		else if (spelNode instanceof InlineList)
-			illegal = true;
-		else if (spelNode instanceof InlineMap)
-			illegal = true;
-		else if (spelNode instanceof MethodReference)
-			illegal = true;
-		else if (spelNode instanceof Projection)
-			illegal = true;
-		else if (spelNode instanceof QualifiedIdentifier)
-			illegal = true;
-		else if (spelNode instanceof Selection)
-			illegal = true;
-		else if (spelNode instanceof TypeReference)
-			illegal = true;
-
-		if (illegal)
-			throw new ParseException(spelNode.toStringAST(), spelNode.getStartPosition(), "illegal syntax");
-
-		int cc = spelNode.getChildCount();
-
-		for (int i = 0; i < cc; i++)
-		{
-			checkSpelNode(spelExpression, spelNode.getChild(i));
-		}
 	}
 
 	/**
