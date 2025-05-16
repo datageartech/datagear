@@ -19,6 +19,8 @@ package org.datagear.analysis.support.datasetres;
 
 import java.io.Reader;
 
+import org.datagear.analysis.support.AbstractJsonDataSet;
+
 /**
  * JSON数据集资源。
  * 
@@ -29,22 +31,42 @@ public abstract class JsonDataSetResource extends DataSetResource
 {
 	private static final long serialVersionUID = 1L;
 	
+	/** 同{@linkplain AbstractJsonDataSet#getDataJsonPath()} */
 	private String dataJsonPath;
+
+	/** 同{@linkplain AbstractJsonDataSet#getAdditionDataProp()} */
+	private String additionDataProp;
 
 	public JsonDataSetResource()
 	{
 		super();
 	}
 
-	public JsonDataSetResource(String resolvedTemplate, String dataJsonPath)
+	public JsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProp)
 	{
 		super(resolvedTemplate);
 		this.dataJsonPath = dataJsonPath;
+		this.additionDataProp = additionDataProp;
 	}
 
 	public String getDataJsonPath()
 	{
 		return dataJsonPath;
+	}
+
+	public void setDataJsonPath(String dataJsonPath)
+	{
+		this.dataJsonPath = dataJsonPath;
+	}
+
+	public String getAdditionDataProp()
+	{
+		return additionDataProp;
+	}
+
+	public void setAdditionDataProp(String additionDataProp)
+	{
+		this.additionDataProp = additionDataProp;
 	}
 
 	/**
@@ -63,6 +85,7 @@ public abstract class JsonDataSetResource extends DataSetResource
 	{
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((additionDataProp == null) ? 0 : additionDataProp.hashCode());
 		result = prime * result + ((dataJsonPath == null) ? 0 : dataJsonPath.hashCode());
 		return result;
 	}
@@ -77,6 +100,13 @@ public abstract class JsonDataSetResource extends DataSetResource
 		if (getClass() != obj.getClass())
 			return false;
 		JsonDataSetResource other = (JsonDataSetResource) obj;
+		if (additionDataProp == null)
+		{
+			if (other.additionDataProp != null)
+				return false;
+		}
+		else if (!additionDataProp.equals(other.additionDataProp))
+			return false;
 		if (dataJsonPath == null)
 		{
 			if (other.dataJsonPath != null)

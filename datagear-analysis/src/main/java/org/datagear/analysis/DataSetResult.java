@@ -18,6 +18,7 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -91,5 +92,73 @@ public class DataSetResult implements AdditionsAware, Serializable
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
+	}
+
+	/**
+	 * 添加附加数据。
+	 * <p>
+	 * 如果{@linkplain #getAdditions()}为{@code null}，它会默认创建{@linkplain HashMap}。
+	 * </p>
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	@SuppressWarnings("unchecked")
+	public void addAddition(String name, Object value)
+	{
+		if (this.additions == null)
+			this.additions = new HashMap<>();
+
+		((Map<String, Object>) this.additions).put(name, value);
+	}
+
+	/**
+	 * 添加附加数据。
+	 * <p>
+	 * 如果{@linkplain #getAdditions()}为{@code null}，它会默认创建{@linkplain HashMap}。
+	 * </p>
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	@SuppressWarnings("unchecked")
+	public void addAdditions(Map<String, ?> additions)
+	{
+		if (this.additions == null)
+			this.additions = new HashMap<>();
+
+		((Map<String, Object>) this.additions).putAll(additions);
+	}
+
+	/**
+	 * 获取附加数据。
+	 * 
+	 * @param <T>
+	 * @param name
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getAddition(String name)
+	{
+		if (this.additions == null)
+			return null;
+		else
+			return (T) this.additions.get(name);
+	}
+
+	/**
+	 * 移除并返回附加数据。
+	 * 
+	 * @param <T>
+	 * @param name
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T removeAddition(String name)
+	{
+		if (this.additions == null)
+			return null;
+		else
+			return (T) this.additions.remove(name);
 	}
 }

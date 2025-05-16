@@ -36,9 +36,9 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 		super();
 	}
 
-	public JsonValueDataSetResource(String resolvedTemplate, String dataJsonPath)
+	public JsonValueDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProp)
 	{
-		super(resolvedTemplate, dataJsonPath);
+		super(resolvedTemplate, dataJsonPath, additionDataProp);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
-				+ getResolvedTemplate() + "]";
+		return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", additionDataProp="
+				+ getAdditionDataProp() + ", resolvedTemplate=" + getResolvedTemplate() + "]";
 	}
 }

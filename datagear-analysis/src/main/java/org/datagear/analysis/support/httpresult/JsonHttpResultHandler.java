@@ -91,13 +91,16 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			setParams(dataSet.getParams());
 			setDataFormat(dataSet.getDataFormat());
 			super.setDataJsonPath(dataSet.getResponseDataJsonPath());
+			// TODO
+			super.setAdditionDataProp(null);
 			this.responseJsonReader = responseJsonReader;
 		}
 
 		@Override
 		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query) throws Throwable
 		{
-			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), this.responseJsonReader);
+			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), getAdditionDataProp(),
+					this.responseJsonReader);
 		}
 	}
 
@@ -112,9 +115,10 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			super();
 		}
 
-		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, Reader jsonReader)
+		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProp,
+				Reader jsonReader)
 		{
-			super(resolvedTemplate, dataJsonPath);
+			super(resolvedTemplate, dataJsonPath, additionDataProp);
 			this.jsonReader = jsonReader;
 		}
 
@@ -126,6 +130,7 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 		@Override
 		public boolean isIdempotent()
 		{
+			// 这里应始终返回false
 			return false;
 		}
 
@@ -133,13 +138,6 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 		public Reader getReader() throws Throwable
 		{
 			return this.jsonReader;
-		}
-
-		@Override
-		public String toString()
-		{
-			return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
-					+ getResolvedTemplate() + "]";
 		}
 	}
 }

@@ -43,10 +43,10 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 		super();
 	}
 
-	public JsonFileDataSetResource(String resolvedTemplate, String dataJsonPath,
+	public JsonFileDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProp,
 			String encoding, String filePath, long lastModified)
 	{
-		super(resolvedTemplate, dataJsonPath);
+		super(resolvedTemplate, dataJsonPath, additionDataProp);
 		this.filePath = filePath;
 		this.lastModified = lastModified;
 		this.encoding = encoding;
@@ -124,7 +124,7 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [encoding=" + encoding + ", filePath=" + filePath + ", lastModified="
-				+ lastModified + ", dataJsonPath=" + getDataJsonPath() + ", resolvedTemplate="
-				+ getResolvedTemplate() + "]";
+				+ lastModified + ", dataJsonPath=" + getDataJsonPath() + ", additionDataProp=" + getAdditionDataProp()
+				+ ", resolvedTemplate=" + getResolvedTemplate() + "]";
 	}
 }

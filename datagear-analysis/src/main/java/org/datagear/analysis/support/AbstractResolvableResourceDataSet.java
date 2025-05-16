@@ -236,7 +236,12 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	{
 		DataSetResult dr = new DataSetResult(data);
 		dr.setAdditions(additions);
-		ResolvedDataSetResult rdr = new ResolvedDataSetResult(dr, fields);
+		return toResourceResult(dr, fields);
+	}
+
+	protected ResourceResult toResourceResult(DataSetResult result, List<DataSetField> fields) throws Throwable
+	{
+		ResolvedDataSetResult rdr = new ResolvedDataSetResult(result, fields);
 		return new ResourceResult(rdr);
 	}
 

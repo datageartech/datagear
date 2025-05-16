@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,9 @@ import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.support.datasetres.JsonDataSetResource;
 import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
+import org.datagear.util.spel.BaseSpelExpressionParser;
+import org.springframework.expression.Expression;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,8 +52,15 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 {
 	private static final long serialVersionUID = 1L;
 
+	public static final String ADDITION_NAME_DATA = "data";
+
+	public static final char ADDITION_DATA_PROP_SPLITTER = ',';
+
 	/** 数据JSON路径 */
 	private String dataJsonPath = "";
+
+	/** 作为结果附加数据的属性名，多个以{@code ','}分隔 */
+	private String additionDataProp = "";
 
 	public AbstractJsonDataSet()
 	{
@@ -91,6 +102,16 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		this.dataJsonPath = dataJsonPath;
 	}
 
+	public String getAdditionDataProp()
+	{
+		return additionDataProp;
+	}
+
+	public void setAdditionDataProp(String additionDataProp)
+	{
+		this.additionDataProp = additionDataProp;
+	}
+
 	@Override
 	protected ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
@@ -100,13 +121,13 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		{
 			reader = resource.getReader();
 
-			Object data = resolveData(reader, resource.getDataJsonPath());
+			DataSetResult result = resolveSourceResult(resource, reader);
 			List<DataSetField> fields = null;
 
 			if (resolveFields)
-				fields = resolveFields(data);
+				fields = resolveFields(result.getData());
 
-			return toResourceResult(data, fields);
+			return toResourceResult(result, fields);
 		}
 		finally
 		{
@@ -115,15 +136,15 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	}
 
 	/**
-	 * 解析数据。
+	 * 解析JSON源结果。
 	 * 
+	 * @param resource
 	 * @param jsonReader
-	 * @param dataJsonPath
 	 * @return
 	 * @throws ReadJsonDataPathException
 	 * @throws Throwable
 	 */
-	protected Object resolveData(Reader jsonReader, String dataJsonPath)
+	protected DataSetResult resolveSourceResult(T resource, Reader jsonReader)
 			throws ReadJsonDataPathException, Throwable
 	{
 		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
@@ -131,13 +152,48 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		if (!isLegalDataJsonNode(jsonNode))
 			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
 	
-		if (jsonNode == null)
+		DataSetResult re = new DataSetResult();
+
+		Object srcData = (jsonNode == null ? null : getObjectMapperNonStardand().treeToValue(jsonNode, Object.class));
+
+		if (srcData != null)
+		{
+			Object reData = getJsonPathSupport().resolve(srcData, resource.getDataJsonPath());
+			re.setData(reData);
+
+			Object additionData = resolveSourceAdditionData(resource, srcData);
+			if (additionData != null)
+			{
+				re.addAddition(ADDITION_NAME_DATA, additionData);
+			}
+		}
+	
+		return re;
+	}
+
+	protected Map<String, ?> resolveSourceAdditionData(T resource, Object srcData) throws Throwable
+	{
+		if (StringUtil.isEmpty(resource.getAdditionDataProp()) || srcData == null)
 			return null;
-	
-		Object data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
-		data = getJsonPathSupport().resolve(data, dataJsonPath);
-	
-		return data;
+		
+		List<String> props = StringUtil.splitWithEscape(resource.getAdditionDataProp(), ADDITION_DATA_PROP_SPLITTER,
+				true);
+
+		if (props == null || props.isEmpty())
+			return null;
+
+		Map<String, Object> re = new HashMap<>();
+
+		BaseSpelExpressionParser spelParser = getBaseSpelExpressionParser();
+
+		for (String prop : props)
+		{
+			Expression exp = spelParser.parseExpression(prop);
+			Object value = spelParser.getValue(exp, srcData);
+			re.put(prop, value);
+		}
+
+		return re;
 	}
 
 	/**
@@ -283,5 +339,10 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	protected JsonPathSupport getJsonPathSupport()
 	{
 		return JsonPathSupport.INSTANCE;
+	}
+
+	protected BaseSpelExpressionParser getBaseSpelExpressionParser()
+	{
+		return BaseSpelExpressionParser.INSTANCE;
 	}
 }

@@ -281,9 +281,10 @@ public class DataSetResultWrapper
 		}
 
 		@Override
-		protected Object resolveData(Reader jsonReader, String dataJsonPath) throws ReadJsonDataPathException, Throwable
+		protected DataSetResult resolveSourceResult(InternalJsonDataSetResource resource, Reader jsonReader)
+				throws ReadJsonDataPathException, Throwable
 		{
-			return this.data;
+			return new DataSetResult(this.data);
 		}
 
 		@Override
@@ -308,7 +309,7 @@ public class DataSetResultWrapper
 
 		public InternalJsonDataSetResource()
 		{
-			super("", "");
+			super("", "", "");
 		}
 
 		@Override
