@@ -178,6 +178,8 @@ global.dashboardApiCompletions =
 	{name: "resetDataSetParamValues", value: "resetDataSetParamValues(", displayName: "resetDataSetParamValues() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resetDataSetParamValuesFirst", value: "resetDataSetParamValuesFirst()", displayName: "resetDataSetParamValuesFirst() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resize", value: "resize()", displayName: "resize() ", displayComment: "chart", categories: ["chart"]},
+	{name: "resultAddition", value: "resultAddition(", displayName: "resultAddition() ", displayComment: "chart", categories: ["chart"]},
+	{name: "resultAdditions", value: "resultAdditions(", displayName: "resultAdditions() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultCell", value: "resultCell(", displayName: "resultCell() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultColumnArrays", value: "resultColumnArrays(", displayName: "resultColumnArrays() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultData", value: "resultData(", displayName: "resultData() ", displayComment: "chart", categories: ["chart"]},

@@ -4743,6 +4743,55 @@
 		return re;
 	};
 	
+	/**
+	 * 获取/设置数据集结果所有附加数据。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param additions 可选，要设置的附加数据映射表，格式为：{ ... }
+	 * @returns {}，可能null
+	 * @since 5.4.0
+	 */
+	chartBase.resultAdditions = function(dataSetResult, additions)
+	{
+		if(additions === undefined)
+		{
+			return (dataSetResult ? dataSetResult.additions : null);
+		}
+		else
+		{
+			dataSetResult.additions = additions;
+		}
+	};
+	
+	/**
+	 * 获取/设置数据集结果指定名称的附加数据。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param name 名称
+	 * @param value 可选，要设置的附加数据
+	 * @returns 附加数据，可能null
+	 * @since 5.4.0
+	 */
+	chartBase.resultAddition = function(dataSetResult, name, value)
+	{
+		var additions = this.resultAdditions(dataSetResult);
+		
+		if(value === undefined)
+		{
+			return (additions ? additions[name] : null);
+		}
+		else
+		{
+			if(additions == null)
+			{
+				additions = {};
+				this.resultAdditions(dataSetResult, additions);
+			}
+			
+			additions[name] = value;
+		}
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
