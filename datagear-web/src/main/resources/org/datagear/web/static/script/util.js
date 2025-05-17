@@ -1559,9 +1559,12 @@
 		return (fileName && fileName.charAt(fileName.length - 1) == '/');
 	};
 	
-	$.toJsonString = function(obj)
+	$.toJsonString = function(obj, pretty)
 	{
-		return JSON.stringify(obj);
+		if(pretty == null)
+			return JSON.stringify(obj);
+		else
+			return JSON.stringify(obj, null, 2);
 	};
 	
 	$.replaceAllSubStr = function(str, subStr, replacement)

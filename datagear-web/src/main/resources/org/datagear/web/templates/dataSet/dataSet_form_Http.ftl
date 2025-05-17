@@ -137,6 +137,17 @@
 					</p-inputtext>
 				</div>
 			</div>
+			<div class="field grid" v-if="fm.responseContentType == pm.responseContentTypeOptions[0].value">
+				<label for="${pid}responseAdditionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='httpDataSet.responseAdditionDataProps.desc' />">
+					<@spring.message code='responseAdditionData' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}responseAdditionDataProps" v-model="fm.responseAdditionDataProps" type="text" class="input w-full"
+						name="responseAdditionDataProps" maxlength="500">
+					</p-inputtext>
+				</div>
+			</div>
 			<#include "include/dataSet_form_param_field.ftl">
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
@@ -168,6 +179,7 @@
 		fingerprint.headerContent = dataSet.headerContent;
 		fingerprint.responseContentType = dataSet.responseContentType;
 		fingerprint.responseDataJsonPath = dataSet.responseDataJsonPath;
+		fingerprint.responseAdditionDataProps = dataSet.responseAdditionDataProps;
 	};
 	
 	po.beforeSubmitForm = function(action)

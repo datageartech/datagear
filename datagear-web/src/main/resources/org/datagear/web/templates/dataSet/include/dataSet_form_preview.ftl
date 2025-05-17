@@ -64,21 +64,31 @@
 						</p-button>
 					</div>
 				</div>
-				<div class="flex-grow-1 flex justify-content-end" v-if="!pm.previewError">
-					<p-button icon="pi pi-info-circle" type="button"
+				<div class="flex-grow-1 flex justify-content-end gap-1" v-if="!pm.previewError">
+					<p-button icon="pi pi-paperclip" type="button" title="<@spring.message code='additionData' />"
+						aria:haspopup="true" aria-controls="${pid}previewAdditionsResultPanel" v-if="pm.previewAdditionsResult"
+						@click="togglePreviewAdditionsResultPanel" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button icon="pi pi-info-circle" type="button" title="<@spring.message code='templateResult' />"
 						aria:haspopup="true" aria-controls="${pid}previewTplResultPanel"
 						@click="togglePreviewTplResultPanel" class="p-button-secondary p-button-sm">
 					</p-button>
-					<p-overlaypanel ref="${pid}previewTplResultEle" append-to="body"
-						:show-close-icon="false" id="${pid}previewTplResultPanel">
-						<p-textarea v-model="pm.previewTplResult" class="overflow-auto"
-							readonly style="width:30vw;height:30vh;">
-						</p-textarea>
-					</p-overlaypanel>
 				</div>
 			</div>
 		</div>
 	</div>
+</p-overlaypanel>
+<p-overlaypanel ref="${pid}previewAdditionsResultEle" append-to="body"
+	:show-close-icon="false" id="${pid}previewAdditionsResultPanel">
+	<p-textarea v-model="pm.previewAdditionsResult" class="overflow-auto"
+		readonly style="width:30vw;height:30vh;">
+	</p-textarea>
+</p-overlaypanel>
+<p-overlaypanel ref="${pid}previewTplResultEle" append-to="body"
+	:show-close-icon="false" id="${pid}previewTplResultPanel">
+	<p-textarea v-model="pm.previewTplResult" class="overflow-auto"
+		readonly style="width:30vw;height:30vh;">
+	</p-textarea>
 </p-overlaypanel>
 <p-button id="${pid}paramPanelBtn" type="button" label="<@spring.message code='parameter' />"
 	aria:haspopup="true" aria-controls="${pid}previewParamPanel"
@@ -209,6 +219,7 @@
 		
 		pm.previewColumns = previewColumns;
 		pm.previewResultDatas = $.wrapAsArray(response.result && response.result.data ? response.result.data : []);
+		pm.previewAdditionsResult = (response.result && response.result.additions ? $.toJsonString(response.result.additions, true) : "");
 		pm.previewTplResult = response.templateResult;
 		
 		if(fm.mutableModel)
@@ -314,11 +325,13 @@
 		previewQuery: { resultFetchSize: 100, paramValues: {} },
 		previewColumns: [],
 		previewResultDatas: [],
+		previewAdditionsResult: "",
 		previewTplResult: "",
 		previewError: false
 	});
 	
 	po.vueRef("${pid}previewPanelEle", null);
+	po.vueRef("${pid}previewAdditionsResultEle", null);
 	po.vueRef("${pid}previewTplResultEle", null);
 	po.vueRef("${pid}previewParamPanelEle", null);
 
@@ -349,6 +362,10 @@
 				
 				po.elementOfId("${pid}paramPanelBtn").click();
 			}
+		},
+		togglePreviewAdditionsResultPanel: function(e)
+		{
+			po.vueUnref("${pid}previewAdditionsResultEle").toggle(e);
 		},
 		togglePreviewTplResultPanel: function(e)
 		{
