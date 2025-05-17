@@ -162,6 +162,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	 */
 	private String responseDataJsonPath = "";
 
+	/**
+	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，作为结果附加数据的JSON属性配置
+	 */
+	private String responseAdditionDataProps = "";
+
 	public HttpDataSet()
 	{
 		super();
@@ -375,6 +380,24 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public void setResponseDataJsonPath(String responseDataJsonPath)
 	{
 		this.responseDataJsonPath = responseDataJsonPath;
+	}
+
+	public String getResponseAdditionDataProps()
+	{
+		return responseAdditionDataProps;
+	}
+
+	/**
+	 * 设置响应数据中作为结果附加数据的JSON属性配置。
+	 * <p>
+	 * 具体参考{@linkplain AbstractJsonDataSet#setAdditionDataProps(String)}。
+	 * </p>
+	 * 
+	 * @param responseAdditionDataProps
+	 */
+	public void setResponseAdditionDataProps(String responseAdditionDataProps)
+	{
+		this.responseAdditionDataProps = responseAdditionDataProps;
 	}
 
 	@Override

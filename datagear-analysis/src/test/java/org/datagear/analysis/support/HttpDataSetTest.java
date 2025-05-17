@@ -188,7 +188,7 @@ public class HttpDataSetTest
 							throws HttpException, IOException
 					{
 						StringEntity responseEntity = new StringEntity(
-								"{ path0: { path1: [ { path2: [{name: 'aaa', value: 11}, {name: '名称b', value: 22}] } ] } }",
+								"{ path0: { path1: [ { path2: [{name: 'aaa', value: 11}, {name: '名称b', value: 22}] } ] }, total: 200, page: 1, pageSize: 20 }",
 								ContentType.APPLICATION_JSON);
 						response.setEntity(responseEntity);
 					}
@@ -457,6 +457,71 @@ public class HttpDataSetTest
 
 				assertEquals(PARAM_NAME_1, row.get("name"));
 				assertEquals(pv1, row.get("value"));
+			}
+		}
+	}
+
+	@Test
+	public void resolveTest_REQUEST_CONTENT_TYPE_JSON_responseDataJsonPath_responseAdditionDataProps() throws Throwable
+	{
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testResponseJsonPath");
+		dataSet.setResponseDataJsonPath("path0.path1[0].path2");
+		dataSet.setResponseAdditionDataProps(
+				"{ reTotal: 'total', rePageSize: 'pageSize', reData: 'path0.path1[0].path2[0,1].name' }");
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
+		DataSetResult dr = result.getResult();
+		List<DataSetField> fields = result.getFields();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) dr.getData();
+
+		{
+			Integer v = dr.getAddition("reTotal");
+			assertEquals(200, v.intValue());
+		}
+		{
+			Integer v = dr.getAddition("rePageSize");
+			assertEquals(20, v.intValue());
+		}
+		{
+			List<String> v = dr.getAddition("reData");
+			assertEquals(2, v.size());
+			assertEquals("aaa", v.get(0));
+			assertEquals("名称b", v.get(1));
+		}
+
+		{
+			assertEquals(2, fields.size());
+
+			{
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
+			}
+
+			{
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+			}
+		}
+
+		{
+			assertEquals(2, data.size());
+
+			{
+				Map<String, Object> row = data.get(0);
+
+				assertEquals("aaa", row.get("name"));
+				assertEquals(11, ((Number) row.get("value")).intValue());
+			}
+
+			{
+				Map<String, Object> row = data.get(1);
+
+				assertEquals("名称b", row.get("name"));
+				assertEquals(22, ((Number) row.get("value")).intValue());
 			}
 		}
 	}
