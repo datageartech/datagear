@@ -40,6 +40,9 @@ import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.datagear.analysis.support.datasettpl.TemplateContext;
 import org.datagear.analysis.support.datasettpl.TemplateResult;
+import org.datagear.util.spel.BaseSpelExpressionParser;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -180,6 +183,28 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 						"Parameter [" + param.getName() + "] 's value is required");
 		}
 	}
+
+	/**
+	 * 解析结果。
+	 * 
+	 * @param rawResult
+	 * @param fields
+	 * @param fetchSize
+	 *            获取条数，小于{@code 0}表示全部
+	 * @param format
+	 *            允许为{@code null}
+	 * @return
+	 * @throws Throwable
+	 * @see {@link #resolveResultData(Object, List, int, ResultDataFormat)}
+	 */
+	protected ResolvedDataSetResult resolveResult(DataSetResult rawResult, List<DataSetField> fields, int fetchSize,
+			ResultDataFormat format) throws Throwable
+	{
+		Object data = resolveResultData(rawResult.getData(), fields, fetchSize, format);
+		DataSetResult resolvedResult = toDataSetResult(data, rawResult.getAdditions());
+
+		return new ResolvedDataSetResult(resolvedResult, fields);
+	}
 	
 	/**
 	 * 解析结果数据。
@@ -199,7 +224,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		if (rawData == null)
 		{
-
+			data = null;
 		}
 		else if (rawData instanceof Collection<?>)
 		{
@@ -228,27 +253,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 					"Unsupported raw data type : " + rawData.getClass().getSimpleName());
 
 		return data;
-	}
-
-	/**
-	 * 解析结果。
-	 * 
-	 * @param rawData
-	 *            允许为{@code null}
-	 * @param fields
-	 * @param fetchSize
-	 *            获取条数，小于{@code 0}表示全部
-	 * @param format
-	 *            允许为{@code null}
-	 * @return
-	 * @throws Throwable
-	 * @see {@link #resolveResultData(Object, List, int, ResultDataFormat)}
-	 */
-	protected ResolvedDataSetResult resolveResult(Object rawData, List<DataSetField> fields,
-			int fetchSize, ResultDataFormat format) throws Throwable
-	{
-		Object data = resolveResultData(rawData, fields, fetchSize, format);
-		return new ResolvedDataSetResult(new DataSetResult(data), fields);
 	}
 
 	/**
@@ -392,6 +396,37 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
+	 * 转换为{@linkplain DataSetResult}。
+	 * 
+	 * @param data
+	 *            允许{@code null}
+	 * @param additions
+	 *            允许{@code null}
+	 * @return
+	 */
+	protected DataSetResult toDataSetResult(Object data)
+	{
+		return toDataSetResult(data, null);
+	}
+
+	/**
+	 * 转换为{@linkplain DataSetResult}。
+	 * 
+	 * @param data
+	 *            允许{@code null}
+	 * @param additions
+	 *            允许{@code null}
+	 * @return
+	 */
+	protected DataSetResult toDataSetResult(Object data, Map<String, ?> additions)
+	{
+		DataSetResult re = new DataSetResult(data);
+		re.setAdditions(additions);
+
+		return re;
+	}
+
+	/**
 	 * 查找与名称数组对应的{@linkplain DataSetField}列表。
 	 * <p>
 	 * 如果{@code names}某元素没有对应的{@linkplain DataSetField}，返回列表对应元素位置将为{@code null}。
@@ -509,6 +544,37 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return maps;
+	}
+
+	/**
+	 * 解析对象指定属性值集。
+	 * 
+	 * @param data
+	 *            允许{@code null}
+	 * @param props
+	 *            允许{@code null}
+	 * @param parser
+	 * @return
+	 * @throws Throwable
+	 */
+	protected Map<String, ?> resolvePropValues(Object data, List<String> props, BaseSpelExpressionParser parser)
+			throws Throwable
+	{
+		if (data == null || props == null || props.isEmpty())
+			return null;
+
+		Map<String, Object> re = new HashMap<>();
+
+		EvaluationContext spelContext = parser.readonlyMapSimplifyContext();
+
+		for (String prop : props)
+		{
+			Expression exp = parser.parseExpression(prop);
+			Object value = parser.getValue(exp, spelContext, data);
+			re.put(prop, value);
+		}
+
+		return re;
 	}
 
 	/**

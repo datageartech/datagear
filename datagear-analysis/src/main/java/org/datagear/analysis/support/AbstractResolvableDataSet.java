@@ -87,14 +87,13 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 解析结果。
 	 * 
 	 * @param query
-	 * @param rawData
-	 *            允许为{@code null}
+	 * @param rawResult
 	 * @param rawDataFields
 	 *            允许为{@code null}，如果不为空，将与{@linkplain #getFields()}合并后作为解析基础，否则，仅以{@linkplain #getFields()}作为解析基础
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, Object rawData,
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, DataSetResult rawResult,
 			List<DataSetField> rawDataFields) throws Throwable
 	{
 		List<DataSetField> fields = getFields();
@@ -105,7 +104,7 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 		if (rawDataFields != null && !rawDataFields.isEmpty())
 			fields = mergeFields(rawDataFields, fields);
 
-		return resolveResult(rawData, fields, query.getResultFetchSize(), query.getResultDataFormat());
+		return resolveResult(rawResult, fields, query.getResultFetchSize(), query.getResultDataFormat());
 	}
 
 	/**

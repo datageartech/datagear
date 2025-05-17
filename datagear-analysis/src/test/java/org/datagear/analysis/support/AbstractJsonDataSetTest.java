@@ -18,12 +18,14 @@
 package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.DataSetResult;
 import org.junit.Test;
 
 /**
@@ -51,6 +53,69 @@ public class AbstractJsonDataSetTest
 
 		assertEquals(jsonString, result.getTemplateResult());
 
+		{
+			assertEquals(3, fields.size());
+
+			{
+				DataSetField field = fields.get(0);
+				assertEquals("name", field.getName());
+				assertEquals(DataSetField.DataType.STRING, field.getType());
+			}
+
+			{
+				DataSetField field = fields.get(1);
+				assertEquals("value", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+			}
+
+			{
+				DataSetField field = fields.get(2);
+				assertEquals("size", field.getName());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+			}
+		}
+
+		{
+			assertEquals(1, data.size());
+
+			{
+				Map<String, Object> row = data.get(0);
+
+				assertEquals("aaa", row.get("name"));
+				assertEquals(11, ((Number) row.get("value")).intValue());
+				assertEquals(12, ((Number) row.get("size")).intValue());
+			}
+		}
+	}
+
+	@Test
+	public void resolveTest_additionDataProp()
+	{
+		String jsonString = "{ items: [ { name:'aaa', value: 11, size: 12 } ], total: 50, page: 1, pageSize: 20 }";
+
+		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
+				JsonValueDataSet.class.getSimpleName(), jsonString);
+
+		dataSet.setDataJsonPath("items");
+		dataSet.setAdditionDataProp("total,pageSize");
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
+		DataSetResult dr = result.getResult();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) dr.getData();
+
+		{
+			Map<String, ?> additionData = dr.getAddition("data");
+
+			assertNotNull(additionData);
+			assertEquals(2, additionData.size());
+			assertEquals(50, additionData.get("total"));
+			assertEquals(20, additionData.get("pageSize"));
+		}
+
+		assertEquals(jsonString, result.getTemplateResult());
+
+		List<DataSetField> fields = result.getFields();
 		{
 			assertEquals(3, fields.size());
 

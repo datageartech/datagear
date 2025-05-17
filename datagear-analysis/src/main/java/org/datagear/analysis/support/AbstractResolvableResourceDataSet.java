@@ -127,6 +127,24 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 	}
 
 	/**
+	 * 解析结果。
+	 * 
+	 * @param query
+	 * @param result
+	 * @param resolveFields
+	 * @return
+	 * @throws Throwable
+	 */
+	protected ResolvedDataSetResult resolveResult(DataSetQuery query, ResourceResult result, boolean resolveFields)
+			throws Throwable
+	{
+		ResolvedDataSetResult rdr = result.getResult();
+		DataSetResult dr = rdr.getResult();
+
+		return resolveResult(query, dr, (resolveFields ? rdr.getFields() : null));
+	}
+
+	/**
 	 * 获取资源结果。
 	 * 
 	 * @param resource
@@ -206,24 +224,6 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		this.cache.put(resource, cacheRr);
 
 		return true;
-	}
-
-	/**
-	 * 解析结果。
-	 * 
-	 * @param query
-	 * @param result
-	 * @param resolveFields
-	 * @return
-	 * @throws Throwable
-	 */
-	protected ResolvedDataSetResult resolveResult(DataSetQuery query, ResourceResult result,
-			boolean resolveFields) throws Throwable
-	{
-		ResolvedDataSetResult rdr = result.getResult();
-		DataSetResult dr = rdr.getResult();
-
-		return resolveResult(query, dr.getData(), (resolveFields ? rdr.getFields() : null));
 	}
 
 	protected ResourceResult toResourceResult(Object data, List<DataSetField> fields) throws Throwable

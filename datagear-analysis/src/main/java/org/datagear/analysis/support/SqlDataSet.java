@@ -272,7 +272,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		if (resolveFields)
 			calibrateFields(rawFields, rawData);
 		
-		return resolveResult(query, rawData, rawFields);
+		return resolveResult(query, toDataSetResult(rawData), rawFields);
 	}
 
 	/**

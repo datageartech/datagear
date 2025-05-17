@@ -21,7 +21,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +32,6 @@ import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.spel.BaseSpelExpressionParser;
-import org.springframework.expression.Expression;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -179,21 +177,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		List<String> props = StringUtil.splitWithEscape(resource.getAdditionDataProp(), ADDITION_DATA_PROP_SPLITTER,
 				true);
 
-		if (props == null || props.isEmpty())
-			return null;
-
-		Map<String, Object> re = new HashMap<>();
-
-		BaseSpelExpressionParser spelParser = getBaseSpelExpressionParser();
-
-		for (String prop : props)
-		{
-			Expression exp = spelParser.parseExpression(prop);
-			Object value = spelParser.getValue(exp, srcData);
-			re.put(prop, value);
-		}
-
-		return re;
+		return resolvePropValues(srcData, props, getBaseSpelExpressionParser());
 	}
 
 	/**
