@@ -51,6 +51,7 @@ import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -161,6 +162,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，响应数据的JSON路径
 	 */
 	private String responseDataJsonPath = "";
+
+	/**
+	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，作为结果附加数据的JSON属性配置
+	 */
+	private String responseAdditionDataProps = "";
 
 	public HttpDataSet()
 	{
@@ -375,6 +381,52 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public void setResponseDataJsonPath(String responseDataJsonPath)
 	{
 		this.responseDataJsonPath = responseDataJsonPath;
+	}
+
+	public String getResponseAdditionDataProps()
+	{
+		return responseAdditionDataProps;
+	}
+
+	/**
+	 * 设置响应数据中作为结果附加数据的JSON属性配置。
+	 * <p>
+	 * 具体参考{@linkplain AbstractJsonDataSet#setAdditionDataProps(String)}。
+	 * </p>
+	 * 
+	 * @param responseAdditionDataProps
+	 */
+	public void setResponseAdditionDataProps(String responseAdditionDataProps)
+	{
+		this.responseAdditionDataProps = responseAdditionDataProps;
+	}
+
+	/**
+	 * 同{@linkplain #getResponseAdditionDataProps()}。
+	 * <p>
+	 * 用于ORM处理，避免列别名过长。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public String getResponseAdtndProps()
+	{
+		return responseAdditionDataProps;
+	}
+
+	/**
+	 * 同{@linkplain #setResponseAdditionDataProps(String)}。
+	 * <p>
+	 * 用于ORM处理，避免列别名过长。
+	 * </p>
+	 * 
+	 * @param responseAdditionDataProps
+	 */
+	@JsonIgnore
+	public void setResponseAdtndProps(String responseAdditionDataProps)
+	{
+		this.responseAdditionDataProps = responseAdditionDataProps;
 	}
 
 	@Override

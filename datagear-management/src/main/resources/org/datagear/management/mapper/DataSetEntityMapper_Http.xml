@@ -8,13 +8,13 @@
 			(
 			DS_ID, DS_URI, DS_HEADER_CONTENT, DS_RQT_METHOD, DS_RQT_CONTENT_TYPE,
 			DS_RQT_CONTENT_CHARSET, DS_RQT_CONTENT, DS_RPS_CONTENT_TYPE, DS_RPS_DATA_JSON_PATH,
-			DS_ENCODE_URI
+			DS_ENCODE_URI, DS_RPS_ADTND_PROPS
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.uri}, #{entity.headerContent}, #{entity.requestMethod}, #{entity.requestContentType},
 			#{entity.requestContentCharset}, #{entity.requestContent}, #{entity.responseContentType}, #{entity.responseDataJsonPath},
-			#{entity.encodeUri}
+			#{entity.encodeUri}, #{entity.responseAdtndProps}
 			)
 	</insert>
 	
@@ -28,7 +28,8 @@
 			DS_RQT_CONTENT = #{entity.requestContent},
 			DS_RPS_CONTENT_TYPE = #{entity.responseContentType},
 			DS_RPS_DATA_JSON_PATH = #{entity.responseDataJsonPath},
-			DS_ENCODE_URI = #{entity.encodeUri}
+			DS_ENCODE_URI = #{entity.encodeUri},
+			DS_RPS_ADTND_PROPS = #{entity.responseAdtndProps}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -44,7 +45,8 @@
 			T2.DS_RQT_CONTENT AS ${_iq_}requestContent${_iq_},
 			T2.DS_RPS_CONTENT_TYPE AS ${_iq_}responseContentType${_iq_},
 			T2.DS_RPS_DATA_JSON_PATH AS ${_iq_}responseDataJsonPath${_iq_},
-			T2.DS_ENCODE_URI AS ${_iq_}encodeUri${_iq_}
+			T2.DS_ENCODE_URI AS ${_iq_}encodeUri${_iq_},
+			T2.DS_RPS_ADTND_PROPS AS ${_iq_}responseAdtndProps${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
 		INNER JOIN
