@@ -92,14 +92,14 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			setDataFormat(dataSet.getDataFormat());
 			super.setDataJsonPath(dataSet.getResponseDataJsonPath());
 			// TODO
-			super.setAdditionDataProp(null);
+			super.setAdditionDataProps(null);
 			this.responseJsonReader = responseJsonReader;
 		}
 
 		@Override
 		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query) throws Throwable
 		{
-			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), getAdditionDataProp(),
+			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), getAdditionDataProps(),
 					this.responseJsonReader);
 		}
 	}
@@ -115,10 +115,10 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			super();
 		}
 
-		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProp,
+		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProps,
 				Reader jsonReader)
 		{
-			super(resolvedTemplate, dataJsonPath, additionDataProp);
+			super(resolvedTemplate, dataJsonPath, additionDataProps);
 			this.jsonReader = jsonReader;
 		}
 

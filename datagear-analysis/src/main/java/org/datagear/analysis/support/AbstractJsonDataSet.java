@@ -31,7 +31,6 @@ import org.datagear.analysis.support.datasetres.JsonDataSetResource;
 import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.util.spel.BaseSpelExpressionParser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,15 +49,11 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final String ADDITION_NAME_DATA = "data";
-
-	public static final char ADDITION_DATA_PROP_SPLITTER = ',';
-
 	/** 数据JSON路径 */
 	private String dataJsonPath = "";
 
-	/** 作为结果附加数据的属性名，多个以{@code ','}分隔 */
-	private String additionDataProp = "";
+	/** 作为结果附加数据的JSON属性配置 */
+	private String additionDataProps = "";
 
 	public AbstractJsonDataSet()
 	{
@@ -100,14 +95,28 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		this.dataJsonPath = dataJsonPath;
 	}
 
-	public String getAdditionDataProp()
+	public String getAdditionDataProps()
 	{
-		return additionDataProp;
+		return additionDataProps;
 	}
 
-	public void setAdditionDataProp(String additionDataProp)
+	/**
+	 * 设置作为结果附加数据的JSON属性配置，格式为：
+	 * <p>
+	 * <code>
+	 * "{ name1: 'prop-json-path-1', name2: 'prop-json-path-2' }"
+	 * </code>
+	 * </p>
+	 * <p>
+	 * 上述格式将读取原始数据的{@code "prop-json-path-1"}、{@code "prop-json-path-2"}属性值，
+	 * 然后以{@code "name1"}、{@code "name2"}关键字存入{@linkplain DataSetResult#getAdditions()}中。
+	 * </p>
+	 * 
+	 * @param additionDataProps
+	 */
+	public void setAdditionDataProps(String additionDataProps)
 	{
-		this.additionDataProp = additionDataProp;
+		this.additionDataProps = additionDataProps;
 	}
 
 	@Override
@@ -158,26 +167,34 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		{
 			Object reData = getJsonPathSupport().resolve(srcData, resource.getDataJsonPath());
 			re.setData(reData);
-
-			Object additionData = resolveSourceAdditionData(resource, srcData);
-			if (additionData != null)
-			{
-				re.addAddition(ADDITION_NAME_DATA, additionData);
-			}
+			resolveSourceAdditionData(resource, srcData, re);
 		}
 	
 		return re;
 	}
 
-	protected Map<String, ?> resolveSourceAdditionData(T resource, Object srcData) throws Throwable
+	protected void resolveSourceAdditionData(T resource, Object srcData, DataSetResult result)
+			throws Throwable
 	{
-		if (StringUtil.isEmpty(resource.getAdditionDataProp()) || srcData == null)
-			return null;
+		if (StringUtil.isEmpty(resource.getAdditionDataProps()) || srcData == null)
+			return;
 		
-		List<String> props = StringUtil.splitWithEscape(resource.getAdditionDataProp(), ADDITION_DATA_PROP_SPLITTER,
-				true);
+		@SuppressWarnings("unchecked")
+		Map<String, String> propMap = getObjectMapperNonStardand().readValue(resource.getAdditionDataProps(),
+				Map.class);
 
-		return resolvePropValues(srcData, props, getBaseSpelExpressionParser());
+		if (propMap == null || propMap.isEmpty())
+			return;
+
+		JsonPathSupport jsonPathSupport = getJsonPathSupport();
+		for (Map.Entry<String, String> entry : propMap.entrySet())
+		{
+			String name = entry.getKey();
+			String path = entry.getValue();
+			Object value = jsonPathSupport.resolve(srcData, path);
+
+			result.addAddition(name, value);
+		}
 	}
 
 	/**
@@ -323,10 +340,5 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	protected JsonPathSupport getJsonPathSupport()
 	{
 		return JsonPathSupport.INSTANCE;
-	}
-
-	protected BaseSpelExpressionParser getBaseSpelExpressionParser()
-	{
-		return BaseSpelExpressionParser.DEFAULT;
 	}
 }

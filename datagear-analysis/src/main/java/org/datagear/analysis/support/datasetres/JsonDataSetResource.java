@@ -34,19 +34,19 @@ public abstract class JsonDataSetResource extends DataSetResource
 	/** 同{@linkplain AbstractJsonDataSet#getDataJsonPath()} */
 	private String dataJsonPath;
 
-	/** 同{@linkplain AbstractJsonDataSet#getAdditionDataProp()} */
-	private String additionDataProp;
+	/** 同{@linkplain AbstractJsonDataSet#getAdditionDataProps()} */
+	private String additionDataProps;
 
 	public JsonDataSetResource()
 	{
 		super();
 	}
 
-	public JsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProp)
+	public JsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProps)
 	{
 		super(resolvedTemplate);
 		this.dataJsonPath = dataJsonPath;
-		this.additionDataProp = additionDataProp;
+		this.additionDataProps = additionDataProps;
 	}
 
 	public String getDataJsonPath()
@@ -59,14 +59,14 @@ public abstract class JsonDataSetResource extends DataSetResource
 		this.dataJsonPath = dataJsonPath;
 	}
 
-	public String getAdditionDataProp()
+	public String getAdditionDataProps()
 	{
-		return additionDataProp;
+		return additionDataProps;
 	}
 
-	public void setAdditionDataProp(String additionDataProp)
+	public void setAdditionDataProps(String additionDataProps)
 	{
-		this.additionDataProp = additionDataProp;
+		this.additionDataProps = additionDataProps;
 	}
 
 	/**
@@ -85,7 +85,7 @@ public abstract class JsonDataSetResource extends DataSetResource
 	{
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((additionDataProp == null) ? 0 : additionDataProp.hashCode());
+		result = prime * result + ((additionDataProps == null) ? 0 : additionDataProps.hashCode());
 		result = prime * result + ((dataJsonPath == null) ? 0 : dataJsonPath.hashCode());
 		return result;
 	}
@@ -100,12 +100,12 @@ public abstract class JsonDataSetResource extends DataSetResource
 		if (getClass() != obj.getClass())
 			return false;
 		JsonDataSetResource other = (JsonDataSetResource) obj;
-		if (additionDataProp == null)
+		if (additionDataProps == null)
 		{
-			if (other.additionDataProp != null)
+			if (other.additionDataProps != null)
 				return false;
 		}
-		else if (!additionDataProp.equals(other.additionDataProp))
+		else if (!additionDataProps.equals(other.additionDataProps))
 			return false;
 		if (dataJsonPath == null)
 		{

@@ -40,9 +40,6 @@ import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.datagear.analysis.support.datasettpl.TemplateContext;
 import org.datagear.analysis.support.datasettpl.TemplateResult;
-import org.datagear.util.spel.BaseSpelExpressionParser;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -544,37 +541,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return maps;
-	}
-
-	/**
-	 * 解析对象指定属性值集。
-	 * 
-	 * @param data
-	 *            允许{@code null}
-	 * @param props
-	 *            允许{@code null}
-	 * @param parser
-	 * @return
-	 * @throws Throwable
-	 */
-	protected Map<String, ?> resolvePropValues(Object data, List<String> props, BaseSpelExpressionParser parser)
-			throws Throwable
-	{
-		if (data == null || props == null || props.isEmpty())
-			return null;
-
-		Map<String, Object> re = new HashMap<>();
-
-		EvaluationContext spelContext = parser.readonlyMapSimplifyContext();
-
-		for (String prop : props)
-		{
-			Expression exp = parser.parseExpression(prop);
-			Object value = parser.getValue(exp, spelContext, data);
-			re.put(prop, value);
-		}
-
-		return re;
 	}
 
 	/**

@@ -18,7 +18,6 @@
 package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -89,65 +88,34 @@ public class AbstractJsonDataSetTest
 	}
 
 	@Test
-	public void resolveTest_additionDataProp()
+	public void resolveTest_additionDataProps()
 	{
-		String jsonString = "{ items: [ { name:'aaa', value: 11, size: 12 } ], total: 50, page: 1, pageSize: 20 }";
+		String jsonString = "{ items: [ { name:'aaa', value: 11, size: 12 }, { name:'bbb', value: 21, size: 22 } ], total: 50, page: 1, pageSize: 20 }";
 
 		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
 				JsonValueDataSet.class.getSimpleName(), jsonString);
 
 		dataSet.setDataJsonPath("items");
-		dataSet.setAdditionDataProp("total,pageSize");
+		dataSet.setAdditionDataProps("{reTotal: 'total', rePageSize: 'pageSize', reData: 'items[0,1].name'}");
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
 		DataSetResult dr = result.getResult();
-		@SuppressWarnings("unchecked")
-		List<Map<String, Object>> data = (List<Map<String, Object>>) dr.getData();
 
 		{
-			Map<String, ?> additionData = dr.getAddition("data");
-
-			assertNotNull(additionData);
-			assertEquals(2, additionData.size());
-			assertEquals(50, additionData.get("total"));
-			assertEquals(20, additionData.get("pageSize"));
-		}
-
-		assertEquals(jsonString, result.getTemplateResult());
-
-		List<DataSetField> fields = result.getFields();
-		{
-			assertEquals(3, fields.size());
-
-			{
-				DataSetField field = fields.get(0);
-				assertEquals("name", field.getName());
-				assertEquals(DataSetField.DataType.STRING, field.getType());
-			}
-
-			{
-				DataSetField field = fields.get(1);
-				assertEquals("value", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
-			}
-
-			{
-				DataSetField field = fields.get(2);
-				assertEquals("size", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
-			}
+			Integer v = dr.getAddition("reTotal");
+			assertEquals(50, v.intValue());
 		}
 
 		{
-			assertEquals(1, data.size());
+			Integer v = dr.getAddition("rePageSize");
+			assertEquals(20, v.intValue());
+		}
 
-			{
-				Map<String, Object> row = data.get(0);
-
-				assertEquals("aaa", row.get("name"));
-				assertEquals(11, ((Number) row.get("value")).intValue());
-				assertEquals(12, ((Number) row.get("size")).intValue());
-			}
+		{
+			List<String> v = dr.getAddition("reData");
+			assertEquals(2, v.size());
+			assertEquals("aaa", v.get(0));
+			assertEquals("bbb", v.get(1));
 		}
 	}
 }

@@ -69,7 +69,7 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 		FileResolvedInfo fileInfo = getJsonFile(query);
 		File file = fileInfo.getFile();
 
-		return new JsonFileDataSetResource(fileInfo.getResolvedTemplate(), getDataJsonPath(), getAdditionDataProp(),
+		return new JsonFileDataSetResource(fileInfo.getResolvedTemplate(), getDataJsonPath(), getAdditionDataProps(),
 				getEncoding(), file.getAbsolutePath(), file.lastModified());
 	}
 
