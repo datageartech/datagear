@@ -129,7 +129,7 @@
 			<div class="field grid" v-if="fm.responseContentType == pm.responseContentTypeOptions[0].value">
 				<label for="${pid}responseDataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='httpDataSet.responseDataJsonPath.desc' />">
-					<@spring.message code='responseJsonPath' />
+					<@spring.message code='responseDataJsonPath' />
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<p-inputtext id="${pid}responseDataJsonPath" v-model="fm.responseDataJsonPath" type="text" class="input w-full"
@@ -140,7 +140,7 @@
 			<div class="field grid" v-if="fm.responseContentType == pm.responseContentTypeOptions[0].value">
 				<label for="${pid}responseAdditionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='httpDataSet.responseAdditionDataProps.desc' />">
-					<@spring.message code='responseAdditionData' />
+					<@spring.message code='responseAdditionDataConfig' />
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<p-inputtext id="${pid}responseAdditionDataProps" v-model="fm.responseAdditionDataProps" type="text" class="input w-full"

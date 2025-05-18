@@ -36,7 +36,7 @@
 			<#include "include/dataSet_form_name.ftl">
 			<div class="field grid">
 				<label for="${pid}value" class="field-label col-12 mb-2"
-					title="<@spring.message code='jsonValueDataSetEntity.value.desc' />">
+					title="<@spring.message code='jsonValueDataSet.value.desc' />">
 					<@spring.message code='jsonText' />
 				</label>
 		        <div class="field-input col-12">
@@ -47,6 +47,28 @@
 		        		<input name="value" required type="text" class="validate-normalizer" />
 		        	</div>
 		        </div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}dataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='jsonValueDataSet.dataJsonPath.desc' />">
+					<@spring.message code='dataJsonPath' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}dataJsonPath" v-model="fm.dataJsonPath" type="text" class="input w-full"
+						name="dataJsonPath" maxlength="200">
+					</p-inputtext>
+				</div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}additionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='jsonValueDataSet.additionDataProps.desc' />">
+					<@spring.message code='additionDataConfig' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}additionDataProps" v-model="fm.additionDataProps" type="text" class="input w-full"
+						name="additionDataProps" maxlength="500">
+					</p-inputtext>
+				</div>
 			</div>
 			<#include "include/dataSet_form_param_field.ftl">
 		</div>
@@ -71,6 +93,8 @@
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
 		fingerprint.value = dataSet.value;
+		fingerprint.dataJsonPath = dataSet.dataJsonPath;
+		fingerprint.additionDataProps = dataSet.additionDataProps;
 	};
 	
 	po.beforeSubmitForm = function(action)

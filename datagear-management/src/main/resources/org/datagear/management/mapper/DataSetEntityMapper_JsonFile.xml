@@ -7,12 +7,12 @@
 		INSERT INTO DATAGEAR_DATA_SET_JSON_FILE
 			(
 				DS_ID, DS_FILE_NAME, DS_FILE_ENCODING, DS_DISPLAY_NAME, DS_DATA_JSON_PATH,
-				DS_FILE_SOURCE_TYPE, DS_DSRD_ID, DS_DSRD_FILE_NAME
+				DS_FILE_SOURCE_TYPE, DS_DSRD_ID, DS_DSRD_FILE_NAME, DS_ADTND_PROPS
 			)
 		VALUES
 			(
 				#{entity.id}, #{entity.fileName, jdbcType=VARCHAR}, #{entity.encoding}, #{entity.displayName, jdbcType=VARCHAR}, #{entity.dataJsonPath},
-				#{entity.fileSourceType}, #{entity.fileSource.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}
+				#{entity.fileSourceType}, #{entity.fileSource.id, jdbcType=VARCHAR}, #{entity.dataSetResFileName}, #{entity.additionDataProps}
 			)
 	</insert>
 	
@@ -24,7 +24,8 @@
 			DS_DATA_JSON_PATH = #{entity.dataJsonPath},
 			DS_FILE_SOURCE_TYPE = #{entity.fileSourceType},
 			DS_DSRD_ID = #{entity.fileSource.id, jdbcType=VARCHAR},
-			DS_DSRD_FILE_NAME = #{entity.dataSetResFileName}
+			DS_DSRD_FILE_NAME = #{entity.dataSetResFileName},
+			DS_ADTND_PROPS = #{entity.additionDataProps}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -39,6 +40,7 @@
 			T2.DS_FILE_SOURCE_TYPE AS ${_iq_}fileSourceType${_iq_},
 			T2.DS_DSRD_ID AS ${_iq_}fileSource.id${_iq_},
 			T2.DS_DSRD_FILE_NAME AS ${_iq_}dataSetResFileName${_iq_},
+			T2.DS_ADTND_PROPS AS ${_iq_}additionDataProps${_iq_},
 			DSRD.DD_DIRECTORY AS ${_iq_}fileSource.directory${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1

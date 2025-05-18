@@ -46,6 +46,17 @@
 					</p-inputtext>
 				</div>
 			</div>
+			<div class="field grid">
+				<label for="${pid}additionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='jsonFileDataSet.additionDataProps.desc' />">
+					<@spring.message code='additionDataConfig' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-inputtext id="${pid}additionDataProps" v-model="fm.additionDataProps" type="text" class="input w-full"
+						name="additionDataProps" maxlength="500">
+					</p-inputtext>
+				</div>
+			</div>
 			<#include "include/dataSet_form_encoding.ftl">
 			<#include "include/dataSet_form_param_field.ftl">
 		</div>
@@ -87,6 +98,7 @@
 		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
 		fingerprint.dataJsonPath = dataSet.dataJsonPath;
 		fingerprint.encoding = dataSet.encoding;
+		fingerprint.additionDataProps = dataSet.additionDataProps;
 	};
 	
 	po.beforeSubmitForm = function(action)

@@ -6,17 +6,19 @@
 	<insert id="insertJsonValueDataSetEntity">
 		INSERT INTO DATAGEAR_DATA_SET_JSON_VALUE
 			(
-			DS_ID, DS_VALUE
+			DS_ID, DS_VALUE, DS_DATA_JSON_PATH, DS_ADTND_PROPS
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.value}
+			#{entity.id}, #{entity.value}, #{entity.dataJsonPath}, #{entity.additionDataProps}
 			)
 	</insert>
 	
 	<update id="updateJsonValueDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_JSON_VALUE SET
-			DS_VALUE = #{entity.value}
+			DS_VALUE = #{entity.value},
+			DS_DATA_JSON_PATH = #{entity.dataJsonPath},
+			DS_ADTND_PROPS = #{entity.additionDataProps}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -24,7 +26,9 @@
 	<select id="getJsonValueDataSetEntityById" resultType="org.datagear.management.domain.JsonValueDataSetEntity">
 		SELECT
 			T1.*,
-			T2.DS_VALUE AS ${_iq_}value${_iq_}
+			T2.DS_VALUE AS ${_iq_}value${_iq_},
+			T2.DS_DATA_JSON_PATH AS ${_iq_}dataJsonPath${_iq_},
+			T2.DS_ADTND_PROPS AS ${_iq_}additionDataProps${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
 		INNER JOIN
