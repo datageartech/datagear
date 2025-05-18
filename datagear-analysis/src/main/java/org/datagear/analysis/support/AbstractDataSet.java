@@ -62,6 +62,9 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	/** 底层数据转换格式 */
 	private DataFormat dataFormat = DataFormat.DEFAULT;
 
+	/** 描述 */
+	private String desc = "";
+
 	public AbstractDataSet()
 	{
 		super();
@@ -157,6 +160,16 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	public void setDataFormat(DataFormat dataFormat)
 	{
 		this.dataFormat = dataFormat;
+	}
+
+	public String getDesc()
+	{
+		return desc;
+	}
+
+	public void setDesc(String desc)
+	{
+		this.desc = desc;
 	}
 
 	/**

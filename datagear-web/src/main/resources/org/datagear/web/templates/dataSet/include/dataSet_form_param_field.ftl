@@ -203,6 +203,16 @@ dataSet_form_param_field_form.ftl
 		</div>
 	</div>
 </div>
+<div class="field grid">
+	<label for="${pid}desc" class="field-label col-12 mb-2">
+		<@spring.message code='desc' />
+	</label>
+	<div class="field-input col-12">
+		<p-textarea id="${pid}desc" v-model="fm.desc" rows="5" class="input w-full"
+       		name="desc" maxlength="500">
+       	</p-textarea>
+	</div>
+</div>
 <script>
 (function(po)
 {

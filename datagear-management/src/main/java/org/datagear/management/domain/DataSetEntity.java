@@ -122,4 +122,18 @@ public interface DataSetEntity
 	 */
 	@Override
 	void setCreateTime(Date createTime);
+
+	/**
+	 * 获取描述。
+	 * 
+	 * @return
+	 */
+	String getDesc();
+
+	/**
+	 * 设置描述。
+	 * 
+	 * @param desc
+	 */
+	void setDesc(String desc);
 }

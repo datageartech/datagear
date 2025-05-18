@@ -7,13 +7,13 @@
 		INSERT INTO DATAGEAR_DATA_SET
 			(
 				DS_ID, DS_NAME, DS_TYPE, DS_CREATE_USER_ID, DS_CREATE_TIME,
-				DS_AP_ID, DS_DATA_FORMAT, DS_MUTABLE_MODEL
+				DS_AP_ID, DS_DATA_FORMAT, DS_MUTABLE_MODEL, DS_DESC
 			)
 		VALUES
 			(
 				#{entity.id}, #{entity.name}, #{entity.dataSetType}, #{entity.createUser.id}, #{entity.createTime},
 				#{entity.analysisProject.id, jdbcType=VARCHAR}, #{entity.dataFormat, jdbcType=VARCHAR},
-				#{entity.mutableModel, jdbcType=VARCHAR}
+				#{entity.mutableModel, jdbcType=VARCHAR}, #{entity.desc, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -50,7 +50,8 @@
 			DS_NAME = #{entity.name},
 			DS_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR},
 			DS_DATA_FORMAT = #{entity.dataFormat, jdbcType=VARCHAR},
-			DS_MUTABLE_MODEL = #{entity.mutableModel, jdbcType=VARCHAR}
+			DS_MUTABLE_MODEL = #{entity.mutableModel, jdbcType=VARCHAR},
+			DS_DESC = #{entity.desc, jdbcType=VARCHAR}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -233,6 +234,7 @@
 			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_},
 			A.DS_DATA_FORMAT AS ${_iq_}dataFormat${_iq_},
 			A.DS_MUTABLE_MODEL AS ${_iq_}mutableModel${_iq_},
+			A.DS_DESC AS ${_iq_}desc${_iq_},
 			AP.*
 		FROM
 			DATAGEAR_DATA_SET A
