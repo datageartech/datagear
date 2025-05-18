@@ -112,6 +112,67 @@ public class SqlDataSetTest extends DBTestSupport
 	}
 
 	@Test
+	public void getResultTest_precompile() throws Exception
+	{
+		Connection cn = null;
+
+		long id = 993699993;
+		String name = "getResultTest";
+		byte[] headImg = new byte[] { 33, 55, 66, 77, 82, 99, 12, 16, 32, 51, 63 };
+		String introduction = "111122223333";
+
+		try
+		{
+			cn = getConnection();
+			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
+
+			insertAccount(cn, id, name, headImg, introduction);
+
+			String sql = "SELECT ID, NAME, HEAD_IMG, INTRODUCTION FROM T_ACCOUNT <#if id??>WHERE ID = ${pc(id)} AND NAME != ${pc(name)}</#if>";
+
+			List<DataSetField> dataSetFields = Arrays.asList(new DataSetField("ID", DataSetField.DataType.INTEGER),
+					new DataSetField("NAME", DataSetField.DataType.STRING),
+					new DataSetField("HEAD_IMG", DataSetField.DataType.STRING),
+					new DataSetField("INTRODUCTION", DataSetField.DataType.STRING));
+
+			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataSetParam.DataType.NUMBER, true),
+					new DataSetParam("name", DataSetParam.DataType.STRING, true));
+
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetFields, connectionFactory, sql);
+			sqlDataSet.setParams(dataSetParams);
+			sqlDataSet.setSqlValidator(createSqlValidator());
+
+			{
+				Map<String, Object> dataSetParamValues = new HashMap<>();
+				dataSetParamValues.put("id", id);
+				dataSetParamValues.put("name", "name-for-test");
+
+				DataSetResult dataSetResult = sqlDataSet.getResult(DataSetQuery.valueOf(dataSetParamValues));
+
+				@SuppressWarnings("unchecked")
+				List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSetResult.getData();
+
+				Assert.assertEquals(1, datas.size());
+
+				{
+					Map<String, ?> row = datas.get(0);
+
+					Assert.assertEquals(4, row.size());
+					Assert.assertEquals(Long.toString(id), row.get("ID").toString());
+					Assert.assertEquals(name, row.get("NAME"));
+					Assert.assertEquals(Base64.getEncoder().encodeToString(headImg), row.get("HEAD_IMG"));
+					Assert.assertEquals(introduction, row.get("INTRODUCTION"));
+				}
+			}
+		}
+		finally
+		{
+			deleteAccount(cn, id);
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
 	public void resolveResultTest() throws Exception
 	{
 		Connection cn = null;
