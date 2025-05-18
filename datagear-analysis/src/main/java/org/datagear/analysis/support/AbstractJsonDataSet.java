@@ -158,18 +158,30 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	
 		if (!isLegalDataJsonNode(jsonNode))
 			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
-	
-		DataSetResult re = new DataSetResult();
 
 		Object srcData = (jsonNode == null ? null : getObjectMapperNonStardand().treeToValue(jsonNode, Object.class));
+		return resolveSourceResult(resource, srcData);
+	}
 
-		if (srcData != null)
+	/**
+	 * 解析JSON源结果。
+	 * 
+	 * @param resource
+	 * @param sourceData
+	 *            允许{@code null}
+	 * @return
+	 * @throws Throwable
+	 */
+	protected DataSetResult resolveSourceResult(T resource, Object sourceData) throws Throwable
+	{
+		DataSetResult re = new DataSetResult();
+		if (sourceData != null)
 		{
-			Object reData = getJsonPathSupport().resolve(srcData, resource.getDataJsonPath());
+			Object reData = getJsonPathSupport().resolve(sourceData, resource.getDataJsonPath());
 			re.setData(reData);
-			resolveSourceAdditionData(resource, srcData, re);
+			resolveSourceAdditionData(resource, sourceData, re);
 		}
-	
+
 		return re;
 	}
 

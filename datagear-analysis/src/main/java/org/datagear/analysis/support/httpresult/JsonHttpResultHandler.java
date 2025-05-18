@@ -90,8 +90,8 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			setMutableModel(dataSet.isMutableModel());
 			setParams(dataSet.getParams());
 			setDataFormat(dataSet.getDataFormat());
-			super.setDataJsonPath(dataSet.getResponseDataJsonPath());
-			super.setAdditionDataProps(dataSet.getResponseAdditionDataProps());
+			setDataJsonPath(dataSet.getResponseDataJsonPath());
+			setAdditionDataProps(dataSet.getResponseAdditionDataProps());
 			this.responseJsonReader = responseJsonReader;
 		}
 
