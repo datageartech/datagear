@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/checkCode")
 public class CheckCodeController extends AbstractController
 {
-	protected static final int IMAGE_PADDING = 2;
+	protected static final int IMAGE_PADDING = 6;
 
 	@Autowired
 	private CheckCodeManager checkCodeManager;

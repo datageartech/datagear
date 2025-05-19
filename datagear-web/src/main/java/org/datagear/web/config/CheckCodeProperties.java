@@ -43,7 +43,7 @@ public class CheckCodeProperties implements Serializable
 	/**
 	 * 字体尺寸
 	 */
-	private int fontSize = 16;
+	private int fontSize = 20;
 
 	/**
 	 * 校验码图片宽度，小于{@code 0}表示自动计算
