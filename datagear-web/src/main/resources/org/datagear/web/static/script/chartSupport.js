@@ -6955,13 +6955,14 @@
 			for(var j=0; j<fields.length; j++)
 			{
 				var field = fields[j];
-				var colIdx = chartSupport.findInArray(columns, field.name, "data");
+				var colIdx = chartSupport.findInArray(columns, field.name, "name");
 				
 				if(colIdx < 0)
 				{
 					var column =
 					{
 						title: chart.dataSetFieldAlias(dataSetBind, field),
+						name: field.name,
 						data: field.name,
 						defaultContent: "",
 						orderable: true,
