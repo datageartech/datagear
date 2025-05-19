@@ -128,12 +128,12 @@ public interface DataSetEntity
 	 * 
 	 * @return
 	 */
-	String getDesc();
+	String getDescription();
 
 	/**
 	 * 设置描述。
 	 * 
-	 * @param desc
+	 * @param description
 	 */
-	void setDesc(String desc);
+	void setDescription(String description);
 }

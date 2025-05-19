@@ -68,7 +68,7 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 		setMutableModel(dataSetEntity.isMutableModel());
 		setParams(dataSetEntity.getParams());
 		setDataFormat(dataSetEntity.getDataFormat());
-		setDesc(dataSetEntity.getDesc());
+		setDescription(dataSetEntity.getDescription());
 		this.dataSetType = dataSetEntity.getDataSetType();
 		this.createUser = dataSetEntity.getCreateUser();
 		this.createTime = dataSetEntity.getCreateTime();

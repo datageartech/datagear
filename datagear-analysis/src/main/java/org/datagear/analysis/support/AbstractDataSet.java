@@ -63,7 +63,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	private DataFormat dataFormat = DataFormat.DEFAULT;
 
 	/** 描述 */
-	private String desc = "";
+	private String description = "";
 
 	public AbstractDataSet()
 	{
@@ -162,14 +162,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		this.dataFormat = dataFormat;
 	}
 
-	public String getDesc()
+	public String getDescription()
 	{
-		return desc;
+		return description;
 	}
 
-	public void setDesc(String desc)
+	public void setDescription(String description)
 	{
-		this.desc = desc;
+		this.description = description;
 	}
 
 	/**
