@@ -10,7 +10,7 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.directory}, #{entity.desc}, #{entity.createUser.id}, #{entity.createTime}
+			#{entity.id}, #{entity.name}, #{entity.directory}, #{entity.description}, #{entity.createUser.id}, #{entity.createTime}
 			)
 	</insert>
 	
@@ -18,7 +18,7 @@
 		UPDATE DATAGEAR_DSR_DIRECTORY SET
 			DD_NAME = #{entity.name},
 			DD_DIRECTORY = #{entity.directory},
-			DD_DESC = #{entity.desc}
+			DD_DESC = #{entity.description}
 		WHERE
 			DD_ID = #{entity.id}
 	</update>
@@ -128,7 +128,7 @@
 			A.DD_ID AS ${_iq_}id${_iq_},
 			A.DD_NAME AS ${_iq_}name${_iq_},
 			A.DD_DIRECTORY AS ${_iq_}directory${_iq_},
-			A.DD_DESC AS ${_iq_}desc${_iq_},
+			A.DD_DESC AS ${_iq_}description${_iq_},
 			A.DD_CREATE_TIME AS ${_iq_}createTime${_iq_},
 			A.DD_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />
@@ -146,7 +146,7 @@
 		AND
 		(
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}desc${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}description${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 		<include refid="commonDataPermission.dataFilterCondition" />

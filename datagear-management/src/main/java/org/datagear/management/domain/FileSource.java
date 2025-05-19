@@ -45,7 +45,7 @@ public class FileSource extends AbstractStringIdEntity
 	private String directory;
 
 	/** 描述 */
-	private String desc = "";
+	private String description = "";
 
 	/** 此模式的创建用户 */
 	private User createUser;
@@ -89,14 +89,14 @@ public class FileSource extends AbstractStringIdEntity
 		this.name = name;
 	}
 
-	public String getDesc()
+	public String getDescription()
 	{
-		return desc;
+		return description;
 	}
 
-	public void setDesc(String desc)
+	public void setDescription(String description)
 	{
-		this.desc = desc;
+		this.description = description;
 	}
 
 	@Override
@@ -138,8 +138,9 @@ public class FileSource extends AbstractStringIdEntity
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name="+name+", directory=" + directory + ", desc=" + desc + ", createUser=" + createUser
-				+ ", createTime=" + createTime + ", dataPermission=" + dataPermission + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", directory=" + directory + ", description="
+				+ description + ", createUser=" + createUser + ", createTime=" + createTime + ", dataPermission="
+				+ dataPermission + "]";
 	}
 
 	@Override
