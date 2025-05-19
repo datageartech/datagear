@@ -48,6 +48,9 @@
 	//内置表格的更新底层组件回调函数选项名
 	builtinOptionNames.updateInternal = "updateInternal";
 	
+	//内置表格图表服务端分页选项名
+	builtinOptionNames.serverSidePaging = "serverSidePaging";
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, options)
@@ -1868,7 +1871,7 @@
 			}
 		}
 		
-		if(chartSupport.sortAxisDataOptionValue(renderOptions))
+		if(chartSupport.sortAxisDataOption(renderOptions))
 		{
 			var tmpAxisData = [];
 			$.each(indicatorData, function(i, indicator)
@@ -6562,7 +6565,7 @@
 			"autoWidth": true,
 	        "scrollCollapse": false,
 			"pagingType": "full_numbers",
-			"lengthMenu": [ 10, 25, 50, 75, 100 ],
+			"lengthMenu": [],
 			"pageLength": 50,
 			"select" : { style : 'os' },
 			"searching" : false,
@@ -6858,6 +6861,58 @@
 	{
 		var isV1 = chartSupport.tableIsV1();
 		
+		//服务端分页配置，格式为：
+		//{
+		//  //读取data中的分页信息，设置为图表数据集参数
+		//  param: function(chart, data){ ... },
+		//  //数据集附加数据中总记录数关键字
+		//  totalAdditionName: "...",
+		//  //附件数据集中总记录数字段名
+		//  totalFieldName: "..."
+		//}
+		var serverSidePaging = chartSupport.serverSidePagingOption(options);
+		if(serverSidePaging)
+		{
+			options.paging = true;
+			options.serverSide = true;
+			options.ajax = function(data, callback, settings)
+			{
+				var callbackInfos = chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos");
+				if(callbackInfos == null)
+				{
+					callbackInfos = [];
+					chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos", callbackInfos);
+				}
+				
+				callbackInfos.push({ data: data, callback: callback, settings: settings });
+				serverSidePaging.param(chart, data);
+				
+				if(chart.isActive())
+					chart.refreshData();
+			};
+			chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
+			{
+				var callbackInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos") || []);
+				for(var i=0; i<callbackInfos.length; i++)
+				{
+					var callbackInfo = callbackInfos[i];
+					var recordsTotal = chartSupport.tableGetRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
+					
+					var pagingData =
+					{
+						draw: (callbackInfo.data ? callbackInfo.data.draw : undefined),
+						recordsTotal: recordsTotal,
+						recordsFiltered: recordsTotal,
+						data: updateOptions.data
+					};
+					
+					callbackInfo.callback(pagingData);
+				}
+				
+				chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos", []);
+			});
+		}
+		
 		//默认轮播配置
 		var carouselConfig =
 		{
@@ -6885,6 +6940,12 @@
 		
 		//开启分页后，默认开启info
 		options.info = (options.info != null ? options.info : options.paging);
+		
+		if(options.paging)
+		{
+			options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
+			options.pageLength = (chartFactory.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
+		}
 		
 		if(isV1)
 		{
@@ -6928,6 +6989,38 @@
 		}
 		
 		options.carousel = carouselConfig;
+	};
+	
+	chartSupport.tableGetRecordsTotal = function(updateOptions, chart, chartResult, serverSidePaging)
+	{
+		var recordsTotal = null;
+		
+		var dsbs = chart.dataSetBinds();
+		
+		for(var i=0; i<dsbs.length; i++)
+		{
+			var result = chart.resultOf(chartResult, dsbs[i]);
+			
+			if(serverSidePaging.totalAdditionName != null)
+			{
+				recordsTotal = chartBase.resultAddition(result, serverSidePaging.totalAdditionName);
+			}
+			
+			if(recordsTotal == null && serverSidePaging.totalFieldName != null
+				&& chart.dataSetField(dsbs[i], serverSidePaging.totalFieldName) != null)
+			{
+				var colValues = chart.resultColumnArrays(result, serverSidePaging.totalFieldName);
+				recordsTotal = chartSupport.findNonNull(colValues);
+			}
+			
+			if(recordsTotal != null)
+				break;
+		}
+		
+		if(recordsTotal == null)
+			recordsTotal = (updateOptions.data ? updateOptions.data.length : 0);
+			
+		return recordsTotal;
 	};
 	
 	chartSupport.tableGetChartContent = function(chart)
@@ -7445,9 +7538,11 @@
 		var renderOptions = chart.renderOptions();
 		
 		//自定义更新底层组件数据，当启用serverSide后，需要自定义调用其ajax配置项的callback更新数据，而非这里
-		if(renderOptions[builtinOptionNames.updateInternal] != null)
+		//格式为：function(updateOptions, chart, chartResult){ ... }
+		var updateInternal = chartSupport.updateInternalOption(renderOptions);
+		if(updateInternal)
 		{
-			renderOptions[builtinOptionNames.updateInternal](updateOptions, chart, chartResult);
+			updateInternal.call(renderOptions, updateOptions, chart, chartResult);
 			return;
 		}
 		
@@ -9646,7 +9741,7 @@
 		if(!sortAxisData && !sortSeriesData)
 			return;
 		
-		var sortHandler = chartSupport.sortAxisDataOptionValue(renderOptions);
+		var sortHandler = chartSupport.sortAxisDataOption(renderOptions);
 		
 		if(chartFactory.isString(sortHandler))
 		{
@@ -9720,12 +9815,9 @@
 		}
 	};
 	
-	chartSupport.sortAxisDataOptionValue = function(options)
+	chartSupport.sortAxisDataOption = function(options)
 	{
-		if(!options)
-			return null;
-		
-		var value = options[builtinOptionNames.sortAxisData];
+		var value = chartFactory.optionValue(options, builtinOptionNames.sortAxisData);
 		
 		// < @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
 		if(value == null)
@@ -9735,6 +9827,16 @@
 		// > @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
 		
 		return value;
+	};
+	
+	chartSupport.serverSidePagingOption = function(options, value)
+	{
+		return chartFactory.optionValue(options, builtinOptionNames.serverSidePaging, value);
+	};
+	
+	chartSupport.updateInternalOption = function(options, value)
+	{
+		return chartFactory.optionValue(options, builtinOptionNames.updateInternal, value);
 	};
 	
 	chartSupport.inflateAxisDataExtractors =

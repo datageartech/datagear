@@ -8947,6 +8947,22 @@
 	//以http://或者https://开头的正则表达式
 	chartFactory.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
 	
+	/**
+	 * 获取/设置选项值
+	 */
+	chartFactory.optionValue = function(options, name, value)
+	{
+		if(value === undefined)
+		{
+			return (options ? options[name] : null);
+		}
+		else
+		{
+			options[name] = value;
+		}
+	};
+	
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
