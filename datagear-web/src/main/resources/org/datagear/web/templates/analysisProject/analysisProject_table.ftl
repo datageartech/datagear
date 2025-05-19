@@ -57,7 +57,7 @@
 			<p-column :selection-mode="pm.selectionMode" :frozen="true" class="col-check"></p-column>
 			<p-column field="id" header="<@spring.message code='id' />" :hidden="true"></p-column>
 			<p-column field="name" header="<@spring.message code='name' />" :sortable="true" class="col-name"></p-column>
-			<p-column field="desc" header="<@spring.message code='desc' />" :sortable="true" class="col-desc"></p-column>
+			<p-column field="description" header="<@spring.message code='description' />" :sortable="true" class="col-desc"></p-column>
 			<p-column field="createUser.realName" header="<@spring.message code='createUser' />" :sortable="true" class="col-user"></p-column>
 			<p-column field="createTime" header="<@spring.message code='createTime' />" :sortable="true" class="col-datetime col-last"></p-column>
 		</p-datatable>

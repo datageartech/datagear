@@ -39,7 +39,7 @@ public class AnalysisProject extends AbstractStringIdEntity
 	private String name;
 
 	/** 描述 */
-	private String desc = "";
+	private String description = "";
 
 	/** 创建用户 */
 	private User createUser;
@@ -71,14 +71,14 @@ public class AnalysisProject extends AbstractStringIdEntity
 		this.name = name;
 	}
 
-	public String getDesc()
+	public String getDescription()
 	{
-		return desc;
+		return description;
 	}
 
-	public void setDesc(String desc)
+	public void setDescription(String description)
 	{
-		this.desc = desc;
+		this.description = description;
 	}
 
 	@Override
@@ -120,8 +120,8 @@ public class AnalysisProject extends AbstractStringIdEntity
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", desc=" + desc + ", createUser=" + createUser
-				+ ", createTime=" + createTime + ", dataPermission=" + dataPermission + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", description=" + description + ", createUser="
+				+ createUser + ", createTime=" + createTime + ", dataPermission=" + dataPermission + "]";
 	}
 
 	@Override

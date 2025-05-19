@@ -43,12 +43,12 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}desc" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='desc' />
+				<label for="${pid}description" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='description' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<p-textarea id="${pid}desc" v-model="fm.desc" rows="10" class="input w-full"
-		        		name="desc" maxlength="500">
+		        	<p-textarea id="${pid}description" v-model="fm.description" rows="10" class="input w-full"
+		        		name="description" maxlength="500">
 		        	</p-textarea>
 		        </div>
 			</div>
