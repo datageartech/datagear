@@ -6863,11 +6863,13 @@
 		
 		//服务端分页配置，格式为：
 		//{
-		//  //读取data中的分页信息，设置为图表数据集参数
+		//  //必填，将data中的分页查询信息设置为图表数据集参数
 		//  param: function(chart, data){ ... },
-		//  //数据集附加数据中总记录数关键字
+		//  //可选，将图表数据集参数设置为表格的分页查询信息，如果不设置，使用图表参数面板的查询信息不会同步显示到表格中
+		//  data: function(chart){ ... },
+		//  //可选（与totalFieldName二选一），数据集附加数据中总记录数关键字
 		//  totalAdditionName: "...",
-		//  //附件数据集中总记录数字段名
+		//  //可选（与totalAdditionName二选一），附件数据集中总记录数字段名
 		//  totalFieldName: "..."
 		//}
 		var serverSidePaging = chartSupport.serverSidePagingOption(options);
@@ -6885,31 +6887,85 @@
 				}
 				
 				ajaxInfos.push({ data: data, callback: callback, settings: settings });
-				serverSidePaging.param(chart, data);
 				
-				if(chart.isActive())
-					chart.refreshData();
+				var refreshInfo = chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo");
+				
+				//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
+				if(refreshInfo != null)
+				{
+					chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", null);
+					
+					if(chart.isActive())
+						chartSupport.tableUpdateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
+				}
+				else
+				{
+					serverSidePaging.param(chart, data);
+					
+					if(chart.isActive())
+						chart.refreshData();
+				}
 			};
 			chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
 			{
 				var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
-				for(var i=0; i<ajaxInfos.length; i++)
-				{
-					var ajaxInfo = ajaxInfos[i];
-					var recordsTotal = chartSupport.tableGetRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
-					
-					var pagingData =
-					{
-						draw: (ajaxInfo.data ? ajaxInfo.data.draw : undefined),
-						recordsTotal: recordsTotal,
-						recordsFiltered: recordsTotal,
-						data: updateOptions.data
-					};
-					
-					ajaxInfo.callback(pagingData);
-				}
 				
-				chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", []);
+				//由表格内部操作触发
+				if(ajaxInfos.length > 0)
+				{
+					for(var i=0; i<ajaxInfos.length; i++)
+					{
+						var ajaxInfo = ajaxInfos[i];
+						var recordsTotal = chartSupport.tableGetRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
+						
+						var pagingData =
+						{
+							draw: (ajaxInfo.data ? ajaxInfo.data.draw : undefined),
+							recordsTotal: recordsTotal,
+							recordsFiltered: recordsTotal,
+							data: updateOptions.data
+						};
+						
+						ajaxInfo.callback(pagingData);
+					}
+					
+					chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", []);
+				}
+				//由图表API触发，比如：参数表单提交、chart.refreshData()
+				else
+				{
+					var dataTable = chart.internal();
+					
+					if(serverSidePaging.data != null)
+					{
+						//格式支持：{ length: 页大小数值, page: 页码数值, start: 页索引数值 }
+						var pagingData = serverSidePaging.data(chart);
+						if(pagingData != null)
+						{
+							var pageLength = (pagingData.length == null ? null : parseInt(pagingData.length));
+							var pagePage = (pagingData.page == null ? null : parseInt(pagingData.page));
+							var pageStart = (pagingData.start == null ? null : parseInt(pagingData.start));
+							
+							if(pageLength != null)
+								dataTable.page.len(pageLength);
+							
+							if(pagePage != null)
+							{
+								dataTable.page(pagePage);
+							}
+							else if(pageStart != null)
+							{
+								pageLength = (pageLength == null ? dataTable.page.info() : pageLength);
+								pagePage = parseInt(pageStart/pageLength);
+								dataTable.page(pagePage);
+							}
+						}
+					}
+					
+					var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
+					chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
+					dataTable.draw(false);
+				}
 			});
 		}
 		
