@@ -6742,9 +6742,6 @@
 	
 	chartSupport.tableUpdate = function(chart, chartResult)
 	{
-		var renderOptions = chart.renderOptions();
-		var chartEle = chart.elementJquery();
-		
 		var dataSetBinds = chart.dataSetBindsMain();
 		
 		var updateOptions = { data: [] };
@@ -6769,12 +6766,6 @@
 		
 		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
 		chartSupport.tableUpdateInternalData(chart, chartResult, updateOptions);
-		
-		if(renderOptions.carousel.enable)
-		{
-			chartEle.data("tableCarouselPrepared", false);
-			chartSupport.tableStartCarousel(chart);
-		}
 	};
 	
 	chartSupport.tableResize = function(chart)
@@ -7668,6 +7659,13 @@
 		
 		dataTable.draw();
 		chartSupport.tableAdjustColumn(dataTable);
+		
+		if(renderOptions.carousel.enable)
+		{
+			var chartEle = chart.elementJquery();
+			chartEle.data("tableCarouselPrepared", false);
+			chartSupport.tableStartCarousel(chart);
+		}
 	};
 	
 	/**
@@ -7694,6 +7692,12 @@
 	 */
 	chartSupport.tablePrepareCarousel = function(chart)
 	{
+		var renderOptions = chart.renderOptions();
+		
+		//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
+		if(chartSupport.serverSidePagingOption(renderOptions) != null)
+			return;
+		
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
 		var rowIndexes = dataTable.rows().indexes();
@@ -7733,6 +7737,11 @@
 	chartSupport.tableStartCarousel = function(chart)
 	{
 		var renderOptions = chart.renderOptions();
+		
+		//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
+		if(chartSupport.serverSidePagingOption(renderOptions) != null)
+			return;
+		
 		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
