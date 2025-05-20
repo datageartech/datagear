@@ -105,6 +105,12 @@
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button{
 	padding: 0.2em 0.5em;
 }
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button.ui-state-disabled{
+	opacity: 0.6;
+}
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate > span > .fg-button.ui-state-disabled{
+	font-weight: bold;
+}
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_length select{
 	margin-left: 0.2em;
 	margin-right: 0.2em;

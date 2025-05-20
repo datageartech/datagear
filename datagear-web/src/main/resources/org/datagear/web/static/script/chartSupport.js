@@ -6877,14 +6877,14 @@
 			options.serverSide = true;
 			options.ajax = function(data, callback, settings)
 			{
-				var callbackInfos = chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos");
-				if(callbackInfos == null)
+				var ajaxInfos = chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos");
+				if(ajaxInfos == null)
 				{
-					callbackInfos = [];
-					chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos", callbackInfos);
+					ajaxInfos = [];
+					chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", ajaxInfos);
 				}
 				
-				callbackInfos.push({ data: data, callback: callback, settings: settings });
+				ajaxInfos.push({ data: data, callback: callback, settings: settings });
 				serverSidePaging.param(chart, data);
 				
 				if(chart.isActive())
@@ -6892,24 +6892,24 @@
 			};
 			chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
 			{
-				var callbackInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos") || []);
-				for(var i=0; i<callbackInfos.length; i++)
+				var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
+				for(var i=0; i<ajaxInfos.length; i++)
 				{
-					var callbackInfo = callbackInfos[i];
+					var ajaxInfo = ajaxInfos[i];
 					var recordsTotal = chartSupport.tableGetRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
 					
 					var pagingData =
 					{
-						draw: (callbackInfo.data ? callbackInfo.data.draw : undefined),
+						draw: (ajaxInfo.data ? ajaxInfo.data.draw : undefined),
 						recordsTotal: recordsTotal,
 						recordsFiltered: recordsTotal,
 						data: updateOptions.data
 					};
 					
-					callbackInfo.callback(pagingData);
+					ajaxInfo.callback(pagingData);
 				}
 				
-				chartFactory.extValueBuiltin(chart, "serverSidePagingCallbackInfos", []);
+				chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", []);
 			});
 		}
 		
@@ -7003,7 +7003,7 @@
 			
 			if(serverSidePaging.totalAdditionName != null)
 			{
-				recordsTotal = chartBase.resultAddition(result, serverSidePaging.totalAdditionName);
+				recordsTotal = chart.resultAddition(result, serverSidePaging.totalAdditionName);
 			}
 			
 			if(recordsTotal == null && serverSidePaging.totalFieldName != null
