@@ -115,6 +115,9 @@
 	margin-left: 0.2em;
 	margin-right: 0.2em;
 }
+.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_filter input{
+	color: inherit;
+}
 /*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .DTFC_LeftBodyLiner,
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .DTFC_RightBodyLiner{

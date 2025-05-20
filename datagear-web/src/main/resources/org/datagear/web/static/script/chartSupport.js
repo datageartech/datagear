@@ -6953,6 +6953,7 @@
 			{
 				options.dom = "t";
 				options.dom = (options.paging ? (options.dom + "ilpr") : options.dom);
+				options.dom = (options.searching ? ("f" + options.dom) : options.dom);
 				options.dom = (options.buttons ? ("B" + options.dom) : options.dom);
 			}
 		}
@@ -7444,6 +7445,7 @@
 				{
 					name:
 					[
+						qualifierV1 + " .dataTables_wrapper .dataTables_filter input",
 						qualifierV2 + " div.dt-container .dt-paging .dt-paging-button.current",
 						qualifierV2 + " div.dt-container .dt-paging .dt-paging-button.current:hover",
 						qualifierV2 + " div.dt-container .dt-input"
