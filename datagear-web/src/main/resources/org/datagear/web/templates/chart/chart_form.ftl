@@ -467,7 +467,7 @@
 				<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 					<div class="field grid">
 						<div class="field-input col-12">
-							<div id="${pid}optionsContent" class="code-editor-wrapper input p-component p-inputtext panel-content-size-xxs">
+							<div id="${pid}optionsContent" class="code-editor-wrapper input p-component p-inputtext size-40vw size-40vh">
 								<div id="${pid}optionsContentCodeEditor" class="code-editor"></div>
 							</div>
 				        	<div class="desc text-color-secondary">
