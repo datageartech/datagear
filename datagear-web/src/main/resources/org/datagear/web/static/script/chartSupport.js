@@ -6726,16 +6726,19 @@
 			tableBody.css("overflow-y", "hidden");
 		}
 		
-		$(dataTable.table().body()).on("mouseenter", "tr", function()
+		if(options.carousel.enable)
 		{
-			if(options.carousel.pauseOnHover)
-				chartSupport.tableStopCarousel(chart);
-		})
-		.on("mouseleave", "tr", function()
-		{
-			if(options.carousel.pauseOnHover && options.carousel.enable)
-				chartSupport.tableStartCarousel(chart);
-		});
+			$(dataTable.table().body()).on("mouseenter", "tr", function()
+			{
+				if(options.carousel.pauseOnHover)
+					chartSupport.tableStopCarousel(chart);
+			})
+			.on("mouseleave", "tr", function()
+			{
+				if(options.carousel.pauseOnHover)
+					chartSupport.tableStartCarousel(chart);
+			});
+		}
 		
 		chart.internal(dataTable);
 	};
@@ -6968,8 +6971,11 @@
 		if(!serverSidePaging)
 			return;
 		
-		options.paging = true;
 		options.serverSide = true;
+		options.paging = true;
+		
+		//这里需禁用轮播，详细参考chartSupport.tableStartCarousel()函数
+		options.carousel = false;
 		
 		options.ajax = function(data, callback, settings)
 		{
@@ -7695,7 +7701,7 @@
 		var renderOptions = chart.renderOptions();
 		
 		//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
-		if(chartSupport.serverSidePagingOption(renderOptions) != null)
+		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(renderOptions) != null)
 			return;
 		
 		var chartContent = chartSupport.tableGetChartContent(chart);
@@ -7739,7 +7745,7 @@
 		var renderOptions = chart.renderOptions();
 		
 		//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
-		if(chartSupport.serverSidePagingOption(renderOptions) != null)
+		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(renderOptions) != null)
 			return;
 		
 		var chartEle = chart.elementJquery();
