@@ -6768,7 +6768,6 @@
 		chartSupport.tableStopCarousel(chart);
 		
 		updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
-		
 		chartSupport.tableUpdateInternalData(chart, chartResult, updateOptions);
 		
 		if(renderOptions.carousel.enable)
@@ -6844,7 +6843,6 @@
 		if(chartData)
 		{
 			var columnData = [];
-			
 			var columnDataSrc = dataTable.columns().dataSrc();
 			
 			for(var i=0; i<columnDataSrc.length; i++)
@@ -6859,117 +6857,55 @@
 	
 	chartSupport.tableRenderProcessOptions = function(chart, options)
 	{
-		var isV1 = chartSupport.tableIsV1();
+		chartSupport.tableRenderProcessServerSidePaging(chart, options);
+		chartSupport.tableRenderProcessCarousel(chart, options)
 		
-		//服务端分页配置，格式为：
-		//{
-		//  //必填，将data中的分页查询信息设置为图表数据集参数
-		//  param: function(chart, data){ ... },
-		//  //可选，将图表数据集参数设置为表格的分页查询信息，如果不设置，使用图表参数面板的查询信息不会同步显示到表格中
-		//  data: function(chart){ ... },
-		//  //可选（与totalFieldName二选一），数据集附加数据中总记录数关键字
-		//  totalAdditionName: "...",
-		//  //可选（与totalAdditionName二选一），附件数据集中总记录数字段名
-		//  totalFieldName: "..."
-		//}
-		var serverSidePaging = chartSupport.serverSidePagingOption(options);
-		if(serverSidePaging)
+		//必须明确设置paging=false，因为底层表格组件的paging默认值为true
+		options.paging = (options.paging != null ? options.paging : false);
+		
+		//开启分页后，默认开启info
+		options.info = (options.info != null ? options.info : options.paging);
+		
+		if(options.paging)
 		{
-			options.paging = true;
-			options.serverSide = true;
-			options.ajax = function(data, callback, settings)
-			{
-				var ajaxInfos = chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos");
-				if(ajaxInfos == null)
-				{
-					ajaxInfos = [];
-					chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", ajaxInfos);
-				}
-				
-				ajaxInfos.push({ data: data, callback: callback, settings: settings });
-				
-				var refreshInfo = chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo");
-				
-				//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
-				if(refreshInfo != null)
-				{
-					chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", null);
-					
-					if(chart.isActive())
-						chartSupport.tableUpdateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
-				}
-				else
-				{
-					serverSidePaging.param(chart, data);
-					
-					if(chart.isActive())
-						chart.refreshData();
-				}
-			};
-			chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
-			{
-				var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
-				
-				//由表格内部操作触发
-				if(ajaxInfos.length > 0)
-				{
-					for(var i=0; i<ajaxInfos.length; i++)
-					{
-						var ajaxInfo = ajaxInfos[i];
-						var recordsTotal = chartSupport.tableGetRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
-						
-						var pagingData =
-						{
-							draw: (ajaxInfo.data ? ajaxInfo.data.draw : undefined),
-							recordsTotal: recordsTotal,
-							recordsFiltered: recordsTotal,
-							data: updateOptions.data
-						};
-						
-						ajaxInfo.callback(pagingData);
-					}
-					
-					chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", []);
-				}
-				//由图表API触发，比如：参数表单提交、chart.refreshData()
-				else
-				{
-					var dataTable = chart.internal();
-					
-					if(serverSidePaging.data != null)
-					{
-						//格式支持：{ length: 页大小数值, page: 页码数值, start: 页索引数值 }
-						var pagingData = serverSidePaging.data(chart);
-						if(pagingData != null)
-						{
-							var pageLength = (pagingData.length == null ? null : parseInt(pagingData.length));
-							var pagePage = (pagingData.page == null ? null : parseInt(pagingData.page));
-							var pageStart = (pagingData.start == null ? null : parseInt(pagingData.start));
-							
-							if(pageLength != null)
-								dataTable.page.len(pageLength);
-							
-							if(pagePage != null)
-							{
-								dataTable.page(pagePage);
-							}
-							else if(pageStart != null)
-							{
-								pageLength = (pageLength == null ? dataTable.page.info() : pageLength);
-								pagePage = parseInt(pageStart/pageLength);
-								dataTable.page(pagePage);
-							}
-						}
-					}
-					
-					var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
-					chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
-					dataTable.draw(false);
-				}
-			});
+			options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
+			//如果有50，则取50，以兼容旧版逻辑
+			options.pageLength = (chartFactory.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
 		}
 		
-		//默认轮播配置
+		if(chartSupport.tableIsV1())
+		{
+			if(options.dom == null)
+			{
+				options.dom = "t";
+				options.dom = (options.paging ? (options.dom + "ilpr") : options.dom);
+				options.dom = (options.searching ? ("f" + options.dom) : options.dom);
+				options.dom = (options.buttons ? ("B" + options.dom) : options.dom);
+			}
+		}
+		else
+		{
+			var dftLayout =
+			{
+				topStart: (options.buttons ? "buttons" : null),
+				topEnd: (options.searching ? "search" : null),
+				bottomStart: (options.info ? "info" : null),
+				bottomEnd: (options.paging ? ["pageLength", "paging"] : null)
+			};
+			
+			options.layout = (options.layout  == null ? dftLayout : options.layout);
+		}
+	};
+	
+	/**
+	 * 表格处理carousel选项，格式为：
+	 * {
+	 *   carousel: ...
+	 * }
+	 */
+	chartSupport.tableRenderProcessCarousel = function(chart, options)
+	{
+		//标准轮播格式
 		var carouselConfig =
 		{
 			//是否开启，true 开启；false 禁用；"auto" 只有在行溢出时才开启
@@ -6991,61 +6927,162 @@
 			overflowCount: 2
 		};
 		
-		//必须明确设置paging=false，因为底层表格组件的paging默认值为true
-		options.paging = (options.paging != null ? options.paging : false);
-		
-		//开启分页后，默认开启info
-		options.info = (options.info != null ? options.info : options.paging);
-		
-		if(options.paging)
-		{
-			options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
-			options.pageLength = (chartFactory.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
-		}
-		
-		if(isV1)
-		{
-			if(options.dom == null)
-			{
-				options.dom = "t";
-				options.dom = (options.paging ? (options.dom + "ilpr") : options.dom);
-				options.dom = (options.searching ? ("f" + options.dom) : options.dom);
-				options.dom = (options.buttons ? ("B" + options.dom) : options.dom);
-			}
-		}
-		else
-		{
-			var dftLayout =
-			{
-				topStart: (options.buttons ? "buttons" : null),
-				topEnd: (options.searching ? "search" : null),
-				bottomStart: (options.info ? "info" : null),
-				bottomEnd: (options.paging ? ["pageLength", "paging"] : null)
-			};
-			
-			options.layout = (options.layout != null ? options.layout : dftLayout);
-		}
-		
-		//完善轮播选项
 		if(options.carousel == null)
 		{
 			
 		}
+		//true、false、"auto"
 		else if(options.carousel === true || options.carousel === false || chartFactory.isString(options.carousel))
 		{
 			carouselConfig.enable = options.carousel;
 		}
+		//间隔数值、函数
 		else if(chartFactory.isNumber(options.carousel) || $.isFunction(options.carousel))
 		{
 			carouselConfig.enable = true;
 			carouselConfig.interval = options.carousel;
 		}
+		//轮播对象
 		else
 		{
 			carouselConfig = $.extend(true, carouselConfig, options.carousel);
 		}
 		
 		options.carousel = carouselConfig;
+	};
+	
+	/**
+	 * 表格处理serverSidePaging选项，格式为：
+	 * {
+	 *   serverSidePaging:
+	 *   {
+	 *      //必填，将data中的分页查询信息设置为图表数据集参数
+	 *      param: function(chart, data){ ... },
+	 *      //可选（与totalFieldName二选一），数据集附加数据中总记录数关键字
+	 *      totalAdditionName: "...",
+	 *      //可选（与totalAdditionName二选一），附件数据集中总记录数字段名
+	 *      totalFieldName: "...",
+	 *      //可选，根据图表数据集参数设置表格分页状态，或者返回要设置的状态数据（参考chartSupport.tableUpdatePagingState()函数），
+	 *      //如果不设置，使用图表参数面板的查询信息不会同步显示到表格中
+	 *      state: function(chart){ ... },
+	 *      //可选，触发表格draw()函数时的paging参数
+	 *      drawPagingArg: ...,
+	 *   }
+	 * }
+	 */
+	chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
+	{
+		var serverSidePaging = chartSupport.serverSidePagingOption(options);
+		
+		if(!serverSidePaging)
+			return;
+		
+		options.paging = true;
+		options.serverSide = true;
+		
+		options.ajax = function(data, callback, settings)
+		{
+			var ajaxInfos = chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos");
+			if(ajaxInfos == null)
+			{
+				ajaxInfos = [];
+				chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", ajaxInfos);
+			}
+			
+			ajaxInfos.push({ data: data, callback: callback, settings: settings });
+			
+			var refreshInfo = chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo");
+			
+			//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
+			if(refreshInfo != null)
+			{
+				chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", null);
+				
+				if(chart.isActive())
+					chartSupport.tableUpdateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
+			}
+			else
+			{
+				serverSidePaging.param(chart, data);
+				
+				if(chart.isActive())
+					chart.refreshData();
+			}
+		};
+		chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
+		{
+			var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
+			
+			//由表格内部操作触发
+			if(ajaxInfos.length > 0)
+			{
+				for(var i=0; i<ajaxInfos.length; i++)
+				{
+					var ajaxInfo = ajaxInfos[i];
+					var recordsTotal = chartSupport.tableGetRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
+					
+					var pagingData =
+					{
+						draw: (ajaxInfo.data ? ajaxInfo.data.draw : undefined),
+						recordsTotal: recordsTotal,
+						recordsFiltered: recordsTotal,
+						data: updateOptions.data
+					};
+					
+					ajaxInfo.callback(pagingData);
+				}
+				
+				chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", []);
+			}
+			//由图表API触发，比如：参数表单提交、chart.refreshData()
+			else
+			{
+				var pagingState = (serverSidePaging.state == null ? null : serverSidePaging.state(chart));
+				if(pagingState != null)
+					chartSupport.tableUpdatePagingState(chart, pagingState);
+				
+				var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
+				chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
+				chart.internal().draw(serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
+			}
+		});
+	};
+	
+	/**
+	 * 表格更新分页状态（不应刷新数据），state格式为：
+	 * {
+	 *   //可选，页大小
+	 *   length: 数值,
+	 *   //可选，页码（以0开始）
+	 *   page: 数值,
+	 *   //可选，页数据起始索引
+	 *   start: 数值
+	 * }
+	 */
+	chartSupport.tableUpdatePagingState = function(chart, state)
+	{
+		if(!state)
+			return;
+		
+		var dataTable = chart.internal();
+		
+		var pageLength = (state.length == null ? null : parseInt(state.length));
+		var pagePage = (state.page == null ? null : parseInt(state.page));
+		var pageStart = (state.start == null ? null : parseInt(state.start));
+		
+		if(pageLength != null)
+			dataTable.page.len(pageLength);
+		
+		if(pagePage != null)
+		{
+			dataTable.page(pagePage);
+		}
+		else if(pageStart != null)
+		{
+			pageLength = (pageLength == null ? dataTable.page.info() : pageLength);
+			pagePage = parseInt(pageStart/pageLength);
+			dataTable.page(pagePage);
+		}
 	};
 	
 	chartSupport.tableGetRecordsTotal = function(updateOptions, chart, chartResult, serverSidePaging)
