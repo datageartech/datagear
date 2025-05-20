@@ -511,7 +511,7 @@
 		options);
 		
 		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
-			.attr("value", (value || "")).appendTo($parent);
+			.attr("value", (value == null ? "" : value)).appendTo($parent);
 		
 		if(chartSetting.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
@@ -554,7 +554,7 @@
 		options);
 		
 		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
-			.attr("value", (value || "")).appendTo($parent);
+			.attr("value", (value == null ? "" : value)).appendTo($parent);
 		
 		if(chartSetting.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
@@ -603,7 +603,7 @@
 		options);
 		
 		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
-			.attr("value", (value || "")).appendTo($parent);
+			.attr("value", (value == null ? "" : value)).appendTo($parent);
 		
 		if(chartSetting.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
@@ -761,7 +761,7 @@
 	chartSetting.renderDataSetParamValueFormInputTextarea = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var $input = $("<textarea class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
-			.text(value || "").appendTo($parent);
+			.text(value == null ? "" : value).appendTo($parent);
 		
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
@@ -1425,7 +1425,7 @@
 						$this.prop("checked", false);
 				}
 				else
-					$this.val(value || "");
+					$this.val(value == null ? "" : value);
 			}
 			else if($this.is("select"))
 			{
@@ -1446,7 +1446,7 @@
 			}
 			else if($this.is("textarea"))
 			{
-				$this.val(value || "");
+				$this.val(value == null ? "" : value);
 			}
 		});
 	};
