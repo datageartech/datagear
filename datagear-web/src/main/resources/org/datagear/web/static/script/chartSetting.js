@@ -1786,11 +1786,12 @@
 					
 					var doRefresh = true;
 					var chartOptions = chart.options();
+					var onParamFormSubmit = chart.customOptionValue(chartOptions, builtinOptionNames.onParamFormSubmit);
 					
 					//执行提交前回调
-					if(chartOptions && chartOptions[builtinOptionNames.onParamFormSubmit])
+					if(onParamFormSubmit)
 					{
-						doRefresh = chartOptions[builtinOptionNames.onParamFormSubmit](chart);
+						doRefresh = onParamFormSubmit.call(chartOptions, chart);
 					}
 					
 					//不执行刷新

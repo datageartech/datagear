@@ -81,6 +81,7 @@ global.dashboardApiCompletions =
 	{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", displayName: "bindLinksEventHanders() ", displayComment: "chart", categories: ["chart"]},
 	{name: "callEventHandler", value: "callEventHandler(", displayName: "callEventHandler() ", displayComment: "chart", categories: ["chart"]},
 	{name: "contextURL", value: "contextURL(", displayName: "contextURL() ", displayComment: "chart", categories: ["chart"]},
+	{name: "customOptionValue", value: "customOptionValue(", displayName: "customOptionValue() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dashboard", value: "dashboard", displayName: "dashboard ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetAlias", value: "dataSetAlias(", displayName: "dataSetAlias() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetBindAt", value: "dataSetBindAt(", displayName: "dataSetBindAt() ", displayComment: "chart", categories: ["chart"]},

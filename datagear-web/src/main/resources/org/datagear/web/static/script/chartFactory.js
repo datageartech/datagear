@@ -234,6 +234,8 @@
 	// renderContextAttrConst结束
 	//----------------------------------------
 	
+	/** 内置图表选项名：自定义选项名 */
+	builtinOptionNames.customOptionNames = "customOptionNames";
 	/** 内置图表选项名：是否美化滚动条 */
 	builtinOptionNames.beautifyScrollbar = "beautifyScrollbar";
 	/** 内置图表选项名：处理图表渲染选项 */
@@ -799,12 +801,12 @@
 	chartBase._initUpdateAppendMode = function()
 	{
 		var options = this.options();
-		var mode = (options ? options[builtinOptionNames.updateAppendMode] : null);
+		var mode = this.customOptionValue(options, builtinOptionNames.updateAppendMode);
 		
 		// < @deprecated 兼容5.2.0版本的dgUpdateAppendMode选项，将在未来版本移除
 		if(mode == null)
 		{
-			mode = (options ? options["dgUpdateAppendMode"] : null);
+			mode = this.customOptionValue(options, "dgUpdateAppendMode");
 		}
 		// > @deprecated 兼容5.2.0版本的dgUpdateAppendMode选项，将在未来版本移除
 		
@@ -1147,7 +1149,8 @@
 		$element.addClass(this.themeStyleName());
 		
 		var options = this.options();
-		if(!options || options[builtinOptionNames.beautifyScrollbar] != false)
+		
+		if(this.customOptionValue(options, builtinOptionNames.beautifyScrollbar) !== false)
 			$element.addClass("dg-chart-beautify-scrollbar");
 		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
@@ -2815,8 +2818,11 @@
 			beforeProcessHandler(renderOptions, this);
 		
 		//最后调用processRenderOptions
-		if(renderOptions[builtinOptionNames.processRenderOptions])
-			renderOptions[builtinOptionNames.processRenderOptions](renderOptions, this);
+		var proHandler = this.customOptionValue(renderOptions, builtinOptionNames.processRenderOptions);
+		if(proHandler)
+		{
+			proHandler.call(renderOptions, renderOptions, this);
+		}
 		
 		this.renderOptions(renderOptions);
 		
@@ -2893,17 +2899,23 @@
 			beforeProcessHandler(updateOptions, this, chartResult);
 		
 		//最后调用processUpdateOptions
-		if(renderOptions[builtinOptionNames.processUpdateOptions])
+		var puoHandler = this.customOptionValue(renderOptions, builtinOptionNames.processUpdateOptions);
+		
+		if(puoHandler)
 		{
 			var chartResultMy = this._toApiSpecResult(chartResult);
-			renderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
+			puoHandler.call(renderOptions, updateOptions, this, chartResultMy);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
-		else if(chartRenderOptions && renderOptions !== chartRenderOptions
-					&& chartRenderOptions[builtinOptionNames.processUpdateOptions])
+		else if(chartRenderOptions && renderOptions !== chartRenderOptions)
 		{
-			var chartResultMy = this._toApiSpecResult(chartResult);
-			chartRenderOptions[builtinOptionNames.processUpdateOptions](updateOptions, this, chartResultMy);
+			puoHandler = this.customOptionValue(chartRenderOptions, builtinOptionNames.processUpdateOptions);
+			
+			if(puoHandler)
+			{
+				var chartResultMy = this._toApiSpecResult(chartResult);
+				puoHandler.call(chartRenderOptions, updateOptions, this, chartResultMy);
+			}
 		}
 		
 		this.updateOptions(updateOptions);
@@ -4789,6 +4801,30 @@
 			}
 			
 			additions[name] = value;
+		}
+	};
+	
+	/**
+	 * 获取/设置可自定义选项名的选项值。
+	 * 
+	 * @param options 获取时可为null，选项对象，格式为：{ ... }
+	 * @param name 选项名
+	 * @param value 要设置的选项值
+	 * @returns 要获取的选项值
+	 * @since 5.4.0
+	 */
+	chartBase.customOptionValue = function(options, name, value)
+	{
+		var customNames = (options == null ? null : options[builtinOptionNames.customOptionNames]);
+		name = (customNames && customNames[name] ? customNames[name] : name);
+		
+		if(value === undefined)
+		{
+			return (options ? options[name] : null);
+		}
+		else
+		{
+			options[name] = value;
 		}
 	};
 	
@@ -8946,21 +8982,6 @@
 	
 	//以http://或者https://开头的正则表达式
 	chartFactory.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
-	
-	/**
-	 * 获取/设置选项值
-	 */
-	chartFactory.optionValue = function(options, name, value)
-	{
-		if(value === undefined)
-		{
-			return (options ? options[name] : null);
-		}
-		else
-		{
-			options[name] = value;
-		}
-	};
 	
 	
 	//-------------

@@ -212,7 +212,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -445,7 +445,7 @@
 		else
 			options.xAxis = { id: 0 };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -689,7 +689,7 @@
 		else
 			options.radiusAxis = { id: 0 };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
 						{
 							get: function(s)
 							{
@@ -877,7 +877,7 @@
 		
 		var options = { legend: { id: 0 }, series: series };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.legend,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.legend,
 						chartSupport.inflateAxisDataExtractors.property("name"));
 		
 		chartSupport.pieEvalSeriesLayout(chart, renderOptions, options);
@@ -1475,7 +1475,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -1723,7 +1723,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -1874,7 +1874,7 @@
 			}
 		}
 		
-		if(chartSupport.sortAxisDataOption(renderOptions))
+		if(chartSupport.sortAxisDataOption(chart, renderOptions))
 		{
 			var tmpAxisData = [];
 			$.each(indicatorData, function(i, indicator)
@@ -1884,7 +1884,7 @@
 			
 			var tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
 			
-			chartSupport.sortAxisDataForUpdateOptions(renderOptions, tmpOptions, tmpOptions.tmpAxis,
+			chartSupport.sortAxisDataForUpdateOptions(chart, renderOptions, tmpOptions, tmpOptions.tmpAxis,
 							true, true, chartSupport.inflateAxisDataExtractors.property("name"));
 			
 			indicatorData.sort(function(a, b)
@@ -3629,7 +3629,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.property("name"));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -3830,9 +3830,9 @@
 		
 		chartSupport.trimNumberRange(options.visualMap);
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.xAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.xAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.yAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.yAxis,
 						chartSupport.inflateAxisDataExtractors.valueElement(1), false);
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -5072,7 +5072,7 @@
 		else
 			options.xAxis = { id: 0 };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						{
 							get: function(s)
 							{
@@ -5959,7 +5959,7 @@
 		//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 		var options = { legend: { id: 0, data: legendData}, series: [ series ], singleAxis: { id: 0 } };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, options.singleAxis,
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, options.singleAxis,
 						chartSupport.inflateAxisDataExtractors.element(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -6211,7 +6211,7 @@
 		else
 			options.xAxis = { id: 0 };
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -6456,7 +6456,7 @@
 			options.yAxis = { id: 0, max: maxValue };
 		}
 		
-		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+		chartSupport.inflateAxisDataForEchartsUpdateOptions(chart, renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
 						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -6687,7 +6687,7 @@
 		
 		chartSupport.tableThemeStyleSheet(chart, options);
 		
-		var carousel = chartSupport.carouselOption(options);
+		var carousel = chartSupport.carouselOption(chart, options);
 		
 		if(carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
@@ -6926,7 +6926,7 @@
 			overflowCount: 2
 		};
 		
-		var carousel = chartSupport.carouselOption(options);
+		var carousel = chartSupport.carouselOption(chart, options);
 		
 		if(carousel == null)
 		{
@@ -6949,7 +6949,7 @@
 			carouselObj = $.extend(true, carouselObj, carousel);
 		}
 		
-		chartSupport.carouselOption(options, carouselObj);
+		chartSupport.carouselOption(chart, options, carouselObj);
 	};
 	
 	/**
@@ -6973,7 +6973,7 @@
 	 */
 	chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 	{
-		var serverSidePaging = chartSupport.serverSidePagingOption(options);
+		var serverSidePaging = chartSupport.serverSidePagingOption(chart, options);
 		
 		if(!serverSidePaging)
 			return;
@@ -6982,7 +6982,7 @@
 		options.paging = true;
 		
 		//这里需禁用轮播，详细参考chartSupport.tableStartCarousel()函数
-		chartSupport.carouselOption(options, false);
+		chartSupport.carouselOption(chart, options, false);
 		
 		options.ajax = function(data, callback, settings)
 		{
@@ -7013,7 +7013,7 @@
 					chart.refreshData();
 			}
 		};
-		chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
+		chartSupport.updateInternalOption(chart, options, function(updateOptions, chart, chartResult)
 		{
 			var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
 			
@@ -7657,7 +7657,7 @@
 		
 		//自定义更新底层组件数据，当启用serverSide后，需要自定义调用其ajax配置项的callback更新数据，而非这里
 		//格式为：function(updateOptions, chart, chartResult){ ... }
-		var updateInternal = chartSupport.updateInternalOption(renderOptions);
+		var updateInternal = chartSupport.updateInternalOption(chart, renderOptions);
 		if(updateInternal)
 		{
 			updateInternal.call(renderOptions, updateOptions, chart, chartResult);
@@ -7692,7 +7692,7 @@
 		dataTable.draw();
 		chartSupport.tableAdjustColumn(dataTable);
 		
-		if(chartSupport.carouselOption(renderOptions).enable)
+		if(chartSupport.carouselOption(chart, renderOptions).enable)
 		{
 			var chartEle = chart.elementJquery();
 			chartEle.data("tableCarouselPrepared", false);
@@ -7727,7 +7727,7 @@
 		var renderOptions = chart.renderOptions();
 		
 		//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
-		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(renderOptions) != null)
+		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(chart, renderOptions) != null)
 			return;
 		
 		var chartContent = chartSupport.tableGetChartContent(chart);
@@ -7771,10 +7771,10 @@
 		var renderOptions = chart.renderOptions();
 		
 		//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
-		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(renderOptions) != null)
+		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(chart, renderOptions) != null)
 			return;
 		
-		var carousel = chartSupport.carouselOption(renderOptions);
+		var carousel = chartSupport.carouselOption(chart, renderOptions);
 		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
@@ -7812,7 +7812,7 @@
 		if(chartEle.data("tableCarouselStatus") == "stop")
 			return;
 		
-		var carousel = chartSupport.carouselOption(renderOptions);
+		var carousel = chartSupport.carouselOption(chart, renderOptions);
 		var doCarousel = true;
 		
 		//元素隐藏时会因为高度计算有问题导致浏览器卡死，所以隐藏式不实际执行轮播
@@ -9252,7 +9252,7 @@
 	//初始化ECharts地图类图表的地图选项
 	chartSupport.echartsMapChartInitMap = function(chart, options)
 	{
-		var map = options[builtinOptionNames.mapName];
+		var map = chart.customOptionValue(options, builtinOptionNames.mapName);
 		
 		// < @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本移除
 		if(!map)
@@ -9800,6 +9800,7 @@
 	/**
 	 * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
 	 * 
+	 * @param chart
 	 * @param renderOptions 渲染选项，其中的builtinOptionNames.sortAxisData配置项可以控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
@@ -9811,7 +9812,7 @@
 	 * @param valueExtractor 轴数据值提取器，格式同chartSupport.sortAxisDataForUpdateOptions的valueExtractor参数
 	 * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
 	 */
-	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, updateOptions, updateAxis, valueExtractor, sortSeriesData)
+	chartSupport.inflateAxisDataForEchartsUpdateOptions = function(chart, renderOptions, updateOptions, updateAxis, valueExtractor, sortSeriesData)
 	{
 		sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
 		
@@ -9847,13 +9848,14 @@
 		
 		updateAxis.data = axisData;
 		
-		chartSupport.sortAxisDataForUpdateOptions(renderOptions, updateOptions, updateAxis,
+		chartSupport.sortAxisDataForUpdateOptions(chart, renderOptions, updateOptions, updateAxis,
 					true, sortSeriesData, valueExtractors);
 	};
 	
 	/**
 	 * 依据renderOptions中的排序配置对updateAxis.data、updateOptions.series[i].data进行排序。
 	 * 
+	 * @param chart
 	 * @param renderOptions 渲染选项，其中的builtinOptionNames.sortAxisData配置项用于控制数据排序方式，格式为：
 	 *						"asc"、"ASC"：升序；
 	 *						"desc"、"DESC"：降序；
@@ -9872,13 +9874,13 @@
 	 *						[ ... ]
 	 *						其元素索引与updateOptions.series[i]索引对应
 	 */
-	chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOptions, updateAxis,
+	chartSupport.sortAxisDataForUpdateOptions = function(chart, renderOptions, updateOptions, updateAxis,
 					sortAxisData, sortSeriesData, valueExtractor)
 	{
 		if(!sortAxisData && !sortSeriesData)
 			return;
 		
-		var sortHandler = chartSupport.sortAxisDataOption(renderOptions);
+		var sortHandler = chartSupport.sortAxisDataOption(chart, renderOptions);
 		
 		if(chartFactory.isString(sortHandler))
 		{
@@ -9952,33 +9954,33 @@
 		}
 	};
 	
-	chartSupport.sortAxisDataOption = function(options)
+	chartSupport.sortAxisDataOption = function(chart, options)
 	{
-		var value = chartFactory.optionValue(options, builtinOptionNames.sortAxisData);
+		var value = chart.customOptionValue(options, builtinOptionNames.sortAxisData);
 		
 		// < @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
 		if(value == null)
 		{
-			value = options["dgSortAxisData"];
+			value = chart.customOptionValue(options, "dgSortAxisData");
 		}
 		// > @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
 		
 		return value;
 	};
 	
-	chartSupport.serverSidePagingOption = function(options, value)
+	chartSupport.serverSidePagingOption = function(chart, options, value)
 	{
-		return chartFactory.optionValue(options, builtinOptionNames.serverSidePaging, value);
+		return chart.customOptionValue(options, builtinOptionNames.serverSidePaging, value);
 	};
 	
-	chartSupport.updateInternalOption = function(options, value)
+	chartSupport.updateInternalOption = function(chart, options, value)
 	{
-		return chartFactory.optionValue(options, builtinOptionNames.updateInternal, value);
+		return chart.customOptionValue(options, builtinOptionNames.updateInternal, value);
 	};
 	
-	chartSupport.carouselOption = function(options, value)
+	chartSupport.carouselOption = function(chart, options, value)
 	{
-		return chartFactory.optionValue(options, builtinOptionNames.carousel, value);
+		return chart.customOptionValue(options, builtinOptionNames.carousel, value);
 	};
 	
 	chartSupport.inflateAxisDataExtractors =
