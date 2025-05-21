@@ -111,10 +111,6 @@
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate > span > .fg-button.ui-state-disabled{
 	font-weight: bold;
 }
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_length select{
-	margin-left: 0.2em;
-	margin-right: 0.2em;
-}
 .dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_filter input{
 	color: inherit;
 }
