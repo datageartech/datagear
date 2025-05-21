@@ -6550,7 +6550,7 @@
 			tableStyle: undefined,
 			//自定义单元格渲染函数，格式为：function(value, name, rowIndex, columnIndex, row, meta){ return ...; }
 			renderCell: undefined,
-			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
+			//轮播，格式参考chartSupport.tableRenderProcessCarousel()函数
 			carousel: undefined,
 			//是否禁用条纹样式效果
 			disableStripe: false,
@@ -6558,6 +6558,8 @@
 			disableHover: false,
 			//是否表格文本不换行
 			enableWrapText: false,
+			//服务端分页，格式参考chartSupport.tableRenderProcessServerSidePaging()函数
+			serverSidePaging: undefined,
 			
 			//DataTable配置项
 			"columns": columns,
@@ -6600,29 +6602,38 @@
 			chartSupport.tableRenderProcessOptions(chart, options);
 		});
 		
+		var titleOption = chart.customOptionValue(options, "title");
+		var titleStyleOption = chart.customOptionValue(options, "titleStyle");
+		var tableStyleOption = chart.customOptionValue(options, "tableStyle");
+		
 		// < @deprecated 兼容2.8.0版本的{table:{renderValue:...}}配置项结构，未来版本会移除
-		if(options.table && options.table.renderValue)
+		var tableOption = chart.customOptionValue(options, "table");
+		
+		if(tableOption && tableOption.renderValue)
 		{
-			options.renderCell = options.table.renderValue;
+			chart.customOptionValue(options, "renderCell", tableOption.renderValue);
 		}
 		// > @deprecated 兼容2.8.0版本的{table:{renderValue:...}}配置项结构，未来版本会移除
 		
 		// < @deprecated 兼容2.8.0版本的{title:{color:"..."}}配置项结构，未来版本会移除
-		if(options.title && !options.titleStyle)
+		if(titleOption && !titleStyleOption)
 		{
-			var titleStyle = $.extend(true, {}, options.title);
+			var titleStyle = $.extend(true, {}, titleOption);
 			delete titleStyle.show;
 			delete titleStyle.text;
 			
 			if(!$.isEmptyObject(titleStyle))
-				options.titleStyle = titleStyle;
+			{
+				chart.customOptionValue(options, "titleStyle", titleStyle);
+				titleStyleOption = titleStyle;
+			}
 		}
 		// > @deprecated 兼容2.8.0版本的{title:{color:"..."}}配置项结构，未来版本会移除
 		
 		// < @deprecated 兼容2.8.0版本的{table:{header:{},row:{color:'red',odd:{...},even:{...},hover:{...},selected:{...}}}}配置项结构，未来版本会移除
-		if(options.table && !options.tableStyle)
+		if(tableOption && !tableStyleOption)
 		{
-			var tableStyle = $.extend(true, {}, options.table);
+			var tableStyle = $.extend(true, {}, tableOption);
 			delete tableStyle.renderValue;
 			
 			if(tableStyle.header || tableStyle.row)
@@ -6645,7 +6656,8 @@
 					delete tableStyle.body.row.selected;
 				}
 				
-				options.tableStyle = tableStyle;
+				chart.customOptionValue(options, "tableStyle", tableStyle);
+				tableStyleOption = tableStyle;
 			}
 		}
 		// > @deprecated 兼容2.8.0版本的{table:{header:{},row:{color:'red',odd:{...},even:{...},hover:{...},selected:{...}}}}配置项结构，未来版本会移除
@@ -6662,18 +6674,20 @@
 			
 			if(column.render == null)
 			{
+				var renderCell = chart.customOptionValue(options, "renderCell");
+				
 				column.render = function(value, type, row, meta)
 				{
 					//单元格展示绘制
 					if(type == "display")
 					{
-						if(options.renderCell)
+						if(renderCell)
 						{
 							var rowIndex = meta.row;
 							var columnIndex = meta.col;
 							var name = options.columns[columnIndex].data;
 							
-							return options.renderCell(value, name, rowIndex, columnIndex, row, meta);
+							return renderCell.call(options, value, name, rowIndex, columnIndex, row, meta);
 						}
 						else
 							return chartFactory.escapeHtml(value);
@@ -6687,31 +6701,34 @@
 		
 		chartSupport.tableThemeStyleSheet(chart, options);
 		
+		var enableWrapText = chart.customOptionValue(options, "enableWrapText");
+		var disableStripe = chart.customOptionValue(options, "disableStripe");
+		var disableHover = chart.customOptionValue(options, "disableHover");
 		var carousel = chartSupport.carouselOption(chart, options);
 		
 		if(carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
 		
-		if(!options.title.show)
+		if(!titleOption.show)
 			chartEle.addClass("dg-hide-title");
 		
-		if(options.enableWrapText)
+		if(enableWrapText)
 			chartEle.addClass("dg-text-nowrap");
 		
 		var eleWrapper = (isV1 ? chartEle : $("<div class='dg-chart-ele-wrapper' />").appendTo(chartEle));
 		
-		var chartTitle = $("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(eleWrapper);
-		if(options.titleStyle)
-			chart.elementStyle(chartTitle, options.titleStyle);
+		var chartTitle = $("<div class='dg-chart-table-title' />").html(titleOption.text).appendTo(eleWrapper);
+		if(titleStyleOption)
+			chart.elementStyle(chartTitle, titleStyleOption);
 		
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(eleWrapper);
 		
 		if(isV1)
 		{
-			chartContent.css("top", (options.title.show ? chartTitle.outerHeight(true) : 0));
+			chartContent.css("top", (titleOption.show ? chartTitle.outerHeight(true) : 0));
 		}
 		
-		var table = $("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
+		var table = $("<table width='100%' class='"+(disableStripe ? "" : " stripe ")+(disableHover ? "" : " hover ")+"'></table>")
 						.appendTo(chartContent);
 		var tableId = chart.id+"-table";
 		table.attr("id", tableId);
@@ -7013,6 +7030,7 @@
 					chart.refreshData();
 			}
 		};
+		
 		chartSupport.updateInternalOption(chart, options, function(updateOptions, chart, chartResult)
 		{
 			var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
@@ -7223,7 +7241,8 @@
 	{
 		var isV1 = chartSupport.tableIsV1();
 		var name = chartFactory.builtinPropName("TableChart");
-		var isLocalStyle = (options.tableStyle != null);
+		var tableStyleOption = chart.customOptionValue(options, "tableStyle");
+		var isLocalStyle = (tableStyleOption != null);
 		var forceUpdate = false;
 		
 		if(isLocalStyle)
@@ -7305,33 +7324,31 @@
 			
 			if(isLocalStyle)
 			{
-				var optionTableStyle = options.tableStyle;
-				
 				// < @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
 				//需要先转换可能的驼峰CSS命名，不然extend后的CSS可能重名而优先级混乱
-				optionTableStyle = $.extend(true, {}, optionTableStyle);
-				optionTableStyle.table = chartSupport.toLegalStyleNameObj(optionTableStyle.table);
-				if(optionTableStyle.head)
+				tableStyleOption = $.extend(true, {}, tableStyleOption);
+				tableStyleOption.table = chartSupport.toLegalStyleNameObj(tableStyleOption.table);
+				if(tableStyleOption.head)
 				{
-					optionTableStyle.head.row = chartSupport.toLegalStyleNameObj(optionTableStyle.head.row);
-					optionTableStyle.head.cell = chartSupport.toLegalStyleNameObj(optionTableStyle.head.cell);
+					tableStyleOption.head.row = chartSupport.toLegalStyleNameObj(tableStyleOption.head.row);
+					tableStyleOption.head.cell = chartSupport.toLegalStyleNameObj(tableStyleOption.head.cell);
 				}
-				if(optionTableStyle.body)
+				if(tableStyleOption.body)
 				{
-					optionTableStyle.body.row = chartSupport.toLegalStyleNameObj(optionTableStyle.body.row);
-					optionTableStyle.body.rowOdd = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowOdd);
-					optionTableStyle.body.rowEven = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowEven);
-					optionTableStyle.body.rowHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowHover);
-					optionTableStyle.body.rowSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowSelected);
-					optionTableStyle.body.cell = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cell);
-					optionTableStyle.body.cellOdd = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellOdd);
-					optionTableStyle.body.cellEven = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellEven);
-					optionTableStyle.body.cellHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellHover);
-					optionTableStyle.body.cellSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellSelected);
+					tableStyleOption.body.row = chartSupport.toLegalStyleNameObj(tableStyleOption.body.row);
+					tableStyleOption.body.rowOdd = chartSupport.toLegalStyleNameObj(tableStyleOption.body.rowOdd);
+					tableStyleOption.body.rowEven = chartSupport.toLegalStyleNameObj(tableStyleOption.body.rowEven);
+					tableStyleOption.body.rowHover = chartSupport.toLegalStyleNameObj(tableStyleOption.body.rowHover);
+					tableStyleOption.body.rowSelected = chartSupport.toLegalStyleNameObj(tableStyleOption.body.rowSelected);
+					tableStyleOption.body.cell = chartSupport.toLegalStyleNameObj(tableStyleOption.body.cell);
+					tableStyleOption.body.cellOdd = chartSupport.toLegalStyleNameObj(tableStyleOption.body.cellOdd);
+					tableStyleOption.body.cellEven = chartSupport.toLegalStyleNameObj(tableStyleOption.body.cellEven);
+					tableStyleOption.body.cellHover = chartSupport.toLegalStyleNameObj(tableStyleOption.body.cellHover);
+					tableStyleOption.body.cellSelected = chartSupport.toLegalStyleNameObj(tableStyleOption.body.cellSelected);
 				}
 				// > @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
 				
-				tableStyle = $.extend(true, tableStyle, optionTableStyle);
+				tableStyle = $.extend(true, tableStyle, tableStyleOption);
 			}
 			
 			//DataTable-1.11.3内置表头背景CSS添加了"!important"，这里也必须添加才能起作用
