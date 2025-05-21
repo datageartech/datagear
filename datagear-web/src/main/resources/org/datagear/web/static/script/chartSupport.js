@@ -45,6 +45,9 @@
 	//内置类目轴数据排序配置选项名
 	builtinOptionNames.sortAxisData = "sortAxisData";
 	
+	//内置表格的轮播选项名
+	builtinOptionNames.carousel = "carousel";
+	
 	//内置表格的更新底层组件回调函数选项名
 	builtinOptionNames.updateInternal = "updateInternal";
 	
@@ -6684,7 +6687,9 @@
 		
 		chartSupport.tableThemeStyleSheet(chart, options);
 		
-		if(options.carousel.enable)
+		var carousel = chartSupport.carouselOption(options);
+		
+		if(carousel.enable)
 			chartEle.addClass("dg-chart-table-carousel");
 		
 		if(!options.title.show)
@@ -6720,22 +6725,22 @@
 			chartSupport.tableEvalBodyHeightV1(chart, chartContent, dataTable);
 		}
 		
-		if(options.carousel.enable && options.carousel.hideVerticalScrollbar != false)
+		if(carousel.enable && carousel.hideVerticalScrollbar != false)
 		{
 			var tableBody = chartSupport.tableGetScrollBody(chart, chartContent);
 			tableBody.css("overflow-y", "hidden");
 		}
 		
-		if(options.carousel.enable)
+		if(carousel.enable)
 		{
 			$(dataTable.table().body()).on("mouseenter", "tr", function()
 			{
-				if(options.carousel.pauseOnHover)
+				if(carousel.pauseOnHover)
 					chartSupport.tableStopCarousel(chart);
 			})
 			.on("mouseleave", "tr", function()
 			{
-				if(options.carousel.pauseOnHover)
+				if(carousel.pauseOnHover)
 					chartSupport.tableStartCarousel(chart);
 			});
 		}
@@ -6900,7 +6905,7 @@
 	chartSupport.tableRenderProcessCarousel = function(chart, options)
 	{
 		//标准轮播格式
-		var carouselConfig =
+		var carouselObj =
 		{
 			//是否开启，true 开启；false 禁用；"auto" 只有在行溢出时才开启
 			enable: false,
@@ -6921,28 +6926,30 @@
 			overflowCount: 2
 		};
 		
-		if(options.carousel == null)
+		var carousel = chartSupport.carouselOption(options);
+		
+		if(carousel == null)
 		{
 			
 		}
 		//true、false、"auto"
-		else if(options.carousel === true || options.carousel === false || chartFactory.isString(options.carousel))
+		else if(carousel === true || carousel === false || chartFactory.isString(carousel))
 		{
-			carouselConfig.enable = options.carousel;
+			carouselObj.enable = carousel;
 		}
 		//间隔数值、函数
-		else if(chartFactory.isNumber(options.carousel) || $.isFunction(options.carousel))
+		else if(chartFactory.isNumber(carousel) || $.isFunction(carousel))
 		{
-			carouselConfig.enable = true;
-			carouselConfig.interval = options.carousel;
+			carouselObj.enable = true;
+			carouselObj.interval = carousel;
 		}
 		//轮播对象
 		else
 		{
-			carouselConfig = $.extend(true, carouselConfig, options.carousel);
+			carouselObj = $.extend(true, carouselObj, carousel);
 		}
 		
-		options.carousel = carouselConfig;
+		chartSupport.carouselOption(options, carouselObj);
 	};
 	
 	/**
@@ -6960,7 +6967,7 @@
 	 *      //如果不设置，使用图表参数面板的查询信息不会同步显示到表格中
 	 *      state: function(chart){ ... },
 	 *      //可选，触发表格draw()函数时的paging参数
-	 *      drawPagingArg: ...,
+	 *      drawPagingArg: ...、function(chart){ return ...; },
 	 *   }
 	 * }
 	 */
@@ -6975,7 +6982,7 @@
 		options.paging = true;
 		
 		//这里需禁用轮播，详细参考chartSupport.tableStartCarousel()函数
-		options.carousel = false;
+		chartSupport.carouselOption(options, false);
 		
 		options.ajax = function(data, callback, settings)
 		{
@@ -7040,7 +7047,12 @@
 				
 				var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
 				chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
-				chart.internal().draw(serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
+				
+				var drawPagingArg = (serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
+				if($.isFunction(drawPagingArg))
+					drawPagingArg = serverSidePaging.drawPagingArg(chart);
+				
+				chart.internal().draw(drawPagingArg);
 			}
 		});
 	};
@@ -7053,7 +7065,11 @@
 	 *   //可选，页码（以0开始）
 	 *   page: 数值,
 	 *   //可选，页数据起始索引
-	 *   start: 数值
+	 *   start: 数值,
+	 *   //可选，搜索关键字
+	 *   searchValue: "...",
+	 *   //可选，排序
+	 *   order: "..."
 	 * }
 	 */
 	chartSupport.tableUpdatePagingState = function(chart, state)
@@ -7079,6 +7095,16 @@
 			pageLength = (pageLength == null ? dataTable.page.info() : pageLength);
 			pagePage = parseInt(pageStart/pageLength);
 			dataTable.page(pagePage);
+		}
+		
+		if(state.searchValue !== undefined)
+		{
+			dataTable.search(state.searchValue == null ? "" : state.searchValue);
+		}
+		
+		if(state.order !== undefined)
+		{
+			dataTable.order(state.order);
 		}
 	};
 	
@@ -7666,7 +7692,7 @@
 		dataTable.draw();
 		chartSupport.tableAdjustColumn(dataTable);
 		
-		if(renderOptions.carousel.enable)
+		if(chartSupport.carouselOption(renderOptions).enable)
 		{
 			var chartEle = chart.elementJquery();
 			chartEle.data("tableCarouselPrepared", false);
@@ -7748,6 +7774,7 @@
 		if(renderOptions.serverSide == true || chartSupport.serverSidePagingOption(renderOptions) != null)
 			return;
 		
+		var carousel = chartSupport.carouselOption(renderOptions);
 		var chartEle = chart.elementJquery();
 		var chartContent = chartSupport.tableGetChartContent(chart);
 		var dataTable = chart.internal();
@@ -7758,7 +7785,7 @@
 		
 		//空表格，或者，"auto"且行数未溢出时不轮播
 		if(rowCount == 0
-			|| (renderOptions.carousel.enable == "auto" && (scrollTable.height() <= scrollBody.height())))
+			|| (carousel.enable == "auto" && (scrollTable.height() <= scrollBody.height())))
 		{
 			scrollTable.css("margin-top", "0px");
 			return;
@@ -7785,7 +7812,7 @@
 		if(chartEle.data("tableCarouselStatus") == "stop")
 			return;
 		
-		var carouselConfig = renderOptions.carousel;
+		var carousel = chartSupport.carouselOption(renderOptions);
 		var doCarousel = true;
 		
 		//元素隐藏时会因为高度计算有问题导致浏览器卡死，所以隐藏式不实际执行轮播
@@ -7822,7 +7849,7 @@
 				currentRowHeight = $checkRow.outerHeight(true);
 				currentRowVisibleHeight = currentRowHeight;
 				
-				if($checkRow.length == 0 || removeRowIndexes.length >= carouselConfig.overflowCount)
+				if($checkRow.length == 0 || removeRowIndexes.length >= carousel.overflowCount)
 				{
 					offset += tmpOffset;
 					doRemove = true;
@@ -7861,23 +7888,23 @@
 			if(needDraw)
 				dataTable.draw();
 			
-			var span = ($.isFunction(carouselConfig.span) ?
-					carouselConfig.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carouselConfig.span);
+			var span = ($.isFunction(carousel.span) ?
+					carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carousel.span);
 			
 			scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
 		}
 		
 		var interval = null;
 		
-		if(!$.isFunction(carouselConfig.interval))
+		if(!$.isFunction(carousel.interval))
 		{
-			interval = carouselConfig.interval;
+			interval = carousel.interval;
 		}
 		else
 		{
 			if(doCarousel)
 			{
-				interval = carouselConfig.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
+				interval = carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
 			}
 			else
 			{
@@ -9947,6 +9974,11 @@
 	chartSupport.updateInternalOption = function(options, value)
 	{
 		return chartFactory.optionValue(options, builtinOptionNames.updateInternal, value);
+	};
+	
+	chartSupport.carouselOption = function(options, value)
+	{
+		return chartFactory.optionValue(options, builtinOptionNames.carousel, value);
 	};
 	
 	chartSupport.inflateAxisDataExtractors =
