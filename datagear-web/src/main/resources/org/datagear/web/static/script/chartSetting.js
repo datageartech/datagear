@@ -1786,7 +1786,7 @@
 					
 					var doRefresh = true;
 					var chartOptions = chart.options();
-					var onParamFormSubmit = chart.customOptionValue(chartOptions, builtinOptionNames.onParamFormSubmit);
+					var onParamFormSubmit = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.onParamFormSubmit);
 					
 					//执行提交前回调
 					if(onParamFormSubmit)

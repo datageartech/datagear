@@ -801,12 +801,12 @@
 	chartBase._initUpdateAppendMode = function()
 	{
 		var options = this.options();
-		var mode = this.customOptionValue(options, builtinOptionNames.updateAppendMode);
+		var mode = chartFactory.builtinOptionValue(options, builtinOptionNames.updateAppendMode);
 		
 		// < @deprecated 兼容5.2.0版本的dgUpdateAppendMode选项，将在未来版本移除
 		if(mode == null)
 		{
-			mode = this.customOptionValue(options, "dgUpdateAppendMode");
+			mode = chartFactory.builtinOptionValue(options, "dgUpdateAppendMode");
 		}
 		// > @deprecated 兼容5.2.0版本的dgUpdateAppendMode选项，将在未来版本移除
 		
@@ -1150,7 +1150,7 @@
 		
 		var options = this.options();
 		
-		if(this.customOptionValue(options, builtinOptionNames.beautifyScrollbar) !== false)
+		if(chartFactory.builtinOptionValue(options, builtinOptionNames.beautifyScrollbar) !== false)
 			$element.addClass("dg-chart-beautify-scrollbar");
 		
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
@@ -2818,7 +2818,7 @@
 			beforeProcessHandler(renderOptions, this);
 		
 		//最后调用processRenderOptions
-		var proHandler = this.customOptionValue(renderOptions, builtinOptionNames.processRenderOptions);
+		var proHandler = chartFactory.builtinOptionValue(renderOptions, builtinOptionNames.processRenderOptions);
 		if(proHandler)
 		{
 			proHandler.call(renderOptions, renderOptions, this);
@@ -2899,7 +2899,7 @@
 			beforeProcessHandler(updateOptions, this, chartResult);
 		
 		//最后调用processUpdateOptions
-		var puoHandler = this.customOptionValue(renderOptions, builtinOptionNames.processUpdateOptions);
+		var puoHandler = chartFactory.builtinOptionValue(renderOptions, builtinOptionNames.processUpdateOptions);
 		
 		if(puoHandler)
 		{
@@ -2907,9 +2907,9 @@
 			puoHandler.call(renderOptions, updateOptions, this, chartResultMy);
 		}
 		//renderOptions可能不是chartRenderOptions，此时要确保chartRenderOptions.processUpdateOptions被调用
-		else if(chartRenderOptions && renderOptions !== chartRenderOptions)
+		else if(chartRenderOptions && chartRenderOptions !== renderOptions)
 		{
-			puoHandler = this.customOptionValue(chartRenderOptions, builtinOptionNames.processUpdateOptions);
+			puoHandler = chartFactory.builtinOptionValue(chartRenderOptions, builtinOptionNames.processUpdateOptions);
 			
 			if(puoHandler)
 			{
@@ -4801,30 +4801,6 @@
 			}
 			
 			additions[name] = value;
-		}
-	};
-	
-	/**
-	 * 获取/设置可自定义选项名的选项值。
-	 * 
-	 * @param options 获取时可为null，选项对象，格式为：{ ... }
-	 * @param name 选项名
-	 * @param value 要设置的选项值
-	 * @returns 要获取的选项值
-	 * @since 5.4.0
-	 */
-	chartBase.customOptionValue = function(options, name, value)
-	{
-		var customNames = (options == null ? null : options[builtinOptionNames.customOptionNames]);
-		name = (customNames && customNames[name] ? customNames[name] : name);
-		
-		if(value === undefined)
-		{
-			return (options ? options[name] : null);
-		}
-		else
-		{
-			options[name] = value;
 		}
 	};
 	
@@ -7044,6 +7020,46 @@
 			return -1;
 		else
 			return 0;
+	};
+	
+	/**
+	 * 获取/设置内置图表选项名的选项值。
+	 * 内置选项名是公用的，可能会出现未知的命名冲突问题，使用此函数获取/设置可以避免此问题，
+	 * 因为此函数支持在图表选项中定义"customOptionNames"选项自定义选项名。
+	 * 
+	 * @param options 获取时可为null，图表选项对象，格式为：{ ... }
+	 * @param name 内置选项名
+	 * @param value 要设置的选项值
+	 * @returns 要获取的选项值
+	 */
+	chartFactory.builtinOptionValue = function(options, name, value)
+	{
+		var customNames = (options == null ? null : options[builtinOptionNames.customOptionNames]);
+		name = (customNames && customNames[name] ? customNames[name] : name);
+		
+		if(value === undefined)
+		{
+			return (options ? options[name] : null);
+		}
+		else
+		{
+			options[name] = value;
+		}
+	};
+	
+	/**
+	 * 获取/设置选项值
+	 */
+	chartFactory.optionValue = function(options, name, value)
+	{
+		if(value === undefined)
+		{
+			return (options ? options[name] : null);
+		}
+		else
+		{
+			options[name] = value;
+		}
 	};
 	
 	/**内置名字标识片段*/
