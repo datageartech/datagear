@@ -6949,7 +6949,7 @@
 	 *   serverSidePaging:
 	 *   {
 	 *      //必填，将data中的分页查询信息设置为图表数据集参数
-	 *      param: function(chart, data){ ... },
+	 *      param: function(data, chart){ ... },
 	 *      //可选（与totalFieldName二选一），数据集附加数据中总记录数关键字
 	 *      totalAdditionName: "...",
 	 *      //可选（与totalAdditionName二选一），附件数据集中总记录数字段名
@@ -6998,7 +6998,7 @@
 			}
 			else
 			{
-				serverSidePaging.param(chart, data);
+				serverSidePaging.param(data, chart);
 				
 				if(chart.isActive())
 					chart.refreshData();
