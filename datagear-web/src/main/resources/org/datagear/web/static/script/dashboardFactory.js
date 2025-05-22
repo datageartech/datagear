@@ -739,11 +739,12 @@
 	{
 		this._assertActive();
 		
-		var msg = {};
-		if(!this.isDataSetParamValueReady(msg))
+		var unready = this.unreadyDataSetParam();
+		
+		if(unready != null)
 		{
-			chartFactory.logException("chart '#"+this.elementId+"' dataSetBinds["+msg.dataSetBindIndex+"] "
-										+"'s ["+msg.paramName+"] param value required");
+			chartFactory.logException("chart '#"+this.elementId+"' dataSetBinds["+unready.dataSetBind.index
+										+"] DataSetParam["+unready.paramIndex+"](named " +"'"+unready.param.name+"') value required");
 			return;
 		}
 		else
@@ -1743,7 +1744,7 @@
 				wait = true;
 		}
 		
-		if(wait && !chart.isDataSetParamValueReady())
+		if(wait && chart.unreadyDataSetParam() != null)
 		{
 			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
