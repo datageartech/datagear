@@ -93,6 +93,8 @@
 			DATAGEAR_HCW_DS
 		WHERE
 			HCW_ID = #{widgetId}
+		ORDER BY
+			DS_ORDER ASC
 	</select>
 	
 	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
