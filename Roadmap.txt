@@ -13,6 +13,7 @@
 	
 待定：
 	
+	图表JS对象chart.refreshData()支持刷新控制参数，可以控制仅刷新加载指定数据集的数据；
 	新增客户端（local）图表功能，不参与服务端交互，完全由客户端看板API操作；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
@@ -30,8 +31,9 @@
 		chart.plugin -> chart.plugin()；
 		chart.renderContext -> chart.renderContext()；
 		chart.updateInterval -> chart.updateInterval()；
-		chart.updateResults -> chart.updateResult()；
+		chart.updateResults() -> chart.updateResult()；
 		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数（几乎没用反而增加函数复杂度）；
+		chart.update()函数默认不使用上一次结果；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
