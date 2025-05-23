@@ -244,6 +244,8 @@
 	builtinOptionNames.processUpdateOptions = "processUpdateOptions";
 	/** 内置图表选项名：更新追加模式 */
 	builtinOptionNames.updateAppendMode = "updateAppendMode";
+	/** 内置图表选项名：禁用图表设置，功能同：dg-chart-disable-setting */
+	builtinOptionNames.disableSetting = "disableSetting";
 	
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
@@ -698,13 +700,26 @@
 		
 		globalSetting = this._evalDisableSettingAttr(globalSetting);
 		
-		if(localSetting != null && localSetting != "")
+		if(!chartFactory.isNullOrEmpty(localSetting))
 		{
 			localSetting = this._evalDisableSettingAttr(localSetting);
 			localSetting = $.extend({}, globalSetting, localSetting);
 		}
 		else
-			localSetting = globalSetting;
+		{
+			var options = this.options();
+			var optionSetting = chartFactory.builtinOptionValue(options, builtinOptionNames.disableSetting);
+			
+			if(!chartFactory.isNullOrEmpty(optionSetting))
+			{
+				optionSetting = this._evalDisableSettingAttr(optionSetting);
+				localSetting = $.extend({}, globalSetting, optionSetting);
+			}
+			else
+			{
+				localSetting = globalSetting;
+			}
+		}
 		
 		this.disableSetting(localSetting);
 	};
@@ -726,10 +741,16 @@
 			setting.param = true;
 			setting.data = true;
 		}
+		//字符串
+		else if(chartFactory.isString(settingAttr))
+		{
+			var evalSetting = chartFactory.evalSilently(settingAttr, {});
+			setting = $.extend(setting, evalSetting);
+		}
+		//对象
 		else
 		{
-			var tmpSetting = chartFactory.evalSilently(settingAttr, {});
-			setting = $.extend(setting, tmpSetting);
+			setting = $.extend(setting, settingAttr);
 		}
 		
 		return setting;
