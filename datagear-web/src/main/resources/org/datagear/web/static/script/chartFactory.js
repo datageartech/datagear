@@ -4768,7 +4768,13 @@
 	
 	/**
 	 * 获取未准备好（必填但值为null）的数据集字段信息。
+	 * 此函数支持的调用格式：
+	 * chart.unreadyDataSetParams();
+	 * chart.unreadyDataSetParams(true、false);
+	 * chart.unreadyDataSetParams([ ... ]);
+	 * chart.unreadyDataSetParams([ ... ], true、false);
 	 * 
+	 * @param dataSetBinds 可选，要查找的数据集绑定数组，默认为：this.dataSetBinds()
 	 * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
 	 * @returns 未准备好的数据集字段信息数组，格式为：
 	 * 				[
@@ -4777,13 +4783,19 @@
 	 * 				]，空数组表示都已准备好
 	 * @since 5.4.0
 	 */
-	chartBase.unreadyDataSetParams = function(stopOnFirst)
+	chartBase.unreadyDataSetParams = function(dataSetBinds, stopOnFirst)
 	{
+		//(true)、(false)
+		if(dataSetBinds === true || dataSetBinds === false)
+		{
+			stopOnFirst = dataSetBinds;
+			dataSetBinds = undefined;
+		}
+		
+		dataSetBinds = (dataSetBinds == null ? this.dataSetBinds() : dataSetBinds);
 		stopOnFirst = (stopOnFirst == null ? false : stopOnFirst);
 		
 		var re = [];
-		
-		var dataSetBinds = this.dataSetBinds();
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
