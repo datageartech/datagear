@@ -739,23 +739,20 @@
 	{
 		this._assertActive();
 		
-		var unready = this.unreadyDataSetParam();
-		
-		if(unready != null)
+		var unreadys = this.unreadyDataSetParams(true);
+		if(unreadys.length > 0)
 		{
-			chartFactory.logException("chart '#"+this.elementId+"' dataSetBinds["+unready.dataSetBind.index
-										+"] DataSetParam["+unready.paramIndex+"](named " +"'"+unready.param.name+"') value required");
+			chartFactory.logException("chart '#"+this.elementId+"' dataSetBinds["+unreadys[0].dataSetBindIndex
+										+"] DataSetParam["+unreadys[0].paramIndex+"](named " +"'"+unreadys[0].param.name+"') value required");
 			return;
 		}
-		else
-		{
-			//这里不能使用this.statusPreUpdate(true)的方式实现
-			//当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
-			//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
-			//而导致refreshData()失效
-			
-			this._requestRefreshData();
-		}
+		
+		//这里不能使用this.statusPreUpdate(true)的方式实现
+		//当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
+		//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
+		//而导致refreshData()失效
+		
+		this._requestRefreshData();
 	};
 	
 	chartBase._updateTime = function(time)
@@ -1744,7 +1741,7 @@
 				wait = true;
 		}
 		
-		if(wait && chart.unreadyDataSetParam() != null)
+		if(wait && chart.unreadyDataSetParams(true).length > 0)
 		{
 			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);

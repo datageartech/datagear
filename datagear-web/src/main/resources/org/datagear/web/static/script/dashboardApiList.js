@@ -211,7 +211,7 @@ global.dashboardApiCompletions =
 	{name: "themeGradualColor", value: "themeGradualColor(", displayName: "themeGradualColor() ", displayComment: "chart", categories: ["chart"]},
 	{name: "themeStyleName", value: "themeStyleName()", displayName: "themeStyleName() ", displayComment: "chart", categories: ["chart"]},
 	{name: "themeStyleSheet", value: "themeStyleSheet(", displayName: "themeStyleSheet() ", displayComment: "chart", categories: ["chart"]},
-	{name: "unreadyDataSetParam", value: "unreadyDataSetParam(", displayName: "unreadyDataSetParam() ", displayComment: "chart", categories: ["chart"]},
+	{name: "unreadyDataSetParams", value: "unreadyDataSetParams(", displayName: "unreadyDataSetParams() ", displayComment: "chart", categories: ["chart"]},
 	{name: "update", value: "update(", displayName: "update() ", displayComment: "chart", categories: ["chart"]},
 	{name: "updateAppendMode", value: "updateAppendMode(", displayName: "updateAppendMode() ", displayComment: "chart", categories: ["chart"]},
 	{name: "updateGroup", value: "updateGroup(", displayName: "updateGroup() ", displayComment: "chart", categories: ["chart"]},

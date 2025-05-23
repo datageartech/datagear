@@ -4767,17 +4767,23 @@
 	};
 	
 	/**
-	 * 获取第一个未准备好的数据集字段信息（必填参数值为null时说明参数未准备好）。
+	 * 获取未准备好（必填但值为null）的数据集字段信息。
 	 * 
-	 * @param dataSetBind 可选，数据集绑定或其索引，不设置则取this.dataSetBinds()
-	 * @returns 未准备好的数据集字段信息，格式为：{ dataSetBind: 数据集绑定对象, param: 数据集参数对象, paramIndex: 参数索引 }，返回null表示都已准备好
+	 * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
+	 * @returns 未准备好的数据集字段信息数组，格式为：
+	 * 				[
+	 * 					{ dataSetBind: 数据集绑定, dataSetBindIndex: 数据集绑定索引, param: 数据集参数对象, paramIndex: 参数索引 },
+	 * 					...
+	 * 				]，空数组表示都已准备好
 	 * @since 5.4.0
 	 */
-	chartBase.unreadyDataSetParam = function(dataSetBind)
+	chartBase.unreadyDataSetParams = function(stopOnFirst)
 	{
-		dataSetBind = (dataSetBind === undefined ? undefined : this._dataSetBindOf(dataSetBind));
+		stopOnFirst = (stopOnFirst == null ? false : stopOnFirst);
 		
-		var dataSetBinds = (dataSetBind === undefined ? this.dataSetBinds() : [ dataSetBind ]);
+		var re = [];
+		
+		var dataSetBinds = this.dataSetBinds();
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
@@ -4793,32 +4799,41 @@
 			{
 				var param = params[j];
 				
-				if((param.required == true || param.required == "true") && paramValues[param.name] == null)
+				if(this._isDataSetParamUnready(param, paramValues))
 				{
-					var re = { dataSetBind: dsb, param: param, paramIndex: j };
-					return re;
+					var info = { dataSetBind: dsb, dataSetBindIndex: i, param: param, paramIndex: j };
+					re.push(info);
+					
+					if(stopOnFirst === true)
+						return re;
 				}
 			}
 		}
 		
-		return null;
+		return re;
+	};
+	
+	chartBase._isDataSetParamUnready = function(dataSetParam, paramValues)
+	{
+		var required = (dataSetParam.required == true || dataSetParam.required == "true");
+		return (required && (paramValues == null || paramValues[dataSetParam.name] == null));
 	};
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
 	
-	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.unreadyDataSetParam()函数
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.unreadyDataSetParams()函数
 	
 	/**
 	 * 判断图表的所有数据集参数值是否准备就绪，即：所有必填参数值都不为null。
 	 */
 	chartBase.isDataSetParamValueReady = function()
 	{
-		return (this.unreadyDataSetParam() == null);
+		return (this.unreadyDataSetParams(true).length == 0);
 	};
 	
-	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.unreadyDataSetParam()函数
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.unreadyDataSetParams()函数
 	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.dataSetFieldsSigns()
