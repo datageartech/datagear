@@ -3444,14 +3444,19 @@
 	/**
 	 * 判断是否有数据集参数。
 	 * 
+	 * @param dataSetBinds 可选，要判断的数据集绑定、索引数值，或者它们的数组，默认为：this.dataSetBinds()
+	 * @return true、false
 	 * @since 2.10.0
 	 */
-	chartBase.hasDataSetParam = function()
+	chartBase.hasDataSetParam = function(dataSetBinds)
 	{
-		var dataSetBinds = this.dataSetBinds();
+		dataSetBinds = (dataSetBinds === undefined ? this.dataSetBinds() :
+							($.isArray(dataSetBinds) ? dataSetBinds : [ dataSetBinds ]));
+		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var params = this.dataSetParams(dataSetBinds[i]);
+			var dsb = this._dataSetBindOf(dataSetBinds[i]);
+			var params = this.dataSetParams(dsb);
 			
 			if(params && params.length > 0)
 				return true;
