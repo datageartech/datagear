@@ -4792,10 +4792,10 @@
 	 * 此函数支持的调用格式：
 	 * chart.unreadyDataSetParams();
 	 * chart.unreadyDataSetParams(true、false);
-	 * chart.unreadyDataSetParams([ ... ]);
-	 * chart.unreadyDataSetParams([ ... ], true、false);
+	 * chart.unreadyDataSetParams(dataSetBinds);
+	 * chart.unreadyDataSetParams(dataSetBinds, true、false);
 	 * 
-	 * @param dataSetBinds 可选，要查找的数据集绑定数组，默认为：this.dataSetBinds()
+	 * @param dataSetBinds 可选，要查找的数据集绑定、索引数值，或者它们的数组，默认为：this.dataSetBinds()
 	 * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
 	 * @returns 未准备好的数据集字段信息数组，格式为：
 	 * 				[
@@ -4813,14 +4813,15 @@
 			dataSetBinds = undefined;
 		}
 		
-		dataSetBinds = (dataSetBinds == null ? this.dataSetBinds() : dataSetBinds);
+		dataSetBinds = (dataSetBinds === undefined ? this.dataSetBinds() :
+							($.isArray(dataSetBinds) ? dataSetBinds : [ dataSetBinds ]));
 		stopOnFirst = (stopOnFirst == null ? false : stopOnFirst);
 		
 		var re = [];
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var dsb = dataSetBinds[i];
+			var dsb = this._dataSetBindOf(dataSetBinds[i]);
 			var params = this.dataSetParams(dsb);
 			
 			if(!params || params.length == 0)
