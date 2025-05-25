@@ -148,7 +148,7 @@
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
-				var data = chart.resultMapObjects(result, propertyMap);
+				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
 				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
@@ -370,7 +370,7 @@
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
-				var data = chart.resultMapObjects(result, propertyMap);
+				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
 				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
@@ -620,7 +620,7 @@
 				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = (isAngleAxis ? {name: np, value: vp} : {"value": [np, vp]});
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
-				var data = chart.resultMapObjects(result, propertyMap);
+				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
 				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
@@ -828,7 +828,7 @@
 			if(cp)
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
-			var data = chart.resultMapObjects(result, propertyMap);
+			var data = chart.resultMapDatas(result, propertyMap);
 			chart.originalDataIndexes(data, dataSetBind);
 			
 			if(cp)
@@ -1424,7 +1424,7 @@
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
-				var data = chart.resultMapObjects(result, propertyMap);
+				var data = chart.resultMapDatas(result, propertyMap);
 				
 				chart.originalDataIndexes(data, dataSetBind);
 				chartSupport.evalArrayDataRange(dataRange, data, "value", 1);
@@ -1680,7 +1680,7 @@
 			if(cp)
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
-			var data = chart.resultMapObjects(result, propertyMap);
+			var data = chart.resultMapDatas(result, propertyMap);
 			chart.originalDataIndexes(data, dataSetBind);
 			if(wp)
 				chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
@@ -1929,7 +1929,7 @@
 		
 		for(var i=0; i<indicatorLen; i++)
 		{
-			var indicators = chart.resultMapObjects(result, { name: np[i], max: mp[i] });
+			var indicators = chart.resultMapDatas(result, { name: np[i], max: mp[i] });
 			$.each(indicators, function(j, indicator)
 			{
 				chartSupport.radarAppendValidIndicator(indicatorData, indicator);
@@ -1945,7 +1945,7 @@
 			var categoryNames = [];
 			var categoryDatasMap = {};
 			var propertyMap = chartSupport.inflatePropertyMapWithCategory({ name: np, value: vp }, ip);
-			var data = chart.resultMapObjects(result, propertyMap);
+			var data = chart.resultMapDatas(result, propertyMap);
 			chart.originalDataIndexes(data, dataSetBind);
 			chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 			
@@ -2553,7 +2553,7 @@
 			if(cp)
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
-			var data = chart.resultMapObjects(result, propertyMap);
+			var data = chart.resultMapDatas(result, propertyMap);
 			chart.originalDataIndexes(data, dataSetBind);
 			
 			if(vp)
@@ -3240,7 +3240,7 @@
 			if(cp)
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
-			var data = chart.resultMapObjects(result, propertyMap);
+			var data = chart.resultMapDatas(result, propertyMap);
 			
 			for(var j=0; j<data.length; j++)
 			{
@@ -4969,7 +4969,7 @@
 				if(cp)
 					propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				
-				var data = chart.resultMapObjects(result, propertyMap);
+				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
 				
 				if(cp)
@@ -5009,7 +5009,7 @@
 					var propertyMap = { "value": [np, vp] }; 
 					propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 					
-					var data = chart.resultMapObjects(result, propertyMap);
+					var data = chart.resultMapDatas(result, propertyMap);
 					chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
 					chart.originalDataIndexes(data, dataSetBind);
 					chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
@@ -5579,7 +5579,7 @@
 			if(cp)
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
-			var data = chart.resultMapObjects(result, propertyMap);
+			var data = chart.resultMapDatas(result, propertyMap);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			
@@ -6136,7 +6136,7 @@
 				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 				var propertyMap = { "value": [np, vp] }; 
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
-				var data = chart.resultMapObjects(result, propertyMap);
+				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
 				chartSupport.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				

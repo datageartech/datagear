@@ -2458,7 +2458,7 @@
 	chartBase.resultNameValueObjects = function(dataSetResult, nameField, valueField, row, count)
 	{
 		var fieldMap ={ "name": nameField, "value": valueField };
-		return this.resultMapObjects(dataSetResult, fieldMap, row, count);
+		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
 	};
 	
 	/**
@@ -2473,7 +2473,7 @@
 	chartBase.resultValueObjects = function(dataSetResult, valueField, row, count)
 	{
 		var fieldMap ={ "value": valueField };
-		return this.resultMapObjects(dataSetResult, fieldMap, row, count);
+		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
 	};
 	
 	/**
@@ -3361,62 +3361,6 @@
 		}
 		
 		return false;
-	};
-	
-	/**
-	 * 获取数据集结果数据经属性映射后的对象数组。
-	 * 
-	 * @param dataSetResult 数据集结果
-	 * @param fieldMap 返回对象属性映射表，格式为：{ 返回对象字段名: 数据集字段对象、字段名、字段数组、字段名数组 }
-	 * @param row 可选，行索引，以0开始，默认为0
-	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{"...": ..., "...": ...}, ...]
-	 * @since 2.10.0
-	 */
-	chartBase.resultMapObjects = function(dataSetResult, fieldMap, row, count)
-	{
-		var re = [];
-		
-		var datas = this.resultDatas(dataSetResult);
-		row = (row == null ? 0 : row);
-		var endIdx = (count == null ? datas.length : (row + count));
-		endIdx = (endIdx > datas.length ? datas.length : endIdx);
-		
-		var propIsArray = {};
-		for(var opn in fieldMap)
-			propIsArray[opn] = $.isArray(fieldMap[opn]);
-		
-		for(var i=row; i<endIdx; i++)
-		{
-			var di = datas[i];
-			var obj = (di == null ? null : {});
-			
-			for(var opn in fieldMap)
-			{
-				var dp = fieldMap[opn];
-				
-				if(dp == null){}
-				else if(propIsArray[opn])
-				{
-					obj[opn] = [];
-					
-					for(var j=0; j<dp.length; j++)
-					{
-						var dpn = (dp[j].name || dp[j]);
-						obj[opn][j] = di[dpn];
-					}
-				}
-				else
-				{
-					var dpn = (dp.name || dp);
-					obj[opn] = di[dpn];
-				}
-			}
-			
-			re.push(obj);
-		}
-		
-		return re;
 	};
 	
 	/**
@@ -4860,9 +4804,84 @@
 		}
 	};
 	
+	/**
+	 * 获取数据集结果数据经字段映射后的数据对象数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param fieldMap 返回字段映射表，格式为：{ 返回对象字段名: 数据集字段对象、字段名、字段数组、字段名数组 }
+	 * @param row 可选，行索引，以0开始，默认为：0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{"...": ..., "...": ...}, ...]
+	 * @since 5.4.0
+	 */
+	chartBase.resultMapDatas = function(dataSetResult, fieldMap, row, count)
+	{
+		var re = [];
+		
+		var datas = this.resultDatas(dataSetResult);
+		row = (row == null ? 0 : row);
+		var endIdx = (count == null ? datas.length : (row + count));
+		endIdx = (endIdx > datas.length ? datas.length : endIdx);
+		
+		var propIsArray = {};
+		for(var opn in fieldMap)
+			propIsArray[opn] = $.isArray(fieldMap[opn]);
+		
+		for(var i=row; i<endIdx; i++)
+		{
+			var di = datas[i];
+			var obj = (di == null ? null : {});
+			
+			for(var opn in fieldMap)
+			{
+				var dp = fieldMap[opn];
+				
+				if(dp == null){}
+				else if(propIsArray[opn])
+				{
+					obj[opn] = [];
+					
+					for(var j=0; j<dp.length; j++)
+					{
+						var dpn = (dp[j].name || dp[j]);
+						obj[opn][j] = di[dpn];
+					}
+				}
+				else
+				{
+					var dpn = (dp.name || dp);
+					obj[opn] = di[dpn];
+				}
+			}
+			
+			re.push(obj);
+		}
+		
+		return re;
+	};
+	
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultMapDatas()函数
+	/**
+	 * 获取数据集结果数据经属性映射后的对象数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param fieldMap 返回对象属性映射表，格式为：{ 返回对象字段名: 数据集字段对象、字段名、字段数组、字段名数组 }
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{"...": ..., "...": ...}, ...]
+	 * @since 2.10.0
+	 */
+	chartBase.resultMapObjects = function(dataSetResult, fieldMap, row, count)
+	{
+		return this.resultMapDatas(dataSetResult, fieldMap, row, count)
+	};
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultMapDatas()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultDataRow()函数
 	/**
