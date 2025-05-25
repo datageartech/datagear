@@ -192,7 +192,7 @@ global.dashboardApiCompletions =
 	{name: "resultNameValueDatas", value: "resultNameValueDatas(", displayName: "resultNameValueDatas() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultOf", value: "resultOf(", displayName: "resultOf() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultRowArrayDatas", value: "resultRowArrayDatas(", displayName: "resultRowArrayDatas() ", displayComment: "chart", categories: ["chart"]},
-	{name: "resultValueObjects", value: "resultValueObjects(", displayName: "resultValueObjects() ", displayComment: "chart", categories: ["chart"]},
+	{name: "resultValueDatas", value: "resultValueDatas(", displayName: "resultValueDatas() ", displayComment: "chart", categories: ["chart"]},
 	/*{name: "results", value: "results(", displayName: "results() ", displayComment: "chart", categories: ["chart"]},*/
 	{name: "status", value: "status(", displayName: "status() ", displayComment: "chart", categories: ["chart"]},
 	{name: "statusDestroyed", value: "statusDestroyed(", displayName: "statusDestroyed() ", displayComment: "chart", categories: ["chart"]},

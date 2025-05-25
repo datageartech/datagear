@@ -2371,21 +2371,6 @@
 	};
 	
 	/**
-	 * 获取数据集结果数据的值对象数组。
-	 * 
-	 * @param dataSetResult 数据集结果
-	 * @param valueField 值数据集字段对象、字段名、数组
-	 * @param row 可选，行索引，以0开始，默认为0
-	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{value: ...}, ...]
-	 */
-	chartBase.resultValueObjects = function(dataSetResult, valueField, row, count)
-	{
-		var fieldMap ={ "value": valueField };
-		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
-	};
-	
-	/**
 	 * 获取指定地图名对应的地图数据地址。
 	 * 此函数先从chartFactory.chartMapURLs查找对应的地址，如果没有，则直接返回name作为地址。
 	 * 
@@ -4863,10 +4848,43 @@
 		return rowObj[name];
 	};
 	
+	/**
+	 * 获取数据集结果数据的值对象数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param valueField 值数据集字段对象、字段名、数组
+	 * @param row 可选，行索引，以0开始，默认为：0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{value: ...}, ...]
+	 * @since 5.4.0
+	 */
+	chartBase.resultValueDatas = function(dataSetResult, valueField, row, count)
+	{
+		var fieldMap ={ "value": valueField };
+		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultValueDatas()函数
+	/**
+	 * 获取数据集结果数据的值对象数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param valueField 值数据集字段对象、字段名、数组
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{value: ...}, ...]
+	 */
+	chartBase.resultValueObjects = function(dataSetResult, valueField, row, count)
+	{
+		return this.resultValueDatas(dataSetResult, valueField, row, count);
+	};
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultValueDatas()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultDataRowCell()函数
 	/**

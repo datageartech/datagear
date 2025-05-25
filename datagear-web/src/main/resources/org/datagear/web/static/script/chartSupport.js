@@ -180,7 +180,7 @@
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
 					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var data = chart.resultValueObjects(result, [ np, vps[j] ]);
+					var data = chart.resultValueDatas(result, [ np, vps[j] ]);
 					chart.originalDataIndexes(data, dataSetBind);
 					var mySeries = {id: series.length, type: "line", name: legendName, data: data};
 					
@@ -405,7 +405,7 @@
 					
 					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 					var vpsMy = [np, vps[j]];
-					var data = chart.resultValueObjects(result, vpsMy);
+					var data = chart.resultValueDatas(result, vpsMy);
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					
@@ -654,7 +654,7 @@
 						data = chart.resultNameValueDatas(result, np, vps[j]);
 					//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 					else
-						data = chart.resultValueObjects(result, [np, vps[j]]);
+						data = chart.resultValueDatas(result, [np, vps[j]]);
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					
@@ -1448,7 +1448,7 @@
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
 					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var data = chart.resultValueObjects(result, [np, vps[j]]);
+					var data = chart.resultValueDatas(result, [np, vps[j]]);
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					chartSupport.evalArrayDataRange(dataRange, data, "value", 1);
@@ -3436,7 +3436,7 @@
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
 			
-			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
+			var data = chart.resultValueDatas(result, [ np, vp, wp ]);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
@@ -3799,7 +3799,7 @@
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
 			
-			var data = chart.resultValueObjects(result, [ np, vp, wp ]);
+			var data = chart.resultValueDatas(result, [ np, vp, wp ]);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
@@ -5037,7 +5037,7 @@
 					{
 						var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
 						var vpsMy = [np, vps[j]];
-						var data = chart.resultValueObjects(result, vpsMy);
+						var data = chart.resultValueDatas(result, vpsMy);
 						chartSupport.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
 						chart.originalDataIndexes(data, dataSetBind);
 						
@@ -6171,7 +6171,7 @@
 					
 					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 					var vpsMy = [np, vps[j]];
-					var data = chart.resultValueObjects(result, vpsMy);
+					var data = chart.resultValueDatas(result, vpsMy);
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					
@@ -6372,7 +6372,7 @@
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
 			//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-			var data = chart.resultValueObjects(result, [np, vp]);
+			var data = chart.resultValueDatas(result, [np, vp]);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			
