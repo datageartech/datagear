@@ -2939,35 +2939,6 @@
 	};
 	
 	/**
-	 * 获取数据集结果数据指定索引的元素。
-	 * 
-	 * @param dataSetResult 数据集结果
-	 * @param index 索引数值、数值数组
-	 * @return 数据对象、据对象数组，当result、index为null时，将返回null
-	 */
-	chartBase.resultDataElement = function(dataSetResult, index)
-	{
-		if(dataSetResult == null || dataSetResult.data == null || index == null)
-			return null;
-		
-		var datas = this.resultDatas(dataSetResult);
-		
-		if(!$.isArray(index))
-		{
-			return datas[index];
-		}
-		else
-		{
-			var re = [];
-			
-			for(var i=0; i<index.length; i++)
-				re.push(datas[index[i]]);
-			
-			return re;
-		}
-	};
-	
-	/**
 	 * 获取此图表主题对应的CSS类名。
 	 * 这个CSS类名是全局唯一的，可添加至HTML元素的"class"属性。
 	 * 
@@ -4859,9 +4830,54 @@
 		return re;
 	};
 	
+	/**
+	 * 获取数据集结果数据指定行索引的元素。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param row 行索引数值、数值数组
+	 * @return 数据对象、据对象数组，当result、row为null时，将返回null
+	 * @since 5.4.0
+	 */
+	chartBase.resultDataRow = function(dataSetResult, row)
+	{
+		if(dataSetResult == null || dataSetResult.data == null || row == null)
+			return null;
+		
+		var datas = this.resultDatas(dataSetResult);
+		
+		if(!$.isArray(row))
+		{
+			return datas[row];
+		}
+		else
+		{
+			var re = [];
+			
+			for(var i=0; i<row.length; i++)
+				re.push(datas[row[i]]);
+			
+			return re;
+		}
+	};
+	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultDataRow()函数
+	/**
+	 * 获取数据集结果数据指定索引的元素。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param index 索引数值、数值数组
+	 * @return 数据对象、据对象数组，当result、index为null时，将返回null
+	 */
+	chartBase.resultDataElement = function(dataSetResult, index)
+	{
+		return this.resultDataRow(dataSetResult, index);
+	};
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultDataRow()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultColumnArrayDatas()函数
 	/**
@@ -5341,7 +5357,7 @@
 			ocdsi = originalInfo;
 			ordi = originalResultDataIndex;
 			
-			odata = this.resultDataElement(this.resultOf(chartResult, ocdsi), ordi);
+			odata = this.resultDataRow(this.resultOf(chartResult, ocdsi), ordi);
 		}
 		else
 		{
@@ -5372,11 +5388,11 @@
 					odata[i] = [];
 					
 					for(var j=0; j<myOcdsi.length; j++)
-						odata[i][j] = this.resultDataElement(this.resultOf(chartResult, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
+						odata[i][j] = this.resultDataRow(this.resultOf(chartResult, myOcdsi[j]), (myOrdi ? myOrdi[j] : null));
 				}
 				else
 				{
-					odata[i] = this.resultDataElement(this.resultOf(chartResult, myOcdsi), myOrdi);
+					odata[i] = this.resultDataRow(this.resultOf(chartResult, myOcdsi), myOrdi);
 				}
 			}
 			
@@ -5909,13 +5925,13 @@
 				for(var j=0; j<dataSetBindIndex.length; j++)
 				{
 					var result = chart.resultOf(chartResult, dataSetBindIndex[j]);
-					originalDataMy[j] = chart.resultDataElement(result, (resultDataIndex != null ? resultDataIndex[j] : null));
+					originalDataMy[j] = chart.resultDataRow(result, (resultDataIndex != null ? resultDataIndex[j] : null));
 				}
 			}
 			else
 			{
 				var result = chart.resultOf(chartResult, dataSetBindIndex);
-				originalDataMy = chart.resultDataElement(result, resultDataIndex);
+				originalDataMy = chart.resultDataRow(result, resultDataIndex);
 			}
 			
 			originalData[i] = originalDataMy;

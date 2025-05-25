@@ -3291,13 +3291,13 @@
 						for(var j=0; j<dataSetBindIndex.length; j++)
 						{
 							var result = chart.resultOf(chart.updateResult(), dataSetBindIndex[j]);
-							resultData[j] = chart.resultDataElement(result, (resultDataIndex ? resultDataIndex[j] : null));
+							resultData[j] = chart.resultDataRow(result, (resultDataIndex ? resultDataIndex[j] : null));
 						}
 					}
 					else
 					{
 						var result = chart.resultOf(chart.updateResult(), dataSetBindIndex);
-						resultData = chart.resultDataElement(result, resultDataIndex);
+						resultData = chart.resultDataRow(result, resultDataIndex);
 					}
 				}
 				
