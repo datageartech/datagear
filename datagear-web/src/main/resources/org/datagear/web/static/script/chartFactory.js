@@ -3414,42 +3414,16 @@
 				autoIncrement = resultDataIndex;
 				resultDataIndex = undefined;
 			}
-			resultDataIndex = (resultDataIndex === undefined ? 0 : resultDataIndex);
 			
-			var isCdsiArray = $.isArray(dataSetBindIndex);
-			
-			if(isCdsiArray)
-			{
-				var cdsiNew = [];
-				
-				for(var i=0; i<dataSetBindIndex.length; i++)
-				{
-					cdsiNew[i] = (dataSetBindIndex[i] != null && dataSetBindIndex[i].index !== undefined ?
-									dataSetBindIndex[i].index : dataSetBindIndex[i]);
-				}
-				
-				dataSetBindIndex = cdsiNew;
-				
-				if(!$.isArray(resultDataIndex))
-				{
-					var rdiNew = [];
-					
-					for(var i=0; i<dataSetBindIndex.length; i++)
-						rdiNew[i] = resultDataIndex;
-					
-					resultDataIndex = rdiNew;
-				}
-			}
-			else
-			{
-				dataSetBindIndex = (dataSetBindIndex != null && dataSetBindIndex.index !== undefined ?
-										dataSetBindIndex.index : dataSetBindIndex);
-			}
-			
+			var trimIndex = this._trimOriginalDataIndex(dataSetBindIndex, resultDataIndex);
+			dataSetBindIndex = trimIndex.dataSetBindIndex;
+			resultDataIndex = trimIndex.resultDataIndex;
 			autoIncrement = (autoIncrement === undefined ? true : autoIncrement);
-			var isRdiNumber = chartFactory.isNumber(resultDataIndex);
 			
+			var isRdiNumber = chartFactory.isNumber(resultDataIndex);
 			var needAutoIncrementEle = (autoIncrement == true && $.isArray(resultDataIndex));
+			var eleIsNumbers = [];
+			
 			if(needAutoIncrementEle == true)
 			{
 				needAutoIncrementEle = false;
@@ -3457,38 +3431,30 @@
 				//任一元素是数值的话，才需要自增处理
 				for(var i=0; i<resultDataIndex.length; i++)
 				{
-					if(chartFactory.isNumber(resultDataIndex[i]))
+					eleIsNumbers[i] = chartFactory.isNumber(resultDataIndex[i]);
+					if(eleIsNumbers[i] && !needAutoIncrementEle)
 					{
 						needAutoIncrementEle = true;
-						break;
 					}
 				}
 			}
 			
 			for(var i=0; i<data.length; i++)
 			{
-				var resultDataIndexMy;
+				var resultDataIndexMy = resultDataIndex;
 				
-				if(!autoIncrement)
+				if(autoIncrement)
 				{
-					resultDataIndexMy = resultDataIndex;
-				}
-				else
-				{
-					resultDataIndexMy = resultDataIndex;
-					
 					if(isRdiNumber)
 					{
-						resultDataIndexMy = resultDataIndex + i;
+						resultDataIndexMy = resultDataIndexMy + i;
 					}
 					else if(needAutoIncrementEle)
 					{
 						resultDataIndexMy = [];
 						for(var j=0; j<resultDataIndex.length; j++)
 						{
-							resultDataIndexMy[j] = resultDataIndex[j];
-							if(chartFactory.isNumber(resultDataIndexMy[j]))
-								resultDataIndexMy[j] = resultDataIndexMy[j] + i;
+							resultDataIndexMy[j] = (eleIsNumbers[j] ? (resultDataIndex[j]+i) : resultDataIndex[j]);
 						}
 					}
 				}
@@ -3518,9 +3484,52 @@
 		}
 		else
 		{
-			data = [ data ];
-			this.originalDataIndexes(data, dataSetBindIndex, resultDataIndex, false);
+			if(data == null)
+				return;
+			
+			var trimIndex = this._trimOriginalDataIndex(dataSetBindIndex, resultDataIndex);
+			this._originalDataIndex(data, trimIndex.dataSetBindIndex, trimIndex.resultDataIndex);
 		}
+	};
+	
+	chartBase._trimOriginalDataIndex = function(dataSetBindIndex, resultDataIndex)
+	{
+		var re = {};
+		
+		resultDataIndex = (resultDataIndex === undefined ? 0 : resultDataIndex);
+		
+		if($.isArray(dataSetBindIndex))
+		{
+			var dsbIdxNew = [];
+			
+			for(var i=0; i<dataSetBindIndex.length; i++)
+			{
+				dsbIdxNew[i] = (dataSetBindIndex[i] != null && dataSetBindIndex[i].index !== undefined ?
+								dataSetBindIndex[i].index : dataSetBindIndex[i]);
+			}
+			
+			dataSetBindIndex = dsbIdxNew;
+			
+			if(!$.isArray(resultDataIndex))
+			{
+				var rdIdxNew = [];
+				
+				for(var i=0; i<dataSetBindIndex.length; i++)
+					rdIdxNew[i] = resultDataIndex;
+				
+				resultDataIndex = rdIdxNew;
+			}
+		}
+		else
+		{
+			dataSetBindIndex = (dataSetBindIndex != null && dataSetBindIndex.index !== undefined ?
+									dataSetBindIndex.index : dataSetBindIndex);
+		}
+		
+		re.dataSetBindIndex = dataSetBindIndex;
+		re.resultDataIndex = resultDataIndex;
+		
+		return re;
 	};
 	
 	//获取/设置单条图表展示数据的原始数据索引
