@@ -1127,7 +1127,7 @@
 				var minp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min);
 				if(minp)
 				{
-					var minpv = chart.resultColumnArrays(result, minp);
+					var minpv = chart.resultColumnArrayDatas(result, minp);
 					min = chartSupport.findNonNull(minpv);
 				}
 			}
@@ -1137,7 +1137,7 @@
 				var maxp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
 				if(maxp)
 				{
-					var maxpv = chart.resultColumnArrays(result, maxp);
+					var maxpv = chart.resultColumnArrayDatas(result, maxp);
 					max = chartSupport.findNonNull(maxpv);
 				}
 			}
@@ -1967,7 +1967,7 @@
 		//单行式雷达网
 		else
 		{
-			var iv = chart.resultColumnArrays(result, ip);
+			var iv = chart.resultColumnArrayDatas(result, ip);
 			var nv = chart.resultRowArrays(result, np);
 			var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 			var vv = chart.resultRowArrays(result, vp);
@@ -1994,9 +1994,9 @@
 		var dataSignNames = dg.dataSignNames;
 		
 		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var nv = chart.resultColumnArrays(result, np);
+		var nv = chart.resultColumnArrayDatas(result, np);
 		var mp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
-		var mv = chart.resultColumnArrays(result, mp);
+		var mv = chart.resultColumnArrayDatas(result, mp);
 		var indicatorLen = Math.min(nv.length, mv.length);
 		
 		for(var i=0; i<indicatorLen; i++)
@@ -2006,7 +2006,7 @@
 		}
 		
 		var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-		var vv = chart.resultColumnArrays(result, vp);
+		var vv = chart.resultColumnArrayDatas(result, vp);
 		
 		var resultDataIndex = [];
 		for(var i=0; i<indicatorData.length; i++)
@@ -2162,7 +2162,7 @@
 			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-			var npv = chart.resultColumnArrays(result, np);
+			var npv = chart.resultColumnArrayDatas(result, np);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			var data = chart.resultNameValueObjects(result, np, vp);
 			
@@ -7117,7 +7117,7 @@
 			if(recordsTotal == null && serverSidePaging.totalFieldName != null
 				&& chart.dataSetField(dsbs[i], serverSidePaging.totalFieldName) != null)
 			{
-				var colValues = chart.resultColumnArrays(result, serverSidePaging.totalFieldName);
+				var colValues = chart.resultColumnArrayDatas(result, serverSidePaging.totalFieldName);
 				recordsTotal = chartSupport.findNonNull(colValues);
 			}
 			
@@ -9233,7 +9233,7 @@
 		
 		if(vp)
 		{
-			var values = chart.resultColumnArrays(result, vp);
+			var values = chart.resultColumnArrayDatas(result, vp);
 			return chartSupport.findNonEmpty(values);
 		}
 		
