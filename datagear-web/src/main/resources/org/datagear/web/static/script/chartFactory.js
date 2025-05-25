@@ -2446,22 +2446,6 @@
 	};
 	
 	/**
-	 * 获取数据集结果数据的名称/值对象数组。
-	 * 
-	 * @param dataSetResult 数据集结果
-	 * @param nameField 名称数据集字段对象、字段名
-	 * @param valueField 值数据集字段对象、字段名、数组
-	 * @param row 可选，行索引，以0开始，默认为0
-	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{name: ..., value: ...}, ...]
-	 */
-	chartBase.resultNameValueObjects = function(dataSetResult, nameField, valueField, row, count)
-	{
-		var fieldMap ={ "name": nameField, "value": valueField };
-		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
-	};
-	
-	/**
 	 * 获取数据集结果数据的值对象数组。
 	 * 
 	 * @param dataSetResult 数据集结果
@@ -4860,10 +4844,45 @@
 		return re;
 	};
 	
+	/**
+	 * 获取数据集结果数据的名/值对象数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param nameField 名称数据集字段对象、字段名
+	 * @param valueField 值数据集字段对象、字段名、数组
+	 * @param row 可选，行索引，以0开始，默认为：0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{name: ..., value: ...}, ...]
+	 * @since 5.4.0
+	 */
+	chartBase.resultNameValueDatas = function(dataSetResult, nameField, valueField, row, count)
+	{
+		var fieldMap ={ "name": nameField, "value": valueField };
+		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultNameValueDatas()函数
+	/**
+	 * 获取数据集结果数据的名称/值对象数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param nameField 名称数据集字段对象、字段名
+	 * @param valueField 值数据集字段对象、字段名、数组
+	 * @param row 可选，行索引，以0开始，默认为0
+	 * @param count 可选，获取结果数据的最多行数，默认为全部
+	 * @return [{name: ..., value: ...}, ...]
+	 */
+	chartBase.resultNameValueObjects = function(dataSetResult, nameField, valueField, row, count)
+	{
+		return this.resultNameValueDatas(dataSetResult, nameField, valueField, row, count);
+	};
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultNameValueDatas()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultMapDatas()函数
 	/**

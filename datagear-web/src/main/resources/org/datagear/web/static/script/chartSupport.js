@@ -651,7 +651,7 @@
 					
 					//角度图时使用{value: [name,value]}格式的数据会无法显示
 					if(isAngleAxis)
-						data = chart.resultNameValueObjects(result, np, vps[j]);
+						data = chart.resultNameValueDatas(result, np, vps[j]);
 					//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 					else
 						data = chart.resultValueObjects(result, [np, vps[j]]);
@@ -2164,7 +2164,7 @@
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var npv = chart.resultColumnArrayDatas(result, np);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-			var data = chart.resultNameValueObjects(result, np, vp);
+			var data = chart.resultNameValueDatas(result, np, vp);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			
@@ -2308,7 +2308,7 @@
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-			var data = chart.resultNameValueObjects(result, np, vp);
+			var data = chart.resultNameValueDatas(result, np, vp);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			chartSupport.evalArrayDataRange(dataRange, data, "value");
@@ -3035,7 +3035,7 @@
 				var names = [];
 				var coordsInfos = {};
 				
-				data = chart.resultNameValueObjects(result, np, [lop, lap]);
+				data = chart.resultNameValueDatas(result, np, [lop, lap]);
 				
 				for(var j=0; j<data.length; j++)
 				{
@@ -3604,7 +3604,7 @@
 			
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			
-			var data = chart.resultNameValueObjects(result, np,
+			var data = chart.resultNameValueDatas(result, np,
 					[
 						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.open),
 						chart.dataSetFieldOfSign(dataSetBind, dataSignNames.close),
@@ -5248,7 +5248,7 @@
 			var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			
-			var data = chart.resultNameValueObjects(result, np, vp);
+			var data = chart.resultNameValueDatas(result, np, vp);
 			
 			chart.originalDataIndexes(data, dataSetBind);
 			chartSupport.evalArrayDataRange(dataRange, data, "value");

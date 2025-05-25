@@ -188,7 +188,7 @@ global.dashboardApiCompletions =
 	{name: "resultDatas", value: "resultDatas(", displayName: "resultDatas() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultDatasOf", value: "resultDatasOf(", displayName: "resultDatasOf() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultMapDatas", value: "resultMapDatas(", displayName: "resultMapDatas() ", displayComment: "chart", categories: ["chart"]},
-	{name: "resultNameValueObjects", value: "resultNameValueObjects(", displayName: "resultNameValueObjects() ", displayComment: "chart", categories: ["chart"]},
+	{name: "resultNameValueDatas", value: "resultNameValueDatas(", displayName: "resultNameValueDatas() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultOf", value: "resultOf(", displayName: "resultOf() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultRowArrays", value: "resultRowArrays(", displayName: "resultRowArrays() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultRowCell", value: "resultRowCell(", displayName: "resultRowCell() ", displayComment: "chart", categories: ["chart"]},
