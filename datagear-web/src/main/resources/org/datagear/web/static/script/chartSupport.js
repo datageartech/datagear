@@ -2772,15 +2772,15 @@
 				//在ECharts由4.9.0升级至5.1.2版本后，【名/值数组】、【名/X/Y/值】格式都会报错：Can not read property 'off' of undefined，
 				//在修改了源码（修改位置参考DataGear-2.8.0版本echarts-5.1.2/echarts.js的58833行）同时采用【名/值数组】格式后才解决。
 				//在ECharts由5.1.2升级至5.2.0版本后，【名/X/Y/值】格式不会报错但是显示位置不对，【名/值数组】则可以正常展示
-				var sd = { name: chart.resultRowCell(data[j], snp), value: [ chart.resultRowCell(data[j], slop), chart.resultRowCell(data[j], slap) ] };
-				var td = { name: chart.resultRowCell(data[j], tnp), value: [ chart.resultRowCell(data[j], tlop), chart.resultRowCell(data[j], tlap) ] };
+				var sd = { name: chart.resultDataRowCell(data[j], snp), value: [ chart.resultDataRowCell(data[j], slop), chart.resultDataRowCell(data[j], slap) ] };
+				var td = { name: chart.resultDataRowCell(data[j], tnp), value: [ chart.resultDataRowCell(data[j], tlop), chart.resultDataRowCell(data[j], tlap) ] };
 				
 				if(sip)
-					sd.id = chart.resultRowCell(data[j], sip);
+					sd.id = chart.resultDataRowCell(data[j], sip);
 				
 				if(scp)
 				{
-					var category = chart.resultRowCell(data[j], scp);
+					var category = chart.resultDataRowCell(data[j], scp);
 					sd._categoryOrigin = category;
 					if(category)
 					{
@@ -2791,7 +2791,7 @@
 				
 				if(svp)
 				{
-					var sv = chart.resultRowCell(data[j], svp);
+					var sv = chart.resultDataRowCell(data[j], svp);
 					sd.value.push(sv);
 					
 					min = (min == null ? sv : Math.min(min, sv));
@@ -2799,11 +2799,11 @@
 				}
 				
 				if(tip)
-					td.id = chart.resultRowCell(data[j], tip);
+					td.id = chart.resultDataRowCell(data[j], tip);
 				
 				if(tcp)
 				{
-					var category = chart.resultRowCell(data[j], tcp);
+					var category = chart.resultDataRowCell(data[j], tcp);
 					td._categoryOrigin = category;
 					if(category)
 					{
@@ -2814,7 +2814,7 @@
 				
 				if(tvp)
 				{
-					var tv = chart.resultRowCell(data[j], tvp);
+					var tv = chart.resultDataRowCell(data[j], tvp);
 					td.value.push(tv);
 					
 					min = (min == null ? tv : Math.min(min, tv));
@@ -4239,13 +4239,13 @@
 			{
 				var node = {};
 				
-				node.name = chart.resultRowCell(data[j], np);
-				node.idOrigin = (ip ? chart.resultRowCell(data[j], ip) : undefined);
+				node.name = chart.resultDataRowCell(data[j], np);
+				node.idOrigin = (ip ? chart.resultDataRowCell(data[j], ip) : undefined);
 				node.id = (ip ? node.idOrigin : node.name);
-				node.parent = chart.resultRowCell(data[j], pp);
+				node.parent = chart.resultDataRowCell(data[j], pp);
 				if(vp)
 				{
-					node.value = chart.resultRowCell(data[j], vp);
+					node.value = chart.resultDataRowCell(data[j], vp);
 					chartSupport.treeNodeEvalValueMark(node);
 				}
 				
@@ -4402,13 +4402,13 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var sd = { name: chart.resultRowCell(data[j], snp) };
-				var td = { name: chart.resultRowCell(data[j], tnp) };
+				var sd = { name: chart.resultDataRowCell(data[j], snp) };
+				var td = { name: chart.resultDataRowCell(data[j], tnp) };
 				
 				if(svp)
-					sd.value = chart.resultRowCell(data[j], svp);
+					sd.value = chart.resultDataRowCell(data[j], svp);
 				if(tvp)
-					td.value = chart.resultRowCell(data[j], tvp);
+					td.value = chart.resultDataRowCell(data[j], tvp);
 				
 				chart.originalDataIndex(sd, dataSetBind, j);
 				
@@ -4431,7 +4431,7 @@
 				var link = {};
 				link.source = sd.name;
 				link.target = td.name;
-				link.value = chart.resultRowCell(data[j], vp);
+				link.value = chart.resultDataRowCell(data[j], vp);
 				
 				link._sourceIndex = sidx;
 				link._targetIndex = tidx;
@@ -4659,15 +4659,15 @@
 			
 			for(var j=0; j<data.length; j++)
 			{
-				var sd = { name: chart.resultRowCell(data[j], snp) };
-				var td = { name: chart.resultRowCell(data[j], tnp) };
+				var sd = { name: chart.resultDataRowCell(data[j], snp) };
+				var td = { name: chart.resultDataRowCell(data[j], tnp) };
 				
 				if(sip)
-					sd.id = chart.resultRowCell(data[j], sip);
+					sd.id = chart.resultDataRowCell(data[j], sip);
 				
 				if(scp)
 				{
-					var category = chart.resultRowCell(data[j], scp);
+					var category = chart.resultDataRowCell(data[j], scp);
 					sd._categoryOrigin = category;
 					if(category)
 					{
@@ -4678,18 +4678,18 @@
 				
 				if(svp)
 				{
-					sd.value = chart.resultRowCell(data[j], svp);
+					sd.value = chart.resultDataRowCell(data[j], svp);
 					
 					min = (min == null ? sd.value : Math.min(min, sd.value));
 					max = (max == null ? sd.value : Math.max(max, sd.value));
 				}
 				
 				if(tip)
-					td.id = chart.resultRowCell(data[j], tip);
+					td.id = chart.resultDataRowCell(data[j], tip);
 				
 				if(tcp)
 				{
-					var category = chart.resultRowCell(data[j], tcp);
+					var category = chart.resultDataRowCell(data[j], tcp);
 					td._categoryOrigin = category;
 					if(category)
 					{
@@ -4700,7 +4700,7 @@
 				
 				if(tvp)
 				{
-					td.value = chart.resultRowCell(data[j], tvp);
+					td.value = chart.resultDataRowCell(data[j], tvp);
 					
 					min = (min == null ? td.value : Math.min(min, td.value));
 					max = (max == null ? td.value : Math.max(max, td.value));
@@ -4728,7 +4728,7 @@
 				link.target = tidx;
 				
 				if(vp)
-					link.value = chart.resultRowCell(data[j], vp);
+					link.value = chart.resultDataRowCell(data[j], vp);
 				
 				chart.originalDataIndex(link, dataSetBind, j);
 				

@@ -2371,21 +2371,6 @@
 	};
 	
 	/**
-	 * 获取数据集结果数据的行对象指定属性值。
-	 * 
-	 * @param rowObj 行对象，格式为：{ ... }
-	 * @param field 数据集字段对象、字段名
-	 */
-	chartBase.resultRowCell = function(rowObj, field)
-	{
-		if(!rowObj || !field)
-			return undefined;
-		
-		var name = (field.name || field);
-		return rowObj[name];
-	};
-	
-	/**
 	 * 获取数据集结果数据的值对象数组。
 	 * 
 	 * @param dataSetResult 数据集结果
@@ -4862,10 +4847,40 @@
 		return re;
 	};
 	
+	/**
+	 * 获取数据集结果数据的行对象指定字段值。
+	 * 
+	 * @param rowObj 行对象，格式为：{ ... }
+	 * @param field 数据集字段对象、字段名
+	 * @since 5.4.0
+	 */
+	chartBase.resultDataRowCell = function(rowObj, field)
+	{
+		if(!rowObj || !field)
+			return null;
+		
+		var name = (field.name || field);
+		return rowObj[name];
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultDataRowCell()函数
+	/**
+	 * 获取数据集结果数据的行对象指定属性值。
+	 * 
+	 * @param rowObj 行对象，格式为：{ ... }
+	 * @param field 数据集字段对象、字段名
+	 */
+	chartBase.resultRowCell = function(rowObj, field)
+	{
+		return this.resultDataRowCell(rowObj, field);
+	};
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultDataRowCell()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultRowArrayDatas()函数
 	/**
