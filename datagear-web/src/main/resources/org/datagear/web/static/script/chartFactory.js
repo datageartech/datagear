@@ -2386,66 +2386,6 @@
 	};
 	
 	/**
-	 * 将数据集结果数据的行对象按照指定fields顺序转换为行值数组。
-	 * 
-	 * @param dataSetResult 数据集结果
-	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
-	 * @param row 可选，行索引，默认为0
-	 * @param count 可选，获取的最多行数，默认为全部
-	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
-	 */
-	chartBase.resultRowArrays = function(dataSetResult, fields, row, count)
-	{
-		var re = [];
-		
-		if(!dataSetResult || !fields)
-			return re;
-		
-		var datas = this.resultDatas(dataSetResult);
-		
-		row = (row == null ? 0 : row);
-		var endIdx = (count == null ? datas.length : (row + count));
-		endIdx = (endIdx > datas.length ? datas.length : endIdx);
-		
-		if($.isArray(fields))
-		{
-			for(var i=row; i<endIdx; i++)
-			{
-				var rowObj = datas[i];
-				var rowVal = [];
-				
-				for(var j=0; j<fields.length; j++)
-				{
-					var p = fields[j];
-					
-					var name = (p ? (p.name || p) : undefined);
-					if(!name)
-						continue;
-					
-					rowVal[j] = rowObj[name];
-				}
-				
-				re.push(rowVal);
-			}
-		}
-		else
-		{
-			var name = (fields ? (fields.name || fields) : undefined);
-			
-			if(name)
-			{
-				for(var i=row; i<endIdx; i++)
-				{
-					var rowObj = datas[i];
-					re.push(rowObj[name]);
-				}
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
 	 * 获取数据集结果数据的值对象数组。
 	 * 
 	 * @param dataSetResult 数据集结果
@@ -4696,7 +4636,7 @@
 	{
 		row = (row == null ? 0 : row);
 		
-		var re = this.resultRowArrays(dataSetResult, field, row, 1);
+		var re = this.resultRowArrayDatas(dataSetResult, field, row, 1);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
@@ -4861,10 +4801,88 @@
 		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
 	};
 	
+	/**
+	 * 将数据集结果数据的行对象按照指定fields顺序转换为行值数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
+	 * @param row 可选，行索引，默认为：0
+	 * @param count 可选，获取的最多行数，默认为全部
+	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
+	 * @since 5.4.0
+	 */
+	chartBase.resultRowArrayDatas = function(dataSetResult, fields, row, count)
+	{
+		var re = [];
+		
+		if(!dataSetResult || !fields)
+			return re;
+		
+		var datas = this.resultDatas(dataSetResult);
+		
+		row = (row == null ? 0 : row);
+		var endIdx = (count == null ? datas.length : (row + count));
+		endIdx = (endIdx > datas.length ? datas.length : endIdx);
+		
+		if($.isArray(fields))
+		{
+			for(var i=row; i<endIdx; i++)
+			{
+				var rowObj = datas[i];
+				var rowVal = [];
+				
+				for(var j=0; j<fields.length; j++)
+				{
+					var p = fields[j];
+					
+					var name = (p ? (p.name || p) : undefined);
+					if(!name)
+						continue;
+					
+					rowVal[j] = rowObj[name];
+				}
+				
+				re.push(rowVal);
+			}
+		}
+		else
+		{
+			var name = (fields ? (fields.name || fields) : undefined);
+			
+			if(name)
+			{
+				for(var i=row; i<endIdx; i++)
+				{
+					var rowObj = datas[i];
+					re.push(rowObj[name]);
+				}
+			}
+		}
+		
+		return re;
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultRowArrayDatas()函数
+	/**
+	 * 将数据集结果数据的行对象按照指定fields顺序转换为行值数组。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
+	 * @param row 可选，行索引，默认为0
+	 * @param count 可选，获取的最多行数，默认为全部
+	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
+	 */
+	chartBase.resultRowArrays = function(dataSetResult, fields, row, count)
+	{
+		return this.resultRowArrayDatas(dataSetResult, fields, row, count);
+	};
+	// > @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultRowArrayDatas()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultNameValueDatas()函数
 	/**

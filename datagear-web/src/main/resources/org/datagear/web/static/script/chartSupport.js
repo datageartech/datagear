@@ -1143,7 +1143,7 @@
 			}
 			
 			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-			var vpsvs = chart.resultRowArrays(result, vps);
+			var vpsvs = chart.resultRowArrayDatas(result, vps);
 			
 			for(var j=0; j<vpsvs.length; j++)
 			{
@@ -1968,9 +1968,9 @@
 		else
 		{
 			var iv = chart.resultColumnArrayDatas(result, ip);
-			var nv = chart.resultRowArrays(result, np);
+			var nv = chart.resultRowArrayDatas(result, np);
 			var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-			var vv = chart.resultRowArrays(result, vp);
+			var vv = chart.resultRowArrayDatas(result, vp);
 			var dataLen = Math.min(np.length, vp.length);
 			
 			for(var i=0; i<iv.length; i++)
@@ -3065,7 +3065,7 @@
 			else
 			{
 				//整个数据集是一条路径
-				data = chart.resultRowArrays(result, [lop, lap]);
+				data = chart.resultRowArrayDatas(result, [lop, lap]);
 				var originalDataIndexes = [];
 				for(var j=0;j<data.length; j++)
 					originalDataIndexes[j] = j;
@@ -5410,7 +5410,7 @@
 			
 			if(npsNone)
 			{
-				var ras = chart.resultRowArrays(result, vps);
+				var ras = chart.resultRowArrayDatas(result, vps);
 				for(var j=0; j<ras.length; j++)
 				{
 					var ra = ras[j];
@@ -5424,8 +5424,8 @@
 			}
 			else
 			{
-				var namess = chart.resultRowArrays(result, nps);
-				var valuess = chart.resultRowArrays(result, vps);
+				var namess = chart.resultRowArrayDatas(result, nps);
+				var valuess = chart.resultRowArrayDatas(result, vps);
 				
 				for(var j=0; j<namess.length; j++)
 				{
@@ -5906,7 +5906,7 @@
 				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 				
 				//主题河流图只支持[ name, value, category ]格式的数据条目
-				var data = chart.resultRowArrays(result, [ np, vp, cp ]);
+				var data = chart.resultRowArrayDatas(result, [ np, vp, cp ]);
 				chart.originalDataIndexes(data, dataSetBind);
 				
 				//为类别添加前缀，确保多数据集类别不重复
@@ -5928,7 +5928,7 @@
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
 					//主题河流图只支持[ name, value, lengendName ]格式的数据条目
-					var data = chart.resultRowArrays(result, [ np, vps[j] ]);
+					var data = chart.resultRowArrayDatas(result, [ np, vps[j] ]);
 					for(var k=0; k<data.length; k++)
 						data[k].push(legendName);
 					
@@ -8070,8 +8070,8 @@
 				throw new Error("The ["+dataSignNames.name+"] sign column must be "
 						+"one-to-one with ["+dataSignNames.value+"] sign column");
 			
-			var namess = (hasNps ? chart.resultRowArrays(result, nps) : []);
-			var valuess = chart.resultRowArrays(result, vps);
+			var namess = (hasNps ? chart.resultRowArrayDatas(result, nps) : []);
+			var valuess = chart.resultRowArrayDatas(result, vps);
 			
 			var vpNames = [];
 			if(!hasNps)
@@ -8325,8 +8325,8 @@
 				throw new Error("The ["+dataSignNames.name+"] sign column must be "
 						+"one-to-one with ["+dataSignNames.value+"] sign column");
 			
-			var namess = (hasNps ? chart.resultRowArrays(result, nps) : []);
-			var valuess = chart.resultRowArrays(result, vps);
+			var namess = (hasNps ? chart.resultRowArrayDatas(result, nps) : []);
+			var valuess = chart.resultRowArrayDatas(result, vps);
 			
 			for(var j=0; j<valuess.length; j++)
 			{
