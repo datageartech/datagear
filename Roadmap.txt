@@ -13,7 +13,9 @@
 	
 待定：
 	
-	图表JS对象chart.refreshData()支持刷新控制参数，可以控制仅刷新加载指定数据集的数据；
+	图表JS对象chart.refreshData()支持刷新控制参数，可以控制仅刷新加载指定数据集的数据：
+		图表插件（渲染器？）添加{ supportUpdatePart: true | false }附加属性，声明是否支持局部更新；
+		图表JS对象添加chart.resultAbsent()函数，用于获取/设置结果是否是未参与更新的；
 	新增客户端（local）图表功能，不参与服务端交互，完全由客户端看板API操作；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
