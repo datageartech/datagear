@@ -2084,7 +2084,7 @@
 				this._doUpdateChart(chart, chartResult);
 			}
 			else
-				chartFactory.logException("chart '#"+chart.elementId+"' not active");
+				throw new Error("chart '#"+chart.elementId+"' not active");
 		}
 		catch(e)
 		{
