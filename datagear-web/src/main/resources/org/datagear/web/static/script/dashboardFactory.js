@@ -766,33 +766,21 @@
 	
 	chartBase._requestRefreshData = function()
 	{
-		var requestIdx = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
-		if(requestIdx == null || requestIdx < 0)
-			requestIdx = 0;
+		var chartQuery = this.dashboard._buildChartQuery(this);
+		var rrds = chartFactory.extValueBuiltin(this, "requestRefreshDatas");
+		if(rrds == null)
+		{
+			rrds = [];
+			chartFactory.extValueBuiltin(this, "requestRefreshDatas", rrds);
+		}
 		
-		requestIdx = requestIdx + 1;
-		
-		chartFactory.extValueBuiltin(this, "requestRefreshDataIdx", requestIdx);
+		rrds.push(chartQuery);
 	};
 	
 	chartBase._isRequestRefreshData = function()
 	{
-		var requestIdx = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
-		return (requestIdx != null && requestIdx > 0);
-	};
-	
-	chartBase._startRefreshData = function()
-	{
-		var requestIdx = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
-		this._handleRefreshDataIdx = requestIdx;
-	};
-	
-	chartBase._finishRefreshDataIfMatch = function()
-	{
-		var requestIdxNow = chartFactory.extValueBuiltin(this, "requestRefreshDataIdx");
-		
-		if(this._handleRefreshDataIdx == requestIdxNow)
-			chartFactory.extValueBuiltin(this, "requestRefreshDataIdx", 0);
+		var rrds = chartFactory.extValueBuiltin(this, "requestRefreshDatas");
+		return (rrds != null && rrds.length > 0);
 	};
 	
 	/**
@@ -1584,7 +1572,7 @@
 		if(this._doHandlingCharts != true)
 			return;
 		
-		var charts = this.charts;
+		var charts = (this.charts || []);
 		
 		for(var i=0; i<charts.length; i++)
 		{
@@ -1602,11 +1590,26 @@
 		{
 			var chart = charts[i];
 			
-			if(this._isWaitForUpdate(chart, time))
+			var wait = this._isWaitForUpdate(chart, time);
+			if(wait > 0)
 			{
+				//应立即设置为HANDLING_UPDATE状态
+				chart.status(chartStatusConst.HANDLING_UPDATE);
+				
+				var chartQuery = null;
+				
+				//由chart.refreshData()函数触发
+				if(wait == 2)
+				{
+					var rrds = chartFactory.extValueBuiltin(chart, "requestRefreshDatas");
+					chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
+				}
+				
+				chartQuery = (chartQuery == null ? this._buildChartQuery(chart) : chartQuery);
+				
 				if(this._isLocalChart(chart))
 				{
-					preUpdateLocals.push(chart);
+					preUpdateLocals.push({chart: chart, query: chartQuery});
 				}
 				else
 				{
@@ -1619,7 +1622,7 @@
 						preUpdateGroups[group] = preUpdates;
 					}
 					
-					preUpdates.push(chart);
+					preUpdates.push({chart: chart, query: chartQuery});
 				}
 			}
 		}
@@ -1629,16 +1632,12 @@
 		var dashboard = this;
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
 		var url = this.contextURL(webContext.attributes.updateDashboardURL);
-		var groupContext =
-		{
-			groups: preUpdateGroups
-		};
 		
 		for(var group in preUpdateGroups)
 		{
 			chartFactory.executeSilently(function()
 			{
-				dashboard._doHandleChartsAjax(url, group, preUpdateGroups[group], groupContext);
+				dashboard._doHandleChartsAjax(url, group, preUpdateGroups[group]);
 			});
 		}
 		
@@ -1649,58 +1648,6 @@
 		dashboardFactory.HANDLE_CHART_INTERVAL_MS);
 	};
 	
-	dashboardBase._isLocalChart = function(chart)
-	{
-		var dataSetBinds = chart.dataSetBinds();
-		return (dataSetBinds.length == 0);
-	};
-	
-	dashboardBase._doHandleChartsLocal = function(preUpdateCharts)
-	{
-		if(!preUpdateCharts || preUpdateCharts.length == 0)
-			return;
-		
-		var updateTime = chartFactory.currentDateMs();
-		this._startChartsRefreshData(preUpdateCharts);
-		
-		var dashboard = this;
-		var dashboardQueryForm = this._buildDashboardQueryForm(preUpdateCharts);
-		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
-		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
-		var fetchContext =
-		{
-			charts: preUpdateCharts,
-			query: dashboardQuery
-		};
-		
-		//这里不允许异常中断
-		chartFactory.executeSilently(function()
-		{
-			dashboard._execListenerOnFetch(fetchContext);
-		});
-		
-		try
-		{
-			for(var i=0; i<preUpdateCharts.length; i++)
-			{
-				var chart = preUpdateCharts[i];
-				var chartResult = {};
-				//设置空数据集结果数组，避免后续出现空指针异常
-				chart.results(chartResult, []);
-				
-				this._updateChart(chart, chartResult, true);
-			}
-		}
-		finally
-		{
-			this._setChartsUpdateTime(preUpdateCharts, updateTime);			
-			this._finishChartsRefreshDataIfMatch(preUpdateCharts);
-		}
-	};
-	
-	/**
-	 * 图表是否在等待渲染。
-	 */
 	dashboardBase._isWaitForRender = function(chart)
 	{
 		return chart.statusPreRender();
@@ -1708,11 +1655,13 @@
 	
 	/**
 	 * 给定图表是否在等待更新数据。
-	 * 如果返回true，图表状态将被设置为chartStatusConst.HANDLING_UPDATE，后续除非图表更新完成，都将返回false。
+	 * @param chart
+	 * @param currentTime
+	 * @returns 0 否；1 是，但不是refreshData()触发；2 是，并且由refreshData()触发
 	 */
 	dashboardBase._isWaitForUpdate = function(chart, currentTime)
 	{
-		var wait = false;
+		var wait = 0;
 		
 		if(currentTime == null)
 			currentTime = chartFactory.currentDateMs();
@@ -1721,15 +1670,15 @@
 		
 		if(status == chartStatusConst.HANDLING_UPDATE)
 		{
-			wait = false;
-		}
-		else if(chart.statusRendered() || chart.statusPreUpdate())
-		{
-			wait = true;
+			wait = 0;
 		}
 		else if(chart._isRequestRefreshData())
 		{
-			wait = true;
+			wait = 2;
+		}
+		else if(chart.statusRendered() || chart.statusPreUpdate())
+		{
+			wait = 1;
 		}
 		else if(chart.updateInterval > -1
 					&& (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
@@ -1738,30 +1687,26 @@
 			var prevUpdateTime = chart._updateTime();
 			
 			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
-				wait = true;
+				wait = 1;
 		}
 		
-		if(wait && chart.unreadyDataSetParams(true).length > 0)
+		// wait=2时不应校验参数合法性
+		if(wait == 1 && chart.unreadyDataSetParams(true).length > 0)
 		{
 			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
-			wait = false;
-		}
-		
-		if(wait)
-		{
-			//应立即设置为HANDLING_UPDATE状态，避免并发逻辑出错
-			chart.status(chartStatusConst.HANDLING_UPDATE);
+			wait = 0;
 		}
 		
 		return wait;
 	};
 	
-	/**
-	 * 渲染指定图表。
-	 * 
-	 * @param chart 图表对象
-	 */
+	dashboardBase._isLocalChart = function(chart)
+	{
+		var dataSetBinds = chart.dataSetBinds();
+		return (dataSetBinds.length == 0);
+	};
+	
 	dashboardBase._renderChart = function(chart)
 	{
 		try
@@ -1776,23 +1721,75 @@
 		}
 	};
 	
-	dashboardBase._doHandleChartsAjax = function(url, group, preUpdateCharts, groupContext)
+	dashboardBase._chartsOfChartQueryPairs = function(chartQueryPairs)
 	{
-		if(!preUpdateCharts || preUpdateCharts.length == 0)
+		var re = [];
+		
+		for(var i=0; i<chartQueryPairs.length; i++)
+		{
+			re.push(chartQueryPairs[i].chart);
+		}
+		
+		return re;
+	};
+	
+	dashboardBase._doHandleChartsLocal = function(chartQueryPairs)
+	{
+		if(!chartQueryPairs || chartQueryPairs.length == 0)
 			return;
 		
-		this._startChartsRefreshData(preUpdateCharts);
+		var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
+		var updateTime = chartFactory.currentDateMs();
 		
 		var dashboard = this;
-		var dashboardQueryForm = this._buildDashboardQueryForm(preUpdateCharts);
+		var dashboardQueryForm = this._buildDashboardQueryForm(chartQueryPairs);
+		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
+		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
+		var fetchContext =
+		{
+			charts: charts,
+			query: dashboardQuery
+		};
+		
+		//这里不允许异常中断
+		chartFactory.executeSilently(function()
+		{
+			dashboard._execListenerOnFetch(fetchContext);
+		});
+		
+		try
+		{
+			for(var i=0; i<charts.length; i++)
+			{
+				var chart = charts[i];
+				var chartResult = {};
+				//设置空数据集结果数组，避免后续出现空指针异常
+				chart.results(chartResult, []);
+				
+				this._updateChart(chart, chartResult, true);
+			}
+		}
+		finally
+		{
+			this._setChartsUpdateTime(charts, updateTime);			
+		}
+	};
+	
+	dashboardBase._doHandleChartsAjax = function(url, group, chartQueryPairs)
+	{
+		if(!chartQueryPairs || chartQueryPairs.length == 0)
+			return;
+		
+		var dashboard = this;
+		var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
+		var dashboardQueryForm = this._buildDashboardQueryForm(chartQueryPairs);
 		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
 		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 		var fetchContext =
 		{
 			group: group,
-			charts: preUpdateCharts,
+			charts: charts,
 			query: dashboardQuery,
-			groupContext: groupContext,
 			//此次请求的XMLHttpRequest，将在后续设置
 			xhr: undefined,
 			//此次请求是否成功，将在后续设置
@@ -1846,8 +1843,7 @@
 				}
 				finally
 				{
-					dashboard._setChartsUpdateTime(preUpdateCharts, updateTime);				
-					dashboard._finishChartsRefreshDataIfMatch(preUpdateCharts);
+					dashboard._setChartsUpdateTime(charts, updateTime);				
 				}
 			},
 			error : function(jqXHR, textStatus, errorThrown)
@@ -1860,8 +1856,7 @@
 				}
 				finally
 				{
-					dashboard._setChartsUpdateTime(preUpdateCharts, updateTime);
-					dashboard._finishChartsRefreshDataIfMatch(preUpdateCharts);
+					dashboard._setChartsUpdateTime(charts, updateTime);
 				}
 			}
 		});
@@ -1970,7 +1965,7 @@
 		
 		var dashboard = this;
 		var charts = fetchContext.charts;
-		//结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+		//结构同：org.datagear.analysis.support.ChartResultErrorMessage
 		var error = { type: "Error", message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
 		var logException = true;
 		
@@ -2111,29 +2106,10 @@
 		});
 	};
 	
-	dashboardBase._startChartsRefreshData = function(charts)
-	{
-		for(var i=0; i<charts.length; i++)
-		{
-			charts[i]._startRefreshData();
-		}
-	};
-	
-	dashboardBase._finishChartsRefreshDataIfMatch = function(charts)
-	{
-		chartFactory.executeSilently(function()
-		{
-			for(var i=0; i<charts.length; i++)
-			{
-				charts[i]._finishRefreshDataIfMatch();
-			}
-		});
-	};
-	
 	/**
 	 * 构建更新看板的ajax请求数据。
 	 */
-	dashboardBase._buildDashboardQueryForm = function(charts)
+	dashboardBase._buildDashboardQueryForm = function(chartQueryPairs)
 	{
 		var updateDashboardConfig = dashboardFactory.updateDashboardConfig;
 		
@@ -2144,19 +2120,19 @@
 			globalResultDataFormat = $.extend(true, {}, globalResultDataFormat);
 		
 		var dashboardQueryForm = {};
+		//结构同：org.datagear.analysis.DashboardQuery
 		var dashboardQuery = { chartQueries: {}, resultDataFormat: globalResultDataFormat, suppressChartError: true };
 		
 		dashboardQueryForm[updateDashboardConfig.dashboardIdParamName] = this.id;
 		this._dashboardQueryOfForm(dashboardQueryForm, dashboardQuery);
 		
-		if(charts && charts.length)
+		if(chartQueryPairs && chartQueryPairs.length > 0)
 		{
-			for(var i=0; i<charts.length; i++)
+			for(var i=0; i<chartQueryPairs.length; i++)
 			{
-				var chart = charts[i];
-				var chartId = chart.id;
-				var chartQuery = this._buildChartQuery(chart);
-				dashboardQuery.chartQueries[chartId] = chartQuery;
+				var chart = chartQueryPairs[i].chart;
+				var chartQuery = chartQueryPairs[i].query;
+				dashboardQuery.chartQueries[chart.id] = chartQuery;
 			}
 		}
 		
@@ -3346,7 +3322,7 @@
 	 */
 	dashboardBase.isWaitForUpdate = function(chart, currentTime)
 	{
-		return this._isWaitForUpdate(chart, currentTime);
+		return (this._isWaitForUpdate(chart, currentTime)  > 0);
 	};
 	// > @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForUpdate取代
 	
