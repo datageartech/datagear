@@ -1664,7 +1664,7 @@
 		this._startChartsRefreshData(preUpdateCharts);
 		
 		var dashboard = this;
-		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
+		var dashboardQueryForm = this._buildDashboardQueryForm(preUpdateCharts);
 		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
 		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 		var fetchContext =
@@ -1784,7 +1784,7 @@
 		this._startChartsRefreshData(preUpdateCharts);
 		
 		var dashboard = this;
-		var dashboardQueryForm = this._buildUpdateDashboardAjaxData(preUpdateCharts);
+		var dashboardQueryForm = this._buildDashboardQueryForm(preUpdateCharts);
 		var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
 		// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 		var fetchContext =
@@ -2133,7 +2133,7 @@
 	/**
 	 * 构建更新看板的ajax请求数据。
 	 */
-	dashboardBase._buildUpdateDashboardAjaxData = function(charts)
+	dashboardBase._buildDashboardQueryForm = function(charts)
 	{
 		var updateDashboardConfig = dashboardFactory.updateDashboardConfig;
 		
@@ -2155,32 +2155,43 @@
 			{
 				var chart = charts[i];
 				var chartId = chart.id;
-				
-				var chartQuery = { dataSetQueries: [], resultDataFormat: chart.resultDataFormat() };
-				
-				if(chartQuery.resultDataFormat)
-				{
-					//这里需要深度拷贝，因为后续可能会被修改
-					chartQuery.resultDataFormat = $.extend(true, {}, chartQuery.resultDataFormat);
-				}
-				else
-				{
-					chartQuery.resultDataFormat = globalResultDataFormat;
-				}
-				
-				var dataSetBinds = chart.dataSetBinds();
-				for(var j=0; j<dataSetBinds.length; j++)
-				{
-					//这里需要深度拷贝，因为后续可能会被修改
-					var dataSetQuery = $.extend(true, {}, dataSetBinds[j].query);
-					chartQuery.dataSetQueries.push(dataSetQuery);
-				}
-				
+				var chartQuery = this._buildChartQuery(chart);
 				dashboardQuery.chartQueries[chartId] = chartQuery;
 			}
 		}
 		
 		return dashboardQueryForm;
+	};
+	
+	dashboardBase._buildChartQuery = function(chart)
+	{
+		var globalResultDataFormat = this.resultDataFormat();
+		
+		//这里需要深度拷贝，因为后续可能会被修改
+		if(globalResultDataFormat)
+			globalResultDataFormat = $.extend(true, {}, globalResultDataFormat);
+		
+		var chartQuery = { dataSetQueries: [], resultDataFormat: chart.resultDataFormat() };
+		
+		if(chartQuery.resultDataFormat)
+		{
+			//这里需要深度拷贝，因为后续可能会被修改
+			chartQuery.resultDataFormat = $.extend(true, {}, chartQuery.resultDataFormat);
+		}
+		else
+		{
+			chartQuery.resultDataFormat = globalResultDataFormat;
+		}
+		
+		var dataSetBinds = chart.dataSetBinds();
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			//这里需要深度拷贝，因为后续可能会被修改
+			var dataSetQuery = $.extend(true, {}, dataSetBinds[i].query);
+			chartQuery.dataSetQueries.push(dataSetQuery);
+		}
+		
+		return chartQuery;
 	};
 	
 	dashboardBase._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQuery)
