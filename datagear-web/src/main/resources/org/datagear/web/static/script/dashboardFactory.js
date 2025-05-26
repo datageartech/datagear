@@ -717,7 +717,12 @@
 		}
 		
 		for(var i=0; i<targetCharts.length; i++)
-			targetCharts[i].refreshData();
+		{
+			chartFactory.executeSilently(function()
+			{
+				targetCharts[i].refreshData();
+			});
+		}
 	};
 	
 	chartBase._isLinkTriggerableByEvent = function(link, chartEvent)
@@ -742,9 +747,8 @@
 		var unreadys = this.unreadyDataSetParams(true);
 		if(unreadys.length > 0)
 		{
-			chartFactory.logException("chart '#"+this.elementId+"' dataSetBinds["+unreadys[0].dataSetBindIndex
+			throw new Error("chart '#"+this.elementId+"' dataSetBinds["+unreadys[0].dataSetBindIndex
 										+"] DataSetParam["+unreadys[0].paramIndex+"](named " +"'"+unreadys[0].param.name+"') value required");
-			return;
 		}
 		
 		//这里不能使用this.statusPreUpdate(true)的方式实现
@@ -1427,14 +1431,10 @@
 					
 					for(var i=0; i<charts.length; i++)
 					{
-						try
+						chartFactory.executeSilently(function()
 						{
 							charts[i].refreshData();
-						}
-						catch(e)
-						{
-							chartFactory.logException(e);
-						}
+						});
 					}
 				}
 			}
