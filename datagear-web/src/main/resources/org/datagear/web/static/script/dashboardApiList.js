@@ -190,6 +190,8 @@ global.dashboardApiCompletions =
 	{name: "resultDataRowCell", value: "resultDataRowCell(", displayName: "resultDataRowCell() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultDatas", value: "resultDatas(", displayName: "resultDatas() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultDatasOf", value: "resultDatasOf(", displayName: "resultDatasOf() ", displayComment: "chart", categories: ["chart"]},
+	{name: "resultIgnoreFetch", value: "resultIgnoreFetch(", displayName: "resultIgnoreFetch() ", displayComment: "chart", categories: ["chart"]},
+	{name: "resultIgnoreFetchOf", value: "resultIgnoreFetchOf(", displayName: "resultIgnoreFetchOf() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultMapDatas", value: "resultMapDatas(", displayName: "resultMapDatas() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultNameValueDatas", value: "resultNameValueDatas(", displayName: "resultNameValueDatas() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resultOf", value: "resultOf(", displayName: "resultOf() ", displayComment: "chart", categories: ["chart"]},

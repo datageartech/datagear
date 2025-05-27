@@ -4934,6 +4934,49 @@
 		}
 	};
 	
+	/**
+	 * 获取/设置数据集结果是否是忽略获取的。
+	 * 
+	 * @param dataSetResult 数据集结果
+	 * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
+	 * @returns true、false
+	 * @since 5.4.0
+	 */
+	chartBase.resultIgnoreFetch = function(dataSetResult, ignoreFetch)
+	{
+		if(ignoreFetch === undefined)
+		{
+			return (dataSetResult && dataSetResult.ignoreFetch != null ? dataSetResult.ignoreFetch : false);
+		}
+		else
+		{
+			dataSetResult.ignoreFetch = ignoreFetch;
+		}
+	};
+	
+	/**
+	 * 获取/设置指定数据集绑定对应的数据集结果是否是忽略获取的。
+	 * 
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @param dataSetBind 数据集绑定、索引数值
+	 * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
+	 * @returns true、false
+	 * @since 5.4.0
+	 */
+	chartBase.resultIgnoreFetchOf = function(chartResult, dataSetBind, ignoreFetch)
+	{
+		var dataSetResult = this.resultOf(chartResult, dataSetBind);
+		
+		if(ignoreFetch === undefined)
+		{
+			return this.resultIgnoreFetch(dataSetResult);
+		}
+		else
+		{
+			this.resultIgnoreFetch(dataSetResult, ignoreFetch);
+		}
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
