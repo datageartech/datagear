@@ -2139,6 +2139,7 @@
 		return dashboardQueryForm;
 	};
 	
+	//构建图表查询对象，结构同：org.datagear.analysis.ChartQuery
 	dashboardBase._buildChartQuery = function(chart)
 	{
 		var globalResultDataFormat = this.resultDataFormat();
@@ -2162,6 +2163,7 @@
 		var dataSetBinds = chart.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
+			//这里无需处理是否忽略获取结果（ignoreFetch），后台会处理
 			//这里需要深度拷贝，因为后续可能会被修改
 			var dataSetQuery = $.extend(true, {}, dataSetBinds[i].query);
 			chartQuery.dataSetQueries.push(dataSetQuery);

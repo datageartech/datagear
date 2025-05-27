@@ -4546,6 +4546,7 @@
 	 * 
 	 * @param dataSetBinds 可选，要查找的数据集绑定、索引数值，或者它们的数组，默认为：this.dataSetBinds()
 	 * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
+	 * @param checkIgnoreFetch 可选，是否校验忽略获取结果的数据集，默认值为：false
 	 * @returns 未准备好的数据集字段信息数组，格式为：
 	 * 				[
 	 * 					{ dataSetBind: 数据集绑定, dataSetBindIndex: 数据集绑定索引, param: 数据集参数对象, paramIndex: 参数索引 },
@@ -4553,7 +4554,7 @@
 	 * 				]，空数组表示都已准备好
 	 * @since 5.4.0
 	 */
-	chartBase.unreadyDataSetParams = function(dataSetBinds, stopOnFirst)
+	chartBase.unreadyDataSetParams = function(dataSetBinds, stopOnFirst, checkIgnoreFetch)
 	{
 		//(true)、(false)
 		if(dataSetBinds === true || dataSetBinds === false)
@@ -4565,12 +4566,17 @@
 		dataSetBinds = (dataSetBinds === undefined ? this.dataSetBinds() :
 							($.isArray(dataSetBinds) ? dataSetBinds : [ dataSetBinds ]));
 		stopOnFirst = (stopOnFirst == null ? false : stopOnFirst);
+		checkIgnoreFetch = (checkIgnoreFetch == null ? false: checkIgnoreFetch);
 		
 		var re = [];
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
 			var dsb = this._dataSetBindOf(dataSetBinds[i]);
+			
+			if(!checkIgnoreFetch && this.dataSetIgnoreFetch(dsb))
+				continue;
+			
 			var params = this.dataSetParams(dsb);
 			
 			if(!params || params.length == 0)

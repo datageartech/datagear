@@ -218,7 +218,14 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 		{
 			DataSetBind dataSetBind = this.dataSetBinds[i];
 			DataSetQuery dataSetQuery = getDataSetQuery(query, dataSetBind, i);
-			DataSetResult dataSetResult = dataSetBind.getResult(dataSetQuery);
+			boolean ignoreFetch = dataSetQuery.isIgnoreFetch();
+
+			DataSetResult dataSetResult;
+
+			if (ignoreFetch)
+				dataSetResult = createDataSetResultForIgnoreFetch();
+			else
+				dataSetResult = dataSetBind.getResult(dataSetQuery);
 
 			dataSetResults.add(dataSetResult);
 		}
@@ -262,6 +269,14 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 		}
 
 		return dataSetQuery;
+	}
+
+	protected DataSetResult createDataSetResultForIgnoreFetch()
+	{
+		DataSetResult dr = new DataSetResult(null);
+		dr.setIgnoreFetch(true);
+
+		return dr;
 	}
 
 	@Override

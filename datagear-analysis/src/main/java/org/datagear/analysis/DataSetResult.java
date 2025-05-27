@@ -27,7 +27,7 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetResult implements AdditionsAware, Serializable
+public class DataSetResult implements AdditionsAware, IgnoreFetchAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -41,6 +41,9 @@ public class DataSetResult implements AdditionsAware, Serializable
 	 * </p>
 	 */
 	private Map<String, ?> additions = null;
+
+	/** 是否忽略获取结果 */
+	private boolean ignoreFetch = IgnoreFetchAware.DEFAULT;
 
 	public DataSetResult()
 	{
@@ -92,6 +95,18 @@ public class DataSetResult implements AdditionsAware, Serializable
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
+	}
+
+	@Override
+	public boolean isIgnoreFetch()
+	{
+		return ignoreFetch;
+	}
+
+	@Override
+	public void setIgnoreFetch(boolean ignoreFetch)
+	{
+		this.ignoreFetch = ignoreFetch;
 	}
 
 	/**

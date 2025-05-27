@@ -32,7 +32,7 @@ import org.datagear.util.Global;
  * @author datagear@163.com
  *
  */
-public class DataSetQuery implements ResultDataFormatAware, Serializable
+public class DataSetQuery implements ResultDataFormatAware, IgnoreFetchAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -56,6 +56,9 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	/** 结果数据最大返回数目 */
 	private int resultFetchSize = -1;
 
+	/** 是否忽略获取结果 */
+	private boolean ignoreFetch = IgnoreFetchAware.DEFAULT;
+
 	public DataSetQuery()
 	{
 		super();
@@ -67,6 +70,7 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 		setParamValues(query.getParamValues());
 		this.resultDataFormat = query.resultDataFormat;
 		this.resultFetchSize = query.resultFetchSize;
+		this.ignoreFetch = query.ignoreFetch;
 	}
 
 	public Map<String, ?> getParamValues()
@@ -127,6 +131,18 @@ public class DataSetQuery implements ResultDataFormatAware, Serializable
 	public void setResultFetchSize(int resultFetchSize)
 	{
 		this.resultFetchSize = resultFetchSize;
+	}
+
+	@Override
+	public boolean isIgnoreFetch()
+	{
+		return ignoreFetch;
+	}
+
+	@Override
+	public void setIgnoreFetch(boolean ignoreFetch)
+	{
+		this.ignoreFetch = ignoreFetch;
 	}
 
 	/**
