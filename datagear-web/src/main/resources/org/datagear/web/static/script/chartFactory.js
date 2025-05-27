@@ -1995,7 +1995,6 @@
 	chartBase.dataSetParamValues = function(dataSetBind, paramValues, increment)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		
 		var paramValuesCurrent = dataSetBind.query.paramValues;
 		
 		if(dataSetBind._originalParamValues == null)
@@ -4682,7 +4681,7 @@
 	 * 
 	 * @param dataSetResult 数据集结果
 	 * @param row 行索引数值、数值数组
-	 * @return 数据对象、据对象数组，当result、row为null时，将返回null
+	 * @returns 数据对象、据对象数组，当result、row为null时，将返回null
 	 * @since 5.4.0
 	 */
 	chartBase.resultDataRow = function(dataSetResult, row)
@@ -4714,7 +4713,7 @@
 	 * @param fieldMap 返回字段映射表，格式为：{ 返回对象字段名: 数据集字段对象、字段名、字段数组、字段名数组 }
 	 * @param row 可选，行索引，以0开始，默认为：0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{"...": ..., "...": ...}, ...]
+	 * @returns [{"...": ..., "...": ...}, ...]
 	 * @since 5.4.0
 	 */
 	chartBase.resultMapDatas = function(dataSetResult, fieldMap, row, count)
@@ -4771,7 +4770,7 @@
 	 * @param valueField 值数据集字段对象、字段名、数组
 	 * @param row 可选，行索引，以0开始，默认为：0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{name: ..., value: ...}, ...]
+	 * @returns [{name: ..., value: ...}, ...]
 	 * @since 5.4.0
 	 */
 	chartBase.resultNameValueDatas = function(dataSetResult, nameField, valueField, row, count)
@@ -4787,7 +4786,7 @@
 	 * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
 	 * @param row 可选，行索引，默认为：0
 	 * @param count 可选，获取的最多行数，默认为全部
-	 * @return fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
+	 * @returns fields为数组时：[[..., ...], ...]；fields非数组时：[..., ...]
 	 * @since 5.4.0
 	 */
 	chartBase.resultRowArrayDatas = function(dataSetResult, fields, row, count)
@@ -4864,13 +4863,69 @@
 	 * @param valueField 值数据集字段对象、字段名、数组
 	 * @param row 可选，行索引，以0开始，默认为：0
 	 * @param count 可选，获取结果数据的最多行数，默认为全部
-	 * @return [{value: ...}, ...]
+	 * @returns [{value: ...}, ...]
 	 * @since 5.4.0
 	 */
 	chartBase.resultValueDatas = function(dataSetResult, valueField, row, count)
 	{
 		var fieldMap ={ "value": valueField };
 		return this.resultMapDatas(dataSetResult, fieldMap, row, count);
+	};
+	
+	/**
+	 * 获取/设置指定数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
+	 * 
+	 * @param dataSetBind 指定数据集绑定或其索引
+	 * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
+	 * @returns true、false
+	 * @since 5.4.0
+	 */
+	chartBase.dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		var query = dataSetBind.query;
+		
+		if(ignoreFetch === undefined)
+		{
+			return (query.ignoreFetch == null ? false : query.ignoreFetch);
+		}
+		else
+		{
+			query.ignoreFetch = ignoreFetch;
+		}
+	};
+	
+	/**
+	 * 获取/设置全部数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
+	 * 
+	 * @param ignoreFetch 可选，要设置的值，true 全部忽略；false 全部不忽略；[ ... ] 指定元素值
+	 * @returns true、false
+	 * @since 5.4.0
+	 */
+	chartBase.dataSetIgnoreFetches = function(ignoreFetch)
+	{
+		var dataSetBinds = this.dataSetBinds();
+		
+		if(ignoreFetch === undefined)
+		{
+			var re = [];
+			
+			for(var i=0; i<dataSetBinds.length; i++)
+				re[i] = this.dataSetIgnoreFetch(dataSetBinds[i]);
+			
+			return re;
+		}
+		else
+		{
+			var isArray = $.isArray(ignoreFetch);
+			var len = (isArray ? Math.min(dataSetBinds.length, ignoreFetch.length) : dataSetBinds.length);
+			
+			for(var i=0; i<len; i++)
+			{
+				var myVal = (isArray ? ignoreFetch[i] : ignoreFetch);
+				this.dataSetIgnoreFetch(dataSetBinds[i], myVal);
+			}
+		}
 	};
 	
 	

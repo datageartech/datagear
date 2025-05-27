@@ -99,6 +99,8 @@ global.dashboardApiCompletions =
 	{name: "dataSetFields", value: "dataSetFields(", displayName: "dataSetFields() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetFieldsOfSign", value: "dataSetFieldsOfSign(", displayName: "dataSetFieldsOfSign() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetFieldsSigns", value: "dataSetFieldsSigns(", displayName: "dataSetFieldsSigns() ", displayComment: "chart", categories: ["chart"]},
+	{name: "dataSetIgnoreFetch", value: "dataSetIgnoreFetch(", displayName: "dataSetIgnoreFetch() ", displayComment: "chart", categories: ["chart"]},
+	{name: "dataSetIgnoreFetches", value: "dataSetIgnoreFetches(", displayName: "dataSetIgnoreFetches() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetParam", value: "dataSetParam(", displayName: "dataSetParam() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetParamValue", value: "dataSetParamValue(", displayName: "dataSetParamValue() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetParamValueFirst", value: "dataSetParamValueFirst(", displayName: "dataSetParamValueFirst() ", displayComment: "chart", categories: ["chart"]},
