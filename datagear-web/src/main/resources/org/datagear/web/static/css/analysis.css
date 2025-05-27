@@ -518,6 +518,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0.2em 0em;
+	cursor: pointer;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form input,
 .dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form select,

@@ -1750,6 +1750,13 @@
 						chartSetting.getDataSetParamValueFormFoot(this).hide();
 					}
 				});
+				
+				$head.click(function()
+				{
+					$(".dg-datasetbind-section-content", $(this).parent()).toggle();
+				});
+				
+				chartSetting.toggleParamFormContentByIgnoreFetch($panel, $fp, chart, i);
 			}
 			
 			$button.click(function()
@@ -1764,16 +1771,16 @@
 						return;
 					
 					var $this = $(this);
-					
 					var $form = chartSetting.getDataSetParamValueForm($this);
+					var dataSetBindIndex = $this.data("dataSetBindIndex");
+					var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
-					if(!chartSetting.validateDataSetParamValueForm($form))
+					if(!ignoreFetch && !chartSetting.validateDataSetParamValueForm($form))
 						validateOk = false;
 					else
 					{
-						var myIndex = $this.data("dataSetBindIndex");
 						var myParamValues = chartSetting.getDataSetParamValueObj($form);
-						paramValuess.push({ index : myIndex, paramValues: myParamValues });
+						paramValuess.push({ index : dataSetBindIndex, paramValues: myParamValues });
 					}
 				});
 				
@@ -1834,6 +1841,7 @@
 				var $form = chartSetting.getDataSetParamValueForm(this);
 				
 				chartSetting.setDataSetParamValueObj($form, chart.dataSetParamValues(dataSetBindIndex));
+				chartSetting.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);
 			});
 		}
 		
@@ -1847,6 +1855,17 @@
 	{
 		//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
 		chart.dataSetParamValues(dataSetBindIndex, paramValues, true);
+	};
+	
+	chartSetting.toggleParamFormContentByIgnoreFetch = function($panel, $section, chart, dataSetBindIndex)
+	{
+		var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
+		var $content = $(".dg-datasetbind-section-content", $section);
+		
+		if(ignoreFetch)
+			$content.hide();
+		else
+			$content.show();
 	};
 	
 	/**
