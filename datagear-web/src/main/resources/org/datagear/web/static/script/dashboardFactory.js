@@ -1770,6 +1770,9 @@
 				//设置空数据集结果数组，避免后续出现空指针异常
 				chart.results(chartResult, []);
 				
+				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
+				this._addChartQueryToChartResult(chartResult, chartQuery);
+				
 				this._updateChart(chart, chartResult, true);
 			}
 		}
@@ -1871,7 +1874,6 @@
 	{
 		var charts = fetchContext.charts;
 		var dashboardQuery = fetchContext.query;
-		var chartQueries = dashboardQuery.chartQueries;
 		
 		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
 		var dashboard = this;
@@ -1892,8 +1894,7 @@
 			
 			if(chartListener && chartListener.onFetch)
 			{
-				var chartId = chart.id;
-				var chartQuery = (chartQueries[chartId] || {});
+				var chartQuery = (this._chartQueryOfDashboardQuery(dashboardQuery, chart.id) || {});
 				
 				chartFactory.executeSilently(function()
 				{
@@ -1911,6 +1912,7 @@
 		var dashboard = this;
 		var chartResults = dashboardResult.chartResults;
 		var chartErrors = dashboardResult.chartErrors;
+		var dashboardQuery = fetchContext.query;
 		
 		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
 		var listener = this.listener();
@@ -1933,6 +1935,9 @@
 			chartFactory.executeSilently(function()
 			{
 				var chartResult = (chartResults[chartId] || {});
+				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
+				
+				dashboard._addChartQueryToChartResult(chartResult, chartQuery);
 				dashboard._updateChart(chart, chartResult, true);
 			});
 		}
@@ -1946,7 +1951,10 @@
 			
 			chartFactory.executeSilently(function()
 			{
-				var error = (chartErrors[chartId] || {});
+				var error = (chartErrors[chartId] || { type: "Error", message: "error" });
+				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
+				
+				dashboard._addChartQueryToChartError(error, chartQuery);
 				dashboard._handleChartAjaxError(chart, error, true);
 			});
 		}
@@ -1969,8 +1977,8 @@
 		
 		var dashboard = this;
 		var charts = fetchContext.charts;
-		//结构同：org.datagear.analysis.support.ChartResultErrorMessage
-		var error = { type: "Error", message: (errorThrown ? errorThrown : (textStatus ? textStatus : "error")) };
+		var dashboardQuery = fetchContext.query;
+		var errorMsg = (errorThrown ? errorThrown : (textStatus ? textStatus : "error"));
 		var logException = true;
 		
 		/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
@@ -1996,6 +2004,11 @@
 			
 			chartFactory.executeSilently(function()
 			{
+				//结构同：org.datagear.analysis.support.ChartResultErrorMessage
+				var error = { type: "Error", message: errorMsg };
+				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
+				
+				dashboard._addChartQueryToChartError(error, chartQuery);
 				dashboard._handleChartAjaxError(chart, error, false);
 			});
 		}
@@ -2012,7 +2025,7 @@
 		
 		if(logException)
 		{
-			chartFactory.logException("Fetch charts data error : " + error.message);
+			chartFactory.logException("Fetch charts data error : " + errorMsg);
 		}
 	};
 	
@@ -2052,8 +2065,8 @@
 		if(logIfNone)
 		{
 			var type = (error ? error.type : "Error");
-			var message = (error ? error.message : "Chart result error");
-			chartFactory.logException("["+chart.name+"]["+chart.elementWidgetId()+"] " + type + " : " + message);
+			var message = (error ? error.message : "chart result error");
+			chartFactory.logException("chart '#"+chart.elementId+"' " + type + " : " + message);
 		}
 	};
 	
@@ -2136,11 +2149,32 @@
 			{
 				var chart = chartQueryPairs[i].chart;
 				var chartQuery = chartQueryPairs[i].query;
-				dashboardQuery.chartQueries[chart.id] = chartQuery;
+				this._chartQueryOfDashboardQuery(dashboardQuery, chart.id, chartQuery);
 			}
 		}
 		
 		return dashboardQueryForm;
+	};
+	
+	//获取/设置看板查询对象中的图表查询对象
+	dashboardBase._chartQueryOfDashboardQuery = function(dashboardQuery, chartId, chartQuery)
+	{
+		var chartQueries = dashboardQuery.chartQueries;
+		
+		if(chartQuery === undefined)
+		{
+			return (chartQueries ? chartQueries[chartId] : null);
+		}
+		else
+		{
+			if(chartQueries == null)
+			{
+				chartQueries = {};
+				dashboardQuery.chartQueries = chartQueries;
+			}
+			
+			chartQueries[chartId] = chartQuery;
+		}
 	};
 	
 	//构建图表查询对象，结构同：org.datagear.analysis.ChartQuery
@@ -2188,6 +2222,35 @@
 		{
 			dashboardQueryForm[dashboardQueryParamName] = dashboardQuery;
 		}
+	};
+	
+	dashboardBase._addChartQueryToChartResult = function(chartResult, chartQuery)
+	{
+		if(!chartResult)
+			return;
+		
+		//应在图表结果中添加对应的查询参数信息，因为此时图表的参数状态可能已被修改
+		
+		chartResult.query = chartQuery;
+		
+		var dataSetResults = (chartResult.dataSetResults || []);
+		var dataSetQueries = (chartQuery && chartQuery.dataSetQueries ? chartQuery.dataSetQueries : []);
+		
+		for(var i=0; i<dataSetResults.length; i++)
+		{
+			if(dataSetResults[i] != null)
+				dataSetResults[i].query = dataSetQueries[i];
+		}
+	};
+	
+	dashboardBase._addChartQueryToChartError = function(chartError, chartQuery)
+	{
+		if(!chartError)
+			return;
+		
+		//应在图表错误信息中添加对应的查询参数信息，因为此时图表的参数状态可能已被修改
+		
+		chartError.query = chartQuery;
 	};
 	
 	/**
