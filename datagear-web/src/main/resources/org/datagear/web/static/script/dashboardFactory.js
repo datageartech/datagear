@@ -1627,9 +1627,13 @@
 			}
 		}
 		
-		this._doHandleChartsLocal(preUpdateLocals);
-		
 		var dashboard = this;
+		
+		chartFactory.executeSilently(function()
+		{
+			dashboard._doHandleChartsLocal(preUpdateLocals);
+		});
+		
 		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
 		var url = this.contextURL(webContext.attributes.updateDashboardURL);
 		
