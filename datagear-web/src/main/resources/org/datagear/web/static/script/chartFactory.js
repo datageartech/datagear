@@ -1921,12 +1921,17 @@
 		if(dataSetBind && dataSetBind.dataSet !== undefined)
 			return dataSetBind;
 		
-		var re = dataSetBind;
+		var re;
 		
 		//索引数值
 		if(chartFactory.isNumber(dataSetBind))
 		{
 			re = this.dataSetBindAt(dataSetBind);
+		}
+		else
+		{
+			//其他情况应直接赋值且不校验合法性
+			re = dataSetBind;
 		}
 		
 		if(!nullable && re == null)
@@ -1956,8 +1961,16 @@
 	chartBase.dataSetParamValue = function(dataSetBind, name, value)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		var param = this._dataSetParamOf(dataSetBind, name);
-		name = param.name;
+		
+		if(chartFactory.isString(name))
+		{
+			//name是字符串时不应使用下面的this._dataSetParamOf()函数逻辑，以允许设置未定义的参数值，从而支持隐式参数
+		}
+		else
+		{
+			var param = this._dataSetParamOf(dataSetBind, name);
+			name = param.name;
+		}
 		
 		if(value === undefined)
 		{
@@ -2980,18 +2993,26 @@
 	 */
 	chartBase.dataSetFields = function(dataSetBind, sort)
 	{
-		dataSetBind = this._dataSetBindOf(dataSetBind);
 		sort = (sort === undefined ? true : sort);
 		
-		var fields = null;
-		var isDataSet = (dataSetBind.fields !== undefined);
+		var dataSet;
+		var isDataSet;
 		
-		if(isDataSet)
-			fields = dataSetBind.fields;
+		//数据集
+		if(dataSetBind && dataSetBind.params !== undefined)
+		{
+			dataSet = dataSetBind;
+			isDataSet = true;
+		}
+		//数据集绑定、索引数值
 		else
-			fields = (dataSetBind.dataSet ? dataSetBind.dataSet.fields : null);
+		{
+			dataSetBind = this._dataSetBindOf(dataSetBind);
+			dataSet = dataSetBind.dataSet;
+			isDataSet = false;
+		}
 		
-		fields = (fields || []);
+		var fields = (dataSet && dataSet.fields ? dataSet.fields : []);
 		
 		if(isDataSet || !sort)
 			return fields;
@@ -3063,12 +3084,8 @@
 		
 		var fields = this.dataSetFields(dataSetBind, false);
 		
-		if(!fields)
-		{
-			re = null;
-		}
 		//索引数值
-		else if(chartFactory.isNumber(fieldInfo))
+		if(chartFactory.isNumber(fieldInfo))
 		{
 			re = fields[fieldInfo];
 		}
@@ -3161,22 +3178,21 @@
 	 */
 	chartBase.dataSetParams = function(dataSetBind)
 	{
-		dataSetBind = this._dataSetBindOf(dataSetBind);
-		
-		var params = null;
+		var dataSet;
 		
 		//数据集
-		if(dataSetBind.params !== undefined)
+		if(dataSetBind && dataSetBind.params !== undefined)
 		{
-			params = dataSetBind.params;
+			dataSet = dataSetBind;
 		}
-		//数据集绑定
+		//数据集绑定、索引数值
 		else
 		{
-			params = (dataSetBind.dataSet ? dataSetBind.dataSet.params : null);
+			dataSetBind = this._dataSetBindOf(dataSetBind);
+			dataSet = dataSetBind.dataSet;
 		}
 		
-		return (params || []);
+		return (dataSet && dataSet.params ? dataSet.params : []);
 	};
 	
 	/**
