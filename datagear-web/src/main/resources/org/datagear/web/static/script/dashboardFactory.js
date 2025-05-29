@@ -1771,7 +1771,7 @@
 				chart.results(chartResult, []);
 				
 				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
-				this._addChartQueryToChartResult(chartResult, chartQuery);
+				this._chartQueryOfChartResult(chartResult, chartQuery);
 				
 				this._updateChart(chart, chartResult, true);
 			}
@@ -1937,7 +1937,7 @@
 				var chartResult = (chartResults[chartId] || {});
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
 				
-				dashboard._addChartQueryToChartResult(chartResult, chartQuery);
+				dashboard._chartQueryOfChartResult(chartResult, chartQuery);
 				dashboard._updateChart(chart, chartResult, true);
 			});
 		}
@@ -1954,7 +1954,7 @@
 				var error = (chartErrors[chartId] || { type: "Error", message: "error" });
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
 				
-				dashboard._addChartQueryToChartError(error, chartQuery);
+				dashboard._chartQueryOfChartError(error, chartQuery);
 				dashboard._handleChartAjaxError(chart, error, true);
 			});
 		}
@@ -2008,7 +2008,7 @@
 				var error = { type: "Error", message: errorMsg };
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
 				
-				dashboard._addChartQueryToChartError(error, chartQuery);
+				dashboard._chartQueryOfChartError(error, chartQuery);
 				dashboard._handleChartAjaxError(chart, error, false);
 			});
 		}
@@ -2224,33 +2224,43 @@
 		}
 	};
 	
-	dashboardBase._addChartQueryToChartResult = function(chartResult, chartQuery)
+	dashboardBase._chartQueryOfChartResult = function(chartResult, chartQuery)
 	{
-		if(!chartResult)
-			return;
-		
-		//应在图表结果中添加对应的查询参数信息，因为此时图表的参数状态可能已被修改
-		
-		chartResult.query = chartQuery;
-		
-		var dataSetResults = (chartResult.dataSetResults || []);
-		var dataSetQueries = (chartQuery && chartQuery.dataSetQueries ? chartQuery.dataSetQueries : []);
-		
-		for(var i=0; i<dataSetResults.length; i++)
+		if(chartQuery === undefined)
 		{
-			if(dataSetResults[i] != null)
-				dataSetResults[i].query = dataSetQueries[i];
+			return (chartResult ? chartResult.query : null);
+		}
+		else
+		{
+			if(!chartResult)
+				return;
+			
+			chartResult.query = chartQuery;
+			
+			var dataSetResults = (chartResult.dataSetResults || []);
+			var dataSetQueries = (chartQuery && chartQuery.dataSetQueries ? chartQuery.dataSetQueries : []);
+			
+			for(var i=0; i<dataSetResults.length; i++)
+			{
+				if(dataSetResults[i] != null)
+					dataSetResults[i].query = dataSetQueries[i];
+			}
 		}
 	};
 	
-	dashboardBase._addChartQueryToChartError = function(chartError, chartQuery)
+	dashboardBase._chartQueryOfChartError = function(chartError, chartQuery)
 	{
-		if(!chartError)
-			return;
-		
-		//应在图表错误信息中添加对应的查询参数信息，因为此时图表的参数状态可能已被修改
-		
-		chartError.query = chartQuery;
+		if(chartQuery === undefined)
+		{
+			return (chartError ? chartError.query : null);
+		}
+		else
+		{
+			if(!chartError)
+				return;
+			
+			chartError.query = chartQuery;
+		}
 	};
 	
 	/**

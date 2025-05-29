@@ -4541,8 +4541,10 @@
 	 * 此函数支持的调用格式：
 	 * chart.unreadyDataSetParams();
 	 * chart.unreadyDataSetParams(true、false);
+	 * chart.unreadyDataSetParams(true、false, true、false);
 	 * chart.unreadyDataSetParams(dataSetBinds);
 	 * chart.unreadyDataSetParams(dataSetBinds, true、false);
+	 * chart.unreadyDataSetParams(dataSetBinds, true、false, true、false);
 	 * 
 	 * @param dataSetBinds 可选，要查找的数据集绑定、索引数值，或者它们的数组，默认为：this.dataSetBinds()
 	 * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
