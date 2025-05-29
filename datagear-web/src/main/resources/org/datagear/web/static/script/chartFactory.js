@@ -1964,7 +1964,7 @@
 		
 		if(chartFactory.isString(name))
 		{
-			//name是字符串时不应使用下面的this._dataSetParamOf()函数逻辑，以允许设置未定义的参数值，从而支持隐式参数
+			//name是字符串时不应使用下面的this._dataSetParamOf()函数逻辑，以允许获取/设置未定义的参数值，从而支持隐式参数
 		}
 		else
 		{
@@ -4993,6 +4993,73 @@
 		{
 			this.resultIgnoreFetch(dataSetResult, ignoreFetch);
 		}
+	};
+	
+	/**
+	 * 获取/设置查询对象中的指定参数值。
+	 * 
+	 * @param query 图表查询、数据集查询、数据集查询数组、数据集结果、图表结果
+	 * @param dataSetBind 数据集绑定、索引数值
+	 * @param name 参数名、索引数值
+	 * @param value 可选，要设置的参数值
+	 * @returns 要获取的参数值，没有则是null
+	 * @since 5.4.0
+	 */
+	chartBase.paramValueOfQuery = function(query, dataSetBind, name, value)
+	{
+		dataSetBind = this._dataSetBindOf(dataSetBind);
+		var dataSetQuery = this._dataSetQueryOfQuery(query, dataSetBind);
+		
+		if(chartFactory.isString(name))
+		{
+			//name是字符串时不应使用下面的this._dataSetParamOf()函数逻辑，以允许获取/设置未定义的参数值，从而支持隐式参数
+		}
+		else
+		{
+			var param = this._dataSetParamOf(dataSetBind, name);
+			name = param.name;
+		}
+		
+		if(value === undefined)
+		{
+			return (dataSetQuery && dataSetQuery.paramValues ? dataSetQuery.paramValues[name] : null);
+		}
+		else
+		{
+			dataSetQuery.paramValues[name] = value;
+		}
+	};
+	
+	chartBase._dataSetQueryOfQuery = function(query, dataSetBind)
+	{
+		var dataSetQuery = query;
+		
+		if(query)
+		{
+			//图表查询对象：org.datagear.analysis.ChartQuery
+			if(query.dataSetQueries !== undefined)
+			{
+				dataSetQuery = (query.dataSetQueries ? query.dataSetQueries[dataSetBind.index] : null);
+			}
+			//数据集查询对象：org.datagear.analysis.DataSetQuery
+			else if(query.paramValues !== undefined)
+			{
+				dataSetQuery = query;
+			}
+			//数组
+			else if($.isArray(query))
+			{
+				var myQuery = query[dataSetBind.index];
+				dataSetQuery = this._dataSetQueryOfQuery(myQuery, dataSetBind);
+			}
+			//通过chartFactory.queryOfObject()设置的对象
+			else if(chartFactory.queryOfObject(query) !== undefined)
+			{
+				dataSetQuery = this._dataSetQueryOfQuery(chartFactory.queryOfObject(query), dataSetBind);
+			}
+		}
+		
+		return dataSetQuery;
 	};
 	
 	
@@ -9329,6 +9396,20 @@
 	//以http://或者https://开头的正则表达式
 	chartFactory.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
 	
+	/**
+	 * 获取/设置指定对象的"query"字段值
+	 */
+	chartFactory.queryOfObject = function(obj, query)
+	{
+		if(query === undefined)
+		{
+			return (obj ? obj.query : null);
+		}
+		else
+		{
+			obj.query = query;
+		}
+	};
 	
 	//-------------
 	// < 已弃用函数 start

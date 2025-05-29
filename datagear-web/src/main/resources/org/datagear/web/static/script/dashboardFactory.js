@@ -2228,14 +2228,14 @@
 	{
 		if(chartQuery === undefined)
 		{
-			return (chartResult ? chartResult.query : null);
+			return chartFactory.queryOfObject(chartResult);
 		}
 		else
 		{
 			if(!chartResult)
 				return;
 			
-			chartResult.query = chartQuery;
+			chartFactory.queryOfObject(chartResult, chartQuery);
 			
 			var dataSetResults = (chartResult.dataSetResults || []);
 			var dataSetQueries = (chartQuery && chartQuery.dataSetQueries ? chartQuery.dataSetQueries : []);
@@ -2243,7 +2243,7 @@
 			for(var i=0; i<dataSetResults.length; i++)
 			{
 				if(dataSetResults[i] != null)
-					dataSetResults[i].query = dataSetQueries[i];
+					chartFactory.queryOfObject(dataSetResults[i], dataSetQueries[i]);
 			}
 		}
 	};
@@ -2252,14 +2252,14 @@
 	{
 		if(chartQuery === undefined)
 		{
-			return (chartError ? chartError.query : null);
+			return chartFactory.queryOfObject(chartError);
 		}
 		else
 		{
 			if(!chartError)
 				return;
 			
-			chartError.query = chartQuery;
+			chartFactory.queryOfObject(chartError, chartQuery);
 		}
 	};
 	
