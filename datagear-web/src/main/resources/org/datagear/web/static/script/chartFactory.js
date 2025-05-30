@@ -268,6 +268,14 @@
 	 */
 	chartFactory.DATA_SIGN_FULLNAME_SEPARATOR = ".";
 	
+	//org.datagear.analysis.DataSetParam.DataType
+	chartFactory.DataSetParamType =
+	{
+		STRING: "STRING",
+		BOOLEAN: "BOOLEAN",
+		NUMBER: "NUMBER"
+	};
+	
 	/**
 	 * 初始化渲染上下文。
 	 * 将webContext直接存入渲染上下文，复制chartTheme后使用<body>上的dg-chart-theme填充相关属性后存入渲染上下文，
@@ -1945,10 +1953,11 @@
 	 * 
 	 * @param name 参数名、参数索引
 	 * @param value 可选，要设置的参数值，不设置则执行获取操作
+	 * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
 	 */
-	chartBase.dataSetParamValueFirst = function(name, value)
+	chartBase.dataSetParamValueFirst = function(name, value, convert)
 	{
-		return this.dataSetParamValue(0, name, value);
+		return this.dataSetParamValue(0, name, value, convert);
 	};
 	
 	/**
@@ -1957,8 +1966,9 @@
 	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param name 参数名、参数索引
 	 * @param value 可选，要设置的参数值，不设置则执行获取操作
+	 * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
 	 */
-	chartBase.dataSetParamValue = function(dataSetBind, name, value)
+	chartBase.dataSetParamValue = function(dataSetBind, name, value, convert)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
@@ -1982,7 +1992,7 @@
 			var myParamValues = {};
 			myParamValues[name] = value;
 			
-			this.dataSetParamValues(dataSetBind, myParamValues, true);
+			this.dataSetParamValues(dataSetBind, myParamValues, true, convert);
 		}
 	};
 	
@@ -1991,10 +2001,11 @@
 	 * 
 	 * @param paramValues 可选，要设置的参数名/值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
 	 * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
+	 * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
 	 */
-	chartBase.dataSetParamValuesFirst = function(paramValues, increment)
+	chartBase.dataSetParamValuesFirst = function(paramValues, increment, convert)
 	{
-		return this.dataSetParamValues(0, paramValues, increment);
+		return this.dataSetParamValues(0, paramValues, increment, convert);
 	};
 	
 	/**
@@ -2003,9 +2014,10 @@
 	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
 	 * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
+	 * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
 	 * @returns 要获取的参数值集，不会null
 	 */
-	chartBase.dataSetParamValues = function(dataSetBind, paramValues, increment)
+	chartBase.dataSetParamValues = function(dataSetBind, paramValues, increment, convert)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		var paramValuesCurrent = dataSetBind.query.paramValues;
@@ -2017,22 +2029,40 @@
 			return (paramValuesCurrent || (dataSetBind.query.paramValues = {}));
 		else
 		{
-			increment = (increment == null ? false : increment);
 			paramValues = (paramValues || {});
+			increment = (increment == null ? false : increment);
+			convert = (convert == null ? false : convert);
+			
+			var params;
 			
 			if($.isArray(paramValues))
 			{
-				var params = this.dataSetParams(dataSetBind);
+				params = this.dataSetParams(dataSetBind);
 				var len = Math.min(params.length, paramValues.length);
 				var paramValuesObj = {};
 				
 				for(var i=0; i<len; i++)
 				{
 					var name = params[i].name;
-					paramValuesObj[name] = paramValues[i];
+					paramValuesObj[name] = (convert ? chartFactory.convertDataSetParamValue(params[i], paramValues[i]) : paramValues[i]);
 				}
 				
 				paramValues = paramValuesObj;
+			}
+			else
+			{
+				if(convert)
+				{
+					params = this.dataSetParams(dataSetBind);
+					for(var i=0; i<params.length; i++)
+					{
+						var name = params[i].name;
+						if(paramValues[name] !== undefined)
+						{
+							paramValues[name] = chartFactory.convertDataSetParamValue(params[i], paramValues[name]);
+						}
+					}
+				}
 			}
 			
 			if(increment)
@@ -9410,6 +9440,56 @@
 			obj.query = query;
 		}
 	};
+	
+	/**
+	 * 尝试将给定值转换为符合数据集参数类型
+	 */
+	chartFactory.convertDataSetParamValue = function(dataSetParam, value)
+	{
+		if(!dataSetParam || value == null)
+			return value;
+		
+		var re = value;
+		
+		if(chartFactory.DataSetParamType.STRING == dataSetParam.type)
+		{
+			re = (chartFactory.isString(value) ? value : value.toString());
+		}
+		else if(chartFactory.DataSetParamType.BOOLEAN == dataSetParam.type)
+		{
+			if(value === true || value === false)
+			{
+				re = value;
+			}
+			else if(chartFactory.isString(value))
+			{
+				//与后台DataSetParamValueConverter规则一致
+				re = (value == "true" || value == "1");
+			}
+			else
+				re = (value ? true : false);
+		}
+		else if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
+		{
+			if(chartFactory.isNumber(value))
+			{
+				re = value;
+			}
+			else
+			{
+				re = Number(value);
+				
+				//如果由字符串转数值丢失精度，则撤销转换，交由后台处理
+				if(chartFactory.isString(value) && re.toString() != value)
+				{
+					re = value;
+				}
+			}
+		}
+		
+		return re;
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start
