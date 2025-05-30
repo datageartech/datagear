@@ -161,7 +161,6 @@ global.dashboardApiCompletions =
 	{name: "optionsOrigin", value: "optionsOrigin()", displayName: "optionsOrigin() ", displayComment: "chart", categories: ["chart"]},
 	{name: "originalDataIndex", value: "originalDataIndex(", displayName: "originalDataIndex() ", displayComment: "chart", categories: ["chart"]},
 	{name: "originalDataIndexes", value: "originalDataIndexes(", displayName: "originalDataIndexes() ", displayComment: "chart", categories: ["chart"]},
-	{name: "paramValueOfQuery", value: "paramValueOfQuery(", displayName: "paramValueOfQuery() ", displayComment: "chart", categories: ["chart"]},
 	{name: "plugin", value: "plugin", displayName: "plugin ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginAddition", value: "pluginAddition(", displayName: "pluginAddition() ", displayComment: "chart", categories: ["chart"]},
 	{name: "pluginAttributes", value: "pluginAttributes()", displayName: "pluginAttributes() ", displayComment: "chart", categories: ["chart"]},

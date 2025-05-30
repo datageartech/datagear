@@ -5035,6 +5035,7 @@
 	 * @returns 要获取的参数值，没有则是null
 	 * @since 5.4.0
 	 */
+	/* 暂时移除，这个API不够清晰，需要重新设计
 	chartBase.paramValueOfQuery = function(query, dataSetBind, name, value)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
@@ -5091,6 +5092,7 @@
 		
 		return dataSetQuery;
 	};
+	*/
 	
 	
 	//-------------
