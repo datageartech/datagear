@@ -1362,7 +1362,7 @@
 	 *   value: ...,
 	 *   //可选，输入项标签
 	 *   label: "...",
-	 *   //可选，输入项类型，参考chartSetting.DataSetParamDataType，默认值为：chartSetting.DataSetParamDataType.STRING
+	 *   //可选，输入项类型，参考chartFactory.DataSetParamType，默认值为：chartFactory.DataSetParamType.STRING
 	 *   type: "...",
 	 *   //可选，是否必须，默认为false
 	 *   required: true || false,
@@ -1463,7 +1463,7 @@
 				item = $.extend({}, item);
 			
 			if(!item.type)
-				item.type = chartFactory.chartSetting.DataSetParamDataType.STRING;
+				item.type = chartFactory.DataSetParamType.STRING;
 			
 			items.push(item);
 			

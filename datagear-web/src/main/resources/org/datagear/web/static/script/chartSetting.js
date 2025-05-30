@@ -40,14 +40,6 @@
 	chartFactory.chartForm = chartSetting;
 	// > @deprecated 兼容2.1.1版本的window.chartFactory.chartSetting变量名，未来版本会移除
 	
-	//org.datagear.analysis.DataSetParam.DataType
-	chartSetting.DataSetParamDataType =
-	{
-		STRING: "STRING",
-		BOOLEAN: "BOOLEAN",
-		NUMBER: "NUMBER"
-	};
-	
 	//org.datagear.analysis.DataSetParam.InputType
 	chartSetting.DataSetParamInputType =
 	{
@@ -78,6 +70,9 @@
 	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
 	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
+	
+	//参数表单是否转换参数值类型选项名，以支持自定义是否转换，默认值为：true
+	builtinOptionNames.convertParamFormValue = "convertParamFormValue";
 	
 	//参数表单提交前回调函数选项名，以支持自定义提交前置处理逻辑
 	builtinOptionNames.onParamFormSubmit = "onParamFormSubmit";
@@ -159,7 +154,7 @@
 			
 			var $valueDiv = $("<div class='dg-dspv-form-item-value' />").appendTo($item);
 			
-			if(dsp.type == chartSetting.DataSetParamDataType.BOOLEAN)
+			if(dsp.type == chartFactory.DataSetParamType.BOOLEAN)
 			{
 				var defaultSelOpts = undefined;
 				
@@ -176,7 +171,7 @@
 				else
 					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options, defaultSelOpts);
 			}
-			else if(dsp.type == chartSetting.DataSetParamDataType.STRING)
+			else if(dsp.type == chartFactory.DataSetParamType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
 					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options);
@@ -195,7 +190,7 @@
 				else
 					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options);
 			}
-			else if(dsp.type == chartSetting.DataSetParamDataType.NUMBER)
+			else if(dsp.type == chartFactory.DataSetParamType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
 					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options);
@@ -409,7 +404,7 @@
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
 		
-		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 	};
 	
@@ -480,7 +475,7 @@
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
 		
-		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 	};
 	
@@ -519,7 +514,7 @@
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
 		
-		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
 		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
@@ -562,7 +557,7 @@
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
 		
-		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
 		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
@@ -611,7 +606,7 @@
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
 		
-		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
 		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
@@ -676,7 +671,7 @@
 			if((dataSetParam.required+"") == "true")
 				$input.attr("dg-validation-required", "true");
 			
-			if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+			if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 				$input.attr("dg-validation-number", "true");
 		}
 	};
@@ -744,7 +739,7 @@
 			if((dataSetParam.required+"") == "true")
 				$input.attr("dg-validation-required", "true");
 			
-			if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+			if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 				$input.attr("dg-validation-number", "true");
 		}
 	};
@@ -766,7 +761,7 @@
 		if((dataSetParam.required+"") == "true")
 			$input.attr("dg-validation-required", "true");
 		
-		if(chartSetting.DataSetParamDataType.NUMBER == dataSetParam.type)
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 	};
 	
@@ -1788,11 +1783,16 @@
 				{
 					$thisButton.removeClass("dg-param-value-form-invalid");
 					
+					var chartOptions = chart.options();
+					var convertParamFormValue = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.convertParamFormValue);
+					convertParamFormValue = (convertParamFormValue == null ? true : convertParamFormValue);
+					
 					for(var i=0; i<paramValuess.length; i++)
-						chartSetting.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues);
+					{
+						chartSetting.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
+					}
 					
 					var doRefresh = true;
-					var chartOptions = chart.options();
 					var onParamFormSubmit = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.onParamFormSubmit);
 					
 					//执行提交前回调
@@ -1851,10 +1851,10 @@
 		chartSetting.focusOnFirstInput($("form:first", $panel));
 	};
 	
-	chartSetting.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues)
+	chartSetting.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
 	{
 		//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
-		chart.dataSetParamValues(dataSetBindIndex, paramValues, true);
+		chart.dataSetParamValues(dataSetBindIndex, paramValues, true, convert);
 	};
 	
 	chartSetting.toggleParamFormContentByIgnoreFetch = function($panel, $section, chart, dataSetBindIndex)
