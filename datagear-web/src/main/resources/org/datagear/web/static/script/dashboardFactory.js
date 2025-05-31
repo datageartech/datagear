@@ -1676,30 +1676,43 @@
 		{
 			wait = 0;
 		}
-		else if(chart._isRequestRefreshData())
+		else
 		{
-			wait = 2;
-		}
-		else if(chart.statusRendered() || chart.statusPreUpdate())
-		{
-			wait = 1;
-		}
-		else if(chart.updateInterval > -1
-					&& (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
-		{
-			var updateInterval = chart.updateInterval;
-			var prevUpdateTime = chart._updateTime();
+			var isRequestRefreshData = chart._isRequestRefreshData();
 			
-			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
+			if(chart.isActive() && isRequestRefreshData)
+			{
+				wait = 2;
+			}
+			else if(chart.statusRendered() || chart.statusPreUpdate())
+			{
 				wait = 1;
-		}
-		
-		// wait=2时不应校验参数合法性
-		if(wait == 1 && chart.unreadyDataSetParams(true).length > 0)
-		{
-			//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
-			chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
-			wait = 0;
+			}
+			else if(chart.updateInterval > -1 && (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
+			{
+				var updateInterval = chart.updateInterval;
+				var prevUpdateTime = chart._updateTime();
+				
+				if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
+				{
+					wait = 1;
+				}
+			}
+			
+			if(wait == 1)
+			{
+				//应升级为优先级更高的刷新操作，且无需判断参数是否准备好
+				if(isRequestRefreshData)
+				{
+					wait = 2;
+				}
+				else if(chart.unreadyDataSetParams(true).length > 0)
+				{
+					//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
+					chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
+					wait = 0;
+				}
+			}
 		}
 		
 		return wait;
