@@ -1665,10 +1665,10 @@
 	 */
 	dashboardBase._isWaitForUpdate = function(chart, currentTime)
 	{
-		var wait = 0;
+		if(!chart.isActive())
+			return 0;
 		
-		if(currentTime == null)
-			currentTime = chartFactory.currentDateMs();
+		var wait = 0;
 		
 		var status = chart.status();
 		
@@ -1680,7 +1680,7 @@
 		{
 			var isRequestRefreshData = chart._isRequestRefreshData();
 			
-			if(chart.isActive() && isRequestRefreshData)
+			if(isRequestRefreshData)
 			{
 				wait = 2;
 			}
@@ -3414,6 +3414,7 @@
 	 */
 	dashboardBase.isWaitForUpdate = function(chart, currentTime)
 	{
+		currentTime = (currentTime == null ? chartFactory.currentDateMs() : currentTime);
 		return (this._isWaitForUpdate(chart, currentTime)  > 0);
 	};
 	// > @deprecated 兼容2.6.0版本的API，将在未来版本移除，已被私有函数dashboardBase._isWaitForUpdate取代
