@@ -8618,7 +8618,7 @@
 		if(customRenderer.on)
 			customRenderer.on(chart, eventType, handler);
 		else
-			throw new Error("Chart renderer 's [on] rqeuired");
+			throw new Error("chart renderer 's [on] rqeuired");
 	};
 	
 	chartSupport.customOff = function(chart, eventType, handler)
@@ -8628,7 +8628,19 @@
 		if(customRenderer.off)
 			customRenderer.off(chart, eventType, handler);
 		else
-			throw new Error("Chart renderer 's [off] rqeuired");
+			throw new Error("chart renderer 's [off] rqeuired");
+	};
+	
+	chartSupport.customAdditions = function(chart)
+	{
+		var re = null;
+		
+		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
+		
+		if(customRenderer && customRenderer.additions)
+			re = ($.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
+		
+		return re;
 	};
 	
 	chartSupport.customGetCustomRenderer = function(chart, nullable)
@@ -8638,7 +8650,7 @@
 		var renderer = chart.renderer();
 		
 		if(renderer == null && !nullable)
-			throw new Error("Chart renderer required");
+			throw new Error("chart renderer required");
 		
 		return renderer;
 	};
