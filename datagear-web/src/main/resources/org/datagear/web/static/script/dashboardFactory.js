@@ -239,8 +239,8 @@
 	/**图表主题关联的看板表单实体ID*/
 	dashboardFactory._THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
 	
-	/**图表插件扩展属性：默认联动事件类型 */
-	dashboardFactory.PLUGIN_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
+	/**图表渲染器附加属性：默认联动事件类型 */
+	dashboardFactory.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
 	
 	/**
 	 * 初始化看板JSON对象，为其添加看板API，为看版内的图表JSON对象添加图表API，并设置状态：dashboard.statusPreInit(true)。
@@ -640,9 +640,9 @@
 	{
 		var triggers = link.trigger;
 		
-		//从插件附加属性中取默认值
+		//从图表渲染器附加属性中取默认值
 		if(!triggers)
-			triggers = this.pluginAddition(dashboardFactory.PLUGIN_ADDITION_DTF_LINK_EVENT_TYPE);
+			triggers = this.rendererAddition(dashboardFactory.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE);
 		
 		//默认值设为"click"
 		if(!triggers)
