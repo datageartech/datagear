@@ -5033,14 +5033,14 @@
 	 */
 	chartBase.resultIgnoreFetch = function(dataSetResult, ignoreFetch)
 	{
-		var supportIgnoreFetch = this._supportIgnoreFetch();
-		
 		if(ignoreFetch === undefined)
 		{
 			return (dataSetResult && dataSetResult.ignoreFetch != null ? dataSetResult.ignoreFetch : false);
 		}
 		else
 		{
+			var supportIgnoreFetch = this._supportIgnoreFetch();
+			
 			if(!supportIgnoreFetch)
 				throw new Error("feature [ignore-fetch] unsupported");
 			
