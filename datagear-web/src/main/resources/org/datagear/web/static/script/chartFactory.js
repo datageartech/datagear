@@ -4604,9 +4604,10 @@
 	 */
 	chartBase.unreadyDataSetParams = function(dataSetBinds, stopOnFirst, checkIgnoreFetch)
 	{
-		//(true)、(false)
+		//(true, ...)、(false, ...)
 		if(dataSetBinds === true || dataSetBinds === false)
 		{
+			checkIgnoreFetch = stopOnFirst;
 			stopOnFirst = dataSetBinds;
 			dataSetBinds = undefined;
 		}
