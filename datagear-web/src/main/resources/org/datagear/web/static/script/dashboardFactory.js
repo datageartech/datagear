@@ -239,7 +239,7 @@
 	/**图表主题关联的看板表单实体ID*/
 	dashboardFactory._THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
 	
-	/**图表渲染器附加属性：默认联动事件类型 */
+	/**图表渲染器附加属性：默认联动事件类型，默认值为："click" */
 	dashboardFactory.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
 	
 	/**

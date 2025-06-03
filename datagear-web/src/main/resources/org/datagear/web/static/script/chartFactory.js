@@ -270,6 +270,9 @@
 	 */
 	chartFactory.DATA_SIGN_FULLNAME_SEPARATOR = ".";
 	
+	/**图表渲染器附加属性：是否支持忽略获取结果，默认值为：false */
+	chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH = "supportIgnoreFetch";
+	
 	//org.datagear.analysis.DataSetParam.DataType
 	chartFactory.DataSetParamType =
 	{
@@ -4930,6 +4933,7 @@
 	
 	/**
 	 * 获取/设置指定数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
+	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于获取操作，此函数将始终返回false，对于设置操作，将直接抛出异常，不允许调用。
 	 * 
 	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
@@ -4939,35 +4943,39 @@
 	chartBase.dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		var query = dataSetBind.query;
+		
+		var supportIgnoreFetch = this._supportIgnoreFetch();
 		
 		if(ignoreFetch === undefined)
 		{
-			return (query.ignoreFetch == null ? false : query.ignoreFetch);
+			return this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBind);
 		}
 		else
 		{
-			query.ignoreFetch = ignoreFetch;
+			this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBind, ignoreFetch);
 		}
 	};
 	
 	/**
 	 * 获取/设置全部数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
+	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于获取操作，此函数将始终返回false数组，对于设置操作，将直接抛出异常，不允许调用。
 	 * 
 	 * @param ignoreFetch 可选，要设置的值，true 全部忽略；false 全部不忽略；[ ... ] 指定元素值
-	 * @returns true、false
+	 * @returns [ true、false, ... ]
 	 * @since 5.4.0
 	 */
 	chartBase.dataSetIgnoreFetches = function(ignoreFetch)
 	{
 		var dataSetBinds = this.dataSetBinds();
 		
+		var supportIgnoreFetch = this._supportIgnoreFetch();
+		
 		if(ignoreFetch === undefined)
 		{
 			var re = [];
 			
 			for(var i=0; i<dataSetBinds.length; i++)
-				re[i] = this.dataSetIgnoreFetch(dataSetBinds[i]);
+				re[i] = this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBinds[i]);
 			
 			return re;
 		}
@@ -4979,9 +4987,39 @@
 			for(var i=0; i<len; i++)
 			{
 				var myVal = (isArray ? ignoreFetch[i] : ignoreFetch);
-				this.dataSetIgnoreFetch(dataSetBinds[i], myVal);
+				this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBinds[i], myVal);
 			}
 		}
+	};
+	
+	chartBase._dataSetIgnoreFetch = function(supportIgnoreFetch, dataSetBind, ignoreFetch)
+	{
+		var query = dataSetBind.query;
+		
+		if(ignoreFetch === undefined)
+		{
+			if(!supportIgnoreFetch)
+			{
+				return false;
+			}
+			else
+			{
+				return (query.ignoreFetch == null ? false : query.ignoreFetch);
+			}
+		}
+		else
+		{
+			if(!supportIgnoreFetch)
+				throw new Error("feature [ignore-fetch] unsupported");
+			
+			query.ignoreFetch = ignoreFetch;
+		}
+	};
+	
+	chartBase._supportIgnoreFetch = function()
+	{
+		var re = this.rendererAddition(chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH);
+		return (re == null ? false : re);
 	};
 	
 	/**
