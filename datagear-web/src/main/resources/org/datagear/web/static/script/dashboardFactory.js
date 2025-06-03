@@ -2121,8 +2121,20 @@
 	
 	dashboardBase._doUpdateChart = function(chart, chartResult)
 	{
-		chartResult = chart._toApiSpecResult(chartResult);
-		chart.update(chartResult);
+		var apiResult = chart._toApiSpecResult(chartResult);
+		
+		if(apiResult !== chartResult)
+		{
+			//apiResult的结构不确定，应使用try避免后续逻辑被中断
+			try
+			{
+				var chartQuery = this._chartQueryOfChartResult(chartResult);
+				this._chartQueryOfChartResult(apiResult, chartQuery);
+			}
+			catch(e){}
+		}
+		
+		chart.update(apiResult);
 	};
 	
 	dashboardBase._setChartsUpdateTime = function(charts, time)
@@ -2249,15 +2261,7 @@
 				return;
 			
 			chartFactory.queryOfObject(chartResult, chartQuery);
-			
-			var dataSetResults = (chartResult.dataSetResults || []);
-			var dataSetQueries = (chartQuery && chartQuery.dataSetQueries ? chartQuery.dataSetQueries : []);
-			
-			for(var i=0; i<dataSetResults.length; i++)
-			{
-				if(dataSetResults[i] != null)
-					chartFactory.queryOfObject(dataSetResults[i], dataSetQueries[i]);
-			}
+			// 这里不必再为每个数据集结果设置数据集查询，增加复杂性，后续看板2.0将直接开放图表结果对象，从中可以获取数据集查询信息
 		}
 	};
 	
