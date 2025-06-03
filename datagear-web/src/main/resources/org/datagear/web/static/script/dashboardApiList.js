@@ -176,6 +176,7 @@ global.dashboardApiCompletions =
 	{name: "renderContextAttr", value: "renderContextAttr(", displayName: "renderContextAttr() ", displayComment: "chart", categories: ["chart"]},
 	{name: "renderOptions", value: "renderOptions(", displayName: "renderOptions() ", displayComment: "chart", categories: ["chart"]},
 	{name: "renderer", value: "renderer(", displayName: "renderer() ", displayComment: "chart", categories: ["chart"]},
+	{name: "rendererAddition", value: "rendererAddition(", displayName: "rendererAddition() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resetDataSetParamValues", value: "resetDataSetParamValues(", displayName: "resetDataSetParamValues() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resetDataSetParamValuesFirst", value: "resetDataSetParamValuesFirst()", displayName: "resetDataSetParamValuesFirst() ", displayComment: "chart", categories: ["chart"]},
 	{name: "resize", value: "resize()", displayName: "resize() ", displayComment: "chart", categories: ["chart"]},

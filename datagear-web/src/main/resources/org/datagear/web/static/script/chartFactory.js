@@ -70,7 +70,9 @@
  *   //handler 图表事件处理函数引用
  *   off: function(chart, eventType, handler){ ... },
  *   //可选，销毁图表函数
- *   destroy: function(chart){ ... }
+ *   destroy: function(chart){ ... },
+ *   //可选，渲染器附加数据
+ *   additions: { 名: 值, ... }、function(chart){ return { 名: 值, ... }; };
  * }
  * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
@@ -1185,7 +1187,6 @@
 		$element.data(chartFactory._KEY_ELEMENT_RENDERED_CHART, this);
 		
 		var async = this.isAsyncRender();
-		
 		var renderer = this.renderer();
 		
 		if(renderer && renderer.render)
@@ -5024,6 +5025,41 @@
 		{
 			this.resultIgnoreFetch(dataSetResult, ignoreFetch);
 		}
+	};
+	
+	/**
+	 * 获取图表渲染器指定附加属性值。
+	 * 
+	 * @param name 附加属性名
+	 * @returns 要获取的附加属性值，没有则返回null
+	 * @since 5.4.0
+	 */
+	chartBase.rendererAddition = function(name)
+	{
+		var re = null;
+		
+		var additions = null;
+		var renderer = this.renderer();
+		
+		//优先取自定义渲染器中的
+		if(renderer && renderer.additions)
+		{
+			additions = ($.isFunction(renderer.additions) ? renderer.additions(this) : renderer.additions);
+			re = (additions ? additions[name] : undefined);
+			
+			if(re !== undefined)
+				return re;
+		}
+		
+		renderer = this.plugin.renderer;
+		
+		if(renderer && renderer.additions)
+		{
+			additions = ($.isFunction(renderer.additions) ? renderer.additions(this) : renderer.additions);
+			re = (additions ? additions[name] : undefined);
+		}
+		
+		return re;
 	};
 	
 	
