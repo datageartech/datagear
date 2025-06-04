@@ -4538,26 +4538,6 @@
 	};
 	
 	/**
-	 * 获取/设置数据集结果所有附加数据。
-	 * 
-	 * @param dataSetResult 数据集结果
-	 * @param additions 可选，要设置的附加数据映射表，格式为：{ ... }
-	 * @returns {}，可能null
-	 * @since 5.4.0
-	 */
-	chartBase.resultAdditions = function(dataSetResult, additions)
-	{
-		if(additions === undefined)
-		{
-			return (dataSetResult ? dataSetResult.additions : null);
-		}
-		else
-		{
-			dataSetResult.additions = additions;
-		}
-	};
-	
-	/**
 	 * 获取/设置数据集结果指定名称的附加数据。
 	 * 
 	 * @param dataSetResult 数据集结果
@@ -4568,7 +4548,7 @@
 	 */
 	chartBase.resultAddition = function(dataSetResult, name, value)
 	{
-		var additions = this.resultAdditions(dataSetResult);
+		var additions = (dataSetResult ? dataSetResult.additions : null);
 		
 		if(value === undefined)
 		{
@@ -4579,7 +4559,7 @@
 			if(additions == null)
 			{
 				additions = {};
-				this.resultAdditions(dataSetResult, additions);
+				dataSetResult.additions = additions;
 			}
 			
 			additions[name] = value;
