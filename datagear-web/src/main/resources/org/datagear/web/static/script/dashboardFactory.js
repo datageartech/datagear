@@ -1784,7 +1784,7 @@
 				chart.results(chartResult, []);
 				
 				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
-				this._chartQueryOfChartResult(chartResult, chartQuery);
+				chartFactory.chartQueryOfChartResult(chartResult, chartQuery);
 				
 				this._updateChart(chart, chartResult, true);
 			}
@@ -1949,8 +1949,7 @@
 			{
 				var chartResult = (chartResults[chartId] || {});
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-				
-				dashboard._chartQueryOfChartResult(chartResult, chartQuery);
+				chartFactory.chartQueryOfChartResult(chartResult, chartQuery);
 				dashboard._updateChart(chart, chartResult, true);
 			});
 		}
@@ -1966,8 +1965,7 @@
 			{
 				var error = (chartErrors[chartId] || { type: "Error", message: "error" });
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-				
-				dashboard._chartQueryOfChartError(error, chartQuery);
+				chartFactory.chartQueryOfChartError(error, chartQuery);
 				dashboard._handleChartAjaxError(chart, error, true);
 			});
 		}
@@ -2020,8 +2018,7 @@
 				//结构同：org.datagear.analysis.support.ChartResultErrorMessage
 				var error = { type: "Error", message: errorMsg };
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
-				
-				dashboard._chartQueryOfChartError(error, chartQuery);
+				chartFactory.chartQueryOfChartError(error, chartQuery);
 				dashboard._handleChartAjaxError(chart, error, false);
 			});
 		}
@@ -2122,18 +2119,6 @@
 	dashboardBase._doUpdateChart = function(chart, chartResult)
 	{
 		var apiResult = chart._toApiSpecResult(chartResult);
-		
-		if(apiResult !== chartResult)
-		{
-			//apiResult的结构不确定，应使用try避免后续逻辑被中断
-			try
-			{
-				var chartQuery = this._chartQueryOfChartResult(chartResult);
-				this._chartQueryOfChartResult(apiResult, chartQuery);
-			}
-			catch(e){}
-		}
-		
 		chart.update(apiResult);
 	};
 	
@@ -2246,37 +2231,6 @@
 		else
 		{
 			dashboardQueryForm[dashboardQueryParamName] = dashboardQuery;
-		}
-	};
-	
-	dashboardBase._chartQueryOfChartResult = function(chartResult, chartQuery)
-	{
-		if(chartQuery === undefined)
-		{
-			return chartFactory.queryOfObject(chartResult);
-		}
-		else
-		{
-			if(!chartResult)
-				return;
-			
-			chartFactory.queryOfObject(chartResult, chartQuery);
-			// 这里不必再为每个数据集结果设置数据集查询，增加复杂性，后续看板2.0将直接开放图表结果对象，从中可以获取数据集查询信息
-		}
-	};
-	
-	dashboardBase._chartQueryOfChartError = function(chartError, chartQuery)
-	{
-		if(chartQuery === undefined)
-		{
-			return chartFactory.queryOfObject(chartError);
-		}
-		else
-		{
-			if(!chartError)
-				return;
-			
-			chartFactory.queryOfObject(chartError, chartQuery);
 		}
 	};
 	

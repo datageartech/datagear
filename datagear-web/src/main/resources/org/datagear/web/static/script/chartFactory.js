@@ -2289,7 +2289,10 @@
 		if($.isArray(chartResult))
 		{
 			var re = {};
+			
 			this.results(re, chartResult);
+			var chartQuery = chartFactory.chartQueryOfChartResult(chartResult);
+			chartFactory.chartQueryOfChartResult(re, chartQuery);
 			
 			return re;
 		}
@@ -2306,7 +2309,20 @@
 	chartBase._toApiSpecResult = function(chartResult)
 	{
 		//目前版本的API都应返回数据集结果数组
-		return this.results(chartResult);
+		var re = this.results(chartResult);
+		
+		if(re !== chartResult)
+		{
+			//此处应使用try避免未知异常导致后续逻辑被中断
+			try
+			{
+				var chartQuery = chartFactory.chartQueryOfChartResult(chartResult);
+				chartFactory.chartQueryOfChartResult(re, chartQuery);
+			}
+			catch(e){}
+		}
+		
+		return re;
 	};
 	
 	/**
@@ -9433,6 +9449,43 @@
 		else
 		{
 			obj.query = query;
+		}
+	};
+	
+	/**
+	 * 获取/设置图表结果对象的查询信息。
+	 */
+	chartFactory.chartQueryOfChartResult = function(chartResult, chartQuery)
+	{
+		if(chartQuery === undefined)
+		{
+			return chartFactory.queryOfObject(chartResult);
+		}
+		else
+		{
+			if(!chartResult)
+				return;
+			
+			chartFactory.queryOfObject(chartResult, chartQuery);
+			// 这里不必再为每个数据集结果设置数据集查询，增加复杂性，后续看板2.0将直接开放图表结果对象，从中可以获取数据集查询信息
+		}
+	};
+	
+	/**
+	 * 获取/设置图表错误对象的查询信息。
+	 */
+	chartFactory.chartQueryOfChartError = function(chartError, chartQuery)
+	{
+		if(chartQuery === undefined)
+		{
+			return chartFactory.queryOfObject(chartError);
+		}
+		else
+		{
+			if(!chartError)
+				return;
+			
+			chartFactory.queryOfObject(chartError, chartQuery);
 		}
 	};
 	
