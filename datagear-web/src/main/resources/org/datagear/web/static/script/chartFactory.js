@@ -9466,7 +9466,16 @@
 		
 		var re = value;
 		
-		if(chartFactory.DataSetParamType.STRING == dataSetParam.type)
+		if($.isArray(value))
+		{
+			re = [];
+			
+			for(var i=0; i<value.length; i++)
+			{
+				re[i] = chartFactory.convertDataSetParamValue(dataSetParam, value[i]);
+			}
+		}
+		else if(chartFactory.DataSetParamType.STRING == dataSetParam.type)
 		{
 			re = (chartFactory.isString(value) ? value : value.toString());
 		}
