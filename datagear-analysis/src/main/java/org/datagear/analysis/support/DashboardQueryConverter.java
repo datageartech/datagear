@@ -22,11 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
 import org.datagear.analysis.DashboardQuery;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetQuery;
 
 /**
@@ -132,6 +132,14 @@ public class DashboardQueryConverter
 	 */
 	protected DataSetQuery convertDataSetQuery(DataSetQuery dataSetQuery, DataSet dataSet)
 	{
-		return getDataSetParamValueConverter().convert(dataSetQuery, dataSet, true);
+		// 忽略获取结果的查询不进行转换，以支持设置任意占位查询参数
+		if (dataSetQuery != null && dataSetQuery.isIgnoreFetch())
+		{
+			return dataSetQuery.copy();
+		}
+		else
+		{
+			return getDataSetParamValueConverter().convert(dataSetQuery, dataSet, true);
+		}
 	}
 }
