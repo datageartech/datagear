@@ -2289,10 +2289,7 @@
 		if($.isArray(chartResult))
 		{
 			var re = {};
-			
 			this.results(re, chartResult);
-			var chartQuery = chartFactory.chartQueryOfChartResult(chartResult);
-			chartFactory.chartQueryOfChartResult(re, chartQuery);
 			
 			return re;
 		}
@@ -2310,18 +2307,6 @@
 	{
 		//目前版本的API都应返回数据集结果数组
 		var re = this.results(chartResult);
-		
-		if(re !== chartResult)
-		{
-			//此处应使用try避免未知异常导致后续逻辑被中断
-			try
-			{
-				var chartQuery = chartFactory.chartQueryOfChartResult(chartResult);
-				chartFactory.chartQueryOfChartResult(re, chartQuery);
-			}
-			catch(e){}
-		}
-		
 		return re;
 	};
 	

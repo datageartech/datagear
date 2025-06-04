@@ -1779,14 +1779,12 @@
 			for(var i=0; i<charts.length; i++)
 			{
 				var chart = charts[i];
+				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
 				var chartResult = {};
 				//设置空数据集结果数组，避免后续出现空指针异常
 				chart.results(chartResult, []);
 				
-				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
-				chartFactory.chartQueryOfChartResult(chartResult, chartQuery);
-				
-				this._updateChart(chart, chartResult, true);
+				this._updateChart(chart, chartResult, chartQuery, true);
 			}
 		}
 		finally
@@ -1949,8 +1947,7 @@
 			{
 				var chartResult = (chartResults[chartId] || {});
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-				chartFactory.chartQueryOfChartResult(chartResult, chartQuery);
-				dashboard._updateChart(chart, chartResult, true);
+				dashboard._updateChart(chart, chartResult, chartQuery, true);
 			});
 		}
 		
@@ -1965,8 +1962,7 @@
 			{
 				var error = (chartErrors[chartId] || { type: "Error", message: "error" });
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-				chartFactory.chartQueryOfChartError(error, chartQuery);
-				dashboard._handleChartAjaxError(chart, error, true);
+				dashboard._handleChartAjaxError(chart, error, chartQuery, true);
 			});
 		}
 		
@@ -2018,8 +2014,7 @@
 				//结构同：org.datagear.analysis.support.ChartResultErrorMessage
 				var error = { type: "Error", message: errorMsg };
 				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
-				chartFactory.chartQueryOfChartError(error, chartQuery);
-				dashboard._handleChartAjaxError(chart, error, false);
+				dashboard._handleChartAjaxError(chart, error, chartQuery, false);
 			});
 		}
 		
@@ -2039,9 +2034,9 @@
 		}
 	};
 	
-	dashboardBase._handleChartAjaxError = function(chart, error, logIfNone)
+	dashboardBase._handleChartAjaxError = function(chart, error, chartQuery, logIfNone)
 	{
-		this._handleChartResultError(chart, error, true, logIfNone);
+		this._handleChartResultError(chart, error, chartQuery, true, logIfNone);
 	};
 	
 	/**
@@ -2049,10 +2044,11 @@
 	 * 
 	 * @param chart 图表对象
 	 * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+	 * @param chartQuery 结果错误对应的图表查询，可能null
 	 * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
 	 * @param logIfNone 可选，如果chart.listener()没有定义updateError，是否输出默认日志，默认为：true
 	 */
-	dashboardBase._handleChartResultError = function(chart, error, setErrorStatus, logIfNone)
+	dashboardBase._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
 	{
 		logIfNone = (logIfNone == null ? true : logIfNone);
 		
@@ -2085,9 +2081,10 @@
 	 * 
 	 * @param chart 图表对象
 	 * @param chartResult 图表结果对象，参考：org.datagear.analysis.ChartResult
+	 * @param chartQuery 图表结果对应的查询信息，可能null
 	 * @param force 可选，是否强制更新，默认值：false
 	 */
-	dashboardBase._updateChart = function(chart, chartResult, force)
+	dashboardBase._updateChart = function(chart, chartResult, chartQuery, force)
 	{
 		force = (force === true);
 		
@@ -2103,7 +2100,7 @@
 					}
 				}
 				
-				this._doUpdateChart(chart, chartResult);
+				this._doUpdateChart(chart, chartResult, chartQuery);
 			}
 			else
 				throw new Error("chart '#"+chart.elementId+"' not active");
@@ -2116,7 +2113,7 @@
 		}
 	};
 	
-	dashboardBase._doUpdateChart = function(chart, chartResult)
+	dashboardBase._doUpdateChart = function(chart, chartResult, chartQuery)
 	{
 		var apiResult = chart._toApiSpecResult(chartResult);
 		chart.update(apiResult);
