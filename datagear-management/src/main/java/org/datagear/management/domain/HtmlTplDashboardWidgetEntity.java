@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 		implements Entity<String>, CreateUserEntity, DataPermissionEntity, AnalysisProjectAwareEntity,
-		CloneableEntity
+		CloneableEntity, DescriptionEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -62,14 +62,16 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 
 	private AnalysisProject analysisProject = null;
 
+	/** 描述 */
+	private String description = "";
+
 	public HtmlTplDashboardWidgetEntity()
 	{
 		super();
 	}
 
 	public HtmlTplDashboardWidgetEntity(String id, String template, HtmlTplDashboardWidgetRenderer renderer,
-			TplDashboardWidgetResManager resManager,
-			String name, User createUser)
+			TplDashboardWidgetResManager resManager, String name, User createUser)
 	{
 		super(id, template, renderer, resManager);
 		this.name = name;
@@ -132,6 +134,18 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return description;
+	}
+
+	@Override
+	public void setDescription(String description)
+	{
+		this.description = description;
 	}
 
 	@Override

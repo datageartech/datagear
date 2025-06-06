@@ -33,12 +33,17 @@
 	<form id="${pid}form" class="flex flex-column h-full" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 flex flex-column overflow-y-auto">
 			<div class="field grid flex-grow-0 mb-1">
-				<label class="field-label col-12 mb-0">
-					{{fm.name}}
-					<!--
-					<span class="text-color-secondary ml-2" title="<@spring.message code='dashboard.version' />">v<small>{{fm.version}}</small></span>
-					-->
-				</label>
+				<div class="field-label col-12 mb-0 flex flex-row align-items-center gap-1">
+					<label>
+						{{fm.name}}
+						<!--
+						<span class="text-color-secondary ml-2" title="<@spring.message code='dashboard.version' />">v<small>{{fm.version}}</small></span>
+						-->
+					</label>
+       				<p-button type="button" icon="pi pi-info-circle" size="small" rounded v-if="fm.description"
+						@click="onShowDashboardDesc" class="p-button-secondary p-button-text p-1">
+					</p-button>
+				</div>
 			</div>
 			<div class="field grid mb-0 flex-grow-1 flex flex-column">
 		        <div class="field-input col-12 flex-grow-1 flex flex-column">
@@ -62,6 +67,16 @@
 	<#include "include/dashboard_design_editor_forms.ftl">
 	<#include "../include/page_palette.ftl">
 	<#include "../include/page_copy_to_clipboard.ftl">
+	<p-overlaypanel ref="${pid}dashboardDescEle" append-to="body" id="${pid}dashboardDesc">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='desc' />
+			</label>
+		</div>
+		<div class="panel-content-size-xxs overflow-auto flex flex-column p-2">
+			<div class="white-space-pre-wrap" v-text="fm.description"></div>
+		</div>
+	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
 <#include "../include/page_simple_form.ftl">
@@ -154,8 +169,15 @@
 		}
 	});
 	
+	po.vueRef("${pid}dashboardDescEle", null);
+	
 	po.vueMethod(
 	{
+		onShowDashboardDesc: function(e)
+		{
+			po.vueUnref("${pid}dashboardDescEle").toggle(e);
+		},
+		
 		onSaveAndShow: function(e)
 		{
 			try

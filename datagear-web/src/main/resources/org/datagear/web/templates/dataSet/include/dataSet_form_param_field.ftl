@@ -208,7 +208,7 @@ dataSet_form_param_field_form.ftl
 		<@spring.message code='description' />
 	</label>
 	<div class="field-input col-12">
-		<p-textarea id="${pid}description" v-model="fm.description" rows="5" class="input w-full"
+		<p-textarea id="${pid}description" v-model="fm.description" rows="4" class="input w-full"
        		name="description" maxlength="500">
        	</p-textarea>
 	</div>

@@ -32,7 +32,8 @@ import org.datagear.analysis.support.DataFormat;
  *
  */
 public interface DataSetEntity
-		extends Entity<String>, DataSet, CreateUserEntity, DataPermissionEntity, AnalysisProjectAwareEntity
+		extends Entity<String>, DataSet, CreateUserEntity, DataPermissionEntity, AnalysisProjectAwareEntity,
+		DescriptionEntity
 {
 	/** 授权资源类型 */
 	String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
@@ -128,6 +129,7 @@ public interface DataSetEntity
 	 * 
 	 * @return
 	 */
+	@Override
 	String getDescription();
 
 	/**
@@ -135,5 +137,6 @@ public interface DataSetEntity
 	 * 
 	 * @param description
 	 */
+	@Override
 	void setDescription(String description);
 }

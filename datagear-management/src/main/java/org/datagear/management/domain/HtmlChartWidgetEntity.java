@@ -41,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlChartWidgetEntity extends HtmlChartWidget
 		implements Entity<String>, CreateUserEntity, DataPermissionEntity, AnalysisProjectAwareEntity,
-		CloneableEntity
+		CloneableEntity, DescriptionEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -73,6 +73,9 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
 	private AnalysisProject analysisProject = null;
+
+	/** 描述 */
+	private String description = "";
 
 	public HtmlChartWidgetEntity()
 	{
@@ -178,6 +181,18 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return description;
+	}
+
+	@Override
+	public void setDescription(String description)
+	{
+		this.description = description;
 	}
 
 	/**

@@ -303,6 +303,16 @@
 					</div>
 				</div>
 			</div>
+			<div class="field grid">
+				<label for="${pid}description" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='description' />
+				</label>
+				<div class="field-input col-12 md:col-9">
+					<p-textarea id="${pid}description" v-model="fm.description" rows="4" class="input w-full"
+			       		name="description" maxlength="500">
+			       	</p-textarea>
+				</div>
+			</div>
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>

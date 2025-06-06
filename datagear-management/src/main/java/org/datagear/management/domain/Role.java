@@ -29,7 +29,7 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class Role extends AbstractStringIdEntity implements CloneableEntity
+public class Role extends AbstractStringIdEntity implements CloneableEntity, DescriptionEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -63,11 +63,13 @@ public class Role extends AbstractStringIdEntity implements CloneableEntity
 		this.name = name;
 	}
 
+	@Override
 	public String getDescription()
 	{
 		return description;
 	}
 
+	@Override
 	public void setDescription(String description)
 	{
 		this.description = description;

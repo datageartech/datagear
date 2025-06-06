@@ -28,7 +28,7 @@ import org.springframework.beans.BeanUtils;
  *
  */
 public class AnalysisProject extends AbstractStringIdEntity
-		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
+		implements CreateUserEntity, DataPermissionEntity, CloneableEntity, DescriptionEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -71,11 +71,13 @@ public class AnalysisProject extends AbstractStringIdEntity
 		this.name = name;
 	}
 
+	@Override
 	public String getDescription()
 	{
 		return description;
 	}
 
+	@Override
 	public void setDescription(String description)
 	{
 		this.description = description;

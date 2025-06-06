@@ -8,13 +8,13 @@
 			(
 			HCW_ID, HCW_NAME, HCW_PLUGIN_ID, HCW_UPDATE_INTERVAL, HCW_CREATE_USER_ID,
 			HCW_CREATE_TIME, HCW_AP_ID, HCW_RD_FORMAT,
-			HCW_ATTR_VALUES, HCW_OPTIONS
+			HCW_ATTR_VALUES, HCW_OPTIONS, HCW_DESC
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.name}, #{entity.pluginVo.id}, #{entity.updateInterval}, #{entity.createUser.id},
 			#{entity.createTime}, #{entity.analysisProject.id, jdbcType=VARCHAR}, #{entity.resultDataFormat, jdbcType=VARCHAR},
-			#{entity.attrValuesJson, jdbcType=VARCHAR}, #{entity.options, jdbcType=VARCHAR} 
+			#{entity.attrValuesJson, jdbcType=VARCHAR}, #{entity.options, jdbcType=VARCHAR}, #{entity.description, jdbcType=VARCHAR} 
 			)
 	</insert>
 	
@@ -41,7 +41,8 @@
 			HCW_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR},
 			HCW_RD_FORMAT = #{entity.resultDataFormat, jdbcType=VARCHAR},
 			HCW_ATTR_VALUES = #{entity.attrValuesJson, jdbcType=VARCHAR},
-			HCW_OPTIONS = #{entity.options, jdbcType=VARCHAR}
+			HCW_OPTIONS = #{entity.options, jdbcType=VARCHAR},
+			HCW_DESC = #{entity.description, jdbcType=VARCHAR}
 		WHERE
 			HCW_ID = #{entity.id}
 	</update>
@@ -205,6 +206,7 @@
 			A.HCW_RD_FORMAT AS ${_iq_}resultDataFormat${_iq_},
 			A.HCW_ATTR_VALUES AS ${_iq_}attrValuesJson${_iq_},
 			A.HCW_OPTIONS AS ${_iq_}options${_iq_},
+			A.HCW_DESC AS ${_iq_}description${_iq_},
 			AP.*
 		FROM
 			DATAGEAR_HTML_CHART_WIDGET A
@@ -223,7 +225,9 @@
 		<if test="queryKeyword != null">
 		AND
 		(
-			${_iq_}id${_iq_} LIKE #{queryKeyword} OR ${_iq_}name${_iq_} LIKE #{queryKeyword}
+			${_iq_}id${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}description${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}analysisProject.name${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
