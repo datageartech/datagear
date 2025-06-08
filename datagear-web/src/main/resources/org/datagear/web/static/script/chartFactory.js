@@ -5006,6 +5006,30 @@
 		return re;
 	};
 	
+	/**
+	 * 获取未忽略结果的数据集绑定数组。
+	 * 
+	 * @param dataSetBinds 数据集结果、数组
+	 * @param chartResult 图表结果、数据集结果数组
+	 * @returns [ ... ]，空数组表示没有
+	 */
+	chartBase.dataSetBindsFetched = function(dataSetBinds, chartResult)
+	{
+		dataSetBinds = (dataSetBinds == null ? [] : ($.isArray(dataSetBinds) ? dataSetBinds : [ dataSetBinds ]));
+		
+		var re = [];
+		
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			if(this.resultIgnoreFetchOf(chartResult, dataSetBinds[i]))
+				continue;
+			
+			re.push(dataSetBinds[i]);
+		}
+		
+		return re;
+	};
+	
 	
 	//-------------
 	// < 已弃用函数 start

@@ -88,6 +88,7 @@ global.dashboardApiCompletions =
 	{name: "dataSetBindMain", value: "dataSetBindMain()", displayName: "dataSetBindMain() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetBinds", value: "dataSetBinds()", displayName: "dataSetBinds() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetBindsAttachment", value: "dataSetBindsAttachment()", displayName: "dataSetBindsAttachment() ", displayComment: "chart", categories: ["chart"]},
+	{name: "dataSetBindsFetched", value: "dataSetBindsFetched()", displayName: "dataSetBindsFetched() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetBindsMain", value: "dataSetBindsMain()", displayName: "dataSetBindsMain() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetField", value: "dataSetField(", displayName: "dataSetField() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetFieldAlias", value: "dataSetFieldAlias(", displayName: "dataSetFieldAlias() ", displayComment: "chart", categories: ["chart"]},
