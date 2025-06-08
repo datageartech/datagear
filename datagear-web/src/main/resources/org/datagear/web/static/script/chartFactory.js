@@ -4841,7 +4841,7 @@
 	
 	/**
 	 * 获取/设置指定数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
-	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于获取操作，此函数将始终返回false，对于设置操作，将直接抛出异常，不允许调用。
+	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
 	 * 
 	 * @param dataSetBind 指定数据集绑定或其索引
 	 * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
@@ -4852,21 +4852,20 @@
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
 		
-		var supportIgnoreFetch = this._supportIgnoreFetch();
-		
 		if(ignoreFetch === undefined)
 		{
-			return this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBind);
+			return this._dataSetIgnoreFetch(dataSetBind);
 		}
 		else
 		{
-			this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBind, ignoreFetch);
+			this._checkSupportIgnoreFetch();
+			this._dataSetIgnoreFetch(dataSetBind, ignoreFetch);
 		}
 	};
 	
 	/**
 	 * 获取/设置全部数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
-	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于获取操作，此函数将始终返回false数组，对于设置操作，将直接抛出异常，不允许调用。
+	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
 	 * 
 	 * @param ignoreFetch 可选，要设置的值，true 全部忽略；false 全部不忽略；[ ... ] 指定元素值
 	 * @returns [ true、false, ... ]
@@ -4876,63 +4875,59 @@
 	{
 		var dataSetBinds = this.dataSetBinds();
 		
-		var supportIgnoreFetch = this._supportIgnoreFetch();
-		
 		if(ignoreFetch === undefined)
 		{
 			var re = [];
 			
 			for(var i=0; i<dataSetBinds.length; i++)
-				re[i] = this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBinds[i]);
+				re[i] = this._dataSetIgnoreFetch(dataSetBinds[i]);
 			
 			return re;
 		}
 		else
 		{
+			this._checkSupportIgnoreFetch();
+			
 			var isArray = $.isArray(ignoreFetch);
 			var len = (isArray ? Math.min(dataSetBinds.length, ignoreFetch.length) : dataSetBinds.length);
 			
 			for(var i=0; i<len; i++)
 			{
 				var myVal = (isArray ? ignoreFetch[i] : ignoreFetch);
-				this._dataSetIgnoreFetch(supportIgnoreFetch, dataSetBinds[i], myVal);
+				this._dataSetIgnoreFetch(dataSetBinds[i], myVal);
 			}
 		}
 	};
 	
-	chartBase._dataSetIgnoreFetch = function(supportIgnoreFetch, dataSetBind, ignoreFetch)
+	chartBase._dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 	{
 		var query = dataSetBind.query;
 		
 		if(ignoreFetch === undefined)
 		{
-			if(!supportIgnoreFetch)
-			{
-				return false;
-			}
-			else
-			{
-				return (query.ignoreFetch == null ? false : query.ignoreFetch);
-			}
+			return (!query || query.ignoreFetch == null ? false : query.ignoreFetch);
 		}
 		else
 		{
-			if(!supportIgnoreFetch)
-				throw new Error("feature [ignore-fetch] unsupported");
-			
 			query.ignoreFetch = ignoreFetch;
 		}
 	};
 	
-	chartBase._supportIgnoreFetch = function()
+	chartBase._checkSupportIgnoreFetch = function()
 	{
-		var re = this.rendererAddition(chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH);
-		return (re == null ? false : re);
+		var support = this.rendererAddition(chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH);
+		support = (support == null ? false : support);
+		
+		if(!support)
+		{
+			//这里不必抛出异常，因为后端没有禁用逻辑，只警告即可
+			chartFactory.logWarn("chart '#"+this.elementId+"' plugin feature [ignore-fetch] unsupported");
+		}
 	};
 	
 	/**
 	 * 获取/设置数据集结果是否是忽略获取的。
-	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于获取操作，此函数将如实返回，对于设置操作，将直接抛出异常，不允许调用。
+	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
 	 * 
 	 * @param dataSetResult 数据集结果
 	 * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
@@ -4947,18 +4942,14 @@
 		}
 		else
 		{
-			var supportIgnoreFetch = this._supportIgnoreFetch();
-			
-			if(!supportIgnoreFetch)
-				throw new Error("feature [ignore-fetch] unsupported");
-			
+			this._checkSupportIgnoreFetch();
 			dataSetResult.ignoreFetch = ignoreFetch;
 		}
 	};
 	
 	/**
 	 * 获取/设置指定数据集绑定对应的数据集结果是否是忽略获取的。
-	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于获取操作，此函数将如实返回，对于设置操作，将直接抛出异常，不允许调用。
+	 * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
 	 * 
 	 * @param chartResult 图表结果、数据集结果数组
 	 * @param dataSetBind 数据集绑定、索引数值
@@ -7228,26 +7219,26 @@
 		{
 			if(console.error)
 				console.error(exception);
-			else if(console.warn)
-				console.warn(exception);
-			else if(console.info)
-				console.info(exception);
+			else
+				chartFactory.logWarn(exception);
 		}
 	};
 	
 	/**
 	 * 记录警告日志。
 	 * 
-	 * @param exception 警告消息字符串
+	 * @param msg 警告消息字符串
 	 */
-	chartFactory.logWarn = function(exception)
+	chartFactory.logWarn = function(msg)
 	{
 		if(typeof(console) != "undefined")
 		{
 			if(console.warn)
-				console.warn(exception);
+				console.warn(msg);
 			else if(console.info)
-				console.info(exception);
+				console.info(msg);
+			else if(console.log)
+				console.log(msg);
 		}
 	};
 	
