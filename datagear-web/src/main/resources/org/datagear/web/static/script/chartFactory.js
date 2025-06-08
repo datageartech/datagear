@@ -4009,7 +4009,7 @@
 				break;
 			
 			var dsb = dataSetBinds[i];
-			var dsbAttachment = this.isDataSetAttachment(dsb);
+			var dsbAttachment = this.dataSetAttachment(dsb);
 			
 			if((!attachment && dsbAttachment) || (attachment && !dsbAttachment))
 				continue;
@@ -4328,16 +4328,25 @@
 	};
 	
 	/**
-	 * 判断是否附件数据集。
+	 * 获取/设置是否附件数据集。
 	 * 
 	 * @param dataSetBind 数据集绑定或其索引
+	 * @param attachment 可选，要设置的值
 	 * @returns true、false
 	 * @since 5.4.0
 	 */
-	chartBase.isDataSetAttachment = function(dataSetBind)
+	chartBase.dataSetAttachment = function(dataSetBind, attachment)
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		return (dataSetBind.attachment ? true : false);
+		
+		if(attachment === undefined)
+		{
+			return (dataSetBind.attachment ? true : false);
+		}
+		else
+		{
+			dataSetBind.attachment = attachment;
+		}
 	};
 	
 	/**
@@ -5853,7 +5862,7 @@
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var isAttachment = this.isDataSetAttachment(dataSetBinds[i]);
+			var isAttachment = this.dataSetAttachment(dataSetBinds[i]);
 			
 			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
 			{
@@ -5898,7 +5907,7 @@
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var isAttachment = this.isDataSetAttachment(dataSetBinds[i]);
+			var isAttachment = this.dataSetAttachment(dataSetBinds[i]);
 			
 			if((isAttachment && attachment == true) || (!isAttachment && attachment != true))
 			{
