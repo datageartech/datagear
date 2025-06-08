@@ -3938,8 +3938,8 @@
 	 */
 	chartBase.dataSetBindAt = function(index)
 	{
-		var dataSetBinds = this.dataSetBinds();
-		return dataSetBinds[index];
+		var dsbs = this.dataSetBinds();
+		return dsbs[index];
 	};
 	
 	/**
@@ -3950,7 +3950,7 @@
 	 */
 	chartBase.dataSetBindsMain = function()
 	{
-		return this._dataSetBindsMain(-1);
+		return this._dataSetBindsOf(-1, false);
 	};
 	
 	/**
@@ -3962,29 +3962,8 @@
 	 */
 	chartBase.dataSetBindMain = function()
 	{
-		var re = this._dataSetBindsMain(1);
+		var re = this._dataSetBindsOf(1, false);
 		return (re.length > 0 ? re[0] : null);
-	};
-	
-	chartBase._dataSetBindsMain = function(count)
-	{
-		var re = [];
-		
-		var dataSetBinds = this.dataSetBinds();
-		for(var i=0; i<dataSetBinds.length; i++)
-		{
-			var dsb = dataSetBinds[i];
-			
-			if(!this.isDataSetAttachment(dsb))
-			{
-				re.push(dsb);
-				
-				if(count > -1 && re.length >= count)
-					break;
-			}
-		}
-		
-		return re;
 	};
 	
 	/**
@@ -3995,7 +3974,7 @@
 	 */
 	chartBase.dataSetBindsAttachment = function()
 	{
-		return this._dataSetBindsAttachment(-1);
+		return this._dataSetBindsOf(-1, true);
 	};
 	
 	/**
@@ -4007,26 +3986,27 @@
 	 */
 	chartBase.dataSetBindAttachment = function()
 	{
-		var re = this._dataSetBindsAttachment(1);
+		var re = this._dataSetBindsOf(1, true);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
-	chartBase._dataSetBindsAttachment = function(count)
+	chartBase._dataSetBindsOf = function(count, attachment)
 	{
 		var re = [];
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			var dsb = dataSetBinds[i];
+			if(count > -1 && re.length >= count)
+				break;
 			
-			if(this.isDataSetAttachment(dsb))
-			{
-				re.push(dsb);
-				
-				if(count > -1 && re.length >= count)
-					break;
-			}
+			var dsb = dataSetBinds[i];
+			var dsbAttachment = this.isDataSetAttachment(dsb);
+			
+			if((!attachment && dsbAttachment) || (attachment && !dsbAttachment))
+				continue;
+			
+			re.push(dsb);
 		}
 		
 		return re;
