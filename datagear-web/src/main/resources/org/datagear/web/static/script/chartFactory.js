@@ -3943,7 +3943,8 @@
 	};
 	
 	/**
-	 * 获取全部主件数据集绑定，它们的用途是绘制图表。
+	 * 获取全部主件数据集绑定，或者设置了指定数据标记的全部主件数据集绑定。
+	 * 主件数据集绑定的用途是绘制图表。
 	 * 
 	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @returns []，空数组表示没有主件数据集绑定
@@ -3955,7 +3956,7 @@
 	};
 	
 	/**
-	 * 获取第一个主件数据集绑定。
+	 * 获取第一个主件数据集绑定，或者设置了指定数据标记的第一个主件数据集绑定。
 	 * 主件数据集绑定的用途是绘制图表。
 	 * 
 	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
@@ -3969,7 +3970,8 @@
 	};
 	
 	/**
-	 * 获取附件数据集绑定数组，它们的用途不是绘制图表。
+	 * 获取全部附件数据集绑定，或者设置了指定数据标记的全部附件数据集绑定。
+	 * 附件数据集绑定的用途不是绘制图表。
 	 * 
 	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @returns []，空数组表示没有附件数据集绑定
@@ -3981,7 +3983,7 @@
 	};
 	
 	/**
-	 * 获取第一个附件数据集绑定、或者第一个设置了指定数据标记的附件数据集绑定。
+	 * 获取第一个附件数据集绑定，或者设置了指定数据标记的第一个附件数据集绑定。
 	 * 附件数据集绑定的用途不是绘制图表。
 	 * 
 	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
@@ -4012,7 +4014,7 @@
 			if((!attachment && dsbAttachment) || (attachment && !dsbAttachment))
 				continue;
 			
-			if(signFullname !== undefined && !this.isDataSetSigned(dsb, signFullname))
+			if(dataSign !== undefined && !this.isDataSetSigned(dsb, signFullname))
 				continue;
 			
 			re.push(dsb);
