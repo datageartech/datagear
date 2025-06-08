@@ -23,7 +23,7 @@
 		图表监听器、chart.update()等的results参数结构改为chartResult（对象结构，易于扩展）；
 		dashboard.charts -> dashboard.charts()；
 		dashboard.renderContext -> dashboard.renderContext()；
-		chart.dashboard -> chart.owner()；
+		chart.dashboard -> chart.dashboard()；
 		chart.dataSetFieldSign() -> chart.dataSetFieldSigns()（因为是参数和返回值主要是数组）；
 		chart.elementId -> chart.elementId()；
 		chart.id -> chart.id()；
@@ -35,6 +35,7 @@
 		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数（几乎没用反而增加函数复杂度）；
 		chart.update()函数默认不使用上一次结果？；
 		内置图表插件数据结构由value数组改为更常用的name/value结构；
+		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
