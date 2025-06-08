@@ -3945,54 +3945,60 @@
 	/**
 	 * 获取全部主件数据集绑定，它们的用途是绘制图表。
 	 * 
+	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @returns []，空数组表示没有主件数据集绑定
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindsMain = function()
+	chartBase.dataSetBindsMain = function(dataSign)
 	{
-		return this._dataSetBindsOf(-1, false);
+		return this._dataSetBindsOf(-1, false, dataSign);
 	};
 	
 	/**
 	 * 获取第一个主件数据集绑定。
 	 * 主件数据集绑定的用途是绘制图表。
 	 * 
+	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @returns 数据集绑定、null
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindMain = function()
+	chartBase.dataSetBindMain = function(dataSign)
 	{
-		var re = this._dataSetBindsOf(1, false);
+		var re = this._dataSetBindsOf(1, false, dataSign);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
 	/**
 	 * 获取附件数据集绑定数组，它们的用途不是绘制图表。
 	 * 
+	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @returns []，空数组表示没有附件数据集绑定
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindsAttachment = function()
+	chartBase.dataSetBindsAttachment = function(dataSign)
 	{
-		return this._dataSetBindsOf(-1, true);
+		return this._dataSetBindsOf(-1, true, dataSign);
 	};
 	
 	/**
-	 * 获取第一个附件数据集绑定对象。
+	 * 获取第一个附件数据集绑定、或者第一个设置了指定数据标记的附件数据集绑定。
 	 * 附件数据集绑定的用途不是绘制图表。
 	 * 
+	 * @param dataSign 可选，要筛选的数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
 	 * @returns 数据集绑定、null
 	 * @since 5.0.0
 	 */
-	chartBase.dataSetBindAttachment = function()
+	chartBase.dataSetBindAttachment = function(dataSign)
 	{
-		var re = this._dataSetBindsOf(1, true);
+		var re = this._dataSetBindsOf(1, true, dataSign);
 		return (re.length > 0 ? re[0] : null);
 	};
 	
-	chartBase._dataSetBindsOf = function(count, attachment)
+	chartBase._dataSetBindsOf = function(count, attachment, dataSign)
 	{
 		var re = [];
+		
+		var signFullname = (dataSign === undefined ? undefined : this.dataSignFullname(dataSign));
 		
 		var dataSetBinds = this.dataSetBinds();
 		for(var i=0; i<dataSetBinds.length; i++)
@@ -4004,6 +4010,9 @@
 			var dsbAttachment = this.isDataSetAttachment(dsb);
 			
 			if((!attachment && dsbAttachment) || (attachment && !dsbAttachment))
+				continue;
+			
+			if(signFullname !== undefined && !this.isDataSetSigned(dsb, signFullname))
 				continue;
 			
 			re.push(dsb);
@@ -4452,73 +4461,6 @@
 	chartBase.updateOptions = function(updateOptions)
 	{
 		return chartFactory.extValueBuiltin(this, "updateOptions", updateOptions);
-	};
-	
-	/**
-	 * 获取指定数据标记的主件数据集绑定数组，它们的用途是绘制图表。
-	 * 
-	 * @param dataSign 筛选数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
-	 * @param nonEmpty 可选，需要设置sign参数，是否要求返回数组非空并且在为空时抛出异常，
-	 * 					   "auto" 依据sign的required判断，为true则要求非空，否则不要求；
-	 * 					   true 要求非空；false 不要求非空。默认为："auto"。
-	 * @returns []，空数组表示没有主件数据集绑定
-	 * @since 5.4.0
-	 */
-	chartBase.dataSetBindsMainOfSign = function(dataSign, nonEmpty)
-	{
-		return this._dataSetBindsMainOfSign(-1, dataSign, nonEmpty);
-	};
-	
-	/**
-	 * 获取指定数据标记的第一个主件数据集绑定。
-	 * 主件数据集绑定的用途是绘制图表。
-	 * 
-	 * @param dataSign 筛选数据集标记，与this.dataSignFullname()函数参数相同，为null表示筛选无任何标记的数据集绑定
-	 * @param nonNull 可选，与this.dataSetBindsMain()函数的nonEmpty参数相同
-	 * @returns 数据集绑定、null
-	 * @since 5.4.0
-	 */
-	chartBase.dataSetBindMainOfSign = function(dataSign, nonNull)
-	{
-		var re = this._dataSetBindsMainOfSign(1, dataSign, nonNull);
-		return (re.length > 0 ? re[0] : null);
-	};
-	
-	chartBase._dataSetBindsMainOfSign = function(count, dataSign, nonEmpty)
-	{
-		nonEmpty = (nonEmpty == null ? "auto" : nonEmpty);
-		
-		var re = [];
-		
-		var signFullname = this.dataSignFullname(dataSign);
-		
-		var dataSetBinds = this.dataSetBinds();
-		for(var i=0; i<dataSetBinds.length; i++)
-		{
-			var dsb = dataSetBinds[i];
-			
-			if(!this.isDataSetAttachment(dsb))
-			{
-				if(this.isDataSetSigned(dsb, signFullname))
-				{
-					re.push(dsb);
-					
-					if(count > -1 && re.length >= count)
-						break;
-				}
-			}
-		}
-		
-		if(nonEmpty == "auto")
-		{
-			var dataSignNodes = this.dataSignPathNodes(dataSign);
-			nonEmpty = (dataSignNodes && dataSignNodes.length > 0 ? dataSignNodes[dataSignNodes.length-1].required : false);
-		}
-		
-		if(nonEmpty && re.length == 0)
-			throw new Error("DataSetBind signed by '"+signFullname+"' required");
-		
-		return re;
 	};
 	
 	/**
