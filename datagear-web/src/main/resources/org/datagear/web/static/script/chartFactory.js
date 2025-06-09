@@ -5019,7 +5019,7 @@
 	 * 获取未忽略结果的数据集绑定数组。
 	 * 
 	 * @param dataSetBinds 数据集结果、数组
-	 * @param chartResult 图表结果、数据集结果数组
+	 * @param chartResult 可选，用于筛选匹配的图表结果、数据集结果数组，如果未设置，则使用this.dataSetIgnoreFetch()匹配
 	 * @returns [ ... ]，空数组表示没有
 	 */
 	chartBase.dataSetBindsFetched = function(dataSetBinds, chartResult)
@@ -5030,7 +5030,10 @@
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
-			if(this.resultIgnoreFetchOf(chartResult, dataSetBinds[i]))
+			var dsb = dataSetBinds[i];
+			var ignore = (chartResult === undefined ? this.dataSetIgnoreFetch(dsb) : this.resultIgnoreFetchOf(chartResult, dsb));
+			
+			if(ignore)
 				continue;
 			
 			re.push(dataSetBinds[i]);
