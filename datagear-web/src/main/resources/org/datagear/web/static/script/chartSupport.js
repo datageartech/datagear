@@ -124,7 +124,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -346,7 +346,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -595,7 +595,7 @@
 		var dataSignNames = dg.dataSignNames;
 		var isAngleAxis = (dg.axisType == "angle");
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -810,7 +810,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var series = [];
 		
@@ -1109,7 +1109,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -1396,7 +1396,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -1656,7 +1656,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -1829,7 +1829,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var indicatorData = [];
@@ -2148,7 +2148,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var seriesName = "";
@@ -2289,7 +2289,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -2523,7 +2523,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -2724,7 +2724,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var seriesName = "";
@@ -3007,7 +3007,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -3212,7 +3212,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		var categoryNames = [];
 		var categoryDatasMap = {};
 		var map = undefined;
@@ -3415,7 +3415,7 @@
 		var dataSignNames = dg.dataSignNames;
 		var chartEle = chart.elementJquery();
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -3591,7 +3591,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -3783,7 +3783,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -4214,7 +4214,7 @@
 		
 		initSeries = (initSeries || {});
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -4377,7 +4377,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -4624,7 +4624,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var seriesName = "";
@@ -4936,7 +4936,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -5234,7 +5234,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -5388,7 +5388,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesData = [];
 		
@@ -5555,10 +5555,10 @@
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
-		var parallelAxis = chartSupport.parallelEvalParallelAxis(chart);
-		var valuePropertyNamess = chartSupport.parallelEvalValuePropertyNamess(chart, parallelAxis);
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
+		var parallelAxis = chartSupport.parallelEvalParallelAxis(chart, chartResult, dataSetBinds);
+		var valuePropertyNamess = chartSupport.parallelEvalValuePropertyNamess(chart, chartResult, dataSetBinds, parallelAxis);
 		var categoryNames = [];
 		var categoryDatasMap = {};
 		
@@ -5694,15 +5694,13 @@
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
-	chartSupport.parallelEvalParallelAxis = function(chart)
+	chartSupport.parallelEvalParallelAxis = function(chart, chartResult, dataSetBinds)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
 		var parallelAxis = [];
-		
-		var dataSetBinds = chart.dataSetBindsMain();
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
@@ -5760,7 +5758,7 @@
 		return parallelAxis;
 	};
 	
-	chartSupport.parallelEvalValuePropertyNamess = function(chart, parallelAxis)
+	chartSupport.parallelEvalValuePropertyNamess = function(chart, chartResult, dataSetBinds, parallelAxis)
 	{
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
@@ -5769,7 +5767,6 @@
 		var valuePropertyNamess = [];
 		
 		var placeholderName = chartFactory.builtinPropName("DataPropNamePlaceholder");
-		var dataSetBinds = chart.dataSetBindsMain();
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
@@ -5887,7 +5884,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var seriesData = [];
@@ -6112,7 +6109,7 @@
 		if(chartSupport.pictorialBarSymbolPaths[symbol])
 			symbol = chartSupport.pictorialBarSymbolPaths[symbol];
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var legendData = [];
 		var series = [];
@@ -6356,7 +6353,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var seriesName = "";
 		var seriesData = [];
@@ -6741,7 +6738,7 @@
 	
 	chartSupport.tableUpdate = function(chart, chartResult)
 	{
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var updateOptions = { data: [] };
 		
@@ -7143,7 +7140,7 @@
 	{
 		var columns = [];
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart);
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
@@ -8048,7 +8045,7 @@
 		var dataSignNames = dg.dataSignNames;
 		var valueFirst = renderOptions.valueFirst;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var $parent = $(chart.internal());
 		
@@ -8298,7 +8295,7 @@
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		var $select = $(chart.internal());
 		
@@ -8495,7 +8492,7 @@
 		var $content = $("> .dg-chart-rawdata-content", ele);
 		$(".dg-chart-rawdata-ds", $content).remove();
 		
-		var dataSetBinds = chart.dataSetBindsMain();
+		var dataSetBinds = chartSupport.dataSetBindsMainFetched(chart, chartResult);
 		
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
@@ -10043,6 +10040,12 @@
 			
 			updateOptions[name] = updateValue;
 		}
+	};
+	
+	chartSupport.dataSetBindsMainFetched = function(chart, chartResult)
+	{
+		var dsbs = chart.dataSetBindsMain();
+		return chart.dataSetBindsFetched(dsbs, chartResult);
 	};
 	
 	//---------------------------------------------------------
