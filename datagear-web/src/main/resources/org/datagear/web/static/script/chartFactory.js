@@ -2646,13 +2646,14 @@
 	 * 
 	 * 图表渲染器应该在其render()中使用此函数构建图表渲染选项，然后使用它执行图表渲染逻辑，以符合图表API规范。
 	 * 
-	 * @param renderOptions 可选，待填充的渲染选项，通常由图表渲染器render函数内部生成，格式为：{ ... }，默认为空对象：{}
+	 * @param renderOptions 待填充的渲染选项，通常由图表渲染器render函数内部生成，格式为：{ ... }
 	 * @param beforeProcessHandler 可选，renderOptions.processRenderOptions调用前处理函数，
 								   格式为：function(renderOptions, chart){ ... }, 默认为：undefined
 	 * @returns renderOptions
 	 */
 	chartBase.inflateRenderOptions = function(renderOptions, beforeProcessHandler)
 	{
+		// < @deprecated 兼容5.3.1版本的renderOptions可选规则，将在未来版本移除
 		if(beforeProcessHandler === undefined)
 		{
 			//(beforeProcessHandler)
@@ -2662,9 +2663,9 @@
 				renderOptions = undefined;
 			}
 		}
+		// > @deprecated 兼容5.3.1版本的renderOptions可选规则，将在未来版本移除
 		
-		if(renderOptions == null)
-			renderOptions = {};
+		renderOptions = (renderOptions == null ? {} : renderOptions);
 		
 		$.extend(true, renderOptions, this.options());
 		
