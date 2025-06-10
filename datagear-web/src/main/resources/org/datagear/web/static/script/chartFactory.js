@@ -2694,17 +2694,20 @@
 	 * 图表渲染器应该在其update()中使用此函数构建图表更新选项，然后使用它执行图表更新逻辑，以符合图表API规范。
 	 * 
 	 * @param chartResult 图表结果、数据集结果数组
-	 * @param updateOptions 可选，待填充的更新选项，通常由图表渲染器update函数内部生成，格式为：{ ... }，默认为空对象：{}
-	 * @param renderOptions 可选，图表的渲染选项，格式为：{ ... }，默认为：chart.renderOptions()
+	 * @param updateOptions 待填充的更新选项，通常由图表渲染器update函数内部生成，格式为：{ ... }
+	 * @param renderOptions 可选，图表的渲染选项，格式为：{ ... }，默认为：this.renderOptions()，或者：this.options()
 	 * @param beforeProcessHandler 可选，renderOptions.processUpdateOptions调用前处理函数，
 								   格式为：function(updateOptions, chart, chartResult){ ... }, 默认为：undefined
 	 * @returns updateOptions
 	 */
 	chartBase.inflateUpdateOptions = function(chartResult, updateOptions, renderOptions, beforeProcessHandler)
 	{
+		// < @deprecated 兼容5.3.1版本的updateOptions可选规则，将在未来版本移除
 		//(chartResult)
 		if(arguments.length == 1)
 			;
+		// > @deprecated 兼容5.3.1版本的updateOptions可选规则，将在未来版本移除
+		
 		else if(arguments.length == 2)
 		{
 			//(chartResult, beforeProcessHandler)
@@ -2731,10 +2734,14 @@
 				;
 		}
 		
-		var chartRenderOptions = this.renderOptions();
-		
 		if(updateOptions == null)
 			updateOptions = {};
+		
+		var chartRenderOptions = this.renderOptions();
+		
+		if(chartRenderOptions == null)
+			chartRenderOptions = this.options();
+		
 		if(renderOptions == null)
 			renderOptions = (chartRenderOptions || {});
 		
@@ -2744,11 +2751,11 @@
 		for(var uop in updateOptions)
 			srcRenderOptions[uop] = renderOptions[uop];
 		
-		// < @deprecated 兼容2.6.0版本的chart.optionsUpdate()
-		// 待chart.optionsUpdate()移除后应改为：
-		// $.extend(true, updateOptions, srcRenderOptions);
-		$.extend(true, updateOptions, srcRenderOptions, this.optionsUpdate());
-		// > @deprecated 兼容2.6.0版本的chart.optionsUpdate()
+		$.extend(true, updateOptions, srcRenderOptions);
+		
+		// < @deprecated 兼容2.6.0版本的chart.optionsUpdate()，将在未来版本移除
+		$.extend(true, updateOptions, this.optionsUpdate());
+		// > @deprecated 兼容2.6.0版本的chart.optionsUpdate()，将在未来版本移除
 		
 		if(beforeProcessHandler != null)
 			beforeProcessHandler(updateOptions, this, chartResult);
