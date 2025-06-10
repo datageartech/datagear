@@ -36,6 +36,7 @@
 		chart.update()函数默认不使用上一次结果？；
 		内置图表插件数据结构由value数组改为更常用的name/value结构；
 		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；
+		移除ECharts内置看板库，改为通过图表插件depend依赖库引入（只需引入名称，库源由系统环境提供）；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
