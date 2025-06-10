@@ -5029,6 +5029,7 @@
 	 * @param dataSetBinds 数据集结果、数组
 	 * @param chartResult 可选，用于筛选匹配的图表结果、数据集结果数组，如果未设置，则使用this.dataSetIgnoreFetch()匹配
 	 * @returns [ ... ]，空数组表示没有
+	 * @since 5.4.0
 	 */
 	chartBase.dataSetBindsFetched = function(dataSetBinds, chartResult)
 	{
