@@ -9718,6 +9718,21 @@
 			replaceMerge: replaceMerge
 		};
 		
+		//对于忽略全部数据集的场景，某些图表（饼图/地图散点图等）不会清空画布，需要添加占位系列或数据
+		if(options.series != null)
+		{
+			var series = options.series;
+			
+			if(series.length == 0)
+				series.push({ id: 0 });
+			
+			for(var i=0; i<series.length; i++)
+			{
+				if(series[i].data === undefined)
+					series[i].data = [];
+			}
+		}
+		
 		chart.echartsOptions(options, opts);
 	};
 	
