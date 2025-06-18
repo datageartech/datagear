@@ -329,10 +329,10 @@
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
 			<div v-for="ds in pm.candidateDataSigns" :key="ds.extFullname" class="mb-2">
 				<div class="p-inputgroup">
-					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus"
+					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(isDataSignTargetField(ds) ? '' : 'secondary')"
 						@click="onAddDataSign($event, ds)">
 					</p-button>
-					<p-button type="button" icon="pi pi-info-circle"
+					<p-button type="button" icon="pi pi-info-circle" :severity="(isDataSignTargetField(ds) ? '' : 'secondary')"
 						aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
 						@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
 					</p-button>
@@ -1158,6 +1158,11 @@
 		formatDsfFieldsetName: function(dataSetField)
 		{
 			return "<@spring.message code='fieldWithColon' />" + dataSetField.name;
+		},
+		
+		isDataSignTargetField: function(dataSign)
+		{
+			return po.isDataSignTargetField(dataSign);
 		},
 		
 		onDeleteAnalysisProject: function()
