@@ -5372,7 +5372,20 @@
 					},
 					label:
 					{
-						color: chartTheme.color
+						color: chartTheme.color,
+						//当series.data为空时，label会显示"series***"异常内容，所以这里重新处理
+						formatter: function(param)
+						{
+							var value = (param && param.data != null ? param.data.value : null);
+							value = (value != null ? value : (param && param.value != null ? param.value : null));
+							
+							if(value == null)
+								return "";
+							
+							//此处逻辑参考自echarts-liquidfill.js
+							value = 100 * value;
+							return (isNaN(value) ? "" : value.toFixed(0) + "%");
+						}
 					}
 				}
 			]
@@ -5455,8 +5468,6 @@
 		}
 		
 		var options = { series: [ {id: 0, type: "liquidFill", data: seriesData, shape: dg.shape } ] };
-		//当seriesData为空时，label会显示"series***"异常内容，所以这里判断和隐藏
-		options.series[0].label = { show: (seriesData.length == 0 ? false : true) };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(chartResult, options);
