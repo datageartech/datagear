@@ -4933,12 +4933,15 @@
 	chartBase._checkSupportIgnoreFetch = function()
 	{
 		var support = this.rendererAddition(chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH);
-		support = (support == null ? false : support);
 		
-		if(!support)
+		//这里不必抛出异常，因为后端没有禁用逻辑，只警告即可
+		if(support == null)
 		{
-			//这里不必抛出异常，因为后端没有禁用逻辑，只警告即可
-			chartFactory.logWarn("chart '#"+this.elementId+"' plugin feature [ignore-fetch] unsupported");
+			chartFactory.logWarn("chart '#"+this.elementId+"' renderer ["+chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH+"] addition undefined, feature may unsupported");
+		}
+		else if(support == false)
+		{
+			chartFactory.logWarn("chart '#"+this.elementId+"' renderer ["+chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH+"] feature unsupported");
 		}
 	};
 	
