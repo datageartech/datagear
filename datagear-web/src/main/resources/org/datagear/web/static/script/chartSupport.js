@@ -5455,6 +5455,8 @@
 		}
 		
 		var options = { series: [ {id: 0, type: "liquidFill", data: seriesData, shape: dg.shape } ] };
+		//当seriesData为空时，label会显示"series***"异常内容，所以这里判断和隐藏
+		options.series[0].label = { show: (seriesData.length == 0 ? false : true) };
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(chartResult, options);
@@ -8522,6 +8524,8 @@
 		$("> .dg-chart-rawdata-content", ele).remove();
 	};
 	
+	chartSupport.rawDataAdditions = { supportIgnoreFetch: true };
+	
 	chartSupport.rawDataResize = function(chart){};
 	chartSupport.rawDataOn = function(chart, eventType, handler){};
 	chartSupport.rawDataOff = function(chart, eventType, handler){};
@@ -8634,8 +8638,17 @@
 		
 		var customRenderer = chartSupport.customGetCustomRenderer(chart, true);
 		
-		if(customRenderer && customRenderer.additions)
-			re = ($.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
+		if(customRenderer)
+		{
+			if(customRenderer.additions)
+				re = ($.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
+			else
+				re = null;
+		}
+		else
+		{
+			re = chartSupport.rawDataAdditions;
+		}
 		
 		return re;
 	};
