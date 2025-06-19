@@ -328,14 +328,26 @@
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
 			<div v-for="ds in pm.candidateDataSigns" :key="ds.extFullname" class="mb-2">
-				<div class="p-inputgroup">
-					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
-						@click="onAddDataSign($event, ds)">
-					</p-button>
-					<p-button type="button" icon="pi pi-info-circle" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
-						aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
-						@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
-					</p-button>
+				<div class="flex align-items-center gap-1">
+					<div>
+						<div class="p-inputgroup">
+							<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
+								@click="onAddDataSign($event, ds)" class="white-space-nowrap">
+							</p-button>
+							<p-button type="button" icon="pi pi-info-circle" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
+								aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
+								@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
+							</p-button>
+						</div>
+					</div>
+					<div class="flex align-items-center gap-1">
+						<p-badge severity="info" class="font-normal white-space-nowrap">
+							{{ds.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
+						</p-badge>
+						<p-badge :severity="ds.required ? 'danger' : 'info'" class="font-normal white-space-nowrap">
+							{{ds.required ? "<@spring.message code='requiredInput' />" : "<@spring.message code='optionalInput' />"}}
+						</p-badge>
+					</div>
 				</div>
 			</div>
 		</div>
