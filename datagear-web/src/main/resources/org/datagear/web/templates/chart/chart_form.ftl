@@ -340,7 +340,7 @@
 							</p-button>
 						</div>
 					</div>
-					<div class="flex align-items-center gap-1">
+					<div class="flex align-items-center" style="gap:1px;">
 						<p-badge severity="info" class="font-normal white-space-nowrap">
 							{{ds.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
 						</p-badge>
