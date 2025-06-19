@@ -164,17 +164,21 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	{
 		Set<HtmlChartPlugin> loaded = Collections.emptySet();
 
-		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
-
 		try
 		{
-			loaded = loader.loadAll(directory);
+			loaded = resolveHtmlChartPluginsThrow(directory);
 		}
 		catch (HtmlChartPluginLoadException e)
 		{
 		}
 
 		return loaded;
+	}
+
+	protected Set<HtmlChartPlugin> resolveHtmlChartPluginsThrow(File directory) throws HtmlChartPluginLoadException
+	{
+		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
+		return loader.loadAll(directory);
 	}
 
 	/**

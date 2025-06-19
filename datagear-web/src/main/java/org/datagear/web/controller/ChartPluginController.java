@@ -34,7 +34,6 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -128,18 +127,13 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		}
 
 		List<HtmlChartPluginView> pluginInfos = new ArrayList<>();
-		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPlugins(myTmpDirectory);
+
+		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPluginsThrow(myTmpDirectory);
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
 
-		try
-		{
-			for (HtmlChartPlugin chartPlugin : loadedPlugins)
-				pluginInfos.add(toHtmlChartPluginView(chartPlugin, themeName, locale));
-		}
-		catch (HtmlChartPluginLoadException e)
-		{
-		}
+		for (HtmlChartPlugin chartPlugin : loadedPlugins)
+			pluginInfos.add(toHtmlChartPluginView(chartPlugin, themeName, locale));
 
 		Map<String, Object> results = new HashMap<>();
 		results.put("pluginFileName", pluginFileName);

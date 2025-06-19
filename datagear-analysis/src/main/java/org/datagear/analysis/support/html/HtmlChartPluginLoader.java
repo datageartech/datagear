@@ -302,7 +302,18 @@ public class HtmlChartPluginLoader
 	 */
 	public HtmlChartPlugin loadZip(ZipInputStream in) throws HtmlChartPluginLoadException
 	{
-		return loadSingleForZipInputStream(in);
+		try
+		{
+			return loadSingleForZipInputStream(in);
+		}
+		catch (HtmlChartPluginLoadException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
 	}
 
 	/**
@@ -409,7 +420,7 @@ public class HtmlChartPluginLoader
 		}
 		catch (Exception e)
 		{
-			throw new HtmlChartPluginLoadException(e);
+			throw new HtmlChartPluginLoadException(e, zip.getName());
 		}
 		finally
 		{
@@ -428,7 +439,7 @@ public class HtmlChartPluginLoader
 			}
 			catch (Exception e)
 			{
-				throw new HtmlChartPluginLoadException(e);
+				throw new HtmlChartPluginLoadException(e, zip.getName());
 			}
 		}
 
@@ -443,50 +454,38 @@ public class HtmlChartPluginLoader
 	 * 
 	 * @param in
 	 * @return {@code null}表示文件不合法
-	 * @throws HtmlChartPluginLoadException
+	 * @throws Exception
 	 */
-	protected HtmlChartPlugin loadSingleForZipInputStream(ZipInputStream in) throws HtmlChartPluginLoadException
+	protected HtmlChartPlugin loadSingleForZipInputStream(ZipInputStream in) throws Exception
 	{
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
 		JsDefContent jsDefContent = null;
 
-		try
+		ZipEntry zipEntry = null;
+		while ((zipEntry = in.getNextEntry()) != null)
 		{
-			ZipEntry zipEntry = null;
-			while ((zipEntry = in.getNextEntry()) != null)
+			String name = zipEntry.getName();
+
+			if (zipEntry.isDirectory())
+				;
+			else if (name.equals(FILE_NAME_PLUGIN))
 			{
-				String name = zipEntry.getName();
-
-				if (zipEntry.isDirectory())
-					;
-				else if (name.equals(FILE_NAME_PLUGIN))
-				{
-					Reader pluginIn = IOUtil.getReader(in, this.encoding);
-					jsDefContent = this.htmlChartPluginJsDefResolver.resolve(pluginIn);
-					inflateChartPluginProperties(plugin, jsDefContent);
-				}
-				else if (name.equals(FILE_NAME_RENDERER))
-				{
-					if (jsDefContent == null || !jsDefContent.hasPluginRenderer())
-					{
-						Reader rendererIn = IOUtil.getReader(in, this.encoding);
-						String rendererCodeValue = IOUtil.readString(rendererIn, false);
-						plugin.setRenderer(
-								new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
-					}
-				}
-
-				in.closeEntry();
+				Reader pluginIn = IOUtil.getReader(in, this.encoding);
+				jsDefContent = this.htmlChartPluginJsDefResolver.resolve(pluginIn);
+				inflateChartPluginProperties(plugin, jsDefContent);
 			}
-		}
-		catch (HtmlChartPluginLoadException e)
-		{
-			throw e;
-		}
-		catch (Exception e)
-		{
-			throw new HtmlChartPluginLoadException(e);
+			else if (name.equals(FILE_NAME_RENDERER))
+			{
+				if (jsDefContent == null || !jsDefContent.hasPluginRenderer())
+				{
+					Reader rendererIn = IOUtil.getReader(in, this.encoding);
+					String rendererCodeValue = IOUtil.readString(rendererIn, false);
+					plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
+				}
+			}
+
+			in.closeEntry();
 		}
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
@@ -542,7 +541,7 @@ public class HtmlChartPluginLoader
 		}
 		catch (Exception e)
 		{
-			throw new HtmlChartPluginLoadException(e);
+			throw new HtmlChartPluginLoadException(e, directory.getName());
 		}
 		finally
 		{

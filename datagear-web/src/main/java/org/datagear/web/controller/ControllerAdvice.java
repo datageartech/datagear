@@ -37,6 +37,7 @@ import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
 import org.datagear.analysis.support.UnsupportedJsonResultDataException;
 import org.datagear.analysis.support.UnsupportedResultDataException;
 import org.datagear.analysis.support.datasettpl.TemplateResolverException;
+import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
@@ -545,6 +546,16 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
 				exception.getFieldName(), getRootMessage(exception));
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(HtmlChartPluginLoadException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisHtmlChartPluginLoadException(HttpServletRequest request, HttpServletResponse response,
+			HtmlChartPluginLoadException exception)
+	{
+		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
+				exception.getSource(), getRootMessage(exception));
 		return getErrorView(request, response);
 	}
 
