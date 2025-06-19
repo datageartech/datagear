@@ -621,9 +621,11 @@ public class JsonChartPluginPropertiesResolverTest
 
 			{
 				DataSign dataSign = dataSigns.get(0);
+				String[] targets = dataSign.getTargets();
 
 				assertEquals("field-01", dataSign.getName());
-				assertEquals(DataSign.TARGET_FIELD, dataSign.getTarget());
+				assertEquals(1, targets.length);
+				assertEquals(DataSign.TARGET_FIELD, targets[0]);
 				assertTrue(dataSign.isRequired());
 				assertFalse(dataSign.isMultiple());
 				assertNull(dataSign.getChildren());
@@ -632,49 +634,82 @@ public class JsonChartPluginPropertiesResolverTest
 
 			{
 				DataSign dataSign = dataSigns.get(1);
+				String[] targets = dataSign.getTargets();
 
 				assertEquals("dataSet-01", dataSign.getName());
-				assertEquals(DataSign.TARGET_DATASET, dataSign.getTarget());
+				assertEquals(1, targets.length);
+				assertEquals(DataSign.TARGET_DATASET, targets[0]);
 				assertFalse(dataSign.isRequired());
 				assertTrue(dataSign.isMultiple());
 				assertNull(dataSign.getNameLabel());
 
 				List<DataSign> children = dataSign.getChildren();
 				assertNotNull(children);
-				assertEquals(2, children.size());
+				assertEquals(4, children.size());
 
 				{
-					DataSign ds0 = children.get(0);
+					DataSign ds = children.get(0);
+					String[] dsTargets = ds.getTargets();
 
-					assertEquals("name", ds0.getName());
-					assertEquals(DataSign.TARGET_FIELD, ds0.getTarget());
-					assertFalse(ds0.isRequired());
-					assertTrue(ds0.isMultiple());
-					assertEquals("数据集标记01-名称", ds0.getNameLabel().getValue());
-					assertEquals("数据集标记01-名称-描述", ds0.getDescLabel().getValue());
-					assertNull(ds0.getChildren());
+					assertEquals("name", ds.getName());
+					assertEquals(1, dsTargets.length);
+					assertEquals(DataSign.TARGET_FIELD, dsTargets[0]);
+					assertFalse(ds.isRequired());
+					assertTrue(ds.isMultiple());
+					assertEquals("数据集标记01-名称", ds.getNameLabel().getValue());
+					assertEquals("数据集标记01-名称-描述", ds.getDescLabel().getValue());
+					assertNull(ds.getChildren());
 
-					Map<String, ?> additions = ds0.getAdditions();
+					Map<String, ?> additions = ds.getAdditions();
 					assertEquals("v0", additions.get("a0"));
 					assertEquals(3, ((Integer) additions.get("a1")).intValue());
 				}
 
 				{
-					DataSign ds1 = children.get(1);
+					DataSign ds = children.get(1);
+					String[] dsTargets = ds.getTargets();
 
-					assertEquals("value", ds1.getName());
-					assertEquals(DataSign.TARGET_FIELD, ds1.getTarget());
-					assertTrue(ds1.isRequired());
-					assertFalse(ds1.isMultiple());
-					assertEquals("数据集标记01-值", ds1.getNameLabel().getValue());
+					assertEquals("value", ds.getName());
+					assertEquals(1, dsTargets.length);
+					assertEquals(DataSign.TARGET_FIELD, dsTargets[0]);
+					assertTrue(ds.isRequired());
+					assertFalse(ds.isMultiple());
+					assertEquals("数据集标记01-值", ds.getNameLabel().getValue());
+				}
+
+				{
+					DataSign ds = children.get(2);
+					String[] dsTargets = ds.getTargets();
+
+					assertEquals("size", ds.getName());
+					assertEquals(1, dsTargets.length);
+					assertEquals("unknown", dsTargets[0]);
+					assertTrue(ds.isRequired());
+					assertFalse(ds.isMultiple());
+					assertEquals("数据集标记01-尺寸", ds.getNameLabel().getValue());
+				}
+
+				{
+					DataSign ds = children.get(3);
+					String[] dsTargets = ds.getTargets();
+
+					assertEquals("range", ds.getName());
+					assertEquals(2, dsTargets.length);
+					assertEquals("aaa", dsTargets[0]);
+					assertEquals("bbb", dsTargets[1]);
+					assertTrue(ds.isRequired());
+					assertFalse(ds.isMultiple());
+					assertEquals("数据集标记01-范围", ds.getNameLabel().getValue());
 				}
 			}
 
 			{
 				DataSign dataSign = dataSigns.get(2);
+				String[] targets = dataSign.getTargets();
 
 				assertEquals("value", dataSign.getName());
-				assertEquals(DataSign.TARGET_FIELD, dataSign.getTarget());
+				assertEquals(1, targets.length);
+				assertEquals(DataSign.TARGET_FIELD, targets[0]);
 				assertTrue(dataSign.isRequired());
 				assertFalse(dataSign.isMultiple());
 				assertNull(dataSign.getChildren());
@@ -683,9 +718,13 @@ public class JsonChartPluginPropertiesResolverTest
 
 			{
 				DataSign dataSign = dataSigns.get(3);
+				String[] targets = dataSign.getTargets();
 
 				assertEquals("dataSet-02", dataSign.getName());
-				assertEquals(DataSign.TARGET_DATASET, dataSign.getTarget());
+				assertEquals(3, targets.length);
+				assertEquals(DataSign.TARGET_FIELD, targets[0]);
+				assertEquals(DataSign.TARGET_DATASET, targets[1]);
+				assertEquals("unknown", targets[2]);
 				assertTrue(dataSign.isRequired());
 				assertFalse(dataSign.isMultiple());
 				assertNull(dataSign.getNameLabel());

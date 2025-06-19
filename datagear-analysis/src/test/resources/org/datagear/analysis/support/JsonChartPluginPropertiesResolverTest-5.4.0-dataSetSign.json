@@ -8,7 +8,7 @@
 		},
 		{
 			name: "dataSet-01",
-			target: "dataset",
+			targets: "dataset",
 			required : false,
 			multiple : true,
 			children:
@@ -24,6 +24,16 @@
 				{
 					name: "value",
 					nameLabel: "数据集标记01-值"
+				},
+				{
+					name: "size",
+					nameLabel: "数据集标记01-尺寸",
+					targets: "unknown"
+				},
+				{
+					name: "range",
+					nameLabel: "数据集标记01-范围",
+					targets: [ "aaa", "bbb" ]
 				}
 			]
 		},
@@ -32,7 +42,7 @@
 		},
 		{
 			name: "dataSet-02",
-			target: "dataset"
+			targets: ["field", "dataset", "unknown"]
 		}
 	]
 }

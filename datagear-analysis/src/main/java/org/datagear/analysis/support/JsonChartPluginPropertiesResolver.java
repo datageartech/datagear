@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -241,7 +242,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException(
-					"Convert object of type [" + obj.getClass().getName() + "] to icon map is not supported");
+					"Convert object of type [" + obj.getClass().getName() + "] to icon map unsupported");
 	}
 
 	/**
@@ -325,7 +326,7 @@ public class JsonChartPluginPropertiesResolver
 			DataSign dataSign = createDataSign();
 
 			dataSign.setName(name);
-			dataSign.setTarget(convertToDataSignTarget(map.get(DataSign.PROPERTY_TARGET), parent));
+			dataSign.setTargets(convertToDataSignTargets(map.get(DataSign.PROPERTY_TARGETS), parent));
 			dataSign.setRequired(convertToDataSignRequired(map.get(DataSign.PROPERTY_REQUIRED)));
 			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
 			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
@@ -338,29 +339,72 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ DataSign.class.getName() + "] is not supported");
+					+ DataSign.class.getName() + "] unsupported");
 	}
 
-	protected String convertToDataSignTarget(Object v, DataSign parent)
+	/**
+	 * 转换为{@linkplain DataSign#getTargets()}。
+	 * <p>
+	 * 支持格式：{@code "..."}、{@code [ "...", ... ]}
+	 * </p>
+	 * 
+	 * @param v
+	 * @param parent
+	 * @return
+	 */
+	protected String[] convertToDataSignTargets(Object v, DataSign parent)
 	{
-		String target;
+		String[] targets;
 
-		if (parent != null)
+		// 设为默认值，以兼容旧版逻辑
+		if(v == null)
 		{
-			// 子标记都是字段标记
-			target = DataSign.TARGET_FIELD;
+			targets = DataSign.TARGETS_FIELDS;
 		}
-		else if (v != null && (v instanceof String) && DataSign.TARGET_DATASET.equalsIgnoreCase((String) v))
+		else if (v instanceof String)
 		{
-			target = DataSign.TARGET_DATASET;
+			targets = convertToDataSignTargets(Arrays.asList(v), parent);
+		}
+		else if (v instanceof Object[])
+		{
+			targets = convertToDataSignTargets(Arrays.asList((Object[]) v), parent);
+		}
+		else if (v instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) v;
+			targets = new String[collection.size()];
+
+			int idx = 0;
+			for (Object ele : collection)
+			{
+				if (ele instanceof String)
+				{
+					String eleStr = (String) ele;
+					String dsv;
+
+					if (DataSign.TARGET_DATASET.equalsIgnoreCase(eleStr))
+					{
+						dsv = DataSign.TARGET_DATASET;
+					}
+					else if (DataSign.TARGET_FIELD.equalsIgnoreCase(eleStr))
+					{
+						dsv = DataSign.TARGET_FIELD;
+					}
+					else
+					{
+						dsv = eleStr;
+					}
+
+					targets[idx] = dsv;
+					idx++;
+				}
+			}
 		}
 		else
-		{
-			// 默认应为TARGET_FIELD，以兼容旧版设计
-			target = DataSign.TARGET_FIELD;
-		}
+			throw new UnsupportedOperationException("Convert object of type [" + v.getClass().getName() + "] to ["
+					+ DataSign.class.getName() + ".targets] unsupported");
 
-		return target;
+		return targets;
 	}
 
 	protected boolean convertToDataSignRequired(Object v)
@@ -386,7 +430,7 @@ public class JsonChartPluginPropertiesResolver
 			return (Map<String, ?>) obj;
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ DataSign.class.getName() + ".additions] is not supported");
+					+ DataSign.class.getName() + ".additions] unsupported");
 	}
 
 	/**
@@ -479,7 +523,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttribute.class.getName() + "] is not supported");
+					+ ChartPluginAttribute.class.getName() + "] unsupported");
 	}
 
 	protected boolean convertToAttributeRequired(Object v)
@@ -568,7 +612,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Group.class.getName() + "] is not supported");
+					+ Group.class.getName() + "] unsupported");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -580,7 +624,7 @@ public class JsonChartPluginPropertiesResolver
 			return (Map<String, ?>) obj;
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttribute.class.getName() + ".additions] is not supported");
+					+ ChartPluginAttribute.class.getName() + ".additions] unsupported");
 	}
 
 	/**
@@ -686,7 +730,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginDataSetRange.class.getName() + "] is not supported");
+					+ ChartPluginDataSetRange.class.getName() + "] unsupported");
 	}
 
 	protected Range convertToRange(Map<String, ?> map)
@@ -777,7 +821,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Category.class.getName() + "] is not supported");
+					+ Category.class.getName() + "] unsupported");
 	}
 
 	protected List<Integer> convertToCategoryOrders(Object obj, int defaultOrder)
@@ -817,7 +861,7 @@ public class JsonChartPluginPropertiesResolver
 			return (Map<String, ?>) obj;
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPlugin.class.getName() + ".additions] is not supported");
+					+ ChartPlugin.class.getName() + ".additions] unsupported");
 	}
 
 	/**
@@ -850,7 +894,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ enumType.getName() + "] is not supported");
+					+ enumType.getName() + "] unsupported");
 	}
 
 	/**
@@ -887,13 +931,13 @@ public class JsonChartPluginPropertiesResolver
 				label.setLocaleValues((Map<String, String>)localeValues);
 			else
 				throw new UnsupportedOperationException("Convert object of type [" + localeValues.getClass().getName() + "] to ["
-						+ Label.class.getName() + ".localeValues] is not supported");
+						+ Label.class.getName() + ".localeValues] unsupported");
 	
 			return label;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Label.class.getName() + "] is not supported");
+					+ Label.class.getName() + "] unsupported");
 	}
 
 	/**
@@ -916,7 +960,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException(
-					"Convert object [" + obj + "] to [" + boolean.class.getName() + "] is not supported");
+					"Convert object [" + obj + "] to [" + boolean.class.getName() + "] unsupported");
 	}
 
 	protected int convertToInt(Object obj, int defaultValue)
@@ -938,7 +982,7 @@ public class JsonChartPluginPropertiesResolver
 		}
 		else
 			throw new UnsupportedOperationException(
-					"Convert object [" + obj + "] to [" + Integer.class.getName() + "] is not supported");
+					"Convert object [" + obj + "] to [" + Integer.class.getName() + "] unsupported");
 	}
 	
 	protected String convertToString(Object obj)

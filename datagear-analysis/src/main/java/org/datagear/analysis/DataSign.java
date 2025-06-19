@@ -46,7 +46,7 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROPERTY_NAME = "name";
-	public static final String PROPERTY_TARGET = "target";
+	public static final String PROPERTY_TARGETS = "targets";
 	public static final String PROPERTY_REQUIRED = "required";
 	public static final String PROPERTY_MULTIPLE = "multiple";
 	public static final String PROPERTY_CHILDREN = "children";
@@ -64,20 +64,29 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 	 */
 	public static final String TARGET_DATASET = "DATASET";
 
+	/**
+	 * 标记目标数组：字段。
+	 */
+	public static final String[] TARGETS_FIELDS = new String[] { TARGET_FIELD };
+
 	/** 名称 */
 	private String name;
 
 	/**
 	 * 标记目标。
 	 * <p>
-	 * 如果值为{@linkplain #TARGET_DATASET}，应仅用于标记{@linkplain DataSetBind#getDataSet()}；
-	 * 如果值为{@linkplain #TARGET_FIELD}，应仅用于标记{@linkplain DataSetBind#getDataSet()}所包含的{@linkplain DataSetField}。
+	 * 一个{@linkplain DataSign}可定义多个标记目标。
 	 * </p>
 	 * <p>
-	 * 注意：默认值应设为{@linkplain #TARGET_FIELD}，以兼容旧版逻辑。
+	 * 如果包含{@linkplain #TARGET_DATASET}，表明可应用于{@linkplain DataSetBind#getDataSetSigns()}；
+	 * 如果包含{@linkplain #TARGET_FIELD}，表明可应用于{@linkplain DataSetBind#getFieldSigns()}。
+	 * </p>
+	 * <p>
+	 * 注意：标记目标功能是在{@code 5.4.0}版本支持的，在之前版本中{@linkplain DataSign}只能应用于{@linkplain DataSetBind#getFieldSigns()}，
+	 * 因此，默认值应仅设为{@linkplain #TARGETS_FIELDS}，以兼容旧版逻辑。
 	 * </p>
 	 */
-	private String target = TARGET_FIELD;
+	private String[] targets = TARGETS_FIELDS;
 
 	/** 数据集是否必须有此标记 */
 	private boolean required;
@@ -101,14 +110,14 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 
 	public DataSign(String name, boolean required, boolean multiple)
 	{
-		this(name, TARGET_FIELD, required, multiple);
+		this(name, TARGETS_FIELDS, required, multiple);
 	}
 
-	public DataSign(String name, String target, boolean required, boolean multiple)
+	public DataSign(String name, String[] targets, boolean required, boolean multiple)
 	{
 		super();
 		this.name = name;
-		this.target = target;
+		this.targets = targets;
 		this.required = required;
 		this.multiple = multiple;
 	}
@@ -123,14 +132,14 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 		this.name = name;
 	}
 
-	public String getTarget()
+	public String[] getTargets()
 	{
-		return target;
+		return targets;
 	}
 
-	public void setTarget(String target)
+	public void setTargets(String[] targets)
 	{
-		this.target = target;
+		this.targets = targets;
 	}
 
 	public boolean isRequired()
@@ -182,7 +191,7 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 	 */
 	public DataSign clone(Locale locale)
 	{
-		DataSign re = new DataSign(this.name, this.target, this.required, this.multiple);
+		DataSign re = new DataSign(this.name, this.targets, this.required, this.multiple);
 		re.setAdditions(this.additions);
 		LabelUtil.concrete(this, re, locale);
 
@@ -204,9 +213,9 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", required=" + required + ", multiple="
-				+ multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel() + ", additions="
-				+ additions + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", targets=" + targets + ", required=" + required
+				+ ", multiple=" + multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel()
+				+ ", additions=" + additions + "]";
 	}
 
 	/**

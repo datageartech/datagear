@@ -329,10 +329,10 @@
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
 			<div v-for="ds in pm.candidateDataSigns" :key="ds.extFullname" class="mb-2">
 				<div class="p-inputgroup">
-					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(isDataSignTargetField(ds) ? '' : 'secondary')"
+					<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
 						@click="onAddDataSign($event, ds)">
 					</p-button>
-					<p-button type="button" icon="pi pi-info-circle" :severity="(isDataSignTargetField(ds) ? '' : 'secondary')"
+					<p-button type="button" icon="pi pi-info-circle" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
 						aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
 						@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
 					</p-button>
@@ -800,7 +800,7 @@
 		
 		for(var i=0; i<dataSigns.length; i++)
 		{
-			if(!po.isDataSignTargetField(dataSigns[i]))
+			if(po.isDataSignTargetDataset(dataSigns[i]))
 			{
 				return true;
 			}
@@ -840,11 +840,12 @@
 	{
 		var re = [];
 		
+		//二级数据集标记目前没有应用场景，暂时没有必要支持
 		for(var i=0; i<dataSigns.length; i++)
 		{
 			var dsi = dataSigns[i];
 			
-			if(!po.isDataSignTargetField(dsi))
+			if(po.isDataSignTargetDataset(dsi))
 			{
 				re.push(dsi);
 			}
@@ -869,6 +870,7 @@
 		
 		if(dsb.extSignObjs)
 		{
+			//三级字段标记目前没有应用场景，暂时没有必要支持
 			$.each(dsb.extSignObjs, function(idx, signObj)
 			{
 				var signObjChildren = (signObj.children || []);
@@ -887,7 +889,24 @@
 	
 	po.isDataSignTargetField = function(dataSign)
 	{
-		return (dataSign.target == null || dataSign.target == "" || dataSign.target == "${DataSign.TARGET_FIELD}");
+		var targets = dataSign.targets;
+		
+		//兼容旧版逻辑
+		if(targets == null || targets.length == 0)
+			return true;
+		
+		return ($.inArray("${DataSign.TARGET_FIELD}", targets) > -1);
+	};
+	
+	po.isDataSignTargetDataset = function(dataSign)
+	{
+		var targets = dataSign.targets;
+		
+		//兼容旧版逻辑
+		if(targets == null || targets.length == 0)
+			return false;
+		
+		return ($.inArray("${DataSign.TARGET_DATASET}", targets) > -1);
 	};
 	
 	po.formatDataSignLabel = function(dataSign)
@@ -1106,6 +1125,7 @@
 		disableSaveShow: po.disableSaveShow,
 		pluginHasDataSetSign: po.containsDataSetSign(formModel.pluginVo),
 		candidateDataSigns: [],
+		candidateDataSignTarget: "",
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
 		dataSignTarget: "field",
@@ -1163,6 +1183,11 @@
 		isDataSignTargetField: function(dataSign)
 		{
 			return po.isDataSignTargetField(dataSign);
+		},
+		
+		isDataSignTargetDataset: function(dataSign)
+		{
+			return po.isDataSignTargetDataset(dataSign);
 		},
 		
 		onDeleteAnalysisProject: function()
@@ -1267,9 +1292,15 @@
 				pm.dataSetFieldForSign = (dataSetField != null ? dataSetField : null);
 				
 				if(dataSetField != null)
+				{
 					pm.candidateDataSigns = po.evalCandidateDataSignsForField(fm.pluginVo.dataSigns, dataSetBind);
+					pm.candidateDataSignTarget = "field";
+				}
 				else
+				{
 					pm.candidateDataSigns = po.evalCandidateDataSignsForDataSet(fm.pluginVo.dataSigns);
+					pm.candidateDataSignTarget = "dataset";
+				}
 				
 				po.vueUnref("${pid}dataSignsPanelEle").show(e);
 			});
