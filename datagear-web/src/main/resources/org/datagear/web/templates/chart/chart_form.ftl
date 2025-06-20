@@ -127,7 +127,7 @@
 														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetDataSign(dsb, sign.extFullname)">
 													</p-chip>
 												</div>
-												<p-button type="button" icon="pi pi-plus"
+												<p-button type="button" icon="pi pi-plus" severity="info"
 													aria:haspopup="true" aria-controls="${pid}dataSignsPanel"
 													@click="onShowDataSignPanel($event, dsb)" v-if="!pm.isReadonlyAction">
 												</p-button>
@@ -136,7 +136,7 @@
 									</div>
 								</p-fieldset>
 								
-								<p-fieldset v-for="(df, dfIdx) in dsb.dataSet.fields" :key="dfIdx" :legend="formatDsfFieldsetName(df)" class="fieldset-sm mb-3">
+								<p-fieldset v-for="(df, dfIdx) in dsb.dataSet.fields" :key="dfIdx" :legend="formatDsfFieldsetName(df)" class="fieldset-sm mb-3 surface-50">
 									<div class="field grid mb-2">
 										<label :for="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 											title="<@spring.message code='chart.dsb.fieldSign.desc' />">
@@ -331,10 +331,10 @@
 				<div class="flex align-items-center gap-1">
 					<div>
 						<div class="p-inputgroup">
-							<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
+							<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'info' : '')"
 								@click="onAddDataSign($event, ds)" class="white-space-nowrap">
 							</p-button>
-							<p-button type="button" icon="pi pi-info-circle" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'secondary' : '')"
+							<p-button type="button" icon="pi pi-info-circle" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataset(ds) ? 'info' : '')"
 								aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
 								@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
 							</p-button>
