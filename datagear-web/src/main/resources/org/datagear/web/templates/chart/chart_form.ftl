@@ -323,7 +323,7 @@
 		:show-close-icon="false" id="${pid}dataSignsPanel">
 		<div class="pb-2">
 			<label class="text-lg font-bold">
-				<@spring.message code='dataSign' />
+				{{pm.candidateDataSignTarget == "dataset" ? "<@spring.message code='dataSetSign' />" : "<@spring.message code='fieldSign' />"}}
 			</label>
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
