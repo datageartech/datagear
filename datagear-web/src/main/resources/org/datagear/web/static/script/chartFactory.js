@@ -2261,7 +2261,7 @@
 		
 		if(nonEmpty == "auto")
 		{
-			var dataSignNodes = this.dataSignPathNodes(dataSign);
+			var dataSignNodes = this._dataSignPathNodes(dataSign);
 			nonEmpty = (dataSignNodes && dataSignNodes.length > 0 ? dataSignNodes[dataSignNodes.length-1].required : false);
 		}
 		
@@ -4271,7 +4271,7 @@
 	 * @returns 数据标记数组，空数组表示任一级没找到
 	 * @since 5.4.0
 	 */
-	chartBase.dataSignPathNodes = function(fullname, dataSigns)
+	chartBase._dataSignPathNodes = function(fullname, dataSigns)
 	{
 		var re = [];
 		
@@ -4290,7 +4290,7 @@
 			//标记全名
 			else
 			{
-				re = this.dataSignPathNodes(fullname.split(chartFactory.DATA_SIGN_FULLNAME_SEPARATOR), dataSigns);
+				re = this._dataSignPathNodes(fullname.split(chartFactory.DATA_SIGN_FULLNAME_SEPARATOR), dataSigns);
 			}
 		}
 		//插件数据标记层级数组
