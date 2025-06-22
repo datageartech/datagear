@@ -4508,19 +4508,19 @@
 	};
 	
 	/**
-	 * 获取未准备好（必填但值为null）的数据集字段信息。
+	 * 获取未准备好（必填但值为null）的数据集参数信息。
 	 * 此函数支持的调用格式：
 	 * chart.unreadyDataSetParams();
-	 * chart.unreadyDataSetParams(true、false);
-	 * chart.unreadyDataSetParams(true、false, true、false);
+	 * chart.unreadyDataSetParams(stopOnFirst);
+	 * chart.unreadyDataSetParams(stopOnFirst, checkIgnoreFetch);
 	 * chart.unreadyDataSetParams(dataSetBinds);
-	 * chart.unreadyDataSetParams(dataSetBinds, true、false);
-	 * chart.unreadyDataSetParams(dataSetBinds, true、false, true、false);
+	 * chart.unreadyDataSetParams(dataSetBinds, stopOnFirst);
+	 * chart.unreadyDataSetParams(dataSetBinds, stopOnFirst, checkIgnoreFetch);
 	 * 
 	 * @param dataSetBinds 可选，要查找的数据集绑定、索引数值，或者它们的数组，默认为：this.dataSetBinds()
 	 * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
 	 * @param checkIgnoreFetch 可选，是否校验忽略获取结果的数据集，默认值为：false
-	 * @returns 未准备好的数据集字段信息数组，格式为：
+	 * @returns 未准备好的数据集参数信息数组，格式为：
 	 * 				[
 	 * 					{ dataSetBind: 数据集绑定, dataSetBindIndex: 数据集绑定索引, param: 数据集参数对象, paramIndex: 参数索引 },
 	 * 					...
