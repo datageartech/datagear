@@ -1,16 +1,7 @@
 下一版本：
 
-	扩充图表数据标记概念，支持标记数据集：
-		ok 添加DataSign.target、DataSign.children字段，DataSetBind.fieldSigns中标记信息支持"数据集标记名.字段标记名"格式）；
-		ok 图表JS对象新增chart.dataSetSigns()函数，用于设置数据集标记；
-		ok 图表JS对象dataSetBind*()函数参数支持设置筛选数据标记；
-		ok 图表编辑页面支持数据集标记功能；
-	ok SQL数据集支持SQL预编译语法；
-	ok HTTP数据集响应类型支持文本、Base64二进制；
-	ok DataSetResult添加additions功能，可将数据源数据对象中有用但无法的解析为字段的数据收集；
-	ok HTTP数据集添加响应附加数据功能，可设置从响应JSON数据中读取附加数据；
-	ok 图表JS对象添加可忽略获取指定数据集结果的API；
-	ok 内置图表添加supportIgnoreFetch声明；
+	图表展示页删除默认的"dg-chart-disable-setting"元素属性，不然"disableSetting"图表选项不起作用；
+	SQL数据集预编译语法不禁用关键字SQL防注入功能；
 	
 待定：
 	
