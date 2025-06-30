@@ -708,25 +708,26 @@
 	 */
 	chartBase._initDisableSetting = function()
 	{
-		var globalSetting = $(document.body).attr(elementAttrConst.DISABLE_SETTING);
-		var localSetting = this.elementJquery().attr(elementAttrConst.DISABLE_SETTING);
+		var localSetting;
 		
-		globalSetting = this._evalDisableSettingAttr(globalSetting);
+		var options = this.options();
+		var optionSetting = chartFactory.builtinOptionValue(options, builtinOptionNames.disableSetting);
 		
-		if(!chartFactory.isNullOrEmpty(localSetting))
+		//图表选项里的优先级应最高，不然图表展示页的选项不起效
+		if(!chartFactory.isNullOrEmpty(optionSetting))
 		{
-			localSetting = this._evalDisableSettingAttr(localSetting);
-			localSetting = $.extend({}, globalSetting, localSetting);
+			localSetting = this._evalDisableSettingAttr(optionSetting);
 		}
 		else
 		{
-			var options = this.options();
-			var optionSetting = chartFactory.builtinOptionValue(options, builtinOptionNames.disableSetting);
+			var globalSetting = $(document.body).attr(elementAttrConst.DISABLE_SETTING);
+			globalSetting = this._evalDisableSettingAttr(globalSetting);
+			localSetting = this.elementJquery().attr(elementAttrConst.DISABLE_SETTING);
 			
-			if(!chartFactory.isNullOrEmpty(optionSetting))
+			if(!chartFactory.isNullOrEmpty(localSetting))
 			{
-				optionSetting = this._evalDisableSettingAttr(optionSetting);
-				localSetting = $.extend({}, globalSetting, optionSetting);
+				localSetting = this._evalDisableSettingAttr(localSetting);
+				localSetting = $.extend({}, globalSetting, localSetting);
 			}
 			else
 			{
