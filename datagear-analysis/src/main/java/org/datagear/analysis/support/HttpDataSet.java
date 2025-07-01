@@ -455,7 +455,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			AbstractHttpResultHandler resultHandler = buildHttpResultHandler(query, resolveFields);
 			ResolvedDataSetResult result = this.httpClient.execute(request, resultHandler);
 
-			return buildTemplateResolvedDataSetResult(result, uri, headerContent, requestContent);
+			TemplateResolvedDataSetResult tplResult = buildTemplateResolvedDataSetResult(result, uri, resolveFields,
+					headerContent, requestContent);
+			return tplResult;
 		}
 		catch (DataSetException e)
 		{
@@ -463,15 +465,16 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetSourceParseException(t, buildResolvedTemplate(uri, headerContent, requestContent));
+			throw new DataSetSourceParseException(t,
+					buildResolvedTemplate(uri, resolveFields, headerContent, requestContent));
 		}
 	}
 
 	protected TemplateResolvedDataSetResult buildTemplateResolvedDataSetResult(ResolvedDataSetResult result, String uri,
-			String headerContent, String requestContent) throws Throwable
+			boolean buildDetail, String headerContent, String requestContent) throws Throwable
 	{
 		return new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
-				buildResolvedTemplate(uri, headerContent, requestContent));
+				buildResolvedTemplate(uri, buildDetail, headerContent, requestContent));
 	}
 
 	protected AbstractHttpResultHandler buildHttpResultHandler(DataSetQuery query, boolean resolveFields)
@@ -510,8 +513,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		return new URI(uri).toASCIIString();
 	}
 
-	protected String buildResolvedTemplate(String uri, String headerContent, String requestContent)
+	protected String buildResolvedTemplate(String uri, boolean buildDetail, String headerContent, String requestContent)
 	{
+		if (!buildDetail)
+			return (uri == null ? "" : uri);
+
 		StringBuilder sb = new StringBuilder();
 
 		if (!StringUtil.isEmpty(uri))

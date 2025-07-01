@@ -234,11 +234,11 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		return qrs;
 	}
 
-	protected String buildTemplateResultStr(SqlTemplateResult sqlTemplateResult, boolean resolvePrecompileParam)
+	protected String buildTemplateResultStr(SqlTemplateResult sqlTemplateResult, boolean buildPrecompileParam)
 	{
 		String sql = sqlTemplateResult.getResult();
 
-		if (!resolvePrecompileParam || !sqlTemplateResult.isPrecompiled())
+		if (!buildPrecompileParam || !sqlTemplateResult.isPrecompiled())
 			return sql;
 
 		StringBuilder sb = new StringBuilder();
