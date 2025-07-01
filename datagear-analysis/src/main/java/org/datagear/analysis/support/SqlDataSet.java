@@ -205,7 +205,8 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		{
 			ResultSet rs = qrs.getResultSet();
 			ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveFields);
-			dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(), sql);
+			dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
+					buildTemplateResultStr(sqlTemplateResult, resolveFields));
 		}
 		finally
 		{
@@ -231,6 +232,32 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		}
 
 		return qrs;
+	}
+
+	protected String buildTemplateResultStr(SqlTemplateResult sqlTemplateResult, boolean resolvePrecompileParam)
+	{
+		String sql = sqlTemplateResult.getResult();
+
+		if (!resolvePrecompileParam || !sqlTemplateResult.isPrecompiled())
+			return sql;
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(sql);
+
+		List<Object> params = sqlTemplateResult.getParamValues();
+		if (params != null && params.size() > 0)
+		{
+			sb.append(System.lineSeparator() + "-----------------------------------------" + System.lineSeparator());
+			sb.append("Parameters :" + System.lineSeparator());
+			for (int i = 0; i < params.size(); i++)
+			{
+				Object v = params.get(i);
+				sb.append("[" + (i + 1) + "] : " + v);
+				sb.append(System.lineSeparator());
+			}
+		}
+
+		return sb.toString();
 	}
 
 	/**
