@@ -112,6 +112,43 @@ public class SqlDataSetTest extends DBTestSupport
 	}
 
 	@Test
+	public void getResultTest_validateSql() throws Exception
+	{
+		Connection cn = null;
+
+		try
+		{
+			cn = getConnection();
+			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
+
+			String sql = "SELECT * FROM T_ACCOUNT WHERE NAME = ${name}";
+
+			List<DataSetField> dataSetFields = Arrays.asList(new DataSetField("ID", DataSetField.DataType.INTEGER),
+					new DataSetField("NAME", DataSetField.DataType.STRING),
+					new DataSetField("HEAD_IMG", DataSetField.DataType.STRING),
+					new DataSetField("INTRODUCTION", DataSetField.DataType.STRING));
+
+			List<DataSetParam> dataSetParams = Arrays
+					.asList(new DataSetParam("name", DataSetParam.DataType.STRING, true));
+
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetFields, connectionFactory, sql);
+			sqlDataSet.setParams(dataSetParams);
+			sqlDataSet.setSqlValidator(createSqlValidator());
+
+			Assert.assertThrows(SqlDataSetSqlValidationException.class, () ->
+			{
+				Map<String, Object> dataSetParamValues = new HashMap<>();
+				dataSetParamValues.put("name", "delete");
+				sqlDataSet.getResult(DataSetQuery.valueOf(dataSetParamValues));
+			});
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
 	public void getResultTest_precompile() throws Exception
 	{
 		Connection cn = null;
@@ -168,6 +205,43 @@ public class SqlDataSetTest extends DBTestSupport
 		finally
 		{
 			deleteAccount(cn, id);
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
+	public void getResultTest_precompile_validateSql() throws Exception
+	{
+		Connection cn = null;
+
+		try
+		{
+			cn = getConnection();
+			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
+
+			String sql = "SELECT * FROM T_ACCOUNT WHERE NAME = ${pc(name)} delete";
+
+			List<DataSetField> dataSetFields = Arrays.asList(new DataSetField("ID", DataSetField.DataType.INTEGER),
+					new DataSetField("NAME", DataSetField.DataType.STRING),
+					new DataSetField("HEAD_IMG", DataSetField.DataType.STRING),
+					new DataSetField("INTRODUCTION", DataSetField.DataType.STRING));
+
+			List<DataSetParam> dataSetParams = Arrays
+					.asList(new DataSetParam("name", DataSetParam.DataType.STRING, true));
+
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetFields, connectionFactory, sql);
+			sqlDataSet.setParams(dataSetParams);
+			sqlDataSet.setSqlValidator(createSqlValidator());
+
+			Assert.assertThrows(SqlDataSetSqlValidationException.class, () ->
+			{
+				Map<String, Object> dataSetParamValues = new HashMap<>();
+				dataSetParamValues.put("name", "aaa");
+				sqlDataSet.getResult(DataSetQuery.valueOf(dataSetParamValues));
+			});
+		}
+		finally
+		{
 			JdbcUtil.closeConnection(cn);
 		}
 	}

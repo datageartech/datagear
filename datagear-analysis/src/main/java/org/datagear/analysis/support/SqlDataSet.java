@@ -181,14 +181,12 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected TemplateResolvedDataSetResult resolveResult(Connection cn, DataSetQuery query, boolean resolveFields,
 			SqlTemplateResult sqlTemplateResult) throws Throwable
 	{
+		// 注意：无论是否预编译SQL，都应进行防注入校验，因为混合场景很常用，比如：
+		// SELECT * FROM T WHERE NAME = ${pc(name)} ORDER BY ${col} ${dir}
+		validateSql(cn, sqlTemplateResult);
+
 		String sql = sqlTemplateResult.getResult();
 		boolean precompiles = sqlTemplateResult.isPrecompiled();
-
-		// 对于已采用预编译语法的，不进行SQL防注入校验；未采用预编译语法的应该进行SQL防注入校验
-		if (!precompiles)
-		{
-			validateSql(cn, sql);
-		}
 
 		Sql sqlObj = Sql.valueOf(sql);
 		JdbcSupport jdbcSupport = getJdbcSupport();
@@ -239,14 +237,16 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	 * 校验SQL。
 	 * 
 	 * @param cn
-	 * @param sql
+	 * @param sqlTemplateResult
 	 * @throws SqlDataSetSqlValidationException
 	 */
-	protected void validateSql(Connection cn, String sql) throws SqlDataSetSqlValidationException
+	protected void validateSql(Connection cn, SqlTemplateResult sqlTemplateResult)
+			throws SqlDataSetSqlValidationException
 	{
 		if (this.sqlValidator == null)
 			return;
 
+		String sql = sqlTemplateResult.getResult();
 		SqlValidation validation = this.sqlValidator.validate(sql, DatabaseProfile.valueOf(cn));
 
 		if (!validation.isValid())

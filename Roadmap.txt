@@ -1,7 +1,7 @@
 下一版本：
 
-	图表展示页删除默认的"dg-chart-disable-setting"元素属性，不然"disableSetting"图表选项不起作用；
-	SQL数据集预编译语法不禁用关键字SQL防注入功能；
+	修复内置图表选项disableSetting在图表展示页不起作用的BUG；
+	修复SQL数据集使用预编译语法后SQL关键字防注入功能不起作用的BUG；
 	
 待定：
 	
