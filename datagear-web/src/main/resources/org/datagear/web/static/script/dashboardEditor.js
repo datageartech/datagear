@@ -2025,13 +2025,10 @@
 		this._setElementStyle(body, so.style);
 		this._setElementClass(body, so.option.className);
 		
-		if(so.style.color)
+		this._setPageStyle(
 		{
-			this._setPageStyle(
-			{
-				selectedBorderColor: so.style.color
-			});
-		}
+			selectedBorderColor: (so.style.color ? so.style.color : undefined)
+		});
 		
 		if(so.option.syncChartTheme)
 		{
