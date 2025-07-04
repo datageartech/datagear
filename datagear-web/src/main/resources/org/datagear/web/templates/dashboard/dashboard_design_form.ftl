@@ -36,9 +36,7 @@
 				<div class="field-label col-12 mb-0 flex flex-row align-items-center gap-1">
 					<label>
 						{{fm.name}}
-						<!--
 						<span class="text-color-secondary ml-2" title="<@spring.message code='dashboard.version' />">v<small>{{fm.version}}</small></span>
-						-->
 					</label>
        				<p-button type="button" icon="pi pi-info-circle" size="small" rounded v-if="fm.description"
 						@click="onShowDashboardDesc" class="p-button-secondary p-button-text p-1">
