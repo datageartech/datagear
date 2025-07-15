@@ -179,7 +179,7 @@ public class TextParserSupport
 	}
 
 	/**
-	 * 将输入流写入输出流，直到写完匹配字符串后停止。
+	 * 将输入流写至输出流，直到写完匹配字符串后停止。
 	 * 
 	 * @param in
 	 * @param out
@@ -192,13 +192,17 @@ public class TextParserSupport
 		int c = -1;
 		int matchCount = 0;
 
-		while ((c = in.read()) > -1)
+		while (true)
 		{
-			out.write(c);
-
 			if (matchCount == str.length)
 				break;
-			else if (c == str[matchCount])
+
+			c = in.read();
+
+			if (!writeIfValid(out, c))
+				break;
+
+			if (c == str[matchCount])
 				matchCount++;
 			else
 				matchCount = 0;
@@ -222,20 +226,11 @@ public class TextParserSupport
 	{
 		in.mark(str.length);
 
-		int c = -1;
-		int matchCount = 0;
-
-		while ((c = in.read()) > -1)
+		for (int i = start; i < end; i++)
 		{
-			if (matchCount >= (end - start))
-			{
-				break;
-			}
-			else if (c == str[matchCount + start])
-			{
-				matchCount++;
-			}
-			else
+			int c = in.read();
+			
+			if(c != str[i])
 			{
 				in.reset();
 				return false;
@@ -262,10 +257,15 @@ public class TextParserSupport
 	 * @param sb
 	 * @param c
 	 */
-	public void appendCharIfValid(StringBuilder sb, int c)
+	public boolean appendCharIfValid(StringBuilder sb, int c)
 	{
 		if (c > -1)
+		{
 			sb.appendCodePoint(c);
+			return true;
+		}
+		else
+			return false;
 	}
 
 	/**
@@ -275,10 +275,15 @@ public class TextParserSupport
 	 * @param c
 	 * @throws IOException
 	 */
-	public void writeIfValid(Writer out, int c) throws IOException
+	public boolean writeIfValid(Writer out, int c) throws IOException
 	{
 		if (c > -1)
+		{
 			out.write(c);
+			return true;
+		}
+		else
+			return false;
 	}
 
 	/**

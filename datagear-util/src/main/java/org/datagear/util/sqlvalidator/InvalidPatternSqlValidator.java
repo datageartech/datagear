@@ -144,11 +144,11 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 		if (!this.ignoreSqlString && !this.ignoreQuoteIdentifier)
 			return sql;
 
-		SqlReplacer sr = new SqlReplacer();
-		sr.setReplaceSqlString(this.ignoreSqlString);
-		sr.setReplaceQuoteIdentifier(this.ignoreQuoteIdentifier);
+		SqlSimplifier sr = new SqlSimplifier(profile.getIdentifierQuote());
+		sr.setHandleString(this.ignoreSqlString);
+		sr.setHandleQuoteIdentifier(this.ignoreQuoteIdentifier);
 
-		return sr.replace(sql, profile.getIdentifierQuote());
+		return sr.simplify(sql);
 	}
 
 	/**
