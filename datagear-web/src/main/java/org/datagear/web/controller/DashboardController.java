@@ -437,7 +437,6 @@ public class DashboardController extends AbstractDataAnalysisController
 			HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 					.getHtmlTplDashboardWidgetRenderer();
 			SimpleHtmlTplOption tplOption = buildDftSimpleHtmlTplOption(entity);
-			tplOption.setViewport(SimpleHtmlTplOption.DEFAULT_VIEWPORT);
 			String templateContent = renderer.simpleTemplate(tplOption);
 
 			data.put("defaultTemplateContent", templateContent);
@@ -451,6 +450,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
 		tplOption.setCharset(
 				entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
+		tplOption.setViewport(SimpleHtmlTplOption.DEFAULT_VIEWPORT);
 		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果
 		tplOption.setStyle("html { height: 100%; }\n*, ::after, ::before { box-sizing: border-box; }\n");
 
