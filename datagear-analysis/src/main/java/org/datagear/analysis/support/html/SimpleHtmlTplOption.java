@@ -31,14 +31,24 @@ public class SimpleHtmlTplOption implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * 默认{@code viewport}内容。
+	 */
+	public static final String DEFAULT_VIEWPORT = "width=device-width, initial-scale=1";
+
+	/**
 	 * <code>&lt;html&gt;</code>元素属性
 	 */
 	private String htmlAttr = "";
 
 	/**
-	 * <code>&lt;meta&gt;</code>元素编码
+	 * <code>&lt;meta charset&gt;</code>值
 	 */
 	private String charset = "UTF-8";
+
+	/**
+	 * <code>&lt;meta meta name="viewport"&gt;</code>内容
+	 */
+	private String viewport = "";
 
 	/**
 	 * <code>&lt;title&gt;</code>元素内容
@@ -80,20 +90,6 @@ public class SimpleHtmlTplOption implements Serializable
 		super();
 	}
 
-	public SimpleHtmlTplOption(String htmlAttr, String charset, String title, String bodyStyleName, String bodyAttr,
-			String[] chartWidgetIds, String chartEleStyleName, String chartEleAttr)
-	{
-		super();
-		this.htmlAttr = htmlAttr;
-		this.charset = charset;
-		this.title = title;
-		this.bodyStyleName = bodyStyleName;
-		this.bodyAttr = bodyAttr;
-		this.chartWidgetIds = chartWidgetIds;
-		this.chartEleStyleName = chartEleStyleName;
-		this.chartEleAttr = chartEleAttr;
-	}
-
 	public String getHtmlAttr()
 	{
 		return htmlAttr;
@@ -112,6 +108,16 @@ public class SimpleHtmlTplOption implements Serializable
 	public void setCharset(String charset)
 	{
 		this.charset = charset;
+	}
+
+	public String getViewport()
+	{
+		return viewport;
+	}
+
+	public void setViewport(String viewport)
+	{
+		this.viewport = viewport;
 	}
 
 	public String getTitle()
@@ -187,9 +193,9 @@ public class SimpleHtmlTplOption implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [htmlAttr=" + htmlAttr + ", charset=" + charset + ", title=" + title
-				+ ", style=" + style + ", bodyStyleName=" + bodyStyleName + ", bodyAttr=" + bodyAttr
-				+ ", chartWidgetIds=" + Arrays.toString(chartWidgetIds) + ", chartEleStyleName=" + chartEleStyleName
-				+ ", chartEleAttr=" + chartEleAttr + "]";
+		return getClass().getSimpleName() + " [htmlAttr=" + htmlAttr + ", charset=" + charset + ", viewport=" + viewport
+				+ ", title=" + title + ", style=" + style + ", bodyStyleName=" + bodyStyleName + ", bodyAttr="
+				+ bodyAttr + ", chartWidgetIds=" + Arrays.toString(chartWidgetIds) + ", chartEleStyleName="
+				+ chartEleStyleName + ", chartEleAttr=" + chartEleAttr + "]";
 	}
 }

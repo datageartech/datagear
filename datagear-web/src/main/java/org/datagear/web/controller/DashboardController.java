@@ -437,6 +437,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 					.getHtmlTplDashboardWidgetRenderer();
 			SimpleHtmlTplOption tplOption = buildDftSimpleHtmlTplOption(entity);
+			tplOption.setViewport(SimpleHtmlTplOption.DEFAULT_VIEWPORT);
 			String templateContent = renderer.simpleTemplate(tplOption);
 
 			data.put("defaultTemplateContent", templateContent);
