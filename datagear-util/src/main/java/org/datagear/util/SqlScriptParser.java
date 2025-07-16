@@ -30,6 +30,15 @@ import java.util.regex.Pattern;
 
 /**
  * SQL脚本解析器。
+ * <p>
+ * 默认语句分隔符是分号（{@code ;}），支持在脚本单独行内定义：
+ * </p>
+ * <p>
+ * <code>--@DELIMITER 分隔符</code>
+ * </p>
+ * <p>
+ * 自定义分语句隔符。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -43,7 +52,7 @@ public class SqlScriptParser
 	public static final String DEFAULT_DELIMITER = DEFAULT_DELIMITER_CHAR + "";
 
 	public static final Pattern DELIMITER_PATTERN = Pattern
-			.compile("^\\s*((--)|(//))?\\s*(//)?\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
+			.compile("^\\s*--\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
 
 	public static final int SQL_SNIPPET_STRING = 2;
 
@@ -249,7 +258,7 @@ public class SqlScriptParser
 			findDelimiter = false;
 		}
 
-		boolean isCommentLine = isCommentLine(trimmedLine);
+		boolean isCommentLine = isLineComment(trimmedLine);
 
 		if (isCommentLine)
 		{
@@ -258,7 +267,7 @@ public class SqlScriptParser
 			// 分隔符声明行
 			if (matcher.find())
 			{
-				this.delimiter = matcher.group(5);
+				this.delimiter = matcher.group(1);
 
 				if (!isSqlBuilderEmpty)
 					sqlBuilder.append(LINE_SEPARATOR);
@@ -587,7 +596,7 @@ public class SqlScriptParser
 	protected boolean addSqlStatement(List<SqlStatement> sqlStatements, StringBuilder sqlBuilder)
 	{
 		String sql = sqlBuilder.toString().trim();
-		if (!sql.isEmpty() && !isAsteriskComment(sql))
+		if (!sql.isEmpty() && !isBlockComment(sql))
 		{
 			SqlStatement sqlStatement = new SqlStatement(sql, _currentSqlStartRow, _currentSqlStartColumn,
 					_currentSqlEndRow, _currentSqlEndColumn);
@@ -601,25 +610,31 @@ public class SqlScriptParser
 	}
 
 	/**
-	 * 判断字符串是否是"&#47*...*&#47"注释。
+	 * 判断字符串是否是块注释：
+	 * <p>
+	 * <code>&#47*...*&#47</code>
+	 * </p>
 	 * 
 	 * @param trimmedString
 	 * @return
 	 */
-	protected boolean isAsteriskComment(String trimmedString)
+	protected boolean isBlockComment(String trimmedString)
 	{
 		return trimmedString.startsWith("/*") && trimmedString.endsWith("*/");
 	}
 
 	/**
-	 * 是否是注释行。
+	 * 判断字符串是否是行注释：
+	 * <p>
+	 * <code>--注释</code>
+	 * </p>
 	 * 
 	 * @param trimmedLine
 	 * @return
 	 */
-	protected boolean isCommentLine(String trimmedLine)
+	protected boolean isLineComment(String trimmedLine)
 	{
-		return trimmedLine.startsWith("--") || trimmedLine.startsWith("//");
+		return trimmedLine.startsWith("--");
 	}
 
 	/**

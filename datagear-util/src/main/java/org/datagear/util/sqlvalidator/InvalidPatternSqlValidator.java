@@ -94,7 +94,7 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 	{
 		SqlValidation validation = new SqlValidation(true);
 		
-		sql = replaceSqlIfNeed(sql, profile);
+		sql = simplifySqlIfNeed(sql, profile);
 
 		List<Pattern> patterns = findPatterns(profile);
 		
@@ -136,7 +136,7 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 		return new SqlValidation(sql.substring(start, end));
 	}
 
-	protected String replaceSqlIfNeed(String sql, DatabaseProfile profile)
+	protected String simplifySqlIfNeed(String sql, DatabaseProfile profile)
 	{
 		if (sql == null)
 			sql = "";

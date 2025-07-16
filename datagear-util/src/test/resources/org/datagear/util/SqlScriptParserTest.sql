@@ -41,3 +41,6 @@ select * from c
 --
 /*d*/
 
+update a set n=3
+where ;
+name=2;
