@@ -42,7 +42,7 @@
 							</p-button>
 						</div>
 						<div class="col overflow-auto">
-							<p-tabmenu :model="pm.mainMenu.items" v-model:active-index="pm.mainMenu.active"
+							<p-tabmenu :model="pm.mainMenu.items" v-model:active-index="pm.mainMenu.active" id="${pid}mainMenu"
 								@tab-change="onMainMenuTabChange" class="vertical-tabmenu" :class="{collapse: pm.mainMenu.collapse}">
 							</p-tabmenu>
 						</div>
@@ -214,6 +214,17 @@
 				disabled: true
 			});
 		}
+		
+		//悬浮提示
+		po.vueNextTick(function()
+		{
+			var mainMenu = po.elementOfId("${pid}mainMenu");
+			$("a.p-menuitem-link", mainMenu).each(function()
+			{
+				var item = $(this);
+				item.attr("title", item.attr("aria-label"));
+			});
+		});
 	});
 })
 (${pid});
