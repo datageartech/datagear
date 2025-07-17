@@ -650,6 +650,6 @@ ALTER TABLE DATAGEAR_HTML_DASHBOARD ADD COLUMN HD_DESC VARCHAR(500);
 
 
 /*-----------------------------------------*/
-/*--version[6.0.0], DO NOT EDIT THIS LINE!*/
+/*--version[5.5.0], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
 
