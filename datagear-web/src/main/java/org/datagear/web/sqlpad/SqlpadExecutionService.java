@@ -38,6 +38,7 @@ import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.util.DtbsSourceConnectionSupport;
+import org.datagear.management.util.DtbsSourceSqlPermissionValidator;
 import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
@@ -70,7 +71,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 	private MessageChannel messageChannel;
 
-	private SqlPermissionValidator sqlPermissionValidator = null;
+	private DtbsSourceSqlPermissionValidator dtbsSourceSqlPermissionValidator = null;
 
 	private DtbsSourceConnectionSupport dtbsSourceConnectionSupport = new DtbsSourceConnectionSupport();
 
@@ -144,14 +145,14 @@ public class SqlpadExecutionService extends PersistenceSupport
 		this.messageChannel = messageChannel;
 	}
 
-	public SqlPermissionValidator getSqlPermissionValidator()
+	public DtbsSourceSqlPermissionValidator getDtbsSourceSqlPermissionValidator()
 	{
-		return sqlPermissionValidator;
+		return dtbsSourceSqlPermissionValidator;
 	}
 
-	public void setSqlPermissionValidator(SqlPermissionValidator sqlPermissionValidator)
+	public void setDtbsSourceSqlPermissionValidator(DtbsSourceSqlPermissionValidator dtbsSourceSqlPermissionValidator)
 	{
-		this.sqlPermissionValidator = sqlPermissionValidator;
+		this.dtbsSourceSqlPermissionValidator = dtbsSourceSqlPermissionValidator;
 	}
 
 	public DtbsSourceConnectionSupport getDtbsSourceConnectionSupport()
@@ -546,7 +547,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			int totalCount = getSqlStatements().size();
 			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
 			SqlpadFileDirectory sqlpadFileDirectory = SqlpadFileDirectory.valueOf(getSqlpadFileDirectory());
-			SqlPermissionValidator sqlPermissionValidator = SqlpadExecutionService.this.sqlPermissionValidator;
+			DtbsSourceSqlPermissionValidator dtbsSourceSqlPermissionValidator = SqlpadExecutionService.this.dtbsSourceSqlPermissionValidator;
 			DatabaseProfile databaseProfile = DatabaseProfile.valueOf(cn);
 
 			List<String> sqlHistories = new ArrayList<>();
@@ -559,9 +560,9 @@ public class SqlpadExecutionService extends PersistenceSupport
 						break;
 
 					SqlStatement sqlStatement = getSqlStatements().get(i);
-					SqlValidation sqlValidation = (sqlPermissionValidator == null ? null
-							: sqlPermissionValidator.validate(getUser(), getDtbsSource(), sqlStatement,
-									databaseProfile));
+					SqlValidation sqlValidation = (dtbsSourceSqlPermissionValidator == null ? null
+							: dtbsSourceSqlPermissionValidator.validate(getDtbsSource().getDataPermission(),
+									sqlStatement.getSql(), databaseProfile));
 
 					if (sqlValidation != null && !sqlValidation.isValid())
 					{

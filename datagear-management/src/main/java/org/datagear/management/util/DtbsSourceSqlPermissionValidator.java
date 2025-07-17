@@ -15,22 +15,20 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.sqlpad;
+package org.datagear.management.util;
 
 import org.datagear.management.domain.DtbsSource;
-import org.datagear.management.domain.User;
-import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.util.sqlvalidator.DatabaseProfile;
 import org.datagear.util.sqlvalidator.SqlValidation;
 import org.datagear.util.sqlvalidator.SqlValidator;
 
 /**
- * SQL执行权限校验器。
+ * 数据源SQL执行权限校验器。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlPermissionValidator
+public class DtbsSourceSqlPermissionValidator
 {
 	private SqlValidator readPermissionSqlValidator;
 
@@ -38,7 +36,7 @@ public class SqlPermissionValidator
 
 	private SqlValidator deletePermissionSqlValidator;
 
-	public SqlPermissionValidator(SqlValidator readPermissionSqlValidator, SqlValidator editPermissionSqlValidator,
+	public DtbsSourceSqlPermissionValidator(SqlValidator readPermissionSqlValidator, SqlValidator editPermissionSqlValidator,
 			SqlValidator deletePermissionSqlValidator)
 	{
 		super();
@@ -78,20 +76,16 @@ public class SqlPermissionValidator
 	}
 
 	/**
-	 * 检查用户是否有执行指定SQL的权限。
+	 * 检查对{@linkplain DtbsSource}有指定权限时，是否有执行指定SQL的权限。
 	 * 
-	 * @param user
-	 * @param dtbsSource
-	 * @param sqlStatement
+	 * @param permission
+	 *            数据源权限，参考{@linkplain DtbsSource#getDataPermission()}
+	 * @param sql
 	 * @param databaseProfile
 	 * @return
 	 */
-	public SqlValidation validate(User user, DtbsSource dtbsSource, SqlStatement sqlStatement,
-			DatabaseProfile databaseProfile)
+	public SqlValidation validate(int permission, String sql, DatabaseProfile databaseProfile)
 	{
-		String sql = sqlStatement.getSql();
-		int permission = dtbsSource.getDataPermission();
-
 		if (DtbsSource.isDeleteTableDataPermission(permission))
 		{
 			return this.deletePermissionSqlValidator.validate(sql, databaseProfile);
@@ -104,7 +98,9 @@ public class SqlPermissionValidator
 		{
 			return this.readPermissionSqlValidator.validate(sql, databaseProfile);
 		}
-
-		return new SqlValidation("ANY KEYWORD");
+		else
+		{
+			return new SqlValidation("ALL");
+		}
 	}
 }

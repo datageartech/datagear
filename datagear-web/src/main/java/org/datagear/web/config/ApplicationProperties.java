@@ -223,23 +223,20 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${welcomeContentEncoding}")
 	private String welcomeContentEncoding;
 
-	/** SQL数据集的SQL关键字黑名单 */
-	private Map<String, String> sqlDataSetInvalidSqlKeywords = Collections.emptyMap();
-
 	/** 数据源管理查询操作SQL关键字黑名单 */
 	private Map<String, String> dsmanagerQueryInvalidSqlKeywords = Collections.emptyMap();
 
 	/** 数据源管理导入SQL操作SQL关键字黑名单 */
 	private Map<String, String> dsmanagerImptsqlInvalidSqlKeywords = Collections.emptyMap();
 
-	/** 数据源管理SQL工作台-读权限用户的SQL关键字黑名单 */
-	private Map<String, String> dsmanagerSqlpadReadInvalidSqlKeywords = Collections.emptyMap();
+	/** 数据源管理-读权限用户的SQL关键字黑名单 */
+	private Map<String, String> dsmanagerReadInvalidSqlKeywords = Collections.emptyMap();
 
-	/** 数据源管理SQL工作台-写权限用户的SQL关键字黑名单 */
-	private Map<String, String> dsmanagerSqlpadEditInvalidSqlKeywords = Collections.emptyMap();
+	/** 数据源管理-写权限用户的SQL关键字黑名单 */
+	private Map<String, String> dsmanagerEditInvalidSqlKeywords = Collections.emptyMap();
 
-	/** 数据源管理SQL工作台-删除权限用户的SQL关键字黑名单 */
-	private Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords = Collections.emptyMap();
+	/** 数据源管理-删除权限用户的SQL关键字黑名单 */
+	private Map<String, String> dsmanagerDeleteInvalidSqlKeywords = Collections.emptyMap();
 
 	/** 跨域请求配置列表 */
 	private List<CrossOriginProperties> crossOriginPropertiess = Collections.emptyList();
@@ -724,16 +721,6 @@ public abstract class ApplicationProperties implements Serializable
 		this.welcomeContentEncoding = welcomeContentEncoding;
 	}
 
-	public Map<String, String> getSqlDataSetInvalidSqlKeywords()
-	{
-		return sqlDataSetInvalidSqlKeywords;
-	}
-
-	public void setSqlDataSetInvalidSqlKeywords(Map<String, String> sqlDataSetInvalidSqlKeywords)
-	{
-		this.sqlDataSetInvalidSqlKeywords = sqlDataSetInvalidSqlKeywords;
-	}
-
 	public Map<String, String> getDsmanagerQueryInvalidSqlKeywords()
 	{
 		return dsmanagerQueryInvalidSqlKeywords;
@@ -754,34 +741,34 @@ public abstract class ApplicationProperties implements Serializable
 		this.dsmanagerImptsqlInvalidSqlKeywords = dsmanagerImptsqlInvalidSqlKeywords;
 	}
 
-	public Map<String, String> getDsmanagerSqlpadReadInvalidSqlKeywords()
+	public Map<String, String> getDsmanagerReadInvalidSqlKeywords()
 	{
-		return dsmanagerSqlpadReadInvalidSqlKeywords;
+		return dsmanagerReadInvalidSqlKeywords;
 	}
 
-	public void setDsmanagerSqlpadReadInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadReadInvalidSqlKeywords)
+	public void setDsmanagerReadInvalidSqlKeywords(Map<String, String> dsmanagerReadInvalidSqlKeywords)
 	{
-		this.dsmanagerSqlpadReadInvalidSqlKeywords = dsmanagerSqlpadReadInvalidSqlKeywords;
+		this.dsmanagerReadInvalidSqlKeywords = dsmanagerReadInvalidSqlKeywords;
 	}
 
-	public Map<String, String> getDsmanagerSqlpadEditInvalidSqlKeywords()
+	public Map<String, String> getDsmanagerEditInvalidSqlKeywords()
 	{
-		return dsmanagerSqlpadEditInvalidSqlKeywords;
+		return dsmanagerEditInvalidSqlKeywords;
 	}
 
-	public void setDsmanagerSqlpadEditInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadEditInvalidSqlKeywords)
+	public void setDsmanagerEditInvalidSqlKeywords(Map<String, String> dsmanagerEditInvalidSqlKeywords)
 	{
-		this.dsmanagerSqlpadEditInvalidSqlKeywords = dsmanagerSqlpadEditInvalidSqlKeywords;
+		this.dsmanagerEditInvalidSqlKeywords = dsmanagerEditInvalidSqlKeywords;
 	}
 
-	public Map<String, String> getDsmanagerSqlpadDeleteInvalidSqlKeywords()
+	public Map<String, String> getDsmanagerDeleteInvalidSqlKeywords()
 	{
-		return dsmanagerSqlpadDeleteInvalidSqlKeywords;
+		return dsmanagerDeleteInvalidSqlKeywords;
 	}
 
-	public void setDsmanagerSqlpadDeleteInvalidSqlKeywords(Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords)
+	public void setDsmanagerDeleteInvalidSqlKeywords(Map<String, String> dsmanagerDeleteInvalidSqlKeywords)
 	{
-		this.dsmanagerSqlpadDeleteInvalidSqlKeywords = dsmanagerSqlpadDeleteInvalidSqlKeywords;
+		this.dsmanagerDeleteInvalidSqlKeywords = dsmanagerDeleteInvalidSqlKeywords;
 	}
 
 	public List<CrossOriginProperties> getCrossOriginPropertiess()

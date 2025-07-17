@@ -97,6 +97,7 @@ import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserServiceImpl;
 import org.datagear.management.util.DataPermissionSpec;
+import org.datagear.management.util.DtbsSourceSqlPermissionValidator;
 import org.datagear.management.util.ManagementSupport;
 import org.datagear.management.util.RoleSpec;
 import org.datagear.management.util.dialect.MbSqlDialect;
@@ -130,7 +131,6 @@ import org.datagear.web.format.SqlTimestampFormatter;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.security.AuthenticationSecurity;
 import org.datagear.web.security.AuthenticationUserGetter;
-import org.datagear.web.sqlpad.SqlPermissionValidator;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
@@ -769,7 +769,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DataSetEntityService dataSetEntityService()
 	{
 		DataSetEntityServiceImpl bean = createDataSetEntityServiceImpl();
-		bean.setSqlDataSetSqlValidator(this.sqlDataSetSqlValidator());
+		bean.setSqlDataSetSqlValidator(this.dsmanagerReadSqlValidator());
 		bean.setDataSetCacheMaxLength(getApplicationProperties().getDataSetCacheMaxLength());
 
 		return bean;
@@ -936,12 +936,12 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SqlPermissionValidator sqlPermissionValidator()
+	public DtbsSourceSqlPermissionValidator dtbsSourceSqlPermissionValidator()
 	{
-		SqlPermissionValidator bean = new SqlPermissionValidator(
-				this.dsmanagerSqlpadReadSqlValidator(),
-				this.dsmanagerSqlpadEditSqlValidator(),
-				this.dsmanagerSqlpadDeleteSqlValidator());
+		DtbsSourceSqlPermissionValidator bean = new DtbsSourceSqlPermissionValidator(
+				this.dsmanagerReadSqlValidator(),
+				this.dsmanagerEditSqlValidator(),
+				this.dsmanagerDeleteSqlValidator());
 
 		return bean;
 	}
@@ -951,7 +951,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	{
 		SqlpadExecutionService bean = new SqlpadExecutionService(this.connectionSource(), this.messageSource(),
 				this.sqlHistoryService(), this.sqlSelectManager(), this.sqlpadMessageChannel());
-		bean.setSqlPermissionValidator(this.sqlPermissionValidator());
+		bean.setDtbsSourceSqlPermissionValidator(this.dtbsSourceSqlPermissionValidator());
 
 		return bean;
 	}
@@ -1047,15 +1047,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SqlValidator sqlDataSetSqlValidator()
-	{
-		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
-				getApplicationProperties().getSqlDataSetInvalidSqlKeywords());
-
-		return bean;
-	}
-
-	@Bean
 	public SqlValidator dsmanagerQuerySqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
@@ -1074,28 +1065,28 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Bean
-	public SqlValidator dsmanagerSqlpadReadSqlValidator()
+	public SqlValidator dsmanagerReadSqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
-				getApplicationProperties().getDsmanagerSqlpadReadInvalidSqlKeywords());
+				getApplicationProperties().getDsmanagerReadInvalidSqlKeywords());
 
 		return bean;
 	}
 
 	@Bean
-	public SqlValidator dsmanagerSqlpadEditSqlValidator()
+	public SqlValidator dsmanagerEditSqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
-				getApplicationProperties().getDsmanagerSqlpadEditInvalidSqlKeywords());
+				getApplicationProperties().getDsmanagerEditInvalidSqlKeywords());
 
 		return bean;
 	}
 
 	@Bean
-	public SqlValidator dsmanagerSqlpadDeleteSqlValidator()
+	public SqlValidator dsmanagerDeleteSqlValidator()
 	{
 		InvalidPatternSqlValidator bean = buildInvalidPatternSqlValidator(
-				getApplicationProperties().getDsmanagerSqlpadDeleteInvalidSqlKeywords());
+				getApplicationProperties().getDsmanagerDeleteInvalidSqlKeywords());
 
 		return bean;
 	}

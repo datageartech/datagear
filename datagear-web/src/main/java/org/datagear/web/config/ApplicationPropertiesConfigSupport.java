@@ -74,22 +74,22 @@ public class ApplicationPropertiesConfigSupport
 	}
 
 	@Bean
-	@ConfigurationProperties("dsmanager.sqlpad.read.invalidsqlkeywords")
-	public Map<String, String> dsmanagerSqlpadReadInvalidSqlKeywords()
+	@ConfigurationProperties("dsmanager.read.invalidsqlkeywords")
+	public Map<String, String> dsmanagerReadInvalidSqlKeywords()
 	{
 		return new HashMap<String, String>();
 	}
 
 	@Bean
-	@ConfigurationProperties("dsmanager.sqlpad.edit.invalidsqlkeywords")
-	public Map<String, String> dsmanagerSqlpadEditInvalidSqlKeywords()
+	@ConfigurationProperties("dsmanager.edit.invalidsqlkeywords")
+	public Map<String, String> dsmanagerEditInvalidSqlKeywords()
 	{
 		return new HashMap<String, String>();
 	}
 
 	@Bean
-	@ConfigurationProperties("dsmanager.sqlpad.delete.invalidsqlkeywords")
-	public Map<String, String> dsmanagerSqlpadDeleteInvalidSqlKeywords()
+	@ConfigurationProperties("dsmanager.delete.invalidsqlkeywords")
+	public Map<String, String> dsmanagerDeleteInvalidSqlKeywords()
 	{
 		return new HashMap<String, String>();
 	}
@@ -127,12 +127,11 @@ public class ApplicationPropertiesConfigSupport
 	{
 		ApplicationProperties bean = createApplicationProperties();
 
-		bean.setSqlDataSetInvalidSqlKeywords(this.sqlDataSetInvalidSqlKeywords());
 		bean.setDsmanagerQueryInvalidSqlKeywords(this.dsmanagerQueryInvalidSqlKeywords());
 		bean.setDsmanagerImptsqlInvalidSqlKeywords(this.dsmanagerImptsqlInvalidSqlKeywords());
-		bean.setDsmanagerSqlpadReadInvalidSqlKeywords(this.dsmanagerSqlpadReadInvalidSqlKeywords());
-		bean.setDsmanagerSqlpadEditInvalidSqlKeywords(this.dsmanagerSqlpadEditInvalidSqlKeywords());
-		bean.setDsmanagerSqlpadDeleteInvalidSqlKeywords(this.dsmanagerSqlpadDeleteInvalidSqlKeywords());
+		bean.setDsmanagerReadInvalidSqlKeywords(this.dsmanagerReadInvalidSqlKeywords());
+		bean.setDsmanagerEditInvalidSqlKeywords(this.dsmanagerEditInvalidSqlKeywords());
+		bean.setDsmanagerDeleteInvalidSqlKeywords(this.dsmanagerDeleteInvalidSqlKeywords());
 		bean.setCrossOriginPropertiess(this.crossOriginPropertiess());
 		bean.setDbTableTypeSpecs(this.dbTableTypeSpecs());
 		bean.setConnectionSourceProperties(this.connectionSourceProperties());
