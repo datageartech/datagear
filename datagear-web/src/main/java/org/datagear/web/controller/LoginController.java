@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.util.StringUtil;
 import org.datagear.web.security.LoginCheckCodeErrorException;
 import org.datagear.web.util.DetectNewVersionScriptResolver;
 import org.datagear.web.util.OperationMessage;
@@ -89,6 +90,14 @@ public class LoginController extends AbstractController
 	public static final String LOGIN_PARAM_CHECK_CODE = "checkCode";
 
 	public static final String CHECK_CODE_MODULE_LOGIN = "LOGIN";
+
+	/**
+	 * 登录成功后跳转页参数名。
+	 * <p>
+	 * 注意：不要修改此值，因为可能会被外部系统使用。
+	 * </p>
+	 */
+	public static final String REDIRECT_PARAM_NAME = "redirect";
 
 	@Autowired
 	private IpLoginLatch ipLoginLatch;
@@ -160,6 +169,10 @@ public class LoginController extends AbstractController
 		setFormModel(model, form);
 		this.detectNewVersionScriptResolver.enableIf(request);
 		
+		String redirect = request.getParameter(REDIRECT_PARAM_NAME);
+		if (!StringUtil.isEmpty(redirect))
+			model.addAttribute("redirect", redirect);
+
 		return "/login";
 	}
 

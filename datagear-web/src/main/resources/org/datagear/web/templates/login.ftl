@@ -101,6 +101,7 @@
 	
 	po.disableLoginCheckCode = ("${(configProperties.disableLoginCheckCode)?string('true','false')}" == "true");
 	po.disableRegister = ("${(configProperties.disableRegister)?string('true','false')}" == "true");
+	po.customRedirect = "${redirect!''}";
 	
 	po.vuePageModel(
 	{
@@ -132,8 +133,15 @@
 	{
 		var url = "${contextPath}/";
 		
-		if(response && response.data && response.data.redirectUrl)
-			url = response.data.redirectUrl;
+		if(po.customRedirect)
+		{
+			url = po.customRedirect;
+		}
+		else
+		{
+			if(response && response.data && response.data.redirectUrl)
+				url = response.data.redirectUrl;
+		}
 		
 		(window.top ? window.top : window).location.href = url;
 	};
