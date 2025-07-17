@@ -63,6 +63,7 @@
 					</div>
 				</div>
 			</div>
+			<!--
 			<div class="field grid">
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='dashboard.version' />
@@ -79,6 +80,7 @@
 		        	</div>
 		        </div>
 			</div>
+			-->
 			<div class="field grid">
 				<label for="${pid}description" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='description' />
