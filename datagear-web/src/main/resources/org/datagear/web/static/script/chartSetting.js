@@ -1482,30 +1482,43 @@
 		if(noNeedParam && disableSetting.data == true)
 			return false;
 		
+		var chartOptions = chart.options();
+		var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+		//显示模式："hover" 悬浮显示（默认）、"display" 始终显示
+		var displayMode = (builtinSetting ? builtinSetting.displayMode : null);
+		displayMode = (chartFactory.isNullOrEmpty(displayMode) ? "hover" : displayMode);
+		
 		var $chart = chart.elementJquery();
 		
 		if(!$chart.data("dgChartSettingHasBindEvent"))
 		{
 			$chart.data("dgChartSettingHasBindEvent", true);
 			
-			var mouseenterHandler = function(event)
+			if(displayMode == "display")
 			{
-				if(chart.isActive())
-					chartSetting.showChartSettingBox(chart);
-			};
-			var mouseleaveHandler = function(event)
+				chartSetting.showChartSettingBox(chart);
+			}
+			else if(displayMode == "hover")
 			{
-				if(chartSetting.isChartSettingParamPanelClosed(chart)
-					&& chartSetting.isChartSettingDataPanelClosed(chart))
+				var mouseenterHandler = function(event)
 				{
-					chartSetting.hideChartSettingBox(chart);
-				}
-			};
-			
-			$chart.mouseenter(mouseenterHandler).mouseleave(mouseleaveHandler);
-			
-			$chart.data("dgChartSettingMouseEnterHandler", mouseenterHandler);
-			$chart.data("dgChartSettingMouseLeaveHandler", mouseleaveHandler);
+					if(chart.isActive())
+						chartSetting.showChartSettingBox(chart);
+				};
+				var mouseleaveHandler = function(event)
+				{
+					if(chartSetting.isChartSettingParamPanelClosed(chart)
+						&& chartSetting.isChartSettingDataPanelClosed(chart))
+					{
+						chartSetting.hideChartSettingBox(chart);
+					}
+				};
+				
+				$chart.mouseenter(mouseenterHandler).mouseleave(mouseleaveHandler);
+				
+				$chart.data("dgChartSettingMouseEnterHandler", mouseenterHandler);
+				$chart.data("dgChartSettingMouseLeaveHandler", mouseleaveHandler);
+			}
 		}
 		
 		return true;
