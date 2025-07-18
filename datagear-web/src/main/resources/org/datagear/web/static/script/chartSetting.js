@@ -71,12 +71,6 @@
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
 	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
 	
-	//参数表单是否转换参数值类型选项名，以支持自定义是否转换，默认值为：true
-	builtinOptionNames.convertParamFormValue = "convertParamFormValue";
-	
-	//参数表单提交前回调函数选项名，以支持自定义提交前置处理逻辑
-	builtinOptionNames.onParamFormSubmit = "onParamFormSubmit";
-	
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
@@ -1784,7 +1778,16 @@
 					$thisButton.removeClass("dg-param-value-form-invalid");
 					
 					var chartOptions = chart.options();
-					var convertParamFormValue = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.convertParamFormValue);
+					var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+					var convertParamFormValue = (builtinSetting ? builtinSetting.convertParamFormValue : null);
+					
+					// < @deprecated 兼容5.4.0版本的convertParamFormValue选项，将在未来版本移除，已被builtinSetting.convertParamFormValue取代
+					if(convertParamFormValue == null)
+					{
+						convertParamFormValue = chartFactory.builtinOptionValue(chartOptions, "convertParamFormValue");
+					}
+					// > @deprecated 兼容5.4.0版本的convertParamFormValue选项，将在未来版本移除，已被builtinSetting.convertParamFormValue取代
+					
 					convertParamFormValue = (convertParamFormValue == null ? true : convertParamFormValue);
 					
 					for(var i=0; i<paramValuess.length; i++)
@@ -1793,7 +1796,14 @@
 					}
 					
 					var doRefresh = true;
-					var onParamFormSubmit = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.onParamFormSubmit);
+					var onParamFormSubmit = (builtinSetting ? builtinSetting.onParamFormSubmit : null);
+					
+					// < @deprecated 兼容5.3.0版本的onParamFormSubmit选项，将在未来版本移除，已被builtinSetting.onParamFormSubmit取代
+					if(onParamFormSubmit == null)
+					{
+						onParamFormSubmit = chartFactory.builtinOptionValue(chartOptions, "onParamFormSubmit");
+					}
+					// > @deprecated 兼容5.3.0版本的onParamFormSubmit选项，将在未来版本移除，已被builtinSetting.onParamFormSubmit取代
 					
 					//执行提交前回调
 					if(onParamFormSubmit)

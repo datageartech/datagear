@@ -246,8 +246,8 @@
 	builtinOptionNames.processUpdateOptions = "processUpdateOptions";
 	/** 内置图表选项名：更新追加模式 */
 	builtinOptionNames.updateAppendMode = "updateAppendMode";
-	/** 内置图表选项名：禁用图表设置，功能同：dg-chart-disable-setting */
-	builtinOptionNames.disableSetting = "disableSetting";
+	/** 内置图表选项名：内置设置（参数/数据透视表） */
+	builtinOptionNames.builtinSetting = "builtinSetting";
 	
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
@@ -711,12 +711,20 @@
 		var localSetting;
 		
 		var options = this.options();
-		var optionSetting = chartFactory.builtinOptionValue(options, builtinOptionNames.disableSetting);
+		var builtinSetting = chartFactory.builtinOptionValue(options, builtinOptionNames.builtinSetting);
+		var optionValue = (builtinSetting ? builtinSetting.disable : null);
+		
+		// < @deprecated 兼容5.4.0版本的disableSetting选项，将在未来版本移除，已被builtinSetting.disable取代
+		if(optionValue == null)
+		{
+			optionValue = chartFactory.builtinOptionValue(options, "disableSetting");
+		}
+		// > @deprecated 兼容5.4.0版本的disableSetting选项，将在未来版本移除，已被builtinSetting.disable取代
 		
 		//图表选项里的优先级应最高，不然图表展示页的选项不起效
-		if(!chartFactory.isNullOrEmpty(optionSetting))
+		if(!chartFactory.isNullOrEmpty(optionValue))
 		{
-			localSetting = this._evalDisableSettingAttr(optionSetting);
+			localSetting = this._evalDisableSettingAttr(optionValue);
 		}
 		else
 		{
