@@ -1,7 +1,8 @@
 下一版本：
 	
 	ok 登录页地址支持redirect参数，可在登录成功后重定向到指定页面；
-	图表新增builtinSetting.showMode内置选项，值为："hover"、"always"，用于控制内置设置面板显示模式；
+	ok 图表新增builtinSetting.displayMode内置选项，值为："hover"、"display"，用于控制内置设置面板显示模式；
+	ok 图表选项里的内置设置选项都移至builtinSetting名字内；
 	
 待定：
 	
