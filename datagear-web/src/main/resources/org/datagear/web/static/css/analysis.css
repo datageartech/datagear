@@ -447,6 +447,72 @@
 	display: flex;
 	flex-direction: row;
 	gap: 2px;
+	z-index: 9;
+}
+.dg-chart-setting-box.dg-position-leftTop{
+	left: 0.1em;
+	top: 0.1em;
+	right: unset;
+	bottom: unset;
+}
+.dg-chart-setting-box.dg-position-leftBottom{
+	left: 0.1em;
+	top: unset;
+	right: unset;
+	bottom: 0.1em;
+}
+.dg-chart-setting-box.dg-position-leftCenter{
+	left: 0.1em;
+	top: 50%;
+	right: unset;
+	bottom: unset;
+	transform: translateY(-50%);
+}
+.dg-chart-setting-box.dg-position-rightTop{
+	left: unset;
+	top: 0.1em;
+	right: 0.1em;
+	bottom: unset;
+}
+.dg-chart-setting-box.dg-position-rightBottom{
+	left: unset;
+	top: unset;
+	right: 0.1em;
+	bottom: 0.1em;
+}
+.dg-chart-setting-box.dg-position-rightCenter{
+	left: unset;
+	top: 50%;
+	right: 0.1em;
+	bottom: unset;
+	transform: translateY(-50%);
+}
+.dg-chart-setting-box.dg-position-centerTop{
+	left: 50%;
+	top: 0.1em;
+	right: unset;
+	bottom: unset;
+	transform: translateX(-50%);
+}
+.dg-chart-setting-box.dg-position-center{
+	left: 50%;
+	top: 50%;
+	right: unset;
+	bottom: unset;
+	transform: translate(-50%, -50%);
+}
+.dg-chart-setting-box.dg-position-centerBottom{
+	left: 50%;
+	top: unset;
+	right: unset;
+	bottom: 0.1em;
+	transform: translateX(-50%);
+}
+.dg-chart-setting-box.dg-flex-dir-row{
+	flex-direction: row;
+}
+.dg-chart-setting-box.dg-flex-dir-column{
+	flex-direction: column;
 }
 .dg-chart-setting-box .dg-chart-setting-panel,
 .dg-chart-setting-box button{

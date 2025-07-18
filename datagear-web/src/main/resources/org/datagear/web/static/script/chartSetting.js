@@ -1552,7 +1552,19 @@
 		
 		if($box.length <= 0)
 		{
-			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
+			var chartOptions = chart.options();
+			var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+			//显示位置："rightTop" 右上（默认）；"leftTop" 左上；"leftBottom" 左下；"rightBottom" 右下
+			var boxPosition = (builtinSetting ? builtinSetting.position : null);
+			boxPosition = (chartFactory.isNullOrEmpty(boxPosition) ? "rightTop" : boxPosition);
+			//显示方向："row" 横向（默认）；"column" 竖向
+			var boxDirection = (builtinSetting ? builtinSetting.direction : null);
+			boxDirection = (chartFactory.isNullOrEmpty(boxDirection) ? "row" : boxDirection);
+			
+			var boxPositionCssName = "dg-position-" + boxPosition;
+			var boxDirectionCssName = "dg-flex-dir-" + boxDirection;
+			
+			$box = $("<div class='dg-chart-setting-box "+boxPositionCssName+" "+boxDirectionCssName+"' />").appendTo($chart);
 			
 			chartSetting.setChartSettingBoxThemeStyle(chart, $box);
 			
