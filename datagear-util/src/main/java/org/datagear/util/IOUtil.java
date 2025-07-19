@@ -999,6 +999,7 @@ public class IOUtil
 	 * </p>
 	 * 
 	 * @param closeable
+	 *            允许{@code null}
 	 */
 	public static void close(AutoCloseable closeable)
 	{
@@ -1018,6 +1019,7 @@ public class IOUtil
 	 * 刷新{@linkplain Flushable}。
 	 * 
 	 * @param flushable
+	 *            允许{@code null}
 	 */
 	public static void flush(Flushable flushable)
 	{
@@ -1040,6 +1042,7 @@ public class IOUtil
 	 * </p>
 	 * 
 	 * @param list
+	 *            允许{@code null}
 	 */
 	public static void closeIf(Collection<?> list)
 	{
@@ -1057,6 +1060,7 @@ public class IOUtil
 	 * </p>
 	 * 
 	 * @param objs
+	 *            允许{@code null}
 	 */
 	public static void closeIf(Object[] objs)
 	{
@@ -1074,6 +1078,7 @@ public class IOUtil
 	 * </p>
 	 * 
 	 * @param o
+	 *            允许{@code null}
 	 * @return
 	 */
 	public static boolean closeIf(Object o)

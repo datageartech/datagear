@@ -41,6 +41,7 @@ import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
 import org.datagear.persistence.support.dialect.OracleDialectBuilder;
 import org.datagear.persistence.support.dialect.PostgresqlDialectBuilder;
 import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
+import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
 
 /**
@@ -263,10 +264,17 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 				.sql(dialect.quote(testInfo.getTableName()));
 
 		Order[] orders = Order.asArray(Order.valueOf(testInfo.getOrderColumnName(), Order.ASC));
-
 		Sql pagingQuerySql = dialect.toPagingQuerySql(query, orders, 1, 5);
+		QueryResultSet qrs = null;
 
-		executeQuery(cn, pagingQuerySql, ResultSet.TYPE_FORWARD_ONLY);
+		try
+		{
+			qrs = executeQuery(cn, pagingQuerySql, ResultSet.TYPE_FORWARD_ONLY);
+		}
+		finally
+		{
+			QueryResultSet.close(qrs);
+		}
 
 		return true;
 	}

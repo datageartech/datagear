@@ -114,6 +114,7 @@ public class JdbcSupport
 
 		Statement st = null;
 		ResultSet rs = null;
+		List<SqlParamValue> rawParams = sql.getParamValues();
 		@SuppressWarnings("unchecked")
 		List<Object> setParams = Collections.EMPTY_LIST;
 
@@ -126,7 +127,7 @@ public class JdbcSupport
 			{
 				PreparedStatement pst = createQueryPreparedStatement(cn, sql.getSqlValue(), resultSetType);
 				st = pst;
-				setParams = setParamValues(cn, pst, sql);
+				setParams = setParamValues(cn, pst, rawParams);
 				rs = pst.executeQuery();
 			}
 			else
@@ -140,6 +141,10 @@ public class JdbcSupport
 		}
 		catch (SQLSyntaxErrorException | SQLDataException | SQLTimeoutException | SQLWarning e)
 		{
+			IOUtil.closeIf(setParams);
+			JdbcUtil.closeResultSet(rs);
+			JdbcUtil.closeStatement(st);
+
 			@JDBCCompatiblity("这些异常必定不是驱动程序的ResultSet.TYPE_SCROLL_*支持与否问题，不需要再降级处理")
 			SQLException e1 = e;
 			throw e1;
@@ -162,6 +167,19 @@ public class JdbcSupport
 			}
 			else
 			{
+				// 关闭内部新生成的输入流
+				if (rawParams != null)
+				{
+					for (int i = 0, len = rawParams.size(); i < len; i++)
+					{
+						Object rawParam = rawParams.get(i).getValue();
+						Object setParam = setParams.get(i);
+
+						if (rawParam != setParam)
+							IOUtil.closeIf(setParam);
+					}
+				}
+
 				JdbcUtil.closeResultSet(rs);
 				JdbcUtil.closeStatement(st);
 
@@ -282,6 +300,9 @@ public class JdbcSupport
 
 	/**
 	 * 设置预编译SQL参数。
+	 * <p>
+	 * 注意：返回列表可能包含输入流，调用者应在执行完SQL语句后检测和关闭它们（比如使用{@linkplain IOUtil#closeIf(java.util.Collection)}）。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param st
@@ -296,6 +317,9 @@ public class JdbcSupport
 
 	/**
 	 * 设置预编译SQL参数。
+	 * <p>
+	 * 注意：返回列表可能包含输入流，调用者应在执行完SQL语句后检测和关闭它们（比如使用{@linkplain IOUtil#closeIf(java.util.Collection)}）。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param st
@@ -319,6 +343,9 @@ public class JdbcSupport
 
 	/**
 	 * 设置预编译SQL参数。
+	 * <p>
+	 * 注意：返回数组可能包含输入流，调用者应在执行完SQL语句后检测和关闭它们（比如使用{@linkplain IOUtil#closeIf(java.util.Collection)}）。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param st
@@ -479,12 +506,15 @@ public class JdbcSupport
 	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to
 	 * JDBC Types”表。
 	 * </p>
+	 * <p>
+	 * 注意：返回值可能是输入流，调用者应在执行完SQL语句后检测和关闭它们（比如使用{@linkplain IOUtil#closeIf(java.util.Collection)}）。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param st
 	 * @param paramIndex
 	 * @param paramValue
-	 * @return
+	 * @return 实际设置的值（可能是原始值，也可能是经原始值转换后的新值）
 	 * @throws SQLException
 	 */
 	@JDBCCompatiblity("某些驱动程序不支持PreparedStatement.setObject()方法（比如：Hive JDBC），所以这里没有使用")
@@ -534,13 +564,15 @@ public class JdbcSupport
 					st.setBoolean(paramIndex, (Boolean) value);
 				else if(value instanceof String)
 				{
-					String sv = (String)value;
-					st.setBoolean(paramIndex, toJdbcBoolean(sv));
+					boolean v = toJdbcBoolean((String) value);
+					st.setBoolean(paramIndex, v);
+					value = v;
 				}
 				else if(value instanceof Number)
 				{
-					Number nv = (Number)value;
-					st.setBoolean(paramIndex, toJdbcBoolean(nv));
+					boolean v = toJdbcBoolean((Number) value);
+					st.setBoolean(paramIndex, v);
+					value = v;
 				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);

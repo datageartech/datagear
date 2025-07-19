@@ -197,12 +197,12 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			sqlObj.param(spvs);
 		}
 
-		QueryResultSet qrs = executeQuery(cn, sqlObj, jdbcSupport);
-
+		QueryResultSet qrs = null;
 		TemplateResolvedDataSetResult dataSetResult = null;
 
 		try
 		{
+			qrs = executeQuery(cn, sqlObj, jdbcSupport);
 			ResultSet rs = qrs.getResultSet();
 			ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveFields);
 			dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),

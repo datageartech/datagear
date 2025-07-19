@@ -37,6 +37,7 @@ import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.support.PersistenceSupport;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.NumberParserException;
 import org.datagear.util.SqlParamValue;
@@ -661,7 +662,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @throws UnsupportedSqlValueException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected void setParamValue(Connection cn, PreparedStatement st, int paramIndex, Object paramValue,
+	protected Object setParamValue(Connection cn, PreparedStatement st, int paramIndex, Object paramValue,
 			Column column, DataFormatContext dataFormatContext) throws SQLException, ParseException,
 			NumberParserException, DecoderException, UnsupportedSqlValueException, UnsupportedSqlTypeException
 	{
@@ -670,7 +671,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		if (paramValue == null)
 		{
 			st.setNull(paramIndex, sqlType);
-			return;
+			return null;
 		}
 
 		Object value = paramValue;
@@ -820,7 +821,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			}
 		}
 
-		super.setParamValue(cn, st, paramIndex, SqlParamValue.valueOf(value, sqlType));
+		return super.setParamValue(cn, st, paramIndex, SqlParamValue.valueOf(value, sqlType));
 	}
 
 	@Override
@@ -973,9 +974,10 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		DataExchangeException exception = null;
 
+		List<Object> re = null;
 		try
 		{
-			setImportParamValues(cn, st, columns, columnValues, dataIndex, nullForIllegalColumnValue,
+			re = setImportParamValues(cn, st, columns, columnValues, dataIndex, nullForIllegalColumnValue,
 					dataFormatContext, listener);
 
 			executeImportPreparedStatement(st, dataIndex);
@@ -983,6 +985,10 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		catch (Throwable t)
 		{
 			exception = wrapToDataExchangeException(t);
+		}
+		finally
+		{
+			IOUtil.closeIf(re);
 		}
 
 		if (exception == null)
@@ -1038,12 +1044,15 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param nullForIllegalColumnValue
 	 * @param dataFormatContext
 	 * @param listener
+	 * @return
 	 * @throws SetImportColumnValueException
 	 */
-	protected void setImportParamValues(Connection cn, PreparedStatement st, List<Column> columns,
+	protected List<Object> setImportParamValues(Connection cn, PreparedStatement st, List<Column> columns,
 			List<? extends Object> columnValues, DataIndex dataIndex, boolean nullForIllegalColumnValue,
 			DataFormatContext dataFormatContext, ValueDataImportListener listener) throws SetImportColumnValueException
 	{
+		List<Object> re = new ArrayList<>();
+
 		int columnCount = columns.size();
 		int columnValueCount = columnValues.size();
 
@@ -1056,7 +1065,8 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			try
 			{
-				setParamValue(cn, st, parameterIndex, rawValue, column, dataFormatContext);
+				Object reVal = setParamValue(cn, st, parameterIndex, rawValue, column, dataFormatContext);
+				re.add(reVal);
 			}
 			catch (Throwable t)
 			{
@@ -1088,5 +1098,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 					throw e;
 			}
 		}
+
+		return re;
 	}
 }
