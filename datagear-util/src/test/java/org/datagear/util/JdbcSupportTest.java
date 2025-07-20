@@ -18,7 +18,9 @@
 package org.datagear.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -45,6 +47,108 @@ import org.junit.Test;
 public class JdbcSupportTest extends DBTestSupport
 {
 	private JdbcSupport jdbcSupport = new JdbcSupport();
+
+	@Test
+	public void executeQueryTest() throws Exception
+	{
+		Connection cn = null;
+
+		try
+		{
+			cn = getConnection();
+
+			{
+				Sql sql = Sql.valueOf("SELECT ID, NAME FROM T_ACCOUNT WHERE ID = ?");
+				sql.param(SqlParamValue.valueOf(3, Types.INTEGER));
+				QueryResultSet qrs = this.jdbcSupport.executeQuery(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
+
+				assertTrue(qrs.isPreparedStatement());
+				assertTrue(qrs.hasParam());
+			}
+
+			{
+				Sql sql = Sql.valueOf("SELECT ID, NAME FROM T_ACCOUNT WHERE ID = ?");
+				sql.param(SqlParamValue.valueOf(3, Types.INTEGER));
+				QueryResultSet qrs = this.jdbcSupport.executeQuery(cn, sql, ResultSet.TYPE_SCROLL_INSENSITIVE);
+
+				assertTrue(qrs.isPreparedStatement());
+				assertTrue(qrs.hasParam());
+			}
+
+			{
+				Sql sql = Sql.valueOf("SELECT ID, NAME FROM T_ACCOUNT WHERE ID = 3");
+				QueryResultSet qrs = this.jdbcSupport.executeQuery(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
+
+				assertFalse(qrs.isPreparedStatement());
+				assertFalse(qrs.hasParam());
+			}
+
+			{
+				Sql sql = Sql.valueOf("SELECT ID, NAME FROM T_ACCOUNT WHERE ID = 3");
+				QueryResultSet qrs = this.jdbcSupport.executeQuery(cn, sql, ResultSet.TYPE_SCROLL_INSENSITIVE);
+
+				assertFalse(qrs.isPreparedStatement());
+				assertFalse(qrs.hasParam());
+			}
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
+	public void executeTest() throws Exception
+	{
+		Connection cn = null;
+
+		try
+		{
+			cn = getConnection();
+
+			{
+				Sql sql = Sql.valueOf("SELECT ID, NAME FROM T_ACCOUNT WHERE ID = ?");
+				sql.param(SqlParamValue.valueOf(3, Types.INTEGER));
+				SqlExecuteState state = this.jdbcSupport.execute(cn, sql);
+
+				assertTrue(state.isResultSet());
+				assertTrue(state.isPreparedStatement());
+				assertTrue(state.hasParam());
+			}
+
+			{
+				Sql sql = Sql.valueOf("SELECT ID, NAME FROM T_ACCOUNT WHERE ID = 3");
+				SqlExecuteState state = this.jdbcSupport.execute(cn, sql);
+
+				assertTrue(state.isResultSet());
+				assertFalse(state.isPreparedStatement());
+				assertFalse(state.hasParam());
+			}
+
+			{
+				Sql sql = Sql.valueOf("UPDATE T_ACCOUNT SET NAME='AAAA' WHERE ID = ?");
+				sql.param(SqlParamValue.valueOf(9999999, Types.BIGINT));
+				SqlExecuteState state = this.jdbcSupport.execute(cn, sql);
+
+				assertFalse(state.isResultSet());
+				assertTrue(state.isPreparedStatement());
+				assertTrue(state.hasParam());
+			}
+
+			{
+				Sql sql = Sql.valueOf("UPDATE T_ACCOUNT SET NAME='AAAA' WHERE ID = 99999999");
+				SqlExecuteState state = this.jdbcSupport.execute(cn, sql);
+
+				assertFalse(state.isResultSet());
+				assertFalse(state.isPreparedStatement());
+				assertFalse(state.hasParam());
+			}
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
 
 	@SuppressWarnings("deprecation")
 	@Test

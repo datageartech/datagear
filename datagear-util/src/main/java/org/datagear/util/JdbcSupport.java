@@ -99,6 +99,9 @@ public class JdbcSupport
 
 	/**
 	 * 执行查询。
+	 * <p>
+	 * 注意：调用者负责调用{@linkplain QueryResultSet#close()}。。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param sql
@@ -115,8 +118,7 @@ public class JdbcSupport
 		Statement st = null;
 		ResultSet rs = null;
 		List<SqlParamValue> rawParams = sql.getParamValues();
-		@SuppressWarnings("unchecked")
-		List<Object> setParams = Collections.EMPTY_LIST;
+		List<Object> setParams = Collections.emptyList();
 
 		try
 		{
@@ -190,6 +192,56 @@ public class JdbcSupport
 				QueryResultSet qrs = executeQuery(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
 				return qrs;
 			}
+		}
+	}
+
+	/**
+	 * 执行SQL。
+	 * <p>
+	 * 注意：调用者负责调用{@linkplain SqlExecuteState#close()}。。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @return
+	 * @throws SQLException
+	 */
+	public SqlExecuteState execute(Connection cn, Sql sql) throws SQLException
+	{
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("execute {}", sql);
+
+		Statement st = null;
+		boolean resultSet;
+		List<SqlParamValue> rawParams = sql.getParamValues();
+		List<Object> setParams = Collections.emptyList();
+
+		try
+		{
+			@JDBCCompatiblity("如果没有参数，则不必采用预编译方式，避免某些驱动对预编译功能支持有问题")
+			boolean hasParamValue = sql.hasParamValue();
+
+			if (hasParamValue)
+			{
+				PreparedStatement pst = cn.prepareStatement(sql.getSqlValue());
+				st = pst;
+				setParams = setParamValues(cn, pst, rawParams);
+				resultSet = pst.execute();
+			}
+			else
+			{
+				st = cn.createStatement();
+				resultSet = st.execute(sql.getSqlValue());
+			}
+
+			return new SqlExecuteState(st, resultSet, setParams);
+		}
+		catch (SQLException e)
+		{
+			IOUtil.closeIf(setParams);
+			JdbcUtil.closeStatement(st);
+			
+			throw e;
 		}
 	}
 

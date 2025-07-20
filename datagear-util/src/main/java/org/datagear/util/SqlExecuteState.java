@@ -19,37 +19,36 @@ package org.datagear.util;
 
 import java.io.Closeable;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 
 /**
- * SQL查询结果。
+ * SQL执行状态。
  * 
  * @author datagear@163.com
  *
  */
-public class QueryResultSet implements Closeable
+public class SqlExecuteState implements Closeable
 {
 	private Statement statement;
 
-	private ResultSet resultSet;
+	private boolean resultSet;
 
 	private List<Object> params = null;
 
-	public QueryResultSet()
+	public SqlExecuteState()
 	{
 		super();
 	}
 
-	public QueryResultSet(Statement statement, ResultSet resultSet)
+	public SqlExecuteState(Statement statement, boolean resultSet)
 	{
 		super();
 		this.statement = statement;
 		this.resultSet = resultSet;
 	}
 
-	public QueryResultSet(Statement statement, ResultSet resultSet, List<Object> params)
+	public SqlExecuteState(Statement statement, boolean resultSet, List<Object> params)
 	{
 		super();
 		this.statement = statement;
@@ -67,12 +66,12 @@ public class QueryResultSet implements Closeable
 		this.statement = statement;
 	}
 
-	public ResultSet getResultSet()
+	public boolean isResultSet()
 	{
 		return resultSet;
 	}
 
-	public void setResultSet(ResultSet resultSet)
+	public void setResultSet(boolean resultSet)
 	{
 		this.resultSet = resultSet;
 	}
@@ -114,7 +113,6 @@ public class QueryResultSet implements Closeable
 		if (this.hasParam())
 			IOUtil.closeIf(this.params);
 
-		JdbcUtil.closeResultSet(this.resultSet);
 		JdbcUtil.closeStatement(this.statement);
 	}
 
@@ -124,7 +122,7 @@ public class QueryResultSet implements Closeable
 	 * 此方法不会抛出任何{@linkplain Throwable}。
 	 * </p>
 	 */
-	public static void close(QueryResultSet qrs)
+	public static void close(SqlExecuteState qrs)
 	{
 		if (qrs != null)
 			qrs.close();
