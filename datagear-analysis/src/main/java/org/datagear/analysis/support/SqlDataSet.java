@@ -142,7 +142,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		{
 			try
 			{
-				cn = getConnectionFactory().get();
+				cn = getConnection();
 			}
 			catch (Throwable t)
 			{
@@ -151,6 +151,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 			try
 			{
+				// 注意：无论是否预编译SQL，都应进行防注入校验，因为混合场景很常用，比如：
+				// SELECT * FROM T WHERE NAME = ${pc(name)} ORDER BY ${col}
+				validateSql(cn, sqlTemplateResult);
+
 				return resolveResult(cn, query, resolveFields, sqlTemplateResult);
 			}
 			catch (DataSetException e)
@@ -168,7 +172,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			{
 				try
 				{
-					getConnectionFactory().release(cn);
+					releaseConnection(cn);
 				}
 				catch (Throwable t)
 				{
@@ -178,31 +182,27 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		}
 	}
 
+	protected Connection getConnection() throws Throwable
+	{
+		return getConnectionFactory().get();
+	}
+
+	protected void releaseConnection(Connection cn) throws Throwable
+	{
+		getConnectionFactory().release(cn);
+	}
+
 	protected TemplateResolvedDataSetResult resolveResult(Connection cn, DataSetQuery query, boolean resolveFields,
 			SqlTemplateResult sqlTemplateResult) throws Throwable
 	{
-		// 注意：无论是否预编译SQL，都应进行防注入校验，因为混合场景很常用，比如：
-		// SELECT * FROM T WHERE NAME = ${pc(name)} ORDER BY ${col} ${dir}
-		validateSql(cn, sqlTemplateResult);
-
-		String sql = sqlTemplateResult.getResult();
-		boolean precompiles = sqlTemplateResult.isPrecompiled();
-
-		Sql sqlObj = Sql.valueOf(sql);
-		JdbcSupport jdbcSupport = getJdbcSupport();
-
-		if (precompiles)
-		{
-			List<SqlParamValue> spvs = jdbcSupport.toSqlParamValues(sqlTemplateResult.getParamValues());
-			sqlObj.param(spvs);
-		}
+		Sql sqlObj = buildSqlObj(sqlTemplateResult);
 
 		QueryResultSet qrs = null;
 		TemplateResolvedDataSetResult dataSetResult = null;
 
 		try
 		{
-			qrs = executeQuery(cn, sqlObj, jdbcSupport);
+			qrs = executeQuery(cn, sqlObj);
 			ResultSet rs = qrs.getResultSet();
 			ResolvedDataSetResult result = resolveResult(cn, rs, query, resolveFields);
 			dataSetResult = new TemplateResolvedDataSetResult(result.getResult(), result.getFields(),
@@ -216,14 +216,30 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		return dataSetResult;
 	}
 
-	protected QueryResultSet executeQuery(Connection cn, Sql sqlObj, JdbcSupport jdbcSupport)
-			throws SqlDataSetSqlExecutionException
+	protected Sql buildSqlObj(SqlTemplateResult sqlTemplateResult)
+	{
+		String sql = sqlTemplateResult.getResult();
+		boolean precompiles = sqlTemplateResult.isPrecompiled();
+
+		Sql sqlObj = Sql.valueOf(sql);
+		JdbcSupport jdbcSupport = getJdbcSupport();
+
+		if (precompiles)
+		{
+			List<SqlParamValue> spvs = jdbcSupport.toSqlParamValues(sqlTemplateResult.getParamValues());
+			sqlObj.param(spvs);
+		}
+
+		return sqlObj;
+	}
+
+	protected QueryResultSet executeQuery(Connection cn, Sql sqlObj) throws SqlDataSetSqlExecutionException
 	{
 		QueryResultSet qrs = null;
 
 		try
 		{
-			qrs = jdbcSupport.executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
+			qrs = getJdbcSupport().executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
 		}
 		catch (Throwable t)
 		{

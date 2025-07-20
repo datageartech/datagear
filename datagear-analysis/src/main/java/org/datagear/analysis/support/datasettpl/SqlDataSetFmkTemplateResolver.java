@@ -55,6 +55,11 @@ public class SqlDataSetFmkTemplateResolver extends DataSetFmkTemplateResolver
 	 */
 	public static final String PRECOMPILE_METHOD_NAME = "pc";
 
+	/**
+	 * 预编译参数占位符，应始终是{@linkplain PreparedStatement}规定的{@code "?"}。
+	 */
+	public static final String PRECOMPILE_PARAM_PLACEHOLDER = "?";
+
 	public SqlDataSetFmkTemplateResolver()
 	{
 		super(SqlOutputFormat.INSTANCE);
@@ -166,11 +171,6 @@ public class SqlDataSetFmkTemplateResolver extends DataSetFmkTemplateResolver
 
 	protected static class SqlPreCompileTemplateMethodModel implements TemplateMethodModelEx
 	{
-		/**
-		 * 预编译执行结果，应始终是{@linkplain PreparedStatement}规范中的预编译占位符{@code ?}。
-		 */
-		public static final String PRECOMILE_RESULT = "?";
-
 		public SqlPreCompileTemplateMethodModel()
 		{
 			super();
@@ -194,7 +194,7 @@ public class SqlDataSetFmkTemplateResolver extends DataSetFmkTemplateResolver
 				Object pv = extractRaw(arguments.get(0));
 				sth.addParamValue(pv);
 
-				return PRECOMILE_RESULT;
+				return PRECOMPILE_PARAM_PLACEHOLDER;
 			}
 			catch (TemplateModelException e)
 			{
