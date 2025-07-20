@@ -64,6 +64,7 @@ public class SqlDataSetTest extends DBTestSupport
 			cn = getConnection();
 			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
 
+			deleteAccount(cn, id);
 			insertAccount(cn, id, name, headImg, introduction);
 
 			String sql = "SELECT ID, NAME, HEAD_IMG, INTRODUCTION FROM T_ACCOUNT <#if id??>WHERE ID = ${id} AND NAME != '${name}'</#if>";
@@ -163,6 +164,7 @@ public class SqlDataSetTest extends DBTestSupport
 			cn = getConnection();
 			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
 
+			deleteAccount(cn, id);
 			insertAccount(cn, id, name, headImg, introduction);
 
 			String sql = "SELECT ID, NAME, HEAD_IMG, INTRODUCTION FROM T_ACCOUNT <#if id??>WHERE ID = ${pc(id)} AND NAME != ${pc(name)}</#if>";
@@ -261,6 +263,7 @@ public class SqlDataSetTest extends DBTestSupport
 			cn = getConnection();
 			SimpleConnectionFactory connectionFactory = new SimpleConnectionFactory(cn, false);
 
+			deleteAccount(cn, id);
 			insertAccount(cn, id, name, headImg, introduction);
 
 			String sql = "SELECT ID, NAME, HEAD_IMG, INTRODUCTION FROM T_ACCOUNT WHERE ID = ${id}";

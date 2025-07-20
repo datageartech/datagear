@@ -31,6 +31,8 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import org.datagear.util.FileUtil;
+import org.datagear.util.JdbcSupport;
+import org.datagear.util.Sql;
 
 /**
  * 数据库测试支持类。
@@ -146,6 +148,18 @@ public abstract class DBTestSupport
 				return DBTestSupport.this.getConnection();
 			}
 		};
+	}
+
+	protected void executeUpdateSilently(Connection cn, Sql sql)
+	{
+		JdbcSupport jdbcSupport = new JdbcSupport();
+		try
+		{
+			jdbcSupport.executeUpdate(cn, sql);
+		}
+		catch (Exception e)
+		{
+		}
 	}
 
 	protected void println()
