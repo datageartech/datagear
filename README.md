@@ -151,7 +151,7 @@ SQL数据集
 
 ## 准备单元测试环境
 
-1. 安装`MySQL-8.0`数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/jdbc.properties`配置）
+1. 安装`MySQL-8.0`数据库，并将`root`用户的密码设置为：`root`（或者修改`test/config/test.properties`配置）
 
 2. 新建测试数据库，名称取为：`dg_test`
 
