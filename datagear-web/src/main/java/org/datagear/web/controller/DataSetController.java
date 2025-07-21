@@ -967,7 +967,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		entity.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewSql(entity, query);
+	}
 
+	protected TemplateResolvedDataSetResult doPreviewSql(SqlDataSetEntity entity, DataSetQuery query) throws Exception
+	{
 		return entity.resolve(query);
 	}
 
@@ -1017,7 +1021,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		}
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewJsonValue(entity, query);
+	}
 
+	protected TemplateResolvedDataSetResult doPreviewJsonValue(JsonValueDataSetEntity entity, DataSetQuery query)
+			throws Exception
+	{
 		return entity.resolve(query);
 	}
 
@@ -1062,7 +1071,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewJsonFile(entity, query);
+	}
 
+	protected ResolvedDataSetResult doPreviewJsonFile(JsonFileDataSetEntity entity, DataSetQuery query) throws Exception
+	{
 		return entity.resolve(query);
 	}
 
@@ -1106,7 +1119,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewExcel(entity, query);
+	}
 
+	protected ResolvedDataSetResult doPreviewExcel(ExcelDataSetEntity entity, DataSetQuery query) throws Exception
+	{
 		return entity.resolve(query);
 	}
 
@@ -1147,7 +1164,12 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		}
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewCsvValue(entity, query);
+	}
 
+	protected TemplateResolvedDataSetResult doPreviewCsvValue(CsvValueDataSetEntity entity, DataSetQuery query)
+			throws Exception
+	{
 		return entity.resolve(query);
 	}
 
@@ -1191,7 +1213,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		setDirectoryFileDataSetForPreview(user, entity, originalFileName);
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewCsvFile(entity, query);
+	}
 
+	protected ResolvedDataSetResult doPreviewCsvFile(CsvFileDataSetEntity entity, DataSetQuery query) throws Exception
+	{
 		return entity.resolve(query);
 	}
 
@@ -1234,7 +1260,11 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		entity.setHttpClient(getDataSetEntityService().getHttpClient());
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
+		return doPreviewHttp(entity, query);
+	}
 
+	protected TemplateResolvedDataSetResult doPreviewHttp(HttpDataSetEntity entity, DataSetQuery query) throws Exception
+	{
 		return entity.resolve(query);
 	}
 
