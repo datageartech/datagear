@@ -2250,19 +2250,43 @@
 			left = btnPosition.left - width/2;
 		}
 		
-		//按钮底部有足够空间
-		if((docHeight - btnOffset.top - btnHeight) > heightGap)
+		var bottomFirst = true;
+		if($box.hasClass("dg-position-leftBottom") || $box.hasClass("dg-position-rightBottom") || $box.hasClass("dg-position-centerBottom"))
+			bottomFirst = false;
+		
+		if(bottomFirst)
 		{
-			top = btnPosition.top + btnHeight;
-		}
-		//按钮上部有足够空间
-		else if(btnOffset.top > heightGap)
-		{
-			bottom = btnPosition.top + btnHeight;
+			//按钮底部有足够空间
+			if((docHeight - btnOffset.top - btnHeight) > heightGap)
+			{
+				top = btnPosition.top + btnHeight;
+			}
+			//按钮上部有足够空间
+			else if(btnOffset.top > heightGap)
+			{
+				bottom = btnPosition.top + btnHeight;
+			}
+			else
+			{
+				top = btnPosition.top - height/2;
+			}
 		}
 		else
 		{
-			top = btnPosition.top - height/2;
+			//按钮上部有足够空间
+			if(btnOffset.top > heightGap)
+			{
+				bottom = btnPosition.top + btnHeight;
+			}
+			//按钮底部有足够空间
+			else if((docHeight - btnOffset.top - btnHeight) > heightGap)
+			{
+				top = btnPosition.top + btnHeight;
+			}
+			else
+			{
+				top = btnPosition.top - height/2;
+			}
 		}
 		
 		$panel.css("left", left);

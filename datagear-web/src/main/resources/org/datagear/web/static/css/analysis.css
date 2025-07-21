@@ -447,7 +447,7 @@
 	display: flex;
 	flex-direction: row;
 	gap: 2px;
-	z-index: 9;
+	z-index: 8;
 }
 .dg-chart-setting-box.dg-position-leftTop{
 	left: 0.1em;
@@ -535,7 +535,7 @@
 	padding: 0.5em 0.8em 0.6em 0.8em;
 	user-select: text;
 	-webkit-user-select: text;
-	z-index: 100;
+	z-index: 9;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-closebtn{
 	padding-left: 0.5em !important;
