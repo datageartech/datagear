@@ -218,7 +218,7 @@ public class DerbySqlClient extends JdbcSupport
 
 				for (int i = 1; i <= columnCount; i++)
 				{
-					String columnLabel = getColumnName(metaData, i);
+					String columnLabel = getColumnLabel(metaData, i);
 
 					if (i > 1)
 						print(", ");

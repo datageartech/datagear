@@ -41,8 +41,9 @@ public class SimpleRowMapper extends AbstractRowMapper
 	}
 
 	@Override
-	protected Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column) throws Throwable
+	protected Object mapColumn(Connection cn, Table table, Column column, ResultSet rs, int rowIndex, int columnIndex)
+			throws Throwable
 	{
-		return getColumnValue(cn, rs, column);
+		return getColumnValue(cn, rs, column, columnIndex);
 	}
 }

@@ -338,7 +338,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		JdbcSupport jdbcSupport = getJdbcSupport();
 
 		ResultSetMetaData rsMeta = rs.getMetaData();
-		String[] colNames = jdbcSupport.getColumnNames(rsMeta);
+		String[] colNames = jdbcSupport.getColumnLabels(rsMeta);
 		SqlType[] sqlTypes = jdbcSupport.getColumnSqlTypes(rsMeta);
 		String[] fieldTypes = new String[colNames.length];
 		
@@ -367,7 +367,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 			for (int i = 0; i < colNames.length; i++)
 			{
-				Object value = getColumnValue(cn, rs, colNames[i], sqlTypes[i].getType(), jdbcSupport);
+				Object value = getColumnValue(cn, rs, (i + 1), sqlTypes[i].getType(), jdbcSupport);
 				row.put(colNames[i], value);
 			}
 
@@ -377,20 +377,20 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		return data;
 	}
 
-	protected Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType,
+	protected Object getColumnValue(Connection cn, ResultSet rs, int column, int sqlType,
 			JdbcSupport jdbcSupport) throws Throwable
 	{
-		Object value = jdbcSupport.getColumnValueExtract(cn, rs, columnName, sqlType);
+		Object value = jdbcSupport.getColumnValueExtract(cn, rs, column, sqlType);
 
 		if (value instanceof byte[])
 		{
-			value = convertBytesColumnValue(cn, rs, columnName, sqlType, (byte[]) value);
+			value = convertBytesColumnValue(cn, rs, column, sqlType, (byte[]) value);
 		}
 
 		return value;
 	}
 
-	protected Object convertBytesColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType, byte[] value)
+	protected Object convertBytesColumnValue(Connection cn, ResultSet rs, int column, int sqlType, byte[] value)
 			throws Throwable
 	{
 		if (value == null)

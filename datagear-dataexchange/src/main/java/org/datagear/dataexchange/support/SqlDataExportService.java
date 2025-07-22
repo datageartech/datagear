@@ -78,7 +78,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 		ResultSet rs = qrs.getResultSet();
 		List<Column> columns = getColumns(cn, rs);
 
-		writeRecords(dataExchange, cn, columns, rs, sqlWriter, exportContext);
+		writeRecords(dataExchange, cn, rs, columns, sqlWriter, exportContext);
 	}
 
 	/**
@@ -86,12 +86,13 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 	 * 
 	 * @param dataExchange
 	 * @param cn
-	 * @param columns
 	 * @param rs
+	 * @param columns
 	 * @param out
 	 * @param exportContext
+	 * @throws Throwable
 	 */
-	protected void writeRecords(SqlDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
+	protected void writeRecords(SqlDataExport dataExchange, Connection cn, ResultSet rs, List<Column> columns,
 			Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
@@ -135,7 +136,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 
 				try
 				{
-					value = getStringValue(cn, rs, column, exportContext.getDataFormatContext());
+					value = getStringValue(cn, rs, column, i + 1, exportContext.getDataFormatContext());
 				}
 				catch (Throwable t)
 				{

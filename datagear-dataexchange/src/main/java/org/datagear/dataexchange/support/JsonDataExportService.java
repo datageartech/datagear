@@ -146,7 +146,7 @@ public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeServ
 			{
 				Column column = columns.get(i);
 
-				writeJsonValue(dataExchange, cn, columns, rs, exportContext, generator, i + 1, column, exportOption,
+				writeJsonValue(dataExchange, cn, columns, rs, column, i + 1, exportContext, generator, exportOption,
 						jsonDataFormat, listener);
 			}
 
@@ -178,18 +178,18 @@ public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeServ
 	 * @param cn
 	 * @param columns
 	 * @param rs
-	 * @param exportContext
-	 * @param generator
+	 * @param column
 	 * @param columnIndex
 	 *            行号，以{@code 1}开始
-	 * @param column
+	 * @param exportContext
+	 * @param generator
 	 * @param exportOption
 	 * @param jsonDataFormat
 	 * @param listener
 	 * @throws Throwable
 	 */
 	protected void writeJsonValue(JsonDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
-			IndexFormatDataExchangeContext exportContext, JsonGenerator generator, int columnIndex, Column column,
+			Column column, int columnIndex, IndexFormatDataExchangeContext exportContext, JsonGenerator generator,
 			JsonDataExportOption exportOption, JsonDataFormat jsonDataFormat, TextDataExportListener listener)
 			throws Throwable
 	{
@@ -198,7 +198,7 @@ public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeServ
 
 		try
 		{
-			value = getColumnValueSimple(cn, rs, column);
+			value = getColumnValueSimple(cn, rs, column, columnIndex);
 
 			if (value == null)
 			{

@@ -40,7 +40,8 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 	}
 
 	@Override
-	public Row map(Connection cn, Table table, ResultSet rs, int rowIndex) throws RowMapperException
+	public Row map(Connection cn, Table table, ResultSet rs, int rowIndex, int[] columnIndexes)
+			throws RowMapperException
 	{
 		Row rowObj = new Row();
 
@@ -52,7 +53,7 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 				if (!supportsColumn(columns[i]))
 					continue;
 
-				Object value = mapColumn(cn, table, rs, rowIndex, columns[i]);
+				Object value = mapColumn(cn, table, columns[i], rs, rowIndex, columnIndexes[i]);
 				rowObj.put(columns[i].getName(), value);
 			}
 		}
@@ -76,12 +77,15 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 	 * 
 	 * @param cn
 	 * @param table
+	 * @param column
 	 * @param rs
 	 * @param rowIndex
-	 * @param column
+	 *            行号，以{@code 1}开始
+	 * @param columnIndex
+	 *            结果集中的列号（以{@code 1}开始）
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column)
-			throws Throwable;
+	protected abstract Object mapColumn(Connection cn, Table table, Column column, ResultSet rs, int rowIndex,
+			int columnIndex) throws Throwable;
 }

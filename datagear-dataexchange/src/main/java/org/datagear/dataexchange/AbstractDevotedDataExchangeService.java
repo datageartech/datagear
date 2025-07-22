@@ -844,18 +844,19 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param cn
 	 * @param rs
 	 * @param column
+	 * @param columnIndex
+	 *            {@linkplain Column}在结果集中的列号（以{@code 1}开始）
 	 * @return
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected Object getColumnValueSimple(Connection cn, ResultSet rs, Column column)
+	protected Object getColumnValueSimple(Connection cn, ResultSet rs, Column column, int columnIndex)
 			throws SQLException, IOException, UnsupportedSqlTypeException
 	{
 		Object value = null;
 
 		int sqlType = column.getType();
-		String columnName = column.getName();
 
 		switch (sqlType)
 		{
@@ -868,13 +869,13 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.REF_CURSOR:
 			case Types.STRUCT:
 			{
-				value = getColumnValueExtractExt(cn, rs, columnName, sqlType);
+				value = getColumnValueExtractExt(cn, rs, columnIndex, sqlType);
 				break;
 			}
 
 			default:
 			{
-				value = super.getColumnValueExtract(cn, rs, columnName, sqlType);
+				value = super.getColumnValueExtract(cn, rs, columnIndex, sqlType);
 				break;
 			}
 		}
@@ -883,13 +884,14 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	@Override
-	protected Object getColumnValueExt(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
+	protected Object getColumnValueRawExt(Connection cn, ResultSet rs, int column, int sqlType)
+			throws SQLException
 	{
 		throw new UnsupportedSqlTypeException(sqlType);
 	}
 
 	@Override
-	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, String columnName, int sqlType)
+	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, int column, int sqlType)
 			throws SQLException
 	{
 		throw new UnsupportedSqlTypeException(sqlType);
@@ -901,16 +903,18 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param cn
 	 * @param rs
 	 * @param column
+	 * @param columnIndex
+	 *            {@linkplain Column}在结果集中的列号（以{@code 1}开始）
 	 * @param dataFormatContext
 	 * @return
 	 * @throws SQLException
 	 * @throws IOException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected String getStringValue(Connection cn, ResultSet rs, Column column,
+	protected String getStringValue(Connection cn, ResultSet rs, Column column, int columnIndex,
 			DataFormatContext dataFormatContext) throws SQLException, IOException, UnsupportedSqlTypeException
 	{
-		Object value = getColumnValueSimple(cn, rs, column);
+		Object value = getColumnValueSimple(cn, rs, column, columnIndex);
 		String valueStr = null;
 
 		if (value == null)

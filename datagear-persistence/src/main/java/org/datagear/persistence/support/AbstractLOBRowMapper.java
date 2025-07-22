@@ -41,13 +41,12 @@ public abstract class AbstractLOBRowMapper extends AbstractRowMapper
 	}
 
 	@Override
-	protected Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column) throws Throwable
+	protected Object mapColumn(Connection cn, Table table, Column column, ResultSet rs, int rowIndex, int columnIndex)
+			throws Throwable
 	{
-		String columnName = column.getName();
-		int sqlType = column.getType();
-
 		Object value = null;
 
+		int sqlType = column.getType();
 		switch (sqlType)
 		{
 			case Types.LONGVARCHAR:
@@ -100,7 +99,7 @@ public abstract class AbstractLOBRowMapper extends AbstractRowMapper
 			}
 
 			default:
-				value = getColumnValueExtract(cn, rs, columnName, sqlType);
+				value = getColumnValueExtract(cn, rs, columnIndex, sqlType);
 				break;
 		}
 

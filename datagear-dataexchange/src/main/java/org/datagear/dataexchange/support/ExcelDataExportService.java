@@ -155,7 +155,7 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 
 				Cell cell = row.createCell(i);
 
-				setCellValue(dataExchange, cn, rs, i + 1, column, exportOption, exportContext, wb, creationHelper,
+				setCellValue(dataExchange, cn, rs, column, i + 1, exportOption, exportContext, wb, creationHelper,
 						cell);
 			}
 
@@ -176,8 +176,8 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 	 * @param dataExchange
 	 * @param cn
 	 * @param rs
-	 * @param columnIndex
 	 * @param column
+	 * @param columnIndex
 	 * @param exportOption
 	 * @param exportContext
 	 * @param workbook
@@ -185,8 +185,8 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 	 * @param cell
 	 * @throws Throwable
 	 */
-	protected void setCellValue(ExcelDataExport dataExchange, Connection cn, ResultSet rs, int columnIndex,
-			Column column, TextDataExportOption exportOption, ExcelDataExportContext exportContext,
+	protected void setCellValue(ExcelDataExport dataExchange, Connection cn, ResultSet rs, Column column,
+			int columnIndex, TextDataExportOption exportOption, ExcelDataExportContext exportContext,
 			SXSSFWorkbook workbook, CreationHelper creationHelper, Cell cell) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
@@ -196,7 +196,7 @@ public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeSer
 
 		try
 		{
-			value = getColumnValueSimple(cn, rs, column);
+			value = getColumnValueSimple(cn, rs, column, columnIndex);
 		}
 		catch (Throwable t)
 		{

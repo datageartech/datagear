@@ -36,9 +36,12 @@ public interface RowMapper
 	 * @param cn
 	 * @param table
 	 * @param rs
-	 * @param rowIndex   行号，以{@code 1}开始
+	 * @param rowIndex
+	 *            行号（以{@code 1}开始）
+	 * @param columnIndexes
+	 *            {@linkplain Table#getColumns()}中元素在结果集中的列号（以{@code 1}开始）数组
 	 * @return
 	 * @throws RowMapperException
 	 */
-	Row map(Connection cn, Table table, ResultSet rs, int rowIndex) throws RowMapperException;
+	Row map(Connection cn, Table table, ResultSet rs, int rowIndex, int[] columnIndexes) throws RowMapperException;
 }

@@ -19,6 +19,7 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.RowMapperException;
+import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
@@ -222,13 +224,79 @@ public class PersistenceSupport extends JdbcSupport
 	}
 
 	/**
+	 * 获取{@linkplain Column}数组在数据集结果中的列号（以{@code 1}开头，{@code -1}表示每找到）。
+	 * 
+	 * @param rsm
+	 * @param columns
+	 * @return
+	 * @throws SQLException
+	 */
+	public int[] getColumnIndexes(ResultSetMetaData rsm, Column[] columns) throws SQLException
+	{
+		int[] re = new int[columns.length];
+
+		String[] labels = getColumnLabels(rsm);
+
+		for (int i = 0; i < columns.length; i++)
+		{
+			int idx = -1;
+
+			for (int j = 0; j < labels.length; j++)
+			{
+				if (columns[i].getName().equalsIgnoreCase(labels[j]))
+				{
+					idx = j + 1;
+					break;
+				}
+			}
+
+			re[i] = idx;
+		}
+
+		return re;
+	}
+
+	/**
+	 * 获取{@linkplain Column}列表在数据集结果中的列号（以{@code 1}开头，{@code -1}表示每找到）。
+	 * 
+	 * @param rsm
+	 * @param columns
+	 * @return
+	 * @throws SQLException
+	 */
+	public int[] getColumnIndexes(ResultSetMetaData rsm, List<Column> columns) throws SQLException
+	{
+		int[] re = new int[columns.size()];
+
+		String[] labels = getColumnLabels(rsm);
+
+		for (int i = 0, len = columns.size(); i < len; i++)
+		{
+			int idx = -1;
+
+			for (int j = 0; j < labels.length; j++)
+			{
+				if (columns.get(i).getName().equalsIgnoreCase(labels[j]))
+				{
+					idx = j + 1;
+					break;
+				}
+			}
+
+			re[i] = idx;
+		}
+
+		return re;
+	}
+
+	/**
 	 * 将结果集映射至{@linkplain Row}洌表。
 	 * 
 	 * @param cn
 	 * @param table
 	 * @param rs
 	 * @param startRow
-	 *            起始行，以{@code 1}开头
+	 *            起始行号（以{@code 1}开始）
 	 * @param count
 	 *            映射行数，{@code -1}表示全部
 	 * @param mapper
@@ -244,6 +312,10 @@ public class PersistenceSupport extends JdbcSupport
 			startRow = 1;
 
 		List<Row> resultList = new ArrayList<>();
+		
+		@JDBCCompatiblity("应在遍历ResultSet数据前读取ResultSetMetaData信息解析数据集字段，"
+				+ "因为某些驱动在遍历数据后读取ResultSetMetaData会报【ResultSet已关闭】的错误（比如DB2-9.7的db2jcc4.jar驱动）")
+		int[] columnIndexes = getColumnIndexes(rs.getMetaData(), table.getColumns());
 
 		if (count >= 0 && startRow > 1)
 			forwardBefore(rs, startRow);
@@ -256,7 +328,7 @@ public class PersistenceSupport extends JdbcSupport
 			if (endRow >= 0 && rowIndex >= endRow)
 				break;
 
-			Row row = mapToRow(cn, table, rs, rowIndex, mapper);
+			Row row = mapToRow(cn, table, rs, rowIndex, columnIndexes, mapper);
 
 			resultList.add(row);
 
@@ -273,11 +345,14 @@ public class PersistenceSupport extends JdbcSupport
 	 * @param table
 	 * @param rs
 	 * @param rowIndex
-	 *            行号，以{@code 1}开头
+	 *            行号（以{@code 1}开始）
+	 * @param columnIndexes
+	 *            {@linkplain Table#getColumns()}中元素在结果集中的列号（以{@code 1}开始）数组
 	 * @return
 	 * @throws RowMapperException
 	 */
-	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex) throws RowMapperException
+	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex, int[] columnIndexes)
+			throws RowMapperException
 	{
 		return mapToRow(cn, table, rs, rowIndex, null);
 	}
@@ -289,17 +364,19 @@ public class PersistenceSupport extends JdbcSupport
 	 * @param table
 	 * @param rs
 	 * @param rowIndex
-	 *            行号，以{@code 1}开头
+	 *            行号（以{@code 1}开始）
+	 * @param columnIndexes
+	 *            {@linkplain Table#getColumns()}中元素在结果集中的列号（以{@code 1}开始）数组
 	 * @param mapper
 	 *            允许为{@code null}
 	 * @return
 	 * @throws RowMapperException
 	 */
-	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex, RowMapper mapper)
+	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex, int[] columnIndexes, RowMapper mapper)
 			throws RowMapperException
 	{
 		if (mapper != null)
-			return mapper.map(cn, table, rs, rowIndex);
+			return mapper.map(cn, table, rs, rowIndex, columnIndexes);
 		else
 		{
 			Row row = new Row();
@@ -314,7 +391,7 @@ public class PersistenceSupport extends JdbcSupport
 					if (!supportsColumn(column))
 						continue;
 
-					Object value = getColumnValue(cn, rs, column);
+					Object value = getColumnValue(cn, rs, column, columnIndexes[i]);
 					row.put(column.getName(), value);
 				}
 			}
@@ -327,9 +404,9 @@ public class PersistenceSupport extends JdbcSupport
 		}
 	}
 
-	public Object getColumnValue(Connection cn, ResultSet rs, Column column) throws SQLException
+	public Object getColumnValue(Connection cn, ResultSet rs, Column column, int columnIndex) throws SQLException
 	{
-		return getColumnValueExtract(cn, rs, column.getName(), column.getType());
+		return getColumnValueExtract(cn, rs, columnIndex, column.getType());
 	}
 
 	public SqlParamValue createSqlParamValue(Column column, Object value)
