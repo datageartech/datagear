@@ -100,7 +100,7 @@ public class DtbsSourceSqlPermissionValidator
 		}
 		else
 		{
-			return new SqlValidation("ALL");
+			return new SqlValidation("ANY SQL");
 		}
 	}
 }
