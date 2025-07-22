@@ -1989,7 +1989,7 @@ public class JdbcSupport
 	protected Object getColumnValueForROWID(Connection cn, ResultSet rs, String columnName) throws SQLException
 	{
 		RowId rowId = rs.getRowId(columnName);
-		byte[] value = (rowId == null ? null : rowId.getBytes());
+		String value = (rowId == null ? null : rowId.toString());
 		return checkGotWasNull(cn, rs, columnName, value);
 	}
 
