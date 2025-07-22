@@ -869,13 +869,13 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.REF_CURSOR:
 			case Types.STRUCT:
 			{
-				value = getColumnValueExtractExt(cn, rs, columnIndex, sqlType);
+				value = getColumnValueExt(cn, rs, columnIndex, sqlType);
 				break;
 			}
 
 			default:
 			{
-				value = super.getColumnValueExtract(cn, rs, columnIndex, sqlType);
+				value = super.getColumnValue(cn, rs, columnIndex, sqlType);
 				break;
 			}
 		}
@@ -884,14 +884,14 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	@Override
-	protected Object getColumnValueRawExt(Connection cn, ResultSet rs, int column, int sqlType)
+	protected Object getColumnValueExt(Connection cn, ResultSet rs, int column, int sqlType)
 			throws SQLException
 	{
 		throw new UnsupportedSqlTypeException(sqlType);
 	}
 
 	@Override
-	protected Object getColumnValueExtractExt(Connection cn, ResultSet rs, int column, int sqlType)
+	protected Object getColumnValueRawExt(Connection cn, ResultSet rs, int column, int sqlType)
 			throws SQLException
 	{
 		throw new UnsupportedSqlTypeException(sqlType);

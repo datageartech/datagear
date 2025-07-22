@@ -188,7 +188,7 @@ public class JdbcSupportTest extends DBTestSupport
 
 					for (int i = 0; i < colNames.length; i++)
 					{
-						Object value = jdbcSupport.getColumnValueExtract(cn, keysRs, i + 1, sqlTypes[i].getType());
+						Object value = jdbcSupport.getColumnValue(cn, keysRs, i + 1, sqlTypes[i].getType());
 						row.put(colNames[i], value);
 					}
 
@@ -217,7 +217,7 @@ public class JdbcSupportTest extends DBTestSupport
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void getColumnValueExtractTest() throws Exception
+	public void getColumnValueTest() throws Exception
 	{
 		Connection cn = null;
 
@@ -262,24 +262,24 @@ public class JdbcSupportTest extends DBTestSupport
 				rs.next();
 
 				{
-					Number v = (Number) jdbcSupport.getColumnValueExtract(cn, rs, 1, Types.INTEGER);
+					Number v = (Number) jdbcSupport.getColumnValue(cn, rs, 1, Types.INTEGER);
 					assertEquals(id, v.intValue());
 				}
 
 				{
-					String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, 2, Types.VARCHAR);
+					String v = (String) jdbcSupport.getColumnValue(cn, rs, 2, Types.VARCHAR);
 					assertEquals(name, v);
 				}
 
 				{
-					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValueExtract(cn, rs, 3, Types.DATE);
+					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValue(cn, rs, 3, Types.DATE);
 					assertEquals(date.getYear(), v.getYear());
 					assertEquals(date.getMonth(), v.getMonth());
 					assertEquals(date.getDay(), v.getDay());
 				}
 
 				{
-					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValueExtract(cn, rs, 4,
+					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValue(cn, rs, 4,
 							Types.DATE);
 					assertEquals(dateTime.getYear(), v.getYear());
 					assertEquals(dateTime.getMonth(), v.getMonth());
@@ -287,14 +287,14 @@ public class JdbcSupportTest extends DBTestSupport
 				}
 
 				{
-					Time v = (Time) jdbcSupport.getColumnValueExtract(cn, rs, 5, Types.TIME);
+					Time v = (Time) jdbcSupport.getColumnValue(cn, rs, 5, Types.TIME);
 					assertEquals(time.getHours(), v.getHours());
 					assertEquals(time.getMinutes(), v.getMinutes());
 					assertEquals(time.getSeconds(), v.getSeconds());
 				}
 
 				{
-					Timestamp v = (Timestamp) jdbcSupport.getColumnValueExtract(cn, rs, 6, Types.TIMESTAMP);
+					Timestamp v = (Timestamp) jdbcSupport.getColumnValue(cn, rs, 6, Types.TIMESTAMP);
 					assertEquals(timestamp.getYear(), v.getYear());
 					assertEquals(timestamp.getMonth(), v.getMonth());
 					assertEquals(timestamp.getDay(), v.getDay());
@@ -305,7 +305,7 @@ public class JdbcSupportTest extends DBTestSupport
 
 				{
 					{
-						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, 7, Types.BLOB);
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.BLOB);
 						assertEquals(blob.length, v.length);
 						for (int i = 0; i < v.length; i++)
 						{
@@ -314,7 +314,7 @@ public class JdbcSupportTest extends DBTestSupport
 					}
 
 					{
-						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, 7, Types.BINARY);
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.BINARY);
 						assertEquals(blob.length, v.length);
 						for (int i = 0; i < v.length; i++)
 						{
@@ -323,7 +323,7 @@ public class JdbcSupportTest extends DBTestSupport
 					}
 
 					{
-						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, 7, Types.LONGVARBINARY);
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.LONGVARBINARY);
 						assertEquals(blob.length, v.length);
 						for (int i = 0; i < v.length; i++)
 						{
@@ -332,7 +332,7 @@ public class JdbcSupportTest extends DBTestSupport
 					}
 
 					{
-						byte[] v = (byte[]) jdbcSupport.getColumnValueExtract(cn, rs, 7, Types.VARBINARY);
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.VARBINARY);
 						assertEquals(blob.length, v.length);
 						for (int i = 0; i < v.length; i++)
 						{
@@ -344,23 +344,137 @@ public class JdbcSupportTest extends DBTestSupport
 				{
 
 					{
-						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, 8, Types.CLOB);
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.CLOB);
 						assertEquals(clob, v);
 					}
 
 					{
-						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, 8, Types.LONGNVARCHAR);
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.LONGNVARCHAR);
 						assertEquals(clob, v);
 					}
 
 					{
-						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, 8, Types.LONGVARCHAR);
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.LONGVARCHAR);
 						assertEquals(clob, v);
 					}
 
 					{
-						String v = (String) jdbcSupport.getColumnValueExtract(cn, rs, 8, Types.NCLOB);
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.NCLOB);
 						assertEquals(clob, v);
+					}
+				}
+			}
+		}
+		finally
+		{
+			Sql sql = Sql.valueOf("DELETE FROM T_DATA_IMPORT WHERE ID = ?");
+			sql.param(jdbcSupport.toSqlParamValue(id));
+			jdbcSupport.executeUpdate(cn, sql);
+
+			IOUtil.close(cn);
+		}
+	};
+
+	@Test
+	public void getColumnValueTest_null() throws Exception
+	{
+		Connection cn = null;
+
+		int id = 999123466;
+
+		try
+		{
+			cn = getConnection();
+
+			{
+				Sql sql = Sql.valueOf(
+						"INSERT INTO T_DATA_IMPORT (ID) VALUES(?)");
+
+				sql.param(jdbcSupport.toSqlParamValue(id));
+				jdbcSupport.executeUpdate(cn, sql);
+			}
+
+			{
+				Sql sql = Sql.valueOf(
+						"SELECT ID, NAME, COL_DATE, COL_DATETIME, COL_TIME, COL_TIMESTAMP, COL_BLOB, COL_CLOB FROM T_DATA_IMPORT WHERE ID = ?");
+				sql.param(jdbcSupport.toSqlParamValue(id));
+
+				QueryResultSet re = jdbcSupport.executeQuery(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
+				ResultSet rs = re.getResultSet();
+				rs.next();
+
+				{
+					Number v = (Number) jdbcSupport.getColumnValue(cn, rs, 1, Types.INTEGER);
+					assertEquals(id, v.intValue());
+				}
+
+				{
+					String v = (String) jdbcSupport.getColumnValue(cn, rs, 2, Types.VARCHAR);
+					assertNull(v);
+				}
+
+				{
+					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValue(cn, rs, 3, Types.DATE);
+					assertNull(v);
+				}
+
+				{
+					java.sql.Date v = (java.sql.Date) jdbcSupport.getColumnValue(cn, rs, 4, Types.DATE);
+					assertNull(v);
+				}
+
+				{
+					Time v = (Time) jdbcSupport.getColumnValue(cn, rs, 5, Types.TIME);
+					assertNull(v);
+				}
+
+				{
+					Timestamp v = (Timestamp) jdbcSupport.getColumnValue(cn, rs, 6, Types.TIMESTAMP);
+					assertNull(v);
+				}
+
+				{
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.BLOB);
+						assertNull(v);
+					}
+
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.BINARY);
+						assertNull(v);
+					}
+
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.LONGVARBINARY);
+						assertNull(v);
+					}
+
+					{
+						byte[] v = (byte[]) jdbcSupport.getColumnValue(cn, rs, 7, Types.VARBINARY);
+						assertNull(v);
+					}
+				}
+
+				{
+
+					{
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.CLOB);
+						assertNull(v);
+					}
+
+					{
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.LONGNVARCHAR);
+						assertNull(v);
+					}
+
+					{
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.LONGVARCHAR);
+						assertNull(v);
+					}
+
+					{
+						String v = (String) jdbcSupport.getColumnValue(cn, rs, 8, Types.NCLOB);
+						assertNull(v);
 					}
 				}
 			}

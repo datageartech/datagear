@@ -99,7 +99,7 @@ public abstract class AbstractLOBRowMapper extends AbstractRowMapper
 			}
 
 			default:
-				value = getColumnValueExtract(cn, rs, columnIndex, sqlType);
+				value = getColumnValue(cn, rs, columnIndex, sqlType);
 				break;
 		}
 

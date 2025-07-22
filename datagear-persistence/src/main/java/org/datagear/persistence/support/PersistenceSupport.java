@@ -406,7 +406,7 @@ public class PersistenceSupport extends JdbcSupport
 
 	public Object getColumnValue(Connection cn, ResultSet rs, Column column, int columnIndex) throws SQLException
 	{
-		return getColumnValueExtract(cn, rs, columnIndex, column.getType());
+		return getColumnValue(cn, rs, columnIndex, column.getType());
 	}
 
 	public SqlParamValue createSqlParamValue(Column column, Object value)

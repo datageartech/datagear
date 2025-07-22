@@ -380,7 +380,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected Object getColumnValue(Connection cn, ResultSet rs, int column, int sqlType,
 			JdbcSupport jdbcSupport) throws Throwable
 	{
-		Object value = jdbcSupport.getColumnValueExtract(cn, rs, column, sqlType);
+		Object value = jdbcSupport.getColumnValue(cn, rs, column, sqlType);
 
 		if (value instanceof byte[])
 		{
