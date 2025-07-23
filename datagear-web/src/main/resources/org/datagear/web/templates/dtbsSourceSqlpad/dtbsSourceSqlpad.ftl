@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign SqlScriptParser=statics['org.datagear.util.SqlScriptParser']>
 <#assign CommitMode=statics['org.datagear.web.sqlpad.SqlpadExecutionService$CommitMode']>
 <#assign ExceptionHandleMode=statics['org.datagear.web.sqlpad.SqlpadExecutionService$ExceptionHandleMode']>
 <#assign SqlCommand=statics['org.datagear.web.sqlpad.SqlpadExecutionService$SqlCommand']>
@@ -61,7 +62,7 @@
 					<p-inputtext v-model="fm.sqlDelimiter" class="ml-4" style="width:6rem;"
 						title="<@spring.message code='sqlpad.sqlDelimiter' />">
 					</p-inputtext>
-					<p-button type="button" icon="pi pi-flag" class="p-button-secondary px-4" @click="onInsertSqlDelimiterDefine"
+					<p-button type="button" icon="pi pi-flag" class="p-button-secondary px-4" @click="onDefineSqlDelimiter"
 						title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />">
 					</p-button>
 					<p-button type="button" icon="pi pi-flag-fill" class="p-button-secondary px-4" @click="onInsertSqlDelimiter"
@@ -259,6 +260,7 @@
 	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder}";
 	po.sqlResultClobPlacholder = "${sqlResultRowMapper.clobPlaceholder}";
 	po.sqlResultSqlXmlPlaceholder = "${sqlResultRowMapper.sqlXmlPlaceholder}";
+	po.defaultSqlDelimiter = "${SqlScriptParser.DEFAULT_DELIMITER}";
 	
 	po.commitModel =
 	{
@@ -330,7 +332,7 @@
 		var fm = po.vueFormModel();
 		
 		if(!fm.sqlDelimiter)
-			fm.sqlDelimiter = ";";
+			fm.sqlDelimiter = po.defaultSqlDelimiter;
 		
 		return fm.sqlDelimiter;
 	};
@@ -1126,7 +1128,7 @@
 			po.handleRollback();
 		},
 		
-		onInsertSqlDelimiterDefine: function()
+		onDefineSqlDelimiter: function()
 		{
 			var delimiter = po.getSqlDelimiter();
 			

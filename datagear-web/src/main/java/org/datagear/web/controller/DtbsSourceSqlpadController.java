@@ -442,7 +442,7 @@ public class DtbsSourceSqlpadController extends AbstractDtbsSourceConnController
 		private String dtbsSourceId;
 		private String sqlpadId;
 		private String sql = "";
-		private String sqlDelimiter = ";";
+		private String sqlDelimiter = SqlScriptParser.DEFAULT_DELIMITER;
 		private Integer sqlStartRow;
 		private Integer sqlStartColumn;
 		private CommitMode commitMode = CommitMode.AUTO;
