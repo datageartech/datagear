@@ -208,12 +208,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity, null);
 		this.htmlChartWidgetEntityService.add(user, entity);
 
 		toFormResponseData(request, entity);
@@ -243,16 +238,11 @@ public class ChartController extends AbstractChartPluginAwareController
 		User user = getCurrentUser();
 
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity,
+		checkSaveEntity(request, user, entity,
 				new OnceSupplier<>(() ->
 				{
 					return getByIdForEdit(getHtmlChartWidgetEntityService(), user, entity.getId());
 				}));
-
-		if (re != null)
-			return re;
-
 		this.htmlChartWidgetEntityService.update(user, entity);
 
 		toFormResponseData(request, entity);
@@ -415,7 +405,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		return re;
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+	protected void checkSaveEntity(HttpServletRequest request, User user,
 			HtmlChartWidgetEntity entity, OnceSupplier<HtmlChartWidgetEntity> persist)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
@@ -447,8 +437,6 @@ public class ChartController extends AbstractChartPluginAwareController
 				}, getDataSetEntityService());
 			}
 		}
-
-		return null;
 	}
 
 	protected void trimAnalysisProjectAware(AnalysisProjectAwareEntity entity)

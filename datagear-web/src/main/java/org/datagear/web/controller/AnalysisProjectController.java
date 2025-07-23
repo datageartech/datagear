@@ -93,12 +93,7 @@ public class AnalysisProjectController extends AbstractController
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity);
 		this.analysisProjectService.add(entity);
 
 		toFormResponseData(request, entity);
@@ -128,12 +123,7 @@ public class AnalysisProjectController extends AbstractController
 		User user = getCurrentUser();
 
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity);
 		this.analysisProjectService.update(user, entity);
 
 		toFormResponseData(request, entity);
@@ -227,13 +217,11 @@ public class AnalysisProjectController extends AbstractController
 		return pagingData;
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+	protected void checkSaveEntity(HttpServletRequest request, User user,
 			AnalysisProject entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
-
-		return null;
 	}
 
 	protected void setFormPageAttr(HttpServletRequest request, Model model, AnalysisProject entity)

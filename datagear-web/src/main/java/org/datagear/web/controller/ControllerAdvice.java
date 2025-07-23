@@ -137,6 +137,19 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(OperationMessageException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleControllerOperationMessageException(HttpServletRequest request, HttpServletResponse response,
+			OperationMessageException exception)
+	{
+		setOperationMessage(request, exception.getOperationMessage());
+
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Operation error", exception);
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleControllerIllegalArgumentException(HttpServletRequest request, HttpServletResponse response,
@@ -627,7 +640,7 @@ public class ControllerAdvice extends AbstractController
 		OperationMessage om = super.setOptMsgForThrowable(request, t, msgArgs);
 
 		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Operation error: ", t);
+			LOGGER.debug("Operation error", t);
 		
 		return om;
 	}
@@ -636,7 +649,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		OperationMessage om = super.setOptMsgForThrowable(request, t, msgArgs);
 		
-		LOGGER.error("Operation error: ", t);
+		LOGGER.error("Operation error", t);
 		
 		return om;
 	}
@@ -647,7 +660,7 @@ public class ControllerAdvice extends AbstractController
 		OperationMessage om = super.setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
 		
 		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Operation error: ", t);
+			LOGGER.debug("Operation error", t);
 		
 		return om;
 	}
@@ -656,7 +669,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		OperationMessage om = super.setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
 		
-		LOGGER.error("Operation error: ", t);
+		LOGGER.error("Operation error", t);
 		
 		return om;
 	}

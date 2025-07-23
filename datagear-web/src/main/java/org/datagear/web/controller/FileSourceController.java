@@ -98,12 +98,7 @@ public class FileSourceController extends AbstractController
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity);
 		this.fileSourceService.add(entity);
 
 		toFormResponseData(request, entity);
@@ -133,12 +128,7 @@ public class FileSourceController extends AbstractController
 		User user = getCurrentUser();
 
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity);
 		this.fileSourceService.update(user, entity);
 
 		toFormResponseData(request, entity);
@@ -253,7 +243,7 @@ public class FileSourceController extends AbstractController
 		return new DirectoryQuerySupport(directory);
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+	protected void checkSaveEntity(HttpServletRequest request, User user,
 			FileSource entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getDirectory()))
@@ -265,8 +255,6 @@ public class FileSourceController extends AbstractController
 		// if (!directory.exists())
 		// throw new
 		// FileSourceDirectoryNotFoundException(fileSource.getDirectory());
-
-		return null;
 	}
 	
 	protected void setIsShowDirectory(HttpServletRequest request, Model model, boolean isShowDirectory)

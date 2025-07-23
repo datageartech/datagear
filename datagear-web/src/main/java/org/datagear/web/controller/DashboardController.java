@@ -200,12 +200,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity, null);
 		this.htmlTplDashboardWidgetEntityService.add(entity);
 
 		if (!isEmpty(copySourceId))
@@ -250,11 +245,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			return getByIdForEdit(this.htmlTplDashboardWidgetEntityService, user, entity.getId());
 		});
 
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, persist);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity, persist);
 		mergeSaveEditEntity(entity, persist.get());
 
 		this.htmlTplDashboardWidgetEntityService.update(user, entity);
@@ -879,12 +870,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		HtmlTplDashboardWidgetEntity entity = createInstance();
 		inflateSaveImportEntity(request, user, form, uploadDirectory, templates, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity, null);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity, null);
 		this.htmlTplDashboardWidgetEntityService.add(user, entity);
 
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
@@ -1195,7 +1181,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		return templateEncoding;
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+	protected void checkSaveEntity(HttpServletRequest request, User user,
 			HtmlTplDashboardWidgetEntity entity, OnceSupplier<HtmlTplDashboardWidgetEntity> persist)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
@@ -1205,8 +1191,6 @@ public class DashboardController extends AbstractDataAnalysisController
 			throw new IllegalInputException();
 
 		checkSaveRefAnalysisProject(request, user, entity, persist);
-
-		return null;
 	}
 
 	protected void trimAnalysisProjectAware(AnalysisProjectAwareEntity entity)

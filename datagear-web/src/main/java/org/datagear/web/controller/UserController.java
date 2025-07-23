@@ -160,11 +160,7 @@ public class UserController extends AbstractController
 		entity.setAdmin(User.isAdminUser(entity));
 		inflateCreateTime(entity);
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
+		checkSaveEntity(request, entity);
 
 		if (isBlank(entity.getPassword()))
 			throw new IllegalInputException();
@@ -207,11 +203,7 @@ public class UserController extends AbstractController
 		// 禁用新建管理员账号功能
 		entity.setAdmin(User.isAdminUser(entity));
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
+		checkSaveEntity(request, entity);
 
 		User namedEntity = this.userService.getByNameNoPassword(entity.getName());
 
@@ -455,12 +447,10 @@ public class UserController extends AbstractController
 		return optSuccessResponseEntity(request);
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User entity)
+	protected void checkSaveEntity(HttpServletRequest request, User entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
-
-		return null;
 	}
 
 	protected void setFormPageAttr(HttpServletRequest request, Model model, User entity)

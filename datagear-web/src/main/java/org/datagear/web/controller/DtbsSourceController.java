@@ -142,12 +142,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity);
 		getDtbsSourceService().add(user, entity);
 
 		toFormResponseData(request, entity);
@@ -177,14 +172,8 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		User user = getCurrentUser();
 
 		inflateSaveEntity(request, user, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, user, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, user, entity);
 		DtbsSource persist = getDtbsSourceService().getById(entity.getId());
-
 		boolean updated = getDtbsSourceService().update(user, entity);
 
 		// 如果URL或者用户变更了，则需要清除缓存
@@ -434,13 +423,11 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		return "/dtbsSource/dtbsSource_dbinfo";
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, User user,
+	protected void checkSaveEntity(HttpServletRequest request, User user,
 			DtbsSource entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalInputException();
-
-		return null;
 	}
 	
 	protected void setFormPageAttr(HttpServletRequest request, Model model, DtbsSource entity)

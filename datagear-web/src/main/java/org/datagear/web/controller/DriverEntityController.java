@@ -155,12 +155,7 @@ public class DriverEntityController extends AbstractController
 		String[] driverLibraryFileNames = form.getDriverLibraryFileNames();
 
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, entity);
 		this.driverEntityManager.add(entity);
 
 		if (driverLibraryFileNames != null)
@@ -235,12 +230,7 @@ public class DriverEntityController extends AbstractController
 		DriverEntity entity = form.getDriverEntity();
 
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, entity);
 		this.driverEntityManager.update(entity);
 
 		toFormResponseData(request, entity);
@@ -443,12 +433,10 @@ public class DriverEntityController extends AbstractController
 		return fileInfos;
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, DriverEntity entity)
+	protected void checkSaveEntity(HttpServletRequest request, DriverEntity entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getDriverClassName()))
 			throw new IllegalInputException();
-
-		return null;
 	}
 
 	protected void resolveDriverClassNames(File file, List<String> driverClassNames)

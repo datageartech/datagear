@@ -89,12 +89,7 @@ public class RoleController extends AbstractController
 	{
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, entity);
 		this.roleService.add(entity);
 
 		toFormResponseData(request, entity);
@@ -121,12 +116,7 @@ public class RoleController extends AbstractController
 			@RequestBody Role entity)
 	{
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, entity);
 		this.roleService.update(entity);
 
 		toFormResponseData(request, entity);
@@ -186,12 +176,10 @@ public class RoleController extends AbstractController
 		return pagingData;
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, Role entity)
+	protected void checkSaveEntity(HttpServletRequest request, Role entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
-
-		return null;
 	}
 
 	protected void setFormPageAttr(HttpServletRequest request, Model model, Role entity)

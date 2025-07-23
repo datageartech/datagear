@@ -95,12 +95,7 @@ public class DtbsSourceGuardController extends AbstractController
 		entity.setId(IDUtil.randomIdOnTime20());
 		inflateCreateTime(entity);
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, entity);
 		this.dtbsSourceGuardService.add(entity);
 
 		toFormResponseData(request, entity);
@@ -127,12 +122,7 @@ public class DtbsSourceGuardController extends AbstractController
 			@RequestBody DtbsSourceGuard entity)
 	{
 		inflateSaveEntity(request, entity);
-
-		ResponseEntity<OperationMessage> re = checkSaveEntity(request, entity);
-
-		if (re != null)
-			return re;
-
+		checkSaveEntity(request, entity);
 		this.dtbsSourceGuardService.update(entity);
 
 		toFormResponseData(request, entity);
@@ -203,12 +193,10 @@ public class DtbsSourceGuardController extends AbstractController
 		return optSuccessDataResponseEntity(request, permitted);
 	}
 
-	protected ResponseEntity<OperationMessage> checkSaveEntity(HttpServletRequest request, DtbsSourceGuard entity)
+	protected void checkSaveEntity(HttpServletRequest request, DtbsSourceGuard entity)
 	{
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()) || isBlank(entity.getPattern()))
 			throw new IllegalInputException();
-
-		return null;
 	}
 
 	protected void setFormPageAttr(HttpServletRequest request, Model model, DtbsSourceGuard entity)
