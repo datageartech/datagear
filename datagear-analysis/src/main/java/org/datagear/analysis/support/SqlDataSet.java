@@ -39,6 +39,7 @@ import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcSupport;
+import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlParamValue;
@@ -184,7 +185,10 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 
 	protected Connection getConnection() throws Throwable
 	{
-		return getConnectionFactory().get();
+		Connection cn = getConnectionFactory().get();
+		// 设为只读，提示底层数据库驱动优化
+		JdbcUtil.setReadonlyIfSupports(cn, true);
+		return cn;
 	}
 
 	protected void releaseConnection(Connection cn) throws Throwable
