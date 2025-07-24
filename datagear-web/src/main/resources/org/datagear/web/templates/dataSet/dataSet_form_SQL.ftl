@@ -66,8 +66,7 @@
 			<#include "include/dataSet_form_param_field.ftl">
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
-			<#include "include/dataSet_form_preview.ftl">
-			<p-button type="submit" label="<@spring.message code='save' />" class="hide-if-readonly"></p-button>
+			<#include "include/dataSet_form_submit_btn.ftl">
 		</div>
 	</form>
 	<#include "include/dataSet_form_param_field_form.ftl">

@@ -111,12 +111,6 @@ dataSet_form_param_field_form.ftl
 							@click="onDeleteField" class="p-button-danger p-button-sm">
 						</p-button>
 					</div>
-					<div class="flex align-items-center ml-5">
-						<p-checkbox input-id="${pid}fieldAutoGen" v-model="pm.autoGenerateField" :binary="true"></p-checkbox>
-						<label for="${pid}fieldAutoGen" class="ml-1 align-tip" title="<@spring.message code='dataSet.fields.autoGenerate.desc' />">
-							<@spring.message code='autoGenerate' />
-						</label>
-					</div>
 				</div>
 				<div>
 					<p-button type="button" label="<@spring.message code='dataFormat' />"
@@ -219,8 +213,7 @@ dataSet_form_param_field_form.ftl
 	po.vuePageModel(
 	{
 		selectedParams: [],
-		selectedFields: [],
-		autoGenerateField: true
+		selectedFields: []
 	});
 	
 	po.vueRef("${pid}dataSourceFormatPanelEle", null);

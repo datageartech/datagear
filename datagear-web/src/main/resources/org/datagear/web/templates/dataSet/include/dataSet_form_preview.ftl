@@ -169,12 +169,17 @@
 		}
 		else
 		{
-			var myPreviewFingerprint = po.toPreviewFingerprint(action.options.data);
-			if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint)
-					|| !po.isPreviewSuccess())
+			var pm = po.vuePageModel();
+			
+			if(pm.saveMustPreview)
 			{
-				$.tipInfo("<@spring.message code='dataSet.previewRequired' />");
-				return false;
+				var myPreviewFingerprint = po.toPreviewFingerprint(action.options.data);
+				if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint)
+						|| !po.isPreviewSuccess())
+				{
+					$.tipInfo("<@spring.message code='dataSet.previewRequired' />");
+					return false;
+				}
 			}
 		}
 		
