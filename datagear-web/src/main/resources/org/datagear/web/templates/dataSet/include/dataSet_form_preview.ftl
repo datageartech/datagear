@@ -22,8 +22,8 @@
 依赖：
 
 -->
-<p-button id="${pid}previewPanelBtn" type="button" label="<@spring.message code='preview' />"
-	aria:haspopup="true" aria-controls="${pid}previewPanel"
+<p-button id="${pid}previewPanelBtn" type="button" :label="pm.inPreviewRequest ? '<@spring.message code='previewing' />' : '<@spring.message code='preview' />'"
+	aria:haspopup="true" aria-controls="${pid}previewPanel" :disabled="pm.inPreviewRequest ? true : false"
 	@click="onPreview" class="p-button-secondary">
 </p-button>
 <p-overlaypanel ref="${pid}previewPanelEle" append-to="body"
@@ -146,16 +146,22 @@
 	
 	po.beforeSubmitFormWithPreview = function(action)
 	{
+		var pm = po.vuePageModel();
+		
 		if(po.inPreviewAction())
 		{
+			pm.inPreviewRequest = true;
+			
 			action.url = ($.isFunction(po.previewUrl) ? po.previewUrl() : po.previewUrl);
 			action.options.defaultSuccessCallback = false;
 			action.options.success = function(response)
 			{
+				pm.inPreviewRequest = false;
 				po.handlePreviewSuccess(response);
 			};
 			action.options.error = function(jqXHR)
 			{
+				pm.inPreviewRequest = false;
 				po.handlePreviewError(jqXHR);
 			};
 			
@@ -169,8 +175,6 @@
 		}
 		else
 		{
-			var pm = po.vuePageModel();
-			
 			if(pm.saveMustPreview)
 			{
 				var myPreviewFingerprint = po.toPreviewFingerprint(action.options.data);
@@ -198,7 +202,7 @@
 		
 		var fm = po.vueFormModel();
 		var pm = po.vuePageModel();
-		
+
 		pm.previewError = false;
 		pm.previewPanelShow = true;
 		
@@ -241,7 +245,7 @@
 		po._isPreviewSuccess = false;
 		
 		var pm = po.vuePageModel();
-		
+
 		pm.previewError = true;
 		pm.previewPanelShow = true;
 		
@@ -332,7 +336,8 @@
 		previewResultDatas: [],
 		previewAdditionsResult: "",
 		previewTplResult: "",
-		previewError: false
+		previewError: false,
+		inPreviewRequest: false
 	});
 	
 	po.vueRef("${pid}previewPanelEle", null);
