@@ -895,7 +895,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		DtbsSourceConnectionFactory connectionFactory = new DtbsSourceConnectionFactory(getConnectionSource(),
 				dtbsSource);
 		entity.setConnectionFactory(connectionFactory);
-		entity.setSqlValidator(this.dataSetEntityService.getSqlDataSetSqlValidator());
+		entity.setSqlValidator(this.dataSetEntityService.buildSqlValidator(entity));
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 		return doPreviewSql(entity, query);
@@ -1188,7 +1188,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 					}));
 		}
 
-		entity.setHttpClient(getDataSetEntityService().getHttpClient());
+		entity.setHttpClient(getDataSetEntityService().buildHttpClient(entity));
 
 		DataSetQuery query = convertDataSetQuery(request, response, preview.getQuery(), entity);
 		return doPreviewHttp(entity, query);

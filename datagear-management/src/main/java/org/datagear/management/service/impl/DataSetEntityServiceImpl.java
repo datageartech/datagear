@@ -29,7 +29,9 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.DataFormat;
+import org.datagear.analysis.support.HttpDataSet;
 import org.datagear.analysis.support.ProfileDataSet;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
@@ -53,6 +55,8 @@ import org.datagear.management.service.FileSourceService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.DtbsSourceConnectionFactory;
+import org.datagear.management.util.DtbsSourcePermissionSqlValidator;
+import org.datagear.management.util.DtbsSourceSqlPermissionValidator;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -93,7 +97,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	/** 数据集缓存数据的最大条目数 */
 	private int dataSetCacheMaxLength = 500;
 
-	private SqlValidator sqlDataSetSqlValidator;
+	private DtbsSourceSqlPermissionValidator dtbsSourceSqlPermissionValidator;
 
 	public DataSetEntityServiceImpl()
 	{
@@ -194,7 +198,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.dataSetRootDirectory = dataSetRootDirectory;
 	}
 
-	@Override
 	public HttpClient getHttpClient()
 	{
 		return httpClient;
@@ -225,21 +228,33 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.dataSetCacheMaxLength = dataSetCacheMaxLength;
 	}
 
-	@Override
-	public SqlValidator getSqlDataSetSqlValidator()
+	public DtbsSourceSqlPermissionValidator getDtbsSourceSqlPermissionValidator()
 	{
-		return sqlDataSetSqlValidator;
+		return dtbsSourceSqlPermissionValidator;
 	}
 
-	public void setSqlDataSetSqlValidator(SqlValidator sqlDataSetSqlValidator)
+	public void setDtbsSourceSqlPermissionValidator(DtbsSourceSqlPermissionValidator dtbsSourceSqlPermissionValidator)
 	{
-		this.sqlDataSetSqlValidator = sqlDataSetSqlValidator;
+		this.dtbsSourceSqlPermissionValidator = dtbsSourceSqlPermissionValidator;
 	}
 
 	@Override
 	public File getDataSetDirectory(String dataSetId)
 	{
 		return FileUtil.getDirectory(getDataSetRootDirectory(), dataSetId);
+	}
+
+	@Override
+	public HttpClient buildHttpClient(HttpDataSet dataSet)
+	{
+		return getHttpClient();
+	}
+
+	@Override
+	public SqlValidator buildSqlValidator(SqlDataSet dataSet)
+	{
+		return new DtbsSourcePermissionSqlValidator(getDtbsSourceSqlPermissionValidator(),
+				DtbsSource.PERMISSION_TABLE_DATA_READ);
 	}
 
 	@Override
@@ -258,14 +273,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				sqlDataSetEntity.setConnectionFactory(connectionFactory);
 			}
 
-			sqlDataSetEntity.setSqlValidator(this.sqlDataSetSqlValidator);
+			sqlDataSetEntity.setSqlValidator(buildSqlValidator(sqlDataSetEntity));
 		}
 
 		if (entity instanceof DirectoryFileDataSetEntity)
 			((DirectoryFileDataSetEntity) entity).setDirectory(getDataSetDirectory(entity.getId()));
 
 		if (entity instanceof HttpDataSetEntity)
-			((HttpDataSetEntity) entity).setHttpClient(this.httpClient);
+			((HttpDataSetEntity) entity).setHttpClient(buildHttpClient((HttpDataSetEntity) entity));
 
 		if (entity instanceof AbstractResolvableResourceDataSet<?>)
 		{

@@ -769,7 +769,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DataSetEntityService dataSetEntityService()
 	{
 		DataSetEntityServiceImpl bean = createDataSetEntityServiceImpl();
-		bean.setSqlDataSetSqlValidator(this.dsmanagerReadSqlValidator());
+		bean.setDtbsSourceSqlPermissionValidator(this.dtbsSourceSqlPermissionValidator());
 		bean.setDataSetCacheMaxLength(getApplicationProperties().getDataSetCacheMaxLength());
 
 		return bean;
