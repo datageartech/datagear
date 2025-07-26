@@ -6960,10 +6960,12 @@
 	 *   {
 	 *      //必填，将data中的分页查询信息设置为图表数据集参数
 	 *      param: function(data, chart){ ... },
-	 *      //可选（与totalFieldName二选一），数据集附加数据中总记录数关键字
+	 *      //可选（与totalFieldName、totalValue三选一），数据集附加数据中总记录数关键字
 	 *      totalAdditionName: "...",
-	 *      //可选（与totalAdditionName二选一），附件数据集中总记录数字段名
+	 *      //可选（与totalAdditionName、totalValue三选一），附件数据集中总记录数字段名
 	 *      totalFieldName: "...",
+	 *      //可选（与totalFieldName、totalAdditionName三选一），附件数据集中总记录数字段名
+	 *      totalValue: function(chart){ return 数值; },
 	 *      //可选，根据图表数据集参数设置表格分页状态，或者返回要设置的状态数据（参考chartSupport.tableUpdatePagingState()函数），
 	 *      //如果不设置，使用图表参数面板的查询信息不会同步显示到表格中
 	 *      state: function(chart){ ... },
@@ -7113,26 +7115,33 @@
 	{
 		var recordsTotal = null;
 		
-		var dsbs = chart.dataSetBinds();
-		
-		for(var i=0; i<dsbs.length; i++)
+		if(serverSidePaging.totalValue != null)
 		{
-			var result = chart.resultOf(chartResult, dsbs[i]);
+			recordsTotal = serverSidePaging.totalValue(chart);
+		}
+		else
+		{
+			var dsbs = chart.dataSetBinds();
 			
-			if(serverSidePaging.totalAdditionName != null)
+			for(var i=0; i<dsbs.length; i++)
 			{
-				recordsTotal = chart.resultAddition(result, serverSidePaging.totalAdditionName);
+				var result = chart.resultOf(chartResult, dsbs[i]);
+				
+				if(serverSidePaging.totalAdditionName != null)
+				{
+					recordsTotal = chart.resultAddition(result, serverSidePaging.totalAdditionName);
+				}
+				
+				if(recordsTotal == null && serverSidePaging.totalFieldName != null
+					&& chart.dataSetField(dsbs[i], serverSidePaging.totalFieldName) != null)
+				{
+					var colValues = chart.resultColumnArrayDatas(result, serverSidePaging.totalFieldName);
+					recordsTotal = chartSupport.findNonNull(colValues);
+				}
+				
+				if(recordsTotal != null)
+					break;
 			}
-			
-			if(recordsTotal == null && serverSidePaging.totalFieldName != null
-				&& chart.dataSetField(dsbs[i], serverSidePaging.totalFieldName) != null)
-			{
-				var colValues = chart.resultColumnArrayDatas(result, serverSidePaging.totalFieldName);
-				recordsTotal = chartSupport.findNonNull(colValues);
-			}
-			
-			if(recordsTotal != null)
-				break;
 		}
 		
 		if(recordsTotal == null)
