@@ -38,7 +38,7 @@ public class JsonPathSupportTest
 	private JsonPathSupport support = new JsonPathSupport();
 
 	@Test
-	public void test()
+	public void resolveTest()
 	{
 		Object map = testMap();
 		Object list = testList();
@@ -61,6 +61,40 @@ public class JsonPathSupportTest
 		{
 			Object v = support.resolve(list, "$[1].key21");
 			assertEquals("value21", v);
+		}
+	}
+
+	@Test
+	public void resolveMapTest_jsonPaths() throws Exception
+	{
+		Object map = testMap();
+
+		{
+			Map<String, String> jsonPaths = new HashMap<>();
+			jsonPaths.put("a", "key1");
+			jsonPaths.put("b", "key4");
+
+			Map<String, Object> actual = support.resolveMap(map, jsonPaths);
+
+			assertEquals(2, actual.size());
+			assertEquals("value1", actual.get("a"));
+			assertEquals("value4", actual.get("b"));
+		}
+	}
+
+	@Test
+	public void resolveMapTest_jsonPathsJson() throws Exception
+	{
+		Object map = testMap();
+
+		{
+			String jsonPathsJson = "{a:'key1',b:'key4'}";
+
+			Map<String, Object> actual = support.resolveMap(map, jsonPathsJson);
+
+			assertEquals(2, actual.size());
+			assertEquals("value1", actual.get("a"));
+			assertEquals("value4", actual.get("b"));
 		}
 	}
 

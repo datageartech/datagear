@@ -191,21 +191,14 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		if (StringUtil.isEmpty(resource.getAdditionDataProps()) || srcData == null)
 			return;
 		
-		@SuppressWarnings("unchecked")
-		Map<String, String> propMap = getObjectMapperNonStardand().readValue(resource.getAdditionDataProps(),
-				Map.class);
+		Map<String, Object> additions = getJsonPathSupport().resolveMap(srcData, resource.getAdditionDataProps());
 
-		if (propMap == null || propMap.isEmpty())
+		if (additions == null)
 			return;
 
-		JsonPathSupport jsonPathSupport = getJsonPathSupport();
-		for (Map.Entry<String, String> entry : propMap.entrySet())
+		for (Map.Entry<String, Object> entry : additions.entrySet())
 		{
-			String name = entry.getKey();
-			String path = entry.getValue();
-			Object value = jsonPathSupport.resolve(srcData, path);
-
-			result.addAddition(name, value);
+			result.addAddition(entry.getKey(), entry.getValue());
 		}
 	}
 

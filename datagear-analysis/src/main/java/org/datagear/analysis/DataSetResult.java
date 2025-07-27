@@ -63,6 +63,20 @@ public class DataSetResult implements AdditionsAware, IgnoreFetchAware, Serializ
 	}
 
 	/**
+	 * 创建实例。
+	 * 
+	 * @param data
+	 *            应符合{@linkplain #getData()}规范
+	 * @param additions
+	 */
+	public DataSetResult(Object data, Map<String, ?> additions)
+	{
+		super();
+		this.data = data;
+		this.additions = additions;
+	}
+
+	/**
 	 * 获取数据。
 	 * <p>
 	 * 数据应是普通JavaBean、 {@linkplain Map}对象，或者是它们的数组、集合。
@@ -133,12 +147,15 @@ public class DataSetResult implements AdditionsAware, IgnoreFetchAware, Serializ
 	 * 如果{@linkplain #getAdditions()}为{@code null}，它会默认创建{@linkplain HashMap}。
 	 * </p>
 	 * 
-	 * @param name
-	 * @param value
+	 * @param additions
+	 *            允许{@code null}
 	 */
 	@SuppressWarnings("unchecked")
 	public void addAdditions(Map<String, ?> additions)
 	{
+		if (additions == null)
+			return;
+
 		if (this.additions == null)
 			this.additions = new HashMap<>();
 

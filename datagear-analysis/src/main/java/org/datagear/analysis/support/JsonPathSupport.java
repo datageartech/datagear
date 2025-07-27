@@ -17,8 +17,15 @@
 
 package org.datagear.analysis.support;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.datagear.util.StringUtil;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -94,5 +101,65 @@ public class JsonPathSupport
 		}
 
 		return data;
+	}
+
+	/**
+	 * 解析JSON路径结果映射表。
+	 * 
+	 * @param data
+	 *            允许{@code null}
+	 * @param jsonPaths
+	 *            允许{@code null}，JSON路径映射表，关键字作为返回映射表的关键字，值则是JSON路径
+	 * @return
+	 * @throws ReadJsonDataPathException
+	 */
+	public Map<String, Object> resolveMap(Object data, Map<String, String> jsonPaths) throws ReadJsonDataPathException
+	{
+		if (data == null || jsonPaths == null || jsonPaths.isEmpty())
+			return Collections.emptyMap();
+
+		Map<String, Object> re = new HashMap<>();
+
+		for (Map.Entry<String, String> entry : jsonPaths.entrySet())
+		{
+			String name = entry.getKey();
+			String path = entry.getValue();
+			Object value = resolve(data, path);
+			re.put(name, value);
+		}
+
+		return re;
+	}
+
+	/**
+	 * 解析JSON路径结果映射表。
+	 * 
+	 * @param data
+	 *            允许{@code null}
+	 * @param jsonPathsConfig
+	 *            允许{@code null}，{@linkplain #resolveMap(Object, Map)}中的{@code jsonPaths}的JSON格式
+	 * @return
+	 * @throws ReadJsonDataPathException
+	 * @throws JsonProcessingException
+	 * @throws JsonMappingException
+	 */
+	public Map<String, Object> resolveMap(Object data, String jsonPathsJson)
+			throws ReadJsonDataPathException, JsonMappingException, JsonProcessingException
+	{
+		if (StringUtil.isEmpty(jsonPathsJson))
+			return Collections.emptyMap();
+
+		@SuppressWarnings("unchecked")
+		Map<String, String> jsonPaths = getObjectMapperNonStardand().readValue(jsonPathsJson, Map.class);
+
+		if (jsonPaths == null || jsonPaths.isEmpty())
+			return Collections.emptyMap();
+
+		return resolveMap(data, jsonPaths);
+	}
+
+	protected ObjectMapper getObjectMapperNonStardand()
+	{
+		return JsonSupport.getObjectMapperNonStardand();
 	}
 }
