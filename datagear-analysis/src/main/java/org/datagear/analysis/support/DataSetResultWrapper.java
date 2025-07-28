@@ -36,6 +36,12 @@ public class DataSetResultWrapper
 
 	private DataSet dataSet;
 
+	/** 数据JSON路径 */
+	private String dataJsonPath = "";
+
+	/** 作为结果附加数据的JSON属性配置 */
+	private String additionDataProps = "";
+
 	public DataSetResultWrapper()
 	{
 		super();
@@ -47,6 +53,14 @@ public class DataSetResultWrapper
 		this.dataSet = dataSet;
 	}
 
+	public DataSetResultWrapper(DataSet dataSet, String dataJsonPath, String additionDataProps)
+	{
+		super();
+		this.dataSet = dataSet;
+		this.dataJsonPath = dataJsonPath;
+		this.additionDataProps = additionDataProps;
+	}
+
 	public DataSet getDataSet()
 	{
 		return dataSet;
@@ -55,6 +69,26 @@ public class DataSetResultWrapper
 	public void setDataSet(DataSet dataSet)
 	{
 		this.dataSet = dataSet;
+	}
+
+	public String getDataJsonPath()
+	{
+		return dataJsonPath;
+	}
+
+	public void setDataJsonPath(String dataJsonPath)
+	{
+		this.dataJsonPath = dataJsonPath;
+	}
+
+	public String getAdditionDataProps()
+	{
+		return additionDataProps;
+	}
+
+	public void setAdditionDataProps(String additionDataProps)
+	{
+		this.additionDataProps = additionDataProps;
 	}
 
 	/**
@@ -90,7 +124,12 @@ public class DataSetResultWrapper
 	protected InternalJsonDataSet createInternalDataSet(Object data)
 	{
 		data = wrapData(data);
-		return new InternalJsonDataSet(this.dataSet, data);
+
+		InternalJsonDataSet dataSet = new InternalJsonDataSet(this.dataSet, data);
+		dataSet.setDataJsonPath(this.dataJsonPath);
+		dataSet.setAdditionDataProps(this.additionDataProps);
+
+		return dataSet;
 	}
 
 	/**

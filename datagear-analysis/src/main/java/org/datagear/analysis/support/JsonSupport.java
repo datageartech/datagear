@@ -64,10 +64,11 @@ public class JsonSupport
 	}
 
 	/**
-	 * 生成JSON，如果出现异常，则返回{@code defaultJson}。
+	 * 生成JSON。
 	 * 
 	 * @param value
 	 * @param defaultJson
+	 *            出现异常时的默认值
 	 * @return
 	 */
 	public static String generate(Object value, String defaultJson)
@@ -103,6 +104,7 @@ public class JsonSupport
 	 * @param json
 	 * @param type
 	 * @param defaultValue
+	 *            出现异常时的默认值
 	 * @return
 	 */
 	public static <T> T parse(String json, Class<T> type, T defaultValue)
@@ -138,6 +140,7 @@ public class JsonSupport
 	 * @param json
 	 * @param type
 	 * @param defaultValue
+	 *            出现异常时的默认值
 	 * @return
 	 */
 	public static <T> T parseNonStardand(String json, Class<T> type, T defaultValue)
