@@ -36,24 +36,24 @@
 			<#include "include/dataSet_form_name.ftl">
 			<#include "include/dataSet_form_file_source.ftl">
 			<div class="field grid">
-				<label for="${pid}dataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='jsonFileDataSet.dataJsonPath.desc' />">
+				<label for="${pid}resultJsonRuleDataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dataSet.resultJsonRule.dataJsonPath.desc' />">
 					<@spring.message code='dataJsonPath' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}dataJsonPath" v-model="fm.dataJsonPath" type="text" class="input w-full"
-						name="dataJsonPath" maxlength="200">
+					<p-inputtext id="${pid}resultJsonRuleDataJsonPath" v-model="fm.resultJsonRule.dataJsonPath" type="text" class="input w-full"
+						name="resultJsonRule.dataJsonPath" maxlength="200">
 					</p-inputtext>
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}additionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='jsonFileDataSet.additionDataProps.desc' />">
+				<label for="${pid}resultJsonRuleAdditionJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dataSet.resultJsonRule.additionJsonPath.desc' />">
 					<@spring.message code='additionDataConfig' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}additionDataProps" v-model="fm.additionDataProps" type="text" class="input w-full"
-						name="additionDataProps" maxlength="500">
+					<p-inputtext id="${pid}resultJsonRuleAdditionJsonPath" v-model="fm.resultJsonRule.additionJsonPath" type="text" class="input w-full"
+						name="resultJsonRule.additionJsonPath" maxlength="500">
 					</p-inputtext>
 				</div>
 			</div>
@@ -95,9 +95,8 @@
 		fingerprint.fileName = dataSet.fileName;
 		fingerprint.fileSourceId = dataSet.fileSource.id;
 		fingerprint.dataSetResFileName = dataSet.dataSetResFileName;
-		fingerprint.dataJsonPath = dataSet.dataJsonPath;
+		fingerprint.resultJsonRuleJson = $.toJsonString(dataSet.resultJsonRule);
 		fingerprint.encoding = dataSet.encoding;
-		fingerprint.additionDataProps = dataSet.additionDataProps;
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -108,6 +107,7 @@
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.fileSource = (!formModel.fileSource ? {} : formModel.fileSource);
+	formModel.resultJsonRule = (formModel.resultJsonRule == null ? {} : formModel.resultJsonRule);
 	po.inflateDataSetModel(formModel);
 	
 	po.originalFileName = (formModel.fileName || "");

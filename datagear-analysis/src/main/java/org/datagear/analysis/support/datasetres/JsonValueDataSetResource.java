@@ -19,6 +19,7 @@ package org.datagear.analysis.support.datasetres;
 
 import java.io.Reader;
 
+import org.datagear.analysis.support.ResultJsonRule;
 import org.datagear.util.IOUtil;
 
 /**
@@ -36,9 +37,9 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 		super();
 	}
 
-	public JsonValueDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProps)
+	public JsonValueDataSetResource(String resolvedTemplate, ResultJsonRule resultJsonRule)
 	{
-		super(resolvedTemplate, dataJsonPath, additionDataProps);
+		super(resolvedTemplate, resultJsonRule);
 	}
 
 	@Override
@@ -74,7 +75,6 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [dataJsonPath=" + getDataJsonPath() + ", additionDataProps="
-				+ getAdditionDataProps() + ", resolvedTemplate=" + getResolvedTemplate() + "]";
+		return getClass().getSimpleName() + " [resultJsonRule=" + getResultJsonRule() + "]";
 	}
 }

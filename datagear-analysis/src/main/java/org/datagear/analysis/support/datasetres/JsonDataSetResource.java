@@ -19,7 +19,7 @@ package org.datagear.analysis.support.datasetres;
 
 import java.io.Reader;
 
-import org.datagear.analysis.support.AbstractJsonDataSet;
+import org.datagear.analysis.support.ResultJsonRule;
 
 /**
  * JSON数据集资源。
@@ -30,43 +30,33 @@ import org.datagear.analysis.support.AbstractJsonDataSet;
 public abstract class JsonDataSetResource extends DataSetResource
 {
 	private static final long serialVersionUID = 1L;
-	
-	/** 同{@linkplain AbstractJsonDataSet#getDataJsonPath()} */
-	private String dataJsonPath;
 
-	/** 同{@linkplain AbstractJsonDataSet#getAdditionDataProps()} */
-	private String additionDataProps;
+	private ResultJsonRule resultJsonRule = null;
 
 	public JsonDataSetResource()
 	{
 		super();
 	}
 
-	public JsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProps)
+	public JsonDataSetResource(String resolvedTemplate)
 	{
 		super(resolvedTemplate);
-		this.dataJsonPath = dataJsonPath;
-		this.additionDataProps = additionDataProps;
 	}
 
-	public String getDataJsonPath()
+	public JsonDataSetResource(String resolvedTemplate, ResultJsonRule resultJsonRule)
 	{
-		return dataJsonPath;
+		super(resolvedTemplate);
+		this.resultJsonRule = resultJsonRule;
 	}
 
-	public void setDataJsonPath(String dataJsonPath)
+	public ResultJsonRule getResultJsonRule()
 	{
-		this.dataJsonPath = dataJsonPath;
+		return resultJsonRule;
 	}
 
-	public String getAdditionDataProps()
+	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
-		return additionDataProps;
-	}
-
-	public void setAdditionDataProps(String additionDataProps)
-	{
-		this.additionDataProps = additionDataProps;
+		this.resultJsonRule = resultJsonRule;
 	}
 
 	/**
@@ -85,8 +75,7 @@ public abstract class JsonDataSetResource extends DataSetResource
 	{
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((additionDataProps == null) ? 0 : additionDataProps.hashCode());
-		result = prime * result + ((dataJsonPath == null) ? 0 : dataJsonPath.hashCode());
+		result = prime * result + ((resultJsonRule == null) ? 0 : resultJsonRule.hashCode());
 		return result;
 	}
 
@@ -100,19 +89,12 @@ public abstract class JsonDataSetResource extends DataSetResource
 		if (getClass() != obj.getClass())
 			return false;
 		JsonDataSetResource other = (JsonDataSetResource) obj;
-		if (additionDataProps == null)
+		if (resultJsonRule == null)
 		{
-			if (other.additionDataProps != null)
+			if (other.resultJsonRule != null)
 				return false;
 		}
-		else if (!additionDataProps.equals(other.additionDataProps))
-			return false;
-		if (dataJsonPath == null)
-		{
-			if (other.dataJsonPath != null)
-				return false;
-		}
-		else if (!dataJsonPath.equals(other.dataJsonPath))
+		else if (!resultJsonRule.equals(other.resultJsonRule))
 			return false;
 		return true;
 	}

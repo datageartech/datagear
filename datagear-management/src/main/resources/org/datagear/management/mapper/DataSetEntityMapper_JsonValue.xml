@@ -6,19 +6,21 @@
 	<insert id="insertJsonValueDataSetEntity">
 		INSERT INTO DATAGEAR_DATA_SET_JSON_VALUE
 			(
-			DS_ID, DS_VALUE, DS_DATA_JSON_PATH, DS_ADTND_PROPS
+			DS_ID, DS_VALUE,
+			DS_DATA_JSON_PATH, DS_ADTND_PROPS
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.value}, #{entity.dataJsonPath}, #{entity.additionDataProps}
+			#{entity.id}, #{entity.value},
+			#{entity.rstDataJsonPath, jdbcType=VARCHAR}, #{entity.rstAdditionJsonPath, jdbcType=VARCHAR}
 			)
 	</insert>
 	
 	<update id="updateJsonValueDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_JSON_VALUE SET
 			DS_VALUE = #{entity.value},
-			DS_DATA_JSON_PATH = #{entity.dataJsonPath},
-			DS_ADTND_PROPS = #{entity.additionDataProps}
+			DS_DATA_JSON_PATH = #{entity.rstDataJsonPath, jdbcType=VARCHAR},
+			DS_ADTND_PROPS = #{entity.rstAdditionJsonPath, jdbcType=VARCHAR}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -27,8 +29,8 @@
 		SELECT
 			T1.*,
 			T2.DS_VALUE AS ${_iq_}value${_iq_},
-			T2.DS_DATA_JSON_PATH AS ${_iq_}dataJsonPath${_iq_},
-			T2.DS_ADTND_PROPS AS ${_iq_}additionDataProps${_iq_}
+			T2.DS_DATA_JSON_PATH AS ${_iq_}rstDataJsonPath${_iq_},
+			T2.DS_ADTND_PROPS AS ${_iq_}rstAdditionJsonPath${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="org.datagear.management.domain.DataSetEntity.queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
 		INNER JOIN

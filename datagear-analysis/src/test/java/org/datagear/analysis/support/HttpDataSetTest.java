@@ -462,13 +462,12 @@ public class HttpDataSetTest
 	}
 
 	@Test
-	public void resolveTest_REQUEST_CONTENT_TYPE_JSON_responseDataJsonPath_responseAdditionDataProps() throws Throwable
+	public void resolveTest_REQUEST_CONTENT_TYPE_JSON_resultJsonRule() throws Throwable
 	{
 		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
 				SERVER + "/testResponseJsonPath");
-		dataSet.setResponseDataJsonPath("path0.path1[0].path2");
-		dataSet.setResponseAdditionDataProps(
-				"{ reTotal: 'total', rePageSize: 'pageSize', reData: 'path0.path1[0].path2[0,1].name' }");
+		dataSet.setResultJsonRule(new ResultJsonRule("path0.path1[0].path2",
+				"{ reTotal: 'total', rePageSize: 'pageSize', reData: 'path0.path1[0].path2[0,1].name' }"));
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(DataSetQuery.valueOf());
 		DataSetResult dr = result.getResult();

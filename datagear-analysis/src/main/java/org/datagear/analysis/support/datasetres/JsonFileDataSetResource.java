@@ -20,6 +20,7 @@ package org.datagear.analysis.support.datasetres;
 import java.io.File;
 import java.io.Reader;
 
+import org.datagear.analysis.support.ResultJsonRule;
 import org.datagear.util.FileUtil;
 
 /**
@@ -43,10 +44,10 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 		super();
 	}
 
-	public JsonFileDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProps,
+	public JsonFileDataSetResource(String resolvedTemplate, ResultJsonRule resultJsonRule,
 			String encoding, String filePath, long lastModified)
 	{
-		super(resolvedTemplate, dataJsonPath, additionDataProps);
+		super(resolvedTemplate, resultJsonRule);
 		this.filePath = filePath;
 		this.lastModified = lastModified;
 		this.encoding = encoding;
@@ -124,7 +125,7 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [encoding=" + encoding + ", filePath=" + filePath + ", lastModified="
-				+ lastModified + ", dataJsonPath=" + getDataJsonPath() + ", additionDataProps=" + getAdditionDataProps()
-				+ ", resolvedTemplate=" + getResolvedTemplate() + "]";
+				+ lastModified + ", resultJsonRule=" + getResultJsonRule() + ", resolvedTemplate="
+				+ getResolvedTemplate() + "]";
 	}
 }

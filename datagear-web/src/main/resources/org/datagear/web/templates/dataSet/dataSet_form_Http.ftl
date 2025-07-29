@@ -127,24 +127,24 @@
 				</div>
 			</div>
 			<div class="field grid" v-if="fm.responseContentType == pm.responseContentTypeOptions[0].value">
-				<label for="${pid}responseDataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='httpDataSet.responseDataJsonPath.desc' />">
+				<label for="${pid}resultJsonRuleDataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dataSet.resultJsonRule.dataJsonPath.desc' />">
 					<@spring.message code='responseDataJsonPath' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}responseDataJsonPath" v-model="fm.responseDataJsonPath" type="text" class="input w-full"
-						name="responseDataJsonPath" maxlength="200">
+					<p-inputtext id="${pid}resultJsonRuleDataJsonPath" v-model="fm.resultJsonRule.dataJsonPath" type="text" class="input w-full"
+						name="resultJsonRule.dataJsonPath" maxlength="200">
 					</p-inputtext>
 				</div>
 			</div>
 			<div class="field grid" v-if="fm.responseContentType == pm.responseContentTypeOptions[0].value">
-				<label for="${pid}responseAdditionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='httpDataSet.responseAdditionDataProps.desc' />">
+				<label for="${pid}resultJsonRuleAdditionJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dataSet.resultJsonRule.additionJsonPath.desc' />">
 					<@spring.message code='responseAdditionDataConfig' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}responseAdditionDataProps" v-model="fm.responseAdditionDataProps" type="text" class="input w-full"
-						name="responseAdditionDataProps" maxlength="500">
+					<p-inputtext id="resultJsonRuleAdditionJsonPath" v-model="fm.resultJsonRule.additionJsonPath" type="text" class="input w-full"
+						name="resultJsonRule.additionJsonPath" maxlength="500">
 					</p-inputtext>
 				</div>
 			</div>
@@ -177,8 +177,7 @@
 		fingerprint.requestContent = dataSet.requestContent;
 		fingerprint.headerContent = dataSet.headerContent;
 		fingerprint.responseContentType = dataSet.responseContentType;
-		fingerprint.responseDataJsonPath = dataSet.responseDataJsonPath;
-		fingerprint.responseAdditionDataProps = dataSet.responseAdditionDataProps;
+		fingerprint.resultJsonRuleJson = $.toJsonString(dataSet.resultJsonRule);
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -192,6 +191,7 @@
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+	formModel.resultJsonRule = (formModel.resultJsonRule == null ? {} : formModel.resultJsonRule);
 	po.inflateDataSetModel(formModel);
 	
 	po.setupForm(formModel,

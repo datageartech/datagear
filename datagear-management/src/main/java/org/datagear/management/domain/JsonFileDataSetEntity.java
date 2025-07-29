@@ -23,10 +23,13 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.ResultJsonRuleUtil;
 import org.datagear.analysis.support.AbstractJsonFileDataSet;
 import org.datagear.analysis.support.FileResolvedInfo;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 import org.springframework.beans.BeanUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@linkplain JsonDirectoryFileDataSet}实体。
@@ -34,7 +37,8 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements DirectoryFileDataSetEntity, CloneableEntity
+public class JsonFileDataSetEntity extends AbstractJsonFileDataSet
+		implements DirectoryFileDataSetEntity, CloneableEntity, ResultJsonRuleAwareEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -224,6 +228,34 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	@JsonIgnore
+	public String getRstDataJsonPath()
+	{
+		return ResultJsonRuleUtil.getResultDataJsonPath(getResultJsonRule());
+	}
+
+	@Override
+	@JsonIgnore
+	public void setRstDataJsonPath(String rstDataJsonPath)
+	{
+		setResultJsonRule(ResultJsonRuleUtil.setResultDataJsonPath(getResultJsonRule(), rstDataJsonPath));
+	}
+
+	@Override
+	@JsonIgnore
+	public String getRstAdditionJsonPath()
+	{
+		return ResultJsonRuleUtil.getResultAdditionJsonPath(getResultJsonRule());
+	}
+
+	@Override
+	@JsonIgnore
+	public void setRstAdditionJsonPath(String rstAdditionJsonPath)
+	{
+		setResultJsonRule(ResultJsonRuleUtil.setResultAdditionJsonPath(getResultJsonRule(), rstAdditionJsonPath));
 	}
 
 	@Override

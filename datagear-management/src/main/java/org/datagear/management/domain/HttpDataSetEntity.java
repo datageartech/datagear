@@ -22,8 +22,11 @@ import java.util.List;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.ResultJsonRuleUtil;
 import org.datagear.analysis.support.HttpDataSet;
 import org.springframework.beans.BeanUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@linkplain HttpDataSet}实体。
@@ -31,7 +34,7 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, CloneableEntity
+public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, CloneableEntity, ResultJsonRuleAwareEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -123,6 +126,34 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, Clo
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	@JsonIgnore
+	public String getRstDataJsonPath()
+	{
+		return ResultJsonRuleUtil.getResultDataJsonPath(getResultJsonRule());
+	}
+
+	@Override
+	@JsonIgnore
+	public void setRstDataJsonPath(String rstDataJsonPath)
+	{
+		setResultJsonRule(ResultJsonRuleUtil.setResultDataJsonPath(getResultJsonRule(), rstDataJsonPath));
+	}
+
+	@Override
+	@JsonIgnore
+	public String getRstAdditionJsonPath()
+	{
+		return ResultJsonRuleUtil.getResultAdditionJsonPath(getResultJsonRule());
+	}
+
+	@Override
+	@JsonIgnore
+	public void setRstAdditionJsonPath(String rstAdditionJsonPath)
+	{
+		setResultJsonRule(ResultJsonRuleUtil.setResultAdditionJsonPath(getResultJsonRule(), rstAdditionJsonPath));
 	}
 
 	@Override

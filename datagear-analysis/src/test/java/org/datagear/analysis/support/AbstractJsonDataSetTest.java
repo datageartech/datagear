@@ -42,8 +42,7 @@ public class AbstractJsonDataSetTest
 
 		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
 				JsonValueDataSet.class.getSimpleName(), jsonString);
-
-		dataSet.setDataJsonPath("path0.path1[0].path2");
+		dataSet.setResultJsonRule(new ResultJsonRule("path0.path1[0].path2"));
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
 		List<DataSetField> fields = result.getFields();
@@ -88,15 +87,14 @@ public class AbstractJsonDataSetTest
 	}
 
 	@Test
-	public void resolveTest_additionDataProps()
+	public void resolveTest_additionJsonPath()
 	{
 		String jsonString = "{ items: [ { name:'aaa', value: 11, size: 12 }, { name:'bbb', value: 21, size: 22 } ], total: 50, page: 1, pageSize: 20 }";
 
 		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
 				JsonValueDataSet.class.getSimpleName(), jsonString);
-
-		dataSet.setDataJsonPath("items");
-		dataSet.setAdditionDataProps("{reTotal: 'total', rePageSize: 'pageSize', reData: 'items[0,1].name'}");
+		dataSet.setResultJsonRule(
+				new ResultJsonRule("items", "{reTotal: 'total', rePageSize: 'pageSize', reData: 'items[0,1].name'}"));
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(new DataSetQuery());
 		DataSetResult dr = result.getResult();

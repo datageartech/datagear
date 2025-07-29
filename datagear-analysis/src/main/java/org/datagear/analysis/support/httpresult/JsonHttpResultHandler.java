@@ -28,6 +28,7 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractJsonDataSet;
 import org.datagear.analysis.support.HttpDataSet;
+import org.datagear.analysis.support.ResultJsonRule;
 import org.datagear.analysis.support.datasetres.JsonDataSetResource;
 import org.datagear.util.IOUtil;
 
@@ -90,16 +91,14 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			setMutableModel(dataSet.isMutableModel());
 			setParams(dataSet.getParams());
 			setDataFormat(dataSet.getDataFormat());
-			setDataJsonPath(dataSet.getResponseDataJsonPath());
-			setAdditionDataProps(dataSet.getResponseAdditionDataProps());
+			setResultJsonRule(dataSet.getResultJsonRule());
 			this.responseJsonReader = responseJsonReader;
 		}
 
 		@Override
 		protected HttpResponseJsonDataSetResource getResource(DataSetQuery query) throws Throwable
 		{
-			return new HttpResponseJsonDataSetResource("", getDataJsonPath(), getAdditionDataProps(),
-					this.responseJsonReader);
+			return new HttpResponseJsonDataSetResource("", getResultJsonRule(), this.responseJsonReader);
 		}
 	}
 
@@ -114,10 +113,10 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 			super();
 		}
 
-		public HttpResponseJsonDataSetResource(String resolvedTemplate, String dataJsonPath, String additionDataProps,
+		public HttpResponseJsonDataSetResource(String resolvedTemplate, ResultJsonRule resultJsonRule,
 				Reader jsonReader)
 		{
-			super(resolvedTemplate, dataJsonPath, additionDataProps);
+			super(resolvedTemplate, resultJsonRule);
 			this.jsonReader = jsonReader;
 		}
 

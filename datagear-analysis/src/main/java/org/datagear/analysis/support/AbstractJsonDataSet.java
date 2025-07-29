@@ -49,11 +49,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 数据JSON路径 */
-	private String dataJsonPath = "";
-
-	/** 作为结果附加数据的JSON属性配置 */
-	private String additionDataProps = "";
+	private ResultJsonRule resultJsonRule = null;
 
 	public AbstractJsonDataSet()
 	{
@@ -70,53 +66,14 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		super(id, name, fields);
 	}
 
-	public String getDataJsonPath()
+	public ResultJsonRule getResultJsonRule()
 	{
-		return dataJsonPath;
+		return resultJsonRule;
 	}
 
-	/**
-	 * 设置数据JSON路径。
-	 * <p>
-	 * 当希望返回的是原始JSON数据的指定JSON路径值时，可以设置此项。
-	 * </p>
-	 * <p>
-	 * 例如："stores[0].books"、"[1].stores"、"$['store']['book'][0]"、
-	 * "$.store.book[*].author"、"$..book[2]"，具体参考{@code JSONPath}相关文档。
-	 * </p>
-	 * <p>
-	 * 默认无数据路径，将直接返回原始JSON数据。
-	 * </p>
-	 * 
-	 * @param dataJsonPath
-	 */
-	public void setDataJsonPath(String dataJsonPath)
+	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
-		this.dataJsonPath = dataJsonPath;
-	}
-
-	public String getAdditionDataProps()
-	{
-		return additionDataProps;
-	}
-
-	/**
-	 * 设置作为结果附加数据的JSON属性配置，格式为：
-	 * <p>
-	 * <code>
-	 * "{ name1: 'prop-json-path-1', name2: 'prop-json-path-2' }"
-	 * </code>
-	 * </p>
-	 * <p>
-	 * 上述格式将读取原始数据的{@code "prop-json-path-1"}、{@code "prop-json-path-2"}属性值，
-	 * 然后以{@code "name1"}、{@code "name2"}关键字存入{@linkplain DataSetResult#getAdditions()}中。
-	 * </p>
-	 * 
-	 * @param additionDataProps
-	 */
-	public void setAdditionDataProps(String additionDataProps)
-	{
-		this.additionDataProps = additionDataProps;
+		this.resultJsonRule = resultJsonRule;
 	}
 
 	@Override
@@ -175,23 +132,25 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	protected DataSetResult resolveSourceDataResult(T resource, Object sourceData) throws Throwable
 	{
 		DataSetResult re = new DataSetResult();
-		if (sourceData != null)
-		{
-			Object reData = getJsonPathSupport().resolve(sourceData, resource.getDataJsonPath());
-			re.setData(reData);
-			resolveSourceAdditionData(resource, sourceData, re);
-		}
+
+		ResultJsonRule jsonRule = resource.getResultJsonRule();
+		Object reData = getJsonPathSupport().resolve(sourceData,
+				(jsonRule == null ? null : jsonRule.getDataJsonPath()));
+		re.setData(reData);
+		resolveSourceAdditionData(resource, sourceData, re);
 
 		return re;
 	}
 
-	protected void resolveSourceAdditionData(T resource, Object srcData, DataSetResult result)
+	protected void resolveSourceAdditionData(T resource, Object sourceData, DataSetResult result)
 			throws Throwable
 	{
-		if (StringUtil.isEmpty(resource.getAdditionDataProps()) || srcData == null)
+		ResultJsonRule jsonRule = resource.getResultJsonRule();
+
+		if (sourceData == null || jsonRule == null || StringUtil.isEmpty(jsonRule.getAdditionJsonPath()))
 			return;
 		
-		Map<String, Object> additions = getJsonPathSupport().resolveMap(srcData, resource.getAdditionDataProps());
+		Map<String, Object> additions = getJsonPathSupport().resolveMap(sourceData, jsonRule.getAdditionJsonPath());
 
 		if (additions == null)
 			return;

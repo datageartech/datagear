@@ -36,11 +36,7 @@ public class DataSetResultWrapper
 
 	private DataSet dataSet;
 
-	/** 数据JSON路径 */
-	private String dataJsonPath = "";
-
-	/** 作为结果附加数据的JSON属性配置 */
-	private String additionDataProps = "";
+	private ResultJsonRule resultJsonRule = null;
 
 	public DataSetResultWrapper()
 	{
@@ -53,12 +49,11 @@ public class DataSetResultWrapper
 		this.dataSet = dataSet;
 	}
 
-	public DataSetResultWrapper(DataSet dataSet, String dataJsonPath, String additionDataProps)
+	public DataSetResultWrapper(DataSet dataSet, ResultJsonRule resultJsonRule)
 	{
 		super();
 		this.dataSet = dataSet;
-		this.dataJsonPath = dataJsonPath;
-		this.additionDataProps = additionDataProps;
+		this.resultJsonRule = resultJsonRule;
 	}
 
 	public DataSet getDataSet()
@@ -71,24 +66,14 @@ public class DataSetResultWrapper
 		this.dataSet = dataSet;
 	}
 
-	public String getDataJsonPath()
+	public ResultJsonRule getResultJsonRule()
 	{
-		return dataJsonPath;
+		return resultJsonRule;
 	}
 
-	public void setDataJsonPath(String dataJsonPath)
+	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
-		this.dataJsonPath = dataJsonPath;
-	}
-
-	public String getAdditionDataProps()
-	{
-		return additionDataProps;
-	}
-
-	public void setAdditionDataProps(String additionDataProps)
-	{
-		this.additionDataProps = additionDataProps;
+		this.resultJsonRule = resultJsonRule;
 	}
 
 	/**
@@ -126,8 +111,7 @@ public class DataSetResultWrapper
 		data = wrapData(data);
 
 		InternalJsonDataSet dataSet = new InternalJsonDataSet(this.dataSet, data);
-		dataSet.setDataJsonPath(this.dataJsonPath);
-		dataSet.setAdditionDataProps(this.additionDataProps);
+		dataSet.setResultJsonRule(getResultJsonRule());
 
 		return dataSet;
 	}
@@ -327,7 +311,7 @@ public class DataSetResultWrapper
 		@Override
 		protected InternalJsonDataSetResource getResource(DataSetQuery query) throws Throwable
 		{
-			return new InternalJsonDataSetResource(getDataJsonPath(), getAdditionDataProps());
+			return new InternalJsonDataSetResource(getResultJsonRule());
 		}
 
 		@Override
@@ -344,9 +328,9 @@ public class DataSetResultWrapper
 
 		private static final Reader PLACEHOLDER_READER = new StringReader("");
 
-		public InternalJsonDataSetResource(String dataJsonPath, String additionDataProps)
+		public InternalJsonDataSetResource(ResultJsonRule resultJsonRule)
 		{
-			super("", dataJsonPath, additionDataProps);
+			super("", resultJsonRule);
 		}
 
 		@Override

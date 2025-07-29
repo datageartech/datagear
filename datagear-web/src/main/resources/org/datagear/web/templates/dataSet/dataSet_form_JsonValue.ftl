@@ -49,24 +49,24 @@
 		        </div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}dataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='jsonValueDataSet.dataJsonPath.desc' />">
+				<label for="${pid}resultJsonRuleDataJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dataSet.resultJsonRule.dataJsonPath.desc' />">
 					<@spring.message code='dataJsonPath' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}dataJsonPath" v-model="fm.dataJsonPath" type="text" class="input w-full"
-						name="dataJsonPath" maxlength="200">
+					<p-inputtext id="${pid}resultJsonRuleDataJsonPath" v-model="fm.resultJsonRule.dataJsonPath" type="text" class="input w-full"
+						name="resultJsonRule.dataJsonPath" maxlength="200">
 					</p-inputtext>
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}additionDataProps" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='jsonValueDataSet.additionDataProps.desc' />">
+				<label for="${pid}resultJsonRuleAdditionJsonPath" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dataSet.resultJsonRule.additionJsonPath.desc' />">
 					<@spring.message code='additionDataConfig' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<p-inputtext id="${pid}additionDataProps" v-model="fm.additionDataProps" type="text" class="input w-full"
-						name="additionDataProps" maxlength="500">
+					<p-inputtext id="${pid}resultJsonRuleAdditionJsonPath" v-model="fm.resultJsonRule.additionJsonPath" type="text" class="input w-full"
+						name="resultJsonRule.additionJsonPath" maxlength="500">
 					</p-inputtext>
 				</div>
 			</div>
@@ -92,8 +92,7 @@
 	po.inflatePreviewFingerprint = function(fingerprint, dataSet)
 	{
 		fingerprint.value = dataSet.value;
-		fingerprint.dataJsonPath = dataSet.dataJsonPath;
-		fingerprint.additionDataProps = dataSet.additionDataProps;
+		fingerprint.resultJsonRuleJson = $.toJsonString(dataSet.resultJsonRule);
 	};
 	
 	po.beforeSubmitForm = function(action)
@@ -106,6 +105,7 @@
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
+	formModel.resultJsonRule = (formModel.resultJsonRule == null ? {} : formModel.resultJsonRule);
 	po.inflateDataSetModel(formModel);
 	
 	po.setupForm(formModel,

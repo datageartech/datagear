@@ -51,7 +51,6 @@ import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -159,14 +158,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	private String responseContentType = RESPONSE_CONTENT_TYPE_JSON;
 
 	/**
-	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，响应数据的JSON路径
+	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，响应数据的JSON规则
 	 */
-	private String responseDataJsonPath = "";
-
-	/**
-	 * 当{@code #responseContentType}是{@linkplain #RESPONSE_CONTENT_TYPE_JSON}时，作为结果附加数据的JSON属性配置
-	 */
-	private String responseAdditionDataProps = "";
+	private ResultJsonRule resultJsonRule = null;
 
 	public HttpDataSet()
 	{
@@ -359,74 +353,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		this.responseContentType = responseContentType;
 	}
 
-	public String getResponseDataJsonPath()
+	public ResultJsonRule getResultJsonRule()
 	{
-		return responseDataJsonPath;
+		return resultJsonRule;
 	}
 
-	/**
-	 * 设置响应数据的JSON路径。
-	 * <p>
-	 * 当希望返回的是响应原始JSON数据的指定JSON路径值时，可以设置此项。
-	 * </p>
-	 * <p>
-	 * 具体格式参考{@linkplain AbstractJsonDataSet#setDataJsonPath(String)}。
-	 * </p>
-	 * <p>
-	 * 默认无数据路径，将直接返回响应原始JSON数据。
-	 * </p>
-	 * 
-	 * @param responseDataJsonPath
-	 */
-	public void setResponseDataJsonPath(String responseDataJsonPath)
+	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
-		this.responseDataJsonPath = responseDataJsonPath;
-	}
-
-	public String getResponseAdditionDataProps()
-	{
-		return responseAdditionDataProps;
-	}
-
-	/**
-	 * 设置响应数据中作为结果附加数据的JSON属性配置。
-	 * <p>
-	 * 具体参考{@linkplain AbstractJsonDataSet#setAdditionDataProps(String)}。
-	 * </p>
-	 * 
-	 * @param responseAdditionDataProps
-	 */
-	public void setResponseAdditionDataProps(String responseAdditionDataProps)
-	{
-		this.responseAdditionDataProps = responseAdditionDataProps;
-	}
-
-	/**
-	 * 同{@linkplain #getResponseAdditionDataProps()}。
-	 * <p>
-	 * 用于ORM处理，避免列别名过长。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	@JsonIgnore
-	public String getResponseAdtndProps()
-	{
-		return responseAdditionDataProps;
-	}
-
-	/**
-	 * 同{@linkplain #setResponseAdditionDataProps(String)}。
-	 * <p>
-	 * 用于ORM处理，避免列别名过长。
-	 * </p>
-	 * 
-	 * @param responseAdditionDataProps
-	 */
-	@JsonIgnore
-	public void setResponseAdtndProps(String responseAdditionDataProps)
-	{
-		this.responseAdditionDataProps = responseAdditionDataProps;
+		this.resultJsonRule = resultJsonRule;
 	}
 
 	@Override
