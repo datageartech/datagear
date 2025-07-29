@@ -299,8 +299,6 @@ public class DataSetResultWrapper
 	{
 		private static final long serialVersionUID = 1L;
 		
-		private static final InternalJsonDataSetResource DATA_SET_RESOURCE = new InternalJsonDataSetResource();
-
 		private final Object data;
 
 		public InternalJsonDataSet(DataSet dataSet, Object data)
@@ -323,13 +321,13 @@ public class DataSetResultWrapper
 		protected DataSetResult resolveSourceResult(InternalJsonDataSetResource resource, Reader jsonReader)
 				throws ReadJsonDataPathException, Throwable
 		{
-			return new DataSetResult(this.data);
+			return resolveSourceDataResult(resource, this.data);
 		}
 
 		@Override
 		protected InternalJsonDataSetResource getResource(DataSetQuery query) throws Throwable
 		{
-			return DATA_SET_RESOURCE;
+			return new InternalJsonDataSetResource(getDataJsonPath(), getAdditionDataProps());
 		}
 
 		@Override
@@ -344,17 +342,17 @@ public class DataSetResultWrapper
 	{
 		private static final long serialVersionUID = 1L;
 
-		private Reader reader = new StringReader("");
+		private static final Reader PLACEHOLDER_READER = new StringReader("");
 
-		public InternalJsonDataSetResource()
+		public InternalJsonDataSetResource(String dataJsonPath, String additionDataProps)
 		{
-			super("", "", "");
+			super("", dataJsonPath, additionDataProps);
 		}
 
 		@Override
 		public Reader getReader() throws Throwable
 		{
-			return this.reader;
+			return PLACEHOLDER_READER;
 		}
 
 		@Override

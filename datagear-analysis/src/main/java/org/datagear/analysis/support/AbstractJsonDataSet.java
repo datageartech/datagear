@@ -160,7 +160,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
 
 		Object srcData = (jsonNode == null ? null : getObjectMapperNonStardand().treeToValue(jsonNode, Object.class));
-		return resolveSourceResult(resource, srcData);
+		return resolveSourceDataResult(resource, srcData);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	 * @return
 	 * @throws Throwable
 	 */
-	protected DataSetResult resolveSourceResult(T resource, Object sourceData) throws Throwable
+	protected DataSetResult resolveSourceDataResult(T resource, Object sourceData) throws Throwable
 	{
 		DataSetResult re = new DataSetResult();
 		if (sourceData != null)
