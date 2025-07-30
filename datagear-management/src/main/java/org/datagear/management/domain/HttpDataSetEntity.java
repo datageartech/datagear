@@ -24,6 +24,7 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.ResultJsonRuleUtil;
 import org.datagear.analysis.support.HttpDataSet;
+import org.datagear.analysis.support.ResultJsonRule;
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, CloneableEntity, ResultJsonRuleAwareEntity
+public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, CloneableEntity, ResultJsonRuleAwareSplitEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -126,6 +127,19 @@ public class HttpDataSetEntity extends HttpDataSet implements DataSetEntity, Clo
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	@JsonIgnore
+	public String getResultJsonRuleJson()
+	{
+		return null;
+	}
+
+	@Override
+	@JsonIgnore
+	public void setResultJsonRuleJson(ResultJsonRule resultJsonRule)
+	{
 	}
 
 	@Override

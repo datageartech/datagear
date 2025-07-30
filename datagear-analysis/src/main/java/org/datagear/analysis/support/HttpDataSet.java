@@ -62,7 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author datagear@163.com
  *
  */
-public class HttpDataSet extends AbstractResolvableDataSet
+public class HttpDataSet extends AbstractResolvableDataSet implements ResultJsonRuleAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -353,11 +353,13 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		this.responseContentType = responseContentType;
 	}
 
+	@Override
 	public ResultJsonRule getResultJsonRule()
 	{
 		return resultJsonRule;
 	}
 
+	@Override
 	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
 		this.resultJsonRule = resultJsonRule;

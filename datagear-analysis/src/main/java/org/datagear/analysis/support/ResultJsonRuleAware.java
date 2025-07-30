@@ -15,40 +15,27 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.management.domain;
-
-import org.datagear.analysis.support.ResultJsonRule;
-import org.datagear.analysis.support.ResultJsonRuleAware;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package org.datagear.analysis.support;
 
 /**
- * {@linkplain ResultJsonRuleAware}实体接口。
+ * 带有{@linkplain ResultJsonRule}的数据集。
  * 
  * @author datagear@163.com
  *
  */
-public interface ResultJsonRuleAwareEntity extends ResultJsonRuleAware
+public interface ResultJsonRuleAware
 {
 	/**
-	 * 仅用于ORM。
-	 * <p>
-	 * 如果子类不需要，应该返回{@code null}，不要抛出异常。
-	 * </p>
+	 * 获取{@linkplain ResultJsonRule}。
 	 * 
 	 * @return
 	 */
-	@JsonIgnore
-	String getResultJsonRuleJson();
+	ResultJsonRule getResultJsonRule();
 
 	/**
-	 * 仅用于ORM
-	 * <p>
-	 * 如果子类不需要，应该留空，不要抛出异常。
-	 * </p>
+	 * 设置{@linkplain ResultJsonRule}。
 	 * 
-	 * @param rstDataJsonPath
+	 * @param resultJsonRule
 	 */
-	@JsonIgnore
-	void setResultJsonRuleJson(ResultJsonRule resultJsonRule);
+	void setResultJsonRule(ResultJsonRule resultJsonRule);
 }

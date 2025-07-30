@@ -17,21 +17,20 @@
 
 package org.datagear.management.domain;
 
-import org.datagear.analysis.support.ResultJsonRule;
 import org.datagear.analysis.support.ResultJsonRuleAware;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * {@linkplain ResultJsonRuleAware}实体接口。
+ * {@linkplain ResultJsonRuleAware}拆分存储相关实体。
  * 
  * @author datagear@163.com
  *
  */
-public interface ResultJsonRuleAwareEntity extends ResultJsonRuleAware
+public interface ResultJsonRuleAwareSplitEntity extends ResultJsonRuleAwareEntity
 {
 	/**
-	 * 仅用于ORM。
+	 * 仅用于ORM，避免过长映射名导致数据库兼容错误
 	 * <p>
 	 * 如果子类不需要，应该返回{@code null}，不要抛出异常。
 	 * </p>
@@ -39,10 +38,10 @@ public interface ResultJsonRuleAwareEntity extends ResultJsonRuleAware
 	 * @return
 	 */
 	@JsonIgnore
-	String getResultJsonRuleJson();
+	String getRstDataJsonPath();
 
 	/**
-	 * 仅用于ORM
+	 * 仅用于ORM，避免过长映射名导致数据库兼容错误
 	 * <p>
 	 * 如果子类不需要，应该留空，不要抛出异常。
 	 * </p>
@@ -50,5 +49,27 @@ public interface ResultJsonRuleAwareEntity extends ResultJsonRuleAware
 	 * @param rstDataJsonPath
 	 */
 	@JsonIgnore
-	void setResultJsonRuleJson(ResultJsonRule resultJsonRule);
+	void setRstDataJsonPath(String rstDataJsonPath);
+
+	/**
+	 * 仅用于ORM，避免过长映射名导致数据库兼容错误
+	 * <p>
+	 * 如果子类不需要，应该返回{@code null}，不要抛出异常。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	String getRstAdditionJsonPath();
+
+	/**
+	 * 仅用于ORM，避免过长映射名导致数据库兼容错误
+	 * <p>
+	 * 如果子类不需要，应该留空，不要抛出异常。
+	 * </p>
+	 * 
+	 * @param rstAdditionJsonPath
+	 */
+	@JsonIgnore
+	void setRstAdditionJsonPath(String rstAdditionJsonPath);
 }

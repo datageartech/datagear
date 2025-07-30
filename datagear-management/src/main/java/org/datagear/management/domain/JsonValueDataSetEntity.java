@@ -23,6 +23,7 @@ import java.util.List;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.ResultJsonRuleUtil;
 import org.datagear.analysis.support.JsonValueDataSet;
+import org.datagear.analysis.support.ResultJsonRule;
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public class JsonValueDataSetEntity extends JsonValueDataSet
-		implements DataSetEntity, CloneableEntity, ResultJsonRuleAwareEntity
+		implements DataSetEntity, CloneableEntity, ResultJsonRuleAwareSplitEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -120,6 +121,19 @@ public class JsonValueDataSetEntity extends JsonValueDataSet
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	@JsonIgnore
+	public String getResultJsonRuleJson()
+	{
+		return null;
+	}
+
+	@Override
+	@JsonIgnore
+	public void setResultJsonRuleJson(ResultJsonRule resultJsonRule)
+	{
 	}
 
 	@Override

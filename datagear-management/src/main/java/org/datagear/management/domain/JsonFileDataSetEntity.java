@@ -27,6 +27,7 @@ import org.datagear.analysis.ResultJsonRuleUtil;
 import org.datagear.analysis.support.AbstractJsonFileDataSet;
 import org.datagear.analysis.support.FileResolvedInfo;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
+import org.datagear.analysis.support.ResultJsonRule;
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -38,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public class JsonFileDataSetEntity extends AbstractJsonFileDataSet
-		implements DirectoryFileDataSetEntity, CloneableEntity, ResultJsonRuleAwareEntity
+		implements DirectoryFileDataSetEntity, CloneableEntity, ResultJsonRuleAwareSplitEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -228,6 +229,19 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet
 	public void setAnalysisProject(AnalysisProject analysisProject)
 	{
 		this.analysisProject = analysisProject;
+	}
+
+	@Override
+	@JsonIgnore
+	public String getResultJsonRuleJson()
+	{
+		return null;
+	}
+
+	@Override
+	@JsonIgnore
+	public void setResultJsonRuleJson(ResultJsonRule resultJsonRule)
+	{
 	}
 
 	@Override

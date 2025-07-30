@@ -27,7 +27,7 @@ import org.datagear.analysis.support.datasetres.JsonDataSetResource;
  * @author datagear@163.com
  *
  */
-public class DataSetResultWrapper
+public class DataSetResultWrapper implements ResultJsonRuleAware
 {
 	/**
 	 * 基本类型的数据转换至规范数据集结果数据类型的{@linkplain Map}时的属性名。
@@ -66,11 +66,13 @@ public class DataSetResultWrapper
 		this.dataSet = dataSet;
 	}
 
+	@Override
 	public ResultJsonRule getResultJsonRule()
 	{
 		return resultJsonRule;
 	}
 
+	@Override
 	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
 		this.resultJsonRule = resultJsonRule;

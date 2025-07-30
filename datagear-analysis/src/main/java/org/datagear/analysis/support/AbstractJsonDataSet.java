@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.node.ValueNode;
  *
  */
 public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends AbstractResolvableResourceDataSet<T>
-		implements ResolvableDataSet
+		implements ResolvableDataSet, ResultJsonRuleAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -66,11 +66,13 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		super(id, name, fields);
 	}
 
+	@Override
 	public ResultJsonRule getResultJsonRule()
 	{
 		return resultJsonRule;
 	}
 
+	@Override
 	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
 		this.resultJsonRule = resultJsonRule;
