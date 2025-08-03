@@ -443,7 +443,9 @@ public class DashboardController extends AbstractDataAnalysisController
 				entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
 		tplOption.setViewport(SimpleHtmlTplOption.DEFAULT_VIEWPORT);
 		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果
-		tplOption.setStyle("html { height: 100%; }\n*, ::after, ::before { box-sizing: border-box; }\n");
+		tplOption.setStyle("html { height: 100%; }\n" //
+				+ "body { margin: 0; }\n" //
+				+ "*, ::after, ::before { box-sizing: border-box; }\n");
 
 		return tplOption;
 	}
