@@ -24,58 +24,58 @@
 .dg-rsp-col{
 	flex: 1 0 0;
 }
-.dg-rsp-col-1{
+.dg-rsp-col-12-1{
 	flex: 0 0 auto;
 	width: 8.33333333%;
 }
-.dg-rsp-col-2{
+.dg-rsp-col-12-2{
 	flex: 0 0 auto;
 	width: 16.66666667%;
 }
-.dg-rsp-col-3{
+.dg-rsp-col-12-3{
 	flex: 0 0 auto;
 	width: 25%;
 }
-.dg-rsp-col-4{
+.dg-rsp-col-12-4{
 	flex: 0 0 auto;
 	width: 33.33333333%;
 }
-.dg-rsp-col-5{
+.dg-rsp-col-12-5{
 	flex: 0 0 auto;
 	width: 41.66666667%;
 }
-.dg-rsp-col-6{
+.dg-rsp-col-12-6{
 	flex: 0 0 auto;
 	width: 50%;
 }
-.dg-rsp-col-7{
+.dg-rsp-col-12-7{
 	flex: 0 0 auto;
 	width: 58.33333333%
 }
-.dg-rsp-col-8{
+.dg-rsp-col-12-8{
 	flex: 0 0 auto;
 	width: 66.66666667%;
 }
-.dg-rsp-col-9{
+.dg-rsp-col-12-9{
 	flex: 0 0 auto;
 	width: 75%;
 }
-.dg-rsp-col-10{
+.dg-rsp-col-12-10{
 	flex: 0 0 auto;
 	width: 83.33333333%;
 }
-.dg-rsp-col-11{
+.dg-rsp-col-12-11{
 	flex: 0 0 auto;
 	width: 91.66666667%;
 }
-.dg-rsp-col-12{
+.dg-rsp-col-12-12{
 	flex: 0 0 auto;
 	width: 100%;
 }
-.dg-rsp-display-none{
+.dg-rsp-d-none{
 	display: none;
 }
-.dg-rsp-display-block{
+.dg-rsp-d-block{
 	display: block;
 }
 .dg-rsp-h-full{
@@ -91,58 +91,58 @@
 /*sm*/
 @media (min-width: 576px){
 
-	.dg-rsp-col-sm-1{
+	.dg-rsp-col-sm-12-1{
 		flex: 0 0 auto;
 		width: 8.33333333%;
 	}
-	.dg-rsp-col-sm-2{
+	.dg-rsp-col-sm-12-2{
 		flex: 0 0 auto;
 		width: 16.66666667%;
 	}
-	.dg-rsp-col-sm-3{
+	.dg-rsp-col-sm-12-3{
 		flex: 0 0 auto;
 		width: 25%;
 	}
-	.dg-rsp-col-sm-4{
+	.dg-rsp-col-sm-12-4{
 		flex: 0 0 auto;
 		width: 33.33333333%;
 	}
-	.dg-rsp-col-sm-5{
+	.dg-rsp-col-sm-12-5{
 		flex: 0 0 auto;
 		width: 41.66666667%;
 	}
-	.dg-rsp-col-sm-6{
+	.dg-rsp-col-sm-12-6{
 		flex: 0 0 auto;
 		width: 50%;
 	}
-	.dg-rsp-col-sm-7{
+	.dg-rsp-col-sm-12-7{
 		flex: 0 0 auto;
 		width: 58.33333333%;
 	}
-	.dg-rsp-col-sm-8{
+	.dg-rsp-col-sm-12-8{
 		flex: 0 0 auto;
 		width: 66.66666667%;
 	}
-	.dg-rsp-col-sm-9{
+	.dg-rsp-col-sm-12-9{
 		flex: 0 0 auto;
 		width: 75%;
 	}
-	.dg-rsp-col-sm-10{
+	.dg-rsp-col-sm-12-10{
 		flex: 0 0 auto;
 		width: 83.33333333%;
 	}
-	.dg-rsp-col-sm-11{
+	.dg-rsp-col-sm-12-11{
 		flex: 0 0 auto;
 		width: 91.66666667%;
 	}
-	.dg-rsp-col-sm-12{
+	.dg-rsp-col-sm-12-12{
 		flex: 0 0 auto;
 		width: 100%;
 	}
-	.dg-rsp-display-sm-none{
+	.dg-rsp-d-sm-none{
 		display: none;
 	}
-	.dg-rsp-display-sm-block{
+	.dg-rsp-d-sm-block{
 		display: block;
 	}
 	.dg-rsp-h-sm-full{
@@ -159,58 +159,58 @@
 /*md*/
 @media (min-width: 768px){
 
-	.dg-rsp-col-md-1{
+	.dg-rsp-col-md-12-1{
 		flex: 0 0 auto;
 		width: 8.33333333%;
 	}
-	.dg-rsp-col-md-2{
+	.dg-rsp-col-md-12-2{
 		flex: 0 0 auto;
 		width: 16.66666667%;
 	}
-	.dg-rsp-col-md-3{
+	.dg-rsp-col-md-12-3{
 		flex: 0 0 auto;
 		width: 25%;
 	}
-	.dg-rsp-col-md-4{
+	.dg-rsp-col-md-12-4{
 		flex: 0 0 auto;
 		width: 33.33333333%;
 	}
-	.dg-rsp-col-md-5{
+	.dg-rsp-col-md-12-5{
 		flex: 0 0 auto;
 		width: 41.66666667%;
 	}
-	.dg-rsp-col-md-6{
+	.dg-rsp-col-md-12-6{
 		flex: 0 0 auto;
 		width: 50%;
 	}
-	.dg-rsp-col-md-7{
+	.dg-rsp-col-md-12-7{
 		flex: 0 0 auto;
 		width: 58.33333333%;
 	}
-	.dg-rsp-col-md-8{
+	.dg-rsp-col-md-12-8{
 		flex: 0 0 auto;
 		width: 66.66666667%;
 	}
-	.dg-rsp-col-md-9{
+	.dg-rsp-col-md-12-9{
 		flex: 0 0 auto;
 		width: 75%;
 	}
-	.dg-rsp-col-md-10{
+	.dg-rsp-col-md-12-10{
 		flex: 0 0 auto;
 		width: 83.33333333%;
 	}
-	.dg-rsp-col-md-11{
+	.dg-rsp-col-md-12-11{
 		flex: 0 0 auto;
 		width: 91.66666667%;
 	}
-	.dg-rsp-col-md-12{
+	.dg-rsp-col-md-12-12{
 		flex: 0 0 auto;
 		width: 100%;
 	}
-	.dg-rsp-display-md-none{
+	.dg-rsp-d-md-none{
 		display: none;
 	}
-	.dg-rsp-display-md-block{
+	.dg-rsp-d-md-block{
 		display: block;
 	}
 	.dg-rsp-h-md-full{
@@ -227,58 +227,58 @@
 /*lg*/
 @media (min-width: 992px){
 
-	.dg-rsp-col-lg-1{
+	.dg-rsp-col-lg-12-1{
 		flex: 0 0 auto;
 		width: 8.33333333%;
 	}
-	.dg-rsp-col-lg-2{
+	.dg-rsp-col-lg-12-2{
 		flex: 0 0 auto;
 		width: 16.66666667%;
 	}
-	.dg-rsp-col-lg-3{
+	.dg-rsp-col-lg-12-3{
 		flex: 0 0 auto;
 		width: 25%;
 	}
-	.dg-rsp-col-lg-4{
+	.dg-rsp-col-lg-12-4{
 		flex: 0 0 auto;
 		width: 33.33333333%;
 	}
-	.dg-rsp-col-lg-5{
+	.dg-rsp-col-lg-12-5{
 		flex: 0 0 auto;
 		width: 41.66666667%;
 	}
-	.dg-rsp-col-lg-6{
+	.dg-rsp-col-lg-12-6{
 		flex: 0 0 auto;
 		width: 50%;
 	}
-	.dg-rsp-col-lg-7{
+	.dg-rsp-col-lg-12-7{
 		flex: 0 0 auto;
 		width: 58.33333333%;
 	}
-	.dg-rsp-col-lg-8{
+	.dg-rsp-col-lg-12-8{
 		flex: 0 0 auto;
 		width: 66.66666667%;
 	}
-	.dg-rsp-col-lg-9{
+	.dg-rsp-col-lg-12-9{
 		flex: 0 0 auto;
 		width: 75%;
 	}
-	.dg-rsp-col-lg-10{
+	.dg-rsp-col-lg-12-10{
 		flex: 0 0 auto;
 		width: 83.33333333%;
 	}
-	.dg-rsp-col-lg-11{
+	.dg-rsp-col-lg-12-11{
 		flex: 0 0 auto;
 		width: 91.66666667%;
 	}
-	.dg-rsp-col-lg-12{
+	.dg-rsp-col-lg-12-12{
 		flex: 0 0 auto;
 		width: 100%;
 	}
-	.dg-rsp-display-lg-none{
+	.dg-rsp-d-lg-none{
 		display: none;
 	}
-	.dg-rsp-display-lg-block{
+	.dg-rsp-d-lg-block{
 		display: block;
 	}
 	.dg-rsp-h-lg-full{
@@ -295,58 +295,58 @@
 /*xl*/
 @media (min-width: 1200px){
 
-	.dg-rsp-col-xl-1{
+	.dg-rsp-col-xl-12-1{
 		flex: 0 0 auto;
 		width: 8.33333333%;
 	}
-	.dg-rsp-col-xl-2{
+	.dg-rsp-col-xl-12-2{
 		flex: 0 0 auto;
 		width: 16.66666667%;
 	}
-	.dg-rsp-col-xl-3{
+	.dg-rsp-col-xl-12-3{
 		flex: 0 0 auto;
 		width: 25%;
 	}
-	.dg-rsp-col-xl-4{
+	.dg-rsp-col-xl-12-4{
 		flex: 0 0 auto;
 		width: 33.33333333%;
 	}
-	.dg-rsp-col-xl-5{
+	.dg-rsp-col-xl-12-5{
 		flex: 0 0 auto;
 		width: 41.66666667%;
 	}
-	.dg-rsp-col-xl-6{
+	.dg-rsp-col-xl-12-6{
 		flex: 0 0 auto;
 		width: 50%;
 	}
-	.dg-rsp-col-xl-7{
+	.dg-rsp-col-xl-12-7{
 		flex: 0 0 auto;
 		width: 58.33333333%;
 	}
-	.dg-rsp-col-xl-8{
+	.dg-rsp-col-xl-12-8{
 		flex: 0 0 auto;
 		width: 66.66666667%;
 	}
-	.dg-rsp-col-xl-9{
+	.dg-rsp-col-xl-12-9{
 		flex: 0 0 auto;
 		width: 75%;
 	}
-	.dg-rsp-col-xl-10{
+	.dg-rsp-col-xl-12-10{
 		flex: 0 0 auto;
 		width: 83.33333333%;
 	}
-	.dg-rsp-col-xl-11{
+	.dg-rsp-col-xl-12-11{
 		flex: 0 0 auto;
 		width: 91.66666667%;
 	}
-	.dg-rsp-col-xl-12{
+	.dg-rsp-col-xl-12-12{
 		flex: 0 0 auto;
 		width: 100%;
 	}
-	.dg-rsp-display-xl-none{
+	.dg-rsp-d-xl-none{
 		display: none;
 	}
-	.dg-rsp-display-xl-block{
+	.dg-rsp-d-xl-block{
 		display: block;
 	}
 	.dg-rsp-h-xl-full{
