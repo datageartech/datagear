@@ -2791,7 +2791,49 @@ $.inflateDashboardDesignEditorForms = function(po)
 				{ name: "10/12", value: 10 },
 				{ name: "11/12", value: 11 },
 				{ name: "12/12", value: 12 }
-			]
+			],
+			responsiveHeightUnits:
+			[
+				{
+					value: "%"
+				},
+				{
+					value: "rem"
+					
+				},
+				{
+					value: "vh"
+				}
+			],
+			responsiveHeightOptions:
+			{
+				"%":
+				[
+					{name: "auto", value: "auto"},
+					{name: "5%", value: 5}, {name: "10%", value: 10}, {name: "15%", value: 15}, {name: "20%", value: 20}, {name: "25%", value: 25},
+					{name: "30%", value: 30}, {name: "35%", value: 35}, {name: "40%", value: 40}, {name: "45%", value: 45}, {name: "50%", value: 50},
+					{name: "55%", value: 55}, {name: "60%", value: 60}, {name: "65%", value: 65}, {name: "70%", value: 70}, {name: "75%", value: 75},
+					{name: "80%", value: 80}, {name: "85%", value: 85}, {name: "90%", value: 90}, {name: "95%", value: 95}, {name: "100%", value: 100}
+				],
+				"rem":
+				[
+					{name: "auto", value: "auto"},
+					{name: "1rem", value: 1}, {name: "2rem", value: 2}, {name: "3rem", value: 3}, {name: "4rem", value: 4}, {name: "5rem", value: 5},
+					{name: "6rem", value: 6}, {name: "7rem", value: 7}, {name: "8rem", value: 8}, {name: "9rem", value: 9}, {name: "10rem", value: 10},
+					{name: "11rem", value: 11}, {name: "12rem", value: 12}, {name: "13rem", value: 13}, {name: "14rem", value: 14}, {name: "15rem", value: 15},
+					{name: "16rem", value: 16}, {name: "17rem", value: 17}, {name: "18rem", value: 18}, {name: "19rem", value: 19}, {name: "20rem", value: 20},
+					{name: "21rem", value: 21}, {name: "22rem", value: 22}, {name: "23rem", value: 23}, {name: "24rem", value: 24}, {name: "25rem", value: 25},
+					{name: "26rem", value: 26}, {name: "27rem", value: 27}, {name: "28rem", value: 28}, {name: "29rem", value: 29}, {name: "30rem", value: 30}
+				],
+				"vh":
+				[
+					{name: "auto", value: "auto"},
+					{name: "5vh", value: 5}, {name: "10vh", value: 10}, {name: "15vh", value: 15}, {name: "20vh", value: 20}, {name: "25vh", value: 25},
+					{name: "30vh", value: 30}, {name: "35vh", value: 35}, {name: "40vh", value: 40}, {name: "45vh", value: 45}, {name: "50vh", value: 50},
+					{name: "55vh", value: 55}, {name: "60vh", value: 60}, {name: "65vh", value: 65}, {name: "70vh", value: 70}, {name: "75vh", value: 75},
+					{name: "80vh", value: 80}, {name: "85vh", value: 85}, {name: "90vh", value: 90}, {name: "95vh", value: 95}, {name: "100vh", value: 100}
+				]
+			}
 		});
 		
 		var pm = po.vuePageModel();
@@ -3167,7 +3209,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				for(var i=0;i<responsiveScreens.length; i++)
 				{
 					var type = responsiveScreens[i].value;
-					dftValue[type] = { display: true };
+					dftValue[type] = { display: true, heightUnit: "%" };
 				}
 				
 				return dftValue;

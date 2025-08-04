@@ -421,7 +421,7 @@ page_palette.ftl
 												</label>
 												<div class="field-input col-12 md:col-9">
 													<p-dropdown v-model="item[screen.value].width" :options="pm.responsiveFlexCols" option-label="name" option-value="value"
-										        		@change="onVersionChange" class="input w-full">
+										        		class="input w-full">
 										        	</p-dropdown>
 												</div>
 											</div>
@@ -430,8 +430,12 @@ page_palette.ftl
 													<@spring.message code='height' />
 												</label>
 												<div class="field-input col-12 md:col-9">
-													<p-inputtext v-model="item[screen.value].height" type="text" class="help-target input w-full">
-													</p-inputtext>
+													<div class="p-inputgroup">
+														<p-selectbutton v-model="item[screen.value].heightUnit" :options="pm.responsiveHeightUnits" option-label="value" option-value="value">
+											        	</p-selectbutton>
+														<p-dropdown v-model="item[screen.value].height" :options="pm.responsiveHeightOptions[item[screen.value].heightUnit]" option-label="name" option-value="value">
+											        	</p-dropdown>
+													</div>
 												</div>
 											</div>
 											<div class="field grid">
