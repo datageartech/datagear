@@ -64,7 +64,8 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veGridLayoutRowHeightDivide" class="field-label col-12 mb-2">
+					<label for="${pid}veGridLayoutRowHeightDivide" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.gridLayout.rowHeightDiv.desc' />">
 						<@spring.message code='rowHeightDivide' />
 					</label>
 					<div class="field-input col-12">
@@ -155,7 +156,8 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veGridLayoutColWidthDivide" class="field-label col-12 mb-2">
+					<label for="${pid}veGridLayoutColWidthDivide" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.gridLayout.colWidthDiv.desc' />">
 						<@spring.message code='columnWidthDivide' />
 					</label>
 					<div class="field-input col-12">
