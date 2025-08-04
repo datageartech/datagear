@@ -959,6 +959,33 @@ $.inflateDashboardDesignEditor = function(po)
 		});
 	};
 
+	po.insertVeResponsiveFlex = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		var insertType = po.veCurrentInsertType;
+		
+		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertResponsiveFlex(insertType))
+			return false;
+		
+		$.executeSilently(function()
+		{
+			dashboardEditor.insertResponsiveFlex(model, po.veCurrentInsertType);
+		});
+	};
+
+	po.updateVeResponsiveFlex = function(model)
+	{
+		var dashboardEditor = po.visualDashboardEditorByTab();
+		
+		if(!dashboardEditor || !dashboardEditor.checkSetResponsiveFlex())
+			return false;
+		
+		$.executeSilently(function()
+		{
+			dashboardEditor.setResponsiveFlex(model);
+		});
+	};
+	
 	po.insertVeHxtitle = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
@@ -1488,6 +1515,32 @@ $.inflateDashboardDesignEditor = function(po)
 						po.veCurrentInsertType = this.insertType;
 						var showFillParent = dashboardEditor.canInsertFillParentFlexLayout(this.insertType);
 						po.showVeFlexLayoutPanel(showFillParent);
+					}
+				}
+			},
+			{
+				label: po.i18n.responsiveFlexLayout,
+				insertType: insertType,
+				parentLabelPath: parentLabelPath,
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
+				{
+					po.veQuickExecuteMenuItem(this);
+					
+					var dashboardEditor = po.visualDashboardEditorByTab();
+					if(dashboardEditor)
+					{
+						po.veCurrentInsertType = this.insertType;
+						//var showFillParent = dashboardEditor.canInsertFillParentResponsiveFlex(this.insertType);
+						var showFillParent = false;
+						po.showVeResponsiveFlexPanel(function(model)
+						{
+							console.dir(model);
+						},
+						showFillParent);
 					}
 				}
 			},
@@ -2368,6 +2421,18 @@ $.inflateDashboardDesignEditorForms = function(po)
 		return re;
 	};
 	
+	po.veDftResponsiveFlexModel = function()
+	{
+		var re =
+		{
+			fillParent: false, 
+			itemCount: null,
+			itemLayouts: []
+		};
+		
+		return re;
+	};
+	
 	po.veDftVideoModel = function()
 	{
 		var re = {};
@@ -2484,6 +2549,18 @@ $.inflateDashboardDesignEditorForms = function(po)
 		pm.vepss.flexLayoutShown = true;
 	};
 	
+	po.showVeResponsiveFlexPanel = function(submitHandler, showFillParent)
+	{
+		showFillParent = (showFillParent == null ? false : showFillParent);
+		
+		var pm = po.vuePageModel();
+		
+		pm.veshs.responsiveFlex = submitHandler;
+		pm.veResponsiveFlexPanelShowFillParent = showFillParent;
+		pm.vepms.responsiveFlex.fillParent = showFillParent;
+		pm.vepss.responsiveFlexShown = true;
+	};
+	
 	po.showVeHxtitlePanel = function(submitHandler, model)
 	{
 		var pm = po.vuePageModel();
@@ -2598,6 +2675,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 			{
 				gridLayoutShown: false,
 				flexLayoutShown: false,
+				responsiveFlexShown: false,
 				hxtitleShown: false,
 				textElementShown: false,
 				imageShown: false,
@@ -2616,6 +2694,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 			{
 				gridLayout: po.i18n.gridLayout,
 				flexLayout: po.i18n.flexLayout,
+				responsiveFlex: po.i18n.responsiveFlexLayout,
 				hxtitle: po.i18n.titleElement,
 				textElement: po.i18n.textElement,
 				image: po.i18n.image,
@@ -2634,6 +2713,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 			{
 				gridLayout: po.veDftGridLayoutModel(),
 				flexLayout: { fillParent: false },
+				responsiveFlex: po.veDftResponsiveFlexModel(),
 				hxtitle: { type: "h1", content: "" },
 				textElement: { content: "" },
 				image: {},
@@ -2650,6 +2730,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 			//可视编辑操作对话框提交处理函数
 			veshs:
 			{
+				responsiveFlex: function(model){},
 				hxtitle: function(model){},
 				textElement: function(model){},
 				image: function(model){},
@@ -2687,6 +2768,29 @@ $.inflateDashboardDesignEditorForms = function(po)
 			[
 				{ name: po.i18n["dashboard.veditor.gridLayout.divide.avg"], value: "avg" },
 				{ name: po.i18n["dashboard.veditor.gridLayout.divide.custom"], value: "custom" }
+			],
+			responsiveScreens:
+			[
+				{ name: po.i18n["screenType.phone"], value: "xs" },
+				{ name: po.i18n["screenType.tablet"], value: "md" },
+				{ name: po.i18n["screenType.desktop"], value: "lg" },
+				{ name: po.i18n["screenType.large"], value: "xl" }
+			],
+			veResponsiveFlexScreenType: "xs",
+			responsiveFlexCols:
+			[
+				{ name: "1/12", value: 1 },
+				{ name: "2/12", value: 2 },
+				{ name: "3/12", value: 3 },
+				{ name: "4/12", value: 4 },
+				{ name: "5/12", value: 5 },
+				{ name: "6/12", value: 6 },
+				{ name: "7/12", value: 7 },
+				{ name: "8/12", value: 8 },
+				{ name: "9/12", value: 9 },
+				{ name: "10/12", value: 10 },
+				{ name: "11/12", value: 11 },
+				{ name: "12/12", value: 12 }
 			]
 		});
 		
@@ -2698,6 +2802,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 			{
 				return "<"+option.value+">"+option.name+"</"+option.value+">";
 			},
+			
 			onVeGridLayoutPanelShow: function()
 			{
 				var form = po.elementOfPidPrefix("veGridLayoutForm", document.body);
@@ -2726,6 +2831,22 @@ $.inflateDashboardDesignEditorForms = function(po)
 					{
 						pm.vepms.flexLayout = { fillParent: false };
 						pm.vepss.flexLayoutShown = false;
+					}
+				});
+			},
+			
+			onVeResponsiveFlexPanelShow: function()
+			{
+				var form = po.elementOfPidPrefix("veResponsiveFlexForm", document.body);
+				po.initVePanelHelperSrc(form, pm.vepms.responsiveFlex);
+				
+				po.setupSimpleForm(form, pm.vepms.responsiveFlex, function()
+				{
+					if(pm.veshs.responsiveFlex(pm.vepms.responsiveFlex) !== false)
+					{
+						pm.vepms.responsiveFlex = po.veDftResponsiveFlexModel();
+						pm.veResponsiveFlexScreenType = "xs";
+						pm.vepss.responsiveFlexShown = false;
 					}
 				});
 			},
@@ -3015,22 +3136,42 @@ $.inflateDashboardDesignEditorForms = function(po)
 		{
 			return pm.vepms.gridLayout.rows;
 		},
-		function(newVal, oldVal)
+		function(newVal)
 		{
 			//默认不使用"auto"，内部插入元素后会导致尺寸变化
 			var dftValue = "1fr";
-			$.trimArrayLen(pm.vepms.gridLayout.rowHeights, pm.vepms.gridLayout.rows, dftValue);
+			$.trimArrayLen(pm.vepms.gridLayout.rowHeights, newVal, dftValue);
 		});
 		
 		po.vueWatch(function()
 		{
 			return pm.vepms.gridLayout.columns;
 		},
-		function(newVal, oldVal)
+		function(newVal)
 		{
 			//默认不使用"auto"，内部插入元素后会导致尺寸变化
 			var dftValue = "1fr";
-			$.trimArrayLen(pm.vepms.gridLayout.colWidths, pm.vepms.gridLayout.columns, dftValue);
+			$.trimArrayLen(pm.vepms.gridLayout.colWidths, newVal, dftValue);
+		});
+		
+		po.vueWatch(function()
+		{
+			return pm.vepms.responsiveFlex.itemCount;
+		},
+		function(newVal)
+		{
+			$.trimArrayLen(pm.vepms.responsiveFlex.itemLayouts, newVal, function()
+			{
+				var dftValue = {};
+				var responsiveScreens = pm.responsiveScreens;
+				for(var i=0;i<responsiveScreens.length; i++)
+				{
+					var type = responsiveScreens[i].value;
+					dftValue[type] = { display: true };
+				}
+				
+				return dftValue;
+			});
 		});
 	};
 };

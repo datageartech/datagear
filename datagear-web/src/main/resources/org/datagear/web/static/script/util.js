@@ -782,7 +782,7 @@
 		
 		while(array.length < len)
 		{
-			array.push(initValue);
+			array.push($.isFunction(initValue) ? initValue() : initValue);
 		}
 		
 		while(array.length > len)

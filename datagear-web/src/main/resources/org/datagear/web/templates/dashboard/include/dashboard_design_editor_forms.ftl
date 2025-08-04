@@ -367,6 +367,98 @@ page_palette.ftl
 	</div>
 </p-dialog>
 
+<p-dialog :header="pm.vepts.responsiveFlex" append-to="body"
+	position="center" :modal="true" v-model:visible="pm.vepss.responsiveFlexShown" @show="onVeResponsiveFlexPanelShow">
+	<div class="page page-form">
+		<form id="${pid}veResponsiveFlexForm" class="flex flex-column">
+			<div class="page-form-content panel-content-size-xs-minw flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}veResponsiveFlexItems" class="field-label col-12 mb-2">
+						<@spring.message code='itemCount' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}veResponsiveFlexItems" v-model="pm.vepms.responsiveFlex.itemCount" type="text"
+							class="help-target input w-full" name="itemCount" required maxlength="10" autofocus>
+						</p-inputtext>
+						<div class="p-buttonset mt-1 text-sm">
+							<p-button type="button" class="help-src p-button-secondary" help-value="1">
+								<@spring.message code='itemCount.1' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="2">
+								<@spring.message code='itemCount.2' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="3">
+								<@spring.message code='itemCount.3' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="4">
+								<@spring.message code='itemCount.4' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="5">
+								<@spring.message code='itemCount.5' />
+							</p-button>
+							<p-button type="button" class="help-src p-button-secondary" help-value="6">
+								<@spring.message code='itemCount.6' />
+							</p-button>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veResponsiveFlexScreen" class="field-label col-12 mb-2">
+						<@spring.message code='itemLayout' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}veResponsiveFlexScreen" v-model="pm.veResponsiveFlexScreenType" :options="pm.responsiveScreens"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
+						<div id="${pid}veResponsiveFlexItemLayouts" class="mt-2">
+							<div v-for="(screen, screenIdx) in pm.responsiveScreens">
+								<div v-if="pm.veResponsiveFlexScreenType == screen.value">
+									<div v-for="(item, itemIdx) in pm.vepms.responsiveFlex.itemLayouts">
+										<p-fieldset :legend="'<@spring.message code='item' /> ' + (itemIdx+1)" class="fieldset-sm fieldset-bold-legend mb-3">
+											<div class="field grid">
+												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
+													<@spring.message code='width' />
+												</label>
+												<div class="field-input col-12 md:col-9">
+													<p-dropdown v-model="item[screen.value].width" :options="pm.responsiveFlexCols" option-label="name" option-value="value"
+										        		@change="onVersionChange" class="input w-full">
+										        	</p-dropdown>
+												</div>
+											</div>
+											<div class="field grid">
+												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
+													<@spring.message code='height' />
+												</label>
+												<div class="field-input col-12 md:col-9">
+													<p-inputtext v-model="item[screen.value].height" type="text" class="help-target input w-full">
+													</p-inputtext>
+												</div>
+											</div>
+											<div class="field grid">
+												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
+													<@spring.message code='display' />
+												</label>
+												<div class="field-input col-12 md:col-9">
+													<p-selectbutton v-model="item[screen.value].display" :options="pm.booleanOptions"
+														option-label="name" option-value="value" class="input w-full">
+													</p-selectbutton>
+												</div>
+											</div>
+										</p-fieldset>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <p-dialog :header="pm.vepts.hxtitle" append-to="body"
 	position="center" :modal="true" v-model:visible="pm.vepss.hxtitleShown" @show="onVeHxtitlePanelShow">
 	<div class="page page-form">
@@ -2546,6 +2638,7 @@ page_palette.ftl
 	
 	po.i18n.gridLayout = "<@spring.message code='gridLayout' />";
 	po.i18n.flexLayout = "<@spring.message code='flexLayout' />";
+	po.i18n.responsiveFlexLayout = "<@spring.message code='responsiveFlexLayout' />";
 	po.i18n.titleElement = "<@spring.message code='titleElement' />";
 	po.i18n.textElement = "<@spring.message code='textElement' />";
 	po.i18n.image = "<@spring.message code='image' />";
@@ -2568,6 +2661,10 @@ page_palette.ftl
 	po.i18n["dashboard.veditor.gridLayout.divide.avg"] = "<@spring.message code='dashboard.veditor.gridLayout.divide.avg' />";
 	po.i18n["dashboard.veditor.gridLayout.divide.custom"] = "<@spring.message code='dashboard.veditor.gridLayout.divide.custom' />";
 	po.i18n.resetToOrigin = "<@spring.message code='resetToOrigin' />";
+	po.i18n["screenType.phone"] = "<@spring.message code='screenType.phone' />";
+	po.i18n["screenType.tablet"] = "<@spring.message code='screenType.tablet' />";
+	po.i18n["screenType.desktop"] = "<@spring.message code='screenType.desktop' />";
+	po.i18n["screenType.large"] = "<@spring.message code='screenType.large' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditorForms(po);
