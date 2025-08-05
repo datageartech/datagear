@@ -2436,8 +2436,10 @@ $.inflateDashboardDesignEditorForms = function(po)
 		for(var i=0;i<po.responsiveScreens.length; i++)
 		{
 			var type = po.responsiveScreens[i].value;
-			re[type] = { display: true, heightUnit: "%" };
+			re[type] = { heightUnit: "%", minHeightUnit: "%", maxHeightUnit: "%", display: true };
 		}
+		
+		re["xs"] = $.extend(re["xs"], { width: 12, height: 20, heightUnit: "rem" });
 		
 		return re;
 	};
@@ -2447,28 +2449,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 		var re =
 		{
 			fillParent: false, 
-			itemCount: 3,
-			itemLayouts: [ po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel() ]
+			itemLayouts: []
 		};
-		
-		$.extend(true, re.itemLayouts,
-		[
-			{
-				"xs": { width: 12, height: 20, heightUnit: "rem" },
-				"sm": { width: 6, height: 50, heightUnit: "%" },
-				"lg": { width: 4, height: 100, heightUnit: "%" },
-			},
-			{
-				"xs": { width: 12, height: 20, heightUnit: "rem" },
-				"sm": { width: 6, height: 50, heightUnit: "%" },
-				"lg": { width: 4, height: 100, heightUnit: "%" },
-			},
-			{
-				"xs": { width: 12, height: 20, heightUnit: "rem" },
-				"sm": { width: 12, height: 50, heightUnit: "%" },
-				"lg": { width: 4, height: 100, heightUnit: "%" },
-			}
-		]);
 		
 		return re;
 	};

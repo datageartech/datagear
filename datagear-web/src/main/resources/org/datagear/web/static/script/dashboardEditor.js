@@ -84,7 +84,8 @@
 	//HTML规范注释节点类型
 	var HTML_NODE_TYPE_COMMENT = (editor.HTML_NODE_TYPE_COMMENT = 8);
 	
-	var RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "lx" ];
+	//响应式布局断点
+	var RESPONSIVE_BREAKPOINTS = (editor.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "lx" ]);
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
@@ -928,7 +929,7 @@
 	/**
 	 * 插入响应式弹性布局元素。
 	 * 
-	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ {}, ... ], fillParent: 布尔值或布尔值字符串 }
+	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ { xs: { width: ..., height: ..., ...}, sm: {...}, ... }, ... ], fillParent: 布尔值或布尔值字符串 }
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 * 
@@ -998,8 +999,20 @@
 		
 		if(!chartFactory.isNullOrEmpty(layout.height))
 		{
-			var heightUnit = (layout.heightUnit == "%" ? "pct" : layout.heightUnit);
+			var heightUnit = this._evalResponsiveFlexCssLengthUnit(layout.heightUnit);
 			re += (re == "" ? "" : " ") + "dg-rsp-h-" + infix + layout.height + heightUnit;
+		}
+		
+		if(!chartFactory.isNullOrEmpty(layout.minHeight))
+		{
+			var heightUnit = this._evalResponsiveFlexCssLengthUnit(layout.minHeightUnit);
+			re += (re == "" ? "" : " ") + "dg-rsp-min-h-" + infix + layout.minHeight + heightUnit;
+		}
+		
+		if(!chartFactory.isNullOrEmpty(layout.maxHeight))
+		{
+			var heightUnit = this._evalResponsiveFlexCssLengthUnit(layout.maxHeightUnit);
+			re += (re == "" ? "" : " ") + "dg-rsp-max-h-" + infix + layout.maxHeight + heightUnit;
 		}
 		
 		if(layout.display === false || layout.display === "false")
@@ -1008,6 +1021,11 @@
 		}
 		
 		return re;
+	};
+	
+	editor._evalResponsiveFlexCssLengthUnit = function(unit)
+	{
+		return (unit == "%" ? "pct" : unit);
 	};
 	
 	/**
