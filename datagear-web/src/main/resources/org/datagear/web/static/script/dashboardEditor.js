@@ -84,6 +84,8 @@
 	//HTML规范注释节点类型
 	var HTML_NODE_TYPE_COMMENT = (editor.HTML_NODE_TYPE_COMMENT = 8);
 	
+	var RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "lx" ];
+	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
@@ -746,23 +748,12 @@
 	};
 	
 	/**
-	 * 校验网格布局元素。
+	 * 是否在空白<body>元素内插入元素。
 	 * 
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertGridLayout = function(insertType, refEle)
-	{
-		return true;
-	};
-	
-	/**
-	 * 是否可以插入填满父元素的网格布局元素。
-	 * 
-	 * @param insertType 可选，参考_insertElement()函数的insertType参数
-	 * @param refEle 可选，参考_insertElement()函数的refEle参数
-	 */
-	editor.canInsertFillParentGridLayout = function(insertType, refEle)
+	editor.isInsertToEmptyBody = function(insertType, refEle)
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
@@ -782,6 +773,17 @@
 		});
 		
 		return canInsert;
+	};
+	
+	/**
+	 * 校验网格布局元素。
+	 * 
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor.checkInsertGridLayout = function(insertType, refEle)
+	{
+		return true;
 	};
 	
 	/**
@@ -817,22 +819,7 @@
 		
 		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
-		var isBodyParent = insertParentEle.is("body");
-		
-		if(gridAttr.fillParent === "true" || gridAttr.fillParent === true)
-		{
-			if(isBodyParent)
-			{
-				this._setElementStyleAppend(insertParentEle, this._fillBodyStyleByAbsolute());
-			}
-			
-			styleStr += "height:100%;";
-		}
-		else if(isBodyParent)
-			styleStr += "height:300px;";
-		else
-			styleStr += "height:100%;";
-		
+		styleStr += this._evalInsertLayoutHeightStyle(gridAttr.fillParent, insertParentEle);
 		styleStr += "display:grid;";
 		
 		if(rows > 0)
@@ -890,17 +877,6 @@
 	};
 	
 	/**
-	 * 是否可以插入填满父元素的弹性布局元素。
-	 * 
-	 * @param insertType 可选，参考_insertElement()函数的insertType参数
-	 * @param refEle 可选，参考_insertElement()函数的refEle参数
-	 */
-	editor.canInsertFillParentFlexLayout = function(insertType, refEle)
-	{
-		return this.canInsertFillParentGridLayout(insertType, refEle);
-	};
-	
-	/**
 	 * 插入弹性布局元素。
 	 * 
 	 * @param flexAttr 网格设置，格式为：{ items: 数值或数值字符串, direction: "...", fillParent: 布尔值或布尔值字符串 }
@@ -921,22 +897,7 @@
 		
 		var styleStr = "";
 		var insertParentEle = this._getInsertParentElement(refEle, insertType);
-		var isBodyParent = insertParentEle.is("body");
-		
-		if(flexAttr.fillParent === "true" || flexAttr.fillParent === true)
-		{
-			if(isBodyParent)
-			{
-				this._setElementStyleAppend(insertParentEle, this._fillBodyStyleByAbsolute());
-			}
-			
-			styleStr += "height:100%;";
-		}
-		else if(isBodyParent)
-			styleStr += "height:300px;";
-		else
-			styleStr += "height:100%;";
-		
+		styleStr += this._evalInsertLayoutHeightStyle(flexAttr.fillParent, insertParentEle);
 		styleStr += "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
 						+"justify-content:space-around;align-items:center;align-content:space-around;";
 		
@@ -951,6 +912,102 @@
 		this._insertElement(div, insertType, refEle, true);
 		
 		return div;
+	};
+	
+	/**
+	 * 校验插入响应式弹性布局元素。
+	 * 
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor.checkInsertResponsiveFlex = function(insertType, refEle)
+	{
+		return true;
+	};
+	
+	/**
+	 * 插入响应式弹性布局元素。
+	 * 
+	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ {}, ... ], fillParent: 布尔值或布尔值字符串 }
+	 * @param insertType 可选，参考_insertElement()函数的insertType参数
+	 * @param refEle 可选，参考_insertElement()函数的refEle参数
+	 * 
+	 * @returns 元素
+	 */
+	editor.insertResponsiveFlex = function(model, insertType, refEle)
+	{
+		refEle = this._currentElement(refEle);
+		insertType = this._trimInsertType(refEle, insertType);
+		
+		var itemCount = (!chartFactory.isNumber(model.itemCount) ? parseInt(model.itemCount) : model.itemCount);
+		
+		//不能使用"<div />"，生成的源码格式不对
+		var div = $("<div></div>");
+		
+		var styleStr = "";
+		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		styleStr += this._evalInsertLayoutHeightStyle(model.fillParent, insertParentEle);
+		div.attr("style", styleStr);
+		
+		div.attr("class", "dg-rsp-row");
+		
+		for(var i=0; i<itemCount; i++)
+		{
+			var itemDiv = $("<div></div>");
+			var styleClass = this._evalResponsiveFlexItemClass(model.itemLayouts[i]);
+			itemDiv.attr("class", styleClass);
+			
+			this._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
+		}
+		
+		this._insertElement(div, insertType, refEle, true);
+		
+		return div;
+	};
+	
+	editor._evalResponsiveFlexItemClass = function(itemLayout)
+	{
+		itemLayout = (itemLayout == null ? {} : itemLayout);
+		
+		var re = "";
+		
+		for(var i=0; i<RESPONSIVE_BREAKPOINTS.length; i++)
+		{
+			var breakpoint = RESPONSIVE_BREAKPOINTS[i];
+			var layout = (itemLayout[breakpoint] || {});
+			var infix = (breakpoint == "xs" ? "" : breakpoint+"-");
+			var myRe = this._evalResponsiveFlexBreakpointClass(itemLayout, breakpoint, infix, layout);
+			
+			if(myRe)
+			{
+				re += (re == "" ? "" : " ") + myRe;
+			}
+		}
+		
+		return re;
+	};
+	
+	editor._evalResponsiveFlexBreakpointClass = function(itemLayout, breakpoint, infix, layout)
+	{
+		var re = "";
+		
+		if(!chartFactory.isNullOrEmpty(layout.width))
+		{
+			re += (re == "" ? "" : " ") + "dg-rsp-col-" + infix + layout.width;
+		}
+		
+		if(!chartFactory.isNullOrEmpty(layout.height))
+		{
+			var heightUnit = (layout.heightUnit == "%" ? "pct" : layout.heightUnit);
+			re += (re == "" ? "" : " ") + "dg-rsp-h-" + infix + layout.height + heightUnit;
+		}
+		
+		if(layout.display === false || layout.display === "false")
+		{
+			re += (re == "" ? "" : " ") + "dg-rsp-d-" + infix + "none";
+		}
+		
+		return re;
 	};
 	
 	/**
@@ -3667,5 +3724,28 @@
 		return display;
 	};
 	
+	editor._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
+	{
+		fillParent = (fillParent === true || fillParent === "true");
+		
+		var re = "";	
+		var isBodyParent = parentEle.is("body");
+		
+		if(fillParent)
+		{
+			if(isBodyParent)
+			{
+				this._setElementStyleAppend(parentEle, this._fillBodyStyleByAbsolute());
+			}
+			
+			re = "height:100%;";
+		}
+		else if(isBodyParent)
+			re = "height:300px;";
+		else
+			re = "height:100%;";
+		
+		return re;
+	};
 })
 (this);

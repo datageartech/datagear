@@ -1492,7 +1492,7 @@ $.inflateDashboardDesignEditor = function(po)
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						var showFillParent = dashboardEditor.canInsertFillParentGridLayout(this.insertType);
+						var showFillParent = dashboardEditor.isInsertToEmptyBody(this.insertType);
 						po.showVeGridLayoutPanel(showFillParent);
 					}
 				}
@@ -1513,7 +1513,7 @@ $.inflateDashboardDesignEditor = function(po)
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						var showFillParent = dashboardEditor.canInsertFillParentFlexLayout(this.insertType);
+						var showFillParent = dashboardEditor.isInsertToEmptyBody(this.insertType);
 						po.showVeFlexLayoutPanel(showFillParent);
 					}
 				}
@@ -1534,11 +1534,10 @@ $.inflateDashboardDesignEditor = function(po)
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						//var showFillParent = dashboardEditor.canInsertFillParentResponsiveFlex(this.insertType);
-						var showFillParent = false;
+						var showFillParent = dashboardEditor.isInsertToEmptyBody(this.insertType);
 						po.showVeResponsiveFlexPanel(function(model)
 						{
-							console.dir(model);
+							po.insertVeResponsiveFlex(model);
 						},
 						showFillParent);
 					}
@@ -2405,6 +2404,15 @@ $.inflateDashboardDesignEditor = function(po)
 //dashboard_design_editor_forms.ftl
 $.inflateDashboardDesignEditorForms = function(po)
 {
+	po.responsiveScreens =
+	[
+		{ name: po.i18n["screen.mobile"], value: "xs" },
+		{ name: po.i18n["screen.wideMobile"], value: "sm" },
+		{ name: po.i18n["screen.tablet"], value: "md" },
+		{ name: po.i18n["screen.desktop"], value: "lg" },
+		{ name: po.i18n["screen.large"], value: "xl" }
+	];
+	
 	po.veDftChartThemeModel = function()
 	{
 		var re = { graphColors: [], graphRangeColors: [] };
@@ -2421,14 +2429,46 @@ $.inflateDashboardDesignEditorForms = function(po)
 		return re;
 	};
 	
+	po.veInitResponsiveFlexModel = function()
+	{
+		var re = {};
+		
+		for(var i=0;i<po.responsiveScreens.length; i++)
+		{
+			var type = po.responsiveScreens[i].value;
+			re[type] = { display: true, heightUnit: "%" };
+		}
+		
+		return re;
+	};
+	
 	po.veDftResponsiveFlexModel = function()
 	{
 		var re =
 		{
 			fillParent: false, 
-			itemCount: null,
-			itemLayouts: []
+			itemCount: 3,
+			itemLayouts: [ po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel() ]
 		};
+		
+		$.extend(true, re.itemLayouts,
+		[
+			{
+				"xs": { width: 12, height: 20, heightUnit: "rem" },
+				"sm": { width: 6, height: 50, heightUnit: "%" },
+				"lg": { width: 4, height: 100, heightUnit: "%" },
+			},
+			{
+				"xs": { width: 12, height: 20, heightUnit: "rem" },
+				"sm": { width: 6, height: 50, heightUnit: "%" },
+				"lg": { width: 4, height: 100, heightUnit: "%" },
+			},
+			{
+				"xs": { width: 12, height: 20, heightUnit: "rem" },
+				"sm": { width: 12, height: 50, heightUnit: "%" },
+				"lg": { width: 4, height: 100, heightUnit: "%" },
+			}
+		]);
 		
 		return re;
 	};
@@ -2745,6 +2785,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 			},
 			veGridLayoutPanelShowFillParent: false,
 			veFlexLayoutPanelShowFillParent: false,
+			veResponsiveFlexPanelShowFillParent: false,
 			dashboardSizeScaleOptions:
 			[
 				{ name: po.i18n.auto, value: "auto" },
@@ -2769,13 +2810,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				{ name: po.i18n["dashboard.veditor.gridLayout.divide.avg"], value: "avg" },
 				{ name: po.i18n["dashboard.veditor.gridLayout.divide.custom"], value: "custom" }
 			],
-			responsiveScreens:
-			[
-				{ name: po.i18n["screenType.phone"], value: "xs" },
-				{ name: po.i18n["screenType.tablet"], value: "md" },
-				{ name: po.i18n["screenType.desktop"], value: "lg" },
-				{ name: po.i18n["screenType.large"], value: "xl" }
-			],
+			responsiveScreens: po.responsiveScreens,
 			veResponsiveFlexScreenType: "xs",
 			responsiveFlexCols:
 			[
@@ -3204,15 +3239,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		{
 			$.trimArrayLen(pm.vepms.responsiveFlex.itemLayouts, newVal, function()
 			{
-				var dftValue = {};
-				var responsiveScreens = pm.responsiveScreens;
-				for(var i=0;i<responsiveScreens.length; i++)
-				{
-					var type = responsiveScreens[i].value;
-					dftValue[type] = { display: true, heightUnit: "%" };
-				}
-				
-				return dftValue;
+				return po.veInitResponsiveFlexModel();
 			});
 		});
 	};

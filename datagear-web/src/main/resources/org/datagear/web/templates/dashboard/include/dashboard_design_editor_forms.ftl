@@ -279,8 +279,7 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid" v-if="pm.veGridLayoutPanelShowFillParent">
-					<label for="${pid}veGridLayoutFillParent" class="field-label col-12 mb-2"
-						title="<@spring.message code='dashboard.veditor.gridLayout.fillPage.desc' />">
+					<label for="${pid}veGridLayoutFillParent" class="field-label col-12 mb-2">
 						<@spring.message code='fillPage' />
 					</label>
 					<div class="field-input col-12">
@@ -349,8 +348,7 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid" v-if="pm.veFlexLayoutPanelShowFillParent">
-					<label for="${pid}veFlexLayoutFillParent" class="field-label col-12 mb-2"
-						title="<@spring.message code='dashboard.veditor.flexLayout.fillPage.desc' />">
+					<label for="${pid}veFlexLayoutFillParent" class="field-label col-12 mb-2">
 						<@spring.message code='fillPage' />
 					</label>
 					<div class="field-input col-12">
@@ -453,6 +451,16 @@ page_palette.ftl
 								</div>
 							</div>
 						</div>
+					</div>
+				</div>
+				<div class="field grid" v-if="pm.veResponsiveFlexPanelShowFillParent">
+					<label for="${pid}veResponsiveFlexFillParent" class="field-label col-12 mb-2">
+						<@spring.message code='fillPage' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}veResponsiveFlexFillParent" v-model="pm.vepms.responsiveFlex.fillParent" :options="pm.booleanOptions"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
 					</div>
 				</div>
 			</div>
@@ -2665,10 +2673,11 @@ page_palette.ftl
 	po.i18n["dashboard.veditor.gridLayout.divide.avg"] = "<@spring.message code='dashboard.veditor.gridLayout.divide.avg' />";
 	po.i18n["dashboard.veditor.gridLayout.divide.custom"] = "<@spring.message code='dashboard.veditor.gridLayout.divide.custom' />";
 	po.i18n.resetToOrigin = "<@spring.message code='resetToOrigin' />";
-	po.i18n["screenType.phone"] = "<@spring.message code='screenType.phone' />";
-	po.i18n["screenType.tablet"] = "<@spring.message code='screenType.tablet' />";
-	po.i18n["screenType.desktop"] = "<@spring.message code='screenType.desktop' />";
-	po.i18n["screenType.large"] = "<@spring.message code='screenType.large' />";
+	po.i18n["screen.mobile"] = "<@spring.message code='screen.mobile' />";
+	po.i18n["screen.wideMobile"] = "<@spring.message code='screen.wideMobile' />";
+	po.i18n["screen.tablet"] = "<@spring.message code='screen.tablet' />";
+	po.i18n["screen.desktop"] = "<@spring.message code='screen.desktop' />";
+	po.i18n["screen.large"] = "<@spring.message code='screen.large' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditorForms(po);
