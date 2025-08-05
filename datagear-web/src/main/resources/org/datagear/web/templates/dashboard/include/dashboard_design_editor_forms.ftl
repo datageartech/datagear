@@ -436,6 +436,8 @@ page_palette.ftl
 													</div>
 												</div>
 											</div>
+											<!--
+											这两个属性暂时没必要，先禁用，减少功能复杂性
 											<div class="field grid">
 												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
 													<@spring.message code='minHeight' />
@@ -462,6 +464,7 @@ page_palette.ftl
 													</div>
 												</div>
 											</div>
+											-->
 											<div class="field grid">
 												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
 													<@spring.message code='display' />
