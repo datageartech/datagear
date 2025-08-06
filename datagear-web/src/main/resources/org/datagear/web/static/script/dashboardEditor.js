@@ -1003,18 +1003,6 @@
 			re += (re == "" ? "" : " ") + "dg-rsp-h-" + infix + layout.height + heightUnit;
 		}
 		
-		if(!chartFactory.isNullOrEmpty(layout.minHeight))
-		{
-			var heightUnit = this._evalResponsiveFlexCssLengthUnit(layout.minHeightUnit);
-			re += (re == "" ? "" : " ") + "dg-rsp-min-h-" + infix + layout.minHeight + heightUnit;
-		}
-		
-		if(!chartFactory.isNullOrEmpty(layout.maxHeight))
-		{
-			var heightUnit = this._evalResponsiveFlexCssLengthUnit(layout.maxHeightUnit);
-			re += (re == "" ? "" : " ") + "dg-rsp-max-h-" + infix + layout.maxHeight + heightUnit;
-		}
-		
 		if(layout.display === false || layout.display === "false")
 		{
 			re += (re == "" ? "" : " ") + "dg-rsp-d-" + infix + "none";

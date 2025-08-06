@@ -2436,7 +2436,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		for(var i=0;i<po.responsiveScreens.length; i++)
 		{
 			var type = po.responsiveScreens[i].value;
-			re[type] = { heightUnit: "%", minHeightUnit: "%", maxHeightUnit: "%", display: true };
+			re[type] = { heightUnit: "%", display: true };
 		}
 		
 		re["xs"] = $.extend(re["xs"], { width: 12, height: 20, heightUnit: "rem" });

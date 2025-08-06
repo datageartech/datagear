@@ -436,35 +436,6 @@ page_palette.ftl
 													</div>
 												</div>
 											</div>
-											<!--
-											这两个属性暂时没必要，先禁用，减少功能复杂性
-											<div class="field grid">
-												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
-													<@spring.message code='minHeight' />
-												</label>
-												<div class="field-input col-12 md:col-9">
-													<div class="p-inputgroup">
-														<p-selectbutton v-model="item[screen.value].minHeightUnit" :options="pm.responsiveHeightUnits" option-label="value" option-value="value">
-											        	</p-selectbutton>
-														<p-dropdown v-model="item[screen.value].minHeight" :options="pm.responsiveHeightOptions[item[screen.value].minHeightUnit]" option-label="name" option-value="value" show-clear="true">
-											        	</p-dropdown>
-													</div>
-												</div>
-											</div>
-											<div class="field grid">
-												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
-													<@spring.message code='maxHeight' />
-												</label>
-												<div class="field-input col-12 md:col-9">
-													<div class="p-inputgroup">
-														<p-selectbutton v-model="item[screen.value].maxHeightUnit" :options="pm.responsiveHeightUnits" option-label="value" option-value="value">
-											        	</p-selectbutton>
-														<p-dropdown v-model="item[screen.value].maxHeight" :options="pm.responsiveHeightOptions[item[screen.value].maxHeightUnit]" option-label="name" option-value="value" show-clear="true">
-											        	</p-dropdown>
-													</div>
-												</div>
-											</div>
-											-->
 											<div class="field grid">
 												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
 													<@spring.message code='display' />
