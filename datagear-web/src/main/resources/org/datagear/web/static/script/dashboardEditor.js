@@ -86,6 +86,8 @@
 	
 	//响应式布局断点
 	var RESPONSIVE_BREAKPOINTS = (editor.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "lx" ]);
+	//响应式布局名称，详细参考analysis.css中的【.dg-rsp-布局名称[-断点]-布局值】样式类定义
+	var RESPONSIVE_LAYOUT_NAMES = (editor.RESPONSIVE_LAYOUT_NAMES = [ "col", "h", "d" ]);
 	
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
@@ -538,7 +540,7 @@
 		if(!$ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID))
 			return false;
 		
-		var tagName = ($ele[0] && $ele[0].tagName ? $ele[0].tagName : "").toLowerCase();
+		var tagName = this._tagNameOfEleLowerCase($ele);
 		
 		if(chartFactory.isNullOrEmpty(tagName))
 			return false;
@@ -546,7 +548,7 @@
 		if(tagName == "body")
 			return false;
 		
-		if(tagName == "script" || tagName == "style" || tagName == "template")
+		if(!this._isVisualEleTag(tagName))
 			return false;
 		
 		if($ele.is(":hidden"))
@@ -561,6 +563,23 @@
 		*/
 		
 		return true;
+	};
+	
+	editor._tagNameOfEleLowerCase = function($ele)
+	{
+		return ($ele[0] && $ele[0].tagName ? $ele[0].tagName : "").toLowerCase();
+	};
+	
+	editor._isVisualEleTag = function(tagNameLowerCase)
+	{
+		if(tagNameLowerCase == "script" || tagNameLowerCase == "style" || tagNameLowerCase == "template")
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	};
 	
 	/**
@@ -929,7 +948,7 @@
 	/**
 	 * 插入响应式弹性布局元素。
 	 * 
-	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ { xs: { width: ..., height: ..., ...}, sm: {...}, ... }, ... ], fillParent: 布尔值或布尔值字符串 }
+	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ { xs: { "布局名称": ..., ...}, sm: {...}, ... }, ... ], fillParent: 布尔值或布尔值字符串 }
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 * 
@@ -976,13 +995,11 @@
 		{
 			var breakpoint = RESPONSIVE_BREAKPOINTS[i];
 			var layout = (itemLayout[breakpoint] || {});
-			var infix = (breakpoint == "xs" ? "" : breakpoint+"-");
+			var infix = (breakpoint == "xs" ? "" : "-"+breakpoint);
 			var myRe = this._evalResponsiveFlexBreakpointClass(itemLayout, breakpoint, infix, layout);
 			
 			if(myRe)
-			{
 				re += (re == "" ? "" : " ") + myRe;
-			}
 		}
 		
 		return re;
@@ -992,20 +1009,15 @@
 	{
 		var re = "";
 		
-		if(!chartFactory.isNullOrEmpty(layout.width))
+		for(var i=0; i<RESPONSIVE_LAYOUT_NAMES.length; i++)
 		{
-			re += (re == "" ? "" : " ") + "dg-rsp-col-" + infix + layout.width;
-		}
-		
-		if(!chartFactory.isNullOrEmpty(layout.height))
-		{
-			var heightUnit = this._evalResponsiveFlexCssLengthUnit(layout.heightUnit);
-			re += (re == "" ? "" : " ") + "dg-rsp-h-" + infix + layout.height + heightUnit;
-		}
-		
-		if(layout.display === false || layout.display === "false")
-		{
-			re += (re == "" ? "" : " ") + "dg-rsp-d-" + infix + "none";
+			var name = RESPONSIVE_LAYOUT_NAMES[i];
+			var value = layout[name];
+			
+			if(!chartFactory.isNullOrEmpty(value))
+			{
+				re += (re == "" ? "" : " ") + "dg-rsp-"+name + infix +"-" + value;
+			}
 		}
 		
 		return re;
@@ -1014,6 +1026,189 @@
 	editor._evalResponsiveFlexCssLengthUnit = function(unit)
 	{
 		return (unit == "%" ? "pct" : unit);
+	};
+	
+	/**
+	 * 获取指定元素的响应式弹性布局设置。
+	 * 
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor.getResponsiveFlex = function(ele)
+	{
+		ele = this._editElement(this._currentElement(ele, true));
+		
+		var re = { itemCount: 0, itemLayouts: [] };
+		
+		var thisEditor = this;
+		ele.children().each(function()
+		{
+			var child = $(this);
+			var editId = thisEditor._layoutAffectEleEditId(child);
+			
+			if(chartFactory.isNullOrEmpty(editId))
+				return;
+			
+			var layout = thisEditor._evalResponsiveFlexItemLayout(child.attr("class"));
+			layout.visualEditId = editId;
+			
+			re.itemCount++;
+			re.itemLayouts.push(layout);
+		});
+		
+		return re;
+	};
+	
+	editor._layoutAffectEleEditId = function($ele)
+	{
+		var editId = $ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID);
+		
+		if(chartFactory.isNullOrEmpty(editId))
+			return null;
+		
+		var tagName = this._tagNameOfEleLowerCase($ele);
+		
+		if(chartFactory.isNullOrEmpty(tagName))
+			return null;
+		
+		if(!this._isVisualEleTag(tagName))
+			return null;
+		
+		var position = $ele.css("position");
+		if(position == "absolute" || position == "fixed")
+			return null;
+		
+		return editId;
+	};
+	
+	editor._evalResponsiveFlexItemLayout = function(classStr)
+	{
+		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
+		
+		var re = {};
+		
+		//从"dg-rsp-名称[-breakpoint]-值"中解析布局信息
+		for(var i=0; i<classNames.length; i++)
+		{
+			var className = classNames[i];
+			
+			if(chartFactory.isNullOrEmpty(className) || !className.indexOf("dg-rsp-") == 0)
+				continue;
+			
+			var partStr = className.substr("dg-rsp-".length);
+			var splitIdx = partStr.indexOf("-");
+			
+			if(splitIdx <= 0)
+				continue;
+			
+			var breakpoint = "xs";
+			var name = partStr.substring(0, splitIdx);
+			var value = (splitIdx == partStr.length-1 ? "" : partStr.substring(splitIdx + 1));
+			
+			if(chartFactory.isNullOrEmpty(value))
+				continue;
+			
+			splitIdx = value.indexOf("-");
+			if(splitIdx >= 0)
+			{
+				var part0 = value.substring(0, splitIdx);
+				var isBreakpoint = ($.inArray(part0, RESPONSIVE_BREAKPOINTS) > -1);
+				
+				if(isBreakpoint)
+				{
+					breakpoint = part0;
+					value = (splitIdx == value.length-1 ? "" : value.substring(splitIdx + 1));
+				}
+			}
+			
+			if(chartFactory.isNullOrEmpty(value))
+				continue;
+			
+			re[breakpoint] = (re[breakpoint] || {});
+			this._inflateResponsiveFlexBreakpoint(re[breakpoint], name, value);
+		}
+		
+		return re;
+	};
+	
+	editor._inflateResponsiveFlexBreakpoint = function(breakpointObj, name, value)
+	{
+		breakpointObj[name] = value;
+	};
+	
+	/**
+	 * 校验设置元素响应式弹性布局。
+	 * 
+	 * @param ele 可选，参考_insertElement()函数的refEle参数
+	 */
+	editor.checkSetResponsiveFlex = function(ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this._checkNotEmptyElement(ele))
+			return false;
+		
+		return true;
+	};
+	
+	/**
+	 * 设置元素响应式弹性布局。
+	 * 
+	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ { xs: { "布局名称": ..., ...}, sm: {...}, ... }, ... ] }
+	 * @param ele 可选
+	 * 
+	 * @returns 元素
+	 */
+	editor.setResponsiveFlex = function(model, ele)
+	{
+		ele = this._currentElement(ele, true);
+		
+		if(!this.checkSetResponsiveFlex(ele))
+			return false;
+		
+		var editEle = this._editElement(ele);
+		var newClassName = this._removeResponsiveFlexClass(editEle.attr("class"));
+		newClassName = "dg-rsp-row" + (newClassName == "" ? "" : " " + newClassName);
+		
+		this._setElementClass(ele, newClassName);
+		
+		var itemLayouts = (model.itemLayouts || []);
+		for(var i=0; i<itemLayouts.length; i++)
+		{
+			var itemLayout = itemLayouts[i];
+			
+			if(!itemLayout.visualEditId)
+				continue;
+			
+			var child = this._getEleByVisualEditId(itemLayout.visualEditId);
+			var editChild = this._editElement(child);
+			
+			var layoutClass = this._evalResponsiveFlexItemClass(itemLayout);
+			var newChildClassName = this._removeResponsiveFlexClass(editChild.attr("class"));
+			newChildClassName = layoutClass + (newChildClassName == "" ? "" : " " + newChildClassName);
+			
+			this._setElementClass(child, newChildClassName);
+		}
+		
+		return ele;
+	};
+	
+	editor._removeResponsiveFlexClass = function(classStr)
+	{
+		var re = "";
+		
+		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
+		
+		for(var i=0; i<classNames.length; i++)
+		{
+			var className = classNames[i];
+			
+			if(className.indexOf("dg-rsp-") == 0)
+				continue;
+			
+			re += (re == "" ? "" : " ") + className;
+		}
+		
+		return re;
 	};
 	
 	/**
@@ -3334,6 +3529,11 @@
 	editor._getVisualEditId = function($ele)
 	{
 		return $ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID);
+	};
+	
+	editor._getEleByVisualEditId = function(editId)
+	{
+		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
 	};
 	
 	editor._nextVisualEditId = function()

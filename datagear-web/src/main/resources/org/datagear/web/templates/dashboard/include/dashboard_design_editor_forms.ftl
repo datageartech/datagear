@@ -420,8 +420,8 @@ page_palette.ftl
 													<@spring.message code='width' />
 												</label>
 												<div class="field-input col-12 md:col-9">
-													<p-dropdown v-model="item[screen.value].width" :options="pm.responsiveFlexCols" option-label="name" option-value="value" show-clear="true"
-										        		class="input w-full">
+													<p-dropdown v-model="item[screen.value].col" :options="pm.responsiveFlexCols"
+														option-label="name" option-value="value" show-clear="true" class="input w-full">
 										        	</p-dropdown>
 												</div>
 											</div>
@@ -432,9 +432,10 @@ page_palette.ftl
 												</label>
 												<div class="field-input col-12 md:col-9">
 													<div class="p-inputgroup">
-														<p-selectbutton v-model="item[screen.value].heightUnit" :options="pm.responsiveHeightUnits" option-label="value" option-value="value">
+														<p-selectbutton v-model="item[screen.value].heightUnit" :options="pm.responsiveHeightUnits" option-label="name" option-value="value">
 											        	</p-selectbutton>
-														<p-dropdown v-model="item[screen.value].height" :options="pm.responsiveHeightOptions[item[screen.value].heightUnit]" option-label="name" option-value="value" show-clear="true">
+														<p-dropdown v-model="item[screen.value].h" :options="pm.responsiveHeightOptions[item[screen.value].heightUnit]"
+															option-label="name" option-value="value" show-clear="true">
 											        	</p-dropdown>
 													</div>
 												</div>
@@ -445,9 +446,9 @@ page_palette.ftl
 													<@spring.message code='display' />
 												</label>
 												<div class="field-input col-12 md:col-9">
-													<p-selectbutton v-model="item[screen.value].display" :options="pm.booleanOptions"
-														option-label="name" option-value="value" class="input w-full">
-													</p-selectbutton>
+													<p-dropdown v-model="item[screen.value].d" :options="pm.responsiveDisplayOptions"
+														option-label="name" option-value="value" show-clear="true" class="input w-full">
+													</p-dropdown>
 												</div>
 											</div>
 										</p-fieldset>
@@ -2874,6 +2875,8 @@ page_palette.ftl
 	po.i18n["screen.tablet"] = "<@spring.message code='screen.tablet' />";
 	po.i18n["screen.desktop"] = "<@spring.message code='screen.desktop' />";
 	po.i18n["screen.large"] = "<@spring.message code='screen.large' />";
+	po.i18n["display"] = "<@spring.message code='display' />";
+	po.i18n["hide"] = "<@spring.message code='hide' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditorForms(po);

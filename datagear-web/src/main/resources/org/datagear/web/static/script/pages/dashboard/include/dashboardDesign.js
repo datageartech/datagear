@@ -1539,6 +1539,7 @@ $.inflateDashboardDesignEditor = function(po)
 						{
 							po.insertVeResponsiveFlex(model);
 						},
+						po.veDftResponsiveFlexModel(),
 						showFillParent);
 					}
 				}
@@ -2059,6 +2060,32 @@ $.inflateDashboardDesignEditor = function(po)
 							}
 						},
 						{
+							label: po.i18n.responsiveFlexLayout,
+							parentLabelPath: po.i18n.edit,
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.veQuickExecuteMenuItem(this);
+								
+								var dashboardEditor = po.visualDashboardEditorByTab();
+								if(dashboardEditor)
+								{
+									if(!dashboardEditor.checkSetResponsiveFlex())
+										return;
+									
+									var model = dashboardEditor.getResponsiveFlex();
+									po.showVeResponsiveFlexPanel(function(model)
+									{
+										po.updateVeResponsiveFlex(model);
+									},
+									model);
+								}
+							}
+						},
+						{
 							label: po.i18n.chart,
 							items:
 							[
@@ -2436,7 +2463,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		for(var i=0;i<po.responsiveScreens.length; i++)
 		{
 			var type = po.responsiveScreens[i].value;
-			re[type] = { heightUnit: "%", display: true };
+			re[type] = { heightUnit: "pct" };
 		}
 		
 		return re;
@@ -2454,16 +2481,16 @@ $.inflateDashboardDesignEditorForms = function(po)
 		$.extend(true, re.itemLayouts,
 		[
 			{
-				"xs": { width: 12, height: 33, heightUnit: "%" },
-				"sm": { width: 6, height: 50, heightUnit: "%" }
+				"xs": { col: "12", h: "33pct" },
+				"sm": { col: "6", h: "50pct" }
 			},
 			{
-				"xs": { width: 12, height: 33, heightUnit: "%" },
-				"sm": { width: 6, height: 50, heightUnit: "%" }
+				"xs": { col: "12", h: "33pct" },
+				"sm": { col: "6", h: "50pct" }
 			},
 			{
-				"xs": { width: 12, height: 33, heightUnit: "%" },
-				"sm": { width: 12, height: 50, heightUnit: "%" }
+				"xs": { col: "12", h: "33pct" },
+				"sm": { col: "12", h: "50pct" }
 			}
 		]);
 		
@@ -2586,7 +2613,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		pm.vepss.flexLayoutShown = true;
 	};
 	
-	po.showVeResponsiveFlexPanel = function(submitHandler, showFillParent)
+	po.showVeResponsiveFlexPanel = function(submitHandler, model, showFillParent)
 	{
 		showFillParent = (showFillParent == null ? false : showFillParent);
 		
@@ -2594,6 +2621,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		
 		pm.veshs.responsiveFlex = submitHandler;
 		pm.veResponsiveFlexPanelShowFillParent = showFillParent;
+		pm.vepms.responsiveFlex = $.extend(true, {}, model);
 		pm.vepms.responsiveFlex.fillParent = showFillParent;
 		pm.vepss.responsiveFlexShown = true;
 	};
@@ -2811,61 +2839,59 @@ $.inflateDashboardDesignEditorForms = function(po)
 			veResponsiveFlexScreenType: "xs",
 			responsiveFlexCols:
 			[
-				{ name: "1/12", value: 1 },
-				{ name: "2/12", value: 2 },
-				{ name: "3/12", value: 3 },
-				{ name: "4/12", value: 4 },
-				{ name: "5/12", value: 5 },
-				{ name: "6/12", value: 6 },
-				{ name: "7/12", value: 7 },
-				{ name: "8/12", value: 8 },
-				{ name: "9/12", value: 9 },
-				{ name: "10/12", value: 10 },
-				{ name: "11/12", value: 11 },
-				{ name: "12/12", value: 12 }
+				{ name: "1/12", value: "1" },
+				{ name: "2/12", value: "2" },
+				{ name: "3/12", value: "3" },
+				{ name: "4/12", value: "4" },
+				{ name: "5/12", value: "5" },
+				{ name: "6/12", value: "6" },
+				{ name: "7/12", value: "7" },
+				{ name: "8/12", value: "8" },
+				{ name: "9/12", value: "9" },
+				{ name: "10/12", value: "10" },
+				{ name: "11/12", value: "11" },
+				{ name: "12/12", value: "12" }
 			],
 			responsiveHeightUnits:
 			[
-				{
-					value: "%"
-				},
-				{
-					value: "rem"
-					
-				},
-				{
-					value: "vh"
-				}
+				{ name: "%", value: "pct" },
+				{ name: "rem", value: "rem" },
+				{ name: "vh", value: "vh" }
 			],
 			responsiveHeightOptions:
 			{
-				"%":
+				"pct":
 				[
 					{name: "auto", value: "auto"},
-					{name: "5%", value: 5}, {name: "10%", value: 10}, {name: "15%", value: 15}, {name: "20%", value: 20}, {name: "25%", value: 25},
-					{name: "30%", value: 30}, {name: "33.3%", value: 33}, {name: "35%", value: 35}, {name: "40%", value: 40}, {name: "45%", value: 45}, {name: "50%", value: 50},
-					{name: "55%", value: 55}, {name: "60%", value: 60}, {name: "65%", value: 65}, {name: "70%", value: 70}, {name: "75%", value: 75},
-					{name: "80%", value: 80}, {name: "85%", value: 85}, {name: "90%", value: 90}, {name: "95%", value: 95}, {name: "100%", value: 100}
+					{name: "5%", value: "5pct"}, {name: "10%", value: "10pct"}, {name: "15%", value: "15pct"}, {name: "20%", value: "20pct"}, {name: "25%", value: "25pct"},
+					{name: "30%", value: "30pct"}, {name: "33.3%", value: "33pct"}, {name: "35%", value: "35pct"}, {name: "40%", value: "40pct"}, {name: "45%", value: "45pct"}, {name: "50%", value: "50pct"},
+					{name: "55%", value: "55pct"}, {name: "60%", value: "60pct"}, {name: "65%", value: "65pct"}, {name: "70%", value: "70pct"}, {name: "75%", value: "75pct"},
+					{name: "80%", value: "80pct"}, {name: "85%", value: "85pct"}, {name: "90%", value: "90pct"}, {name: "95%", value: "95pct"}, {name: "100%", value: "100pct"}
 				],
 				"rem":
 				[
 					{name: "auto", value: "auto"},
-					{name: "1rem", value: 1}, {name: "2rem", value: 2}, {name: "3rem", value: 3}, {name: "4rem", value: 4}, {name: "5rem", value: 5},
-					{name: "6rem", value: 6}, {name: "7rem", value: 7}, {name: "8rem", value: 8}, {name: "9rem", value: 9}, {name: "10rem", value: 10},
-					{name: "11rem", value: 11}, {name: "12rem", value: 12}, {name: "13rem", value: 13}, {name: "14rem", value: 14}, {name: "15rem", value: 15},
-					{name: "16rem", value: 16}, {name: "17rem", value: 17}, {name: "18rem", value: 18}, {name: "19rem", value: 19}, {name: "20rem", value: 20},
-					{name: "21rem", value: 21}, {name: "22rem", value: 22}, {name: "23rem", value: 23}, {name: "24rem", value: 24}, {name: "25rem", value: 25},
-					{name: "26rem", value: 26}, {name: "27rem", value: 27}, {name: "28rem", value: 28}, {name: "29rem", value: 29}, {name: "30rem", value: 30}
+					{name: "1rem", value: "1rem"}, {name: "2rem", value: "2rem"}, {name: "3rem", value: "3rem"}, {name: "4rem", value: "4rem"}, {name: "5rem", value: "5rem"},
+					{name: "6rem", value: "6rem"}, {name: "7rem", value: "7rem"}, {name: "8rem", value: "8rem"}, {name: "9rem", value: "9rem"}, {name: "10rem", value: "10rem"},
+					{name: "11rem", value: "11rem"}, {name: "12rem", value: "12rem"}, {name: "13rem", value: "13rem"}, {name: "14rem", value: "14rem"}, {name: "15rem", value: "15rem"},
+					{name: "16rem", value: "16rem"}, {name: "17rem", value: "17rem"}, {name: "18rem", value: "18rem"}, {name: "19rem", value: "19rem"}, {name: "20rem", value: "20rem"},
+					{name: "21rem", value: "21rem"}, {name: "22rem", value: "22rem"}, {name: "23rem", value: "23rem"}, {name: "24rem", value: "24rem"}, {name: "25rem", value: "25rem"},
+					{name: "26rem", value: "26rem"}, {name: "27rem", value: "27rem"}, {name: "28rem", value: "28rem"}, {name: "29rem", value: "29rem"}, {name: "30rem", value: "30rem"}
 				],
 				"vh":
 				[
 					{name: "auto", value: "auto"},
-					{name: "5vh", value: 5}, {name: "10vh", value: 10}, {name: "15vh", value: 15}, {name: "20vh", value: 20}, {name: "25vh", value: 25},
-					{name: "30vh", value: 30}, {name: "33.3vh", value: 33}, {name: "35vh", value: 35}, {name: "40vh", value: 40}, {name: "45vh", value: 45}, {name: "50vh", value: 50},
-					{name: "55vh", value: 55}, {name: "60vh", value: 60}, {name: "65vh", value: 65}, {name: "70vh", value: 70}, {name: "75vh", value: 75},
-					{name: "80vh", value: 80}, {name: "85vh", value: 85}, {name: "90vh", value: 90}, {name: "95vh", value: 95}, {name: "100vh", value: 100}
+					{name: "5vh", value: "5vh"}, {name: "10vh", value: "10vh"}, {name: "15vh", value: "15vh"}, {name: "20vh", value: "20vh"}, {name: "25vh", value: "25vh"},
+					{name: "30vh", value: "30vh"}, {name: "33.3vh", value: "33vh"}, {name: "35vh", value: "35vh"}, {name: "40vh", value: "40vh"}, {name: "45vh", value: "45vh"}, {name: "50vh", value: "50vh"},
+					{name: "55vh", value: "55vh"}, {name: "60vh", value: "60vh"}, {name: "65vh", value: "65vh"}, {name: "70vh", value: "70vh"}, {name: "75vh", value: "75vh"},
+					{name: "80vh", value: "80vh"}, {name: "85vh", value: "85vh"}, {name: "90vh", value: "90vh"}, {name: "95vh", value: "95vh"}, {name: "100vh", value: "100vh"}
 				]
-			}
+			},
+			responsiveDisplayOptions:
+			[
+				{ name: po.i18n["display"], value: "block" },
+				{ name: po.i18n["hide"], value: "none" }
+			]
 		});
 		
 		var pm = po.vuePageModel();
