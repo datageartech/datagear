@@ -1390,6 +1390,198 @@ page_palette.ftl
 								</div>
 							</div>
 							<div class="field grid">
+								<label for="${pid}veStyleMinWdith" class="field-label col-12 mb-2">
+									<@spring.message code='minWidth' />
+									<span class="text-color-secondary text-sm ml-1">min-width</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleMinWdith" v-model="pm.vepms.style['min-width']" type="text"
+										class="help-target input w-full" name="min-width">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="5rem">
+											5rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10rem">
+											10rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="15rem">
+											15rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20rem">
+											20rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25rem">
+											25rem
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vw">
+											20vw
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vw">
+											25vw
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vw">
+											30vw
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vmin">
+											20vmin
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vmin">
+											25vmin
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vmin">
+											30vmin
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleMinHeight" class="field-label col-12 mb-2">
+									<@spring.message code='minHeight' />
+									<span class="text-color-secondary text-sm ml-1">min-height</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleMinHeight" v-model="pm.vepms.style['min-height']" type="text"
+										class="help-target input w-full" name="min-height">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="5rem">
+											5rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10rem">
+											10rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="15rem">
+											15rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20rem">
+											20rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25rem">
+											25rem
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vh">
+											20vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vh">
+											25vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vh">
+											30vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vmin">
+											20vmin
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vmin">
+											25vmin
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vmin">
+											30vmin
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleMaxWdith" class="field-label col-12 mb-2">
+									<@spring.message code='maxWidth' />
+									<span class="text-color-secondary text-sm ml-1">max-width</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleMaxWdith" v-model="pm.vepms.style['max-width']" type="text"
+										class="help-target input w-full" name="max-width">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="5rem">
+											5rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10rem">
+											10rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="15rem">
+											15rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20rem">
+											20rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25rem">
+											25rem
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vw">
+											20vw
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vw">
+											25vw
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vw">
+											30vw
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vmax">
+											20vmax
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vmax">
+											25vmax
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vmax">
+											30vmax
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
+								<label for="${pid}veStyleMaxHeight" class="field-label col-12 mb-2">
+									<@spring.message code='maxHeight' />
+									<span class="text-color-secondary text-sm ml-1">max-height</span>
+								</label>
+								<div class="field-input col-12">
+									<p-inputtext id="${pid}veStyleMaxHeight" v-model="pm.vepms.style['max-height']" type="text"
+										class="help-target input w-full" name="max-height">
+									</p-inputtext>
+									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="5rem">
+											5rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="10rem">
+											10rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="15rem">
+											15rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20rem">
+											20rem
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25rem">
+											25rem
+										</p-button>
+									</div>
+									<div class="p-buttonset text-sm" style="margin-top:1px;">
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vh">
+											20vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vh">
+											25vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vh">
+											30vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vmax">
+											20vmax
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vmax">
+											25vmax
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vmax">
+											30vmax
+										</p-button>
+									</div>
+								</div>
+							</div>
+							<div class="field grid">
 								<label for="${pid}veStylePadding" class="field-label col-12 mb-2"
 									 title="<@spring.message code='dashboard.veditor.style.padding.desc' />">
 									<@spring.message code='dashboard.veditor.style.padding' />
