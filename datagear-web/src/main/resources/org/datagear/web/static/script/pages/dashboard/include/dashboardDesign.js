@@ -2439,8 +2439,6 @@ $.inflateDashboardDesignEditorForms = function(po)
 			re[type] = { heightUnit: "%", display: true };
 		}
 		
-		re["xs"] = $.extend(re["xs"], { width: 12, height: 20, heightUnit: "rem" });
-		
 		return re;
 	};
 	
@@ -2448,9 +2446,26 @@ $.inflateDashboardDesignEditorForms = function(po)
 	{
 		var re =
 		{
-			fillParent: false, 
-			itemLayouts: []
+			fillParent: false,
+			itemCount: 3,
+			itemLayouts: [ po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel() ]
 		};
+		
+		$.extend(true, re.itemLayouts,
+		[
+			{
+				"xs": { width: 12, height: 33, heightUnit: "%" },
+				"sm": { width: 6, height: 50, heightUnit: "%" }
+			},
+			{
+				"xs": { width: 12, height: 33, heightUnit: "%" },
+				"sm": { width: 6, height: 50, heightUnit: "%" }
+			},
+			{
+				"xs": { width: 12, height: 33, heightUnit: "%" },
+				"sm": { width: 12, height: 50, heightUnit: "%" }
+			}
+		]);
 		
 		return re;
 	};
