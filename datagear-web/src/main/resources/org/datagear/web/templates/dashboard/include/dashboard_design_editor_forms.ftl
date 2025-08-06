@@ -401,7 +401,8 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veResponsiveFlexScreen" class="field-label col-12 mb-2">
+					<label for="${pid}veResponsiveFlexScreen" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.rspFlex.itemLayout.desc' />">
 						<@spring.message code='itemLayout' />
 					</label>
 					<div class="field-input col-12">
@@ -414,7 +415,8 @@ page_palette.ftl
 									<div v-for="(item, itemIdx) in pm.vepms.responsiveFlex.itemLayouts">
 										<p-fieldset :legend="'<@spring.message code='item' /> ' + (itemIdx+1)" class="fieldset-sm fieldset-bold-legend mb-3">
 											<div class="field grid">
-												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
+												<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
+													title="<@spring.message code='dashboard.veditor.rspFlex.width.desc' />">
 													<@spring.message code='width' />
 												</label>
 												<div class="field-input col-12 md:col-9">
@@ -424,7 +426,8 @@ page_palette.ftl
 												</div>
 											</div>
 											<div class="field grid">
-												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
+												<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
+													title="<@spring.message code='dashboard.veditor.rspFlex.height.desc' />">
 													<@spring.message code='height' />
 												</label>
 												<div class="field-input col-12 md:col-9">
@@ -437,7 +440,8 @@ page_palette.ftl
 												</div>
 											</div>
 											<div class="field grid">
-												<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
+												<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
+													title="<@spring.message code='dashboard.veditor.rspFlex.display.desc' />">
 													<@spring.message code='display' />
 												</label>
 												<div class="field-input col-12 md:col-9">
