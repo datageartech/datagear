@@ -1540,7 +1540,7 @@ $.inflateDashboardDesignEditor = function(po)
 							po.insertVeResponsiveFlex(model);
 						},
 						po.veDftResponsiveFlexModel(),
-						showFillParent);
+						false, showFillParent);
 					}
 				}
 			},
@@ -2077,11 +2077,13 @@ $.inflateDashboardDesignEditor = function(po)
 										return;
 									
 									var model = dashboardEditor.getResponsiveFlex();
+									po.veInflateResponsiveFlexModel(model);
+									
 									po.showVeResponsiveFlexPanel(function(model)
 									{
 										po.updateVeResponsiveFlex(model);
 									},
-									model);
+									model, true);
 								}
 							}
 						},
@@ -2456,17 +2458,33 @@ $.inflateDashboardDesignEditorForms = function(po)
 		return re;
 	};
 	
-	po.veInitResponsiveFlexModel = function()
+	po.veInitResponsiveFlexItem = function(item)
 	{
-		var re = {};
+		item = (item == null ? {} : item);
 		
 		for(var i=0;i<po.responsiveScreens.length; i++)
 		{
 			var type = po.responsiveScreens[i].value;
-			re[type] = { heightUnit: "pct" };
+			item[type] = (item[type] ? item[type] : {});
+			var heightUnit = (item[type].h == null ? null : item[type].h.match(/[a-z]*$/i)[0]);
+			item[type].heightUnit = (heightUnit ? heightUnit : "pct");
 		}
 		
-		return re;
+		return item;
+	};
+	
+	po.veInflateResponsiveFlexModel = function(model)
+	{
+		model = (model == null ? {} : model);
+		model.itemLayouts = (model.itemLayouts == null ? [] : model.itemLayouts);
+		model.itemCount = model.itemLayouts.length;
+		
+		for(var i=0; i<model.itemLayouts.length; i++)
+		{
+			model.itemLayouts[i] = po.veInitResponsiveFlexItem(model.itemLayouts[i]);
+		}
+		
+		return model;
 	};
 	
 	po.veDftResponsiveFlexModel = function()
@@ -2474,8 +2492,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		var re =
 		{
 			fillParent: false,
-			itemCount: 3,
-			itemLayouts: [ po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel(), po.veInitResponsiveFlexModel() ]
+			itemLayouts: [ {}, {}, {} ]
 		};
 		
 		$.extend(true, re.itemLayouts,
@@ -2493,6 +2510,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 				"sm": { col: "12", h: "50pct" }
 			}
 		]);
+		
+		po.veInflateResponsiveFlexModel(re);
 		
 		return re;
 	};
@@ -2613,14 +2632,16 @@ $.inflateDashboardDesignEditorForms = function(po)
 		pm.vepss.flexLayoutShown = true;
 	};
 	
-	po.showVeResponsiveFlexPanel = function(submitHandler, model, showFillParent)
+	po.showVeResponsiveFlexPanel = function(submitHandler, model, disableItemCount, showFillParent)
 	{
+		disableItemCount = (disableItemCount == null ? false : disableItemCount);
 		showFillParent = (showFillParent == null ? false : showFillParent);
 		
 		var pm = po.vuePageModel();
 		
 		pm.veshs.responsiveFlex = submitHandler;
-		pm.veResponsiveFlexPanelShowFillParent = showFillParent;
+		pm.veResponsiveFlexFormShowFillParent = showFillParent;
+		pm.veResponsiveFlexFormDisableItemCount = disableItemCount;
 		pm.vepms.responsiveFlex = $.extend(true, {}, model);
 		pm.vepms.responsiveFlex.fillParent = showFillParent;
 		pm.vepss.responsiveFlexShown = true;
@@ -2810,7 +2831,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 			},
 			veGridLayoutPanelShowFillParent: false,
 			veFlexLayoutPanelShowFillParent: false,
-			veResponsiveFlexPanelShowFillParent: false,
+			veResponsiveFlexFormShowFillParent: false,
+			veResponsiveFlexFormDisableItemCount: false,
 			dashboardSizeScaleOptions:
 			[
 				{ name: po.i18n.auto, value: "auto" },
@@ -3262,7 +3284,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		{
 			$.trimArrayLen(pm.vepms.responsiveFlex.itemLayouts, newVal, function()
 			{
-				return po.veInitResponsiveFlexModel();
+				return po.veInitResponsiveFlexItem();
 			});
 		});
 	};

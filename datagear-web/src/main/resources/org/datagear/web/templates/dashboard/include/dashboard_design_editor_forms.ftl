@@ -376,9 +376,10 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}veResponsiveFlexItems" v-model="pm.vepms.responsiveFlex.itemCount" type="text"
+							:disabled="pm.veResponsiveFlexFormDisableItemCount"
 							class="help-target input w-full" name="itemCount" required maxlength="10" autofocus>
 						</p-inputtext>
-						<div class="p-buttonset mt-1 text-sm">
+						<div class="p-buttonset mt-1 text-sm" v-if="!pm.veResponsiveFlexFormDisableItemCount">
 							<p-button type="button" class="help-src p-button-secondary" help-value="1">
 								<@spring.message code='itemCount.1' />
 							</p-button>
@@ -458,7 +459,7 @@ page_palette.ftl
 						</div>
 					</div>
 				</div>
-				<div class="field grid" v-if="pm.veResponsiveFlexPanelShowFillParent">
+				<div class="field grid" v-if="pm.veResponsiveFlexFormShowFillParent">
 					<label for="${pid}veResponsiveFlexFillParent" class="field-label col-12 mb-2">
 						<@spring.message code='fillPage' />
 					</label>

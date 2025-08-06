@@ -1166,7 +1166,10 @@
 			return false;
 		
 		var editEle = this._editElement(ele);
-		var newClassName = this._removeResponsiveFlexClass(editEle.attr("class"));
+		var newClassName = this._removeClassName(editEle.attr("class"), function(className)
+		{
+			return ("dg-rsp-row" == className);
+		});
 		newClassName = "dg-rsp-row" + (newClassName == "" ? "" : " " + newClassName);
 		
 		this._setElementClass(ele, newClassName);
@@ -1183,32 +1186,16 @@
 			var editChild = this._editElement(child);
 			
 			var layoutClass = this._evalResponsiveFlexItemClass(itemLayout);
-			var newChildClassName = this._removeResponsiveFlexClass(editChild.attr("class"));
+			var newChildClassName = this._removeClassName(editChild.attr("class"), function(className)
+			{
+				return (className.indexOf("dg-rsp-") == 0);
+			});
 			newChildClassName = layoutClass + (newChildClassName == "" ? "" : " " + newChildClassName);
 			
 			this._setElementClass(child, newChildClassName);
 		}
 		
 		return ele;
-	};
-	
-	editor._removeResponsiveFlexClass = function(classStr)
-	{
-		var re = "";
-		
-		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
-		
-		for(var i=0; i<classNames.length; i++)
-		{
-			var className = classNames[i];
-			
-			if(className.indexOf("dg-rsp-") == 0)
-				continue;
-			
-			re += (re == "" ? "" : " ") + className;
-		}
-		
-		return re;
 	};
 	
 	/**
@@ -3005,6 +2992,25 @@
 		
 		this._reSelectElementIf(ele);
 		this.changeFlag(true);
+	};
+	
+	editor._removeClassName = function(classStr, predicate)
+	{
+		var re = "";
+		
+		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
+		
+		for(var i=0; i<classNames.length; i++)
+		{
+			var className = classNames[i];
+			
+			if(predicate(className))
+				continue;
+			
+			re += (re == "" ? "" : " ") + className;
+		}
+		
+		return re;
 	};
 	
 	/**
