@@ -1396,7 +1396,8 @@ page_palette.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleMinWdith" class="field-label col-12 mb-2">
+								<label for="${pid}veStyleMinWdith" class="field-label col-12 mb-2"
+									 title="<@spring.message code='dashboard.veditor.style.minWidth.desc' />">
 									<@spring.message code='minWidth' />
 									<span class="text-color-secondary text-sm ml-1">min-width</span>
 								</label>
@@ -1444,7 +1445,8 @@ page_palette.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleMinHeight" class="field-label col-12 mb-2">
+								<label for="${pid}veStyleMinHeight" class="field-label col-12 mb-2"
+									 title="<@spring.message code='dashboard.veditor.style.minHeight.desc' />">
 									<@spring.message code='minHeight' />
 									<span class="text-color-secondary text-sm ml-1">min-height</span>
 								</label>
@@ -1492,7 +1494,8 @@ page_palette.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleMaxWdith" class="field-label col-12 mb-2">
+								<label for="${pid}veStyleMaxWdith" class="field-label col-12 mb-2"
+									 title="<@spring.message code='dashboard.veditor.style.maxWidth.desc' />">
 									<@spring.message code='maxWidth' />
 									<span class="text-color-secondary text-sm ml-1">max-width</span>
 								</label>
@@ -1540,7 +1543,8 @@ page_palette.ftl
 								</div>
 							</div>
 							<div class="field grid">
-								<label for="${pid}veStyleMaxHeight" class="field-label col-12 mb-2">
+								<label for="${pid}veStyleMaxHeight" class="field-label col-12 mb-2"
+									 title="<@spring.message code='dashboard.veditor.style.maxHeight.desc' />">
 									<@spring.message code='maxHeight' />
 									<span class="text-color-secondary text-sm ml-1">max-height</span>
 								</label>
