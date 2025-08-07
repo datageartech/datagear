@@ -154,7 +154,7 @@ public class KeywordMatcher
 				if (lb.length() > 0)
 				{
 					pb.append(Pattern.quote(lb.toString()));
-					lb.delete(0, lb.length());
+					lb.setLength(0);
 				}
 
 				pb.append(".*");

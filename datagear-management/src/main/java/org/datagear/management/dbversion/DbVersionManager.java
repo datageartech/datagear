@@ -688,8 +688,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 			if (!sql.isEmpty())
 			{
 				contents.add(deleteTailSemicolon(sql));
-
-				cache.delete(0, cache.length());
+				cache.setLength(0);
 			}
 		}
 		else

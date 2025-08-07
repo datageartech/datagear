@@ -662,9 +662,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 			if (isCellContentElement(localName))
 			{
 				_inCellContentElement = true;
-
-				if (this._cellContents.length() > 0)
-					this._cellContents.delete(0, this._cellContents.length());
+				this._cellContents.setLength(0);
 			}
 			else if ("is".equals(localName))
 			{

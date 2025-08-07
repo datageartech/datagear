@@ -738,7 +738,7 @@ public class StringUtil
 				if (node.length() > 0)
 				{
 					re.append(encodeURL(node.toString(), encoding));
-					node.delete(0, node.length());
+					node.setLength(0);
 				}
 
 				re.append(c);

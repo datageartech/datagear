@@ -325,7 +325,7 @@ public class SqlScriptParser
 					}
 
 					addSqlStatement(sqlStatements, sqlBuilder);
-					clear(sqlBuilder);
+					sqlBuilder.setLength(0);
 
 					isSqlBuilderEmpty = true;
 					handleIndex = delimiterIndex + this.delimiter.length();
@@ -646,21 +646,6 @@ public class SqlScriptParser
 	protected boolean isEmpty(StringBuilder stringBuilder)
 	{
 		return (stringBuilder.length() == 0);
-	}
-
-	/**
-	 * 清空{@linkplain StringBuilder}。
-	 * 
-	 * @param stringBuilder
-	 */
-	protected void clear(StringBuilder stringBuilder)
-	{
-		int len = stringBuilder.length();
-
-		if (len == 0)
-			return;
-
-		stringBuilder.delete(0, len);
 	}
 
 	/**

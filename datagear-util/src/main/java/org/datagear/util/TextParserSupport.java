@@ -389,16 +389,16 @@ public class TextParserSupport
 	}
 
 	/**
-	 * 清除{@linkplain StringBuilder}。
+	 * 获取字符串并清空{@linkplain StringBuilder}。
 	 * 
 	 * @param sb
+	 * @return
 	 */
-	public void clear(StringBuilder sb)
+	public String toStringWithClear(StringBuilder sb)
 	{
-		if (sb == null || sb.length() == 0)
-			return;
-
-		sb.delete(0, sb.length());
+		String str = sb.toString();
+		sb.setLength(0);
+		return str;
 	}
 
 	/**
@@ -408,23 +408,6 @@ public class TextParserSupport
 	 */
 	public StringBuilder createStringBuilder()
 	{
-		return new StringBuilder();
-	}
-
-	/**
-	 * 获取一个可用的初始{@linkplain StringBuilder}。
-	 * <p>
-	 * 如果{@code prev}不为{@code null}且为空，将直接返回它，否则，新建一个并返回。
-	 * </p>
-	 * 
-	 * @param prev
-	 * @return
-	 */
-	public StringBuilder availableStringBuilder(StringBuilder prev)
-	{
-		if (prev != null && prev.length() == 0)
-			return prev;
-
 		return new StringBuilder();
 	}
 }

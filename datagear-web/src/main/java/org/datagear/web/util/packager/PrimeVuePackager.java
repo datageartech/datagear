@@ -464,9 +464,7 @@ public class PrimeVuePackager extends AbstractPackager
 			{
 				// 只需要读取组件JS文件最后的函数调用参数即可
 				if (c == '(')
-				{
-					functionCallParamStr.delete(0, functionCallParamStr.length());
-				}
+					functionCallParamStr.setLength(0);
 
 				functionCallParamStr.appendCodePoint(c);
 			}

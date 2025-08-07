@@ -126,15 +126,15 @@ public class HtmlFilter extends TextParserSupport
 		handler.beforeWrite(in);
 
 		Writer out = handler.getOut();
+		StringBuilder tagNameSb = createStringBuilder();
 		int c = -1;
 
 		while ((c = in.read()) > -1)
 		{
 			if (c == TAG_START_CHAR)
 			{
-				StringBuilder tagNameSb = createStringBuilder();
 				String afterTagName = readTagName(in, tagNameSb);
-				String tagName = tagNameSb.toString();
+				String tagName = toStringWithClear(tagNameSb);
 
 				// <!--
 				if (tagName.startsWith("!--"))

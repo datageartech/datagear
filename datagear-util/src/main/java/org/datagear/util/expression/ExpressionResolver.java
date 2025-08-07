@@ -348,7 +348,7 @@ public class ExpressionResolver
 				}
 
 				expValue = cache.toString();
-				cache.delete(0, cache.length());
+				cache.setLength(0);
 			}
 
 			expValues.add(expValue);
