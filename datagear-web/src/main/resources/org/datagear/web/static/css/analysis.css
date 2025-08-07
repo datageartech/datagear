@@ -833,7 +833,7 @@
 .dg-rsp-h-20pct{ height: 20%; }
 .dg-rsp-h-25pct{ height: 25%; }
 .dg-rsp-h-30pct{ height: 30%; }
-.dg-rsp-h-33pct{ height: 33.33333333%; }
+.dg-rsp-h-33f3pct{ height: 33.33333333%; }
 .dg-rsp-h-35pct{ height: 35%; }
 .dg-rsp-h-40pct{ height: 40%; }
 .dg-rsp-h-45pct{ height: 45%; }
@@ -841,6 +841,7 @@
 .dg-rsp-h-55pct{ height: 55%; }
 .dg-rsp-h-60pct{ height: 60%; }
 .dg-rsp-h-65pct{ height: 65%; }
+.dg-rsp-h-66f6pct{ height: 66.66666667%; }
 .dg-rsp-h-70pct{ height: 70%; }
 .dg-rsp-h-75pct{ height: 75%; }
 .dg-rsp-h-80pct{ height: 80%; }
@@ -854,7 +855,7 @@
 .dg-rsp-h-20vh{ height: 20vh; }
 .dg-rsp-h-25vh{ height: 25vh; }
 .dg-rsp-h-30vh{ height: 30vh; }
-.dg-rsp-h-33vh{ height: 33.33333333vh; }
+.dg-rsp-h-33f3vh{ height: 33.33333333vh; }
 .dg-rsp-h-35vh{ height: 35vh; }
 .dg-rsp-h-40vh{ height: 40vh; }
 .dg-rsp-h-45vh{ height: 45vh; }
@@ -862,6 +863,7 @@
 .dg-rsp-h-55vh{ height: 55vh; }
 .dg-rsp-h-60vh{ height: 60vh; }
 .dg-rsp-h-65vh{ height: 65vh; }
+.dg-rsp-h-66f6vh{ height: 66.66666667vh; }
 .dg-rsp-h-70vh{ height: 70vh; }
 .dg-rsp-h-75vh{ height: 75vh; }
 .dg-rsp-h-80vh{ height: 80vh; }
@@ -930,7 +932,7 @@
 	.dg-rsp-h-sm-20pct{ height: 20%; }
 	.dg-rsp-h-sm-25pct{ height: 25%; }
 	.dg-rsp-h-sm-30pct{ height: 30%; }
-	.dg-rsp-h-sm-33pct{ height: 33.33333333%; }
+	.dg-rsp-h-sm-33f3pct{ height: 33.33333333%; }
 	.dg-rsp-h-sm-35pct{ height: 35%; }
 	.dg-rsp-h-sm-40pct{ height: 40%; }
 	.dg-rsp-h-sm-45pct{ height: 45%; }
@@ -938,6 +940,7 @@
 	.dg-rsp-h-sm-55pct{ height: 55%; }
 	.dg-rsp-h-sm-60pct{ height: 60%; }
 	.dg-rsp-h-sm-65pct{ height: 65%; }
+	.dg-rsp-h-sm-66f6pct{ height: 66.66666667%; }
 	.dg-rsp-h-sm-70pct{ height: 70%; }
 	.dg-rsp-h-sm-75pct{ height: 75%; }
 	.dg-rsp-h-sm-80pct{ height: 80%; }
@@ -951,7 +954,7 @@
 	.dg-rsp-h-sm-20vh{ height: 20vh; }
 	.dg-rsp-h-sm-25vh{ height: 25vh; }
 	.dg-rsp-h-sm-30vh{ height: 30vh; }
-	.dg-rsp-h-sm-33vh{ height: 33.33333333vh; }
+	.dg-rsp-h-sm-33f3vh{ height: 33.33333333vh; }
 	.dg-rsp-h-sm-35vh{ height: 35vh; }
 	.dg-rsp-h-sm-40vh{ height: 40vh; }
 	.dg-rsp-h-sm-45vh{ height: 45vh; }
@@ -959,6 +962,7 @@
 	.dg-rsp-h-sm-55vh{ height: 55vh; }
 	.dg-rsp-h-sm-60vh{ height: 60vh; }
 	.dg-rsp-h-sm-65vh{ height: 65vh; }
+	.dg-rsp-h-sm-66f6vh{ height: 66.66666667vh; }
 	.dg-rsp-h-sm-70vh{ height: 70vh; }
 	.dg-rsp-h-sm-75vh{ height: 75vh; }
 	.dg-rsp-h-sm-80vh{ height: 80vh; }
@@ -1028,7 +1032,7 @@
 	.dg-rsp-h-md-20pct{ height: 20%; }
 	.dg-rsp-h-md-25pct{ height: 25%; }
 	.dg-rsp-h-md-30pct{ height: 30%; }
-	.dg-rsp-h-md-33pct{ height: 33.33333333%; }
+	.dg-rsp-h-md-33f3pct{ height: 33.33333333%; }
 	.dg-rsp-h-md-35pct{ height: 35%; }
 	.dg-rsp-h-md-40pct{ height: 40%; }
 	.dg-rsp-h-md-45pct{ height: 45%; }
@@ -1036,6 +1040,7 @@
 	.dg-rsp-h-md-55pct{ height: 55%; }
 	.dg-rsp-h-md-60pct{ height: 60%; }
 	.dg-rsp-h-md-65pct{ height: 65%; }
+	.dg-rsp-h-md-66f6pct{ height: 66.66666667%; }
 	.dg-rsp-h-md-70pct{ height: 70%; }
 	.dg-rsp-h-md-75pct{ height: 75%; }
 	.dg-rsp-h-md-80pct{ height: 80%; }
@@ -1049,7 +1054,7 @@
 	.dg-rsp-h-md-20vh{ height: 20vh; }
 	.dg-rsp-h-md-25vh{ height: 25vh; }
 	.dg-rsp-h-md-30vh{ height: 30vh; }
-	.dg-rsp-h-md-33vh{ height: 33.33333333vh; }
+	.dg-rsp-h-md-33f3vh{ height: 33.33333333vh; }
 	.dg-rsp-h-md-35vh{ height: 35vh; }
 	.dg-rsp-h-md-40vh{ height: 40vh; }
 	.dg-rsp-h-md-45vh{ height: 45vh; }
@@ -1057,6 +1062,7 @@
 	.dg-rsp-h-md-55vh{ height: 55vh; }
 	.dg-rsp-h-md-60vh{ height: 60vh; }
 	.dg-rsp-h-md-65vh{ height: 65vh; }
+	.dg-rsp-h-md-66f6vh{ height: 66.66666667vh; }
 	.dg-rsp-h-md-70vh{ height: 70vh; }
 	.dg-rsp-h-md-75vh{ height: 75vh; }
 	.dg-rsp-h-md-80vh{ height: 80vh; }
@@ -1126,7 +1132,7 @@
 	.dg-rsp-h-lg-20pct{ height: 20%; }
 	.dg-rsp-h-lg-25pct{ height: 25%; }
 	.dg-rsp-h-lg-30pct{ height: 30%; }
-	.dg-rsp-h-lg-33pct{ height: 33.33333333%; }
+	.dg-rsp-h-lg-33f3pct{ height: 33.33333333%; }
 	.dg-rsp-h-lg-35pct{ height: 35%; }
 	.dg-rsp-h-lg-40pct{ height: 40%; }
 	.dg-rsp-h-lg-45pct{ height: 45%; }
@@ -1134,6 +1140,7 @@
 	.dg-rsp-h-lg-55pct{ height: 55%; }
 	.dg-rsp-h-lg-60pct{ height: 60%; }
 	.dg-rsp-h-lg-65pct{ height: 65%; }
+	.dg-rsp-h-lg-66f6pct{ height: 66.66666667%; }
 	.dg-rsp-h-lg-70pct{ height: 70%; }
 	.dg-rsp-h-lg-75pct{ height: 75%; }
 	.dg-rsp-h-lg-80pct{ height: 80%; }
@@ -1147,7 +1154,7 @@
 	.dg-rsp-h-lg-20vh{ height: 20vh; }
 	.dg-rsp-h-lg-25vh{ height: 25vh; }
 	.dg-rsp-h-lg-30vh{ height: 30vh; }
-	.dg-rsp-h-lg-33vh{ height: 33.33333333vh; }
+	.dg-rsp-h-lg-33f3vh{ height: 33.33333333vh; }
 	.dg-rsp-h-lg-35vh{ height: 35vh; }
 	.dg-rsp-h-lg-40vh{ height: 40vh; }
 	.dg-rsp-h-lg-45vh{ height: 45vh; }
@@ -1155,6 +1162,7 @@
 	.dg-rsp-h-lg-55vh{ height: 55vh; }
 	.dg-rsp-h-lg-60vh{ height: 60vh; }
 	.dg-rsp-h-lg-65vh{ height: 65vh; }
+	.dg-rsp-h-lg-66f6vh{ height: 66.66666667vh; }
 	.dg-rsp-h-lg-70vh{ height: 70vh; }
 	.dg-rsp-h-lg-75vh{ height: 75vh; }
 	.dg-rsp-h-lg-80vh{ height: 80vh; }
@@ -1224,7 +1232,7 @@
 	.dg-rsp-h-xl-20pct{ height: 20%; }
 	.dg-rsp-h-xl-25pct{ height: 25%; }
 	.dg-rsp-h-xl-30pct{ height: 30%; }
-	.dg-rsp-h-xl-33pct{ height: 33.33333333%; }
+	.dg-rsp-h-xl-33f3pct{ height: 33.33333333%; }
 	.dg-rsp-h-xl-35pct{ height: 35%; }
 	.dg-rsp-h-xl-40pct{ height: 40%; }
 	.dg-rsp-h-xl-45pct{ height: 45%; }
@@ -1232,6 +1240,7 @@
 	.dg-rsp-h-xl-55pct{ height: 55%; }
 	.dg-rsp-h-xl-60pct{ height: 60%; }
 	.dg-rsp-h-xl-65pct{ height: 65%; }
+	.dg-rsp-h-xl-66f6pct{ height: 66.66666667%; }
 	.dg-rsp-h-xl-70pct{ height: 70%; }
 	.dg-rsp-h-xl-75pct{ height: 75%; }
 	.dg-rsp-h-xl-80pct{ height: 80%; }
@@ -1245,7 +1254,7 @@
 	.dg-rsp-h-xl-20vh{ height: 20vh; }
 	.dg-rsp-h-xl-25vh{ height: 25vh; }
 	.dg-rsp-h-xl-30vh{ height: 30vh; }
-	.dg-rsp-h-xl-33vh{ height: 33.33333333vh; }
+	.dg-rsp-h-xl-33f3vh{ height: 33.33333333vh; }
 	.dg-rsp-h-xl-35vh{ height: 35vh; }
 	.dg-rsp-h-xl-40vh{ height: 40vh; }
 	.dg-rsp-h-xl-45vh{ height: 45vh; }
@@ -1253,6 +1262,7 @@
 	.dg-rsp-h-xl-55vh{ height: 55vh; }
 	.dg-rsp-h-xl-60vh{ height: 60vh; }
 	.dg-rsp-h-xl-65vh{ height: 65vh; }
+	.dg-rsp-h-xl-66f6vh{ height: 66.66666667vh; }
 	.dg-rsp-h-xl-70vh{ height: 70vh; }
 	.dg-rsp-h-xl-75vh{ height: 75vh; }
 	.dg-rsp-h-xl-80vh{ height: 80vh; }

@@ -85,7 +85,7 @@
 	var HTML_NODE_TYPE_COMMENT = (editor.HTML_NODE_TYPE_COMMENT = 8);
 	
 	//响应式布局断点
-	var RESPONSIVE_BREAKPOINTS = (editor.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "lx" ]);
+	var RESPONSIVE_BREAKPOINTS = (editor.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "xl" ]);
 	//响应式布局名称，详细参考analysis.css中的【.dg-rsp-布局名称[-断点]-布局值】样式类定义
 	var RESPONSIVE_LAYOUT_NAMES = (editor.RESPONSIVE_LAYOUT_NAMES = [ "col", "h", "d" ]);
 	
