@@ -801,7 +801,7 @@
 	display: inline-block;
 }
 
-/*响应式布局*/
+/*响应式布局，尺寸断点参考自tailwindcss，样式类名参考自bootstrap*/
 .dg-rsp-row{ display: flex; flex-wrap: wrap; }
 .dg-rsp-col{ flex: 1 0 0; }
 .dg-rsp-col-1{ flex: 0 0 auto; width: 8.33333333%; }
@@ -901,7 +901,7 @@
 .dg-rsp-h-28rem{ height: 28rem; }
 .dg-rsp-h-29rem{ height: 29rem; }
 .dg-rsp-h-30rem{ height: 30rem; }
-@media (min-width: 576px) /*sm*/
+@media (min-width: 640px) /*sm*/
 {
 	.dg-rsp-col-sm-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-sm-2{ flex: 0 0 auto; width: 16.66666667%; }
@@ -1101,7 +1101,7 @@
 	.dg-rsp-h-md-29rem{ height: 29rem; }
 	.dg-rsp-h-md-30rem{ height: 30rem; }
 }
-@media (min-width: 992px) /*lg*/
+@media (min-width: 1024px) /*lg*/
 {
 	.dg-rsp-col-lg-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-lg-2{ flex: 0 0 auto; width: 16.66666667%; }
@@ -1201,7 +1201,7 @@
 	.dg-rsp-h-lg-29rem{ height: 29rem; }
 	.dg-rsp-h-lg-30rem{ height: 30rem; }
 }
-@media (min-width: 1200px) /*xl*/
+@media (min-width: 1280px) /*xl*/
 {
 	.dg-rsp-col-xl-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-xl-2{ flex: 0 0 auto; width: 16.66666667%; }
