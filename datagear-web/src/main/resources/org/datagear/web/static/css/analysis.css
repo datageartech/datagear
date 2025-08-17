@@ -801,7 +801,7 @@
 	display: inline-block;
 }
 
-/*响应式布局，尺寸断点参考自tailwindcss，样式类名参考自bootstrap*/
+/*响应式布局，断点尺寸参考自tailwindcss-v3，样式类名参考自bootstrap*/
 .dg-rsp-row{ display: flex; flex-wrap: wrap; }
 .dg-rsp-col{ flex: 1 0 0; }
 .dg-rsp-col-1{ flex: 0 0 auto; width: 8.33333333%; }
@@ -1300,4 +1300,104 @@
 	.dg-rsp-h-xl-28rem{ height: 28rem; }
 	.dg-rsp-h-xl-29rem{ height: 29rem; }
 	.dg-rsp-h-xl-30rem{ height: 30rem; }
+}
+@media (min-width: 1536px) /*2xl*/
+{
+	.dg-rsp-col-2xl-1{ flex: 0 0 auto; width: 8.33333333%; }
+	.dg-rsp-col-2xl-2{ flex: 0 0 auto; width: 16.66666667%; }
+	.dg-rsp-col-2xl-3{ flex: 0 0 auto; width: 25%; }
+	.dg-rsp-col-2xl-4{ flex: 0 0 auto; width: 33.33333333%; }
+	.dg-rsp-col-2xl-5{ flex: 0 0 auto; width: 41.66666667%; }
+	.dg-rsp-col-2xl-6{ flex: 0 0 auto; width: 50%; }
+	.dg-rsp-col-2xl-7{ flex: 0 0 auto; width: 58.33333333%; }
+	.dg-rsp-col-2xl-8{ flex: 0 0 auto; width: 66.66666667%; }
+	.dg-rsp-col-2xl-9{ flex: 0 0 auto; width: 75%; }
+	.dg-rsp-col-2xl-10{ flex: 0 0 auto; width: 83.33333333%; }
+	.dg-rsp-col-2xl-11{ flex: 0 0 auto; width: 91.66666667%; }
+	.dg-rsp-col-2xl-12{ flex: 0 0 auto; width: 100%; }
+	.dg-rsp-d-2xl-none{ display: none; }
+	.dg-rsp-d-2xl-block{ display: block; }
+	.dg-rsp-d-2xl-inline{ display: inline; }
+	.dg-rsp-d-2xl-inline-block{ display: inline-block; }
+	.dg-rsp-d-2xl-flex{ display: flex; }
+	.dg-rsp-d-2xl-inline-flex{ display: inline-flex; }
+	.dg-rsp-d-2xl-grid{ display: grid; }
+	.dg-rsp-d-2xl-inline-grid{ display: inline-grid; }
+	.dg-rsp-h-2xl-full{ height: 100%; }
+	.dg-rsp-h-2xl-screen{ height: 100vh; }
+	.dg-rsp-h-2xl-auto{ height: auto; }
+	.dg-rsp-h-2xl-5pct{ height: 5%; }
+	.dg-rsp-h-2xl-10pct{ height: 10%; }
+	.dg-rsp-h-2xl-15pct{ height: 15%; }
+	.dg-rsp-h-2xl-20pct{ height: 20%; }
+	.dg-rsp-h-2xl-25pct{ height: 25%; }
+	.dg-rsp-h-2xl-30pct{ height: 30%; }
+	.dg-rsp-h-2xl-33f3pct{ height: 33.33333333%; }
+	.dg-rsp-h-2xl-35pct{ height: 35%; }
+	.dg-rsp-h-2xl-40pct{ height: 40%; }
+	.dg-rsp-h-2xl-45pct{ height: 45%; }
+	.dg-rsp-h-2xl-50pct{ height: 50%; }
+	.dg-rsp-h-2xl-55pct{ height: 55%; }
+	.dg-rsp-h-2xl-60pct{ height: 60%; }
+	.dg-rsp-h-2xl-65pct{ height: 65%; }
+	.dg-rsp-h-2xl-66f6pct{ height: 66.66666667%; }
+	.dg-rsp-h-2xl-70pct{ height: 70%; }
+	.dg-rsp-h-2xl-75pct{ height: 75%; }
+	.dg-rsp-h-2xl-80pct{ height: 80%; }
+	.dg-rsp-h-2xl-85pct{ height: 85%; }
+	.dg-rsp-h-2xl-90pct{ height: 90%; }
+	.dg-rsp-h-2xl-95pct{ height: 95%; }
+	.dg-rsp-h-2xl-100pct{ height: 100%; }
+	.dg-rsp-h-2xl-5vh{ height: 5vh; }
+	.dg-rsp-h-2xl-10vh{ height: 10vh; }
+	.dg-rsp-h-2xl-15vh{ height: 15vh; }
+	.dg-rsp-h-2xl-20vh{ height: 20vh; }
+	.dg-rsp-h-2xl-25vh{ height: 25vh; }
+	.dg-rsp-h-2xl-30vh{ height: 30vh; }
+	.dg-rsp-h-2xl-33f3vh{ height: 33.33333333vh; }
+	.dg-rsp-h-2xl-35vh{ height: 35vh; }
+	.dg-rsp-h-2xl-40vh{ height: 40vh; }
+	.dg-rsp-h-2xl-45vh{ height: 45vh; }
+	.dg-rsp-h-2xl-50vh{ height: 50vh; }
+	.dg-rsp-h-2xl-55vh{ height: 55vh; }
+	.dg-rsp-h-2xl-60vh{ height: 60vh; }
+	.dg-rsp-h-2xl-65vh{ height: 65vh; }
+	.dg-rsp-h-2xl-66f6vh{ height: 66.66666667vh; }
+	.dg-rsp-h-2xl-70vh{ height: 70vh; }
+	.dg-rsp-h-2xl-75vh{ height: 75vh; }
+	.dg-rsp-h-2xl-80vh{ height: 80vh; }
+	.dg-rsp-h-2xl-85vh{ height: 85vh; }
+	.dg-rsp-h-2xl-90vh{ height: 90vh; }
+	.dg-rsp-h-2xl-95vh{ height: 95vh; }
+	.dg-rsp-h-2xl-100vh{ height: 100vh; }
+	.dg-rsp-h-2xl-1rem{ height: 1rem; }
+	.dg-rsp-h-2xl-2rem{ height: 2rem; }
+	.dg-rsp-h-2xl-3rem{ height: 3rem; }
+	.dg-rsp-h-2xl-4rem{ height: 4rem; }
+	.dg-rsp-h-2xl-5rem{ height: 5rem; }
+	.dg-rsp-h-2xl-6rem{ height: 6rem; }
+	.dg-rsp-h-2xl-7rem{ height: 7rem; }
+	.dg-rsp-h-2xl-8rem{ height: 8rem; }
+	.dg-rsp-h-2xl-9rem{ height: 9rem; }
+	.dg-rsp-h-2xl-10rem{ height: 10rem; }
+	.dg-rsp-h-2xl-11rem{ height: 11rem; }
+	.dg-rsp-h-2xl-12rem{ height: 12rem; }
+	.dg-rsp-h-2xl-13rem{ height: 13rem; }
+	.dg-rsp-h-2xl-14rem{ height: 14rem; }
+	.dg-rsp-h-2xl-15rem{ height: 15rem; }
+	.dg-rsp-h-2xl-16rem{ height: 16rem; }
+	.dg-rsp-h-2xl-17rem{ height: 17rem; }
+	.dg-rsp-h-2xl-18rem{ height: 18rem; }
+	.dg-rsp-h-2xl-19rem{ height: 19rem; }
+	.dg-rsp-h-2xl-20rem{ height: 20rem; }
+	.dg-rsp-h-2xl-21rem{ height: 21rem; }
+	.dg-rsp-h-2xl-22rem{ height: 22rem; }
+	.dg-rsp-h-2xl-23rem{ height: 23rem; }
+	.dg-rsp-h-2xl-24rem{ height: 24rem; }
+	.dg-rsp-h-2xl-25rem{ height: 25rem; }
+	.dg-rsp-h-2xl-26rem{ height: 26rem; }
+	.dg-rsp-h-2xl-27rem{ height: 27rem; }
+	.dg-rsp-h-2xl-28rem{ height: 28rem; }
+	.dg-rsp-h-2xl-29rem{ height: 29rem; }
+	.dg-rsp-h-2xl-30rem{ height: 30rem; }
 }

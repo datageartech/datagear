@@ -2436,10 +2436,13 @@ $.inflateDashboardDesignEditorForms = function(po)
 	po.responsiveScreens =
 	[
 		{ name: po.i18n["screen.mobile"], value: "xs" },
-		{ name: po.i18n["screen.wideMobile"], value: "sm" },
-		{ name: po.i18n["screen.tablet"], value: "md" },
+		{ name: po.i18n["screen.tablet"], value: "sm" },
+		/*不必支持这么细的划分，暂时禁用*/
+		/*{ name: po.i18n["screen.tablet"], value: "md" },*/
 		{ name: po.i18n["screen.desktop"], value: "lg" },
-		{ name: po.i18n["screen.large"], value: "xl" }
+		/*不必支持这么细的划分，暂时禁用*/
+		/*{ name: po.i18n["screen.desktop"], value: "xl" },*/
+		{ name: po.i18n["screen.large"], value: "2xl" }
 	];
 	
 	po.veDftChartThemeModel = function()

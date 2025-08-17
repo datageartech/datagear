@@ -2876,7 +2876,6 @@ page_palette.ftl
 	po.i18n["dashboard.veditor.gridLayout.divide.custom"] = "<@spring.message code='dashboard.veditor.gridLayout.divide.custom' />";
 	po.i18n.resetToOrigin = "<@spring.message code='resetToOrigin' />";
 	po.i18n["screen.mobile"] = "<@spring.message code='screen.mobile' />";
-	po.i18n["screen.wideMobile"] = "<@spring.message code='screen.wideMobile' />";
 	po.i18n["screen.tablet"] = "<@spring.message code='screen.tablet' />";
 	po.i18n["screen.desktop"] = "<@spring.message code='screen.desktop' />";
 	po.i18n["screen.large"] = "<@spring.message code='screen.large' />";
