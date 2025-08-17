@@ -2844,6 +2844,13 @@ $.inflateDashboardDesignEditorForms = function(po)
 				{ name: "50%", value: 50 },
 				{ name: "25%", value: 25 }
 			],
+			dashboardScreenSizeOptions:
+			[
+				{ name: po.i18n["screen.mobile"], width: 375, height: 667 },
+				{ name: po.i18n["screen.tablet"], width: 768, height: 1024 },
+				{ name: po.i18n["screen.desktop"], width: 1366, height: 1024 },
+				{ name: po.i18n["screen.large"], width: 1560, height: 906 }
+			],
 			veStyleTabviewActiveIndex: 0,
 			hxtitleTypeOptions:
 			[
@@ -3071,6 +3078,25 @@ $.inflateDashboardDesignEditorForms = function(po)
 				if(po.setVeDashboardSize(null, {}) !== false)
 				{
 					pm.vepss.dashboardSizeShown = false;
+				}
+			},
+			
+			onVeDashboardScreenSizeChange: function(e, screenSize)
+			{
+				if(pm.vepms.dashboardSize)
+				{
+					pm.vepms.dashboardSize.width = screenSize.width;
+					pm.vepms.dashboardSize.height = screenSize.height;
+				}
+			},
+			
+			onVeDashboardSizeExchange: function()
+			{
+				if(pm.vepms.dashboardSize)
+				{
+					var width = pm.vepms.dashboardSize.width;
+					pm.vepms.dashboardSize.width = pm.vepms.dashboardSize.height;
+					pm.vepms.dashboardSize.height = width;
 				}
 			},
 			

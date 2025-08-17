@@ -793,29 +793,46 @@ page_palette.ftl
 		<form id="${pid}veDashboardSizeForm" class="flex flex-column">
 			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
-					<label for="${pid}veDashboardSizeWdith" class="field-label col-12 mb-2">
-						<@spring.message code='width' />
-					</label>
 					<div class="field-input col-12">
-						<div class="p-inputgroup">
-							<p-inputtext id="${pid}veDashboardSizeWdith" v-model="pm.vepms.dashboardSize.width" type="text"
-								class="input w-full" name="width">
-							</p-inputtext>
-							<span class="p-inputgroup-addon">px</span>
+						<div class="p-buttonset">
+							<p-button v-for="(ss, ssIdx) in pm.dashboardScreenSizeOptions" :key="ssIdx" type="button" severity="secondary" @click="onVeDashboardScreenSizeChange($event, ss)">
+								{{ss.name}}
+							</p-button>
 						</div>
 					</div>
 				</div>
-				<div class="field grid">
-					<label for="${pid}veDashboardSizeHeight" class="field-label col-12 mb-2">
-						<@spring.message code='height' />
-					</label>
-					<div class="field-input col-12">
-						<div class="p-inputgroup">
-							<p-inputtext id="${pid}veDashboardSizeHeight" v-model="pm.vepms.dashboardSize.height" type="text"
-								class="input w-full" name="height">
-							</p-inputtext>
-							<span class="p-inputgroup-addon">px</span>
+				<div class="flex">
+					<div class="flex-grow-1">
+						<div class="field grid">
+							<label for="${pid}veDashboardSizeWdith" class="field-label col-12 mb-2">
+								<@spring.message code='width' />
+							</label>
+							<div class="field-input col-12">
+								<div class="p-inputgroup">
+									<p-inputtext id="${pid}veDashboardSizeWdith" v-model="pm.vepms.dashboardSize.width" type="text"
+										class="input w-full" name="width">
+									</p-inputtext>
+									<span class="p-inputgroup-addon">px</span>
+								</div>
+							</div>
 						</div>
+						<div class="field grid">
+							<label for="${pid}veDashboardSizeHeight" class="field-label col-12 mb-2">
+								<@spring.message code='height' />
+							</label>
+							<div class="field-input col-12">
+								<div class="p-inputgroup">
+									<p-inputtext id="${pid}veDashboardSizeHeight" v-model="pm.vepms.dashboardSize.height" type="text"
+										class="input w-full" name="height">
+									</p-inputtext>
+									<span class="p-inputgroup-addon">px</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="flex-grow-0 flex justify-content-center align-items-center pl-1 pt-1">
+						<p-button type="button" icon="pi pi-arrows-v" severity="secondary" text outlined rounded @click="onVeDashboardSizeExchange">
+						</p-button>
 					</div>
 				</div>
 				<div class="field grid">
