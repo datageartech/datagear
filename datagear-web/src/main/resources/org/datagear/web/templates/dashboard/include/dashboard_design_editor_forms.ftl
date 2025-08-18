@@ -402,22 +402,53 @@ page_palette.ftl
 					</div>
 				</div>
 				<div class="field grid">
-					<label for="${pid}veResponsiveFlexScreen" class="field-label col-12 mb-2"
+					<label for="${pid}veResponsiveFlexContainerScreen" class="field-label col-12 mb-2"
+						title="<@spring.message code='dashboard.veditor.rspFlex.layout.desc' />">
+						<@spring.message code='containerLayout' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}veResponsiveFlexContainerScreen" v-model="pm.veResponsiveFlexContainerScreenType" :options="pm.responsiveScreens"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
+						<div id="${pid}veResponsiveFlexContainerLayout" class="mt-2">
+							<div v-for="(screen, screenIdx) in pm.responsiveScreens">
+								<div v-if="pm.veResponsiveFlexContainerScreenType == screen.value">
+									<p-fieldset class="fieldset-sm fieldset-no-legend mb-3">
+										<div class="field grid">
+											<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
+												title="<@spring.message code='dashboard.veditor.rspFlex.height.desc' />">
+												<@spring.message code='height' />
+											</label>
+											<div class="field-input col-12 md:col-9">
+												<div class="p-inputgroup">
+													<p-selectbutton v-model="pm.vepms.responsiveFlex.layout[screen.value].h" :options="pm.responsiveContainerHeightOptions" option-label="name" option-value="value">
+										        	</p-selectbutton>
+												</div>
+											</div>
+										</div>
+									</p-fieldset>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="field grid">
+					<label for="${pid}veResponsiveFlexItemScreen" class="field-label col-12 mb-2"
 						title="<@spring.message code='dashboard.veditor.rspFlex.itemLayout.desc' />">
 						<@spring.message code='itemLayout' />
 					</label>
 					<div class="field-input col-12">
-						<p-selectbutton id="${pid}veResponsiveFlexScreen" v-model="pm.veResponsiveFlexScreenType" :options="pm.responsiveScreens"
+						<p-selectbutton id="${pid}veResponsiveFlexItemScreen" v-model="pm.veResponsiveFlexItemScreenType" :options="pm.responsiveScreens"
 							option-label="name" option-value="value" class="input w-full">
 						</p-selectbutton>
 						<div id="${pid}veResponsiveFlexItemLayouts" class="mt-2">
 							<div v-for="(screen, screenIdx) in pm.responsiveScreens">
-								<div v-if="pm.veResponsiveFlexScreenType == screen.value">
+								<div v-if="pm.veResponsiveFlexItemScreenType == screen.value">
 									<div v-for="(item, itemIdx) in pm.vepms.responsiveFlex.itemLayouts">
 										<p-fieldset :legend="'<@spring.message code='item' /> ' + (itemIdx+1)" class="fieldset-sm fieldset-bold-legend mb-3">
 											<div class="field grid">
 												<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
-													title="<@spring.message code='dashboard.veditor.rspFlex.width.desc' />">
+													title="<@spring.message code='dashboard.veditor.rspFlex.item.width.desc' />">
 													<@spring.message code='width' />
 												</label>
 												<div class="field-input col-12 md:col-9">
@@ -428,14 +459,14 @@ page_palette.ftl
 											</div>
 											<div class="field grid">
 												<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
-													title="<@spring.message code='dashboard.veditor.rspFlex.height.desc' />">
+													title="<@spring.message code='dashboard.veditor.rspFlex.item.height.desc' />">
 													<@spring.message code='height' />
 												</label>
 												<div class="field-input col-12 md:col-9">
 													<div class="p-inputgroup">
 														<p-selectbutton v-model="item[screen.value].heightUnit" :options="pm.responsiveHeightUnits" option-label="name" option-value="value">
 											        	</p-selectbutton>
-														<p-dropdown v-model="item[screen.value].h" :options="pm.responsiveHeightOptions[item[screen.value].heightUnit]"
+														<p-dropdown v-model="item[screen.value].h" :options="pm.responsiveHeightTypeOptions[item[screen.value].heightUnit]"
 															option-label="name" option-value="value" show-clear="true">
 											        	</p-dropdown>
 													</div>
@@ -443,7 +474,7 @@ page_palette.ftl
 											</div>
 											<div class="field grid">
 												<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
-													title="<@spring.message code='dashboard.veditor.rspFlex.display.desc' />">
+													title="<@spring.message code='dashboard.veditor.rspFlex.item.display.desc' />">
 													<@spring.message code='display' />
 												</label>
 												<div class="field-input col-12 md:col-9">

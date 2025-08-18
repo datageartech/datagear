@@ -948,7 +948,7 @@
 	/**
 	 * 插入响应式弹性布局元素。
 	 * 
-	 * @param model 布局模型，格式为：{ itemCount: 条目数, itemLayouts: [ { xs: { "布局名称": ..., ...}, sm: {...}, ... }, ... ], fillParent: 布尔值或布尔值字符串 }
+	 * @param model 布局模型，格式为：{ itemCount: 条目数, layout: { xs: { ... }, ... }, itemLayouts: [ { xs: { "布局名称": ..., ...}, sm: {...}, ... }, ... ], fillParent: 布尔值或布尔值字符串 }
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 * 
@@ -969,13 +969,15 @@
 		styleStr += this._evalInsertLayoutHeightStyle(model.fillParent, insertParentEle);
 		div.attr("style", styleStr);
 		
-		div.attr("class", "dg-rsp-row");
+		var styleClass = this._evalResponsiveFlexLayoutClass(model.layout);
+		styleClass = (styleClass ? "dg-rsp-row " + styleClass : "dg-rsp-row");
+		div.attr("class", styleClass);
 		
 		for(var i=0; i<itemCount; i++)
 		{
 			var itemDiv = $("<div></div>");
-			var styleClass = this._evalResponsiveFlexItemClass(model.itemLayouts[i]);
-			itemDiv.attr("class", styleClass);
+			var itemStyleClass = this._evalResponsiveFlexLayoutClass(model.itemLayouts[i]);
+			itemDiv.attr("class", itemStyleClass);
 			
 			this._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
 		}
@@ -985,18 +987,17 @@
 		return div;
 	};
 	
-	editor._evalResponsiveFlexItemClass = function(itemLayout)
+	editor._evalResponsiveFlexLayoutClass = function(layout)
 	{
-		itemLayout = (itemLayout == null ? {} : itemLayout);
+		layout = (layout == null ? {} : layout);
 		
 		var re = "";
 		
 		for(var i=0; i<RESPONSIVE_BREAKPOINTS.length; i++)
 		{
 			var breakpoint = RESPONSIVE_BREAKPOINTS[i];
-			var layout = (itemLayout[breakpoint] || {});
-			var infix = (breakpoint == "xs" ? "" : "-"+breakpoint);
-			var myRe = this._evalResponsiveFlexBreakpointClass(itemLayout, breakpoint, infix, layout);
+			var myLayout = (layout[breakpoint] || {});
+			var myRe = this._evalResponsiveFlexBreakpointClass(breakpoint, myLayout);
 			
 			if(myRe)
 				re += (re == "" ? "" : " ") + myRe;
@@ -1005,10 +1006,11 @@
 		return re;
 	};
 	
-	editor._evalResponsiveFlexBreakpointClass = function(itemLayout, breakpoint, infix, layout)
+	editor._evalResponsiveFlexBreakpointClass = function(breakpoint, layout)
 	{
 		var re = "";
-		
+
+		var infix = (breakpoint == "xs" ? "" : "-"+breakpoint);
 		for(var i=0; i<RESPONSIVE_LAYOUT_NAMES.length; i++)
 		{
 			var name = RESPONSIVE_LAYOUT_NAMES[i];
@@ -1037,7 +1039,9 @@
 	{
 		ele = this._editElement(this._currentElement(ele, true));
 		
-		var re = { itemCount: 0, itemLayouts: [] };
+		var re = { itemCount: 0, layout: {}, itemLayouts: [] };
+		
+		re.layout = this._evalResponsiveFlexLayout(ele.attr("class"), [ "dg-rsp-row" ]);
 		
 		var thisEditor = this;
 		ele.children().each(function()
@@ -1048,7 +1052,7 @@
 			if(chartFactory.isNullOrEmpty(editId))
 				return;
 			
-			var layout = thisEditor._evalResponsiveFlexItemLayout(child.attr("class"));
+			var layout = thisEditor._evalResponsiveFlexLayout(child.attr("class"));
 			layout.visualEditId = editId;
 			
 			re.itemCount++;
@@ -1080,7 +1084,7 @@
 		return editId;
 	};
 	
-	editor._evalResponsiveFlexItemLayout = function(classStr)
+	editor._evalResponsiveFlexLayout = function(classStr, ignoreClasses)
 	{
 		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
 		
@@ -1092,6 +1096,9 @@
 			var className = classNames[i];
 			
 			if(chartFactory.isNullOrEmpty(className) || !className.indexOf("dg-rsp-") == 0)
+				continue;
+			
+			if(ignoreClasses != null && $.inArray(className, ignoreClasses) > -1)
 				continue;
 			
 			var partStr = className.substr("dg-rsp-".length);
@@ -1166,11 +1173,11 @@
 			return false;
 		
 		var editEle = this._editElement(ele);
-		var newClassName = this._removeClassName(editEle.attr("class"), function(className)
-		{
-			return ("dg-rsp-row" == className);
-		});
-		newClassName = "dg-rsp-row" + (newClassName == "" ? "" : " " + newClassName);
+		
+		var styleClass = this._evalResponsiveFlexLayoutClass(model.layout);
+		styleClass = (styleClass ? "dg-rsp-row " + styleClass : "dg-rsp-row");
+		var newClassName = this._removeClassName(editEle.attr("class"), this._isResponsiveClassName);
+		newClassName = styleClass + (newClassName == "" ? "" : " " + newClassName);
 		
 		this._setElementClass(ele, newClassName);
 		
@@ -1185,17 +1192,19 @@
 			var child = this._getEleByVisualEditId(itemLayout.visualEditId);
 			var editChild = this._editElement(child);
 			
-			var layoutClass = this._evalResponsiveFlexItemClass(itemLayout);
-			var newChildClassName = this._removeClassName(editChild.attr("class"), function(className)
-			{
-				return (className.indexOf("dg-rsp-") == 0);
-			});
+			var layoutClass = this._evalResponsiveFlexLayoutClass(itemLayout);
+			var newChildClassName = this._removeClassName(editChild.attr("class"), this._isResponsiveClassName);
 			newChildClassName = layoutClass + (newChildClassName == "" ? "" : " " + newChildClassName);
 			
 			this._setElementClass(child, newChildClassName);
 		}
 		
 		return ele;
+	};
+	
+	editor._isResponsiveClassName = function(className)
+	{
+		return (className.indexOf("dg-rsp-") == 0);
 	};
 	
 	/**

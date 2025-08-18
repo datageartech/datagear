@@ -2479,8 +2479,11 @@ $.inflateDashboardDesignEditorForms = function(po)
 	po.veInflateResponsiveFlexModel = function(model)
 	{
 		model = (model == null ? {} : model);
+		model.layout = (model.layout == null ? {} : model.layout);
 		model.itemLayouts = (model.itemLayouts == null ? [] : model.itemLayouts);
 		model.itemCount = model.itemLayouts.length;
+		
+		po.veInitResponsiveFlexItem(model.layout);
 		
 		for(var i=0; i<model.itemLayouts.length; i++)
 		{
@@ -2495,21 +2498,22 @@ $.inflateDashboardDesignEditorForms = function(po)
 		var re =
 		{
 			fillParent: false,
+			layout: { },
 			itemLayouts: [ {}, {}, {} ]
 		};
 		
 		$.extend(true, re.itemLayouts,
 		[
 			{
-				"xs": { col: "12", h: "33pct" },
+				"xs": { col: "12", h: "33f3pct" },
 				"sm": { col: "6", h: "50pct" }
 			},
 			{
-				"xs": { col: "12", h: "33pct" },
+				"xs": { col: "12", h: "33f3pct" },
 				"sm": { col: "6", h: "50pct" }
 			},
 			{
-				"xs": { col: "12", h: "33pct" },
+				"xs": { col: "12", h: "33f3pct" },
 				"sm": { col: "12", h: "50pct" }
 			}
 		]);
@@ -2868,7 +2872,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 				{ name: po.i18n["dashboard.veditor.gridLayout.divide.custom"], value: "custom" }
 			],
 			responsiveScreens: po.responsiveScreens,
-			veResponsiveFlexScreenType: "xs",
+			veResponsiveFlexContainerScreenType: "xs",
+			veResponsiveFlexItemScreenType: "xs",
 			responsiveFlexCols:
 			[
 				{ name: "1/12", value: "1" },
@@ -2884,13 +2889,18 @@ $.inflateDashboardDesignEditorForms = function(po)
 				{ name: "11/12", value: "11" },
 				{ name: "12/12", value: "12" }
 			],
+			responsiveContainerHeightOptions:
+			[
+				{name: "100%", value: "100pct"},
+				{name: "auto", value: "auto"}
+			],
 			responsiveHeightUnits:
 			[
 				{ name: "%", value: "pct" },
 				{ name: "rem", value: "rem" },
 				{ name: "vh", value: "vh" }
 			],
-			responsiveHeightOptions:
+			responsiveHeightTypeOptions:
 			{
 				"pct":
 				[
@@ -2972,12 +2982,14 @@ $.inflateDashboardDesignEditorForms = function(po)
 				var form = po.elementOfPidPrefix("veResponsiveFlexForm", document.body);
 				po.initVePanelHelperSrc(form, pm.vepms.responsiveFlex);
 				
+				pm.veResponsiveFlexContainerScreenType = "xs";
+				pm.veResponsiveFlexItemScreenType = "xs";
+				
 				po.setupSimpleForm(form, pm.vepms.responsiveFlex, function()
 				{
 					if(pm.veshs.responsiveFlex(pm.vepms.responsiveFlex) !== false)
 					{
 						pm.vepms.responsiveFlex = po.veDftResponsiveFlexModel();
-						pm.veResponsiveFlexScreenType = "xs";
 						pm.vepss.responsiveFlexShown = false;
 					}
 				});

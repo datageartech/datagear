@@ -442,6 +442,9 @@ label.align-tip{
 .p-fieldset.fieldset-bold-legend .p-fieldset-legend{
 	font-weight: bold;
 }
+.p-fieldset.fieldset-no-legend .p-fieldset-legend{
+	display: none;
+}
 .p-divider.divider-z-0 .p-divider-content{
 	z-index: 0 !important;
 }
