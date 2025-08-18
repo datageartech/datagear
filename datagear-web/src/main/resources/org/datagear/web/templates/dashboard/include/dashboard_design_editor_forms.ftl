@@ -490,16 +490,6 @@ page_palette.ftl
 						</div>
 					</div>
 				</div>
-				<div class="field grid" v-if="pm.veResponsiveFlexFormShowFillParent">
-					<label for="${pid}veResponsiveFlexFillParent" class="field-label col-12 mb-2">
-						<@spring.message code='fillPage' />
-					</label>
-					<div class="field-input col-12">
-						<p-selectbutton id="${pid}veResponsiveFlexFillParent" v-model="pm.vepms.responsiveFlex.fillParent" :options="pm.booleanOptions"
-							option-label="name" option-value="value" class="input w-full">
-						</p-selectbutton>
-					</div>
-				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>

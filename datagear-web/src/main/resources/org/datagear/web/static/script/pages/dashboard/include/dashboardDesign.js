@@ -1534,13 +1534,12 @@ $.inflateDashboardDesignEditor = function(po)
 					if(dashboardEditor)
 					{
 						po.veCurrentInsertType = this.insertType;
-						var showFillParent = dashboardEditor.isInsertToEmptyBody(this.insertType);
 						po.showVeResponsiveFlexPanel(function(model)
 						{
 							po.insertVeResponsiveFlex(model);
 						},
 						po.veDftResponsiveFlexModel(),
-						false, showFillParent);
+						false);
 					}
 				}
 			},
@@ -2498,7 +2497,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		var re =
 		{
 			fillParent: false,
-			layout: { },
+			layout: { xs: { h: "100pct" } },
 			itemLayouts: [ {}, {}, {} ]
 		};
 		
@@ -2639,18 +2638,15 @@ $.inflateDashboardDesignEditorForms = function(po)
 		pm.vepss.flexLayoutShown = true;
 	};
 	
-	po.showVeResponsiveFlexPanel = function(submitHandler, model, disableItemCount, showFillParent)
+	po.showVeResponsiveFlexPanel = function(submitHandler, model, disableItemCount)
 	{
 		disableItemCount = (disableItemCount == null ? false : disableItemCount);
-		showFillParent = (showFillParent == null ? false : showFillParent);
 		
 		var pm = po.vuePageModel();
 		
 		pm.veshs.responsiveFlex = submitHandler;
-		pm.veResponsiveFlexFormShowFillParent = showFillParent;
 		pm.veResponsiveFlexFormDisableItemCount = disableItemCount;
 		pm.vepms.responsiveFlex = $.extend(true, {}, model);
-		pm.vepms.responsiveFlex.fillParent = showFillParent;
 		pm.vepss.responsiveFlexShown = true;
 	};
 	
@@ -2838,7 +2834,6 @@ $.inflateDashboardDesignEditorForms = function(po)
 			},
 			veGridLayoutPanelShowFillParent: false,
 			veFlexLayoutPanelShowFillParent: false,
-			veResponsiveFlexFormShowFillParent: false,
 			veResponsiveFlexFormDisableItemCount: false,
 			dashboardSizeScaleOptions:
 			[

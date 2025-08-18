@@ -948,7 +948,7 @@
 	/**
 	 * 插入响应式弹性布局元素。
 	 * 
-	 * @param model 布局模型，格式为：{ itemCount: 条目数, layout: { xs: { ... }, ... }, itemLayouts: [ { xs: { "布局名称": ..., ...}, sm: {...}, ... }, ... ], fillParent: 布尔值或布尔值字符串 }
+	 * @param model 布局模型，格式为：{ itemCount: 条目数, layout: { xs: { ... }, ... }, itemLayouts: [ { xs: { "布局名称": ..., ...}, sm: {...}, ... }, ... ] }
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 * 
@@ -963,11 +963,6 @@
 		
 		//不能使用"<div />"，生成的源码格式不对
 		var div = $("<div></div>");
-		
-		var styleStr = "";
-		var insertParentEle = this._getInsertParentElement(refEle, insertType);
-		styleStr += this._evalInsertLayoutHeightStyle(model.fillParent, insertParentEle);
-		div.attr("style", styleStr);
 		
 		var styleClass = this._evalResponsiveFlexLayoutClass(model.layout);
 		styleClass = (styleClass ? "dg-rsp-row " + styleClass : "dg-rsp-row");
@@ -2666,26 +2661,6 @@
 		return this._getElementChartOptions(ele);
 	};
 	
-	editor._fillBodyStyleByAbsolute = function()
-	{
-		var re = this._fillParentStyleByAbsolute();
-		//设置默认内边距，贴边效果不佳
-		re.padding = "3px";
-		
-		return re;
-	};
-	
-	editor._fillParentStyleByAbsolute = function()
-	{
-		var re =
-		{
-			position: "absolute", left: "0", top: "0", right: "0", bottom: "0",
-			padding: "0", margin: "0", "box-sizing": "border-box"
-		};
-		
-		return re;
-	};
-	
 	editor._reRenderDashboard = function()
 	{
 		var dashboard = this.dashboard;
@@ -3958,11 +3933,6 @@
 		
 		if(fillParent)
 		{
-			if(isBodyParent)
-			{
-				this._setElementStyleAppend(parentEle, this._fillBodyStyleByAbsolute());
-			}
-			
 			re = "height:100%;";
 		}
 		else if(isBodyParent)
