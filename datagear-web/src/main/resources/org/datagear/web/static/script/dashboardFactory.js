@@ -232,6 +232,11 @@
 	dashboardFactory.HANDLE_CHART_INTERVAL_MS = 1;
 	
 	/**
+	 * 自动调整图表尺寸延迟毫秒数。
+	 */
+	dashboardFactory.RESIZE_CHART_TIMEOUT_MS = 300;
+	
+	/**
 	 * 浏览器初始化到此看板工厂JS的时间戳。
 	 */
 	dashboardFactory.LOAD_TIME = new Date().getTime();
@@ -933,7 +938,10 @@
 		var thisDashboard = this;
 		this._windowResizeHandler = function()
 		{
-			setTimeout(function()
+			if(thisDashboard._resizeChartTimeoutId != null)
+				clearTimeout(thisDashboard._resizeChartTimeoutId);
+			
+			thisDashboard._resizeChartTimeoutId = setTimeout(function()
 			{
 				if(thisDashboard.statusRendered())
 				{
@@ -948,7 +956,7 @@
 					}
 				}
 			},
-			300);
+			dashboardFactory.RESIZE_CHART_TIMEOUT_MS);
 		};
 		
 		$window.on("resize", this._windowResizeHandler);
