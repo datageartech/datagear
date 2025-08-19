@@ -2444,6 +2444,71 @@ $.inflateDashboardDesignEditorForms = function(po)
 		{ name: po.i18n["screen.large"], value: "2xl" }
 	];
 	
+	po.responsiveFlexCols =
+	[
+		{ name: "1/12", value: "1" },
+		{ name: "2/12", value: "2" },
+		{ name: "3/12", value: "3" },
+		{ name: "4/12", value: "4" },
+		{ name: "5/12", value: "5" },
+		{ name: "6/12", value: "6" },
+		{ name: "7/12", value: "7" },
+		{ name: "8/12", value: "8" },
+		{ name: "9/12", value: "9" },
+		{ name: "10/12", value: "10" },
+		{ name: "11/12", value: "11" },
+		{ name: "12/12", value: "12" }
+	];
+	
+	po.responsiveContainerHeightOptions =
+	[
+		{name: "100%", value: "100pct"},
+		{name: "auto", value: "auto"}
+	];
+	
+	po.responsiveHeightUnits =
+	[
+		{ name: "%", value: "pct" },
+		{ name: "rem", value: "rem" },
+		{ name: "vh", value: "vh" }
+	];
+	
+	po.responsiveHeightTypeOptions =
+	{
+		"pct":
+		[
+			{name: "auto", value: "auto"},
+			{name: "5%", value: "5pct"}, {name: "10%", value: "10pct"}, {name: "15%", value: "15pct"}, {name: "20%", value: "20pct"}, {name: "25%", value: "25pct"},
+			{name: "30%", value: "30pct"}, {name: "33.3%", value: "33f3pct"}, {name: "35%", value: "35pct"}, {name: "40%", value: "40pct"}, {name: "45%", value: "45pct"}, {name: "50%", value: "50pct"},
+			{name: "55%", value: "55pct"}, {name: "60%", value: "60pct"}, {name: "65%", value: "65pct"}, {name: "66.6%", value: "66f6pct"}, {name: "70%", value: "70pct"}, {name: "75%", value: "75pct"},
+			{name: "80%", value: "80pct"}, {name: "85%", value: "85pct"}, {name: "90%", value: "90pct"}, {name: "95%", value: "95pct"}, {name: "100%", value: "100pct"}
+		],
+		"rem":
+		[
+			{name: "auto", value: "auto"},
+			{name: "1rem", value: "1rem"}, {name: "2rem", value: "2rem"}, {name: "3rem", value: "3rem"}, {name: "4rem", value: "4rem"}, {name: "5rem", value: "5rem"},
+			{name: "6rem", value: "6rem"}, {name: "7rem", value: "7rem"}, {name: "8rem", value: "8rem"}, {name: "9rem", value: "9rem"}, {name: "10rem", value: "10rem"},
+			{name: "11rem", value: "11rem"}, {name: "12rem", value: "12rem"}, {name: "13rem", value: "13rem"}, {name: "14rem", value: "14rem"}, {name: "15rem", value: "15rem"},
+			{name: "16rem", value: "16rem"}, {name: "17rem", value: "17rem"}, {name: "18rem", value: "18rem"}, {name: "19rem", value: "19rem"}, {name: "20rem", value: "20rem"},
+			{name: "21rem", value: "21rem"}, {name: "22rem", value: "22rem"}, {name: "23rem", value: "23rem"}, {name: "24rem", value: "24rem"}, {name: "25rem", value: "25rem"},
+			{name: "26rem", value: "26rem"}, {name: "27rem", value: "27rem"}, {name: "28rem", value: "28rem"}, {name: "29rem", value: "29rem"}, {name: "30rem", value: "30rem"}
+		],
+		"vh":
+		[
+			{name: "auto", value: "auto"},
+			{name: "5vh", value: "5vh"}, {name: "10vh", value: "10vh"}, {name: "15vh", value: "15vh"}, {name: "20vh", value: "20vh"}, {name: "25vh", value: "25vh"},
+			{name: "30vh", value: "30vh"}, {name: "33.3vh", value: "33f3vh"}, {name: "35vh", value: "35vh"}, {name: "40vh", value: "40vh"}, {name: "45vh", value: "45vh"}, {name: "50vh", value: "50vh"},
+			{name: "55vh", value: "55vh"}, {name: "60vh", value: "60vh"}, {name: "65vh", value: "65vh"}, {name: "66.6vh", value: "66f6vh"}, {name: "70vh", value: "70vh"}, {name: "75vh", value: "75vh"},
+			{name: "80vh", value: "80vh"}, {name: "85vh", value: "85vh"}, {name: "90vh", value: "90vh"}, {name: "95vh", value: "95vh"}, {name: "100vh", value: "100vh"}
+		]
+	};
+	
+	po.responsiveDisplayOptions =
+	[
+		{ name: po.i18n["display"], value: "block" },
+		{ name: po.i18n["hide"], value: "none" }
+	];
+	
 	po.veDftChartThemeModel = function()
 	{
 		var re = { graphColors: [], graphRangeColors: [] };
@@ -2468,8 +2533,29 @@ $.inflateDashboardDesignEditorForms = function(po)
 		{
 			var type = po.responsiveScreens[i].value;
 			item[type] = (item[type] ? item[type] : {});
-			var heightUnit = (item[type].h == null ? null : item[type].h.match(/[a-z]*$/i)[0]);
-			item[type].heightUnit = (heightUnit ? heightUnit : "pct");
+			var typeItem = item[type];
+			var heightUnit = null;
+			
+			if(typeItem.h != null)
+			{
+				for(var hu in po.responsiveHeightTypeOptions)
+				{
+					var myOptions = po.responsiveHeightTypeOptions[hu];
+					for(var j=0; j<myOptions.length; j++)
+					{
+						if(myOptions[j].value === typeItem.h)
+						{
+							heightUnit = hu;
+							break;
+						}
+					}
+					
+					if(heightUnit)
+						break;
+				}
+			}
+			
+			typeItem.heightUnit = (heightUnit ? heightUnit : "pct");
 		}
 		
 		return item;
@@ -2867,68 +2953,12 @@ $.inflateDashboardDesignEditorForms = function(po)
 				{ name: po.i18n["dashboard.veditor.gridLayout.divide.custom"], value: "custom" }
 			],
 			responsiveScreens: po.responsiveScreens,
-			veResponsiveFlexContainerScreenType: "xs",
-			veResponsiveFlexItemScreenType: "xs",
-			responsiveFlexCols:
-			[
-				{ name: "1/12", value: "1" },
-				{ name: "2/12", value: "2" },
-				{ name: "3/12", value: "3" },
-				{ name: "4/12", value: "4" },
-				{ name: "5/12", value: "5" },
-				{ name: "6/12", value: "6" },
-				{ name: "7/12", value: "7" },
-				{ name: "8/12", value: "8" },
-				{ name: "9/12", value: "9" },
-				{ name: "10/12", value: "10" },
-				{ name: "11/12", value: "11" },
-				{ name: "12/12", value: "12" }
-			],
-			responsiveContainerHeightOptions:
-			[
-				{name: "100%", value: "100pct"},
-				{name: "auto", value: "auto"}
-			],
-			responsiveHeightUnits:
-			[
-				{ name: "%", value: "pct" },
-				{ name: "rem", value: "rem" },
-				{ name: "vh", value: "vh" }
-			],
-			responsiveHeightTypeOptions:
-			{
-				"pct":
-				[
-					{name: "auto", value: "auto"},
-					{name: "5%", value: "5pct"}, {name: "10%", value: "10pct"}, {name: "15%", value: "15pct"}, {name: "20%", value: "20pct"}, {name: "25%", value: "25pct"},
-					{name: "30%", value: "30pct"}, {name: "33.3%", value: "33f3pct"}, {name: "35%", value: "35pct"}, {name: "40%", value: "40pct"}, {name: "45%", value: "45pct"}, {name: "50%", value: "50pct"},
-					{name: "55%", value: "55pct"}, {name: "60%", value: "60pct"}, {name: "65%", value: "65pct"}, {name: "66.6%", value: "66f6pct"}, {name: "70%", value: "70pct"}, {name: "75%", value: "75pct"},
-					{name: "80%", value: "80pct"}, {name: "85%", value: "85pct"}, {name: "90%", value: "90pct"}, {name: "95%", value: "95pct"}, {name: "100%", value: "100pct"}
-				],
-				"rem":
-				[
-					{name: "auto", value: "auto"},
-					{name: "1rem", value: "1rem"}, {name: "2rem", value: "2rem"}, {name: "3rem", value: "3rem"}, {name: "4rem", value: "4rem"}, {name: "5rem", value: "5rem"},
-					{name: "6rem", value: "6rem"}, {name: "7rem", value: "7rem"}, {name: "8rem", value: "8rem"}, {name: "9rem", value: "9rem"}, {name: "10rem", value: "10rem"},
-					{name: "11rem", value: "11rem"}, {name: "12rem", value: "12rem"}, {name: "13rem", value: "13rem"}, {name: "14rem", value: "14rem"}, {name: "15rem", value: "15rem"},
-					{name: "16rem", value: "16rem"}, {name: "17rem", value: "17rem"}, {name: "18rem", value: "18rem"}, {name: "19rem", value: "19rem"}, {name: "20rem", value: "20rem"},
-					{name: "21rem", value: "21rem"}, {name: "22rem", value: "22rem"}, {name: "23rem", value: "23rem"}, {name: "24rem", value: "24rem"}, {name: "25rem", value: "25rem"},
-					{name: "26rem", value: "26rem"}, {name: "27rem", value: "27rem"}, {name: "28rem", value: "28rem"}, {name: "29rem", value: "29rem"}, {name: "30rem", value: "30rem"}
-				],
-				"vh":
-				[
-					{name: "auto", value: "auto"},
-					{name: "5vh", value: "5vh"}, {name: "10vh", value: "10vh"}, {name: "15vh", value: "15vh"}, {name: "20vh", value: "20vh"}, {name: "25vh", value: "25vh"},
-					{name: "30vh", value: "30vh"}, {name: "33.3vh", value: "33f3vh"}, {name: "35vh", value: "35vh"}, {name: "40vh", value: "40vh"}, {name: "45vh", value: "45vh"}, {name: "50vh", value: "50vh"},
-					{name: "55vh", value: "55vh"}, {name: "60vh", value: "60vh"}, {name: "65vh", value: "65vh"}, {name: "66.6vh", value: "66f6vh"}, {name: "70vh", value: "70vh"}, {name: "75vh", value: "75vh"},
-					{name: "80vh", value: "80vh"}, {name: "85vh", value: "85vh"}, {name: "90vh", value: "90vh"}, {name: "95vh", value: "95vh"}, {name: "100vh", value: "100vh"}
-				]
-			},
-			responsiveDisplayOptions:
-			[
-				{ name: po.i18n["display"], value: "block" },
-				{ name: po.i18n["hide"], value: "none" }
-			]
+			veResponsiveFlexScreenTypeIdx: 0,
+			responsiveFlexCols: po.responsiveFlexCols,
+			responsiveContainerHeightOptions: po.responsiveContainerHeightOptions,
+			responsiveHeightUnits: po.responsiveHeightUnits,
+			responsiveHeightTypeOptions: po.responsiveHeightTypeOptions,
+			responsiveDisplayOptions: po.responsiveDisplayOptions
 		});
 		
 		var pm = po.vuePageModel();
@@ -2977,8 +3007,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				var form = po.elementOfPidPrefix("veResponsiveFlexForm", document.body);
 				po.initVePanelHelperSrc(form, pm.vepms.responsiveFlex);
 				
-				pm.veResponsiveFlexContainerScreenType = "xs";
-				pm.veResponsiveFlexItemScreenType = "xs";
+				pm.veResponsiveFlexScreenTypeIdx = 0;
 				
 				po.setupSimpleForm(form, pm.vepms.responsiveFlex, function()
 				{

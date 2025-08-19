@@ -401,18 +401,15 @@ page_palette.ftl
 						</div>
 					</div>
 				</div>
-				<div class="field grid">
-					<label for="${pid}veResponsiveFlexContainerScreen" class="field-label col-12 mb-2"
-						title="<@spring.message code='dashboard.veditor.rspFlex.layout.desc' />">
-						<@spring.message code='containerLayout' />
-					</label>
-					<div class="field-input col-12">
-						<p-selectbutton id="${pid}veResponsiveFlexContainerScreen" v-model="pm.veResponsiveFlexContainerScreenType" :options="pm.responsiveScreens"
-							option-label="name" option-value="value" class="input w-full">
-						</p-selectbutton>
-						<div id="${pid}veResponsiveFlexContainerLayout" class="mt-2">
-							<div v-for="(screen, screenIdx) in pm.responsiveScreens">
-								<div v-if="pm.veResponsiveFlexContainerScreenType == screen.value">
+				<div>
+					<p-tabview v-model:active-index="pm.veResponsiveFlexScreenTypeIdx" class="light-tabview" :pt="{panelContainer:{'class':'px-0'}}">
+						<p-tabpanel v-for="(screen, screenIdx) in pm.responsiveScreens" :header="screen.name" class="px-0">
+							<div class="field grid mb-1">
+								<label for="${pid}veResponsiveFlexContainerScreen" class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.rspFlex.layout.desc' />">
+									<@spring.message code='containerLayout' />
+								</label>
+								<div class="field-input col-12">
 									<p-fieldset class="fieldset-sm fieldset-no-legend mb-3">
 										<div class="field grid">
 											<label class="field-label col-12 mb-2 md:col-3 md:mb-0"
@@ -429,21 +426,12 @@ page_palette.ftl
 									</p-fieldset>
 								</div>
 							</div>
-						</div>
-					</div>
-				</div>
-				<div class="field grid">
-					<label for="${pid}veResponsiveFlexItemScreen" class="field-label col-12 mb-2"
-						title="<@spring.message code='dashboard.veditor.rspFlex.itemLayout.desc' />">
-						<@spring.message code='itemLayout' />
-					</label>
-					<div class="field-input col-12">
-						<p-selectbutton id="${pid}veResponsiveFlexItemScreen" v-model="pm.veResponsiveFlexItemScreenType" :options="pm.responsiveScreens"
-							option-label="name" option-value="value" class="input w-full">
-						</p-selectbutton>
-						<div id="${pid}veResponsiveFlexItemLayouts" class="mt-2">
-							<div v-for="(screen, screenIdx) in pm.responsiveScreens">
-								<div v-if="pm.veResponsiveFlexItemScreenType == screen.value">
+							<div class="field grid mb-1">
+								<label class="field-label col-12 mb-2"
+									title="<@spring.message code='dashboard.veditor.rspFlex.itemLayout.desc' />">
+									<@spring.message code='itemLayout' />
+								</label>
+								<div class="field-input col-12">
 									<div v-for="(item, itemIdx) in pm.vepms.responsiveFlex.itemLayouts">
 										<p-fieldset :legend="'<@spring.message code='item' /> ' + (itemIdx+1)" class="fieldset-sm fieldset-bold-legend mb-3">
 											<div class="field grid">
@@ -487,8 +475,8 @@ page_palette.ftl
 									</div>
 								</div>
 							</div>
-						</div>
-					</div>
+						</p-tabpanel>
+					</p-tabview>
 				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
