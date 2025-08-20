@@ -60,6 +60,7 @@ import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -143,6 +144,9 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	private DashboardShareSetService dashboardShareSetService;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private ApplicationProperties applicationProperties;
 
 	@Autowired
@@ -187,6 +191,16 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	public void setDashboardShareSetService(DashboardShareSetService dashboardShareSetService)
 	{
 		this.dashboardShareSetService = dashboardShareSetService;
+	}
+
+	public UserService getUserService()
+	{
+		return userService;
+	}
+
+	public void setUserService(UserService userService)
+	{
+		this.userService = userService;
 	}
 
 	public ApplicationProperties getApplicationProperties()
@@ -695,8 +709,6 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			Model model, User currentUser, HtmlTplDashboardWidgetEntity dashboardWidget,
 			String template, boolean isShowForEdit) throws Exception
 	{
-		User createUser = dashboardWidget.getCreateUser();
-
 		String showHtml = (isShowForEdit
 				? buildShowForEditShowHtml(request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT))
 				: "");
@@ -705,7 +717,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		Reader showHtmlIn = null;
 		Writer out = null;
 
-		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(createUser));
+		ChartWidgetSourceContext.set(createChartWidgetSourceContextForCreator(dashboardWidget));
 
 		try
 		{
@@ -750,6 +762,18 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			IOUtil.close(out);
 			ChartWidgetSourceContext.remove();
 		}
+	}
+
+	protected ChartWidgetSourceContext createChartWidgetSourceContextForCreator(
+			HtmlTplDashboardWidgetEntity dashboardWidget)
+	{
+		User createUser = dashboardWidget.getCreateUser();
+		// 必须加载包含角色信息的完整用户信息，不然底层权限查询逻辑不对
+		if (createUser != null)
+			createUser = getUserService().getById(createUser.getId());
+
+		ChartWidgetSourceContext re = new ChartWidgetSourceContext(createUser);
+		return re;
 	}
 
 	protected HtmlTitleHandler getShowDashboardHtmlTitleHandler(HttpServletRequest request,
@@ -985,7 +1009,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		if (lcws.isPatternAll())
 		{
 			// 使用看板创建用户
-			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
+			ChartWidgetSourceContext.set(createChartWidgetSourceContextForCreator(dashboardWidget));
 		}
 		// 不可异步加载任何图表
 		else if (lcws.isPatternNone())
@@ -1019,7 +1043,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			}
 
 			// 使用看板创建用户
-			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
+			ChartWidgetSourceContext.set(createChartWidgetSourceContextForCreator(dashboardWidget));
 		}
 		// 未知模式
 		else
