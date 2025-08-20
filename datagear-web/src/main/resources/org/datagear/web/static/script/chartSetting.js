@@ -1554,9 +1554,11 @@
 		{
 			var chartOptions = chart.options();
 			var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+			
 			//显示位置："rightTop" 右上（默认）；"leftTop" 左上；"leftBottom" 左下；"rightBottom" 右下
 			var boxPosition = (builtinSetting ? builtinSetting.position : null);
 			boxPosition = (chartFactory.isNullOrEmpty(boxPosition) ? "rightTop" : boxPosition);
+			
 			//显示方向："row" 横向（默认）；"column" 竖向
 			var boxDirection = (builtinSetting ? builtinSetting.direction : null);
 			boxDirection = (chartFactory.isNullOrEmpty(boxDirection) ? "row" : boxDirection);
@@ -1572,7 +1574,9 @@
 			if(!disableSetting.param && chart.hasDataSetParam())
 			{
 				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-param-button' />")
-						.html(chartSetting.labels.param).appendTo($box);
+						.html(chartSetting.labels.param);
+				chartSetting.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.paramButton : null));
+				$button.appendTo($box);
 				
 				$button.click(function()
 				{
@@ -1598,7 +1602,9 @@
 			if(!disableSetting.data)
 			{
 				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-data-button' />")
-						.html(chartSetting.labels.data).appendTo($box);
+						.html(chartSetting.labels.data);
+				chartSetting.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.dataButton : null));
+				$button.appendTo($box);
 				
 				$button.click(function()
 				{
@@ -1627,6 +1633,22 @@
 	chartSetting.hideChartSettingBox = function(chart)
 	{
 		$(".dg-chart-setting-box", chart.elementJquery()).hide();
+	};
+	
+	//设置按钮选项，格式为：{ text: "", style: "...", styleClass: "..." }
+	chartSetting.setChartSettingButtonOptions = function($button, buttonOptions)
+	{
+		if(!buttonOptions)
+			return;
+		
+		if(buttonOptions.text)
+			$button.html(buttonOptions.text);
+		
+		if(buttonOptions.style)
+			chartFactory.elementStyle($button, buttonOptions.style);
+		
+		if(buttonOptions.styleClass)
+			$button.addClass(buttonOptions.styleClass);
 	};
 	
 	chartSetting.setChartSettingBoxThemeStyle = function(chart, $box)

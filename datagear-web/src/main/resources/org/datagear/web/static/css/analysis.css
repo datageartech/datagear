@@ -402,6 +402,9 @@
 	display: inline-block;
 	padding-right: 0.5rem;
 }
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value{
+	text-align: left;
+}
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value input[type=text],
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value textarea,
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value select,
@@ -514,21 +517,21 @@
 .dg-chart-setting-box.dg-flex-dir-column{
 	flex-direction: column;
 }
-.dg-chart-setting-box .dg-chart-setting-panel,
+.dg-chart-setting-panel,
 .dg-chart-setting-box button{
 	border-bottom-right-radius: 3px;
 	border-bottom-left-radius: 3px;
 	border-top-right-radius: 3px;
 	border-top-left-radius: 3px;
 }
-.dg-chart-setting-box .dg-chart-setting-button{
-	font-size: 0.8em !important;
-	padding: 0.1em 0.2em !important;
-	margin: 0 !important;
+.dg-chart-setting-button{
+	font-size: 0.8em;
+	padding: 0.1em 0.2em;
+	margin: 0;
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-chart-setting-box .dg-chart-setting-panel{
+.dg-chart-setting-panel{
 	position: absolute;
 	border-width: 1px;
 	border-style: solid;
@@ -537,14 +540,14 @@
 	-webkit-user-select: text;
 	z-index: 9;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-closebtn{
+.dg-chart-setting-panel .dg-chart-setting-panel-closebtn{
 	padding-left: 0.5em !important;
     padding-right: 0.5em !important;
     padding-top: 0.2em !important;
     padding-bottom: 0.2em !important;
     font-size: 0.8em !important;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
+.dg-chart-setting-panel .dg-chart-setting-panel-head{
 	font-weight: bold;
 	white-space: nowrap;
 	padding-bottom: 0.5em;
@@ -552,74 +555,74 @@
     justify-content: space-between;
     align-items: center;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-content{
+.dg-chart-setting-panel .dg-chart-setting-panel-content{
 	overflow: auto;
 	font-size: 0.9em;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
+.dg-chart-setting-panel .dg-chart-setting-panel-foot{
 	padding-top: 0.5em;
 	text-align: center;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button,
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head input[type=button],
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head input[type=submit],
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button,
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=button],
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=submit]{
+.dg-chart-setting-panel .dg-chart-setting-panel-head button,
+.dg-chart-setting-panel .dg-chart-setting-panel-head input[type=button],
+.dg-chart-setting-panel .dg-chart-setting-panel-head input[type=submit],
+.dg-chart-setting-panel .dg-chart-setting-panel-foot button,
+.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=button],
+.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=submit]{
 	font-weight: normal;
 	padding-left: 2em;
 	padding-right: 2em;
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-datasetbind-section{
+.dg-chart-setting-panel .dg-datasetbind-section{
 	border-width: 1px;
 	border-style: solid;
 	padding: 0.5em 0.5em;
 	margin: 0.5em 0;
 	border-radius: 3px;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-datasetbind-section-head{
+.dg-chart-setting-panel .dg-datasetbind-section-head{
 	font-weight: bold;
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0.2em 0em;
 	cursor: pointer;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form input,
-.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form select,
-.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form textarea
-.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form button{
+.dg-chart-setting-panel .dg-dspv-form input,
+.dg-chart-setting-panel .dg-dspv-form select,
+.dg-chart-setting-panel .dg-dspv-form textarea
+.dg-chart-setting-panel .dg-dspv-form button{
 	font-size: 1em;
 	border-width: 1px;
 	border-style: solid;
 	padding: 0.3em 0;
 }
-.dg-chart-setting-box .dg-chart-setting-panel button,
-.dg-chart-setting-box .dg-chart-setting-panel input[type=submit],
-.dg-chart-setting-box .dg-chart-setting-panel input[type=button]{
+.dg-chart-setting-panel button,
+.dg-chart-setting-panel input[type=submit],
+.dg-chart-setting-panel input[type=button]{
 	padding: 0.4em 0.8em;
 	white-space: nowrap;
 	font-size: 1em;
 }
-.dg-chart-setting-box .dg-chart-setting-panel button.dg-param-value-form-invalid,
-.dg-chart-setting-box .dg-chart-setting-panel input[type=submit].dg-param-value-form-invalid,
-.dg-chart-setting-box .dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
+.dg-chart-setting-panel button.dg-param-value-form-invalid,
+.dg-chart-setting-panel input[type=submit].dg-param-value-form-invalid,
+.dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
 	border-color: red !important;
 }
-.dg-chart-setting-box .dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
+.dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
 	display: none;
 }
-.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table{
+.dg-chart-setting-panel table.dg-chart-data-table{
 	border-collapse: collapse;
 }
-.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table th,
-.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table td{
+.dg-chart-setting-panel table.dg-chart-data-table th,
+.dg-chart-setting-panel table.dg-chart-data-table td{
 	padding: 0.5em 1em 0.5em 10px;
 	text-align: left;
 }
-.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table thead th,
-.dg-chart-setting-box .dg-chart-setting-panel table.dg-chart-data-table thead td{
+.dg-chart-setting-panel table.dg-chart-data-table thead th,
+.dg-chart-setting-panel table.dg-chart-data-table thead td{
 	white-space: nowrap;
 }
 
