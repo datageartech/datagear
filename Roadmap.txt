@@ -1,11 +1,10 @@
 下一版本：
 	
-	ok 登录页地址支持redirect参数，可在登录成功后重定向到指定页面；
-	ok 图表新增builtinSetting.displayMode内置选项，值为："hover"、"display"，用于控制内置设置面板显示模式；
-	ok 图表选项里的内置设置选项都移至builtinSetting名字内；
+	
 	
 待定：
 	
+	数据源防护支持正则表达式，支持URL和连接属性的或关系；
 	匿名用户始终不开放数据源的SQL工作台、数据导入/导出功能；
 	看板内置资源库移除ECharts，改为在图表插件库中引入（内置共用库），避免仅表格看板仍加载ECharts库；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
@@ -33,6 +32,7 @@
 		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；
 		移除ECharts内置看板库，改为通过图表插件depend依赖库引入（只需引入名称，库源由系统环境提供）；
 		看板JS中不使用jQuery别名$，改为直接使用jQuery，库加载改为采用Promise实现（尝试scriptEle.async=false顺序加载）；
+		移除chart.elementJquery()、echarts*()函数；
 	看板可视编辑模式绝对/相对定位元素可拖拽；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
