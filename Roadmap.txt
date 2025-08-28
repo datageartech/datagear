@@ -1,19 +1,16 @@
 下一版本：
 	
-	
-	
-待定：
-	
 	数据源防护支持正则表达式，支持URL和连接属性的或关系；
 	匿名用户始终不开放数据源的SQL工作台、数据导入/导出功能；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
-	新增客户端（local）图表功能，不参与服务端交互，完全由客户端看板API操作；
+	新增客户端（local）图表功能，不参与服务端交互，完全由客户端看板API操作？；
 	图表插件属性/分组新增可重复repeatable特性，用于支持属性值数组输入需求；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
 		图表插件添加apiVersion属性，标识支持的看板版本；
 		图表展示页根据插件的apiVersion自动加载对应看板API环境；
 		看板编辑页新增看板版本设置项，展示页根据此版本号加载对应看板API环境；
 		图表监听器、chart.update()等的results参数结构改为chartResult（对象结构，易于扩展）；
+		chartFactory.init()改为prototype实现；
 		dashboard.charts -> dashboard.charts()；
 		dashboard.renderContext -> dashboard.renderContext()；
 		chart.dashboard -> chart.dashboard()；
@@ -31,12 +28,28 @@
 		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；
 		移除ECharts内置看板库，改为通过图表插件depend依赖库引入（只需引入名称，库源由系统环境提供）；
 		看板JS中不使用jQuery别名$，改为直接使用jQuery，库加载改为采用Promise实现（尝试scriptEle.async=false顺序加载）；
-		移除chart.elementJquery()、echarts*()函数；
+		移除chart.elementJquery()函数；
 		看板内置资源库移除ECharts，改为在图表插件库中引入（内置共用库），避免仅表格看板仍加载ECharts库；
+		图表JS对象移除ECharts相关API，改为以内置插件依赖库的方式支持；
+		图表JS对象loadMap()改为loadResource()、dg-chart-map-urls改为dg-chart-resource-urls？；
 		内置标签卡移除字体尺寸CSS样式；
+		移除图表事件格式规范，改为由插件自决定，移除图表JS对象中事件、originalDataIndex()相关函数和规范；
+		图表渲染器renderer.js扩展可选的图表联动支持函数：
+			{
+				eventTypes: [ "series.click", { value: "...", description: "" }, ... ]、function(){ return [...]; },,
+				eventDataNames: function(eventTypeObj)
+				{
+					return [ "...", { value: "...", description: "" }, ... ];
+				}
+				eventDataValue: function(event, name)
+				{
+					return ...;
+				}
+			}
+待定：
+	
 	看板可视编辑模式绝对/相对定位元素可拖拽；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
-	plugin.json添加ext:{event:[{sourceType:"", data:[{name:"..."},...]}]}属性，用于说明图表事件结构，为图表联动提供支持；
 	图表插件数据标记自动绑定；
 	图表插件定义常用图表属性；
 	图表插件在线定义功能；
