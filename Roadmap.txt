@@ -46,6 +46,7 @@
 					return ...;
 				}
 			}
+		移除chart.inflateRenderOptions()、chart.inflateUpdateOptions()函数，添加chart.processRenderOptions()、chart.processUpdateOptions()函数；
 待定：
 	
 	看板可视编辑模式绝对/相对定位元素可拖拽；
