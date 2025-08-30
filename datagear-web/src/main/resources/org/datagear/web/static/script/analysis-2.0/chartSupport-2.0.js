@@ -33,10 +33,6 @@ var chartFactory = (global.chartFactory || (global.chartFactory = {}));
 var chartSupport = (chartFactory.chartSupport || (chartFactory.chartSupport = {}));
 var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
 
-// < @deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
-global.chartSupport = chartSupport;
-// > @deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
-
 //内置地图类图表的地图选项名
 //默认的ECharts地图类图表配置地图名稍微麻烦，
 //所有这里的内置图表都支持此快捷方式设置地图名选项
@@ -49,7 +45,7 @@ builtinOptionNames.sortAxisData = "sortAxisData";
 
 chartSupport.xxxRenderer = function(plugin, config)
 {
-	config = $.extend(true,
+	config = chartFactory.extend(true,
 	{
 		
 	},
@@ -95,7 +91,7 @@ chartSupport.xxxRenderer = function(plugin, config)
 
 chartSupport.lineRenderer = function(plugin, config)
 {
-	config = $.extend(true,
+	config = chartFactory.extend(true,
 	{
 		//是否堆叠
 		stack: false,
@@ -292,7 +288,7 @@ chartSupport.lineRenderer = function(plugin, config)
 
 chartSupport.barRenderer = function(plugin, config)
 {
-	config = $.extend(true,
+	config = chartFactory.extend(true,
 	{
 		//是否堆叠
 		stack: false,
@@ -555,7 +551,7 @@ chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventPara
 
 chartSupport.barPolarRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -815,7 +811,7 @@ chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEven
 
 chartSupport.pieRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -1023,7 +1019,7 @@ chartSupport.pieEvalSeriesLayout = function(chart, renderOptions, updateOptions)
 
 chartSupport.gaugeRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -1064,7 +1060,7 @@ chartSupport.gaugeRender = function(chart, options)
 		var chartEle = chart.elementJquery();
 		var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/12);
 		
-		$.extend(builtinOptions.series[0],
+		chartFactory.extend(builtinOptions.series[0],
 		{
 			startAngle: 90,
 			endAngle: -270,
@@ -1116,7 +1112,7 @@ chartSupport.gaugeRender = function(chart, options)
 		var chartEle = chart.elementJquery();
 		var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/20);
 		
-		$.extend(builtinOptions.series[0],
+		chartFactory.extend(builtinOptions.series[0],
 		{
 			axisLine:
 			{
@@ -1385,7 +1381,7 @@ chartSupport.scatterRippleOff = function(chart, eventType, handler)
 
 chartSupport._scatterRender = function(chart, options, scatterType)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -1645,7 +1641,7 @@ chartSupport.scatterCoordRippleOff = function(chart, eventType, handler)
 
 chartSupport._scatterCoordRender = function(chart, options, scatterType)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -1834,7 +1830,7 @@ chartSupport._scatterCoordSetChartEventData = function(chart, chartEvent, echart
 
 chartSupport.radarRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -1933,7 +1929,7 @@ chartSupport.radarUpdate = function(chart, chartResult)
 	if(chartSupport.sortAxisDataOption(renderOptions))
 	{
 		var tmpAxisData = [];
-		$.each(indicatorData, function(i, indicator)
+		chartFactory.each(indicatorData, function(i, indicator)
 		{
 			tmpAxisData.push(indicator.name);
 		});
@@ -1958,7 +1954,7 @@ chartSupport.radarUpdate = function(chart, chartResult)
 		var ts = tmpSeries[i];
 		var radarData = { name: ts.name, value: [] };
 		
-		$.each(indicatorData, function(j, indicator)
+		chartFactory.each(indicatorData, function(j, indicator)
 		{
 			var idx = chartSupport.findInArray(ts.data, indicator.name, "name");
 			radarData.value.push(idx > -1 ? ts.data[idx].value : null);
@@ -1977,7 +1973,7 @@ chartSupport.radarUpdate = function(chart, chartResult)
 	
 	chartSupport.echartsOptionsReplaceMerge(chart, options);
 	
-	chartFactory.extValueBuiltin(chart, "radarIndicatorData", indicatorData);
+	chartFactory.liveDataBuiltin(chart, "radarIndicatorData", indicatorData);
 };
 
 //行式雷达网数据处理
@@ -1995,7 +1991,7 @@ chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, chartResult, rende
 	for(var i=0; i<indicatorLen; i++)
 	{
 		var indicators = chart.resultMapDatas(result, { name: np[i], max: mp[i] });
-		$.each(indicators, function(j, indicator)
+		chartFactory.each(indicators, function(j, indicator)
 		{
 			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
 		});
@@ -2020,7 +2016,7 @@ chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, chartResult, rende
 			var categoryDatas = categoryDatasMap[categoryName];
 			var mySeries = { name: categoryName, data: categoryDatas, dataSetBindIndex: dataSetBind.index, resultDataIndex: [] };
 			
-			$.each(categoryDatas, function(k, cd)
+			chartFactory.each(categoryDatas, function(k, cd)
 			{
 				var odIdx = chart.originalDataIndex(cd);
 				mySeries.resultDataIndex.push(odIdx.resultDataIndex);
@@ -2141,7 +2137,7 @@ chartSupport.radarSetChartEventData = function(chart, chartEvent, echartsEventPa
 	data[dataSignNames.item] = echartsData.name;
 	data[dataSignNames.value] = echartsData.value;
 	
-	var indicatorData = chartFactory.extValueBuiltin(chart, "radarIndicatorData");
+	var indicatorData = chartFactory.liveDataBuiltin(chart, "radarIndicatorData");
 	var names = [];
 	var maxes = [];
 	for(var i=0; i<indicatorData.length; i++)
@@ -2161,7 +2157,7 @@ chartSupport.radarSetChartEventData = function(chart, chartEvent, echartsEventPa
 
 chartSupport.funnelRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -2291,7 +2287,7 @@ chartSupport.funnelSetChartEventData = function(chart, chartEvent, echartsEventP
 
 chartSupport.mapRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -2504,7 +2500,7 @@ chartSupport.mapScatterRippleOff = function(chart, eventType, handler)
 
 chartSupport._mapScatterRender = function(chart, options, scatterType)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -2709,7 +2705,7 @@ chartSupport._mapScatterSetChartEventData = function(chart, chartEvent, echartsE
 
 chartSupport.mapGraphRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -2927,7 +2923,7 @@ chartSupport.mapGraphUpdate = function(chart, chartResult)
 	
 	chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	
-	chartFactory.extValueBuiltin(chart, "mapGraphSeriesData", seriesData);
+	chartFactory.liveDataBuiltin(chart, "mapGraphSeriesData", seriesData);
 };
 
 chartSupport.mapGraphResize = function(chart)
@@ -2978,7 +2974,7 @@ chartSupport.mapGraphSetChartEventData = function(chart, chartEvent, echartsEven
 	//边
 	else if(echartsEventParams.dataType == "edge")
 	{
-		var seriesData = chartFactory.extValueBuiltin(chart, "mapGraphSeriesData");
+		var seriesData = chartFactory.liveDataBuiltin(chart, "mapGraphSeriesData");
 		var sourceData = seriesData[echartsData.source];
 		var targetData = seriesData[echartsData.target];
 		
@@ -3010,7 +3006,7 @@ chartSupport.mapGraphSetChartEventData = function(chart, chartEvent, echartsEven
 
 chartSupport.mapLinesRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -3203,7 +3199,7 @@ chartSupport.mapLinesSetChartEventData = function(chart, chartEvent, echartsEven
 
 chartSupport.mapFlylineRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -3411,7 +3407,7 @@ chartSupport.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEv
 
 chartSupport.mapHeatmapRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -3580,7 +3576,7 @@ chartSupport.mapHeatmapSetChartEventData = function(chart, chartEvent, echartsEv
 
 chartSupport.candlestickRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -3741,7 +3737,7 @@ chartSupport.candlestickSetChartEventData = function(chart, chartEvent, echartsE
 
 chartSupport.heatmapRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -3938,7 +3934,7 @@ chartSupport.heatmapSetChartEventData = function(chart, chartEvent, echartsEvent
 //树图
 chartSupport.treeRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -4083,13 +4079,13 @@ chartSupport.treeInflateUpdateOptions = function(chart, updateOptions, renderOpt
 		};
 	}
 	
-	$.extend(seriesEle, seriesEleExt);
+	chartFactory.extend(seriesEle, seriesEleExt);
 };
 
 //矩形树图
 chartSupport.treemapRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -4185,7 +4181,7 @@ chartSupport.treemapSetChartEventData = function(chart, chartEvent, echartsEvent
 
 chartSupport.sunburstRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -4331,7 +4327,7 @@ chartSupport.buildTreeNodeSeries = function(chart, chartResult, initSeries)
 		}
 	}
 	
-	initSeries = $.extend(initSeries, { name: seriesName, data: seriesData });
+	initSeries = chartFactory.extend(initSeries, { name: seriesName, data: seriesData });
 	
 	return initSeries;
 };
@@ -4390,7 +4386,7 @@ chartSupport.treeAppendNode = function(treeNode, node)
 
 chartSupport.sankeyRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -4513,7 +4509,7 @@ chartSupport.sankeyUpdate = function(chart, chartResult)
 	chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 	options = chart.inflateUpdateOptions(chartResult, options);
 	
-	chartFactory.extValueBuiltin(chart, "sankeySeriesData", seriesData);
+	chartFactory.liveDataBuiltin(chart, "sankeySeriesData", seriesData);
 	
 	chartSupport.echartsOptionsReplaceMerge(chart, options);
 };
@@ -4561,7 +4557,7 @@ chartSupport.sankeySetChartEventData = function(chart, chartEvent, echartsEventP
 	//边
 	else if(echartsEventParams.dataType == "edge")
 	{
-		var seriesData = chartFactory.extValueBuiltin(chart, "sankeySeriesData");
+		var seriesData = chartFactory.liveDataBuiltin(chart, "sankeySeriesData");
 		var sourceData = seriesData[echartsData._sourceIndex];
 		var targetData = seriesData[echartsData._targetIndex];
 		
@@ -4623,14 +4619,14 @@ chartSupport.sankeyInflateUpdateOptions = function(chart, updateOptions, renderO
 	nodeGap = (nodeWidth < 1 ? 1: nodeGap);
 	seriesEleExt.nodeGap = nodeGap;
 	
-	$.extend(seriesEle, seriesEleExt);
+	chartFactory.extend(seriesEle, seriesEleExt);
 };
 
 //关系图
 
 chartSupport.graphRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -4811,7 +4807,7 @@ chartSupport.graphUpdate = function(chart, chartResult)
 	chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 	options = chart.inflateUpdateOptions(chartResult, options);
 	
-	chartFactory.extValueBuiltin(chart, "graphSeriesData", seriesData);
+	chartFactory.liveDataBuiltin(chart, "graphSeriesData", seriesData);
 	
 	chartSupport.echartsOptionsReplaceMerge(chart, options);
 };
@@ -4861,7 +4857,7 @@ chartSupport.graphSetChartEventData = function(chart, chartEvent, echartsEventPa
 	//边
 	else if(echartsEventParams.dataType == "edge")
 	{
-		var seriesData = chartFactory.extValueBuiltin(chart, "graphSeriesData");
+		var seriesData = chartFactory.liveDataBuiltin(chart, "graphSeriesData");
 		var sourceData = seriesData[echartsData.source];
 		var targetData = seriesData[echartsData.target];
 		
@@ -4908,7 +4904,7 @@ chartSupport.graphInflateUpdateOptions = function(chart, updateOptions, min, max
 
 chartSupport.boxplotRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -5211,7 +5207,7 @@ chartSupport.wordcloudRender = function(chart, options)
 	//不支持在echarts主题中设置样式，只能在这里设置
 	var chartTheme = chart.theme();
 	
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -5383,7 +5379,7 @@ chartSupport.wordcloudSetChartEventData = function(chart, chartEvent, echartsEve
 
 chartSupport.liquidfillRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -5527,7 +5523,7 @@ chartSupport.liquidfillUpdate = function(chart, chartResult)
 	{
 		for(var i=1; i<dg.autoInflateWave; i++)
 		{
-			var inflateValue = $.extend({}, seriesData[0]);
+			var inflateValue = chartFactory.extend({}, seriesData[0]);
 			seriesData.push(inflateValue);
 		}
 	}
@@ -5581,7 +5577,7 @@ chartSupport.liquidfillSetChartEventData = function(chart, chartEvent, echartsEv
 
 chartSupport.parallelRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -5897,7 +5893,7 @@ chartSupport.parallelTrimAxisMinMax = function(options)
 
 chartSupport.themeRiverRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -6088,7 +6084,7 @@ chartSupport.pictorialBarSymbolPaths=
 
 chartSupport.pictorialBarRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -6331,7 +6327,7 @@ chartSupport.pictorialBarSetChartEventData = function(chart, chartEvent, echarts
 
 chartSupport.pictorialBarProgressRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -6573,7 +6569,7 @@ chartSupport.pictorialBarProgressSetChartEventData = function(chart, chartEvent,
 
 chartSupport.tableRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -6665,56 +6661,6 @@ chartSupport.tableRender = function(chart, options)
 	{
 		chartSupport.tableRenderProcessOptions(chart, options);
 	});
-	
-	// < @deprecated 兼容2.8.0版本的{table:{renderValue:...}}配置项结构，未来版本会移除
-	if(options.table && options.table.renderValue)
-	{
-		options.renderCell = options.table.renderValue;
-	}
-	// > @deprecated 兼容2.8.0版本的{table:{renderValue:...}}配置项结构，未来版本会移除
-	
-	// < @deprecated 兼容2.8.0版本的{title:{color:"..."}}配置项结构，未来版本会移除
-	if(options.title && !options.titleStyle)
-	{
-		var titleStyle = $.extend(true, {}, options.title);
-		delete titleStyle.show;
-		delete titleStyle.text;
-		
-		if(!$.isEmptyObject(titleStyle))
-			options.titleStyle = titleStyle;
-	}
-	// > @deprecated 兼容2.8.0版本的{title:{color:"..."}}配置项结构，未来版本会移除
-	
-	// < @deprecated 兼容2.8.0版本的{table:{header:{},row:{color:'red',odd:{...},even:{...},hover:{...},selected:{...}}}}配置项结构，未来版本会移除
-	if(options.table && !options.tableStyle)
-	{
-		var tableStyle = $.extend(true, {}, options.table);
-		delete tableStyle.renderValue;
-		
-		if(tableStyle.header || tableStyle.row)
-		{
-			tableStyle.head = { row: tableStyle.header };
-			delete tableStyle.header;
-			
-			if(tableStyle.row)
-			{
-				tableStyle.body = { row: tableStyle.row };
-				delete tableStyle.row;
-				
-				tableStyle.body.rowOdd = tableStyle.body.row.odd;
-				tableStyle.body.rowEven = tableStyle.body.row.even;
-				tableStyle.body.rowHover = tableStyle.body.row.hover;
-				tableStyle.body.rowSelected = tableStyle.body.row.selected;
-				delete tableStyle.body.row.odd;
-				delete tableStyle.body.row.even;
-				delete tableStyle.body.row.hover;
-				delete tableStyle.body.row.selected;
-			}
-			
-			options.tableStyle = tableStyle;
-		}
-	}
-	// > @deprecated 兼容2.8.0版本的{table:{header:{},row:{color:'red',odd:{...},even:{...},hover:{...},selected:{...}}}}配置项结构，未来版本会移除
 	
 	//填充options.columns的render函数
 	for(var i=0; i<options.columns.length; i++)
@@ -6830,7 +6776,7 @@ chartSupport.tableUpdate = function(chart, chartResult)
 		//复制，避免污染原始数据
 		for(var j=0; j<resultDatas.length; j++)
 		{
-			var data = $.extend({}, resultDatas[j]);
+			var data = chartFactory.extend({}, resultDatas[j]);
 			chart.originalDataIndex(data, dataSetBind, j);
 			updateOptions.data.push(data);
 		}
@@ -6862,7 +6808,7 @@ chartSupport.tableDestroy = function(chart)
 	
 	chartSupport.tableStopCarousel(chart);
 	chartEle.removeClass("dg-chart-table dg-table-v1 dg-table-v2 dg-hide-title dg-text-nowrap dg-chart-table-carousel");
-	chartEle.removeClass(chart.extValue(chartFactory.builtinPropName("TableChartLocalStyleName")));
+	chartEle.removeClass(chart.liveData(chartFactory.builtinPropName("TableChartLocalStyleName")));
 	$(".dg-chart-table-title", chartEle).remove();
 	$(".dg-chart-table-content", chartEle).remove();
 	$(".dg-chart-ele-wrapper", chartEle).remove();
@@ -6935,7 +6881,7 @@ chartSupport.tableRenderProcessOptions = function(chart, options)
 	{
 		options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
 		//如果有50，则取50，以兼容旧版逻辑
-		options.pageLength = (chartFactory.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
+		options.pageLength = (chartFactory.inArray(50, options.lengthMenu) >= 0 ? 50 : options.lengthMenu[0]);
 	}
 	
 	if(chartSupport.tableIsV1())
@@ -7004,7 +6950,7 @@ chartSupport.tableRenderProcessCarousel = function(chart, options)
 		carouselObj.enable = carousel;
 	}
 	//间隔数值、函数
-	else if(chartFactory.isNumber(carousel) || $.isFunction(carousel))
+	else if(chartFactory.isNumber(carousel) || chartFactory.isFunction(carousel))
 	{
 		carouselObj.enable = true;
 		carouselObj.interval = carousel;
@@ -7012,7 +6958,7 @@ chartSupport.tableRenderProcessCarousel = function(chart, options)
 	//轮播对象
 	else
 	{
-		carouselObj = $.extend(true, carouselObj, carousel);
+		carouselObj = chartFactory.extend(true, carouselObj, carousel);
 	}
 	
 	chartSupport.carouselOption(options, carouselObj);
@@ -7054,21 +7000,21 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 	
 	options.ajax = function(data, callback, settings)
 	{
-		var ajaxInfos = chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos");
+		var ajaxInfos = chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos");
 		if(ajaxInfos == null)
 		{
 			ajaxInfos = [];
-			chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", ajaxInfos);
+			chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos", ajaxInfos);
 		}
 		
 		ajaxInfos.push({ data: data, callback: callback, settings: settings });
 		
-		var refreshInfo = chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo");
+		var refreshInfo = chartFactory.liveDataBuiltin(chart, "serverSidePagingRefreshInfo");
 		
 		//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
 		if(refreshInfo != null)
 		{
-			chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", null);
+			chartFactory.liveDataBuiltin(chart, "serverSidePagingRefreshInfo", null);
 			
 			if(chart.isActive())
 				chartSupport.tableUpdateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
@@ -7083,7 +7029,7 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 	};
 	chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
 	{
-		var ajaxInfos = (chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos") || []);
+		var ajaxInfos = (chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos") || []);
 		
 		//由表格内部操作触发
 		if(ajaxInfos.length > 0)
@@ -7104,7 +7050,7 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 				ajaxInfo.callback(pagingData);
 			}
 			
-			chartFactory.extValueBuiltin(chart, "serverSidePagingAjaxInfos", []);
+			chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos", []);
 		}
 		//由图表API触发，比如：参数表单提交、chart.refreshData()
 		else
@@ -7114,10 +7060,10 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 				chartSupport.tableUpdatePagingState(chart, pagingState);
 			
 			var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
-			chartFactory.extValueBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
+			chartFactory.liveDataBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
 			
 			var drawPagingArg = (serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
-			if($.isFunction(drawPagingArg))
+			if(chartFactory.isFunction(drawPagingArg))
 				drawPagingArg = serverSidePaging.drawPagingArg(chart);
 			
 			chart.internal().draw(drawPagingArg);
@@ -7309,7 +7255,7 @@ chartSupport.tableThemeStyleSheet = function(chart, options)
 		forceUpdate = true;
 		
 		chart.elementJquery().addClass(name);
-		chart.extValue(chartFactory.builtinPropName("TableChartLocalStyleName"), name);
+		chart.liveData(chartFactory.builtinPropName("TableChartLocalStyleName"), name);
 	}
 	
 	chart.themeStyleSheet(name, function()
@@ -7381,32 +7327,7 @@ chartSupport.tableThemeStyleSheet = function(chart, options)
 		if(isLocalStyle)
 		{
 			var optionTableStyle = options.tableStyle;
-			
-			// < @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
-			//需要先转换可能的驼峰CSS命名，不然extend后的CSS可能重名而优先级混乱
-			optionTableStyle = $.extend(true, {}, optionTableStyle);
-			optionTableStyle.table = chartSupport.toLegalStyleNameObj(optionTableStyle.table);
-			if(optionTableStyle.head)
-			{
-				optionTableStyle.head.row = chartSupport.toLegalStyleNameObj(optionTableStyle.head.row);
-				optionTableStyle.head.cell = chartSupport.toLegalStyleNameObj(optionTableStyle.head.cell);
-			}
-			if(optionTableStyle.body)
-			{
-				optionTableStyle.body.row = chartSupport.toLegalStyleNameObj(optionTableStyle.body.row);
-				optionTableStyle.body.rowOdd = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowOdd);
-				optionTableStyle.body.rowEven = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowEven);
-				optionTableStyle.body.rowHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowHover);
-				optionTableStyle.body.rowSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.rowSelected);
-				optionTableStyle.body.cell = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cell);
-				optionTableStyle.body.cellOdd = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellOdd);
-				optionTableStyle.body.cellEven = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellEven);
-				optionTableStyle.body.cellHover = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellHover);
-				optionTableStyle.body.cellSelected = chartSupport.toLegalStyleNameObj(optionTableStyle.body.cellSelected);
-			}
-			// > @deprecated 兼容2.8.0版本的驼峰命名CSS，将在未来版本移除
-			
-			tableStyle = $.extend(true, tableStyle, optionTableStyle);
+			tableStyle = chartFactory.extend(true, tableStyle, optionTableStyle);
 		}
 		
 		//DataTable-1.11.3内置表头背景CSS添加了"!important"，这里也必须添加才能起作用
@@ -7963,7 +7884,7 @@ chartSupport.tableHandleCarousel = function(chart, renderOptions, chartEle, data
 		if(needDraw)
 			dataTable.draw();
 		
-		var span = ($.isFunction(carousel.span) ?
+		var span = (chartFactory.isFunction(carousel.span) ?
 				carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carousel.span);
 		
 		scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
@@ -7971,7 +7892,7 @@ chartSupport.tableHandleCarousel = function(chart, renderOptions, chartEle, data
 	
 	var interval = null;
 	
-	if(!$.isFunction(carousel.interval))
+	if(!chartFactory.isFunction(carousel.interval))
 	{
 		interval = carousel.interval;
 	}
@@ -8022,7 +7943,7 @@ chartSupport.tableCarouselIntervalId = function(chart, intervalId)
 
 chartSupport.labelRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -8074,31 +7995,6 @@ chartSupport.labelRender = function(chart, options)
 		valueStyle: undefined
 	},
 	options);
-	
-	// < @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
-	if(options.label && options.label.name)
-		options.name = options.label.name;
-	if(options.label && options.label.value)
-		options.value = options.label.value;
-	options.label = undefined;
-	// > @deprecated 兼容2.7.0版本的{label:{name:{...},value:{...}}}配置项结构，未来版本会移除
-	
-	// < @deprecated 兼容2.8.0版本的{name:{ show:true|false, ... }, value:{...}}配置项结构，未来版本会移除
-	if(options.name)
-	{
-		if(options.name.show !== undefined)
-		{
-			options.hideName = !options.name.show;
-			options.name.show = undefined;
-		}
-		options.nameStyle = options.name;
-	}
-	options.name = undefined;
-	
-	if(options.value)
-		options.valueStyle = options.value;
-	options.value = undefined;
-	// > @deprecated 兼容2.8.0版本的{name:{ show:true|false, ... }, value:{...}}配置项结构，未来版本会移除
 	
 	if(options.inline == true)
 		chartEle.addClass("dg-chart-label-inline");
@@ -8297,7 +8193,7 @@ chartSupport.labelSetChartEventData = function(chart, chartEvent, htmlEvent, $la
 
 chartSupport.selectRender = function(chart, options)
 {
-	options = $.extend(true,
+	options = chartFactory.extend(true,
 	{
 		dg:
 		{
@@ -8432,7 +8328,7 @@ chartSupport.selectUpdate = function(chart, chartResult)
 	
 	if(renderOptions.prepend)
 	{
-		var newData = ($.isArray(renderOptions.prepend) ? renderOptions.prepend : [ renderOptions.prepend ]);
+		var newData = (chartFactory.isArray(renderOptions.prepend) ? renderOptions.prepend : [ renderOptions.prepend ]);
 		data = newData.concat(data);
 	}
 	
@@ -8443,7 +8339,7 @@ chartSupport.selectUpdate = function(chart, chartResult)
 		var $opt = $("<option />").attr("value", optData.value)
 			.html(optData.name ? optData.name : optData.value).appendTo($select);
 		
-		if(optData.selected || (selected != null && $.inArray(i, selected) > -1))
+		if(optData.selected || (selected != null && chartFactory.inArray(i, selected) > -1))
 			$opt.attr("selected", "selected");
 		
 		$opt.data("_dgChartSelectOptionChartData", optData);
@@ -8726,7 +8622,7 @@ chartSupport.customAdditions = function(chart)
 	if(customRenderer)
 	{
 		if(customRenderer.additions)
-			re = ($.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
+			re = (chartFactory.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
 		else
 			re = null;
 	}
@@ -8836,13 +8732,13 @@ chartSupport.inflateEChartsRenderOptions = function(chart, defaultOptions, befor
 	//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
 	if(firstSeriesAsTemplate && defaultOptions.series && defaultOptions.series[0])
 	{
-		var series0 = $.extend(true, {}, defaultOptions.series[0]);
+		var series0 = chartFactory.extend(true, {}, defaultOptions.series[0]);
 		newBeforeProcessHandler = function(renderOptions, chart)
 		{
 			var series = renderOptions.series;
 			
 			for(var i=1; i<series.length; i++)
-				series[i] = $.extend(true, {}, series0, series[i]);
+				series[i] = chartFactory.extend(true, {}, series0, series[i]);
 			
 			//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
 			for(var i=0; i<series.length; i++)
@@ -8894,7 +8790,7 @@ chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptio
 	
 	seriesFirstAsTemplate = (seriesFirstAsTemplate == null ? true : seriesFirstAsTemplate);
 	
-	var renderOptions = $.extend(true, {}, defaultOptions, builtinOptions);
+	var renderOptions = chartFactory.extend(true, {}, defaultOptions, builtinOptions);
 	
 	if(afterMergeHandlerFirst != null)
 		afterMergeHandlerFirst(renderOptions, chart);
@@ -8905,7 +8801,7 @@ chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptio
 	if(seriesFirstAsTemplate)
 	{
 		var series0 = (renderOptions.series && renderOptions.series[0] ?
-						$.extend(true, {}, renderOptions.series[0]) : null);
+						chartFactory.extend(true, {}, renderOptions.series[0]) : null);
 		
 		if(series0)
 		{
@@ -8914,7 +8810,7 @@ chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptio
 				var series = renderOptions.series;
 				
 				for(var i=1; i<series.length; i++)
-					series[i] = $.extend(true, {}, series0, series[i]);
+					series[i] = chartFactory.extend(true, {}, series0, series[i]);
 				
 				//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
 				for(var i=0; i<series.length; i++)
@@ -8992,7 +8888,7 @@ chartSupport.isDataTypeTimestamp = function(dataSetField)
  */
 chartSupport.appendElement = function(array, eles)
 {
-	if($.isArray(eles))
+	if(chartFactory.isArray(eles))
 	{
 		for(var i=0; i<eles.length; i++)
 			array.push(eles[i]);
@@ -9027,7 +8923,7 @@ chartSupport.appendDistinctQuick = function(array, eles, indexCache, propertyNam
 {
 	indexCache = (indexCache == null ? {} : indexCache);
 	
-	var isArray = $.isArray(eles);
+	var isArray = chartFactory.isArray(eles);
 	
 	if(!isArray)
 		eles = [ eles ];
@@ -9074,7 +8970,7 @@ chartSupport.appendDistinctQuick = function(array, eles, indexCache, propertyNam
  */
 chartSupport.findInArray = function(array, value, propertyName)
 {
-	var isPnFunction = (propertyName && $.isFunction(propertyName));
+	var isPnFunction = (propertyName && chartFactory.isFunction(propertyName));
 	
 	for(var i=0; i<array.length; i++)
 	{
@@ -9191,11 +9087,6 @@ chartSupport.bindChartEventHandlerForEcharts = function(chart, eventType, eventH
 	{
 		var chartEvent = chart.eventNew(eventType, params);
 		chartEventDataSetter(chart, chartEvent, params);
-		
-		// < @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
-		chartEvent.chartType = "echarts";
-		// > @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
-		
 		chart.callEventHandler(eventHanlder, chartEvent);
 	};
 	
@@ -9307,7 +9198,7 @@ chartSupport.evalSeriesDataValueSymbolSize = function(series, minValue, maxValue
 	if(valuePropertyName == null)
 		valuePropertyName = "value";
 	
-	if(!$.isArray(series))
+	if(!chartFactory.isArray(series))
 		series = [ series ];
 	
 	for(var i=0; i<series.length; i++)
@@ -9331,7 +9222,7 @@ chartSupport.evalDataValueSymbolSize = function(data, minValue, maxValue, symbol
 	if(valuePropertyName == null)
 		valuePropertyName = "value";
 	
-	if(!$.isArray(data))
+	if(!chartFactory.isArray(data))
 		data = [ data ];
 	
 	for(var i=0; i<data.length; i++)
@@ -9340,7 +9231,7 @@ chartSupport.evalDataValueSymbolSize = function(data, minValue, maxValue, symbol
 		var value = obj[valuePropertyName];
 		
 		if(valueElementIndex != null)
-			value = ($.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
+			value = (chartFactory.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
 		
 		obj.symbolSize = chartSupport.evalValueSymbolSize(
 			value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
@@ -9391,20 +9282,6 @@ chartSupport.echartsMapChartInitMap = function(chart, options)
 {
 	var map = chartFactory.builtinOptionValue(options, builtinOptionNames.mapName);
 	
-	// < @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本移除
-	if(!map)
-	{
-		map = chartFactory.builtinOptionValue(options, "dgMap");
-	}
-	// > @deprecated 兼容5.2.0版本的dgMap图表选项，将在未来版本移除
-	
-	// < @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-	if(!map)
-	{
-		map = chart.map();
-	}
-	// > @deprecated 兼容4.7.0版本的chart.map()函数功能，将在未来版本随之一起移除
-	
 	//必须设置初始map，不然渲染会报错
 	if(!map)
 	{
@@ -9436,7 +9313,7 @@ chartSupport.echartsMapChartUpdate = function(chart, chartResult, updateOptions,
 	updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions, function(updateOptions)
 	{
 		//inflateUpdateOptions()会将地图设置为renderOptions里的项，所以这里需要再次设置为updateMap
-		$.extend(true, updateOptions, updateMapOptions);
+		chartFactory.extend(true, updateOptions, updateMapOptions);
 		
 		var renderMaps = chartSupport.echartsGetMapsDistinct(renderOptions);
 		var updateMaps = chartSupport.echartsGetMapsDistinct(updateOptions);
@@ -9477,7 +9354,7 @@ chartSupport.echartsGetMapOptions = function(echartsOptions)
 	
 	if(geo)
 	{
-		if($.isArray(geo))
+		if(chartFactory.isArray(geo))
 		{
 			re.geo = [];
 			
@@ -9494,7 +9371,7 @@ chartSupport.echartsGetMapOptions = function(echartsOptions)
 	
 	if(series)
 	{
-		if($.isArray(series))
+		if(chartFactory.isArray(series))
 		{
 			re.series = [];
 			
@@ -9523,7 +9400,7 @@ chartSupport.echartsGetMapsDistinct = function(echartsOptions)
 	
 	if(geo)
 	{
-		if($.isArray(geo))
+		if(chartFactory.isArray(geo))
 		{
 			for(var i=0; i<geo.length; i++)
 			{
@@ -9544,7 +9421,7 @@ chartSupport.echartsGetMapsDistinct = function(echartsOptions)
 	
 	if(series)
 	{
-		if($.isArray(series))
+		if(chartFactory.isArray(series))
 		{
 			for(var i=0; i<series.length; i++)
 			{
@@ -9576,7 +9453,7 @@ chartSupport.echartsSetMapOption = function(echartsOptions, map, force)
 	
 	if(geo)
 	{
-		if($.isArray(geo))
+		if(chartFactory.isArray(geo))
 		{
 			for(var i=0; i<geo.length; i++)
 			{
@@ -9597,7 +9474,7 @@ chartSupport.echartsSetMapOption = function(echartsOptions, map, force)
 	
 	if(series)
 	{
-		if($.isArray(series))
+		if(chartFactory.isArray(series))
 		{
 			for(var i=0; i<series.length; i++)
 			{
@@ -9625,7 +9502,7 @@ chartSupport.echartsResetMapSettings = function(echartsOptions)
 	
 	if(geo)
 	{
-		if($.isArray(geo))
+		if(chartFactory.isArray(geo))
 		{
 			for(var i=0; i<geo.length; i++)
 			{
@@ -9642,7 +9519,7 @@ chartSupport.echartsResetMapSettings = function(echartsOptions)
 	
 	if(series)
 	{
-		if($.isArray(series))
+		if(chartFactory.isArray(series))
 		{
 			for(var i=0; i<series.length; i++)
 			{
@@ -9783,7 +9660,7 @@ chartSupport.extractNameValueStyleObj = function(obj, nameProperty, valuePropert
 		var value = obj.value;
 		
 		//{ value: [..., ...] }
-		if($.isArray(value))
+		if(chartFactory.isArray(value))
 		{
 			name = value[nameIndex];
 			value = value[valueIndex];
@@ -9801,7 +9678,7 @@ chartSupport.evalLocalPlainObj = function(localPlainObj, publicPlainObj)
 	var re = null;
 	
 	if(localPlainObj && publicPlainObj)
-		re = $.extend({}, publicPlainObj, localPlainObj);
+		re = chartFactory.extend({}, publicPlainObj, localPlainObj);
 	else if(publicPlainObj)
 		re = publicPlainObj;
 	else if(localPlainObj)
@@ -9893,11 +9770,6 @@ chartSupport.dataSetBindMainNonNull = function(chart, renderError)
 chartSupport.chartEventForHtml = function(chart, type, htmlEvent)
 {
 	var event = chart.eventNew(type, htmlEvent);
-	
-	// < @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
-	event.chartType = "html";
-	// > @deprecated 兼容3.0.1版本的ChartEvent.chartType，将在未来版本移除
-	
 	return event;
 };
 
@@ -9977,12 +9849,12 @@ chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, up
 	
 	var axisData = [];
 	var indexCache = {};
-	var isValueExtractorFunc = $.isFunction(valueExtractor);
-	var isValueExtractorAry = (!isValueExtractorFunc && $.isArray(valueExtractor));
+	var isValueExtractorFunc = chartFactory.isFunction(valueExtractor);
+	var isValueExtractorAry = (!isValueExtractorFunc && chartFactory.isArray(valueExtractor));
 	var valueExtractors = [];
 	
 	var series = (updateOptions.series || []);
-	$.each(series, function(i, s)
+	chartFactory.each(series, function(i, s)
 	{
 		var data = (s.data || []);
 		var myData = [];
@@ -9995,7 +9867,7 @@ chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, up
 		else
 			myValueExtractor = valueExtractor.get(s);
 		
-		$.each(data, function(j, d)
+		chartFactory.each(data, function(j, d)
 		{
 			var v = myValueExtractor(d, s);
 			myData.push(v);
@@ -10067,23 +9939,23 @@ chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOption
 	}
 	
 	var axisData = updateAxis.data;
-	var isValueExtractorFunc = $.isFunction(valueExtractor);
-	var isValueExtractorAry = (!isValueExtractorFunc && $.isArray(valueExtractor));
+	var isValueExtractorFunc = chartFactory.isFunction(valueExtractor);
+	var isValueExtractorAry = (!isValueExtractorFunc && chartFactory.isArray(valueExtractor));
 	
-	if($.isFunction(sortHandler))
+	if(chartFactory.isFunction(sortHandler))
 	{
 		axisData.sort(sortHandler);
 		
 		if(sortSeriesData)
 		{
 			var indexCache = {};
-			$.each(axisData, function(i, a)
+			chartFactory.each(axisData, function(i, a)
 			{
 				indexCache[a] = i;
 			});
 			
 			var series = (updateOptions.series || []);
-			$.each(series, function(i, s)
+			chartFactory.each(series, function(i, s)
 			{
 				var data = (s.data || []);
 				var myValueExtractor = null;
@@ -10115,14 +9987,6 @@ chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOption
 chartSupport.sortAxisDataOption = function(options)
 {
 	var value = chartFactory.builtinOptionValue(options, builtinOptionNames.sortAxisData);
-	
-	// < @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
-	if(value == null)
-	{
-		value = chartFactory.builtinOptionValue(options, "dgSortAxisData");
-	}
-	// > @deprecated 兼容5.2.0版本的dgSortAxisData图表选项，将在未来版本移除
-	
 	return value;
 };
 
@@ -10189,8 +10053,8 @@ chartSupport.adaptArrayPropsForUpdateOptions = function(updateOptions, renderOpt
 	{
 		var renderValue = renderOptions[name];
 		var updateValue = updateOptions[name];
-		var isRenderArray = $.isArray(renderValue);
-		var isUpdateArray = $.isArray(updateValue);
+		var isRenderArray = chartFactory.isArray(renderValue);
+		var isUpdateArray = chartFactory.isArray(updateValue);
 		
 		//如果渲染选项是数组，更新选项不是，应把更新选项包裹为数组
 		if(isRenderArray && !isUpdateArray)

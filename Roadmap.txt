@@ -22,18 +22,24 @@
 		chart.renderContext -> chart.renderContext()；
 		chart.updateInterval -> chart.updateInterval()；
 		chart.updateResults() -> chart.updateResult()；
-		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数（几乎没用反而增加函数复杂度）；
-		chart.update()函数默认不使用上一次结果？；
+		chart.extValue() -> chart.liveData()；
+		chart.loadMap()改为fetch实现；
+		chart.render()、update()函数仅接受图表结果对象参数；
+		chart.off()函数必须指定要解绑的handler函数；
+		移除chart.loadMap()函数;
+		图表元素上的dg-chart-listener不再继承<body>元素上的；
+		图表元素上的dg-chart-disable-setting不再继承<body>元素上的；
+		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数；
 		内置图表插件数据结构由value数组改为更常用的name/value结构；
 		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；
 		移除ECharts内置看板库，改为通过图表插件depend依赖库引入（只需引入名称，库源由系统环境提供）；
-		看板JS中不使用jQuery别名$，改为直接使用jQuery，库加载改为采用Promise实现（尝试scriptEle.async=false顺序加载）；
+		移除jQuery，库加载改为采用Promise实现（尝试scriptEle.async=false顺序加载）；
 		移除chart.elementJquery()函数；
 		看板内置资源库移除ECharts，改为在图表插件库中引入（内置共用库），避免仅表格看板仍加载ECharts库；
 		图表JS对象移除ECharts相关API，改为以内置插件依赖库的方式支持；
 		图表JS对象loadMap()改为loadResource()、dg-chart-map-urls改为dg-chart-resource-urls？；
 		内置标签卡移除字体尺寸CSS样式；
-		移除图表事件格式规范，改为由插件自决定，移除图表JS对象中事件、originalDataIndex()相关函数和规范；
+		移除图表事件格式规范，改为由插件自决定，移除chart.eventHandlers()、chart.originalDataIndex()相关函数和规范；
 		图表渲染器renderer.js扩展可选的图表联动支持函数：
 			{
 				eventTypes: [ "series.click", { value: "...", description: "" }, ... ]、function(){ return [...]; },,
@@ -47,6 +53,7 @@
 				}
 			}
 		移除chart.inflateRenderOptions()、chart.inflateUpdateOptions()函数，添加chart.processRenderOptions()、chart.processUpdateOptions()函数；
+		移除jquery.datetimepicker日期组件，改为使用无依赖的组件（flatpickr）；
 待定：
 	
 	看板可视编辑模式绝对/相对定位元素可拖拽；
