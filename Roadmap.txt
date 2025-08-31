@@ -28,7 +28,6 @@
 		chart.off()函数必须指定要解绑的handler函数；
 		移除chart.loadMap()函数;
 		图表元素上的dg-chart-listener不再继承<body>元素上的；
-		图表元素上的dg-chart-disable-setting不再继承<body>元素上的；
 		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数；
 		内置图表插件数据结构由value数组改为更常用的name/value结构；
 		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；

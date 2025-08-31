@@ -1972,8 +1972,7 @@ chartSupport.radarUpdate = function(chart, chartResult)
 	options = chart.inflateUpdateOptions(chartResult, options);
 	
 	chartSupport.echartsOptionsReplaceMerge(chart, options);
-	
-	chartFactory.liveDataBuiltin(chart, "radarIndicatorData", indicatorData);
+	chart.liveData("radarIndicatorData", indicatorData);
 };
 
 //行式雷达网数据处理
@@ -2137,7 +2136,7 @@ chartSupport.radarSetChartEventData = function(chart, chartEvent, echartsEventPa
 	data[dataSignNames.item] = echartsData.name;
 	data[dataSignNames.value] = echartsData.value;
 	
-	var indicatorData = chartFactory.liveDataBuiltin(chart, "radarIndicatorData");
+	var indicatorData = chart.liveData("radarIndicatorData");
 	var names = [];
 	var maxes = [];
 	for(var i=0; i<indicatorData.length; i++)
@@ -2923,7 +2922,7 @@ chartSupport.mapGraphUpdate = function(chart, chartResult)
 	
 	chartSupport.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
 	
-	chartFactory.liveDataBuiltin(chart, "mapGraphSeriesData", seriesData);
+	chart.liveData("mapGraphSeriesData", seriesData);
 };
 
 chartSupport.mapGraphResize = function(chart)
@@ -2974,7 +2973,7 @@ chartSupport.mapGraphSetChartEventData = function(chart, chartEvent, echartsEven
 	//边
 	else if(echartsEventParams.dataType == "edge")
 	{
-		var seriesData = chartFactory.liveDataBuiltin(chart, "mapGraphSeriesData");
+		var seriesData = chart.liveData("mapGraphSeriesData");
 		var sourceData = seriesData[echartsData.source];
 		var targetData = seriesData[echartsData.target];
 		
@@ -4509,7 +4508,7 @@ chartSupport.sankeyUpdate = function(chart, chartResult)
 	chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 	options = chart.inflateUpdateOptions(chartResult, options);
 	
-	chartFactory.liveDataBuiltin(chart, "sankeySeriesData", seriesData);
+	chart.liveData("sankeySeriesData", seriesData);
 	
 	chartSupport.echartsOptionsReplaceMerge(chart, options);
 };
@@ -4557,7 +4556,7 @@ chartSupport.sankeySetChartEventData = function(chart, chartEvent, echartsEventP
 	//边
 	else if(echartsEventParams.dataType == "edge")
 	{
-		var seriesData = chartFactory.liveDataBuiltin(chart, "sankeySeriesData");
+		var seriesData = chart.liveData("sankeySeriesData");
 		var sourceData = seriesData[echartsData._sourceIndex];
 		var targetData = seriesData[echartsData._targetIndex];
 		
@@ -4807,7 +4806,7 @@ chartSupport.graphUpdate = function(chart, chartResult)
 	chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 	options = chart.inflateUpdateOptions(chartResult, options);
 	
-	chartFactory.liveDataBuiltin(chart, "graphSeriesData", seriesData);
+	chart.liveData("graphSeriesData", seriesData);
 	
 	chartSupport.echartsOptionsReplaceMerge(chart, options);
 };
@@ -4857,7 +4856,7 @@ chartSupport.graphSetChartEventData = function(chart, chartEvent, echartsEventPa
 	//边
 	else if(echartsEventParams.dataType == "edge")
 	{
-		var seriesData = chartFactory.liveDataBuiltin(chart, "graphSeriesData");
+		var seriesData = chart.liveData("graphSeriesData");
 		var sourceData = seriesData[echartsData.source];
 		var targetData = seriesData[echartsData.target];
 		
@@ -6725,7 +6724,7 @@ chartSupport.tableRender = function(chart, options)
 	
 	var table = $("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
 					.appendTo(chartContent);
-	var tableId = chart.id+"-table";
+	var tableId = chart.id()+"-table";
 	table.attr("id", tableId);
 	
 	table.dataTable(options);
@@ -7000,21 +6999,21 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 	
 	options.ajax = function(data, callback, settings)
 	{
-		var ajaxInfos = chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos");
+		var ajaxInfos = chart.liveData("serverSidePagingAjaxInfos");
 		if(ajaxInfos == null)
 		{
 			ajaxInfos = [];
-			chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos", ajaxInfos);
+			chart.liveData("serverSidePagingAjaxInfos", ajaxInfos);
 		}
 		
 		ajaxInfos.push({ data: data, callback: callback, settings: settings });
 		
-		var refreshInfo = chartFactory.liveDataBuiltin(chart, "serverSidePagingRefreshInfo");
+		var refreshInfo = chart.liveData("serverSidePagingRefreshInfo");
 		
 		//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
 		if(refreshInfo != null)
 		{
-			chartFactory.liveDataBuiltin(chart, "serverSidePagingRefreshInfo", null);
+			chart.liveData("serverSidePagingRefreshInfo", null);
 			
 			if(chart.isActive())
 				chartSupport.tableUpdateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
@@ -7029,7 +7028,7 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 	};
 	chartSupport.updateInternalOption(options, function(updateOptions, chart, chartResult)
 	{
-		var ajaxInfos = (chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos") || []);
+		var ajaxInfos = (chart.liveData("serverSidePagingAjaxInfos") || []);
 		
 		//由表格内部操作触发
 		if(ajaxInfos.length > 0)
@@ -7050,7 +7049,7 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 				ajaxInfo.callback(pagingData);
 			}
 			
-			chartFactory.liveDataBuiltin(chart, "serverSidePagingAjaxInfos", []);
+			chart.liveData("serverSidePagingAjaxInfos", []);
 		}
 		//由图表API触发，比如：参数表单提交、chart.refreshData()
 		else
@@ -7060,7 +7059,7 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 				chartSupport.tableUpdatePagingState(chart, pagingState);
 			
 			var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
-			chartFactory.liveDataBuiltin(chart, "serverSidePagingRefreshInfo", refreshInfo);
+			chart.liveData("serverSidePagingRefreshInfo", refreshInfo);
 			
 			var drawPagingArg = (serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
 			if(chartFactory.isFunction(drawPagingArg))
@@ -7250,7 +7249,7 @@ chartSupport.tableThemeStyleSheet = function(chart, options)
 	if(isLocalStyle)
 	{
 		//这里不应使用随机数，因为在图表多次destroy再init后，会导致残留无法销毁的样式表DOM
-		name = "tableStyle" + chart.id;
+		name = "tableStyle" + chart.id();
 		//需强制为每次都更新样式表，因为绑定的图表主题可能是全局主题
 		forceUpdate = true;
 		

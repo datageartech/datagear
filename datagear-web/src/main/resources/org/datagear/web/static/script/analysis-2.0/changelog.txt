@@ -1,0 +1,34 @@
+chartFactory.init()返回新图表对象
+图表元素上的dg-chart-listener不再继承<body>元素上的
+chart.off()函数必须指定要解绑的handler函数
+chart.render()、update()函数仅接受图表结果对象参数
+chart.resetDataSetParamValuesFirst()	x
+chart.resetDataSetParamValues()			x
+chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑
+chart.echartsThemeName() x
+chart.elementJquery()	x
+chart.id -> chart.id()
+chart.name -> chart.name()
+chart.plugin -> chart.plugin()
+chart.renderContext -> chart.renderContext()
+chart.dataSetFieldSign	->	dataSetFieldSigns()
+chart.loadMap()		x
+chart.echartsInit()		x
+chart.echartsOptions()	x
+chart.echartsMapRegistered()	x
+chart.echartsLoadMap()		x
+chart.eventData()		x
+chart.eventOriginalData()	x
+chart.processRenderOptions()	+
+chart.processUpdateOptions()	+
+chart.inflateRenderOptions()	x
+chart.inflateUpdateOptions()	x
+chart.registerEventHandlerDelegation()	x
+chart.callEventHandler()			x
+chart.removeEventHandlerDelegation()	x
+chart.echartsOffEventHandler()	x
+chart.echartsGetThemeName()	x
+chart.originalDataIndexes()		x
+chart.originalDataIndex()		x
+chart.eventOriginalDataIndex()	x
+chart.eventNew()				x

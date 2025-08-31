@@ -756,7 +756,7 @@
 	 */
 	chartSetting.removeDatetimePickerRoot = function()
 	{
-		var rootWrapperId = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
+		var rootWrapperId = chartFactory.BUILTIN_NAME_PART + "DatetimepickerRoot";
 		$("#" + rootWrapperId).remove();
 	};
 	
@@ -780,7 +780,7 @@
 			+"border:0 !important;"
 			+"border-width:0 !important;";
 		
-		var rootWrapperId = chartFactory._BUILT_IN_NAME_PART + "DatetimepickerRoot";
+		var rootWrapperId = chartFactory.BUILTIN_NAME_PART + "DatetimepickerRoot";
 		var $rootWrapper = $("#" + rootWrapperId);
 		if($rootWrapper.length < 1)
 			$rootWrapper = $("<div style='"+noSizeCss+"' />").attr("id", rootWrapperId).appendTo(document.body);
@@ -2016,7 +2016,7 @@
 		
 		for(var i=0; i<dataSetFields.length; i++)
 		{
-			var signs = (chart.dataSetFieldSign(dataSetBind, dataSetFields[i]) || []);
+			var signs = (chart.dataSetFieldSigns(dataSetBind, dataSetFields[i]) || []);
 			if(signs.length > 0)
 			{
 				signFields.push(dataSetFields[i]);
@@ -2094,7 +2094,7 @@
 	{
 		var title = chart.dataSetFieldAlias(dataSetBind, dataSetField);
 		title = (title == dataSetField.name ? title : title + "-" + dataSetField.name);
-		var signs = (chart.dataSetFieldSign(dataSetBind, dataSetField) || []);
+		var signs = (chart.dataSetFieldSigns(dataSetBind, dataSetField) || []);
 		var signInfo = "";
 		
 		for(var i=0; i<signs.length; i++)

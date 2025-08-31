@@ -744,7 +744,7 @@
 		var unreadys = this.unreadyDataSetParams(true);
 		if(unreadys.length > 0)
 		{
-			throw new Error("chart '#"+this.elementId+"' dataSetBinds["+unreadys[0].dataSetBindIndex
+			throw new Error("chart '#"+this.elementId()+"' dataSetBinds["+unreadys[0].dataSetBindIndex
 										+"] DataSetParam["+unreadys[0].paramIndex+"](named " +"'"+unreadys[0].param.name+"') value required");
 		}
 		
@@ -756,19 +756,26 @@
 		this._requestRefreshData();
 	};
 	
+	var UPDATE_TIME_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
+
 	chartBase._updateTime = function(time)
 	{
-		return chartFactory.liveDataBuiltin(this, "updateTime", time);
+		if(time === undefined)
+			return this.liveData(UPDATE_TIME_LIVE_DATA_NAME);
+		else
+			this.liveData(UPDATE_TIME_LIVE_DATA_NAME, time);
 	};
+	
+	var REQ_REFRESH_DATAS_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshDatas";
 	
 	chartBase._requestRefreshData = function()
 	{
 		var chartQuery = this.dashboard._buildChartQuery(this);
-		var rrds = chartFactory.liveDataBuiltin(this, "requestRefreshDatas");
+		var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 		if(rrds == null)
 		{
 			rrds = [];
-			chartFactory.liveDataBuiltin(this, "requestRefreshDatas", rrds);
+			this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME, rrds);
 		}
 		
 		rrds.push(chartQuery);
@@ -776,7 +783,7 @@
 	
 	chartBase._isRequestRefreshData = function()
 	{
-		var rrds = chartFactory.liveDataBuiltin(this, "requestRefreshDatas");
+		var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 		return (rrds != null && rrds.length > 0);
 	};
 	
@@ -978,7 +985,7 @@
 			var chartEle = chart.element();
 			if(chartEle == null)
 			{
-				chartFactory.logWarn("chart '#"+chart.elementId+"' element not found, init() ignored");
+				chartFactory.logWarn("chart '#"+chart.elementId()+"' element not found, init() ignored");
 				continue;
 			}
 			
@@ -1098,8 +1105,8 @@
 		for(var i=0; i<charts.length; i++)
 		{
 			if(charts[i] === chartInfo
-					|| charts[i].elementId === chartInfo
-					|| charts[i].id === chartInfo
+					|| charts[i].elementId() === chartInfo
+					|| charts[i].id() === chartInfo
 					|| charts[i].element() === chartInfo
 					|| i === chartInfo)
 				return i;
@@ -1121,7 +1128,7 @@
 		if(exists != null)
 			return false;
 		
-		exists = this.chartOf(chart.elementId);
+		exists = this.chartOf(chart.elementId());
 		
 		if(exists != null)
 			return false;
@@ -1555,7 +1562,7 @@
 				//由chart.refreshData()函数触发
 				if(wait == 2)
 				{
-					var rrds = chartFactory.liveDataBuiltin(chart, "requestRefreshDatas");
+					var rrds = chart.liveData(chart, REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 					chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
 				}
 				
@@ -1733,7 +1740,7 @@
 			for(var i=0; i<charts.length; i++)
 			{
 				var chart = charts[i];
-				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
+				var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
 				var chartResult = {};
 				//设置空数据集结果数组，避免后续出现空指针异常
 				chart.results(chartResult, []);
@@ -1837,7 +1844,7 @@
 			
 			if(chartListener && chartListener.onFetch)
 			{
-				var chartQuery = (this._chartQueryOfDashboardQuery(dashboardQuery, chart.id) || {});
+				var chartQuery = (this._chartQueryOfDashboardQuery(dashboardQuery, chart.id()) || {});
 				
 				chartFactory.executeSilently(function()
 				{
@@ -1945,7 +1952,7 @@
 			{
 				//结构同：org.datagear.analysis.support.ChartResultErrorMessage
 				var error = { type: "Error", message: errorMsg };
-				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id);
+				var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
 				dashboard._handleChartAjaxError(chart, error, chartQuery, false);
 			});
 		}
@@ -2004,7 +2011,7 @@
 		{
 			var type = (error ? error.type : "Error");
 			var message = (error ? error.message : "chart result error");
-			chartFactory.logException("chart '#"+chart.elementId+"' " + type + " : " + message);
+			chartFactory.logException("chart '#"+chart.elementId()+"' " + type + " : " + message);
 		}
 	};
 	
@@ -2035,7 +2042,7 @@
 				this._doUpdateChart(chart, chartResult, chartQuery);
 			}
 			else
-				throw new Error("chart '#"+chart.elementId+"' not active");
+				throw new Error("chart '#"+chart.elementId()+"' not active");
 		}
 		catch(e)
 		{
@@ -2087,7 +2094,7 @@
 			{
 				var chart = chartQueryPairs[i].chart;
 				var chartQuery = chartQueryPairs[i].query;
-				this._chartQueryOfDashboardQuery(dashboardQuery, chart.id, chartQuery);
+				this._chartQueryOfDashboardQuery(dashboardQuery, chart.id(), chartQuery);
 			}
 		}
 		
