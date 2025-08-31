@@ -21,6 +21,7 @@ chart.eventData()		x
 chart.eventOriginalData()	x
 chart.processRenderOptions()	+
 chart.processUpdateOptions()	+
+chart.inflateOptions()			+
 chart.inflateRenderOptions()	x
 chart.inflateUpdateOptions()	x
 chart.registerEventHandlerDelegation()	x
