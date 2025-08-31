@@ -1357,7 +1357,7 @@
 	{
 		this._assertAlive();
 		
-		form = chartFactory.toJqueryObj(form)
+		form = jQuery(form)
 		form.addClass("dg-dashboard-form");
 		
 		if(!config)
@@ -2188,7 +2188,7 @@
 		//异步加载无需看板已渲染
 		//this._assertAlive();
 		
-		element = chartFactory.toJqueryObj(element);
+		element = jQuery(element);
 		
 		if(this._loadingChartElement(element))
 			throw new Error("the element is loading chart");
@@ -2275,7 +2275,7 @@
 		//异步加载无需看板已渲染
 		//this._assertAlive();
 		
-		element = chartFactory.toJqueryObj(element);
+		element = jQuery(element);
 		
 		for(var i=0; i<element.length; i++)
 		{
@@ -2392,7 +2392,7 @@
 			element = undefined;
 		}
 		
-		element = chartFactory.toJqueryObj(element == null ? document.body : element);
+		element = jQuery(element == null ? document.body : element);
 		
 		var widgetEles = $(chartFactory.domsWithWidgetId(element));
 		var unsolved = [];

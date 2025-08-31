@@ -2291,13 +2291,12 @@ chartProto.updateOptions = function(updateOptions)
  * 处理图表渲染选项。
  * 如果this.options()中有定义processRenderOptions选项函数（格式为：function(renderOptions, chart){ ... }），则调用它；否则，什么也不做。
  * 
- * @param renderOptions 待处理的渲染选项，通常由图表渲染器render()函数内部生成，格式应为：{ ... }，如果为null，将会自动创建
+ * @param renderOptions 待处理的渲染选项，通常由图表渲染器render()函数内部生成，格式应为：{ ... }
  * @param set 可选，是否在处理完后调用chart.renderOptions()设置图表渲染选项，默认值为：true 
  * @returns renderOptions
  */
 chartProto.processRenderOptions = function(renderOptions, set)
 {
-	renderOptions = (renderOptions == null ? {} : renderOptions);
 	set = (set == null ? true : set);
 	
 	var options = this.options();
@@ -2319,13 +2318,12 @@ chartProto.processRenderOptions = function(renderOptions, set)
  * 处理图表更新选项。
  * 如果this.options()中有定义processUpdateOptions选项函数（格式为：function(updateOptions, chart){ ... }），则调用它；否则，什么也不做。
  * 
- * @param updateOptions 待处理的更新选项，通常由图表渲染器update()函数内部生成，格式应为：{ ... }，如果为null，将会自动创建
+ * @param updateOptions 待处理的更新选项，通常由图表渲染器update()函数内部生成，格式应为：{ ... }
  * @param set 可选，是否在处理完后调用chart.updateOptions()设置图表更新选项，默认值为：true
  * @returns updateOptions
  */
 chartProto.processUpdateOptions = function(updateOptions, set)
 {
-	updateOptions = (updateOptions == null ? {} : updateOptions);
 	set = (set == null ? true : set);
 	
 	var options = this.options();
@@ -2344,25 +2342,42 @@ chartProto.processUpdateOptions = function(updateOptions, set)
 };
 
 /**
- * 将this.options()深度合并至目标选项中。
+ * 将源选项对象深度合并至目标选项中。
+ * 此函数支持如下调用方式：
+ * inflateOptions(target);
+ * inflateOptions(target, filter);
+ * inflateOptions(target, source);
+ * inflateOptions(target, source, filter);
  * 
- * @param target 待合并的目标选项，格式应为：{ ... }，如果为null，将会自动创建
- * @param filter 可选，合并过滤器，true 全部合并；false 仅合并在target中存在同名属性（仅顶级属性）；
- * 				 过滤函数，格式为：function(name, value){ return true、false; }，返回false将不合并this.options()中的指定属性
+ * @param target 合并目标选项对象，格式应为：{ ... }
+ * @param source 合并源选项对象，格式应为：{ ... }，默认为：this.options()
+ * @param filter 可选，合并过滤器，true 全部合并；false 仅合并在target中存在的属性（仅顶级属性）；
+ * 				 源选项对象过滤函数，格式为：function(name, value){ return true、false; }，返回false将不合并source中的对应属性
  * @returns target
  */
-chartProto.inflateOptions = function(target, filter)
+chartProto.inflateOptions = function(target, source, filter)
 {
-	target = (target == null ? {} : target);
+	// (target)
+	if(arguments.length == 1)
+	{
+		source = this.options();
+		filter = null;
+	}
+	// (target, filter)
+	else if(arguments.length == 2 && (source === true || source === false || CF.isFunction(source)))
+	{
+		filter = source;
+		source = this.options();
+	}
+	// (target, source)、(target, source, filter)
+	
 	filter = (filter == null ? true : filter);
 	
-	var options = this.options();
-	
-	if(options != null)
+	if(source != null)
 	{
 		if(filter === true)
 		{
-			CF.extend(true, target, options);
+			CF.extend(true, target, source);
 		}
 		else
 		{
@@ -2373,15 +2388,15 @@ chartProto.inflateOptions = function(target, filter)
 			{
 				for(var name in target)
 				{
-					srcOptions[name] = options[name];
+					srcOptions[name] = source[name];
 				}
 			}
-			//是否合并断言函数：
+			//自定义
 			else if(CF.isFunction(filter))
 			{
-				for(var name in options)
+				for(var name in source)
 				{
-					var value = options[name];
+					var value = source[name];
 					
 					if(filter(name, value) !== false)
 					{
@@ -2389,6 +2404,8 @@ chartProto.inflateOptions = function(target, filter)
 					}
 				}
 			}
+			else
+				throw new Error("[filter] illegal");
 			
 			CF.extend(true, target, srcOptions);
 		}
@@ -2459,7 +2476,7 @@ chartProto.themeStyleSheet = function(name, css, force)
 };
 
 /**
- * 获取/设置HTML元素的CSS样式字符串（元素的style属性）。
+ * 获取/设置HTML元素的style样式。
  * 具体参考CF.elementStyle()函数。
  */
 chartProto.elementStyle = function(element, css)
@@ -4657,14 +4674,14 @@ CF.domsWithWidgetId = function(element)
 };
 
 /**
- * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
+ * 获取当前在指定HTML元素上渲染的图表对象。
  * 
- * @param element HTML元素、Jquery选择器、Jquery对象
+ * @param ele HTML元素
+ * @returns 图表对象，null表示元素上并未渲染图表
  */
-CF.renderedChart = function(element)
+CF.renderedChart = function(ele)
 {
-	element = CF.toJqueryObj(element);
-	return element.data(CF.ELE_RENDERED_CHART_NAME);
+	return CF.eleData(ele, CF.ELE_RENDERED_CHART_NAME);
 };
 
 /**
@@ -4689,16 +4706,6 @@ CF.checkSetChartElementId = function(element, chart)
 		chart.elementId(elementId);
 	
 	return elementId;
-};
-
-/**
- * 获取Jquery对象。
- * 
- * @param element HTML元素、HTML元素数组、Jquery选择器、Jquery对象
- */
-CF.toJqueryObj = function(element)
-{
-	return jQuery(element);
 };
 
 /**
