@@ -4345,6 +4345,78 @@ CF.eleRemove = function(ele)
 };
 
 /**
+ * 在HTML元素内部末尾插入子元素
+ * 
+ * @param ele HTML元素
+ * @param child HTML元素、HTML字符串
+ */
+CF.eleAppend = function(ele, child)
+{
+	if(CF.isString(child))
+	{
+		ele.insertAdjacentHTML("beforeend", child);
+	}
+	else
+	{
+		ele.appendChild(child);
+	}
+};
+
+/**
+ * 在HTML元素内部开头插入子元素
+ * 
+ * @param ele HTML元素
+ * @param child HTML元素、HTML字符串
+ */
+CF.elePrepend = function(ele, child)
+{
+	if(CF.isString(child))
+	{
+		ele.insertAdjacentHTML("afterbegin", child);
+	}
+	else
+	{
+		ele.insertBefore(child, ele.firstChild);
+	}
+};
+
+/**
+ * 在HTML元素之前插入元素
+ * 
+ * @param ele HTML元素
+ * @param sibling HTML元素、HTML字符串
+ */
+CF.eleBefore = function(ele, sibling)
+{
+	if(CF.isString(child))
+	{
+		ele.insertAdjacentHTML("beforebegin", sibling);
+	}
+	else
+	{
+		ele.before(sibling);
+	}
+};
+
+/**
+ * 在HTML元素之之后插入元素
+ * 
+ * @param ele HTML元素
+ * @param sibling HTML元素、HTML字符串
+ */
+CF.eleAfter = function(ele, sibling)
+{
+	if(CF.isString(child))
+	{
+		ele.insertAdjacentHTML("afterend", sibling);
+	}
+	else
+	{
+		ele.after(sibling);
+	}
+};
+
+/**
  * 获取/设置元素属性。
  * 
  * @param ele HTML元素
@@ -4397,6 +4469,25 @@ CF.eleRemoveClass = function(ele, classes)
 	for(var i=0; i<classes.length; i++)
 	{
 		classList.remove(classes[i]);
+	}
+};
+
+/**
+ * 获取/设置元素的CSS样式。
+ * 
+ * @param ele HTML元素
+ * @param name CSS样式名
+ * @param value 可选，要设置的CSS样式值
+ */
+CF.eleCss = function(ele, name, value)
+{
+	if(value === undefined)
+	{
+		return window.getComputedStyle(ele, null).getPropertyValue(name);
+	}
+	else
+	{
+		ele.style[name] = value;
 	}
 };
 
@@ -4945,13 +5036,27 @@ CF.colorToHexStr = function(color, prefix)
 	return color;
 };
 
+//RGB颜色字符串前缀正则
+var RGB_COLOR_PREFIX_REGEX = /^\s*rgb/i;
+
+//HSL颜色字符串前缀正则
+var HSL_COLOR_PREFIX_REGEX = /^\s*hsl/i;
+
+//HEX颜色字符串前缀正则
+var HEX_COLOR_PREFIX_REGEX = /^\s*\#/i;
+
+//名称颜色字符串前缀正则
+var NAME_COLOR_PREFIX_REGEX = /^\s*\w*\s*$/i;
+
+CF._COMPUTED_NAME_COLORS = {};
+
 var ELE_ID_FOR_PARSE_COLOR = CF.BUILTIN_NAME_PART + "EleForParseColor";
 
 /**
  * 解析颜色对象。
  * 将颜色字符串解析为{r: number, g: number, b: number, a: number}格式的对象。
  * 
- * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"#FFFFFF80"、"rgb(255,255,255)"、"rgba(255,255,255, 0.5)"
+ * @param color 颜色字符串，格式为："red"、#FFF"、"#FFFFFF"、"#FFFFFF80"、"rgb(...)"、"rgba(...)"、"hsl(...)"、"hsla(...)"
  */
 CF.parseColor = function(color)
 {
@@ -4961,20 +5066,32 @@ CF.parseColor = function(color)
 	if(!color)
 		return re;
 	
-	//是颜色名称（red、green、yellow等），则通过元素css函数转换
-	if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
+	//颜色名称（red、green、yellow等），通过元素css函数转换
+	if(NAME_COLOR_PREFIX_REGEX.test(color))
 	{
-		var $colorEle = CF.eleOfId(ELE_ID_FOR_PARSE_COLOR);
-		if($colorEle.length == 0)
-			$colorEle = jQuery("<div id='"+ELE_ID_FOR_PARSE_COLOR+"' style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;'></div>")
-							.appendTo(document.body);
+		var computedColor = CF._COMPUTED_NAME_COLORS[color];
 		
-		$colorEle.css("color", color);
-		color = $colorEle.css("color");
+		if(computedColor != null)
+		{
+			color = computedColor;
+		}
+		else
+		{
+			var ele = CF.eleOfId(ELE_ID_FOR_PARSE_COLOR);
+			if(ele == null)
+			{
+				CF.eleAppend(document.body,
+					"<div id='"+ELE_ID_FOR_PARSE_COLOR+"' style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;'></div>");
+				ele = CF.eleOfId(ELE_ID_FOR_PARSE_COLOR);
+			}
+			
+			CF.eleCss(ele, "color", color);
+			computedColor = CF.eleCss(ele, "color");
+		}
 	}
 	
 	// #FFF、#FFFFFF、#FFFFFFFF
-	if(color.charAt(0) == '#')
+	if(HEX_COLOR_PREFIX_REGEX.test(color))
 	{
 		color = color.substring(1);
 		
@@ -4990,48 +5107,85 @@ CF.parseColor = function(color)
 		if(color.length >= 8)
 			re.a = parseInt(color.substr(6, 2), 16)/255;
 	}
-	// rgb()、rgba()
 	else
 	{
-		var si = color.indexOf("(");
-		var ei = (si >= 0 ? color.lastIndexOf(")") : -1);
+		// rgb()、rgba()
+		var isRgb = RGB_COLOR_PREFIX_REGEX.test(color);
+		// hsl()、hsla()
+		var isHsl = HSL_COLOR_PREFIX_REGEX.test(color);
 		
-		if(ei > si)
+		if(isRgb || isHsl)
 		{
-			color = color.substring(si+1, ei);
+			var si = color.indexOf("(");
+			var ei = (si >= 0 ? color.lastIndexOf(")") : -1);
 			
-			//以逗号分隔
-			if(color.indexOf(",") >= 0)
+			if(ei > si)
 			{
-				color = color.split(",");
-			}
-			//以空格分隔
-			else if(color.indexOf(" ") >= 0)
-			{
-				color = color.split(" ");
+				color = CF.trim(color.substring(si+1, ei));
 				
-				//rbg(r g b / a)
-				if(color.length >= 4 && color[3] == "/")
+				//以逗号分隔
+				if(color.indexOf(",") >= 0)
 				{
-					color[3] = color[4];
-					color[4] = null;
+					color = color.split(",");
 				}
+				//以空格分隔
+				else if(color.indexOf(" ") >= 0)
+				{
+					color = color.split(" ");
+					
+					//rbg(r g b / a)
+					if(color.length >= 4 && color[3] == "/")
+					{
+						color[3] = color[4];
+						color[4] = null;
+					}
+				}
+				else
+					color = [];
+			}
+			else
+				color = [];
+			
+			if(isRgb)
+			{
+				if(color.length >= 1)
+					re.r = parseInt(color[0]);
+				if(color.length >= 2)
+					re.g = parseInt(color[1]);
+				if(color.length >= 3)
+					re.b = parseInt(color[2]);
+				if(color[3] != null)
+					re.a = parseFloat(color[3]);
+			}
+			else if(isHsl)
+			{
+				CF._hslArrayToRgb(color, re);
 			}
 		}
-		else
-			color = [];
-		
-		if(color.length >= 1)
-			re.r = parseInt(color[0]);
-		if(color.length >= 2)
-			re.g = parseInt(color[1]);
-		if(color.length >= 3)
-			re.b = parseInt(color[2]);
-		if(color.length >= 4 && color[3] != null)
-			re.a = parseFloat(color[3]);
 	}
 	
 	return re;
+};
+
+CF._hslArrayToRgb = function(hsl, rgbObj)
+{
+	if(hsl.length < 3)
+		return;
+	
+	var h = parseFloat(color[0]);
+	var s = parseFloat(color[1]);
+	var l = parseFloat(color[2]);
+	var a = 1.0;
+	
+	if(color[3] != null)
+	{
+		if (color[3].endsWith('%'))
+			a = parseFloat(color[3]) / 100.0;
+		else
+			a = parseFloat(color[3]);
+	}
+	
+	//TODO
 };
 
 /**
@@ -5312,6 +5466,12 @@ CF.isNullOrEmpty = function(v)
 	return (v == null || v === "" || (v.length !== undefined && v.length === 0));
 };
 
+//删除字符串两端空格。
+CF.trim = function(str)
+{
+	return (str == null ? "" : str.trim());
+};
+
 CF.toJsonString = function(obj)
 {
 	return JSON.stringify(obj);
@@ -5352,7 +5512,6 @@ var toString = class2type.toString;
 var hasOwn = class2type.hasOwnProperty;
 var fnToString = hasOwn.toString;
 var ObjectFunctionString = fnToString.call(Object);
-var rtrim = /^[\s\uFEFF\xA0]+|([^\s\uFEFF\xA0])[\s\uFEFF\xA0]+$/g;
 var toType = function( obj ) {
 	if ( obj == null ) {
 		return obj + "";
@@ -5422,14 +5581,6 @@ CF.isEmptyObject = function(obj)
 	}
 	
 	return true;
-};
-
-/**
- * 删除字符串两端空格（修改自3.7.1版本的jQuery.trim函数）。
- */
-CF.trim = function(text)
-{
-	return (text == null ? "" : ( text + "" ).replace( rtrim, "$1" ));
 };
 
 /**
