@@ -5268,7 +5268,7 @@ CF.styleSheetText = function(styleId, cssText)
 	
 	if(styleEle != null)
 	{
-		styleEle.text(cssText);
+		CF.eleTextContent(styleEle, cssText);
 		return;
 	}
 	
