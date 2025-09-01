@@ -33,3 +33,5 @@ chart.originalDataIndexes()		x
 chart.originalDataIndex()		x
 chart.eventOriginalDataIndex()	x
 chart.eventNew()				x
+chart.updateResults()			x
+chart.updateResult()			+

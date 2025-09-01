@@ -2917,7 +2917,7 @@
 		//默认严格设置模式，这样才能支持删除styleObj中未出现的样式
 		strictSet = (strictSet == null ? true : strictSet);
 		
-		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele) || "");
+		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.eleStyle(ele) || "");
 		
 		if(strictSet)
 		{
@@ -3246,7 +3246,7 @@
 	
 	editor._getElementStyleObj = function(ele)
 	{
-		var styleObj = chartFactory.styleStringToObj(chartFactory.elementStyle(ele));
+		var styleObj = chartFactory.styleStringToObj(chartFactory.eleStyle(ele));
 		styleObj.className = (ele.attr("class") || "");
 		
 		return styleObj;
@@ -3459,7 +3459,7 @@
 	//注意：返回的图表元素中可能有还未渲染为图表的元素
 	editor._getChartElements = function(ele)
 	{
-		return $(chartFactory.domsWithWidgetId(ele));
+		return $(chartFactory.elesWithWidgetId(ele));
 	};
 	
 	editor._selectedElement = function(context)

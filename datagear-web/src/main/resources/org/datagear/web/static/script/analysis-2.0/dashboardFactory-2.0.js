@@ -2394,7 +2394,7 @@
 		
 		element = jQuery(element == null ? document.body : element);
 		
-		var widgetEles = $(chartFactory.domsWithWidgetId(element));
+		var widgetEles = $(chartFactory.elesWithWidgetId(element));
 		var unsolved = [];
 		
 		var dashboard = this;

@@ -1637,7 +1637,7 @@
 			$button.html(buttonOptions.text);
 		
 		if(buttonOptions.style)
-			chartFactory.elementStyle($button, buttonOptions.style);
+			chartFactory.eleStyle($button, buttonOptions.style);
 		
 		if(buttonOptions.styleClass)
 			$button.addClass(buttonOptions.styleClass);

@@ -375,12 +375,20 @@ CF.init = function(chart)
 	return instance;
 };
 
+/**
+ * Chart类
+ */
 CF.Chart = function(chart)
 {
 	CF.initChartProps(chart);
 	this._root = chart;
 	this._plugin = CF.findPluginById(chart.plugin ? chart.plugin.id : null);
 };
+
+/**
+ * Chart类原型
+ */
+var chartProto = CF.Chart.prototype;
 
 /**
  * 初始化图表对象基础属性。
@@ -434,8 +442,6 @@ CF.findPluginById = function(pluginId)
 //----------------------------------------
 // Chart prototype start
 //----------------------------------------
-
-var chartProto = CF.Chart.prototype;
 
 /**
  * 初始化图表，使用图表元素上的dg-*属性值初始化图表。
@@ -730,6 +736,7 @@ chartProto.id = function()
 
 /**
  * 获取/设置图表对应的HTML元素ID。
+ * 注意：设置操作仅应在图表未渲染、或者选然后图表元素ID有变更的情况下执行。
  * 
  * @param elementId 可选，要设置的元素ID
  */
@@ -741,9 +748,6 @@ chartProto.elementId = function(elementId)
 	{
 		if(CF.isNullOrEmpty(elementId))
 			throw new Error("[elementId] required");
-		
-		if(this.isAlive())
-			throw new Error("chart is illegal state for : elementId(elementId)");
 		
 		this._root.elementId = elementId;
 	}
@@ -761,9 +765,6 @@ chartProto.plugin = function(plugin)
 		return this._plugin;
 	else
 	{
-		if(this.isAlive())
-			throw new Error("chart is illegal state for : plugin(plugin)");
-		
 		this._plugin = plugin;
 	}
 };
@@ -2477,32 +2478,26 @@ chartProto.themeStyleSheet = function(name, css, force)
 
 /**
  * 获取/设置HTML元素的style样式。
- * 具体参考CF.elementStyle()函数。
+ * 具体参考CF.eleStyle()函数。
  */
 chartProto.elementStyle = function(element, css)
 {
-	return CF.elementStyle(element, css);
+	return CF.eleStyle(element, css);
 };
 
 /**
  * 拼接CSS样式字符串。
- * 具体参考CF.styleString()函数。
+ * 
+ * @param css 同CF.styleString()函数参数。
  */
 chartProto.styleString = function(css)
 {
 	var cssArray = [];
 	
 	for(var i=0; i<arguments.length; i++)
-	{
-		var cssi = arguments[i];
-		
-		if(!cssi)
-			continue;
-		
-		cssArray = cssArray.concat(cssi);
-	}
+		cssArray.push(arguments[i]);
 	
-	return CF.styleString(cssArray);
+	return CF.styleString.apply(CF, cssArray);
 };
 
 /**
@@ -4131,6 +4126,8 @@ CF.themeStyleName = function(theme)
 	return sn;
 };
 
+var THEME_STYLE_SHEET_INFO_NAME = CF.BUILTIN_PROP_PREFIX + "StyleSheetInfo";
+
 /**
  * 判断/设置与指定主题和名称关联的CSS样式表。
  * 对于设置操作，最终生成的样式表都会添加CF.themeStyleName(theme)CSS类名选择器前缀，
@@ -4169,9 +4166,9 @@ CF.themeStyleName = function(theme)
  */
 CF.themeStyleSheet = function(theme, name, css, force)
 {
-	var infoMap = theme[CF._KEY_THEME_STYLE_SHEET_INFO];
+	var infoMap = theme[THEME_STYLE_SHEET_INFO_NAME];
 	if(infoMap == null)
-		infoMap = (theme[CF._KEY_THEME_STYLE_SHEET_INFO] = {});
+		infoMap = (theme[THEME_STYLE_SHEET_INFO_NAME] = {});
 	
 	var info = infoMap[name];
 	
@@ -4225,6 +4222,8 @@ CF.themeStyleSheet = function(theme, name, css, force)
 	return styleName;
 };
 
+var THEME_REF_ENTITY_IDS_NAME = CF.BUILTIN_PROP_PREFIX + "RefEntityIds";
+
 /**
  * 添加主题关联实体。
  */
@@ -4233,8 +4232,8 @@ CF.addThemeRefEntity = function(theme, entityId)
 	if(!theme)
 		return;
 	
-	var entityIds = (theme[CF._KEY_THEME_REF_ENTITY_IDS]
-						|| (theme[CF._KEY_THEME_REF_ENTITY_IDS] = {}));
+	var entityIds = (theme[THEME_REF_ENTITY_IDS_NAME]
+						|| (theme[THEME_REF_ENTITY_IDS_NAME] = {}));
 	
 	entityIds[entityId] = true;
 };
@@ -4249,7 +4248,7 @@ CF.removeThemeRefEntity = function(theme, entityId, destroyCss)
 	if(!theme)
 		return;
 	
-	var entityIds = (theme[CF._KEY_THEME_REF_ENTITY_IDS] || {});
+	var entityIds = (theme[THEME_REF_ENTITY_IDS_NAME] || {});
 	
 	if(entityIds[entityId] == true)
 		entityIds[entityId] = false;
@@ -4282,11 +4281,11 @@ CF.destroyThemeStyleSheet = function(theme)
 	if(!theme)
 		return;
 	
-	var infoMap = theme[CF._KEY_THEME_STYLE_SHEET_INFO];
+	var infoMap = theme[THEME_STYLE_SHEET_INFO_NAME];
 	
 	if(infoMap != null)
 	{
-		theme[CF._KEY_THEME_STYLE_SHEET_INFO] = null;
+		theme[THEME_STYLE_SHEET_INFO_NAME] = null;
 		
 		for(var name in infoMap)
 		{
@@ -4294,15 +4293,61 @@ CF.destroyThemeStyleSheet = function(theme)
 			var styleId = (info ? info.styleId : null);
 			
 			if(styleId)
-				jQuery("#" + styleId).remove();
+				CF.eleRemove(CF.eleOfId(styleId));
 		}
 	}
 };
 
 /**
+ * 获取指定ID的元素
+ * 
+ * @param id HTML元素ID
+ */
+CF.eleOfId = function(id)
+{
+	return document.getElementById(id);
+};
+
+/**
+ * 获取匹配选择器的全部后代元素
+ * 
+ * @param selector CSS选择器
+ * @param rootEle 可选，查找根元素（不包含），默认为：document
+ * @returns HTML元素数组
+ */
+CF.elesOfSelector = function(selector, rootEle)
+{
+	rootEle = (rootEle == null ? document : rootEle);
+	
+	var re = [];
+	
+	var nodeList = rootEle.querySelectorAll(selector);
+	if(nodeList)
+	{
+		for(var i=0; i<nodeList.length; i++)
+			re.push(nodeList[i]);
+	}
+	
+	return re;
+};
+
+/**
+ * 删除元素
+ * 
+ * @param ele HTML元素
+ */
+CF.eleRemove = function(ele)
+{
+	if(!ele)
+		return;
+	
+	ele.remove();
+};
+
+/**
  * 获取/设置元素属性。
  * 
- * @param ele DOM元素
+ * @param ele HTML元素
  * @param name 属性名
  * @param value 可选，要设置的值，为null时将删除属性
  */
@@ -4324,7 +4369,7 @@ CF.eleAttr = function(ele, name, value)
 /**
  * 添加元素样式类。
  * 
- * @param ele DOM元素
+ * @param ele HTML元素
  * @param classes 样式类数组、以空格分隔的字符串
  */
 CF.eleAddClass = function(ele, classes)
@@ -4341,7 +4386,7 @@ CF.eleAddClass = function(ele, classes)
 /**
  * 删除元素样式类。
  * 
- * @param ele DOM元素
+ * @param ele HTML元素
  * @param classes 样式类数组、以空格分隔的字符串
  */
 CF.eleRemoveClass = function(ele, classes)
@@ -4360,7 +4405,7 @@ CF.ELE_DATA_CACHE = new WeakMap();
 /**
  * 获取/绑定元素数据，值会在删除元素后自动删除。
  * 
- * @param ele DOM元素
+ * @param ele HTML元素
  * @param name 名称
  * @param value 可选，要设置的值
  */
@@ -4387,7 +4432,7 @@ CF.eleData = function(ele, name, value)
 /**
  * 删除元素数据。
  * 
- * @param ele DOM元素
+ * @param ele HTML元素
  * @param name 可选，名称，不设置则删除全部
  */
 CF.eleRemoveData = function(ele, name)
@@ -4410,7 +4455,7 @@ CF.eleRemoveData = function(ele, name)
 /**
  * 清空元素内容。
  * 
- * @param ele DOM元素
+ * @param ele HTML元素
  */
 CF.eleEmpty = function(ele)
 {
@@ -4425,38 +4470,28 @@ CF.eleEmpty = function(ele)
  * 获取/设置HTML元素的CSS样式字符串（元素的style属性）。
  * 
  * 使用方式：
- * CF.elementStyle(element)
- * CF.elementStyle(element, "color:red;font-size:1.5em")
- * CF.elementStyle(element, {border:"1px solid red"}, "color:red;font-size:1.5em")
- * CF.elementStyle(element, "color:red;font-size:1.5em", {border:"1px solid red"}, "background:blue")
- * CF.elementStyle(element, ["color:red;font-size:1.5em", {border:"1px solid red"}], "background:blue")
+ * CF.eleStyle(element)
+ * CF.eleStyle(element, "color:red;font-size:1.5em")
+ * CF.eleStyle(element, {border:"1px solid red"}, "color:red;font-size:1.5em")
+ * CF.eleStyle(element, "color:red;font-size:1.5em", {border:"1px solid red"}, "background:blue")
+ * CF.eleStyle(element, ["color:red;font-size:1.5em", {border:"1px solid red"}], "background:blue")
  * 
- * @param element HTML元素、Jquery对象
+ * @param ele HTML元素
  * @param css 可选，要设置的CSS样式，格式为：同CF.styleString()函数参数
  * @return 要获取的CSS样式字符串
  */
-CF.elementStyle = function(element, css)
+CF.eleStyle = function(ele, css)
 {
-	element = jQuery(element);
-	
 	if(css === undefined)
-		return element.attr("style");
+		return CF.eleAttr(ele, "style");
 	
 	var cssArray = [];
 	
 	for(var i=1; i<arguments.length; i++)
-	{
-		var cssi = arguments[i];
-		
-		if(!cssi)
-			continue;
-		
-		cssArray = cssArray.concat(cssi);
-	}
+		cssArray.push(arguments[i]);
 	
-	var cssText = CF.styleString(cssArray);
-	
-	element.attr("style", cssText);
+	var cssText = CF.styleString.apply(CF, cssArray);
+	CF.eleAttr(ele, "style", cssText);
 };
 
 /**
@@ -4472,53 +4507,50 @@ CF.elementStyle = function(element, css)
  *            字符串，例如："color:red;font-size:1.5em"
  *            CSS属性对象，例如：{ color: "...", "backgroundColor": "...", "font-size": "...", ...  }，
  *            数组，元素可以是字符串、CSS属性对象
- *            或者是上述格式的变长参数
+ *            或者是包含字符串、CSS属性对象、数组的变长参数
  * @return 拼接后的CSS样式字符串，例如："color:red;background-color:red;font-size:1px;"
  */
 CF.styleString = function(css)
 {
 	var cssText = "";
 	
-	var cssArray = [];
-	
 	for(var i=0; i<arguments.length; i++)
 	{
 		var cssi = arguments[i];
 		
-		if(!cssi)
+		if(CF.isNullOrEmpty(cssi))
 			continue;
 		
-		cssArray = cssArray.concat(cssi);
-	}
-	
-	for(var i=0; i<cssArray.length; i++)
-	{
-		var cssi = cssArray[i];
 		var cssiText = "";
 		
-		if(!cssi)
-			continue;
-		
-		if(typeof(cssi) == "string")
+		if(CF.isString(cssi))
+		{
 			cssiText = cssi;
+		}
+		else if(CF.isArray(cssi))
+		{
+			cssiText = CF.styleString.apply(CF, cssi);
+		}
 		else
 		{
 			for(var name in cssi)
 			{
 				var value = cssi[name];
-				var valueType = typeof(value);
 				
-				if(valueType == "string" || valueType == "number" || valueType == "boolean")
+				if(!CF.isNullOrEmpty(value))
 				{
 					cssiText += name + ":" + value + ";";
 				}
 			}
 		}
 		
-		if(cssiText && cssText && cssText.charAt(cssText.length - 1) != ";")
-			cssText += ";" + cssiText;
-		else
-			cssText += cssiText;
+		if(CF.isNullOrEmpty(cssiText))
+			continue;
+		
+		if(cssText && cssText.charAt(cssText.length - 1) != ";")
+			cssText += ";";
+		
+		cssText += cssiText;
 	}
 	
 	return cssText;
@@ -4536,12 +4568,12 @@ CF.styleStringToObj = function(styleStr)
 		var strs = styleStr.split(";");
 		for(var i=0; i<strs.length; i++)
 		{
-			var str = jQuery.trim(strs[i]);
+			var str = CF.trim(strs[i]);
 			if(str)
 			{
 				var nv = str.split(":");
-				var n = jQuery.trim(nv[0] || "");
-				var v = jQuery.trim(nv[1] || "");
+				var n = CF.trim(nv[0] || "");
+				var v = CF.trim(nv[1] || "");
 				
 				if(n)
 					re[n] = v;
@@ -4631,46 +4663,47 @@ CF.toWebContextPathURL = function(webContext, url)
 /**
  * 获取/设置HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
  * 
- * @param element HTML元素、Jquery对象
+ * @param ele HTML元素
  * @param widgetId 选填参数，要设置的图表部件ID，不设置则执行获取操作
  */
-CF.elementWidgetId = function(element, widgetId)
+CF.elementWidgetId = function(ele, widgetId)
 {
-	element = jQuery(element);
-	
 	if(widgetId === undefined)
 	{
-		return element.attr(CF.elementAttrConst.WIDGET);
+		return CF.eleAttr(ele, CF.elementAttrConst.WIDGET);
 	}
 	else
 	{
-		element.attr(CF.elementAttrConst.WIDGET, widgetId);
+		CF.eleAttr(ele, CF.elementAttrConst.WIDGET, widgetId);
 	}
 };
 
 /**
  * 获取HTML元素自身或其子孙元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
  * 
- * @param element HTML元素、Jquery对象
- * @returns DOM数组
+ * @param ele HTML元素
+ * @returns HTML元素数组
  */
-CF.domsWithWidgetId = function(element)
+CF.elesWithWidgetId = function(ele)
 {
-	element = jQuery(element);
-	element = element.add(jQuery("["+CF.elementAttrConst.WIDGET+"]", element));
+	var re = [];
 	
-	var widgetEles = [];
+	if(ele == null)
+		return re;
 	
-	//处理元素自身
-	element.each(function()
+	if(!CF.isNullOrEmpty(CF.elementWidgetId(ele)))
+		re.push(ele);
+	
+	var children = CF.elesOfSelector("["+CF.elementAttrConst.WIDGET+"]", ele);
+	children.forEach(function(child)
 	{
-		if(!CF.isNullOrEmpty(CF.elementWidgetId(this)))
+		if(!CF.isNullOrEmpty(CF.elementWidgetId(child)))
 		{
-			widgetEles.push(this);
+			re.push(child);
 		}
 	});
 	
-	return widgetEles;
+	return re;
 };
 
 /**
@@ -4688,18 +4721,17 @@ CF.renderedChart = function(ele)
  * 校验设置图表元素ID。
  * 图表元素必须有ID，且要与图表中的元素ID同步。
  * 
- * @param element
+ * @param ele HTML元素
  * @param chart 可选，要同步的图表
  */
-CF.checkSetChartElementId = function(element, chart)
+CF.checkSetChartElementId = function(ele, chart)
 {
-	element = jQuery(element);
+	var elementId = CF.eleAttr(ele, "id");
 	
-	var elementId = element.attr("id");
-	if(!elementId)
+	if(CF.isNullOrEmpty(elementId))
 	{
 		elementId = CF.uid();
-		element.attr("id", elementId);
+		CF.eleAttr(ele, "id", elementId);
 	}
 	
 	if(chart)
@@ -4806,6 +4838,8 @@ CF.toLegalStyleName = function(name)
 	return re;
 };
 
+var THEME_GRADUAL_COLORS_NAME = CF.BUILTIN_PROP_PREFIX + "GradualColors";
+
 /**
  * 获取主题从背景色（actualBackgroundColor）到前景色（color）之间的渐变因子对应的颜色。
  * 这个颜色是实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
@@ -4816,12 +4850,12 @@ CF.toLegalStyleName = function(name)
  */
 CF.themeGradualColor = function(theme, factor)
 {
-	var gcs = theme[CF._KEY_GRADUAL_COLORS];
+	var gcs = theme[THEME_GRADUAL_COLORS_NAME];
 	
 	if(!gcs || gcs.length == 0)
 	{
 		gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, (theme.gradient || 20));
-		theme[CF._KEY_GRADUAL_COLORS] = gcs;
+		theme[THEME_GRADUAL_COLORS_NAME] = gcs;
 	}
 	
 	if(factor == null)
@@ -4911,6 +4945,8 @@ CF.colorToHexStr = function(color, prefix)
 	return color;
 };
 
+var ELE_ID_FOR_PARSE_COLOR = CF.BUILTIN_NAME_PART + "EleForParseColor";
+
 /**
  * 解析颜色对象。
  * 将颜色字符串解析为{r: number, g: number, b: number, a: number}格式的对象。
@@ -4928,12 +4964,9 @@ CF.parseColor = function(color)
 	//是颜色名称（red、green、yellow等），则通过元素css函数转换
 	if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
 	{
-		var elementId = (CF._ELEMENT_ID_FOR_CVT_COLOR == null ?
-							(CF._ELEMENT_ID_FOR_CVT_COLOR = CF.uid()) : CF._ELEMENT_ID_FOR_CVT_COLOR);
-		
-		var $colorEle = jQuery("#"+elementId);
+		var $colorEle = CF.eleOfId(ELE_ID_FOR_PARSE_COLOR);
 		if($colorEle.length == 0)
-			$colorEle = jQuery("<div id='"+elementId+"' style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;'></div>")
+			$colorEle = jQuery("<div id='"+ELE_ID_FOR_PARSE_COLOR+"' style='display:none;position:absolute;left:0;bottom:0;width:0;height:0;z-index:-999;'></div>")
 							.appendTo(document.body);
 		
 		$colorEle.css("color", color);
@@ -5586,17 +5619,8 @@ CF.optionValue = function(options, name, value)
 /**图表展示数据对象的原始信息属性名*/
 CF._ORIGINAL_DATA_INDEX_PROP_NAME = CF.BUILTIN_PROP_PREFIX + "OriginalDataIndex";
 
-/**图表主题关联的实体ID属性名*/
-CF._KEY_THEME_REF_ENTITY_IDS = CF.BUILTIN_PROP_PREFIX + "RefEntityIds";
-
-/**图表主题的CSS信息属性名*/
-CF._KEY_THEME_STYLE_SHEET_INFO = CF.BUILTIN_PROP_PREFIX + "StyleSheetInfo";
-
 /** 关键字：注册得ECharts主题名 */
 CF._KEY_REGISTERED_ECHARTS_THEME_NAME = CF.BUILTIN_PROP_PREFIX + "RegisteredEchartsThemeName";
-
-/** 关键字：渐变色数组 */
-CF._KEY_GRADUAL_COLORS = CF.BUILTIN_PROP_PREFIX + "GradualColors";
 
 /**
  * 将指定图表主题填充为全局图表主题，即使用<body>上的dg-chart-theme属性值填充。
