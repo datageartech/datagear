@@ -4332,6 +4332,29 @@ CF.elesOfSelector = function(selector, rootEle)
 };
 
 /**
+ * 获取匹配选择器的第一个后代元素
+ * 
+ * @param selector CSS选择器
+ * @param rootEle 可选，查找根元素（不包含），默认为：document
+ * @returns HTML元素
+ */
+CF.eleOfSelector = function(selector, rootEle)
+{
+	rootEle = (rootEle == null ? document : rootEle);
+	return rootEle.querySelector(selector);
+};
+
+/**
+ * 创建HTML元素
+ * 
+ * @param name 元素名，比如："div"、"a"
+ */
+CF.eleCreate = function(name)
+{
+	return document.createElement(name);
+};
+
+/**
  * 删除元素
  * 
  * @param ele HTML元素
@@ -4388,7 +4411,7 @@ CF.elePrepend = function(ele, child)
  */
 CF.eleBefore = function(ele, sibling)
 {
-	if(CF.isString(child))
+	if(CF.isString(sibling))
 	{
 		ele.insertAdjacentHTML("beforebegin", sibling);
 	}
@@ -4406,7 +4429,7 @@ CF.eleBefore = function(ele, sibling)
  */
 CF.eleAfter = function(ele, sibling)
 {
-	if(CF.isString(child))
+	if(CF.isString(sibling))
 	{
 		ele.insertAdjacentHTML("afterend", sibling);
 	}
@@ -4489,6 +4512,20 @@ CF.eleCss = function(ele, name, value)
 	{
 		ele.style[name] = value;
 	}
+};
+
+/**
+ * 获取/设置元素的文本内容。
+ * 
+ * @param ele HTML元素
+ * @param text 可选，要设置的文本内容
+ */
+CF.eleTextContent = function(ele, text)
+{
+	if(text === undefined)
+		return ele.textContent;
+	else
+		ele.textContent = text;
 };
 
 CF.ELE_DATA_CACHE = new WeakMap();
@@ -4663,8 +4700,8 @@ CF.styleStringToObj = function(styleStr)
 			if(str)
 			{
 				var nv = str.split(":");
-				var n = CF.trim(nv[0] || "");
-				var v = CF.trim(nv[1] || "");
+				var n = CF.trim(nv[0]);
+				var v = CF.trim(nv[1]);
 				
 				if(n)
 					re[n] = v;
@@ -5037,13 +5074,13 @@ CF.colorToHexStr = function(color, prefix)
 };
 
 //RGB颜色字符串前缀正则
-var RGB_COLOR_PREFIX_REGEX = /^\s*rgb/i;
+var RGB_COLOR_PREFIX_REGEX = /^rgb/i;
 
 //HSL颜色字符串前缀正则
-var HSL_COLOR_PREFIX_REGEX = /^\s*hsl/i;
+var HSL_COLOR_PREFIX_REGEX = /^hsl/i;
 
 //HEX颜色字符串前缀正则
-var HEX_COLOR_PREFIX_REGEX = /^\s*\#/i;
+var HEX_COLOR_PREFIX_REGEX = /^\#/i;
 
 //名称颜色字符串前缀正则
 var NAME_COLOR_PREFIX_REGEX = /^\s*\w*\s*$/i;
@@ -5066,6 +5103,8 @@ CF.parseColor = function(color)
 	if(!color)
 		return re;
 	
+	color = CF.trim(color);
+	
 	//颜色名称（red、green、yellow等），通过元素css函数转换
 	if(NAME_COLOR_PREFIX_REGEX.test(color))
 	{
@@ -5087,6 +5126,8 @@ CF.parseColor = function(color)
 			
 			CF.eleCss(ele, "color", color);
 			computedColor = CF.eleCss(ele, "color");
+			CF._COMPUTED_NAME_COLORS[color] = computedColor;
+			color = computedColor;
 		}
 	}
 	
@@ -5126,18 +5167,18 @@ CF.parseColor = function(color)
 				//以逗号分隔
 				if(color.indexOf(",") >= 0)
 				{
-					color = color.split(",");
+					color = CF.trimStrArray(color.split(","));
 				}
 				//以空格分隔
 				else if(color.indexOf(" ") >= 0)
 				{
-					color = color.split(" ");
+					color = CF.splitByWhitespace(color);
 					
-					//rbg(r g b / a)
+					//rbg(r g b / a)、hsl(r g b / a)
 					if(color.length >= 4 && color[3] == "/")
 					{
 						color[3] = color[4];
-						color[4] = null;
+						color[4] = undefined;
 					}
 				}
 				else
@@ -5145,6 +5186,10 @@ CF.parseColor = function(color)
 			}
 			else
 				color = [];
+			
+			//透明度是百分比
+			if(!CF.isNullOrEmpty(color[3]))
+				color[3] = (color[3].endsWith("%") ? parseFloat(color[3])/100 : parseFloat(color[3]));
 			
 			if(isRgb)
 			{
@@ -5154,38 +5199,54 @@ CF.parseColor = function(color)
 					re.g = parseInt(color[1]);
 				if(color.length >= 3)
 					re.b = parseInt(color[2]);
-				if(color[3] != null)
-					re.a = parseFloat(color[3]);
+				if(color.length >= 4)
+					re.a = color[3];
 			}
-			else if(isHsl)
+			else if(isHsl && color.length >= 3)
 			{
-				CF._hslArrayToRgb(color, re);
+				let h = parseFloat(color[0]);
+				let s = parseFloat(color[1])/100;
+				let l = parseFloat(color[2])/100;
+				
+				h = ((h % 360) + 360) % 360;
+				s = Math.max(0, Math.min(1, s));
+				l = Math.max(0, Math.min(1, l));
+				
+				const c = (1 - Math.abs(2 * l - 1)) * s;
+				const hp = h / 60;
+				const x = c * (1 - Math.abs((hp % 2) - 1));
+				
+				let r1, g1, b1;
+				
+				if (hp >= 0 && hp < 1) {
+					r1 = c; g1 = x; b1 = 0;
+				} else if (hp >= 1 && hp < 2) {
+					r1 = x; g1 = c; b1 = 0;
+				} else if (hp >= 2 && hp < 3) {
+					r1 = 0; g1 = c; b1 = x;
+				} else if (hp >= 3 && hp < 4) {
+					r1 = 0; g1 = x; b1 = c;
+				} else if (hp >= 4 && hp < 5) {
+					r1 = x; g1 = 0; b1 = c;
+				} else if (hp >= 5 && hp < 6) {
+					r1 = c; g1 = 0; b1 = x;
+				} else {
+					r1 = 0; g1 = 0; b1 = 0;
+				}
+				
+				const m = l - c / 2;
+				
+				re.r = Math.round((r1 + m) * 255);
+				re.g = Math.round((g1 + m) * 255);
+				re.b = Math.round((b1 + m) * 255);
+				
+				if(color.length >= 4)
+					re.a = color[3];
 			}
 		}
 	}
 	
 	return re;
-};
-
-CF._hslArrayToRgb = function(hsl, rgbObj)
-{
-	if(hsl.length < 3)
-		return;
-	
-	var h = parseFloat(color[0]);
-	var s = parseFloat(color[1]);
-	var l = parseFloat(color[2]);
-	var a = 1.0;
-	
-	if(color[3] != null)
-	{
-		if (color[3].endsWith('%'))
-			a = parseFloat(color[3]) / 100.0;
-		else
-			a = parseFloat(color[3]);
-	}
-	
-	//TODO
 };
 
 /**
@@ -5203,63 +5264,57 @@ CF._hslArrayToRgb = function(hsl, rgbObj)
  */
 CF.styleSheetText = function(styleId, cssText)
 {
-	var $style = jQuery("#" + styleId);
+	var styleEle = CF.eleOfId(styleId);
 	
-	if($style.length > 0)
+	if(styleEle != null)
 	{
-		$style.text(cssText);
+		styleEle.text(cssText);
 		return;
 	}
 	
-	$style = jQuery("<style />").attr("id", styleId)
-		.attr("dg-generated-style", "true").attr("type", "text/css").text(cssText);
+	styleEle = CF.eleCreate("style");
+	CF.eleAttr(styleEle, "id", styleId);
+	CF.eleAttr(styleEle, "type", "text/css");
+	CF.eleAttr(styleEle, "dg-generated-style", "true");
+	CF.eleTextContent(styleEle, cssText);
 	
-	var $head = jQuery("head:first");
+	var headEle = document.head;
 	
-	var $lastGenStyle = jQuery("style[dg-generated-style]:last", $head);
-	if($lastGenStyle.length > 0)
+	var lastGenStyle = CF.elesOfSelector("style[dg-generated-style]", headEle);
+	lastGenStyle = lastGenStyle[lastGenStyle.length - 1];
+	
+	if(lastGenStyle != null)
 	{
-		$lastGenStyle.after($style);
+		CF.eleAfter(lastGenStyle, styleEle);
 		return;
 	}
 	
-	var $lastImport = jQuery("["+CF.LIB_ATTR_NAME+"]:last", $head);
+	var lastImport = CF.elesOfSelector("["+CF.LIB_ATTR_NAME+"]", headEle);
+	lastImport = lastImport[lastImport.length - 1];
 	
-	if($lastImport.length > 0)
+	if(lastImport != null)
 	{
-		$lastImport.after($style);
+		CF.eleAfter(lastImport, styleEle);
 		return;
 	}
 	
-	var $firstLink = jQuery("link:first", $head);
+	var firstLink = CF.eleOfSelector("link", headEle);
 	
-	if($firstLink.length > 0)
+	if(firstLink != null)
 	{
-		$firstLink.before($style);
+		CF.eleBefore(firstLink, styleEle);
 		return;
 	}
 	
-	var $firstStyle = jQuery("style:first", $head);
+	var firstStyle = CF.eleOfSelector("style", headEle);
 	
-	if($firstStyle.length > 0)
+	if(firstStyle != null)
 	{
-		$firstStyle.before($style);
+		CF.eleBefore(firstStyle, styleEle);
 		return;
 	}
 	
-	$head.append($style);
-};
-
-/**
- * 判断给定CSS样式表是否已创建。
- * 
- * @param id 样式表元素ID
- */
-CF.isStyleSheetCreated = function(id)
-{
-	var style = document.getElementById(id);
-	
-	return (style != null && style.type == "text/css");
+	CF.eleAppend(headEle, styleEle);
 };
 
 /**
@@ -5466,11 +5521,23 @@ CF.isNullOrEmpty = function(v)
 	return (v == null || v === "" || (v.length !== undefined && v.length === 0));
 };
 
-//删除字符串两端空格。
+//删除字符串两端空格（null将直接返回）。
 CF.trim = function(str)
 {
-	return (str == null ? "" : str.trim());
+	return (str == null ? str : str.trim());
 };
+
+//删除字符串数组中每一个元素的两端空格
+CF.trimStrArray = function(strArray)
+{
+	if(strArray)
+	{
+		for(var i=0; i<strArray.length; i++)
+			strArray[i] = CF.trim(strArray[i]);
+	}
+	
+	return strArray;
+}
 
 CF.toJsonString = function(obj)
 {
@@ -5491,7 +5558,7 @@ CF.SPLIT_WHITESPACE_REGEX = ( /[^\x20\t\r\n\f]+/g );
  */
 CF.splitByWhitespace = function(str)
 {
-	if(str == nul)
+	if(str == null)
 		return [];
 	else
 		return (str.match(CF.SPLIT_WHITESPACE_REGEX) || []);
