@@ -625,7 +625,7 @@
 			
 			for(var j=0; j<myTriggers.length; j++)
 			{
-				if(chartFactory.inArray(myTriggers[j], triggers) < 0)
+				if(chartFactory.indexInArray(triggers, myTriggers[j]) < 0)
 					triggers.push(myTriggers[j]);
 			}
 		}
@@ -708,7 +708,7 @@
 			
 			for(var j=0; j<myTargetCharts.length; j++)
 			{
-				if(chartFactory.inArray(myTargetCharts[j], targetCharts) < 0)
+				if(chartFactory.indexInArray(targetCharts, myTargetCharts[j]) < 0)
 					targetCharts.push(myTargetCharts[j]);
 			}
 		}
@@ -730,7 +730,7 @@
 			return false;
 		
 		var triggers = this._resolveLinkTriggers(link);
-		return (chartFactory.inArray(eventType, triggers) >= 0);
+		return (chartFactory.indexInArray(triggers, eventType) >= 0);
 	};
 	
 	/**
@@ -2678,7 +2678,7 @@
 					if(targetChart == null)
 						throw new Error("no chart found for : " + chartIdx);
 					
-					if(chartFactory.inArray(targetChart, targetCharts) < 0)
+					if(chartFactory.indexInArray(targetCharts, targetChart) < 0)
 						targetCharts.push(targetChart);
 				}
 				

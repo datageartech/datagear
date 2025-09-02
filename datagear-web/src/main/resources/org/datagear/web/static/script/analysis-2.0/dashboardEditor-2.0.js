@@ -1093,7 +1093,7 @@
 			if(chartFactory.isNullOrEmpty(className) || !className.indexOf("dg-rsp-") == 0)
 				continue;
 			
-			if(ignoreClasses != null && chartFactory.inArray(className, ignoreClasses) > -1)
+			if(ignoreClasses != null && chartFactory.indexInArray(ignoreClasses, className) > -1)
 				continue;
 			
 			var partStr = className.substr("dg-rsp-".length);
@@ -1113,7 +1113,7 @@
 			if(splitIdx >= 0)
 			{
 				var part0 = value.substring(0, splitIdx);
-				var isBreakpoint = (chartFactory.inArray(part0, RESPONSIVE_BREAKPOINTS) > -1);
+				var isBreakpoint = (chartFactory.indexInArray(RESPONSIVE_BREAKPOINTS, part0) > -1);
 				
 				if(isBreakpoint)
 				{

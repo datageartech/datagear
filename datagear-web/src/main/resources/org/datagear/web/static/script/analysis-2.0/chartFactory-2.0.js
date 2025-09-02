@@ -45,8 +45,8 @@
  * 
  * 此图表工厂要求图表插件的图表渲染器（chart.plugin().renderer）格式为：
  * {
- *   //可选，渲染器依赖库，具体结构参考chartFactory.loadLib()函数说明
- *   //注意库源URL规范不同，具体参考chartFactory.trimPluginRendererLibSourceUrl()函数说明
+ *   //可选，渲染器依赖库，具体结构参考CF.loadLib()函数说明
+ *   //注意库源URL规范不同，具体参考CF.trimPluginRendererLibSourceUrl()函数说明
  *   depend: { ... }、[ {...}, ... ]、function(){ return { ... }、[ {...}, ... ]; }
  *   //可选，渲染图表函数是否是异步函数，默认为false
  *   asyncRender: true、false、function(chart){ ...; return true 或者 false; }
@@ -2850,7 +2850,7 @@ chartProto._toDataSignValues = function(dataSigns)
 		var value = this.dataSignFullname(dsi);
 		
 		//标记数组不应包含null，也不应有重复项
-		if(value != null && CF.inArray(value, re) < 0)
+		if(value != null && CF.indexInArray(re, value) < 0)
 		{
 			re.push(value);
 		}
@@ -3441,7 +3441,7 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
 	if(dataSign == null && (dss == null || dss.length == 0))
 		return true;
 	
-	return (CF.inArray(dataSign, dss) >= 0);
+	return (CF.indexInArray(dss, dataSign) >= 0);
 };
 
 /**
@@ -3461,7 +3461,7 @@ chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
 	if(dataSign == null && (fieldSigns == null || fieldSigns.length == 0))
 		return true;
 	
-	return (CF.inArray(dataSign, fieldSigns) >= 0);
+	return (CF.indexInArray(fieldSigns, dataSign) >= 0);
 };
 
 /**
@@ -5543,6 +5543,12 @@ CF.trim = function(str)
 	return (str == null ? str : str.trim());
 };
 
+//获取元素在数组中的索引
+CF.indexInArray = function(array, value, index)
+{
+	return (array == null ? -1 : array.indexOf(value, index));
+};
+
 //删除字符串数组中每一个元素的两端空格
 CF.trimStrArray = function(strArray)
 {
@@ -5581,49 +5587,12 @@ CF.splitByWhitespace = function(str)
 };
 
 /* 移植jQuery函数需要使用的变量 */
-var arr = [];
-var indexOf = arr.indexOf;
 var getProto = Object.getPrototypeOf;
 var class2type = {};
 var toString = class2type.toString;
 var hasOwn = class2type.hasOwnProperty;
 var fnToString = hasOwn.toString;
 var ObjectFunctionString = fnToString.call(Object);
-var toType = function( obj ) {
-	if ( obj == null ) {
-		return obj + "";
-	}
-
-	return typeof obj === "object" || typeof obj === "function" ?
-		class2type[ toString.call( obj ) ] || "object" :
-		typeof obj;
-};
-var isWindow = function isWindow( obj ) {
-	return obj != null && obj === obj.window;
-};
-var isArrayLike =function(obj) {
-	var length = !!obj && "length" in obj && obj.length,
-		type = toType( obj );
-
-	if ( CF.isFunction( obj ) || isWindow( obj ) ) {
-		return false;
-	}
-
-	return type === "array" || length === 0 ||
-		typeof length === "number" && length > 0 && ( length - 1 ) in obj;
-};
-
-/**
- * 获取元素在数组中的索引（修改自3.7.1版本的jQuery.inArray函数）
- * 
- * @param ele 要查找的元素
- * @param array 数组
- * @param index 可选，查找位置
- */
-CF.inArray = function(ele, array, index)
-{
-	return (array == null ? -1 : indexOf.call(array, ele, index));
-};
 
 /**
  * 是否是纯JS对象（修改自3.7.1版本的jQuery.isPlainObject函数）。
@@ -6058,28 +6027,8 @@ CF.loadLib = function(lib, callback, contextCharts)
 	}
 	else
 	{
-		var stateObjs = [];
-		var deferreds = [];
-		var loadedCallback = function()
-		{
-			CF.loadLibInner(unloadeds, stateObjs);
-		};
-		
-		for(var i=0; i<unloadeds.length; i++)
-		{
-			var stateObj = CF.libState(unloadeds[i], true, CF.LIB_STATE_INIT, false, loadedCallback);
-			stateObjs.push(stateObj);
-			deferreds.push(stateObj.loadedDeferred);
-		}
-		
-		jQuery.when.apply(jQuery, deferreds).always(function(){ callback(); });
-		
-		for(var i=0; i<stateObjs.length; i++)
-		{
-			CF.triggerLibStateResolvedIfLoaded(stateObjs[i]);
-		}
-		
-		CF.loadLibInner(unloadeds, stateObjs);
+		CF.sortLibsByDepend(unloadeds);
+		CF.loadLibInner(unloadeds, callback);
 	}
 };
 
@@ -6108,7 +6057,7 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 			if(CF.isLibLoadedInEnv(latestLib))
 			{
 				//如果最新版已在环境中加载，应将其状态设为loaded，以减少后续加载操作的搜索步骤
-				CF.libState(latestLib, true, CF.LIB_STATE_LOADED, true);
+				CF.libState(latestLib, true, CF.LIB_STATE_LOADED);
 				continue;
 			}
 			
@@ -6166,114 +6115,137 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 	}
 };
 
-CF.loadLibInner = function(libs, stateObjs)
+//根据依赖优先级排序库，被依赖库靠前
+CF.sortLibsByDepend = function(libs)
 {
-	for(var i=0; i<libs.length; i++)
+	for(var i=0, len=libs.length; i<len-1; i++)
 	{
-		var lib = libs[i];
-		var stateObj = stateObjs[i];
+		for (var j = 0; j < len - 1 - i; j++)
+		{
+			//libs[j+1]是否依赖libs[j]
+			var dj = (libs[j+1].depend != null && CF.resolveSameLibName(libs[j+1].depend, libs[j].name) != null);
+			if(!dj)
+			{
+				var tmp = libs[j];
+				libs[j] = libs[j+1];
+				libs[j+1] = tmp;
+			}
+		}
+	}
+};
+
+CF.loadLibInner = function(libs, callback)
+{
+	var libPromises = [];
+	
+	for(let i=0; i<libs.length; i++)
+	{
+		let lib = libs[i];
+		let stateObj = CF.libState(lib, true);
 		
-		if(stateObj.state === CF.LIB_STATE_INIT && CF.isLibReadyForLoad(lib))
+		if(stateObj.state === CF.LIB_STATE_INIT)
 		{
 			stateObj.state = CF.LIB_STATE_LOADING;
 			
-			var source = stateObj.lib.source;
-			var srcDfds = stateObj.sourceLoadedDeferreds;
+			let source = stateObj.lib.source;
+			let sourcePromises = [];
 			
 			if(source != null)
 			{
 				if(!CF.isArray(source))
 					source = [ source ];
 				
-				for(var j=0; j<source.length; j++)
+				for(let j=0; j<source.length; j++)
 				{
-					CF.loadSingleLibSource(lib, source[j], srcDfds[j]);
+					let sourcePromise = CF.loadSingleLibSource(lib, source[j]);
+					if(sourcePromise != null)
+						sourcePromises.push(sourcePromise);
 				}
 			}
+			
+			let libPromise = Promise.all(sourcePromises);
+			libPromise.finally(function()
+			{
+				stateObj.state = CF.LIB_STATE_LOADED
+			});
+			
+			stateObj.libPromise = libPromise;
+			libPromises.push(libPromise);
 		}
-	}
-};
-
-CF.isLibReadyForLoad = function(lib)
-{
-	var depend = lib.depend;
-	
-	if(CF.isNullOrEmpty(depend))
-		return true;
-	
-	if(!CF.isArray(depend))
-		depend = [ depend ];
-	
-	var ready = true;
-	
-	for(var i=0; i<depend.length; i++)
-	{
-		var dependName = depend[i];
-		var dependStateObj = CF.libStateByName(dependName);
-		//没有找到依赖库也应认为已ready，因为通过HTML的<script>标签引入的库这里dependStateObj为null
-		ready = (dependStateObj == null || dependStateObj.state == CF.LIB_STATE_LOADED);
-		
-		if(!ready)
+		else
 		{
-			break;
+			libPromises.push(stateObj.libPromise);
 		}
 	}
 	
-	return ready;
+	Promise.all(libPromises).finally(function()
+	{
+		callback();
+	});
 };
 
-CF.loadSingleLibSource = function(lib, source, deferred)
+CF.loadSingleLibSource = function(lib, source)
 {
-	if(deferred.state() !== "pending")
-		return;
-	
 	if(CF.isString(source))
-	{
 		source = { url: source, type: CF.resolveLibSourceType(source) };
-	}
+	
+	var promise = null;
 	
 	if(source.type == "js")
 	{
-		CF.loadSingleJsLibSource(lib, source, deferred);
+		promise = CF.loadSingleJsLibSource(lib, source);
 	}
 	else if(source.type == "css")
 	{
-		CF.loadSingleCssLibSource(lib, source, deferred);
+		promise = CF.loadSingleCssLibSource(lib, source);
 	}
 	else
 	{
-		deferred.resolve();
-		CF.logException("Unknown lib source type '"+source.type+"', load ignored");
+		promise = null;
+		CF.logException("unknown lib source type '"+source.type+"', load ignored");
 	}
+	
+	return promise;
 };
 
-CF.loadSingleJsLibSource = function(lib, source, deferred)
+CF.loadSingleJsLibSource = function(lib, source)
 {
-	var ele = document.createElement("script");
+	var promise = new Promise(function(resolve)
+	{
+		var ele = document.createElement("script");
+		
+		ele.src = source.url;
+		ele.type = "text/javascript";
+		ele.async = false; //必须设置，不然可能出现加载顺序错乱
+		ele.onload = function(){ resolve(); };
+		ele.onerror = function(){ resolve(); };
+		
+		CF.addLibSourceEleToDoc(lib, ele);
+	});
 	
-	ele.src = source.url;
-	ele.type = "text/javascript";
-	ele.onload = function(){ deferred.resolve(); };
-	ele.onerror = function(){ deferred.resolve(); };
-	
-	CF.addLibSourceEleToDoc(lib, ele);
+	return promise;
 };
 
-CF.loadSingleCssLibSource = function(lib, source, deferred)
+CF.loadSingleCssLibSource = function(lib, source)
 {
-	var ele = document.createElement("link");
+	var promise = new Promise(function(resolve)
+	{
+		var ele = document.createElement("link");
+		
+		ele.href = source.url;
+		ele.type = "text/css";
+		ele.rel = "stylesheet";
+		ele.onload = function(){ resolve(); };
+		ele.onerror = function(){ resolve(); };
+		
+		CF.addLibSourceEleToDoc(lib, ele);
+	});
 	
-	ele.href = source.url;
-	ele.type = "text/css";
-	ele.rel = "stylesheet";
-	ele.onload = function(){ deferred.resolve(); };
-	ele.onerror = function(){ deferred.resolve(); };
-	
-	CF.addLibSourceEleToDoc(lib, ele);
+	return promise;
 };
 
 /**
- * 在DOM中插入依赖库源。
+ * 在<head>中插入依赖库源。
  * 插入规则：
  * 一级优先：插入在最后一个看板引入库（dg-lib-name）之后、且为其添加dg-lib-name属性，
  * 			确保其可以使用之前依赖库和内置引入库、且可以被全部生成样式表覆盖（参考CF.styleSheetText()函数说明）；
@@ -6555,19 +6527,19 @@ CF.resolveSameLibName = function(baseLibName, compareLibName)
 	}
 	else if(!baseNameArray)
 	{
-		var idx = CF.inArray(baseLibName, compareLibName);
+		var idx = CF.indexInArray(compareLibName, baseLibName);
 		return (idx > -1 ? baseLibName : null);
 	}
 	else if(!compareNameArray)
 	{
-		var idx = CF.inArray(compareLibName, baseLibName);
+		var idx = CF.indexInArray(baseLibName, compareLibName);
 		return (idx > -1 ? compareLibName : null);
 	}
 	else
 	{
 		for(var i=0; i<baseLibName; i++)
 		{
-			var idx = CF.inArray(baseLibName[i], compareLibName);
+			var idx = CF.indexInArray(compareLibName, baseLibName[i]);
 			if(idx > -1)
 			{
 				return baseLibName[i];
@@ -6582,16 +6554,31 @@ CF.resolveSameLibName = function(baseLibName, compareLibName)
  * 获取库状态信息。
  * 
  * @param lib 库对象
- * @param nonNull 可选，是否返回非null，默认为：false
- * @param createState 可选，当要返回nonNull时，需要创建的状态，默认为：LIB_STATE_INIT
- * @param resolvedIfLoaded 可选，当要返回nonNull时，如果库状态为已加载、或者没有需要加载的库，是否触发resolve逻辑
- * @param loadedCallback 可选，当要返回nonNull时，加载完成回调函数
+ * @param nonNull 可选，是否返回非null
+ * @param createState 当要返回nonNull时，需要创建的状态
  */
-CF.libState = function(lib, nonNull, createState, resolvedIfLoaded, loadedCallback)
+CF.libState = function(lib, nonNull, createState)
 {
+	var states = CF.LIB_STATES;
+	
 	if(nonNull !== true)
 	{
-		return CF.libStateByName(lib.name);
+		if(CF.isString(lib.name))
+		{
+			return states[lib.name];
+		}
+		else
+		{
+			for(var i=0; i<lib.name.length; i++)
+			{
+				if(states[lib.name[i]])
+				{
+					return states[lib.name[i]];
+				}
+			}
+		}
+		
+		return null;
 	}
 	else
 	{
@@ -6599,8 +6586,7 @@ CF.libState = function(lib, nonNull, createState, resolvedIfLoaded, loadedCallba
 		
 		if(stateObj == null)
 		{
-			var states = CF.LIB_STATES;
-			stateObj = CF.createLibState(lib, createState, resolvedIfLoaded, loadedCallback);
+			stateObj = CF.createLibState(lib, createState);
 			
 			if(CF.isString(lib.name))
 			{
@@ -6619,105 +6605,19 @@ CF.libState = function(lib, nonNull, createState, resolvedIfLoaded, loadedCallba
 	}
 };
 
-/**
- * 获取指定名称的库状态，没有则返回null
- */
-CF.libStateByName = function(name)
+CF.createLibState = function(lib, state)
 {
-	if(name == null)
-		return null;
-	
-	var states = CF.LIB_STATES;
-	
-	if(CF.isString(name))
-	{
-		return states[name];
-	}
-	else
-	{
-		for(var i=0; i<name.length; i++)
-		{
-			if(states[name[i]])
-			{
-				return states[name[i]];
-			}
-		}
-	}
-	
-	return null;
-};
-
-CF.createLibState = function(lib, state, resolvedIfLoaded, loadedCallback)
-{
-	//应深度复制lib，避免可能的修改导致状态错乱
-	lib = CF.deepCloneLib(lib);
 	state = (state == null ? CF.LIB_STATE_INIT : state);
-	resolvedIfLoaded = (resolvedIfLoaded == null ? false : resolvedIfLoaded);
-	loadedCallback = (loadedCallback == null ? null : loadedCallback);
 	
-	//无论state是何状态，都应设置loadedDeferred、sourceLoadedDeferreds，
-	//确保其在异步调用中结构完整
 	var stateObj =
 	{
 		//库对象
 		lib: lib,
 		//库状态，参考：CF.LIB_STATE_*
-		state: state,
-		//库加载完成后的回调函数
-		loadedDeferred: jQuery.Deferred(),
-		//库中source对应的加载完成后回调函数
-		sourceLoadedDeferreds: []
+		state: state
 	};
 	
-	stateObj.loadedDeferred.always(function()
-	{
-		stateObj.state = CF.LIB_STATE_LOADED;
-		
-		if(loadedCallback != null)
-		{
-			CF.executeSilently(loadedCallback);
-		}
-	});
-	
-	var source = stateObj.lib.source;
-	var sourceLen = (source == null ? 0 : (CF.isArray(source) ? source.length : 1));
-	
-	if(sourceLen > 0)
-	{
-		for(var i=0; i<sourceLen; i++)
-		{
-			stateObj.sourceLoadedDeferreds[i] = jQuery.Deferred();
-		}
-		
-		jQuery.when.apply(jQuery, stateObj.sourceLoadedDeferreds).always(function(){ stateObj.loadedDeferred.resolve(); });
-	}
-	
-	if(resolvedIfLoaded)
-	{
-		CF.triggerLibStateResolvedIfLoaded(stateObj);
-	}
-	
 	return stateObj;
-};
-
-CF.triggerLibStateResolvedIfLoaded = function(stateObj)
-{
-	var source = stateObj.lib.source;
-	var sourceLen = (source == null ? 0 : (CF.isArray(source) ? source.length : 1));
-	
-	if(sourceLen == 0)
-	{
-		stateObj.state = CF.LIB_STATE_LOADED;
-		stateObj.loadedDeferred.resolve();
-	}
-	
-	if(stateObj.state == CF.LIB_STATE_LOADED)
-	{
-		for(var i=0; i<sourceLen; i++)
-		{
-			stateObj.sourceLoadedDeferreds[i].resolve();
-		}
-	}
 };
 
 CF.deepCloneLib = function(lib)
@@ -6725,23 +6625,10 @@ CF.deepCloneLib = function(lib)
 	if(!lib)
 		return lib;
 	
-	if(CF.isArray(lib))
-	{
-		var newLibs = [];
-		
-		for(var i=0; i<lib.length; i++)
-		{
-			var newLib = CF.extend(true, {}, lib[i]);
-			newLibs.push(newLib);
-		}
-		
-		return newLibs;
-	}
-	else
-	{
-		var newLib = CF.extend(true, {}, lib);
-		return newLib;
-	}
+	var newLib = (CF.isArray(lib) ? [] : {});
+	newLib = CF.extend(true, newLib, lib);
+	
+	return newLib;
 };
 
 //库及其状态，键值结构：库名 -> 库信息。
@@ -6856,58 +6743,6 @@ CF.rendererLib = function(renderer)
 
 //以http://或者https://开头的正则表达式
 CF.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
-
-/**
- * 获取/设置指定对象的"query"字段值
- */
-CF.queryOfObject = function(obj, query)
-{
-	if(query === undefined)
-	{
-		return (obj ? obj.query : null);
-	}
-	else
-	{
-		obj.query = query;
-	}
-};
-
-/**
- * 获取/设置图表结果对象的查询信息。
- */
-CF.chartQueryOfChartResult = function(chartResult, chartQuery)
-{
-	if(chartQuery === undefined)
-	{
-		return CF.queryOfObject(chartResult);
-	}
-	else
-	{
-		if(!chartResult)
-			return;
-		
-		CF.queryOfObject(chartResult, chartQuery);
-		// 这里不必再为每个数据集结果设置数据集查询，增加复杂性，后续看板2.0将直接开放图表结果对象，从中可以获取数据集查询信息
-	}
-};
-
-/**
- * 获取/设置图表错误对象的查询信息。
- */
-CF.chartQueryOfChartError = function(chartError, chartQuery)
-{
-	if(chartQuery === undefined)
-	{
-		return CF.queryOfObject(chartError);
-	}
-	else
-	{
-		if(!chartError)
-			return;
-		
-		CF.queryOfObject(chartError, chartQuery);
-	}
-};
 
 /**
  * 尝试将给定值转换为符合数据集参数类型

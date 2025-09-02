@@ -6880,7 +6880,7 @@ chartSupport.tableRenderProcessOptions = function(chart, options)
 	{
 		options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
 		//如果有50，则取50，以兼容旧版逻辑
-		options.pageLength = (chartFactory.inArray(50, options.lengthMenu) >= 0 ? 50 : options.lengthMenu[0]);
+		options.pageLength = (chartFactory.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
 	}
 	
 	if(chartSupport.tableIsV1())
@@ -8338,7 +8338,7 @@ chartSupport.selectUpdate = function(chart, chartResult)
 		var $opt = $("<option />").attr("value", optData.value)
 			.html(optData.name ? optData.name : optData.value).appendTo($select);
 		
-		if(optData.selected || (selected != null && chartFactory.inArray(i, selected) > -1))
+		if(optData.selected || (selected != null && chartFactory.indexInArray(selected, i) > -1))
 			$opt.attr("selected", "selected");
 		
 		$opt.data("_dgChartSelectOptionChartData", optData);
