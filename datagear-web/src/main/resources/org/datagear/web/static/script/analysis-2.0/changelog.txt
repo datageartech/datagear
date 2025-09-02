@@ -9,6 +9,7 @@ chart.echartsThemeName() x
 chart.elementJquery()	x
 chart.id -> chart.id()
 chart.name -> chart.name()
+chart.updateInterval -> chart.updateInterval()
 chart.plugin -> chart.plugin()
 chart.renderContext -> chart.renderContext()
 chart.dataSetFieldSign	->	dataSetFieldSigns()

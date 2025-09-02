@@ -731,6 +731,20 @@ chartProto.id = function()
 };
 
 /**
+ * 获取/设置图表名称。
+ * 
+ * @param name 可选，要设置的名称
+ * @returns 名称，非null
+ */
+chartProto.name = function(name)
+{
+	if(name === undefined)
+		return this._root.name;
+	else
+		this._root.name = (name || "");
+};
+
+/**
  * 获取/设置图表对应的HTML元素ID。
  * 注意：设置操作仅应在图表未渲染、或者选然后图表元素ID有变更的情况下执行。
  * 
@@ -750,6 +764,20 @@ chartProto.elementId = function(elementId)
 };
 
 /**
+ * 获取/设置图表自动更新间隔。
+ * 
+ * @param interval 可选，要设置的更新间隔毫秒数
+ * @returns 更新间隔，-1 表示不自动间隔更新
+ */
+chartProto.updateInterval = function(interval)
+{
+	if(interval === undefined)
+		return this._root.updateInterval;
+	else
+		this._root.updateInterval = (interval == null ? -1 : interval);
+};
+
+/**
  * 获取/设置图表插件，可能null。
  * 设置操作应在图表渲染器执行。
  * 
@@ -760,9 +788,7 @@ chartProto.plugin = function(plugin)
 	if(plugin === undefined)
 		return this._plugin;
 	else
-	{
 		this._plugin = plugin;
-	}
 };
 
 chartProto._pluginRenderer = function()
@@ -813,16 +839,9 @@ chartProto.renderContext = function(renderContext)
 chartProto.options = function(options)
 {
 	if(options === undefined)
-	{
-		return (this._root.options || (this._root.options = {}));
-	}
+		return this._root.options;
 	else
-	{
-		if(options == null)
-			options = {};
-		
-		this._root.options = options;
-	}
+		this._root.options = (options || {});
 };
 
 /**
