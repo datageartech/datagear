@@ -8582,28 +8582,8 @@
 		}
 		else
 		{
-			var stateObjs = [];
-			var deferreds = [];
-			var loadedCallback = function()
-			{
-				chartFactory.loadLibInner(unloadeds, stateObjs);
-			};
-			
-			for(var i=0; i<unloadeds.length; i++)
-			{
-				var stateObj = chartFactory.libState(unloadeds[i], true, chartFactory.LIB_STATE_INIT, false, loadedCallback);
-				stateObjs.push(stateObj);
-				deferreds.push(stateObj.loadedDeferred);
-			}
-			
-			$.when.apply($, deferreds).always(function(){ callback(); });
-			
-			for(var i=0; i<stateObjs.length; i++)
-			{
-				chartFactory.triggerLibStateResolvedIfLoaded(stateObjs[i]);
-			}
-			
-			chartFactory.loadLibInner(unloadeds, stateObjs);
+			chartFactory.sortLibsByDepend(unloadeds);
+			chartFactory.loadLibInner(unloadeds, callback);
 		}
 	};
 	
@@ -8632,7 +8612,7 @@
 				if(chartFactory.isLibLoadedInEnv(latestLib))
 				{
 					//如果最新版已在环境中加载，应将其状态设为loaded，以减少后续加载操作的搜索步骤
-					chartFactory.libState(latestLib, true, chartFactory.LIB_STATE_LOADED, true);
+					chartFactory.libState(latestLib, true, chartFactory.LIB_STATE_LOADED);
 					continue;
 				}
 				
@@ -8690,14 +8670,35 @@
 		}
 	};
 	
-	chartFactory.loadLibInner = function(libs, stateObjs)
+	//根据依赖优先级排序库，被依赖库靠前
+	chartFactory.sortLibsByDepend = function(libs)
 	{
+		for(var i=0, len=libs.length; i<len-1; i++)
+		{
+			for (var j = 0; j < len - 1 - i; j++)
+			{
+				//libs[j+1]是否依赖libs[j]
+				var dj = (libs[j+1].depend != null && chartFactory.resolveSameLibName(libs[j+1].depend, libs[j].name) != null);
+				if(!dj)
+				{
+					var tmp = libs[j];
+					libs[j] = libs[j+1];
+					libs[j+1] = tmp;
+				}
+			}
+		}
+	};
+	
+	chartFactory.loadLibInner = function(libs, callback)
+	{
+		var deferreds = [];
+		
 		for(var i=0; i<libs.length; i++)
 		{
 			var lib = libs[i];
-			var stateObj = stateObjs[i];
+			var stateObj = chartFactory.libState(lib, true);
 			
-			if(stateObj.state === chartFactory.LIB_STATE_INIT && chartFactory.isLibReadyForLoad(lib))
+			if(stateObj.state === chartFactory.LIB_STATE_INIT)
 			{
 				stateObj.state = chartFactory.LIB_STATE_LOADING;
 				
@@ -8715,35 +8716,11 @@
 					}
 				}
 			}
-		}
-	};
-	
-	chartFactory.isLibReadyForLoad = function(lib)
-	{
-		var depend = lib.depend;
-		
-		if(chartFactory.isNullOrEmpty(depend))
-			return true;
-		
-		if(!$.isArray(depend))
-			depend = [ depend ];
-		
-		var ready = true;
-		
-		for(var i=0; i<depend.length; i++)
-		{
-			var dependName = depend[i];
-			var dependStateObj = chartFactory.libStateByName(dependName);
-			//没有找到依赖库也应认为已ready，因为通过HTML的<script>标签引入的库这里dependStateObj为null
-			ready = (dependStateObj == null || dependStateObj.state == chartFactory.LIB_STATE_LOADED);
 			
-			if(!ready)
-			{
-				break;
-			}
+			deferreds.push(stateObj.loadedDeferred);
 		}
 		
-		return ready;
+		$.when.apply($, deferreds).always(function(){ callback(); });
 	};
 	
 	chartFactory.loadSingleLibSource = function(lib, source, deferred)
@@ -8777,6 +8754,7 @@
 		
 		ele.src = source.url;
 		ele.type = "text/javascript";
+		ele.async = false; //必须设置，不然可能出现加载顺序错乱
 		ele.onload = function(){ deferred.resolve(); };
 		ele.onerror = function(){ deferred.resolve(); };
 		
@@ -8804,11 +8782,11 @@
 	 * 二级优先：插入在<head>末尾。
 	 * 
 	 * @param lib 库对象
-	 * @param ele 库对应的DOM对象
+	 * @param libEle 库对应的DOM对象
 	 */
-	chartFactory.addLibSourceEleToDoc = function(lib, ele)
+	chartFactory.addLibSourceEleToDoc = function(lib, libEle)
 	{
-		$(ele).attr(chartFactory.LIB_ATTR_NAME, lib.name);
+		$(libEle).attr(chartFactory.LIB_ATTR_NAME, lib.name);
 		
 		var $head = $("head:first");
 		var headEle = $head[0];
@@ -8826,9 +8804,9 @@
 		
 		//这里不能使用$的API，会无法正常执行绑定事件
 		if(beforeEle != null)
-			headEle.insertBefore(ele, beforeEle);
+			headEle.insertBefore(libEle, beforeEle);
 		else
-			headEle.appendChild(ele);
+			headEle.appendChild(libEle);
 	};
 	
 	chartFactory.resolveLibSourceType = function(url)
@@ -9112,16 +9090,31 @@
 	 * 获取库状态信息。
 	 * 
 	 * @param lib 库对象
-	 * @param nonNull 可选，是否返回非null，默认为：false
-	 * @param createState 可选，当要返回nonNull时，需要创建的状态，默认为：LIB_STATE_INIT
-	 * @param resolvedIfLoaded 可选，当要返回nonNull时，如果库状态为已加载、或者没有需要加载的库，是否触发resolve逻辑
-	 * @param loadedCallback 可选，当要返回nonNull时，加载完成回调函数
+	 * @param nonNull 可选，是否返回非null
+	 * @param createState 当要返回nonNull时，需要创建的状态
 	 */
-	chartFactory.libState = function(lib, nonNull, createState, resolvedIfLoaded, loadedCallback)
+	chartFactory.libState = function(lib, nonNull, createState)
 	{
+		var states = chartFactory.LIB_STATES;
+		
 		if(nonNull !== true)
 		{
-			return chartFactory.libStateByName(lib.name);
+			if(chartFactory.isString(lib.name))
+			{
+				return states[lib.name];
+			}
+			else
+			{
+				for(var i=0; i<lib.name.length; i++)
+				{
+					if(states[lib.name[i]])
+					{
+						return states[lib.name[i]];
+					}
+				}
+			}
+			
+			return null;
 		}
 		else
 		{
@@ -9129,8 +9122,7 @@
 			
 			if(stateObj == null)
 			{
-				var states = chartFactory.LIB_STATES;
-				stateObj = chartFactory.createLibState(lib, createState, resolvedIfLoaded, loadedCallback);
+				stateObj = chartFactory.createLibState(lib, createState);
 				
 				if(chartFactory.isString(lib.name))
 				{
@@ -9149,41 +9141,11 @@
 		}
 	};
 	
-	/**
-	 * 获取指定名称的库状态，没有则返回null
-	 */
-	chartFactory.libStateByName = function(name)
-	{
-		if(name == null)
-			return null;
-		
-		var states = chartFactory.LIB_STATES;
-		
-		if(chartFactory.isString(name))
-		{
-			return states[name];
-		}
-		else
-		{
-			for(var i=0; i<name.length; i++)
-			{
-				if(states[name[i]])
-				{
-					return states[name[i]];
-				}
-			}
-		}
-		
-		return null;
-	};
-	
-	chartFactory.createLibState = function(lib, state, resolvedIfLoaded, loadedCallback)
+	chartFactory.createLibState = function(lib, state)
 	{
 		//应深度复制lib，避免可能的修改导致状态错乱
 		lib = chartFactory.deepCloneLib(lib);
 		state = (state == null ? chartFactory.LIB_STATE_INIT : state);
-		resolvedIfLoaded = (resolvedIfLoaded == null ? false : resolvedIfLoaded);
-		loadedCallback = (loadedCallback == null ? null : loadedCallback);
 		
 		//无论state是何状态，都应设置loadedDeferred、sourceLoadedDeferreds，
 		//确保其在异步调用中结构完整
@@ -9202,17 +9164,17 @@
 		stateObj.loadedDeferred.always(function()
 		{
 			stateObj.state = chartFactory.LIB_STATE_LOADED;
-			
-			if(loadedCallback != null)
-			{
-				chartFactory.executeSilently(loadedCallback);
-			}
 		});
 		
 		var source = stateObj.lib.source;
 		var sourceLen = (source == null ? 0 : ($.isArray(source) ? source.length : 1));
 		
-		if(sourceLen > 0)
+		if(sourceLen == 0)
+		{
+			stateObj.state = chartFactory.LIB_STATE_LOADED;
+			stateObj.loadedDeferred.resolve();
+		}
+		else
 		{
 			for(var i=0; i<sourceLen; i++)
 			{
@@ -9222,32 +9184,15 @@
 			$.when.apply($, stateObj.sourceLoadedDeferreds).always(function(){ stateObj.loadedDeferred.resolve(); });
 		}
 		
-		if(resolvedIfLoaded)
-		{
-			chartFactory.triggerLibStateResolvedIfLoaded(stateObj);
-		}
-		
-		return stateObj;
-	};
-	
-	chartFactory.triggerLibStateResolvedIfLoaded = function(stateObj)
-	{
-		var source = stateObj.lib.source;
-		var sourceLen = (source == null ? 0 : ($.isArray(source) ? source.length : 1));
-		
-		if(sourceLen == 0)
-		{
-			stateObj.state = chartFactory.LIB_STATE_LOADED;
-			stateObj.loadedDeferred.resolve();
-		}
-		
-		if(stateObj.state == chartFactory.LIB_STATE_LOADED)
+		if(state == chartFactory.LIB_STATE_LOADED)
 		{
 			for(var i=0; i<sourceLen; i++)
 			{
 				stateObj.sourceLoadedDeferreds[i].resolve();
 			}
 		}
+		
+		return stateObj;
 	};
 	
 	chartFactory.deepCloneLib = function(lib)
