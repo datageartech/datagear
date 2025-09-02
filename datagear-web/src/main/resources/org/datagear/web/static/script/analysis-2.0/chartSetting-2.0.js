@@ -258,7 +258,7 @@
 			});
 			
 			if(thisForm.attr("dg-generated-ele"))
-				chartFactory.removeElementWithDerived(this);
+				chartFactory.removeEleWithDerived(this);
 			else
 			{
 				thisForm.removeClass("dg-dspv-form");
@@ -269,7 +269,7 @@
 				var des = chartFactory.derivedElements(this);
 				if(des)
 				{
-					chartFactory.removeElementWithDerived($(des));
+					chartFactory.removeEleWithDerived($(des));
 					chartFactory.derivedElements(this, null);
 				}
 				

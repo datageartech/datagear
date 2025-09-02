@@ -23,8 +23,6 @@
  *   无
  * 
  * 运行时依赖:
- *   jquery.js
- *   echarts.js
  *   chartSetting.js
  * 
  * 
@@ -81,10 +79,9 @@
  *   
  *   render: function(chart)
  *   {
- *     jQuery.get("...", function()
+ *     fetch("...").then(function()
  *     {
- *       ...;
- *       
+ *       ...
  *       //将图表状态设置为已完成render
  *       chart.statusRendered(true);
  *     });
@@ -94,10 +91,9 @@
  *   
  *   update: function(chart, chartResult)
  *   {
- *     jQuery.get("...", function()
+ *     fetch("...").then(function()
  *     {
- *       ...;
- *       
+ *       ...
  *       //将图表状态设置为已完成update
  *       chart.statusUpdated(true);
  *     });
@@ -314,12 +310,12 @@ CF.initRenderContext = function(renderContext, webContext, chartTheme)
 	if(!chartTheme)
 		throw new Error("[chartTheme] required");
 	
-	if(CF._themeInflated(chartTheme))
+	if(CF.isThemeInflated(chartTheme))
 		throw new Error("[chartTheme] must not inflated");
 	
 	chartTheme = CF.extend(true, {}, chartTheme);
 	
-	CF._inflateGlobalChartTheme(chartTheme);
+	CF.inflateGlobalChartTheme(chartTheme);
 	
 	CF.renderContextAttrWebContext(renderContext, webContext);
 	CF.renderContextAttrChartTheme(renderContext, chartTheme);
@@ -335,7 +331,7 @@ CF.isRenderContextInited = function(renderContext)
 	
 	var webContext = CF.renderContextAttrWebContext(renderContext);
 	var chartTheme = CF.renderContextAttrChartTheme(renderContext);
-	var inflated = CF._themeInflated(chartTheme);
+	var inflated = CF.isThemeInflated(chartTheme);
 	
 	return (webContext && chartTheme && inflated);
 };
@@ -859,13 +855,13 @@ chartProto.theme = function(theme)
 		//这里不应采用复制一个新图表主题对象的方式，因为图表主题对象后续会关联创建很多<style>元素，
 		//如果采用复制方式的话，也会重复创建<style>元素，导致不必要的资源占用
 		
-		if(theme !== globalTheme && !CF._themeInflated(theme))
+		if(theme !== globalTheme && !CF.isThemeInflated(theme))
 		{
-			CF._inflateChartThemeIf(theme);
+			CF.inflateChartTheme(theme);
 			var extTheme = CF.extend(true, {}, globalTheme._RAW_CHART_THEME, theme);
-			CF._inflateChartThemeIf(extTheme);
+			CF.inflateChartTheme(extTheme);
 			CF.extend(theme, extTheme);
-			CF._themeInflated(theme, true);
+			CF.isThemeInflated(theme, true);
 		}
 		
 		this._theme = theme;
@@ -1003,7 +999,7 @@ chartProto.render = function()
 	if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
 		throw new Error("chart is illegal state for : render()");
 	
-	if(CF.renderedChart(this.elementJquery()) != null)
+	if(CF.renderedChart(this.element()) != null)
 		throw new Error("element '#"+this.elementId()+"' has been rendered as chart");
 	
 	this.statusRendering(true);
@@ -2451,16 +2447,12 @@ chartProto.themeStyleName = function()
  * {
  *   render: function(chart)
  *   {
- *     jQuery("<span class='result-data-count'>").appendTo(chart.element());
+ *     chart.element().insertAdjacentHTML("beforeend", "<span class='result-data-count'>");
  *     //使用相同图表主题的多个图表将仅创建一个CSS样式表
  *     chart.themeStyleSheet("myChartTextStyle", function()
  *     {
  *       return { name: " .result-data-count", value: { color: chart.theme().color } };
  *     });
- *   },
- *   update: function(chart, chartResult)
- *   {
- *     jQuery(".result-data-count", chart.elementJquery()).text(chart.resultDatas(...).length);
  *   }
  * }
  * 
@@ -4136,12 +4128,12 @@ var THEME_STYLE_SHEET_INFO_NAME = CF.BUILTIN_PROP_PREFIX + "StyleSheetInfo";
  * 同一主题和名称的CSS样式表，通常仅需创建一次，因此，当需要为某个HTML元素应用与主题相关的样式表时，通常使用方式如下：
  * 
  * var styleName = CF.themeStyleSheet(theme, "myName", function(){ return CSS样式表对象、数组; });
- * jQuery(element).addClass(styleName);
+ * addElementClassFunc(element, styleName);
  * 
  * 或者
  * 
  * if(!CF.themeStyleSheet(theme, "myName"))
- *   jQuery(element).addClass(CF.themeStyleSheet(theme, "myName", CSS样式表对象、数组));
+ *   addElementClassFunc(element, CF.themeStyleSheet(theme, "myName", CSS样式表对象、数组));
  * 
  * @param theme 主题对象，格式为：{ ... }
  * @param name 名称
@@ -4342,6 +4334,26 @@ CF.eleOfSelector = function(selector, rootEle)
 {
 	rootEle = (rootEle == null ? document : rootEle);
 	return rootEle.querySelector(selector);
+};
+
+/**
+ * 获取元素的前一个兄弟元素
+ * 
+ * @param ele HTML元素
+ */
+CF.eleOfPrev = function(ele)
+{
+	return (ele == null ? null : ele.previousSibling);
+};
+
+/**
+ * 获取元素的后一个兄弟元素
+ * 
+ * @param ele HTML元素
+ */
+CF.eleOfNext = function(ele)
+{
+	return (ele == null ? null : ele.nextSibling);
 };
 
 /**
@@ -4620,6 +4632,16 @@ CF.eleStyle = function(ele, css)
 	
 	var cssText = CF.styleString.apply(CF, cssArray);
 	CF.eleAttr(ele, "style", cssText);
+};
+
+/**
+ * 判断指定对象是否是是HTML元素
+ * 
+ * @param obj
+ */
+CF.isHtmlEle = function(obj)
+{
+	return (obj && obj.nodeType != null && obj.nodeName != null);
 };
 
 /**
@@ -5347,59 +5369,53 @@ CF.currentDateMs = function()
 var DERIVED_ELEMENTS_NAME = CF.BUILTIN_PROP_PREFIX + "derivedElements";
 
 /**
- * 获取/设置父元素的派生子元素DOM数组，派生子元素并不是父元素的直接子孙元素，但是从属于父元素生命周期，随父元素创建，也应随父元素删除。
+ * 获取/设置父元素的派生子元素DOM数组，派生子元素并不是父元素的直接后代元素，但是从属于父元素生命周期，随父元素创建，也应随父元素删除。
  *
- * @param parent 父DOM元素、JQ对象
- * @param derived 可选，要设置的派生子元素DOM、DOM数组、JQ对象、null
+ * @param parent 父HTML元素
+ * @param derived 可选，要设置的派生子HTML元素、null
  * @param append 可选，当执行设置操作时，是否追加而非覆盖，默认为：true
+ * @returns 要获取的派生子HTML元素数组
  */
 CF.derivedElements = function(parent, derived, append)
 {
-	parent = jQuery(parent);
-	
 	if(derived === undefined)
-		return parent.data(DERIVED_ELEMENTS_NAME);
+		return CF.eleData(parent, DERIVED_ELEMENTS_NAME);
 	
 	append = (append == null ? true : append);
 	
 	if(derived == null)
-		parent.removeData(DERIVED_ELEMENTS_NAME);
+	{
+		CF.eleRemoveData(parent, DERIVED_ELEMENTS_NAME);
+	}
 	else
 	{
-		derived = jQuery(derived);
-		
-		var des = parent.data(DERIVED_ELEMENTS_NAME);
+		var des = CF.eleData(parent, DERIVED_ELEMENTS_NAME);
 		if(des == null || !append)
 		{
 			des = [];
-			parent.data(DERIVED_ELEMENTS_NAME, des);
+			CF.eleData(parent, DERIVED_ELEMENTS_NAME, des);
 		}
 		
-		derived.each(function()
-		{
-			des.push(this);
-		});
+		des.push(derived);
 	}
 };
 
 /**
  * 删除元素，同时删除通过CF.derivedElements()设置的派生子元素。
  * 
- * @param ele 要删除的DOM元素、DOM元素数组、JQ对象
+ * @param ele HTML元素
  */
-CF.removeElementWithDerived = function(ele)
+CF.removeEleWithDerived = function(ele)
 {
-	ele = jQuery(ele);
+	var des = CF.derivedElements(ele);
 	
-	ele.each(function()
+	if(des != null)
 	{
-		var des = (CF.derivedElements(this) || []);
-		
 		for(var i=0; i<des.length; i++)
-			CF.removeElementWithDerived(des[i]);
-		
-		jQuery(this).remove();
-	});
+			CF.eleRemove(des[i]);
+	}
+	
+	CF.eleRemove(ele);
 };
 
 /**
@@ -5407,7 +5423,7 @@ CF.removeElementWithDerived = function(ele)
  */
 CF.escapeHtml = function(value)
 {
-	if(typeof(value) != "string")
+	if(!CF.isString(value))
 		return value;
 	
 	var epn = "";
@@ -5440,7 +5456,7 @@ CF.toCssFontSize = function(fontSize)
 		//返回一个无效的css字号值，使其不影响其他层级字号设置
 		return "null";
 	}
-	else if(jQuery.isNumeric(fontSize))
+	else if(CF.isNumber(fontSize))
 	{
 		return fontSize + "px";
 	}
@@ -5457,7 +5473,7 @@ CF.toCssFontSize = function(fontSize)
  */
 CF.logException = function(exception)
 {
-	if(typeof(console) != "undefined")
+	if(typeof(console) !== "undefined")
 	{
 		if(console.error)
 			console.error(exception);
@@ -5473,7 +5489,7 @@ CF.logException = function(exception)
  */
 CF.logWarn = function(msg)
 {
-	if(typeof(console) != "undefined")
+	if(typeof(console) !== "undefined")
 	{
 		if(console.warn)
 			console.warn(msg);
@@ -5564,12 +5580,6 @@ CF.splitByWhitespace = function(str)
 		return (str.match(CF.SPLIT_WHITESPACE_REGEX) || []);
 };
 
-//是否是DOM元素或Jquery对象
-CF.isDomOrJquery = function(obj)
-{
-	return (obj && ((obj.nodeType != null && obj.nodeName != null) || (obj instanceof jQuery)));
-};
-
 /* 移植jQuery函数需要使用的变量 */
 var arr = [];
 var indexOf = arr.indexOf;
@@ -5651,31 +5661,6 @@ CF.isEmptyObject = function(obj)
 };
 
 /**
- * 遍历数组/对象（修改自3.7.1版本的jQuery.each函数）。
- */
-CF.each = function(obj, callback)
-{
-	var length, i = 0;
-
-	if ( isArrayLike( obj ) ) {
-		length = obj.length;
-		for ( ; i < length; i++ ) {
-			if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
-				break;
-			}
-		}
-	} else {
-		for ( i in obj ) {
-			if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
-				break;
-			}
-		}
-	}
-	
-	return obj;
-};
-
-/**
  * 合并对象并返回（修改自3.7.1版本的jQuery.extend函数）。
  * 调用方式：
  * 浅合并：CF.extend(target, src1, src2, ...)
@@ -5710,13 +5695,13 @@ CF.extend = function()
 					continue;
 				}
 
-				if ( deep && copy && ( jQuery.isPlainObject( copy ) ||
+				if ( deep && copy && ( CF.isPlainObject( copy ) ||
 					( copyIsArray = CF.isArray( copy ) ) ) ) {
 					src = target[ name ];
 
 					if ( copyIsArray && !CF.isArray( src ) ) {
 						clone = [];
-					} else if ( !copyIsArray && !jQuery.isPlainObject( src ) ) {
+					} else if ( !copyIsArray && !CF.isPlainObject( src ) ) {
 						clone = {};
 					} else {
 						clone = src;
@@ -5740,7 +5725,7 @@ CF.extend = function()
  * 支持版本号格式示例：
  * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
  * 
- * 此函数原封不动地拷贝自util.js中的jQuery.compareVersion函数
+ * 此函数原封不动地拷贝自util.js中的compareVersion函数
  * 
  * @param v1
  * @param v2
@@ -5834,24 +5819,18 @@ CF.optionValue = function(options, name, value)
 	}
 };
 
-/**图表展示数据对象的原始信息属性名*/
-CF._ORIGINAL_DATA_INDEX_PROP_NAME = CF.BUILTIN_PROP_PREFIX + "OriginalDataIndex";
-
-/** 关键字：注册得ECharts主题名 */
-CF._KEY_REGISTERED_ECHARTS_THEME_NAME = CF.BUILTIN_PROP_PREFIX + "RegisteredEchartsThemeName";
-
 /**
  * 将指定图表主题填充为全局图表主题，即使用<body>上的dg-chart-theme属性值填充。
  * 如果图表主题已经被此函数填充过，不会再次处理。
  * 
  * @param theme 图表主题，会被此函数修改
  */
-CF._inflateGlobalChartTheme = function(theme)
+CF.inflateGlobalChartTheme = function(theme)
 {
-	if(CF._themeInflated(theme))
+	if(CF.isThemeInflated(theme))
 		return false;
 	
-	CF._inflateActualBgColorIf(theme);
+	CF.inflateThemeActualBgColor(theme);
 	
 	var rawTheme = null;
 	
@@ -5873,9 +5852,9 @@ CF._inflateGlobalChartTheme = function(theme)
 	if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
 		theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
 	
-	CF._inflateActualBgColorIf(theme);
+	CF.inflateThemeActualBgColor(theme);
 	
-	var bodyThemeValue = jQuery(document.body).attr(elementAttrConst.THEME);
+	var bodyThemeValue = CF.eleAttr(document.body, elementAttrConst.THEME);
 	if(bodyThemeValue)
 	{
 		var bodyThemeObj = CF.evalSilently(bodyThemeValue, {});
@@ -5884,26 +5863,26 @@ CF._inflateGlobalChartTheme = function(theme)
 		if(!CF.isJsonString(bodyThemeValue))
 			bodyThemeObj = CF.extend(true, {}, bodyThemeObj);
 		
-		CF._inflateActualBgColorIf(bodyThemeObj);
+		CF.inflateThemeActualBgColor(bodyThemeObj);
 		
 		rawTheme = CF.extend(true, {}, theme, bodyThemeObj);
 		
-		CF._inflateChartThemeIf(bodyThemeObj);
+		CF.inflateChartTheme(bodyThemeObj);
 		CF.extend(true, theme, bodyThemeObj);
 	}
 	
 	if(rawTheme == null)
 		rawTheme = CF.extend(true, {}, theme);
 	
-	CF._inflateChartThemeIf(theme);
+	CF.inflateChartTheme(theme);
 	
 	theme._RAW_CHART_THEME = rawTheme;
-	CF._themeInflated(theme, true);
+	CF.isThemeInflated(theme, true);
 	
 	return true;
 };
 
-CF._themeInflated = function(theme, inflated)
+CF.isThemeInflated = function(theme, inflated)
 {
 	if(inflated === undefined)
 		return (theme._INFLATED == true);
@@ -5911,7 +5890,7 @@ CF._themeInflated = function(theme, inflated)
 		theme._INFLATED = inflated;
 };
 
-CF._inflateActualBgColorIf = function(theme)
+CF.inflateThemeActualBgColor = function(theme)
 {
 	//如果设置了非透明backgroundColor，那么也应同时设置actualBackgroundColor
 	if(theme.backgroundColor && theme.backgroundColor != "transparent")
@@ -5924,10 +5903,10 @@ CF._inflateActualBgColorIf = function(theme)
 };
 
 //填充图表主题，如果图表主题已设置了color、backgroundColor、actualBackgroundColor、fontSize，则尝试自动填充其他相关的主题属性。
-CF._inflateChartThemeIf = function(theme)
+CF.inflateChartTheme = function(theme)
 {
 	if(!theme.actualBackgroundColor)
-		CF._inflateActualBgColorIf(theme);
+		CF.inflateThemeActualBgColor(theme);
 	
 	if(theme.color && theme.actualBackgroundColor)
 	{
@@ -6024,802 +6003,6 @@ CF._inflateChartThemeIf = function(theme)
 	
 	if(theme.borderWidth && !theme.borderStyle)
 		theme.borderStyle = "solid";
-};
-
-/**
- * 由图表主题构建ECharts主题。
- * 
- * @param chartTheme 图表主题对象：org.datagear.analysis.ChartTheme
- */
-CF.buildEchartsTheme = function(chartTheme)
-{
-	var axisColor = CF.themeGradualColor(chartTheme, 0.7);
-	var axisScaleLineColor = CF.themeGradualColor(chartTheme, 0.35);
-	var areaColor0 = CF.themeGradualColor(chartTheme, 0.1);
-	var areaBorderColor0 = CF.themeGradualColor(chartTheme, 0.3);
-	var areaColor1 = CF.themeGradualColor(chartTheme, 0.25);
-	var areaBorderColor1 = CF.themeGradualColor(chartTheme, 0.5);
-	var shadowColor = CF.themeGradualColor(chartTheme, 0.9);
-	
-	var theme =
-	{
-		"color" : chartTheme.graphColors,
-		"backgroundColor" : chartTheme.backgroundColor,
-		"textStyle" : {},
-		"title" : {
-	        "left" : "center",
-			"textStyle" : {
-				"color" : chartTheme.titleTheme.color
-			},
-			"subtextStyle" : {
-				"color" : chartTheme.titleTheme.color
-			},
-			"backgroundColor" : chartTheme.titleTheme.backgroundColor
-		},
-		"line" : {
-			"itemStyle" : {
-				"borderWidth" : 2
-			},
-			"lineStyle" : {
-				"width" : 2
-			},
-			"label": {
-				"color": chartTheme.color
-			},
-			"symbol" : "circle",
-			"symbolSize" : 8,
-			"smooth" : false,
-			"emphasis" :
-			{
-				"lineStyle" :
-				{
-					"width" : 4
-				}
-			}
-		},
-		"radar" : {
-			"name" : { "textStyle" : { "color" : chartTheme.legendTheme.color } },
-			"axisLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
-			"splitLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
-			"splitArea" : { "areaStyle" : { "color" : [ areaColor0, chartTheme.backgroundColor ] } },
-			"itemStyle" : {
-				"borderWidth" : 1
-			},
-			"lineStyle" : {
-				"width" : 2
-			},
-			"emphasis" :
-			{
-				"lineStyle" : {
-					"width" : 4,
-					"shadowBlur" : 5,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			},
-			"symbolSize" : 6,
-			"symbol" : "circle",
-			"smooth" : false
-		},
-		"bar" : {
-			"itemStyle" : {
-				"barBorderWidth" : 0,
-				"barBorderColor" : chartTheme.borderColor
-			},
-			"label": {
-				"color": chartTheme.color
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"barBorderWidth" : 0,
-					"barBorderColor" : chartTheme.borderColor,
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor,
-			        "shadowOffsetY" : 0
-				}
-			}
-		},
-		"pie" : {
-			"itemStyle" : {
-				"borderWidth" : 0,
-				"borderColor" : chartTheme.borderColor
-			},
-			"label": {
-				"color": chartTheme.color
-			},
-			"emphasis" :
-			{
-				"itemStyle":
-				{
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor,
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
-				}
-			},
-			"emptyCircleStyle":
-			{
-				"color": CF.themeGradualColor(chartTheme, 0),
-				"borderColor": CF.themeGradualColor(chartTheme, 0.1)
-			}
-		},
-		"scatter" : {
-			"itemStyle" : {
-				"borderWidth" : 0,
-				"borderColor" : chartTheme.borderColor,
-				"shadowBlur" : 3,
-				"shadowColor" : shadowColor
-			},
-			"label": {
-				"color": chartTheme.color
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor,
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			}
-		},
-		"effectScatter":
-		{
-			"itemStyle" : {
-				"borderWidth" : 0,
-				"borderColor" : chartTheme.borderColor,
-				"shadowBlur" : 0,
-				"shadowColor" : shadowColor
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor,
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			}
-		},
-		"boxplot" : {
-			"itemStyle" : {
-				"color": "transparent"
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"color": "transparent"
-				}
-			}
-		},
-		"parallel" : {
-			"left": "10%",
-            "top": "24%",
-            "right": "10%",
-            "bottom": "10%",
-			"lineStyle" : {
-				"width": 2,
-				"shadowBlur" : 0,
-				"shadowColor" : shadowColor
-			},
-			"emphasis" : {
-				"lineStyle" : {
-					"shadowBlur" : 4,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			}
-		},
-		"sankey" : {
-			"label":
-			{
-				"color": chartTheme.color
-			},
-			"itemStyle" : {
-				"borderWidth" : 0,
-				"borderColor" : chartTheme.borderColor
-			},
-			"lineStyle":
-			{
-				"color": areaColor1,
-				"opacity": 1
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
-				},
-				"lineStyle":
-				{
-					"color": axisColor,
-					"opacity": 0.6
-				},
-				"focus": "adjacency"
-			}
-		},
-		"funnel" :
-		{
-			"left": "10%",
-            "top": "20%",
-            "right": "10%",
-            "bottom": "10%",
-            "minSize": "0%",
-            "maxSize": "100%",
-			"label" : {
-				"color" : chartTheme.color,
-				"show": true,
-                "position": "inside"
-            },
-			"itemStyle" : {
-				"borderColor" : chartTheme.borderColor,
-				"borderWidth" : 0
-			},
-			"emphasis" : {
-				"label" : {
-                    "fontSize" : 20
-                },
-				"itemStyle" : {
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor,
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
-				}
-			}
-		},
-		"gauge" : {
-			"title" : { "color" : chartTheme.legendTheme.color },
-			"detail":
-			{
-				"color": chartTheme.legendTheme.color
-			},
-			"progress":
-			{
-				"show": true
-	        },
-			"axisLine":
-			{
-				"show": true,
-				"lineStyle":
-				{
-					"color" : [ [ 1, areaColor1 ] ]
-				}
-	        },
-			"axisLabel":
-			{
-				"color" : axisColor
-			},
-			"splitLine":
-			{
-				"lineStyle":
-				{
-					"color": chartTheme.actualBackgroundColor
-				}
-			},
-			"axisTick":
-			{
-				"lineStyle":
-				{
-					"color": chartTheme.actualBackgroundColor
-				}
-			},
-			"itemStyle" : {
-				"borderColor" : chartTheme.borderColor,
-				"borderWidth" : 0
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor,
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
-				}
-			}
-		},
-		"candlestick" : {
-			"itemStyle" : {
-				"borderWidth" : 1
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			}
-		},
-		"heatmap":
-		{
-			"label":
-			{
-				"show": true
-			},
-			"emphasis" :
-			{
-				"itemStyle" :
-				{
-					"shadowBlur" : 5
-				}
-			}
-		},
-		"tree":
-		{
-			"expandAndCollapse": true,
-			"label":
-			{
-				"color": chartTheme.color
-			},
-			"itemStyle":
-			{
-				"color": chartTheme.color
-			},
-			"lineStyle": { "color": areaBorderColor0 },
-			"emphasis" :
-			{
-				"itemStyle" : {
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			}
-		},
-		"treemap":
-		{
-			"itemStyle" :
-			{
-				"borderWidth": 0.5,
-				"borderColor": chartTheme.backgroundColor
-			},
-			"emphasis" :
-			{
-				"itemStyle" : {
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor,
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
-				}
-			},
-			"breadcrumb":
-			{
-				"itemStyle":
-				{
-					"color": chartTheme.backgroundColor,
-					"borderColor": chartTheme.borderColor,
-					"shadowBlur": 0,
-					"textStyle": { color: chartTheme.color }
-				}
-			}
-		},
-		"sunburst":
-		{
-			"itemStyle" :
-			{
-				"borderWidth" : 1,
-				"borderColor" : chartTheme.backgroundColor
-			},
-			"emphasis" :
-			{
-				"itemStyle" :
-				{
-					"shadowBlur" : 10,
-					"shadowColor" : shadowColor,
-					"borderColor" : chartTheme.borderColor
-				}
-			}
-		},
-		"graph" :
-		{
-			"left": "12%",
-            "right": "12%",
-            "top": "20%",
-            "bottom": "12%",
-			"roam": true,
-			"itemStyle" : {
-				"borderWidth" : 0,
-				"borderColor" : chartTheme.borderColor,
-				"shadowBlur" : 2,
-				"shadowColor" : shadowColor
-			},
-			"lineStyle" : {
-                "color": "source",
-                "curveness": 0.3
-			},
-			"label" : {
-				"color" : chartTheme.color
-			},
-			"emphasis" : {
-				"itemStyle" : {
-					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor,
-					"shadowBlur" : 10,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				},
-				"lineStyle" : {
-					"width": 4
-				},
-				"focus": "adjacency",
-				"legendHoverLink": true,
-				"label": { "position": "right" }
-			}
-		},
-		"map" : {
-			"roam" : true,
-			"itemStyle" : {
-				"areaColor" : areaBorderColor0,
-				"borderColor" : areaBorderColor1,
-				"borderWidth" : 0.5
-			},
-			"label" : {
-				"show": true,
-				"color" : chartTheme.color
-			},
-			"emphasis" :
-			{
-				"label":
-				{
-					"color" : chartTheme.highlightTheme.color
-				},
-				"itemStyle":
-				{
-					"areaColor" : chartTheme.highlightTheme.backgroundColor,
-					"borderColor" : chartTheme.highlightTheme.borderColor,
-					"borderWidth" : 1
-				}
-			}
-		},
-		"lines":
-		{
-			"lineStyle":
-			{
-				"width": 2
-			},
-			"emphasis":
-			{
-				"lineStyle":
-				{
-					"shadowBlur" : 4,
-					"shadowOffsetX" : 0,
-					"shadowColor" : shadowColor
-				}
-			}
-		},
-		"geo" : {
-			"itemStyle" : {
-				"areaColor" : areaBorderColor0,
-				"borderColor" : areaBorderColor1,
-				"borderWidth" : 0.5
-			},
-			"label" : {
-				"color" : chartTheme.color
-			},
-			"emphasis" :
-			{
-				"label":
-				{
-					"color" : chartTheme.highlightTheme.color
-				},
-				"itemStyle":
-				{
-					"areaColor" : chartTheme.highlightTheme.backgroundColor,
-					"borderColor" : chartTheme.highlightTheme.borderColor,
-					"borderWidth" : 1
-				}
-			}
-		},
-		"themeRiver":
-		{
-			/*ECharts-5.3.2版本这里配置不起作用
-			"left": "10%",
-            "top": "24%",
-            "right": "10%",
-            "bottom": "10%",
-			*/
-			"label":
-			{
-				"show": true 
-			},
-			"emphasis":
-			{
-				"itemStyle":
-				{
-					"shadowBlur": 10,
-					"shadowColor": shadowColor
-				}
-			}
-		},
-		"categoryAxis" : {
-			"axisLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisTick" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisLabel" : {
-				"show" : true,
-				"textStyle" : {
-					"color" : axisColor
-				}
-			},
-			"splitLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"type" : "dotted",
-					"color" : [ axisScaleLineColor ]
-				}
-			},
-			"splitArea" : {
-				"show" : false,
-				"areaStyle" : {
-					"color" : [ axisScaleLineColor ]
-				}
-			}
-		},
-		"valueAxis" : {
-			"axisLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisTick" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisLabel" : {
-				"show" : true,
-				"textStyle" : {
-					"color" : axisColor
-				}
-			},
-			"splitLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"type" : "dotted",
-					"color" : [ axisScaleLineColor ]
-				}
-			},
-			"splitArea" : {
-				"show" : false,
-				"areaStyle" : {
-					"color" : [ axisScaleLineColor ]
-				}
-			}
-		},
-		"logAxis" : {
-			"axisLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisTick" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisLabel" : {
-				"show" : true,
-				"textStyle" : {
-					"color" : axisColor
-				}
-			},
-			"splitLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"type" : "dotted",
-					"color" : [ axisScaleLineColor ]
-				}
-			},
-			"splitArea" : {
-				"show" : false,
-				"areaStyle" : {
-					"color" : [ axisScaleLineColor ]
-				}
-			}
-		},
-		"timeAxis" : {
-			"axisLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisTick" : {
-				"show" : true,
-				"lineStyle" : {
-					"color" : axisColor
-				}
-			},
-			"axisLabel" : {
-				"show" : true,
-				"textStyle" : {
-					"color" : axisColor
-				}
-			},
-			"splitLine" : {
-				"show" : true,
-				"lineStyle" : {
-					"type" : "dotted",
-					"color" : [ axisScaleLineColor ]
-				}
-			},
-			"splitArea" : {
-				"show" : false,
-				"areaStyle" : {
-					"color" : [ axisScaleLineColor ]
-				}
-			}
-		},
-		/*ECharts-5.3.2版本这里配置不起作用（主题河流图）
-		"singleAxis":
-		{
-			"left": "30%",
-            "top": "54%",
-            "right": "30%",
-            "bottom": "40%"
-		},
-		*/
-		"toolbox" : {
-			"iconStyle" : {
-				"normal" : {
-					"borderColor" : chartTheme.borderColor
-				},
-				"emphasis" : {
-					"borderColor" : axisColor
-				}
-			}
-		},
-		"grid":
-		{
-			"left": "6%",
-			"right": "10%",
-			"top": "20%",
-			"bottom": "8%",
-			"containLabel": true
-		},
-		"legend" : {
-			"orient": "horizontal",
-			"top": 25,
-			"textStyle" : {
-				"color" : chartTheme.legendTheme.color
-			},
-			"inactiveColor" : axisScaleLineColor,
-			"backgroundColor" : chartTheme.legendTheme.backgroundColor
-		},
-		"tooltip" : {
-			"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
-			"borderColor" : chartTheme.tooltipTheme.borderColor,
-			"borderWidth" : chartTheme.tooltipTheme.borderWidth,
-			"textStyle" : { color: chartTheme.tooltipTheme.color },
-			"axisPointer" : {
-				"lineStyle" : {
-					"color" : axisColor,
-					"width" : "1"
-				},
-				"crossStyle" : {
-					"color" : axisColor,
-					"width" : "1"
-				}
-			}
-		},
-		"timeline" : {
-			"lineStyle" : {
-				"color" : axisColor,
-				"width" : 1
-			},
-			"itemStyle" : {
-				"normal" : {
-					"color" : chartTheme.color,
-					"borderWidth" : 1
-				},
-				"emphasis" : {
-					"color" : chartTheme.color
-				}
-			},
-			"controlStyle" : {
-				"normal" : {
-					"color" : chartTheme.color,
-					"borderColor" : chartTheme.borderColor,
-					"borderWidth" : 0.5
-				},
-				"emphasis" : {
-					"color" : chartTheme.color,
-					"borderColor" : chartTheme.borderColor,
-					"borderWidth" : 0.5
-				}
-			},
-			"checkpointStyle" : {
-				"color" : chartTheme.highlightTheme.backgroundColor,
-				"borderColor" : chartTheme.highlightTheme.borderColor
-			},
-			"label" : {
-				"normal" : {
-					"textStyle" : {
-						"color" : axisColor
-					}
-				},
-				"emphasis" : {
-					"textStyle" : {
-						"color" : chartTheme.color
-					}
-				}
-			}
-		},
-		"visualMap" : {
-			"inRange" :
-			{
-				"color" : chartTheme.graphRangeColors
-			},
-			"backgroundColor" : "transparent",
-			"textStyle" :
-			{
-				"color" : axisColor
-			}
-		},
-		"dataZoom" : {
-			"backgroundColor" : "transparent",
-			"dataBackgroundColor" : axisScaleLineColor,
-			"fillerColor" : axisScaleLineColor,
-			"handleColor" : axisScaleLineColor,
-			"handleSize" : "100%",
-			"textStyle" : {
-				"color" : axisColor
-			}
-		},
-		"markPoint" : {
-			"label" : {
-				"normal" : {
-					"textStyle" : {
-						"color" : axisColor
-					}
-				},
-				"emphasis" : {
-					"textStyle" : {
-						"color" : axisColor
-					}
-				}
-			}
-		}
-	};
-	
-	//不能在上述theme中直接设置fontSize，因为即时值为null，仍然会改变默认字体
-	
-	if(chartTheme.fontSize)
-	{
-		theme.textStyle = (theme.textStyle || {});
-		theme.textStyle.fontSize = chartTheme.fontSize;
-		
-		theme.categoryAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.valueAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.logAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.timeAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.gauge.title.fontSize = chartTheme.fontSize;
-		theme.gauge.detail.fontSize = chartTheme.fontSize;
-		theme.gauge.axisLabel.fontSize = chartTheme.fontSize;
-		theme.sankey.label.fontSize = chartTheme.fontSize;
-		theme.themeRiver.label.fontSize = chartTheme.fontSize;
-	}
-	if(chartTheme.titleTheme.fontSize)
-		theme.title.textStyle.fontSize = chartTheme.titleTheme.fontSize;
-	if(chartTheme.legendTheme.fontSize)
-		theme.legend.textStyle.fontSize = chartTheme.legendTheme.fontSize;
-	if(chartTheme.tooltipTheme.fontSize)
-		theme.tooltip.textStyle.fontSize = chartTheme.tooltipTheme.fontSize;
-	
-	return theme;
 };
 
 /**
@@ -7097,31 +6280,25 @@ CF.loadSingleCssLibSource = function(lib, source, deferred)
  * 二级优先：插入在<head>末尾。
  * 
  * @param lib 库对象
- * @param ele 库对应的DOM对象
+ * @param libEle 库对应的HTML元素
  */
-CF.addLibSourceEleToDoc = function(lib, ele)
+CF.addLibSourceEleToDoc = function(lib, libEle)
 {
-	jQuery(ele).attr(CF.LIB_ATTR_NAME, lib.name);
+	CF.eleAttr(libEle, CF.LIB_ATTR_NAME, lib.name);
 	
-	var $head = jQuery("head:first");
-	var headEle = $head[0];
+	var headEle = document.head;
 	var beforeEle = null;
 	
-	var $lastImport = jQuery("["+CF.LIB_ATTR_NAME+"]:last", $head);
-	if($lastImport.length > 0)
-	{
-		var $next = $lastImport.next();
-		if($next.length > 0)
-		{
-			beforeEle = $next[0];
-		}
-	}
+	var lastImport = CF.elesOfSelector("["+CF.LIB_ATTR_NAME+"]", headEle);
+	lastImport = lastImport[lastImport.length - 1];
 	
-	//这里不能使用jQuery的API，会无法正常执行绑定事件
+	if(lastImport != null)
+		beforeEle = CF.eleOfNext(lastImport);
+	
 	if(beforeEle != null)
-		headEle.insertBefore(ele, beforeEle);
+		CF.eleBefore(beforeEle, libEle);
 	else
-		headEle.appendChild(ele);
+		CF.eleAppend(headEle, libEle);
 };
 
 CF.resolveLibSourceType = function(url)

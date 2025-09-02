@@ -2386,7 +2386,7 @@
 		//this._assertAlive();
 		
 		//(ajaxOptions)
-		if(arguments.length == 1 && !chartFactory.isString(element) && !chartFactory.isDomOrJquery(element))
+		if(arguments.length == 1 && !chartFactory.isString(element) && !chartFactory.isHtmlEle(element))
 		{
 			ajaxOptions = element;
 			element = undefined;
