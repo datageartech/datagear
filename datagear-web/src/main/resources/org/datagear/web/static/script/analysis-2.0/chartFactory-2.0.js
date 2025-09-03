@@ -291,55 +291,42 @@ CF.DataSetParamType =
 
 /**
  * 初始化渲染上下文。
- * 将webContext直接存入渲染上下文，复制chartTheme后使用<body>上的dg-chart-theme填充相关属性后存入渲染上下文，
- * 之后可以通过:
- * CF.renderContextAttrWebContext(renderContext)
- * CF.renderContextAttrChartTheme(renderContext)
- * 获取它们。
- * 
  * 注意：此函数应在初始化图表前（chart.init()函数调用前）且<body>后调用。
  * 
  * @param renderContext
- * @param webContext Web上下文
- * @param chartTheme 图表主题
  */
-CF.initRenderContext = function(renderContext, webContext, chartTheme)
+CF.initRenderContext = function(renderContext)
 {
+	var webContext = CF.renderContextAttrWebContext(renderContext);
+	
 	if(!webContext)
 		throw new Error("[webContext] required");
+	
+	var chartTheme = CF.renderContextAttrChartTheme(renderContext);
+	
 	if(!chartTheme)
 		throw new Error("[chartTheme] required");
 	
-	if(CF.isThemeInflated(chartTheme))
-		throw new Error("[chartTheme] must not inflated");
-	
-	chartTheme = CF.extend(true, {}, chartTheme);
-	
 	CF.inflateGlobalChartTheme(chartTheme);
-	
-	CF.renderContextAttrWebContext(renderContext, webContext);
-	CF.renderContextAttrChartTheme(renderContext, chartTheme);
-};
-
-/**
- * 判断CF.initRenderContext()函数是否已执行。
- */
-CF.isRenderContextInited = function(renderContext)
-{
-	if(!renderContext)
-		return false;
-	
-	var webContext = CF.renderContextAttrWebContext(renderContext);
-	var chartTheme = CF.renderContextAttrChartTheme(renderContext);
-	var inflated = CF.isThemeInflated(chartTheme);
-	
-	return (webContext && chartTheme && inflated);
 };
 
 /**
  * 创建图表实例，为其添加图表API，并设置chart.statusPreInit(true)状态，但不调用chart.init()函数。
  * 
- * @param chart 图表JSON对象，格式应为：
+ * @param root 图表根对象，格式参考CF.Chart()函数
+ * @returns 新图表实例
+ */
+CF.init = function(root)
+{
+	var chart = new CF.Chart(root);
+	chart.statusPreInit(true);
+	return chart;
+};
+
+/**
+ * 创建图表类实例
+ * 
+ * @param root 图表根对象，格式应为：
  *				{
  *				  //唯一ID
  *				  id: "...",
@@ -362,41 +349,26 @@ CF.isRenderContextInited = function(renderContext)
  *				}
  *				
  *				另参考：org.datagear.analysis.support.html.HtmlChart
- * @returns 图表实例
  */
-CF.init = function(chart)
+CF.Chart = function(root)
 {
-	var instance = new CF.Chart(chart);
-	instance.statusPreInit(true);
-	return instance;
+	CF.initChartRoot(root);
+	this._root = root;
+	this._plugin = CF.findPluginById(root.plugin ? root.plugin.id : null);
 };
 
-/**
- * Chart类
- */
-CF.Chart = function(chart)
-{
-	CF.initChartProps(chart);
-	this._root = chart;
-	this._plugin = CF.findPluginById(chart.plugin ? chart.plugin.id : null);
-};
-
-/**
- * Chart类原型
- */
+//Chart类原型
 var chartProto = CF.Chart.prototype;
 
-/**
- * 初始化图表对象基础属性。
- */
-CF.initChartProps = function(chart)
+//初始化图表根对象基础属性
+CF.initChartRoot = function(root)
 {
-	chart.name = (chart.name || "");
-	chart.updateInterval = (chart.updateInterval == null ? -1 : chart.updateInterval);
-	chart.dataSetBinds = (chart.dataSetBinds || []);
-	for(var i=0; i<chart.dataSetBinds.length; i++)
+	root.name = (root.name || "");
+	root.updateInterval = (root.updateInterval == null ? -1 : root.updateInterval);
+	root.dataSetBinds = (root.dataSetBinds || []);
+	for(var i=0; i<root.dataSetBinds.length; i++)
 	{
-		var dsb = chart.dataSetBinds[i];
+		var dsb = root.dataSetBinds[i];
 		dsb.dataSetSigns = (dsb.dataSetSigns || []);
 		dsb.fieldSigns = (dsb.fieldSigns || {});
 		dsb.alias = (dsb.alias == null ?  "" : dsb.alias);
@@ -407,19 +379,19 @@ CF.initChartProps = function(chart)
 		dsb.index = i;
 	}
 	
-	chart.attrValues = (chart.attrValues || {});
-	chart.options = (chart.options || {});
+	root.attrValues = (root.attrValues || {});
+	root.options = (root.options || {});
 	
 	//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
-	chart.widget = chart.attrValues[CF.CHART_ATTR_NAME_WIDGET];
-	chart.optionsOrigin = chart.attrValues[CF.CHART_ATTR_NAME_OPTIONS];
-	delete chart.attrValues[CF.CHART_ATTR_NAME_WIDGET];
-	delete chart.attrValues[CF.CHART_ATTR_NAME_OPTIONS];
+	root.widget = root.attrValues[CF.CHART_ATTR_NAME_WIDGET];
+	root.optionsOrigin = root.attrValues[CF.CHART_ATTR_NAME_OPTIONS];
+	delete root.attrValues[CF.CHART_ATTR_NAME_WIDGET];
+	delete root.attrValues[CF.CHART_ATTR_NAME_OPTIONS];
 	
 	//保留原始属性值集，看板可视编辑需要使用
 	//注意，初始化attrValuesOrigin的逻辑不能在chart.render()中执行，
 	//因为chart.render()可以被多次调用，chart.attrValues可能已被修改
-	chart.attrValuesOrigin = CF.extend(true, {}, chart.attrValues);
+	root.attrValuesOrigin = CF.extend(true, {}, root.attrValues);
 };
 
 CF.findPluginById = function(pluginId)
@@ -445,7 +417,7 @@ CF.findPluginById = function(pluginId)
  * 此函数在图表生命周期内仅允许调用一次，在this.destroy()后允许再次调用。 
  * 
  * 注意：只有this.statusPreInit()或者this.statusDestroyed()为true，此函数才允许执行。
- * 注意：初始化图表前应确保已调用CF.initRenderContext(this.renderContext)。
+ * 注意：初始化图表前应确保已调用CF.initRenderContext(renderContext)。
  * 注意：此函数内不应执行渲染相关逻辑，而应仅执行初始化图表属性的相关逻辑，因为chart.destroy()后可再次调用chart.init()。
  * 
  * 图表生命周期：
@@ -472,9 +444,6 @@ chartProto.init = function()
 	if(!this.statusPreInit() && !this.statusDestroyed())
 		throw new Error("chart is illegal state for : init()");
 	
-	if(!this._isRenderContextInited())
-		throw new Error("chart is illegal state for : init()");
-	
 	this.statusIniting(true);
 	
 	this._initForPre();
@@ -490,11 +459,6 @@ chartProto.init = function()
 	this._initForPost();
 	
 	this.statusInited(true);
-};
-
-chartProto._isRenderContextInited = function()
-{
-	return CF.isRenderContextInited(this.renderContext());
 };
 
 chartProto._renderContextAttrChartTheme = function()
@@ -857,9 +821,6 @@ chartProto.options = function(options)
  */
 chartProto.theme = function(theme)
 {
-	if(!this._isRenderContextInited())
-		throw new Error("chart is illegal state for : theme()");
-	
 	if(theme === undefined)
 	{
 		return (this._theme || (this._theme = this._renderContextAttrChartTheme()));
@@ -4955,7 +4916,7 @@ CF.evalSilently = function(str, defaultValue)
 		CF.logException(e);
 	}
 	
-	return (re || defaultValue);
+	return (re != null ? re : defaultValue);
 };
 
 /**
