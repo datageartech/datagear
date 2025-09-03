@@ -499,7 +499,7 @@ chartProto._initUpdateGroup = function()
  *   //可选，联动触发事件类型、事件类型数组，默认为"click"
  *   trigger: "..."、["...", ...],
  *   
- *   //必选，联动目标图表元素ID、ID数组
+ *   //可选，联动目标图表元素ID、ID数组
  *   target: "..."、["...", ...],
  *   
  *   //可选，联动数据参数映射表
@@ -593,14 +593,21 @@ chartBase.bindLinksEventHanders = function(links)
 	var triggers = this._resolveLinksTriggers(links);
 	var _thisChart = this;
 	
-	for(var i=0; i<triggers.length; i++)
+	//TODO
+	var renderer = null;
+	
+	for(let i=0; i<triggers.length; i++)
 	{
+		//TODO 渲染器定义的用于提取数据的事件处理函数
+		let dataHandler = renderer.linkDataEventHander(triggers[i]);
 		var eh =
 		{
 			eventType: triggers[i],
-			eventHandler: function(chartEvent)
+			eventHandler: function()
 			{
-				_thisChart.handleChartEventLink(chartEvent, links);
+				let args = [];//由arguments转换而得数组
+				let linkData = dataHandler.apply(this, args);
+				_thisChart.handleChartEventLink(triggers[i], linkData, links);
 			}
 		};
 		
