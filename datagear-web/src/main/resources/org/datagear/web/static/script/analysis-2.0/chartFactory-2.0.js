@@ -1552,7 +1552,7 @@ chartProto.statusRendered = function(set, postProcess)
 chartProto._postProcessRendered = function()
 {
 	this._renderSetting();
-	this._bindEventHandlers();
+	this._bindEleEventHandlers();
 	
 	var listener = this.listener();
 	if(listener && listener.render)
@@ -1576,9 +1576,9 @@ chartProto._renderSetting = function()
 /**
  * 绑定初始图表事件处理函数。
  */
-chartProto._bindEventHandlers = function()
+chartProto._bindEleEventHandlers = function()
 {
-	var ehs = this._eventHandlers();
+	var ehs = this._eleEventHandlers();
 	
 	for(var i=0; i<ehs.length; i++)
 		this.on(ehs[i].eventType, ehs[i].eventHandler);
@@ -1591,7 +1591,7 @@ chartProto._bindEventHandlers = function()
  * <div dg-chart-on-click="clickHandler"></div> 						定义"click"事件处理函数
  * <div dg-chart-on-mouseover="function(chartEvent){ ... }"></div>		定义"mouseover"事件处理函数
  */
-chartProto._eventHandlers = function()
+chartProto._eleEventHandlers = function()
 {
 	var ehs = [];
 	var prefix = elementAttrConst.ON;
@@ -1752,8 +1752,8 @@ chartProto.status = function(status)
  * 图表渲染器实现相关：
  * 图表渲染器应实现on函数，以支持此特性。
  * 
- * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
- * @param handler 事件处理函数：function(chartEvent){ ... }
+ * @param eventType 事件类型，比如："click"、"mouseover"
+ * @param handler 事件处理函数，格式为：function(chartEvent){ ... }
  */
 chartProto.on = function(eventType, handler)
 {
@@ -1781,8 +1781,8 @@ chartProto.on = function(eventType, handler)
  * 图表渲染器实现相关：
  * 图表渲染器应实现off函数，以支持此特性。
  * 
- * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
- * @param handler 解绑的事件处理函数
+ * @param eventType 事件类型，比如："click"、"mouseover"
+ * @param handler 解绑的事件处理函数，如果不指定，则是解绑此事件类型的所有处理函数
  */
 chartProto.off = function(eventType, handler)
 {
@@ -2464,12 +2464,7 @@ chartProto.elementStyle = function(element, css)
  */
 chartProto.styleString = function(css)
 {
-	var cssArray = [];
-	
-	for(var i=0; i<arguments.length; i++)
-		cssArray.push(arguments[i]);
-	
-	return CF.styleString.apply(CF, cssArray);
+	return CF.styleString.apply(CF, arguments);
 };
 
 /**
