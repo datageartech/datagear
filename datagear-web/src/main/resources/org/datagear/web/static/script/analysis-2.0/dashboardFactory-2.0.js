@@ -496,8 +496,9 @@ chartProto._initUpdateGroup = function()
  * 获取/设置初始图表联动设置对象数组。
  * 联动设置对象格式为：
  * {
- *   //可选，联动触发事件类型、事件类型数组，默认为"click"
- *   trigger: "..."、["...", ...],
+ *   //可选，联动触发事件类型、事件类型数组，格式参考chart.on()函数的eventType参数，
+ *   //默认值参考DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE说明
+ *   trigger: ...、[ ... ],
  *   
  *   //可选，联动目标图表元素ID、ID数组
  *   target: "..."、["...", ...],
@@ -505,14 +506,12 @@ chartProto._initUpdateGroup = function()
  *   //可选，联动数据参数映射表
  *   data:
  *   {
- *     //ChartEvent对象的"data"、"orginalData"对象的属性名 : 目标数据集参数的映射索引、映射索引数组
- *     "..." : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
+ *     //数据属性名：图表渲染器的linkDataHander()返回数据对象的属性访问路径，比如："name"、"data.value"、"[0].name"
+ *     //图表数据集参数索引对象：格式同dashboard._batchSetDataSetParamValues()函数的图表数据集参数索引对象
+ *     "数据属性名" : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  *     ...
  *   }
  * }
- * 
- * 图表数据集参数索引对象格式参考dashboardBase._batchSetDataSetParamValues函数相关说明，
- * 其中value函数的sourceValueContext参数为图表事件对象（chartEvent）对象。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-link"属性值执行设置操作。
  * 
@@ -573,12 +572,14 @@ chartProto.updateGroup = function(group)
  * 为指定图表联动设置绑定事件处理函数。
  * 
  * 图表渲染器实现相关：
- * 图表渲染器应实现on函数，以支持此特性。
+ * 图表渲染器应实现on()函数、linkDataHander()函数，以支持此特性。
+ * 其中，linkDataHander()函数格式为：function(eventType){ return 联动数据处理函数; }，
+ * 联动数据处理函数是一个图表事件处理函数，它从图表事件中提取联动数据
  * 
  * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
- * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: "...", eventHandler: function(chartEvent){ ... } }, ... ]
+ * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: ..., eventHandler: function(...){ ... } }, ... ]
  */
-chartBase.bindLinksEventHanders = function(links)
+chartProto.bindLinksEventHanders = function(links)
 {
 	this._assertActive();
 	
@@ -591,28 +592,34 @@ chartBase.bindLinksEventHanders = function(links)
 	var ehs = [];
 	
 	var triggers = this._resolveLinksTriggers(links);
-	var _thisChart = this;
+	var thisChart = this;
 	
-	//TODO
-	var renderer = null;
+	var renderer = this.renderer();
+	if(renderer == null || renderer.linkDataHander == null)
+	{
+		let pluginRenderer = this._pluginRenderer();
+		if(pluginRenderer && pluginRenderer.linkDataHander)
+			renderer = pluginRenderer;
+	}
+	
+	if(renderer == null || renderer.linkDataHander == null)
+		throw new Error("chart renderer.linkDataHander required");
 	
 	for(let i=0; i<triggers.length; i++)
 	{
-		//TODO 渲染器定义的用于提取数据的事件处理函数
-		let dataHandler = renderer.linkDataEventHander(triggers[i]);
-		var eh =
+		//渲染器定义的用于从事件中提取联动源数据的函数
+		let dataHandler = renderer.linkDataHander(triggers[i]);
+		let eh =
 		{
 			eventType: triggers[i],
 			eventHandler: function()
 			{
-				let args = [];//由arguments转换而得数组
-				let linkData = dataHandler.apply(this, args);
-				_thisChart.handleChartEventLink(triggers[i], linkData, links);
+				let linkSrcData = dataHandler.apply(this, arguments);
+				thisChart._handleChartEventLink(triggers[i], linkSrcData, links);
 			}
 		};
 		
 		this.on(eh.eventType, eh.eventHandler);
-		
 		ehs.push(eh);
 	}
 	
@@ -660,12 +667,13 @@ chartBase._resolveLinkTriggers = function(link)
 
 /**
  * 处理指定图表事件的图表联动操作。
- * 此方法根据图表联动设置对象，将图表事件数据传递至目标图表数据集参数值，然后请求刷新图表数据。
+ * 此方法根据图表联动设置对象，将图表联动源数据传递至目标图表数据集参数值，然后请求刷新图表数据。
  * 
- * @param chartEvent 图表事件对象
+ * @param eventType 事件类型
+ * @param linkSrcData 联动源数据
  * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
  */
-chartBase.handleChartEventLink = function(chartEvent, links)
+chartBase._handleChartEventLink = function(eventType, linkSrcData, links)
 {
 	this._assertActive();
 	
@@ -675,18 +683,17 @@ chartBase.handleChartEventLink = function(chartEvent, links)
 	if(!CF.isArray(links))
 		links = [ links ];
 	
-	var dashboard = this.dashboard;
+	var dashboard = this.dashboard();
 	var targetCharts = [];
 	
 	var batchSource =
 	{
-		data: this.eventData(chartEvent),
-		originalData: this.eventOriginalData(chartEvent),
+		data: linkSrcData,
 		getValue: function(name)
 		{
 			var val = undefined;
 			
-			//当name为空时，应直接使用this.data
+			//当name为空时，直接使用this.data
 			if(name == null || name == "")
 			{
 				val = this.data;
@@ -2565,41 +2572,38 @@ dashboardBase._loadChartJson = function(chartWidgetId, ajaxOptions)
 /**
  * 批量设置图表数据集参数值。
  * 
- * 批量设置对象格式为：
- * {
- *   //可选，要设置的目标图表元素ID、图表ID、看板图表数组索引，或者它们的数组
- *   target: "..."、["...", ...],
- *   
- *   //可选，要设置的参数值映射表，没有则不设置任何参数值
- *   data:
- *   {
- *     源参数名 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
- *     ...
- *   }
- * }
- * 
- * 上述【源参数名】可以是简单参数名，例如："name"、"value"，也可以是源参数对象的属性路径，例如："order.name"、"[0].name"、"['order'].product.name"
- * 
- * 图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
- * {
- *   //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
- *   chart: 数值、"...",
- *   
- *   //可选，目标图表数据集数组的索引数值，默认为：0
- *   dataSet: ...,
- *   
- *   //可选，目标图表数据集的参数数组索引/参数名，默认为：0
- *   param: ...,
- *   
- *   //可选，自定义源参数值处理函数，返回要设置的目标参数值
- *   //sourceValue 源参数值
- *   //sourceValueContext 源参数值上下文对象
- *   value: function(sourceValue, sourceValueContext){ return ...; }
- * }
- * 或者，可简写为上述图表数据集参数索引对象的"param"属性值
- * 
  * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }（需支持属性路径）
- * @param batchSet 批量设置对象
+ * @param batchSet 批量设置对象，格式为：
+ * 					{
+ * 					  //可选，要设置的目标图表元素ID、图表ID、看板图表数组索引，或者它们的数组
+ * 					  target: "..."、["...", ...],
+ * 					  
+ * 					  //可选，要设置的参数值映射表，没有则不设置任何参数值
+ * 					  data:
+ * 					  {
+ * 					    源参数名 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
+ * 					    ...
+ * 					  }
+ * 					}
+ * 					上述【源参数名】可以是简单参数名，例如："name"、"value"，也可以是源参数对象的属性路径，
+ * 					例如："order.name"、"[0].name"、"['order'].product.name"。
+ * 					图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
+ * 					{
+ *  					 //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
+ * 					  chart: 数值、"...",
+ * 					  
+ * 					  //可选，目标图表数据集数组的索引数值，默认为：0
+ * 					  dataSet: ...,
+ * 					  
+ * 					  //可选，目标图表数据集的参数数组索引/参数名，默认为：0
+ * 					  param: ...,
+ * 					  
+ * 					  //可选，自定义源参数值处理函数，返回要设置的目标参数值
+ * 					  //sourceValue 源参数值
+ * 					  //sourceValueContext 源参数值上下文对象
+ * 					  value: function(sourceValue, sourceValueContext){ return ...; }
+ * 					}
+ * 					或者，可简写为上述图表数据集参数索引对象的"param"属性值
  * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
  * @return 批量设置的图表对象数组
  */
@@ -2667,7 +2671,7 @@ dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourc
 				dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : dataSetIdx);
 				param = (indexObj.param != null ? indexObj.param : param);
 				
-				if(indexObj.value)
+				if(indexObj.value != null)
 				{
 					sourceValueContextArgs[0] = dataValue;
 					paramValue = indexObj.value.apply(indexObj, sourceValueContextArgs);
@@ -2680,19 +2684,12 @@ dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourc
 			
 			//优先使用batchSet.target中的索引号
 			if(CF.isNumber(chartIdx) && targets[chartIdx] != null)
-			{
 				targetChart = targetCharts[chartIdx];
-			}
 			else
-			{
 				targetChart = this.chartOf(chartIdx);
-				
-				if(targetChart == null)
-					throw new Error("no chart found for : " + chartIdx);
-				
-				if(CF.indexInArray(targetCharts, targetChart) < 0)
-					targetCharts.push(targetChart);
-			}
+			
+			if(targetChart == null)
+				throw new Error("no chart found for : " + chartIdx);
 			
 			targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
 		}

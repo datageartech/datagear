@@ -1752,8 +1752,8 @@ chartProto.status = function(status)
  * 图表渲染器实现相关：
  * 图表渲染器应实现on函数，以支持此特性。
  * 
- * @param eventType 事件类型，比如："click"、"mouseover"
- * @param handler 事件处理函数，格式为：function(chartEvent){ ... }
+ * @param eventType 事件类型，比如："click"、"mouseover"、{ ... }，具体支持格式由插件实现
+ * @param handler 事件处理函数，格式为：function(...){ ... }，具体参数格式由插件实现
  */
 chartProto.on = function(eventType, handler)
 {
@@ -1781,7 +1781,7 @@ chartProto.on = function(eventType, handler)
  * 图表渲染器实现相关：
  * 图表渲染器应实现off函数，以支持此特性。
  * 
- * @param eventType 事件类型，比如："click"、"mouseover"
+ * @param eventType 事件类型，格式同chart.on()函数eventType参数
  * @param handler 解绑的事件处理函数，如果不指定，则是解绑此事件类型的所有处理函数
  */
 chartProto.off = function(eventType, handler)

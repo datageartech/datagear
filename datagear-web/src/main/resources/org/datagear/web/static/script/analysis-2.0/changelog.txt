@@ -37,4 +37,5 @@ chart.eventNew()				x
 chart.updateResults()			x
 chart.updateResult()			+
 chart.dashboard	-> chart.dashboard()
+chart.handleChartEventLink()	x
 dg-chart-auto-resize默认值为true
