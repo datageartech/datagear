@@ -326,8 +326,11 @@ DF.initChart = function(dashboard, chartRoot)
 //开始心跳，避免看板会话超时
 DF.startHeartBeat = function(renderContext, dashboardId)
 {
-	if(DF._heartbeatRunning)
-		return;
+	if(DF._heartbeatIntervalId != null)
+	{
+		clearInterval(DF._heartbeatIntervalId);
+		DF._heartbeatIntervalId = null;
+	}
 	
 	var webContext = CF.renderContextAttrWebContext(renderContext);
 	var heartbeatURL = (webContext && webContext.attributes ? webContext.attributes.heartbeatURL : null);
@@ -336,46 +339,30 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 		throw new Error("[heartbeatURL] required");
 	
 	heartbeatURL = CF.toWebContextPathURL(webContext, heartbeatURL);
+	var firstHeartbeat = true;
 	
-	DF._heartbeatRunning = true;
-	this.handleHeartBeat(heartbeatURL, dashboardId);
+	DF._heartbeatIntervalId = setInterval(function()
+	{
+		if(firstHeartbeat)
+			return;
+		
+		firstHeartbeat = false;
+		
+		var data = {};
+		data[DF.heartbeatConfig.dashboardIdParamName] = dashboardId;
+		fetch(heartbeatURL, DF.fetchOptsOfGetJson(data));
+	},
+	DF.heartbeatConfig.interval);
 };
 
 //停止心跳
 DF.stopHeartBeat = function()
 {
-	DF._heartbeatRunning = false;
-	
-	if(DF._heartbeatTimeoutId != null)
-		clearTimeout(DF._heartbeatTimeoutId);
-};
-
-DF.handleHeartBeat = function(heartbeatURL, dashboardId)
-{
-	if(DF._heartbeatTimeoutId != null)
-		clearTimeout(DF._heartbeatTimeoutId);
-	
-	DF._heartbeatTimeoutId = setTimeout(function()
+	if(DF._heartbeatIntervalId != null)
 	{
-		if(DF._heartbeatRunning)
-		{
-			var data = {};
-			data[DF.heartbeatConfig.dashboardIdParamName] = dashboardId;
-			
-			$.ajax({
-				type : "GET",
-				cache: false,
-				url : heartbeatURL,
-				data: data,
-				complete : function()
-				{
-					if(DF._heartbeatRunning == "run")
-						DF.handleHeartBeat(heartbeatURL, dashboardId);
-				}
-			});
-		}
-	},
-	DF.heartbeatConfig.interval);
+		clearInterval(DF._heartbeatIntervalId);
+		DF._heartbeatIntervalId = null;
+	}
 };
 
 //----------------------------------------
@@ -1506,18 +1493,17 @@ dashboardProto.startHandleCharts = function()
 		clearInterval(this._handlingChartsIntervalId);
 	
 	var doHandleCharts = false;
-	var dashboard = this;
 	
-	this._handlingChartsIntervalId = setInterval(function()
+	this._handlingChartsIntervalId = setInterval(() =>
 	{
 		if(doHandleCharts == true)
 			return;
 		
 		doHandleCharts = true;
 		
-		CF.executeSilently(function()
+		CF.executeSilently(() =>
 		{
-			dashboard._doHandleCharts();
+			this._doHandleCharts();
 		});
 		
 		doHandleCharts = false;
@@ -1597,11 +1583,9 @@ dashboardProto._doHandleCharts = function()
 		}
 	}
 	
-	var dashboard = this;
-	
-	CF.executeSilently(function()
+	CF.executeSilently(() =>
 	{
-		dashboard._doHandleChartsLocal(preUpdateLocals);
+		this._doHandleChartsLocal(preUpdateLocals);
 	});
 	
 	var webContext = CF.renderContextAttrWebContext(this.renderContext);
@@ -1609,9 +1593,9 @@ dashboardProto._doHandleCharts = function()
 	
 	for(var group in preUpdateGroups)
 	{
-		CF.executeSilently(function()
+		CF.executeSilently(() =>
 		{
-			dashboard._doHandleChartsAjax(url, group, preUpdateGroups[group]);
+			this._doHandleChartsAjax(url, group, preUpdateGroups[group]);
 		});
 	}
 };
@@ -1721,7 +1705,6 @@ dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
 	var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
 	var updateTime = CF.currentDateMs();
 	
-	var dashboard = this;
 	var dashboardQueryForm = this._buildDashboardQueryForm(chartQueryPairs);
 	var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
 	// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
@@ -1732,9 +1715,9 @@ dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
 	};
 	
 	//这里不允许异常中断
-	CF.executeSilently(function()
+	CF.executeSilently(() =>
 	{
-		dashboard._execListenerOnFetch(fetchContext);
+		this._execListenerOnFetch(fetchContext);
 	});
 	
 	try
@@ -1756,12 +1739,11 @@ dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
 	}
 };
 
-dashboardBase._doHandleChartsAjax = function(url, group, chartQueryPairs)
+dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
 {
 	if(!chartQueryPairs || chartQueryPairs.length == 0)
 		return;
 	
-	var dashboard = this;
 	var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
 	var dashboardQueryForm = this._buildDashboardQueryForm(chartQueryPairs);
 	var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
@@ -1771,58 +1753,65 @@ dashboardBase._doHandleChartsAjax = function(url, group, chartQueryPairs)
 		group: group,
 		charts: charts,
 		query: dashboardQuery,
-		//此次请求的XMLHttpRequest，将在后续设置
-		xhr: undefined,
 		//此次请求是否成功，将在后续设置
 		success: undefined
 	};
 	
 	//这里不允许异常中断
-	CF.executeSilently(function()
+	CF.executeSilently(() =>
 	{
-		dashboard._execListenerOnFetch(fetchContext);
+		this._execListenerOnFetch(fetchContext);
 	});
 	
-	$.ajax({
-		contentType : "application/json",
-		type : "POST",
-		url : url,
-		data : JSON.stringify(dashboardQueryForm),
-		success : function(dashboardResult, textStatus, jqXHR)
+	fetch(url, DF.fetchOptsOfPostJson(dashboardQueryForm))
+	.then((response) =>
+	{
+		let updateTime = CF.currentDateMs();
+		
+		try
 		{
-			dashboardResult = (dashboardResult ? dashboardResult : {});
-			dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
-			dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
-			
-			var updateTime = CF.currentDateMs();
-			
-			try
+			if(response.ok)
 			{
-				dashboard._handleChartsAjaxSuccess(fetchContext, dashboardResult, jqXHR);
+				let dashboardResult = response.json();
+				dashboardResult = (dashboardResult ? dashboardResult : {});
+				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
+				dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
+				
+				this._handleChartsAjaxSuccess(fetchContext, dashboardResult);
 			}
-			finally
+			else
 			{
-				dashboard._setChartsUpdateTime(charts, updateTime);				
+				let error = null;
+				CF.executeSilently(() =>
+				{
+					error = response.json();
+				});
+				
+				this._handleChartsAjaxError(fetchContext, error);
 			}
-		},
-		error : function(jqXHR, textStatus, errorThrown)
+		}
+		finally
 		{
-			var updateTime = CF.currentDateMs();
-			
-			try
-			{
-				dashboard._handleChartsAjaxError(fetchContext, jqXHR, textStatus, errorThrown)
-			}
-			finally
-			{
-				dashboard._setChartsUpdateTime(charts, updateTime);
-			}
+			this._setChartsUpdateTime(charts, updateTime);				
+		}
+	})
+	.catch((error) =>
+	{
+		let updateTime = CF.currentDateMs();
+		
+		try
+		{
+			this._handleChartsAjaxError(fetchContext, error)
+		}
+		finally
+		{
+			this._setChartsUpdateTime(charts, updateTime);
 		}
 	});
 };
 
 //执行监听器的onFetch回调函数
-dashboardBase._execListenerOnFetch = function(fetchContext)
+dashboardProto._execListenerOnFetch = function(fetchContext)
 {
 	var charts = fetchContext.charts;
 	var dashboardQuery = fetchContext.query;
@@ -1844,12 +1833,10 @@ dashboardBase._execListenerOnFetch = function(fetchContext)
 	}
 };
 
-dashboardBase._handleChartsAjaxSuccess = function(fetchContext, dashboardResult, xhr)
+dashboardProto._handleChartsAjaxSuccess = function(fetchContext, dashboardResult)
 {
-	fetchContext.xhr = xhr;
 	fetchContext.success = true;
 	
-	var dashboard = this;
 	var chartResults = dashboardResult.chartResults;
 	var chartErrors = dashboardResult.chartErrors;
 	var dashboardQuery = fetchContext.query;
@@ -1861,11 +1848,11 @@ dashboardBase._handleChartsAjaxSuccess = function(fetchContext, dashboardResult,
 		if(!chart)
 			continue;
 		
-		CF.executeSilently(function()
+		CF.executeSilently(() =>
 		{
 			var chartResult = (chartResults[chartId] || {});
-			var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-			dashboard._updateChart(chart, chartResult, chartQuery, true);
+			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
+			this._updateChart(chart, chartResult, chartQuery, true);
 		});
 	}
 	
@@ -1876,46 +1863,44 @@ dashboardBase._handleChartsAjaxSuccess = function(fetchContext, dashboardResult,
 		if(!chart)
 			continue;
 		
-		CF.executeSilently(function()
+		CF.executeSilently(() =>
 		{
 			var error = (chartErrors[chartId] || { type: "Error", message: "error" });
-			var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-			dashboard._handleChartAjaxError(chart, error, chartQuery, true);
+			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
+			this._handleChartAjaxError(chart, error, chartQuery, true);
 		});
 	}
 };
 
-dashboardBase._handleChartsAjaxError = function(fetchContext, xhr, textStatus, errorThrown)
+dashboardProto._handleChartsAjaxError = function(fetchContext, error)
 {
-	fetchContext.xhr = xhr;
 	fetchContext.success = false;
 	
-	var dashboard = this;
 	var charts = fetchContext.charts;
 	var dashboardQuery = fetchContext.query;
-	var errorMsg = (errorThrown ? errorThrown : (textStatus ? textStatus : "error"));
+	var errorMsg = (error && error.message ? error.message : "error");
 	var logException = true;
 	
 	for(var i=0; i<charts.length; i++)
 	{
 		var chart = charts[i];
 		
-		CF.executeSilently(function()
+		CF.executeSilently(() =>
 		{
 			//结构同：org.datagear.analysis.support.ChartResultErrorMessage
 			var error = { type: "Error", message: errorMsg };
-			var chartQuery = dashboard._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
-			dashboard._handleChartAjaxError(chart, error, chartQuery, false);
+			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
+			this._handleChartAjaxError(chart, error, chartQuery, false);
 		});
 	}
 	
 	if(logException)
 	{
-		CF.logException("Fetch charts data error : " + errorMsg);
+		CF.logException("fetch charts data error : " + errorMsg);
 	}
 };
 
-dashboardBase._handleChartAjaxError = function(chart, error, chartQuery, logIfNone)
+dashboardProto._handleChartAjaxError = function(chart, error, chartQuery, logIfNone)
 {
 	this._handleChartResultError(chart, error, chartQuery, true, logIfNone);
 };
@@ -1929,7 +1914,7 @@ dashboardBase._handleChartAjaxError = function(chart, error, chartQuery, logIfNo
  * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
  * @param logIfNone 可选，如果chart.listener()没有定义updateError，是否输出默认日志，默认为：true
  */
-dashboardBase._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
+dashboardProto._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
 {
 	logIfNone = (logIfNone == null ? true : logIfNone);
 	
@@ -1965,7 +1950,7 @@ dashboardBase._handleChartResultError = function(chart, error, chartQuery, setEr
  * @param chartQuery 图表结果对应的查询信息，可能null
  * @param force 可选，是否强制更新，默认值：false
  */
-dashboardBase._updateChart = function(chart, chartResult, chartQuery, force)
+dashboardProto._updateChart = function(chart, chartResult, chartQuery, force)
 {
 	force = (force === true);
 	
@@ -1994,14 +1979,14 @@ dashboardBase._updateChart = function(chart, chartResult, chartQuery, force)
 	}
 };
 
-dashboardBase._doUpdateChart = function(chart, chartResult, chartQuery)
+dashboardProto._doUpdateChart = function(chart, chartResult, chartQuery)
 {
 	chart.update(chartResult);
 };
 
-dashboardBase._setChartsUpdateTime = function(charts, time)
+dashboardProto._setChartsUpdateTime = function(charts, time)
 {
-	CF.executeSilently(function()
+	CF.executeSilently(() =>
 	{
 		for(var i=0; i<charts.length; i++)
 		{
@@ -2010,13 +1995,10 @@ dashboardBase._setChartsUpdateTime = function(charts, time)
 	});
 };
 
-/**
- * 构建更新看板的ajax请求数据。
- */
-dashboardBase._buildDashboardQueryForm = function(chartQueryPairs)
+//构建更新看板的ajax请求数据
+dashboardProto._buildDashboardQueryForm = function(chartQueryPairs)
 {
 	var updateDashboardConfig = DF.updateDashboardConfig;
-	
 	var globalResultDataFormat = this.resultDataFormat();
 	
 	//这里需要深度拷贝，因为后续可能会被修改
@@ -2044,7 +2026,7 @@ dashboardBase._buildDashboardQueryForm = function(chartQueryPairs)
 };
 
 //获取/设置看板查询对象中的图表查询对象
-dashboardBase._chartQueryOfDashboardQuery = function(dashboardQuery, chartId, chartQuery)
+dashboardProto._chartQueryOfDashboardQuery = function(dashboardQuery, chartId, chartQuery)
 {
 	var chartQueries = dashboardQuery.chartQueries;
 	
@@ -2065,7 +2047,7 @@ dashboardBase._chartQueryOfDashboardQuery = function(dashboardQuery, chartId, ch
 };
 
 //构建图表查询对象，结构同：org.datagear.analysis.ChartQuery
-dashboardBase._buildChartQuery = function(chart)
+dashboardProto._buildChartQuery = function(chart)
 {
 	var globalResultDataFormat = this.resultDataFormat();
 	
@@ -2097,7 +2079,7 @@ dashboardBase._buildChartQuery = function(chart)
 	return chartQuery;
 };
 
-dashboardBase._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQuery)
+dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQuery)
 {
 	var dashboardQueryParamName = DF.updateDashboardConfig.dashboardQueryParamName;
 	
@@ -3123,7 +3105,24 @@ DF.fetchOptsOfPostJson = function(data)
 		cache: "no-cache",
 		credentials: "same-origin",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(data)
+		body: (data == null ? undefined : JSON.stringify(data))
+	};
+	
+	return re;
+};
+
+/**
+ * 获取GET JSON的fetch选项
+ */
+DF.fetchOptsOfGetJson = function(data)
+{
+	var re =
+	{
+		method: "GET",
+		cache: "no-cache",
+		credentials: "same-origin",
+		headers: { "Content-Type": "application/json" },
+		body: (data == null ? undefined : JSON.stringify(data))
 	};
 	
 	return re;

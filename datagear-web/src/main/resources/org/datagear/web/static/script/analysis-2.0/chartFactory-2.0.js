@@ -989,11 +989,10 @@ chartProto.render = function()
 	if(lib)
 	{
 		var contextCharts = this._contextCharts();
-		var thisChart = this;
 		
-		CF.loadLib(lib, function()
+		CF.loadLib(lib, () =>
 		{
-			thisChart._renderInner();
+			this._renderInner();
 		},
 		contextCharts);
 	}
