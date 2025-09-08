@@ -39,3 +39,6 @@ chart.updateResult()			+
 chart.dashboard	-> chart.dashboard()
 chart.handleChartEventLink()	x
 dg-chart-auto-resize默认值为true
+dashboard.id -> dashboard.id()
+dashboard.charts -> dashboard.charts()
+dashboard.renderContext -> dashboard.renderContext()

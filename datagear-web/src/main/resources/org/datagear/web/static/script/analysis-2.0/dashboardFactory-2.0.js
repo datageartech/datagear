@@ -250,17 +250,7 @@ DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
 /**
  * 创建看板实例，为其添加看板API，并设置状态：dashboard.statusPreInit(true)。
  * 
- * @param root 看板根对象，格式应为：
- *				{
- *				  //唯一ID
- *				  id: "...",
- *				  //渲染上下文
- *				  renderContext: {...},
- *				  //可选，图表JSON对象数组
- *				  charts: [ 图表JSON对象, ... ]
- *				}
- *				
- *				另参考：org.datagear.analysis.Dashboard
+ * @param root 看板根对象，格式参考DF.Dashboard()
  * @returns 新看板实例
  */
 DF.init = function(root)
@@ -572,9 +562,10 @@ chartProto.updateGroup = function(group)
  * 为指定图表联动设置绑定事件处理函数。
  * 
  * 图表渲染器实现相关：
- * 图表渲染器应实现on()函数、linkDataHander()函数，以支持此特性。
- * 其中，linkDataHander()函数格式为：function(eventType){ return 联动数据处理函数; }，
- * 联动数据处理函数是一个图表事件处理函数，它从图表事件中提取联动数据
+ * 图表渲染器应实现on()函数、linkDataHander()函数（可选），以支持此特性。
+ * 其中，linkDataHander()是一个图表事件处理函数，它返回一个可以从图表事件中提取联动数据的函数，格式为：function(eventType){ return 联动数据处理函数; }。
+ * 当linkDataHander()函数未定义时，传入图表事件处理函数的第一个非null的object类型（typeof(arg) === 'object'）参数将会作为联动数据源。
+ * 联动数据处理函数应返回一个联动数据对象或其数组，格式为：{ ... }、[ {...}, ... ]。
  * 
  * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
  * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: ..., eventHandler: function(...){ ... } }, ... ]
@@ -602,42 +593,47 @@ chartProto.bindLinksEventHanders = function(links)
 			renderer = pluginRenderer;
 	}
 	
-	if(renderer == null || renderer.linkDataHander == null)
-		throw new Error("chart renderer.linkDataHander required");
-	
 	for(let i=0; i<triggers.length; i++)
 	{
 		//渲染器定义的用于从事件中提取联动源数据的函数
-		let dataHandler = renderer.linkDataHander(triggers[i]);
-		let eh =
+		let dataHandler = (renderer == null || renderer.linkDataHander == null ?
+							this._dftLinkDataHandler : renderer.linkDataHander(triggers[i]));
+		let eventType = triggers[i];
+		let eventHandler = function()
 		{
-			eventType: triggers[i],
-			eventHandler: function()
-			{
-				let linkSrcData = dataHandler.apply(this, arguments);
-				thisChart._handleChartEventLink(triggers[i], linkSrcData, links);
-			}
+			let linkSrcData = dataHandler.apply(this, arguments);
+			thisChart._handleChartEventLink(eventType, linkSrcData, links);
 		};
 		
-		this.on(eh.eventType, eh.eventHandler);
-		ehs.push(eh);
+		this.on(eventType, eventHandler);
+		ehs.push({ eventType: eventType, eventHandler: eventHandler });
 	}
 	
 	return ehs;
 };
 
-/**
- * 解析不重复的联动设置触发事件数组。
- */
-chartBase._resolveLinksTriggers = function(links)
+chartProto._dftLinkDataHandler = function()
+{
+	for(let i=0; i<arguments.length; i++)
+	{
+		let arg = arguments[i];
+		if(arg != null && typeof(arg) === "object")
+			return arg;
+	}
+	
+	return null;
+};
+
+//解析不重复的联动设置触发事件数组。
+chartProto._resolveLinksTriggers = function(links)
 {
 	var triggers = [];
 	
-	for(var i=0; i<links.length; i++)
+	for(let i=0; i<links.length; i++)
 	{
-		var myTriggers = this._resolveLinkTriggers(links[i]);
+		let myTriggers = this._resolveLinkTriggers(links[i]);
 		
-		for(var j=0; j<myTriggers.length; j++)
+		for(let j=0; j<myTriggers.length; j++)
 		{
 			if(CF.indexInArray(triggers, myTriggers[j]) < 0)
 				triggers.push(myTriggers[j]);
@@ -647,7 +643,7 @@ chartBase._resolveLinksTriggers = function(links)
 	return triggers;
 };
 
-chartBase._resolveLinkTriggers = function(link)
+chartProto._resolveLinkTriggers = function(link)
 {
 	var triggers = link.trigger;
 	
@@ -670,10 +666,10 @@ chartBase._resolveLinkTriggers = function(link)
  * 此方法根据图表联动设置对象，将图表联动源数据传递至目标图表数据集参数值，然后请求刷新图表数据。
  * 
  * @param eventType 事件类型
- * @param linkSrcData 联动源数据
+ * @param linkSrcData 联动数据
  * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
  */
-chartBase._handleChartEventLink = function(eventType, linkSrcData, links)
+chartProto._handleChartEventLink = function(eventType, linkSrcData, links)
 {
 	this._assertActive();
 	
@@ -698,13 +694,21 @@ chartBase._handleChartEventLink = function(eventType, linkSrcData, links)
 			{
 				val = this.data;
 			}
+			else if(CF.isArray(this.data))
+			{
+				for(let i=0; i<this.data.length; i++)
+				{
+					//需支持属性路径格式的name
+					val = DF.getPropertyPathValue(this.data[i], name);
+					
+					if(val !== undefined)
+						break;
+				}
+			}
 			else
 			{
 				//需支持属性路径格式的name
 				val = DF.getPropertyPathValue(this.data, name);
-				
-				if(val === undefined && this.originalData != null)
-					val = DF.getPropertyPathValue(this.originalData, name);
 			}
 			
 			return val;
@@ -715,10 +719,10 @@ chartBase._handleChartEventLink = function(eventType, linkSrcData, links)
 	{
 		var link = links[i];
 		
-		if(!this._isLinkTriggerableByEvent(link, chartEvent))
+		if(!this._isLinkByEventType(link, eventType))
 			continue;
 		
-		var myTargetCharts = dashboard._batchSetDataSetParamValues(batchSource, link, chartEvent);
+		var myTargetCharts = dashboard._batchSetDataSetParamValues(batchSource, link, linkSrcData);
 		
 		for(var j=0; j<myTargetCharts.length; j++)
 		{
@@ -736,13 +740,8 @@ chartBase._handleChartEventLink = function(eventType, linkSrcData, links)
 	}
 };
 
-chartBase._isLinkTriggerableByEvent = function(link, chartEvent)
+chartProto._isLinkByEventType = function(link, eventType)
 {
-	var eventType = chartEvent.type;
-	
-	if(!eventType)
-		return false;
-	
 	var triggers = this._resolveLinkTriggers(link);
 	return (CF.indexInArray(triggers, eventType) >= 0);
 };
@@ -751,7 +750,7 @@ chartBase._isLinkTriggerableByEvent = function(link, chartEvent)
  * 从服务端获取并更新图表数据。
  * 此函数是基于状态实现的，在一个请求内的多次重复调用只会刷新一次。
  */
-chartBase.refreshData = function()
+chartProto.refreshData = function()
 {
 	this._assertActive();
 	
@@ -772,7 +771,7 @@ chartBase.refreshData = function()
 
 var UPDATE_TIME_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
 
-chartBase._updateTime = function(time)
+chartProto._updateTime = function(time)
 {
 	if(time === undefined)
 		return this.liveData(UPDATE_TIME_LIVE_DATA_NAME);
@@ -782,7 +781,7 @@ chartBase._updateTime = function(time)
 
 var REQ_REFRESH_DATAS_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshDatas";
 
-chartBase._requestRefreshData = function()
+chartProto._requestRefreshData = function()
 {
 	var chartQuery = this.dashboard._buildChartQuery(this);
 	var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
@@ -795,7 +794,7 @@ chartBase._requestRefreshData = function()
 	rrds.push(chartQuery);
 };
 
-chartBase._isRequestRefreshData = function()
+chartProto._isRequestRefreshData = function()
 {
 	var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 	return (rrds != null && rrds.length > 0);
@@ -806,21 +805,19 @@ chartBase._isRequestRefreshData = function()
  * 
  * @param manualRender 可选，设置是否手动渲染，默认为：false
  * @returns true 是；false 否
- * 
- * @since 4.4.0
  */
-chartBase.manualRender = function(manualRender)
+chartProto.manualRender = function(manualRender)
 {
 	if(manualRender === undefined)
 	{
-		//注意：此属性不应以chartBase._initManualRender()的方式初始化
+		//注意：此属性不应以chart._initManualRender()的方式初始化，
 		//因为看板需要在chart.init()之前就读取它的值
 		
 		if(this._manualRender != null)
 			return (this._manualRender == true);
 		else
 		{
-			var eleValue = this.elementJquery().attr(elementAttrConst.MANUAL_RENDER);
+			var eleValue = CF.eleAttr(this.element(), elementAttrConst.MANUAL_RENDER);
 			return (eleValue == true || eleValue == "true");
 		}
 	}
@@ -829,7 +826,7 @@ chartBase.manualRender = function(manualRender)
 };
 
 //----------------------------------------
-// chartBase扩展结束
+// Chart prototype end
 //----------------------------------------
 
 
@@ -852,15 +849,15 @@ chartBase.manualRender = function(manualRender)
  *       |                       |---------------------<--------------------| 
  *       |------------------------------<-----------------------------------| 
  */
-dashboardBase.init = function()
+dashboardProto.init = function()
 {
-	if(!this.id)
-		throw new Error("[dashboard.id] required");
-	if(!this.renderContext)
-		throw new Error("[dashboard.renderContext] required");
+	if(!this.id())
+		throw new Error("dashboard id required");
+	if(!this.renderContext())
+		throw new Error("dashboard renderContext required");
 	
 	if(!this.statusPreInit() && !this.statusDestroyed())
-		throw new Error("dashboard is illegal state for init()");
+		throw new Error("dashboard is illegal state for : init()");
 	
 	this.statusIniting(true);
 	
@@ -877,7 +874,7 @@ dashboardBase.init = function()
  * 初始化地图URL映射表。
  * 它将body元素的elementAttrConst.MAP_URLS属性值设置为地图URL映射表。
  */
-dashboardBase._initMapURLs = function()
+dashboardProto._initMapURLs = function()
 {
 	var mapURLs = {};
 	
@@ -888,7 +885,7 @@ dashboardBase._initMapURLs = function()
 			mapURLs[namesMap.names[j]] = builtinChartMapBaseURL + namesMap.map;
 	}
 	
-	var mapURLsBody = $(document.body).attr(elementAttrConst.MAP_URLS);
+	var mapURLsBody = CF.eleAttr(document.body, elementAttrConst.MAP_URLS);
 	
 	if(mapURLsBody)
 		mapURLs = CF.extend(mapURLs, CF.evalSilently(mapURLsBody, {}));
@@ -900,9 +897,9 @@ dashboardBase._initMapURLs = function()
  * 初始化看板的监听器。
  * 它将body元素的elementAttrConst.DASHBOARD_LISTENER属性值设置为看板的监听器。
  */
-dashboardBase._initListener = function()
+dashboardProto._initListener = function()
 {
-	var listener = $(document.body).attr(elementAttrConst.DASHBOARD_LISTENER);
+	var listener = CF.eleAttr(document.body, elementAttrConst.DASHBOARD_LISTENER);
 	
 	if(listener)
 		listener = CF.evalSilently(listener);
@@ -913,13 +910,11 @@ dashboardBase._initListener = function()
 /**
  * 初始化自动调整图表大小处理器。
  */
-dashboardBase._initChartResizeHandler = function()
+dashboardProto._initChartResizeHandler = function()
 {
-	var $window = $(window);
-	
 	//解绑之前的，确保此函数可重复调用
-	if(this._windowResizeHandler)
-		$window.off("resize", this._windowResizeHandler);
+	if(this._windowResizeHandler != null)
+		window.removeEventListener("resize", this._windowResizeHandler);
 	
 	var thisDashboard = this;
 	this._windowResizeHandler = function()
@@ -931,7 +926,7 @@ dashboardBase._initChartResizeHandler = function()
 		{
 			if(thisDashboard.statusRendered())
 			{
-				var charts = thisDashboard.charts;
+				var charts = thisDashboard.charts();
 				
 				for(var i =0; i<charts.length; i++)
 				{
@@ -945,48 +940,44 @@ dashboardBase._initChartResizeHandler = function()
 		DF.RESIZE_CHART_TIMEOUT_MS);
 	};
 	
-	$window.on("resize", this._windowResizeHandler);
+	window.addEventListener("resize", this._windowResizeHandler);
 };
 
-dashboardBase._initUnloadDashboardHandler = function()
+dashboardProto._initUnloadDashboardHandler = function()
 {
-	var $window = $(window);
-	
 	//解绑之前的，确保此函数可重复调用
 	if(this._windowBeforeunloadHandler)
-		$window.off("beforeunload", this._windowBeforeunloadHandler);
+		window.removeEventListener("beforeunload", this._windowBeforeunloadHandler);
 	
 	var thisDashboard = this;
 	this._windowBeforeunloadHandler = function()
 	{
-		var renderContext = thisDashboard.renderContext;
+		var renderContext = thisDashboard.renderContext();
 		var webContext = CF.renderContextAttrWebContext(renderContext);
 		var unloadURL = webContext.attributes[DF.unloadConfig.urlAttrName];
 		unloadURL = thisDashboard.contextURL(unloadURL);
 		var data = {};
 		data[DF.unloadConfig.dashboardIdParamName] = thisDashboard.id;
 		
-		$.post(unloadURL, data);
+		fetch(unloadURL, DF.fetchOptsOfPostJson(data));
 	}
 	
-	$window.on("beforeunload", this._windowBeforeunloadHandler);
+	window.addEventListener("beforeunload", this._windowBeforeunloadHandler);
 };
 
-dashboardBase._initCharts = function()
+dashboardProto._initCharts = function()
 {
-	if(!this.charts)
-		return;
+	var charts = this.charts();
 	
-	for(var i=0; i<this.charts.length; i++)
+	for(var i=0; i<charts.length; i++)
 	{
-		var chart = this.charts[i];
+		var chart = charts[i];
 		
 		if(chart.manualRender())
 			continue;
 		
 		//如果图表元素不存在（比如在<template></template>里），应忽略初始化
-		var chartEle = chart.element();
-		if(chartEle == null)
+		if(chart.element() == null)
 		{
 			CF.logWarn("chart '#"+chart.elementId()+"' element not found, init() ignored");
 			continue;
@@ -1009,6 +1000,14 @@ dashboardBase._initChart = function(chart)
 	{
 		CF.logException(e);
 	}
+};
+
+/**
+ * 获取看板ID
+ */
+dashboardBase.id = function()
+{
+	return this._root.id;
 };
 
 /**
@@ -3190,18 +3189,35 @@ dashboardBase.resizeChartsIn = function(element)
 //----------------------------------------
 
 /**
+ * 获取POST JSON的fetch选项
+ */
+DF.fetchOptsOfPostJson = function(data)
+{
+	var re =
+	{
+		method: "POST",
+		cache: "no-cache",
+		credentials: "same-origin",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(data)
+	};
+	
+	return re;
+};
+
+/**
  * 获取对象的指定属性路径的值。
  * 
  * @param obj
  * @param propertyPath 属性路径，示例：order、order.product、[0].name、order['product'].name
- * @return 属性路径值，属性路径不存在则返回undefined
+ * @return 属性路径值，属性路径不存在则返回null
  */
 DF.getPropertyPathValue = function(obj, propertyPath)
 {
 	if(obj == null)
-		return undefined;
+		return null;
 	
-	var value = undefined;
+	var value = null;
 	
 	//简单属性值
 	value = obj[propertyPath];
@@ -3221,7 +3237,8 @@ DF.getPropertyPathValue = function(obj, propertyPath)
 	}
 	catch(e)
 	{
-		value = undefined;
+		CF.logException(e);
+		value = null;
 	}
 	
 	return value;
