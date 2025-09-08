@@ -990,7 +990,7 @@ dashboardProto._initCharts = function()
 	}
 };
 
-dashboardBase._initChart = function(chart)
+dashboardProto._initChart = function(chart)
 {
 	try
 	{
@@ -1005,7 +1005,7 @@ dashboardBase._initChart = function(chart)
 /**
  * 获取看板ID
  */
-dashboardBase.id = function()
+dashboardProto.id = function()
 {
 	return this._root.id;
 };
@@ -1013,7 +1013,7 @@ dashboardBase.id = function()
 /**
  * 获取全部图表
  */
-dashboardBase.charts = function()
+dashboardProto.charts = function()
 {
 	return this._root.charts;
 };
@@ -1021,13 +1021,13 @@ dashboardBase.charts = function()
 /**
  * 获取看板渲染上下文。
  */
-dashboardBase.renderContext = function()
+dashboardProto.renderContext = function()
 {
 	this._root.renderContext;
 };
 
 /**
- * 获取/设置初始看板监听器。
+ * 获取/设置看板监听器。
  * 看板监听器格式为：
  * {
  *   //可选，渲染看板后置回调函数
@@ -1037,26 +1037,14 @@ dashboardBase.renderContext = function()
  *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
  *   onRender: function(dashboard){ ... },
  *   //可选，销毁看板前置回调函数，返回false将阻止销毁看板
- *   onDestroy: function(dashboard){ ... },
- *   //可选，从服务端加载数据前置回调函数
- *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
- *   onFetch: function(dashboard, fetchContext){ ... },
- *   //可选，从服务端加载数据成功回调函数，将在相关图表逻辑执行前调用
- *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
- *   fetchSuccess: function(dashboard, result, fetchContext){ ... },
- *   //可选，从服务端加载数据出错回调函数，将在相关图表逻辑执行前调用
- *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
- *   fetchError: function(dashboard, error, fetchContext){ ... },
- *   //可选，从服务端加载数据完成回调函数，将在fetchSuccess/fetchError后、且相关图表逻辑都执行完后调用
- *   //暂不启用，很难覆盖完整周期，且暴露过多内部结构
- *   fetchComplete: function(dashboard, fetchContext){ ... }
+ *   onDestroy: function(dashboard){ ... }
  * }
  * 
  * 看板初始化时会使用<body>元素的"dg-dashboard-listener"属性值执行设置操作。
  * 
  * @param listener 可选，要设置的监听器对象，没有则执行获取操作
  */
-dashboardBase.listener = function(listener)
+dashboardProto.listener = function(listener)
 {
 	if(listener === undefined)
 		return this._listener;
@@ -1070,64 +1058,64 @@ dashboardBase.listener = function(listener)
  * @param mapURLs 可选，要设置的地图URL映射表，仅会覆盖同名的地图URL映射，格式为参考CF.chartMapURLs说明
  * @returns 要获取的地图URL映射表
  */
-dashboardBase.mapURLs = function(mapURLs)
+dashboardProto.mapURLs = function(mapURLs)
 {
 	if(!CF.chartMapURLs)
 		CF.chartMapURLs = {};
 	
 	if(mapURLs === undefined)
 		return CF.chartMapURLs;
-	
-	CF.extend(CF.chartMapURLs, mapURLs);
+	else
+		CF.extend(CF.chartMapURLs, mapURLs);
 };
 
 /**
  * 获取指定标识的图表，没有则返回undefined。
  * 
- * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param chartInfo 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
  */
-dashboardBase.chartOf = function(chartInfo)
+dashboardProto.chartOf = function(chartInfo)
 {
-	var index = this.chartIndex(chartInfo);
+	var charts = this.charts();
+	var index = this._chartIndex(charts, chartInfo);
 	
-	return (index < 0 ? undefined : this.charts[index]);
+	return (index < 0 ? null : charts[index]);
 };
 
 /**
  * 获取指定图表在看板图表数组中的索引号，返回-1表示未找到。
  * 
- * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param chartInfo 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
  */
-dashboardBase.chartIndex = function(chartInfo)
+dashboardProto.chartIndex = function(chartInfo)
 {
-	return this._chartIndex(this.charts, chartInfo);
+	var charts = this.charts();
+	return this._chartIndex(charts, chartInfo);
 };
 
 /**
  * 获取图表索引，返回-1表示未找到。
  * 
  * @param charts 待查找的图表数组
- * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  */
-dashboardBase._chartIndex = function(charts, chartInfo)
+dashboardProto._chartIndex = function(charts, chartInfo)
 {
-	if(!charts)
+	if(charts == null || chartInfo == null)
 		return -1;
 	
-	//jQuery对象，取第一个元素
-	if(chartInfo instanceof jQuery)
-	{
-		chartInfo = (chartInfo.length > 0 ? chartInfo[0] : null);
-	}
+	if(CF.isHtmlEle(chartInfo))
+		chartInfo = CF.eleAttr(chartInfo, "id");
 	
 	for(var i=0; i<charts.length; i++)
 	{
-		if(charts[i] === chartInfo
-				|| charts[i].elementId() === chartInfo
-				|| charts[i].id() === chartInfo
-				|| charts[i].element() === chartInfo
-				|| i === chartInfo)
+		var chart = charts[i];
+		
+		if(chart === chartInfo || chart.elementId() === chartInfo
+				|| i === chartInfo || chart.id() === chartInfo)
+		{
 			return i;
+		}
 	}
 	
 	return -1;
@@ -1139,7 +1127,7 @@ dashboardBase._chartIndex = function(charts, chartInfo)
  * 
  * @param chart 图表对象
  */
-dashboardBase.addChart = function(chart)
+dashboardProto.addChart = function(chart)
 {
 	var exists = this.chartOf(chart);
 	
@@ -1153,7 +1141,8 @@ dashboardBase.addChart = function(chart)
 	
 	//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
 	
-	this.charts = this.charts.concat(chart);
+	var charts = this.charts();
+	charts.push(chart);
 	
 	return true;
 };
@@ -1161,33 +1150,32 @@ dashboardBase.addChart = function(chart)
 /**
  * 删除图表。
  * 
- * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  * @param doDestroy 选填参数，是否销毁图表，默认为true
- * @return 移除的图表对象，或者图表未找到时为undefined
+ * @return 移除的图表对象，或者图表未找到时为null
  */
-dashboardBase.removeChart = function(chartInfo, doDestroy)
+dashboardProto.removeChart = function(chartInfo, doDestroy)
 {
-	var newCharts = [].concat(this.charts);
-	var index = this._chartIndex(newCharts, chartInfo);
+	var charts = this.charts();
+	var index = this._chartIndex(charts, chartInfo);
 	
 	if(index < 0)
-		return undefined;
+		return null;
 	
-	var removeds = newCharts.splice(index, 1);
-	this.charts = newCharts;
+	var removed = charts.splice(index, 1)[0];
 	
-	if(doDestroy != false)
-		this._destroyChart(removeds[0]);
+	if(doDestroy !== false)
+		this._destroyChart(removed);
 	
-	return removeds[0];
+	return removed;
 };
 
 /**
  * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
  * 
- * @param element HTML元素、HTML元素ID、Jquery对象
+ * @param element HTML元素、HTML元素ID
  */
-dashboardBase.renderedChart = function(element)
+dashboardProto.renderedChart = function(element)
 {
 	return CF.renderedChart(element);
 };
@@ -1198,9 +1186,10 @@ dashboardBase.renderedChart = function(element)
  * @param attrName
  * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
  */
-dashboardBase.renderContextAttr = function(attrName, attrValue)
+dashboardProto.renderContextAttr = function(attrName, attrValue)
 {
-	return CF.renderContextAttr(this.renderContext, attrName, attrValue);
+	var rc = this.renderContext();
+	return CF.renderContextAttr(rc, attrName, attrValue);
 };
 
 /**
@@ -1211,7 +1200,7 @@ dashboardBase.renderContextAttr = function(attrName, attrValue)
  * @param resultDataFormat 可选，要设置的结果数据格式，结构参考：org.datagear.analysis.ResultDataFormat
  * @returns 要获取的结果数据格式，没有则返回null
  */
-dashboardBase.resultDataFormat = function(resultDataFormat)
+dashboardProto.resultDataFormat = function(resultDataFormat)
 {
 	if(resultDataFormat === undefined)
 		return this._resultDataFormat;
@@ -1228,13 +1217,13 @@ dashboardBase.resultDataFormat = function(resultDataFormat)
  * 只有this.statusPreInit()或者this.statusInited()或者this.statusDestroyed()为true时，此函数才允许执行。
  * 特别地，当处于this.statusPreInit()时，此函数内部会先调用this.init()函数。
  */
-dashboardBase.render = function()
+dashboardProto.render = function()
 {
 	if(this.statusPreInit())
 		this.init();
 	
 	if(!this.statusInited() && !this.statusDestroyed())
-		throw new Error("dashboard is illegal state for render()");
+		throw new Error("dashboard is illegal state for : render()");
 	
 	this.statusRendering(true);
 	
@@ -1254,10 +1243,10 @@ dashboardBase.render = function()
  * 执行看板渲染，渲染所有看板表单元素，渲染所有符合状态的图表元素；
  * 渲染看版内所有处于chart.statusPreRender()或者chart.statusDestroyed()状态的图表；
  */
-dashboardBase.doRender = function()
+dashboardProto.doRender = function()
 {
 	if(!this.statusRendering())
-		throw new Error("dashboard is illegal state for doRender()");
+		throw new Error("dashboard is illegal state for : doRender()");
 	
 	this._renderForms();
 	this._prepareDoRenderCharts();
@@ -1266,14 +1255,13 @@ dashboardBase.doRender = function()
 	this.statusRendered(true);
 };
 
-dashboardBase._prepareDoRenderCharts = function()
+dashboardProto._prepareDoRenderCharts = function()
 {
-	if(!this.charts)
-		return;
+	var charts = this.charts();
 	
-	for(var i=0; i<this.charts.length; i++)
+	for(var i=0; i<charts.length; i++)
 	{
-		var chart = this.charts[i];
+		var chart = charts[i];
 		
 		if(chart.manualRender())
 			continue;
@@ -1285,33 +1273,27 @@ dashboardBase._prepareDoRenderCharts = function()
 	}
 };
 
-/**
- * 渲染你看板表单。
- */
-dashboardBase._renderForms = function()
+//渲染看板表单
+dashboardProto._renderForms = function()
 {
-	var $forms = $("form[dg-dashboard-form]", document.body);
+	var forms = CF.elesOfSelector("form[dg-dashboard-form]");
 	
 	var dashboard = this;
-	$forms.each(function()
+	forms.forEach(function(form)
 	{
-		dashboard.renderForm(this);
+		dashboard.renderForm(form);
 	});
 };
 
-/**
- * 校验看板是否是活着的。
- */
-dashboardBase._assertAlive = function()
+//校验看板是否是活着的
+dashboardProto._assertAlive = function()
 {
 	if(!this.isAlive())
 		throw new Error("dashboard not alive");
 };
 
-/**
- * 校验看板是否处于活跃状态。
- */
-dashboardBase._assertActive = function()
+//校验看板是否处于活跃状态
+dashboardProto._assertActive = function()
 {
 	if(!this.isActive())
 		throw new Error("dashboard not active");
@@ -1368,18 +1350,17 @@ dashboardBase._assertActive = function()
  * 
  * 图表数据集参数索引对象格式参考dashboardBase._batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
  * 
- * @param form 要渲染的<form>表单元素、Jquery选择器、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
+ * @param form 要渲染的<form>表单HTML元素，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
  * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
  */
-dashboardBase.renderForm = function(form, config)
+dashboardProto.renderForm = function(form, config)
 {
 	this._assertAlive();
 	
-	form = jQuery(form)
-	form.addClass("dg-dashboard-form");
+	CF.eleAddClass(form, "dg-dashboard-form");
 	
-	if(!config)
-		config = CF.evalSilently(form.attr(elementAttrConst.DASHBOARD_FORM), {});
+	if(config == null)
+		config = CF.evalSilently(CF.eleAttr(form, elementAttrConst.DASHBOARD_FORM), {});
 	
 	var dashboard = this;
 	var globalTheme = CF.renderContextAttrChartTheme(this.renderContext);
@@ -1389,12 +1370,11 @@ dashboardBase.renderForm = function(form, config)
 	{
 		submit: function(formData)
 		{
-			var thisForm = this;
-			var batchSet = $(thisForm).data(bindBatchSetName);
+			var batchSet = CF.eleData(form, bindBatchSetName);
 			
 			if(batchSet)
 			{
-				var charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
+				var charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ form, thisForm ]);
 				
 				for(var i=0; i<charts.length; i++)
 				{
@@ -1454,7 +1434,7 @@ dashboardBase.renderForm = function(form, config)
 			batchSet.data[item.name] = item.link;
 	}
 	
-	form.data(bindBatchSetName, batchSet);
+	CF.eleData(form, bindBatchSetName, batchSet);
 	
 	config.paramValues = defaultValues;
 	config.chartTheme = globalTheme;
@@ -1466,10 +1446,10 @@ dashboardBase.renderForm = function(form, config)
 /**
  * 重新调整指定图表尺寸。
  * 
- * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  * @returns 图表对象
  */
-dashboardBase.resizeChart = function(chartInfo)
+dashboardProto.resizeChart = function(chartInfo)
 {
 	this._assertActive();
 	
@@ -1482,27 +1462,23 @@ dashboardBase.resizeChart = function(chartInfo)
 /**
  * 重新调整所有活跃图表尺寸。
  */
-dashboardBase.resizeAllCharts = function()
+dashboardProto.resizeAllCharts = function()
 {
 	this._assertActive();
 	
-	for(var i=0; i<this.charts.length; i++)
+	this.charts().forEach(function(chart)
 	{
-		var chart = this.charts[i];
-		
 		if(chart.isActive())
-		{
 			chart.resize();
-		}
-	}
+	});
 };
 
 /**
  * 从服务端获取并更新图表数据。
  * 
- * @param chartInfo 图表标识信息：图表Jquery对象、图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  */
-dashboardBase.refreshData = function(chartInfo)
+dashboardProto.refreshData = function(chartInfo)
 {
 	this._assertActive();
 	
@@ -1513,45 +1489,60 @@ dashboardBase.refreshData = function(chartInfo)
 /**
  * 是否正在监视处理看板图表。
  */
-dashboardBase.isHandlingCharts = function()
+dashboardProto.isHandlingCharts = function()
 {
-	return (this._doHandlingCharts == true);
+	return (this._handlingChartsIntervalId != null);
 };
 
 /**
  * 开始监视处理看板图表，循环查看它们的状态，执行相应操作：
- * 如果图表需要渲染，则执行chart.render()；如果图表需要更新，则执行chart.update()。
+ * 如果图表需要渲染，则执行chart.render()函数；如果图表需要更新，则执行chart.update()函数。
  */
-dashboardBase.startHandleCharts = function()
+dashboardProto.startHandleCharts = function()
 {
 	this._assertAlive();
 	
-	if(this._doHandlingCharts == true)
-		return false;
+	if(this._handlingChartsIntervalId != null)
+		clearInterval(this._handlingChartsIntervalId);
 	
-	this._doHandlingCharts = true;
-	this._doHandleCharts();
+	var doHandleCharts = false;
+	var dashboard = this;
 	
-	return true;
+	this._handlingChartsIntervalId = setInterval(function()
+	{
+		if(doHandleCharts == true)
+			return;
+		
+		doHandleCharts = true;
+		
+		CF.executeSilently(function()
+		{
+			dashboard._doHandleCharts();
+		});
+		
+		doHandleCharts = false;
+	},
+	DF.HANDLE_CHART_INTERVAL_MS);
 };
 
 /**
- * 停止监视处理看板图表。
+ * 停止监视处理看板图表
  */
-dashboardBase.stopHandleCharts = function()
+dashboardProto.stopHandleCharts = function()
 {
-	this._doHandlingCharts = false;
+	if(this._handlingChartsIntervalId != null)
+	{
+		clearInterval(this._handlingChartsIntervalId);
+		this._handlingChartsIntervalId = null;
+	}
 };
 
 /**
  * 开始循环处理看板所有图表，根据其状态执行render或者update。
  */
-dashboardBase._doHandleCharts = function()
+dashboardProto._doHandleCharts = function()
 {
-	if(this._doHandlingCharts != true)
-		return;
-	
-	var charts = (this.charts || []);
+	var charts = this.charts();
 	
 	for(var i=0; i<charts.length; i++)
 	{
@@ -1623,15 +1614,9 @@ dashboardBase._doHandleCharts = function()
 			dashboard._doHandleChartsAjax(url, group, preUpdateGroups[group]);
 		});
 	}
-	
-	setTimeout(function()
-	{
-		dashboard._doHandleCharts();
-	},
-	DF.HANDLE_CHART_INTERVAL_MS);
 };
 
-dashboardBase._isWaitForRender = function(chart)
+dashboardProto._isWaitForRender = function(chart)
 {
 	return chart.statusPreRender();
 };
@@ -1642,7 +1627,7 @@ dashboardBase._isWaitForRender = function(chart)
  * @param currentTime
  * @returns 0 否；1 是，但不是refreshData()触发；2 是，并且由refreshData()触发
  */
-dashboardBase._isWaitForUpdate = function(chart, currentTime)
+dashboardProto._isWaitForUpdate = function(chart, currentTime)
 {
 	if(!chart.isActive())
 		return 0;
@@ -1657,6 +1642,7 @@ dashboardBase._isWaitForUpdate = function(chart, currentTime)
 	}
 	else
 	{
+		var updateInterval = chart.updateInterval();
 		var isRequestRefreshData = chart._isRequestRefreshData();
 		
 		if(isRequestRefreshData)
@@ -1667,11 +1653,9 @@ dashboardBase._isWaitForUpdate = function(chart, currentTime)
 		{
 			wait = 1;
 		}
-		else if(chart.updateInterval > -1 && (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
+		else if(updateInterval > -1 && (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
 		{
-			var updateInterval = chart.updateInterval;
 			var prevUpdateTime = chart._updateTime();
-			
 			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
 			{
 				wait = 1;
@@ -1697,13 +1681,13 @@ dashboardBase._isWaitForUpdate = function(chart, currentTime)
 	return wait;
 };
 
-dashboardBase._isLocalChart = function(chart)
+dashboardProto._isLocalChart = function(chart)
 {
 	var dataSetBinds = chart.dataSetBinds();
 	return (dataSetBinds.length == 0);
 };
 
-dashboardBase._renderChart = function(chart)
+dashboardProto._renderChart = function(chart)
 {
 	try
 	{
@@ -1717,7 +1701,7 @@ dashboardBase._renderChart = function(chart)
 	}
 };
 
-dashboardBase._chartsOfChartQueryPairs = function(chartQueryPairs)
+dashboardProto._chartsOfChartQueryPairs = function(chartQueryPairs)
 {
 	var re = [];
 	
@@ -1729,7 +1713,7 @@ dashboardBase._chartsOfChartQueryPairs = function(chartQueryPairs)
 	return re;
 };
 
-dashboardBase._doHandleChartsLocal = function(chartQueryPairs)
+dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
 {
 	if(!chartQueryPairs || chartQueryPairs.length == 0)
 		return;
@@ -1843,18 +1827,6 @@ dashboardBase._execListenerOnFetch = function(fetchContext)
 	var charts = fetchContext.charts;
 	var dashboardQuery = fetchContext.query;
 	
-	/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
-	var dashboard = this;
-	var listener = this.listener();
-	if(listener && listener.onFetch)
-	{
-		CF.executeSilently(function()
-		{
-			listener.onFetch(dashboard, fetchContext);
-		});
-	}
-	*/
-	
 	for(var i=0; i<charts.length; i++)
 	{
 		var chart = charts[i];
@@ -1881,17 +1853,6 @@ dashboardBase._handleChartsAjaxSuccess = function(fetchContext, dashboardResult,
 	var chartResults = dashboardResult.chartResults;
 	var chartErrors = dashboardResult.chartErrors;
 	var dashboardQuery = fetchContext.query;
-	
-	/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
-	var listener = this.listener();
-	if(listener && listener.fetchSuccess)
-	{
-		CF.executeSilently(function()
-		{
-			listener.fetchSuccess(dashboard, dashboardResult, fetchContext);
-		});
-	}
-	*/
 	
 	for(var chartId in chartResults)
 	{
@@ -1922,16 +1883,6 @@ dashboardBase._handleChartsAjaxSuccess = function(fetchContext, dashboardResult,
 			dashboard._handleChartAjaxError(chart, error, chartQuery, true);
 		});
 	}
-	
-	/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
-	if(listener && listener.fetchComplete)
-	{
-		CF.executeSilently(function()
-		{
-			listener.fetchComplete(dashboard, fetchContext);
-		});
-	}
-	*/
 };
 
 dashboardBase._handleChartsAjaxError = function(fetchContext, xhr, textStatus, errorThrown)
@@ -1945,23 +1896,6 @@ dashboardBase._handleChartsAjaxError = function(fetchContext, xhr, textStatus, e
 	var errorMsg = (errorThrown ? errorThrown : (textStatus ? textStatus : "error"));
 	var logException = true;
 	
-	/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
-	var listener = this.listener();
-	if(listener && listener.fetchError)
-	{
-		logException = false;
-		
-		CF.executeSilently(function()
-		{
-			listener.fetchError(dashboard, error, fetchContext);
-		});
-	}
-	else
-	{
-		logException = true;
-	}
-	*/
-	
 	for(var i=0; i<charts.length; i++)
 	{
 		var chart = charts[i];
@@ -1974,16 +1908,6 @@ dashboardBase._handleChartsAjaxError = function(fetchContext, xhr, textStatus, e
 			dashboard._handleChartAjaxError(chart, error, chartQuery, false);
 		});
 	}
-	
-	/* 暂不启用，很难覆盖完整周期，且暴露过多内部结构
-	if(listener && listener.fetchComplete)
-	{
-		CF.executeSilently(function()
-		{
-			listener.fetchComplete(dashboard, fetchContext);
-		});
-	}
-	*/
 	
 	if(logException)
 	{

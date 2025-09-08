@@ -4834,11 +4834,15 @@ CF.elesWithWidgetId = function(ele)
 /**
  * 获取当前在指定HTML元素上渲染的图表对象。
  * 
- * @param ele HTML元素
+ * @param ele HTML元素、HTML元素ID
  * @returns 图表对象，null表示元素上并未渲染图表
  */
 CF.renderedChart = function(ele)
 {
+	//元素ID
+	if(CF.isString(ele))
+		ele = CF.eleOfId(ele);
+	
 	return CF.eleData(ele, CF.ELE_RENDERED_CHART_NAME);
 };
 
