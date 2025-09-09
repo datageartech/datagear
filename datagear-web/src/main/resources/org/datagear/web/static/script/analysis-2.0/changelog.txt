@@ -42,3 +42,7 @@ dg-chart-auto-resize默认值为true
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()
 dashboard.renderContext -> dashboard.renderContext()
+dashboard.loadChart()	*
+dashboard.loadCharts()	*
+dashboard.loadUnsolvedCharts()	*
+dashboard.originalDataIndex()	x	

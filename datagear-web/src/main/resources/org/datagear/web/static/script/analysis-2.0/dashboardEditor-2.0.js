@@ -3459,7 +3459,7 @@
 	//注意：返回的图表元素中可能有还未渲染为图表的元素
 	editor._getChartElements = function(ele)
 	{
-		return $(chartFactory.elesWithWidgetId(ele));
+		return $(chartFactory.elesWithWidgetId(ele).elements);
 	};
 	
 	editor._selectedElement = function(context)

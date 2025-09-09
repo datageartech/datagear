@@ -4806,24 +4806,31 @@ CF.elementWidgetId = function(ele, widgetId)
  * 获取HTML元素自身或其子孙元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
  * 
  * @param ele HTML元素
- * @returns HTML元素数组
+ * @returns { elements: [ HTML元素, ... ], widgetIds: [ "...", ... ] }
  */
 CF.elesWithWidgetId = function(ele)
 {
-	var re = [];
+	var re = { elements: [], widgetIds: [] };
 	
 	if(ele == null)
 		return re;
 	
-	if(!CF.isNullOrEmpty(CF.elementWidgetId(ele)))
-		re.push(ele);
+	var widgetId = CF.elementWidgetId(ele);
+	
+	if(!CF.isNullOrEmpty(widgetId))
+	{
+		re.elements.push(ele);
+		re.widgetIds.push(widgetId);
+	}
 	
 	var children = CF.elesOfSelector("["+CF.elementAttrConst.WIDGET+"]", ele);
 	children.forEach(function(child)
 	{
-		if(!CF.isNullOrEmpty(CF.elementWidgetId(child)))
+		let childWidgetId = CF.elementWidgetId(child);
+		if(!CF.isNullOrEmpty(childWidgetId))
 		{
-			re.push(child);
+			re.elements.push(child);
+			re.widgetIds.push(childWidgetId);
 		}
 	});
 	

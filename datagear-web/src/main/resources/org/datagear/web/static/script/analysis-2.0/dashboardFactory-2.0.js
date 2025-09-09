@@ -28,12 +28,12 @@
  * 
  * 
  * 此看板工厂支持为<body>元素添加elementAttrConst.DASHBOARD_LISTENER属性，用于指定看板监听器JS对象名，
- * 看板监听器格式参考dashboardBase.listener()函数说明。
+ * 看板监听器格式参考dashboard.listener()函数说明。
  * 
  * 此看板工厂支持为<body>元素添加elementAttrConst.MAP_URLS属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
  * 
- * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chartBase.links函数说明。
+ * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chart.links()函数说明。
  * 
  * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.AUTO_RESIZE属性，用于设置图表是否自动调整大小。
  * 
@@ -47,7 +47,7 @@
  *   updateError: function(chart, error){ ... }
  * }
  * 
- * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboardBase._renderForms函数说明。
+ * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboard._renderForms()函数说明。
  * 
  */
 (function(global, window)
@@ -58,9 +58,6 @@ var CF = (global.chartFactory || (global.chartFactory = {}));
 
 /**看板工厂*/
 var DF = (global.dashboardFactory || (global.dashboardFactory = {}));
-
-/**图表对象基类*/
-var chartBase = (CF.chartBase || (CF.chartBase = {}));
 
 /**图表状态常量*/
 var chartStatusConst = (CF.chartStatusConst || (CF.chartStatusConst = {}));
@@ -73,9 +70,6 @@ var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttr
 
 /**看板状态常量*/
 var dashboardStatusConst = (DF.dashboardStatusConst || (DF.dashboardStatusConst = {}));
-
-/**看板对象基类*/
-var dashboardBase = (DF.dashboardBase || (DF.dashboardBase = {}));
 
 /** 内置地图 */
 var builtinChartMaps = (DF.builtinChartMaps || (DF.builtinChartMaps = []));
@@ -270,6 +264,19 @@ DF.init = function(root)
 	return dashboard;
 };
 
+DF.initRenderContext = function(renderContext)
+{
+	var chartTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme);
+	if(!chartTheme)
+	{
+		var dashboardTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
+		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
+		CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
+	}
+	
+	CF.initRenderContext(renderContext);
+};
+
 /**
  * 创建看板实例
  * 
@@ -294,29 +301,16 @@ DF.Dashboard = function(root)
 	var charts = this._root.charts;
 	for(let i=0; i<charts.length; i++)
 	{
-		charts[i] = DF.initChart(charts[i]);
+		charts[i] = DF.initChart(charts[i], root.renderContext, this);
 	}
 };
 
 //Dashboard类原型
 var dashboardProto = DF.Dashboard.prototype;
 
-DF.initRenderContext = function(renderContext)
+DF.initChart = function(chartRoot, renderContext, dashboard)
 {
-	var chartTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme);
-	if(!chartTheme)
-	{
-		var dashboardTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
-		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
-		CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
-	}
-	
-	CF.initRenderContext(renderContext);
-};
-
-DF.initChart = function(dashboard, chartRoot)
-{
-	chartRoot.renderContext = dashboard.renderContext;
+	chartRoot.renderContext = renderContext;
 	var chart = CF.init(chartRoot);
 	chart.dashboard(dashboard);
 	
@@ -554,7 +548,7 @@ chartProto.updateGroup = function(group)
  * 当linkDataHander()函数未定义时，传入图表事件处理函数的第一个非null的object类型（typeof(arg) === 'object'）参数将会作为联动数据源。
  * 联动数据处理函数应返回一个联动数据对象或其数组，格式为：{ ... }、[ {...}, ... ]。
  * 
- * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
+ * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
  * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: ..., eventHandler: function(...){ ... } }, ... ]
  */
 chartProto.bindLinksEventHanders = function(links)
@@ -654,7 +648,7 @@ chartProto._resolveLinkTriggers = function(link)
  * 
  * @param eventType 事件类型
  * @param linkSrcData 联动数据
- * @param links 图表联动设置对象、数组，格式参考chartBase.links函数说明
+ * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
  */
 chartProto._handleChartEventLink = function(eventType, linkSrcData, links)
 {
@@ -818,7 +812,7 @@ chartProto.manualRender = function(manualRender)
 
 
 //----------------------------------------
-// dashboardBase start
+// Dashboard prototype start
 //----------------------------------------
 
 /**
@@ -1335,7 +1329,7 @@ dashboardProto._assertActive = function()
  * }
  * 或者，简写为图表联动设置对象的target属性值。
  * 
- * 图表数据集参数索引对象格式参考dashboardBase._batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
+ * 图表数据集参数索引对象格式参考dashboard._batchSetDataSetParamValues()函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
  * 
  * @param form 要渲染的<form>表单HTML元素，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
  * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
@@ -1689,7 +1683,7 @@ dashboardProto._chartsOfChartQueryPairs = function(chartQueryPairs)
 {
 	var re = [];
 	
-	for(var i=0; i<chartQueryPairs.length; i++)
+	for(let i=0; i<chartQueryPairs.length; i++)
 	{
 		re.push(chartQueryPairs[i].chart);
 	}
@@ -1722,11 +1716,11 @@ dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
 	
 	try
 	{
-		for(var i=0; i<charts.length; i++)
+		for(let i=0; i<charts.length; i++)
 		{
-			var chart = charts[i];
-			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
-			var chartResult = {};
+			let chart = charts[i];
+			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
+			let chartResult = {};
 			//设置空数据集结果数组，避免后续出现空指针异常
 			chart.results(chartResult, []);
 			
@@ -1770,25 +1764,22 @@ dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
 		
 		try
 		{
-			if(response.ok)
+			response.json().then((data) =>
 			{
-				let dashboardResult = response.json();
-				dashboardResult = (dashboardResult ? dashboardResult : {});
-				dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
-				dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
-				
-				this._handleChartsAjaxSuccess(fetchContext, dashboardResult);
-			}
-			else
-			{
-				let error = null;
-				CF.executeSilently(() =>
+				if(response.ok)
 				{
-					error = response.json();
-				});
-				
-				this._handleChartsAjaxError(fetchContext, error);
-			}
+					let dashboardResult = (data ? data : {});
+					dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
+					dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
+					
+					this._handleChartsAjaxSuccess(fetchContext, dashboardResult);
+				}
+				else
+				{
+					let error = (data || DF.errorOfMsg("error"));
+					this._handleChartsAjaxError(fetchContext, error);
+				}
+			});
 		}
 		finally
 		{
@@ -1801,7 +1792,7 @@ dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
 		
 		try
 		{
-			this._handleChartsAjaxError(fetchContext, error)
+			this._handleChartsAjaxError(fetchContext, DF.errorOfFetchError(error))
 		}
 		finally
 		{
@@ -1818,12 +1809,12 @@ dashboardProto._execListenerOnFetch = function(fetchContext)
 	
 	for(var i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
-		var chartListener = chart.listener();
+		let chart = charts[i];
+		let chartListener = chart.listener();
 		
 		if(chartListener && chartListener.onFetch)
 		{
-			var chartQuery = (this._chartQueryOfDashboardQuery(dashboardQuery, chart.id()) || {});
+			let chartQuery = (this._chartQueryOfDashboardQuery(dashboardQuery, chart.id()) || {});
 			
 			CF.executeSilently(function()
 			{
@@ -1881,15 +1872,15 @@ dashboardProto._handleChartsAjaxError = function(fetchContext, error)
 	var errorMsg = (error && error.message ? error.message : "error");
 	var logException = true;
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
+		let chart = charts[i];
 		
 		CF.executeSilently(() =>
 		{
 			//结构同：org.datagear.analysis.support.ChartResultErrorMessage
-			var error = { type: "Error", message: errorMsg };
-			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
+			let error = { type: "Error", message: errorMsg };
+			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
 			this._handleChartAjaxError(chart, error, chartQuery, false);
 		});
 	}
@@ -1936,8 +1927,8 @@ dashboardProto._handleChartResultError = function(chart, error, chartQuery, setE
 	
 	if(logIfNone)
 	{
-		var type = (error ? error.type : "Error");
-		var message = (error ? error.message : "chart result error");
+		let type = (error ? error.type : "Error");
+		let message = (error ? error.message : "chart result error");
 		CF.logException("chart '#"+chart.elementId()+"' " + type + " : " + message);
 	}
 };
@@ -2014,10 +2005,10 @@ dashboardProto._buildDashboardQueryForm = function(chartQueryPairs)
 	
 	if(chartQueryPairs && chartQueryPairs.length > 0)
 	{
-		for(var i=0; i<chartQueryPairs.length; i++)
+		for(let i=0; i<chartQueryPairs.length; i++)
 		{
-			var chart = chartQueryPairs[i].chart;
-			var chartQuery = chartQueryPairs[i].query;
+			let chart = chartQueryPairs[i].chart;
+			let chartQuery = chartQueryPairs[i].query;
 			this._chartQueryOfDashboardQuery(dashboardQuery, chart.id(), chartQuery);
 		}
 	}
@@ -2068,11 +2059,11 @@ dashboardProto._buildChartQuery = function(chart)
 	}
 	
 	var dataSetBinds = chart.dataSetBinds();
-	for(var i=0; i<dataSetBinds.length; i++)
+	for(let i=0; i<dataSetBinds.length; i++)
 	{
 		//这里无需处理是否忽略获取结果（ignoreFetch），后台会处理
 		//这里需要深度拷贝，因为后续可能会被修改
-		var dataSetQuery = CF.extend(true, {}, dataSetBinds[i].query);
+		let dataSetQuery = CF.extend(true, {}, dataSetBinds[i].query);
 		chartQuery.dataSetQueries.push(dataSetQuery);
 	}
 	
@@ -2099,194 +2090,81 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * 支持调用方式：
  * dashboard.loadChart(element);
  * dashboard.loadChart(element, chartWidgetId);
- * dashboard.loadChart(element, ajaxOptions);
- * dashboard.loadChart(element, chartWidgetId, ajaxOptions);
+ * dashboard.loadChart(element, successCallback);
+ * dashboard.loadChart(element, chartWidgetId, successCallback);
  * 
- * @param element 用于渲染图表的HTML元素、Jquery选择器、Jquery对象
- * @param chartWidgetId 选填参数，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param ajaxOptions 选填参数，参数格式可以是图表加载成功回调函数：function(chart){ ... }，也可以是ajax配置项：{...}。
- * 					  如果图表加载成功回调函数、ajax配置项的success函数返回false，则这个图表不会加入此看板。
+ * @param element 用于渲染图表的HTML元素、HTML元素ID
+ * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
+ * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }
+ * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
-dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
+dashboardProto.loadChart = function(element, chartWidgetId, successCallback, errorCallback)
 {
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
-	element = jQuery(element);
+	element = (CF.isString(element) ? CF.eleOfId(element) : element);
 	
-	if(this._loadingChartElement(element))
-		throw new Error("the element is loading chart");
-	
-	if(this.renderedChart(element) != null)
-		throw new Error("the element has been rendered as chart");
-	
-	//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
-	if(this.chartOf(element) != null)
-		throw new Error("there is a chart on this element");
-	
-	if(!CF.isString(chartWidgetId))
+	// (element, successCallback)
+	if(CF.isFunction(chartWidgetId))
 	{
-		ajaxOptions = chartWidgetId;
+		errorCallback = successCallback
+		successCallback = chartWidgetId;
 		chartWidgetId = null;
 	}
 	
 	if(!chartWidgetId)
 		chartWidgetId = CF.elementWidgetId(element);
 	
-	if(!chartWidgetId)
-		throw new Error("[chartWidgetId] argument or ["+CF.elementAttrConst.WIDGET
-			+"] attribute must be set for HTML element");
-	
-	if(!ajaxOptions)
-		ajaxOptions = {};
-	else if(CF.isFunction(ajaxOptions))
+	this._loadCharts([ element ], [ chartWidgetId ],
+	(charts, response) =>
 	{
-		var successHandler = ajaxOptions;
-		ajaxOptions =
-		{
-			success: successHandler
-		};
-	}
-	
-	var dashboard = this;
-	
-	var myAjaxOptions = CF.extend({}, ajaxOptions);
-	
-	var successHandler = myAjaxOptions.success;
-	myAjaxOptions.success = function(chart, textStatus, jqXHR)
-	{
-		dashboard._initLoadedChart(chart, element, chartWidgetId);
-		
-		var re = true;
-		
-		if(successHandler)
-			re = successHandler.call(this, chart, textStatus, jqXHR);
-		
-		if(re != false)
-			dashboard._addLoadedChart(chart);
-	};
-	
-	var completeHandler = myAjaxOptions.complete;
-	myAjaxOptions.complete = function(jqXHR, textStatus)
-	{
-		dashboard._loadingChartElement(element, false);
-		
-		if(completeHandler)
-			re = completeHandler.call(this, jqXHR, textStatus);
-	};
-	
-	this._loadingChartElement(element, true);
-	
-	this._loadChartJson(chartWidgetId, myAjaxOptions);
+		if(successCallback)
+			return successCallback(charts[0], response);
+	},
+	errorCallback);
 };
 
 /**
  * 异步加载多个图表，并将它们加入此看板。
  * 
  * 支持调用方式：
- * dashboard.loadCharts(element);
- * dashboard.loadCharts(element, chartWidgetId);
- * dashboard.loadCharts(element, ajaxOptions);
- * dashboard.loadCharts(element, chartWidgetId, ajaxOptions);
+ * dashboard.loadCharts(elements);
+ * dashboard.loadCharts(elements, chartWidgetIds);
+ * dashboard.loadCharts(elements, successCallback);
+ * dashboard.loadCharts(elements, chartWidgetIds, successCallback);
  * 
- * @param element 用于渲染图表的HTML元素、HTML元素数组、Jquery选择器、Jquery对象
- * @param chartWidgetId 可选，要加载的图表部件ID、图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param ajaxOptions 可选，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
- * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
+ * @param elements 用于渲染图表的CSS元素选择器字符串、HTML元素数组
+ * @param chartWidgetIds 可选，要加载的图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }
+ * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
-dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
+dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
 {
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
-	element = jQuery(element);
+	elements = (CF.isString(elements) ? CF.elesOfSelector(elements) : elements);
 	
-	for(var i=0; i<element.length; i++)
+	// (elements, successCallback)
+	if(CF.isFunction(chartWidgetIds))
 	{
-		if(this._loadingChartElement(element[i]))
-			throw new Error("the "+i+"-th element is loading chart");
-		
-		if(this.renderedChart(element[i]) != null)
-			throw new Error("the "+i+"-th element has been rendered as chart");
-		
-		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
-		if(this.chartOf(element[i]) != null)
-			throw new Error("there is a chart on the "+i+"-th element");
+		errorCallback = successCallback
+		successCallback = chartWidgetIds;
+		chartWidgetIds = null;
 	}
 	
-	if(!CF.isString(chartWidgetId) && !CF.isArray(chartWidgetId))
+	var newChartWidgetIds = [];
+	
+	for(let i=0; i<elements.length; i++)
 	{
-		ajaxOptions = chartWidgetId;
-		chartWidgetId = null;
+		newChartWidgetIds[i] = (chartWidgetIds == null ? null : chartWidgetIds[i]);
+		
+		if(!newChartWidgetIds[i])
+			newChartWidgetIds[i] = CF.elementWidgetId(elements[i]);
 	}
 	
-	if(chartWidgetId == null)
-		chartWidgetId = [];
-	else if(CF.isString(chartWidgetId))
-		chartWidgetId = [ chartWidgetId ];
-	
-	if(!ajaxOptions)
-		ajaxOptions = {};
-	else if(CF.isFunction(ajaxOptions))
-	{
-		var successHandler = ajaxOptions;
-		ajaxOptions =
-		{
-			success: successHandler
-		};
-	}
-	
-	var chartWidgetIds = [];
-	
-	element.each(function(index)
-	{
-		var $thisEle = $(this);
-		
-		var widgetId = (index < chartWidgetId.length ? chartWidgetId[index] : null);
-		if(!widgetId)
-			widgetId = CF.elementWidgetId($thisEle);
-		
-		if(!widgetId)
-			throw new Error("[chartWidgetId] argument or ["+CF.elementAttrConst.WIDGET
-				+"] attribute must be set for "+index+"-th element");
-		
-		chartWidgetIds.push(widgetId);
-	});
-	
-	var dashboard = this;
-	
-	var myAjaxOptions = CF.extend({}, ajaxOptions);
-	
-	var successHandler = myAjaxOptions.success;
-	myAjaxOptions.success = function(charts, textStatus, jqXHR)
-	{
-		for(var i=0; i<charts.length; i++)
-			dashboard._initLoadedChart(charts[i], element[i], chartWidgetIds[i]);
-		
-		var re = true;
-		
-		if(successHandler)
-			re = successHandler.call(this, charts, textStatus, jqXHR);
-		
-		if(re != false)
-		{
-			for(var i=0; i<charts.length; i++)
-				dashboard._addLoadedChart(charts[i]);
-		}
-	};
-	
-	var completeHandler = myAjaxOptions.complete;
-	myAjaxOptions.complete = function(jqXHR, textStatus)
-	{
-		dashboard._loadingChartElement(element, false);
-		
-		if(completeHandler)
-			re = completeHandler.call(this, jqXHR, textStatus);
-	};
-	
-	this._loadingChartElement(element, true);
-	
-	this._loadChartJson(chartWidgetIds, myAjaxOptions);
+	this._loadCharts(elements, newChartWidgetIds, successCallback, errorCallback);
 };
 
 /**
@@ -2296,98 +2174,188 @@ dashboardBase.loadCharts = function(element, chartWidgetId, ajaxOptions)
  * 支持调用方式：
  * dashboard.loadUnsolvedCharts();
  * dashboard.loadUnsolvedCharts(element);
- * dashboard.loadUnsolvedCharts(ajaxOptions);
- * dashboard.loadUnsolvedCharts(element, ajaxOptions);
+ * dashboard.loadUnsolvedCharts(successCallback);
+ * dashboard.loadUnsolvedCharts(element, successCallback);
  * 
- * @param element 可选，限定查找的根HTML元素、Jquery选择器、Jquery对象，默认为：<body>元素
- * @param ajaxOptions 可选，参数格式可以是图表数组加载成功回调函数：function(charts){ ... }，也可以是ajax配置项：{...}。
- * 					  如果图表数组加载成功回调函数、ajax配置项的success函数返回false，则这些图表不会加入此看板。
+ * @param element 可选，限定查找的根HTML元素、HTML元素ID，默认为：<body>元素
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }
+ * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  * @return 要异步加载的HTML元素数组
  */
-dashboardBase.loadUnsolvedCharts = function(element, ajaxOptions)
+dashboardProto.loadUnsolvedCharts = function(element, successCallback, errorCallback)
 {
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
-	//(ajaxOptions)
-	if(arguments.length == 1 && !CF.isString(element) && !CF.isHtmlEle(element))
+	// (elements, successCallback)
+	if(CF.isFunction(element))
 	{
-		ajaxOptions = element;
-		element = undefined;
+		errorCallback = successCallback
+		successCallback = element;
+		element = null;
 	}
 	
-	element = jQuery(element == null ? document.body : element);
+	element = (element == null ? document.body : (CF.isString(element) ? CF.eleOfId(element) : element));
 	
-	var widgetEles = $(CF.elesWithWidgetId(element));
-	var unsolved = [];
+	var eleWidgetIdInfo = CF.elesWithWidgetId(element);
+	var unsolvedEles = [];
+	var unsolvedWidgetIds = [];
 	
-	var dashboard = this;
-	widgetEles.each(function()
+	for(let i=0; i<eleWidgetIdInfo.elements.length; i++)
 	{
-		if(dashboard._loadingChartElement(this))
-			return;
+		let ele = eleWidgetIdInfo.elements[i];
+		let widgetId = eleWidgetIdInfo.widgetIds[i];
 		
-		if($(this).attr(CF.elementAttrConst.WIDGET)
-			&& dashboard.renderedChart(this) == null
-			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
-			&& dashboard.chartOf(this) == null)
-		{
-			unsolved.push(this);
-		}
-	});
+		if(this._loadingChartElement(ele))
+			continue;
+		
+		if(this.renderedChart(ele) != null)
+			continue;
+		
+		//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
+		if(this.chartOf(ele) != null)
+			continue;
+		
+		unsolvedEles.push(ele);
+		unsolvedWidgetIds.push(widgetId);
+	}
 	
-	if(unsolved.length > 0)
-		this.loadCharts(unsolved, ajaxOptions);
+	if(unsolvedEles.length > 0)
+	{
+		this._loadCharts(unsolvedEles, unsolvedWidgetIds, successCallback, errorCallback);
+	}
 	
-	return unsolved;
+	return unsolvedEles;
 };
 
 /**
- * 获取单个/设置多个元素是否正在加载图表。
+ * 异步加载图表。
+ * 
+ * @param elements HTML元素数组
+ * @param chartWidgetIds 图表部件ID数组，与上面一一对应
+ * @param successCallback 选填，加载成功回调函数：function(charts){ ... }
+ * @param errorCallback 选填，加载失败回调函数：function(error){ ... }
  */
-dashboardBase._loadingChartElement = function(element, set)
+dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
 {
-	element = $(element);
+	var elementsLen = elements.length;
+	for(let i=0; i<elementsLen; i++)
+	{
+		let element = elements[i];
+		let chartWidgetId = chartWidgetIds[i];
+		
+		if(!chartWidgetId)
+			throw new Error((elementsLen > 1 ? "the "+(i+1)+"-th " : "")
+				+ "[chartWidgetId] required");
+		
+		if(this._loadingChartElement(element))
+			throw new Error((elementsLen > 1 ? "the "+(i+1)+"-th " : "")
+				+ "element is loading chart");
+		
+		if(this.renderedChart(element) != null)
+			throw new Error((elementsLen > 1 ? "the "+(i+1)+"-th " : "")
+				+ "element has a rendered chart");
+		
+		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
+		if(this.chartOf(element) != null)
+			throw new Error((elementsLen > 1 ? "the "+(i+1)+"-th " : "")
+				+ "element has a bounded chart");
+	}
 	
+	var webContext = CF.renderContextAttrWebContext(this.renderContext());
+	var url = this.contextURL(webContext.attributes.loadChartURL);
+	var loadChartConfig = DF.loadChartConfig;
+	
+	url = CF.appendUrlParam(url, loadChartConfig.dashboardIdParamName, this.id());
+	for(let i=0; i<chartWidgetIds.length; i++)
+		url = CF.appendUrlParam(url, loadChartConfig.chartWidgetIdParamName, chartWidgetIds[i]);
+	
+	this._loadingChartElement(elements, true);
+	
+	fetch(url, DF.fetchOptsOfGetJson(null))
+	.then((response) =>
+	{
+		this._loadingChartElement(elements, false);
+		
+		response.json().then((data) =>
+		{
+			if(response.ok)
+			{
+				let chartRoots = (data || []);
+				let charts = [];
+				
+				for(let i=0; i<chartRoots.length; i++)
+				{
+					charts[i] = this._initLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
+					this._addLoadedChart(charts[i]);
+				}
+				
+				if(successCallback)
+					successCallback(charts, response);
+			}
+			else
+			{
+				let error = (data || DF.errorOfMsg("error"));
+				
+				if(errorCallback != null)
+				{
+					errorCallback(error, response);
+				}
+			}
+		});
+	})
+	.catch((error) =>
+	{
+		this._loadingChartElement(elements, false);
+		
+		if(errorCallback != null)
+			errorCallback(DF.errorOfFetchError(error), error);
+	});
+};
+
+//获取单个/设置多个HTML元素是否正在加载图表
+dashboardProto._loadingChartElement = function(element, set)
+{
 	var name = CF.builtinPropName("loadingChart");
 	
 	if(set === undefined)
 	{
-		return (element.data(name) == true);
+		return (CF.eleData(element, name) === true);
 	}
 	else
 	{
-		element.each(function()
+		if(!CF.isArray(element))
+			element = [ element ];
+		
+		for(let i=0; i<element.length; i++)
 		{
-			var $this = $(this);
-			
-			if(set == true)
-				$this.data(name, true);
+			if(set === true)
+				CF.eleData(element[i], name, true);
 			else
-				$this.removeData(name);
-		});
+				CF.eleRemoveData(element[i], name);
+		}
 	}
 };
 
 /**
  * 初始化异步加载的图表。
  * 
- * @param chart 图表JSON对象
- * @param element 图表HTML元素、Jquery对象
- * @param chartWidgetId 要异步加载的图表部件ID
+ * @param chartRoot 图表根对象
+ * @param element 图表HTML元素
+ * @param chartWidgetId 图表部件ID
  */
-dashboardBase._initLoadedChart = function(chart, element, chartWidgetId)
+dashboardProto._initLoadedChart = function(chartRoot, element, chartWidgetId)
 {
-	element = $(element);
-	
 	//这里不应设置"dg-chart-widget"属性而破坏了元素的原生结构
 	//CF.elementWidgetId(element, chartWidgetId);
 	
-	CF.checkSetChartElementId(element, chart);
-	DF.initChart(this, chart);
+	var eleId = CF.checkSetChartElementId(element);
+	chartRoot.elementId = eleId;
+	
+	return DF.initChart(chartRoot, this.renderContext(), this);
 };
 
-dashboardBase._addLoadedChart = function(chart)
+dashboardProto._addLoadedChart = function(chart)
 {
 	this.addChart(chart);
 	
@@ -2410,71 +2378,6 @@ dashboardBase._addLoadedChart = function(chart)
 };
 
 /**
- * 异步加载图表JSON对象。
- * 图表JSON对象仅是简单的JSON数据，没有初始化为实际可用的图表对象，也不会加入此看板。
- * 
- * @param chartWidgetId 图表部件ID、图表部件ID数组
- * @param ajaxOptions 选填参数，参数格式可以是ajax配置项的success回调函数：function(data){ ... }，也可以是ajax配置项：{...}。
-					  注意：当chartWidgetId是单个字符串时，success函数的data参数将是单个JSON对象；
-					  当chartWidgetId是数组时，success函数的data参数将是JSON对象数组。
- */
-dashboardBase._loadChartJson = function(chartWidgetId, ajaxOptions)
-{
-	var isFetchSingle = (!CF.isArray(chartWidgetId));
-	
-	var chartWidgetIds = chartWidgetId;
-	
-	if(!CF.isArray(chartWidgetIds))
-		chartWidgetIds = [ chartWidgetIds ];
-	
-	if(!ajaxOptions)
-		ajaxOptions = {};
-	else if(CF.isFunction(ajaxOptions))
-	{
-		var successHandler = ajaxOptions;
-		ajaxOptions =
-		{
-			success: successHandler
-		};
-	}
-	
-	var webContext = CF.renderContextAttrWebContext(this.renderContext);
-	var url = this.contextURL(webContext.attributes.loadChartURL);
-	var loadChartConfig = DF.loadChartConfig;
-	
-	var dashboard = this;
-	
-	var data = [];
-	data[0] = { name: loadChartConfig.dashboardIdParamName, value: dashboard.id };
-	for(var i=0; i<chartWidgetIds.length; i++)
-	{
-		data.push({ name: loadChartConfig.chartWidgetIdParamName, value: chartWidgetIds[i] });
-	}
-	
-	var myAjaxOptions = CF.extend(
-	{
-		url: url,
-		data: data,
-		type: "POST"
-	},
-	ajaxOptions);
-	
-	var successHandler = myAjaxOptions.success;
-	myAjaxOptions.success = function(charts, textStatus, jqXHR)
-	{
-		charts = (charts || []);
-		
-		if(successHandler)
-		{
-			var handlerChart = (isFetchSingle ? (charts.length > 0 ? charts[0] : null) : charts);
-			successHandler.call(this, handlerChart, textStatus, jqXHR);
-		}
-	};
-	
-	$.ajax(myAjaxOptions);
-};
-
-/**
  * 批量设置图表数据集参数值。
  * 
  * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }（需支持属性路径）
@@ -2494,7 +2397,7 @@ dashboardBase._loadChartJson = function(chartWidgetId, ajaxOptions)
  * 					例如："order.name"、"[0].name"、"['order'].product.name"。
  * 					图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
  * 					{
- *  					 //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
+ *                    //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
  * 					  chart: 数值、"...",
  * 					  
  * 					  //可选，目标图表数据集数组的索引数值，默认为：0
@@ -2512,14 +2415,14 @@ dashboardBase._loadChartJson = function(chartWidgetId, ajaxOptions)
  * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
  * @return 批量设置的图表对象数组
  */
-dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
+dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
 {
 	sourceValueContext = (sourceValueContext === undefined ? sourceData : sourceValueContext);
 	
 	var targets = (batchSet.target == null ? [] : (CF.isArray(batchSet.target) ? batchSet.target : [ batchSet.target ]));
 	var targetCharts = [];
 	
-	for(var i=0; i<targets.length; i++)
+	for(let i=0; i<targets.length; i++)
 	{
 		targetCharts[i] = this.chartOf(targets[i]);
 		
@@ -2535,7 +2438,7 @@ dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourc
 	
 	for(var name in dataMap)
 	{
-		var dataValue = undefined;
+		let dataValue = undefined;
 		
 		if(hasGetValueFunc)
 		{
@@ -2550,19 +2453,19 @@ dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourc
 				dataValue = DF.getPropertyPathValue(sourceData, name);
 		}
 		
-		var indexes = dataMap[name];
+		let indexes = dataMap[name];
 		
 		if(!CF.isArray(indexes))
 			indexes = [ indexes ];
 		
-		for(var i=0; i<indexes.length; i++)
+		for(let i=0; i<indexes.length; i++)
 		{
-			var indexObj = indexes[i];
+			let indexObj = indexes[i];
 			
-			var chartIdx = 0;
-			var dataSetIdx = 0;
-			var param = 0;
-			var paramValue = null;
+			let chartIdx = 0;
+			let dataSetIdx = 0;
+			let param = 0;
+			let paramValue = null;
 			
 			//参数名/索引号
 			if(CF.isStringOrNumber(indexObj))
@@ -2585,7 +2488,7 @@ dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourc
 					paramValue = dataValue;
 			}
 			
-			var targetChart = null;
+			let targetChart = null;
 			
 			//优先使用batchSet.target中的索引号
 			if(CF.isNumber(chartIdx) && targets[chartIdx] != null)
@@ -2611,16 +2514,16 @@ dashboardBase._batchSetDataSetParamValues = function(sourceData, batchSet, sourc
  * @param asMillisecond 可选，是否返回毫秒数值而非Date对象，默认为：false 
  * @return Date对象，或者毫秒数值
  */
-dashboardBase.serverDate = function(asMillisecond)
+dashboardProto.serverDate = function(asMillisecond)
 {
 	//参考org.datagear.web.controller.ServerTimeJsController.SERVERTIME_JS_VAR
 	if(global.DATAGEAR_SERVER_TIME == null)
-		throw new Error("get current server date is not supported");
+		throw new Error("get current server date unsupported");
 	
 	var cct = CF.currentDateMs();
 	var cst = global.DATAGEAR_SERVER_TIME + (cct - DF.LOAD_TIME);
 	
-	if(asMillisecond == true)
+	if(asMillisecond === true)
 		return cst;
 	
 	var csd = new Date();
@@ -2634,12 +2537,12 @@ dashboardBase.serverDate = function(asMillisecond)
  * 
  * @returns 用户信息，格式参考：org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser
  */
-dashboardBase.user = function()
+dashboardProto.user = function()
 {
 	var user = this.renderContextAttr(renderContextAttrConst.user);
 	
 	if(user == null)
-		throw new Error("get user not support");
+		throw new Error("get user unsupport");
 	
 	return user;
 };
@@ -2650,7 +2553,7 @@ dashboardBase.user = function()
  * 
  * @returns true 正常执行销毁；false 未执行销毁，因为看板处于销毁非法状态
  */
-dashboardBase.destroy = function()
+dashboardProto.destroy = function()
 {
 	if(!this.isAlive() || this.statusDestroying() || this.statusDestroyed())
 		return false;
@@ -2663,7 +2566,7 @@ dashboardBase.destroy = function()
 	if(listener && listener.onDestroy)
 		doDestroy = listener.onDestroy(this);
 	
-	if(doDestroy != false)
+	if(doDestroy !== false)
 	{
 		this.doDestroy();
 	}
@@ -2671,15 +2574,32 @@ dashboardBase.destroy = function()
 	return true;
 };
 
-dashboardBase._destroyCharts = function()
+/**
+ * 执行看板销毁。
+ */
+dashboardProto.doDestroy = function()
 {
-	var charts = (this.charts || []);
+	if(!this.statusDestroying())
+		throw new Error("dashboard is illegal state for : doDestroy()");
 	
-	for(var i=0; i<charts.length; i++)
-		this._destroyChart(charts[i]);
+	this.stopHandleCharts();
+	this._destroyCharts();
+	this._destroyForms();
+	
+	this.statusDestroyed(true);
 };
 
-dashboardBase._destroyChart = function(chart)
+dashboardProto._destroyCharts = function()
+{
+	var charts = this.charts();
+	
+	for(let i=0; i<charts.length; i++)
+	{
+		this._destroyChart(charts[i]);
+	}
+};
+
+dashboardProto._destroyChart = function(chart)
 {
 	try
 	{
@@ -2691,21 +2611,20 @@ dashboardBase._destroyChart = function(chart)
 	}
 };
 
-dashboardBase._destroyForms = function()
+dashboardProto._destroyForms = function()
 {
-	var $forms = $("form[dg-dashboard-form]", document.body);
+	var forms = CF.elesOfSelector("form[dg-dashboard-form]");
 	
-	var thisDashboard = this;
-	$forms.each(function()
+	forms.forEach((form) =>
 	{
-		thisDashboard._destroyForm(this);
+		this._destroyForm(form);
 	});
 	
-	var globalTheme = CF.renderContextAttrChartTheme(this.renderContext);
+	var globalTheme = CF.renderContextAttrChartTheme(this.renderContext());
 	CF.removeThemeRefEntity(globalTheme, DF.THEME_REF_DASHBOARD_FORM_ID);
 };
 
-dashboardBase._destroyForm = function(form)
+dashboardProto._destroyForm = function(form)
 {
 	try
 	{
@@ -2718,81 +2637,17 @@ dashboardBase._destroyForm = function(form)
 };
 
 /**
- * 获取图表展示数据的原始数据索引，应是已由chartBase.originalDataIndex()、chartBase.originalDataIndexes()函数设置过。
- * 
- * @param data 图表展示数据、或其数组，格式为：{ ... }、[ ... ]、[ { ... }, ... ]、、[ [ ... ], ... ]
- * @param inflate 可选，是否在返回原始数据索引对象的复本并填充图表对象、原始数据集结果数据，默认值为：true
- * @returns 原始数据索引(可能为null）、或其数组(元素可能为null），格式为：
- *									{
- *										//同chartBase.originalDataIndexes()函数返回的原始数据索引对象结构
- *										...,
- *										//当inflate为true时，chartId对应的图表对象
- *										chart: 图表对象,
- *										//当inflate为true时，resultDataIndex对应的原始结果数据，格式为：
- *                                      //当dataSetBindIndex是数值时：
- *                                      //对象、对象数组
- *                                      //当dataSetBindIndex是数值数组时：
- *                                      //数组（元素可能是对象、对象数组）
- *										resultData: 结果数据
- *									}
- *									当data是图表展示数据数组时，将返回此结构的数组。
- * @since 3.1.0
- */
-dashboardBase.originalDataIndex = function(data, inflate)
-{
-	if(!data)
-		return undefined;
-	
-	var odIdx = CF.originalDataIndex(data);
-	
-	if(odIdx == null && CF.isArray(data))
-	{
-		odIdx = [];
-		
-		for(var i=0; i<data.length; i++)
-			odIdx[i] = CF.originalDataIndex(data[i]);
-	}
-	
-	if(odIdx == null || inflate === false)
-		return odIdx;
-	
-	var isArray = CF.isArray(odIdx);
-	var odIdxAry = (isArray ? odIdx : [ odIdx ]);
-	var odIdxAryClone = [];
-	
-	for(var i=0; i<odIdxAry.length; i++)
-	{
-		var odIdxMy = (odIdxAry[i] ? CF.extend({}, odIdxAry[i]) : null);
-		odIdxAryClone[i] = odIdxMy;
-		
-		if(odIdxMy)
-		{
-			var chart = this.chartOf(odIdxMy.chartId);
-			odIdxMy["chart"] = chart;
-			if(chart)
-				odIdxMy["resultData"] = CF.originalData(chart, odIdxMy);
-		}
-	}
-	
-	return (isArray ? odIdxAryClone : odIdxAryClone[0]);
-};
-
-/**
  * 看板是否是活着的（已执行渲染且未完成销毁）。
- * 
- * @since 4.4.0
  */
-dashboardBase.isAlive = function()
+dashboardProto.isAlive = function()
 {
 	return (this._isAlive == true);
 };
 
 /**
  * 看板是否处于活跃可用的状态（已完成渲染且未执行销毁）。
- * 
- * @since 4.4.0
  */
-dashboardBase.isActive = function()
+dashboardProto.isActive = function()
 {
 	return (this._isActive == true);
 };
@@ -2803,7 +2658,7 @@ dashboardBase.isActive = function()
  * 
  * @param status 可选，要设置的状态，不设置则执行获取操作
  */
-dashboardBase.status = function(status)
+dashboardProto.status = function(status)
 {
 	if(status === undefined)
 		return (this._status || "");
@@ -2815,10 +2670,8 @@ dashboardBase.status = function(status)
  * 看板是否为/设置为：准备初始化。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * 
- * @since 4.4.0
  */
-dashboardBase.statusPreInit = function(set)
+dashboardProto.statusPreInit = function(set)
 {
 	if(set === true)
 	{
@@ -2834,10 +2687,8 @@ dashboardBase.statusPreInit = function(set)
  * 看板是否为/设置为：正在初始化。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * 
- * @since 4.4.0
  */
-dashboardBase.statusIniting = function(set)
+dashboardProto.statusIniting = function(set)
 {
 	if(set === true)
 	{
@@ -2853,10 +2704,8 @@ dashboardBase.statusIniting = function(set)
  * 看板是否为/设置为：完成初始化。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * 
- * @since 4.4.0
  */
-dashboardBase.statusInited = function(set)
+dashboardProto.statusInited = function(set)
 {
 	if(set === true)
 	{
@@ -2872,10 +2721,8 @@ dashboardBase.statusInited = function(set)
  * 看板是否为/设置为：渲染中。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * 
- * @since 4.4.0
  */
-dashboardBase.statusRendering = function(set)
+dashboardProto.statusRendering = function(set)
 {
 	if(set === true)
 	{
@@ -2891,11 +2738,9 @@ dashboardBase.statusRendering = function(set)
  * 看板是否为/设置为：完成渲染。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，默认为true
- * 
- * @since 4.4.0
+ * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，默认为：true
  */
-dashboardBase.statusRendered = function(set, postProcess)
+dashboardProto.statusRendered = function(set, postProcess)
 {
 	if(set === true)
 	{
@@ -2903,7 +2748,7 @@ dashboardBase.statusRendered = function(set, postProcess)
 		this._isAlive = true;
 		this.status(dashboardStatusConst.RENDERED);
 		
-		if(postProcess == null || postProcess == true)
+		if(postProcess !== false)
 			this._postProcessRendered();
 	}
 	else
@@ -2913,7 +2758,7 @@ dashboardBase.statusRendered = function(set, postProcess)
 /**
  * 渲染完成后置处理。
  */
-dashboardBase._postProcessRendered = function()
+dashboardProto._postProcessRendered = function()
 {
 	var listener = this.listener();
 	if(listener && listener.render)
@@ -2924,10 +2769,8 @@ dashboardBase._postProcessRendered = function()
  * 看板是否为/设置为：正在销毁。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * 
- * @since 4.4.0
  */
-dashboardBase.statusDestroying = function(set)
+dashboardProto.statusDestroying = function(set)
 {
 	if(set === true)
 	{
@@ -2943,11 +2786,9 @@ dashboardBase.statusDestroying = function(set)
  * 看板是否为/设置为：完成销毁。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，默认为true
- * 
- * @since 4.4.0
+ * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，默认为：true
  */
-dashboardBase.statusDestroyed = function(set, postProcess)
+dashboardProto.statusDestroyed = function(set, postProcess)
 {
 	if(set === true)
 	{
@@ -2955,35 +2796,18 @@ dashboardBase.statusDestroyed = function(set, postProcess)
 		this._isAlive = false;
 		this.status(dashboardStatusConst.DESTROYED);
 		
-		if(postProcess == null || postProcess == true)
+		if(postProcess !== false)
 			this._postProcessDestroyed();
 	}
 	else
 		return (this.status() == dashboardStatusConst.DESTROYED);
 };
 
-dashboardBase._postProcessDestroyed = function()
+dashboardProto._postProcessDestroyed = function()
 {
 	var listener = this.listener();
 	if(listener && listener.destroy)
 		listener.destroy(this);
-};
-
-/**
- * 执行看板销毁。
- * 
- * @since 4.4.0
- */
-dashboardBase.doDestroy = function()
-{
-	if(!this.statusDestroying())
-		throw new Error("dashboard is illegal state for doDestroy()");
-	
-	this.stopHandleCharts();
-	this._destroyCharts();
-	this._destroyForms();
-	
-	this.statusDestroyed(true);
 };
 
 /**
@@ -2992,17 +2816,14 @@ dashboardBase.doDestroy = function()
  * 
  * @param url 可选，要处理的URL
  * @return 添加后的新URL，如果没有url参数，将返回系统根路径
- * @since 5.0.0
  */
-dashboardBase.contextURL = function(url)
+dashboardProto.contextURL = function(url)
 {
-	var renderContext = this.renderContext;
+	var renderContext = this.renderContext();
 	var webContext = CF.renderContextAttrWebContext(renderContext);
 	
 	if(!webContext)
-	{
-		throw new Error("dashboard is illegal state for contextURL(url)");
-	}
+		throw new Error("dashboard is illegal state for : contextURL(url)");
 	
 	return CF.toWebContextPathURL(webContext, url);
 };
@@ -3010,10 +2831,9 @@ dashboardBase.contextURL = function(url)
 /**
  * 销毁元素内（包括自身）包含的所有看板表单。
  * 
- * @param form HTML元素、Jquery元素选择器、Jquery对象
- * @since 5.3.0
+ * @param form HTML元素
  */
-dashboardBase.destroyForm = function(form)
+dashboardProto.destroyForm = function(form)
 {
 	this._destroyForm(form);
 };
@@ -3023,35 +2843,33 @@ dashboardBase.destroyForm = function(form)
  * 具体参考：org.datagear.web.analysis.DashboardVersion
  * 
  * @return 版本号，目前只有：1.0、2.0
- * @since 5.3.0 此API暂不开放，因为5.3.0版本的看板版本功能已禁用
  */
-dashboardBase.version = function()
+dashboardProto.version = function()
 {
-	return this._version;
+	return this._root.version;
 };
 
 /**
  * 获取指定元素内（包括自身）包含的所有图表。
  *
- * @param element DOM元素、Jquery元素选择器、Jquery对象
+ * @param element HTML元素、HTML元素ID
  * @param active 可选，是否仅返回已完成渲染且未执行销毁的图表，true 是；false 否。默认值：false
  * @return [ ... ]
- * @since 5.3.0
  */
-dashboardBase.chartsIn = function(element, active)
+dashboardProto.chartsIn = function(element, active)
 {
-	element = $(element);
+	element = (CF.isString(element) ? CF.eleOfId(element) : element);
 	active = (active == null ? false : active);
-	
-	element = element.add($("[id]", element));
 	
 	var re = [];
 	
-	var dashboard = this;
-	element.each(function()
+	var eles = CF.elesOfSelector("[id]", element);
+	eles.unshift(element);
+	
+	eles.forEach((ele) =>
 	{
-		var id = $(this).attr("id");
-		var chart = (id ? dashboard.chartOf(id) : null);
+		let id = CF.eleAttr(ele, "id");
+		let chart = (CF.isNullOrEmpty(id) ? null : this.chartOf(id));
 		
 		if(!chart)
 			return;
@@ -3066,18 +2884,17 @@ dashboardBase.chartsIn = function(element, active)
 /**
  * 重新调整指定元素内（包括自身）包含的所有图表尺寸。
  * 
- * @param element DOM元素、Jquery元素选择器、Jquery对象
+ * @param element HTML元素、HTML元素ID
  * @return 已调整尺寸的图表数组：[ ... ]
- * @since 5.3.0
  */
-dashboardBase.resizeChartsIn = function(element)
+dashboardProto.resizeChartsIn = function(element)
 {
 	var charts = this.chartsIn(element, true);
 	
-	for(var i=0; i<charts.length; i++)
+	charts.forEach((chart) =>
 	{
-		charts[i].resize();
-	}
+		chart.resize();
+	});
 	
 	return charts;
 };
@@ -3091,7 +2908,7 @@ dashboardBase.resizeChartsIn = function(element)
 //-------------
 
 //----------------------------------------
-// dashboardBase end
+// Dashboard prototype end
 //----------------------------------------
 
 /**
@@ -3123,6 +2940,21 @@ DF.fetchOptsOfGetJson = function(data)
 		credentials: "same-origin",
 		headers: { "Content-Type": "application/json" },
 		body: (data == null ? undefined : JSON.stringify(data))
+	};
+	
+	return re;
+};
+
+DF.errorOfFetchError = function(error)
+{
+	return DF.errorOfMsg((error && error.message ? error.message : "error"));
+};
+
+DF.errorOfMsg = function(message)
+{
+	var re =
+	{
+		message: (message ? message : "error")
 	};
 	
 	return re;
