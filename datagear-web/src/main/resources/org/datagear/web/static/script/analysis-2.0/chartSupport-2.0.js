@@ -20,18 +20,17 @@
  * 全局变量名：window.chartFactory.chartSupport
  * 
  * 加载时依赖：
- *   无
+ *   chartFactory.js
  * 
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
- *   chartFactory.js
  */
 (function(global){
 
-var chartFactory = (global.chartFactory || (global.chartFactory = {}));
-var chartSupport = (chartFactory.chartSupport || (chartFactory.chartSupport = {}));
-var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
+var CF = (global.chartFactory || (global.chartFactory = {}));
+var chartSupport = (CF.chartSupport || (CF.chartSupport = {}));
+var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
 
 //内置地图类图表的地图选项名
 //默认的ECharts地图类图表配置地图名稍微麻烦，
@@ -45,7 +44,7 @@ builtinOptionNames.sortAxisData = "sortAxisData";
 
 chartSupport.xxxRenderer = function(plugin, config)
 {
-	config = chartFactory.extend(true,
+	config = CF.extend(true,
 	{
 		
 	},
@@ -91,7 +90,7 @@ chartSupport.xxxRenderer = function(plugin, config)
 
 chartSupport.lineRenderer = function(plugin, config)
 {
-	config = chartFactory.extend(true,
+	config = CF.extend(true,
 	{
 		//是否堆叠
 		stack: false,
@@ -288,7 +287,7 @@ chartSupport.lineRenderer = function(plugin, config)
 
 chartSupport.barRenderer = function(plugin, config)
 {
-	config = chartFactory.extend(true,
+	config = CF.extend(true,
 	{
 		//是否堆叠
 		stack: false,
@@ -551,7 +550,7 @@ chartSupport.barSetChartEventData = function(chart, chartEvent, echartsEventPara
 
 chartSupport.barPolarRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -811,7 +810,7 @@ chartSupport.barPolarSetChartEventData = function(chart, chartEvent, echartsEven
 
 chartSupport.pieRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -1019,7 +1018,7 @@ chartSupport.pieEvalSeriesLayout = function(chart, renderOptions, updateOptions)
 
 chartSupport.gaugeRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -1060,7 +1059,7 @@ chartSupport.gaugeRender = function(chart, options)
 		var chartEle = chart.elementJquery();
 		var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/12);
 		
-		chartFactory.extend(builtinOptions.series[0],
+		CF.extend(builtinOptions.series[0],
 		{
 			startAngle: 90,
 			endAngle: -270,
@@ -1112,7 +1111,7 @@ chartSupport.gaugeRender = function(chart, options)
 		var chartEle = chart.elementJquery();
 		var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/20);
 		
-		chartFactory.extend(builtinOptions.series[0],
+		CF.extend(builtinOptions.series[0],
 		{
 			axisLine:
 			{
@@ -1381,7 +1380,7 @@ chartSupport.scatterRippleOff = function(chart, eventType, handler)
 
 chartSupport._scatterRender = function(chart, options, scatterType)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -1641,7 +1640,7 @@ chartSupport.scatterCoordRippleOff = function(chart, eventType, handler)
 
 chartSupport._scatterCoordRender = function(chart, options, scatterType)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -1830,7 +1829,7 @@ chartSupport._scatterCoordSetChartEventData = function(chart, chartEvent, echart
 
 chartSupport.radarRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -1929,7 +1928,7 @@ chartSupport.radarUpdate = function(chart, chartResult)
 	if(chartSupport.sortAxisDataOption(renderOptions))
 	{
 		var tmpAxisData = [];
-		chartFactory.each(indicatorData, function(i, indicator)
+		CF.each(indicatorData, function(i, indicator)
 		{
 			tmpAxisData.push(indicator.name);
 		});
@@ -1954,7 +1953,7 @@ chartSupport.radarUpdate = function(chart, chartResult)
 		var ts = tmpSeries[i];
 		var radarData = { name: ts.name, value: [] };
 		
-		chartFactory.each(indicatorData, function(j, indicator)
+		CF.each(indicatorData, function(j, indicator)
 		{
 			var idx = chartSupport.findInArray(ts.data, indicator.name, "name");
 			radarData.value.push(idx > -1 ? ts.data[idx].value : null);
@@ -1990,7 +1989,7 @@ chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, chartResult, rende
 	for(var i=0; i<indicatorLen; i++)
 	{
 		var indicators = chart.resultMapDatas(result, { name: np[i], max: mp[i] });
-		chartFactory.each(indicators, function(j, indicator)
+		CF.each(indicators, function(j, indicator)
 		{
 			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
 		});
@@ -2015,7 +2014,7 @@ chartSupport.radarUpdateTmpSeriesForRowMode = function(chart, chartResult, rende
 			var categoryDatas = categoryDatasMap[categoryName];
 			var mySeries = { name: categoryName, data: categoryDatas, dataSetBindIndex: dataSetBind.index, resultDataIndex: [] };
 			
-			chartFactory.each(categoryDatas, function(k, cd)
+			CF.each(categoryDatas, function(k, cd)
 			{
 				var odIdx = chart.originalDataIndex(cd);
 				mySeries.resultDataIndex.push(odIdx.resultDataIndex);
@@ -2156,7 +2155,7 @@ chartSupport.radarSetChartEventData = function(chart, chartEvent, echartsEventPa
 
 chartSupport.funnelRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -2286,7 +2285,7 @@ chartSupport.funnelSetChartEventData = function(chart, chartEvent, echartsEventP
 
 chartSupport.mapRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -2499,7 +2498,7 @@ chartSupport.mapScatterRippleOff = function(chart, eventType, handler)
 
 chartSupport._mapScatterRender = function(chart, options, scatterType)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -2704,7 +2703,7 @@ chartSupport._mapScatterSetChartEventData = function(chart, chartEvent, echartsE
 
 chartSupport.mapGraphRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -3005,7 +3004,7 @@ chartSupport.mapGraphSetChartEventData = function(chart, chartEvent, echartsEven
 
 chartSupport.mapLinesRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -3198,7 +3197,7 @@ chartSupport.mapLinesSetChartEventData = function(chart, chartEvent, echartsEven
 
 chartSupport.mapFlylineRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -3406,7 +3405,7 @@ chartSupport.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEv
 
 chartSupport.mapHeatmapRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -3575,7 +3574,7 @@ chartSupport.mapHeatmapSetChartEventData = function(chart, chartEvent, echartsEv
 
 chartSupport.candlestickRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -3736,7 +3735,7 @@ chartSupport.candlestickSetChartEventData = function(chart, chartEvent, echartsE
 
 chartSupport.heatmapRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -3933,7 +3932,7 @@ chartSupport.heatmapSetChartEventData = function(chart, chartEvent, echartsEvent
 //树图
 chartSupport.treeRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -4078,13 +4077,13 @@ chartSupport.treeInflateUpdateOptions = function(chart, updateOptions, renderOpt
 		};
 	}
 	
-	chartFactory.extend(seriesEle, seriesEleExt);
+	CF.extend(seriesEle, seriesEleExt);
 };
 
 //矩形树图
 chartSupport.treemapRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -4180,7 +4179,7 @@ chartSupport.treemapSetChartEventData = function(chart, chartEvent, echartsEvent
 
 chartSupport.sunburstRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -4326,7 +4325,7 @@ chartSupport.buildTreeNodeSeries = function(chart, chartResult, initSeries)
 		}
 	}
 	
-	initSeries = chartFactory.extend(initSeries, { name: seriesName, data: seriesData });
+	initSeries = CF.extend(initSeries, { name: seriesName, data: seriesData });
 	
 	return initSeries;
 };
@@ -4385,7 +4384,7 @@ chartSupport.treeAppendNode = function(treeNode, node)
 
 chartSupport.sankeyRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -4618,14 +4617,14 @@ chartSupport.sankeyInflateUpdateOptions = function(chart, updateOptions, renderO
 	nodeGap = (nodeWidth < 1 ? 1: nodeGap);
 	seriesEleExt.nodeGap = nodeGap;
 	
-	chartFactory.extend(seriesEle, seriesEleExt);
+	CF.extend(seriesEle, seriesEleExt);
 };
 
 //关系图
 
 chartSupport.graphRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -4903,7 +4902,7 @@ chartSupport.graphInflateUpdateOptions = function(chart, updateOptions, min, max
 
 chartSupport.boxplotRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -5206,7 +5205,7 @@ chartSupport.wordcloudRender = function(chart, options)
 	//不支持在echarts主题中设置样式，只能在这里设置
 	var chartTheme = chart.theme();
 	
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -5280,7 +5279,7 @@ chartSupport.wordcloudRender = function(chart, options)
 			if(!toColor)
 				break;
 			
-			colorGradients = colorGradients.concat(chartFactory.evalGradualColors(fromColor, toColor, 5));
+			colorGradients = colorGradients.concat(CF.evalGradualColors(fromColor, toColor, 5));
 		}
 		options.dg.colorGradients = colorGradients;
 	});
@@ -5378,7 +5377,7 @@ chartSupport.wordcloudSetChartEventData = function(chart, chartEvent, echartsEve
 
 chartSupport.liquidfillRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -5522,7 +5521,7 @@ chartSupport.liquidfillUpdate = function(chart, chartResult)
 	{
 		for(var i=1; i<dg.autoInflateWave; i++)
 		{
-			var inflateValue = chartFactory.extend({}, seriesData[0]);
+			var inflateValue = CF.extend({}, seriesData[0]);
 			seriesData.push(inflateValue);
 		}
 	}
@@ -5576,7 +5575,7 @@ chartSupport.liquidfillSetChartEventData = function(chart, chartEvent, echartsEv
 
 chartSupport.parallelRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -5839,7 +5838,7 @@ chartSupport.parallelEvalValuePropertyNamess = function(chart, chartResult, data
 	
 	var valuePropertyNamess = [];
 	
-	var placeholderName = chartFactory.builtinPropName("DataPropNamePlaceholder");
+	var placeholderName = CF.builtinPropName("DataPropNamePlaceholder");
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
@@ -5892,7 +5891,7 @@ chartSupport.parallelTrimAxisMinMax = function(options)
 
 chartSupport.themeRiverRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -6083,7 +6082,7 @@ chartSupport.pictorialBarSymbolPaths=
 
 chartSupport.pictorialBarRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -6326,7 +6325,7 @@ chartSupport.pictorialBarSetChartEventData = function(chart, chartEvent, echarts
 
 chartSupport.pictorialBarProgressRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -6568,7 +6567,7 @@ chartSupport.pictorialBarProgressSetChartEventData = function(chart, chartEvent,
 
 chartSupport.tableRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -6668,7 +6667,7 @@ chartSupport.tableRender = function(chart, options)
 		
 		//DataTables-1.10.18是允许column.data为""的，升级至1.11.3后则会有一个警告弹出框，
 		//这里设置defaultContent可以解决此问题
-		if(chartFactory.isNullOrEmpty(column.data) && column.defaultContent == null)
+		if(CF.isNullOrEmpty(column.data) && column.defaultContent == null)
 			column.defaultContent = "";
 		
 		if(column.render == null)
@@ -6687,7 +6686,7 @@ chartSupport.tableRender = function(chart, options)
 						return options.renderCell(value, name, rowIndex, columnIndex, row, meta);
 					}
 					else
-						return chartFactory.escapeHtml(value);
+						return CF.escapeHtml(value);
 				}
 				//其他绘制，比如排序
 				else
@@ -6775,7 +6774,7 @@ chartSupport.tableUpdate = function(chart, chartResult)
 		//复制，避免污染原始数据
 		for(var j=0; j<resultDatas.length; j++)
 		{
-			var data = chartFactory.extend({}, resultDatas[j]);
+			var data = CF.extend({}, resultDatas[j]);
 			chart.originalDataIndex(data, dataSetBind, j);
 			updateOptions.data.push(data);
 		}
@@ -6807,7 +6806,7 @@ chartSupport.tableDestroy = function(chart)
 	
 	chartSupport.tableStopCarousel(chart);
 	chartEle.removeClass("dg-chart-table dg-table-v1 dg-table-v2 dg-hide-title dg-text-nowrap dg-chart-table-carousel");
-	chartEle.removeClass(chart.liveData(chartFactory.builtinPropName("TableChartLocalStyleName")));
+	chartEle.removeClass(chart.liveData(CF.builtinPropName("TableChartLocalStyleName")));
 	$(".dg-chart-table-title", chartEle).remove();
 	$(".dg-chart-table-content", chartEle).remove();
 	$(".dg-chart-ele-wrapper", chartEle).remove();
@@ -6880,7 +6879,7 @@ chartSupport.tableRenderProcessOptions = function(chart, options)
 	{
 		options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
 		//如果有50，则取50，以兼容旧版逻辑
-		options.pageLength = (chartFactory.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
+		options.pageLength = (CF.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
 	}
 	
 	if(chartSupport.tableIsV1())
@@ -6944,12 +6943,12 @@ chartSupport.tableRenderProcessCarousel = function(chart, options)
 		
 	}
 	//true、false、"auto"
-	else if(carousel === true || carousel === false || chartFactory.isString(carousel))
+	else if(carousel === true || carousel === false || CF.isString(carousel))
 	{
 		carouselObj.enable = carousel;
 	}
 	//间隔数值、函数
-	else if(chartFactory.isNumber(carousel) || chartFactory.isFunction(carousel))
+	else if(CF.isNumber(carousel) || CF.isFunction(carousel))
 	{
 		carouselObj.enable = true;
 		carouselObj.interval = carousel;
@@ -6957,7 +6956,7 @@ chartSupport.tableRenderProcessCarousel = function(chart, options)
 	//轮播对象
 	else
 	{
-		carouselObj = chartFactory.extend(true, carouselObj, carousel);
+		carouselObj = CF.extend(true, carouselObj, carousel);
 	}
 	
 	chartSupport.carouselOption(options, carouselObj);
@@ -7062,7 +7061,7 @@ chartSupport.tableRenderProcessServerSidePaging = function(chart, options)
 			chart.liveData("serverSidePagingRefreshInfo", refreshInfo);
 			
 			var drawPagingArg = (serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
-			if(chartFactory.isFunction(drawPagingArg))
+			if(CF.isFunction(drawPagingArg))
 				drawPagingArg = serverSidePaging.drawPagingArg(chart);
 			
 			chart.internal().draw(drawPagingArg);
@@ -7242,7 +7241,7 @@ chartSupport.tableGetScrollBody = function(chart, $chartContent)
 chartSupport.tableThemeStyleSheet = function(chart, options)
 {
 	var isV1 = chartSupport.tableIsV1();
-	var name = chartFactory.builtinPropName("TableChart");
+	var name = CF.builtinPropName("TableChart");
 	var isLocalStyle = (options.tableStyle != null);
 	var forceUpdate = false;
 	
@@ -7254,7 +7253,7 @@ chartSupport.tableThemeStyleSheet = function(chart, options)
 		forceUpdate = true;
 		
 		chart.elementJquery().addClass(name);
-		chart.liveData(chartFactory.builtinPropName("TableChartLocalStyleName"), name);
+		chart.liveData(CF.builtinPropName("TableChartLocalStyleName"), name);
 	}
 	
 	chart.themeStyleSheet(name, function()
@@ -7326,7 +7325,7 @@ chartSupport.tableThemeStyleSheet = function(chart, options)
 		if(isLocalStyle)
 		{
 			var optionTableStyle = options.tableStyle;
-			tableStyle = chartFactory.extend(true, tableStyle, optionTableStyle);
+			tableStyle = CF.extend(true, tableStyle, optionTableStyle);
 		}
 		
 		//DataTable-1.11.3内置表头背景CSS添加了"!important"，这里也必须添加才能起作用
@@ -7353,7 +7352,7 @@ chartSupport.tableThemeStyleSheet = function(chart, options)
 				name: (isLocalStyle ? "." + name : "") + " .dg-chart-table-title",
 				value:
 				{
-					"font-size": chartFactory.toCssFontSize(theme.titleTheme.fontSize)
+					"font-size": CF.toCssFontSize(theme.titleTheme.fontSize)
 				}
 			},
 			{
@@ -7883,7 +7882,7 @@ chartSupport.tableHandleCarousel = function(chart, renderOptions, chartEle, data
 		if(needDraw)
 			dataTable.draw();
 		
-		var span = (chartFactory.isFunction(carousel.span) ?
+		var span = (CF.isFunction(carousel.span) ?
 				carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carousel.span);
 		
 		scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
@@ -7891,7 +7890,7 @@ chartSupport.tableHandleCarousel = function(chart, renderOptions, chartEle, data
 	
 	var interval = null;
 	
-	if(!chartFactory.isFunction(carousel.interval))
+	if(!CF.isFunction(carousel.interval))
 	{
 		interval = carousel.interval;
 	}
@@ -7942,7 +7941,7 @@ chartSupport.tableCarouselIntervalId = function(chart, intervalId)
 
 chartSupport.labelRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -8192,7 +8191,7 @@ chartSupport.labelSetChartEventData = function(chart, chartEvent, htmlEvent, $la
 
 chartSupport.selectRender = function(chart, options)
 {
-	options = chartFactory.extend(true,
+	options = CF.extend(true,
 	{
 		dg:
 		{
@@ -8327,7 +8326,7 @@ chartSupport.selectUpdate = function(chart, chartResult)
 	
 	if(renderOptions.prepend)
 	{
-		var newData = (chartFactory.isArray(renderOptions.prepend) ? renderOptions.prepend : [ renderOptions.prepend ]);
+		var newData = (CF.isArray(renderOptions.prepend) ? renderOptions.prepend : [ renderOptions.prepend ]);
 		data = newData.concat(data);
 	}
 	
@@ -8338,7 +8337,7 @@ chartSupport.selectUpdate = function(chart, chartResult)
 		var $opt = $("<option />").attr("value", optData.value)
 			.html(optData.name ? optData.name : optData.value).appendTo($select);
 		
-		if(optData.selected || (selected != null && chartFactory.indexInArray(selected, i) > -1))
+		if(optData.selected || (selected != null && CF.indexInArray(selected, i) > -1))
 			$opt.attr("selected", "selected");
 		
 		$opt.data("_dgChartSelectOptionChartData", optData);
@@ -8420,7 +8419,7 @@ chartSupport.selectSetChartEventData = function(chart, chartEvent, htmlEvent, $s
 
 chartSupport.selectThemeStyleSheet = function(chart)
 {
-	chart.themeStyleSheet(chartFactory.builtinPropName("SelectChart"), function()
+	chart.themeStyleSheet(CF.builtinPropName("SelectChart"), function()
 	{
 		var theme = chart.theme();
 		
@@ -8433,14 +8432,14 @@ chartSupport.selectThemeStyleSheet = function(chart)
 					"color": theme.color,
 					"background-color": theme.backgroundColor,
 					"border-color": theme.borderColor,
-					"font-size": chartFactory.toCssFontSize(theme.fontSize)
+					"font-size": CF.toCssFontSize(theme.fontSize)
 				}
 			},
 			{
 				name: " .dg-chart-select-select option",
 				value:
 				{
-					"font-size": chartFactory.toCssFontSize(theme.fontSize)
+					"font-size": CF.toCssFontSize(theme.fontSize)
 				}
 			},
 			{
@@ -8489,7 +8488,7 @@ chartSupport.rawDataUpdate = function(chart, chartResult)
 		
 		for(var j=0; j<datas.length; j++)
 		{
-			var di = chartFactory.toJsonString(datas[j]);
+			var di = CF.toJsonString(datas[j]);
 			$("<div class='dg-chart-rawdata-ds-data-item' />").text(di).appendTo($dsd);
 		}
 	}
@@ -8621,7 +8620,7 @@ chartSupport.customAdditions = function(chart)
 	if(customRenderer)
 	{
 		if(customRenderer.additions)
-			re = (chartFactory.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
+			re = (CF.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
 		else
 			re = null;
 	}
@@ -8731,13 +8730,13 @@ chartSupport.inflateEChartsRenderOptions = function(chart, defaultOptions, befor
 	//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
 	if(firstSeriesAsTemplate && defaultOptions.series && defaultOptions.series[0])
 	{
-		var series0 = chartFactory.extend(true, {}, defaultOptions.series[0]);
+		var series0 = CF.extend(true, {}, defaultOptions.series[0]);
 		newBeforeProcessHandler = function(renderOptions, chart)
 		{
 			var series = renderOptions.series;
 			
 			for(var i=1; i<series.length; i++)
-				series[i] = chartFactory.extend(true, {}, series0, series[i]);
+				series[i] = CF.extend(true, {}, series0, series[i]);
 			
 			//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
 			for(var i=0; i<series.length; i++)
@@ -8789,7 +8788,7 @@ chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptio
 	
 	seriesFirstAsTemplate = (seriesFirstAsTemplate == null ? true : seriesFirstAsTemplate);
 	
-	var renderOptions = chartFactory.extend(true, {}, defaultOptions, builtinOptions);
+	var renderOptions = CF.extend(true, {}, defaultOptions, builtinOptions);
 	
 	if(afterMergeHandlerFirst != null)
 		afterMergeHandlerFirst(renderOptions, chart);
@@ -8800,7 +8799,7 @@ chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptio
 	if(seriesFirstAsTemplate)
 	{
 		var series0 = (renderOptions.series && renderOptions.series[0] ?
-						chartFactory.extend(true, {}, renderOptions.series[0]) : null);
+						CF.extend(true, {}, renderOptions.series[0]) : null);
 		
 		if(series0)
 		{
@@ -8809,7 +8808,7 @@ chartSupport.inflateRenderOptions = function(chart, defaultOptions, builtinOptio
 				var series = renderOptions.series;
 				
 				for(var i=1; i<series.length; i++)
-					series[i] = chartFactory.extend(true, {}, series0, series[i]);
+					series[i] = CF.extend(true, {}, series0, series[i]);
 				
 				//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
 				for(var i=0; i<series.length; i++)
@@ -8887,7 +8886,7 @@ chartSupport.isDataTypeTimestamp = function(dataSetField)
  */
 chartSupport.appendElement = function(array, eles)
 {
-	if(chartFactory.isArray(eles))
+	if(CF.isArray(eles))
 	{
 		for(var i=0; i<eles.length; i++)
 			array.push(eles[i]);
@@ -8922,7 +8921,7 @@ chartSupport.appendDistinctQuick = function(array, eles, indexCache, propertyNam
 {
 	indexCache = (indexCache == null ? {} : indexCache);
 	
-	var isArray = chartFactory.isArray(eles);
+	var isArray = CF.isArray(eles);
 	
 	if(!isArray)
 		eles = [ eles ];
@@ -8969,7 +8968,7 @@ chartSupport.appendDistinctQuick = function(array, eles, indexCache, propertyNam
  */
 chartSupport.findInArray = function(array, value, propertyName)
 {
-	var isPnFunction = (propertyName && chartFactory.isFunction(propertyName));
+	var isPnFunction = (propertyName && CF.isFunction(propertyName));
 	
 	for(var i=0; i<array.length; i++)
 	{
@@ -9197,7 +9196,7 @@ chartSupport.evalSeriesDataValueSymbolSize = function(series, minValue, maxValue
 	if(valuePropertyName == null)
 		valuePropertyName = "value";
 	
-	if(!chartFactory.isArray(series))
+	if(!CF.isArray(series))
 		series = [ series ];
 	
 	for(var i=0; i<series.length; i++)
@@ -9221,7 +9220,7 @@ chartSupport.evalDataValueSymbolSize = function(data, minValue, maxValue, symbol
 	if(valuePropertyName == null)
 		valuePropertyName = "value";
 	
-	if(!chartFactory.isArray(data))
+	if(!CF.isArray(data))
 		data = [ data ];
 	
 	for(var i=0; i<data.length; i++)
@@ -9230,7 +9229,7 @@ chartSupport.evalDataValueSymbolSize = function(data, minValue, maxValue, symbol
 		var value = obj[valuePropertyName];
 		
 		if(valueElementIndex != null)
-			value = (chartFactory.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
+			value = (CF.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
 		
 		obj.symbolSize = chartSupport.evalValueSymbolSize(
 			value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
@@ -9279,7 +9278,7 @@ chartSupport.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, resul
 //初始化ECharts地图类图表的地图选项
 chartSupport.echartsMapChartInitMap = function(chart, options)
 {
-	var map = chartFactory.builtinOptionValue(options, builtinOptionNames.mapName);
+	var map = CF.builtinOptionValue(options, builtinOptionNames.mapName);
 	
 	//必须设置初始map，不然渲染会报错
 	if(!map)
@@ -9312,7 +9311,7 @@ chartSupport.echartsMapChartUpdate = function(chart, chartResult, updateOptions,
 	updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions, function(updateOptions)
 	{
 		//inflateUpdateOptions()会将地图设置为renderOptions里的项，所以这里需要再次设置为updateMap
-		chartFactory.extend(true, updateOptions, updateMapOptions);
+		CF.extend(true, updateOptions, updateMapOptions);
 		
 		var renderMaps = chartSupport.echartsGetMapsDistinct(renderOptions);
 		var updateMaps = chartSupport.echartsGetMapsDistinct(updateOptions);
@@ -9353,7 +9352,7 @@ chartSupport.echartsGetMapOptions = function(echartsOptions)
 	
 	if(geo)
 	{
-		if(chartFactory.isArray(geo))
+		if(CF.isArray(geo))
 		{
 			re.geo = [];
 			
@@ -9370,7 +9369,7 @@ chartSupport.echartsGetMapOptions = function(echartsOptions)
 	
 	if(series)
 	{
-		if(chartFactory.isArray(series))
+		if(CF.isArray(series))
 		{
 			re.series = [];
 			
@@ -9399,7 +9398,7 @@ chartSupport.echartsGetMapsDistinct = function(echartsOptions)
 	
 	if(geo)
 	{
-		if(chartFactory.isArray(geo))
+		if(CF.isArray(geo))
 		{
 			for(var i=0; i<geo.length; i++)
 			{
@@ -9420,7 +9419,7 @@ chartSupport.echartsGetMapsDistinct = function(echartsOptions)
 	
 	if(series)
 	{
-		if(chartFactory.isArray(series))
+		if(CF.isArray(series))
 		{
 			for(var i=0; i<series.length; i++)
 			{
@@ -9452,7 +9451,7 @@ chartSupport.echartsSetMapOption = function(echartsOptions, map, force)
 	
 	if(geo)
 	{
-		if(chartFactory.isArray(geo))
+		if(CF.isArray(geo))
 		{
 			for(var i=0; i<geo.length; i++)
 			{
@@ -9473,7 +9472,7 @@ chartSupport.echartsSetMapOption = function(echartsOptions, map, force)
 	
 	if(series)
 	{
-		if(chartFactory.isArray(series))
+		if(CF.isArray(series))
 		{
 			for(var i=0; i<series.length; i++)
 			{
@@ -9501,7 +9500,7 @@ chartSupport.echartsResetMapSettings = function(echartsOptions)
 	
 	if(geo)
 	{
-		if(chartFactory.isArray(geo))
+		if(CF.isArray(geo))
 		{
 			for(var i=0; i<geo.length; i++)
 			{
@@ -9518,7 +9517,7 @@ chartSupport.echartsResetMapSettings = function(echartsOptions)
 	
 	if(series)
 	{
-		if(chartFactory.isArray(series))
+		if(CF.isArray(series))
 		{
 			for(var i=0; i<series.length; i++)
 			{
@@ -9585,7 +9584,7 @@ chartSupport.echartsMapChartLoadMaps = function(chart, options, callback)
 			error: function(jqXHR, textStatus, errorThrown)
 			{
 				this.mapLoadedDeferred.reject();
-				chartFactory.logException("Load map '"+this.needLoadMap+"' error : " + (errorThrown || textStatus));
+				CF.logException("Load map '"+this.needLoadMap+"' error : " + (errorThrown || textStatus));
 			}
 		});
 	}
@@ -9659,7 +9658,7 @@ chartSupport.extractNameValueStyleObj = function(obj, nameProperty, valuePropert
 		var value = obj.value;
 		
 		//{ value: [..., ...] }
-		if(chartFactory.isArray(value))
+		if(CF.isArray(value))
 		{
 			name = value[nameIndex];
 			value = value[valueIndex];
@@ -9677,7 +9676,7 @@ chartSupport.evalLocalPlainObj = function(localPlainObj, publicPlainObj)
 	var re = null;
 	
 	if(localPlainObj && publicPlainObj)
-		re = chartFactory.extend({}, publicPlainObj, localPlainObj);
+		re = CF.extend({}, publicPlainObj, localPlainObj);
 	else if(publicPlainObj)
 		re = publicPlainObj;
 	else if(localPlainObj)
@@ -9708,7 +9707,7 @@ chartSupport.toLegalStyleNameObj = function(obj)
 	
 	for(var p in obj)
 	{
-		var name = chartFactory.toLegalStyleName(p);
+		var name = CF.toLegalStyleName(p);
 		var value = obj[p];
 		
 		re[name] = value;
@@ -9774,7 +9773,7 @@ chartSupport.chartEventForHtml = function(chart, type, htmlEvent)
 
 chartSupport.builtinCategoryPropName = function()
 {
-	return chartFactory.builtinPropName("Category");
+	return CF.builtinPropName("Category");
 };
 
 chartSupport.addCategoryToFieldMap = function(fieldMap, categoryField, categoryName)
@@ -9848,12 +9847,12 @@ chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, up
 	
 	var axisData = [];
 	var indexCache = {};
-	var isValueExtractorFunc = chartFactory.isFunction(valueExtractor);
-	var isValueExtractorAry = (!isValueExtractorFunc && chartFactory.isArray(valueExtractor));
+	var isValueExtractorFunc = CF.isFunction(valueExtractor);
+	var isValueExtractorAry = (!isValueExtractorFunc && CF.isArray(valueExtractor));
 	var valueExtractors = [];
 	
 	var series = (updateOptions.series || []);
-	chartFactory.each(series, function(i, s)
+	CF.each(series, function(i, s)
 	{
 		var data = (s.data || []);
 		var myData = [];
@@ -9866,7 +9865,7 @@ chartSupport.inflateAxisDataForEchartsUpdateOptions = function(renderOptions, up
 		else
 			myValueExtractor = valueExtractor.get(s);
 		
-		chartFactory.each(data, function(j, d)
+		CF.each(data, function(j, d)
 		{
 			var v = myValueExtractor(d, s);
 			myData.push(v);
@@ -9911,7 +9910,7 @@ chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOption
 	
 	var sortHandler = chartSupport.sortAxisDataOption(renderOptions);
 	
-	if(chartFactory.isString(sortHandler))
+	if(CF.isString(sortHandler))
 	{
 		sortHandler = sortHandler.toLowerCase();
 		
@@ -9938,23 +9937,23 @@ chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOption
 	}
 	
 	var axisData = updateAxis.data;
-	var isValueExtractorFunc = chartFactory.isFunction(valueExtractor);
-	var isValueExtractorAry = (!isValueExtractorFunc && chartFactory.isArray(valueExtractor));
+	var isValueExtractorFunc = CF.isFunction(valueExtractor);
+	var isValueExtractorAry = (!isValueExtractorFunc && CF.isArray(valueExtractor));
 	
-	if(chartFactory.isFunction(sortHandler))
+	if(CF.isFunction(sortHandler))
 	{
 		axisData.sort(sortHandler);
 		
 		if(sortSeriesData)
 		{
 			var indexCache = {};
-			chartFactory.each(axisData, function(i, a)
+			CF.each(axisData, function(i, a)
 			{
 				indexCache[a] = i;
 			});
 			
 			var series = (updateOptions.series || []);
-			chartFactory.each(series, function(i, s)
+			CF.each(series, function(i, s)
 			{
 				var data = (s.data || []);
 				var myValueExtractor = null;
@@ -9985,23 +9984,23 @@ chartSupport.sortAxisDataForUpdateOptions = function(renderOptions, updateOption
 
 chartSupport.sortAxisDataOption = function(options)
 {
-	var value = chartFactory.builtinOptionValue(options, builtinOptionNames.sortAxisData);
+	var value = CF.builtinOptionValue(options, builtinOptionNames.sortAxisData);
 	return value;
 };
 
 chartSupport.serverSidePagingOption = function(options, value)
 {
-	return chartFactory.optionValue(options, "serverSidePaging", value);
+	return CF.optionValue(options, "serverSidePaging", value);
 };
 
 chartSupport.updateInternalOption = function(options, value)
 {
-	return chartFactory.optionValue(options, "updateInternal", value);
+	return CF.optionValue(options, "updateInternal", value);
 };
 
 chartSupport.carouselOption = function(options, value)
 {
-	return chartFactory.optionValue(options, "carousel", value);
+	return CF.optionValue(options, "carousel", value);
 };
 
 chartSupport.inflateAxisDataExtractors =
@@ -10052,8 +10051,8 @@ chartSupport.adaptArrayPropsForUpdateOptions = function(updateOptions, renderOpt
 	{
 		var renderValue = renderOptions[name];
 		var updateValue = updateOptions[name];
-		var isRenderArray = chartFactory.isArray(renderValue);
-		var isUpdateArray = chartFactory.isArray(updateValue);
+		var isRenderArray = CF.isArray(renderValue);
+		var isUpdateArray = CF.isArray(updateValue);
 		
 		//如果渲染选项是数组，更新选项不是，应把更新选项包裹为数组
 		if(isRenderArray && !isUpdateArray)

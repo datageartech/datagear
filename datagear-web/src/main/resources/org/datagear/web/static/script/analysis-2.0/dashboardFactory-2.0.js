@@ -23,7 +23,6 @@
  *   chartFactory.js
  * 
  * 运行时依赖:
- *   jquery.js
  *   chartSetting.js
  * 
  * 
@@ -696,23 +695,23 @@ chartProto._handleChartEventLink = function(eventType, linkSrcData, links)
 		}
 	};
 	
-	for(var i=0; i<links.length; i++)
+	for(let i=0; i<links.length; i++)
 	{
-		var link = links[i];
+		let link = links[i];
 		
 		if(!this._isLinkByEventType(link, eventType))
 			continue;
 		
-		var myTargetCharts = dashboard._batchSetDataSetParamValues(batchSource, link, linkSrcData);
+		let myTargetCharts = dashboard._batchSetDataSetParamValues(batchSource, link, linkSrcData);
 		
-		for(var j=0; j<myTargetCharts.length; j++)
+		for(let j=0; j<myTargetCharts.length; j++)
 		{
 			if(CF.indexInArray(targetCharts, myTargetCharts[j]) < 0)
 				targetCharts.push(myTargetCharts[j]);
 		}
 	}
 	
-	for(var i=0; i<targetCharts.length; i++)
+	for(let i=0; i<targetCharts.length; i++)
 	{
 		CF.executeSilently(function()
 		{
@@ -859,10 +858,10 @@ dashboardProto._initMapURLs = function()
 {
 	var mapURLs = {};
 	
-	for(var i=0; i<builtinChartMaps.length; i++)
+	for(let i=0; i<builtinChartMaps.length; i++)
 	{
-		var namesMap = builtinChartMaps[i];
-		for(var j=0; j<namesMap.names.length; j++)
+		let namesMap = builtinChartMaps[i];
+		for(let j=0; j<namesMap.names.length; j++)
 			mapURLs[namesMap.names[j]] = builtinChartMapBaseURL + namesMap.map;
 	}
 	
@@ -909,9 +908,9 @@ dashboardProto._initChartResizeHandler = function()
 			{
 				var charts = thisDashboard.charts();
 				
-				for(var i =0; i<charts.length; i++)
+				for(let i =0; i<charts.length; i++)
 				{
-					var chart = charts[i];
+					let chart = charts[i];
 					
 					if(chart.autoResize() && chart.isActive())
 						chart.resize();
@@ -950,9 +949,9 @@ dashboardProto._initCharts = function()
 {
 	var charts = this.charts();
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
+		let chart = charts[i];
 		
 		if(chart.manualRender())
 			continue;
@@ -1088,9 +1087,9 @@ dashboardProto._chartIndex = function(charts, chartInfo)
 	if(CF.isHtmlEle(chartInfo))
 		chartInfo = CF.eleAttr(chartInfo, "id");
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
+		let chart = charts[i];
 		
 		if(chart === chartInfo || chart.elementId() === chartInfo
 				|| i === chartInfo || chart.id() === chartInfo)
@@ -1240,9 +1239,9 @@ dashboardProto._prepareDoRenderCharts = function()
 {
 	var charts = this.charts();
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
+		let chart = charts[i];
 		
 		if(chart.manualRender())
 			continue;
@@ -1331,12 +1330,14 @@ dashboardProto._assertActive = function()
  * 
  * 图表数据集参数索引对象格式参考dashboard._batchSetDataSetParamValues()函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
  * 
- * @param form 要渲染的<form>表单HTML元素，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
+ * @param form 要渲染的<form>表单HTML元素、HTML元素ID，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
  * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
  */
 dashboardProto.renderForm = function(form, config)
 {
 	this._assertAlive();
+	
+	form = (CF.isString(form) ? CF.eleOfId(form) : form);
 	
 	CF.eleAddClass(form, "dg-dashboard-form");
 	
@@ -1355,9 +1356,9 @@ dashboardProto.renderForm = function(form, config)
 			
 			if(batchSet)
 			{
-				var charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ form, thisForm ]);
+				let charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ form, thisForm ]);
 				
-				for(var i=0; i<charts.length; i++)
+				for(let i=0; i<charts.length; i++)
 				{
 					CF.executeSilently(function()
 					{
@@ -1374,7 +1375,7 @@ dashboardProto.renderForm = function(form, config)
 	
 	if(config.link)
 	{
-		var link = config.link;
+		let link = config.link;
 		
 		//转换简写格式
 		if(CF.isString(link) || CF.isArray(link))
@@ -1392,9 +1393,9 @@ dashboardProto.renderForm = function(form, config)
 	if(!CF.isArray(sourceItems))
 		sourceItems = [ sourceItems ];
 	
-	for(var i=0; i<sourceItems.length; i++)
+	for(let i=0; i<sourceItems.length; i++)
 	{
-		var item = sourceItems[i];
+		let item = sourceItems[i];
 		
 		if(CF.isString(item))
 			item = { name: item };
@@ -1524,9 +1525,9 @@ dashboardProto._doHandleCharts = function()
 {
 	var charts = this.charts();
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
+		let chart = charts[i];
 		
 		if(this._isWaitForRender(chart))
 			this._renderChart(chart);
@@ -1536,22 +1537,22 @@ dashboardProto._doHandleCharts = function()
 	var preUpdateLocals = [];
 	var time = CF.currentDateMs();
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
+		let chart = charts[i];
 		
-		var wait = this._isWaitForUpdate(chart, time);
+		let wait = this._isWaitForUpdate(chart, time);
 		if(wait > 0)
 		{
 			//应立即设置为HANDLING_UPDATE状态
 			chart.status(chartStatusConst.HANDLING_UPDATE);
 			
-			var chartQuery = null;
+			let chartQuery = null;
 			
 			//由chart.refreshData()函数触发
 			if(wait == 2)
 			{
-				var rrds = chart.liveData(chart, REQ_REFRESH_DATAS_LIVE_DATA_NAME);
+				let rrds = chart.liveData(chart, REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 				chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
 			}
 			
@@ -1563,8 +1564,8 @@ dashboardProto._doHandleCharts = function()
 			}
 			else
 			{
-				var group = chart.updateGroup();
-				var preUpdates = preUpdateGroups[group];
+				let group = chart.updateGroup();
+				let preUpdates = preUpdateGroups[group];
 				
 				if(preUpdates == null)
 				{
@@ -1585,7 +1586,7 @@ dashboardProto._doHandleCharts = function()
 	var webContext = CF.renderContextAttrWebContext(this.renderContext);
 	var url = this.contextURL(webContext.attributes.updateDashboardURL);
 	
-	for(var group in preUpdateGroups)
+	for(let group in preUpdateGroups)
 	{
 		CF.executeSilently(() =>
 		{
@@ -1807,7 +1808,7 @@ dashboardProto._execListenerOnFetch = function(fetchContext)
 	var charts = fetchContext.charts;
 	var dashboardQuery = fetchContext.query;
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
 		let chart = charts[i];
 		let chartListener = chart.listener();
@@ -1832,32 +1833,32 @@ dashboardProto._handleChartsAjaxSuccess = function(fetchContext, dashboardResult
 	var chartErrors = dashboardResult.chartErrors;
 	var dashboardQuery = fetchContext.query;
 	
-	for(var chartId in chartResults)
+	for(let chartId in chartResults)
 	{
-		var chart = this.chartOf(chartId);
+		let chart = this.chartOf(chartId);
 		
 		if(!chart)
 			continue;
 		
 		CF.executeSilently(() =>
 		{
-			var chartResult = (chartResults[chartId] || {});
-			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
+			let chartResult = (chartResults[chartId] || {});
+			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
 			this._updateChart(chart, chartResult, chartQuery, true);
 		});
 	}
 	
-	for(var chartId in chartErrors)
+	for(let chartId in chartErrors)
 	{
-		var chart = this.chartOf(chartId);
+		let chart = this.chartOf(chartId);
 		
 		if(!chart)
 			continue;
 		
 		CF.executeSilently(() =>
 		{
-			var error = (chartErrors[chartId] || { type: "Error", message: "error" });
-			var chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
+			let error = (chartErrors[chartId] || { type: "Error", message: "error" });
+			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
 			this._handleChartAjaxError(chart, error, chartQuery, true);
 		});
 	}
@@ -1979,7 +1980,7 @@ dashboardProto._setChartsUpdateTime = function(charts, time)
 {
 	CF.executeSilently(() =>
 	{
-		for(var i=0; i<charts.length; i++)
+		for(let i=0; i<charts.length; i++)
 		{
 			charts[i]._updateTime(time);
 		}
@@ -2436,7 +2437,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 	var sourceValueContextArgs = [ "place-holder-for-source-value" ];
 	sourceValueContextArgs = sourceValueContextArgs.concat(CF.isArray(sourceValueContext) ? sourceValueContext : [ sourceValueContext ]);
 	
-	for(var name in dataMap)
+	for(let name in dataMap)
 	{
 		let dataValue = undefined;
 		
@@ -3021,15 +3022,15 @@ DF.addBuiltinChartMaps = function(chartMaps)
 {
 	var ukChartMapNames = (DF._uniqueBuiltinChartMapNames || (DF._uniqueBuiltinChartMapNames = {}));
 	
-	for(var i=0; i<chartMaps.length; i++)
+	for(let i=0; i<chartMaps.length; i++)
 	{
-		var cm = chartMaps[i];
-		var names = cm.names;
-		var adcodeInNames = (cm.adcode ? false : true);
+		let cm = chartMaps[i];
+		let names = cm.names;
+		let adcodeInNames = (cm.adcode ? false : true);
 		
-		for(var j=0; j<names.length; j++)
+		for(let j=0; j<names.length; j++)
 		{
-			var name = names[j];
+			let name = names[j];
 			
 			if(ukChartMapNames[name])
 				throw new Error("duplicate built-in chart map name : " + name);
@@ -3071,17 +3072,17 @@ DF.getStdBuiltinChartMapTree = function(listener)
 	
 	var nodeCache = {};
 	
-	for(var i=0; i<builtinChartMaps.length; i++)
+	for(let i=0; i<builtinChartMaps.length; i++)
 	{
-		var bcm = builtinChartMaps[i];
+		let bcm = builtinChartMaps[i];
 		
 		if(!bcm.adname || !bcm.adcode)
 			continue;
 		
 		//DF.addBuiltinChartMaps()函数已经确保了adcode可以用作地图名
 		//而且它是全局唯一的，最合适
-		var node = { mapName: bcm.adcode, mapLabel: bcm.adname };
-		var parentNode = (bcm.parent ? nodeCache[bcm.parent] : null);
+		let node = { mapName: bcm.adcode, mapLabel: bcm.adname };
+		let parentNode = (bcm.parent ? nodeCache[bcm.parent] : null);
 		
 		if(parentNode)
 		{
@@ -3124,16 +3125,16 @@ DF.getStdBuiltinChartMapArray = function(listener)
 {
 	var re = [];
 	
-	for(var i=0; i<builtinChartMaps.length; i++)
+	for(let i=0; i<builtinChartMaps.length; i++)
 	{
-		var bcm = builtinChartMaps[i];
+		let bcm = builtinChartMaps[i];
 		
 		if(!bcm.adname || !bcm.adcode)
 			continue;
 		
 		//DF.addBuiltinChartMaps()函数已经确保了adcode可以用作地图名
 		//而且它是全局唯一的，最合适
-		var node = { mapName: bcm.adcode, mapLabel: bcm.adname };
+		let node = { mapName: bcm.adcode, mapLabel: bcm.adname };
 		re.push(node);
 		
 		if(listener && listener.added)

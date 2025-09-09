@@ -32,7 +32,7 @@
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.THEME属性来设置图表主题，格式为：
  * { color:'...', backgroundColor:'...', ... }
  * 
- * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chart.listener函数参数说明。
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chart.listener()函数参数说明。
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.ECHARTS_THEME属性来设置图表ECharts主题名。
  * 
@@ -41,7 +41,7 @@
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数。
  * 
- * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chart._initRenderer函数说明。
+ * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chart.renderer()函数说明。
  * 
  * 此图表工厂要求图表插件的图表渲染器（chart.plugin().renderer）格式为：
  * {
@@ -2328,7 +2328,8 @@ chartProto.processUpdateOptions = function(updateOptions, set)
  * @param target 合并目标选项对象，格式应为：{ ... }
  * @param source 合并源选项对象，格式应为：{ ... }，默认为：this.options()
  * @param filter 可选，合并过滤器，true 全部合并；false 仅合并在target中存在的属性（仅顶级属性）；
- * 				 源选项对象过滤函数，格式为：function(name, value){ return true、false; }，返回false将不合并source中的对应属性
+ * 				 源选项对象过滤函数，格式为：function(name, value){ return true、false; }，返回false将不合并source中的对应属性。
+ * 				 默认值为：true
  * @returns target
  */
 chartProto.inflateOptions = function(target, source, filter)
@@ -5839,7 +5840,7 @@ CF.inflateGlobalChartTheme = function(theme)
 CF.isThemeInflated = function(theme, inflated)
 {
 	if(inflated === undefined)
-		return (theme._INFLATED == true);
+		return (theme._INFLATED === true);
 	else
 		theme._INFLATED = inflated;
 };
