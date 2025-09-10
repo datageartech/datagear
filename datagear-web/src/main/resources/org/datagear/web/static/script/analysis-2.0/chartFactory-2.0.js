@@ -34,8 +34,6 @@
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chart.listener()函数参数说明。
  * 
- * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.ECHARTS_THEME属性来设置图表ECharts主题名。
- * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_SETTING属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
  * 
@@ -195,9 +193,6 @@ elementAttrConst.THEME = "dg-chart-theme";
 
 /**图表监听器*/
 elementAttrConst.LISTENER = "dg-chart-listener";
-
-/**图表ECharts主题*/
-elementAttrConst.ECHARTS_THEME = "dg-echarts-theme";
 
 /**图表禁用设置*/
 elementAttrConst.DISABLE_SETTING = "dg-chart-disable-setting";

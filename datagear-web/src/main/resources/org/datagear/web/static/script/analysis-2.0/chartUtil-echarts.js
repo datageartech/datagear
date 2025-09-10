@@ -20,228 +20,201 @@
  * 全局变量名：window.chartUtil.echarts
  * 
  * 加载时依赖：
- *   无
  * 
  * 运行时依赖:
+ *   chartFactory
  *   echarts
  */
 (function(global)
 {
 
+/**图表工厂*/
+var CF = (global.chartFactory || (global.chartFactory = {}));
+
 var chartUtil = (global.chartUtil || (global.chartUtil = {}));
-var echartsUtil = (chartUtil.echarts || (chartUtil.echarts = {}));
+var EU = (chartUtil.echarts || (chartUtil.echarts = {}));
+
+//图表ECharts主题
+EU.ELE_ATTR_ECHARTS_THEME = "dg-echarts-theme";
+
+//图表主题中的ECharts主题名属性名
+EU.THEME_PROP_ECHARTS_THEME_NAME = "DG_ECHARTS_THEME_NAME";
+
+//注册地图状态
+//键："地图名"；值：{ loaded: true、false, fetchPromise: Promise }
+EU.MAP_REGISTER_STATES = {};
 
 /**
- * 初始化图表的ECharts主题名。
- * 此函数依次从图表元素、<body>元素的elementAttrConst.ECHARTS_THEME属性获取ECharts主题名。
+ * 获取全局ECharts对象。
  */
-echartsUtil._initEchartsThemeName = function()
+EU.echarts = function()
 {
-	var themeName = CF.eleAttr(this.element(), elementAttrConst.ECHARTS_THEME);
+	return global.echarts;
+};
+
+/**
+ * 将图表初始化为ECharts图表。
+ * 此函数会自动将EU.themeName()函数、EU.themeNameOfChartTheme()函数返回的主题名应用至初始化的ECharts图表主题。
+ * 此函数会自动调用chart.internal()将初始化的ECharts实例对象设置为图表底层组件。
+ * 
+ * @param chart 图表
+ * @param opts 可选，同echarts.init()函数的opts附加参数
+ * @returns ECharts实例
+ */
+EU.init = function(chart, opts)
+{
+	var themeName = EU.themeName(chart);
+	
 	if(!themeName)
-		themeName = CF.eleAttr(document.body, elementAttrConst.ECHARTS_THEME);
+		themeName = EU.themeNameOfChartTheme(chart);
 	
-	this.echartsThemeName(themeName);
-};
-
-
-/**
- * ECharts图表支持函数：获取/设置图表的ECharts主题名。
- * 此函数用于为ECharts图表提供支持，如果不是ECharts图表，则不必设置此项。
- * 
- * 图表初始化时会使用图表元素的"dg-echarts-theme"属性值执行设置操作。
- * 
- * 图表渲染器实现相关：
- * 图表渲染器应使用此函数获取并应用ECharts主题。
- * 
- * @param themeName 可选，要设置的且已注册的ECharts主题名，没有则执行获取操作
- */
-echartsUtil.echartsThemeName = function(themeName)
-{
-	if(themeName === undefined)
-		return this._echartsThemeName;
-	else
-		this._echartsThemeName = themeName;
-};
-
-
-/**
- * ECharts图表支持函数：将图表初始化为ECharts图表，设置其选项。
- * 此函数会自动应用chartBase.echartsGetThemeName()至初始化的ECharts图表。
- * 此函数会自动调用chartBase.internal()将初始化的ECharts实例对象设置为图表底层组件。
- * 
- * @param options 要设置的ECharts选项，为null表示不设置
- * @param opts 可选，ECharts的init函数附加参数，具体参考ECharts.init()函数的opts参数
- * @returns ECharts实例对象
- */
-chartBase.echartsInit = function(options, opts)
-{
-	var instance = echarts.init(this.element(), this.echartsGetThemeName(), opts);
-	this.internal(instance);
-	
-	if(options != null)
-	{
-		instance.setOption(options);
-	}
+	var instance = EU.echarts().init(chart.element(), themeName, opts);
+	chart.internal(instance);
 	
 	return instance;
 };
 
 /**
- * ECharts图表支持函数：设置图表的ECharts实例的选项。
+ * 获取在图表元素上（优先）或者<body>元素上通过"dg-echarts-theme"属性定义的ECharts主题名
  * 
- * @param options
- * @param opts 可选，ECharts的setOption函数附加参数，具体参考ECharts.setOption()函数的opts参数
+ * @param chart 图表
+ * @returns ECharts主题名
  */
-chartBase.echartsOptions = function(options, opts)
+EU.themeName = function(chart)
 {
-	var internal = this.internal();
+	var themeName = CF.eleAttr(chart.element(), elementAttrConst.ECHARTS_THEME);
 	
-	if(!this._isEchartsInstance(internal))
-		throw new Error("chart is not ECharts");
+	if(!themeName)
+		themeName = CF.eleAttr(document.body, elementAttrConst.ECHARTS_THEME);
 	
-	internal.setOption(options, opts);
+	return themeName;
 };
 
 /**
- * 给定对象是否是ECharts实例。
- */
-chartBase._isEchartsInstance = function(obj)
-{
-	return (obj && obj.setOption && obj.isDisposed && obj.dispose && obj.off);
-};
-
-/**
- * ECharts图表支持函数：判断指定名称的ECharts地图是否已经注册过而无需再加载。
+ * 获取根据图表主题生成（只第一次生成）的ECharts主题名。
  * 
- * @param name ECharts地图名称
+ * @param chart 图表
+ * @returns ECharts主题名，对应的主题由图表主题生成且已经注册至ECharts
  */
-chartBase.echartsMapRegistered = function(name)
+EU.themeNameOfChartTheme = function(chart)
 {
-	return (echarts.getMap(name) != null);
-};
-
-/**
- * ECharts图表支持函数：加载并注册指定名称的ECharts地图（GeoJSON、SVG），并在注册完成后执行回调函数。
- * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
- * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
- * 
- * @param name 地图名称
- * @param callback 可选，加载并注册完成后的回调函数，格式为：function(name, map, jqXHR){ ... }，或者也可以是JQuery的ajax配置项：{...}
- */
-chartBase.echartsLoadMap = function(name, callback)
-{
-	var registerMap = function(name, map, jqXHR)
-	{
-		var contentType = (jqXHR.getResponseHeader("Content-Type") || "");
-		
-		//SVG地图
-		if(/svg/i.test(contentType))
-		{
-			echarts.registerMap(name, {svg: map});
-		}
-		//其他都认为是GeoJSON地图
-		else
-		{
-			echarts.registerMap(name, {geoJSON: map});
-		}
-	};
+	var theme = chart.theme();
+	var themeName = theme[EU.THEME_PROP_ECHARTS_THEME_NAME];
 	
-	if(callback == null)
-		;
-	else if(CF.isFunction(callback))
-	{
-		var originalCallback = callback;
-		callback = function(name, map, jqXHR)
-		{
-			registerMap(name, map, jqXHR);
-			originalCallback.call(this, name, map, jqXHR);
-		};
-	}
-	//ajax配置项：{...}
-	else
-	{
-		var settings = CF.extend({}, callback);
-		var originalCallback = settings.success;
-		settings.success = function(map, textStatus, jqXHR)
-		{
-			registerMap(name, map, jqXHR);
-			
-			if(originalCallback)
-				originalCallback.call(this, map, textStatus, jqXHR);
-		};
-		
-		callback = settings;
-	}
-	
-	this.loadMap(name, callback);
-};
-
-/**
- * ECharts图表支持函数：解绑指定图表事件处理函数。
- * ECharts相关的图表渲染器可以在其off函数中调用此函数，以实现底层事件解绑功能。
- * 
- * @param eventType 图表事件类型
- * @param eventHanlder 可选，图表事件处理函数，格式为：function(chartEvent){ ... }，不设置则解绑所有此类型的图表事件处理函数
- * @returns 同chartBase.removeEventHandlerDelegation返回值
- */
-chartBase.echartsOffEventHandler = function(eventType, eventHanlder)
-{
-	var internal = this.internal();
-	
-	return this.removeEventHandlerDelegation(eventType, eventHanlder, function(et, eh, ehd)
-	{
-		if(internal)
-			internal.off(et, ehd);
-	});
-};
-
-/** 关键字：注册得ECharts主题名 */
-var REGISTERED_ECHARTS_THEME_NAME = CF.BUILTIN_PROP_PREFIX + "RegisteredEchartsThemeName";
-
-/**
- * ECharts图表支持函数：获取可用于此图表的且已注册的ECharts主题名。
- * 此函数优先返回chartBase.echartsThemeName()函数的结果，
- * 当其为null时，则使用chartBase.theme()构建和注册ECharts主题（仅第一次），并返回注册后的主题名。
- * 
- * @since 2.11.0
- */
-chartBase.echartsGetThemeName = function()
-{
-	var themeName = this.echartsThemeName();
-	
-	//从ChartTheme构建ECharts主题
 	if(!themeName)
 	{
-		var theme = this.theme();
-		themeName = theme[REGISTERED_ECHARTS_THEME_NAME];
+		themeName = (theme[EU.THEME_PROP_ECHARTS_THEME_NAME] = CF.uid());
 		
-		if(!themeName)
-		{
-			themeName = (theme[REGISTERED_ECHARTS_THEME_NAME] = CF.uid());
-			
-			var echartsTheme = CF.buildEchartsTheme(theme);
-			echarts.registerTheme(themeName, echartsTheme);
-		}
+		var echartsTheme = EU._buildEchartsTheme(chart);
+		EU.echarts().registerTheme(themeName, echartsTheme);
 	}
 	
     return themeName;
 };
 
 /**
+ * 为图表注册指定名称的地图（GeoJSON、SVG）至ECharts，并在注册完成后执行回调函数。
+ * 如果地图未加载，将在加载后再注册。
+ * 注意：如果在图表渲染器的render()、update()函数中调用此函数，应该首先设置渲染器的asyncRender、asyncUpdate，
+ * 并在callback中调用chart.statusRendered(true)、chart.statusUpdated(true)。
+ * 
+ * @param chart 图表
+ * @param name 地图名称
+ * @param callback 可选，加载并注册成功后的回调函数，格式为：function(name){ ... }
+ */
+EU.registerMap = function(chart, name, callback)
+{
+	var echarts = EU.echarts();
+	
+	if(echarts.getMap(name) != null)
+	{
+		if(callback != null)
+			callback(name);
+	}
+	else
+	{
+		let state = EU.MAP_REGISTER_STATES[name];
+		
+		if(state && state.loaded === true)
+		{
+			if(callback != null)
+				callback(name);
+			
+			//释放内存
+			if(state.fetchPromise != null)
+				state.fetchPromise = null;
+		}
+		else
+		{
+			if(state == null)
+			{
+				let mapUrl = chart.mapURL(name);
+				
+				state = { loaded: false };
+				state.fetchPromise = fetch(mapUrl);
+				EU.MAP_REGISTER_STATES[name] = state;
+				
+				state.fetchPromise.then((response) =>
+				{
+					if(response.ok)
+					{
+						let headers = response.headers;
+						let contentType = (headers.get("Content-Type") || "");
+						//是否SVG地图
+						let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(url));
+						
+						return response.text().then((text) =>
+						{
+							if(isSvg)
+								EU.echarts().registerMap(name, {svg: text});
+							else
+								EU.echarts().registerMap(name, {geoJSON: text});
+							
+							state.loaded = true;
+							callback(name);
+							
+							return response;
+						});
+					}
+					else
+					{
+						EU.MAP_REGISTER_STATES[name] = null;
+						return response;
+					}
+				});
+			}
+			else
+			{
+				state.fetchPromise.then((response) =>
+				{
+					if(response.ok)
+					{
+						callback(name);
+					}
+				});
+			}
+		}
+	}
+};
+
+/**
  * 由图表主题构建ECharts主题。
  * 
- * @param chartTheme 图表主题对象：org.datagear.analysis.ChartTheme
+ * @param chart 图表
  */
-CF.buildEchartsTheme = function(chartTheme)
+CF._buildEchartsTheme = function(chart)
 {
-	var axisColor = CF.themeGradualColor(chartTheme, 0.7);
-	var axisScaleLineColor = CF.themeGradualColor(chartTheme, 0.35);
-	var areaColor0 = CF.themeGradualColor(chartTheme, 0.1);
-	var areaBorderColor0 = CF.themeGradualColor(chartTheme, 0.3);
-	var areaColor1 = CF.themeGradualColor(chartTheme, 0.25);
-	var areaBorderColor1 = CF.themeGradualColor(chartTheme, 0.5);
-	var shadowColor = CF.themeGradualColor(chartTheme, 0.9);
+	var axisColor = chart.themeGradualColor(0.7);
+	var axisScaleLineColor = chart.themeGradualColor(0.35);
+	var areaColor0 = chart.themeGradualColor(0.1);
+	var areaBorderColor0 = chart.themeGradualColor(0.3);
+	var areaColor1 = chart.themeGradualColor(0.25);
+	var areaBorderColor1 = chart.themeGradualColor(0.5);
+	var shadowColor = chart.themeGradualColor(0.9);
+	var emptyAreaColor = chart.themeGradualColor(0);
+	var emptyBorderColor = areaColor0;
+	
+	var chartTheme = chart.theme();
 	
 	var theme =
 	{
@@ -343,8 +316,8 @@ CF.buildEchartsTheme = function(chartTheme)
 			},
 			"emptyCircleStyle":
 			{
-				"color": CF.themeGradualColor(chartTheme, 0),
-				"borderColor": CF.themeGradualColor(chartTheme, 0.1)
+				"color": emptyAreaColor,
+				"borderColor": emptyBorderColor
 			}
 		},
 		"scatter" : {
@@ -1014,10 +987,13 @@ CF.buildEchartsTheme = function(chartTheme)
 		theme.sankey.label.fontSize = chartTheme.fontSize;
 		theme.themeRiver.label.fontSize = chartTheme.fontSize;
 	}
+	
 	if(chartTheme.titleTheme.fontSize)
 		theme.title.textStyle.fontSize = chartTheme.titleTheme.fontSize;
+	
 	if(chartTheme.legendTheme.fontSize)
 		theme.legend.textStyle.fontSize = chartTheme.legendTheme.fontSize;
+	
 	if(chartTheme.tooltipTheme.fontSize)
 		theme.tooltip.textStyle.fontSize = chartTheme.tooltipTheme.fontSize;
 	
