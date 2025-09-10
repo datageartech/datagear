@@ -34,7 +34,7 @@ var CF = (global.chartFactory || (global.chartFactory = {}));
 var chartUtil = (global.chartUtil || (global.chartUtil = {}));
 var EU = (chartUtil.echarts || (chartUtil.echarts = {}));
 
-//图表ECharts主题
+//图表元素属性名：ECharts主题名
 EU.ELE_ATTR_ECHARTS_THEME = "dg-echarts-theme";
 
 //图表主题中的ECharts主题名属性名
@@ -120,16 +120,16 @@ EU.themeNameOfChartTheme = function(chart)
  * 
  * @param chart 图表
  * @param name 地图名称
- * @param callback 可选，加载并注册成功后的回调函数，格式为：function(name){ ... }
+ * @param complete 可选，注册完成后（无论是否成功）的回调函数，格式为：function(name){ ... }
  */
-EU.registerMap = function(chart, name, callback)
+EU.registerMap = function(chart, name, complete)
 {
 	var echarts = EU.echarts();
 	
 	if(echarts.getMap(name) != null)
 	{
-		if(callback != null)
-			callback(name);
+		if(complete != null)
+			complete(name);
 	}
 	else
 	{
@@ -137,8 +137,8 @@ EU.registerMap = function(chart, name, callback)
 		
 		if(state && state.loaded === true)
 		{
-			if(callback != null)
-				callback(name);
+			if(complete != null)
+				complete(name);
 			
 			//释放内存
 			if(state.fetchPromise != null)
@@ -150,49 +150,50 @@ EU.registerMap = function(chart, name, callback)
 			{
 				let mapUrl = chart.mapURL(name);
 				
-				state = { loaded: false };
-				state.fetchPromise = fetch(mapUrl);
+				state = { loaded: false, fetchPromise: fetch(mapUrl) };
 				EU.MAP_REGISTER_STATES[name] = state;
 				
 				state.fetchPromise.then((response) =>
 				{
-					if(response.ok)
+					if(!response.ok)
+						throw new Error(response.statusText ? response.statusText : "error");
+					
+					let headers = response.headers;
+					let contentType = (headers.get("Content-Type") || "");
+					//是否SVG地图
+					let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(url));
+					
+					if(isSvg)
 					{
-						let headers = response.headers;
-						let contentType = (headers.get("Content-Type") || "");
-						//是否SVG地图
-						let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(url));
-						
-						return response.text().then((text) =>
+						return response.text().then((svgText) =>
 						{
-							if(isSvg)
-								EU.echarts().registerMap(name, {svg: text});
-							else
-								EU.echarts().registerMap(name, {geoJSON: text});
-							
+							EU.echarts().registerMap(name, {svg: svgText});
 							state.loaded = true;
-							callback(name);
 							
 							return response;
 						});
 					}
 					else
 					{
-						EU.MAP_REGISTER_STATES[name] = null;
-						return response;
+						return response.json().then((geoJSON) =>
+						{
+							EU.echarts().registerMap(name, {geoJSON: geoJSON});
+							state.loaded = true;
+							
+							return response;
+						});
 					}
-				});
-			}
-			else
-			{
-				state.fetchPromise.then((response) =>
+				})
+				.catch(() =>
 				{
-					if(response.ok)
-					{
-						callback(name);
-					}
+					EU.MAP_REGISTER_STATES[name] = null;
 				});
 			}
+			
+			state.fetchPromise.finally(() =>
+			{
+				complete(name);
+			});
 		}
 	}
 };
