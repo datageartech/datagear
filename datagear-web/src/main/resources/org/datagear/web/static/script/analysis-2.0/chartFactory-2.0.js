@@ -5957,14 +5957,16 @@ CF.inflateChartTheme = function(theme)
 };
 
 /**
- * 加载库，并在全部加载完成后（无论是否成功）执行回调函数。
+ * 加载图表渲染器依赖库，并在全部加载完成后（无论是否成功）执行回调函数。
  * 库对象结构为：
  * {
  *   //库名称，应尽量使用库本身定义的全局名称
  *   name: "..."、[ "...", ... ],
- *   //版本号，应符合语义化版本规范："X.Y.Z"、"X.Y.Z-BUILD"
+ *   //可选，图表渲染器对于此库可兼容接受的版本范围，不设置表示接受任意版本。
+ *   acceptVersion: "...",
+ *   //可选，可提供的库源版本号，应符合语义化版本规范："X.Y.Z"、"X.Y.Z-BUILD"
  *   version: "...",
- *   //库源
+ *   //可选，可提供的库源信息，不设置表示不提供
  *   source:
  *   //库源URL
  *   "..."、
@@ -5977,10 +5979,10 @@ CF.inflateChartTheme = function(theme)
  *   }、
  *   //库源URL/对象数组
  *   [ "...", { ... }, ... ],
- *   //可选，依赖库名称/数组
- *   depend: "..."、[ "..."、... ],
+ *   //可选，依赖库名称/对象/数组，不设置表示不依赖任何库
+ *   depend: "..."、{ name: "..."、[ "...", ... ], acceptVersion: "..." }、[ "..."、{ ... }、... ],
  *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。
- *   //默认值是：如果this.name已在window下已定义，返回true；否则，返回false。
+ *   //默认值是：如果this.name已在window下定义，返回true；否则，返回false。
  *   loaded: function(){ ... }
  * }
  * 
@@ -6285,6 +6287,7 @@ CF.findLatestLibInCharts = function(charts, lib)
 	if(charts == null)
 		return lib;
 	
+	var acceptVersion = lib.acceptVersion;
 	var rendererLatestLib = lib;
 	var pluginLatestLib = lib;
 	var pluginLatestLibChart = null;
@@ -6294,7 +6297,7 @@ CF.findLatestLibInCharts = function(charts, lib)
 		let chart = charts[i];
 		let renderer = chart.renderer();
 		let rendererLib = CF.rendererLib(renderer);
-		rendererLatestLib = CF.findLatestLibInLibs(rendererLib, rendererLatestLib);
+		rendererLatestLib = CF.findLatestLibInLibs(rendererLib, rendererLatestLib, acceptVersion);
 	}
 	
 	for(let i=0; i<charts.length; i++)
@@ -6302,7 +6305,7 @@ CF.findLatestLibInCharts = function(charts, lib)
 		let chart = charts[i];
 		let pluginRenderer = chart._pluginRenderer();
 		let rendererLib = CF.rendererLib(pluginRenderer);
-		let myPluginLatestLib = CF.findLatestLibInLibs(rendererLib, pluginLatestLib);
+		let myPluginLatestLib = CF.findLatestLibInLibs(rendererLib, pluginLatestLib, acceptVersion);
 		
 		if(myPluginLatestLib !== pluginLatestLib)
 		{
@@ -6312,7 +6315,7 @@ CF.findLatestLibInCharts = function(charts, lib)
 	}
 	
 	//图表渲染器在看板页面定义，所以其依赖库应该优先使用
-	var latestLib = CF.resolveLatestLibByBase(rendererLatestLib, pluginLatestLib);
+	var latestLib = CF.resolveLatestLibByBase(rendererLatestLib, pluginLatestLib, acceptVersion);
 	
 	//如果是插件依赖库，需要转换为可用依赖库
 	if(latestLib !== lib && latestLib === pluginLatestLib && pluginLatestLibChart != null)
@@ -6323,7 +6326,7 @@ CF.findLatestLibInCharts = function(charts, lib)
 	return latestLib;
 };
 
-CF.findLatestLibInLibs = function(libs, lib)
+CF.findLatestLibInLibs = function(libs, lib, acceptVersion)
 {
 	if(libs == null)
 		return lib;
@@ -6334,39 +6337,65 @@ CF.findLatestLibInLibs = function(libs, lib)
 	{
 		for(let i=0; i<libs.length; i++)
 		{
-			latestLib = CF.resolveLatestLibByBase(latestLib, libs[i]);
+			latestLib = CF.resolveLatestLibByBase(latestLib, libs[i], acceptVersion);
 		}
 	}
 	else
 	{
-		latestLib = CF.resolveLatestLibByBase(latestLib, libs);
+		latestLib = CF.resolveLatestLibByBase(latestLib, libs, acceptVersion);
 	}
 	
 	return latestLib;
 };
 
 //如果compareLib与baseLib同名，且版本更高，返回compareLib；否则，返回baseLib
-CF.resolveLatestLibByBase = function(baseLib, compareLib)
+CF.resolveLatestLibByBase = function(baseLib, compareLib, acceptVersion)
 {
-	if(compareLib == null)
+	if(compareLib == null || baseLib === compareLib)
 		return baseLib;
 	
-	var latestLib = baseLib;
+	if(CF.isEmpty(compareLib.source))
+		return baseLib;
+	
+	var re = baseLib;
 	
 	var name = CF.resolveSameLibName(baseLib.name, compareLib.name);
 	
-	if(name != null)
+	if(name != null && CF.isLibVersionAccepted(name, compareLib.version, acceptVersion))
 	{
-		//只有找到更高版本号的才替换，否则应该优先使用传入的lib参数
-		var lower = (CF.compareLibVersion(name, baseLib.version, compareLib.version) < 0);
+		//只有找到更高版本号的才替换
+		let lower = (CF.compareLibVersion(name, baseLib.version, compareLib.version) < 0);
 		
 		if(lower)
-		{
-			latestLib = compareLib;
-		}
+			re = compareLib;
 	}
 	
-	return latestLib;
+	return re;
+};
+
+CF.isLibVersionAccepted = function(name, version, acceptVersion)
+{
+	if(CF.isEmpty(acceptVersion))
+		return true;
+	
+	var acceptObj = CF.resolveAcceptVersionObj(acceptVersion);
+	
+	var compareMin = (acceptObj.min == null ? 1 : CF.compareLibVersion(name, version, acceptObj.min));
+	var acceptMin = (acceptObj.includeMin ? (compareMin >= 0) : (compareMin > 0));
+	
+	var compareMax = (acceptObj.max == null ? -1 : CF.compareLibVersion(name, version, acceptObj.max));
+	var acceptMax = (acceptObj.includeMax ? (compareMax <= 0) : (compareMax < 0));
+	
+	return (acceptMin && acceptMax);
+};
+
+CF.resolveAcceptVersionObj = function(acceptVersion)
+{
+	var re = { min: null, includeMin: true, max: null, includeMax: false };
+	
+	//TODO
+	
+	return re;
 };
 
 //查找第一个库
