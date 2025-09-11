@@ -542,7 +542,7 @@
 		
 		var tagName = this._tagNameOfEleLowerCase($ele);
 		
-		if(chartFactory.isNullOrEmpty(tagName))
+		if(chartFactory.isEmpty(tagName))
 			return false;
 		
 		if(tagName == "body")
@@ -866,10 +866,10 @@
 			}
 		}
 		
-		if(!chartFactory.isNullOrEmpty(gridAttr.rowGap))
+		if(!chartFactory.isEmpty(gridAttr.rowGap))
 			styleStr += "row-gap:"+gridAttr.rowGap+";";
 		
-		if(!chartFactory.isNullOrEmpty(gridAttr.columnGap))
+		if(!chartFactory.isEmpty(gridAttr.columnGap))
 			styleStr += "column-gap:"+gridAttr.columnGap+";";
 		
 		div.attr("style", styleStr);
@@ -1011,7 +1011,7 @@
 			var name = RESPONSIVE_LAYOUT_NAMES[i];
 			var value = layout[name];
 			
-			if(!chartFactory.isNullOrEmpty(value))
+			if(!chartFactory.isEmpty(value))
 			{
 				re += (re == "" ? "" : " ") + "dg-rsp-"+name + infix +"-" + value;
 			}
@@ -1044,7 +1044,7 @@
 			var child = $(this);
 			var editId = thisEditor._layoutAffectEleEditId(child);
 			
-			if(chartFactory.isNullOrEmpty(editId))
+			if(chartFactory.isEmpty(editId))
 				return;
 			
 			var layout = thisEditor._evalResponsiveFlexLayout(child.attr("class"));
@@ -1061,12 +1061,12 @@
 	{
 		var editId = $ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID);
 		
-		if(chartFactory.isNullOrEmpty(editId))
+		if(chartFactory.isEmpty(editId))
 			return null;
 		
 		var tagName = this._tagNameOfEleLowerCase($ele);
 		
-		if(chartFactory.isNullOrEmpty(tagName))
+		if(chartFactory.isEmpty(tagName))
 			return null;
 		
 		if(!this._isVisualEleTag(tagName))
@@ -1081,7 +1081,7 @@
 	
 	editor._evalResponsiveFlexLayout = function(classStr, ignoreClasses)
 	{
-		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
+		var classNames = (chartFactory.isEmpty(classStr) ? [] : classStr.split(" "));
 		
 		var re = {};
 		
@@ -1090,7 +1090,7 @@
 		{
 			var className = classNames[i];
 			
-			if(chartFactory.isNullOrEmpty(className) || !className.indexOf("dg-rsp-") == 0)
+			if(chartFactory.isEmpty(className) || !className.indexOf("dg-rsp-") == 0)
 				continue;
 			
 			if(ignoreClasses != null && chartFactory.indexInArray(ignoreClasses, className) > -1)
@@ -1106,7 +1106,7 @@
 			var name = partStr.substring(0, splitIdx);
 			var value = (splitIdx == partStr.length-1 ? "" : partStr.substring(splitIdx + 1));
 			
-			if(chartFactory.isNullOrEmpty(value))
+			if(chartFactory.isEmpty(value))
 				continue;
 			
 			splitIdx = value.indexOf("-");
@@ -1122,7 +1122,7 @@
 				}
 			}
 			
-			if(chartFactory.isNullOrEmpty(value))
+			if(chartFactory.isEmpty(value))
 				continue;
 			
 			re[breakpoint] = (re[breakpoint] || {});
@@ -2047,7 +2047,7 @@
 	{
 		var body = $(document.body);
 		
-		if(chartFactory.isNullOrEmpty(value))
+		if(chartFactory.isEmpty(value))
 		{
 			this._setElementAttr(body, name, null);
 		}
@@ -2102,7 +2102,7 @@
 		if(!this.checkSetElementAttr(ele))
 			return false;
 		
-		if(chartFactory.isNullOrEmpty(value))
+		if(chartFactory.isEmpty(value))
 		{
 			this._setElementAttr(ele, name, null);
 		}
@@ -2803,7 +2803,7 @@
 		{
 			var v = chartTheme[p];
 			
-			if(chartFactory.isNullOrEmpty(v))
+			if(chartFactory.isEmpty(v))
 				delete mergedChartTheme[p];
 			else
 				mergedChartTheme[p] = v;
@@ -2825,7 +2825,7 @@
 		{
 			var v = mergedChartTheme[p];
 			
-			if(!chartFactory.isNullOrEmpty(v))
+			if(!chartFactory.isEmpty(v))
 				trim[p] = v;
 		}
 		
@@ -2931,7 +2931,7 @@
 		{
 			var value = styleObj[name];
 			
-			if(chartFactory.isNullOrEmpty(value))
+			if(chartFactory.isEmpty(value))
 				delete nowStyleObj[name];
 			else
 			{
@@ -2982,7 +2982,7 @@
 	{
 		var re = "";
 		
-		var classNames = (chartFactory.isNullOrEmpty(classStr) ? [] : classStr.split(" "));
+		var classNames = (chartFactory.isEmpty(classStr) ? [] : classStr.split(" "));
 		
 		for(var i=0; i<classNames.length; i++)
 		{
@@ -3282,13 +3282,13 @@
 		var bgColor = styleObj['background-color'];
 		var fontSize = styleObj['font-size'];
 		
-		if(!chartFactory.isNullOrEmpty(color))
+		if(!chartFactory.isEmpty(color))
 			styleTheme.color = color;
 		
 		//始终将图表元素的背景色置为null，因为背景色会自动继承父级元素
 		styleTheme.backgroundColor = null;
 		
-		if(!chartFactory.isNullOrEmpty(bgColor))
+		if(!chartFactory.isEmpty(bgColor))
 		{
 			//应忽略透明度
 			var bgColorObj = chartFactory.parseColor(bgColor);
@@ -3296,7 +3296,7 @@
 			styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
 		}
 		
-		if(!chartFactory.isNullOrEmpty(fontSize))
+		if(!chartFactory.isEmpty(fontSize))
 		{
 			//从元素的css中取才能获取字体尺寸像素数
 			styleTheme.fontSize = styleEle.css("font-size");
@@ -3412,7 +3412,7 @@
 	
 	editor._isOnlyEmptyOrFormat = function(text)
 	{
-		if(chartFactory.isNullOrEmpty(text))
+		if(chartFactory.isEmpty(text))
 			return true;
 		
 		if(/^\s*$/.test(text))
@@ -3747,7 +3747,7 @@
 	
 	editor._isEmptyJsonObjStr = function(str)
 	{
-		if(chartFactory.isNullOrEmpty(str))
+		if(chartFactory.isEmpty(str))
 			return true;
 		
 		return /^\s*\{\s*\}\s*$/i.test(str);

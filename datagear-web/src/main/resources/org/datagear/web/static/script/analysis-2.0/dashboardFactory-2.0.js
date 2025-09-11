@@ -248,7 +248,7 @@ DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
  */
 DF.init = function(root)
 {
-	if(CF.isNullOrEmpty(root.id))
+	if(CF.isEmpty(root.id))
 		throw new Error("[id] required");
 	
 	if(root.renderContext == null)
@@ -328,7 +328,7 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 	var webContext = CF.renderContextAttrWebContext(renderContext);
 	var heartbeatURL = (webContext && webContext.attributes ? webContext.attributes.heartbeatURL : null);
 	
-	if(CF.isNullOrEmpty(heartbeatURL))
+	if(CF.isEmpty(heartbeatURL))
 		throw new Error("[heartbeatURL] required");
 	
 	heartbeatURL = CF.toWebContextPathURL(webContext, heartbeatURL);
@@ -422,7 +422,7 @@ chartProto._initAutoResize = function()
 {
 	var autoResize = CF.eleAttr(this.element(), elementAttrConst.AUTO_RESIZE);
 	
-	if(!CF.isNullOrEmpty(autoResize))
+	if(!CF.isEmpty(autoResize))
 	{
 		//使用eval可以支持变量而非仅字面值
 		autoResize = CF.evalSilently(autoResize);
@@ -456,7 +456,7 @@ chartProto._initUpdateGroup = function()
 {
 	var updateGroup = CF.eleAttr(this.element(), elementAttrConst.UPDATE_GROUP);
 	
-	if(CF.isNullOrEmpty(updateGroup))
+	if(CF.isEmpty(updateGroup))
 		updateGroup = CF.eleAttr(document.body, elementAttrConst.UPDATE_GROUP);
 	
 	this.updateGroup(updateGroup);
@@ -1761,44 +1761,30 @@ dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
 	fetch(url, DF.fetchOptsOfPostJson(dashboardQueryForm))
 	.then((response) =>
 	{
-		let updateTime = CF.currentDateMs();
+		if(!response.ok)
+			throw new Error(DF.msgOfResponse(response));
 		
-		try
+		let re = response.json();
+		
+		re.then((data) =>
 		{
-			response.json().then((data) =>
-			{
-				if(response.ok)
-				{
-					let dashboardResult = (data ? data : {});
-					dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
-					dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
-					
-					this._handleChartsAjaxSuccess(fetchContext, dashboardResult);
-				}
-				else
-				{
-					let error = (data || DF.errorOfMsg("error"));
-					this._handleChartsAjaxError(fetchContext, error);
-				}
-			});
-		}
-		finally
-		{
-			this._setChartsUpdateTime(charts, updateTime);				
-		}
+			let dashboardResult = (data ? data : {});
+			dashboardResult.chartResults = (dashboardResult.chartResults ? dashboardResult.chartResults : {});
+			dashboardResult.chartErrors = (dashboardResult.chartErrors ? dashboardResult.chartErrors : {});
+			
+			this._handleChartsAjaxSuccess(fetchContext, dashboardResult);
+		});
+		
+		return re;
 	})
 	.catch((error) =>
 	{
+		this._handleChartsAjaxError(fetchContext, error);
+	})
+	.finally(() =>
+	{
 		let updateTime = CF.currentDateMs();
-		
-		try
-		{
-			this._handleChartsAjaxError(fetchContext, DF.errorOfFetchError(error))
-		}
-		finally
-		{
-			this._setChartsUpdateTime(charts, updateTime);
-		}
+		this._setChartsUpdateTime(charts, updateTime);
 	});
 };
 
@@ -2118,10 +2104,10 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
 		chartWidgetId = CF.elementWidgetId(element);
 	
 	this._loadCharts([ element ], [ chartWidgetId ],
-	(charts, response) =>
+	(charts) =>
 	{
 		if(successCallback)
-			return successCallback(charts[0], response);
+			return successCallback(charts[0]);
 	},
 	errorCallback);
 };
@@ -2161,7 +2147,7 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
 	{
 		newChartWidgetIds[i] = (chartWidgetIds == null ? null : chartWidgetIds[i]);
 		
-		if(!newChartWidgetIds[i])
+		if(CF.isEmpty(newChartWidgetIds[i]))
 			newChartWidgetIds[i] = CF.elementWidgetId(elements[i]);
 	}
 	
@@ -2276,41 +2262,36 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 	fetch(url, DF.fetchOptsOfGetJson(null))
 	.then((response) =>
 	{
+		if(!response.ok)
+			throw new Error(DF.msgOfResponse(response));
+		
 		this._loadingChartElement(elements, false);
 		
-		response.json().then((data) =>
+		let re = response.json();
+		
+		re.then((data) =>
 		{
-			if(response.ok)
+			let chartRoots = (data || []);
+			let charts = [];
+			
+			for(let i=0; i<chartRoots.length; i++)
 			{
-				let chartRoots = (data || []);
-				let charts = [];
-				
-				for(let i=0; i<chartRoots.length; i++)
-				{
-					charts[i] = this._initLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
-					this._addLoadedChart(charts[i]);
-				}
-				
-				if(successCallback)
-					successCallback(charts, response);
+				charts[i] = this._initLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
+				this._addLoadedChart(charts[i]);
 			}
-			else
-			{
-				let error = (data || DF.errorOfMsg("error"));
-				
-				if(errorCallback != null)
-				{
-					errorCallback(error, response);
-				}
-			}
+			
+			if(successCallback)
+				successCallback(charts);
 		});
+		
+		return re;
 	})
 	.catch((error) =>
 	{
 		this._loadingChartElement(elements, false);
 		
 		if(errorCallback != null)
-			errorCallback(DF.errorOfFetchError(error), error);
+			errorCallback(error);
 	});
 };
 
@@ -2870,7 +2851,7 @@ dashboardProto.chartsIn = function(element, active)
 	eles.forEach((ele) =>
 	{
 		let id = CF.eleAttr(ele, "id");
-		let chart = (CF.isNullOrEmpty(id) ? null : this.chartOf(id));
+		let chart = (CF.isEmpty(id) ? null : this.chartOf(id));
 		
 		if(!chart)
 			return;
@@ -2946,19 +2927,9 @@ DF.fetchOptsOfGetJson = function(data)
 	return re;
 };
 
-DF.errorOfFetchError = function(error)
+DF.msgOfResponse = function(response)
 {
-	return DF.errorOfMsg((error && error.message ? error.message : "error"));
-};
-
-DF.errorOfMsg = function(message)
-{
-	var re =
-	{
-		message: (message ? message : "error")
-	};
-	
-	return re;
+	return (response.statusText ? response.statusText : response.status+"");
 };
 
 /**

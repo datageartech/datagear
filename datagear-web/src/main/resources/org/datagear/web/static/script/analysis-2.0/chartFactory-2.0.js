@@ -565,7 +565,7 @@ chartProto._initDisableSetting = function()
 	var optionValue = CF.builtinOptionValue(options, builtinOptionNames.disableSetting);
 	
 	//图表选项里的优先级应最高，不然图表展示页的选项不起效
-	if(!CF.isNullOrEmpty(optionValue))
+	if(!CF.isEmpty(optionValue))
 	{
 		setting = this._evalDisableSettingAttr(optionValue);
 	}
@@ -574,7 +574,7 @@ chartProto._initDisableSetting = function()
 		var globalSetting = this._bodyDisableSetting();
 		setting = CF.eleAttr(this.element(), elementAttrConst.DISABLE_SETTING);
 		
-		if(!CF.isNullOrEmpty(setting))
+		if(!CF.isEmpty(setting))
 		{
 			setting = this._evalDisableSettingAttr(setting);
 			setting = CF.extend({}, globalSetting, setting);
@@ -605,7 +605,7 @@ chartProto._evalDisableSettingAttr = function(settingAttr)
 {
 	var setting = {};
 	
-	if(CF.isNullOrEmpty(settingAttr))
+	if(CF.isEmpty(settingAttr))
 		settingAttr == "false";
 	
 	if(settingAttr == "false" || settingAttr == false)
@@ -715,7 +715,7 @@ chartProto.elementId = function(elementId)
 		return this._root.elementId;
 	else
 	{
-		if(CF.isNullOrEmpty(elementId))
+		if(CF.isEmpty(elementId))
 			throw new Error("[elementId] required");
 		
 		this._root.elementId = elementId;
@@ -2943,7 +2943,7 @@ chartProto.optionsOrigin = function(eval)
 	
 	if(eval)
 	{
-		if(CF.isNullOrEmpty(options))
+		if(CF.isEmpty(options))
 			options = null;
 		else
 			options = CF.evalSilently(options, {});
@@ -4638,7 +4638,7 @@ CF.styleString = function(css)
 	{
 		var cssi = arguments[i];
 		
-		if(CF.isNullOrEmpty(cssi))
+		if(CF.isEmpty(cssi))
 			continue;
 		
 		var cssiText = "";
@@ -4657,14 +4657,14 @@ CF.styleString = function(css)
 			{
 				var value = cssi[name];
 				
-				if(!CF.isNullOrEmpty(value))
+				if(!CF.isEmpty(value))
 				{
 					cssiText += name + ":" + value + ";";
 				}
 			}
 		}
 		
-		if(CF.isNullOrEmpty(cssiText))
+		if(CF.isEmpty(cssiText))
 			continue;
 		
 		if(cssText && cssText.charAt(cssText.length - 1) != ";")
@@ -4813,7 +4813,7 @@ CF.elesWithWidgetId = function(ele)
 	
 	var widgetId = CF.elementWidgetId(ele);
 	
-	if(!CF.isNullOrEmpty(widgetId))
+	if(!CF.isEmpty(widgetId))
 	{
 		re.elements.push(ele);
 		re.widgetIds.push(widgetId);
@@ -4823,7 +4823,7 @@ CF.elesWithWidgetId = function(ele)
 	children.forEach(function(child)
 	{
 		let childWidgetId = CF.elementWidgetId(child);
-		if(!CF.isNullOrEmpty(childWidgetId))
+		if(!CF.isEmpty(childWidgetId))
 		{
 			re.elements.push(child);
 			re.widgetIds.push(childWidgetId);
@@ -4859,7 +4859,7 @@ CF.checkSetChartElementId = function(ele, chart)
 {
 	var elementId = CF.eleAttr(ele, "id");
 	
-	if(CF.isNullOrEmpty(elementId))
+	if(CF.isEmpty(elementId))
 	{
 		elementId = CF.uid();
 		CF.eleAttr(ele, "id", elementId);
@@ -5191,7 +5191,7 @@ CF.parseColor = function(color)
 				color = [];
 			
 			//透明度是百分比
-			if(!CF.isNullOrEmpty(color[3]))
+			if(!CF.isEmpty(color[3]))
 				color[3] = (color[3].endsWith("%") ? parseFloat(color[3])/100 : parseFloat(color[3]));
 			
 			if(isRgb)
@@ -5432,7 +5432,7 @@ CF.escapeHtml = function(value)
 
 CF.toCssFontSize = function(fontSize)
 {
-	if(CF.isNullOrEmpty(fontSize))
+	if(CF.isEmpty(fontSize))
 	{
 		//返回一个无效的css字号值，使其不影响其他层级字号设置
 		return "null";
@@ -5513,7 +5513,7 @@ CF.isStringOrNumber = function(v)
 };
 
 //是否为null、undefined、空字符串、空数组
-CF.isNullOrEmpty = function(v)
+CF.isEmpty = function(v)
 {
 	return (v == null || v === "" || (v.length !== undefined && v.length === 0));
 };

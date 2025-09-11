@@ -1222,7 +1222,7 @@
 			{
 				var val = $required.val();
 				
-				if(chartFactory.isNullOrEmpty(val))
+				if(chartFactory.isEmpty(val))
 				{
 					$required.addClass("dg-validation-required");
 					validationOk = false;
@@ -1254,7 +1254,7 @@
 						break;
 					
 					var val = $(checkeds[i]).attr("value");
-					myValid = (chartFactory.isNullOrEmpty(val) ? true : regexNumber.test(val));
+					myValid = (chartFactory.isEmpty(val) ? true : regexNumber.test(val));
 				}
 				
 				if(!myValid)
@@ -1276,7 +1276,7 @@
 					if(!myValid)
 						break;
 					
-					myValid = (chartFactory.isNullOrEmpty(val[i]) ? true : regexNumber.test(val[i]));
+					myValid = (chartFactory.isEmpty(val[i]) ? true : regexNumber.test(val[i]));
 				}
 				
 				if(!myValid)
@@ -1361,7 +1361,7 @@
 		{
 			var v = re[p];
 			
-			if(chartFactory.isNullOrEmpty(v))
+			if(chartFactory.isEmpty(v))
 				re[p] = null;
 		}
 		
@@ -1478,7 +1478,7 @@
 		var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
 		//显示模式："hover" 悬浮显示（默认）、"display" 始终显示
 		var displayMode = (builtinSetting ? builtinSetting.displayMode : null);
-		displayMode = (chartFactory.isNullOrEmpty(displayMode) ? "hover" : displayMode);
+		displayMode = (chartFactory.isEmpty(displayMode) ? "hover" : displayMode);
 		
 		var $chart = chart.elementJquery();
 		
@@ -1549,11 +1549,11 @@
 			
 			//显示位置："rightTop" 右上（默认）；"leftTop" 左上；"leftBottom" 左下；"rightBottom" 右下
 			var boxPosition = (builtinSetting ? builtinSetting.position : null);
-			boxPosition = (chartFactory.isNullOrEmpty(boxPosition) ? "rightTop" : boxPosition);
+			boxPosition = (chartFactory.isEmpty(boxPosition) ? "rightTop" : boxPosition);
 			
 			//显示方向："row" 横向（默认）；"column" 竖向
 			var boxDirection = (builtinSetting ? builtinSetting.direction : null);
-			boxDirection = (chartFactory.isNullOrEmpty(boxDirection) ? "row" : boxDirection);
+			boxDirection = (chartFactory.isEmpty(boxDirection) ? "row" : boxDirection);
 			
 			var boxPositionCssName = "dg-position-" + boxPosition;
 			var boxDirectionCssName = "dg-flex-dir-" + boxDirection;
