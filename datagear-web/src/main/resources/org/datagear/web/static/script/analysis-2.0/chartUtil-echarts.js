@@ -137,12 +137,12 @@ EU.registerMap = function(chart, name, complete)
 		
 		if(state && state.loaded === true)
 		{
-			if(complete != null)
-				complete(name);
-			
 			//释放内存
 			if(state.fetchPromise != null)
 				state.fetchPromise = null;
+			
+			if(complete != null)
+				complete(name);
 		}
 		else
 		{
@@ -156,7 +156,7 @@ EU.registerMap = function(chart, name, complete)
 				state.fetchPromise.then((response) =>
 				{
 					if(!response.ok)
-						throw new Error(response.statusText ? response.statusText : "error");
+						throw new Error(response.statusText ? response.statusText : response.status+"");
 					
 					let headers = response.headers;
 					let contentType = (headers.get("Content-Type") || "");

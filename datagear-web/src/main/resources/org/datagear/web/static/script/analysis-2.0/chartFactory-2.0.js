@@ -5675,14 +5675,15 @@ CF.extend = function()
  * 支持版本号格式示例：
  * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
  * 
- * 此函数原封不动地拷贝自util.js中的compareVersion函数
- * 
  * @param v1
  * @param v2
  * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
  */
 CF.compareVersion = function(v1, v2)
 {
+	v1 = (v1 == null ? "" : v1);
+	v2 = (v2 == null ? "" : v2);
+	
 	if(v1 === v2)
 		return 0;
 	
@@ -5706,10 +5707,10 @@ CF.compareVersion = function(v1, v2)
 	var v1ds = v1.split(".");
 	var v2ds = v2.split(".");
 	
-	for(var i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
+	for(let i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
 	{
-		var num1 = (v1ds[i] == null ? 0 : parseInt(v1ds[i]));
-		var num2 = (v2ds[i] == null ? 0 : parseInt(v2ds[i]));
+		let num1 = (CF.isEmpty(v1ds[i]) ? -999999 : parseInt(v1ds[i]));
+		let num2 = (CF.isEmpty(v2ds[i]) ? -999999 : parseInt(v2ds[i]));
 		
 		if(num1 > num2)
 		{
@@ -6016,22 +6017,24 @@ CF.loadLib = function(lib, callback, contextCharts)
 //填充所有待加载库，填充后，unloadeds中都是最新版本库，且都包含依赖库
 CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 {
-	for(var i=0; i<libs.length; i++)
+	for(let i=0; i<libs.length; i++)
 	{
-		var lib = libs[i];
+		let lib = libs[i];
 		
-		if(CF.isLibLoadedInEnv(lib))
-		{
+		if(lib == null || CF.isLibLoadedInEnv(lib))
 			continue;
-		}
 		
-		var stateObj = CF.libState(lib);
+		let stateObj = CF.libState(lib);
 		if(stateObj && stateObj.state == CF.LIB_STATE_LOADED)
+			continue;
+		
+		let latestLib = CF.findLatestLibInCharts(contextCharts, lib);
+		
+		if(latestLib == null)
 		{
+			CF.logException("no lib found for name : " + lib.name);
 			continue;
 		}
-		
-		var latestLib = CF.findLatestLibInCharts(contextCharts, lib);
 		
 		if(latestLib !== lib)
 		{
@@ -6055,17 +6058,17 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 		unloadeds.push(latestLib);
 		
 		//处理依赖
-		if(latestLib.depend)
+		if(latestLib.depend != null)
 		{
-			var depend = latestLib.depend;
-			var dependLibs = [];
+			let depend = latestLib.depend;
+			let dependLibs = [];
 			
 			if(!CF.isArray(depend))
 				depend = [ depend ];
 			
-			for(var j=0; j<depend.length; j++)
+			for(let j=0; j<depend.length; j++)
 			{
-				var dependName = depend[j];
+				let dependName = depend[j];
 				
 				if(CF.libIndex(unloadeds, dependName) > -1)
 					continue;
@@ -6076,16 +6079,12 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 				if(CF.libIndex(dependLibs, dependName) > -1)
 					continue;
 				
-				var dependLib = CF.findFirstLibInCharts(contextCharts, dependName);
+				let dependLib = CF.findFirstLibInCharts(contextCharts, dependName);
 				
-				if(dependLib != null)
-				{
-					dependLibs.push(dependLib);
-				}
-				else
-				{
+				if(dependLib == null)
 					CF.logException("no lib found for name : '"+dependName+"', load ignored");
-				}
+				else
+					dependLibs.push(dependLib);
 			}
 			
 			if(dependLibs.length > 0)
@@ -6297,20 +6296,20 @@ CF.findLatestLibInCharts = function(charts, lib)
 	var pluginLatestLib = lib;
 	var pluginLatestLibChart = null;
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
-		var renderer = chart.renderer();
-		var rendererLib = CF.rendererLib(renderer);
+		let chart = charts[i];
+		let renderer = chart.renderer();
+		let rendererLib = CF.rendererLib(renderer);
 		rendererLatestLib = CF.findLatestLibInLibs(rendererLib, rendererLatestLib);
 	}
 	
-	for(var i=0; i<charts.length; i++)
+	for(let i=0; i<charts.length; i++)
 	{
-		var chart = charts[i];
-		var pluginRenderer = (chart.plugin ? chart.plugin.renderer : null);
-		var rendererLib = CF.rendererLib(pluginRenderer);
-		var myPluginLatestLib = CF.findLatestLibInLibs(rendererLib, pluginLatestLib);
+		let chart = charts[i];
+		let pluginRenderer = chart._pluginRenderer();
+		let rendererLib = CF.rendererLib(pluginRenderer);
+		let myPluginLatestLib = CF.findLatestLibInLibs(rendererLib, pluginLatestLib);
 		
 		if(myPluginLatestLib !== pluginLatestLib)
 		{
@@ -6340,7 +6339,7 @@ CF.findLatestLibInLibs = function(libs, lib)
 	
 	if(CF.isArray(libs))
 	{
-		for(var i=0; i<libs.length; i++)
+		for(let i=0; i<libs.length; i++)
 		{
 			latestLib = CF.resolveLatestLibByBase(latestLib, libs[i]);
 		}
@@ -6456,28 +6455,27 @@ CF.libIndex = function(libs, name)
 //当前环境是否已加载了指定库
 CF.isLibLoadedInEnv = function(lib)
 {
+	if(lib == null)
+		return true;
+	
 	if(lib.loaded != null)
 	{
 		return lib.loaded();
 	}
 	else
 	{
-		if(CF.isString(lib.name))
+		if(CF.isArray(lib.name))
 		{
-			return (window[lib.name] !== undefined);
+			for(let i=0; i<lib.name.length; i++)
+			{
+				if(window[lib.name[i]] !== undefined)
+					return true;
+			}
 		}
 		else
 		{
-			for(var i=0; i<lib.name.length; i++)
-			{
-				if(window[lib.name[i]] !== undefined)
-				{
-					return true;
-				}
-			}
+			return (window[lib.name] !== undefined);
 		}
-		
-		return false;
 	}
 };
 
