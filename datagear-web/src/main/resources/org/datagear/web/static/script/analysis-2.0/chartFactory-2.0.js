@@ -2212,10 +2212,10 @@ chartProto.mapURL = function(name)
 {
 	var url = chartMapURLs[name];
 	
-	if(!url && CF.isFunction(chartMapURLs.mapURL))
+	if(CF.isEmpty(url) && CF.isFunction(chartMapURLs.mapURL))
 		url = chartMapURLs.mapURL(name);
 	
-	url = this.contextURL(url || name);
+	url = this.contextURL(CF.isEmpty(url) ? name : url);
 	
 	return url;
 };
@@ -5990,15 +5990,8 @@ CF.inflateChartTheme = function(theme)
  */
 CF.loadLib = function(lib, callback, contextCharts)
 {
+	lib = (lib == null ? [] : (CF.isArray(lib) ? lib : [ lib ]));
 	contextCharts = (contextCharts == null ? [] : contextCharts);
-	
-	if(!lib)
-	{
-		callback();
-	}
-	
-	if(!CF.isArray(lib))
-		lib = [ lib ];
 	
 	var unloadeds = [];
 	CF.inflateUnloadedLibs(contextCharts, lib, unloadeds);
@@ -6098,15 +6091,15 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 //根据依赖优先级排序库，被依赖库靠前
 CF.sortLibsByDepend = function(libs)
 {
-	for(var i=0, len=libs.length; i<len-1; i++)
+	for(let i=0, len=libs.length; i<len-1; i++)
 	{
-		for (var j = 0; j < len - 1 - i; j++)
+		for (let j = 0; j < len - 1 - i; j++)
 		{
 			//libs[j+1]是否依赖libs[j]
-			var dj = (libs[j+1].depend != null && CF.resolveSameLibName(libs[j+1].depend, libs[j].name) != null);
+			let dj = (libs[j+1].depend != null && CF.resolveSameLibName(libs[j+1].depend, libs[j].name) != null);
 			if(!dj)
 			{
-				var tmp = libs[j];
+				let tmp = libs[j];
 				libs[j] = libs[j+1];
 				libs[j+1] = tmp;
 			}

@@ -64,6 +64,9 @@ var chartStatusConst = (CF.chartStatusConst || (CF.chartStatusConst = {}));
 /**HTML元素属性常量*/
 var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
 
+/** 图表地图映射表，详细格式参考CF.chartMapURLs */
+var chartMapURLs = (CF.chartMapURLs || (CF.chartMapURLs = {}));
+
 /** 渲染上下文属性名常量 */
 var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttrConst = {}));
 
@@ -1039,14 +1042,11 @@ dashboardProto.listener = function(listener)
  * @returns 要获取的地图URL映射表
  */
 dashboardProto.mapURLs = function(mapURLs)
-{
-	if(!CF.chartMapURLs)
-		CF.chartMapURLs = {};
-	
+{	
 	if(mapURLs === undefined)
-		return CF.chartMapURLs;
+		return chartMapURLs;
 	else
-		CF.extend(CF.chartMapURLs, mapURLs);
+		CF.extend(chartMapURLs, mapURLs);
 };
 
 /**
