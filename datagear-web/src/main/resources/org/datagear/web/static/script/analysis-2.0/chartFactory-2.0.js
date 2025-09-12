@@ -5515,7 +5515,7 @@ CF.isStringOrNumber = function(v)
 //是否为null、undefined、空字符串、空数组
 CF.isEmpty = function(v)
 {
-	return (v == null || v === "" || (v.length !== undefined && v.length === 0));
+	return (v == null || v === "" || (CF.isArray(v) && v.length === 0));
 };
 
 //删除字符串两端空格（null将直接返回）。
@@ -5979,7 +5979,9 @@ CF.inflateChartTheme = function(theme)
  *     type: "css"
  *   }、
  *   //库源URL/对象数组
- *   [ "...", { ... }, ... ],
+ *   [ "...", { ... }, ... ]、
+ *   //库源函数，返回上述任一结构
+ *   function(){ return ...; },
  *   //可选，依赖库名称/对象/数组，不设置表示不依赖任何库
  *   depend: "..."、{ name: 格式同上述name, acceptVersion: 格式同上述acceptVersion }、[ "..."、{ ... }、... ],
  *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。
@@ -6035,11 +6037,7 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 		if(bestLib !== lib)
 		{
 			if(CF.isLibLoadedInEnv(bestLib))
-			{
-				//如果最新版已在环境中加载，应将其状态设为loaded，以减少后续加载操作的搜索步骤
-				CF.libState(bestLib, true, CF.LIB_STATE_LOADED);
 				continue;
-			}
 			
 			stateObj = CF.libState(bestLib);
 			if(stateObj && stateObj.state == CF.LIB_STATE_LOADED)
@@ -6116,14 +6114,14 @@ CF.loadLibInner = function(libs, callback)
 	
 	for(let i=0; i<libs.length; i++)
 	{
-		let lib = libs[i];
-		let stateObj = CF.libState(lib, true);
+		let stateObj = CF.libState(libs[i], true);
 		
 		if(stateObj.state === CF.LIB_STATE_INIT)
 		{
 			stateObj.state = CF.LIB_STATE_LOADING;
 			
 			let source = stateObj.lib.source;
+			source = (source != null && CF.isFunction(source) ? stateObj.lib.source() : source);
 			let sourcePromises = [];
 			
 			if(source != null)
@@ -6133,7 +6131,7 @@ CF.loadLibInner = function(libs, callback)
 				
 				for(let j=0; j<source.length; j++)
 				{
-					let sourcePromise = CF.loadSingleLibSource(lib, source[j]);
+					let sourcePromise = CF.loadSingleLibSource(stateObj.lib, source[j]);
 					if(sourcePromise != null)
 						sourcePromises.push(sourcePromise);
 				}
@@ -6148,7 +6146,7 @@ CF.loadLibInner = function(libs, callback)
 			stateObj.libPromise = libPromise;
 			libPromises.push(libPromise);
 		}
-		else
+		else if(stateObj.libPromise != null)
 		{
 			libPromises.push(stateObj.libPromise);
 		}
@@ -6396,6 +6394,10 @@ CF.isLibVersionAccepted = function(name, version, acceptVersion)
 	for(let i=0; i<acceptVersion.length; i++)
 	{
 		let acceptObj = CF.resolveAcceptVersionObj(acceptVersion[i]);
+		
+		if(acceptObj == null)
+			continue;
+		
 		let compareMin = (acceptObj.min == null ? 1 : CF.compareLibVersion(name, version, acceptObj.min));
 		let acceptMin = (acceptObj.includeMin ? (compareMin >= 0) : (compareMin > 0));
 		let compareMax = (acceptObj.max == null ? -1 : CF.compareLibVersion(name, version, acceptObj.max));
@@ -6408,11 +6410,66 @@ CF.isLibVersionAccepted = function(name, version, acceptVersion)
 	return false;
 };
 
+CF._ACCEPT_VERSION_OBJS = {};
+CF._ACCEPT_ANY_VERSION_OBJ = { min: null, includeMin: true, max: null, includeMax: true };
+
+//解析接受版本对象，支持格式：null（接受任意）、""（接受任意）、">1.0"、">=1.0"、"<1.0"、"<=1.0"、">=1.0 <2.0"
 CF.resolveAcceptVersionObj = function(acceptVersion)
 {
-	var re = { min: null, includeMin: true, max: null, includeMax: false };
+	acceptVersion = CF.trim(acceptVersion);
 	
-	//TODO
+	if(CF.isEmpty(acceptVersion))
+		return CF._ACCEPT_ANY_VERSION_OBJ;
+	
+	var re = CF._ACCEPT_VERSION_OBJS[acceptVersion];
+	
+	if(re != null)
+		return re;
+	
+	re = CF.extend({}, CF._ACCEPT_ANY_VERSION_OBJ);
+	
+	var splits = CF.splitByWhitespace(acceptVersion);
+	
+	if(splits.length > 2)
+	{
+		CF.logWarn("ignore invalid [acceptVersion] : " + acceptVersion);
+		return null;
+	}
+	
+	for(let i=0;i<splits.length; i++)
+	{
+		let part = splits[i];
+		
+		if(part.startsWith(">="))
+		{
+			re.min = part.substring(2);
+			re.includeMin = true;
+		}
+		else if(part.startsWith(">"))
+		{
+			re.min = part.substring(1);
+			re.includeMin = false;
+		}
+		else if(part.startsWith("<="))
+		{
+			re.max = part.substring(2);
+			re.includeMax = true;
+		}
+		else if(part.startsWith("<"))
+		{
+			re.max = part.substring(1);
+			re.includeMax = false;
+		}
+		else
+		{
+			re.min = part;
+			re.includeMin = true;
+			re.max = part;
+			re.includeMax = true;
+		}
+	}
+	
+	CF._ACCEPT_VERSION_OBJS[acceptVersion] = re;
 	
 	return re;
 };
@@ -6612,17 +6669,6 @@ CF.createLibState = function(lib, state)
 	return stateObj;
 };
 
-CF.deepCloneLib = function(lib)
-{
-	if(!lib)
-		return lib;
-	
-	var newLib = (CF.isArray(lib) ? [] : {});
-	newLib = CF.extend(true, newLib, lib);
-	
-	return newLib;
-};
-
 //库及其状态，键值结构：库名 -> 库信息。
 CF.LIB_STATES = {};
 
@@ -6635,30 +6681,35 @@ CF.LIB_STATE_LOADED = "loaded";
 
 CF.convertPluginRendererLib = function(chart, lib)
 {
-	if(!lib)
+	if(lib == null)
 		return lib;
 	
-	lib = CF.deepCloneLib(lib);
+	var re;
 	
 	if(CF.isArray(lib))
 	{
-		for(var i=0; i<lib.length; i++)
+		re = CF.extend(true, [], re);
+		
+		for(var i=0; i<re.length; i++)
 		{
-			CF.trimPluginRendererLibSource(chart, lib[i]);
+			CF.trimPluginRendererLibSource(chart, re[i]);
 		}
 	}
 	else
 	{
-		CF.trimPluginRendererLibSource(chart, lib);
+		re = CF.extend(true, {}, re);
+		CF.trimPluginRendererLibSource(chart, re);
 	}
 	
-	return lib;
+	return re;
 };
 
 CF.trimPluginRendererLibSource = function(chart, lib)
 {
-	if(!lib.source)
+	if(lib == null || CF.isEmpty(lib.source))
 		return;
+	
+	lib.source = (CF.isFunction(lib.source) ? lib.source() : lib.source);
 	
 	if(CF.isArray(lib.source))
 	{
