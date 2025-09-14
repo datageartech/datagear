@@ -138,7 +138,7 @@ var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttr
 var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
 
 /**已注册的全局图表渲染器依赖库*/
-var registeredLibs = (CF.registeredLibs || (CF.registeredLibs = []));
+var globalLibs = (CF.globalLibs || (CF.globalLibs = []));
 
 //----------------------------------------
 // chartStatusConst开始
@@ -306,6 +306,27 @@ CF.initRenderContext = function(renderContext)
 		throw new Error("[chartTheme] required");
 	
 	CF.inflateGlobalChartTheme(chartTheme);
+};
+
+/**
+ * 注册全局依赖库
+ * 
+ * @param lib 全局依赖库对象、数组，格式同CF.loadLib()函数的lib参数
+ */
+CF.registerGlobalLib = function(lib)
+{
+	if(lib == null)
+		return;
+	
+	if(CF.isArray(lib))
+	{
+		for(let i=0; i<lib.length; i++)
+			globalLibs.push(lib[i]);
+	}
+	else
+	{
+		globalLibs.push(lib);
+	}
 };
 
 /**
@@ -1023,14 +1044,14 @@ chartProto._rendererLib = function()
 	
 	if(lib != null)
 	{
-		lib = CF.trimCustomRendererLib(this, lib);
+		lib = CF.trimCustomRendererLib(lib, this);
 	}
 	else //其次插件渲染器
 	{
 		lib = CF.rendererLib(this._pluginRenderer());
 		
 		if(lib != null)
-			lib = CF.trimPluginRendererLib(this, lib);
+			lib = CF.trimPluginRendererLib(lib, this);
 	}
 	
 	return lib;
@@ -3196,7 +3217,7 @@ chartProto.loadLib = function(lib, callback)
 	callback = (callback ? callback : function(){});
 	
 	var contextCharts = this._contextCharts();
-	CF.loadLib(lib,  callback, contextCharts);
+	CF.loadLib(lib,  callback, this.renderContext(), contextCharts);
 };
 
 var UPDATE_RESULT_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateResult";
@@ -5996,15 +6017,16 @@ CF.inflateChartTheme = function(theme)
  * 
  * @param lib 库对象、数组
  * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
+ * @param renderContext
  * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
  */
-CF.loadLib = function(lib, callback, contextCharts)
+CF.loadLib = function(lib, callback, renderContext, contextCharts)
 {
 	lib = (lib == null ? [] : (CF.isArray(lib) ? lib : [ lib ]));
 	contextCharts = (contextCharts == null ? [] : contextCharts);
 	
 	var unloadeds = [];
-	CF.inflateUnloadedLibs(unloadeds, lib, contextCharts);
+	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, contextCharts);
 	
 	if(unloadeds.length == 0)
 	{
@@ -6018,37 +6040,36 @@ CF.loadLib = function(lib, callback, contextCharts)
 };
 
 //解析libs相关的所有待加载库，填充至unloadeds中
-CF.inflateUnloadedLibs = function(unloadeds, libs, contextCharts)
+CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 {
 	for(let i=0; i<libs.length; i++)
 	{
 		let lib = libs[i];
 		
-		if(lib == null || CF.isLibLoadedInEnv(lib))
+		if(lib == null)
+			continue;
+			
+		if(CF.isLibLoaded(lib))
 			continue;
 		
-		let stateObj = CF.libState(lib);
-		if(stateObj && stateObj.state == CF.LIB_STATE_LOADED)
+		//应该优先使用全局依赖库，安全统一
+		let bestLib = CF.findBestLibInGlobal(lib, renderContext);
+		
+		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
 			continue;
 		
-		let bestLib = CF.findBestLibInCharts(lib, contextCharts);
+		if(bestLib == null)
+		{
+			bestLib = CF.findBestLibInCharts(lib, contextCharts);
+			
+			if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
+				continue;
+		}
 		
 		if(bestLib == null)
 		{
 			CF.logException("no lib found for name : " + lib.name);
 			continue;
-		}
-		
-		if(bestLib !== lib)
-		{
-			if(CF.isLibLoadedInEnv(bestLib))
-				continue;
-			
-			stateObj = CF.libState(bestLib);
-			if(stateObj && stateObj.state == CF.LIB_STATE_LOADED)
-			{
-				continue;
-			}
 		}
 		
 		if(CF.libIndex(unloadeds, bestLib.name) > -1)
@@ -6285,6 +6306,24 @@ CF.resolveLibSourceType = function(url)
 CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
+//查找与baseLib同名的全局最新版的可用库；否则，将返回null
+CF.findBestLibInGlobal = function(baseLib, renderContext)
+{
+	var re = baseLib;
+	
+	re = CF.findBestLibInLibs(baseLib, globalLibs, baseLib.acceptVersion);
+	
+	if(re !== baseLib)
+	{
+		re = CF.trimGlobalLib(re, renderContext);
+	}
+	
+	if(CF.isEmpty(re.version) || CF.isEmpty(re.source))
+		re = null;
+	
+	return re;
+};
+
 //查找与baseLib同名的最新版的可用库；否则，将返回null
 CF.findBestLibInCharts = function(baseLib, charts)
 {
@@ -6303,11 +6342,11 @@ CF.findBestLibInCharts = function(baseLib, charts)
 			let chart = charts[i];
 			let renderer = chart.renderer();
 			let rendererLib = CF.rendererLib(renderer);
-			let myRendererBestLib = CF.findBestLibInLibs(rendererLib, rendererBestLib, acceptVersion);
+			let myBestLib = CF.findBestLibInLibs(rendererBestLib, rendererLib, acceptVersion);
 			
-			if(myRendererBestLib !== rendererBestLib)
+			if(myBestLib !== rendererBestLib)
 			{
-				rendererBestLib = myRendererBestLib;
+				rendererBestLib = myBestLib;
 				rendererBestLibChart = chart;
 			}
 		}
@@ -6315,13 +6354,13 @@ CF.findBestLibInCharts = function(baseLib, charts)
 		for(let i=0; i<charts.length; i++)
 		{
 			let chart = charts[i];
-			let pluginRenderer = chart._pluginRenderer();
-			let rendererLib = CF.rendererLib(pluginRenderer);
-			let myPluginBestLib = CF.findBestLibInLibs(rendererLib, pluginBestLib, acceptVersion);
+			let renderer = chart._pluginRenderer();
+			let rendererLib = CF.rendererLib(renderer);
+			let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
 			
-			if(myPluginBestLib !== pluginBestLib)
+			if(myBestLib !== pluginBestLib)
 			{
-				pluginBestLib = myPluginBestLib;
+				pluginBestLib = myBestLib;
 				pluginBestLibChart = chart;
 			}
 		}
@@ -6334,11 +6373,11 @@ CF.findBestLibInCharts = function(baseLib, charts)
 			//整理依赖库源URL
 			if(re === rendererBestLib && rendererBestLibChart != null)
 			{
-				re = CF.trimCustomRendererLib(pluginBestLibChart, re);
+				re = CF.trimCustomRendererLib(re, pluginBestLibChart);
 			}
 			else if(re === pluginBestLib && pluginBestLibChart != null)
 			{
-				re = CF.trimPluginRendererLib(pluginBestLibChart, re);
+				re = CF.trimPluginRendererLib(re, pluginBestLibChart);
 			}
 		}
 	}
@@ -6353,7 +6392,7 @@ CF.findBestLibInCharts = function(baseLib, charts)
 };
 
 //查找更可用的库；否则，返回baseLib
-CF.findBestLibInLibs = function(libs, baseLib, acceptVersion)
+CF.findBestLibInLibs = function(baseLib, libs, acceptVersion)
 {
 	if(libs == null)
 		return baseLib;
@@ -6541,12 +6580,23 @@ CF.libIndex = function(libs, name)
 	return -1;
 };
 
+CF.isLibLoaded = function(lib)
+{
+	var envLoaded = CF.isLibLoadedInEnv(lib);
+	
+	if(envLoaded == true)
+		return true;
+	
+	let stateObj = CF.libState(lib);
+	if(stateObj && stateObj.state == CF.LIB_STATE_LOADED)
+		return true;
+	
+	return false;
+};
+
 //当前环境是否已加载了指定库
 CF.isLibLoadedInEnv = function(lib)
 {
-	if(lib == null)
-		return true;
-	
 	if(lib.loaded != null)
 	{
 		return lib.loaded();
@@ -6700,25 +6750,47 @@ CF.LIB_STATE_LOADED = "loaded";
 
 //整理由chart.renderer().depend获取的依赖库
 //库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示相对当前页面路径
-CF.trimCustomRendererLib = function(chart, lib)
+CF.trimGlobalLib = function(lib, renderContext)
 {
 	return CF.doTrimRendererLib(chart, lib, (url) =>
 	{
-		return url;
+		if(url.indexOf("/") == 0)
+		{
+			var webContext = CF.renderContextAttrWebContext(renderContext);
+			return CF.toWebContextPathURL(webContext, url);
+		}
+		else
+			return url;
+	});
+};
+
+//整理由chart.renderer().depend获取的依赖库
+//库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示相对当前页面路径
+CF.trimCustomRendererLib = function(lib, chart)
+{
+	return CF.doTrimRendererLib(lib, (url) =>
+	{
+		if(url.indexOf("/") == 0)
+			url = chart.contextURL(url);
+		else
+			return url;
 	});
 };
 
 //整理由chart.plugin.renderer.depend获取的依赖库
 //库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示插件资源路径
-CF.trimPluginRendererLib = function(chart, lib)
+CF.trimPluginRendererLib = function(lib, chart)
 {
-	return CF.doTrimRendererLib(chart, lib, (url, chart) =>
+	return CF.doTrimRendererLib(lib, (url) =>
 	{
-		return chart.pluginResourceURL(url);
+		if(url.indexOf("/") == 0)
+			url = chart.contextURL(url);
+		else
+			return chart.pluginResourceURL(url);
 	});
 };
 
-CF.doTrimRendererLib = function(chart, lib, relativeUrlHandler)
+CF.doTrimRendererLib = function(lib, relativeUrlHandler)
 {
 	if(lib == null)
 		return lib;
@@ -6731,19 +6803,19 @@ CF.doTrimRendererLib = function(chart, lib, relativeUrlHandler)
 		
 		for(var i=0; i<re.length; i++)
 		{
-			CF.doTrimRendererLibSource(chart, re[i], relativeUrlHandler);
+			CF.doTrimRendererLibSource(re[i], relativeUrlHandler);
 		}
 	}
 	else
 	{
 		re = CF.extend(true, {}, re);
-		CF.doTrimRendererLibSource(chart, re, relativeUrlHandler);
+		CF.doTrimRendererLibSource(re, relativeUrlHandler);
 	}
 	
 	return re;
 };
 
-CF.doTrimRendererLibSource = function(chart, singleLib, relativeUrlHandler)
+CF.doTrimRendererLibSource = function(singleLib, relativeUrlHandler)
 {
 	if(singleLib == null || CF.isEmpty(singleLib.source))
 		return;
@@ -6754,16 +6826,16 @@ CF.doTrimRendererLibSource = function(chart, singleLib, relativeUrlHandler)
 	{
 		for(var i=0; i<singleLib.source.length; i++)
 		{
-			singleLib.source[i] = CF.doTrimRendererLibSourceUrl(chart, singleLib, singleLib.source[i], relativeUrlHandler);
+			singleLib.source[i] = CF.doTrimRendererLibSourceUrl(singleLib, singleLib.source[i], relativeUrlHandler);
 		}
 	}
 	else
 	{
-		singleLib.source = CF.doTrimRendererLibSourceUrl(chart, singleLib, singleLib.source, relativeUrlHandler);
+		singleLib.source = CF.doTrimRendererLibSourceUrl(singleLib, singleLib.source, relativeUrlHandler);
 	}
 };
 
-CF.doTrimRendererLibSourceUrl = function(chart, singleLib, singleSource, relativeUrlHandler)
+CF.doTrimRendererLibSourceUrl = function(singleLib, singleSource, relativeUrlHandler)
 {
 	var isStr = CF.isString(singleSource);
 	var url = (isStr ? singleSource : (singleSource == null ? null : singleSource.url));
@@ -6771,20 +6843,15 @@ CF.doTrimRendererLibSourceUrl = function(chart, singleLib, singleSource, relativ
 	if(CF.isEmpty(url))
 		return singleSource;
 	
-	//应用根路径
-	if(url.indexOf("/") == 0)
-	{
-		url = chart.contextURL(url);
-	}
 	//绝对路径
-	else if(CF.HTTP_S_PREFIX_REGEX.test(url))
+	if(CF.HTTP_S_PREFIX_REGEX.test(url))
 	{
 		url = url;
 	}
 	//相对路径
 	else
 	{
-		url = relativeUrlHandler(url, chart, singleLib, singleSource);
+		url = relativeUrlHandler(url, singleLib, singleSource);
 	}
 	
 	if(isStr)
