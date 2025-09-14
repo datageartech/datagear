@@ -44,8 +44,8 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/lib/primeflex@3.3.1/primeflex.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/lib/codemirror-5.64.0/pkg/codemirror-bundle.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/css/analysis.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/analysislib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/analysis-1.0/css/style.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/style.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/codemirror-5.64.0/custom.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/theme/<@spring.theme code='styleName' />/style.css?v=${clientCacheCode}" type="text/css" rel="stylesheet" id="styleCssLink" />
@@ -61,12 +61,12 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/pkg/codemirror-bundle.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
-<script src="${contextPath}/static/lib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/analysislib/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/util.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/chartFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/chartSetting.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dashboardFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dashboardApiList.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/analysis-1.0/chartFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/analysis-1.0/chartSetting.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/analysis-1.0/dashboardFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
+<script src="${contextPath}/static/analysis-1.0/dashboardApiList.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/pages/include/page.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/pages/dashboard/include/dashboardDesign.js?v=${clientCacheCode}" type="text/javascript"></script>
 ${detectNewVersionResult.script?no_esc}

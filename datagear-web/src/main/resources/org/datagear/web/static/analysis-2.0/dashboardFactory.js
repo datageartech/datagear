@@ -76,7 +76,7 @@ var dashboardStatusConst = (DF.dashboardStatusConst || (DF.dashboardStatusConst 
 /** 内置地图 */
 var builtinChartMaps = (DF.builtinChartMaps || (DF.builtinChartMaps = []));
 
-var builtinChartMapBaseURL = (DF.builtinChartMapBaseURL || (DF.builtinChartMapBaseURL = "/static/lib/geojson/"));
+var builtinChartMapBaseURL = (DF.builtinChartMapBaseURL || (DF.builtinChartMapBaseURL = "/static/analysislib/geojson/"));
 
 /** 看板版本常量，参考：org.datagear.web.analysis.DashboardVersion */
 var dashboardVersion = (DF.dashboardVersion || (DF.dashboardVersion = { V_1_0: "1.0" }));

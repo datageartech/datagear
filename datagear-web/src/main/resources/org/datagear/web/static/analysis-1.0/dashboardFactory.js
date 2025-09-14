@@ -80,7 +80,7 @@
 	/** 内置地图 */
 	var builtinChartMaps = (dashboardFactory.builtinChartMaps || (dashboardFactory.builtinChartMaps = []));
 	
-	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/lib/geojson/"));
+	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/analysislib/geojson/"));
 	
 	/** 看板版本常量，参考：org.datagear.web.analysis.DashboardVersion */
 	var dashboardVersion = (dashboardFactory.dashboardVersion || (dashboardFactory.dashboardVersion = { V_1_0: "1.0" }));

@@ -60,7 +60,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 	public static final String PATH_STATIC = "/static";
 
-	public static final String PATH_LIB = "/static/lib";
+	public static final String PATH_LIB = "/static/analysislib";
 
 	public static final String PATH_CSS = "/static/css";
 
@@ -136,8 +136,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
 
 		String libPrefix = contextPath + PATH_LIB;
-		String cssPrefix = contextPath + PATH_CSS;
-		String scriptPrefix = contextPath + PATH_SCRIPT;
+		String analysisPrefix = getAnalysisPath(contextPath, dashboard);
 
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
@@ -150,12 +149,12 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE,
-				cssPrefix + "/analysis.css?v=" + Global.VERSION));
+				analysisPrefix + "/css/style.css?v=" + Global.VERSION));
 		
 		if (isEditMode(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
-					contextPath + "/static/css/dashboardEditor.css?v=" + Global.VERSION));
+					analysisPrefix + "/css/dashboardEditor.css?v=" + Global.VERSION));
 		}
 
 		// JS
@@ -168,25 +167,30 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY,
-						scriptPrefix + "/chartFactory.js?v=" + Global.VERSION));
+				analysisPrefix + "/chartFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
-				scriptPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
+				analysisPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME,
 				contextPath + ServerTimeJsController.SERVER_TIME_URL + "?v=" + randomCode));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,
-						scriptPrefix + "/chartSupport.js?v=" + Global.VERSION));
+				analysisPrefix + "/chartSupport.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
-						scriptPrefix + "/chartSetting.js?v=" + Global.VERSION));
+				analysisPrefix + "/chartSetting.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
 				contextPath + "/vres/plugin/chartPluginManager.js?v=" + Global.VERSION));
 
 		if (isEditMode(mode))
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
-					scriptPrefix + "/dashboardEditor.js?v=" + Global.VERSION));
+					analysisPrefix + "/dashboardEditor.js?v=" + Global.VERSION));
 		}
 
 		return impts;
+	}
+
+	protected String getAnalysisPath(String contextPath, HtmlTplDashboard dashboard)
+	{
+		return contextPath + "/static/analysis-1.0";
 	}
 
 	protected boolean isEditMode(String mode)
