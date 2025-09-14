@@ -20,16 +20,16 @@
  * 全局变量名：window.chartUtil.echarts
  * 
  * 加载时依赖：
+ *   chartFactory.js
  * 
  * 运行时依赖:
- *   chartFactory
  *   echarts
  */
 (function(global)
 {
 
 /**图表工厂*/
-var CF = (global.chartFactory || (global.chartFactory = {}));
+var CF = global.chartFactory;
 
 var chartUtil = (global.chartUtil || (global.chartUtil = {}));
 var EU = (chartUtil.echarts || (chartUtil.echarts = {}));

@@ -53,7 +53,7 @@
 {
 
 /**图表工厂*/
-var CF = (global.chartFactory || (global.chartFactory = {}));
+var CF = global.chartFactory;
 
 /**看板工厂*/
 var DF = (global.dashboardFactory || (global.dashboardFactory = {}));

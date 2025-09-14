@@ -98,7 +98,7 @@
  *   }
  * }
  */
-(function(global)
+(function(global, window)
 {
 
 /**图表工厂*/
@@ -6752,7 +6752,7 @@ CF.LIB_STATE_LOADED = "loaded";
 //库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示相对当前页面路径
 CF.trimGlobalLib = function(lib, renderContext)
 {
-	return CF.doTrimRendererLib(chart, lib, (url) =>
+	return CF.doTrimRendererLib(lib, (url) =>
 	{
 		if(url.indexOf("/") == 0)
 		{
@@ -6959,4 +6959,4 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 // > 已弃用函数 end
 //-------------
 
-})(this);
+})(this, window);

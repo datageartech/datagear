@@ -28,8 +28,10 @@
  */
 (function(global){
 
-var CF = (global.chartFactory || (global.chartFactory = {}));
+var CF = global.chartFactory;
+
 var SPT = (CF.chartSupport || (CF.chartSupport = {}));
+
 var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
 
 //内置地图类图表的地图选项名
