@@ -44,7 +44,7 @@
  * 此图表工厂要求图表插件的图表渲染器（chart.plugin().renderer）格式为：
  * {
  *   //可选，渲染器依赖库，具体结构参考CF.loadLib()函数说明
- *   //注意库源URL规范不同，具体参考CF.trimPluginRendererLibSourceUrl()函数说明
+ *   //注意库源URL规范不同，具体参考CF.trimPluginRendererLib()函数说明
  *   depend: { ... }、[ {...}, ... ]、function(){ return { ... }、[ {...}, ... ]; }
  *   //可选，渲染图表函数是否是异步函数，默认为false
  *   asyncRender: true、false、function(chart){ ...; return true 或者 false; }
@@ -136,6 +136,9 @@ var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttr
 
 /**内置图表选项名定义，所有内置图表选项名都应定义于此，便于因名字冲突需要重新定义*/
 var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
+
+/**已注册的全局图表渲染器依赖库*/
+var registeredLibs = (CF.registeredLibs || (CF.registeredLibs = []));
 
 //----------------------------------------
 // chartStatusConst开始
@@ -981,15 +984,12 @@ chartProto.render = function()
 	
 	var lib = this._rendererLib();
 	
-	if(lib)
+	if(lib != null)
 	{
-		var contextCharts = this._contextCharts();
-		
-		CF.loadLib(lib, () =>
+		this.loadLib(lib, () =>
 		{
 			this._renderInner();
-		},
-		contextCharts);
+		});
 	}
 	else
 	{
@@ -1018,14 +1018,19 @@ chartProto._renderInner = function()
 
 chartProto._rendererLib = function()
 {
-	//优先
+	//优先自定义渲染器
 	var lib = CF.rendererLib(this.renderer());
 	
-	//其次
-	if(lib == null)
+	if(lib != null)
+	{
+		lib = CF.trimCustomRendererLib(this, lib);
+	}
+	else //其次插件渲染器
 	{
 		lib = CF.rendererLib(this._pluginRenderer());
-		lib = CF.convertPluginRendererLib(this, lib);
+		
+		if(lib != null)
+			lib = CF.trimPluginRendererLib(this, lib);
 	}
 	
 	return lib;
@@ -5999,7 +6004,7 @@ CF.loadLib = function(lib, callback, contextCharts)
 	contextCharts = (contextCharts == null ? [] : contextCharts);
 	
 	var unloadeds = [];
-	CF.inflateUnloadedLibs(contextCharts, lib, unloadeds);
+	CF.inflateUnloadedLibs(unloadeds, lib, contextCharts);
 	
 	if(unloadeds.length == 0)
 	{
@@ -6013,7 +6018,7 @@ CF.loadLib = function(lib, callback, contextCharts)
 };
 
 //解析libs相关的所有待加载库，填充至unloadeds中
-CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
+CF.inflateUnloadedLibs = function(unloadeds, libs, contextCharts)
 {
 	for(let i=0; i<libs.length; i++)
 	{
@@ -6026,7 +6031,7 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 		if(stateObj && stateObj.state == CF.LIB_STATE_LOADED)
 			continue;
 		
-		let bestLib = CF.findBestLibInCharts(contextCharts, lib);
+		let bestLib = CF.findBestLibInCharts(lib, contextCharts);
 		
 		if(bestLib == null)
 		{
@@ -6083,7 +6088,7 @@ CF.inflateUnloadedLibs = function(contextCharts, libs, unloadeds)
 			
 			if(dependLibs.length > 0)
 			{
-				CF.inflateUnloadedLibs(contextCharts, dependLibs, unloadeds);
+				CF.inflateUnloadedLibs(unloadeds, dependLibs, contextCharts);
 			}
 		}
 	}
@@ -6281,7 +6286,7 @@ CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
 //查找与baseLib同名的最新版的可用库；否则，将返回null
-CF.findBestLibInCharts = function(charts, baseLib)
+CF.findBestLibInCharts = function(baseLib, charts)
 {
 	var re = null;
 	
@@ -6289,6 +6294,7 @@ CF.findBestLibInCharts = function(charts, baseLib)
 	{
 		let acceptVersion = baseLib.acceptVersion;
 		let rendererBestLib = baseLib;
+		let rendererBestLibChart = null;
 		let pluginBestLib = baseLib;
 		let pluginBestLibChart = null;
 		
@@ -6297,7 +6303,13 @@ CF.findBestLibInCharts = function(charts, baseLib)
 			let chart = charts[i];
 			let renderer = chart.renderer();
 			let rendererLib = CF.rendererLib(renderer);
-			rendererBestLib = CF.findBestLibInLibs(rendererLib, rendererBestLib, acceptVersion);
+			let myRendererBestLib = CF.findBestLibInLibs(rendererLib, rendererBestLib, acceptVersion);
+			
+			if(myRendererBestLib !== rendererBestLib)
+			{
+				rendererBestLib = myRendererBestLib;
+				rendererBestLibChart = chart;
+			}
 		}
 		
 		for(let i=0; i<charts.length; i++)
@@ -6317,10 +6329,17 @@ CF.findBestLibInCharts = function(charts, baseLib)
 		//图表渲染器在看板页面定义，所以其依赖库应该优先使用
 		re = CF.resolveBestLibBaseFirst(rendererBestLib, pluginBestLib, acceptVersion);
 		
-		//如果是插件依赖库，需要转换为可用依赖库
-		if(re != null && re !== baseLib && re === pluginBestLib && pluginBestLibChart != null)
+		if(re != null && re !== baseLib)
 		{
-			re = CF.convertPluginRendererLib(pluginBestLibChart, re);
+			//整理依赖库源URL
+			if(re === rendererBestLib && rendererBestLibChart != null)
+			{
+				re = CF.trimCustomRendererLib(pluginBestLibChart, re);
+			}
+			else if(re === pluginBestLib && pluginBestLibChart != null)
+			{
+				re = CF.trimPluginRendererLib(pluginBestLibChart, re);
+			}
 		}
 	}
 	
@@ -6679,7 +6698,27 @@ CF.LIB_STATE_LOADING = "loading";
 //库状态：加载完成
 CF.LIB_STATE_LOADED = "loaded";
 
-CF.convertPluginRendererLib = function(chart, lib)
+//整理由chart.renderer().depend获取的依赖库
+//库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示相对当前页面路径
+CF.trimCustomRendererLib = function(chart, lib)
+{
+	return CF.doTrimRendererLib(chart, lib, (url) =>
+	{
+		return url;
+	});
+};
+
+//整理由chart.plugin.renderer.depend获取的依赖库
+//库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示插件资源路径
+CF.trimPluginRendererLib = function(chart, lib)
+{
+	return CF.doTrimRendererLib(chart, lib, (url, chart) =>
+	{
+		return chart.pluginResourceURL(url);
+	});
+};
+
+CF.doTrimRendererLib = function(chart, lib, relativeUrlHandler)
 {
 	if(lib == null)
 		return lib;
@@ -6692,48 +6731,47 @@ CF.convertPluginRendererLib = function(chart, lib)
 		
 		for(var i=0; i<re.length; i++)
 		{
-			CF.trimPluginRendererLibSource(chart, re[i]);
+			CF.doTrimRendererLibSource(chart, re[i], relativeUrlHandler);
 		}
 	}
 	else
 	{
 		re = CF.extend(true, {}, re);
-		CF.trimPluginRendererLibSource(chart, re);
+		CF.doTrimRendererLibSource(chart, re, relativeUrlHandler);
 	}
 	
 	return re;
 };
 
-CF.trimPluginRendererLibSource = function(chart, lib)
+CF.doTrimRendererLibSource = function(chart, singleLib, relativeUrlHandler)
 {
-	if(lib == null || CF.isEmpty(lib.source))
+	if(singleLib == null || CF.isEmpty(singleLib.source))
 		return;
 	
-	lib.source = (CF.isFunction(lib.source) ? lib.source() : lib.source);
+	singleLib.source = (CF.isFunction(singleLib.source) ? singleLib.source() : singleLib.source);
 	
-	if(CF.isArray(lib.source))
+	if(CF.isArray(singleLib.source))
 	{
-		for(var i=0; i<lib.source.length; i++)
+		for(var i=0; i<singleLib.source.length; i++)
 		{
-			lib.source[i] = CF.trimPluginRendererLibSourceUrl(chart, lib.source[i]);
+			singleLib.source[i] = CF.doTrimRendererLibSourceUrl(chart, singleLib, singleLib.source[i], relativeUrlHandler);
 		}
 	}
 	else
 	{
-		lib.source = CF.trimPluginRendererLibSourceUrl(chart, lib.source);
+		singleLib.source = CF.doTrimRendererLibSourceUrl(chart, singleLib, singleLib.source, relativeUrlHandler);
 	}
 };
 
-//将图表插件的依赖库url解析为可直接加载的绝对路径
-CF.trimPluginRendererLibSourceUrl = function(chart, singleSource)
+CF.doTrimRendererLibSourceUrl = function(chart, singleLib, singleSource, relativeUrlHandler)
 {
 	var isStr = CF.isString(singleSource);
-	var url = (isStr ? singleSource : singleSource.url);
+	var url = (isStr ? singleSource : (singleSource == null ? null : singleSource.url));
 	
-	if(!url)
+	if(CF.isEmpty(url))
 		return singleSource;
 	
-	//相对应用根路径
+	//应用根路径
 	if(url.indexOf("/") == 0)
 	{
 		url = chart.contextURL(url);
@@ -6743,10 +6781,10 @@ CF.trimPluginRendererLibSourceUrl = function(chart, singleSource)
 	{
 		url = url;
 	}
-	//插件内路径
+	//相对路径
 	else
 	{
-		url = chart.pluginResourceURL(url);
+		url = relativeUrlHandler(url, chart, singleLib, singleSource);
 	}
 	
 	if(isStr)
