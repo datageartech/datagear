@@ -6800,7 +6800,7 @@ CF.doTrimRendererLib = function(lib, relativeUrlHandler)
 	
 	if(CF.isArray(lib))
 	{
-		re = CF.extend(true, [], re);
+		re = CF.extend(true, [], lib);
 		
 		for(var i=0; i<re.length; i++)
 		{
@@ -6809,7 +6809,7 @@ CF.doTrimRendererLib = function(lib, relativeUrlHandler)
 	}
 	else
 	{
-		re = CF.extend(true, {}, re);
+		re = CF.extend(true, {}, lib);
 		CF.doTrimRendererLibSource(re, relativeUrlHandler);
 	}
 	

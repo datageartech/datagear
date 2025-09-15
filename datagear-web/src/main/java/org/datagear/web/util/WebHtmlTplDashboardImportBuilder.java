@@ -201,11 +201,11 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	{
 		if (DashboardApiVersion.isV1(dashboard.getApiVersion()))
 		{
-			return contextPath + "/static/analysis-1.0";
+			return contextPath + "/static/analysisapi/1.0";
 		}
 		else
 		{
-			return contextPath + "/static/analysis-2.0";
+			return contextPath + "/static/analysisapi/2.0";
 		}
 	}
 

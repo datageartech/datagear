@@ -87,6 +87,12 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	/** 系统theme静态资源路径通配模式 */
 	public static final String STATIC_RES_THEME_PATH_PATTERN = "/static/theme/**/*.css";
 
+	/** 系统看板API的CSS静态资源路径通配模式 */
+	public static final String STATIC_RES_ANALYSISAPI_CSS_PATH_PATTERN = "/static/analysisapi/**/*.css";
+
+	/** 系统看板API的JS静态资源路径通配模式 */
+	public static final String STATIC_RES_ANALYSISAPI_JS_PATH_PATTERN = "/static/analysisapi/**/*.js";
+
 	/** 系统静态资源位置 */
 	public static final String STATIC_RES_LOCATION = "classpath:org/datagear/web/static/";
 
@@ -130,12 +136,14 @@ public class WebMvcConfigurerConfigSupport implements WebMvcConfigurer
 	
 	protected ClearCssCommentResourceTransformer clearCssCommentResourceTransformer()
 	{
-		return new ClearCssCommentResourceTransformer(STATIC_RES_CSS_PATH_PATTERN, STATIC_RES_THEME_PATH_PATTERN);
+		return new ClearCssCommentResourceTransformer(STATIC_RES_CSS_PATH_PATTERN, STATIC_RES_THEME_PATH_PATTERN,
+				STATIC_RES_ANALYSISAPI_CSS_PATH_PATTERN);
 	}
 	
 	protected ClearJsCommentResourceTransformer clearJsCommentResourceTransformer()
 	{
-		return new ClearJsCommentResourceTransformer(STATIC_RES_JS_PATH_PATTERN);
+		return new ClearJsCommentResourceTransformer(STATIC_RES_JS_PATH_PATTERN,
+				STATIC_RES_ANALYSISAPI_JS_PATH_PATTERN);
 	}
 
 	@Override
