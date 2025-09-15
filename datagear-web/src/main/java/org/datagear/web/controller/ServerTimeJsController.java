@@ -41,7 +41,7 @@ public class ServerTimeJsController extends AbstractController
 	public static final String SERVERTIME_JS_VAR = Global.PRODUCT_NAME_EN_UC + "_SERVER_TIME";
 
 	/** 服务端时间URL */
-	public static final String SERVER_TIME_URL = "/static/script/serverTime.js";
+	public static final String SERVER_TIME_URL = "/static/analysisapi/serverTime.js";
 
 	@RequestMapping(SERVER_TIME_URL)
 	public void serverTimeJs(HttpServletRequest request, HttpServletResponse response) throws Exception
