@@ -138,10 +138,6 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 //AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME
 renderContextAttrConst.dashboardTheme = "DG_DASHBOARD_THEME";
 
-//渲染上下文属性名：图表主题，同：
-//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
-renderContextAttrConst.chartTheme = "DG_CHART_THEME";
-
 //渲染上下文属性名：当前用户，同：
 //AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER
 renderContextAttrConst.user = "DG_USER";
@@ -268,12 +264,12 @@ DF.init = function(root)
 
 DF.initRenderContext = function(renderContext)
 {
-	var chartTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme);
+	var chartTheme = CF.renderContextAttrChartTheme(renderContext);
 	if(!chartTheme)
 	{
 		var dashboardTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
 		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
-		CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
+		CF.renderContextAttrChartTheme(renderContext, chartTheme);
 	}
 	
 	CF.initRenderContext(renderContext);

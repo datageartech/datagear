@@ -221,8 +221,9 @@ elementAttrConst.ATTR_VALUES = "dg-chart-attr-values";
 //AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT
 renderContextAttrConst.webContext = "DG_WEB_CONTEXT";
 
-//渲染上下文属性名：已填充图表主题
-renderContextAttrConst.inflatedChartTheme = "DG_INFLATED_CHART_THEME";
+//渲染上下文属性名：图表主题，同：
+//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
+renderContextAttrConst.chartTheme = "DG_CHART_THEME";
 
 //----------------------------------------
 // renderContextAttrConst结束
@@ -529,7 +530,7 @@ chartProto._bodyOptions = function()
 
 /**
  * 初始化图表主题。
- * 此函数依次从this.renderContext()中的renderContextAttrConst.inflatedChartTheme属性值、
+ * 此函数依次从this.renderContext()中的renderContextAttrConst.chartTheme属性值、
  * <body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
  */
 chartProto._initTheme = function()
@@ -4773,7 +4774,7 @@ CF.renderContextAttrWebContext = function(renderContext, webContext)
  */
 CF.renderContextAttrChartTheme = function(renderContext, chartTheme)
 {
-	return CF.renderContextAttr(renderContext, renderContextAttrConst.inflatedChartTheme, chartTheme);
+	return CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
 };
 
 /**
