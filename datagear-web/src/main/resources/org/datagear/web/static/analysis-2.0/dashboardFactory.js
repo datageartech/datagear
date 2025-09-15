@@ -1002,7 +1002,7 @@ dashboardProto.charts = function()
  */
 dashboardProto.renderContext = function()
 {
-	this._root.renderContext;
+	return this._root.renderContext;
 };
 
 /**
@@ -1579,7 +1579,7 @@ dashboardProto._doHandleCharts = function()
 		this._doHandleChartsLocal(preUpdateLocals);
 	});
 	
-	var webContext = CF.renderContextAttrWebContext(this.renderContext);
+	var webContext = CF.renderContextAttrWebContext(this.renderContext());
 	var url = this.contextURL(webContext.attributes.updateDashboardURL);
 	
 	for(let group in preUpdateGroups)

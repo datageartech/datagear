@@ -275,6 +275,8 @@
 			this._initChart(dashboard, charts[i]);
 		
 		dashboard.statusPreInit(true);
+		
+		return dashboard;
 	};
 	
 	dashboardFactory._initRenderContext = function(dashboard)

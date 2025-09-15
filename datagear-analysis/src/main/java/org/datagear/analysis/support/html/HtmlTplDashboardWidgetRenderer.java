@@ -639,7 +639,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		
 		Writer out = renderContext.getWriter();
 		
-		out.write(dashboardFactoryVar + "." + this.dashboardFactoryInitFuncName + "(" + varName + ");");
+		out.write(varName + "=" + dashboardFactoryVar + "." + this.dashboardFactoryInitFuncName + "(" + varName + ");");
 		writeNewLine(out);
 	}
 	
