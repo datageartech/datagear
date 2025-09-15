@@ -57,6 +57,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  *     dg-dashboard-unimport="..."
  *     dg-loadable-chart-widgets="..."
  *     dg-dashboard-code="..."
+ *     dg-api-version="..."
  *     dg-dashboard-auto-render="..."（已废弃）
  *     &gt;
  * ...
@@ -88,6 +89,9 @@ import org.springframework.cache.Cache.ValueWrapper;
  * </p>
  * <p>
  * <code>html dg-dashboard-code</code>：选填，自定义看板脚本写入内容，可选值参考下面的<code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>
+ * </p>
+ * <p>
+ * <code>html dg-api-version</code>：选填，自定义看板JS端API版本，比如：{@code 1.0}、{@code 2.0}
  * </p>
  * <p>
  * <code>html dg-dashboard-auto-render</code>：已在4.4.0版本废弃，选填，定义看板网页是否自动执行渲染函数，可选值：{@code "true"}
@@ -147,6 +151,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_CODE = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-code";
 
+	/** {@code dg-api-version} */
+	public static final String DEFAULT_ATTR_NAME_API_VERSION = DASHBOARD_ELEMENT_ATTR_PREFIX + "api-version";
+
 	/** {@code dg-chart-widget} */
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-widget";
 
@@ -181,6 +188,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	/** 属性名：写入看板脚本标识属性 */
 	private String attrNameDashboardCode = DEFAULT_ATTR_NAME_DASHBOARD_CODE;
+
+	/** 属性名：看板API版本 */
+	private String attrNameApiVersion = DEFAULT_ATTR_NAME_API_VERSION;
 
 	/** 图表标签名 */
 	private String chartTagName = DEFAULT_CHART_TAG_NAME;
@@ -271,6 +281,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public void setAttrNameDashboardCode(String attrNameDashboardCode)
 	{
 		this.attrNameDashboardCode = attrNameDashboardCode;
+	}
+
+	public String getAttrNameApiVersion()
+	{
+		return attrNameApiVersion;
+	}
+
+	public void setAttrNameApiVersion(String attrNameApiVersion)
+	{
+		this.attrNameApiVersion = attrNameApiVersion;
 	}
 
 	public String getChartTagName()
@@ -465,6 +485,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	{
 		HtmlTplDashboard dashboard = createDashboard(dashboardWidget, renderContext, nextDashboardId(),
 				renderContext.getTemplate());
+		inflateDashboardPrerequired(dashboard, dashboardMeta);
 		DashboardFilterContext context = new DashboardFilterContext(dashboardWidget, renderContext, dashboardMeta,
 				dashboard);
 		IndexedDashboardFilterHandler filterHandler = new IndexedDashboardFilterHandler(context);
@@ -472,6 +493,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		getHtmlFilter().filter(renderContext.getTemplateReader(), filterHandler);
 		
 		return context;
+	}
+
+	protected void inflateDashboardPrerequired(HtmlTplDashboard dashboard, TplDashboardMeta dashboardMeta)
+	{
+		dashboard.setVarName(dashboardMeta.getDashboardVar());
+		dashboard.setLoadableChartWidgets(dashboardMeta.getLoadableChartWidgets());
+		dashboard.setApiVersion(dashboardMeta.getApiVersion());
 	}
 
 	/**
@@ -486,7 +514,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected void writeDashboardScript(HtmlTplDashboardRenderContext renderContext, TplDashboardMeta dashboardMeta,
 			HtmlTplDashboard dashboard, boolean writeScriptTag) throws IOException
 	{
-		String globalDashboardVar = dashboardMeta.getDashboardVar();
+		String globalDashboardVar = dashboard.getVarName();
 		if (StringUtil.isEmpty(globalDashboardVar))
 			globalDashboardVar = getDefaultDashboardVar();
 		
@@ -520,9 +548,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		String tmp0RenderContextVarName = renderContext.varNameOfRenderContext("Tmp0");
 		String tmp1RenderContextVarName = renderContext.varNameOfRenderContext("Tmp1");
 		String localDashboardVarName = renderContext.varNameOfDashboard("Tmp");
-
 		dashboard.setVarName(localDashboardVarName);
-		dashboard.setLoadableChartWidgets(dashboardMeta.getLoadableChartWidgets());
 
 		if(writeScriptTag)
 			writeScriptStartTag(out);
@@ -761,6 +787,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 看板脚本 */
 		private String dashboardCode = null;
 
+		/** 看板API版本 */
+		private String apiVersion = null;
+
 		/**
 		 * 是否自动执行看板渲染函数
 		 * 
@@ -858,6 +887,21 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public void setDashboardCode(String dashboardCode)
 		{
 			this.dashboardCode = dashboardCode;
+		}
+
+		public boolean hasApiVersion()
+		{
+			return !StringUtil.isEmpty(this.apiVersion);
+		}
+
+		public String getApiVersion()
+		{
+			return apiVersion;
+		}
+
+		public void setApiVersion(String apiVersion)
+		{
+			this.apiVersion = apiVersion;
 		}
 
 		/**
@@ -981,8 +1025,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", dashboardFactoryVar=" + dashboardFactoryVar
-					+ ", dashboardUnimport=" + dashboardUnimport + ", dashboardCode=" + dashboardCode
-					+ ", chartMetas=" + chartMetas + "]";
+					+ ", dashboardUnimport=" + dashboardUnimport + ", dashboardCode=" + dashboardCode + ", apiVersion="
+					+ apiVersion + ", chartMetas=" + chartMetas + "]";
 		}
 	}
 
@@ -1419,9 +1463,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				//if (!this.dashboardImportWritten)
 				//	writeDashboardImportWithSet();
 				
-				if(attrs != null && attrs.containsKey(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode))
+				if (attrs != null
+						&& attrs.containsKey(HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardCode()))
 				{
-					String dashboardCode = attrs.get(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode);
+					String dashboardCode = attrs
+							.get(HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardCode());
 					if (!StringUtil.isEmpty(dashboardCode))
 						this.filterContext.getDashboardMeta().setDashboardCode(dashboardCode);
 
@@ -1529,31 +1575,41 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			{
 				String name = entry.getKey();
 
-				if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardVar.equalsIgnoreCase(name))
+				if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardVar().equalsIgnoreCase(name))
 				{
 					this.filterContext.getDashboardMeta().setDashboardVar(trim(entry.getValue()));
 				}
-				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardFactory.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardFactory().equalsIgnoreCase(name))
 				{
 					this.filterContext.getDashboardMeta().setDashboardFactoryVar(trim(entry.getValue()));
 				}
-				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardUnimport.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardUnimport().equalsIgnoreCase(name))
 				{
 					this.filterContext.getDashboardMeta().setDashboardUnimport(trim(entry.getValue()));
 				}
-				else if(HtmlTplDashboardWidgetHtmlRenderer.this.attrNameLoadableChartWidgets.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameLoadableChartWidgets()
+						.equalsIgnoreCase(name))
 				{
-					this.filterContext.getDashboardMeta().setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
+					this.filterContext.getDashboardMeta()
+							.setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
 				}
-				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardCode.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardCode().equalsIgnoreCase(name))
 				{
 					this.filterContext.getDashboardMeta().setDashboardCode(trim(entry.getValue()));
 				}
-				else if (HtmlTplDashboardWidgetHtmlRenderer.this.attrNameDashboardAutoRender.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameApiVersion().equalsIgnoreCase(name))
+				{
+					this.filterContext.getDashboardMeta().setApiVersion(trim(entry.getValue()));
+				}
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardAutoRender()
+						.equalsIgnoreCase(name))
 				{
 					this.filterContext.getDashboardMeta().setDashboardAutoRender(trim(entry.getValue()));
 				}
 			}
+
+			HtmlTplDashboardWidgetHtmlRenderer.this.inflateDashboardPrerequired(this.filterContext.getDashboard(),
+					this.filterContext.getDashboardMeta());
 		}
 		
 		protected LoadableChartWidgets resolveLoadableChartWidgets(String str)

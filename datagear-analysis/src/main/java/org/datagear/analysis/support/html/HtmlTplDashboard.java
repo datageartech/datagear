@@ -36,6 +36,9 @@ public class HtmlTplDashboard extends TplDashboard
 	
 	private LoadableChartWidgets loadableChartWidgets = null;
 
+	/** API版本 */
+	private String apiVersion = null;
+
 	public HtmlTplDashboard()
 	{
 		super();
@@ -81,5 +84,15 @@ public class HtmlTplDashboard extends TplDashboard
 	public void setLoadableChartWidgets(LoadableChartWidgets loadableChartWidgets)
 	{
 		this.loadableChartWidgets = loadableChartWidgets;
+	}
+
+	public String getApiVersion()
+	{
+		return apiVersion;
+	}
+
+	public void setApiVersion(String apiVersion)
+	{
+		this.apiVersion = apiVersion;
 	}
 }

@@ -82,8 +82,8 @@
 	
 	var builtinChartMapBaseURL = (dashboardFactory.builtinChartMapBaseURL || (dashboardFactory.builtinChartMapBaseURL = "/static/analysislib/geojson/"));
 	
-	/** 看板版本常量，参考：org.datagear.web.analysis.DashboardVersion */
-	var dashboardVersion = (dashboardFactory.dashboardVersion || (dashboardFactory.dashboardVersion = { V_1_0: "1.0" }));
+	/** 看板版本常量，参考：org.datagear.web.analysis.DashboardApiVersion */
+	var apiVersion = (dashboardFactory.apiVersion || (dashboardFactory.apiVersion = { V1: "1.0", V2: "2.0" }));
 	
 	//----------------------------------------
 	// chartStatusConst开始
@@ -3176,7 +3176,7 @@
 	
 	/**
 	 * 获取版本。
-	 * 具体参考：org.datagear.web.analysis.DashboardVersion
+	 * 具体参考：org.datagear.web.analysis.DashboardApiVersion
 	 * 
 	 * @return 版本号，目前只有：1.0、2.0
 	 * @since 5.3.0 此API暂不开放，因为5.3.0版本的看板版本功能已禁用

@@ -29,6 +29,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
+import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.controller.ServerTimeJsController;
 
 /**
@@ -137,6 +138,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 		String libPrefix = contextPath + PATH_LIB;
 		String analysisPrefix = getAnalysisPath(contextPath, dashboard);
+		boolean isV1 = DashboardApiVersion.isV1(dashboard.getApiVersion());
 
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
@@ -146,8 +148,12 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 		// CSS
 
-		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
-				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
+		if (isV1)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
+					libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css"));
+		}
+
 		impts.add(HtmlTplDashboardImport.valueOfLinkCss(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE,
 				analysisPrefix + "/css/style.css?v=" + Global.VERSION));
 		
@@ -159,13 +165,16 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 		// JS
 
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
-				libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
-				libPrefix + "/echarts-5.6.0/echarts.min.js"));
+		if (isV1)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
+					libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
+					libPrefix + "/echarts-5.6.0/echarts.min.js"));
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
+					libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
+		}
 
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
-				libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY,
 				analysisPrefix + "/chartFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
@@ -190,7 +199,14 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 	protected String getAnalysisPath(String contextPath, HtmlTplDashboard dashboard)
 	{
-		return contextPath + "/static/analysis-1.0";
+		if (DashboardApiVersion.isV1(dashboard.getApiVersion()))
+		{
+			return contextPath + "/static/analysis-1.0";
+		}
+		else
+		{
+			return contextPath + "/static/analysis-2.0";
+		}
 	}
 
 	protected boolean isEditMode(String mode)

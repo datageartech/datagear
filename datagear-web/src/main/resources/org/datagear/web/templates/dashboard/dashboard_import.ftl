@@ -16,7 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign DashboardVersion=statics['org.datagear.web.analysis.DashboardVersion']>
+<#assign DashboardApiVersion=statics['org.datagear.web.analysis.DashboardApiVersion']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -162,8 +162,12 @@
 		versionDropdownItems:
 		[
 			{
-				label: "${DashboardVersion.V_1_0}",
-				value: "${DashboardVersion.V_1_0}"
+				label: "${DashboardApiVersion.V1}",
+				value: "${DashboardApiVersion.V1}"
+			},
+			{
+				label: "${DashboardApiVersion.V2}",
+				value: "${DashboardApiVersion.V2}"
 			}
 		]
 	});

@@ -55,7 +55,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
-import org.datagear.web.analysis.DashboardVersion;
+import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
@@ -1103,7 +1103,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	protected void inflateSaveEntity(HttpServletRequest request, User user, HtmlTplDashboardWidgetEntity entity)
 	{
 		trimAnalysisProjectAware(entity);
-		entity.setVersion(DashboardVersion.V_1_0);
+		entity.setVersion(DashboardApiVersion.V1);
 	}
 
 	protected HtmlTplDashboardWidgetEntity createInstance()

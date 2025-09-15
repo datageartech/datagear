@@ -78,8 +78,8 @@ var builtinChartMaps = (DF.builtinChartMaps || (DF.builtinChartMaps = []));
 
 var builtinChartMapBaseURL = (DF.builtinChartMapBaseURL || (DF.builtinChartMapBaseURL = "/static/analysislib/geojson/"));
 
-/** 看板版本常量，参考：org.datagear.web.analysis.DashboardVersion */
-var dashboardVersion = (DF.dashboardVersion || (DF.dashboardVersion = { V_1_0: "1.0" }));
+/** 看板版本常量，参考：org.datagear.web.analysis.DashboardApiVersion */
+var apiVersion = (dashboardFactory.apiVersion || (dashboardFactory.apiVersion = { V1: "1.0", V2: "2.0" }));
 
 //----------------------------------------
 // chartStatusConst开始
@@ -2822,7 +2822,7 @@ dashboardProto.destroyForm = function(form)
 
 /**
  * 获取版本。
- * 具体参考：org.datagear.web.analysis.DashboardVersion
+ * 具体参考：org.datagear.web.analysis.DashboardApiVersion
  * 
  * @return 版本号，目前只有：1.0、2.0
  */
