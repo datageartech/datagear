@@ -20,5 +20,5 @@
 页脚
 -->
 <div class="page-foot text-right text-xs opacity-40 text-color-secondary pt-1 pr-1 flex-grow-0">
-	<span class="text-color-secondary">Powered by DataGear</span>
+	<span class="text-color-secondary">Copyright 2018-2025 datagear.tech</span>
 </div>
