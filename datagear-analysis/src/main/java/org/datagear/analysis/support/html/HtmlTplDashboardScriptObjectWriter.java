@@ -149,7 +149,6 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		public TplDashboardWidgetJson(HtmlTplDashboardWidget dashboardWidget)
 		{
 			super(dashboardWidget.getId(), dashboardWidget.getTemplates(), null, null);
-			setVersion(dashboardWidget.getVersion());
 		}
 
 		@JsonIgnore

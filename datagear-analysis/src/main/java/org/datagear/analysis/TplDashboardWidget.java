@@ -42,9 +42,6 @@ public abstract class TplDashboardWidget extends AbstractIdentifiable
 	/** 模板编码 */
 	private String templateEncoding = DEFAULT_TEMPLATE_ENCODING;
 
-	/** 版本 */
-	private String version = "";
-
 	public TplDashboardWidget()
 	{
 		super();
@@ -74,16 +71,6 @@ public abstract class TplDashboardWidget extends AbstractIdentifiable
 	public void setTemplateEncoding(String templateEncoding)
 	{
 		this.templateEncoding = templateEncoding;
-	}
-
-	public String getVersion()
-	{
-		return version;
-	}
-
-	public void setVersion(String version)
-	{
-		this.version = version;
 	}
 
 	/**

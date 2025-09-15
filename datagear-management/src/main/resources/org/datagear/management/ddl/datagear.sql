@@ -669,3 +669,5 @@ VALUES('MYSQL_DISABLE_LOADLOCAL_3','jdbc:mysql:*','false',999,'true',CURRENT_TIM
 /*--version[6.0.0], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
 
+/*2025-09-15*/
+/*DATAGEAR_HTML_DASHBOARD表的HD_VERSION列已弃用，暂不删除，留着备用*/

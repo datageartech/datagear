@@ -55,7 +55,6 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
-import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
@@ -895,7 +894,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		entity.setTemplateEncoding(templateEncoding);
 		entity.setName(form.getName());
 		entity.setAnalysisProject(form.getAnalysisProject());
-		entity.setVersion(form.getVersion());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
 	}
@@ -1103,7 +1101,6 @@ public class DashboardController extends AbstractDataAnalysisController
 	protected void inflateSaveEntity(HttpServletRequest request, User user, HtmlTplDashboardWidgetEntity entity)
 	{
 		trimAnalysisProjectAware(entity);
-		entity.setVersion(DashboardApiVersion.V1);
 	}
 
 	protected HtmlTplDashboardWidgetEntity createInstance()
@@ -1446,8 +1443,6 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		private AnalysisProject analysisProject;
 
-		private String version;
-
 		public DashboardImportForm()
 		{
 			super();
@@ -1501,16 +1496,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		public void setAnalysisProject(AnalysisProject analysisProject)
 		{
 			this.analysisProject = analysisProject;
-		}
-
-		public String getVersion()
-		{
-			return version;
-		}
-
-		public void setVersion(String version)
-		{
-			this.version = version;
 		}
 	}
 }

@@ -16,7 +16,6 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign DashboardApiVersion=statics['org.datagear.web.analysis.DashboardApiVersion']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -103,24 +102,6 @@
 					</div>
 				</div>
 			</div>
-			<!--
-			<div class="field grid">
-				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">
-					<@spring.message code='dashboard.version' />
-				</label>
-		        <div class="field-input col-12 md:col-9">
-		        	<p-dropdown v-model="fm.version" :options="pm.versionDropdownItems" option-label="label" option-value="value"
-		        		@change="onVersionChange" class="input w-full">
-		        	</p-dropdown>
-		        	<div class="validate-msg">
-		        		<input name="version" required type="text" class="validate-proxy" />
-		        	</div>
-		        	<div class="desc text-color-secondary">
-		        		<small><@spring.message code='dashboard.version.desc' /></small>
-		        	</div>
-		        </div>
-			</div>
-			-->
 			<div class="field grid">
 				<label class="field-label col-12 mb-2 md:col-3 md:mb-0">
 				</label>
@@ -158,18 +139,7 @@
 	po.vuePageModel(
 	{
 		availableCharsetNames: availableCharsetNames,
-		uploadFileUrl: po.concatContextPath("/dashboard/uploadImportFile"),
-		versionDropdownItems:
-		[
-			{
-				label: "${DashboardApiVersion.V1}",
-				value: "${DashboardApiVersion.V1}"
-			},
-			{
-				label: "${DashboardApiVersion.V2}",
-				value: "${DashboardApiVersion.V2}"
-			}
-		]
+		uploadFileUrl: po.concatContextPath("/dashboard/uploadImportFile")
 	});
 	
 	po.vueMethod(

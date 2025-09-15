@@ -959,7 +959,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		dashboard.setWidget(dashboardWidget);
 		dashboard.setRenderContext(renderContext);
 		dashboard.setCharts(new ArrayList<Chart>());
-		dashboard.setApiVersion(dashboardWidget.getVersion());
 
 		return dashboard;
 	}
