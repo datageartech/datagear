@@ -20,9 +20,9 @@ package org.datagear.web.analysis;
 import org.datagear.util.StringUtil;
 
 /**
- * 看板API版本。
+ * 看板JS端API版本。
  * <p>
- * 从系统{@code 6.0.0}版本起，整个JS端的看板API都进行了重构， 为了解决旧版看板的兼容问题，引入了看板API版本概念，
+ * 从系统{@code 6.0.0}版本起，整个看板JS端API都进行了重构， 为了解决旧版看板的兼容问题，引入了看板API版本概念，
  * 通过在看板里{@code <html>}标签上使用{@code dg-api-version}控制看板API版本切换。
  * </p>
  * 
@@ -49,13 +49,7 @@ public class DashboardApiVersion
 	 */
 	public static boolean isV1(String version)
 	{
-		if (V1.equals(version))
-			return true;
-		// 为空应判断为V1版本，以兼容旧版没有看板API版本的概念
-		else if (StringUtil.isEmpty(version))
-			return true;
-		else
-			return false;
+		return V1.equals(version);
 	}
 
 	/**
@@ -67,5 +61,39 @@ public class DashboardApiVersion
 	public static boolean isV2(String version)
 	{
 		return V2.equals(version);
+	}
+
+	/**
+	 * 修整版本号。
+	 * 
+	 * @param version
+	 * @param defaultValue
+	 *            默认值，当{@code version}既不是{@linkplain #V1}、也不是{@linkplain #V2}时的返回值
+	 * @return
+	 */
+	public static String trimVersion(String version, String defaultValue)
+	{
+		if (StringUtil.isEmpty(version))
+			return defaultValue;
+
+		version = version.trim();
+
+		if (V1.equals(version))
+			return V1;
+		else if (V2.equals(version))
+			return V2;
+		else
+			return defaultValue;
+	}
+
+	/**
+	 * 修整版本号，并在非法版本时返回{@linkplain #V1}。
+	 * 
+	 * @param version
+	 * @return
+	 */
+	public static String trimVersionWithV1(String version)
+	{
+		return trimVersion(version, V1);
 	}
 }

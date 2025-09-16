@@ -138,7 +138,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 		String libPrefix = contextPath + PATH_LIB;
 		String analysisPrefix = getAnalysisPath(contextPath, dashboard);
-		boolean isV1 = DashboardApiVersion.isV1(dashboard.getApiVersion());
+		boolean isV1 = DashboardApiVersion.isV1(trimDashboardApiVersion(dashboard));
 
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
@@ -199,7 +199,9 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 	protected String getAnalysisPath(String contextPath, HtmlTplDashboard dashboard)
 	{
-		if (DashboardApiVersion.isV1(dashboard.getApiVersion()))
+		String apiVersion = trimDashboardApiVersion(dashboard);
+
+		if (DashboardApiVersion.isV1(apiVersion))
 		{
 			return contextPath + "/static/analysisapi/1.0";
 		}
@@ -207,6 +209,12 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		{
 			return contextPath + "/static/analysisapi/2.0";
 		}
+	}
+
+	protected String trimDashboardApiVersion(HtmlTplDashboard dashboard)
+	{
+		// 默认版本应设为V1，以兼容旧版看板
+		return DashboardApiVersion.trimVersionWithV1(dashboard.getApiVersion());
 	}
 
 	protected boolean isEditMode(String mode)

@@ -43,6 +43,8 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
+import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,18 @@ import org.springframework.web.context.request.WebRequest;
 @RequestMapping(ChartVisualController.PATH_PREFIX)
 public class ChartVisualController extends AbstractDataAnalysisController implements ServletContextAware
 {
+	/**
+	 * 图表展示URL的请求参数名：API版本
+	 * <p>
+	 * 图表展示时，默认会使用插件兼容支持的最高看板JS端API版本，此参数可以自定义此功能。
+	 * </p>
+	 * <p>
+	 * 另参考：{@linkplain DashboardApiVersion}
+	 * </p>
+	 */
+	public static final String CHART_SHOW_PARAM_API_VERSION = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+			+ "API_VERSION";
+
 	/** 展示页路径前缀 */
 	public static final String PATH_PREFIX = "/cv";
 
@@ -131,12 +145,11 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	 * 
 	 * @param request
 	 * @param response
-	 * @param model
 	 * @param id
 	 * @throws Exception
 	 */
 	@RequestMapping({ "/{id}/", "/{id}" })
-	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public void show(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("id") String id) throws Exception
 	{
 		String requestPath = resolvePathAfter(request, "");
@@ -156,7 +169,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			User user = getCurrentUser();
 			HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
-			showChart(request, response, model, user, chart);
+			showChart(request, response, user, chart);
 		}
 	}
 
@@ -166,13 +179,12 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	 * @param request
 	 * @param response
 	 * @param webRequest
-	 * @param model
 	 * @param id
 	 * @throws Exception
 	 */
 	@RequestMapping("/{id}/**")
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
+			@PathVariable("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
@@ -181,7 +193,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 
 		if (isEmpty(resName))
 		{
-			showChart(request, response, model, user, chart);
+			showChart(request, response, user, chart);
 		}
 		else
 		{
@@ -214,14 +226,13 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	 * 
 	 * @param request
 	 * @param response
-	 * @param model
 	 * @param id
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/data", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
+			@RequestBody DashboardQueryForm form) throws Exception
 	{
 		// 此处获取ChartWidget不再需要权限控制，应显式移除线程变量
 		ChartWidgetSourceContext.remove();
@@ -277,12 +288,11 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	 * 
 	 * @param request
 	 * @param response
-	 * @param model
 	 * @param id
 	 * @throws Exception
 	 */
 	protected void showChart(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, User user, HtmlChartWidgetEntity chart) throws Exception
+			User user, HtmlChartWidgetEntity chart) throws Exception
 	{
 		if (chart == null)
 			throw new RecordNotFoundException();
@@ -296,7 +306,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		{
 			String id = chart.getId();
 			HtmlTplDashboardWidget dashboardWidget = buildHtmlTplDashboardWidget(id);
-			SimpleHtmlTplOption tplOption = buildShowSimpleHtmlTplOption(chart, dashboardWidget);
+			SimpleHtmlTplOption tplOption = buildShowSimpleHtmlTplOption(request, chart, dashboardWidget);
 			String simpleTemplate = this.htmlTplDashboardWidgetHtmlRenderer.simpleTemplate(tplOption);
 			templateIn = IOUtil.getReader(simpleTemplate);
 
@@ -323,14 +333,29 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		}
 	}
 
-	protected SimpleHtmlTplOption buildShowSimpleHtmlTplOption(HtmlChartWidgetEntity entity,
+	protected SimpleHtmlTplOption buildShowSimpleHtmlTplOption(HttpServletRequest request, HtmlChartWidgetEntity entity,
 			HtmlTplDashboardWidget dashboardWidget)
 	{
+		String apiVersion = DashboardApiVersion.V2;
+		String apiVersionParam = DashboardApiVersion.trimVersion(request.getParameter(CHART_SHOW_PARAM_API_VERSION),
+				"");
+
+		if (!StringUtil.isEmpty(apiVersionParam))
+		{
+			apiVersion = apiVersionParam;
+		}
+		else
+		{
+			// TODO 从图表插件中解析应使用的看板JS端API版本
+		}
+
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
 		String htmlTitle = entity.getName();
 		// 图表展示页面应禁用异步加载功能，避免越权访问隐患
 		String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
-				+ LoadableChartWidgets.PATTERN_NONE + "\"";
+				+ LoadableChartWidgets.PATTERN_NONE + "\" "
+				+ this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameApiVersion() + "=\""
+				+ apiVersion + "\"";
 		tplOption.setHtmlAttr(htmlAttr);
 		tplOption.setCharset(IOUtil.CHARSET_UTF_8);
 		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果

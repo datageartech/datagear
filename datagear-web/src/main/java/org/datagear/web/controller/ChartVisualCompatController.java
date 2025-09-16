@@ -52,27 +52,27 @@ public class ChartVisualCompatController extends ChartVisualController
 
 	@Override
 	@RequestMapping({ "/show/{id}/", "/show/{id}" })
-	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public void show(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("id") String id) throws Exception
 	{
-		super.show(request, response, model, id);
+		super.show(request, response, id);
 	}
 
 	@Override
 	@RequestMapping("/show/{id}/**")
 	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
+			@PathVariable("id") String id) throws Exception
 	{
-		super.showResource(request, response, webRequest, model, id);
+		super.showResource(request, response, webRequest, id);
 	}
 
 	@Override
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ErrorMessageDashboardResult showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestBody DashboardQueryForm form) throws Exception
+			@RequestBody DashboardQueryForm form) throws Exception
 	{
-		return super.showData(request, response, model, form);
+		return super.showData(request, response, form);
 	}
 
 	@Override
