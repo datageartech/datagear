@@ -2079,8 +2079,13 @@
 			vertical: false,
 			//横向对齐方式："start"、"center"、"end"
 			justifyContent: "center",
+			smallName: false,
 			showVersion: false,
-			showAuthor: false
+			showAuthor: false,
+			showApiVersion: false,
+			showPlatformVersion: false,
+			apiVersionDesc: "",
+			platformVersionDesc: ""
 		},
 		options);
 		
@@ -2089,7 +2094,7 @@
 					+(!chartPlugin || !chartPlugin.iconUrl ? " no-icon " : "")
 					+"'>";
 		
-		if(chartPlugin)
+		if(chartPlugin && chartPlugin.id)
 		{
 			if(chartPlugin.iconUrl)
 				html += "<div class='plugin-icon' style='background-image:url("+contextPath+$.escapeHtml(chartPlugin.iconUrl)+")'></div>";
@@ -2097,16 +2102,28 @@
 			var name = (chartPlugin.nameLabel ? (chartPlugin.nameLabel.value || chartPlugin.id) : chartPlugin.id);
 			name = $.escapeHtml(name || "");
 			
-			html += "<div class='plugin-name'>"+name+"</div>";
+			html += "<div class='plugin-name"+(options.smallName ? " text-sm" : "")+"'><span>"+name+"</span>";
 			
 			if(options.showVersion)
 			{
-				html += "<div class='plugin-version text-color-secondary'><small>"+(chartPlugin.version ? $.escapeHtml(chartPlugin.version) : "")+"</small></div>";
+				html += "<span class='plugin-version text-color-secondary'><small>"+(chartPlugin.version ? " ("+$.escapeHtml(chartPlugin.version)+")" : "")+"</small></span>";
+			}
+			
+			html += "</div>";
+			
+			if(options.showApiVersion)
+			{
+				html += "<div class='plugin-api-version plugin-desc text-color-secondary' title='"+$.escapeHtml(options.apiVersionDesc)+"'><small class='desc-content'>"+(chartPlugin.apiVersion ? $.escapeHtml(chartPlugin.apiVersion) : "---")+"</small></div>";
+			}
+			
+			if(options.showPlatformVersion)
+			{
+				html += "<div class='plugin-platform-version plugin-desc text-color-secondary' title='"+$.escapeHtml(options.platformVersionDesc)+"'><small class='desc-content'>"+(chartPlugin.platformVersion ? $.escapeHtml(chartPlugin.platformVersion) : "---")+"</small></div>";
 			}
 			
 			if(options.showAuthor)
 			{
-				html += "<div class='plugin-author text-color-secondary'><small>"+(chartPlugin.author ? $.escapeHtml(chartPlugin.author) : "")+"</small></div>";
+				html += "<div class='plugin-author plugin-desc text-color-secondary'><small class='desc-content'>"+(chartPlugin.author ? $.escapeHtml(chartPlugin.author) : "")+"</small></div>";
 			}
 		}
 		

@@ -1171,7 +1171,12 @@
 	{
 		formatChartPlugin: function(chartPlugin)
 		{
-			return $.toChartPluginHtml(chartPlugin, po.contextPath, {justifyContent: "start"});
+			return $.toChartPluginHtml(chartPlugin, po.contextPath,
+						{
+							justifyContent: "start", showVersion:true, showApiVersion:true, showPlatformVersion: true,
+							apiVersionDesc: "<@spring.message code='chartPlugin.apiVersion.desc' />",
+							platformVersionDesc: "<@spring.message code='chartPlugin.platformVersion.desc' />"
+						});
 		},
 		
 		formatChartPluginDesc: function(chartPlugin)

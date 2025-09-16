@@ -195,7 +195,12 @@
 		
 		formatChartPlugin: function(chartPlugin)
 		{
-			return $.toChartPluginHtml(chartPlugin, po.contextPath, {vertical:true, showVersion:true, showAuthor:true});
+			return $.toChartPluginHtml(chartPlugin, po.contextPath,
+						{
+							vertical:true, smallName: true, showVersion:true, showApiVersion:true, showPlatformVersion: true,
+							apiVersionDesc: "<@spring.message code='chartPlugin.apiVersion.desc' />",
+							platformVersionDesc: "<@spring.message code='chartPlugin.platformVersion.desc' />"
+						});
 		},
 		
 		onCategoryMenuItemChange: function(e)

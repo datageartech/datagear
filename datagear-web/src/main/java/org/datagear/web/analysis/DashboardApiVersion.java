@@ -32,12 +32,12 @@ import org.datagear.util.StringUtil;
 public class DashboardApiVersion
 {
 	/**
-	 * 版本：{@code 1.0}（旧版）
+	 * 版本：{@code 1.0}（5.5.0及以下版本的JS端看板API）
 	 */
 	public static final String V1 = "1.0";
 
 	/**
-	 * 版本：{@code 2.0}（新版）
+	 * 版本：{@code 2.0}（6.0.0及以上版本的JS端看板API）
 	 */
 	public static final String V2 = "2.0";
 

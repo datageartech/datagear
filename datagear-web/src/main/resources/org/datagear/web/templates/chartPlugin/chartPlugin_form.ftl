@@ -63,13 +63,24 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}apiVersion" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chartPlugin.apiVersion.desc' />">
+					<@spring.message code='apiVersionRequirement' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-inputtext id="${pid}apiVersion" v-model="fm.apiVersion" type="text" class="input w-full"
+		        		name="apiVersion" maxlength="100">
+		        	</p-inputtext>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}platformVersion" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='chartPlugin.platformVersion.desc' />">
 					<@spring.message code='platformVersionRequirement' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
 		        	<p-inputtext id="${pid}platformVersion" v-model="fm.platformVersion" type="text" class="input w-full"
-		        		name="platformVersion" maxlength="50">
+		        		name="platformVersion" maxlength="100">
 		        	</p-inputtext>
 		        </div>
 			</div>

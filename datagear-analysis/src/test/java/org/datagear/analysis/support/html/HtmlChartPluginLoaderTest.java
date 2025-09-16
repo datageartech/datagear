@@ -44,21 +44,20 @@ import org.junit.Test;
  */
 public class HtmlChartPluginLoaderTest
 {
-	private HtmlChartPluginLoader htmlChartPluginLoader;
-
 	public HtmlChartPluginLoaderTest()
 	{
 		super();
-		this.htmlChartPluginLoader = new HtmlChartPluginLoader();
 	}
 
 	@Test
 	public void loadTest()
 	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+
 		File directory = FileUtil.getFile(
 				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin01");
 
-		HtmlChartPlugin plugin = this.htmlChartPluginLoader.load(directory);
+		HtmlChartPlugin plugin = loader.load(directory);
 		Assert.assertEquals("plugin01", plugin.getId());
 		assertEquals("icon-01.png", plugin.getIconResourceName(ChartPlugin.DEFAULT_ICON_THEME_NAME));
 
@@ -92,10 +91,12 @@ public class HtmlChartPluginLoaderTest
 	@Test
 	public void loadZipTest()
 	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+
 		File file = FileUtil.getFile(
 				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin03.zip");
 
-		HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadZip(file);
+		HtmlChartPlugin plugin = loader.loadZip(file);
 		Assert.assertEquals("plugin03", plugin.getId());
 
 		assertTrue(plugin.getRenderer() instanceof StringJsChartRenderer);
@@ -131,10 +132,12 @@ public class HtmlChartPluginLoaderTest
 	@Test
 	public void loadsTest()
 	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+
 		File directory = FileUtil
 				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders");
 
-		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loadAll(directory);
+		Set<HtmlChartPlugin> plugins = loader.loadAll(directory);
 
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
@@ -200,6 +203,65 @@ public class HtmlChartPluginLoaderTest
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			Assert.assertTrue(chartRenderer.getCodeValue().contains("(function(localPlugin)"));
+		}
+	}
+
+	@Test
+	public void loadTest_loadedProcessor()
+	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+		loader.setLoadedProcessor(new TestHtmlChartPluginLoadedProcessor());
+
+		File directory = FileUtil
+				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin01");
+
+		HtmlChartPlugin plugin = loader.load(directory);
+		Assert.assertEquals("plugin01", plugin.getId());
+		Assert.assertEquals("9.9.9", plugin.getApiVersion());
+	}
+
+	@Test
+	public void loadZipTest_loadedProcessor()
+	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+		loader.setLoadedProcessor(new TestHtmlChartPluginLoadedProcessor());
+
+		File file = FileUtil
+				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin03.zip");
+
+		HtmlChartPlugin plugin = loader.loadZip(file);
+		Assert.assertEquals("plugin03", plugin.getId());
+		Assert.assertEquals("9.9.9", plugin.getApiVersion());
+	}
+
+	@Test
+	public void loadsTest_loadedProcessor()
+	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+		loader.setLoadedProcessor(new TestHtmlChartPluginLoadedProcessor());
+
+		File directory = FileUtil
+				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders");
+
+		Set<HtmlChartPlugin> plugins = loader.loadAll(directory);
+
+		List<HtmlChartPlugin> list = new ArrayList<>();
+		list.addAll(plugins);
+
+		Assert.assertEquals(6, list.size());
+
+		for (HtmlChartPlugin plugin : plugins)
+		{
+			Assert.assertEquals("9.9.9", plugin.getApiVersion());
+		}
+	}
+
+	protected static class TestHtmlChartPluginLoadedProcessor implements HtmlChartPluginLoadedProcessor
+	{
+		@Override
+		public void process(HtmlChartPlugin plugin) throws HtmlChartPluginLoadException
+		{
+			plugin.setApiVersion("9.9.9");
 		}
 	}
 }

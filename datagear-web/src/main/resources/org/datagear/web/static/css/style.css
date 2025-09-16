@@ -664,24 +664,30 @@ label.align-tip{
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
+.plugin-info.inline{
+	gap: 0.25rem;
+}
 .plugin-info.inline .plugin-icon{
 	width: 2rem;
 	height: 2rem;
 }
-.plugin-info.inline .plugin-name{
-	padding-left: 0.25rem;
-}
 .plugin-info.block{
 	min-height: 8rem;
+	gap: 1px;
 }
 .plugin-info.block .plugin-icon{
 	width: 6rem;
 	height: 6rem;
-	margin-bottom: 0.5rem;
 }
-.plugin-info.block .plugin-version,
-.plugin-info.block .plugin-author{
-	min-height: 1.5em;
+.plugin-info.block .plugin-desc{
+	text-align: center;
+}
+
+.plugin-info .plugin-api-version .desc-content,
+.plugin-info .plugin-platform-version .desc-content{
+	padding: 1px 1em;
+	background: var(--surface-d);
+	border-radius: 0.5rem;
 }
 
 .page-manager-dtbsSource .p-tree.dtbsSource-tree .p-tree-wrapper,

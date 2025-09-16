@@ -29,8 +29,9 @@ import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
  * <code>
  * <pre>
  * {
- *   ...
- *   platformVersion: "..."
+ *   ...,
+ *   platformVersion: "...",
+ *   apiVersion: "..."
  * }
  * </pre>
  * </code>
@@ -45,6 +46,7 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 		extends JsonChartPluginPropertiesResolver<T>
 {
 	public static final String JSON_PROPERTY_PLATFORM_VERSION = HtmlChartPlugin.PROPERTY_PLATFORM_VERSION;
+	public static final String JSON_PROPERTY_API_VERSION = HtmlChartPlugin.PROPERTY_API_VERSION;
 
 	public JsonHtmlChartPluginPropertiesResolver()
 	{
@@ -56,5 +58,6 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 	{
 		super.resolveChartPluginProperties(chartPlugin, properties);
 		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
+		chartPlugin.setApiVersion(convertToString(properties.get(JSON_PROPERTY_API_VERSION)));
 	}
 }

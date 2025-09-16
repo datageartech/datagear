@@ -46,4 +46,16 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 
 		assertEquals("5.2.0", chartPlugin.getPlatformVersion());
 	}
+
+	@Test
+	public void resolveChartPluginPropertiesTest_apiVersion() throws IOException
+	{
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-apiVersion.json");
+
+		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
+		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
+
+		assertEquals(">=1.0", chartPlugin.getApiVersion());
+	}
 }

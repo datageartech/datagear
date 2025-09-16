@@ -61,16 +61,22 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 图表渲染器属性名 */
+	/** 属性名：图表渲染器 */
 	public static final String PROPERTY_RENDERER = "renderer";
 	
 	/**
-	 * 旧版本（4.0.0及以前版本）图表渲染器属性名，将在未来版本移除。
+	 * 属性名：旧版本（4.0.0及以前版本）图表渲染器，将在未来版本移除
+	 * 
+	 * @deprecated
 	 */
+	@Deprecated
 	public static final String PROPERTY_RENDERER_OLD = "chartRenderer";
 	
-	/** 支持的平台版本属性名 */
+	/** 属性名：支持的平台版本 */
 	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
+
+	/** 属性名：支持的看板JS端API版本 */
+	public static final String PROPERTY_API_VERSION = "apiVersion";
 
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
@@ -81,13 +87,30 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	/**
 	 * 支持的平台版本。
 	 * <p>
-	 * 比如：>=5.0 表示支持5.0.0及以上版本；<=6.0 表示支持6.0.0及以下版本
+	 * 比如：<br>
+	 * <code>"&gt;=5.0"</code> 表示支持5.0.0及以上版本<br>
+	 * <code>"&lt;=6.0"</code> 表示支持6.0.0及以下版本<br>
+	 * <code>"&gt;=5.0 &lt;6.0"</code> 表示支持5.0.0及以上且6.0.0下版本
 	 * </p>
 	 * <p>
 	 * {@code null}或空字符串表示没有限制
 	 * </p>
 	 */
 	private String platformVersion = "";
+
+	/**
+	 * 支持的看板JS端API版本。
+	 * <p>
+	 * 比如：<br>
+	 * <code>"&gt;=5.0"</code> 表示支持5.0.0及以上版本<br>
+	 * <code>"&lt;=6.0"</code> 表示支持6.0.0及以下版本<br>
+	 * <code>"&gt;=5.0 &lt;6.0"</code> 表示支持5.0.0及以上且6.0.0下版本
+	 * </p>
+	 * <p>
+	 * {@code null}或空字符串表示未定义
+	 * </p>
+	 */
+	private String apiVersion = "";
 
 	private HtmlChartPluginScriptObjectWriter pluginWriter;
 
@@ -138,6 +161,16 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	public void setPlatformVersion(String platformVersion)
 	{
 		this.platformVersion = platformVersion;
+	}
+
+	public String getApiVersion()
+	{
+		return apiVersion;
+	}
+
+	public void setApiVersion(String apiVersion)
+	{
+		this.apiVersion = apiVersion;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getPluginWriter()

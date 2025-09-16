@@ -185,6 +185,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			setContact(plugin.getContact());
 			setIssueDate(plugin.getIssueDate());
 			setPlatformVersion(plugin.getPlatformVersion());
+			setApiVersion(plugin.getApiVersion());
 			setAdditions(plugin.getAdditions());
 		}
 

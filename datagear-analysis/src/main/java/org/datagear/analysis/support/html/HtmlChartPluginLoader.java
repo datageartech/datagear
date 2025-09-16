@@ -113,6 +113,8 @@ public class HtmlChartPluginLoader
 
 	private HtmlChartScriptObjectWriter chartScriptObjectWriter = HtmlChartScriptObjectWriter.INSTANCE;
 
+	private HtmlChartPluginLoadedProcessor loadedProcessor = null;
+
 	/** 文件编码 */
 	private String encoding = IOUtil.CHARSET_UTF_8;
 
@@ -170,6 +172,16 @@ public class HtmlChartPluginLoader
 	public void setChartScriptObjectWriter(HtmlChartScriptObjectWriter chartScriptObjectWriter)
 	{
 		this.chartScriptObjectWriter = chartScriptObjectWriter;
+	}
+
+	public HtmlChartPluginLoadedProcessor getLoadedProcessor()
+	{
+		return loadedProcessor;
+	}
+
+	public void setLoadedProcessor(HtmlChartPluginLoadedProcessor loadedProcessor)
+	{
+		this.loadedProcessor = loadedProcessor;
 	}
 
 	public String getEncoding()
@@ -273,7 +285,9 @@ public class HtmlChartPluginLoader
 	 */
 	public HtmlChartPlugin load(File directory) throws HtmlChartPluginLoadException
 	{
-		return loadSingleForDirectory(directory);
+		HtmlChartPlugin plugin = loadSingleForDirectory(directory);
+		processLoadedPlugin(plugin);
+		return plugin;
 	}
 
 	/**
@@ -285,7 +299,9 @@ public class HtmlChartPluginLoader
 	 */
 	public HtmlChartPlugin loadZip(File zip) throws HtmlChartPluginLoadException
 	{
-		return loadSingleForZip(zip);
+		HtmlChartPlugin plugin = loadSingleForZip(zip);
+		processLoadedPlugin(plugin);
+		return plugin;
 	}
 
 	/**
@@ -302,7 +318,9 @@ public class HtmlChartPluginLoader
 	{
 		try
 		{
-			return loadSingleForZipInputStream(in);
+			HtmlChartPlugin plugin = loadSingleForZipInputStream(in);
+			processLoadedPlugin(plugin);
+			return plugin;
 		}
 		catch (HtmlChartPluginLoadException e)
 		{
@@ -333,6 +351,8 @@ public class HtmlChartPluginLoader
 		else
 			plugin = loadFileExt(file);
 
+		processLoadedPlugin(plugin);
+
 		return plugin;
 	}
 
@@ -358,6 +378,7 @@ public class HtmlChartPluginLoader
 		for (File child : children)
 		{
 			HtmlChartPlugin plugin = loadFile(child);
+			processLoadedPlugin(plugin);
 
 			if (plugin != null)
 				plugins.add(plugin);
@@ -677,6 +698,14 @@ public class HtmlChartPluginLoader
 	protected boolean isZipFile(File file)
 	{
 		return FileUtil.isExtension(file, "zip");
+	}
+
+	protected void processLoadedPlugin(HtmlChartPlugin plugin)
+	{
+		if (plugin == null || this.loadedProcessor == null)
+			return;
+
+		this.loadedProcessor.process(plugin);
 	}
 
 	protected HtmlChartPlugin createHtmlChartPlugin()
