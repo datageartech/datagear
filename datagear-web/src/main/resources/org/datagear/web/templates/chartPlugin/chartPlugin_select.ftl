@@ -197,7 +197,7 @@
 		{
 			return $.toChartPluginHtml(chartPlugin, po.contextPath,
 						{
-							vertical:true, smallName: true, showVersion:true, showApiVersion:true, showPlatformVersion: true,
+							vertical:true, smallName:true, showVersion:true, showApiVersion:true, showPlatformVersion:true, showAuthor:true,
 							apiVersionDesc: "<@spring.message code='chartPlugin.apiVersion.desc' />",
 							platformVersionDesc: "<@spring.message code='chartPlugin.platformVersion.desc' />"
 						});

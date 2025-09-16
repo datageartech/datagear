@@ -2123,7 +2123,7 @@
 			
 			if(options.showAuthor)
 			{
-				html += "<div class='plugin-author plugin-desc text-color-secondary'><small class='desc-content'>"+(chartPlugin.author ? $.escapeHtml(chartPlugin.author) : "")+"</small></div>";
+				html += "<div class='plugin-author plugin-desc text-color-secondary text-sm'><small class='desc-content'>"+(chartPlugin.author ? $.escapeHtml(chartPlugin.author) : "")+"</small></div>";
 			}
 		}
 		

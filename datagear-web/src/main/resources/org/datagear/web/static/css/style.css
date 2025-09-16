@@ -672,19 +672,15 @@ label.align-tip{
 	height: 2rem;
 }
 .plugin-info.block{
-	min-height: 8rem;
-	gap: 1px;
+	gap: 2px;
 }
 .plugin-info.block .plugin-icon{
 	width: 6rem;
 	height: 6rem;
 }
-.plugin-info.block .plugin-desc{
+.plugin-info .plugin-api-version,
+.plugin-info .plugin-platform-version{
 	text-align: center;
-}
-
-.plugin-info .plugin-api-version .desc-content,
-.plugin-info .plugin-platform-version .desc-content{
 	padding: 1px 1em;
 	background: var(--surface-d);
 	border-radius: 0.5rem;
