@@ -103,15 +103,15 @@ public class HtmlChartPluginLoader
 	 */
 	public static final String FILE_NAME_RENDERER = "renderer.js";
 	
-	private HtmlChartPluginJsDefResolver htmlChartPluginJsDefResolver = new HtmlChartPluginJsDefResolver();
+	private HtmlChartPluginJsDefResolver pluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 
-	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
+	private JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> jsonPluginPropertiesResolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>();
 
-	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = HtmlChartPluginScriptObjectWriter.INSTANCE;
+	private HtmlChartPluginScriptObjectWriter pluginScriptObjectWriter = HtmlChartPluginScriptObjectWriter.INSTANCE;
 
-	private HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter = HtmlRenderContextScriptObjectWriter.INSTANCE;
+	private HtmlRenderContextScriptObjectWriter renderContextScriptObjectWriter = HtmlRenderContextScriptObjectWriter.INSTANCE;
 
-	private HtmlChartScriptObjectWriter htmlChartScriptObjectWriter = HtmlChartScriptObjectWriter.INSTANCE;
+	private HtmlChartScriptObjectWriter chartScriptObjectWriter = HtmlChartScriptObjectWriter.INSTANCE;
 
 	/** 文件编码 */
 	private String encoding = IOUtil.CHARSET_UTF_8;
@@ -121,57 +121,55 @@ public class HtmlChartPluginLoader
 		super();
 	}
 
-	public HtmlChartPluginJsDefResolver getHtmlChartPluginJsDefResolver()
+	public HtmlChartPluginJsDefResolver getPluginJsDefResolver()
 	{
-		return htmlChartPluginJsDefResolver;
+		return pluginJsDefResolver;
 	}
 
-	public void setHtmlChartPluginJsDefResolver(HtmlChartPluginJsDefResolver htmlChartPluginJsDefResolver)
+	public void setPluginJsDefResolver(HtmlChartPluginJsDefResolver pluginJsDefResolver)
 	{
-		this.htmlChartPluginJsDefResolver = htmlChartPluginJsDefResolver;
+		this.pluginJsDefResolver = pluginJsDefResolver;
 	}
 
-	public JsonChartPluginPropertiesResolver getJsonChartPluginPropertiesResolver()
+	public JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> getJsonPluginPropertiesResolver()
 	{
-		return jsonChartPluginPropertiesResolver;
+		return jsonPluginPropertiesResolver;
 	}
 
-	public void setJsonChartPluginPropertiesResolver(
-			JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver)
+	public void setJsonPluginPropertiesResolver(
+			JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> jsonPluginPropertiesResolver)
 	{
-		this.jsonChartPluginPropertiesResolver = jsonChartPluginPropertiesResolver;
+		this.jsonPluginPropertiesResolver = jsonPluginPropertiesResolver;
 	}
 
-	public HtmlChartPluginScriptObjectWriter getHtmlChartPluginScriptObjectWriter()
+	public HtmlChartPluginScriptObjectWriter getPluginScriptObjectWriter()
 	{
-		return htmlChartPluginScriptObjectWriter;
+		return pluginScriptObjectWriter;
 	}
 
-	public void setHtmlChartPluginScriptObjectWriter(
-			HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter)
+	public void setPluginScriptObjectWriter(HtmlChartPluginScriptObjectWriter pluginScriptObjectWriter)
 	{
-		this.htmlChartPluginScriptObjectWriter = htmlChartPluginScriptObjectWriter;
+		this.pluginScriptObjectWriter = pluginScriptObjectWriter;
 	}
 
-	public HtmlRenderContextScriptObjectWriter getHtmlRenderContextScriptObjectWriter()
+	public HtmlRenderContextScriptObjectWriter getRenderContextScriptObjectWriter()
 	{
-		return htmlRenderContextScriptObjectWriter;
+		return renderContextScriptObjectWriter;
 	}
 
-	public void setHtmlRenderContextScriptObjectWriter(
-			HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter)
+	public void setRenderContextScriptObjectWriter(HtmlRenderContextScriptObjectWriter renderContextScriptObjectWriter)
 	{
-		this.htmlRenderContextScriptObjectWriter = htmlRenderContextScriptObjectWriter;
+		this.renderContextScriptObjectWriter = renderContextScriptObjectWriter;
 	}
 
-	public HtmlChartScriptObjectWriter getHtmlChartScriptObjectWriter()
+	public HtmlChartScriptObjectWriter getChartScriptObjectWriter()
 	{
-		return htmlChartScriptObjectWriter;
+		return chartScriptObjectWriter;
 	}
 
-	public void setHtmlChartScriptObjectWriter(HtmlChartScriptObjectWriter htmlChartScriptObjectWriter)
+	public void setChartScriptObjectWriter(HtmlChartScriptObjectWriter chartScriptObjectWriter)
 	{
-		this.htmlChartScriptObjectWriter = htmlChartScriptObjectWriter;
+		this.chartScriptObjectWriter = chartScriptObjectWriter;
 	}
 
 	public String getEncoding()
@@ -472,7 +470,7 @@ public class HtmlChartPluginLoader
 			else if (name.equals(FILE_NAME_PLUGIN))
 			{
 				Reader pluginIn = IOUtil.getReader(in, this.encoding);
-				jsDefContent = this.htmlChartPluginJsDefResolver.resolve(pluginIn);
+				jsDefContent = this.pluginJsDefResolver.resolve(pluginIn);
 				inflateChartPluginProperties(plugin, jsDefContent);
 			}
 			else if (name.equals(FILE_NAME_RENDERER))
@@ -519,7 +517,7 @@ public class HtmlChartPluginLoader
 		try
 		{
 			pluginIn = IOUtil.getReader(pluginFile, this.encoding);
-			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(pluginIn);
+			JsDefContent jsDefContent = this.pluginJsDefResolver.resolve(pluginIn);
 			inflateChartPluginProperties(plugin, jsDefContent);
 			
 			if (!jsDefContent.hasPluginRenderer())
@@ -562,7 +560,7 @@ public class HtmlChartPluginLoader
 	{
 		if (!StringUtil.isEmpty(jsDefContent.getPluginJson()))
 		{
-			this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
+			this.jsonPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
 
 			// 内联渲染器格式
 			if (jsDefContent.hasPluginRenderer())
@@ -572,9 +570,9 @@ public class HtmlChartPluginLoader
 			}
 		}
 
-		plugin.setPluginWriter(getHtmlChartPluginScriptObjectWriter());
-		plugin.setRenderContextWriter(getHtmlRenderContextScriptObjectWriter());
-		plugin.setChartWriter(getHtmlChartScriptObjectWriter());
+		plugin.setPluginWriter(getPluginScriptObjectWriter());
+		plugin.setRenderContextWriter(getRenderContextScriptObjectWriter());
+		plugin.setChartWriter(getChartScriptObjectWriter());
 	}
 
 	protected void inflateChartPluginResources(HtmlChartPlugin plugin, File pluginFile) throws Exception

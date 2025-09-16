@@ -77,7 +77,7 @@ import org.datagear.util.i18n.Label;
  * @author datagear@163.com
  *
  */
-public class JsonChartPluginPropertiesResolver
+public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 {
 	public static final String JSON_PROPERTY_ID = ChartPlugin.PROPERTY_ID;
 	public static final String JSON_PROPERTY_NAME_LABEL = ChartPlugin.PROPERTY_NAME_LABEL;
@@ -92,7 +92,6 @@ public class JsonChartPluginPropertiesResolver
 	public static final String JSON_PROPERTY_AUTHOR = ChartPlugin.PROPERTY_AUTHOR;
 	public static final String JSON_PROPERTY_CONTACT = ChartPlugin.PROPERTY_CONTACT;
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
-	public static final String JSON_PROPERTY_PLATFORM_VERSION = ChartPlugin.PROPERTY_PLATFORM_VERSION;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
 
@@ -118,7 +117,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param chartPlugin
 	 * @param properties
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Map<String, ?> properties)
+	public void resolveChartPluginProperties(T chartPlugin, Map<String, ?> properties)
 	{
 		chartPlugin.setId(convertToString(properties.get(JSON_PROPERTY_ID)));
 		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
@@ -141,7 +140,6 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setAuthor(convertToString(properties.get(JSON_PROPERTY_AUTHOR)));
 		chartPlugin.setContact(convertToString(properties.get(JSON_PROPERTY_CONTACT)));
 		chartPlugin.setIssueDate(convertToString(properties.get(JSON_PROPERTY_ISSUE_DATE)));
-		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
 		chartPlugin.setAdditions(convertToAdditions(properties.get(JSON_PROPERTY_ADDITIONS)));
 	}
 
@@ -152,7 +150,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param json
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, String json) throws IOException
+	public void resolveChartPluginProperties(T chartPlugin, String json) throws IOException
 	{
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = JsonSupport.parseNonStardand(json, Map.class);
@@ -166,7 +164,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param jsonReader
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Reader jsonReader) throws IOException
+	public void resolveChartPluginProperties(T chartPlugin, Reader jsonReader) throws IOException
 	{
 		String json = null;
 
@@ -194,7 +192,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param encoding
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, InputStream in, String encoding)
+	public void resolveChartPluginProperties(T chartPlugin, InputStream in, String encoding)
 			throws IOException
 	{
 		Reader reader = IOUtil.getReader(in, encoding);
@@ -872,19 +870,19 @@ public class JsonChartPluginPropertiesResolver
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends Enum<T>> T convertToEnum(Object obj, Class<T> enumType)
+	protected <E extends Enum<E>> E convertToEnum(Object obj, Class<E> enumType)
 	{
 		if (obj == null)
 			return null;
 		else if (enumType.isAssignableFrom(obj.getClass()))
-			return (T) obj;
+			return (E) obj;
 		else if (obj instanceof String)
 		{
 			String strVal = (String) obj;
 	
-			EnumSet<T> enumSet = EnumSet.allOf(enumType);
+			EnumSet<E> enumSet = EnumSet.allOf(enumType);
 	
-			for (T e : enumSet)
+			for (E e : enumSet)
 			{
 				if (e.name().equalsIgnoreCase(strVal))
 					return e;

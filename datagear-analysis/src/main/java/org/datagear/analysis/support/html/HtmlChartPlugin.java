@@ -69,11 +69,25 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	 */
 	public static final String PROPERTY_RENDERER_OLD = "chartRenderer";
 	
+	/** 支持的平台版本属性名 */
+	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
+
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
 
 	/** JS图表渲染器 */
 	private JsChartRenderer renderer;
+
+	/**
+	 * 支持的平台版本。
+	 * <p>
+	 * 比如：>=5.0 表示支持5.0.0及以上版本；<=6.0 表示支持6.0.0及以下版本
+	 * </p>
+	 * <p>
+	 * {@code null}或空字符串表示没有限制
+	 * </p>
+	 */
+	private String platformVersion = "";
 
 	private HtmlChartPluginScriptObjectWriter pluginWriter;
 
@@ -114,6 +128,16 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	public void setRenderer(JsChartRenderer renderer)
 	{
 		this.renderer = renderer;
+	}
+
+	public String getPlatformVersion()
+	{
+		return platformVersion;
+	}
+
+	public void setPlatformVersion(String platformVersion)
+	{
+		this.platformVersion = platformVersion;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getPluginWriter()

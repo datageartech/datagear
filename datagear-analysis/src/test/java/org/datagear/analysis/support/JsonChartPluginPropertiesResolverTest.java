@@ -53,7 +53,7 @@ import org.junit.Test;
  */
 public class JsonChartPluginPropertiesResolverTest
 {
-	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
+	private JsonChartPluginPropertiesResolver<TestChartPlugin> jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>();
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -84,7 +84,6 @@ public class JsonChartPluginPropertiesResolverTest
 			assertEquals(2, chartPlugin.getCategoryOrders().size());
 			assertEquals("test", chartPlugin.getAuthor());
 			assertEquals("2024-09-01", chartPlugin.getIssueDate());
-			assertEquals("5.3.0+", chartPlugin.getPlatformVersion());
 
 			{
 				Label nameLabel = chartPlugin.getNameLabel();
@@ -352,19 +351,6 @@ public class JsonChartPluginPropertiesResolverTest
 		assertEquals("author-issueDate", chartPlugin.getId());
 		assertEquals("test", chartPlugin.getAuthor());
 		assertEquals("2024-09-01", chartPlugin.getIssueDate());
-	}
-
-	@Test
-	public void resolveChartPluginPropertiesTest_platformVersion() throws IOException
-	{
-		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
-				"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-platformVersion.json");
-
-		TestChartPlugin chartPlugin = new TestChartPlugin();
-		jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
-				IOUtil.CHARSET_UTF_8);
-
-		assertEquals("5.2.0", chartPlugin.getPlatformVersion());
 	}
 
 	@Test
