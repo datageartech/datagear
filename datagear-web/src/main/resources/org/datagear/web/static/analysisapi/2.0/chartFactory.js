@@ -5736,8 +5736,8 @@ CF.compareVersion = function(v1, v2)
 	
 	for(let i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
 	{
-		let num1 = (CF.isEmpty(v1ds[i]) ? -999999 : parseInt(v1ds[i]));
-		let num2 = (CF.isEmpty(v2ds[i]) ? -999999 : parseInt(v2ds[i]));
+		let num1 = (CF.isEmpty(v1ds[i]) ? 0 : parseInt(v1ds[i]));
+		let num2 = (CF.isEmpty(v2ds[i]) ? 0 : parseInt(v2ds[i]));
 		
 		if(num1 > num2)
 		{
