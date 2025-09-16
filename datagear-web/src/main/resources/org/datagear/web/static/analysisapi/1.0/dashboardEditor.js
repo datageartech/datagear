@@ -92,8 +92,10 @@
 	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
 	dashboardFactory.init = function(dashboard)
 	{
-		dashboardFactory._initSuperByDashboardEditor(dashboard);
+		dashboard = dashboardFactory._initSuperByDashboardEditor(dashboard);
 		editor.init(dashboard);
+		
+		return dashboard;
 	};
 	
 	/**
