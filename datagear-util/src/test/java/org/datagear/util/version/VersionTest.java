@@ -58,10 +58,19 @@ public class VersionTest
 		Version b = Version.valueOf("1.0.0");
 		Version c = Version.valueOf("2.5");
 
-		assertTrue(a.isEqualTo(b));
-		assertTrue(b.isEqualTo(a));
-		assertFalse(a.isEqualTo(c));
-		assertFalse(b.isEqualTo(c));
+		{
+			assertTrue(a.isEqualTo(b));
+			assertTrue(b.isEqualTo(a));
+			assertFalse(a.isEqualTo(c));
+			assertFalse(b.isEqualTo(c));
+		}
+
+		{
+			assertTrue(a.equals(b));
+			assertTrue(b.equals(a));
+			assertFalse(a.equals(c));
+			assertFalse(b.equals(c));
+		}
 	}
 
 	@Test
@@ -71,18 +80,21 @@ public class VersionTest
 			String v = "1.0";
 			Version version = Version.valueOf(v);
 			assertEquals("1.0.0", version.stringValue());
+			assertEquals(version.toString(), version.stringValue());
 		}
 
 		{
 			String v = "1.0.0";
 			Version version = Version.valueOf(v);
 			assertEquals(v, version.stringValue());
+			assertEquals(version.toString(), version.stringValue());
 		}
 
 		{
 			String v = "1.0.0-a1";
 			Version version = Version.valueOf(v);
 			assertEquals(v, version.stringValue());
+			assertEquals(version.toString(), version.stringValue());
 		}
 	}
 

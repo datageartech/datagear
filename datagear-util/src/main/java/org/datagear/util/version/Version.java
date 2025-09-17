@@ -246,10 +246,7 @@ public class Version implements Serializable, Comparable<Version>
 
 	protected String trimVersionPart(String part)
 	{
-		if (part == null)
-			return "";
-		else
-			return part.trim();
+		return (part == null ? "" : part.trim());
 	}
 
 	/**
