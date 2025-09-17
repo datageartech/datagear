@@ -5700,11 +5700,11 @@ CF.extend = function()
 /**
  * 比较版本号。
  * 支持版本号格式示例：
- * 1、1-alpha、1.1、1.1-alpha、1.1.1、1.1.1-alpha、1.1.1.1、1.1.1.1-alpha
+ * 1.1、1.1-alpha、1.1.1、1.1.1-alpha
  * 
  * @param v1
  * @param v2
- * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
+ * @returns <0 v1低于v2；0 v1等于v2；>0 v1高于v2
  */
 CF.compareVersion = function(v1, v2)
 {
@@ -5714,47 +5714,70 @@ CF.compareVersion = function(v1, v2)
 	if(v1 === v2)
 		return 0;
 	
-	var b1 = "";
-	var b2 = "";
+	v1 = CF.parseVersion(v1);
+	v2 = CF.parseVersion(v2);
 	
-	var bIdx1 = v1.indexOf("-");
-	if(bIdx1 > 0)
-	{
-		b1 = (bIdx1 >= v1.length - 1 ? "" : v1.substring(bIdx1 + 1));
-		v1 = v1.substring(0, bIdx1);
-	}
+	var re = v1.major - v2.major;
 	
-	var bIdx2 = v2.indexOf("-");
-	if(bIdx2 > 0)
-	{
-		b2 = (bIdx2 >= v2.length - 1 ? "" : v2.substring(bIdx2 + 1));
-		v2 = v2.substring(0, bIdx2);
-	}
-	
-	var v1ds = v1.split(".");
-	var v2ds = v2.split(".");
-	
-	for(let i= 0, len = Math.max(v1ds.length, v2ds.length); i<len; i++)
-	{
-		let num1 = (CF.isEmpty(v1ds[i]) ? 0 : parseInt(v1ds[i]));
-		let num2 = (CF.isEmpty(v2ds[i]) ? 0 : parseInt(v2ds[i]));
-		
-		if(num1 > num2)
-		{
-			return 1;
-		}
-		else if(num1 < num2)
-		{
-			return -1;
-		}
-	}
-	
-	if(b1 > b2)
+	if (re != 0)
+		return re;
+
+	re = v1.minor - v2.minor;
+
+	if (re != 0)
+		return re;
+
+	re = v1.revision - v2.revision;
+
+	if (re != 0)
+		return re;
+
+	// 带有先行预览版本号的始终低于不带的
+	if (CF.isEmpty(v1.build) && !CF.isEmpty(v2.build))
 		return 1;
-	else if(b1 < b2)
+	else if (!CF.isEmpty(v1.build) && CF.isEmpty(v2.build))
 		return -1;
-	else
+	else if(v1.build == v2.build)
 		return 0;
+	else
+		return (v1.build > v2.build ? 1 : -1);
+};
+
+/**
+ * 解析版本号：x.y.z-build
+ */
+CF.parseVersion = function(version)
+{
+	version = CF.trim(version);
+	
+	var re = { major: 0, minor: 0, revision: 0, build: "" };
+	
+	if(version == null || version == "")
+		return re;
+	
+	var bidx = version.indexOf('-');
+	var p0 = (bidx <= 0 ? version : version.substring(0, bidx));
+	var vs = p0.split(".");
+	
+	re.major = (vs.length > 0 ? parseInt(vs[0]) : 0);
+	re.major = (isNaN(re.major) ? 0 : re.major);
+	re.minor = (vs.length > 1 ? parseInt(vs[1]) : 0);
+	re.minor = (isNaN(re.minor) ? 0 : re.minor);
+	re.revision = (vs.length > 2 ? parseInt(vs[2]) : 0);
+	re.revision = (isNaN(re.revision) ? 0 : re.revision);
+	re.build = (bidx > 0 && bidx < (version.length - 1) ? version.substring(bidx + 1) : "");
+	
+	return re;
+};
+
+CF.versionToString = function(versionObj)
+{
+	var re = ""+versionObj.major+"."+versionObj.minor+"."+versionObj.revision;
+	
+	if(versionObj.build)
+		re += "-"+versionObj.build;
+	
+	return re;
 };
 
 /**
@@ -6472,7 +6495,7 @@ CF.isLibVersionAccepted = function(name, version, acceptVersion)
 CF._ACCEPT_VERSION_OBJS = {};
 CF._ACCEPT_ANY_VERSION_OBJ = { min: null, includeMin: true, max: null, includeMax: true };
 
-//解析接受版本对象，支持格式：null（接受任意）、""（接受任意）、">1.0"、">=1.0"、"<1.0"、"<=1.0"、">=1.0 <2.0"
+//解析接受版本对象，支持格式：null（接受任意）、""（接受任意）、"1.0"、"^1.0"、"~1.0"、">1.0"、">=1.0"、"<1.0"、"<=1.0"、">=1.0 <2.0"
 CF.resolveAcceptVersionObj = function(acceptVersion)
 {
 	acceptVersion = CF.trim(acceptVersion);
@@ -6488,18 +6511,37 @@ CF.resolveAcceptVersionObj = function(acceptVersion)
 	re = CF.extend({}, CF._ACCEPT_ANY_VERSION_OBJ);
 	
 	var splits = CF.splitByWhitespace(acceptVersion);
-	
-	if(splits.length > 2)
-	{
-		CF.logWarn("ignore invalid [acceptVersion] : " + acceptVersion);
-		return null;
-	}
-	
 	for(let i=0;i<splits.length; i++)
 	{
 		let part = splits[i];
 		
-		if(part.startsWith(">="))
+		if(part.startsWith("^"))
+		{
+			let maxObj = CF.parseVersion(part.substring(1));
+			maxObj.major = maxObj.major + 1;
+			maxObj.minor = 0;
+			maxObj.revision = 0;
+			maxObj.build = "";
+			
+			re.min = part.substring(1);
+			re.includeMin = true;
+			re.max = CF.versionToString(maxObj);
+			re.includeMax = false;
+		}
+		else if(part.startsWith("~"))
+		{
+			let maxObj = CF.parseVersion(part.substring(1));
+			maxObj.major = maxObj.major;
+			maxObj.minor = maxObj.minor + 1;
+			maxObj.revision = 0;
+			maxObj.build = "";
+			
+			re.min = part.substring(1);
+			re.includeMin = true;
+			re.max = CF.versionToString(maxObj);
+			re.includeMax = false;
+		}
+		else if(part.startsWith(">="))
 		{
 			re.min = part.substring(2);
 			re.includeMin = true;
