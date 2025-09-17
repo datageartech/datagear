@@ -79,13 +79,13 @@ public abstract class AbstractVersionContentReader
 				Version myVersion = resolveVersion(line);
 
 				// 使用方法参数对象调用比较方法，因为它们可能是Version的子类
-				if (to != null && (to.isLowerThan(myVersion) || (!contailsTo && to.equals(myVersion))))
+				if (to != null && (to.isLowerThan(myVersion) || (!contailsTo && to.isEqualTo(myVersion))))
 				{
 					break;
 				}
 
 				// 使用方法参数对象调用比较方法，因为它们可能是Version的子类
-				if (from == null || from.isLowerThan(myVersion) || (containsFrom && from.equals(myVersion)))
+				if (from == null || from.isLowerThan(myVersion) || (containsFrom && from.isEqualTo(myVersion)))
 				{
 					if (versionContent != null)
 					{

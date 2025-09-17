@@ -362,9 +362,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 		if (from.isHigherThan(Version.ZERO_VERSION) && from.isLowerThan(UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN))
 		{
 			throw new DbVersionManagerException("Upgrade lower than " + Global.PRODUCT_NAME_EN + "-"
-					+ UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString() + " NOT support, you MUST run "
-					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
-					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.toString()
+					+ UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.stringValue() + " NOT support, you MUST run "
+					+ Global.PRODUCT_NAME_EN + "-" + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.stringValue()
+					+ " for upgrading version to " + UPGRADE_UNCOMPATIBLE_VERSION_LOWER_THAN.stringValue()
 					+ " first, then shutdown it, then run " + Global.PRODUCT_NAME_EN + "-" + to);
 		}
 	}
@@ -490,7 +490,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 	{
 		PreparedStatement st = cn.prepareStatement("UPDATE " + this.versionTableName + " SET VERSION_VALUE = ?");
 
-		st.setString(1, Version.stringOf(version));
+		st.setString(1, version.stringValue());
 
 		int count = st.executeUpdate();
 
@@ -498,7 +498,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 		{
 			st = cn.prepareStatement("INSERT INTO " + this.versionTableName + " (VERSION_VALUE) VALUES(?)");
 
-			st.setString(1, Version.stringOf(version));
+			st.setString(1, version.stringValue());
 
 			st.executeUpdate();
 		}
@@ -519,9 +519,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 		PreparedStatement st = cn.prepareStatement("UPDATE " + this.versionTableName
 				+ " SET VERSION_MAJOR = ?, VERSION_MINOR = ?, VERSION_REVISION = ?, VERSION_BUILD = ?");
 
-		st.setString(1, version.getMajor());
-		st.setString(2, version.getMinor());
-		st.setString(3, version.getRevision());
+		st.setString(1, Integer.toString(version.getMajor()));
+		st.setString(2, Integer.toString(version.getMinor()));
+		st.setString(3, Integer.toString(version.getRevision()));
 		st.setString(4, version.getBuild());
 
 		int count = st.executeUpdate();
@@ -531,9 +531,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 			st = cn.prepareStatement("INSERT INTO " + this.versionTableName
 					+ " (VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD) VALUES(?, ?, ?, ?)");
 
-			st.setString(1, version.getMajor());
-			st.setString(2, version.getMinor());
-			st.setString(3, version.getRevision());
+			st.setString(1, Integer.toString(version.getMajor()));
+			st.setString(2, Integer.toString(version.getMinor()));
+			st.setString(3, Integer.toString(version.getRevision()));
 			st.setString(4, version.getBuild());
 
 			st.executeUpdate();
@@ -622,7 +622,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 			Version myVersion = vc.getVersion();
 			
 			// 使用方法参数对象调用比较方法，因为它们可能是Version的子类
-			if (from.isLowerThan(myVersion) && (to.equals(myVersion) || to.isHigherThan(myVersion)))
+			if (from.isLowerThan(myVersion) && (to.isEqualTo(myVersion) || to.isHigherThan(myVersion)))
 			{
 				myVersionContents.add(vc);
 			}

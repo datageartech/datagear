@@ -35,83 +35,130 @@ public class VersionTest
 	public void isLowerThanTest()
 	{
 		Version a = Version.valueOf("1.0");
-		Version b = Version.valueOf("1.10");
-		Version c = Version.valueOf("1.0");
-		Version d = Version.valueOf("2.1");
+		Version b = Version.valueOf("2.5");
 
 		assertTrue(a.isLowerThan(b));
 		assertFalse(b.isLowerThan(a));
-		assertFalse(a.isEqual(b));
-
-		assertFalse(a.isLowerThan(c));
-		assertFalse(c.isLowerThan(a));
-		assertTrue(a.isEqual(c));
-
-		assertTrue(a.isLowerThan(d));
-		assertFalse(d.isLowerThan(a));
-		assertFalse(a.isEqual(d));
 	}
 
 	@Test
 	public void isHigherThanTest()
 	{
 		Version a = Version.valueOf("1.0");
-		Version b = Version.valueOf("1.10");
-		Version c = Version.valueOf("1.0");
-		Version d = Version.valueOf("2.1");
+		Version b = Version.valueOf("2.5");
 
 		assertFalse(a.isHigherThan(b));
 		assertTrue(b.isHigherThan(a));
-		assertFalse(a.isEqual(b));
-
-		assertFalse(a.isHigherThan(c));
-		assertFalse(c.isHigherThan(a));
-		assertTrue(a.isEqual(c));
-
-		assertFalse(a.isHigherThan(d));
-		assertTrue(d.isHigherThan(a));
-		assertFalse(a.isEqual(d));
 	}
 
 	@Test
-	public void isEqualTest()
+	public void isEqualToTest()
 	{
 		Version a = Version.valueOf("1.0");
-		Version b = Version.valueOf("1.10");
-		Version c = Version.valueOf("1.0");
+		Version b = Version.valueOf("1.0.0");
+		Version c = Version.valueOf("2.5");
 
-		assertFalse(a.isEqual(b));
-		assertTrue(a.equals(c));
+		assertTrue(a.isEqualTo(b));
+		assertTrue(b.isEqualTo(a));
+		assertFalse(a.isEqualTo(c));
+		assertFalse(b.isEqualTo(c));
 	}
 
 	@Test
-	public void stringOfTest()
+	public void stringValueTest()
 	{
+		{
+			String v = "1.0";
+			Version version = Version.valueOf(v);
+			assertEquals("1.0.0", version.stringValue());
+		}
+
 		{
 			String v = "1.0.0";
 			Version version = Version.valueOf(v);
-			assertEquals(v, version.stringOf());
-			assertEquals(v, Version.stringOf(version));
+			assertEquals(v, version.stringValue());
 		}
 
 		{
 			String v = "1.0.0-a1";
 			Version version = Version.valueOf(v);
-			assertEquals(v, version.stringOf());
-			assertEquals(v, Version.stringOf(version));
+			assertEquals(v, version.stringValue());
 		}
 	}
 
 	@Test
 	public void compareToTest()
 	{
-		Version a = Version.valueOf("1.0");
-		Version b = Version.valueOf("1.10");
-		Version c = Version.valueOf("1.0");
+		{
+			Version a = Version.valueOf("1.0");
+			Version b = Version.valueOf("2.0");
 
-		assertEquals(-1, a.compareTo(b));
-		assertEquals(1, b.compareTo(a));
-		assertEquals(0, a.compareTo(c));
-		assertEquals(0, c.compareTo(a));
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.1");
+			Version b = Version.valueOf("1.2");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.1.1");
+			Version b = Version.valueOf("1.1.2");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.0");
+			Version b = Version.valueOf("2.0-a1");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.0.0-a1");
+			Version b = Version.valueOf("1.0");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.0.0-a1");
+			Version b = Version.valueOf("1.0-a2");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.0.0-a1");
+			Version b = Version.valueOf("1.0.0-a2");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.0.0-a1");
+			Version b = Version.valueOf("1.0.0-b");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
+
+		{
+			Version a = Version.valueOf("1.0.0-a1");
+			Version b = Version.valueOf("1.0.0-release");
+
+			assertTrue(a.compareTo(b) < 0);
+			assertTrue(b.compareTo(a) > 0);
+		}
 	}
 }

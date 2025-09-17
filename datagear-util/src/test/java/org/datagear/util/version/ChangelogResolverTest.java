@@ -46,7 +46,7 @@ public class ChangelogResolverTest
 			VersionContent vc = versions.get(0);
 			List<String> contents = vc.getContents();
 
-			assertEquals("2.0.0", vc.getVersion().toString());
+			assertEquals("2.0.0", vc.getVersion().stringValue());
 			assertEquals(3, contents.size());
 			assertEquals("日志2", contents.get(0));
 			assertEquals("日志3", contents.get(1));
@@ -75,7 +75,7 @@ public class ChangelogResolverTest
 			VersionContent vc = versions.get(0);
 			List<String> contents = vc.getContents();
 
-			assertEquals("2.0.0", vc.getVersion().toString());
+			assertEquals("2.0.0", vc.getVersion().stringValue());
 			assertEquals(3, contents.size());
 			assertEquals("日志2", contents.get(0));
 			assertEquals("日志3", contents.get(1));

@@ -19,18 +19,16 @@ package org.datagear.util.version;
 
 import java.io.Serializable;
 
+import org.datagear.util.StringUtil;
+
 /**
  * 版本号。
  * <p>
  * 示例：
  * </p>
  * <p>
- * {@code 0.1}<br>
- * {@code 1.2}<br>
- * {@code 2.1.3}<br>
- * {@code 3.2-A0}<br>
- * {@code 3.3-B1}<br>
- * {@code 3.5.2-B3}
+ * {@code 0.1}、 {@code 1.2}、 {@code 2.05}、 {@code 2.1.3}、 {@code 2.09.03}、
+ * {@code 3.2-A0}、 {@code 3.3-B1}、 {@code 3.5.2-B3}
  * </p>
  * 
  * @author datagear@163.com
@@ -38,45 +36,38 @@ import java.io.Serializable;
  */
 public class Version implements Serializable, Comparable<Version>
 {
-	public static final Version ZERO_VERSION = new Version("0", "0", "0");
+	public static final Version ZERO_VERSION = new Version(0, 0, 0);
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String SPLITTER_D = ".";
-
-	public static final String SPLITTER_D_REGEX = "\\.";
-
-	public static final String SPLITTER_L = "-";
-
-	public static final String SPLITTER_L_REGEX = "\\-";
-
-	public static final String ZERO = "0";
-
 	/** 主版本号 */
-	private String major;
+	private final int major;
 
 	/** 次版本号 */
-	private String minor;
+	private final int minor;
 
 	/** 修订版本号 */
-	private String revision;
+	private final int revision;
 
-	/** 内部编译版本号 */
-	private String build;
+	/** 先行预览版本号 */
+	private final String build;
 
 	public Version()
 	{
-		this(ZERO, ZERO, ZERO, "");
+		this(0, 0, 0);
 	}
 
-	public Version(String major)
+	public Version(int major, int minor, int revision)
 	{
-		this(major, ZERO, ZERO, "");
+		this(major, minor, revision, "");
 	}
 
-	public Version(String major, String minor)
+	public Version(int major, int minor, int revision, String build)
 	{
-		this(major, minor, ZERO, "");
+		this.major = major;
+		this.minor = minor;
+		this.revision = revision;
+		this.build = trimVersionPart(build);
 	}
 
 	public Version(String major, String minor, String revision)
@@ -87,19 +78,25 @@ public class Version implements Serializable, Comparable<Version>
 	public Version(String major, String minor, String revision, String build)
 	{
 		super();
-		this.major = major;
-		this.minor = minor;
-		this.revision = revision;
-		this.build = build;
 
-		if (this.major == null || this.major.isEmpty())
-			this.major = ZERO;
-		if (this.minor == null || this.minor.isEmpty())
-			this.minor = ZERO;
-		if (this.revision == null || this.revision.isEmpty())
-			this.revision = ZERO;
-		if (this.build == null)
-			this.build = "";
+		major = trimVersionPart(major);
+		minor = trimVersionPart(minor);
+		revision = trimVersionPart(revision);
+		build = trimVersionPart(build);
+
+		if (StringUtil.isEmpty(major))
+			major = "0";
+
+		if (StringUtil.isEmpty(minor))
+			minor = "0";
+
+		if (StringUtil.isEmpty(revision))
+			revision = "0";
+
+		this.major = Integer.parseInt(major);
+		this.minor = Integer.parseInt(minor);
+		this.revision = Integer.parseInt(revision);
+		this.build = build;
 	}
 
 	public Version(Version version)
@@ -107,56 +104,24 @@ public class Version implements Serializable, Comparable<Version>
 		this(version.major, version.minor, version.revision, version.build);
 	}
 
-	public String getMajor()
+	public int getMajor()
 	{
-		return major;
+		return this.major;
 	}
 
-	public void setMajor(String major)
+	public int getMinor()
 	{
-		this.major = major;
-
-		if (this.major == null || this.major.isEmpty())
-			this.major = ZERO;
+		return this.minor;
 	}
 
-	public String getMinor()
+	public int getRevision()
 	{
-		return minor;
-	}
-
-	public void setMinor(String minor)
-	{
-		this.minor = minor;
-
-		if (this.minor == null || this.minor.isEmpty())
-			this.minor = ZERO;
-	}
-
-	public String getRevision()
-	{
-		return revision;
-	}
-
-	public void setRevision(String revision)
-	{
-		this.revision = revision;
-
-		if (this.revision == null || this.revision.isEmpty())
-			this.revision = ZERO;
+		return this.revision;
 	}
 
 	public String getBuild()
 	{
 		return build;
-	}
-
-	public void setBuild(String build)
-	{
-		this.build = build;
-
-		if (this.build == null)
-			this.build = "";
 	}
 
 	/**
@@ -167,39 +132,7 @@ public class Version implements Serializable, Comparable<Version>
 	 */
 	public boolean isLowerThan(Version another)
 	{
-		int ma = compareWithLength(this.major, another.major);
-
-		if (ma < 0)
-			return true;
-		else if (ma > 0)
-			return false;
-		else
-		{
-			int mi = compareWithLength(this.minor, another.minor);
-
-			if (mi < 0)
-				return true;
-			else if (mi > 0)
-				return false;
-			else
-			{
-				int re = compareWithLength(this.revision, another.revision);
-
-				if (re < 0)
-					return true;
-				else if (re > 0)
-					return false;
-				else
-				{
-					int bu = compareWithLength(this.build, another.build);
-
-					if (bu < 0)
-						return true;
-					else
-						return false;
-				}
-			}
-		}
+		return (compareTo(another) < 0);
 	}
 
 	/**
@@ -210,69 +143,32 @@ public class Version implements Serializable, Comparable<Version>
 	 */
 	public boolean isHigherThan(Version another)
 	{
-		return !isLowerThan(another) && !isEqual(another);
+		return (compareTo(another) > 0);
 	}
 
 	/**
 	 * 是否相同版本号。
 	 * 
-	 * @param obj
+	 * @param another
 	 * @return
 	 */
-	public boolean isEqual(Object obj)
+	public boolean isEqualTo(Version another)
 	{
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof Version))
-			return false;
-
-		Version other = (Version) obj;
-
-		if (build == null)
-		{
-			if (other.build != null)
-				return false;
-		}
-		else if (!build.equals(other.build))
-			return false;
-		if (major == null)
-		{
-			if (other.major != null)
-				return false;
-		}
-		else if (!major.equals(other.major))
-			return false;
-		if (minor == null)
-		{
-			if (other.minor != null)
-				return false;
-		}
-		else if (!minor.equals(other.minor))
-			return false;
-		if (revision == null)
-		{
-			if (other.revision != null)
-				return false;
-		}
-		else if (!revision.equals(other.revision))
-			return false;
-		return true;
+		return (compareTo(another) == 0);
 	}
 
 	/**
-	 * 返回字符串形式，仅包含版本信息。
+	 * 获取字符串形式。
 	 * 
 	 * @return
 	 */
-	public String stringOf()
+	public String stringValue()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.major).append(SPLITTER_D).append(this.minor).append(SPLITTER_D).append(this.revision);
+		sb.append(this.major).append('.').append(this.minor).append('.').append(this.revision);
 
 		if (!this.build.isEmpty())
-			sb.append(SPLITTER_L).append(this.build);
+			sb.append('-').append(this.build);
 
 		return sb.toString();
 	}
@@ -280,12 +176,28 @@ public class Version implements Serializable, Comparable<Version>
 	@Override
 	public int compareTo(Version o)
 	{
-		if (this.isLowerThan(o))
-			return -1;
-		else if (this.equals(o))
-			return 0;
-		else
+		int re = this.major - o.major;
+
+		if (re != 0)
+			return re;
+
+		re = this.minor - o.minor;
+
+		if (re != 0)
+			return re;
+
+		re = this.revision - o.revision;
+
+		if (re != 0)
+			return re;
+
+		// 带有先行预览版本号的始终低于不带的
+		if (this.build.isEmpty() && !o.build.isEmpty())
 			return 1;
+		else if (!this.build.isEmpty() && o.build.isEmpty())
+			return -1;
+		else
+			return this.build.compareTo(o.build);
 	}
 
 	@Override
@@ -294,76 +206,57 @@ public class Version implements Serializable, Comparable<Version>
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((build == null) ? 0 : build.hashCode());
-		result = prime * result + ((major == null) ? 0 : major.hashCode());
-		result = prime * result + ((minor == null) ? 0 : minor.hashCode());
-		result = prime * result + ((revision == null) ? 0 : revision.hashCode());
+		result = prime * result + major;
+		result = prime * result + minor;
+		result = prime * result + revision;
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj)
 	{
-		return isEqual(obj);
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Version other = (Version) obj;
+		if (build == null)
+		{
+			if (other.build != null)
+				return false;
+		}
+		else if (!build.equals(other.build))
+			return false;
+		if (major != other.major)
+			return false;
+		if (minor != other.minor)
+			return false;
+		if (revision != other.revision)
+			return false;
+		return true;
 	}
 
-	/**
-	 * 要获取版本的字符串形式，应使用{@linkplain #stringOf()}。
-	 */
 	@Override
 	public String toString()
 	{
-		return stringOf(this);
+		return stringValue();
 	}
 
-	/**
-	 * 长度优先比较字符串。
-	 * 
-	 * @param a
-	 * @param b
-	 * @return
-	 */
-	protected static int compareWithLength(String a, String b)
+	protected String trimVersionPart(String part)
 	{
-		if (a == null)
-		{
-			if (b == null)
-				return 0;
-			else
-				return -1;
-		}
+		if (part == null)
+			return "";
 		else
-		{
-			if (b == null)
-				return 1;
-			else
-			{
-				int alen = a.length(), blen = b.length();
-
-				if (alen == blen)
-				{
-					return a.compareTo(b);
-				}
-				else
-					return alen - blen;
-			}
-		}
+			return part.trim();
 	}
 
 	/**
-	 * 返回{@linkplain Version}的字符串形式。
-	 * 
-	 * @param version
-	 * @return
-	 */
-	public static String stringOf(Version version)
-	{
-		return version.stringOf();
-	}
-
-	/**
-	 * 构建Version。
+	 * 构建{@linkplain Version}。
 	 * <p>
-	 * 1.0、1.0-A1、1.1.0、1.1.0-A1
+	 * 支持格式：{@code 0.1}、 {@code 1.2}、 {@code 2.05}、 {@code 2.1.3}、
+	 * {@code 2.09.03}、 {@code 3.2-A0}、 {@code 3.3-B1}、 {@code 3.5.2-B3}
 	 * </p>
 	 * 
 	 * @param version
@@ -375,34 +268,15 @@ public class Version implements Serializable, Comparable<Version>
 		if (!isValidVersion(version))
 			throw new IllegalArgumentException("illegal version : " + version);
 
-		String[] vs = version.split(SPLITTER_D_REGEX);
+		int bidx = version.indexOf('-');
 
-		String major = vs[0];
+		String p0 = (bidx <= 0 ? version : version.substring(0, bidx));
+		String build = (bidx > 0 && bidx < (version.length() - 1) ? version.substring(bidx + 1) : "");
+
+		String[] vs = p0.split("\\.");
+		String major = (vs.length > 0 ? vs[0] : null);
 		String minor = (vs.length > 1 ? vs[1] : null);
 		String revision = (vs.length > 2 ? vs[2] : null);
-		String build = null;
-
-		if (revision != null)
-		{
-			String[] bs = revision.split(SPLITTER_L_REGEX);
-
-			revision = bs[0];
-			build = (bs.length > 1 ? bs[1] : null);
-		}
-		else if (minor != null)
-		{
-			String[] bs = minor.split(SPLITTER_L_REGEX);
-
-			minor = bs[0];
-			build = (bs.length > 1 ? bs[1] : null);
-		}
-		else if (major != null)
-		{
-			String[] bs = major.split(SPLITTER_L_REGEX);
-
-			major = bs[0];
-			build = (bs.length > 1 ? bs[1] : null);
-		}
 
 		return new Version(major, minor, revision, build);
 	}
