@@ -250,7 +250,7 @@ public class Version implements Serializable, Comparable<Version>
 	}
 
 	/**
-	 * 构建{@linkplain Version}。
+	 * 解析{@linkplain Version}。
 	 * <p>
 	 * 支持格式：{@code 0.1}、 {@code 1.2}、 {@code 2.05}、 {@code 2.1.3}、
 	 * {@code 2.09.03}、 {@code 3.2-A0}、 {@code 3.3-B1}、 {@code 3.5.2-B3}
@@ -276,6 +276,17 @@ public class Version implements Serializable, Comparable<Version>
 		String revision = (vs.length > 2 ? vs[2] : null);
 
 		return new Version(major, minor, revision, build);
+	}
+
+	/**
+	 * 复制{@linkplain Version}。
+	 * 
+	 * @param version
+	 * @return
+	 */
+	public static Version valueOf(Version version)
+	{
+		return new Version(version);
 	}
 
 	/**
