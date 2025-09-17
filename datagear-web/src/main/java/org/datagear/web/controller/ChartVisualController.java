@@ -21,16 +21,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
+import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
@@ -44,6 +49,7 @@ import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.version.VersionPattern;
 import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.WebUtils;
@@ -91,6 +97,11 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	@Autowired
 	private TplDashboardWidgetResManager tplDashboardWidgetResManager;
 
+	@Autowired
+	private ChartPluginManager chartPluginManager;
+
+	private VersionPattern versionPattern = new VersionPattern();
+
 	private ServletContext servletContext;
 
 	public ChartVisualController()
@@ -127,6 +138,26 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	public void setTplDashboardWidgetResManager(TplDashboardWidgetResManager tplDashboardWidgetResManager)
 	{
 		this.tplDashboardWidgetResManager = tplDashboardWidgetResManager;
+	}
+
+	public ChartPluginManager getChartPluginManager()
+	{
+		return chartPluginManager;
+	}
+
+	public void setChartPluginManager(ChartPluginManager chartPluginManager)
+	{
+		this.chartPluginManager = chartPluginManager;
+	}
+
+	public VersionPattern getVersionPattern()
+	{
+		return versionPattern;
+	}
+
+	public void setVersionPattern(VersionPattern versionPattern)
+	{
+		this.versionPattern = versionPattern;
 	}
 
 	public ServletContext getServletContext()
@@ -336,26 +367,13 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	protected SimpleHtmlTplOption buildShowSimpleHtmlTplOption(HttpServletRequest request, HtmlChartWidgetEntity entity,
 			HtmlTplDashboardWidget dashboardWidget)
 	{
-		String apiVersion = DashboardApiVersion.V2;
-		String apiVersionParam = DashboardApiVersion.trimVersion(request.getParameter(CHART_SHOW_PARAM_API_VERSION),
-				"");
-
-		if (!StringUtil.isEmpty(apiVersionParam))
-		{
-			apiVersion = apiVersionParam;
-		}
-		else
-		{
-			// TODO 从图表插件中解析应使用的看板JS端API版本
-		}
-
+		String apiVersion = resolveShowApiVersion(request, entity, dashboardWidget);
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
 		String htmlTitle = entity.getName();
 		// 图表展示页面应禁用异步加载功能，避免越权访问隐患
 		String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
 				+ LoadableChartWidgets.PATTERN_NONE + "\" "
-				+ this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameApiVersion() + "=\""
-				+ apiVersion + "\"";
+				+ this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameApiVersion() + "=\"" + apiVersion + "\"";
 		tplOption.setHtmlAttr(htmlAttr);
 		tplOption.setCharset(IOUtil.CHARSET_UTF_8);
 		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果
@@ -369,6 +387,49 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		tplOption.setChartEleAttr("dg-chart-disable-setting=\"false\"");
 
 		return tplOption;
+	}
+
+	protected String resolveShowApiVersion(HttpServletRequest request, HtmlChartWidgetEntity entity,
+			HtmlTplDashboardWidget dashboardWidget)
+	{
+		String apiVersion = DashboardApiVersion.V2;
+		String apiVersionParam = DashboardApiVersion.trimVersion(request.getParameter(CHART_SHOW_PARAM_API_VERSION),
+				"");
+
+		if (!StringUtil.isEmpty(apiVersionParam))
+		{
+			apiVersion = apiVersionParam;
+		}
+		else
+		{
+			ChartPlugin plugin = entity.getPluginVo();
+			String pluginId = (plugin == null ? null : plugin.getId());
+			plugin = (pluginId == null ? null : this.chartPluginManager.get(pluginId));
+
+			if (plugin == null || !(plugin instanceof HtmlChartPlugin))
+			{
+				apiVersion = DashboardApiVersion.V2;
+			}
+			else
+			{
+				String apiVersionPattern = ((HtmlChartPlugin) plugin).getApiVersion();
+
+				// 兼容未定义apiVersion的旧版插件
+				if (StringUtil.isBlank(apiVersionPattern))
+				{
+					apiVersion = DashboardApiVersion.V1;
+				}
+				else
+				{
+					List<String> matches = this.versionPattern.matchesOfString(apiVersionPattern,
+							Arrays.asList(DashboardApiVersion.V2, DashboardApiVersion.V1));
+					
+					apiVersion = (matches.size() > 0 ? matches.get(0) : DashboardApiVersion.V2);
+				}
+			}
+		}
+		
+		return apiVersion;
 	}
 
 	protected HtmlTitleHandler getShowChartHtmlTitleHandler(HttpServletRequest request, HttpServletResponse response,
