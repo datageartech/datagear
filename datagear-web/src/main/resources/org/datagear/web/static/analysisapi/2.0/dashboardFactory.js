@@ -331,18 +331,13 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 		throw new Error("[heartbeatURL] required");
 	
 	heartbeatURL = CF.toWebContextPathURL(webContext, heartbeatURL);
-	var firstHeartbeat = true;
 	
 	DF._heartbeatIntervalId = setInterval(function()
 	{
-		if(firstHeartbeat)
-			return;
+		var formData = new FormData();
+		formData.append(DF.heartbeatConfig.dashboardIdParamName, dashboardId);
 		
-		firstHeartbeat = false;
-		
-		var data = {};
-		data[DF.heartbeatConfig.dashboardIdParamName] = dashboardId;
-		fetch(heartbeatURL, DF.fetchOptsOfGetJson(data));
+		fetch(heartbeatURL, DF.fetchOptsOfPostForm(formData));
 	},
 	DF.heartbeatConfig.interval);
 };
@@ -935,10 +930,10 @@ dashboardProto._initUnloadDashboardHandler = function()
 		var webContext = CF.renderContextAttrWebContext(renderContext);
 		var unloadURL = webContext.attributes[DF.unloadConfig.urlAttrName];
 		unloadURL = thisDashboard.contextURL(unloadURL);
-		var data = {};
-		data[DF.unloadConfig.dashboardIdParamName] = thisDashboard.id;
+		var formData = new FormData();
+		formData.append(DF.unloadConfig.dashboardIdParamName, thisDashboard.id());
 		
-		fetch(unloadURL, DF.fetchOptsOfPostJson(data));
+		fetch(unloadURL, DF.fetchOptsOfPostForm(formData));
 	}
 	
 	window.addEventListener("beforeunload", this._windowBeforeunloadHandler);
@@ -1483,21 +1478,21 @@ dashboardProto.startHandleCharts = function()
 	if(this._handlingChartsIntervalId != null)
 		clearInterval(this._handlingChartsIntervalId);
 	
-	var doHandleCharts = false;
+	this._inHandlingCharts = false;
 	
 	this._handlingChartsIntervalId = setInterval(() =>
 	{
-		if(doHandleCharts == true)
+		if(this._inHandlingCharts == true)
 			return;
 		
-		doHandleCharts = true;
+		this._inHandlingCharts = true;
 		
 		CF.executeSilently(() =>
 		{
 			this._doHandleCharts();
 		});
 		
-		doHandleCharts = false;
+		this._inHandlingCharts = false;
 	},
 	DF.HANDLE_CHART_INTERVAL_MS);
 };
@@ -1983,7 +1978,7 @@ dashboardProto._buildDashboardQueryForm = function(chartQueryPairs)
 	//结构同：org.datagear.analysis.DashboardQuery
 	var dashboardQuery = { chartQueries: {}, resultDataFormat: globalResultDataFormat, suppressChartError: true };
 	
-	dashboardQueryForm[updateDashboardConfig.dashboardIdParamName] = this.id;
+	dashboardQueryForm[updateDashboardConfig.dashboardIdParamName] = this.id();
 	this._dashboardQueryOfForm(dashboardQueryForm, dashboardQuery);
 	
 	if(chartQueryPairs && chartQueryPairs.length > 0)
@@ -2249,13 +2244,14 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 	var url = this.contextURL(webContext.attributes.loadChartURL);
 	var loadChartConfig = DF.loadChartConfig;
 	
-	url = CF.appendUrlParam(url, loadChartConfig.dashboardIdParamName, this.id());
+	var formData = new FormData();
+	formData.append(loadChartConfig.dashboardIdParamName, this.id());
 	for(let i=0; i<chartWidgetIds.length; i++)
-		url = CF.appendUrlParam(url, loadChartConfig.chartWidgetIdParamName, chartWidgetIds[i]);
+		formData.append(loadChartConfig.chartWidgetIdParamName, chartWidgetIds[i]);
 	
 	this._loadingChartElement(elements, true);
 	
-	fetch(url, DF.fetchOptsOfGetJson(null))
+	fetch(url, DF.fetchOptsOfPostForm(formData))
 	.then((response) =>
 	{
 		if(!response.ok)
@@ -2907,17 +2903,18 @@ DF.fetchOptsOfPostJson = function(data)
 };
 
 /**
- * 获取GET JSON的fetch选项
+ * 获取POST FormData的fetch选项
  */
-DF.fetchOptsOfGetJson = function(data)
+DF.fetchOptsOfPostForm = function(formData)
 {
+	formData = (formData == null ? new FormData() : formData);
+	
 	var re =
 	{
-		method: "GET",
+		method: "POST",
 		cache: "no-cache",
 		credentials: "same-origin",
-		headers: { "Content-Type": "application/json" },
-		body: (data == null ? undefined : JSON.stringify(data))
+		body: formData
 	};
 	
 	return re;
