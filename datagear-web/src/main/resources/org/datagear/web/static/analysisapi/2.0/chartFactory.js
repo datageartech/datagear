@@ -6092,7 +6092,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 		
 		if(bestLib == null)
 		{
-			CF.logException("no lib found for name : " + lib.name);
+			CF.logException("no lib found for : " + lib.name + (CF.isEmpty(lib.acceptVersion) ? "" : " "+lib.acceptVersion));
 			continue;
 		}
 		

@@ -51,6 +51,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER = "jquery-datetimepicker";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY = "chartFactory";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY = "dashboardFactory";
+	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTLIBREGISTRY = "chartLibRegistry";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME = "serverTime";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT = "chartSupport";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING = "chartSetting";
@@ -179,6 +180,13 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 				analysisPrefix + "/chartFactory.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
 				analysisPrefix + "/dashboardFactory.js?v=" + Global.VERSION));
+
+		if (!isV1)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTLIBREGISTRY,
+					analysisPrefix + "/chartLibRegistry.js?v=" + Global.VERSION));
+		}
+
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME,
 				contextPath + ServerTimeJsController.SERVER_TIME_URL + "?v=" + randomCode));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,

@@ -16,7 +16,7 @@
  */
 
 /**
- * 图表全局依赖库注册器-1.0
+ * 全局图表依赖库注册器
  * 
  * 加载时依赖：
  *   chartFactory
@@ -28,17 +28,15 @@ var CF = global.chartFactory;
 
 CF.registerGlobalLib(
 [
-	//TODO
-	
 	{
 		name: "echarts",
-		version: "",
-		source: "..."
+		version: "5.6.0",
+		source: "/static/analysislib/echarts-5.6.0/echarts.min.js"
 	},
 	{
 		name: "jQuery",
-		version: "",
-		source: "..."
+		version: "3.7.1",
+		source: "/static/analysislib/jquery-3.7.1/jquery-3.7.1.min.js"
 	}
 ]);
 
