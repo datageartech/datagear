@@ -6330,6 +6330,58 @@ CF.resolveLibSourceType = function(url)
 CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
+//查找未加载的最新版可用库
+//返回值：false 表示库已加载；null 未找到可用库；bestLib 找到库
+CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
+{
+	if(lib == null)
+		return false;
+	
+	if(CF.isLibLoaded(lib))
+		return false;
+	
+	//应该优先使用全局依赖库，安全统一
+	let bestLib = CF.findBestLibInGlobal(lib, renderContext);
+	
+	if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
+		return false;
+	
+	if(bestLib == null)
+	{
+		bestLib = CF.findBestLibInCharts(lib, contextCharts);
+		
+		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
+			return false;
+	}
+	
+	if(bestLib == null)
+		return null;
+	
+	//如果bestLib有可接受版本，则查找其可接受的最新版可用库
+	if(bestLib !== lib && !CF.isEmpty(bestLib.acceptVersion))
+	{
+		let bestLibAccept = CF.findUnloadedBestLib(bestLib, renderContext, contextCharts);
+		
+		if(bestLibAccept === false)
+		{
+			return false;
+		}
+		else if(bestLibAccept != null && bestLibAccept !== bestLib)
+		{
+			if(CF.isLibLoaded(bestLibAccept))
+			{
+				return null;
+			}
+			else if(CF.compareLibVersion(bestLib.name, bestLib.version, bestLibAccept.version) < 0)
+			{
+				bestLib = bestLibAccept;
+			}
+		}
+	}
+	
+	return bestLib;
+};
+
 //查找与baseLib同名的全局最新版的可用库；否则，将返回null
 CF.findBestLibInGlobal = function(baseLib, renderContext)
 {
