@@ -37,7 +37,7 @@ public class HtmlTplDashboard extends TplDashboard
 	private LoadableChartWidgets loadableChartWidgets = null;
 
 	/**
-	 * 看板采用的JS端API版本，比如：{@code 1.0}、{@code 2.0}，{@code null}或空表示未定义
+	 * 看板采用的页面端API版本，比如：{@code 1.0}、{@code 2.0}，{@code null}或空表示未定义
 	 */
 	private String apiVersion = null;
 

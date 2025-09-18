@@ -91,7 +91,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * <code>html dg-dashboard-code</code>：选填，自定义看板脚本写入内容，可选值参考下面的<code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>
  * </p>
  * <p>
- * <code>html dg-api-version</code>：选填，自定义看板JS端API版本，比如：{@code 1.0}、{@code 2.0}
+ * <code>html dg-api-version</code>：选填，自定义看板页面端API版本，比如：{@code 1.0}、{@code 2.0}
  * </p>
  * <p>
  * <code>html dg-dashboard-auto-render</code>：已在4.4.0版本废弃，选填，定义看板网页是否自动执行渲染函数，可选值：{@code "true"}

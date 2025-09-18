@@ -604,6 +604,31 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				assertEquals(html, html1);
 			}
 		}
+
+		// dg-api-version
+		{
+			String template = "<html dg-api-version=\"1.2\"></html>";
+
+			HtmlTplDashboardRenderContext renderContext = buildRenderContext(template);
+			DashboardFilterContext filterContext = this.renderer.doRenderDashboard(dashboardWidget, renderContext);
+
+			HtmlTplDashboard dashboard = filterContext.getDashboard();
+			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
+			String html = getHtmlWithPrint(renderContext);
+
+			assertEquals("1.2", dashboard.getApiVersion());
+			assertEquals("1.2", dashboardMeta.getApiVersion());
+			assertTrue(html.contains("<html dg-api-version=\"1.2\">"));
+
+			// 缓存
+			{
+				HtmlTplDashboardRenderContext renderContext1 = buildRenderContext(template);
+				this.renderer.doRenderDashboard(dashboardWidget, renderContext1, dashboardMeta);
+				String html1 = getHtmlWithPrint(renderContext1);
+
+				assertEquals(html, html1);
+			}
+		}
 	}
 	
 	@Test

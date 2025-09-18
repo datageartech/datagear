@@ -20,9 +20,9 @@ package org.datagear.web.analysis;
 import org.datagear.util.StringUtil;
 
 /**
- * 看板JS端API版本。
+ * 看板页面端API版本。
  * <p>
- * 从系统{@code 6.0.0}版本起，整个看板JS端API都进行了重构， 为了解决旧版看板的兼容问题，引入了看板API版本概念，
+ * 从系统{@code 6.0.0}版本起，整个看板页面端API都进行了重构， 为了解决旧版看板的兼容问题，引入了看板API版本概念，
  * 通过在看板里{@code <html>}标签上使用{@code dg-api-version}控制看板API版本切换。
  * </p>
  * 
@@ -32,12 +32,12 @@ import org.datagear.util.StringUtil;
 public class DashboardApiVersion
 {
 	/**
-	 * 版本：{@code 1.0}（5.5.0及以下版本的JS端看板API）
+	 * 版本：{@code 1.0}（5.5.0及以下版本的页面端看板API）
 	 */
 	public static final String V1 = "1.0";
 
 	/**
-	 * 版本：{@code 2.0}（6.0.0及以上版本的JS端看板API）
+	 * 版本：{@code 2.0}（6.0.0及以上版本的页面端看板API）
 	 */
 	public static final String V2 = "2.0";
 

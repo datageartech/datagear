@@ -76,7 +76,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	/** 属性名：支持的平台版本 */
 	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
 
-	/** 属性名：支持的看板JS端API版本 */
+	/** 属性名：支持的看板页面端API版本 */
 	public static final String PROPERTY_API_VERSION = "apiVersion";
 
 	/** HTML换行符 */
@@ -97,7 +97,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	private String platformVersion = "";
 
 	/**
-	 * 支持的看板JS端API版本模式。
+	 * 支持的看板页面端API版本模式。
 	 * <p>
 	 * 格式参考：{@linkplain VersionPattern}。
 	 * </p>

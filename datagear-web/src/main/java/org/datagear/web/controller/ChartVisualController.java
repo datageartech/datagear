@@ -76,7 +76,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	/**
 	 * 图表展示URL的请求参数名：API版本
 	 * <p>
-	 * 图表展示时，默认会使用插件兼容支持的最高看板JS端API版本，此参数可以自定义此功能。
+	 * 图表展示时，默认会使用插件兼容支持的最高看板页面端API版本，此参数可以自定义此功能。
 	 * </p>
 	 * <p>
 	 * 另参考：{@linkplain DashboardApiVersion}
