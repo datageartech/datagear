@@ -6072,23 +6072,8 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 		
 		if(lib == null)
 			continue;
-			
-		if(CF.isLibLoaded(lib))
-			continue;
 		
-		//应该优先使用全局依赖库，安全统一
-		let bestLib = CF.findBestLibInGlobal(lib, renderContext);
-		
-		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
-			continue;
-		
-		if(bestLib == null)
-		{
-			bestLib = CF.findBestLibInCharts(lib, contextCharts);
-			
-			if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
-				continue;
-		}
+		let bestLib = CF.findUnloadedBestLib(lib, renderContext, contextCharts);
 		
 		if(bestLib == null)
 		{
@@ -6096,7 +6081,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 			continue;
 		}
 		
-		if(CF.libIndex(unloadeds, bestLib.name) > -1)
+		if(bestLib === false || (CF.libIndex(unloadeds, bestLib.name) > -1))
 			continue;
 		
 		unloadeds.push(bestLib);
@@ -6331,7 +6316,7 @@ CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
 //查找未加载的最新版可用库
-//返回值：false 表示库已加载；null 未找到可用库；bestLib 找到库
+//返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
 CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
 {
 	if(lib == null)
@@ -6362,20 +6347,12 @@ CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
 	{
 		let bestLibAccept = CF.findUnloadedBestLib(bestLib, renderContext, contextCharts);
 		
-		if(bestLibAccept === false)
+		if(bestLibAccept != null && bestLibAccept !== bestLib)
 		{
-			return false;
-		}
-		else if(bestLibAccept != null && bestLibAccept !== bestLib)
-		{
-			if(CF.isLibLoaded(bestLibAccept))
-			{
-				return null;
-			}
-			else if(CF.compareLibVersion(bestLib.name, bestLib.version, bestLibAccept.version) < 0)
-			{
+			if(bestLibAccept === false)
+				return false;
+			else
 				bestLib = bestLibAccept;
-			}
 		}
 	}
 	
@@ -6627,29 +6604,6 @@ CF.resolveAcceptVersionObj = function(acceptVersion)
 	return re;
 };
 
-//查找第一个库
-CF.findFirstLibInLibs = function(libs, name)
-{
-	if(libs == null)
-		return null;
-	
-	if(CF.isArray(libs))
-	{
-		for(var i=0; i<libs.length; i++)
-		{
-			if(CF.resolveSameLibName(libs[i].name, name))
-				return libs[i];
-		}
-	}
-	else
-	{
-		if(CF.resolveSameLibName(libs.name, name))
-				return libs;
-	}
-	
-	return null;
-};
-
 /**
  * 比较库版本号。
  * 
@@ -6694,7 +6648,10 @@ CF.isLibLoadedInEnv = function(lib)
 {
 	if(lib.loaded != null)
 	{
-		return lib.loaded();
+		if(CF.isFunction(lib.loaded))
+			return lib.loaded();
+		else
+			return (lib.loaded == true);
 	}
 	else
 	{
