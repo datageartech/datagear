@@ -1130,8 +1130,8 @@ chartProto._createChartThemeCssIfNon = function()
 				],
 				value:
 				{
-					"width": "0.8rem",
-					"height": "0.8rem"
+					"width": "0.6rem",
+					"height": "0.6rem"
 				}
 			},
 			{

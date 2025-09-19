@@ -1235,8 +1235,8 @@
 					],
 					value:
 					{
-						"width": "10px",
-						"height": "10px"
+						"width": "0.6rem",
+						"height": "0.6rem"
 					}
 				},
 				{
