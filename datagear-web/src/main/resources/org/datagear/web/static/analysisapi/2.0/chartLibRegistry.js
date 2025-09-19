@@ -37,6 +37,11 @@ CF.registerGlobalLib(
 		name: "jQuery",
 		version: "3.7.1",
 		source: "/static/analysislib/jquery-3.7.1/jquery-3.7.1.min.js"
+	},
+	{
+		name: ["lodash", "_"],
+		version: "4.17.21",
+		source: "/static/analysislib/lodash@4.17.21/lodash.min.js"
 	}
 ]);
 
