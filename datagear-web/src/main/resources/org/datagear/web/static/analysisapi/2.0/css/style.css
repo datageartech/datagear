@@ -25,13 +25,15 @@
 	right: 0 !important;
 	bottom: 0 !important;
 	margin: 0 !important;
-	padding: 6px !important;
+	padding: 3px !important;
 	box-sizing: border-box !important;
 }
 /*图表展示页面样式*/
 .dg-chart-for-show-chart{
 	width: 100% !important;
 	height: 100% !important;
+	box-sizing: border-box !important;
+	overflow: auto !important;
 }
 .dg-chart-for-indication{
 	/*为图表元素设置最小尺寸，避免看板中插入图表元素时由于没设尺寸无法显示的问题*/
