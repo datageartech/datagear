@@ -374,6 +374,10 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
 				+ LoadableChartWidgets.PATTERN_NONE + "\" "
 				+ this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameApiVersion() + "=\"" + apiVersion + "\"";
+		// 看板页面端API-1.0中默认不自动调整尺寸，需要明确设置
+		String bodyAttr = (DashboardApiVersion.isV1(apiVersion)
+				? HtmlTplDashboardWidgetHtmlRenderer.ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\""
+				: "");
 		tplOption.setHtmlAttr(htmlAttr);
 		tplOption.setCharset(IOUtil.CHARSET_UTF_8);
 		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果
@@ -381,6 +385,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		tplOption.setTitle(htmlTitle);
 		tplOption.setBodyStyleName(
 				this.htmlTplDashboardWidgetHtmlRenderer.getDashboardStyleName() + " dg-dashboard-for-show-chart");
+		tplOption.setBodyAttr(bodyAttr);
 		tplOption.setChartWidgetIds(new String[] { entity.getId() });
 		tplOption.setChartEleStyleName(
 				"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName());

@@ -368,8 +368,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		sb.append("</head>\n");
 		sb.append("<body"
 				+ (StringUtil.isEmpty(option.getBodyStyleName()) ? "" : " class=\"" + option.getBodyStyleName() + "\"")
-				+ (StringUtil.isEmpty(option.getBodyAttr()) ? "" : " " + option.getBodyAttr()) //
-				+ " " + ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\"");//
+				+ (StringUtil.isEmpty(option.getBodyAttr()) ? "" : " " + option.getBodyAttr()));//
 		sb.append(">\n");
 		sb.append("\n");
 

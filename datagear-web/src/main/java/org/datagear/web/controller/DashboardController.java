@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.SimpleHtmlTplOption;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
@@ -55,6 +55,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
+import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
@@ -424,8 +425,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		
 		if(!exists && (FileUtil.isExtension(resourceName, "html") || FileUtil.isExtension(resourceName, "htm")))
 		{
-			HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
-					.getHtmlTplDashboardWidgetRenderer();
+			HtmlTplDashboardWidgetHtmlRenderer renderer = getHtmlTplDashboardWidgetHtmlRenderer();
 			SimpleHtmlTplOption tplOption = buildDftSimpleHtmlTplOption(entity);
 			String templateContent = renderer.simpleTemplate(tplOption);
 
@@ -437,7 +437,10 @@ public class DashboardController extends AbstractDataAnalysisController
 
 	protected SimpleHtmlTplOption buildDftSimpleHtmlTplOption(HtmlTplDashboardWidgetEntity entity)
 	{
+		HtmlTplDashboardWidgetHtmlRenderer renderer = getHtmlTplDashboardWidgetHtmlRenderer();
+
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
+		tplOption.setHtmlAttr(renderer.getAttrNameApiVersion() + "=\"" + DashboardApiVersion.V2 + "\"");
 		tplOption.setCharset(
 				entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
 		tplOption.setViewport(SimpleHtmlTplOption.DEFAULT_VIEWPORT);
@@ -1359,6 +1362,12 @@ public class DashboardController extends AbstractDataAnalysisController
 			HtmlTplDashboardWidgetEntity entity)
 	{
 		setRequestAnalysisProjectIfValid(request, this.analysisProjectService, entity);
+	}
+
+	protected HtmlTplDashboardWidgetHtmlRenderer getHtmlTplDashboardWidgetHtmlRenderer()
+	{
+		return (HtmlTplDashboardWidgetHtmlRenderer) this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer();
 	}
 
 	public static class HtmlTplDashboardDesignForm implements ControllerForm
