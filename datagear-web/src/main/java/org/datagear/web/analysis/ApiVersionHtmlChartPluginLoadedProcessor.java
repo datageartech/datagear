@@ -20,6 +20,7 @@ package org.datagear.web.analysis;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadedProcessor;
+import org.datagear.util.StringUtil;
 
 /**
  * 将{@linkplain HtmlChartPlugin#getApiVersion()}默认设置为{@linkplain DashboardApiVersion#V1}的处理器。
@@ -36,7 +37,7 @@ public class ApiVersionHtmlChartPluginLoadedProcessor implements HtmlChartPlugin
 	public void process(HtmlChartPlugin plugin) throws HtmlChartPluginLoadException
 	{
 		// 默认版本应设为V1，以兼容旧版插件
-		String version = DashboardApiVersion.trimVersionWithV1(plugin.getApiVersion());
-		plugin.setApiVersion(version);
+		if (StringUtil.isEmpty(plugin.getApiVersion()))
+			plugin.setApiVersion(DashboardApiVersion.V1);
 	}
 }
