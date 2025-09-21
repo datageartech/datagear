@@ -287,8 +287,8 @@
 	 * 初始化渲染上下文。
 	 * 将webContext直接存入渲染上下文，复制chartTheme后使用<body>上的dg-chart-theme填充相关属性后存入渲染上下文，
 	 * 之后可以通过:
-	 * chartFactory.renderContextAttrWebContext(renderContext)
-	 * chartFactory.renderContextAttrChartTheme(renderContext)
+	 * chartFactory.renderContextWebContext(renderContext)
+	 * chartFactory.renderContextChartTheme(renderContext)
 	 * 获取它们。
 	 * 
 	 * 注意：此函数应在初始化图表前（chart.init()函数调用前）且<body>后调用。
@@ -311,8 +311,8 @@
 		
 		chartFactory._inflateGlobalChartTheme(chartTheme);
 		
-		chartFactory.renderContextAttrWebContext(renderContext, webContext);
-		chartFactory.renderContextAttrChartTheme(renderContext, chartTheme);
+		chartFactory.renderContextWebContext(renderContext, webContext);
+		chartFactory.renderContextChartTheme(renderContext, chartTheme);
 	};
 	
 	/**
@@ -323,8 +323,8 @@
 		if(!renderContext)
 			return false;
 		
-		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
-		var chartTheme = chartFactory.renderContextAttrChartTheme(renderContext);
+		var webContext = chartFactory.renderContextWebContext(renderContext);
+		var chartTheme = chartFactory.renderContextChartTheme(renderContext);
 		var inflated = chartFactory._themeInflated(chartTheme);
 		
 		return (webContext && chartTheme && inflated);
@@ -514,14 +514,14 @@
 		return chartFactory.isRenderContextInited(this.renderContext);
 	};
 	
-	chartBase._renderContextAttrChartTheme = function()
+	chartBase._renderContextChartTheme = function()
 	{
-		return chartFactory.renderContextAttrChartTheme(this.renderContext);
+		return chartFactory.renderContextChartTheme(this.renderContext);
 	};
 	
-	chartBase._renderContextAttrWebContext = function()
+	chartBase._renderContextWebContext = function()
 	{
-		return chartFactory.renderContextAttrWebContext(this.renderContext);
+		return chartFactory.renderContextWebContext(this.renderContext);
 	};
 	
 	/**
@@ -581,7 +581,7 @@
 		}
 		else
 		{
-			var globalTheme = this._renderContextAttrChartTheme();
+			var globalTheme = this._renderContextChartTheme();
 			this.theme(globalTheme);
 		}
 	};
@@ -904,14 +904,14 @@
 		
 		if(theme === undefined)
 		{
-			return (this._theme || (this._theme = this._renderContextAttrChartTheme()));
+			return (this._theme || (this._theme = this._renderContextChartTheme()));
 		}
 		else
 		{
 			if(theme == null)
 				theme = {};
 			
-			var globalTheme = this._renderContextAttrChartTheme();
+			var globalTheme = this._renderContextChartTheme();
 			
 			//这里不应采用复制一个新图表主题对象的方式，因为图表主题对象后续会关联创建很多<style>元素，
 			//如果采用复制方式的话，也会重复创建<style>元素，导致不必要的资源占用
@@ -3703,7 +3703,7 @@
 	{
 		name = (name || "");
 		
-		var webContext = this._renderContextAttrWebContext();
+		var webContext = this._renderContextWebContext();
 		
 		if(!webContext)
 			throw new Error("chart is illegal state for : pluginResourceURL(name)");
@@ -4040,7 +4040,7 @@
 	 */
 	chartBase.contextURL = function(url)
 	{
-		var webContext = this._renderContextAttrWebContext();
+		var webContext = this._renderContextWebContext();
 		
 		if(!webContext)
 		{
@@ -6619,7 +6619,7 @@
 	 * @param renderContext
 	 * @param webContext 可选，要设置的WebContext
 	 */
-	chartFactory.renderContextAttrWebContext = function(renderContext, webContext)
+	chartFactory.renderContextWebContext = function(renderContext, webContext)
 	{
 		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.webContext, webContext);
 	};
@@ -6630,7 +6630,7 @@
 	 * @param renderContext
 	 * @param chartTheme 可选，要设置的ChartTheme
 	 */
-	chartFactory.renderContextAttrChartTheme = function(renderContext, chartTheme)
+	chartFactory.renderContextChartTheme = function(renderContext, chartTheme)
 	{
 		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.inflatedChartTheme, chartTheme);
 	};

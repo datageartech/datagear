@@ -264,12 +264,12 @@ DF.init = function(root)
 
 DF.initRenderContext = function(renderContext)
 {
-	var chartTheme = CF.renderContextAttrChartTheme(renderContext);
+	var chartTheme = CF.renderContextChartTheme(renderContext);
 	if(!chartTheme)
 	{
 		var dashboardTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
 		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
-		CF.renderContextAttrChartTheme(renderContext, chartTheme);
+		CF.renderContextChartTheme(renderContext, chartTheme);
 	}
 	
 	CF.initRenderContext(renderContext);
@@ -324,13 +324,10 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 		DF._heartbeatIntervalId = null;
 	}
 	
-	var webContext = CF.renderContextAttrWebContext(renderContext);
-	var heartbeatURL = (webContext && webContext.attributes ? webContext.attributes.heartbeatURL : null);
+	var contextPath = CF.renderContextWebContextPath(renderContext);
+	var heartbeatURL = CF.renderContextWebContextAttr(renderContext, "heartbeatURL");
 	
-	if(CF.isEmpty(heartbeatURL))
-		throw new Error("[heartbeatURL] required");
-	
-	heartbeatURL = CF.toWebContextPathURL(webContext, heartbeatURL);
+	heartbeatURL = CF.toWebContextPathURL(contextPath, heartbeatURL);
 	
 	DF._heartbeatIntervalId = setInterval(function()
 	{
@@ -927,8 +924,7 @@ dashboardProto._initUnloadDashboardHandler = function()
 	this._windowBeforeunloadHandler = function()
 	{
 		var renderContext = thisDashboard.renderContext();
-		var webContext = CF.renderContextAttrWebContext(renderContext);
-		var unloadURL = webContext.attributes[DF.unloadConfig.urlAttrName];
+		var unloadURL = CF.renderContextWebContextAttr(renderContext, DF.unloadConfig.urlAttrName);
 		unloadURL = thisDashboard.contextURL(unloadURL);
 		var formData = new FormData();
 		formData.append(DF.unloadConfig.dashboardIdParamName, thisDashboard.id());
@@ -1336,7 +1332,7 @@ dashboardProto.renderForm = function(form, config)
 		config = CF.evalSilently(CF.eleAttr(form, elementAttrConst.DASHBOARD_FORM), {});
 	
 	var dashboard = this;
-	var globalTheme = CF.renderContextAttrChartTheme(this.renderContext);
+	var globalTheme = CF.renderContextChartTheme(this.renderContext);
 	var bindBatchSetName = CF.builtinPropName("batchSet");
 	
 	config = CF.extend(
@@ -1574,8 +1570,8 @@ dashboardProto._doHandleCharts = function()
 		this._doHandleChartsLocal(preUpdateLocals);
 	});
 	
-	var webContext = CF.renderContextAttrWebContext(this.renderContext());
-	var url = this.contextURL(webContext.attributes.updateDashboardURL);
+	var updateDashboardURL = CF.renderContextWebContextAttr(this.renderContext(), "updateDashboardURL");
+	var url = this.contextURL(updateDashboardURL);
 	
 	for(let group in preUpdateGroups)
 	{
@@ -2240,8 +2236,8 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 				+ "element has a bounded chart");
 	}
 	
-	var webContext = CF.renderContextAttrWebContext(this.renderContext());
-	var url = this.contextURL(webContext.attributes.loadChartURL);
+	var loadChartURL = CF.renderContextWebContextAttr(this.renderContext(), "loadChartURL");
+	var url = this.contextURL(loadChartURL);
 	var loadChartConfig = DF.loadChartConfig;
 	
 	var formData = new FormData();
@@ -2594,7 +2590,7 @@ dashboardProto._destroyForms = function()
 		this._destroyForm(form);
 	});
 	
-	var globalTheme = CF.renderContextAttrChartTheme(this.renderContext());
+	var globalTheme = CF.renderContextChartTheme(this.renderContext());
 	CF.removeThemeRefEntity(globalTheme, DF.THEME_REF_DASHBOARD_FORM_ID);
 };
 
@@ -2794,12 +2790,8 @@ dashboardProto._postProcessDestroyed = function()
 dashboardProto.contextURL = function(url)
 {
 	var renderContext = this.renderContext();
-	var webContext = CF.renderContextAttrWebContext(renderContext);
-	
-	if(!webContext)
-		throw new Error("dashboard is illegal state for : contextURL(url)");
-	
-	return CF.toWebContextPathURL(webContext, url);
+	var contextPath = CF.renderContextWebContextPath(renderContext);
+	return CF.toWebContextPathURL(contextPath, url);
 };
 
 /**

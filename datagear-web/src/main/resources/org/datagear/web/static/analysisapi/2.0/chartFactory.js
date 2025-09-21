@@ -296,12 +296,12 @@ CF.DataSetParamType =
  */
 CF.initRenderContext = function(renderContext)
 {
-	var webContext = CF.renderContextAttrWebContext(renderContext);
+	var webContext = CF.renderContextWebContext(renderContext);
 	
 	if(!webContext)
 		throw new Error("[webContext] required");
 	
-	var chartTheme = CF.renderContextAttrChartTheme(renderContext);
+	var chartTheme = CF.renderContextChartTheme(renderContext);
 	
 	if(!chartTheme)
 		throw new Error("[chartTheme] required");
@@ -481,14 +481,9 @@ chartProto.init = function()
 	this.statusInited(true);
 };
 
-chartProto._renderContextAttrChartTheme = function()
+chartProto._renderContextChartTheme = function()
 {
-	return CF.renderContextAttrChartTheme(this.renderContext());
-};
-
-chartProto._renderContextAttrWebContext = function()
-{
-	return CF.renderContextAttrWebContext(this.renderContext());
+	return CF.renderContextChartTheme(this.renderContext());
 };
 
 /**
@@ -544,7 +539,7 @@ chartProto._initTheme = function()
 	}
 	else
 	{
-		var globalTheme = this._renderContextAttrChartTheme();
+		var globalTheme = this._renderContextChartTheme();
 		this.theme(globalTheme);
 	}
 };
@@ -843,14 +838,14 @@ chartProto.theme = function(theme)
 {
 	if(theme === undefined)
 	{
-		return (this._theme || (this._theme = this._renderContextAttrChartTheme()));
+		return (this._theme || (this._theme = this._renderContextChartTheme()));
 	}
 	else
 	{
 		if(theme == null)
 			theme = {};
 		
-		var globalTheme = this._renderContextAttrChartTheme();
+		var globalTheme = this._renderContextChartTheme();
 		
 		//这里不应采用复制一个新图表主题对象的方式，因为图表主题对象后续会关联创建很多<style>元素，
 		//如果采用复制方式的话，也会重复创建<style>元素，导致不必要的资源占用
@@ -2891,12 +2886,7 @@ chartProto.pluginResourceURL = function(name)
 	name = (name || "");
 	
 	var plugin = this._pluginNonNull();
-	var webContext = this._renderContextAttrWebContext();
-	
-	if(webContext == null)
-		throw new Error("chart is illegal state for : pluginResourceURL(name)");
-	
-	var urlPrefix = webContext.attributes.pluginResUrlPrefix;
+	var urlPrefix = CF.renderContextWebContextAttr(this.renderContext(), "pluginResUrlPrefix");
 	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
 	url = this.contextURL(url);
 	
@@ -3197,12 +3187,9 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
  */
 chartProto.contextURL = function(url)
 {
-	var webContext = this._renderContextAttrWebContext();
-	
-	if(webContext == null)
-		throw new Error("chart is illegal state for : contextURL(url)");
-	
-	return CF.toWebContextPathURL(webContext, url);
+	var renderContext = this.renderContext();
+	var contextPath = CF.renderContextWebContextPath(renderContext);
+	return CF.toWebContextPathURL(contextPath, url);
 };
 
 /**
@@ -4761,9 +4748,40 @@ CF.renderContextAttr = function(renderContext, attrName, attrValue)
  * @param renderContext
  * @param webContext 可选，要设置的WebContext
  */
-CF.renderContextAttrWebContext = function(renderContext, webContext)
+CF.renderContextWebContext = function(renderContext, webContext)
 {
 	return CF.renderContextAttr(renderContext, renderContextAttrConst.webContext, webContext);
+};
+
+/**
+ * 获取渲染上下文中的WebContext的属性值。
+ * 
+ * @param renderContext
+ * @param name WebContext属性名
+ * @param nullable 是否允许为null，默认值为：false
+ */
+CF.renderContextWebContextAttr = function(renderContext, name, nullable)
+{
+	nullable = (nullable == null ? false : nullable);
+	
+	var webContext = CF.renderContextWebContext(renderContext);
+	var value = (webContext == null ? null : webContext[name]);
+	
+	if(!nullable && value == null)
+		throw new Error("["+name+"] required in WebContext");
+	
+	return value;
+};
+
+/**
+ * 获取渲染上下文中的WebContext的contextPath属性值。
+ * 
+ * @param renderContext
+ * @param nullable 是否允许为null，默认值为：false
+ */
+CF.renderContextWebContextPath = function(renderContext, nullable)
+{
+	return CF.renderContextWebContextAttr(renderContext, "contextPath", nullable);
 };
 
 /**
@@ -4772,7 +4790,7 @@ CF.renderContextAttrWebContext = function(renderContext, webContext)
  * @param renderContext
  * @param chartTheme 可选，要设置的ChartTheme
  */
-CF.renderContextAttrChartTheme = function(renderContext, chartTheme)
+CF.renderContextChartTheme = function(renderContext, chartTheme)
 {
 	return CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
 };
@@ -4782,14 +4800,12 @@ CF.renderContextAttrChartTheme = function(renderContext, chartTheme)
  * 只有当URL以"/"开头时才会添加系统根路径前缀，否则，将直接返回原URL。
  * 当需要访问系统内其他功能模块的资源时，应为其URL添加系统根路径前缀。
  * 
- * @param webContext web上下文
+ * @param contextPath 系统根路径
  * @param url 可选，要处理的URL
  * @return 添加后的新URL，如果未设置url参数，将返回系统根路径
  */
-CF.toWebContextPathURL = function(webContext, url)
+CF.toWebContextPathURL = function(contextPath, url)
 {
-	var contextPath = webContext.contextPath;
-	
 	// (webContext)
 	if(url === undefined)
 	{
@@ -6808,8 +6824,8 @@ CF.trimGlobalLib = function(lib, renderContext)
 	{
 		if(url.indexOf("/") == 0)
 		{
-			var webContext = CF.renderContextAttrWebContext(renderContext);
-			return CF.toWebContextPathURL(webContext, url);
+			let contextPath = CF.renderContextWebContextPath(renderContext);
+			return CF.toWebContextPathURL(contextPath, url);
 		}
 		else
 			return url;

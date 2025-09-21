@@ -3877,8 +3877,8 @@
 	
 	editor._buildLoadChartAjaxOptions = function()
 	{
-		var webContext = chartFactory.renderContextAttrWebContext(this.dashboard.renderContext);
-		var url = this.dashboard.contextURL(webContext.attributes.loadChartURL);
+		var loadChartURL = chartFactory.renderContextWebContextAttr(this.dashboard.renderContext, "loadChartURL");
+		var url = this.dashboard.contextURL(loadChartURL);
 		var qidx = url.indexOf('?');
 		url = url + (qidx < 0 ? "?" : "&") + LOAD_CHART_FOR_EDITOR_PARAM + "=true";
 		

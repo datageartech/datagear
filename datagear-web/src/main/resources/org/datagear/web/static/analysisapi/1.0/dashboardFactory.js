@@ -283,15 +283,41 @@
 	//从6.0.0版本起，org.datagear.analysis.RenderContext结构由{ attributes: { ... } }修改为{ ... }，需要在这里兼容处理
 	dashboardFactory._compatRenderContext = function(renderContext)
 	{
+		if(renderContext == null)
+			return;
+		
 		var attributes = {};
 		
 		for(var name in renderContext)
 		{
 			attributes[name] = renderContext[name];
 			delete renderContext[name];
+			
+			if(name == renderContextAttrConst.webContext)
+				dashboardFactory._compatWebContext(attributes[name]);
 		}
 		
 		renderContext.attributes = attributes;
+	};
+	
+	//从6.0.0版本起，org.datagear.web.controller.AbstractDataAnalysisController.WebContext结构由{ contextPath: "", attributes: { ... } }修改为{ ... }，需要在这里兼容处理
+	dashboardFactory._compatWebContext = function(webContext)
+	{
+		if(webContext == null)
+			return;
+		
+		var attributes = {};
+		
+		for(var name in webContext)
+		{
+			if(name == "contextPath")
+				continue;
+			
+			attributes[name] = webContext[name];
+			delete webContext[name];
+		}
+		
+		webContext.attributes = attributes;
 	};
 	
 	dashboardFactory._initRenderContext = function(dashboard)
@@ -403,7 +429,7 @@
 			return;
 		
 		//开启心跳，避免会话超时
-		var webContext = chartFactory.renderContextAttrWebContext(dashboard.renderContext);
+		var webContext = chartFactory.renderContextWebContext(dashboard.renderContext);
 		var heartbeatURL = dashboard.contextURL(webContext.attributes.heartbeatURL);
 		dashboardFactory.startHeartBeat(heartbeatURL, dashboard.id);
 		
@@ -891,8 +917,8 @@
 		
 		// < @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 		this.renderContextAttr("dashboardTheme", dashboardTheme);
-		this.renderContextAttr("webContext", chartFactory.renderContextAttrWebContext(this.renderContext));
-		this.renderContextAttr("chartTheme", chartFactory.renderContextAttrChartTheme(this.renderContext));
+		this.renderContextAttr("webContext", chartFactory.renderContextWebContext(this.renderContext));
+		this.renderContextAttr("chartTheme", chartFactory.renderContextChartTheme(this.renderContext));
 		// > @deprecated 兼容2.9.0版本的渲染上下文属性：dashboardTheme、webContext、chartTheme，将在未来版本移除，已被新名称取代
 	};
 	
@@ -991,7 +1017,7 @@
 		this._windowBeforeunloadHandler = function()
 		{
 			var renderContext = thisDashboard.renderContext;
-			var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+			var webContext = chartFactory.renderContextWebContext(renderContext);
 			var unloadURL = webContext.attributes[dashboardFactory.unloadConfig.urlAttrName];
 			unloadURL = thisDashboard.contextURL(unloadURL);
 			var data = {};
@@ -1428,7 +1454,7 @@
 			config = chartFactory.evalSilently(form.attr(elementAttrConst.DASHBOARD_FORM), {});
 		
 		var dashboard = this;
-		var globalTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
+		var globalTheme = chartFactory.renderContextChartTheme(this.renderContext);
 		var bindBatchSetName = chartFactory.builtinPropName("batchSet");
 		
 		config = $.extend(
@@ -1659,7 +1685,7 @@
 			dashboard._doHandleChartsLocal(preUpdateLocals);
 		});
 		
-		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		var webContext = chartFactory.renderContextWebContext(this.renderContext);
 		var url = this.contextURL(webContext.attributes.updateDashboardURL);
 		
 		for(var group in preUpdateGroups)
@@ -2601,7 +2627,7 @@
 			};
 		}
 		
-		var webContext = chartFactory.renderContextAttrWebContext(this.renderContext);
+		var webContext = chartFactory.renderContextWebContext(this.renderContext);
 		var url = this.contextURL(webContext.attributes.loadChartURL);
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		
@@ -2874,7 +2900,7 @@
 			thisDashboard._destroyForm(this);
 		});
 		
-		var globalTheme = chartFactory.renderContextAttrChartTheme(this.renderContext);
+		var globalTheme = chartFactory.renderContextChartTheme(this.renderContext);
 		chartFactory.removeThemeRefEntity(globalTheme, dashboardFactory._THEME_REF_DASHBOARD_FORM_ID);
 	};
 	
@@ -3170,7 +3196,7 @@
 	dashboardBase.contextURL = function(url)
 	{
 		var renderContext = this.renderContext;
-		var webContext = chartFactory.renderContextAttrWebContext(renderContext);
+		var webContext = chartFactory.renderContextWebContext(renderContext);
 		
 		if(!webContext)
 		{

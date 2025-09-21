@@ -18,9 +18,12 @@
 package org.datagear.web.controller;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -134,22 +137,25 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
 			+ "TEMPLATE_CONTENT";
 
-	/** 看板展示页{@linkplain WebContext}属性名：更新数据URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：上下文 */
+	public static final String DASHBOARD_CONTEXT_PATH_NAME = "contextPath";
+
+	/** 看板展示页{@linkplain WebContext}属性名：更新数据URL */
 	public static final String DASHBOARD_UPDATE_URL_NAME = "updateDashboardURL";
 
-	/** 看板展示页{@linkplain WebContext}属性名：加载图表URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：加载图表URL */
 	public static final String DASHBOARD_LOAD_CHART_URL_NAME = "loadChartURL";
 
-	/** 看板展示页{@linkplain WebContext}属性名：心跳URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：心跳URL */
 	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
 
-	/** 看板展示页{@linkplain WebContext}属性名：销毁URL名 */
+	/** 看板展示页{@linkplain WebContext}属性名：销毁URL */
 	public static final String DASHBOARD_UNLOAD_URL_NAME = "unloadURL";
 
 	/** 看板展示页{@linkplain WebContext}属性名：插件资源URL前缀 */
 	public static final String DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME = "pluginResUrlPrefix";
 
-	/** 看板展示页{@linkplain WebContext}属性名：会话名 */
+	/** 看板展示页{@linkplain WebContext}属性名：会话 */
 	public static final String DASHBOARD_SESSION_NAME_NAME = "sessionName";
 
 	/** 看板展示页{@linkplain WebContext}属性名：会话值 */
@@ -397,13 +403,15 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 */
 	protected WebContext createInitWebContext(HttpServletRequest request)
 	{
-		WebContext webContext = new WebContext(WebUtils.getContextPath(request));
+		WebContext webContext = new WebContext();
+
+		webContext.put(DASHBOARD_CONTEXT_PATH_NAME, WebUtils.getContextPath(request));
 
 		// 如果是启用安全会话请求，则将会话信息返回给前端，前端需要构建安全会话链接时可能需要
 		if (isSafeSessionRequest(request))
 		{
-			webContext.addAttribute(DASHBOARD_SESSION_NAME_NAME, this.sessionIdParamResolver.getSessionIdParamName());
-			webContext.addAttribute(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdParamResolver.getAddableSessionId(request));
+			webContext.put(DASHBOARD_SESSION_NAME_NAME, this.sessionIdParamResolver.getSessionIdParamName());
+			webContext.put(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdParamResolver.getAddableSessionId(request));
 		}
 
 		return webContext;
@@ -586,31 +594,31 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected void addUpdateDataValue(HttpServletRequest request, WebContext webContext, String updateDataURL)
 	{
 		updateDataURL = addSessionIdParamIfNotExplicitDisable(updateDataURL, request);
-		webContext.addAttribute(DASHBOARD_UPDATE_URL_NAME, updateDataURL);
+		webContext.put(DASHBOARD_UPDATE_URL_NAME, updateDataURL);
 	}
 
 	protected void addLoadChartValue(HttpServletRequest request, WebContext webContext, String loadChartURL)
 	{
 		loadChartURL = addSessionIdParamIfNotExplicitDisable(loadChartURL, request);
-		webContext.addAttribute(DASHBOARD_LOAD_CHART_URL_NAME, loadChartURL);
+		webContext.put(DASHBOARD_LOAD_CHART_URL_NAME, loadChartURL);
 	}
 
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext, String heartbeatURL)
 	{
 		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
-		webContext.addAttribute(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
+		webContext.put(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
 	}
 
 	protected void addUnloadValue(HttpServletRequest request, WebContext webContext, String unloadURL)
 	{
 		unloadURL = addSessionIdParamIfNotExplicitDisable(unloadURL, request);
-		webContext.addAttribute(DASHBOARD_UNLOAD_URL_NAME, unloadURL);
+		webContext.put(DASHBOARD_UNLOAD_URL_NAME, unloadURL);
 	}
 
 	protected void addPluginResUrlPrefixValue(HttpServletRequest request, WebContext webContext,
 			String pluginResUrlPrefix)
 	{
-		webContext.addAttribute(DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME, pluginResUrlPrefix);
+		webContext.put(DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME, pluginResUrlPrefix);
 	}
 
 	/**
@@ -786,55 +794,117 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class WebContext
+	public static class WebContext implements Map<String, Object>, Serializable
 	{
-		/** 上下文路径 */
-		private String contextPath;
+		private static final long serialVersionUID = 1L;
 
-		/** Web属性集 */
-		private Map<String, ?> attributes = new HashMap<String, Object>();
+		private Map<String, Object> map;
 
 		public WebContext()
 		{
 			super();
+			this.map = new HashMap<>();
 		}
 
-		public WebContext(String contextPath)
+		public WebContext(Map<String, Object> map)
 		{
 			super();
-			this.contextPath = contextPath;
-		}
-
-		public String getContextPath()
-		{
-			return contextPath;
-		}
-
-		public void setContextPath(String contextPath)
-		{
-			this.contextPath = contextPath;
-		}
-
-		public Map<String, ?> getAttributes()
-		{
-			return attributes;
-		}
-
-		public void setAttributes(Map<String, ?> attributes)
-		{
-			this.attributes = attributes;
-		}
-
-		@SuppressWarnings("unchecked")
-		public void addAttribute(String name, Object value)
-		{
-			((Map<String, Object>) this.attributes).put(name, value);
+			this.map = map;
 		}
 
 		@Override
-		public String toString()
+		public int size()
 		{
-			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", attributes=" + attributes + "]";
+			return this.map.size();
+		}
+
+		@Override
+		public boolean isEmpty()
+		{
+			return this.map.isEmpty();
+		}
+
+		@Override
+		public boolean containsKey(Object key)
+		{
+			return this.map.containsKey(key);
+		}
+
+		@Override
+		public boolean containsValue(Object value)
+		{
+			return this.map.containsValue(value);
+		}
+
+		@Override
+		public Object get(Object key)
+		{
+			return this.map.get(key);
+		}
+
+		@Override
+		public Object put(String key, Object value)
+		{
+			return this.map.put(key, value);
+		}
+
+		@Override
+		public Object remove(Object key)
+		{
+			return this.map.remove(key);
+		}
+
+		@Override
+		public void putAll(Map<? extends String, ? extends Object> m)
+		{
+			this.map.putAll(m);
+		}
+
+		@Override
+		public void clear()
+		{
+			this.map.clear();
+		}
+
+		@Override
+		public Set<String> keySet()
+		{
+			return this.map.keySet();
+		}
+
+		@Override
+		public Collection<Object> values()
+		{
+			return this.map.values();
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet()
+		{
+			return this.map.entrySet();
+		}
+
+		public WebContext copy()
+		{
+			WebContext re = new WebContext();
+			re.putAll(this);
+
+			return re;
+		}
+
+		protected void putAllInThis(RenderContext renderContext)
+		{
+			renderContext.putAll(this);
+		}
+
+		protected Map<String, Object> getMap()
+		{
+			return map;
+		}
+
+		protected void setMap(Map<String, Object> map)
+		{
+			this.map = map;
 		}
 	}
 }
