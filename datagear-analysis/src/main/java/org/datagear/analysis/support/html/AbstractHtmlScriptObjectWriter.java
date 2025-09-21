@@ -20,9 +20,8 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
-import java.util.Map;
 
-import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.DefaultRenderContext;
 import org.datagear.analysis.support.JsonSupport;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -132,7 +131,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 	}
 
-	protected static class RefRenderContext implements RenderContext, JsonRefObject, Serializable
+	protected static class RefRenderContext extends DefaultRenderContext implements JsonRefObject, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -148,48 +147,6 @@ public abstract class AbstractHtmlScriptObjectWriter
 		public String getRefName()
 		{
 			return refName;
-		}
-
-		@Override
-		public <T> T getAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setAttribute(String name, Object value)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T> T removeAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean hasAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Map<String, ?> getAttributes()
-		{
-			return null;
-		}
-
-		@Override
-		public void putAttributes(Map<String, ?> attrs)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void putAttributes(RenderContext renderContext)
-		{
-			throw new UnsupportedOperationException();
 		}
 	}
 

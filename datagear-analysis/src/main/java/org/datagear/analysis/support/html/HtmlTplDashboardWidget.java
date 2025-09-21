@@ -130,7 +130,7 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 		if (renderContext.hasTemplateReader())
 			return renderContext;
 
-		HtmlTplDashboardRenderContext full = new HtmlTplDashboardRenderContext(renderContext);
+		HtmlTplDashboardRenderContext full = renderContext.copy();
 		
 		full.setTemplateReader(IOUtil.getBufferedReader(this.resManager.getReader(this, full.getTemplate())));
 		full.setTemplateLastModified(this.resManager.lastModified(this.getId(), full.getTemplate()));

@@ -353,13 +353,12 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		AnalysisUser analysisUser = getWebDashboardQueryConverter().toAnalysisUser(getCurrentUser().cloneNoPassword());
 		
-		renderContext.putAttributes(paramValues);
-		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT, webContext);
-		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME, dashboardTheme);
-		renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
+		renderContext.putAll(paramValues);
+		renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT, webContext);
+		renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME, dashboardTheme);
+		renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
 		
 		renderContext.setImportBuilder(importBuilder);
-		;
 		renderContext.setDashboardTheme(dashboardTheme);
 		renderContext.setHtmlTitleHandler(titleHandler);
 

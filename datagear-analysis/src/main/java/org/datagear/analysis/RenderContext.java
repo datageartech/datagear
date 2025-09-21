@@ -28,63 +28,12 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public interface RenderContext
+public interface RenderContext extends Map<String, Object>
 {
-	String PROPERTY_ATTRIBUTES = "attributes";
-	
 	/**
-	 * 获取属性。
-	 * 
-	 * @param <T>
-	 * @param name
-	 * @return
-	 */
-	<T> T getAttribute(String name);
-
-	/**
-	 * 设置属性。
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	void setAttribute(String name, Object value);
-
-	/**
-	 * 移除属性。
-	 * 
-	 * @param <T>
-	 * @param name
-	 * @return 已移除的属性值或者{@code null}
-	 */
-	<T> T removeAttribute(String name);
-
-	/**
-	 * 是否有指定属性。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	boolean hasAttribute(String name);
-
-	/**
-	 * 获取所有属性。
+	 * 复制一个新的{@linkplain RenderContext}，对其本身的操作不影响旧{@linkplain RenderContext}。
 	 * 
 	 * @return
 	 */
-	Map<String, ?> getAttributes();
-	
-	/**
-	 * 设置多个属性。
-	 * 
-	 * @param attrs
-	 */
-	void putAttributes(Map<String, ?> attrs);
-	
-	/**
-	 * 设置多个属性。
-	 * 
-	 * @param renderContext
-	 */
-	void putAttributes(RenderContext renderContext);
-	
+	RenderContext copy();
 }

@@ -18,8 +18,10 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 默认{@linkplain RenderContext}。
@@ -31,75 +33,113 @@ public class DefaultRenderContext implements RenderContext, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private Map<String, Object> attributes;
+	private Map<String, Object> map;
 
 	public DefaultRenderContext()
 	{
 		super();
-		this.attributes = new HashMap<>();
+		this.map = new HashMap<>();
 	}
 
-	public DefaultRenderContext(Map<String, ?> attributes)
+	public DefaultRenderContext(Map<String, Object> map)
 	{
 		super();
-		this.setAttributes(attributes);
-	}
-
-	public DefaultRenderContext(DefaultRenderContext renderContext)
-	{
-		super();
-		this.attributes = renderContext.attributes;
+		this.map = map;
 	}
 
 	@Override
-	public Map<String, Object> getAttributes()
+	public int size()
 	{
-		return attributes;
-	}
-
-	@SuppressWarnings("unchecked")
-	public void setAttributes(Map<String, ?> attributes)
-	{
-		this.attributes = (Map<String, Object>)attributes;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getAttribute(String name)
-	{
-		return (T) this.attributes.get(name);
+		return this.map.size();
 	}
 
 	@Override
-	public void setAttribute(String name, Object value)
+	public boolean isEmpty()
 	{
-		this.attributes.put(name, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T removeAttribute(String name)
-	{
-		return (T) this.attributes.remove(name);
+		return this.map.isEmpty();
 	}
 
 	@Override
-	public boolean hasAttribute(String name)
+	public boolean containsKey(Object key)
 	{
-		return this.attributes.containsKey(name);
+		return this.map.containsKey(key);
 	}
 
 	@Override
-	public void putAttributes(Map<String, ?> attrs)
+	public boolean containsValue(Object value)
 	{
-		if(attrs != null)
-			this.attributes.putAll(attrs);
+		return this.map.containsValue(value);
 	}
 
 	@Override
-	public void putAttributes(RenderContext renderContext)
+	public Object get(Object key)
 	{
-		if(renderContext != null)
-			putAttributes(renderContext.getAttributes());
+		return this.map.get(key);
+	}
+
+	@Override
+	public Object put(String key, Object value)
+	{
+		return this.map.put(key, value);
+	}
+
+	@Override
+	public Object remove(Object key)
+	{
+		return this.map.remove(key);
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> m)
+	{
+		this.map.putAll(m);
+	}
+
+	@Override
+	public void clear()
+	{
+		this.map.clear();
+	}
+
+	@Override
+	public Set<String> keySet()
+	{
+		return this.map.keySet();
+	}
+
+	@Override
+	public Collection<Object> values()
+	{
+		return this.map.values();
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet()
+	{
+		return this.map.entrySet();
+	}
+
+	@Override
+	public DefaultRenderContext copy()
+	{
+		DefaultRenderContext re = new DefaultRenderContext();
+		putAllInThis(re);
+
+		return re;
+	}
+
+	protected void putAllInThis(RenderContext renderContext)
+	{
+		renderContext.putAll(this);
+	}
+
+	protected Map<String, Object> getMap()
+	{
+		return map;
+	}
+
+	protected void setMap(Map<String, Object> map)
+	{
+		this.map = map;
 	}
 }

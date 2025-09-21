@@ -558,7 +558,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			throw new IllegalArgumentException();
 		
 		Writer out = renderContext.getWriter();
-		getHtmlRenderContextScriptObjectWriter().writeNoAttributes(out, renderContext, tmpRenderContextVarName);
+		getHtmlRenderContextScriptObjectWriter().writeEmpty(out, tmpRenderContextVarName);
 		getHtmlTplDashboardScriptObjectWriter().write(out, dashboard, tmpRenderContextVarName);
 	}
 
@@ -567,8 +567,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * var [tmpRenderContext] = { attributes: {...} };
-	 * dashboard.renderContext.attributes = [tmpRenderContext].attributes;
+	 * var [tmpRenderContext] = { ... };
+	 * dashboard.renderContext = [tmpRenderContext];
 	 * ...
 	 * dashboard.charts.push(...);
 	 * ...
@@ -593,8 +593,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		Writer out = renderContext.getWriter();
 		
 		getHtmlRenderContextScriptObjectWriter().write(out, renderContext, tmpRenderContextVarName);
-		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + "." + RenderContext.PROPERTY_ATTRIBUTES + " = "
-				+ tmpRenderContextVarName + "." + RenderContext.PROPERTY_ATTRIBUTES + ";");
+		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + " = " + tmpRenderContextVarName + ";");
 		writeNewLine(out);
 
 		List<Chart> charts = dashboard.getCharts();

@@ -19,6 +19,7 @@ package org.datagear.analysis;
 
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Map;
 
 /**
  * 模板看板渲染上下文。
@@ -38,14 +39,14 @@ public class TplDashboardRenderContext extends DefaultRenderContext
 	/**模板名*/
 	private String template;
 
+	/** 输出流 */
+	private transient Writer writer;
+
 	/**模版上次修改时间*/
 	private long templateLastModified = TEMPLATE_LAST_MODIFIED_NONE;
 
 	/**模版输入流*/
 	private transient Reader templateReader = null;
-
-	/**输出流*/
-	private transient Writer writer;
 	
 	public TplDashboardRenderContext()
 	{
@@ -59,22 +60,6 @@ public class TplDashboardRenderContext extends DefaultRenderContext
 		this.writer = writer;
 	}
 
-	public TplDashboardRenderContext(String template, long templateLastModified, Writer writer)
-	{
-		super();
-		this.template = template;
-		this.templateLastModified = templateLastModified;
-		this.writer = writer;
-	}
-
-	public TplDashboardRenderContext(String template, Reader templateReader, Writer writer)
-	{
-		super();
-		this.template = template;
-		this.templateReader = templateReader;
-		this.writer = writer;
-	}
-
 	public TplDashboardRenderContext(String template, Reader templateReader, long templateLastModified, Writer writer)
 	{
 		super();
@@ -84,13 +69,21 @@ public class TplDashboardRenderContext extends DefaultRenderContext
 		this.writer = writer;
 	}
 
-	public TplDashboardRenderContext(TplDashboardRenderContext renderContext)
+	public TplDashboardRenderContext(String template, Writer writer, Map<String, Object> map)
 	{
-		super(renderContext);
-		this.template = renderContext.getTemplate();
-		this.templateLastModified = renderContext.getTemplateLastModified();
-		this.templateReader = renderContext.getTemplateReader();
-		this.writer = renderContext.getWriter();
+		super(map);
+		this.template = template;
+		this.writer = writer;
+	}
+
+	public TplDashboardRenderContext(String template, Reader templateReader, long templateLastModified, Writer writer,
+			Map<String, Object> map)
+	{
+		super(map);
+		this.template = template;
+		this.templateReader = templateReader;
+		this.templateLastModified = templateLastModified;
+		this.writer = writer;
 	}
 
 	public String getTemplate()
@@ -141,5 +134,15 @@ public class TplDashboardRenderContext extends DefaultRenderContext
 	public void setWriter(Writer writer)
 	{
 		this.writer = writer;
+	}
+
+	@Override
+	public TplDashboardRenderContext copy()
+	{
+		TplDashboardRenderContext re = new TplDashboardRenderContext(this.template, this.templateReader,
+				this.templateLastModified, this.writer);
+		putAllInThis(re);
+
+		return re;
 	}
 }

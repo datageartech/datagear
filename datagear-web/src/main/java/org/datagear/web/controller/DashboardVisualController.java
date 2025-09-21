@@ -742,10 +742,10 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 					createWebContext(request), importBuilder, htmlTitleHandler);
 
 			// 移除参数中的模板内容，一是它不应该传入页面，二是它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
-			renderContext.removeAttribute(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+			renderContext.remove(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
 
 			if (isShowForEdit)
-				renderContext.setAttribute(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
+				renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
 
 			if (showHtmlIn != null)
 			{

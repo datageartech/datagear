@@ -4750,9 +4750,9 @@ CF.builtinPropName = function(name)
 CF.renderContextAttr = function(renderContext, attrName, attrValue)
 {
 	if(attrValue === undefined)
-		return renderContext.attributes[attrName];
+		return renderContext[attrName];
 	else
-		return renderContext.attributes[attrName] = attrValue;
+		return renderContext[attrName] = attrValue;
 };
 
 /**

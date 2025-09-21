@@ -264,6 +264,7 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
+		dashboardFactory._compatRenderContext(dashboard.renderContext);
 		this._initDashboardBaseProperties(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		this._initStartHeartBeatIfNot(dashboard);
@@ -277,6 +278,20 @@
 		dashboard.statusPreInit(true);
 		
 		return dashboard;
+	};
+	
+	//从6.0.0版本起，org.datagear.analysis.RenderContext结构由{ attributes: { ... } }修改为{ ... }，需要在这里兼容处理
+	dashboardFactory._compatRenderContext = function(renderContext)
+	{
+		var attributes = {};
+		
+		for(var name in renderContext)
+		{
+			attributes[name] = renderContext[name];
+			delete renderContext[name];
+		}
+		
+		renderContext.attributes = attributes;
 	};
 	
 	dashboardFactory._initRenderContext = function(dashboard)

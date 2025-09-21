@@ -607,7 +607,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			List<String> chartPluginVarNames = writeChartPluginScriptsResolveImport(renderContext, chartWidgets);
 
 			HtmlChartRenderContext chartRenderContext = new HtmlChartRenderContext(renderContext.getWriter());
-			chartRenderContext.setAttributes(renderContext.getAttributes());
+			chartRenderContext.putAll(renderContext);
 			chartRenderContext.setNotWriteChartElement(true);
 			chartRenderContext.setNotWriteScriptTag(true);
 			chartRenderContext.setNotWriteInvoke(true);

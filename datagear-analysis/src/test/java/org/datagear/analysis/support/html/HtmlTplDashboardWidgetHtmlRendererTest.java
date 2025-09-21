@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.TplDashboardRenderContext;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.FileTplDashboardWidgetResManager;
@@ -1811,7 +1812,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 	
 	protected HtmlTplDashboardRenderContext buildRenderContext(String template, Reader templateReader, Writer out)
 	{
-		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, templateReader, out);
+		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, templateReader,
+				TplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE, out);
 		renderContext.setDashboardTheme(SimpleDashboardThemeSource.THEME_LIGHT);
 		renderContext.setImportBuilder(importBuilder());
 		

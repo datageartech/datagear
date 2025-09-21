@@ -19,6 +19,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.Writer;
 import java.util.Locale;
+import java.util.Map;
 
 import org.datagear.analysis.DefaultRenderContext;
 import org.datagear.analysis.RenderContext;
@@ -79,6 +80,12 @@ public class HtmlChartRenderContext extends DefaultRenderContext
 		this.writer = writer;
 	}
 	
+	public HtmlChartRenderContext(Writer writer, Map<String, Object> map)
+	{
+		super(map);
+		this.writer = writer;
+	}
+
 	public HtmlChartRenderContext(HtmlChartRenderContext renderContext)
 	{
 		super(renderContext);
@@ -266,6 +273,26 @@ public class HtmlChartRenderContext extends DefaultRenderContext
 		return chartElementId;
 	}
 	
+	@Override
+	public HtmlChartRenderContext copy()
+	{
+		HtmlChartRenderContext re = new HtmlChartRenderContext(this.writer);
+		putAllInThis(re);
+		re.chartElementId = this.chartElementId;
+		re.chartVarName = this.chartVarName;
+		re.pluginVarName = this.pluginVarName;
+		re.renderContextVarName = this.renderContextVarName;
+		re.notWriteChartElement = this.notWriteChartElement;
+		re.notWritePluginObject = this.notWritePluginObject;
+		re.notWriteRenderContextObject = this.notWriteRenderContextObject;
+		re.notWriteScriptTag = this.notWriteScriptTag;
+		re.notWriteInvoke = this.notWriteInvoke;
+		re.writeChartJson = this.writeChartJson;
+		re.locale = this.locale;
+
+		return re;
+	}
+
 	/**
 	 * 生成标识。
 	 * 

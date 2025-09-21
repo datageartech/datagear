@@ -20,6 +20,7 @@ package org.datagear.analysis.support.html;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Locale;
+import java.util.Map;
 
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
@@ -54,29 +55,21 @@ public class HtmlTplDashboardRenderContext extends TplDashboardRenderContext
 		super(template, writer);
 	}
 
-	public HtmlTplDashboardRenderContext(String template, long templateLastModified, Writer writer)
-	{
-		super(template, templateLastModified, writer);
-	}
-
-	public HtmlTplDashboardRenderContext(String template, Reader templateReader, Writer writer)
-	{
-		super(template, templateReader, writer);
-	}
-
 	public HtmlTplDashboardRenderContext(String template, Reader templateReader, long templateLastModified,
 			Writer writer)
 	{
 		super(template, templateReader, templateLastModified, writer);
 	}
 
-	public HtmlTplDashboardRenderContext(HtmlTplDashboardRenderContext renderContext)
+	public HtmlTplDashboardRenderContext(String template, Writer writer, Map<String, Object> map)
 	{
-		super(renderContext);
-		this.importBuilder = renderContext.getImportBuilder();
-		this.htmlTitleHandler = renderContext.getHtmlTitleHandler();
-		this.dashboardTheme = renderContext.getDashboardTheme();
-		this.locale = renderContext.getLocale();
+		super(template, writer, map);
+	}
+
+	public HtmlTplDashboardRenderContext(String template, Reader templateReader, long templateLastModified,
+			Writer writer, Map<String, Object> map)
+	{
+		super(template, templateReader, templateLastModified, writer, map);
 	}
 
 	public HtmlTplDashboardImportBuilder getImportBuilder()
@@ -227,6 +220,20 @@ public class HtmlTplDashboardRenderContext extends TplDashboardRenderContext
 	public String varNameOfDashboard(String suffix)
 	{
 		return genIdentifier("Dashboard", suffix);
+	}
+
+	@Override
+	public HtmlTplDashboardRenderContext copy()
+	{
+		HtmlTplDashboardRenderContext re = new HtmlTplDashboardRenderContext(getTemplate(), getTemplateReader(),
+				getTemplateLastModified(), getWriter());
+		putAllInThis(re);
+		re.importBuilder = this.importBuilder;
+		re.htmlTitleHandler = this.htmlTitleHandler;
+		re.dashboardTheme = this.dashboardTheme;
+		re.locale = this.locale;
+
+		return re;
 	}
 
 	/**
