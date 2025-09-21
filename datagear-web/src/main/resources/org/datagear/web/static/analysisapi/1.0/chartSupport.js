@@ -47,9 +47,43 @@
 	
 	//折线图
 	
-	chartSupport.lineRender = function(chart, options)
+	chartSupport.lineRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.lineRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.lineUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.lineResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.lineDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.lineOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.lineOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.lineRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -67,7 +101,7 @@
 				step: false
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -255,9 +289,43 @@
 	
 	//柱状图
 	
-	chartSupport.barRender = function(chart, options)
+	chartSupport.barRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.barRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.barUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.barResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.barDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.barOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.barOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.barRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -273,7 +341,7 @@
 				horizontal: false
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -488,9 +556,43 @@
 	
 	//极坐标柱状图
 	
-	chartSupport.barPolarRender = function(chart, options)
+	chartSupport.barPolarRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.barPolarRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.barPolarUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.barPolarResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.barPolarDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.barPolarOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.barPolarOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.barPolarRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -506,7 +608,7 @@
 				axisType: "radius",
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -748,9 +850,43 @@
 	
 	//饼图
 	
-	chartSupport.pieRender = function(chart, options)
+	chartSupport.pieRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.pieRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.pieUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.pieResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.pieDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.pieOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.pieOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.pieRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -769,7 +905,7 @@
 				rose: false
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -956,9 +1092,43 @@
 	
 	//仪表盘
 	
-	chartSupport.gaugeRender = function(chart, options)
+	chartSupport.gaugeRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render : function(chart)
+			{
+				chartFactory.chartSupport.gaugeRender(chart, config);
+			},
+			update : function(chart, results)
+			{
+				chartFactory.chartSupport.gaugeUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.gaugeResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.gaugeDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.gaugeOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.gaugeOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.gaugeRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -970,7 +1140,7 @@
 				gaugeType: ""
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var builtinOptions =
 		{
@@ -1258,9 +1428,43 @@
 	
 	//散点图
 	
-	chartSupport.scatterRender = function(chart, options)
+	chartSupport.scatterRenderer = function(plugin, config)
 	{
-		chartSupport._scatterRender(chart, options, "scatter");
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.scatterRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.scatterUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.scatterResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.scatterDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.scatterRender = function(chart, config)
+	{
+		chartSupport._scatterRender(chart, config, "scatter");
 	};
 	
 	chartSupport.scatterUpdate = function(chart, chartResult)
@@ -1288,9 +1492,43 @@
 		chartSupport._scatterOff(chart, eventType, handler);
 	};
 	
-	chartSupport.scatterRippleRender = function(chart, options)
+	chartSupport.scatterRippleRenderer = function(plugin, config)
 	{
-		chartSupport._scatterRender(chart, options, "effectScatter");
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.scatterRippleRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.scatterRippleUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.scatterRippleResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.scatterRippleDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterRippleOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterRippleOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.scatterRippleRender = function(chart, config)
+	{
+		chartSupport._scatterRender(chart, config, "effectScatter");
 	};
 	
 	chartSupport.scatterRippleUpdate = function(chart, chartResult)
@@ -1318,9 +1556,9 @@
 		chartSupport._scatterOff(chart, eventType, handler);
 	};
 	
-	chartSupport._scatterRender = function(chart, options, scatterType)
+	chartSupport._scatterRender = function(chart, config, scatterType)
 	{
-		options = $.extend(true,
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -1336,7 +1574,7 @@
 				scatterType: scatterType
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -1518,9 +1756,43 @@
 	
 	//坐标散点图
 	
-	chartSupport.scatterCoordRender = function(chart, options)
+	chartSupport.scatterCoordRenderer = function(plugin, config)
 	{
-		chartSupport._scatterCoordRender(chart, options, "scatter");
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.scatterCoordRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.scatterCoordUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.scatterCoordResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.scatterCoordDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterCoordOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterCoordOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.scatterCoordRender = function(chart, config)
+	{
+		chartSupport._scatterCoordRender(chart, config, "scatter");
 	};
 	
 	chartSupport.scatterCoordUpdate = function(chart, chartResult)
@@ -1548,9 +1820,43 @@
 		chartSupport._scatterCoordOff(chart, eventType, handler);
 	};
 	
-	chartSupport.scatterCoordRippleRender = function(chart, options)
+	chartSupport.scatterCoordRippleRenderer = function(plugin, config)
 	{
-		chartSupport._scatterCoordRender(chart, options, "effectScatter");
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.scatterCoordRippleRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.scatterCoordRippleUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.scatterCoordRippleResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.scatterCoordRippleDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterCoordRippleOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.scatterCoordRippleOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.scatterCoordRippleRender = function(chart, config)
+	{
+		chartSupport._scatterCoordRender(chart, config, "effectScatter");
 	};
 	
 	chartSupport.scatterCoordRippleUpdate = function(chart, chartResult)
@@ -1578,9 +1884,9 @@
 		chartSupport._scatterCoordOff(chart, eventType, handler);
 	};
 	
-	chartSupport._scatterCoordRender = function(chart, options, scatterType)
+	chartSupport._scatterCoordRender = function(chart, config, scatterType)
 	{
-		options = $.extend(true,
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -1597,7 +1903,7 @@
 				scatterType: scatterType
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -1767,9 +2073,43 @@
 	
 	//雷达图
 	
-	chartSupport.radarRender = function(chart, options)
+	chartSupport.radarRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.radarRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.radarUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.radarResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.radarDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.radarOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.radarOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.radarRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -1777,10 +2117,14 @@
 				//name 名称
 				//value 数值
 				//max 最大值
-				dataSignNames: { item: "item", name: "name", value: "value", max: "max" }
+				dataSignNames: { item: "item", name: "name", value: "value", max: "max" },
+				radarShape: undefined
 			}
 		},
-		options);
+		{ dg: config });
+		
+		if(options.dg.radarShape != null)
+			options.radar = { shape: options.dg.radarShape };
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -2094,9 +2438,43 @@
 	
 	//漏斗图
 	
-	chartSupport.funnelRender = function(chart, options)
+	chartSupport.funnelRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.funnelRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.funnelUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.funnelResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.funnelDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.funnelOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.funnelOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.funnelRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -2107,7 +2485,7 @@
 				sort: "descending",
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -2224,9 +2602,45 @@
 	
 	//地图
 	
-	chartSupport.mapRender = function(chart, options)
+	chartSupport.mapRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -2236,7 +2650,7 @@
 				dataSignNames: { name: "name", value: "value", map: "map" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -2377,9 +2791,45 @@
 	
 	//地图散点图
 	
-	chartSupport.mapScatterRender = function(chart, options)
+	chartSupport.mapScatterRenderer = function(plugin, config)
 	{
-		chartSupport._mapScatterRender(chart, options, "scatter");
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapScatterRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapScatterUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapScatterResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapScatterDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapScatterOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapScatterOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapScatterRender = function(chart, config)
+	{
+		chartSupport._mapScatterRender(chart, config, "scatter");
 	};
 	
 	chartSupport.mapScatterUpdate = function(chart, chartResult)
@@ -2407,9 +2857,45 @@
 		chartSupport._mapScatterOff(chart, eventType, handler);
 	};
 	
-	chartSupport.mapScatterRippleRender = function(chart, options)
+	chartSupport.mapScatterRippleRenderer = function(plugin, config)
 	{
-		chartSupport._mapScatterRender(chart, options, "effectScatter");
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapScatterRippleRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapScatterRippleUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapScatterRippleResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapScatterRippleDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapScatterRippleOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapScatterRippleOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapScatterRippleRender = function(chart, config)
+	{
+		chartSupport._mapScatterRender(chart, config, "effectScatter");
 	};
 	
 	chartSupport.mapScatterRippleUpdate = function(chart, chartResult)
@@ -2437,9 +2923,9 @@
 		chartSupport._mapScatterOff(chart, eventType, handler);
 	};
 	
-	chartSupport._mapScatterRender = function(chart, options, scatterType)
+	chartSupport._mapScatterRender = function(chart, config, scatterType)
 	{
-		options = $.extend(true,
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -2462,7 +2948,7 @@
 				scatterType: scatterType
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -2642,9 +3128,45 @@
 	
 	//地图关系图
 	
-	chartSupport.mapGraphRender = function(chart, options)
+	chartSupport.mapGraphRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapGraphRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapGraphUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapGraphResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapGraphDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapGraphOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapGraphOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapGraphRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -2663,7 +3185,7 @@
 				symbolSizeMin: undefined,
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -2943,9 +3465,45 @@
 	
 	//地图路径图
 	
-	chartSupport.mapLinesRender = function(chart, options)
+	chartSupport.mapLinesRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapLinesRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapLinesUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapLinesResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapLinesDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapLinesOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapLinesOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapLinesRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -2956,7 +3514,7 @@
 				dataSignNames: { name: "name", longitude: "longitude", latitude: "latitude", map: "map" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -3136,9 +3694,45 @@
 	
 	//地图飞线图
 	
-	chartSupport.mapFlylineRender = function(chart, options)
+	chartSupport.mapFlylineRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapFlylineRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapFlylineUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapFlylineResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapFlylineDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapFlylineOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapFlylineOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapFlylineRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -3157,7 +3751,7 @@
 				}
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -3344,9 +3938,45 @@
 	
 	//地图热力图
 	
-	chartSupport.mapHeatmapRender = function(chart, options)
+	chartSupport.mapHeatmapRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			asyncRender: true,
+			render: function(chart)
+			{
+				chartFactory.chartSupport.mapHeatmapRender(chart, config);
+			},
+			asyncUpdate: true,
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.mapHeatmapUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.mapHeatmapResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.mapHeatmapDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapHeatmapOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.mapHeatmapOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.mapHeatmapRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -3357,7 +3987,7 @@
 				dataSignNames: { name: "name", value: "value", weight: "weight", map: "map" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -3513,16 +4143,50 @@
 	
 	//K线图
 	
-	chartSupport.candlestickRender = function(chart, options)
+	chartSupport.candlestickRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.candlestickRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.candlestickUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.candlestickResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.candlestickDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.candlestickOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.candlestickOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.candlestickRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
 				dataSignNames: { name: "name", open: "open", close: "close", min: "min", max: "max" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -3674,9 +4338,43 @@
 	
 	//热力图
 	
-	chartSupport.heatmapRender = function(chart, options)
+	chartSupport.heatmapRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.heatmapRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.heatmapUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.heatmapResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.heatmapDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.heatmapOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.heatmapOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.heatmapRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -3686,7 +4384,7 @@
 				dataSignNames: { name: "name", value: "value", weight: "weight" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -3871,9 +4569,44 @@
 	};
 	
 	//树图
-	chartSupport.treeRender = function(chart, options)
+	
+	chartSupport.treeRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.treeRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.treeUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.treeResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.treeDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.treeOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.treeOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.treeRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -3882,7 +4615,7 @@
 				orient: "LR",
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -4022,16 +4755,51 @@
 	};
 	
 	//矩形树图
-	chartSupport.treemapRender = function(chart, options)
+	
+	chartSupport.treemapRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.treemapRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.treemapUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.treemapResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.treemapDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.treemapOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.treemapOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.treemapRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
 				dataSignNames: { id: "id", name: "name", parent: "parent", value: "value" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -4118,16 +4886,50 @@
 	
 	//旭日图
 	
-	chartSupport.sunburstRender = function(chart, options)
+	chartSupport.sunburstRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.sunburstRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.sunburstUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.sunburstResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.sunburstDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.sunburstOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.sunburstOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.sunburstRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
 				dataSignNames: { id: "id", name: "name", parent: "parent", value: "value" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -4322,10 +5124,44 @@
 	};
 	
 	//桑基图
-
-	chartSupport.sankeyRender = function(chart, options)
+	
+	chartSupport.sankeyRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.sankeyRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.sankeyUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.sankeyResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.sankeyDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.sankeyOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.sankeyOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+
+	chartSupport.sankeyRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -4340,7 +5176,7 @@
 				orient: "horizontal"
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -4563,9 +5399,43 @@
 	
 	//关系图
 	
-	chartSupport.graphRender = function(chart, options)
+	chartSupport.graphRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.graphRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.graphUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.graphResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.graphDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.graphOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.graphOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.graphRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -4584,7 +5454,7 @@
 				layout: "force"
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -4841,9 +5711,43 @@
 	
 	//箱型图
 	
-	chartSupport.boxplotRender = function(chart, options)
+	chartSupport.boxplotRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.boxplotRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.boxplotUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.boxplotResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.boxplotDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.boxplotOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.boxplotOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.boxplotRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -4863,7 +5767,7 @@
 				symbolSizeMin: undefined,
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -5141,12 +6045,52 @@
 	
 	//词云图
 	
-	chartSupport.wordcloudRender = function(chart, options)
+	chartSupport.wordcloudRenderer = function(plugin, config)
+	{
+		var r =
+		{
+			depend:
+			{
+				name: "echarts-wordcloud",
+				version: "2.0.0",
+				source: "lib/echarts-wordcloud-2.0.0/echarts-wordcloud.min.js"
+			},
+			render: function(chart)
+			{
+				chartFactory.chartSupport.wordcloudRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.wordcloudUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.wordcloudResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.wordcloudDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.wordcloudOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.wordcloudOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.wordcloudRender = function(chart, config)
 	{
 		//不支持在echarts主题中设置样式，只能在这里设置
 		var chartTheme = chart.theme();
 		
-		options = $.extend(true,
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -5159,7 +6103,7 @@
 				colorGradients: undefined
 			}
 		},
-		options);
+		{ dg: config });
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -5316,9 +6260,49 @@
 	
 	//水球图
 	
-	chartSupport.liquidfillRender = function(chart, options)
+	chartSupport.liquidfillRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			depend:
+			{
+				name: "echarts-liquidfill",
+				version: "3.0.0",
+				source: "lib/echarts-liquidfill-3.0.0/echarts-liquidfill.min.js"
+			},
+			render: function(chart)
+			{
+				chartFactory.chartSupport.liquidfillRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.liquidfillUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.liquidfillResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.liquidfillDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.liquidfillOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.liquidfillOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.liquidfillRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -5331,7 +6315,7 @@
 				autoInflateWave: 3
 			}
 		},
-		options);
+		{ dg: config });
 		
 		//不支持在echarts主题中设置样式，只能在这里设置
 		var chartTheme = chart.theme();
@@ -5514,9 +6498,43 @@
 	
 	//平行坐标系
 	
-	chartSupport.parallelRender = function(chart, options)
+	chartSupport.parallelRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.parallelRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.parallelUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.parallelResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.parallelDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.parallelOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.parallelOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.parallelRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -5525,10 +6543,15 @@
 				//category 可选，平行线类别
 				dataSignNames: { name: "name", value: "value", category: "category" },
 				//是否平滑
-				smooth: false
+				smooth: false,
+				//布局
+				parallelLayout: undefined
 			}
 		},
-		options);
+		{ dg: config });
+		
+		if(options.dg.parallelLayout != null)
+			options.parallel = {layout: options.dg.parallelLayout};
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -5830,9 +6853,43 @@
 	
 	//主题河流图
 	
-	chartSupport.themeRiverRender = function(chart, options)
+	chartSupport.themeRiverRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.themeRiverRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.themeRiverUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.themeRiverResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.themeRiverDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.themeRiverOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.themeRiverOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.themeRiverRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -5842,7 +6899,7 @@
 				dataSignNames: { name: "name", value: "value", category: "category" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -6015,15 +7072,49 @@
 	
 	//象形柱图
 	
+	chartSupport.pictorialBarRenderer = function(plugin, config)
+	{
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.pictorialBarRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.pictorialBarUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.pictorialBarResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.pictorialBarDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.pictorialBarOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.pictorialBarOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
 	chartSupport.pictorialBarSymbolPaths=
 	{
 		//星型
 		"star" : "path://m15.5,19c-0.082,0 -0.164,-0.02 -0.239,-0.061l-5.261,-2.869l-5.261,2.869c-0.168,0.092 -0.373,0.079 -0.529,-0.032s-0.235,-0.301 -0.203,-0.49l0.958,-5.746l-3.818,-3.818c-0.132,-0.132 -0.18,-0.328 -0.123,-0.506s0.209,-0.31 0.394,-0.341l5.749,-0.958l2.386,-4.772c0.085,-0.169 0.258,-0.276 0.447,-0.276s0.363,0.107 0.447,0.276l2.386,4.772l5.749,0.958c0.185,0.031 0.337,0.162 0.394,0.341s0.01,0.374 -0.123,0.506l-3.818,3.818l0.958,5.746c0.031,0.189 -0.048,0.379 -0.203,0.49c-0.086,0.061 -0.188,0.093 -0.29,0.093z",
 	};
 	
-	chartSupport.pictorialBarRender = function(chart, options)
+	chartSupport.pictorialBarRender = function(chart, config)
 	{
-		options = $.extend(true,
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -6041,7 +7132,7 @@
 				barGap: "100%"
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -6264,9 +7355,43 @@
 	
 	//象形进度柱图
 	
-	chartSupport.pictorialBarProgressRender = function(chart, options)
+	chartSupport.pictorialBarProgressRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.pictorialBarProgressRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.pictorialBarProgressUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.pictorialBarProgressResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.pictorialBarProgressDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.pictorialBarProgressOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.pictorialBarProgressOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.pictorialBarProgressRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
@@ -6292,7 +7417,7 @@
 				max: 100,
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var dataSetBind = chartSupport.dataSetBindMainNonNull(chart);
@@ -6506,16 +7631,60 @@
 	
 	//表格
 	
-	chartSupport.tableRender = function(chart, options)
+	chartSupport.tableRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			depend:
+			{
+				name: "DataTable",
+				version: "2.3.1",
+				source:
+				[
+					"lib/DataTables-2.3.1/datatables.min.css",
+					"lib/DataTables-2.3.1/datatables.min.js"
+				]
+			},
+			render: function(chart)
+			{
+				chartFactory.chartSupport.tableRender(chart, config);
+			},
+			update: function(chart, chartResult)
+			{
+				chartFactory.chartSupport.tableUpdate(chart, chartResult);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.tableResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.tableDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.tableOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.tableOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.tableRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
 				dataSignNames: { column: "column" }
 			}
 		},
-		options);
+		{ dg: config });
 		
 		var dataSignNames = options.dg.dataSignNames;
 		var chartEle = chart.elementJquery();
@@ -7955,7 +9124,41 @@
 	
 	//标签卡
 	
-	chartSupport.labelRender = function(chart, options)
+	chartSupport.labelRenderer = function(plugin, config)
+	{
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.labelRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.labelUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.labelResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.labelDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.labelOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.labelOff(chart, eventType, handler);
+			},
+			additions: { supportIgnoreFetch: true }
+		};
+		
+		return r;
+	};
+	
+	chartSupport.labelRender = function(chart, config)
 	{
 		options = $.extend(true,
 		{
@@ -7963,10 +9166,17 @@
 			{
 				//name 可选，名称
 				//value 数值
-				dataSignNames: { name: "name", value: "value" }
+				dataSignNames: { name: "name", value: "value" },
+				hideName: undefined,
+				valueFirst: undefined
 			}
 		},
-		options);
+		{ dg: config });
+		
+		if(options.dg.hideName != null)
+			options.hideName = options.dg.hideName;
+		if(options.dg.valueFirst != null)
+			options.valueFirst = options.dg.valueFirst;
 		
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
@@ -8230,18 +9440,60 @@
 	
 	//下拉框
 	
-	chartSupport.selectRender = function(chart, options)
+	chartSupport.selectRenderer = function(plugin, config)
 	{
-		options = $.extend(true,
+		var r =
+		{
+			render: function(chart)
+			{
+				chartFactory.chartSupport.selectRender(chart, config);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.selectUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.selectResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.selectDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.selectOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.selectOff(chart, eventType, handler);
+			},
+			additions:
+			{
+				defaultLinkEventType: "change",
+				supportIgnoreFetch: true
+			}
+		};
+		
+		return r;
+	};
+	
+	chartSupport.selectRender = function(chart, config)
+	{
+		var options = $.extend(true,
 		{
 			dg:
 			{
 				//name 可选，名称
 				//value 数值
-				dataSignNames: { name: "name", value: "value" }
+				dataSignNames: { name: "name", value: "value" },
+				multiple: undefined
 			}
 		},
-		options);
+		{ dg: config });
+		
+		if(options.dg.multiple != null)
+			options.multiple = options.dg.multiple;
 		
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-select");
@@ -8551,6 +9803,51 @@
 	chartSupport.rawDataOff = function(chart, eventType, handler){};
 	
 	//自定义
+	
+	chartSupport.customRenderer = function(plugin, config)
+	{
+		var r =
+		{
+			asyncRender: function(chart)
+			{
+				return chartFactory.chartSupport.customAsyncRender(chart);
+			},
+			render: function(chart)
+			{
+				chartFactory.chartSupport.customRender(chart, config);
+			},
+			asyncUpdate: function(chart, results)
+			{
+				return chartFactory.chartSupport.customAsyncUpdate(chart, results);
+			},
+			update: function(chart, results)
+			{
+				chartFactory.chartSupport.customUpdate(chart, results);
+			},
+			resize: function(chart)
+			{
+				chartFactory.chartSupport.customResize(chart);
+			},
+			destroy: function(chart)
+			{
+				chartFactory.chartSupport.customDestroy(chart);
+			},
+			on: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.customOn(chart, eventType, handler);
+			},
+			off: function(chart, eventType, handler)
+			{
+				chartFactory.chartSupport.customOff(chart, eventType, handler);
+			},
+			additions: function(chart)
+			{
+				return chartFactory.chartSupport.customAdditions(chart);
+			}
+		};
+		
+		return r;
+	};
 	
 	chartSupport.customAsyncRender = function(chart)
 	{
