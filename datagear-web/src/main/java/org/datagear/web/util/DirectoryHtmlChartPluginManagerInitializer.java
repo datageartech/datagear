@@ -38,7 +38,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * {@linkplain DirectoryHtmlChartPluginManager}初始化器。
  * <p>
  * 此类的{@linkplain #init()}方法首先调用{@linkplain DirectoryHtmlChartPluginManager#init()}方法，
- * 然后加载{@linkplain #getClasspathPatterns()}类路径（默认为：<code>org/datagear/web/builtInHtmlChartPlugins/*.zip</code>）的{@linkplain HtmlChartPlugin}。
+ * 然后加载{@linkplain #getClasspathPatterns()}类路径（默认为：<code>org/datagear/web/builtInChartPlugins/*.zip</code>）的{@linkplain HtmlChartPlugin}。
  * </p>
  * <p>
  * 创建此类的实例后，需要调用{@linkplain #init()}执行初始化。
@@ -51,7 +51,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryHtmlChartPluginManagerInitializer.class);
 
-	public static final String DEFAULT_CLASSPATH_PATTERN = "classpath:org/datagear/web/builtInHtmlChartPlugins/*.zip";
+	public static final String DEFAULT_CLASSPATH_PATTERN = "classpath:org/datagear/web/builtInChartPlugins/*.zip";
 
 	private ResourcePatternResolver resourcePatternResolver;
 
