@@ -20,12 +20,15 @@ package org.datagear.web.util;
 import java.io.File;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -41,14 +44,37 @@ public class ChartPluginZipTool
 	protected static Pattern VERSION_REG_NO_QUOTE = Pattern.compile("version\\s*\\:\\s*\\\"[^\\\"]+\\\"");
 	protected static Pattern VERSION_REG_QUOTE = Pattern.compile("\\\"version\\\"\\s*\\:\\s*\\\"[^\\\"]+\\\"");
 
-	/**
-	 * 将指定目录下的所有图表插件文件夹压缩为ZIP文件。
-	 * 
-	 * @param directory
-	 */
-	public void zip(File directory) throws Exception
+	private File rootDirectory;
+
+	private HtmlChartPluginLoader pluginLoader = new HtmlChartPluginLoader();
+
+	public ChartPluginZipTool()
 	{
-		File[] files = directory.listFiles();
+		super();
+	}
+
+	public ChartPluginZipTool(File rootDirectory)
+	{
+		super();
+		this.rootDirectory = rootDirectory;
+	}
+
+	public File getRootDirectory()
+	{
+		return rootDirectory;
+	}
+
+	public void setRootDirectory(File rootDirectory)
+	{
+		this.rootDirectory = rootDirectory;
+	}
+
+	/**
+	 * 将所有图表插件文件夹压缩为ZIP文件。
+	 */
+	public void zip() throws Exception
+	{
+		File[] files = this.rootDirectory.listFiles();
 
 		int count = 0;
 
@@ -57,7 +83,15 @@ public class ChartPluginZipTool
 			if (!file.isDirectory())
 				continue;
 
-			File zipFile = FileUtil.getFile(directory, file.getName() + ".zip");
+			if (!pluginLoader.isHtmlChartPluginDirectory(file))
+				continue;
+
+			HtmlChartPlugin plugin = this.pluginLoader.load(file);
+
+			if (!file.getName().equals(plugin.getId()))
+				throw new IllegalArgumentException("Folder [" + file.getName() + "] must be same with its plugin id");
+
+			File zipFile = FileUtil.getFile(this.rootDirectory, file.getName() + ".zip");
 
 			ZipOutputStream out = null;
 
@@ -79,14 +113,13 @@ public class ChartPluginZipTool
 	}
 
 	/**
-	 * 解压指定目录下的所有图表插件ZIP文件。
+	 * 解压所有图表插件ZIP文件。
 	 * 
-	 * @param directory
 	 * @param deleteAfterUnzip
 	 */
-	public void unzip(File directory, boolean deleteAfterUnzip) throws Exception
+	public void unzip(boolean deleteAfterUnzip) throws Exception
 	{
-		File[] files = directory.listFiles();
+		File[] files = this.rootDirectory.listFiles();
 
 		int count = 0;
 		for (File file : files)
@@ -94,7 +127,8 @@ public class ChartPluginZipTool
 			if (!FileUtil.isExtension(file, "zip"))
 				continue;
 
-			File myDirectory = FileUtil.getDirectory(directory, FileUtil.deleteExtension(file.getName()), true);
+			File myDirectory = FileUtil.getDirectory(this.rootDirectory, FileUtil.deleteExtension(file.getName()),
+					true);
 
 			ZipInputStream in = null;
 
@@ -119,15 +153,14 @@ public class ChartPluginZipTool
 	}
 
 	/**
-	 * 修改指定目录下所有插件的版本号。
+	 * 修改所有插件的版本号。
 	 * 
-	 * @param directory
 	 * @param newVersion
 	 * @throws Exception
 	 */
-	public void updateVersion(File directory, String newVersion) throws Exception
+	public void updateVersion(String newVersion) throws Exception
 	{
-		File[] files = directory.listFiles();
+		File[] files = this.rootDirectory.listFiles();
 
 		if (files == null)
 			return;
@@ -210,12 +243,10 @@ public class ChartPluginZipTool
 
 	/**
 	 * 创建{@code renderer.js}文件规范。
-	 * 
-	 * @param directory
 	 */
-	public void createRendererJs(File directory) throws Exception
+	public void createRendererJs() throws Exception
 	{
-		File[] files = directory.listFiles();
+		File[] files = this.rootDirectory.listFiles();
 
 		if (files == null)
 			return;
@@ -271,6 +302,42 @@ public class ChartPluginZipTool
 			IOUtil.close(in);
 			IOUtil.close(out);
 		}
+	}
+
+	/**
+	 * 校验插件目录名和插件ID是否相同。
+	 * 
+	 * @param newVersion
+	 * @throws Exception
+	 */
+	public void checkFolderNameAndId() throws Exception
+	{
+		File[] files = this.rootDirectory.listFiles();
+
+		if (files == null)
+			return;
+
+		int successCount = 0;
+		List<String> failFolderName = new ArrayList<>();
+
+		for (File file : files)
+		{
+			if (!file.isDirectory())
+				continue;
+
+			HtmlChartPlugin plugin = pluginLoader.load(file);
+
+			if (file.getName().equals(plugin.getId()))
+			{
+				successCount++;
+			}
+			else
+			{
+				failFolderName.add(file.getName());
+			}
+		}
+
+		println("Check folder name and id, success count : " + successCount + ", fails : " + failFolderName.toString());
 	}
 
 	protected String readString(File file) throws Exception
@@ -332,8 +399,8 @@ public class ChartPluginZipTool
 
 	public static void main(String[] args) throws Exception
 	{
-		ChartPluginZipTool tool = new ChartPluginZipTool();
 		File directory = FileUtil.getDirectory("target/chart-plugins", true);
+		ChartPluginZipTool tool = new ChartPluginZipTool(directory);
 
 		println("*****************************************");
 		println("ChartPluginZipTool, on directory [" + directory.getPath() + "]");
@@ -341,7 +408,8 @@ public class ChartPluginZipTool
 		println("1 : for unzip");
 		println("2 : for zip");
 		println("3 : for replace version");
-		println("4 : for create " + HtmlChartPluginLoader.FILE_NAME_RENDERER);
+		println("4 : for check folder name and id");
+		println("5 : for create " + HtmlChartPluginLoader.FILE_NAME_RENDERER);
 		println("clean : for clean");
 		println("*****************************************");
 		println("");
@@ -362,21 +430,25 @@ public class ChartPluginZipTool
 			}
 			else if ("1".equals(input))
 			{
-				tool.unzip(directory, true);
+				tool.unzip(true);
 			}
 			else if ("2".equals(input))
 			{
-				tool.zip(directory);
+				tool.zip();
 			}
 			else if ("3".equals(input))
 			{
 				println("Input new version :");
 				String version = scanner.nextLine().trim();
-				tool.updateVersion(directory, version);
+				tool.updateVersion(version);
 			}
 			else if ("4".equals(input))
 			{
-				tool.createRendererJs(directory);
+				tool.checkFolderNameAndId();
+			}
+			else if ("5".equals(input))
+			{
+				tool.createRendererJs();
 			}
 			else if ("clean".equals(input))
 			{
