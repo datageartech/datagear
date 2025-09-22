@@ -382,6 +382,12 @@ public class HtmlChartWidgetEntityServiceImpl
 					pluginVo.setNameLabel(full.getNameLabel());
 					pluginVo.setDescLabel(full.getDescLabel());
 					pluginVo.setIconResourceNames(full.getIconResourceNames());
+					pluginVo.setVersion(full.getVersion());
+					pluginVo.setApiVersion(full.getApiVersion());
+					pluginVo.setPlatformVersion(full.getPlatformVersion());
+					pluginVo.setAuthor(full.getAuthor());
+					pluginVo.setContact(full.getContact());
+					pluginVo.setIssueDate(full.getIssueDate());
 				}
 			}
 		}

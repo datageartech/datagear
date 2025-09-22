@@ -170,7 +170,11 @@
 		},
 		formatChartPlugin: function(data)
 		{
-			return $.toChartPluginHtml(data.pluginVo, po.contextPath, { justifyContent: "start" });
+			return $.toChartPluginHtml(data.pluginVo, po.contextPath,
+						{
+							justifyContent: "start", showApiVersion:true,
+							apiVersionDesc: "<@spring.message code='chartPlugin.apiVersion.desc' />"
+					});
 		},
 		onAdd: function()
 		{
