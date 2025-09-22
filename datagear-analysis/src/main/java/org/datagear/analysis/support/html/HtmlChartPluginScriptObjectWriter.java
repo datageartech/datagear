@@ -130,11 +130,15 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 
 			out.write("(function(" + JsChartRenderer.INVOKE_CONTEXT_PLUGIN_VAR + "){");
 			writeNewLine(out);
+			out.write("try{ ");
+			writeNewLine(out);
 			out.write("var " + tmpVarName + " =");
 			writeNewLine(out);
 			writeHtmlChartRendererCodeValue(out, renderer);
 			writeNewLine(out);
 			out.write("return " + tmpVarName + ";");
+			writeNewLine(out);
+			out.write("}catch(e){ if(typeof(console) !== \"undefined\"){ if(console.error){ console.error(e); } } }");
 			writeNewLine(out);
 			out.write("})(" + varName + ");");
 			writeNewLine(out);
