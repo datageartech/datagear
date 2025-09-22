@@ -17,6 +17,7 @@
 
 package org.datagear.analysis.support;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.analysis.ChartPlugin;
@@ -59,12 +60,24 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager
 	@Override
 	public <T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType)
 	{
-		return findChartPlugins(chartPluginType);
+		return findChartPlugins(chartPluginType, null);
+	}
+
+	@Override
+	public <T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType, Comparator<T> comparator)
+	{
+		return findChartPlugins(chartPluginType, comparator);
 	}
 
 	@Override
 	public List<ChartPlugin> getAll()
 	{
-		return getAllChartPlugins();
+		return getAllChartPlugins(null);
+	}
+
+	@Override
+	public List<ChartPlugin> getAll(Comparator<ChartPlugin> comparator)
+	{
+		return getAllChartPlugins(comparator);
 	}
 }

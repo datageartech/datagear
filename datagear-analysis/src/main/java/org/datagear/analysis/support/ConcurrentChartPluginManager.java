@@ -17,6 +17,7 @@
 
 package org.datagear.analysis.support;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -96,13 +97,19 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	@Override
 	public <T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType)
 	{
+		return getAll(chartPluginType, null);
+	}
+
+	@Override
+	public <T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType, Comparator<T> comparator)
+	{
 		ReadLock readLock = this.lock.readLock();
 
 		try
 		{
 			readLock.lock();
 
-			return findChartPlugins(chartPluginType);
+			return findChartPlugins(chartPluginType, comparator);
 		}
 		finally
 		{
@@ -113,13 +120,19 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	@Override
 	public List<ChartPlugin> getAll()
 	{
+		return getAll((Comparator<ChartPlugin>) null);
+	}
+
+	@Override
+	public List<ChartPlugin> getAll(Comparator<ChartPlugin> comparator)
+	{
 		ReadLock readLock = this.lock.readLock();
 
 		try
 		{
 			readLock.lock();
 
-			return getAllChartPlugins();
+			return getAllChartPlugins(comparator);
 		}
 		finally
 		{

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -190,21 +191,15 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 */
 	protected HtmlChartPluginView getHtmlChartPluginView(HttpServletRequest request, String id)
 	{
-		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
+		ChartPlugin plugin = getDirectoryHtmlChartPluginManager().get(id);
 
-		if (plugins == null)
+		if (plugin == null || !(plugin instanceof HtmlChartPlugin))
 			return null;
 
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
 		
-		for (HtmlChartPlugin plugin : plugins)
-		{
-			if (plugin.getId().equals(id))
-				return toHtmlChartPluginView(plugin, themeName, locale);
-		}
-
-		return null;
+		return toHtmlChartPluginView((HtmlChartPlugin) plugin, themeName, locale);
 	}
 
 	/**
@@ -218,7 +213,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	{
 		List<HtmlChartPluginView> pluginViews = new ArrayList<>();
 
-		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
+		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class,
+				HTML_CHART_PLUGIN_SORT);
 
 		if (plugins != null)
 		{
@@ -379,4 +375,33 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			return null;
 		}
 	}
+
+	/**
+	 * 图表插件排序器。
+	 * <p>
+	 * {@linkplain HtmlChartPlugin#getApiVersion()}越大越靠前、{@linkplain HtmlChartPlugin#getOrder()}越小越靠前。
+	 * </p>
+	 */
+	protected static final Comparator<HtmlChartPlugin> HTML_CHART_PLUGIN_SORT = new Comparator<HtmlChartPlugin>()
+	{
+		@Override
+		public int compare(HtmlChartPlugin o1, HtmlChartPlugin o2)
+		{
+			String apiVersion1 = o1.getApiVersion();
+			String apiVersion2 = o2.getApiVersion();
+			
+			if(apiVersion1 == null)
+				apiVersion1 = "";
+			if(apiVersion2 == null)
+				apiVersion2 = "";
+			
+			// 越大越靠前
+			int re = (0 - apiVersion1.compareTo(apiVersion2));
+
+			if (re == 0)
+				re = Integer.valueOf(o1.getOrder()).compareTo(o2.getOrder());
+
+			return re;
+		}
+	};
 }

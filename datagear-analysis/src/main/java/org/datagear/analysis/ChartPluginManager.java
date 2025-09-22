@@ -17,6 +17,7 @@
 
 package org.datagear.analysis;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -71,6 +72,16 @@ public interface ChartPluginManager
 	<T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType);
 
 	/**
+	 * 获取指定类型的所有{@linkplain ChartPlugin}，自定义排序。
+	 * <p>
+	 * 
+	 * @param chartPluginType
+	 * @param comparator
+	 * @return
+	 */
+	<T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType, Comparator<T> comparator);
+
+	/**
 	 * 获取所有{@linkplain ChartPlugin}。
 	 * <p>
 	 * 返回结果将根据{@linkplain ChartPlugin#getOrder()}进行排序，越小越靠前。
@@ -79,4 +90,12 @@ public interface ChartPluginManager
 	 * @return
 	 */
 	List<ChartPlugin> getAll();
+
+	/**
+	 * 获取所有{@linkplain ChartPlugin}，自定义排序。
+	 * 
+	 * @param comparator
+	 * @return
+	 */
+	List<ChartPlugin> getAll(Comparator<ChartPlugin> comparator);
 }
