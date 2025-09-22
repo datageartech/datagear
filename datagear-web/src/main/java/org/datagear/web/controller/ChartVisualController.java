@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -417,20 +415,8 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			}
 			else
 			{
-				String apiVersionPattern = ((HtmlChartPlugin) plugin).getApiVersion();
-
-				// 兼容未定义apiVersion的旧版插件
-				if (StringUtil.isBlank(apiVersionPattern))
-				{
-					apiVersion = DashboardApiVersion.V1;
-				}
-				else
-				{
-					List<String> matches = this.versionPattern.matchesOfString(apiVersionPattern,
-							Arrays.asList(DashboardApiVersion.V2, DashboardApiVersion.V1));
-					
-					apiVersion = (matches.size() > 0 ? matches.get(0) : DashboardApiVersion.V2);
-				}
+				apiVersion = ((HtmlChartPlugin) plugin).getApiVersion();
+				apiVersion = DashboardApiVersion.trimVersionWithV1(apiVersion);
 			}
 		}
 		

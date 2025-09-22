@@ -86,9 +86,9 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	private JsChartRenderer renderer;
 
 	/**
-	 * 支持的平台版本模式。
+	 * 支持的平台版本模式，比如：{@code >=6.0}。
 	 * <p>
-	 * 格式参考：{@linkplain VersionPattern}。
+	 * 详细格式参考：{@linkplain VersionPattern}。
 	 * </p>
 	 * <p>
 	 * {@code null}或空字符串表示没有限制
@@ -97,9 +97,9 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 	private String platformVersion = "";
 
 	/**
-	 * 支持的看板页面端API版本模式。
+	 * 支持的看板页面端API版本，比如：{@code 1.0}、{@code 2.0}。
 	 * <p>
-	 * 格式参考：{@linkplain VersionPattern}。
+	 * 这里应该指定明确的版本号，而非版本模式，因为不同的看板页面端API版本是不兼容的，一个插件不应支持多个不兼容版本。
 	 * </p>
 	 * <p>
 	 * {@code null}或空字符串表示未定义

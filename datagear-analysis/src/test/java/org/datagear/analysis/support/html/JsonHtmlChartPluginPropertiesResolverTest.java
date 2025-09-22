@@ -56,6 +56,6 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
 		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
 
-		assertEquals(">=1.0", chartPlugin.getApiVersion());
+		assertEquals("2.0", chartPlugin.getApiVersion());
 	}
 }
