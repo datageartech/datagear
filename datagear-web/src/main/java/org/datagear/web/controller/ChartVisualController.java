@@ -46,7 +46,6 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.util.IOUtil;
-import org.datagear.util.StringUtil;
 import org.datagear.util.version.VersionPattern;
 import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
@@ -71,18 +70,6 @@ import org.springframework.web.context.request.WebRequest;
 @RequestMapping(ChartVisualController.PATH_PREFIX)
 public class ChartVisualController extends AbstractDataAnalysisController implements ServletContextAware
 {
-	/**
-	 * 图表展示URL的请求参数名：API版本
-	 * <p>
-	 * 图表展示时，默认会使用插件兼容支持的最高看板页面端API版本，此参数可以自定义此功能。
-	 * </p>
-	 * <p>
-	 * 另参考：{@linkplain DashboardApiVersion}
-	 * </p>
-	 */
-	public static final String CHART_SHOW_PARAM_API_VERSION = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "API_VERSION";
-
 	/** 展示页路径前缀 */
 	public static final String PATH_PREFIX = "/cv";
 
@@ -396,28 +383,19 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			HtmlTplDashboardWidget dashboardWidget)
 	{
 		String apiVersion = DashboardApiVersion.V2;
-		String apiVersionParam = DashboardApiVersion.trimVersion(request.getParameter(CHART_SHOW_PARAM_API_VERSION),
-				"");
 
-		if (!StringUtil.isEmpty(apiVersionParam))
+		ChartPlugin plugin = entity.getPluginVo();
+		String pluginId = (plugin == null ? null : plugin.getId());
+		plugin = (pluginId == null ? null : this.chartPluginManager.get(pluginId));
+
+		if (plugin == null || !(plugin instanceof HtmlChartPlugin))
 		{
-			apiVersion = apiVersionParam;
+			apiVersion = DashboardApiVersion.V2;
 		}
 		else
 		{
-			ChartPlugin plugin = entity.getPluginVo();
-			String pluginId = (plugin == null ? null : plugin.getId());
-			plugin = (pluginId == null ? null : this.chartPluginManager.get(pluginId));
-
-			if (plugin == null || !(plugin instanceof HtmlChartPlugin))
-			{
-				apiVersion = DashboardApiVersion.V2;
-			}
-			else
-			{
-				apiVersion = ((HtmlChartPlugin) plugin).getApiVersion();
-				apiVersion = DashboardApiVersion.trimVersionWithV1(apiVersion);
-			}
+			apiVersion = ((HtmlChartPlugin) plugin).getApiVersion();
+			apiVersion = DashboardApiVersion.trimVersionWithV1(apiVersion);
 		}
 		
 		return apiVersion;
