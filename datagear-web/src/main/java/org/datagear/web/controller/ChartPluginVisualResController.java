@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.request.WebRequest;
 
@@ -51,6 +52,11 @@ import org.springframework.web.context.request.WebRequest;
 @RequestMapping("/vres/plugin")
 public class ChartPluginVisualResController extends AbstractChartPluginAwareController implements ServletContextAware
 {
+	/**
+	 * 加载图表插件JS脚本时过滤的插件API版本{@linkplain HtmlChartPlugin#getApiVersion()}
+	 */
+	public static final String API_VERSION_PARAM = HtmlChartPlugin.PROPERTY_API_VERSION;
+
 	@Autowired
 	private File tempDirectory;
 
@@ -118,17 +124,21 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 	}
 
 	@RequestMapping("/chartPluginManager.js")
-	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
-			throws Exception
+	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			@RequestParam(value = API_VERSION_PARAM, required = false) String apiVersion) throws Exception
 	{
 		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
 		List<HtmlChartPlugin> htmlChartPlugins = new ArrayList<>(plugins.size());
+		boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
 		long lastModified = -1;
 
 		if (plugins != null)
 		{
 			for (HtmlChartPlugin plugin : plugins)
 			{
+				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
+					continue;
+
 				htmlChartPlugins.add(plugin);
 				lastModified = Math.max(lastModified, plugin.getLastModified());
 			}

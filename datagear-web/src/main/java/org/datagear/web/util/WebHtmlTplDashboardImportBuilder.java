@@ -30,6 +30,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
 import org.datagear.web.analysis.DashboardApiVersion;
+import org.datagear.web.controller.ChartPluginVisualResController;
 import org.datagear.web.controller.ServerTimeJsController;
 
 /**
@@ -139,7 +140,8 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 		String libPrefix = contextPath + PATH_LIB;
 		String analysisPrefix = getAnalysisPath(contextPath, dashboard);
-		boolean isV1 = DashboardApiVersion.isV1(trimDashboardApiVersion(dashboard));
+		String apiVersion = trimDashboardApiVersion(dashboard);
+		boolean isV1 = DashboardApiVersion.isV1(apiVersion);
 
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
@@ -194,7 +196,8 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
 				analysisPrefix + "/chartSetting.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
-				contextPath + "/vres/plugin/chartPluginManager.js?v=" + Global.VERSION));
+				contextPath + "/vres/plugin/chartPluginManager.js?" + ChartPluginVisualResController.API_VERSION_PARAM
+						+ "=" + apiVersion + "&v=" + Global.VERSION));
 
 		if (isEditMode(mode))
 		{
