@@ -207,9 +207,12 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * 
 	 * @param request
 	 * @param keyword
+	 * @param apiVersion
+	 *            允许{@code null}
 	 * @return
 	 */
-	protected List<HtmlChartPluginView> findHtmlChartPluginViews(HttpServletRequest request, String keyword)
+	protected List<HtmlChartPluginView> findHtmlChartPluginViews(HttpServletRequest request, String keyword,
+			String apiVersion)
 	{
 		List<HtmlChartPluginView> pluginViews = new ArrayList<>();
 
@@ -220,9 +223,15 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		{
 			Locale locale = WebUtils.getLocale(request);
 			String themeName = resolveChartPluginIconThemeName(request);
+			boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
 
 			for (HtmlChartPlugin plugin : plugins)
+			{
+				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
+					continue;
+
 				pluginViews.add(toHtmlChartPluginView(plugin, themeName, locale));
+			}
 		}
 
 		return this.keywordMatcher.match(pluginViews, keyword, new MatchValue<HtmlChartPluginView>()

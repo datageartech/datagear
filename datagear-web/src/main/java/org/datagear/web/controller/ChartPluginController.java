@@ -35,13 +35,13 @@ import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
-import org.datagear.management.util.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -212,11 +212,13 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartPluginView> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQuery)
+			final org.springframework.ui.Model springModel,
+			@RequestBody(required = false) DataFilterPagingQuery pagingQuery)
 			throws Exception
 	{
-		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
-		List<HtmlChartPluginView> chartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword());
+		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
+		List<HtmlChartPluginView> chartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword(),
+				pagingQuery.getDataFilter());
 
 		PagingData<HtmlChartPluginView> pagingData = new PagingData<>(pagingQuery.getPage(), chartPluginViews.size(),
 				pagingQuery.getPageSize());
@@ -228,11 +230,6 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping("/select")
 	public String select(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, null);
-		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);
-
-		addAttributeForWriteJson(model, "categorizations", categorizations);
-
 		setSelectAction(request, model);
 		return "/chartPlugin/chartPlugin_select";
 	}
@@ -240,12 +237,14 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/selectData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Categorization> selectData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQuery)
+			final org.springframework.ui.Model springModel,
+			@RequestBody(required = false) DataFilterPagingQuery pagingQuery)
 			throws Exception
 	{
-		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
+		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 
-		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword());
+		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword(),
+				pagingQuery.getDataFilter());
 		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);
 
 		return categorizations;

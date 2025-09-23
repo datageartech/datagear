@@ -2113,12 +2113,12 @@
 			
 			if(options.showApiVersion)
 			{
-				html += "<div class='plugin-api-version plugin-desc text-color-secondary' title='"+$.escapeHtml(options.apiVersionDesc)+"'><small class='desc-content'>"+(chartPlugin.apiVersion ? $.escapeHtml(chartPlugin.apiVersion) : "---")+"</small></div>";
+				html += "<div class='plugin-api-version plugin-desc p-tag p-tag-warning' title='"+$.escapeHtml(options.apiVersionDesc)+"'><small class='desc-content'>"+(chartPlugin.apiVersion ? $.escapeHtml(chartPlugin.apiVersion) : "---")+"</small></div>";
 			}
 			
 			if(options.showPlatformVersion)
 			{
-				html += "<div class='plugin-platform-version plugin-desc text-color-secondary' title='"+$.escapeHtml(options.platformVersionDesc)+"'><small class='desc-content'>"+(chartPlugin.platformVersion ? $.escapeHtml(chartPlugin.platformVersion) : "---")+"</small></div>";
+				html += "<div class='plugin-platform-version plugin-desc p-tag p-tag-info' title='"+$.escapeHtml(options.platformVersionDesc)+"'><small class='desc-content'>"+(chartPlugin.platformVersion ? $.escapeHtml(chartPlugin.platformVersion) : "---")+"</small></div>";
 			}
 			
 			if(options.showAuthor)

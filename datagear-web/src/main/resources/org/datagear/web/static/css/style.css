@@ -681,8 +681,7 @@ label.align-tip{
 .plugin-info .plugin-api-version,
 .plugin-info .plugin-platform-version{
 	text-align: center;
-	padding: 1px 1em;
-	background: var(--surface-d);
+	padding: 0.2rem 0.8em;
 	border-radius: 0.5rem;
 }
 

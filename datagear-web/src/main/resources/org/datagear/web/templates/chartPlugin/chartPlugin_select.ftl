@@ -32,7 +32,7 @@
 <div id="${pid}" class="page page-manager page-chartPlugin-select h-full flex flex-column overflow-auto">
 	<div class="page-header grid grid-nogutter align-items-center p-1 flex-grow-0">
 		<div class="col-12" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-4'">
-			<#include "../include/page_search_form.ftl">
+			<#include "include/search_form_filter.ftl">
 		</div>
 		<div class="operations col-12 flex gap-1 flex-wrap md:justify-content-end" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect"></p-button>
@@ -85,11 +85,7 @@
 {
 	po.refresh = function()
 	{
-		//兼容搜索表单集成
-		if(po.submitSearchForm)
-			po.submitSearchForm();
-		else
-			po.loadCategorizations();
+		po.submitSearchForm();
 	};
 	
 	po.getSelectedEntities = function()
@@ -101,44 +97,45 @@
 	//重写搜索表单提交处理函数
 	po.search = function(formData)
 	{
-		po.loadCategorizations(formData);
-	};
-	
-	po.loadCategorizations = function(data)
-	{
-		var pm = po.vuePageModel();
-		data = (data ? data : { keyword: pm.searchForm.keyword });
+		po.updatePageData([]);
 		
 		po.ajaxJson("/chartPlugin/selectData",
 		{
-			data: data,
+			data: formData,
 			success: function(response)
 			{
-				pm.categorizations = response;
-				pm.categoryMenuItems = po.toCategoryMenuItems(response);
-				pm.categoryMenuActiveIndex = 0;
-				pm.selectedChartPlugin = null;
-				pm.selectedChartPluginId = null;
-				
-				var pluginTotal = 0;
-				var pluginIdMap = {};
-				$.each(response, function(idx, ct)
-				{
-					$.each(ct.chartPlugins, function(iidx, cp)
-					{
-						if(!pluginIdMap[cp.id])
-						{
-							pluginIdMap[cp.id] = true;
-							pluginTotal++;
-						}
-					});
-				});
-				
-				pm.pluginTotal = pluginTotal;
-				
-				po.element(".chart-plugins-scroller").animate({scrollTop:0}, 'fast');
+				po.updatePageData(response);
 			}
 		});
+	};
+	
+	po.updatePageData = function(categorizations)
+	{
+		var pm = po.vuePageModel();
+		
+		pm.categorizations = categorizations;
+		pm.categoryMenuItems = po.toCategoryMenuItems(categorizations);
+		pm.categoryMenuActiveIndex = 0;
+		pm.selectedChartPlugin = null;
+		pm.selectedChartPluginId = null;
+		
+		var pluginTotal = 0;
+		var pluginIdMap = {};
+		$.each(categorizations, function(idx, ct)
+		{
+			$.each(ct.chartPlugins, function(iidx, cp)
+			{
+				if(!pluginIdMap[cp.id])
+				{
+					pluginIdMap[cp.id] = true;
+					pluginTotal++;
+				}
+			});
+		});
+		
+		pm.pluginTotal = pluginTotal;
+		
+		po.element(".chart-plugins-scroller").animate({scrollTop:0}, 'fast');
 	};
 	
 	po.toCategoryMenuItems = function(categorizations)
@@ -172,7 +169,6 @@
 	
 	po.vuePageModel(
 	{
-		searchForm:{ keyword: "" },
 		categorizations: [],
 		pluginTotal: 0,
 		categoryMenuItems: [],
@@ -233,7 +229,7 @@
 
 	po.vueMounted(function()
 	{
-		po.loadCategorizations();
+		po.refresh();
 	});
 
 	po.setupAction();
