@@ -33,7 +33,7 @@
 		}
 	];
 	
-	po.initDropdownFilterSearchForm(po.searchFilterMenuItems, { dropdownBtnTitle: "<@spring.message code='apiVersionRequirement' />" });
+	po.initDropdownFilterSearchForm(po.searchFilterMenuItems, { dropdownBtnTitle: "<@spring.message code='apiVersion' />" });
 })
 (${pid});
 </script>
