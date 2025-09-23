@@ -20,7 +20,7 @@
 当前项目。
 
 依赖：
-page_search_form_filter.ftl
+page_search_form_sharetype.ftl
 或
 page_search_form.ftl
 -->

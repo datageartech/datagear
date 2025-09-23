@@ -16,24 +16,31 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign DashboardApiVersion=statics['org.datagear.web.analysis.DashboardApiVersion']>
-<#include "../../include/page_search_form_dropdown.ftl">
+<#--
+"我的"、"分享的"、"全部"过滤搜索表单。
+-->
+<#assign DataPermissionSpec=statics['org.datagear.management.util.DataPermissionSpec']>
+<#include "page_search_form_dropdown.ftl">
 <script>
 (function(po)
 {
 	po.searchFilterMenuItems =
 	[
 		{
-			label: "${DashboardApiVersion.V2}",
-			value: "${DashboardApiVersion.V2}"
+			label: "<@spring.message code='searchFilter.all' />",
+			value: "${DataPermissionSpec.DATA_FILTER_VALUE_ALL}"
 		},
 		{
-			label: "${DashboardApiVersion.V1}",
-			value: "${DashboardApiVersion.V1}"
+			label: "<@spring.message code='searchFilter.mine' />",
+			value: "${DataPermissionSpec.DATA_FILTER_VALUE_MINE}"
+		},
+		{
+			label: "<@spring.message code='searchFilter.other' />",
+			value: "${DataPermissionSpec.DATA_FILTER_VALUE_OTHER}"
 		}
 	];
 	
-	po.initDropdownFilterSearchForm(po.searchFilterMenuItems, { dropdownBtnTitle: "<@spring.message code='apiVersionRequirement' />" });
+	po.initDropdownFilterSearchForm(po.searchFilterMenuItems);
 })
 (${pid});
 </script>

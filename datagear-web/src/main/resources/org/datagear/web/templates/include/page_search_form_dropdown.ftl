@@ -17,14 +17,13 @@
  *
 -->
 <#--
-"我的"、"分享的"、"全部"过滤搜索表单。
+带有下拉过滤条件的搜索表单。
 -->
 <#assign AbstractController=statics['org.datagear.web.controller.AbstractController']>
-<#assign DataPermissionSpec=statics['org.datagear.management.util.DataPermissionSpec']>
 <form id="${pid}searchForm" @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
 		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100"></p-inputtext>
-		<p-button type="button" :label="pm.searchFilterLabel"
+		<p-button type="button" :label="pm.searchFilterLabel" :title="pm.earchDropdownBtnTitle"
 			 aria-haspopup="true" aria-controls="${pid}searchFilterMenu"
 			@click="onToggleSearchFilterMenu">
 		</p-button>
@@ -37,69 +36,67 @@
 {
 	po.search = function(formData){ /*需实现*/ };
 	
+	po.searchFormFilterName = "${AbstractController.DATA_FILTER_PARAM}";
+	
 	po.submitSearchForm = function()
 	{
-		var param = po.vueRaw(po.vuePageModel().searchForm);
+		var pm = po.vuePageModel();
+		var param = po.vueRaw(pm.searchForm);
 		po.search(param);
 	};
 	
 	po.updateSearchFilterForMenuItem = function(menuItem)
 	{
 		var pm = po.vuePageModel();
-		pm.searchForm["${AbstractController.DATA_FILTER_PARAM}"] = menuItem.value;
+		pm.searchForm[po.searchFormFilterName] = menuItem.value;
 		pm.searchFilterLabel = menuItem.label;
 	};
 	
-	po.vuePageModel(
+	po.initDropdownFilterSearchForm = function(filterMenuItems, options)
 	{
-		searchForm: { keyword: "", "${AbstractController.DATA_FILTER_PARAM}": "${DataPermissionSpec.DATA_FILTER_VALUE_ALL}" },
-		searchFilterLabel: "<@spring.message code='searchFilter.all' />",
-		searchFilterMenuItems:
-		[
-			{
-				label: "<@spring.message code='searchFilter.all' />",
-				value: "${DataPermissionSpec.DATA_FILTER_VALUE_ALL}",
-				command: function(e)
-				{
-					po.updateSearchFilterForMenuItem(e.item);
-					po.submitSearchForm();
-				}
-			},
-			{
-				label: "<@spring.message code='searchFilter.mine' />",
-				value: "${DataPermissionSpec.DATA_FILTER_VALUE_MINE}",
-				command: function(e)
-				{
-					po.updateSearchFilterForMenuItem(e.item);
-					po.submitSearchForm();
-				}
-			},
-			{
-				label: "<@spring.message code='searchFilter.other' />",
-				value: "${DataPermissionSpec.DATA_FILTER_VALUE_OTHER}",
-				command: function(e)
-				{
-					po.updateSearchFilterForMenuItem(e.item);
-					po.submitSearchForm();
-				}
-			}
-		]
-	});
-	
-	po.vueRef("${pid}searchFilterMenuEle", null);
-	
-	po.vueMethod(
-	{
-		onSearchFormSubmit: function()
-		{
-			po.submitSearchForm();
-		},
+		options = (options || {});
+		options.dftItemIndex = (options.dftItemIndex == null || options.dftItemIndex < 0 ? 0 : options.dftItemIndex);
+		options.dropdownBtnTitle = (options.dropdownBtnTitle ? options.dropdownBtnTitle : "");
 		
-		onToggleSearchFilterMenu: function(e)
+		filterMenuItems.forEach((item) =>
 		{
-			po.vueUnref("${pid}searchFilterMenuEle").toggle(e);
-		}
-	});
+			if(item.command != null)
+				return;
+			
+			item.command = function(e)
+			{
+				po.updateSearchFilterForMenuItem(e.item);
+				po.submitSearchForm();
+			}
+		});
+		
+		var dftMenuItem = filterMenuItems[options.dftItemIndex];
+		var searchForm = { keyword: "" };
+		searchForm[po.searchFormFilterName] = dftMenuItem.value;
+		
+		po.vuePageModel(
+		{
+			searchForm: searchForm,
+			searchFilterLabel: dftMenuItem.label,
+			searchFilterMenuItems: filterMenuItems,
+			earchDropdownBtnTitle: options.dropdownBtnTitle
+		});
+		
+		po.vueRef("${pid}searchFilterMenuEle", null);
+		
+		po.vueMethod(
+		{
+			onSearchFormSubmit: function()
+			{
+				po.submitSearchForm();
+			},
+			
+			onToggleSearchFilterMenu: function(e)
+			{
+				po.vueUnref("${pid}searchFilterMenuEle").toggle(e);
+			}
+		});
+	};
 })
 (${pid});
 </script>
