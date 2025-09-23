@@ -28,11 +28,11 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.CreateTimeEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.util.PagingQuery;
+import org.datagear.management.util.Query;
 import org.datagear.management.util.dialect.MbSqlDialect;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.Query;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.PagingData;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**

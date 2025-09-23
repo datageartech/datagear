@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class KeywordQuery implements Serializable
+public class KeywordQuery implements KeywordAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -41,11 +41,13 @@ public class KeywordQuery implements Serializable
 		this.keyword = keyword;
 	}
 
+	@Override
 	public String getKeyword()
 	{
 		return keyword;
 	}
 
+	@Override
 	public void setKeyword(String keyword)
 	{
 		this.keyword = keyword;

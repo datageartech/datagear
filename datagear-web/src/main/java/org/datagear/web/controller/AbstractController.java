@@ -45,11 +45,9 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.EntityService;
 import org.datagear.management.util.DataPermissionSpec;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.util.dirquery.DirectoryPagingQuery;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.security.AuthenticationSecurity;
@@ -57,7 +55,6 @@ import org.datagear.web.security.AuthenticationUserGetter;
 import org.datagear.web.util.MessageSourceSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -440,69 +437,6 @@ public abstract class AbstractController extends MessageSourceSupport
 	}
 
 	/**
-	 * 检查并补充{@linkplain APIDDataFilterPagingQuery}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @return 不会为{@code null}
-	 */
-	protected APIDDataFilterPagingQuery inflateAPIDDataFilterPagingQuery(HttpServletRequest request,
-			APIDDataFilterPagingQuery pagingQuery)
-	{
-		DataFilterPagingQuery pq = inflateDataFilterPagingQuery(request, pagingQuery);
-
-		if (pagingQuery == null)
-		{
-			pagingQuery = new APIDDataFilterPagingQuery(pq.getPage(), pq.getPageSize(), pq.getKeyword(),
-					pq.getCondition());
-			pagingQuery.setNotLike(pq.isNotLike());
-			pagingQuery.setDataFilter(pq.getDataFilter());
-
-			pagingQuery.setAnalysisProjectId(WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID));
-		}
-
-		return pagingQuery;
-	}
-
-	/**
-	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @return 不会为{@code null}
-	 */
-	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
-			DataFilterPagingQuery pagingQuery)
-	{
-		return inflateDataFilterPagingQuery(request, pagingQuery, WebUtils.COOKIE_PAGINATION_SIZE);
-	}
-
-	/**
-	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @param cookiePaginationSize
-	 * @return 不会为{@code null}
-	 */
-	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
-			DataFilterPagingQuery pagingQuery, String cookiePaginationSize)
-	{
-		PagingQuery pq = inflatePagingQuery(request, pagingQuery, cookiePaginationSize);
-
-		if (pagingQuery == null)
-		{
-			pagingQuery = new DataFilterPagingQuery(pq.getPage(), pq.getPageSize(), pq.getKeyword(), pq.getCondition());
-			pagingQuery.setNotLike(pq.isNotLike());
-		}
-
-		return pagingQuery;
-	}
-
-	/**
 	 * 设置单选或多选请求操作。
 	 * 
 	 * @param request
@@ -531,112 +465,6 @@ public abstract class AbstractController extends MessageSourceSupport
 	{
 		String multipleParam = request.getParameter("multiple");
 		return (multipleParam != null);
-	}
-
-	/**
-	 * 检查并补充{@linkplain PagingQuery}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @return 不会为{@code null}
-	 */
-	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery)
-	{
-		return inflatePagingQuery(request, pagingQuery, WebUtils.COOKIE_PAGINATION_SIZE);
-	}
-
-	/**
-	 * 检查并补充{@linkplain PagingQuery}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @param cookiePaginationSize
-	 *            允许为{@code null}
-	 * @return 不会为{@code null}
-	 */
-	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery,
-			String cookiePaginationSize)
-	{
-		if (pagingQuery == null)
-		{
-			pagingQuery = new PagingQuery();
-			Integer pageSize = resolveCookiePageSize(request, cookiePaginationSize);
-
-			if (pageSize != null)
-				pagingQuery.setPageSize(pageSize);
-		}
-
-		return pagingQuery;
-	}
-
-	/**
-	 * 检查并补充{@linkplain DirectoryPagingQuery}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @return 不会为{@code null}
-	 */
-	protected DirectoryPagingQuery inflateDirectoryPagingQuery(HttpServletRequest request,
-			DirectoryPagingQuery pagingQuery)
-	{
-		return inflateDirectoryPagingQuery(request, pagingQuery, WebUtils.COOKIE_PAGINATION_SIZE);
-	}
-
-	/**
-	 * 检查并补充{@linkplain DirectoryPagingQuery}。
-	 * 
-	 * @param request
-	 * @param pagingQuery
-	 *            允许为{@code null}
-	 * @param cookiePaginationSize
-	 *            允许为{@code null}
-	 * @return 不会为{@code null}
-	 */
-	protected DirectoryPagingQuery inflateDirectoryPagingQuery(HttpServletRequest request,
-			DirectoryPagingQuery pagingQuery, String cookiePaginationSize)
-	{
-		if (pagingQuery == null)
-		{
-			pagingQuery = new DirectoryPagingQuery();
-			Integer pageSize = resolveCookiePageSize(request, cookiePaginationSize);
-
-			if (pageSize != null)
-				pagingQuery.setPageSize(pageSize);
-		}
-
-		return pagingQuery;
-	}
-
-	/**
-	 * 解析Cookie中的页大小。
-	 * 
-	 * @param request
-	 * @param cookiePageSize
-	 *            允许为{@code null}
-	 * @return {@code null}表示未解析到
-	 */
-	protected Integer resolveCookiePageSize(HttpServletRequest request, String cookiePageSize)
-	{
-		Integer pageSize = null;
-
-		if (!isEmpty(cookiePageSize))
-		{
-			try
-			{
-				String pss = WebUtils.getCookieValue(request, cookiePageSize);
-
-				if (!isEmpty(pss))
-					pageSize = Integer.parseInt(pss);
-			}
-			catch (Exception e)
-			{
-			}
-		}
-
-		return pageSize;
 	}
 
 	/**

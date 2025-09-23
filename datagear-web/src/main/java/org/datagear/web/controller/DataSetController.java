@@ -62,12 +62,12 @@ import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.FileSourceService;
 import org.datagear.management.util.DtbsSourceConnectionFactory;
 import org.datagear.management.util.ManagementSupport;
-import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebDashboardQueryConverter;
@@ -779,10 +779,10 @@ public class DataSetController extends AbstractDtbsSourceConnController
 	@ResponseBody
 	public PagingData<DataSetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final Model springModel,
-			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new APIDDataFilterPagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<DataSetEntity> pagingData = this.dataSetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());

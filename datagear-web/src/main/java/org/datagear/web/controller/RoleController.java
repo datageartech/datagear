@@ -24,9 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Role;
 import org.datagear.management.service.RoleService;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -166,9 +166,9 @@ public class RoleController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<Role> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) PagingQuery pagingQuery) throws Exception
 	{
-		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 
 		PagingData<Role> pagingData = this.roleService.pagingQuery(pagingQuery);
 		toQueryResponseData(request, pagingData.getItems());

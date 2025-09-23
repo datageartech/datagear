@@ -54,11 +54,6 @@ public class APIDDataFilterPagingQuery extends DataFilterPagingQuery
 		super(page, pageSize, keyword);
 	}
 
-	public APIDDataFilterPagingQuery(int page, int pageSize, String keyword, String condition)
-	{
-		super(page, pageSize, keyword, condition);
-	}
-
 	public String getAnalysisProjectId()
 	{
 		return analysisProjectId;

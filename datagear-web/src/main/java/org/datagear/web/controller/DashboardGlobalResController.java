@@ -497,10 +497,10 @@ public class DashboardGlobalResController extends AbstractController implements 
 	@ResponseBody
 	public PagingData<ResultFileInfo> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DirectoryPagingQuery pagingQueryParam)
+			@RequestBody(required = false) DirectoryPagingQuery pagingQuery)
 			throws Exception
 	{
-		final DirectoryPagingQuery pagingQuery = inflateDirectoryPagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new DirectoryPagingQuery() : pagingQuery);
 		DirectoryQuerySupport qs = getDirectoryQuerySupport();
 
 		return qs.pagingQuery(pagingQuery);

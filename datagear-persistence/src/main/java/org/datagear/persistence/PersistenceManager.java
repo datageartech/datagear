@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.util.List;
 
 import org.datagear.meta.Table;
+import org.datagear.util.query.PagingData;
 
 /**
  * 持久化管理器。

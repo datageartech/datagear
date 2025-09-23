@@ -17,7 +17,7 @@
 
 package org.datagear.web.vo;
 
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
 
 /**
  * 数据过滤器{@linkplain PagingQuery}。
@@ -51,11 +51,6 @@ public class DataFilterPagingQuery extends PagingQuery
 	public DataFilterPagingQuery(int page, int pageSize, String keyword)
 	{
 		super(page, pageSize, keyword);
-	}
-
-	public DataFilterPagingQuery(int page, int pageSize, String keyword, String condition)
-	{
-		super(page, pageSize, keyword, condition);
 	}
 
 	public String getDataFilter()

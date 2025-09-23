@@ -34,8 +34,7 @@ import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.persistence.support.DefaultLOBRowMapper;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
@@ -46,6 +45,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.json.jackson.ObjectMapperBuilder;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
@@ -379,10 +379,10 @@ public class DtbsSourceSqlpadController extends AbstractDtbsSourceConnController
 	@ResponseBody
 	public PagingData<SqlHistory> sqlHistoryData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
-			@RequestBody PagingQuery pagingQueryParam) throws Throwable
+			@RequestBody PagingQuery pagingQuery) throws Throwable
 	{
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 		final User user = getCurrentUser();
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		return this.sqlHistoryService.pagingQueryByUserId(dtbsSourceId, user.getId(), pagingQuery);
 	}

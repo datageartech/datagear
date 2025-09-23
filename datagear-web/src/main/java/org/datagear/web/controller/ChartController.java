@@ -44,10 +44,10 @@ import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.util.ManagementSupport;
-import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -362,11 +362,11 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartWidgetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			Model model, @RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam)
+			Model model, @RequestBody(required = false) APIDDataFilterPagingQuery pagingQuery)
 			throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new APIDDataFilterPagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());

@@ -15,11 +15,10 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.persistence;
+package org.datagear.management.util;
 
 import java.util.Arrays;
 
-import org.datagear.util.StringUtil;
 import org.datagear.util.query.KeywordQuery;
 import org.datagear.util.query.Order;
 import org.datagear.util.query.OrdersAware;
@@ -34,14 +33,8 @@ public class Query extends KeywordQuery implements OrdersAware
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 查询条件 */
-	private String condition;
-
 	/** 排序方式 */
 	private Order[] orders;
-
-	/** 针对keyword，是否使用“NOT LIKE”而非“LIKE” */
-	private boolean notLike = false;
 
 	public Query()
 	{
@@ -51,47 +44,6 @@ public class Query extends KeywordQuery implements OrdersAware
 	public Query(String keyword)
 	{
 		super(keyword);
-	}
-
-	public Query(String keyword, String condition)
-	{
-		super(keyword);
-		this.condition = condition;
-	}
-
-	public boolean hasKeyword()
-	{
-		return !StringUtil.isEmpty(getKeyword());
-	}
-
-	public boolean isNotLike()
-	{
-		return notLike;
-	}
-
-	public void setNotLike(boolean notLike)
-	{
-		this.notLike = notLike;
-	}
-
-	public boolean hasCondition()
-	{
-		return (this.condition != null && !this.condition.isEmpty());
-	}
-
-	public String getCondition()
-	{
-		return condition;
-	}
-
-	public void setCondition(String condition)
-	{
-		this.condition = condition;
-	}
-
-	public boolean hasOrder()
-	{
-		return (this.orders != null && this.orders.length > 0);
 	}
 
 	@Override
@@ -111,8 +63,6 @@ public class Query extends KeywordQuery implements OrdersAware
 	{
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((condition == null) ? 0 : condition.hashCode());
-		result = prime * result + (notLike ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(orders);
 		return result;
 	}
@@ -127,15 +77,6 @@ public class Query extends KeywordQuery implements OrdersAware
 		if (getClass() != obj.getClass())
 			return false;
 		Query other = (Query) obj;
-		if (condition == null)
-		{
-			if (other.condition != null)
-				return false;
-		}
-		else if (!condition.equals(other.condition))
-			return false;
-		if (notLike != other.notLike)
-			return false;
 		if (!Arrays.equals(orders, other.orders))
 			return false;
 		return true;
@@ -144,7 +85,6 @@ public class Query extends KeywordQuery implements OrdersAware
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [keyword=" + getKeyword() + ", condition=" + condition + ", orders="
-				+ Arrays.toString(orders) + ", notLike=" + notLike + "]";
+		return getClass().getSimpleName() + " [keyword=" + getKeyword() + ", orders=" + Arrays.toString(orders) + "]";
 	}
 }

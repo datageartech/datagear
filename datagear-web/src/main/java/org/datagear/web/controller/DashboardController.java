@@ -49,12 +49,12 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DashboardShareSetService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
-import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
@@ -990,10 +990,10 @@ public class DashboardController extends AbstractDataAnalysisController
 	@ResponseBody
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQueryData(HttpServletRequest request,
 			HttpServletResponse response, final Model springModel,
-			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new APIDDataFilterPagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
 				pagingQuery, pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());

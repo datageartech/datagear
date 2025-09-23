@@ -28,7 +28,7 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.impl.AuthorizationQueryContext;
 import org.datagear.management.service.impl.EnumValueLabel;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.util.AuthorizationResMetaManager;
 import org.datagear.web.util.AuthorizationResMetaManager.PermissionMeta;
@@ -247,10 +247,10 @@ public class AuthorizationController extends AbstractController
 	public List<Authorization> queryData(HttpServletRequest request, HttpServletResponse response,
 			Model model, @PathVariable("resourceType") String resourceType,
 			@PathVariable("resource") String resource,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) PagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		ResourceMeta resourceMeta = getResourceMetaNonNull(request, resourceType);
 

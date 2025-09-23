@@ -139,4 +139,27 @@ public class Order implements Serializable
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", type=" + type + "]";
 	}
+
+	/**
+	 * 创建{@linkplain Order}实例。
+	 * 
+	 * @param name
+	 * @param type
+	 * @return
+	 */
+	public static Order valueOf(String name, String type)
+	{
+		return new Order(name, type);
+	}
+
+	/**
+	 * 转换为数组。
+	 * 
+	 * @param order
+	 * @return
+	 */
+	public static Order[] asArray(Order order)
+	{
+		return new Order[] { order };
+	}
 }

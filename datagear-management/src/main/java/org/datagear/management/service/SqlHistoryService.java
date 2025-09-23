@@ -20,8 +20,8 @@ package org.datagear.management.service;
 import java.util.List;
 
 import org.datagear.management.domain.SqlHistory;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
+import org.datagear.util.query.PagingData;
 
 /**
  * {@linkplain SqlHistory}业务服务接口。

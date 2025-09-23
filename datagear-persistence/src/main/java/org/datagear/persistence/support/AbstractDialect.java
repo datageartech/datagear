@@ -23,11 +23,11 @@ import org.datagear.meta.Column;
 import org.datagear.meta.SearchableType;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
-import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.NumberParser;
 import org.datagear.util.Sql;
+import org.datagear.util.query.Order;
 
 /**
  * 抽象{@linkplain Dialect}。

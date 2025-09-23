@@ -33,15 +33,15 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.DtbsSourceGuardService;
 import org.datagear.management.service.impl.SaveDtbsSourcePermissionDeniedException;
 import org.datagear.management.util.GuardEntity;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableUtil;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -243,10 +243,10 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DtbsSource> queryData(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) PagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<DtbsSource> items = getDtbsSourceService().query(user, pagingQuery);
 		toQueryResponseData(request, items);
@@ -257,10 +257,10 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<DtbsSource> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) PagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		PagingData<DtbsSource> pagingData = getDtbsSourceService().pagingQuery(user, pagingQuery);
 		toQueryResponseData(request, pagingData.getItems());
@@ -306,9 +306,9 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 	@ResponseBody
 	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
 			Model model, @PathVariable("dtbsSourceId") String dtbsSourceId,
-			@RequestBody PagingQuery pagingQueryParam) throws Throwable
+			@RequestBody PagingQuery pagingQuery) throws Throwable
 	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 
 		List<SimpleTable> tables = new ReturnDtbsSourceConnExecutor<List<SimpleTable>>(request, response, model,
 				dtbsSourceId, true)

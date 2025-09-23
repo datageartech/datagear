@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class Paging implements Serializable
+public class Paging implements PagingAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -56,21 +56,25 @@ public class Paging implements Serializable
 		this.pageSize = pageSize;
 	}
 
+	@Override
 	public int getPage()
 	{
 		return page;
 	}
 
+	@Override
 	public void setPage(int page)
 	{
 		this.page = page;
 	}
 
+	@Override
 	public int getPageSize()
 	{
 		return pageSize;
 	}
 
+	@Override
 	public void setPageSize(int pageSize)
 	{
 		this.pageSize = pageSize;

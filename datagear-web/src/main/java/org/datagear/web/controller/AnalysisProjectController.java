@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
-import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,10 +205,10 @@ public class AnalysisProjectController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<AnalysisProject> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			Model springModel, @RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			Model springModel, @RequestBody(required = false) DataFilterPagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<AnalysisProject> pagingData = this.analysisProjectService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());

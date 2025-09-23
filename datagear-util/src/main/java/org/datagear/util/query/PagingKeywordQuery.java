@@ -15,46 +15,30 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.util.dirquery;
+package org.datagear.util.query;
 
-import org.datagear.util.query.Order;
-import org.datagear.util.query.Paging;
-import org.datagear.util.query.PagingAware;
+import java.io.Serializable;
 
 /**
- * 目录分页查询。
+ * 分页关键字查询。
  * 
  * @author datagear@163.com
  *
  */
-public class DirectoryPagingQuery extends DirectoryQuery implements PagingAware
+public class PagingKeywordQuery extends KeywordQuery implements PagingAware, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 分页信息 */
 	private Paging paging = new Paging();
 
-	public DirectoryPagingQuery()
+	public PagingKeywordQuery()
 	{
 		super();
 	}
 
-	public DirectoryPagingQuery(int page, String keyword)
+	public PagingKeywordQuery(String keyword)
 	{
 		super(keyword);
-		this.paging.setPage(page);
-	}
-
-	public DirectoryPagingQuery(int page, String keyword, Order order)
-	{
-		super(keyword, order);
-		this.paging.setPage(page);
-	}
-
-	public DirectoryPagingQuery(int page, String keyword, Order order, String queryRange)
-	{
-		super(keyword, order, queryRange);
-		this.paging.setPage(page);
 	}
 
 	@Override

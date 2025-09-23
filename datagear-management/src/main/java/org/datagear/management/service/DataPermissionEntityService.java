@@ -23,9 +23,9 @@ import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.Entity;
 import org.datagear.management.domain.User;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.Query;
+import org.datagear.management.util.PagingQuery;
+import org.datagear.management.util.Query;
+import org.datagear.util.query.PagingData;
 
 /**
  * 数据权限{@linkplain EntityService}。

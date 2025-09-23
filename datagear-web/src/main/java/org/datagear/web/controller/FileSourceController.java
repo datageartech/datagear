@@ -198,11 +198,11 @@ public class FileSourceController extends AbstractController
 	@ResponseBody
 	public PagingData<FileSource> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam)
+			@RequestBody(required = false) DataFilterPagingQuery pagingQuery)
 			throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<FileSource> pagingData = this.fileSourceService.pagingQuery(user, pagingQuery,
 				pagingQuery.getDataFilter());
@@ -225,11 +225,10 @@ public class FileSourceController extends AbstractController
 	@ResponseBody
 	public PagingData<ResultFileInfo> filePagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			Model springModel, @RequestParam("id") String id,
-			@RequestBody(required = false) DirectoryPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) DirectoryPagingQuery pagingQuery) throws Exception
 	{
+		pagingQuery = (pagingQuery == null ? new DirectoryPagingQuery() : pagingQuery);
 		User user = getCurrentUser();
-
-		final DirectoryPagingQuery pagingQuery = inflateDirectoryPagingQuery(request, pagingQueryParam);
 
 		FileSource fileSource = getByIdForView(this.fileSourceService, user, id);
 		DirectoryQuerySupport qs = getDirectoryQuerySupport(fileSource);

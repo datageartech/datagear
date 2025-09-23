@@ -20,9 +20,9 @@ package org.datagear.management.service;
 import java.util.List;
 
 import org.datagear.management.domain.Entity;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.Query;
+import org.datagear.management.util.PagingQuery;
+import org.datagear.management.util.Query;
+import org.datagear.util.query.PagingData;
 
 /**
  * 基础服务接口。

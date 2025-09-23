@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.datagear.management.service.impl.AbstractMybatisService;
-import org.datagear.persistence.Order;
-import org.datagear.persistence.Query;
+import org.datagear.management.util.Query;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.Order;
 
 /**
  * Mybatis SQL方言。
@@ -44,11 +44,6 @@ public abstract class MbSqlDialect
 	 * 变量名：标识符引用符
 	 */
 	public static final String VAR_IDENTIFIER_QUOTE_KEY = "_iq_";
-
-	/**
-	 * 变量名：查询不匹配
-	 */
-	public static final String VAR_QUERY_NOT_LIKE = "queryNotLike";
 
 	/**
 	 * 变量名：查询关键字
@@ -154,9 +149,7 @@ public abstract class MbSqlDialect
 	public void setQueryParams(Map<String, Object> param, Query query)
 	{
 		setQueryKeywordParam(param, query);
-		setQueryConditionParam(param, query);
 		setQueryOrderParam(param, query);
-		param.put(VAR_QUERY_NOT_LIKE, query.isNotLike());
 	}
 
 	/**
@@ -214,17 +207,6 @@ public abstract class MbSqlDialect
 		}
 
 		params.put(VAR_QUERY_ORDER, orderSql);
-	}
-
-	/**
-	 * 设置查询条件参数（{@linkplain Query#getCondition()}）。
-	 * 
-	 * @param params
-	 * @param query
-	 */
-	protected void setQueryConditionParam(Map<String, Object> params, Query query)
-	{
-		// 禁用查询条件参数，避免SQL注入问题
 	}
 
 	/**

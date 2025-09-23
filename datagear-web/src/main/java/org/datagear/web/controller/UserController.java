@@ -32,10 +32,10 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.management.util.RoleSpec;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,10 +342,10 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<User> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			final Model springModel, @RequestBody(required = false) PagingQuery pagingQuery)
 			throws Exception
 	{
-		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 
 		PagingData<User> pagingData = this.userService.pagingQuery(pagingQuery);
 		toQueryResponseData(request, pagingData.getItems());

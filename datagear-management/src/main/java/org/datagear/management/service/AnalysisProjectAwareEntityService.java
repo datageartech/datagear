@@ -19,8 +19,8 @@ package org.datagear.management.service;
 
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.User;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
+import org.datagear.util.query.PagingData;
 
 /**
  * {@linkplain AnalysisProjectAwareEntity}业务服务接口。

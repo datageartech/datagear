@@ -50,10 +50,10 @@ import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.UserService;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.management.util.dialect.MbSqlDialect;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.PagingData;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**

@@ -24,10 +24,10 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.service.SqlHistoryService;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.management.util.dialect.MbSqlDialect;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.util.query.PagingData;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**

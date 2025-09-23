@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.connection.DriverLibraryInfo;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
@@ -280,9 +280,9 @@ public class DriverEntityController extends AbstractController
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DriverEntity> queryData(HttpServletRequest request,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) PagingQuery pagingQuery) throws Exception
 	{
-		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 
 		List<DriverEntity> items = this.driverEntityManager.getAll();
 		items = findByKeyword(items, pagingQuery.getKeyword());

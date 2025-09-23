@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.persistence;
+package org.datagear.management.util;
 
 import java.util.Arrays;
 
@@ -60,13 +60,6 @@ public class PagingQuery extends Query implements PagingAware
 		this.paging.setPageSize(pageSize);
 	}
 
-	public PagingQuery(int page, int pageSize, String keyword, String condition)
-	{
-		super(keyword, condition);
-		this.paging.setPage(page);
-		this.paging.setPageSize(pageSize);
-	}
-
 	@Override
 	public int getPage()
 	{
@@ -94,9 +87,8 @@ public class PagingQuery extends Query implements PagingAware
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [page=" + getPage() + ", pageSize=" + getPageSize() + ", notLike="
-				+ isNotLike() + ", keyword=" + getKeyword() + ", condition=" + getCondition() + ", orders="
-				+ Arrays.toString(getOrders()) + "]";
+		return getClass().getSimpleName() + " [page=" + getPage() + ", pageSize=" + getPageSize() + ", keyword="
+				+ getKeyword() + ", orders=" + Arrays.toString(getOrders()) + "]";
 	}
 
 	@Override

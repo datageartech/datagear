@@ -28,8 +28,8 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.DtbsSourceGuardService;
 import org.datagear.management.util.DtbsSourceGuardChecker;
 import org.datagear.management.util.GuardEntity;
+import org.datagear.management.util.Query;
 import org.datagear.management.util.dialect.MbSqlDialect;
-import org.datagear.persistence.Query;
 import org.datagear.util.LastModifiedService;
 import org.mybatis.spring.SqlSessionTemplate;
 

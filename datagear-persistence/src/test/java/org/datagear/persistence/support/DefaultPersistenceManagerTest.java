@@ -27,10 +27,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.datagear.meta.Table;
-import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceTestSupport;
 import org.datagear.persistence.Row;
+import org.datagear.util.query.PagingData;
 import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
 import org.junit.Test;
 

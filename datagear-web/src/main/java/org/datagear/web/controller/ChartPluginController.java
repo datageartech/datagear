@@ -35,11 +35,11 @@ import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
+import org.datagear.management.util.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,10 +212,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartPluginView> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQuery)
 			throws Exception
 	{
-		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 		List<HtmlChartPluginView> chartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword());
 
 		PagingData<HtmlChartPluginView> pagingData = new PagingData<>(pagingQuery.getPage(), chartPluginViews.size(),
@@ -240,10 +240,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/selectData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Categorization> selectData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQuery)
 			throws Exception
 	{
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 
 		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword());
 		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);

@@ -166,9 +166,9 @@ public class DtbsSourceGuardController extends AbstractController
 	@ResponseBody
 	public List<DtbsSourceGuard> queryData(HttpServletRequest request, HttpServletResponse response,
 			final Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) DataFilterPagingQuery pagingQuery) throws Exception
 	{
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
+		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 
 		List<DtbsSourceGuard> items = this.dtbsSourceGuardService.query(pagingQuery);
 		toQueryResponseData(request, items);

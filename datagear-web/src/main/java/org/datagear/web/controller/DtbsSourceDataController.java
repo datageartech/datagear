@@ -38,7 +38,6 @@ import org.datagear.management.domain.User;
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
-import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.Query;
@@ -51,6 +50,7 @@ import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.query.PagingData;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
@@ -249,11 +249,12 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 	@RequestMapping(value = "/{dtbsSourceId}/{tableName}/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	public void pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("dtbsSourceId") String dtbsSourceId,
-			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery paramData)
+			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery pagingQuery)
 			throws Throwable
 	{
+		pagingQuery = (pagingQuery == null ? new PagingQuery() : pagingQuery);
 		final User user = getCurrentUser();
-		final PagingQuery pagingQuery = inflatePagingQuery(request, paramData);
+		final PagingQuery fpq = pagingQuery;
 
 		final DefaultLOBRowMapper rowMapper = buildQueryDefaultLOBRowMapper();
 
@@ -266,7 +267,7 @@ public class DtbsSourceDataController extends AbstractDtbsSourceConnTableControl
 			{
 				checkReadTableDataPermission(dtbsSource, user);
 
-				PagingData<Row> pagingData = persistenceManager.pagingQuery(getConnection(), null, table, pagingQuery,
+				PagingData<Row> pagingData = persistenceManager.pagingQuery(getConnection(), null, table, fpq,
 						rowMapper);
 				return pagingData;
 			}

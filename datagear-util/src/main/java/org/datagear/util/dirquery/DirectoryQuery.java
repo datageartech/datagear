@@ -19,6 +19,7 @@ package org.datagear.util.dirquery;
 
 import org.datagear.util.query.KeywordQuery;
 import org.datagear.util.query.Order;
+import org.datagear.util.query.OrderAware;
 
 /**
  * 目录查询。
@@ -26,7 +27,7 @@ import org.datagear.util.query.Order;
  * @author datagear@163.com
  *
  */
-public class DirectoryQuery extends KeywordQuery
+public class DirectoryQuery extends KeywordQuery implements OrderAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -75,11 +76,13 @@ public class DirectoryQuery extends KeywordQuery
 		this.queryRange = queryRange;
 	}
 
+	@Override
 	public Order getOrder()
 	{
 		return order;
 	}
 
+	@Override
 	public void setOrder(Order order)
 	{
 		this.order = order;

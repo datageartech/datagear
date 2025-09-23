@@ -36,13 +36,13 @@ import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectBuilder;
 import org.datagear.persistence.DialectException;
 import org.datagear.persistence.DialectSource;
-import org.datagear.persistence.Order;
 import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
 import org.datagear.persistence.support.dialect.OracleDialectBuilder;
 import org.datagear.persistence.support.dialect.PostgresqlDialectBuilder;
 import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
+import org.datagear.util.query.Order;
 
 /**
  * 默认{@linkplain DialectSource}。
