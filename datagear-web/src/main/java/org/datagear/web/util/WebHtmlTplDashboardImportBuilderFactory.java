@@ -27,6 +27,30 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class WebHtmlTplDashboardImportBuilderFactory
 {
+	private ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory;
+
+	public WebHtmlTplDashboardImportBuilderFactory()
+	{
+		super();
+	}
+
+	public WebHtmlTplDashboardImportBuilderFactory(ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	{
+		super();
+		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+	}
+
+	public ChartPluginManagerJsBufferFactory getChartPluginManagerJsBufferFactory()
+	{
+		return chartPluginManagerJsBufferFactory;
+	}
+
+	public void setChartPluginManagerJsBufferFactory(
+			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	{
+		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+	}
+
 	/**
 	 * 获取{@linkplain WebHtmlTplDashboardImportBuilder}。
 	 * 
@@ -38,6 +62,6 @@ public class WebHtmlTplDashboardImportBuilderFactory
 	 */
 	public WebHtmlTplDashboardImportBuilder getBuilder(HttpServletRequest request, String mode)
 	{
-		return new WebHtmlTplDashboardImportBuilder(request, mode);
+		return new WebHtmlTplDashboardImportBuilder(request, mode, this.chartPluginManagerJsBufferFactory);
 	}
 }

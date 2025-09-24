@@ -19,6 +19,7 @@ package org.datagear.web.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,6 +33,7 @@ import org.datagear.util.Global;
 import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.controller.ChartPluginVisualResController;
 import org.datagear.web.controller.ServerTimeJsController;
+import org.datagear.web.util.ChartPluginManagerJsBufferFactory.ChartPluginManagerJsBuffer;
 
 /**
  * Web {@linkplain HtmlTplDashboardImportBuilder}。
@@ -85,16 +87,20 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	/** 模式 */
 	private String mode;
 
+	private ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory;
+
 	public WebHtmlTplDashboardImportBuilder()
 	{
 		super();
 	}
 	
-	public WebHtmlTplDashboardImportBuilder(HttpServletRequest request, String mode)
+	public WebHtmlTplDashboardImportBuilder(HttpServletRequest request, String mode,
+			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
 	{
 		super();
 		this.request = request;
 		this.mode = mode;
+		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
 	}
 
 	public HttpServletRequest getRequest()
@@ -115,6 +121,17 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	public void setMode(String mode)
 	{
 		this.mode = mode;
+	}
+
+	public ChartPluginManagerJsBufferFactory getChartPluginManagerJsBufferFactory()
+	{
+		return chartPluginManagerJsBufferFactory;
+	}
+
+	public void setChartPluginManagerJsBufferFactory(
+			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	{
+		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
 	}
 
 	@Override
@@ -142,6 +159,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		String analysisPrefix = getAnalysisPath(contextPath, dashboard);
 		String apiVersion = trimDashboardApiVersion(dashboard);
 		boolean isV1 = DashboardApiVersion.isV1(apiVersion);
+		Locale locale = WebUtils.getLocale(request);
 
 		// favicon
 		impts.add(new HtmlTplDashboardImport(BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON,
@@ -195,9 +213,8 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 				analysisPrefix + "/chartSupport.js?v=" + Global.VERSION));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
 				analysisPrefix + "/chartSetting.js?v=" + Global.VERSION));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
-				contextPath + "/vres/plugin/chartPluginManager.js?" + ChartPluginVisualResController.API_VERSION_PARAM
-						+ "=" + apiVersion + "&v=" + Global.VERSION));
+
+		addChartPluginManagerImport(impts, contextPath, locale, apiVersion);
 
 		if (isEditMode(mode))
 		{
@@ -206,6 +223,23 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		}
 
 		return impts;
+	}
+
+	protected void addChartPluginManagerImport(List<HtmlTplDashboardImport> impts, String contextPath, Locale locale,
+			String apiVersion)
+	{
+		ChartPluginManagerJsBuffer cpmJsBuffer = this.chartPluginManagerJsBufferFactory
+				.latest(locale, apiVersion);
+		int cpmJsCount = cpmJsBuffer.getBufferCount();
+		
+		for (int i = 0; i < cpmJsCount; i++)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
+					contextPath + "/vres/plugin/chartPluginManager.js" //
+							+ "?" + ChartPluginVisualResController.MANAGER_BUFFER_ID_PARAM + "=" + cpmJsBuffer.getId() //
+							+ "&" + ChartPluginVisualResController.MANAGER_BUFFER_BLOCK_PARAM + "=" + i //
+							+ "&v=" + Global.VERSION));
+		}
 	}
 
 	protected String getAnalysisPath(String contextPath, HtmlTplDashboard dashboard)

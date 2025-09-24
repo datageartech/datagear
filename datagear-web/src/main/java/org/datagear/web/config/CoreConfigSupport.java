@@ -137,6 +137,7 @@ import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.AuthorizationResMetaManager;
 import org.datagear.web.util.AuthorizationResMetas;
+import org.datagear.web.util.ChartPluginManagerJsBufferFactory;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DefaultMessageChannel;
 import org.datagear.web.util.DelegatingTextEncryptor;
@@ -671,7 +672,8 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public WebHtmlTplDashboardImportBuilderFactory webHtmlTplDashboardImportBuilderFactory()
 	{
-		WebHtmlTplDashboardImportBuilderFactory bean = new WebHtmlTplDashboardImportBuilderFactory();
+		WebHtmlTplDashboardImportBuilderFactory bean = new WebHtmlTplDashboardImportBuilderFactory(
+				this.chartPluginManagerJsBufferFactory());
 		return bean;
 	}
 	
@@ -817,6 +819,14 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return bean;
 	}
 	
+	@Bean
+	public ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory()
+	{
+		ChartPluginManagerJsBufferFactory bean = new ChartPluginManagerJsBufferFactory(
+				this.directoryHtmlChartPluginManager());
+		return bean;
+	}
+
 	protected String[] getBuiltInHtmlChartPluginClasspathPatterns()
 	{
 		return new String[] { DirectoryHtmlChartPluginManagerInitializer.DEFAULT_CLASSPATH_PATTERN };
