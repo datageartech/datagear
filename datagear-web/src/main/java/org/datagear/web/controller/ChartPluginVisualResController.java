@@ -163,17 +163,16 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 		out.println("(function(global)");
 		out.println("{");
 
-		out.println("var chartFactory = (global.chartFactory || (global.chartFactory = {}));");
-		out.println(
-				"var chartPluginManager = (chartFactory.chartPluginManager || (chartFactory.chartPluginManager = {}));");
-		out.println("chartPluginManager.plugins = (chartPluginManager.plugins || {});");
+		out.println("var CF = (global.chartFactory || (global.chartFactory = {}));");
+		out.println("var CPM = (CF.chartPluginManager || (CF.chartPluginManager = {}));");
+		out.println("CPM.plugins = (CPM.plugins || {});");
 
 		// @deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除
 		out.println();
-		out.println("global.chartPluginManager = chartPluginManager;");
+		out.println("global.chartPluginManager = CPM;");
 
 		out.println();
-		out.println("chartPluginManager.get = function(id){ return this.plugins[id]; };");
+		out.println("if(CPM.get == null){ CPM.get = function(id){ return this.plugins[id]; }; }");
 		out.println();
 
 		for (int i = 0, len = htmlChartPlugins.size(); i < len; i++)
@@ -188,7 +187,7 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 			out.println(pluginVar + "." + HtmlChartPlugin.PROPERTY_RENDERER_OLD + " = " + pluginVar + "."
 					+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
 
-			out.println("chartPluginManager.plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
+			out.println("CPM.plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
 					+ pluginVar + ";");
 		}
 
