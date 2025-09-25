@@ -137,7 +137,7 @@ import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.AuthorizationResMetaManager;
 import org.datagear.web.util.AuthorizationResMetas;
-import org.datagear.web.util.ChartPluginManagerJsBufferFactory;
+import org.datagear.web.util.ChartPluginManagerJsFactory;
 import org.datagear.web.util.CheckCodeManager;
 import org.datagear.web.util.DefaultMessageChannel;
 import org.datagear.web.util.DelegatingTextEncryptor;
@@ -673,7 +673,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public WebHtmlTplDashboardImportBuilderFactory webHtmlTplDashboardImportBuilderFactory()
 	{
 		WebHtmlTplDashboardImportBuilderFactory bean = new WebHtmlTplDashboardImportBuilderFactory(
-				this.chartPluginManagerJsBufferFactory());
+				this.chartPluginManagerJsFactory());
 		return bean;
 	}
 	
@@ -820,9 +820,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	}
 	
 	@Bean
-	public ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory()
+	public ChartPluginManagerJsFactory chartPluginManagerJsFactory()
 	{
-		ChartPluginManagerJsBufferFactory bean = new ChartPluginManagerJsBufferFactory(
+		ChartPluginManagerJsFactory bean = new ChartPluginManagerJsFactory(
 				this.directoryHtmlChartPluginManager());
 		return bean;
 	}

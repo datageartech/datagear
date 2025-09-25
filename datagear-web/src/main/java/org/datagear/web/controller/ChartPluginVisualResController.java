@@ -19,7 +19,6 @@ package org.datagear.web.controller;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.nio.CharBuffer;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,8 +29,8 @@ import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.util.StringUtil;
-import org.datagear.web.util.ChartPluginManagerJsBufferFactory;
-import org.datagear.web.util.ChartPluginManagerJsBufferFactory.ChartPluginManagerJsBuffer;
+import org.datagear.web.util.ChartPluginManagerJsFactory;
+import org.datagear.web.util.ChartPluginManagerJsFactory.ChartPluginManagerJs;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -52,7 +51,7 @@ import org.springframework.web.context.request.WebRequest;
 public class ChartPluginVisualResController extends AbstractChartPluginAwareController implements ServletContextAware
 {
 	/**
-	 * 加载图表插件JS脚本参数名：{@linkplain ChartPluginManagerJsBuffer#getId()}
+	 * 加载图表插件JS脚本参数名：{@linkplain ChartPluginManagerJs#getId()}
 	 */
 	public static final String MANAGER_BUFFER_ID_PARAM = "id";
 
@@ -73,7 +72,7 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
 	@Autowired
-	private ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory;
+	private ChartPluginManagerJsFactory chartPluginManagerJsFactory;
 
 	public ChartPluginVisualResController()
 	{
@@ -101,15 +100,14 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
 	}
 
-	public ChartPluginManagerJsBufferFactory getChartPluginManagerJsBufferFactory()
+	public ChartPluginManagerJsFactory getChartPluginManagerJsFactory()
 	{
-		return chartPluginManagerJsBufferFactory;
+		return chartPluginManagerJsFactory;
 	}
 
-	public void setChartPluginManagerJsBufferFactory(
-			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	public void setChartPluginManagerJsFactory(ChartPluginManagerJsFactory chartPluginManagerJsFactory)
 	{
-		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+		this.chartPluginManagerJsFactory = chartPluginManagerJsFactory;
 	}
 
 	@RequestMapping("/resource/{pluginId:.+}/**")
@@ -139,18 +137,18 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 			@RequestParam(value = MANAGER_BUFFER_BLOCK_PARAM, required = false) Integer block,
 			@RequestParam(value = API_VERSION_PARAM, required = false) String apiVersion) throws Exception
 	{
-		ChartPluginManagerJsBuffer cpmJsBuffer = null;
+		ChartPluginManagerJs managerJs = null;
 
 		if (!StringUtil.isEmpty(bufferId))
 		{
-			cpmJsBuffer = this.chartPluginManagerJsBufferFactory.getById(bufferId);
+			managerJs = this.chartPluginManagerJsFactory.getById(bufferId);
 		}
 		else
 		{
-			cpmJsBuffer = this.chartPluginManagerJsBufferFactory.latest(WebUtils.getLocale(request), apiVersion);
+			managerJs = this.chartPluginManagerJsFactory.latest(WebUtils.getLocale(request), apiVersion);
 		}
 
-		long lastModified = (cpmJsBuffer == null ? -1 : cpmJsBuffer.getLastModified());
+		long lastModified = (managerJs == null ? -1 : managerJs.getLastModified());
 
 		if (webRequest.checkNotModified(lastModified))
 			return;
@@ -160,21 +158,21 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 
 		PrintWriter out = response.getWriter();
 
-		if (cpmJsBuffer != null)
+		if (managerJs != null)
 		{
 			if (block != null)
 			{
-				CharBuffer charBuffer = (cpmJsBuffer == null ? null : cpmJsBuffer.getBuffer(block));
+				String script = (managerJs == null ? null : managerJs.getScript(block));
 
-				if (charBuffer != null)
-					out.write(charBuffer.toString());
+				if (script != null)
+					out.write(script);
 			}
 			else
 			{
-				List<CharBuffer> charBuffers = cpmJsBuffer.getBuffers();
-				for (CharBuffer charBuffer : charBuffers)
+				List<String> scripts = managerJs.getScripts();
+				for (String script : scripts)
 				{
-					out.write(charBuffer.toString());
+					out.println(script);
 				}
 			}
 		}

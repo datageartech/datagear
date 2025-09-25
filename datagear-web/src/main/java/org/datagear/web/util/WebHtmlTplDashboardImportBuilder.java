@@ -33,7 +33,7 @@ import org.datagear.util.Global;
 import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.controller.ChartPluginVisualResController;
 import org.datagear.web.controller.ServerTimeJsController;
-import org.datagear.web.util.ChartPluginManagerJsBufferFactory.ChartPluginManagerJsBuffer;
+import org.datagear.web.util.ChartPluginManagerJsFactory.ChartPluginManagerJs;
 
 /**
  * Web {@linkplain HtmlTplDashboardImportBuilder}。
@@ -87,7 +87,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	/** 模式 */
 	private String mode;
 
-	private ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory;
+	private ChartPluginManagerJsFactory chartPluginManagerJsFactory;
 
 	public WebHtmlTplDashboardImportBuilder()
 	{
@@ -95,12 +95,12 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	}
 	
 	public WebHtmlTplDashboardImportBuilder(HttpServletRequest request, String mode,
-			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+			ChartPluginManagerJsFactory chartPluginManagerJsFactory)
 	{
 		super();
 		this.request = request;
 		this.mode = mode;
-		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+		this.chartPluginManagerJsFactory = chartPluginManagerJsFactory;
 	}
 
 	public HttpServletRequest getRequest()
@@ -123,15 +123,14 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		this.mode = mode;
 	}
 
-	public ChartPluginManagerJsBufferFactory getChartPluginManagerJsBufferFactory()
+	public ChartPluginManagerJsFactory getChartPluginManagerJsFactory()
 	{
-		return chartPluginManagerJsBufferFactory;
+		return chartPluginManagerJsFactory;
 	}
 
-	public void setChartPluginManagerJsBufferFactory(
-			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	public void setChartPluginManagerJsFactory(ChartPluginManagerJsFactory chartPluginManagerJsFactory)
 	{
-		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+		this.chartPluginManagerJsFactory = chartPluginManagerJsFactory;
 	}
 
 	@Override
@@ -228,16 +227,16 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	protected void addChartPluginManagerImport(List<HtmlTplDashboardImport> impts, String contextPath, Locale locale,
 			String apiVersion)
 	{
-		ChartPluginManagerJsBuffer cpmJsBuffer = this.chartPluginManagerJsBufferFactory
-				.latest(locale, apiVersion);
-		int cpmJsCount = cpmJsBuffer.getBufferCount();
+		ChartPluginManagerJs managerJs = this.chartPluginManagerJsFactory.latest(locale, apiVersion);
+		int scriptCount = managerJs.getScriptCount();
 		
-		for (int i = 0; i < cpmJsCount; i++)
+		for (int i = 0; i < scriptCount; i++)
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
 					contextPath + "/vres/plugin/chartPluginManager.js" //
-							+ "?" + ChartPluginVisualResController.MANAGER_BUFFER_ID_PARAM + "=" + cpmJsBuffer.getId() //
+							+ "?" + ChartPluginVisualResController.MANAGER_BUFFER_ID_PARAM + "=" + managerJs.getId() //
 							+ "&" + ChartPluginVisualResController.MANAGER_BUFFER_BLOCK_PARAM + "=" + i //
+							+ "&" + ChartPluginVisualResController.API_VERSION_PARAM + "=" + apiVersion //
 							+ "&v=" + Global.VERSION));
 		}
 	}

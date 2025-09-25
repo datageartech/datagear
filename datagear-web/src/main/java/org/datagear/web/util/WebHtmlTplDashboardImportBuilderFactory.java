@@ -27,28 +27,27 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class WebHtmlTplDashboardImportBuilderFactory
 {
-	private ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory;
+	private ChartPluginManagerJsFactory chartPluginManagerJsFactory;
 
 	public WebHtmlTplDashboardImportBuilderFactory()
 	{
 		super();
 	}
 
-	public WebHtmlTplDashboardImportBuilderFactory(ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	public WebHtmlTplDashboardImportBuilderFactory(ChartPluginManagerJsFactory chartPluginManagerJsFactory)
 	{
 		super();
-		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+		this.chartPluginManagerJsFactory = chartPluginManagerJsFactory;
 	}
 
-	public ChartPluginManagerJsBufferFactory getChartPluginManagerJsBufferFactory()
+	public ChartPluginManagerJsFactory getChartPluginManagerJsFactory()
 	{
-		return chartPluginManagerJsBufferFactory;
+		return chartPluginManagerJsFactory;
 	}
 
-	public void setChartPluginManagerJsBufferFactory(
-			ChartPluginManagerJsBufferFactory chartPluginManagerJsBufferFactory)
+	public void setChartPluginManagerJsFactory(ChartPluginManagerJsFactory chartPluginManagerJsFactory)
 	{
-		this.chartPluginManagerJsBufferFactory = chartPluginManagerJsBufferFactory;
+		this.chartPluginManagerJsFactory = chartPluginManagerJsFactory;
 	}
 
 	/**
@@ -62,6 +61,6 @@ public class WebHtmlTplDashboardImportBuilderFactory
 	 */
 	public WebHtmlTplDashboardImportBuilder getBuilder(HttpServletRequest request, String mode)
 	{
-		return new WebHtmlTplDashboardImportBuilder(request, mode, this.chartPluginManagerJsBufferFactory);
+		return new WebHtmlTplDashboardImportBuilder(request, mode, this.chartPluginManagerJsFactory);
 	}
 }

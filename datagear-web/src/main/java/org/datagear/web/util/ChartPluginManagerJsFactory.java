@@ -20,7 +20,6 @@ package org.datagear.web.util;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,18 +42,18 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
- * 看板展示页的{@code chartPluginManager.js}缓冲区工厂。
+ * 看板展示页的{@code chartPluginManager.js}脚本工厂。
  * <p>
- * 此类将{@linkplain #getChartPluginManager()}中的所有{@linkplain HtmlChartPlugin}按照预设块大小拆分构建为{@linkplain ChartPluginManagerJsBuffer}，
+ * 此类将{@linkplain #getChartPluginManager()}中的所有{@linkplain HtmlChartPlugin}按照预设块大小拆分构建为{@linkplain ChartPluginManagerJs}，
  * 使得后续看板展示页可以分块引入，避免单个文件过大加载缓慢。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChartPluginManagerJsBufferFactory
+public class ChartPluginManagerJsFactory
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ChartPluginManagerJsBufferFactory.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChartPluginManagerJsFactory.class);
 
 	/**
 	 * 默认块大小，大约{@code 500k}。
@@ -68,16 +67,16 @@ public class ChartPluginManagerJsBufferFactory
 	/** 块字符数 */
 	private int blockCharSize = DEFAULT_BLOCK_SIZE;
 
-	private ConcurrentMap<Key, ChartPluginManagerJsBuffer> _latestJsBuffers = new ConcurrentHashMap<>();
+	private ConcurrentMap<Key, ChartPluginManagerJs> _latestJss = new ConcurrentHashMap<>();
 
-	private Cache<String, ChartPluginManagerJsBuffer> _cache;
+	private Cache<String, ChartPluginManagerJs> _cache;
 
-	public ChartPluginManagerJsBufferFactory()
+	public ChartPluginManagerJsFactory()
 	{
 		this(null);
 	}
 
-	public ChartPluginManagerJsBufferFactory(ChartPluginManager chartPluginManager)
+	public ChartPluginManagerJsFactory(ChartPluginManager chartPluginManager)
 	{
 		super();
 		this.chartPluginManager = chartPluginManager;
@@ -118,14 +117,14 @@ public class ChartPluginManagerJsBufferFactory
 	}
 
 	/**
-	 * 获取最新{@linkplain ChartPluginManagerJsBuffer}。
+	 * 获取最新{@linkplain ChartPluginManagerJs}。
 	 * 
 	 * @param locale
 	 * @param apiVersion
 	 *            允许{@code null}
 	 * @return
 	 */
-	public ChartPluginManagerJsBuffer latest(Locale locale, String apiVersion)
+	public ChartPluginManagerJs latest(Locale locale, String apiVersion)
 	{
 		List<HtmlChartPlugin> plugins = chartPluginManager.getAll(HtmlChartPlugin.class);
 		List<HtmlChartPlugin> htmlChartPlugins = new ArrayList<>(plugins.size());
@@ -147,32 +146,32 @@ public class ChartPluginManagerJsBufferFactory
 		// TOTO 添加 htmlChartPluginForGetWidgetException
 
 		Key key = new Key(locale, apiVersion);
-		ChartPluginManagerJsBuffer latest = this._latestJsBuffers.get(key);
+		ChartPluginManagerJs latest = this._latestJss.get(key);
 
 		if (latest != null && latest.getLastModified() == lastModified)
 			return latest;
 
 		String id = IDUtil.randomIdOnTime20();
-		List<CharBuffer> buffers = Collections.unmodifiableList(jsBuffersOf(htmlChartPlugins, locale));
-		ChartPluginManagerJsBuffer jsBuffer = new ChartPluginManagerJsBuffer(id, buffers, lastModified);
+		List<String> scripts = Collections.unmodifiableList(scriptsOf(htmlChartPlugins, locale));
+		ChartPluginManagerJs managerJs = new ChartPluginManagerJs(id, scripts, lastModified);
 
-		this._latestJsBuffers.putIfAbsent(key, jsBuffer);
-		this._cache.put(id, jsBuffer);
+		this._latestJss.putIfAbsent(key, managerJs);
+		this._cache.put(id, managerJs);
 
-		return jsBuffer;
+		return managerJs;
 	}
 
 	/**
-	 * 获取指定ID的{@linkplain ChartPluginManagerJsBuffer}。
+	 * 获取指定ID的{@linkplain ChartPluginManagerJs}。
 	 * 
 	 * @param id
 	 * @return {@code null}表示没有
 	 */
-	public ChartPluginManagerJsBuffer getById(String id)
+	public ChartPluginManagerJs getById(String id)
 	{
-		Collection<ChartPluginManagerJsBuffer> latests = this._latestJsBuffers.values();
+		Collection<ChartPluginManagerJs> latests = this._latestJss.values();
 
-		for (ChartPluginManagerJsBuffer jb : latests)
+		for (ChartPluginManagerJs jb : latests)
 		{
 			if (jb.getId().equals(id))
 				return jb;
@@ -181,58 +180,38 @@ public class ChartPluginManagerJsBufferFactory
 		return this._cache.getIfPresent(id);
 	}
 
-	protected List<CharBuffer> jsBuffersOf(List<HtmlChartPlugin> plugins, Locale locale)
+	protected List<String> scriptsOf(List<HtmlChartPlugin> plugins, Locale locale)
 	{
-		List<CharBuffer> cbs = new ArrayList<>();
+		List<String> cbs = new ArrayList<>();
 
+		int blockSize = getBlockCharSize();
 		String newLine = this.htmlChartPluginScriptObjectWriter.getNewLine();
-		String chartPluginManagerVar = "CPM";
-		String tail = "})(this);" + newLine;
-		int tolerantCount = 100;
-		CharBuffer buffer = CharBuffer.allocate(this.blockCharSize);
-		int pluginIdx = 0;
+		String managerVar = "CPM";
+		StringBuilder buffer = new StringBuilder(blockSize);
+		int pluginNumber = 1;
 
 		try
 		{
-			writeChartPluginJsStart(buffer, newLine);
+			appendManagerJsStart(buffer, managerVar, newLine);
 
 			for (HtmlChartPlugin plugin : plugins)
 			{
-				String pluginJs = jsStringOf(plugin, chartPluginManagerVar, "plugin" + pluginIdx, locale);
+				appendPluginJs(buffer, plugin, managerVar, "plugin" + pluginNumber, locale);
 				
-				boolean hasSpace = (buffer.remaining() >= (pluginJs.length() + tail.length() + tolerantCount));
-				
-				if (!hasSpace)
+				if (buffer.length() > blockSize)
 				{
-					if (pluginIdx == 0)
-					{
-						// 插件尺寸太大，超过缓冲容量，只能忽略
-						if (LOGGER.isWarnEnabled())
-							LOGGER.warn("HtmlChartPlugin with id [" + plugin.getId() + "] is too big, ignored!");
+					appendManagerJsEnd(buffer, newLine);
+					cbs.add(buffer.toString());
 
-						continue;
-					}
-					else
-					{
-						buffer.put(tail);
-						buffer.flip();
-						cbs.add(buffer);
+					buffer = new StringBuilder(blockSize);
+					appendManagerJsStart(buffer, managerVar, newLine);
+				}
 
-						buffer = CharBuffer.allocate(this.blockCharSize);
-						pluginIdx = 0;
-						writeChartPluginJsStart(buffer, newLine);
-					}
-				}
-				else
-				{
-					buffer.put(pluginJs);
-					pluginIdx++;
-				}
+				pluginNumber++;
 			}
 
-			buffer.put(tail);
-			buffer.flip();
-			cbs.add(buffer);
+			appendManagerJsEnd(buffer, newLine);
+			cbs.add(buffer.toString());
 		}
 		catch (IOException e)
 		{
@@ -242,28 +221,35 @@ public class ChartPluginManagerJsBufferFactory
 		return cbs;
 	}
 
-	protected void writeChartPluginJsStart(CharBuffer buffer, String newLine)
+	protected void appendManagerJsStart(StringBuilder buffer, String managerVar, String newLine)
 	{
-		buffer.put("(function(global) {");
-		buffer.put(newLine);
+		buffer.append("(function(global) {");
+		buffer.append(newLine);
 
-		buffer.put("var CF = (global.chartFactory || (global.chartFactory = {}));");
-		buffer.put(newLine);
-		buffer.put("var CPM = (CF.chartPluginManager || (CF.chartPluginManager = {}));");
-		buffer.put(newLine);
-		buffer.put("CPM.plugins = (CPM.plugins || {});");
+		buffer.append("var CF = (global.chartFactory || (global.chartFactory = {}));");
+		buffer.append(newLine);
+		buffer.append("var " + managerVar + " = (CF.chartPluginManager || (CF.chartPluginManager = {}));");
+		buffer.append(newLine);
+		buffer.append(managerVar + ".plugins = (" + managerVar + ".plugins || {});");
 
 		// @deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除
-		buffer.put("global.chartPluginManager = CPM;");
-		buffer.put(newLine);
+		buffer.append("global.chartPluginManager = " + managerVar + ";");
+		buffer.append(newLine);
 
-		buffer.put("if(CPM.get == null){ CPM.get = function(id){ return this.plugins[id]; }; }");
-		buffer.put(newLine);
+		buffer.append("if(" + managerVar + ".get == null){" + managerVar
+				+ ".get = function(id){ return this.plugins[id]; }; }");
+		buffer.append(newLine);
+	}
+
+	protected void appendManagerJsEnd(StringBuilder buffer, String newLine)
+	{
+		buffer.append(newLine);
+		buffer.append("})(this);");
 	}
 
 	@SuppressWarnings("deprecation")
-	protected String jsStringOf(HtmlChartPlugin plugin, String chartPluginManagerVar, String pluginVar, Locale locale)
-			throws IOException
+	protected void appendPluginJs(StringBuilder buffer, HtmlChartPlugin plugin, String managerVar, String pluginVar,
+			Locale locale) throws IOException
 	{
 		StringWriter out = new StringWriter();
 
@@ -277,7 +263,7 @@ public class ChartPluginManagerJsBufferFactory
 					+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
 			out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
 
-			out.write(chartPluginManagerVar + ".plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
+			out.write(managerVar + ".plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
 					+ pluginVar + ";");
 			out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
 		}
@@ -286,7 +272,7 @@ public class ChartPluginManagerJsBufferFactory
 			IOUtil.close(out);
 		}
 
-		return out.toString();
+		buffer.append(out.toString());
 	}
 	
 	protected static class Key implements Serializable
@@ -352,31 +338,31 @@ public class ChartPluginManagerJsBufferFactory
 	}
 
 	/**
-	 * 看板展示页的{@code chartPluginManager.js}缓冲区，
-	 * 其{@linkplain ChartPluginManagerJsBuffer#getBuffers()}中的每个{@linkplain CharBuffer}里都包含一个{@code chartPluginManager.js}。
+	 * 看板展示页的{@code chartPluginManager.js}脚本，
+	 * 其{@linkplain ChartPluginManagerJs#getScripts()}中的每个元素都是一个经拆分后的{@code chartPluginManager.js}脚本。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class ChartPluginManagerJsBuffer
+	public static class ChartPluginManagerJs
 	{
 		private final String id;
 
-		private final List<CharBuffer> buffers;
+		private final List<String> scripts;
 
 		private final long lastModified;
 
-		public ChartPluginManagerJsBuffer(String id, List<CharBuffer> buffers, long lastModified)
+		public ChartPluginManagerJs(String id, List<String> scripts, long lastModified)
 		{
 			super();
 			this.id = id;
-			this.buffers = buffers;
+			this.scripts = scripts;
 			this.lastModified = lastModified;
 		}
 
-		public List<CharBuffer> getBuffers()
+		public List<String> getScripts()
 		{
-			return buffers;
+			return scripts;
 		}
 
 		public String getId()
@@ -389,17 +375,17 @@ public class ChartPluginManagerJsBufferFactory
 			return lastModified;
 		}
 
-		public int getBufferCount()
+		public int getScriptCount()
 		{
-			return (this.buffers == null ? 0 : this.buffers.size());
+			return (this.scripts == null ? 0 : this.scripts.size());
 		}
 
-		public CharBuffer getBuffer(int idx)
+		public String getScript(int idx)
 		{
-			if (idx < 0 || idx >= this.getBufferCount())
+			if (idx < 0 || idx >= this.getScriptCount())
 				return null;
 
-			return this.buffers.get(idx);
+			return this.scripts.get(idx);
 		}
 	}
 }
