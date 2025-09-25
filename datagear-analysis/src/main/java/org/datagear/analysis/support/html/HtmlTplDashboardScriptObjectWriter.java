@@ -34,6 +34,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
+	public static final HtmlTplDashboardScriptObjectWriter INSTANCE = new HtmlTplDashboardScriptObjectWriter();
+
 	public HtmlTplDashboardScriptObjectWriter()
 	{
 		super();

@@ -27,15 +27,11 @@ import org.datagear.util.i18n.Label;
  * 它从{@linkplain ChartDefinition#getAttrValues()}获取{@linkplain #getAttrName()}对应的值，并将其作为图表内容渲染。
  * </p>
  * <p>
- * 注意：此插件的JS渲染器要求运行环境（浏览器）如下：
+ * 注意：此插件的页面端要求如下：
  * </p>
  * <p>
- * jQuery 库 <br>
- * chart.elementJquery() 函数：获取图表元素jQuery对象 <br>
- * chart.attrValue(name) 函数：获取图表指定名称的属性值
- * </p>
- * <p>
- * jQuery
+ * {@code chart.element()} 函数，用于获取图表HTML元素 <br>
+ * {@code chart.attrValue(name)} 函数，用于获取图表指定名称的图表属性值
  * </p>
  * 
  * @author datagear@163.com
@@ -52,13 +48,12 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 		super();
 	}
 
-	public AttributeValueHtmlChartPlugin(String id, String attrName, HtmlChartPluginScriptObjectWriter pluginWriter,
-			HtmlRenderContextScriptObjectWriter renderContextWriter, HtmlChartScriptObjectWriter chartWriter)
+	public AttributeValueHtmlChartPlugin(String id, Label nameLabel, String attrName)
 	{
-		super(id, new Label(AttributeValueHtmlChartPlugin.class.getSimpleName()), null, pluginWriter,
-				renderContextWriter, chartWriter);
-		super.setRenderer(buildJsChartRenderer(attrName));
+		super(id, nameLabel, null, HtmlChartPluginScriptObjectWriter.INSTANCE,
+				HtmlRenderContextScriptObjectWriter.INSTANCE, HtmlChartScriptObjectWriter.INSTANCE);
 		this.attrName = attrName;
+		super.setRenderer(buildJsChartRenderer(attrName));
 	}
 
 	public String getAttrName()
@@ -74,23 +69,17 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 
 	protected StringJsChartRenderer buildJsChartRenderer(String attrName)
 	{
-		return new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_OBJECT, "{" + HtmlChartPlugin.HTML_NEW_LINE
-		//
-				+ "	render : function(chart)" + HtmlChartPlugin.HTML_NEW_LINE
-				//
-				+ "	{" + HtmlChartPlugin.HTML_NEW_LINE +
-				//
-				"		var element = chart.elementJquery();" + HtmlChartPlugin.HTML_NEW_LINE
-				//
-				+ "		var value = chart.attrValue(" + StringUtil.toJavaScriptString(attrName) + ");"
-				+ HtmlChartPlugin.HTML_NEW_LINE
-				//
-				+ "		element.html(value);" + HtmlChartPlugin.HTML_NEW_LINE
-				//
-				+ "	}," + HtmlChartPlugin.HTML_NEW_LINE
-				//
-				+ "	update : function(){}" + HtmlChartPlugin.HTML_NEW_LINE
-				//
+		String newLine = getNewLine();
+		// 这样使用<div>包裹可以避免直接设置文本导致图表元素竖向错位
+		String valueExp = "\"<div style='position:absolute;'>\"+value+\"</div>\"";
+		return new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_OBJECT, "{" + newLine //
+				+ "	render : function(chart)" + newLine //
+				+ "	{" + newLine + //
+				"		var element = chart.element();" + newLine //
+				+ "		var value = chart.attrValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
+				+ "		element.innerHTML = " + valueExp + ";" + newLine //
+				+ "	}," + newLine //
+				+ "	update : function(){}" + newLine //
 				+ "}");
 	}
 }

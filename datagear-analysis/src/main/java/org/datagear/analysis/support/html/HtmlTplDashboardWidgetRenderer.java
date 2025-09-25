@@ -34,7 +34,6 @@ import org.datagear.analysis.RenderException;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -99,16 +98,13 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	private ChartWidgetSource chartWidgetSource;
 
-	private HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter = new HtmlRenderContextScriptObjectWriter();
+	private HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter = HtmlRenderContextScriptObjectWriter.INSTANCE;
 
-	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
+	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = HtmlChartPluginScriptObjectWriter.INSTANCE;
 
-	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
+	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = HtmlTplDashboardScriptObjectWriter.INSTANCE;
 
-	private AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new AttributeValueHtmlChartPlugin(
-			Global.PRODUCT_NAME_EN_LC + "HtmlChartPluginForGetWidgetException",
-			ChartDefinition.BUILTIN_ATTR_PREFIX + "EXCEPTION_MESSAGE", HtmlChartPluginScriptObjectWriter.INSTANCE,
-			HtmlRenderContextScriptObjectWriter.INSTANCE, HtmlChartScriptObjectWriter.INSTANCE);
+	private ExceptionMsgHtmlChartPlugin exceptionMsgHtmlChartPlugin = ExceptionMsgHtmlChartPlugin.INSTANCE;
 
 	/** 默认JS看板工厂变量名 */
 	private String defaultDashboardFactoryVar = DEFAULT_DASHBOARD_FACTORY_VAR;
@@ -201,15 +197,14 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		this.htmlTplDashboardScriptObjectWriter = htmlTplDashboardScriptObjectWriter;
 	}
 
-	public AttributeValueHtmlChartPlugin getHtmlChartPluginForGetWidgetException()
+	public ExceptionMsgHtmlChartPlugin getExceptionMsgHtmlChartPlugin()
 	{
-		return htmlChartPluginForGetWidgetException;
+		return exceptionMsgHtmlChartPlugin;
 	}
 
-	public void setHtmlChartPluginForGetWidgetException(
-			AttributeValueHtmlChartPlugin htmlChartPluginForGetWidgetException)
+	public void setExceptionMsgHtmlChartPlugin(ExceptionMsgHtmlChartPlugin exceptionMsgHtmlChartPlugin)
 	{
-		this.htmlChartPluginForGetWidgetException = htmlChartPluginForGetWidgetException;
+		this.exceptionMsgHtmlChartPlugin = exceptionMsgHtmlChartPlugin;
 	}
 
 	public String getDefaultDashboardFactoryVar()
@@ -483,10 +478,12 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(this.htmlChartWidgetIdForGetException, "HtmlChartWidgetForWidgetException",
-				ChartDefinition.EMPTY_DATA_SET_BINDS, this.htmlChartPluginForGetWidgetException);
+		ExceptionMsgHtmlChartPlugin plugin = getExceptionMsgHtmlChartPlugin();
 
-		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart widget '"
+		HtmlChartWidget widget = new HtmlChartWidget(this.htmlChartWidgetIdForGetException,
+				"HtmlChartWidgetForException", ChartDefinition.EMPTY_DATA_SET_BINDS, plugin);
+
+		widget.setAttrValue(plugin.getAttrName(), "Chart widget '"
 				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
 		if (LOGGER.isDebugEnabled())
@@ -498,10 +495,12 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	protected HtmlChartWidget createHtmlChartWidgetForNotFound(String notFoundWidgetId)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForNotFound, "HtmlChartWidgetForWidgetNotFound",
-				ChartDefinition.EMPTY_DATA_SET_BINDS, this.htmlChartPluginForGetWidgetException);
+		ExceptionMsgHtmlChartPlugin plugin = getExceptionMsgHtmlChartPlugin();
 
-		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(),
+		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForNotFound, "HtmlChartWidgetForNotFound",
+				ChartDefinition.EMPTY_DATA_SET_BINDS, plugin);
+
+		widget.setAttrValue(plugin.getAttrName(),
 				"Chart widget '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
 		if (LOGGER.isDebugEnabled())
@@ -513,10 +512,12 @@ public abstract class HtmlTplDashboardWidgetRenderer
 
 	protected HtmlChartWidget createHtmlChartWidgetForPluginNull(ChartWidget chartWidget)
 	{
-		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForPluginNull, "HtmlChartWidgetForWidgetPluginNull",
-				ChartDefinition.EMPTY_DATA_SET_BINDS, this.htmlChartPluginForGetWidgetException);
+		ExceptionMsgHtmlChartPlugin plugin = getExceptionMsgHtmlChartPlugin();
 
-		widget.setAttrValue(this.htmlChartPluginForGetWidgetException.getAttrName(), "Chart plugin is null");
+		HtmlChartWidget widget = new HtmlChartWidget(this.HtmlChartWidgetIdForPluginNull,
+				"HtmlChartWidgetForPluginNull", ChartDefinition.EMPTY_DATA_SET_BINDS, plugin);
+
+		widget.setAttrValue(plugin.getAttrName(), "Chart plugin is null");
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + chartWidget.getId()

@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.support.html.ApiVersionAware;
+import org.datagear.analysis.support.html.ExceptionMsgHtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.util.IDUtil;
@@ -63,7 +64,9 @@ public class ChartPluginManagerJsFactory
 
 	private ChartPluginManager chartPluginManager;
 
-	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
+	private ExceptionMsgHtmlChartPlugin exceptionMsgHtmlChartPlugin = ExceptionMsgHtmlChartPlugin.INSTANCE;
+
+	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = HtmlChartPluginScriptObjectWriter.INSTANCE;
 
 	/** 块字符数 */
 	private int blockCharSize = DEFAULT_BLOCK_SIZE;
@@ -94,6 +97,16 @@ public class ChartPluginManagerJsFactory
 	public void setChartPluginManager(ChartPluginManager chartPluginManager)
 	{
 		this.chartPluginManager = chartPluginManager;
+	}
+
+	public ExceptionMsgHtmlChartPlugin getExceptionMsgHtmlChartPlugin()
+	{
+		return exceptionMsgHtmlChartPlugin;
+	}
+
+	public void setExceptionMsgHtmlChartPlugin(ExceptionMsgHtmlChartPlugin exceptionMsgHtmlChartPlugin)
+	{
+		this.exceptionMsgHtmlChartPlugin = exceptionMsgHtmlChartPlugin;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getHtmlChartPluginScriptObjectWriter()
@@ -128,7 +141,7 @@ public class ChartPluginManagerJsFactory
 	public ChartPluginManagerJs latest(Locale locale, String apiVersion)
 	{
 		List<HtmlChartPlugin> plugins = chartPluginManager.getAll(HtmlChartPlugin.class);
-		List<HtmlChartPlugin> htmlChartPlugins = new ArrayList<>(plugins.size());
+		List<HtmlChartPlugin> filterPlugins = new ArrayList<>(plugins.size());
 		boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
 		long lastModified = -1;
 
@@ -139,21 +152,22 @@ public class ChartPluginManagerJsFactory
 				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
 					continue;
 
-				htmlChartPlugins.add(plugin);
+				filterPlugins.add(plugin);
 				lastModified = Math.max(lastModified, plugin.getLastModified());
 			}
 		}
 		
-		// TOTO 添加 htmlChartPluginForGetWidgetException
-
 		Key key = new Key(locale, apiVersion);
 		ChartPluginManagerJs latest = this._latestJss.get(key);
 
 		if (latest != null && latest.getLastModified() == lastModified)
 			return latest;
 
+		// 需要添加此插件，以支持显示后端渲染图表异常信息
+		filterPlugins.add(getExceptionMsgHtmlChartPlugin());
+
 		String id = IDUtil.randomIdOnTime20();
-		List<String> scripts = Collections.unmodifiableList(scriptsOf(htmlChartPlugins, locale));
+		List<String> scripts = Collections.unmodifiableList(scriptsOf(filterPlugins, locale));
 		ChartPluginManagerJs managerJs = new ChartPluginManagerJs(id, scripts, lastModified);
 
 		this._latestJss.putIfAbsent(key, managerJs);
@@ -232,6 +246,7 @@ public class ChartPluginManagerJsFactory
 		buffer.append("var " + managerVar + " = (CF.chartPluginManager || (CF.chartPluginManager = {}));");
 		buffer.append(newLine);
 		buffer.append(managerVar + ".plugins = (" + managerVar + ".plugins || {});");
+		buffer.append(newLine);
 
 		// @deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除
 		buffer.append("global.chartPluginManager = " + managerVar + ";");
