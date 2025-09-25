@@ -229,13 +229,14 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	{
 		ChartPluginManagerJs managerJs = this.chartPluginManagerJsFactory.latest(locale, apiVersion);
 		int scriptCount = managerJs.getScriptCount();
+		String key = managerJs.getKey();
 		
 		for (int i = 0; i < scriptCount; i++)
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
 					contextPath + "/vres/plugin/chartPluginManager.js" //
-							+ "?" + ChartPluginVisualResController.MANAGER_BUFFER_ID_PARAM + "=" + managerJs.getId() //
-							+ "&" + ChartPluginVisualResController.MANAGER_BUFFER_BLOCK_PARAM + "=" + i //
+							+ "?" + ChartPluginVisualResController.MANAGER_JS_KEY_PARAM + "=" + key //
+							+ "&" + ChartPluginVisualResController.MANAGER_JS_BLOCK_PARAM + "=" + i //
 							+ "&" + ChartPluginVisualResController.API_VERSION_PARAM + "=" + apiVersion //
 							+ "&v=" + Global.VERSION));
 		}

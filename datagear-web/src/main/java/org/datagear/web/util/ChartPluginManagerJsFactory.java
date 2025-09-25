@@ -18,30 +18,24 @@
 package org.datagear.web.util;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.support.html.ApiVersionAware;
 import org.datagear.analysis.support.html.ExceptionMsgHtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
-import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 看板展示页的{@code chartPluginManager.js}脚本工厂。
@@ -64,6 +58,8 @@ public class ChartPluginManagerJsFactory
 
 	private ChartPluginManager chartPluginManager;
 
+	private Cache cache;
+
 	private ExceptionMsgHtmlChartPlugin exceptionMsgHtmlChartPlugin = ExceptionMsgHtmlChartPlugin.INSTANCE;
 
 	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = HtmlChartPluginScriptObjectWriter.INSTANCE;
@@ -71,22 +67,16 @@ public class ChartPluginManagerJsFactory
 	/** 块字符数 */
 	private int blockCharSize = DEFAULT_BLOCK_SIZE;
 
-	private ConcurrentMap<Key, ChartPluginManagerJs> _latestJss = new ConcurrentHashMap<>();
-
-	private Cache<String, ChartPluginManagerJs> _cache;
-
 	public ChartPluginManagerJsFactory()
 	{
-		this(null);
+		super();
 	}
 
-	public ChartPluginManagerJsFactory(ChartPluginManager chartPluginManager)
+	public ChartPluginManagerJsFactory(ChartPluginManager chartPluginManager, Cache cache)
 	{
 		super();
 		this.chartPluginManager = chartPluginManager;
-
-		this._cache = Caffeine.newBuilder().maximumSize(100)
-				.expireAfterAccess(60, TimeUnit.SECONDS).build();
+		this.cache = cache;
 	}
 
 	public ChartPluginManager getChartPluginManager()
@@ -97,6 +87,16 @@ public class ChartPluginManagerJsFactory
 	public void setChartPluginManager(ChartPluginManager chartPluginManager)
 	{
 		this.chartPluginManager = chartPluginManager;
+	}
+
+	public Cache getCache()
+	{
+		return cache;
+	}
+
+	public void setCache(Cache cache)
+	{
+		this.cache = cache;
 	}
 
 	public ExceptionMsgHtmlChartPlugin getExceptionMsgHtmlChartPlugin()
@@ -157,42 +157,37 @@ public class ChartPluginManagerJsFactory
 			}
 		}
 		
-		Key key = new Key(locale, apiVersion);
-		ChartPluginManagerJs latest = this._latestJss.get(key);
+		String key = toCacheKey(locale, apiVersion, lastModified);
+		ChartPluginManagerJs managerJs = getFromCache(key);
 
-		if (latest != null && latest.getLastModified() == lastModified)
-			return latest;
+		if (managerJs != null)
+			return managerJs;
 
 		// 需要添加此插件，以支持显示后端渲染图表异常信息
 		filterPlugins.add(getExceptionMsgHtmlChartPlugin());
 
-		String id = IDUtil.randomIdOnTime20();
 		List<String> scripts = Collections.unmodifiableList(scriptsOf(filterPlugins, locale));
-		ChartPluginManagerJs managerJs = new ChartPluginManagerJs(id, scripts, lastModified);
-
-		this._latestJss.putIfAbsent(key, managerJs);
-		this._cache.put(id, managerJs);
+		managerJs = new ChartPluginManagerJs(key, scripts, lastModified);
+		this.cache.put(key, managerJs);
 
 		return managerJs;
 	}
 
 	/**
-	 * 获取指定ID的{@linkplain ChartPluginManagerJs}。
+	 * 获取指定Key的{@linkplain ChartPluginManagerJs}。
 	 * 
-	 * @param id
+	 * @param key
 	 * @return {@code null}表示没有
 	 */
-	public ChartPluginManagerJs getById(String id)
+	public ChartPluginManagerJs getByKey(String key)
 	{
-		Collection<ChartPluginManagerJs> latests = this._latestJss.values();
+		return getFromCache(key);
+	}
 
-		for (ChartPluginManagerJs jb : latests)
-		{
-			if (jb.getId().equals(id))
-				return jb;
-		}
-
-		return this._cache.getIfPresent(id);
+	protected ChartPluginManagerJs getFromCache(String key)
+	{
+		ValueWrapper vw = this.cache.get(key);
+		return (vw == null ? null : (ChartPluginManagerJs) vw.get());
 	}
 
 	protected List<String> scriptsOf(List<HtmlChartPlugin> plugins, Locale locale)
@@ -291,73 +286,23 @@ public class ChartPluginManagerJsFactory
 		buffer.append(out.toString());
 	}
 	
-	protected static class Key implements ApiVersionAware, Serializable
+	/**
+	 * 获取缓存关键字。
+	 * <p>
+	 * 注意：返回的字符串不应包含特殊字符，因为会在{@linkplain WebHtmlTplDashboardImportBuilder}中作为URL参数使用。
+	 * </p>
+	 * 
+	 * @param locale
+	 * @param apiVersion
+	 * @param lastModified
+	 * @return
+	 */
+	protected String toCacheKey(Locale locale, String apiVersion, long lastModified)
 	{
-		private static final long serialVersionUID = 1L;
-		
-		private final Locale locale;
-		private final String apiVersion;
-		
-		public Key(Locale locale, String apiVersion)
-		{
-			super();
-			this.locale = locale;
-			this.apiVersion = apiVersion;
-		}
-
-		public Locale getLocale()
-		{
-			return locale;
-		}
-
-		@Override
-		public String getApiVersion()
-		{
-			return apiVersion;
-		}
-
-		@Override
-		public void setApiVersion(String apiVersion)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int hashCode()
-		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((apiVersion == null) ? 0 : apiVersion.hashCode());
-			result = prime * result + ((locale == null) ? 0 : locale.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Key other = (Key) obj;
-			if (apiVersion == null)
-			{
-				if (other.apiVersion != null)
-					return false;
-			}
-			else if (!apiVersion.equals(other.apiVersion))
-				return false;
-			if (locale == null)
-			{
-				if (other.locale != null)
-					return false;
-			}
-			else if (!locale.equals(other.locale))
-				return false;
-			return true;
-		}
+		byte[] keyBytes = (ChartPluginManagerJs.class.getSimpleName() + (locale == null ? "null" : locale.toString())
+				+ (apiVersion == null ? "null" : apiVersion)
+				+ Long.toHexString(lastModified)).getBytes(StandardCharsets.UTF_8);
+		return Base64.getUrlEncoder().encodeToString(keyBytes);
 	}
 
 	/**
@@ -369,28 +314,26 @@ public class ChartPluginManagerJsFactory
 	 */
 	public static class ChartPluginManagerJs
 	{
-		private final String id;
-
+		private final String key;
 		private final List<String> scripts;
-
 		private final long lastModified;
 
-		public ChartPluginManagerJs(String id, List<String> scripts, long lastModified)
+		public ChartPluginManagerJs(String key, List<String> scripts, long lastModified)
 		{
 			super();
-			this.id = id;
+			this.key = key;
 			this.scripts = scripts;
 			this.lastModified = lastModified;
+		}
+
+		public String getKey()
+		{
+			return key;
 		}
 
 		public List<String> getScripts()
 		{
 			return scripts;
-		}
-
-		public String getId()
-		{
-			return id;
 		}
 
 		public long getLastModified()

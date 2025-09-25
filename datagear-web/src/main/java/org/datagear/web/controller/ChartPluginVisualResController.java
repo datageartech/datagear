@@ -51,14 +51,14 @@ import org.springframework.web.context.request.WebRequest;
 public class ChartPluginVisualResController extends AbstractChartPluginAwareController implements ServletContextAware
 {
 	/**
-	 * 加载图表插件JS脚本参数名：{@linkplain ChartPluginManagerJs#getId()}
+	 * 加载图表插件JS脚本参数名：{@linkplain ChartPluginManagerJsFactory#getByKey(String)}需要的Key参数名
 	 */
-	public static final String MANAGER_BUFFER_ID_PARAM = "id";
+	public static final String MANAGER_JS_KEY_PARAM = "key";
 
 	/**
 	 * 加载图表插件JS脚本参数名：块号
 	 */
-	public static final String MANAGER_BUFFER_BLOCK_PARAM = "block";
+	public static final String MANAGER_JS_BLOCK_PARAM = "block";
 
 	/**
 	 * 加载图表插件JS脚本参数名：过滤的插件API版本{@linkplain HtmlChartPlugin#getApiVersion()}
@@ -133,15 +133,15 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 
 	@RequestMapping("/chartPluginManager.js")
 	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			@RequestParam(value = MANAGER_BUFFER_ID_PARAM, required = false) String bufferId,
-			@RequestParam(value = MANAGER_BUFFER_BLOCK_PARAM, required = false) Integer block,
+			@RequestParam(value = MANAGER_JS_KEY_PARAM, required = false) String managerJsKey,
+			@RequestParam(value = MANAGER_JS_BLOCK_PARAM, required = false) Integer managerJsBlock,
 			@RequestParam(value = API_VERSION_PARAM, required = false) String apiVersion) throws Exception
 	{
 		ChartPluginManagerJs managerJs = null;
 
-		if (!StringUtil.isEmpty(bufferId))
+		if (!StringUtil.isEmpty(managerJsKey))
 		{
-			managerJs = this.chartPluginManagerJsFactory.getById(bufferId);
+			managerJs = this.chartPluginManagerJsFactory.getByKey(managerJsKey);
 		}
 		else
 		{
@@ -160,9 +160,9 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 
 		if (managerJs != null)
 		{
-			if (block != null)
+			if (managerJsBlock != null)
 			{
-				String script = (managerJs == null ? null : managerJs.getScript(block));
+				String script = (managerJs == null ? null : managerJs.getScript(managerJsBlock));
 
 				if (script != null)
 					out.write(script);

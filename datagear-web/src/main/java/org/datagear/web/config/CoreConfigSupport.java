@@ -822,8 +822,9 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	@Bean
 	public ChartPluginManagerJsFactory chartPluginManagerJsFactory()
 	{
-		ChartPluginManagerJsFactory bean = new ChartPluginManagerJsFactory(
-				this.directoryHtmlChartPluginManager());
+		ChartPluginManagerJsFactory bean = new ChartPluginManagerJsFactory();
+		bean.setChartPluginManager(this.directoryHtmlChartPluginManager());
+
 		return bean;
 	}
 
@@ -1230,6 +1231,14 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		initDataSetEntityServiceCache(context);
 		initHtmlTplDashboardWidgetHtmlRendererCaches(context);
 		initDtbsSourceTableCache(context);
+		initChartPluginManagerJsFactoryCache(context);
+	}
+
+	protected void initChartPluginManagerJsFactoryCache(ApplicationContext context)
+	{
+		CacheManager cacheManager = getCacheManager(context);
+		this.chartPluginManagerJsFactory()
+				.setCache(getCache(cacheManager, ChartPluginManagerJsFactory.class.getSimpleName()));
 	}
 
 	protected void initDtbsSourceTableCache(ApplicationContext context)
