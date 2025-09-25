@@ -24,7 +24,7 @@ import org.datagear.util.i18n.Label;
 /**
  * 仅渲染图表指定属性值的{@linkplain HtmlChartPlugin}。
  * <p>
- * 它从{@linkplain ChartDefinition#getAttrValues()}获取{@linkplain #getAttrName()}的值，并将其作为图表内容渲染。
+ * 它从{@linkplain ChartDefinition#getAttrValues()}获取{@linkplain #getAttrName()}对应的值，并将其作为图表内容渲染。
  * </p>
  * <p>
  * 注意：此插件的JS渲染器要求运行环境（浏览器）如下：

@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.support.html.ApiVersionAware;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.util.IDUtil;
@@ -275,7 +276,7 @@ public class ChartPluginManagerJsFactory
 		buffer.append(out.toString());
 	}
 	
-	protected static class Key implements Serializable
+	protected static class Key implements ApiVersionAware, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 		
@@ -294,9 +295,16 @@ public class ChartPluginManagerJsFactory
 			return locale;
 		}
 
+		@Override
 		public String getApiVersion()
 		{
 			return apiVersion;
+		}
+
+		@Override
+		public void setApiVersion(String apiVersion)
+		{
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

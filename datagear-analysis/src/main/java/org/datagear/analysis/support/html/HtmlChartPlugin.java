@@ -58,7 +58,7 @@ import org.datagear.util.version.VersionPattern;
  * @author datagear@163.com
  *
  */
-public class HtmlChartPlugin extends AbstractChartPlugin
+public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -158,11 +158,13 @@ public class HtmlChartPlugin extends AbstractChartPlugin
 		this.platformVersion = platformVersion;
 	}
 
+	@Override
 	public String getApiVersion()
 	{
 		return apiVersion;
 	}
 
+	@Override
 	public void setApiVersion(String apiVersion)
 	{
 		this.apiVersion = apiVersion;

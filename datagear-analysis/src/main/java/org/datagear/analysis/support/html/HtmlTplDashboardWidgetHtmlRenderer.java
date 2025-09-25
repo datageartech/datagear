@@ -770,7 +770,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static class TplDashboardMeta implements Serializable
+	protected static class TplDashboardMeta implements ApiVersionAware, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -893,11 +893,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			return !StringUtil.isEmpty(this.apiVersion);
 		}
 
+		@Override
 		public String getApiVersion()
 		{
 			return apiVersion;
 		}
 
+		@Override
 		public void setApiVersion(String apiVersion)
 		{
 			this.apiVersion = apiVersion;

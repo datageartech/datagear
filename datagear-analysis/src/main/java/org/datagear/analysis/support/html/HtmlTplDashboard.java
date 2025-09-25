@@ -27,7 +27,7 @@ import org.datagear.analysis.TplDashboardWidget;
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboard extends TplDashboard
+public class HtmlTplDashboard extends TplDashboard implements ApiVersionAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -88,11 +88,13 @@ public class HtmlTplDashboard extends TplDashboard
 		this.loadableChartWidgets = loadableChartWidgets;
 	}
 
+	@Override
 	public String getApiVersion()
 	{
 		return apiVersion;
 	}
 
+	@Override
 	public void setApiVersion(String apiVersion)
 	{
 		this.apiVersion = apiVersion;
