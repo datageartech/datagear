@@ -21,10 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -204,8 +202,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 {
 	public static final String NAME_DASHBOARD_GLOBAL_RES_ROOT_DIRECTORY = "dashboardGlobalResRootDirectory";
 	
-	public static final String INVALID_SQL_KEYWORDS_PREFIX_REGEX="regex:";
-
 	private Environment environment;
 
 	private ApplicationPropertiesConfigSupport applicationPropertiesConfig;
@@ -1104,6 +1100,14 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		return bean;
 	}
 
+	protected InvalidPatternSqlValidator buildInvalidPatternSqlValidator(Map<String, String> strMap)
+	{
+		InvalidPatternSqlValidator bean = new InvalidPatternSqlValidator();
+		bean.setStringPatterns(strMap);
+
+		return bean;
+	}
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
@@ -1123,45 +1127,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public ApplicationProperties getApplicationProperties()
 	{
 		return this.applicationPropertiesConfig.applicationProperties();
-	}
-
-	protected InvalidPatternSqlValidator buildInvalidPatternSqlValidator(Map<String, String> keywordsMap)
-	{
-		Map<String, Pattern> patterns = new HashMap<String, Pattern>();
-
-		for (Map.Entry<String, String> entry : keywordsMap.entrySet())
-		{
-			String keywordsStr = entry.getValue();
-
-			if (StringUtil.isEmpty(keywordsStr))
-				continue;
-			
-			//正则
-			if(keywordsStr.startsWith(INVALID_SQL_KEYWORDS_PREFIX_REGEX))
-			{
-				keywordsStr = keywordsStr.substring(INVALID_SQL_KEYWORDS_PREFIX_REGEX.length());
-
-				if (!StringUtil.isEmpty(keywordsStr))
-				{
-					Pattern pattern = InvalidPatternSqlValidator.compileToSqlValidatorPattern(keywordsStr);
-					patterns.put(entry.getKey(), pattern);
-				}
-			}
-			//字面
-			else
-			{
-				String[] keywords = StringUtil.split(keywordsStr, ",", true);
-				if (keywords.length > 0)
-				{
-					Pattern pattern = InvalidPatternSqlValidator.toKeywordPattern(keywords);
-					patterns.put(entry.getKey(), pattern);
-				}
-			}
-		}
-
-		InvalidPatternSqlValidator bean = new InvalidPatternSqlValidator(patterns);
-
-		return bean;
 	}
 
 	@SuppressWarnings("rawtypes")

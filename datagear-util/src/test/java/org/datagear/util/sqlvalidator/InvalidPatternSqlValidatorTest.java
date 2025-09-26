@@ -398,4 +398,66 @@ public class InvalidPatternSqlValidatorTest
 			assertTrue(validation.isValid());
 		}
 	}
+
+	@Test
+	public void setStringPatternsTest()
+	{
+		Map<String, String> patterns = new HashMap<String, String>();
+		patterns.put(InvalidPatternSqlValidator.DEFAULT_PATTERN_KEY, "DELETE,ALTER");
+		patterns.put("mysql", "exec,use");
+		patterns.put("postgres", "regex:^\\s*insert");
+
+		InvalidPatternSqlValidator validator = new InvalidPatternSqlValidator();
+		validator.setStringPatterns(patterns);
+
+		{
+			DatabaseProfile profile = new DatabaseProfile("mysql", "", "`");
+
+			{
+				String sql = "DELETE";
+				SqlValidation validation = validator.validate(sql, profile);
+
+				assertFalse(validation.isValid());
+			}
+
+			{
+				String sql = "INSERT";
+				SqlValidation validation = validator.validate(sql, profile);
+
+				assertTrue(validation.isValid());
+			}
+		}
+
+		{
+			DatabaseProfile profile = new DatabaseProfile("postgresql", "", "\"");
+
+			{
+				String sql = "update";
+				SqlValidation validation = validator.validate(sql, profile);
+
+				assertTrue(validation.isValid());
+			}
+
+			{
+				String sql = "into INSERT";
+				SqlValidation validation = validator.validate(sql, profile);
+
+				assertTrue(validation.isValid());
+			}
+
+			{
+				String sql = "INSERT";
+				SqlValidation validation = validator.validate(sql, profile);
+
+				assertFalse(validation.isValid());
+			}
+
+			{
+				String sql = " INSERT";
+				SqlValidation validation = validator.validate(sql, profile);
+
+				assertFalse(validation.isValid());
+			}
+		}
+	}
 }

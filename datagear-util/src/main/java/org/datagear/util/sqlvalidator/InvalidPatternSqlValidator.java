@@ -19,10 +19,13 @@ package org.datagear.util.sqlvalidator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.datagear.util.StringUtil;
 
 /**
  * 黑名单正则模式{@linkplain SqlValidator}。
@@ -40,6 +43,8 @@ import java.util.regex.Pattern;
 public class InvalidPatternSqlValidator extends AbstractSqlValidator
 {
 	public static final String DEFAULT_PATTERN_KEY = "default";
+
+	public static final String REGEX_PREFIX = "regex:";
 
 	/** 数据库名子串/URL子串 - 正则模式 */
 	private Map<String, Pattern> patterns = Collections.emptyMap();
@@ -67,6 +72,49 @@ public class InvalidPatternSqlValidator extends AbstractSqlValidator
 	public void setPatterns(Map<String, Pattern> patterns)
 	{
 		this.patterns = patterns;
+	}
+
+	/**
+	 * 设置字符串匹配模式。
+	 * 
+	 * @param patterns
+	 *            字符串匹配模式映射表，映射值以{@code "regex:"}开头表示正则表达式，其他则表示以{@code ","}分隔的关键字
+	 */
+	public void setStringPatterns(Map<String, String> patterns)
+	{
+		Map<String, Pattern> converted = new HashMap<String, Pattern>();
+
+		for (Map.Entry<String, String> entry : patterns.entrySet())
+		{
+			String patternStr = entry.getValue();
+
+			if (StringUtil.isEmpty(patternStr))
+				continue;
+
+			// 正则
+			if (patternStr.startsWith(REGEX_PREFIX))
+			{
+				patternStr = patternStr.substring(REGEX_PREFIX.length());
+
+				if (!StringUtil.isEmpty(patternStr))
+				{
+					Pattern pattern = InvalidPatternSqlValidator.compileToSqlValidatorPattern(patternStr);
+					converted.put(entry.getKey(), pattern);
+				}
+			}
+			// 逗号分隔关键字
+			else
+			{
+				String[] keywords = StringUtil.split(patternStr, ",", true);
+				if (keywords.length > 0)
+				{
+					Pattern pattern = toKeywordPattern(keywords);
+					converted.put(entry.getKey(), pattern);
+				}
+			}
+		}
+
+		setPatterns(converted);
 	}
 
 	public boolean isIgnoreSqlString()
