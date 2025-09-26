@@ -606,7 +606,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public DtbsSourceTableCache dtbsSourceTableCache()
 	{
 		DtbsSourceTableCache bean = new DtbsSourceTableCache();
-		bean.setTableCacheMaxLength(getApplicationProperties().getDtbsSourceTableCacheMaxLength());
 
 		return bean;
 	}

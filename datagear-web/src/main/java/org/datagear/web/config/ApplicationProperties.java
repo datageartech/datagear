@@ -207,10 +207,6 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${permissionCacheMaxLength}")
 	private int permissionCacheMaxLength;
 
-	/** 数据源缓存表信息最大个数 */
-	@Value("${dtbsSourceTableCacheMaxLength}")
-	private int dtbsSourceTableCacheMaxLength;
-
 	/** 数据集缓存数据的最大条目数 */
 	@Value("${dataSetCacheMaxLength}")
 	private int dataSetCacheMaxLength;
@@ -679,16 +675,6 @@ public abstract class ApplicationProperties implements Serializable
 	public void setPermissionCacheMaxLength(int permissionCacheMaxLength)
 	{
 		this.permissionCacheMaxLength = permissionCacheMaxLength;
-	}
-
-	public int getDtbsSourceTableCacheMaxLength()
-	{
-		return dtbsSourceTableCacheMaxLength;
-	}
-
-	protected void setDtbsSourceTableCacheMaxLength(int dtbsSourceTableCacheMaxLength)
-	{
-		this.dtbsSourceTableCacheMaxLength = dtbsSourceTableCacheMaxLength;
 	}
 
 	public int getDataSetCacheMaxLength()

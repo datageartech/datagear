@@ -17,11 +17,12 @@
 
 package org.datagear.web.util;
 
+import java.io.Serializable;
+
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.meta.Table;
-import org.datagear.util.StringUtil;
 import org.datagear.util.cache.CacheAware;
-import org.datagear.util.cache.CollectionCacheValue;
+import org.datagear.util.cache.CommonCacheKey;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
@@ -34,9 +35,6 @@ import org.springframework.cache.Cache.ValueWrapper;
 public class DtbsSourceTableCache implements CacheAware
 {
 	private Cache cache;
-
-	/** 每个数据源最多缓存表数目 */
-	private int tableCacheMaxLength = 10;
 
 	public DtbsSourceTableCache()
 	{
@@ -61,16 +59,6 @@ public class DtbsSourceTableCache implements CacheAware
 		this.cache = cache;
 	}
 
-	public int getTableCacheMaxLength()
-	{
-		return tableCacheMaxLength;
-	}
-
-	public void setTableCacheMaxLength(int tableCacheMaxLength)
-	{
-		this.tableCacheMaxLength = tableCacheMaxLength;
-	}
-
 	/**
 	 * 获取{@linkplain Table}。
 	 * 
@@ -80,10 +68,10 @@ public class DtbsSourceTableCache implements CacheAware
 	 */
 	public Table get(String dtbsSourceId, String tableName)
 	{
-		ValueWrapper vw = this.cache.get(dtbsSourceId);
-		TableCacheValue tcv = (vw == null ? null : (TableCacheValue) vw.get());
+		DtbsSourceTableCacheKey key = toCacheKey(dtbsSourceId, tableName);
 
-		return (tcv == null ? null : tcv.get(tableName));
+		ValueWrapper vw = this.cache.get(key);
+		return (vw == null ? null : (Table) vw.get());
 	}
 
 	/**
@@ -94,15 +82,8 @@ public class DtbsSourceTableCache implements CacheAware
 	 */
 	public void put(String dtbsSourceId, Table table)
 	{
-		ValueWrapper vw = this.cache.get(dtbsSourceId);
-		TableCacheValue tcv = (vw == null ? null : (TableCacheValue) vw.get());
-
-		if (tcv == null)
-			tcv = new TableCacheValue();
-
-		tcv.add(table, this.tableCacheMaxLength);
-
-		this.cache.put(dtbsSourceId, tcv);
+		DtbsSourceTableCacheKey key = toCacheKey(dtbsSourceId, table.getName());
+		this.cache.put(key, table);
 	}
 
 	/**
@@ -113,13 +94,8 @@ public class DtbsSourceTableCache implements CacheAware
 	 */
 	public void invalidate(String dtbsSourceId, String tableName)
 	{
-		ValueWrapper vw = this.cache.get(dtbsSourceId);
-		TableCacheValue tcv = (vw == null ? null : (TableCacheValue) vw.get());
-
-		if (tcv != null)
-			tcv.remove(tableName);
-
-		this.cache.put(dtbsSourceId, tcv);
+		DtbsSourceTableCacheKey key = toCacheKey(dtbsSourceId, tableName);
+		this.cache.evict(key);
 	}
 
 	/**
@@ -132,61 +108,77 @@ public class DtbsSourceTableCache implements CacheAware
 		this.cache.evict(dtbsSourceId);
 	}
 
-	public static class TableCacheValue extends CollectionCacheValue<Table>
+	protected DtbsSourceTableCacheKey toCacheKey(String dtbsSourceId, String tableName)
+	{
+		return new DtbsSourceTableCacheKey(dtbsSourceId, tableName);
+	}
+
+	protected static class DtbsSourceTableCacheKey implements CommonCacheKey, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
-		public TableCacheValue()
+		private final String dtbsSourceId;
+
+		private final String tableName;
+
+		public DtbsSourceTableCacheKey(String dtbsSourceId, String tableName)
 		{
 			super();
+			this.dtbsSourceId = dtbsSourceId;
+			this.tableName = tableName;
 		}
 
-		/**
-		 * 获取{@linkplain Table}。
-		 * 
-		 * @param tableName
-		 * @return 可能{@code null}
-		 */
-		public Table get(String tableName)
+		public String getDtbsSourceId()
 		{
-			return find(t ->
-			{
-				return StringUtil.isEquals(tableName, t.getName());
-			});
+			return dtbsSourceId;
 		}
 
-		/**
-		 * 添加。
-		 * <p>
-		 * 注意：执行此操作后应执行存入缓存操作。
-		 * </p>
-		 * 
-		 * @param table
-		 * @param maxSize
-		 */
-		public void add(Table table, int maxSize)
+		public String getTableName()
 		{
-			add(table, (t) ->
-			{
-				return StringUtil.isEquals(table.getName(), t.getName());
-			}, maxSize);
+			return tableName;
 		}
 
-		/**
-		 * 添加。
-		 * <p>
-		 * 注意：执行此操作后应执行存入缓存操作。
-		 * </p>
-		 * 
-		 * @param tableName
-		 * @return
-		 */
-		public Table remove(String tableName)
+		@Override
+		public int hashCode()
 		{
-			return remove(t ->
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dtbsSourceId == null) ? 0 : dtbsSourceId.hashCode());
+			result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DtbsSourceTableCacheKey other = (DtbsSourceTableCacheKey) obj;
+			if (dtbsSourceId == null)
 			{
-				return StringUtil.isEquals(tableName, t.getName());
-			});
+				if (other.dtbsSourceId != null)
+					return false;
+			}
+			else if (!dtbsSourceId.equals(other.dtbsSourceId))
+				return false;
+			if (tableName == null)
+			{
+				if (other.tableName != null)
+					return false;
+			}
+			else if (!tableName.equals(other.tableName))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [dtbsSourceId=" + dtbsSourceId + ", tableName=" + tableName + "]";
 		}
 	}
 }
