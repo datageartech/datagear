@@ -1265,7 +1265,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 			{
 				AbstractMybatisDataPermissionEntityService<?, ?> dpes = (AbstractMybatisDataPermissionEntityService<?, ?>) es;
 				dpes.setPermissionCache(getCache(cacheManager, cacheName + "Permission"));
-				dpes.setPermissionCacheMaxLength(getApplicationProperties().getPermissionCacheMaxLength());
 			}
 		}
 	}

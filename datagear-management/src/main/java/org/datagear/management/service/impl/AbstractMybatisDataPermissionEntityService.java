@@ -17,7 +17,6 @@
 
 package org.datagear.management.service.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,11 +39,9 @@ import org.datagear.management.util.PagingQuery;
 import org.datagear.management.util.Query;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.StringUtil;
-import org.datagear.util.cache.CollectionCacheValue;
 import org.datagear.util.query.PagingData;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.cache.Cache;
-import org.springframework.cache.Cache.ValueWrapper;
 
 /**
  * 抽象基于Mybatis的{@linkplain DataPermissionEntityService}实现类。
@@ -66,11 +63,6 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * </p>
 	 */
 	private int permissionCacheCountForQuery = 0;
-
-	/**
-	 * 每条记录权限缓存存储的最多用户权限数。
-	 */
-	private int permissionCacheMaxLength = 10;
 
 	private DataPermissionSpec dataPermissionSpec = new DataPermissionSpec();
 
@@ -121,16 +113,6 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	public void setPermissionCacheCountForQuery(int permissionCacheCountForQuery)
 	{
 		this.permissionCacheCountForQuery = permissionCacheCountForQuery;
-	}
-
-	public int getPermissionCacheMaxLength()
-	{
-		return permissionCacheMaxLength;
-	}
-
-	public void setPermissionCacheMaxLength(int permissionCacheMaxLength)
-	{
-		this.permissionCacheMaxLength = permissionCacheMaxLength;
 	}
 
 	public DataPermissionSpec getDataPermissionSpec()
@@ -305,8 +287,8 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return false;
 
-		for (String resource : resources)
-			this.permissionCache.evict(toPermissionCacheKeyOfStr(resource));
+		// XXX 无法进行更细粒度的删除缓存，只能整体清空
+		permissionCacheInvalidate();
 
 		return true;
 	}
@@ -513,11 +495,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return null;
 
-		ValueWrapper valueWrapper = this.permissionCache.get(toPermissionCacheKey(id));
-		UserIdPermissionCacheValue upcv = (valueWrapper == null ? null
-				: (UserIdPermissionCacheValue) valueWrapper.get());
-
-		return (upcv == null ? null : upcv.getPermission(userId));
+		return this.permissionCache.get(toPermissionCacheKey(id, userId), Integer.class);
 	}
 
 	protected void permissionCachePut(ID id, String userId, int permission)
@@ -525,19 +503,8 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		if (!isPermissionCacheEnabled())
 			return;
 
-		Object key = toPermissionCacheKey(id);
-
-		ValueWrapper valueWrapper = this.permissionCache.get(key);
-		UserIdPermissionCacheValue upcv = (valueWrapper == null ? null
-				: (UserIdPermissionCacheValue) valueWrapper.get());
-
-		if (upcv == null)
-			upcv = new UserIdPermissionCacheValue();
-
-		upcv.add(new UserIdPermission(userId, permission), this.permissionCacheMaxLength);
-
-		// 注意：无论upcv之前是否存在于缓存，这里都应再次执行存入缓存操作
-		this.permissionCache.put(key, upcv);
+		Object key = toPermissionCacheKey(id, userId);
+		this.permissionCache.put(key, permission);
 	}
 
 	protected void permissionCachePutQueryResult(String statement, Map<String, Object> params, List<T> result)
@@ -593,12 +560,13 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * 
 	 * @param id
 	 *            实体ID，允许{@code null}
+	 * @param userId
 	 * @return
 	 */
-	protected Object toPermissionCacheKey(ID id)
+	protected Object toPermissionCacheKey(ID id, String userId)
 	{
 		String idStr = (id == null ? "" : id.toString());
-		return toPermissionCacheKeyOfStr(idStr);
+		return toPermissionCacheKeyOfStr(idStr, userId);
 	}
 
 	/**
@@ -609,11 +577,12 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	 * 
 	 * @param id
 	 *            实体ID
+	 * @param userId
 	 * @return
 	 */
-	protected Object toPermissionCacheKeyOfStr(String id)
+	protected Object toPermissionCacheKeyOfStr(String id, String userId)
 	{
-		return new GlobalPermissionCacheKey<String>(getSqlNamespace(), id);
+		return new GlobalPermissionCacheKey<String>(getSqlNamespace(), id, userId);
 	}
 
 	/**
@@ -669,15 +638,26 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	{
 		private static final long serialVersionUID = 1L;
 
-		public GlobalPermissionCacheKey(String namespace, ID id)
+		private final String userId;
+
+		public GlobalPermissionCacheKey(String namespace, ID id, String userId)
 		{
 			super(namespace, id);
+			this.userId = userId;
+		}
+
+		public String getUserId()
+		{
+			return userId;
 		}
 
 		@Override
 		public int hashCode()
 		{
-			return super.hashCode();
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+			return result;
 		}
 
 		@Override
@@ -689,103 +669,22 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
+			GlobalPermissionCacheKey<?> other = (GlobalPermissionCacheKey<?>) obj;
+			if (userId == null)
+			{
+				if (other.userId != null)
+					return false;
+			}
+			else if (!userId.equals(other.userId))
+				return false;
 			return true;
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [namespace=" + getNamespace() + ", id=" + getId() + "]";
-		}
-	}
-
-	/**
-	 * 用户权限集缓存值。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class UserIdPermissionCacheValue extends CollectionCacheValue<UserIdPermission>
-	{
-		private static final long serialVersionUID = 1L;
-
-		public UserIdPermissionCacheValue()
-		{
-			super();
-		}
-
-		public Integer getPermission(String userId)
-		{
-			UserIdPermission up = find(t ->
-			{
-				return StringUtil.isEquals(userId, t.getUserId());
-			});
-
-			return (up == null ? null : up.getPermission());
-		}
-
-		/**
-		 * 添加。
-		 * <p>
-		 * 注意：执行此操作后应执行存入缓存操作。
-		 * </p>
-		 * 
-		 * @param up
-		 * @param maxSize
-		 */
-		public void add(UserIdPermission up, int maxSize)
-		{
-			add(up, (t) ->
-			{
-				return StringUtil.isEquals(up.getUserId(), t.getUserId());
-			}, maxSize);
-		}
-	}
-
-	/**
-	 * 用户权限。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class UserIdPermission implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private String userId;
-
-		private Integer permission;
-
-		public UserIdPermission()
-		{
-			super();
-		}
-
-		public UserIdPermission(String userId, Integer permission)
-		{
-			super();
-			this.userId = userId;
-			this.permission = permission;
-		}
-
-		public String getUserId()
-		{
-			return userId;
-		}
-
-		public void setUserId(String userId)
-		{
-			this.userId = userId;
-		}
-
-		public Integer getPermission()
-		{
-			return permission;
-		}
-
-		public void setPermission(Integer permission)
-		{
-			this.permission = permission;
+			return getClass().getSimpleName() + " [namespace=" + getNamespace() + ", id=" + getId() + ", userId="
+					+ getUserId() + "]";
 		}
 	}
 }

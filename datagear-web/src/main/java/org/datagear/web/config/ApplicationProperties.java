@@ -203,10 +203,6 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${poi.zipSecureFile.minInflateRatio}")
 	private String poiZipSecureFileMinInflateRatio = "";
 
-	/** 每条记录权限缓存存储的最多用户权限数 */
-	@Value("${permissionCacheMaxLength}")
-	private int permissionCacheMaxLength;
-
 	/** 数据集缓存数据的最大条目数 */
 	@Value("${dataSetCacheMaxLength}")
 	private int dataSetCacheMaxLength;
@@ -665,16 +661,6 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setPoiZipSecureFileMinInflateRatio(String poiZipSecureFileMinInflateRatio)
 	{
 		this.poiZipSecureFileMinInflateRatio = poiZipSecureFileMinInflateRatio;
-	}
-
-	public int getPermissionCacheMaxLength()
-	{
-		return permissionCacheMaxLength;
-	}
-
-	public void setPermissionCacheMaxLength(int permissionCacheMaxLength)
-	{
-		this.permissionCacheMaxLength = permissionCacheMaxLength;
 	}
 
 	public int getDataSetCacheMaxLength()
