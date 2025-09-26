@@ -32,6 +32,7 @@ import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.cache.CacheAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -47,7 +48,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * @author datagear@163.com
  *
  */
-public class ChartPluginManagerJsFactory
+public class ChartPluginManagerJsFactory implements CacheAware
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChartPluginManagerJsFactory.class);
 
@@ -89,11 +90,13 @@ public class ChartPluginManagerJsFactory
 		this.chartPluginManager = chartPluginManager;
 	}
 
+	@Override
 	public Cache getCache()
 	{
 		return cache;
 	}
 
+	@Override
 	public void setCache(Cache cache)
 	{
 		this.cache = cache;

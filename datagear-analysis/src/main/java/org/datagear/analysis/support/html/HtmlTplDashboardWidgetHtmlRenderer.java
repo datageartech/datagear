@@ -37,6 +37,8 @@ import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.cache.CacheAware;
+import org.datagear.util.cache.CommonCacheKey;
 import org.datagear.util.html.CopyWriter;
 import org.datagear.util.html.DefaultFilterHandler;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
@@ -117,7 +119,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  *
  * @param <T>
  */
-public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRenderer
+public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRenderer implements CacheAware
 {
 	public static final String DEFAULT_CHART_TAG_NAME = "div";
 
@@ -323,6 +325,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.localGlobalVarName = localGlobalVarName;
 	}
 
+	@Override
 	public Cache getCache()
 	{
 		return cache;
@@ -336,6 +339,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @param cache
 	 */
+	@Override
 	public void setCache(Cache cache)
 	{
 		this.cache = cache;
@@ -661,7 +665,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	 * 
 	 * @author datagear@163.com
 	 */
-	protected static class TplDashboardMetaCacheKey implements Serializable
+	protected static class TplDashboardMetaCacheKey implements CommonCacheKey, Serializable
 	{
 		private static final long serialVersionUID = 1L;
 	

@@ -20,6 +20,7 @@ package org.datagear.web.util;
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.meta.Table;
 import org.datagear.util.StringUtil;
+import org.datagear.util.cache.CacheAware;
 import org.datagear.util.cache.CollectionCacheValue;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
@@ -30,7 +31,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * @author datagear@163.com
  *
  */
-public class DtbsSourceTableCache
+public class DtbsSourceTableCache implements CacheAware
 {
 	private Cache cache;
 
@@ -48,11 +49,13 @@ public class DtbsSourceTableCache
 		this.cache = cache;
 	}
 
+	@Override
 	public Cache getCache()
 	{
 		return cache;
 	}
 
+	@Override
 	public void setCache(Cache cache)
 	{
 		this.cache = cache;

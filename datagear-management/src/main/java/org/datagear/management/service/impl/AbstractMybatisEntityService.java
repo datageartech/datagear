@@ -39,6 +39,7 @@ import org.datagear.management.util.PagingQuery;
 import org.datagear.management.util.Query;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.StringUtil;
+import org.datagear.util.cache.CacheAware;
 import org.datagear.util.cache.CommonCacheKey;
 import org.datagear.util.query.PagingData;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -53,7 +54,7 @@ import org.springframework.cache.support.SimpleValueWrapper;
  *
  */
 public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> extends AbstractMybatisService<T>
-		implements EntityService<ID, T>
+		implements EntityService<ID, T>, CacheAware
 {
 	private Cache cache = null;
 	
@@ -83,11 +84,13 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		super(sqlSessionTemplate, dialect);
 	}
 
+	@Override
 	public Cache getCache()
 	{
 		return cache;
 	}
 
+	@Override
 	public void setCache(Cache cache)
 	{
 		this.cache = cache;

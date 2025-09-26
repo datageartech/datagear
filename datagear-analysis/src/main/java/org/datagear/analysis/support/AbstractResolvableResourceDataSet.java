@@ -29,6 +29,7 @@ import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.datasetres.DataSetResource;
 import org.datagear.analysis.support.datasetres.ResourceResult;
+import org.datagear.util.cache.CacheAware;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
@@ -42,6 +43,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  *
  */
 public abstract class AbstractResolvableResourceDataSet<T extends DataSetResource> extends AbstractResolvableDataSet
+		implements CacheAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -65,11 +67,13 @@ public abstract class AbstractResolvableResourceDataSet<T extends DataSetResourc
 		super(id, name, fields);
 	}
 
+	@Override
 	public Cache getCache()
 	{
 		return cache;
 	}
 
+	@Override
 	public void setCache(Cache cache)
 	{
 		this.cache = cache;
