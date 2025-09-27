@@ -46,6 +46,15 @@
  *   updateError: function(chart, error){ ... }
  * }
  * 
+ * 此看板工厂扩展了图表渲染器格式：
+ * {
+ *   //图表联动源数据处理函数，默认值为：0
+ *   //其中：
+ *   //索引数值，表示图表事件处理函数对应索引数值的参数是联动源数据
+ *   //图表事件处理函数，表示此函数的返回值是图表联动源数据，返回值格式应为：{ ... }、[ {...}, ... ]
+ *   linkDataHander: 索引数值、function(eventType){ return 索引数值、图表事件处理函数; }
+ * }
+ * 
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboard._renderForms()函数说明。
  * 
  */
@@ -389,7 +398,7 @@ chartProto._initForPost = function()
 chartProto._postProcessRenderedSuper = chartProto._postProcessRendered;
 chartProto._postProcessRendered = function()
 {
-	this.bindLinksEventHanders(this.links());
+	this.bindLinkEventHanders(this.links());
 	this._postProcessRenderedSuper();
 };
 
@@ -467,7 +476,7 @@ chartProto._initUpdateGroup = function()
  *   //可选，联动数据参数映射表
  *   data:
  *   {
- *     //数据属性名：图表渲染器的linkDataHander()返回数据对象的属性访问路径，比如："name"、"data.value"、"[0].name"
+ *     //数据属性名：图表渲染器的linkDataHander所决定的联动源数据的属性访问路径，比如："name"、"data.value"、"[0].name"
  *     //图表数据集参数索引对象：格式同dashboard._batchSetDataSetParamValues()函数的图表数据集参数索引对象
  *     "数据属性名" : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  *     ...
@@ -533,15 +542,12 @@ chartProto.updateGroup = function(group)
  * 为指定图表联动设置绑定事件处理函数。
  * 
  * 图表渲染器实现相关：
- * 图表渲染器应实现on()函数、linkDataHander()函数（可选），以支持此特性。
- * 其中，linkDataHander()是一个图表事件处理函数，它返回一个可以从图表事件中提取联动数据的函数，格式为：function(eventType){ return 联动数据处理函数; }。
- * 当linkDataHander()函数未定义时，传入图表事件处理函数的第一个非null的object类型（typeof(arg) === 'object'）参数将会作为联动数据源。
- * 联动数据处理函数应返回一个联动数据对象或其数组，格式为：{ ... }、[ {...}, ... ]。
+ * 图表渲染器应实现on()函数、linkDataHander（可选），以支持此特性。
  * 
  * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
  * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: ..., eventHandler: function(...){ ... } }, ... ]
  */
-chartProto.bindLinksEventHanders = function(links)
+chartProto.bindLinkEventHanders = function(links)
 {
 	this._assertActive();
 	
@@ -560,19 +566,25 @@ chartProto.bindLinksEventHanders = function(links)
 	if(renderer == null || renderer.linkDataHander == null)
 	{
 		let pluginRenderer = this._pluginRenderer();
-		if(pluginRenderer && pluginRenderer.linkDataHander)
+		if(pluginRenderer && pluginRenderer.linkDataHander != null)
 			renderer = pluginRenderer;
 	}
 	
 	for(let i=0; i<triggers.length; i++)
 	{
-		//渲染器定义的用于从事件中提取联动源数据的函数
-		let dataHandler = (renderer == null || renderer.linkDataHander == null ?
-							this._dftLinkDataHandler : renderer.linkDataHander(triggers[i]));
 		let eventType = triggers[i];
+		//默认
+		let dataHandler = 0;
+		
+		if(renderer != null && renderer.linkDataHander != null)
+		{
+			dataHandler = (CF.isFunction(renderer.linkDataHander) ?
+							renderer.linkDataHander(eventType) : renderer.linkDataHander);
+		}
+		
 		let eventHandler = function()
 		{
-			let linkSrcData = dataHandler.apply(this, arguments);
+			let linkSrcData = (CF.isFunction(dataHandler) ? dataHandler.apply(this, arguments) : arguments[dataHandler]);
 			thisChart._handleChartEventLink(eventType, linkSrcData, links);
 		};
 		
@@ -581,18 +593,6 @@ chartProto.bindLinksEventHanders = function(links)
 	}
 	
 	return ehs;
-};
-
-chartProto._dftLinkDataHandler = function()
-{
-	for(let i=0; i<arguments.length; i++)
-	{
-		let arg = arguments[i];
-		if(arg != null && typeof(arg) === "object")
-			return arg;
-	}
-	
-	return null;
 };
 
 //解析不重复的联动设置触发事件数组。
