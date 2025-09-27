@@ -28,12 +28,12 @@
  */
 (function(global)
 {
-	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
-	var chartSetting = (chartFactory.chartSetting || (chartFactory.chartSetting = {}));
-	var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
+	var CF = (global.chartFactory || (global.chartFactory = {}));
+	var CST = (CF.chartSetting || (CF.chartSetting = {}));
+	var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
 	
 	//org.datagear.analysis.DataSetParam.InputType
-	chartSetting.DataSetParamInputType =
+	CST.DataSetParamInputType =
 	{
 		TEXT: "text",
 		SELECT: "select",
@@ -45,7 +45,7 @@
 		TEXTAREA: "textarea"
 	};
 	
-	chartSetting.labels = (chartSetting.labels ||
+	CST.labels = (CST.labels ||
 	{
 		confirm: "确定",
 		close: "X",
@@ -61,12 +61,12 @@
 	});
 	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
-	chartSetting.disableDateAwareInputAutocomplete = (chartSetting.disableDateAwareInputAutocomplete || true);
+	CST.disableDateAwareInputAutocomplete = (CST.disableDateAwareInputAutocomplete || true);
 	
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
-	 * @param $parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素，<form>元素结构也允许预先自定义
+	 * @param parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素，<form>元素结构也允许预先自定义
 	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam，也可附加"label"属性，用于定义输入项标签
 	 * @param options 渲染配置项，格式为：
 	 * 			{
@@ -81,159 +81,183 @@
 	 * 				noText: "...",       		   //可选，"否"选项文本内容
 	 * 				render: function(){}		   //可选，渲染后回调函数
 	 * 			}
-	 * @return 表单DOM元素
+	 * @return 表单HTML元素
 	 */
-	chartSetting.renderDataSetParamValueForm = function($parent, dataSetParams, options)
+	CST.renderDataSetParamValueForm = function(parent, dataSetParams, options)
 	{
-		options = chartFactory.extend(
+		options = CF.extend(
 		{
 			inChartElement: false,
-			submitText: chartSetting.labels.confirm,
-			labelColon: chartSetting.labels.colon,
+			submitText: CST.labels.confirm,
+			labelColon: CST.labels.colon,
 			readonly: false,
-			yesText: chartSetting.labels.yes,
-			noText: chartSetting.labels.no
+			yesText: CST.labels.yes,
+			noText: CST.labels.no
 		},
 		(options || {}));
 		
 		var paramValues = (options.paramValues || {});
-		var InputType = chartSetting.DataSetParamInputType;
+		var InputType = CST.DataSetParamInputType;
 		
-		var $form = ($parent.is("form") ? $parent : $("<form dg-generated-ele='true' />").appendTo($parent));
+		var form;
 		
-		$form.addClass("dg-dspv-form");
+		if(CF.isEleMatches(parent, "form"))
+			form = parent;
+		else
+		{
+			form = CF.eleCreate("form", "dg-generated-ele");
+			CF.eleAppend(parent, form);
+		}
+		
+		CF.eleAddClass(form, "dg-dpform");
 		
 		//创建表单样式表
 		if(options.chartTheme)
 		{
 			if(options.inChartElement)
-				chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme, true);
+				CST.dspvFormThemeStyle(options.chartTheme, true);
 			else
 			{
-				var themeStyleName = chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme, false);
-				$form.addClass(themeStyleName);
-				$form.data("dgDspvFormThemeClassName", themeStyleName);
+				var themeStyleName = CST.dspvFormThemeStyle(options.chartTheme, false);
+				CF.eleAddClass(form, themeStyleName);
+				CF.eleData(form, CF.builtinPropName("dpFormThemeClassName"), themeStyleName);
 			}
 		}
 		
-		var $head = $(".dg-dspv-form-head", $form);
-		var $content = $(".dg-dspv-form-content", $form);
-		var $foot = $(".dg-dspv-form-foot", $form);
+		var head = CF.eleOfSelector(".dg-dpform-head", form);
+		var content = CF.eleOfSelector(".dg-dpform-content", form);
+		var foot = CF.eleOfSelector(".dg-dpform-foot", form);
 		
 		//允许预先自定义表单结构
-		if($head.length == 0)
-			$head = $("<div class='dg-dspv-form-head' />").prependTo($form);
-		if($content.length == 0)
-			$content = $("<div class='dg-dspv-form-content' />").appendTo($form);
-		if($foot.length == 0)
-			$foot = $("<div class='dg-dspv-form-foot' />").appendTo($form);
-		
-		for(var i=0; i<dataSetParams.length; i++)
+		if(head == null)
 		{
-			var dsp = dataSetParams[i];
-			var value = paramValues[dsp.name];
+			head = CF.eleCreate("div", "dg-dpform-head dg-generated-ele");
+			CF.eleAppend(form, head);
+		}
+		
+		if(content == null)
+		{
+			content = CF.eleCreate("div", "dg-dpform-content dg-generated-ele");
+			CF.eleAppend(form, content);
+		}
+		
+		if(foot == null)
+		{
+			foot = CF.eleCreate("div", "dg-dpform-foot dg-generated-ele");
+			CF.eleAppend(form, foot);
+		}
+		
+		var dftBooleanOptions = [ { name: options.yesText, value: "true" }, { name: options.noText, value: "false" } ];
+		
+		for(let i=0; i<dataSetParams.length; i++)
+		{
+			let dsp = dataSetParams[i];
+			let value = paramValues[dsp.name];
 			
-			var $item = $("<div class='dg-dspv-form-item' />").appendTo($content);
+			let item = CF.eleCreate("div", "dg-dpform-item dg-generated-ele");
+			CF.eleAppend(content, item);
 			
-			var $labelDiv = $("<div class='dg-dspv-form-item-label' />").appendTo($item);
-			chartSetting.renderDataSetParamValueFormLabel($form, $labelDiv, dsp, options);
+			let labelDiv = CF.eleCreate("div", "dg-dpform-item-label");
+			CF.eleAppend(item, labelDiv);
+			CST.renderDspvFormLabel(form, labelDiv, dsp, options);
 			
-			var $valueDiv = $("<div class='dg-dspv-form-item-value' />").appendTo($item);
+			let valueDiv = CF.eleCreate("div", "dg-dpform-item-value");
+			CF.eleAppend(item, valueDiv);
 			
-			if(dsp.type == chartFactory.DataSetParamType.BOOLEAN)
+			if(dsp.type == CF.DataSetParamType.BOOLEAN)
 			{
-				var defaultSelOpts = undefined;
-				
-				if(!dsp.inputPayload)
-					defaultSelOpts = [ { name: options.yesText, value: "true" }, { name: options.noText, value: "false" } ];
+				let defaultSelOpts = (!dsp.inputPayload ? dftBooleanOptions : null);
 				
 				//XXX 上面不应将defaultSelOpts对象赋值给dsp.inputPayload，因为dsp.inputPayload应是字符串类型，
 				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options, defaultSelOpts);
+					CST.renderDspvFormInputRadio(form, valueDiv, dsp, value, options, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options, defaultSelOpts);
+					CST.renderDspvFormInputCheckbox(form, valueDiv, dsp, value, options, defaultSelOpts);
 				else
-					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options, defaultSelOpts);
+					CST.renderDspvFormInputSelect(form, valueDiv, dsp, value, options, defaultSelOpts);
 			}
-			else if(dsp.type == chartFactory.DataSetParamType.STRING)
+			else if(dsp.type == CF.DataSetParamType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputSelect(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.DATE)
-					chartSetting.renderDataSetParamValueFormInputDate($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputDate(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TIME)
-					chartSetting.renderDataSetParamValueFormInputTime($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputTime(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.DATETIME)
-					chartSetting.renderDataSetParamValueFormInputDateTime($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputDateTime(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputRadio(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputCheckbox(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartSetting.renderDataSetParamValueFormInputTextarea($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputTextarea(form, valueDiv, dsp, value, options);
 				else
-					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputText(form, valueDiv, dsp, value, options);
 			}
-			else if(dsp.type == chartFactory.DataSetParamType.NUMBER)
+			else if(dsp.type == CF.DataSetParamType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputSelect(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputRadio(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputCheckbox(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartSetting.renderDataSetParamValueFormInputTextarea($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputTextarea(form, valueDiv, dsp, value, options);
 				else
-					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options);
+					CST.renderDspvFormInputText(form, valueDiv, dsp, value, options);
 			}
 		}
 		
 		if(!options.readonly)
 		{
-			var $submitBtn = $("[type='submit']", $foot);
+			let submitBtn = CF.eleOfSelector("[type='submit']", foot);
 			
 			//允许自定义提交按钮
-			if($submitBtn.length == 0)
-				$submitBtn = $("<button type='submit' />").html(options.submitText).appendTo($foot);
+			if(submitBtn == null)
+			{
+				submitBtn = CF.eleCreate("button", "dg-generated-ele");
+				CF.eleAttr(submitBtn, "type", "submit");
+				CF.eleHtmlContent(submitBtn, options.submitText);
+				CF.eleAppend(foot, submitBtn);
+			}
 		}
 		
-		var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
 		var submitHandler = function()
 		{
 			if(options.readonly)
 				return false;
 			
-			var validationOk = chartSetting.validateDataSetParamValueForm(this);
+			let validationOk = CST.validateDataSetParamValueForm(this);
+			let submitBtn = CF.eleOfSelector("[type='submit']", foot);
 			
 			if(validationOk)
-				$("[type=submit]", $foot).removeClass("dg-form-invalid");
+				CF.eleRemoveClass(submitBtn, "dg-form-invalid");
 			else
-				$("[type=submit]", $foot).addClass("dg-form-invalid");
+				CF.eleAddClass(submitBtn, "dg-form-invalid");
 			
 			if(!validationOk)
 				return false;
 			
 			if(options.submit)
 			{
-				var formData = chartSetting.getDataSetParamValueObj(this);
+				let formData = CST.getDataSetParamValueObj(this);
 				return (options.submit.call(this, formData) == true);
 			}
 			else
 				return false;
 		};
 		
-		$form.data(submitHandlerKey, submitHandler);
-		$form.on("submit", submitHandler);
-		
-		var formEle = $form[0];
+		CF.eleData(form, CF.builtinPropName("dpFormSubmitHandler"), submitHandler);
+		CF.eleOn(form, "submit", submitHandler);
 		
 		if(options.render)
-			options.render.call(formEle, formEle);
+			options.render(form);
 		
-		return formEle;
+		return form;
 	};
 	
 	/**
@@ -241,59 +265,52 @@
 	 * 
 	 * @param ancestor 渲染数据集参数值的<form>表单元素，或者它的祖先元素（其所有内部数据集参数值表单都会被销毁）。
 	 */
-	chartSetting.destroyDataSetParamValueForm = function(ancestor)
+	CST.destroyDataSetParamValueForm = function(ancestor)
 	{
-		ancestor = $(ancestor);
+		var forms = [];
 		
-		var $form = (ancestor.is("form") ? ancestor : $("form.dg-dspv-form", ancestor));
+		if(CF.isEleMatches(ancestor, "form"))
+			forms.push(ancestor);
+		else
+			forms = CF.elesOfSelector("form.dg-dpform", ancestor);
 		
-		$form.each(function()
+		forms.forEach((form) =>
 		{
-			var thisForm = $(this);
-			
-			var dateWidgets = $(".dg-dspv-form-widget-date", thisForm);
-			dateWidgets.each(function()
+			if(CF.isEleMatches(form, ".dg-generated-ele"))
 			{
-				chartSetting.destroyDatetimePicker($(this));
-			});
-			
-			if(thisForm.attr("dg-generated-ele"))
-				chartFactory.removeEleWithDerived(this);
+				CF.eleRemove(form);
+			}
 			else
 			{
-				thisForm.removeClass("dg-dspv-form");
-				var themeStyleName = thisForm.data("dgDspvFormThemeClassName");
+				CF.eleRemoveClass(form, "dg-dpform");
+				
+				let themeStyleName = CF.eleData(form, CF.builtinPropName("dpFormThemeClassName"));
 				if(themeStyleName)
-					thisForm.removeClass(themeStyleName);
+					CF.eleRemoveClass(form, themeStyleName);
 				
-				var des = chartFactory.derivedElements(this);
-				if(des)
+				let genEles = CF.elesOfSelector(".dg-generated-ele", form);
+				genEles.forEach((genEle) =>
 				{
-					chartFactory.removeEleWithDerived($(des));
-					chartFactory.derivedElements(this, null);
-				}
-				
-				var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
-				var submitHandler = thisForm.data(submitHandlerKey);
-				
-				if(submitHandler != null)
-					thisForm.off("submit", submitHandler);
-				
-				thisForm.empty();
+					CF.eleRemove(genEle);
+				});
 			}
+			
+			let submitHandler = CF.eleData(form, CF.builtinPropName("dpFormSubmitHandler"));
+			if(submitHandler != null)
+				CF.eleOff(form, "submit", submitHandler);
 		});
 	};
 	
-	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme, isSubStyle)
+	CST.dspvFormThemeStyle = function(chartTheme, isSubStyle)
 	{
-		var name = chartFactory.builtinPropName("DataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
-		return chartFactory.themeStyleSheet(chartTheme, name, function()
+		var name = CF.builtinPropName("dataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
+		return CF.themeStyleSheet(chartTheme, name, function()
 		{
-			var color = chartFactory.themeGradualColor(chartTheme, 1);
-			var bgColor = chartFactory.themeGradualColor(chartTheme, 0);
-			var borderColor = chartFactory.themeGradualColor(chartTheme, 0.5);
+			var color = CF.themeGradualColor(chartTheme, 1);
+			var bgColor = CF.themeGradualColor(chartTheme, 0);
+			var borderColor = CF.themeGradualColor(chartTheme, 0.5);
 			
-			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dspv-form";
+			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dpform";
 			
 			var css =
 			[
@@ -309,11 +326,11 @@
 				{
 					name:
 					[
-						cssPrefix + " .dg-dspv-form-item-value input",
-						cssPrefix + " .dg-dspv-form-item-value textarea",
-						cssPrefix + " .dg-dspv-form-item-value select",
-						cssPrefix + " .dg-dspv-form-item-value select option",
-						cssPrefix + " .dg-dspv-form-item-value .input"
+						cssPrefix + " .dg-dpform-item-value input",
+						cssPrefix + " .dg-dpform-item-value textarea",
+						cssPrefix + " .dg-dpform-item-value select",
+						cssPrefix + " .dg-dpform-item-value select option",
+						cssPrefix + " .dg-dpform-item-value .input"
 					],
 					value:
 					{
@@ -333,7 +350,7 @@
 					value:
 					{
 						"color": color,
-						"background-color": chartFactory.themeGradualColor(chartTheme, 0.1),
+						"background-color": CF.themeGradualColor(chartTheme, 0.1),
 						"border-color": borderColor
 					}
 				},
@@ -347,7 +364,7 @@
 					],
 					value:
 					{
-						"background-color": chartFactory.themeGradualColor(chartTheme, 0.3)
+						"background-color": CF.themeGradualColor(chartTheme, 0.3)
 					}
 				}
 			];
@@ -359,39 +376,44 @@
 	/**
 	 * 渲染表单项标签。
 	 * 
-	 * @param $form
-	 * @param $parent 渲染标签的父容器元素
+	 * @param form
+	 * @param parent 渲染标签的父容器元素
 	 * @param dataSetParam
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormLabel = function($form, $parent, dataSetParam, formOptions)
+	CST.renderDspvFormLabel = function(form, parent, dataSetParam, formOptions)
 	{
-		var $label = $("<label />").html(dataSetParam.label ? dataSetParam.label : dataSetParam.name)
-							.appendTo($parent);
+		var label = CF.eleCreate("label");
+		CF.eleHtmlContent(label, (dataSetParam.label ? dataSetParam.label : dataSetParam.name));
+		CF.eleAttr(label, "title", dataSetParam.desc);
+		CF.eleAppend(parent, label);
 		
-		if(dataSetParam.desc)
-			$label.attr("title", dataSetParam.desc);
+		return label;
 	};
 	
 	/**
 	 * 渲染输入项：文本框
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputText = function($form, $parent, dataSetParam, value, formOptions)
+	CST.renderDspvFormInputText = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
-			.attr("value", (value == null ? "" : value)).appendTo($parent);
+		var input = CF.eleCreate("input", "dg-dpform-input");
+		CF.eleAttr(input, "type", "text");
+		CF.eleAttr(input, "name", dataSetParam.name);
+		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
+		if(CF.isLiteralTrue(dataSetParam.required))
+			CF.eleAttr(input, "dg-validation-required", "true");
 		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
+			CF.eleAttr(input, "dg-validation-number", "true");
+		
+		CF.eleAppend(parent, input);
 	};
 	
 	/**
@@ -409,35 +431,35 @@
 	 * 其中，待选项名值对象格式允许为：
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputSelect = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspvFormInputSelect = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
-		var payload = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
+		var payload = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
-		if(defaultSelOpts && payload && payload.length == 0)
+		if(defaultSelOpts && CF.isEmpty(payload))
 			payload = defaultSelOpts;
 		
-		if(chartSetting.isString(payload))
+		if(CF.isString(payload))
 			payload = [ payload ];
 		
-		if(chartFactory.isArray(payload))
+		if(CF.isArray(payload))
 			payload = { multiple: false, options: payload };
 		
-		if(value == null)
-			value = [];
-		else
-			value = (value.length != undefined ? value : [ value ]);
+		value = (value == null ? [] : (CF.isArray(value) ? value : [ value ]));
 		
-		var $input = $("<select class='dg-dspv-form-input' />").attr("name", dataSetParam.name).appendTo($parent);
+		var input = CF.eleCreate("select", "dg-dpform-input");
+		CF.eleAttr(input, "name", dataSetParam.name);
 		
 		if(payload.multiple)
-			$input.attr("multiple", "true");
+			CF.eleAttr(input, "multiple", "true");
+		
+		CF.eleAppend(parent, input);
 		
 		var opts = (payload.options || []);
 		
@@ -447,22 +469,23 @@
 			
 			var optName = (opt.name != null ? opt.name : opt.value);
 			var optVal = (opt.value != null ? opt.value : opt.name);
-			if(optName == null)
-				optName = opt;
-			if(optVal == null)
-				optVal = opt;
+			optName = (optName == null ? opt : optName);
+			optVal = (optVal == null ? opt : optVal);
 			
-			var $opt = $("<option />").attr("value", optVal).html(optName).appendTo($input);
+			var opt = CF.eleCreateWithAttr("option", "value", optVal);
+			CF.eleHtmlContent(opt, optName);
 			
-			if(chartSetting.containsValueForString(value, optVal))
-				$opt.attr("selected", "selected");
+			if(CST.containsValueAsString(value, optVal))
+				CF.eleAttr(opt, "selected", "selected");
+			
+			CF.eleAppend(input, opt);
 		}
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
+		if(CF.isLiteralTrue(dataSetParam.required))
+			CF.eleAttr(input, "dg-validation-required", "true");
 		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
+			CF.eleAttr(input, "dg-validation-number", "true");
 	};
 	
 	/**
@@ -470,41 +493,36 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
-	 * 或者
-	 * "{ format: '...Y|y...m...d...' }"、"{ format: '...Y|y...' }"（仅年份选择）  //数据集定义功能时
-	 * 或者
-	 * { format: '...Y|y...m...d...' }、{ format: '...Y|y...' }（仅年份选择）      //看板表单功能时
+	 * "{ format: '...y...m...d...' }"  //数据集定义功能时
+	 * { format: '...y...m...d...' }    //看板表单功能时
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * 其中：
+	 * y：年份（4位长度）
+	 * m：月份（2位长度，01-12）
+	 * d：天（2位长度，01-31）
+	 * 
+	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
+	 * 
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputDate = function($form, $parent, dataSetParam, value, formOptions)
+	CST.renderDspvFormInputDate = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
-		options = chartFactory.extend(
-		{
-			format: "Y-m-d",
-			timepicker: false,
-		},
-		options);
+		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
+		options = CF.extend({ format: "y-m-d" }, options);
 		
-		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
-			.attr("value", (value == null ? "" : value)).appendTo($parent);
+		var input = CF.eleCreate("input", "dg-dpform-input");
+		CF.eleAttr(input, "type", "date");
+		CF.eleAttr(input, "name", dataSetParam.name);
+		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
-		if(chartSetting.disableDateAwareInputAutocomplete)
-			$input.attr("autocomplete", "off");
+		if(CF.isLiteralTrue(dataSetParam.required))
+			CF.eleAttr(input, "dg-validation-required", "true");
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
-		
-		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
-		chartFactory.derivedElements($form, $wrapper);
+		CF.eleAppend(parent, input);
 	};
 	
 	/**
@@ -512,42 +530,37 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
-	 * 或者
-	 * "{ format: '...H|h...i...s...' }"  //数据集定义功能时
-	 * 或者
-	 * { format: '...H|h...i...s...' }    //看板表单功能时
+	 * "{ format: '...h...i...s...' }"  //数据集定义功能时
+	 * { format: '...h...i...s...' }    //看板表单功能时
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * 其中：
+	 * h：小时（2位长度24时制，00-23）
+	 * i：分钟（2位长度，00-59）
+	 * s：秒数（2位长度，00-59）
+	 * 
+	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
+	 * 
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputTime = function($form, $parent, dataSetParam, value, formOptions)
+	CST.renderDspvFormInputTime = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
-		options = chartFactory.extend(
-		{
-			format: "H:i:s",
-			datepicker: false,
-			step:10,
-		},
-		options);
+		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
+		options = CF.extend({ format: "h:i:s" }, options);
 		
-		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
-			.attr("value", (value == null ? "" : value)).appendTo($parent);
+		var input = CF.eleCreate("input", "dg-dpform-input");
+		CF.eleAttr(input, "type", "time");
+		CF.eleAttr(input, "name", dataSetParam.name);
+		CF.eleAttr(input, "value", (value == null ? "" : value));
+		CF.eleAttr(input, "step", "1");
 		
-		if(chartSetting.disableDateAwareInputAutocomplete)
-			$input.attr("autocomplete", "off");
+		if(CF.isLiteralTrue(dataSetParam.required))
+			CF.eleAttr(input, "dg-validation-required", "true");
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
-		
-		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
-		chartFactory.derivedElements($form, $wrapper);
+		CF.eleAppend(parent, input);
 	};
 	
 	/**
@@ -555,48 +568,40 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
-	 * 或者
-	 * "{ format: '...Y|y...m...d...H|h...i...s...' }"  //数据集定义功能时
-	 * 或者
-	 * { format: '...Y|y...m...d...H|h...i...s...' }    //看板表单功能时
-	 *
-	 * Y|y ：年份，四位长度，不足补0
-	 * m   ：月份，两位长度，不足补0
-	 * d   ：日，两位长度，不足补0
-	 * H|h ：时，两位长度，不足补0
-	 * i   ：分，两位长度，不足补0
-	 * s   ：秒，两位长度，不足补0
+	 * "{ format: '...y...m...d...h...i...s...' }"  //数据集定义功能时
+	 * { format: '...y...m...d...h...i...s...' }    //看板表单功能时
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * 其中：
+	 * y：年份（4位长度）
+	 * m：月份（2位长度，01-12）
+	 * d：天（2位长度，01-31）
+	 * h：小时（2位长度24时制，00-23）
+	 * i：分钟（2位长度，00-59）
+	 * s：秒数（2位长度，00-59）
+	 * 
+	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
+	 * 
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputDateTime = function($form, $parent, dataSetParam, value, formOptions)
+	CST.renderDspvFormInputDateTime = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
-		options = chartFactory.extend(
-		{
-			format: "Y-m-d H:i:s",
-			step:10
-		},
-		options);
+		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
+		options = CF.extend({ format: "y-m-d h:i:s" }, options);
 		
-		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
-			.attr("value", (value == null ? "" : value)).appendTo($parent);
+		var input = CF.eleCreate("input", "dg-dpform-input");
+		CF.eleAttr(input, "type", "datetime-local");
+		CF.eleAttr(input, "name", dataSetParam.name);
+		CF.eleAttr(input, "value", (value == null ? "" : value));
+		CF.eleAttr(input, "step", "1");
 		
-		if(chartSetting.disableDateAwareInputAutocomplete)
-			$input.attr("autocomplete", "off");
+		if(CF.isLiteralTrue(dataSetParam.required))
+			CF.eleAttr(input, "dg-validation-required", "true");
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
-		
-		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
-		chartFactory.derivedElements($form, $wrapper);
+		CF.eleAppend(parent, input);
 	};
 	
 	/**
@@ -604,32 +609,31 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串
-	 * 或者
 	 * "[ 待选项名值对象, ... ]"  //数据集定义功能时
-	 * 或者
 	 * [ 待选项名值对象, ... ]    //看板表单功能时
 	 * 
 	 * 其中，待选项名值对象格式允许为：
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputRadio = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspvFormInputRadio = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
-		var opts = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
+		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
-		if(defaultSelOpts && opts && opts.length == 0)
+		if(defaultSelOpts && CF.isEmpty(opts))
 			opts = defaultSelOpts;
 		
-		if(chartSetting.isString(opts))
+		if(!CF.isArray(opts))
 			opts = [ opts ];
 		
-		var $inputsWrapper = $("<div class='dg-dspv-form-inputs-wrapper' />").appendTo($parent);
+		var inputsWrapper = CF.eleCreate("div", "dg-dpform-inputs-wrapper");
+		CF.eleAppend(parent, inputsWrapper);
 		
 		for(var i=0; i<opts.length; i++)
 		{
@@ -637,28 +641,30 @@
 			
 			var optName = (opt.name != null ? opt.name : opt.value);
 			var optVal = (opt.value != null ? opt.value : opt.name);
-			if(optName == null)
-				optName = opt;
-			if(optVal == null)
-				optVal = opt;
+			optName = (optName == null ? opt : optName);
+			optVal = (optVal == null ? opt : optVal);
 			
-			var eleId = chartFactory.uid();
+			var eleId = CF.uid();
 			
-			var $wrapper = $("<div class='dg-dspv-form-radio-wrapper' />").appendTo($inputsWrapper);
+			var wrapper = CF.eleCreate("div", "dg-dpform-radio-wrapper");
+			CF.eleAppend(inputsWrapper, wrapper);
 			
-			var $input = $("<input type='radio' class='dg-dspv-form-input' />")
-				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", optVal).appendTo($wrapper);
+			var input = CF.eleCreateWithAttr("input", "type", "radio", "class", "dg-dpform-input",
+							"id", eleId, "name", dataSetParam.name, "value", optVal);
+			CF.eleAppend(wrapper, input);
 			
-			$("<label />").attr("for", eleId).html(optName).appendTo($wrapper);
+			var label = CF.eleCreateWithAttr("label", "for", eleId);
+			CF.eleHtmlContent(label, optName);
+			CF.eleAppend(wrapper, label);
 			
-			if((value+"") == (optVal+""))
-				$input.attr("checked", "checked");
+			if(CST.isEqualAsString(value, optVal))
+				CF.eleAttr(input, "checked", "checked");
 			
-			if((dataSetParam.required+"") == "true")
-				$input.attr("dg-validation-required", "true");
+			if(CF.isLiteralTrue(dataSetParam.required))
+				CF.eleAttr(input, "dg-validation-required", "true");
 			
-			if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-				$input.attr("dg-validation-number", "true");
+			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
+				CF.eleAttr(input, "dg-validation-number", "true");
 		}
 	};
 	
@@ -667,37 +673,33 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串
-	 * 或者
 	 * "[ 待选项名值对象, ... ]"  //数据集定义功能时
-	 * 或者
 	 * [ 待选项名值对象, ... ]    //看板表单功能时
 	 * 
 	 * 其中，待选项名值对象格式允许为：
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选，值、值数组
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputCheckbox = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspvFormInputCheckbox = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
-		var opts = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
+		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
-		if(defaultSelOpts && opts && opts.length == 0)
+		if(defaultSelOpts && CF.isEmpty(payload))
 			opts = defaultSelOpts;
 		
-		if(chartSetting.isString(opts))
+		if(!CF.isArray(opts))
 			opts = [ opts ];
 		
-		if(value == null)
-			value = [];
-		else
-			value = (value.length != undefined ? value : [ value ]);
+		value = (value == null ? [] : (CF.isArray(value) ? value : [ value ]));
 		
-		var $inputsWrapper = $("<div class='dg-dspv-form-inputs-wrapper' />").appendTo($parent);
+		var inputsWrapper = CF.eleCreate("div", "dg-dpform-inputs-wrapper");
+		CF.eleAppend(parent, inputsWrapper);
 		
 		for(var i=0; i<opts.length; i++)
 		{
@@ -705,167 +707,60 @@
 			
 			var optName = (opt.name != null ? opt.name : opt.value);
 			var optVal = (opt.value != null ? opt.value : opt.name);
-			if(optName == null)
-				optName = opt;
-			if(optVal == null)
-				optVal = opt;
+			optName = (optName == null ? opt : optName);
+			optVal = (optVal == null ? opt : optVal);
 			
-			var eleId = chartFactory.uid();
+			var eleId = CF.uid();
 			
-			var $wrapper = $("<div class='dg-dspv-form-checkbox-wrapper' />").appendTo($inputsWrapper);
+			var wrapper = CF.eleCreate("div", "dg-dpform-radio-wrapper");
+			CF.eleAppend(inputsWrapper, wrapper);
 			
-			var $input = $("<input type='checkbox' class='dg-dspv-form-input' />")
-				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", optVal).appendTo($wrapper);
+			var input = CF.eleCreateWithAttr("input", "type", "checkbox", "class", "dg-dpform-input",
+							"id", eleId, "name", dataSetParam.name, "value", optVal);
+			CF.eleAppend(wrapper, input);
 			
-			$("<label />").attr("for", eleId).html(optName).appendTo($wrapper);
+			var label = CF.eleCreateWithAttr("label", "for", eleId);
+			CF.eleHtmlContent(label, optName);
+			CF.eleAppend(wrapper, label);
 			
-			if(chartSetting.containsValueForString(value, optVal))
-				$input.attr("checked", "checked");
+			if(CST.containsValueAsString(value, optVal))
+				CF.eleAttr(input, "checked", "checked");
 			
-			if((dataSetParam.required+"") == "true")
-				$input.attr("dg-validation-required", "true");
+			if(CF.isLiteralTrue(dataSetParam.required))
+				CF.eleAttr(input, "dg-validation-required", "true");
 			
-			if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-				$input.attr("dg-validation-number", "true");
+			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
+				CF.eleAttr(input, "dg-validation-number", "true");
 		}
 	};
 	
 	/**
 	 * 渲染输入项：文本域
 	 * 
-	 * @param $form
-	 * @param $parent 渲染输入项的父容器元素
+	 * @param form
+	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputTextarea = function($form, $parent, dataSetParam, value, formOptions)
+	CST.renderDspvFormInputTextarea = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var $input = $("<textarea class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
-			.text(value == null ? "" : value).appendTo($parent);
+		var input = CF.eleCreate("textarea", "dg-dpform-input");
+		CF.eleAttr(input, "type", "text");
+		CF.eleAttr(input, "name", dataSetParam.name);
+		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
+		if(CF.isLiteralTrue(dataSetParam.required))
+			CF.eleAttr(input, "dg-validation-required", "true");
 		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
+			CF.eleAttr(input, "dg-validation-number", "true");
+		
+		CF.eleAppend(parent, input);
 	};
 	
-	/**
-	 * 移除日期选择器组件root容器元素。
-	 */
-	chartSetting.removeDatetimePickerRoot = function()
-	{
-		var rootWrapperId = chartFactory.BUILTIN_NAME_PART + "DatetimepickerRoot";
-		$("#" + rootWrapperId).remove();
-	};
-	
-	/**
-	 * 渲染日期选择器组件。
-	 */
-	chartSetting.renderDatetimePicker = function($input, options, chartTheme)
-	{
-		//在这里检查并重写，避免依赖加载顺序
-		if(!chartSetting._datetimepickerInited)
-		{
-			chartSetting.datetimepickerInit();
-			chartSetting._datetimepickerInited = true;
-		}
-		
-		var noSizeCss =
-			 "width:0 !important;"
-			+"height:0 !important;"
-			+"padding:0 0 !important;"
-			+"margin:0 0 !important;"
-			+"border:0 !important;"
-			+"border-width:0 !important;";
-		
-		var rootWrapperId = chartFactory.BUILTIN_NAME_PART + "DatetimepickerRoot";
-		var $rootWrapper = $("#" + rootWrapperId);
-		if($rootWrapper.length < 1)
-			$rootWrapper = $("<div style='"+noSizeCss+"' />").attr("id", rootWrapperId).appendTo(document.body);
-		
-		var wrapperId = chartFactory.uid();
-		var $wrapper = $("<div style='"+noSizeCss+"' />").attr("id", wrapperId).appendTo($rootWrapper);
-		
-		if(chartTheme)
-			$wrapper.addClass(chartSetting.datetimepickerThemeStyle(chartTheme));
-		
-		options = chartFactory.extend(
-		{
-			//inline应该为false，为true的话下面的datetimepickerThemeStyle函数创建的样式将不起作用
-			inline: false,
-			parentID: "#"+wrapperId,
-			i18n:
-			{
-				zh: { months: ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"] }
-			}
-		},
-		options);
-		
-		//年份选择器
-		if("Y" == options.format || "y" == options.format)
-		{
-			//显示确定按钮，用于直接选中默认年份
-			options.showApplyButton = true;
-			options.onGenerate = function(currentValue, $input)
-			{
-				var yearPickerInited = $(this).attr("yearPickerInited");
-				if(!yearPickerInited)
-				{
-					$(this).attr("yearPickerInited", "yes");
-					
-					$(".xdsoft_prev", this).hide();
-					$(".xdsoft_today_button", this).hide();
-					$(".xdsoft_month", this).hide();
-					$(".xdsoft_next", this).hide();
-					$(".xdsoft_calendar", this).hide();
-					
-					$(".xdsoft_save_selected", this).removeClass("blue-gradient-button")
-						.addClass("xdsoft_save_selected_year ui-button ui-corner-all").html(chartSetting.labels.confirm);
-				}
-			};
-			options.onShow = function(currentValue,$input)
-			{
-				if(!$input.val())
-				{
-					//这样可以直接点击【确定】按钮选择默认年份
-					this.setOptions({value: currentValue});
-					$input.val("");
-				}
-			};
-			options.onChangeYear = function(currentValue,$input)
-			{
-				this.setOptions({value: currentValue});
-				$(".xdsoft_save_selected", this).click();
-			};
-		}
-		
-		$input.datetimepicker(options);
-		
-		return $wrapper;
-	};
-	
-	/**
-	 * 销毁日期选择器组件。
-	 */
-	chartSetting.destroyDatetimePicker = function($input)
-	{
-		try
-		{
-			$input.datetimepicker("destroy");
-		}
-		catch(e){}
-	};
-	
-	chartSetting.datetimepickerInit = function()
-	{
-		$.datetimepicker.setLocale('zh');
-		$.datetimepicker.setDateFormatter(chartSetting.datetimepickerDateFormatter);
-	};
-	
-	//默认$.datetimepicker的DateFormatter有缺陷，支持格式有限，且对于"ymd"格式无法解析，所以这里重写
-	chartSetting.datetimepickerDateFormatter =
+	//日期格式支持类，且对于"ymd"格式无法解析，所以这里重写
+	CST.dateFormatter =
 	{
 		parseDate: function(date, format)
 		{
@@ -1015,175 +910,16 @@
 		_formatArrayCache:{}
 	};
 	
-	/**
-	 * 获取或创建与指定图表主题匹配的datetimepicker组件样式表，并返回CSS类名。
-	 * 
-	 * @param chartTheme
-	 */
-	chartSetting.datetimepickerThemeStyle = function(chartTheme)
+	CST.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
 	{
-		return chartFactory.themeStyleSheet(chartTheme, chartFactory.builtinPropName("Datetimepicker"), function()
-		{
-			var color = chartFactory.themeGradualColor(chartTheme, 1);
-			var bgColor = chartFactory.themeGradualColor(chartTheme, 0);
-			var borderColor = chartFactory.themeGradualColor(chartTheme, 0.3);
-			var shadowColor = chartFactory.themeGradualColor(chartTheme, 0.9);
-			var hoverColor = chartFactory.themeGradualColor(chartTheme, 0.3);
-			
-			var cssPrefix = " .xdsoft_datetimepicker";
-			
-			var css =
-			[
-				//主体
-				{
-					name: cssPrefix,
-					value:
-					{
-						"color": color,
-						"background": bgColor,
-						"border-color": borderColor,
-						"box-shadow": "0px 0px 6px " + shadowColor,
-						"-webkit-box-shadow": "0px 0px 6px " + shadowColor
-					}
-				},
-				//前景色
-				{
-					name: [ cssPrefix + " .xdsoft_calendar td", cssPrefix + " .xdsoft_calendar th" ],
-					value:
-					{
-						"color": color
-					}
-				},
-				//按钮
-				{
-					name:
-					[
-						cssPrefix + " .xdsoft_label i",
-						cssPrefix + " .xdsoft_next",
-						cssPrefix + " .xdsoft_prev"
-					],
-					value:
-					{
-						"color": color
-					}
-				},
-				{
-					name: cssPrefix + " .xdsoft_today_button:before" ,
-					value:
-					{
-						"background": color
-					}
-				},
-				//年、月
-				{
-					name: cssPrefix + " .xdsoft_label",
-					value:
-					{
-						"background": bgColor
-					}
-				},
-				//年、月下拉框
-				{
-					name: cssPrefix + " .xdsoft_label>.xdsoft_select",
-					value:
-					{
-						"color": color,
-						"background": bgColor,
-						"border-color": borderColor,
-						"box-shadow": "0px 0px 6px " + shadowColor,
-						"-webkit-box-shadow": "0px 0px 6px " + shadowColor
-					}
-				},
-				//时间框
-				{
-					name: cssPrefix + " .xdsoft_timepicker .xdsoft_time_box",
-					value:
-					{
-						"border-color": borderColor
-					}
-				},
-				//时间条目
-				{
-					name: cssPrefix + " .xdsoft_timepicker .xdsoft_time_box>div>div",
-					value:
-					{
-						"color": color,
-						"border-color": borderColor
-					}
-				},
-				//悬停
-				{
-					name:
-					[
-						cssPrefix + " .xdsoft_calendar td:hover",
-						cssPrefix + " .xdsoft_timepicker .xdsoft_time_box>div>div:hover",
-						cssPrefix + " .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover"
-					],
-					value:
-					{
-						"color": color + " !important",
-						"background": hoverColor + " !important"
-					}
-				},
-				//今天
-				{
-					name: cssPrefix + " .xdsoft_calendar td.xdsoft_today",
-					value:
-					{
-						"color": color,
-						"font-weight": "bold"
-					}
-				},
-				//选中
-				{
-					name:
-					[
-						cssPrefix + " .xdsoft_calendar td.xdsoft_default",
-						cssPrefix + " .xdsoft_calendar td.xdsoft_current",
-						cssPrefix + " .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current",
-						cssPrefix + " .xdsoft_label>.xdsoft_select>div>.xdsoft_option.xdsoft_current"
-					],
-					value:
-					{
-						"color": chartTheme.highlightTheme.color,
-						"background": chartTheme.highlightTheme.backgroundColor,
-						"box-shadow": "none",
-						"-webkit-box-shadow": "none"
-					}
-				},
-				{
-					name: cssPrefix + " .xdsoft_save_selected.xdsoft_save_selected_year",
-					value:
-					{
-						"color": color,
-						"background": bgColor,
-						"border": "1px solid "+borderColor+" !important"
-					}
-				},
-				{
-					name: cssPrefix + " .xdsoft_save_selected.xdsoft_save_selected_year:hover",
-					value:
-					{
-						"background": hoverColor
-					}
-				}
-			];
-			
-			return css;
-		});
-	};
-	
-	chartSetting.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
-	{
-		if(typeof(dataSetParam.inputPayload) == "string" && dataSetParam.inputPayload != "")
-			return chartFactory.evalSilently(dataSetParam.inputPayload, defaultValue);
+		var inputPayload = dataSetParam.inputPayload;
+		
+		if(CF.isEmpty(inputPayload))
+			return defaultValue;
+		else if(CF.isString(inputPayload))
+			return CF.evalSilently(dataSetParam.inputPayload, defaultValue);
 		else
-			return (dataSetParam.inputPayload || defaultValue);
-	};
-	
-	chartSetting.isString = function(str)
-	{
-		return typeof(str) == "string";
+			return defaultValue;
 	};
 	
 	/**
@@ -1192,11 +928,11 @@
 	 * @param form
 	 * @return true 验证通过；false 验证不通过
 	 */
-	chartSetting.validateDataSetParamValueForm = function(form)
+	CST.validateDataSetParamValueForm = function(form)
 	{
 		var validationOk = true;
 		
-		var $itemValue = $(".dg-dspv-form-item-value", form);
+		var $itemValue = $(".dg-dpform-item-value", form);
 		
 		$itemValue.each(function()
 		{
@@ -1212,17 +948,17 @@
 				var checkeds = $required.filter(":checked");
 				if(checkeds.length == 0)
 				{
-					$(".dg-dspv-form-inputs-wrapper", this).addClass("dg-validation-required");
+					$(".dg-dpform-inputs-wrapper", this).addClass("dg-validation-required");
 					validationOk = false;
 				}
 				else
-					$(".dg-dspv-form-inputs-wrapper", this).removeClass("dg-validation-required");
+					$(".dg-dpform-inputs-wrapper", this).removeClass("dg-validation-required");
 			}
 			else
 			{
 				var val = $required.val();
 				
-				if(chartFactory.isEmpty(val))
+				if(CF.isEmpty(val))
 				{
 					$required.addClass("dg-validation-required");
 					validationOk = false;
@@ -1254,21 +990,21 @@
 						break;
 					
 					var val = $(checkeds[i]).attr("value");
-					myValid = (chartFactory.isEmpty(val) ? true : regexNumber.test(val));
+					myValid = (CF.isEmpty(val) ? true : regexNumber.test(val));
 				}
 				
 				if(!myValid)
 				{
-					$(".dg-dspv-form-inputs-wrapper", this).addClass("dg-validation-number");
+					$(".dg-dpform-inputs-wrapper", this).addClass("dg-validation-number");
 					validationOk = false;
 				}
 				else
-					$(".dg-dspv-form-inputs-wrapper", this).removeClass("dg-validation-number");
+					$(".dg-dpform-inputs-wrapper", this).removeClass("dg-validation-number");
 			}
 			else
 			{
 				var val = $number.val();
-				val = (chartFactory.isArray(val) ? val: [ val ]);
+				val = (CF.isArray(val) ? val: [ val ]);
 				var myValid = true;
 				
 				for(var i=0; i<val.length; i++)
@@ -1276,7 +1012,7 @@
 					if(!myValid)
 						break;
 					
-					myValid = (chartFactory.isEmpty(val[i]) ? true : regexNumber.test(val[i]));
+					myValid = (CF.isEmpty(val[i]) ? true : regexNumber.test(val[i]));
 				}
 				
 				if(!myValid)
@@ -1304,7 +1040,7 @@
 	 * 
 	 * @param form
 	 */
-	chartSetting.getDataSetParamValueObj = function(form)
+	CST.getDataSetParamValueObj = function(form)
 	{
 		var $form = $(form);
 		var array = $form.serializeArray();
@@ -1345,7 +1081,7 @@
 			{
 				if(value != null)
 				{
-					if(chartFactory.isArray(prev))
+					if(CF.isArray(prev))
 						prev.push(value);
 					else
 					{
@@ -1361,7 +1097,7 @@
 		{
 			var v = re[p];
 			
-			if(chartFactory.isEmpty(v))
+			if(CF.isEmpty(v))
 				re[p] = null;
 		}
 		
@@ -1375,11 +1111,11 @@
 		return re;
 	};
 	
-	chartSetting.setDataSetParamValueObj = function(form, paramValueObj)
+	CST.setDataSetParamValueObj = function(form, paramValueObj)
 	{
 		paramValueObj = (paramValueObj || {});
 		
-		$(".dg-dspv-form-input", form).each(function()
+		$(".dg-dpform-input", form).each(function()
 		{
 			var $this = $(this);
 			var name = $this.attr("name");
@@ -1400,7 +1136,7 @@
 					else
 						value = (value.length != undefined ? value : [ value ]);
 					
-					if(chartSetting.containsValueForString(value, $this.attr("value")))
+					if(CST.containsValueAsString(value, $this.attr("value")))
 						$this.prop("checked", true);
 					else
 						$this.prop("checked", false);
@@ -1419,7 +1155,7 @@
 				{
 					var $thisOpt = $(this);
 					
-					if(chartSetting.containsValueForString(value, $thisOpt.attr("value")))
+					if(CST.containsValueAsString(value, $thisOpt.attr("value")))
 						$thisOpt.prop("selected", true);
 					else
 						$thisOpt.prop("selected", false);
@@ -1432,41 +1168,51 @@
 		});
 	};
 	
-	chartSetting.containsValueForString = function(array, value)
+	CST.containsValueAsString = function(array, value)
 	{
 		if(array === value)
 			return true;
 		
+		var valueStr = (value+"");
+		
 		for(var i=0; i<array.length; i++)
 		{
-			if((array[i]+"") == (value+""))
+			if(array[i] == value)
+				return true;
+			
+			if((array[i]+"") == valueStr)
 				return true;
 		}
 		
 		return false;
 	};
 	
-	chartSetting.getDataSetParamValueForm = function($parent)
+	CST.isEqualAsString = function(a, b)
 	{
-		return $(".dg-dspv-form", $parent);
+		return (a == b || (a+"") == (b+""));
+	};
+	
+	CST.getDataSetParamValueForm = function($parent)
+	{
+		return $(".dg-dpform", $parent);
 	};
 
-	chartSetting.getDataSetParamValueFormHead = function(form)
+	CST.getDataSetParamValueFormHead = function(form)
 	{
-		return $(".dg-dspv-form-head", form);
+		return $(".dg-dpform-head", form);
 	};
 	
-	chartSetting.getDataSetParamValueFormContent = function(form)
+	CST.getDataSetParamValueFormContent = function(form)
 	{
-		return $(".dg-dspv-form-content", form);
+		return $(".dg-dpform-content", form);
 	};
 	
-	chartSetting.getDataSetParamValueFormFoot = function(form)
+	CST.getDataSetParamValueFormFoot = function(form)
 	{
-		return $(".dg-dspv-form-foot", form);
+		return $(".dg-dpform-foot", form);
 	};
 	
-	chartSetting.bindChartSettingPanelEvent = function(chart)
+	CST.bindChartSettingPanelEvent = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
 		var noNeedParam = (disableSetting.param == true || !chart.hasDataSetParam());
@@ -1475,10 +1221,10 @@
 			return false;
 		
 		var chartOptions = chart.options();
-		var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+		var builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
 		//显示模式："hover" 悬浮显示（默认）、"display" 始终显示
 		var displayMode = (builtinSetting ? builtinSetting.displayMode : null);
-		displayMode = (chartFactory.isEmpty(displayMode) ? "hover" : displayMode);
+		displayMode = (CF.isEmpty(displayMode) ? "hover" : displayMode);
 		
 		var $chart = chart.elementJquery();
 		
@@ -1488,21 +1234,21 @@
 			
 			if(displayMode == "display")
 			{
-				chartSetting.showChartSettingBox(chart);
+				CST.showChartSettingBox(chart);
 			}
 			else if(displayMode == "hover")
 			{
 				var mouseenterHandler = function(event)
 				{
 					if(chart.isActive())
-						chartSetting.showChartSettingBox(chart);
+						CST.showChartSettingBox(chart);
 				};
 				var mouseleaveHandler = function(event)
 				{
-					if(chartSetting.isChartSettingParamPanelClosed(chart)
-						&& chartSetting.isChartSettingDataPanelClosed(chart))
+					if(CST.isChartSettingParamPanelClosed(chart)
+						&& CST.isChartSettingDataPanelClosed(chart))
 					{
-						chartSetting.hideChartSettingBox(chart);
+						CST.hideChartSettingBox(chart);
 					}
 				};
 				
@@ -1516,7 +1262,7 @@
 		return true;
 	};
 	
-	chartSetting.unbindChartSettingPanelEvent = function(chart)
+	CST.unbindChartSettingPanelEvent = function(chart)
 	{
 		var $chart = chart.elementJquery();
 		var mouseenterHandler = $chart.data("dgChartSettingMouseEnterHandler");
@@ -1531,11 +1277,11 @@
 		
 		var $box = $(".dg-chart-setting-box", $chart);
 		
-		chartSetting.destroyDataSetParamValueForm($box);
+		CST.destroyDataSetParamValueForm($box);
 		$box.remove();
 	};
 	
-	chartSetting.showChartSettingBox = function(chart)
+	CST.showChartSettingBox = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
 		
@@ -1545,47 +1291,47 @@
 		if($box.length <= 0)
 		{
 			var chartOptions = chart.options();
-			var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+			var builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
 			
 			//显示位置："rightTop" 右上（默认）；"leftTop" 左上；"leftBottom" 左下；"rightBottom" 右下
 			var boxPosition = (builtinSetting ? builtinSetting.position : null);
-			boxPosition = (chartFactory.isEmpty(boxPosition) ? "rightTop" : boxPosition);
+			boxPosition = (CF.isEmpty(boxPosition) ? "rightTop" : boxPosition);
 			
 			//显示方向："row" 横向（默认）；"column" 竖向
 			var boxDirection = (builtinSetting ? builtinSetting.direction : null);
-			boxDirection = (chartFactory.isEmpty(boxDirection) ? "row" : boxDirection);
+			boxDirection = (CF.isEmpty(boxDirection) ? "row" : boxDirection);
 			
 			var boxPositionCssName = "dg-position-" + boxPosition;
 			var boxDirectionCssName = "dg-flex-dir-" + boxDirection;
 			
 			$box = $("<div class='dg-chart-setting-box "+boxPositionCssName+" "+boxDirectionCssName+"' />").appendTo($chart);
 			
-			chartSetting.setChartSettingBoxThemeStyle(chart, $box);
+			CST.setChartSettingBoxThemeStyle(chart, $box);
 			
 			//参数
 			if(!disableSetting.param && chart.hasDataSetParam())
 			{
 				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-param-button' />")
-						.html(chartSetting.labels.param);
-				chartSetting.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.paramButton : null));
+						.html(CST.labels.param);
+				CST.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.paramButton : null));
 				$button.appendTo($box);
 				
 				$button.click(function()
 				{
-					chartSetting.closeChartSettingDataPanel(chart);
+					CST.closeChartSettingDataPanel(chart);
 					
-					if(chartSetting.isChartSettingParamPanelClosed(chart))
-						chartSetting.openChartSettingParamPanel($box, chart);
+					if(CST.isChartSettingParamPanelClosed(chart))
+						CST.openChartSettingParamPanel($box, chart);
 					else
-						chartSetting.closeChartSettingParamPanel(chart);
+						CST.closeChartSettingParamPanel(chart);
 				});
 				
 				$chart.click(function(event)
 				{
-					if(!chartSetting.isChartSettingParamPanelClosed(chart))
+					if(!CST.isChartSettingParamPanelClosed(chart))
 					{
 						if($(event.target).closest(".dg-chart-setting-box").length == 0)
-							chartSetting.closeChartSettingParamPanel(chart);
+							CST.closeChartSettingParamPanel(chart);
 					}
 				});
 			}
@@ -1594,26 +1340,26 @@
 			if(!disableSetting.data)
 			{
 				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-data-button' />")
-						.html(chartSetting.labels.data);
-				chartSetting.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.dataButton : null));
+						.html(CST.labels.data);
+				CST.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.dataButton : null));
 				$button.appendTo($box);
 				
 				$button.click(function()
 				{
-					chartSetting.closeChartSettingParamPanel(chart);
+					CST.closeChartSettingParamPanel(chart);
 					
-					if(chartSetting.isChartSettingDataPanelClosed(chart))
-						chartSetting.openChartSettingDataPanel($box, chart);
+					if(CST.isChartSettingDataPanelClosed(chart))
+						CST.openChartSettingDataPanel($box, chart);
 					else
-						chartSetting.closeChartSettingDataPanel(chart);
+						CST.closeChartSettingDataPanel(chart);
 				});
 				
 				$chart.click(function(event)
 				{
-					if(!chartSetting.isChartSettingDataPanelClosed(chart))
+					if(!CST.isChartSettingDataPanelClosed(chart))
 					{
 						if($(event.target).closest(".dg-chart-setting-box").length == 0)
-							chartSetting.closeChartSettingDataPanel(chart);
+							CST.closeChartSettingDataPanel(chart);
 					}
 				});
 			}
@@ -1622,13 +1368,13 @@
 		$box.show();
 	};
 	
-	chartSetting.hideChartSettingBox = function(chart)
+	CST.hideChartSettingBox = function(chart)
 	{
 		$(".dg-chart-setting-box", chart.elementJquery()).hide();
 	};
 	
 	//设置按钮选项，格式为：{ text: "", style: "...", styleClass: "..." }
-	chartSetting.setChartSettingButtonOptions = function($button, buttonOptions)
+	CST.setChartSettingButtonOptions = function($button, buttonOptions)
 	{
 		if(!buttonOptions)
 			return;
@@ -1637,15 +1383,15 @@
 			$button.html(buttonOptions.text);
 		
 		if(buttonOptions.style)
-			chartFactory.eleStyle($button, buttonOptions.style);
+			CF.eleStyle($button, buttonOptions.style);
 		
 		if(buttonOptions.styleClass)
 			$button.addClass(buttonOptions.styleClass);
 	};
 	
-	chartSetting.setChartSettingBoxThemeStyle = function(chart, $box)
+	CST.setChartSettingBoxThemeStyle = function(chart, $box)
 	{
-		chart.themeStyleSheet(chartFactory.builtinPropName("ChartSettingBox"), function()
+		chart.themeStyleSheet(CF.builtinPropName("ChartSettingBox"), function()
 		{
 			var color = chart.themeGradualColor(1);
 			var bgColor = chart.themeGradualColor(0);
@@ -1724,7 +1470,7 @@
 	/**
 	 * 打开图表参数面板。
 	 */
-	chartSetting.openChartSettingParamPanel = function($box, chart)
+	CST.openChartSettingParamPanel = function($box, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
 		var $panel = $(".dg-chart-setting-param-panel", $box);
@@ -1733,24 +1479,24 @@
 		{
 			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-param-panel' />").appendTo($box);
 			
-			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
-			$("<div class='dg-chart-setting-panel-head-title' />").html(chartSetting.labels.chartParam).appendTo($panelHead);
+			$("<div class='dg-chart-setting-panel-head-title' />").html(CST.labels.chartParam).appendTo($panelHead);
 			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo($panelHead);
 			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
-				.html(chartSetting.labels.close).appendTo($headBtns)
+				.html(CST.labels.close).appendTo($headBtns)
 				.click(function()
 				{
-					chartSetting.closeChartSettingParamPanel(chart);
+					CST.closeChartSettingParamPanel(chart);
 				});
 			
-			var $button = $("<button type='button' />").html(chartSetting.labels.confirm).appendTo($panelFoot);
+			var $button = $("<button type='button' />").html(CST.labels.confirm).appendTo($panelFoot);
 			
-			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent, $panelFoot);
+			CST.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent, $panelFoot);
 			
 			for(var i=0; i<dataSetBinds.length; i++)
 			{
@@ -1759,12 +1505,12 @@
 				if(!params || params.length == 0)
 					continue;
 				
-				var myTitle = chartSetting.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
+				var myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
 				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
 				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
 				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
-				chartSetting.renderDataSetParamValueForm($content, params,
+				CST.renderDataSetParamValueForm($content, params,
 				{
 					chartTheme: chart.theme(),
 					inChartElement: true,
@@ -1775,7 +1521,7 @@
 					paramValues: chart.dataSetParamValues(i),
 					render: function()
 					{
-						chartSetting.getDataSetParamValueFormFoot(this).hide();
+						CST.getDataSetParamValueFormFoot(this).hide();
 					}
 				});
 				
@@ -1784,7 +1530,7 @@
 					$(".dg-datasetbind-section-content", $(this).parent()).toggle();
 				});
 				
-				chartSetting.toggleParamFormContentByIgnoreFetch($panel, $fp, chart, i);
+				CST.toggleParamFormContentByIgnoreFetch($panel, $fp, chart, i);
 			}
 			
 			$button.click(function()
@@ -1799,15 +1545,15 @@
 						return;
 					
 					var $this = $(this);
-					var $form = chartSetting.getDataSetParamValueForm($this);
+					var $form = CST.getDataSetParamValueForm($this);
 					var dataSetBindIndex = $this.data("dataSetBindIndex");
 					var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
-					if(!ignoreFetch && !chartSetting.validateDataSetParamValueForm($form))
+					if(!ignoreFetch && !CST.validateDataSetParamValueForm($form))
 						validateOk = false;
 					else
 					{
-						var myParamValues = chartSetting.getDataSetParamValueObj($form);
+						var myParamValues = CST.getDataSetParamValueObj($form);
 						paramValuess.push({ index : dataSetBindIndex, paramValues: myParamValues });
 					}
 				});
@@ -1817,13 +1563,13 @@
 					$thisButton.removeClass("dg-param-value-form-invalid");
 					
 					var chartOptions = chart.options();
-					var builtinSetting = chartFactory.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+					var builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
 					var convertParamFormValue = (builtinSetting ? builtinSetting.convertParamFormValue : null);
 					convertParamFormValue = (convertParamFormValue == null ? true : convertParamFormValue);
 					
 					for(var i=0; i<paramValuess.length; i++)
 					{
-						chartSetting.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
+						CST.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
 					}
 					
 					var doRefresh = true;
@@ -1844,7 +1590,7 @@
 						}
 						else
 						{
-							chartSetting.closeChartSettingParamPanel(chart);
+							CST.closeChartSettingParamPanel(chart);
 						}
 					}
 					else
@@ -1855,7 +1601,7 @@
 						}
 						else
 						{
-							chartSetting.closeChartSettingParamPanel(chart);
+							CST.closeChartSettingParamPanel(chart);
 						}
 						
 						chart.refreshData();
@@ -1867,31 +1613,31 @@
 		}
 		else
 		{
-			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
 				var dataSetBindIndex = $(this).data("dataSetBindIndex");
-				var $form = chartSetting.getDataSetParamValueForm(this);
+				var $form = CST.getDataSetParamValueForm(this);
 				
-				chartSetting.setDataSetParamValueObj($form, chart.dataSetParamValues(dataSetBindIndex));
-				chartSetting.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);
+				CST.setDataSetParamValueObj($form, chart.dataSetParamValues(dataSetBindIndex));
+				CST.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);
 			});
 		}
 		
-		chartSetting.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-param-button", $box), chart);
+		CST.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-param-button", $box), chart);
 		
 		//聚焦至第一个可操作输入框
-		chartSetting.focusOnFirstInput($("form:first", $panel));
+		CST.focusOnFirstInput($("form:first", $panel));
 	};
 	
-	chartSetting.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
+	CST.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
 	{
 		//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
 		chart.dataSetParamValues(dataSetBindIndex, paramValues, true, convert);
 	};
 	
-	chartSetting.toggleParamFormContentByIgnoreFetch = function($panel, $section, chart, dataSetBindIndex)
+	CST.toggleParamFormContentByIgnoreFetch = function($panel, $section, chart, dataSetBindIndex)
 	{
 		var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 		var $content = $(".dg-datasetbind-section-content", $section);
@@ -1905,7 +1651,7 @@
 	/**
 	 * 关闭图表参数面板。
 	 */
-	chartSetting.closeChartSettingParamPanel = function(chart)
+	CST.closeChartSettingParamPanel = function(chart)
 	{
 		$(".dg-chart-setting-param-panel", chart.elementJquery()).hide();
 	};
@@ -1913,12 +1659,12 @@
 	/**
 	 * 获取图表参数面板。
 	 */
-	chartSetting.getChartSettingParamPanel = function(chart)
+	CST.getChartSettingParamPanel = function(chart)
 	{
 		return $(".dg-chart-setting-param-panel", chart.elementJquery());
 	};
 	
-	chartSetting.isChartSettingParamPanelClosed = function(chart)
+	CST.isChartSettingParamPanelClosed = function(chart)
 	{
 		var $panel = $(".dg-chart-setting-param-panel", chart.elementJquery());
 		
@@ -1928,7 +1674,7 @@
 	/**
 	 * 打开图表数据面板。
 	 */
-	chartSetting.openChartSettingDataPanel = function($box, chart)
+	CST.openChartSettingDataPanel = function($box, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
 		var $panel = $(".dg-chart-setting-data-panel", $box);
@@ -1937,40 +1683,40 @@
 		{
 			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-data-panel' />").appendTo($box);
 			
-			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
-			$("<div class='dg-chart-setting-panel-head-title' />").html(chartSetting.labels.chartData).appendTo($panelHead);
+			$("<div class='dg-chart-setting-panel-head-title' />").html(CST.labels.chartData).appendTo($panelHead);
 			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo($panelHead);
 			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
-				.html(chartSetting.labels.close).appendTo($headBtns)
+				.html(CST.labels.close).appendTo($headBtns)
 				.click(function()
 				{
-					chartSetting.closeChartSettingDataPanel(chart);
+					CST.closeChartSettingDataPanel(chart);
 				});
 			
-			chartSetting.setChartSettingDataPanelThemeStyle(chart, $panel);
-			chartSetting.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
+			CST.setChartSettingDataPanelThemeStyle(chart, $panel);
+			CST.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
 			
 			for(var i=0; i<dataSetBinds.length; i++)
 			{
-				var myTitle = chartSetting.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
+				var myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
 				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
 				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
 				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
 				
-				var tableId = chartSetting.initDataSetBindDataTable(chart, dataSetBinds, i, $content);
+				var tableId = CST.initDataSetBindDataTable(chart, dataSetBinds, i, $content);
 				
 				$fp.data("chartDataTableId", tableId);
 			}
 		}
 		else
 		{
-			chartSetting.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
 			
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
@@ -1978,17 +1724,17 @@
 				var tableId = $(this).data("chartDataTableId");
 				var $table = $("#"+tableId, this);
 				
-				chartSetting.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, $table);
+				CST.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, $table);
 			});
 		}
 		
-		chartSetting.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-data-button", $box), chart);
+		CST.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-data-button", $box), chart);
 	};
 	
 	/**
 	 * 关闭图表数据面板。
 	 */
-	chartSetting.closeChartSettingDataPanel = function(chart)
+	CST.closeChartSettingDataPanel = function(chart)
 	{
 		$(".dg-chart-setting-data-panel", chart.elementJquery()).hide();
 	};
@@ -1996,19 +1742,19 @@
 	/**
 	 * 获取图表数据面板。
 	 */
-	chartSetting.getChartSettingDataPanel = function(chart)
+	CST.getChartSettingDataPanel = function(chart)
 	{
 		return $(".dg-chart-setting-data-panel", chart.elementJquery());
 	};
 	
-	chartSetting.isChartSettingDataPanelClosed = function(chart)
+	CST.isChartSettingDataPanelClosed = function(chart)
 	{
 		var $panel = $(".dg-chart-setting-data-panel", chart.elementJquery());
 		
 		return ($panel.length == 0 || $panel.is(":hidden"));
 	};
 	
-	chartSetting.initDataSetBindDataTable = function(chart, dataSetBinds, index, $parent)
+	CST.initDataSetBindDataTable = function(chart, dataSetBinds, index, $parent)
 	{
 		var dataSetBind = dataSetBinds[index];
 		var dataSetFields = chart.dataSetFields(dataSetBind);
@@ -2031,7 +1777,7 @@
 		
 		columns.push(
 		{
-			title: chartSetting.labels.serialNumber,
+			title: CST.labels.serialNumber,
 			style: "width:4em",
 			render: function(data, index)
 			{
@@ -2043,11 +1789,11 @@
 		{
 			var column =
 			{
-				title: chartSetting.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i]),
+				title: CST.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i]),
 				fieldName: signFields[i].name,
 				render: function(data)
 				{
-					return chartFactory.escapeHtml(data[this.fieldName]);
+					return CF.escapeHtml(data[this.fieldName]);
 				}
 			};
 			
@@ -2058,15 +1804,15 @@
 		{
 			columns.push(
 			{
-				title: chartSetting.labels.dataDetail,
+				title: CST.labels.dataDetail,
 				render: function(data)
 				{
-					return chartFactory.toJsonString(data);
+					return CF.toJsonString(data);
 				}
 			});
 		}
 		
-		var tableId = chartFactory.uid();
+		var tableId = CF.uid();
 		
 		var table = $("<table width='100%' class='dg-chart-data-table'></table>");
 		table.attr("id", tableId);
@@ -2085,12 +1831,12 @@
 		$("<tbody />").appendTo(table);
 		table.appendTo($parent);
 		
-		chartSetting.updateChartSettingDataTableData(chart, dataSetBinds, index, table);
+		CST.updateChartSettingDataTableData(chart, dataSetBinds, index, table);
 		
 		return tableId;
 	};
 	
-	chartSetting.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField)
+	CST.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField)
 	{
 		var title = chart.dataSetFieldAlias(dataSetBind, dataSetField);
 		title = (title == dataSetField.name ? title : title + "-" + dataSetField.name);
@@ -2106,9 +1852,9 @@
 		return (signInfo ? title + " (" + signInfo +")" : title);
 	};
 	
-	chartSetting.setChartSettingDataPanelThemeStyle = function(chart, $panel)
+	CST.setChartSettingDataPanelThemeStyle = function(chart, $panel)
 	{
-		chart.themeStyleSheet(chartFactory.builtinPropName("ChartSettingDataPanel"), function()
+		chart.themeStyleSheet(CF.builtinPropName("ChartSettingDataPanel"), function()
 		{
 			var theme = chart.theme();
 			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
@@ -2158,7 +1904,7 @@
 		});
 	};
 	
-	chartSetting.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $table)
+	CST.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $table)
 	{
 		var chartResult = chart.updateResult();
 		var result = chart.resultOf(chartResult, index);
@@ -2181,7 +1927,7 @@
 		}
 	};
 	
-	chartSetting.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
+	CST.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
 	{
 		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + chart.dataSetAlias(dataSetBinds[index]);
 		if(title != dataSetBinds[index].dataSet.name)
@@ -2190,7 +1936,7 @@
 		return title;
 	};
 	
-	chartSetting.setChartSetingPanelContentSizeRange = function(chart, $panel, $panelContent, $panelFoot)
+	CST.setChartSetingPanelContentSizeRange = function(chart, $panel, $panelContent, $panelFoot)
 	{
 		var $chart = chart.elementJquery();
 		
@@ -2206,7 +1952,7 @@
 		$panelContent.css("max-height", wh*3/5 - fh);
 	};
 	
-	chartSetting.showChartSetingPanelOpacityOut = function($box, $panel, chart)
+	CST.showChartSetingPanelOpacityOut = function($box, $panel, chart)
 	{
 		//先透明显示，避免布局计算错误，后续调整位置后再移除透明
 		$panel.addClass("dg-opacity-hide")
@@ -2214,7 +1960,7 @@
 			.show();
 	};
 	
-	chartSetting.adjustChartSetingPanelPosition = function($box, $panel, $btn, chart)
+	CST.adjustChartSetingPanelPosition = function($box, $panel, $btn, chart)
 	{
 		var docWidth = $(document).width();
 		var docHeight = $(document).height();
@@ -2297,7 +2043,7 @@
 	};
 	
 	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
-	chartSetting.focusOnFirstInput = function(ele)
+	CST.focusOnFirstInput = function(ele)
 	{
 		var input = $(":input:not(:disabled,[readonly]):first", ele); 
 		input.focus();

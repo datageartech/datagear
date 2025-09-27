@@ -628,12 +628,12 @@ chartProto._evalDisableSettingAttr = function(settingAttr)
 	if(CF.isEmpty(settingAttr))
 		settingAttr == "false";
 	
-	if(settingAttr == "false" || settingAttr == false)
+	if(CF.isLiteralFalse(settingAttr))
 	{
 		setting.param = false;
 		setting.data = false;
 	}
-	else if(settingAttr == "true" || settingAttr == true)
+	else if(CF.isLiteralTrue(settingAttr))
 	{
 		setting.param = true;
 		setting.data = true;
@@ -933,11 +933,11 @@ chartProto.disableSetting = function(setting)
 		{
 			setting = {};
 		}
-		else if(setting == true || setting == "true")
+		else if(CF.isLiteralTrue(setting))
 		{
 			setting = {param: true, data: true};
 		}
-		else if(setting == false || setting == "false")
+		else if(CF.isLiteralFalse(setting))
 		{
 			setting = {param: false, data: false};
 		}
@@ -3612,7 +3612,7 @@ chartProto.unreadyDataSetParams = function(dataSetBinds, stopOnFirst, checkIgnor
 
 chartProto._isDataSetParamUnready = function(dataSetParam, paramValues)
 {
-	var required = (dataSetParam.required == true || dataSetParam.required == "true");
+	var required = CF.isLiteralTrue(dataSetParam.required);
 	return (required && (paramValues == null || paramValues[dataSetParam.name] == null));
 };
 
@@ -4344,10 +4344,41 @@ CF.eleOfNext = function(ele)
  * 创建HTML元素
  * 
  * @param name 元素名，比如："div"、"a"
+ * @param classValue 可选，元素样式类属性值
  */
-CF.eleCreate = function(name)
+CF.eleCreate = function(name, classValue)
 {
-	return document.createElement(name);
+	var ele = document.createElement(name);
+	
+	if(!CF.isEmpty(classValue))
+		CF.eleAttr("class", classValue);
+	
+	return ele;
+};
+
+/**
+ * 创建HTML元素，同时设置元素属性
+ * 
+ * @param name 元素名，比如："div"、"a"
+ * @param attrName 可选，要设置的属性名
+ * @param attrValue 可选，要设置的属性值，应与attrName成对
+ */
+CF.eleCreateWithAttr = function(name, attrName, attrValue)
+{
+	var ele = document.createElement(name);
+	
+	for(let i=1; i<arguments.length;)
+	{
+		let name = arguments[i];
+		let value = arguments[i+1];
+		
+		if(!CF.isEmpty(name))
+			CF.eleAttr(ele, name, value);
+		
+		i+=2;
+	}
+	
+	return ele;
 };
 
 /**
@@ -4524,6 +4555,20 @@ CF.eleTextContent = function(ele, text)
 		ele.textContent = text;
 };
 
+/**
+ * 获取/设置元素的HTML内容。
+ * 
+ * @param ele HTML元素
+ * @param html 可选，要设置的HTML内容
+ */
+CF.eleHtmlContent = function(ele, html)
+{
+	if(text === undefined)
+		return ele.innerHTML;
+	else
+		ele.innerHTML = html;
+};
+
 CF.ELE_DATA_CACHE = new WeakMap();
 
 /**
@@ -4619,6 +4664,30 @@ CF.eleStyle = function(ele, css)
 };
 
 /**
+ * 为HTML元素绑定事件处理函数。
+ * 
+ * @param ele
+ * @param eventType
+ * @param handler
+ */
+CF.eleOn = function(ele, eventType, handler)
+{
+	ele.addEventListener(eventType, handler);
+};
+
+/**
+ * 为HTML元素绑定事件处理函数。
+ * 
+ * @param ele
+ * @param eventType
+ * @param handler
+ */
+CF.eleOff = function(ele, eventType, handler)
+{
+	ele.removeEventListener(eventType, handler);
+};
+
+/**
  * 判断指定对象是否是是HTML元素
  * 
  * @param obj
@@ -4626,6 +4695,17 @@ CF.eleStyle = function(ele, css)
 CF.isHtmlEle = function(obj)
 {
 	return (obj && obj.nodeType != null && obj.nodeName != null);
+};
+
+/**
+ * 判断HTML元素是否匹配指定CSS选择器`
+ * 
+ * @param ele HTML元素
+ * @param selector CSS选择器，比如："form"、"div.red"
+ */
+CF.isEleMatches = function(ele, selector)
+{
+	return ele.matches(selector);
 };
 
 /**
@@ -5522,6 +5602,16 @@ CF.logWarn = function(msg)
 		else if(console.log)
 			console.log(msg);
 	}
+};
+
+CF.isLiteralTrue = function(v)
+{
+	return (v === true || v === "true");
+};
+
+CF.isLiteralFalse = function(v)
+{
+	return (v === false || v === "false");
 };
 
 CF.isBoolean = function(v)
