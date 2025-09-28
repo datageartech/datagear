@@ -231,7 +231,7 @@
 			if(options.readonly)
 				return false;
 			
-			let validationOk = CST.validateDataSetParamValueForm(this);
+			let validationOk = CST.validateDspvForm(this);
 			let submitBtn = CF.eleOfSelector("[type='submit']", foot);
 			
 			if(validationOk)
@@ -408,10 +408,10 @@
 		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-required", "true");
+			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-			CF.eleAttr(input, "dg-validation-number", "true");
+			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
 		CF.eleAppend(parent, input);
 	};
@@ -482,10 +482,10 @@
 		}
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-required", "true");
+			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-			CF.eleAttr(input, "dg-validation-number", "true");
+			CF.eleAttr(input, "dg-validation-check-number", "true");
 	};
 	
 	/**
@@ -520,7 +520,7 @@
 		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-required", "true");
+			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
 	};
@@ -558,7 +558,7 @@
 		CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-required", "true");
+			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
 	};
@@ -599,7 +599,7 @@
 		CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-required", "true");
+			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
 	};
@@ -661,10 +661,10 @@
 				CF.eleAttr(input, "checked", "checked");
 			
 			if(CF.isLiteralTrue(dataSetParam.required))
-				CF.eleAttr(input, "dg-validation-required", "true");
+				CF.eleAttr(input, "dg-validation-check-required", "true");
 			
 			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-				CF.eleAttr(input, "dg-validation-number", "true");
+				CF.eleAttr(input, "dg-validation-check-number", "true");
 		}
 	};
 	
@@ -727,10 +727,10 @@
 				CF.eleAttr(input, "checked", "checked");
 			
 			if(CF.isLiteralTrue(dataSetParam.required))
-				CF.eleAttr(input, "dg-validation-required", "true");
+				CF.eleAttr(input, "dg-validation-check-required", "true");
 			
 			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-				CF.eleAttr(input, "dg-validation-number", "true");
+				CF.eleAttr(input, "dg-validation-check-number", "true");
 		}
 	};
 	
@@ -751,15 +751,16 @@
 		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-required", "true");
+			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-			CF.eleAttr(input, "dg-validation-number", "true");
+			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
 		CF.eleAppend(parent, input);
 	};
 	
-	//日期格式支持类，且对于"ymd"格式无法解析，所以这里重写
+	//日期格式解析支持类，支持"...y...m...d...h...i...s..."格式日期解析
+	//注意：这里保留了大写'Y'标识符，以兼容旧数据集预览时的格式
 	CST.dateFormatter =
 	{
 		parseDate: function(date, format)
@@ -779,7 +780,7 @@
 			{
 				var fmt = format[j];
 				
-				if(fmt == 'Y' || fmt == 'y')
+				if(fmt == 'y' || fmt == 'Y')
 					idx = this._readAndParseSet(date, idx, 4, dateObj, "y");
 				else if(fmt == 'm')
 					idx = this._readAndParseSet(date, idx, 2, dateObj, "m");
@@ -810,7 +811,7 @@
 			{
 				var fmt = format[j];
 				
-				if(fmt == 'Y' || fmt == 'y')
+				if(fmt == 'y' || fmt == 'Y')
 					re += this._paddingLeftZero(y, 4);
 				else if(fmt == 'm')
 					re += this._paddingLeftZero(m, 2);
@@ -842,7 +843,7 @@
 			{
 				var c = format[i];
 				
-				if(c == 'Y' || c == 'y' || c == 'm' || c == 'd'
+				if(c == 'y' || c == 'Y' || c == 'm' || c == 'd'
 					 || c == 'H' || c == 'h' || c == 'i' || c == 's')
 				{
 					if(tmp)
@@ -922,106 +923,111 @@
 			return defaultValue;
 	};
 	
+	CST.NUMBER_REGEX = /^-?\d+\.?\d*$/;
+	
 	/**
 	 * 校验数据集参数值表单的必填项、数值项。
 	 * 
 	 * @param form
 	 * @return true 验证通过；false 验证不通过
 	 */
-	CST.validateDataSetParamValueForm = function(form)
+	CST.validateDspvForm = function(form)
 	{
 		var validationOk = true;
 		
-		var $itemValue = $(".dg-dpform-item-value", form);
+		var valueWrappers = CF.elesOfSelector(".dg-dpform-item-value", form);
 		
-		$itemValue.each(function()
+		valueWrappers.forEach((valueWrapper) =>
 		{
-			var $required = $("[dg-validation-required]", this);
+			let inputs = CF.elesOfSelector("[dg-validation-check-required]", valueWrapper);
 			
-			if($required.length == 0)
+			if(CF.isEmpty(inputs))
 				return;
 			
-			var type = $required.attr("type");
+			let type = CST.eleInputType(inputs[0]);
+			let isCheckboxRadio = (type == "checkbox" || type == "radio");
+			let checkedValues = [];
 			
-			if(type == "checkbox" || type == "radio")
+			inputs.forEach((input) =>
 			{
-				var checkeds = $required.filter(":checked");
-				if(checkeds.length == 0)
-				{
-					$(".dg-dpform-inputs-wrapper", this).addClass("dg-validation-required");
-					validationOk = false;
-				}
-				else
-					$(".dg-dpform-inputs-wrapper", this).removeClass("dg-validation-required");
-			}
-			else
-			{
-				var val = $required.val();
+				let val = CST.eleInputActualValue(input);
 				
-				if(CF.isEmpty(val))
+				if(isCheckboxRadio)
 				{
-					$required.addClass("dg-validation-required");
+					if(!CF.isEmpty(val))
+						checkedValues.puth(val);
+				}
+				else
+				{
+					if(CF.isEmpty(val))
+					{
+						CF.eleAddClass(input, "dg-validation-required");
+						validationOk = false;
+					}
+					else
+						CF.eleRemoveClass(input, "dg-validation-required");
+				}
+			});
+			
+			if(isCheckboxRadio)
+			{
+				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dpform-inputs-wrapper");
+				
+				if(CF.isEmpty(checkedValues))
+				{
+					CF.eleAddClass(inputsWrapper, "dg-validation-required");
 					validationOk = false;
 				}
 				else
-					$required.removeClass("dg-validation-required");
+					CF.eleRemoveClass(inputsWrapper, "dg-validation-required");
 			}
 		});
 		
-		var regexNumber = /^-?\d+\.?\d*$/;
-		
-		$itemValue.each(function()
+		valueWrappers.forEach((valueWrapper) =>
 		{
-			var $number = $("[dg-validation-number]", this);
+			let inputs = CF.elesOfSelector("[dg-validation-check-number]", valueWrapper);
 			
-			if($number.length == 0)
+			if(CF.isEmpty(inputs))
 				return;
 			
-			var type = $number.attr("type");
+			let type = CST.eleInputType(inputs[0]);
+			let isCheckboxRadio = (type == "checkbox" || type == "radio");
+			let checkedValues = [];
 			
-			if(type == "checkbox" || type == "radio")
+			inputs.forEach((input) =>
 			{
-				var checkeds = $number.filter(":checked");
-				var myValid = true;
+				let val = CST.eleInputActualValue(input);
 				
-				for(var i=0; i<checkeds.length; i++)
+				if(isCheckboxRadio)
 				{
-					if(!myValid)
-						break;
-					
-					var val = $(checkeds[i]).attr("value");
-					myValid = (CF.isEmpty(val) ? true : regexNumber.test(val));
+					if(!CF.isEmpty(val))
+						checkedValues.puth(val);
 				}
-				
-				if(!myValid)
+				else
 				{
-					$(".dg-dpform-inputs-wrapper", this).addClass("dg-validation-number");
+					val = (CF.isEmpty(val) ? [] : (CF.isArray(val) ? val : [ val ]));
+					
+					if(!CST.isNonEmptyAllNumberic(val))
+					{
+						CF.eleAddClass(input, "dg-validation-number");
+						validationOk = false;
+					}
+					else
+						CF.eleRemoveClass(input, "dg-validation-number");
+				}
+			});
+			
+			if(isCheckboxRadio)
+			{
+				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dpform-inputs-wrapper");
+				
+				if(!CST.isNonEmptyAllNumberic(checkedValues))
+				{
+					CF.eleAddClass(inputsWrapper, "dg-validation-number");
 					validationOk = false;
 				}
 				else
-					$(".dg-dpform-inputs-wrapper", this).removeClass("dg-validation-number");
-			}
-			else
-			{
-				var val = $number.val();
-				val = (CF.isArray(val) ? val: [ val ]);
-				var myValid = true;
-				
-				for(var i=0; i<val.length; i++)
-				{
-					if(!myValid)
-						break;
-					
-					myValid = (CF.isEmpty(val[i]) ? true : regexNumber.test(val[i]));
-				}
-				
-				if(!myValid)
-				{
-					$number.addClass("dg-validation-number");
-					validationOk = false;
-				}
-				else
-					$number.removeClass("dg-validation-number");
+					CF.eleRemoveClass(inputsWrapper, "dg-validation-number");
 			}
 		});
 		
@@ -1168,19 +1174,105 @@
 		});
 	};
 	
+	/**
+	 * 获取/设置单个输入框的实际值
+	 * 
+	 * @param input 输入框HTML元素
+	 * @param 可选，要设置的值，多余复选框、单选框、多选下拉框时可以是数组
+	 * @returns 实际值，如果复选框、单选框、下拉框未选中时，将返回undefined
+	 */
+	CST.eleInputActualValue = function(input, value)
+	{
+		var type = CST.eleInputType(input);
+		
+		if(value === undefined)
+		{
+			var re = undefined;
+			
+			if(type == "checkbox" || type == "radio")
+			{
+				if(CF.isEleMatches(input, ":checked"))
+					re = input.value;
+				else
+					re = undefined;
+			}
+			else if(CF.isEleMatches(input, "select"))
+			{
+				if(CF.eleAttr(input, "multiple"))
+				{
+					re = Array.from(input.selectedOptions).map(option => option.value);
+				}
+				else
+				{
+					re = input.value;
+				}
+			}
+			else
+			{
+				re = input.value;
+			}
+			
+			return re;
+		}
+		else
+		{
+			if(type == "checkbox" || type == "radio")
+			{
+				if(value == null)
+					input.checked = false;
+				else if(CF.isArray(value))
+					input.checked = CST.containsValueAsString(value, input.value);
+				else
+					input.checked = CST.isEqualAsString(value, input.value);
+			}
+			else if(CF.isEleMatches(input, "select"))
+			{
+				if(CF.eleAttr(input, "multiple"))
+				{
+					input.value = (CF.isArray(value) ? value : [ value ]);
+				}
+				else
+				{
+					input.value = value;
+				}
+			}
+			else
+			{
+				input.value = (value == null ? "" : value);
+			}
+		}
+	};
+	
+	CST.eleInputType = function(input)
+	{
+		var type = (CF.eleAttr(input, "type") || "").toLowerCase();
+		return type;
+	};
+	
+	CST.isNonEmptyAllNumberic = function(array)
+	{
+		for(let i=0; i<array.length; i++)
+		{
+			let val = array[i];
+			
+			if(CF.isEmpty(val) || CF.isNumber(val))
+				continue;
+			
+			if(!CST.NUMBER_REGEX.test(val))
+				return false;
+		}
+		
+		return true;
+	};
+	
 	CST.containsValueAsString = function(array, value)
 	{
 		if(array === value)
 			return true;
 		
-		var valueStr = (value+"");
-		
 		for(var i=0; i<array.length; i++)
 		{
-			if(array[i] == value)
-				return true;
-			
-			if((array[i]+"") == valueStr)
+			if(CST.isEqualAsString(array[i], value))
 				return true;
 		}
 		
@@ -1189,7 +1281,12 @@
 	
 	CST.isEqualAsString = function(a, b)
 	{
-		return (a == b || (a+"") == (b+""));
+		if(a == null)
+			return (b == null);
+		else if(b == null)
+			return (a == null);
+		else
+			return (a == b || (a+"") == (b+""));
 	};
 	
 	CST.getDataSetParamValueForm = function($parent)
@@ -1549,7 +1646,7 @@
 					var dataSetBindIndex = $this.data("dataSetBindIndex");
 					var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
-					if(!ignoreFetch && !CST.validateDataSetParamValueForm($form))
+					if(!ignoreFetch && !CST.validateDspvForm($form))
 						validateOk = false;
 					else
 					{

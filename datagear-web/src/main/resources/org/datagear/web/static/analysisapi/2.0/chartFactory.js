@@ -4298,11 +4298,9 @@ CF.elesOfSelector = function(selector, rootEle)
 	var re = [];
 	
 	var nodeList = rootEle.querySelectorAll(selector);
+	
 	if(nodeList)
-	{
-		for(var i=0; i<nodeList.length; i++)
-			re.push(nodeList[i]);
-	}
+		re = Array.from(nodeList);
 	
 	return re;
 };
@@ -4318,6 +4316,18 @@ CF.eleOfSelector = function(selector, rootEle)
 {
 	rootEle = (rootEle == null ? document : rootEle);
 	return rootEle.querySelector(selector);
+};
+
+/**
+ * 从HTML元素数组中筛选匹配指定选择器的元素数组。
+ * 
+ * @param eles HTML元素数组
+ * @param selector CSS选择器
+ * @returns HTML元素数组
+ */
+CF.elesOfMatches = function(eles, selector)
+{
+	return eles.filter((ele) => { return CS.isEleMatches(ele, selector); });
 };
 
 /**
