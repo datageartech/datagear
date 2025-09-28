@@ -64,7 +64,7 @@
 	CST.disableDateAwareInputAutocomplete = (CST.disableDateAwareInputAutocomplete || true);
 	
 	/**
-	 * 渲染数据集参数值表单。
+	 * 渲染数据集参数表单。
 	 * 
 	 * @param parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素，<form>元素结构也允许预先自定义
 	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam，也可附加"label"属性，用于定义输入项标签
@@ -83,7 +83,7 @@
 	 * 			}
 	 * @return 表单HTML元素
 	 */
-	CST.renderDataSetParamValueForm = function(parent, dataSetParams, options)
+	CST.renderDataSetParamForm = function(parent, dataSetParams, options)
 	{
 		options = CF.extend(
 		{
@@ -115,10 +115,10 @@
 		if(options.chartTheme)
 		{
 			if(options.inChartElement)
-				CST.dspvFormThemeStyle(options.chartTheme, true);
+				CST.dspFormThemeStyle(options.chartTheme, true);
 			else
 			{
-				var themeStyleName = CST.dspvFormThemeStyle(options.chartTheme, false);
+				var themeStyleName = CST.dspFormThemeStyle(options.chartTheme, false);
 				CF.eleAddClass(form, themeStyleName);
 				CF.eleData(form, CF.builtinPropName("dpFormThemeClassName"), themeStyleName);
 			}
@@ -159,7 +159,7 @@
 			
 			let labelDiv = CF.eleCreate("div", "dg-dpform-item-label");
 			CF.eleAppend(item, labelDiv);
-			CST.renderDspvFormLabel(form, labelDiv, dsp, options);
+			CST.renderDspFormLabel(form, labelDiv, dsp, options);
 			
 			let valueDiv = CF.eleCreate("div", "dg-dpform-item-value");
 			CF.eleAppend(item, valueDiv);
@@ -172,43 +172,43 @@
 				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					CST.renderDspvFormInputRadio(form, valueDiv, dsp, value, options, defaultSelOpts);
+					CST.renderDspFormInputRadio(form, valueDiv, dsp, value, options, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					CST.renderDspvFormInputCheckbox(form, valueDiv, dsp, value, options, defaultSelOpts);
+					CST.renderDspFormInputCheckbox(form, valueDiv, dsp, value, options, defaultSelOpts);
 				else
-					CST.renderDspvFormInputSelect(form, valueDiv, dsp, value, options, defaultSelOpts);
+					CST.renderDspFormInputSelect(form, valueDiv, dsp, value, options, defaultSelOpts);
 			}
 			else if(dsp.type == CF.DataSetParamType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					CST.renderDspvFormInputSelect(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputSelect(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.DATE)
-					CST.renderDspvFormInputDate(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputDate(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TIME)
-					CST.renderDspvFormInputTime(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputTime(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.DATETIME)
-					CST.renderDspvFormInputDateTime(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputDateTime(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.RADIO)
-					CST.renderDspvFormInputRadio(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputRadio(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					CST.renderDspvFormInputCheckbox(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputCheckbox(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					CST.renderDspvFormInputTextarea(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputTextarea(form, valueDiv, dsp, value, options);
 				else
-					CST.renderDspvFormInputText(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputText(form, valueDiv, dsp, value, options);
 			}
 			else if(dsp.type == CF.DataSetParamType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					CST.renderDspvFormInputSelect(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputSelect(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.RADIO)
-					CST.renderDspvFormInputRadio(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputRadio(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					CST.renderDspvFormInputCheckbox(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputCheckbox(form, valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					CST.renderDspvFormInputTextarea(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputTextarea(form, valueDiv, dsp, value, options);
 				else
-					CST.renderDspvFormInputText(form, valueDiv, dsp, value, options);
+					CST.renderDspFormInputText(form, valueDiv, dsp, value, options);
 			}
 		}
 		
@@ -231,7 +231,7 @@
 			if(options.readonly)
 				return false;
 			
-			let validationOk = CST.validateDspvForm(this);
+			let validationOk = CST.validateDspForm(this);
 			let submitBtn = CF.eleOfSelector("[type='submit']", foot);
 			
 			if(validationOk)
@@ -244,7 +244,7 @@
 			
 			if(options.submit)
 			{
-				let formData = CST.getDataSetParamValueObj(this);
+				let formData = CST.getDataSetParamFormData(this);
 				return (options.submit.call(this, formData) == true);
 			}
 			else
@@ -261,11 +261,11 @@
 	};
 	
 	/**
-	 * 销毁数据集参数值表单。
+	 * 销毁数据集参数表单。
 	 * 
 	 * @param ancestor 渲染数据集参数值的<form>表单元素，或者它的祖先元素（其所有内部数据集参数值表单都会被销毁）。
 	 */
-	CST.destroyDataSetParamValueForm = function(ancestor)
+	CST.destroyDataSetParamForm = function(ancestor)
 	{
 		var forms = [];
 		
@@ -301,7 +301,7 @@
 		});
 	};
 	
-	CST.dspvFormThemeStyle = function(chartTheme, isSubStyle)
+	CST.dspFormThemeStyle = function(chartTheme, isSubStyle)
 	{
 		var name = CF.builtinPropName("dataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
 		return CF.themeStyleSheet(chartTheme, name, function()
@@ -381,7 +381,7 @@
 	 * @param dataSetParam
 	 * @param formOptions
 	 */
-	CST.renderDspvFormLabel = function(form, parent, dataSetParam, formOptions)
+	CST.renderDspFormLabel = function(form, parent, dataSetParam, formOptions)
 	{
 		var label = CF.eleCreate("label");
 		CF.eleHtmlContent(label, (dataSetParam.label ? dataSetParam.label : dataSetParam.name));
@@ -400,7 +400,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspvFormInputText = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputText = function(form, parent, dataSetParam, value, formOptions)
 	{
 		var input = CF.eleCreate("input", "dg-dpform-input");
 		CF.eleAttr(input, "type", "text");
@@ -438,7 +438,7 @@
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	CST.renderDspvFormInputSelect = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspFormInputSelect = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
 		var payload = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -509,7 +509,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspvFormInputDate = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputDate = function(form, parent, dataSetParam, value, formOptions)
 	{
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d" }, options);
@@ -546,7 +546,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspvFormInputTime = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputTime = function(form, parent, dataSetParam, value, formOptions)
 	{
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "h:i:s" }, options);
@@ -587,7 +587,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspvFormInputDateTime = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputDateTime = function(form, parent, dataSetParam, value, formOptions)
 	{
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d h:i:s" }, options);
@@ -622,7 +622,7 @@
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
-	CST.renderDspvFormInputRadio = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspFormInputRadio = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
 		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -686,7 +686,7 @@
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
-	CST.renderDspvFormInputCheckbox = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspFormInputCheckbox = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
 		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -743,7 +743,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspvFormInputTextarea = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputTextarea = function(form, parent, dataSetParam, value, formOptions)
 	{
 		var input = CF.eleCreate("textarea", "dg-dpform-input");
 		CF.eleAttr(input, "type", "text");
@@ -931,7 +931,7 @@
 	 * @param form
 	 * @return true 验证通过；false 验证不通过
 	 */
-	CST.validateDspvForm = function(form)
+	CST.validateDspForm = function(form)
 	{
 		var validationOk = true;
 		
@@ -1046,7 +1046,7 @@
 	 * 
 	 * @param form
 	 */
-	CST.getDataSetParamValueObj = function(form)
+	CST.getDataSetParamFormData = function(form)
 	{
 		var re = {};
 		
@@ -1109,7 +1109,7 @@
 		return re;
 	};
 	
-	CST.setDataSetParamValueObj = function(form, data)
+	CST.setDataSetParamFormData = function(form, data)
 	{
 		data = (data || {});
 		
@@ -1325,7 +1325,7 @@
 		
 		var $box = $(".dg-chart-setting-box", $chart);
 		
-		CST.destroyDataSetParamValueForm($box);
+		CST.destroyDataSetParamForm($box);
 		$box.remove();
 	};
 	
@@ -1558,7 +1558,7 @@
 				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
 				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
 				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
-				CST.renderDataSetParamValueForm($content, params,
+				CST.renderDataSetParamForm($content, params,
 				{
 					chartTheme: chart.theme(),
 					inChartElement: true,
@@ -1597,11 +1597,11 @@
 					var dataSetBindIndex = $this.data("dataSetBindIndex");
 					var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
-					if(!ignoreFetch && !CST.validateDspvForm($form))
+					if(!ignoreFetch && !CST.validateDspForm($form))
 						validateOk = false;
 					else
 					{
-						var myParamValues = CST.getDataSetParamValueObj($form);
+						var myParamValues = CST.getDataSetParamFormData($form);
 						paramValuess.push({ index : dataSetBindIndex, paramValues: myParamValues });
 					}
 				});
@@ -1668,7 +1668,7 @@
 				var dataSetBindIndex = $(this).data("dataSetBindIndex");
 				var $form = CST.getDataSetParamValueForm(this);
 				
-				CST.setDataSetParamValueObj($form, chart.dataSetParamValues(dataSetBindIndex));
+				CST.setDataSetParamFormData($form, chart.dataSetParamValues(dataSetBindIndex));
 				CST.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);
 			});
 		}

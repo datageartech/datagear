@@ -91,7 +91,7 @@
 	 * 			}
 	 * @return 表单DOM元素
 	 */
-	chartSetting.renderDataSetParamValueForm = function($parent, dataSetParams, options)
+	chartSetting.renderDataSetParamForm = function($parent, dataSetParams, options)
 	{
 		options = $.extend(
 		{
@@ -120,7 +120,7 @@
 			{
 				var themeStyleName = chartSetting.dataSetParamValueFormThemeStyle(options.chartTheme, false);
 				$form.addClass(themeStyleName);
-				$form.data("dgDspvFormThemeClassName", themeStyleName);
+				$form.data("dgDspFormThemeClassName", themeStyleName);
 			}
 		}
 		
@@ -144,7 +144,7 @@
 			var $item = $("<div class='dg-dspv-form-item' />").appendTo($content);
 			
 			var $labelDiv = $("<div class='dg-dspv-form-item-label' />").appendTo($item);
-			chartSetting.renderDataSetParamValueFormLabel($form, $labelDiv, dsp, options);
+			chartSetting.renderDataSetParamFormLabel($form, $labelDiv, dsp, options);
 			
 			var $valueDiv = $("<div class='dg-dspv-form-item-value' />").appendTo($item);
 			
@@ -159,43 +159,43 @@
 				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options, defaultSelOpts);
+					chartSetting.renderDataSetParamFormInputRadio($form, $valueDiv, dsp, value, options, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options, defaultSelOpts);
+					chartSetting.renderDataSetParamFormInputCheckbox($form, $valueDiv, dsp, value, options, defaultSelOpts);
 				else
-					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options, defaultSelOpts);
+					chartSetting.renderDataSetParamFormInputSelect($form, $valueDiv, dsp, value, options, defaultSelOpts);
 			}
 			else if(dsp.type == chartFactory.DataSetParamType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputSelect($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.DATE)
-					chartSetting.renderDataSetParamValueFormInputDate($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputDate($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TIME)
-					chartSetting.renderDataSetParamValueFormInputTime($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputTime($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.DATETIME)
-					chartSetting.renderDataSetParamValueFormInputDateTime($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputDateTime($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputRadio($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputCheckbox($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartSetting.renderDataSetParamValueFormInputTextarea($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputTextarea($form, $valueDiv, dsp, value, options);
 				else
-					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputText($form, $valueDiv, dsp, value, options);
 			}
 			else if(dsp.type == chartFactory.DataSetParamType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartSetting.renderDataSetParamValueFormInputSelect($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputSelect($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.RADIO)
-					chartSetting.renderDataSetParamValueFormInputRadio($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputRadio($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartSetting.renderDataSetParamValueFormInputCheckbox($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputCheckbox($form, $valueDiv, dsp, value, options);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartSetting.renderDataSetParamValueFormInputTextarea($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputTextarea($form, $valueDiv, dsp, value, options);
 				else
-					chartSetting.renderDataSetParamValueFormInputText($form, $valueDiv, dsp, value, options);
+					chartSetting.renderDataSetParamFormInputText($form, $valueDiv, dsp, value, options);
 			}
 		}
 		
@@ -208,7 +208,7 @@
 				$submitBtn = $("<button type='submit' />").html(options.submitText).appendTo($foot);
 		}
 		
-		var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
+		var submitHandlerKey = chartFactory.builtinPropName("dspFormSubmitHandler");
 		var submitHandler = function()
 		{
 			if(options.readonly)
@@ -226,7 +226,7 @@
 			
 			if(options.submit)
 			{
-				var formData = chartSetting.getDataSetParamValueObj(this);
+				var formData = chartSetting.getDataSetParamFormData(this);
 				return (options.submit.call(this, formData) == true);
 			}
 			else
@@ -249,7 +249,7 @@
 	 * 
 	 * @param ancestor 渲染数据集参数值的<form>表单元素，或者它的祖先元素（其所有内部数据集参数值表单都会被销毁）。
 	 */
-	chartSetting.destroyDataSetParamValueForm = function(ancestor)
+	chartSetting.destroyDataSetParamForm = function(ancestor)
 	{
 		ancestor = $(ancestor);
 		
@@ -270,7 +270,7 @@
 			else
 			{
 				thisForm.removeClass("dg-dspv-form");
-				var themeStyleName = thisForm.data("dgDspvFormThemeClassName");
+				var themeStyleName = thisForm.data("dgDspFormThemeClassName");
 				if(themeStyleName)
 					thisForm.removeClass(themeStyleName);
 				
@@ -281,7 +281,7 @@
 					chartFactory.derivedElements(this, null);
 				}
 				
-				var submitHandlerKey = chartFactory.builtinPropName("dspvFormSubmitHandler");
+				var submitHandlerKey = chartFactory.builtinPropName("dspFormSubmitHandler");
 				var submitHandler = thisForm.data(submitHandlerKey);
 				
 				if(submitHandler != null)
@@ -372,7 +372,7 @@
 	 * @param dataSetParam
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormLabel = function($form, $parent, dataSetParam, formOptions)
+	chartSetting.renderDataSetParamFormLabel = function($form, $parent, dataSetParam, formOptions)
 	{
 		var $label = $("<label />").html(dataSetParam.label ? dataSetParam.label : dataSetParam.name)
 							.appendTo($parent);
@@ -390,7 +390,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputText = function($form, $parent, dataSetParam, value, formOptions)
+	chartSetting.renderDataSetParamFormInputText = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value == null ? "" : value)).appendTo($parent);
@@ -424,7 +424,7 @@
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputSelect = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
+	chartSetting.renderDataSetParamFormInputSelect = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
 		var payload = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -489,7 +489,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputDate = function($form, $parent, dataSetParam, value, formOptions)
+	chartSetting.renderDataSetParamFormInputDate = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
 		options = $.extend(
@@ -531,7 +531,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputTime = function($form, $parent, dataSetParam, value, formOptions)
+	chartSetting.renderDataSetParamFormInputTime = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
 		options = $.extend(
@@ -581,7 +581,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputDateTime = function($form, $parent, dataSetParam, value, formOptions)
+	chartSetting.renderDataSetParamFormInputDateTime = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
 		options = $.extend(
@@ -627,7 +627,7 @@
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputRadio = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
+	chartSetting.renderDataSetParamFormInputRadio = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
 		var opts = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -690,7 +690,7 @@
 	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
-	chartSetting.renderDataSetParamValueFormInputCheckbox = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
+	chartSetting.renderDataSetParamFormInputCheckbox = function($form, $parent, dataSetParam, value, formOptions, defaultSelOpts)
 	{
 		var opts = chartSetting.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -747,7 +747,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	chartSetting.renderDataSetParamValueFormInputTextarea = function($form, $parent, dataSetParam, value, formOptions)
+	chartSetting.renderDataSetParamFormInputTextarea = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var $input = $("<textarea class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.text(value == null ? "" : value).appendTo($parent);
@@ -1312,7 +1312,7 @@
 	 * 
 	 * @param form
 	 */
-	chartSetting.getDataSetParamValueObj = function(form)
+	chartSetting.getDataSetParamFormData = function(form)
 	{
 		var $form = $(form);
 		var array = $form.serializeArray();
@@ -1383,7 +1383,7 @@
 		return re;
 	};
 	
-	chartSetting.setDataSetParamValueObj = function(form, paramValueObj)
+	chartSetting.setDataSetParamFormData = function(form, paramValueObj)
 	{
 		paramValueObj = (paramValueObj || {});
 		
@@ -1539,7 +1539,7 @@
 		
 		var $box = $(".dg-chart-setting-box", $chart);
 		
-		chartSetting.destroyDataSetParamValueForm($box);
+		chartSetting.destroyDataSetParamForm($box);
 		$box.remove();
 	};
 	
@@ -1772,7 +1772,7 @@
 				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
 				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
 				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
-				chartSetting.renderDataSetParamValueForm($content, params,
+				chartSetting.renderDataSetParamForm($content, params,
 				{
 					chartTheme: chart.theme(),
 					inChartElement: true,
@@ -1815,7 +1815,7 @@
 						validateOk = false;
 					else
 					{
-						var myParamValues = chartSetting.getDataSetParamValueObj($form);
+						var myParamValues = chartSetting.getDataSetParamFormData($form);
 						paramValuess.push({ index : dataSetBindIndex, paramValues: myParamValues });
 					}
 				});
@@ -1897,7 +1897,7 @@
 				var dataSetBindIndex = $(this).data("dataSetBindIndex");
 				var $form = chartSetting.getDataSetParamValueForm(this);
 				
-				chartSetting.setDataSetParamValueObj($form, chart.dataSetParamValues(dataSetBindIndex));
+				chartSetting.setDataSetParamFormData($form, chart.dataSetParamValues(dataSetBindIndex));
 				chartSetting.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);
 			});
 		}

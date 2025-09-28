@@ -311,7 +311,7 @@
 			},
 			submit: function()
 			{
-				pm.previewQuery.paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
+				pm.previewQuery.paramValues = chartFactory.chartSetting.getDataSetParamFormData(this);
 				
 				po.inParamFormSubmitAction(true);
 				po.triggerPreview();
@@ -324,7 +324,7 @@
 		var fm = po.vueFormModel();
 		var params = $.extend(true, [], po.vueRaw(fm.params));
 		
-		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
+		chartFactory.chartSetting.renderDataSetParamForm(wrapper, params, formOptions);
 	};
 	
 	po.vuePageModel(
@@ -392,7 +392,7 @@
 		onPreviewParamPanelHide: function(e)
 		{
 			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
-			chartFactory.chartSetting.destroyDataSetParamValueForm(wrapper);
+			chartFactory.chartSetting.destroyDataSetParamForm(wrapper);
 		},
 		formatPreviewColValue: function(data, name)
 		{

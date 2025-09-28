@@ -952,7 +952,7 @@
 			},
 			submit: function()
 			{
-				var paramValues = chartFactory.chartSetting.getDataSetParamValueObj(this);
+				var paramValues = chartFactory.chartSetting.getDataSetParamFormData(this);
 				dataSetBind.query.paramValues = paramValues;
 				
 				po.vueUnref("${pid}paramPanelEle").hide();
@@ -963,7 +963,7 @@
 		wrapper.empty();
 		
 		var params = $.extend(true, [], po.vueRaw(dataSetBind.dataSet.params));
-		chartFactory.chartSetting.renderDataSetParamValueForm(wrapper, params, formOptions);
+		chartFactory.chartSetting.renderDataSetParamForm(wrapper, params, formOptions);
 	};
 	
 	$.validator.addMethod("dataSetSignRequired", function(chart, element)
@@ -1467,7 +1467,7 @@
 		onParamPanelHide: function(e)
 		{
 			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}paramPanel", document.body));
-			chartFactory.chartSetting.destroyDataSetParamValueForm(wrapper);
+			chartFactory.chartSetting.destroyDataSetParamForm(wrapper);
 		},
 		
 		onClearParamValues: function(e, dataSetBind)

@@ -1419,7 +1419,7 @@
 	 *   required: true || false,
 	 *   //可选，输入框类型，参考chartSetting.DataSetParamInputType，默认值为：chartSetting.DataSetParamInputType.TEXT
 	 *   inputType: "...",
-	 *   //可选，输入框配置，参考chartSetting.renderDataSetParamValueForm函数说明
+	 *   //可选，输入框配置，参考chartSetting.renderDataSetParamForm函数说明
 	 *   inputPayload: ...,
 	 *   //可选，输入项的联动数据映射设置
 	 *   link: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ]
@@ -1440,7 +1440,7 @@
 	 * 
 	 * 图表数据集参数索引对象格式参考dashboardBase._batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
 	 * 
-	 * @param form 要渲染的<form>表单元素、Jquery选择器、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamValueForm
+	 * @param form 要渲染的<form>表单元素、Jquery选择器、Jquery对象，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamForm
 	 * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
 	 */
 	dashboardBase.renderForm = function(form, config)
@@ -1532,7 +1532,7 @@
 		config.chartTheme = globalTheme;
 		
 		chartFactory.addThemeRefEntity(globalTheme, dashboardFactory._THEME_REF_DASHBOARD_FORM_ID);
-		chartFactory.chartSetting.renderDataSetParamValueForm(form, items, config);
+		chartFactory.chartSetting.renderDataSetParamForm(form, items, config);
 	};
 	
 	/**
@@ -2908,7 +2908,7 @@
 	{
 		try
 		{
-			chartFactory.chartSetting.destroyDataSetParamValueForm(form);
+			chartFactory.chartSetting.destroyDataSetParamForm(form);
 		}
 		catch(e)
 		{
