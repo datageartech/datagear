@@ -1035,7 +1035,7 @@
 	};
 	
 	/**
-	 * 获取图表数据集参数表单的参数值对象。
+	 * 获取数据集参数表单的参数值对象。
 	 * 
 	 * 图表参数化数据集要求这里的表单返回对象必须符合以下规则：
 	 * 1. 所有输入项必须在返回对象中出现；（避免出现因未出现而导致无法覆盖上次设置数据集参数值的情况）
@@ -1048,129 +1048,81 @@
 	 */
 	CST.getDataSetParamValueObj = function(form)
 	{
-		var $form = $(form);
-		var array = $form.serializeArray();
-		
-		var multipleValNames = {};
-		$("input[type='checkbox'], select[multiple]", $form).each(function()
-		{
-			var name = $(this).attr("name");
-			multipleValNames[name] = true;
-		});
-		
 		var re = {};
 		
-		$(array).each(function()
+		var inputs = CF.elesOfSelector("input, textarea, select", form);
+		inputs.forEach((input) =>
 		{
-			var name = this.name;
-			var value = this.value;
+			let name = input.name;
 			
-			var prev = re[name];
+			if(CF.isEmpty(name))
+				return;
+				
+			if(CF.isEleMatches(input, "button, input[type='submit'], input[type='reset'], input[type='button']"))
+				return;
 			
-			if(multipleValNames[name])
+			let arrayValue = CF.isEleMatches(input, "input[type='checkbox'], select[multiple]");
+			let value = CF.eleInputActualValue(input);
+			let prevValue = re[name];
+			
+			if(arrayValue)
 			{
-				if(prev == null)
+				if(prevValue == null)
 				{
-					prev = [];
-					re[name] = prev;
+					prevValue = [];
+					re[name] = prevValue;
 				}
 				
 				if(value != null)
-					prev.push(value);
+					prevValue.push(value);
 			}
-			else if(prev == null)
+			else if(prevValue == null)
 			{
-				re[name] = value;
+				re[name] = (value === undefined ? null : value);
 			}
 			//可能出现同名单值输入项的情况
 			else
 			{
 				if(value != null)
 				{
-					if(CF.isArray(prev))
-						prev.push(value);
+					if(CF.isArray(prevValue))
+						prevValue.push(value);
 					else
 					{
-						prev = [ prev ];
-						prev.push(value);
-						re[name] = prev;
+						prevValue = [ prevValue ];
+						prevValue.push(value);
+						re[name] = prevValue;
 					}
 				}
 			}
 		});
 		
-		for(var p in re)
+		//空字符串、空数组置为null
+		for(let name in re)
 		{
-			var v = re[p];
+			let v = re[name];
 			
 			if(CF.isEmpty(v))
-				re[p] = null;
-		}
-		
-		//当多选框没有任一选中时，此时re不会出现对应属性，这里需要检查补充
-		for(var p in multipleValNames)
-		{
-			if(re[p] === undefined)
-				re[p] = null;
+				re[name] = null;
 		}
 		
 		return re;
 	};
 	
-	CST.setDataSetParamValueObj = function(form, paramValueObj)
+	CST.setDataSetParamValueObj = function(form, data)
 	{
-		paramValueObj = (paramValueObj || {});
+		data = (data || {});
 		
-		$(".dg-dpform-input", form).each(function()
+		var inputs = CF.elesOfSelector("input, textarea, select", form);
+		inputs.forEach((input) =>
 		{
-			var $this = $(this);
-			var name = $this.attr("name");
+			let name = input.name;
 			
-			if(!name)
+			if(CF.isEmpty(name))
 				return;
 			
-			var value = paramValueObj[name];
-			
-			if($this.is("input"))
-			{
-				var type = $this.attr("type");
-				
-				if(type == "checkbox" || type == "radio")
-				{
-					if(value == null)
-						value = [];
-					else
-						value = (value.length != undefined ? value : [ value ]);
-					
-					if(CST.containsValueAsString(value, $this.attr("value")))
-						$this.prop("checked", true);
-					else
-						$this.prop("checked", false);
-				}
-				else
-					$this.val(value == null ? "" : value);
-			}
-			else if($this.is("select"))
-			{
-				if(value == null)
-					value = [];
-				else
-					value = (value.length != undefined ? value : [ value ]);
-				
-				$("option", $this).each(function()
-				{
-					var $thisOpt = $(this);
-					
-					if(CST.containsValueAsString(value, $thisOpt.attr("value")))
-						$thisOpt.prop("selected", true);
-					else
-						$thisOpt.prop("selected", false);
-				});
-			}
-			else if($this.is("textarea"))
-			{
-				$this.val(value == null ? "" : value);
-			}
+			let value = data[name];
+			CST.eleInputActualValue(input, value);
 		});
 	};
 	
@@ -1227,13 +1179,12 @@
 			}
 			else if(CF.isEleMatches(input, "select"))
 			{
-				if(CF.eleAttr(input, "multiple"))
+				value = (value == null ? null : (CF.isArray(value) ? value : [ value ]));
+				
+				for (let i = 0; i < input.options.length; i++)
 				{
-					input.value = (CF.isArray(value) ? value : [ value ]);
-				}
-				else
-				{
-					input.value = value;
+					let option = input.options[i];
+					option.selected = (value == null ? false : CST.containsValueAsString(value, option.value));
 				}
 			}
 			else
