@@ -754,7 +754,7 @@ var REQ_REFRESH_DATAS_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshDatas
 
 chartProto._requestRefreshData = function()
 {
-	var chartQuery = this.dashboard._buildChartQuery(this);
+	var chartQuery = this.dashboard()._buildChartQuery(this);
 	var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 	if(rrds == null)
 	{
@@ -1471,8 +1471,7 @@ dashboardProto.startHandleCharts = function()
 {
 	this._assertAlive();
 	
-	if(this._handlingChartsIntervalId != null)
-		clearInterval(this._handlingChartsIntervalId);
+	this.stopHandleCharts();
 	
 	this._inHandlingCharts = false;
 	
@@ -1539,7 +1538,7 @@ dashboardProto._doHandleCharts = function()
 			//由chart.refreshData()函数触发
 			if(wait == 2)
 			{
-				let rrds = chart.liveData(chart, REQ_REFRESH_DATAS_LIVE_DATA_NAME);
+				let rrds = chart.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
 				chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
 			}
 			

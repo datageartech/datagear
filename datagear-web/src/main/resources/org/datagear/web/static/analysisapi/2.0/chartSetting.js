@@ -226,8 +226,10 @@
 			}
 		}
 		
-		var submitHandler = function()
+		var submitHandler = function(event)
 		{
+			event.preventDefault();
+			
 			if(options.readonly)
 				return false;
 			
@@ -966,7 +968,7 @@
 				if(isCheckboxRadio)
 				{
 					if(!CF.isEmpty(val))
-						checkedValues.puth(val);
+						checkedValues.push(val);
 				}
 				else
 				{
@@ -982,7 +984,7 @@
 			
 			if(isCheckboxRadio)
 			{
-				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dspform-inputs-wrapper");
+				let inputsWrapper = CF.eleOfSelector(".dg-dspform-inputs-wrapper", valueWrapper);
 				
 				if(CF.isEmpty(checkedValues))
 				{
@@ -1075,7 +1077,7 @@
 			let arrayValue = CF.isEleMatches(input, "input[type='checkbox'], select[multiple]");
 			let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
 			let dateDestFormat = CF.eleAttr(input, "dg-date-dest-format");
-			let value = CF.eleInputActualValue(input);
+			let value = CST.eleInputActualValue(input);
 			let prevValue = re[name];
 			
 			if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat) && !CF.isEmpty(value))
@@ -1615,7 +1617,7 @@
 					inChartElement: true,
 					submit: function()
 					{
-						$("button", panelFoot).click();
+						confirmBtn.click();
 					},
 					paramValues: chart.dataSetParamValues(i),
 					render: function(form)
@@ -1632,7 +1634,7 @@
 				CST.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, i);
 			}
 			
-			confirmBtn.click(function()
+			CF.eleOn(confirmBtn, "click", function()
 			{
 				let thisButton = this;
 				let validateOk = true;
