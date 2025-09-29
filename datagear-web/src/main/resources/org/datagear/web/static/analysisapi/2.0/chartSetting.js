@@ -109,7 +109,7 @@
 			CF.eleAppend(parent, form);
 		}
 		
-		CF.eleAddClass(form, "dg-dpform");
+		CF.eleAddClass(form, "dg-dspform");
 		
 		//创建表单样式表
 		if(options.chartTheme)
@@ -124,26 +124,26 @@
 			}
 		}
 		
-		var head = CF.eleOfSelector(".dg-dpform-head", form);
-		var content = CF.eleOfSelector(".dg-dpform-content", form);
-		var foot = CF.eleOfSelector(".dg-dpform-foot", form);
+		var head = CF.eleOfSelector(".dg-dspform-head", form);
+		var content = CF.eleOfSelector(".dg-dspform-content", form);
+		var foot = CF.eleOfSelector(".dg-dspform-foot", form);
 		
 		//允许预先自定义表单结构
 		if(head == null)
 		{
-			head = CF.eleCreate("div", "dg-dpform-head dg-generated-ele");
+			head = CF.eleCreate("div", "dg-dspform-head dg-generated-ele");
 			CF.eleAppend(form, head);
 		}
 		
 		if(content == null)
 		{
-			content = CF.eleCreate("div", "dg-dpform-content dg-generated-ele");
+			content = CF.eleCreate("div", "dg-dspform-content dg-generated-ele");
 			CF.eleAppend(form, content);
 		}
 		
 		if(foot == null)
 		{
-			foot = CF.eleCreate("div", "dg-dpform-foot dg-generated-ele");
+			foot = CF.eleCreate("div", "dg-dspform-foot dg-generated-ele");
 			CF.eleAppend(form, foot);
 		}
 		
@@ -154,14 +154,14 @@
 			let dsp = dataSetParams[i];
 			let value = paramValues[dsp.name];
 			
-			let item = CF.eleCreate("div", "dg-dpform-item dg-generated-ele");
+			let item = CF.eleCreate("div", "dg-dspform-item dg-generated-ele");
 			CF.eleAppend(content, item);
 			
-			let labelDiv = CF.eleCreate("div", "dg-dpform-item-label");
+			let labelDiv = CF.eleCreate("div", "dg-dspform-item-label");
 			CF.eleAppend(item, labelDiv);
 			CST.renderDspFormLabel(form, labelDiv, dsp, options);
 			
-			let valueDiv = CF.eleCreate("div", "dg-dpform-item-value");
+			let valueDiv = CF.eleCreate("div", "dg-dspform-item-value");
 			CF.eleAppend(item, valueDiv);
 			
 			if(dsp.type == CF.DataSetParamType.BOOLEAN)
@@ -272,7 +272,7 @@
 		if(CF.isEleMatches(ancestor, "form"))
 			forms.push(ancestor);
 		else
-			forms = CF.elesOfSelector("form.dg-dpform", ancestor);
+			forms = CF.elesOfSelector("form.dg-dspform", ancestor);
 		
 		forms.forEach((form) =>
 		{
@@ -282,7 +282,7 @@
 			}
 			else
 			{
-				CF.eleRemoveClass(form, "dg-dpform");
+				CF.eleRemoveClass(form, "dg-dspform");
 				
 				let themeStyleName = CF.eleData(form, CF.builtinPropName("dpFormThemeClassName"));
 				if(themeStyleName)
@@ -310,7 +310,7 @@
 			var bgColor = CF.themeGradualColor(chartTheme, 0);
 			var borderColor = CF.themeGradualColor(chartTheme, 0.5);
 			
-			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dpform";
+			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dspform";
 			
 			var css =
 			[
@@ -326,11 +326,11 @@
 				{
 					name:
 					[
-						cssPrefix + " .dg-dpform-item-value input",
-						cssPrefix + " .dg-dpform-item-value textarea",
-						cssPrefix + " .dg-dpform-item-value select",
-						cssPrefix + " .dg-dpform-item-value select option",
-						cssPrefix + " .dg-dpform-item-value .input"
+						cssPrefix + " .dg-dspform-item-value input",
+						cssPrefix + " .dg-dspform-item-value textarea",
+						cssPrefix + " .dg-dspform-item-value select",
+						cssPrefix + " .dg-dspform-item-value select option",
+						cssPrefix + " .dg-dspform-item-value .input"
 					],
 					value:
 					{
@@ -402,7 +402,7 @@
 	 */
 	CST.renderDspFormInputText = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var input = CF.eleCreate("input", "dg-dpform-input");
+		var input = CF.eleCreate("input", "dg-dspform-input");
 		CF.eleAttr(input, "type", "text");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -453,7 +453,7 @@
 		
 		value = (value == null ? [] : (CF.isArray(value) ? value : [ value ]));
 		
-		var input = CF.eleCreate("select", "dg-dpform-input");
+		var input = CF.eleCreate("select", "dg-dspform-input");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		
 		if(payload.multiple)
@@ -514,7 +514,7 @@
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d" }, options);
 		
-		var input = CF.eleCreate("input", "dg-dpform-input");
+		var input = CF.eleCreate("input", "dg-dspform-input");
 		CF.eleAttr(input, "type", "date");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -551,7 +551,7 @@
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "h:i:s" }, options);
 		
-		var input = CF.eleCreate("input", "dg-dpform-input");
+		var input = CF.eleCreate("input", "dg-dspform-input");
 		CF.eleAttr(input, "type", "time");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -592,7 +592,7 @@
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d h:i:s" }, options);
 		
-		var input = CF.eleCreate("input", "dg-dpform-input");
+		var input = CF.eleCreate("input", "dg-dspform-input");
 		CF.eleAttr(input, "type", "datetime-local");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -632,7 +632,7 @@
 		if(!CF.isArray(opts))
 			opts = [ opts ];
 		
-		var inputsWrapper = CF.eleCreate("div", "dg-dpform-inputs-wrapper");
+		var inputsWrapper = CF.eleCreate("div", "dg-dspform-inputs-wrapper");
 		CF.eleAppend(parent, inputsWrapper);
 		
 		for(var i=0; i<opts.length; i++)
@@ -646,10 +646,10 @@
 			
 			var eleId = CF.uid();
 			
-			var wrapper = CF.eleCreate("div", "dg-dpform-radio-wrapper");
+			var wrapper = CF.eleCreate("div", "dg-dspform-radio-wrapper");
 			CF.eleAppend(inputsWrapper, wrapper);
 			
-			var input = CF.eleCreateWithAttr("input", "type", "radio", "class", "dg-dpform-input",
+			var input = CF.eleCreateWithAttr("input", "type", "radio", "class", "dg-dspform-input",
 							"id", eleId, "name", dataSetParam.name, "value", optVal);
 			CF.eleAppend(wrapper, input);
 			
@@ -698,7 +698,7 @@
 		
 		value = (value == null ? [] : (CF.isArray(value) ? value : [ value ]));
 		
-		var inputsWrapper = CF.eleCreate("div", "dg-dpform-inputs-wrapper");
+		var inputsWrapper = CF.eleCreate("div", "dg-dspform-inputs-wrapper");
 		CF.eleAppend(parent, inputsWrapper);
 		
 		for(var i=0; i<opts.length; i++)
@@ -712,10 +712,10 @@
 			
 			var eleId = CF.uid();
 			
-			var wrapper = CF.eleCreate("div", "dg-dpform-radio-wrapper");
+			var wrapper = CF.eleCreate("div", "dg-dspform-radio-wrapper");
 			CF.eleAppend(inputsWrapper, wrapper);
 			
-			var input = CF.eleCreateWithAttr("input", "type", "checkbox", "class", "dg-dpform-input",
+			var input = CF.eleCreateWithAttr("input", "type", "checkbox", "class", "dg-dspform-input",
 							"id", eleId, "name", dataSetParam.name, "value", optVal);
 			CF.eleAppend(wrapper, input);
 			
@@ -745,7 +745,7 @@
 	 */
 	CST.renderDspFormInputTextarea = function(form, parent, dataSetParam, value, formOptions)
 	{
-		var input = CF.eleCreate("textarea", "dg-dpform-input");
+		var input = CF.eleCreate("textarea", "dg-dspform-input");
 		CF.eleAttr(input, "type", "text");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -935,7 +935,7 @@
 	{
 		var validationOk = true;
 		
-		var valueWrappers = CF.elesOfSelector(".dg-dpform-item-value", form);
+		var valueWrappers = CF.elesOfSelector(".dg-dspform-item-value", form);
 		
 		valueWrappers.forEach((valueWrapper) =>
 		{
@@ -971,7 +971,7 @@
 			
 			if(isCheckboxRadio)
 			{
-				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dpform-inputs-wrapper");
+				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dspform-inputs-wrapper");
 				
 				if(CF.isEmpty(checkedValues))
 				{
@@ -1019,7 +1019,7 @@
 			
 			if(isCheckboxRadio)
 			{
-				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dpform-inputs-wrapper");
+				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dspform-inputs-wrapper");
 				
 				if(!CST.isNonEmptyAllNumberic(checkedValues))
 				{
@@ -1242,22 +1242,22 @@
 	
 	CST.getDataSetParamValueForm = function($parent)
 	{
-		return $(".dg-dpform", $parent);
+		return $(".dg-dspform", $parent);
 	};
 
 	CST.getDataSetParamValueFormHead = function(form)
 	{
-		return $(".dg-dpform-head", form);
+		return $(".dg-dspform-head", form);
 	};
 	
 	CST.getDataSetParamValueFormContent = function(form)
 	{
-		return $(".dg-dpform-content", form);
+		return $(".dg-dspform-content", form);
 	};
 	
 	CST.getDataSetParamValueFormFoot = function(form)
 	{
-		return $(".dg-dpform-foot", form);
+		return $(".dg-dspform-foot", form);
 	};
 	
 	CST.bindChartSettingPanelEvent = function(chart)

@@ -366,24 +366,24 @@
 }
 
 /*数据集参数值表单*/
-.dg-dpform{}
-.dg-dpform .dg-dpform-content{
+.dg-dspform{}
+.dg-dspform .dg-dspform-content{
 	padding: 0.4rem 0.4rem;
 }
-.dg-dpform .dg-dpform-item{
+.dg-dspform .dg-dspform-item{
 	padding-top: 0.35rem;
 	padding-bottom: 0.35rem;
 }
-.dg-dpform .dg-dpform-item-label{
+.dg-dspform .dg-dspform-item-label{
 	padding-bottom: 0.2rem;
 }
-.dg-dpform .dg-dpform-item-label label{
+.dg-dspform .dg-dspform-item-label label{
 	/*添加这个样式可以使下面的提示图标居中显示*/
 	display: flex;
     align-items: center;
     padding-right: 0.3rem;
 }
-.dg-dpform .dg-dpform-item-label label[title]::after{
+.dg-dspform .dg-dspform-item-label label[title]::after{
 	display: inline-block;
 	content: "?";
 	margin-left: 0.1rem;
@@ -398,19 +398,19 @@
 	border-style: solid;
 	opacity: 0.7;
 }
-.dg-dpform .dg-dpform-radio-wrapper,
-.dg-dpform .dg-dpform-checkbox-wrapper{
+.dg-dspform .dg-dspform-radio-wrapper,
+.dg-dspform .dg-dspform-checkbox-wrapper{
 	white-space: nowrap;
 	display: inline-block;
 	padding-right: 0.5rem;
 }
-.dg-dpform .dg-dpform-item-value{
+.dg-dspform .dg-dspform-item-value{
 	text-align: left;
 }
-.dg-dpform .dg-dpform-item-value input[type=text],
-.dg-dpform .dg-dpform-item-value textarea,
-.dg-dpform .dg-dpform-item-value select,
-.dg-dpform .dg-dpform-inputs-wrapper{
+.dg-dspform .dg-dspform-item-value input[type=text],
+.dg-dspform .dg-dspform-item-value textarea,
+.dg-dspform .dg-dspform-item-value select,
+.dg-dspform .dg-dspform-inputs-wrapper{
 	width: 100%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
@@ -420,27 +420,27 @@
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-dpform .dg-dpform-inputs-wrapper{
+.dg-dspform .dg-dspform-inputs-wrapper{
 	border: 1px solid transparent;
 }
-.dg-dpform .dg-validation-required,
-.dg-dpform .dg-validation-number{
+.dg-dspform .dg-validation-required,
+.dg-dspform .dg-validation-number{
 	border-color: red !important;
 }
-.dg-dpform .dg-dpform-foot{
+.dg-dspform .dg-dspform-foot{
 	padding-top: 0.3rem;
 	text-align: center;
 }
-.dg-dpform button,
-.dg-dpform input[type=button],
-.dg-dpform input[type=submit],
-.dg-dpform .button{
+.dg-dspform button,
+.dg-dspform input[type=button],
+.dg-dspform input[type=submit],
+.dg-dspform .button{
 	padding: 0.5rem 2rem;
 	border-radius: 3px;
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-dpform .dg-form-invalid{
+.dg-dspform .dg-form-invalid{
 	border-color: red !important;
 }
 
@@ -591,10 +591,10 @@
 	padding: 0.2em 0em;
 	cursor: pointer;
 }
-.dg-chart-setting-panel .dg-dpform input,
-.dg-chart-setting-panel .dg-dpform select,
-.dg-chart-setting-panel .dg-dpform textarea
-.dg-chart-setting-panel .dg-dpform button{
+.dg-chart-setting-panel .dg-dspform input,
+.dg-chart-setting-panel .dg-dspform select,
+.dg-chart-setting-panel .dg-dspform textarea
+.dg-chart-setting-panel .dg-dspform button{
 	font-size: 1em;
 	border-width: 1px;
 	border-style: solid;
@@ -629,38 +629,38 @@
 }
 
 /*看板表单*/
-.dg-dashboard-form.dg-dpform,
-.dg-dashboard-form.dg-dpform .dg-dpform-input,
-.dg-dashboard-form.dg-dpform .dg-dpform-item-value select[multiple] option{
+.dg-dashboard-form.dg-dspform,
+.dg-dashboard-form.dg-dspform .dg-dspform-input,
+.dg-dashboard-form.dg-dspform .dg-dspform-item-value select[multiple] option{
     background: transparent !important;
 }
-.dg-dashboard-form.dg-dpform .dg-dpform-content{
+.dg-dashboard-form.dg-dspform .dg-dspform-content{
 	padding: 0 0;
 }
 /*单行表单：dg-inline*/
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-head,
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-content,
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-foot,
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-item{
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-head,
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-content,
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-foot,
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item{
 	display: inline;
 }
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-item{
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item{
 	padding-right: 1rem;
 }
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-foot{
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-foot{
 	padding-left: 0.5rem;
 	padding-top: 0;
 }
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-item-label,
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-item-value{
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-label,
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-value{
 	display: inline-block;
 }
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-item-label,
-.dg-dashboard-form.dg-dpform.dg-inline .dg-dpform-item-value{
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-label,
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-value{
 	display: inline-block;
 }
 /*两列表单：dg-col-2*/
-.dg-dashboard-form.dg-dpform.dg-col-2 .dg-dpform-item{
+.dg-dashboard-form.dg-dspform.dg-col-2 .dg-dspform-item{
 	display: inline-block;
 	width: 50%;
 	box-sizing: border-box;
@@ -670,7 +670,7 @@
 	padding-right: 0.5rem;
 }
 /*三列表单：dg-col-3*/
-.dg-dashboard-form.dg-dpform.dg-col-3 .dg-dpform-item{
+.dg-dashboard-form.dg-dspform.dg-col-3 .dg-dspform-item{
 	display: inline-block;
 	width: 33.3%;
 	box-sizing: border-box;
@@ -680,7 +680,7 @@
 	padding-right: 0.5rem;
 }
 /*四列表单：dg-col-4*/
-.dg-dashboard-form.dg-dpform.dg-col-4 .dg-dpform-item{
+.dg-dashboard-form.dg-dspform.dg-col-4 .dg-dspform-item{
 	display: inline-block;
 	width: 25%;
 	box-sizing: border-box;
@@ -690,7 +690,7 @@
 	padding-right: 0.5rem;
 }
 /*五列表单：dg-col-5*/
-.dg-dashboard-form.dg-dpform.dg-col-5 .dg-dpform-item{
+.dg-dashboard-form.dg-dspform.dg-col-5 .dg-dspform-item{
 	display: inline-block;
 	width: 20%;
 	box-sizing: border-box;
@@ -700,8 +700,8 @@
 	padding-right: 0.5rem;
 }
 /*条目单行：dg-item-inline*/
-.dg-dashboard-form.dg-dpform.dg-item-inline .dg-dpform-item-label,
-.dg-dashboard-form.dg-dpform.dg-item-inline .dg-dpform-item-value{
+.dg-dashboard-form.dg-dspform.dg-item-inline .dg-dspform-item-label,
+.dg-dashboard-form.dg-dspform.dg-item-inline .dg-dspform-item-value{
 	display: inline-block;
 }
 
