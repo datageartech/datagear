@@ -1454,22 +1454,22 @@
 		return false;
 	};
 	
-	chartSetting.getDataSetParamValueForm = function($parent)
+	chartSetting.getDataSetParamForm = function($parent)
 	{
 		return $(".dg-dspv-form", $parent);
 	};
 
-	chartSetting.getDataSetParamValueFormHead = function(form)
+	chartSetting.getDataSetParamFormHead = function(form)
 	{
 		return $(".dg-dspv-form-head", form);
 	};
 	
-	chartSetting.getDataSetParamValueFormContent = function(form)
+	chartSetting.getDataSetParamFormContent = function(form)
 	{
 		return $(".dg-dspv-form-content", form);
 	};
 	
-	chartSetting.getDataSetParamValueFormFoot = function(form)
+	chartSetting.getDataSetParamFormFoot = function(form)
 	{
 		return $(".dg-dspv-form-foot", form);
 	};
@@ -1783,7 +1783,7 @@
 					paramValues: chart.dataSetParamValues(i),
 					render: function()
 					{
-						chartSetting.getDataSetParamValueFormFoot(this).hide();
+						chartSetting.getDataSetParamFormFoot(this).hide();
 					}
 				});
 				
@@ -1807,7 +1807,7 @@
 						return;
 					
 					var $this = $(this);
-					var $form = chartSetting.getDataSetParamValueForm($this);
+					var $form = chartSetting.getDataSetParamForm($this);
 					var dataSetBindIndex = $this.data("dataSetBindIndex");
 					var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
@@ -1895,7 +1895,7 @@
 			$(".dg-datasetbind-section", $panel).each(function()
 			{
 				var dataSetBindIndex = $(this).data("dataSetBindIndex");
-				var $form = chartSetting.getDataSetParamValueForm(this);
+				var $form = chartSetting.getDataSetParamForm(this);
 				
 				chartSetting.setDataSetParamFormData($form, chart.dataSetParamValues(dataSetBindIndex));
 				chartSetting.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);

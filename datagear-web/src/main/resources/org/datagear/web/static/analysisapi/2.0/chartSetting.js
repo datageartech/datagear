@@ -79,7 +79,7 @@
 	 *              labelColon: "..."              //可选，标签冒号值
 	 * 				yesText: "...",       		   //可选，"是"选项文本内容
 	 * 				noText: "...",       		   //可选，"否"选项文本内容
-	 * 				render: function(){}		   //可选，渲染后回调函数
+	 * 				render: function(form){}	   //可选，渲染后回调函数
 	 * 			}
 	 * @return 表单HTML元素
 	 */
@@ -515,6 +515,8 @@
 		options = CF.extend({ format: "y-m-d" }, options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
+		CF.eleAttr(input, "dg-date-src-format", "y-m-d");
+		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "date");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -552,6 +554,8 @@
 		options = CF.extend({ format: "h:i:s" }, options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
+		CF.eleAttr(input, "dg-date-src-format", "h:i:s");
+		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "time");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -593,6 +597,8 @@
 		options = CF.extend({ format: "y-m-d h:i:s" }, options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
+		CF.eleAttr(input, "dg-date-src-format", "y-m-dTh:i:s");
+		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "datetime-local");
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
@@ -763,6 +769,11 @@
 	//注意：这里保留了大写'Y'标识符，以兼容旧数据集预览时的格式
 	CST.dateFormatter =
 	{
+		convertFormat: function(src, srcFormat, destFormat)
+		{
+			var date = this.parseDate(src, srcFormat);
+			return this.formatDate(date, destFormat);
+		},
 		parseDate: function(date, format)
 		{
 			date = (date || "");
@@ -1057,13 +1068,20 @@
 			
 			if(CF.isEmpty(name))
 				return;
-				
+			
 			if(CF.isEleMatches(input, "button, input[type='submit'], input[type='reset'], input[type='button']"))
 				return;
 			
 			let arrayValue = CF.isEleMatches(input, "input[type='checkbox'], select[multiple]");
+			let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
+			let dateDestFormat = CF.eleAttr(input, "dg-date-dest-format");
 			let value = CF.eleInputActualValue(input);
 			let prevValue = re[name];
+			
+			if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat) && !CF.isEmpty(value))
+			{
+				value = CST.dateFormatter.convertFormat(value, dateSrcFormat, dateDestFormat);
+			}
 			
 			if(arrayValue)
 			{
@@ -1121,7 +1139,15 @@
 			if(CF.isEmpty(name))
 				return;
 			
+			let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
+			let dateDestFormat = CF.eleAttr(input, "dg-date-dest-format");
 			let value = data[name];
+			
+			if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat) && !CF.isEmpty(value))
+			{
+				value = CST.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
+			}
+			
 			CST.eleInputActualValue(input, value);
 		});
 	};
@@ -1240,24 +1266,24 @@
 			return (a == b || (a+"") == (b+""));
 	};
 	
-	CST.getDataSetParamValueForm = function($parent)
+	CST.getDataSetParamForm = function(parent)
 	{
-		return $(".dg-dspform", $parent);
-	};
-
-	CST.getDataSetParamValueFormHead = function(form)
-	{
-		return $(".dg-dspform-head", form);
+		return CF.eleOfSelector(".dg-dspform", parent);
 	};
 	
-	CST.getDataSetParamValueFormContent = function(form)
+	CST.getDataSetParamFormHead = function(form)
 	{
-		return $(".dg-dspform-content", form);
+		return CF.eleOfSelector(".dg-dspform-head", form);
 	};
 	
-	CST.getDataSetParamValueFormFoot = function(form)
+	CST.getDataSetParamFormContent = function(form)
 	{
-		return $(".dg-dspform-foot", form);
+		return CF.eleOfSelector(".dg-dspform-content", form);
+	};
+	
+	CST.getDataSetParamFormFoot = function(form)
+	{
+		return CF.eleOfSelector(".dg-dspform-foot", form);
 	};
 	
 	CST.bindChartSettingPanelEvent = function(chart)
@@ -1274,11 +1300,11 @@
 		var displayMode = (builtinSetting ? builtinSetting.displayMode : null);
 		displayMode = (CF.isEmpty(displayMode) ? "hover" : displayMode);
 		
-		var $chart = chart.elementJquery();
+		var chartEle = chart.element();
 		
-		if(!$chart.data("dgChartSettingHasBindEvent"))
+		if(!CF.eleAttr(chartEle, "dg-chartsetting-bind-event"))
 		{
-			$chart.data("dgChartSettingHasBindEvent", true);
+			CF.eleAttr(chartEle, "dg-chartsetting-bind-event", "true");
 			
 			if(displayMode == "display")
 			{
@@ -1286,12 +1312,13 @@
 			}
 			else if(displayMode == "hover")
 			{
-				var mouseenterHandler = function(event)
+				var mouseenterHandler = function()
 				{
 					if(chart.isActive())
 						CST.showChartSettingBox(chart);
 				};
-				var mouseleaveHandler = function(event)
+				
+				var mouseleaveHandler = function()
 				{
 					if(CST.isChartSettingParamPanelClosed(chart)
 						&& CST.isChartSettingDataPanelClosed(chart))
@@ -1300,10 +1327,11 @@
 					}
 				};
 				
-				$chart.mouseenter(mouseenterHandler).mouseleave(mouseleaveHandler);
+				CF.eleOn(chartEle, "mouseenter", mouseenterHandler);
+				CF.eleOn(chartEle, "mouseleave", mouseleaveHandler);
 				
-				$chart.data("dgChartSettingMouseEnterHandler", mouseenterHandler);
-				$chart.data("dgChartSettingMouseLeaveHandler", mouseleaveHandler);
+				CF.eleData(chartEle, "dgChartSettingMouseEnterHandler", mouseenterHandler);
+				CF.eleData(chartEle, "dgChartSettingMouseLeaveHandler", mouseleaveHandler);
 			}
 		}
 		
@@ -1312,73 +1340,74 @@
 	
 	CST.unbindChartSettingPanelEvent = function(chart)
 	{
-		var $chart = chart.elementJquery();
-		var mouseenterHandler = $chart.data("dgChartSettingMouseEnterHandler");
-		var mouseleaveHandler = $chart.data("dgChartSettingMouseLeaveHandler");
+		var chartEle = chart.element();
+		var mouseenterHandler = CF.eleData(chartEle, "dgChartSettingMouseEnterHandler");
+		var mouseleaveHandler = CF.eleData(chartEle, "dgChartSettingMouseLeaveHandler");
 		
-		$chart.removeData("dgChartSettingHasBindEvent");
+		CF.eleAttr(chartEle, "dg-chartsetting-bind-event", null);
 		
 		if(mouseenterHandler)
-			$chart.off("mouseenter", mouseenterHandler);
+			CF.eleOff(chartEle, "mouseenter", mouseenterHandler);
 		if(mouseleaveHandler)
-			$chart.off("mouseleave", mouseleaveHandler);
+			CF.eleOff(chartEle, "mouseleave", mouseleaveHandler);
 		
-		var $box = $(".dg-chart-setting-box", $chart);
-		
-		CST.destroyDataSetParamForm($box);
-		$box.remove();
+		var box = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
+		CST.destroyDataSetParamForm(box);
+		box.remove();
 	};
 	
 	CST.showChartSettingBox = function(chart)
 	{
 		var disableSetting = chart.disableSetting();
 		
-		var $chart = chart.elementJquery();
-		var $box = $(".dg-chart-setting-box", $chart);
+		var chartEle = chart.element();
+		var boxEle = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
 		
-		if($box.length <= 0)
+		if(boxEle == null)
 		{
-			var chartOptions = chart.options();
-			var builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+			let chartOptions = chart.options();
+			let builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
 			
 			//显示位置："rightTop" 右上（默认）；"leftTop" 左上；"leftBottom" 左下；"rightBottom" 右下
-			var boxPosition = (builtinSetting ? builtinSetting.position : null);
+			let boxPosition = (builtinSetting ? builtinSetting.position : null);
 			boxPosition = (CF.isEmpty(boxPosition) ? "rightTop" : boxPosition);
 			
 			//显示方向："row" 横向（默认）；"column" 竖向
-			var boxDirection = (builtinSetting ? builtinSetting.direction : null);
+			let boxDirection = (builtinSetting ? builtinSetting.direction : null);
 			boxDirection = (CF.isEmpty(boxDirection) ? "row" : boxDirection);
 			
-			var boxPositionCssName = "dg-position-" + boxPosition;
-			var boxDirectionCssName = "dg-flex-dir-" + boxDirection;
+			let boxPositionCssName = "dg-position-" + boxPosition;
+			let boxDirectionCssName = "dg-flex-dir-" + boxDirection;
 			
-			$box = $("<div class='dg-chart-setting-box "+boxPositionCssName+" "+boxDirectionCssName+"' />").appendTo($chart);
+			boxEle = CF.eleCreate("div", "dg-chart-setting-box "+boxPositionCssName+" "+boxDirectionCssName);
+			CF.eleAppend(chartEle, boxEle);
 			
-			CST.setChartSettingBoxThemeStyle(chart, $box);
+			CST.setChartSettingBoxThemeStyle(chart, boxEle);
 			
 			//参数
 			if(!disableSetting.param && chart.hasDataSetParam())
 			{
-				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-param-button' />")
-						.html(CST.labels.param);
-				CST.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.paramButton : null));
-				$button.appendTo($box);
+				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-button dg-chart-setting-param-button");
+				CF.eleHtmlContent(button, CST.labels.param);
+				CF.eleAppend(boxEle, button);
 				
-				$button.click(function()
+				CST.setChartSettingButtonOptions(button, (builtinSetting ? builtinSetting.paramButton : null));
+				
+				CF.eleOn(button, "click", () =>
 				{
 					CST.closeChartSettingDataPanel(chart);
 					
 					if(CST.isChartSettingParamPanelClosed(chart))
-						CST.openChartSettingParamPanel($box, chart);
+						CST.openChartSettingParamPanel(boxEle, chart);
 					else
 						CST.closeChartSettingParamPanel(chart);
 				});
 				
-				$chart.click(function(event)
+				CF.eleOn(chartEle, "click", (event) =>
 				{
 					if(!CST.isChartSettingParamPanelClosed(chart))
 					{
-						if($(event.target).closest(".dg-chart-setting-box").length == 0)
+						if(CF.eleAncestorOfSelector(event.target, ".dg-chart-setting-box") == null)
 							CST.closeChartSettingParamPanel(chart);
 					}
 				});
@@ -1387,59 +1416,62 @@
 			//数据
 			if(!disableSetting.data)
 			{
-				var $button = $("<button type='button' class='dg-chart-setting-button dg-chart-setting-data-button' />")
-						.html(CST.labels.data);
-				CST.setChartSettingButtonOptions($button, (builtinSetting ? builtinSetting.dataButton : null));
-				$button.appendTo($box);
+				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-button dg-chart-setting-data-button");
+				CF.eleHtmlContent(button, CST.labels.data);
+				CF.eleAppend(boxEle, button);
 				
-				$button.click(function()
+				CST.setChartSettingButtonOptions(button, (builtinSetting ? builtinSetting.dataButton : null));
+				
+				CF.eleOn(button, "click", () =>
 				{
 					CST.closeChartSettingParamPanel(chart);
 					
 					if(CST.isChartSettingDataPanelClosed(chart))
-						CST.openChartSettingDataPanel($box, chart);
+						CST.openChartSettingDataPanel(boxEle, chart);
 					else
 						CST.closeChartSettingDataPanel(chart);
 				});
 				
-				$chart.click(function(event)
+				CF.eleOn(chartEle, "click", (event) =>
 				{
 					if(!CST.isChartSettingDataPanelClosed(chart))
 					{
-						if($(event.target).closest(".dg-chart-setting-box").length == 0)
+						if(CF.eleAncestorOfSelector(event.target, ".dg-chart-setting-box") == null)
 							CST.closeChartSettingDataPanel(chart);
 					}
 				});
 			}
 		}
 		
-		$box.show();
+		CST.eleShow(boxEle);
 	};
 	
 	CST.hideChartSettingBox = function(chart)
 	{
-		$(".dg-chart-setting-box", chart.elementJquery()).hide();
+		var chartEle = chart.element();
+		var boxEle = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
+		CST.eleHide(boxEle);
 	};
 	
 	//设置按钮选项，格式为：{ text: "", style: "...", styleClass: "..." }
-	CST.setChartSettingButtonOptions = function($button, buttonOptions)
+	CST.setChartSettingButtonOptions = function(button, buttonOptions)
 	{
 		if(!buttonOptions)
 			return;
 		
 		if(buttonOptions.text)
-			$button.html(buttonOptions.text);
+			CF.eleHtmlContent(button, buttonOptions.text);
 		
 		if(buttonOptions.style)
-			CF.eleStyle($button, buttonOptions.style);
+			CF.eleStyle(button, buttonOptions.style);
 		
 		if(buttonOptions.styleClass)
-			$button.addClass(buttonOptions.styleClass);
+			button.addClass(buttonOptions.styleClass);
 	};
 	
-	CST.setChartSettingBoxThemeStyle = function(chart, $box)
+	CST.setChartSettingBoxThemeStyle = function(chart, boxEle)
 	{
-		chart.themeStyleSheet(CF.builtinPropName("ChartSettingBox"), function()
+		chart.themeStyleSheet(CF.builtinPropName("chartSettingBox"), function()
 		{
 			var color = chart.themeGradualColor(1);
 			var bgColor = chart.themeGradualColor(0);
@@ -1518,110 +1550,129 @@
 	/**
 	 * 打开图表参数面板。
 	 */
-	CST.openChartSettingParamPanel = function($box, chart)
+	CST.openChartSettingParamPanel = function(boxEle, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
-		var $panel = $(".dg-chart-setting-param-panel", $box);
+		var panel = CF.eleOfSelector(".dg-chart-setting-param-panel", boxEle);
 		
-		if($panel.length <= 0)
+		if(panel == null)
 		{
-			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-param-panel' />").appendTo($box);
+			panel = CF.eleCreate("div", "dg-chart-setting-panel dg-chart-setting-param-panel");
+			CF.eleAppend(boxEle, panel);
 			
-			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
-			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
-			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
+			let panelHead = CF.eleCreate("div", "dg-chart-setting-panel-head");
+			CF.eleAppend(panel, panelHead);
 			
-			$("<div class='dg-chart-setting-panel-head-title' />").html(CST.labels.chartParam).appendTo($panelHead);
-			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo($panelHead);
-			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
-				.html(CST.labels.close).appendTo($headBtns)
-				.click(function()
-				{
-					CST.closeChartSettingParamPanel(chart);
-				});
+			let panelContent = CF.eleCreate("div", "dg-chart-setting-panel-content");
+			CF.eleAppend(panel, panelContent);
 			
-			var $button = $("<button type='button' />").html(CST.labels.confirm).appendTo($panelFoot);
+			let panelFoot = CF.eleCreate("div", "dg-chart-setting-panel-foot");
+			CF.eleAppend(panel, panelFoot);
 			
-			CST.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent, $panelFoot);
+			let headTitle = CF.eleCreate("div", "dg-chart-setting-panel-head-title");
+			CF.eleHtmlContent(headTitle, CST.labels.chartParam);
+			CF.eleAppend(panelHead, headTitle);
 			
-			for(var i=0; i<dataSetBinds.length; i++)
+			let headBtns = CF.eleCreate("div", "dg-chart-setting-panel-head-btns");
+			CF.eleAppend(panelHead, headBtns);
+			
+			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-panel-closebtn");
+			CF.eleHtmlContent(closeBtn, CST.labels.close);
+			CF.eleAppend(headBtns, closeBtn);
+			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingParamPanel(chart); });
+			
+			let confirmBtn = CF.eleCreateWithAttr("button", "type", "button");
+			CF.eleHtmlContent(confirmBtn, CST.labels.confirm);
+			CF.eleAppend(panelFoot, confirmBtn);
+			
+			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent, panelFoot);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
 			{
-				var params = chart.dataSetParams(dataSetBinds[i]);
+				let params = chart.dataSetParams(dataSetBinds[i]);
 				
-				if(!params || params.length == 0)
+				if(CF.isEmpty(params))
 					continue;
 				
-				var myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
+				let myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
-				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
-				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
-				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
-				CST.renderDataSetParamForm($content, params,
+				let dsbSection = CF.eleCreate("div", "dg-datasetbind-section");
+				CF.eleAttr(dsbSection, "dg-datasetbind-index", i);
+				CF.eleAppend(panelContent, dsbSection);
+				
+				let dsbHead = CF.eleCreate("div", "dg-datasetbind-section-head");
+				CF.eleHtmlContent(dsbHead, myTitle);
+				CF.eleAppend(dsbSection, dsbHead);
+				
+				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
+				CF.eleAppend(dsbSection, dsbContent);
+				
+				CST.renderDataSetParamForm(dsbContent, params,
 				{
 					chartTheme: chart.theme(),
 					inChartElement: true,
 					submit: function()
 					{
-						$("button", $panelFoot).click();
+						$("button", panelFoot).click();
 					},
 					paramValues: chart.dataSetParamValues(i),
-					render: function()
+					render: function(form)
 					{
-						CST.getDataSetParamValueFormFoot(this).hide();
+						CST.eleHide(CST.getDataSetParamFormFoot(form));
 					}
 				});
 				
-				$head.click(function()
+				CF.eleOn(dsbHead, "click", () =>
 				{
-					$(".dg-datasetbind-section-content", $(this).parent()).toggle();
+					CST.eleToggle(dsbContent);
 				});
 				
-				CST.toggleParamFormContentByIgnoreFetch($panel, $fp, chart, i);
+				CST.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, i);
 			}
 			
-			$button.click(function()
+			confirmBtn.click(function()
 			{
-				var $thisButton = $(this);
-				var validateOk = true;
-				var paramValuess = [];
+				let thisButton = this;
+				let validateOk = true;
+				let paramValuess = [];
 				
-				$(".dg-datasetbind-section", $panelContent).each(function()
+				let dsbSections = CF.elesOfSelector(".dg-datasetbind-section", panelContent);
+				dsbSections.forEach(function(dsbSection)
 				{
 					if(!validateOk)
 						return;
 					
-					var $this = $(this);
-					var $form = CST.getDataSetParamValueForm($this);
-					var dataSetBindIndex = $this.data("dataSetBindIndex");
-					var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
+					let dspForm = CST.getDataSetParamForm(dsbSection);
+					let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
+					let ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
-					if(!ignoreFetch && !CST.validateDspForm($form))
+					if(!ignoreFetch && !CST.validateDspForm(dspForm))
 						validateOk = false;
 					else
 					{
-						var myParamValues = CST.getDataSetParamFormData($form);
+						let myParamValues = CST.getDataSetParamFormData(dspForm);
 						paramValuess.push({ index : dataSetBindIndex, paramValues: myParamValues });
 					}
 				});
 				
 				if(validateOk)
 				{
-					$thisButton.removeClass("dg-param-value-form-invalid");
+					CF.eleRemoveClass(thisButton, "dg-param-value-form-invalid");
 					
-					var chartOptions = chart.options();
-					var builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
-					var convertParamFormValue = (builtinSetting ? builtinSetting.convertParamFormValue : null);
+					let chartOptions = chart.options();
+					let builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+					let convertParamFormValue = (builtinSetting ? builtinSetting.convertParamFormValue : null);
 					convertParamFormValue = (convertParamFormValue == null ? true : convertParamFormValue);
 					
-					for(var i=0; i<paramValuess.length; i++)
+					for(let i=0; i<paramValuess.length; i++)
 					{
 						CST.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
 					}
 					
-					var doRefresh = true;
-					var onParamFormSubmit = (builtinSetting ? builtinSetting.onParamFormSubmit : null);
+					let doRefresh = true;
+					let onParamFormSubmit = (builtinSetting ? builtinSetting.onParamFormSubmit : null);
 					
 					//执行提交前回调
 					if(onParamFormSubmit)
@@ -1656,27 +1707,29 @@
 					}
 				}
 				else
-					$thisButton.addClass("dg-param-value-form-invalid");
+					CF.eleAddClass(thisButton, "dg-param-value-form-invalid");
 			});
 		}
 		else
 		{
-			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			$(".dg-datasetbind-section", $panel).each(function()
+			let dsbSections = CF.elesOfSelector(".dg-datasetbind-section", panel);
+			
+			dsbSections.forEach(function(dsbSection)
 			{
-				var dataSetBindIndex = $(this).data("dataSetBindIndex");
-				var $form = CST.getDataSetParamValueForm(this);
+				let dspForm = CST.getDataSetParamForm(dsbSection);
+				let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
 				
-				CST.setDataSetParamFormData($form, chart.dataSetParamValues(dataSetBindIndex));
-				CST.toggleParamFormContentByIgnoreFetch($panel, this, chart, dataSetBindIndex);
+				CST.setDataSetParamFormData(dspForm, chart.dataSetParamValues(dataSetBindIndex));
+				CST.toggleParamFormContentByIgnoreFetch(panel, this, chart, dataSetBindIndex);
 			});
 		}
 		
-		CST.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-param-button", $box), chart);
+		CST.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-setting-param-button", boxEle), chart);
 		
 		//聚焦至第一个可操作输入框
-		CST.focusOnFirstInput($("form:first", $panel));
+		CST.focusOnFirstInput($("form:first", panel));
 	};
 	
 	CST.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
@@ -1685,7 +1738,7 @@
 		chart.dataSetParamValues(dataSetBindIndex, paramValues, true, convert);
 	};
 	
-	CST.toggleParamFormContentByIgnoreFetch = function($panel, $section, chart, dataSetBindIndex)
+	CST.toggleParamFormContentByIgnoreFetch = function(panel, $section, chart, dataSetBindIndex)
 	{
 		var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 		var $content = $(".dg-datasetbind-section-content", $section);
@@ -1701,7 +1754,8 @@
 	 */
 	CST.closeChartSettingParamPanel = function(chart)
 	{
-		$(".dg-chart-setting-param-panel", chart.elementJquery()).hide();
+		var panel = CST.getChartSettingParamPanel(chart);
+		CST.eleHide(panel);
 	};
 	
 	/**
@@ -1709,36 +1763,35 @@
 	 */
 	CST.getChartSettingParamPanel = function(chart)
 	{
-		return $(".dg-chart-setting-param-panel", chart.elementJquery());
+		return CF.eleOfSelector(".dg-chart-setting-param-panel", chart.element());
 	};
 	
 	CST.isChartSettingParamPanelClosed = function(chart)
 	{
-		var $panel = $(".dg-chart-setting-param-panel", chart.elementJquery());
-		
-		return ($panel.length == 0 || $panel.is(":hidden"));
+		var panel = CST.getChartSettingParamPanel(chart);
+		return (panel == null || CF.eleAncestorOfSelector(panel, ".dg-display-none") != null);
 	};
 	
 	/**
 	 * 打开图表数据面板。
 	 */
-	CST.openChartSettingDataPanel = function($box, chart)
+	CST.openChartSettingDataPanel = function(boxEle, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
-		var $panel = $(".dg-chart-setting-data-panel", $box);
+		var panel = $(".dg-chart-setting-data-panel", boxEle);
 		
-		if($panel.length <= 0)
+		if(panel.length <= 0)
 		{
-			$panel = $("<div class='dg-chart-setting-panel dg-chart-setting-data-panel' />").appendTo($box);
+			panel = $("<div class='dg-chart-setting-panel dg-chart-setting-data-panel' />").appendTo(boxEle);
 			
-			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo($panel);
-			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
-			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
+			var panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo(panel);
+			var panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo(panel);
+			var panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo(panel);
 			
-			$("<div class='dg-chart-setting-panel-head-title' />").html(CST.labels.chartData).appendTo($panelHead);
-			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo($panelHead);
+			$("<div class='dg-chart-setting-panel-head-title' />").html(CST.labels.chartData).appendTo(panelHead);
+			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo(panelHead);
 			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
 				.html(CST.labels.close).appendTo($headBtns)
 				.click(function()
@@ -1746,29 +1799,29 @@
 					CST.closeChartSettingDataPanel(chart);
 				});
 			
-			CST.setChartSettingDataPanelThemeStyle(chart, $panel);
-			CST.setChartSetingPanelContentSizeRange(chart, $panel, $panelContent,$panelFoot);
+			CST.setChartSettingDataPanelThemeStyle(chart, panel);
+			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent,panelFoot);
 			
 			for(var i=0; i<dataSetBinds.length; i++)
 			{
 				var myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
-				var $fp = $("<div class='dg-datasetbind-section' />").data("dataSetBindIndex", i).appendTo($panelContent);
-				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo($fp);
-				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo($fp);
+				var dsbSection = $("<div class='dg-datasetbind-section' />").data("dg-datasetbind-index", i).appendTo(panelContent);
+				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo(dsbSection);
+				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo(dsbSection);
 				
 				var tableId = CST.initDataSetBindDataTable(chart, dataSetBinds, i, $content);
 				
-				$fp.data("chartDataTableId", tableId);
+				dsbSection.data("chartDataTableId", tableId);
 			}
 		}
 		else
 		{
-			CST.showChartSetingPanelOpacityOut($box, $panel, chart);
+			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			$(".dg-datasetbind-section", $panel).each(function()
+			$(".dg-datasetbind-section", panel).each(function()
 			{
-				var dataSetBindIndex = $(this).data("dataSetBindIndex");
+				var dataSetBindIndex = $(this).data("dg-datasetbind-index");
 				var tableId = $(this).data("chartDataTableId");
 				var $table = $("#"+tableId, this);
 				
@@ -1776,7 +1829,7 @@
 			});
 		}
 		
-		CST.adjustChartSetingPanelPosition($box, $panel, $(".dg-chart-setting-data-button", $box), chart);
+		CST.adjustChartSetingPanelPosition(boxEle, panel, $(".dg-chart-setting-data-button", boxEle), chart);
 	};
 	
 	/**
@@ -1784,7 +1837,8 @@
 	 */
 	CST.closeChartSettingDataPanel = function(chart)
 	{
-		$(".dg-chart-setting-data-panel", chart.elementJquery()).hide();
+		var panel = CST.getChartSettingDataPanel(chart);
+		CST.eleHide(panel);
 	};
 	
 	/**
@@ -1792,14 +1846,13 @@
 	 */
 	CST.getChartSettingDataPanel = function(chart)
 	{
-		return $(".dg-chart-setting-data-panel", chart.elementJquery());
+		return CF.eleOfSelector(".dg-chart-setting-data-panel", chart.element());
 	};
 	
 	CST.isChartSettingDataPanelClosed = function(chart)
 	{
-		var $panel = $(".dg-chart-setting-data-panel", chart.elementJquery());
-		
-		return ($panel.length == 0 || $panel.is(":hidden"));
+		var panel = CST.getChartSettingDataPanel(chart);
+		return (panel == null || CF.eleAncestorOfSelector(panel, ".dg-display-none") != null);
 	};
 	
 	CST.initDataSetBindDataTable = function(chart, dataSetBinds, index, $parent)
@@ -1900,7 +1953,7 @@
 		return (signInfo ? title + " (" + signInfo +")" : title);
 	};
 	
-	CST.setChartSettingDataPanelThemeStyle = function(chart, $panel)
+	CST.setChartSettingDataPanelThemeStyle = function(chart, panel)
 	{
 		chart.themeStyleSheet(CF.builtinPropName("ChartSettingDataPanel"), function()
 		{
@@ -1984,44 +2037,45 @@
 		return title;
 	};
 	
-	CST.setChartSetingPanelContentSizeRange = function(chart, $panel, $panelContent, $panelFoot)
+	CST.setChartSetingPanelContentSizeRange = function(chart, panel, panelContent, panelFoot)
 	{
-		var $chart = chart.elementJquery();
+		var chartEle = chart.element();
+		var cw = parseInt(CF.eleCss(chartEle, "width"));
 		
-		var cw = $chart.width();
-		var ch = $chart.height();
-		var ww = $(window).width();
-		var wh = $(window).height();
-		var fh = ($panelFoot.is(":hidden") ? 0 : $panelFoot.outerHeight());
-		
-		$panelContent.css("min-width", Math.max(cw*2/5, ww*1/5));
-		$panelContent.css("max-width", ww*3/5);
-		//$panelContent.css("min-height", Math.max(ch*2/5, wh*1/5) - fh);
-		$panelContent.css("max-height", wh*3/5 - fh);
+		CF.eleCss(panelContent, "min-width", (cw*2/5)+"px");
+		CF.eleCss(panelContent, "max-width", "60vw");
+		CF.eleCss(panelContent, "max-height", "60vh");
 	};
 	
-	CST.showChartSetingPanelOpacityOut = function($box, $panel, chart)
+	CST.showChartSetingPanelOpacityOut = function(boxEle, panel, chart)
 	{
 		//先透明显示，避免布局计算错误，后续调整位置后再移除透明
-		$panel.addClass("dg-opacity-hide")
-			.css("left", -999999).css("top", -999999).css("right", "unset").css("bottom", "unset")
-			.show();
+		CF.eleAddClass(panel, "dg-opacity-hide");
+		CF.eleCss(panel, "left", "-999999px");
+		CF.eleCss(panel, "top", "-999999px");
+		CF.eleCss(panel, "right", "unset");
+		CF.eleCss(panel, "bottom", "unset");
+		CST.eleShow(panel);
 	};
 	
-	CST.adjustChartSetingPanelPosition = function($box, $panel, $btn, chart)
+	CST.adjustChartSetingPanelPosition = function(boxEle, panel, btn, chart)
 	{
-		var docWidth = $(document).width();
-		var docHeight = $(document).height();
+		var docWidth = window.innerWidth;
+		var docHeight = window.innerHeight;
 		
-		var width = $panel.outerWidth(true);
-		var height = $panel.outerHeight(true);
+		var width = CST.eleOuterWidth(panel);
+		var height = CST.eleOuterHeight(panel);
 		var widthGap = width + 20;
 		var heightGap = height + 20;
 		
-		var btnWidth = $btn.outerWidth(true);
-		var btnHeight = $btn.outerHeight(true);
-		var btnOffset = $btn.offset();
-		var btnPosition = $btn.position();
+		var btnWidth = CST.eleOuterWidth(btn);
+		var btnHeight = CST.eleOuterHeight(btn);
+		
+		//TODO
+		//var btnOffset = btn.offset();
+		//var btnPosition = btn.position();
+		var btnOffset = { left: docWidth, top: 0 };
+		var btnPosition = { left: 0, top: 0 };
 		
 		var left = "unset";
 		var right = "unset";
@@ -2044,7 +2098,7 @@
 		}
 		
 		var bottomFirst = true;
-		if($box.hasClass("dg-position-leftBottom") || $box.hasClass("dg-position-rightBottom") || $box.hasClass("dg-position-centerBottom"))
+		if(CF.isEleMatches(boxEle, "dg-position-leftBottom, dg-position-rightBottom, dg-position-centerBottom"))
 			bottomFirst = false;
 		
 		if(bottomFirst)
@@ -2082,12 +2136,12 @@
 			}
 		}
 		
-		$panel.css("left", left);
-		$panel.css("top", top);
-		$panel.css("right", right);
-		$panel.css("bottom", bottom);
+		CF.eleCss(panel, "left", (left === "unset" ? left : (left+"px")));
+		CF.eleCss(panel, "top", (top === "unset" ? top : (top+"px")));
+		CF.eleCss(panel, "right", (right === "unset" ? right : (right+"px")));
+		CF.eleCss(panel, "bottom", (bottom === "unset" ? bottom : (bottom+"px")));
 		
-		$panel.removeClass("dg-opacity-hide");
+		CF.eleRemoveClass(panel, "dg-opacity-hide");
 	};
 	
 	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
@@ -2095,6 +2149,42 @@
 	{
 		var input = $(":input:not(:disabled,[readonly]):first", ele); 
 		input.focus();
+	};
+	
+	CST.eleHide = function(ele)
+	{
+		CF.eleAddClass(ele, "dg-display-none");
+	};
+	
+	CST.eleShow = function(ele)
+	{
+		CF.eleRemoveClass(ele, "dg-display-none");
+	};
+	
+	CST.eleToggle = function(ele)
+	{
+		if(CF.isEleMatches(ele, ".dg-display-none"))
+			CST.eleShow(ele);
+		else
+			CST.eleHide(ele);
+	};
+	
+	CST.eleOuterWidth = function(ele)
+	{
+		let width = parseFloat(CF.eleCss(ele, "width") || 0);
+		let marginLeft = parseFloat(CF.eleCss(ele, "margin-left") || 0);
+		let marginRight = parseFloat(CF.eleCss(ele, "margin-right") || 0);
+		
+		return (width + marginLeft + marginRight);
+	};
+	
+	CST.eleOuterHeight = function(ele)
+	{
+		let height = parseFloat(CF.eleCss(ele, "height") || 0);
+		let marginTop = parseFloat(CF.eleCss(ele, "margin-top") || 0);
+		let marginBottom = parseFloat(CF.eleCss(ele, "margin-bottom") || 0);
+		
+		return (height + marginTop + marginBottom);
 	};
 })
 (this);

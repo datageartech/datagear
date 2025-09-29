@@ -4319,6 +4319,30 @@ CF.eleOfSelector = function(selector, rootEle)
 };
 
 /**
+ * 获取匹配指定选择器的祖先元素
+ * 
+ * @param ele HTML元素
+ * @param selector CSS选择器
+ * @returns HTML元素、null
+ */
+CF.eleAncestorOfSelector = function(ele, selector)
+{
+	var re = ele;
+	
+	for(;;)
+	{
+		if(re == null)
+			break;
+		else if(CF.isEleMatches(re, selector))
+			break;
+		else
+			re = re.parentElement;
+	}
+	
+	return re;
+};
+
+/**
  * 从HTML元素数组中筛选匹配指定选择器的元素数组。
  * 
  * @param eles HTML元素数组
@@ -4327,7 +4351,10 @@ CF.eleOfSelector = function(selector, rootEle)
  */
 CF.elesOfMatches = function(eles, selector)
 {
-	return eles.filter((ele) => { return CS.isEleMatches(ele, selector); });
+	if(eles == null)
+		return [];
+	
+	return eles.filter((ele) => { return CF.isEleMatches(ele, selector); });
 };
 
 /**
@@ -4337,7 +4364,7 @@ CF.elesOfMatches = function(eles, selector)
  */
 CF.eleOfPrev = function(ele)
 {
-	return (ele == null ? null : ele.previousSibling);
+	return (ele == null ? undefined : ele.previousSibling);
 };
 
 /**
@@ -4347,7 +4374,7 @@ CF.eleOfPrev = function(ele)
  */
 CF.eleOfNext = function(ele)
 {
-	return (ele == null ? null : ele.nextSibling);
+	return (ele == null ? undefined : ele.nextSibling);
 };
 
 /**
@@ -4361,7 +4388,7 @@ CF.eleCreate = function(name, classValue)
 	var ele = document.createElement(name);
 	
 	if(!CF.isEmpty(classValue))
-		CF.eleAttr("class", classValue);
+		CF.eleAttr(ele, "class", classValue);
 	
 	return ele;
 };
@@ -4398,7 +4425,7 @@ CF.eleCreateWithAttr = function(name, attrName, attrValue)
  */
 CF.eleRemove = function(ele)
 {
-	if(!ele)
+	if(ele == null)
 		return;
 	
 	ele.remove();
@@ -4412,6 +4439,9 @@ CF.eleRemove = function(ele)
  */
 CF.eleAppend = function(ele, child)
 {
+	if(ele == null)
+		return;
+	
 	if(CF.isString(child))
 	{
 		ele.insertAdjacentHTML("beforeend", child);
@@ -4430,6 +4460,9 @@ CF.eleAppend = function(ele, child)
  */
 CF.elePrepend = function(ele, child)
 {
+	if(ele == null)
+		return;
+	
 	if(CF.isString(child))
 	{
 		ele.insertAdjacentHTML("afterbegin", child);
@@ -4448,6 +4481,9 @@ CF.elePrepend = function(ele, child)
  */
 CF.eleBefore = function(ele, sibling)
 {
+	if(ele == null)
+		return;
+	
 	if(CF.isString(sibling))
 	{
 		ele.insertAdjacentHTML("beforebegin", sibling);
@@ -4466,6 +4502,9 @@ CF.eleBefore = function(ele, sibling)
  */
 CF.eleAfter = function(ele, sibling)
 {
+	if(ele == null)
+		return;
+	
 	if(CF.isString(sibling))
 	{
 		ele.insertAdjacentHTML("afterend", sibling);
@@ -4486,16 +4525,15 @@ CF.eleAfter = function(ele, sibling)
 CF.eleAttr = function(ele, name, value)
 {
 	if(value === undefined)
-	{
-		return ele.getAttribute(name);
-	}
+		return (ele == null ? undefined : ele.getAttribute(name));
+	
+	if(ele == null)
+		return;
+	
+	if(value == null)
+		ele.removeAttribute(name);
 	else
-	{
-		if(value == null)
-			ele.removeAttribute(name);
-		else
-			ele.setAttribute(name, value);
-	}
+		ele.setAttribute(name, value);
 };
 
 /**
@@ -4506,6 +4544,9 @@ CF.eleAttr = function(ele, name, value)
  */
 CF.eleAddClass = function(ele, classes)
 {
+	if(ele == null)
+		return;
+	
 	classes = (CF.isArray(classes) ? classes : CF.splitByWhitespace(classes));
 	
 	var classList = ele.classList;
@@ -4523,6 +4564,9 @@ CF.eleAddClass = function(ele, classes)
  */
 CF.eleRemoveClass = function(ele, classes)
 {
+	if(ele == null)
+		return;
+	
 	classes = (CF.isArray(classes) ? classes : CF.splitByWhitespace(classes));
 	
 	var classList = ele.classList;
@@ -4542,13 +4586,12 @@ CF.eleRemoveClass = function(ele, classes)
 CF.eleCss = function(ele, name, value)
 {
 	if(value === undefined)
-	{
-		return window.getComputedStyle(ele, null).getPropertyValue(name);
-	}
-	else
-	{
-		ele.style[name] = value;
-	}
+		return (ele == null ? undefined : window.getComputedStyle(ele, null).getPropertyValue(name));
+	
+	if(ele == null)
+		return;
+	
+	ele.style[name] = value;
 };
 
 /**
@@ -4560,9 +4603,12 @@ CF.eleCss = function(ele, name, value)
 CF.eleTextContent = function(ele, text)
 {
 	if(text === undefined)
-		return ele.textContent;
-	else
-		ele.textContent = text;
+		return (ele == null ? undefined : ele.textContent);
+	
+	if(ele == null)
+		return;
+	
+	ele.textContent = text;
 };
 
 /**
@@ -4573,10 +4619,13 @@ CF.eleTextContent = function(ele, text)
  */
 CF.eleHtmlContent = function(ele, html)
 {
-	if(text === undefined)
-		return ele.innerHTML;
-	else
-		ele.innerHTML = html;
+	if(html === undefined)
+		return (ele == null ? undefined : ele.innerHTML);
+	
+	if(ele == null)
+		return;
+	
+	ele.innerHTML = html;
 };
 
 CF.ELE_DATA_CACHE = new WeakMap();
@@ -4590,7 +4639,7 @@ CF.ELE_DATA_CACHE = new WeakMap();
  */
 CF.eleData = function(ele, name, value)
 {
-	var map = CF.ELE_DATA_CACHE.get(ele);
+	var map = (ele == null ? null : CF.ELE_DATA_CACHE.get(ele));
 	
 	if(value === undefined)
 	{
@@ -4598,6 +4647,9 @@ CF.eleData = function(ele, name, value)
 	}
 	else
 	{
+		if(ele == null)
+			return;
+		
 		if(map == null)
 		{
 			map = {};
@@ -4616,6 +4668,9 @@ CF.eleData = function(ele, name, value)
  */
 CF.eleRemoveData = function(ele, name)
 {
+	if(ele == null)
+		return;
+	
 	if(name === undefined)
 	{
 		CF.ELE_DATA_CACHE.delete(ele);
@@ -4638,7 +4693,7 @@ CF.eleRemoveData = function(ele, name)
  */
 CF.eleEmpty = function(ele)
 {
-	if(!ele)
+	if(ele == null)
 		return;
 	
 	while(ele.firstChild)
@@ -4662,7 +4717,10 @@ CF.eleEmpty = function(ele)
 CF.eleStyle = function(ele, css)
 {
 	if(css === undefined)
-		return CF.eleAttr(ele, "style");
+		return (ele == null ? undefined : CF.eleAttr(ele, "style"));
+	
+	if(ele == null)
+		return;
 	
 	var cssArray = [];
 	
@@ -4682,6 +4740,9 @@ CF.eleStyle = function(ele, css)
  */
 CF.eleOn = function(ele, eventType, handler)
 {
+	if(ele == null)
+		return;
+	
 	ele.addEventListener(eventType, handler);
 };
 
@@ -4694,6 +4755,9 @@ CF.eleOn = function(ele, eventType, handler)
  */
 CF.eleOff = function(ele, eventType, handler)
 {
+	if(ele == null)
+		return;
+	
 	ele.removeEventListener(eventType, handler);
 };
 
@@ -4715,6 +4779,9 @@ CF.isHtmlEle = function(obj)
  */
 CF.isEleMatches = function(ele, selector)
 {
+	if(ele == null)
+		return false;
+	
 	return ele.matches(selector);
 };
 

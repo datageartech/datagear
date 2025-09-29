@@ -47,6 +47,9 @@
 	opacity: 0 !important;
 	z-index: -99 !important;
 }
+.dg-display-none{
+	display: none !important;
+}
 
 /*表格图表*/
 .dg-chart-table{}
