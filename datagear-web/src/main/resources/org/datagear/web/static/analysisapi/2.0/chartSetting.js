@@ -26,7 +26,7 @@
  *   jquery.js
  *   chartFactory.js
  */
-(function(global)
+(function(global, window)
 {
 	var CF = (global.chartFactory || (global.chartFactory = {}));
 	var CST = (CF.chartSetting || (CF.chartSetting = {}));
@@ -1768,14 +1768,14 @@
 				let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
 				
 				CST.setDataSetParamFormData(dspForm, chart.dataSetParamValues(dataSetBindIndex));
-				CST.toggleParamFormContentByIgnoreFetch(panel, this, chart, dataSetBindIndex);
+				CST.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, dataSetBindIndex);
 			});
 		}
 		
 		CST.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-setting-param-button", boxEle), chart);
 		
 		//聚焦至第一个可操作输入框
-		CST.focusOnFirstInput($("form:first", panel));
+		CST.focusOnFirstInput(CF.eleOfSelector("form:first-child", panel));
 	};
 	
 	CST.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
@@ -1784,15 +1784,15 @@
 		chart.dataSetParamValues(dataSetBindIndex, paramValues, true, convert);
 	};
 	
-	CST.toggleParamFormContentByIgnoreFetch = function(panel, $section, chart, dataSetBindIndex)
+	CST.toggleParamFormContentByIgnoreFetch = function(panel, section, chart, dataSetBindIndex)
 	{
 		var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
-		var $content = $(".dg-datasetbind-section-content", $section);
+		var content = CF.eleOfSelector(".dg-datasetbind-section-content", section);
 		
 		if(ignoreFetch)
-			$content.hide();
+			CST.eleHide(content);
 		else
-			$content.show();
+			CST.eleShow(content);
 	};
 	
 	/**
@@ -1824,58 +1824,81 @@
 	CST.openChartSettingDataPanel = function(boxEle, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
-		var panel = $(".dg-chart-setting-data-panel", boxEle);
+		var panel = CF.eleOfSelector(".dg-chart-setting-data-panel", boxEle);
 		
-		if(panel.length <= 0)
+		if(panel == null)
 		{
-			panel = $("<div class='dg-chart-setting-panel dg-chart-setting-data-panel' />").appendTo(boxEle);
+			panel = CF.eleCreate("div", "dg-chart-setting-panel dg-chart-setting-data-panel")
+			CF.eleAppend(boxEle, panel);
 			
 			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			var panelHead = $("<div class='dg-chart-setting-panel-head' />").appendTo(panel);
-			var panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo(panel);
-			var panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo(panel);
+			let panelHead = CF.eleCreate("div", "dg-chart-setting-panel-head");
+			CF.eleAppend(panel, panelHead);
 			
-			$("<div class='dg-chart-setting-panel-head-title' />").html(CST.labels.chartData).appendTo(panelHead);
-			var $headBtns = $("<div class='dg-chart-setting-panel-head-btns' />").appendTo(panelHead);
-			$("<button type='button' class='dg-chart-setting-panel-closebtn' />")
-				.html(CST.labels.close).appendTo($headBtns)
-				.click(function()
-				{
-					CST.closeChartSettingDataPanel(chart);
-				});
+			let panelContent = CF.eleCreate("div", "dg-chart-setting-panel-content");
+			CF.eleAppend(panel, panelContent);
+			
+			let panelFoot = CF.eleCreate("div", "dg-chart-setting-panel-foot");
+			CF.eleAppend(panel, panelFoot);
+			
+			let headTitle = CF.eleCreate("div", "dg-chart-setting-panel-head-title");
+			CF.eleHtmlContent(headTitle, CST.labels.chartData);
+			CF.eleAppend(panelHead, headTitle);
+			
+			let headBtns = CF.eleCreate("div", "dg-chart-setting-panel-head-btns");
+			CF.eleAppend(panelHead, headBtns);
+			
+			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-panel-closebtn");
+			CF.eleHtmlContent(closeBtn, CST.labels.close);
+			CF.eleAppend(headBtns, closeBtn);
+			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingDataPanel(chart); });
 			
 			CST.setChartSettingDataPanelThemeStyle(chart, panel);
 			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent,panelFoot);
 			
-			for(var i=0; i<dataSetBinds.length; i++)
+			for(let i=0; i<dataSetBinds.length; i++)
 			{
-				var myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
+				let myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
-				var dsbSection = $("<div class='dg-datasetbind-section' />").data("dg-datasetbind-index", i).appendTo(panelContent);
-				var $head = $("<div class='dg-datasetbind-section-head' />").html(myTitle).appendTo(dsbSection);
-				var $content = $("<div class='dg-datasetbind-section-content' />").appendTo(dsbSection);
+				let dsbSection = CF.eleCreate("div", "dg-datasetbind-section");
+				CF.eleAttr(dsbSection, "dg-datasetbind-index", i);
+				CF.eleAppend(panelContent, dsbSection);
 				
-				var tableId = CST.initDataSetBindDataTable(chart, dataSetBinds, i, $content);
+				let dsbHead = CF.eleCreate("div", "dg-datasetbind-section-head");
+				CF.eleHtmlContent(dsbHead, myTitle);
+				CF.eleAppend(dsbSection, dsbHead);
 				
-				dsbSection.data("chartDataTableId", tableId);
+				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
+				CF.eleAppend(dsbSection, dsbContent);
+				
+				let tableId = CST.initDataSetBindDataTable(chart, dataSetBinds, i, dsbContent);
+				CF.eleAttr(dsbSection, "dg-datasetbind-table-id", tableId);
+				
+				CF.eleOn(dsbHead, "click", () =>
+				{
+					CST.eleToggle(dsbContent);
+				});
 			}
 		}
 		else
 		{
 			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			$(".dg-datasetbind-section", panel).each(function()
+			CF.elesOfSelector(".dg-datasetbind-section", panel).forEach((dsbSection) =>
 			{
-				var dataSetBindIndex = $(this).data("dg-datasetbind-index");
-				var tableId = $(this).data("chartDataTableId");
-				var $table = $("#"+tableId, this);
+				let dsbContent = CF.eleOfSelector(".dg-datasetbind-section-content", dsbSection);
+				CST.eleShow(dsbContent);
 				
-				CST.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, $table);
+				let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
+				let tableId = CF.eleAttr(dsbSection, "dg-datasetbind-table-id");
+				let table = CF.eleOfSelector("#"+tableId, dsbSection);
+				
+				CST.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, table);
 			});
 		}
 		
-		CST.adjustChartSetingPanelPosition(boxEle, panel, $(".dg-chart-setting-data-button", boxEle), chart);
+		CST.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-setting-data-button", boxEle), chart);
 	};
 	
 	/**
@@ -1901,15 +1924,15 @@
 		return (panel == null || CF.eleAncestorOfSelector(panel, ".dg-display-none") != null);
 	};
 	
-	CST.initDataSetBindDataTable = function(chart, dataSetBinds, index, $parent)
+	CST.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
 	{
 		var dataSetBind = dataSetBinds[index];
 		var dataSetFields = chart.dataSetFields(dataSetBind);
 		var signFields = [];
 		
-		for(var i=0; i<dataSetFields.length; i++)
+		for(let i=0; i<dataSetFields.length; i++)
 		{
-			var signs = (chart.dataSetFieldSigns(dataSetBind, dataSetFields[i]) || []);
+			let signs = (chart.dataSetFieldSigns(dataSetBind, dataSetFields[i]) || []);
 			if(signs.length > 0)
 			{
 				signFields.push(dataSetFields[i]);
@@ -1960,23 +1983,29 @@
 		}
 		
 		var tableId = CF.uid();
+		var table = CF.eleCreateWithAttr("table", "id", tableId, "width", "100%", "class", "dg-chart-data-table");
+		CF.eleAppend(parent, table);
+		CF.eleData(table, "tableColumns", columns);
 		
-		var table = $("<table width='100%' class='dg-chart-data-table'></table>");
-		table.attr("id", tableId);
-		table.data("tableColumns", columns);
+		var thead = CF.eleCreate("thead")
+		CF.eleAppend(table, thead);
 		
-		var thead = $("<thead />").appendTo(table);
-		var tr = $("<tr />").appendTo(thead);
+		var tr = CF.eleCreate("tr");
+		CF.eleAppend(thead, tr);
 		
-		for(var i=0; i<columns.length; i++)
+		for(let i=0; i<columns.length; i++)
 		{
-			var th = $("<th />").html(columns[i].title).appendTo(tr);
+			let th = CF.eleCreate("th");
+			CF.eleHtmlContent(th, columns[i].title);
+			
 			if(columns[i].style)
-				th.attr("style", columns[i].style);
+				CF.eleAttr(th, "style", columns[i].style);
+			
+			CF.eleAppend(tr, th);
 		}
 		
-		$("<tbody />").appendTo(table);
-		table.appendTo($parent);
+		var tbody = CF.eleCreate("tbody");
+		CF.eleAppend(table, tbody);
 		
 		CST.updateChartSettingDataTableData(chart, dataSetBinds, index, table);
 		
@@ -2051,33 +2080,37 @@
 		});
 	};
 	
-	CST.updateChartSettingDataTableData = function(chart, dataSetBinds, index, $table)
+	CST.updateChartSettingDataTableData = function(chart, dataSetBinds, index, table)
 	{
 		var chartResult = chart.updateResult();
 		var result = chart.resultOf(chartResult, index);
 		var datas = chart.resultDatas(result);
-		var columns = ($table.data("tableColumns") || []);
+		var columns = (CF.eleData(table, "tableColumns") || []);
 		
-		var tbody = $("> tbody", $table);
-		tbody.empty();
+		var tbody = CF.eleOfSelector("tbody", table);
+		CF.eleEmpty(tbody);
 		
-		for(var i=0; i<datas.length; i++)
+		for(let i=0; i<datas.length; i++)
 		{
-			var data = (datas[i] || {});
-			var tr = $("<tr />").appendTo(tbody);
+			let data = (datas[i] || {});
+			let tr = CF.eleCreate("tr");
+			CF.eleAppend(tbody, tr);
 			
-			for(var j=0; j<columns.length; j++)
+			for(let j=0; j<columns.length; j++)
 			{
-				var column = columns[j];
-				$("<td />").html(column.render(data, i)).appendTo(tr);
+				let column = columns[j];
+				let td = CF.eleCreate("td");
+				CF.eleHtmlContent(td, column.render(data, i));
+				CF.eleAppend(tr, td);
 			}
 		}
 	};
 	
 	CST.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
 	{
-		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + chart.dataSetAlias(dataSetBinds[index]);
-		if(title != dataSetBinds[index].dataSet.name)
+		let alias = chart.dataSetAlias(dataSetBinds[index]);
+		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + alias;
+		if(alias != dataSetBinds[index].dataSet.name)
 			title += " ("+dataSetBinds[index].dataSet.name+")";
 		
 		return title;
@@ -2117,11 +2150,8 @@
 		var btnWidth = CST.eleOuterWidth(btn);
 		var btnHeight = CST.eleOuterHeight(btn);
 		
-		//TODO
-		//var btnOffset = btn.offset();
-		//var btnPosition = btn.position();
-		var btnOffset = { left: docWidth, top: 0 };
-		var btnPosition = { left: 0, top: 0 };
+		var btnOffset = CST.eleOffset(btn);
+		var btnPosition = CST.elePosition(btn);
 		
 		var left = "unset";
 		var right = "unset";
@@ -2193,8 +2223,10 @@
 	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
 	CST.focusOnFirstInput = function(ele)
 	{
-		var input = $(":input:not(:disabled,[readonly]):first", ele); 
-		input.focus();
+		var input = CF.eleOfSelector("input:not(:disabled,[readonly])", ele);
+		
+		if(input)
+			input.focus();
 	};
 	
 	CST.eleHide = function(ele)
@@ -2232,5 +2264,54 @@
 		
 		return (height + marginTop + marginBottom);
 	};
+	
+	CST.eleOffset = function(ele)
+	{
+		let re = { left: 0, top: 0 };
+		
+		if(ele == null)
+			return re;
+		
+		let rect = ele.getBoundingClientRect();
+		let scrollLeft = window.scrollX;
+		let scrollTop = window.scrollY;
+		
+		re.left = rect.left + scrollLeft;
+		re.top = rect.top + scrollTop;
+		
+		return re;
+	};
+	
+	CST.elePosition = function(ele)
+	{
+		let re = { left: 0, top: 0 };
+		
+		if(ele == null)
+			return re;
+		
+		let rect = ele.getBoundingClientRect();
+		let offsetParent = ele.offsetParent || document.documentElement;
+		
+		if (offsetParent === document.body && CF.eleCss(offsetParent, "position") === "static")
+        	offsetParent = document.documentElement;
+        	
+        let parentRect = offsetParent.getBoundingClientRect();
+        let parentBorderTop = (parseInt(CF.eleCss(offsetParent, "border-top-width")) || 0);
+        let parentBorderLeft = (parseInt(CF.eleCss(offsetParent, "border-left-width")) || 0);
+        
+		let top = rect.top - parentRect.top - parentBorderTop;
+		let left = rect.left - parentRect.left - parentBorderLeft;
+		
+		if(offsetParent !== document.documentElement && offsetParent !== document.body)
+		{
+			top += offsetParent.scrollTop;
+			left += offsetParent.scrollLeft;
+		}
+		
+		re.top = top;
+		re.left = left;
+		
+		return re;
+	};
 })
-(this);
+(this, window);

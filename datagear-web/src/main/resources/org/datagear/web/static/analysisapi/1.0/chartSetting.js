@@ -2206,8 +2206,9 @@
 	
 	chartSetting.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
 	{
-		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + chart.dataSetAlias(dataSetBinds[index]);
-		if(title != dataSetBinds[index].dataSet.name)
+		var alias = chart.dataSetAlias(dataSetBinds[index]);
+		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + alias;
+		if(alias != dataSetBinds[index].dataSet.name)
 			title += " ("+dataSetBinds[index].dataSet.name+")";
 		
 		return title;
