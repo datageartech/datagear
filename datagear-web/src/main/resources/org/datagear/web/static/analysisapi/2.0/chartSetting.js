@@ -159,10 +159,11 @@
 			
 			let labelDiv = CF.eleCreate("div", "dg-dspform-item-label");
 			CF.eleAppend(item, labelDiv);
-			CST.renderDspFormLabel(form, labelDiv, dsp, options);
+			let label = CST.renderDspFormLabel(form, options, labelDiv, dsp);
 			
 			let valueDiv = CF.eleCreate("div", "dg-dspform-item-value");
 			CF.eleAppend(item, valueDiv);
+			let input;
 			
 			if(dsp.type == CF.DataSetParamType.BOOLEAN)
 			{
@@ -172,43 +173,49 @@
 				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					CST.renderDspFormInputRadio(form, valueDiv, dsp, value, options, defaultSelOpts);
+					input = CST.renderDspFormInputRadio(form, options, valueDiv, dsp, value, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					CST.renderDspFormInputCheckbox(form, valueDiv, dsp, value, options, defaultSelOpts);
+					input = CST.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value, defaultSelOpts);
 				else
-					CST.renderDspFormInputSelect(form, valueDiv, dsp, value, options, defaultSelOpts);
+					input = CST.renderDspFormInputSelect(form, options, valueDiv, dsp, value, defaultSelOpts);
 			}
 			else if(dsp.type == CF.DataSetParamType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					CST.renderDspFormInputSelect(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.DATE)
-					CST.renderDspFormInputDate(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputDate(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.TIME)
-					CST.renderDspFormInputTime(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputTime(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.DATETIME)
-					CST.renderDspFormInputDateTime(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputDateTime(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.RADIO)
-					CST.renderDspFormInputRadio(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputRadio(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					CST.renderDspFormInputCheckbox(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					CST.renderDspFormInputTextarea(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
 				else
-					CST.renderDspFormInputText(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputText(form, options, valueDiv, dsp, value);
 			}
 			else if(dsp.type == CF.DataSetParamType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					CST.renderDspFormInputSelect(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.RADIO)
-					CST.renderDspFormInputRadio(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputRadio(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					CST.renderDspFormInputCheckbox(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					CST.renderDspFormInputTextarea(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
 				else
-					CST.renderDspFormInputText(form, valueDiv, dsp, value, options);
+					input = CST.renderDspFormInputText(form, options, valueDiv, dsp, value);
+			}
+			
+			let inputId = (input ? CF.eleAttr(input, "id") : null);
+			if(!CF.isEmpty(inputId))
+			{
+				CF.eleAttr(label, "for", inputId);
 			}
 		}
 		
@@ -345,8 +352,8 @@
 					name:
 					[
 						cssPrefix + " button",
-						cssPrefix + " input[type=button]",
-						cssPrefix + " input[type=submit]",
+						cssPrefix + " input[type='button']",
+						cssPrefix + " input[type='submit']",
 						cssPrefix + " .button"
 					],
 					value:
@@ -360,8 +367,8 @@
 					name:
 					[
 						cssPrefix + " button:hover",
-						cssPrefix + " input[type=button]:hover",
-						cssPrefix + " input[type=submit]:hover",
+						cssPrefix + " input[type='button']:hover",
+						cssPrefix + " input[type='submit']:hover",
 						cssPrefix + " .button:hover"
 					],
 					value:
@@ -379,16 +386,18 @@
 	 * 渲染表单项标签。
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染标签的父容器元素
 	 * @param dataSetParam
-	 * @param formOptions
 	 */
-	CST.renderDspFormLabel = function(form, parent, dataSetParam, formOptions)
+	CST.renderDspFormLabel = function(form, formOptions, parent, dataSetParam)
 	{
 		var label = CF.eleCreate("label");
 		CF.eleHtmlContent(label, (dataSetParam.label ? dataSetParam.label : dataSetParam.name));
-		CF.eleAttr(label, "title", dataSetParam.desc);
 		CF.eleAppend(parent, label);
+		
+		if(!CF.isEmpty(dataSetParam.desc))
+			CF.eleAttr(label, "title", dataSetParam.desc);
 		
 		return label;
 	};
@@ -397,17 +406,17 @@
 	 * 渲染输入项：文本框
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
-	 * @param formOptions
 	 */
-	CST.renderDspFormInputText = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputText = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var input = CF.eleCreate("input", "dg-dspform-input");
 		CF.eleAttr(input, "type", "text");
+		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
-		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
@@ -416,6 +425,9 @@
 			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
 		CF.eleAppend(parent, input);
+		CST.eleInputActualValue(input, value);
+		
+		return input;
 	};
 	
 	/**
@@ -434,13 +446,13 @@
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
-	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	CST.renderDspFormInputSelect = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspFormInputSelect = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
 	{
 		var payload = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -457,6 +469,7 @@
 		
 		var input = CF.eleCreate("select", "dg-dspform-input");
 		CF.eleAttr(input, "name", dataSetParam.name);
+		CF.eleAttr(input, "id", CF.uid());
 		
 		if(payload.multiple)
 			CF.eleAttr(input, "multiple", "true");
@@ -477,9 +490,6 @@
 			var opt = CF.eleCreateWithAttr("option", "value", optVal);
 			CF.eleHtmlContent(opt, optName);
 			
-			if(CST.containsValueAsString(value, optVal))
-				CF.eleAttr(opt, "selected", "selected");
-			
 			CF.eleAppend(input, opt);
 		}
 		
@@ -488,6 +498,10 @@
 		
 		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
 			CF.eleAttr(input, "dg-validation-check-number", "true");
+		
+		CST.eleInputActualValue(input, value);
+		
+		return input;
 	};
 	
 	/**
@@ -506,12 +520,12 @@
 	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
-	 * @param formOptions
 	 */
-	CST.renderDspFormInputDate = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputDate = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d" }, options);
@@ -520,13 +534,16 @@
 		CF.eleAttr(input, "dg-date-src-format", "y-m-d");
 		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "date");
+		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
-		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
+		CST.eleInputActualValue(input, value);
+		
+		return input;
 	};
 	
 	/**
@@ -550,7 +567,7 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspFormInputTime = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputTime = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "h:i:s" }, options);
@@ -559,14 +576,17 @@
 		CF.eleAttr(input, "dg-date-src-format", "h:i:s");
 		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "time");
+		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
-		CF.eleAttr(input, "value", (value == null ? "" : value));
 		CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
+		CST.eleInputActualValue(input, value);
+		
+		return input;
 	};
 	
 	/**
@@ -588,12 +608,12 @@
 	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
-	 * @param formOptions
 	 */
-	CST.renderDspFormInputDateTime = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputDateTime = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d h:i:s" }, options);
@@ -602,14 +622,17 @@
 		CF.eleAttr(input, "dg-date-src-format", "y-m-dTh:i:s");
 		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "datetime-local");
+		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
-		CF.eleAttr(input, "value", (value == null ? "" : value));
 		CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
+		CST.eleInputActualValue(input, value);
+		
+		return input;
 	};
 	
 	/**
@@ -624,13 +647,13 @@
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
-	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
-	CST.renderDspFormInputRadio = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspFormInputRadio = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
 	{
 		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -641,6 +664,7 @@
 			opts = [ opts ];
 		
 		var inputsWrapper = CF.eleCreate("div", "dg-dspform-inputs-wrapper");
+		CF.eleAttr(inputsWrapper, "id", CF.uid());
 		CF.eleAppend(parent, inputsWrapper);
 		
 		for(var i=0; i<opts.length; i++)
@@ -665,15 +689,16 @@
 			CF.eleHtmlContent(label, optName);
 			CF.eleAppend(wrapper, label);
 			
-			if(CST.isEqualAsString(value, optVal))
-				CF.eleAttr(input, "checked", "checked");
-			
 			if(CF.isLiteralTrue(dataSetParam.required))
 				CF.eleAttr(input, "dg-validation-check-required", "true");
 			
 			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
 				CF.eleAttr(input, "dg-validation-check-number", "true");
+			
+			CST.eleInputActualValue(input, value);
 		}
+		
+		return inputsWrapper;
 	};
 	
 	/**
@@ -688,17 +713,17 @@
 	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选，值、值数组
-	 * @param formOptions
 	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
-	CST.renderDspFormInputCheckbox = function(form, parent, dataSetParam, value, formOptions, defaultSelOpts)
+	CST.renderDspFormInputCheckbox = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
 	{
 		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
 		
-		if(defaultSelOpts && CF.isEmpty(payload))
+		if(defaultSelOpts && CF.isEmpty(opts))
 			opts = defaultSelOpts;
 		
 		if(!CF.isArray(opts))
@@ -707,6 +732,7 @@
 		value = (value == null ? [] : (CF.isArray(value) ? value : [ value ]));
 		
 		var inputsWrapper = CF.eleCreate("div", "dg-dspform-inputs-wrapper");
+		CF.eleAttr(inputsWrapper, "id", CF.uid());
 		CF.eleAppend(parent, inputsWrapper);
 		
 		for(var i=0; i<opts.length; i++)
@@ -731,30 +757,32 @@
 			CF.eleHtmlContent(label, optName);
 			CF.eleAppend(wrapper, label);
 			
-			if(CST.containsValueAsString(value, optVal))
-				CF.eleAttr(input, "checked", "checked");
-			
 			if(CF.isLiteralTrue(dataSetParam.required))
 				CF.eleAttr(input, "dg-validation-check-required", "true");
 			
 			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
 				CF.eleAttr(input, "dg-validation-check-number", "true");
+			
+			CST.eleInputActualValue(input, value);
 		}
+		
+		return inputsWrapper;
 	};
 	
 	/**
 	 * 渲染输入项：文本域
 	 * 
 	 * @param form
+	 * @param formOptions
 	 * @param parent 渲染输入项的父容器元素
 	 * @param dataSetParam
 	 * @param value 可选
-	 * @param formOptions
 	 */
-	CST.renderDspFormInputTextarea = function(form, parent, dataSetParam, value, formOptions)
+	CST.renderDspFormInputTextarea = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var input = CF.eleCreate("textarea", "dg-dspform-input");
 		CF.eleAttr(input, "type", "text");
+		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
 		CF.eleAttr(input, "value", (value == null ? "" : value));
 		
@@ -765,6 +793,9 @@
 			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
 		CF.eleAppend(parent, input);
+		CST.eleInputActualValue(input, value);
+		
+		return input;
 	};
 	
 	//日期格式解析支持类，支持"...y...m...d...h...i...s..."格式日期解析
@@ -1075,15 +1106,8 @@
 				return;
 			
 			let arrayValue = CF.isEleMatches(input, "input[type='checkbox'], select[multiple]");
-			let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
-			let dateDestFormat = CF.eleAttr(input, "dg-date-dest-format");
 			let value = CST.eleInputActualValue(input);
 			let prevValue = re[name];
-			
-			if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat) && !CF.isEmpty(value))
-			{
-				value = CST.dateFormatter.convertFormat(value, dateSrcFormat, dateDestFormat);
-			}
 			
 			if(arrayValue)
 			{
@@ -1094,7 +1118,17 @@
 				}
 				
 				if(value != null)
-					prevValue.push(value);
+				{
+					if(CF.isArray(value))
+					{
+						prevValue = prevValue.concat(value);
+						re[name] = prevValue;
+					}
+					else
+					{
+						prevValue.push(value);
+					}
+				}
 			}
 			else if(prevValue == null)
 			{
@@ -1141,15 +1175,7 @@
 			if(CF.isEmpty(name))
 				return;
 			
-			let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
-			let dateDestFormat = CF.eleAttr(input, "dg-date-dest-format");
 			let value = data[name];
-			
-			if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat) && !CF.isEmpty(value))
-			{
-				value = CST.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
-			}
-			
 			CST.eleInputActualValue(input, value);
 		});
 	};
@@ -1190,6 +1216,15 @@
 			else
 			{
 				re = input.value;
+				
+				if(!CF.isEmpty(re))
+				{
+					let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
+					let dateDestFormat = (dateSrcFormat == null ? null : CF.eleAttr(input, "dg-date-dest-format"));
+					
+					if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat))
+						re = CST.dateFormatter.convertFormat(re, dateSrcFormat, dateDestFormat);
+				}
 			}
 			
 			return re;
@@ -1217,6 +1252,15 @@
 			}
 			else
 			{
+				if(!CF.isEmpty(value))
+				{
+					let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
+					let dateDestFormat = (dateSrcFormat == null ? null : CF.eleAttr(input, "dg-date-dest-format"));
+					
+					if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat))
+						value = CST.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
+				}
+				
 				input.value = (value == null ? "" : value);
 			}
 		}

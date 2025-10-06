@@ -410,7 +410,10 @@
 .dg-dspform .dg-dspform-item-value{
 	text-align: left;
 }
-.dg-dspform .dg-dspform-item-value input[type=text],
+.dg-dspform .dg-dspform-item-value input[type="text"],
+.dg-dspform .dg-dspform-item-value input[type="date"],
+.dg-dspform .dg-dspform-item-value input[type="datetime-local"],
+.dg-dspform .dg-dspform-item-value input[type="time"],
 .dg-dspform .dg-dspform-item-value textarea,
 .dg-dspform .dg-dspform-item-value select,
 .dg-dspform .dg-dspform-inputs-wrapper{
@@ -435,8 +438,8 @@
 	text-align: center;
 }
 .dg-dspform button,
-.dg-dspform input[type=button],
-.dg-dspform input[type=submit],
+.dg-dspform input[type="button"],
+.dg-dspform input[type="submit"],
 .dg-dspform .button{
 	padding: 0.5rem 2rem;
 	border-radius: 3px;
@@ -569,11 +572,11 @@
 	text-align: center;
 }
 .dg-chart-setting-panel .dg-chart-setting-panel-head button,
-.dg-chart-setting-panel .dg-chart-setting-panel-head input[type=button],
-.dg-chart-setting-panel .dg-chart-setting-panel-head input[type=submit],
+.dg-chart-setting-panel .dg-chart-setting-panel-head input[type="button"],
+.dg-chart-setting-panel .dg-chart-setting-panel-head input[type="submit"],
 .dg-chart-setting-panel .dg-chart-setting-panel-foot button,
-.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=button],
-.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=submit]{
+.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type="button"],
+.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type="submit"]{
 	font-weight: normal;
 	padding-left: 2em;
 	padding-right: 2em;
@@ -604,15 +607,15 @@
 	padding: 0.3em 0;
 }
 .dg-chart-setting-panel button,
-.dg-chart-setting-panel input[type=submit],
-.dg-chart-setting-panel input[type=button]{
+.dg-chart-setting-panel input[type="submit"],
+.dg-chart-setting-panel input[type="button"]{
 	padding: 0.4em 0.8em;
 	white-space: nowrap;
 	font-size: 1em;
 }
 .dg-chart-setting-panel button.dg-param-value-form-invalid,
-.dg-chart-setting-panel input[type=submit].dg-param-value-form-invalid,
-.dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
+.dg-chart-setting-panel input[type="submit"].dg-param-value-form-invalid,
+.dg-chart-setting-panel input[type="button"].dg-param-value-form-invalid{
 	border-color: red !important;
 }
 .dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
