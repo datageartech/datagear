@@ -213,6 +213,7 @@
 			}
 			
 			let inputId = (input ? CF.eleAttr(input, "id") : null);
+			inputId = (CF.isEmpty(inputId) ? CF.eleAttr(input, "dg-label-for-id") : inputId);
 			if(!CF.isEmpty(inputId))
 			{
 				CF.eleAttr(label, "for", inputId);
@@ -317,7 +318,8 @@
 		{
 			var color = CF.themeGradualColor(chartTheme, 1);
 			var bgColor = CF.themeGradualColor(chartTheme, 0);
-			var borderColor = CF.themeGradualColor(chartTheme, 0.5);
+			var bgColor1 = CF.themeGradualColor(chartTheme, 0.2);
+			var borderColor = CF.themeGradualColor(chartTheme, 0.4);
 			
 			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dspform";
 			
@@ -339,13 +341,20 @@
 						cssPrefix + " .dg-dspform-item-value textarea",
 						cssPrefix + " .dg-dspform-item-value select",
 						cssPrefix + " .dg-dspform-item-value select option",
-						cssPrefix + " .dg-dspform-item-value .input"
+						cssPrefix + " .dg-dspform-item-value .dg-dspform-inputs-wrapper"
 					],
 					value:
 					{
 						"color": color,
 						"background-color": bgColor,
 						"border-color": borderColor
+					}
+				},
+				{
+					name: cssPrefix + " .dg-dspform-item-value select[multiple] option:checked",
+					value:
+					{
+						"background-color": bgColor1
 					}
 				},
 				{
@@ -530,18 +539,87 @@
 		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d" }, options);
 		
-		var input = CF.eleCreate("input", "dg-dspform-input");
-		CF.eleAttr(input, "dg-date-src-format", "y-m-d");
-		CF.eleAttr(input, "dg-date-dest-format", options.format);
-		CF.eleAttr(input, "type", "date");
-		CF.eleAttr(input, "id", CF.uid());
-		CF.eleAttr(input, "name", dataSetParam.name);
+		let input;
 		
-		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-check-required", "true");
-		
-		CF.eleAppend(parent, input);
-		CST.eleInputActualValue(input, value);
+		if(!CST.dateFormatter.hasDay(options.format))
+		{
+			let hasMonth = CST.dateFormatter.hasMonth(options.format);
+			let inputId = CF.uid();
+			let inputsWrapper = CF.eleCreate("div", "dg-date-widget dg-dspform-inputs-wrapper");
+			CF.eleAppend(parent, inputsWrapper);
+			
+			input = CF.eleCreate("input", "dg-dspform-input dg-date-widget-hidden");
+			CF.eleAttr(input, "dg-date-src-format", (hasMonth ? "y-m" : "y"));
+			CF.eleAttr(input, "dg-date-dest-format", options.format);
+			CF.eleAttr(input, "type", "hidden");
+			CF.eleAttr(input, "name", dataSetParam.name);
+			CF.eleAttr(input, "dg-label-for-id", inputId);
+			CF.eleAppend(inputsWrapper, input);
+			
+			if(CF.isLiteralTrue(dataSetParam.required))
+				CF.eleAttr(input, "dg-validation-check-required", "true");
+			
+			let inputs = CF.eleCreate("div", "dg-date-widget-inputs");
+			CF.eleAppend(inputsWrapper, inputs);
+			
+			let yearSelect = CF.eleCreate("select", "dg-date-widget-year");
+			CF.eleAttr(yearSelect, "id", inputId);
+			CF.eleAppend(inputs, yearSelect);
+			
+			if(hasMonth)
+			{
+				let separator = CF.eleCreate("div", "dg-date-widget-separator");
+				CF.eleAppend(inputs, separator);
+				let separatorContent = CF.eleCreate("small");
+				CF.eleHtmlContent(separatorContent, "/");
+				CF.eleAppend(separator, separatorContent);
+				
+				let monthSelect = CF.eleCreate("select", "dg-date-widget-month");
+				CF.eleAppend(inputs, monthSelect);
+				for(let i=0; i<CST.MONTH_OPTIONS.length; i++)
+				{
+					let opt = CF.eleCreateWithAttr("option", "value", CST.MONTH_OPTIONS[i]);
+					CF.eleHtmlContent(opt, CST.MONTH_OPTIONS[i]);
+					CF.eleAppend(monthSelect, opt);
+				}
+			}
+			
+			let btns = CF.eleCreate("div", "dg-date-widget-year-btns");
+			CF.eleAppend(inputsWrapper, btns);
+			
+			let prevBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-prev-year-btn");
+			CF.eleHtmlContent(prevBtn, "&uarr;");
+			CF.eleAppend(btns, prevBtn);
+			CF.eleOn(prevBtn, "click", () =>
+			{
+				CST.eleYearSelectRollOptions(yearSelect, false);
+			});
+			
+			let nextBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-next-year-btn");
+			CF.eleHtmlContent(nextBtn, "&darr;");
+			CF.eleAppend(btns, nextBtn);
+			CF.eleOn(nextBtn, "click", () =>
+			{
+				CST.eleYearSelectRollOptions(yearSelect, true);
+			});
+			
+			CST.eleInputActualValue(input, value);
+		}
+		else
+		{
+			input = CF.eleCreate("input", "dg-dspform-input");
+			CF.eleAttr(input, "dg-date-src-format", "y-m-d");
+			CF.eleAttr(input, "dg-date-dest-format", options.format);
+			CF.eleAttr(input, "type", "date");
+			CF.eleAttr(input, "id", CF.uid());
+			CF.eleAttr(input, "name", dataSetParam.name);
+			
+			if(CF.isLiteralTrue(dataSetParam.required))
+				CF.eleAttr(input, "dg-validation-check-required", "true");
+			
+			CF.eleAppend(parent, input);
+			CST.eleInputActualValue(input, value);
+		}
 		
 		return input;
 	};
@@ -578,7 +656,9 @@
 		CF.eleAttr(input, "type", "time");
 		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
-		CF.eleAttr(input, "step", "1");
+		
+		if(CST.dateFormatter.hasSecond(options.format))
+			CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
@@ -624,7 +704,9 @@
 		CF.eleAttr(input, "type", "datetime-local");
 		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
-		CF.eleAttr(input, "step", "1");
+		
+		if(CST.dateFormatter.hasSecond(options.format))
+			CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
@@ -798,10 +880,28 @@
 		return input;
 	};
 	
+	CST.MONTH_OPTIONS = ["", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+	
 	//日期格式解析支持类，支持"...y...m...d...h...i...s..."格式日期解析
 	//注意：这里保留了大写'Y'标识符，以兼容旧数据集预览时的格式
 	CST.dateFormatter =
 	{
+		hasYear: function(format)
+		{
+			return (format != null && (format.indexOf("y") >= 0 || format.indexOf("Y") >= 0));
+		},
+		hasMonth: function(format)
+		{
+			return (format != null && format.indexOf("m") >= 0);
+		},
+		hasDay: function(format)
+		{
+			return (format != null && format.indexOf("d") >= 0);
+		},
+		hasSecond: function(format)
+		{
+			return (format != null && format.indexOf("s") >= 0);
+		},
 		convertFormat: function(src, srcFormat, destFormat)
 		{
 			var date = this.parseDate(src, srcFormat);
@@ -856,20 +956,33 @@
 				var fmt = format[j];
 				
 				if(fmt == 'y' || fmt == 'Y')
-					re += this._paddingLeftZero(y, 4);
+					re += this.formatYear(y);
 				else if(fmt == 'm')
-					re += this._paddingLeftZero(m, 2);
+					re += this.paddingLeftZero(m, 2);
 				else if(fmt == 'd')
-					re += this._paddingLeftZero(d, 2);
+					re += this.paddingLeftZero(d, 2);
 				else if(fmt == 'H' || fmt == 'h')
-					re += this._paddingLeftZero(h, 2);
+					re += this.paddingLeftZero(h, 2);
 				else if(fmt == 'i')
-					re += this._paddingLeftZero(i, 2);
+					re += this.paddingLeftZero(i, 2);
 				else if(fmt == 's')
-					re += this._paddingLeftZero(s, 2);
+					re += this.paddingLeftZero(s, 2);
 				else
 					re += fmt;
 			}
+			
+			return re;
+		},
+		formatYear: function(yearNumber)
+		{
+			return this.paddingLeftZero(yearNumber, 4);
+		},
+		paddingLeftZero: function(number, length)
+		{
+			var re = number + "";
+			
+			while(re.length < length)
+				re = "0" + re;
 			
 			return re;
 		},
@@ -943,15 +1056,6 @@
 			
 			return index;
 		},
-		_paddingLeftZero: function(number, length)
-		{
-			var re = number + "";
-			
-			while(re.length < length)
-				re = "0" + re;
-			
-			return re;
-		},
 		_formatArrayCache:{}
 	};
 	
@@ -1003,13 +1107,15 @@
 				}
 				else
 				{
+					let indicator = (type == "hidden" ? CF.eleAncestorOfSelector(input, ".dg-dspform-inputs-wrapper") : input);
+					
 					if(CF.isEmpty(val))
 					{
-						CF.eleAddClass(input, "dg-validation-required");
+						CF.eleAddClass(indicator, "dg-validation-required");
 						validationOk = false;
 					}
 					else
-						CF.eleRemoveClass(input, "dg-validation-required");
+						CF.eleRemoveClass(indicator, "dg-validation-required");
 				}
 			});
 			
@@ -1045,19 +1151,20 @@
 				if(isCheckboxRadio)
 				{
 					if(!CF.isEmpty(val))
-						checkedValues.puth(val);
+						checkedValues.push(val);
 				}
 				else
 				{
 					val = (CF.isEmpty(val) ? [] : (CF.isArray(val) ? val : [ val ]));
+					let indicator = (type == "hidden" ? CF.eleAncestorOfSelector(input, ".dg-dspform-inputs-wrapper") : input);
 					
 					if(!CST.isNonEmptyAllNumberic(val))
 					{
-						CF.eleAddClass(input, "dg-validation-number");
+						CF.eleAddClass(indicator, "dg-validation-number");
 						validationOk = false;
 					}
 					else
-						CF.eleRemoveClass(input, "dg-validation-number");
+						CF.eleRemoveClass(indicator, "dg-validation-number");
 				}
 			});
 			
@@ -1205,26 +1312,18 @@
 			else if(CF.isEleMatches(input, "select"))
 			{
 				if(CF.eleAttr(input, "multiple"))
-				{
 					re = Array.from(input.selectedOptions).map(option => option.value);
-				}
 				else
-				{
 					re = input.value;
-				}
 			}
 			else
 			{
-				re = input.value;
+				if(CF.isEleMatches(input, ".dg-date-widget-hidden"))
+					re = CST.eleDateWidgetValue(input);
+				else
+					re = input.value;
 				
-				if(!CF.isEmpty(re))
-				{
-					let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
-					let dateDestFormat = (dateSrcFormat == null ? null : CF.eleAttr(input, "dg-date-dest-format"));
-					
-					if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat))
-						re = CST.dateFormatter.convertFormat(re, dateSrcFormat, dateDestFormat);
-				}
+				re = CST.eleInputConvertDateFormat(input, re);
 			}
 			
 			return re;
@@ -1242,27 +1341,154 @@
 			}
 			else if(CF.isEleMatches(input, "select"))
 			{
-				value = (value == null ? null : (CF.isArray(value) ? value : [ value ]));
-				
-				for (let i = 0; i < input.options.length; i++)
-				{
-					let option = input.options[i];
-					option.selected = (value == null ? false : CST.containsValueAsString(value, option.value));
-				}
+				CST.eleSelectSetValue(input, value);
 			}
 			else
 			{
-				if(!CF.isEmpty(value))
+				if(CF.isEleMatches(input, ".dg-date-widget-hidden"))
 				{
-					let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
-					let dateDestFormat = (dateSrcFormat == null ? null : CF.eleAttr(input, "dg-date-dest-format"));
-					
-					if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat))
-						value = CST.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
+					CST.eleDateWidgetValue(input, value);
 				}
-				
-				input.value = (value == null ? "" : value);
+				else
+				{
+					value = CST.eleInputConvertDateFormat(input, value, true);
+					input.value = (value == null ? "" : value);
+				}
 			}
+		}
+	};
+	
+	CST.eleDateWidgetValue = function(inputHidden, value)
+	{
+		let dateWidget = CF.eleAncestorOfSelector(inputHidden, ".dg-date-widget");
+		let yearSelect = (dateWidget == null ? null : CF.eleOfSelector(".dg-date-widget-year", dateWidget));
+		let monthSelect = (dateWidget == null ? null : CF.eleOfSelector(".dg-date-widget-month", dateWidget));
+		
+		if(value === undefined)
+		{
+			let re = (yearSelect == null ? undefined : yearSelect.value);
+			
+			if(!CF.isEmpty(re) && monthSelect != null)
+			{
+				let month = monthSelect.value;
+				re = (CF.isEmpty(month) ? undefined : (re + "-" + month));
+			}
+			
+			return re;
+		}
+		else
+		{
+			let date = (CF.isEmpty(value) ? null : CST.dateFormatter.parseDate(value, CF.eleAttr(inputHidden, "dg-date-dest-format")));
+			let yearValue = (date == null ? "" : CST.dateFormatter.formatYear(date.getFullYear()));
+			let monthValue = (date == null ? "" : CST.dateFormatter.formatDate(date, "m"));
+			
+			CST.eleSetYearSelectOptions(yearSelect, (date == null ? null : date.getFullYear()));
+			CST.eleSelectSetValue(yearSelect, yearValue);
+			CST.eleSelectSetValue(monthSelect, monthValue);
+		}
+	};
+	
+	CST.eleSetYearSelectOptions = function(yearSelect, yearValue)
+	{
+		if(yearSelect == null)
+			return;
+		
+		yearValue = (yearValue == null ? new Date().getFullYear() : yearValue);
+		yearValue = yearValue - 5;
+		yearValue = (yearValue < 0 ? 0 : yearValue);
+		yearValue = (yearValue > 9999 ? 9999 : yearValue);
+		
+		CF.eleEmpty(yearSelect);
+		
+		let emptyOpt = CF.eleCreateWithAttr("option", "value", "");
+		CF.eleHtmlContent(emptyOpt, "");
+		CF.eleAppend(yearSelect, emptyOpt);
+		
+		//前五年后四年
+		for(let i=0; i<10; i++)
+		{
+			let value = yearValue+i;
+			
+			if(value > 9999)
+				break;
+			
+			value = CST.dateFormatter.formatYear(value);
+			let opt = CF.eleCreateWithAttr("option", "value", value);
+			CF.eleHtmlContent(opt, value);
+			CF.eleAppend(yearSelect, opt);
+		}
+	};
+	
+	CST.eleYearSelectRollOptions = function(yearSelect, down)
+	{
+		if(yearSelect == null)
+			return;
+		
+		down = (down == null ? true : down);
+		
+		let selectedValue = yearSelect.value;
+		if(CF.isEmpty(selectedValue))
+		{
+			for (let i=0; i<yearSelect.options.length; i++)
+			{
+				let option = yearSelect.options[i];
+				if(!CF.isEmpty(option.value))
+				{
+					selectedValue = option.value;
+					break;
+				}
+			}
+		}
+		
+		if(!CF.isEmpty(selectedValue))
+		{
+			selectedValue = parseInt(selectedValue);
+			selectedValue = (down ? (selectedValue + 10) : (selectedValue - 10));
+			selectedValue = CST.dateFormatter.formatYear(selectedValue);
+		}
+		
+		let optIdx = (down ? (yearSelect.options.length - 1) : 1);
+		let option = yearSelect.options[optIdx];
+		let newYear = (option == null ? null : option.value);
+		newYear = (CF.isEmpty(newYear) ? new Date().getFullYear() : parseInt(newYear));
+		newYear = (down ? (newYear + 6) : (newYear - 5));
+		
+		CST.eleSetYearSelectOptions(yearSelect, newYear);
+		CST.eleSelectSetValue(yearSelect, selectedValue);
+	};
+	
+	CST.eleInputConvertDateFormat = function(input, value, toSrc)
+	{
+		toSrc = (toSrc == null ? false : toSrc);
+		
+		if(input == null || CF.isEmpty(value))
+			return value;
+		
+		let dateSrcFormat = CF.eleAttr(input, "dg-date-src-format");
+		let dateDestFormat = (dateSrcFormat == null ? null : CF.eleAttr(input, "dg-date-dest-format"));
+		
+		if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat))
+		{
+			if(toSrc)
+				value = CST.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
+			else
+				value = CST.dateFormatter.convertFormat(value, dateSrcFormat, dateDestFormat);
+		}
+		
+		return value;
+	};
+	
+	CST.eleSelectSetValue = function(select, value)
+	{
+		if(!select)
+			return;
+		
+		value = (value == null ? null : (CF.isArray(value) ? value : [ value ]));
+		
+		for (let i = 0; i < select.options.length; i++)
+		{
+			let option = select.options[i];
+			option.selected = (value == null ? false : CST.containsValueAsString(value, option.value));
 		}
 	};
 	

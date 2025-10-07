@@ -426,6 +426,45 @@
 	border-width: 1px;
 	border-style: solid;
 }
+.dg-dspform .dg-dspform-item-value .dg-date-widget{
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.2rem;
+	padding: 0.2rem 0.1rem;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-inputs{
+	display: flex;
+	align-items: center;
+	gap: 0.2rem;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-year,
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-month{
+	padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+	border: 0;
+	background: none;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-year{
+	width: 5em;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-month{
+	width: 4em;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-year-btns{
+	display: flex;
+	gap: 2px;
+	padding-left: 0.2rem;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-year-btn{
+	padding: 0.2rem 0.5rem;
+	border-radius: 2px;
+	border: 0;
+}
+.dg-dspform .dg-dspform-item-value .dg-date-widget .dg-date-widget-separator{
+	padding-left: 0.2rem;
+	display: flex;
+	align-items: center;
+}
 .dg-dspform .dg-dspform-inputs-wrapper{
 	border: 1px solid transparent;
 }
