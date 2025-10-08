@@ -230,7 +230,7 @@ DF.unloadConfig = (DF.unloadConfig ||
 /**
  * 循环监视处理图表状态间隔毫秒数。
  */
-DF.HANDLE_CHART_INTERVAL_MS = 1;
+DF.HANDLE_CHART_INTERVAL_MS = 10;
 
 /**
  * 自动调整图表尺寸延迟毫秒数。
