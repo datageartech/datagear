@@ -5634,8 +5634,7 @@ CF.toCssFontSize = function(fontSize)
 {
 	if(CF.isEmpty(fontSize))
 	{
-		//返回一个无效的css字号值，使其不影响其他层级字号设置
-		return "null";
+		return null;
 	}
 	else if(CF.isNumber(fontSize))
 	{

@@ -2346,10 +2346,11 @@
 	{
 		var chartEle = chart.element();
 		var cw = parseInt(CF.eleCss(chartEle, "width"));
+		var ww = window.innerWidth;
 		
-		CF.eleCss(panelContent, "min-width", (cw*2/5)+"px");
+		CF.eleCss(panelContent, "min-width", Math.max(cw*2/5, ww*3/10)+"px");
 		CF.eleCss(panelContent, "max-width", "60vw");
-		CF.eleCss(panelContent, "max-height", "60vh");
+		CF.eleCss(panelContent, "max-height", "55vh");
 	};
 	
 	CST.showChartSetingPanelOpacityOut = function(boxEle, panel, chart)
