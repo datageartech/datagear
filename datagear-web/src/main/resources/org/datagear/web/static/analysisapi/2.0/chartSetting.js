@@ -1298,7 +1298,7 @@
 	{
 		var type = CST.eleInputType(input);
 		
-		if(value === undefined)
+		if(arguments.length < 2)
 		{
 			var re = undefined;
 			
@@ -1364,7 +1364,7 @@
 		let yearSelect = (dateWidget == null ? null : CF.eleOfSelector(".dg-date-widget-year", dateWidget));
 		let monthSelect = (dateWidget == null ? null : CF.eleOfSelector(".dg-date-widget-month", dateWidget));
 		
-		if(value === undefined)
+		if(arguments.length < 2)
 		{
 			let re = (yearSelect == null ? undefined : yearSelect.value);
 			
