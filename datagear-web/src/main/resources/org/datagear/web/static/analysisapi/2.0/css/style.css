@@ -673,8 +673,10 @@
 
 /*看板表单*/
 .dg-dashboard-form.dg-dspform,
-.dg-dashboard-form.dg-dspform .dg-dspform-input,
-.dg-dashboard-form.dg-dspform .dg-dspform-item-value select[multiple] option{
+.dg-dashboard-form.dg-dspform .dg-dspform-item-value input,
+.dg-dashboard-form.dg-dspform .dg-dspform-item-value textarea,
+.dg-dashboard-form.dg-dspform .dg-dspform-item-value select,
+.dg-dashboard-form.dg-dspform .dg-dspform-item-value .dg-dspform-inputs-wrapper{
     background: transparent !important;
 }
 .dg-dashboard-form.dg-dspform .dg-dspform-content{

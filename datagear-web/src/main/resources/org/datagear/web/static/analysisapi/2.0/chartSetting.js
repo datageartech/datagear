@@ -1066,9 +1066,9 @@
 		if(CF.isEmpty(inputPayload))
 			return defaultValue;
 		else if(CF.isString(inputPayload))
-			return CF.evalSilently(dataSetParam.inputPayload, defaultValue);
+			return CF.evalSilently(inputPayload, defaultValue);
 		else
-			return defaultValue;
+			return inputPayload;
 	};
 	
 	CST.NUMBER_REGEX = /^-?\d+\.?\d*$/;

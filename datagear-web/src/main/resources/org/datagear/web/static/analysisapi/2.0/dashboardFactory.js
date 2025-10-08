@@ -1332,7 +1332,7 @@ dashboardProto.renderForm = function(form, config)
 		config = CF.evalSilently(CF.eleAttr(form, elementAttrConst.DASHBOARD_FORM), {});
 	
 	var dashboard = this;
-	var globalTheme = CF.renderContextChartTheme(this.renderContext);
+	var globalTheme = CF.renderContextChartTheme(this.renderContext());
 	var bindBatchSetName = CF.builtinPropName("batchSet");
 	
 	config = CF.extend(
