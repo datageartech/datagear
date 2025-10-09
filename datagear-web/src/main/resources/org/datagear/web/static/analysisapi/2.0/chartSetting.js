@@ -320,6 +320,8 @@
 			var bgColor = CF.themeGradualColor(chartTheme, -1);
 			var bgColor1 = CF.themeGradualColor(chartTheme, 0.2);
 			var borderColor = CF.themeGradualColor(chartTheme, 0.4);
+			var btnBg = CF.themeGradualColor(chartTheme, 0.1);
+			var btnHoverBg = CF.themeGradualColor(chartTheme, 0.2);
 			
 			var cssPrefix = (isSubStyle ? " " : "") + ".dg-dspform";
 			
@@ -368,7 +370,7 @@
 					value:
 					{
 						"color": color,
-						"background-color": CF.themeGradualColor(chartTheme, 0.1),
+						"background-color": btnBg,
 						"border-color": borderColor
 					}
 				},
@@ -382,7 +384,7 @@
 					],
 					value:
 					{
-						"background-color": CF.themeGradualColor(chartTheme, 0.2)
+						"background-color": btnHoverBg
 					}
 				}
 			];
@@ -1747,7 +1749,10 @@
 		{
 			var color = chart.themeGradualColor(1);
 			var bgColor = chart.themeGradualColor(-1);
+			var titleBg = chart.themeGradualColor(0);
+			var btnBg = chart.themeGradualColor(0.1);
 			var btnBorderColor = chart.themeGradualColor(0.5);
+			var btnHoverBg = chart.themeGradualColor(0.2);
 			var panelBorderColor = chart.themeGradualColor(0.3);
 			var shadowColor = chart.themeGradualColor(0.9);
 			
@@ -1766,7 +1771,7 @@
 					name: " .dg-chart-setting-box .dg-chart-setting-button:hover",
 					value:
 					{
-						"background-color": chart.themeGradualColor(0.2)
+						"background-color": btnHoverBg
 					}
 				},
 				{
@@ -1789,7 +1794,7 @@
 					value:
 					{
 						"color": color,
-						"background-color": chart.themeGradualColor(0.1),
+						"background-color": btnBg,
 						"border-color": btnBorderColor
 					}
 				},
@@ -1801,7 +1806,7 @@
 					],
 					value:
 					{
-						"background-color": chart.themeGradualColor(0.2)
+						"background-color": btnHoverBg
 					}
 				},
 				{
@@ -1817,7 +1822,18 @@
 					name: " .dg-chart-setting-panel .dg-datasetbind-section-head",
 					value:
 					{
-						"background-color": chart.themeGradualColor(0),
+						"background-color": titleBg
+					}
+				},
+				{
+					name:
+					[
+						" .dg-chart-setting-data-panel table.dg-chart-data-table tbody tr:hover",
+						" .dg-chart-setting-data-panel table.dg-chart-data-table tbody tr:hover td"
+					],
+					value:
+					{
+						"background-color": btnBg
 					}
 				}
 			];
@@ -1921,11 +1937,8 @@
 				let paramValuess = [];
 				
 				let dsbSections = CF.elesOfSelector(".dg-datasetbind-section", panelContent);
-				dsbSections.forEach(function(dsbSection)
+				dsbSections.forEach((dsbSection) =>
 				{
-					if(!validateOk)
-						return;
-					
 					let dspForm = CST.getDataSetParamForm(dsbSection);
 					let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
 					let ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
@@ -2090,7 +2103,6 @@
 			CF.eleAppend(headBtns, closeBtn);
 			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingDataPanel(chart); });
 			
-			CST.setChartSettingDataPanelThemeStyle(chart, panel);
 			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent,panelFoot);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
@@ -2265,59 +2277,6 @@
 		}
 		
 		return (signInfo ? title + " (" + signInfo +")" : title);
-	};
-	
-	CST.setChartSettingDataPanelThemeStyle = function(chart, panel)
-	{
-		chart.themeStyleSheet(CF.builtinPropName("ChartSettingDataPanel"), function()
-		{
-			var theme = chart.theme();
-			var color = chart.themeGradualColor(2);
-			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
-			var bgColor = chart.themeGradualColor(-1);
-			
-			var cssPrefix = " .dg-chart-setting-box .dg-chart-setting-data-panel";
-			
-			var css =
-			[
-				{
-					name:
-					[
-						cssPrefix + " table.dg-chart-data-table thead th",
-						cssPrefix + " table.dg-chart-data-table thead td"
-					],
-					value:
-					{
-						"color": color,
-						"background-color": bgColor
-					}
-				},
-				{
-					name:
-					[
-						cssPrefix + " table.dg-chart-data-table tbody tr",
-						cssPrefix + " table.dg-chart-data-table tbody tr td",
-					],
-					value:
-					{
-						"color": color
-					}
-				},
-				{
-					name:
-					[
-						cssPrefix + " table.dg-chart-data-table tbody tr:hover",
-						cssPrefix + " table.dg-chart-data-table tbody tr:hover td"
-					],
-					value:
-					{
-						"background-color": chart.themeGradualColor(0.1)
-					}
-				}
-			];
-			
-			return css;
-		});
 	};
 	
 	CST.updateChartSettingDataTableData = function(chart, dataSetBinds, index, table)
