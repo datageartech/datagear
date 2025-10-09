@@ -1333,32 +1333,26 @@ dashboardProto.renderForm = function(form, config)
 	
 	var dashboard = this;
 	var globalTheme = CF.renderContextChartTheme(this.renderContext());
-	var bindBatchSetName = CF.builtinPropName("batchSet");
+	//构建用于批量设置数据集参数值的对象
+	var batchSet = { target: [], data: {} };
 	
 	config = CF.extend(
 	{
 		submit: function(formData)
 		{
-			var batchSet = CF.eleData(form, bindBatchSetName);
+			let thisForm = this;
+			let charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
 			
-			if(batchSet)
+			for(let i=0; i<charts.length; i++)
 			{
-				let charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ form, thisForm ]);
-				
-				for(let i=0; i<charts.length; i++)
+				CF.executeSilently(function()
 				{
-					CF.executeSilently(function()
-					{
-						charts[i].refreshData();
-					});
-				}
+					charts[i].refreshData();
+				});
 			}
 		}
 	},
 	config);
-	
-	//构建用于批量设置数据集参数值的对象
-	var batchSet = { target: [], data: {} };
 	
 	if(config.link)
 	{
@@ -1402,8 +1396,6 @@ dashboardProto.renderForm = function(form, config)
 		if(item.link != null)
 			batchSet.data[item.name] = item.link;
 	}
-	
-	CF.eleData(form, bindBatchSetName, batchSet);
 	
 	config.paramValues = defaultValues;
 	config.chartTheme = globalTheme;

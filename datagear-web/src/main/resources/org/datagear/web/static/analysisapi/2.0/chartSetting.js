@@ -1641,7 +1641,7 @@
 		
 		var box = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
 		CST.destroyDataSetParamForm(box);
-		box.remove();
+		CF.eleRemove(box);
 	};
 	
 	CST.showChartSettingBox = function(chart)
