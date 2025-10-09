@@ -5714,6 +5714,11 @@ CF.isNumber = function(v)
 	return (typeof(v) === "number");
 };
 
+CF.isDate = function(v)
+{
+	return (v instanceof Date);
+};
+
 CF.isArray = function(v)
 {
 	return Array.isArray(v);

@@ -589,8 +589,16 @@
 			let btns = CF.eleCreate("div", "dg-date-widget-year-btns");
 			CF.eleAppend(inputsWrapper, btns);
 			
+			let nowBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-now-year-btn");
+			CF.eleHtmlContent(nowBtn, "&#9679;");
+			CF.eleAppend(btns, nowBtn);
+			CF.eleOn(nowBtn, "click", () =>
+			{
+				CST.eleInputActualValue(input, new Date());
+			});
+			
 			let prevBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-prev-year-btn");
-			CF.eleHtmlContent(prevBtn, "&uarr;");
+			CF.eleHtmlContent(prevBtn, "&#8593;");
 			CF.eleAppend(btns, prevBtn);
 			CF.eleOn(prevBtn, "click", () =>
 			{
@@ -598,7 +606,7 @@
 			});
 			
 			let nextBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-next-year-btn");
-			CF.eleHtmlContent(nextBtn, "&darr;");
+			CF.eleHtmlContent(nextBtn, "&#8595;");
 			CF.eleAppend(btns, nextBtn);
 			CF.eleOn(nextBtn, "click", () =>
 			{
@@ -1380,7 +1388,13 @@
 		}
 		else
 		{
-			let date = (CF.isEmpty(value) ? null : CST.dateFormatter.parseDate(value, CF.eleAttr(inputHidden, "dg-date-dest-format")));
+			let date = null;
+			
+			if(CF.isDate(value))
+				date = value;
+			else
+				date = (CF.isEmpty(value) ? null : CST.dateFormatter.parseDate(value, CF.eleAttr(inputHidden, "dg-date-dest-format")));
+			
 			let yearValue = (date == null ? "" : CST.dateFormatter.formatYear(date.getFullYear()));
 			let monthValue = (date == null ? "" : CST.dateFormatter.formatDate(date, "m"));
 			
