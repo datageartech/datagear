@@ -5176,7 +5176,7 @@ var THEME_GRADUAL_COLORS_NAME = CF.BUILTIN_PROP_PREFIX + "GradualColors";
  * 这个颜色是实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
  * 
  * @param theme 主题对象，格式为：{ color: "...", actualBackgroundColor: "..." }
- * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+ * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色，小于0表示返回实际背景色，大于1表示返回前景色
  * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
  */
 CF.themeGradualColor = function(theme, factor)
@@ -5190,21 +5190,30 @@ CF.themeGradualColor = function(theme, factor)
 	}
 	
 	if(factor == null)
+	{
 		return gcs;
+	}
 	else
 	{
-		var index = parseInt((gcs.length-1) * factor);
-		
-		index = (index < 0 ? 0 : index);
-		index = (index >= gcs.length ? gcs.length - 1 : index);
-		
-		if(index == 0 && factor > 0)
-			index = 1;
-		
-		if(index == gcs.length - 1 && factor < 1)
-			index == gcs.length - 2;
-		
-		return gcs[index];
+		if(factor < 0)
+			return theme.actualBackgroundColor;
+		else if(factor > 1)
+			return theme.color;
+		else
+		{
+			var index = parseInt((gcs.length-1) * factor);
+			
+			index = (index < 0 ? 0 : index);
+			index = (index >= gcs.length ? gcs.length - 1 : index);
+			
+			if(index == 0 && factor > 0)
+				index = 1;
+			
+			if(index == gcs.length - 1 && factor < 1)
+				index == gcs.length - 2;
+			
+			return gcs[index];
+		}
 	}
 };
 
