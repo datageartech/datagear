@@ -625,10 +625,12 @@
 	border-radius: 3px;
 }
 .dg-chart-setting-panel .dg-datasetbind-section-head{
-	font-weight: bold;
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0.2rem 0;
+}
+.dg-chart-setting-panel .dg-datasetbind-section-title{
+	font-weight: bold;
 	cursor: pointer;
 }
 .dg-chart-setting-panel .dg-dspform input,

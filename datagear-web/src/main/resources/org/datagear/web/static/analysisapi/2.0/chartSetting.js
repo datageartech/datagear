@@ -1875,8 +1875,11 @@
 				CF.eleAppend(panelContent, dsbSection);
 				
 				let dsbHead = CF.eleCreate("div", "dg-datasetbind-section-head");
-				CF.eleHtmlContent(dsbHead, myTitle);
 				CF.eleAppend(dsbSection, dsbHead);
+				
+				let dsbTitle = CF.eleCreate("span", "dg-datasetbind-section-title");
+				CF.eleHtmlContent(dsbTitle, myTitle);
+				CF.eleAppend(dsbHead, dsbTitle);
 				
 				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
 				CF.eleAppend(dsbSection, dsbContent);
@@ -1896,7 +1899,7 @@
 					}
 				});
 				
-				CF.eleOn(dsbHead, "click", () =>
+				CF.eleOn(dsbTitle, "click", () =>
 				{
 					CST.eleToggle(dsbContent);
 				});
@@ -2092,8 +2095,11 @@
 				CF.eleAppend(panelContent, dsbSection);
 				
 				let dsbHead = CF.eleCreate("div", "dg-datasetbind-section-head");
-				CF.eleHtmlContent(dsbHead, myTitle);
 				CF.eleAppend(dsbSection, dsbHead);
+				
+				let dsbTitle = CF.eleCreate("span", "dg-datasetbind-section-title");
+				CF.eleHtmlContent(dsbTitle, myTitle);
+				CF.eleAppend(dsbHead, dsbTitle);
 				
 				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
 				CF.eleAppend(dsbSection, dsbContent);
@@ -2101,7 +2107,7 @@
 				let tableId = CST.initDataSetBindDataTable(chart, dataSetBinds, i, dsbContent);
 				CF.eleAttr(dsbSection, "dg-datasetbind-table-id", tableId);
 				
-				CF.eleOn(dsbHead, "click", () =>
+				CF.eleOn(dsbTitle, "click", () =>
 				{
 					CST.eleToggle(dsbContent);
 				});
