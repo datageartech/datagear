@@ -317,7 +317,7 @@
 		return CF.themeStyleSheet(chartTheme, name, function()
 		{
 			var color = CF.themeGradualColor(chartTheme, 1);
-			var bgColor = CF.themeGradualColor(chartTheme, 0);
+			var bgColor = CF.themeGradualColor(chartTheme, -1);
 			var bgColor1 = CF.themeGradualColor(chartTheme, 0.2);
 			var borderColor = CF.themeGradualColor(chartTheme, 0.4);
 			
@@ -382,7 +382,7 @@
 					],
 					value:
 					{
-						"background-color": CF.themeGradualColor(chartTheme, 0.3)
+						"background-color": CF.themeGradualColor(chartTheme, 0.2)
 					}
 				}
 			];
@@ -1746,7 +1746,7 @@
 		chart.themeStyleSheet(CF.builtinPropName("chartSettingBox"), function()
 		{
 			var color = chart.themeGradualColor(1);
-			var bgColor = chart.themeGradualColor(0);
+			var bgColor = chart.themeGradualColor(-1);
 			var btnBorderColor = chart.themeGradualColor(0.5);
 			var panelBorderColor = chart.themeGradualColor(0.3);
 			var shadowColor = chart.themeGradualColor(0.9);
@@ -1770,7 +1770,7 @@
 					}
 				},
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-panel",
+					name: " .dg-chart-setting-panel",
 					value:
 					{
 						"color": color,
@@ -1781,19 +1781,10 @@
 					}
 				},
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-panel .dg-datasetbind-section",
-					value:
-					{
-						"color": color,
-						"background-color": bgColor,
-						"border-color": panelBorderColor
-					}
-				},
-				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button",
-						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button"
+						" .dg-chart-setting-panel-head button",
+						" .dg-chart-setting-panel-foot button"
 					],
 					value:
 					{
@@ -1805,12 +1796,28 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head button:hover",
-						" .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover"
+						" .dg-chart-setting-panel-head button:hover",
+						" .dg-chart-setting-panel-foot button:hover"
 					],
 					value:
 					{
-						"background-color": chart.themeGradualColor(0.3)
+						"background-color": chart.themeGradualColor(0.2)
+					}
+				},
+				{
+					name: " .dg-chart-setting-panel .dg-datasetbind-section",
+					value:
+					{
+						"color": color,
+						"background-color": bgColor,
+						"border-color": panelBorderColor
+					}
+				},
+				{
+					name: " .dg-chart-setting-panel .dg-datasetbind-section-head",
+					value:
+					{
+						"background-color": chart.themeGradualColor(0),
 					}
 				}
 			];
@@ -2265,8 +2272,9 @@
 		chart.themeStyleSheet(CF.builtinPropName("ChartSettingDataPanel"), function()
 		{
 			var theme = chart.theme();
+			var color = chart.themeGradualColor(2);
 			//表格背景色应与面板背景色一致，且不能设透明背景色，因为设置了固定列
-			var bgColor = chart.themeGradualColor(0);
+			var bgColor = chart.themeGradualColor(-1);
 			
 			var cssPrefix = " .dg-chart-setting-box .dg-chart-setting-data-panel";
 			
@@ -2280,7 +2288,7 @@
 					],
 					value:
 					{
-						"color": theme.color,
+						"color": color,
 						"background-color": bgColor
 					}
 				},
@@ -2292,7 +2300,7 @@
 					],
 					value:
 					{
-						"color": theme.color
+						"color": color
 					}
 				},
 				{
@@ -2303,7 +2311,7 @@
 					],
 					value:
 					{
-						"background-color": chart.themeGradualColor(0.2)
+						"background-color": chart.themeGradualColor(0.1)
 					}
 				}
 			];
