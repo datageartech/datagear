@@ -44,6 +44,8 @@ EU.THEME_PROP_ECHARTS_THEME_NAME = "DG_ECHARTS_THEME_NAME";
 //键："地图名"；值：{ loaded: true、false, fetchPromise: Promise }
 EU.MAP_REGISTER_STATES = {};
 
+EU.version = "1.0";
+
 /**
  * 获取全局ECharts对象。
  */
@@ -82,10 +84,10 @@ EU.init = function(chart, opts)
  */
 EU.themeName = function(chart)
 {
-	var themeName = CF.eleAttr(chart.element(), elementAttrConst.ECHARTS_THEME);
+	var themeName = CF.eleAttr(chart.element(), CF.elementAttrConst.ECHARTS_THEME);
 	
 	if(!themeName)
-		themeName = CF.eleAttr(document.body, elementAttrConst.ECHARTS_THEME);
+		themeName = CF.eleAttr(document.body, CF.elementAttrConst.ECHARTS_THEME);
 	
 	return themeName;
 };
@@ -203,7 +205,7 @@ EU.registerMap = function(chart, name, complete)
  * 
  * @param chart 图表
  */
-CF._buildEchartsTheme = function(chart)
+EU._buildEchartsTheme = function(chart)
 {
 	var axisColor = chart.themeGradualColor(0.7);
 	var axisScaleLineColor = chart.themeGradualColor(0.35);

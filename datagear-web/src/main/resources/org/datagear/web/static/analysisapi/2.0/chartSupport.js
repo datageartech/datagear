@@ -88,6 +88,8 @@ SPT.xxxRenderer = function(plugin, config)
 	return renderer;
 };
 
+SPT.ECHARTS_RENDERER_DEPEND = [ { name: "echarts" }, { name: "chartUtil.echarts" } ];
+
 //折线图
 
 SPT.lineRenderer = function(plugin, config)
@@ -107,17 +109,18 @@ SPT.lineRenderer = function(plugin, config)
 	
 	var renderer =
 	{
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
 		render: function(chart)
 		{
-			var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+			var dataSetBind = chart.dataSetBindMain();
 			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 			var valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
 			
-			var options = SPT.inflateRenderOptions(chart,
+			var options = SPT.prepareEChartsRenderOptions(chart,
 			{
 				title:
 				{
-			        text: chart.name
+			        text: chart.name()
 			    },
 				tooltip:
 				{
@@ -125,36 +128,30 @@ SPT.lineRenderer = function(plugin, config)
 				},
 				legend:
 				{
-					id: 0,
-					//将在update中设置：
-					//data
+					data: []
 				},
 				xAxis: {
-					id: 0,
 					name: chart.dataSetFieldAlias(dataSetBind, nameField),
 					nameGap: 5,
 					type: SPT.evalDataSetFieldAxisType(chart, nameField),
 					boundaryGap: false
 				},
 				yAxis: {
-					name: (valueFields.length == 1 ? chart.dataSetFieldAlias(dataSetBind, valueFields[0]) : ""),
+					name: (valueFields.length > 0 ? chart.dataSetFieldAlias(dataSetBind, valueFields[0]) : ""),
 					nameGap: 5,
 					type: "value"
 				},
 				series:
 				[
-					//将在update中设置：
-					//{}
-					//设初值以免渲染报错
 					{
-						id: 0,
-						type: "line"
+						type: "line",
+						data: []
 					}
 				]
-			},
-			options);
+			});
 			
-			chart.echartsInit(options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
 		},
 		
 		update: function(chart, chartResult)
@@ -304,7 +301,7 @@ SPT.barRenderer = function(plugin, config)
 	{
 		render: function(chart)
 		{
-			var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+			var dataSetBind = chart.dataSetBindMain();
 			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 			var valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
 			
@@ -312,7 +309,7 @@ SPT.barRenderer = function(plugin, config)
 			{
 				title:
 				{
-			        text: chart.name
+			        text: chart.name()
 			    },
 				tooltip:
 				{
@@ -574,7 +571,7 @@ SPT.barPolarRender = function(chart, options)
 	{
 		title:
 		{
-			text: chart.name
+			text: chart.name()
 		},
 		angleAxis: {id: 0},
 		radiusAxis: {id: 0},
@@ -608,7 +605,7 @@ SPT.barPolarRender = function(chart, options)
 	options,
 	function(options)
 	{
-		var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+		var dataSetBind = chart.dataSetBindMain();
 		var dataSignNames = options.dg.dataSignNames;
 		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 		
@@ -837,7 +834,7 @@ SPT.pieRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -1037,7 +1034,7 @@ SPT.gaugeRender = function(chart, options)
 	var builtinOptions =
 	{
 		title: {
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -1401,7 +1398,7 @@ SPT._scatterRender = function(chart, options, scatterType)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 	
@@ -1409,7 +1406,7 @@ SPT._scatterRender = function(chart, options, scatterType)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -1662,14 +1659,14 @@ SPT._scatterCoordRender = function(chart, options, scatterType)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 	
 	options = SPT.inflateRenderOptions(chart,
 	{
 		title: {
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -1848,7 +1845,7 @@ SPT.radarRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -2174,7 +2171,7 @@ SPT.funnelRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 	    tooltip:
 	    {
@@ -2303,7 +2300,7 @@ SPT.mapRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -2529,7 +2526,7 @@ SPT._mapScatterRender = function(chart, options, scatterType)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -2730,7 +2727,7 @@ SPT.mapGraphRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -3023,7 +3020,7 @@ SPT.mapLinesRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		legend:
 		{
@@ -3224,7 +3221,7 @@ SPT.mapFlylineRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -3424,7 +3421,7 @@ SPT.mapHeatmapRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		geo:
 		{
@@ -3586,14 +3583,14 @@ SPT.candlestickRender = function(chart, options)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	
 	options = SPT.inflateRenderOptions(chart,
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -3750,7 +3747,7 @@ SPT.heatmapRender = function(chart, options)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 	
@@ -3761,7 +3758,7 @@ SPT.heatmapRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -3949,7 +3946,7 @@ SPT.treeRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -4098,7 +4095,7 @@ SPT.treemapRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -4194,7 +4191,7 @@ SPT.sunburstRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -4407,7 +4404,7 @@ SPT.sankeyRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -4651,7 +4648,7 @@ SPT.graphRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -4927,14 +4924,14 @@ SPT.boxplotRender = function(chart, options)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	
 	options = SPT.inflateRenderOptions(chart,
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -5225,7 +5222,7 @@ SPT.wordcloudRender = function(chart, options)
 	options = SPT.inflateRenderOptions(chart,
 	{
 		title: {
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -5401,7 +5398,7 @@ SPT.liquidfillRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -5595,7 +5592,7 @@ SPT.parallelRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -5906,14 +5903,14 @@ SPT.themeRiverRender = function(chart, options)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	
 	options = SPT.inflateRenderOptions(chart,
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -6105,7 +6102,7 @@ SPT.pictorialBarRender = function(chart, options)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
 	
@@ -6117,7 +6114,7 @@ SPT.pictorialBarRender = function(chart, options)
 		},
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -6356,7 +6353,7 @@ SPT.pictorialBarProgressRender = function(chart, options)
 	options);
 	
 	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = SPT.dataSetBindMainNonNull(chart);
+	var dataSetBind = chart.dataSetBindMain();
 	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 	
@@ -6364,7 +6361,7 @@ SPT.pictorialBarProgressRender = function(chart, options)
 	{
 		title:
 		{
-	        text: chart.name
+	        text: chart.name()
 	    },
 		tooltip:
 		{
@@ -6587,7 +6584,7 @@ SPT.tableRender = function(chart, options)
 	var columns = SPT.tableGetFieldColumns(chart, dataSignNames.column);
 	
 	if(columns.length == 0)
-		throw new Error("Column required for rendering table in chart '"+chart.name+"'");
+		throw new Error("Column required for rendering table in chart '"+chart.name()+"'");
 	
 	options = SPT.inflateRenderOptions(chart,
 	{
@@ -6595,7 +6592,7 @@ SPT.tableRender = function(chart, options)
 		title:
 		{
 			show: true,
-			text: chart.name
+			text: chart.name()
 		},
 		//标题样式，格式为：{ color:'red', 'background-color':'blue' }
 		titleStyle: undefined,
@@ -8465,7 +8462,7 @@ SPT.rawDataRender = function(chart)
 	var ele = chart.elementJquery();
 	ele.addClass("dg-chart-rawdata");
 	
-	$("<div class='dg-chart-rawdata-title' />").text(chart.name).appendTo(ele);
+	$("<div class='dg-chart-rawdata-title' />").text(chart.name()).appendTo(ele);
 	$("<div class='dg-chart-rawdata-content' />").appendTo(ele);
 };
 
@@ -8714,42 +8711,68 @@ SPT.evalDataSetFieldAxisType = function(chart, dataSetField)
 };
 
 /**
- * 填充ECharts图表渲染options。
- * 注意： defaultOptions不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
- *		 因为update函数中调用的inflateUpdateOptions函数会把这里的设置高优先级深度合并。
- *
+ * 准备ECharts图表渲染选项。
+ * 
  * @param chart
- * @param defaultOptions
- * @param beforeProcessHandler 可选
- * @param firstSeriesAsTemplate 可选，是否使用defaultOptions的series[0]作为series后续元素的模板，true 是；false 否。默认值为：true 
+ * @param renderOptions
+ * @param beforeProcessHandler
  * @returns 一个新的图表渲染options
  */
-SPT.inflateEChartsRenderOptions = function(chart, defaultOptions, beforeProcessHandler, firstSeriesAsTemplate)
+SPT.prepareEChartsRenderOptions = function(chart, renderOptions, beforeProcessHandler)
 {
-	firstSeriesAsTemplate = (firstSeriesAsTemplate == null ? true : firstSeriesAsTemplate);
-	var newBeforeProcessHandler = beforeProcessHandler;
+	var options = chart.options();
+	renderOptions = SPT.trimArrayPropsForMerge(renderOptions, options);
+	options = SPT.trimArrayPropsForMerge(options, renderOptions);
+	renderOptions = chart.inflateOptions(renderOptions, options);
 	
 	//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
-	if(firstSeriesAsTemplate && defaultOptions.series && defaultOptions.series[0])
+	var series = renderOptions.series;
+	if(series && series.length > 1)
 	{
-		var series0 = CF.extend(true, {}, defaultOptions.series[0]);
-		newBeforeProcessHandler = function(renderOptions, chart)
-		{
-			var series = renderOptions.series;
-			
-			for(var i=1; i<series.length; i++)
-				series[i] = CF.extend(true, {}, series0, series[i]);
-			
-			//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
-			for(var i=0; i<series.length; i++)
-				series[i].id = i;
-			
-			if(beforeProcessHandler)
-				beforeProcessHandler(renderOptions, chart);
-		};
+		var series0 = CF.extend(true, {}, series[0]);
+		
+		for(let i=1; i<series.length; i++)
+			series[i] = CF.extend(true, {}, series0, series[i]);
 	}
 	
-	return chart.inflateRenderOptions(renderOptions, newBeforeProcessHandler);
+	if(beforeProcessHandler)
+		beforeProcessHandler(renderOptions, chart);
+	
+	SPT.setEChartsOptionsCmpId(renderOptions);
+	chart.processRenderOptions(renderOptions);
+	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
+	SPT.setEChartsOptionsCmpId(renderOptions);
+	
+	return renderOptions;
+};
+
+//设置ECharts选项中的组件ID，必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
+SPT.setEChartsOptionsCmpId = function(options)
+{
+	for(let name in options)
+	{
+		let value = options[name];
+		
+		if(value == null)
+			continue;
+		
+		if(CF.isArray(value))
+		{
+			for(let i=0; i<value.length; i++)
+			{
+				let vi = value[i];
+				
+				if(vi != null && CF.isPlainObject(vi) && vi.id === undefined)
+				{
+					vi.id = i;
+				}
+			}
+		}
+		else if(CF.isPlainObject(value) && value.id === undefined)
+		{
+			value.id = 0;
+		}
+	}
 };
 
 /**
@@ -9750,23 +9773,6 @@ SPT.echartsOptionsReplaceMerge = function(chart, options, replaceMerge)
 	chart.echartsOptions(options, opts);
 };
 
-SPT.dataSetBindMainNonNull = function(chart, renderError)
-{
-	renderError = (renderError == null ? true : renderError);
-	
-	var dataSetBind = chart.dataSetBindMain();
-	
-	if(dataSetBind == null)
-	{
-		if(renderError)
-			$("<div />").html("Main DataSetBind required").appendTo(chart.elementJquery());
-		
-		throw new Error("Main DataSetBind required");
-	}
-	
-	return dataSetBind;
-};
-
 SPT.chartEventForHtml = function(chart, type, htmlEvent)
 {
 	var event = chart.eventNew(type, htmlEvent);
@@ -10045,6 +10051,29 @@ SPT.defaultMapName = function()
 {
 	//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
 	return "china";
+};
+
+//返回targetObj的浅复制对象，如果某个属性值在baseObj中是数组而在targetObj不是数组，返回对象会将其转为数组
+SPT.trimArrayPropsForMerge = function(targetObj, baseObj)
+{
+	var targetRe = {};
+	
+	for(let name in targetObj)
+	{
+		let value = targetObj[name];
+		let baseValue = (baseObj == null ? null : baseObj[name]);
+		
+		if(value != null && !CF.isArray(value) && CF.isArray(baseValue))
+		{
+			targetRe[name] = [ value ];
+		}
+		else
+		{
+			targetRe[name] = value;
+		}
+	}
+	
+	return targetRe;
 };
 
 SPT.adaptArrayPropsForUpdateOptions = function(updateOptions, renderOptions)

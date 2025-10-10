@@ -2352,7 +2352,7 @@ chartProto.processUpdateOptions = function(updateOptions, set)
 chartProto.inflateOptions = function(target, source, filter)
 {
 	// (target)
-	if(arguments.length == 1)
+	if(arguments.length <= 1)
 	{
 		source = this.options();
 		filter = null;
