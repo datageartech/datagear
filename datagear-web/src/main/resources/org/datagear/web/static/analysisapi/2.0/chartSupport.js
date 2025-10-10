@@ -114,38 +114,29 @@ SPT.lineRenderer = function(plugin, config)
 		{
 			var dataSetBind = chart.dataSetBindMain();
 			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
-			var valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
 			
 			var options = SPT.prepareEChartsRenderOptions(chart,
 			{
-				title:
+				title: { text: chart.name() },
+				tooltip: { trigger: "axis" },
+				legend: { data: [] },
+				xAxis:
 				{
-			        text: chart.name()
-			    },
-				tooltip:
-				{
-					trigger: "axis"
-				},
-				legend:
-				{
-					data: []
-				},
-				xAxis: {
 					name: chart.dataSetFieldAlias(dataSetBind, nameField),
-					nameGap: 5,
-					type: SPT.evalDataSetFieldAxisType(chart, nameField),
-					boundaryGap: false
+					type: SPT.evalDataSetFieldAxisType(chart, nameField)
 				},
-				yAxis: {
-					name: (valueFields.length > 0 ? chart.dataSetFieldAlias(dataSetBind, valueFields[0]) : ""),
-					nameGap: 5,
-					type: "value"
+				yAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, valueField),
+					type: SPT.evalDataSetFieldAxisType(chart, valueField)
 				},
 				series:
 				[
 					{
 						type: "line",
-						data: []
+						data: [],
+						encode: { x: "name", y: "value" }
 					}
 				]
 			});
@@ -156,7 +147,6 @@ SPT.lineRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions= chart.renderOptions();
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			var legendData = [];
 			var series = [];
@@ -187,9 +177,13 @@ SPT.lineRenderer = function(plugin, config)
 					{
 						let categoryName = categoryNames[j];
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-						let mySeries = {id: series.length, type: "line", name: legendName, data: categoryDatasMap[categoryName]};
-						this._configSeries(mySeries);
+						let mySeries =
+						{
+							type: "line", name: legendName,
+							data: categoryDatasMap[categoryName], encode: { x: "name", y: "value" }
+						};
 						
+						this._configSeries(mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -204,9 +198,9 @@ SPT.lineRenderer = function(plugin, config)
 						//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 						let data = chart.resultMapDatas(result, { name: nameField, value: valueFields[j] });
 						//chart.originalDataIndexes(data, dataSetBind);
-						let mySeries = { type: "line", name: legendName, data: data };
-						this._configSeries(mySeries);
+						let mySeries = { type: "line", name: legendName, data: data, encode: { x: "name", y: "value" } };
 						
+						this._configSeries(mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -214,8 +208,8 @@ SPT.lineRenderer = function(plugin, config)
 			}
 			
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-			var options = { legend: { data: legendData }, series: series, xAxis: { } };
-			SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.xAxis, SPT.inflateAxisDataExtractors.property("name"));
+			var options = { legend: { data: legendData }, series: series, xAxis: {} };
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis, SPT.inflateAxisDataExtractors.property("name"));
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
 			
 			SPT.echartsOptionsReplaceMerge(chart, options);
@@ -486,7 +480,7 @@ SPT.barUpdate = function(chart, chartResult)
 	else
 		options.xAxis = { id: 0 };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
 					SPT.inflateAxisDataExtractors.valueElement(0));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -730,7 +724,7 @@ SPT.barPolarUpdate = function(chart, chartResult)
 	else
 		options.radiusAxis = { id: 0 };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
+	SPT.inflateEChartsUpdateAxisData(chart, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
 					{
 						get: function(s)
 						{
@@ -918,7 +912,7 @@ SPT.pieUpdate = function(chart, chartResult)
 	
 	var options = { legend: { id: 0 }, series: series };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.legend,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.legend,
 					SPT.inflateAxisDataExtractors.property("name"));
 	
 	SPT.pieEvalSeriesLayout(chart, renderOptions, options);
@@ -1516,7 +1510,7 @@ SPT._scatterUpdate = function(chart, chartResult)
 	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 	var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.xAxis,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
 					SPT.inflateAxisDataExtractors.valueElement(0));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -1764,7 +1758,7 @@ SPT._scatterCoordUpdate = function(chart, chartResult)
 	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 	var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.xAxis,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
 					SPT.inflateAxisDataExtractors.valueElement(0));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -3669,7 +3663,7 @@ SPT.candlestickUpdate = function(chart, chartResult)
 	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 	var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.xAxis,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
 					SPT.inflateAxisDataExtractors.property("name"));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -3870,9 +3864,9 @@ SPT.heatmapUpdate = function(chart, chartResult)
 	
 	SPT.trimNumberRange(options.visualMap);
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.xAxis,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
 					SPT.inflateAxisDataExtractors.valueElement(0));
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.yAxis,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.yAxis,
 					SPT.inflateAxisDataExtractors.valueElement(1), false);
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -5112,7 +5106,7 @@ SPT.boxplotUpdate = function(chart, chartResult)
 	else
 		options.xAxis = { id: 0 };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
 					{
 						get: function(s)
 						{
@@ -6009,7 +6003,7 @@ SPT.themeRiverUpdate = function(chart, chartResult)
 	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 	var options = { legend: { id: 0, data: legendData}, series: [ series ], singleAxis: { id: 0 } };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, options.singleAxis,
+	SPT.inflateEChartsUpdateAxisData(chart, options, options.singleAxis,
 					SPT.inflateAxisDataExtractors.element(0));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -6261,7 +6255,7 @@ SPT.pictorialBarUpdate = function(chart, chartResult)
 	else
 		options.xAxis = { id: 0 };
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
 					SPT.inflateAxisDataExtractors.valueElement(0));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -6506,7 +6500,7 @@ SPT.pictorialBarProgressUpdate = function(chart, chartResult)
 		options.yAxis = { id: 0, max: maxValue };
 	}
 	
-	SPT.inflateEChartsUpdateAxisData(renderOptions, options, (dg.horizontal ? options.yAxis : options.xAxis),
+	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
 					SPT.inflateAxisDataExtractors.valueElement(0));
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -8676,7 +8670,10 @@ SPT.evalDataSetFieldAxisType = function(chart, dataSetField)
 	{
 		var resultDataFormat = chart.resultDataFormat();
 		if(!resultDataFormat)
-			resultDataFormat = (chart.dashboard ? chart.dashboard.resultDataFormat() : null);
+		{
+			let dashboard = chart.dashboard();
+			resultDataFormat = (dashboard ? dashboard.resultDataFormat() : null);
+		}
 		
 		if(resultDataFormat)
 		{
@@ -9856,18 +9853,13 @@ SPT.evalArrayDataRange = function(range, data, propertyName0, propertyName1)
 /**
  * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
  * 
- * @param renderOptions 渲染选项，其中的sortAxisData配置项可以控制数据排序方式，格式为：
- *						"asc"、"ASC"：升序；
- *						"desc"、"DESC"：降序；
- *						自定义排序函数：function(a, b){}；
- *						null、false、其他：不排序；
- *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
+ * @param chart
  * @param updateOptions 更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
  * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
  * @param valueExtractor 轴数据值提取器，格式同SPT.sortEChartsUpdateAxisData的valueExtractor参数
  * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
  */
-SPT.inflateEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxis, valueExtractor, sortSeriesData)
+SPT.inflateEChartsUpdateAxisData = function(chart, updateOptions, updateAxis, valueExtractor, sortSeriesData)
 {
 	sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
 	
@@ -9904,13 +9896,13 @@ SPT.inflateEChartsUpdateAxisData = function(renderOptions, updateOptions, update
 	
 	updateAxis.data = axisData;
 	
-	SPT.sortEChartsUpdateAxisData(renderOptions, updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
+	SPT.sortEChartsUpdateAxisData(chart.renderOptions(), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
 };
 
 /**
  * 依据renderOptions中的排序配置对updateAxis.data、updateOptions.series[i].data进行排序。
  * 
- * @param renderOptions 渲染选项，其中的builtinOptionNames.sortAxisData配置项用于控制数据排序方式，格式为：
+ * @param renderOptions 渲染选项，其中的sortAxisData配置项用于控制数据排序方式，格式为：
  *						"asc"、"ASC"：升序；
  *						"desc"、"DESC"：降序；
  *						自定义排序函数：function(a, b){}；
@@ -9935,6 +9927,9 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 		return;
 	
 	var sortHandler = SPT.sortAxisDataOption(renderOptions);
+	
+	if(sortHandler == null)
+		return;
 	
 	if(CF.isString(sortHandler))
 	{
