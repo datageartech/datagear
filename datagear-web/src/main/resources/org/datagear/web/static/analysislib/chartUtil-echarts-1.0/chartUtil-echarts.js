@@ -201,6 +201,32 @@ EU.registerMap = function(chart, name, complete)
 };
 
 /**
+ * 释放ECharts图表实例。
+ * 
+ * @param chart
+ */
+EU.dispose = function(chart)
+{
+	var internal = chart.internal();
+	
+	if(internal && !internal.isDisposed())
+		internal.dispose();
+};
+
+/**
+ * 调整ECharts图表尺寸。
+ * 
+ * @param chart
+ */
+EU.resize = function(chart)
+{
+	var internal = chart.internal();
+	
+	if(internal)
+		internal.resize();
+};
+
+/**
  * 由图表主题构建ECharts主题。
  * 
  * @param chart 图表

@@ -90,6 +90,12 @@ SPT.xxxRenderer = function(plugin, config)
 
 SPT.ECHARTS_RENDERER_DEPEND = [ { name: "echarts" }, { name: "chartUtil.echarts" } ];
 
+//图表数据属性名：原始类别
+SPT.ORIGINAL_CATEGORY_PROP_NAME = "originalCategory";
+
+//图表数据属性名：原始数据
+SPT.ORIGINAL_DATA_PROP_NAME = "originalData";
+
 //折线图
 
 SPT.lineRenderer = function(plugin, config)
@@ -170,7 +176,7 @@ SPT.lineRenderer = function(plugin, config)
 					let fieldMap = { name: nameField, value: valueField };
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 					let data = chart.resultMapDatas(result, fieldMap);
-					//chart.originalDataIndexes(data, dataSetBind);
+					SPT.originalDataOfResult(data, chart, result);
 					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
 					
 					for(let j=0; j<categoryNames.length; j++)
@@ -195,9 +201,8 @@ SPT.lineRenderer = function(plugin, config)
 					for(let j=0; j<valueFields.length; j++)
 					{
 						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
-						//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
 						let data = chart.resultMapDatas(result, { name: nameField, value: valueFields[j] });
-						//chart.originalDataIndexes(data, dataSetBind);
+						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { type: "line", name: legendName, data: data, encode: { x: "name", y: "value" } };
 						
 						this._configSeries(mySeries);
@@ -209,7 +214,7 @@ SPT.lineRenderer = function(plugin, config)
 			
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			var options = { legend: { data: legendData }, series: series, xAxis: {} };
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis, SPT.inflateAxisDataExtractors.property("name"));
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis, SPT.inflateAxisDataExtractors.propertyName());
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
 			
 			SPT.echartsOptionsReplaceMerge(chart, options);
@@ -217,12 +222,12 @@ SPT.lineRenderer = function(plugin, config)
 		
 		destroy: function(chart)
 		{
-			SPT.destroyChartEcharts(chart);
+			chartUtil.echarts.dispose(chart);
 		},
 		
 		resize: function(chart)
 		{
-			SPT.resizeChartEcharts(chart);
+			chartUtil.echarts.resize(chart);
 		},
 		
 		on: function(chart, eventType, handler)
@@ -235,7 +240,7 @@ SPT.lineRenderer = function(plugin, config)
 				
 				var echartsData = echartsEventParams.data;
 				var data = SPT.extractNameValueStyleObj(echartsData, nameProp, valueProp);
-				data[categoryProp] = SPT.getCategoryPropValue(echartsData);
+				data[categoryProp] = SPT.categoryValueOfData(echartsData);
 				
 				chart.eventData(chartEvent, data);
 				chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -519,12 +524,10 @@ SPT.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var echartsData = echartsEventParams.data;
 	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -767,7 +770,6 @@ SPT.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var echartsData = echartsEventParams.data;
 	var data = {};
@@ -783,8 +785,7 @@ SPT.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
 		data[dataSignNames.value] = echartsData.value[1];
 	}
 	
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -1549,12 +1550,10 @@ SPT._scatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var echartsData = echartsEventParams.data;
 	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -1793,7 +1792,6 @@ SPT._scatterCoordSetChartEventData = function(chart, chartEvent, echartsEventPar
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var echartsData = echartsEventParams.data;
 	var data = {};
@@ -1802,8 +1800,7 @@ SPT._scatterCoordSetChartEventData = function(chart, chartEvent, echartsEventPar
 	data[dataSignNames.value] = echartsData.value[1];
 	if(echartsData.value.length > 2)
 		data[dataSignNames.weight] = echartsData.value[2];
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -2665,7 +2662,6 @@ SPT._mapScatterSetChartEventData = function(chart, chartEvent, echartsEventParam
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var echartsData = echartsEventParams.data;
 	
@@ -2676,8 +2672,7 @@ SPT._mapScatterSetChartEventData = function(chart, chartEvent, echartsEventParam
 	data[dataSignNames.latitude] = echartsData.value[1];
 	if(echartsData.value.length > 2)
 		data[dataSignNames.value] = echartsData.value[2];
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -3370,7 +3365,6 @@ SPT.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEventParams
 		var coords = (echartsData.coords || []);
 		var coords0 = (coords[0] || []);
 		var coords1 = (coords[1] || []);
-		var categoryPropertyName = SPT.builtinCategoryPropName();
 		
 		data={};
 		data[dataSignNames.name] = echartsData.name;
@@ -3378,7 +3372,7 @@ SPT.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEventParams
 		data[dataSignNames.sourceLatitude] = coords0[1];
 		data[dataSignNames.targetLongitude] = coords1[0];
 		data[dataSignNames.targetLatitude] = coords1[1];
-		data[dataSignNames.category] = echartsData[categoryPropertyName];
+		data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	}
 	
 	chart.eventData(chartEvent, data);
@@ -5149,7 +5143,6 @@ SPT.boxplotSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var seriesType = echartsEventParams.seriesType;
 	var echartsData = (echartsEventParams.data || {});
@@ -5175,8 +5168,7 @@ SPT.boxplotSetChartEventData = function(chart, chartEvent, echartsEventParams)
 		data[dataSignNames.name] = echartsValue[0];
 		data[dataSignNames.value] = echartsValue[1];
 	}
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -5738,12 +5730,10 @@ SPT.parallelSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	
 	if(echartsData)
 	{
-		var categoryPropertyName = SPT.builtinCategoryPropName();;
-		
 		data = {};
 		data[dataSignNames.name] = echartsData.name;
 		data[dataSignNames.value] = echartsData.value;
-		data[dataSignNames.category] = echartsData[categoryPropertyName];
+		data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	}
 	
 	chart.eventData(chartEvent, data);
@@ -6294,12 +6284,10 @@ SPT.pictorialBarSetChartEventData = function(chart, chartEvent, echartsEventPara
 	var renderOptions= chart.renderOptions();
 	var dg = renderOptions.dg;
 	var dataSignNames = dg.dataSignNames;
-	var categoryPropName = SPT.builtinCategoryPropName();
 	
 	var echartsData = echartsEventParams.data;
 	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
-										echartsData[categoryPropName] : undefined);
+	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
 	
 	chart.eventData(chartEvent, data);
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
@@ -9275,7 +9263,7 @@ SPT.evalDataValueSymbolSize = function(data, minValue, maxValue, symbolSizeMax, 
 	}
 };
 
-SPT.appendCategoryNameAndData =function(categoryNames, categoryDatasMap, categoryName, categoryData)
+SPT.appendCategoryNameAndData = function(categoryNames, categoryDatasMap, categoryName, categoryData)
 {
 	SPT.appendDistinct(categoryNames, categoryName);
 	
@@ -9283,16 +9271,15 @@ SPT.appendCategoryNameAndData =function(categoryNames, categoryDatasMap, categor
 	SPT.appendElement(categoryDatas, categoryData);
 };
 
-SPT.splitDataByCategory =function(data, categoryNames, categoryDatasMap,
-												defaultCategoryName, categoryPropertyName)
+SPT.splitDataByCategory = function(data, categoryNames, categoryDatasMap, defaultCategoryName, categoryPropName)
 {
 	defaultCategoryName = (defaultCategoryName == null ? "" : defaultCategoryName);
-	categoryPropertyName = (categoryPropertyName == null ? SPT.builtinCategoryPropName() : categoryPropertyName);
 	
-	for(var i=0; i<data.length; i++)
+	for(let i=0; i<data.length; i++)
 	{
-		var di = data[i];
-		var categoryName = (di == null ? defaultCategoryName : (di[categoryPropertyName] || defaultCategoryName));
+		let di = data[i];
+		let categoryName = (di == null ? null : SPT.categoryValueOfData(di, categoryPropName));
+		categoryName = (categoryName == null ? defaultCategoryName : categoryName);
 		
 		SPT.appendCategoryNameAndData(categoryNames, categoryDatasMap, categoryName, di);
 	}
@@ -9794,25 +9781,20 @@ SPT.chartEventForHtml = function(chart, type, htmlEvent)
 	return event;
 };
 
-SPT.builtinCategoryPropName = function()
-{
-	return CF.builtinPropName("Category");
-};
-
 SPT.addCategoryToFieldMap = function(fieldMap, categoryField, categoryName)
 {
-	categoryName = (categoryName == null ? SPT.builtinCategoryPropName() : categoryName);
+	categoryName = (categoryName == null ? SPT.ORIGINAL_CATEGORY_PROP_NAME : categoryName);
 	fieldMap[categoryName] = categoryField;
 	return fieldMap;
 };
 
-SPT.getCategoryPropValue = function(obj, categoryName)
+SPT.categoryValueOfData = function(data, categoryPopName)
 {
-	if(obj == null)
+	if(data == null)
 		return undefined;
 	
-	categoryName = (categoryName == null ? SPT.builtinCategoryPropName() : categoryName);
-	return obj[categoryName];
+	categoryPopName = (categoryPopName == null ? SPT.ORIGINAL_CATEGORY_PROP_NAME : categoryPopName);
+	return data[categoryPopName];
 };
 
 SPT.legendNameForDataCategory = function(dataSetBinds, dataSetAlias, categoryName)
@@ -10028,6 +10010,10 @@ SPT.carouselOption = function(options, value)
 
 SPT.inflateAxisDataExtractors =
 {
+	propertyName: function()
+	{
+		return this.property("name");
+	},
 	property: function(name)
 	{
 		var extractor = function(de)
@@ -10114,6 +10100,36 @@ SPT.dataSetBindsMainFetched = function(chart, chartResult)
 {
 	var dsbs = chart.dataSetBindsMain();
 	return chart.dataSetBindsFetched(dsbs, chartResult);
+};
+
+SPT.originalDataOfData = function(data, originalData)
+{
+	if(originalData === undefined)
+	{
+		return (data == null ? null : data[SPT.ORIGINAL_DATA_PROP_NAME]);
+	}
+	else
+	{
+		data[SPT.ORIGINAL_DATA_PROP_NAME] = originalData;
+	}
+};
+
+SPT.originalDataOfDatas = function(datas, originalDatas)
+{
+	if(datas == null || originalDatas == null)
+		return;
+	
+	var len = Math.min(datas.length, originalDatas.length);
+	
+	for(let i=0; i<len; i++)
+	{
+		SPT.originalDataOfData(datas[i], originalDatas[i]);
+	}
+};
+
+SPT.originalDataOfResult = function(datas, chart, result)
+{
+	SPT.originalDataOfDatas(datas, chart.resultDatas(result));
 };
 
 //---------------------------------------------------------
