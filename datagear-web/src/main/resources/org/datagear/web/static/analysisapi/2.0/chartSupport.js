@@ -189,7 +189,7 @@ SPT.lineRenderer = function(plugin, config)
 							data: categoryDatasMap[categoryName], encode: { x: "name", y: "value" }
 						};
 						
-						this._configSeries(mySeries);
+						this._configSeriesEle(mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -205,7 +205,7 @@ SPT.lineRenderer = function(plugin, config)
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { type: "line", name: legendName, data: data, encode: { x: "name", y: "value" } };
 						
-						this._configSeries(mySeries);
+						this._configSeriesEle(mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -220,55 +220,24 @@ SPT.lineRenderer = function(plugin, config)
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
 		
-		destroy: function(chart)
-		{
-			chartUtil.echarts.dispose(chart);
-		},
-		
-		resize: function(chart)
-		{
-			chartUtil.echarts.resize(chart);
-		},
-		
-		on: function(chart, eventType, handler)
-		{
-			SPT.bindChartEventHandlerForEcharts(chart, eventType, handler, function(chart, chartEvent, echartsEventParams)
-			{
-				var nameProp = chart.pluginDataSign(0).name;
-				var valueProp = chart.pluginDataSign(1).name;
-				var categoryProp = chart.pluginDataSign(2).name;
-				
-				var echartsData = echartsEventParams.data;
-				var data = SPT.extractNameValueStyleObj(echartsData, nameProp, valueProp);
-				data[categoryProp] = SPT.categoryValueOfData(echartsData);
-				
-				chart.eventData(chartEvent, data);
-				chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-			});
-		},
-		
-		off: function(chart, eventType, handler)
-		{
-			chart.echartsOffEventHandler(eventType, handler);
-		},
-		
-		_configSeries: function(series)
+		_configSeriesEle: function(seriesEle)
 		{
 			//折线图按数据集分组没有展示效果，所以都使用同一个堆叠
 			if(config.stack)
-				series.stack = "stack";
+				seriesEle.stack = "stack";
 			
 			if(config.smooth)
-				series.smooth = true;
+				seriesEle.smooth = true;
 			
 			if(config.area)
-				series.areaStyle = {};
+				seriesEle.areaStyle = {};
 			
 			if(config.step !== false)
-				series.step = config.step;
+				seriesEle.step = config.step;
 		}
 	};
 	
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
 	return renderer;
 };
 
@@ -10130,6 +10099,31 @@ SPT.originalDataOfDatas = function(datas, originalDatas)
 SPT.originalDataOfResult = function(datas, chart, result)
 {
 	SPT.originalDataOfDatas(datas, chart.resultDatas(result));
+};
+
+SPT.inflateEChartsRendererCommonFuncs = function(renderer)
+{
+	renderer.destroy = function(chart)
+	{
+		chartUtil.echarts.dispose(chart);
+	};
+	
+	renderer.resize = function(chart)
+	{
+		chartUtil.echarts.resize(chart);
+	},
+	
+	renderer.on = function(chart, eventType, handler)
+	{
+		chartUtil.echarts.on(chart, eventType, handler);
+	},
+	
+	renderer.off = function(chart, eventType, handler)
+	{
+		chartUtil.echarts.off(chart, eventType, handler);
+	};
+	
+	return renderer;		
 };
 
 //---------------------------------------------------------

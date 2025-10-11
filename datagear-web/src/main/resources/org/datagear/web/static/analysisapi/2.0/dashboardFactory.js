@@ -729,7 +729,7 @@ chartProto.refreshData = function()
 	if(unreadys.length > 0)
 	{
 		throw new Error("chart '#"+this.elementId()+"' dataSetBinds["+unreadys[0].dataSetBindIndex
-									+"] DataSetParam["+unreadys[0].paramIndex+"](named " +"'"+unreadys[0].param.name+"') value required");
+									+"] DataSetParam["+unreadys[0].paramIndex+"]('"+unreadys[0].param.name+"') value required");
 	}
 	
 	//这里不能使用this.statusPreUpdate(true)的方式实现
@@ -2455,10 +2455,15 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 			if(CF.isNumber(chartIdx) && targets[chartIdx] != null)
 				targetChart = targetCharts[chartIdx];
 			else
+			{
 				targetChart = this.chartOf(chartIdx);
-			
-			if(targetChart == null)
-				throw new Error("no chart found for : " + chartIdx);
+				
+				if(targetChart == null)
+					throw new Error("no chart found for : " + chartIdx);
+				
+				if(CF.indexInArray(targetCharts, targetChart) < 0)
+					targetCharts.push(targetChart);
+			}
 			
 			targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
 		}

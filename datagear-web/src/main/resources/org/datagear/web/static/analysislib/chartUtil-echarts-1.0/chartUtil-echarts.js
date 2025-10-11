@@ -227,6 +227,58 @@ EU.resize = function(chart)
 };
 
 /**
+ * 绑定ECharts图表事件处理函数。
+ * 
+ * @param chart
+ * @param eventType 事件类型，支持格式：
+ * 						1、"click"、"mousemove"等事件类型字符串
+ * 						2、{ name: "...", query: ... }，其中name表示事件类型，比如"click"、"mousemove"，query表示过滤条件，同ECharts的on函数的query参数
+ * @param handler 事件处理函数，格式为：function(event){ ... }
+ * @param context 可选，事件处理函数内的this指向，默认值为：chart
+ */
+EU.on = function(chart, eventType, handler, context)
+{
+	eventType = (CF.isString(eventType) ? { name: eventType } : eventType);
+	context = (context === undefined ? chart : context);
+	
+	var internal = chart.internal();
+	
+	if(eventType.query == null)
+	{
+		internal.on(eventType.name, handler, context);
+	}
+	else
+	{
+		internal.on(eventType.name, eventType.query, handler, context);
+	}
+};
+
+/**
+ * 解绑ECharts图表事件处理函数。
+ * 
+ * @param chart
+ * @param eventType 可选，事件类型，比如"click"、"mousemove"等，不提供则取消监听所有事件
+ * @param handler 可选，解绑的具体事件处理函数，不提供则取消监听eventType下的所有事件
+ */
+EU.off = function(chart, eventType, handler)
+{
+	var internal = chart.internal();
+	
+	if(eventType === undefined || arguments.length < 2)
+	{
+		internal.off();
+	}
+	else if(handler === undefined || arguments.length == 2)
+	{
+		internal.off(eventType);
+	}
+	else
+	{
+		internal.off(eventType, handler);
+	}
+};
+
+/**
  * 由图表主题构建ECharts主题。
  * 
  * @param chart 图表
