@@ -33,6 +33,7 @@ import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.cache.CacheAware;
+import org.datagear.web.analysis.DashboardApiVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -169,7 +170,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		// 需要添加此插件，以支持显示后端渲染图表异常信息
 		filterPlugins.add(getExceptionMsgHtmlChartPlugin());
 
-		List<String> scripts = Collections.unmodifiableList(scriptsOf(filterPlugins, locale));
+		List<String> scripts = Collections.unmodifiableList(scriptsOf(filterPlugins, locale, apiVersion));
 		managerJs = new ChartPluginManagerJs(key, scripts, lastModified);
 		this.cache.put(key, managerJs);
 
@@ -193,7 +194,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		return (vw == null ? null : (ChartPluginManagerJs) vw.get());
 	}
 
-	protected List<String> scriptsOf(List<HtmlChartPlugin> plugins, Locale locale)
+	protected List<String> scriptsOf(List<HtmlChartPlugin> plugins, Locale locale, String apiVersion)
 	{
 		List<String> cbs = new ArrayList<>();
 
@@ -205,11 +206,11 @@ public class ChartPluginManagerJsFactory implements CacheAware
 
 		try
 		{
-			appendManagerJsStart(buffer, managerVar, newLine);
+			appendManagerJsStart(apiVersion, buffer, managerVar, newLine);
 
 			for (HtmlChartPlugin plugin : plugins)
 			{
-				appendPluginJs(buffer, plugin, managerVar, "plugin" + pluginNumber, locale);
+				appendPluginJs(apiVersion, buffer, plugin, managerVar, "plugin" + pluginNumber, locale);
 				
 				if (buffer.length() > blockSize)
 				{
@@ -217,7 +218,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 					cbs.add(buffer.toString());
 
 					buffer = new StringBuilder(blockSize);
-					appendManagerJsStart(buffer, managerVar, newLine);
+					appendManagerJsStart(apiVersion, buffer, managerVar, newLine);
 				}
 
 				pluginNumber++;
@@ -234,7 +235,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		return cbs;
 	}
 
-	protected void appendManagerJsStart(StringBuilder buffer, String managerVar, String newLine)
+	protected void appendManagerJsStart(String apiVersion, StringBuilder buffer, String managerVar, String newLine)
 	{
 		buffer.append("(function(global) {");
 		buffer.append(newLine);
@@ -246,9 +247,13 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append(managerVar + ".plugins = (" + managerVar + ".plugins || {});");
 		buffer.append(newLine);
 
-		// @deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除
-		buffer.append("global.chartPluginManager = " + managerVar + ";");
-		buffer.append(newLine);
+		if (DashboardApiVersion.isV1(apiVersion))
+		{
+			// @deprecated
+			// 兼容1.8.1版本的window.chartPluginManager变量名
+			buffer.append("global.chartPluginManager = " + managerVar + ";");
+			buffer.append(newLine);
+		}
 
 		buffer.append("if(" + managerVar + ".get == null){" + managerVar
 				+ ".get = function(id){ return this.plugins[id]; }; }");
@@ -262,8 +267,8 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	}
 
 	@SuppressWarnings("deprecation")
-	protected void appendPluginJs(StringBuilder buffer, HtmlChartPlugin plugin, String managerVar, String pluginVar,
-			Locale locale) throws IOException
+	protected void appendPluginJs(String apiVersion, StringBuilder buffer, HtmlChartPlugin plugin, String managerVar,
+			String pluginVar, Locale locale) throws IOException
 	{
 		StringWriter out = new StringWriter();
 
@@ -271,11 +276,14 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		{
 			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar, locale);
 
-			// @deprecated
-			// 兼容4.0.0版本的"+HtmlChartPlugin.PROPERTY_RENDERER_OLD+"属性名，未来版本会移除
-			out.write(pluginVar + "." + HtmlChartPlugin.PROPERTY_RENDERER_OLD + " = " + pluginVar + "."
-					+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
-			out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
+			if (DashboardApiVersion.isV1(apiVersion))
+			{
+				// @deprecated
+				// 兼容4.0.0版本的HtmlChartPlugin.PROPERTY_RENDERER_OLD属性名
+				out.write(pluginVar + "." + HtmlChartPlugin.PROPERTY_RENDERER_OLD + " = " + pluginVar + "."
+						+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
+				out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
+			}
 
 			out.write(managerVar + ".plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
 					+ pluginVar + ";");
