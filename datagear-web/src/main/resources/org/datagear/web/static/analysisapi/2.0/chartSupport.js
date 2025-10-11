@@ -391,51 +391,6 @@ SPT.barRenderer = function(plugin, config)
 	return renderer;
 };
 
-SPT.barRender = function(chart, options)
-{
-
-};
-
-SPT.barUpdate = function(chart, chartResult)
-{
-	
-};
-
-SPT.barResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.barDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.barOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.barSetChartEventData);
-};
-
-SPT.barOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.barSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-};
-
 //极坐标柱状图
 
 SPT.barPolarRender = function(chart, options)
