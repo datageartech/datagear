@@ -136,7 +136,7 @@ SPT.lineRenderer = function(plugin, config)
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
-						this._configSeriesEle(mySeries);
+						this._configSingleSeries(mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -154,7 +154,7 @@ SPT.lineRenderer = function(plugin, config)
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
 						
-						this._configSeriesEle(mySeries);
+						this._configSingleSeries(mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -169,23 +169,23 @@ SPT.lineRenderer = function(plugin, config)
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
 		
-		_configSeriesEle: function(seriesEle)
+		_configSingleSeries: function(series)
 		{
-			seriesEle.type = "line";
-			seriesEle.encode = { x: 0, y: 1 };
+			series.type = "line";
+			series.encode = { x: 0, y: 1 };
 			
 			//折线图按数据集分组没有展示效果，所以都使用同一个堆叠
 			if(config.stack)
-				seriesEle.stack = "stack";
+				series.stack = "stack";
 			
 			if(config.smooth)
-				seriesEle.smooth = true;
+				series.smooth = true;
 			
 			if(config.area)
-				seriesEle.areaStyle = {};
+				series.areaStyle = {};
 			
 			if(config.step !== false)
-				seriesEle.step = config.step;
+				series.step = config.step;
 		}
 	};
 	
@@ -291,7 +291,7 @@ SPT.barRenderer = function(plugin, config)
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
-						this._configSeriesEle(chart, mySeries, dataSetAlias);
+						this._configSingleSeries(chart, mySeries, dataSetAlias);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -309,7 +309,7 @@ SPT.barRenderer = function(plugin, config)
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
 						
-						this._configSeriesEle(chart, mySeries, dataSetAlias);
+						this._configSingleSeries(chart, mySeries, dataSetAlias);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -327,18 +327,18 @@ SPT.barRenderer = function(plugin, config)
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
 		
-		_configSeriesEle: function(chart, seriesEle, dataSetAlias)
+		_configSingleSeries: function(chart, series, dataSetAlias)
 		{
-			seriesEle.type = "bar";
-			seriesEle.encode = (config.horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 });
+			series.type = "bar";
+			series.encode = (config.horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 });
 			
 			if(chart.liveData("encodeTooltip"))
-				seriesEle.encode.tooltip = [0, 1];
+				series.encode.tooltip = [0, 1];
 			
 			if(config.stack)
 			{
-				seriesEle.stack = (config.stackGroup ? dataSetAlias : "stack");
-				seriesEle.label = { show: true };
+				series.stack = (config.stackGroup ? dataSetAlias : "stack");
+				series.label = { show: true };
 			}
 		}
 	};
@@ -461,7 +461,7 @@ SPT.barPolarRenderer = function(plugin, config)
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
-						this._configSeriesEle(chart, mySeries, dataSetAlias);
+						this._configSingleSeries(chart, mySeries, dataSetAlias);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -479,7 +479,7 @@ SPT.barPolarRenderer = function(plugin, config)
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
 						
-						this._configSeriesEle(chart, mySeries, dataSetAlias);
+						this._configSingleSeries(chart, mySeries, dataSetAlias);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -497,19 +497,19 @@ SPT.barPolarRenderer = function(plugin, config)
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
 		
-		_configSeriesEle: function(chart, seriesEle, dataSetAlias)
+		_configSingleSeries: function(chart, series, dataSetAlias)
 		{
-			seriesEle.type = "bar";
-			seriesEle.coordinateSystem = "polar";
-			seriesEle.encode = (isAngleAxis ? { radius: 1, angle: 0 } : { radius: 0, angle: 1 });
+			series.type = "bar";
+			series.coordinateSystem = "polar";
+			series.encode = (isAngleAxis ? { radius: 1, angle: 0 } : { radius: 0, angle: 1 });
 			
 			if(chart.liveData("encodeTooltip"))
-				seriesEle.encode.tooltip = [0, 1];
+				series.encode.tooltip = [0, 1];
 			
 			if(config.stack)
 			{
-				seriesEle.stack = (config.stackGroup ? dataSetAlias : "stack");
-				seriesEle.label = { show: true };
+				series.stack = (config.stackGroup ? dataSetAlias : "stack");
+				series.label = { show: true };
 			}
 		}
 	};
