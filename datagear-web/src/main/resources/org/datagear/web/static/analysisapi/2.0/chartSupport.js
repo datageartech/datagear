@@ -42,52 +42,6 @@ builtinOptionNames.mapName = "mapName";
 //内置类目轴数据排序配置选项名
 builtinOptionNames.sortAxisData = "sortAxisData";
 
-//模板
-
-SPT.xxxRenderer = function(plugin, config)
-{
-	config = CF.extend(true,
-	{
-		
-	},
-	config);
-	
-	var renderer =
-	{
-		render: function(chart)
-		{
-			
-		},
-		
-		update: function(chart, chartResult)
-		{
-			
-		},
-		
-		destroy: function(chart)
-		{
-			SPT.destroyChartEcharts(chart);
-		},
-		
-		resize: function(chart)
-		{
-			SPT.resizeChartEcharts(chart);
-		},
-		
-		on: function(chart, eventType, handler)
-		{
-			
-		},
-		
-		off: function(chart, eventType, handler)
-		{
-			chart.echartsOffEventHandler(eventType, handler);
-		}
-	};
-	
-	return renderer;
-};
-
 SPT.ECHARTS_RENDERER_DEPEND = [ { name: "echarts" }, { name: "chartUtil.echarts" } ];
 
 //图表数据属性名：原始类别
@@ -9695,7 +9649,7 @@ SPT.evalArrayDataRange = function(range, data, propertyName0, propertyName1)
  * 
  * @param chart
  * @param updateOptions 更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
- * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
+ * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ { value: ... }、基本类型, ...], ... }
  * @param valueExtractor 轴数据值提取器，格式同SPT.sortEChartsUpdateAxisData的valueExtractor参数
  * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
  */
@@ -9727,11 +9681,13 @@ SPT.inflateEChartsUpdateAxisData = function(chart, updateOptions, updateAxis, va
 		data.forEach(function(d)
 		{
 			let v = myValueExtractor(d, s);
+			//转换为更规范更易于扩展的{ value: ... }格式
+			v = (v != null && v.value !== undefined ? v : { value: v });
 			myData.push(v);
 		});
 		
 		valueExtractors.push(myValueExtractor);
-		SPT.appendDistinctQuick(axisData, myData, indexCache);
+		SPT.appendDistinctQuick(axisData, myData, indexCache, "value");
 	});
 	
 	updateAxis.data = axisData;
@@ -9749,7 +9705,7 @@ SPT.inflateEChartsUpdateAxisData = function(chart, updateOptions, updateAxis, va
  *						null、false、其他：不排序；
  *						注意：ECharts对于轴type为"value"、"time"的，仅设置"desc"是无效的，需要把轴type改为"category"
  * @param updateOptions 要排序的更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
- * @param updateAxis 要排序的轴对象，格式应为：{ data: [ 基本类型值, ...], ... }
+ * @param updateAxis 要排序的轴对象，格式应为：{ data: [ { value: ... }、基本类型, ...], ... }
  * @param sortAxisData 是否对updateAxis.data进行排序
  * @param sortSeriesData 是否对updateOptions.series[i].data按照updateAxis.data的顺序重排
  * @param valueExtractor 可选，当sortSeriesData为true时，updateOptions.series[i].data[i]的排序值提取器，格式为：
@@ -9779,6 +9735,9 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 		{
 			sortHandler = function(a, b)
 			{
+				a = (a != null && a.value !== undefined ? a.value : a);
+				b = (b != null && b.value !== undefined ? b.value : b);
+				
 				if(a == b)
 					return 0;
 				else
@@ -9789,6 +9748,9 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 		{
 			sortHandler = function(a, b)
 			{
+				a = (a != null && a.value !== undefined ? a.value : a);
+				b = (b != null && b.value !== undefined ? b.value : b);
+				
 				if(a == b)
 					return 0;
 				else
@@ -9796,30 +9758,42 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 			};
 		}
 	}
-	
-	var axisData = updateAxis.data;
-	var isValueExtractorFunc = CF.isFunction(valueExtractor);
-	var isValueExtractorAry = (!isValueExtractorFunc && CF.isArray(valueExtractor));
+	else if(CF.isFunction(sortHandler))
+	{
+		let originalSortHandler = sortHandler;
+		sortHandler = function(a, b)
+		{
+			a = (a != null && a.value !== undefined ? a.value : a);
+			b = (b != null && b.value !== undefined ? b.value : b);
+			
+			return originalSortHandler(a, b);
+		};
+	}
 	
 	if(CF.isFunction(sortHandler))
 	{
+		let axisData = updateAxis.data;
+		let isValueExtractorFunc = CF.isFunction(valueExtractor);
+		let isValueExtractorAry = (!isValueExtractorFunc && CF.isArray(valueExtractor));
+		
 		axisData.sort(sortHandler);
 		
 		if(sortSeriesData)
 		{
-			var indexCache = {};
+			let indexCache = {};
 			
 			axisData.forEach(function(a, i)
 			{
+				a = (a != null && a.value !== undefined ? a.value : a);
 				indexCache[a] = i;
 			});
 			
-			var series = (updateOptions.series || []);
+			let series = (updateOptions.series || []);
 			
 			series.forEach(function(s, i)
 			{
-				var data = (s.data || []);
-				var myValueExtractor = null;
+				let data = (s.data || []);
+				let myValueExtractor = null;
 				
 				if(isValueExtractorFunc)
 					myValueExtractor = valueExtractor;
@@ -9830,10 +9804,10 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 				
 				data.sort(function(da, db)
 				{
-					var va = myValueExtractor(da, s);
-					var vb = myValueExtractor(db, s);
-					var ia = indexCache[va];
-					var ib = indexCache[vb];
+					let va = myValueExtractor(da, s);
+					let vb = myValueExtractor(db, s);
+					let ia = indexCache[va];
+					let ib = indexCache[vb];
 					
 					if(ia == ib)
 						return 0;
