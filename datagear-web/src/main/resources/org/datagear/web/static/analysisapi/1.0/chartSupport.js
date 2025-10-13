@@ -561,9 +561,14 @@
 					//data
 				};
 				
-				//角度柱状图的angleAxis.type不能为value和time，不然图形会错乱
-				if(options.angleAxis.type == "value" || options.angleAxis.type == "time")
-					options.angleAxis.type = "category";
+				//非类目轴（比如：time）时的特殊设置
+				if(options.angleAxis.type !== "category")
+				{
+					//需要设置boundaryGap，不然第一个条目可能会被最后一个条目覆盖不可见
+					options.angleAxis.boundaryGap = ['8%', '8%'];
+					//需要重新编码，不然提示信息不显示名称信息
+					chart.extValue("encodeTooltip", true);
+				}
 			}
 			else
 			{
@@ -585,6 +590,13 @@
 				{
 					options.radiusAxis.type = "category";
 					chart.extValue("dataNameToString", true);
+				}
+				
+				//非类目轴（比如：time）时的特殊设置
+				if(options.radiusAxis.type !== "category")
+				{
+					//需要重新编码，不然提示信息不显示名称信息
+					chart.extValue("encodeTooltip", true);
 				}
 			}
 		});
@@ -620,9 +632,8 @@
 				var categoryNames = [];
 				var categoryDatasMap = {};
 				
-				//角度图时使用{value: [name,value]}格式的数据会无法显示
 				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = (isAngleAxis ? {name: np, value: vp} : {"value": [np, vp]});
+				var propertyMap = {"value": [np, vp]};
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
@@ -632,10 +643,17 @@
 				{
 					var categoryName = categoryNames[j];
 					var legendName = chartSupport.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName], coordinateSystem: "polar"};
+					var mySeries =
+					{
+						id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName], coordinateSystem: "polar",
+						encode: (isAngleAxis ? { radius: 1, angle: 0 } : { radius: 0, angle: 1 })
+					};
 					
 					if(chart.extValue("dataNameToString"))
 						chartSupport.convertArrayValueEleToString(mySeries.data);
+					
+					if(chart.extValue("encodeTooltip"))
+						mySeries.encode.tooltip = [0, 1];
 					
 					if(dg.stack)
 					{
@@ -654,21 +672,22 @@
 				for(var j=0; j<vps.length; j++)
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-					var data = null;
-					
-					//角度图时使用{value: [name,value]}格式的数据会无法显示
-					if(isAngleAxis)
-						data = chart.resultNameValueDatas(result, np, vps[j]);
 					//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					else
-						data = chart.resultValueDatas(result, [np, vps[j]]);
+					var data = chart.resultValueDatas(result, [np, vps[j]]);
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					
-					var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
+					var mySeries =
+					{
+						id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar",
+						encode: (isAngleAxis ? { radius: 1, angle: 0 } : { radius: 0, angle: 1 })
+					};
 					
 					if(chart.extValue("dataNameToString"))
 						chartSupport.convertArrayValueEleToString(mySeries.data);
+					
+					if(chart.extValue("encodeTooltip"))
+						mySeries.encode.tooltip = [0, 1];
 					
 					if(dg.stack)
 					{
@@ -691,15 +710,7 @@
 			options.radiusAxis = { id: 0 };
 		
 		chartSupport.inflateAxisDataForEchartsUpdateOptions(renderOptions, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
-						{
-							get: function(s)
-							{
-								if(isAngleAxis)
-									return chartSupport.inflateAxisDataExtractors.property("name");
-								else
-									return chartSupport.inflateAxisDataExtractors.valueElement(0);
-							}
-						});
+						chartSupport.inflateAxisDataExtractors.valueElement(0));
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
 		options = chart.inflateUpdateOptions(chartResult, options);
@@ -737,17 +748,8 @@
 		
 		var echartsData = echartsEventParams.data;
 		var data = {};
-		
-		if(dg.axisType == "angle")
-		{
-			data[dataSignNames.name] = echartsData.name;
-			data[dataSignNames.value] = echartsData.value;
-		}
-		else
-		{
-			data[dataSignNames.name] = echartsData.value[0];
-			data[dataSignNames.value] = echartsData.value[1];
-		}
+		data[dataSignNames.name] = echartsData.value[0];
+		data[dataSignNames.value] = echartsData.value[1];
 		
 		data[dataSignNames.category] = (echartsData && echartsData[categoryPropName] != null ?
 											echartsData[categoryPropName] : undefined);
