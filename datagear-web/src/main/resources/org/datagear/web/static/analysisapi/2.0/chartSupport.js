@@ -84,7 +84,8 @@ SPT.lineRenderer = function(plugin, config)
 				xAxis:
 				{
 					name: chart.dataSetFieldAlias(dataSetBind, nameField),
-					type: SPT.evalDataSetFieldAxisType(chart, nameField)
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					boundaryGap: false
 				},
 				yAxis:
 				{
@@ -414,6 +415,14 @@ SPT.barPolarRenderer = function(plugin, config)
 					data: []
 				};
 				
+				//在ECharts-5.6.0中，当radiusAxis.type="value"时，会自动转为角度柱图，
+				//此时，需要强制设为"category"，并将对应数据转换为字符串，否则会出现图元混乱的情况
+				if(options.radiusAxis.type === "value")
+				{
+					options.radiusAxis.type = "category";
+					chart.liveData("dataNameToString", true);
+				}
+				
 				//非类目轴（比如：time）时的特殊设置
 				if(options.radiusAxis.type !== "category")
 				{
@@ -453,6 +462,10 @@ SPT.barPolarRenderer = function(plugin, config)
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 					let data = chart.resultMapDatas(result, fieldMap);
 					SPT.originalDataOfResult(data, chart, result);
+					
+					if(chart.liveData("dataNameToString"))
+						SPT.convertArrayValueEleToString(data);
+					
 					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
 					
 					for(let j=0; j<categoryNames.length; j++)
@@ -477,6 +490,10 @@ SPT.barPolarRenderer = function(plugin, config)
 						let fieldMap = { value: [nameField, valueFields[j]] };
 						let data = chart.resultMapDatas(result, fieldMap);
 						SPT.originalDataOfResult(data, chart, result);
+						
+						if(chart.liveData("dataNameToString"))
+							SPT.convertArrayValueEleToString(data);
+						
 						let mySeries = { name: legendName, data: data };
 						
 						this._configSingleSeries(chart, mySeries, dataSetAlias);
@@ -10162,6 +10179,23 @@ SPT.inflateEChartsRendererCommonFuncs = function(renderer)
 	};
 	
 	return renderer;		
+};
+
+SPT.convertArrayValueEleToString = function(array, index)
+{
+	index = (index == null ? 0 : index);
+	
+	if(array == null)
+		return;
+	
+	for(let i=0; i<array.length; i++)
+	{
+		let v = (array[i] == null ? null : array[i].value);
+		let vi = (v == null ? null : v[index]);
+		
+		if(vi != null && !CF.isString(vi))
+			v[index] = vi + "";
+	}
 };
 
 //---------------------------------------------------------
