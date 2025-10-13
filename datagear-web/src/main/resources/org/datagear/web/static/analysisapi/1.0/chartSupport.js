@@ -579,9 +579,13 @@
 					//data
 				};
 				
-				//径向柱状图的radiusAxis.type不能为value，不然会变为角度图形
+				//在ECharts-5.6.0中，当radiusAxis.type="value"时，会自动转为角度柱图，
+				//此时，需要强制设为"category"，并将对应数据转换为字符串，否则会出现图元混乱的情况
 				if(options.radiusAxis.type == "value")
+				{
 					options.radiusAxis.type = "category";
+					chart.extValue("dataNameToString", true);
+				}
 			}
 		});
 		
@@ -630,6 +634,9 @@
 					var legendName = chartSupport.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 					var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName], coordinateSystem: "polar"};
 					
+					if(chart.extValue("dataNameToString"))
+						chartSupport.convertArrayValueEleToString(mySeries.data);
+					
 					if(dg.stack)
 					{
 						mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
@@ -659,6 +666,9 @@
 					chart.originalDataIndexes(data, dataSetBind);
 					
 					var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
+					
+					if(chart.extValue("dataNameToString"))
+						chartSupport.convertArrayValueEleToString(mySeries.data);
 					
 					if(dg.stack)
 					{
@@ -10094,6 +10104,23 @@
 	{
 		var dsbs = chart.dataSetBindsMain();
 		return chart.dataSetBindsFetched(dsbs, chartResult);
+	};
+	
+	chartSupport.convertArrayValueEleToString = function(array, index)
+	{
+		index = (index == null ? 0 : index);
+		
+		if(array == null)
+			return;
+		
+		for(let i=0; i<array.length; i++)
+		{
+			let v = (array[i] == null ? null : array[i].value);
+			let vi = (v == null ? null : v[index]);
+			
+			if(vi != null && !chartFactory.isString(vi))
+				v[index] = vi + "";
+		}
 	};
 	
 	//---------------------------------------------------------
