@@ -535,263 +535,172 @@ SPT.barPolarRenderer = function(plugin, config)
 	return renderer;
 };
 
-SPT.barPolarRender = function(chart, options)
-{
-	options = CF.extend(true,
-	{
-		dg:
-		{
-			//name 必选，名称
-			//value 必选，当标记category时单选，否则可多选，数值
-			//category 可选，类别，不同类别绘制为不同系列
-			dataSignNames: { name: "name", value: "value", category: "category" },
-			//是否堆叠
-			stack: false,
-			//是否按数据集分组堆叠
-			stackGroup: true,
-			//坐标类型：radius（径向）、angle（角度）
-			axisType: "radius",
-		}
-	},
-	options);
-	
-	options = SPT.inflateRenderOptions(chart,
-	{
-		title:
-		{
-			text: chart.name()
-		},
-		angleAxis: {id: 0},
-		radiusAxis: {id: 0},
-		polar:
-		{
-			id: 0,
-			radius: "60%"
-		},
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: "bar",
-				coordinateSystem: "polar"
-			}
-		]
-	},
-	options,
-	function(options)
-	{
-		var dataSetBind = chart.dataSetBindMain();
-		var dataSignNames = options.dg.dataSignNames;
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		
-		if(options.dg.axisType == "angle")
-		{
-			options.angleAxis =
-			{
-				id: 0,
-				type: SPT.evalDataSetFieldAxisType(chart, np)
-				
-				//将在update中设置：
-				//data
-			};
-			
-			//角度柱状图的angleAxis.type不能为value和time，不然图形会错乱
-			if(options.angleAxis.type == "value" || options.angleAxis.type == "time")
-				options.angleAxis.type = "category";
-		}
-		else
-		{
-			options.radiusAxis =
-			{
-				id: 0,
-				name: chart.dataSetFieldAlias(dataSetBind, np),
-				nameGap: 20,
-				type: SPT.evalDataSetFieldAxisType(chart, np),
-		        z: 10
-				
-				//将在update中设置：
-				//data
-			};
-			
-			//径向柱状图的radiusAxis.type不能为value，不然会变为角度图形
-			if(options.radiusAxis.type == "value")
-				options.radiusAxis.type = "category";
-		}
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.barPolarUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	var isAngleAxis = (dg.axisType == "angle");
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		
-		if(cp)
-		{
-			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-			
-			var categoryNames = [];
-			var categoryDatasMap = {};
-			
-			//角度图时使用{value: [name,value]}格式的数据会无法显示
-			//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-			var propertyMap = (isAngleAxis ? {name: np, value: vp} : {"value": [np, vp]});
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-			var data = chart.resultMapDatas(result, propertyMap);
-			chart.originalDataIndexes(data, dataSetBind);
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-			
-			for(var j=0; j<categoryNames.length; j++)
-			{
-				var categoryName = categoryNames[j];
-				var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-				var mySeries = {id: series.length, type: "bar", name: legendName, data: categoryDatasMap[categoryName], coordinateSystem: "polar"};
-				
-				if(dg.stack)
-				{
-					mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
-					mySeries.label = { show: true };
-				}
-				
-				legendData.push(legendName);
-				series.push(mySeries);
-			}
-		}
-		else
-		{
-			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-			
-			for(var j=0; j<vps.length; j++)
-			{
-				var legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-				var data = null;
-				
-				//角度图时使用{value: [name,value]}格式的数据会无法显示
-				if(isAngleAxis)
-					data = chart.resultNameValueDatas(result, np, vps[j]);
-				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				else
-					data = chart.resultValueDatas(result, [np, vps[j]]);
-				
-				chart.originalDataIndexes(data, dataSetBind);
-				
-				var mySeries = {id: series.length, type: "bar", name: legendName, data: data, coordinateSystem: "polar"};
-				
-				if(dg.stack)
-				{
-					mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
-					mySeries.label = { show: true };
-				}
-				
-				legendData.push(legendName);
-				series.push(mySeries);
-			}
-		}
-	}
-	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	if(isAngleAxis)
-		options.angleAxis = { id: 0 };
-	else
-		options.radiusAxis = { id: 0 };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
-					{
-						get: function(s)
-						{
-							if(isAngleAxis)
-								return SPT.inflateAxisDataExtractors.property("name");
-							else
-								return SPT.inflateAxisDataExtractors.valueElement(0);
-						}
-					});
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.barPolarResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.barPolarDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.barPolarOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.barPolarSetChartEventData);
-};
-
-SPT.barPolarOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.barPolarSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	if(dg.axisType == "angle")
-	{
-		data[dataSignNames.name] = echartsData.name;
-		data[dataSignNames.value] = echartsData.value;
-	}
-	else
-	{
-		data[dataSignNames.name] = echartsData.value[0];
-		data[dataSignNames.value] = echartsData.value[1];
-	}
-	
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-};
-
 //饼图
+
+SPT.pieRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+		//是否按数据集分割系列，而非仅一个系列
+		splitDataSet: false,
+		//当splitDataSet=true时，各系列布局：
+		//nest：嵌套；grid：网格
+		seriesLayout: "nest",
+		//当splitDataSet=false且数据集无category标记时，是否环形图
+		ring: false,
+		//当splitDataSet=false且数据集无category标记时，是否玫瑰图
+		rose: false
+	},
+	config);
+	
+	var renderer =
+	{
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
+		{
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				series:
+				[
+					{ type: "pie", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var hasCategorySign = (chart.pluginDataSigns().length > 2);
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var series = [];
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let categoryField = (hasCategorySign ? chart.dataSetFieldOfSign(dataSetBind, 2) : null);
+				
+				//饼图只支持{name,value}格式的数据
+				let fieldMap = { name: nameField, value: valueField };
+				if(categoryField)
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+				
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				if(categoryField)
+				{
+					let categoryNames = [];
+					let categoryDatasMap = {};
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+					
+					for(let j=0; j<categoryNames.length; j++)
+					{
+						let categoryName = categoryNames[j];
+						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
+						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
+						
+						this._configSingleSeries(chart, mySeries);
+						series.push(mySeries);
+					}
+				}
+				else if(config.splitDataSet)
+				{
+					let mySeries = { name: dataSetAlias, data: data };
+					
+					this._configSingleSeries(chart, mySeries);
+					series.push(mySeries);
+				}
+				else
+				{
+					if(series.length == 0)
+					{
+						let mySeries = { name: dataSetAlias, data: [], radius: "60%" };
+						
+						if(config.ring)
+							mySeries.radius = ["35%", "55%"];
+						
+						if(config.rose)
+							mySeries.roseType = "radius";
+						
+						this._configSingleSeries(chart, mySeries);
+						series.push(mySeries);
+					}
+					
+					series[0].data = series[0].data.concat(data);
+				}
+			}
+			
+			var options = { legend: {}, series: series };
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.legend,
+							SPT.inflateAxisDataExtractors.propertyName());
+			SPT.convertDataPropValueToName(options.legend);
+			this._evalSeriesLayout(chart, options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_configSingleSeries: function(chart, series)
+		{
+			series.type = "pie";
+			series.encode = { value: 1 };
+		},
+		
+		_evalSeriesLayout: function(chart, options)
+		{
+			if(!config.splitDataSet)
+				return;
+			
+			var series = options.series;
+			var len = series.length;
+			
+			if(!len)
+				return;
+			
+			if(config.seriesLayout == "nest")
+			{
+				let radiusMax = 80;
+				let radiusInner = 0;
+				//系列数=1取60，否则取30
+				let radiusOuter = (len == 1 ? 60 : 30);
+				let radiusStep = parseInt((radiusMax - radiusOuter)/len);
+				let radiusGap = parseInt(radiusStep*4/9);
+				radiusStep = radiusStep - radiusGap;
+				
+				for(let i=0; i<len; i++)
+				{
+					series[i].radius = [ radiusInner+"%", radiusOuter+"%" ];
+					
+					//不是最外圈系列标签显示在内部
+					if(i < (len - 1))
+						series[i].label = { position: "inner" };
+					
+					radiusInner = radiusOuter + radiusGap;
+					radiusOuter = radiusInner + radiusStep;
+				}
+			}
+			else if(config.seriesLayout == "grid")
+			{
+				//TODO
+			}
+		}
+	};
+	
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
+};
 
 SPT.pieRender = function(chart, options)
 {
@@ -10195,6 +10104,19 @@ SPT.convertArrayValueEleToString = function(array, index)
 		
 		if(vi != null && !CF.isString(vi))
 			v[index] = vi + "";
+	}
+};
+
+//转换dataObj.data[i]元素{value: ...}为{name: ...}
+SPT.convertDataPropValueToName = function(dataObj)
+{
+	if(dataObj == null || dataObj.data == null)
+		return;
+	
+	for(let i=0; i<dataObj.data.length; i++)
+	{
+		let di = dataObj.data[i];
+		dataObj.data[i] = (di == null ? null : { name: di.value });
 	}
 };
 
