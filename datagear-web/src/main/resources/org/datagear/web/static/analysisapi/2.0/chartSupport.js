@@ -44,7 +44,7 @@ builtinOptionNames.sortAxisData = "sortAxisData";
 
 SPT.ECHARTS_RENDERER_DEPEND =
 [
-	{ name: "echarts", acceptVersion: "^5.0" },
+	{ name: "echarts", acceptVersion: ">=5.0" },
 	{ name: "chartUtil.echarts", acceptVersion: ">=1.0" }
 ];
 

@@ -30,6 +30,11 @@ CF.registerGlobalLib(
 [
 	{
 		name: "echarts",
+		version: "6.0.0",
+		source: "/static/analysislib/echarts-6.0.0/echarts.min.js"
+	},
+	{
+		name: "echarts",
 		version: "5.6.0",
 		source: "/static/analysislib/echarts-5.6.0/echarts.min.js"
 	},
