@@ -792,7 +792,10 @@
 			tooltip:
 			{
 				trigger: "item",
-				formatter: "{a} <br />{b}: {c} ({d}%)"
+				formatter: function(params)
+				{
+					return chartSupport.customEChartsTooltip(params, (params) => { return { value: params.value + " ("+params.percent+"%)" } });
+				}
 			},
 			legend:
 			{
@@ -10125,6 +10128,34 @@
 		}
 	};
 	
+	chartSupport.customEChartsTooltip = function(params, extractor)
+	{
+		var html = "";
+		
+		var data = (extractor == null ? {} : (extractor(params) || {}));
+		
+		if(data.title == null)
+			data.title = (params.seriesName || "");
+		
+		if(data.name == null)
+			data.name = (params.name || "");
+		
+		if(data.value == null)
+			data.value = (params.value || "");
+		
+		html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
+		html += 	"<div>"+data.title+"</div>";
+		html += 	"<div style='display:flex;flex-direction:row;align-items:center;gap:20px;'>";
+		html += 		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
+		html += 			"<div style='width:10px;height:10px;border-radius:10px;background:"+params.color+"'></div><div>"+data.name+"</div>";
+		html += 		"</div>";
+		html += 		"<div style='font-weight:bold;'>"+data.value+"</div>";
+		html += 	"</div>";
+		html += "</div>";
+		
+		return html;
+	};
+
 	//---------------------------------------------------------
 	//    公用函数结束
 	//---------------------------------------------------------
