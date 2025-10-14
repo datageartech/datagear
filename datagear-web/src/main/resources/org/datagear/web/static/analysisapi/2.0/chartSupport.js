@@ -44,7 +44,7 @@ builtinOptionNames.sortAxisData = "sortAxisData";
 
 SPT.ECHARTS_RENDERER_DEPEND =
 [
-	{ name: "echarts", acceptVersion: ">=5.0" },
+	{ name: "echarts", acceptVersion: "^5.0" },
 	{ name: "chartUtil.echarts", acceptVersion: ">=1.0" }
 ];
 
@@ -244,7 +244,7 @@ SPT.barRenderer = function(plugin, config)
 			};
 			
 			//非类目轴（比如：time）时的特殊设置
-			if(options.yAxis.type !== "category")
+			if(options.xAxis.type !== "category")
 			{
 				//需要重新编码，不然提示信息不显示名称信息
 				chart.liveData("encodeTooltip", true);
