@@ -7983,14 +7983,15 @@
 				},
 				"progress":
 				{
-					"show": true
+					"show": true,
+					"roundCap": true
 		        },
 				"axisLine":
 				{
 					"show": true,
 					"lineStyle":
 					{
-						"color" : [ [ 1, areaColor1 ] ]
+						"color" : [ [ 1, areaColor0 ] ]
 					}
 		        },
 				"axisLabel":

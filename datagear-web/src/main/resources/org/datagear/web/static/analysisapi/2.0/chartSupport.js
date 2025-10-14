@@ -165,7 +165,7 @@ SPT.lineRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			var options = { legend: { data: legendData }, series: series, xAxis: {} };
 			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis, SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "line"); });
 			
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
@@ -323,7 +323,7 @@ SPT.barRenderer = function(plugin, config)
 			
 			SPT.inflateEChartsUpdateAxisData(chart, options, (config.horizontal ? options.yAxis : options.xAxis),
 							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "bar"); });
 			
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
@@ -509,7 +509,7 @@ SPT.barPolarRenderer = function(plugin, config)
 			
 			SPT.inflateEChartsUpdateAxisData(chart, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
 							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "bar"); });
 			
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
@@ -709,304 +709,202 @@ SPT.pieRenderer = function(plugin, config)
 
 //仪表盘
 
-SPT.gaugeRender = function(chart, options)
+SPT.gaugeRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//value 必选，可多选，数值
-			//min 可选，最小值
-			//max 可选，最大值
-			dataSignNames: { value: "value", min: "min", max: "max" },
-			//仪表盘类型："" 基本；"ring" 得分环；"step" 阶段
-			gaugeType: ""
-		}
+		//仪表盘类型："" 基本；"ring" 得分环；"step" 阶段
+		gaugeType: ""
 	},
-	options);
+	config);
 	
-	var builtinOptions =
+	var renderer =
 	{
-		title: {
-	        text: chart.name()
-	    },
-		tooltip:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-			formatter: "{a} <br />{b} : {c}"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "gauge"
+				title: { text: chart.name() },
+				tooltip: {},
+				series:
+				[
+					{ type: "gauge", data: [] }
+				]
+			};
+			
+			if(config.gaugeType == "ring")
+			{
+				let itemBorderColor = chart.themeGradualColor(0.8);
+				let axisLineWidth = this._evalAxisLineWidth(chart, 12);
+				
+				CF.extend(options.series[0],
+				{
+					startAngle: 90,
+					endAngle: -270,
+					pointer: { show: false },
+					progress:
+					{
+						show: true, overlap: false,
+						roundCap: true, clip: false,
+						itemStyle:
+						{
+							borderWidth: 1,
+							borderColor: itemBorderColor
+						}
+					},
+					axisLine: { lineStyle: { width: axisLineWidth } },
+					splitLine: { show: false },
+					axisTick: { show: false },
+					axisLabel: { show: false },
+					detail: { borderColor: 'auto', borderRadius: 20, borderWidth: 1 }
+				});
 			}
-		]
+			else if(config.gaugeType == "step")
+			{
+				let axisLineWidth = this._evalAxisLineWidth(chart, 20);
+				
+				CF.extend(options.series[0],
+				{
+					axisLine:
+					{
+						lineStyle:
+						{
+							width: axisLineWidth,
+							color: [ [0.2, '#67e0e3'], [0.8, '#37a2da'], [1, '#fd666d'] ]
+						}
+					},
+					pointer: { itemStyle: { color: 'auto' } },
+					progress: { show: false },
+					axisTick: { distance: (0-axisLineWidth), length: parseInt(axisLineWidth/3), },
+					splitLine: { distance: (0-axisLineWidth), length: axisLineWidth },
+					axisLabel: { color: 'auto', distance: axisLineWidth + parseInt(axisLineWidth/3) },
+					detail: { valueAnimation: true, color: 'auto' }
+				});
+			}
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var seriesName = "";
+			var seriesData = [];
+			var min = null;
+			var max = null;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let minField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				if(minField)
+				{
+					let minValues = chart.resultColumnArrayDatas(result, minField);
+					let myMin = SPT.findNonNull(minValues);
+					min = (min == null ? myMin : Math.min(min, myMin));
+				}
+				
+				let maxField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				if(maxField)
+				{
+					let maxValues = chart.resultColumnArrayDatas(result, maxField);
+					let myMax = SPT.findNonNull(maxValues);
+					max = (max == null ? myMax : Math.max(max, myMax));
+				}
+				
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 0);
+				let valuess = chart.resultRowArrayDatas(result, valueFields);
+				let originalDatas = chart.resultDatas(result);
+				
+				for(let j=0; j<valuess.length; j++)
+				{
+					let values = valuess[j];
+					let originalData = originalDatas[j];
+					
+					for(let k=0; k<values.length; k++)
+					{
+						let name = chart.dataSetFieldAlias(dataSetBind, valueFields[k]);
+						let data = { name: name, value: values[k] };
+						SPT.originalDataOfData(data, originalData);
+						
+						seriesData.push(data);
+					}
+				}
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+			}
+			
+			if(config.gaugeType == "ring")
+				this._evalDataTitlePosition(chart, seriesData, "center", null, 1);
+			else
+				this._evalDataTitlePosition(chart, seriesData, "top");
+			
+			min = (min == null ? 0 : min);
+			max = (max == null ? 100 : max);
+			
+			var options = { series: [ { type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_evalAxisLineWidth: function(chart, divide)
+		{
+			var chartEle = chart.element();
+			var width = chartEle.clientWidth;
+			var height = chartEle.clientHeight;
+			return parseInt(Math.min(width, height)/divide);
+		},
+		
+		_evalDataTitlePosition: function(chart, seriesData, positionType, topPposition, colCount, titleHeight, detailHeight)
+		{
+			positionType = (positionType == null ? "center" : positionType);
+			topPposition = (topPposition == null ? 50 : topPposition);
+			if(colCount == null)
+			{
+				var len = seriesData.length;
+				if(len < 3)
+					colCount = len;
+				else if(len%3 == 0)
+					colCount = 3;
+				else if(len%2 == 0)
+					colCount = 2;
+				else
+					colCount = 3;
+			}
+			titleHeight = (titleHeight == null? 14 : titleHeight);
+			detailHeight = (detailHeight == null ? 15 : detailHeight);
+			
+			var rowHeight = titleHeight + detailHeight;
+			var rowCount = Math.ceil(seriesData.length/colCount);
+			var colCenterIdx = colCount/2;
+			var rowCenterIdx = rowCount/2;
+			var xGap = 100/colCount;
+			
+			for(var i=0; i<seriesData.length; i++)
+			{
+				var row = Math.floor(i/colCount);
+				var col = i%colCount;
+				
+				var x = parseInt((col - colCenterIdx) * xGap + xGap/2);
+				var yt = (positionType == "top" ? (topPposition + row*rowHeight) : ((row - rowCenterIdx)*rowHeight));
+				var yd = yt + titleHeight;
+				
+				seriesData[i].title = { offsetCenter: [ x+'%', yt+"%" ] };
+				seriesData[i].detail = { offsetCenter: [ x+'%', yd+"%" ] };
+			}
+		}
 	};
 	
-	if(options.dg.gaugeType == "ring")
-	{
-		var itemBorderColor = chart.themeGradualColor(0.8);
-		var chartEle = chart.elementJquery();
-		var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/12);
-		
-		CF.extend(builtinOptions.series[0],
-		{
-			startAngle: 90,
-			endAngle: -270,
-			pointer:
-			{
-				show: false
-			},
-			progress:
-			{
-				show: true,
-				overlap: false,
-				roundCap: true,
-				clip: false,
-				itemStyle:
-				{
-					borderWidth: 1,
-					borderColor: itemBorderColor
-				}
-			},
-			axisLine:
-			{
-				lineStyle:
-				{
-					width: axisLineWidth
-				}
-			},
-			splitLine:
-			{
-				show: false
-			},
-			axisTick:
-			{
-				show: false
-			},
-			axisLabel:
-			{
-				show: false
-			},
-			detail:
-			{
-				borderColor: 'auto',
-				borderRadius: 20,
-				borderWidth: 1
-			}
-		});
-	}
-	else if(options.dg.gaugeType == "step")
-	{
-		var chartEle = chart.elementJquery();
-		var axisLineWidth = parseInt(Math.min(chartEle.width(), chartEle.height())/20);
-		
-		CF.extend(builtinOptions.series[0],
-		{
-			axisLine:
-			{
-				lineStyle:
-				{
-					width: axisLineWidth,
-					color:
-					[
-						[0.2, '#67e0e3'], [0.8, '#37a2da'], [1, '#fd666d']
-					]
-				}
-			},
-			pointer:
-			{
-				itemStyle:
-				{
-					color: 'auto'
-				}
-			},
-			progress:
-			{
-				show: false
-			},
-			axisTick:
-			{
-				distance: (0-axisLineWidth),
-				length: parseInt(axisLineWidth/3),
-			},
-			splitLine:
-			{
-				distance: (0-axisLineWidth),
-				length: axisLineWidth
-			},
-			axisLabel:
-			{
-				color: 'auto',
-				distance: axisLineWidth + parseInt(axisLineWidth/3)
-			},
-			detail:
-			{
-				valueAnimation: true,
-				color: 'auto'
-			}
-		});
-	}
-	
-	options = SPT.inflateRenderOptions(chart, builtinOptions, options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.gaugeUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var min = null;
-	var max = null;
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		if(min == null)
-		{
-			var minp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min);
-			if(minp)
-			{
-				var minpv = chart.resultColumnArrayDatas(result, minp);
-				min = SPT.findNonNull(minpv);
-			}
-		}
-		
-		if(max == null)
-		{
-			var maxp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
-			if(maxp)
-			{
-				var maxpv = chart.resultColumnArrayDatas(result, maxp);
-				max = SPT.findNonNull(maxpv);
-			}
-		}
-		
-		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-		var vpsvs = chart.resultRowArrayDatas(result, vps);
-		
-		for(var j=0; j<vpsvs.length; j++)
-		{
-			var vRow = vpsvs[j];
-			
-			for(var k=0; k<vRow.length; k++)
-			{
-				var vpn = chart.dataSetFieldAlias(dataSetBind,vps[k]);
-				var data = { name: vpn, value: vRow[k] };
-				chart.originalDataIndex(data, dataSetBind, j);
-				
-				seriesData.push(data);
-			}
-		}
-		
-		if(!seriesName)
-			seriesName = dataSetAlias;
-	}
-	
-	if(dg.gaugeType == "ring")
-		SPT.gaugeEvalDataTitlePosition(chart, seriesData, "center", null, 1);
-	else
-		SPT.gaugeEvalDataTitlePosition(chart, seriesData, "top");
-	
-	min = (min == null ? 0 : min);
-	max = (max == null ? 100 : max);
-	
-	var options = { series : [ { id: 0, type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.gaugeResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.gaugeDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.gaugeOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.gaugeSetChartEventData);
-};
-
-SPT.gaugeOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.gaugeSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.value] = echartsData.value;
-	data[dataSignNames.min] = echartsData.min;
-	data[dataSignNames.max] = echartsData.max;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-};
-
-SPT.gaugeEvalDataTitlePosition = function(chart, seriesData, positionType, topPposition, colCount, titleHeight, detailHeight)
-{
-	positionType = (positionType == null ? "center" : positionType);
-	topPposition = (topPposition == null ? 50 : topPposition);
-	if(colCount == null)
-	{
-		var len = seriesData.length;
-		if(len < 3)
-			colCount = len;
-		else if(len%3 == 0)
-			colCount = 3;
-		else if(len%2 == 0)
-			colCount = 2;
-		else
-			colCount = 3;
-	}
-	titleHeight = (titleHeight == null? 14 : titleHeight);
-	detailHeight = (detailHeight == null ? 15 : detailHeight);
-	
-	var rowHeight = titleHeight + detailHeight;
-	var rowCount = Math.ceil(seriesData.length/colCount);
-	var colCenterIdx = colCount/2;
-	var rowCenterIdx = rowCount/2;
-	var xGap = 100/colCount;
-	
-	for(var i=0; i<seriesData.length; i++)
-	{
-		var row = Math.floor(i/colCount);
-		var col = i%colCount;
-		
-		var x = parseInt((col - colCenterIdx) * xGap + xGap/2);
-		var yt = (positionType == "top" ? (topPposition + row*rowHeight) : ((row - rowCenterIdx)*rowHeight));
-		var yd = yt + titleHeight;
-		
-		seriesData[i].title = { offsetCenter: [ x+'%', yt+"%" ] };
-		seriesData[i].detail = { offsetCenter: [ x+'%', yd+"%" ] };
-	}
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //散点图
@@ -1226,7 +1124,7 @@ SPT._scatterUpdate = function(chart, chartResult)
 	
 	options = chart.inflateUpdateOptions(chartResult, options, function(options)
 	{
-		SPT.adaptValueArrayObjSeriesData(chart, options, "scatter");
+		SPT.adaptEChartsValueArrayData(chart, options, "scatter");
 	});
 	
 	SPT.echartsOptionsReplaceMerge(chart, options);
@@ -5960,7 +5858,7 @@ SPT.pictorialBarUpdate = function(chart, chartResult)
 	
 	options = chart.inflateUpdateOptions(chartResult, options, function(options)
 	{
-		SPT.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+		SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar");
 	});
 	
 	SPT.echartsOptionsReplaceMerge(chart, options);
@@ -6203,7 +6101,7 @@ SPT.pictorialBarProgressUpdate = function(chart, chartResult)
 	
 	options = chart.inflateUpdateOptions(chartResult, options, function(options)
 	{
-		SPT.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+		SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar");
 	});
 	
 	SPT.echartsOptionsReplaceMerge(chart, options);
@@ -9337,32 +9235,40 @@ SPT.echartsMapChartLoadMaps = function(chart, options, callback)
  * @param nameIndex 可选，name在值数组对象的索引，默认为：0
  * @param valueIndex 可选，value在值数组对象的索引，默认为：1
  */
-SPT.adaptValueArrayObjSeriesData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
+SPT.adaptEChartsValueArrayData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
 {
 	nameIndex = (nameIndex == null ? 0 : nameIndex);
 	valueIndex = (valueIndex == null ? 1 : valueIndex);
 	
 	var series = (options.series || []);
 	
-	for(var i=0; i<series.length; i++)
+	for(let i=0; i<series.length; i++)
 	{
-		var type = series[i].type;
+		let si = series[i];
+		let type = si.type;
 		
-		if(type == originalSeriesType)
+		if(type === originalSeriesType)
 			continue;
 		
-		var seriesData = (series[i].data || []);
+		let data = (si.data || []);
 		
 		//这些图表不支持值数组对象格式的数据，支持名值格式的数据，因此需要适配
 		if(type == "pie" || type == "funnel" || type == "map"
 			|| type == "wordCloud" || type == "liquidFill")
 		{
-			for(var j=0; j<seriesData.length; j++)
+			data.forEach((di) =>
 			{
-				var value = (seriesData[j].value || []);
-				seriesData[j].name = value[nameIndex];
-				seriesData[j].value = value[valueIndex];
-			}
+				let value = (di == null ? null : di.value);
+				
+				if(value != null)
+				{
+					di.name = value[nameIndex];
+					di.value = value[valueIndex];
+				}
+			});
+			
+			//需同时删除encode
+			si.encode = null;
 		}
 	}
 };

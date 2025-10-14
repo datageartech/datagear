@@ -210,7 +210,7 @@
 		
 		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
-			chartSupport.adaptValueArrayObjSeriesData(chart, options, "line");
+			chartSupport.adaptEChartsValueArrayData(chart, options, "line");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -443,7 +443,7 @@
 		
 		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
-			chartSupport.adaptValueArrayObjSeriesData(chart, options, "bar");
+			chartSupport.adaptEChartsValueArrayData(chart, options, "bar");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -1485,7 +1485,7 @@
 		
 		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
-			chartSupport.adaptValueArrayObjSeriesData(chart, options, "scatter");
+			chartSupport.adaptEChartsValueArrayData(chart, options, "scatter");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -6231,7 +6231,7 @@
 		
 		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
-			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+			chartSupport.adaptEChartsValueArrayData(chart, options, "pictorialBar");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -6476,7 +6476,7 @@
 		
 		options = chart.inflateUpdateOptions(chartResult, options, function(options)
 		{
-			chartSupport.adaptValueArrayObjSeriesData(chart, options, "pictorialBar");
+			chartSupport.adaptEChartsValueArrayData(chart, options, "pictorialBar");
 		});
 		
 		chartSupport.echartsOptionsReplaceMerge(chart, options);
@@ -9636,7 +9636,7 @@
 	 * @param nameIndex 可选，name在值数组对象的索引，默认为：0
 	 * @param valueIndex 可选，value在值数组对象的索引，默认为：1
 	 */
-	chartSupport.adaptValueArrayObjSeriesData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
+	chartSupport.adaptEChartsValueArrayData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
 	{
 		nameIndex = (nameIndex == null ? 0 : nameIndex);
 		valueIndex = (valueIndex == null ? 1 : valueIndex);
