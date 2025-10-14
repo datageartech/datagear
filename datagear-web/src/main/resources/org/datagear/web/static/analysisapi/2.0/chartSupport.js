@@ -137,7 +137,7 @@ SPT.lineRenderer = function(plugin, config)
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
-						this._configSingleSeries(mySeries);
+						this._configSingleSeries(chart, mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -155,7 +155,7 @@ SPT.lineRenderer = function(plugin, config)
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
 						
-						this._configSingleSeries(mySeries);
+						this._configSingleSeries(chart, mySeries);
 						legendData.push(legendName);
 						series.push(mySeries);
 					}
@@ -170,7 +170,7 @@ SPT.lineRenderer = function(plugin, config)
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
 		
-		_configSingleSeries: function(series)
+		_configSingleSeries: function(chart, series)
 		{
 			series.type = "line";
 			series.encode = { x: 0, y: 1 };
@@ -561,7 +561,14 @@ SPT.pieRenderer = function(plugin, config)
 			var options =
 			{
 				title: { text: chart.name() },
-				tooltip: { trigger: "item" },
+				tooltip:
+				{
+					trigger: "item",
+					formatter: function(params)
+					{
+						return SPT.customEChartsTooltip(params, (params) => { return { value: params.value + " ("+params.percent+"%)" } });
+					}
+				},
 				legend: { data: [] },
 				series:
 				[
@@ -643,8 +650,7 @@ SPT.pieRenderer = function(plugin, config)
 			
 			var options = { legend: {}, series: series };
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.legend,
-							SPT.inflateAxisDataExtractors.propertyName());
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.legend, SPT.inflateAxisDataExtractors.propertyName());
 			SPT.convertDataPropValueToName(options.legend);
 			this._evalSeriesLayout(chart, options);
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
@@ -655,7 +661,6 @@ SPT.pieRenderer = function(plugin, config)
 		_configSingleSeries: function(chart, series)
 		{
 			series.type = "pie";
-			series.encode = { value: 1 };
 		},
 		
 		_evalSeriesLayout: function(chart, options)
@@ -700,212 +705,6 @@ SPT.pieRenderer = function(plugin, config)
 	
 	SPT.inflateEChartsRendererCommonFuncs(renderer);
 	return renderer;
-};
-
-SPT.pieRender = function(chart, options)
-{
-	options = CF.extend(true,
-	{
-		dg:
-		{
-			//name 必选，名称
-			//value 必选，数值
-			//category 可选，类别，不同类别绘制为不同系列
-			dataSignNames: { name: "name", value: "value", category: "category" },
-			//是否按数据集分割系列，而非仅一个系列
-			splitDataSet: false,
-			//当splitDataSet=true时，各系列布局：
-			//nest：嵌套；grid：网格
-			seriesLayout: "nest",
-			//当splitDataSet=false且数据集无category标记时，是否环形图
-			ring: false,
-			//当splitDataSet=false且数据集无category标记时，是否玫瑰图
-			rose: false
-		}
-	},
-	options);
-	
-	options = SPT.inflateRenderOptions(chart,
-	{
-		title:
-		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item",
-			formatter: "{a} <br />{b}: {c} ({d}%)"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: "pie"
-			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.pieUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var series = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		
-		var propertyMap = {"name": np, "value": vp};
-		if(cp)
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-		
-		var data = chart.resultMapDatas(result, propertyMap);
-		chart.originalDataIndexes(data, dataSetBind);
-		
-		if(cp)
-		{
-			var categoryNames = [];
-			var categoryDatasMap = {};
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-			
-			for(var j=0; j<categoryNames.length; j++)
-			{
-				var categoryName = categoryNames[j];
-				var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-				var mySeries = {id: series.length, type: "pie", name: legendName, data: categoryDatasMap[categoryName]};
-				series.push(mySeries);
-			}
-		}
-		else if(dg.splitDataSet)
-		{
-			series.push({ id: series.length, type: "pie", name: dataSetAlias, data: data});
-		}
-		else
-		{
-			if(series.length == 0)
-			{
-				series.push({ id: series.length, type: "pie", name: dataSetAlias, data: [], radius: "60%" });
-				
-				if(dg.ring)
-					series[0].radius = ["35%", "55%"];
-				
-				if(dg.rose)
-					series[0].roseType = "radius";
-			}
-			
-			series[0].data = series[0].data.concat(data);
-		}
-	}
-	
-	var options = { legend: { id: 0 }, series: series };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.legend,
-					SPT.inflateAxisDataExtractors.property("name"));
-	
-	SPT.pieEvalSeriesLayout(chart, renderOptions, options);
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.pieResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.pieDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.pieOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.pieSetChartEventData);
-};
-
-SPT.pieOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.pieSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.value] = echartsData.value;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-};
-
-SPT.pieEvalSeriesLayout = function(chart, renderOptions, updateOptions)
-{
-	if(!renderOptions.dg.splitDataSet)
-		return;
-	
-	var series = updateOptions.series;
-	var len = series.length;
-	
-	if(!len)
-		return;
-	
-	if(renderOptions.dg.seriesLayout == "nest")
-	{
-		var radiusMax = 80;
-		var radiusInner = 0;
-		//系列数=1取60，否则取30
-		var radiusOuter = (len == 1 ? 60 : 30);
-		var radiusStep = parseInt((radiusMax - radiusOuter)/len);
-		var radiusGap = parseInt(radiusStep*4/9);
-		radiusStep = radiusStep - radiusGap;
-		
-		for(var i=0; i<len; i++)
-		{
-			series[i].radius = [ radiusInner+"%", radiusOuter+"%" ];
-			
-			//不是最外圈系列标签显示在内部
-			if(i < (len - 1))
-				series[i].label = { position: "inner" };
-			
-			radiusInner = radiusOuter + radiusGap;
-			radiusOuter = radiusInner + radiusStep;
-		}
-	}
-	else if(renderOptions.dg.seriesLayout == "grid")
-	{
-		//TODO
-	}
 };
 
 //仪表盘
@@ -10118,6 +9917,34 @@ SPT.convertDataPropValueToName = function(dataObj)
 		let di = dataObj.data[i];
 		dataObj.data[i] = (di == null ? null : { name: di.value });
 	}
+};
+
+SPT.customEChartsTooltip = function(params, extractor)
+{
+	var html = "";
+	
+	var data = (extractor == null ? {} : (extractor(params) || {}));
+	
+	if(data.title == null)
+		data.title = (params.seriesName || "");
+	
+	if(data.name == null)
+		data.name = (params.name || "");
+	
+	if(data.value == null)
+		data.value = (params.value || "");
+	
+	html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
+	html += 	"<div>"+data.title+"</div>";
+	html += 	"<div style='display:flex;flex-direction:row;align-items:center;gap:20px;'>";
+	html += 		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
+	html += 			"<div style='width:10px;height:10px;border-radius:10px;background:"+params.color+"'></div><div>"+data.name+"</div>";
+	html += 		"</div>";
+	html += 		"<div style='font-weight:bold;'>"+data.value+"</div>";
+	html += 	"</div>";
+	html += "</div>";
+	
+	return html;
 };
 
 //---------------------------------------------------------
