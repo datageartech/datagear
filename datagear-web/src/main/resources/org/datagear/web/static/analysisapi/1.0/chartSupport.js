@@ -992,10 +992,7 @@
 			title: {
 		        text: chart.name
 		    },
-			tooltip:
-			{
-				formatter: "{a} <br />{b} : {c}"
-			},
+			tooltip: {},
 			series:
 			[
 				//将在update中设置：
