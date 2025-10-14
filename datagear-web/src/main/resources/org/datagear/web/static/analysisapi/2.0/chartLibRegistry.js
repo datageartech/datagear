@@ -46,7 +46,7 @@ CF.registerGlobalLib(
 	{
 		name: "chartUtil.echarts",
 		version: "1.0",
-		source: "/static/analysislib/chartUtil-echarts-1.0/chartUtil-echarts.js",
+		source: "/static/analysislib/chartUtil.echarts-1.0/chartUtil.echarts.js",
 		loaded: function()
 		{
 			var chartUtil = global.chartUtil;

@@ -42,7 +42,11 @@ builtinOptionNames.mapName = "mapName";
 //内置类目轴数据排序配置选项名
 builtinOptionNames.sortAxisData = "sortAxisData";
 
-SPT.ECHARTS_RENDERER_DEPEND = [ { name: "echarts" }, { name: "chartUtil.echarts" } ];
+SPT.ECHARTS_RENDERER_DEPEND =
+[
+	{ name: "echarts", acceptVersion: ">=5.0" },
+	{ name: "chartUtil.echarts", acceptVersion: ">=1.0" }
+];
 
 //图表数据属性名：原始类别
 SPT.ORIGINAL_CATEGORY_PROP_NAME = "originalCategory";
