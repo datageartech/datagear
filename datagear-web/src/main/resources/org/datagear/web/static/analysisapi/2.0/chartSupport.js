@@ -138,7 +138,7 @@ SPT.lineRenderer = function(plugin, config)
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
 						this._configSingleSeries(chart, mySeries);
-						legendData.push(legendName);
+						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
@@ -156,7 +156,7 @@ SPT.lineRenderer = function(plugin, config)
 						let mySeries = { name: legendName, data: data };
 						
 						this._configSingleSeries(chart, mySeries);
-						legendData.push(legendName);
+						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
@@ -293,7 +293,7 @@ SPT.barRenderer = function(plugin, config)
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
 						this._configSingleSeries(chart, mySeries, dataSetAlias);
-						legendData.push(legendName);
+						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
@@ -311,7 +311,7 @@ SPT.barRenderer = function(plugin, config)
 						let mySeries = { name: legendName, data: data };
 						
 						this._configSingleSeries(chart, mySeries, dataSetAlias);
-						legendData.push(legendName);
+						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
@@ -475,7 +475,7 @@ SPT.barPolarRenderer = function(plugin, config)
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
 						this._configSingleSeries(chart, mySeries, dataSetAlias);
-						legendData.push(legendName);
+						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
@@ -497,7 +497,7 @@ SPT.barPolarRenderer = function(plugin, config)
 						let mySeries = { name: legendName, data: data };
 						
 						this._configSingleSeries(chart, mySeries, dataSetAlias);
-						legendData.push(legendName);
+						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
