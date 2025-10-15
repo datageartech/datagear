@@ -1090,249 +1090,176 @@ SPT._scatterRenderer = function(plugin, config)
 
 //坐标散点图
 
-SPT.scatterCoordRender = function(chart, options)
+SPT.scatterCoordRenderer = function(plugin, config)
 {
-	SPT._scatterCoordRender(chart, options, "scatter");
-};
-
-SPT.scatterCoordUpdate = function(chart, chartResult)
-{
-	SPT._scatterCoordUpdate(chart, chartResult);
-};
-
-SPT.scatterCoordResize = function(chart)
-{
-	SPT._scatterCoordResize(chart);
-};
-
-SPT.scatterCoordDestroy = function(chart)
-{
-	SPT._scatterCoordDestroy(chart);
-};
-
-SPT.scatterCoordOn = function(chart, eventType, handler)
-{
-	SPT._scatterCoordOn(chart, eventType, handler);
-};
-
-SPT.scatterCoordOff = function(chart, eventType, handler)
-{
-	SPT._scatterCoordOff(chart, eventType, handler);
-};
-
-SPT.scatterCoordRippleRender = function(chart, options)
-{
-	SPT._scatterCoordRender(chart, options, "effectScatter");
-};
-
-SPT.scatterCoordRippleUpdate = function(chart, chartResult)
-{
-	SPT._scatterCoordUpdate(chart, chartResult);
-};
-
-SPT.scatterCoordRippleResize = function(chart)
-{
-	SPT._scatterCoordResize(chart);
-};
-
-SPT.scatterCoordRippleDestroy = function(chart)
-{
-	SPT._scatterCoordDestroy(chart);
-};
-
-SPT.scatterCoordRippleOn = function(chart, eventType, handler)
-{
-	SPT._scatterCoordOn(chart, eventType, handler);
-};
-
-SPT.scatterCoordRippleOff = function(chart, eventType, handler)
-{
-	SPT._scatterCoordOff(chart, eventType, handler);
-};
-
-SPT._scatterCoordRender = function(chart, options, scatterType)
-{
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 必选，名称
-			//value 必选，数值
-			//weight 可选，散点尺寸
-			//category 可选，类别，不同类别绘制为不同系列
-			dataSignNames: { name: "name", value: "value", weight: "weight", category: "category" },
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
-			//散点图类型："scatter"、"effectScatter"
-			scatterType: scatterType
-		}
+		scatterType: "scatter"
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-	
-	options = SPT.inflateRenderOptions(chart,
+	return SPT._scatterCoordRenderer(plugin, config);
+};
+
+SPT.scatterCoordRippleRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
 	{
-		title: {
-	        text: chart.name()
-	    },
-		tooltip:
+		scatterType: "effectScatter"
+	},
+	config);
+	
+	return SPT._scatterCoordRenderer(plugin, config);
+};
+
+SPT._scatterCoordRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+		//散点图类型："scatter"、"effectScatter"
+		scatterType: "scatter",
+		//是否互换坐标轴
+		interchangeAxis: false
+	},
+	config);
+	
+	var renderer =
+	{
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		xAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			boundaryGap: !SPT.isDataTypeNumber(np)
-		},
-		yAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, vp),
-			nameGap: 5,
-			type: "value"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+			
+			var options =
 			{
-				id: 0,
-				type: scatterType
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					boundaryGap: !SPT.isDataTypeNumber(nameField)
+				},
+				yAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, valueField),
+					type: SPT.evalDataSetFieldAxisType(chart, valueField)
+				},
+				series:
+				[
+					{ type: config.scatterType, data: [] }
+				]
+			};
+			
+			//非类目轴（比如：time）时的特殊设置
+			if(options.xAxis.type !== "category")
+			{
+				//需要重新编码，不然提示信息不显示名称信息
+				chart.liveData("encodeTooltip", true);
 			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT._scatterCoordUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	
-	var dataRange = { min: null, max: null };
-	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, dg.scatterType);
-	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, dg.scatterType);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		var propertyMap = { "value": (wp ? [np, vp, wp] : [np, vp]) };
-		
-		if(cp)
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-		
-		var data = chart.resultMapDatas(result, propertyMap);
-		chart.originalDataIndexes(data, dataSetBind);
-		if(wp)
-			SPT.evalArrayDataRange(dataRange, data, "value", 2);
-		
-		if(cp)
-		{
-			var categoryNames = [];
-			var categoryDatasMap = {};
 			
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-			
-			for(var j=0; j<categoryNames.length; j++)
+			if(config.interchangeAxis)
 			{
-				var categoryName = categoryNames[j];
-				var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-				var mySeries = {id: series.length, type: dg.scatterType, name: legendName, data: categoryDatasMap[categoryName]};
+				let xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+			}
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var series = [];
+			
+			var dataRange = { min: null, max: null };
+			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, config.scatterType);
+			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, config.scatterType);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				legendData.push(legendName);
-				series.push(mySeries);
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let weightField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 3);
+				
+				//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
+				let fieldMap = { value: (weightField ? [nameField, valueField, weightField] : [nameField, valueField]) };
+				if(categoryField)
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+				
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				if(weightField)
+					SPT.evalArrayDataRange(dataRange, data, "value", 2);
+				
+				if(categoryField)
+				{
+					let categoryNames = [];
+					let categoryDatasMap = {};
+					
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+					
+					for(let j=0; j<categoryNames.length; j++)
+					{
+						let categoryName = categoryNames[j];
+						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
+						let mySeries = { name: legendName, data: categoryDatasMap[categoryName], _hasWeightData: (weightField != null) };
+						
+						this._configSingleSeries(chart, mySeries);
+						legendData.push({ name: legendName });
+						series.push(mySeries);
+					}
+				}
+				else
+				{
+					let mySeries = { name: dataSetAlias, data: data, _hasWeightData: (weightField != null) };
+					
+					this._configSingleSeries(chart, mySeries);
+					legendData.push({name: dataSetAlias});
+					series.push(mySeries);
+				}
 			}
-		}
-		else
+			
+			SPT.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
+			
+			var options = { legend: { data: legendData }, series: series };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							SPT.inflateAxisDataExtractors.valueElement0());
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, config.scatterType); });
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_configSingleSeries: function(chart, series)
 		{
-			legendData.push(dataSetAlias);
-			series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data });
+			series.type = config.scatterType;
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
+			
+			if(chart.liveData("encodeTooltip"))
+				series.encode.tooltip = (series._hasWeightData ? [0, 1, 2] : [0, 1]);
+			else if(series._hasWeightData)
+				series.encode.tooltip = [1, 2];
 		}
-	}
+	};
 	
-	SPT.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
-	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
-					SPT.inflateAxisDataExtractors.valueElement(0));
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT._scatterCoordResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT._scatterCoordDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT._scatterCoordOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT._scatterCoordSetChartEventData);
-};
-
-SPT._scatterCoordOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT._scatterCoordSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.value[0];
-	data[dataSignNames.value] = echartsData.value[1];
-	if(echartsData.value.length > 2)
-		data[dataSignNames.weight] = echartsData.value[2];
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //雷达图
