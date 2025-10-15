@@ -913,260 +913,179 @@ SPT.gaugeRenderer = function(plugin, config)
 
 //散点图
 
-SPT.scatterRender = function(chart, options)
+SPT.scatterRenderer = function(plugin, config)
 {
-	SPT._scatterRender(chart, options, "scatter");
-};
-
-SPT.scatterUpdate = function(chart, chartResult)
-{
-	SPT._scatterUpdate(chart, chartResult);
-};
-
-SPT.scatterResize = function(chart)
-{
-	SPT._scatterResize(chart);
-};
-
-SPT.scatterDestroy = function(chart)
-{
-	SPT._scatterDestroy(chart);
-};
-
-SPT.scatterOn = function(chart, eventType, handler)
-{
-	SPT._scatterOn(chart, eventType, handler);
-};
-
-SPT.scatterOff = function(chart, eventType, handler)
-{
-	SPT._scatterOff(chart, eventType, handler);
-};
-
-SPT.scatterRippleRender = function(chart, options)
-{
-	SPT._scatterRender(chart, options, "effectScatter");
-};
-
-SPT.scatterRippleUpdate = function(chart, chartResult)
-{
-	SPT._scatterUpdate(chart, chartResult);
-};
-
-SPT.scatterRippleResize = function(chart)
-{
-	SPT._scatterResize(chart);
-};
-
-SPT.scatterRippleDestroy = function(chart)
-{
-	SPT._scatterDestroy(chart);
-};
-
-SPT.scatterRippleOn = function(chart, eventType, handler)
-{
-	SPT._scatterOn(chart, eventType, handler);
-};
-
-SPT.scatterRippleOff = function(chart, eventType, handler)
-{
-	SPT._scatterOff(chart, eventType, handler);
-};
-
-SPT._scatterRender = function(chart, options, scatterType)
-{
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 必选，名称
-			//value 必选，当标记category时单选，否则可多选，数值
-			//category 可选，类别，不同类别绘制为不同系列
-			dataSignNames: { name: "name", value: "value", category: "category" },
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
-			//散点图类型："scatter"、"effectScatter"
-			scatterType: scatterType
-		}
+		scatterType: "scatter"
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-	
-	options = SPT.inflateRenderOptions(chart,
+	return SPT._scatterRenderer(plugin, config);
+};
+
+SPT.scatterRippleRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
 	{
-		title:
-		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		xAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			boundaryGap: !SPT.isDataTypeNumber(np)
-		},
-		yAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, vp),
-			nameGap: 5,
-			type: "value"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: scatterType
-			}
-		]
+		scatterType: "effectScatter"
 	},
-	options);
+	config);
 	
-	chart.echartsInit(options);
+	return SPT._scatterRenderer(plugin, config);
 };
 
-SPT._scatterUpdate = function(chart, chartResult)
+SPT._scatterRenderer = function(plugin, config)
 {
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	
-	var dataRange = { min: null, max: null };
-	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
-	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
+	config = CF.extend(true,
 	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		
-		if(cp)
-		{
-			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-			
-			var categoryNames = [];
-			var categoryDatasMap = {};
-			
-			//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-			var propertyMap = { "value": [np, vp] };
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-			var data = chart.resultMapDatas(result, propertyMap);
-			
-			chart.originalDataIndexes(data, dataSetBind);
-			SPT.evalArrayDataRange(dataRange, data, "value", 1);
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-			
-			for(var j=0; j<categoryNames.length; j++)
-			{
-				var categoryName = categoryNames[j];
-				var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-				var mySeries = {id: series.length, type: dg.scatterType, name: legendName, data: categoryDatasMap[categoryName]};
-				
-				legendData.push(legendName);
-				series.push(mySeries);
-			}
-		}
-		else
-		{
-			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-			
-			for(var j=0; j<vps.length; j++)
-			{
-				var legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var data = chart.resultValueDatas(result, [np, vps[j]]);
-				
-				chart.originalDataIndexes(data, dataSetBind);
-				SPT.evalArrayDataRange(dataRange, data, "value", 1);
-				
-				var mySeries = { id: series.length, type: dg.scatterType, name: legendName, data: data };
-				
-				legendData.push(legendName);
-				series.push(mySeries);
-			}
-		}
-	}
+		//散点图类型："scatter"、"effectScatter"
+		scatterType: "scatter",
+		//是否互换坐标轴
+		interchangeAxis: false
+	},
+	config);
 	
-	SPT.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 1);
-	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
-					SPT.inflateAxisDataExtractors.valueElement(0));
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	
-	options = chart.inflateUpdateOptions(chartResult, options, function(options)
+	var renderer =
 	{
-		SPT.adaptEChartsValueArrayData(chart, options, "scatter");
-	});
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
+		{
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+			
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					boundaryGap: !SPT.isDataTypeNumber(nameField)
+				},
+				yAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, valueField),
+					type: SPT.evalDataSetFieldAxisType(chart, valueField)
+				},
+				series:
+				[
+					{ type: config.scatterType, data: [] }
+				]
+			};
+			
+			//非类目轴（比如：time）时的特殊设置
+			if(options.xAxis.type !== "category")
+			{
+				//需要重新编码，不然提示信息不显示名称信息
+				chart.liveData("encodeTooltip", true);
+			}
+			
+			if(config.interchangeAxis)
+			{
+				let xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+			}
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var series = [];
+			
+			var dataRange = { min: null, max: null };
+			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, config.scatterType);
+			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, config.scatterType);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				if(categoryField)
+				{
+					let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+					let categoryNames = [];
+					let categoryDatasMap = {};
+					
+					//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
+					let fieldMap = { value: [nameField, valueField] };
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+					let data = chart.resultMapDatas(result, fieldMap);
+					SPT.originalDataOfResult(data, chart, result);
+					SPT.evalArrayDataRange(dataRange, data, "value", 1);
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+					
+					for(let j=0; j<categoryNames.length; j++)
+					{
+						let categoryName = categoryNames[j];
+						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
+						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
+						
+						this._configSingleSeries(chart, mySeries);
+						legendData.push({ name: legendName });
+						series.push(mySeries);
+					}
+				}
+				else
+				{
+					let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+					
+					for(let j=0; j<valueFields.length; j++)
+					{
+						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
+						//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
+						let fieldMap = { value: [nameField, valueFields[j]] };
+						let data = chart.resultMapDatas(result, fieldMap);
+						SPT.originalDataOfResult(data, chart, result);
+						SPT.evalArrayDataRange(dataRange, data, "value", 1);
+						let mySeries = { name: legendName, data: data };
+						
+						this._configSingleSeries(chart, mySeries);
+						legendData.push({ name: legendName });
+						series.push(mySeries);
+					}
+				}
+			}
+			
+			SPT.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 1);
+			
+			var options = { legend: { data: legendData }, series: series };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							SPT.inflateAxisDataExtractors.valueElement0());
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, config.scatterType); });
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_configSingleSeries: function(chart, series)
+		{
+			series.type = config.scatterType;
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
+			
+			if(chart.liveData("encodeTooltip"))
+				series.encode.tooltip = [0, 1];
+		}
+	};
 	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT._scatterResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT._scatterDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT._scatterOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT._scatterSetChartEventData);
-};
-
-SPT._scatterOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT._scatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //坐标散点图
@@ -1315,8 +1234,8 @@ SPT._scatterCoordUpdate = function(chart, chartResult)
 	var series = [];
 	
 	var dataRange = { min: null, max: null };
-	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
-	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
+	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, dg.scatterType);
+	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, dg.scatterType);
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
@@ -2180,8 +2099,8 @@ SPT._mapScatterUpdate = function(chart, chartResult)
 	var map = undefined;
 	
 	var dataRange = { min: null, max: null };
-	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, renderOptions, dg.scatterType);
-	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, renderOptions, symbolSizeMax, dg.scatterType);
+	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, dg.scatterType);
+	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, dg.scatterType);
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
@@ -2382,8 +2301,8 @@ SPT.mapGraphUpdate = function(chart, chartResult)
 	var map = undefined;
 	
 	var min = undefined, max = undefined;
-	var symbolSizeMax = SPT.evalSymbolSizeMax(chart, renderOptions);
-	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+	var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
+	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
@@ -4280,8 +4199,8 @@ SPT.graphUpdate = function(chart, chartResult)
 	var seriesLinks = [];
 	
 	var min = undefined, max = undefined;
-	var symbolSizeMax = SPT.evalSymbolSizeMax(chart, renderOptions);
-	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+	var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
+	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
@@ -4588,8 +4507,8 @@ SPT.boxplotUpdate = function(chart, chartResult)
 	var legendData = [];
 	var series = [];
 	
-	var symbolSizeMax = SPT.evalSymbolSizeMax(chart, renderOptions);
-	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, renderOptions, symbolSizeMax);
+	var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
+	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
@@ -8747,63 +8666,56 @@ SPT.legendNameForDataValues = function(chart, dataSetBinds, dataSetBind, dataSet
 	return legendName;
 };
 
-SPT.evalSymbolSizeMaxForScatter = function(chart, options, scatterType)
+SPT.evalSymbolSizeMaxForScatter = function(chart, scatterType)
 {
 	//涟漪效果会是散点显得很大，所以这里稍作调整
-	var ratio = (scatterType == "effectScatter" ? 0.06 : undefined);
-	return SPT.evalSymbolSizeMax(chart, options, ratio);
+	var ratio = (scatterType == "effectScatter" ? 0.06 : null);
+	return SPT.evalSymbolSizeMax(chart, ratio);
 };
 
-SPT.evalSymbolSizeMinForScatter = function(chart, options, symbolSizeMax, scatterType)
+SPT.evalSymbolSizeMinForScatter = function(chart, symbolSizeMax, scatterType)
 {
 	//最小涟漪散点不必调整
-	return SPT.evalSymbolSizeMin(chart, options, symbolSizeMax, null);
+	return SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 };
 
 /**
- * 计算最大图符元素尺寸
+ * 计算最大图元记号尺寸
+ * 
  * @param chart
- * @param options
  * @param ratio 可选，自动获取的比率
  */
-SPT.evalSymbolSizeMax = function(chart, options, ratio)
+SPT.evalSymbolSizeMax = function(chart, ratio)
 {
-	var symbolSizeMax = (options && options.dg ? options.dg.symbolSizeMax : undefined);
 	ratio = (ratio == null ? 0.08 : ratio);
 	
 	//根据图表元素尺寸自动计算
-	if(!symbolSizeMax)
-	{
-		var chartEle = chart.elementJquery();
-		symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())*ratio);
-	}
+	var chartEle = chart.element();
+	var symbolSizeMax = parseInt(Math.min(chartEle.clientWidth, chartEle.clientHeight)*ratio);
 	
 	return symbolSizeMax;
 };
 
 /**
- * 计算最小图符元素尺寸
+ * 计算最小图元记号尺寸
+ * 
  * @param chart
- * @param options
  * @param symbolSizeMax
  * @param ratio 可选，自动获取的比率
  */
-SPT.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
+SPT.evalSymbolSizeMin = function(chart, symbolSizeMax, ratio)
 {
-	var symbolSizeMin = (options && options.dg ? options.dg.symbolSizeMin : undefined);
 	ratio = (ratio == null ? 0.15 : ratio);
 	
-	if(!symbolSizeMin)
-	{
-		symbolSizeMin = parseInt(symbolSizeMax * ratio);
-		if(symbolSizeMin < 6)
-			symbolSizeMin = 6;
-	}
+	var symbolSizeMin = parseInt(symbolSizeMax * ratio);
+	
+	if(symbolSizeMin < 6)
+		symbolSizeMin = 6;
 	
 	return symbolSizeMin;
 };
 
-//计算数值的图符元素尺寸
+//计算数值的图元记号尺寸
 SPT.evalValueSymbolSize = function(value, minValue, maxValue, symbolSizeMax, symbolSizeMin)
 {
 	if(symbolSizeMin == null)
@@ -8820,7 +8732,7 @@ SPT.evalValueSymbolSize = function(value, minValue, maxValue, symbolSizeMax, sym
 };
 
 /**
- * 计算系列数据数值的图符元素尺寸
+ * 计算系列数据数值的图元记号尺寸
  * 
  * @param series 系列对象：{ data: [ {value: ...}, ... ] }、或其数组
  */
@@ -8844,7 +8756,7 @@ SPT.evalSeriesDataValueSymbolSize = function(series, minValue, maxValue, symbolS
 };
 
 /**
- * 计算系列数据数值的图符元素尺寸
+ * 计算系列数据数值的图元记号尺寸
  * 
  * @param data 数据对象：{value: ...}、或其数组
  */
