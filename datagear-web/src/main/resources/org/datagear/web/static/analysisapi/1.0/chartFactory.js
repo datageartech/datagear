@@ -7755,6 +7755,8 @@
 			"textStyle" : {},
 			"title" : {
 		        "left" : "center",
+		        //6.0版本标题默认top有变动，需要明确设置为0才能兼容旧版
+		        "top": 0,
 				"textStyle" : {
 					"color" : chartTheme.titleTheme.color
 				},
