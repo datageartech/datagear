@@ -1193,16 +1193,17 @@ SPT._scatterCoordRenderer = function(plugin, config)
 				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
 				let weightField = chart.dataSetFieldOfSign(dataSetBind, 2);
 				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 3);
+				let hasWeightField = (weightField != null);
 				
 				//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-				let fieldMap = { value: (weightField ? [nameField, valueField, weightField] : [nameField, valueField]) };
+				let fieldMap = { value: (hasWeightField ? [nameField, valueField, weightField] : [nameField, valueField]) };
 				if(categoryField)
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 				
 				let data = chart.resultMapDatas(result, fieldMap);
 				SPT.originalDataOfResult(data, chart, result);
 				
-				if(weightField)
+				if(hasWeightField)
 					SPT.evalArrayDataRange(dataRange, data, "value", 2);
 				
 				if(categoryField)
@@ -1216,18 +1217,18 @@ SPT._scatterCoordRenderer = function(plugin, config)
 					{
 						let categoryName = categoryNames[j];
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-						let mySeries = { name: legendName, data: categoryDatasMap[categoryName], _hasWeightData: (weightField != null) };
+						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
-						this._configSingleSeries(chart, mySeries);
+						this._configSingleSeries(chart, mySeries, hasWeightField);
 						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
 				}
 				else
 				{
-					let mySeries = { name: dataSetAlias, data: data, _hasWeightData: (weightField != null) };
+					let mySeries = { name: dataSetAlias, data: data };
 					
-					this._configSingleSeries(chart, mySeries);
+					this._configSingleSeries(chart, mySeries, hasWeightField);
 					legendData.push({name: dataSetAlias});
 					series.push(mySeries);
 				}
@@ -1246,14 +1247,14 @@ SPT._scatterCoordRenderer = function(plugin, config)
 			SPT.echartsOptionsReplaceMerge(chart, options);
 		},
 		
-		_configSingleSeries: function(chart, series)
+		_configSingleSeries: function(chart, series, hasWeightField)
 		{
 			series.type = config.scatterType;
 			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
 			
 			if(chart.liveData("encodeTooltip"))
-				series.encode.tooltip = (series._hasWeightData ? [0, 1, 2] : [0, 1]);
-			else if(series._hasWeightData)
+				series.encode.tooltip = (hasWeightField ? [0, 1, 2] : [0, 1]);
+			else if(hasWeightField)
 				series.encode.tooltip = [1, 2];
 		}
 	};
