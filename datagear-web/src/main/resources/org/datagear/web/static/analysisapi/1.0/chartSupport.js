@@ -566,8 +566,6 @@
 				{
 					//需要设置boundaryGap，不然第一个条目可能会被最后一个条目覆盖不可见
 					options.angleAxis.boundaryGap = ['8%', '8%'];
-					//需要重新编码，不然提示信息不显示名称信息
-					chart.extValue("encodeTooltip", true);
 				}
 			}
 			else
@@ -590,13 +588,6 @@
 				{
 					options.radiusAxis.type = "category";
 					chart.extValue("dataNameToString", true);
-				}
-				
-				//非类目轴（比如：time）时的特殊设置
-				if(options.radiusAxis.type !== "category")
-				{
-					//需要重新编码，不然提示信息不显示名称信息
-					chart.extValue("encodeTooltip", true);
 				}
 			}
 		});
@@ -652,9 +643,6 @@
 					if(chart.extValue("dataNameToString"))
 						chartSupport.convertArrayValueEleToString(mySeries.data);
 					
-					if(chart.extValue("encodeTooltip"))
-						mySeries.encode.tooltip = [0, 1];
-					
 					if(dg.stack)
 					{
 						mySeries.stack = (dg.stackGroup ? dataSetAlias : "stack");
@@ -685,9 +673,6 @@
 					
 					if(chart.extValue("dataNameToString"))
 						chartSupport.convertArrayValueEleToString(mySeries.data);
-					
-					if(chart.extValue("encodeTooltip"))
-						mySeries.encode.tooltip = [0, 1];
 					
 					if(dg.stack)
 					{

@@ -128,8 +128,8 @@ SPT.lineRenderer = function(plugin, config)
 					let categoryNames = [];
 					let categoryDatasMap = {};
 					
-					//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-					let fieldMap = { value: [nameField, valueField] };
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					let fieldMap = { name: nameField, value: [nameField, valueField] };
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 					let data = chart.resultMapDatas(result, fieldMap);
 					SPT.originalDataOfResult(data, chart, result);
@@ -153,8 +153,8 @@ SPT.lineRenderer = function(plugin, config)
 					for(let j=0; j<valueFields.length; j++)
 					{
 						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
-						//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-						let fieldMap = { value: [nameField, valueFields[j]] };
+						//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+						let fieldMap = { name: nameField, value: [nameField, valueFields[j]] };
 						let data = chart.resultMapDatas(result, fieldMap);
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
@@ -243,13 +243,6 @@ SPT.barRenderer = function(plugin, config)
 				]
 			};
 			
-			//非类目轴（比如：time）时的特殊设置
-			if(options.xAxis.type !== "category")
-			{
-				//需要重新编码，不然提示信息不显示名称信息
-				chart.liveData("encodeTooltip", true);
-			}
-			
 			if(config.horizontal)
 			{
 				let xAxisTmp = options.xAxis;
@@ -283,8 +276,8 @@ SPT.barRenderer = function(plugin, config)
 					let categoryNames = [];
 					let categoryDatasMap = {};
 					
-					//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-					let fieldMap = { value: [nameField, valueField] };
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					let fieldMap = { name: nameField, value: [nameField, valueField] };
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 					let data = chart.resultMapDatas(result, fieldMap);
 					SPT.originalDataOfResult(data, chart, result);
@@ -308,8 +301,8 @@ SPT.barRenderer = function(plugin, config)
 					for(let j=0; j<valueFields.length; j++)
 					{
 						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
-						//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-						let fieldMap = { value: [nameField, valueFields[j]] };
+						//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+						let fieldMap = { name: nameField, value: [nameField, valueFields[j]] };
 						let data = chart.resultMapDatas(result, fieldMap);
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
@@ -336,9 +329,6 @@ SPT.barRenderer = function(plugin, config)
 		{
 			series.type = "bar";
 			series.encode = (config.horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 });
-			
-			if(chart.liveData("encodeTooltip"))
-				series.encode.tooltip = [0, 1];
 			
 			if(config.stack)
 			{
@@ -405,8 +395,6 @@ SPT.barPolarRenderer = function(plugin, config)
 				{
 					//需要设置boundaryGap，不然第一个条目可能会被最后一个条目覆盖不可见
 					options.angleAxis.boundaryGap = ['8%', '8%'];
-					//需要重新编码，不然提示信息不显示名称信息
-					chart.liveData("encodeTooltip", true);
 				}
 			}
 			else
@@ -425,13 +413,6 @@ SPT.barPolarRenderer = function(plugin, config)
 				{
 					options.radiusAxis.type = "category";
 					chart.liveData("dataNameToString", true);
-				}
-				
-				//非类目轴（比如：time）时的特殊设置
-				if(options.radiusAxis.type !== "category")
-				{
-					//需要重新编码，不然提示信息不显示名称信息
-					chart.liveData("encodeTooltip", true);
 				}
 			}
 			
@@ -461,8 +442,8 @@ SPT.barPolarRenderer = function(plugin, config)
 					let categoryNames = [];
 					let categoryDatasMap = {};
 					
-					//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-					let fieldMap = { value: [nameField, valueField] };
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					let fieldMap = { name: nameField, value: [nameField, valueField] };
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 					let data = chart.resultMapDatas(result, fieldMap);
 					SPT.originalDataOfResult(data, chart, result);
@@ -490,8 +471,8 @@ SPT.barPolarRenderer = function(plugin, config)
 					for(let j=0; j<valueFields.length; j++)
 					{
 						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
-						//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-						let fieldMap = { value: [nameField, valueFields[j]] };
+						//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+						let fieldMap = { name: nameField, value: [nameField, valueFields[j]] };
 						let data = chart.resultMapDatas(result, fieldMap);
 						SPT.originalDataOfResult(data, chart, result);
 						
@@ -523,9 +504,6 @@ SPT.barPolarRenderer = function(plugin, config)
 			series.type = "bar";
 			series.coordinateSystem = "polar";
 			series.encode = (isAngleAxis ? { radius: 1, angle: 0 } : { radius: 0, angle: 1 });
-			
-			if(chart.liveData("encodeTooltip"))
-				series.encode.tooltip = [0, 1];
 			
 			if(config.stack)
 			{
@@ -981,13 +959,6 @@ SPT._scatterRenderer = function(plugin, config)
 				]
 			};
 			
-			//非类目轴（比如：time）时的特殊设置
-			if(options.xAxis.type !== "category")
-			{
-				//需要重新编码，不然提示信息不显示名称信息
-				chart.liveData("encodeTooltip", true);
-			}
-			
 			if(config.interchangeAxis)
 			{
 				let xAxisTmp = options.xAxis;
@@ -1025,8 +996,8 @@ SPT._scatterRenderer = function(plugin, config)
 					let categoryNames = [];
 					let categoryDatasMap = {};
 					
-					//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-					let fieldMap = { value: [nameField, valueField] };
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					let fieldMap = { name: nameField, value: [nameField, valueField] };
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 					let data = chart.resultMapDatas(result, fieldMap);
 					SPT.originalDataOfResult(data, chart, result);
@@ -1051,8 +1022,8 @@ SPT._scatterRenderer = function(plugin, config)
 					for(let j=0; j<valueFields.length; j++)
 					{
 						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
-						//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-						let fieldMap = { value: [nameField, valueFields[j]] };
+						//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+						let fieldMap = { name: nameField, value: [nameField, valueFields[j]] };
 						let data = chart.resultMapDatas(result, fieldMap);
 						SPT.originalDataOfResult(data, chart, result);
 						SPT.evalArrayDataRange(dataRange, data, "value", 1);
@@ -1082,9 +1053,6 @@ SPT._scatterRenderer = function(plugin, config)
 		{
 			series.type = config.scatterType;
 			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
-			
-			if(chart.liveData("encodeTooltip"))
-				series.encode.tooltip = [0, 1];
 		}
 	};
 	
@@ -1158,13 +1126,6 @@ SPT._scatterCoordRenderer = function(plugin, config)
 				]
 			};
 			
-			//非类目轴（比如：time）时的特殊设置
-			if(options.xAxis.type !== "category")
-			{
-				//需要重新编码，不然提示信息不显示名称信息
-				chart.liveData("encodeTooltip", true);
-			}
-			
 			if(config.interchangeAxis)
 			{
 				let xAxisTmp = options.xAxis;
@@ -1199,8 +1160,8 @@ SPT._scatterCoordRenderer = function(plugin, config)
 				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 3);
 				let hasWeightField = (weightField != null);
 				
-				//使用{value:[]}格式可以更好地兼容category、value、time坐标轴类型
-				let fieldMap = { value: (hasWeightField ? [nameField, valueField, weightField] : [nameField, valueField]) };
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				let fieldMap = { name: nameField, value: (hasWeightField ? [nameField, valueField, weightField] : [nameField, valueField]) };
 				if(categoryField)
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 				
@@ -1256,9 +1217,7 @@ SPT._scatterCoordRenderer = function(plugin, config)
 			series.type = config.scatterType;
 			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
 			
-			if(chart.liveData("encodeTooltip"))
-				series.encode.tooltip = (hasWeightField ? [0, 1, 2] : [0, 1]);
-			else if(hasWeightField)
+			if(hasWeightField)
 				series.encode.tooltip = [1, 2];
 		}
 	};
