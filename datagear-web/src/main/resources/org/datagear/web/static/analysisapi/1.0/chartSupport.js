@@ -145,8 +145,8 @@
 				var categoryNames = [];
 				var categoryDatasMap = {};
 				
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = { "value": [np, vp] };
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				var propertyMap = { "name": np, "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
@@ -179,8 +179,8 @@
 				for(var j=0; j<vps.length; j++)
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var data = chart.resultValueDatas(result, [ np, vps[j] ]);
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					var data = chart.resultMapDatas(result, { "name": np, "value": [ np, vps[j] ] });
 					chart.originalDataIndexes(data, dataSetBind);
 					var mySeries = {id: series.length, type: "line", name: legendName, data: data};
 					
@@ -367,8 +367,8 @@
 				var categoryNames = [];
 				var categoryDatasMap = {};
 				
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = { "value": [np, vp] };
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				var propertyMap = { "name": np, "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
@@ -403,9 +403,9 @@
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
 					
-					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var vpsMy = [np, vps[j]];
-					var data = chart.resultValueDatas(result, vpsMy);
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					var vpsMy = { "name": np, "value": [np, vps[j]] };
+					var data = chart.resultMapDatas(result, vpsMy);
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					
@@ -623,8 +623,8 @@
 				var categoryNames = [];
 				var categoryDatasMap = {};
 				
-				//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = {"value": [np, vp]};
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				var propertyMap = { "name": np, "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapDatas(result, propertyMap);
 				chart.originalDataIndexes(data, dataSetBind);
@@ -660,8 +660,8 @@
 				for(var j=0; j<vps.length; j++)
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-					//径向图时使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var data = chart.resultValueDatas(result, [np, vps[j]]);
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					var data = chart.resultMapDatas(result, { "name": np, "value": [np, vps[j]] });
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					
@@ -1418,8 +1418,8 @@
 				var categoryNames = [];
 				var categoryDatasMap = {};
 				
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = { "value": [np, vp] };
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				var propertyMap = { "name": np, "value": [np, vp] };
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 				var data = chart.resultMapDatas(result, propertyMap);
 				
@@ -1444,8 +1444,8 @@
 				for(var j=0; j<vps.length; j++)
 				{
 					var legendName = chartSupport.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-					//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-					var data = chart.resultValueDatas(result, [np, vps[j]]);
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					var data = chart.resultMapDatas(result, { "name": np, "value": [np, vps[j]] });
 					
 					chart.originalDataIndexes(data, dataSetBind);
 					chartSupport.evalArrayDataRange(dataRange, data, "value", 1);
@@ -1672,13 +1672,15 @@
 			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
 			var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
 			var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-			var propertyMap = { "value": (wp ? [np, vp, wp] : [np, vp]) };
+			//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+			var propertyMap = { "name": np, "value": (wp ? [np, vp, wp] : [np, vp]) };
 			
 			if(cp)
 				propertyMap = chartSupport.inflatePropertyMapWithCategory(propertyMap, cp);
 			
 			var data = chart.resultMapDatas(result, propertyMap);
 			chart.originalDataIndexes(data, dataSetBind);
+			
 			if(wp)
 				chartSupport.evalArrayDataRange(dataRange, data, "value", 2);
 			
@@ -1695,14 +1697,22 @@
 					var legendName = chartSupport.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 					var mySeries = {id: series.length, type: dg.scatterType, name: legendName, data: categoryDatasMap[categoryName]};
 					
+					if(wp)
+						mySeries.encode = { tooltip: [1, 2] };
+					
 					legendData.push(legendName);
 					series.push(mySeries);
 				}
 			}
 			else
 			{
+				var mySeries = { id: series.length, type: dg.scatterType, name: dataSetAlias, data: data };
+				
+				if(wp)
+					mySeries.encode = { tooltip: [1, 2] };
+				
 				legendData.push(dataSetAlias);
-				series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data });
+				series.push(mySeries);
 			}
 		}
 		
