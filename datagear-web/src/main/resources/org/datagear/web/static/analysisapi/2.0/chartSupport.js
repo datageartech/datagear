@@ -1228,328 +1228,256 @@ SPT._scatterCoordRenderer = function(plugin, config)
 
 //雷达图
 
-SPT.radarRender = function(chart, options)
+SPT.radarRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//item 可选，行式雷达网数据条目
-			//name 名称
-			//value 数值
-			//max 最大值
-			dataSignNames: { item: "item", name: "name", value: "value", max: "max" }
-		}
+		//雷达图形状："polygon" 多边形；"circle" 圆形
+		radarShape: "polygon"
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		radar:
-		{
-			id: 0,
-			center: ["50%", "60%"],
-			radius: "70%",
-			nameGap: 6,
-			//将在update中设置：
-			//indicator
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "radar"
-			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.radarUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var indicatorData = [];
-	var seriesData = [];
-	
-	//临时series，series[i]表示一条雷达网，series[i].name是雷达网名称，
-	//series[i].data[i].name是雷达指标名、series[i].data[i].value雷达指标值
-	//这样可以使用已有的排序逻辑，从而支持sortAxisData特性
-	var tmpSeries = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.item);
-		
-		//行式雷达网数据，必设置【雷达网条目名称】标记
-		//一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
-		//或者
-		//相同条目名的多行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*1
-		if(ip)
-		{
-			SPT.radarUpdateTmpSeriesForRowMode(chart, chartResult, renderOptions,
-					dataSetBind, result, indicatorData, tmpSeries)
-		}
-		//列式雷达网数据
-		//一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
-		else
-		{
-			SPT.radarUpdateTmpSeriesForColumnMode(chart, chartResult, renderOptions,
-					dataSetBind, result, indicatorData, tmpSeries)
-		}
-	}
-	
-	if(SPT.sortAxisDataOption(renderOptions))
-	{
-		var tmpAxisData = [];
-		CF.each(indicatorData, function(i, indicator)
-		{
-			tmpAxisData.push(indicator.name);
-		});
-		
-		var tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
-		
-		SPT.sortEChartsUpdateAxisData(renderOptions, tmpOptions, tmpOptions.tmpAxis,
-						true, true, SPT.inflateAxisDataExtractors.property("name"));
-		
-		indicatorData.sort(function(a, b)
-		{
-			var ia = SPT.findInArray(tmpAxisData, a.name);
-			var ib = SPT.findInArray(tmpAxisData, b.name);
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				radar:
+				{
+					center: ["50%", "60%"],
+					radius: "70%",
+					shape: config.radarShape,
+					indicator: []
+				},
+				series:
+				[
+					{ type: "radar", data: [] }
+				]
+			};
 			
-			return (ia - ib);
-		});
-	}
-	
-	//将上述tmpSeries转换为雷达网数据
-	for(var i=0; i<tmpSeries.length; i++)
-	{
-		var ts = tmpSeries[i];
-		var radarData = { name: ts.name, value: [] };
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
 		
-		CF.each(indicatorData, function(j, indicator)
+		update: function(chart, chartResult)
 		{
-			var idx = SPT.findInArray(ts.data, indicator.name, "name");
-			radarData.value.push(idx > -1 ? ts.data[idx].value : null);
-		});
-		
-		chart.originalDataIndex(radarData, ts.dataSetBindIndex, ts.resultDataIndex);
-		seriesData.push(radarData);
-		legendData.push(ts.name);
-	}
-	
-	var series = [ { id: 0, type: "radar", data: seriesData } ];
-	var options = { legend: {id: 0, data: legendData}, radar: {id: 0, indicator: indicatorData}, series: series };
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-	chart.liveData("radarIndicatorData", indicatorData);
-};
-
-//行式雷达网数据处理
-SPT.radarUpdateTmpSeriesForRowMode = function(chart, chartResult, renderOptions,
-		dataSetBind, result, indicatorData, series)
-{
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.item);
-	var np = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
-	var mp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.max);
-	var indicatorLen = Math.min(np.length, mp.length);
-	
-	for(var i=0; i<indicatorLen; i++)
-	{
-		var indicators = chart.resultMapDatas(result, { name: np[i], max: mp[i] });
-		CF.each(indicators, function(j, indicator)
-		{
-			SPT.radarAppendValidIndicator(indicatorData, indicator);
-		});
-	}
-	
-	if(indicatorLen == 0){}
-	//多行式雷达网
-	else if(indicatorLen == 1)
-	{
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		
-		var categoryNames = [];
-		var categoryDatasMap = {};
-		var propertyMap = SPT.addCategoryToFieldMap({ name: np, value: vp }, ip);
-		var data = chart.resultMapDatas(result, propertyMap);
-		chart.originalDataIndexes(data, dataSetBind);
-		SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-		
-		for(var j=0; j<categoryNames.length; j++)
-		{
-			var categoryName = categoryNames[j];
-			var categoryDatas = categoryDatasMap[categoryName];
-			var mySeries = { name: categoryName, data: categoryDatas, dataSetBindIndex: dataSetBind.index, resultDataIndex: [] };
+			var renderOptions = chart.renderOptions();
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			
-			CF.each(categoryDatas, function(k, cd)
+			var legendData = [];
+			var indicatorData = [];
+			var seriesName = "";
+			var seriesData = [];
+			
+			//临时series，series[i]表示一条雷达网，series[i].name是雷达网名称，
+			//series[i].data[i].name是雷达指标名、series[i].data[i].value雷达指标值
+			//这样可以使用已有的排序逻辑，从而支持sortAxisData特性
+			var tmpSeries = [];
+			
+			for(let i=0; i<dataSetBinds.length; i++)
 			{
-				var odIdx = chart.originalDataIndex(cd);
-				mySeries.resultDataIndex.push(odIdx.resultDataIndex);
-			});
-			
-			series.push(mySeries);
-		}
-	}
-	//单行式雷达网
-	else
-	{
-		var iv = chart.resultColumnArrayDatas(result, ip);
-		var nv = chart.resultRowArrayDatas(result, np);
-		var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-		var vv = chart.resultRowArrayDatas(result, vp);
-		var dataLen = Math.min(np.length, vp.length);
-		
-		for(var i=0; i<iv.length; i++)
-		{
-			var mySeries = { name: iv[i], data: [], dataSetBindIndex: dataSetBind.index, resultDataIndex: i };
-			
-			for(var j=0; j<dataLen; j++)
-			{
-				mySeries.data.push({ name: nv[i][j], value: vv[i][j] });
+				let dataSetBind = dataSetBinds[i];
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = chart.dataSetAlias(dataSetBind);
+				
+				let itemField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				
+				//行式雷达网数据，必设置【雷达网条目名称】标记
+				//一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*n
+				//或者
+				//相同条目名的多行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值]*1
+				if(itemField)
+				{
+					this._inflateTmpSeriesForRowMode(chart, chartResult, dataSetBind, result, indicatorData, tmpSeries);
+				}
+				//列式雷达网数据
+				//一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中【指标值】列名将作为雷达网条目名称
+				else
+				{
+					this._inflateTmpSeriesForColumnMode(chart, chartResult, dataSetBind, result, indicatorData, tmpSeries);
+				}
 			}
 			
-			series.push(mySeries);
-		}
-	}
-};
-
-SPT.radarUpdateTmpSeriesForColumnMode = function(chart, chartResult, renderOptions,
-		dataSetBind, result, indicatorData, series)
-{
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	var nv = chart.resultColumnArrayDatas(result, np);
-	var mp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
-	var mv = chart.resultColumnArrayDatas(result, mp);
-	var indicatorLen = Math.min(nv.length, mv.length);
-	
-	for(var i=0; i<indicatorLen; i++)
-	{
-		var indicator = {name: nv[i], max: mv[i]};
-		SPT.radarAppendValidIndicator(indicatorData, indicator);
-	}
-	
-	var vp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-	var vv = chart.resultColumnArrayDatas(result, vp);
-	
-	var resultDataIndex = [];
-	for(var i=0; i<indicatorData.length; i++)
-		resultDataIndex[i] = i;
-	
-	for(var i=0; i<vp.length; i++)
-	{
-		var name = chart.dataSetFieldAlias(dataSetBind, vp[i]);
-		var mySeries = { name: name, data: [], dataSetBindIndex: dataSetBind.index, resultDataIndex: resultDataIndex };
+			if(SPT.sortAxisDataOption(renderOptions))
+			{
+				let tmpAxisData = [];
+				indicatorData.forEach((indicator) =>
+				{
+					tmpAxisData.push(indicator.name);
+				});
+				
+				let tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
+				
+				SPT.sortEChartsUpdateAxisData(renderOptions, tmpOptions, tmpOptions.tmpAxis,
+								true, true, SPT.inflateAxisDataExtractors.propertyName());
+				
+				indicatorData.sort((a, b) =>
+				{
+					let ia = SPT.findInArray(tmpAxisData, a.name);
+					let ib = SPT.findInArray(tmpAxisData, b.name);
+					return (ia - ib);
+				});
+			}
+			
+			//将上述tmpSeries转换为雷达网数据
+			for(let i=0; i<tmpSeries.length; i++)
+			{
+				let ts = tmpSeries[i];
+				let radarData = { name: ts.name, value: [] };
+				
+				indicatorData.forEach((indicator) =>
+				{
+					let idx = SPT.findInArray(ts.data, indicator.name, "name");
+					radarData.value.push(idx > -1 ? ts.data[idx].value : null);
+				});
+				
+				SPT.originalDataOfData(radarData, SPT.originalDataOfData(ts));
+				seriesData.push(radarData);
+				legendData.push({ name: ts.name });
+			}
+			
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			var series = [ { name: seriesName, type: "radar", data: seriesData } ];
+			var options = { legend: { data: legendData }, radar: { indicator: indicatorData }, series: series };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
 		
-		for(var j=0; j<nv.length; j++)
+		//行式雷达网数据处理
+		_inflateTmpSeriesForRowMode: function(chart, chartResult, dataSetBind, result, indicatorData, series)
 		{
-			mySeries.data.push({ name: nv[j], value: vv[i][j] });
-		}
+			var itemField = chart.dataSetFieldOfSign(dataSetBind, 0);
+			var nameFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+			var maxFields = chart.dataSetFieldsOfSign(dataSetBind, 3);
+			var indicatorLen = Math.min(nameFields.length, maxFields.length);
+			
+			for(let i=0; i<indicatorLen; i++)
+			{
+				let indicators = chart.resultMapDatas(result, { name: nameFields[i], max: maxFields[i] });
+				indicators.forEach((indicator) =>
+				{
+					this._appendValidIndicator(indicatorData, indicator);
+				});
+			}
+			
+			if(indicatorLen == 0){}
+			//多行式雷达网
+			else if(indicatorLen == 1)
+			{
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				let categoryNames = [];
+				let categoryDatasMap = {};
+				
+				let fieldMap = SPT.addCategoryToFieldMap({ name: nameFields, value: valueField }, itemField);
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				
+				for(let j=0; j<categoryNames.length; j++)
+				{
+					let categoryName = categoryNames[j];
+					let categoryDatas = categoryDatasMap[categoryName];
+					let mySeries = { name: categoryName, data: categoryDatas };
+					let originalData = [];
+					
+					categoryDatas.forEach((cd) =>
+					{
+						let myOriginalData = SPT.originalDataOfData(cd);
+						originalData.push(myOriginalData);
+					});
+					
+					SPT.originalDataOfData(mySeries, originalData);
+					
+					series.push(mySeries);
+				}
+			}
+			//单行式雷达网
+			else
+			{
+				let iv = chart.resultColumnArrayDatas(result, itemField);
+				let nv = chart.resultRowArrayDatas(result, nameFields);
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 2);
+				let vv = chart.resultRowArrayDatas(result, valueFields);
+				let dataLen = Math.min(nameFields.length, valueFields.length);
+				
+				for(let i=0; i<iv.length; i++)
+				{
+					let mySeries = { name: iv[i], data: [] };
+					
+					for(let j=0; j<dataLen; j++)
+					{
+						mySeries.data.push({ name: nv[i][j], value: vv[i][j] });
+					}
+					
+					series.push(mySeries);
+				}
+				
+				SPT.originalDataOfResult(series, chart, result);
+			}
+		},
 		
-		series.push(mySeries);
-	}
-};
-
-SPT.radarAppendValidIndicator = function(indicatorData, indicator)
-{
-	if(indicator && indicator.name != null)
-	{
-		var idx = SPT.findInArray(indicatorData, indicator.name, "name");
+		_inflateTmpSeriesForColumnMode: function(chart, chartResult, dataSetBind, result, indicatorData, series)
+		{
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 1);
+			var nv = chart.resultColumnArrayDatas(result, nameField);
+			var maxField = chart.dataSetFieldOfSign(dataSetBind, 3);
+			var mv = chart.resultColumnArrayDatas(result, maxField);
+			var indicatorLen = Math.min(nv.length, mv.length);
+			
+			for(let i=0; i<indicatorLen; i++)
+			{
+				let indicator = {name: nv[i], max: mv[i]};
+				this._appendValidIndicator(indicatorData, indicator);
+			}
+			
+			var valueFields = chart.dataSetFieldsOfSign(dataSetBind, 2);
+			var vv = chart.resultColumnArrayDatas(result, valueFields);
+			
+			for(let i=0; i<valueFields.length; i++)
+			{
+				let name = chart.dataSetFieldAlias(dataSetBind, valueFields[i]);
+				let mySeries = { name: name, data: [] };
+				
+				for(let j=0; j<nv.length; j++)
+				{
+					mySeries.data.push({ name: nv[j], value: vv[i][j] });
+				}
+				
+				SPT.originalDataOfData(mySeries, chart.resultDatas(result));
+				
+				series.push(mySeries);
+			}
+		},
 		
-		if(idx < 0)
+		_appendValidIndicator: function(indicatorData, indicator)
 		{
-			indicatorData.push(indicator);
+			if(indicator && indicator.name != null)
+			{
+				var idx = SPT.findInArray(indicatorData, indicator.name, "name");
+				
+				if(idx < 0)
+				{
+					indicatorData.push(indicator);
+				}
+				else if(indicatorData[idx].max == null || indicatorData[idx].max < indicator.max)
+				{
+					indicatorData[idx] = indicator;
+				}
+			}
 		}
-		else if(indicatorData[idx].max == null || indicatorData[idx].max < indicator.max)
-		{
-			indicatorData[idx] = indicator;
-		}
-	}
-};
-
-SPT.radarResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.radarDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.radarOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.radarSetChartEventData);
-};
-
-SPT.radarOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.radarSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
+	};
 	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.item] = echartsData.name;
-	data[dataSignNames.value] = echartsData.value;
-	
-	var indicatorData = chart.liveData("radarIndicatorData");
-	var names = [];
-	var maxes = [];
-	for(var i=0; i<indicatorData.length; i++)
-	{
-		names[i] = indicatorData[i].name;
-		maxes[i] = indicatorData[i].max;
-	}
-	
-	data[dataSignNames.name] = names;
-	data[dataSignNames.max] = maxes;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //漏斗图
