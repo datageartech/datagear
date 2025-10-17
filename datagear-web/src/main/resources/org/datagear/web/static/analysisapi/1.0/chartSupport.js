@@ -779,7 +779,11 @@
 				trigger: "item",
 				formatter: function(params)
 				{
-					return chartSupport.customEChartsTooltip(params, (params) => { return { value: params.value + " ("+params.percent+"%)" } });
+					return chartSupport.customEChartsTooltip(params, (pi) =>
+					{
+						let re = { value: pi.value + " ("+pi.percent+"%)" };
+						return re;
+					});
 				}
 			},
 			legend:
@@ -10124,25 +10128,78 @@
 	{
 		var html = "";
 		
-		var data = (extractor == null ? {} : (extractor(params) || {}));
+		let datas = [];
+		let title = "";
 		
-		if(data.title == null)
-			data.title = (params.seriesName || "");
-		
-		if(data.name == null)
-			data.name = (params.name || "");
-		
-		if(data.value == null)
-			data.value = (params.value || "");
+		// "axis"触发时
+		if($.isArray(params))
+		{
+			for(let i=0; i<params.length; i++)
+			{
+				let pi = params[i];
+				let data = (extractor == null ? {} : (extractor(pi) || {}));
+				
+				if(chartFactory.isEmpty(title))
+				{
+					if(data.title != null)
+						title = data.title;
+					else
+						title = (pi.axisValueLabel || pi.axisValue || pi.name);
+				}
+				
+				if(data.color == null)
+					data.color = (pi.color || "");
+				
+				if(data.name == null)
+					data.name = (pi.seriesName || "");
+				
+				if(data.value == null)
+					data.value = (pi.value || "");
+				
+				datas.push(data);
+			}
+		}
+		//"item"触发时
+		else
+		{
+			let data = (extractor == null ? {} : (extractor(params) || {}));
+			title = (data.title != null ? data.title : (params.seriesName || ""));
+			
+			if(data.color == null)
+				data.color = (params.color || "");
+			
+			if(data.name == null)
+				data.name = (params.name || "");
+			
+			if(data.value == null)
+				data.value = (params.value || "");
+			
+			datas.push(data);
+		}
 		
 		html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
-		html += 	"<div>"+data.title+"</div>";
-		html += 	"<div style='display:flex;flex-direction:row;align-items:center;gap:20px;'>";
-		html += 		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
-		html += 			"<div style='width:10px;height:10px;border-radius:10px;background:"+params.color+"'></div><div>"+data.name+"</div>";
-		html += 		"</div>";
-		html += 		"<div style='font-weight:bold;'>"+data.value+"</div>";
-		html += 	"</div>";
+		html += 	"<div>"+title+"</div>";
+		
+		for(let i=0; i<datas.length; i++)
+		{
+			let di = datas[i];
+			let vs = ($.isArray(di.value) ? di.value : [ di.value ]);
+			
+			html +=	"<div style='display:flex;flex-direction:row;align-items:center;gap:20px;'>";
+			html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
+			html +=			"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div><div>"+di.name+"</div>";
+			html +=		"</div>";
+			html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;font-weight:bold;'>";
+			
+			for(let j=0; j<vs.length; j++)
+			{
+				html +=		"<div>"+vs[j]+"</div>";
+			}
+			
+			html +=		"</div>";
+			html +=	"</div>";
+		}
+		
 		html += "</div>";
 		
 		return html;
