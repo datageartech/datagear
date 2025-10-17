@@ -93,7 +93,7 @@
 		        	</div>
 				</div>
 			</div>
-			<div class="field grid">
+			<div class="field grid align-items-start">
 				<label for="${pid}dataSetBindVOs" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 					title="<@spring.message code='chart.dsb.desc' />">
 					<@spring.message code='dataSetBind' />
