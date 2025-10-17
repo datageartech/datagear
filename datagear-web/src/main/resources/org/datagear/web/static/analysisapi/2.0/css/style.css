@@ -634,6 +634,7 @@
 }
 .dg-chart-setting-panel .dg-datasetbind-section-content{
 	padding: 0 0.5rem 0.5rem 0.5rem;
+	overflow-x: auto;
 }
 .dg-chart-setting-panel .dg-dspform input,
 .dg-chart-setting-panel .dg-dspform select,

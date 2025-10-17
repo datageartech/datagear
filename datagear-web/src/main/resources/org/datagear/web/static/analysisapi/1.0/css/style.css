@@ -594,6 +594,10 @@
 	padding: 0.2em 0em;
 	cursor: pointer;
 }
+.dg-chart-setting-panel .dg-datasetbind-section-content{
+	padding: 0 0.5rem 0.5rem 0.5rem;
+	overflow-x: auto;
+}
 .dg-chart-setting-panel .dg-dspv-form input,
 .dg-chart-setting-panel .dg-dspv-form select,
 .dg-chart-setting-panel .dg-dspv-form textarea
