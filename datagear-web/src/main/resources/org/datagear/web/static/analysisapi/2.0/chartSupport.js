@@ -1233,7 +1233,9 @@ SPT.radarRenderer = function(plugin, config)
 	config = CF.extend(true,
 	{
 		//雷达图形状："polygon" 多边形；"circle" 圆形
-		radarShape: "polygon"
+		radarShape: "polygon",
+		//默认indicator最大值
+		defaultIndicatorMax: 100
 	},
 	config);
 	
@@ -1306,6 +1308,12 @@ SPT.radarRenderer = function(plugin, config)
 				}
 			}
 			
+			indicatorData.forEach((indicator) =>
+			{
+				if(indicator.max == null)
+					indicator.max = config.defaultIndicatorMax;
+			});
+			
 			if(SPT.sortAxisDataOption(renderOptions))
 			{
 				let tmpAxisData = [];
@@ -1358,20 +1366,47 @@ SPT.radarRenderer = function(plugin, config)
 			var itemField = chart.dataSetFieldOfSign(dataSetBind, 0);
 			var nameFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
 			var maxFields = chart.dataSetFieldsOfSign(dataSetBind, 3);
-			var indicatorLen = Math.min(nameFields.length, maxFields.length);
 			
-			for(let i=0; i<indicatorLen; i++)
+			var fields = chart.dataSetFields(dataSetBind, false);
+			for(let i=0; i<nameFields.length; i++)
 			{
-				let indicators = chart.resultMapDatas(result, { name: nameFields[i], max: maxFields[i] });
+				let nameField = nameFields[i];
+				let maxField = null;
+				
+				if(maxFields.length > 0)
+				{
+					if(maxFields.length >= nameFields.length)
+					{
+						maxField = maxFields[i];
+					}
+					else
+					{
+						let nameFieldIdx = fields.indexOf(nameField);
+						let nextNameFieldIdx = ((i+1) >= nameFields.length ? fields.length : fields.indexOf(nameFields[i+1]));
+						
+						for(let j=0; j<maxFields.length; j++)
+						{
+							let myMaxFieldIdx = fields.indexOf(maxFields[j]);
+							if(myMaxFieldIdx >= nameFieldIdx && myMaxFieldIdx < nextNameFieldIdx)
+							{
+								maxField = maxFields[j];
+								break;
+							}
+						}
+					}
+				}
+				
+				let indicators = chart.resultMapDatas(result, (maxField == null ? { name: nameField } : { name: nameField, max: maxField }));
+				
 				indicators.forEach((indicator) =>
 				{
 					this._appendValidIndicator(indicatorData, indicator);
 				});
 			}
 			
-			if(indicatorLen == 0){}
+			if(nameFields.length == 0){}
 			//多行式雷达网
-			else if(indicatorLen == 1)
+			else if(nameFields.length == 1)
 			{
 				let valueField = chart.dataSetFieldOfSign(dataSetBind, 2);
 				let categoryNames = [];
@@ -1430,12 +1465,11 @@ SPT.radarRenderer = function(plugin, config)
 			var nameField = chart.dataSetFieldOfSign(dataSetBind, 1);
 			var nv = chart.resultColumnArrayDatas(result, nameField);
 			var maxField = chart.dataSetFieldOfSign(dataSetBind, 3);
-			var mv = chart.resultColumnArrayDatas(result, maxField);
-			var indicatorLen = Math.min(nv.length, mv.length);
+			var mv = (maxField == null ? null : chart.resultColumnArrayDatas(result, maxField));
 			
-			for(let i=0; i<indicatorLen; i++)
+			for(let i=0; i<nv.length; i++)
 			{
-				let indicator = {name: nv[i], max: mv[i]};
+				let indicator = { name: nv[i], max: (mv == null ? null : mv[i]) };
 				this._appendValidIndicator(indicatorData, indicator);
 			}
 			
