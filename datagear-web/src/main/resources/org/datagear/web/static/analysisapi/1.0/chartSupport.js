@@ -1789,7 +1789,9 @@
 				//value 数值
 				//max 最大值
 				dataSignNames: { item: "item", name: "name", value: "value", max: "max" }
-			}
+			},
+			//默认indicator最大值
+			defaultIndicatorMax: 100
 		},
 		options);
 		
@@ -1876,6 +1878,12 @@
 			}
 		}
 		
+		indicatorData.forEach((indicator) =>
+		{
+			if(indicator.max == null)
+				indicator.max = renderOptions.defaultIndicatorMax;
+		});
+		
 		if(chartSupport.sortAxisDataOption(renderOptions))
 		{
 			var tmpAxisData = [];
@@ -1936,11 +1944,39 @@
 		var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.item);
 		var np = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
 		var mp = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.max);
-		var indicatorLen = Math.min(np.length, mp.length);
+		var indicatorLen = np.length;
 		
+		var fields = chart.dataSetFields(dataSetBind, false);
 		for(var i=0; i<indicatorLen; i++)
 		{
-			var indicators = chart.resultMapDatas(result, { name: np[i], max: mp[i] });
+			let nameField = np[i];
+			let maxField = null;
+			
+			if(mp.length > 0)
+			{
+				if(mp.length >= np.length)
+				{
+					maxField = mp[i];
+				}
+				//查找至下一个名nameField之间的maxField
+				else
+				{
+					let nameFieldIdx = fields.indexOf(nameField);
+					let nextNameFieldIdx = ((i+1) >= np.length ? fields.length : fields.indexOf(np[i+1]));
+					
+					for(let j=0; j<mp.length; j++)
+					{
+						let myMaxFieldIdx = fields.indexOf(mp[j]);
+						if(myMaxFieldIdx >= nameFieldIdx && myMaxFieldIdx < nextNameFieldIdx)
+						{
+							maxField = mp[j];
+							break;
+						}
+					}
+				}
+			}
+			
+			var indicators = chart.resultMapDatas(result, (maxField == null ? { name: nameField } : { name: nameField, max: maxField }));
 			$.each(indicators, function(j, indicator)
 			{
 				chartSupport.radarAppendValidIndicator(indicatorData, indicator);
@@ -2007,12 +2043,12 @@
 		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
 		var nv = chart.resultColumnArrayDatas(result, np);
 		var mp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max);
-		var mv = chart.resultColumnArrayDatas(result, mp);
-		var indicatorLen = Math.min(nv.length, mv.length);
+		var mv = (mp == null ? null : chart.resultColumnArrayDatas(result, mp));
+		var indicatorLen = nv.length;
 		
 		for(var i=0; i<indicatorLen; i++)
 		{
-			var indicator = {name: nv[i], max: mv[i]};
+			var indicator = {name: nv[i], max: (mv == null ? null : mv[i])};
 			chartSupport.radarAppendValidIndicator(indicatorData, indicator);
 		}
 		

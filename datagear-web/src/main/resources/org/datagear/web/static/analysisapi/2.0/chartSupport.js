@@ -1379,6 +1379,7 @@ SPT.radarRenderer = function(plugin, config)
 					{
 						maxField = maxFields[i];
 					}
+					//查找至下一个名nameField之间的maxField
 					else
 					{
 						let nameFieldIdx = fields.indexOf(nameField);
