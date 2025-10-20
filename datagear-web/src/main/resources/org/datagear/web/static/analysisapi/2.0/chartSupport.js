@@ -1596,155 +1596,97 @@ SPT.funnelRenderer = function(plugin, config)
 
 //地图
 
-SPT.mapRender = function(chart, options)
+SPT.mapRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值
-			//map 可选，地图名
-			dataSignNames: { name: "name", value: "value", map: "map" }
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		asyncRender: true,
+		asyncUpdate: true,
+		
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item",
-			formatter: "{b}<br />{c}"
-		},
-		visualMap:
-		{
-			id: 0,
-			text: ["高", "低"],
-			realtime: true,
-			calculable: true,
-			
-			//将在update中设置：
-			//min: 0,
-			//max: 100
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-	            type: "map"
-				//将在下面和update中设置：
-				//map
-	        }
-		]
-	},
-	options,
-	null,
-	function(renderOptions, chart)
-	{
-		SPT.echartsMapChartInitMap(chart, renderOptions);
-	});
-	
-	SPT.echartsMapChartRender(chart, options);
-};
-
-SPT.mapUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var dataRange = { min: undefined, max: undefined };
-	var map = undefined;
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				visualMap:
+				{
+					text: ["高", "低"],
+					realtime: true,
+					calculable: true,
+					min: 0,
+					max: 100
+				},
+				series:
+				[
+					{ type: "map", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options,
+				(chart, renderOptions) =>
+				{
+					SPT.echartsMapChartInitMap(chart, renderOptions);
+				});
+			
+			SPT.echartsMapChartRender(chart, options);
+		},
 		
-		//取任一不为空的地图名列值
-		if(!map)
-			map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var data = chart.resultNameValueDatas(result, np, vp);
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		SPT.evalArrayDataRange(dataRange, data, "value");
-		
-		if(!seriesName)
-			seriesName = dataSetAlias;
-		
-		seriesData = seriesData.concat(data);
-	}
-	
-	var options =
-	{
-		visualMap: {id: 0, min: dataRange.min, max: dataRange.max},
-		series: [ {id: 0, type: "map", name: seriesName, data: seriesData } ]
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var seriesName = "";
+			var seriesData = [];
+			var dataRange = { min: undefined, max: undefined };
+			var map = undefined;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let mapField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				if(CF.isEmpty(map) && mapField != null)
+					map = SPT.findNonEmpty(chart.resultColumnArrayDatas(result, mapField));
+				
+				let data = chart.resultNameValueDatas(result, nameField, valueField);
+				SPT.originalDataOfResult(data, chart, result);
+				SPT.evalArrayDataRange(dataRange, data, "value");
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+				
+				seriesData = seriesData.concat(data);
+			}
+			
+			var visualMap = { min: dataRange.min, max: dataRange.max };
+			SPT.trimNumberRange(visualMap);
+			
+			var series = [ { type: "map", name: seriesName, data: seriesData } ];
+			
+			if(!CF.isEmpty(map))
+				series[0].map = map;
+			
+			var options = { visualMap: visualMap, series: series };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsMapChartUpdate(chart, options);
+		}
 	};
 	
-	SPT.trimNumberRange(options.visualMap);
-	
-	if(map)
-		options.series[0].map = map;
-	
-	SPT.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
-};
-
-SPT.mapResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.mapDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.mapOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.mapSetChartEventData);
-};
-
-SPT.mapOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.mapSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	
-	//当指定地区没有设置数据时，echartsData为null
-	if(!echartsData)
-		echartsData = { name: echartsEventParams.name, value: null } ;
-	
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.value] = echartsData.value;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //地图散点图
@@ -1965,7 +1907,7 @@ SPT._mapScatterUpdate = function(chart, chartResult)
 		options.geo = { id: 0, map: map };
 	}
 	
-	SPT.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
+	SPT.echartsMapChartUpdate(chart, options);
 };
 
 SPT._mapScatterResize = function(chart)
@@ -2230,7 +2172,7 @@ SPT.mapGraphUpdate = function(chart, chartResult)
 		options.geo = { id: 0, map: map };
 	}
 	
-	SPT.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
+	SPT.echartsMapChartUpdate(chart, options);
 	
 	chart.liveData("mapGraphSeriesData", seriesData);
 };
@@ -2455,7 +2397,7 @@ SPT.mapLinesUpdate = function(chart, chartResult)
 		options.geo = { id: 0, map: map };
 	}
 	
-	SPT.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
+	SPT.echartsMapChartUpdate(chart, options);
 };
 
 SPT.mapLinesResize = function(chart)
@@ -2659,7 +2601,7 @@ SPT.mapFlylineUpdate = function(chart, chartResult)
 		options.geo = { id: 0, map: map };
 	}
 	
-	SPT.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
+	SPT.echartsMapChartUpdate(chart, options);
 };
 
 SPT.mapFlylineResize = function(chart)
@@ -2839,7 +2781,7 @@ SPT.mapHeatmapUpdate = function(chart, chartResult)
 		options.geo = { id: 0, map: map };
 	}
 	
-	SPT.echartsMapChartUpdate(chart, chartResult, options, renderOptions);
+	SPT.echartsMapChartUpdate(chart, options);
 };
 
 SPT.mapHeatmapResize = function(chart)
@@ -8044,7 +7986,7 @@ SPT.prepareEChartsRenderOptions = function(chart, renderOptions, beforeProcessHa
 	}
 	
 	if(beforeProcessHandler)
-		beforeProcessHandler(renderOptions, chart);
+		beforeProcessHandler(chart, renderOptions);
 	
 	SPT.setEChartsOptionsCmpId(renderOptions);
 	chart.processRenderOptions(renderOptions);
@@ -8645,48 +8587,40 @@ SPT.echartsMapChartInitMap = function(chart, options)
 //渲染ECharts地图类图表
 SPT.echartsMapChartRender = function(chart, options)
 {
-	SPT.echartsMapChartLoadMaps(chart, options, function()
+	var maps = SPT.echartsGetMapsDistinct(options);
+	chartUtil.echarts.registerMap(chart, maps, () =>
 	{
-		chart.echartsInit(options);
+		var instance = chartUtil.echarts.init(chart);
+		instance.setOption(options);
 		chart.statusRendered(true);
 	});
 };
 
 //更新ECharts地图类图表
-SPT.echartsMapChartUpdate = function(chart, chartResult, updateOptions, renderOptions)
+SPT.echartsMapChartUpdate = function(chart, updateOptions)
 {
-	SPT.adaptArrayPropsForUpdateOptions(updateOptions, renderOptions);
+	var renderOptions = chart.renderOptions();
+	var renderMaps = SPT.echartsGetMapsDistinct(renderOptions);
+	var updateMaps = SPT.echartsGetMapsDistinct(updateOptions);
+	var mapChanged = (renderMaps.length !== updateMaps.length);
 	
-	var updateMapOptions = SPT.echartsGetMapOptions(updateOptions);
-	
-	updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions, function(updateOptions)
+	if(!mapChanged)
 	{
-		//inflateUpdateOptions()会将地图设置为renderOptions里的项，所以这里需要再次设置为updateMap
-		CF.extend(true, updateOptions, updateMapOptions);
-		
-		var renderMaps = SPT.echartsGetMapsDistinct(renderOptions);
-		var updateMaps = SPT.echartsGetMapsDistinct(updateOptions);
-		var mapChanged = (renderMaps.length !== updateMaps.length);
-		
-		if(!mapChanged)
+		for(let i=0; i<renderMaps.length; i++)
 		{
-			for(var i=0; i<renderMaps.length; i++)
+			if(renderMaps[i] != updateMaps[i])
 			{
-				if(renderMaps[i] != updateMaps[i])
-				{
-					mapChanged = true;
-					break;
-				}
+				mapChanged = true;
+				break;
 			}
 		}
-		
-		if(mapChanged)
-		{
-			SPT.echartsResetMapSettings(updateOptions);
-		}
-	});
+	}
 	
-	SPT.echartsMapChartLoadMaps(chart, updateOptions, function()
+	if(mapChanged)
+		SPT.echartsResetMapSettings(updateOptions);
+	
+	var maps = SPT.echartsGetMapsDistinct(updateOptions);
+	chartUtil.echarts.registerMap(chart, maps, () =>
 	{
 		SPT.echartsOptionsReplaceMerge(chart, updateOptions);
 		chart.statusUpdated(true);
@@ -8890,57 +8824,6 @@ SPT.echartsResetMapSettings = function(echartsOptions)
 	}
 };
 
-//加载ECharts地图类图表中的所有地图，并在全部加载完成后调用callbak
-SPT.echartsMapChartLoadMaps = function(chart, options, callback)
-{
-	var maps = SPT.echartsGetMapsDistinct(options);
-	var needLoads = [];
-	
-	for(var i=0; i<maps.length; i++)
-	{
-		if(!chart.echartsMapRegistered(maps[i]))
-		{
-			needLoads.push(maps[i]);
-		}
-	}
-	
-	if(needLoads.length == 0)
-	{
-		callback();
-		return;
-	}
-	
-	var loadedDeferreds = [];
-	
-	for(var i=0; i<needLoads.length; i++)
-	{
-		loadedDeferreds[i] = $.Deferred();
-	}
-	
-	$.when.apply($, loadedDeferreds).done(function()
-	{
-		callback();
-	});
-	
-	for(var i=0; i<needLoads.length; i++)
-	{
-		chart.echartsLoadMap(needLoads[i],
-		{
-			needLoadMap: needLoads[i],
-			mapLoadedDeferred: loadedDeferreds[i],
-			success: function()
-			{
-				this.mapLoadedDeferred.resolve();
-			},
-			error: function(jqXHR, textStatus, errorThrown)
-			{
-				this.mapLoadedDeferred.reject();
-				CF.logException("Load map '"+this.needLoadMap+"' error : " + (errorThrown || textStatus));
-			}
-		});
-	}
-};
-
 /**
  * 将值数组对象（{value: [name, value]}）格式的options.series[i].data元素适配为与options.series[i].type匹配的格式。
  * 比如，对于"pie"的type，应适配为名值对象：{ name: name, value: value }格式，图表才能正确显示。
@@ -9080,8 +8963,11 @@ SPT.echartsOptionsReplaceMerge = function(chart, options, replaceMerge)
 	if(replaceMerge == null)
 	{
 		replaceMerge = [];
+		
 		for(var p in options)
+		{
 			replaceMerge.push(p);
+		}
 	}
 	
 	var opts =
@@ -9145,9 +9031,9 @@ SPT.evalArrayDataRange = function(range, data, propertyName0, propertyName1)
 	if(data == null)
 		return range;
 	
-	for(var i=0; i<data.length; i++)
+	for(let i=0; i<data.length; i++)
 	{
-		var val = (data[i] == null ? null : data[i]);
+		let val = (data[i] == null ? null : data[i]);
 		
 		if(propertyName0 != null)
 			val = (val == null ? null : val[propertyName0]);

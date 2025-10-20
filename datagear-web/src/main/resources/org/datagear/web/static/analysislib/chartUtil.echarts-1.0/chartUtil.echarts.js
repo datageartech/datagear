@@ -118,86 +118,94 @@ EU.themeNameOfChartTheme = function(chart)
  * 为图表注册指定名称的地图（GeoJSON、SVG）至ECharts，并在注册完成后执行回调函数。
  * 如果地图未加载，将在加载后再注册。
  * 注意：如果在图表渲染器的render()、update()函数中调用此函数，应该首先设置渲染器的asyncRender、asyncUpdate，
- * 并在callback中调用chart.statusRendered(true)、chart.statusUpdated(true)。
+ * 并在complete中调用chart.statusRendered(true)、chart.statusUpdated(true)。
  * 
  * @param chart 图表
- * @param name 地图名称
- * @param complete 可选，注册完成后（无论是否成功）的回调函数，格式为：function(name){ ... }
+ * @param name 地图名称、地图名称数组
+ * @param complete 可选，注册完成后（无论是否成功）的回调函数，格式为：function(){ ... }
  */
 EU.registerMap = function(chart, name, complete)
 {
+	name = (CF.isArray(name) ? name : [ name ]);
+	
 	var echarts = EU.echarts();
 	
-	if(echarts.getMap(name) != null)
+	var needLoads = [];
+	
+	for(let i=0; i<name.length; i++)
+	{
+		if(echarts.getMap(name[i]) == null)
+			needLoads.push(name[i]);
+	}
+	
+	if(needLoads.length == 0)
 	{
 		if(complete != null)
-			complete(name);
-	}
-	else
-	{
-		let state = EU.MAP_REGISTER_STATES[name];
+			complete();
 		
-		if(state && state.loaded === true)
-		{
-			//释放内存
-			if(state.fetchPromise != null)
-				state.fetchPromise = null;
-			
-			if(complete != null)
-				complete(name);
-		}
-		else
-		{
-			if(state == null)
-			{
-				let mapUrl = chart.mapURL(name);
-				
-				state = { loaded: false, fetchPromise: fetch(mapUrl) };
-				EU.MAP_REGISTER_STATES[name] = state;
-				
-				state.fetchPromise.then((response) =>
-				{
-					if(!response.ok)
-						throw new Error(response.statusText ? response.statusText : response.status+"");
-					
-					let headers = response.headers;
-					let contentType = (headers.get("Content-Type") || "");
-					//是否SVG地图
-					let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(url));
-					
-					if(isSvg)
-					{
-						return response.text().then((svgText) =>
-						{
-							EU.echarts().registerMap(name, {svg: svgText});
-							state.loaded = true;
-							
-							return response;
-						});
-					}
-					else
-					{
-						return response.json().then((geoJSON) =>
-						{
-							EU.echarts().registerMap(name, {geoJSON: geoJSON});
-							state.loaded = true;
-							
-							return response;
-						});
-					}
-				})
-				.catch(() =>
-				{
-					EU.MAP_REGISTER_STATES[name] = null;
-				});
-			}
-			
-			state.fetchPromise.finally(() =>
-			{
-				complete(name);
-			});
-		}
+		return;
 	}
+	
+	var loadPromises = [];
+	
+	for(let i=0; i<needLoads.length; i++)
+	{
+		let myName = name[i];
+		let state = EU.MAP_REGISTER_STATES[myName];
+		
+		if(state == null)
+		{
+			let mapUrl = chart.mapURL(myName);
+			state =
+			{
+				loadPromise: new Promise(function(resolve, reject)
+				{
+					fetch(mapUrl).then((response) =>
+					{
+						if(!response.ok)
+							throw new Error(response.statusText ? response.statusText : response.status+"");
+						
+						let headers = response.headers;
+						let contentType = (headers.get("Content-Type") || "");
+						//是否SVG地图
+						let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(mapUrl));
+						
+						if(isSvg)
+						{
+							response.text().then((svgText) =>
+							{
+								echarts.registerMap(myName, {svg: svgText});
+								resolve();
+							});
+						}
+						else
+						{
+							response.json().then((geoJSON) =>
+							{
+								echarts.registerMap(myName, {geoJSON: geoJSON});
+								resolve();
+							});
+						}
+					})
+					.catch((e) =>
+					{
+						EU.MAP_REGISTER_STATES[myName] = null;
+						reject();
+					});
+				})
+			};
+			
+			EU.MAP_REGISTER_STATES[myName] = state;
+		}
+		
+		loadPromises.push(state.loadPromise);
+	}
+	
+	Promise.all(loadPromises).finally(function()
+	{
+		if(complete != null)
+			complete();
+	});
 };
 
 /**
