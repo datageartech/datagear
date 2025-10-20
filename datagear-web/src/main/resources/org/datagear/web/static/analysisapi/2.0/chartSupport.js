@@ -1517,132 +1517,81 @@ SPT.radarRenderer = function(plugin, config)
 
 //漏斗图
 
-SPT.funnelRender = function(chart, options)
+SPT.funnelRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值
-			dataSignNames: { name: "name", value: "value" },
-			//同series[i].sort
-			sort: "descending",
-		}
+		//同series[i].sort
+		sort: "descending"
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-	    tooltip:
-	    {
-	        trigger: "item",
-	        formatter: "{a} <br />{b} : {c}"
-	    },
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-	            type: "funnel"
-	        }
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.funnelUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var seriesName = "";
-	var seriesData = [];
-	var dataRange = { min: 0, max: 100 };
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				series:
+				[
+					{ type: "funnel", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
 		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var npv = chart.resultColumnArrayDatas(result, np);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var data = chart.resultNameValueDatas(result, np, vp);
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		
-		legendData = legendData.concat(npv);
-		if(!seriesName)
-			seriesName = dataSetAlias;
-		seriesData = seriesData.concat(data);
-	}
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var seriesName = "";
+			var seriesData = [];
+			var dataRange = { min: 0, max: 100 };
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				
+				let data = chart.resultNameValueDatas(result, nameField, valueField);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				let names = chart.resultColumnArrayDatas(result, nameField);
+				
+				for(let j=0; j<names.length; j++)
+				{
+					legendData.push({ name: names[j] });
+				}
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+				
+				seriesData = seriesData.concat(data);
+			}
+			
+			SPT.evalArrayDataRange(dataRange, seriesData, "value");
+			
+			var series = [ {type: "funnel", name: seriesName, min: dataRange.min, max: dataRange.max, data: seriesData, sort: config.sort } ];
+			var options = { legend: { data: legendData }, series: series };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		}
+	};
 	
-	SPT.evalArrayDataRange(dataRange, seriesData, "value");
-	
-	var series = [ {id: 0, type: "funnel", name: seriesName, min: dataRange.min, max: dataRange.max, data: seriesData, sort: dg.sort } ];
-	var options = { legend: { id: 0, data: legendData }, series: series };
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.funnelResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.funnelDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.funnelOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.funnelSetChartEventData);
-};
-
-SPT.funnelOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.funnelSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.value] = echartsData.value;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //地图

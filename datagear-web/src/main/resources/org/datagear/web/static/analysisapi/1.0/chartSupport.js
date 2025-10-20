@@ -2164,8 +2164,7 @@
 		    },
 		    tooltip:
 		    {
-		        trigger: "item",
-		        formatter: "{a} <br />{b} : {c}"
+		        trigger: "item"
 		    },
 			legend:
 			{
