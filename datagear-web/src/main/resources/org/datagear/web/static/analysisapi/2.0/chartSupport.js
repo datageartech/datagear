@@ -1644,8 +1644,8 @@ SPT.mapRenderer = function(plugin, config)
 			
 			var seriesName = "";
 			var seriesData = [];
-			var dataRange = { min: undefined, max: undefined };
-			var map = undefined;
+			var dataRange = { min: null, max: null };
+			var map = null;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1691,265 +1691,156 @@ SPT.mapRenderer = function(plugin, config)
 
 //地图散点图
 
-SPT.mapScatterRender = function(chart, options)
+SPT.mapScatterRenderer = function(plugin, config)
 {
-	SPT._mapScatterRender(chart, options, "scatter");
-};
-
-SPT.mapScatterUpdate = function(chart, chartResult)
-{
-	SPT._mapScatterUpdate(chart, chartResult);
-};
-
-SPT.mapScatterResize = function(chart)
-{
-	SPT._mapScatterResize(chart);
-};
-
-SPT.mapScatterDestroy = function(chart)
-{
-	SPT._mapScatterDestroy(chart);
-};
-
-SPT.mapScatterOn = function(chart, eventType, handler)
-{
-	SPT._mapScatterOn(chart, eventType, handler);
-};
-
-SPT.mapScatterOff = function(chart, eventType, handler)
-{
-	SPT._mapScatterOff(chart, eventType, handler);
-};
-
-SPT.mapScatterRippleRender = function(chart, options)
-{
-	SPT._mapScatterRender(chart, options, "effectScatter");
-};
-
-SPT.mapScatterRippleUpdate = function(chart, chartResult)
-{
-	SPT._mapScatterUpdate(chart, chartResult);
-};
-
-SPT.mapScatterRippleResize = function(chart)
-{
-	SPT._mapScatterResize(chart);
-};
-
-SPT.mapScatterRippleDestroy = function(chart)
-{
-	SPT._mapScatterDestroy(chart);
-};
-
-SPT.mapScatterRippleOn = function(chart, eventType, handler)
-{
-	SPT._mapScatterOn(chart, eventType, handler);
-};
-
-SPT.mapScatterRippleOff = function(chart, eventType, handler)
-{
-	SPT._mapScatterOff(chart, eventType, handler);
-};
-
-SPT._mapScatterRender = function(chart, options, scatterType)
-{
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//longitude 经度
-			//latitude 维度
-			//value 可选，数值
-			//category 可选，类别，不同类别绘制为不同系列
-			//map 可选，地图名
-			dataSignNames:
-			{
-				name: "name", longitude: "longitude", latitude: "latitude", value: "value",
-				category: "category", map: "map"
-			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
-			//散点图类型："scatter"、"effectScatter"
-			scatterType: scatterType
-		}
+		scatterType: "scatter"
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
-	{
-		title:
-		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item",
-			formatter: function (params)
-			{
-				var fre = params.name;
-				if(params.value && params.value[2] != null)
-					fre +=  "<br />" + params.value[2];
-				return fre;
-			}
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		geo:
-		{
-			id: 0,
-			roam: true
-			//将在下面和update中设置：
-			//map
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: scatterType,
-				coordinateSystem: "geo",
-				geoIndex: 0
-			}
-		]
-	},
-	options,
-	null,
-	function(renderOptions, chart)
-	{
-		SPT.echartsMapChartInitMap(chart, renderOptions);
-	});
-	
-	SPT.echartsMapChartRender(chart, options);
+	return SPT._mapScatterRenderer(plugin, config);
 };
 
-SPT._mapScatterUpdate = function(chart, chartResult)
+SPT.mapScatterRippleRenderer = function(plugin, config)
 {
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	var map = undefined;
-	
-	var dataRange = { min: null, max: null };
-	var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, dg.scatterType);
-	var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, dg.scatterType);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
+	config = CF.extend(true,
 	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
+		scatterType: "effectScatter"
+	},
+	config);
+	
+	return SPT._mapScatterRenderer(plugin, config);
+};
+
+SPT._mapScatterRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+		//散点图类型："scatter"、"effectScatter"
+		scatterType: "scatter",
+	},
+	config);
+	
+	var renderer =
+	{
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		asyncRender: true,
+		asyncUpdate: true,
 		
-		//取任一不为空的地图名列值
-		if(!map)
-			map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var lop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.longitude);
-		var lap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.latitude);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		var propertyMap = { "name": np, "value": (vp ? [lop, lap, vp] : [lop, lap]) };
-		
-		if(cp)
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-		
-		var data = chart.resultMapDatas(result, propertyMap);
-		chart.originalDataIndexes(data, dataSetBind);
-		
-		if(vp)
-			SPT.evalArrayDataRange(dataRange, data, "value", 2);
-		
-		if(cp)
+		render: function(chart)
 		{
-			var categoryNames = [];
-			var categoryDatasMap = {};
-			
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-			
-			for(var j=0; j<categoryNames.length; j++)
+			var options =
 			{
-				var categoryName = categoryNames[j];
-				var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-				var mySeries = {id: series.length, type: dg.scatterType, name: legendName,
-								data: categoryDatasMap[categoryName], coordinateSystem: "geo"};
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				geo: { roam: true },
+				series:
+				[
+					{ type: config.scatterType, coordinateSystem: "geo", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options,
+				(chart, renderOptions) =>
+				{
+					SPT.echartsMapChartInitMap(chart, renderOptions);
+				});
+			
+			SPT.echartsMapChartRender(chart, options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var series = [];
+			var map = null;
+			
+			var dataRange = { min: null, max: null };
+			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, config.scatterType);
+			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, config.scatterType);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				legendData.push(legendName);
-				series.push(mySeries);
+				let mapField = chart.dataSetFieldOfSign(dataSetBind, 5);
+				
+				if(CF.isEmpty(map) && mapField != null)
+					map = SPT.findNonEmpty(chart.resultColumnArrayDatas(result, mapField));
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let loField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let laField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 3);
+				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 4);
+				let hasValueField = (valueField != null);
+				
+				let fieldMap = { name: nameField, value: (hasValueField ? [loField, laField, valueField] : [loField, laField]) };
+				
+				if(categoryField)
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+				
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				if(hasValueField)
+					SPT.evalArrayDataRange(dataRange, data, "value", 2);
+				
+				if(categoryField)
+				{
+					let categoryNames = [];
+					let categoryDatasMap = {};
+					
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+					
+					for(let j=0; j<categoryNames.length; j++)
+					{
+						let categoryName = categoryNames[j];
+						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
+						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
+						
+						this._configSingleSeries(chart, mySeries, hasValueField);
+						legendData.push({ name: legendName });
+						series.push(mySeries);
+					}
+				}
+				else
+				{
+					let mySeries = { name: dataSetAlias, data: data };
+					
+					this._configSingleSeries(chart, mySeries, hasValueField);
+					legendData.push({ name: dataSetAlias });
+					series.push(mySeries);
+				}
 			}
-		}
-		else
+			
+			SPT.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
+			
+			var options = { legend: { data: legendData }, series: series };
+			
+			if(!CF.isEmpty(map))
+				options.geo = { map: map };
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsMapChartUpdate(chart, options);
+		},
+		
+		_configSingleSeries: function(chart, series, hasValueField)
 		{
-			legendData.push(dataSetAlias);
-			series.push({ id: series.length, type: dg.scatterType, name: dataSetAlias, data: data, coordinateSystem: "geo" });
+			series.type = config.scatterType;
+			series.coordinateSystem = "geo";
+			series.encode = { tooltip: (hasValueField ? [0, 1, 2] : [0, 1]) };
 		}
-	}
+	};
 	
-	SPT.evalSeriesDataValueSymbolSize(series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
-	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	
-	if(map)
-	{
-		options.geo = { id: 0, map: map };
-	}
-	
-	SPT.echartsMapChartUpdate(chart, options);
-};
-
-SPT._mapScatterResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT._mapScatterDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT._mapScatterOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT._mapScatterSetChartEventData);
-};
-
-SPT._mapScatterOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT._mapScatterSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.longitude] = echartsData.value[0];
-	data[dataSignNames.latitude] = echartsData.value[1];
-	if(echartsData.value.length > 2)
-		data[dataSignNames.value] = echartsData.value[2];
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //地图关系图
@@ -8574,10 +8465,8 @@ SPT.echartsMapChartInitMap = function(chart, options)
 	var map = CF.builtinOptionValue(options, builtinOptionNames.mapName);
 	
 	//必须设置初始map，不然渲染会报错
-	if(!map)
-	{
+	if(CF.isEmpty(map))
 		map = SPT.defaultMapName();
-	}
 	
 	//不应替换原始地图名
 	var coverOriginalMap = false;
