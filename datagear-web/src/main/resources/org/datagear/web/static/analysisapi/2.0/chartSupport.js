@@ -1641,6 +1641,7 @@ SPT.mapRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 2;
 			
 			var seriesName = "";
 			var seriesData = [];
@@ -1655,10 +1656,9 @@ SPT.mapRenderer = function(plugin, config)
 				
 				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
-				let mapField = chart.dataSetFieldOfSign(dataSetBind, 2);
 				
-				if(CF.isEmpty(map) && mapField != null)
-					map = SPT.findNonEmpty(chart.resultColumnArrayDatas(result, mapField));
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let data = chart.resultNameValueDatas(result, nameField, valueField);
 				SPT.originalDataOfResult(data, chart, result);
@@ -1754,6 +1754,8 @@ SPT._mapScatterRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 5;
+			
 			var legendData = [];
 			var series = [];
 			var map = null;
@@ -1768,10 +1770,8 @@ SPT._mapScatterRenderer = function(plugin, config)
 				let dataSetAlias = chart.dataSetAlias(dataSetBind);
 				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				let mapField = chart.dataSetFieldOfSign(dataSetBind, 5);
-				
-				if(CF.isEmpty(map) && mapField != null)
-					map = SPT.findNonEmpty(chart.resultColumnArrayDatas(result, mapField));
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let loField = chart.dataSetFieldOfSign(dataSetBind, 1);
@@ -1884,6 +1884,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 12;
 			
 			var legendData = [];
 			var seriesName = "";
@@ -1903,10 +1904,8 @@ SPT.mapGraphRenderer = function(plugin, config)
 				let dataSetAlias = chart.dataSetAlias(dataSetBind);
 				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				let mapField = chart.dataSetFieldOfSign(dataSetBind, 12);
-				
-				if(CF.isEmpty(map) && mapField != null)
-					map = SPT.findNonEmpty(chart.resultColumnArrayDatas(result, mapField));
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				if(CF.isEmpty(seriesName))
 					seriesName = dataSetAlias;
@@ -2022,7 +2021,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				name: seriesName, categories: categories, data: seriesData, links: seriesLinks
 			}];
 			
-			this._configSingleSeries(chart, series[0], true);
+			this._configSingleSeries(chart, series[0], hasValueField);
 			SPT.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
 			
 			var options = { legend: { data: legendData }, series: series };
@@ -8349,17 +8348,17 @@ SPT.splitDataByCategory = function(data, categoryNames, categoryDatasMap, defaul
 /**
  * 从数据集结果中读取第一个不为空的数据标记数据值。
  */
-SPT.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, result, valueSign)
+SPT.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, result, dataSign)
 {
-	var vp = chart.dataSetFieldOfSign(dataSetBind, valueSign);
+	var field = chart.dataSetFieldOfSign(dataSetBind, dataSign);
 	
-	if(vp)
+	if(field)
 	{
-		var values = chart.resultColumnArrayDatas(result, vp);
+		var values = chart.resultColumnArrayDatas(result, field);
 		return SPT.findNonEmpty(values);
 	}
 	
-	return undefined;
+	return null;
 };
 
 //初始化ECharts地图类图表的地图选项
