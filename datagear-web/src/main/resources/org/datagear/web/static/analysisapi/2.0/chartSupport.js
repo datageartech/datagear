@@ -1863,7 +1863,19 @@ SPT.mapGraphRenderer = function(plugin, config)
 			var options =
 			{
 				title: { text: chart.name() },
-				tooltip: { trigger: "item" },
+				tooltip:
+				{
+					trigger: "item",
+					//ECharts-6.0中设置series.encode.tooltip仍不会显示第三个数值，所以这里自定义了formatter选项
+					formatter: function(params)
+					{
+						return SPT.customEChartsTooltip(params, (pi) =>
+						{
+							let re = { value: pi.value };
+							return re;
+						});
+					}
+				},
 				legend: { data: [] },
 				geo: { roam: true },
 				series:
@@ -2009,8 +2021,9 @@ SPT.mapGraphRenderer = function(plugin, config)
 						SPT.originalDataOfData(td, dataj);
 					}
 					
-					//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
-					let link = { source: sidx, target: tidx };
+					//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
+					//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
+					let link = { source: seriesData[sidx].name, target: seriesData[tidx].name };
 					SPT.originalDataOfData(link, dataj);
 					seriesLinks.push(link);
 				}
@@ -2038,6 +2051,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 		{
 			series.type = "graph";
 			series.coordinateSystem = "geo";
+			//ECharts-6.0中这样设置仍不会显示第三个数值，所以上面自定义了tooltip.formatter选项
 			series.encode = { tooltip: (hasValueField ? [0, 1, 2] : [0, 1]) };
 		}
 	};
@@ -9282,11 +9296,11 @@ SPT.customEChartsTooltip = function(params, extractor)
 		let di = datas[i];
 		let vs = (CF.isArray(di.value) ? di.value : [ di.value ]);
 		
-		html +=	"<div style='display:flex;flex-direction:row;align-items:center;gap:20px;'>";
+		html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
 		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
 		html +=			"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div><div>"+di.name+"</div>";
 		html +=		"</div>";
-		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;font-weight:bold;'>";
+		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:12px;font-weight:bold;'>";
 		
 		for(let j=0; j<vs.length; j++)
 		{
