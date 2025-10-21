@@ -1896,7 +1896,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-			var mapSignIndex = 10;
+			var mapSignIndex = 1;
 			
 			var legendData = [];
 			var seriesName = "";
@@ -1916,22 +1916,19 @@ SPT.mapGraphRenderer = function(plugin, config)
 				let dataSetAlias = chart.dataSetAlias(dataSetBind);
 				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
-				
 				if(CF.isEmpty(seriesName))
 					seriesName = dataSetAlias;
 				
-				let srcNameField = chart.dataSetFieldOfSign(dataSetBind, 0);
-				let srcLoField = chart.dataSetFieldOfSign(dataSetBind, 1);
-				let srcLaField = chart.dataSetFieldOfSign(dataSetBind, 2);
-				let srcValueField = chart.dataSetFieldOfSign(dataSetBind, 3);
-				let srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, 4);
-				let tgtNameField = chart.dataSetFieldOfSign(dataSetBind, 5);
-				let tgtLoField = chart.dataSetFieldOfSign(dataSetBind, 6);
-				let tgtLaField = chart.dataSetFieldOfSign(dataSetBind, 7);
-				let tgtValueField = chart.dataSetFieldOfSign(dataSetBind, 8);
-				let tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, 9);
+				let srcNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+				let srcLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
+				let srcLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
+				let srcValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 3]);
+				let srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 4]);
+				let tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 5]);
+				let tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 6]);
+				let tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 7]);
+				let tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 8]);
+				let tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 9]);
 				
 				if(!hasValueField && srcValueField != null)
 					hasValueField = true;
@@ -2009,6 +2006,9 @@ SPT.mapGraphRenderer = function(plugin, config)
 					SPT.originalDataOfData(link, dataj);
 					seriesLinks.push(link);
 				}
+				
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 			}
 			
 			var series =
