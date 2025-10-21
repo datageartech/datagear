@@ -1896,11 +1896,11 @@ SPT.mapGraphRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-			var mapSignIndex = 12;
+			var mapSignIndex = 10;
 			
 			var legendData = [];
 			var seriesName = "";
-			var categories = [];
+			var seriesCategories = [];
 			var seriesData = [];
 			var seriesLinks = [];
 			var map = null;
@@ -1922,18 +1922,16 @@ SPT.mapGraphRenderer = function(plugin, config)
 				if(CF.isEmpty(seriesName))
 					seriesName = dataSetAlias;
 				
-				let srcIdField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let srcNameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let srcLoField = chart.dataSetFieldOfSign(dataSetBind, 1);
 				let srcLaField = chart.dataSetFieldOfSign(dataSetBind, 2);
-				let srcNameField = chart.dataSetFieldOfSign(dataSetBind, 3);
+				let srcValueField = chart.dataSetFieldOfSign(dataSetBind, 3);
 				let srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, 4);
-				let srcValueField = chart.dataSetFieldOfSign(dataSetBind, 5);
-				let tgtIdField = chart.dataSetFieldOfSign(dataSetBind, 6);
-				let tgtLoField = chart.dataSetFieldOfSign(dataSetBind, 7);
-				let tgtLaField = chart.dataSetFieldOfSign(dataSetBind, 8);
-				let tgtNameField = chart.dataSetFieldOfSign(dataSetBind, 9);
-				let tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, 10);
-				let tgtValueField = chart.dataSetFieldOfSign(dataSetBind, 11);
+				let tgtNameField = chart.dataSetFieldOfSign(dataSetBind, 5);
+				let tgtLoField = chart.dataSetFieldOfSign(dataSetBind, 6);
+				let tgtLaField = chart.dataSetFieldOfSign(dataSetBind, 7);
+				let tgtValueField = chart.dataSetFieldOfSign(dataSetBind, 8);
+				let tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, 9);
 				
 				if(!hasValueField && srcValueField != null)
 					hasValueField = true;
@@ -1959,19 +1957,8 @@ SPT.mapGraphRenderer = function(plugin, config)
 						value: [ chart.resultDataRowCell(dataj, tgtLoField), chart.resultDataRowCell(dataj, tgtLaField) ]
 					};
 					
-					if(srcIdField)
-						sd.id = chart.resultDataRowCell(dataj, srcIdField);
-					
-					if(srcCategoryField)
-					{
-						let category = chart.resultDataRowCell(dataj, srcCategoryField);
-						sd._categoryOrigin = category;
-						if(category)
-						{
-							sd.category = SPT.appendDistinct(categories, {name: category}, "name");
-							SPT.appendDistinct(legendData, {name: category}, "name");
-						}
-					}
+					SPT.originalDataOfData(sd, dataj);
+					SPT.originalDataOfData(td, dataj);
 					
 					if(srcValueField)
 					{
@@ -1982,16 +1969,13 @@ SPT.mapGraphRenderer = function(plugin, config)
 						max = (max == null ? sv : Math.max(max, sv));
 					}
 					
-					if(tgtIdField)
-						td.id = chart.resultDataRowCell(dataj, tgtIdField);
-					
-					if(tgtCategoryField)
+					if(srcCategoryField)
 					{
-						let category = chart.resultDataRowCell(dataj, tgtCategoryField);
-						td._categoryOrigin = category;
+						let category = chart.resultDataRowCell(dataj, srcCategoryField);
+						sd._categoryOrigin = category;
 						if(category)
 						{
-							td.category = SPT.appendDistinct(categories, {name: category}, "name");
+							sd.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
 							SPT.appendDistinct(legendData, {name: category}, "name");
 						}
 					}
@@ -2005,25 +1989,23 @@ SPT.mapGraphRenderer = function(plugin, config)
 						max = (max == null ? tv : Math.max(max, tv));
 					}
 					
-					let sidx = SPT.appendDistinct(seriesData, sd, (srcIdField ? "id" : "name"));
-					
-					//新插入
-					if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
+					if(tgtCategoryField)
 					{
-						SPT.originalDataOfData(sd, dataj);
+						let category = chart.resultDataRowCell(dataj, tgtCategoryField);
+						td._categoryOrigin = category;
+						if(category)
+						{
+							td.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
+							SPT.appendDistinct(legendData, {name: category}, "name");
+						}
 					}
 					
-					let tidx = SPT.appendDistinct(seriesData, td, (tgtIdField ? "id" : "name"));
-					
-					//新插入
-					if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
-					{
-						SPT.originalDataOfData(td, dataj);
-					}
+					SPT.appendDistinct(seriesData, sd, "name");
+					SPT.appendDistinct(seriesData, td, "name");
 					
 					//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
 					//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
-					let link = { source: seriesData[sidx].name, target: seriesData[tidx].name };
+					let link = { source: sd.name, target: td.name };
 					SPT.originalDataOfData(link, dataj);
 					seriesLinks.push(link);
 				}
@@ -2031,7 +2013,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 			
 			var series =
 			[{
-				name: seriesName, categories: categories, data: seriesData, links: seriesLinks
+				name: seriesName, categories: seriesCategories, data: seriesData, links: seriesLinks
 			}];
 			
 			this._configSingleSeries(chart, series[0], hasValueField);
