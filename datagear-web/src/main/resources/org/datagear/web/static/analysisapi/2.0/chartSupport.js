@@ -1845,303 +1845,206 @@ SPT._mapScatterRenderer = function(plugin, config)
 
 //地图关系图
 
-SPT.mapGraphRender = function(chart, options)
+SPT.mapGraphRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//map 可选，地图名
-			dataSignNames:
-			{
-				sourceId: "sourceId", sourceLongitude: "sourceLongitude", sourceLatitude: "sourceLatitude",
-				sourceName: "sourceName", sourceCategory: "sourceCategory", sourceValue: "sourceValue",
-				targetId: "targetId", targetLongitude: "targetLongitude", targetLatitude: "targetLatitude",
-				targetName: "targetName", targetCategory: "targetCategory", targetValue: "targetValue",
-				map: "map"
-			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		asyncRender: true,
+		asyncUpdate: true,
+		
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		geo:
-		{
-			id: 0,
-			roam: true
-			//将在下面和update中设置：
-			//map
-		},
-		series:
-		[
+			var options =
 			{
-				//将在update中设置：
-				//name
-				//data
-				//links
-				
-				id: 0,
-				type: "graph",
-		        coordinateSystem: "geo",
-				geoIndex: 0,
-		        layout: "none",
-				tooltip:
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				geo: { roam: true },
+				series:
+				[
+					{ type: "graph", coordinateSystem: "geo", layout: "none", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options,
+				(chart, renderOptions) =>
 				{
-					formatter: "{a}<br />{b}：{c}"
+					SPT.echartsMapChartInitMap(chart, renderOptions);
+				});
+			
+			SPT.echartsMapChartRender(chart, options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var legendData = [];
+			var seriesName = "";
+			var categories = [];
+			var seriesData = [];
+			var seriesLinks = [];
+			var map = null;
+			
+			var min = null, max = null;
+			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
+			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
+			var hasValueField = false;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let mapField = chart.dataSetFieldOfSign(dataSetBind, 12);
+				
+				if(CF.isEmpty(map) && mapField != null)
+					map = SPT.findNonEmpty(chart.resultColumnArrayDatas(result, mapField));
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+				
+				let srcIdField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let srcLoField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let srcLaField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				let srcNameField = chart.dataSetFieldOfSign(dataSetBind, 3);
+				let srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, 4);
+				let srcValueField = chart.dataSetFieldOfSign(dataSetBind, 5);
+				let tgtIdField = chart.dataSetFieldOfSign(dataSetBind, 6);
+				let tgtLoField = chart.dataSetFieldOfSign(dataSetBind, 7);
+				let tgtLaField = chart.dataSetFieldOfSign(dataSetBind, 8);
+				let tgtNameField = chart.dataSetFieldOfSign(dataSetBind, 9);
+				let tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, 10);
+				let tgtValueField = chart.dataSetFieldOfSign(dataSetBind, 11);
+				
+				if(!hasValueField && srcValueField != null)
+					hasValueField = true;
+				
+				let data = chart.resultDatas(result);
+				
+				for(let j=0; j<data.length; j++)
+				{
+					let dataj = data[j];
+					//ECharts-4.9.0时graph官方数据格式为【名/值数组】：{name: ..., value:[经度值, 纬度值, 关系数值]}
+					//ECharts-5.0+ 时graph官方数据格式为【名/X/Y/值】：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
+					//在ECharts由4.9.0升级至5.1.2版本后，【名/值数组】、【名/X/Y/值】格式都会报错：Can not read property 'off' of undefined，
+					//在修改了源码（修改位置参考DataGear-2.8.0版本echarts-5.1.2/echarts.js的58833行）同时采用【名/值数组】格式后才解决。
+					//在ECharts由5.1.2升级至5.2.0版本后，【名/X/Y/值】格式不会报错但是显示位置不对，【名/值数组】则可以正常展示
+					let sd =
+					{
+						name: chart.resultDataRowCell(dataj, srcNameField),
+						value: [ chart.resultDataRowCell(dataj, srcLoField), chart.resultDataRowCell(dataj, srcLaField) ]
+					};
+					let td =
+					{
+						name: chart.resultDataRowCell(dataj, tgtNameField),
+						value: [ chart.resultDataRowCell(dataj, tgtLoField), chart.resultDataRowCell(dataj, tgtLaField) ]
+					};
+					
+					if(srcIdField)
+						sd.id = chart.resultDataRowCell(dataj, srcIdField);
+					
+					if(srcCategoryField)
+					{
+						let category = chart.resultDataRowCell(dataj, srcCategoryField);
+						sd._categoryOrigin = category;
+						if(category)
+						{
+							sd.category = SPT.appendDistinct(categories, {name: category}, "name");
+							SPT.appendDistinct(legendData, {name: category}, "name");
+						}
+					}
+					
+					if(srcValueField)
+					{
+						let sv = chart.resultDataRowCell(dataj, srcValueField);
+						sd.value.push(sv);
+						
+						min = (min == null ? sv : Math.min(min, sv));
+						max = (max == null ? sv : Math.max(max, sv));
+					}
+					
+					if(tgtIdField)
+						td.id = chart.resultDataRowCell(dataj, tgtIdField);
+					
+					if(tgtCategoryField)
+					{
+						let category = chart.resultDataRowCell(dataj, tgtCategoryField);
+						td._categoryOrigin = category;
+						if(category)
+						{
+							td.category = SPT.appendDistinct(categories, {name: category}, "name");
+							SPT.appendDistinct(legendData, {name: category}, "name");
+						}
+					}
+					
+					if(tgtValueField)
+					{
+						let tv = chart.resultDataRowCell(dataj, tgtValueField);
+						td.value.push(tv);
+						
+						min = (min == null ? tv : Math.min(min, tv));
+						max = (max == null ? tv : Math.max(max, tv));
+					}
+					
+					let sidx = SPT.appendDistinct(seriesData, sd, (srcIdField ? "id" : "name"));
+					
+					//新插入
+					if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
+					{
+						SPT.originalDataOfData(sd, dataj);
+					}
+					
+					let tidx = SPT.appendDistinct(seriesData, td, (tgtIdField ? "id" : "name"));
+					
+					//新插入
+					if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
+					{
+						SPT.originalDataOfData(td, dataj);
+					}
+					
+					//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
+					let link = { source: sidx, target: tidx };
+					SPT.originalDataOfData(link, dataj);
+					seriesLinks.push(link);
 				}
 			}
-		]
-	},
-	options,
-	null,
-	function(renderOptions, chart)
-	{
-		SPT.echartsMapChartInitMap(chart, renderOptions);
-	});
-	
-	SPT.echartsMapChartRender(chart, options);
-};
-
-SPT.mapGraphUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var seriesName = "";
-	var categories = [];
-	var seriesData = [];
-	var seriesLinks = [];
-	var map = undefined;
-	
-	var min = undefined, max = undefined;
-	var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
-	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
+			
+			var series =
+			[{
+				name: seriesName, categories: categories, data: seriesData, links: seriesLinks
+			}];
+			
+			this._configSingleSeries(chart, series[0], true);
+			SPT.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
+			
+			var options = { legend: { data: legendData }, series: series };
+			
+			if(!CF.isEmpty(map))
+				options.geo = { map: map };
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsMapChartUpdate(chart, options);
+		},
 		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		//取任一不为空的地图名列值
-		if(!map)
-			map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
-		
-		if(!seriesName)
-			seriesName = chart.dataSetAlias(dataSetBind);
-		
-		var sip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceId);
-		var slop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLongitude);
-		var slap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLatitude);
-		var snp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceName);
-		var scp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceCategory);
-		var svp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceValue);
-		var tip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetId);
-		var tlop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLongitude);
-		var tlap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLatitude);
-		var tnp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetName);
-		var tcp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetCategory);
-		var tvp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetValue);
-		
-		var data = chart.resultDatas(result);
-		
-		for(var j=0; j<data.length; j++)
+		_configSingleSeries: function(chart, series, hasValueField)
 		{
-			//ECharts-4.9.0时graph官方数据格式为【名/值数组】：{name: ..., value:[经度值, 纬度值, 关系数值]}
-			//ECharts-5.0+ 时graph官方数据格式为【名/X/Y/值】：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
-			//在ECharts由4.9.0升级至5.1.2版本后，【名/值数组】、【名/X/Y/值】格式都会报错：Can not read property 'off' of undefined，
-			//在修改了源码（修改位置参考DataGear-2.8.0版本echarts-5.1.2/echarts.js的58833行）同时采用【名/值数组】格式后才解决。
-			//在ECharts由5.1.2升级至5.2.0版本后，【名/X/Y/值】格式不会报错但是显示位置不对，【名/值数组】则可以正常展示
-			var sd = { name: chart.resultDataRowCell(data[j], snp), value: [ chart.resultDataRowCell(data[j], slop), chart.resultDataRowCell(data[j], slap) ] };
-			var td = { name: chart.resultDataRowCell(data[j], tnp), value: [ chart.resultDataRowCell(data[j], tlop), chart.resultDataRowCell(data[j], tlap) ] };
-			
-			if(sip)
-				sd.id = chart.resultDataRowCell(data[j], sip);
-			
-			if(scp)
-			{
-				var category = chart.resultDataRowCell(data[j], scp);
-				sd._categoryOrigin = category;
-				if(category)
-				{
-					sd.category = SPT.appendDistinct(categories, {name: category}, "name");
-					SPT.appendDistinct(legendData, category);
-				}
-			}
-			
-			if(svp)
-			{
-				var sv = chart.resultDataRowCell(data[j], svp);
-				sd.value.push(sv);
-				
-				min = (min == null ? sv : Math.min(min, sv));
-				max = (max == null ? sv : Math.max(max, sv));
-			}
-			
-			if(tip)
-				td.id = chart.resultDataRowCell(data[j], tip);
-			
-			if(tcp)
-			{
-				var category = chart.resultDataRowCell(data[j], tcp);
-				td._categoryOrigin = category;
-				if(category)
-				{
-					td.category = SPT.appendDistinct(categories, {name: category}, "name");
-					SPT.appendDistinct(legendData, category);
-				}
-			}
-			
-			if(tvp)
-			{
-				var tv = chart.resultDataRowCell(data[j], tvp);
-				td.value.push(tv);
-				
-				min = (min == null ? tv : Math.min(min, tv));
-				max = (max == null ? tv : Math.max(max, tv));
-			}
-			
-			var sidx = SPT.appendDistinct(seriesData, sd, (sip ? "id" : "name"));
-			
-			//新插入
-			if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
-			{
-				chart.originalDataIndex(sd, dataSetBind, j);
-			}
-			
-			var tidx = SPT.appendDistinct(seriesData, td, (tip ? "id" : "name"));
-			
-			//新插入
-			if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
-			{
-				chart.originalDataIndex(td, dataSetBind, j);
-			}
-			
-			//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
-			var link = {};
-			link.source = sidx;
-			link.target = tidx;
-			
-			chart.originalDataIndex(link, dataSetBind, j);
-			
-			seriesLinks.push(link);
+			series.type = "graph";
+			series.coordinateSystem = "geo";
+			series.encode = { tooltip: (hasValueField ? [0, 1, 2] : [0, 1]) };
 		}
-	}
+	};
 	
-	var series = [ { id: 0, type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks, 
-		        		coordinateSystem: "geo" } ];
-	
-	SPT.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
-	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	
-	if(map)
-	{
-		options.geo = { id: 0, map: map };
-	}
-	
-	SPT.echartsMapChartUpdate(chart, options);
-	
-	chart.liveData("mapGraphSeriesData", seriesData);
-};
-
-SPT.mapGraphResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.mapGraphDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.mapGraphOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.mapGraphSetChartEventData);
-};
-
-SPT.mapGraphOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.mapGraphSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	
-	var data = {};
-	
-	//节点，仅使用源数据标记对象
-	if(echartsEventParams.dataType == "node")
-	{
-		data[dataSignNames.sourceId] = echartsData.id;
-		data[dataSignNames.sourceLongitude] = echartsData.value[0];
-		data[dataSignNames.sourceLatitude] = echartsData.value[1];
-		data[dataSignNames.sourceName] = echartsData.name;
-		data[dataSignNames.sourceCategory] = echartsData._categoryOrigin;
-		if(echartsData.value.length > 2)
-			data[dataSignNames.sourceValue] = echartsData.value[2];
-		
-		chart.eventData(chartEvent, data);
-		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-	}
-	//边
-	else if(echartsEventParams.dataType == "edge")
-	{
-		var seriesData = chart.liveData("mapGraphSeriesData");
-		var sourceData = seriesData[echartsData.source];
-		var targetData = seriesData[echartsData.target];
-		
-		data[dataSignNames.sourceId] = sourceData.id;
-		data[dataSignNames.sourceLongitude] = sourceData.value[0];
-		data[dataSignNames.sourceLatitude] = sourceData.value[1];
-		data[dataSignNames.sourceName] = sourceData.name;
-		data[dataSignNames.sourceCategory] = sourceData._categoryOrigin;
-		if(sourceData.value.length > 2)
-			data[dataSignNames.sourceValue] = sourceData.value[2];
-		
-		if(targetData)
-		{
-			data[dataSignNames.targetId] = targetData.id;
-			data[dataSignNames.targetLongitude] = targetData.value[0];
-			data[dataSignNames.targetLatitude] = targetData.value[1];
-			data[dataSignNames.targetName] = targetData.name;
-			data[dataSignNames.targetCategory] = targetData._categoryOrigin;
-			if(targetData.value.length > 2)
-				data[dataSignNames.targetValue] = targetData.value[2];
-		}
-		
-		chart.eventData(chartEvent, data);
-		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-	}
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //地图路径图
