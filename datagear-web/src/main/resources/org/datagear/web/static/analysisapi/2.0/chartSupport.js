@@ -2142,195 +2142,122 @@ SPT.mapGraphRenderer = function(plugin, config)
 
 //地图路径图
 
-SPT.mapLinesRender = function(chart, options)
+SPT.mapLinesRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 可选，路径名称，同一名称的坐标组成一条路径，如果不选，整个数据集组成一条路径
-			//longitude 路径经度
-			//latitude 路径纬度
-			//map 可选，地图名
-			dataSignNames: { name: "name", longitude: "longitude", latitude: "latitude", map: "map" }
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		asyncRender: true,
+		asyncUpdate: true,
+		
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		geo:
-		{
-			id: 0,
-			roam: true
-			//将在下面和update中设置：
-			//map
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "lines",
-				coordinateSystem: "geo",
-				geoIndex: 0,
-				polyline: true
-			}
-		]
-	},
-	options,
-	null,
-	function(renderOptions, chart)
-	{
-		SPT.echartsMapChartInitMap(chart, renderOptions);
-	});
-	
-	SPT.echartsMapChartRender(chart, options);
-};
-
-SPT.mapLinesUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	var map = undefined;
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		//取任一不为空的地图名列值
-		if(!map)
-			map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var lop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.longitude);
-		var lap = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.latitude);
-		
-		var data = null;
-		if(np)
-		{
-			//同名称的是一条路径
+				title: { text: chart.name() },
+				legend: { data: [] },
+				geo: { roam: true },
+				series:
+				[
+					{ type: "lines", data: [], coordinateSystem: "geo", polyline: true }
+				]
+			};
 			
-			var names = [];
-			var coordsInfos = {};
-			
-			data = chart.resultNameValueDatas(result, np, [lop, lap]);
-			
-			for(var j=0; j<data.length; j++)
-			{
-				var dj = data[j];
-				var name = dj.name;
-				var coordsInfo = coordsInfos[name];
-				
-				if(!coordsInfo)
+			options = SPT.prepareEChartsRenderOptions(chart, options,
+				(chart, renderOptions) =>
 				{
-					names.push(name);
-					coordsInfo = (coordsInfos[name] = { coords: [], originalDataIndexes: [] });
+					SPT.echartsMapChartInitMap(chart, renderOptions);
+				});
+			
+			SPT.echartsMapChartRender(chart, options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 3;
+			
+			var legendData = [];
+			var series = [];
+			var map = null;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let loField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let laField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
+				
+				let data = null;
+				
+				//同名称的是一条路径
+				if(nameField)
+				{
+					data = chart.resultNameValueDatas(result, nameField, [loField, laField]);
+					let names = [];
+					let coordsInfos = {};
+					
+					for(let j=0; j<data.length; j++)
+					{
+						let dj = data[j];
+						let name = dj.name;
+						let coordsInfo = coordsInfos[name];
+						
+						if(!coordsInfo)
+						{
+							names.push(name);
+							coordsInfo = { coords: [], originalData: [] };
+							coordsInfos[name] = coordsInfo;
+						}
+						
+						coordsInfo.coords.push(dj.value);
+						coordsInfo.originalData.push(dj);
+					}
+					
+					data = [];
+					
+					for(let j=0; j<names.length; j++)
+					{
+						let name = names[j];
+						data[j] = { name: name, coords: coordsInfos[name].coords };
+						SPT.originalDataOfData(data[j], coordsInfos[name].originalData);
+					}
+				}
+				//整个数据集是一条路径
+				else
+				{
+					data = chart.resultRowArrayDatas(result, [loField, laField]);
+					data = [ { name: dataSetAlias, coords: data } ];
+					SPT.originalDataOfData(data[0], chart.resultDatas(result));
 				}
 				
-				coordsInfo.coords.push(dj.value);
-				coordsInfo.originalDataIndexes.push(j);
+				legendData.push({name: dataSetAlias});
+				series.push({ name: dataSetAlias, data: data, type: "lines", coordinateSystem: "geo", polyline: true });
 			}
 			
-			data = [];
+			var options = { legend: {data: legendData}, series: series };
 			
-			for(var j=0; j<names.length; j++)
-			{
-				var name = names[j];
-				data[j] = { name: name, coords: coordsInfos[name].coords };
-				chart.originalDataIndex(data[j], dataSetBind, coordsInfos[name].originalDataIndexes);
-			}
-		}
-		else
-		{
-			//整个数据集是一条路径
-			data = chart.resultRowArrayDatas(result, [lop, lap]);
-			var originalDataIndexes = [];
-			for(var j=0;j<data.length; j++)
-				originalDataIndexes[j] = j;
+			if(!CF.isEmpty(map))
+				options.geo = { map: map };
 			
-			data = [ { name: dataSetAlias, coords: data } ];
-			chart.originalDataIndex(data[0], dataSetBind, originalDataIndexes);
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			SPT.echartsMapChartUpdate(chart, options);
 		}
-		
-		legendData.push(dataSetAlias);
-		series.push({ id: series.length, name: dataSetAlias, data: data, type: "lines", coordinateSystem: "geo", polyline: true });
-	}
+	};
 	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	
-	if(map)
-	{
-		options.geo = { id: 0, map: map };
-	}
-	
-	SPT.echartsMapChartUpdate(chart, options);
-};
-
-SPT.mapLinesResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.mapLinesDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.mapLinesOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.mapLinesSetChartEventData);
-};
-
-SPT.mapLinesOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.mapLinesSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	
-	var data = {};
-	data[dataSignNames.name] = echartsData.name;
-	var dataLongitude = (data[dataSignNames.longitude] = []);
-	var dataLatitude = (data[dataSignNames.latitude] = []);
-	
-	var coords = (echartsData.coords || []);
-	for(var i=0; i<coords.length; i++)
-	{
-		var coord = coords[i];
-		dataLongitude.push(coord[0]);
-		dataLatitude.push(coord[1]);
-	}
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //地图飞线图
