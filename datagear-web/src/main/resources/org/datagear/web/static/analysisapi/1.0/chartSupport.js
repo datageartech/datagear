@@ -2786,7 +2786,7 @@
 		for(var i=0; i<dataSetBinds.length; i++)
 		{
 			var dataSetBind = dataSetBinds[i];
-			
+			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(chartResult, dataSetBind);
 			
 			//取任一不为空的地图名列值
@@ -2794,7 +2794,7 @@
 				map = chartSupport.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
 			
 			if(!seriesName)
-				seriesName = chart.dataSetAlias(dataSetBind);
+				seriesName = dataSetAlias;
 			
 			var sip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceId);
 			var slop = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLongitude);
@@ -2824,16 +2824,10 @@
 				if(sip)
 					sd.id = chart.resultDataRowCell(data[j], sip);
 				
-				if(scp)
-				{
-					var category = chart.resultDataRowCell(data[j], scp);
-					sd._categoryOrigin = category;
-					if(category)
-					{
-						sd.category = chartSupport.appendDistinct(categories, {name: category}, "name");
-						chartSupport.appendDistinct(legendData, category);
-					}
-				}
+				var srcCategory = (scp ? chart.resultDataRowCell(data[j], scp) : dataSetAlias);
+				sd._categoryOrigin = srcCategory;
+				sd.category = chartSupport.appendDistinct(categories, {name: srcCategory}, "name");
+				chartSupport.appendDistinct(legendData, srcCategory);
 				
 				if(svp)
 				{
@@ -2847,16 +2841,10 @@
 				if(tip)
 					td.id = chart.resultDataRowCell(data[j], tip);
 				
-				if(tcp)
-				{
-					var category = chart.resultDataRowCell(data[j], tcp);
-					td._categoryOrigin = category;
-					if(category)
-					{
-						td.category = chartSupport.appendDistinct(categories, {name: category}, "name");
-						chartSupport.appendDistinct(legendData, category);
-					}
-				}
+				var tgtCategory = (tcp ? chart.resultDataRowCell(data[j], tcp) : dataSetAlias);
+				td._categoryOrigin = tgtCategory;
+				td.category = chartSupport.appendDistinct(categories, {name: tgtCategory}, "name");
+				chartSupport.appendDistinct(legendData, tgtCategory);
 				
 				if(tvp)
 				{

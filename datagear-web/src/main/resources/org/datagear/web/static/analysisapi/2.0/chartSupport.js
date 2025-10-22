@@ -1938,11 +1938,6 @@ SPT.mapGraphRenderer = function(plugin, config)
 				for(let j=0; j<data.length; j++)
 				{
 					let dataj = data[j];
-					//ECharts-4.9.0时graph官方数据格式为【名/值数组】：{name: ..., value:[经度值, 纬度值, 关系数值]}
-					//ECharts-5.0+ 时graph官方数据格式为【名/X/Y/值】：{name: ..., x: 经度值, y: 纬度值, value: 关系数值}
-					//在ECharts由4.9.0升级至5.1.2版本后，【名/值数组】、【名/X/Y/值】格式都会报错：Can not read property 'off' of undefined，
-					//在修改了源码（修改位置参考DataGear-2.8.0版本echarts-5.1.2/echarts.js的58833行）同时采用【名/值数组】格式后才解决。
-					//在ECharts由5.1.2升级至5.2.0版本后，【名/X/Y/值】格式不会报错但是显示位置不对，【名/值数组】则可以正常展示
 					let sd =
 					{
 						name: chart.resultDataRowCell(dataj, srcNameField),
@@ -1966,16 +1961,10 @@ SPT.mapGraphRenderer = function(plugin, config)
 						max = (max == null ? sv : Math.max(max, sv));
 					}
 					
-					if(srcCategoryField)
-					{
-						let category = chart.resultDataRowCell(dataj, srcCategoryField);
-						sd._categoryOrigin = category;
-						if(category)
-						{
-							sd.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
-							SPT.appendDistinct(legendData, {name: category}, "name");
-						}
-					}
+					let srcCategory = (srcCategoryField ? chart.resultDataRowCell(dataj, srcCategoryField) : dataSetAlias);
+					sd._categoryOrigin = srcCategory;
+					sd.category = SPT.appendDistinct(seriesCategories, {name: srcCategory}, "name");
+					SPT.appendDistinct(legendData, {name: srcCategory}, "name");
 					
 					if(tgtValueField)
 					{
@@ -1986,16 +1975,10 @@ SPT.mapGraphRenderer = function(plugin, config)
 						max = (max == null ? tv : Math.max(max, tv));
 					}
 					
-					if(tgtCategoryField)
-					{
-						let category = chart.resultDataRowCell(dataj, tgtCategoryField);
-						td._categoryOrigin = category;
-						if(category)
-						{
-							td.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
-							SPT.appendDistinct(legendData, {name: category}, "name");
-						}
-					}
+					let tgtCategory = (tgtCategoryField ? chart.resultDataRowCell(dataj, tgtCategoryField) : dataSetAlias);
+					td._categoryOrigin = tgtCategory;
+					td.category = SPT.appendDistinct(seriesCategories, {name: tgtCategory}, "name");
+					SPT.appendDistinct(legendData, {name: tgtCategory}, "name");
 					
 					SPT.appendDistinct(seriesData, sd, "name");
 					SPT.appendDistinct(seriesData, td, "name");
