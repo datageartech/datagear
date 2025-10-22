@@ -691,6 +691,7 @@ EU._buildEchartsTheme = function(chart)
 				"shadowColor" : shadowColor
 			},
 			"lineStyle" : {
+				"width": 2,
                 "color": "source",
                 "curveness": 0.3
 			},
@@ -706,7 +707,7 @@ EU._buildEchartsTheme = function(chart)
 					"shadowColor" : shadowColor
 				},
 				"lineStyle" : {
-					"width": 4
+					"width": 5
 				},
 				"focus": "adjacency",
 				"legendHoverLink": true,
