@@ -1894,7 +1894,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-			var mapSignIndex = 1;
+			var mapSignIndex = 3;
 			
 			var options =
 			{
@@ -1905,13 +1905,25 @@ SPT.mapGraphRenderer = function(plugin, config)
 			var dataRange = { min: null, max: null };
 			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
 			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
+			var linkById = false;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
 				let dataSetBind = dataSetBinds[i];
 				
-				//合并数据集
+				//节点数据集
 				if(chart.isDataSetSigned(dataSetBind, 0))
+				{
+					linkById = (chart.dataSetFieldOfSign(dataSetBind, [0, 0]) != null);
+					this._inflateOptionsForNode(chart, chartResult, dataSetBinds, i, options, dataRange);
+				}
+				//关系数据集
+				else if(chart.isDataSetSigned(dataSetBind, 1))
+				{
+					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options, linkById);
+				}
+				//合并数据集
+				else if(chart.isDataSetSigned(dataSetBind, 2))
 				{
 					this._inflateOptionsForJoin(chart, chartResult, dataSetBinds, i, options, dataRange);
 				}
@@ -1939,6 +1951,96 @@ SPT.mapGraphRenderer = function(plugin, config)
 			SPT.echartsMapChartUpdate(chart, options);
 		},
 		
+		_inflateOptionsForNode: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
+		{
+			var legendData = options.legend.data;
+			var seriesCategories = options.series[0].categories;
+			var seriesData = options.series[0].data;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var dataSetAlias = chart.dataSetAlias(dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var idField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
+			var loField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
+			var laField = chart.dataSetFieldOfSign(dataSetBind, [0, 3]);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, [0, 4]);
+			var categoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 5]);
+			
+			var data = chart.resultDatas(result);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let dataj = data[i];
+				let node =
+				{
+					name: chart.resultDataRowCell(dataj, nameField),
+					value: [ chart.resultDataRowCell(dataj, loField), chart.resultDataRowCell(dataj, laField) ]
+				};
+				
+				SPT.originalDataOfData(node, dataj);
+				
+				if(idField)
+				{
+					let id = chart.resultDataRowCell(dataj, idField);
+					node._originalId = id;
+				}
+				
+				if(valueField)
+				{
+					let v = chart.resultDataRowCell(dataj, valueField);
+					node.value.push(v);
+					
+					dataRange.min = (dataRange.min == null ? v : Math.min(dataRange.min, v));
+					dataRange.max = (dataRange.max == null ? v : Math.max(dataRange.max, v));
+				}
+				
+				let category = (categoryField ? chart.resultDataRowCell(dataj, categoryField) : dataSetAlias);
+				node._categoryName = category;
+				node.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
+				SPT.appendDistinct(legendData, {name: category}, "name");
+				
+				SPT.appendDistinct(seriesData, node, (idField ? "_originalId" : "name"));
+			}
+		},
+		
+		_inflateOptionsForLink: function(chart, chartResult, dataSetBinds, dsbIndex, options, linkById)
+		{
+			var seriesData = options.series[0].data;
+			var seriesLinks = options.series[0].links;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var sourceField = chart.dataSetFieldOfSign(dataSetBind, [1, 0]);
+			var targetField = chart.dataSetFieldOfSign(dataSetBind, [1, 1]);
+			var fieldMap = { source: sourceField, target: targetField };
+			
+			var data = chart.resultMapDatas(result, fieldMap);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let link = data[i];
+				
+				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
+				//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
+				if(linkById)
+				{
+					let srcIdx = SPT.findInArray(seriesData, link.source, "_originalId");
+					let srcNode = (srcIdx >= 0 ? seriesData[srcIdx] : null);
+					let tgtIdx = SPT.findInArray(seriesData, link.target, "_originalId");
+					let tgtNode = (tgtIdx >= 0 ? seriesData[tgtIdx] : null);
+					
+					if(srcNode != null && tgtNode != null)
+						link = { source: srcNode.name, target: tgtNode.name };
+				}
+				
+				if(link != null)
+					seriesLinks.push(link);
+			}
+		},
+		
 		_inflateOptionsForJoin: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
 		{
 			var legendData = options.legend.data;
@@ -1950,22 +2052,22 @@ SPT.mapGraphRenderer = function(plugin, config)
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(chartResult, dataSetBind);
 			
-			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
-			var srcLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
-			var srcLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
-			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 3]);
-			var srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 4]);
-			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 5]);
-			var tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 6]);
-			var tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 7]);
-			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 8]);
-			var tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 9]);
+			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 0]);
+			var srcLoField = chart.dataSetFieldOfSign(dataSetBind, [2, 1]);
+			var srcLaField = chart.dataSetFieldOfSign(dataSetBind, [2, 2]);
+			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 3]);
+			var srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 4]);
+			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 5]);
+			var tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [2, 6]);
+			var tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [2, 7]);
+			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 8]);
+			var tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 9]);
 			
 			var data = chart.resultDatas(result);
 			
-			for(let j=0; j<data.length; j++)
+			for(let i=0; i<data.length; i++)
 			{
-				let dataj = data[j];
+				let dataj = data[i];
 				let sd =
 				{
 					name: chart.resultDataRowCell(dataj, srcNameField),
@@ -1990,7 +2092,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				}
 				
 				let srcCategory = (srcCategoryField ? chart.resultDataRowCell(dataj, srcCategoryField) : dataSetAlias);
-				sd._categoryOrigin = srcCategory;
+				sd._categoryName = srcCategory;
 				sd.category = SPT.appendDistinct(seriesCategories, {name: srcCategory}, "name");
 				SPT.appendDistinct(legendData, {name: srcCategory}, "name");
 				
@@ -2004,12 +2106,12 @@ SPT.mapGraphRenderer = function(plugin, config)
 				}
 				
 				let tgtCategory = (tgtCategoryField ? chart.resultDataRowCell(dataj, tgtCategoryField) : dataSetAlias);
-				td._categoryOrigin = tgtCategory;
+				td._categoryName = tgtCategory;
 				td.category = SPT.appendDistinct(seriesCategories, {name: tgtCategory}, "name");
 				SPT.appendDistinct(legendData, {name: tgtCategory}, "name");
 				
-				SPT.appendDistinct(seriesData, sd, "name");
-				SPT.appendDistinct(seriesData, td, "name");
+				this._appendNode(seriesData, sd);
+				this._appendNode(seriesData, td);
 				
 				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
 				//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
@@ -2019,12 +2121,18 @@ SPT.mapGraphRenderer = function(plugin, config)
 			}
 		},
 		
-		_configSingleSeries: function(chart, series, hasValueField)
+		_appendNode: function(seriesData, node)
+		{
+			return SPT.appendDistinct(seriesData, node, "name");
+		},
+		
+		_configSingleSeries: function(chart, series)
 		{
 			series.type = "graph";
 			series.coordinateSystem = "geo";
+			
 			//ECharts-6.0中这样设置仍不会显示第三个数值，所以上面自定义了tooltip.formatter选项
-			series.encode = { tooltip: (hasValueField ? [0, 1, 2] : [0, 1]) };
+			//series.encode = { tooltip: (hasValueField ? [0, 1, 2] : [0, 1]) };
 		}
 	};
 	
