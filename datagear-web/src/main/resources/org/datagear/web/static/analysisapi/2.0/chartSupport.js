@@ -1680,7 +1680,6 @@ SPT.mapRenderer = function(plugin, config)
 			
 			var options = { visualMap: visualMap, series: series };
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			
 			SPT.echartsMapChartUpdate(chart, options);
 		}
 	};
@@ -1827,7 +1826,6 @@ SPT._mapScatterRenderer = function(plugin, config)
 				options.geo = { map: map };
 			
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			
 			SPT.echartsMapChartUpdate(chart, options);
 		},
 		
@@ -1898,118 +1896,127 @@ SPT.mapGraphRenderer = function(plugin, config)
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			var mapSignIndex = 1;
 			
-			var legendData = [];
-			var seriesName = "";
-			var seriesCategories = [];
-			var seriesData = [];
-			var seriesLinks = [];
-			var map = null;
+			var options =
+			{
+				legend: { data: [] },
+				series: [{ name: "", categories: [], data: [], links: [] }]
+			};
 			
-			var min = null, max = null;
+			var dataRange = { min: null, max: null };
 			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
 			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
-			var hasValueField = false;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
 				let dataSetBind = dataSetBinds[i];
-				let dataSetAlias = chart.dataSetAlias(dataSetBind);
-				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				if(CF.isEmpty(seriesName))
-					seriesName = dataSetAlias;
-				
-				let srcNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
-				let srcLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
-				let srcLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
-				let srcValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 3]);
-				let srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 4]);
-				let tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 5]);
-				let tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 6]);
-				let tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 7]);
-				let tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 8]);
-				let tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 9]);
-				
-				if(!hasValueField && srcValueField != null)
-					hasValueField = true;
-				
-				let data = chart.resultDatas(result);
-				
-				for(let j=0; j<data.length; j++)
+				//合并数据集
+				if(chart.isDataSetSigned(dataSetBind, 0))
 				{
-					let dataj = data[j];
-					let sd =
-					{
-						name: chart.resultDataRowCell(dataj, srcNameField),
-						value: [ chart.resultDataRowCell(dataj, srcLoField), chart.resultDataRowCell(dataj, srcLaField) ]
-					};
-					let td =
-					{
-						name: chart.resultDataRowCell(dataj, tgtNameField),
-						value: [ chart.resultDataRowCell(dataj, tgtLoField), chart.resultDataRowCell(dataj, tgtLaField) ]
-					};
-					
-					SPT.originalDataOfData(sd, dataj);
-					SPT.originalDataOfData(td, dataj);
-					
-					if(srcValueField)
-					{
-						let sv = chart.resultDataRowCell(dataj, srcValueField);
-						sd.value.push(sv);
-						
-						min = (min == null ? sv : Math.min(min, sv));
-						max = (max == null ? sv : Math.max(max, sv));
-					}
-					
-					let srcCategory = (srcCategoryField ? chart.resultDataRowCell(dataj, srcCategoryField) : dataSetAlias);
-					sd._categoryOrigin = srcCategory;
-					sd.category = SPT.appendDistinct(seriesCategories, {name: srcCategory}, "name");
-					SPT.appendDistinct(legendData, {name: srcCategory}, "name");
-					
-					if(tgtValueField)
-					{
-						let tv = chart.resultDataRowCell(dataj, tgtValueField);
-						td.value.push(tv);
-						
-						min = (min == null ? tv : Math.min(min, tv));
-						max = (max == null ? tv : Math.max(max, tv));
-					}
-					
-					let tgtCategory = (tgtCategoryField ? chart.resultDataRowCell(dataj, tgtCategoryField) : dataSetAlias);
-					td._categoryOrigin = tgtCategory;
-					td.category = SPT.appendDistinct(seriesCategories, {name: tgtCategory}, "name");
-					SPT.appendDistinct(legendData, {name: tgtCategory}, "name");
-					
-					SPT.appendDistinct(seriesData, sd, "name");
-					SPT.appendDistinct(seriesData, td, "name");
-					
-					//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
-					//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
-					let link = { source: sd.name, target: td.name };
-					SPT.originalDataOfData(link, dataj);
-					seriesLinks.push(link);
+					this._inflateOptionsForJoin(chart, chartResult, dataSetBinds, i, options, dataRange);
 				}
 				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
+				if(CF.isEmpty(options.series[0].name))
+					options.series[0].name = chart.dataSetAlias(dataSetBind);
+				
+				if(!options.geo || !options.geo.map)
+				{
+					let result = chart.resultOf(chartResult, dataSetBind);
+					let map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
+					
+					if(!CF.isEmpty(map))
+					{
+						options.geo = (options.geo || {});
+						options.geo.map = map;
+					}
+				}
 			}
 			
-			var series =
-			[{
-				name: seriesName, categories: seriesCategories, data: seriesData, links: seriesLinks
-			}];
-			
-			this._configSingleSeries(chart, series[0], hasValueField);
-			SPT.evalSeriesDataValueSymbolSize(series, min, max, symbolSizeMax, symbolSizeMin, "value", 2);
-			
-			var options = { legend: { data: legendData }, series: series };
-			
-			if(!CF.isEmpty(map))
-				options.geo = { map: map };
+			this._configSingleSeries(chart, options.series[0]);
+			SPT.evalSeriesDataValueSymbolSize(options.series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
 			
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			
 			SPT.echartsMapChartUpdate(chart, options);
+		},
+		
+		_inflateOptionsForJoin: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
+		{
+			var legendData = options.legend.data;
+			var seriesCategories = options.series[0].categories;
+			var seriesData = options.series[0].data;
+			var seriesLinks = options.series[0].links;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var dataSetAlias = chart.dataSetAlias(dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+			var srcLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
+			var srcLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
+			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 3]);
+			var srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 4]);
+			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [0, 5]);
+			var tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [0, 6]);
+			var tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [0, 7]);
+			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [0, 8]);
+			var tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 9]);
+			
+			var data = chart.resultDatas(result);
+			
+			for(let j=0; j<data.length; j++)
+			{
+				let dataj = data[j];
+				let sd =
+				{
+					name: chart.resultDataRowCell(dataj, srcNameField),
+					value: [ chart.resultDataRowCell(dataj, srcLoField), chart.resultDataRowCell(dataj, srcLaField) ]
+				};
+				let td =
+				{
+					name: chart.resultDataRowCell(dataj, tgtNameField),
+					value: [ chart.resultDataRowCell(dataj, tgtLoField), chart.resultDataRowCell(dataj, tgtLaField) ]
+				};
+				
+				SPT.originalDataOfData(sd, dataj);
+				SPT.originalDataOfData(td, dataj);
+				
+				if(srcValueField)
+				{
+					let sv = chart.resultDataRowCell(dataj, srcValueField);
+					sd.value.push(sv);
+					
+					dataRange.min = (dataRange.min == null ? sv : Math.min(dataRange.min, sv));
+					dataRange.max = (dataRange.max == null ? sv : Math.max(dataRange.max, sv));
+				}
+				
+				let srcCategory = (srcCategoryField ? chart.resultDataRowCell(dataj, srcCategoryField) : dataSetAlias);
+				sd._categoryOrigin = srcCategory;
+				sd.category = SPT.appendDistinct(seriesCategories, {name: srcCategory}, "name");
+				SPT.appendDistinct(legendData, {name: srcCategory}, "name");
+				
+				if(tgtValueField)
+				{
+					let tv = chart.resultDataRowCell(dataj, tgtValueField);
+					td.value.push(tv);
+					
+					dataRange.min = (dataRange.min == null ? tv : Math.min(dataRange.min, tv));
+					dataRange.max = (dataRange.max == null ? tv : Math.max(dataRange.max, tv));
+				}
+				
+				let tgtCategory = (tgtCategoryField ? chart.resultDataRowCell(dataj, tgtCategoryField) : dataSetAlias);
+				td._categoryOrigin = tgtCategory;
+				td.category = SPT.appendDistinct(seriesCategories, {name: tgtCategory}, "name");
+				SPT.appendDistinct(legendData, {name: tgtCategory}, "name");
+				
+				SPT.appendDistinct(seriesData, sd, "name");
+				SPT.appendDistinct(seriesData, td, "name");
+				
+				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
+				//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
+				let link = { source: sd.name, target: td.name };
+				SPT.originalDataOfData(link, dataj);
+				seriesLinks.push(link);
+			}
 		},
 		
 		_configSingleSeries: function(chart, series, hasValueField)
