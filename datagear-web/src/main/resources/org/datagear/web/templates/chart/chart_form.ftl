@@ -878,22 +878,24 @@
 			{
 				re.push(dsi);
 			}
-		}
-		
-		if(dsb.extSignObjs)
-		{
-			//三级字段标记目前没有应用场景，暂时没有必要支持
-			$.each(dsb.extSignObjs, function(idx, signObj)
+			else if(po.isDataSignTargetDataset(dsi) && dsb.extSignObjs)
 			{
-				var signObjChildren = (signObj.children || []);
-				for(var i=0; i<signObjChildren.length; i++)
+				//三级字段标记目前没有应用场景，暂时没有必要支持
+				$.each(dsb.extSignObjs, function(idx, signObj)
 				{
-					if(po.isDataSignTargetField(signObjChildren[i]))
+					if(dsi.name == signObj.name)
 					{
-						re.push(signObjChildren[i]);
+						var signObjChildren = (signObj.children || []);
+						for(var i=0; i<signObjChildren.length; i++)
+						{
+							if(po.isDataSignTargetField(signObjChildren[i]))
+							{
+								re.push(signObjChildren[i]);
+							}
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 		
 		return re;
@@ -924,7 +926,7 @@
 	po.formatDataSignLabel = function(dataSign)
 	{
 		if(dataSign.nameLabel && dataSign.nameLabel.value)
-			return dataSign.nameLabel.value + "("+dataSign.name+")";
+			return dataSign.nameLabel.value;
 		else
 			return dataSign.name;
 	};
