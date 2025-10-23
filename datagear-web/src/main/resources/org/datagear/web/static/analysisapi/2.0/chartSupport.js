@@ -2399,171 +2399,114 @@ SPT.mapFlylineRenderer = function(plugin, config)
 
 //地图热力图
 
-SPT.mapHeatmapRender = function(chart, options)
+SPT.mapHeatmapRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 经度
-			//value 纬度
-			//weight 热力
-			//map 可选，地图名
-			dataSignNames: { name: "name", value: "value", weight: "weight", map: "map" }
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		asyncRender: true,
+		asyncUpdate: true,
+		
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		geo:
-		{
-			id: 0,
-			roam: true
-			//将在下面和update中设置：
-			//map
-		},
-		visualMap:
-		{
-			//将在update中设置：
-			//min
-			//max
-			
-			id: 0,
-			show: false,
-			top: "top",
-			calculable: true
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
+				title: { text: chart.name() },
+				geo: { roam: true },
+				visualMap: { show: false },
+				series:
+				[
+					{ type: "heatmap", data: [], coordinateSystem: "geo", pointSize: 5, blurSize: 6 }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options,
+				(chart, renderOptions) =>
+				{
+					SPT.echartsMapChartInitMap(chart, renderOptions);
+				});
+			
+			SPT.echartsMapChartRender(chart, options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 4;
+			
+			var seriesName = "";
+			var seriesData = [];
+			var dataRange = { min: null, max: null };
+			var map = null;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let longitudeField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let latitudeField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 3);
+				
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
+				
+				let data = chart.resultNameValueDatas(result, nameField, [ longitudeField, latitudeField, valueField ]);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				SPT.evalArrayDataRange(dataRange, data, "value", 2);
+				
+				seriesData = seriesData.concat(data);
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+			}
+			
+			var pointSize = this._evalPointSize(chart);
+			var blurSize = parseInt(pointSize*1.2);
+			
+			var series =
+			[{
+				name: seriesName,
+				data: seriesData,
 				type: "heatmap",
 				coordinateSystem: "geo",
-				geoIndex: 0,
-				pointSize: 5,
-				blurSize: 6
-			}
-		]
-	},
-	options,
-	null,
-	function(renderOptions, chart)
-	{
-		SPT.echartsMapChartInitMap(chart, renderOptions);
-	});
-	
-	SPT.echartsMapChartRender(chart, options);
-};
-
-SPT.mapHeatmapUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	var chartEle = chart.elementJquery();
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var dataRange = { min: undefined, max: undefined };
-	var map = undefined;
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
+				pointSize: pointSize,
+				blurSize: blurSize
+			}];
+			
+			var options = { visualMap: { min: dataRange.min, max: dataRange.max }, series: series };
+			SPT.trimNumberRange(options.visualMap);
+			
+			if(!CF.isEmpty(map))
+				options.geo = { map: map };
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			SPT.echartsMapChartUpdate(chart, options);
+		},
 		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		//取任一不为空的地图名列值
-		if(!map)
-			map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
-		
-		var data = chart.resultValueDatas(result, [ np, vp, wp ]);
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		SPT.evalArrayDataRange(dataRange, data, "value", 2);
-		
-		seriesData = seriesData.concat(data);
-		
-		if(!seriesName)
-			seriesName = chart.dataSetAlias(dataSetBind);
-	}
+		_evalPointSize: function(chart)
+		{
+			//根据图表元素尺寸自动计算
+			var chartEle = chart.element();
+			var pointSize = parseInt(Math.min(chartEle.clientWidth, chartEle.clientHeight)/60);
+			
+			if(pointSize < 1)
+				pointSize = 1;
+				
+			return pointSize;
+		}
+	};
 	
-	var pointSize = parseInt(Math.min(chartEle.width(), chartEle.height())/60);
-	if(pointSize < 1)
-		pointSize = 1;
-	
-	var series =
-	[{
-		id: 0,
-		name: seriesName,
-		data: seriesData,
-		type: "heatmap",
-		coordinateSystem: "geo",
-		pointSize: pointSize,
-		blurSize: parseInt(pointSize*1.2)
-	}];
-	
-	var options = { visualMap: {id: 0, min: dataRange.min, max: dataRange.max}, series: series };
-	SPT.trimNumberRange(options.visualMap);
-	
-	if(map)
-	{
-		options.geo = { id: 0, map: map };
-	}
-	
-	SPT.echartsMapChartUpdate(chart, options);
-};
-
-SPT.mapHeatmapResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.mapHeatmapDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.mapHeatmapOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.mapHeatmapSetChartEventData);
-};
-
-SPT.mapHeatmapOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.mapHeatmapSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.value[0];
-	data[dataSignNames.value] = echartsData.value[1];
-	data[dataSignNames.weight] = echartsData.value[2];
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //K线图
