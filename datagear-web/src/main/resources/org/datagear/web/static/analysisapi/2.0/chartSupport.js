@@ -2612,200 +2612,133 @@ SPT.candlestickRenderer = function(plugin, config)
 
 //热力图
 
-SPT.heatmapRender = function(chart, options)
+SPT.heatmapRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值
-			//weight 热力值
-			dataSignNames: { name: "name", value: "value", weight: "weight" }
-		}
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-	
-	var chartEle = chart.elementJquery();
-	var vmItemWidth = parseInt(chartEle.height()/20);
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		grid:
-		{
-			bottom: vmItemWidth + 20
-		},
-		legend:
-		{
-			id: 0,
-			show: false
-		},
-		xAxis:
-		{
-			//将在update中设置：
-			//data
+			var dataSetBind = chart.dataSetBindMain();
+			var xField = chart.dataSetFieldOfSign(dataSetBind, 1);
+			var yField = chart.dataSetFieldOfSign(dataSetBind, 2);
 			
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			splitArea: { show: true }
-		},
-		yAxis:
-		{
-			//将在update中设置：
-			//data
+			var chartEle = chart.element();
+			var vmItemWidth = parseInt(chartEle.clientHeight/20);
 			
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, vp),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, vp),
-			splitArea: { show: true }
-		},
-		visualMap:
-		{
-			//将在update中设置：
-			//min
-			//max
-			
-			id: 0,
-			text: ["高", "低"],
-			realtime: true,
-			calculable: true,
-			orient: "horizontal",
-	        left: "center",
-	        itemWidth: vmItemWidth,
-	        itemHeight: parseInt(chartEle.width()/8),
-	        bottom: 0
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "heatmap"
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				grid: { bottom: vmItemWidth + 20 },
+				legend: { show: false },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, xField),
+					nameGap: 5,
+					type: SPT.evalDataSetFieldAxisType(chart, xField),
+					splitArea: { show: true },
+					data: []
+				},
+				yAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, yField),
+					nameGap: 5,
+					type: SPT.evalDataSetFieldAxisType(chart, yField),
+					splitArea: { show: true },
+					data: []
+				},
+				visualMap:
+				{
+					text: ["高", "低"],
+					realtime: true,
+					calculable: true,
+					orient: "horizontal",
+			        left: "center",
+			        itemWidth: vmItemWidth,
+			        itemHeight: parseInt(chartEle.clientWidth/8),
+			        bottom: 0,
+			        min: 0,
+					max: 100
+				},
+				series: [{ type: "heatmap", data: [] }]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var seriesName = "";
+			var seriesData = [];
+			var dataRange = { min: null, max: null };
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueFields =
+				[
+					chart.dataSetFieldOfSign(dataSetBind, 1),
+					chart.dataSetFieldOfSign(dataSetBind, 2),
+					chart.dataSetFieldOfSign(dataSetBind, 3)
+				];
+				
+				let data = chart.resultNameValueDatas(result, nameField, valueFields);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				SPT.evalArrayDataRange(dataRange, data, "value", 2);
+				
+				seriesData = seriesData.concat(data);
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
 			}
-		]
-	},
-	options,
-	function(options)
-	{
-		//热力图的xAxis.type、yAxis.type不能为value和time，不然图形无法显示
-		if(options.xAxis.type == "value" || options.xAxis.type == "time")
-			options.xAxis.type = "category";
-		if(options.yAxis.type == "value" || options.yAxis.type == "time")
-			options.yAxis.type = "category";
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.heatmapUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var dataRange = { min: undefined, max: undefined };
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
+			
+			var mySeries = { name: seriesName, data: seriesData };
+			this._configSingleSeries(chart, mySeries);
+			
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			var options =
+			{
+				xAxis: {}, yAxis: {},
+				visualMap: {min: dataRange.min, max: dataRange.max},
+				series: [ mySeries ]
+			};
+			
+			SPT.trimNumberRange(options.visualMap);
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
+							SPT.inflateAxisDataExtractors.valueElement(0));
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.yAxis,
+							SPT.inflateAxisDataExtractors.valueElement(1), false);
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
 		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		var wp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.weight);
-		
-		var data = chart.resultValueDatas(result, [ np, vp, wp ]);
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		SPT.evalArrayDataRange(dataRange, data, "value", 2);
-		
-		seriesData = seriesData.concat(data);
-		
-		if(!seriesName)
-			seriesName = chart.dataSetAlias(dataSetBind);
-	}
-	
-	var series = [ { id: 0, type: "heatmap", name: seriesName, data: seriesData } ];
-	
-	var options =
-	{
-		xAxis: { id: 0 }, yAxis: { id: 0 },
-		visualMap: {id: 0, min: dataRange.min, max: dataRange.max},
-		series: series
+		_configSingleSeries: function(chart, series)
+		{
+			series.type = "heatmap";
+			series.encode = { x: 0, y: 1, tooltip: 2 };
+		}
 	};
 	
-	SPT.trimNumberRange(options.visualMap);
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
-					SPT.inflateAxisDataExtractors.valueElement(0));
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.yAxis,
-					SPT.inflateAxisDataExtractors.valueElement(1), false);
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.heatmapResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.heatmapDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.heatmapOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.heatmapSetChartEventData);
-};
-
-SPT.heatmapOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.heatmapSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.value[0];
-	data[dataSignNames.value] = echartsData.value[1];
-	data[dataSignNames.weight] = echartsData.value[2];
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //树图
