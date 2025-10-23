@@ -2205,6 +2205,7 @@ SPT.mapLinesRenderer = function(plugin, config)
 				if(nameField)
 				{
 					data = chart.resultNameValueDatas(result, nameField, [loField, laField]);
+					let originalDatas = chart.resultDatas(result);
 					let names = [];
 					let coordsInfos = {};
 					
@@ -2222,7 +2223,7 @@ SPT.mapLinesRenderer = function(plugin, config)
 						}
 						
 						coordsInfo.coords.push(dj.value);
-						coordsInfo.originalData.push(dj);
+						coordsInfo.originalData.push(originalDatas[j]);
 					}
 					
 					data = [];
@@ -2262,209 +2263,138 @@ SPT.mapLinesRenderer = function(plugin, config)
 
 //地图飞线图
 
-SPT.mapFlylineRender = function(chart, options)
+SPT.mapFlylineRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 飞线名
-			//sourceLongitude 源点经度
-			//sourceLatitude 源点纬度
-			//targetLongitude 终点经度
-			//targetLatitude 终点纬度
-			//category 类别，可选，同一类别的绘制于同一系列
-			//map 地图名，可选
-			dataSignNames:
-			{
-				name: "name", sourceLongitude: "sourceLongitude", sourceLatitude: "sourceLatitude",
-				targetLongitude: "targetLongitude", targetLatitude: "targetLatitude",
-				category: "category", map: "map"
-			}
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		asyncRender: true,
+		asyncUpdate: true,
+		
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip:
+				{
+					trigger: "item",
+					//ECharts-6.0中默认提示信息太简单，所以这里自定义了formatter选项
+					formatter: function(params)
+					{
+						return SPT.customEChartsTooltip(params);
+					}
+				},
+				legend: { data: [] },
+				geo: { roam: true },
+				series:
+				[
+					{ type: "lines", data: [], coordinateSystem: "geo", polyline: false }
+				]
+			};
 			
+			options = SPT.prepareEChartsRenderOptions(chart, options,
+				(chart, renderOptions) =>
+				{
+					SPT.echartsMapChartInitMap(chart, renderOptions);
+				});
+			
+			SPT.echartsMapChartRender(chart, options);
 		},
-		legend:
+		
+		update: function(chart, chartResult)
 		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		geo:
-		{
-			id: 0,
-			roam: true
-			//将在下面和update中设置：
-			//map
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 6;
+			
+			var legendData = [];
+			var categoryNames = [];
+			var categoryDatasMap = {};
+			var map = null;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
 			{
-				id: 0,
-				type: "lines",
-				coordinateSystem: "geo",
-				geoIndex: 0,
-				polyline: false
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				var coordFields = [
+							chart.dataSetFieldOfSign(dataSetBind, 1),
+							chart.dataSetFieldOfSign(dataSetBind, 2),
+							chart.dataSetFieldOfSign(dataSetBind, 3),
+							chart.dataSetFieldOfSign(dataSetBind, 4),
+						];
+				var categoryField = chart.dataSetFieldOfSign(dataSetBind, 5);
+				
+				var fieldMap = { "name": nameField, "coords": coordFields };
+				
+				if(categoryField)
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+				
+				if(CF.isEmpty(map))
+					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
+				
+				let data = chart.resultMapDatas(result, fieldMap);
+				
+				for(let j=0; j<data.length; j++)
+				{
+					let coords = data[j].coords;
+					data[j].coords = [[coords[0], coords[1]], [coords[2], coords[3]]];
+				}
+				
+				SPT.originalDataOfResult(data, chart, result);
+				
+				if(categoryField)
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				else
+					SPT.appendCategoryNameAndData(categoryNames, categoryDatasMap, dataSetAlias, data);
 			}
-		]
-	},
-	options,
-	null,
-	function(renderOptions, chart)
-	{
-		SPT.echartsMapChartInitMap(chart, renderOptions);
-	});
-	
-	SPT.echartsMapChartRender(chart, options);
-};
-
-SPT.mapFlylineUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	var categoryNames = [];
-	var categoryDatasMap = {};
-	var map = undefined;
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		//取任一不为空的地图名列值
-		if(!map)
-			map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.map);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vps = [
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLongitude),
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceLatitude),
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLongitude),
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetLatitude),
-				];
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		
-		var propertyMap = { "name": np, "coords": vps };
-		if(cp)
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-		
-		var data = chart.resultMapDatas(result, propertyMap);
-		
-		for(var j=0; j<data.length; j++)
-		{
-			var coords = data[j].coords;
-			data[j].coords = [[coords[0], coords[1]], [coords[2], coords[3]]];
+			
+			var series = [];
+			
+			for(let i=0; i<categoryNames.length; i++)
+			{
+				let categoryName = categoryNames[i];
+				legendData.push({ name: categoryName });
+				series[i] =
+				{
+					name: categoryName,
+					data: categoryDatasMap[categoryName],
+					type: "lines",
+					coordinateSystem: "geo",
+					polyline: false,
+					effect:
+					{
+						show: true,
+						symbol: "arrow",
+						symbolSize: 8,
+						trailLength: 0
+					},
+					lineStyle:
+					{
+						curveness: 0.2
+					}
+				};
+			}
+			
+			var options = { legend: {data: legendData}, series: series };
+			
+			if(!CF.isEmpty(map))
+				options.geo = { map: map };
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			SPT.echartsMapChartUpdate(chart, options);
 		}
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		
-		if(cp)
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-		else
-			SPT.appendCategoryNameAndData(categoryNames, categoryDatasMap, dataSetAlias, data);
-	}
+	};
 	
-	var series = [];
-	
-	for(var i=0; i<categoryNames.length; i++)
-	{
-		series[i] =
-		{
-			id: series.length,
-			name: categoryNames[i],
-			data: categoryDatasMap[categoryNames[i]],
-			type: "lines",
-			coordinateSystem: "geo",
-			polyline: false,
-			effect:
-			{
-				show: true,
-				symbol: "arrow",
-				symbolSize: 5,
-				trailLength: 0
-			},
-			lineStyle:
-			{
-				curveness: 0.2
-			}
-		};
-	}
-	
-	var options = { legend: {id: 0, data: categoryNames}, series: series };
-	
-	if(map)
-	{
-		options.geo = { id: 0, map: map };
-	}
-	
-	SPT.echartsMapChartUpdate(chart, options);
-};
-
-SPT.mapFlylineResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.mapFlylineDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.mapFlylineOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.mapFlylineSetChartEventData);
-};
-
-SPT.mapFlylineOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.mapFlylineSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = undefined;
-	
-	if(echartsData)
-	{
-		var coords = (echartsData.coords || []);
-		var coords0 = (coords[0] || []);
-		var coords1 = (coords[1] || []);
-		
-		data={};
-		data[dataSignNames.name] = echartsData.name;
-		data[dataSignNames.sourceLongitude] = coords0[0];
-		data[dataSignNames.sourceLatitude] = coords0[1];
-		data[dataSignNames.targetLongitude] = coords1[0];
-		data[dataSignNames.targetLatitude] = coords1[1];
-		data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	}
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //地图热力图
@@ -9301,7 +9231,7 @@ SPT.customEChartsTooltip = function(params, extractor)
 	for(let i=0; i<datas.length; i++)
 	{
 		let di = datas[i];
-		let vs = (CF.isArray(di.value) ? di.value : [ di.value ]);
+		let vs = (CF.isArray(di.value) ? di.value : (CF.isEmpty(di.value) ? [] : [ di.value ]));
 		
 		html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
 		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";

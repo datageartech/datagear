@@ -749,7 +749,8 @@ EU._buildEchartsTheme = function(chart)
 			{
 				"lineStyle":
 				{
-					"shadowBlur" : 4,
+					"width": 5,
+					"shadowBlur" : 5,
 					"shadowOffsetX" : 0,
 					"shadowColor" : shadowColor
 				}
