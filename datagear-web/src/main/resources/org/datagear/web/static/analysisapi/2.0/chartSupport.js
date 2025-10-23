@@ -1869,7 +1869,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 					{
 						return SPT.customEChartsTooltip(params, (pi) =>
 						{
-							let re = { value: pi.value };
+							let re = { value: (pi.value && pi.value.length >= 3 ? pi.value[2] : "") };
 							return re;
 						});
 					}

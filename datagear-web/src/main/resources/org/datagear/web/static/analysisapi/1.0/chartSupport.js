@@ -2719,7 +2719,15 @@
 		    },
 			tooltip:
 			{
-				trigger: "item"
+				trigger: "item",
+				formatter: function(params)
+				{
+					return chartSupport.customEChartsTooltip(params, (pi) =>
+					{
+						let re = { value: (pi.value && pi.value.length >= 3 ? pi.value[2] : "") };
+						return re;
+					});
+				}
 			},
 			legend:
 			{
@@ -2746,11 +2754,7 @@
 					type: "graph",
 			        coordinateSystem: "geo",
 					geoIndex: 0,
-			        layout: "none",
-					tooltip:
-					{
-						formatter: "{a}<br />{b}：{c}"
-					}
+			        layout: "none"
 				}
 			]
 		},
@@ -10162,7 +10166,7 @@
 				let pi = params[i];
 				let data = (extractor == null ? {} : (extractor(pi) || {}));
 				
-				if(chartFactory.isEmpty(title))
+				if(chartFactory.isNullOrEmpty(title))
 				{
 					if(data.title != null)
 						title = data.title;
@@ -10206,9 +10210,9 @@
 		for(let i=0; i<datas.length; i++)
 		{
 			let di = datas[i];
-			let vs = ($.isArray(di.value) ? di.value : [ di.value ]);
+			let vs = ($.isArray(di.value) ? di.value : (chartFactory.isNullOrEmpty(di.value) ? [] : [ di.value ]));
 			
-			html +=	"<div style='display:flex;flex-direction:row;align-items:center;gap:20px;'>";
+			html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
 			html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
 			html +=			"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div><div>"+di.name+"</div>";
 			html +=		"</div>";
