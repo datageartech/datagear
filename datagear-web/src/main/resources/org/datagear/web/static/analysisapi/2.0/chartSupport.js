@@ -2511,163 +2511,103 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 
 //K线图
 
-SPT.candlestickRender = function(chart, options)
+SPT.candlestickRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			dataSignNames: { name: "name", open: "open", close: "close", min: "min", max: "max" }
-		}
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		xAxis:
-		{
-			//将在update中设置：
-			//data
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 			
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			boundaryGap: true,
-			splitLine: {show:false}
-		},
-		yAxis:
-		{
-			id: 0,
-			name: "",
-			nameGap: 5,
-			type: "value"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "k"
-			}
-		]
-	},
-	options,
-	function(options)
-	{
-		//K线图的angleAxis.type不能为value和time，不然图形无法显示
-		if(options.xAxis.type == "value" || options.xAxis.type == "time")
-			options.xAxis.type = "category";
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.candlestickUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		
-		var data = chart.resultNameValueDatas(result, np,
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					nameGap: 5,
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					boundaryGap: true,
+					splitLine: { show:false },
+					data: []
+				},
+				yAxis:
+				{
+					name: "", nameGap: 5, type: "value"
+				},
+				series:
 				[
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.open),
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.close),
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min),
-					chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max)
-				]);
+					{ type: "candlestick", data: [] }
+				]
+			};
+			
+			//非类目轴需要设置，不然图形会贴边
+			if(options.xAxis.type != "category")
+				options.xAxis.boundaryGap = [ "12%", "12%" ];
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
 		
-		chart.originalDataIndexes(data, dataSetBind);
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var series = [];
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueFields =
+				[
+					nameField,
+					chart.dataSetFieldOfSign(dataSetBind, 1),
+					chart.dataSetFieldOfSign(dataSetBind, 2),
+					chart.dataSetFieldOfSign(dataSetBind, 3),
+					chart.dataSetFieldOfSign(dataSetBind, 4)
+				];
+				
+				let data = chart.resultNameValueDatas(result, nameField, valueFields);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				let mySeries = {name: dataSetAlias, data: data };
+				this._configSingleSeries(chart, mySeries);
+				series.push(mySeries);
+			}
+			
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			var options = { series: series, xAxis: {} };
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
+							SPT.inflateAxisDataExtractors.propertyName());
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
 		
-		series.push({id: series.length, type: "k", name: dataSetAlias, data: data});
-	}
+		_configSingleSeries: function(chart, series)
+		{
+			series.type = "candlestick";
+			series.encode = { x: 0, y: [ 1,2,3,4 ], tooltip: [1, 2, 3, 4] };
+		}
+	};
 	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	var options = { legend: {id: 0, data: legendData}, series: series, xAxis: { id: 0 } };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
-					SPT.inflateAxisDataExtractors.property("name"));
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.candlestickResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.candlestickDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.candlestickOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.candlestickSetChartEventData);
-};
-
-SPT.candlestickOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.candlestickSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	//echartsData不是设置的初始系列数据，第0个元素是数据索引，echarts的BUG？？？
-	var idx = (echartsData.value.length > 4 ? 1 : 0);
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.open] = echartsData.value[idx];
-	data[dataSignNames.close] = echartsData.value[idx+1];
-	data[dataSignNames.min] = echartsData.value[idx+2];
-	data[dataSignNames.max] = echartsData.value[idx+3];
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //热力图
