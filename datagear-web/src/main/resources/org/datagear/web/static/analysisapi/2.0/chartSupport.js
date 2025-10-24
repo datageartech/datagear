@@ -2895,92 +2895,42 @@ SPT.treemapRenderer = function(plugin, config)
 
 //旭日图
 
-SPT.sunburstRender = function(chart, options)
+SPT.sunburstRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			dataSignNames: { id: "id", name: "name", parent: "parent", value: "value" }
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "sunburst"
-			}
-		]
-	},
-	options);
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				series: [{ type: "sunburst", data: [] }]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "sunburst" });
+			var options = { series: [ singleSeries ] };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		}
+	};
 	
-	chart.echartsInit(options);
-};
-
-SPT.sunburstUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	
-	var options = { series: [ SPT.inflateTreeNodeSingleSeries(chart, chartResult, { id: 0, type: "sunburst" }) ] };
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.sunburstResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.sunburstDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.sunburstOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.sunburstSetChartEventData);
-};
-
-SPT.sunburstOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.sunburstSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.id] = echartsData.idOrigin;
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.parent] = echartsData.parent;
-	data[dataSignNames.value] = echartsData.value;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 SPT.inflateTreeNodeSingleSeries = function(chart, chartResult, singleSeries, singleRootNode, dataSignIndexes)
