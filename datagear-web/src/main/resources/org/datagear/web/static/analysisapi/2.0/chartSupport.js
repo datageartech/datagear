@@ -2780,7 +2780,9 @@ SPT.treeRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "tree" });
+			//树图只支持单根节点
+			var singleRootNode = true;
+			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "tree" }, singleRootNode);
 			var options = { series: [ singleSeries ] };
 			
 			this._inflateUpdateOptions(chart, options);
@@ -2852,6 +2854,44 @@ SPT.treeRenderer = function(plugin, config)
 };
 
 //矩形树图
+
+SPT.treemapRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+	},
+	config);
+	
+	var renderer =
+	{
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
+		{
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				series: [{ type: "treemap", data: [] }]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "treemap" });
+			var options = { series: [ singleSeries ] };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		}
+	};
+	
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
+};
 
 SPT.treemapRender = function(chart, options)
 {
@@ -3037,9 +3077,10 @@ SPT.sunburstSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 };
 
-SPT.inflateTreeNodeSingleSeries = function(chart, chartResult, singleSeries, dataSignIndexes)
+SPT.inflateTreeNodeSingleSeries = function(chart, chartResult, singleSeries, singleRootNode, dataSignIndexes)
 {
 	singleSeries = (singleSeries || {});
+	singleRootNode = (singleRootNode == null ? false : singleRootNode);
 	dataSignIndexes = (dataSignIndexes || { id: 0, name: 1, parent: 2, value: 3 });
 	
 	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
@@ -3085,31 +3126,47 @@ SPT.inflateTreeNodeSingleSeries = function(chart, chartResult, singleSeries, dat
 			
 			SPT.originalDataOfData(node, dataj);
 			
-			let added = false;
+			//处理seriesData中可能的node子节点
 			for(let k=0; k<seriesData.length; k++)
 			{
-				let appendResult = SPT.treeAppendNode(seriesData[k], node);
+				if(seriesData[k] == null)
+					continue;
 				
-				if(appendResult !== false)
+				if(SPT.treeAppendNode(node, seriesData[k]))
 				{
-					if(appendResult === node)
-						seriesData[k] = node;
-					
-					added = true;
+					seriesData[k] = null;
+				}
+			}
+			
+			let addedAsChild = false;
+			
+			//将node添加至seriesData中可能的父节点中
+			for(let k=0; k<seriesData.length; k++)
+			{
+				if(seriesData[k] == null)
+					continue;
+				
+				if(SPT.treeAppendNode(seriesData[k], node))
+				{
+					addedAsChild = true;
 					break;
 				}
 			}
 			
-			if(!added)
+			if(!addedAsChild)
 				seriesData.push(node);
 		}
 	}
 	
-	//树图只支持一个根节点，如果有多个，需要合并至一个虚拟根节点
-	if(seriesData.length > 1)
+	seriesData = seriesData.filter((di) => { return (di != null);  });
+	
+	if(singleRootNode && seriesData.length > 1)
 	{
 		let rootNode = { name: "", children: seriesData };
+		SPT.treeNodeEvalValueMark(rootNode);
 		rootNode[SPT.VIRTUAL_ROOT_PROP_NAME] = true;
+		SPT.treeEvalNodeValue(rootNode);
+		
 		seriesData = [ rootNode ];
 	}
 	
@@ -3126,10 +3183,8 @@ SPT.treeNodeEvalValueMark = function(node)
 		node._evalValue = true;
 };
 
-SPT.treeAppendNode = function(treeNode, node, tryReverse)
+SPT.treeAppendNode = function(treeNode, node)
 {
-	tryReverse = (tryReverse == null ? true : tryReverse);
-	
 	if(!treeNode)
 		return false;
 	
@@ -3141,13 +3196,7 @@ SPT.treeAppendNode = function(treeNode, node, tryReverse)
 			treeNode.children = [];
 		
 		treeNode.children.push(node);
-		
-		//动态计算父节点的值
-		if(treeNode._evalValue && CF.isNumber(node.value))
-		{
-			let treeNodeValue = (treeNode.value == null ? 0 : treeNode.value);
-			treeNode.value = treeNodeValue + node.value;
-		}
+		SPT.treeEvalNodeValue(treeNode);
 		
 		return true;
 	}
@@ -3157,33 +3206,38 @@ SPT.treeAppendNode = function(treeNode, node, tryReverse)
 		for(let i=0; i<treeNode.children.length; i++)
 		{
 			let child = treeNode.children[i];
-			let appendResult = SPT.treeAppendNode(child, node);
 			
-			if(appendResult !== false)
+			if(SPT.treeAppendNode(child, node))
 			{
-				if(appendResult === node)
-				{
-					treeNode.children[i] = node;
-					child = node;
-				}
-				
-				//动态计算treeNode的值
-				if(treeNode._evalValue && CF.isNumber(child.value))
-				{
-					let treeNodeValue = (treeNode.value == null ? 0 : treeNode.value);
-					treeNode.value = treeNodeValue + child.value;
-				}
-				
+				SPT.treeEvalNodeValue(treeNode);
 				return true;
 			}
 		}
 	}
 	
-	//node可能是treeNode的父节点
-	if(tryReverse && SPT.treeAppendNode(node, treeNode, false) === true)
-		return node;
-	
 	return false;
+};
+
+SPT.treeEvalNodeValue = function(treeNode)
+{
+	if(treeNode._evalValue !== true)
+		return;
+	
+	let value = 0;
+	
+	if(treeNode.children != null)
+	{
+		for(let i=0; i<treeNode.children.length; i++)
+		{
+			let child = treeNode.children[i];
+			SPT.treeEvalNodeValue(child);
+			
+			if(child.value != null && CF.isNumber(child.value))
+				value += child.value;
+		}
+	}
+	
+	treeNode.value = value;
 };
 
 //桑基图

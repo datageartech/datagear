@@ -3952,7 +3952,9 @@
 	{
 		var renderOptions= chart.renderOptions();
 		
-		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "tree" }) ] };
+		//树图只支持单根节点
+		var singleRootNode = true;
+		var options = { series: [ chartSupport.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "tree" }, singleRootNode) ] };
 		chartSupport.treeInflateUpdateOptions(chart, options, renderOptions);
 		
 		chartSupport.adaptArrayPropsForUpdateOptions(options, renderOptions);
@@ -4244,8 +4246,10 @@
 		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 	};
 	
-	chartSupport.buildTreeNodeSeries = function(chart, chartResult, initSeries)
+	chartSupport.buildTreeNodeSeries = function(chart, chartResult, initSeries, singleRootNode)
 	{
+		singleRootNode = (singleRootNode == null ? false : singleRootNode);
+		
 		var renderOptions= chart.renderOptions();
 		var dg = renderOptions.dg;
 		var dataSignNames = dg.dataSignNames;
@@ -4289,19 +4293,49 @@
 				
 				chart.originalDataIndex(node, dataSetBind, j);
 				
-				var added = false;
-				for(var k=0; k<seriesData.length; k++)
+				//处理seriesData中可能的node子节点
+				for(let k=0; k<seriesData.length; k++)
 				{
+					if(seriesData[k] == null)
+						continue;
+					
+					if(chartSupport.treeAppendNode(node, seriesData[k]))
+					{
+						seriesData[k] = null;
+					}
+				}
+				
+				let addedAsChild = false;
+				
+				//将node添加至seriesData中可能的父节点中
+				for(let k=0; k<seriesData.length; k++)
+				{
+					if(seriesData[k] == null)
+						continue;
+					
 					if(chartSupport.treeAppendNode(seriesData[k], node))
 					{
-						added = true;
+						addedAsChild = true;
 						break;
 					}
 				}
 				
-				if(!added)
+				if(!addedAsChild)
 					seriesData.push(node);
 			}
+		}
+		
+		seriesData = seriesData.filter((di) => { return (di != null);  });
+		
+		//树图只支持一个根节点，如果有多个，需要合并至一个虚拟根节点
+		if(singleRootNode && seriesData.length > 1)
+		{
+			let rootNode = { name: "", children: seriesData };
+			chartSupport.treeNodeEvalValueMark(rootNode);
+			rootNode["virtualRoot"] = true;
+			chartSupport.treeEvalNodeValue(rootNode);
+			
+			seriesData = [ rootNode ];
 		}
 		
 		initSeries = $.extend(initSeries, { name: seriesName, data: seriesData });
@@ -4327,13 +4361,7 @@
 				treeNode.children = [];
 			
 			treeNode.children.push(node);
-			
-			//动态计算父节点的值
-			if(treeNode._evalValue && typeof(node.value) == "number")
-			{
-				var treeNodeValue = (treeNode.value || 0);
-				treeNode.value = treeNodeValue + node.value;
-			}
+			chartSupport.treeEvalNodeValue(treeNode);
 			
 			return true;
 		}
@@ -4343,20 +4371,38 @@
 		
 		for(var i=0; i<treeNode.children.length; i++)
 		{
-			if(chartSupport.treeAppendNode(treeNode.children[i], node))
+			let child = treeNode.children[i];
+			
+			if(chartSupport.treeAppendNode(child, node))
 			{
-				//动态计算treeNode的值
-				if(treeNode._evalValue && typeof(treeNode.children[i].value) == "number")
-				{
-					var treeNodeValue = (treeNode.value || 0);
-					treeNode.value = treeNodeValue + treeNode.children[i].value;
-				}
-				
+				chartSupport.treeEvalNodeValue(treeNode);
 				return true;
 			}
 		}
 		
 		return false;
+	};
+	
+	chartSupport.treeEvalNodeValue = function(treeNode)
+	{
+		if(treeNode._evalValue !== true)
+			return;
+		
+		let value = 0;
+		
+		if(treeNode.children != null)
+		{
+			for(let i=0; i<treeNode.children.length; i++)
+			{
+				let child = treeNode.children[i];
+				chartSupport.treeEvalNodeValue(child);
+				
+				if(child.value != null && chartFactory.isNumber(child.value))
+					value += child.value;
+			}
+		}
+		
+		treeNode.value = value;
 	};
 	
 	//桑基图
