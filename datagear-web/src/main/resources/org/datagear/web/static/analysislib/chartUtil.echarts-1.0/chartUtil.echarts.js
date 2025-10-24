@@ -1028,15 +1028,10 @@ EU._buildEchartsTheme = function(chart)
 			}
 		},
 		"visualMap" : {
-			"inRange" :
-			{
-				"color" : chartTheme.graphRangeColors
-			},
+			"inRange" : { "color" : chartTheme.graphRangeColors },
+			"outOfRange" : { "color" : emptyAreaColor },
 			"backgroundColor" : "transparent",
-			"textStyle" :
-			{
-				"color" : axisColor
-			}
+			"textStyle" : { "color" : axisColor }
 		},
 		"dataZoom" : {
 			"backgroundColor" : "transparent",
