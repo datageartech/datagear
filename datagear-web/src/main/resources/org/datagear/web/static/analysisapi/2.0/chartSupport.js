@@ -54,6 +54,15 @@ SPT.ORIGINAL_CATEGORY_PROP_NAME = "originalCategory";
 //图表数据属性名：原始数据
 SPT.ORIGINAL_DATA_PROP_NAME = "originalData";
 
+//图表数据属性名：原始ID
+SPT.ORIGINAL_ID_PROP_NAME = "originalId";
+
+//图表数据属性名：原始ID
+SPT.ORIGINAL_PARENT_PROP_NAME = "originalParent";
+
+//树图虚拟根节点标识属性名
+SPT.VIRTUAL_ROOT_PROP_NAME = "virtualRoot";
+
 //折线图
 
 SPT.lineRenderer = function(plugin, config)
@@ -1984,7 +1993,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				if(idField)
 				{
 					let id = chart.resultDataRowCell(dataj, idField);
-					node._originalId = id;
+					node[SPT.ORIGINAL_ID_PROP_NAME] = id;
 				}
 				
 				if(valueField)
@@ -2001,7 +2010,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				node.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
 				SPT.appendDistinct(legendData, {name: category}, "name");
 				
-				SPT.appendDistinct(seriesData, node, (idField ? "_originalId" : "name"));
+				SPT.appendDistinct(seriesData, node, (idField ? SPT.ORIGINAL_ID_PROP_NAME : "name"));
 			}
 		},
 		
@@ -2027,9 +2036,9 @@ SPT.mapGraphRenderer = function(plugin, config)
 				//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
 				if(linkById)
 				{
-					let srcIdx = SPT.findInArray(seriesData, link.source, "_originalId");
+					let srcIdx = SPT.findInArray(seriesData, link.source, SPT.ORIGINAL_ID_PROP_NAME);
 					let srcNode = (srcIdx >= 0 ? seriesData[srcIdx] : null);
-					let tgtIdx = SPT.findInArray(seriesData, link.target, "_originalId");
+					let tgtIdx = SPT.findInArray(seriesData, link.target, SPT.ORIGINAL_ID_PROP_NAME);
 					let tgtNode = (tgtIdx >= 0 ? seriesData[tgtIdx] : null);
 					
 					if(srcNode != null && tgtNode != null)
@@ -2742,157 +2751,108 @@ SPT.heatmapRenderer = function(plugin, config)
 };
 
 //树图
-SPT.treeRender = function(chart, options)
+
+SPT.treeRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			dataSignNames: { id: "id", name: "name", parent: "parent", value: "value" },
-			//同series[i].orient
-			orient: "LR",
-		}
+		//同series[i].orient
+		orient: "LR",
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "tree"
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				series: [{ type: "tree", data: [] }]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "tree" });
+			var options = { series: [ singleSeries ] };
+			
+			this._inflateUpdateOptions(chart, options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_inflateUpdateOptions: function(chart, updateOptions)
+		{
+			var label;
+            var leaves;
+            var left;
+            var right;
+            var top;
+            var bottom;
+			
+			if(config.orient == "TB")
+			{
+				label = { position: "left", verticalAlign: "middle", align: "right" };
+	            leaves = { label: { position: "right", verticalAlign: "middle", align: "left" } };
+	            left = "12%";
+	            right= "12%";
+	            top = "16%";
+	            bottom = "16%";
 			}
-		]
-	},
-	options);
+			else if(config.orient == "RL")
+			{
+				label = { position: "right", verticalAlign: "middle", align: "left" };
+	            leaves = { label: { position: "left", verticalAlign: "middle", align: "right" } };
+	            left = "16%";
+	            right = "16%";
+	            top = "12%";
+	            bottom = "12%";
+			}
+			else if(config.orient == "BT")
+			{
+				label = { position: "left", verticalAlign: "middle", align: "right" };
+	            leaves = { label: { position: "right", verticalAlign: "middle", align: "left" } };
+	            left = "12%";
+	            right = "12%";
+	            top = "16%";
+	            bottom = "16%";
+			}
+			//LR
+			else
+			{
+				label = { position: "left", verticalAlign: "middle", align: "right" };
+	            leaves = { label: { position: "right", verticalAlign: "middle", align: "left" } };
+	            left = "16%";
+	            right = "16%";
+	            top = "12%";
+	            bottom = "12%";
+			}
+			
+			var series0 = updateOptions.series[0];
+			series0.orient = config.orient;
+			series0.label = label;
+            series0.leaves = leaves;
+            series0.left = left;
+            series0.right = right;
+            series0.top = top;
+            series0.bottom = bottom;
+		}
+	};
 	
-	chart.echartsInit(options);
-};
-
-SPT.treeUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	
-	var options = { series: [ SPT.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "tree" }) ] };
-	SPT.treeInflateUpdateOptions(chart, options, renderOptions);
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.treeResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.treeDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.treeOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.treeSetChartEventData);
-};
-
-SPT.treeOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.treeSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.id] = echartsData.idOrigin;
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.parent] = echartsData.parent;
-	data[dataSignNames.value] = echartsData.value;
-
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-};
-
-SPT.treeInflateUpdateOptions = function(chart, updateOptions, renderOptions)
-{
-	var seriesEle = updateOptions.series[0];
-	var seriesEleExt = {};
-	
-	seriesEle.orient = renderOptions.dg.orient;
-	
-	if(renderOptions.dg.orient == "LR")
-	{
-		seriesEleExt =
-		{
-			label: { position: "left", verticalAlign: "middle", align: "right" },
-            leaves: { label: { position: "right", verticalAlign: "middle", align: "left" } },
-            left: "16%",
-            right: "16%",
-            top: "12%",
-            bottom: "12%"
-		};
-	}
-	else if(renderOptions.dg.orient == "TB")
-	{
-		seriesEleExt =
-		{
-			label: { position: "left", verticalAlign: "middle", align: "right" },
-            leaves: { label: { position: "right", verticalAlign: "middle", align: "left" } },
-            left: "12%",
-            right: "12%",
-            top: "16%",
-            bottom: "16%"
-		};
-	}
-	else if(renderOptions.dg.orient == "RL")
-	{
-		seriesEleExt =
-		{
-			label: { position: "right", verticalAlign: "middle", align: "left" },
-            leaves: { label: { position: "left", verticalAlign: "middle", align: "right" } },
-            left: "16%",
-            right: "16%",
-            top: "12%",
-            bottom: "12%"
-		};
-	}
-	else if(renderOptions.dg.orient == "BT")
-	{
-		seriesEleExt =
-		{
-			label: { position: "left", verticalAlign: "middle", align: "right" },
-            leaves: { label: { position: "right", verticalAlign: "middle", align: "left" } },
-            left: "12%",
-            right: "12%",
-            top: "16%",
-            bottom: "16%"
-		};
-	}
-	
-	CF.extend(seriesEle, seriesEleExt);
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //矩形树图
+
 SPT.treemapRender = function(chart, options)
 {
 	options = CF.extend(true,
@@ -2934,7 +2894,7 @@ SPT.treemapUpdate = function(chart, chartResult)
 {
 	var renderOptions= chart.renderOptions();
 	
-	var options = { series: [ SPT.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "treemap" }) ] };
+	var options = { series: [ SPT.inflateTreeNodeSingleSeries(chart, chartResult, { id: 0, type: "treemap" }) ] };
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
 	options = chart.inflateUpdateOptions(chartResult, options);
@@ -3030,7 +2990,7 @@ SPT.sunburstUpdate = function(chart, chartResult)
 {
 	var renderOptions= chart.renderOptions();
 	
-	var options = { series: [ SPT.buildTreeNodeSeries(chart, chartResult, { id: 0, type: "sunburst" }) ] };
+	var options = { series: [ SPT.inflateTreeNodeSingleSeries(chart, chartResult, { id: 0, type: "sunburst" }) ] };
 	
 	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
 	options = chart.inflateUpdateOptions(chartResult, options);
@@ -3077,56 +3037,64 @@ SPT.sunburstSetChartEventData = function(chart, chartEvent, echartsEventParams)
 	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
 };
 
-SPT.buildTreeNodeSeries = function(chart, chartResult, initSeries)
+SPT.inflateTreeNodeSingleSeries = function(chart, chartResult, singleSeries, dataSignIndexes)
 {
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	initSeries = (initSeries || {});
+	singleSeries = (singleSeries || {});
+	dataSignIndexes = (dataSignIndexes || { id: 0, name: 1, parent: 2, value: 3 });
 	
 	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 	
 	var seriesName = "";
 	var seriesData = [];
 	
-	for(var i=0; i<dataSetBinds.length; i++)
+	for(let i=0; i<dataSetBinds.length; i++)
 	{
-		var dataSetBind = dataSetBinds[i];
+		let dataSetBind = dataSetBinds[i];
+		let dataSetAlias = chart.dataSetAlias(dataSetBind);
+		let result = chart.resultOf(chartResult, dataSetBind);
 		
-		var result = chart.resultOf(chartResult, dataSetBind);
+		if(CF.isEmpty(seriesName))
+			seriesName = dataSetAlias;
 		
-		if(!seriesName)
-			seriesName = chart.dataSetAlias(dataSetBind);
+		let idField = chart.dataSetFieldOfSign(dataSetBind, dataSignIndexes.id);
+		let nameField = chart.dataSetFieldOfSign(dataSetBind, dataSignIndexes.name);
+		let parentField = chart.dataSetFieldOfSign(dataSetBind, dataSignIndexes.parent);
+		let valueField = chart.dataSetFieldOfSign(dataSetBind, dataSignIndexes.value);
 		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var ip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.id);
-		var pp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.parent);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+		let data = chart.resultDatas(result);
 		
-		var data = chart.resultDatas(result);
-		
-		for(var j=0; j<data.length; j++)
+		for(let j=0; j<data.length; j++)
 		{
-			var node = {};
+			let dataj = data[j];
+			let node = {};
 			
-			node.name = chart.resultDataRowCell(data[j], np);
-			node.idOrigin = (ip ? chart.resultDataRowCell(data[j], ip) : undefined);
-			node.id = (ip ? node.idOrigin : node.name);
-			node.parent = chart.resultDataRowCell(data[j], pp);
-			if(vp)
+			node.name = chart.resultDataRowCell(dataj, nameField);
+			
+			node[SPT.ORIGINAL_PARENT_PROP_NAME] = chart.resultDataRowCell(dataj, parentField);
+			
+			if(idField)
 			{
-				node.value = chart.resultDataRowCell(data[j], vp);
+				node[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, idField);
+			}
+			
+			if(valueField)
+			{
+				node.value = chart.resultDataRowCell(dataj, valueField);
 				SPT.treeNodeEvalValueMark(node);
 			}
 			
-			chart.originalDataIndex(node, dataSetBind, j);
+			SPT.originalDataOfData(node, dataj);
 			
-			var added = false;
-			for(var k=0; k<seriesData.length; k++)
+			let added = false;
+			for(let k=0; k<seriesData.length; k++)
 			{
-				if(SPT.treeAppendNode(seriesData[k], node))
+				let appendResult = SPT.treeAppendNode(seriesData[k], node);
+				
+				if(appendResult !== false)
 				{
+					if(appendResult === node)
+						seriesData[k] = node;
+					
 					added = true;
 					break;
 				}
@@ -3137,9 +3105,18 @@ SPT.buildTreeNodeSeries = function(chart, chartResult, initSeries)
 		}
 	}
 	
-	initSeries = CF.extend(initSeries, { name: seriesName, data: seriesData });
+	//树图只支持一个根节点，如果有多个，需要合并至一个虚拟根节点
+	if(seriesData.length > 1)
+	{
+		let rootNode = { name: "", children: seriesData };
+		rootNode[SPT.VIRTUAL_ROOT_PROP_NAME] = true;
+		seriesData = [ rootNode ];
+	}
 	
-	return initSeries;
+	singleSeries.name = seriesName;
+	singleSeries.data = seriesData;
+	
+	return singleSeries;
 };
 
 SPT.treeNodeEvalValueMark = function(node)
@@ -3149,12 +3126,16 @@ SPT.treeNodeEvalValueMark = function(node)
 		node._evalValue = true;
 };
 
-SPT.treeAppendNode = function(treeNode, node)
+SPT.treeAppendNode = function(treeNode, node, tryReverse)
 {
+	tryReverse = (tryReverse == null ? true : tryReverse);
+	
 	if(!treeNode)
 		return false;
 	
-	if(node.parent == treeNode.id)
+	var parentId = (treeNode[SPT.ORIGINAL_ID_PROP_NAME] !== undefined ? treeNode[SPT.ORIGINAL_ID_PROP_NAME] : treeNode.name);
+	
+	if(node[SPT.ORIGINAL_PARENT_PROP_NAME] === parentId)
 	{
 		if(!treeNode.children)
 			treeNode.children = [];
@@ -3162,32 +3143,45 @@ SPT.treeAppendNode = function(treeNode, node)
 		treeNode.children.push(node);
 		
 		//动态计算父节点的值
-		if(treeNode._evalValue && typeof(node.value) == "number")
+		if(treeNode._evalValue && CF.isNumber(node.value))
 		{
-			var treeNodeValue = (treeNode.value || 0);
+			let treeNodeValue = (treeNode.value == null ? 0 : treeNode.value);
 			treeNode.value = treeNodeValue + node.value;
 		}
 		
 		return true;
 	}
 	
-	if(!treeNode.children)
-		return false;
-	
-	for(var i=0; i<treeNode.children.length; i++)
+	if(treeNode.children)
 	{
-		if(SPT.treeAppendNode(treeNode.children[i], node))
+		for(let i=0; i<treeNode.children.length; i++)
 		{
-			//动态计算treeNode的值
-			if(treeNode._evalValue && typeof(treeNode.children[i].value) == "number")
-			{
-				var treeNodeValue = (treeNode.value || 0);
-				treeNode.value = treeNodeValue + treeNode.children[i].value;
-			}
+			let child = treeNode.children[i];
+			let appendResult = SPT.treeAppendNode(child, node);
 			
-			return true;
+			if(appendResult !== false)
+			{
+				if(appendResult === node)
+				{
+					treeNode.children[i] = node;
+					child = node;
+				}
+				
+				//动态计算treeNode的值
+				if(treeNode._evalValue && CF.isNumber(child.value))
+				{
+					let treeNodeValue = (treeNode.value == null ? 0 : treeNode.value);
+					treeNode.value = treeNodeValue + child.value;
+				}
+				
+				return true;
+			}
 		}
 	}
+	
+	//node可能是treeNode的父节点
+	if(tryReverse && SPT.treeAppendNode(node, treeNode, false) === true)
+		return node;
 	
 	return false;
 };
