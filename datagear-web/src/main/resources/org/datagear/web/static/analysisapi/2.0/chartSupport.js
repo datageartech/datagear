@@ -63,6 +63,12 @@ SPT.ORIGINAL_PARENT_PROP_NAME = "originalParent";
 //树图虚拟根节点标识属性名
 SPT.VIRTUAL_ROOT_PROP_NAME = "virtualRoot";
 
+//图表数据属性名：原始源名
+SPT.ORIGINAL_SOURCE_NAME_PROP_NAME = "originalSourceName";
+
+//图表数据属性名：原始目标名
+SPT.ORIGINAL_TARGET_NAME_PROP_NAME = "originalTargetName";
+
 //折线图
 
 SPT.lineRenderer = function(plugin, config)
@@ -1873,12 +1879,22 @@ SPT.mapGraphRenderer = function(plugin, config)
 				tooltip:
 				{
 					trigger: "item",
-					//ECharts-6.0中设置series.encode.tooltip仍不会显示第三个数值，所以这里自定义了formatter选项
+					//ECharts-6.0默认tooltip显示有缺陷，所以这里自定义了formatter选项
 					formatter: function(params)
 					{
 						return SPT.customEChartsTooltip(params, (pi) =>
 						{
-							let re = { value: (pi.value && pi.value.length >= 3 ? pi.value[2] : "") };
+							let re = {};
+							
+							if(pi.dataType == "edge" && pi.data)
+							{
+								re.name = pi.data[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] + " > " + pi.data[SPT.ORIGINAL_TARGET_NAME_PROP_NAME];
+							}
+							else if(pi.dataType == "node" && pi.value)
+							{
+								re.value = (pi.value.length >= 3 ? pi.value[2] : "");
+							}
+							
 							return re;
 						});
 					}
@@ -1914,7 +1930,6 @@ SPT.mapGraphRenderer = function(plugin, config)
 			var dataRange = { min: null, max: null };
 			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
 			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
-			var linkById = false;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1923,13 +1938,12 @@ SPT.mapGraphRenderer = function(plugin, config)
 				//节点数据集
 				if(chart.isDataSetSigned(dataSetBind, 0))
 				{
-					linkById = (chart.dataSetFieldOfSign(dataSetBind, [0, 0]) != null);
 					this._inflateOptionsForNode(chart, chartResult, dataSetBinds, i, options, dataRange);
 				}
 				//关系数据集
 				else if(chart.isDataSetSigned(dataSetBind, 1))
 				{
-					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options, linkById);
+					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
 				}
 				//合并数据集
 				else if(chart.isDataSetSigned(dataSetBind, 2))
@@ -1988,13 +2002,8 @@ SPT.mapGraphRenderer = function(plugin, config)
 					value: [ chart.resultDataRowCell(dataj, loField), chart.resultDataRowCell(dataj, laField) ]
 				};
 				
+				node[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, idField);
 				SPT.originalDataOfData(node, dataj);
-				
-				if(idField)
-				{
-					let id = chart.resultDataRowCell(dataj, idField);
-					node[SPT.ORIGINAL_ID_PROP_NAME] = id;
-				}
 				
 				if(valueField)
 				{
@@ -2006,15 +2015,15 @@ SPT.mapGraphRenderer = function(plugin, config)
 				}
 				
 				let category = (categoryField ? chart.resultDataRowCell(dataj, categoryField) : dataSetAlias);
-				node._categoryName = category;
+				node[SPT.ORIGINAL_CATEGORY_PROP_NAME] = category;
 				node.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
 				SPT.appendDistinct(legendData, {name: category}, "name");
 				
-				SPT.appendDistinct(seriesData, node, (idField ? SPT.ORIGINAL_ID_PROP_NAME : "name"));
+				SPT.appendDistinct(seriesData, node, SPT.ORIGINAL_ID_PROP_NAME);
 			}
 		},
 		
-		_inflateOptionsForLink: function(chart, chartResult, dataSetBinds, dsbIndex, options, linkById)
+		_inflateOptionsForLink: function(chart, chartResult, dataSetBinds, dsbIndex, options)
 		{
 			var seriesData = options.series[0].data;
 			var seriesLinks = options.series[0].links;
@@ -2030,23 +2039,23 @@ SPT.mapGraphRenderer = function(plugin, config)
 			
 			for(let i=0; i<data.length; i++)
 			{
-				let link = data[i];
+				let di = data[i];
+				let srcIdx = SPT.findInArray(seriesData, di.source, SPT.ORIGINAL_ID_PROP_NAME);
+				let srcNode = (srcIdx >= 0 ? seriesData[srcIdx] : null);
+				let tgtIdx = SPT.findInArray(seriesData, di.target, SPT.ORIGINAL_ID_PROP_NAME);
+				let tgtNode = (tgtIdx >= 0 ? seriesData[tgtIdx] : null);
 				
-				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
-				//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
-				if(linkById)
+				if(srcNode != null && tgtNode != null)
 				{
-					let srcIdx = SPT.findInArray(seriesData, link.source, SPT.ORIGINAL_ID_PROP_NAME);
-					let srcNode = (srcIdx >= 0 ? seriesData[srcIdx] : null);
-					let tgtIdx = SPT.findInArray(seriesData, link.target, SPT.ORIGINAL_ID_PROP_NAME);
-					let tgtNode = (tgtIdx >= 0 ? seriesData[tgtIdx] : null);
+					//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
+					//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
+					let link = { source: srcIdx, target: tgtIdx };
+					link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = srcNode.name;
+					link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = tgtNode.name;
+					SPT.originalDataOfData(link, di);
 					
-					if(srcNode != null && tgtNode != null)
-						link = { source: srcNode.name, target: tgtNode.name };
-				}
-				
-				if(link != null)
 					seriesLinks.push(link);
+				}
 			}
 		},
 		
@@ -2101,7 +2110,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				}
 				
 				let srcCategory = (srcCategoryField ? chart.resultDataRowCell(dataj, srcCategoryField) : dataSetAlias);
-				sd._categoryName = srcCategory;
+				sd[SPT.ORIGINAL_CATEGORY_PROP_NAME] = srcCategory;
 				sd.category = SPT.appendDistinct(seriesCategories, {name: srcCategory}, "name");
 				SPT.appendDistinct(legendData, {name: srcCategory}, "name");
 				
@@ -2115,16 +2124,18 @@ SPT.mapGraphRenderer = function(plugin, config)
 				}
 				
 				let tgtCategory = (tgtCategoryField ? chart.resultDataRowCell(dataj, tgtCategoryField) : dataSetAlias);
-				td._categoryName = tgtCategory;
+				td[SPT.ORIGINAL_CATEGORY_PROP_NAME] = tgtCategory;
 				td.category = SPT.appendDistinct(seriesCategories, {name: tgtCategory}, "name");
 				SPT.appendDistinct(legendData, {name: tgtCategory}, "name");
 				
-				this._appendNode(seriesData, sd);
-				this._appendNode(seriesData, td);
+				let srcIdx = this._appendNode(seriesData, sd);
+				let tgtIdx = this._appendNode(seriesData, td);
 				
-				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引；
-				//使用数据索引在连接线上的tooltip只会显示索引数值不友好，所有这里使用名称
-				let link = { source: sd.name, target: td.name };
+				//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
+				//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
+				let link = { source: srcIdx, target: tgtIdx };
+				link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = sd.name;
+				link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = td.name;
 				SPT.originalDataOfData(link, dataj);
 				seriesLinks.push(link);
 			}
@@ -8948,7 +8959,13 @@ SPT.customEChartsTooltip = function(params, extractor)
 		
 		html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
 		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
-		html +=			"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div><div>"+di.name+"</div>";
+		
+		if(!CF.isEmpty(di.color))
+		{
+			html +=		"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div>";
+		}
+		
+		html +=			"<div>"+di.name+"</div>";
 		html +=		"</div>";
 		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:12px;font-weight:bold;'>";
 		
