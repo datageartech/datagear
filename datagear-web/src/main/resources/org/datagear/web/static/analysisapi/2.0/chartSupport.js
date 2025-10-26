@@ -63,8 +63,14 @@ SPT.ORIGINAL_PARENT_PROP_NAME = "originalParent";
 //树图虚拟根节点标识属性名
 SPT.VIRTUAL_ROOT_PROP_NAME = "virtualRoot";
 
+//图表数据属性名：原始源ID
+SPT.ORIGINAL_SOURCE_ID_PROP_NAME = "originalSourceId";
+
 //图表数据属性名：原始源名
 SPT.ORIGINAL_SOURCE_NAME_PROP_NAME = "originalSourceName";
+
+//图表数据属性名：原始目标ID
+SPT.ORIGINAL_TARGET_ID_PROP_NAME = "originalTargetId";
 
 //图表数据属性名：原始目标名
 SPT.ORIGINAL_TARGET_NAME_PROP_NAME = "originalTargetName";
@@ -2019,7 +2025,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				node.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
 				SPT.appendDistinct(legendData, {name: category}, "name");
 				
-				SPT.appendDistinct(seriesData, node, SPT.ORIGINAL_ID_PROP_NAME);
+				this._appendNode(seriesData, node);
 			}
 		},
 		
@@ -2050,8 +2056,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 					//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
 					//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
 					let link = { source: srcIdx, target: tgtIdx };
-					link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = srcNode.name;
-					link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = tgtNode.name;
+					this._inflateLinkOriginalInfo(link, srcNode, tgtNode);
 					SPT.originalDataOfData(link, di);
 					
 					seriesLinks.push(link);
@@ -2070,16 +2075,18 @@ SPT.mapGraphRenderer = function(plugin, config)
 			var dataSetAlias = chart.dataSetAlias(dataSetBind);
 			var result = chart.resultOf(chartResult, dataSetBind);
 			
-			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 0]);
-			var srcLoField = chart.dataSetFieldOfSign(dataSetBind, [2, 1]);
-			var srcLaField = chart.dataSetFieldOfSign(dataSetBind, [2, 2]);
-			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 3]);
-			var srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 4]);
-			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 5]);
-			var tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [2, 6]);
-			var tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [2, 7]);
-			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 8]);
-			var tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 9]);
+			var srcIdField = chart.dataSetFieldOfSign(dataSetBind, [2, 0]);
+			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 1]);
+			var srcLoField = chart.dataSetFieldOfSign(dataSetBind, [2, 2]);
+			var srcLaField = chart.dataSetFieldOfSign(dataSetBind, [2, 3]);
+			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 4]);
+			var srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 5]);
+			var tgtIdField = chart.dataSetFieldOfSign(dataSetBind, [2, 6]);
+			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 7]);
+			var tgtLoField = chart.dataSetFieldOfSign(dataSetBind, [2, 8]);
+			var tgtLaField = chart.dataSetFieldOfSign(dataSetBind, [2, 9]);
+			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 10]);
+			var tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 11]);
 			
 			var data = chart.resultDatas(result);
 			
@@ -2096,6 +2103,9 @@ SPT.mapGraphRenderer = function(plugin, config)
 					name: chart.resultDataRowCell(dataj, tgtNameField),
 					value: [ chart.resultDataRowCell(dataj, tgtLoField), chart.resultDataRowCell(dataj, tgtLaField) ]
 				};
+				
+				sd[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, srcIdField);
+				td[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, tgtIdField);
 				
 				SPT.originalDataOfData(sd, dataj);
 				SPT.originalDataOfData(td, dataj);
@@ -2134,16 +2144,23 @@ SPT.mapGraphRenderer = function(plugin, config)
 				//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
 				//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
 				let link = { source: srcIdx, target: tgtIdx };
-				link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = sd.name;
-				link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = td.name;
+				this._inflateLinkOriginalInfo(link, sd, td);
 				SPT.originalDataOfData(link, dataj);
 				seriesLinks.push(link);
 			}
 		},
 		
+		_inflateLinkOriginalInfo: function(link, sourceNode, targetNode)
+		{
+			link[SPT.ORIGINAL_SOURCE_ID_PROP_NAME] = sourceNode[SPT.ORIGINAL_ID_PROP_NAME];
+			link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = sourceNode.name;
+			link[SPT.ORIGINAL_TARGET_ID_PROP_NAME] = targetNode[SPT.ORIGINAL_ID_PROP_NAME];
+			link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = targetNode.name;
+		},
+		
 		_appendNode: function(seriesData, node)
 		{
-			return SPT.appendDistinct(seriesData, node, "name");
+			return SPT.appendDistinct(seriesData, node, SPT.ORIGINAL_ID_PROP_NAME);
 		},
 		
 		_configSingleSeries: function(chart, series)
