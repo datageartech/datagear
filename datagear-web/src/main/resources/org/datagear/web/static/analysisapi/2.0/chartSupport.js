@@ -2966,13 +2966,8 @@ SPT.inflateTreeNodeSingleSeries = function(chart, chartResult, singleSeries, sin
 			let node = {};
 			
 			node.name = chart.resultDataRowCell(dataj, nameField);
-			
+			node[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, idField);
 			node[SPT.ORIGINAL_PARENT_PROP_NAME] = chart.resultDataRowCell(dataj, parentField);
-			
-			if(idField)
-			{
-				node[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, idField);
-			}
 			
 			if(valueField)
 			{
@@ -3044,9 +3039,7 @@ SPT.treeAppendNode = function(treeNode, node)
 	if(!treeNode)
 		return false;
 	
-	var parentId = (treeNode[SPT.ORIGINAL_ID_PROP_NAME] !== undefined ? treeNode[SPT.ORIGINAL_ID_PROP_NAME] : treeNode.name);
-	
-	if(node[SPT.ORIGINAL_PARENT_PROP_NAME] === parentId)
+	if(node[SPT.ORIGINAL_PARENT_PROP_NAME] === treeNode[SPT.ORIGINAL_ID_PROP_NAME])
 	{
 		if(!treeNode.children)
 			treeNode.children = [];
