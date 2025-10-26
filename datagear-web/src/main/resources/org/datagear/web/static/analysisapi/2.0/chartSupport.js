@@ -3119,242 +3119,265 @@ SPT.treeEvalNodeValue = function(treeNode)
 
 //桑基图
 
-SPT.sankeyRender = function(chart, options)
+SPT.sankeyRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			dataSignNames:
-			{
-				sourceName: "sourceName", sourceValue: "sourceValue",
-				targetName: "targetName", targetValue: "targetValue",
-				value: "value"
-			},
-			
-			//同series[i].orient
-			orient: "horizontal"
-		}
+		//同series[i].orient
+		orient: "horizontal"
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip:
+				{
+					trigger: "item",
+					//ECharts-6.0默认tooltip显示有缺陷，所以这里自定义了formatter选项
+					formatter: function(params)
+					{
+						return SPT.customEChartsTooltip(params, (pi) =>
+						{
+							let re = {};
+							
+							if(pi.dataType == "edge" && pi.data)
+							{
+								re.name = pi.data[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] + " - " + pi.data[SPT.ORIGINAL_TARGET_NAME_PROP_NAME];
+							}
+							else if(pi.dataType == "node" && pi.value != null)
+							{
+								re.value = pi.value;
+							}
+							
+							return re;
+						});
+					}
+				},
+				series:
+				[
+					{ type: "sankey", data: [], links: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
 		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: "sankey",
-				//这里必须设置data、links，不然渲染会报错
-				data: [],
-				links: []
-			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.sankeyUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var seriesLinks = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
 		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		if(!seriesName)
-			seriesName = chart.dataSetAlias(dataSetBind);
-		
-		var snp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceName);
-		var svp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceValue);
-		var tnp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetName);
-		var tvp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetValue);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		
-		var data = chart.resultDatas(result);
-		
-		for(var j=0; j<data.length; j++)
+		update: function(chart, chartResult)
 		{
-			var sd = { name: chart.resultDataRowCell(data[j], snp) };
-			var td = { name: chart.resultDataRowCell(data[j], tnp) };
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			
-			if(svp)
-				sd.value = chart.resultDataRowCell(data[j], svp);
-			if(tvp)
-				td.value = chart.resultDataRowCell(data[j], tvp);
-			
-			chart.originalDataIndex(sd, dataSetBind, j);
-			
-			var sidx = SPT.appendDistinct(seriesData, sd, "name");
-			
-			//新插入
-			if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
+			var options =
 			{
-				chart.originalDataIndex(sd, dataSetBind, j);
+				series: [{ name: "", data: [], links: [] }]
+			};
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				
+				//节点数据集
+				if(chart.isDataSetSigned(dataSetBind, 0))
+				{
+					this._inflateOptionsForNode(chart, chartResult, dataSetBinds, i, options);
+				}
+				//关系数据集
+				else if(chart.isDataSetSigned(dataSetBind, 1))
+				{
+					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
+				}
+				//合并数据集
+				else if(chart.isDataSetSigned(dataSetBind, 2))
+				{
+					this._inflateOptionsForJoin(chart, chartResult, dataSetBinds, i, options);
+				}
+				
+				if(CF.isEmpty(options.series[0].name))
+					options.series[0].name = chart.dataSetAlias(dataSetBind);
 			}
 			
-			var tidx = SPT.appendDistinct(seriesData, td, "name");
+			this._configSingleSeries(chart, options.series[0]);
+			this._inflateUpdateOptions(chart, options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_inflateUpdateOptions: function(chart, updateOptions)
+		{
+			var series0 = updateOptions.series[0];
+			series0.orient = config.orient;
 			
-			//新插入
-			if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
+			if(series0.orient == "horizontal")
 			{
-				chart.originalDataIndex(td, dataSetBind, j);
+				series0.left = "16%";
+	            series0.right = "16%";
+	            series0.top = "12%";
+	            series0.bottom = "12%";
+			}
+			else if(series0.orient == "vertical")
+			{
+				series0.label = { position: "top" };
+	            series0.left = "12%";
+	            series0.right = "12%";
+	            series0.top = "16%";
+	            series0.bottom = "16%";
 			}
 			
-			var link = {};
-			link.source = sd.name;
-			link.target = td.name;
-			link.value = chart.resultDataRowCell(data[j], vp);
+			//自适应条目宽度和间隔
+			var chartEle = chart.element();
+			var width = chartEle.clientWidth;
+			var height = chartEle.clientHeight;
 			
-			link._sourceIndex = sidx;
-			link._targetIndex = tidx;
+			var totalWidth = (series0.orient == "vertical" ? height : width);
+			nodeWidth = parseInt(totalWidth * 5/100);
+			nodeWidth = (nodeWidth < 4 ? 4: nodeWidth);
+			series0.nodeWidth = nodeWidth;
 			
-			chart.originalDataIndex(link, dataSetBind, j);
+			var totalWidth = (series0.orient == "vertical" ? width : height);
+			nodeGap = parseInt(totalWidth * 2/100);
+			nodeGap = (nodeWidth < 1 ? 1: nodeGap);
+			series0.nodeGap = nodeGap;
+		},
+		
+		_inflateOptionsForNode: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var seriesData = options.series[0].data;
 			
-			seriesLinks.push(link);
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var idField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
+			
+			var data = chart.resultDatas(result);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let dataj = data[i];
+				let node = { name: chart.resultDataRowCell(dataj, nameField) };
+				node[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, idField);
+				SPT.originalDataOfData(node, dataj);
+				
+				if(valueField)
+					node.value = chart.resultDataRowCell(dataj, valueField);
+				
+				this._appendNode(seriesData, node);
+			}
+		},
+		
+		_inflateOptionsForLink: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var seriesData = options.series[0].data;
+			var seriesLinks = options.series[0].links;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var sourceField = chart.dataSetFieldOfSign(dataSetBind, [1, 0]);
+			var targetField = chart.dataSetFieldOfSign(dataSetBind, [1, 1]);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, [1, 2]);
+			var fieldMap = { source: sourceField, target: targetField, value: valueField };
+			
+			var data = chart.resultMapDatas(result, fieldMap);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let di = data[i];
+				let srcIdx = SPT.findInArray(seriesData, di.source, SPT.ORIGINAL_ID_PROP_NAME);
+				let srcNode = (srcIdx >= 0 ? seriesData[srcIdx] : null);
+				let tgtIdx = SPT.findInArray(seriesData, di.target, SPT.ORIGINAL_ID_PROP_NAME);
+				let tgtNode = (tgtIdx >= 0 ? seriesData[tgtIdx] : null);
+				
+				if(srcNode != null && tgtNode != null)
+				{
+					//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
+					//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
+					let link = { source: srcIdx, target: tgtIdx, value: di.value };
+					this._inflateLinkOriginalInfo(link, srcNode, tgtNode);
+					SPT.originalDataOfData(link, di);
+					
+					seriesLinks.push(link);
+				}
+			}
+		},
+		
+		_inflateOptionsForJoin: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var seriesData = options.series[0].data;
+			var seriesLinks = options.series[0].links;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var srcIdField = chart.dataSetFieldOfSign(dataSetBind, [2, 0]);
+			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 1]);
+			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 2]);
+			var tgtIdField = chart.dataSetFieldOfSign(dataSetBind, [2, 3]);
+			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 4]);
+			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 5]);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, [2, 6]);
+			
+			var data = chart.resultDatas(result);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let dataj = data[i];
+				let sd = { name: chart.resultDataRowCell(dataj, srcNameField) };
+				let td = { name: chart.resultDataRowCell(dataj, tgtNameField) };
+				
+				sd[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, srcIdField);
+				td[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, tgtIdField);
+				
+				SPT.originalDataOfData(sd, dataj);
+				SPT.originalDataOfData(td, dataj);
+				
+				if(srcValueField)
+					sd.value = chart.resultDataRowCell(dataj, srcValueField);
+				
+				if(tgtValueField)
+					td.value = chart.resultDataRowCell(dataj, tgtValueField);
+				
+				let srcIdx = this._appendNode(seriesData, sd);
+				let tgtIdx = this._appendNode(seriesData, td);
+				
+				//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
+				//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
+				let link = { source: srcIdx, target: tgtIdx, value: chart.resultDataRowCell(dataj, valueField) };
+				this._inflateLinkOriginalInfo(link, sd, td);
+				SPT.originalDataOfData(link, dataj);
+				seriesLinks.push(link);
+			}
+		},
+		
+		_inflateLinkOriginalInfo: function(link, sourceNode, targetNode)
+		{
+			link[SPT.ORIGINAL_SOURCE_ID_PROP_NAME] = sourceNode[SPT.ORIGINAL_ID_PROP_NAME];
+			link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = sourceNode.name;
+			link[SPT.ORIGINAL_TARGET_ID_PROP_NAME] = targetNode[SPT.ORIGINAL_ID_PROP_NAME];
+			link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = targetNode.name;
+		},
+		
+		_appendNode: function(seriesData, node)
+		{
+			return SPT.appendDistinct(seriesData, node, SPT.ORIGINAL_ID_PROP_NAME);
+		},
+		
+		_configSingleSeries: function(chart, series)
+		{
+			series.type = "sankey";
 		}
-	}
+	};
 	
-	var options = { series: [ { id: 0, type: "sankey", name: seriesName, data: seriesData, links: seriesLinks } ] };
-	
-	SPT.sankeyInflateUpdateOptions(chart, options, renderOptions);
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	chart.liveData("sankeySeriesData", seriesData);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.sankeyResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.sankeyDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.sankeyOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.sankeySetChartEventData);
-};
-
-SPT.sankeyOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.sankeySetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	//TODO 点击节点没反应？？？
-	//节点，仅使用源数据标记对象
-	if(echartsEventParams.dataType == "node")
-	{
-		data[dataSignNames.sourceName] = echartsData.name;
-		data[dataSignNames.sourceValue] = echartsData.value;
-		
-		chart.eventData(chartEvent, data);
-		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-	}
-	//边
-	else if(echartsEventParams.dataType == "edge")
-	{
-		var seriesData = chart.liveData("sankeySeriesData");
-		var sourceData = seriesData[echartsData._sourceIndex];
-		var targetData = seriesData[echartsData._targetIndex];
-		
-		data[dataSignNames.sourceName] = sourceData.name;
-		data[dataSignNames.sourceValue] = sourceData.value;
-		
-		if(targetData)
-		{
-			data[dataSignNames.targetName] = targetData.name;
-			data[dataSignNames.targetValue] = targetData.value;
-		}
-		
-		data[dataSignNames.value] = echartsData.value;
-		
-		chart.eventData(chartEvent, data);
-		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-	}
-};
-
-SPT.sankeyInflateUpdateOptions = function(chart, updateOptions, renderOptions)
-{
-	var seriesEle = updateOptions.series[0];
-	var seriesEleExt = {};
-	
-	seriesEle.orient = renderOptions.dg.orient;
-	
-	if(renderOptions.dg.orient == "horizontal")
-	{
-		seriesEleExt =
-		{
-			left: "16%",
-            right: "16%",
-            top: "12%",
-            bottom: "12%"
-		};
-	}
-	else if(renderOptions.dg.orient == "vertical")
-	{
-		seriesEleExt =
-		{
-			label: { position: "top" },
-            left: "12%",
-            right: "12%",
-            top: "16%",
-            bottom: "16%"
-		};
-	}
-	
-	//自适应条目宽度和间隔
-	var chartEle = chart.elementJquery();
-	
-	var totalWidth = (seriesEle.orient == "vertical" ? chartEle.height() : chartEle.width());
-	nodeWidth = parseInt(totalWidth * 5/100);
-	nodeWidth = (nodeWidth < 4 ? 4: nodeWidth);
-	seriesEleExt.nodeWidth = nodeWidth;
-	
-	var totalWidth = (seriesEle.orient == "vertical" ? chartEle.width() : chartEle.height());
-	nodeGap = parseInt(totalWidth * 2/100);
-	nodeGap = (nodeWidth < 1 ? 1: nodeGap);
-	seriesEleExt.nodeGap = nodeGap;
-	
-	CF.extend(seriesEle, seriesEleExt);
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //关系图
