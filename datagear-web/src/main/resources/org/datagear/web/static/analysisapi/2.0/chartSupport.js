@@ -1755,7 +1755,24 @@ SPT._mapScatterRenderer = function(plugin, config)
 			var options =
 			{
 				title: { text: chart.name() },
-				tooltip: { trigger: "item" },
+				tooltip:
+				{
+					trigger: "item",
+					//ECharts-6.0设置“series.encode = { tooltip: (hasValueField ? [2] : []) }”时，
+					//无值时仍会显示经度，所以这里自定义了formatter选项
+					formatter: function(params)
+					{
+						return SPT.customEChartsTooltip(params, (pi) =>
+						{
+							let re = {};
+							
+							if(pi.value)
+								re.value = (pi.value.length >= 3 ? pi.value[2] : "");
+							
+							return re;
+						});
+					}
+				},
 				legend: { data: [] },
 				geo: { roam: true },
 				series:
@@ -1857,7 +1874,7 @@ SPT._mapScatterRenderer = function(plugin, config)
 		{
 			series.type = config.scatterType;
 			series.coordinateSystem = "geo";
-			series.encode = { tooltip: (hasValueField ? [0, 1, 2] : [0, 1]) };
+			//series.encode = { tooltip: (hasValueField ? [2] : []) };
 		}
 	};
 	
