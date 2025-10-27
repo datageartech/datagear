@@ -999,8 +999,9 @@ SPT._scatterRenderer = function(plugin, config)
 			var series = [];
 			
 			var dataRange = { min: null, max: null };
-			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, config.scatterType);
-			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, config.scatterType);
+			var symbolSizeRatio = SPT.symbolSizeRadioIfEffectScatter(config.scatterType);
+			var symbolSizeMax = SPT.evalSymbolSizeMax(chart, symbolSizeRatio);
+			var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1166,8 +1167,9 @@ SPT._scatterCoordRenderer = function(plugin, config)
 			var series = [];
 			
 			var dataRange = { min: null, max: null };
-			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, config.scatterType);
-			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, config.scatterType);
+			var symbolSizeRatio = SPT.symbolSizeRadioIfEffectScatter(config.scatterType);
+			var symbolSizeMax = SPT.evalSymbolSizeMax(chart, symbolSizeRatio);
+			var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1781,8 +1783,9 @@ SPT._mapScatterRenderer = function(plugin, config)
 			var map = null;
 			
 			var dataRange = { min: null, max: null };
-			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart, config.scatterType);
-			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax, config.scatterType);
+			var symbolSizeRatio = SPT.symbolSizeRadioIfEffectScatter(config.scatterType);
+			var symbolSizeMax = SPT.evalSymbolSizeMax(chart, symbolSizeRatio);
+			var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1933,8 +1936,8 @@ SPT.mapGraphRenderer = function(plugin, config)
 			};
 			
 			var dataRange = { min: null, max: null };
-			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
-			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
+			var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
+			var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -3478,8 +3481,8 @@ SPT.graphRenderer = function(plugin, config)
 			};
 			
 			var dataRange = { min: null, max: null };
-			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
-			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
+			var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
+			var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -7975,17 +7978,10 @@ SPT.legendNameForDataValues = function(chart, dataSetBinds, dataSetBind, dataSet
 	return legendName;
 };
 
-SPT.evalSymbolSizeMaxForScatter = function(chart, scatterType)
+SPT.symbolSizeRadioIfEffectScatter = function(scatterType)
 {
 	//涟漪效果会是散点显得很大，所以这里稍作调整
-	var ratio = (scatterType == "effectScatter" ? 0.06 : null);
-	return SPT.evalSymbolSizeMax(chart, ratio);
-};
-
-SPT.evalSymbolSizeMinForScatter = function(chart, symbolSizeMax, scatterType)
-{
-	//最小涟漪散点不必调整
-	return SPT.evalSymbolSizeMin(chart, symbolSizeMax);
+	return (scatterType == "effectScatter" ? 0.06 : null);
 };
 
 /**
@@ -8014,7 +8010,7 @@ SPT.evalSymbolSizeMax = function(chart, ratio)
  */
 SPT.evalSymbolSizeMin = function(chart, symbolSizeMax, ratio)
 {
-	ratio = (ratio == null ? 0.15 : ratio);
+	ratio = (ratio == null ? 0.2 : ratio);
 	
 	var symbolSizeMin = parseInt(symbolSizeMax * ratio);
 	
