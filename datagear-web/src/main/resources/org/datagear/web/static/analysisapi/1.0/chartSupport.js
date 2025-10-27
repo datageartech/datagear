@@ -9269,8 +9269,8 @@
 		if((maxValue-minValue) <= 0)
 			return symbolSizeMin;
 		
-		var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
-		return (size < symbolSizeMin ? symbolSizeMin : size);
+		var size = parseInt((value-minValue)/(maxValue-minValue)*(symbolSizeMax-symbolSizeMin)) + symbolSizeMin;
+		return size;
 	};
 	
 	/**

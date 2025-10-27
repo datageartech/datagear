@@ -1925,7 +1925,6 @@ SPT.mapGraphRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-			var mapSignIndex = 3;
 			
 			var options =
 			{
@@ -1946,31 +1945,27 @@ SPT.mapGraphRenderer = function(plugin, config)
 				{
 					this._inflateOptionsForNode(chart, chartResult, dataSetBinds, i, options, dataRange);
 				}
-				//关系数据集
-				else if(chart.isDataSetSigned(dataSetBind, 1))
-				{
-					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
-				}
 				//合并数据集
 				else if(chart.isDataSetSigned(dataSetBind, 2))
 				{
 					this._inflateOptionsForJoin(chart, chartResult, dataSetBinds, i, options, dataRange);
 				}
 				
-				if(CF.isEmpty(options.series[0].name))
-					options.series[0].name = chart.dataSetAlias(dataSetBind);
+				this._inflateCommonOptions(chart, chartResult, dataSetBinds, i, options);
+			}
+			
+			//应在所有节点填充完成后再处理关系
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
 				
-				if(!options.geo || !options.geo.map)
+				//关系数据集
+				if(chart.isDataSetSigned(dataSetBind, 1))
 				{
-					let result = chart.resultOf(chartResult, dataSetBind);
-					let map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
-					
-					if(!CF.isEmpty(map))
-					{
-						options.geo = (options.geo || {});
-						options.geo.map = map;
-					}
+					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
 				}
+				
+				this._inflateCommonOptions(chart, chartResult, dataSetBinds, i, options);
 			}
 			
 			this._configSingleSeries(chart, options.series[0]);
@@ -1978,6 +1973,27 @@ SPT.mapGraphRenderer = function(plugin, config)
 			
 			options = SPT.prepareEChartsUpdateOptions(chart, options);
 			SPT.echartsMapChartUpdate(chart, options);
+		},
+		
+		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var mapSignIndex = 3;
+			var dataSetBind = dataSetBinds[dsbIndex];
+			
+			if(CF.isEmpty(options.series[0].name))
+				options.series[0].name = chart.dataSetAlias(dataSetBind);
+			
+			if(!options.geo || !options.geo.map)
+			{
+				let result = chart.resultOf(chartResult, dataSetBind);
+				let map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
+				
+				if(!CF.isEmpty(map))
+				{
+					options.geo = (options.geo || {});
+					options.geo.map = map;
+				}
+			}
 		},
 		
 		_inflateOptionsForNode: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
@@ -3188,19 +3204,27 @@ SPT.sankeyRenderer = function(plugin, config)
 				{
 					this._inflateOptionsForNode(chart, chartResult, dataSetBinds, i, options);
 				}
-				//关系数据集
-				else if(chart.isDataSetSigned(dataSetBind, 1))
-				{
-					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
-				}
 				//合并数据集
 				else if(chart.isDataSetSigned(dataSetBind, 2))
 				{
 					this._inflateOptionsForJoin(chart, chartResult, dataSetBinds, i, options);
 				}
 				
-				if(CF.isEmpty(options.series[0].name))
-					options.series[0].name = chart.dataSetAlias(dataSetBind);
+				this._inflateCommonOptions(chart, chartResult, dataSetBinds, i, options);
+			}
+			
+			//应在所有节点填充完成后再处理关系
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				
+				//关系数据集
+				if(chart.isDataSetSigned(dataSetBind, 1))
+				{
+					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
+				}
+				
+				this._inflateCommonOptions(chart, chartResult, dataSetBinds, i, options);
 			}
 			
 			this._configSingleSeries(chart, options.series[0]);
@@ -3244,6 +3268,14 @@ SPT.sankeyRenderer = function(plugin, config)
 			nodeGap = parseInt(totalWidth * 2/100);
 			nodeGap = (nodeWidth < 1 ? 1: nodeGap);
 			series0.nodeGap = nodeGap;
+		},
+		
+		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var dataSetBind = dataSetBinds[dsbIndex];
+			
+			if(CF.isEmpty(options.series[0].name))
+				options.series[0].name = chart.dataSetAlias(dataSetBind);
 		},
 		
 		_inflateOptionsForNode: function(chart, chartResult, dataSetBinds, dsbIndex, options)
@@ -3382,280 +3414,304 @@ SPT.sankeyRenderer = function(plugin, config)
 
 //关系图
 
-SPT.graphRender = function(chart, options)
+SPT.graphRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//map 可选，地图名
-			dataSignNames:
-			{
-				sourceId: "sourceId", sourceName: "sourceName", sourceCategory: "sourceCategory", sourceValue: "sourceValue",
-				targetId: "targetId", targetName: "targetName", targetCategory: "targetCategory", targetValue: "targetValue",
-				value: "value"
-			},
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
-			//同series[i].layout
-			layout: "force"
-		}
+		//同series[i].layout
+		layout: "force"
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var options =
 			{
-				id: 0,
-				type: "graph"
-			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.graphUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var seriesName = "";
-	var categories = [];
-	var seriesData = [];
-	var seriesLinks = [];
-	
-	var min = undefined, max = undefined;
-	var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
-	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		if(!seriesName)
-			seriesName = chart.dataSetAlias(dataSetBind);
-		
-		var sip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceId);
-		var snp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceName);
-		var scp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceCategory);
-		var svp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.sourceValue);
-		var tip = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetId);
-		var tnp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetName);
-		var tcp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetCategory);
-		var tvp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.targetValue);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		
-		var data = chart.resultDatas(result);
-		
-		for(var j=0; j<data.length; j++)
-		{
-			var sd = { name: chart.resultDataRowCell(data[j], snp) };
-			var td = { name: chart.resultDataRowCell(data[j], tnp) };
-			
-			if(sip)
-				sd.id = chart.resultDataRowCell(data[j], sip);
-			
-			if(scp)
-			{
-				var category = chart.resultDataRowCell(data[j], scp);
-				sd._categoryOrigin = category;
-				if(category)
+				title: { text: chart.name() },
+				tooltip:
 				{
-					sd.category = SPT.appendDistinct(categories, {name: category}, "name");
-					SPT.appendDistinct(legendData, category);
+					trigger: "item",
+					//ECharts-6.0默认tooltip显示有缺陷，所以这里自定义了formatter选项
+					formatter: function(params)
+					{
+						return SPT.customEChartsTooltip(params, (pi) =>
+						{
+							let re = {};
+							
+							if(pi.dataType == "edge" && pi.data)
+							{
+								re.name = pi.data[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] + " > " + pi.data[SPT.ORIGINAL_TARGET_NAME_PROP_NAME];
+							}
+							else if(pi.dataType == "node" && pi.value != null)
+							{
+								re.value = pi.value;
+							}
+							
+							return re;
+						});
+					}
+				},
+				legend: { data: [] },
+				series:
+				[
+					{ type: "graph", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var options =
+			{
+				legend: { data: [] },
+				series: [{ name: "", categories: [], data: [], links: [] }]
+			};
+			
+			var dataRange = { min: null, max: null };
+			var symbolSizeMax = SPT.evalSymbolSizeMaxForScatter(chart);
+			var symbolSizeMin = SPT.evalSymbolSizeMinForScatter(chart, symbolSizeMax);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				
+				//节点数据集
+				if(chart.isDataSetSigned(dataSetBind, 0))
+				{
+					this._inflateOptionsForNode(chart, chartResult, dataSetBinds, i, options, dataRange);
+				}
+				//合并数据集
+				else if(chart.isDataSetSigned(dataSetBind, 2))
+				{
+					this._inflateOptionsForJoin(chart, chartResult, dataSetBinds, i, options, dataRange);
+				}
+				
+				this._inflateCommonOptions(chart, chartResult, dataSetBinds, i, options);
+			}
+			
+			//应在所有节点填充完成后再处理关系
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				
+				//关系数据集
+				if(chart.isDataSetSigned(dataSetBind, 1))
+				{
+					this._inflateOptionsForLink(chart, chartResult, dataSetBinds, i, options);
+				}
+				
+				this._inflateCommonOptions(chart, chartResult, dataSetBinds, i, options);
+			}
+			
+			this._configSingleSeries(chart, options.series[0], symbolSizeMax);
+			SPT.evalSeriesDataValueSymbolSize(options.series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value");
+			
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var dataSetBind = dataSetBinds[dsbIndex];
+			
+			if(CF.isEmpty(options.series[0].name))
+				options.series[0].name = chart.dataSetAlias(dataSetBind);
+		},
+		
+		_inflateOptionsForNode: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
+		{
+			var legendData = options.legend.data;
+			var seriesCategories = options.series[0].categories;
+			var seriesData = options.series[0].data;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var dataSetAlias = chart.dataSetAlias(dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var idField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, [0, 1]);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, [0, 2]);
+			var categoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 3]);
+			
+			var data = chart.resultDatas(result);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let dataj = data[i];
+				let node = { name: chart.resultDataRowCell(dataj, nameField) };
+				
+				node[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, idField);
+				SPT.originalDataOfData(node, dataj);
+				
+				if(valueField)
+				{
+					let v = chart.resultDataRowCell(dataj, valueField);
+					node.value = v;
+					
+					dataRange.min = (dataRange.min == null ? v : Math.min(dataRange.min, v));
+					dataRange.max = (dataRange.max == null ? v : Math.max(dataRange.max, v));
+				}
+				
+				let category = (categoryField ? chart.resultDataRowCell(dataj, categoryField) : dataSetAlias);
+				node[SPT.ORIGINAL_CATEGORY_PROP_NAME] = category;
+				node.category = SPT.appendDistinct(seriesCategories, {name: category}, "name");
+				SPT.appendDistinct(legendData, {name: category}, "name");
+				
+				this._appendNode(seriesData, node);
+			}
+		},
+		
+		_inflateOptionsForLink: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var seriesData = options.series[0].data;
+			var seriesLinks = options.series[0].links;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var sourceField = chart.dataSetFieldOfSign(dataSetBind, [1, 0]);
+			var targetField = chart.dataSetFieldOfSign(dataSetBind, [1, 1]);
+			var fieldMap = { source: sourceField, target: targetField };
+			
+			var data = chart.resultMapDatas(result, fieldMap);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let di = data[i];
+				let srcIdx = SPT.findInArray(seriesData, di.source, SPT.ORIGINAL_ID_PROP_NAME);
+				let srcNode = (srcIdx >= 0 ? seriesData[srcIdx] : null);
+				let tgtIdx = SPT.findInArray(seriesData, di.target, SPT.ORIGINAL_ID_PROP_NAME);
+				let tgtNode = (tgtIdx >= 0 ? seriesData[tgtIdx] : null);
+				
+				if(srcNode != null && tgtNode != null)
+				{
+					//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
+					//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
+					let link = { source: srcIdx, target: tgtIdx };
+					this._inflateLinkOriginalInfo(link, srcNode, tgtNode);
+					SPT.originalDataOfData(link, di);
+					
+					seriesLinks.push(link);
 				}
 			}
-			
-			if(svp)
-			{
-				sd.value = chart.resultDataRowCell(data[j], svp);
-				
-				min = (min == null ? sd.value : Math.min(min, sd.value));
-				max = (max == null ? sd.value : Math.max(max, sd.value));
-			}
-			
-			if(tip)
-				td.id = chart.resultDataRowCell(data[j], tip);
-			
-			if(tcp)
-			{
-				var category = chart.resultDataRowCell(data[j], tcp);
-				td._categoryOrigin = category;
-				if(category)
-				{
-					td.category = SPT.appendDistinct(categories, {name: category}, "name");
-					SPT.appendDistinct(legendData, category);
-				}
-			}
-			
-			if(tvp)
-			{
-				td.value = chart.resultDataRowCell(data[j], tvp);
-				
-				min = (min == null ? td.value : Math.min(min, td.value));
-				max = (max == null ? td.value : Math.max(max, td.value));
-			}
-			
-			var sidx = SPT.appendDistinct(seriesData, sd, (sip ? "id" : "name"));
-			
-			//新插入
-			if(sidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === sd)
-			{
-				chart.originalDataIndex(sd, dataSetBind, j);
-			}
-			
-			var tidx = SPT.appendDistinct(seriesData, td, (tip ? "id" : "name"));
-			
-			//新插入
-			if(tidx == seriesData.length - 1 && seriesData[seriesData.length - 1] === td)
-			{
-				chart.originalDataIndex(td, dataSetBind, j);
-			}
-			
-			//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
-			var link = {};
-			link.source = sidx;
-			link.target = tidx;
-			
-			if(vp)
-				link.value = chart.resultDataRowCell(data[j], vp);
-			
-			chart.originalDataIndex(link, dataSetBind, j);
-			
-			seriesLinks.push(link);
-		}
-	}
-	
-	if(min == null && max == null && symbolSizeMin < 10)
-		symbolSizeMin = 10;
-	
-	var series = [ { id: 0, type: "graph", name: seriesName, categories: categories, data: seriesData, links: seriesLinks } ];
-	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	SPT.graphInflateUpdateOptions(chart, options, min, max, symbolSizeMax, symbolSizeMin, renderOptions);
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	chart.liveData("graphSeriesData", seriesData);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.graphResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.graphDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.graphOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.graphSetChartEventData);
-};
-
-SPT.graphOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.graphSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	
-	var data = {};
-	
-	//节点，仅使用源数据标记对象
-	if(echartsEventParams.dataType == "node")
-	{
-		data[dataSignNames.sourceId] = echartsData.id;
-		data[dataSignNames.sourceName] = echartsData.name;
-		data[dataSignNames.sourceCategory] = echartsData._categoryOrigin;
-		data[dataSignNames.sourceValue] = echartsData.value;
-
-		chart.eventData(chartEvent, data);
-		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-	}
-	//边
-	else if(echartsEventParams.dataType == "edge")
-	{
-		var seriesData = chart.liveData("graphSeriesData");
-		var sourceData = seriesData[echartsData.source];
-		var targetData = seriesData[echartsData.target];
+		},
 		
-		data[dataSignNames.sourceId] = sourceData.id;
-		data[dataSignNames.sourceName] = sourceData.name;
-		data[dataSignNames.sourceCategory] = sourceData._categoryOrigin;
-		data[dataSignNames.sourceValue] = sourceData.value;
-		
-		if(targetData)
+		_inflateOptionsForJoin: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
 		{
-			data[dataSignNames.targetId] = targetData.id;
-			data[dataSignNames.targetName] = targetData.name;
-			data[dataSignNames.targetCategory] = targetData._categoryOrigin;
-			data[dataSignNames.targetValue] = targetData.value;
+			var legendData = options.legend.data;
+			var seriesCategories = options.series[0].categories;
+			var seriesData = options.series[0].data;
+			var seriesLinks = options.series[0].links;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var dataSetAlias = chart.dataSetAlias(dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var srcIdField = chart.dataSetFieldOfSign(dataSetBind, [2, 0]);
+			var srcNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 1]);
+			var srcValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 2]);
+			var srcCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 3]);
+			var tgtIdField = chart.dataSetFieldOfSign(dataSetBind, [2, 4]);
+			var tgtNameField = chart.dataSetFieldOfSign(dataSetBind, [2, 5]);
+			var tgtValueField = chart.dataSetFieldOfSign(dataSetBind, [2, 6]);
+			var tgtCategoryField = chart.dataSetFieldOfSign(dataSetBind, [2, 7]);
+			
+			var data = chart.resultDatas(result);
+			
+			for(let i=0; i<data.length; i++)
+			{
+				let dataj = data[i];
+				let sd = { name: chart.resultDataRowCell(dataj, srcNameField) };
+				let td = { name: chart.resultDataRowCell(dataj, tgtNameField) };
+				
+				sd[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, srcIdField);
+				td[SPT.ORIGINAL_ID_PROP_NAME] = chart.resultDataRowCell(dataj, tgtIdField);
+				
+				SPT.originalDataOfData(sd, dataj);
+				SPT.originalDataOfData(td, dataj);
+				
+				if(srcValueField)
+				{
+					let sv = chart.resultDataRowCell(dataj, srcValueField);
+					sd.value = sv;
+					
+					dataRange.min = (dataRange.min == null ? sv : Math.min(dataRange.min, sv));
+					dataRange.max = (dataRange.max == null ? sv : Math.max(dataRange.max, sv));
+				}
+				
+				let srcCategory = (srcCategoryField ? chart.resultDataRowCell(dataj, srcCategoryField) : dataSetAlias);
+				sd[SPT.ORIGINAL_CATEGORY_PROP_NAME] = srcCategory;
+				sd.category = SPT.appendDistinct(seriesCategories, {name: srcCategory}, "name");
+				SPT.appendDistinct(legendData, {name: srcCategory}, "name");
+				
+				if(tgtValueField)
+				{
+					let tv = chart.resultDataRowCell(dataj, tgtValueField);
+					td.value = tv;
+					
+					dataRange.min = (dataRange.min == null ? tv : Math.min(dataRange.min, tv));
+					dataRange.max = (dataRange.max == null ? tv : Math.max(dataRange.max, tv));
+				}
+				
+				let tgtCategory = (tgtCategoryField ? chart.resultDataRowCell(dataj, tgtCategoryField) : dataSetAlias);
+				td[SPT.ORIGINAL_CATEGORY_PROP_NAME] = tgtCategory;
+				td.category = SPT.appendDistinct(seriesCategories, {name: tgtCategory}, "name");
+				SPT.appendDistinct(legendData, {name: tgtCategory}, "name");
+				
+				let srcIdx = this._appendNode(seriesData, sd);
+				let tgtIdx = this._appendNode(seriesData, td);
+				
+				//如果使用id值作为关系标识，对于数值型id，echarts会误当做数据索引；
+				//如果使用名称作为关系标识，在连接线上的tooltip只会显示索引数值不友好，所有这里使用索引号同时自定义tooltip
+				let link = { source: srcIdx, target: tgtIdx };
+				this._inflateLinkOriginalInfo(link, sd, td);
+				SPT.originalDataOfData(link, dataj);
+				seriesLinks.push(link);
+			}
+		},
+		
+		_inflateLinkOriginalInfo: function(link, sourceNode, targetNode)
+		{
+			link[SPT.ORIGINAL_SOURCE_ID_PROP_NAME] = sourceNode[SPT.ORIGINAL_ID_PROP_NAME];
+			link[SPT.ORIGINAL_SOURCE_NAME_PROP_NAME] = sourceNode.name;
+			link[SPT.ORIGINAL_TARGET_ID_PROP_NAME] = targetNode[SPT.ORIGINAL_ID_PROP_NAME];
+			link[SPT.ORIGINAL_TARGET_NAME_PROP_NAME] = targetNode.name;
+		},
+		
+		_appendNode: function(seriesData, node)
+		{
+			return SPT.appendDistinct(seriesData, node, SPT.ORIGINAL_ID_PROP_NAME);
+		},
+		
+		_configSingleSeries: function(chart, series, symbolSizeMax)
+		{
+			series.type = "graph";
+			series.layout = config.layout;
+			
+			if(series.layout == "force")
+			{
+				series.draggable = true;
+				series.force = {};
+				//自动计算散点间距
+				series.force.edgeLength = parseInt(symbolSizeMax*1.5);
+				//自动计算散点稀疏度
+				series.force.repulsion = parseInt(symbolSizeMax*2);
+			}
 		}
-		
-		data[dataSignNames.value] = echartsData.value;
-		
-		chart.eventData(chartEvent, data);
-		chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
-	}
-};
-
-SPT.graphInflateUpdateOptions = function(chart, updateOptions, min, max, symbolSizeMax, symbolSizeMin, renderOptions)
-{
-	var seriesEle = updateOptions.series[0];
+	};
 	
-	seriesEle.layout = renderOptions.dg.layout;
-	
-	if(seriesEle.layout == "force")
-	{
-		seriesEle.draggable = true;
-		seriesEle.force = {};
-		//自动计算散点间距
-		seriesEle.force.edgeLength = parseInt(symbolSizeMax*1.5);
-		//自动计算散点稀疏度
-		seriesEle.force.repulsion = parseInt(symbolSizeMax*2);
-	}
-	
-	SPT.evalSeriesDataValueSymbolSize(seriesEle, min, max, symbolSizeMax, symbolSizeMin);
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //箱型图
@@ -7980,8 +8036,8 @@ SPT.evalValueSymbolSize = function(value, minValue, maxValue, symbolSizeMax, sym
 	if((maxValue-minValue) <= 0)
 		return symbolSizeMin;
 	
-	var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
-	return (size < symbolSizeMin ? symbolSizeMin : size);
+	var size = parseInt((value-minValue)/(maxValue-minValue)*(symbolSizeMax-symbolSizeMin)) + symbolSizeMin;
+	return size;
 };
 
 /**
@@ -8033,8 +8089,7 @@ SPT.evalDataValueSymbolSize = function(data, minValue, maxValue, symbolSizeMax, 
 		if(valueElementIndex != null)
 			value = (CF.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
 		
-		obj.symbolSize = SPT.evalValueSymbolSize(
-			value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
+		obj.symbolSize = SPT.evalValueSymbolSize(value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
 	}
 };
 
