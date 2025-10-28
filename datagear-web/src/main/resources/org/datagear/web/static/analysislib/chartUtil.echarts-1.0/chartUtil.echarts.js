@@ -415,7 +415,7 @@ EU._buildEchartsTheme = function(chart)
 			"itemStyle" : {
 				"borderWidth" : 0,
 				"borderColor" : chartTheme.borderColor,
-				"shadowBlur" : 3,
+				"shadowBlur" : 0,
 				"shadowColor" : shadowColor
 			},
 			"label": {
