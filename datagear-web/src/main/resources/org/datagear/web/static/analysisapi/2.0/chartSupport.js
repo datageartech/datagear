@@ -3749,300 +3749,235 @@ SPT.graphRenderer = function(plugin, config)
 
 //箱型图
 
-SPT.boxplotRender = function(chart, options)
+SPT.boxplotRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值
-			dataSignNames:
-			{
-				name: "name", min: "min", lower: "lower",
-				median: "median", upper: "upper", max: "max", value: "value",
-				category: "category"
-			},
-			//是否横向
-			horizontal: false,
-			//最大数据标记像素数
-			symbolSizeMax: undefined,
-			//最小数据标记像素数
-			symbolSizeMin: undefined,
-		}
+		//散点图类型："scatter"、"effectScatter"
+		scatterType: "scatter",
+		//是否互换坐标轴
+		interchangeAxis: false
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		xAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			boundaryGap: true,
-			splitLine: { show: false }
-		},
-		yAxis:
-		{
-			id: 0,
-			name: "",
-			nameGap: 5,
-			type: "value"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+			
+			var options =
 			{
-				id: 0,
-				type: "boxplot"
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					boundaryGap: true,
+					splitLine: { show: false }
+				},
+				yAxis:
+				{
+					name: "",
+					type: "value"
+				},
+				series:
+				[
+					{ type: "boxplot", data: [] }
+				]
+			};
+			
+			//非类目轴需要设置，不然图形会贴边
+			if(options.xAxis.type != "category")
+				options.xAxis.boundaryGap = [ "12%", "12%" ];
+			
+			if(config.interchangeAxis)
+			{
+				let xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
 			}
-		]
-	},
-	options,
-	function(options)
-	{
-		//箱形图的angleAxis.type不能为value和time，不然图形无法显示
-		if(options.xAxis.type == "value" || options.xAxis.type == "time")
-			options.xAxis.type = "category";
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
 		
-		if(options.dg.horizontal)
+		update: function(chart, chartResult)
 		{
-			var xAxisTmp = options.xAxis;
-			options.xAxis = options.yAxis;
-			options.yAxis = xAxisTmp;
-		}
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.boxplotUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	
-	var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
-	var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var options = { legend: { data: [] }, series: [] };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				
+				//箱形数据集
+				if(chart.isDataSetSigned(dataSetBind, 0))
+				{
+					this._inflateOptionsForBoxplot(chart, chartResult, dataSetBinds, i, options);
+				}
+				//异常值数据集
+				else if(chart.isDataSetSigned(dataSetBind, 1))
+				{
+					this._inflateOptionsForOutlier(chart, chartResult, dataSetBinds, i, options);
+				}
+			}
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							{
+								get: function(s)
+								{
+									if(s.type == "boxplot")
+										return SPT.inflateAxisDataExtractors.propertyName();
+									else
+										return SPT.inflateAxisDataExtractors.valueElement0();
+								}
+							});
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
 		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var minp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.min);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		
-		//箱形数据集
-		if(minp)
+		_inflateOptionsForBoxplot: function(chart, chartResult, dataSetBinds, dsbIndex, options)
 		{
-			var vp =
+			var legendData = options.legend.data;
+			var series = options.series;
+			
+			var dataSetBind = dataSetBinds[dsbIndex];
+			var dataSetAlias = chart.dataSetAlias(dataSetBind);
+			var result = chart.resultOf(chartResult, dataSetBind);
+			
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, [0, 0]);
+			var valueFields =
 			[
-				minp,
-				chart.dataSetFieldOfSign(dataSetBind, dataSignNames.lower),
-				chart.dataSetFieldOfSign(dataSetBind, dataSignNames.median),
-				chart.dataSetFieldOfSign(dataSetBind, dataSignNames.upper),
-				chart.dataSetFieldOfSign(dataSetBind, dataSignNames.max)
+				nameField,
+				chart.dataSetFieldOfSign(dataSetBind, [0, 1]),
+				chart.dataSetFieldOfSign(dataSetBind, [0, 2]),
+				chart.dataSetFieldOfSign(dataSetBind, [0, 3]),
+				chart.dataSetFieldOfSign(dataSetBind, [0, 4]),
+				chart.dataSetFieldOfSign(dataSetBind, [0, 5])
 			];
-			var propertyMap = { name: np, value: vp };
-			if(cp)
-				propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
+			var categoryField = chart.dataSetFieldOfSign(dataSetBind, [0, 6]);
 			
-			var data = chart.resultMapDatas(result, propertyMap);
-			chart.originalDataIndexes(data, dataSetBind);
+			var fieldMap = { name: nameField, value: valueFields };
+			if(categoryField)
+				fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
 			
-			if(cp)
+			var data = chart.resultMapDatas(result, fieldMap);
+			SPT.originalDataOfResult(data, chart, result);
+			
+			if(categoryField)
 			{
 				var categoryNames = [];
 				var categoryDatasMap = {};
-				
 				SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
 				
 				for(var j=0; j<categoryNames.length; j++)
 				{
 					var categoryName = categoryNames[j];
 					var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-					var mySeries = {id: series.length, type: "boxplot", name: legendName, data: categoryDatasMap[categoryName]};
+					var mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 					
-					legendData.push(legendName);
+					this._configSingleSeriesForBoxplot(chart, mySeries);
+					legendData.push({ name: legendName });
 					series.push(mySeries);
 				}
 			}
 			else
 			{
-				legendData.push(dataSetAlias);
-				series.push({ id: series.length, type: "boxplot", name: dataSetAlias, data: data });
+				let mySeries = { name: dataSetAlias, data: data };
+				
+				this._configSingleSeriesForBoxplot(chart, mySeries);
+				legendData.push({ name: dataSetAlias });
+				series.push(mySeries);
 			}
-		}
-		//异常值数据集
-		else
-		{
-			if(cp)
-			{
-				var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-				
-				var categoryNames = [];
-				var categoryDatasMap = {};
-				
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var propertyMap = { "value": [np, vp] }; 
-				propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-				
-				var data = chart.resultMapDatas(result, propertyMap);
-				SPT.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
-				chart.originalDataIndexes(data, dataSetBind);
-				SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-				
-				for(var j=0; j<categoryNames.length; j++)
-				{
-					var categoryName = categoryNames[j];
-					var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-					var mySeries = {id: series.length, type: "scatter", name: legendName, data: categoryDatasMap[categoryName]};
-					
-					if(dg.horizontal)
-					{
-						mySeries.encode = { x: 1, y: 0 };
-					}
-					
-					legendData.push(legendName);
-					series.push(mySeries);
-				}
-			}
-			else
-			{
-				var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-				
-				for(var j=0; j<vps.length; j++)
-				{
-					var legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-					var vpsMy = [np, vps[j]];
-					var data = chart.resultValueDatas(result, vpsMy);
-					SPT.evalDataValueSymbolSize(data, 1, 1, symbolSizeMax, symbolSizeMin);
-					chart.originalDataIndexes(data, dataSetBind);
-					
-					var mySeries = { id: series.length, type: "scatter", name: legendName, data: data };
-					
-					if(dg.horizontal)
-					{
-						mySeries.encode = { x: 1, y: 0 };
-					}
-					
-					legendData.push(legendName);
-					series.push(mySeries);
-				}
-			}
-		}
-	}
-	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	
-	//需要设置坐标值，不然刻度会错乱
-	if(dg.horizontal)
-		options.yAxis = { id: 0 };
-	else
-		options.xAxis = { id: 0 };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
-					{
-						get: function(s)
-						{
-							if(s.type == "boxplot")
-								return SPT.inflateAxisDataExtractors.property("name");
-							else
-								return SPT.inflateAxisDataExtractors.valueElement(0);
-						}
-					});
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.boxplotResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.boxplotDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.boxplotOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.boxplotSetChartEventData);
-};
-
-SPT.boxplotOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.boxplotSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var seriesType = echartsEventParams.seriesType;
-	var echartsData = (echartsEventParams.data || {});
-	var echartsValue = (echartsData.value || []);
-	var data = {};
-	
-	//箱形系列
-	if(seriesType == "boxplot")
-	{
-		//value的第一个元素是数据索引
-		var startIdx = (echartsValue.length > 5 ? 1 : 0);
+		},
 		
-		data[dataSignNames.name] = echartsData.name;
-		data[dataSignNames.min] = echartsValue[startIdx];
-		data[dataSignNames.lower] = echartsValue[startIdx+1];
-		data[dataSignNames.median] = echartsValue[startIdx+2];
-		data[dataSignNames.upper] = echartsValue[startIdx+3];
-		data[dataSignNames.max] = echartsValue[startIdx+4];
-	}
-	//异常值系列
-	else
-	{
-		data[dataSignNames.name] = echartsValue[0];
-		data[dataSignNames.value] = echartsValue[1];
-	}
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
+		_configSingleSeriesForBoxplot: function(chart, series)
+		{
+			series.type = "boxplot";
+			series.encode = (config.interchangeAxis ? { x: [1, 2, 3,4 ,5], y: 0 } : { x: 0, y: [1, 2, 3, 4, 5] });
+		},
+		
+		_inflateOptionsForOutlier: function(chart, chartResult, dataSetBinds, dsbIndex, options)
+		{
+			var legendData = options.legend.data;
+			var series = options.series;
+			
+			var dataRange = { min: 1, max: 1 };
+			var symbolSizeMax = SPT.evalSymbolSizeMax(chart);
+			var symbolSizeMin = SPT.evalSymbolSizeMin(chart, symbolSizeMax);
+			
+			let dataSetBind = dataSetBinds[dsbIndex];
+			let dataSetAlias = chart.dataSetAlias(dataSetBind);
+			let result = chart.resultOf(chartResult, dataSetBind);
+			
+			let nameField = chart.dataSetFieldOfSign(dataSetBind, [1, 0]);
+			let categoryField = chart.dataSetFieldOfSign(dataSetBind, [1, 2]);
+			
+			if(categoryField)
+			{
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, [1, 1]);
+				let categoryNames = [];
+				let categoryDatasMap = {};
+				
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				let fieldMap = { name: nameField, value: [nameField, valueField] };
+				fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				SPT.evalDataValueSymbolSize(data, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "_inexists");
+				SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				
+				for(let j=0; j<categoryNames.length; j++)
+				{
+					let categoryName = categoryNames[j];
+					let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
+					let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
+					
+					this._configSingleSeriesForOutlier(chart, mySeries);
+					legendData.push({ name: legendName });
+					series.push(mySeries);
+				}
+			}
+			else
+			{
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, [1, 1]);
+				
+				for(let j=0; j<valueFields.length; j++)
+				{
+					let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					let fieldMap = { name: nameField, value: [nameField, valueFields[j]] };
+					let data = chart.resultMapDatas(result, fieldMap);
+					SPT.originalDataOfResult(data, chart, result);
+					SPT.evalDataValueSymbolSize(data, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "_inexists");
+					let mySeries = { name: legendName, data: data };
+					
+					this._configSingleSeriesForOutlier(chart, mySeries);
+					legendData.push({ name: legendName });
+					series.push(mySeries);
+				}
+			}
+		},
+		
+		_configSingleSeriesForOutlier: function(chart, series)
+		{
+			series.type = config.scatterType;
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
+		}
+	};
 	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //词云图
@@ -8112,8 +8047,8 @@ SPT.evalDataValueSymbolSize = function(data, minValue, maxValue, symbolSizeMax, 
 		var obj = 	data[i];
 		var value = obj[valuePropertyName];
 		
-		if(valueElementIndex != null)
-			value = (CF.isArray(value) && valueElementIndex < value.length ? value[valueElementIndex] : null);
+		if(value != null && valueElementIndex != null)
+			value = value[valueElementIndex];
 		
 		obj.symbolSize = SPT.evalValueSymbolSize(value, minValue, maxValue, symbolSizeMax, symbolSizeMin);
 	}
