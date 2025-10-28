@@ -51,7 +51,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryHtmlChartPluginManagerInitializer.class);
 
-	public static final String DEFAULT_CLASSPATH_PATTERN = "classpath:org/datagear/web/builtInChartPlugins/*.zip";
+	public static final String DEFAULT_CLASSPATH_PATTERN = "classpath:org/datagear/web/builtInChartPlugins/**/*.zip";
 
 	private ResourcePatternResolver resourcePatternResolver;
 
