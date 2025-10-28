@@ -88,7 +88,9 @@ SPT.lineRenderer = function(plugin, config)
 		//是否面积
 		area: false,
 		//阶梯：true, false, "start", "middle", "end"
-		step: false
+		step: false,
+		//是否互换坐标轴
+		interchangeAxis: false
 	},
 	config);
 	
@@ -122,6 +124,13 @@ SPT.lineRenderer = function(plugin, config)
 					{ type: "line", data: [] }
 				]
 			};
+			
+			if(config.interchangeAxis)
+			{
+				let xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+			}
 			
 			options = SPT.prepareEChartsRenderOptions(chart, options);
 			var instance = chartUtil.echarts.init(chart);
@@ -188,8 +197,12 @@ SPT.lineRenderer = function(plugin, config)
 			}
 			
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-			var options = { legend: { data: legendData }, series: series, xAxis: {} };
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis, SPT.inflateAxisDataExtractors.valueElement0());
+			var options = { legend: { data: legendData }, series: series };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+					SPT.inflateAxisDataExtractors.valueElement0());
 			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "line"); });
 			
 			SPT.echartsOptionsReplaceMerge(chart, options);
@@ -198,7 +211,7 @@ SPT.lineRenderer = function(plugin, config)
 		_configSingleSeries: function(chart, series)
 		{
 			series.type = "line";
-			series.encode = { x: 0, y: 1 };
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
 			
 			//折线图按数据集分组没有展示效果，所以都使用同一个堆叠
 			if(config.stack)
@@ -229,8 +242,8 @@ SPT.barRenderer = function(plugin, config)
 		stack: false,
 		//是否按数据集分组堆叠
 		stackGroup: true,
-		//是否横向
-		horizontal: false
+		//是否互换坐标轴
+		interchangeAxis: false
 	},
 	config);
 	
@@ -264,7 +277,7 @@ SPT.barRenderer = function(plugin, config)
 				]
 			};
 			
-			if(config.horizontal)
+			if(config.interchangeAxis)
 			{
 				let xAxisTmp = options.xAxis;
 				options.xAxis = options.yAxis;
@@ -337,9 +350,9 @@ SPT.barRenderer = function(plugin, config)
 			
 			var options = { legend: { data: legendData }, series: series };
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-			(config.horizontal ? (options.yAxis = {}) : (options.xAxis = {}));
+			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.horizontal ? options.yAxis : options.xAxis),
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
 							SPT.inflateAxisDataExtractors.valueElement0());
 			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "bar"); });
 			
@@ -349,7 +362,7 @@ SPT.barRenderer = function(plugin, config)
 		_configSingleSeries: function(chart, series, dataSetAlias)
 		{
 			series.type = "bar";
-			series.encode = (config.horizontal ? { x: 1, y: 0 } : { x: 0, y: 1 });
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
 			
 			if(config.stack)
 			{
