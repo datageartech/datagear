@@ -41,18 +41,10 @@ EU.ELE_ATTR_ECHARTS_THEME = "dg-echarts-theme";
 EU.THEME_PROP_ECHARTS_THEME_NAME = "DG_ECHARTS_THEME_NAME";
 
 //注册地图状态
-//键："地图名"；值：{ loaded: true、false, fetchPromise: Promise }
+//键："地图名"；值：{ loadPromise: Promise }
 EU.MAP_REGISTER_STATES = {};
 
 EU.version = "1.0";
-
-/**
- * 获取全局ECharts对象。
- */
-EU.echarts = function()
-{
-	return global.echarts;
-};
 
 /**
  * 将图表初始化为ECharts图表。
@@ -70,7 +62,7 @@ EU.init = function(chart, opts)
 	if(!themeName)
 		themeName = EU.themeNameOfChartTheme(chart);
 	
-	var instance = EU.echarts().init(chart.element(), themeName, opts);
+	var instance = EU._echarts().init(chart.element(), themeName, opts);
 	chart.internal(instance);
 	
 	return instance;
@@ -108,7 +100,7 @@ EU.themeNameOfChartTheme = function(chart)
 		themeName = (theme[EU.THEME_PROP_ECHARTS_THEME_NAME] = CF.uid());
 		
 		var echartsTheme = EU._buildEchartsTheme(chart);
-		EU.echarts().registerTheme(themeName, echartsTheme);
+		EU._echarts().registerTheme(themeName, echartsTheme);
 	}
 	
     return themeName;
@@ -128,7 +120,7 @@ EU.registerMap = function(chart, name, complete)
 {
 	name = (CF.isArray(name) ? name : [ name ]);
 	
-	var echarts = EU.echarts();
+	var echarts = EU._echarts();
 	
 	var needLoads = [];
 	
@@ -966,6 +958,7 @@ EU._buildEchartsTheme = function(chart)
 				"color" : chartTheme.legendTheme.color
 			},
 			"inactiveColor" : axisScaleLineColor,
+			"inactiveBorderColor": axisColor,
 			"backgroundColor" : chartTheme.legendTheme.backgroundColor
 		},
 		"tooltip" : {
@@ -1088,5 +1081,11 @@ EU._buildEchartsTheme = function(chart)
 	
 	return theme;
 };
-	
+
+//获取全局ECharts对象
+EU._echarts = function()
+{
+	return global.echarts;
+};
+
 })(this);

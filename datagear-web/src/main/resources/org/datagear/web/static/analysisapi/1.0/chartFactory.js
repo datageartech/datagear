@@ -8407,6 +8407,7 @@
 					"color" : chartTheme.legendTheme.color
 				},
 				"inactiveColor" : axisScaleLineColor,
+				"inactiveBorderColor": axisColor,
 				"backgroundColor" : chartTheme.legendTheme.backgroundColor
 			},
 			"tooltip" : {

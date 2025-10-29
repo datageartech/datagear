@@ -9245,7 +9245,7 @@
 	chartSupport.evalSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
 	{
 		var symbolSizeMin = (options && options.dg ? options.dg.symbolSizeMin : undefined);
-		ratio = (ratio == null ? 0.15 : ratio);
+		ratio = (ratio == null ? 0.2 : ratio);
 		
 		if(!symbolSizeMin)
 		{
