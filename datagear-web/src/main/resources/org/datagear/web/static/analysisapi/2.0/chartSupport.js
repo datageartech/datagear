@@ -4026,11 +4026,7 @@ SPT.wordcloudRenderer = function(plugin, config)
 							focus: "self",
 							textStyle:
 							{
-								//echarts-wordcloud-2.0.0版本有BUG，shadowBlur不起作用，
-								//所以这里采用fontWeight效果
-								"fontWeight": "bold",
-								"shadowBlur" : 10,
-								"shadowColor" : chart.themeGradualColor(0.9)
+								"fontWeight": "bold"
 							}
 						}
 					}
