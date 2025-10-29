@@ -4106,200 +4106,164 @@ SPT.wordcloudRenderer = function(plugin, config)
 
 //水球图
 
-SPT.liquidfillRender = function(chart, options)
+SPT.liquidfillRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值
-			dataSignNames: { name: "name", value: "value" },
-			//同series[i].shape
-			shape: "circle",
-			//如果仅有一个波浪数据，则自动复制扩充至这些个波浪数据
-			autoInflateWave: 3
-		}
+		//同series[i].shape
+		shape: "circle"
 	},
-	options);
+	config);
 	
-	//不支持在echarts主题中设置样式，只能在这里设置
-	var chartTheme = chart.theme();
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend:
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
+			name: "echarts-liquidfill",
+			acceptVersion: ">=3.0",
+			version: "3.1.0",
+			source: "lib/echarts-liquidfill-3.1.0/echarts-liquidfill.min.js",
+			depend: SPT.ECHARTS_RENDERER_DEPEND
 		},
-		series:
-		[
-			{
-				//将在update中设置：
-				//data
-				//这里必须设置data，不然渲染会报错
-				data: [],
-				
-				id: 0,
-				type: "liquidFill",
-				radius: "75%",
-				color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
-				backgroundStyle:
-				{
-					color: "transparent"
-				},
-				outline:
-				{
-					itemStyle:
-					{
-						borderColor: chartTheme.borderColor,
-						shadowColor: chart.themeGradualColor(0.4)
-					}
-				},
-				label:
-				{
-					color: chartTheme.color,
-					//当series.data为空时，label会显示"series***"异常内容，所以这里重新处理
-					formatter: function(param)
-					{
-						var value = (param && param.data != null ? param.data.value : null);
-						value = (value != null ? value : (param && param.value != null ? param.value : null));
-						
-						if(value == null)
-							return "";
-						
-						//此处逻辑参考自echarts-liquidfill.js
-						value = 100 * value;
-						return (isNaN(value) ? "" : value.toFixed(0) + "%");
-					}
-				}
-			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.liquidfillUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesData = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
-		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-		var npsNone = (nps==null || nps.length==0);
-		
-		if(!npsNone && nps.length!=vps.length)
-			throw new Error("The ["+dataSignNames.name+"] sign column must be "
-					+"one-to-one with ["+dataSignNames.value+"] sign column");
-		
-		var data = [];
-		
-		if(npsNone)
+		render: function(chart)
 		{
-			var ras = chart.resultRowArrayDatas(result, vps);
-			for(var j=0; j<ras.length; j++)
-			{
-				var ra = ras[j];
-				for(var k=0; k<ra.length; k++)
-				{
-					var sv = { name: chart.dataSetFieldAlias(dataSetBind, vps[k]), value: ra[k] };
-					chart.originalDataIndex(sv, dataSetBind, j);
-					data.push(sv);
-				}
-			}
-		}
-		else
-		{
-			var namess = chart.resultRowArrayDatas(result, nps);
-			var valuess = chart.resultRowArrayDatas(result, vps);
+			var chartEle = chart.element();
+			//不支持在echarts主题中设置样式，只能在这里设置
+			var chartTheme = chart.theme();
 			
-			for(var j=0; j<namess.length; j++)
+			//自适应字体大小
+			var baseSize = Math.min(chartEle.clientWidth, chartEle.clientHeight);
+			var fontSize = parseInt(baseSize * 8/50);
+			fontSize = (fontSize < 6 ? 6: fontSize);
+			
+			var options =
 			{
-				var names = namess[j];
-				var values = valuess[j];
+				//如果仅有一个波浪数据，则自动复制扩充至这些个波浪数据
+				autoInflateWave: 3,
 				
-				for(var k=0; k<names.length; k++)
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				series:
+				[
+					{
+						type: "liquidFill", shape: config.shape, radius: "75%", data: [],
+						color: ['#294D99', '#156ACF', '#1598ED', '#45BDFF'],
+						backgroundStyle: { color: "transparent" },
+						outline:
+						{
+							itemStyle:
+							{
+								borderColor: chartTheme.borderColor,
+								shadowColor: chart.themeGradualColor(0.4)
+							}
+						},
+						label:
+						{
+							color: chartTheme.color,
+							fontSize: fontSize,
+							//当series.data为空时（图表渲染时），label会显示"series***"异常内容，所以这里重新处理
+							formatter: function(param)
+							{
+								var value = (param && param.data != null ? param.data.value : null);
+								value = (value != null ? value : (param && param.value != null ? param.value : null));
+								
+								if(value == null)
+									return "";
+								
+								//此处逻辑参考自echarts-liquidfill.js
+								value = 100 * value;
+								return (isNaN(value) ? "" : value.toFixed(0) + "%");
+							}
+						}
+					}
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var renderOptions = chart.renderOptions();
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var seriesName = "";
+			var seriesData = [];
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = chart.dataSetAlias(dataSetBind);
+				
+				let nameFields = chart.dataSetFieldsOfSign(dataSetBind, 0);
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+				let noNameField = CF.isEmpty(nameFields);
+				
+				if(!noNameField && nameFields.length != valueFields.length)
+					throw new Error("The [name] sign column must be one-to-one with [value] sign column");
+				
+				let originalDatas = chart.resultDatas(result);
+				
+				if(noNameField)
 				{
-					var sv = { name: names[k], value: values[k] };
-					chart.originalDataIndex(sv, dataSetBind, j);
-					data.push(sv);
+					let ras = chart.resultRowArrayDatas(result, valueFields);
+					for(let j=0; j<ras.length; j++)
+					{
+						let ra = ras[j];
+						for(let k=0; k<ra.length; k++)
+						{
+							let sv = { name: chart.dataSetFieldAlias(dataSetBind, valueFields[k]), value: ra[k] };
+							SPT.originalDataOfData(sv, originalDatas[j]);
+							
+							seriesData.push(sv);
+						}
+					}
+				}
+				else
+				{
+					let namess = chart.resultRowArrayDatas(result, nameFields);
+					let valuess = chart.resultRowArrayDatas(result, valueFields);
+					
+					for(let j=0; j<namess.length; j++)
+					{
+						let names = namess[j];
+						let values = valuess[j];
+						
+						for(let k=0; k<names.length; k++)
+						{
+							let sv = { name: names[k], value: values[k] };
+							SPT.originalDataOfData(sv, originalDatas[j]);
+							
+							seriesData.push(sv);
+						}
+					}
 				}
 			}
+			
+			//如果仅有一个波浪，则自动扩充
+			if(seriesData.length == 1 && renderOptions.autoInflateWave > 1)
+			{
+				for(var i=1; i<renderOptions.autoInflateWave; i++)
+				{
+					var inflateValue = CF.extend(true, {}, seriesData[0]);
+					seriesData.push(inflateValue);
+				}
+			}
+			
+			var options = { series: [ { type: "liquidFill", name: seriesName, data: seriesData, shape: config.shape } ] };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
 		}
-		
-		seriesData = seriesData.concat(data);
-	}
+	};
 	
-	//如果仅有一个波浪，则自动扩充
-	if(seriesData.length == 1 && dg.autoInflateWave > 1)
-	{
-		for(var i=1; i<dg.autoInflateWave; i++)
-		{
-			var inflateValue = CF.extend({}, seriesData[0]);
-			seriesData.push(inflateValue);
-		}
-	}
-	
-	var options = { series: [ {id: 0, type: "liquidFill", data: seriesData, shape: dg.shape } ] };
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.liquidfillResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.liquidfillDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.liquidfillOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.liquidfillSetChartEventData);
-};
-
-SPT.liquidfillOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.liquidfillSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.value] = echartsData.value;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //平行坐标系
