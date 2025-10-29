@@ -5413,8 +5413,14 @@
 		},
 		options);
 		
+		var chartEle = chart.elementJquery();
 		//不支持在echarts主题中设置样式，只能在这里设置
 		var chartTheme = chart.theme();
+		
+		//自适应字体大小
+		var baseSize = Math.min(chartEle.width(), chartEle.height());
+		var fontSize = parseInt(baseSize * 8/50);
+		fontSize = (fontSize < 6 ? 6: fontSize);
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
@@ -5453,6 +5459,7 @@
 					label:
 					{
 						color: chartTheme.color,
+						fontSize: fontSize,
 						//当series.data为空时，label会显示"series***"异常内容，所以这里重新处理
 						formatter: function(param)
 						{
