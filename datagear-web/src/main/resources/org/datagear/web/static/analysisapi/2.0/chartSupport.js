@@ -3982,177 +3982,130 @@ SPT.boxplotRenderer = function(plugin, config)
 
 //词云图
 
-SPT.wordcloudRender = function(chart, options)
+SPT.wordcloudRenderer = function(plugin, config)
 {
-	//不支持在echarts主题中设置样式，只能在这里设置
-	var chartTheme = chart.theme();
-	
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值
-			dataSignNames: { name: "name", value: "value" },
-			//由低到高值域颜色映射
-			colorRange: chartTheme.graphRangeColors,
-			//由低到高值渐变色数组，如果不设置，将由colorRange自动计算
-			colorGradients: undefined
-		}
 	},
-	options);
+	config);
 	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title: {
-	        text: chart.name()
-	    },
-		tooltip:
+		depend:
 		{
-			trigger: "item"
+			name: "echarts-wordcloud",
+			version: "2.1.0",
+			acceptVersion: ">=2.0",
+			source: "lib/echarts-wordcloud-2.1.0/echarts-wordcloud.min.js",
+			depend: SPT.ECHARTS_RENDERER_DEPEND
 		},
-		series:
-		[
+		render: function(chart)
+		{
+			var chartEle = chart.element();
+			//不支持在echarts主题中设置样式，只能在这里设置
+			var chartTheme = chart.theme();
+			
+			//自适应字体大小
+			var baseSize = Math.min(chartEle.clientWidth, chartEle.clientHeight);
+			var sizeRange = [parseInt(baseSize * 1/40), parseInt(baseSize * 1/8)];
+			sizeRange[0] = (sizeRange[0] < 6 ? 6: sizeRange[0]);
+			sizeRange[1] = (sizeRange[1] < 12 ? 12: sizeRange[1]);
+			
+			var options =
 			{
-				//将在update中设置：
-				//name
-				//data
-				//这里必须设置data，不然渲染会报错
-				data: [],
-				
-				id: 0,
-				type: "wordCloud",
-				shape: "circle",
-				"textStyle": { "color": chartTheme.color },
-				"emphasis":
-				{
-					"focus": "self",
-					"textStyle":
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				series:
+				[
 					{
-						//echarts-wordcloud-2.0.0版本有BUG，shadowBlur不起作用，
-						//所以这里采用fontWeight效果
-						"fontWeight": "bold",
-						"shadowBlur" : 10,
-						"shadowColor" : chart.themeGradualColor(0.9)
+						type: "wordCloud", shape: "circle", data: [],
+						textStyle: { color: chartTheme.color },
+						sizeRange: sizeRange,
+						emphasis:
+						{
+							focus: "self",
+							textStyle:
+							{
+								//echarts-wordcloud-2.0.0版本有BUG，shadowBlur不起作用，
+								//所以这里采用fontWeight效果
+								"fontWeight": "bold",
+								"shadowBlur" : 10,
+								"shadowColor" : chart.themeGradualColor(0.9)
+							}
+						}
 					}
-				}
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			var seriesName = "";
+			var seriesData = [];
+			var dataRange = { min: null, max: null };
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = chart.dataSetAlias(dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				
+				let data = chart.resultNameValueDatas(result, nameField, valueField);
+				SPT.originalDataOfResult(data, chart, result);
+				SPT.evalArrayDataRange(dataRange, data, "value");
+				
+				seriesData = seriesData.concat(data);
 			}
-		]
-	},
-	options,
-	function(options)
-	{
-		var chartEle = chart.elementJquery();
-		
-		//自适应字体大小
-		var chartSize = Math.min(chartEle.height(), chartEle.width());
-		var sizeRange = [parseInt(chartSize * 1/40), parseInt(chartSize * 1/8)];
-		sizeRange[0] = (sizeRange[0] < 6 ? 6: sizeRange[0]);
-		options.series[0].sizeRange = sizeRange;
-		
-		//计算渐变色
-		var colorRange = options.dg.colorRange;
-		var colorGradients = [];
-		for(var i=0; i<colorRange.length; i++)
-		{
-			var fromColor = colorRange[i];
-			var toColor = ((i+1) < colorRange.length ? colorRange[i+1] : null);
 			
-			if(!toColor)
-				break;
+			//映射颜色值
+			this._inflateSeriesDataTextStyle(chart, seriesData, dataRange);
 			
-			colorGradients = colorGradients.concat(CF.evalGradualColors(fromColor, toColor, 5));
-		}
-		options.dg.colorGradients = colorGradients;
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.wordcloudUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var dataRange = { min: undefined, max: undefined };
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var result = chart.resultOf(chartResult, dataSetBind);
+			var options = { series: [ { type: "wordCloud", name: seriesName, data: seriesData } ] };
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
 		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		
-		var data = chart.resultNameValueDatas(result, np, vp);
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		SPT.evalArrayDataRange(dataRange, data, "value");
-		
-		seriesData = seriesData.concat(data);
-	}
-	
-	dataRange.min = (dataRange.min >= dataRange.max ? dataRange.max - 1 : dataRange.min);
-	
-	//映射颜色值
-	var colorGradients = dg.colorGradients;
-	if(colorGradients)
-	{
-		for(var i=0; i<seriesData.length; i++)
+		_inflateSeriesDataTextStyle: function(chart, seriesData, dataRange)
 		{
-			var colorIndex = parseInt((seriesData[i].value-dataRange.min)/(dataRange.max-dataRange.min) * (colorGradients.length-1));
-			seriesData[i].textStyle = { "color": colorGradients[colorIndex] };
+			dataRange.min = (dataRange.min >= dataRange.max ? dataRange.max - 1 : dataRange.min);
+			
+			var chartTheme = chart.theme();
+			var colorRange = chartTheme.graphRangeColors;
+			var colorGradients = [];
+			
+			for(let i=0; i<colorRange.length; i++)
+			{
+				let fromColor = colorRange[i];
+				let toColor = ((i+1) < colorRange.length ? colorRange[i+1] : null);
+				
+				if(!toColor)
+					break;
+				
+				colorGradients = colorGradients.concat(CF.evalGradualColors(fromColor, toColor, 5));
+			}
+			
+			for(let i=0; i<seriesData.length; i++)
+			{
+				let colorIndex = parseInt((seriesData[i].value-dataRange.min)/(dataRange.max-dataRange.min) * (colorGradients.length-1));
+				seriesData[i].textStyle = { "color": colorGradients[colorIndex] };
+			}
 		}
-	}
+	};
 	
-	var options = { series: [ {id: 0, type: "wordCloud", name: seriesName, data: seriesData} ] };
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.wordcloudResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.wordcloudDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.wordcloudOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.wordcloudSetChartEventData);
-};
-
-SPT.wordcloudOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.wordcloudSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = {};
-	
-	data[dataSignNames.name] = echartsData.name;
-	data[dataSignNames.value] = echartsData.value;
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //水球图

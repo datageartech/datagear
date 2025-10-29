@@ -6314,7 +6314,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 			
 			if(dependLibs.length > 0)
 			{
-				CF.inflateUnloadedLibs(unloadeds, dependLibs, contextCharts);
+				CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, contextCharts);
 			}
 		}
 	}
