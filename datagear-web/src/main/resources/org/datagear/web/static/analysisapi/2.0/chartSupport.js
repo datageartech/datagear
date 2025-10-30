@@ -4268,6 +4268,222 @@ SPT.liquidfillRenderer = function(plugin, config)
 
 //平行坐标系
 
+SPT.parallelRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+		//同parallel.layout
+		parallelLayout: "horizontal",
+		//是否平滑
+		smooth: false
+	},
+	config);
+	
+	var renderer =
+	{
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
+		{
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				parallel: { layout: config.parallelLayout },
+				parallelAxis:  [],
+				series:
+				[
+					{ type: "parallel", data: [] }
+				]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var parallelAxis = this._evalParallelAxis(chart, dataSetBinds);
+			var valuePropertyNamess = this._evalValueFieldNamess(chart, dataSetBinds, parallelAxis);
+			var categoryNames = [];
+			var categoryDatasMap = {};
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let fieldMap = { name: chart.dataSetFieldOfSign(dataSetBind, 0), value: valuePropertyNamess[i] };
+				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				if(categoryField)
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+				
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				if(categoryField)
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+				else
+					SPT.appendCategoryNameAndData(categoryNames, categoryDatasMap, dataSetAlias, data);
+				
+				//设置每个坐标系的min、max、data
+				for(let j=0; j<data.length; j++)
+				{
+					let vs = (data[j].value || []);
+					
+					for(let k=0; k<parallelAxis.length; k++)
+					{
+						let paxis = parallelAxis[k];
+						let pv = vs[k];
+						
+						if(paxis.type == "category")
+						{
+							paxis.data = (paxis.data || (paxis.data = []));
+							if(pv != null)
+								SPT.appendDistinct(paxis.data, pv);
+						}
+						else
+						{
+							if(pv != null)
+							{
+								//设置min、max，不然当多系列时不能自动识别，可能导致某些线飞离
+								if(paxis.min == null)
+									paxis.min = pv;
+								else if(paxis.min > pv)
+									paxis.min = pv;
+								
+								if(paxis.max == null)
+									paxis.max = pv;
+								else if(paxis.max < pv)
+									paxis.max = pv;
+							}
+						}
+					}
+				}
+			}
+			
+			var legendData = [];
+			var series = [];
+			
+			for(let i=0; i<categoryNames.length; i++)
+			{
+				let categoryName = categoryNames[i];
+				legendData.push({ name: categoryName });
+				let mySeries = { name: categoryName, data: categoryDatasMap[categoryName] };
+				series.push(mySeries);
+				this._configSingleSeries(chart, mySeries);
+			}
+			
+			var options = { legend: { data: legendData }, parallelAxis: parallelAxis, series: series };
+			this._trimAxisMinMax(options);
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_configSingleSeries: function(chart, series)
+		{
+			series.type = "parallel";
+			
+			if(config.smooth)
+				series.smooth = true;
+		},
+		
+		_evalParallelAxis: function(chart, dataSetBinds)
+		{
+			var parallelAxis = [];
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+				
+				for(let j=0; j<valueFields.length; j++)
+				{
+					let valueField = valueFields[j];
+					//使用alias而非name作为坐标轴名，因为alias是可编辑得，使得用户可以自定义坐标轴
+					let axisName = chart.dataSetFieldAlias(dataSetBind, valueField);
+					
+					if(SPT.findInArray(parallelAxis, axisName, "name") < 0)
+					{
+						let axis =
+						{
+							name: axisName,
+							type: SPT.evalDataSetFieldAxisType(chart, valueField)
+						};
+						
+						parallelAxis.push(axis);
+					}
+				}
+			}
+			
+			for(let i=0; i<parallelAxis.length; i++)
+				parallelAxis[i].dim = i;
+			
+			return parallelAxis;
+		},
+		
+		_evalValueFieldNamess: function(chart, dataSetBinds, parallelAxis)
+		{
+			var valueFieldNamess = [];
+			
+			var placeholderName = CF.uid() + "ForGetNullValue";
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let valueFieldNames = [];
+				let dataSetBind = dataSetBinds[i];
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+				
+				for(let j=0; j<parallelAxis.length; j++)
+				{
+					let idx = SPT.findInArray(valueFields, parallelAxis[j].name,
+								function(valueField)
+								{
+									return chart.dataSetFieldAlias(dataSetBind, valueField);
+								});
+					
+					valueFieldNames[j] = (idx < 0 ? placeholderName : valueFields[idx].name);
+				}
+				
+				valueFieldNamess[i] = valueFieldNames;
+			}
+			
+			return valueFieldNamess;
+		},
+		
+		_trimAxisMinMax: function(options)
+		{
+			var parallelAxis = (options.parallelAxis || []);
+			var series = (options.series || []);
+			
+			for(let i=0; i<parallelAxis.length; i++)
+			{
+				let pa = parallelAxis[i];
+				
+				//单系列ECharts会自动计算min、max，这里不必设置
+				if(series.length < 2)
+				{
+					pa.min = undefined;
+					pa.max = undefined;
+				}
+				//多系列ECharts不会自动计算，需要手动计算
+				else
+				{
+					SPT.trimNumberRange(pa);
+				}
+			}
+		}
+	};
+	
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
+};
+
 SPT.parallelRender = function(chart, options)
 {
 	options = CF.extend(true,
