@@ -4488,187 +4488,116 @@ SPT.parallelRenderer = function(plugin, config)
 
 //主题河流图
 
-SPT.themeRiverRender = function(chart, options)
+SPT.themeRiverRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 河流X轴坐标，通常是数值、日期
-			//value 河流数值，当标记category时单选，否则可多选，每一列作为一条河流
-			//category 可选，类别，不同类别绘制为不同系列
-			dataSignNames: { name: "name", value: "value", category: "category" }
-		}
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			show: true,
-			trigger: 'axis'
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		singleAxis:
-		{
-			id: 0,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			//ECharts-5.3.2版本主题配置不起作用，所以这里配置
-			"left": "10%",
-            "top": "24%",
-            "right": "10%",
-            "bottom": "10%",
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+			
+			var options =
 			{
-				id: 0,
-				type: "themeRiver"
-			}
-		]
-	},
-	options);
-	
-	chart.echartsInit(options);
-};
-
-SPT.themeRiverUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var seriesData = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
+				title: { text: chart.name() },
+				tooltip: { trigger: "axis" },
+				legend: { data: [] },
+				singleAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					data: [],
+					//ECharts-5.3.2版本主题配置不起作用，所以这里配置
+					"left": "10%",
+		            "top": "24%",
+		            "right": "10%",
+		            "bottom": "10%"
+				},
+				series: [ { type: "themeRiver", data: [] } ]
+			};
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
 		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
-		
-		if(cp)
+		update: function(chart, chartResult)
 		{
-			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var seriesName = "";
+			var seriesData = [];
 			
-			//主题河流图只支持[ name, value, category ]格式的数据条目
-			var data = chart.resultRowArrayDatas(result, [ np, vp, cp ]);
-			chart.originalDataIndexes(data, dataSetBind);
-			
-			//为类别添加前缀，确保多数据集类别不重复
-			for(var j=0; j<data.length; j++)
+			for(let i=0; i<dataSetBinds.length; i++)
 			{
-				var myCategory = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, data[j][2]);
-				data[j][2] = myCategory;
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				SPT.appendDistinct(legendData, myCategory);
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				if(categoryField)
+				{
+					let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+					
+					//主题河流图只支持[ name, value, category ]格式的数据条目
+					let data = chart.resultRowArrayDatas(result, [ nameField, valueField, categoryField ]);
+					SPT.originalDataOfResult(data, chart, result);
+					
+					//为类别添加前缀，确保多数据集类别不重复
+					for(let j=0; j<data.length; j++)
+					{
+						let myCategory = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, data[j][2]);
+						data[j][2] = myCategory;
+						
+						SPT.appendDistinct(legendData, { name: myCategory });
+					}
+					
+					SPT.appendElement(seriesData, data);
+				}
+				else
+				{
+					let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+					
+					for(let j=0; j<valueFields.length; j++)
+					{
+						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
+						
+						//主题河流图只支持[ name, value, lengendName ]格式的数据条目
+						let data = chart.resultRowArrayDatas(result, [ nameField, valueFields[j] ]);
+						for(let k=0; k<data.length; k++)
+							data[k].push(legendName);
+						
+						SPT.originalDataOfResult(data, chart, result);
+						
+						SPT.appendDistinct(legendData, { name: legendName });
+						SPT.appendElement(seriesData, data);
+					}
+				}
 			}
 			
-			SPT.appendElement(seriesData, data);
-		}
-		else
-		{
-			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
+			var singleSeries = { name: seriesName, type: "themeRiver", data: seriesData };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			var options = { legend: { data: legendData }, series: [ singleSeries ], singleAxis: {} };
+			SPT.inflateEChartsUpdateAxisData(chart, options, options.singleAxis, SPT.inflateAxisDataExtractors.valueElement0());
+			options = SPT.prepareEChartsUpdateOptions(chart, options);
 			
-			for(var j=0; j<vps.length; j++)
-			{
-				var legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-				//主题河流图只支持[ name, value, lengendName ]格式的数据条目
-				var data = chart.resultRowArrayDatas(result, [ np, vps[j] ]);
-				for(var k=0; k<data.length; k++)
-					data[k].push(legendName);
-				
-				chart.originalDataIndexes(data, dataSetBind);
-				
-				SPT.appendDistinct(legendData, legendName);
-				SPT.appendElement(seriesData, data);
-			}
+			SPT.echartsOptionsReplaceMerge(chart, options);
 		}
-	}
-	
-	var series =
-	{
-		id: 0,
-		type: "themeRiver",
-		data: seriesData
 	};
 	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	var options = { legend: { id: 0, data: legendData}, series: [ series ], singleAxis: { id: 0 } };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, options.singleAxis,
-					SPT.inflateAxisDataExtractors.element(0));
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	options = chart.inflateUpdateOptions(chartResult, options);
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.themeRiverResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.themeRiverDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.themeRiverOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.themeRiverSetChartEventData);
-};
-
-SPT.themeRiverOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.themeRiverSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	//TODO ECharts-5.3.2版本这里的数据与实际的事件数据不匹配，可能是BUG
-	var echartsData = echartsEventParams.data;
-	
-	var data = undefined;
-	
-	if(echartsData)
-	{
-		data = {};
-		data[dataSignNames.name] = echartsData[0];
-		data[dataSignNames.value] = echartsData[1];
-		data[dataSignNames.category] = echartsData[2];
-	}
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //象形柱图
