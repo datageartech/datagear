@@ -775,10 +775,10 @@ EU._buildEchartsTheme = function(chart)
 		{
 			/*ECharts-5.3.2版本这里配置不起作用
 			"left": "10%",
-            "top": "24%",
+            "top": "20%",
             "right": "10%",
             "bottom": "10%",
-			*/
+            */
 			"label":
 			{
 				"show": true 
@@ -924,15 +924,13 @@ EU._buildEchartsTheme = function(chart)
 				}
 			}
 		},
-		/*ECharts-5.3.2版本这里配置不起作用（主题河流图）
 		"singleAxis":
 		{
-			"left": "30%",
-            "top": "54%",
-            "right": "30%",
-            "bottom": "40%"
+			"left": "10%",
+            "top": "20%",
+            "right": "10%",
+            "bottom": "10%"
 		},
-		*/
 		"toolbox" : {
 			"iconStyle" : {
 				"normal" : {

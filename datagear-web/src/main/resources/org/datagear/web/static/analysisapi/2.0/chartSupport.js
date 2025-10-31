@@ -4513,11 +4513,11 @@ SPT.themeRiverRenderer = function(plugin, config)
 					name: chart.dataSetFieldAlias(dataSetBind, nameField),
 					type: SPT.evalDataSetFieldAxisType(chart, nameField),
 					data: [],
-					//ECharts-5.3.2版本主题配置不起作用，所以这里配置
-					"left": "10%",
-		            "top": "24%",
-		            "right": "10%",
-		            "bottom": "10%"
+					//ECharts-6.0版本主题配置不起作用，所以这里配置
+					left: "10%",
+		            top: "20%",
+		            right: "10%",
+		            bottom: "10%"
 				},
 				series: [ { type: "themeRiver", data: [] } ]
 			};
@@ -4550,8 +4550,9 @@ SPT.themeRiverRenderer = function(plugin, config)
 				{
 					let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
 					
-					//主题河流图只支持[ name, value, category ]格式的数据条目
+					//主题河流图只支持[name, value, category]格式的数据条目
 					let data = chart.resultRowArrayDatas(result, [ nameField, valueField, categoryField ]);
+					//即使这里设置了originalData，由于其结构是数组，在绑定了click事件处理函数后，事件对象的data中仍会丢失originalData，暂时无解决办法
 					SPT.originalDataOfResult(data, chart, result);
 					
 					//为类别添加前缀，确保多数据集类别不重复
@@ -4573,11 +4574,12 @@ SPT.themeRiverRenderer = function(plugin, config)
 					{
 						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
 						
-						//主题河流图只支持[ name, value, lengendName ]格式的数据条目
+						//主题河流图只支持[name, value, lengendName]格式的数据条目
 						let data = chart.resultRowArrayDatas(result, [ nameField, valueFields[j] ]);
 						for(let k=0; k<data.length; k++)
 							data[k].push(legendName);
 						
+						//即使这里设置了originalData，由于其结构是数组，在绑定了click事件处理函数后，事件对象的data中仍会丢失originalData，暂时无解决办法
 						SPT.originalDataOfResult(data, chart, result);
 						
 						SPT.appendDistinct(legendData, { name: legendName });

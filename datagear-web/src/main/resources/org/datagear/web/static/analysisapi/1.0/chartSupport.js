@@ -5955,10 +5955,11 @@
 			singleAxis:
 			{
 				id: 0,
+				name: chart.dataSetFieldAlias(dataSetBind, np),
 				type: chartSupport.evalDataSetFieldAxisType(chart, np),
 				//ECharts-5.3.2版本主题配置不起作用，所以这里配置
 				"left": "10%",
-	            "top": "24%",
+	            "top": "20%",
 	            "right": "10%",
 	            "bottom": "10%",
 			},
