@@ -4698,7 +4698,7 @@ SPT.pictorialBarRenderer = function(plugin, config)
 						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
 						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
 						
-						this._configSingleSeries(chart, mySeries, dataSetAlias);
+						this._configSingleSeries(chart, mySeries);
 						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
@@ -4716,7 +4716,7 @@ SPT.pictorialBarRenderer = function(plugin, config)
 						SPT.originalDataOfResult(data, chart, result);
 						let mySeries = { name: legendName, data: data };
 						
-						this._configSingleSeries(chart, mySeries, dataSetAlias);
+						this._configSingleSeries(chart, mySeries);
 						legendData.push({ name: legendName });
 						series.push(mySeries);
 					}
@@ -4748,7 +4748,7 @@ SPT.pictorialBarRenderer = function(plugin, config)
 			}
 		},
 		
-		_configSingleSeries: function(chart, series, dataSetAlias)
+		_configSingleSeries: function(chart, series)
 		{
 			var symbol = config.symbol;
 			if(SPT.pictorialBarSymbolPaths[symbol])
@@ -4767,244 +4767,148 @@ SPT.pictorialBarRenderer = function(plugin, config)
 
 //象形进度柱图
 
-SPT.pictorialBarProgressRender = function(chart, options)
+SPT.pictorialBarProgressRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称，必选，单选
-			//value 值，必选，单选
-			//max 最大值，可选，单选，默认：100
-			dataSignNames: { name: "name", value: "value", max: "max" },
-			//是否横向
-			horizontal: false,
-			//图形类型
-			symbol: "rect",
-			//图形尺寸
-			symbolSize: ["100%", "100%"],
-			//图形重复
-			symbolRepeat: false,
-			//背景图形重复
-			symbolRepeatForBg: false,
-			//图形间距
-			symbolMargin: 0,
-			//柱条间距
-			barGap: "-100%",
-			//最大值
-			max: 100,
-		}
+		//是否互换坐标轴
+		interchangeAxis: false,
+		//最大值
+		max: 100,
+		//系列配置
+		series: {}
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		title:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		xAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			splitLine: { show: false }
-		},
-		yAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, vp),
-			nameGap: 5,
-			type: "value",
-			splitLine: { show: false }
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: "pictorialBar"
-			}
-		]
-	},
-	options,
-	function(options)
-	{
-		if(options.dg.horizontal)
-		{
-			var xAxisTmp = options.xAxis;
-			options.xAxis = options.yAxis;
-			options.yAxis = xAxisTmp;
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
 			
-			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
-			if(options.yAxis.type == "value")
-				options.yAxis.type = "category";
-		}
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.pictorialBarProgressUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var seriesName = "";
-	var seriesData = [];
-	var maxValue = null;
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
-		
-		//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-		var data = chart.resultValueDatas(result, [np, vp]);
-		
-		chart.originalDataIndexes(data, dataSetBind);
-		
-		//取任一不为空的地图名列值
-		if(maxValue == null)
-			maxValue = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, dataSignNames.max);
-		
-		seriesData = seriesData.concat(data);
-		
-		if(!seriesName)
-			seriesName = dataSetAlias;
-	}
-	
-	maxValue = (maxValue == null ? dg.max : maxValue);
-	
-	var symbol = dg.symbol;
-	if(SPT.pictorialBarSymbolPaths[symbol])
-		symbol = SPT.pictorialBarSymbolPaths[symbol];
-	
-	var series =
-	[
-		{
-			id: 0,
-			type: "pictorialBar",
-			name: seriesName,
-			data: seriesData,
-			symbol: symbol,
-			symbolSize: dg.symbolSize,
-			symbolRepeat: dg.symbolRepeat,
-			barGap: dg.barGap,
-			symbolBoundingData: maxValue,
-			symbolClip: true,
-			symbolMargin: dg.symbolMargin,
-			z: 10
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					splitLine: { show: false }
+				},
+				yAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, valueField),
+					type: SPT.evalDataSetFieldAxisType(chart, valueField),
+					splitLine: { show: false }
+				},
+				series:
+				[
+					{ type: "pictorialBar", data: [] }
+				]
+			};
+			
+			if(config.interchangeAxis)
+			{
+				let xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+			}
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
 		},
+		
+		update: function(chart, chartResult)
 		{
-			id: 1,
-			type: "pictorialBar",
-			name: seriesName+"-background",
-			data: seriesData,
-			symbol: symbol,
-			symbolSize: dg.symbolSize,
-			symbolRepeat: dg.symbolRepeatForBg,
-			barGap: dg.barGap,
-			symbolBoundingData: maxValue,
-			symbolClip: false,
-			symbolMargin: dg.symbolMargin,
-			z: 1,
-			animationDuration: 0,
-			itemStyle:{ color: chart.themeGradualColor(0.2) },
-			silent: true
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var seriesName = "";
+			var seriesData = [];
+			var maxValue = null;
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				if(CF.isEmpty(seriesName))
+					seriesName = dataSetAlias;
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let maxField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+				let fieldMap = { name: nameField, value: [nameField, valueField] };
+				let data = chart.resultMapDatas(result, fieldMap);
+				SPT.originalDataOfResult(data, chart, result);
+				
+				seriesData = seriesData.concat(data);
+				
+				if(maxField != null)
+				{
+					let maxValues = chart.resultColumnArrayDatas(result, maxField);
+					for(let j=0; j<maxValues.length; j++)
+						maxValue = (maxValue == null ? maxValues[j] : (maxValues[j] == null ? null : Math.max(maxValue, maxValues[j])));
+				}
+			}
+			
+			maxValue = (maxValue == null ? config.max : maxValue);
+			
+			let series0 = { name: seriesName, data: seriesData, symbolClip: true, z: 10 };
+			this._configSingleSeries(chart, series0, config.series0, maxValue);
+			legendData.push({ name: seriesName });
+			
+			let series1 =
+			{
+				name: seriesName+"-background", data: seriesData, symbolClip: false, z: 1,
+				animationDuration: 0, itemStyle:{ color: chart.themeGradualColor(0.2) }, silent: true
+			};
+			this._configSingleSeries(chart, series1, config.series1, maxValue);
+			
+			var options = { legend: { data: legendData }, series: [ series0, series1 ] };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			if(config.interchangeAxis)
+			{
+				options.xAxis = { max: maxValue };
+				options.yAxis = {};
+			}
+			else
+			{
+				options.xAxis = {};
+				options.yAxis = { max: maxValue };
+			}
+			
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							SPT.inflateAxisDataExtractors.valueElement0());
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar"); });
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
+		
+		_configSingleSeries: function(chart, series, seriesTemplate, maxValue)
+		{
+			series = CF.extend(true, series, seriesTemplate);
+			
+			if(SPT.pictorialBarSymbolPaths[series.symbol])
+				series.symbol = SPT.pictorialBarSymbolPaths[series.symbol];
+			
+			series.type = "pictorialBar";
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
+			series.barGap = "-100%";
+			series.symbolBoundingData = maxValue;
 		}
-	];
+	};
 	
-	if(dg.horizontal)
-	{
-		series[0].encode = { x: 1, y: 0 };
-		series[1].encode = { x: 1, y: 0 };
-	}
-	
-	var options = { legend: {id: 0, data: [ seriesName ]}, series: series };
-	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	if(dg.horizontal)
-	{
-		options.xAxis = { id: 0, max: maxValue };
-		options.yAxis = { id: 0 };
-	}
-	else
-	{
-		options.xAxis = { id: 0 };
-		options.yAxis = { id: 0, max: maxValue };
-	}
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
-					SPT.inflateAxisDataExtractors.valueElement(0));
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	
-	options = chart.inflateUpdateOptions(chartResult, options, function(options)
-	{
-		SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar");
-	});
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.pictorialBarProgressResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.pictorialBarProgressDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.pictorialBarProgressOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.pictorialBarProgressSetChartEventData);
-};
-
-SPT.pictorialBarProgressOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.pictorialBarProgressSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //表格
