@@ -4856,7 +4856,10 @@ SPT.pictorialBarProgressRenderer = function(plugin, config)
 				{
 					let maxValues = chart.resultColumnArrayDatas(result, maxField);
 					for(let j=0; j<maxValues.length; j++)
-						maxValue = (maxValue == null ? maxValues[j] : (maxValues[j] == null ? null : Math.max(maxValue, maxValues[j])));
+					{
+						let mvj = maxValues[j];
+						maxValue = (maxValue == null ? mvj : (mvj == null ? maxValue : Math.max(maxValue, mvj)));
+					}
 				}
 			}
 			
