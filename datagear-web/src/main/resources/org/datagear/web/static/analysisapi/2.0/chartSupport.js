@@ -4916,6 +4916,1156 @@ SPT.pictorialBarProgressRenderer = function(plugin, config)
 
 //表格
 
+SPT.tableRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+	},
+	config);
+	
+	var renderer =
+	{
+		depend:
+		{
+			name: "DataTable",
+			version: "2.3.1",
+			acceptVersion: ">=2.0",
+			source:
+			[
+				"lib/DataTables-2.3.1/datatables.min.css",
+				"lib/DataTables-2.3.1/datatables.min.js"
+			],
+			depend: { name: "jQuery", acceptVersion: ">=1.8" }
+		},
+		render: function(chart)
+		{
+			var chartEle = jQuery(chart.element());
+			chartEle.addClass("dg-chart-table");
+			
+			var columns = this._getFieldColumns(chart);
+			
+			if(columns.length == 0)
+				throw new Error("Column required for rendering table in chart '"+chart.name()+"'");
+			
+			var options =
+			{
+				//标题配置
+				title:
+				{
+					show: true,
+					text: chart.name()
+				},
+				//标题样式，格式为：{ color:'red', 'background-color':'blue' }
+				titleStyle: undefined,
+				//表格样式，格式为：
+				//{
+				//	table: {...},
+				//	head: { row: {...}, cell: {...} },
+				//	body:
+				//	{
+				//		row: {...}, rowOdd: {}, rowEven: {}, rowHover: {...}, rowSelected: {...},
+				//		cell: {...}, cellOdd: {}, cellEven: {}, cellHover: {...}, cellSelected: {...}
+				//	}
+				//}
+				tableStyle: undefined,
+				//自定义单元格渲染函数，格式为：function(value, name, rowIndex, columnIndex, row, meta){ return ...; }
+				renderCell: undefined,
+				//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
+				carousel: undefined,
+				//是否禁用条纹样式效果
+				disableStripe: false,
+				//是否禁用悬浮样式效果
+				disableHover: false,
+				//是否表格文本不换行
+				enableWrapText: false,
+				
+				//DataTable配置项
+				"columns": columns,
+				"data" : [],
+				"ordering": false,
+				"scrollX": true,
+				"scrollY": undefined,
+				"autoWidth": true,
+		        "scrollCollapse": false,
+				"pagingType": "full_numbers",
+				"lengthMenu": [],
+				"pageLength": 50,
+				"select" : { style : 'os' },
+				"searching" : false,
+				"language":
+			    {
+					"emptyTable": "",
+					"zeroRecords": "",
+					"search": "搜索",
+					"lengthMenu": "每页_MENU_条",
+					"info": "共_TOTAL_条，当前_START_-_END_条",
+					"infoEmpty": "无数据",
+					"infoFiltered": "_TOTAL_条",
+					"loadingRecords": "加载中...",
+					"paginate":
+					{
+						"first": "首页",
+						"last": "尾页",
+						"next": "下一页",
+						"previous": "上一页"
+					},
+					"select":
+					{
+						"rows": ""
+					}
+				}
+			};
+			
+			chart.inflateOptions(options);
+			this._processRenderOptions(chart, options);
+			chart.processRenderOptions(options);
+			
+			this._themeStyleSheet(chart, options);
+			
+			var carousel = SPT.carouselOption(options);
+			
+			if(carousel.enable)
+				chartEle.addClass("dg-chart-table-carousel");
+			
+			if(!options.title.show)
+				chartEle.addClass("dg-hide-title");
+			
+			if(options.enableWrapText)
+				chartEle.addClass("dg-text-nowrap");
+			
+			var eleWrapper = jQuery("<div class='dg-chart-ele-wrapper' />").appendTo(chartEle);
+			var chartTitle = jQuery("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(eleWrapper);
+			var chartContent = jQuery("<div class='dg-chart-table-content' />").appendTo(eleWrapper);
+			var table = jQuery("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
+							.appendTo(chartContent);
+			
+			var tableId = "table" + chart.id();
+			table.attr("id", tableId);
+			
+			if(options.titleStyle)
+				chart.elementStyle(chartTitle[0], options.titleStyle);
+			
+			table.dataTable(options);
+			
+			var dataTable = table.DataTable();
+			
+			if(carousel.enable && carousel.hideVerticalScrollbar != false)
+			{
+				var tableBody = this._getScrollBody(chart, chartContent);
+				tableBody.css("overflow-y", "hidden");
+			}
+			
+			if(carousel.enable)
+			{
+				jQuery(dataTable.table().body()).on("mouseenter", "tr", () =>
+				{
+					if(carousel.pauseOnHover)
+						this._stopCarousel(chart);
+				})
+				.on("mouseleave", "tr", () =>
+				{
+					if(carousel.pauseOnHover)
+						this._startCarousel(chart);
+				});
+			}
+			
+			chart.internal(dataTable);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var updateOptions = { data: [] };
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let result = chart.resultOf(chartResult, dataSetBind);
+				let resultDatas = chart.resultDatas(result);
+				
+				//复制，避免污染原始数据
+				for(let j=0; j<resultDatas.length; j++)
+				{
+					var data = CF.extend({}, resultDatas[j]);
+					SPT.originalDataOfData(data, resultDatas[j]);
+					updateOptions.data.push(data);
+				}
+			}
+			
+			this._stopCarousel(chart);
+			
+			updateOptions = chart.inflateOptions(updateOptions);
+			chart.processUpdateOptions(updateOptions);
+			this._updateInternalData(chart, chartResult, updateOptions);
+		},
+		
+		resize: function(chart)
+		{
+			var dataTable = chart.internal();
+			this._adjustColumn(dataTable);
+		},
+		
+		destroy: function(chart)
+		{
+			var chartEle = jQuery(chart.element());
+			
+			this._stopCarousel(chart);
+			chartEle.removeClass("dg-chart-table dg-hide-title dg-text-nowrap dg-chart-table-carousel");
+			chartEle.removeClass(chart.liveData(CF.builtinPropName("TableChartLocalStyleName")));
+			$(".dg-chart-ele-wrapper", chartEle).remove();
+		},
+		
+		on: function(chart, eventType, handler)
+		{
+			//TODO
+		},
+		
+		off: function(chart, eventType, handler)
+		{
+			//TODO
+		},
+		
+		_getFieldColumns: function(chart)
+		{
+			var columns = [];
+			
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let fields = chart.dataSetFieldsOfSign(dataSetBind, 0);
+				if(!fields || fields.length == 0)
+					fields = chart.dataSetFields(dataSetBind);
+				
+				for(let j=0; j<fields.length; j++)
+				{
+					let field = fields[j];
+					let colIdx = SPT.findInArray(columns, field.name, "name");
+					
+					if(colIdx < 0)
+					{
+						let column =
+						{
+							title: chart.dataSetFieldAlias(dataSetBind, field),
+							name: field.name,
+							data: field.name,
+							defaultContent: "",
+							orderable: true,
+							searchable: false,
+							//需后续完善
+							render: undefined
+						};
+						
+						columns.push(column);
+					}
+				}
+			}
+			
+			return columns;
+		},
+		
+		_processRenderOptions: function(chart, options)
+		{
+			this._processServerSidePagingOptions(chart, options);
+			this._processCarouselOptions(chart, options)
+			
+			//必须明确设置paging=false，因为底层表格组件的paging默认值为true
+			options.paging = (options.paging != null ? options.paging : false);
+			
+			//开启分页后，默认开启info
+			options.info = (options.info != null ? options.info : options.paging);
+			
+			if(options.paging)
+			{
+				options.lengthMenu = (options.lengthMenu == null || options.lengthMenu.length == 0 ? [ 10, 25, 50, 75, 100 ] : options.lengthMenu);
+				//如果有50，则取50
+				options.pageLength = (CF.indexInArray(options.lengthMenu, 50) >= 0 ? 50 : options.lengthMenu[0]);
+			}
+			
+			var dftLayout =
+			{
+				topStart: (options.buttons ? "buttons" : null),
+				topEnd: (options.searching ? "search" : null),
+				bottomStart: (options.info ? "info" : null),
+				bottomEnd: (options.paging ? ["pageLength", "paging"] : null)
+			};
+			
+			options.layout = (options.layout  == null ? dftLayout : options.layout);
+			
+			//填充options.columns的render函数
+			for(let i=0; i<options.columns.length; i++)
+			{
+				let column = options.columns[i];
+				
+				//DataTables-1.10.18是允许column.data为""的，升级至1.11.3后则会有一个警告弹出框，
+				//这里设置defaultContent可以解决此问题
+				if(CF.isEmpty(column.data) && column.defaultContent == null)
+					column.defaultContent = "";
+				
+				if(column.render == null)
+				{
+					column.render = function(value, type, row, meta)
+					{
+						//单元格展示绘制
+						if(type == "display")
+						{
+							if(options.renderCell)
+							{
+								var rowIndex = meta.row;
+								var columnIndex = meta.col;
+								var name = options.columns[columnIndex].data;
+								
+								return options.renderCell(value, name, rowIndex, columnIndex, row, meta);
+							}
+							else
+								return CF.escapeHtml(value);
+						}
+						//其他绘制，比如排序
+						else
+							return value;
+					};
+				}
+			}
+		},
+		
+		/**
+		 * 表格处理carousel选项，格式为：
+		 * {
+		 *   carousel: ...
+		 * }
+		 */
+		_processCarouselOptions: function(chart, options)
+		{
+			//标准轮播格式
+			var carouselObj =
+			{
+				//是否开启，true 开启；false 禁用；"auto" 只有在行溢出时才开启
+				enable: false,
+				//滚动间隔毫秒数，或者返回间隔毫秒数的函数：
+				//currentRow 当前可见行
+				//visibleHeight 当前可见行的剩余可见高度
+				//height 当前可见行高度
+				//function(currentRow, visibleHeight, height){ return ...; }
+				interval: 50,
+				//滚动跨度像素数，或者返回跨度像素数的函数：
+				//function(currentRow, visibleHeight, height){ return ...; }
+				span: 1,
+				//是否在鼠标悬停时暂停轮播
+				pauseOnHover: true,
+				//是否隐藏纵向滚动条
+				hideVerticalScrollbar: true,
+				//溢出删除个数，小于这个数的轮播溢出行数，不会执行删除操作
+				overflowCount: 2
+			};
+			
+			var carousel = SPT.carouselOption(options);
+			
+			if(carousel == null)
+			{
+				
+			}
+			//true、false、"auto"
+			else if(carousel === true || carousel === false || CF.isString(carousel))
+			{
+				carouselObj.enable = carousel;
+			}
+			//间隔数值、函数
+			else if(CF.isNumber(carousel) || CF.isFunction(carousel))
+			{
+				carouselObj.enable = true;
+				carouselObj.interval = carousel;
+			}
+			//轮播对象
+			else
+			{
+				carouselObj = CF.extend(true, carouselObj, carousel);
+			}
+			
+			SPT.carouselOption(options, carouselObj);
+		},
+		
+		/**
+		 * 表格处理serverSidePaging选项，格式为：
+		 * {
+		 *   serverSidePaging:
+		 *   {
+		 *      //必填，将data中的分页查询信息设置为图表数据集参数
+		 *      param: function(data, chart){ ... },
+		 *      //可选（与totalFieldName、totalValue三选一），数据集附加数据中总记录数关键字
+		 *      totalAdditionName: "...",
+		 *      //可选（与totalAdditionName、totalValue三选一），附件数据集中总记录数字段名
+		 *      totalFieldName: "...",
+		 *      //可选（与totalFieldName、totalAdditionName三选一），附件数据集中总记录数字段名
+		 *      totalValue: function(chart){ return 数值; },
+		 *      //可选，根据图表数据集参数设置表格分页状态，或者返回要设置的状态数据（参考SPT.tableUpdatePagingState()函数），
+		 *      //如果不设置，使用图表参数面板的查询信息不会同步显示到表格中
+		 *      state: function(chart){ ... },
+		 *      //可选，触发表格draw()函数时的paging参数
+		 *      drawPagingArg: ...、function(chart){ return ...; },
+		 *   }
+		 * }
+		 */
+		_processServerSidePagingOptions: function(chart, options)
+		{
+			var serverSidePaging = SPT.serverSidePagingOption(options);
+			
+			if(!serverSidePaging)
+				return;
+			
+			options.serverSide = true;
+			options.paging = true;
+			
+			//这里需禁用轮播，详细参考SPT.tableStartCarousel()函数
+			SPT.carouselOption(options, false);
+			
+			var thisRenderer = this;
+			
+			options.ajax = function(data, callback, settings)
+			{
+				var ajaxInfos = chart.liveData("serverSidePagingAjaxInfos");
+				if(ajaxInfos == null)
+				{
+					ajaxInfos = [];
+					chart.liveData("serverSidePagingAjaxInfos", ajaxInfos);
+				}
+				
+				ajaxInfos.push({ data: data, callback: callback, settings: settings });
+				
+				var refreshInfo = chart.liveData("serverSidePagingRefreshInfo");
+				
+				//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
+				if(refreshInfo != null)
+				{
+					chart.liveData("serverSidePagingRefreshInfo", null);
+					
+					if(chart.isActive())
+						thisRenderer._updateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
+				}
+				else
+				{
+					serverSidePaging.param(data, chart);
+					
+					if(chart.isActive())
+						chart.refreshData();
+				}
+			};
+			
+			SPT.updateInternalOption(options, function(updateOptions, chart, chartResult)
+			{
+				var ajaxInfos = (chart.liveData("serverSidePagingAjaxInfos") || []);
+				
+				//由表格内部操作触发
+				if(ajaxInfos.length > 0)
+				{
+					for(var i=0; i<ajaxInfos.length; i++)
+					{
+						var ajaxInfo = ajaxInfos[i];
+						var recordsTotal = thisRenderer._getRecordsTotal(updateOptions, chart, chartResult, serverSidePaging);
+						
+						var pagingData =
+						{
+							draw: (ajaxInfo.data ? ajaxInfo.data.draw : undefined),
+							recordsTotal: recordsTotal,
+							recordsFiltered: recordsTotal,
+							data: updateOptions.data
+						};
+						
+						ajaxInfo.callback(pagingData);
+					}
+					
+					chart.liveData("serverSidePagingAjaxInfos", []);
+				}
+				//由图表API触发，比如：参数表单提交、chart.refreshData()
+				else
+				{
+					var pagingState = (serverSidePaging.state == null ? null : serverSidePaging.state(chart));
+					if(pagingState != null)
+						thisRenderer._updatePagingState(chart, pagingState);
+					
+					var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
+					chart.liveData("serverSidePagingRefreshInfo", refreshInfo);
+					
+					var drawPagingArg = (serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
+					if(CF.isFunction(drawPagingArg))
+						drawPagingArg = serverSidePaging.drawPagingArg(chart);
+					
+					chart.internal().draw(drawPagingArg);
+				}
+			});
+		},
+		
+		/**
+		 * 表格更新分页状态（不应刷新数据），state格式为：
+		 * {
+		 *   //可选，页大小
+		 *   length: 数值,
+		 *   //可选，页码（以0开始）
+		 *   page: 数值,
+		 *   //可选，页数据起始索引
+		 *   start: 数值,
+		 *   //可选，搜索关键字
+		 *   searchValue: "...",
+		 *   //可选，排序
+		 *   order: "..."
+		 * }
+		 */
+		_updatePagingState: function(chart, state)
+		{
+			if(!state)
+				return;
+			
+			var dataTable = chart.internal();
+			
+			var pageLength = (state.length == null ? null : parseInt(state.length));
+			var pagePage = (state.page == null ? null : parseInt(state.page));
+			var pageStart = (state.start == null ? null : parseInt(state.start));
+			
+			if(pageLength != null)
+				dataTable.page.len(pageLength);
+			
+			if(pagePage != null)
+			{
+				dataTable.page(pagePage);
+			}
+			else if(pageStart != null)
+			{
+				pageLength = (pageLength == null ? dataTable.page.info() : pageLength);
+				pagePage = parseInt(pageStart/pageLength);
+				dataTable.page(pagePage);
+			}
+			
+			if(state.searchValue !== undefined)
+			{
+				dataTable.search(state.searchValue == null ? "" : state.searchValue);
+			}
+			
+			if(state.order !== undefined)
+			{
+				dataTable.order(state.order);
+			}
+		},
+		
+		_getRecordsTotal: function(updateOptions, chart, chartResult, serverSidePaging)
+		{
+			var recordsTotal = null;
+			
+			if(serverSidePaging.totalValue != null)
+			{
+				recordsTotal = serverSidePaging.totalValue(chart);
+			}
+			else
+			{
+				var dsbs = chart.dataSetBinds();
+				
+				for(var i=0; i<dsbs.length; i++)
+				{
+					var result = chart.resultOf(chartResult, dsbs[i]);
+					
+					if(serverSidePaging.totalAdditionName != null)
+					{
+						recordsTotal = chart.resultAddition(result, serverSidePaging.totalAdditionName);
+					}
+					
+					if(recordsTotal == null && serverSidePaging.totalFieldName != null
+						&& chart.dataSetField(dsbs[i], serverSidePaging.totalFieldName) != null)
+					{
+						var colValues = chart.resultColumnArrayDatas(result, serverSidePaging.totalFieldName);
+						recordsTotal = SPT.findNonNull(colValues);
+					}
+					
+					if(recordsTotal != null)
+						break;
+				}
+			}
+			
+			if(recordsTotal == null)
+				recordsTotal = (updateOptions.data ? updateOptions.data.length : 0);
+			
+			return recordsTotal;
+		},
+		
+		_getChartContent: function(chart)
+		{
+			return jQuery(".dg-chart-table-content", chart.element());
+		},
+		
+		_getScrollHead: function(chart, $chartContent)
+		{
+			return jQuery(".dt-scroll-head", $chartContent);
+		},
+		
+		_getScrollBody: function(chart, $chartContent)
+		{
+			return jQuery(".dt-scroll-body", $chartContent);
+		},
+		
+		_themeStyleSheet: function(chart, options)
+		{
+			var name = CF.builtinPropName("TableChart");
+			var isLocalStyle = (options.tableStyle != null);
+			var forceUpdate = false;
+			
+			if(isLocalStyle)
+			{
+				//这里不应使用随机数，因为在图表多次destroy再init后，会导致残留无法销毁的样式表DOM
+				name = "tableStyle" + chart.id();
+				//需强制为每次都更新样式表，因为绑定的图表主题可能是全局主题
+				forceUpdate = true;
+				
+				jQuery(chart.element()).addClass(name);
+				chart.liveData(CF.builtinPropName("TableChartLocalStyleName"), name);
+			}
+			
+			chart.themeStyleSheet(name, () =>
+			{
+				var theme = chart.theme();
+				
+				var rowBgColor ="rgba(0,0,0,0)";
+				var rowOddBgColor = chart.themeGradualColor(0.5) + "09";
+				
+				var tableStyle =
+				{
+					table: {},
+					head:
+					{
+						row:
+						{
+							"color": theme.color,
+							//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+							"background-color": rowBgColor
+						},
+						cell: {}
+					},
+					body:
+					{
+						row:
+						{
+							"color": theme.color,
+							//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+							"background-color": rowBgColor
+						},
+						rowOdd:
+						{
+							//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+							"background-color": rowOddBgColor
+						},
+						rowEven:
+						{
+							//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+							"background-color": rowBgColor
+						},
+						rowHover:
+						{
+							"background-color": chart.themeGradualColor(0.2)
+						},
+						rowSelected:
+						{
+							"color": theme.highlightTheme.color,
+							"background-color": theme.highlightTheme.backgroundColor
+						},
+						cell: {},
+						cellOdd: {},
+						cellEven: {},
+						cellHover: {},
+						cellSelected:
+						{
+							"color": theme.highlightTheme.color
+						}
+					}
+				};
+				
+				if(isLocalStyle)
+				{
+					let optionTableStyle = options.tableStyle;
+					tableStyle = CF.extend(true, tableStyle, optionTableStyle);
+				}
+				
+				//DataTable-1.11.3内置表头背景CSS添加了"!important"，这里也必须添加才能起作用
+				this._copyStyleBackground(tableStyle.head.row, tableStyle.head.row, true, true);
+				
+				//DataTable-1.11.3的固定列采用的sticky特性，导致单元格必须设置背景不然会变透明
+				this._copyStyleBackground(tableStyle.head.row, tableStyle.head.cell, false, true);
+				this._copyStyleBackground(tableStyle.body.row, tableStyle.body.cell);
+				this._copyStyleBackground(tableStyle.body.rowOdd, tableStyle.body.cellOdd);
+				this._copyStyleBackground(tableStyle.body.rowEven, tableStyle.body.cellEven);
+				this._copyStyleBackground(tableStyle.body.rowHover, tableStyle.body.cellHover);
+				this._copyStyleBackground(tableStyle.body.rowSelected, tableStyle.body.cellSelected);
+				
+				//样式应加".dg-chart-table-content"限定
+				var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
+				
+				var css=
+				[
+					{
+						name: (isLocalStyle ? "." + name : "") + " .dg-chart-table-title",
+						value: { "font-size": CF.toCssFontSize(theme.titleTheme.fontSize) }
+					},
+					{
+						name: qualifier + " table.dataTable",
+						value: chart.styleString(tableStyle.table)
+					},
+					{
+						name: qualifier + " table.dataTable thead tr",
+						value: chart.styleString(tableStyle.head.row)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable thead tr th",
+							qualifier + " table.dataTable thead tr td"
+						],
+						value: chart.styleString(tableStyle.head.cell)
+					},
+					{
+						name: qualifier + " table.dataTable tbody tr",
+						value: chart.styleString(tableStyle.body.row)
+					},
+					{
+						name: qualifier + " table.dataTable tbody tr td",
+						value: chart.styleString(tableStyle.body.cell)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)"
+						],
+						value: chart.styleString(tableStyle.body.rowOdd)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)>*"
+						],
+						value: chart.styleString(tableStyle.body.cellOdd)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)"
+						],
+						value: chart.styleString(tableStyle.body.rowEven)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)>*"
+						],
+						value: chart.styleString(tableStyle.body.cellEven)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable.hover tbody tr:hover",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover"
+						],
+						value: chart.styleString(tableStyle.body.rowHover)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable.hover tbody tr:hover td",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover>*",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover>*",
+						],
+						value: chart.styleString(tableStyle.body.cellHover)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable tbody tr.selected",
+							qualifier + " table.dataTable.hover tbody tr:hover.selected",
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd).selected",
+							qualifier + " table.dataTable.display>tbody>tr:nth-child(odd).selected",
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even).selected",
+							qualifier + " table.dataTable.display>tbody>tr:nth-child(even).selected",
+							qualifier + " table.dataTable.hover tbody tr:hover.selected",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected"
+						],
+						value: chart.styleString(tableStyle.body.rowSelected)
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable tbody tr.selected td",
+							qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
+							qualifier + " table.dataTable.stripe tbody tr.even.selected td",
+							qualifier + " table.dataTable.hover tbody tr:hover.selected td",
+							qualifier + " table.dataTable>tbody>tr.selected>*",
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd).selected>*",
+							qualifier + " table.dataTable.display>tbody>tr:nth-child(odd).selected>*",
+							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even).selected>*",
+							qualifier + " table.dataTable.display>tbody>tr:nth-child(even).selected>*",
+							qualifier + " table.dataTable.hover tbody tr:hover.selected td",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected>*",
+							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected>*",
+						],
+						value: chart.styleString(tableStyle.body.cellSelected)
+					},
+					{
+						name:
+						[
+							qualifier + " .dt-container .dt-length select"
+						],
+						value: { color: theme.color }
+					},
+					{
+						name:
+						[
+							qualifier + " .dt-container .dt-length select option"
+						],
+						value: { color: theme.color, "background-color": chart.themeGradualColor(0) }
+					},
+					{
+						name: qualifier + " .dt-container .dt-scroll-body",
+						value: { color: theme.color }
+					},
+					{
+						name:
+						[
+							qualifier + " table.dataTable>thead>tr>th",
+							qualifier + " table.dataTable>thead>tr>td"
+						],
+						value: { "border-bottom-color": chart.themeGradualColor(0) }
+					},
+					{
+						name: qualifier + " table.dataTable.dtfc-scrolling-left tr>.dtfc-fixed-left::after",
+						value: { "box-shadow": "inset 10px 0 8px -8px " + chart.themeGradualColor(0.2) }
+					},
+					{
+						name: qualifier + " table.dataTable.dtfc-scrolling-right tr>.dtfc-fixed-right::after",
+						value: { "box-shadow": "inset -10px 0 8px -8px " + chart.themeGradualColor(0.2) }
+					},
+					{
+						name:
+						[
+							qualifier + " div.dt-container .dt-paging .dt-paging-button.current",
+							qualifier + " div.dt-container .dt-paging .dt-paging-button.current:hover",
+							qualifier + " div.dt-container .dt-input"
+						],
+						value: { "border-color": theme.borderColor }
+					},
+					{
+						name:
+						[
+							qualifier + " div.dt-container div.dt-buttons>.dt-button",
+							qualifier + " div.dt-container div.dt-buttons>div.dt-button-split .dt-button"
+						],
+						value: { "border-color": theme.borderColor }
+					},
+					{
+						name:
+						[
+							qualifier + " div.dt-container div.dt-buttons>.dt-button:focus:not(.disabled)",
+							qualifier + " div.dt-container div.dt-buttons>div.dt-button-split .dt-button:focus:not(.disabled)"
+						],
+						value: { "outline": "2px solid " + theme.borderColor }
+					}
+				];
+				
+				if(!isLocalStyle)
+				{
+					css.push(
+					{
+						name: " .dg-chart-table-title",
+						value: { "color": theme.titleTheme.color, "background-color": theme.titleTheme.backgroundColor }
+					});
+				}
+				
+				return css;
+			},
+			forceUpdate);
+		},
+		
+		_copyStyleBackground: function(from, to, force, important)
+		{
+			force = (force == null ? false : force);
+			important = (important == null ? false : important);
+			
+			if(from["background-color"] && (force || !to["background-color"]))
+				to["background-color"] = (important ? SPT.cssValueImportant(from["background-color"]) : from["background-color"]);
+			
+			if(from["background"] && (force || !to["background"]))
+				to["background"] = (important ? SPT.cssValueImportant(from["background"]) : from["background"]);
+		},
+		
+		_updateInternalData: function(chart, chartResult, updateOptions)
+		{
+			var renderOptions = chart.renderOptions();
+			
+			//自定义更新底层组件数据，当启用serverSide后，需要自定义调用其ajax配置项的callback更新数据，而非这里
+			//格式为：function(updateOptions, chart, chartResult){ ... }
+			var updateInternal = SPT.updateInternalOption(renderOptions);
+			if(updateInternal)
+			{
+				updateInternal.call(renderOptions, updateOptions, chart, chartResult);
+				return;
+			}
+			
+			var dataTable = chart.internal();
+			var rows = dataTable.rows();
+			var datas = updateOptions.data;
+			var removeRowIndexes = [];
+			var startRowIndex = 0;
+			var dataIndex = 0;
+			
+			rows.every(function(rowIndex)
+			{
+				if(rowIndex < startRowIndex)
+					return;
+				
+				if(dataIndex >= datas.length)
+					removeRowIndexes.push(rowIndex);
+				else
+					this.data(datas[dataIndex]);
+				
+				dataIndex++;
+			});
+			
+			for(; dataIndex<datas.length; dataIndex++)
+				dataTable.row.add(datas[dataIndex]);
+			
+			dataTable.rows(removeRowIndexes).remove();
+			
+			dataTable.draw();
+			SPT.tableAdjustColumn(dataTable);
+			
+			if(SPT.carouselOption(renderOptions).enable)
+			{
+				let chartEle = jQuery(chart.element());
+				chartEle.data("tableCarouselPrepared", false);
+				SPT.tableStartCarousel(chart);
+			}
+		},
+		
+		/**
+		 * 调整图表表格。
+		 * 当表格隐藏显示、位置调整、数据变更后，可能会出现表头、固定列错位的情况，需要重新调整。
+		 */
+		_adjustColumn: function(dataTable)
+		{
+			dataTable.columns.adjust();
+			
+			var initOptions = dataTable.init();
+			
+			if(initOptions.fixedHeader)
+				dataTable.fixedHeader.adjust();
+		},
+		
+		_prepareCarousel: function(chart)
+		{
+			var renderOptions = chart.renderOptions();
+			
+			//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
+			if(renderOptions.serverSide == true || SPT.serverSidePagingOption(renderOptions) != null)
+				return;
+			
+			var chartContent = this._getChartContent(chart);
+			var dataTable = chart.internal();
+			var rowIndexes = dataTable.rows().indexes();
+			var rowCount = rowIndexes.length;
+			
+			//空表格
+			if(rowCount == 0)
+				return;
+			
+			var scrollBody = this._getScrollBody(chart, chartContent);
+			var scrollTable = jQuery(".dataTable", scrollBody);
+			
+			var scrollBodyHeight = scrollBody.height();
+			
+			while(true)
+			{
+				let scrollTableHeight = scrollTable.height();
+				
+				//表格高度至少为容器高度两倍，保证滚动平滑
+				if(scrollTableHeight >= scrollBodyHeight*2)
+					break;
+				
+				//必须成倍添加数据，避免出现轮播次序混乱
+				for(let i=0; i<rowCount; i++)
+				{
+					let addData = dataTable.row(rowIndexes[i]).data();
+					dataTable.row.add(addData);
+				}
+				
+				dataTable.draw();
+			}
+		},
+		
+		_startCarousel: function(chart)
+		{
+			var renderOptions = chart.renderOptions();
+			
+			//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
+			if(renderOptions.serverSide == true || SPT.serverSidePagingOption(renderOptions) != null)
+				return;
+			
+			var carousel = SPT.carouselOption(renderOptions);
+			var chartEle = jQuery(chart.element());
+			var chartContent = this._getChartContent(chart);
+			var dataTable = chart.internal();
+			var rowCount = dataTable.rows().indexes().length;
+			
+			var scrollBody = this._getScrollBody(chart, chartContent);
+			var scrollTable = jQuery(".dataTable", scrollBody);
+			
+			//空表格，或者，"auto"且行数未溢出时不轮播
+			if(rowCount == 0
+				|| (carousel.enable == "auto" && (scrollTable.height() <= scrollBody.height())))
+			{
+				scrollTable.css("margin-top", "0px");
+				return;
+			}
+			
+			SPT.tableStopCarousel(chart);
+			chartEle.data("tableCarouselStatus", "start");
+			
+			this._handleCarousel(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable);
+		},
+		
+		_stopCarousel: function(chart)
+		{
+			var chartEle = jQuery(chart.element());
+			chartEle.data("tableCarouselStatus", "stop");
+			this._carouselIntervalId(chart, null);
+		},
+		
+		_handleCarousel: function(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable)
+		{
+			if(chartEle.data("tableCarouselStatus") == "stop")
+				return;
+			
+			var carousel = SPT.carouselOption(renderOptions);
+			var doCarousel = true;
+			
+			//元素隐藏时会因为高度计算有问题导致浏览器卡死，所以隐藏式不实际执行轮播
+			if(scrollBody.is(":hidden"))
+				doCarousel = false;
+			
+			if(doCarousel)
+			{
+				if(chartEle.data("tableCarouselPrepared") != true)
+				{
+					this._prepareCarousel(chart);
+					chartEle.data("tableCarouselPrepared", true)
+				}
+				
+				//不采用设置滚动高度的方式（scrollBody.scrollTop()），因为会出现影响整个页面滚动高度的情况
+				let scrollTop = parseInt(scrollTable.css("margin-top"));
+				scrollTop = (Math.abs(scrollTop) || 0);
+				
+				let tableBody = dataTable.table().body();
+				let currentRow = undefined;
+				let currentRowHeight = undefined;
+				let currentRowVisibleHeight = undefined;
+				
+				let offset = 0;
+				let removeRowIndexes = [];
+				let addRowDatas = [];
+				let doRemove = false;
+				let $checkRow = jQuery("> tr:first", tableBody);
+				let tmpOffset = 0;
+				
+				while(true)
+				{
+					currentRow = $checkRow[0];
+					currentRowHeight = $checkRow.outerHeight(true);
+					currentRowVisibleHeight = currentRowHeight;
+					
+					if($checkRow.length == 0 || removeRowIndexes.length >= carousel.overflowCount)
+					{
+						offset += tmpOffset;
+						doRemove = true;
+						break;
+					}
+					
+					tmpOffset += currentRowHeight;
+					
+					if(scrollTop < tmpOffset)
+					{
+						currentRowVisibleHeight = tmpOffset - scrollTop;
+						break;
+					}
+					
+					let dtRow = dataTable.row($checkRow);
+					removeRowIndexes.push(dtRow.index());
+					addRowDatas.push(dtRow.data());
+					$checkRow = $checkRow.next();
+				}
+				
+				let needDraw = false;
+				
+				if(doRemove && removeRowIndexes.length > 0)
+				{
+					dataTable.rows(removeRowIndexes).remove();
+					scrollTop = scrollTop - offset;
+					needDraw = true;
+				}
+				
+				if(doRemove && addRowDatas.length > 0)
+				{
+					dataTable.rows.add(addRowDatas);
+					needDraw = true;
+				}
+				
+				if(needDraw)
+					dataTable.draw();
+				
+				let span = (CF.isFunction(carousel.span) ?
+						carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carousel.span);
+				
+				scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
+			}
+			
+			var interval = null;
+			
+			if(!CF.isFunction(carousel.interval))
+			{
+				interval = carousel.interval;
+			}
+			else
+			{
+				if(doCarousel)
+				{
+					interval = carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
+				}
+				else
+				{
+					//没有执行轮播时，无法执行interval函数，所以采用默认处理间隔（同轮播默认间隔）
+					interval = 50;
+				}
+			}
+			
+			var intervalId = setTimeout(() =>
+			{
+				this._handleCarousel(chart, renderOptions, chartEle, dataTable, scrollBody, scrollTable);
+			},
+			interval);
+			
+			this._carouselIntervalId(chart, intervalId);
+		},
+		
+		_carouselIntervalId: function(chart, intervalId)
+		{
+			var chartEle = jQuery(chart.element());
+			var curIntervalId = chartEle.data("tableCarouselIntervalId");
+			
+			if(intervalId === undefined)
+				return curIntervalId;
+			
+			if(curIntervalId != null)
+				clearInterval(curIntervalId);
+			
+			chartEle.data("tableCarouselIntervalId", intervalId);
+		}
+	};
+	
+	return renderer;
+};
+
 SPT.tableRender = function(chart, options)
 {
 	options = CF.extend(true,

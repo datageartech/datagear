@@ -69,102 +69,7 @@
 .dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable tbody td{
 	white-space: nowrap;
 }
-.dg-chart-table.dg-table-v1 .dg-chart-table-title{
-	position: absolute;/*必须设置，不然元素竖向无法贴顶对齐*/
-	left: 0;
-	top: 0;
-	right: 0;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content{
-	position: absolute;
-	left: 1px;
-	top: 1.6em;
-	right: 1px;
-	bottom: 1px;
-}
-.dg-chart-table.dg-table-v1.dg-hide-title .dg-chart-table-content{
-	top: 0;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th,
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead td,
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable tbody th,
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable tbody td{
-	padding: 0.5em 18px;
-	text-align: left;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable td.dataTables_empty{
-	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_info{
-	padding-top: 0.5em;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_length{
-	float: none;
-	margin-left: 1em;
-	display: inline-block;
-	padding-top: 0.5em;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button{
-	padding: 0.2em 0.5em;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate .fg-button.ui-state-disabled{
-	opacity: 0.6;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_paginate > span > .fg-button.ui-state-disabled{
-	font-weight: bold;
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .dataTables_wrapper .dataTables_filter input{
-	color: inherit;
-}
-/*设置固定列后，在某些版本浏览器固定列会出现横向滚动条，所以这里通过此样式将滚动条隐藏*/
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .DTFC_LeftBodyLiner,
-.dg-chart-table.dg-table-v1 .dg-chart-table-content .DTFC_RightBodyLiner{
-	overflow-x: hidden;
-}
-/*DataTables-1.11.3版本内置的jquery-ui CSS标题右上角会多一个白线，这里设置不可见*/
-.dg-chart-table.dg-table-v1 .dataTables_wrapper .dtfc-right-top-blocker{
-	opacity: 0;
-	filter: Alpha(Opacity=0);
-}
-/*排序图标*/
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th.sorting div.DataTables_sort_wrapper span{
-	position: absolute;
-	top: 50%;
-	margin-top: -2px;
-	right: -14px;
-	width: 4px;
-	height: 4px;
-	background: #333;
-	opacity: 0.6;
-	filter: Alpha(Opacity=60);
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th.sorting_asc div.DataTables_sort_wrapper span{
-	width: 0;
-	height: 0;
-	margin-top: -3px;
-	border-left: 3px solid transparent;
-	border-right: 3px solid transparent;
-	border-bottom: 6px solid #333;
-	background: none;
-	opacity: 1;
-	filter: Alpha(Opacity=100);
-}
-.dg-chart-table.dg-table-v1 .dg-chart-table-content table.dataTable thead th.sorting_desc div.DataTables_sort_wrapper span{
-	width: 0;
-	height: 0;
-	margin-top: -3px;
-	border-left: 3px solid transparent;
-	border-right: 3px solid transparent;
-	border-top: 6px solid #333;
-	background: none;
-	opacity: 1;
-	filter: Alpha(Opacity=100);
-}
-.dg-chart-table.dg-table-v2{}
-.dg-chart-table.dg-table-v2 .dg-chart-ele-wrapper{
+.dg-chart-table .dg-chart-ele-wrapper{
 	position: absolute;
 	left: 1px;
 	top: 1px;
@@ -174,102 +79,102 @@
 	flex-direction: column;
 	overflow: auto;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content{
+.dg-chart-table .dg-chart-table-content{
 	flex-grow: 1;
 	overflow: auto;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll{
+.dg-chart-table .dg-chart-table-content,
+.dg-chart-table .dg-chart-table-content .dt-container,
+.dg-chart-table .dg-chart-table-content .dt-container .dt-scroll{
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
 	flex-grow: 1;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row{
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-layout-row{
 	margin: 0.1em 0;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row:first-child{
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-layout-row:first-child{
 	margin-top: 0;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table{
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table{
 	flex-grow: 1;
 	overflow: auto;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell .dt-scroll{
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell,
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-layout-row.dt-layout-table .dt-layout-cell .dt-scroll{
 	height: 100%;
 	overflow: auto;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-head{
+.dg-chart-table .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-head{
 	flex: 0 0 auto;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-body{
+.dg-chart-table .dg-chart-table-content .dt-container .dt-scroll .dt-scroll-body{
 	flex-grow: 1;
 	overflow: auto;
 	border-bottom-width: 0;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable thead th,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable thead td,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable tbody th,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable tbody td{
+.dg-chart-table .dg-chart-table-content table.dataTable thead th,
+.dg-chart-table .dg-chart-table-content table.dataTable thead td,
+.dg-chart-table .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table .dg-chart-table-content table.dataTable tbody td{
 	text-align: left;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable>tbody>tr.selected>*,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.hover>tbody>tr.selected:hover>*,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr.selected:hover>*,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.hover>tbody>tr:hover>*,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr:hover>*,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.stripe>tbody>tr:nth-child(odd)>*,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content table.dataTable.display>tbody>tr:nth-child(odd)>*{
+.dg-chart-table .dg-chart-table-content table.dataTable>tbody>tr.selected>*,
+.dg-chart-table .dg-chart-table-content table.dataTable.hover>tbody>tr.selected:hover>*,
+.dg-chart-table .dg-chart-table-content table.dataTable.display>tbody>tr.selected:hover>*,
+.dg-chart-table .dg-chart-table-content table.dataTable.hover>tbody>tr:hover>*,
+.dg-chart-table .dg-chart-table-content table.dataTable.display>tbody>tr:hover>*,
+.dg-chart-table .dg-chart-table-content table.dataTable.stripe>tbody>tr:nth-child(odd)>*,
+.dg-chart-table .dg-chart-table-content table.dataTable.display>tbody>tr:nth-child(odd)>*{
 	box-shadow: none !important;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-buttons{
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-buttons{
 	padding: 0.1em 0.2rem;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-buttons>.dt-button,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container div.dt-buttons>div.dt-button-split .dt-button{
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-buttons>.dt-button,
+.dg-chart-table .dg-chart-table-content div.dt-container div.dt-buttons>div.dt-button-split .dt-button{
 	padding: 0.3em 1em;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging{
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-length,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-search,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-info,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-processing,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging{
 	padding: 0.1em 0.2rem;
 	font-size: 0.9em;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-length,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-search,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-info,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-processing,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button{
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-length,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-search,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-info,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-processing,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button{
 	opacity: 0.8;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button:hover{
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button:hover{
 	border-color: transparent;
 	background: none;
     color: inherit !important;
     opacity: 1;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:hover,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:active{
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:hover,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.disabled:active{
     color: inherit !important;
 	opacity: 0.5;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current:hover{
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current,
+.dg-chart-table .dg-chart-table-content div.dt-container .dt-paging .dt-paging-button.current:hover{
 	background: none;
 }
 /* < 解决开启右侧固定列后，表头列不对齐的问题 */
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-scroll div.dtfc-top-blocker,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-scroll div.dtfc-bottom-blocker,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dtfh-floatingparent div.dtfc-top-blocker,
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dtfh-floatingparent div.dtfc-bottom-blocker{
+.dg-chart-table .dg-chart-table-content div.dt-scroll div.dtfc-top-blocker,
+.dg-chart-table .dg-chart-table-content div.dt-scroll div.dtfc-bottom-blocker,
+.dg-chart-table .dg-chart-table-content div.dtfh-floatingparent div.dtfc-top-blocker,
+.dg-chart-table .dg-chart-table-content div.dtfh-floatingparent div.dtfc-bottom-blocker{
 	display: none !important;
 }
-.dg-chart-table.dg-table-v2 .dg-chart-table-content div.dt-scroll .dt-scroll-head .dt-scroll-headInner{
+.dg-chart-table .dg-chart-table-content div.dt-scroll .dt-scroll-head .dt-scroll-headInner{
 	padding-left: 0 !important;
 }
 /* > 解决开启右侧固定列后，表头列不对齐的问题 */
