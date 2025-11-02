@@ -4610,243 +4610,159 @@ SPT.pictorialBarSymbolPaths=
 	"star" : "path://m15.5,19c-0.082,0 -0.164,-0.02 -0.239,-0.061l-5.261,-2.869l-5.261,2.869c-0.168,0.092 -0.373,0.079 -0.529,-0.032s-0.235,-0.301 -0.203,-0.49l0.958,-5.746l-3.818,-3.818c-0.132,-0.132 -0.18,-0.328 -0.123,-0.506s0.209,-0.31 0.394,-0.341l5.749,-0.958l2.386,-4.772c0.085,-0.169 0.258,-0.276 0.447,-0.276s0.363,0.107 0.447,0.276l2.386,4.772l5.749,0.958c0.185,0.031 0.337,0.162 0.394,0.341s0.01,0.374 -0.123,0.506l-3.818,3.818l0.958,5.746c0.031,0.189 -0.048,0.379 -0.203,0.49c-0.086,0.061 -0.188,0.093 -0.29,0.093z",
 };
 
-SPT.pictorialBarRender = function(chart, options)
+SPT.pictorialBarRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 名称
-			//value 数值，当标记category时单选，否则可多选
-			//category 可选，类别，不同类别绘制为不同系列
-			dataSignNames: { name: "name", value: "value", category: "category" },
-			//是否横向
-			horizontal: false,
-			//图形类型
-			symbol: "circle",
-			//图形重复
-			symbolRepeat: true,
-			//柱条间距
-			barGap: "100%"
-		}
+		//图形类型
+		symbol: "circle",
+		//是否互换坐标轴
+		interchangeAxis: false
 	},
-	options);
+	config);
 	
-	var dataSignNames = options.dg.dataSignNames;
-	var dataSetBind = chart.dataSetBindMain();
-	var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-	var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-	
-	options = SPT.inflateRenderOptions(chart,
+	var renderer =
 	{
-		dg:
+		depend: SPT.ECHARTS_RENDERER_DEPEND,
+		render: function(chart)
 		{
-			symbolSize: (vps.length > 1 ? "100%" : "50%")
-		},
-		title:
-		{
-	        text: chart.name()
-	    },
-		tooltip:
-		{
-			trigger: "item"
-		},
-		legend:
-		{
-			id: 0,
-			//将在update中设置：
-			//data
-		},
-		xAxis:
-		{
-			id: 0,
-			name: chart.dataSetFieldAlias(dataSetBind, np),
-			nameGap: 5,
-			type: SPT.evalDataSetFieldAxisType(chart, np),
-			splitLine: { show: false }
-		},
-		yAxis:
-		{
-			id: 0,
-			name: (vps.length == 1 ? chart.dataSetFieldAlias(dataSetBind, vps[0]) : ""),
-			nameGap: 5,
-			type: "value"
-		},
-		series:
-		[
-			//将在update中设置：
-			//{}
-			//设初值以免渲染报错
-			{
-				id: 0,
-				type: "pictorialBar"
-			}
-		]
-	},
-	options,
-	function(options)
-	{
-		if(options.dg.horizontal)
-		{
-			var xAxisTmp = options.xAxis;
-			options.xAxis = options.yAxis;
-			options.yAxis = xAxisTmp;
+			var dataSetBind = chart.dataSetBindMain();
+			var nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+			var valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
 			
-			//横向柱状图的yAxis.type不能为value，不然会变为竖向图形
-			if(options.yAxis.type == "value")
-				options.yAxis.type = "category";
-		}
-	});
-	
-	chart.echartsInit(options);
-};
-
-SPT.pictorialBarUpdate = function(chart, chartResult)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var symbol = dg.symbol;
-	if(SPT.pictorialBarSymbolPaths[symbol])
-		symbol = SPT.pictorialBarSymbolPaths[symbol];
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var legendData = [];
-	var series = [];
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
+			var options =
+			{
+				title: { text: chart.name() },
+				tooltip: { trigger: "item" },
+				legend: { data: [] },
+				xAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, nameField),
+					type: SPT.evalDataSetFieldAxisType(chart, nameField),
+					splitLine: { show: false }
+				},
+				yAxis:
+				{
+					name: chart.dataSetFieldAlias(dataSetBind, valueField),
+					type: SPT.evalDataSetFieldAxisType(chart, valueField)
+				},
+				series:
+				[
+					{ type: "pictorialBar", data: [] }
+				]
+			};
+			
+			if(config.interchangeAxis)
+			{
+				let xAxisTmp = options.xAxis;
+				options.xAxis = options.yAxis;
+				options.yAxis = xAxisTmp;
+			}
+			
+			options = SPT.prepareEChartsRenderOptions(chart, options);
+			var instance = chartUtil.echarts.init(chart);
+			instance.setOption(options);
+		},
 		
-		var np = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.name);
-		var cp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.category);
+		update: function(chart, chartResult)
+		{
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var legendData = [];
+			var series = [];
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let categoryField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				
+				if(categoryField)
+				{
+					let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
+					let categoryNames = [];
+					let categoryDatasMap = {};
+					
+					//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+					let fieldMap = { name: nameField, value: [nameField, valueField] };
+					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
+					let data = chart.resultMapDatas(result, fieldMap);
+					SPT.originalDataOfResult(data, chart, result);
+					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
+					
+					for(let j=0; j<categoryNames.length; j++)
+					{
+						let categoryName = categoryNames[j];
+						let legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
+						let mySeries = { name: legendName, data: categoryDatasMap[categoryName] };
+						
+						this._configSingleSeries(chart, mySeries, dataSetAlias);
+						legendData.push({ name: legendName });
+						series.push(mySeries);
+					}
+				}
+				else
+				{
+					let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+					
+					for(let j=0; j<valueFields.length; j++)
+					{
+						let legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, valueFields, j);
+						//使用{name,value:[]}格式可以更好地兼容category、value、time坐标轴类型以及tooltip、事件数据
+						let fieldMap = { name: nameField, value: [nameField, valueFields[j]] };
+						let data = chart.resultMapDatas(result, fieldMap);
+						SPT.originalDataOfResult(data, chart, result);
+						let mySeries = { name: legendName, data: data };
+						
+						this._configSingleSeries(chart, mySeries, dataSetAlias);
+						legendData.push({ name: legendName });
+						series.push(mySeries);
+					}
+				}
+			}
+			
+			var options = { legend: { data: legendData }, series: series };
+			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
+			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
+			
+			this._inflateUpdateOptions(chart, options);
+			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							SPT.inflateAxisDataExtractors.valueElement0());
+			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar"); });
+			
+			SPT.echartsOptionsReplaceMerge(chart, options);
+		},
 		
-		if(cp)
+		_inflateUpdateOptions: function(chart, options)
 		{
-			var vp = chart.dataSetFieldOfSign(dataSetBind, dataSignNames.value);
+			var series = options.series;
+			var symbolSize = (series.length > 1 ? "100%" : "50%");
+			var barGap = (series.length > 1 ? "50%" : "100%");
 			
-			var categoryNames = [];
-			var categoryDatasMap = {};
-			
-			//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-			var propertyMap = { "value": [np, vp] }; 
-			propertyMap = SPT.addCategoryToFieldMap(propertyMap, cp);
-			var data = chart.resultMapDatas(result, propertyMap);
-			chart.originalDataIndexes(data, dataSetBind);
-			SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
-			
-			for(var j=0; j<categoryNames.length; j++)
+			for(let i=0; i<series.length; i++)
 			{
-				var categoryName = categoryNames[j];
-				var legendName = SPT.legendNameForDataCategory(dataSetBinds, dataSetAlias, categoryName);
-				var mySeries =
-				{
-					id: series.length, type: "pictorialBar", name: legendName, data: categoryDatasMap[categoryName],
-					symbol: symbol,
-					symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
-					barGap: dg.barGap
-				};
-				
-				if(dg.horizontal)
-				{
-					mySeries.encode = { x: 1, y: 0 };
-				}
-				
-				legendData.push(legendName);
-				series.push(mySeries);
+				series[i].symbolSize = symbolSize;
+				series[i].barGap = barGap;
 			}
-		}
-		else
+		},
+		
+		_configSingleSeries: function(chart, series, dataSetAlias)
 		{
-			var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
+			var symbol = config.symbol;
+			if(SPT.pictorialBarSymbolPaths[symbol])
+				symbol = SPT.pictorialBarSymbolPaths[symbol];
 			
-			for(var j=0; j<vps.length; j++)
-			{
-				var legendName = SPT.legendNameForDataValues(chart, dataSetBinds, dataSetBind, dataSetAlias, vps, j);
-				
-				//使用{value: [name,value]}格式可以更好地兼容category、value、time坐标轴类型
-				var vpsMy = [np, vps[j]];
-				var data = chart.resultValueDatas(result, vpsMy);
-				
-				chart.originalDataIndexes(data, dataSetBind);
-				
-				var mySeries =
-				{
-					id: series.length, type: "pictorialBar", name: legendName, data: data,
-					symbol: symbol,
-					symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
-					barGap: dg.barGap
-				};
-				
-				if(dg.horizontal)
-				{
-					mySeries.encode = { x: 1, y: 0 };
-				}
-				
-				legendData.push(legendName);
-				series.push(mySeries);
-			}
+			series.type = "pictorialBar";
+			series.encode = (config.interchangeAxis ? { x: 1, y: 0 } : { x: 0, y: 1 });
+			series.symbol = symbol;
+			series.symbolRepeat = true;
 		}
-	}
+	};
 	
-	var options = { legend: {id: 0, data: legendData}, series: series };
-	
-	//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
-	if(dg.horizontal)
-		options.yAxis = { id: 0 };
-	else
-		options.xAxis = { id: 0 };
-	
-	SPT.inflateEChartsUpdateAxisData(chart, options, (dg.horizontal ? options.yAxis : options.xAxis),
-					SPT.inflateAxisDataExtractors.valueElement(0));
-	
-	SPT.adaptArrayPropsForUpdateOptions(options, renderOptions);
-	
-	options = chart.inflateUpdateOptions(chartResult, options, function(options)
-	{
-		SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar");
-	});
-	
-	SPT.echartsOptionsReplaceMerge(chart, options);
-};
-
-SPT.pictorialBarResize = function(chart)
-{
-	SPT.resizeChartEcharts(chart);
-};
-
-SPT.pictorialBarDestroy = function(chart)
-{
-	SPT.destroyChartEcharts(chart);
-};
-
-SPT.pictorialBarOn = function(chart, eventType, handler)
-{
-	SPT.bindChartEventHandlerForEcharts(chart, eventType, handler,
-			SPT.pictorialBarSetChartEventData);
-};
-
-SPT.pictorialBarOff = function(chart, eventType, handler)
-{
-	chart.echartsOffEventHandler(eventType, handler);
-};
-
-SPT.pictorialBarSetChartEventData = function(chart, chartEvent, echartsEventParams)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var echartsData = echartsEventParams.data;
-	var data = SPT.extractNameValueStyleObj(echartsData, dataSignNames.name, dataSignNames.value);
-	data[dataSignNames.category] = SPT.categoryValueOfData(echartsData);
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(echartsData));
+	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	return renderer;
 };
 
 //象形进度柱图

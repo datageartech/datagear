@@ -6122,11 +6122,7 @@
 				//是否横向
 				horizontal: false,
 				//图形类型
-				symbol: "circle",
-				//图形重复
-				symbolRepeat: true,
-				//柱条间距
-				barGap: "100%"
+				symbol: "circle"
 			}
 		},
 		options);
@@ -6138,10 +6134,6 @@
 		
 		options = chartSupport.inflateRenderOptions(chart,
 		{
-			dg:
-			{
-				symbolSize: (vps.length > 1 ? "100%" : "50%")
-			},
 			title:
 			{
 		        text: chart.name
@@ -6245,9 +6237,7 @@
 					var mySeries =
 					{
 						id: series.length, type: "pictorialBar", name: legendName, data: categoryDatasMap[categoryName],
-						symbol: symbol,
-						symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
-						barGap: dg.barGap
+						symbol: symbol, symbolRepeat: true
 					};
 					
 					if(dg.horizontal)
@@ -6276,9 +6266,7 @@
 					var mySeries =
 					{
 						id: series.length, type: "pictorialBar", name: legendName, data: data,
-						symbol: symbol,
-						symbolSize: dg.symbolSize, symbolRepeat: dg.symbolRepeat,
-						barGap: dg.barGap
+						symbol: symbol, symbolRepeat: true
 					};
 					
 					if(dg.horizontal)
@@ -6290,6 +6278,14 @@
 					series.push(mySeries);
 				}
 			}
+		}
+		
+		var symbolSize = (series.length > 1 ? "100%" : "50%");
+		var barGap = (series.length > 1 ? "50%" : "100%");
+		for(let i=0; i<series.length; i++)
+		{
+			series[i].symbolSize = symbolSize;
+			series[i].barGap = barGap;
 		}
 		
 		var options = { legend: {id: 0, data: legendData}, series: series };
