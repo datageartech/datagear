@@ -4990,7 +4990,7 @@ SPT.tableRenderer = function(plugin, config)
 				"pagingType": "full_numbers",
 				"lengthMenu": [],
 				"pageLength": 50,
-				"select" : { style : 'os' },
+				"select" : { style : "os" },
 				"searching" : false,
 				"language":
 			    {
@@ -5117,12 +5117,12 @@ SPT.tableRenderer = function(plugin, config)
 		
 		on: function(chart, eventType, handler)
 		{
-			//TODO
+			chart.internal().on(eventType, handler);
 		},
 		
 		off: function(chart, eventType, handler)
 		{
-			//TODO
+			chart.internal().off(eventType, handler);
 		},
 		
 		_getFieldColumns: function(chart)
