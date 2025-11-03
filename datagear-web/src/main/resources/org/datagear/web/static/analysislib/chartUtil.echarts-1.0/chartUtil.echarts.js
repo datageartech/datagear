@@ -626,6 +626,8 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"treemap":
 		{
+			//ECharts-6.0中默认的left/top/width/height没有起作用，需要这里明确设置
+			"left": "center", "top": "middle", "width": "80%", "height": "80%",
 			"itemStyle" :
 			{
 				"borderWidth": 0.5,
@@ -643,6 +645,8 @@ EU._buildEchartsTheme = function(chart)
 			},
 			"breadcrumb":
 			{
+				//ECharts-6.0中默认的top没有起作用，需要这里明确设置
+				"top": "bottom",
 				"itemStyle":
 				{
 					"color": chartTheme.backgroundColor,
