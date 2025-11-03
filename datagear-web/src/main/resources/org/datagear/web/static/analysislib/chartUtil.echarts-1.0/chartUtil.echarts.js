@@ -453,7 +453,7 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"parallel" : {
 			"left": "10%",
-            "top": "24%",
+            "top": "20%",
             "right": "10%",
             "bottom": "10%",
 			"lineStyle" : {
@@ -671,10 +671,10 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"graph" :
 		{
-			"left": "12%",
-            "right": "12%",
+			"left": "10%",
+            "right": "10%",
             "top": "20%",
-            "bottom": "12%",
+            "bottom": "10%",
 			"roam": true,
 			"itemStyle" : {
 				"borderWidth" : 0,
@@ -773,12 +773,11 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"themeRiver":
 		{
-			/*ECharts-5.3.2版本这里配置不起作用
+			/*ECharts-6.0版本这里定位配置不起作用*/
 			"left": "10%",
             "top": "20%",
             "right": "10%",
             "bottom": "10%",
-            */
 			"label":
 			{
 				"show": true 
@@ -943,10 +942,10 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"grid":
 		{
-			"left": "6%",
+			"left": "10%",
 			"right": "10%",
 			"top": "20%",
-			"bottom": "8%",
+			"bottom": "10%",
 			"containLabel": true
 		},
 		"legend" : {
