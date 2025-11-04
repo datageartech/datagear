@@ -3864,21 +3864,6 @@ chartProto.resultDataRowCell = function(rowObj, field)
 };
 
 /**
- * 获取数据集结果数据的值对象数组。
- * 
- * @param dataSetResult 数据集结果
- * @param valueField 值数据集字段对象、字段名、数组
- * @param row 可选，行索引，以0开始，默认为：0
- * @param count 可选，获取结果数据的最多行数，默认为全部
- * @returns [{value: ...}, ...]
- */
-chartProto.resultValueDatas = function(dataSetResult, valueField, row, count)
-{
-	var fieldMap ={ "value": valueField };
-	return this.resultMapDatas(dataSetResult, fieldMap, row, count);
-};
-
-/**
  * 获取/设置指定数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
  * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
  * 
