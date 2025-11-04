@@ -5557,12 +5557,12 @@ SPT.tableRenderer = function(plugin, config)
 						},
 						rowHover:
 						{
-							"background-color": chart.themeGradualColor(0.2)
+							"background-color": chart.themeGradualColor(0.1)
 						},
 						rowSelected:
 						{
-							"color": theme.highlightTheme.color,
-							"background-color": theme.highlightTheme.backgroundColor
+							"color": theme.color,
+							"background-color": chart.themeGradualColor(0.3)
 						},
 						cell: {},
 						cellOdd: {},
@@ -5570,7 +5570,8 @@ SPT.tableRenderer = function(plugin, config)
 						cellHover: {},
 						cellSelected:
 						{
-							"color": theme.highlightTheme.color
+							"color": theme.color,
+							"background-color": chart.themeGradualColor(0.3)
 						}
 					}
 				};
