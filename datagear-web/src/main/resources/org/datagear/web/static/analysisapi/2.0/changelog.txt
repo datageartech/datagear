@@ -25,9 +25,9 @@ chart.processUpdateOptions()	+
 chart.inflateOptions()			+
 chart.inflateRenderOptions()	x
 chart.inflateUpdateOptions()	x
-chart.registerEventHandlerDelegation()	x
+chart.registerEventHandlerDelegation()	-> chart.registerEventHandlerDelegate()
+chart.removeEventHandlerDelegation()	-> chart.removeEventHandlerDelegate()
 chart.callEventHandler()			x
-chart.removeEventHandlerDelegation()	x
 chart.echartsOffEventHandler()	x
 chart.echartsGetThemeName()	x
 chart.originalDataIndexes()		x
