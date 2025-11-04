@@ -5110,6 +5110,7 @@ SPT.tableRenderer = function(plugin, config)
 			var chartEle = jQuery(chart.element());
 			
 			this._stopCarousel(chart);
+			chart.internal().destroy(true);
 			chartEle.removeClass("dg-chart-table dg-hide-title dg-text-nowrap dg-chart-table-carousel");
 			chartEle.removeClass(chart.liveData(CF.builtinPropName("TableChartLocalStyleName")));
 			$(".dg-chart-ele-wrapper", chartEle).remove();

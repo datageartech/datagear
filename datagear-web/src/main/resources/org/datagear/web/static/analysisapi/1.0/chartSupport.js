@@ -6880,6 +6880,7 @@
 		var chartEle = chart.elementJquery();
 		
 		chartSupport.tableStopCarousel(chart);
+		chart.internal().destroy(true);
 		chartEle.removeClass("dg-chart-table dg-table-v1 dg-table-v2 dg-hide-title dg-text-nowrap dg-chart-table-carousel");
 		chartEle.removeClass(chart.extValue(chartFactory.builtinPropName("TableChartLocalStyleName")));
 		$(".dg-chart-table-title", chartEle).remove();
