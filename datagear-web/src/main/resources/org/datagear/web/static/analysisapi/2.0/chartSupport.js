@@ -4980,38 +4980,38 @@ SPT.tableRenderer = function(plugin, config)
 				enableWrapText: false,
 				
 				//DataTable配置项
-				"columns": columns,
-				"data" : [],
-				"ordering": false,
-				"scrollX": true,
-				"scrollY": undefined,
-				"autoWidth": true,
-		        "scrollCollapse": false,
-				"pagingType": "full_numbers",
-				"lengthMenu": [],
-				"pageLength": 50,
-				"select" : { style : "os" },
-				"searching" : false,
-				"language":
+				columns: columns,
+				data: [],
+				ordering: false,
+				scrollX: true,
+				scrollY: undefined,
+				autoWidth: true,
+		        scrollCollapse: false,
+				pagingType: "full_numbers",
+				lengthMenu: [],
+				pageLength: 50,
+				select : { style : "single", toggleable: false },
+				searching : false,
+				language:
 			    {
-					"emptyTable": "",
-					"zeroRecords": "",
-					"search": "搜索",
-					"lengthMenu": "每页_MENU_条",
-					"info": "共_TOTAL_条，当前_START_-_END_条",
-					"infoEmpty": "无数据",
-					"infoFiltered": "_TOTAL_条",
-					"loadingRecords": "加载中...",
-					"paginate":
+					emptyTable: "",
+					zeroRecords: "",
+					search: "搜索",
+					lengthMenu: "每页_MENU_条",
+					info: "共_TOTAL_条，当前_START_-_END_条",
+					infoEmpty: "无数据",
+					infoFiltered: "_TOTAL_条",
+					loadingRecords: "加载中...",
+					paginate:
 					{
-						"first": "首页",
-						"last": "尾页",
-						"next": "下一页",
-						"previous": "上一页"
+						first: "首页",
+						last: "尾页",
+						next: "下一页",
+						previous: "上一页"
 					},
-					"select":
+					select:
 					{
-						"rows": ""
+						rows: ""
 					}
 				}
 			};
