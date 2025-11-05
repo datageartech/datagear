@@ -670,7 +670,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 				for(let i=0; i<this.data.length; i++)
 				{
 					//需支持属性路径格式的name
-					val = DF.getPropertyPathValue(this.data[i], name);
+					val = CF.propertyPathValue(this.data[i], name);
 					
 					if(val !== undefined)
 						break;
@@ -679,7 +679,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 			else
 			{
 				//需支持属性路径格式的name
-				val = DF.getPropertyPathValue(this.data, name);
+				val = CF.propertyPathValue(this.data, name);
 			}
 			
 			return val;
@@ -2411,7 +2411,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 			if(name == null || name == "")
 				dataValue = sourceData;
 			else
-				dataValue = DF.getPropertyPathValue(sourceData, name);
+				dataValue = CF.propertyPathValue(sourceData, name);
 		}
 		
 		let indexes = dataMap[name];
@@ -2911,45 +2911,6 @@ DF.fetchOptsOfPostForm = function(formData)
 DF.msgOfResponse = function(response)
 {
 	return (response.statusText ? response.statusText : response.status+"");
-};
-
-/**
- * 获取对象的指定属性路径的值。
- * 
- * @param obj
- * @param propertyPath 属性路径，示例：order、order.product、[0].name、order['product'].name
- * @return 属性路径值，属性路径不存在则返回null
- */
-DF.getPropertyPathValue = function(obj, propertyPath)
-{
-	if(obj == null)
-		return null;
-	
-	var value = null;
-	
-	//简单属性值
-	value = obj[propertyPath];
-	
-	if(value !== undefined)
-		return value;
-	
-	//构建eval表达式
-	if(propertyPath.charAt(0) == '[')
-		propertyPath = "obj" + propertyPath;
-	else
-		propertyPath = "obj." + propertyPath;
-	
-	try
-	{
-		value = eval(propertyPath);
-	}
-	catch(e)
-	{
-		CF.logException(e);
-		value = null;
-	}
-	
-	return value;
 };
 
 /**

@@ -5200,6 +5200,64 @@ CF.executeSilently = function(func, exceptionHandler)
 	}
 };
 
+//属性路径函数缓存，元素结构：{ name: "", value: ... }
+CF.PROPERTY_PATH_FUNCTIONS = [];
+CF.PROPERTY_PATH_FUNCTIONS_SIZE = 100;
+
+/**
+ * 获取对象指定属性路径的值。
+ * 
+ * @param obj 对象、数组
+ * @param propertyPath 属性路径，示例：order、order.product、[0].name、order['product'].name
+ * @return 属性路径值，属性路径不存在则返回undefined
+ */
+CF.propertyPathValue = function(obj, propertyPath)
+{
+	if(obj == null)
+		return undefined;
+	
+	//构建eval表达式
+	if(propertyPath.charAt(0) == '[')
+		propertyPath = "obj" + propertyPath;
+	else
+		propertyPath = "obj." + propertyPath;
+	
+	var func = null;
+	
+	for(let i=(CF.PROPERTY_PATH_FUNCTIONS.length-1); i>=0; i--)
+	{
+		let fo = CF.PROPERTY_PATH_FUNCTIONS[i];
+		if(fo && fo.name === propertyPath)
+		{
+			func = fo.value;
+			break;
+		}
+	}
+	
+	var re = undefined;
+	
+	try
+	{
+		if(func == null)
+		{
+			while(CF.PROPERTY_PATH_FUNCTIONS.length > CF.PROPERTY_PATH_FUNCTIONS_SIZE)
+				CF.PROPERTY_PATH_FUNCTIONS.shift();
+			
+			func = Function("obj", "return ("+propertyPath+");");
+			CF.PROPERTY_PATH_FUNCTIONS.push({ name: propertyPath, value: func });
+		}
+		
+		re = func(obj);
+	}
+	catch(e)
+	{
+		CF.logException(e);
+		re = undefined;
+	}
+	
+	return re;
+};
+
 /**
  * 将指定名称转换为合法的CSS样式属性名
  * 例如："backgroundColor" 将被转换为 "background-color"
