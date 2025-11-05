@@ -5240,8 +5240,14 @@ CF.propertyPathValue = function(obj, propertyPath)
 	{
 		if(func == null)
 		{
-			while(CF.PROPERTY_PATH_FUNCTIONS.length > CF.PROPERTY_PATH_FUNCTIONS_SIZE)
-				CF.PROPERTY_PATH_FUNCTIONS.shift();
+			if(CF.PROPERTY_PATH_FUNCTIONS.length >= CF.PROPERTY_PATH_FUNCTIONS_SIZE)
+			{
+				let delCount = parseInt(CF.PROPERTY_PATH_FUNCTIONS_SIZE*2/10);
+				delCount = (delCount < 1 ? 1 : delCount);
+				
+				for(let i=0; i<delCount; i++)
+					CF.PROPERTY_PATH_FUNCTIONS.shift();
+			}
 			
 			func = Function("obj", "return ("+propertyPath+");");
 			CF.PROPERTY_PATH_FUNCTIONS.push({ name: propertyPath, value: func });
