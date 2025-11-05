@@ -4953,10 +4953,11 @@ SPT.tableRenderer = function(plugin, config)
 				title:
 				{
 					show: true,
-					text: chart.name()
+					text: chart.name(),
+					//样式，格式支持："color:red;background-color:blue;"、{ color:'red', 'background-color':'blue' }
+					style: undefined
 				},
-				//标题样式，格式为：{ color:'red', 'background-color':'blue' }
-				titleStyle: undefined,
+				
 				//表格样式，格式为：
 				//{
 				//	table: {...},
@@ -5027,26 +5028,18 @@ SPT.tableRenderer = function(plugin, config)
 			if(carousel.enable)
 				chartEle.addClass("dg-chart-table-carousel");
 			
-			if(!options.title.show)
-				chartEle.addClass("dg-hide-title");
-			
 			if(!options.disableWrapText)
 				chartEle.addClass("dg-text-nowrap");
 			
 			var eleWrapper = jQuery("<div class='dg-chart-ele-wrapper' />").appendTo(chartEle);
-			var chartTitle = jQuery("<div class='dg-chart-table-title' />").html(options.title.text).appendTo(eleWrapper);
+			var chartTitle = jQuery("<div class='dg-chart-table-title' />").appendTo(eleWrapper);
 			var chartContent = jQuery("<div class='dg-chart-table-content' />").appendTo(eleWrapper);
 			var table = jQuery("<table width='100%' class='"+(options.disableStripe ? "" : " stripe ")+(options.disableHover ? "" : " hover ")+"'></table>")
-							.appendTo(chartContent);
+							.attr("id", "table"+chart.id()).appendTo(chartContent);
 			
-			var tableId = "table" + chart.id();
-			table.attr("id", tableId);
-			
-			if(options.titleStyle)
-				chart.elementStyle(chartTitle[0], options.titleStyle);
+			this._renderTitleIfSet(chart, options, chartEle, chartTitle);
 			
 			table.dataTable(options);
-			
 			var dataTable = table.DataTable();
 			
 			if(carousel.enable && carousel.hideVerticalScrollbar != false)
@@ -5075,7 +5068,7 @@ SPT.tableRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-			var updateOptions = { data: [] };
+			var options = { data: [] };
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -5088,15 +5081,17 @@ SPT.tableRenderer = function(plugin, config)
 				{
 					var data = CF.extend({}, resultDatas[j]);
 					SPT.originalDataOfData(data, resultDatas[j]);
-					updateOptions.data.push(data);
+					options.data.push(data);
 				}
 			}
 			
 			this._stopCarousel(chart);
 			
-			updateOptions = chart.inflateOptions(updateOptions);
-			chart.processUpdateOptions(updateOptions);
-			this._updateInternalData(chart, chartResult, updateOptions);
+			options = chart.inflateOptions(options);
+			chart.processUpdateOptions(options);
+			
+			this._renderTitleIfSet(chart, options);
+			this._updateInternalData(chart, chartResult, options);
 		},
 		
 		resize: function(chart)
@@ -5126,9 +5121,29 @@ SPT.tableRenderer = function(plugin, config)
 			chart.internal().off(type, handler);
 		},
 		
-		_renderTitleIfSet: function(chart, options)
+		_renderTitleIfSet: function(chart, options, chartEle, titleEle)
 		{
+			var title = (options ? options.title : undefined);
 			
+			if(title == null)
+				return;
+			
+			chartEle = (chartEle == null ? jQuery(chart.element()) : jQuery(chartEle));
+			titleEle = (titleEle == null ? jQuery(".dg-chart-table-title", chartEle) : jQuery(titleEle));
+			
+			if(title.show !== undefined)
+			{
+				if(!title.show)
+					chartEle.addClass("dg-hide-title");
+				else
+					chartEle.removeClass("dg-hide-title");
+			}
+			
+			if(title.text !== undefined)
+				titleEle.html(title.text != null ? title.text : "");
+			
+			if(title.style !== undefined)
+				chart.elementStyle(titleEle[0], title.style);
 		},
 		
 		_getFieldColumns: function(chart)
