@@ -58,13 +58,13 @@
  *   //可选，调整图表尺寸函数
  *   resize: function(chart){ ... },
  *   //可选，绑定图表事件处理函数
- *   //eventType 事件类型，比如："click"、"mouseover"等
+ *   //type 事件类型，比如："click"、"mouseover"等
  *   //handler 图表事件处理函数，格式为：function(chartEvent){ ... }
- *   on: function(chart, eventType, handler){ ... },
+ *   on: function(chart, type, handler){ ... },
  *   //可选，解绑图表事件处理函数
- *   //eventType 事件类型
- *   //handler 图表事件处理函数引用
- *   off: function(chart, eventType, handler){ ... },
+ *   //type 事件类型
+ *   //handler 图表事件处理函数，如果为undefined，应解绑所有此事件类型的处理函数
+ *   off: function(chart, type, handler){ ... },
  *   //可选，销毁图表函数
  *   destroy: function(chart){ ... },
  *   //可选，渲染器附加数据
@@ -1597,7 +1597,7 @@ chartProto._bindEleEventHandlers = function()
 	var ehs = this._eleEventHandlers();
 	
 	for(var i=0; i<ehs.length; i++)
-		this.on(ehs[i].eventType, ehs[i].eventHandler);
+		this.on(ehs[i].type, ehs[i].handler);
 };
 
 /**
@@ -1615,20 +1615,23 @@ chartProto._eleEventHandlers = function()
 	
 	if(ele.hasAttributes())
 	{
-		var attrs = ele.attributes;
-		for(var i=0; i<attrs.length; i++)
+		let attrs = ele.attributes;
+		for(let i=0; i<attrs.length; i++)
 		{
-			var item = attrs.item(i);
-			var name = item.name;
-			var value = item.value;
+			let item = attrs.item(i);
+			let name = item.name;
+			let value = item.value;
 			
 			if(name && name.indexOf(prefix) == 0 && name.length > prefix.length)
 			{
-				var eventType = name.substr(prefix.length);
-				var eventHandler = CF.evalSilently(value);
+				let type = name.substr(prefix.length);
+				let handler = CF.evalSilently(value);
 				
-				if(eventHandler)
-					ehs.push({ eventType: eventType, eventHandler: eventHandler });
+				if(handler)
+				{
+					let eh = { type: type, handler: handler };
+					ehs.push(eh);
+				}
 			}
 		}
 	}
@@ -1768,10 +1771,10 @@ chartProto.status = function(status)
  * 图表渲染器实现相关：
  * 图表渲染器应实现on函数，以支持此特性。
  * 
- * @param eventType 事件类型，比如："click"、"mouseover"、{ ... }，具体支持格式由插件实现
+ * @param type 事件类型，比如："click"、"mouseover"、{ ... }，具体支持格式由插件实现
  * @param handler 事件处理函数，格式为：function(...){ ... }，具体参数格式由插件实现
  */
-chartProto.on = function(eventType, handler)
+chartProto.on = function(type, handler)
 {
 	this._assertActive();
 	
@@ -1780,11 +1783,11 @@ chartProto.on = function(eventType, handler)
 	
 	if(renderer && renderer.on)
 	{
-		renderer.on(this, eventType, handler);
+		renderer.on(this, type, handler);
 	}
 	else if(pluginRenderer && pluginRenderer.on)
 	{
-		pluginRenderer.on(this, eventType, handler);
+		pluginRenderer.on(this, type, handler);
 	}
 	else
 		throw new Error("chart renderer.on required");
@@ -1797,10 +1800,10 @@ chartProto.on = function(eventType, handler)
  * 图表渲染器实现相关：
  * 图表渲染器应实现off函数，以支持此特性。
  * 
- * @param eventType 事件类型，格式同chart.on()函数eventType参数
+ * @param type 事件类型，格式同chart.on()函数type参数
  * @param handler 解绑的事件处理函数，如果不指定，则是解绑此事件类型的所有处理函数
  */
-chartProto.off = function(eventType, handler)
+chartProto.off = function(type, handler)
 {
 	this._assertAlive();
 	
@@ -1809,11 +1812,11 @@ chartProto.off = function(eventType, handler)
 	
 	if(renderer && renderer.off)
 	{
-		renderer.off(this, eventType, handler);
+		renderer.off(this, type, handler);
 	}
 	else if(pluginRenderer && pluginRenderer.off)
 	{
-		pluginRenderer.off(this, eventType, handler);
+		pluginRenderer.off(this, type, handler);
 	}
 	else
 		throw new Error("chart renderer.off required");
@@ -1823,59 +1826,59 @@ var EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "EventHand
 
 /**
  * 注册图表事件处理函数代理。
- * 图表渲染器on函数的实现逻辑通常是：先构建适配底层组件的图表事件处理函数代理（handlerDelegate），
- * 在代理中构建图表事件对象，然后调用图表事件处理函数（eventHanlder）。
+ * 图表渲染器on函数的实现逻辑通常是：先构建适配底层组件的图表事件处理函数代理（delegate），
+ * 在代理中构建图表事件对象，然后调用handler图表事件处理函数。
  * 此函数用于注册这些信息，使得在实现图表渲染器的off函数时，可以获取对应底层组件的图表事件处理函数代理，进而实现底层组件的解绑逻辑。
  * 
- * @param eventType 图表事件类型
- * @param eventHanlder 图表事件处理函数，格式为：function(...){ ... }
- * @param handlerDelegate 图表事件处理函数代理，通常是图表底层组件事件处理函数
- * @returns 已注册的图表事件处理函数代理信息对象，格式为：{ eventType: "...", eventHanlder: ..., handlerDelegate: ... }
+ * @param type 图表事件类型
+ * @param handler 图表事件处理函数，格式为：function(...){ ... }
+ * @param delegate 图表事件处理函数代理，通常是图表底层组件事件处理函数
+ * @returns 已注册的图表事件处理函数代理信息对象，格式为：{ type: "...", handler: ..., delegate: ... }
  */
-chartProto.registerEventHandlerDelegate = function(eventType, eventHanlder, handlerDelegate)
+chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 {
-	var delegates = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
+	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
 	
-	if(delegates == null)
+	if(delegateObjs == null)
 	{
-		delegates = [];
-		this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME, delegates);
+		delegateObjs = [];
+		this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME, delegateObjs);
 	}
 	
-	var delegate = { eventType: eventType, eventHanlder: eventHanlder, handlerDelegate: handlerDelegate };
-	delegates.push(delegate);
+	var delegateObj = { type: type, handler: handler, delegate: delegate };
+	delegateObjs.push(delegateObj);
 	
-	return delegate;
+	return delegateObj;
 };
 
 /**
  * 删除图表事件处理函数代理，并返回已删除的代理信息对象数组。
  * 图表渲染器off函数的实现逻辑通常是：使用此函数移除由chart.registerEventHandlerDelegate()函数注册的图表事件处理函数代理信息对象，
- * 然后调用底层组件的事件解绑函数，解绑代理信息对象的handlerDelegate。
+ * 然后调用底层组件的事件解绑函数，解绑代理信息对象的delegate。
  * 
- * @param eventType 图表事件类型
- * @param eventHanlder 可选，图表事件处理函数，格式为：function(...){ ... }，当为undefined时，表示全部
+ * @param type 图表事件类型
+ * @param handler 可选，图表事件处理函数，格式为：function(...){ ... }，当为undefined时，表示全部
  * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）的代理信息对象数组，格式为：
- *						[ { eventType: "...", eventHanlder: ..., handlerDelegate: ... }, ... ]
+ *						[ { type: "...", handler: ..., delegate: ... }, ... ]
  */
-chartProto.removeEventHandlerDelegate = function(eventType, eventHanlder)
+chartProto.removeEventHandlerDelegate = function(type, handler)
 {
 	var re = [];
 	
-	var delegates = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
+	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
 	
-	if(delegates == null)
+	if(delegateObjs == null)
 		return re;
 	
-	for(let i=0; i<delegates.length;)
+	for(let i=0; i<delegateObjs.length;)
 	{
-		let delegate = delegates[i];
+		let delegateObj = delegateObjs[i];
 		
-		if(delegate.eventType == eventType
-				&& (eventHanlder === undefined || delegate.eventHanlder == eventHanlder))
+		if(delegateObj.type == type
+				&& (handler === undefined || delegateObj.handler == handler))
 		{
-			re.push(delegate);
-			delegates.splice(i, 1);
+			re.push(delegateObj);
+			delegateObjs.splice(i, 1);
 		}
 		else
 		{
@@ -4787,30 +4790,30 @@ CF.eleStyle = function(ele, css)
  * 为HTML元素绑定事件处理函数。
  * 
  * @param ele
- * @param eventType
+ * @param type
  * @param handler
  */
-CF.eleOn = function(ele, eventType, handler)
+CF.eleOn = function(ele, type, handler)
 {
 	if(ele == null)
 		return;
 	
-	ele.addEventListener(eventType, handler);
+	ele.addEventListener(type, handler);
 };
 
 /**
  * 为HTML元素绑定事件处理函数。
  * 
  * @param ele
- * @param eventType
+ * @param type
  * @param handler
  */
-CF.eleOff = function(ele, eventType, handler)
+CF.eleOff = function(ele, type, handler)
 {
 	if(ele == null)
 		return;
 	
-	ele.removeEventListener(eventType, handler);
+	ele.removeEventListener(type, handler);
 };
 
 /**

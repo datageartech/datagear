@@ -52,7 +52,7 @@
  *   //其中：
  *   //索引数值，表示图表事件处理函数对应索引数值的参数是联动源数据
  *   //图表事件处理函数，表示此函数的返回值是图表联动源数据，返回值格式应为：{ ... }、[ {...}, ... ]
- *   linkDataHander: 索引数值、function(eventType){ return 索引数值、图表事件处理函数; }
+ *   linkDataHander: 索引数值、function(type){ return 索引数值、图表事件处理函数; }
  * }
  * 
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboard._renderForms()函数说明。
@@ -466,7 +466,7 @@ chartProto._initUpdateGroup = function()
  * 获取/设置初始图表联动设置对象数组。
  * 联动设置对象格式为：
  * {
- *   //可选，联动触发事件类型、事件类型数组，格式参考chart.on()函数的eventType参数，
+ *   //可选，联动触发事件类型、事件类型数组，格式参考chart.on()函数的type参数，
  *   //默认值参考DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE说明
  *   trigger: ...、[ ... ],
  *   
@@ -545,7 +545,7 @@ chartProto.updateGroup = function(group)
  * 图表渲染器应实现on()函数、linkDataHander（可选），以支持此特性。
  * 
  * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
- * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: ..., eventHandler: function(...){ ... } }, ... ]
+ * @return 绑定的事件处理函数对象数组，格式为：[ { type: ..., handler: function(...){ ... } }, ... ]
  */
 chartProto.bindLinkEventHanders = function(links)
 {
@@ -572,24 +572,24 @@ chartProto.bindLinkEventHanders = function(links)
 	
 	for(let i=0; i<triggers.length; i++)
 	{
-		let eventType = triggers[i];
+		let type = triggers[i];
 		//默认
 		let dataHandler = 0;
 		
 		if(renderer != null && renderer.linkDataHander != null)
 		{
 			dataHandler = (CF.isFunction(renderer.linkDataHander) ?
-							renderer.linkDataHander(eventType) : renderer.linkDataHander);
+							renderer.linkDataHander(type) : renderer.linkDataHander);
 		}
 		
-		let eventHandler = function()
+		let handler = function()
 		{
 			let linkSrcData = (CF.isFunction(dataHandler) ? dataHandler.apply(this, arguments) : arguments[dataHandler]);
-			thisChart._handleChartEventLink(eventType, linkSrcData, links);
+			thisChart._handleChartEventLink(type, linkSrcData, links);
 		};
 		
-		this.on(eventType, eventHandler);
-		ehs.push({ eventType: eventType, eventHandler: eventHandler });
+		this.on(type, handler);
+		ehs.push({ type: type, handler: handler });
 	}
 	
 	return ehs;
@@ -636,11 +636,11 @@ chartProto._resolveLinkTriggers = function(link)
  * 处理指定图表事件的图表联动操作。
  * 此方法根据图表联动设置对象，将图表联动源数据传递至目标图表数据集参数值，然后请求刷新图表数据。
  * 
- * @param eventType 事件类型
+ * @param type 事件类型
  * @param linkSrcData 联动数据
  * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
  */
-chartProto._handleChartEventLink = function(eventType, linkSrcData, links)
+chartProto._handleChartEventLink = function(type, linkSrcData, links)
 {
 	this._assertActive();
 	
@@ -690,7 +690,7 @@ chartProto._handleChartEventLink = function(eventType, linkSrcData, links)
 	{
 		let link = links[i];
 		
-		if(!this._isLinkByEventType(link, eventType))
+		if(!this._isLinkByEventType(link, type))
 			continue;
 		
 		let myTargetCharts = dashboard._batchSetDataSetParamValues(batchSource, link, linkSrcData);
@@ -711,10 +711,10 @@ chartProto._handleChartEventLink = function(eventType, linkSrcData, links)
 	}
 };
 
-chartProto._isLinkByEventType = function(link, eventType)
+chartProto._isLinkByEventType = function(link, type)
 {
 	var triggers = this._resolveLinkTriggers(link);
-	return (CF.indexInArray(triggers, eventType) >= 0);
+	return (CF.indexInArray(triggers, type) >= 0);
 };
 
 /**

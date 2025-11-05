@@ -5116,14 +5116,14 @@ SPT.tableRenderer = function(plugin, config)
 			$(".dg-chart-ele-wrapper", chartEle).remove();
 		},
 		
-		on: function(chart, eventType, handler)
+		on: function(chart, type, handler)
 		{
-			chart.internal().on(eventType, handler);
+			chart.internal().on(type, handler);
 		},
 		
-		off: function(chart, eventType, handler)
+		off: function(chart, type, handler)
 		{
-			chart.internal().off(eventType, handler);
+			chart.internal().off(type, handler);
 		},
 		
 		_getFieldColumns: function(chart)
@@ -6288,26 +6288,26 @@ SPT.labelDestroy = function(chart)
 	$(".dg-chart-label-item", chart.internal()).remove();
 };
 
-SPT.labelOn = function(chart, eventType, handler)
+SPT.labelOn = function(chart, type, handler)
 {
 	var handlerDelegation = function(htmlEvent)
 	{
 		var $label = $(this);
-		var chartEvent = SPT.chartEventForHtml(chart, eventType, htmlEvent);
+		var chartEvent = SPT.chartEventForHtml(chart, type, htmlEvent);
 		SPT.labelSetChartEventData(chart, chartEvent, htmlEvent, $label);
 		
 		chart.callEventHandler(handler, chartEvent);
 	};
 	
-	chart.registerEventHandlerDelegation(eventType, handler, handlerDelegation);
-	$(chart.internal()).on(eventType, ".dg-chart-label-item", handlerDelegation);
+	chart.registerEventHandlerDelegation(type, handler, handlerDelegation);
+	$(chart.internal()).on(type, ".dg-chart-label-item", handlerDelegation);
 };
 
-SPT.labelOff = function(chart, eventType, handler)
+SPT.labelOff = function(chart, type, handler)
 {
 	var internal = $(chart.internal());
 	
-	chart.removeEventHandlerDelegation(eventType, handler, function(et, eh, ehd)
+	chart.removeEventHandlerDelegation(type, handler, function(et, eh, ehd)
 	{
 		internal.off(et, ".dg-chart-label-item", ehd);
 	});
@@ -6508,26 +6508,26 @@ SPT.selectDestroy = function(chart)
 	$(chart.internal()).remove();
 };
 
-SPT.selectOn = function(chart, eventType, handler)
+SPT.selectOn = function(chart, type, handler)
 {
 	var handlerDelegation = function(htmlEvent)
 	{
 		var $select = $(this);
-		var chartEvent = SPT.chartEventForHtml(chart, eventType, htmlEvent);
+		var chartEvent = SPT.chartEventForHtml(chart, type, htmlEvent);
 		SPT.selectSetChartEventData(chart, chartEvent, htmlEvent, $select);
 		
 		chart.callEventHandler(handler, chartEvent);
 	};
 	
-	chart.registerEventHandlerDelegation(eventType, handler, handlerDelegation);
-	$(chart.internal()).on(eventType, handlerDelegation);
+	chart.registerEventHandlerDelegation(type, handler, handlerDelegation);
+	$(chart.internal()).on(type, handlerDelegation);
 };
 
-SPT.selectOff = function(chart, eventType, handler)
+SPT.selectOff = function(chart, type, handler)
 {
 	var internal = $(chart.internal());
 	
-	chart.removeEventHandlerDelegation(eventType, handler, function(et, eh, ehd)
+	chart.removeEventHandlerDelegation(type, handler, function(et, eh, ehd)
 	{
 		internal.off(et, ehd);
 	});
@@ -6652,8 +6652,8 @@ SPT.rawDataDestroy = function(chart)
 SPT.rawDataAdditions = { supportIgnoreFetch: true };
 
 SPT.rawDataResize = function(chart){};
-SPT.rawDataOn = function(chart, eventType, handler){};
-SPT.rawDataOff = function(chart, eventType, handler){};
+SPT.rawDataOn = function(chart, type, handler){};
+SPT.rawDataOff = function(chart, type, handler){};
 
 //自定义
 
@@ -6737,22 +6737,22 @@ SPT.customDestroy = function(chart)
 	}
 };
 
-SPT.customOn = function(chart, eventType, handler)
+SPT.customOn = function(chart, type, handler)
 {
 	var customRenderer = SPT.customGetCustomRenderer(chart);
 	
 	if(customRenderer.on)
-		customRenderer.on(chart, eventType, handler);
+		customRenderer.on(chart, type, handler);
 	else
 		throw new Error("chart renderer 's [on] rqeuired");
 };
 
-SPT.customOff = function(chart, eventType, handler)
+SPT.customOff = function(chart, type, handler)
 {
 	var customRenderer = SPT.customGetCustomRenderer(chart);
 	
 	if(customRenderer.off)
-		customRenderer.off(chart, eventType, handler);
+		customRenderer.off(chart, type, handler);
 	else
 		throw new Error("chart renderer 's [off] rqeuired");
 };
@@ -7280,17 +7280,17 @@ SPT.resizeChartEcharts = function(chart)
 		internal.resize();
 };
 
-SPT.bindChartEventHandlerForEcharts = function(chart, eventType, eventHanlder, chartEventDataSetter)
+SPT.bindChartEventHandlerForEcharts = function(chart, type, handler, chartEventDataSetter)
 {
-	var hanlderDelegation = function(params)
+	var handlerDelegation = function(params)
 	{
-		var chartEvent = chart.eventNew(eventType, params);
+		var chartEvent = chart.eventNew(type, params);
 		chartEventDataSetter(chart, chartEvent, params);
-		chart.callEventHandler(eventHanlder, chartEvent);
+		chart.callEventHandler(handler, chartEvent);
 	};
 	
-	chart.registerEventHandlerDelegation(eventType, eventHanlder, hanlderDelegation);
-	chart.internal().on(eventType, "series", hanlderDelegation);
+	chart.registerEventHandlerDelegation(type, handler, handlerDelegation);
+	chart.internal().on(type, "series", handlerDelegation);
 };
 
 //计算图例名
@@ -8262,14 +8262,14 @@ SPT.inflateEChartsRendererCommonFuncs = function(renderer)
 		chartUtil.echarts.resize(chart);
 	},
 	
-	renderer.on = function(chart, eventType, handler)
+	renderer.on = function(chart, type, handler)
 	{
-		chartUtil.echarts.on(chart, eventType, handler);
+		chartUtil.echarts.on(chart, type, handler);
 	},
 	
-	renderer.off = function(chart, eventType, handler)
+	renderer.off = function(chart, type, handler)
 	{
-		chartUtil.echarts.off(chart, eventType, handler);
+		chartUtil.echarts.off(chart, type, handler);
 	};
 	
 	return renderer;		
