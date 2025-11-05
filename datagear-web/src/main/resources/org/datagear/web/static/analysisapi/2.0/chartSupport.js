@@ -4976,8 +4976,8 @@ SPT.tableRenderer = function(plugin, config)
 				disableStripe: false,
 				//是否禁用悬浮样式效果
 				disableHover: false,
-				//是否表格文本不换行
-				enableWrapText: false,
+				//是否禁用文本不换行
+				disableWrapText: false,
 				
 				//DataTable配置项
 				columns: columns,
@@ -5030,7 +5030,7 @@ SPT.tableRenderer = function(plugin, config)
 			if(!options.title.show)
 				chartEle.addClass("dg-hide-title");
 			
-			if(options.enableWrapText)
+			if(!options.disableWrapText)
 				chartEle.addClass("dg-text-nowrap");
 			
 			var eleWrapper = jQuery("<div class='dg-chart-ele-wrapper' />").appendTo(chartEle);
@@ -5124,6 +5124,11 @@ SPT.tableRenderer = function(plugin, config)
 		off: function(chart, type, handler)
 		{
 			chart.internal().off(type, handler);
+		},
+		
+		_renderTitleIfSet: function(chart, options)
+		{
+			
 		},
 		
 		_getFieldColumns: function(chart)
