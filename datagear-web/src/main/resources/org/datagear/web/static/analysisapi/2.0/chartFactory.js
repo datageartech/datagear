@@ -1856,7 +1856,7 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
  * 图表渲染器off函数的实现逻辑通常是：使用此函数移除由chart.registerEventHandlerDelegate()函数注册的图表事件处理函数代理信息对象，
  * 然后调用底层组件的事件解绑函数，解绑代理信息对象的delegate。
  * 
- * @param type 图表事件类型
+ * @param type 可选，图表事件类型，当为undefined时，表示全部类型
  * @param handler 可选，图表事件处理函数，格式为：function(...){ ... }，当为undefined时，表示全部
  * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）的代理信息对象数组，格式为：
  *						[ { type: "...", handler: ..., delegate: ... }, ... ]
@@ -1874,7 +1874,7 @@ chartProto.removeEventHandlerDelegate = function(type, handler)
 	{
 		let delegateObj = delegateObjs[i];
 		
-		if(delegateObj.type == type
+		if((type === undefined || delegateObj.type == type)
 				&& (handler === undefined || delegateObj.handler == handler))
 		{
 			re.push(delegateObj);

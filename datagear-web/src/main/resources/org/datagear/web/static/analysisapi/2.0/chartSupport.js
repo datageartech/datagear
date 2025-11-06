@@ -6120,9 +6120,6 @@ SPT.labelRenderer = function(plugin, config)
 	{
 		render: function(chart)
 		{
-			var chartEle = chart.element();
-			CF.eleAddClass(chartEle, "dg-chart-label");
-			
 			var options =
 			{
 				//标签条目、标签名、标签值是否都行内显示
@@ -6157,11 +6154,16 @@ SPT.labelRenderer = function(plugin, config)
 				data: []
 			};
 			
+			var chartEle = chart.element();
+			CF.eleAddClass(chartEle, "dg-chart-label");
+			var eleWrapper = CF.eleCreate("div", "dg-chart-ele-wrapper");
+			CF.eleAppend(chartEle, eleWrapper);
+			chart.internal(eleWrapper);
+			
 			chart.inflateOptions(options);
 			chart.processRenderOptions(options);
-			chart.internal(chartEle);
 			
-			this._drawByOptions(chart, chartEle, options);
+			this._drawByOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -6210,70 +6212,65 @@ SPT.labelRenderer = function(plugin, config)
 			options = chart.inflateOptions(options);
 			chart.processUpdateOptions(options);
 			
-			this._drawByOptions(chart, chart.element(), options);
+			this._drawByOptions(chart, options);
 		},
 		
 		destroy: function(chart)
 		{
 			var chartEle = chart.element();
-			CF.eleAddClass(chartEle, "dg-chart-label dg-chart-label-inline dg-chart-label-hide-name dg-chart-label-flex "
-									+"dg-chart-label-flex-around dg-chart-label-flex-start dg-chart-label-flex-end "
-									+"dg-chart-label-flex-center dg-chart-label-flex-between");
-									
-			var itemEles = CF.elesOfSelector(".dg-chart-label-item", chartEle);
-			itemEles.forEach((itemEle) =>
-			{
-				CF.eleRemove(itemEle);
-			});
+			var eleWrapper = CF.eleOfSelector(".dg-chart-ele-wrapper", chartEle);
+			CF.eleRemove(eleWrapper);
 		},
 		
 		on: function(chart, type, handler)
 		{
-			chart.internal().on(type, handler);
+			chart.internal().addEventListener(type, handler);
 		},
 		
 		off: function(chart, type, handler)
 		{
-			chart.internal().off(type, handler);
+			chart.internal().removeEventListener(type, handler);
 		},
 		
-		_drawByOptions: function(chart, chartEle, options)
+		_drawByOptions: function(chart, options)
 		{
+			var internal = chart.internal();
+			
 			if(options.inline !== undefined)
 			{
 				if(options.inline == true)
-					CF.eleAddClass(chartEle, "dg-chart-label-inline");
+					CF.eleAddClass(internal, "dg-chart-label-inline");
 				else
-					CF.eleRemoveClass(chartEle, "dg-chart-label-inline");
+					CF.eleRemoveClass(internal, "dg-chart-label-inline");
 			}
 			
 			if(options.hideName !== undefined)
 			{
 				if(options.hideName == true)
-					CF.eleAddClass(chartEle, "dg-chart-label-hide-name");
+					CF.eleAddClass(internal, "dg-chart-label-hide-name");
 				else
-					CF.eleRemoveClass(chartEle, "dg-chart-label-hide-name");
+					CF.eleRemoveClass(internal, "dg-chart-label-hide-name");
 			}
 			
 			if(options.flex !== undefined)
 			{
 				if(options.flex == true)
-					CF.eleAddClass(chartEle, "dg-chart-label-flex dg-chart-label-flex-around");
+					CF.eleAddClass(internal, "dg-chart-label-flex dg-chart-label-flex-around");
 				else if(options.flex == "start")
-					CF.eleAddClass(chartEle, "dg-chart-label-flex dg-chart-label-flex-start");
+					CF.eleAddClass(internal, "dg-chart-label-flex dg-chart-label-flex-start");
 				else if(options.flex == "end")
-					CF.eleAddClass(chartEle, "dg-chart-label-flex dg-chart-label-flex-end");
+					CF.eleAddClass(internal, "dg-chart-label-flex dg-chart-label-flex-end");
 				else if(options.flex == "center")
-					CF.eleAddClass(chartEle, "dg-chart-label-flex dg-chart-label-flex-center");
+					CF.eleAddClass(internal, "dg-chart-label-flex dg-chart-label-flex-center");
 				else if(options.flex == "between")
-					CF.eleAddClass(chartEle, "dg-chart-label-flex dg-chart-label-flex-between");
+					CF.eleAddClass(internal, "dg-chart-label-flex dg-chart-label-flex-between");
 				else
-					CF.eleRemoveClass(chartEle, "dg-chart-label-flex dg-chart-label-flex-around dg-chart-label-flex-start"
+					CF.eleRemoveClass(internal, "dg-chart-label-flex dg-chart-label-flex-around dg-chart-label-flex-start"
 						+" dg-chart-label-flex-end dg-chart-label-flex-center dg-chart-label-flex-between");
 			}
 			
 			var data = (options.data || []);
-			var itemEles = CF.elesOfSelector(".dg-chart-label-item", chartEle);
+			var itemEles = CF.elesOfSelector(".dg-chart-label-item", internal);
 			var length = Math.max(data.length, itemEles.length);
 			var valueFirst = options.valueFirst;
 			
@@ -6294,7 +6291,7 @@ SPT.labelRenderer = function(plugin, config)
 				if(itemEle == null)
 				{
 					itemEle = CF.eleCreate("div", "dg-chart-label-item");
-					CF.eleAppend(chartEle, itemEle);
+					CF.eleAppend(internal, itemEle);
 					CF.eleAppend(itemEle, CF.eleCreate("div", "dg-label-item-child1"));
 					CF.eleAppend(itemEle, CF.eleCreate("div", "dg-label-item-child2"));
 				}

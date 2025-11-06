@@ -183,37 +183,47 @@
 .dg-chart-label{
 	box-sizing: border-box;
 }
-.dg-chart-label.dg-chart-label-hide-name .dg-chart-label-name,
-.dg-chart-label .dg-chart-label-hide-name .dg-chart-label-name{
-	display: none !important;/*防止被dg-chart-label-inline样式覆盖*/
+.dg-chart-label .dg-chart-ele-wrapper{
+	position: absolute;
+	left: 1px;
+	top: 1px;
+	right: 1px;
+	bottom: 1px;
+	overflow: auto;
 }
-.dg-chart-label .dg-chart-label-item .dg-chart-label-name,
-.dg-chart-label .dg-chart-label-item .dg-chart-label-value{
+.dg-chart-label .dg-chart-label-hide-name .dg-chart-label-name{
+	display: none !important; /*防止被dg-chart-label-inline样式覆盖*/
+}
+.dg-chart-label .dg-chart-label-name{
 	text-align: center;
 }
-.dg-chart-label.dg-chart-label-inline .dg-chart-label-item,
-.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .dg-chart-label-name,
-.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .dg-chart-label-value{
+.dg-chart-label .dg-chart-label-value{
+	font-weight: bold;
+	text-align: center;
+}
+.dg-chart-label .dg-chart-label-inline .dg-chart-label-item,
+.dg-chart-label .dg-chart-label-inline .dg-chart-label-name,
+.dg-chart-label .dg-chart-label-inline .dg-chart-label-value{
 	display: inline-block;
 }
-.dg-chart-label.dg-chart-label-flex{
+.dg-chart-label .dg-chart-label-flex{
 	display: flex;
     flex-wrap: wrap;
     align-items: center;
 }
-.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-around{
+.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-around{
     justify-content: space-around;
 }
-.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-start{
+.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-start{
     justify-content: flex-start;
 }
-.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-end{
+.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-end{
     justify-content: flex-end;
 }
-.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-center{
+.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-center{
     justify-content: center;
 }
-.dg-chart-label.dg-chart-label-flex.dg-chart-label-flex-between{
+.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-between{
     justify-content: space-between;
 }
 
