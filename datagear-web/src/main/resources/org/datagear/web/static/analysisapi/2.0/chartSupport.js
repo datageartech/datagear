@@ -6213,6 +6213,30 @@ SPT.labelRenderer = function(plugin, config)
 			this._drawByOptions(chart, chart.element(), options);
 		},
 		
+		destroy: function(chart)
+		{
+			var chartEle = chart.element();
+			CF.eleAddClass(chartEle, "dg-chart-label dg-chart-label-inline dg-chart-label-hide-name dg-chart-label-flex "
+									+"dg-chart-label-flex-around dg-chart-label-flex-start dg-chart-label-flex-end "
+									+"dg-chart-label-flex-center dg-chart-label-flex-between");
+									
+			var itemEles = CF.elesOfSelector(".dg-chart-label-item", chartEle);
+			itemEles.forEach((itemEle) =>
+			{
+				CF.eleRemove(itemEle);
+			});
+		},
+		
+		on: function(chart, type, handler)
+		{
+			chart.internal().on(type, handler);
+		},
+		
+		off: function(chart, type, handler)
+		{
+			chart.internal().off(type, handler);
+		},
+		
 		_drawByOptions: function(chart, chartEle, options)
 		{
 			if(options.inline !== undefined)
@@ -6304,30 +6328,6 @@ SPT.labelRenderer = function(plugin, config)
 				let valueStyle = SPT.evalLocalPlainObj(di.valueStyle, options.valueStyle);
 				chart.elementStyle(valueEle, valueStyle);
 			}
-		},
-		
-		destroy: function(chart)
-		{
-			var chartEle = chart.element();
-			CF.eleAddClass(chartEle, "dg-chart-label dg-chart-label-inline dg-chart-label-hide-name dg-chart-label-flex "
-									+"dg-chart-label-flex-around dg-chart-label-flex-start dg-chart-label-flex-end "
-									+"dg-chart-label-flex-center dg-chart-label-flex-between");
-									
-			var itemEles = CF.elesOfSelector(".dg-chart-label-item", chartEle);
-			itemEles.forEach((itemEle) =>
-			{
-				CF.eleRemove(itemEle);
-			});
-		},
-		
-		on: function(chart, type, handler)
-		{
-			chart.internal().on(type, handler);
-		},
-		
-		off: function(chart, type, handler)
-		{
-			chart.internal().off(type, handler);
 		}
 	};
 	
