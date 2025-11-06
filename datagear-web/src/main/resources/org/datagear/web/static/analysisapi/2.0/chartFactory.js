@@ -810,7 +810,7 @@ chartProto.renderContext = function(renderContext)
  * 图表初始化时会使用图表元素的"dg-chart-options"属性值执行设置操作。
  * 
  * 图表渲染器实现相关：
- * 图表渲染器应使用此函数获取并应用图表选项，另参考chart.inflateRenderOptions()、chart.inflateUpdateOptions()。
+ * 图表渲染器应使用此函数获取并应用图表选项，另参考chart.inflateOptions()。
  * 
  * @param options 可选，要设置的图表选项，没有则执行获取操作
  * @returns 要获取的图表选项，格式为：{ ... }，不会为null

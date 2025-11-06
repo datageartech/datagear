@@ -183,20 +183,17 @@
 .dg-chart-label{
 	box-sizing: border-box;
 }
-.dg-chart-label.dg-hide-name .label-name,
-.dg-chart-label .dg-hide-name .label-name{
+.dg-chart-label.dg-chart-label-hide-name .dg-chart-label-name,
+.dg-chart-label .dg-chart-label-hide-name .dg-chart-label-name{
 	display: none !important;/*防止被dg-chart-label-inline样式覆盖*/
 }
-.dg-chart-label .dg-chart-label-item .label-name{
+.dg-chart-label .dg-chart-label-item .dg-chart-label-name,
+.dg-chart-label .dg-chart-label-item .dg-chart-label-value{
 	text-align: center;
-}
-.dg-chart-label .dg-chart-label-item .label-value{
-	text-align: center;
-	font-weight: bold;
 }
 .dg-chart-label.dg-chart-label-inline .dg-chart-label-item,
-.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .label-name,
-.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .label-value{
+.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .dg-chart-label-name,
+.dg-chart-label.dg-chart-label-inline .dg-chart-label-item .dg-chart-label-value{
 	display: inline-block;
 }
 .dg-chart-label.dg-chart-label-flex{
