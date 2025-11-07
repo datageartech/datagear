@@ -2973,7 +2973,7 @@
 	 */
 	chartBase.elementStyle = function(element, css)
 	{
-		return chartFactory.elementStyle(element, css);
+		return chartFactory.elementStyle.apply(chartFactory, arguments);
 	};
 	
 	/**
@@ -2982,19 +2982,7 @@
 	 */
 	chartBase.styleString = function(css)
 	{
-		var cssArray = [];
-		
-		for(var i=0; i<arguments.length; i++)
-		{
-			var cssi = arguments[i];
-			
-			if(!cssi)
-				continue;
-			
-			cssArray = cssArray.concat(cssi);
-		}
-		
-		return chartFactory.styleString(cssArray);
+		return chartFactory.styleString.apply(chartFactory, arguments);
 	};
 	
 	/**

@@ -2541,7 +2541,7 @@ chartProto.themeStyleSheet = function(name, css, force)
  */
 chartProto.elementStyle = function(element, css)
 {
-	return CF.eleStyle(element, css);
+	return CF.eleStyle.apply(CF, arguments);
 };
 
 /**
