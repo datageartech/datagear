@@ -184,12 +184,11 @@
 	box-sizing: border-box;
 }
 .dg-chart-label .dg-chart-container{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
+	/*不采用绝对定位可以适应父元素未设尺寸的场景*/
+	width: 100%;
+	height: 100%;
 	overflow: auto;
+	box-sizing: border-box;
 }
 .dg-chart-label .dg-chart-label-hide-name .dg-chart-label-name{
 	display: none !important; /*防止被dg-chart-label-item-inline样式覆盖*/

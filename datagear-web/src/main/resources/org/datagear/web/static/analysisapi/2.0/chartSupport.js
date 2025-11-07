@@ -6251,7 +6251,7 @@ SPT.labelRenderer = function(plugin, config)
 		_drawDataOptions: function(chart, options)
 		{
 			var internal = chart.internal();
-			var bindDataName = this._lableItemBindDataName();
+			var bindDataName = this._itemBindDataName();
 			
 			var data = (options.data || []);
 			var itemEles = CF.elesOfSelector(".dg-chart-label-item", internal);
@@ -6268,7 +6268,6 @@ SPT.labelRenderer = function(plugin, config)
 				
 				if(di == null)
 				{
-					CF.eleRemoveData(itemEle);
 					CF.eleRemove(itemEle);
 					continue;
 				}
@@ -6294,10 +6293,10 @@ SPT.labelRenderer = function(plugin, config)
 			}
 		},
 		
-		_lableItemBindDataName: function()
+		_itemBindDataName: function()
 		{
-			return (this._lableItemBindDataName != null ? this._lableItemBindDataName
-							: (this._lableItemBindDataName = CF.uid()+"LableItemBindData"));
+			return (this.__itemBindDataName != null ? this.__itemBindDataName
+							: (this.__itemBindDataName = CF.uid()+"LabelItemBindData"));
 		}
 	};
 	
