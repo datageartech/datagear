@@ -69,7 +69,7 @@
 .dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable tbody td{
 	white-space: nowrap;
 }
-.dg-chart-table .dg-chart-ele-wrapper{
+.dg-chart-table .dg-chart-container{
 	position: absolute;
 	left: 1px;
 	top: 1px;
@@ -183,16 +183,16 @@
 .dg-chart-label{
 	box-sizing: border-box;
 }
-.dg-chart-label .dg-chart-ele-wrapper{
+.dg-chart-label .dg-chart-container{
 	position: absolute;
-	left: 1px;
-	top: 1px;
-	right: 1px;
-	bottom: 1px;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
 	overflow: auto;
 }
 .dg-chart-label .dg-chart-label-hide-name .dg-chart-label-name{
-	display: none !important; /*防止被dg-chart-label-inline样式覆盖*/
+	display: none !important; /*防止被dg-chart-label-item-inline样式覆盖*/
 }
 .dg-chart-label .dg-chart-label-name{
 	text-align: center;
@@ -201,29 +201,44 @@
 	font-weight: bold;
 	text-align: center;
 }
-.dg-chart-label .dg-chart-label-inline .dg-chart-label-item,
-.dg-chart-label .dg-chart-label-inline .dg-chart-label-name,
-.dg-chart-label .dg-chart-label-inline .dg-chart-label-value{
+.dg-chart-label .dg-chart-label-item-inline .dg-chart-label-name,
+.dg-chart-label .dg-chart-label-item-inline .dg-chart-label-value{
 	display: inline-block;
+	padding: 0.1em;
 }
-.dg-chart-label .dg-chart-label-flex{
+.dg-chart-label .dg-chart-label-layout-flex-around{
 	display: flex;
     flex-wrap: wrap;
+    align-content: space-evenly;
     align-items: center;
-}
-.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-around{
     justify-content: space-around;
 }
-.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-start{
+.dg-chart-label .dg-chart-label-layout-flex-start{
+	display: flex;
+    flex-wrap: wrap;
+    align-content: space-evenly;
+    align-items: center;
     justify-content: flex-start;
 }
-.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-end{
+.dg-chart-label .dg-chart-label-layout-flex-end{
+	display: flex;
+    flex-wrap: wrap;
+    align-content: space-evenly;
+    align-items: center;
     justify-content: flex-end;
 }
-.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-center{
+.dg-chart-label .dg-chart-label-layout-flex-center{
+	display: flex;
+    flex-wrap: wrap;
+    align-content: space-evenly;
+    align-items: center;
     justify-content: center;
 }
-.dg-chart-label .dg-chart-label-flex.dg-chart-label-flex-between{
+.dg-chart-label .dg-chart-label-layout-flex-between{
+	display: flex;
+    flex-wrap: wrap;
+    align-content: space-evenly;
+    align-items: center;
     justify-content: space-between;
 }
 
