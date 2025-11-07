@@ -6231,9 +6231,12 @@ SPT.labelRenderer = function(plugin, config)
 		destroy: function(chart)
 		{
 			var chartEle = chart.element();
-			var containerEle = CF.eleOfSelector(".dg-chart-container", chartEle);
+			var internal = chart.internal();
+			var itemEles = CF.elesOfSelector(".dg-chart-label-item", internal);
+			
+			itemEles.forEach((itemEle) => { CF.eleRemoveData(itemEle); });			
+			CF.eleRemove(internal);
 			CF.eleRemoveClass(chartEle, "dg-chart-label");
-			CF.eleRemove(containerEle);
 		},
 		
 		on: function(chart, type, handler)
@@ -6251,6 +6254,7 @@ SPT.labelRenderer = function(plugin, config)
 		_drawDataOptions: function(chart, options)
 		{
 			var internal = chart.internal();
+			var bindDataName = this._lableItemBindDataName();
 			
 			var data = (options.data || []);
 			var itemEles = CF.elesOfSelector(".dg-chart-label-item", internal);
@@ -6265,8 +6269,9 @@ SPT.labelRenderer = function(plugin, config)
 				if(di == null && itemEle == null)
 					continue;
 				
-				if(di === null)
+				if(di == null)
 				{
+					CF.eleRemoveData(itemEle);
 					CF.eleRemove(itemEle);
 					continue;
 				}
@@ -6275,34 +6280,27 @@ SPT.labelRenderer = function(plugin, config)
 				{
 					itemEle = CF.eleCreate("div", "dg-chart-label-item");
 					CF.eleAppend(internal, itemEle);
-					CF.eleAppend(itemEle, CF.eleCreate("div", "dg-label-item-child1"));
-					CF.eleAppend(itemEle, CF.eleCreate("div", "dg-label-item-child2"));
+					CF.eleAppend(itemEle, CF.eleCreate("div", (valueFirst ? "dg-chart-label-value" : "dg-chart-label-name")));
+					CF.eleAppend(itemEle, CF.eleCreate("div", (valueFirst ? "dg-chart-label-name" : "dg-chart-label-value")));
 				}
 				
-				let nameEle = CF.eleOfSelector(".dg-label-item-child1", itemEle);
-				let valueEle = CF.eleOfSelector(".dg-label-item-child2", itemEle);
-				
-				if(valueFirst == true)
-				{
-					let tmpEle = nameEle;
-					nameEle = valueEle;
-					valueEle = tmpEle;
-				}
-				
-				CF.eleRemoveClass(nameEle, "dg-chart-label-value");
-				CF.eleAddClass(nameEle, "dg-chart-label-name");
-				CF.eleRemoveClass(valueEle, "dg-chart-label-name");
-				CF.eleAddClass(valueEle, "dg-chart-label-value");
+				let nameEle = CF.eleOfSelector(".dg-chart-label-name", itemEle);
+				let valueEle = CF.eleOfSelector(".dg-chart-label-value", itemEle);
 				
 				CF.eleHtmlContent(nameEle, (di.name == null ? "" : di.name));
 				CF.eleHtmlContent(valueEle, (di.value == null ? "" : di.value));
-				//TODO 绑定数据
-				CF.eleAttr(itemEle, "dg-chart-label-data", i);
+				CF.eleData(itemEle, bindDataName, di);
 				
 				chart.elementStyle(itemEle, options.itemStyle, di.itemStyle);
 				chart.elementStyle(nameEle, options.nameStyle, di.nameStyle);
 				chart.elementStyle(valueEle, options.valueStyle, di.valueStyle);
 			}
+		},
+		
+		_lableItemBindDataName: function()
+		{
+			return (this._lableItemBindDataName != null ? this._lableItemBindDataName
+							: (this._lableItemBindDataName = CF.uid()+"LableItemBindData"));
 		}
 	};
 	
