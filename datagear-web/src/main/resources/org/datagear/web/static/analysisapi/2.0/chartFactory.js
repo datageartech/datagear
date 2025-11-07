@@ -4655,7 +4655,7 @@ CF.eleCss = function(ele, name, value)
  * @param ele HTML元素
  * @param text 可选，要设置的文本内容
  */
-CF.eleTextContent = function(ele, text)
+CF.eleText = function(ele, text)
 {
 	if(text === undefined)
 		return (ele == null ? undefined : ele.textContent);
@@ -4672,7 +4672,7 @@ CF.eleTextContent = function(ele, text)
  * @param ele HTML元素
  * @param html 可选，要设置的HTML内容
  */
-CF.eleHtmlContent = function(ele, html)
+CF.eleHtml = function(ele, html)
 {
 	if(html === undefined)
 		return (ele == null ? undefined : ele.innerHTML);
@@ -4683,7 +4683,7 @@ CF.eleHtmlContent = function(ele, html)
 	ele.innerHTML = html;
 };
 
-CF.ELE_DATA_CACHE = new WeakMap();
+var ELE_BIND_DATAS_ATTR_NAME = CF.BUILTIN_PROP_PREFIX + "BindDatas";
 
 /**
  * 获取/绑定元素数据，值会在删除元素后自动删除。
@@ -4694,24 +4694,24 @@ CF.ELE_DATA_CACHE = new WeakMap();
  */
 CF.eleData = function(ele, name, value)
 {
-	var map = (ele == null ? null : CF.ELE_DATA_CACHE.get(ele));
+	var datas = (ele == null ? null : ele[ELE_BIND_DATAS_ATTR_NAME]);
 	
 	if(value === undefined)
 	{
-		return (map == null ? undefined : map[name]);
+		return (datas == null ? undefined : datas.get(name));
 	}
 	else
 	{
 		if(ele == null)
 			return;
 		
-		if(map == null)
+		if(datas == null)
 		{
-			map = {};
-			CF.ELE_DATA_CACHE.set(ele, map);
+			datas = new Map();
+			ele[ELE_BIND_DATAS_ATTR_NAME] = datas;
 		}
 		
-		map[name] = value;
+		datas.set(name, value);
 	}
 };
 
@@ -4723,22 +4723,15 @@ CF.eleData = function(ele, name, value)
  */
 CF.eleRemoveData = function(ele, name)
 {
-	if(ele == null)
+	var datas = (ele == null ? null : ele[ELE_BIND_DATAS_ATTR_NAME]);
+	
+	if(datas == null)
 		return;
 	
 	if(name === undefined)
-	{
-		CF.ELE_DATA_CACHE.delete(ele);
-	}
+		ele[ELE_BIND_DATAS_ATTR_NAME] = null;
 	else
-	{
-		var map = CF.ELE_DATA_CACHE.get(ele);
-		
-		if(map == null)
-			return;
-		
-		delete map[name];
-	}
+		datas.delete(name);
 };
 
 /**
@@ -5599,7 +5592,7 @@ CF.styleSheetText = function(styleId, cssText)
 	
 	if(styleEle != null)
 	{
-		CF.eleTextContent(styleEle, cssText);
+		CF.eleText(styleEle, cssText);
 		return;
 	}
 	
@@ -5607,7 +5600,7 @@ CF.styleSheetText = function(styleId, cssText)
 	CF.eleAttr(styleEle, "id", styleId);
 	CF.eleAttr(styleEle, "type", "text/css");
 	CF.eleAttr(styleEle, "dg-generated-style", "true");
-	CF.eleTextContent(styleEle, cssText);
+	CF.eleText(styleEle, cssText);
 	
 	var headEle = document.head;
 	

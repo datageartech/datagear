@@ -229,7 +229,7 @@
 			{
 				submitBtn = CF.eleCreate("button", "dg-generated-ele");
 				CF.eleAttr(submitBtn, "type", "submit");
-				CF.eleHtmlContent(submitBtn, options.submitText);
+				CF.eleHtml(submitBtn, options.submitText);
 				CF.eleAppend(foot, submitBtn);
 			}
 		}
@@ -404,7 +404,7 @@
 	CST.renderDspFormLabel = function(form, formOptions, parent, dataSetParam)
 	{
 		var label = CF.eleCreate("label");
-		CF.eleHtmlContent(label, (dataSetParam.label ? dataSetParam.label : dataSetParam.name));
+		CF.eleHtml(label, (dataSetParam.label ? dataSetParam.label : dataSetParam.name));
 		CF.eleAppend(parent, label);
 		
 		if(!CF.isEmpty(dataSetParam.desc))
@@ -499,7 +499,7 @@
 			optVal = (optVal == null ? opt : optVal);
 			
 			var opt = CF.eleCreateWithAttr("option", "value", optVal);
-			CF.eleHtmlContent(opt, optName);
+			CF.eleHtml(opt, optName);
 			
 			CF.eleAppend(input, opt);
 		}
@@ -573,7 +573,7 @@
 				let separator = CF.eleCreate("div", "dg-date-widget-separator");
 				CF.eleAppend(inputs, separator);
 				let separatorContent = CF.eleCreate("small");
-				CF.eleHtmlContent(separatorContent, "/");
+				CF.eleHtml(separatorContent, "/");
 				CF.eleAppend(separator, separatorContent);
 				
 				let monthSelect = CF.eleCreate("select", "dg-date-widget-month");
@@ -581,7 +581,7 @@
 				for(let i=0; i<CST.MONTH_OPTIONS.length; i++)
 				{
 					let opt = CF.eleCreateWithAttr("option", "value", CST.MONTH_OPTIONS[i]);
-					CF.eleHtmlContent(opt, CST.MONTH_OPTIONS[i]);
+					CF.eleHtml(opt, CST.MONTH_OPTIONS[i]);
 					CF.eleAppend(monthSelect, opt);
 				}
 			}
@@ -590,7 +590,7 @@
 			CF.eleAppend(inputsWrapper, btns);
 			
 			let nowBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-now-year-btn");
-			CF.eleHtmlContent(nowBtn, "&#9679;");
+			CF.eleHtml(nowBtn, "&#9679;");
 			CF.eleAppend(btns, nowBtn);
 			CF.eleOn(nowBtn, "click", () =>
 			{
@@ -598,7 +598,7 @@
 			});
 			
 			let prevBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-prev-year-btn");
-			CF.eleHtmlContent(prevBtn, "&#8593;");
+			CF.eleHtml(prevBtn, "&#8593;");
 			CF.eleAppend(btns, prevBtn);
 			CF.eleOn(prevBtn, "click", () =>
 			{
@@ -606,7 +606,7 @@
 			});
 			
 			let nextBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-next-year-btn");
-			CF.eleHtmlContent(nextBtn, "&#8595;");
+			CF.eleHtml(nextBtn, "&#8595;");
 			CF.eleAppend(btns, nextBtn);
 			CF.eleOn(nextBtn, "click", () =>
 			{
@@ -778,7 +778,7 @@
 			CF.eleAppend(wrapper, input);
 			
 			var label = CF.eleCreateWithAttr("label", "for", eleId);
-			CF.eleHtmlContent(label, optName);
+			CF.eleHtml(label, optName);
 			CF.eleAppend(wrapper, label);
 			
 			if(CF.isLiteralTrue(dataSetParam.required))
@@ -846,7 +846,7 @@
 			CF.eleAppend(wrapper, input);
 			
 			var label = CF.eleCreateWithAttr("label", "for", eleId);
-			CF.eleHtmlContent(label, optName);
+			CF.eleHtml(label, optName);
 			CF.eleAppend(wrapper, label);
 			
 			if(CF.isLiteralTrue(dataSetParam.required))
@@ -1417,7 +1417,7 @@
 		CF.eleEmpty(yearSelect);
 		
 		let emptyOpt = CF.eleCreateWithAttr("option", "value", "");
-		CF.eleHtmlContent(emptyOpt, "");
+		CF.eleHtml(emptyOpt, "");
 		CF.eleAppend(yearSelect, emptyOpt);
 		
 		//前五年后四年
@@ -1430,7 +1430,7 @@
 			
 			value = CST.dateFormatter.formatYear(value);
 			let opt = CF.eleCreateWithAttr("option", "value", value);
-			CF.eleHtmlContent(opt, value);
+			CF.eleHtml(opt, value);
 			CF.eleAppend(yearSelect, opt);
 		}
 	};
@@ -1629,8 +1629,8 @@
 	CST.unbindChartSettingPanelEvent = function(chart)
 	{
 		var chartEle = chart.element();
-		var mouseenterHandler = CF.eleData(chartEle, "dgChartSettingMouseEnterHandler");
-		var mouseleaveHandler = CF.eleData(chartEle, "dgChartSettingMouseLeaveHandler");
+		var mouseenterHandler = CF.eleRemoveData(chartEle, "dgChartSettingMouseEnterHandler");
+		var mouseleaveHandler = CF.eleRemoveData(chartEle, "dgChartSettingMouseLeaveHandler");
 		
 		CF.eleAttr(chartEle, "dg-chartsetting-bind-event", null);
 		
@@ -1676,7 +1676,7 @@
 			if(!disableSetting.param && chart.hasDataSetParam())
 			{
 				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-button dg-chart-setting-param-button");
-				CF.eleHtmlContent(button, CST.labels.param);
+				CF.eleHtml(button, CST.labels.param);
 				CF.eleAppend(boxEle, button);
 				
 				CST.setChartSettingButtonOptions(button, (builtinSetting ? builtinSetting.paramButton : null));
@@ -1705,7 +1705,7 @@
 			if(!disableSetting.data)
 			{
 				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-button dg-chart-setting-data-button");
-				CF.eleHtmlContent(button, CST.labels.data);
+				CF.eleHtml(button, CST.labels.data);
 				CF.eleAppend(boxEle, button);
 				
 				CST.setChartSettingButtonOptions(button, (builtinSetting ? builtinSetting.dataButton : null));
@@ -1748,7 +1748,7 @@
 			return;
 		
 		if(buttonOptions.text)
-			CF.eleHtmlContent(button, buttonOptions.text);
+			CF.eleHtml(button, buttonOptions.text);
 		
 		if(buttonOptions.style)
 			CF.eleStyle(button, buttonOptions.style);
@@ -1881,19 +1881,19 @@
 			CF.eleAppend(panel, panelFoot);
 			
 			let headTitle = CF.eleCreate("div", "dg-chart-setting-panel-head-title");
-			CF.eleHtmlContent(headTitle, CST.labels.chartParam);
+			CF.eleHtml(headTitle, CST.labels.chartParam);
 			CF.eleAppend(panelHead, headTitle);
 			
 			let headBtns = CF.eleCreate("div", "dg-chart-setting-panel-head-btns");
 			CF.eleAppend(panelHead, headBtns);
 			
 			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-panel-closebtn");
-			CF.eleHtmlContent(closeBtn, CST.labels.close);
+			CF.eleHtml(closeBtn, CST.labels.close);
 			CF.eleAppend(headBtns, closeBtn);
 			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingParamPanel(chart); });
 			
 			let confirmBtn = CF.eleCreateWithAttr("button", "type", "button");
-			CF.eleHtmlContent(confirmBtn, CST.labels.confirm);
+			CF.eleHtml(confirmBtn, CST.labels.confirm);
 			CF.eleAppend(panelFoot, confirmBtn);
 			
 			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent, panelFoot);
@@ -1915,7 +1915,7 @@
 				CF.eleAppend(dsbSection, dsbHead);
 				
 				let dsbTitle = CF.eleCreate("span", "dg-datasetbind-section-title");
-				CF.eleHtmlContent(dsbTitle, myTitle);
+				CF.eleHtml(dsbTitle, myTitle);
 				CF.eleAppend(dsbHead, dsbTitle);
 				
 				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
@@ -2106,14 +2106,14 @@
 			CF.eleAppend(panel, panelFoot);
 			
 			let headTitle = CF.eleCreate("div", "dg-chart-setting-panel-head-title");
-			CF.eleHtmlContent(headTitle, CST.labels.chartData);
+			CF.eleHtml(headTitle, CST.labels.chartData);
 			CF.eleAppend(panelHead, headTitle);
 			
 			let headBtns = CF.eleCreate("div", "dg-chart-setting-panel-head-btns");
 			CF.eleAppend(panelHead, headBtns);
 			
 			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-panel-closebtn");
-			CF.eleHtmlContent(closeBtn, CST.labels.close);
+			CF.eleHtml(closeBtn, CST.labels.close);
 			CF.eleAppend(headBtns, closeBtn);
 			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingDataPanel(chart); });
 			
@@ -2131,7 +2131,7 @@
 				CF.eleAppend(dsbSection, dsbHead);
 				
 				let dsbTitle = CF.eleCreate("span", "dg-datasetbind-section-title");
-				CF.eleHtmlContent(dsbTitle, myTitle);
+				CF.eleHtml(dsbTitle, myTitle);
 				CF.eleAppend(dsbHead, dsbTitle);
 				
 				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
@@ -2261,7 +2261,7 @@
 		for(let i=0; i<columns.length; i++)
 		{
 			let th = CF.eleCreate("th");
-			CF.eleHtmlContent(th, columns[i].title);
+			CF.eleHtml(th, columns[i].title);
 			
 			if(columns[i].style)
 				CF.eleAttr(th, "style", columns[i].style);
@@ -2313,7 +2313,7 @@
 			{
 				let column = columns[j];
 				let td = CF.eleCreate("td");
-				CF.eleHtmlContent(td, column.render(data, i));
+				CF.eleHtml(td, column.render(data, i));
 				CF.eleAppend(tr, td);
 			}
 		}

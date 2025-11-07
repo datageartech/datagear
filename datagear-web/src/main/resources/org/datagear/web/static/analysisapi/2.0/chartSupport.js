@@ -6232,9 +6232,6 @@ SPT.labelRenderer = function(plugin, config)
 		{
 			var chartEle = chart.element();
 			var internal = chart.internal();
-			var itemEles = CF.elesOfSelector(".dg-chart-label-item", internal);
-			
-			itemEles.forEach((itemEle) => { CF.eleRemoveData(itemEle); });			
 			CF.eleRemove(internal);
 			CF.eleRemoveClass(chartEle, "dg-chart-label");
 		},
@@ -6287,8 +6284,8 @@ SPT.labelRenderer = function(plugin, config)
 				let nameEle = CF.eleOfSelector(".dg-chart-label-name", itemEle);
 				let valueEle = CF.eleOfSelector(".dg-chart-label-value", itemEle);
 				
-				CF.eleHtmlContent(nameEle, (di.name == null ? "" : di.name));
-				CF.eleHtmlContent(valueEle, (di.value == null ? "" : di.value));
+				CF.eleHtml(nameEle, (di.name == null ? "" : di.name));
+				CF.eleHtml(valueEle, (di.value == null ? "" : di.value));
 				CF.eleData(itemEle, bindDataName, di);
 				
 				chart.elementStyle(itemEle, options.itemStyle, di.itemStyle);
