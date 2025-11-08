@@ -6256,7 +6256,7 @@ SPT.labelRenderer = function(plugin, config)
 			var data = (options.data || []);
 			var itemEles = CF.elesOfSelector(".dg-chart-label-item", internal);
 			var length = Math.max(data.length, itemEles.length);
-			var valueFirst = options.valueFirst;
+			var valueFirst = config.valueFirst;
 			
 			for(let i=0; i<length; i++)
 			{
