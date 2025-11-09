@@ -6947,79 +6947,6 @@ SPT.setEChartsOptionsCmpId = function(options)
 };
 
 /**
- * 填充图表渲染options。
- * 注意： defaultOptions、builtinOptions，以及afterMergeHandlerFirst处理后的渲染options中，
- *		 不应设置会在update函数中有设置的项（对于基本类型，不应出现，也不要将值设置为undefined、null，可能会影响图表内部逻辑；对于数组类型，可以不出现，也可以设置为：[]），
- *		 因为update函数中调用的inflateUpdateOptions函数会把这里的设置高优先级深度合并。
- *
- * @param chart
- * @param defaultOptions 默认options，优先级最低
- * @param builtinOptions 内置options，优先级高于defaultOptions
- * @param afterMergeHandlerFirst 可选，由defaultOptions、builtinOptions合并后的新渲染options处理函数，格式为：function(renderOptions, chart){ ... }
- * @param beforeProcessHandler 可选
- * @param seriesFirstAsTemplate 可选，是否使用defaultOptions和builtinOptions合并后的series[0]作为series后续元素的模板，true 是；false 否。默认值为：true 
- * @returns 一个新的图表渲染options
- */
-SPT.inflateRenderOptions = function(chart, defaultOptions, builtinOptions,
-											afterMergeHandlerFirst, beforeProcessHandler, seriesFirstAsTemplate)
-{
-	if(arguments.length == 4)
-	{
-		// (chart, defaultOptions, builtinOptions, seriesFirstAsTemplate)
-		if(afterMergeHandlerFirst === true || afterMergeHandlerFirst === false)
-		{
-			seriesFirstAsTemplate = afterMergeHandlerFirst;
-			afterMergeHandlerFirst = null;
-		}
-	}
-	else if(arguments.length == 5)
-	{
-		// (chart, defaultOptions, builtinOptions, afterMergeHandlerFirst, seriesFirstAsTemplate)
-		if(beforeProcessHandler === true || beforeProcessHandler === false)
-		{
-			seriesFirstAsTemplate = beforeProcessHandler;
-			beforeProcessHandler = null;
-		}
-	}
-	
-	seriesFirstAsTemplate = (seriesFirstAsTemplate == null ? true : seriesFirstAsTemplate);
-	
-	var renderOptions = CF.extend(true, {}, defaultOptions, builtinOptions);
-	
-	if(afterMergeHandlerFirst != null)
-		afterMergeHandlerFirst(renderOptions, chart);
-	
-	var newBeforeProcessHandler = beforeProcessHandler;
-	
-	//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
-	if(seriesFirstAsTemplate)
-	{
-		var series0 = (renderOptions.series && renderOptions.series[0] ?
-						CF.extend(true, {}, renderOptions.series[0]) : null);
-		
-		if(series0)
-		{
-			newBeforeProcessHandler = function(renderOptions, chart)
-			{
-				var series = renderOptions.series;
-				
-				for(var i=1; i<series.length; i++)
-					series[i] = CF.extend(true, {}, series0, series[i]);
-				
-				//必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
-				for(var i=0; i<series.length; i++)
-					series[i].id = i;
-				
-				if(beforeProcessHandler)
-					beforeProcessHandler(renderOptions, chart);
-			};
-		}
-	}
-	
-	return chart.inflateRenderOptions(renderOptions, newBeforeProcessHandler);
-};
-
-/**
  * 指定数据集字段数据是否字符串类型。
  */
 SPT.isDataTypeString = function(dataSetField)
@@ -7084,24 +7011,44 @@ SPT.appendElement = function(array, eles)
 {
 	if(CF.isArray(eles))
 	{
-		for(var i=0; i<eles.length; i++)
+		for(let i=0; i<eles.length; i++)
+		{
 			array.push(eles[i]);
+		}
 	}
 	else
+	{
 		array.push(eles);
+	}
 };
 
 /**
  * 为源数组追加不重复的元素。
  * 
  * @param array 待追加数组
- * @param eles 追加元素、数组，可以是基本类型、对象类型
- * @param propertyName 可选，当是对象类型时，用于指定判断重复的属性名
+ * @param ele 要追加的元素、数组，可以是基本类型、对象类型
+ * @param propName 可选，当是对象类型时，用于指定判断重复的属性名
  * @returns 追加的或重复元素的索引、或者索引数组
  */
-SPT.appendDistinct = function(array, eles, propertyName)
+SPT.appendDistinct = function(array, ele, propName)
 {
-	return SPT.appendDistinctQuick(array, eles, {}, propertyName);
+	if(CF.isArray(ele))
+	{
+		return SPT.appendDistinctQuick(array, ele, {}, propName);
+	}
+	else
+	{
+		let key = (propName != null && ele != null ? ele[propName] : ele);
+		let keyIdx = SPT.findInArray(array, key, propName);
+		
+		if(keyIdx < 0)
+		{
+			array.push(ele);
+			keyIdx = array.length - 1;
+		}
+		
+		return keyIdx;
+	}
 };
 
 /**
@@ -7110,10 +7057,10 @@ SPT.appendDistinct = function(array, eles, propertyName)
  * @param array 待追加数组
  * @param eles 追加元素、数组，可以是基本类型、对象类型
  * @param indexCache 索引缓存对象，用于存储arry中对应主键元素的索引，初始应为null、{}，格式为：{ 主键：索引数值 }
- * @param propertyName 可选，当是对象类型时，用于指定判断重复的属性名
+ * @param propName 可选，当是对象类型时，用于指定判断重复的属性名
  * @returns 追加的或重复元素的索引、或者索引数组
  */
-SPT.appendDistinctQuick = function(array, eles, indexCache, propertyName)
+SPT.appendDistinctQuick = function(array, eles, indexCache, propName)
 {
 	indexCache = (indexCache == null ? {} : indexCache);
 	
@@ -7122,36 +7069,37 @@ SPT.appendDistinctQuick = function(array, eles, indexCache, propertyName)
 	if(!isArray)
 		eles = [ eles ];
 	
-	var indexes = [];
+	var re = [];
 	
-	for(var i=0; i<eles.length; i++)
+	for(let i=0; i<eles.length; i++)
 	{
-		var key = (propertyName != null && eles[i] ? eles[i][propertyName] : eles[i]);
-		var keyIdx = indexCache[key];
+		let ele = eles[i];
+		let key = (propName != null && ele != null ? ele[propName] : ele);
+		let keyIdx = indexCache[key];
 		
 		if(keyIdx != null && keyIdx > -1)
 		{
-			indexes[i] = keyIdx;
+			re[i] = keyIdx;
 		}
 		else
 		{
-			keyIdx = SPT.findInArray(array, key, propertyName);
+			keyIdx = SPT.findInArray(array, key, propName);
 			
-			if(keyIdx != null && keyIdx > -1)
+			if(keyIdx > -1)
 			{
-				indexes[i] = keyIdx;
+				re[i] = keyIdx;
 				indexCache[key] = keyIdx;
 			}
 			else
 			{
-				array.push(eles[i]);
+				array.push(ele);
 				indexCache[key] = array.length - 1;
-				indexes[i] = array.length - 1;
+				re[i] = array.length - 1;
 			}
 		}
 	}
 	
-	return (isArray ? indexes : indexes[0]);
+	return (isArray ? re : re[0]);
 };
 
 /**
@@ -7253,39 +7201,6 @@ SPT.trimNumberRange = function(obj, defaultMin, defaultMax)
 	}
 	
 	return obj;
-};
-
-/**
- * 销毁图表的echarts对象。
- */
-SPT.destroyChartEcharts = function(chart)
-{
-	var internal = chart.internal();
-	if(internal && !internal.isDisposed())
-		internal.dispose();
-};
-
-/**
- * 调整图表的echarts尺寸。
- */
-SPT.resizeChartEcharts = function(chart)
-{
-	var internal = chart.internal();
-	if(internal)
-		internal.resize();
-};
-
-SPT.bindChartEventHandlerForEcharts = function(chart, type, handler, chartEventDataSetter)
-{
-	var handlerDelegation = function(params)
-	{
-		var chartEvent = chart.eventNew(type, params);
-		chartEventDataSetter(chart, chartEvent, params);
-		chart.callEventHandler(handler, chartEvent);
-	};
-	
-	chart.registerEventHandlerDelegation(type, handler, handlerDelegation);
-	chart.internal().on(type, "series", handlerDelegation);
 };
 
 //计算图例名
@@ -7469,6 +7384,17 @@ SPT.echartsMapChartInitMap = function(chart, options)
 	SPT.echartsSetMapOption(options, map, coverOriginalMap);
 };
 
+/**
+ * 获取默认地图名。
+ * 地图类图表需要默认地图执行render初始渲染。
+ * 注意：返回的默认地图名应是在dashboardFactory.js中dftBuiltinChartMaps的其中之一。
+ */
+SPT.defaultMapName = function()
+{
+	//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
+	return "china";
+};
+
 //渲染ECharts地图类图表
 SPT.echartsMapChartRender = function(chart, options)
 {
@@ -7510,51 +7436,6 @@ SPT.echartsMapChartUpdate = function(chart, updateOptions)
 		SPT.echartsOptionsReplaceMerge(chart, updateOptions);
 		chart.statusUpdated(true);
 	});
-};
-
-//仅提取ECharts地图类图表选项中的非空地图名信息，并且保持原结构
-SPT.echartsGetMapOptions = function(echartsOptions)
-{
-	var re = {};
-	
-	var geo = echartsOptions.geo;
-	var series = echartsOptions.series;
-	
-	if(geo)
-	{
-		if(CF.isArray(geo))
-		{
-			re.geo = [];
-			
-			for(var i=0; i<geo.length; i++)
-			{
-				re.geo[i] = (geo[i].map ? { map: geo[i].map } : {});
-			}
-		}
-		else
-		{
-			re.geo = (geo.map ? { map: geo.map } : {});
-		}
-	}
-	
-	if(series)
-	{
-		if(CF.isArray(series))
-		{
-			re.series = [];
-			
-			for(var i=0; i<series.length; i++)
-			{
-				re.series[i] = (series[i].type == "map" && series[i].map ? { map: series[i].map } : {});
-			}
-		}
-		else
-		{
-			re.series = (series.type == "map" && series.map ? { map: series.map } : {});
-		}
-	}
-	
-	return re;
 };
 
 //仅提取ECharts地图类图表选项中的不重复地图名信息
@@ -7760,58 +7641,6 @@ SPT.adaptEChartsValueArrayData = function(chart, options, originalSeriesType, na
 	}
 };
 
-/**
- * 从obj中提取名值对象。
- * 
- * @param obj 待提取的对象，格式为：{name: ..., value: ...}、{ value: [..., ...] }
- * @param nameProperty
- * @param valueProperty
- * @param nameIndex 可选，当obj.value是数组时，名在值数组对象的索引，默认为：0
- * @param valueIndex 可选，当obj.value是数组时，值在值数组对象的索引，默认为：1
- * @returns { nameProperty: ...,  valueProperty: ...}
- */
-SPT.extractNameValueStyleObj = function(obj, nameProperty, valueProperty, nameIndex, valueIndex)
-{
-	nameIndex = (nameIndex == null ? 0 : nameIndex);
-	valueIndex = (valueIndex == null ? 1 : valueIndex);
-	
-	var re = undefined;
-	
-	if(obj)
-	{
-		re = {};
-		
-		var name = obj.name;
-		var value = obj.value;
-		
-		//{ value: [..., ...] }
-		if(CF.isArray(value))
-		{
-			name = value[nameIndex];
-			value = value[valueIndex];
-		}
-		
-		re[nameProperty] = name;
-		re[valueProperty] = value;
-	}
-	
-	return re;
-};
-
-SPT.evalLocalPlainObj = function(localPlainObj, publicPlainObj)
-{
-	var re = null;
-	
-	if(localPlainObj && publicPlainObj)
-		re = CF.extend({}, publicPlainObj, localPlainObj);
-	else if(publicPlainObj)
-		re = publicPlainObj;
-	else if(localPlainObj)
-		re = localPlainObj;
-	
-	return re;
-};
-
 SPT.cssValueImportant = function(cssValue)
 {
 	if(!cssValue)
@@ -7823,24 +7652,6 @@ SPT.cssValueImportant = function(cssValue)
 		cssValue += " !important";
 	
 	return cssValue;
-};
-
-SPT.toLegalStyleNameObj = function(obj)
-{
-	if(!obj)
-		return obj;
-	
-	var re = {};
-	
-	for(var p in obj)
-	{
-		var name = CF.toLegalStyleName(p);
-		var value = obj[p];
-		
-		re[name] = value;
-	}
-	
-	return re;
 };
 
 SPT.echartsOptionsReplaceMerge = function(chart, options, replaceMerge)
@@ -7877,12 +7688,6 @@ SPT.echartsOptionsReplaceMerge = function(chart, options, replaceMerge)
 	
 	var internal = chart.internal();
 	internal.setOption(options, opts);
-};
-
-SPT.chartEventForHtml = function(chart, type, htmlEvent)
-{
-	var event = chart.eventNew(type, htmlEvent);
-	return event;
 };
 
 SPT.addCategoryToFieldMap = function(fieldMap, categoryField, categoryName)
@@ -8156,17 +7961,6 @@ SPT.inflateAxisDataExtractors =
 	}
 };
 
-/**
- * 获取默认地图名。
- * 地图类图表需要默认地图执行render初始渲染。
- * 注意：返回的默认地图名应是在dashboardFactory.js中dftBuiltinChartMaps的其中之一。
- */
-SPT.defaultMapName = function()
-{
-	//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
-	return "china";
-};
-
 //返回targetObj的浅复制对象，如果某个属性值在baseObj中是数组而在targetObj不是数组，返回对象会将其转为数组
 SPT.trimArrayPropsForMerge = function(targetObj, baseObj)
 {
@@ -8188,25 +7982,6 @@ SPT.trimArrayPropsForMerge = function(targetObj, baseObj)
 	}
 	
 	return targetRe;
-};
-
-SPT.adaptArrayPropsForUpdateOptions = function(updateOptions, renderOptions)
-{
-	for(var name in updateOptions)
-	{
-		var renderValue = renderOptions[name];
-		var updateValue = updateOptions[name];
-		var isRenderArray = CF.isArray(renderValue);
-		var isUpdateArray = CF.isArray(updateValue);
-		
-		//如果渲染选项是数组，更新选项不是，应把更新选项包裹为数组
-		if(isRenderArray && !isUpdateArray)
-		{
-			updateValue = [ updateValue ];
-		}
-		
-		updateOptions[name] = updateValue;
-	}
 };
 
 SPT.dataSetBindsMainFetched = function(chart, chartResult)
