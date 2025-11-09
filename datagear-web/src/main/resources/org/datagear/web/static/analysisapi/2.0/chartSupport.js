@@ -6146,8 +6146,7 @@ SPT.labelRenderer = function(plugin, config)
 				nameClass: null,
 				//标签值元素类名
 				valueClass: null,
-				//标签卡数据
-				//元素结构:
+				//标签卡数据，元素结构:
 				//{
 				//  //可选，标签名，默认为选项值
 				//  name: "...",
@@ -6329,271 +6328,262 @@ SPT.labelRenderer = function(plugin, config)
 
 //下拉框
 
-SPT.selectRender = function(chart, options)
+SPT.selectRenderer = function(plugin, config)
 {
-	options = CF.extend(true,
+	config = CF.extend(true,
 	{
-		dg:
-		{
-			//name 可选，名称
-			//value 数值
-			dataSignNames: { name: "name", value: "value" }
-		}
-	},
-	options);
-	
-	var chartEle = chart.elementJquery();
-	chartEle.addClass("dg-chart-select");
-	
-	options = SPT.inflateRenderOptions(chart,
-	{
-		//将在update中设置：
-		//下拉框数据：
-		// data:
-		// [
-		//	  {
-		//	    //选项名，可选，默认为选项值
-		//	    name: "...",
-		//	    //选项值
-		//	    value: ...,
-		//	    //是否选中，可选，默认为：false
-		//	    selected: true 或 false,
-		//	    //选项css样式，可选
-		//	    itemStyle: { ... }
-		//	  },
-		//	  ...
-		// ]
-		
-		//下拉框ID
-		id: undefined,
-		//下拉框名称
-		name: undefined,
 		//是否多选
-		multiple: false,
-		//可见选项数目
-		size: undefined,
-		//默认选中项：null：默认；数值或其数组：选中指定索引的选项；
-		selected: undefined,
-		//前置添加的条目项，格式同data元素，或者其数组，通常用于添加默认选中项
-		prepend: undefined,
-		//下拉框是否填满父元素，"auto" 当是内联框时填满；true 是；false 否
-		fillParent: "auto",
-		//select框css样式，格式为：{ ... }
-		selectStyle: undefined,
-		//option选项公用css样式，格式为：{ ... }
-		itemStyle: undefined
+		multiple: false
 	},
-	options);
+	config);
 	
-	SPT.selectThemeStyleSheet(chart);
-	
-	var isDropdown = (!options.multiple && (options.size == null || options.size <= 1));
-	
-	if(isDropdown)
-		chartEle.addClass("dg-chart-select-dropdown");
-	
-	var $select = $("<select class='dg-chart-select-select' />").appendTo(chartEle);
-	
-	if(options.id)
-		$select.attr("id", options.id);
-	if(options.name)
-		$select.attr("name", options.name);
-	if(options.multiple)
-		$select.attr("multiple", "multiple");
-	if(options.size != null)
-		$select.attr("size", options.size);
-	if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
-		$select.addClass("dg-fill-parent");
-	if(options.selectStyle)
-		CF.eleStyle($select, options.selectStyle);
-	
-	chart.internal($select[0]);
-};
-
-SPT.selectUpdate = function(chart, chartResult)
-{
-	var renderOptions = chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var $select = $(chart.internal());
-	
-	$select.empty();
-	
-	var selected = renderOptions.selected;
-	
-	if(selected != null && typeof(selected) == "number")
-		selected = [ selected ];
-	
-	var updateOptions = { data: [] };
-	
-	for(var i=0; i<dataSetBinds.length; i++)
+	var renderer =
 	{
-		var dataSetBind = dataSetBinds[i];
-		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
-		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-		var hasNps = (nps && nps.length > 0);
-		
-		if(hasNps && nps.length != vps.length)
-			throw new Error("The ["+dataSignNames.name+"] sign column must be "
-					+"one-to-one with ["+dataSignNames.value+"] sign column");
-		
-		var namess = (hasNps ? chart.resultRowArrayDatas(result, nps) : []);
-		var valuess = chart.resultRowArrayDatas(result, vps);
-		
-		for(var j=0; j<valuess.length; j++)
+		render: function(chart)
 		{
-			var values = valuess[j];
-			var names = (hasNps ? namess[j] : values);
-			
-			for(var k=0; k<names.length; k++)
+			var options =
 			{
-				var sv = { name: names[k], value: values[k] };
-				chart.originalDataIndex(sv, dataSetBind, j);
-				
-				updateOptions.data.push(sv);
+				//下拉框ID
+				id: null,
+				//下拉框名称
+				name: null,
+				//是否多选
+				multiple: config.multiple,
+				//可见选项数目
+				size: null,
+				//默认选中项：null：默认；数值或其数组，选中指定索引的选项
+				selected: null,
+				//前置添加的条目项，格式同data元素，或者其数组，通常用于添加默认选中项
+				prepend: null,
+				//下拉框是否填满父元素，"auto" 当是内联框时填满；true 是；false 否
+				fillParent: "auto",
+				//select框元素css样式，格式允许：CSS字符串、CSS对象
+				selectStyle: null,
+				//option选项元素公用css样式，格式允许：CSS字符串、CSS对象
+				itemStyle: null,
+				//select框元素类名
+				selectClass: null,
+				//option选项元素类名
+				itemClass: null,
+				//下拉框数据，元素格式为：
+				//{
+				//  //选项名，可选，默认为选项值
+				//	name: "...",
+				//	//选项值
+				//	value: ...,
+				//	//是否选中，可选，默认为：false
+				//	selected: true 或 false,
+				//	//可选，选项css样式，格式允许：CSS字符串、CSS对象
+				//	itemStyle: null,
+				//	//option选项元素类名
+				//	itemClass: null
+				//}
+				data: []
+			};
+			
+			var chartEle = chart.element();
+			CF.eleAddClass(chartEle, "dg-chart-select");
+			var selectEle = CF.eleCreate("select", "dg-chart-select-select");
+			CF.eleAppend(chartEle, selectEle);
+			chart.internal(selectEle);
+			
+			chart.inflateOptions(options);
+			chart.processRenderOptions(options);
+			
+			var isDropdown = (!options.multiple && (options.size == null || options.size <= 1));
+			
+			if(isDropdown)
+				CF.eleAddClass(chartEle, "dg-chart-select-dropdown");
+			
+			if(!CF.isEmpty(options.id))
+				CF.eleAttr(selectEle, "id", options.id);
+			
+			if(!CF.isEmpty(options.name))
+				CF.eleAttr(selectEle, "name", options.name);
+			
+			if(options.multiple)
+				CF.eleAttr(selectEle, "multiple", "multiple");
+			
+			if(options.size != null)
+				CF.eleAttr(selectEle, "size", options.size);
+			
+			if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
+				CF.eleAddClass(selectEle, "dg-fill-parent");
+			
+			if(!CF.isEmpty(options.selectStyle))
+				CF.eleStyle(selectEle, options.selectStyle);
+			
+			if(!CF.isEmpty(options.selectClass))
+				CF.eleAddClass(selectEle, options.selectClass);
+			
+			this._themeStyleSheet(chart);
+			//此时不应绘制数据
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var renderOptions = chart.renderOptions();
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var options = { data: [] };
+			
+			if(renderOptions.prepend != null)
+			{
+				var prepend = renderOptions.prepend;
+				prepend = (CF.isArray(prepend) ? prepend : [ prepend ]);
+				options.data  = CF.extend(true, options.data, prepend);
 			}
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let result = chart.resultOf(chartResult, dataSetBind);
+				let resultDatas = chart.resultDatas(result);
+				
+				let nameFields = chart.dataSetFieldsOfSign(dataSetBind, 0);
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
+				let hasNameField = (nameFields.length > 0);
+				
+				if(hasNameField && nameFields.length != valueFields.length)
+					throw new Error("the [name] sign columns must be one-to-one with [value] sign columns");
+				
+				let namess = (hasNameField ? chart.resultRowArrayDatas(result, nameFields) : []);
+				let valuess = chart.resultRowArrayDatas(result, valueFields);
+				
+				for(let j=0; j<valuess.length; j++)
+				{
+					let values = valuess[j];
+					let names = (hasNameField ? namess[j] : values);
+					
+					for(let k=0; k<names.length; k++)
+					{
+						let di = { name: names[k], value: values[k] };
+						SPT.originalDataOfData(di, resultDatas[j]);
+						options.data.push(di);
+					}
+				}
+			}
+			
+			options = chart.inflateOptions(options);
+			chart.processUpdateOptions(options);
+			
+			this._drawDataOptions(chart, options);
+		},
+		
+		destroy: function(chart)
+		{
+			var chartEle = chart.element();
+			var internal = chart.internal();
+			CF.eleRemove(internal);
+			CF.eleRemoveClass(chartEle, "dg-chart-label");
+		},
+		
+		on: function(chart, type, handler)
+		{
+			//TODO
+			chart.internal().addEventListener(type, handler);
+		},
+		
+		off: function(chart, type, handler)
+		{
+			//TODO
+			chart.internal().removeEventListener(type, handler);
+		},
+		
+		_themeStyleSheet: function(chart)
+		{
+			chart.themeStyleSheet(CF.builtinPropName("SelectChart"), function()
+			{
+				var theme = chart.theme();
+				
+				var css=
+				[
+					{
+						name: " .dg-chart-select-select",
+						value:
+						{
+							"color": theme.color,
+							"background-color": theme.backgroundColor,
+							"border-color": theme.borderColor,
+							"font-size": CF.toCssFontSize(theme.fontSize)
+						}
+					},
+					{
+						name: " .dg-chart-select-select option",
+						value:
+						{
+							"font-size": CF.toCssFontSize(theme.fontSize)
+						}
+					},
+					{
+						name: ".dg-chart-select-dropdown .dg-chart-select-select option",
+						value:
+						{
+							"color": theme.color,
+							"background-color": chart.themeGradualColor(0)
+						}
+					}
+				];
+				
+				return css;
+			});
+		},
+		
+		_drawDataOptions: function(chart, options)
+		{
+			var renderOptions = chart.renderOptions();
+			var internal = chart.internal();
+			var bindDataName = this._itemBindDataName();
+			
+			var data = (options.data || []);
+			var itemEles = CF.elesOfSelector("option", internal);
+			var length = Math.max(data.length, itemEles.length);
+			
+			var selected = renderOptions.selected;
+			if(selected != null && !CF.isArray(selected))
+				selected = [ selected ];
+			
+			for(let i=0; i<length; i++)
+			{
+				let di = data[i];
+				let itemEle = itemEles[i];
+				
+				if(di == null && itemEle == null)
+					continue;
+				
+				if(di == null)
+				{
+					CF.eleRemove(itemEle);
+					continue;
+				}
+				
+				if(itemEle == null)
+				{
+					itemEle = CF.eleCreate("option");
+					CF.eleAppend(internal, itemEle);
+				}
+				
+				CF.eleAttr(itemEle, "class", (CF.isEmpty(options.itemClass) ? "" : " "+options.itemClass)
+					+ (CF.isEmpty(di.itemClass) ? "" : " "+di.itemClass));
+				CF.eleStyle(itemEle, options.itemStyle, di.itemStyle);
+				
+				CF.eleAttr(itemEle, "value", di.value);
+				CF.eleHtml(itemEle, (!CF.isEmpty(di.name) ? di.name : di.value));
+				
+				if(di.selected || (selected != null && CF.indexInArray(selected, i) > -1))
+					CF.eleAttr(itemEle, "selected", "selected");
+				
+				CF.eleData(itemEle, bindDataName, di);
+			}
+		},
+		
+		_itemBindDataName: function()
+		{
+			return (this.__itemBindDataName != null ? this.__itemBindDataName
+							: (this.__itemBindDataName = CF.uid()+"SelectItemBindData"));
 		}
-	}
-	
-	updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
-	var data = updateOptions.data;
-	
-	if(renderOptions.prepend)
-	{
-		var newData = (CF.isArray(renderOptions.prepend) ? renderOptions.prepend : [ renderOptions.prepend ]);
-		data = newData.concat(data);
-	}
-	
-	for(var i=0; i<data.length; i++)
-	{
-		var optData = data[i];
-		
-		var $opt = $("<option />").attr("value", optData.value)
-			.html(optData.name ? optData.name : optData.value).appendTo($select);
-		
-		if(optData.selected || (selected != null && CF.indexInArray(selected, i) > -1))
-			$opt.attr("selected", "selected");
-		
-		$opt.data("_dgChartSelectOptionChartData", optData);
-		
-		var itemStyle = SPT.evalLocalPlainObj(optData.itemStyle, renderOptions.itemStyle);
-		if(itemStyle)
-			CF.eleStyle($opt, itemStyle);
-	}
-};
-
-SPT.selectResize = function(chart)
-{
-	
-};
-
-SPT.selectDestroy = function(chart)
-{
-	var chartEle = chart.elementJquery();
-	
-	chartEle.removeClass("dg-chart-select dg-chart-select-dropdown dg-chart-beautify-scrollbar");
-	
-	$(chart.internal()).remove();
-};
-
-SPT.selectOn = function(chart, type, handler)
-{
-	var handlerDelegation = function(htmlEvent)
-	{
-		var $select = $(this);
-		var chartEvent = SPT.chartEventForHtml(chart, type, htmlEvent);
-		SPT.selectSetChartEventData(chart, chartEvent, htmlEvent, $select);
-		
-		chart.callEventHandler(handler, chartEvent);
 	};
 	
-	chart.registerEventHandlerDelegation(type, handler, handlerDelegation);
-	$(chart.internal()).on(type, handlerDelegation);
-};
-
-SPT.selectOff = function(chart, type, handler)
-{
-	var internal = $(chart.internal());
-	
-	chart.removeEventHandlerDelegation(type, handler, function(et, eh, ehd)
-	{
-		internal.off(et, ehd);
-	});
-};
-
-SPT.selectSetChartEventData = function(chart, chartEvent, htmlEvent, $select)
-{
-	var renderOptions = chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var $selectedOptions = $("option:selected", $select);
-	var chartData = [];
-	var data = [];
-	
-	for(var i=0; i<$selectedOptions.length; i++)
-	{
-		chartData.push($($selectedOptions[i]).data("_dgChartSelectOptionChartData"));
-		
-		var datai = (data[i] = {});
-		datai[dataSignNames.name] = chartData[i].name;
-		datai[dataSignNames.value] = chartData[i].value;
-	}
-	
-	//单选
-	if(!renderOptions.multiple)
-	{
-		chartData = (chartData.length > 0 ? chartData[0] : null);
-		data = (data.length > 0 ? data[0] : null);
-	}
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, (renderOptions.multiple ? chart.originalDataIndexes(chartData) : chart.originalDataIndex(chartData)));
-};
-
-SPT.selectThemeStyleSheet = function(chart)
-{
-	chart.themeStyleSheet(CF.builtinPropName("SelectChart"), function()
-	{
-		var theme = chart.theme();
-		
-		var css=
-		[
-			{
-				name: " .dg-chart-select-select",
-				value:
-				{
-					"color": theme.color,
-					"background-color": theme.backgroundColor,
-					"border-color": theme.borderColor,
-					"font-size": CF.toCssFontSize(theme.fontSize)
-				}
-			},
-			{
-				name: " .dg-chart-select-select option",
-				value:
-				{
-					"font-size": CF.toCssFontSize(theme.fontSize)
-				}
-			},
-			{
-				name: ".dg-chart-select-dropdown .dg-chart-select-select option",
-				value:
-				{
-					"color": theme.color,
-					"background-color": chart.themeGradualColor(0.1)
-				}
-			}
-		];
-		
-		return css;
-	});
+	return renderer;
 };
 
 //原始数据
