@@ -40,6 +40,8 @@ chart.dashboard	-> chart.dashboard()
 chart.handleChartEventLink()	x
 chart.bindLinksEventHanders() -> chart.bindLinkEventHanders()
 chart.resultValueDatas()		x
+chart.elementStyle()			x
+chart.styleString()				x
 dg-chart-auto-resize默认值为true
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()

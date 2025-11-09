@@ -5143,7 +5143,7 @@ SPT.tableRenderer = function(plugin, config)
 				titleEle.html(title.text != null ? title.text : "");
 			
 			if(title.style !== undefined)
-				chart.elementStyle(titleEle[0], title.style);
+				CF.eleStyle(titleEle[0], title.style);
 		},
 		
 		_getFieldColumns: function(chart)
@@ -5625,11 +5625,11 @@ SPT.tableRenderer = function(plugin, config)
 					},
 					{
 						name: qualifier + " table.dataTable",
-						value: chart.styleString(tableStyle.table)
+						value: CF.styleString(tableStyle.table)
 					},
 					{
 						name: qualifier + " table.dataTable thead tr",
-						value: chart.styleString(tableStyle.head.row)
+						value: CF.styleString(tableStyle.head.row)
 					},
 					{
 						name:
@@ -5637,43 +5637,43 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " table.dataTable thead tr th",
 							qualifier + " table.dataTable thead tr td"
 						],
-						value: chart.styleString(tableStyle.head.cell)
+						value: CF.styleString(tableStyle.head.cell)
 					},
 					{
 						name: qualifier + " table.dataTable tbody tr",
-						value: chart.styleString(tableStyle.body.row)
+						value: CF.styleString(tableStyle.body.row)
 					},
 					{
 						name: qualifier + " table.dataTable tbody tr td",
-						value: chart.styleString(tableStyle.body.cell)
+						value: CF.styleString(tableStyle.body.cell)
 					},
 					{
 						name:
 						[
 							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)"
 						],
-						value: chart.styleString(tableStyle.body.rowOdd)
+						value: CF.styleString(tableStyle.body.rowOdd)
 					},
 					{
 						name:
 						[
 							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)>*"
 						],
-						value: chart.styleString(tableStyle.body.cellOdd)
+						value: CF.styleString(tableStyle.body.cellOdd)
 					},
 					{
 						name:
 						[
 							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)"
 						],
-						value: chart.styleString(tableStyle.body.rowEven)
+						value: CF.styleString(tableStyle.body.rowEven)
 					},
 					{
 						name:
 						[
 							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)>*"
 						],
-						value: chart.styleString(tableStyle.body.cellEven)
+						value: CF.styleString(tableStyle.body.cellEven)
 					},
 					{
 						name:
@@ -5682,7 +5682,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover",
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover"
 						],
-						value: chart.styleString(tableStyle.body.rowHover)
+						value: CF.styleString(tableStyle.body.rowHover)
 					},
 					{
 						name:
@@ -5691,7 +5691,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover>*",
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover>*",
 						],
-						value: chart.styleString(tableStyle.body.cellHover)
+						value: CF.styleString(tableStyle.body.cellHover)
 					},
 					{
 						name:
@@ -5706,7 +5706,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected",
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected"
 						],
-						value: chart.styleString(tableStyle.body.rowSelected)
+						value: CF.styleString(tableStyle.body.rowSelected)
 					},
 					{
 						name:
@@ -5724,7 +5724,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected>*",
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected>*",
 						],
-						value: chart.styleString(tableStyle.body.cellSelected)
+						value: CF.styleString(tableStyle.body.cellSelected)
 					},
 					{
 						name:
@@ -6138,6 +6138,12 @@ SPT.labelRenderer = function(plugin, config)
 				nameStyle: null,
 				//标签值元素公用css样式，格式允许：CSS字符串、CSS对象
 				valueStyle: null,
+				
+				containerClass: null,
+				itemClass: null,
+				nameClass: null,
+				valueClass: null,
+				
 				//标签卡数据
 				//元素结构:
 				//{
@@ -6174,7 +6180,10 @@ SPT.labelRenderer = function(plugin, config)
 				CF.eleAddClass(containerEle, "dg-chart-label-item-inline");
 			
 			if(!CF.isEmpty(options.containerStyle))
-				chart.elementStyle(containerEle, options.containerStyle);
+				CF.eleStyle(containerEle, options.containerStyle);
+			
+			if(!CF.isEmpty(options.containerClass))
+				CF.eleAddClass(containerEle, options.containerClass);
 			
 			//此时不应绘制数据
 			//this._drawDataOptions(chart, options);
@@ -6287,9 +6296,9 @@ SPT.labelRenderer = function(plugin, config)
 				CF.eleHtml(valueEle, (di.value == null ? "" : di.value));
 				CF.eleData(itemEle, bindDataName, di);
 				
-				chart.elementStyle(itemEle, options.itemStyle, di.itemStyle);
-				chart.elementStyle(nameEle, options.nameStyle, di.nameStyle);
-				chart.elementStyle(valueEle, options.valueStyle, di.valueStyle);
+				CF.eleStyle(itemEle, options.itemStyle, di.itemStyle);
+				CF.eleStyle(nameEle, options.nameStyle, di.nameStyle);
+				CF.eleStyle(valueEle, options.valueStyle, di.valueStyle);
 			}
 		},
 		
@@ -6301,254 +6310,6 @@ SPT.labelRenderer = function(plugin, config)
 	};
 	
 	return renderer;
-};
-
-SPT.labelRender = function(chart, options)
-{
-	options = CF.extend(true,
-	{
-		dg:
-		{
-			//name 可选，名称
-			//value 数值
-			dataSignNames: { name: "name", value: "value" }
-		}
-	},
-	options);
-	
-	var chartEle = chart.elementJquery();
-	chartEle.addClass("dg-chart-label");
-	
-	options = SPT.inflateRenderOptions(chart,
-	{
-		//将在update中设置：
-		//标签卡数据：
-		// data:
-		// [
-		//	  {
-		//	    //可选，标签名，默认为选项值
-		//	    name: "...",
-		//	    //标签值
-		//	    value: ...,
-		//	    //可选，标签条目元素css样式
-		//	    itemStyle: { ... },
-		//	    //可选，标签名元素css样式
-		//	    nameStyle: { ... },
-		//	    //可选，标签值元素css样式
-		//	    valueStyle: { ... }
-		//	  },
-		//	  ...
-		// ]
-		
-		//标签条目、标签名、标签值是否都行内显示
-		inline: false,
-		//是否以flex布局展示标签
-		//弹性布局：true 是、居中间隔；false 否；"around" 居中间隔；"start" 左对齐；"end" 右对齐；"center" 居中；"between" 贴边间隔； 
-		flex: false,
-		//是否标签值在标签名之前展示
-		valueFirst: false,
-		//是否隐藏标签名
-		hideName: false,
-		//标签条目元素公用css样式，格式为：{ ... }
-		itemStyle: undefined,
-		 //标签名元素公用css样式，格式为：{ ... }
-		nameStyle: undefined,
-		//标签值元素公用css样式，格式为：{ ... }
-		valueStyle: undefined
-	},
-	options);
-	
-	if(options.inline == true)
-		chartEle.addClass("dg-chart-label-inline");
-	
-	if(options.hideName == true)
-		chartEle.addClass("dg-chart-label-hide-name");
-	
-	if(options.flex != null && options.flex != false)
-	{
-		chartEle.addClass("dg-chart-label-flex");
-		
-		if(options.flex == "start")
-			chartEle.addClass("dg-chart-label-flex-start");
-		else if(options.flex == "end")
-			chartEle.addClass("dg-chart-label-flex-end");
-		else if(options.flex == "center")
-			chartEle.addClass("dg-chart-label-flex-center");
-		else if(options.flex == "between")
-			chartEle.addClass("dg-chart-label-flex-between");
-		else
-			chartEle.addClass("dg-chart-label-flex-around");
-	}
-	
-	chart.internal(chart.element());
-};
-
-SPT.labelUpdate = function(chart, chartResult)
-{
-	var renderOptions = chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	var valueFirst = renderOptions.valueFirst;
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	var $parent = $(chart.internal());
-	
-	$(".dg-chart-label-item", $parent).addClass("dg-chart-label-item-pending");
-	
-	var updateOptions = { data: [] };
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		
-		var result = chart.resultOf(chartResult, dataSetBind);
-		
-		var nps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.name);
-		var vps = chart.dataSetFieldsOfSign(dataSetBind, dataSignNames.value);
-		var hasNps = (nps && nps.length > 0);
-		
-		if(hasNps && nps.length != vps.length)
-			throw new Error("The ["+dataSignNames.name+"] sign column must be "
-					+"one-to-one with ["+dataSignNames.value+"] sign column");
-		
-		var namess = (hasNps ? chart.resultRowArrayDatas(result, nps) : []);
-		var valuess = chart.resultRowArrayDatas(result, vps);
-		
-		var vpNames = [];
-		if(!hasNps)
-		{
-			for(var j=0; j<vps.length; j++)
-				vpNames[j] = chart.dataSetFieldAlias(dataSetBind, vps[j]);
-		}
-		
-		for(var j=0; j<valuess.length; j++)
-		{
-			var values = valuess[j];
-			var names = (hasNps ? namess[j] : vpNames);
-			
-			for(var k=0; k<names.length; k++)
-			{
-				var sv = { name: names[k], value: values[k] };
-				chart.originalDataIndex(sv, dataSetBind, j);
-				
-				updateOptions.data.push(sv);
-			}
-		}
-	}
-	
-	updateOptions = chart.inflateUpdateOptions(chartResult, updateOptions);
-	
-	for(var i=0; i<updateOptions.data.length; i++)
-	{
-		var labelData = updateOptions.data[i];
-		
-		var cssName = "dg-chart-label-item-"+i;
-		
-		var $label = $("."+ cssName, $parent);
-		var $labelName = null;
-		var $labelValue = null;
-		
-		if($label.length == 0)
-		{
-			$label = $("<div class='dg-chart-label-item "+cssName+"'></div>").appendTo($parent);
-			
-			if(valueFirst)
-			{
-				$labelValue = $("<div class='label-value'></div>").appendTo($label);
-				$labelName = $("<div class='label-name'></div>").appendTo($label);
-			}
-			else
-			{
-				$labelName = $("<div class='label-name'></div>").appendTo($label);
-				$labelValue = $("<div class='label-value'></div>").appendTo($label);
-			}
-		}
-		else
-		{
-			$labelName = $(".label-name", $label);
-			$labelValue = $(".label-value", $label);
-			
-			$label.removeClass("dg-chart-label-item-pending");
-		}
-		
-		$labelName.html(labelData.name);
-		$labelValue.html(labelData.value);
-		$label.data("_dgChartLabelChartData", labelData);
-		
-		var itemStyle = SPT.evalLocalPlainObj(labelData.itemStyle, renderOptions.itemStyle);
-		if(itemStyle)
-			chart.elementStyle($label, itemStyle);
-		
-		var nameStyle = SPT.evalLocalPlainObj(labelData.nameStyle, renderOptions.nameStyle);
-		if(nameStyle)
-			chart.elementStyle($labelName, nameStyle);
-		
-		var valueStyle = SPT.evalLocalPlainObj(labelData.valueStyle, renderOptions.valueStyle);
-		if(valueStyle)
-			chart.elementStyle($labelValue, valueStyle);
-	}
-	
-	$(".dg-chart-label-item-pending", $parent).remove();
-};
-
-SPT.labelResize = function(chart)
-{
-	
-};
-
-SPT.labelDestroy = function(chart)
-{
-	var chartEle = chart.elementJquery();
-	chartEle.removeClass("dg-chart-label dg-chart-label-inline dg-chart-label-hide-name dg-chart-label-flex "
-							+"dg-chart-label-flex-around dg-chart-label-flex-start dg-chart-label-flex-end "
-							+"dg-chart-label-flex-center dg-chart-label-flex-between");
-	$(".dg-chart-label-item", chart.internal()).remove();
-};
-
-SPT.labelOn = function(chart, type, handler)
-{
-	var handlerDelegation = function(htmlEvent)
-	{
-		var $label = $(this);
-		var chartEvent = SPT.chartEventForHtml(chart, type, htmlEvent);
-		SPT.labelSetChartEventData(chart, chartEvent, htmlEvent, $label);
-		
-		chart.callEventHandler(handler, chartEvent);
-	};
-	
-	chart.registerEventHandlerDelegation(type, handler, handlerDelegation);
-	$(chart.internal()).on(type, ".dg-chart-label-item", handlerDelegation);
-};
-
-SPT.labelOff = function(chart, type, handler)
-{
-	var internal = $(chart.internal());
-	
-	chart.removeEventHandlerDelegation(type, handler, function(et, eh, ehd)
-	{
-		internal.off(et, ".dg-chart-label-item", ehd);
-	});
-};
-
-SPT.labelSetChartEventData = function(chart, chartEvent, htmlEvent, $label)
-{
-	var renderOptions= chart.renderOptions();
-	var dg = renderOptions.dg;
-	var dataSignNames = dg.dataSignNames;
-	
-	var chartData = $label.data("_dgChartLabelChartData");
-	
-	var data = {};
-	
-	if(chartData)
-	{
-		data[dataSignNames.name] = chartData.name;
-		data[dataSignNames.value] = chartData.value;
-	}
-	
-	chart.eventData(chartEvent, data);
-	chart.eventOriginalDataIndex(chartEvent, chart.originalDataIndex(chartData));
 };
 
 //下拉框
@@ -6629,7 +6390,7 @@ SPT.selectRender = function(chart, options)
 	if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
 		$select.addClass("dg-fill-parent");
 	if(options.selectStyle)
-		chart.elementStyle($select, options.selectStyle);
+		CF.eleStyle($select, options.selectStyle);
 	
 	chart.internal($select[0]);
 };
@@ -6708,7 +6469,7 @@ SPT.selectUpdate = function(chart, chartResult)
 		
 		var itemStyle = SPT.evalLocalPlainObj(optData.itemStyle, renderOptions.itemStyle);
 		if(itemStyle)
-			chart.elementStyle($opt, itemStyle);
+			CF.eleStyle($opt, itemStyle);
 	}
 };
 

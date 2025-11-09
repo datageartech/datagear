@@ -2536,25 +2536,6 @@ chartProto.themeStyleSheet = function(name, css, force)
 };
 
 /**
- * 获取/设置HTML元素的style样式。
- * 具体参考CF.eleStyle()函数。
- */
-chartProto.elementStyle = function(element, css)
-{
-	return CF.eleStyle.apply(CF, arguments);
-};
-
-/**
- * 拼接CSS样式字符串。
- * 
- * @param css 同CF.styleString()函数参数。
- */
-chartProto.styleString = function(css)
-{
-	return CF.styleString.apply(CF, arguments);
-};
-
-/**
  * 获取/设置数据集别名。
  * 
  * @param dataSetBind 数据集绑定或其索引
