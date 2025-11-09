@@ -6408,7 +6408,7 @@ SPT.selectRenderer = function(plugin, config)
 				CF.eleAttr(selectEle, "size", options.size);
 			
 			if(options.fillParent === true || (options.fillParent == "auto" && !isDropdown))
-				CF.eleAddClass(selectEle, "dg-fill-parent");
+				CF.eleAddClass(selectEle, "dg-chart-select-full");
 			
 			if(!CF.isEmpty(options.selectStyle))
 				CF.eleStyle(selectEle, options.selectStyle);
@@ -6586,190 +6586,201 @@ SPT.selectRenderer = function(plugin, config)
 	return renderer;
 };
 
-//原始数据
-
-SPT.rawDataRender = function(chart)
-{
-	var ele = chart.elementJquery();
-	ele.addClass("dg-chart-rawdata");
-	
-	$("<div class='dg-chart-rawdata-title' />").text(chart.name()).appendTo(ele);
-	$("<div class='dg-chart-rawdata-content' />").appendTo(ele);
-};
-
-SPT.rawDataUpdate = function(chart, chartResult)
-{
-	var ele = chart.elementJquery();
-	var $content = $("> .dg-chart-rawdata-content", ele);
-	$(".dg-chart-rawdata-ds", $content).remove();
-	
-	var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
-	
-	for(var i=0; i<dataSetBinds.length; i++)
-	{
-		var dataSetBind = dataSetBinds[i];
-		var dataSetAlias = chart.dataSetAlias(dataSetBind);
-		var result = chart.resultOf(chartResult, dataSetBind);
-		var datas = chart.resultDatas(result);
-		
-		var $ds = $("<div class='dg-chart-rawdata-ds' />").appendTo($content);
-		$("<div class='dg-chart-rawdata-ds-name' />").text(dataSetAlias).appendTo($ds);
-		var $dsd = $("<div class='dg-chart-rawdata-ds-data' />").appendTo($ds);
-		
-		for(var j=0; j<datas.length; j++)
-		{
-			var di = CF.toJsonString(datas[j]);
-			$("<div class='dg-chart-rawdata-ds-data-item' />").text(di).appendTo($dsd);
-		}
-	}
-};
-
-SPT.rawDataDestroy = function(chart)
-{
-	var ele = chart.elementJquery();
-	
-	ele.removeClass("dg-chart-rawdata");
-	$("> .dg-chart-rawdata-title", ele).remove();
-	$("> .dg-chart-rawdata-content", ele).remove();
-};
-
-SPT.rawDataAdditions = { supportIgnoreFetch: true };
-
-SPT.rawDataResize = function(chart){};
-SPT.rawDataOn = function(chart, type, handler){};
-SPT.rawDataOff = function(chart, type, handler){};
-
 //自定义
 
-SPT.customAsyncRender = function(chart)
+SPT.customRenderer = function(plugin, config)
 {
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	if(!customRenderer || customRenderer.asyncRender == null)
-		return false;
-	
-	if(typeof(customRenderer.asyncRender) == "function")
-		return customRenderer.asyncRender(chart);
-	
-	return (customRenderer.asyncRender == true);
-};
-
-SPT.customRender = function(chart)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	//如果未定义，则采用默认方式，避免空白页，又可以让用户浏览和调试数据
-	if(!customRenderer)
+	config = CF.extend(true,
 	{
-		SPT.rawDataRender(chart);
-	}
-	else
+	},
+	config);
+	
+	var renderer =
 	{
-		customRenderer.render(chart);
-	}
-};
-
-SPT.customAsyncUpdate = function(chart, chartResult)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	if(!customRenderer || customRenderer.asyncUpdate == null)
-		return false;
-	
-	if(typeof(customRenderer.asyncUpdate) == "function")
-		return customRenderer.asyncUpdate(chart, chartResult);
-	
-	return (customRenderer.asyncUpdate == true);
-};
-
-SPT.customUpdate = function(chart, chartResult)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	//如果未定义，则采用默认方式，避免空白页，又可以让用户浏览和调试数据
-	if(!customRenderer)
-	{
-		SPT.rawDataUpdate(chart, chartResult);
-	}
-	else
-	{
-		customRenderer.update(chart, chartResult);
-	}
-};
-
-SPT.customResize = function(chart)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	//即使customRenderer未定义，resize操作也可以不抛出异常，因为不影响主体功能
-	
-	if(customRenderer && customRenderer.resize)
-		customRenderer.resize(chart);
-};
-
-SPT.customDestroy = function(chart)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	if(!customRenderer)
-	{
-		SPT.rawDataDestroy(chart);
-	}
-	else if(customRenderer.destroy)
-	{
-		customRenderer.destroy(chart);
-	}
-};
-
-SPT.customOn = function(chart, type, handler)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart);
-	
-	if(customRenderer.on)
-		customRenderer.on(chart, type, handler);
-	else
-		throw new Error("chart renderer 's [on] rqeuired");
-};
-
-SPT.customOff = function(chart, type, handler)
-{
-	var customRenderer = SPT.customGetCustomRenderer(chart);
-	
-	if(customRenderer.off)
-		customRenderer.off(chart, type, handler);
-	else
-		throw new Error("chart renderer 's [off] rqeuired");
-};
-
-SPT.customAdditions = function(chart)
-{
-	var re = null;
-	
-	var customRenderer = SPT.customGetCustomRenderer(chart, true);
-	
-	if(customRenderer)
-	{
-		if(customRenderer.additions)
-			re = (CF.isFunction(customRenderer.additions) ? customRenderer.additions(chart) : customRenderer.additions);
-		else
-			re = null;
-	}
-	else
-	{
-		re = SPT.rawDataAdditions;
-	}
-	
-	return re;
-};
-
-SPT.customGetCustomRenderer = function(chart, nullable)
-{
-	nullable = (nullable == null ? false : nullable);
-	
-	var renderer = chart.renderer();
-	
-	if(renderer == null && !nullable)
-		throw new Error("chart renderer required");
+		asyncRender: function(chart)
+		{
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			if(!renderer || renderer.asyncRender == null)
+				return false;
+			
+			if(CF.isFunction(renderer.asyncRender))
+				return renderer.asyncRender(chart);
+			else
+				return (renderer.asyncRender == true);
+		},
+		
+		render: function(chart)
+		{
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			if(renderer && renderer.render != null)
+				renderer.render(chart);
+			else
+				this._rawRender(chart);
+		},
+		
+		asyncUpdate: function(chart, chartResult)
+		{
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			if(!renderer || renderer.renderer == null)
+				return false;
+			
+			if(CF.isFunction(renderer.asyncUpdate))
+				return renderer.asyncUpdate(chart, chartResult);
+			else
+				return (renderer.asyncUpdate == true);
+		},
+		
+		update: function(chart, chartResult)
+		{
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			if(renderer && renderer.update != null)
+				renderer.update(chart, chartResult);
+			else
+				this._rawUpdate(chart, chartResult);
+		},
+		
+		destroy: function(chart)
+		{
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			if(renderer && renderer.destroy != null)
+				renderer.destroy(chart);
+			else
+				this._rawDestroy(chart);
+		},
+		
+		on: function(chart, type, handler)
+		{
+			var renderer = this._getCustomRenderer(chart);
+			
+			if(renderer.on != null)
+				renderer.on(chart, type, handler);
+			else
+				throw new Error("chart renderer 's [on] rqeuired");
+		},
+		
+		off: function(chart, type, handler)
+		{
+			var renderer = this._getCustomRenderer(chart);
+			
+			if(renderer.off != null)
+				renderer.off(chart, type, handler);
+			else
+				throw new Error("chart renderer 's [off] rqeuired");
+		},
+		
+		resize: function(chart)
+		{
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			//即使customRenderer未定义，resize操作也可以不抛出异常，因为不影响主体功能
+			if(renderer && renderer.resize != null)
+				renderer.resize(chart);
+		},
+		
+		additions: function(chart)
+		{
+			var re = null;
+			
+			var renderer = this._getCustomRenderer(chart, true);
+			
+			if(renderer)
+			{
+				if(renderer.additions)
+					re = (CF.isFunction(renderer.additions) ? renderer.additions(chart) : renderer.additions);
+				else
+					re = null;
+			}
+			else
+			{
+				re = this._rawAdditions;
+			}
+			
+			return re;
+		},
+		
+		_rawRender: function(chart)
+		{
+			var chartEle = chart.element();
+			CF.eleAddClass(chartEle, "dg-chart-rawdata");
+			
+			var containerEle = CF.eleCreate("div", "dg-chart-container");
+			CF.eleAppend(chartEle, containerEle);
+			
+			var titleEle = CF.eleCreate("div", "dg-chart-rawdata-title");
+			CF.eleHtml(titleEle, chart.name());
+			CF.eleAppend(containerEle, titleEle);
+			
+			var contentEle = CF.eleCreate("div", "dg-chart-rawdata-content");
+			CF.eleAppend(containerEle, contentEle);
+			
+			chart.internal(containerEle);
+		},
+		
+		_rawUpdate: function(chart, chartResult)
+		{
+			var internal = chart.internal();
+			var contentEle = CF.eleOfSelector(".dg-chart-rawdata-content", internal);
+			
+			CF.eleEmpty(contentEle);
+			
+			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			
+			for(let i=0; i<dataSetBinds.length; i++)
+			{
+				let dataSetBind = dataSetBinds[i];
+				let dataSetAlias = chart.dataSetAlias(dataSetBind);
+				let result = chart.resultOf(chartResult, dataSetBind);
+				let datas = chart.resultDatas(result);
+				
+				let dsEle = CF.eleCreate("div", "dg-chart-rawdata-dst");
+				CF.eleAppend(contentEle, dsEle);
+				
+				let nameEle = CF.eleCreate("div", "dg-chart-rawdata-dst-name");
+				CF.eleHtml(nameEle, dataSetAlias);
+				CF.eleAppend(dsEle, nameEle);
+				
+				let dataEle = CF.eleCreate("div", "dg-chart-rawdata-dst-data");
+				CF.eleAppend(dsEle, dataEle);
+				
+				for(let j=0; j<datas.length; j++)
+				{
+					let di = CF.toJsonString(datas[j]);
+					
+					let itemEle = CF.eleCreate("div", "dg-chart-rawdata-dst-data-item");
+					CF.eleText(itemEle, di);
+					CF.eleAppend(dataEle, itemEle);
+				}
+			}
+		},
+		
+		_rawDestroy: function(chart)
+		{
+			var chartEle = chart.element();
+			var internal = chart.internal();
+			
+			CF.eleRemoveClass(chartEle, "dg-chart-rawdata");
+			CF.eleRemove(internal);
+		},
+		
+		_rawAdditions: { supportIgnoreFetch: true },
+		
+		_getCustomRenderer: function(chart, nullable)
+		{
+			nullable = (nullable == null ? false : nullable);
+			
+			var renderer = chart.renderer();
+			
+			if(renderer == null && !nullable)
+				throw new Error("chart renderer required");
+			
+			return renderer;
+		}
+	};
 	
 	return renderer;
 };

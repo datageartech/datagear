@@ -243,52 +243,41 @@
 
 /*下拉框图表*/
 .dg-chart-select{}
-.dg-chart-select .dg-chart-select-select.dg-fill-parent{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
+.dg-chart-select .dg-chart-select-select.dg-chart-select-full{
+	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
 }
 
 /**原始数据图表*/
 .dg-chart-rawdata{
-	position: relative;
+}
+.dg-chart-rawdata .dg-chart-container{
+	/*不采用绝对定位可以适应父元素未设尺寸的场景*/
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
 }
 .dg-chart-rawdata .dg-chart-rawdata-title{
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 1.6em;
+	flex-grow: 0;
 	text-align: center;
 	font-weight: bold;
 	font-size: 1.1em;
 }
 .dg-chart-rawdata .dg-chart-rawdata-content{
-	position: absolute;
-	left: 0;
-	top: 1.6em;
-	right: 0;
-	bottom: 0;
+	flex-grow: 1;
 	overflow: auto;
 }
-.dg-chart-rawdata .dg-chart-rawdata-ds,
-.dg-chart-rawdata .dg-chart-rawdata-ds-name,
-.dg-chart-rawdata .dg-chart-rawdata-ds-data{
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-}
-.dg-chart-rawdata .dg-chart-rawdata-ds-name{
+.dg-chart-rawdata .dg-chart-rawdata-dst-name{
 	font-weight: bold;
 }
-.dg-chart-rawdata .dg-chart-rawdata-ds-data{
+.dg-chart-rawdata .dg-chart-rawdata-dst-data{
 	padding: 0.2em 1em;
 }
-.dg-chart-rawdata .dg-chart-rawdata-ds-data-item{
+.dg-chart-rawdata .dg-chart-rawdata-dst-data-item{
 	padding-top: 0.1em;
 	padding-bottom: 0.1em;
 }
