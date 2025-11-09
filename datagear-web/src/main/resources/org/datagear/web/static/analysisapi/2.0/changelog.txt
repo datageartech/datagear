@@ -50,5 +50,6 @@ dashboard.renderContext -> dashboard.renderContext()
 dashboard.loadChart()	*
 dashboard.loadCharts()	*
 dashboard.loadUnsolvedCharts()	*
-dashboard.originalDataIndex()	x	
+dashboard.originalDataIndex()	x
+dashboard.refreshData()			x
 dashboard.renderContext()返回对象格式由{attributes:{...}}改为{...}

@@ -737,7 +737,7 @@ chartProto.refresh = function()
 	//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
 	//而导致refresh()失效
 	
-	this._requestRefreshData();
+	this._requestRefresh();
 };
 
 var UPDATE_TIME_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
@@ -750,24 +750,24 @@ chartProto._updateTime = function(time)
 		this.liveData(UPDATE_TIME_LIVE_DATA_NAME, time);
 };
 
-var REQ_REFRESH_DATAS_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshDatas";
+var REQUEST_REFRESH_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshes";
 
-chartProto._requestRefreshData = function()
+chartProto._requestRefresh = function()
 {
 	var chartQuery = this.dashboard()._buildChartQuery(this);
-	var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
+	var rrds = this.liveData(REQUEST_REFRESH_LIVE_DATA_NAME);
 	if(rrds == null)
 	{
 		rrds = [];
-		this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME, rrds);
+		this.liveData(REQUEST_REFRESH_LIVE_DATA_NAME, rrds);
 	}
 	
 	rrds.push(chartQuery);
 };
 
-chartProto._isRequestRefreshData = function()
+chartProto._isRequestRefresh = function()
 {
-	var rrds = this.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
+	var rrds = this.liveData(REQUEST_REFRESH_LIVE_DATA_NAME);
 	return (rrds != null && rrds.length > 0);
 };
 
@@ -1435,19 +1435,6 @@ dashboardProto.resizeAllCharts = function()
 };
 
 /**
- * 从服务端获取并更新图表数据。
- * 
- * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
- */
-dashboardProto.refreshData = function(chartInfo)
-{
-	this._assertActive();
-	
-	var chart = this.chartOf(chartInfo);
-	chart.refresh();
-};
-
-/**
  * 是否正在监视处理看板图表。
  */
 dashboardProto.isHandlingCharts = function()
@@ -1530,7 +1517,7 @@ dashboardProto._doHandleCharts = function()
 			//由chart.refresh()函数触发
 			if(wait == 2)
 			{
-				let rrds = chart.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
+				let rrds = chart.liveData(REQUEST_REFRESH_LIVE_DATA_NAME);
 				chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
 			}
 			
@@ -1600,9 +1587,9 @@ dashboardProto._isWaitForUpdate = function(chart, currentTime)
 	else
 	{
 		var updateInterval = chart.updateInterval();
-		var isRequestRefreshData = chart._isRequestRefreshData();
+		var isRequestRefresh = chart._isRequestRefresh();
 		
-		if(isRequestRefreshData)
+		if(isRequestRefresh)
 		{
 			wait = 2;
 		}
@@ -1622,7 +1609,7 @@ dashboardProto._isWaitForUpdate = function(chart, currentTime)
 		if(wait == 1)
 		{
 			//应升级为优先级更高的刷新操作，且无需判断参数是否准备好
-			if(isRequestRefreshData)
+			if(isRequestRefresh)
 			{
 				wait = 2;
 			}
