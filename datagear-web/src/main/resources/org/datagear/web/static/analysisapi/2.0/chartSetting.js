@@ -2012,7 +2012,7 @@
 							CST.closeChartSettingParamPanel(chart);
 						}
 						
-						chart.refreshData();
+						chart.refresh();
 					}
 				}
 				else

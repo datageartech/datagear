@@ -5355,7 +5355,7 @@ SPT.tableRenderer = function(plugin, config)
 				
 				var refreshInfo = chart.liveData("serverSidePagingRefreshInfo");
 				
-				//由图表API触发，此时已获取到数据，不应再执行chart.refreshData()函数
+				//由图表API触发，此时已获取到数据，不应再执行chart.refresh()函数
 				if(refreshInfo != null)
 				{
 					chart.liveData("serverSidePagingRefreshInfo", null);
@@ -5368,7 +5368,7 @@ SPT.tableRenderer = function(plugin, config)
 					serverSidePaging.param(data, chart);
 					
 					if(chart.isActive())
-						chart.refreshData();
+						chart.refresh();
 				}
 			};
 			
@@ -5397,7 +5397,7 @@ SPT.tableRenderer = function(plugin, config)
 					
 					chart.liveData("serverSidePagingAjaxInfos", []);
 				}
-				//由图表API触发，比如：参数表单提交、chart.refreshData()
+				//由图表API触发，比如：参数表单提交、chart.refresh()
 				else
 				{
 					var pagingState = (serverSidePaging.state == null ? null : serverSidePaging.state(chart));

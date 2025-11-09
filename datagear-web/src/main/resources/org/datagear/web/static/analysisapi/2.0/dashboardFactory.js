@@ -706,7 +706,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 	{
 		CF.executeSilently(function()
 		{
-			targetCharts[i].refreshData();
+			targetCharts[i].refresh();
 		});
 	}
 };
@@ -721,7 +721,7 @@ chartProto._isLinkByEventType = function(link, type)
  * 从服务端获取并更新图表数据。
  * 此函数是基于状态实现的，在一个请求内的多次重复调用只会刷新一次。
  */
-chartProto.refreshData = function()
+chartProto.refresh = function()
 {
 	this._assertActive();
 	
@@ -733,9 +733,9 @@ chartProto.refreshData = function()
 	}
 	
 	//这里不能使用this.statusPreUpdate(true)的方式实现
-	//当在A图表监听器的update函数中调用参数化B图表的refreshData()时，
+	//当在A图表监听器的update函数中调用参数化B图表的refresh()时，
 	//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
-	//而导致refreshData()失效
+	//而导致refresh()失效
 	
 	this._requestRefreshData();
 };
@@ -1347,7 +1347,7 @@ dashboardProto.renderForm = function(form, config)
 			{
 				CF.executeSilently(function()
 				{
-					charts[i].refreshData();
+					charts[i].refresh();
 				});
 			}
 		}
@@ -1444,7 +1444,7 @@ dashboardProto.refreshData = function(chartInfo)
 	this._assertActive();
 	
 	var chart = this.chartOf(chartInfo);
-	chart.refreshData();
+	chart.refresh();
 };
 
 /**
@@ -1527,7 +1527,7 @@ dashboardProto._doHandleCharts = function()
 			
 			let chartQuery = null;
 			
-			//由chart.refreshData()函数触发
+			//由chart.refresh()函数触发
 			if(wait == 2)
 			{
 				let rrds = chart.liveData(REQ_REFRESH_DATAS_LIVE_DATA_NAME);
@@ -1582,7 +1582,7 @@ dashboardProto._isWaitForRender = function(chart)
  * 给定图表是否在等待更新数据。
  * @param chart
  * @param currentTime
- * @returns 0 否；1 是，但不是refreshData()触发；2 是，并且由refreshData()触发
+ * @returns 0 否；1 是，但不是refresh()触发；2 是，并且由refresh()触发
  */
 dashboardProto._isWaitForUpdate = function(chart, currentTime)
 {
