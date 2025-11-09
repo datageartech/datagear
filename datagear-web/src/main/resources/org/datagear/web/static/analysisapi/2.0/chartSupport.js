@@ -6130,7 +6130,7 @@ SPT.labelRenderer = function(plugin, config)
 				valueFirst: config.valueFirst,
 				//是否隐藏标签名
 				hideName: config.hideName,
-				//容器样式，格式允许：CSS字符串、CSS对象
+				//容器元素样式，格式允许：CSS字符串、CSS对象
 				containerStyle: null,
 				//标签条目元素公用css样式，格式允许：CSS字符串、CSS对象
 				itemStyle: null,
@@ -6138,12 +6138,14 @@ SPT.labelRenderer = function(plugin, config)
 				nameStyle: null,
 				//标签值元素公用css样式，格式允许：CSS字符串、CSS对象
 				valueStyle: null,
-				
+				//容器元素类名
 				containerClass: null,
+				//标签条目元素类名
 				itemClass: null,
+				//标签名元素类名
 				nameClass: null,
+				//标签值元素类名
 				valueClass: null,
-				
 				//标签卡数据
 				//元素结构:
 				//{
@@ -6151,12 +6153,18 @@ SPT.labelRenderer = function(plugin, config)
 				//  name: "...",
 				//  //标签值
 				//  value: ...,
-				//  //可选，标签条目元素css样式，格式允许：CSS字符串、CSS对象
-				//  itemStyle: ...,
-				//  //可选，标签名元素css样式，格式允许：CSS字符串、CSS对象
-				//  nameStyle: ...,
-				//  //可选，标签值元素css样式，格式允许：CSS字符串、CSS对象
-				//  valueStyle: ...
+				//  //标签条目元素css样式，格式允许：CSS字符串、CSS对象
+				//  itemStyle: null,
+				//  //标签名元素css样式，格式允许：CSS字符串、CSS对象
+				//  nameStyle: null,
+				//  //标签值元素css样式，格式允许：CSS字符串、CSS对象
+				//  valueStyle: null,
+				//  //标签条目元素类名
+				//  itemClass: null,
+				//  //标签名元素类名
+				//  nameClass: null,
+				//  //标签值元素类名
+				//  valueClass: null
 				//}
 				data: []
 			};
@@ -6292,13 +6300,20 @@ SPT.labelRenderer = function(plugin, config)
 				let nameEle = CF.eleOfSelector(".dg-chart-label-name", itemEle);
 				let valueEle = CF.eleOfSelector(".dg-chart-label-value", itemEle);
 				
-				CF.eleHtml(nameEle, (di.name == null ? "" : di.name));
-				CF.eleHtml(valueEle, (di.value == null ? "" : di.value));
-				CF.eleData(itemEle, bindDataName, di);
+				CF.eleAttr(itemEle, "class", "dg-chart-label-item" + (CF.isEmpty(options.itemClass) ? "" : " "+options.itemClass)
+					+ (CF.isEmpty(di.itemClass) ? "" : " "+di.itemClass));
+				CF.eleAttr(nameEle, "class", "dg-chart-label-name" + (CF.isEmpty(options.nameClass) ? "" : " "+options.nameClass)
+					+ (CF.isEmpty(di.nameClass) ? "" : " "+di.nameClass));
+				CF.eleAttr(valueEle, "class", "dg-chart-label-value" + (CF.isEmpty(options.valueClass) ? "" : " "+options.valueClass)
+					+ (CF.isEmpty(di.valueClass) ? "" : " "+di.valueClass));
 				
 				CF.eleStyle(itemEle, options.itemStyle, di.itemStyle);
 				CF.eleStyle(nameEle, options.nameStyle, di.nameStyle);
 				CF.eleStyle(valueEle, options.valueStyle, di.valueStyle);
+				
+				CF.eleHtml(nameEle, (di.name == null ? "" : di.name));
+				CF.eleHtml(valueEle, (di.value == null ? "" : di.value));
+				CF.eleData(itemEle, bindDataName, di);
 			}
 		},
 		
