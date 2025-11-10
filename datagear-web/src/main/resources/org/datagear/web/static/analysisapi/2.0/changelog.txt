@@ -12,6 +12,7 @@ chart.name -> chart.name()
 chart.updateInterval -> chart.updateInterval()
 chart.plugin -> chart.plugin()
 chart.renderContext -> chart.renderContext()
+chart.renderContextAttr() -> chart.renderContextValue()
 chart.dataSetFieldSign	->	dataSetFieldSigns()
 chart.loadMap()		x
 chart.echartsInit()		x
@@ -47,6 +48,7 @@ dg-chart-auto-resize默认值为true
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()
 dashboard.renderContext -> dashboard.renderContext()
+dashboard.renderContextAttr() -> dashboard.renderContextValue()
 dashboard.loadChart()	*
 dashboard.loadCharts()	*
 dashboard.loadUnsolvedCharts()	*

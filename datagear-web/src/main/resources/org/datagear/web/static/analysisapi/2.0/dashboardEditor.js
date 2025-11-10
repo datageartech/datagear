@@ -3576,7 +3576,7 @@
 	//结构参考：org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfo
 	editor._editHtmlInfo = function()
 	{
-		return this.dashboard.renderContextAttr(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
+		return this.dashboard.renderContextValue(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
 	};
 	
 	//反转义编辑HTML（转义操作由后台执行）

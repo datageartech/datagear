@@ -2103,12 +2103,12 @@ chartProto.internal = function(internal)
 /**
  * 获取/设置图表渲染上下文的属性值。
  * 
- * @param attrName
- * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+ * @param name
+ * @param value 要设置的属性值，可选，不设置则执行获取操作
  */
-chartProto.renderContextAttr = function(attrName, attrValue)
+chartProto.renderContextValue = function(name, value)
 {
-	return CF.renderContextAttr(this.renderContext(), attrName, attrValue);
+	return CF.renderContextValue(this.renderContext(), name, value);
 };
 
 /**
@@ -4917,15 +4917,15 @@ CF.builtinPropName = function(name)
  * 获取/设置渲染上下文的属性值。
  * 
  * @param renderContext
- * @param attrName
- * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+ * @param name
+ * @param value 要设置的属性值，可选，不设置则执行获取操作
  */
-CF.renderContextAttr = function(renderContext, attrName, attrValue)
+CF.renderContextValue = function(renderContext, name, value)
 {
-	if(attrValue === undefined)
-		return renderContext[attrName];
+	if(value === undefined)
+		return renderContext[name];
 	else
-		return renderContext[attrName] = attrValue;
+		return renderContext[name] = value;
 };
 
 /**
@@ -4936,7 +4936,7 @@ CF.renderContextAttr = function(renderContext, attrName, attrValue)
  */
 CF.renderContextWebContext = function(renderContext, webContext)
 {
-	return CF.renderContextAttr(renderContext, renderContextAttrConst.webContext, webContext);
+	return CF.renderContextValue(renderContext, renderContextAttrConst.webContext, webContext);
 };
 
 /**
@@ -4978,7 +4978,7 @@ CF.renderContextWebContextPath = function(renderContext, nullable)
  */
 CF.renderContextChartTheme = function(renderContext, chartTheme)
 {
-	return CF.renderContextAttr(renderContext, renderContextAttrConst.chartTheme, chartTheme);
+	return CF.renderContextValue(renderContext, renderContextAttrConst.chartTheme, chartTheme);
 };
 
 /**

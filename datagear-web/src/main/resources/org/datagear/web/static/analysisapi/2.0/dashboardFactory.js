@@ -276,7 +276,7 @@ DF.initRenderContext = function(renderContext)
 	var chartTheme = CF.renderContextChartTheme(renderContext);
 	if(!chartTheme)
 	{
-		var dashboardTheme = CF.renderContextAttr(renderContext, renderContextAttrConst.dashboardTheme);
+		var dashboardTheme = CF.renderContextValue(renderContext, renderContextAttrConst.dashboardTheme);
 		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
 		CF.renderContextChartTheme(renderContext, chartTheme);
 	}
@@ -1150,13 +1150,13 @@ dashboardProto.renderedChart = function(element)
 /**
  * 获取/设置渲染上下文的属性值。
  * 
- * @param attrName
- * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+ * @param name
+ * @param value 要设置的属性值，可选，不设置则执行获取操作
  */
-dashboardProto.renderContextAttr = function(attrName, attrValue)
+dashboardProto.renderContextValue = function(name, value)
 {
 	var rc = this.renderContext();
-	return CF.renderContextAttr(rc, attrName, attrValue);
+	return CF.renderContextValue(rc, name, value);
 };
 
 /**
@@ -2495,7 +2495,7 @@ dashboardProto.serverDate = function(asMillisecond)
  */
 dashboardProto.user = function()
 {
-	var user = this.renderContextAttr(renderContextAttrConst.user);
+	var user = this.renderContextValue(renderContextAttrConst.user);
 	
 	if(user == null)
 		throw new Error("get user unsupport");
