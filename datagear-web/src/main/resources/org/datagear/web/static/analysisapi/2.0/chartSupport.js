@@ -30,19 +30,11 @@
 
 var CF = global.chartFactory;
 var SPT = (CF.chartSupport || (CF.chartSupport = {}));
-
-//扩展ECharts图表选项：地图名
-//默认的ECharts地图类图表配置地图名稍微麻烦，所有这里的内置图表都支持此快捷方式设置地图名选项
-SPT.MAP_NAME_OPTION_NAME = "mapName";
-
-//扩展ECharts图表选项：类目轴数据排序配置选项名
-//对于多数据集场景，如果采用数据先后顺序提取的轴数据，顺序可能不符合预期，需要重新排序
-SPT.SORT_AXIS_DATA_OPTION_NAME = "sortAxisData";
+var EU = (SPT.echartsUtil || (SPT.echartsUtil = {}));
 
 SPT.ECHARTS_RENDERER_DEPEND =
 [
-	{ name: "echarts", acceptVersion: ">=5.0" },
-	{ name: "chartUtil.echarts", acceptVersion: ">=1.0" }
+	{ name: "echarts", acceptVersion: ">=5.0" }
 ];
 
 //图表数据属性名：原始类别
@@ -71,6 +63,24 @@ SPT.ORIGINAL_TARGET_ID_PROP_NAME = "originalTargetId";
 
 //图表数据属性名：原始目标名
 SPT.ORIGINAL_TARGET_NAME_PROP_NAME = "originalTargetName";
+
+//图表元素属性名：ECharts主题名
+EU.ELE_ATTR_ECHARTS_THEME = "dg-echarts-theme";
+
+//图表主题中的ECharts主题名属性名
+EU.THEME_PROP_ECHARTS_THEME_NAME = "DG_ECHARTS_THEME_NAME";
+
+//注册地图状态
+//键："地图名"；值：{ loadPromise: Promise }
+EU.MAP_REGISTER_STATES = {};
+
+//扩展ECharts图表选项：地图名
+//默认的ECharts地图类图表配置地图名稍微麻烦，所有这里的内置图表都支持此快捷方式设置地图名选项
+EU.MAP_NAME_OPTION_NAME = "mapName";
+
+//扩展ECharts图表选项：类目轴数据排序配置选项名
+//对于多数据集场景，如果采用数据先后顺序提取的轴数据，顺序可能不符合预期，需要重新排序
+EU.SORT_AXIS_DATA_OPTION_NAME = "sortAxisData";
 
 //折线图
 
@@ -129,8 +139,8 @@ SPT.lineRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -198,11 +208,11 @@ SPT.lineRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
-					SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "line"); });
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+					EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, "line"); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series)
@@ -225,7 +235,7 @@ SPT.lineRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -281,8 +291,8 @@ SPT.barRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -349,11 +359,11 @@ SPT.barRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
-							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "bar"); });
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, "bar"); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series, dataSetAlias)
@@ -369,7 +379,7 @@ SPT.barRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -447,8 +457,8 @@ SPT.barPolarRenderer = function(plugin, config)
 				}
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -523,11 +533,11 @@ SPT.barPolarRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			(isAngleAxis ? (options.angleAxis = {}) : (options.radiusAxis = {}));
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
-							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "bar"); });
+			EU.inflateUpdateAxisData(chart, options, (isAngleAxis ? options.angleAxis : options.radiusAxis),
+							EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, "bar"); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series, dataSetAlias)
@@ -544,7 +554,7 @@ SPT.barPolarRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -579,7 +589,7 @@ SPT.pieRenderer = function(plugin, config)
 					trigger: "item",
 					formatter: function(params)
 					{
-						return SPT.customEChartsTooltip(params, (pi) =>
+						return EU.customTooltip(params, (pi) =>
 						{
 							let re = { value: pi.value + " ("+pi.percent+"%)" };
 							return re;
@@ -593,8 +603,8 @@ SPT.pieRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -667,12 +677,12 @@ SPT.pieRenderer = function(plugin, config)
 			
 			var options = { legend: {}, series: series };
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.legend, SPT.inflateAxisDataExtractors.propertyName());
+			EU.inflateUpdateAxisData(chart, options, options.legend, EU.axisDataExtractors.propertyName());
 			SPT.convertDataPropValueToName(options.legend);
 			this._evalSeriesLayout(chart, options);
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series)
@@ -720,7 +730,7 @@ SPT.pieRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -800,8 +810,8 @@ SPT.gaugeRenderer = function(plugin, config)
 				});
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -867,9 +877,9 @@ SPT.gaugeRenderer = function(plugin, config)
 			max = (max == null ? 100 : max);
 			
 			var options = { series: [ { type: "gauge", name: seriesName, min: min, max: max, data: seriesData } ] };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_evalAxisLineWidth: function(chart, divide)
@@ -920,7 +930,7 @@ SPT.gaugeRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -997,8 +1007,8 @@ SPT._scatterRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -1074,11 +1084,11 @@ SPT._scatterRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
-							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, config.scatterType); });
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, config.scatterType); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series)
@@ -1088,7 +1098,7 @@ SPT._scatterRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -1165,8 +1175,8 @@ SPT._scatterCoordRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -1238,11 +1248,11 @@ SPT._scatterCoordRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
-							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, config.scatterType); });
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, config.scatterType); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series, hasWeightField)
@@ -1255,7 +1265,7 @@ SPT._scatterCoordRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -1295,8 +1305,8 @@ SPT.radarRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -1347,7 +1357,7 @@ SPT.radarRenderer = function(plugin, config)
 					indicator.max = config.defaultIndicatorMax;
 			});
 			
-			if(SPT.sortAxisDataOption(renderOptions))
+			if(EU.sortAxisDataOption(renderOptions))
 			{
 				let tmpAxisData = [];
 				indicatorData.forEach((indicator) =>
@@ -1357,8 +1367,8 @@ SPT.radarRenderer = function(plugin, config)
 				
 				let tmpOptions = { tmpAxis: { data: tmpAxisData }, series: tmpSeries };
 				
-				SPT.sortEChartsUpdateAxisData(renderOptions, tmpOptions, tmpOptions.tmpAxis,
-								true, true, SPT.inflateAxisDataExtractors.propertyName());
+				EU.sortUpdateAxisData(renderOptions, tmpOptions, tmpOptions.tmpAxis,
+								true, true, EU.axisDataExtractors.propertyName());
 				
 				indicatorData.sort((a, b) =>
 				{
@@ -1388,9 +1398,9 @@ SPT.radarRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			var series = [ { name: seriesName, type: "radar", data: seriesData } ];
 			var options = { legend: { data: legendData }, radar: { indicator: indicatorData }, series: series };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		//行式雷达网数据处理
@@ -1544,7 +1554,7 @@ SPT.radarRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -1575,8 +1585,8 @@ SPT.funnelRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -1617,13 +1627,13 @@ SPT.funnelRenderer = function(plugin, config)
 			
 			var series = [ {type: "funnel", name: seriesName, min: dataRange.min, max: dataRange.max, data: seriesData, sort: config.sort } ];
 			var options = { legend: { data: legendData }, series: series };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -1662,13 +1672,13 @@ SPT.mapRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options,
+			options = EU.prepareRenderOptions(chart, options,
 				(chart, renderOptions) =>
 				{
-					SPT.echartsMapChartInitMap(chart, renderOptions);
+					EU.initChartMap(chart, renderOptions);
 				});
 			
-			SPT.echartsMapChartRender(chart, options);
+			EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1712,12 +1722,12 @@ SPT.mapRenderer = function(plugin, config)
 				series[0].map = map;
 			
 			var options = { visualMap: visualMap, series: series };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsMapChartUpdate(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.updateMapChart(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -1772,7 +1782,7 @@ SPT._mapScatterRenderer = function(plugin, config)
 					//无值时仍会显示经度，所以这里自定义了formatter选项
 					formatter: function(params)
 					{
-						return SPT.customEChartsTooltip(params, (pi) =>
+						return EU.customTooltip(params, (pi) =>
 						{
 							let re = {};
 							
@@ -1791,13 +1801,13 @@ SPT._mapScatterRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options,
+			options = EU.prepareRenderOptions(chart, options,
 				(chart, renderOptions) =>
 				{
-					SPT.echartsMapChartInitMap(chart, renderOptions);
+					EU.initChartMap(chart, renderOptions);
 				});
 			
-			SPT.echartsMapChartRender(chart, options);
+			EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1876,8 +1886,8 @@ SPT._mapScatterRenderer = function(plugin, config)
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsMapChartUpdate(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.updateMapChart(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series, hasValueField)
@@ -1888,7 +1898,7 @@ SPT._mapScatterRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -1918,7 +1928,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 					//ECharts-6.0默认tooltip显示有缺陷，所以这里自定义了formatter选项
 					formatter: function(params)
 					{
-						return SPT.customEChartsTooltip(params, (pi) =>
+						return EU.customTooltip(params, (pi) =>
 						{
 							let re = {};
 							
@@ -1943,13 +1953,13 @@ SPT.mapGraphRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options,
+			options = EU.prepareRenderOptions(chart, options,
 				(chart, renderOptions) =>
 				{
-					SPT.echartsMapChartInitMap(chart, renderOptions);
+					EU.initChartMap(chart, renderOptions);
 				});
 			
-			SPT.echartsMapChartRender(chart, options);
+			EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2001,8 +2011,8 @@ SPT.mapGraphRenderer = function(plugin, config)
 			this._configSingleSeries(chart, options.series[0]);
 			SPT.evalSeriesDataValueSymbolSize(options.series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsMapChartUpdate(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.updateMapChart(chart, options);
 		},
 		
 		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
@@ -2219,7 +2229,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2251,13 +2261,13 @@ SPT.mapLinesRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options,
+			options = EU.prepareRenderOptions(chart, options,
 				(chart, renderOptions) =>
 				{
-					SPT.echartsMapChartInitMap(chart, renderOptions);
+					EU.initChartMap(chart, renderOptions);
 				});
 			
-			SPT.echartsMapChartRender(chart, options);
+			EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2335,12 +2345,12 @@ SPT.mapLinesRenderer = function(plugin, config)
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsMapChartUpdate(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.updateMapChart(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2370,7 +2380,7 @@ SPT.mapFlylineRenderer = function(plugin, config)
 					//ECharts-6.0中默认提示信息太简单，所以这里自定义了formatter选项
 					formatter: function(params)
 					{
-						return SPT.customEChartsTooltip(params);
+						return EU.customTooltip(params);
 					}
 				},
 				legend: { data: [] },
@@ -2381,13 +2391,13 @@ SPT.mapFlylineRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options,
+			options = EU.prepareRenderOptions(chart, options,
 				(chart, renderOptions) =>
 				{
-					SPT.echartsMapChartInitMap(chart, renderOptions);
+					EU.initChartMap(chart, renderOptions);
 				});
 			
-			SPT.echartsMapChartRender(chart, options);
+			EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2471,12 +2481,12 @@ SPT.mapFlylineRenderer = function(plugin, config)
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsMapChartUpdate(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.updateMapChart(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2508,13 +2518,13 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options,
+			options = EU.prepareRenderOptions(chart, options,
 				(chart, renderOptions) =>
 				{
-					SPT.echartsMapChartInitMap(chart, renderOptions);
+					EU.initChartMap(chart, renderOptions);
 				});
 			
-			SPT.echartsMapChartRender(chart, options);
+			EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2571,8 +2581,8 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsMapChartUpdate(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.updateMapChart(chart, options);
 		},
 		
 		_evalPointSize: function(chart)
@@ -2588,7 +2598,7 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2636,8 +2646,8 @@ SPT.candlestickRenderer = function(plugin, config)
 			if(options.xAxis.type != "category")
 				options.xAxis.boundaryGap = [ "12%", "12%" ];
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -2674,12 +2684,12 @@ SPT.candlestickRenderer = function(plugin, config)
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			var options = { series: series, xAxis: {} };
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
-							SPT.inflateAxisDataExtractors.propertyName());
+			EU.inflateUpdateAxisData(chart, options, options.xAxis,
+							EU.axisDataExtractors.propertyName());
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series)
@@ -2689,7 +2699,7 @@ SPT.candlestickRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2752,8 +2762,8 @@ SPT.heatmapRenderer = function(plugin, config)
 				series: [{ type: "heatmap", data: [] }]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -2803,14 +2813,14 @@ SPT.heatmapRenderer = function(plugin, config)
 			
 			SPT.trimNumberRange(options.visualMap);
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.xAxis,
-							SPT.inflateAxisDataExtractors.valueElement(0));
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.yAxis,
-							SPT.inflateAxisDataExtractors.valueElement(1), false);
+			EU.inflateUpdateAxisData(chart, options, options.xAxis,
+							EU.axisDataExtractors.valueElement(0));
+			EU.inflateUpdateAxisData(chart, options, options.yAxis,
+							EU.axisDataExtractors.valueElement(1), false);
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series)
@@ -2820,7 +2830,7 @@ SPT.heatmapRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2847,8 +2857,8 @@ SPT.treeRenderer = function(plugin, config)
 				series: [{ type: "tree", data: [] }]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -2860,9 +2870,9 @@ SPT.treeRenderer = function(plugin, config)
 			var options = { series: [ singleSeries ] };
 			
 			this._inflateUpdateOptions(chart, options);
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_inflateUpdateOptions: function(chart, updateOptions)
@@ -2923,7 +2933,7 @@ SPT.treeRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2948,8 +2958,8 @@ SPT.treemapRenderer = function(plugin, config)
 				series: [{ type: "treemap", data: [] }]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -2957,13 +2967,13 @@ SPT.treemapRenderer = function(plugin, config)
 		{
 			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "treemap" });
 			var options = { series: [ singleSeries ] };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -2988,8 +2998,8 @@ SPT.sunburstRenderer = function(plugin, config)
 				series: [{ type: "sunburst", data: [] }]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -2997,13 +3007,13 @@ SPT.sunburstRenderer = function(plugin, config)
 		{
 			var singleSeries = SPT.inflateTreeNodeSingleSeries(chart, chartResult, { type: "sunburst" });
 			var options = { series: [ singleSeries ] };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -3188,7 +3198,7 @@ SPT.sankeyRenderer = function(plugin, config)
 					//ECharts-6.0默认tooltip显示有缺陷，所以这里自定义了formatter选项
 					formatter: function(params)
 					{
-						return SPT.customEChartsTooltip(params, (pi) =>
+						return EU.customTooltip(params, (pi) =>
 						{
 							let re = {};
 							
@@ -3211,8 +3221,8 @@ SPT.sankeyRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -3259,8 +3269,8 @@ SPT.sankeyRenderer = function(plugin, config)
 			
 			this._configSingleSeries(chart, options.series[0]);
 			this._inflateUpdateOptions(chart, options);
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_inflateUpdateOptions: function(chart, updateOptions)
@@ -3438,7 +3448,7 @@ SPT.sankeyRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -3468,7 +3478,7 @@ SPT.graphRenderer = function(plugin, config)
 					//ECharts-6.0默认tooltip显示有缺陷，所以这里自定义了formatter选项
 					formatter: function(params)
 					{
-						return SPT.customEChartsTooltip(params, (pi) =>
+						return EU.customTooltip(params, (pi) =>
 						{
 							let re = {};
 							
@@ -3492,8 +3502,8 @@ SPT.graphRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -3546,8 +3556,8 @@ SPT.graphRenderer = function(plugin, config)
 			this._configSingleSeries(chart, options.series[0], symbolSizeMax);
 			SPT.evalSeriesDataValueSymbolSize(options.series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value");
 			
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
@@ -3740,7 +3750,7 @@ SPT.graphRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -3799,8 +3809,8 @@ SPT.boxplotRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -3828,19 +3838,19 @@ SPT.boxplotRenderer = function(plugin, config)
 				}
 			}
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
 							{
 								get: function(s)
 								{
 									if(s.type == "boxplot")
-										return SPT.inflateAxisDataExtractors.propertyName();
+										return EU.axisDataExtractors.propertyName();
 									else
-										return SPT.inflateAxisDataExtractors.valueElement0();
+										return EU.axisDataExtractors.valueElement0();
 								}
 							});
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_inflateOptionsForBoxplot: function(chart, chartResult, dataSetBinds, dsbIndex, options)
@@ -3973,7 +3983,7 @@ SPT.boxplotRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -4030,8 +4040,8 @@ SPT.wordcloudRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -4065,9 +4075,9 @@ SPT.wordcloudRenderer = function(plugin, config)
 			this._inflateSeriesDataTextStyle(chart, seriesData, dataRange);
 			
 			var options = { series: [ { type: "wordCloud", name: seriesName, data: seriesData } ] };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_inflateSeriesDataTextStyle: function(chart, seriesData, dataRange)
@@ -4097,7 +4107,7 @@ SPT.wordcloudRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -4176,8 +4186,8 @@ SPT.liquidfillRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -4253,13 +4263,13 @@ SPT.liquidfillRenderer = function(plugin, config)
 			}
 			
 			var options = { series: [ { type: "liquidFill", name: seriesName, data: seriesData, shape: config.shape } ] };
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -4294,8 +4304,8 @@ SPT.parallelRenderer = function(plugin, config)
 				]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -4377,9 +4387,9 @@ SPT.parallelRenderer = function(plugin, config)
 			
 			var options = { legend: { data: legendData }, parallelAxis: parallelAxis, series: series };
 			this._trimAxisMinMax(options);
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series)
@@ -4479,7 +4489,7 @@ SPT.parallelRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -4519,8 +4529,8 @@ SPT.themeRiverRenderer = function(plugin, config)
 				series: [ { type: "themeRiver", data: [] } ]
 			};
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -4588,14 +4598,14 @@ SPT.themeRiverRenderer = function(plugin, config)
 			var singleSeries = { name: seriesName, type: "themeRiver", data: seriesData };
 			//坐标轴信息也应替换合并，不然图表刷新有数据变化时，坐标不能自动更新
 			var options = { legend: { data: legendData }, series: [ singleSeries ], singleAxis: {} };
-			SPT.inflateEChartsUpdateAxisData(chart, options, options.singleAxis, SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options);
+			EU.inflateUpdateAxisData(chart, options, options.singleAxis, EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options);
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -4656,8 +4666,8 @@ SPT.pictorialBarRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -4725,11 +4735,11 @@ SPT.pictorialBarRenderer = function(plugin, config)
 			(config.interchangeAxis ? (options.yAxis = {}) : (options.xAxis = {}));
 			
 			this._inflateUpdateOptions(chart, options);
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
-							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar"); });
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, "pictorialBar"); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_inflateUpdateOptions: function(chart, options)
@@ -4758,7 +4768,7 @@ SPT.pictorialBarRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -4816,8 +4826,8 @@ SPT.pictorialBarProgressRenderer = function(plugin, config)
 				options.yAxis = xAxisTmp;
 			}
 			
-			options = SPT.prepareEChartsRenderOptions(chart, options);
-			var instance = chartUtil.echarts.init(chart);
+			options = EU.prepareRenderOptions(chart, options);
+			var instance = EU.init(chart);
 			instance.setOption(options);
 		},
 		
@@ -4886,11 +4896,11 @@ SPT.pictorialBarProgressRenderer = function(plugin, config)
 				options.yAxis = { max: maxValue };
 			}
 			
-			SPT.inflateEChartsUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
-							SPT.inflateAxisDataExtractors.valueElement0());
-			options = SPT.prepareEChartsUpdateOptions(chart, options, (options) => { SPT.adaptEChartsValueArrayData(chart, options, "pictorialBar"); });
+			EU.inflateUpdateAxisData(chart, options, (config.interchangeAxis ? options.yAxis : options.xAxis),
+							EU.axisDataExtractors.valueElement0());
+			options = EU.prepareUpdateOptions(chart, options, (options) => { EU.adaptValueArrayData(chart, options, "pictorialBar"); });
 			
-			SPT.echartsOptionsReplaceMerge(chart, options);
+			EU.setOptionsReplaceMerge(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series, seriesTemplate, maxValue)
@@ -4907,7 +4917,7 @@ SPT.pictorialBarProgressRenderer = function(plugin, config)
 		}
 	};
 	
-	SPT.inflateEChartsRendererCommonFuncs(renderer);
+	EU.inflateRendererCommons(renderer);
 	return renderer;
 };
 
@@ -6853,97 +6863,6 @@ SPT.evalDataSetFieldAxisType = function(chart, dataSetField)
 };
 
 /**
- * 准备ECharts图表渲染选项。
- * 
- * @param chart
- * @param renderOptions
- * @param beforeProcessHandler
- * @returns 一个新的图表渲染选项
- */
-SPT.prepareEChartsRenderOptions = function(chart, renderOptions, beforeProcessHandler)
-{
-	var options = chart.options();
-	renderOptions = SPT.trimArrayPropsForMerge(renderOptions, options);
-	options = SPT.trimArrayPropsForMerge(options, renderOptions);
-	renderOptions = chart.inflateOptions(renderOptions, options);
-	
-	//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
-	var series = renderOptions.series;
-	if(series && series.length > 1)
-	{
-		var series0 = CF.extend(true, {}, series[0]);
-		
-		for(let i=1; i<series.length; i++)
-			series[i] = CF.extend(true, {}, series0, series[i]);
-	}
-	
-	if(beforeProcessHandler)
-		beforeProcessHandler(chart, renderOptions);
-	
-	SPT.setEChartsOptionsCmpId(renderOptions);
-	chart.processRenderOptions(renderOptions);
-	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
-	SPT.setEChartsOptionsCmpId(renderOptions);
-	
-	return renderOptions;
-};
-
-/**
- * 准备ECharts图表更新选项。
- * 
- * @param chart
- * @param updateOptions
- * @param beforeProcessHandler
- * @returns 一个新的图表更新选项
- */
-SPT.prepareEChartsUpdateOptions = function(chart, updateOptions, beforeProcessHandler)
-{
-	var options = chart.options();
-	updateOptions = SPT.trimArrayPropsForMerge(updateOptions, options);
-	options = SPT.trimArrayPropsForMerge(options, updateOptions);
-	updateOptions = chart.inflateOptions(updateOptions, options);
-	
-	if(beforeProcessHandler)
-		beforeProcessHandler(updateOptions, chart);
-	
-	SPT.setEChartsOptionsCmpId(updateOptions);
-	chart.processUpdateOptions(updateOptions);
-	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
-	SPT.setEChartsOptionsCmpId(updateOptions);
-	
-	return updateOptions;
-};
-
-//设置ECharts选项中的组件ID，必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
-SPT.setEChartsOptionsCmpId = function(options)
-{
-	for(let name in options)
-	{
-		let value = options[name];
-		
-		if(value == null)
-			continue;
-		
-		if(CF.isArray(value))
-		{
-			for(let i=0; i<value.length; i++)
-			{
-				let vi = value[i];
-				
-				if(vi != null && CF.isPlainObject(vi) && vi.id === undefined)
-				{
-					vi.id = i;
-				}
-			}
-		}
-		else if(CF.isPlainObject(value) && value.id === undefined)
-		{
-			value.id = 0;
-		}
-	}
-};
-
-/**
  * 指定数据集字段数据是否字符串类型。
  */
 SPT.isDataTypeString = function(dataSetField)
@@ -7367,277 +7286,6 @@ SPT.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, result, dataSi
 	return null;
 };
 
-//初始化ECharts地图类图表的地图选项
-SPT.echartsMapChartInitMap = function(chart, options)
-{
-	var map = CF.optionValue(options, SPT.MAP_NAME_OPTION_NAME);
-	
-	//必须设置初始map，不然渲染会报错
-	if(CF.isEmpty(map))
-		map = SPT.defaultMapName();
-	
-	//不应替换原始地图名
-	var coverOriginalMap = false;
-	SPT.echartsSetMapOption(options, map, coverOriginalMap);
-};
-
-/**
- * 获取默认地图名。
- * 地图类图表需要默认地图执行render初始渲染。
- * 注意：返回的默认地图名应是在dashboardFactory.js中dftBuiltinChartMaps的其中之一。
- */
-SPT.defaultMapName = function()
-{
-	//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
-	return "china";
-};
-
-//渲染ECharts地图类图表
-SPT.echartsMapChartRender = function(chart, options)
-{
-	var maps = SPT.echartsGetMapsDistinct(options);
-	chartUtil.echarts.registerMap(chart, maps, () =>
-	{
-		var instance = chartUtil.echarts.init(chart);
-		instance.setOption(options);
-		chart.statusRendered(true);
-	});
-};
-
-//更新ECharts地图类图表
-SPT.echartsMapChartUpdate = function(chart, updateOptions)
-{
-	var renderOptions = chart.renderOptions();
-	var renderMaps = SPT.echartsGetMapsDistinct(renderOptions);
-	var updateMaps = SPT.echartsGetMapsDistinct(updateOptions);
-	var mapChanged = (renderMaps.length !== updateMaps.length);
-	
-	if(!mapChanged)
-	{
-		for(let i=0; i<renderMaps.length; i++)
-		{
-			if(renderMaps[i] != updateMaps[i])
-			{
-				mapChanged = true;
-				break;
-			}
-		}
-	}
-	
-	if(mapChanged)
-		SPT.echartsResetMapSettings(updateOptions);
-	
-	var maps = SPT.echartsGetMapsDistinct(updateOptions);
-	chartUtil.echarts.registerMap(chart, maps, () =>
-	{
-		SPT.echartsOptionsReplaceMerge(chart, updateOptions);
-		chart.statusUpdated(true);
-	});
-};
-
-//仅提取ECharts地图类图表选项中的不重复地图名信息
-SPT.echartsGetMapsDistinct = function(echartsOptions)
-{
-	var re = [];
-	
-	var maps = [];
-	var geo = echartsOptions.geo;
-	var series = echartsOptions.series;
-	
-	if(geo)
-	{
-		if(CF.isArray(geo))
-		{
-			for(var i=0; i<geo.length; i++)
-			{
-				if(geo[i].map)
-				{
-					maps.push(geo[i].map);
-				}
-			}
-		}
-		else
-		{
-			if(geo.map)
-			{
-				maps.push(geo.map);
-			}
-		}
-	}
-	
-	if(series)
-	{
-		if(CF.isArray(series))
-		{
-			for(var i=0; i<series.length; i++)
-			{
-				if(series[i].type == "map" && series[i].map)
-				{
-					maps.push(series[i].map);
-				}
-			}
-		}
-		else
-		{
-			if(series.type == "map" && series.map)
-			{
-				maps.push(series.map);
-			}
-		}
-	}
-	
-	SPT.appendDistinct(re, maps);
-	
-	return re;
-};
-
-//设置ECharts地图类图表选项中的地图名
-SPT.echartsSetMapOption = function(echartsOptions, map, force)
-{
-	var geo = echartsOptions.geo;
-	var series = echartsOptions.series;
-	
-	if(geo)
-	{
-		if(CF.isArray(geo))
-		{
-			for(var i=0; i<geo.length; i++)
-			{
-				if(geo[i].map == null || force)
-				{
-					geo[i].map = map;
-				}
-			}
-		}
-		else
-		{
-			if(geo.map == null || force)
-			{
-				geo.map = map;
-			}
-		}
-	}
-	
-	if(series)
-	{
-		if(CF.isArray(series))
-		{
-			for(var i=0; i<series.length; i++)
-			{
-				if(series[i].type == "map" && (series[i].map == null || force))
-				{
-					series[i].map = map;
-				}
-			}
-		}
-		else
-		{
-			if(series.type == "map" && (series.map == null || force))
-			{
-				series.map = map;
-			}
-		}
-	}
-};
-
-//重置ECharts地图类图表的中心位置、缩放比例
-SPT.echartsResetMapSettings = function(echartsOptions)
-{
-	var geo = echartsOptions.geo;
-	var series = echartsOptions.series;
-	
-	if(geo)
-	{
-		if(CF.isArray(geo))
-		{
-			for(var i=0; i<geo.length; i++)
-			{
-				geo[i].center = null;
-				geo[i].zoom = 1;
-			}
-		}
-		else
-		{
-			geo.center = null;
-			geo.zoom = 1;
-		}
-	}
-	
-	if(series)
-	{
-		if(CF.isArray(series))
-		{
-			for(var i=0; i<series.length; i++)
-			{
-				if(series[i].type == "map")
-				{
-					series[i].center = null;
-					series[i].zoom = 1;
-				}
-			}
-		}
-		else
-		{
-			if(series.type == "map")
-			{
-				series.center = null;
-				series.zoom = 1;
-			}
-		}
-	}
-};
-
-/**
- * 将值数组对象（{value: [name, value]}）格式的options.series[i].data元素适配为与options.series[i].type匹配的格式。
- * 比如，对于"pie"的type，应适配为名值对象：{ name: name, value: value }格式，图表才能正确显示。
- * 如果originalSeriesType与options.series[i].type相同，则不进行处理。
- * 
- * 某些内置图表允许修改series[i].type来自定义系列的类型，而不同类型的数据格式规范不同，所以需要适配。
- * 
- * @param chart
- * @param options
- * @param originalSeriesType
- * @param nameIndex 可选，name在值数组对象的索引，默认为：0
- * @param valueIndex 可选，value在值数组对象的索引，默认为：1
- */
-SPT.adaptEChartsValueArrayData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
-{
-	nameIndex = (nameIndex == null ? 0 : nameIndex);
-	valueIndex = (valueIndex == null ? 1 : valueIndex);
-	
-	var series = (options.series || []);
-	
-	for(let i=0; i<series.length; i++)
-	{
-		let si = series[i];
-		let type = si.type;
-		
-		if(type === originalSeriesType)
-			continue;
-		
-		let data = (si.data || []);
-		
-		//这些图表不支持值数组对象格式的数据，支持名值格式的数据，因此需要适配
-		if(type == "pie" || type == "funnel" || type == "map"
-			|| type == "wordCloud" || type == "liquidFill")
-		{
-			data.forEach((di) =>
-			{
-				let value = (di == null ? null : di.value);
-				
-				if(value != null)
-				{
-					di.name = value[nameIndex];
-					di.value = value[valueIndex];
-				}
-			});
-			
-			//需同时删除encode
-			si.encode = null;
-		}
-	}
-};
-
 SPT.cssValueImportant = function(cssValue)
 {
 	if(!cssValue)
@@ -7649,42 +7297,6 @@ SPT.cssValueImportant = function(cssValue)
 		cssValue += " !important";
 	
 	return cssValue;
-};
-
-SPT.echartsOptionsReplaceMerge = function(chart, options, replaceMerge)
-{
-	if(replaceMerge == null)
-	{
-		replaceMerge = [];
-		
-		for(var p in options)
-		{
-			replaceMerge.push(p);
-		}
-	}
-	
-	var opts =
-	{
-		replaceMerge: replaceMerge
-	};
-	
-	//对于忽略全部数据集的场景，某些图表（饼图/地图散点图等）不会清空画布，需要添加占位系列或数据
-	if(options.series != null)
-	{
-		let series = options.series;
-		
-		if(series.length == 0)
-			series.push({ id: 0 });
-		
-		for(let i=0; i<series.length; i++)
-		{
-			if(series[i].data === undefined)
-				series[i].data = [];
-		}
-	}
-	
-	var internal = chart.internal();
-	internal.setOption(options, opts);
 };
 
 SPT.addCategoryToFieldMap = function(fieldMap, categoryField, categoryName)
@@ -7738,16 +7350,1208 @@ SPT.evalArrayDataRange = function(range, data, propertyName0, propertyName1)
 	return range;
 };
 
+//返回targetObj的浅复制对象，如果某个属性值在baseObj中是数组而在targetObj不是数组，返回对象会将其转为数组
+SPT.trimArrayPropsForMerge = function(targetObj, baseObj)
+{
+	var targetRe = {};
+	
+	for(let name in targetObj)
+	{
+		let value = targetObj[name];
+		let baseValue = (baseObj == null ? null : baseObj[name]);
+		
+		if(value != null && !CF.isArray(value) && CF.isArray(baseValue))
+		{
+			targetRe[name] = [ value ];
+		}
+		else
+		{
+			targetRe[name] = value;
+		}
+	}
+	
+	return targetRe;
+};
+
+SPT.dataSetBindsMainFetched = function(chart, chartResult)
+{
+	var dsbs = chart.dataSetBindsMain();
+	return chart.dataSetBindsFetched(dsbs, chartResult);
+};
+
+SPT.originalDataOfData = function(data, originalData)
+{
+	if(originalData === undefined)
+	{
+		return (data == null ? null : data[SPT.ORIGINAL_DATA_PROP_NAME]);
+	}
+	else
+	{
+		data[SPT.ORIGINAL_DATA_PROP_NAME] = originalData;
+	}
+};
+
+SPT.originalDataOfDatas = function(datas, originalDatas)
+{
+	if(datas == null || originalDatas == null)
+		return;
+	
+	var len = Math.min(datas.length, originalDatas.length);
+	
+	for(let i=0; i<len; i++)
+	{
+		SPT.originalDataOfData(datas[i], originalDatas[i]);
+	}
+};
+
+SPT.originalDataOfResult = function(datas, chart, result)
+{
+	SPT.originalDataOfDatas(datas, chart.resultDatas(result));
+};
+
+SPT.convertArrayValueEleToString = function(array, index)
+{
+	index = (index == null ? 0 : index);
+	
+	if(array == null)
+		return;
+	
+	for(let i=0; i<array.length; i++)
+	{
+		let v = (array[i] == null ? null : array[i].value);
+		let vi = (v == null ? null : v[index]);
+		
+		if(vi != null && !CF.isString(vi))
+			v[index] = vi + "";
+	}
+};
+
+//转换dataObj.data[i]元素{value: ...}为{name: ...}
+SPT.convertDataPropValueToName = function(dataObj)
+{
+	if(dataObj == null || dataObj.data == null)
+		return;
+	
+	for(let i=0; i<dataObj.data.length; i++)
+	{
+		let di = dataObj.data[i];
+		dataObj.data[i] = (di == null ? null : { name: di.value });
+	}
+};
+
+//获取全局ECharts对象
+EU._echarts = function()
+{
+	return global.echarts;
+};
+
+/**
+ * 将图表初始化为ECharts图表。
+ * 此函数会自动将EU.themeName()函数、EU.themeNameOfChartTheme()函数返回的主题名应用至初始化的ECharts图表主题。
+ * 此函数会自动调用chart.internal()将初始化的ECharts实例对象设置为图表底层组件。
+ * 
+ * @param chart 图表
+ * @param opts 可选，同echarts.init()函数的opts附加参数
+ * @returns ECharts实例
+ */
+EU.init = function(chart, opts)
+{
+	var themeName = EU.themeName(chart);
+	
+	if(!themeName)
+		themeName = EU.themeNameOfChartTheme(chart);
+	
+	var instance = EU._echarts().init(chart.element(), themeName, opts);
+	chart.internal(instance);
+	
+	return instance;
+};
+
+/**
+ * 获取在图表元素上（优先）或者<body>元素上通过"dg-echarts-theme"属性定义的ECharts主题名
+ * 
+ * @param chart 图表
+ * @returns ECharts主题名
+ */
+EU.themeName = function(chart)
+{
+	var themeName = CF.eleAttr(chart.element(), CF.elementAttrConst.ECHARTS_THEME);
+	
+	if(!themeName)
+		themeName = CF.eleAttr(document.body, CF.elementAttrConst.ECHARTS_THEME);
+	
+	return themeName;
+};
+
+/**
+ * 获取根据图表主题生成（只第一次生成）的ECharts主题名。
+ * 
+ * @param chart 图表
+ * @returns ECharts主题名，对应的主题由图表主题生成且已经注册至ECharts
+ */
+EU.themeNameOfChartTheme = function(chart)
+{
+	var theme = chart.theme();
+	var themeName = theme[EU.THEME_PROP_ECHARTS_THEME_NAME];
+	
+	if(!themeName)
+	{
+		themeName = (theme[EU.THEME_PROP_ECHARTS_THEME_NAME] = CF.uid());
+		
+		var echartsTheme = EU._buildEchartsTheme(chart);
+		EU._echarts().registerTheme(themeName, echartsTheme);
+	}
+	
+    return themeName;
+};
+
+/**
+ * 为图表注册指定名称的地图（GeoJSON、SVG）至ECharts，并在注册完成后执行回调函数。
+ * 如果地图未加载，将在加载后再注册。
+ * 注意：如果在图表渲染器的render()、update()函数中调用此函数，应该首先设置渲染器的asyncRender、asyncUpdate，
+ * 并在complete中调用chart.statusRendered(true)、chart.statusUpdated(true)。
+ * 
+ * @param chart 图表
+ * @param name 地图名称、地图名称数组
+ * @param complete 可选，注册完成后（无论是否成功）的回调函数，格式为：function(){ ... }
+ */
+EU.registerMap = function(chart, name, complete)
+{
+	name = (CF.isArray(name) ? name : [ name ]);
+	
+	var echarts = EU._echarts();
+	
+	var needLoads = [];
+	
+	for(let i=0; i<name.length; i++)
+	{
+		if(echarts.getMap(name[i]) == null)
+			needLoads.push(name[i]);
+	}
+	
+	if(needLoads.length == 0)
+	{
+		if(complete != null)
+			complete();
+		
+		return;
+	}
+	
+	var loadPromises = [];
+	
+	for(let i=0; i<needLoads.length; i++)
+	{
+		let myName = name[i];
+		let state = EU.MAP_REGISTER_STATES[myName];
+		
+		if(state == null)
+		{
+			let mapUrl = chart.mapURL(myName);
+			state =
+			{
+				loadPromise: new Promise(function(resolve, reject)
+				{
+					fetch(mapUrl).then((response) =>
+					{
+						if(!response.ok)
+							throw new Error(response.statusText ? response.statusText : response.status+"");
+						
+						let headers = response.headers;
+						let contentType = (headers.get("Content-Type") || "");
+						//是否SVG地图
+						let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(mapUrl));
+						
+						if(isSvg)
+						{
+							response.text().then((svgText) =>
+							{
+								echarts.registerMap(myName, {svg: svgText});
+								resolve();
+							});
+						}
+						else
+						{
+							response.json().then((geoJSON) =>
+							{
+								echarts.registerMap(myName, {geoJSON: geoJSON});
+								resolve();
+							});
+						}
+					})
+					.catch((e) =>
+					{
+						EU.MAP_REGISTER_STATES[myName] = null;
+						reject();
+					});
+				})
+			};
+			
+			EU.MAP_REGISTER_STATES[myName] = state;
+		}
+		
+		loadPromises.push(state.loadPromise);
+	}
+	
+	Promise.all(loadPromises).finally(function()
+	{
+		if(complete != null)
+			complete();
+	});
+};
+
+/**
+ * 释放ECharts图表实例。
+ * 
+ * @param chart
+ */
+EU.dispose = function(chart)
+{
+	var internal = chart.internal();
+	
+	if(internal && !internal.isDisposed())
+		internal.dispose();
+};
+
+/**
+ * 调整ECharts图表尺寸。
+ * 
+ * @param chart
+ */
+EU.resize = function(chart)
+{
+	var internal = chart.internal();
+	
+	if(internal)
+		internal.resize();
+};
+
+/**
+ * 绑定ECharts图表事件处理函数。
+ * 
+ * @param chart
+ * @param eventType 事件类型，支持格式：
+ * 						1、"click"、"mousemove"等事件类型字符串
+ * 						2、{ name: "...", query: ... }，其中name表示事件类型，比如"click"、"mousemove"，query表示过滤条件，同ECharts的on函数的query参数
+ * @param handler 事件处理函数，格式为：function(event){ ... }
+ * @param context 可选，事件处理函数内的this指向，默认值为：chart
+ */
+EU.on = function(chart, eventType, handler, context)
+{
+	eventType = (CF.isString(eventType) ? { name: eventType } : eventType);
+	context = (context === undefined ? chart : context);
+	
+	var internal = chart.internal();
+	
+	if(eventType.query == null)
+	{
+		internal.on(eventType.name, handler, context);
+	}
+	else
+	{
+		internal.on(eventType.name, eventType.query, handler, context);
+	}
+};
+
+/**
+ * 解绑ECharts图表事件处理函数。
+ * 
+ * @param chart
+ * @param eventType 可选，事件类型，比如"click"、"mousemove"等，不提供则取消监听所有事件
+ * @param handler 可选，解绑的具体事件处理函数，不提供则取消监听eventType下的所有事件
+ */
+EU.off = function(chart, eventType, handler)
+{
+	var internal = chart.internal();
+	
+	if(eventType === undefined || arguments.length < 2)
+	{
+		internal.off();
+	}
+	else if(handler === undefined || arguments.length == 2)
+	{
+		internal.off(eventType);
+	}
+	else
+	{
+		internal.off(eventType, handler);
+	}
+};
+
+/**
+ * 由图表主题构建ECharts主题。
+ * 
+ * @param chart 图表
+ */
+EU._buildEchartsTheme = function(chart)
+{
+	var axisColor = chart.themeGradualColor(0.7);
+	var axisScaleLineColor = chart.themeGradualColor(0.35);
+	var areaColor0 = chart.themeGradualColor(0.1);
+	var areaBorderColor0 = chart.themeGradualColor(0.3);
+	var areaColor1 = chart.themeGradualColor(0.25);
+	var areaBorderColor1 = chart.themeGradualColor(0.5);
+	var shadowColor = chart.themeGradualColor(0.9);
+	var emptyAreaColor = chart.themeGradualColor(0);
+	var emptyBorderColor = areaColor0;
+	
+	var chartTheme = chart.theme();
+	
+	var theme =
+	{
+		"color" : chartTheme.graphColors,
+		"backgroundColor" : chartTheme.backgroundColor,
+		"textStyle" : {},
+		"title" : {
+	        "left" : "center",
+	        //6.0版本标题默认top有变动，需要明确设置为0才能兼容旧版
+	        "top": 0,
+			"textStyle" : { "color" : chartTheme.titleTheme.color },
+			"subtextStyle" : { "color" : chartTheme.titleTheme.color },
+			"backgroundColor" : chartTheme.titleTheme.backgroundColor
+		},
+		"line" : {
+			"itemStyle" : { "borderWidth" : 2 },
+			"lineStyle" : { "width" : 2 },
+			"label": { "color": chartTheme.color },
+			"symbol" : "circle",
+			"symbolSize" : 8,
+			"smooth" : false,
+			"emphasis" : { "lineStyle" : { "width" : 4 } }
+		},
+		"radar" : {
+			"name" : { "textStyle" : { "color" : chartTheme.legendTheme.color } },
+			"axisLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
+			"splitLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
+			"splitArea" : { "areaStyle" : { "color" : [ areaColor0, chartTheme.backgroundColor ] } },
+			"itemStyle" : { "borderWidth" : 1 },
+			"lineStyle" : { "width" : 2 },
+			"emphasis" : { "lineStyle" : { "width" : 4, "shadowBlur" : 5, "shadowOffsetX" : 0, "shadowColor" : shadowColor } },
+			"symbolSize" : 6,
+			"symbol" : "circle",
+			"smooth" : false
+		},
+		"bar": {
+			"itemStyle" : { "barBorderWidth" : 0, "barBorderColor" : chartTheme.borderColor },
+			"label": { "color": chartTheme.color },
+			"emphasis" : {
+				"itemStyle" : {
+					"barBorderWidth" : 0, "barBorderColor" : chartTheme.borderColor,
+					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor, "shadowOffsetY" : 0
+				}
+			}
+		},
+		"pie" : {
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor },
+			"label": { "color": chartTheme.color },
+			"emphasis" : {
+				"itemStyle": {
+					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor,
+					"borderWidth" : 0, "borderColor" : chartTheme.borderColor
+				}
+			},
+			"emptyCircleStyle": { "color": emptyAreaColor, "borderColor": emptyBorderColor }
+		},
+		"scatter" : {
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 0, "shadowColor" : shadowColor },
+			"label": { "color": chartTheme.color },
+			"emphasis" : {
+				"itemStyle" : {
+					"borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 10,
+					"shadowOffsetX" : 0, "shadowColor" : shadowColor
+				}
+			}
+		},
+		"effectScatter": {
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 0, "shadowColor" : shadowColor },
+			"emphasis" : {
+				"itemStyle" : {
+					"borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 10, "shadowOffsetX" : 0,
+					"shadowColor" : shadowColor
+				}
+			}
+		},
+		"boxplot" : {
+			"itemStyle" : { "color": "transparent" },
+			"emphasis" : { "itemStyle" : { "color": "transparent" } }
+		},
+		"parallel" : {
+			"left": "10%", "top": "20%", "right": "10%", "bottom": "10%",
+			"lineStyle" : { "width": 2, "shadowBlur" : 0, "shadowColor" : shadowColor },
+			"emphasis" : { "lineStyle" : { "shadowBlur" : 4, "shadowOffsetX" : 0, "shadowColor" : shadowColor } }
+		},
+		"sankey" : {
+			"label": { "color": chartTheme.color },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor },
+			"lineStyle": { "color": areaColor1, "opacity": 1 },
+			"emphasis" : {
+				"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor },
+				"lineStyle": { "color": axisColor, "opacity": 0.6 },
+				"focus": "adjacency"
+			}
+		},
+		"funnel" : {
+			"left": "10%", "top": "20%", "right": "10%", "bottom": "10%",
+            "minSize": "0%", "maxSize": "100%",
+			"label" : { "color" : chartTheme.color, "show": true, "position": "inside" },
+			"itemStyle" : { "borderColor" : chartTheme.borderColor, "borderWidth" : 0 },
+			"emphasis" : {
+				"label" : { "fontSize" : 20 },
+				"itemStyle" : {
+					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor, "borderWidth" : 0,
+					"borderColor" : chartTheme.borderColor
+				}
+			}
+		},
+		"gauge" : {
+			"title" : { "color" : chartTheme.legendTheme.color },
+			"detail": { "color": chartTheme.legendTheme.color },
+			"progress": { "show": true, "roundCap": true },
+			"axisLine": { "show": true,
+				"lineStyle": { "color" : [ [ 1, areaColor0 ] ] }
+	        },
+			"axisLabel": { "color" : axisColor },
+			"splitLine": { "lineStyle": { "color": chartTheme.actualBackgroundColor } },
+			"axisTick": { "lineStyle": { "color": chartTheme.actualBackgroundColor } },
+			"itemStyle" : { "borderColor" : chartTheme.borderColor, "borderWidth" : 0 },
+			"emphasis" : {
+				"itemStyle" : {
+					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor,
+					"borderWidth" : 0, "borderColor" : chartTheme.borderColor
+				}
+			}
+		},
+		"candlestick" : {
+			"itemStyle" : { "borderWidth" : 1 },
+			"emphasis" : { "itemStyle" : { "shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor } }
+		},
+		"heatmap": {
+			"label": { "show": true },
+			"emphasis" : { "itemStyle" : { "shadowBlur" : 5 } }
+		},
+		"tree": {
+			"expandAndCollapse": true,
+			"label": { "color": chartTheme.color },
+			"itemStyle": { "color": chartTheme.color },
+			"lineStyle": { "color": areaBorderColor0 },
+			"emphasis" : { "itemStyle" : { "shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor } }
+		},
+		"treemap": {
+			//ECharts-6.0中默认的left/top/width/height没有起作用，需要这里明确设置
+			"left": "center", "top": "middle", "width": "80%", "height": "80%",
+			"itemStyle" : { "borderWidth": 0.5, "borderColor": chartTheme.backgroundColor },
+			"emphasis" : {
+				"itemStyle" : {
+					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor,
+					"borderWidth" : 0, "borderColor" : chartTheme.borderColor
+				}
+			},
+			"breadcrumb": {
+				//ECharts-6.0中默认的top没有起作用，需要这里明确设置
+				"top": "bottom",
+				"itemStyle": {
+					"color": chartTheme.backgroundColor, "borderColor": chartTheme.borderColor,
+					"shadowBlur": 0, "textStyle": { color: chartTheme.color }
+				}
+			}
+		},
+		"sunburst": {
+			"itemStyle" : { "borderWidth" : 1, "borderColor" : chartTheme.backgroundColor },
+			"emphasis" : { "itemStyle" : { "shadowBlur" : 10, "shadowColor" : shadowColor, "borderColor" : chartTheme.borderColor } }
+		},
+		"graph" :
+		{
+			"left": "10%", "right": "10%", "top": "20%", "bottom": "10%", "roam": true,
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 2, "shadowColor" : shadowColor },
+			"lineStyle" : { "width": 2, "color": "source", "curveness": 0.3 },
+			"label" : { "color" : chartTheme.color },
+			"emphasis" : {
+				"itemStyle" : {
+					"borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 10,
+					"shadowOffsetX" : 0, "shadowColor" : shadowColor
+				},
+				"lineStyle" : { "width": 5 },
+				"focus": "adjacency",
+				"legendHoverLink": true,
+				"label": { "position": "right" }
+			}
+		},
+		"map" : {
+			"roam" : true,
+			"itemStyle" : { "areaColor" : areaBorderColor0, "borderColor" : areaBorderColor1, "borderWidth" : 0.5 },
+			"label" : { "show": true, "color" : chartTheme.color },
+			"emphasis" : {
+				"label": { "color" : chartTheme.highlightTheme.color },
+				"itemStyle": {
+					"areaColor" : chartTheme.highlightTheme.backgroundColor,
+					"borderColor" : chartTheme.highlightTheme.borderColor,
+					"borderWidth" : 1
+				}
+			}
+		},
+		"lines":
+		{
+			"lineStyle": { "width": 2 },
+			"emphasis": { "lineStyle": { "width": 5, "shadowBlur" : 5, "shadowOffsetX" : 0, "shadowColor" : shadowColor } }
+		},
+		"geo" : {
+			"itemStyle" : { "areaColor" : areaBorderColor0, "borderColor" : areaBorderColor1, "borderWidth" : 0.5 },
+			"label" : { "color" : chartTheme.color },
+			"emphasis" : {
+				"label": { "color" : chartTheme.highlightTheme.color },
+				"itemStyle": {
+					"areaColor" : chartTheme.highlightTheme.backgroundColor,
+					"borderColor" : chartTheme.highlightTheme.borderColor,
+					"borderWidth" : 1
+				}
+			}
+		},
+		"themeRiver":
+		{
+			/*ECharts-6.0版本这里定位配置不起作用*/
+			"left": "10%", "top": "20%", "right": "10%", "bottom": "10%",
+			"label": { "show": true },
+			"emphasis": { "itemStyle": { "shadowBlur": 10, "shadowColor": shadowColor } }
+		},
+		"categoryAxis" : {
+			"axisLine" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisTick" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisLabel" : { "show" : true, "textStyle" : { "color" : axisColor } },
+			"splitLine" : { "show" : true, "lineStyle" : { "type" : "dotted", "color" : [ axisScaleLineColor ] } },
+			"splitArea" : { "show" : false, "areaStyle" : { "color" : [ axisScaleLineColor ] } }
+		},
+		"valueAxis" : {
+			"axisLine" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisTick" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisLabel" : { "show" : true, "textStyle" : { "color" : axisColor } },
+			"splitLine" : { "show" : true, "lineStyle" : { "type" : "dotted", "color" : [ axisScaleLineColor ] } },
+			"splitArea" : { "show" : false, "areaStyle" : { "color" : [ axisScaleLineColor ] } }
+		},
+		"logAxis" : {
+			"axisLine" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisTick" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisLabel" : { "show" : true, "textStyle" : { "color" : axisColor } },
+			"splitLine" : { "show" : true, "lineStyle" : { "type" : "dotted", "color" : [ axisScaleLineColor ] } },
+			"splitArea" : { "show" : false, "areaStyle" : { "color" : [ axisScaleLineColor ] } }
+		},
+		"timeAxis" : {
+			"axisLine" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisTick" : { "show" : true, "lineStyle" : { "color" : axisColor } },
+			"axisLabel" : { "show" : true, "textStyle" : { "color" : axisColor } },
+			"splitLine" : { "show" : true, "lineStyle" : { "type" : "dotted", "color" : [ axisScaleLineColor ] } },
+			"splitArea" : { "show" : false, "areaStyle" : { "color" : [ axisScaleLineColor ] } }
+		},
+		"singleAxis": { "left": "10%", "top": "20%", "right": "10%", "bottom": "10%" },
+		"toolbox" : {
+			"iconStyle" : { "borderColor" : chartTheme.borderColor },
+			"emphasis" : { "iconStyle" : { "borderColor" : axisColor } }
+		},
+		"grid": { "left": "10%", "right": "10%", "top": "20%", "bottom": "10%", "containLabel": true },
+		"legend" : {
+			"orient": "horizontal",
+			"top": 25,
+			"textStyle" : { "color" : chartTheme.legendTheme.color },
+			"inactiveColor" : axisScaleLineColor,
+			"inactiveBorderColor": axisColor,
+			"backgroundColor" : chartTheme.legendTheme.backgroundColor
+		},
+		"tooltip" : {
+			"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
+			"borderColor" : chartTheme.tooltipTheme.borderColor,
+			"borderWidth" : chartTheme.tooltipTheme.borderWidth,
+			"textStyle" : { color: chartTheme.tooltipTheme.color },
+			"axisPointer" : {
+				"lineStyle" : { "color" : axisColor, "width" : 1 },
+				"crossStyle" : { "color" : axisColor, "width" : 1 }
+			}
+		},
+		"timeline" : {
+			"lineStyle" : { "color" : axisColor, "width" : 1 },
+			"itemStyle" : { "color" : chartTheme.color, "borderWidth" : 1 },
+			"controlStyle" : { "color" : chartTheme.color, "borderColor" : chartTheme.borderColor, "borderWidth" : 0.5 },
+			"checkpointStyle" : {
+				"color" : chartTheme.highlightTheme.backgroundColor,
+				"borderColor" : chartTheme.highlightTheme.borderColor
+			},
+			"label" : { "color" : axisColor },
+			"emphasis" : {
+				"itemStyle" : { "color" : chartTheme.color },
+				"controlStyle" : { "color" : chartTheme.color, "borderColor" : chartTheme.borderColor, "borderWidth" : 0.5 },
+				"label" : { "color" : chartTheme.color }
+			}
+		},
+		"visualMap" : {
+			"inRange" : { "color" : chartTheme.graphRangeColors },
+			"outOfRange" : { "color" : emptyAreaColor },
+			"backgroundColor" : "transparent",
+			"textStyle" : { "color" : axisColor }
+		},
+		"dataZoom" : {
+			"backgroundColor" : "transparent",
+			"dataBackgroundColor" : axisScaleLineColor,
+			"fillerColor" : axisScaleLineColor,
+			"handleColor" : axisScaleLineColor,
+			"handleSize" : "100%",
+			"textStyle" : { "color" : axisColor }
+		},
+		"markPoint" : {
+			"label" : { "color" : axisColor },
+			"emphasis" : { "label" : { "color" : axisColor } }
+		}
+	};
+	
+	//不能在上述theme中直接设置fontSize，因为即时值为null，仍然会改变默认字体
+	
+	if(chartTheme.fontSize)
+	{
+		theme.textStyle = (theme.textStyle || {});
+		theme.textStyle.fontSize = chartTheme.fontSize;
+		
+		theme.categoryAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+		theme.valueAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+		theme.logAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+		theme.timeAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
+		theme.gauge.title.fontSize = chartTheme.fontSize;
+		theme.gauge.detail.fontSize = chartTheme.fontSize;
+		theme.gauge.axisLabel.fontSize = chartTheme.fontSize;
+		theme.sankey.label.fontSize = chartTheme.fontSize;
+		theme.themeRiver.label.fontSize = chartTheme.fontSize;
+	}
+	
+	if(chartTheme.titleTheme.fontSize)
+		theme.title.textStyle.fontSize = chartTheme.titleTheme.fontSize;
+	
+	if(chartTheme.legendTheme.fontSize)
+		theme.legend.textStyle.fontSize = chartTheme.legendTheme.fontSize;
+	
+	if(chartTheme.tooltipTheme.fontSize)
+		theme.tooltip.textStyle.fontSize = chartTheme.tooltipTheme.fontSize;
+	
+	return theme;
+};
+
+/**
+ * 自定义ECharts的tooltip
+ */
+EU.customTooltip = function(params, extractor)
+{
+	var html = "";
+	
+	let datas = [];
+	let title = "";
+	
+	// "axis"触发时
+	if(CF.isArray(params))
+	{
+		for(let i=0; i<params.length; i++)
+		{
+			let pi = params[i];
+			let data = (extractor == null ? {} : (extractor(pi) || {}));
+			
+			if(CF.isEmpty(title))
+			{
+				if(data.title != null)
+					title = data.title;
+				else
+					title = (pi.axisValueLabel || pi.axisValue || pi.name);
+			}
+			
+			if(data.color == null)
+				data.color = (pi.color || "");
+			
+			if(data.name == null)
+				data.name = (pi.seriesName || "");
+			
+			if(data.value == null)
+				data.value = (pi.value || "");
+			
+			datas.push(data);
+		}
+	}
+	//"item"触发时
+	else
+	{
+		let data = (extractor == null ? {} : (extractor(params) || {}));
+		title = (data.title != null ? data.title : (params.seriesName || ""));
+		
+		if(data.color == null)
+			data.color = (params.color || "");
+		
+		if(data.name == null)
+			data.name = (params.name || "");
+		
+		if(data.value == null)
+			data.value = (params.value || "");
+		
+		datas.push(data);
+	}
+	
+	html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
+	html += 	"<div>"+title+"</div>";
+	
+	for(let i=0; i<datas.length; i++)
+	{
+		let di = datas[i];
+		let vs = (CF.isArray(di.value) ? di.value : (CF.isEmpty(di.value) ? [] : [ di.value ]));
+		
+		html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
+		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
+		
+		if(!CF.isEmpty(di.color))
+		{
+			html +=		"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div>";
+		}
+		
+		html +=			"<div>"+di.name+"</div>";
+		html +=		"</div>";
+		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:12px;font-weight:bold;'>";
+		
+		for(let j=0; j<vs.length; j++)
+		{
+			html +=		"<div>"+vs[j]+"</div>";
+		}
+		
+		html +=		"</div>";
+		html +=	"</div>";
+	}
+	
+	html += "</div>";
+	
+	return html;
+};
+
+/**
+ * 准备ECharts图表渲染选项。
+ * 
+ * @param chart
+ * @param renderOptions
+ * @param beforeProcessHandler
+ * @returns 一个新的图表渲染选项
+ */
+EU.prepareRenderOptions = function(chart, renderOptions, beforeProcessHandler)
+{
+	var options = chart.options();
+	renderOptions = SPT.trimArrayPropsForMerge(renderOptions, options);
+	options = SPT.trimArrayPropsForMerge(options, renderOptions);
+	renderOptions = chart.inflateOptions(renderOptions, options);
+	
+	//使用series[0]作为series后续元素的模板，避免"dg-chart-options"中必须为series每个元素设置type等基础信息
+	var series = renderOptions.series;
+	if(series && series.length > 1)
+	{
+		var series0 = CF.extend(true, {}, series[0]);
+		
+		for(let i=1; i<series.length; i++)
+			series[i] = CF.extend(true, {}, series0, series[i]);
+	}
+	
+	if(beforeProcessHandler)
+		beforeProcessHandler(chart, renderOptions);
+	
+	EU.setOptionsComponentId(renderOptions);
+	chart.processRenderOptions(renderOptions);
+	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
+	EU.setOptionsComponentId(renderOptions);
+	
+	return renderOptions;
+};
+
+/**
+ * 准备ECharts图表更新选项。
+ * 
+ * @param chart
+ * @param updateOptions
+ * @param beforeProcessHandler
+ * @returns 一个新的图表更新选项
+ */
+EU.prepareUpdateOptions = function(chart, updateOptions, beforeProcessHandler)
+{
+	var options = chart.options();
+	updateOptions = SPT.trimArrayPropsForMerge(updateOptions, options);
+	options = SPT.trimArrayPropsForMerge(options, updateOptions);
+	updateOptions = chart.inflateOptions(updateOptions, options);
+	
+	if(beforeProcessHandler)
+		beforeProcessHandler(updateOptions, chart);
+	
+	EU.setOptionsComponentId(updateOptions);
+	chart.processUpdateOptions(updateOptions);
+	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
+	EU.setOptionsComponentId(updateOptions);
+	
+	return updateOptions;
+};
+
+//设置ECharts选项中的组件ID，必须指定id且不能重复，因为更新操作采用的是replaceMerge模式，必须有对应id
+EU.setOptionsComponentId = function(options)
+{
+	for(let name in options)
+	{
+		let value = options[name];
+		
+		if(value == null)
+			continue;
+		
+		if(CF.isArray(value))
+		{
+			for(let i=0; i<value.length; i++)
+			{
+				let vi = value[i];
+				
+				if(vi != null && CF.isPlainObject(vi) && vi.id === undefined)
+				{
+					vi.id = i;
+				}
+			}
+		}
+		else if(CF.isPlainObject(value) && value.id === undefined)
+		{
+			value.id = 0;
+		}
+	}
+};
+
+//初始化ECharts地图类图表的地图选项
+EU.initChartMap = function(chart, options)
+{
+	var map = CF.optionValue(options, EU.MAP_NAME_OPTION_NAME);
+	
+	//必须设置初始map，不然渲染会报错
+	if(CF.isEmpty(map))
+		map = EU.defaultMapName();
+	
+	//不应替换原始地图名
+	var coverOriginalMap = false;
+	EU.setMapOption(options, map, coverOriginalMap);
+};
+
+/**
+ * 获取默认地图名。
+ * 地图类图表需要默认地图执行render初始渲染。
+ * 注意：返回的默认地图名应是在dashboardFactory.js中dftBuiltinChartMaps的其中之一。
+ */
+EU.defaultMapName = function()
+{
+	//默认中国地图，这里应使用"china"，因为echarts内部只对"china"地图名的地图才会自动绘制右下角的南海诸岛缩略图
+	return "china";
+};
+
+//渲染ECharts地图类图表
+EU.renderMapChart = function(chart, options)
+{
+	var maps = EU.getDistinctMaps(options);
+	EU.registerMap(chart, maps, () =>
+	{
+		var instance = EU.init(chart);
+		instance.setOption(options);
+		chart.statusRendered(true);
+	});
+};
+
+//更新ECharts地图类图表
+EU.updateMapChart = function(chart, updateOptions)
+{
+	var renderOptions = chart.renderOptions();
+	var renderMaps = EU.getDistinctMaps(renderOptions);
+	var updateMaps = EU.getDistinctMaps(updateOptions);
+	var mapChanged = (renderMaps.length !== updateMaps.length);
+	
+	if(!mapChanged)
+	{
+		for(let i=0; i<renderMaps.length; i++)
+		{
+			if(renderMaps[i] != updateMaps[i])
+			{
+				mapChanged = true;
+				break;
+			}
+		}
+	}
+	
+	if(mapChanged)
+		EU.resetMapOptions(updateOptions);
+	
+	var maps = EU.getDistinctMaps(updateOptions);
+	EU.registerMap(chart, maps, () =>
+	{
+		EU.setOptionsReplaceMerge(chart, updateOptions);
+		chart.statusUpdated(true);
+	});
+};
+
+//仅提取ECharts地图类图表选项中的不重复地图名信息
+EU.getDistinctMaps = function(options)
+{
+	var re = [];
+	
+	var maps = [];
+	var geo = options.geo;
+	var series = options.series;
+	
+	if(geo)
+	{
+		if(CF.isArray(geo))
+		{
+			for(let i=0; i<geo.length; i++)
+			{
+				if(geo[i].map)
+				{
+					maps.push(geo[i].map);
+				}
+			}
+		}
+		else
+		{
+			if(geo.map)
+			{
+				maps.push(geo.map);
+			}
+		}
+	}
+	
+	if(series)
+	{
+		if(CF.isArray(series))
+		{
+			for(let i=0; i<series.length; i++)
+			{
+				if(series[i].type == "map" && series[i].map)
+				{
+					maps.push(series[i].map);
+				}
+			}
+		}
+		else
+		{
+			if(series.type == "map" && series.map)
+			{
+				maps.push(series.map);
+			}
+		}
+	}
+	
+	SPT.appendDistinct(re, maps);
+	
+	return re;
+};
+
+//设置ECharts地图类图表选项中的地图名
+EU.setMapOption = function(options, map, force)
+{
+	var geo = options.geo;
+	var series = options.series;
+	
+	if(geo)
+	{
+		if(CF.isArray(geo))
+		{
+			for(let i=0; i<geo.length; i++)
+			{
+				if(geo[i].map == null || force)
+				{
+					geo[i].map = map;
+				}
+			}
+		}
+		else
+		{
+			if(geo.map == null || force)
+			{
+				geo.map = map;
+			}
+		}
+	}
+	
+	if(series)
+	{
+		if(CF.isArray(series))
+		{
+			for(let i=0; i<series.length; i++)
+			{
+				if(series[i].type == "map" && (series[i].map == null || force))
+				{
+					series[i].map = map;
+				}
+			}
+		}
+		else
+		{
+			if(series.type == "map" && (series.map == null || force))
+			{
+				series.map = map;
+			}
+		}
+	}
+};
+
+//重置ECharts地图类图表的中心位置、缩放比例
+EU.resetMapOptions = function(options)
+{
+	var geo = options.geo;
+	var series = options.series;
+	
+	if(geo)
+	{
+		if(CF.isArray(geo))
+		{
+			for(let i=0; i<geo.length; i++)
+			{
+				geo[i].center = null;
+				geo[i].zoom = 1;
+			}
+		}
+		else
+		{
+			geo.center = null;
+			geo.zoom = 1;
+		}
+	}
+	
+	if(series)
+	{
+		if(CF.isArray(series))
+		{
+			for(let i=0; i<series.length; i++)
+			{
+				if(series[i].type == "map")
+				{
+					series[i].center = null;
+					series[i].zoom = 1;
+				}
+			}
+		}
+		else
+		{
+			if(series.type == "map")
+			{
+				series.center = null;
+				series.zoom = 1;
+			}
+		}
+	}
+};
+
+/**
+ * 将值数组对象（{value: [name, value]}）格式的options.series[i].data元素适配为与options.series[i].type匹配的格式。
+ * 比如，对于"pie"的type，应适配为名值对象：{ name: name, value: value }格式，图表才能正确显示。
+ * 如果originalSeriesType与options.series[i].type相同，则不进行处理。
+ * 
+ * 某些内置图表允许修改series[i].type来自定义系列的类型，而不同类型的数据格式规范不同，所以需要适配。
+ * 
+ * @param chart
+ * @param options
+ * @param originalSeriesType
+ * @param nameIndex 可选，name在值数组对象的索引，默认为：0
+ * @param valueIndex 可选，value在值数组对象的索引，默认为：1
+ */
+EU.adaptValueArrayData = function(chart, options, originalSeriesType, nameIndex, valueIndex)
+{
+	nameIndex = (nameIndex == null ? 0 : nameIndex);
+	valueIndex = (valueIndex == null ? 1 : valueIndex);
+	
+	var series = (options.series || []);
+	
+	for(let i=0; i<series.length; i++)
+	{
+		let si = series[i];
+		let type = si.type;
+		
+		if(type === originalSeriesType)
+			continue;
+		
+		let data = (si.data || []);
+		
+		//这些图表不支持值数组对象格式的数据，支持名值格式的数据，因此需要适配
+		if(type == "pie" || type == "funnel" || type == "map"
+			|| type == "wordCloud" || type == "liquidFill")
+		{
+			data.forEach((di) =>
+			{
+				let value = (di == null ? null : di.value);
+				
+				if(value != null)
+				{
+					di.name = value[nameIndex];
+					di.value = value[valueIndex];
+				}
+			});
+			
+			//需同时删除encode
+			si.encode = null;
+		}
+	}
+};
+
+EU.inflateRendererCommons = function(renderer)
+{
+	renderer.destroy = function(chart)
+	{
+		EU.dispose(chart);
+	};
+	
+	renderer.resize = function(chart)
+	{
+		EU.resize(chart);
+	},
+	
+	renderer.on = function(chart, type, handler)
+	{
+		EU.on(chart, type, handler);
+	},
+	
+	renderer.off = function(chart, type, handler)
+	{
+		EU.off(chart, type, handler);
+	};
+	
+	return renderer;		
+};
+
+EU.setOptionsReplaceMerge = function(chart, options, replaceMerge)
+{
+	if(replaceMerge == null)
+	{
+		replaceMerge = [];
+		
+		for(var p in options)
+		{
+			replaceMerge.push(p);
+		}
+	}
+	
+	var opts =
+	{
+		replaceMerge: replaceMerge
+	};
+	
+	//对于忽略全部数据集的场景，某些图表（饼图/地图散点图等）不会清空画布，需要添加占位系列或数据
+	if(options.series != null)
+	{
+		let series = options.series;
+		
+		if(series.length == 0)
+			series.push({ id: 0 });
+		
+		for(let i=0; i<series.length; i++)
+		{
+			if(series[i].data === undefined)
+				series[i].data = [];
+		}
+	}
+	
+	var internal = chart.internal();
+	internal.setOption(options, opts);
+};
+
 /**
  * 从updateOptions.series[i].data[i]提取轴数据，并设置为updateAxis.data轴数据。
  * 
  * @param chart
  * @param updateOptions 更新选项，格式应为：{ series: [ { data: [ ... ] } ] }
  * @param updateAxis 要填充轴数据的更新的轴对象，格式应为：{ data: [ { value: ... }、基本类型, ...], ... }
- * @param valueExtractor 轴数据值提取器，格式同SPT.sortEChartsUpdateAxisData的valueExtractor参数
+ * @param valueExtractor 轴数据值提取器，格式同EU.sortUpdateAxisData的valueExtractor参数
  * @param sortSeriesData 可选，是否排序系列数据，默认值为：true。
  */
-SPT.inflateEChartsUpdateAxisData = function(chart, updateOptions, updateAxis, valueExtractor, sortSeriesData)
+EU.inflateUpdateAxisData = function(chart, updateOptions, updateAxis, valueExtractor, sortSeriesData)
 {
 	sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
 	
@@ -7786,7 +8590,7 @@ SPT.inflateEChartsUpdateAxisData = function(chart, updateOptions, updateAxis, va
 	
 	updateAxis.data = axisData;
 	
-	SPT.sortEChartsUpdateAxisData(chart.renderOptions(), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
+	EU.sortUpdateAxisData(chart.renderOptions(), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
 };
 
 /**
@@ -7810,13 +8614,12 @@ SPT.inflateEChartsUpdateAxisData = function(chart, updateOptions, updateAxis, va
  *						[ ... ]
  *						其元素索引与updateOptions.series[i]索引对应
  */
-SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxis,
-				sortAxisData, sortSeriesData, valueExtractor)
+EU.sortUpdateAxisData = function(renderOptions, updateOptions, updateAxis, sortAxisData, sortSeriesData, valueExtractor)
 {
 	if(!sortAxisData && !sortSeriesData)
 		return;
 	
-	var sortHandler = SPT.sortAxisDataOption(renderOptions);
+	var sortHandler = EU.sortAxisDataOption(renderOptions);
 	
 	if(sortHandler == null)
 		return;
@@ -7913,12 +8716,12 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 	}
 };
 
-SPT.sortAxisDataOption = function(options)
+EU.sortAxisDataOption = function(options)
 {
-	return CF.optionValue(options, SPT.SORT_AXIS_DATA_OPTION_NAME);
+	return CF.optionValue(options, EU.SORT_AXIS_DATA_OPTION_NAME);
 };
 
-SPT.inflateAxisDataExtractors =
+EU.axisDataExtractors =
 {
 	propertyName: function()
 	{
@@ -7955,207 +8758,6 @@ SPT.inflateAxisDataExtractors =
 		
 		return extractor;
 	}
-};
-
-//返回targetObj的浅复制对象，如果某个属性值在baseObj中是数组而在targetObj不是数组，返回对象会将其转为数组
-SPT.trimArrayPropsForMerge = function(targetObj, baseObj)
-{
-	var targetRe = {};
-	
-	for(let name in targetObj)
-	{
-		let value = targetObj[name];
-		let baseValue = (baseObj == null ? null : baseObj[name]);
-		
-		if(value != null && !CF.isArray(value) && CF.isArray(baseValue))
-		{
-			targetRe[name] = [ value ];
-		}
-		else
-		{
-			targetRe[name] = value;
-		}
-	}
-	
-	return targetRe;
-};
-
-SPT.dataSetBindsMainFetched = function(chart, chartResult)
-{
-	var dsbs = chart.dataSetBindsMain();
-	return chart.dataSetBindsFetched(dsbs, chartResult);
-};
-
-SPT.originalDataOfData = function(data, originalData)
-{
-	if(originalData === undefined)
-	{
-		return (data == null ? null : data[SPT.ORIGINAL_DATA_PROP_NAME]);
-	}
-	else
-	{
-		data[SPT.ORIGINAL_DATA_PROP_NAME] = originalData;
-	}
-};
-
-SPT.originalDataOfDatas = function(datas, originalDatas)
-{
-	if(datas == null || originalDatas == null)
-		return;
-	
-	var len = Math.min(datas.length, originalDatas.length);
-	
-	for(let i=0; i<len; i++)
-	{
-		SPT.originalDataOfData(datas[i], originalDatas[i]);
-	}
-};
-
-SPT.originalDataOfResult = function(datas, chart, result)
-{
-	SPT.originalDataOfDatas(datas, chart.resultDatas(result));
-};
-
-SPT.inflateEChartsRendererCommonFuncs = function(renderer)
-{
-	renderer.destroy = function(chart)
-	{
-		chartUtil.echarts.dispose(chart);
-	};
-	
-	renderer.resize = function(chart)
-	{
-		chartUtil.echarts.resize(chart);
-	},
-	
-	renderer.on = function(chart, type, handler)
-	{
-		chartUtil.echarts.on(chart, type, handler);
-	},
-	
-	renderer.off = function(chart, type, handler)
-	{
-		chartUtil.echarts.off(chart, type, handler);
-	};
-	
-	return renderer;		
-};
-
-SPT.convertArrayValueEleToString = function(array, index)
-{
-	index = (index == null ? 0 : index);
-	
-	if(array == null)
-		return;
-	
-	for(let i=0; i<array.length; i++)
-	{
-		let v = (array[i] == null ? null : array[i].value);
-		let vi = (v == null ? null : v[index]);
-		
-		if(vi != null && !CF.isString(vi))
-			v[index] = vi + "";
-	}
-};
-
-//转换dataObj.data[i]元素{value: ...}为{name: ...}
-SPT.convertDataPropValueToName = function(dataObj)
-{
-	if(dataObj == null || dataObj.data == null)
-		return;
-	
-	for(let i=0; i<dataObj.data.length; i++)
-	{
-		let di = dataObj.data[i];
-		dataObj.data[i] = (di == null ? null : { name: di.value });
-	}
-};
-
-SPT.customEChartsTooltip = function(params, extractor)
-{
-	var html = "";
-	
-	let datas = [];
-	let title = "";
-	
-	// "axis"触发时
-	if(CF.isArray(params))
-	{
-		for(let i=0; i<params.length; i++)
-		{
-			let pi = params[i];
-			let data = (extractor == null ? {} : (extractor(pi) || {}));
-			
-			if(CF.isEmpty(title))
-			{
-				if(data.title != null)
-					title = data.title;
-				else
-					title = (pi.axisValueLabel || pi.axisValue || pi.name);
-			}
-			
-			if(data.color == null)
-				data.color = (pi.color || "");
-			
-			if(data.name == null)
-				data.name = (pi.seriesName || "");
-			
-			if(data.value == null)
-				data.value = (pi.value || "");
-			
-			datas.push(data);
-		}
-	}
-	//"item"触发时
-	else
-	{
-		let data = (extractor == null ? {} : (extractor(params) || {}));
-		title = (data.title != null ? data.title : (params.seriesName || ""));
-		
-		if(data.color == null)
-			data.color = (params.color || "");
-		
-		if(data.name == null)
-			data.name = (params.name || "");
-		
-		if(data.value == null)
-			data.value = (params.value || "");
-		
-		datas.push(data);
-	}
-	
-	html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
-	html += 	"<div>"+title+"</div>";
-	
-	for(let i=0; i<datas.length; i++)
-	{
-		let di = datas[i];
-		let vs = (CF.isArray(di.value) ? di.value : (CF.isEmpty(di.value) ? [] : [ di.value ]));
-		
-		html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
-		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
-		
-		if(!CF.isEmpty(di.color))
-		{
-			html +=		"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div>";
-		}
-		
-		html +=			"<div>"+di.name+"</div>";
-		html +=		"</div>";
-		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:12px;font-weight:bold;'>";
-		
-		for(let j=0; j<vs.length; j++)
-		{
-			html +=		"<div>"+vs[j]+"</div>";
-		}
-		
-		html +=		"</div>";
-		html +=	"</div>";
-	}
-	
-	html += "</div>";
-	
-	return html;
 };
 
 //---------------------------------------------------------

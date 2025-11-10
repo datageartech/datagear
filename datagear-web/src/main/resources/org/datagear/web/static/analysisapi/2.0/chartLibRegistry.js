@@ -47,16 +47,6 @@ CF.registerGlobalLib(
 		name: ["lodash", "_"],
 		version: "4.17.21",
 		source: "/static/analysislib/lodash@4.17.21/lodash.min.js"
-	},
-	{
-		name: "chartUtil.echarts",
-		version: "1.0",
-		source: "/static/analysislib/chartUtil.echarts-1.0/chartUtil.echarts.js",
-		loaded: function()
-		{
-			var chartUtil = global.chartUtil;
-			return (chartUtil != null && chartUtil.echarts !== undefined);
-		}
 	}
 ]);
 
