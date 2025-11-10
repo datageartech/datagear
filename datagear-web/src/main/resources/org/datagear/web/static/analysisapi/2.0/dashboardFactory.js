@@ -1001,9 +1001,9 @@ dashboardProto.renderContext = function()
  * 看板监听器格式为：
  * {
  *   //可选，渲染看板后置回调函数
- *   render: function(dashboard){ ... },
+ *   rendered: function(dashboard){ ... },
  *   //可选，销毁看板后置回调函数
- *   destroy: function(dashboard){ ... },
+ *   destroyed: function(dashboard){ ... },
  *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
  *   onRender: function(dashboard){ ... },
  *   //可选，销毁看板前置回调函数，返回false将阻止销毁看板
@@ -1449,26 +1449,29 @@ dashboardProto.isHandlingCharts = function()
 dashboardProto.startHandleCharts = function()
 {
 	this._assertAlive();
-	
 	this.stopHandleCharts();
+	this._handlingChartsIntervalId = setInterval(() =>
+	{
+		this._exeDoHandleChartsMutex();
+	},
+	DF.HANDLE_CHART_INTERVAL_MS);
+};
+
+dashboardProto._exeDoHandleChartsMutex = function()
+{
+	if(this._inHandlingCharts === true)
+		return false;
+	
+	this._inHandlingCharts = true;
+	
+	CF.executeSilently(() =>
+	{
+		this._doHandleCharts();
+	});
 	
 	this._inHandlingCharts = false;
 	
-	this._handlingChartsIntervalId = setInterval(() =>
-	{
-		if(this._inHandlingCharts == true)
-			return;
-		
-		this._inHandlingCharts = true;
-		
-		CF.executeSilently(() =>
-		{
-			this._doHandleCharts();
-		});
-		
-		this._inHandlingCharts = false;
-	},
-	DF.HANDLE_CHART_INTERVAL_MS);
+	return true;
 };
 
 /**
@@ -2714,8 +2717,8 @@ dashboardProto.statusRendered = function(set, postProcess)
 dashboardProto._postProcessRendered = function()
 {
 	var listener = this.listener();
-	if(listener && listener.render)
-		listener.render(this);
+	if(listener && listener.rendered)
+		listener.rendered(this);
 };
 
 /**
@@ -2759,8 +2762,8 @@ dashboardProto.statusDestroyed = function(set, postProcess)
 dashboardProto._postProcessDestroyed = function()
 {
 	var listener = this.listener();
-	if(listener && listener.destroy)
-		listener.destroy(this);
+	if(listener && listener.destroyed)
+		listener.destroyed(this);
 };
 
 /**
