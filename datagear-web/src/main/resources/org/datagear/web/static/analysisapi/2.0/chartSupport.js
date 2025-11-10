@@ -29,18 +29,15 @@
 (function(global){
 
 var CF = global.chartFactory;
-
 var SPT = (CF.chartSupport || (CF.chartSupport = {}));
 
-var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
+//扩展ECharts图表选项：地图名
+//默认的ECharts地图类图表配置地图名稍微麻烦，所有这里的内置图表都支持此快捷方式设置地图名选项
+SPT.MAP_NAME_OPTION_NAME = "mapName";
 
-//内置地图类图表的地图选项名
-//默认的ECharts地图类图表配置地图名稍微麻烦，
-//所有这里的内置图表都支持此快捷方式设置地图名选项
-builtinOptionNames.mapName = "mapName";
-
-//内置类目轴数据排序配置选项名
-builtinOptionNames.sortAxisData = "sortAxisData";
+//扩展ECharts图表选项：类目轴数据排序配置选项名
+//对于多数据集场景，如果采用数据先后顺序提取的轴数据，顺序可能不符合预期，需要重新排序
+SPT.SORT_AXIS_DATA_OPTION_NAME = "sortAxisData";
 
 SPT.ECHARTS_RENDERER_DEPEND =
 [
@@ -7373,7 +7370,7 @@ SPT.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, result, dataSi
 //初始化ECharts地图类图表的地图选项
 SPT.echartsMapChartInitMap = function(chart, options)
 {
-	var map = CF.builtinOptionValue(options, builtinOptionNames.mapName);
+	var map = CF.optionValue(options, SPT.MAP_NAME_OPTION_NAME);
 	
 	//必须设置初始map，不然渲染会报错
 	if(CF.isEmpty(map))
@@ -7918,8 +7915,7 @@ SPT.sortEChartsUpdateAxisData = function(renderOptions, updateOptions, updateAxi
 
 SPT.sortAxisDataOption = function(options)
 {
-	var value = CF.builtinOptionValue(options, builtinOptionNames.sortAxisData);
-	return value;
+	return CF.optionValue(options, SPT.SORT_AXIS_DATA_OPTION_NAME);
 };
 
 SPT.inflateAxisDataExtractors =

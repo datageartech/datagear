@@ -2955,7 +2955,7 @@ DF.addBuiltinChartMaps = function(chartMaps)
  * 获取标准内置图表地图树形结构。
  * 返回一个数组，其中每个元素都可能是树形结构根节点，节点格式为：
  * {
- *   //地图名，可用于chartSupport中的builtinOptionNames.mapName图表选项的名称
+ *   //地图名，可用于chartSupport中的MAP_NAME_OPTION_NAME图表选项的名称
  *   mapName: "...",
  *   //显示标签
  *   mapLabel: "...",
@@ -3012,7 +3012,7 @@ DF.getStdBuiltinChartMapTree = function(listener)
  * 获取标准内置图表地图平铺数组。
  * 返回一个数组，其中元素格式为：
  * {
- *   //地图名，可用于chartSupport中的builtinOptionNames.mapName图表选项的名称
+ *   //地图名，可用于chartSupport中的MAP_NAME_OPTION_NAME图表选项的名称
  *   mapName: "...",
  *   //显示标签
  *   mapLabel: "..."
