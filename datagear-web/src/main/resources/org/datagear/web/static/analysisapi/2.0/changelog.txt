@@ -53,3 +53,4 @@ dashboard.loadUnsolvedCharts()	*
 dashboard.originalDataIndex()	x
 dashboard.refreshData()			x
 dashboard.renderContext()返回对象格式由{attributes:{...}}改为{...}
+图表监听器函数render()改名为rendered()，update()改名为updated()，destroy()改名为destroyed()

@@ -868,11 +868,11 @@ chartProto.theme = function(theme)
  * 图表监听器格式为：
  * {
  *   //可选，渲染图表完成回调函数
- *   render: function(chart){ ... },
+ *   rendered: function(chart){ ... },
  *   //可选，更新图表数据完成回调函数
- *   update: function(chart, chartResult){ ... },
+ *   updated: function(chart, chartResult){ ... },
  *   //可选，销毁图表完成回调函数
- *   destroy: function(chart){ ... },
+ *   destroyed: function(chart){ ... },
  *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
  *   onRender: function(chart){ ... },
  *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
@@ -1545,7 +1545,7 @@ chartProto.statusRendering = function(set)
  * 图表是否为/设置为：完成render。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，默认为true
+ * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，仅在为false时不执行，默认为：true
  */
 chartProto.statusRendered = function(set, postProcess)
 {
@@ -1555,7 +1555,7 @@ chartProto.statusRendered = function(set, postProcess)
 		this._isAlive = true;
 		this.status(chartStatusConst.RENDERED);
 		
-		if(postProcess == null || postProcess == true)
+		if(postProcess !== false)
 			this._postProcessRendered();
 	}
 	else
@@ -1571,8 +1571,8 @@ chartProto._postProcessRendered = function()
 	this._bindEleEventHandlers();
 	
 	var listener = this.listener();
-	if(listener && listener.render)
-		listener.render(this);
+	if(listener && listener.rendered)
+		listener.rendered(this);
 };
 
 /**
@@ -1677,7 +1677,7 @@ chartProto.statusUpdating = function(set)
  * 图表是否为/设置为：完成update。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的update函数，默认为true
+ * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的update函数，仅在为false时不执行，默认为：true
  */
 chartProto.statusUpdated = function(set, postProcess)
 {
@@ -1687,7 +1687,7 @@ chartProto.statusUpdated = function(set, postProcess)
 		this._isAlive = true;
 		this.status(chartStatusConst.UPDATED);
 		
-		if(postProcess == null || postProcess == true)
+		if(postProcess !== false)
 			this._postProcessUpdated();
 	}
 	else
@@ -1700,9 +1700,9 @@ chartProto.statusUpdated = function(set, postProcess)
 chartProto._postProcessUpdated = function()
 {
 	var listener = this.listener();
-	if(listener && listener.update)
+	if(listener && listener.updated)
 	{
-		listener.update(this, this.updateResult());
+		listener.updated(this, this.updateResult());
 	}
 };
 
@@ -1727,7 +1727,7 @@ chartProto.statusDestroying = function(set)
  * 图表是否为/设置为：已销毁。
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
- * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，默认为true
+ * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，仅在为false时不执行，默认为：true
  */
 chartProto.statusDestroyed = function(set, postProcess)
 {
@@ -1737,7 +1737,7 @@ chartProto.statusDestroyed = function(set, postProcess)
 		this._isAlive = false;
 		this.status(chartStatusConst.DESTROYED);
 		
-		if(postProcess == null || postProcess == true)
+		if(postProcess !== false)
 			this._postProcessDestroyed();
 	}
 	else
@@ -1747,8 +1747,8 @@ chartProto.statusDestroyed = function(set, postProcess)
 chartProto._postProcessDestroyed = function()
 {
 	var listener = this.listener();
-	if(listener && listener.destroy)
-		listener.destroy(this);
+	if(listener && listener.destroyed)
+		listener.destroyed(this);
 };
 
 /**
