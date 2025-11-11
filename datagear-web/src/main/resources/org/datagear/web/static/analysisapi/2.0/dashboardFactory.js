@@ -23,7 +23,7 @@
  *   chartFactory.js
  * 
  * 运行时依赖:
- *   chartSetting.js
+ *   chartTool.js
  * 
  * 
  * 此看板工厂支持为<body>元素添加elementAttrConst.DASHBOARD_LISTENER属性，用于指定看板监听器JS对象名，
@@ -1294,9 +1294,9 @@ dashboardProto._assertActive = function()
  *   type: "...",
  *   //可选，是否必须，默认为false
  *   required: true || false,
- *   //可选，输入框类型，参考chartSetting.DataSetParamInputType，默认值为：chartSetting.DataSetParamInputType.TEXT
+ *   //可选，输入框类型，参考chartTool.DataSetParamInputType，默认值为：chartTool.DataSetParamInputType.TEXT
  *   inputType: "...",
- *   //可选，输入框配置，参考chartSetting.renderDataSetParamForm函数说明
+ *   //可选，输入框配置，参考chartTool.renderDataSetParamForm函数说明
  *   inputPayload: ...,
  *   //可选，输入项的联动数据映射设置
  *   link: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ]
@@ -1317,7 +1317,7 @@ dashboardProto._assertActive = function()
  * 
  * 图表数据集参数索引对象格式参考dashboard._batchSetDataSetParamValues()函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
  * 
- * @param form 要渲染的<form>表单HTML元素、HTML元素ID，表单结构允许灵活自定义，具体参考chartSetting.renderDataSetParamForm
+ * @param form 要渲染的<form>表单HTML元素、HTML元素ID，表单结构允许灵活自定义，具体参考chartTool.renderDataSetParamForm
  * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
  */
 dashboardProto.renderForm = function(form, config)
@@ -1401,7 +1401,7 @@ dashboardProto.renderForm = function(form, config)
 	config.chartTheme = globalTheme;
 	
 	CF.addThemeRefEntity(globalTheme, DF.THEME_REF_DASHBOARD_FORM_ID);
-	CF.chartSetting.renderDataSetParamForm(form, items, config);
+	CF.chartTool.renderDataSetParamForm(form, items, config);
 };
 
 /**
@@ -2584,7 +2584,7 @@ dashboardProto._destroyForm = function(form)
 {
 	try
 	{
-		CF.chartSetting.destroyDataSetParamForm(form);
+		CF.chartTool.destroyDataSetParamForm(form);
 	}
 	catch(e)
 	{

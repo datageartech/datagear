@@ -58,6 +58,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_SERVERTIME = "serverTime";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT = "chartSupport";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING = "chartSetting";
+	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTTOOL = "chartTool";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER = "chartPluginManager";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE = "dashboardStyle";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR = "dashboardEditor";
@@ -210,8 +211,17 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 				contextPath + ServerTimeJsController.SERVER_TIME_URL + "?v=" + randomCode));
 		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSUPPORT,
 				analysisPrefix + "/chartSupport.js?v=" + Global.VERSION));
-		impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
-				analysisPrefix + "/chartSetting.js?v=" + Global.VERSION));
+
+		if (isV1)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTSETTING,
+					analysisPrefix + "/chartSetting.js?v=" + Global.VERSION));
+		}
+		else
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTTOOL,
+					analysisPrefix + "/chartTool.js?v=" + Global.VERSION));
+		}
 
 		addChartPluginManagerImport(impts, contextPath, locale, apiVersion);
 

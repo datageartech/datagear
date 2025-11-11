@@ -7455,7 +7455,7 @@ SPT.processRenderOptions = function(chart, renderOptions, set)
 	
 	if(handler)
 	{
-		options.handler(renderOptions, chart);
+		handler.call(options, renderOptions, chart);
 	}
 	
 	if(set)
@@ -7485,7 +7485,7 @@ SPT.processUpdateOptions = function(chart, updateOptions, set)
 	
 	if(handler)
 	{
-		options.handler(updateOptions, chart);
+		handler.call(options, updateOptions, chart);
 	}
 	
 	if(set)

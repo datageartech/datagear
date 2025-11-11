@@ -23,7 +23,7 @@
  *   无
  * 
  * 运行时依赖:
- *   chartSetting.js
+ *   chartTool.js
  * 
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.OPTIONS属性来设置图表选项，格式为：
@@ -34,7 +34,7 @@
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chart.listener()函数参数说明。
  * 
- * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_SETTING属性，用于禁用图表交互设置功能，
+ * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_TOOL属性，用于禁用图表工具，
  * 值为"true"表示禁用，其他表示启用。
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数。
@@ -197,8 +197,8 @@ elementAttrConst.THEME = "dg-chart-theme";
 /**图表监听器*/
 elementAttrConst.LISTENER = "dg-chart-listener";
 
-/**图表禁用设置*/
-elementAttrConst.DISABLE_SETTING = "dg-chart-disable-setting";
+/**图表禁用工具*/
+elementAttrConst.DISABLE_TOOL = "dg-chart-disable-tool";
 
 /**图表事件处理（前缀）*/
 elementAttrConst.ON = "dg-chart-on-";
@@ -235,10 +235,8 @@ builtinOptionNames.customOptionNames = "customOptionNames";
 builtinOptionNames.beautifyScrollbar = "beautifyScrollbar";
 /** 内置图表选项名：更新追加模式 */
 builtinOptionNames.updateAppendMode = "updateAppendMode";
-/** 内置图表选项名：是否禁用内置设置（参数/数据透视表） */
-builtinOptionNames.disableSetting = "disableSetting";
-/** 内置图表选项名：内置设置（参数/数据透视表） */
-builtinOptionNames.builtinSetting = "builtinSetting";
+/** 内置图表选项名：内置工具（参数/数据） */
+builtinOptionNames.builtinTool = "builtinTool";
 
 /** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 CF.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
@@ -464,7 +462,7 @@ chartProto.init = function()
 	this._initOptions();
 	this._initTheme();
 	this._initListener();
-	this._initDisableSetting();
+	this._initDisableTool();
 	this._initRenderer();
 	this._initAttrValues();
 	this._initUpdateAppendMode();
@@ -567,83 +565,83 @@ chartProto._bodyListener = function()
 };
 
 /**
- * 初始化图表是否禁用交互设置。
- * 此函数从图表元素的elementAttrConst.DISABLE_SETTING属性获取是否禁用值。
+ * 初始化图表是否禁用工具。
+ * 此函数从图表元素的elementAttrConst.DISABLE_TOOL属性获取是否禁用值。
  */
-chartProto._initDisableSetting = function()
+chartProto._initDisableTool = function()
 {
-	var setting;
+	var re;
 	
 	var options = this.options();
-	var optionValue = CF.builtinOptionValue(options, builtinOptionNames.disableSetting);
+	var builtinTool = CF.builtinOptionValue(options, builtinOptionNames.builtinTool);
 	
 	//图表选项里的优先级应最高，不然图表展示页的选项不起效
-	if(!CF.isEmpty(optionValue))
+	if(builtinTool != null && !CF.isEmpty(builtinTool.disable))
 	{
-		setting = this._evalDisableSettingAttr(optionValue);
+		re = this._evalDisableToolObj(builtinTool.disable);
 	}
 	else
 	{
-		var globalSetting = this._bodyDisableSetting();
-		setting = CF.eleAttr(this.element(), elementAttrConst.DISABLE_SETTING);
+		var globalObj = this._bodyDisableTool();
+		re = CF.eleAttr(this.element(), elementAttrConst.DISABLE_TOOL);
 		
-		if(!CF.isEmpty(setting))
+		if(!CF.isEmpty(re))
 		{
-			setting = this._evalDisableSettingAttr(setting);
-			setting = CF.extend({}, globalSetting, setting);
+			re = this._evalDisableToolObj(re);
+			re = CF.extend({}, globalObj, re);
 		}
 		else
 		{
-			setting = globalSetting;
+			re = globalObj;
 		}
 	}
 	
-	this.disableSetting(setting);
+	this.disableTool(re);
 };
 
-chartProto._bodyDisableSetting = function()
+chartProto._bodyDisableTool = function()
 {
-	var settingStr = CF.eleAttr(document.body, elementAttrConst.DISABLE_SETTING);
+	var value = CF.eleAttr(document.body, elementAttrConst.DISABLE_TOOL);
 	
-	if(settingStr !== CF._PREV_BODY_DISABLESETTING_STR)
+	if(value !== CF._PREV_BODY_DISABLE_TOOL_STR)
 	{
-		CF._PREV_BODY_DISABLESETTING_STR = settingStr;
-		CF._PREV_BODY_DISABLESETTING = this._evalDisableSettingAttr(settingStr);
+		CF._PREV_BODY_DISABLE_TOOL_STR = value;
+		CF._PREV_BODY_DISABLE_TOOL = this._evalDisableToolObj(value);
 	}
 	
-	return CF._PREV_BODY_DISABLESETTING;
+	return CF._PREV_BODY_DISABLE_TOOL;
 };
 
-chartProto._evalDisableSettingAttr = function(settingAttr)
+chartProto._evalDisableToolObj = function(value)
 {
-	var setting = {};
+	var re = {};
 	
-	if(CF.isEmpty(settingAttr))
-		settingAttr == "false";
+	if(CF.isEmpty(value))
+		value == "false";
 	
-	if(CF.isLiteralFalse(settingAttr))
+	if(CF.isLiteralFalse(value))
 	{
-		setting.param = false;
-		setting.data = false;
+		re.param = false;
+		re.data = false;
 	}
-	else if(CF.isLiteralTrue(settingAttr))
+	else if(CF.isLiteralTrue(value))
 	{
-		setting.param = true;
-		setting.data = true;
+		re.param = true;
+		re.data = true;
 	}
 	//字符串
-	else if(CF.isString(settingAttr))
+	else if(CF.isString(value))
 	{
-		var evalSetting = CF.evalSilently(settingAttr, {});
-		setting = CF.extend(setting, evalSetting);
+		var evalRe = CF.evalSilently(value, {});
+		re = CF.extend(re, evalRe);
 	}
 	//对象
 	else
 	{
-		setting = CF.extend(setting, settingAttr);
+		re = CF.extend(re, value);
 	}
 	
-	return setting;
+	return re;
 };
 
 /**
@@ -890,9 +888,9 @@ chartProto.listener = function(listener)
 /**
  * 获取/设置图表是否禁用设置。
  * 
- * 图表初始化时会使用图表元素的"dg-chart-disable-setting"属性值执行设置操作。
+ * 图表初始化时会使用图表元素的"dg-chart-disable-tool"属性值执行设置操作。
  * 
- * @param setting 可选，禁用设置，格式为：
+ * @param disable 可选，禁用设置，格式为：
  * 					//全部禁用
  * 					true、"true"、
  * 					//全部启用
@@ -906,37 +904,46 @@ chartProto.listener = function(listener)
  *					}
  * @returns 要获取的禁用设置，格式为：{param: true、false, data: true、false}，不会为null
  */
-chartProto.disableSetting = function(setting)
+chartProto.disableTool = function(disable)
 {
-	var defaultSetting =
+	if(disable === undefined)
 	{
-		//影响图表主体功能，因此默认启用
-		param: false,
-		//不影响图表主体功能，因此默认禁用
-		data: true
-	};
-	
-	if(setting === undefined)
-	{
-		return (this._disableSetting || (this._disableSetting = defaultSetting));
+		return (this._disableTool || (this._disableTool = this._defaultDisableTool()));
 	}
 	else
 	{
-		if(setting == null)
+		if(disable == null)
 		{
-			setting = {};
+			disable = this._defaultDisableTool();
 		}
-		else if(CF.isLiteralTrue(setting))
+		else if(CF.isLiteralTrue(disable))
 		{
-			setting = {param: true, data: true};
+			disable = {param: true, data: true};
 		}
-		else if(CF.isLiteralFalse(setting))
+		else if(CF.isLiteralFalse(disable))
 		{
-			setting = {param: false, data: false};
+			disable = {param: false, data: false};
+		}
+		else
+		{
+			disable = CF.extend(this._defaultDisableTool(), disable);
 		}
 		
-		this._disableSetting = CF.extend(defaultSetting, setting);
+		this._disableTool = disable;
 	}
+};
+
+chartProto._defaultDisableTool = function()
+{
+	var re =
+	{
+		//影响图表主体功能，默认启用
+		param: false,
+		//不影响图表主体功能，默认禁用
+		data: true
+	};
+	
+	return re;
 };
 
 /**
@@ -1387,17 +1394,17 @@ chartProto._doDestroy = function()
 	CF.eleRemoveData(ele, CF.ELE_RENDERED_CHART_NAME);
 	
 	//应在这里先销毁图表元素内部创建的元素，因为renderer.destroy()可能会清空图表元素
-	this._doDestroySetting();
+	this._doDestroyTool();
 	CF.removeThemeRefEntity(theme, this.id());
 };
 
 /**
  * 销毁图表交互设置。
  */
-chartProto._doDestroySetting = function()
+chartProto._doDestroyTool = function()
 {
-	if(CF.chartSetting && CF.chartSetting.unbindChartSettingPanelEvent)
-		CF.chartSetting.unbindChartSettingPanelEvent(this);
+	if(CF.chartTool && CF.chartTool.unbindChartToolPanelEvent)
+		CF.chartTool.unbindChartToolPanelEvent(this);
 };
 
 /**
@@ -1560,7 +1567,7 @@ chartProto.statusRendered = function(set, postProcess)
  */
 chartProto._postProcessRendered = function()
 {
-	this._renderSetting();
+	this._renderTool();
 	this._bindEleEventHandlers();
 	
 	var listener = this.listener();
@@ -1569,17 +1576,17 @@ chartProto._postProcessRendered = function()
 };
 
 /**
- * 渲染图表交互设置项。
+ * 渲染图表工具。
  */
-chartProto._renderSetting = function()
+chartProto._renderTool = function()
 {
-	var disableSetting = this.disableSetting();
+	var disableTool = this.disableTool();
 	
-	if(disableSetting.param && disableSetting.data)
+	if(disableTool.param && disableTool.data)
 		return;
 	
-	if(CF.chartSetting && CF.chartSetting.bindChartSettingPanelEvent)
-		CF.chartSetting.bindChartSettingPanelEvent(this);
+	if(CF.chartTool && CF.chartTool.bindChartToolPanelEvent)
+		CF.chartTool.bindChartToolPanelEvent(this);
 };
 
 /**

@@ -402,8 +402,8 @@
 	border-color: red !important;
 }
 
-/*图表展示页面设置框*/
-.dg-chart-setting-box{
+/*图表展示页面工具框*/
+.dg-chart-tool-box{
 	position: absolute;
 	right: 0.1rem;
 	top: 0.1rem;
@@ -413,85 +413,85 @@
 	z-index: 8;
 	font-size: 1rem;
 }
-.dg-chart-setting-box.dg-position-leftTop{
+.dg-chart-tool-box.dg-position-leftTop{
 	left: 0.1rem;
 	top: 0.1rem;
 	right: unset;
 	bottom: unset;
 }
-.dg-chart-setting-box.dg-position-leftBottom{
+.dg-chart-tool-box.dg-position-leftBottom{
 	left: 0.1rem;
 	top: unset;
 	right: unset;
 	bottom: 0.1rem;
 }
-.dg-chart-setting-box.dg-position-leftCenter{
+.dg-chart-tool-box.dg-position-leftCenter{
 	left: 0.1rem;
 	top: 50%;
 	right: unset;
 	bottom: unset;
 	transform: translateY(-50%);
 }
-.dg-chart-setting-box.dg-position-rightTop{
+.dg-chart-tool-box.dg-position-rightTop{
 	left: unset;
 	top: 0.1rem;
 	right: 0.1rem;
 	bottom: unset;
 }
-.dg-chart-setting-box.dg-position-rightBottom{
+.dg-chart-tool-box.dg-position-rightBottom{
 	left: unset;
 	top: unset;
 	right: 0.1rem;
 	bottom: 0.1rem;
 }
-.dg-chart-setting-box.dg-position-rightCenter{
+.dg-chart-tool-box.dg-position-rightCenter{
 	left: unset;
 	top: 50%;
 	right: 0.1rem;
 	bottom: unset;
 	transform: translateY(-50%);
 }
-.dg-chart-setting-box.dg-position-centerTop{
+.dg-chart-tool-box.dg-position-centerTop{
 	left: 50%;
 	top: 0.1rem;
 	right: unset;
 	bottom: unset;
 	transform: translateX(-50%);
 }
-.dg-chart-setting-box.dg-position-center{
+.dg-chart-tool-box.dg-position-center{
 	left: 50%;
 	top: 50%;
 	right: unset;
 	bottom: unset;
 	transform: translate(-50%, -50%);
 }
-.dg-chart-setting-box.dg-position-centerBottom{
+.dg-chart-tool-box.dg-position-centerBottom{
 	left: 50%;
 	top: unset;
 	right: unset;
 	bottom: 0.1rem;
 	transform: translateX(-50%);
 }
-.dg-chart-setting-box.dg-flex-dir-row{
+.dg-chart-tool-box.dg-flex-dir-row{
 	flex-direction: row;
 }
-.dg-chart-setting-box.dg-flex-dir-column{
+.dg-chart-tool-box.dg-flex-dir-column{
 	flex-direction: column;
 }
-.dg-chart-setting-panel,
-.dg-chart-setting-box button{
+.dg-chart-tool-panel,
+.dg-chart-tool-box button{
 	border-bottom-right-radius: 3px;
 	border-bottom-left-radius: 3px;
 	border-top-right-radius: 3px;
 	border-top-left-radius: 3px;
 }
-.dg-chart-setting-button{
+.dg-chart-tool-button{
 	padding: 0.2rem 0.3rem;
 	margin: 0;
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-chart-setting-panel{
+.dg-chart-tool-panel{
 	position: absolute;
 	border-width: 1px;
 	border-style: solid;
@@ -500,11 +500,11 @@
 	-webkit-user-select: text;
 	z-index: 9;
 }
-.dg-chart-setting-panel .dg-chart-setting-panel-closebtn{
+.dg-chart-tool-panel .dg-chart-tool-panel-closebtn{
     padding: 0.2rem 0.5rem !important;
     font-size: 0.8rem !important;
 }
-.dg-chart-setting-panel .dg-chart-setting-panel-head{
+.dg-chart-tool-panel .dg-chart-tool-panel-head{
 	font-weight: bold;
 	white-space: nowrap;
 	padding-bottom: 0.5rem;
@@ -512,19 +512,19 @@
     justify-content: space-between;
     align-items: center;
 }
-.dg-chart-setting-panel .dg-chart-setting-panel-content{
+.dg-chart-tool-panel .dg-chart-tool-panel-content{
 	overflow: auto;
 }
-.dg-chart-setting-panel .dg-chart-setting-panel-foot{
+.dg-chart-tool-panel .dg-chart-tool-panel-foot{
 	padding-top: 0.5rem;
 	text-align: center;
 }
-.dg-chart-setting-panel .dg-chart-setting-panel-head button,
-.dg-chart-setting-panel .dg-chart-setting-panel-head input[type="button"],
-.dg-chart-setting-panel .dg-chart-setting-panel-head input[type="submit"],
-.dg-chart-setting-panel .dg-chart-setting-panel-foot button,
-.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type="button"],
-.dg-chart-setting-panel .dg-chart-setting-panel-foot input[type="submit"]{
+.dg-chart-tool-panel .dg-chart-tool-panel-head button,
+.dg-chart-tool-panel .dg-chart-tool-panel-head input[type="button"],
+.dg-chart-tool-panel .dg-chart-tool-panel-head input[type="submit"],
+.dg-chart-tool-panel .dg-chart-tool-panel-foot button,
+.dg-chart-tool-panel .dg-chart-tool-panel-foot input[type="button"],
+.dg-chart-tool-panel .dg-chart-tool-panel-foot input[type="submit"]{
 	font-weight: normal;
 	font-size: 1rem;
 	padding-left: 2rem;
@@ -532,60 +532,60 @@
 	border-width: 1px;
 	border-style: solid;
 }
-.dg-chart-setting-panel .dg-datasetbind-section{
+.dg-chart-tool-panel .dg-datasetbind-section{
 	border-width: 1px;
 	border-style: solid;
 	margin: 0.5rem 0;
 	border-radius: 3px;
 }
-.dg-chart-setting-panel .dg-datasetbind-section-head{
+.dg-chart-tool-panel .dg-datasetbind-section-head{
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0.4rem;
 }
-.dg-chart-setting-panel .dg-datasetbind-section-title{
+.dg-chart-tool-panel .dg-datasetbind-section-title{
 	font-weight: bold;
 	cursor: pointer;
 }
-.dg-chart-setting-panel .dg-datasetbind-section-content{
+.dg-chart-tool-panel .dg-datasetbind-section-content{
 	padding: 0 0.5rem 0.5rem 0.5rem;
 	overflow-x: auto;
 }
-.dg-chart-setting-panel .dg-dspform input,
-.dg-chart-setting-panel .dg-dspform select,
-.dg-chart-setting-panel .dg-dspform textarea
-.dg-chart-setting-panel .dg-dspform button{
+.dg-chart-tool-panel .dg-dspform input,
+.dg-chart-tool-panel .dg-dspform select,
+.dg-chart-tool-panel .dg-dspform textarea
+.dg-chart-tool-panel .dg-dspform button{
 	font-size: 1rem;
 	border-width: 1px;
 	border-style: solid;
 	padding: 0.3rem 0;
 }
-.dg-chart-setting-panel button,
-.dg-chart-setting-panel input[type="submit"],
-.dg-chart-setting-panel input[type="button"]{
+.dg-chart-tool-panel button,
+.dg-chart-tool-panel input[type="submit"],
+.dg-chart-tool-panel input[type="button"]{
 	font-size: 1rem;
 	padding: 0.4rem 0.8rem;
 	white-space: nowrap;
 }
-.dg-chart-setting-panel button.dg-param-value-form-invalid,
-.dg-chart-setting-panel input[type="submit"].dg-param-value-form-invalid,
-.dg-chart-setting-panel input[type="button"].dg-param-value-form-invalid{
+.dg-chart-tool-panel button.dg-param-value-form-invalid,
+.dg-chart-tool-panel input[type="submit"].dg-param-value-form-invalid,
+.dg-chart-tool-panel input[type="button"].dg-param-value-form-invalid{
 	border-color: red !important;
 }
-.dg-chart-setting-panel.dg-chart-setting-data-panel .dg-chart-setting-panel-foot{
+.dg-chart-tool-panel.dg-chart-tool-data-panel .dg-chart-tool-panel-foot{
 	display: none;
 }
-.dg-chart-setting-panel table.dg-chart-data-table{
+.dg-chart-tool-panel table.dg-chart-data-table{
 	border-collapse: collapse;
 }
-.dg-chart-setting-panel table.dg-chart-data-table th,
-.dg-chart-setting-panel table.dg-chart-data-table td{
+.dg-chart-tool-panel table.dg-chart-data-table th,
+.dg-chart-tool-panel table.dg-chart-data-table td{
 	font-size: 1rem;
 	padding: 0.5rem 0.8rem;
 	text-align: left;
 }
-.dg-chart-setting-panel table.dg-chart-data-table thead th,
-.dg-chart-setting-panel table.dg-chart-data-table thead td{
+.dg-chart-tool-panel table.dg-chart-data-table thead th,
+.dg-chart-tool-panel table.dg-chart-data-table thead td{
 	font-size: 1rem;
 	white-space: nowrap;
 }

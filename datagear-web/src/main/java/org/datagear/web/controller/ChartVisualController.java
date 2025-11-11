@@ -353,6 +353,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 			HtmlTplDashboardWidget dashboardWidget)
 	{
 		String apiVersion = resolveShowApiVersion(request, entity, dashboardWidget);
+		boolean isV1 = DashboardApiVersion.isV1(apiVersion);
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
 		String htmlTitle = entity.getName();
 		// 图表展示页面应禁用异步加载功能，避免越权访问隐患
@@ -360,9 +361,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 				+ LoadableChartWidgets.PATTERN_NONE + "\" "
 				+ this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameApiVersion() + "=\"" + apiVersion + "\"";
 		// 看板页面端API-1.0中默认不自动调整尺寸，需要明确设置
-		String bodyAttr = (DashboardApiVersion.isV1(apiVersion)
-				? HtmlTplDashboardWidgetHtmlRenderer.ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\""
-				: "");
+		String bodyAttr = (isV1 ? HtmlTplDashboardWidgetHtmlRenderer.ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\"" : "");
 		tplOption.setHtmlAttr(htmlAttr);
 		tplOption.setCharset(IOUtil.CHARSET_UTF_8);
 		// 默认应设置html元素的height为100%，不然css渐变背景可能没效果
@@ -374,7 +373,11 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		tplOption.setChartWidgetIds(new String[] { entity.getId() });
 		tplOption.setChartEleStyleName(
 				"dg-chart-for-show-chart " + this.htmlTplDashboardWidgetHtmlRenderer.getChartStyleName());
-		tplOption.setChartEleAttr("dg-chart-disable-setting=\"false\"");
+
+		if (isV1)
+			tplOption.setChartEleAttr("dg-chart-disable-setting=\"false\"");
+		else
+			tplOption.setChartEleAttr("dg-chart-disable-tool=\"false\"");
 
 		return tplOption;
 	}

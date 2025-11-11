@@ -17,7 +17,7 @@
 
 /**
  * 图表设置库，参数表单、数据表格。
- * 全局变量名：window.chartFactory.chartSetting
+ * 全局变量名：window.chartFactory.chartTool
  * 
  * 加载时依赖：
  *   无
@@ -29,11 +29,11 @@
 (function(global, window)
 {
 	var CF = (global.chartFactory || (global.chartFactory = {}));
-	var CST = (CF.chartSetting || (CF.chartSetting = {}));
+	var TOOL = (CF.chartTool || (CF.chartTool = {}));
 	var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}));
 	
 	//org.datagear.analysis.DataSetParam.InputType
-	CST.DataSetParamInputType =
+	TOOL.DataSetParamInputType =
 	{
 		TEXT: "text",
 		SELECT: "select",
@@ -45,7 +45,7 @@
 		TEXTAREA: "textarea"
 	};
 	
-	CST.labels = (CST.labels ||
+	TOOL.labels = (TOOL.labels ||
 	{
 		confirm: "确定",
 		close: "X",
@@ -59,9 +59,6 @@
 		serialNumber: "序号",
 		dataDetail: "数据明细"
 	});
-	
-	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
-	CST.disableDateAwareInputAutocomplete = (CST.disableDateAwareInputAutocomplete || true);
 	
 	/**
 	 * 渲染数据集参数表单。
@@ -83,21 +80,21 @@
 	 * 			}
 	 * @return 表单HTML元素
 	 */
-	CST.renderDataSetParamForm = function(parent, dataSetParams, options)
+	TOOL.renderDataSetParamForm = function(parent, dataSetParams, options)
 	{
 		options = CF.extend(
 		{
 			inChartElement: false,
-			submitText: CST.labels.confirm,
-			labelColon: CST.labels.colon,
+			submitText: TOOL.labels.confirm,
+			labelColon: TOOL.labels.colon,
 			readonly: false,
-			yesText: CST.labels.yes,
-			noText: CST.labels.no
+			yesText: TOOL.labels.yes,
+			noText: TOOL.labels.no
 		},
 		(options || {}));
 		
 		var paramValues = (options.paramValues || {});
-		var InputType = CST.DataSetParamInputType;
+		var InputType = TOOL.DataSetParamInputType;
 		
 		var form;
 		
@@ -115,10 +112,10 @@
 		if(options.chartTheme)
 		{
 			if(options.inChartElement)
-				CST.dspFormThemeStyle(options.chartTheme, true);
+				TOOL.dspFormThemeStyle(options.chartTheme, true);
 			else
 			{
-				var themeStyleName = CST.dspFormThemeStyle(options.chartTheme, false);
+				var themeStyleName = TOOL.dspFormThemeStyle(options.chartTheme, false);
 				CF.eleAddClass(form, themeStyleName);
 				CF.eleData(form, CF.builtinPropName("dpFormThemeClassName"), themeStyleName);
 			}
@@ -159,7 +156,7 @@
 			
 			let labelDiv = CF.eleCreate("div", "dg-dspform-item-label");
 			CF.eleAppend(item, labelDiv);
-			let label = CST.renderDspFormLabel(form, options, labelDiv, dsp);
+			let label = TOOL.renderDspFormLabel(form, options, labelDiv, dsp);
 			
 			let valueDiv = CF.eleCreate("div", "dg-dspform-item-value");
 			CF.eleAppend(item, valueDiv);
@@ -173,43 +170,43 @@
 				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					input = CST.renderDspFormInputRadio(form, options, valueDiv, dsp, value, defaultSelOpts);
+					input = TOOL.renderDspFormInputRadio(form, options, valueDiv, dsp, value, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					input = CST.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value, defaultSelOpts);
+					input = TOOL.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value, defaultSelOpts);
 				else
-					input = CST.renderDspFormInputSelect(form, options, valueDiv, dsp, value, defaultSelOpts);
+					input = TOOL.renderDspFormInputSelect(form, options, valueDiv, dsp, value, defaultSelOpts);
 			}
 			else if(dsp.type == CF.DataSetParamType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					input = CST.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.DATE)
-					input = CST.renderDspFormInputDate(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputDate(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.TIME)
-					input = CST.renderDspFormInputTime(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputTime(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.DATETIME)
-					input = CST.renderDspFormInputDateTime(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputDateTime(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.RADIO)
-					input = CST.renderDspFormInputRadio(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputRadio(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					input = CST.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					input = CST.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
 				else
-					input = CST.renderDspFormInputText(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputText(form, options, valueDiv, dsp, value);
 			}
 			else if(dsp.type == CF.DataSetParamType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					input = CST.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.RADIO)
-					input = CST.renderDspFormInputRadio(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputRadio(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					input = CST.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputCheckbox(form, options, valueDiv, dsp, value);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					input = CST.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
 				else
-					input = CST.renderDspFormInputText(form, options, valueDiv, dsp, value);
+					input = TOOL.renderDspFormInputText(form, options, valueDiv, dsp, value);
 			}
 			
 			let inputId = (input ? CF.eleAttr(input, "id") : null);
@@ -241,7 +238,7 @@
 			if(options.readonly)
 				return false;
 			
-			let validationOk = CST.validateDspForm(this);
+			let validationOk = TOOL.validateDspForm(this);
 			let submitBtn = CF.eleOfSelector("[type='submit']", foot);
 			
 			if(validationOk)
@@ -254,7 +251,7 @@
 			
 			if(options.submit)
 			{
-				let formData = CST.getDataSetParamFormData(this);
+				let formData = TOOL.getDataSetParamFormData(this);
 				return (options.submit.call(this, formData) == true);
 			}
 			else
@@ -275,7 +272,7 @@
 	 * 
 	 * @param ancestor 渲染数据集参数值的<form>表单元素，或者它的祖先元素（其所有内部数据集参数值表单都会被销毁）。
 	 */
-	CST.destroyDataSetParamForm = function(ancestor)
+	TOOL.destroyDataSetParamForm = function(ancestor)
 	{
 		var forms = [];
 		
@@ -311,7 +308,7 @@
 		});
 	};
 	
-	CST.dspFormThemeStyle = function(chartTheme, isSubStyle)
+	TOOL.dspFormThemeStyle = function(chartTheme, isSubStyle)
 	{
 		var name = CF.builtinPropName("dataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
 		return CF.themeStyleSheet(chartTheme, name, function()
@@ -401,7 +398,7 @@
 	 * @param parent 渲染标签的父容器元素
 	 * @param dataSetParam
 	 */
-	CST.renderDspFormLabel = function(form, formOptions, parent, dataSetParam)
+	TOOL.renderDspFormLabel = function(form, formOptions, parent, dataSetParam)
 	{
 		var label = CF.eleCreate("label");
 		CF.eleHtml(label, (dataSetParam.label ? dataSetParam.label : dataSetParam.name));
@@ -422,7 +419,7 @@
 	 * @param dataSetParam
 	 * @param value 可选
 	 */
-	CST.renderDspFormInputText = function(form, formOptions, parent, dataSetParam, value)
+	TOOL.renderDspFormInputText = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var input = CF.eleCreate("input", "dg-dspform-input");
 		CF.eleAttr(input, "type", "text");
@@ -436,7 +433,7 @@
 			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
 		CF.eleAppend(parent, input);
-		CST.eleInputActualValue(input, value);
+		TOOL.eleInputActualValue(input, value);
 		
 		return input;
 	};
@@ -463,9 +460,9 @@
 	 * @param value 可选
 	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	CST.renderDspFormInputSelect = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
+	TOOL.renderDspFormInputSelect = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
 	{
-		var payload = CST.evalDataSetParamInputPayload(dataSetParam, []);
+		var payload = TOOL.evalDataSetParamInputPayload(dataSetParam, []);
 		
 		if(defaultSelOpts && CF.isEmpty(payload))
 			payload = defaultSelOpts;
@@ -510,7 +507,7 @@
 		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
 			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
-		CST.eleInputActualValue(input, value);
+		TOOL.eleInputActualValue(input, value);
 		
 		return input;
 	};
@@ -536,16 +533,16 @@
 	 * @param dataSetParam
 	 * @param value 可选
 	 */
-	CST.renderDspFormInputDate = function(form, formOptions, parent, dataSetParam, value)
+	TOOL.renderDspFormInputDate = function(form, formOptions, parent, dataSetParam, value)
 	{
-		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
+		var options = TOOL.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d" }, options);
 		
 		let input;
 		
-		if(!CST.dateFormatter.hasDay(options.format))
+		if(!TOOL.dateFormatter.hasDay(options.format))
 		{
-			let hasMonth = CST.dateFormatter.hasMonth(options.format);
+			let hasMonth = TOOL.dateFormatter.hasMonth(options.format);
 			let inputId = CF.uid();
 			let inputsWrapper = CF.eleCreate("div", "dg-date-widget dg-dspform-inputs-wrapper");
 			CF.eleAppend(parent, inputsWrapper);
@@ -578,10 +575,10 @@
 				
 				let monthSelect = CF.eleCreate("select", "dg-date-widget-month");
 				CF.eleAppend(inputs, monthSelect);
-				for(let i=0; i<CST.MONTH_OPTIONS.length; i++)
+				for(let i=0; i<TOOL.MONTH_OPTIONS.length; i++)
 				{
-					let opt = CF.eleCreateWithAttr("option", "value", CST.MONTH_OPTIONS[i]);
-					CF.eleHtml(opt, CST.MONTH_OPTIONS[i]);
+					let opt = CF.eleCreateWithAttr("option", "value", TOOL.MONTH_OPTIONS[i]);
+					CF.eleHtml(opt, TOOL.MONTH_OPTIONS[i]);
 					CF.eleAppend(monthSelect, opt);
 				}
 			}
@@ -594,7 +591,7 @@
 			CF.eleAppend(btns, nowBtn);
 			CF.eleOn(nowBtn, "click", () =>
 			{
-				CST.eleInputActualValue(input, new Date());
+				TOOL.eleInputActualValue(input, new Date());
 			});
 			
 			let prevBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-prev-year-btn");
@@ -602,7 +599,7 @@
 			CF.eleAppend(btns, prevBtn);
 			CF.eleOn(prevBtn, "click", () =>
 			{
-				CST.eleYearSelectRollOptions(yearSelect, false);
+				TOOL.eleYearSelectRollOptions(yearSelect, false);
 			});
 			
 			let nextBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-date-widget-year-btn dg-date-widget-next-year-btn");
@@ -610,10 +607,10 @@
 			CF.eleAppend(btns, nextBtn);
 			CF.eleOn(nextBtn, "click", () =>
 			{
-				CST.eleYearSelectRollOptions(yearSelect, true);
+				TOOL.eleYearSelectRollOptions(yearSelect, true);
 			});
 			
-			CST.eleInputActualValue(input, value);
+			TOOL.eleInputActualValue(input, value);
 		}
 		else
 		{
@@ -628,7 +625,7 @@
 				CF.eleAttr(input, "dg-validation-check-required", "true");
 			
 			CF.eleAppend(parent, input);
-			CST.eleInputActualValue(input, value);
+			TOOL.eleInputActualValue(input, value);
 		}
 		
 		return input;
@@ -655,9 +652,9 @@
 	 * @param value 可选
 	 * @param formOptions
 	 */
-	CST.renderDspFormInputTime = function(form, formOptions, parent, dataSetParam, value)
+	TOOL.renderDspFormInputTime = function(form, formOptions, parent, dataSetParam, value)
 	{
-		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
+		var options = TOOL.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "h:i:s" }, options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
@@ -667,14 +664,14 @@
 		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
 		
-		if(CST.dateFormatter.hasSecond(options.format))
+		if(TOOL.dateFormatter.hasSecond(options.format))
 			CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
-		CST.eleInputActualValue(input, value);
+		TOOL.eleInputActualValue(input, value);
 		
 		return input;
 	};
@@ -703,9 +700,9 @@
 	 * @param dataSetParam
 	 * @param value 可选
 	 */
-	CST.renderDspFormInputDateTime = function(form, formOptions, parent, dataSetParam, value)
+	TOOL.renderDspFormInputDateTime = function(form, formOptions, parent, dataSetParam, value)
 	{
-		var options = CST.evalDataSetParamInputPayload(dataSetParam, {});
+		var options = TOOL.evalDataSetParamInputPayload(dataSetParam, {});
 		options = CF.extend({ format: "y-m-d h:i:s" }, options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
@@ -715,14 +712,14 @@
 		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
 		
-		if(CST.dateFormatter.hasSecond(options.format))
+		if(TOOL.dateFormatter.hasSecond(options.format))
 			CF.eleAttr(input, "step", "1");
 		
 		if(CF.isLiteralTrue(dataSetParam.required))
 			CF.eleAttr(input, "dg-validation-check-required", "true");
 		
 		CF.eleAppend(parent, input);
-		CST.eleInputActualValue(input, value);
+		TOOL.eleInputActualValue(input, value);
 		
 		return input;
 	};
@@ -745,9 +742,9 @@
 	 * @param value 可选
 	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
-	CST.renderDspFormInputRadio = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
+	TOOL.renderDspFormInputRadio = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
 	{
-		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
+		var opts = TOOL.evalDataSetParamInputPayload(dataSetParam, []);
 		
 		if(defaultSelOpts && CF.isEmpty(opts))
 			opts = defaultSelOpts;
@@ -787,7 +784,7 @@
 			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
 				CF.eleAttr(input, "dg-validation-check-number", "true");
 			
-			CST.eleInputActualValue(input, value);
+			TOOL.eleInputActualValue(input, value);
 		}
 		
 		return inputsWrapper;
@@ -811,9 +808,9 @@
 	 * @param value 可选，值、值数组
 	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
-	CST.renderDspFormInputCheckbox = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
+	TOOL.renderDspFormInputCheckbox = function(form, formOptions, parent, dataSetParam, value, defaultSelOpts)
 	{
-		var opts = CST.evalDataSetParamInputPayload(dataSetParam, []);
+		var opts = TOOL.evalDataSetParamInputPayload(dataSetParam, []);
 		
 		if(defaultSelOpts && CF.isEmpty(opts))
 			opts = defaultSelOpts;
@@ -855,7 +852,7 @@
 			if(CF.DataSetParamType.NUMBER == dataSetParam.type)
 				CF.eleAttr(input, "dg-validation-check-number", "true");
 			
-			CST.eleInputActualValue(input, value);
+			TOOL.eleInputActualValue(input, value);
 		}
 		
 		return inputsWrapper;
@@ -870,7 +867,7 @@
 	 * @param dataSetParam
 	 * @param value 可选
 	 */
-	CST.renderDspFormInputTextarea = function(form, formOptions, parent, dataSetParam, value)
+	TOOL.renderDspFormInputTextarea = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var input = CF.eleCreate("textarea", "dg-dspform-input");
 		CF.eleAttr(input, "type", "text");
@@ -885,16 +882,16 @@
 			CF.eleAttr(input, "dg-validation-check-number", "true");
 		
 		CF.eleAppend(parent, input);
-		CST.eleInputActualValue(input, value);
+		TOOL.eleInputActualValue(input, value);
 		
 		return input;
 	};
 	
-	CST.MONTH_OPTIONS = ["", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+	TOOL.MONTH_OPTIONS = ["", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 	
 	//日期格式解析支持类，支持"...y...m...d...h...i...s..."格式日期解析
 	//注意：这里保留了大写'Y'标识符，以兼容旧数据集预览时的格式
-	CST.dateFormatter =
+	TOOL.dateFormatter =
 	{
 		hasYear: function(format)
 		{
@@ -1069,7 +1066,7 @@
 		_formatArrayCache:{}
 	};
 	
-	CST.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
+	TOOL.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
 	{
 		var inputPayload = dataSetParam.inputPayload;
 		
@@ -1081,7 +1078,7 @@
 			return inputPayload;
 	};
 	
-	CST.NUMBER_REGEX = /^-?\d+\.?\d*$/;
+	TOOL.NUMBER_REGEX = /^-?\d+\.?\d*$/;
 	
 	/**
 	 * 校验数据集参数值表单的必填项、数值项。
@@ -1089,7 +1086,7 @@
 	 * @param form
 	 * @return true 验证通过；false 验证不通过
 	 */
-	CST.validateDspForm = function(form)
+	TOOL.validateDspForm = function(form)
 	{
 		var validationOk = true;
 		
@@ -1102,13 +1099,13 @@
 			if(CF.isEmpty(inputs))
 				return;
 			
-			let type = CST.eleInputType(inputs[0]);
+			let type = TOOL.eleInputType(inputs[0]);
 			let isCheckboxRadio = (type == "checkbox" || type == "radio");
 			let checkedValues = [];
 			
 			inputs.forEach((input) =>
 			{
-				let val = CST.eleInputActualValue(input);
+				let val = TOOL.eleInputActualValue(input);
 				
 				if(isCheckboxRadio)
 				{
@@ -1150,13 +1147,13 @@
 			if(CF.isEmpty(inputs))
 				return;
 			
-			let type = CST.eleInputType(inputs[0]);
+			let type = TOOL.eleInputType(inputs[0]);
 			let isCheckboxRadio = (type == "checkbox" || type == "radio");
 			let checkedValues = [];
 			
 			inputs.forEach((input) =>
 			{
-				let val = CST.eleInputActualValue(input);
+				let val = TOOL.eleInputActualValue(input);
 				
 				if(isCheckboxRadio)
 				{
@@ -1168,7 +1165,7 @@
 					val = (CF.isEmpty(val) ? [] : (CF.isArray(val) ? val : [ val ]));
 					let indicator = (type == "hidden" ? CF.eleAncestorOfSelector(input, ".dg-dspform-inputs-wrapper") : input);
 					
-					if(!CST.isNonEmptyAllNumberic(val))
+					if(!TOOL.isNonEmptyAllNumberic(val))
 					{
 						CF.eleAddClass(indicator, "dg-validation-number");
 						validationOk = false;
@@ -1182,7 +1179,7 @@
 			{
 				let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dspform-inputs-wrapper");
 				
-				if(!CST.isNonEmptyAllNumberic(checkedValues))
+				if(!TOOL.isNonEmptyAllNumberic(checkedValues))
 				{
 					CF.eleAddClass(inputsWrapper, "dg-validation-number");
 					validationOk = false;
@@ -1207,7 +1204,7 @@
 	 * 
 	 * @param form
 	 */
-	CST.getDataSetParamFormData = function(form)
+	TOOL.getDataSetParamFormData = function(form)
 	{
 		var re = {};
 		
@@ -1223,7 +1220,7 @@
 				return;
 			
 			let arrayValue = CF.isEleMatches(input, "input[type='checkbox'], select[multiple]");
-			let value = CST.eleInputActualValue(input);
+			let value = TOOL.eleInputActualValue(input);
 			let prevValue = re[name];
 			
 			if(arrayValue)
@@ -1280,7 +1277,7 @@
 		return re;
 	};
 	
-	CST.setDataSetParamFormData = function(form, data)
+	TOOL.setDataSetParamFormData = function(form, data)
 	{
 		data = (data || {});
 		
@@ -1293,7 +1290,7 @@
 				return;
 			
 			let value = data[name];
-			CST.eleInputActualValue(input, value);
+			TOOL.eleInputActualValue(input, value);
 		});
 	};
 	
@@ -1304,9 +1301,9 @@
 	 * @param 可选，要设置的值，多余复选框、单选框、多选下拉框时可以是数组
 	 * @returns 实际值，如果复选框、单选框、下拉框未选中时，将返回undefined
 	 */
-	CST.eleInputActualValue = function(input, value)
+	TOOL.eleInputActualValue = function(input, value)
 	{
-		var type = CST.eleInputType(input);
+		var type = TOOL.eleInputType(input);
 		
 		if(arguments.length < 2)
 		{
@@ -1329,11 +1326,11 @@
 			else
 			{
 				if(CF.isEleMatches(input, ".dg-date-widget-hidden"))
-					re = CST.eleDateWidgetValue(input);
+					re = TOOL.eleDateWidgetValue(input);
 				else
 					re = input.value;
 				
-				re = CST.eleInputConvertDateFormat(input, re);
+				re = TOOL.eleInputConvertDateFormat(input, re);
 			}
 			
 			return re;
@@ -1345,30 +1342,30 @@
 				if(value == null)
 					input.checked = false;
 				else if(CF.isArray(value))
-					input.checked = CST.containsValueAsString(value, input.value);
+					input.checked = TOOL.containsValueAsString(value, input.value);
 				else
-					input.checked = CST.isEqualAsString(value, input.value);
+					input.checked = TOOL.isEqualAsString(value, input.value);
 			}
 			else if(CF.isEleMatches(input, "select"))
 			{
-				CST.eleSelectSetValue(input, value);
+				TOOL.eleSelectSetValue(input, value);
 			}
 			else
 			{
 				if(CF.isEleMatches(input, ".dg-date-widget-hidden"))
 				{
-					CST.eleDateWidgetValue(input, value);
+					TOOL.eleDateWidgetValue(input, value);
 				}
 				else
 				{
-					value = CST.eleInputConvertDateFormat(input, value, true);
+					value = TOOL.eleInputConvertDateFormat(input, value, true);
 					input.value = (value == null ? "" : value);
 				}
 			}
 		}
 	};
 	
-	CST.eleDateWidgetValue = function(inputHidden, value)
+	TOOL.eleDateWidgetValue = function(inputHidden, value)
 	{
 		let dateWidget = CF.eleAncestorOfSelector(inputHidden, ".dg-date-widget");
 		let yearSelect = (dateWidget == null ? null : CF.eleOfSelector(".dg-date-widget-year", dateWidget));
@@ -1393,18 +1390,18 @@
 			if(CF.isDate(value))
 				date = value;
 			else
-				date = (CF.isEmpty(value) ? null : CST.dateFormatter.parseDate(value, CF.eleAttr(inputHidden, "dg-date-dest-format")));
+				date = (CF.isEmpty(value) ? null : TOOL.dateFormatter.parseDate(value, CF.eleAttr(inputHidden, "dg-date-dest-format")));
 			
-			let yearValue = (date == null ? "" : CST.dateFormatter.formatYear(date.getFullYear()));
-			let monthValue = (date == null ? "" : CST.dateFormatter.formatDate(date, "m"));
+			let yearValue = (date == null ? "" : TOOL.dateFormatter.formatYear(date.getFullYear()));
+			let monthValue = (date == null ? "" : TOOL.dateFormatter.formatDate(date, "m"));
 			
-			CST.eleSetYearSelectOptions(yearSelect, (date == null ? null : date.getFullYear()));
-			CST.eleSelectSetValue(yearSelect, yearValue);
-			CST.eleSelectSetValue(monthSelect, monthValue);
+			TOOL.eleSetYearSelectOptions(yearSelect, (date == null ? null : date.getFullYear()));
+			TOOL.eleSelectSetValue(yearSelect, yearValue);
+			TOOL.eleSelectSetValue(monthSelect, monthValue);
 		}
 	};
 	
-	CST.eleSetYearSelectOptions = function(yearSelect, yearValue)
+	TOOL.eleSetYearSelectOptions = function(yearSelect, yearValue)
 	{
 		if(yearSelect == null)
 			return;
@@ -1428,14 +1425,14 @@
 			if(value > 9999)
 				break;
 			
-			value = CST.dateFormatter.formatYear(value);
+			value = TOOL.dateFormatter.formatYear(value);
 			let opt = CF.eleCreateWithAttr("option", "value", value);
 			CF.eleHtml(opt, value);
 			CF.eleAppend(yearSelect, opt);
 		}
 	};
 	
-	CST.eleYearSelectRollOptions = function(yearSelect, down)
+	TOOL.eleYearSelectRollOptions = function(yearSelect, down)
 	{
 		if(yearSelect == null)
 			return;
@@ -1460,7 +1457,7 @@
 		{
 			selectedValue = parseInt(selectedValue);
 			selectedValue = (down ? (selectedValue + 10) : (selectedValue - 10));
-			selectedValue = CST.dateFormatter.formatYear(selectedValue);
+			selectedValue = TOOL.dateFormatter.formatYear(selectedValue);
 		}
 		
 		let optIdx = (down ? (yearSelect.options.length - 1) : 1);
@@ -1469,11 +1466,11 @@
 		newYear = (CF.isEmpty(newYear) ? new Date().getFullYear() : parseInt(newYear));
 		newYear = (down ? (newYear + 6) : (newYear - 5));
 		
-		CST.eleSetYearSelectOptions(yearSelect, newYear);
-		CST.eleSelectSetValue(yearSelect, selectedValue);
+		TOOL.eleSetYearSelectOptions(yearSelect, newYear);
+		TOOL.eleSelectSetValue(yearSelect, selectedValue);
 	};
 	
-	CST.eleInputConvertDateFormat = function(input, value, toSrc)
+	TOOL.eleInputConvertDateFormat = function(input, value, toSrc)
 	{
 		toSrc = (toSrc == null ? false : toSrc);
 		
@@ -1486,15 +1483,15 @@
 		if(!CF.isEmpty(dateSrcFormat) && !CF.isEmpty(dateDestFormat))
 		{
 			if(toSrc)
-				value = CST.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
+				value = TOOL.dateFormatter.convertFormat(value, dateDestFormat, dateSrcFormat);
 			else
-				value = CST.dateFormatter.convertFormat(value, dateSrcFormat, dateDestFormat);
+				value = TOOL.dateFormatter.convertFormat(value, dateSrcFormat, dateDestFormat);
 		}
 		
 		return value;
 	};
 	
-	CST.eleSelectSetValue = function(select, value)
+	TOOL.eleSelectSetValue = function(select, value)
 	{
 		if(!select)
 			return;
@@ -1504,17 +1501,17 @@
 		for (let i = 0; i < select.options.length; i++)
 		{
 			let option = select.options[i];
-			option.selected = (value == null ? false : CST.containsValueAsString(value, option.value));
+			option.selected = (value == null ? false : TOOL.containsValueAsString(value, option.value));
 		}
 	};
 	
-	CST.eleInputType = function(input)
+	TOOL.eleInputType = function(input)
 	{
 		var type = (CF.eleAttr(input, "type") || "").toLowerCase();
 		return type;
 	};
 	
-	CST.isNonEmptyAllNumberic = function(array)
+	TOOL.isNonEmptyAllNumberic = function(array)
 	{
 		for(let i=0; i<array.length; i++)
 		{
@@ -1523,28 +1520,28 @@
 			if(CF.isEmpty(val) || CF.isNumber(val))
 				continue;
 			
-			if(!CST.NUMBER_REGEX.test(val))
+			if(!TOOL.NUMBER_REGEX.test(val))
 				return false;
 		}
 		
 		return true;
 	};
 	
-	CST.containsValueAsString = function(array, value)
+	TOOL.containsValueAsString = function(array, value)
 	{
 		if(array === value)
 			return true;
 		
 		for(var i=0; i<array.length; i++)
 		{
-			if(CST.isEqualAsString(array[i], value))
+			if(TOOL.isEqualAsString(array[i], value))
 				return true;
 		}
 		
 		return false;
 	};
 	
-	CST.isEqualAsString = function(a, b)
+	TOOL.isEqualAsString = function(a, b)
 	{
 		if(a == null)
 			return (b == null);
@@ -1554,195 +1551,195 @@
 			return (a == b || (a+"") == (b+""));
 	};
 	
-	CST.getDataSetParamForm = function(parent)
+	TOOL.getDataSetParamForm = function(parent)
 	{
 		return CF.eleOfSelector(".dg-dspform", parent);
 	};
 	
-	CST.getDataSetParamFormHead = function(form)
+	TOOL.getDataSetParamFormHead = function(form)
 	{
 		return CF.eleOfSelector(".dg-dspform-head", form);
 	};
 	
-	CST.getDataSetParamFormContent = function(form)
+	TOOL.getDataSetParamFormContent = function(form)
 	{
 		return CF.eleOfSelector(".dg-dspform-content", form);
 	};
 	
-	CST.getDataSetParamFormFoot = function(form)
+	TOOL.getDataSetParamFormFoot = function(form)
 	{
 		return CF.eleOfSelector(".dg-dspform-foot", form);
 	};
 	
-	CST.bindChartSettingPanelEvent = function(chart)
+	TOOL.bindChartToolPanelEvent = function(chart)
 	{
-		var disableSetting = chart.disableSetting();
-		var noNeedParam = (disableSetting.param == true || !chart.hasDataSetParam());
+		var disableTool = chart.disableTool();
+		var noNeedParam = (disableTool.param == true || !chart.hasDataSetParam());
 		
-		if(noNeedParam && disableSetting.data == true)
+		if(noNeedParam && disableTool.data == true)
 			return false;
 		
 		var chartOptions = chart.options();
-		var builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+		var builtinTool = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinTool);
 		//显示模式："hover" 悬浮显示（默认）、"display" 始终显示
-		var displayMode = (builtinSetting ? builtinSetting.displayMode : null);
+		var displayMode = (builtinTool ? builtinTool.displayMode : null);
 		displayMode = (CF.isEmpty(displayMode) ? "hover" : displayMode);
 		
 		var chartEle = chart.element();
 		
-		if(!CF.eleAttr(chartEle, "dg-chartsetting-bind-event"))
+		if(!CF.eleData(chartEle, "dgChartToolIsBindEvent"))
 		{
-			CF.eleAttr(chartEle, "dg-chartsetting-bind-event", "true");
+			CF.eleData(chartEle, "dgChartToolIsBindEvent", true);
 			
 			if(displayMode == "display")
 			{
-				CST.showChartSettingBox(chart);
+				TOOL.showChartToolBox(chart);
 			}
 			else if(displayMode == "hover")
 			{
 				var mouseenterHandler = function()
 				{
 					if(chart.isActive())
-						CST.showChartSettingBox(chart);
+						TOOL.showChartToolBox(chart);
 				};
 				
 				var mouseleaveHandler = function()
 				{
-					if(CST.isChartSettingParamPanelClosed(chart)
-						&& CST.isChartSettingDataPanelClosed(chart))
+					if(TOOL.isChartToolParamPanelClosed(chart)
+						&& TOOL.isChartToolDataPanelClosed(chart))
 					{
-						CST.hideChartSettingBox(chart);
+						TOOL.hideChartToolBox(chart);
 					}
 				};
 				
 				CF.eleOn(chartEle, "mouseenter", mouseenterHandler);
 				CF.eleOn(chartEle, "mouseleave", mouseleaveHandler);
 				
-				CF.eleData(chartEle, "dgChartSettingMouseEnterHandler", mouseenterHandler);
-				CF.eleData(chartEle, "dgChartSettingMouseLeaveHandler", mouseleaveHandler);
+				CF.eleData(chartEle, "dgChartToolMouseEnterHandler", mouseenterHandler);
+				CF.eleData(chartEle, "dgChartToolMouseLeaveHandler", mouseleaveHandler);
 			}
 		}
 		
 		return true;
 	};
 	
-	CST.unbindChartSettingPanelEvent = function(chart)
+	TOOL.unbindChartToolPanelEvent = function(chart)
 	{
 		var chartEle = chart.element();
-		var mouseenterHandler = CF.eleRemoveData(chartEle, "dgChartSettingMouseEnterHandler");
-		var mouseleaveHandler = CF.eleRemoveData(chartEle, "dgChartSettingMouseLeaveHandler");
+		var mouseenterHandler = CF.eleRemoveData(chartEle, "dgChartToolMouseEnterHandler");
+		var mouseleaveHandler = CF.eleRemoveData(chartEle, "dgChartToolMouseLeaveHandler");
 		
-		CF.eleAttr(chartEle, "dg-chartsetting-bind-event", null);
+		CF.eleRemoveData(chartEle, "dgChartToolIsBindEvent");
 		
 		if(mouseenterHandler)
 			CF.eleOff(chartEle, "mouseenter", mouseenterHandler);
 		if(mouseleaveHandler)
 			CF.eleOff(chartEle, "mouseleave", mouseleaveHandler);
 		
-		var box = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
-		CST.destroyDataSetParamForm(box);
+		var box = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
+		TOOL.destroyDataSetParamForm(box);
 		CF.eleRemove(box);
 	};
 	
-	CST.showChartSettingBox = function(chart)
+	TOOL.showChartToolBox = function(chart)
 	{
-		var disableSetting = chart.disableSetting();
+		var disableTool = chart.disableTool();
 		
 		var chartEle = chart.element();
-		var boxEle = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
+		var boxEle = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
 		
 		if(boxEle == null)
 		{
 			let chartOptions = chart.options();
-			let builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
+			let builtinTool = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinTool);
 			
 			//显示位置："rightTop" 右上（默认）；"leftTop" 左上；"leftBottom" 左下；"rightBottom" 右下
-			let boxPosition = (builtinSetting ? builtinSetting.position : null);
+			let boxPosition = (builtinTool ? builtinTool.position : null);
 			boxPosition = (CF.isEmpty(boxPosition) ? "rightTop" : boxPosition);
 			
 			//显示方向："row" 横向（默认）；"column" 竖向
-			let boxDirection = (builtinSetting ? builtinSetting.direction : null);
+			let boxDirection = (builtinTool ? builtinTool.direction : null);
 			boxDirection = (CF.isEmpty(boxDirection) ? "row" : boxDirection);
 			
 			let boxPositionCssName = "dg-position-" + boxPosition;
 			let boxDirectionCssName = "dg-flex-dir-" + boxDirection;
 			
-			boxEle = CF.eleCreate("div", "dg-chart-setting-box "+boxPositionCssName+" "+boxDirectionCssName);
+			boxEle = CF.eleCreate("div", "dg-chart-tool-box "+boxPositionCssName+" "+boxDirectionCssName);
 			CF.eleAppend(chartEle, boxEle);
 			
-			CST.setChartSettingBoxThemeStyle(chart, boxEle);
+			TOOL.setChartToolBoxThemeStyle(chart, boxEle);
 			
 			//参数
-			if(!disableSetting.param && chart.hasDataSetParam())
+			if(!disableTool.param && chart.hasDataSetParam())
 			{
-				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-button dg-chart-setting-param-button");
-				CF.eleHtml(button, CST.labels.param);
+				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-tool-button dg-chart-tool-param-button");
+				CF.eleHtml(button, TOOL.labels.param);
 				CF.eleAppend(boxEle, button);
 				
-				CST.setChartSettingButtonOptions(button, (builtinSetting ? builtinSetting.paramButton : null));
+				TOOL.setChartToolButtonOptions(button, (builtinTool ? builtinTool.paramButton : null));
 				
 				CF.eleOn(button, "click", () =>
 				{
-					CST.closeChartSettingDataPanel(chart);
+					TOOL.closeChartToolDataPanel(chart);
 					
-					if(CST.isChartSettingParamPanelClosed(chart))
-						CST.openChartSettingParamPanel(boxEle, chart);
+					if(TOOL.isChartToolParamPanelClosed(chart))
+						TOOL.openChartToolParamPanel(boxEle, chart);
 					else
-						CST.closeChartSettingParamPanel(chart);
+						TOOL.closeChartToolParamPanel(chart);
 				});
 				
 				CF.eleOn(chartEle, "click", (event) =>
 				{
-					if(!CST.isChartSettingParamPanelClosed(chart))
+					if(!TOOL.isChartToolParamPanelClosed(chart))
 					{
-						if(CF.eleAncestorOfSelector(event.target, ".dg-chart-setting-box") == null)
-							CST.closeChartSettingParamPanel(chart);
+						if(CF.eleAncestorOfSelector(event.target, ".dg-chart-tool-box") == null)
+							TOOL.closeChartToolParamPanel(chart);
 					}
 				});
 			}
 			
 			//数据
-			if(!disableSetting.data)
+			if(!disableTool.data)
 			{
-				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-button dg-chart-setting-data-button");
-				CF.eleHtml(button, CST.labels.data);
+				let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-tool-button dg-chart-tool-data-button");
+				CF.eleHtml(button, TOOL.labels.data);
 				CF.eleAppend(boxEle, button);
 				
-				CST.setChartSettingButtonOptions(button, (builtinSetting ? builtinSetting.dataButton : null));
+				TOOL.setChartToolButtonOptions(button, (builtinTool ? builtinTool.dataButton : null));
 				
 				CF.eleOn(button, "click", () =>
 				{
-					CST.closeChartSettingParamPanel(chart);
+					TOOL.closeChartToolParamPanel(chart);
 					
-					if(CST.isChartSettingDataPanelClosed(chart))
-						CST.openChartSettingDataPanel(boxEle, chart);
+					if(TOOL.isChartToolDataPanelClosed(chart))
+						TOOL.openChartToolDataPanel(boxEle, chart);
 					else
-						CST.closeChartSettingDataPanel(chart);
+						TOOL.closeChartToolDataPanel(chart);
 				});
 				
 				CF.eleOn(chartEle, "click", (event) =>
 				{
-					if(!CST.isChartSettingDataPanelClosed(chart))
+					if(!TOOL.isChartToolDataPanelClosed(chart))
 					{
-						if(CF.eleAncestorOfSelector(event.target, ".dg-chart-setting-box") == null)
-							CST.closeChartSettingDataPanel(chart);
+						if(CF.eleAncestorOfSelector(event.target, ".dg-chart-tool-box") == null)
+							TOOL.closeChartToolDataPanel(chart);
 					}
 				});
 			}
 		}
 		
-		CST.eleShow(boxEle);
+		TOOL.eleShow(boxEle);
 	};
 	
-	CST.hideChartSettingBox = function(chart)
+	TOOL.hideChartToolBox = function(chart)
 	{
 		var chartEle = chart.element();
-		var boxEle = CF.eleOfSelector(".dg-chart-setting-box", chartEle);
-		CST.eleHide(boxEle);
+		var boxEle = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
+		TOOL.eleHide(boxEle);
 	};
 	
 	//设置按钮选项，格式为：{ text: "", style: "...", styleClass: "..." }
-	CST.setChartSettingButtonOptions = function(button, buttonOptions)
+	TOOL.setChartToolButtonOptions = function(button, buttonOptions)
 	{
 		if(!buttonOptions)
 			return;
@@ -1757,9 +1754,9 @@
 			button.addClass(buttonOptions.styleClass);
 	};
 	
-	CST.setChartSettingBoxThemeStyle = function(chart, boxEle)
+	TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 	{
-		chart.themeStyleSheet(CF.builtinPropName("chartSettingBox"), function()
+		chart.themeStyleSheet(CF.builtinPropName("chartToolBox"), function()
 		{
 			var color = chart.themeGradualColor(1);
 			var bgColor = chart.themeGradualColor(-1);
@@ -1773,7 +1770,7 @@
 			var css =
 			[
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-button",
+					name: " .dg-chart-tool-box .dg-chart-tool-button",
 					value:
 					{
 						"color": color,
@@ -1782,14 +1779,14 @@
 					}
 				},
 				{
-					name: " .dg-chart-setting-box .dg-chart-setting-button:hover",
+					name: " .dg-chart-tool-box .dg-chart-tool-button:hover",
 					value:
 					{
 						"background-color": btnHoverBg
 					}
 				},
 				{
-					name: " .dg-chart-setting-panel",
+					name: " .dg-chart-tool-panel",
 					value:
 					{
 						"color": color,
@@ -1802,8 +1799,8 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-panel-head button",
-						" .dg-chart-setting-panel-foot button"
+						" .dg-chart-tool-panel-head button",
+						" .dg-chart-tool-panel-foot button"
 					],
 					value:
 					{
@@ -1815,8 +1812,8 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-panel-head button:hover",
-						" .dg-chart-setting-panel-foot button:hover"
+						" .dg-chart-tool-panel-head button:hover",
+						" .dg-chart-tool-panel-foot button:hover"
 					],
 					value:
 					{
@@ -1824,7 +1821,7 @@
 					}
 				},
 				{
-					name: " .dg-chart-setting-panel .dg-datasetbind-section",
+					name: " .dg-chart-tool-panel .dg-datasetbind-section",
 					value:
 					{
 						"color": color,
@@ -1833,7 +1830,7 @@
 					}
 				},
 				{
-					name: " .dg-chart-setting-panel .dg-datasetbind-section-head",
+					name: " .dg-chart-tool-panel .dg-datasetbind-section-head",
 					value:
 					{
 						"background-color": titleBg
@@ -1842,8 +1839,8 @@
 				{
 					name:
 					[
-						" .dg-chart-setting-data-panel table.dg-chart-data-table tbody tr:hover",
-						" .dg-chart-setting-data-panel table.dg-chart-data-table tbody tr:hover td"
+						" .dg-chart-tool-data-panel table.dg-chart-data-table tbody tr:hover",
+						" .dg-chart-tool-data-panel table.dg-chart-data-table tbody tr:hover td"
 					],
 					value:
 					{
@@ -1859,44 +1856,44 @@
 	/**
 	 * 打开图表参数面板。
 	 */
-	CST.openChartSettingParamPanel = function(boxEle, chart)
+	TOOL.openChartToolParamPanel = function(boxEle, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
-		var panel = CF.eleOfSelector(".dg-chart-setting-param-panel", boxEle);
+		var panel = CF.eleOfSelector(".dg-chart-tool-param-panel", boxEle);
 		
 		if(panel == null)
 		{
-			panel = CF.eleCreate("div", "dg-chart-setting-panel dg-chart-setting-param-panel");
+			panel = CF.eleCreate("div", "dg-chart-tool-panel dg-chart-tool-param-panel");
 			CF.eleAppend(boxEle, panel);
 			
-			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			let panelHead = CF.eleCreate("div", "dg-chart-setting-panel-head");
+			let panelHead = CF.eleCreate("div", "dg-chart-tool-panel-head");
 			CF.eleAppend(panel, panelHead);
 			
-			let panelContent = CF.eleCreate("div", "dg-chart-setting-panel-content");
+			let panelContent = CF.eleCreate("div", "dg-chart-tool-panel-content");
 			CF.eleAppend(panel, panelContent);
 			
-			let panelFoot = CF.eleCreate("div", "dg-chart-setting-panel-foot");
+			let panelFoot = CF.eleCreate("div", "dg-chart-tool-panel-foot");
 			CF.eleAppend(panel, panelFoot);
 			
-			let headTitle = CF.eleCreate("div", "dg-chart-setting-panel-head-title");
-			CF.eleHtml(headTitle, CST.labels.chartParam);
+			let headTitle = CF.eleCreate("div", "dg-chart-tool-panel-head-title");
+			CF.eleHtml(headTitle, TOOL.labels.chartParam);
 			CF.eleAppend(panelHead, headTitle);
 			
-			let headBtns = CF.eleCreate("div", "dg-chart-setting-panel-head-btns");
+			let headBtns = CF.eleCreate("div", "dg-chart-tool-panel-head-btns");
 			CF.eleAppend(panelHead, headBtns);
 			
-			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-panel-closebtn");
-			CF.eleHtml(closeBtn, CST.labels.close);
+			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-tool-panel-closebtn");
+			CF.eleHtml(closeBtn, TOOL.labels.close);
 			CF.eleAppend(headBtns, closeBtn);
-			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingParamPanel(chart); });
+			CF.eleOn(closeBtn, "click", () => { TOOL.closeChartToolParamPanel(chart); });
 			
 			let confirmBtn = CF.eleCreateWithAttr("button", "type", "button");
-			CF.eleHtml(confirmBtn, CST.labels.confirm);
+			CF.eleHtml(confirmBtn, TOOL.labels.confirm);
 			CF.eleAppend(panelFoot, confirmBtn);
 			
-			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent, panelFoot);
+			TOOL.setChartSetingPanelContentSizeRange(chart, panel, panelContent, panelFoot);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1905,7 +1902,7 @@
 				if(CF.isEmpty(params))
 					continue;
 				
-				let myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
+				let myTitle = TOOL.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
 				let dsbSection = CF.eleCreate("div", "dg-datasetbind-section");
 				CF.eleAttr(dsbSection, "dg-datasetbind-index", i);
@@ -1921,7 +1918,7 @@
 				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
 				CF.eleAppend(dsbSection, dsbContent);
 				
-				CST.renderDataSetParamForm(dsbContent, params,
+				TOOL.renderDataSetParamForm(dsbContent, params,
 				{
 					chartTheme: chart.theme(),
 					inChartElement: true,
@@ -1932,16 +1929,16 @@
 					paramValues: chart.dataSetParamValues(i),
 					render: function(form)
 					{
-						CST.eleHide(CST.getDataSetParamFormFoot(form));
+						TOOL.eleHide(TOOL.getDataSetParamFormFoot(form));
 					}
 				});
 				
 				CF.eleOn(dsbTitle, "click", () =>
 				{
-					CST.eleToggle(dsbContent);
+					TOOL.eleToggle(dsbContent);
 				});
 				
-				CST.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, i);
+				TOOL.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, i);
 			}
 			
 			CF.eleOn(confirmBtn, "click", function()
@@ -1953,15 +1950,15 @@
 				let dsbSections = CF.elesOfSelector(".dg-datasetbind-section", panelContent);
 				dsbSections.forEach((dsbSection) =>
 				{
-					let dspForm = CST.getDataSetParamForm(dsbSection);
+					let dspForm = TOOL.getDataSetParamForm(dsbSection);
 					let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
 					let ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 					
-					if(!ignoreFetch && !CST.validateDspForm(dspForm))
+					if(!ignoreFetch && !TOOL.validateDspForm(dspForm))
 						validateOk = false;
 					else
 					{
-						let myParamValues = CST.getDataSetParamFormData(dspForm);
+						let myParamValues = TOOL.getDataSetParamFormData(dspForm);
 						paramValuess.push({ index : dataSetBindIndex, paramValues: myParamValues });
 					}
 				});
@@ -1971,17 +1968,17 @@
 					CF.eleRemoveClass(thisButton, "dg-param-value-form-invalid");
 					
 					let chartOptions = chart.options();
-					let builtinSetting = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinSetting);
-					let convertParamFormValue = (builtinSetting ? builtinSetting.convertParamFormValue : null);
+					let builtinTool = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinTool);
+					let convertParamFormValue = (builtinTool ? builtinTool.convertParamFormValue : null);
 					convertParamFormValue = (convertParamFormValue == null ? true : convertParamFormValue);
 					
 					for(let i=0; i<paramValuess.length; i++)
 					{
-						CST.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
+						TOOL.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
 					}
 					
 					let doRefresh = true;
-					let onParamFormSubmit = (builtinSetting ? builtinSetting.onParamFormSubmit : null);
+					let onParamFormSubmit = (builtinTool ? builtinTool.onParamFormSubmit : null);
 					
 					//执行提交前回调
 					if(onParamFormSubmit)
@@ -1998,7 +1995,7 @@
 						}
 						else
 						{
-							CST.closeChartSettingParamPanel(chart);
+							TOOL.closeChartToolParamPanel(chart);
 						}
 					}
 					else
@@ -2009,7 +2006,7 @@
 						}
 						else
 						{
-							CST.closeChartSettingParamPanel(chart);
+							TOOL.closeChartToolParamPanel(chart);
 						}
 						
 						chart.refresh();
@@ -2021,107 +2018,107 @@
 		}
 		else
 		{
-			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
 			let dsbSections = CF.elesOfSelector(".dg-datasetbind-section", panel);
 			
 			dsbSections.forEach(function(dsbSection)
 			{
-				let dspForm = CST.getDataSetParamForm(dsbSection);
+				let dspForm = TOOL.getDataSetParamForm(dsbSection);
 				let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
 				
-				CST.setDataSetParamFormData(dspForm, chart.dataSetParamValues(dataSetBindIndex));
-				CST.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, dataSetBindIndex);
+				TOOL.setDataSetParamFormData(dspForm, chart.dataSetParamValues(dataSetBindIndex));
+				TOOL.toggleParamFormContentByIgnoreFetch(panel, dsbSection, chart, dataSetBindIndex);
 			});
 		}
 		
-		CST.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-setting-param-button", boxEle), chart);
+		TOOL.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-param-button", boxEle), chart);
 		
 		//聚焦至第一个可操作输入框
-		CST.focusOnFirstInput(CF.eleOfSelector("form:first-child", panel));
+		TOOL.focusOnFirstInput(CF.eleOfSelector("form:first-child", panel));
 	};
 	
-	CST.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
+	TOOL.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
 	{
 		//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
 		chart.dataSetParamValues(dataSetBindIndex, paramValues, true, convert);
 	};
 	
-	CST.toggleParamFormContentByIgnoreFetch = function(panel, section, chart, dataSetBindIndex)
+	TOOL.toggleParamFormContentByIgnoreFetch = function(panel, section, chart, dataSetBindIndex)
 	{
 		var ignoreFetch = chart.dataSetIgnoreFetch(dataSetBindIndex);
 		var content = CF.eleOfSelector(".dg-datasetbind-section-content", section);
 		
 		if(ignoreFetch)
-			CST.eleHide(content);
+			TOOL.eleHide(content);
 		else
-			CST.eleShow(content);
+			TOOL.eleShow(content);
 	};
 	
 	/**
 	 * 关闭图表参数面板。
 	 */
-	CST.closeChartSettingParamPanel = function(chart)
+	TOOL.closeChartToolParamPanel = function(chart)
 	{
-		var panel = CST.getChartSettingParamPanel(chart);
-		CST.eleHide(panel);
+		var panel = TOOL.getChartToolParamPanel(chart);
+		TOOL.eleHide(panel);
 	};
 	
 	/**
 	 * 获取图表参数面板。
 	 */
-	CST.getChartSettingParamPanel = function(chart)
+	TOOL.getChartToolParamPanel = function(chart)
 	{
-		return CF.eleOfSelector(".dg-chart-setting-param-panel", chart.element());
+		return CF.eleOfSelector(".dg-chart-tool-param-panel", chart.element());
 	};
 	
-	CST.isChartSettingParamPanelClosed = function(chart)
+	TOOL.isChartToolParamPanelClosed = function(chart)
 	{
-		var panel = CST.getChartSettingParamPanel(chart);
+		var panel = TOOL.getChartToolParamPanel(chart);
 		return (panel == null || CF.eleAncestorOfSelector(panel, ".dg-display-none") != null);
 	};
 	
 	/**
 	 * 打开图表数据面板。
 	 */
-	CST.openChartSettingDataPanel = function(boxEle, chart)
+	TOOL.openChartToolDataPanel = function(boxEle, chart)
 	{
 		var dataSetBinds = chart.dataSetBinds();
-		var panel = CF.eleOfSelector(".dg-chart-setting-data-panel", boxEle);
+		var panel = CF.eleOfSelector(".dg-chart-tool-data-panel", boxEle);
 		
 		if(panel == null)
 		{
-			panel = CF.eleCreate("div", "dg-chart-setting-panel dg-chart-setting-data-panel")
+			panel = CF.eleCreate("div", "dg-chart-tool-panel dg-chart-tool-data-panel")
 			CF.eleAppend(boxEle, panel);
 			
-			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
-			let panelHead = CF.eleCreate("div", "dg-chart-setting-panel-head");
+			let panelHead = CF.eleCreate("div", "dg-chart-tool-panel-head");
 			CF.eleAppend(panel, panelHead);
 			
-			let panelContent = CF.eleCreate("div", "dg-chart-setting-panel-content");
+			let panelContent = CF.eleCreate("div", "dg-chart-tool-panel-content");
 			CF.eleAppend(panel, panelContent);
 			
-			let panelFoot = CF.eleCreate("div", "dg-chart-setting-panel-foot");
+			let panelFoot = CF.eleCreate("div", "dg-chart-tool-panel-foot");
 			CF.eleAppend(panel, panelFoot);
 			
-			let headTitle = CF.eleCreate("div", "dg-chart-setting-panel-head-title");
-			CF.eleHtml(headTitle, CST.labels.chartData);
+			let headTitle = CF.eleCreate("div", "dg-chart-tool-panel-head-title");
+			CF.eleHtml(headTitle, TOOL.labels.chartData);
 			CF.eleAppend(panelHead, headTitle);
 			
-			let headBtns = CF.eleCreate("div", "dg-chart-setting-panel-head-btns");
+			let headBtns = CF.eleCreate("div", "dg-chart-tool-panel-head-btns");
 			CF.eleAppend(panelHead, headBtns);
 			
-			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-setting-panel-closebtn");
-			CF.eleHtml(closeBtn, CST.labels.close);
+			let closeBtn = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-tool-panel-closebtn");
+			CF.eleHtml(closeBtn, TOOL.labels.close);
 			CF.eleAppend(headBtns, closeBtn);
-			CF.eleOn(closeBtn, "click", () => { CST.closeChartSettingDataPanel(chart); });
+			CF.eleOn(closeBtn, "click", () => { TOOL.closeChartToolDataPanel(chart); });
 			
-			CST.setChartSetingPanelContentSizeRange(chart, panel, panelContent,panelFoot);
+			TOOL.setChartSetingPanelContentSizeRange(chart, panel, panelContent,panelFoot);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
-				let myTitle = CST.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
+				let myTitle = TOOL.evalDataSetBindPanelTitle(chart, dataSetBinds, i);
 				
 				let dsbSection = CF.eleCreate("div", "dg-datasetbind-section");
 				CF.eleAttr(dsbSection, "dg-datasetbind-index", i);
@@ -2137,59 +2134,59 @@
 				let dsbContent = CF.eleCreate("div", "dg-datasetbind-section-content");
 				CF.eleAppend(dsbSection, dsbContent);
 				
-				let tableId = CST.initDataSetBindDataTable(chart, dataSetBinds, i, dsbContent);
+				let tableId = TOOL.initDataSetBindDataTable(chart, dataSetBinds, i, dsbContent);
 				CF.eleAttr(dsbSection, "dg-datasetbind-table-id", tableId);
 				
 				CF.eleOn(dsbTitle, "click", () =>
 				{
-					CST.eleToggle(dsbContent);
+					TOOL.eleToggle(dsbContent);
 				});
 			}
 		}
 		else
 		{
-			CST.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
 			
 			CF.elesOfSelector(".dg-datasetbind-section", panel).forEach((dsbSection) =>
 			{
 				let dsbContent = CF.eleOfSelector(".dg-datasetbind-section-content", dsbSection);
-				CST.eleShow(dsbContent);
+				TOOL.eleShow(dsbContent);
 				
 				let dataSetBindIndex = parseInt(CF.eleAttr(dsbSection, "dg-datasetbind-index"));
 				let tableId = CF.eleAttr(dsbSection, "dg-datasetbind-table-id");
 				let table = CF.eleOfSelector("#"+tableId, dsbSection);
 				
-				CST.updateChartSettingDataTableData(chart, dataSetBinds, dataSetBindIndex, table);
+				TOOL.updateChartToolDataTableData(chart, dataSetBinds, dataSetBindIndex, table);
 			});
 		}
 		
-		CST.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-setting-data-button", boxEle), chart);
+		TOOL.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-data-button", boxEle), chart);
 	};
 	
 	/**
 	 * 关闭图表数据面板。
 	 */
-	CST.closeChartSettingDataPanel = function(chart)
+	TOOL.closeChartToolDataPanel = function(chart)
 	{
-		var panel = CST.getChartSettingDataPanel(chart);
-		CST.eleHide(panel);
+		var panel = TOOL.getChartToolDataPanel(chart);
+		TOOL.eleHide(panel);
 	};
 	
 	/**
 	 * 获取图表数据面板。
 	 */
-	CST.getChartSettingDataPanel = function(chart)
+	TOOL.getChartToolDataPanel = function(chart)
 	{
-		return CF.eleOfSelector(".dg-chart-setting-data-panel", chart.element());
+		return CF.eleOfSelector(".dg-chart-tool-data-panel", chart.element());
 	};
 	
-	CST.isChartSettingDataPanelClosed = function(chart)
+	TOOL.isChartToolDataPanelClosed = function(chart)
 	{
-		var panel = CST.getChartSettingDataPanel(chart);
+		var panel = TOOL.getChartToolDataPanel(chart);
 		return (panel == null || CF.eleAncestorOfSelector(panel, ".dg-display-none") != null);
 	};
 	
-	CST.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
+	TOOL.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
 	{
 		var dataSetBind = dataSetBinds[index];
 		var dataSetFields = chart.dataSetFields(dataSetBind);
@@ -2212,7 +2209,7 @@
 		
 		columns.push(
 		{
-			title: CST.labels.serialNumber,
+			title: TOOL.labels.serialNumber,
 			style: "width:4em",
 			render: function(data, index)
 			{
@@ -2224,7 +2221,7 @@
 		{
 			var column =
 			{
-				title: CST.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i]),
+				title: TOOL.evalDataSetBindDataTableColumnTitle(chart, dataSetBind, signFields[i]),
 				fieldName: signFields[i].name,
 				render: function(data)
 				{
@@ -2239,7 +2236,7 @@
 		{
 			columns.push(
 			{
-				title: CST.labels.dataDetail,
+				title: TOOL.labels.dataDetail,
 				render: function(data)
 				{
 					return CF.toJsonString(data);
@@ -2272,12 +2269,12 @@
 		var tbody = CF.eleCreate("tbody");
 		CF.eleAppend(table, tbody);
 		
-		CST.updateChartSettingDataTableData(chart, dataSetBinds, index, table);
+		TOOL.updateChartToolDataTableData(chart, dataSetBinds, index, table);
 		
 		return tableId;
 	};
 	
-	CST.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField)
+	TOOL.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField)
 	{
 		var title = chart.dataSetFieldAlias(dataSetBind, dataSetField);
 		title = (title == dataSetField.name ? title : title + "-" + dataSetField.name);
@@ -2293,7 +2290,7 @@
 		return (signInfo ? title + " (" + signInfo +")" : title);
 	};
 	
-	CST.updateChartSettingDataTableData = function(chart, dataSetBinds, index, table)
+	TOOL.updateChartToolDataTableData = function(chart, dataSetBinds, index, table)
 	{
 		var chartResult = chart.updateResult();
 		var result = chart.resultOf(chartResult, index);
@@ -2319,7 +2316,7 @@
 		}
 	};
 	
-	CST.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
+	TOOL.evalDataSetBindPanelTitle = function(chart, dataSetBinds, index)
 	{
 		let alias = chart.dataSetAlias(dataSetBinds[index]);
 		var title = (dataSetBinds.length > 1 ? (index+1)+". " : "") + alias;
@@ -2329,7 +2326,7 @@
 		return title;
 	};
 	
-	CST.setChartSetingPanelContentSizeRange = function(chart, panel, panelContent, panelFoot)
+	TOOL.setChartSetingPanelContentSizeRange = function(chart, panel, panelContent, panelFoot)
 	{
 		var chartEle = chart.element();
 		var cw = parseInt(CF.eleCss(chartEle, "width"));
@@ -2340,7 +2337,7 @@
 		CF.eleCss(panelContent, "max-height", "55vh");
 	};
 	
-	CST.showChartSetingPanelOpacityOut = function(boxEle, panel, chart)
+	TOOL.showChartSetingPanelOpacityOut = function(boxEle, panel, chart)
 	{
 		//先透明显示，避免布局计算错误，后续调整位置后再移除透明
 		CF.eleAddClass(panel, "dg-opacity-hide");
@@ -2348,24 +2345,24 @@
 		CF.eleCss(panel, "top", "-999999px");
 		CF.eleCss(panel, "right", "unset");
 		CF.eleCss(panel, "bottom", "unset");
-		CST.eleShow(panel);
+		TOOL.eleShow(panel);
 	};
 	
-	CST.adjustChartSetingPanelPosition = function(boxEle, panel, btn, chart)
+	TOOL.adjustChartSetingPanelPosition = function(boxEle, panel, btn, chart)
 	{
 		var docWidth = window.innerWidth;
 		var docHeight = window.innerHeight;
 		
-		var width = CST.eleOuterWidth(panel);
-		var height = CST.eleOuterHeight(panel);
+		var width = TOOL.eleOuterWidth(panel);
+		var height = TOOL.eleOuterHeight(panel);
 		var widthGap = width + 20;
 		var heightGap = height + 20;
 		
-		var btnWidth = CST.eleOuterWidth(btn);
-		var btnHeight = CST.eleOuterHeight(btn);
+		var btnWidth = TOOL.eleOuterWidth(btn);
+		var btnHeight = TOOL.eleOuterHeight(btn);
 		
-		var btnOffset = CST.eleOffset(btn);
-		var btnPosition = CST.elePosition(btn);
+		var btnOffset = TOOL.eleOffset(btn);
+		var btnPosition = TOOL.elePosition(btn);
 		
 		var left = "unset";
 		var right = "unset";
@@ -2435,7 +2432,7 @@
 	};
 	
 	//聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
-	CST.focusOnFirstInput = function(ele)
+	TOOL.focusOnFirstInput = function(ele)
 	{
 		var input = CF.eleOfSelector("input:not(:disabled,[readonly])", ele);
 		
@@ -2443,25 +2440,25 @@
 			input.focus();
 	};
 	
-	CST.eleHide = function(ele)
+	TOOL.eleHide = function(ele)
 	{
 		CF.eleAddClass(ele, "dg-display-none");
 	};
 	
-	CST.eleShow = function(ele)
+	TOOL.eleShow = function(ele)
 	{
 		CF.eleRemoveClass(ele, "dg-display-none");
 	};
 	
-	CST.eleToggle = function(ele)
+	TOOL.eleToggle = function(ele)
 	{
 		if(CF.isEleMatches(ele, ".dg-display-none"))
-			CST.eleShow(ele);
+			TOOL.eleShow(ele);
 		else
-			CST.eleHide(ele);
+			TOOL.eleHide(ele);
 	};
 	
-	CST.eleOuterWidth = function(ele)
+	TOOL.eleOuterWidth = function(ele)
 	{
 		let width = parseFloat(CF.eleCss(ele, "width") || 0);
 		let marginLeft = parseFloat(CF.eleCss(ele, "margin-left") || 0);
@@ -2470,7 +2467,7 @@
 		return (width + marginLeft + marginRight);
 	};
 	
-	CST.eleOuterHeight = function(ele)
+	TOOL.eleOuterHeight = function(ele)
 	{
 		let height = parseFloat(CF.eleCss(ele, "height") || 0);
 		let marginTop = parseFloat(CF.eleCss(ele, "margin-top") || 0);
@@ -2479,7 +2476,7 @@
 		return (height + marginTop + marginBottom);
 	};
 	
-	CST.eleOffset = function(ele)
+	TOOL.eleOffset = function(ele)
 	{
 		let re = { left: 0, top: 0 };
 		
@@ -2496,7 +2493,7 @@
 		return re;
 	};
 	
-	CST.elePosition = function(ele)
+	TOOL.elePosition = function(ele)
 	{
 		let re = { left: 0, top: 0 };
 		

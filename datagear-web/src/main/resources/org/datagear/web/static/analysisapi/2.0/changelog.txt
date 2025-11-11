@@ -44,7 +44,8 @@ chart.resultValueDatas()		x
 chart.elementStyle()			x
 chart.styleString()				x
 chart.refreshData()	-> chart.refresh()
-dg-chart-auto-resize默认值为true
+chart.disableSetting() -> chart.disableTool()
+
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()
 dashboard.renderContext -> dashboard.renderContext()
@@ -54,6 +55,12 @@ dashboard.loadCharts()	*
 dashboard.loadUnsolvedCharts()	*
 dashboard.originalDataIndex()	x
 dashboard.refreshData()			x
-dashboard.renderContext()返回对象格式由{attributes:{...}}改为{...}
+dashboard.renderContext()	返回对象格式由{attributes:{...}}改为{...}
+
+dg-chart-auto-resize默认值为true
+dg-chart-disable-setting改名为dg-chart-disable-tool
+
 图表监听器函数render()改名为rendered()，update()改名为updated()，destroy()改名为destroyed()
 看板监听器函数render()改名为rendered()，destroy()改名为destroyed()
+内置图表选项builtinSetting改名为builtinTool；
+移除内置图表选项disableSetting，改为在builtinTool.disable选项支持；
