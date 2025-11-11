@@ -268,17 +268,14 @@ CF.CHART_ATTR_NAME_WIDGET = "DG_CHART_WIDGET";
  */
 CF.DATA_SIGN_FULLNAME_SEPARATOR = ".";
 
-/**图表渲染器附加属性：是否支持忽略获取结果，默认值为：false */
-CF.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH = "supportIgnoreFetch";
-
-/** HTML元素上已渲染的图表对象KEY */
-CF.ELE_RENDERED_CHART_NAME = "RENDERED_CHART";
-
 /**内置名字标识片段*/
 CF.BUILTIN_NAME_PART = "datagear";
 
 /**内置对象属性名前缀*/
 CF.BUILTIN_PROP_PREFIX = "_" + CF.BUILTIN_NAME_PART;
+
+/** HTML元素上已渲染的图表对象KEY */
+CF.ELE_RENDERED_CHART_NAME = CF.BUILTIN_PROP_PREFIX + "RenderedChart";
 
 //org.datagear.analysis.DataSetParam.DataType
 CF.DataSetParamType =
@@ -3897,7 +3894,6 @@ chartProto.resultDataRowCell = function(rowObj, field)
 
 /**
  * 获取/设置指定数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
- * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
  * 
  * @param dataSetBind 指定数据集绑定或其索引
  * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
@@ -3913,14 +3909,12 @@ chartProto.dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 	}
 	else
 	{
-		this._checkSupportIgnoreFetch();
 		this._dataSetIgnoreFetch(dataSetBind, ignoreFetch);
 	}
 };
 
 /**
  * 获取/设置全部数据集是否忽略获取结果，忽略后下次将不会加载结果数据。
- * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
  * 
  * @param ignoreFetch 可选，要设置的值，true 全部忽略；false 全部不忽略；[ ... ] 指定元素值
  * @returns [ true、false, ... ]
@@ -3940,8 +3934,6 @@ chartProto.dataSetIgnoreFetches = function(ignoreFetch)
 	}
 	else
 	{
-		this._checkSupportIgnoreFetch();
-		
 		var isArray = CF.isArray(ignoreFetch);
 		var len = (isArray ? Math.min(dataSetBinds.length, ignoreFetch.length) : dataSetBinds.length);
 		
@@ -3967,24 +3959,8 @@ chartProto._dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 	}
 };
 
-chartProto._checkSupportIgnoreFetch = function()
-{
-	var support = this.rendererAddition(CF.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH);
-	
-	//这里不必抛出异常，因为后端没有禁用逻辑，只警告即可
-	if(support == null)
-	{
-		CF.logWarn("chart '#"+this.elementId()+"' renderer ["+CF.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH+"] addition undefined, feature may unsupported");
-	}
-	else if(support == false)
-	{
-		CF.logWarn("chart '#"+this.elementId()+"' renderer ["+CF.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH+"] feature unsupported");
-	}
-};
-
 /**
  * 获取/设置数据集结果是否是忽略获取的。
- * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
  * 
  * @param dataSetResult 数据集结果
  * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
@@ -3998,14 +3974,12 @@ chartProto.resultIgnoreFetch = function(dataSetResult, ignoreFetch)
 	}
 	else
 	{
-		this._checkSupportIgnoreFetch();
 		dataSetResult.ignoreFetch = ignoreFetch;
 	}
 };
 
 /**
  * 获取/设置指定数据集绑定对应的数据集结果是否是忽略获取的。
- * 如果图表渲染器附加属性没有定义{ supportIgnoreFetch: true }，对于设置操作，将在控制台警告提示。
  * 
  * @param chartResult 图表结果、数据集结果数组
  * @param dataSetBind 数据集绑定、索引数值

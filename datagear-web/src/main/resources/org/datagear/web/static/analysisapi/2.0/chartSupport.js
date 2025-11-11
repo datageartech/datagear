@@ -6702,10 +6702,6 @@ SPT.customRenderer = function(plugin, config)
 				else
 					re = null;
 			}
-			else
-			{
-				re = this._rawAdditions;
-			}
 			
 			return re;
 		},
@@ -6773,8 +6769,6 @@ SPT.customRenderer = function(plugin, config)
 			CF.eleRemoveClass(chartEle, "dg-chart-rawdata");
 			CF.eleRemove(internal);
 		},
-		
-		_rawAdditions: { supportIgnoreFetch: true },
 		
 		_getCustomRenderer: function(chart, nullable)
 		{
