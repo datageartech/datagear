@@ -21,8 +21,8 @@ chart.echartsMapRegistered()	x
 chart.echartsLoadMap()		x
 chart.eventData()		x
 chart.eventOriginalData()	x
-chart.processRenderOptions()	+
-chart.processUpdateOptions()	+
+chart.renderOptions()		x
+chart.updateOptions()		x
 chart.inflateOptions()			+
 chart.inflateRenderOptions()	x
 chart.inflateUpdateOptions()	x

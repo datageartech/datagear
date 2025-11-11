@@ -233,10 +233,6 @@ renderContextAttrConst.chartTheme = "DG_CHART_THEME";
 builtinOptionNames.customOptionNames = "customOptionNames";
 /** 内置图表选项名：是否美化滚动条 */
 builtinOptionNames.beautifyScrollbar = "beautifyScrollbar";
-/** 内置图表选项名：处理图表渲染选项 */
-builtinOptionNames.processRenderOptions = "processRenderOptions";
-/** 内置图表选项名：处理图表更新选项 */
-builtinOptionNames.processUpdateOptions = "processUpdateOptions";
 /** 内置图表选项名：更新追加模式 */
 builtinOptionNames.updateAppendMode = "updateAppendMode";
 /** 内置图表选项名：是否禁用内置设置（参数/数据透视表） */
@@ -2307,98 +2303,6 @@ chartProto.mapURL = function(name)
 	url = this.contextURL(CF.isEmpty(url) ? name : url);
 	
 	return url;
-};
-
-var RENDER_OPTIONS_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "RenderOptions";
-
-/**
- * 获取/设置图表渲染选项。
- * 
- * 图表渲染器可在其render()中使用此函保存图表渲染选项，然后在其update()中获取渲染选项。
- * 调用chart.processRenderOptions()后，默认会自动调用此函数设置图表渲染选项。
- * 
- * @param renderOptions 可选，要设置的渲染选项对象，通常由图表渲染器内部渲染选项、chart.options()合并而成，格式应为：{ ... }
- * @returns 要获取的图表渲染选项，没有则返回null
- */
-chartProto.renderOptions = function(renderOptions)
-{
-	if(renderOptions === undefined)
-		return this.liveData(RENDER_OPTIONS_LIVE_DATA_NAME);
-	else
-		return this.liveData(RENDER_OPTIONS_LIVE_DATA_NAME, renderOptions);
-};
-
-var UPDATE_OPTIONS_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateOptions";
-
-/**
- * 获取/设置图表更新选项。
- * 
- * 图表渲染器可在其update()中使用此函保存图表更新选项，供后续图表监听器使用。
- * 调用chart.processUpdateOptions()后，默认会自动调用此函数设置图表更新选项。
- * 
- * @param updateOptions 可选，要设置的渲染选项对象，格式应为：{ ... }
- * @returns 要获取的图表更新选项，没有则返回null
- */
-chartProto.updateOptions = function(updateOptions)
-{
-	if(updateOptions === undefined)
-		return this.liveData(UPDATE_OPTIONS_LIVE_DATA_NAME);
-	else
-		this.liveData(UPDATE_OPTIONS_LIVE_DATA_NAME, updateOptions);
-};
-
-/**
- * 处理图表渲染选项。
- * 如果this.options()中有定义processRenderOptions选项函数（格式为：function(renderOptions, chart){ ... }），则调用它；否则，什么也不做。
- * 
- * @param renderOptions 待处理的渲染选项，通常由图表渲染器render()函数内部生成，格式应为：{ ... }
- * @param set 可选，是否在处理完后调用chart.renderOptions()设置图表渲染选项，默认值为：true 
- * @returns renderOptions
- */
-chartProto.processRenderOptions = function(renderOptions, set)
-{
-	set = (set == null ? true : set);
-	
-	var options = this.options();
-	var handler = CF.builtinOptionValue(options, builtinOptionNames.processRenderOptions);
-	if(handler)
-	{
-		handler.call(options, renderOptions, this);
-	}
-	
-	if(set)
-	{
-		this.renderOptions(renderOptions);
-	}
-	
-	return renderOptions;
-};
-
-/**
- * 处理图表更新选项。
- * 如果this.options()中有定义processUpdateOptions选项函数（格式为：function(updateOptions, chart){ ... }），则调用它；否则，什么也不做。
- * 
- * @param updateOptions 待处理的更新选项，通常由图表渲染器update()函数内部生成，格式应为：{ ... }
- * @param set 可选，是否在处理完后调用chart.updateOptions()设置图表更新选项，默认值为：true
- * @returns updateOptions
- */
-chartProto.processUpdateOptions = function(updateOptions, set)
-{
-	set = (set == null ? true : set);
-	
-	var options = this.options();
-	var handler = CF.builtinOptionValue(options, builtinOptionNames.processUpdateOptions);
-	if(handler)
-	{
-		handler.call(options, updateOptions, this);
-	}
-	
-	if(set)
-	{
-		this.updateOptions(updateOptions);
-	}
-	
-	return updateOptions;
 };
 
 /**

@@ -37,6 +37,18 @@ SPT.ECHARTS_RENDERER_DEPEND =
 	{ name: "echarts", acceptVersion: ">=5.0" }
 ];
 
+//扩展图表选项名：处理图表渲染选项
+SPT.PROCESS_RENDER_OPTIONS_OPTION_NAME = "processRenderOptions";
+
+//扩展图表选项名：处理图表更新选项
+SPT.PROCESS_UPDATE_OPTIONS_OPTION_NAME = "processUpdateOptions";
+
+//在chart.liveData()中存储渲染选项的名称
+SPT.RENDER_OPTIONS_LIVE_DATA_NAME = "renderOptions";
+
+//在chart.liveData()中存储更新选项的名称
+SPT.UPDATE_OPTIONS_LIVE_DATA_NAME = "updateOptions";
+
 //图表数据属性名：原始类别
 SPT.ORIGINAL_CATEGORY_PROP_NAME = "originalCategory";
 
@@ -1312,7 +1324,7 @@ SPT.radarRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			
 			var legendData = [];
@@ -4193,7 +4205,7 @@ SPT.liquidfillRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			
 			var seriesName = "";
@@ -5026,7 +5038,7 @@ SPT.tableRenderer = function(plugin, config)
 			
 			chart.inflateOptions(options);
 			this._processRenderOptions(chart, options);
-			chart.processRenderOptions(options);
+			SPT.processRenderOptions(chart, options);
 			
 			this._themeStyleSheet(chart, options);
 			
@@ -5095,7 +5107,7 @@ SPT.tableRenderer = function(plugin, config)
 			this._stopCarousel(chart);
 			
 			options = chart.inflateOptions(options);
-			chart.processUpdateOptions(options);
+			SPT.processUpdateOptions(chart, options);
 			
 			this._renderTitleIfSet(chart, options);
 			this._updateInternalData(chart, chartResult, options);
@@ -5822,7 +5834,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_updateInternalData: function(chart, chartResult, updateOptions)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			
 			//自定义更新底层组件数据，当启用serverSide后，需要自定义调用其ajax配置项的callback更新数据，而非这里
 			//格式为：function(updateOptions, chart, chartResult){ ... }
@@ -5885,7 +5897,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_prepareCarousel: function(chart)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			
 			//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
 			if(renderOptions.serverSide == true || this._serverSidePagingOption(renderOptions) != null)
@@ -5926,7 +5938,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_startCarousel: function(chart)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			
 			//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
 			if(renderOptions.serverSide == true || this._serverSidePagingOption(renderOptions) != null)
@@ -6182,7 +6194,7 @@ SPT.labelRenderer = function(plugin, config)
 			chart.internal(containerEle);
 			
 			chart.inflateOptions(options);
-			chart.processRenderOptions(options);
+			SPT.processRenderOptions(chart, options);
 			
 			if(!CF.isEmpty(options.layout))
 				CF.eleAddClass(containerEle, "dg-chart-label-layout-"+options.layout);
@@ -6246,7 +6258,7 @@ SPT.labelRenderer = function(plugin, config)
 			}
 			
 			options = chart.inflateOptions(options);
-			chart.processUpdateOptions(options);
+			SPT.processUpdateOptions(chart, options);
 			
 			this._drawDataOptions(chart, options);
 		},
@@ -6395,7 +6407,7 @@ SPT.selectRenderer = function(plugin, config)
 			chart.internal(selectEle);
 			
 			chart.inflateOptions(options);
-			chart.processRenderOptions(options);
+			SPT.processRenderOptions(chart, options);
 			
 			var isDropdown = (!options.multiple && (options.size == null || options.size <= 1));
 			
@@ -6429,7 +6441,7 @@ SPT.selectRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			var options = { data: [] };
 			
@@ -6471,7 +6483,7 @@ SPT.selectRenderer = function(plugin, config)
 			}
 			
 			options = chart.inflateOptions(options);
-			chart.processUpdateOptions(options);
+			SPT.processUpdateOptions(chart, options);
 			
 			this._drawDataOptions(chart, options);
 		},
@@ -6481,7 +6493,7 @@ SPT.selectRenderer = function(plugin, config)
 			var chartEle = chart.element();
 			var internal = chart.internal();
 			CF.eleRemove(internal);
-			CF.eleRemoveClass(chartEle, "dg-chart-label");
+			CF.eleRemoveClass(chartEle, "dg-chart-select");
 		},
 		
 		on: function(chart, type, handler)
@@ -6537,7 +6549,7 @@ SPT.selectRenderer = function(plugin, config)
 		
 		_drawDataOptions: function(chart, options)
 		{
-			var renderOptions = chart.renderOptions();
+			var renderOptions = SPT.liveDataRenderOptions(chart);
 			var internal = chart.internal();
 			var bindDataName = this._itemBindDataName();
 			
@@ -7433,6 +7445,66 @@ SPT.convertDataPropValueToName = function(dataObj)
 	}
 };
 
+//调用chart.options()中的processRenderOptions选项函数处理图表渲染选项，格式为：function(renderOptions, chart){ ... }
+SPT.processRenderOptions = function(chart, renderOptions, set)
+{
+	set = (set == null ? true : set);
+	
+	var options = chart.options();
+	var handler = CF.optionValue(options, SPT.PROCESS_RENDER_OPTIONS_OPTION_NAME);
+	
+	if(handler)
+	{
+		options.handler(renderOptions, chart);
+	}
+	
+	if(set)
+	{
+		SPT.liveDataRenderOptions(chart, renderOptions);
+	}
+	
+	return renderOptions;
+};
+
+//获取/设置图表渲染选项
+SPT.liveDataRenderOptions = function(chart, renderOptions)
+{
+	if(renderOptions === undefined)
+		return chart.liveData(SPT.RENDER_OPTIONS_LIVE_DATA_NAME);
+	else
+		chart.liveData(SPT.RENDER_OPTIONS_LIVE_DATA_NAME, renderOptions);
+};
+
+//调用chart.options()中的processUpdateOptions选项函数处理图表更新选项，格式为：function(updateOptions, chart){ ... }
+SPT.processUpdateOptions = function(chart, updateOptions, set)
+{
+	set = (set == null ? true : set);
+	
+	var options = chart.options();
+	var handler = CF.optionValue(options, SPT.PROCESS_UPDATE_OPTIONS_OPTION_NAME);
+	
+	if(handler)
+	{
+		options.handler(updateOptions, chart);
+	}
+	
+	if(set)
+	{
+		SPT.liveDataUpdateOptions(chart, updateOptions);
+	}
+	
+	return updateOptions;
+};
+
+//获取/设置图表更新选项
+SPT.liveDataUpdateOptions = function(chart, updateOptions)
+{
+	if(updateOptions === undefined)
+		return chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME);
+	else
+		chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME, updateOptions);
+};
+
 //获取全局ECharts对象
 EU._echarts = function()
 {
@@ -8142,7 +8214,7 @@ EU.prepareRenderOptions = function(chart, renderOptions, beforeProcessHandler)
 		beforeProcessHandler(chart, renderOptions);
 	
 	EU.setOptionsComponentId(renderOptions);
-	chart.processRenderOptions(renderOptions);
+	SPT.processRenderOptions(chart, renderOptions);
 	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
 	EU.setOptionsComponentId(renderOptions);
 	
@@ -8168,7 +8240,7 @@ EU.prepareUpdateOptions = function(chart, updateOptions, beforeProcessHandler)
 		beforeProcessHandler(updateOptions, chart);
 	
 	EU.setOptionsComponentId(updateOptions);
-	chart.processUpdateOptions(updateOptions);
+	SPT.processUpdateOptions(chart, updateOptions);
 	//应再次检查和设置组件ID，因为上述函数可能会增加新组件
 	EU.setOptionsComponentId(updateOptions);
 	
@@ -8244,7 +8316,7 @@ EU.renderMapChart = function(chart, options)
 //更新ECharts地图类图表
 EU.updateMapChart = function(chart, updateOptions)
 {
-	var renderOptions = chart.renderOptions();
+	var renderOptions = SPT.liveDataRenderOptions(chart);
 	var renderMaps = EU.getDistinctMaps(renderOptions);
 	var updateMaps = EU.getDistinctMaps(updateOptions);
 	var mapChanged = (renderMaps.length !== updateMaps.length);
@@ -8584,7 +8656,7 @@ EU.inflateUpdateAxisData = function(chart, updateOptions, updateAxis, valueExtra
 	
 	updateAxis.data = axisData;
 	
-	EU.sortUpdateAxisData(chart.renderOptions(), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
+	EU.sortUpdateAxisData(SPT.liveDataRenderOptions(chart), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
 };
 
 /**
