@@ -617,7 +617,7 @@ chartProto._evalDisableToolObj = function(value)
 	var re = {};
 	
 	if(CF.isEmpty(value))
-		value == "false";
+		value = "false";
 	
 	if(CF.isLiteralFalse(value))
 	{

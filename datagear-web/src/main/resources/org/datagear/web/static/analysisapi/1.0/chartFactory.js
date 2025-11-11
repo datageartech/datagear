@@ -745,7 +745,7 @@
 		var setting = {};
 		
 		if(chartFactory.isNullOrEmpty(settingAttr))
-			settingAttr == "false";
+			settingAttr = "false";
 		
 		if(settingAttr == "false" || settingAttr == false)
 		{
