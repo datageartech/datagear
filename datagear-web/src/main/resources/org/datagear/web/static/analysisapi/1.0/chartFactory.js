@@ -733,7 +733,7 @@
 			}
 			else
 			{
-				localSetting = globalSetting;
+				localSetting = $.extend({}, globalSetting);
 			}
 		}
 		
@@ -745,9 +745,8 @@
 		var setting = {};
 		
 		if(chartFactory.isNullOrEmpty(settingAttr))
-			settingAttr = "false";
-		
-		if(settingAttr == "false" || settingAttr == false)
+		{}
+		else if(settingAttr == "false" || settingAttr == false)
 		{
 			setting.param = false;
 			setting.data = false;
@@ -760,8 +759,7 @@
 		//字符串
 		else if(chartFactory.isString(settingAttr))
 		{
-			var evalSetting = chartFactory.evalSilently(settingAttr, {});
-			setting = $.extend(setting, evalSetting);
+			setting = chartFactory.evalSilently(settingAttr, {});
 		}
 		//对象
 		else

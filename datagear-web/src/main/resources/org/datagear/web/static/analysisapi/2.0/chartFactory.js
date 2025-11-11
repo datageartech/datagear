@@ -592,7 +592,7 @@ chartProto._initDisableTool = function()
 		}
 		else
 		{
-			re = globalObj;
+			re = CF.extend({}, globalObj);
 		}
 	}
 	
@@ -617,9 +617,8 @@ chartProto._evalDisableToolObj = function(value)
 	var re = {};
 	
 	if(CF.isEmpty(value))
-		value = "false";
-	
-	if(CF.isLiteralFalse(value))
+	{}
+	else if(CF.isLiteralFalse(value))
 	{
 		re.param = false;
 		re.data = false;
@@ -632,8 +631,7 @@ chartProto._evalDisableToolObj = function(value)
 	//字符串
 	else if(CF.isString(value))
 	{
-		var evalRe = CF.evalSilently(value, {});
-		re = CF.extend(re, evalRe);
+		re = CF.evalSilently(value, {});
 	}
 	//对象
 	else
