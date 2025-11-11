@@ -3694,7 +3694,7 @@ chartProto.resultDataCell = function(dataSetResult, field, row)
 chartProto.resultColumnArrayDatas = function(dataSetResult, fields, row, count)
 {
 	var re = [];
-
+	
 	if(!dataSetResult || !fields)
 		return re;
 	
@@ -3706,34 +3706,23 @@ chartProto.resultColumnArrayDatas = function(dataSetResult, fields, row, count)
 	
 	if(CF.isArray(fields))
 	{
-		for(var i=0; i<fields.length; i++)
+		for(let i=0; i<fields.length; i++)
 		{
-			var p = fields[i];
+			let name = (fields[i].name !== undefined ? fields[i].name : fields[i]);
+			let column = [];
 			
-			var name = (p ? (p.name || p) : undefined);
-			if(!name)
-				continue;
-			
-			var column = [];
-			
-			for(var j=row; j<endIdx; j++)
-				column.push(datas[j][name]);
+			for(let j=row; j<endIdx; j++)
+				column.push(datas[j] == null ? null : datas[j][name]);
 			
 			re[i] = column;
 		}
 	}
 	else
 	{
-		var name = (fields ? (fields.name || fields) : undefined);
-
-		if(name)
-		{
-			for(var i=row; i<endIdx; i++)
-			{
-				var rowObj = datas[i];
-				re.push(rowObj[name]);
-			}
-		}
+		let name = (fields.name !== undefined ? fields.name : fields);
+		
+		for(let i=row; i<endIdx; i++)
+			re.push(datas[i] == null ? null : datas[i][name]);
 	}
 	
 	return re;
@@ -3761,7 +3750,7 @@ chartProto.resultDataRow = function(dataSetResult, row)
 	{
 		var re = [];
 		
-		for(var i=0; i<row.length; i++)
+		for(let i=0; i<row.length; i++)
 			re.push(datas[row[i]]);
 		
 		return re;
@@ -3786,34 +3775,37 @@ chartProto.resultMapDatas = function(dataSetResult, fieldMap, row, count)
 	var endIdx = (count == null ? datas.length : (row + count));
 	endIdx = (endIdx > datas.length ? datas.length : endIdx);
 	
-	var propIsArray = {};
-	for(var opn in fieldMap)
-		propIsArray[opn] = CF.isArray(fieldMap[opn]);
+	var fieldIsArray = {};
+	for(let name in fieldMap)
+		fieldIsArray[name] = CF.isArray(fieldMap[name]);
 	
-	for(var i=row; i<endIdx; i++)
+	for(let i=row; i<endIdx; i++)
 	{
-		var di = datas[i];
-		var obj = (di == null ? null : {});
+		let di = datas[i];
+		let obj = (di == null ? null : {});
 		
-		for(var opn in fieldMap)
+		if(obj != null)
 		{
-			var dp = fieldMap[opn];
-			
-			if(dp == null){}
-			else if(propIsArray[opn])
+			for(let name in fieldMap)
 			{
-				obj[opn] = [];
+				let field = fieldMap[name];
 				
-				for(var j=0; j<dp.length; j++)
+				if(field == null){}
+				else if(fieldIsArray[name])
 				{
-					var dpn = (dp[j].name || dp[j]);
-					obj[opn][j] = di[dpn];
+					obj[name] = [];
+					
+					for(let j=0; j<field.length; j++)
+					{
+						let fname = (field[j].name !== undefined ? field[j].name : field[j]);
+						obj[name][j] = di[fname];
+					}
 				}
-			}
-			else
-			{
-				var dpn = (dp.name || dp);
-				obj[opn] = di[dpn];
+				else
+				{
+					let fname = (field.name !== undefined ? field.name : field);
+					obj[name] = di[fname];
+				}
 			}
 		}
 		
@@ -3863,37 +3855,26 @@ chartProto.resultRowArrayDatas = function(dataSetResult, fields, row, count)
 	
 	if(CF.isArray(fields))
 	{
-		for(var i=row; i<endIdx; i++)
+		for(let i=row; i<endIdx; i++)
 		{
-			var rowObj = datas[i];
-			var rowVal = [];
+			let di = datas[i];
+			let row = [];
 			
-			for(var j=0; j<fields.length; j++)
+			for(let j=0; j<fields.length; j++)
 			{
-				var p = fields[j];
-				
-				var name = (p ? (p.name || p) : undefined);
-				if(!name)
-					continue;
-				
-				rowVal[j] = rowObj[name];
+				let name = (fields[j].name !== undefined ? fields[j].name : fields[j]);
+				row[j] = (di == null ? null : di[name]);
 			}
 			
-			re.push(rowVal);
+			re.push(row);
 		}
 	}
 	else
 	{
-		var name = (fields ? (fields.name || fields) : undefined);
+		let name = (fields.name !== undefined ? fields.name : fields);
 		
-		if(name)
-		{
-			for(var i=row; i<endIdx; i++)
-			{
-				var rowObj = datas[i];
-				re.push(rowObj[name]);
-			}
-		}
+		for(let i=row; i<endIdx; i++)
+			re.push(datas[i] == null ? null : datas[i][name]);
 	}
 	
 	return re;
