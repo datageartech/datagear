@@ -193,17 +193,20 @@
 .dg-chart-label .dg-chart-label-hide-name .dg-chart-label-name{
 	display: none !important; /*防止被dg-chart-label-item-inline样式覆盖*/
 }
+.dg-chart-label .dg-chart-label-item{
+	display: flex;
+	flex-direction: column;
+}
+.dg-chart-label .dg-chart-label-item-inline .dg-chart-label-item{
+	flex-direction: row;
+	gap: 0.25em;
+}
 .dg-chart-label .dg-chart-label-name{
 	text-align: center;
 }
 .dg-chart-label .dg-chart-label-value{
 	font-weight: bold;
 	text-align: center;
-}
-.dg-chart-label .dg-chart-label-item-inline .dg-chart-label-name,
-.dg-chart-label .dg-chart-label-item-inline .dg-chart-label-value{
-	display: inline-block;
-	padding: 0.1em;
 }
 .dg-chart-label .dg-chart-label-layout-flex-around{
 	display: flex;
