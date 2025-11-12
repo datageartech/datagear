@@ -5090,30 +5090,6 @@ CF.propertyPathValue = function(obj, propertyPath)
 	return re;
 };
 
-/**
- * 将指定名称转换为合法的CSS样式属性名
- * 例如："backgroundColor" 将被转换为 "background-color"
- */
-CF.toLegalStyleName = function(name)
-{
-	var re = "";
-	
-	for(var i=0; i<name.length; i++)
-	{
-		var c = name.charAt(i);
-		
-		if(c >= 'A' && c <= 'Z')
-		{
-			re += "-";
-			re += c.toLowerCase();
-		}
-		else
-			re += c;
-	}
-	
-	return re;
-};
-
 var THEME_GRADUAL_COLORS_NAME = CF.BUILTIN_PROP_PREFIX + "GradualColors";
 
 /**
@@ -5499,58 +5475,6 @@ CF.uid = function()
 CF.currentDateMs = function()
 {
 	return new Date().getTime();
-};
-
-var DERIVED_ELEMENTS_NAME = CF.BUILTIN_PROP_PREFIX + "derivedElements";
-
-/**
- * 获取/设置父元素的派生子元素DOM数组，派生子元素并不是父元素的直接后代元素，但是从属于父元素生命周期，随父元素创建，也应随父元素删除。
- *
- * @param parent 父HTML元素
- * @param derived 可选，要设置的派生子HTML元素、null
- * @param append 可选，当执行设置操作时，是否追加而非覆盖，默认为：true
- * @returns 要获取的派生子HTML元素数组
- */
-CF.derivedElements = function(parent, derived, append)
-{
-	if(derived === undefined)
-		return CF.eleData(parent, DERIVED_ELEMENTS_NAME);
-	
-	append = (append == null ? true : append);
-	
-	if(derived == null)
-	{
-		CF.eleRemoveData(parent, DERIVED_ELEMENTS_NAME);
-	}
-	else
-	{
-		var des = CF.eleData(parent, DERIVED_ELEMENTS_NAME);
-		if(des == null || !append)
-		{
-			des = [];
-			CF.eleData(parent, DERIVED_ELEMENTS_NAME, des);
-		}
-		
-		des.push(derived);
-	}
-};
-
-/**
- * 删除元素，同时删除通过CF.derivedElements()设置的派生子元素。
- * 
- * @param ele HTML元素
- */
-CF.removeEleWithDerived = function(ele)
-{
-	var des = CF.derivedElements(ele);
-	
-	if(des != null)
-	{
-		for(var i=0; i<des.length; i++)
-			CF.eleRemove(des[i]);
-	}
-	
-	CF.eleRemove(ele);
 };
 
 /**
