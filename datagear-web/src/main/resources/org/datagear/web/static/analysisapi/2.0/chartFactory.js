@@ -566,7 +566,7 @@ chartProto._bodyListener = function()
 
 /**
  * 初始化图表是否禁用工具。
- * 此函数从图表元素的elementAttrConst.DISABLE_TOOL属性获取是否禁用值。
+ * 此函数依次从图表选项builtinTool.disable、图表元素的elementAttrConst.DISABLE_TOOL属性获取是否禁用值。
  */
 chartProto._initDisableTool = function()
 {
@@ -578,65 +578,45 @@ chartProto._initDisableTool = function()
 	//图表选项里的优先级应最高，不然图表展示页的选项不起效
 	if(builtinTool != null && !CF.isEmpty(builtinTool.disable))
 	{
-		re = this._evalDisableToolObj(builtinTool.disable);
+		re = builtinTool.disable;
 	}
 	else
 	{
-		var globalObj = this._bodyDisableTool();
-		re = CF.eleAttr(this.element(), elementAttrConst.DISABLE_TOOL);
+		let globalObj = this._bodyDisableToolObj();
+		let localValue = CF.eleAttr(this.element(), elementAttrConst.DISABLE_TOOL);
 		
-		if(!CF.isEmpty(re))
-		{
-			re = this._evalDisableToolObj(re);
-			re = CF.extend({}, globalObj, re);
-		}
-		else
-		{
-			re = CF.extend({}, globalObj);
-		}
+		re = this._disableToolObjForAttr(localValue);
+		re = CF.extend({}, globalObj, re);
 	}
 	
 	this.disableTool(re);
 };
 
-chartProto._bodyDisableTool = function()
+chartProto._bodyDisableToolObj = function()
 {
 	var value = CF.eleAttr(document.body, elementAttrConst.DISABLE_TOOL);
 	
 	if(value !== CF._PREV_BODY_DISABLE_TOOL_STR)
 	{
 		CF._PREV_BODY_DISABLE_TOOL_STR = value;
-		CF._PREV_BODY_DISABLE_TOOL = this._evalDisableToolObj(value);
+		CF._PREV_BODY_DISABLE_TOOL = this._disableToolObjForAttr(value);
 	}
 	
 	return CF._PREV_BODY_DISABLE_TOOL;
 };
 
-chartProto._evalDisableToolObj = function(value)
+chartProto._disableToolObjForAttr = function(str)
 {
-	var re = {};
+	var re;
 	
-	if(CF.isEmpty(value))
-	{}
-	else if(CF.isLiteralFalse(value))
+	if(CF.isEmpty(str))
 	{
-		re.param = false;
-		re.data = false;
+		re = {};
 	}
-	else if(CF.isLiteralTrue(value))
-	{
-		re.param = true;
-		re.data = true;
-	}
-	//字符串
-	else if(CF.isString(value))
-	{
-		re = CF.evalSilently(value, {});
-	}
-	//对象
 	else
 	{
-		re = CF.extend(re, value);
+		re = CF.evalSilently(str);
+		re = this._toFullDisableToolObj(re);
 	}
 	
 	return re;
@@ -714,7 +694,7 @@ chartProto.name = function(name)
 
 /**
  * 获取/设置图表对应的HTML元素ID。
- * 注意：设置操作仅应在图表未渲染、或者选然后图表元素ID有变更的情况下执行。
+ * 注意：设置操作仅应在图表未渲染、或者渲染后图表元素ID有变更时执行。
  * 
  * @param elementId 可选，要设置的元素ID
  */
@@ -890,15 +870,15 @@ chartProto.listener = function(listener)
  * 
  * @param disable 可选，禁用设置，格式为：
  * 					//全部禁用
- * 					true、"true"、
+ * 					true、
  * 					//全部启用
- * 					false、"false"、
+ * 					false、
  * 					//详细设置
  *					{
  *						//可选，是否禁用参数
- *						param: false || true,
+ *						param: false、true,
  *						//可选，是否禁用数据透视表
- *						data: true || false
+ *						data: true、false
  *					}
  * @returns 要获取的禁用设置，格式为：{param: true、false, data: true、false}，不会为null
  */
@@ -910,25 +890,33 @@ chartProto.disableTool = function(disable)
 	}
 	else
 	{
-		if(disable == null)
-		{
-			disable = this._defaultDisableTool();
-		}
-		else if(CF.isLiteralTrue(disable))
-		{
-			disable = {param: true, data: true};
-		}
-		else if(CF.isLiteralFalse(disable))
-		{
-			disable = {param: false, data: false};
-		}
-		else
-		{
-			disable = CF.extend(this._defaultDisableTool(), disable);
-		}
-		
+		disable = this._toFullDisableToolObj(disable);
 		this._disableTool = disable;
 	}
+};
+
+chartProto._toFullDisableToolObj = function(value)
+{
+	var re;
+	
+	if(CF.isEmpty(value))
+	{
+		re = this._defaultDisableTool();
+	}
+	else if(value === true)
+	{
+		re = {param: true, data: true};
+	}
+	else if(value === false)
+	{
+		re = {param: false, data: false};
+	}
+	else
+	{
+		re = CF.extend(this._defaultDisableTool(), value);
+	}
+	
+	return re;
 };
 
 chartProto._defaultDisableTool = function()
@@ -2056,7 +2044,7 @@ chartProto.widgetId = function()
 chartProto.element = function()
 {
 	var eleId = this.elementId();
-	return document.getElementById(eleId);
+	return CF.eleOfId(eleId);
 };
 
 /**

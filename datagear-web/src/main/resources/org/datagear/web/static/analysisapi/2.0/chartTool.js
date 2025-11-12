@@ -1626,15 +1626,22 @@
 	TOOL.unbindChartToolPanelEvent = function(chart)
 	{
 		var chartEle = chart.element();
-		var mouseenterHandler = CF.eleRemoveData(chartEle, "dgChartToolMouseEnterHandler");
-		var mouseleaveHandler = CF.eleRemoveData(chartEle, "dgChartToolMouseLeaveHandler");
+		var mouseenterHandler = CF.eleData(chartEle, "dgChartToolMouseEnterHandler");
+		var mouseleaveHandler = CF.eleData(chartEle, "dgChartToolMouseLeaveHandler");
 		
 		CF.eleRemoveData(chartEle, "dgChartToolIsBindEvent");
 		
 		if(mouseenterHandler)
+		{
+			CF.eleRemoveData(chartEle, "dgChartToolMouseEnterHandler");
 			CF.eleOff(chartEle, "mouseenter", mouseenterHandler);
+		}
+		
 		if(mouseleaveHandler)
+		{
+			CF.eleRemoveData(chartEle, "dgChartToolMouseLeaveHandler");
 			CF.eleOff(chartEle, "mouseleave", mouseleaveHandler);
+		}
 		
 		var box = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
 		TOOL.destroyDataSetParamForm(box);
