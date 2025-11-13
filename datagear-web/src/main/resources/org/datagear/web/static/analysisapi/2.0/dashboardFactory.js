@@ -403,8 +403,8 @@ chartProto._postProcessRendered = function()
 };
 
 /**
- * 初始化图表联动设置。
- * 此方法从图表元素的elementAttrConst.LINK属性获取联动设置。
+ * 初始化图表联动配置。
+ * 此方法从图表元素的elementAttrConst.LINK属性获取联动配置。
  */
 chartProto._initLinks = function()
 {
@@ -415,8 +415,8 @@ chartProto._initLinks = function()
 };
 
 /**
- * 初始化图表自动调整尺寸设置。
- * 此方法从body元素、图表元素的elementAttrConst.AUTO_RESIZE属性获取联动设置。
+ * 初始化图表是否自动调整尺寸信息。
+ * 此方法从body元素、图表元素的elementAttrConst.AUTO_RESIZE属性获取自动调整尺寸信息。
  */
 chartProto._initAutoResize = function()
 {
@@ -463,8 +463,8 @@ chartProto._initUpdateGroup = function()
 };
 
 /**
- * 获取/设置初始图表联动设置对象数组。
- * 联动设置对象格式为：
+ * 获取/设置初始图表联动配置对象数组。
+ * 联动配置对象格式为：
  * {
  *   //可选，联动触发事件类型、事件类型数组，格式参考chart.on()函数的type参数，
  *   //默认值参考DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE说明
@@ -474,7 +474,7 @@ chartProto._initUpdateGroup = function()
  *   target: "..."、["...", ...],
  * 	 
  * 	 //可选，下述【数据属性名】的统一前缀，末尾无需带'.'字符
- * 	 prefix: "...",
+ * 	 propPrefix: "...",
  *   
  *   //可选，联动数据参数映射表
  *   data:
@@ -491,7 +491,7 @@ chartProto._initUpdateGroup = function()
  * 图表渲染器实现相关：
  * 图表渲染器应实现on函数，以支持此特性。
  * 
- * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
+ * @param links 可选，要设置的图表联动配置对象、数组，没有则执行获取操作。
  */
 chartProto.links = function(links)
 {
@@ -560,12 +560,12 @@ chartProto.updateGroup = function(group)
 };
 
 /**
- * 为指定图表联动设置绑定事件处理函数。
+ * 为指定图表联动配置绑定事件处理函数。
  * 
  * 图表渲染器实现相关：
  * 图表渲染器应实现on()函数、linkDataHander（可选），以支持此特性。
  * 
- * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
+ * @param links 图表联动配置对象、数组，格式参考chart.links()函数说明
  * @return 绑定的事件处理函数对象数组，格式为：[ { type: ..., handler: function(...){ ... } }, ... ]
  */
 chartProto.bindLinkEventHanders = function(links)
@@ -616,7 +616,7 @@ chartProto.bindLinkEventHanders = function(links)
 	return ehs;
 };
 
-//解析不重复的联动设置触发事件数组。
+//解析不重复的联动配置触发事件数组。
 chartProto._resolveLinksTriggers = function(links)
 {
 	var triggers = [];
@@ -655,11 +655,11 @@ chartProto._resolveLinkTriggers = function(link)
 
 /**
  * 处理指定图表事件的图表联动操作。
- * 此方法根据图表联动设置对象，将图表联动源数据传递至目标图表数据集参数值，然后请求刷新图表数据。
+ * 此方法根据图表联动配置对象，将图表联动源数据传递至目标图表数据集参数值，然后请求刷新图表数据。
  * 
  * @param type 事件类型
  * @param linkSrcData 联动数据，格式应为：{...}、[ {...}, ... ]
- * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
+ * @param links 图表联动配置对象、数组，格式参考chart.links()函数说明
  */
 chartProto._handleChartEventLink = function(type, linkSrcData, links)
 {
@@ -1296,7 +1296,7 @@ dashboardProto._assertActive = function()
  *   //必选，表单输入项对象、数组
  *   items: 表单输输入项对象 或者 [ 表单输输入项对象, ... ],
  *   //可选，表单提交操作时执行的联动图表设置
- *   link: 图表联动设置对象,
+ *   link: 图表联动配置对象,
  *   //可选，表单提交按钮文本
  *   submitText: "...",
  *   //表单渲染完成回调函数
@@ -1324,7 +1324,7 @@ dashboardProto._assertActive = function()
  * }
  * 或者，简写为其name属性值。
  * 
- * 图表联动设置对象格式为：
+ * 图表联动配置对象格式为：
  * {
  *   //必选，联动目标图表元素ID、ID数组
  *   target: "..."、["...", ...],
@@ -1334,7 +1334,7 @@ dashboardProto._assertActive = function()
  *     表单输入项名称 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  *     ...
  * }
- * 或者，简写为图表联动设置对象的target属性值。
+ * 或者，简写为图表联动配置对象的target属性值。
  * 
  * 图表数据集参数索引对象格式参考dashboard._batchSetDataSetParamValues()函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
  * 
@@ -2385,7 +2385,7 @@ dashboardProto._addLoadedChart = function(chart)
  * 					  target: "..."、["...", ...],
  * 					  
  * 					  //可选，下述【源数据属性名】的统一前缀，末尾无需带'.'字符
- * 					  prefix: "...",
+ * 					  propPrefix: "...",
  * 					  
  * 					  //可选，要设置的参数值映射表，没有则不设置任何参数值
  * 					  data:
@@ -2438,7 +2438,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 	
 	for(let name in dataMap)
 	{
-		let propertyPath = CF.concatPropertyPath(batchSet.prefix, name);
+		let propertyPath = CF.concatPropertyPath(batchSet.propPrefix, name);
 		let dataValue = null;
 		
 		if(hasGetValueFunc)
