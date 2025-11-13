@@ -1439,17 +1439,43 @@ dashboardProto.resizeChart = function(chartInfo)
 };
 
 /**
- * 重新调整所有活跃图表尺寸。
+ * 重新调整活跃图表尺寸。
+ * 
+ * @param charts 可选，要调整的图表数组，如果未设置，则是全部看板图表
  */
-dashboardProto.resizeAllCharts = function()
+dashboardProto.resizeCharts = function(charts)
 {
 	this._assertActive();
 	
-	this.charts().forEach(function(chart)
+	if(charts === undefined)
+		charts = this.charts();
+	
+	if(charts != null)
 	{
-		if(chart.isActive())
-			chart.resize();
+		this.charts().forEach((chart) =>
+		{
+			if(chart.isActive())
+				chart.resize();
+		});
+	}
+};
+
+/**
+ * 重新调整指定元素内（包括自身）包含的所有图表尺寸。
+ * 
+ * @param element HTML元素、HTML元素ID
+ * @return 已调整尺寸的图表数组：[ ... ]
+ */
+dashboardProto.resizeChartsIn = function(element)
+{
+	var charts = this.chartsIn(element, true);
+	
+	charts.forEach((chart) =>
+	{
+		chart.resize();
 	});
+	
+	return charts;
 };
 
 /**
@@ -2849,24 +2875,6 @@ dashboardProto.chartsIn = function(element, active)
 	});
 	
 	return re;
-};
-
-/**
- * 重新调整指定元素内（包括自身）包含的所有图表尺寸。
- * 
- * @param element HTML元素、HTML元素ID
- * @return 已调整尺寸的图表数组：[ ... ]
- */
-dashboardProto.resizeChartsIn = function(element)
-{
-	var charts = this.chartsIn(element, true);
-	
-	charts.forEach((chart) =>
-	{
-		chart.resize();
-	});
-	
-	return charts;
 };
 
 //-------------

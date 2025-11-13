@@ -56,6 +56,7 @@ dashboard.loadUnsolvedCharts()	*
 dashboard.originalDataIndex()	x
 dashboard.refreshData()			x
 dashboard.renderContext()	返回对象格式由{attributes:{...}}改为{...}
+dashboard.resizeAllCharts() -> dashboard.resizeCharts()
 
 dg-chart-auto-resize默认值为true
 dg-chart-disable-setting改名为dg-chart-disable-tool
