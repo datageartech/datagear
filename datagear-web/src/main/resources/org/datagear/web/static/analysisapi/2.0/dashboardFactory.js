@@ -493,10 +493,18 @@ chartProto._initUpdateGroup = function()
 chartProto.links = function(links)
 {
 	if(links === undefined)
+	{
+		if(this._links == null)
+			this._links = [];
+		
 		return this._links;
+	}
 	else
 	{
-		if(links && !CF.isArray(links))
+		if(links == null)
+			links = [];
+		
+		if(!CF.isArray(links))
 			links = [ links ];
 		
 		this._links = links;
@@ -533,9 +541,19 @@ chartProto.autoResize = function(autoResize)
 chartProto.updateGroup = function(group)
 {
 	if(group === undefined)
-		return (this._updateGroup == null ? "" : this._updateGroup);
+	{
+		if(this._updateGroup == null)
+			this._updateGroup = "";
+		
+		return this._updateGroup;
+	}
 	else
+	{
+		if(group == null)
+			group = "";
+		
 		this._updateGroup = group;
+	}
 };
 
 /**
@@ -551,7 +569,7 @@ chartProto.bindLinkEventHanders = function(links)
 {
 	this._assertActive();
 	
-	if(!links)
+	if(links == null)
 		return [];
 	
 	if(!CF.isArray(links))

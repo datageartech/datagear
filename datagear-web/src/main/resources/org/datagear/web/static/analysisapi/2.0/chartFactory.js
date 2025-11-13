@@ -687,9 +687,19 @@ chartProto.id = function()
 chartProto.name = function(name)
 {
 	if(name === undefined)
+	{
+		if(this._root.name == null)
+			this._root.name = "";
+		
 		return this._root.name;
+	}
 	else
-		this._root.name = (name || "");
+	{
+		if(name == null)
+			name = "";
+		
+		this._root.name = name;
+	}
 };
 
 /**
@@ -720,9 +730,19 @@ chartProto.elementId = function(elementId)
 chartProto.updateInterval = function(interval)
 {
 	if(interval === undefined)
+	{
+		if(this._root.updateInterval == null)
+			this._root.updateInterval = -1;
+		
 		return this._root.updateInterval;
+	}
 	else
-		this._root.updateInterval = (interval == null ? -1 : interval);
+	{
+		if(interval == null)
+			interval = -1;
+		
+		this._root.updateInterval = interval;
+	}
 };
 
 /**
@@ -758,7 +778,7 @@ chartProto._pluginNonNull = function()
 /**
  * 获取/设置图表渲染上下文。
  * 
- * @param renderContext 可选，要设置的图表插件
+ * @param renderContext 可选，要设置的渲染上下文
  */
 chartProto.renderContext = function(renderContext)
 {
@@ -787,9 +807,19 @@ chartProto.renderContext = function(renderContext)
 chartProto.options = function(options)
 {
 	if(options === undefined)
+	{
+		if(this._root.options == null)
+			this._root.options = {};
+		
 		return this._root.options;
+	}
 	else
-		this._root.options = (options || {});
+	{
+		if(options == null)
+			options = {};
+		
+		this._root.options = options;
+	}
 };
 
 /**
@@ -807,7 +837,10 @@ chartProto.theme = function(theme)
 {
 	if(theme === undefined)
 	{
-		return (this._theme || (this._theme = this._renderContextChartTheme()));
+		if(this._theme == null)
+			this._theme = this._renderContextChartTheme();
+		
+		return this._theme;
 	}
 	else
 	{
@@ -1746,7 +1779,7 @@ chartProto._postProcessDestroyed = function()
 chartProto.status = function(status)
 {
 	if(status === undefined)
-		return (this._status || "");
+		return (this._status != null ? this._status : "");
 	else
 		this._status = status;
 };
@@ -2107,7 +2140,9 @@ chartProto.renderContextValue = function(name, value)
 chartProto.liveData = function(name, data)
 {
 	if(data === undefined)
-		return (this._liveDatas ? this._liveDatas[name] : undefined);
+	{
+		return (this._liveDatas ? this._liveDatas[name] : null);
+	}
 	else
 	{
 		if(this._liveDatas == null)
@@ -2757,12 +2792,15 @@ chartProto.dataSetFieldSigns = function(dataSetBind, field, sign)
 	
 	if(sign === undefined)
 	{
-		var re = (dataSetBind.fieldSigns ? dataSetBind.fieldSigns[fieldName] : null);
+		if(dataSetBind.fieldSigns == null)
+			dataSetBind.fieldSigns = {};
+		
+		var re = dataSetBind.fieldSigns[fieldName];
 		return (re == null ? [] : re);
 	}
 	else
 	{
-		if(!dataSetBind.fieldSigns)
+		if(dataSetBind.fieldSigns == null)
 			dataSetBind.fieldSigns = {};
 		
 		sign = this._toDataSignValues(sign);
@@ -2848,12 +2886,14 @@ chartProto.pluginResourceURL = function(name)
  */
 chartProto.attrValue = function(name, value)
 {
-	name = (name && name.name != null ? name.name : name);
+	name = (name && name.name !== undefined ? name.name : name);
+	
+	var attrValues = this.attrValues();
 	
 	if(value === undefined)
-		return this._root.attrValues[name];
+		return attrValues[name];
 	else
-		this._root.attrValues[name] = value;
+		attrValues[name] = value;
 };
 
 /**
@@ -2865,9 +2905,19 @@ chartProto.attrValue = function(name, value)
 chartProto.attrValues = function(values)
 {
 	if(values === undefined)
+	{
+		if(this._root.attrValues == null)
+			this._root.attrValues = {};
+		
 		return this._root.attrValues;
+	}
 	else
-		this._root.attrValues = (values ? values : {});
+	{
+		if(values == null)
+			values = {};
+		
+		this._root.attrValues = values;
+	}
 };
 
 /**
@@ -3031,7 +3081,10 @@ chartProto.updateAppendMode = function(appendMode)
  */
 chartProto.dataSetBinds = function()
 {
-	return (this._root.dataSetBinds || (this._root.dataSetBinds = []));
+	if(this._root.dataSetBinds == null)
+		this._root.dataSetBinds = [];
+	
+	return this._root.dataSetBinds;
 };
 
 /**
@@ -3406,7 +3459,10 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 	
 	if(dataSigns === undefined)
 	{
-		return (dataSetBind.dataSetSigns || (dataSetBind.dataSetSigns = []));
+		if(dataSetBind.dataSetSigns == null)
+			dataSetBind.dataSetSigns = [];
+		
+		return dataSetBind.dataSetSigns;
 	}
 	else
 	{
@@ -3430,7 +3486,10 @@ chartProto.dataSetFieldsSigns = function(dataSetBind, dataSigns, increment)
 	
 	if(dataSigns === undefined)
 	{
-		return (dataSetBind.fieldSigns || (dataSetBind.fieldSigns = {}));
+		if(dataSetBind.fieldSigns == null)
+			dataSetBind.fieldSigns = {};
+		
+		return dataSetBind.fieldSigns;
 	}
 	else
 	{
@@ -3445,7 +3504,7 @@ chartProto.dataSetFieldsSigns = function(dataSetBind, dataSigns, increment)
 			}
 		}
 		
-		if(!dataSetBind.fieldSigns || !increment)
+		if(dataSetBind.fieldSigns == null || !increment)
 		{
 			dataSetBind.fieldSigns = trimSigns;
 		}
