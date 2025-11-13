@@ -5117,10 +5117,7 @@ CF.propertyPathValue = function(obj, propertyPath)
 		return undefined;
 	
 	//构建eval表达式
-	if(propertyPath.charAt(0) == '[')
-		propertyPath = "obj" + propertyPath;
-	else
-		propertyPath = "obj." + propertyPath;
+	propertyPath = CF.concatPropertyPath("obj", propertyPath);
 	
 	var func = null;
 	
@@ -5159,6 +5156,30 @@ CF.propertyPathValue = function(obj, propertyPath)
 	{
 		CF.logException(e);
 		re = undefined;
+	}
+	
+	return re;
+};
+
+CF.concatPropertyPath = function(prefixPath, propertyPath)
+{
+	var re;
+	
+	if(CF.isEmpty(prefixPath))
+	{
+		re = propertyPath;
+	}
+	else if(CF.isEmpty(propertyPath))
+	{
+		re = prefixPath;
+	}
+	else if(propertyPath.charAt(0) === '[')
+	{
+		re = prefixPath + propertyPath;
+	}
+	else
+	{
+		re = prefixPath + "." + propertyPath;
 	}
 	
 	return re;
