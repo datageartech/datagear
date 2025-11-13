@@ -655,7 +655,7 @@ chartProto._resolveLinkTriggers = function(link)
  * 此方法根据图表联动设置对象，将图表联动源数据传递至目标图表数据集参数值，然后请求刷新图表数据。
  * 
  * @param type 事件类型
- * @param linkSrcData 联动数据
+ * @param linkSrcData 联动数据，格式应为：{...}、[ {...}, ... ]
  * @param links 图表联动设置对象、数组，格式参考chart.links()函数说明
  */
 chartProto._handleChartEventLink = function(type, linkSrcData, links)
@@ -673,22 +673,22 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 	
 	var batchSource =
 	{
-		data: linkSrcData,
+		_linkSrcData: linkSrcData,
 		getValue: function(name)
 		{
-			var val = undefined;
+			var val = null;
 			
 			//当name为空时，直接使用this.data
 			if(name == null || name == "")
 			{
-				val = this.data;
+				val = this._linkSrcData;
 			}
-			else if(CF.isArray(this.data))
+			else if(CF.isArray(this._linkSrcData))
 			{
-				for(let i=0; i<this.data.length; i++)
+				for(let i=0; i<this._linkSrcData.length; i++)
 				{
 					//需支持属性路径格式的name
-					val = CF.propertyPathValue(this.data[i], name);
+					val = CF.propertyPathValue(this._linkSrcData[i], name);
 					
 					if(val !== undefined)
 						break;
@@ -697,7 +697,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 			else
 			{
 				//需支持属性路径格式的name
-				val = CF.propertyPathValue(this.data, name);
+				val = CF.propertyPathValue(this._linkSrcData, name);
 			}
 			
 			return val;
@@ -2375,7 +2375,7 @@ dashboardProto._addLoadedChart = function(chart)
 /**
  * 批量设置图表数据集参数值。
  * 
- * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }（需支持属性路径）
+ * @param sourceData 源数据，格式支持：{ ... }、[ ... ]、{ getValue: function(name){ return ...; } }（需支持属性路径）
  * @param batchSet 批量设置对象，格式为：
  * 					{
  * 					  //可选，要设置的目标图表元素ID、图表ID、看板图表数组索引，或者它们的数组
@@ -2384,13 +2384,12 @@ dashboardProto._addLoadedChart = function(chart)
  * 					  //可选，要设置的参数值映射表，没有则不设置任何参数值
  * 					  data:
  * 					  {
- * 					    源参数名 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
+ * 					    源数据属性名 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  * 					    ...
  * 					  }
  * 					}
- * 					上述【源参数名】可以是简单参数名，例如："name"、"value"，也可以是源参数对象的属性路径，
- * 					例如："order.name"、"[0].name"、"['order'].product.name"。
- * 					图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
+ * 					上述【源数据属性名】可以是源数据中的简单属性名（比如："name"、"value"），也可以是属性路径（比如："order.name"、"[0].name"、"['order'].product.name"）。
+ * 					【图表数据集参数索引对象】用于确定【源数据属性名】对应值要设置到的目标图表数据集参数，格式为：
  * 					{
  *                    //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
  * 					  chart: 数值、"...",
@@ -2433,7 +2432,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 	
 	for(let name in dataMap)
 	{
-		let dataValue = undefined;
+		let dataValue = null;
 		
 		if(hasGetValueFunc)
 		{
@@ -2499,7 +2498,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 					targetCharts.push(targetChart);
 			}
 			
-			targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
+			targetChart.dataSetParamValue(dataSetIdx, param, (paramValue === undefined ? null : paramValue));
 		}
 	}
 	

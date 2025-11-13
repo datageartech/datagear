@@ -374,35 +374,33 @@ var chartProto = CF.Chart.prototype;
 //初始化图表根对象基础属性
 CF.initChartRoot = function(root)
 {
-	root.name = (root.name || "");
-	root.updateInterval = (root.updateInterval == null ? -1 : root.updateInterval);
-	root.dataSetBinds = (root.dataSetBinds || []);
-	for(var i=0; i<root.dataSetBinds.length; i++)
+	var dsbs = root.dataSetBinds;
+	
+	if(dsbs != null)
 	{
-		var dsb = root.dataSetBinds[i];
-		dsb.dataSetSigns = (dsb.dataSetSigns || []);
-		dsb.fieldSigns = (dsb.fieldSigns || {});
-		dsb.alias = (dsb.alias == null ?  "" : dsb.alias);
-		dsb.attachment = (dsb.attachment === true ? true : false);
-		dsb.query = (dsb.query || {});
-		dsb.query.paramValues = (dsb.query.paramValues || {});
-		//为dataSetBinds元素添加index属性，便于后续根据其索引获取结果集等信息
-		dsb.index = i;
+		for(let i=0; i<dsbs.length; i++)
+		{
+			let dsb = dsbs[i];
+			//添加index属性，后续需要根据索引获取结果集等信息
+			dsb.index = i;
+		}
 	}
 	
-	root.attrValues = (root.attrValues || {});
-	root.options = (root.options || {});
-	
-	//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
-	root.widget = root.attrValues[CF.CHART_ATTR_NAME_WIDGET];
-	root.optionsOrigin = root.attrValues[CF.CHART_ATTR_NAME_OPTIONS];
-	delete root.attrValues[CF.CHART_ATTR_NAME_WIDGET];
-	delete root.attrValues[CF.CHART_ATTR_NAME_OPTIONS];
-	
-	//保留原始属性值集，看板可视编辑需要使用
-	//注意，初始化attrValuesOrigin的逻辑不能在chart.render()中执行，
-	//因为chart.render()可以被多次调用，chart.attrValues可能已被修改
-	root.attrValuesOrigin = CF.extend(true, {}, root.attrValues);
+	if(root.attrValues != null)
+	{
+		let attrValues = root.attrValues;
+		
+		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
+		root.widget = attrValues[CF.CHART_ATTR_NAME_WIDGET];
+		root.optionsOrigin = attrValues[CF.CHART_ATTR_NAME_OPTIONS];
+		delete attrValues[CF.CHART_ATTR_NAME_WIDGET];
+		delete attrValues[CF.CHART_ATTR_NAME_OPTIONS];
+		
+		//保留原始属性值集，看板可视编辑需要使用
+		//注意，初始化attrValuesOrigin的逻辑不能在chart.render()中执行，
+		//因为chart.render()可以被多次调用，chart.attrValues可能已被修改
+		root.attrValuesOrigin = CF.extend(true, {}, attrValues);
+	}
 };
 
 CF.findPluginById = function(pluginId)
@@ -484,14 +482,12 @@ chartProto._renderContextChartTheme = function()
 chartProto._initOptions = function()
 {
 	var options = {};
-	
-	var optionsOrigin = this.optionsOrigin(true);
-	if(optionsOrigin)
-		options = CF.extend(true, options, optionsOrigin);
+	options = CF.extend(true, options, this.optionsOrigin(true));
 	
 	var eleOptions = CF.eleAttr(this.element(), elementAttrConst.OPTIONS);
 	
 	var bodyOptions = this._bodyOptions();
+	
 	if(bodyOptions)
 		options = CF.extend(true, options, bodyOptions);
 	
@@ -2007,7 +2003,14 @@ chartProto.dataSetParamValuesFirst = function(paramValues, increment, convert)
 chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment, convert)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	var paramValuesCurrent = (dataSetBind.query.paramValues || (dataSetBind.query.paramValues = {}));
+	
+	if(dataSetBind.query == null)
+		dataSetBind.query = {};
+	
+	if(dataSetBind.query.paramValues == null)
+		dataSetBind.query.paramValues = {};
+	
+	var paramValuesCurrent = dataSetBind.query.paramValues;
 	
 	if(paramValues === undefined)
 		return paramValuesCurrent;
@@ -2477,12 +2480,15 @@ chartProto.dataSetAlias = function(dataSetBind, alias)
 	
 	if(alias === undefined)
 	{
-		if(dataSetBind.alias)
+		if(!CF.isEmpty(dataSetBind.alias))
+		{
 			return dataSetBind.alias;
-		
-		var dataSet = (dataSetBind.dataSet || dataSetBind);
-		
-		return (dataSet ? (dataSet.name || "") : "");
+		}
+		else
+		{
+			let dataSet = dataSetBind.dataSet;
+			return (dataSet ? (dataSet.name || "") : "");
+		}
 	}
 	else
 	{
@@ -2923,10 +2929,13 @@ chartProto.attrValues = function(values)
 /**
  * 获取全部原始图表属性值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
  * 
- * @returns { ... }
+ * @returns {}，非null
  */
 chartProto.attrValuesOrigin = function()
 {
+	if(this._root.attrValuesOrigin == null)
+		this._root.attrValuesOrigin = {};
+	
 	return this._root.attrValuesOrigin;
 };
 
@@ -2945,18 +2954,21 @@ chartProto.pluginAttributes = function()
  * 获取原始图表选项，即在定义图表时设置的图表选项。
  * 
  * @param eval 可选，可选，是否返回选项对象而非字符串，默认为：false
- * @returns 字符串、{ ... }、null
+ * @returns 字符串、{}、非null
  */
 chartProto.optionsOrigin = function(eval)
 {
 	eval = (eval == null ? false : eval);
+	
+	if(this._root.optionsOrigin == null)
+		this._root.optionsOrigin = "";
 	
 	var options = this._root.optionsOrigin;
 	
 	if(eval)
 	{
 		if(CF.isEmpty(options))
-			options = null;
+			options = {};
 		else
 			options = CF.evalSilently(options, {});
 	}
@@ -3903,11 +3915,14 @@ chartProto.dataSetIgnoreFetches = function(ignoreFetch)
 
 chartProto._dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 {
+	if(dataSetBind.query == null)
+		dataSetBind.query = {};
+	
 	var query = dataSetBind.query;
 	
 	if(ignoreFetch === undefined)
 	{
-		return (!query || query.ignoreFetch == null ? false : query.ignoreFetch);
+		return (query.ignoreFetch == null ? false : query.ignoreFetch);
 	}
 	else
 	{
