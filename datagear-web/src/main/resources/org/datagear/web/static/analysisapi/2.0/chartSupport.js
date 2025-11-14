@@ -1701,7 +1701,6 @@ SPT.mapRenderer = function(plugin, config)
 			var seriesName = "";
 			var seriesData = [];
 			var dataRange = { min: null, max: null };
-			var map = null;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -1711,9 +1710,6 @@ SPT.mapRenderer = function(plugin, config)
 				
 				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let valueField = chart.dataSetFieldOfSign(dataSetBind, 1);
-				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let data = chart.resultNameValueDatas(result, nameField, valueField);
 				SPT.originalDataOfResult(data, chart, result);
@@ -1730,6 +1726,8 @@ SPT.mapRenderer = function(plugin, config)
 			
 			var series = [ { type: "map", name: seriesName, data: seriesData } ];
 			
+			//从全部结果中取，以支持在附件数据集中定义地图名
+			var map = SPT.chartResultFirstNonEmptyOfSign(chart, chartResult, mapSignIndex);
 			if(!CF.isEmpty(map))
 				series[0].map = map;
 			
@@ -1829,7 +1827,6 @@ SPT._mapScatterRenderer = function(plugin, config)
 			
 			var legendData = [];
 			var series = [];
-			var map = null;
 			
 			var dataRange = { min: null, max: null };
 			var symbolSizeRatio = SPT.symbolSizeRadioIfEffectScatter(config.scatterType);
@@ -1841,9 +1838,6 @@ SPT._mapScatterRenderer = function(plugin, config)
 				let dataSetBind = dataSetBinds[i];
 				let dataSetAlias = chart.dataSetAlias(dataSetBind);
 				let result = chart.resultOf(chartResult, dataSetBind);
-				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let loField = chart.dataSetFieldOfSign(dataSetBind, 1);
@@ -1895,6 +1889,8 @@ SPT._mapScatterRenderer = function(plugin, config)
 			
 			var options = { legend: { data: legendData }, series: series };
 			
+			//从全部结果中取，以支持在附件数据集中定义地图名
+			var map = SPT.chartResultFirstNonEmptyOfSign(chart, chartResult, mapSignIndex);
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
@@ -1977,6 +1973,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 		update: function(chart, chartResult)
 		{
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
+			var mapSignIndex = 3;
 			
 			var options =
 			{
@@ -2023,29 +2020,21 @@ SPT.mapGraphRenderer = function(plugin, config)
 			this._configSingleSeries(chart, options.series[0]);
 			SPT.evalSeriesDataValueSymbolSize(options.series, dataRange.min, dataRange.max, symbolSizeMax, symbolSizeMin, "value", 2);
 			
+			//从全部结果中取，以支持在附件数据集中定义地图名
+			var map = SPT.chartResultFirstNonEmptyOfSign(chart, chartResult, mapSignIndex);
+			if(!CF.isEmpty(map))
+				options.geo = { map: map };
+			
 			options = EU.prepareUpdateOptions(chart, options);
 			EU.updateMapChart(chart, options);
 		},
 		
 		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
 		{
-			var mapSignIndex = 3;
 			var dataSetBind = dataSetBinds[dsbIndex];
 			
 			if(CF.isEmpty(options.series[0].name))
 				options.series[0].name = chart.dataSetAlias(dataSetBind);
-			
-			if(!options.geo || !options.geo.map)
-			{
-				let result = chart.resultOf(chartResult, dataSetBind);
-				let map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
-				
-				if(!CF.isEmpty(map))
-				{
-					options.geo = (options.geo || {});
-					options.geo.map = map;
-				}
-			}
 		},
 		
 		_inflateOptionsForNode: function(chart, chartResult, dataSetBinds, dsbIndex, options, dataRange)
@@ -2289,7 +2278,6 @@ SPT.mapLinesRenderer = function(plugin, config)
 			
 			var legendData = [];
 			var series = [];
-			var map = null;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -2300,9 +2288,6 @@ SPT.mapLinesRenderer = function(plugin, config)
 				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let loField = chart.dataSetFieldOfSign(dataSetBind, 1);
 				let laField = chart.dataSetFieldOfSign(dataSetBind, 2);
-				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let data = null;
 				
@@ -2354,6 +2339,8 @@ SPT.mapLinesRenderer = function(plugin, config)
 			
 			var options = { legend: {data: legendData}, series: series };
 			
+			//从全部结果中取，以支持在附件数据集中定义地图名
+			var map = SPT.chartResultFirstNonEmptyOfSign(chart, chartResult, mapSignIndex);
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
@@ -2420,7 +2407,6 @@ SPT.mapFlylineRenderer = function(plugin, config)
 			var legendData = [];
 			var categoryNames = [];
 			var categoryDatasMap = {};
-			var map = null;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -2441,9 +2427,6 @@ SPT.mapFlylineRenderer = function(plugin, config)
 				
 				if(categoryField)
 					fieldMap = SPT.addCategoryToFieldMap(fieldMap, categoryField);
-				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let data = chart.resultMapDatas(result, fieldMap);
 				
@@ -2490,6 +2473,8 @@ SPT.mapFlylineRenderer = function(plugin, config)
 			
 			var options = { legend: {data: legendData}, series: series };
 			
+			//从全部结果中取，以支持在附件数据集中定义地图名
+			var map = SPT.chartResultFirstNonEmptyOfSign(chart, chartResult, mapSignIndex);
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
@@ -2547,7 +2532,6 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 			var seriesName = "";
 			var seriesData = [];
 			var dataRange = { min: null, max: null };
-			var map = null;
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -2559,9 +2543,6 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 				let longitudeField = chart.dataSetFieldOfSign(dataSetBind, 1);
 				let latitudeField = chart.dataSetFieldOfSign(dataSetBind, 2);
 				let valueField = chart.dataSetFieldOfSign(dataSetBind, 3);
-				
-				if(CF.isEmpty(map))
-					map = SPT.resultFirstNonEmptyValueOfSign(chart, dataSetBind, result, mapSignIndex);
 				
 				let data = chart.resultNameValueDatas(result, nameField, [ longitudeField, latitudeField, valueField ]);
 				SPT.originalDataOfResult(data, chart, result);
@@ -2590,6 +2571,8 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 			var options = { visualMap: { min: dataRange.min, max: dataRange.max }, series: series };
 			SPT.trimNumberRange(options.visualMap);
 			
+			//从全部结果中取，以支持在附件数据集中定义地图名
+			var map = SPT.chartResultFirstNonEmptyOfSign(chart, chartResult, mapSignIndex);
 			if(!CF.isEmpty(map))
 				options.geo = { map: map };
 			
@@ -7082,7 +7065,7 @@ SPT.findNonEmpty = function(array)
 	
 	for(var i=0; i<array.length; i++)
 	{
-		if(array[i] != null && array[i] != "")
+		if(!CF.isEmpty(array[i]))
 			return array[i];
 	}
 	
@@ -7279,14 +7262,41 @@ SPT.splitDataByCategory = function(data, categoryNames, categoryDatasMap, defaul
 /**
  * 从数据集结果中读取第一个不为空的数据标记数据值。
  */
-SPT.resultFirstNonEmptyValueOfSign = function(chart, dataSetBind, result, dataSign)
+SPT.dstResultFirstNonEmptyOfSign = function(chart, dataSetBind, result, dataSign)
 {
 	var field = chart.dataSetFieldOfSign(dataSetBind, dataSign);
 	
 	if(field)
 	{
-		var values = chart.resultColumnArrayDatas(result, field);
-		return SPT.findNonEmpty(values);
+		let datas = chart.resultDatas(result);
+		
+		for(let i=0; i<datas.length; i++)
+		{
+			let value = chart.resultDataRowCell(datas[i], field);
+			
+			if(!CF.isEmpty(value))
+				return value;
+		}
+	}
+	
+	return null;
+};
+
+/**
+ * 从图表结果中读取第一个不为空的数据标记数据值。
+ */
+SPT.chartResultFirstNonEmptyOfSign = function(chart, chartResult, dataSign)
+{
+	var dsbs = chart.dataSetBinds();
+	
+	for(let i=0; i<dsbs.length; i++)
+	{
+		let dsb = dsbs[i];
+		let result = chart.resultOf(chartResult, dsb);
+		let value = SPT.dstResultFirstNonEmptyOfSign(chart, dsb, result, dataSign);
+		
+		if(!CF.isEmpty(value))
+			return value;
 	}
 	
 	return null;

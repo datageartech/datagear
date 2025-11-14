@@ -3856,7 +3856,7 @@ chartProto.resultDataRowCell = function(rowObj, field)
 	if(!rowObj || !field)
 		return null;
 	
-	var name = (field.name || field);
+	var name = (field.name !== undefined ? field.name : field);
 	return rowObj[name];
 };
 
