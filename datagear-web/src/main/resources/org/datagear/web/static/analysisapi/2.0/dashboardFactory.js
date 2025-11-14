@@ -473,13 +473,13 @@ chartProto._initUpdateGroup = function()
  *   //可选，联动目标图表元素ID、ID数组
  *   target: "..."、["...", ...],
  * 	 
- * 	 //可选，下述【数据属性名】的统一前缀，末尾无需带'.'字符
- * 	 propPrefix: "...",
+ * 	 //可选，原始联动源数据（由图表渲染器的linkDataHander所决定）的属性路径，作为下述【数据属性名】的统一根属性名
+ * 	 root: "...",
  *   
  *   //可选，联动数据参数映射表
  *   data:
  *   {
- *     //数据属性名：图表渲染器的linkDataHander所决定的联动源数据的属性访问路径，比如："name"、"data.value"、"[0].name"
+ *     //数据属性名：图表渲染器的linkDataHander所决定的联动源数据（受root配置影响）的属性路径（比如："name"、"data.value"、"[0].name"），其值将作为目标图表数据集参数值
  *     //图表数据集参数索引对象：格式同dashboard._batchSetDataSetParamValues()函数的图表数据集参数索引对象
  *     "数据属性名" : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  *     ...
@@ -2384,8 +2384,8 @@ dashboardProto._addLoadedChart = function(chart)
  * 					  //可选，要设置的目标图表元素ID、图表ID、看板图表数组索引，或者它们的数组
  * 					  target: "..."、["...", ...],
  * 					  
- * 					  //可选，下述【源数据属性名】的统一前缀，末尾无需带'.'字符
- * 					  propPrefix: "...",
+ * 					  //可选，下述【源数据属性名】的统一根前缀，末尾无需带'.'字符
+ * 					  root: "...",
  * 					  
  * 					  //可选，要设置的参数值映射表，没有则不设置任何参数值
  * 					  data:
@@ -2438,7 +2438,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 	
 	for(let name in dataMap)
 	{
-		let propertyPath = CF.concatPropertyPath(batchSet.propPrefix, name);
+		let propertyPath = (CF.isEmpty(batchSet.root) ? name : CF.concatPropertyPath(batchSet.root, name));
 		let dataValue = null;
 		
 		if(hasGetValueFunc)
