@@ -117,8 +117,18 @@
 .dg-chart-table .dg-chart-table-content table.dataTable thead th,
 .dg-chart-table .dg-chart-table-content table.dataTable thead td,
 .dg-chart-table .dg-chart-table-content table.dataTable tbody th,
-.dg-chart-table .dg-chart-table-content table.dataTable tbody td{
+.dg-chart-table .dg-chart-table-content table.dataTable tbody td,
+.dg-chart-table .dg-chart-table-content table.dataTable tfoot th,
+.dg-chart-table .dg-chart-table-content table.dataTable tfoot td{
 	text-align: left;
+}
+.dg-chart-table .dg-chart-table-content table.dataTable thead tr>.dtfc-fixed-start,
+.dg-chart-table .dg-chart-table-content table.dataTable thead tr>.dtfc-fixed-end,
+.dg-chart-table .dg-chart-table-content table.dataTable tfoot tr>.dtfc-fixed-start,
+.dg-chart-table .dg-chart-table-content table.dataTable tfoot tr>.dtfc-fixed-end,
+.dg-chart-table .dg-chart-table-content table.dataTable tbody tr>.dtfc-fixed-start,
+.dg-chart-table .dg-chart-table-content table.dataTable tbody tr>.dtfc-fixed-end{
+	background-color: inherit;
 }
 .dg-chart-table .dg-chart-table-content table.dataTable>tbody>tr.selected>*,
 .dg-chart-table .dg-chart-table-content table.dataTable.hover>tbody>tr.selected:hover>*,

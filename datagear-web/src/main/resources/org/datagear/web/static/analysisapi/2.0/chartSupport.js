@@ -5557,8 +5557,7 @@ SPT.tableRenderer = function(plugin, config)
 							"color": theme.color,
 							//必须设置背景色，不然会是组件默认背景色无法适配图表主题
 							"background-color": rowBgColor
-						},
-						cell: {}
+						}
 					},
 					body:
 					{
@@ -5586,35 +5585,33 @@ SPT.tableRenderer = function(plugin, config)
 						{
 							"color": theme.color,
 							"background-color": chart.themeGradualColor(0.3)
-						},
-						cell: {},
-						cellOdd: {},
-						cellEven: {},
-						cellHover: {},
-						cellSelected:
+						}
+					},
+					foot:
+					{
+						row:
 						{
 							"color": theme.color,
-							"background-color": chart.themeGradualColor(0.3)
+							//必须设置背景色，不然会是组件默认背景色无法适配图表主题
+							"background-color": rowBgColor
 						}
-					}
+					},
 				};
 				
 				if(isLocalStyle)
 				{
-					let optionTableStyle = options.tableStyle;
+					let optionTableStyle = CF.extend(true, {}, options.tableStyle);
+					if(optionTableStyle.body && optionTableStyle.body.row)
+					{
+						if(optionTableStyle.body.rowOdd == null)
+							optionTableStyle.body.rowOdd = CF.extend(true, {}, optionTableStyle.body.row);
+						
+						if(optionTableStyle.body.rowEven == null)
+							optionTableStyle.body.rowEven = CF.extend(true, {}, optionTableStyle.body.row);
+					}
+					
 					tableStyle = CF.extend(true, tableStyle, optionTableStyle);
 				}
-				
-				//DataTable-1.11.3内置表头背景CSS添加了"!important"，这里也必须添加才能起作用
-				this._copyStyleBackground(tableStyle.head.row, tableStyle.head.row, true, true);
-				
-				//DataTable-1.11.3的固定列采用的sticky特性，导致单元格必须设置背景不然会变透明
-				this._copyStyleBackground(tableStyle.head.row, tableStyle.head.cell, false, true);
-				this._copyStyleBackground(tableStyle.body.row, tableStyle.body.cell);
-				this._copyStyleBackground(tableStyle.body.rowOdd, tableStyle.body.cellOdd);
-				this._copyStyleBackground(tableStyle.body.rowEven, tableStyle.body.cellEven);
-				this._copyStyleBackground(tableStyle.body.rowHover, tableStyle.body.cellHover);
-				this._copyStyleBackground(tableStyle.body.rowSelected, tableStyle.body.cellSelected);
 				
 				//样式应加".dg-chart-table-content"限定
 				var qualifier = (isLocalStyle ? "." + name : "") + " .dg-chart-table-content";
@@ -5634,48 +5631,20 @@ SPT.tableRenderer = function(plugin, config)
 						value: CF.styleString(tableStyle.head.row)
 					},
 					{
-						name:
-						[
-							qualifier + " table.dataTable thead tr th",
-							qualifier + " table.dataTable thead tr td"
-						],
-						value: CF.styleString(tableStyle.head.cell)
+						name: qualifier + " table.dataTable tfoot tr",
+						value: CF.styleString(tableStyle.foot.row)
 					},
 					{
 						name: qualifier + " table.dataTable tbody tr",
 						value: CF.styleString(tableStyle.body.row)
 					},
 					{
-						name: qualifier + " table.dataTable tbody tr td",
-						value: CF.styleString(tableStyle.body.cell)
-					},
-					{
-						name:
-						[
-							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)"
-						],
+						name: qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)",
 						value: CF.styleString(tableStyle.body.rowOdd)
 					},
 					{
-						name:
-						[
-							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd)>*"
-						],
-						value: CF.styleString(tableStyle.body.cellOdd)
-					},
-					{
-						name:
-						[
-							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)"
-						],
+						name: qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)",
 						value: CF.styleString(tableStyle.body.rowEven)
-					},
-					{
-						name:
-						[
-							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even)>*"
-						],
-						value: CF.styleString(tableStyle.body.cellEven)
 					},
 					{
 						name:
@@ -5685,15 +5654,6 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover"
 						],
 						value: CF.styleString(tableStyle.body.rowHover)
-					},
-					{
-						name:
-						[
-							qualifier + " table.dataTable.hover tbody tr:hover td",
-							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover>*",
-							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover>*",
-						],
-						value: CF.styleString(tableStyle.body.cellHover)
 					},
 					{
 						name:
@@ -5711,35 +5671,11 @@ SPT.tableRenderer = function(plugin, config)
 						value: CF.styleString(tableStyle.body.rowSelected)
 					},
 					{
-						name:
-						[
-							qualifier + " table.dataTable tbody tr.selected td",
-							qualifier + " table.dataTable.stripe tbody tr.odd.selected td",
-							qualifier + " table.dataTable.stripe tbody tr.even.selected td",
-							qualifier + " table.dataTable.hover tbody tr:hover.selected td",
-							qualifier + " table.dataTable>tbody>tr.selected>*",
-							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(odd).selected>*",
-							qualifier + " table.dataTable.display>tbody>tr:nth-child(odd).selected>*",
-							qualifier + " table.dataTable.stripe>tbody>tr:nth-child(even).selected>*",
-							qualifier + " table.dataTable.display>tbody>tr:nth-child(even).selected>*",
-							qualifier + " table.dataTable.hover tbody tr:hover.selected td",
-							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(odd):hover.selected>*",
-							qualifier + " table.dataTable.hover.stripe>tbody>tr:nth-child(even):hover.selected>*",
-						],
-						value: CF.styleString(tableStyle.body.cellSelected)
-					},
-					{
-						name:
-						[
-							qualifier + " .dt-container .dt-length select"
-						],
+						name: qualifier + " .dt-container .dt-length select",
 						value: { color: theme.color }
 					},
 					{
-						name:
-						[
-							qualifier + " .dt-container .dt-length select option"
-						],
+						name: qualifier + " .dt-container .dt-length select option",
 						value: { color: theme.color, "background-color": chart.themeGradualColor(0) }
 					},
 					{
@@ -5801,18 +5737,6 @@ SPT.tableRenderer = function(plugin, config)
 				return css;
 			},
 			forceUpdate);
-		},
-		
-		_copyStyleBackground: function(from, to, force, important)
-		{
-			force = (force == null ? false : force);
-			important = (important == null ? false : important);
-			
-			if(from["background-color"] && (force || !to["background-color"]))
-				to["background-color"] = (important ? SPT.cssValueImportant(from["background-color"]) : from["background-color"]);
-			
-			if(from["background"] && (force || !to["background"]))
-				to["background"] = (important ? SPT.cssValueImportant(from["background"]) : from["background"]);
 		},
 		
 		_updateInternalData: function(chart, chartResult, updateOptions)
@@ -7300,19 +7224,6 @@ SPT.chartResultFirstNonEmptyOfSign = function(chart, chartResult, dataSign)
 	}
 	
 	return null;
-};
-
-SPT.cssValueImportant = function(cssValue)
-{
-	if(!cssValue)
-		return cssValue;
-	
-	cssValue = (typeof(cssValue) == "string" ? cssValue : cssValue.toString());
-	
-	if(cssValue.indexOf("!important") < 0)
-		cssValue += " !important";
-	
-	return cssValue;
 };
 
 SPT.addCategoryToFieldMap = function(fieldMap, categoryField, categoryName)
