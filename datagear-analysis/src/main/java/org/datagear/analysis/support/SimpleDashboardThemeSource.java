@@ -74,13 +74,6 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 							"#5AB1EF", "#95706D", "#DC69AA" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }));
 
-	static
-	{
-		THEME_LIGHT.getChartTheme().setGradient(20);
-		THEME_DARK.getChartTheme().setGradient(20);
-		THEME_GREEN.getChartTheme().setGradient(20);
-	}
-
 	private List<DashboardTheme> dashboardThemes;
 
 	public SimpleDashboardThemeSource()

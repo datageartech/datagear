@@ -881,27 +881,9 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	{
 		if (theme != null)
 		{
-			String borderWidth = theme.getBorderWidth();
-			if (StringUtil.isEmpty(borderWidth))
-				borderWidth = "0";
-
 			out.write("  color: " + theme.getColor() + ";");
 			writeNewLine(out);
 			out.write("  background-color: " + theme.getBackgroundColor() + ";");
-
-			if (theme.hasBorderColor())
-			{
-				writeNewLine(out);
-				out.write("  border-color: " + theme.getBorderColor() + ";");
-			}
-
-			if (theme.hasBorderWidth())
-			{
-				writeNewLine(out);
-				out.write("  border-width: " + borderWidth + ";");
-				writeNewLine(out);
-				out.write("  border-style: solid;");
-			}
 
 			writeNewLine(out);
 		}

@@ -1767,7 +1767,7 @@
 		{
 			var color = chart.themeGradualColor(1);
 			var bgColor = chart.themeGradualColor(-1);
-			var titleBg = chart.themeGradualColor(0);
+			var titleBg = chart.themeGradualColor(0.05);
 			var btnBg = chart.themeGradualColor(0.1);
 			var btnBorderColor = chart.themeGradualColor(0.5);
 			var btnHoverBg = chart.themeGradualColor(0.2);

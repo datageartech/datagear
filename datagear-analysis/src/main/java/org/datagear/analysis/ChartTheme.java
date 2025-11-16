@@ -23,7 +23,7 @@ import java.util.Arrays;
  * 图表主题。
  * <p>
  * {@linkplain #getTitleTheme()}、{@linkplain #getLegendTheme()}、{@linkplain #getTooltipTheme()}、{@linkplain #getHighlightTheme()}不是必填的，
- * 它们可以由展现界面根据{@linkplain #getColor()}、{@linkplain #getActualBackgroundColor()}配合{@linkplain #getGradient()}自动生成。
+ * 它们可以由展现界面根据{@linkplain #getColor()}、{@linkplain #getActualBackgroundColor()}自动生成。
  * </p>
  * <p>
  * 此类可为在看板内绘制统一主题的多个图表提供支持。
@@ -47,9 +47,6 @@ public class ChartTheme extends Theme
 
 	/** 值域映射范围图形条目颜色 */
 	private String[] graphRangeColors;
-
-	/** 背景色至前景色的渐变跨度 */
-	private int gradient = 10;
 
 	/** 标题主题 */
 	private Theme titleTheme = null;
@@ -132,16 +129,6 @@ public class ChartTheme extends Theme
 		this.graphRangeColors = graphRangeColors;
 	}
 
-	public int getGradient()
-	{
-		return gradient;
-	}
-
-	public void setGradient(int gradient)
-	{
-		this.gradient = gradient;
-	}
-
 	public boolean hasTitleTheme()
 	{
 		return (this.titleTheme != null);
@@ -206,10 +193,9 @@ public class ChartTheme extends Theme
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", color=" + getColor() + ", backgroundColor="
-				+ getBackgroundColor() + ", borderColor=" + getBorderColor() + ", borderWidth="
-				+ getBorderWidth() + ", fontSize=" + getFontSize() + ", actualBackgroundColor="
+				+ getBackgroundColor() + ", fontSize=" + getFontSize() + ", actualBackgroundColor="
 				+ actualBackgroundColor + ", graphColors=" + Arrays.toString(graphColors) + ", graphRangeColors="
-				+ Arrays.toString(graphRangeColors) + ", gradient=" + gradient + ", titleTheme=" + titleTheme
+				+ Arrays.toString(graphRangeColors) + ", titleTheme=" + titleTheme
 				+ ", legendTheme=" + legendTheme + ", tooltipTheme=" + tooltipTheme + ", highlightTheme="
 				+ highlightTheme + "]";
 	}

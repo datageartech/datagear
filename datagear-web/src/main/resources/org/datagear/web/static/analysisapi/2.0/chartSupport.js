@@ -4155,8 +4155,8 @@ SPT.liquidfillRenderer = function(plugin, config)
 						{
 							itemStyle:
 							{
-								borderColor: chartTheme.borderColor,
-								shadowColor: chart.themeGradualColor(0.4)
+								borderColor: chart.themeGradualColor(0.3),
+								shadowColor: chart.themeGradualColor(0.3)
 							}
 						},
 						label:
@@ -5545,7 +5545,8 @@ SPT.tableRenderer = function(plugin, config)
 				var theme = chart.theme();
 				
 				var rowBgColor ="rgba(0,0,0,0)";
-				var rowOddBgColor = chart.themeGradualColor(0.5) + "09";
+				var rowOddBgColor = chart.themeGradualColor(0.5) + "0F";
+				var borderColor = chart.themeGradualColor(0.4);
 				
 				var tableStyle =
 				{
@@ -5697,7 +5698,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " div.dt-container .dt-paging .dt-paging-button.current:hover",
 							qualifier + " div.dt-container .dt-input"
 						],
-						value: { "border-color": theme.borderColor }
+						value: { "border-color": borderColor }
 					},
 					{
 						name:
@@ -5705,7 +5706,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " div.dt-container div.dt-buttons>.dt-button",
 							qualifier + " div.dt-container div.dt-buttons>div.dt-button-split .dt-button"
 						],
-						value: { "border-color": theme.borderColor }
+						value: { "border-color": borderColor }
 					},
 					{
 						name:
@@ -5713,7 +5714,7 @@ SPT.tableRenderer = function(plugin, config)
 							qualifier + " div.dt-container div.dt-buttons>.dt-button:focus:not(.disabled)",
 							qualifier + " div.dt-container div.dt-buttons>div.dt-button-split .dt-button:focus:not(.disabled)"
 						],
-						value: { "outline": "2px solid " + theme.borderColor }
+						value: { "outline": "2px solid " + borderColor }
 					}
 				];
 				
@@ -6460,7 +6461,7 @@ SPT.selectRenderer = function(plugin, config)
 						{
 							"color": theme.color,
 							"background-color": theme.backgroundColor,
-							"border-color": theme.borderColor,
+							"border-color": chart.themeGradualColor(0.4),
 							"font-size": CF.toCssFontSize(theme.fontSize)
 						}
 					},
@@ -7702,6 +7703,7 @@ EU.off = function(chart, eventType, handler)
  */
 EU._buildEchartsTheme = function(chart)
 {
+	var borderColor = chart.themeGradualColor(0.3);
 	var axisColor = chart.themeGradualColor(0.7);
 	var axisScaleLineColor = chart.themeGradualColor(0.35);
 	var areaColor0 = chart.themeGradualColor(0.1);
@@ -7749,41 +7751,41 @@ EU._buildEchartsTheme = function(chart)
 			"smooth" : false
 		},
 		"bar": {
-			"itemStyle" : { "barBorderWidth" : 0, "barBorderColor" : chartTheme.borderColor },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor },
 			"label": { "color": chartTheme.color },
 			"emphasis" : {
 				"itemStyle" : {
-					"barBorderWidth" : 0, "barBorderColor" : chartTheme.borderColor,
+					"borderWidth" : 0, "borderColor" : borderColor,
 					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor, "shadowOffsetY" : 0
 				}
 			}
 		},
 		"pie" : {
-			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor },
 			"label": { "color": chartTheme.color },
 			"emphasis" : {
 				"itemStyle": {
 					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor,
-					"borderWidth" : 0, "borderColor" : chartTheme.borderColor
+					"borderWidth" : 0, "borderColor" : borderColor
 				}
 			},
 			"emptyCircleStyle": { "color": emptyAreaColor, "borderColor": emptyBorderColor }
 		},
 		"scatter" : {
-			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 0, "shadowColor" : shadowColor },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor, "shadowBlur" : 0, "shadowColor" : shadowColor },
 			"label": { "color": chartTheme.color },
 			"emphasis" : {
 				"itemStyle" : {
-					"borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 10,
+					"borderWidth" : 0, "borderColor" : borderColor, "shadowBlur" : 10,
 					"shadowOffsetX" : 0, "shadowColor" : shadowColor
 				}
 			}
 		},
 		"effectScatter": {
-			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 0, "shadowColor" : shadowColor },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor, "shadowBlur" : 0, "shadowColor" : shadowColor },
 			"emphasis" : {
 				"itemStyle" : {
-					"borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 10, "shadowOffsetX" : 0,
+					"borderWidth" : 0, "borderColor" : borderColor, "shadowBlur" : 10, "shadowOffsetX" : 0,
 					"shadowColor" : shadowColor
 				}
 			}
@@ -7799,10 +7801,10 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"sankey" : {
 			"label": { "color": chartTheme.color },
-			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor },
 			"lineStyle": { "color": areaColor1, "opacity": 1 },
 			"emphasis" : {
-				"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor },
+				"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor },
 				"lineStyle": { "color": axisColor, "opacity": 0.6 },
 				"focus": "adjacency"
 			}
@@ -7811,12 +7813,12 @@ EU._buildEchartsTheme = function(chart)
 			"left": "10%", "top": "20%", "right": "10%", "bottom": "10%",
             "minSize": "0%", "maxSize": "100%",
 			"label" : { "color" : chartTheme.color, "show": true, "position": "inside" },
-			"itemStyle" : { "borderColor" : chartTheme.borderColor, "borderWidth" : 0 },
+			"itemStyle" : { "borderColor" : borderColor, "borderWidth" : 0 },
 			"emphasis" : {
 				"label" : { "fontSize" : 20 },
 				"itemStyle" : {
 					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor, "borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
+					"borderColor" : borderColor
 				}
 			}
 		},
@@ -7830,11 +7832,11 @@ EU._buildEchartsTheme = function(chart)
 			"axisLabel": { "color" : axisColor },
 			"splitLine": { "lineStyle": { "color": chartTheme.actualBackgroundColor } },
 			"axisTick": { "lineStyle": { "color": chartTheme.actualBackgroundColor } },
-			"itemStyle" : { "borderColor" : chartTheme.borderColor, "borderWidth" : 0 },
+			"itemStyle" : { "borderColor" : borderColor, "borderWidth" : 0 },
 			"emphasis" : {
 				"itemStyle" : {
 					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor,
-					"borderWidth" : 0, "borderColor" : chartTheme.borderColor
+					"borderWidth" : 0, "borderColor" : borderColor
 				}
 			}
 		},
@@ -7860,31 +7862,31 @@ EU._buildEchartsTheme = function(chart)
 			"emphasis" : {
 				"itemStyle" : {
 					"shadowBlur" : 10, "shadowOffsetX" : 0, "shadowColor" : shadowColor,
-					"borderWidth" : 0, "borderColor" : chartTheme.borderColor
+					"borderWidth" : 0, "borderColor" : borderColor
 				}
 			},
 			"breadcrumb": {
 				//ECharts-6.0中默认的top没有起作用，需要这里明确设置
 				"top": "bottom",
 				"itemStyle": {
-					"color": chartTheme.backgroundColor, "borderColor": chartTheme.borderColor,
+					"color": chartTheme.backgroundColor, "borderColor": borderColor,
 					"shadowBlur": 0, "textStyle": { color: chartTheme.color }
 				}
 			}
 		},
 		"sunburst": {
 			"itemStyle" : { "borderWidth" : 1, "borderColor" : chartTheme.backgroundColor },
-			"emphasis" : { "itemStyle" : { "shadowBlur" : 10, "shadowColor" : shadowColor, "borderColor" : chartTheme.borderColor } }
+			"emphasis" : { "itemStyle" : { "shadowBlur" : 10, "shadowColor" : shadowColor, "borderColor" : borderColor } }
 		},
 		"graph" :
 		{
 			"left": "10%", "right": "10%", "top": "20%", "bottom": "10%", "roam": true,
-			"itemStyle" : { "borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 2, "shadowColor" : shadowColor },
+			"itemStyle" : { "borderWidth" : 0, "borderColor" : borderColor, "shadowBlur" : 2, "shadowColor" : shadowColor },
 			"lineStyle" : { "width": 2, "color": "source", "curveness": 0.3 },
 			"label" : { "color" : chartTheme.color },
 			"emphasis" : {
 				"itemStyle" : {
-					"borderWidth" : 0, "borderColor" : chartTheme.borderColor, "shadowBlur" : 10,
+					"borderWidth" : 0, "borderColor" : borderColor, "shadowBlur" : 10,
 					"shadowOffsetX" : 0, "shadowColor" : shadowColor
 				},
 				"lineStyle" : { "width": 5 },
@@ -7901,7 +7903,7 @@ EU._buildEchartsTheme = function(chart)
 				"label": { "color" : chartTheme.highlightTheme.color },
 				"itemStyle": {
 					"areaColor" : chartTheme.highlightTheme.backgroundColor,
-					"borderColor" : chartTheme.highlightTheme.borderColor,
+					"borderColor" : chart.themeGradualColor(chartTheme.highlightTheme, 0.3),
 					"borderWidth" : 1
 				}
 			}
@@ -7918,7 +7920,7 @@ EU._buildEchartsTheme = function(chart)
 				"label": { "color" : chartTheme.highlightTheme.color },
 				"itemStyle": {
 					"areaColor" : chartTheme.highlightTheme.backgroundColor,
-					"borderColor" : chartTheme.highlightTheme.borderColor,
+					"borderColor" : chart.themeGradualColor(chartTheme.highlightTheme, 0.3),
 					"borderWidth" : 1
 				}
 			}
@@ -7960,7 +7962,7 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"singleAxis": { "left": "10%", "top": "20%", "right": "10%", "bottom": "10%" },
 		"toolbox" : {
-			"iconStyle" : { "borderColor" : chartTheme.borderColor },
+			"iconStyle" : { "borderColor" : borderColor },
 			"emphasis" : { "iconStyle" : { "borderColor" : axisColor } }
 		},
 		"grid": { "left": "10%", "right": "10%", "top": "20%", "bottom": "10%", "containLabel": true },
@@ -7974,8 +7976,8 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"tooltip" : {
 			"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
-			"borderColor" : chartTheme.tooltipTheme.borderColor,
-			"borderWidth" : chartTheme.tooltipTheme.borderWidth,
+			"borderColor" : chart.themeGradualColor(chartTheme.tooltipTheme, 0.3),
+			"borderWidth" : 1,
 			"textStyle" : { color: chartTheme.tooltipTheme.color },
 			"axisPointer" : {
 				"lineStyle" : { "color" : axisColor, "width" : 1 },
@@ -7985,15 +7987,15 @@ EU._buildEchartsTheme = function(chart)
 		"timeline" : {
 			"lineStyle" : { "color" : axisColor, "width" : 1 },
 			"itemStyle" : { "color" : chartTheme.color, "borderWidth" : 1 },
-			"controlStyle" : { "color" : chartTheme.color, "borderColor" : chartTheme.borderColor, "borderWidth" : 0.5 },
+			"controlStyle" : { "color" : chartTheme.color, "borderColor" : borderColor, "borderWidth" : 0.5 },
 			"checkpointStyle" : {
 				"color" : chartTheme.highlightTheme.backgroundColor,
-				"borderColor" : chartTheme.highlightTheme.borderColor
+				"borderColor" : chart.themeGradualColor(chartTheme.tooltipTheme, 0.3)
 			},
 			"label" : { "color" : axisColor },
 			"emphasis" : {
 				"itemStyle" : { "color" : chartTheme.color },
-				"controlStyle" : { "color" : chartTheme.color, "borderColor" : chartTheme.borderColor, "borderWidth" : 0.5 },
+				"controlStyle" : { "color" : chartTheme.color, "borderColor" : borderColor, "borderWidth" : 0.5 },
 				"label" : { "color" : chartTheme.color }
 			}
 		},

@@ -38,12 +38,6 @@ public class Theme implements NameAware, Serializable
 	/** 背景色 */
 	private String backgroundColor;
 
-	/** 边框颜色 */
-	private String borderColor = "";
-
-	/** 边框宽度 */
-	private String borderWidth = "";
-
 	/** 字体尺寸 */
 	private String fontSize = "";
 
@@ -96,36 +90,6 @@ public class Theme implements NameAware, Serializable
 		this.backgroundColor = backgroundColor;
 	}
 
-	public boolean hasBorderColor()
-	{
-		return (this.borderColor != null && !this.borderColor.isEmpty());
-	}
-
-	public String getBorderColor()
-	{
-		return borderColor;
-	}
-
-	public void setBorderColor(String borderColor)
-	{
-		this.borderColor = borderColor;
-	}
-
-	public boolean hasBorderWidth()
-	{
-		return (this.borderWidth != null && !this.borderWidth.isEmpty());
-	}
-
-	public String getBorderWidth()
-	{
-		return borderWidth;
-	}
-
-	public void setBorderWidth(String borderWidth)
-	{
-		this.borderWidth = borderWidth;
-	}
-
 	public boolean hasFontSize()
 	{
 		return (this.fontSize != null && !this.fontSize.isEmpty());
@@ -145,7 +109,6 @@ public class Theme implements NameAware, Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", color=" + color + ", backgroundColor="
-				+ backgroundColor + ", borderColor="
-				+ borderColor + ", borderWidth=" + borderWidth + ", fontSize=" + fontSize + "]";
+				+ backgroundColor + ", fontSize=" + fontSize + "]";
 	}
 }

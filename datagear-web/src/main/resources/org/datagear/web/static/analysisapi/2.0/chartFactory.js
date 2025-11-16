@@ -1128,7 +1128,6 @@ chartProto._createChartThemeCssIfNon = function()
 				{
 					"color": theme.color,
 					"background-color": theme.backgroundColor,
-					"border-color": theme.borderColor,
 					"font-size": CF.toCssFontSize(theme.fontSize)
 				}
 			},
@@ -1170,20 +1169,6 @@ chartProto._createChartThemeCssIfNon = function()
 				}
 			}
 		];
-		
-		if(theme.borderWidth)
-		{
-			//边框宽度和样式应该限定图表元素本身，而非其它也使用了相同样式类名的元素
-			css.push(
-			{
-				name: "."+CF.CHART_STYLE_NAME_FOR_INDICATION,
-				value:
-				{
-					"border-width": theme.borderWidth,
-					"border-style": "solid"
-				}
-			});
-		}
 		
 		return css;
 	});
@@ -3029,16 +3014,25 @@ chartProto.statusInited = function(set)
 
 /**
  * 获取此图表的图表主题指定渐变因子的颜色。
- * 这个颜色是图表主题的实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
+ * 这个颜色是图表主题的背景色（actualBackgroundColor、backgroundColor）与前景色（color）之间的某个颜色。
+ * 此函数支持的调用格式：
+ * chart.themeGradualColor(factor);
+ * chart.themeGradualColor(theme, factor);
  * 
  * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
  * 
- * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
- * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
+ * @param theme 可选，主题对象，默认为：this.theme()
+ * @param factor 渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
+ * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"
  */
-chartProto.themeGradualColor = function(factor)
+chartProto.themeGradualColor = function(theme, factor)
 {
-	var theme = this.theme();
+	if(factor === undefined)
+	{
+		factor = theme;
+		theme = this.theme();
+	}
+	
 	return CF.themeGradualColor(theme, factor);
 };
 
@@ -5188,20 +5182,21 @@ CF.concatPropertyPath = function(prefixPath, propertyPath)
 var THEME_GRADUAL_COLORS_NAME = CF.BUILTIN_PROP_PREFIX + "GradualColors";
 
 /**
- * 获取主题从背景色（actualBackgroundColor）到前景色（color）之间的渐变因子对应的颜色。
- * 这个颜色是实际背景色（actualBackgroundColor）与前景色（color）之间的某个颜色。
+ * 获取主题从背景色（actualBackgroundColor、backgroundColor）到前景色（color）之间的渐变因子对应的颜色。
+ * 这个颜色是背景色（actualBackgroundColor、backgroundColor）与前景色（color）之间的某个颜色。
  * 
  * @param theme 主题对象，格式为：{ color: "...", actualBackgroundColor: "..." }
- * @param factor 可选，渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色，小于0表示返回实际背景色，大于1表示返回前景色
- * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"，如果未设置factor，将返回一个包含所有渐变颜色的数组
+ * @param factor 渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色，小于0表示返回实际背景色，大于1表示返回前景色
+ * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"
  */
 CF.themeGradualColor = function(theme, factor)
 {
+	var bgColor = (!CF.isEmpty(theme.actualBackgroundColor) ? theme.actualBackgroundColor : theme.backgroundColor);
 	var gcs = theme[THEME_GRADUAL_COLORS_NAME];
 	
 	if(!gcs || gcs.length == 0)
 	{
-		gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, (theme.gradient || 20));
+		gcs = this.evalGradualColors(bgColor, theme.color, 50);
 		theme[THEME_GRADUAL_COLORS_NAME] = gcs;
 	}
 	
@@ -5212,7 +5207,7 @@ CF.themeGradualColor = function(theme, factor)
 	else
 	{
 		if(factor < 0)
-			return theme.actualBackgroundColor;
+			return bgColor;
 		else if(factor > 1)
 			return theme.color;
 		else
@@ -5998,18 +5993,21 @@ CF.inflateGlobalChartTheme = function(theme)
 	//默认值
 	if(!theme.name)
 		theme.name = "chartTheme";
+	
 	if(!theme.color)
 		theme.color = "#333";
+	
 	//默认背景色应设为"transparent"，使得图表背景由其所在元素决定
 	if(!theme.backgroundColor)
 		theme.backgroundColor = "transparent";
+	
 	if(!theme.actualBackgroundColor)
 		theme.actualBackgroundColor = "#FFF";
-	if(!theme.gradient)
-		theme.gradient = 20;
+	
 	if(!theme.graphColors || theme.graphColors.length == 0)
 		theme.graphColors = ["#5470C6", "#91CC75", "#FAC858", "#EE6666", "#73C0DE", "#3BA272", "#FC8452",
 						"#9A60B4", "#EA7CCC", "#B6A2DE"];
+	
 	if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
 		theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
 	
@@ -6071,16 +6069,11 @@ CF.inflateChartTheme = function(theme)
 	
 	if(theme.color && theme.actualBackgroundColor)
 	{
-		if(!theme.borderColor)
-			theme.borderColor = CF.themeGradualColor(theme, 0.3);
-		
 		var titleThemeGen =
 		{
 			name: "titleTheme",
 			color: theme.color,
-			backgroundColor: "transparent",
-			borderColor: theme.borderColor,
-			borderWidth: 0
+			backgroundColor: "transparent"
 		};
 		
 		theme.titleTheme = (!theme.titleTheme ? titleThemeGen : CF.extend(true, titleThemeGen, theme.titleTheme));
@@ -6089,9 +6082,7 @@ CF.inflateChartTheme = function(theme)
 		{
 			name: "legendTheme",
 			color: CF.themeGradualColor(theme, 0.9),
-			backgroundColor: "transparent",
-			borderColor: theme.borderColor,
-			borderWidth: 0
+			backgroundColor: "transparent"
 		};
 		
 		theme.legendTheme = (!theme.legendTheme ? legendThemeGen : CF.extend(true, legendThemeGen, theme.legendTheme));
@@ -6100,9 +6091,7 @@ CF.inflateChartTheme = function(theme)
 		{
 			name: "tooltipTheme",
 			color: theme.actualBackgroundColor,
-			backgroundColor: CF.themeGradualColor(theme, 0.7),
-			borderColor: CF.themeGradualColor(theme, 0.9),
-			borderWidth: 1
+			backgroundColor: CF.themeGradualColor(theme, 0.7)
 		};
 		
 		theme.tooltipTheme = (!theme.tooltipTheme ? tooltipThemeGen : CF.extend(true, tooltipThemeGen, theme.tooltipTheme));
@@ -6111,9 +6100,7 @@ CF.inflateChartTheme = function(theme)
 		{
 			name: "highlightTheme",
 			color: theme.actualBackgroundColor,
-			backgroundColor: CF.themeGradualColor(theme, 0.8),
-			borderColor: CF.themeGradualColor(theme, 1),
-			borderWidth: 1
+			backgroundColor: CF.themeGradualColor(theme, 0.8)
 		};
 		
 		theme.highlightTheme = (!theme.highlightTheme ? highlightThemeGen : CF.extend(true, highlightThemeGen, theme.highlightTheme));
@@ -6124,9 +6111,7 @@ CF.inflateChartTheme = function(theme)
 		{
 			name: "titleTheme",
 			color: theme.color,
-			backgroundColor: "transparent",
-			borderColor: theme.borderColor,
-			borderWidth: 0
+			backgroundColor: "transparent"
 		};
 		
 		theme.titleTheme = (!theme.titleTheme ? titleThemeGen : CF.extend(true, titleThemeGen, theme.titleTheme));
@@ -6135,9 +6120,7 @@ CF.inflateChartTheme = function(theme)
 		{
 			name: "legendTheme",
 			color: theme.color,
-			backgroundColor: "transparent",
-			borderColor: theme.borderColor,
-			borderWidth: 0
+			backgroundColor: "transparent"
 		};
 		
 		theme.legendTheme = (!theme.legendTheme ? legendThemeGen : CF.extend(true, legendThemeGen, theme.legendTheme));
@@ -6161,9 +6144,6 @@ CF.inflateChartTheme = function(theme)
 		if(!theme.highlightTheme.fontSize)
 			theme.highlightTheme.fontSize = theme.fontSize;
 	}
-	
-	if(theme.borderWidth && !theme.borderStyle)
-		theme.borderStyle = "solid";
 };
 
 /**

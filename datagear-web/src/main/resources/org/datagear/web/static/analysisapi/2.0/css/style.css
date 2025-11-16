@@ -138,6 +138,7 @@
 .dg-chart-table .dg-chart-table-content table.dataTable.stripe>tbody>tr:nth-child(odd)>*,
 .dg-chart-table .dg-chart-table-content table.dataTable.display>tbody>tr:nth-child(odd)>*{
 	box-shadow: none !important;
+	color: inherit;
 }
 .dg-chart-table .dg-chart-table-content div.dt-container .dt-buttons{
 	padding: 0.1em 0.2rem;
