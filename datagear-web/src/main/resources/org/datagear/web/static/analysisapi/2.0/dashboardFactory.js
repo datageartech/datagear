@@ -48,7 +48,7 @@
  * 
  * 此看板工厂扩展了图表渲染器格式：
  * {
- *   //图表联动源数据处理函数，默认值为：0
+ *   //图表联动源数据处理函数，默认值为：DF.resolveChartLinkData()函数
  *   //其中：
  *   //索引数值，表示图表事件处理函数对应索引数值的参数是联动源数据
  *   //图表事件处理函数，表示此函数的返回值是图表联动源数据，返回值格式应为：{ ... }、[ {...}, ... ]
@@ -594,14 +594,17 @@ chartProto.bindLinkEventHanders = function(links)
 	for(let i=0; i<triggers.length; i++)
 	{
 		let type = triggers[i];
-		//默认
-		let dataHandler = 0;
+		let dataHandler = null;
 		
 		if(renderer != null && renderer.linkDataHander != null)
 		{
 			dataHandler = (CF.isFunction(renderer.linkDataHander) ?
 							renderer.linkDataHander(type) : renderer.linkDataHander);
 		}
+		
+		//取默认
+		if(dataHandler == null)
+			dataHandler = DF.resolveChartLinkData;
 		
 		let handler = function()
 		{
@@ -2902,6 +2905,41 @@ dashboardProto.chartsIn = function(element, active)
 //----------------------------------------
 // Dashboard prototype end
 //----------------------------------------
+
+/**
+ * 从参数中解析图表联动源数据
+ */
+DF.resolveChartLinkData = function(event)
+{
+	var re = null;
+	
+	if(arguments.length === 0)
+	{
+		re = null;
+	}
+	else if(arguments.length === 1)
+	{
+		re = arguments[0];
+	}
+	else
+	{
+		for(let i=0; i<arguments.length; i++)
+		{
+			let arg = arguments[i];
+			
+			if(arg != null && typeof(arg) === "object")
+			{
+				re = arg;
+				break;
+			}
+		}
+		
+		if(re == null)
+			re = arguments[0];
+	}
+	
+	return re;
+};
 
 /**
  * 获取POST JSON的fetch选项
