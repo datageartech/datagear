@@ -59,11 +59,11 @@
  *   resize: function(chart){ ... },
  *   //可选，绑定图表事件处理函数
  *   //type 事件类型，比如："click"、"mouseover"等
- *   //handler 图表事件处理函数，格式为：function(chartEvent){ ... }
+ *   //handler 图表事件处理函数，格式为：function(...){ ... }
  *   on: function(chart, type, handler){ ... },
  *   //可选，解绑图表事件处理函数
  *   //type 事件类型
- *   //handler 图表事件处理函数，如果为undefined，应解绑所有此事件类型的处理函数
+ *   //handler 图表事件处理函数
  *   off: function(chart, type, handler){ ... },
  *   //可选，销毁图表函数
  *   destroy: function(chart){ ... },
@@ -1801,7 +1801,7 @@ chartProto.on = function(type, handler)
  * 图表渲染器应实现off函数，以支持此特性。
  * 
  * @param type 事件类型，格式同chart.on()函数type参数
- * @param handler 解绑的事件处理函数，如果不指定，则是解绑此事件类型的所有处理函数
+ * @param handler 解绑的事件处理函数，是否可选由底层图表渲染器决定
  */
 chartProto.off = function(type, handler)
 {

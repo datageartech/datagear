@@ -474,7 +474,7 @@ chartProto._initUpdateGroup = function()
  *   target: "..."、["...", ...],
  * 	 
  * 	 //可选，原始联动源数据（由图表渲染器的linkDataHander所决定）的属性路径，作为下述【数据属性名】的统一根属性名
- * 	 root: "...",
+ * 	 root: "..."、[ "...", ... ],
  *   
  *   //可选，联动数据参数映射表
  *   data:
@@ -2385,7 +2385,7 @@ dashboardProto._addLoadedChart = function(chart)
  * 					  target: "..."、["...", ...],
  * 					  
  * 					  //可选，下述【源数据属性名】的统一根前缀，末尾无需带'.'字符
- * 					  root: "...",
+ * 					  root: "..."、[ "...", ... ],
  * 					  
  * 					  //可选，要设置的参数值映射表，没有则不设置任何参数值
  * 					  data:
@@ -2432,26 +2432,34 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 	
 	var dataMap = (batchSet.data || {});
 	var hasGetValueFunc = CF.isFunction(sourceData.getValue);
+	var propPathRoots = (CF.isEmpty(batchSet.root) ? [""] : (CF.isArray(batchSet.root) ? batchSet.root : [ batchSet.root ]));
 	
 	var sourceValueContextArgs = [ "place-holder-for-source-value" ];
 	sourceValueContextArgs = sourceValueContextArgs.concat(CF.isArray(sourceValueContext) ? sourceValueContext : [ sourceValueContext ]);
 	
 	for(let name in dataMap)
 	{
-		let propertyPath = (CF.isEmpty(batchSet.root) ? name : CF.concatPropertyPath(batchSet.root, name));
 		let dataValue = null;
 		
-		if(hasGetValueFunc)
+		for(let i=0; i<propPathRoots.length; i++)
 		{
-			dataValue = sourceData.getValue(propertyPath);
-		}
-		else
-		{
-			//当name为空时，应直接使用sourceData
-			if(CF.isEmpty(propertyPath))
-				dataValue = sourceData;
+			let propPath = CF.concatPropertyPath(propPathRoots[i], name);
+			
+			if(hasGetValueFunc)
+			{
+				dataValue = sourceData.getValue(propPath);
+			}
 			else
-				dataValue = CF.propertyPathValue(sourceData, propertyPath);
+			{
+				//当name为空时，应直接使用sourceData
+				if(CF.isEmpty(propPath))
+					dataValue = sourceData;
+				else
+					dataValue = CF.propertyPathValue(sourceData, propPath);
+			}
+			
+			if(dataValue != null)
+				break;
 		}
 		
 		let indexes = dataMap[name];
