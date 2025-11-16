@@ -4960,15 +4960,15 @@ SPT.tableRenderer = function(plugin, config)
 					style: undefined
 				},
 				
-				//表格样式，格式为：
+				//表格样式，每一项都支持CSS字符串或CSS对象：
 				//{
-				//	table: {...},
-				//	head: { row: {...}, cell: {...} },
+				//	table: ...,
+				//	head: { row: ... },
 				//	body:
 				//	{
-				//		row: {...}, rowOdd: {}, rowEven: {}, rowHover: {...}, rowSelected: {...},
-				//		cell: {...}, cellOdd: {}, cellEven: {}, cellHover: {...}, cellSelected: {...}
-				//	}
+				//		row: ..., rowOdd: ..., rowEven: ..., rowHover: ..., rowSelected: ...
+				//	},
+				//	foot: { row: ... }
 				//}
 				tableStyle: undefined,
 				//自定义单元格渲染函数，格式为：function(value, name, rowIndex, columnIndex, row, meta){ return ...; }
@@ -5601,15 +5601,7 @@ SPT.tableRenderer = function(plugin, config)
 				if(isLocalStyle)
 				{
 					let optionTableStyle = CF.extend(true, {}, options.tableStyle);
-					if(optionTableStyle.body && optionTableStyle.body.row)
-					{
-						if(optionTableStyle.body.rowOdd == null)
-							optionTableStyle.body.rowOdd = CF.extend(true, {}, optionTableStyle.body.row);
-						
-						if(optionTableStyle.body.rowEven == null)
-							optionTableStyle.body.rowEven = CF.extend(true, {}, optionTableStyle.body.row);
-					}
-					
+					this._trimTableStyleOption(optionTableStyle);
 					tableStyle = CF.extend(true, tableStyle, optionTableStyle);
 				}
 				
@@ -5737,6 +5729,45 @@ SPT.tableRenderer = function(plugin, config)
 				return css;
 			},
 			forceUpdate);
+		},
+		
+		_trimTableStyleOption: function(tableStyle)
+		{
+			if(tableStyle == null)
+				return;
+			
+			if(CF.isString(tableStyle.table))
+				tableStyle.table = CF.styleStringToObj(tableStyle.table);
+			
+			if(tableStyle.head && CF.isString(tableStyle.head.row))
+				tableStyle.head.row = CF.styleStringToObj(tableStyle.head.row);
+			
+			if(tableStyle.body && CF.isString(tableStyle.body.row))
+				tableStyle.body.row = CF.styleStringToObj(tableStyle.body.row);
+			
+			if(tableStyle.body && CF.isString(tableStyle.body.rowOdd))
+				tableStyle.body.rowOdd = CF.styleStringToObj(tableStyle.body.rowOdd);
+			
+			if(tableStyle.body && CF.isString(tableStyle.body.rowEven))
+				tableStyle.body.rowEven = CF.styleStringToObj(tableStyle.body.rowEven);
+			
+			if(tableStyle.body && CF.isString(tableStyle.body.rowHover))
+				tableStyle.body.rowHover = CF.styleStringToObj(tableStyle.body.rowHover);
+			
+			if(tableStyle.body && CF.isString(tableStyle.body.rowSelected))
+				tableStyle.body.rowSelected = CF.styleStringToObj(tableStyle.body.rowSelected);
+			
+			if(tableStyle.foot && CF.isString(tableStyle.foot.row))
+				tableStyle.foot.row = CF.styleStringToObj(tableStyle.foot.row);
+			
+			if(tableStyle.body && tableStyle.body.row)
+			{
+				if(tableStyle.body.rowOdd == null)
+					tableStyle.body.rowOdd = CF.extend(true, {}, tableStyle.body.row);
+				
+				if(tableStyle.body.rowEven == null)
+					tableStyle.body.rowEven = CF.extend(true, {}, tableStyle.body.row);
+			}
 		},
 		
 		_updateInternalData: function(chart, chartResult, updateOptions)
