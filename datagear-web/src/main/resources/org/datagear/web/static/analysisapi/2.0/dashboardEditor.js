@@ -2452,7 +2452,7 @@
 				}
 			};
 			
-			re = dashboardFactory.getStdBuiltinChartMapTree(listener);
+			re = dashboardFactory.getStdBuiltinMapTree(listener);
 		}
 		//数组
 		else
@@ -2467,7 +2467,7 @@
 				}
 			};
 			
-			re = dashboardFactory.getStdBuiltinChartMapArray(listener);
+			re = dashboardFactory.getStdBuiltinMapArray(listener);
 		}
 		
 		var mapURLs = [];

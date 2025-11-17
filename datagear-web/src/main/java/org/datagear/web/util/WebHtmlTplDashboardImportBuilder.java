@@ -63,6 +63,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDSTYLE = "dashboardStyle";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR = "dashboardEditor";
 	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_FAVICON = "favicon";
+	public static final String BUILTIN_DASHBOARD_IMPORT_NAME_BUILTIN_MAP = "dashboardBuiltinMap";
 
 	public static final String PATH_STATIC = "/static";
 
@@ -221,6 +222,12 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTTOOL,
 					analysisPrefix + "/chartTool.js?v=" + Global.VERSION));
+		}
+
+		if (!isV1)
+		{
+			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_BUILTIN_MAP,
+					analysisPrefix + "/dashboardBuiltinMap.js?v=" + Global.VERSION));
 		}
 
 		addChartPluginManagerImport(impts, contextPath, locale, apiVersion);

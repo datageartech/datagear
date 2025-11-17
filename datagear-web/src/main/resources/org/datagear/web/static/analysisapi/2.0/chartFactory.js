@@ -5712,6 +5712,37 @@ CF.indexInArray = function(array, value, index)
 	return (array == null ? -1 : array.indexOf(value, index));
 };
 
+/**
+ * 获取对象数组中指定属性值的索引
+ * 
+ * @param array
+ * @param value
+ * @param name 数组中对象元素中对应value的属性名、或者获取函数：function(obj){ return ... }
+ * @returns 索引数值，-1 表示没有找到
+ */
+CF.indexInArrayOfProp = function(array, value, name)
+{
+	if(array == null)
+		return -1;
+	
+	var isFunction = CF.isFunction(name);
+	
+	for(let i=0; i<array.length; i++)
+	{
+		let ae = array[i];
+		
+		if(ae == null)
+			continue;
+		
+		ae = (isFunction ? name(ae) : ae[name]);
+		
+		if(ae === value)
+			return i;
+	}
+	
+	return -1;
+};
+
 //删除字符串数组中每一个元素的两端空格
 CF.trimStrArray = function(strArray)
 {
