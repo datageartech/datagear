@@ -876,8 +876,14 @@ dashboardProto._initMapURLs = function()
 	for(let i=0; i<builtinChartMaps.length; i++)
 	{
 		let namesMap = builtinChartMaps[i];
-		for(let j=0; j<namesMap.names.length; j++)
-			mapURLs[namesMap.names[j]] = builtinChartMapBaseURL + namesMap.map;
+		let names = namesMap.names;
+		let map = namesMap.map;
+		let isRelativeMap = (map.charAt(0) !== '/');
+		
+		for(let j=0; j<names.length; j++)
+		{
+			mapURLs[names[j]] = (isRelativeMap ? builtinChartMapBaseURL+map : map);
+		}
 	}
 	
 	var mapURLsBody = CF.eleAttr(document.body, elementAttrConst.MAP_URLS);
@@ -2986,8 +2992,8 @@ DF.msgOfResponse = function(response)
  * 
  * @param chartMaps 内置图表地图，格式为：[
 					{
-						//地图名数组
-					  	names: ["...", ...],
+						//地图名、数组
+					  	names: "..."、["...", ...],
 						//地图文件
 						map: "...",
 						//可选，行政区划名称
@@ -3006,7 +3012,7 @@ DF.addBuiltinChartMaps = function(chartMaps)
 	for(let i=0; i<chartMaps.length; i++)
 	{
 		let cm = chartMaps[i];
-		let names = cm.names;
+		let names = (CF.isArray(cm.names) ? cm.names : [ cm.names ]);
 		let adcodeInNames = (cm.adcode ? false : true);
 		
 		for(let j=0; j<names.length; j++)
@@ -3090,7 +3096,7 @@ DF.getStdBuiltinChartMapTree = function(listener)
  * 获取标准内置图表地图平铺数组。
  * 返回一个数组，其中元素格式为：
  * {
- *   //地图名，可用于chartSupport中的MAP_NAME_OPTION_NAME图表选项的名称
+ *   //地图名
  *   mapName: "...",
  *   //显示标签
  *   mapLabel: "..."
@@ -3130,10 +3136,12 @@ DF.getStdBuiltinChartMapArray = function(listener)
  */
 var dftBuiltinChartMaps =
 [
+	//世界地图
+	{"names":["world", "世界"],"map":"world.json","adname":"世界","adcode":"world","parent":null},
 	{
 		"names":["100000","中国","中华人民共和国","china","China"],
 		//标准中国地图南海诸岛太占空间，所以采用下面南海诸岛在右侧的中国地图
-		//"map" : "100000_full.json"
+		//"map" : "100000_full.json",
 		"map" : "china_nhzd.json",
 		"adname":"中国","adcode":"100000","parent":null
 	},
@@ -3171,14 +3179,6 @@ var dftBuiltinChartMaps =
 	{"names":["710000","台湾省","台湾","taiwan","Taiwan"],"map":"710000.json","adname":"台湾省","adcode":"710000","parent":"100000"},
 	{"names":["810000","香港特别行政区","香港","港","xianggang","Xianggang","HongKong","Hongkong"],"map":"810000_full.json","adname":"香港特别行政区","adcode":"810000","parent":"100000"},
 	{"names":["820000","澳门特别行政区","澳门","澳","aomen","Aomen","Macao"],"map":"820000_full.json","adname":"澳门特别行政区","adcode":"820000","parent":"100000"}
-	
-	//世界地图
-	,
-	{"names":["ext-world","world", "世界"],"map":"world.json","adname":"世界","adcode":"ext-world","parent":null},
-	
-	//旧版遗留地图
-	{"names":["ext-china-contour","china-contour", "中国轮廓"],"map":"china-contour.json"},
-	{"names":["ext-china-cities","china-cities", "中国城市"],"map":"china-cities.json"}
 ];
 
 DF.addBuiltinChartMaps(dftBuiltinChartMaps);
