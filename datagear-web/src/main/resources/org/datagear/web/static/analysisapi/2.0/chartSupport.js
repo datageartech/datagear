@@ -5115,12 +5115,66 @@ SPT.tableRenderer = function(plugin, config)
 		
 		on: function(chart, type, handler)
 		{
-			chart.internal().on(type, handler);
+			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
+			
+			if(this._isSupportEventTypeForData(actualType))
+			{
+				let delegate = function(e, dt, type, indexes)
+				{
+					//暂时仅支持行级事件
+					if (type !== "row")
+						return;
+					
+					if(CF.isEmpty(indexes))
+						return;
+					
+					var data = [];
+					
+					for(let i=0; i<indexes.length; i++)
+						data.push(dt.row(indexes[i]).data());
+					
+					//单选应仅设置单行数据
+					var dtInit = dt.init();
+					if(dtInit.select === "single" || (dtInit.select && dtInit.select.style === "single"))
+						data = data[0];
+					
+					SPT.eventData(e, data);
+					handler.call(this, e, dt, type, indexes);
+				};
+				
+				chart.registerEventHandlerDelegate(type, handler, delegate);
+				internal.on(actualType, delegate);
+			}
+			else
+				internal.on(type, handler);
 		},
 		
 		off: function(chart, type, handler)
 		{
-			chart.internal().off(type, handler);
+			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
+			
+			if(this._isSupportEventTypeForData(actualType))
+			{
+				let delegates = chart.removeEventHandlerDelegate(type, handler);
+				delegates.forEach((d) =>
+				{
+					internal.off(actualType, d.delegate);
+				});
+			}
+			else
+				internal.off(type, handler);
+		},
+		
+		additions:
+		{
+			defaultLinkEventType: "select.data"
+		},
+		
+		_isSupportEventTypeForData: function(type)
+		{
+			return ("select" == type || "deselect");
 		},
 		
 		_renderTitleIfSet: function(chart, options, chartEle, titleEle)
@@ -6225,7 +6279,7 @@ SPT.labelRenderer = function(plugin, config)
 					{
 						let data = CF.eleData(item, bindDataName);
 						SPT.eventData(e, data);
-						handler(e);
+						handler.call(this, e);
 					}
 				};
 				
@@ -6240,6 +6294,7 @@ SPT.labelRenderer = function(plugin, config)
 		{
 			var internal = chart.internal();
 			var actualType = SPT.actualEventTypeForData(type);
+			
 			if(actualType != null)
 			{
 				let delegates = chart.removeEventHandlerDelegate(type, handler);
