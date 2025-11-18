@@ -6212,14 +6212,49 @@ SPT.labelRenderer = function(plugin, config)
 		
 		on: function(chart, type, handler)
 		{
-			//TODO
-			chart.internal().addEventListener(type, handler);
+			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
+			
+			if(actualType != null)
+			{
+				let bindDataName = this._itemBindDataName();
+				let delegate = function(e)
+				{
+					var item = CF.eleAncestorOfSelector(e.target, ".dg-chart-label-item");
+					if(item != null)
+					{
+						let data = CF.eleData(item, bindDataName);
+						SPT.eventData(e, data);
+						handler(e);
+					}
+				};
+				
+				chart.registerEventHandlerDelegate(type, handler, delegate);
+				internal.addEventListener(actualType, delegate);
+			}
+			else
+				internal.addEventListener(type, handler);
 		},
 		
 		off: function(chart, type, handler)
 		{
-			//TODO
-			chart.internal().removeEventListener(type, handler);
+			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
+			if(actualType != null)
+			{
+				let delegates = chart.removeEventHandlerDelegate(type, handler);
+				delegates.forEach((d) =>
+				{
+					internal.removeEventListener(actualType, d.delegate);
+				});
+			}
+			else
+				internal.removeEventListener(type, handler);
+		},
+		
+		additions:
+		{
+			defaultLinkEventType: "click.data"
 		},
 		
 		_drawDataOptions: function(chart, options)
@@ -7456,6 +7491,35 @@ SPT.liveDataUpdateOptions = function(chart, updateOptions)
 		return chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME);
 	else
 		chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME, updateOptions);
+};
+
+SPT.EVENT_TYPE_FOR_DATA_SUFFIX = ".data";
+
+//是否是扩展的数据的事件类型（以'.data'结尾）
+SPT.isEventTypeForData = function(type)
+{
+	if(type == null || !CF.isString(type))
+		return false;
+	
+	return type.endsWith(SPT.EVENT_TYPE_FOR_DATA_SUFFIX);
+};
+
+//获取扩展数据事件类型的实际事件类型，不是则返回null
+SPT.actualEventTypeForData = function(type)
+{
+	if(!SPT.isEventTypeForData(type))
+		return null;
+	
+	return type.substring(0, type.length - SPT.EVENT_TYPE_FOR_DATA_SUFFIX.length);
+};
+
+//获取/设置事件对象的"data"属性值
+SPT.eventData = function(e, data)
+{
+	if(data === undefined)
+		return e.data;
+	else
+		e.data = data;
 };
 
 //获取全局ECharts对象
