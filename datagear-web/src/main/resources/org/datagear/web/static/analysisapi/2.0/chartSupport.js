@@ -5078,11 +5078,10 @@ SPT.tableRenderer = function(plugin, config)
 				let result = chart.resultOf(chartResult, dataSetBind);
 				let resultDatas = chart.resultDatas(result);
 				
-				//复制，避免污染原始数据
 				for(let j=0; j<resultDatas.length; j++)
 				{
-					var data = CF.extend({}, resultDatas[j]);
-					SPT.originalDataOfData(data, resultDatas[j]);
+					//这里直接使用原始数据，所以不需要设置SPT.originalDataOfData()，也无需使用深度复制后的数据
+					var data = resultDatas[j];
 					options.data.push(data);
 				}
 			}
@@ -5174,7 +5173,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_isSupportEventTypeForData: function(type)
 		{
-			return ("select" == type || "deselect");
+			return ("select" == type || "deselect" == type);
 		},
 		
 		_renderTitleIfSet: function(chart, options, chartEle, titleEle)
