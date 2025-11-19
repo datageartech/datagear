@@ -1856,10 +1856,10 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
  * 图表渲染器off函数的实现逻辑通常是：使用此函数移除由chart.registerEventHandlerDelegate()函数注册的图表事件处理函数代理信息对象，
  * 然后调用底层组件的事件解绑函数，解绑代理信息对象的delegate。
  * 
- * @param type 可选，图表事件类型，当为undefined时，表示全部类型
+ * @param type 图表事件类型字符串/对象、事件类型匹配函数，当是对象时，支持对象结构深度比较；匹配函数格式为：function(type){ return true、false; }，返回true表示匹配
  * @param handler 可选，图表事件处理函数，格式为：function(...){ ... }，当为undefined时，表示全部
  * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）的代理信息对象数组，格式为：
- *						[ { type: "...", handler: ..., delegate: ... }, ... ]
+ *						[ { type: ..., handler: ..., delegate: ... }, ... ]
  */
 chartProto.removeEventHandlerDelegate = function(type, handler)
 {
@@ -1873,9 +1873,14 @@ chartProto.removeEventHandlerDelegate = function(type, handler)
 	for(let i=0; i<delegateObjs.length;)
 	{
 		let delegateObj = delegateObjs[i];
+		let typeMatches = false;
 		
-		if((type === undefined || delegateObj.type === type)
-				&& (handler === undefined || delegateObj.handler === handler))
+		if(CF.isFunction(type))
+			typeMatches = type(delegateObj.type);
+		else
+			typeMatches = CF.deepEquals(delegateObj.type, type);
+		
+		if(typeMatches && (handler === undefined || delegateObj.handler === handler))
 		{
 			re.push(delegateObj);
 			delegateObjs.splice(i, 1);
@@ -7173,6 +7178,86 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 	return re;
 };
 
+/**
+ * 深度判断两个对象是否相等。
+ * 支持比较基本类型、Date类型，以及由它们组成的对象、数组。
+ * 
+ * @param a
+ * @param b
+ * @param seen 可选，对象缓存
+ */
+CF.deepEquals = function(a, b, seen)
+{
+	if(Object.is(a, b))
+    	return true;
+    
+    if(typeof(a) !== typeof(b))
+    	return false;
+    
+	if (a === null || b === null || typeof(a) !== 'object')
+    	return false;
+    
+    if((a instanceof Date) && (b instanceof Date))
+    	return (a.getTime() === b.getTime());
+    
+    var aIsArray = Array.isArray(a);
+    
+    if(aIsArray !== Array.isArray(b))
+		return false;
+	
+	if(aIsArray && a.length !== b.length)
+		return false;
+	
+	if(seen == null)
+		seen = new WeakMap();
+	
+	if (seen.has(a))
+    	return (seen.get(a) === b);
+    
+    seen.set(a, b);
+    
+    if(aIsArray)
+    {
+		for(let i=0; i<a.length; i++)
+		{
+			if(!CF.deepEquals(a[i], b[i], seen))
+			{
+				seen.delete(a);
+				return false;
+			}
+		}
+	}
+	else
+	{
+		let akeys = Object.keys(a);
+		let bkeys = Object.keys(b);
+		
+		if(akeys.length !== bkeys.length)
+		{
+			seen.delete(a);
+			return false;
+		}
+		
+		for(let key of akeys)
+		{
+			if(!Object.prototype.hasOwnProperty.call(b, key))
+			{
+				seen.delete(a);
+				return false;
+			}
+			
+			if(!CF.deepEquals(a[key], b[key], seen))
+			{
+				seen.delete(a);
+				return false;
+			}
+		}
+	}
+	
+	seen.delete(a);
+	
+	return true;
+};
 
 //-------------
 // < 已弃用函数 start

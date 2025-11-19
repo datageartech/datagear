@@ -5141,14 +5141,14 @@ SPT.tableRenderer = function(plugin, config)
 						data = data[0];
 					
 					SPT.eventData(e, data);
-					SPT.invokeEventHandler(chart, handler, arguments);
+					return SPT.invokeEventHandler(chart, handler, arguments);
 				};
 			}
 			else
 			{
 				delegate = function()
 				{
-					SPT.invokeEventHandler(chart, handler, arguments);
+					return SPT.invokeEventHandler(chart, handler, arguments);
 				};
 			}
 			
@@ -6282,7 +6282,7 @@ SPT.labelRenderer = function(plugin, config)
 					{
 						let data = CF.eleData(item, bindDataName);
 						SPT.eventData(e, data);
-						SPT.invokeEventHandler(chart, handler, arguments);
+						return SPT.invokeEventHandler(chart, handler, arguments);
 					}
 				};
 			}
@@ -6290,7 +6290,7 @@ SPT.labelRenderer = function(plugin, config)
 			{
 				delegate = function()
 				{
-					SPT.invokeEventHandler(chart, handler, arguments);
+					return SPT.invokeEventHandler(chart, handler, arguments);
 				};
 			}
 			
@@ -6555,7 +6555,7 @@ SPT.selectRenderer = function(plugin, config)
 							data = data[0];
 						
 						SPT.eventData(e, data);
-						SPT.invokeEventHandler(chart, handler, arguments);
+						return SPT.invokeEventHandler(chart, handler, arguments);
 					}
 				};
 			}
@@ -6563,7 +6563,7 @@ SPT.selectRenderer = function(plugin, config)
 			{
 				delegate = function()
 				{
-					SPT.invokeEventHandler(chart, handler, arguments);
+					return SPT.invokeEventHandler(chart, handler, arguments);
 				};
 			}
 			
@@ -7823,60 +7823,6 @@ EU.resize = function(chart)
 };
 
 /**
- * 绑定ECharts图表事件处理函数。
- * 
- * @param chart
- * @param type 事件类型，支持格式：
- * 						1、"click"、"mousemove"等事件类型字符串
- * 						2、{ name: "...", query: ... }，其中name表示事件类型，比如"click"、"mousemove"，query表示过滤条件，同ECharts的on函数的query参数
- * @param handler 事件处理函数，格式为：function(event){ ... }
- */
-EU.on = function(chart, type, handler)
-{
-	var actualType = SPT.actualEventTypeForData(type);
-	if(actualType != null)
-		type = { name: actualType, query: "series" };
-	
-	type = (CF.isString(type) ? { name: type } : type);
-	
-	var internal = chart.internal();
-	
-	if(type.query == null)
-	{
-		internal.on(type.name, handler);
-	}
-	else
-	{
-		internal.on(type.name, type.query, handler);
-	}
-};
-
-/**
- * 解绑ECharts图表事件处理函数。
- * 
- * @param chart
- * @param type 可选，事件类型，比如"click"、"mousemove"等，不提供则取消监听所有事件
- * @param handler 可选，解绑的具体事件处理函数，不提供则取消监听type下的所有事件
- */
-EU.off = function(chart, type, handler)
-{
-	var internal = chart.internal();
-	
-	if((type === undefined && handler === undefined) || arguments.length < 2)
-	{
-		internal.off();
-	}
-	else if(handler === undefined || arguments.length == 2)
-	{
-		internal.off(type);
-	}
-	else
-	{
-		internal.off(type, handler);
-	}
-};
-
-/**
  * 由图表主题构建ECharts主题。
  * 
  * @param chart 图表
@@ -8693,14 +8639,60 @@ EU.inflateRendererCommons = function(renderer)
 		EU.resize(chart);
 	},
 	
+	/**
+	 * 绑定事件处理函数。
+	 * 
+	 * @param chart
+	 * @param type 事件类型，支持格式：
+	 * 						1、"click"、"mouseenter"、"click.data"、"mouseenter.data"等事件类型字符串
+	 * 						2、{ name: "...", query: ... }，其中name表示事件类型，比如"click"、"mousemove"，query表示过滤条件，同ECharts的on函数的query参数
+	 * @param handler 事件处理函数，格式为：function(...){ ... }，参数与底层ECharts相同，函数内部this指向chart
+	 */
 	renderer.on = function(chart, type, handler)
 	{
-		EU.on(chart, type, handler);
+		type = this._toEventTypeObj(type);
+		
+		var internal = chart.internal();
+		var delegate = function()
+		{
+			return SPT.invokeEventHandler(chart, handler, arguments);
+		};
+		
+		chart.registerEventHandlerDelegate(type, handler, delegate);
+		
+		if(type.query == null)
+		{
+			internal.on(type.name, delegate);
+		}
+		else
+		{
+			internal.on(type.name, type.query, delegate);
+		}
 	},
 	
 	renderer.off = function(chart, type, handler)
 	{
-		EU.off(chart, type, handler);
+		var internal = chart.internal();
+		type = this._toEventTypeObj(type);
+		
+		var delegates = chart.removeEventHandlerDelegate(type, handler);
+		delegates.forEach((d) =>
+		{
+			internal.off(d.type.name, d.delegate);
+		});
+	};
+	
+	renderer._toEventTypeObj = function(type)
+	{
+		var re;
+		
+		var actualType = SPT.actualEventTypeForData(type);
+		if(actualType != null)
+			re = { name: actualType, query: "series" };
+		else
+			re = (CF.isString(type) ? { name: type } : type);
+		
+		return re;
 	};
 	
 	return renderer;		
