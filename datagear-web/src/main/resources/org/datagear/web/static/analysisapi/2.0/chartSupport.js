@@ -5140,7 +5140,7 @@ SPT.tableRenderer = function(plugin, config)
 						data = data[0];
 					
 					SPT.eventData(e, data);
-					handler.call(this, e, dt, type, indexes);
+					SPT.invokeEventHandlerForData(chart, handler, arguments);
 				};
 				
 				chart.registerEventHandlerDelegate(type, handler, delegate);
@@ -6279,7 +6279,7 @@ SPT.labelRenderer = function(plugin, config)
 					{
 						let data = CF.eleData(item, bindDataName);
 						SPT.eventData(e, data);
-						handler.call(this, e);
+						SPT.invokeEventHandlerForData(chart, handler, arguments);
 					}
 				};
 				
@@ -6527,14 +6527,60 @@ SPT.selectRenderer = function(plugin, config)
 		
 		on: function(chart, type, handler)
 		{
-			//TODO
-			chart.internal().addEventListener(type, handler);
+			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
+			
+			if(actualType != null)
+			{
+				let bindDataName = this._itemBindDataName();
+				let delegate = function(e)
+				{
+					var selectedItems = Array.from(internal.selectedOptions);
+					
+					if(selectedItems.length > 0)
+					{
+						let data = [];
+						selectedItems.forEach((item) =>
+						{
+							let di = CF.eleData(item, bindDataName);
+							data.push(di);
+						});
+						
+						if(!CF.eleAttr(internal, "multiple"))
+							data = data[0];
+						
+						SPT.eventData(e, data);
+						SPT.invokeEventHandlerForData(chart, handler, arguments);
+					}
+				};
+				
+				chart.registerEventHandlerDelegate(type, handler, delegate);
+				internal.addEventListener(actualType, delegate);
+			}
+			else
+				internal.addEventListener(type, handler);
 		},
 		
 		off: function(chart, type, handler)
 		{
-			//TODO
-			chart.internal().removeEventListener(type, handler);
+			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
+			
+			if(actualType != null)
+			{
+				let delegates = chart.removeEventHandlerDelegate(type, handler);
+				delegates.forEach((d) =>
+				{
+					internal.removeEventListener(actualType, d.delegate);
+				});
+			}
+			else
+				internal.removeEventListener(type, handler);
+		},
+		
+		additions:
+		{
+			defaultLinkEventType: "change.data"
 		},
 		
 		_themeStyleSheet: function(chart)
@@ -7566,6 +7612,12 @@ SPT.actualEventTypeForData = function(type)
 		return null;
 	
 	return type.substring(0, type.length - SPT.EVENT_TYPE_FOR_DATA_SUFFIX.length);
+};
+
+//调用扩展数据事件类型处理函数，函数内的this将指向chart
+SPT.invokeEventHandlerForData = function(chart, handler, args)
+{
+	handler.apply(chart, args);
 };
 
 //获取/设置事件对象的"data"属性值
