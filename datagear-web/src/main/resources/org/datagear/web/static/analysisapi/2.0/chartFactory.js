@@ -1874,8 +1874,8 @@ chartProto.removeEventHandlerDelegate = function(type, handler)
 	{
 		let delegateObj = delegateObjs[i];
 		
-		if((type === undefined || delegateObj.type == type)
-				&& (handler === undefined || delegateObj.handler == handler))
+		if((type === undefined || delegateObj.type === type)
+				&& (handler === undefined || delegateObj.handler === handler))
 		{
 			re.push(delegateObj);
 			delegateObjs.splice(i, 1);

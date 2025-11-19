@@ -5115,11 +5115,13 @@ SPT.tableRenderer = function(plugin, config)
 		on: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
+			var delegate;
 			
+			var actualType = SPT.actualEventTypeForData(type);
 			if(this._isSupportEventTypeForData(actualType))
 			{
-				let delegate = function(e, dt, type, indexes)
+				type = actualType;
+				delegate = function(e, dt, type, indexes)
 				{
 					//暂时仅支持行级事件
 					if (type !== "row")
@@ -5139,31 +5141,31 @@ SPT.tableRenderer = function(plugin, config)
 						data = data[0];
 					
 					SPT.eventData(e, data);
-					SPT.invokeEventHandlerForData(chart, handler, arguments);
+					SPT.invokeEventHandler(chart, handler, arguments);
 				};
-				
-				chart.registerEventHandlerDelegate(type, handler, delegate);
-				internal.on(actualType, delegate);
 			}
 			else
-				internal.on(type, handler);
+			{
+				delegate = function()
+				{
+					SPT.invokeEventHandler(chart, handler, arguments);
+				};
+			}
+			
+			chart.registerEventHandlerDelegate(type, handler, delegate);
+			internal.on(type, delegate);
 		},
-		
+		 
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
+			type = SPT.actualEventTypeForData(type, type);
 			
-			if(this._isSupportEventTypeForData(actualType))
+			var delegates = chart.removeEventHandlerDelegate(type, handler);
+			delegates.forEach((d) =>
 			{
-				let delegates = chart.removeEventHandlerDelegate(type, handler);
-				delegates.forEach((d) =>
-				{
-					internal.off(actualType, d.delegate);
-				});
-			}
-			else
-				internal.off(type, handler);
+				internal.off(type, d.delegate);
+			});
 		},
 		
 		additions:
@@ -6266,44 +6268,46 @@ SPT.labelRenderer = function(plugin, config)
 		on: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
+			var delegate;
 			
+			var actualType = SPT.actualEventTypeForData(type);
 			if(actualType != null)
 			{
 				let bindDataName = this._itemBindDataName();
-				let delegate = function(e)
+				type = actualType;
+				delegate = function(e)
 				{
 					var item = CF.eleAncestorOfSelector(e.target, ".dg-chart-label-item");
 					if(item != null)
 					{
 						let data = CF.eleData(item, bindDataName);
 						SPT.eventData(e, data);
-						SPT.invokeEventHandlerForData(chart, handler, arguments);
+						SPT.invokeEventHandler(chart, handler, arguments);
 					}
 				};
-				
-				chart.registerEventHandlerDelegate(type, handler, delegate);
-				internal.addEventListener(actualType, delegate);
 			}
 			else
-				internal.addEventListener(type, handler);
+			{
+				delegate = function()
+				{
+					SPT.invokeEventHandler(chart, handler, arguments);
+				};
+			}
+			
+			chart.registerEventHandlerDelegate(type, handler, delegate);
+			internal.addEventListener(type, delegate);
 		},
 		
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
+			type = SPT.actualEventTypeForData(type, type);
 			
-			if(actualType != null)
+			var delegates = chart.removeEventHandlerDelegate(type, handler);
+			delegates.forEach((d) =>
 			{
-				let delegates = chart.removeEventHandlerDelegate(type, handler);
-				delegates.forEach((d) =>
-				{
-					internal.removeEventListener(actualType, d.delegate);
-				});
-			}
-			else
-				internal.removeEventListener(type, handler);
+				internal.removeEventListener(actualType, d.delegate);
+			});
 		},
 		
 		additions:
@@ -6527,12 +6531,14 @@ SPT.selectRenderer = function(plugin, config)
 		on: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
+			var delegate;
 			
+			var actualType = SPT.actualEventTypeForData(type);
 			if(actualType != null)
 			{
 				let bindDataName = this._itemBindDataName();
-				let delegate = function(e)
+				type = actualType;
+				delegate = function(e)
 				{
 					var selectedItems = Array.from(internal.selectedOptions);
 					
@@ -6549,32 +6555,32 @@ SPT.selectRenderer = function(plugin, config)
 							data = data[0];
 						
 						SPT.eventData(e, data);
-						SPT.invokeEventHandlerForData(chart, handler, arguments);
+						SPT.invokeEventHandler(chart, handler, arguments);
 					}
 				};
-				
-				chart.registerEventHandlerDelegate(type, handler, delegate);
-				internal.addEventListener(actualType, delegate);
 			}
 			else
-				internal.addEventListener(type, handler);
+			{
+				delegate = function()
+				{
+					SPT.invokeEventHandler(chart, handler, arguments);
+				};
+			}
+			
+			chart.registerEventHandlerDelegate(type, handler, delegate);
+			internal.addEventListener(type, delegate);
 		},
 		
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
+			type = SPT.actualEventTypeForData(type, type);
 			
-			if(actualType != null)
+			var delegates = chart.removeEventHandlerDelegate(type, handler);
+			delegates.forEach((d) =>
 			{
-				let delegates = chart.removeEventHandlerDelegate(type, handler);
-				delegates.forEach((d) =>
-				{
-					internal.removeEventListener(actualType, d.delegate);
-				});
-			}
-			else
-				internal.removeEventListener(type, handler);
+				internal.removeEventListener(actualType, d.delegate);
+			});
 		},
 		
 		additions:
@@ -7604,17 +7610,19 @@ SPT.isEventTypeForData = function(type)
 	return type.endsWith(SPT.EVENT_TYPE_FOR_DATA_SUFFIX);
 };
 
-//获取扩展数据事件类型的实际事件类型，不是则返回null
-SPT.actualEventTypeForData = function(type)
+//获取扩展数据事件类型的实际事件类型，不是则返回null或者typeIfNot
+SPT.actualEventTypeForData = function(type, typeIfNot)
 {
+	typeIfNot = (typeIfNot == null ? null : typeIfNot);
+	
 	if(!SPT.isEventTypeForData(type))
-		return null;
+		return typeIfNot;
 	
 	return type.substring(0, type.length - SPT.EVENT_TYPE_FOR_DATA_SUFFIX.length);
 };
 
 //调用扩展数据事件类型处理函数，函数内的this将指向chart
-SPT.invokeEventHandlerForData = function(chart, handler, args)
+SPT.invokeEventHandler = function(chart, handler, args)
 {
 	handler.apply(chart, args);
 };
@@ -7818,26 +7826,28 @@ EU.resize = function(chart)
  * 绑定ECharts图表事件处理函数。
  * 
  * @param chart
- * @param eventType 事件类型，支持格式：
+ * @param type 事件类型，支持格式：
  * 						1、"click"、"mousemove"等事件类型字符串
  * 						2、{ name: "...", query: ... }，其中name表示事件类型，比如"click"、"mousemove"，query表示过滤条件，同ECharts的on函数的query参数
  * @param handler 事件处理函数，格式为：function(event){ ... }
- * @param context 可选，事件处理函数内的this指向，默认值为：chart
  */
-EU.on = function(chart, eventType, handler, context)
+EU.on = function(chart, type, handler)
 {
-	eventType = (CF.isString(eventType) ? { name: eventType } : eventType);
-	context = (context === undefined ? chart : context);
+	var actualType = SPT.actualEventTypeForData(type);
+	if(actualType != null)
+		type = { name: actualType, query: "series" };
+	
+	type = (CF.isString(type) ? { name: type } : type);
 	
 	var internal = chart.internal();
 	
-	if(eventType.query == null)
+	if(type.query == null)
 	{
-		internal.on(eventType.name, handler, context);
+		internal.on(type.name, handler);
 	}
 	else
 	{
-		internal.on(eventType.name, eventType.query, handler, context);
+		internal.on(type.name, type.query, handler);
 	}
 };
 
@@ -7845,24 +7855,24 @@ EU.on = function(chart, eventType, handler, context)
  * 解绑ECharts图表事件处理函数。
  * 
  * @param chart
- * @param eventType 可选，事件类型，比如"click"、"mousemove"等，不提供则取消监听所有事件
- * @param handler 可选，解绑的具体事件处理函数，不提供则取消监听eventType下的所有事件
+ * @param type 可选，事件类型，比如"click"、"mousemove"等，不提供则取消监听所有事件
+ * @param handler 可选，解绑的具体事件处理函数，不提供则取消监听type下的所有事件
  */
-EU.off = function(chart, eventType, handler)
+EU.off = function(chart, type, handler)
 {
 	var internal = chart.internal();
 	
-	if(eventType === undefined || arguments.length < 2)
+	if((type === undefined && handler === undefined) || arguments.length < 2)
 	{
 		internal.off();
 	}
 	else if(handler === undefined || arguments.length == 2)
 	{
-		internal.off(eventType);
+		internal.off(type);
 	}
 	else
 	{
-		internal.off(eventType, handler);
+		internal.off(type, handler);
 	}
 };
 
