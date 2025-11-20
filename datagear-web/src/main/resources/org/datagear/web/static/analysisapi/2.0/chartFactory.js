@@ -1830,13 +1830,16 @@ var EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "EventHand
  * 在代理函数中构建新的图表事件对象，然后调用图表事件处理函数handler。
  * 此函数用于注册这些信息，使得在实现图表渲染器的off函数时，可以获取对应底层组件的事件处理函数代理，进而实现底层组件的解绑逻辑。
  * 
- * @param type 图表事件类型
+ * @param type 图表事件类型、事件处理函数代理信息对象，当是事件处理函数代理信息对象时，应不设置handler和delegate参数
  * @param handler 图表事件处理函数，格式为：function(...){ ... }
  * @param delegate 图表事件处理函数代理，通常是图表底层组件事件处理函数
  * @returns 已注册的图表事件处理函数代理信息对象，格式为：{ type: "...", handler: ..., delegate: ... }
  */
 chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 {
+	var delegateObj = (handler === undefined && delegate === undefined ?
+						type : { type: type, handler: handler, delegate: delegate });
+	
 	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
 	
 	if(delegateObjs == null)
@@ -1845,7 +1848,6 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 		this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME, delegateObjs);
 	}
 	
-	var delegateObj = { type: type, handler: handler, delegate: delegate };
 	delegateObjs.push(delegateObj);
 	
 	return delegateObj;
