@@ -5155,16 +5155,20 @@ SPT.tableRenderer = function(plugin, config)
 			chart.registerEventHandlerDelegate(type, handler, delegate);
 			internal.on(type, delegate);
 		},
-		 
+		
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
 			type = SPT.actualEventTypeForData(type, type);
 			
-			var delegates = chart.removeEventHandlerDelegate(type, handler);
+			var delegates = chart.removeEventHandlerDelegate((d) =>
+			{
+				return SPT.eventHandlerDelegateFilter(d, type, handler);
+			});
+			
 			delegates.forEach((d) =>
 			{
-				internal.off(type, d.delegate);
+				internal.off(d.type, d.delegate);
 			});
 		},
 		
@@ -6303,10 +6307,14 @@ SPT.labelRenderer = function(plugin, config)
 			var internal = chart.internal();
 			type = SPT.actualEventTypeForData(type, type);
 			
-			var delegates = chart.removeEventHandlerDelegate(type, handler);
+			var delegates = chart.removeEventHandlerDelegate((d) =>
+			{
+				return SPT.eventHandlerDelegateFilter(d, type, handler);
+			});
+			
 			delegates.forEach((d) =>
 			{
-				internal.removeEventListener(actualType, d.delegate);
+				internal.removeEventListener(d.type, d.delegate);
 			});
 		},
 		
@@ -6576,10 +6584,14 @@ SPT.selectRenderer = function(plugin, config)
 			var internal = chart.internal();
 			type = SPT.actualEventTypeForData(type, type);
 			
-			var delegates = chart.removeEventHandlerDelegate(type, handler);
+			var delegates = chart.removeEventHandlerDelegate((d) =>
+			{
+				return SPT.eventHandlerDelegateFilter(d, type, handler);
+			});
+			
 			delegates.forEach((d) =>
 			{
-				internal.removeEventListener(actualType, d.delegate);
+				internal.removeEventListener(d.type, d.delegate);
 			});
 		},
 		
@@ -7619,6 +7631,11 @@ SPT.actualEventTypeForData = function(type, typeIfNot)
 		return typeIfNot;
 	
 	return type.substring(0, type.length - SPT.EVENT_TYPE_FOR_DATA_SUFFIX.length);
+};
+
+SPT.eventHandlerDelegateFilter = function(delegateObj, type, handler)
+{
+	return (delegateObj.type === type && delegateObj.handler === handler);
 };
 
 //调用扩展数据事件类型处理函数，函数内的this将指向chart
@@ -8675,7 +8692,11 @@ EU.inflateRendererCommons = function(renderer)
 		var internal = chart.internal();
 		type = this._toEventTypeObj(type);
 		
-		var delegates = chart.removeEventHandlerDelegate(type, handler);
+		var delegates = chart.removeEventHandlerDelegate((d) =>
+		{
+			return (d.type.name === type.name && d.handler === handler);
+		});
+		
 		delegates.forEach((d) =>
 		{
 			internal.off(d.type.name, d.delegate);

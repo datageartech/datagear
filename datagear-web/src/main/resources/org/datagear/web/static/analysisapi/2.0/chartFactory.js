@@ -1826,9 +1826,9 @@ var EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "EventHand
 
 /**
  * 注册图表事件处理函数代理。
- * 图表渲染器on函数的实现逻辑通常是：先构建适配底层组件的图表事件处理函数代理（delegate），
- * 在代理中构建图表事件对象，然后调用handler图表事件处理函数。
- * 此函数用于注册这些信息，使得在实现图表渲染器的off函数时，可以获取对应底层组件的图表事件处理函数代理，进而实现底层组件的解绑逻辑。
+ * 当底层组件的事件处理逻辑不符合图表需求时，图表渲染器on函数的实现逻辑通常是：先创建一个底层组件的事件处理函数代理delegate，
+ * 在代理函数中构建新的图表事件对象，然后调用图表事件处理函数handler。
+ * 此函数用于注册这些信息，使得在实现图表渲染器的off函数时，可以获取对应底层组件的事件处理函数代理，进而实现底层组件的解绑逻辑。
  * 
  * @param type 图表事件类型
  * @param handler 图表事件处理函数，格式为：function(...){ ... }
@@ -1852,16 +1852,12 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 };
 
 /**
- * 删除图表事件处理函数代理，并返回已删除的代理信息对象数组。
- * 图表渲染器off函数的实现逻辑通常是：使用此函数移除由chart.registerEventHandlerDelegate()函数注册的图表事件处理函数代理信息对象，
- * 然后调用底层组件的事件解绑函数，解绑代理信息对象的delegate。
+ * 查找图表事件处理函数代理信息。
  * 
- * @param type 图表事件类型字符串/对象、事件类型匹配函数，当是对象时，支持对象结构深度比较；匹配函数格式为：function(type){ return true、false; }，返回true表示匹配
- * @param handler 可选，图表事件处理函数，格式为：function(...){ ... }，当为undefined时，表示全部
- * @param returns 匹配给定图表事件类型、图表事件处理函数（可选）的代理信息对象数组，格式为：
- *						[ { type: ..., handler: ..., delegate: ... }, ... ]
+ * @param filter 查找过滤函数，格式为：function(delegateObj){ return true、false; }，返回true表示匹配
+ * @returns [ ... ]，空数组表示没有
  */
-chartProto.removeEventHandlerDelegate = function(type, handler)
+chartProto.findEventHandlerDelegates = function(filter)
 {
 	var re = [];
 	
@@ -1870,17 +1866,65 @@ chartProto.removeEventHandlerDelegate = function(type, handler)
 	if(delegateObjs == null)
 		return re;
 	
+	for(let i=0; i<delegateObjs.length; i++)
+	{
+		let delegateObj = delegateObjs[i];
+		
+		if(filter(delegateObj))
+		{
+			re.push(delegateObj);
+		}
+	}
+	
+	return re;
+};
+
+/**
+ * 删除图表事件处理函数代理，并返回已删除的代理信息对象数组。
+ * 图表渲染器off函数的实现逻辑通常是：使用此函数移除由chart.registerEventHandlerDelegate()函数注册的图表事件处理函数代理信息对象，
+ * 然后调用底层组件的事件解绑函数，解绑代理信息对象的delegate。
+ * 
+ * @param filter 要删除的图表事件处理函数代理信息对象、对象数组、过滤函数，其中过滤函数格式为：function(delegateObj){ return true、false; }，返回true表示删除
+ * @returns [ ... ]，空数组表示没有
+ */
+chartProto.removeEventHandlerDelegate = function(filter)
+{
+	var re = [];
+	
+	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
+	
+	if(delegateObjs == null)
+		return re;
+	
+	var isArray = CF.isArray(filter);
+	var isFunction = (!isArray && CF.isFunction(filter));
+	
 	for(let i=0; i<delegateObjs.length;)
 	{
 		let delegateObj = delegateObjs[i];
-		let typeMatches = false;
+		let doDel = false;
 		
-		if(CF.isFunction(type))
-			typeMatches = type(delegateObj.type);
+		if(isArray)
+		{
+			for(let j=0; j<filter.length; j++)
+			{
+				if(filter[j] === delegateObj)
+				{
+					doDel = true;
+					break;
+				}
+			}
+		}
+		else if(isFunction)
+		{
+			doDel = filter(delegateObj);
+		}
 		else
-			typeMatches = CF.deepEquals(delegateObj.type, type);
+		{
+			doDel = (delegateObj === filter);
+		}
 		
-		if(typeMatches && (handler === undefined || delegateObj.handler === handler))
+		if(doDel)
 		{
 			re.push(delegateObj);
 			delegateObjs.splice(i, 1);
