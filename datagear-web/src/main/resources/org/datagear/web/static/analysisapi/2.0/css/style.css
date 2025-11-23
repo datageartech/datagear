@@ -393,7 +393,8 @@
 	align-items: center;
 }
 .dg-dspform .dg-dspform-inputs-wrapper{
-	border: 1px solid transparent;
+	border-width: 1px;
+	border-style: solid;
 }
 .dg-dspform .dg-validation-required,
 .dg-dspform .dg-validation-number{

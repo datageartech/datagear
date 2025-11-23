@@ -722,98 +722,6 @@ label.align-tip{
 	height: calc(90vh - 6rem - 5rem - 8rem);
 }
 
-/*数据集预览参数日期选择器*/
-/*主体*/
-.xdsoft_datetimepicker{
-	color: var(--text-color);
-	background: var(--surface-overlay);
-	border-color: var(--surface-border);
-	box-shadow: 0px 0px 6px var(--surface-600);
-	-webkit-box-shadow: 0px 0px 6px var(--surface-600);
-	border-radius: 3px;
-}
-.xdsoft_datetimepicker .xdsoft_datepicker{
-	width: unset;
-}
-.xdsoft_datetimepicker .xdsoft_calendar table{
-	border-collapse: separate;
-	border-spacing: 1px;
-}
-/*前景色*/
-.xdsoft_datetimepicker .xdsoft_calendar td,
-.xdsoft_datetimepicker .xdsoft_calendar th{
-	color: var(--text-color);
-	border-radius: 3px;
-}
-.xdsoft_datetimepicker .xdsoft_calendar td>div{
-	padding: 7px 9px;
-}
-/*按钮*/
-.xdsoft_datetimepicker .xdsoft_label i,
-.xdsoft_datetimepicker .xdsoft_next,
-.xdsoft_datetimepicker .xdsoft_prev{
-	color: var(--text-color);
-}
-.xdsoft_datetimepicker .xdsoft_today_button:before{
-	background: var(--text-color);
-}
-/*年、月*/
-.xdsoft_datetimepicker .xdsoft_label{
-	background: var(--surface-overlay);
-}
-/*年、月下拉框*/
-.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{
-	color: var(--text-color);
-	background: var(--surface-overlay);
-	border-color: var(--surface-border);
-	box-shadow: 0px 0px 6px var(--surface-600);
-	-webkit-box-shadow: 0px 0px 6pxvar(--surface-600);
-}
-/*时间框*/
-.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{
-	border-color: var(--surface-border);
-	border-radius: 3px;
-}
-/*时间条目*/
-.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{
-	color: var(--text-color);
-	border-color: var(--surface-border);
-}
-/*悬停*/
-.xdsoft_datetimepicker .xdsoft_calendar td:hover,
-.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,
-.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{
-	color: var(--text-color) !important;
-	background: var(--surface-ground) !important;
-}
-/*今天*/
-.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{
-	color: var(--text-color) !important;
-    background: var(--surface-ground) !important;
-	font-weight: bold;
-}
-/*选中*/
-.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,
-.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,
-.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current,
-.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option.xdsoft_current{
-	color: var(--primary-color-text) !important;
-	background: var(--primary-color) !important;
-	box-shadow: none;
-	-webkit-box-shadow: none;
-}
-/**年份选择器确定按钮*/
-.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{
-	color: var(--text-color) !important;
-	border: 1px solid var(--surface-border) !important;
-    background: var(--surface-ground) !important;
-}
-.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year:hover{
-	color: var(--text-color) !important;
-	border: 1px solid var(--surface-border) !important;
-    background: var(--surface-hover) !important;
-}
-
 .panel-content-size-sm{
 	width: 38vw;
 	height: 50vh;
@@ -885,20 +793,23 @@ label.align-tip{
 	min-height: 20vh;
 }
 
-.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspform-content{
 	/*panel-content-size-sm的高度 - 按钮高度和内间距 */
 	height: calc(50vh - 5rem);
 	overflow: auto;
 	box-sizing: border-box;
 	margin-bottom: 0.8rem;
 }
-.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-label{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspform-content .dg-dspform-item-label{
 	margin-bottom: 0.3rem;
 }
-.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-content .dg-dspv-form-item-value{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspform-content .dg-dspform-item-value{
 	margin-bottom: 0.6rem;
 }
-.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspv-form-foot{
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspform-content select{
+	appearance: auto !important;
+}
+.dataset-paramvalue-panel .paramvalue-form-wrapper .dg-dspform-foot{
 	text-align: center;
 }
 

@@ -76,7 +76,7 @@
 	 *              labelColon: "..."              //可选，标签冒号值
 	 * 				yesText: "...",       		   //可选，"是"选项文本内容
 	 * 				noText: "...",       		   //可选，"否"选项文本内容
-	 * 				render: function(form){}	   //可选，渲染后回调函数
+	 * 				rendered: function(form){}	   //可选，渲染后回调函数
 	 * 			}
 	 * @return 表单HTML元素
 	 */
@@ -261,8 +261,8 @@
 		CF.eleData(form, CF.builtinPropName("dpFormSubmitHandler"), submitHandler);
 		CF.eleOn(form, "submit", submitHandler);
 		
-		if(options.render)
-			options.render(form);
+		if(options.rendered)
+			options.rendered.call(form, form);
 		
 		return form;
 	};
@@ -1934,7 +1934,7 @@
 						confirmBtn.click();
 					},
 					paramValues: chart.dataSetParamValues(i),
-					render: function(form)
+					rendered: function(form)
 					{
 						TOOL.eleHide(TOOL.getDataSetParamFormFoot(form));
 					}
@@ -1976,7 +1976,7 @@
 					
 					let chartOptions = chart.options();
 					let builtinTool = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinTool);
-					let convertParamFormValue = (builtinTool ? builtinTool.convertParamFormValue : null);
+					let convertParamFormValue = (builtinTool ? builtinTool.convertParamFormValue : undefined);
 					convertParamFormValue = (convertParamFormValue === undefined ? true : convertParamFormValue);
 					
 					for(let i=0; i<paramValuess.length; i++)

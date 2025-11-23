@@ -303,28 +303,29 @@
 			noText: "<@spring.message code='no' />",
 			paramValues: po.vueRaw(pm.previewQuery.paramValues),
 			readonly: false,
-			render: function()
+			rendered: function()
 			{
-				$("select, input[type='text'], textarea", this).addClass("p-inputtext p-component w-full");
-				$("button", this).addClass("p-button p-component");
+				$(".dg-dspform-input:not([type='radio'],[type='checkbox']), .dg-dspform-inputs-wrapper", this).addClass("p-inputtext p-component w-full");
+				$(".dg-date-widget-inputs select", this).addClass("p-inputtext p-component");
+				$(".dg-dspform-content button", this).addClass("p-button p-button-secondary p-component");
+				$(".dg-dspform-foot button", this).addClass("p-button p-component");
 				$.focusOnFirstInput(this);
 			},
 			submit: function()
 			{
-				pm.previewQuery.paramValues = chartFactory.chartSetting.getDataSetParamFormData(this);
+				pm.previewQuery.paramValues = chartFactory.chartTool.getDataSetParamFormData(this);
 				
 				po.inParamFormSubmitAction(true);
 				po.triggerPreview();
 			}
 		});
 		
-		chartFactory.chartSetting.removeDatetimePickerRoot();
 		wrapper.empty();
 		
 		var fm = po.vueFormModel();
 		var params = $.extend(true, [], po.vueRaw(fm.params));
 		
-		chartFactory.chartSetting.renderDataSetParamForm(wrapper, params, formOptions);
+		chartFactory.chartTool.renderDataSetParamForm(wrapper[0], params, formOptions);
 	};
 	
 	po.vuePageModel(
@@ -392,7 +393,7 @@
 		onPreviewParamPanelHide: function(e)
 		{
 			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId("${pid}previewParamPanel", document.body));
-			chartFactory.chartSetting.destroyDataSetParamForm(wrapper);
+			chartFactory.chartTool.destroyDataSetParamForm(wrapper[0]);
 		},
 		formatPreviewColValue: function(data, name)
 		{
