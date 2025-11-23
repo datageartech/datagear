@@ -372,7 +372,7 @@ var chartProto = CF.Chart.prototype;
  */
 chartProto.dashboard = function(dashboard)
 {
-	if(dashboard === undefined)
+	if(arguments.length == 0)
 		return this._dashboard;
 	else
 		this._dashboard = dashboard;
@@ -495,7 +495,7 @@ chartProto._initUpdateGroup = function()
  */
 chartProto.links = function(links)
 {
-	if(links === undefined)
+	if(arguments.length == 0)
 	{
 		if(this._links == null)
 			this._links = [];
@@ -526,7 +526,7 @@ chartProto.links = function(links)
  */
 chartProto.autoResize = function(autoResize)
 {
-	if(autoResize === undefined)
+	if(arguments.length == 0)
 		return (this._autoResize == true);
 	else
 		this._autoResize = autoResize;
@@ -543,7 +543,7 @@ chartProto.autoResize = function(autoResize)
  */
 chartProto.updateGroup = function(group)
 {
-	if(group === undefined)
+	if(arguments.length == 0)
 	{
 		if(this._updateGroup == null)
 			this._updateGroup = "";
@@ -768,7 +768,7 @@ var UPDATE_TIME_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
 
 chartProto._updateTime = function(time)
 {
-	if(time === undefined)
+	if(arguments.length == 0)
 		return this.liveData(UPDATE_TIME_LIVE_DATA_NAME);
 	else
 		this.liveData(UPDATE_TIME_LIVE_DATA_NAME, time);
@@ -803,7 +803,7 @@ chartProto._isRequestRefresh = function()
  */
 chartProto.manualRender = function(manualRender)
 {
-	if(manualRender === undefined)
+	if(arguments.length == 0)
 	{
 		//注意：此属性不应以chart._initManualRender()的方式初始化，
 		//因为看板需要在chart.init()之前就读取它的值
@@ -1046,7 +1046,7 @@ dashboardProto.renderContext = function()
  */
 dashboardProto.listener = function(listener)
 {
-	if(listener === undefined)
+	if(arguments.length == 0)
 		return this._listener;
 	else
 		this._listener = listener;
@@ -1060,7 +1060,7 @@ dashboardProto.listener = function(listener)
  */
 dashboardProto.mapURLs = function(mapURLs)
 {	
-	if(mapURLs === undefined)
+	if(arguments.length == 0)
 		return chartMapURLs;
 	else
 		CF.extend(chartMapURLs, mapURLs);
@@ -1199,7 +1199,7 @@ dashboardProto.renderContextValue = function(name, value)
  */
 dashboardProto.resultDataFormat = function(resultDataFormat)
 {
-	if(resultDataFormat === undefined)
+	if(arguments.length == 0)
 		return this._resultDataFormat;
 	else
 		this._resultDataFormat = resultDataFormat;
@@ -1918,7 +1918,7 @@ dashboardProto._handleChartAjaxError = function(chart, error, chartQuery, logIfN
  */
 dashboardProto._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
 {
-	logIfNone = (logIfNone == null ? true : logIfNone);
+	logIfNone = (logIfNone === undefined ? true : logIfNone);
 	
 	if(!chart)
 		return;
@@ -2032,7 +2032,7 @@ dashboardProto._chartQueryOfDashboardQuery = function(dashboardQuery, chartId, c
 {
 	var chartQueries = dashboardQuery.chartQueries;
 	
-	if(chartQuery === undefined)
+	if(arguments.length <= 2)
 	{
 		return (chartQueries ? chartQueries[chartId] : null);
 	}
@@ -2085,7 +2085,7 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
 {
 	var dashboardQueryParamName = DF.updateDashboardConfig.dashboardQueryParamName;
 	
-	if(dashboardQuery === undefined)
+	if(arguments.length <= 1)
 	{
 		return dashboardQueryForm[dashboardQueryParamName];
 	}
@@ -2325,7 +2325,7 @@ dashboardProto._loadingChartElement = function(element, set)
 {
 	var name = CF.builtinPropName("loadingChart");
 	
-	if(set === undefined)
+	if(arguments.length <= 1)
 	{
 		return (CF.eleData(element, name) === true);
 	}
@@ -2683,10 +2683,20 @@ dashboardProto.isActive = function()
  */
 dashboardProto.status = function(status)
 {
-	if(status === undefined)
-		return (this._status || "");
+	if(arguments.length == 0)
+	{
+		if(this._status == null)
+			this._status = "";
+		
+		return this._status;
+	}
 	else
+	{
+		if(status == null)
+			throw new Error("[status] required");
+		
 		this._status = status;
+	}
 };
 
 /**
@@ -2878,7 +2888,7 @@ dashboardProto.version = function()
 dashboardProto.chartsIn = function(element, active)
 {
 	element = (CF.isString(element) ? CF.eleOfId(element) : element);
-	active = (active == null ? false : active);
+	active = (active === undefined ? false : active);
 	
 	var re = [];
 	

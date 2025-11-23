@@ -1472,7 +1472,7 @@
 	
 	TOOL.eleInputConvertDateFormat = function(input, value, toSrc)
 	{
-		toSrc = (toSrc == null ? false : toSrc);
+		toSrc = (toSrc === undefined ? false : toSrc);
 		
 		if(input == null || CF.isEmpty(value))
 			return value;
@@ -1977,7 +1977,7 @@
 					let chartOptions = chart.options();
 					let builtinTool = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinTool);
 					let convertParamFormValue = (builtinTool ? builtinTool.convertParamFormValue : null);
-					convertParamFormValue = (convertParamFormValue == null ? true : convertParamFormValue);
+					convertParamFormValue = (convertParamFormValue === undefined ? true : convertParamFormValue);
 					
 					for(let i=0; i<paramValuess.length; i++)
 					{

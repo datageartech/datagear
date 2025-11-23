@@ -335,27 +335,27 @@ CF.init = function(root)
 };
 
 /**
- * 创建图表类实例
+ * 创建图表类实例。
  * 
  * @param root 图表根对象，格式应为：
  *				{
  *				  //唯一ID
  *				  id: "...",
+ *				  //名称
+ *				  name: "...",
  *				  //HTML元素ID
  *				  elementId: "...",
  *				  //渲染上下文
  *				  renderContext: {...},
- *				  //图表插件
+ *				  //可选，图表插件
  *				  plugin: {...},
- *				  //可选，名称
- *				  name: "...",
  *				  //可选，数据集绑定数组
  *				  dataSetBinds: [...],
  *				  //可选，更新间隔
  *				  updateInterval: 数值,
  *				  //可选，图表结果数据格式
  *				  resultDataFormat: {...},
- *				  //图表属性
+ *				  //可选，图表属性
  *				  attrValues: {...}
  *				}
  *				
@@ -374,6 +374,18 @@ var chartProto = CF.Chart.prototype;
 //初始化图表根对象基础属性
 CF.initChartRoot = function(root)
 {
+	if(CF.isEmpty(root.id))
+		throw new Error("chart [id] required");
+	
+	if(root.name == null)
+		throw new Error("chart [name] required");
+	
+	if(CF.isEmpty(root.elementId))
+		throw new Error("chart [elementId] required");
+	
+	if(CF.isEmpty(root.renderContext))
+		throw new Error("chart [renderContext] required");
+	
 	var dsbs = root.dataSetBinds;
 	
 	if(dsbs != null)
@@ -438,18 +450,6 @@ CF.findPluginById = function(pluginId)
  */
 chartProto.init = function()
 {
-	if(!this.id())
-		throw new Error("chart id required");
-	
-	if(!this.elementId())
-		throw new Error("chart elementId required");
-	
-	if(!this.renderContext())
-		throw new Error("chart renderContext required");
-	
-	if(this.element() == null)
-		throw new Error("chart element '#"+this.elementId()+"' required");
-	
 	if(!this.statusPreInit() && !this.statusDestroyed())
 		throw new Error("chart is illegal state for : init()");
 	
@@ -475,6 +475,16 @@ chartProto._renderContextChartTheme = function()
 	return CF.renderContextChartTheme(this.renderContext());
 };
 
+chartProto._eleNonNull = function()
+{
+	var ele = this.element();
+	
+	if(ele == null)
+		throw new Error("chart '#"+this.elementId()+"' element required");
+	
+	return ele;
+};
+
 /**
  * 初始化图表选项。
  * 此函数依次从<body>元素、图表元素的elementAttrConst.OPTIONS属性读取、合并图表选项。
@@ -484,7 +494,7 @@ chartProto._initOptions = function()
 	var options = {};
 	options = CF.extend(true, options, this.optionsOrigin(true));
 	
-	var eleOptions = CF.eleAttr(this.element(), elementAttrConst.OPTIONS);
+	var eleOptions = CF.eleAttr(this._eleNonNull(), elementAttrConst.OPTIONS);
 	
 	var bodyOptions = this._bodyOptions();
 	
@@ -517,7 +527,7 @@ chartProto._bodyOptions = function()
  */
 chartProto._initTheme = function()
 {
-	var eleTheme = CF.eleAttr(this.element(), elementAttrConst.THEME);
+	var eleTheme = CF.eleAttr(this._eleNonNull(), elementAttrConst.THEME);
 	
 	if(eleTheme)
 	{
@@ -537,7 +547,7 @@ chartProto._initTheme = function()
  */
 chartProto._initListener = function()
 {
-	var listener = CF.eleAttr(this.element(), elementAttrConst.LISTENER);
+	var listener = CF.eleAttr(this._eleNonNull(), elementAttrConst.LISTENER);
 	
 	if(listener)
 		listener = CF.evalSilently(listener);
@@ -579,7 +589,7 @@ chartProto._initDisableTool = function()
 	else
 	{
 		let globalObj = this._bodyDisableToolObj();
-		let localValue = CF.eleAttr(this.element(), elementAttrConst.DISABLE_TOOL);
+		let localValue = CF.eleAttr(this._eleNonNull(), elementAttrConst.DISABLE_TOOL);
 		
 		re = this._disableToolObjForAttr(localValue);
 		re = CF.extend({}, globalObj, re);
@@ -624,7 +634,7 @@ chartProto._disableToolObjForAttr = function(str)
  */
 chartProto._initRenderer = function()
 {
-	var renderer = CF.eleAttr(this.element(), elementAttrConst.RENDERER);
+	var renderer = CF.eleAttr(this._eleNonNull(), elementAttrConst.RENDERER);
 	renderer = (renderer ? CF.evalSilently(renderer) : null);
 	
 	this.renderer(renderer);
@@ -636,7 +646,7 @@ chartProto._initRenderer = function()
  */
 chartProto._initAttrValues = function()
 {
-	var attrValues = CF.eleAttr(this.element(), elementAttrConst.ATTR_VALUES);
+	var attrValues = CF.eleAttr(this._eleNonNull(), elementAttrConst.ATTR_VALUES);
 	attrValues = (attrValues ? CF.evalSilently(attrValues) : null);
 	//注意：应该使用this.attrValuesOrigin()作为合并基础，因为可能this.attrValues()执行修改操作，
 	//比如修改后chart.destroy()后再chart.render()
@@ -668,6 +678,8 @@ chartProto._initForPost = function(){};
 
 /**
  * 获取图表ID。
+ * 
+ * @returns 图表ID，非空
  */
 chartProto.id = function()
 {
@@ -678,21 +690,18 @@ chartProto.id = function()
  * 获取/设置图表名称。
  * 
  * @param name 可选，要设置的名称
- * @returns 名称，非null
+ * @returns 要获取的名称，非null
  */
 chartProto.name = function(name)
 {
-	if(name === undefined)
+	if(arguments.length == 0)
 	{
-		if(this._root.name == null)
-			this._root.name = "";
-		
 		return this._root.name;
 	}
 	else
 	{
 		if(name == null)
-			name = "";
+			throw new Error("[name] required");
 		
 		this._root.name = name;
 	}
@@ -703,11 +712,14 @@ chartProto.name = function(name)
  * 注意：设置操作仅应在图表未渲染、或者渲染后图表元素ID有变更时执行。
  * 
  * @param elementId 可选，要设置的元素ID
+ * @returns 要获取的元素ID，非空
  */
 chartProto.elementId = function(elementId)
 {
-	if(elementId === undefined)
+	if(arguments.length == 0)
+	{
 		return this._root.elementId;
+	}
 	else
 	{
 		if(CF.isEmpty(elementId))
@@ -721,11 +733,11 @@ chartProto.elementId = function(elementId)
  * 获取/设置图表自动更新间隔。
  * 
  * @param interval 可选，要设置的更新间隔毫秒数
- * @returns 更新间隔，-1 表示不自动间隔更新
+ * @returns 要获取的更新间隔，小于0表示不自动间隔更新
  */
 chartProto.updateInterval = function(interval)
 {
-	if(interval === undefined)
+	if(arguments.length == 0)
 	{
 		if(this._root.updateInterval == null)
 			this._root.updateInterval = -1;
@@ -735,21 +747,22 @@ chartProto.updateInterval = function(interval)
 	else
 	{
 		if(interval == null)
-			interval = -1;
+			throw new Error("[interval] required");
 		
 		this._root.updateInterval = interval;
 	}
 };
 
 /**
- * 获取/设置图表插件，可能null。
+ * 获取/设置图表插件。
  * 设置操作应在图表渲染器执行。
  * 
  * @param plugin 可选，要设置的图表插件
+ * @returns 要获取的图表插件，可能为null
  */
 chartProto.plugin = function(plugin)
 {
-	if(plugin === undefined)
+	if(arguments.length == 0)
 		return this._plugin;
 	else
 		this._plugin = plugin;
@@ -775,11 +788,14 @@ chartProto._pluginNonNull = function()
  * 获取/设置图表渲染上下文。
  * 
  * @param renderContext 可选，要设置的渲染上下文
+ * @returns 要获取的渲染上下文，非null
  */
 chartProto.renderContext = function(renderContext)
 {
-	if(renderContext === undefined)
+	if(arguments.length == 0)
+	{
 		return this._root.renderContext;
+	}
 	else
 	{
 		if(renderContext == null)
@@ -797,12 +813,12 @@ chartProto.renderContext = function(renderContext)
  * 图表渲染器实现相关：
  * 图表渲染器应使用此函数获取并应用图表选项，另参考chart.inflateOptions()。
  * 
- * @param options 可选，要设置的图表选项，没有则执行获取操作
- * @returns 要获取的图表选项，格式为：{ ... }，不会为null
+ * @param options 可选，要设置的图表选项
+ * @returns 要获取的图表选项，格式为：{ ... }，非null
  */
 chartProto.options = function(options)
 {
-	if(options === undefined)
+	if(arguments.length == 0)
 	{
 		if(this._root.options == null)
 			this._root.options = {};
@@ -812,7 +828,7 @@ chartProto.options = function(options)
 	else
 	{
 		if(options == null)
-			options = {};
+			throw new Error("[options] required");
 		
 		this._root.options = options;
 	}
@@ -827,21 +843,21 @@ chartProto.options = function(options)
  * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.themeGradualColor()。
  * 
  * @param theme 可选，要设置的图表主题，会被此函数修改，没有则执行获取操作
- * @returns 要获取的主题，不会为null
+ * @returns 要获取的主题，非null
  */
 chartProto.theme = function(theme)
 {
-	if(theme === undefined)
+	if(arguments.length == 0)
 	{
 		if(this._theme == null)
 			this._theme = this._renderContextChartTheme();
 		
-		return this._theme;
+		return this._theme
 	}
 	else
 	{
 		if(theme == null)
-			theme = {};
+			throw new Error("[theme] required");
 		
 		var globalTheme = this._renderContextChartTheme();
 		
@@ -882,11 +898,11 @@ chartProto.theme = function(theme)
  * 图表初始化时会使用图表元素的"dg-chart-listener"属性值执行设置操作。
  * 
  * @param listener 可选，要设置的监听器对象，没有则执行获取操作
- * @returns 要获取的监听器、null
+ * @returns 要获取的监听器，可能null
  */
 chartProto.listener = function(listener)
 {
-	if(listener === undefined)
+	if(arguments.length == 0)
 		return this._listener;
 	else
 		this._listener = listener;
@@ -909,13 +925,16 @@ chartProto.listener = function(listener)
  *						//可选，是否禁用数据透视表
  *						data: true、false
  *					}
- * @returns 要获取的禁用设置，格式为：{param: true、false, data: true、false}，不会为null
+ * @returns 要获取的禁用设置，格式为：{param: true、false, data: true、false}，非null
  */
 chartProto.disableTool = function(disable)
 {
-	if(disable === undefined)
+	if(arguments.length == 0)
 	{
-		return (this._disableTool || (this._disableTool = this._defaultDisableTool()));
+		if(this._disableTool == null)
+			this._disableTool = this._defaultDisableTool();
+		
+		return this._disableTool;
 	}
 	else
 	{
@@ -971,7 +990,7 @@ chartProto._defaultDisableTool = function()
  */
 chartProto.renderer = function(renderer)
 {
-	if(renderer === undefined)
+	if(arguments.length == 0)
 		return this._renderer;
 	else
 		this._renderer = renderer;
@@ -986,7 +1005,7 @@ chartProto.renderer = function(renderer)
  */
 chartProto.resultDataFormat = function(resultDataFormat)
 {
-	if(resultDataFormat === undefined)
+	if(arguments.length == 0)
 		return this._root.resultDataFormat;
 	else
 		this._root.resultDataFormat = resultDataFormat;
@@ -1009,7 +1028,7 @@ chartProto.render = function()
 	if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
 		throw new Error("chart is illegal state for : render()");
 	
-	if(CF.renderedChart(this.element()) != null)
+	if(CF.renderedChart(this._eleNonNull()) != null)
 		throw new Error("element '#"+this.elementId()+"' has been rendered as chart");
 	
 	this.statusRendering(true);
@@ -1076,7 +1095,7 @@ chartProto.doRender = function()
 	if(!this.statusRendering())
 		throw new Error("chart is illegal state for : doRender()");
 	
-	var ele = this.element();
+	var ele = this._eleNonNull();
 	var theme = this.theme();
 	var options = this.options();
 	
@@ -1367,7 +1386,7 @@ chartProto.doDestroy = function()
 	}
 	else
 	{
-		CF.eleEmpty(this.element());
+		CF.eleEmpty(this._eleNonNull());
 	}
 	
 	this.internal(null);
@@ -1379,7 +1398,7 @@ chartProto.doDestroy = function()
 
 chartProto._doDestroy = function()
 {
-	var ele = this.element();
+	var ele = this._eleNonNull();
 	var theme = this.theme();
 	
 	var classes =
@@ -1611,7 +1630,7 @@ chartProto._eleEventHandlers = function()
 {
 	var ehs = [];
 	var prefix = elementAttrConst.ON;
-	var ele = this.element();
+	var ele = this._eleNonNull();
 	
 	if(ele.hasAttributes())
 	{
@@ -1759,10 +1778,20 @@ chartProto._postProcessDestroyed = function()
  */
 chartProto.status = function(status)
 {
-	if(status === undefined)
-		return (this._status != null ? this._status : "");
+	if(arguments.length == 0)
+	{
+		if(this._status == null)
+			this._status = "";
+		
+		return this._status;
+	}
 	else
+	{
+		if(status == null)
+			throw new Error("[status] required");
+		
 		this._status = status;
+	}
 };
 
 /**
@@ -1837,7 +1866,7 @@ var EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "EventHand
  */
 chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 {
-	var delegateObj = (handler === undefined && delegate === undefined ?
+	var delegateObj = (arguments.length <= 1 ?
 						type : { type: type, handler: handler, delegate: delegate });
 	
 	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
@@ -1942,7 +1971,7 @@ chartProto.removeEventHandlerDelegate = function(filter)
 
 chartProto._dataSetBindOf = function(dataSetBind, nullable)
 {
-	nullable = (nullable == null ? false : nullable);
+	nullable = (nullable === undefined ? false : nullable);
 	
 	//数据集绑定对象
 	if(dataSetBind && dataSetBind.dataSet !== undefined)
@@ -2001,7 +2030,7 @@ chartProto.dataSetParamValue = function(dataSetBind, name, value, convert)
 		name = param.name;
 	}
 	
-	if(value === undefined)
+	if(arguments.length <= 2)
 	{
 		var paramValues = this.dataSetParamValues(dataSetBind);
 		return paramValues[name];
@@ -2048,13 +2077,15 @@ chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment, co
 	
 	var paramValuesCurrent = dataSetBind.query.paramValues;
 	
-	if(paramValues === undefined)
+	if(arguments.length <= 1)
+	{
 		return paramValuesCurrent;
+	}
 	else
 	{
-		paramValues = (paramValues || {});
-		increment = (increment == null ? false : increment);
-		convert = (convert == null ? false : convert);
+		paramValues = (paramValues == null ? {} : paramValues);
+		increment = (increment === undefined ? false : increment);
+		convert = (convert === undefined ? false : convert);
 		
 		var params;
 		
@@ -2125,7 +2156,7 @@ chartProto.element = function()
  */
 chartProto.elementWidgetId = function()
 {
-	return CF.elementWidgetId(this.element());
+	return CF.elementWidgetId(this._eleNonNull());
 };
 
 /**
@@ -2152,7 +2183,7 @@ var INTERNAL_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "Internal";
  */
 chartProto.internal = function(internal)
 {
-	if(internal === undefined)
+	if(arguments.length == 0)
 		return this.liveData(INTERNAL_LIVE_DATA_NAME);
 	else
 		this.liveData(INTERNAL_LIVE_DATA_NAME, internal);
@@ -2162,11 +2193,15 @@ chartProto.internal = function(internal)
  * 获取/设置图表渲染上下文的属性值。
  * 
  * @param name
- * @param value 要设置的属性值，可选，不设置则执行获取操作
+ * @param value 可选，要设置的属性值
+ * @returns 要获取的属性值
  */
 chartProto.renderContextValue = function(name, value)
 {
-	return CF.renderContextValue(this.renderContext(), name, value);
+	if(arguments.length <= 1)
+		return CF.renderContextValue(this.renderContext(), name);
+	else
+		CF.renderContextValue(this.renderContext(), name, value);
 };
 
 /**
@@ -2178,7 +2213,7 @@ chartProto.renderContextValue = function(name, value)
  */
 chartProto.liveData = function(name, data)
 {
-	if(data === undefined)
+	if(arguments.length <= 1)
 	{
 		return (this._liveDatas ? this._liveDatas[name] : null);
 	}
@@ -2262,7 +2297,7 @@ chartProto.resultOf = function(chartResult, dataSetBind, dataSetResult)
 	var dataSetResults = this.results(chartResult);
 	var index = (CF.isNumber(dataSetBind) ? dataSetBind : (dataSetBind != null ? dataSetBind.index : null));
 	
-	if(dataSetResult === undefined)
+	if(arguments.length <= 2)
 	{
 		return (dataSetResults ? dataSetResults[index] : null);
 	}
@@ -2288,7 +2323,7 @@ chartProto.resultOf = function(chartResult, dataSetBind, dataSetResult)
  */
 chartProto.resultData = function(dataSetResult, data)
 {
-	if(data === undefined)
+	if(arguments.length <= 1)
 		return (dataSetResult ? dataSetResult.data : null);
 	else
 		dataSetResult.data = data;
@@ -2306,7 +2341,7 @@ chartProto.resultDataOf = function(chartResult, dataSetBind, data)
 {
 	var dataSetResult = this.resultOf(chartResult, dataSetBind);
 	
-	if(data === undefined)
+	if(arguments.length <= 2)
 	{
 		return this.resultData(dataSetResult);
 	}
@@ -2389,21 +2424,14 @@ chartProto.mapURL = function(name)
  */
 chartProto.inflateOptions = function(target, source, filter)
 {
-	// (target)
-	if(arguments.length <= 1)
-	{
-		source = this.options();
-		filter = null;
-	}
-	// (target, filter)
-	else if(arguments.length == 2 && (source === true || source === false || CF.isFunction(source)))
+	if(filter === undefined && (source === true || source === false || CF.isFunction(source)))
 	{
 		filter = source;
-		source = this.options();
+		source = undefined;
 	}
-	// (target, source)、(target, source, filter)
 	
-	filter = (filter == null ? true : filter);
+	source = (source === undefined ? this.options() : source);
+	filter = (filter === undefined ? true : filter);
 	
 	if(source != null)
 	{
@@ -2500,7 +2528,11 @@ chartProto.themeStyleName = function()
 chartProto.themeStyleSheet = function(name, css, force)
 {
 	var theme = this.theme();
-	return CF.themeStyleSheet(theme, name, css, force);
+	
+	if(arguments.length <= 1)
+		return CF.themeStyleSheet(theme, name);
+	else
+		CF.themeStyleSheet(theme, name, css, force);
 };
 
 /**
@@ -2514,7 +2546,7 @@ chartProto.dataSetAlias = function(dataSetBind, alias)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
-	if(alias === undefined)
+	if(arguments.length <= 1)
 	{
 		if(!CF.isEmpty(dataSetBind.alias))
 		{
@@ -2625,7 +2657,7 @@ chartProto.dataSetField = function(dataSetBind, fieldInfo)
 
 chartProto._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
 {
-	nullable = (nullable == null ? false : nullable);
+	nullable = (nullable === undefined ? false : nullable);
 	
 	//字段对象
 	if(fieldInfo && fieldInfo.name !== undefined)
@@ -2672,15 +2704,14 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldOf(dataSetBind, field);
 	
-	if(alias === undefined)
+	if(arguments.length <= 2)
 	{
-		alias =  (dataSetBind.fieldAliases ?
-						dataSetBind.fieldAliases[field.name] : null);
+		let re = (dataSetBind.fieldAliases ? dataSetBind.fieldAliases[field.name] : null);
 		
-		if(!alias)
-			alias = (field.label ||  field.name);
+		if(!re)
+			re = (field.label ||  field.name);
 		
-		return (alias || "");
+		return (re || "");
 	}
 	else
 	{
@@ -2704,7 +2735,7 @@ chartProto.dataSetFieldOrder = function(dataSetBind, field, order)
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldOf(dataSetBind, field);
 	
-	if(order === undefined)
+	if(arguments.length <= 2)
 	{
 		return (dataSetBind.fieldOrders ?
 						dataSetBind.fieldOrders[field.name] : null);
@@ -2757,7 +2788,7 @@ chartProto.dataSetParam = function(dataSetBind, paramInfo)
 
 chartProto._dataSetParamOf = function(dataSetBind, paramInfo, nullable)
 {
-	nullable = (nullable == null ? false : nullable);
+	nullable = (nullable === undefined ? false : nullable);
 	
 	//参数对象
 	if(paramInfo && paramInfo.name !== undefined)
@@ -2832,19 +2863,16 @@ chartProto.dataSetFieldSigns = function(dataSetBind, field, sign)
 	field = this._dataSetFieldOf(dataSetBind, field);
 	var fieldName = field.name;
 	
-	if(sign === undefined)
+	if(dataSetBind.fieldSigns == null)
+		dataSetBind.fieldSigns = {};
+	
+	if(arguments.length <= 2)
 	{
-		if(dataSetBind.fieldSigns == null)
-			dataSetBind.fieldSigns = {};
-		
 		var re = dataSetBind.fieldSigns[fieldName];
 		return (re == null ? [] : re);
 	}
 	else
 	{
-		if(dataSetBind.fieldSigns == null)
-			dataSetBind.fieldSigns = {};
-		
 		sign = this._toDataSignValues(sign);
 		dataSetBind.fieldSigns[fieldName] = sign;
 	}
@@ -2932,7 +2960,7 @@ chartProto.attrValue = function(name, value)
 	
 	var attrValues = this.attrValues();
 	
-	if(value === undefined)
+	if(arguments.length <= 1)
 		return attrValues[name];
 	else
 		attrValues[name] = value;
@@ -2946,7 +2974,7 @@ chartProto.attrValue = function(name, value)
  */
 chartProto.attrValues = function(values)
 {
-	if(values === undefined)
+	if(arguments.length == 0)
 	{
 		if(this._root.attrValues == null)
 			this._root.attrValues = {};
@@ -2956,7 +2984,7 @@ chartProto.attrValues = function(values)
 	else
 	{
 		if(values == null)
-			values = {};
+			throw new Error("[values] required");
 		
 		this._root.attrValues = values;
 	}
@@ -2994,7 +3022,7 @@ chartProto.pluginAttributes = function()
  */
 chartProto.optionsOrigin = function(eval)
 {
-	eval = (eval == null ? false : eval);
+	eval = (eval === undefined ? false : eval);
 	
 	if(this._root.optionsOrigin == null)
 		this._root.optionsOrigin = "";
@@ -3108,7 +3136,7 @@ chartProto.themeGradualColor = function(theme, factor)
  */
 chartProto.updateAppendMode = function(appendMode)
 {
-	if(appendMode === undefined)
+	if(arguments.length == 0)
 	{
 		return this._updateAppendMode;
 	}
@@ -3274,7 +3302,7 @@ var UPDATE_RESULT_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateResult";
  */
 chartProto.updateResult = function(chartResult)
 {
-	if(chartResult === undefined)
+	if(arguments.length == 0)
 		return this.liveData(UPDATE_RESULT_LIVE_DATA_NAME);
 	else
 		this.liveData(UPDATE_RESULT_LIVE_DATA_NAME, chartResult);
@@ -3289,7 +3317,7 @@ chartProto.updateResult = function(chartResult)
  */
 chartProto.results = function(chartResult, dataSetResults)
 {
-	if(dataSetResults === undefined)
+	if(arguments.length <= 1)
 	{
 		return (chartResult == null ? null : chartResult.dataSetResults);
 	}
@@ -3452,7 +3480,7 @@ chartProto.dataSetAttachment = function(dataSetBind, attachment)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
-	if(attachment === undefined)
+	if(arguments.length <= 1)
 	{
 		return (dataSetBind.attachment ? true : false);
 	}
@@ -3514,7 +3542,7 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
-	if(dataSigns === undefined)
+	if(arguments.length <= 1)
 	{
 		if(dataSetBind.dataSetSigns == null)
 			dataSetBind.dataSetSigns = [];
@@ -3539,9 +3567,9 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 chartProto.dataSetFieldsSigns = function(dataSetBind, dataSigns, increment)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	increment = (increment == null ? false : increment);
+	increment = (increment === undefined ? false : increment);
 	
-	if(dataSigns === undefined)
+	if(arguments.length <= 1)
 	{
 		if(dataSetBind.fieldSigns == null)
 			dataSetBind.fieldSigns = {};
@@ -3587,7 +3615,7 @@ chartProto.resultAddition = function(dataSetResult, name, value)
 {
 	var additions = (dataSetResult ? dataSetResult.additions : null);
 	
-	if(value === undefined)
+	if(arguments.length <= 2)
 	{
 		return (additions ? additions[name] : null);
 	}
@@ -3634,8 +3662,8 @@ chartProto.unreadyDataSetParams = function(dataSetBinds, stopOnFirst, checkIgnor
 	
 	dataSetBinds = (dataSetBinds === undefined ? this.dataSetBinds() :
 						(CF.isArray(dataSetBinds) ? dataSetBinds : [ dataSetBinds ]));
-	stopOnFirst = (stopOnFirst == null ? false : stopOnFirst);
-	checkIgnoreFetch = (checkIgnoreFetch == null ? false: checkIgnoreFetch);
+	stopOnFirst = (stopOnFirst === undefined ? false : stopOnFirst);
+	checkIgnoreFetch = (checkIgnoreFetch === undefined ? false: checkIgnoreFetch);
 	
 	var re = [];
 	
@@ -3916,7 +3944,7 @@ chartProto.dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
-	if(ignoreFetch === undefined)
+	if(arguments.length <= 1)
 	{
 		return this._dataSetIgnoreFetch(dataSetBind);
 	}
@@ -3936,7 +3964,7 @@ chartProto.dataSetIgnoreFetches = function(ignoreFetch)
 {
 	var dataSetBinds = this.dataSetBinds();
 	
-	if(ignoreFetch === undefined)
+	if(arguments.length == 0)
 	{
 		var re = [];
 		
@@ -3965,7 +3993,7 @@ chartProto._dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
 	
 	var query = dataSetBind.query;
 	
-	if(ignoreFetch === undefined)
+	if(arguments.length <= 1)
 	{
 		return (query.ignoreFetch == null ? false : query.ignoreFetch);
 	}
@@ -3984,7 +4012,7 @@ chartProto._dataSetIgnoreFetch = function(dataSetBind, ignoreFetch)
  */
 chartProto.resultIgnoreFetch = function(dataSetResult, ignoreFetch)
 {
-	if(ignoreFetch === undefined)
+	if(arguments.length <= 1)
 	{
 		return (dataSetResult && dataSetResult.ignoreFetch != null ? dataSetResult.ignoreFetch : false);
 	}
@@ -4006,7 +4034,7 @@ chartProto.resultIgnoreFetchOf = function(chartResult, dataSetBind, ignoreFetch)
 {
 	var dataSetResult = this.resultOf(chartResult, dataSetBind);
 	
-	if(ignoreFetch === undefined)
+	if(arguments.length <= 2)
 	{
 		return this.resultIgnoreFetch(dataSetResult);
 	}
@@ -4155,7 +4183,7 @@ CF.themeStyleSheet = function(theme, name, css, force)
 	
 	var info = infoMap[name];
 	
-	if(css === undefined)
+	if(arguments.length <= 2)
 		return (info != null);
 	
 	var styleName = CF.themeStyleName(theme);
@@ -4226,7 +4254,7 @@ CF.addThemeRefEntity = function(theme, entityId)
  */
 CF.removeThemeRefEntity = function(theme, entityId, destroyCss)
 {
-	destroyCss = (destroyCss == null ? true : destroyCss);
+	destroyCss = (destroyCss === undefined ? true : destroyCss);
 	
 	if(!theme)
 		return;
@@ -4300,7 +4328,7 @@ CF.eleOfId = function(id)
  */
 CF.elesOfSelector = function(selector, rootEle)
 {
-	rootEle = (rootEle == null ? document : rootEle);
+	rootEle = (rootEle === undefined ? document : rootEle);
 	
 	var re = [];
 	
@@ -4321,7 +4349,7 @@ CF.elesOfSelector = function(selector, rootEle)
  */
 CF.eleOfSelector = function(selector, rootEle)
 {
-	rootEle = (rootEle == null ? document : rootEle);
+	rootEle = (rootEle === undefined ? document : rootEle);
 	return rootEle.querySelector(selector);
 };
 
@@ -4531,7 +4559,7 @@ CF.eleAfter = function(ele, sibling)
  */
 CF.eleAttr = function(ele, name, value)
 {
-	if(value === undefined)
+	if(arguments.length <= 2)
 		return (ele == null ? undefined : ele.getAttribute(name));
 	
 	if(ele == null)
@@ -4592,7 +4620,7 @@ CF.eleRemoveClass = function(ele, classes)
  */
 CF.eleCss = function(ele, name, value)
 {
-	if(value === undefined)
+	if(arguments.length <= 2)
 		return (ele == null ? undefined : window.getComputedStyle(ele, null).getPropertyValue(name));
 	
 	if(ele == null)
@@ -4609,7 +4637,7 @@ CF.eleCss = function(ele, name, value)
  */
 CF.eleText = function(ele, text)
 {
-	if(text === undefined)
+	if(arguments.length <= 1)
 		return (ele == null ? undefined : ele.textContent);
 	
 	if(ele == null)
@@ -4626,7 +4654,7 @@ CF.eleText = function(ele, text)
  */
 CF.eleHtml = function(ele, html)
 {
-	if(html === undefined)
+	if(arguments.length <= 1)
 		return (ele == null ? undefined : ele.innerHTML);
 	
 	if(ele == null)
@@ -4648,7 +4676,7 @@ CF.eleData = function(ele, name, value)
 {
 	var datas = (ele == null ? null : ele[ELE_BIND_DATAS_ATTR_NAME]);
 	
-	if(value === undefined)
+	if(arguments.length <= 2)
 	{
 		return (datas == null ? undefined : datas.get(name));
 	}
@@ -4716,7 +4744,7 @@ CF.eleEmpty = function(ele)
  */
 CF.eleStyle = function(ele, css)
 {
-	if(css === undefined)
+	if(arguments.length <= 1)
 		return (ele == null ? undefined : CF.eleAttr(ele, "style"));
 	
 	if(ele == null)
@@ -4893,7 +4921,7 @@ CF.builtinPropName = function(name)
  */
 CF.renderContextValue = function(renderContext, name, value)
 {
-	if(value === undefined)
+	if(arguments.length <= 2)
 		return renderContext[name];
 	else
 		return renderContext[name] = value;
@@ -4907,7 +4935,10 @@ CF.renderContextValue = function(renderContext, name, value)
  */
 CF.renderContextWebContext = function(renderContext, webContext)
 {
-	return CF.renderContextValue(renderContext, renderContextAttrConst.webContext, webContext);
+	if(arguments.length <= 1)
+		return CF.renderContextValue(renderContext, renderContextAttrConst.webContext);
+	else
+		CF.renderContextValue(renderContext, renderContextAttrConst.webContext, webContext);
 };
 
 /**
@@ -4919,7 +4950,7 @@ CF.renderContextWebContext = function(renderContext, webContext)
  */
 CF.renderContextWebContextAttr = function(renderContext, name, nullable)
 {
-	nullable = (nullable == null ? false : nullable);
+	nullable = (nullable === undefined ? false : nullable);
 	
 	var webContext = CF.renderContextWebContext(renderContext);
 	var value = (webContext == null ? null : webContext[name]);
@@ -4949,7 +4980,10 @@ CF.renderContextWebContextPath = function(renderContext, nullable)
  */
 CF.renderContextChartTheme = function(renderContext, chartTheme)
 {
-	return CF.renderContextValue(renderContext, renderContextAttrConst.chartTheme, chartTheme);
+	if(arguments.length <= 1)
+		return CF.renderContextValue(renderContext, renderContextAttrConst.chartTheme);
+	else
+		CF.renderContextValue(renderContext, renderContextAttrConst.chartTheme, chartTheme);
 };
 
 /**
@@ -4988,7 +5022,7 @@ CF.toWebContextPathURL = function(contextPath, url)
  */
 CF.elementWidgetId = function(ele, widgetId)
 {
-	if(widgetId === undefined)
+	if(arguments.length == 1)
 	{
 		return CF.eleAttr(ele, CF.elementAttrConst.WIDGET);
 	}
@@ -5332,7 +5366,7 @@ CF.colorToHexStr = function(color, prefix)
 	{
 		color = CF.parseColor(color);
 	}
-	prefix = (prefix == null ? false : prefix);
+	prefix = (prefix === undefined ? false : prefix);
 	
 	var r = new Number(color.r).toString(16);
 	var g = new Number(color.g).toString(16);
@@ -6032,7 +6066,7 @@ CF.builtinOptionValue = function(options, name, value)
 	var customNames = (options == null ? null : options[builtinOptionNames.customOptionNames]);
 	name = (customNames && customNames[name] ? customNames[name] : name);
 	
-	if(value === undefined)
+	if(arguments.length <= 2)
 	{
 		return (options ? options[name] : null);
 	}
@@ -6047,7 +6081,7 @@ CF.builtinOptionValue = function(options, name, value)
  */
 CF.optionValue = function(options, name, value)
 {
-	if(value === undefined)
+	if(arguments.length <= 2)
 	{
 		return (options ? options[name] : null);
 	}
@@ -6125,7 +6159,7 @@ CF.inflateGlobalChartTheme = function(theme)
 
 CF.isThemeInflated = function(theme, inflated)
 {
-	if(inflated === undefined)
+	if(arguments.length <= 1)
 		return (theme._INFLATED === true);
 	else
 		theme._INFLATED = inflated;

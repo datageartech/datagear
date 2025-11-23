@@ -6876,7 +6876,7 @@ SPT.customRenderer = function(plugin, config)
 		
 		_getCustomRenderer: function(chart, nullable)
 		{
-			nullable = (nullable == null ? false : nullable);
+			nullable = (nullable === undefined ? false : nullable);
 			
 			var renderer = chart.renderer();
 			
@@ -7493,7 +7493,7 @@ SPT.dataSetBindsMainFetched = function(chart, chartResult)
 
 SPT.originalDataOfData = function(data, originalData)
 {
-	if(originalData === undefined)
+	if(arguments.length <= 1)
 	{
 		return (data == null ? null : data[SPT.ORIGINAL_DATA_PROP_NAME]);
 	}
@@ -7554,7 +7554,7 @@ SPT.convertDataPropValueToName = function(dataObj)
 //调用chart.options()中的processRenderOptions选项函数处理图表渲染选项，格式为：function(renderOptions, chart){ ... }
 SPT.processRenderOptions = function(chart, renderOptions, set)
 {
-	set = (set == null ? true : set);
+	set = (set === undefined ? true : set);
 	
 	var options = chart.options();
 	var handler = CF.optionValue(options, SPT.PROCESS_RENDER_OPTIONS_OPTION_NAME);
@@ -7575,7 +7575,7 @@ SPT.processRenderOptions = function(chart, renderOptions, set)
 //获取/设置图表渲染选项
 SPT.liveDataRenderOptions = function(chart, renderOptions)
 {
-	if(renderOptions === undefined)
+	if(arguments.length <= 1)
 		return chart.liveData(SPT.RENDER_OPTIONS_LIVE_DATA_NAME);
 	else
 		chart.liveData(SPT.RENDER_OPTIONS_LIVE_DATA_NAME, renderOptions);
@@ -7584,7 +7584,7 @@ SPT.liveDataRenderOptions = function(chart, renderOptions)
 //调用chart.options()中的processUpdateOptions选项函数处理图表更新选项，格式为：function(updateOptions, chart){ ... }
 SPT.processUpdateOptions = function(chart, updateOptions, set)
 {
-	set = (set == null ? true : set);
+	set = (set === undefined ? true : set);
 	
 	var options = chart.options();
 	var handler = CF.optionValue(options, SPT.PROCESS_UPDATE_OPTIONS_OPTION_NAME);
@@ -7605,7 +7605,7 @@ SPT.processUpdateOptions = function(chart, updateOptions, set)
 //获取/设置图表更新选项
 SPT.liveDataUpdateOptions = function(chart, updateOptions)
 {
-	if(updateOptions === undefined)
+	if(arguments.length <= 1)
 		return chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME);
 	else
 		chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME, updateOptions);
@@ -7647,7 +7647,7 @@ SPT.invokeEventHandler = function(chart, handler, args)
 //获取/设置事件对象的"data"属性值
 SPT.eventData = function(e, data)
 {
-	if(data === undefined)
+	if(arguments.length <= 1)
 		return e.data;
 	else
 		e.data = data;
@@ -8766,7 +8766,7 @@ EU.setOptionsReplaceMerge = function(chart, options, replaceMerge)
  */
 EU.inflateUpdateAxisData = function(chart, updateOptions, updateAxis, valueExtractor, sortSeriesData)
 {
-	sortSeriesData = (sortSeriesData == null ? true : sortSeriesData);
+	sortSeriesData = (sortSeriesData === undefined ? true : sortSeriesData);
 	
 	var axisData = [];
 	var indexCache = {};

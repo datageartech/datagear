@@ -349,7 +349,7 @@
 	editor.deselectElement = function(ele, force)
 	{
 		ele = this._currentElement(ele, true);
-		force = (force == null ? false : force);
+		force = (force === undefined ? false : force);
 		
 		if(!this._isEmptyElement(ele) || force)
 		{
@@ -377,7 +377,7 @@
 			ele = undefined;
 		}
 		
-		tip = (tip == null ? true : tip);
+		tip = (tip === undefined ? true : tip);
 		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
@@ -420,7 +420,7 @@
 			ele = undefined;
 		}
 		
-		tip = (tip == null ? true : tip);
+		tip = (tip === undefined ? true : tip);
 		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
@@ -462,7 +462,7 @@
 			ele = undefined;
 		}
 		
-		tip = (tip == null ? true : tip);
+		tip = (tip === undefined ? true : tip);
 		ele = this._currentElement(ele);
 		var firstChild = $("> *:first", ele);
 		
@@ -504,7 +504,7 @@
 			ele = undefined;
 		}
 		
-		tip = (tip == null ? true : tip);
+		tip = (tip === undefined ? true : tip);
 		ele = this._currentElement(ele);
 		
 		if(ele.is("body"))
@@ -2119,7 +2119,7 @@
 	//校验设置图表元素ID，图表元素必须有ID，且设置后必须更新图表的elementId属性
 	editor._checkSetElementIdAttrForChart = function(ele, name, reRender)
 	{
-		reRender = (reRender == null ? true : reRender);
+		reRender = (reRender === undefined ? true : reRender);
 		
 		var isIdAttr = /^\s*id\s*$/i.test(name);
 		
@@ -2607,7 +2607,7 @@
 	editor.getElementChartOptions = function(ele, asString)
 	{
 		ele = this._editElement(this._currentElement(ele, true));
-		asString = (asString == null ? true : asString);
+		asString = (asString === undefined ? true : asString);
 		
 		return this._getElementChartOptions(ele);
 	};
@@ -2655,7 +2655,7 @@
 	 */
 	editor.getGlobalChartOptions = function(asString)
 	{
-		asString = (asString == null ? true : asString);
+		asString = (asString === undefined ? true : asString);
 		
 		var ele = this._editElement($(document.body));
 		return this._getElementChartOptions(ele);
@@ -2849,7 +2849,7 @@
 	{
 		refEle = this._currentElement(refEle);
 		insertType = this._trimInsertType(refEle, insertType);
-		highlight = (highlight == null ? false : highlight);
+		highlight = (highlight === undefined ? false : highlight);
 		
 		if(chartFactory.isString(insertEle))
 			insertEle = $(insertEle);
@@ -2915,7 +2915,7 @@
 		//它们应该被保留，且不能同步至对应的编辑元素上
 		
 		//默认严格设置模式，这样才能支持删除styleObj中未出现的样式
-		strictSet = (strictSet == null ? true : strictSet);
+		strictSet = (strictSet === undefined ? true : strictSet);
 		
 		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.eleStyle(ele) || "");
 		
@@ -3031,7 +3031,7 @@
 	
 	editor._insertElementFormat = function(refEle, insertEle, insertType, formatInner)
 	{
-		formatInner = (formatInner == null ? false : formatInner);
+		formatInner = (formatInner === undefined ? false : formatInner);
 		
 		var refEleLevel = this._evalElementLevel(refEle);
 		
@@ -3340,7 +3340,7 @@
 	
 	editor._currentElement = function(currentEle, excludeBody)
 	{
-		excludeBody = (excludeBody == null ? false : excludeBody);
+		excludeBody = (excludeBody === undefined ? false : excludeBody);
 		
 		currentEle = (this._isEmptyElement(currentEle) ? this._selectedElement() : currentEle);
 		
@@ -3671,7 +3671,7 @@
 	
 	editor._toSingleQuoteJsString = function(str, quote)
 	{
-		quote = (quote == null ? false : quote);
+		quote = (quote === undefined ? false : quote);
 		
 		if(str == null)
 			return str;
