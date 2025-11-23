@@ -2522,7 +2522,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 					targetCharts.push(targetChart);
 			}
 			
-			targetChart.dataSetParamValue(dataSetIdx, param, (paramValue === undefined ? null : paramValue));
+			targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
 		}
 	}
 	

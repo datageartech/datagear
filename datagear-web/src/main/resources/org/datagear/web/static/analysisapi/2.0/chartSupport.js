@@ -6092,7 +6092,7 @@ SPT.tableRenderer = function(plugin, config)
 			var chartEle = jQuery(chart.element());
 			var curIntervalId = chartEle.data("tableCarouselIntervalId");
 			
-			if(intervalId === undefined)
+			if(arguments.length <= 1)
 				return curIntervalId;
 			
 			if(curIntervalId != null)
@@ -6103,17 +6103,26 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_serverSidePagingOption: function(options, value)
 		{
-			return CF.optionValue(options, "serverSidePaging", value);
+			if(arguments.length <= 1)
+				return CF.optionValue(options, "serverSidePaging");
+			else
+				CF.optionValue(options, "serverSidePaging", value);
 		},
 		
 		_updateInternalOption: function(options, value)
 		{
-			return CF.optionValue(options, "updateInternal", value);
+			if(arguments.length <= 1)
+				return CF.optionValue(options, "updateInternal");
+			else
+				CF.optionValue(options, "updateInternal", value);
 		},
 		
 		_carouselOption: function(options, value)
 		{
-			return CF.optionValue(options, "carousel", value);
+			if(arguments.length <= 1)
+				return CF.optionValue(options, "carousel");
+			else
+				CF.optionValue(options, "carousel", value);
 		}
 	};
 	

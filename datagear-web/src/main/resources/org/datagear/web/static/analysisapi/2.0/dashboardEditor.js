@@ -280,7 +280,7 @@
 	{
 		var body = $(document.body);
 		
-		if(enable === undefined)
+		if(arguments.length == 0)
 			return body.hasClass(BODY_CLASS_ELEMENT_BOUNDARY);
 		
 		if(enable)
