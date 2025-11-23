@@ -5109,7 +5109,7 @@ SPT.tableRenderer = function(plugin, config)
 			chart.internal().destroy(true);
 			chartEle.removeClass("dg-chart-table dg-hide-title dg-text-nowrap dg-chart-table-carousel");
 			chartEle.removeClass(chart.liveData(CF.builtinPropName("TableChartLocalStyleName")));
-			$(".dg-chart-container", chartEle).remove();
+			jQuery(".dg-chart-container", chartEle).remove();
 		},
 		
 		on: function(chart, type, handler)
@@ -5572,14 +5572,14 @@ SPT.tableRenderer = function(plugin, config)
 			return jQuery(".dg-chart-table-content", chart.element());
 		},
 		
-		_getScrollHead: function(chart, $chartContent)
+		_getScrollHead: function(chart, chartContentEle)
 		{
-			return jQuery(".dt-scroll-head", $chartContent);
+			return jQuery(".dt-scroll-head", chartContentEle);
 		},
 		
-		_getScrollBody: function(chart, $chartContent)
+		_getScrollBody: function(chart, chartContentEle)
 		{
-			return jQuery(".dt-scroll-body", $chartContent);
+			return jQuery(".dt-scroll-body", chartContentEle);
 		},
 		
 		_themeStyleSheet: function(chart, options)
@@ -6005,16 +6005,16 @@ SPT.tableRenderer = function(plugin, config)
 				let removeRowIndexes = [];
 				let addRowDatas = [];
 				let doRemove = false;
-				let $checkRow = jQuery("> tr:first", tableBody);
+				let checkRowEle = jQuery("> tr:first", tableBody);
 				let tmpOffset = 0;
 				
 				while(true)
 				{
-					currentRow = $checkRow[0];
-					currentRowHeight = $checkRow.outerHeight(true);
+					currentRow = checkRowEle[0];
+					currentRowHeight = checkRowEle.outerHeight(true);
 					currentRowVisibleHeight = currentRowHeight;
 					
-					if($checkRow.length == 0 || removeRowIndexes.length >= carousel.overflowCount)
+					if(checkRowEle.length == 0 || removeRowIndexes.length >= carousel.overflowCount)
 					{
 						offset += tmpOffset;
 						doRemove = true;
@@ -6029,10 +6029,10 @@ SPT.tableRenderer = function(plugin, config)
 						break;
 					}
 					
-					let dtRow = dataTable.row($checkRow);
+					let dtRow = dataTable.row(checkRowEle);
 					removeRowIndexes.push(dtRow.index());
 					addRowDatas.push(dtRow.data());
-					$checkRow = $checkRow.next();
+					checkRowEle = checkRowEle.next();
 				}
 				
 				let needDraw = false;
