@@ -2939,7 +2939,7 @@ chartProto.pluginResourceURL = function(name)
 	name = (name || "");
 	
 	var plugin = this._pluginNonNull();
-	var urlPrefix = CF.renderContextWebContextAttr(this.renderContext(), "pluginResUrlPrefix");
+	var urlPrefix = CF.renderContextWebContextValue(this.renderContext(), "pluginResUrlPrefix");
 	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
 	url = this.contextURL(url);
 	
@@ -4328,7 +4328,7 @@ CF.eleOfId = function(id)
  */
 CF.elesOfSelector = function(selector, rootEle)
 {
-	rootEle = (rootEle === undefined ? document : rootEle);
+	rootEle = (rootEle == null ? document : rootEle);
 	
 	var re = [];
 	
@@ -4349,7 +4349,7 @@ CF.elesOfSelector = function(selector, rootEle)
  */
 CF.eleOfSelector = function(selector, rootEle)
 {
-	rootEle = (rootEle === undefined ? document : rootEle);
+	rootEle = (rootEle == null ? document : rootEle);
 	return rootEle.querySelector(selector);
 };
 
@@ -4413,6 +4413,46 @@ CF.eleOfNext = function(ele)
 };
 
 /**
+ * 获取元素的第一个子元素
+ * 
+ * @param ele HTML元素
+ */
+CF.eleOfFirstChild = function(ele)
+{
+	return (ele == null ? undefined : ele.firstElementChild);
+};
+
+/**
+ * 获取元素的父元素
+ * 
+ * @param ele HTML元素
+ */
+CF.eleOfParent = function(ele)
+{
+	return (ele == null ? undefined : ele.parentElement);
+};
+
+/**
+ * 获取元素的全部子元素
+ * 
+ * @param ele HTML元素
+ */
+CF.elesOfChildren = function(ele)
+{
+	return (ele == null ? undefined : Array.from(ele.children));
+};
+
+/**
+ * 获取元素的全部子节点
+ * 
+ * @param ele HTML元素
+ */
+CF.elesOfChildNode = function(ele)
+{
+	return (ele == null ? undefined : Array.from(ele.childNodes));
+};
+
+/**
  * 创建HTML元素
  * 
  * @param name 元素名，比如："div"、"a"
@@ -4451,6 +4491,31 @@ CF.eleCreateWithAttr = function(name, attrName, attrValue)
 	}
 	
 	return ele;
+};
+
+/**
+ * 由HMML字符串创建元素。
+ * 
+ * @param html
+ */
+CF.eleCreateByHtml = function(html)
+{
+	var parser = (CF.DOM_PARSER ? CF.DOM_PARSER : (CF.DOM_PARSER = new DOMParser()));
+	var doc = parser.parseFromString(html, "text/html");
+	return (doc && doc.body ? doc.body.firstChild : null);
+};
+
+/**
+ * 复制元素
+ * 
+ * @param ele HTML元素
+ */
+CF.eleClone = function(ele)
+{
+	if(ele == null)
+		return ele;
+	
+	return ele.cloneNode(true);
 };
 
 /**
@@ -4609,6 +4674,21 @@ CF.eleRemoveClass = function(ele, classes)
 	{
 		classList.remove(classes[i]);
 	}
+};
+
+/**
+ * 判断元素是否由指定样式类。
+ * 
+ * @param ele HTML元素
+ * @param className 样式类
+ */
+CF.eleHasClass = function(ele, className)
+{
+	if(ele == null)
+		return false;
+	
+	var classList = ele.classList;
+	return classList.contains(className);
 };
 
 /**
@@ -4800,7 +4880,7 @@ CF.isHtmlEle = function(obj)
 };
 
 /**
- * 判断HTML元素是否匹配指定CSS选择器`
+ * 判断HTML元素是否匹配指定CSS选择器
  * 
  * @param ele HTML元素
  * @param selector CSS选择器，比如："form"、"div.red"
@@ -4811,6 +4891,24 @@ CF.isEleMatches = function(ele, selector)
 		return false;
 	
 	return ele.matches(selector);
+};
+
+/**
+ * 判断HTML元素是否隐藏
+ * 
+ * @param ele HTML元素
+ */
+CF.isEleHidden = function(ele)
+{
+	if(ele == null)
+		return false;
+	
+	var display = CF.eleCss(ele, "display");
+	
+	if (display === "none")
+		return true;
+	else
+    	return CF.isEleHidden(CF.eleOfParent(ele));
 };
 
 /**
@@ -4942,18 +5040,29 @@ CF.renderContextWebContext = function(renderContext, webContext)
 };
 
 /**
+ * 获取/设置Web上下文中的属性值。
+ */
+CF.webContextValue = function(webContext, name, value)
+{
+	if(arguments.length <= 2)
+		return (webContext == null ? null : webContext[name]);
+	else
+		webContext[name] = value;
+};
+
+/**
  * 获取渲染上下文中的WebContext的属性值。
  * 
  * @param renderContext
  * @param name WebContext属性名
  * @param nullable 是否允许为null，默认值为：false
  */
-CF.renderContextWebContextAttr = function(renderContext, name, nullable)
+CF.renderContextWebContextValue = function(renderContext, name, nullable)
 {
 	nullable = (nullable === undefined ? false : nullable);
 	
 	var webContext = CF.renderContextWebContext(renderContext);
-	var value = (webContext == null ? null : webContext[name]);
+	var value = CF.webContextValue(webContext, name);
 	
 	if(!nullable && value == null)
 		throw new Error("["+name+"] required in WebContext");
@@ -4969,7 +5078,7 @@ CF.renderContextWebContextAttr = function(renderContext, name, nullable)
  */
 CF.renderContextWebContextPath = function(renderContext, nullable)
 {
-	return CF.renderContextWebContextAttr(renderContext, "contextPath", nullable);
+	return CF.renderContextWebContextValue(renderContext, "contextPath", nullable);
 };
 
 /**

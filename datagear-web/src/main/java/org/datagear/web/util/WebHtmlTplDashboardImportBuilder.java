@@ -238,6 +238,12 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 					apiPrefix + "/chartTool.js?v=" + Global.VERSION));
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_BUILTIN_MAP,
 					apiPrefix + "/dashboardBuiltinMap.js?v=" + Global.VERSION));
+
+			if (isEditMode(mode))
+			{
+				impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDEDITOR,
+						apiPrefix + "/dashboardEditor.js?v=" + Global.VERSION));
+			}
 		}
 
 		addChartPluginManagerImport(impts, contextPath, locale, apiVersion);

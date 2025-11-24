@@ -334,7 +334,7 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 	}
 	
 	var contextPath = CF.renderContextWebContextPath(renderContext);
-	var heartbeatURL = CF.renderContextWebContextAttr(renderContext, "heartbeatURL");
+	var heartbeatURL = CF.renderContextWebContextValue(renderContext, "heartbeatURL");
 	
 	heartbeatURL = CF.toWebContextPathURL(contextPath, heartbeatURL);
 	
@@ -954,7 +954,7 @@ dashboardProto._initUnloadDashboardHandler = function()
 	this._windowBeforeunloadHandler = function()
 	{
 		var renderContext = thisDashboard.renderContext();
-		var unloadURL = CF.renderContextWebContextAttr(renderContext, DF.unloadConfig.urlAttrName);
+		var unloadURL = CF.renderContextWebContextValue(renderContext, DF.unloadConfig.urlAttrName);
 		unloadURL = thisDashboard.contextURL(unloadURL);
 		var formData = new FormData();
 		formData.append(DF.unloadConfig.dashboardIdParamName, thisDashboard.id());
@@ -1186,7 +1186,11 @@ dashboardProto.renderedChart = function(element)
 dashboardProto.renderContextValue = function(name, value)
 {
 	var rc = this.renderContext();
-	return CF.renderContextValue(rc, name, value);
+	
+	if(arguments.length <= 1)
+		return CF.renderContextValue(rc, name);
+	else
+		CF.renderContextValue(rc, name, value);
 };
 
 /**
@@ -1607,7 +1611,7 @@ dashboardProto._doHandleCharts = function()
 		this._doHandleChartsLocal(preUpdateLocals);
 	});
 	
-	var updateDashboardURL = CF.renderContextWebContextAttr(this.renderContext(), "updateDashboardURL");
+	var updateDashboardURL = CF.renderContextWebContextValue(this.renderContext(), "updateDashboardURL");
 	var url = this.contextURL(updateDashboardURL);
 	
 	for(let group in preUpdateGroups)
@@ -2273,7 +2277,7 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 				+ "element has a bounded chart");
 	}
 	
-	var loadChartURL = CF.renderContextWebContextAttr(this.renderContext(), "loadChartURL");
+	var loadChartURL = CF.renderContextWebContextValue(this.renderContext(), "loadChartURL");
 	var url = this.contextURL(loadChartURL);
 	var loadChartConfig = DF.loadChartConfig;
 	

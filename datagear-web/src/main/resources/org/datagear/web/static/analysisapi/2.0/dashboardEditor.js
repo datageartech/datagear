@@ -20,19 +20,19 @@
  * 全局变量名：window.dashboardFactory.dashboardEditor
  * 
  * 加载时依赖：
+ *   chartFactory.js
  *   dashboardFactory.js
  * 
  * 运行时依赖:
- *   jquery.js
- *   dashboardFactory.js
- *   chartFactory.js
+ * 
  */
 (function(global)
 {
 	/**看板工厂*/
-	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
-	var editor = (dashboardFactory.dashboardEditor || (dashboardFactory.dashboardEditor = {}));
-	var i18n = (editor.i18n || (editor.i18n = {}));
+	var CF = global.chartFactory;
+	var DF = global.dashboardFactory;
+	var DE = (DF.dashboardEditor || (DF.dashboardEditor = {}));
+	var i18n = (DE.i18n || (DE.i18n = {}));
 	
 	i18n.insertInsideChartOnChartEleDenied = "图表元素内不允许再插入图表元素";
 	i18n.selectElementForSetChart = "请选择要设置/替换的图表元素";
@@ -53,126 +53,134 @@
 	i18n.bindChartElementMustBeDiv = "绑定图表的元素必须是<div>元素";
 	
 	//参考org.datagear.web.controller.DashboardVisualController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
-	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
+	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (DE.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
 	
-	var BODY_CLASS_VISUAL_EDITOR = (editor.BODY_CLASS_VISUAL_EDITOR = "dg-show-ve");
+	var BODY_CLASS_VISUAL_EDITOR = (DE.BODY_CLASS_VISUAL_EDITOR = "dg-show-ve");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.ELEMENT_ATTR_VISUAL_EDIT_ID
-	var ELEMENT_ATTR_VISUAL_EDIT_ID = (editor.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id");
+	var ELEMENT_ATTR_VISUAL_EDIT_ID = (DE.ELEMENT_ATTR_VISUAL_EDIT_ID = "dg-visual-edit-id");
 	
-	var ELEMENT_CLASS_SELECTED = (editor.ELEMENT_CLASS_SELECTED = "dg-show-ve-selected");
+	var ELEMENT_CLASS_SELECTED = (DE.ELEMENT_CLASS_SELECTED = "dg-show-ve-selected");
 	
-	var ELEMENT_CLASS_NEW_INSERT = (editor.ELEMENT_CLASS_NEW_INSERT = "dg-show-ve-new-insert");
+	var ELEMENT_CLASS_NEW_INSERT = (DE.ELEMENT_CLASS_NEW_INSERT = "dg-show-ve-new-insert");
 	
-	var BODY_CLASS_ELEMENT_BOUNDARY = (editor.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
+	var BODY_CLASS_ELEMENT_BOUNDARY = (DE.BODY_CLASS_ELEMENT_BOUNDARY = "dg-show-ve-boundary");
 	
-	var SHOW_BODY_CLASS_FLAG = (editor.SHOW_BODY_CLASS_FLAG = "dg-show-html-body");
-	var EDIT_BODY_CLASS_FLAG = (editor.EDIT_BODY_CLASS_FLAG = "dg-edit-html-body");
+	var SHOW_BODY_CLASS_FLAG = (DE.SHOW_BODY_CLASS_FLAG = "dg-show-html-body");
+	var EDIT_BODY_CLASS_FLAG = (DE.EDIT_BODY_CLASS_FLAG = "dg-edit-html-body");
 	
-	var INSERT_ELE_FORMAT_START = (editor.INSERT_ELE_FORMAT_START = "<!--dgInsertFmtStart-->");
-	var INSERT_ELE_FORMAT_END = (editor.INSERT_ELE_FORMAT_END = "<!--dgInsertFmtEnd-->");
-	var DELETE_ELE_FORMAT_FLAG = (editor.DELETE_ELE_FORMAT_FLAG = "<!--dgDeleteFmtFlag-->");
+	var INSERT_ELE_FORMAT_START = (DE.INSERT_ELE_FORMAT_START = "<!--dgInsertFmtStart-->");
+	var INSERT_ELE_FORMAT_END = (DE.INSERT_ELE_FORMAT_END = "<!--dgInsertFmtEnd-->");
+	var DELETE_ELE_FORMAT_FLAG = (DE.DELETE_ELE_FORMAT_FLAG = "<!--dgDeleteFmtFlag-->");
 	
 	//参考org.datagear.web.controller.DashboardVisualController.LOAD_CHART_FOR_EDITOR_PARAM
-	var LOAD_CHART_FOR_EDITOR_PARAM = (editor.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
+	var LOAD_CHART_FOR_EDITOR_PARAM = (DE.LOAD_CHART_FOR_EDITOR_PARAM = "loadChartForEditor");
 	
-	var INSERT_TYPE_APPEND = (editor.INSERT_TYPE_APPEND = "append");
-	var INSERT_TYPE_PREPEND = (editor.INSERT_TYPE_PREPEND = "prepend");
-	var INSERT_TYPE_AFTER = (editor.INSERT_TYPE_AFTER = "after");
-	var INSERT_TYPE_BEFORE = (editor.INSERT_TYPE_BEFORE = "before");
+	var INSERT_TYPE_APPEND = (DE.INSERT_TYPE_APPEND = "append");
+	var INSERT_TYPE_PREPEND = (DE.INSERT_TYPE_PREPEND = "prepend");
+	var INSERT_TYPE_AFTER = (DE.INSERT_TYPE_AFTER = "after");
+	var INSERT_TYPE_BEFORE = (DE.INSERT_TYPE_BEFORE = "before");
 	
 	//HTML规范注释节点类型
-	var HTML_NODE_TYPE_COMMENT = (editor.HTML_NODE_TYPE_COMMENT = 8);
+	var HTML_NODE_TYPE_COMMENT = (DE.HTML_NODE_TYPE_COMMENT = 8);
 	
 	//响应式布局断点
-	var RESPONSIVE_BREAKPOINTS = (editor.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "xl", "2xl" ]);
+	var RESPONSIVE_BREAKPOINTS = (DE.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "xl", "2xl" ]);
 	//响应式布局名称，详细参考analysis.css中的【.dg-rsp-布局名称[-断点]-布局值】样式类定义
-	var RESPONSIVE_LAYOUT_NAMES = (editor.RESPONSIVE_LAYOUT_NAMES = [ "col", "h", "d" ]);
+	var RESPONSIVE_LAYOUT_NAMES = (DE.RESPONSIVE_LAYOUT_NAMES = [ "col", "h", "d" ]);
 	
-	dashboardFactory._initSuperByDashboardEditor = dashboardFactory.init;
-	dashboardFactory.init = function(dashboard)
+	DF._initSuperByDashboardEditor = DF.init;
+	DF.init = function(root)
 	{
-		dashboardFactory._initSuperByDashboardEditor(dashboard);
-		editor.init(dashboard);
+		var dashboard = DF._initSuperByDashboardEditor(root);
+		DE.init(dashboard);
+		
+		return dashboard;
 	};
 	
 	/**
 	 * 初始化可视编辑器。
 	 */
-	editor.init = function(dashboard)
+	DE.init = function(dashboard)
 	{
-		this.dashboard = dashboard;
+		DE.dashboard = dashboard;
 		
-		this._initStyle();
-		this._initEditHtmlIframe();
-		this._initInteraction();
+		DE._initRenderContext();
+		DE._initStyle();
+		DE._initEditHtmlIframe();
+		DE._initInteraction();
+	};
+	
+	DE._initRenderContext = function()
+	{
+		var renderContext = DE.dashboard.renderContext();
+		var webContext = CF.renderContextWebContext(renderContext);
+		var loadChartURL = CF.webContextValue(webContext, "loadChartURL");
+		loadChartURL = CF.appendUrlParam(loadChartURL, LOAD_CHART_FOR_EDITOR_PARAM, "true");
+		CF.webContextValue(webContext, "loadChartURL", loadChartURL);
 	};
 	
 	///初始化样式。
-	editor._initStyle = function()
+	DE._initStyle = function()
 	{
-		this._setPageStyle();
+		DE._setPageStyle();
 	};
 	
 	//初始化编辑HTML的iframe
-	editor._initEditHtmlIframe = function()
+	DE._initEditHtmlIframe = function()
 	{
-		var editHtmlInfo = this._editHtmlInfo();
-		var editBodyHtml = this._unescapeEditHtml(editHtmlInfo.bodyHtml);
-		this._editIframe(editBodyHtml);
+		var editHtmlInfo = DE._editHtmlInfo();
+		var editBodyHtml = DE._unescapeEditHtml(editHtmlInfo.bodyHtml);
+		DE._editIframe(editBodyHtml);
 	};
 	
 	//初始化交互控制
-	editor._initInteraction = function()
+	DE._initInteraction = function()
 	{
-		var thisEditor = this;
-		
-		$(function()
+		CF.eleOn(document, "DOMContentLoaded", () =>
 		{
-			$(document.body).addClass(BODY_CLASS_VISUAL_EDITOR).addClass(SHOW_BODY_CLASS_FLAG);
+			CF.eleAddClass(document.body, [ BODY_CLASS_VISUAL_EDITOR, SHOW_BODY_CLASS_FLAG]);
 			
-			$(document.body).on("click", function(event)
+			CF.eleOn(document.body, "click", (event) =>
 			{
-				var target = $(event.target);
-				var veEle = (target.attr(ELEMENT_ATTR_VISUAL_EDIT_ID) ? target :
-									target.closest("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]"));
+				var veEle = CF.eleAncestorOfSelector(event.target, "["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]");
 				
-				if(veEle.length == 0)
+				if(veEle == null)
 				{
-					thisEditor.deselectElement();
+					DE.deselectElement();
 				}
 				else
 				{
-					if(!thisEditor._isSelectableElement(veEle))
+					if(!DE._isSelectableElement(veEle))
 					{
-						thisEditor.deselectElement();
+						DE.deselectElement();
 					}
-					else if(thisEditor._isSelectedElement(veEle))
+					else if(DE._isSelectedElement(veEle))
 					{
 						//再次点击选中元素，不取消选择
 					}
 					else
 					{
-						thisEditor.selectElement(veEle);
+						DE.selectElement(veEle);
 					}
 				}
 				
-				if(thisEditor.clickCallback)
-					thisEditor.clickCallback(event);
+				if(DE.clickCallback)
+					DE.clickCallback(event);
 			});
 			
-			$(window).on("beforeunload", function()
+			CF.eleOn(window, "beforeunload", () =>
 			{
-				thisEditor.beforeunloadCallback();
+				DE.beforeunloadCallback();
 			});
 		});
 	};
 	
 	//获取当前编辑HTML
-	editor.editedHtml = function()
+	DE.editedHtml = function()
 	{
-		var editHtmlInfo = this._editHtmlInfo();
-		var editBodyHtml = this._editBodyHtml();
+		var editHtmlInfo = DE._editHtmlInfo();
+		var editBodyHtml = DE._editBodyHtml();
 		
 		//将占位标签还原为原始标签
 		var placeholderSources = (editHtmlInfo.placeholderSources || {});
@@ -207,7 +215,7 @@
 		editBodyHtml = editBodyHtml.replace(deleteFormatRegex0, "");
 		
 		var editedHtml = editHtmlInfo.beforeBodyHtml + editBodyHtml + editHtmlInfo.afterBodyHtml;
-		return this._unescapeEditHtml(editedHtml);
+		return DE._unescapeEditHtml(editedHtml);
 	};
 	
 	/**
@@ -215,9 +223,9 @@
 	 *
 	 * @param changeFlag 待比较的变更标识
 	 */
-	editor.isChanged = function(changeFlag)
+	DE.isChanged = function(changeFlag)
 	{
-		return (this.changeFlag() != changeFlag);
+		return (DE.changeFlag() != changeFlag);
 	};
 	
 	/**
@@ -225,50 +233,50 @@
 	 *
 	 * @param set 可选，要设置的变更标识，格式为：true 自增，数值 设置明确值
 	 */
-	editor.changeFlag = function(set)
+	DE.changeFlag = function(set)
 	{
-		if(this._changeFlag == null)
-			this._changeFlag = 0;
+		if(DE._changeFlag == null)
+			DE._changeFlag = 0;
 		
 		if(set == true)
 		{
-			this._changeFlag++;
+			DE._changeFlag++;
 		}
-		else if(chartFactory.isNumber(set))
+		else if(CF.isNumber(set))
 		{
-			this._changeFlag = set;
+			DE._changeFlag = set;
 		}
 		else
 		{
-			return this._changeFlag;
+			return DE._changeFlag;
 		}
 	};
 	
 	//提示信息
-	editor.tipInfo = function(msg)
+	DE.tipInfo = function(msg)
 	{
 		alert(msg);
 	};
 	
 	//页面点击回调函数，格式为：function(event){}
-	editor.clickCallback = function(event){};
+	DE.clickCallback = function(event){};
 	
 	/**
 	 * 选择元素回调函数。
 	 * 
 	 * @param ele JQ元素
 	 */
-	editor.selectElementCallback = function(ele){};
+	DE.selectElementCallback = function(ele){};
 	
 	/**
 	 * 取消选择元素回调函数。
 	 * 
 	 * @param ele JQ元素
 	 */
-	editor.deselectElementCallback = function(ele){};
+	DE.deselectElementCallback = function(ele){};
 	
 	//页面卸载前回调函数，比如：保存编辑HTML
-	editor.beforeunloadCallback = function(){};
+	DE.beforeunloadCallback = function(){};
 	
 	/**
 	 * 获取/设置元素边界线启用禁用/状态。
@@ -276,26 +284,24 @@
 	 * @param enable 可选，true 启用；false 禁用。
 	 * @returns 是否已启用 
 	 */
-	editor.enableElementBoundary = function(enable)
+	DE.enableElementBoundary = function(enable)
 	{
-		var body = $(document.body);
-		
 		if(arguments.length == 0)
-			return body.hasClass(BODY_CLASS_ELEMENT_BOUNDARY);
+			return CF.eleHasClass(document.body, BODY_CLASS_ELEMENT_BOUNDARY);
 		
 		if(enable)
-			body.addClass(BODY_CLASS_ELEMENT_BOUNDARY);
+			CF.eleAddClass(document.body, BODY_CLASS_ELEMENT_BOUNDARY);
 		else
-			body.removeClass(BODY_CLASS_ELEMENT_BOUNDARY);
+			CF.eleRemoveClass(document.body, BODY_CLASS_ELEMENT_BOUNDARY);
 	};
 	
 	/**
 	 * 是否未选中任何元素。
 	 */
-	editor.isNonSelectedElement = function()
+	DE.isNonSelectedElement = function()
 	{
-		var selected = this._selectedElement();
-		return (selected.length == 0);
+		var selected = DE._selectedElement();
+		return (selected == null);
 	};
 	
 	/**
@@ -303,10 +309,10 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementVisualEditId = function(ele)
+	DE.getElementVisualEditId = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		return this._getVisualEditId(ele);
+		ele = DE._currentElement(ele, true);
+		return DE._getVisualEditId(ele);
 	};
 	
 	/**
@@ -315,24 +321,22 @@
 	 * @param eleOrVisualEditId 元素、元素可编辑ID
 	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectElement = function(eleOrVisualEditId)
+	DE.selectElement = function(eleOrVisualEditId)
 	{
 		var ele = eleOrVisualEditId;
 		
-		if(chartFactory.isString(ele))
-			ele = $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+ele+"']");
-		else
-			ele = $(ele);
+		if(CF.isString(ele))
+			ele = CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+ele+"']");
 		
-		this.deselectElement();
+		DE.deselectElement();
 		
-		if(!this._isEmptyElement(ele))
+		if(!DE._isEmptyElement(ele))
 		{
-			this._removeElementClassNewInsert(ele);
-			this._selectElement(ele);
+			DE._removeElementClassNewInsert(ele);
+			DE._selectElement(ele);
 			
-			if(this.selectElementCallback)
-				this.selectElementCallback(ele);
+			if(DE.selectElementCallback)
+				DE.selectElementCallback(ele);
 			
 			return true;
 		}
@@ -346,17 +350,17 @@
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 * @param force 可选，是否强制执行，默认为：false
 	 */
-	editor.deselectElement = function(ele, force)
+	DE.deselectElement = function(ele, force)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		force = (force === undefined ? false : force);
 		
-		if(!this._isEmptyElement(ele) || force)
+		if(!DE._isEmptyElement(ele) || force)
 		{
-			this._deselectElement(ele);
+			DE._deselectElement(ele);
 			
-			if(this.deselectElementCallback)
-				this.deselectElementCallback(ele);
+			if(DE.deselectElementCallback)
+				DE.deselectElementCallback(ele);
 		}
 	};
 	
@@ -368,7 +372,7 @@
 	 * @param tip 可选，未选择时是否给出提示，默认为：true
 	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectNextElement = function(ele, tip)
+	DE.selectNextElement = function(ele, tip)
 	{
 		//(true)、(false)
 		if(tip === undefined && (ele === true || ele === false))
@@ -378,29 +382,29 @@
 		}
 		
 		tip = (tip === undefined ? true : tip);
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
-		if(ele.is("body"))
-			return this.selectFirstChildElement(ele, tip);
+		if(DF._isBodyEle(ele))
+			return DE.selectFirstChildElement(ele, tip);
 		
 		var target = ele;
-		while((target = target.next()))
+		while((target = CF.eleOfNext(target)))
 		{
-			if(this._isEmptyElement(target) || this._isSelectableElement(target))
+			if(DE._isEmptyElement(target) || DE._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(this._isEmptyElement(target))
+		if(DE._isEmptyElement(target))
 		{
 			if(tip)
-				this.tipInfo(i18n.noSelectableNextElement);
+				DE.tipInfo(i18n.noSelectableNextElement);
 			
 			return false;
 		}
 		
-		return this.selectElement(target);
+		return DE.selectElement(target);
 	};
 	
 	/**
@@ -411,7 +415,7 @@
 	 * @param tip 可选，未选择时是否给出提示，默认为：true
 	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectPrevElement = function(ele, tip)
+	DE.selectPrevElement = function(ele, tip)
 	{
 		//(true)、(false)
 		if(tip === undefined && (ele === true || ele === false))
@@ -421,29 +425,29 @@
 		}
 		
 		tip = (tip === undefined ? true : tip);
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
-		if(ele.is("body"))
-			return this.selectFirstChildElement(ele, tip);
+		if(DF._isBodyEle(ele))
+			return DE.selectFirstChildElement(ele, tip);
 		
 		var target = ele;
-		while((target = target.prev()))
+		while((target = CF.eleOfPrev(target)))
 		{
-			if(this._isEmptyElement(target) || this._isSelectableElement(target))
+			if(DE._isEmptyElement(target) || DE._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(this._isEmptyElement(target))
+		if(DE._isEmptyElement(target))
 		{
 			if(tip)
-				this.tipInfo(i18n.noSelectablePrevElement);
+				DE.tipInfo(i18n.noSelectablePrevElement);
 			
 			return false;
 		}
 		
-		return this.selectElement(target);
+		return DE.selectElement(target);
 	};
 	
 	/**
@@ -453,7 +457,7 @@
 	 * @param tip 可选，未选择时是否给出提示，默认为：true
 	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectFirstChildElement = function(ele, tip)
+	DE.selectFirstChildElement = function(ele, tip)
 	{
 		//(true)、(false)
 		if(tip === undefined && (ele === true || ele === false))
@@ -463,29 +467,29 @@
 		}
 		
 		tip = (tip === undefined ? true : tip);
-		ele = this._currentElement(ele);
-		var firstChild = $("> *:first", ele);
+		ele = DE._currentElement(ele);
+		var firstChild = CF.eleOfFirstChild(ele);
 		
 		var target = firstChild;
 		while(true)
 		{
-			if(this._isEmptyElement(target) || this._isSelectableElement(target))
+			if(DE._isEmptyElement(target) || DE._isSelectableElement(target))
 			{
 				break;
 			}
 			
-			target = target.next();
+			target = CF.eleOfNext(target);
 		}
 		
-		if(this._isEmptyElement(target))
+		if(DE._isEmptyElement(target))
 		{
 			if(tip)
-				this.tipInfo(i18n.noSelectableChildElement);
+				DE.tipInfo(i18n.noSelectableChildElement);
 			
 			return false;
 		}
 		
-		return this.selectElement(target);
+		return DE.selectElement(target);
 	};
 	
 	/**
@@ -495,7 +499,7 @@
 	 * @param tip 可选，未选择时是否给出提示，默认为：true
 	 * @returns true 已选择，false 未选择
 	 */
-	editor.selectParentElement = function(ele, tip)
+	DE.selectParentElement = function(ele, tip)
 	{
 		//(true)、(false)
 		if(tip === undefined && (ele === true || ele === false))
@@ -505,59 +509,59 @@
 		}
 		
 		tip = (tip === undefined ? true : tip);
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
-		if(ele.is("body"))
+		if(DF._isBodyEle(ele))
 		{
 			if(tip)
-				this.tipInfo(i18n.noSelectableParentElement);
+				DE.tipInfo(i18n.noSelectableParentElement);
 			
 			return false;
 		}
 		
 		var target = ele;
-		while((target = target.parent()))
+		while((target = CF.eleOfParent(target)))
 		{
-			if(this._isEmptyElement(target) || target.is("body") || this._isSelectableElement(target))
+			if(DE._isEmptyElement(target) || DF._isBodyEle(target) || DE._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(target.is("body") || this._isEmptyElement(target))
+		if(DF._isBodyEle(target) || DE._isEmptyElement(target))
 		{
 			if(tip)
-				this.tipInfo(i18n.noSelectableParentElement);
+				DE.tipInfo(i18n.noSelectableParentElement);
 			
 			return false;
 		}
 		
-		return this.selectElement(target);
+		return DE.selectElement(target);
 	};
 	
-	editor._isSelectableElement = function($ele)
+	DE._isSelectableElement = function(ele)
 	{
-		if(!$ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID))
+		if(!CF.eleAttr(ele, ELEMENT_ATTR_VISUAL_EDIT_ID))
 			return false;
 		
-		var tagName = this._tagNameOfEleLowerCase($ele);
+		var tagName = DE._tagNameOfEleLowerCase(ele);
 		
-		if(chartFactory.isEmpty(tagName))
+		if(CF.isEmpty(tagName))
 			return false;
 		
 		if(tagName == "body")
 			return false;
 		
-		if(!this._isVisualEleTag(tagName))
+		if(!DE._isVisualEleTag(tagName))
 			return false;
 		
-		if($ele.is(":hidden"))
+		if(CF.isEleHidden(ele))
 			return false;
 		
 		//没有尺寸的不再忽略，因为插入元素没填内容时，元素本身可能没有尺寸，
 		//这样会导致无法选中元素后编辑
 		/*
-		var w = $ele.outerWidth(), h = $ele.outerHeight();
+		var w = ele.outerWidth(), h = ele.outerHeight();
 		if(w == null || w <= 0 || h == null || h <= 0)
 			return false;
 		*/
@@ -565,12 +569,12 @@
 		return true;
 	};
 	
-	editor._tagNameOfEleLowerCase = function($ele)
+	DE._tagNameOfEleLowerCase = function(ele)
 	{
-		return ($ele[0] && $ele[0].tagName ? $ele[0].tagName : "").toLowerCase();
+		return (ele && ele.tagName ? ele.tagName : "").toLowerCase();
 	};
 	
-	editor._isVisualEleTag = function(tagNameLowerCase)
+	DE._isVisualEleTag = function(tagNameLowerCase)
 	{
 		if(tagNameLowerCase == "script" || tagNameLowerCase == "style" || tagNameLowerCase == "template")
 		{
@@ -585,13 +589,13 @@
 	/**
 	 * 校验是否有选中元素。
 	 */
-	editor.checkSelectedElement = function()
+	DE.checkSelectedElement = function()
 	{
-		ele = this._currentElement(null, true);
+		ele = DE._currentElement(null, true);
 		
-		if(this._isEmptyElement(ele))
+		if(DE._isEmptyElement(ele))
 		{
-			this.tipInfo(i18n.selectedElementRequired);
+			DE.tipInfo(i18n.selectedElementRequired);
 			return false;
 		}
 		
@@ -603,18 +607,18 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkHasChartElement = function(ele)
+	DE.checkHasChartElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
-		var chartEles = this._getChartElements(ele);
+		var chartEles = DE._getChartElements(ele);
 		
-		if(this._isEmptyElement(chartEles))
+		if(DE._isEmptyElement(chartEles))
 		{
-			this.tipInfo(i18n.selectedNotHasChartElement);
+			DE.tipInfo(i18n.selectedNotHasChartElement);
 			return false;
 		}
 		
@@ -626,17 +630,17 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkChartElement = function(ele)
+	DE.checkChartElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		if(!chart)
 		{
-			this.tipInfo(i18n.selectedNotChartElement);
+			DE.tipInfo(i18n.selectedNotChartElement);
 			return false;
 		}
 		
@@ -648,24 +652,24 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkAttrChartElement = function(ele)
+	DE.checkAttrChartElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		if(!chart)
 		{
-			this.tipInfo(i18n.selectedNotChartElement);
+			DE.tipInfo(i18n.selectedNotChartElement);
 			return false;
 		}
 		
 		var cpas = chart.pluginAttributes();
 		if(cpas == null || cpas.length == 0)
 		{
-			this.tipInfo(i18n.chartPluginNoAttrDefined);
+			DE.tipInfo(i18n.chartPluginNoAttrDefined);
 			return false;
 		}
 		
@@ -677,10 +681,10 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.isChartElement = function(ele)
+	DE.isChartElement = function(ele)
 	{
-		ele = this._currentElement(ele);
-		return (this.dashboard.renderedChart(ele) != null);
+		ele = DE._currentElement(ele);
+		return (DE.dashboard.renderedChart(ele) != null);
 	};
 	
 	/**
@@ -688,12 +692,12 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.isGridItemElement = function(ele)
+	DE.isGridItemElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		var parent = ele.parent();
+		ele = DE._currentElement(ele, true);
+		var parent = CF.eleOfParent(ele);
 		
-		return this._isDisplayGrid(parent);
+		return DE._isDisplayGrid(parent);
 	};
 	
 	/**
@@ -701,52 +705,50 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.isFlexItemElement = function(ele)
+	DE.isFlexItemElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
-		var parent = ele.parent();
+		ele = DE._currentElement(ele, true);
+		var parent = CF.eleOfParent(ele);
 		
-		return this._isDisplayFlex(parent);
+		return DE._isDisplayFlex(parent);
 	};
 	
 	/**
 	 * 获取元素节点路径信息。
 	 */
-	editor.getElementPath = function(ele)
+	DE.getElementPath = function(ele)
 	{
-		ele = $(ele);
-		
 		var paths = [];
 		
 		while(true)
 		{
-			if(this._isEmptyElement(ele))
+			if(DE._isEmptyElement(ele))
 				break;
 			
-			var isBody =  ele.is("body");
+			var isBody =  DF._isBodyEle(ele);
 			
-			if(!this._isSelectableElement(ele) && !isBody)
+			if(!DE._isSelectableElement(ele) && !isBody)
 			{
-				ele = ele.parent();
+				ele = CF.eleOfParent(ele);
 				continue;
 			}
 			
-			var editEle = this._editElement(ele);
+			var editEle = DE._editElement(ele);
 			var pathInfo =
 			{
-				tagName: (ele[0].tagName || "").toLowerCase(),
-				selected: this._isSelectedElement(ele),
-				id: editEle.attr("id"),
-				className: editEle.attr("class"),
-				cssDisplay: ele.css("display"),
-				visualEditId: editEle.attr(ELEMENT_ATTR_VISUAL_EDIT_ID)
+				tagName: DE._tagNameOfEleLowerCase(ele),
+				selected: DE._isSelectedElement(ele),
+				id: CF.eleAttr(editEle, "id"),
+				className: CF.eleAttr(editEle, "class"),
+				cssDisplay: CF.eleCss(ele, "display"),
+				visualEditId: CF.eleAttr(editEle, ELEMENT_ATTR_VISUAL_EDIT_ID)
 			};
 			
 			var displayName = pathInfo.tagName;
 			
-			if(this._isDisplayGrid(pathInfo.cssDisplay))
+			if(DE._isDisplayGrid(pathInfo.cssDisplay))
 				displayName += "(grid)";
-			else if(this._isDisplayFlex(pathInfo.cssDisplay))
+			else if(DE._isDisplayFlex(pathInfo.cssDisplay))
 				displayName += "(flex)";
 			
 			if(pathInfo.id)
@@ -761,7 +763,7 @@
 			if(isBody)
 				break;
 			else
-				ele = ele.parent();
+				ele = CF.eleOfParent(ele);
 		}
 		
 		return paths.reverse();
@@ -773,22 +775,21 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.isInsertToEmptyBody = function(insertType, refEle)
+	DE.isInsertToEmptyBody = function(insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
-		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
+		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
 		
-		if(!insertParentEle.is("body"))
+		if(!DF._isBodyEle(insertParentEle))
 			return false;
 		
 		var canInsert = true;
-		var thisEditor = this;
 		
 		//只有还未插入任何可选择元素时，才可以插入填满父容器元素
-		insertParentEle.children().each(function()
+		CF.elesOfChildren(insertParentEle).forEach(function(child)
 		{
-			if(thisEditor._isSelectableElement($(this)))
+			if(DE._isSelectableElement(child))
 				canInsert = false;
 		});
 		
@@ -801,7 +802,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertGridLayout = function(insertType, refEle)
+	DE.checkInsertGridLayout = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -826,20 +827,19 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertGridLayout = function(gridAttr, insertType, refEle)
+	DE.insertGridLayout = function(gridAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var rows = (!chartFactory.isNumber(gridAttr.rows) ? parseInt(gridAttr.rows) : gridAttr.rows);
-		var columns = (!chartFactory.isNumber(gridAttr.columns) ? parseInt(gridAttr.columns) : gridAttr.columns);
+		var rows = (!CF.isNumber(gridAttr.rows) ? parseInt(gridAttr.rows) : gridAttr.rows);
+		var columns = (!CF.isNumber(gridAttr.columns) ? parseInt(gridAttr.columns) : gridAttr.columns);
 		
-		//不能使用"<div />"，生成的源码格式不对
-		var div = $("<div></div>");
+		var div = CF.eleCreate("div");
 		
 		var styleStr = "";
-		var insertParentEle = this._getInsertParentElement(refEle, insertType);
-		styleStr += this._evalInsertLayoutHeightStyle(gridAttr.fillParent, insertParentEle);
+		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
+		styleStr += DE._evalInsertLayoutHeightStyle(gridAttr.fillParent, insertParentEle);
 		styleStr += "display:grid;";
 		
 		if(rows > 0)
@@ -866,21 +866,21 @@
 			}
 		}
 		
-		if(!chartFactory.isEmpty(gridAttr.rowGap))
+		if(!CF.isEmpty(gridAttr.rowGap))
 			styleStr += "row-gap:"+gridAttr.rowGap+";";
 		
-		if(!chartFactory.isEmpty(gridAttr.columnGap))
+		if(!CF.isEmpty(gridAttr.columnGap))
 			styleStr += "column-gap:"+gridAttr.columnGap+";";
 		
-		div.attr("style", styleStr);
+		CF.eleAttr(div, "style", styleStr);
 		
-		for(var i=0; i<rows; i++)
+		for(let i=0; i<rows; i++)
 		{
-			for(var j=0; j<columns; j++)
-				this._insertElementFormat(div, $("<div></div>"), INSERT_TYPE_APPEND);
+			for(let j=0; j<columns; j++)
+				DE._insertElementFormat(div, CF.eleCreate("div"), INSERT_TYPE_APPEND);
 		}
 		
-		this._insertElement(div, insertType, refEle, true);
+		DE._insertElement(div, insertType, refEle, true);
 		
 		return div;
 	};
@@ -891,7 +891,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertFlexLayout = function(insertType, refEle)
+	DE.checkInsertFlexLayout = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -905,31 +905,29 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertFlexLayout = function(flexAttr, insertType, refEle)
+	DE.insertFlexLayout = function(flexAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var items = (!chartFactory.isNumber(flexAttr.items) ? parseInt(flexAttr.items) : flexAttr.items);
+		var items = (!CF.isNumber(flexAttr.items) ? parseInt(flexAttr.items) : flexAttr.items);
 		
-		//不能使用"<div />"，生成的源码格式不对
-		var div = $("<div></div>");
+		var div = CF.eleCreate("div");
 		
 		var styleStr = "";
-		var insertParentEle = this._getInsertParentElement(refEle, insertType);
-		styleStr += this._evalInsertLayoutHeightStyle(flexAttr.fillParent, insertParentEle);
+		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
+		styleStr += DE._evalInsertLayoutHeightStyle(flexAttr.fillParent, insertParentEle);
 		styleStr += "display:flex;"+(flexAttr.direction ? "flex-direction:"+flexAttr.direction+";" : "")
 						+"justify-content:space-around;align-items:center;align-content:space-around;";
 		
-		div.attr("style", styleStr);
+		CF.eleAttr(div, "style", styleStr);
 		
 		for(var i=0; i<items; i++)
 		{
-			var itemDiv = $("<div></div>");
-			this._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
+			DE._insertElementFormat(div, CF.eleCreate("div"), INSERT_TYPE_APPEND);
 		}
 		
-		this._insertElement(div, insertType, refEle, true);
+		DE._insertElement(div, insertType, refEle, true);
 		
 		return div;
 	};
@@ -940,7 +938,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertResponsiveFlex = function(insertType, refEle)
+	DE.checkInsertResponsiveFlex = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -954,45 +952,42 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertResponsiveFlex = function(model, insertType, refEle)
+	DE.insertResponsiveFlex = function(model, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var itemCount = (!chartFactory.isNumber(model.itemCount) ? parseInt(model.itemCount) : model.itemCount);
+		var itemCount = (!CF.isNumber(model.itemCount) ? parseInt(model.itemCount) : model.itemCount);
 		
-		//不能使用"<div />"，生成的源码格式不对
-		var div = $("<div></div>");
+		var div = CF.eleCreate("div");
 		
-		var styleClass = this._evalResponsiveFlexLayoutClass(model.layout);
+		var styleClass = DE._evalResponsiveFlexLayoutClass(model.layout);
 		styleClass = (styleClass ? "dg-rsp-row " + styleClass : "dg-rsp-row");
-		div.attr("class", styleClass);
+		CF.eleAttr(div, "class", styleClass);
 		
-		for(var i=0; i<itemCount; i++)
+		for(let i=0; i<itemCount; i++)
 		{
-			var itemDiv = $("<div></div>");
-			var itemStyleClass = this._evalResponsiveFlexLayoutClass(model.itemLayouts[i]);
-			itemDiv.attr("class", itemStyleClass);
-			
-			this._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
+			let itemStyleClass = DE._evalResponsiveFlexLayoutClass(model.itemLayouts[i]);
+			let itemDiv = CF.eleCreate("div", itemStyleClass);
+			DE._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
 		}
 		
-		this._insertElement(div, insertType, refEle, true);
+		DE._insertElement(div, insertType, refEle, true);
 		
 		return div;
 	};
 	
-	editor._evalResponsiveFlexLayoutClass = function(layout)
+	DE._evalResponsiveFlexLayoutClass = function(layout)
 	{
 		layout = (layout == null ? {} : layout);
 		
 		var re = "";
 		
-		for(var i=0; i<RESPONSIVE_BREAKPOINTS.length; i++)
+		for(let i=0; i<RESPONSIVE_BREAKPOINTS.length; i++)
 		{
-			var breakpoint = RESPONSIVE_BREAKPOINTS[i];
-			var myLayout = (layout[breakpoint] || {});
-			var myRe = this._evalResponsiveFlexBreakpointClass(breakpoint, myLayout);
+			let breakpoint = RESPONSIVE_BREAKPOINTS[i];
+			let myLayout = (layout[breakpoint] || {});
+			let myRe = DE._evalResponsiveFlexBreakpointClass(breakpoint, myLayout);
 			
 			if(myRe)
 				re += (re == "" ? "" : " ") + myRe;
@@ -1001,17 +996,17 @@
 		return re;
 	};
 	
-	editor._evalResponsiveFlexBreakpointClass = function(breakpoint, layout)
+	DE._evalResponsiveFlexBreakpointClass = function(breakpoint, layout)
 	{
 		var re = "";
 
 		var infix = (breakpoint == "xs" ? "" : "-"+breakpoint);
-		for(var i=0; i<RESPONSIVE_LAYOUT_NAMES.length; i++)
+		for(let i=0; i<RESPONSIVE_LAYOUT_NAMES.length; i++)
 		{
-			var name = RESPONSIVE_LAYOUT_NAMES[i];
-			var value = layout[name];
+			let name = RESPONSIVE_LAYOUT_NAMES[i];
+			let value = layout[name];
 			
-			if(!chartFactory.isEmpty(value))
+			if(!CF.isEmpty(value))
 			{
 				re += (re == "" ? "" : " ") + "dg-rsp-"+name + infix +"-" + value;
 			}
@@ -1020,7 +1015,7 @@
 		return re;
 	};
 	
-	editor._evalResponsiveFlexCssLengthUnit = function(unit)
+	DE._evalResponsiveFlexCssLengthUnit = function(unit)
 	{
 		return (unit == "%" ? "pct" : unit);
 	};
@@ -1030,24 +1025,22 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.getResponsiveFlex = function(ele)
+	DE.getResponsiveFlex = function(ele)
 	{
-		ele = this._editElement(this._currentElement(ele, true));
+		ele = DE._editElement(DE._currentElement(ele, true));
 		
 		var re = { itemCount: 0, layout: {}, itemLayouts: [] };
 		
-		re.layout = this._evalResponsiveFlexLayout(ele.attr("class"), [ "dg-rsp-row" ]);
+		re.layout = DE._evalResponsiveFlexLayout(CF.eleAttr(ele, "class"), [ "dg-rsp-row" ]);
 		
-		var thisEditor = this;
-		ele.children().each(function()
+		CF.elesOfChildren(ele).forEach(function(child)
 		{
-			var child = $(this);
-			var editId = thisEditor._layoutAffectEleEditId(child);
+			var editId = DE._layoutAffectEleEditId(child);
 			
-			if(chartFactory.isEmpty(editId))
+			if(CF.isEmpty(editId))
 				return;
 			
-			var layout = thisEditor._evalResponsiveFlexLayout(child.attr("class"));
+			var layout = DE._evalResponsiveFlexLayout(CF.eleAttr(child, "class"));
 			layout.visualEditId = editId;
 			
 			re.itemCount++;
@@ -1057,31 +1050,31 @@
 		return re;
 	};
 	
-	editor._layoutAffectEleEditId = function($ele)
+	DE._layoutAffectEleEditId = function(ele)
 	{
-		var editId = $ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID);
+		var editId = CF.eleAttr(ele, ELEMENT_ATTR_VISUAL_EDIT_ID);
 		
-		if(chartFactory.isEmpty(editId))
+		if(CF.isEmpty(editId))
 			return null;
 		
-		var tagName = this._tagNameOfEleLowerCase($ele);
+		var tagName = DE._tagNameOfEleLowerCase(ele);
 		
-		if(chartFactory.isEmpty(tagName))
+		if(CF.isEmpty(tagName))
 			return null;
 		
-		if(!this._isVisualEleTag(tagName))
+		if(!DE._isVisualEleTag(tagName))
 			return null;
 		
-		var position = $ele.css("position");
-		if(position == "absolute" || position == "fixed")
+		var position = CF.eleCss(ele, "position");
+		if(position === "absolute" || position === "fixed")
 			return null;
 		
 		return editId;
 	};
 	
-	editor._evalResponsiveFlexLayout = function(classStr, ignoreClasses)
+	DE._evalResponsiveFlexLayout = function(classStr, ignoreClasses)
 	{
-		var classNames = (chartFactory.isEmpty(classStr) ? [] : classStr.split(" "));
+		var classNames = (CF.isEmpty(classStr) ? [] : classStr.split(" "));
 		
 		var re = {};
 		
@@ -1090,10 +1083,10 @@
 		{
 			var className = classNames[i];
 			
-			if(chartFactory.isEmpty(className) || !className.indexOf("dg-rsp-") == 0)
+			if(CF.isEmpty(className) || !className.indexOf("dg-rsp-") == 0)
 				continue;
 			
-			if(ignoreClasses != null && chartFactory.indexInArray(ignoreClasses, className) > -1)
+			if(ignoreClasses != null && CF.indexInArray(ignoreClasses, className) > -1)
 				continue;
 			
 			var partStr = className.substr("dg-rsp-".length);
@@ -1106,14 +1099,14 @@
 			var name = partStr.substring(0, splitIdx);
 			var value = (splitIdx == partStr.length-1 ? "" : partStr.substring(splitIdx + 1));
 			
-			if(chartFactory.isEmpty(value))
+			if(CF.isEmpty(value))
 				continue;
 			
 			splitIdx = value.indexOf("-");
 			if(splitIdx >= 0)
 			{
 				var part0 = value.substring(0, splitIdx);
-				var isBreakpoint = (chartFactory.indexInArray(RESPONSIVE_BREAKPOINTS, part0) > -1);
+				var isBreakpoint = (CF.indexInArray(RESPONSIVE_BREAKPOINTS, part0) > -1);
 				
 				if(isBreakpoint)
 				{
@@ -1122,17 +1115,17 @@
 				}
 			}
 			
-			if(chartFactory.isEmpty(value))
+			if(CF.isEmpty(value))
 				continue;
 			
 			re[breakpoint] = (re[breakpoint] || {});
-			this._inflateResponsiveFlexBreakpoint(re[breakpoint], name, value);
+			DE._inflateResponsiveFlexBreakpoint(re[breakpoint], name, value);
 		}
 		
 		return re;
 	};
 	
-	editor._inflateResponsiveFlexBreakpoint = function(breakpointObj, name, value)
+	DE._inflateResponsiveFlexBreakpoint = function(breakpointObj, name, value)
 	{
 		breakpointObj[name] = value;
 	};
@@ -1142,11 +1135,11 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkSetResponsiveFlex = function(ele)
+	DE.checkSetResponsiveFlex = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
 		return true;
@@ -1160,21 +1153,21 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setResponsiveFlex = function(model, ele)
+	DE.setResponsiveFlex = function(model, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetResponsiveFlex(ele))
+		if(!DE.checkSetResponsiveFlex(ele))
 			return false;
 		
-		var editEle = this._editElement(ele);
+		var editEle = DE._editElement(ele);
 		
-		var styleClass = this._evalResponsiveFlexLayoutClass(model.layout);
+		var styleClass = DE._evalResponsiveFlexLayoutClass(model.layout);
 		styleClass = (styleClass ? "dg-rsp-row " + styleClass : "dg-rsp-row");
-		var newClassName = this._removeClassName(editEle.attr("class"), this._isResponsiveClassName);
+		var newClassName = DE._removeClassName(CF.eleAttr(editEle, "class"), DE._isResponsiveClassName);
 		newClassName = styleClass + (newClassName == "" ? "" : " " + newClassName);
 		
-		this._setElementClass(ele, newClassName);
+		DE._setElementClass(ele, newClassName);
 		
 		var itemLayouts = (model.itemLayouts || []);
 		for(var i=0; i<itemLayouts.length; i++)
@@ -1184,20 +1177,20 @@
 			if(!itemLayout.visualEditId)
 				continue;
 			
-			var child = this._getEleByVisualEditId(itemLayout.visualEditId);
-			var editChild = this._editElement(child);
+			var child = DE._getEleByVisualEditId(itemLayout.visualEditId);
+			var editChild = DE._editElement(child);
 			
-			var layoutClass = this._evalResponsiveFlexLayoutClass(itemLayout);
-			var newChildClassName = this._removeClassName(editChild.attr("class"), this._isResponsiveClassName);
+			var layoutClass = DE._evalResponsiveFlexLayoutClass(itemLayout);
+			var newChildClassName = DE._removeClassName(CF.eleAttr(editChild, "class"), DE._isResponsiveClassName);
 			newChildClassName = layoutClass + (newChildClassName == "" ? "" : " " + newChildClassName);
 			
-			this._setElementClass(child, newChildClassName);
+			DE._setElementClass(child, newChildClassName);
 		}
 		
 		return ele;
 	};
 	
-	editor._isResponsiveClassName = function(className)
+	DE._isResponsiveClassName = function(className)
 	{
 		return (className.indexOf("dg-rsp-") == 0);
 	};
@@ -1208,7 +1201,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertDiv = function(insertType, refEle)
+	DE.checkInsertDiv = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1221,30 +1214,29 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertDiv = function(insertType, refEle)
+	DE.insertDiv = function(insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		//不能使用"<div />"，生成的源码格式不对
-		var div = $("<div></div>");
+		var div = CF.eleCreate("div");
 		
 		var styleStr = "";
-		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
 		
-		if(insertParentEle.is("body"))
+		if(DF._isBodyEle(insertParentEle))
 			styleStr = "height:300px;";
-		else if(this._isDisplayGrid(insertParentEle))
+		else if(DE._isDisplayGrid(insertParentEle))
 			styleStr = "";
-		else if(this._isDisplayFlex(insertParentEle))
+		else if(DE._isDisplayFlex(insertParentEle))
 			styleStr = "";
 		else
 			styleStr = "";
 		
 		if(styleStr)
-			div.attr("style", styleStr);
+			CF.eleAttr(div, "style", styleStr);
 		
-		this._insertElement(div, insertType, refEle, true);
+		DE._insertElement(div, insertType, refEle, true);
 		
 		return div;
 	};
@@ -1255,7 +1247,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertImage = function(insertType, refEle)
+	DE.checkInsertImage = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1269,15 +1261,15 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertImage = function(imgAttr, insertType, refEle)
+	DE.insertImage = function(imgAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var img = $("<img>");
+		var img = CF.eleCreate("img");
 		
-		this._insertElement(img, insertType, refEle);
-		this._setImageAttr(imgAttr, img);
+		DE._insertElement(img, insertType, refEle);
+		DE._setImageAttr(imgAttr, img);
 		
 		return img;
 	};
@@ -1287,10 +1279,10 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.isImage = function(ele)
+	DE.isImage = function(ele)
 	{
-		ele = this._currentElement(ele);
-		return ele.is("img");
+		ele = DE._currentElement(ele);
+		return CF.isEleMatches(ele, "img");
 	};
 	
 	/**
@@ -1298,20 +1290,20 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.getImageAttr = function(ele)
+	DE.getImageAttr = function(ele)
 	{
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
 		var attrObj = {};
 		
-		if(!this.isImage(ele))
+		if(!DE.isImage(ele))
 			return attrObj;
 		
-		ele = this._editElement(ele);
+		ele = DE._editElement(ele);
 		
-		var eleStyle = this.getElementStyle(ele);
+		var eleStyle = DE.getElementStyle(ele);
 		
-		attrObj.src = (ele.attr("src") || "");
+		attrObj.src = (CF.eleAttr(ele, "src") || "");
 		attrObj.width = eleStyle.width;
 		attrObj.height = eleStyle.height;
 		
@@ -1323,9 +1315,9 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setImageAttr = function(imgAttr, ele)
+	DE.setImageAttr = function(imgAttr, ele)
 	{
-		return this._setImageAttr(imgAttr, ele);
+		return DE._setImageAttr(imgAttr, ele);
 	};
 	
 	/**
@@ -1336,20 +1328,20 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor._setImageAttr = function(imgAttr, ele)
+	DE._setImageAttr = function(imgAttr, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.isImage(ele))
+		if(!DE.isImage(ele))
 		{
-			this.tipInfo(i18n.imgEleRequired);
+			DE.tipInfo(i18n.imgEleRequired);
 			return false;
 		}
 		
 		var eleStyle = { width: imgAttr.width, height: imgAttr.height };
 		
-		this._setElementAttr(ele, "src", (imgAttr.src || ""));
-		this._setElementStyleAppend(ele, eleStyle);
+		DE._setElementAttr(ele, "src", (imgAttr.src || ""));
+		DE._setElementStyleAppend(ele, eleStyle);
 		
 		return ele;
 	};
@@ -1360,7 +1352,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertHyperlink = function(insertType, refEle)
+	DE.checkInsertHyperlink = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1374,15 +1366,15 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertHyperlink = function(hyperlinkAttr, insertType, refEle)
+	DE.insertHyperlink = function(hyperlinkAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var a = $("<a></a>");
+		var a = CF.eleCreate("a");
 		
-		this._insertElement(a, insertType, refEle);
-		this._setHyperlinkAttr(hyperlinkAttr, a);
+		DE._insertElement(a, insertType, refEle);
+		DE._setHyperlinkAttr(hyperlinkAttr, a);
 		
 		return a;
 	};
@@ -1392,10 +1384,10 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.isHyperlink = function(ele)
+	DE.isHyperlink = function(ele)
 	{
-		ele = this._currentElement(ele);
-		return ele.is("a");
+		ele = DE._currentElement(ele);
+		return CF.isEleMatches(ele, "a");
 	};
 	
 	/**
@@ -1403,20 +1395,20 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.getHyperlinkAttr = function(ele)
+	DE.getHyperlinkAttr = function(ele)
 	{
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
 		var attrObj = {};
 		
-		if(!this.isHyperlink(ele))
+		if(!DE.isHyperlink(ele))
 			return attrObj;
 		
-		ele = this._editElement(ele);
+		ele = DE._editElement(ele);
 		
-		attrObj.content = chartFactory.trim(ele.html());
-		attrObj.href = (ele.attr("href") || "");
-		attrObj.target = (ele.attr("target") || "");
+		attrObj.content = CF.trim(ele.html());
+		attrObj.href = (CF.eleAttr(ele, "href") || "");
+		attrObj.target = (CF.eleAttr(ele, "target") || "");
 		
 		return attrObj;
 	};
@@ -1426,9 +1418,9 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setHyperlinkAttr = function(hyperlinkAttr, ele)
+	DE.setHyperlinkAttr = function(hyperlinkAttr, ele)
 	{
-		return this._setHyperlinkAttr(hyperlinkAttr, ele);
+		return DE._setHyperlinkAttr(hyperlinkAttr, ele);
 	};
 	
 	/**
@@ -1439,23 +1431,24 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor._setHyperlinkAttr = function(hyperlinkAttr, ele)
+	DE._setHyperlinkAttr = function(hyperlinkAttr, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.isHyperlink(ele))
+		if(!DE.isHyperlink(ele))
 		{
-			this.tipInfo(i18n.hyperlinkEleRequired);
+			DE.tipInfo(i18n.hyperlinkEleRequired);
 			return false;
 		}
 		
-		this._setElementText(ele, (hyperlinkAttr.content || hyperlinkAttr.href || ""));
-		this._setElementAttr(ele, "href", (hyperlinkAttr.href || ""));
+		DE._setElementText(ele, (hyperlinkAttr.content || hyperlinkAttr.href || ""));
+		DE._setElementAttr(ele, "href", (hyperlinkAttr.href || ""));
+		
 		if(hyperlinkAttr.target)
-			this._setElementAttr(ele, "target", hyperlinkAttr.target);
+			DE._setElementAttr(ele, "target", hyperlinkAttr.target);
 		else
-			this._setElementAttr(ele, "target", null);
-			
+			DE._setElementAttr(ele, "target", null);
+		
 		return ele;
 	};
 	
@@ -1465,7 +1458,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertVideo = function(insertType, refEle)
+	DE.checkInsertVideo = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1479,15 +1472,16 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertVideo = function(videoAttr, insertType, refEle)
+	DE.insertVideo = function(videoAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var ele = $("<video controls=\"controls\"></video>");
+		var ele = CF.eleCreate("video");
+		CF.eleAttr(ele, "controls", "controls");
 		
-		this._insertElement(ele, insertType, refEle);
-		this._setVideoAttr(videoAttr, ele);
+		DE._insertElement(ele, insertType, refEle);
+		DE._setVideoAttr(videoAttr, ele);
 		
 		return ele;
 	};
@@ -1497,10 +1491,10 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.isVideo = function(ele)
+	DE.isVideo = function(ele)
 	{
-		ele = this._currentElement(ele);
-		return ele.is("video");
+		ele = DE._currentElement(ele);
+		return CF.isEleMatches(ele, "video");
 	};
 	
 	/**
@@ -1508,20 +1502,20 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.getVideoAttr = function(ele)
+	DE.getVideoAttr = function(ele)
 	{
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
 		var attrObj = {};
 		
-		if(!this.isVideo(ele))
+		if(!DE.isVideo(ele))
 			return attrObj;
 		
-		ele = this._editElement(ele);
+		ele = DE._editElement(ele);
 		
-		var eleStyle = this.getElementStyle(ele);
+		var eleStyle = DE.getElementStyle(ele);
 		
-		attrObj.src = (ele.attr("src") || "");
+		attrObj.src = (CF.eleAttr(ele, "src") || "");
 		attrObj.width = eleStyle.width;
 		attrObj.height = eleStyle.height;
 		
@@ -1533,9 +1527,9 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setVideoAttr = function(videoAttr, ele)
+	DE.setVideoAttr = function(videoAttr, ele)
 	{
-		return this._setVideoAttr(videoAttr, ele);
+		return DE._setVideoAttr(videoAttr, ele);
 	};
 	
 	/**
@@ -1546,20 +1540,20 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor._setVideoAttr = function(videoAttr, ele)
+	DE._setVideoAttr = function(videoAttr, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.isVideo(ele))
+		if(!DE.isVideo(ele))
 		{
-			this.tipInfo(i18n.videoEleRequired);
+			DE.tipInfo(i18n.videoEleRequired);
 			return false;
 		}
 		
 		var eleStyle = { width: videoAttr.width, height: videoAttr.height };
 		
-		this._setElementAttr(ele, "src", (videoAttr.src || ""));
-		this._setElementStyleAppend(ele, eleStyle);
+		DE._setElementAttr(ele, "src", (videoAttr.src || ""));
+		DE._setElementStyleAppend(ele, eleStyle);
 		
 		return ele;
 	};
@@ -1570,7 +1564,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertIframe = function(insertType, refEle)
+	DE.checkInsertIframe = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1584,15 +1578,15 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertIframe = function(iframeAttr, insertType, refEle)
+	DE.insertIframe = function(iframeAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var ele = $("<iframe></iframe>");
+		var ele = CF.eleCreate("iframe");
 		
-		this._insertElement(ele, insertType, refEle);
-		this._setIframeAttr(iframeAttr, ele);
+		DE._insertElement(ele, insertType, refEle);
+		DE._setIframeAttr(iframeAttr, ele);
 		
 		return ele;
 	};
@@ -1602,10 +1596,10 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.isIframe = function(ele)
+	DE.isIframe = function(ele)
 	{
-		ele = this._currentElement(ele);
-		return ele.is("iframe");
+		ele = DE._currentElement(ele);
+		return CF.isEleMatches(ele, "iframe");
 	};
 	
 	/**
@@ -1613,20 +1607,20 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.getIframeAttr = function(ele)
+	DE.getIframeAttr = function(ele)
 	{
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
 		var attrObj = {};
 		
-		if(!this.isIframe(ele))
+		if(!DE.isIframe(ele))
 			return attrObj;
 		
-		ele = this._editElement(ele);
+		ele = DE._editElement(ele);
 		
-		var eleStyle = this.getElementStyle(ele);
+		var eleStyle = DE.getElementStyle(ele);
 		
-		attrObj.src = (ele.attr("src") || "");
+		attrObj.src = (CF.eleAttr(ele, "src") || "");
 		attrObj.width = eleStyle.width;
 		attrObj.height = eleStyle.height;
 		
@@ -1638,9 +1632,9 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setIframeAttr = function(iframeAttr, ele)
+	DE.setIframeAttr = function(iframeAttr, ele)
 	{
-		return this._setIframeAttr(iframeAttr, ele);
+		return DE._setIframeAttr(iframeAttr, ele);
 	};
 	
 	/**
@@ -1651,20 +1645,20 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor._setIframeAttr = function(iframeAttr, ele)
+	DE._setIframeAttr = function(iframeAttr, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.isIframe(ele))
+		if(!DE.isIframe(ele))
 		{
-			this.tipInfo(i18n.iframeEleRequired);
+			DE.tipInfo(i18n.iframeEleRequired);
 			return false;
 		}
 		
 		var eleStyle = { width: iframeAttr.width, height: iframeAttr.height };
 		
-		this._setElementAttr(ele, "src", (iframeAttr.src || ""));
-		this._setElementStyleAppend(ele, eleStyle);
+		DE._setElementAttr(ele, "src", (iframeAttr.src || ""));
+		DE._setElementStyleAppend(ele, eleStyle);
 		
 		return ele;
 	};
@@ -1675,7 +1669,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertHxtitle = function(insertType, refEle)
+	DE.checkInsertHxtitle = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1689,20 +1683,20 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertHxtitle = function(model, insertType, refEle)
+	DE.insertHxtitle = function(model, insertType, refEle)
 	{
 		model.type = (model.type || "h1");
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var ele = $("<"+model.type+"></"+model.type+">");
+		var ele = CF.eleCreate(model.type);
 		
 		if(model.textAlign)
-			ele.attr("style", "text-align:"+model.textAlign+";");
+			CF.eleAttr(ele, "style", "text-align:"+model.textAlign+";");
 		
-		ele.html(model.content || "");
+		CF.eleHtml(ele, (model.content || ""));
 		
-		this._insertElement(ele, insertType, refEle);
+		DE._insertElement(ele, insertType, refEle);
 		
 		return ele;
 	};
@@ -1713,7 +1707,7 @@
 	 * @param insertType 可选，参考_insertElement()函数的insertType参数
 	 * @param refEle 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.checkInsertLabel = function(insertType, refEle)
+	DE.checkInsertLabel = function(insertType, refEle)
 	{
 		return true;
 	};
@@ -1727,15 +1721,15 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.insertLabel = function(labelAttr, insertType, refEle)
+	DE.insertLabel = function(labelAttr, insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
-		var ele = $("<label></label>");
-		ele.html(labelAttr.content || "");
+		var ele = CF.eleCreate("label");
+		CF.eleHtml(ele, (labelAttr.content || ""));
 		
-		this._insertElement(ele, insertType, refEle);
+		DE._insertElement(ele, insertType, refEle);
 		
 		return ele;
 	};
@@ -1745,10 +1739,10 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.isLabel = function(ele)
+	DE.isLabel = function(ele)
 	{
-		ele = this._currentElement(ele);
-		return ele.is("label");
+		ele = DE._currentElement(ele);
+		return CF.isEleMatches(ele, "label");
 	};
 	
 	/**
@@ -1756,18 +1750,18 @@
 	 * 
 	 * @param ele 可选，参考_insertElement()函数的refEle参数
 	 */
-	editor.getLabelAttr = function(ele)
+	DE.getLabelAttr = function(ele)
 	{
-		ele = this._currentElement(ele);
+		ele = DE._currentElement(ele);
 		
 		var attrObj = {};
 		
-		if(!this.isLabel(ele))
+		if(!DE.isLabel(ele))
 			return attrObj;
 		
-		ele = this._editElement(ele);
+		ele = DE._editElement(ele);
 		
-		attrObj.content = chartFactory.trim(ele.html());
+		attrObj.content = CF.trim(CF.eleHtml(ele));
 		
 		return attrObj;
 	};
@@ -1780,17 +1774,17 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setLabelAttr = function(labelAttr, ele)
+	DE.setLabelAttr = function(labelAttr, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.isLabel(ele))
+		if(!DE.isLabel(ele))
 		{
-			this.tipInfo(i18n.labelEleRequired);
+			DE.tipInfo(i18n.labelEleRequired);
 			return false;
 		}
 		
-		this._setElementText(ele, (labelAttr.content || ""));
+		DE._setElementText(ele, (labelAttr.content || ""));
 		
 		return ele;
 	};
@@ -1801,15 +1795,15 @@
 	 * @param insertType 可选，参考insertChart函数的insertType参数
 	 * @param refEle 可选，参考insertChart函数的refEle参数
 	 */
-	editor.checkInsertChart = function(insertType, refEle)
+	DE.checkInsertChart = function(insertType, refEle)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
-		if(this.isChartElement(refEle) && (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND))
+		if(DE.isChartElement(refEle) && (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND))
 		{
-			this.tipInfo(i18n.insertInsideChartOnChartEleDenied);
+			DE.tipInfo(i18n.insertInsideChartOnChartEleDenied);
 			return false;
 		}
 		else
@@ -1817,7 +1811,7 @@
 	};
 	
 	//插入图表元素时的默认元素样式
-	editor.defaultInsertChartEleStyle = "";
+	DE.defaultInsertChartEleStyle = "";
 	
 	/**
 	 * 插入图表。
@@ -1828,50 +1822,49 @@
 	 * 
 	 * @returns 元素数组、false
 	 */
-	editor.insertChart = function(chartWidgets, insertType, refEle)
+	DE.insertChart = function(chartWidgets, insertType, refEle)
 	{
 		if(!chartWidgets || chartWidgets.length == 0)
 			return;
 		
-		chartWidgets = (!chartFactory.isArray(chartWidgets) ? [ chartWidgets ] : chartWidgets);
+		chartWidgets = (!CF.isArray(chartWidgets) ? [ chartWidgets ] : chartWidgets);
 		
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		
 		//图表元素内部不允许再插入图表元素
-		if(!this.checkInsertChart(insertType, refEle))
+		if(!DE.checkInsertChart(insertType, refEle))
 			return false;
 		
 		var eles = [];
 		
 		var styleStr = "";
-		var insertParentEle = this._getInsertParentElement(refEle, insertType);
+		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
 		
-		if(insertParentEle.is("body"))
-			styleStr = this.defaultInsertChartEleStyle;
+		if(DF._isBodyEle(insertParentEle))
+			styleStr = DE.defaultInsertChartEleStyle;
 		else
 			styleStr = "width:100%;height:100%;";
 		
 		for(var i=0; i<chartWidgets.length; i++)
 		{
 			var chartWidget = chartWidgets[i];
-			
-			var chartDiv = $("<div></div>");
+			var chartDiv = CF.eleCreate("div");
 			
 			//先设style，与源码模式一致
 			if(styleStr)
-				chartDiv.attr("style", styleStr);
+				CF.eleAttr(chartDiv, "style", styleStr);
 			
-			chartDiv.attr(chartFactory.elementAttrConst.WIDGET, chartWidget.id)
-						.html("<!--"+chartWidget.name+"-->");
+			CF.eleAttr(chartDiv, CF.elementAttrConst.WIDGET, chartWidget.id);
+			CF.eleHtml(chartDiv, "<!--"+chartWidget.name+"-->");
 			
-			this._insertElement(chartDiv, insertType, refEle);
+			DE._insertElement(chartDiv, insertType, refEle);
 			
 			eles.push(chartDiv);
 		}
 		
 		var loadChartsEle = (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? refEle : refEle.parent());
-		this._loadUnsolvedChartsInElement(loadChartsEle);
+		DE._loadUnsolvedChartsInElement(loadChartsEle);
 		
 		return eles;
 	};
@@ -1881,19 +1874,19 @@
 	 *
 	 * @param ele 可选，要绑定的图表元素，默认为：当前选中图表元素
 	 */
-	editor.checkBindChart = function(ele)
+	DE.checkBindChart = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
-		var editEle = this._editElement(ele);
+		var editEle = DE._editElement(ele);
 		
 		//绑定图表的元素需要是div
-		if(this._isEmptyElement(editEle) || !editEle.is("div"))
+		if(DE._isEmptyElement(editEle) || !CF.isEleMatches(editEle, "div"))
 		{
-			this.tipInfo(i18n.bindChartElementMustBeDiv);
+			DE.tipInfo(i18n.bindChartElementMustBeDiv);
 			return false;
 		}
 		
@@ -1908,23 +1901,23 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.bindChart = function(chartWidget, ele)
+	DE.bindChart = function(chartWidget, ele)
 	{
 		if(!chartWidget)
 			return false;
 		
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkBindChart(ele))
+		if(!DE.checkBindChart(ele))
 			return false;
 		
-		if(this.isChartElement(ele))
+		if(DE.isChartElement(ele))
 		{
-			this._removeAndDestroyChart(ele);
+			DE._removeAndDestroyChart(ele);
 		}
 		
-		this._setElementAttr(ele, chartFactory.elementAttrConst.WIDGET, chartWidget.id);
-		this.dashboard.loadChart(ele, this._buildLoadChartAjaxOptions());
+		DE._setElementAttr(ele, CF.elementAttrConst.WIDGET, chartWidget.id);
+		DE.dashboard.loadChart(ele);
 		
 		return ele;
 	};
@@ -1934,16 +1927,16 @@
 	 *
 	 * @param ele 可选，要解绑的图表元素，默认为：当前选中图表元素
 	 */
-	editor.checkUnbindChart = function(ele)
+	DE.checkUnbindChart = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
-		if(!this.isChartElement(ele))
+		if(!DE.isChartElement(ele))
 		{
-			this.tipInfo(i18n.selectedNotChartElement);
+			DE.tipInfo(i18n.selectedNotChartElement);
 			return false;
 		}
 		
@@ -1957,15 +1950,15 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.unbindChart = function(ele)
+	DE.unbindChart = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkUnbindChart(ele))
+		if(!DE.checkUnbindChart(ele))
 			return false;
 		
-		this._removeAndDestroyChart(ele);
-		this._setElementAttr(ele, chartFactory.elementAttrConst.WIDGET, null);
+		DE._removeAndDestroyChart(ele);
+		DE._setElementAttr(ele, CF.elementAttrConst.WIDGET, null);
 		
 		return ele;
 	};
@@ -1975,10 +1968,10 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementText = function(ele)
+	DE.getElementText = function(ele)
 	{
-		ele = this._editElement(this._currentElement(ele));
-		return chartFactory.trim(ele.text());
+		ele = DE._editElement(DE._currentElement(ele));
+		return CF.trim(CF.eleText(ele));
 	};
 	
 	/**
@@ -1986,18 +1979,18 @@
 	 *
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementText = function(ele)
+	DE.checkSetElementText = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
-		var firstChild = $("> *:first-child", ele);
+		var firstChild = CF.eleOfFirstChild(ele);
 		
-		if(!this._isEmptyElement(firstChild))
+		if(!DE._isEmptyElement(firstChild))
 		{
-			this.tipInfo(i18n.canEditOnlyTextElement);
+			DE.tipInfo(i18n.canEditOnlyTextElement);
 			return false;
 		}
 		
@@ -2012,14 +2005,14 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setElementText = function(text, ele)
+	DE.setElementText = function(text, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetElementText(ele))
+		if(!DE.checkSetElementText(ele))
 			return false;
 		
-		this._setElementText(ele, text);
+		DE._setElementText(ele, text);
 		
 		return ele;
 	};
@@ -2029,10 +2022,10 @@
 	 * 
 	 * @param name 属性名
 	 */
-	editor.getGlobalAttr = function(name)
+	DE.getGlobalAttr = function(name)
 	{
-		var ele = this._editElement($(document.body));
-		return ele.attr(name);
+		var ele = DE._editElement(document.body);
+		return CF.eleAttr(ele, name);
 	};
 	
 	/**
@@ -2043,17 +2036,17 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setGlobalAttr = function(name, value)
+	DE.setGlobalAttr = function(name, value)
 	{
-		var body = $(document.body);
+		var body = document.body;
 		
-		if(chartFactory.isEmpty(value))
+		if(CF.isEmpty(value))
 		{
-			this._setElementAttr(body, name, null);
+			DE._setElementAttr(body, name, null);
 		}
 		else
 		{
-			this._setElementAttr(body, name, value);
+			DE._setElementAttr(body, name, value);
 		}
 		
 		return body;
@@ -2065,10 +2058,10 @@
 	 * @param name 属性名
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementAttr = function(name, ele)
+	DE.getElementAttr = function(name, ele)
 	{
-		ele = this._editElement(this._currentElement(ele, true));
-		return ele.attr(name);
+		ele = DE._editElement(DE._currentElement(ele, true));
+		return CF.eleAttr(ele, name);
 	};
 	
 	/**
@@ -2076,11 +2069,11 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementAttr = function(ele)
+	DE.checkSetElementAttr = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
 		return true;
@@ -2095,29 +2088,29 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setElementAttr = function(name, value, ele)
+	DE.setElementAttr = function(name, value, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetElementAttr(ele))
+		if(!DE.checkSetElementAttr(ele))
 			return false;
 		
-		if(chartFactory.isEmpty(value))
+		if(CF.isEmpty(value))
 		{
-			this._setElementAttr(ele, name, null);
+			DE._setElementAttr(ele, name, null);
 		}
 		else
 		{
-			this._setElementAttr(ele, name, value);
+			DE._setElementAttr(ele, name, value);
 		}
 		
-		this._checkSetElementIdAttrForChart(ele, name);
+		DE._checkSetElementIdAttrForChart(ele, name);
 		
 		return ele;
 	};
 	
 	//校验设置图表元素ID，图表元素必须有ID，且设置后必须更新图表的elementId属性
-	editor._checkSetElementIdAttrForChart = function(ele, name, reRender)
+	DE._checkSetElementIdAttrForChart = function(ele, name, reRender)
 	{
 		reRender = (reRender === undefined ? true : reRender);
 		
@@ -2126,15 +2119,15 @@
 		if(!isIdAttr)
 			return false;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		
 		if(!chart)
 			return false;
 		
-		var id = chartFactory.checkSetChartElementId(ele, chart);
+		var id = CF.checkSetChartElementId(ele, chart);
 		
 		if(reRender)
-			this._reRenderChart(chart);
+			DE._reRenderChart(chart);
 		
 		return id;
 	};
@@ -2144,11 +2137,11 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkDeleteElement = function(ele)
+	DE.checkDeleteElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
 		return true;
@@ -2161,33 +2154,33 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.deleteElement = function(ele)
+	DE.deleteElement = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkDeleteElement(ele))
+		if(!DE.checkDeleteElement(ele))
 			return false;
 		
-		this._preDeleteElement(ele);
-		this._deleteElement(ele);
+		DE._preDeleteElement(ele);
+		DE._deleteElement(ele);
 		
 		return ele;
 	};
 	
-	editor._preDeleteElement = function(ele)
+	DE._preDeleteElement = function(ele)
 	{
 		//应删除元素包含的所有图表
-		this._removeChartsInElement(ele);
+		DE._removeChartsInElement(ele);
 		
-		var selEle = (this._isSelectedElement(ele) ? ele : this._selectedElement(ele));
-		this.deselectElement(selEle);
+		var selEle = (DE._isSelectedElement(ele) ? ele : DE._selectedElement(ele));
+		DE.deselectElement(selEle);
 		
 		//删除后默认选中临近元素
-		if(!this.selectNextElement(ele, false))
+		if(!DE.selectNextElement(ele, false))
 		{
-			if(!this.selectPrevElement(ele, false))
+			if(!DE.selectPrevElement(ele, false))
 			{
-				this.selectParentElement(ele, false);
+				DE.selectParentElement(ele, false);
 			}
 		}
 	};
@@ -2197,11 +2190,11 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementStyle = function(ele)
+	DE.checkSetElementStyle = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return false;
 		
 		return true;
@@ -2215,33 +2208,31 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setElementStyle = function(styleObj, ele)
+	DE.setElementStyle = function(styleObj, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetElementStyle(ele))
+		if(!DE.checkSetElementStyle(ele))
 			return false;
 		
-		var so = this._spitStyleAndOption(styleObj);
+		var so = DE._spitStyleAndOption(styleObj);
 		
-		this._setElementStyle(ele, so.style);
-		this._setElementClass(ele, so.option.className);
+		DE._setElementStyle(ele, so.style);
+		DE._setElementClass(ele, so.option.className);
 		
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
+		var chartEles = DE._getChartElements(ele);
 		
-		chartEles.each(function()
+		chartEles.forEach((chartEle) =>
 		{
 			if(so.option.syncChartTheme)
 			{
-				var thisEle = $(this);
-				var chartTheme = thisEditor._evalElementChartThemeByStyleObj(thisEle, ele, so.style);
-				thisEditor._setElementChartTheme(thisEle, chartTheme);
-				thisEditor._reRenderChartsInElement(thisEle);
+				var chartTheme = DE._evalElementChartThemeByStyleObj(chartEle, ele, so.style);
+				DE._setElementChartTheme(chartEle, chartTheme);
+				DE._reRenderChartsInElement(chartEle);
 			}
 			else
 			{
-				thisEditor._resizeChartsInElement(this);
+				DE._resizeChartsInElement(chartEle);
 			}
 		});
 		
@@ -2253,10 +2244,10 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementStyle = function(ele)
+	DE.getElementStyle = function(ele)
 	{
-		ele = this._editElement(this._currentElement(ele, true));
-		return this._getElementStyleObj(ele);
+		ele = DE._editElement(DE._currentElement(ele, true));
+		return DE._getElementStyleObj(ele);
 	};
 	
 	/**
@@ -2266,23 +2257,23 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setGlobalStyle = function(styleObj)
+	DE.setGlobalStyle = function(styleObj)
 	{
-		var so = this._spitStyleAndOption(styleObj);
-		var body = $(document.body);
+		var so = DE._spitStyleAndOption(styleObj);
+		var body = document.body;
 		
-		this._setElementStyle(body, so.style);
-		this._setElementClass(body, so.option.className);
+		DE._setElementStyle(body, so.style);
+		DE._setElementClass(body, so.option.className);
 		
-		this._setPageStyle(
+		DE._setPageStyle(
 		{
 			selectedBorderColor: (so.style.color ? so.style.color : undefined)
 		});
 		
 		if(so.option.syncChartTheme)
 		{
-			var chartTheme = this._evalElementChartThemeByStyleObj($(document.body), $(document.body), so.style);
-			this._setGlobalChartTheme(chartTheme);
+			var chartTheme = DE._evalElementChartThemeByStyleObj(body, body, so.style);
+			DE._setGlobalChartTheme(chartTheme);
 		}
 		
 		return body;
@@ -2291,10 +2282,10 @@
 	/**
 	 * 获取全局样式对象（body）。
 	 */
-	editor.getGlobalStyle = function()
+	DE.getGlobalStyle = function()
 	{
-		var ele = this._editElement($(document.body));
-		return this._getElementStyleObj(ele);
+		var ele = DE._editElement(document.body);
+		return DE._getElementStyleObj(ele);
 	};
 	
 	/**
@@ -2302,9 +2293,9 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementChartTheme = function(ele)
+	DE.checkSetElementChartTheme = function(ele)
 	{
-		return this.checkHasChartElement(ele);
+		return DE.checkHasChartElement(ele);
 	};
 	
 	/**
@@ -2315,21 +2306,19 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setElementChartTheme = function(chartTheme, ele)
+	DE.setElementChartTheme = function(chartTheme, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetElementChartTheme(ele))
+		if(!DE.checkSetElementChartTheme(ele))
 			return false;
 		
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
+		var chartEles = DE._getChartElements(ele);
 		
-		chartEles.each(function()
+		chartEles.forEach((chartEle) =>
 		{
-			var thisEle = $(this);
-			thisEditor._setElementChartTheme(thisEle, chartTheme);
-			thisEditor._reRenderChartsInElement(thisEle);
+			DE._setElementChartTheme(chartEle, chartTheme);
+			DE._reRenderChartsInElement(chartEle);
 		});
 		
 		return ele;
@@ -2340,10 +2329,10 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartTheme = function(ele)
+	DE.getElementChartTheme = function(ele)
 	{
-		ele = this._editElement(this._currentElement(ele, true));
-		return this._getElementChartTheme(ele);
+		ele = DE._editElement(DE._currentElement(ele, true));
+		return DE._getElementChartTheme(ele);
 	};
 	
 	/**
@@ -2353,17 +2342,17 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setGlobalChartTheme = function(chartTheme)
+	DE.setGlobalChartTheme = function(chartTheme)
 	{
-		return this._setGlobalChartTheme(chartTheme);
+		return DE._setGlobalChartTheme(chartTheme);
 	};
 	
-	editor._setGlobalChartTheme = function(chartTheme)
+	DE._setGlobalChartTheme = function(chartTheme)
 	{
-		var ele = $(document.body);
+		var ele = document.body;
 		
-		this._setElementChartTheme(ele, chartTheme);
-		this._reRenderDashboard();
+		DE._setElementChartTheme(document.body, chartTheme);
+		DE._reRenderDashboard();
 		
 		return ele;
 	};
@@ -2371,10 +2360,10 @@
 	/**
 	 * 获取全局图表主题。
 	 */
-	editor.getGlobalChartTheme = function()
+	DE.getGlobalChartTheme = function()
 	{
-		var ele = this._editElement($(document.body));
-		return this._getElementChartTheme(ele);
+		var ele = DE._editElement(document.body);
+		return DE._getElementChartTheme(ele);
 	};
 	
 	/**
@@ -2382,19 +2371,19 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartAttrValues = function(ele)
+	DE.getElementChartAttrValues = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return null;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		var attrValues = (chart ? chart.attrValues() : null);
 		
 		//应复制一份，避免被不可预料的修改
 		if(attrValues != null)
-			attrValues = chartFactory.extend(true, {}, attrValues);
+			attrValues = CF.extend(true, {}, attrValues);
 		
 		return attrValues;
 	};
@@ -2404,36 +2393,36 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartAttrValuesForReset = function(ele)
+	DE.getElementChartAttrValuesForReset = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return null;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		if(!chart)
 			return null;
 		
 		var attrValuesOrigin =  (chart.attrValuesOrigin() || {});
-		var attrValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
-		attrValuesEle = chartFactory.evalSilently(attrValuesEle, {});
+		var attrValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
+		attrValuesEle = CF.evalSilently(attrValuesEle, {});
 		var cpas = chart.pluginAttributes();
 		
-		chartFactory.each(cpas, function(i, cpa)
+		cpas.forEach((cpa) =>
 		{
 			delete attrValuesEle[cpa.name];
 		});
 		
 		//保留元素上定义的图表插件属性之外的扩展值
-		var re = chartFactory.extend(true, {}, attrValuesOrigin, attrValuesEle);
+		var re = CF.extend(true, {}, attrValuesOrigin, attrValuesEle);
 		return re;
 	};
 	
 	/**
 	 * 获取看板图表插件属性内置地图选项集。
 	 */
-	editor.getChartPluginAttributeInputOptionsForMap = function(asTree)
+	DE.getChartPluginAttributeInputOptionsForMap = function(asTree)
 	{
 		var re = [];
 		
@@ -2442,7 +2431,7 @@
 		{
 			var listener =
 			{
-				added: function(node, parent, rootArray)
+				added: function(node, parent)
 				{
 					//转换为UI组件所需的结构
 					node.key = node.mapName;
@@ -2452,14 +2441,14 @@
 				}
 			};
 			
-			re = dashboardFactory.getStdBuiltinMapTree(listener);
+			re = DF.getStdBuiltinMapTree(listener);
 		}
 		//数组
 		else
 		{
 			var listener =
 			{
-				added: function(node, rootArray)
+				added: function(node)
 				{
 					//转换为UI组件所需的结构
 					node.value = node.mapName;
@@ -2467,24 +2456,26 @@
 				}
 			};
 			
-			re = dashboardFactory.getStdBuiltinMapArray(listener);
+			re = DF.getStdBuiltinMapArray(listener);
 		}
 		
 		var mapURLs = [];
 		
-		var mapURLsBody = $(document.body).attr(chartFactory.elementAttrConst.MAP_URLS);
-		mapURLsBody = (mapURLsBody ? chartFactory.evalSilently(mapURLsBody, {}) : {});
+		var mapURLsBody = CF.eleAttr(document.body, CF.elementAttrConst.MAP_URLS);
+		mapURLsBody = (mapURLsBody ? CF.evalSilently(mapURLsBody, {}) : {});
 		
-		chartFactory.each(mapURLsBody, function(p, v)
+		for(let p in mapURLsBody)
 		{
-			if(p && chartFactory.isString(v))
+			let v = mapURLsBody[p];
+			
+			if(p && CF.isString(v))
 			{
 				if(asTree)
 					mapURLs.push({ key: p, label: p });
 				else
 					mapURLs.push({ name: p, value: p });
 			}
-		});
+		}
 		
 		if(mapURLs.length > 0)
 			re = mapURLs.concat(re);
@@ -2497,9 +2488,9 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementChartAttrValues = function(ele)
+	DE.checkSetElementChartAttrValues = function(ele)
 	{
-		return this.checkAttrChartElement(ele);
+		return DE.checkAttrChartElement(ele);
 	};
 	
 	/**
@@ -2510,33 +2501,33 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setElementChartAttrValues = function(attrValues, ele)
+	DE.setElementChartAttrValues = function(attrValues, ele)
 	{
 		attrValues = (attrValues || {});
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetElementChartAttrValues(ele))
+		if(!DE.checkSetElementChartAttrValues(ele))
 			return false;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		var attrValuesOrigin = (chart.attrValuesOrigin() || {});
 		var attrValuesMerge = {};
 		
 		//应该只设置有修改的图表属性值，这样在图表模块再次编辑其他图表属性值才能应用于所有引用它看板
-		for(var p in attrValues)
+		for(let p in attrValues)
 		{
-			if(!this._deepEqualsForJson(attrValuesOrigin[p], attrValues[p]))
+			if(!CF.deepEquals(attrValuesOrigin[p], attrValues[p]))
 				attrValuesMerge[p] = attrValues[p];
 		}
 		
-		var eleAttrValue = this._serializeForAttrValue(attrValuesMerge);
+		var eleAttrValue = DE._serializeForAttrValue(attrValuesMerge);
 		
-		if(this._isEmptyJsonObjStr(eleAttrValue))
-			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, null);
+		if(DE._isEmptyJsonObjStr(eleAttrValue))
+			DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, null);
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue);
+			DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, eleAttrValue);
 		
-		this._reRenderChart(chart);
+		DE._reRenderChart(chart);
 		
 		return ele;
 	};
@@ -2546,14 +2537,14 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartPluginAttrs = function(ele)
+	DE.getElementChartPluginAttrs = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return null;
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		if(!chart)
 			return null;
 		
@@ -2565,9 +2556,9 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementChartOptions = function(ele)
+	DE.checkSetElementChartOptions = function(ele)
 	{
-		return this.checkHasChartElement(ele);
+		return DE.checkHasChartElement(ele);
 	};
 	
 	/**
@@ -2578,21 +2569,19 @@
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setElementChartOptions = function(chartOptionsStr, ele)
+	DE.setElementChartOptions = function(chartOptionsStr, ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this.checkSetElementChartOptions(ele))
+		if(!DE.checkSetElementChartOptions(ele))
 			return false;
 		
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
+		var chartEles = DE._getChartElements(ele);
 		
-		chartEles.each(function()
+		chartEles.forEach((chartEle) =>
 		{
-			var thisEle = $(this);
-			thisEditor._setElementChartOptions(thisEle, chartOptionsStr);
-			thisEditor._reRenderChartsInElement(thisEle);
+			DE._setElementChartOptions(chartEle, chartOptionsStr);
+			DE._reRenderChartsInElement(chartEle);
 		});
 		
 		return ele;
@@ -2604,12 +2593,12 @@
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 * @oaram asString 可选，是否以字符串形式返回，默认为：true
 	 */
-	editor.getElementChartOptions = function(ele, asString)
+	DE.getElementChartOptions = function(ele, asString)
 	{
-		ele = this._editElement(this._currentElement(ele, true));
+		ele = DE._editElement(DE._currentElement(ele, true));
 		asString = (asString === undefined ? true : asString);
 		
-		return this._getElementChartOptions(ele);
+		return DE._getElementChartOptions(ele);
 	};
 	
 	/**
@@ -2617,14 +2606,14 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartOptionsOrigin = function(ele)
+	DE.getElementChartOptionsOrigin = function(ele)
 	{
-		ele = this._currentElement(ele, true);
+		ele = DE._currentElement(ele, true);
 		
-		if(!this._checkNotEmptyElement(ele))
+		if(!DE._checkNotEmptyElement(ele))
 			return "";
 		
-		var chart = this.dashboard.renderedChart(ele);
+		var chart = DE.dashboard.renderedChart(ele);
 		if(!chart)
 			return "";
 		
@@ -2638,12 +2627,12 @@
 	 * 
 	 * @returns 元素
 	 */
-	editor.setGlobalChartOptions = function(chartOptionsStr)
+	DE.setGlobalChartOptions = function(chartOptionsStr)
 	{
-		var ele = $(document.body);
+		var ele = document.body;
 		
-		this._setElementChartOptions(ele, chartOptionsStr);
-		this._reRenderDashboard();
+		DE._setElementChartOptions(ele, chartOptionsStr);
+		DE._reRenderDashboard();
 		
 		return ele;
 	};
@@ -2653,18 +2642,18 @@
 	 * 
 	 * @oaram asString 可选，是否以字符串形式返回，默认为：true
 	 */
-	editor.getGlobalChartOptions = function(asString)
+	DE.getGlobalChartOptions = function(asString)
 	{
 		asString = (asString === undefined ? true : asString);
 		
-		var ele = this._editElement($(document.body));
-		return this._getElementChartOptions(ele);
+		var ele = DE._editElement(document.body);
+		return DE._getElementChartOptions(ele);
 	};
 	
-	editor._reRenderDashboard = function()
+	DE._reRenderDashboard = function()
 	{
-		var dashboard = this.dashboard;
-		chartFactory.executeSilently(function()
+		var dashboard = DE.dashboard;
+		CF.executeSilently(() =>
 		{
 			dashboard.destroy();
 			dashboard.init();
@@ -2672,23 +2661,23 @@
 		});
 	};
 	
-	editor._renderChart = function(chart)
+	DE._renderChart = function(chart)
 	{
 		if(!chart)
 			return;
 		
-		chartFactory.executeSilently(function()
+		CF.executeSilently(() =>
 		{
 			chart.render();
 		});
 	};
 	
-	editor._reRenderChart = function(chart)
+	DE._reRenderChart = function(chart)
 	{
 		if(!chart)
 			return;
 		
-		chartFactory.executeSilently(function()
+		CF.executeSilently(() =>
 		{
 			chart.destroy();
 			chart.init();
@@ -2696,121 +2685,118 @@
 		});
 	};
 	
-	editor._resizeChart = function(chart)
+	DE._resizeChart = function(chart)
 	{
 		if(!chart)
 			return;
 		
-		chartFactory.executeSilently(function()
+		CF.executeSilently(() =>
 		{
 			chart.resize();
 		});
 	};
 	
-	editor._removeAndDestroyChart = function(chartInfo)
+	DE._removeAndDestroyChart = function(chartInfo)
 	{
 		if(!chartInfo)
 			return;
 		
-		var dashboard = this.dashboard;
-		chartFactory.executeSilently(function()
+		var dashboard = DE.dashboard;
+		CF.executeSilently(() =>
 		{
 			dashboard.removeChart(chartInfo, true);
 		});
 	};
 	
-	editor._reRenderChartsInElement = function(ele)
+	DE._reRenderChartsInElement = function(ele)
 	{
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
+		var chartEles = DE._getChartElements(ele);
 		
-		chartEles.each(function()
+		chartEles.forEach((chartEle) =>
 		{
-			var chart = thisEditor.dashboard.renderedChart(this);
-			thisEditor._reRenderChart(chart);
+			var chart = DE.dashboard.renderedChart(chartEle);
+			DE._reRenderChart(chart);
 		});
 	};
 	
-	editor._resizeChartsInElement = function(ele)
+	DE._resizeChartsInElement = function(ele)
 	{
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
+		var chartEles = DE._getChartElements(ele);
 		
-		chartEles.each(function()
+		chartEles.forEach((chartEle) =>
 		{
-			var chart = thisEditor.dashboard.renderedChart(this);
-			thisEditor._resizeChart(chart);
+			var chart = DE.dashboard.renderedChart(chartEle);
+			DE._resizeChart(chart);
 		});
 	};
 	
-	editor._removeChartsInElement = function(ele)
+	DE._removeChartsInElement = function(ele)
 	{
-		var chartEles = this._getChartElements(ele);
-		var thisEditor = this;
+		var chartEles = DE._getChartElements(ele);
 		
-		chartEles.each(function()
+		chartEles.forEach((chartEle) =>
 		{
-			thisEditor._removeAndDestroyChart(this);
+			DE._removeAndDestroyChart(chartEle);
 		});
 	};
 	
-	editor._loadUnsolvedChartsInElement = function(ele)
+	DE._loadUnsolvedChartsInElement = function(ele)
 	{
-		this.dashboard.loadUnsolvedCharts(ele, this._buildLoadChartAjaxOptions());
+		DE.dashboard.loadUnsolvedCharts(ele);
 	};
 	
-	editor._setElementChartOptions = function(ele, chartOptionsStr)
+	DE._setElementChartOptions = function(ele, chartOptionsStr)
 	{
 		if(!chartOptionsStr)
 		{
-			this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, null);
+			DE._setElementAttr(ele, CF.elementAttrConst.OPTIONS, null);
 			return;
 		}
 		
 		var attrValue = (chartOptionsStr ? chartOptionsStr : "{}");
-		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue);
+		DE._setElementAttr(ele, CF.elementAttrConst.OPTIONS, attrValue);
 	};
 	
-	editor._getElementChartOptions = function(ele)
+	DE._getElementChartOptions = function(ele)
 	{
-		var optionsStr = ele.attr(chartFactory.elementAttrConst.OPTIONS);
+		var optionsStr = CF.eleAttr(ele, CF.elementAttrConst.OPTIONS);
 		return optionsStr;
 	};
 	
-	editor._getElementChartTheme = function(ele)
+	DE._getElementChartTheme = function(ele)
 	{
-		var themeStr = ele.attr(chartFactory.elementAttrConst.THEME);
+		var themeStr = CF.eleAttr(ele, CF.elementAttrConst.THEME);
 		
 		if(!themeStr)
 			return null;
 		
-		return chartFactory.evalSilently(themeStr, {});
+		return CF.evalSilently(themeStr, {});
 	};
 	
-	editor._setElementChartTheme = function(ele, chartTheme)
+	DE._setElementChartTheme = function(ele, chartTheme)
 	{
-		chartTheme = chartFactory.extend(true, {}, chartTheme); 
+		chartTheme = CF.extend(true, {}, chartTheme); 
 		
-		if(chartFactory.isString(chartTheme.graphColors))
-			chartTheme.graphColors = this._spitIgnoreEmpty(chartTheme.graphColors);
+		if(CF.isString(chartTheme.graphColors))
+			chartTheme.graphColors = DE._spitIgnoreEmpty(chartTheme.graphColors);
 		
-		if(chartFactory.isString(chartTheme.graphRangeColors))
-			chartTheme.graphRangeColors = this._spitIgnoreEmpty(chartTheme.graphRangeColors);
+		if(CF.isString(chartTheme.graphRangeColors))
+			chartTheme.graphRangeColors = DE._spitIgnoreEmpty(chartTheme.graphRangeColors);
 		
-		var mergedChartTheme = (this.getElementChartTheme(ele) || {});
+		var mergedChartTheme = (DE.getElementChartTheme(ele) || {});
 		
 		for(var p in chartTheme)
 		{
 			var v = chartTheme[p];
 			
-			if(chartFactory.isEmpty(v))
+			if(CF.isEmpty(v))
 				delete mergedChartTheme[p];
 			else
 				mergedChartTheme[p] = v;
 		}
 		
 		//确保fontSize为数值
-		if(mergedChartTheme.fontSize != null && !chartFactory.isNumber(mergedChartTheme.fontSize))
+		if(mergedChartTheme.fontSize != null && !CF.isNumber(mergedChartTheme.fontSize))
 		{
 			var fontSize = parseInt(mergedChartTheme.fontSize);
 			if(isNaN(fontSize))
@@ -2825,91 +2811,100 @@
 		{
 			var v = mergedChartTheme[p];
 			
-			if(!chartFactory.isEmpty(v))
+			if(!CF.isEmpty(v))
 				trim[p] = v;
 		}
 		
-		var attrValue = this._serializeForAttrValue(trim);
+		var attrValue = DE._serializeForAttrValue(trim);
 		
-		if(this._isEmptyJsonObjStr(attrValue))
-			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, null);
+		if(DE._isEmptyJsonObjStr(attrValue))
+			DE._setElementAttr(ele, CF.elementAttrConst.THEME, null);
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue);
+			DE._setElementAttr(ele, CF.elementAttrConst.THEME, attrValue);
+	};
+	
+	DF._isBodyEle = function(ele)
+	{
+		return CF.isEleMatches(ele, "body");
 	};
 	
 	/**
 	 * 插入元素，同时同步至编辑HTML中。
 	 * 
-	 * @param insertEle 要插入的jq元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
+	 * @param insertEle 要插入的HTML元素、HTML文本，不要使用"<div />"的格式，可能导致编辑HTML代码格式不对
 	 * @param insertType 可选，插入类型：INSERT_TYPE_*
 	 * @param refEle 插入参照元素，默认为：当前选中元素，或者<body>
 	 * @param highlight 可选，是否为元素添加高亮样式，默认为：false
 	 */
-	editor._insertElement = function(insertEle, insertType, refEle, highlight)
+	DE._insertElement = function(insertEle, insertType, refEle, highlight)
 	{
-		refEle = this._currentElement(refEle);
-		insertType = this._trimInsertType(refEle, insertType);
+		refEle = DE._currentElement(refEle);
+		insertType = DE._trimInsertType(refEle, insertType);
 		highlight = (highlight === undefined ? false : highlight);
 		
-		if(chartFactory.isString(insertEle))
-			insertEle = $(insertEle);
+		if(CF.isString(insertEle))
+			insertEle = CF.eleCreateByHtml(insertEle);
 		
-		this._addVisualEditIdAttr(insertEle);
-		this._insertElementFormat(refEle, insertEle, insertType);
+		DE._addVisualEditIdAttr(insertEle);
+		DE._insertElementFormat(refEle, insertEle, insertType);
 		
 		//同步至编辑HTML中
-		var editEle = this._editElement(refEle);
-		var insertEleClone = insertEle.clone();
-		this._insertElementFormat(editEle, insertEleClone, insertType, true);
+		var editEle = DE._editElement(refEle);
+		var insertEleClone = CF.eleClone(insertEle);
+		DE._insertElementFormat(editEle, insertEleClone, insertType, true);
 		
 		if(highlight)
 		{
 			insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
-			$("*", insertEle).addClass(ELEMENT_CLASS_NEW_INSERT);
+			let ds = CF.elesOfSelector("*", insertEle);
+			ds.forEach((d) =>
+			{
+				CF.eleAddClass(d, ELEMENT_CLASS_NEW_INSERT);
+			});
 		}
 		
-		this.changeFlag(true);
+		DE.changeFlag(true);
 	};
 	
 	/**
 	 * 删除元素，同时同步至编辑HTML中。
 	 */
-	editor._deleteElement = function(ele)
+	DE._deleteElement = function(ele)
 	{
-		var editEle = this._editElement(ele);
+		var editEle = DE._editElement(ele);
 		
-		this._deleteElementFormat(editEle);
-		this._deleteElementFormat(ele);
+		DE._deleteElementFormat(editEle);
+		DE._deleteElementFormat(ele);
 		
-		this.changeFlag(true);
+		DE.changeFlag(true);
 	};
 	
 	/**
 	 * 追加设置元素style属性，同时同步至编辑HTML中。
 	 */
-	editor._setElementStyleAppend = function(ele, styleObj)
+	DE._setElementStyleAppend = function(ele, styleObj)
 	{
-		this._setElementStyle(ele, styleObj, false);
+		DE._setElementStyle(ele, styleObj, false);
 	};
 	
 	/**
 	 * 设置元素style属性，同时同步至编辑HTML中。
 	 */
-	editor._setElementStyle = function(ele, styleObj, strictSet)
+	DE._setElementStyle = function(ele, styleObj, strictSet)
 	{
 		styleObj = (styleObj || {});
 		
-		this._setElementStyleIfStrict(ele, styleObj, strictSet);
+		DE._setElementStyleIfStrict(ele, styleObj, strictSet);
 		
 		//同步至编辑HTML中
-		var editEle = this._editElement(ele);
-		this._setElementStyleIfStrict(editEle, styleObj, strictSet);
+		var editEle = DE._editElement(ele);
+		DE._setElementStyleIfStrict(editEle, styleObj, strictSet);
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
+		DE._reSelectElementIf(ele);
+		DE.changeFlag(true);
 	};
 	
-	editor._setElementStyleIfStrict = function(ele, styleObj, strictSet)
+	DE._setElementStyleIfStrict = function(ele, styleObj, strictSet)
 	{
 		//这里不能采用整体设置"style"属性的方式，因为"style"属性可能有很多不支持编辑的、或者动态生成的css属性，
 		//它们应该被保留，且不能同步至对应的编辑元素上
@@ -2917,11 +2912,11 @@
 		//默认严格设置模式，这样才能支持删除styleObj中未出现的样式
 		strictSet = (strictSet === undefined ? true : strictSet);
 		
-		var nowStyleObj = chartFactory.styleStringToObj(chartFactory.eleStyle(ele) || "");
+		var nowStyleObj = CF.styleStringToObj(CF.eleStyle(ele) || "");
 		
 		if(strictSet)
 		{
-			for(var editableName in this._editableElementStyles)
+			for(var editableName in DE._editableElementStyles)
 			{
 				delete nowStyleObj[editableName];
 			}
@@ -2931,7 +2926,7 @@
 		{
 			var value = styleObj[name];
 			
-			if(chartFactory.isEmpty(value))
+			if(CF.isEmpty(value))
 				delete nowStyleObj[name];
 			else
 			{
@@ -2939,50 +2934,50 @@
 			}
 		}
 		
-		if(chartFactory.isEmptyObject(nowStyleObj))
-			this._setElementAttrNoSync(ele, "style", null);
+		if(CF.isEmptyObject(nowStyleObj))
+			DE._setElementAttrNoSync(ele, "style", null);
 		else
 		{
-			var cssText = chartFactory.styleString(nowStyleObj);
-			this._setElementAttrNoSync(ele, "style", cssText);
+			var cssText = CF.styleString(nowStyleObj);
+			DE._setElementAttrNoSync(ele, "style", cssText);
 		}
 	};
 	
 	/**
 	 * 设置元素class属性，同时同步至编辑HTML中。
 	 */
-	editor._setElementClass = function(ele, className)
+	DE._setElementClass = function(ele, className)
 	{
 		className = (className || "");
 		
-		var editEle = this._editElement(ele);
-		var removeClassName = editEle.attr("class");
+		var editEle = DE._editElement(ele);
+		var removeClassName = CF.eleAttr(editEle, "class");
 		
 		if(removeClassName)
-			this._removeElementClassNoSync(ele, removeClassName);
+			DE._removeElementClassNoSync(ele, removeClassName);
 		
 		//同步至编辑HTML中
 		if(!className)
-			this._setElementAttrNoSync(editEle, "class", null);
+			DE._setElementAttrNoSync(editEle, "class", null);
 		else
-			this._removeElementClassNoSync(editEle, removeClassName);
+			DE._removeElementClassNoSync(editEle, removeClassName);
 		
 		if(className)
 		{
-			this._addElementClassNoSync(ele, className);
+			DE._addElementClassNoSync(ele, className);
 			//同步至编辑HTML中
-			this._addElementClassNoSync(editEle, className);
+			DE._addElementClassNoSync(editEle, className);
 		}
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
+		DE._reSelectElementIf(ele);
+		DE.changeFlag(true);
 	};
 	
-	editor._removeClassName = function(classStr, predicate)
+	DE._removeClassName = function(classStr, predicate)
 	{
 		var re = "";
 		
-		var classNames = (chartFactory.isEmpty(classStr) ? [] : classStr.split(" "));
+		var classNames = (CF.isEmpty(classStr) ? [] : classStr.split(" "));
 		
 		for(var i=0; i<classNames.length; i++)
 		{
@@ -3000,70 +2995,70 @@
 	/**
 	 * 设置元素文本内容，同时同步至编辑HTML中。
 	 */
-	editor._setElementText = function(ele, text)
+	DE._setElementText = function(ele, text)
 	{
 		text = (text || "");
 		
-		this._setElementTextNoSync(ele, text);
+		DE._setElementTextNoSync(ele, text);
 		
 		//同步至编辑HTML中
-		var editEle = this._editElement(ele);
-		this._setElementTextNoSync(editEle, text);
+		var editEle = DE._editElement(ele);
+		DE._setElementTextNoSync(editEle, text);
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
+		DE._reSelectElementIf(ele);
+		DE.changeFlag(true);
 	};
 	
 	/**
 	 * 设置元素属性，同时同步至编辑HTML中，值为null时将移除属性。
 	 */
-	editor._setElementAttr = function(ele, name, value)
+	DE._setElementAttr = function(ele, name, value)
 	{
-		this._setElementAttrNoSync(ele, name, value);
+		DE._setElementAttrNoSync(ele, name, value);
 		
 		//同步至编辑HTML中
-		var editEle = this._editElement(ele);
-		this._setElementAttrNoSync(editEle, name, value);
+		var editEle = DE._editElement(ele);
+		DE._setElementAttrNoSync(editEle, name, value);
 		
-		this._reSelectElementIf(ele);
-		this.changeFlag(true);
+		DE._reSelectElementIf(ele);
+		DE.changeFlag(true);
 	};
 	
-	editor._insertElementFormat = function(refEle, insertEle, insertType, formatInner)
+	DE._insertElementFormat = function(refEle, insertEle, insertType, formatInner)
 	{
 		formatInner = (formatInner === undefined ? false : formatInner);
 		
-		var refEleLevel = this._evalElementLevel(refEle);
+		var refEleLevel = DE._evalElementLevel(refEle);
 		
 		if(insertType == INSERT_TYPE_AFTER)
 		{
-			this._insertElementAfterNoSync(refEle, insertEle);
-			refEle.after(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+			DE._insertElementAfterNoSync(refEle, insertEle);
+			CF.eleAfter(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == INSERT_TYPE_BEFORE)
 		{
-			this._insertElementBeforeNoSync(refEle, insertEle);
-			refEle.before(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+			DE._insertElementBeforeNoSync(refEle, insertEle);
+			CF.eleBefore(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == INSERT_TYPE_APPEND)
 		{
-			var children = refEle.children();
+			var children = CF.elesOfChildren(refEle);
 			
-			if(this._isEmptyElement(children))
+			if(DE._isEmptyElement(children))
 			{
-				var innerHtml = this._getInnerHTML(refEle);
-				if(this._isOnlyEmptyOrFormat(innerHtml))
+				var innerHtml = DE._getInnerHTML(refEle);
+				if(DE._isOnlyEmptyOrFormat(innerHtml))
 				{
-					this._setInnerHTMLNoSync(refEle, "");
+					DE._setInnerHTMLNoSync(refEle, "");
 				}
 				
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
-				this._insertElementAppendNoSync(refEle, insertEle);
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+				CF.eleAppend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
+				DE._insertElementAppendNoSync(refEle, insertEle);
+				CF.eleAppend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 			}
 			else
 			{
-				this._insertElementFormat($(children[children.length-1]), insertEle, INSERT_TYPE_AFTER, formatInner);
+				DE._insertElementFormat(children[children.length-1], insertEle, INSERT_TYPE_AFTER, formatInner);
 				return;
 			}
 		}
@@ -3071,22 +3066,22 @@
 		{
 			var insertTailFormat = false;
 			
-			var children = refEle.children();
-			if(this._isEmptyElement(children))
+			var children = CF.elesOfChildren(refEle);
+			if(DE._isEmptyElement(children))
 			{
-				var innerHtml = this._getInnerHTML(refEle);
-				if(this._isOnlyEmptyOrFormat(innerHtml))
+				var innerHtml = DE._getInnerHTML(refEle);
+				if(DE._isOnlyEmptyOrFormat(innerHtml))
 				{
 					insertTailFormat = true;
-					this._setInnerHTMLNoSync(refEle, "");
+					DE._setInnerHTMLNoSync(refEle, "");
 				}
 			}
 			
-			this._insertElementPrependNoSync(refEle, insertEle);
-			refEle.prepend(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
+			DE._insertElementPrependNoSync(refEle, insertEle);
+			CF.elePrepend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
 			
 			if(insertTailFormat)
-				refEle.append(INSERT_ELE_FORMAT_START + "\n" + this._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
+				CF.eleAppend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else
 			throw new Error("Unsupported insert type : " + insertType);
@@ -3094,90 +3089,87 @@
 		//为所有内部元素补齐格式
 		if(formatInner)
 		{
-			var tabsText = this._genFormatTabs(this._evalElementLevel(insertEle)-1);
-			this._appendElementSubFormat(insertEle, tabsText);
+			var tabsText = DE._genFormatTabs(DE._evalElementLevel(insertEle)-1);
+			DE._appendElementSubFormat(insertEle, tabsText);
 		}
 	};
 	
-	editor._appendElementSubFormat = function(ele, tabsText)
+	DE._appendElementSubFormat = function(ele, tabsText)
 	{
 		//在每一个<!--dgInsertFmtEnd-->注释节点前插入格式文本
 		//注意：这里不应该使用替换HTML内容文本后再设置的方式，因为会新建DOM对象而导致旧DOM引用失效
-		ele.contents()
-			.filter(function()
-			{
-				return (this.nodeType == HTML_NODE_TYPE_COMMENT && this.nodeValue == "dgInsertFmtEnd");
-			})
-			.before(tabsText);
-		
-		var thisEditor = this;
-		ele.children().each(function()
+		CF.elesOfChildNode(ele).forEach(function(node)
 		{
-			thisEditor._appendElementSubFormat($(this), tabsText);
+			if(node.nodeType == HTML_NODE_TYPE_COMMENT && node.nodeValue == "dgInsertFmtEnd")
+			{
+				CF.eleBefore(node, tabsText);
+			}
+		});
+		
+		CF.elesOfChildren(ele).forEach((child) =>
+		{
+			DE._appendElementSubFormat(child, tabsText);
 		});
 	};
 	
-	editor._deleteElementFormat = function(ele)
+	DE._deleteElementFormat = function(ele)
 	{
-		ele.before(DELETE_ELE_FORMAT_FLAG);
-		this._deleteElementNoSync(ele);
+		CF.eleBefore(ele, DELETE_ELE_FORMAT_FLAG);
+		DE._deleteElementNoSync(ele);
 	};
 	
-	editor._addElementClassNoSync = function(ele, className)
+	DE._addElementClassNoSync = function(ele, className)
 	{
-		ele.addClass(className);
+		CF.eleAddClass(ele, className);
 	};
 	
-	editor._removeElementClassNoSync = function(ele, className)
+	DE._removeElementClassNoSync = function(ele, className)
 	{
-		ele.removeClass(className);
+		CF.eleRemoveClass(ele, className);
 	};
 	
-	editor._setElementTextNoSync = function(ele, text)
+	DE._setElementTextNoSync = function(ele, text)
 	{
-		ele.text(text);
+		CF.eleText(ele, text);
 	};
 	
-	editor._setElementAttrNoSync = function(ele, name, value)
+	DE._setElementAttrNoSync = function(ele, name, value)
 	{
 		// value是""时不应移除
-		if(value == null)
-			ele.removeAttr(name);
-		else
-			ele.attr(name, value);
+		CF.eleAttr(ele, name, value);
 	};
 	
-	editor._insertElementAppendNoSync = function(refEle, insertEle)
+	DE._insertElementAppendNoSync = function(refEle, insertEle)
 	{
-		refEle.append(insertEle);
+		CF.eleAppend(refEle, insertEle);
 	};
 	
-	editor._insertElementPrependNoSync = function(refEle, insertEle)
+	DE._insertElementPrependNoSync = function(refEle, insertEle)
 	{
-		refEle.prepend(insertEle);
+		CF.elePrepend(refEle, insertEle);
 	};
 	
-	editor._insertElementAfterNoSync = function(refEle, insertEle)
+	DE._insertElementAfterNoSync = function(refEle, insertEle)
 	{
-		refEle.after(insertEle);
+		CF.eleAfter(refEle, insertEle);
 	};
 	
-	editor._insertElementBeforeNoSync = function(refEle, insertEle)
+	DE._insertElementBeforeNoSync = function(refEle, insertEle)
 	{
-		refEle.before(insertEle);
+		CF.eleBefore(refEle, insertEle);
 	};
 	
-	editor._deleteElementNoSync = function(ele)
+	DE._deleteElementNoSync = function(ele)
 	{
-		ele.remove();
+		CF.eleRemove(ele);
 	};
 	
-	editor._setInnerHTMLNoSync = function(ele, html)
+	DE._setInnerHTMLNoSync = function(ele, html)
 	{
-		ele.prop("innerHTML", html);
+		CF.eleHtml(ele, html);
 	};
 	
-	editor._editableElementStyles =
+	DE._editableElementStyles =
 	{
 		"color": true,
 		"background-color": true,
@@ -3239,20 +3231,20 @@
 		"line-height": true
 	};
 	
-	editor._getInnerHTML = function(ele)
+	DE._getInnerHTML = function(ele)
 	{
-		return ele.prop("innerHTML");
+		return CF.eleHtml(ele);
 	};
 	
-	editor._getElementStyleObj = function(ele)
+	DE._getElementStyleObj = function(ele)
 	{
-		var styleObj = chartFactory.styleStringToObj(chartFactory.eleStyle(ele));
-		styleObj.className = (ele.attr("class") || "");
+		var styleObj = CF.styleStringToObj(CF.eleStyle(ele));
+		styleObj.className = (CF.eleAttr(ele, "class") || "");
 		
 		return styleObj;
 	};
 	
-	editor._spitStyleAndOption = function(styleObj)
+	DE._spitStyleAndOption = function(styleObj)
 	{
 		var optionObj =
 		{
@@ -3260,7 +3252,7 @@
 			className: styleObj.className
 		};
 		
-		var plainStyleObj = chartFactory.extend({}, styleObj);
+		var plainStyleObj = CF.extend({}, styleObj);
 		plainStyleObj.syncChartTheme = undefined;
 		plainStyleObj.className = undefined;
 		
@@ -3273,30 +3265,30 @@
 		return re;
 	};
 	
-	editor._evalElementChartThemeByStyleObj = function(chartEle, styleEle, styleObj)
+	DE._evalElementChartThemeByStyleObj = function(chartEle, styleEle, styleObj)
 	{
-		var nowTheme = this._getElementChartTheme(chartEle);
+		var nowTheme = DE._getElementChartTheme(chartEle);
 		var styleTheme = { color: null, actualBackgroundColor: null, fontSize: null };
 		
 		var color = styleObj['color'];
 		var bgColor = styleObj['background-color'];
 		var fontSize = styleObj['font-size'];
 		
-		if(!chartFactory.isEmpty(color))
+		if(!CF.isEmpty(color))
 			styleTheme.color = color;
 		
 		//始终将图表元素的背景色置为null，因为背景色会自动继承父级元素
 		styleTheme.backgroundColor = null;
 		
-		if(!chartFactory.isEmpty(bgColor))
+		if(!CF.isEmpty(bgColor))
 		{
 			//应忽略透明度
-			var bgColorObj = chartFactory.parseColor(bgColor);
+			var bgColorObj = CF.parseColor(bgColor);
 			bgColorObj.a = undefined;
-			styleTheme.actualBackgroundColor = chartFactory.colorToHexStr(bgColorObj, true);
+			styleTheme.actualBackgroundColor = CF.colorToHexStr(bgColorObj, true);
 		}
 		
-		if(!chartFactory.isEmpty(fontSize))
+		if(!CF.isEmpty(fontSize))
 		{
 			//从元素的css中取才能获取字体尺寸像素数
 			styleTheme.fontSize = styleEle.css("font-size");
@@ -3317,19 +3309,19 @@
 		}
 	};
 	
-	editor._reSelectElementIf = function(ele)
+	DE._reSelectElementIf = function(ele)
 	{
-		if(this._isEmptyElement(ele))
+		if(DE._isEmptyElement(ele))
 			return false;
 		
-		var currentEle = this._currentElement(null, true);
+		var currentEle = DE._currentElement(null, true);
 		
-		if(this._isEmptyElement(currentEle))
+		if(DE._isEmptyElement(currentEle))
 			return false;
 		
-		if($(ele)[0] === currentEle[0])
+		if(ele === currentEle)
 		{
-			this.selectElement(ele);
+			DE.selectElement(ele);
 			return true;
 		}
 		else
@@ -3338,39 +3330,37 @@
 		}
 	};
 	
-	editor._currentElement = function(currentEle, excludeBody)
+	DE._currentElement = function(currentEle, excludeBody)
 	{
 		excludeBody = (excludeBody === undefined ? false : excludeBody);
 		
-		currentEle = (this._isEmptyElement(currentEle) ? this._selectedElement() : currentEle);
+		currentEle = (DE._isEmptyElement(currentEle) ? DE._selectedElement() : currentEle);
 		
 		if(!excludeBody)
-			currentEle = (this._isEmptyElement(currentEle) ? $(document.body) : currentEle);
+			currentEle = (DE._isEmptyElement(currentEle) ? document.body : currentEle);
 		
-		return $(currentEle);
+		return currentEle;
 	};
 	
-	editor._addVisualEditIdAttr = function($ele)
+	DE._addVisualEditIdAttr = function(ele)
 	{
-		var veId = this._nextVisualEditId();
-		$ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID, veId);
+		var veId = DE._nextVisualEditId();
+		CF.eleAttr(ele, ELEMENT_ATTR_VISUAL_EDIT_ID, veId);
 		
-		var children = $ele.children();
+		var children = CF.elesOfChildren(ele);
 		
-		if(children.length < 1)
+		if(CF.isEmpty(children))
 			return;
 		
-		var thisEditor = this;
-		
-		children.each(function()
+		children.forEach((child) =>
 		{
-			thisEditor._addVisualEditIdAttr($(this));
+			DE._addVisualEditIdAttr(child);
 		});
 		
 		return veId;
 	};
 	
-	editor._genFormatTabs = function(count)
+	DE._genFormatTabs = function(count)
 	{
 		var re = "";
 		
@@ -3380,39 +3370,39 @@
 		return re;
 	};
 	
-	editor._evalElementLevel = function(ele)
+	DE._evalElementLevel = function(ele)
 	{
 		var level = 0;
 		
 		var tmpEle = ele;
 		
-		while(!this._isEmptyElement(tmpEle) && !tmpEle.is("body"))
+		while(!DE._isEmptyElement(tmpEle) && !DF._isBodyEle(tmpEle))
 		{
 			level += 1;
-			tmpEle = tmpEle.parent();
+			tmpEle = CF.eleOfParent(tmpEle);
 		}
 		
-		if(level > 0 && !this._isEmptyElement(tmpEle) && tmpEle.is("body"))
+		if(level > 0 && !DE._isEmptyElement(tmpEle) && DF._isBodyEle(tmpEle))
 		{
-			//编辑HTML做了转换，多内嵌了一层，参考editor._toEditIframeBodyHtml()函数，所以这里要减一层
-			if(tmpEle.hasClass(EDIT_BODY_CLASS_FLAG))
+			//编辑HTML做了转换，多内嵌了一层，参考DE._toEditIframeBodyHtml()函数，所以这里要减一层
+			if(CF.eleHasClass(tmpEle, EDIT_BODY_CLASS_FLAG))
 			{
 				level -= 1;
 			}
 			//展示HTML内的元素，应根据对应的编辑HTML内元素计算层级，因为展示HTML内的可能是被自定义引入的UI库动态调整层级了
-			else if(tmpEle.hasClass(SHOW_BODY_CLASS_FLAG))
+			else if(CF.eleHasClass(tmpEle, SHOW_BODY_CLASS_FLAG))
 			{
-				var editEle = this._editElement(ele);
-				level = this._evalElementLevel(editEle);
+				var editEle = DE._editElement(ele);
+				level = DE._evalElementLevel(editEle);
 			}
 		}
 		
 		return level;
 	};
 	
-	editor._isOnlyEmptyOrFormat = function(text)
+	DE._isOnlyEmptyOrFormat = function(text)
 	{
-		if(chartFactory.isEmpty(text))
+		if(CF.isEmpty(text))
 			return true;
 		
 		if(/^\s*$/.test(text))
@@ -3424,27 +3414,27 @@
 		return false;
 	};
 	
-	editor._getInsertParentElement = function(refEle, insertType)
+	DE._getInsertParentElement = function(refEle, insertType)
 	{
 		var insertParentEle = null;
 		
-		if(refEle.is("body"))
+		if(DF._isBodyEle(refEle))
 			insertParentEle = refEle;
 		else if(INSERT_TYPE_AFTER == insertType || INSERT_TYPE_BEFORE == insertType)
-			insertParentEle = refEle.parent();
+			insertParentEle = CF.eleOfParent(refEle);
 		else
 			insertParentEle = refEle;
 		
 		return insertParentEle;
 	};
 	
-	editor._trimInsertType = function(refEle, insertType)
+	DE._trimInsertType = function(refEle, insertType)
 	{
 		insertType = (!insertType ? INSERT_TYPE_AFTER : insertType);
 		insertType = (insertType == INSERT_TYPE_AFTER || insertType == INSERT_TYPE_BEFORE
 						|| insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? insertType : INSERT_TYPE_AFTER);
 		
-		if(refEle.is("body"))
+		if(DF._isBodyEle(refEle))
 		{
 			if(insertType == INSERT_TYPE_AFTER)
 				insertType = INSERT_TYPE_APPEND;
@@ -3457,78 +3447,72 @@
 	
 	//获取元素本身、子孙元素中所有的图表元素
 	//注意：返回的图表元素中可能有还未渲染为图表的元素
-	editor._getChartElements = function(ele)
+	DE._getChartElements = function(ele)
 	{
-		return $(chartFactory.elesWithWidgetId(ele).elements);
+		return CF.elesWithWidgetId(ele).elements;
 	};
 	
-	editor._selectedElement = function(context)
+	DE._selectedElement = function(context)
 	{
 		if(context == null)
-			return $("."+ELEMENT_CLASS_SELECTED);
+			return CF.eleOfSelector("."+ELEMENT_CLASS_SELECTED);
 		else
-			return $("."+ELEMENT_CLASS_SELECTED, context);
+			return CF.eleOfSelector("."+ELEMENT_CLASS_SELECTED, context);
 	};
 	
-	editor._isSelectedElement = function($ele)
+	DE._isSelectedElement = function(ele)
 	{
-		return $ele.hasClass(ELEMENT_CLASS_SELECTED);
+		return CF.eleHasClass(ele, ELEMENT_CLASS_SELECTED);
 	};
 	
-	editor._selectElement = function($ele)
+	DE._selectElement = function(ele)
 	{
-		$ele.addClass(ELEMENT_CLASS_SELECTED);
+		CF.eleAddClass(ele, ELEMENT_CLASS_SELECTED);
 	};
 	
-	editor._deselectElement = function($ele)
+	DE._deselectElement = function(ele)
 	{
-		$ele.removeClass(ELEMENT_CLASS_SELECTED);
+		CF.eleRemoveClass(ele, ELEMENT_CLASS_SELECTED);
 	};
 	
-	editor._removeElementClassNewInsert = function($ele)
+	DE._removeElementClassNewInsert = function(ele)
 	{
-		while($ele != null && $ele.length > 0)
+		while(ele != null)
 		{
-			$ele.removeClass(ELEMENT_CLASS_NEW_INSERT);
-			$ele = $ele.parent();
+			CF.eleRemoveClass(ele, ELEMENT_CLASS_NEW_INSERT);
+			ele = CF.eleOfParent(ele);
 		}
 	};
 	
-	editor._checkNotEmptyElement = function(ele)
+	DE._checkNotEmptyElement = function(ele)
 	{
-		if(this._isEmptyElement(ele))
+		if(DE._isEmptyElement(ele))
 		{
-			this.tipInfo(i18n.selectedElementRequired);
+			DE.tipInfo(i18n.selectedElementRequired);
 			return false;
 		}
 		
 		return true;
 	};
 	
-	editor._isEmptyElement = function(ele)
+	DE._isEmptyElement = function(ele)
 	{
-		if(ele == null)
-			return true;
-		
-		if(ele.length != null && ele.length == 0)
-			return true;
-		
-		return false;
+		return (ele == null);
 	};
 	
-	editor._getVisualEditId = function($ele)
+	DE._getVisualEditId = function(ele)
 	{
-		return $ele.attr(ELEMENT_ATTR_VISUAL_EDIT_ID);
+		return CF.eleAttr(ele, ELEMENT_ATTR_VISUAL_EDIT_ID);
 	};
 	
-	editor._getEleByVisualEditId = function(editId)
+	DE._getEleByVisualEditId = function(editId)
 	{
-		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
+		return CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
 	};
 	
-	editor._nextVisualEditId = function()
+	DE._nextVisualEditId = function()
 	{
-		return chartFactory.uid();
+		return CF.uid();
 	};
 	
 	/**
@@ -3536,22 +3520,22 @@
 	 *
 	 * @param options 可选，格式为：{ selectedBorderColor: "..." }
 	 */
-	editor._setPageStyle = function(options)
+	DE._setPageStyle = function(options)
 	{
-		options = chartFactory.extend(
+		options = CF.extend(
 		{
-			selectedBorderColor: $(document.body).css("color")
+			selectedBorderColor: CF.eleCss(document.body, "color")
 		},
 		options);
 		
-		chartFactory.styleSheetText("dg-show-ve-style", this._buildPageStyleText(options));
+		CF.styleSheetText("dg-show-ve-style", DE._buildPageStyleText(options));
 	};
 	
-	editor._buildPageStyleText = function(options)
+	DE._buildPageStyleText = function(options)
 	{
-		var bgColorNew = chartFactory.parseColor(options.selectedBorderColor);
+		var bgColorNew = CF.parseColor(options.selectedBorderColor);
 		bgColorNew.a = 0.1;
-		bgColorNew = chartFactory.colorToHexStr(bgColorNew, true);
+		bgColorNew = CF.colorToHexStr(bgColorNew, true);
 		
 		var re = "\n"
 			+ "."+BODY_CLASS_VISUAL_EDITOR+"."+BODY_CLASS_ELEMENT_BOUNDARY+" *["+ELEMENT_ATTR_VISUAL_EDIT_ID+"]{\n"
@@ -3574,18 +3558,18 @@
 	
 	//获取编辑HTML信息
 	//结构参考：org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfo
-	editor._editHtmlInfo = function()
+	DE._editHtmlInfo = function()
 	{
-		return this.dashboard.renderContextValue(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
+		return DE.dashboard.renderContextValue(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
 	};
 	
 	//反转义编辑HTML（转义操作由后台执行）
-	editor._unescapeEditHtml = function(editHtml)
+	DE._unescapeEditHtml = function(editHtml)
 	{
 		return (editHtml ? editHtml.replace(/<\\\//g, "</") : editHtml);
 	};
 	
-	editor._spitIgnoreEmpty = function(str, splitter)
+	DE._spitIgnoreEmpty = function(str, splitter)
 	{
 		splitter = (splitter ? splitter : ",");
 		
@@ -3600,7 +3584,7 @@
 		
 		for(var i=0; i<ary.length; i++)
 		{
-			var ele = chartFactory.trim(ary[i]);
+			var ele = CF.trim(ary[i]);
 			if(ele)
 				re.push(ele);
 		}
@@ -3610,28 +3594,26 @@
 	
 	//将符合JSON规范的对象序列化为元素属性值字符串
 	//注意：此函数使用单引号而非双引号作为引号符，因为双引号会被HTML转义为'&quot;'，对源码不友好
-	editor._serializeForAttrValue = function(obj)
+	DE._serializeForAttrValue = function(obj)
 	{
 		if(obj == null)
 			return null;
 		
-		var type = typeof(obj);
-		
-		if(type == "string")
+		if(CF.isString(obj))
 		{
-			return this._toSingleQuoteJsString(obj, true);
+			return DE._toSingleQuoteJsString(obj, true);
 		}
-		else if(type == "number" || type == "boolean")
+		else if(CF.isNumber(obj) || CF.isBoolean(obj))
 		{
 			return obj;
 		}
-		else if(chartFactory.isArray(obj))
+		else if(CF.isArray(obj))
 		{
 			var str = "[";
 			
 			for(var i=0; i<obj.length; i++)
 			{
-				var vstr = this._serializeForAttrValue(obj[i]);
+				var vstr = DE._serializeForAttrValue(obj[i]);
 				if(vstr != null && vstr !== "")
 				{
 					if(str != "[")
@@ -3645,19 +3627,19 @@
 			
 			return str;
 		}
-		else if(chartFactory.isPlainObject(obj))
+		else if(CF.isPlainObject(obj))
 		{
 			var str = "{";
 			
 			for(var p in obj)
 			{
-				var vstr = this._serializeForAttrValue(obj[p]);
+				var vstr = DE._serializeForAttrValue(obj[p]);
 				if(vstr != null && vstr !== "")
 				{
 					if(str != "{")
 						str += ",";
 					
-					str += this._serializeForAttrValue(p) + ":" + vstr;
+					str += DE._serializeForAttrValue(p) + ":" + vstr;
 				}
 			}
 			
@@ -3666,10 +3648,10 @@
 			return str;
 		}
 		else
-			return this._serializeForAttrValue(obj.toString());
+			return DE._serializeForAttrValue(obj.toString());
 	};
 	
-	editor._toSingleQuoteJsString = function(str, quote)
+	DE._toSingleQuoteJsString = function(str, quote)
 	{
 		quote = (quote === undefined ? false : quote);
 		
@@ -3702,52 +3684,9 @@
 		return re;
 	};
 	
-	editor._deepEqualsForJson = function(a, b)
+	DE._isEmptyJsonObjStr = function(str)
 	{
-		if(a == null)
-		{
-			return (b == null);
-		}
-		else if(b == null)
-		{
-			return (a == null);
-		}
-		else if(chartFactory.isArray(a))
-		{
-			if(!chartFactory.isArray(b))
-				return false;
-			
-			if(a.length != b.length)
-				return false;
-			
-			for(var i=0; i<a.length; i++)
-			{
-				if(!this._deepEqualsForJson(a[i], b[i]))
-					return false;
-			}
-			
-			return true;
-		}
-		else if(chartFactory.isPlainObject(a))
-		{
-			if(!chartFactory.isPlainObject(b))
-				return false;
-			
-			for(var p in a)
-			{
-				if(!this._deepEqualsForJson(a[p], b[p]))
-					return false;
-			}
-			
-			return true;
-		}
-		else
-			return (a == b);
-	};
-	
-	editor._isEmptyJsonObjStr = function(str)
-	{
-		if(chartFactory.isEmpty(str))
+		if(CF.isEmpty(str))
 			return true;
 		
 		return /^\s*\{\s*\}\s*$/i.test(str);
@@ -3761,40 +3700,39 @@
 	 * 
 	 * @param editBodyHtml 
 	 */
-	editor._editIframe = function(editBodyHtml)
+	DE._editIframe = function(editBodyHtml)
 	{
-		var id = (this._editIframeId != null ? this._editIframeId
-					: (this._editIframeId = chartFactory.uid()));
+		var id = (DE._editIframeId != null ? DE._editIframeId
+					: (DE._editIframeId = CF.uid()));
 		
-		var iframe = $("#" + id);
+		var iframe = CF.eleOfId(id);
 		
-		if(iframe.length == 0)
+		if(iframe == null)
 		{
-			iframe = $("<iframe class='dg-edit-html-ifm' style='display:none;'></iframe>")
-				.attr("name", id).attr("id", id).appendTo(document.body);
+			iframe = CF.eleCreateWithAttr("iframe", "class", "dg-edit-html-ifm", "style", "display:none;",
+						"name", "id", "id", id);
+			CF.eleAppend(document.body, iframe);
 		}
-		
-		iframe = iframe[0];
 		
 		if(editBodyHtml != null)
 		{
-			var editIframeBodyHtml = this._toEditIframeBodyHtml(editBodyHtml);
+			var editIframeBodyHtml = DE._toEditIframeBodyHtml(editBodyHtml);
 			
-			var editDoc = this._editDocument();
+			var editDoc = DE._editDocument();
 			editDoc.open();
 			editDoc.write("<!DOCTYPE html><html><head></head><body class='"+EDIT_BODY_CLASS_FLAG+"'>");
 			editDoc.write(editIframeBodyHtml);
 			editDoc.write("</body></html>");
 			editDoc.close();
 			
-			this.changeFlag(true);
+			DE.changeFlag(true);
 		}
 		
 		return iframe;
 	};
 	
-	//将"<body>...</body>"转换为"<div>...</div>"，使得可以直接使用：$(document.body).html("...");
-	editor._toEditIframeBodyHtml = function(editBodyHtml)
+	//将"<body>...</body>"转换为"<div>...</div>"，使得可以直接使用：CF.eleHtml(document.body, "...");
+	DE._toEditIframeBodyHtml = function(editBodyHtml)
 	{
 		var startTagRegex = /^\s*<body/i;
 		var endTagRegex = /\/body>\s*$/i;
@@ -3805,8 +3743,8 @@
 		return editIframeBodyHtml;
 	};
 	
-	//将由editor._toEditIframeBodyHtml()转换的"<div>...</div>"恢复为"<body>...</body>"
-	editor._fromEditIframeBodyHtml = function(editIframeBodyHtml)
+	//将由DE._toEditIframeBodyHtml()转换的"<div>...</div>"恢复为"<body>...</body>"
+	DE._fromEditIframeBodyHtml = function(editIframeBodyHtml)
 	{
 		var startTagRegex = /^\s*<div/i;
 		var endTagRegex = /\/div>\s*$/i;
@@ -3820,42 +3758,41 @@
 	/**
 	 * 获取编辑iframe的document对象。
 	 */
-	editor._editDocument = function(iframe)
+	DE._editDocument = function(iframe)
 	{
-		iframe = (iframe == null ? this._editIframe() : iframe);
-		
+		iframe = (iframe == null ? DE._editIframe() : iframe);
 		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
 	
 	//获取编辑HTML的<body>...</body>内容
-	editor._editBodyHtml = function()
+	DE._editBodyHtml = function()
 	{
-		var editDoc = this._editDocument();
-		var editIframeBodyHtml = $(editDoc.body).html();
+		var editDoc = DE._editDocument();
+		var editIframeBodyHtml = CF.eleHtml(editDoc.body);
 		
-		return this._fromEditIframeBodyHtml(editIframeBodyHtml);
+		return DE._fromEditIframeBodyHtml(editIframeBodyHtml);
 	};
 	
 	/**
 	 * 获取编辑iframe中的元素。
 	 * 
-	 * @param $ele 展示元素
+	 * @param ele 展示元素
 	 */
-	editor._editElement = function($ele)
+	DE._editElement = function(ele)
 	{
-		var editDoc = this._editDocument();
+		var editDoc = DE._editDocument();
 		
-		if($ele.is("body"))
+		if(DF._isBodyEle(ele))
 		{
-			// <body>被转换为了<div>，参考editor._toEditIframeBodyHtml()函数
-			return $("> div", editDoc.body);
+			// <body>被转换为了<div>，参考DE._toEditIframeBodyHtml()函数
+			return CF.eleOfSelector("div", editDoc.body);
 		}
 		
-		var editId = (this._getVisualEditId($ele) || "");
-		return $("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']", editDoc.body);
+		var editId = (DE._getVisualEditId(ele) || "");
+		return CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']", editDoc.body);
 	};
 	
-	editor._evalTopWindowSize = function()
+	DE._evalTopWindowSize = function()
 	{
 		var topWindow = window;
 		while(topWindow.parent  && topWindow.parent != topWindow)
@@ -3863,36 +3800,21 @@
 		
 		var size =
 		{
-			width: $(topWindow).width(),
-			height: $(topWindow).height()
+			width: topWindow.clientWidth,
+			height: topWindow.clientHeight
 		};
 		
 		return size;
 	};
 	
-	editor._isJsonString = function(str)
+	DE._isJsonString = function(str)
 	{
-		return chartFactory.isJsonString(str);
+		return CF.isJsonString(str);
 	};
 	
-	editor._buildLoadChartAjaxOptions = function()
+	DE._isDisplayGrid = function(display)
 	{
-		var loadChartURL = chartFactory.renderContextWebContextAttr(this.dashboard.renderContext, "loadChartURL");
-		var url = this.dashboard.contextURL(loadChartURL);
-		var qidx = url.indexOf('?');
-		url = url + (qidx < 0 ? "?" : "&") + LOAD_CHART_FOR_EDITOR_PARAM + "=true";
-		
-		var re =
-		{
-			url: url
-		};
-		
-		return re;
-	};
-	
-	editor._isDisplayGrid = function(display)
-	{
-		display = this._displayCssValue(display);
+		display = DE._displayCssValue(display);
 		
 		if(!display)
 			return false;
@@ -3900,9 +3822,9 @@
 		return /^(grid|inline-grid)$/i.test(display);
 	};
 	
-	editor._isDisplayFlex = function(display)
+	DE._isDisplayFlex = function(display)
 	{
-		display = this._displayCssValue(display);
+		display = DE._displayCssValue(display);
 		
 		if(!display)
 			return false;
@@ -3910,13 +3832,13 @@
 		return /^(flex|inline-flex)$/i.test(display);
 	};
 	
-	editor._displayCssValue = function(display)
+	DE._displayCssValue = function(display)
 	{
 		if(!display)
 			return display;
 		
 		//是DOM元素
-		if(!chartFactory.isStringOrNumber(display))
+		if(!CF.isStringOrNumber(display))
 		{
 			display = display.css("display");
 		}
@@ -3924,12 +3846,12 @@
 		return display;
 	};
 	
-	editor._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
+	DE._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
 	{
 		fillParent = (fillParent === true || fillParent === "true");
 		
 		var re = "";	
-		var isBodyParent = parentEle.is("body");
+		var isBodyParent = DF._isBodyEle(parentEle);
 		
 		if(fillParent)
 		{
