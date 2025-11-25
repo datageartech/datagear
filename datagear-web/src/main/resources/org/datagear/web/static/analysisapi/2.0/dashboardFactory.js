@@ -280,8 +280,6 @@ DF.initRenderContext = function(renderContext)
 		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
 		CF.renderContextChartTheme(renderContext, chartTheme);
 	}
-	
-	CF.initRenderContext(renderContext);
 };
 
 /**
@@ -856,6 +854,7 @@ dashboardProto.init = function()
 	
 	this.statusIniting(true);
 	
+	this._initRenderContext();
 	this._initListener();
 	this._initMapURLs();
 	this._initChartResizeHandler();
@@ -863,6 +862,14 @@ dashboardProto.init = function()
 	this._initCharts();
 	
 	this.statusInited(true);
+};
+
+/**
+ * 初始化渲染上下文。
+ */
+dashboardProto._initRenderContext = function()
+{
+	CF.initRenderContext(this.renderContext());
 };
 
 /**

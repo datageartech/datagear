@@ -225,6 +225,8 @@ renderContextAttrConst.webContext = "DG_WEB_CONTEXT";
 //AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
 renderContextAttrConst.chartTheme = "DG_CHART_THEME";
 
+renderContextAttrConst.originalChartTheme = "DG_ORIGINAL_CHART_THEME";
+
 //----------------------------------------
 // renderContextAttrConst结束
 //----------------------------------------
@@ -292,12 +294,76 @@ CF.initRenderContext = function(renderContext)
 	if(!webContext)
 		throw new Error("[webContext] required");
 	
-	var chartTheme = CF.renderContextChartTheme(renderContext);
+	CF.initGlobalChartTheme(renderContext);
+};
+
+/**
+ * 初始化全局图表主题，使用<body>上的dg-chart-theme属性值填充。
+ */
+CF.initGlobalChartTheme = function(renderContext)
+{
+	var theme = CF.renderContextChartTheme(renderContext);
 	
-	if(!chartTheme)
-		throw new Error("[chartTheme] required");
+	if(theme != null && CF.themeInflated(theme))
+		theme = CF.renderContextValue(renderContext, renderContextAttrConst.originalChartTheme);
 	
-	CF.inflateGlobalChartTheme(chartTheme);
+	if(theme == null)
+		theme = {};
+	
+	CF.renderContextValue(renderContext, renderContextAttrConst.originalChartTheme, theme);
+	theme = CF.extend(true, {}, theme);
+	
+	CF.inflateThemeActualBgColor(theme);
+	
+	var rawTheme = null;
+	
+	if(CF.isEmpty(theme.name))
+		theme.name = "chartTheme";
+	
+	if(CF.isEmpty(theme.color))
+		theme.color = "#333";
+	
+	//默认背景色应设为"transparent"，使得图表背景由其所在元素决定
+	if(CF.isEmpty(theme.backgroundColor))
+		theme.backgroundColor = "transparent";
+	
+	if(CF.isEmpty(theme.actualBackgroundColor))
+		theme.actualBackgroundColor = "#FFF";
+	
+	if(CF.isEmpty(theme.graphColors))
+		theme.graphColors = ["#5470C6", "#91CC75", "#FAC858", "#EE6666", "#73C0DE", "#3BA272", "#FC8452", "#9A60B4", "#EA7CCC", "#B6A2DE"];
+	
+	if(CF.isEmpty(theme.graphRangeColors))
+		theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
+	
+	CF.inflateThemeActualBgColor(theme);
+	
+	var bodyThemeValue = CF.eleAttr(document.body, elementAttrConst.THEME);
+	if(bodyThemeValue)
+	{
+		var bodyThemeObj = CF.evalSilently(bodyThemeValue, {});
+		
+		//如果是引用变量，不应被修改
+		if(!CF.isJsonString(bodyThemeValue))
+			bodyThemeObj = CF.extend(true, {}, bodyThemeObj);
+		
+		CF.inflateThemeActualBgColor(bodyThemeObj);
+		
+		rawTheme = CF.extend(true, {}, theme, bodyThemeObj);
+		
+		CF.inflateChartTheme(bodyThemeObj);
+		CF.extend(true, theme, bodyThemeObj);
+	}
+	
+	if(rawTheme == null)
+		rawTheme = CF.extend(true, {}, theme);
+	
+	CF.inflateChartTheme(theme);
+	
+	theme._RAW_CHART_THEME = rawTheme;
+	CF.themeInflated(theme, true);
+	
+	CF.renderContextChartTheme(renderContext, theme);
 };
 
 /**
@@ -864,13 +930,13 @@ chartProto.theme = function(theme)
 		//这里不应采用复制一个新图表主题对象的方式，因为图表主题对象后续会关联创建很多<style>元素，
 		//如果采用复制方式的话，也会重复创建<style>元素，导致不必要的资源占用
 		
-		if(theme !== globalTheme && !CF.isThemeInflated(theme))
+		if(theme !== globalTheme && !CF.themeInflated(theme))
 		{
 			CF.inflateChartTheme(theme);
 			var extTheme = CF.extend(true, {}, globalTheme._RAW_CHART_THEME, theme);
 			CF.inflateChartTheme(extTheme);
 			CF.extend(theme, extTheme);
-			CF.isThemeInflated(theme, true);
+			CF.themeInflated(theme, true);
 		}
 		
 		this._theme = theme;
@@ -6200,73 +6266,7 @@ CF.optionValue = function(options, name, value)
 	}
 };
 
-/**
- * 将指定图表主题填充为全局图表主题，即使用<body>上的dg-chart-theme属性值填充。
- * 如果图表主题已经被此函数填充过，不会再次处理。
- * 
- * @param theme 图表主题，会被此函数修改
- */
-CF.inflateGlobalChartTheme = function(theme)
-{
-	if(CF.isThemeInflated(theme))
-		return false;
-	
-	CF.inflateThemeActualBgColor(theme);
-	
-	var rawTheme = null;
-	
-	//默认值
-	if(!theme.name)
-		theme.name = "chartTheme";
-	
-	if(!theme.color)
-		theme.color = "#333";
-	
-	//默认背景色应设为"transparent"，使得图表背景由其所在元素决定
-	if(!theme.backgroundColor)
-		theme.backgroundColor = "transparent";
-	
-	if(!theme.actualBackgroundColor)
-		theme.actualBackgroundColor = "#FFF";
-	
-	if(!theme.graphColors || theme.graphColors.length == 0)
-		theme.graphColors = ["#5470C6", "#91CC75", "#FAC858", "#EE6666", "#73C0DE", "#3BA272", "#FC8452",
-						"#9A60B4", "#EA7CCC", "#B6A2DE"];
-	
-	if(!theme.graphRangeColors || theme.graphRangeColors.length == 0)
-		theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
-	
-	CF.inflateThemeActualBgColor(theme);
-	
-	var bodyThemeValue = CF.eleAttr(document.body, elementAttrConst.THEME);
-	if(bodyThemeValue)
-	{
-		var bodyThemeObj = CF.evalSilently(bodyThemeValue, {});
-		
-		//如果是引用变量，不应被修改
-		if(!CF.isJsonString(bodyThemeValue))
-			bodyThemeObj = CF.extend(true, {}, bodyThemeObj);
-		
-		CF.inflateThemeActualBgColor(bodyThemeObj);
-		
-		rawTheme = CF.extend(true, {}, theme, bodyThemeObj);
-		
-		CF.inflateChartTheme(bodyThemeObj);
-		CF.extend(true, theme, bodyThemeObj);
-	}
-	
-	if(rawTheme == null)
-		rawTheme = CF.extend(true, {}, theme);
-	
-	CF.inflateChartTheme(theme);
-	
-	theme._RAW_CHART_THEME = rawTheme;
-	CF.isThemeInflated(theme, true);
-	
-	return true;
-};
-
-CF.isThemeInflated = function(theme, inflated)
+CF.themeInflated = function(theme, inflated)
 {
 	if(arguments.length <= 1)
 		return (theme._INFLATED === true);
@@ -6289,7 +6289,7 @@ CF.inflateThemeActualBgColor = function(theme)
 //填充图表主题，如果图表主题已设置了color、backgroundColor、actualBackgroundColor、fontSize，则尝试自动填充其他相关的主题属性。
 CF.inflateChartTheme = function(theme)
 {
-	if(!theme.actualBackgroundColor)
+	if(CF.isEmpty(theme.actualBackgroundColor))
 		CF.inflateThemeActualBgColor(theme);
 	
 	if(theme.color && theme.actualBackgroundColor)

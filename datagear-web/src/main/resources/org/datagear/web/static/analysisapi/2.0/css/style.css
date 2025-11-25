@@ -527,6 +527,11 @@
     justify-content: space-between;
     align-items: center;
 }
+.dg-chart-tool-panel .dg-chart-tool-panel-head-btns{
+	display: flex;
+	align-items: center;
+	gap: 0.2rem;
+}
 .dg-chart-tool-panel .dg-chart-tool-panel-content{
 	overflow: auto;
 }
