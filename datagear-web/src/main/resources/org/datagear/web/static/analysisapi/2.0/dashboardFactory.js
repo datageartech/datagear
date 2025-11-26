@@ -998,14 +998,10 @@ dashboardProto._initCharts = function()
 
 dashboardProto._initChart = function(chart)
 {
-	try
+	CF.executeSilently(() =>
 	{
 		chart.init();
-	}
-	catch(e)
-	{
-		CF.logException(e);
-	}
+	});
 };
 
 /**
@@ -1285,10 +1281,12 @@ dashboardProto._renderForms = function()
 {
 	var forms = CF.elesOfSelector("form[dg-dashboard-form]");
 	
-	var dashboard = this;
-	forms.forEach(function(form)
+	forms.forEach((form) =>
 	{
-		dashboard.renderForm(form);
+		CF.executeSilently(() =>
+		{
+			this.renderForm(form);
+		});
 	});
 };
 
@@ -2634,14 +2632,10 @@ dashboardProto._destroyCharts = function()
 
 dashboardProto._destroyChart = function(chart)
 {
-	try
+	CF.executeSilently(() =>
 	{
 		chart.destroy();
-	}
-	catch(e)
-	{
-		CF.logException(e);
-	}
+	});
 };
 
 dashboardProto._destroyForms = function()
@@ -2659,14 +2653,10 @@ dashboardProto._destroyForms = function()
 
 dashboardProto._destroyForm = function(form)
 {
-	try
+	CF.executeSilently(() =>
 	{
 		CF.chartTool.destroyDataSetParamForm(form);
-	}
-	catch(e)
-	{
-		CF.logException(e);
-	}
+	});
 };
 
 /**
