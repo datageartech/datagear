@@ -31,6 +31,7 @@
 	/**看板工厂*/
 	var CF = global.chartFactory;
 	var DF = global.dashboardFactory;
+	var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttrConst = {}));
 	var DE = (DF.dashboardEditor || (DF.dashboardEditor = {}));
 	var i18n = (DE.i18n || (DE.i18n = {}));
 	
@@ -114,10 +115,9 @@
 	DE._initRenderContext = function()
 	{
 		var renderContext = DE.dashboard.renderContext();
-		var webContext = CF.renderContextWebContext(renderContext);
-		var loadChartURL = CF.webContextValue(webContext, "loadChartURL");
+		var loadChartURL = CF.renderContextValNonNull(renderContext, renderContextAttrConst.LOAD_CHART_URL);
 		loadChartURL = CF.appendUrlParam(loadChartURL, LOAD_CHART_FOR_EDITOR_PARAM, "true");
-		CF.webContextValue(webContext, "loadChartURL", loadChartURL);
+		CF.renderContextValue(renderContext, renderContextAttrConst.LOAD_CHART_URL, loadChartURL);
 	};
 	
 	///初始化样式。

@@ -217,15 +217,10 @@ elementAttrConst.ATTR_VALUES = "dg-chart-attr-values";
 // renderContextAttrConst开始
 //----------------------------------------
 
-//渲染上下文属性名：Web上下文，同：
-//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT
-renderContextAttrConst.webContext = "DG_WEB_CONTEXT";
-
-//渲染上下文属性名：图表主题，同：
-//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
-renderContextAttrConst.chartTheme = "DG_CHART_THEME";
-
-renderContextAttrConst.originalChartTheme = "DG_ORIGINAL_CHART_THEME";
+renderContextAttrConst.CONTEXT_PATH = "DG_CONTEXT_PATH";
+renderContextAttrConst.PLUGIN_RES_URL_PREFIX = "DG_PLUGIN_RES_URL_PREFIX";
+renderContextAttrConst.CHART_THEME = "DG_CHART_THEME";
+renderContextAttrConst.ORIGINAL_CHART_THEME = "DG_ORIGINAL_CHART_THEME";
 
 //----------------------------------------
 // renderContextAttrConst结束
@@ -289,11 +284,6 @@ CF.DataSetParamType =
  */
 CF.initRenderContext = function(renderContext)
 {
-	var webContext = CF.renderContextWebContext(renderContext);
-	
-	if(!webContext)
-		throw new Error("[webContext] required");
-	
 	CF.initGlobalChartTheme(renderContext);
 };
 
@@ -305,12 +295,12 @@ CF.initGlobalChartTheme = function(renderContext)
 	var theme = CF.renderContextChartTheme(renderContext);
 	
 	if(theme != null && CF.themeInflated(theme))
-		theme = CF.renderContextValue(renderContext, renderContextAttrConst.originalChartTheme);
+		theme = CF.renderContextValue(renderContext, renderContextAttrConst.ORIGINAL_CHART_THEME);
 	
 	if(theme == null)
 		theme = {};
 	
-	CF.renderContextValue(renderContext, renderContextAttrConst.originalChartTheme, theme);
+	CF.renderContextValue(renderContext, renderContextAttrConst.ORIGINAL_CHART_THEME, theme);
 	theme = CF.extend(true, {}, theme);
 	
 	CF.inflateThemeActualBgColor(theme);
@@ -588,7 +578,7 @@ chartProto._bodyOptions = function()
 
 /**
  * 初始化图表主题。
- * 此函数依次从this.renderContext()中的renderContextAttrConst.chartTheme属性值、
+ * 此函数依次从this.renderContext()中的renderContextAttrConst.CHART_THEME属性值、
  * <body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
  */
 chartProto._initTheme = function()
@@ -3005,7 +2995,7 @@ chartProto.pluginResourceURL = function(name)
 	name = (name || "");
 	
 	var plugin = this._pluginNonNull();
-	var urlPrefix = CF.renderContextWebContextValue(this.renderContext(), "pluginResUrlPrefix");
+	var urlPrefix = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.PLUGIN_RES_URL_PREFIX);
 	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
 	url = this.contextURL(url);
 	
@@ -3337,8 +3327,8 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 chartProto.contextURL = function(url)
 {
 	var renderContext = this.renderContext();
-	var contextPath = CF.renderContextWebContextPath(renderContext);
-	return CF.toWebContextPathURL(contextPath, url);
+	var contextPath = CF.renderContextContextPath(renderContext);
+	return CF.toContextPathURL(contextPath, url);
 };
 
 /**
@@ -5092,59 +5082,29 @@ CF.renderContextValue = function(renderContext, name, value)
 };
 
 /**
- * 获取/设置渲染上下文中的WebContext对象。
+ * 获取非null的渲染上下文的属性值。
  * 
  * @param renderContext
- * @param webContext 可选，要设置的WebContext
+ * @param name
  */
-CF.renderContextWebContext = function(renderContext, webContext)
+CF.renderContextValNonNull = function(renderContext, name)
 {
-	if(arguments.length <= 1)
-		return CF.renderContextValue(renderContext, renderContextAttrConst.webContext);
-	else
-		CF.renderContextValue(renderContext, renderContextAttrConst.webContext, webContext);
+	var val = CF.renderContextValue(renderContext, name);
+	
+	if(val == null)
+		throw new Error("["+name+"] required in RenderContext");
+	
+	return val;
 };
 
 /**
- * 获取/设置Web上下文中的属性值。
- */
-CF.webContextValue = function(webContext, name, value)
-{
-	if(arguments.length <= 2)
-		return (webContext == null ? null : webContext[name]);
-	else
-		webContext[name] = value;
-};
-
-/**
- * 获取渲染上下文中的WebContext的属性值。
+ * 获取渲染上下文中的非null应用根路径。
  * 
  * @param renderContext
- * @param name WebContext属性名
- * @param nullable 是否允许为null，默认值为：false
  */
-CF.renderContextWebContextValue = function(renderContext, name, nullable)
+CF.renderContextContextPath = function(renderContext)
 {
-	nullable = (nullable === undefined ? false : nullable);
-	
-	var webContext = CF.renderContextWebContext(renderContext);
-	var value = CF.webContextValue(webContext, name);
-	
-	if(!nullable && value == null)
-		throw new Error("["+name+"] required in WebContext");
-	
-	return value;
-};
-
-/**
- * 获取渲染上下文中的WebContext的contextPath属性值。
- * 
- * @param renderContext
- * @param nullable 是否允许为null，默认值为：false
- */
-CF.renderContextWebContextPath = function(renderContext, nullable)
-{
-	return CF.renderContextWebContextValue(renderContext, "contextPath", nullable);
+	return CF.renderContextValNonNull(renderContext, renderContextAttrConst.CONTEXT_PATH);
 };
 
 /**
@@ -5156,9 +5116,9 @@ CF.renderContextWebContextPath = function(renderContext, nullable)
 CF.renderContextChartTheme = function(renderContext, chartTheme)
 {
 	if(arguments.length <= 1)
-		return CF.renderContextValue(renderContext, renderContextAttrConst.chartTheme);
+		return CF.renderContextValue(renderContext, renderContextAttrConst.CHART_THEME);
 	else
-		CF.renderContextValue(renderContext, renderContextAttrConst.chartTheme, chartTheme);
+		CF.renderContextValue(renderContext, renderContextAttrConst.CHART_THEME, chartTheme);
 };
 
 /**
@@ -5170,14 +5130,14 @@ CF.renderContextChartTheme = function(renderContext, chartTheme)
  * @param url 可选，要处理的URL
  * @return 添加后的新URL，如果未设置url参数，将返回系统根路径
  */
-CF.toWebContextPathURL = function(contextPath, url)
+CF.toContextPathURL = function(contextPath, url)
 {
-	// (webContext)
+	// (contextPath)
 	if(url === undefined)
 	{
 		return contextPath;
 	}
-	// (webContext, url)
+	// (contextPath, url)
 	else
 	{
 		if(url != null && url !== "" && url.charAt(0) == "/")
@@ -7173,8 +7133,8 @@ CF.trimGlobalLib = function(lib, renderContext)
 	{
 		if(url.indexOf("/") == 0)
 		{
-			let contextPath = CF.renderContextWebContextPath(renderContext);
-			return CF.toWebContextPathURL(contextPath, url);
+			let contextPath = CF.renderContextContextPath(renderContext);
+			return CF.toContextPathURL(contextPath, url);
 		}
 		else
 			return url;

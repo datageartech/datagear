@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardResult;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.ErrorMessageDashboardResult;
 import org.datagear.analysis.support.html.DefaultHtmlTitleHandler;
@@ -333,10 +334,11 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 
 			HtmlTitleHandler htmlTitleHandler = getShowChartHtmlTitleHandler(request, response, user, chart);
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response,
-					dashboardWidget.getFirstTemplate(), out, createWebContext(request),
-					buildWebHtmlTplDashboardImportBuilderForShow(request), htmlTitleHandler);
+					dashboardWidget.getFirstTemplate(), out, buildWebHtmlTplDashboardImportBuilderForShow(request),
+					htmlTitleHandler);
 			renderContext.setTemplateReader(templateIn);
 			renderContext.setTemplateLastModified(HtmlTplDashboardRenderContext.TEMPLATE_LAST_MODIFIED_NONE);
+			inflateWebRenderContext(request, renderContext);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 			getSessionDashboardInfoSupport().setDashboardInfo(request, new DashboardInfo(dashboard, false));
@@ -424,17 +426,16 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 				this.tplDashboardWidgetResManager);
 	}
 
-	protected WebContext createWebContext(HttpServletRequest request)
+	@Override
+	protected void inflateWebRenderContext(HttpServletRequest request, RenderContext renderContext)
 	{
-		WebContext webContext = createInitWebContext(request);
+		super.inflateWebRenderContext(request, renderContext);
 
-		addUpdateDataValue(request, webContext, resolveDataPath(request));
-		addLoadChartValue(request, webContext, resolveLoadChartPath(request));
-		addHeartBeatValue(request, webContext, resolveHeartbeatPath(request));
-		addUnloadValue(request, webContext, resolveUnloadPath(request));
-		addPluginResUrlPrefixValue(request, webContext, resolvePluginResPathPrefix(request));
-
-		return webContext;
+		addUpdateDataValue(request, renderContext, resolveDataPath(request));
+		addLoadChartValue(request, renderContext, resolveLoadChartPath(request));
+		addHeartBeatValue(request, renderContext, resolveHeartbeatPath(request));
+		addUnloadValue(request, renderContext, resolveUnloadPath(request));
+		addPluginResUrlPrefixValue(request, renderContext, resolvePluginResPathPrefix(request));
 	}
 
 	/**

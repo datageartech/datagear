@@ -70,8 +70,9 @@ import org.datagear.util.html.DefaultFilterHandler;
 import org.datagear.util.html.HeadBodyAwareFilterHandler;
 import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.html.RedirectWriter;
-import org.datagear.web.analysis.WebHtmlTplDashboardImportBuilder;
+import org.datagear.web.analysis.RenderContextAttrs;
 import org.datagear.web.analysis.SessionDashboardInfoSupport.DashboardInfo;
+import org.datagear.web.analysis.WebHtmlTplDashboardImportBuilder;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.config.CoreConfigSupport;
 import org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfo;
@@ -120,7 +121,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	/**
 	 * 看板内置渲染上下文属性名：{@linkplain EditHtmlInfo}。
 	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = RenderContextAttrs.BUILTIN_ATTR_PREFIX
 			+ "EDIT_HTML_INFO";
 
 	/**
@@ -739,7 +740,8 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			HtmlTitleHandler htmlTitleHandler = getShowDashboardHtmlTitleHandler(request, response, currentUser,
 					dashboardWidget);
 			HtmlTplDashboardRenderContext renderContext = createRenderContext(request, response, template, out,
-					createWebContext(request), importBuilder, htmlTitleHandler);
+					importBuilder, htmlTitleHandler);
+			inflateWebRenderContext(request, renderContext);
 
 			// 移除参数中的模板内容，一是它不应该传入页面，二是它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
 			renderContext.remove(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
@@ -1099,17 +1101,16 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		return super.handleUnloadDashboard(request, response, dashboardId);
 	}
 
-	protected WebContext createWebContext(HttpServletRequest request)
+	@Override
+	protected void inflateWebRenderContext(HttpServletRequest request, RenderContext renderContext)
 	{
-		WebContext webContext = createInitWebContext(request);
+		super.inflateWebRenderContext(request, renderContext);
 
-		addUpdateDataValue(request, webContext, resolveDataPath(request));
-		addLoadChartValue(request, webContext, resolveLoadChartPath(request));
-		addHeartBeatValue(request, webContext, resolveHeartbeatPath(request));
-		addUnloadValue(request, webContext, resolveUnloadPath(request));
-		addPluginResUrlPrefixValue(request, webContext, resolvePluginResPathPrefix(request));
-
-		return webContext;
+		addUpdateDataValue(request, renderContext, resolveDataPath(request));
+		addLoadChartValue(request, renderContext, resolveLoadChartPath(request));
+		addHeartBeatValue(request, renderContext, resolveHeartbeatPath(request));
+		addUnloadValue(request, renderContext, resolveUnloadPath(request));
+		addPluginResUrlPrefixValue(request, renderContext, resolvePluginResPathPrefix(request));
 	}
 
 	/**

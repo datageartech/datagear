@@ -21,7 +21,7 @@ import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.RenderContext;
 
 /**
- * {@linkplain RenderContext}支持类。
+ * {@linkplain RenderContext}属性名常量。
  * <p>
  * 注意：谨慎重构此类的常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
  * </p>
@@ -29,7 +29,7 @@ import org.datagear.analysis.RenderContext;
  * @author datagear@163.com
  *
  */
-public class RenderContextSupport
+public class RenderContextAttrs
 {
 	/**
 	 * 内置属性名前缀。
@@ -38,9 +38,6 @@ public class RenderContextSupport
 	 * </p>
 	 */
 	public static final String BUILTIN_ATTR_PREFIX = ChartDefinition.BUILTIN_ATTR_PREFIX;
-
-	/** Web上下文 */
-	public static final String WEB_CONTEXT = BUILTIN_ATTR_PREFIX + "WEB_CONTEXT";
 
 	/** 看板主题 */
 	public static final String DASHBOARD_THEME = BUILTIN_ATTR_PREFIX + "DASHBOARD_THEME";

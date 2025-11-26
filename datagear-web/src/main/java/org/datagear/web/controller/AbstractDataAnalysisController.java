@@ -18,19 +18,15 @@
 package org.datagear.web.controller;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartQuery;
-import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardQuery;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.DashboardTheme;
@@ -46,11 +42,12 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.User;
 import org.datagear.util.StringUtil;
 import org.datagear.web.analysis.AnalysisUser;
+import org.datagear.web.analysis.RenderContextAttrs;
 import org.datagear.web.analysis.SessionDashboardInfoSupport;
+import org.datagear.web.analysis.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.analysis.WebDashboardQueryConverter;
 import org.datagear.web.analysis.WebHtmlTplDashboardImportBuilder;
 import org.datagear.web.analysis.WebHtmlTplDashboardImportBuilderFactory;
-import org.datagear.web.analysis.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
@@ -66,59 +63,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public abstract class AbstractDataAnalysisController extends AbstractController
 {
 	/**
-	 * 看板内置渲染上下文属性名前缀。
-	 * <p>
-	 * 由于看板展示URL的请求参数会添加至渲染上下文属性中，为了避免名字冲突，所有内置属性名都应采用此前缀。
-	 * </p>
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX = ChartDefinition.BUILTIN_ATTR_PREFIX;
-
-	/**
-	 * 看板内置渲染上下文属性名。
-	 * <p>
-	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
-	 * </p>
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "WEB_CONTEXT";
-
-	/**
-	 * 看板内置渲染上下文属性名。
-	 * <p>
-	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
-	 * </p>
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "DASHBOARD_THEME";
-
-	/**
-	 * 看板内置渲染上下文属性名：{@linkplain ChartTheme}。
-	 * <p>
-	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
-	 * </p>
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "CHART_THEME";
-
-	/**
-	 * 看板内置渲染上下文属性名：{@linkplain User}。
-	 * <p>
-	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
-	 * </p>
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "USER";
-
-	/**
-	 * 看板内置渲染上下文属性名。
-	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_LOCALE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
-			+ "LOCALE";
-
-	/**
 	 * 看板展示URL的请求参数名：系统主题。
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX + "THEME";
+	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = ChartDefinition.BUILTIN_ATTR_PREFIX + "THEME";
 
 	/**
 	 * 看板展示URL的请求参数值：自动设置系统主题。
@@ -128,38 +75,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/**
 	 * 看板展示URL的请求参数名：编辑模板。仅用于可视化编辑看板模板功能。
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+	public static final String DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE = ChartDefinition.BUILTIN_ATTR_PREFIX
 			+ "EDIT_TEMPLATE";
 
 	/**
 	 * 看板展示URL的请求参数名：自定义模板内容。仅用于可视化编辑看板模板功能。
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = ChartDefinition.BUILTIN_ATTR_PREFIX
 			+ "TEMPLATE_CONTENT";
-
-	/** 看板展示页{@linkplain WebContext}属性名：上下文 */
-	public static final String DASHBOARD_CONTEXT_PATH_NAME = "contextPath";
-
-	/** 看板展示页{@linkplain WebContext}属性名：更新数据URL */
-	public static final String DASHBOARD_UPDATE_URL_NAME = "updateDashboardURL";
-
-	/** 看板展示页{@linkplain WebContext}属性名：加载图表URL */
-	public static final String DASHBOARD_LOAD_CHART_URL_NAME = "loadChartURL";
-
-	/** 看板展示页{@linkplain WebContext}属性名：心跳URL */
-	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
-
-	/** 看板展示页{@linkplain WebContext}属性名：销毁URL */
-	public static final String DASHBOARD_UNLOAD_URL_NAME = "unloadURL";
-
-	/** 看板展示页{@linkplain WebContext}属性名：插件资源URL前缀 */
-	public static final String DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME = "pluginResUrlPrefix";
-
-	/** 看板展示页{@linkplain WebContext}属性名：会话 */
-	public static final String DASHBOARD_SESSION_NAME_NAME = "sessionName";
-
-	/** 看板展示页{@linkplain WebContext}属性名：会话值 */
-	public static final String DASHBOARD_SESSION_VALUE_NAME = "sessionValue";
 
 	/** 看板心跳URL后缀 */
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
@@ -193,7 +116,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * </code>
 	 * </p>
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_PREFIX
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = ChartDefinition.BUILTIN_ATTR_PREFIX
 			+ "SAFE_SESSION";
 
 	/**
@@ -350,7 +273,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	protected HtmlTplDashboardRenderContext createRenderContext(HttpServletRequest request, HttpServletResponse response,
-			String template, Writer responseWriter, WebContext webContext, HtmlTplDashboardImportBuilder importBuilder,
+			String template, Writer responseWriter, HtmlTplDashboardImportBuilder importBuilder,
 			HtmlTitleHandler titleHandler) throws IOException
 	{
 		HtmlTplDashboardRenderContext renderContext = new HtmlTplDashboardRenderContext(template, responseWriter);
@@ -360,9 +283,8 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		AnalysisUser analysisUser = getWebDashboardQueryConverter().toAnalysisUser(getCurrentUser().cloneNoPassword());
 		
 		renderContext.putAll(paramValues);
-		renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT, webContext);
-		renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME, dashboardTheme);
-		renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER, analysisUser);
+		renderContext.put(RenderContextAttrs.DASHBOARD_THEME, dashboardTheme);
+		renderContext.put(RenderContextAttrs.USER, analysisUser);
 		
 		renderContext.setImportBuilder(importBuilder);
 		renderContext.setDashboardTheme(dashboardTheme);
@@ -396,25 +318,23 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
-	 * 创建初始{@linkplain WebContext}。
+	 * 填充Web上下文信息至{@linkplain RenderContext}。
 	 * 
 	 * @param request
+	 * @param renderContext
 	 * @return
 	 */
-	protected WebContext createInitWebContext(HttpServletRequest request)
+	protected void inflateWebRenderContext(HttpServletRequest request, RenderContext renderContext)
 	{
-		WebContext webContext = new WebContext();
-
-		webContext.put(DASHBOARD_CONTEXT_PATH_NAME, WebUtils.getContextPath(request));
+		renderContext.put(RenderContextAttrs.CONTEXT_PATH, WebUtils.getContextPath(request));
 
 		// 如果是启用安全会话请求，则将会话信息返回给前端，前端需要构建安全会话链接时可能需要
 		if (isSafeSessionRequest(request))
 		{
-			webContext.put(DASHBOARD_SESSION_NAME_NAME, this.sessionIdParamResolver.getSessionIdParamName());
-			webContext.put(DASHBOARD_SESSION_VALUE_NAME, this.sessionIdParamResolver.getAddableSessionId(request));
+			renderContext.put(RenderContextAttrs.SESSION_NAME, this.sessionIdParamResolver.getSessionIdParamName());
+			renderContext.put(RenderContextAttrs.SESSION_VALUE,
+					this.sessionIdParamResolver.getAddableSessionId(request));
 		}
-
-		return webContext;
 	}
 
 	/**
@@ -591,34 +511,34 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return getWebDashboardQueryConverter().convert(query, chartWidgets, user);
 	}
 
-	protected void addUpdateDataValue(HttpServletRequest request, WebContext webContext, String updateDataURL)
+	protected void addUpdateDataValue(HttpServletRequest request, RenderContext renderContext, String updateDataURL)
 	{
 		updateDataURL = addSessionIdParamIfNotExplicitDisable(updateDataURL, request);
-		webContext.put(DASHBOARD_UPDATE_URL_NAME, updateDataURL);
+		renderContext.put(RenderContextAttrs.UPDATE_DATA_URL, updateDataURL);
 	}
 
-	protected void addLoadChartValue(HttpServletRequest request, WebContext webContext, String loadChartURL)
+	protected void addLoadChartValue(HttpServletRequest request, RenderContext renderContext, String loadChartURL)
 	{
 		loadChartURL = addSessionIdParamIfNotExplicitDisable(loadChartURL, request);
-		webContext.put(DASHBOARD_LOAD_CHART_URL_NAME, loadChartURL);
+		renderContext.put(RenderContextAttrs.LOAD_CHART_URL, loadChartURL);
 	}
 
-	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext, String heartbeatURL)
+	protected void addHeartBeatValue(HttpServletRequest request, RenderContext renderContext, String heartbeatURL)
 	{
 		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
-		webContext.put(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
+		renderContext.put(RenderContextAttrs.HEARTBEAT_URL, heartbeatURL);
 	}
 
-	protected void addUnloadValue(HttpServletRequest request, WebContext webContext, String unloadURL)
+	protected void addUnloadValue(HttpServletRequest request, RenderContext renderContext, String unloadURL)
 	{
 		unloadURL = addSessionIdParamIfNotExplicitDisable(unloadURL, request);
-		webContext.put(DASHBOARD_UNLOAD_URL_NAME, unloadURL);
+		renderContext.put(RenderContextAttrs.UNLOAD_URL, unloadURL);
 	}
 
-	protected void addPluginResUrlPrefixValue(HttpServletRequest request, WebContext webContext,
+	protected void addPluginResUrlPrefixValue(HttpServletRequest request, RenderContext renderContext,
 			String pluginResUrlPrefix)
 	{
-		webContext.put(DASHBOARD_PLUGIN_RES_URL_PREFIX_NAME, pluginResUrlPrefix);
+		renderContext.put(RenderContextAttrs.PLUGIN_RES_URL_PREFIX, pluginResUrlPrefix);
 	}
 
 	/**
@@ -782,129 +702,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		public void setDashboardQuery(DashboardQuery dashboardQuery)
 		{
 			this.dashboardQuery = dashboardQuery;
-		}
-	}
-
-	/**
-	 * Web上下文信息。
-	 * <p>
-	 * 这些信息将输出至客户端，提供看板交互支持。
-	 * </p>
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class WebContext implements Map<String, Object>, Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private Map<String, Object> map;
-
-		public WebContext()
-		{
-			super();
-			this.map = new HashMap<>();
-		}
-
-		public WebContext(Map<String, Object> map)
-		{
-			super();
-			this.map = map;
-		}
-
-		@Override
-		public int size()
-		{
-			return this.map.size();
-		}
-
-		@Override
-		public boolean isEmpty()
-		{
-			return this.map.isEmpty();
-		}
-
-		@Override
-		public boolean containsKey(Object key)
-		{
-			return this.map.containsKey(key);
-		}
-
-		@Override
-		public boolean containsValue(Object value)
-		{
-			return this.map.containsValue(value);
-		}
-
-		@Override
-		public Object get(Object key)
-		{
-			return this.map.get(key);
-		}
-
-		@Override
-		public Object put(String key, Object value)
-		{
-			return this.map.put(key, value);
-		}
-
-		@Override
-		public Object remove(Object key)
-		{
-			return this.map.remove(key);
-		}
-
-		@Override
-		public void putAll(Map<? extends String, ? extends Object> m)
-		{
-			this.map.putAll(m);
-		}
-
-		@Override
-		public void clear()
-		{
-			this.map.clear();
-		}
-
-		@Override
-		public Set<String> keySet()
-		{
-			return this.map.keySet();
-		}
-
-		@Override
-		public Collection<Object> values()
-		{
-			return this.map.values();
-		}
-
-		@Override
-		public Set<Entry<String, Object>> entrySet()
-		{
-			return this.map.entrySet();
-		}
-
-		public WebContext copy()
-		{
-			WebContext re = new WebContext();
-			re.putAll(this);
-
-			return re;
-		}
-
-		protected void putAllInThis(RenderContext renderContext)
-		{
-			renderContext.putAll(this);
-		}
-
-		protected Map<String, Object> getMap()
-		{
-			return map;
-		}
-
-		protected void setMap(Map<String, Object> map)
-		{
-			this.map = map;
 		}
 	}
 }

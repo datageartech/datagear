@@ -143,13 +143,12 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 // renderContextAttrConst开始
 //----------------------------------------
 
-//渲染上下文属性名：看板主题，同：
-//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME
-renderContextAttrConst.dashboardTheme = "DG_DASHBOARD_THEME";
-
-//渲染上下文属性名：当前用户，同：
-//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER
-renderContextAttrConst.user = "DG_USER";
+renderContextAttrConst.DASHBOARD_THEME = "DG_DASHBOARD_THEME";
+renderContextAttrConst.USER = "DG_USER";
+renderContextAttrConst.UPDATE_DATA_URL ="DG_UPDATE_DATA_URL";
+renderContextAttrConst.LOAD_CHART_URL = "DG_LOAD_CHART_URL";
+renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
+renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
 
 //----------------------------------------
 // renderContextAttrConst结束
@@ -221,8 +220,6 @@ DF.heartbeatConfig = (DF.heartbeatConfig ||
  */
 DF.unloadConfig = (DF.unloadConfig ||
 		{
-			//org.datagear.web.controller.AbstractDataAnalysisController.DASHBOARD_UNLOAD_URL_NAME
-			urlAttrName: "unloadURL",
 			//org.datagear.web.controller.DashboardVisualController.UNLOAD_PARAM_DASHBOARD_ID
 			dashboardIdParamName: "dashboardId"
 		});
@@ -276,7 +273,7 @@ DF.initRenderContext = function(renderContext)
 	var chartTheme = CF.renderContextChartTheme(renderContext);
 	if(!chartTheme)
 	{
-		var dashboardTheme = CF.renderContextValue(renderContext, renderContextAttrConst.dashboardTheme);
+		var dashboardTheme = CF.renderContextValue(renderContext, renderContextAttrConst.DASHBOARD_THEME);
 		chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
 		CF.renderContextChartTheme(renderContext, chartTheme);
 	}
@@ -331,10 +328,9 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 		DF._heartbeatIntervalId = null;
 	}
 	
-	var contextPath = CF.renderContextWebContextPath(renderContext);
-	var heartbeatURL = CF.renderContextWebContextValue(renderContext, "heartbeatURL");
-	
-	heartbeatURL = CF.toWebContextPathURL(contextPath, heartbeatURL);
+	var contextPath = CF.renderContextContextPath(renderContext);
+	var heartbeatURL = CF.renderContextValNonNull(renderContext, renderContextAttrConst.HEARTBEAT_URL);
+	heartbeatURL = CF.toContextPathURL(contextPath, heartbeatURL);
 	
 	DF._heartbeatIntervalId = setInterval(function()
 	{
@@ -961,7 +957,7 @@ dashboardProto._initUnloadDashboardHandler = function()
 	this._windowBeforeunloadHandler = function()
 	{
 		var renderContext = thisDashboard.renderContext();
-		var unloadURL = CF.renderContextWebContextValue(renderContext, DF.unloadConfig.urlAttrName);
+		var unloadURL = CF.renderContextValNonNull(renderContext, renderContextAttrConst.UNLOAD_URL);
 		unloadURL = thisDashboard.contextURL(unloadURL);
 		var formData = new FormData();
 		formData.append(DF.unloadConfig.dashboardIdParamName, thisDashboard.id());
@@ -1618,14 +1614,14 @@ dashboardProto._doHandleCharts = function()
 		this._doHandleChartsLocal(preUpdateLocals);
 	});
 	
-	var updateDashboardURL = CF.renderContextWebContextValue(this.renderContext(), "updateDashboardURL");
-	var url = this.contextURL(updateDashboardURL);
+	var updateDataURL = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.UPDATE_DATA_URL);
+	updateDataURL = this.contextURL(updateDataURL);
 	
 	for(let group in preUpdateGroups)
 	{
 		CF.executeSilently(() =>
 		{
-			this._doHandleChartsAjax(url, group, preUpdateGroups[group]);
+			this._doHandleChartsAjax(updateDataURL, group, preUpdateGroups[group]);
 		});
 	}
 };
@@ -2284,8 +2280,8 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 				+ "element has a bounded chart");
 	}
 	
-	var loadChartURL = CF.renderContextWebContextValue(this.renderContext(), "loadChartURL");
-	var url = this.contextURL(loadChartURL);
+	var loadChartURL = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.LOAD_CHART_URL);
+	loadChartURL = this.contextURL(loadChartURL);
 	var loadChartConfig = DF.loadChartConfig;
 	
 	var formData = new FormData();
@@ -2295,7 +2291,7 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 	
 	this._loadingChartElement(elements, true);
 	
-	fetch(url, DF.fetchOptsOfPostForm(formData))
+	fetch(loadChartURL, DF.fetchOptsOfPostForm(formData))
 	.then((response) =>
 	{
 		if(!response.ok)
@@ -2573,7 +2569,7 @@ dashboardProto.serverDate = function(asMillisecond)
  */
 dashboardProto.user = function()
 {
-	var user = this.renderContextValue(renderContextAttrConst.user);
+	var user = this.renderContextValue(renderContextAttrConst.USER);
 	
 	if(user == null)
 		throw new Error("get user unsupport");
@@ -2864,8 +2860,8 @@ dashboardProto._postProcessDestroyed = function()
 dashboardProto.contextURL = function(url)
 {
 	var renderContext = this.renderContext();
-	var contextPath = CF.renderContextWebContextPath(renderContext);
-	return CF.toWebContextPathURL(contextPath, url);
+	var contextPath = CF.renderContextContextPath(renderContext);
+	return CF.toContextPathURL(contextPath, url);
 };
 
 /**
