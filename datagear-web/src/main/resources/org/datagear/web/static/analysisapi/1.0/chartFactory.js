@@ -225,12 +225,10 @@
 	// renderContextAttrConst开始
 	//----------------------------------------
 	
-	//渲染上下文属性名：Web上下文，同：
-	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_WEB_CONTEXT
-	renderContextAttrConst.webContext = "DG_WEB_CONTEXT";
-	
+	//渲染上下文属性名：Web上下文
+	renderContextAttrConst.WEB_CONTEXT = "DG_WEB_CONTEXT";
 	//渲染上下文属性名：已填充图表主题
-	renderContextAttrConst.inflatedChartTheme = "DG_INFLATED_CHART_THEME";
+	renderContextAttrConst.INFLATED_CHART_THEME = "DG_INFLATED_CHART_THEME";
 	
 	//----------------------------------------
 	// renderContextAttrConst结束
@@ -565,7 +563,7 @@
 	
 	/**
 	 * 初始化图表主题。
-	 * 此函数依次从this.renderContext中的renderContextAttrConst.inflatedChartTheme属性值、
+	 * 此函数依次从this.renderContext中的renderContextAttrConst.INFLATED_CHART_THEME属性值、
 	 * <body>元素、图表元素的elementAttrConst.THEME属性读取、合并图表主题。
 	 * 
 	 * @return {...}
@@ -6607,7 +6605,7 @@
 	 */
 	chartFactory.renderContextWebContext = function(renderContext, webContext)
 	{
-		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.webContext, webContext);
+		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.WEB_CONTEXT, webContext);
 	};
 	
 	/**
@@ -6618,7 +6616,7 @@
 	 */
 	chartFactory.renderContextChartTheme = function(renderContext, chartTheme)
 	{
-		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.inflatedChartTheme, chartTheme);
+		return chartFactory.renderContextAttr(renderContext, renderContextAttrConst.INFLATED_CHART_THEME, chartTheme);
 	};
 	
 	/**

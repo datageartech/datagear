@@ -138,17 +138,19 @@
 	// renderContextAttrConst开始
 	//----------------------------------------
 	
-	//渲染上下文属性名：看板主题，同：
-	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_DASHBOARD_THEME
-	renderContextAttrConst.dashboardTheme = "DG_DASHBOARD_THEME";
-	
-	//渲染上下文属性名：图表主题，同：
-	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_CHART_THEME
-	renderContextAttrConst.chartTheme = "DG_CHART_THEME";
-	
-	//渲染上下文属性名：当前用户，同：
-	//AbstractDataAnalysisController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_USER
-	renderContextAttrConst.user = "DG_USER";
+	//org.datagear.web.analysis.RenderContextAttrs
+	renderContextAttrConst.DASHBOARD_THEME = "DG_DASHBOARD_THEME";
+	renderContextAttrConst.CHART_THEME = "DG_CHART_THEME";
+	renderContextAttrConst.USER = "DG_USER";
+	renderContextAttrConst.LOCALE = "DG_LOCALE";
+	renderContextAttrConst.CONTEXT_PATH = "DG_CONTEXT_PATH";
+	renderContextAttrConst.UPDATE_DATA_URL ="DG_UPDATE_DATA_URL";
+	renderContextAttrConst.LOAD_CHART_URL = "DG_LOAD_CHART_URL";
+	renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
+	renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
+	renderContextAttrConst.PLUGIN_RES_URL_PREFIX = "DG_PLUGIN_RES_URL_PREFIX";
+	renderContextAttrConst.SESSION_NAME = "DG_SESSION_NAME";
+	renderContextAttrConst.SESSION_VALUE = "DG_SESSION_VALUE";
 	
 	//----------------------------------------
 	// renderContextAttrConst结束
@@ -291,39 +293,81 @@
 		{
 			attributes[name] = renderContext[name];
 			delete renderContext[name];
-			
-			if(name == renderContextAttrConst.webContext)
-				dashboardFactory._compatWebContext(attributes[name]);
 		}
 		
 		renderContext.attributes = attributes;
+		dashboardFactory._compatWebContext(renderContext);
 	};
 	
-	//从6.0.0版本起，org.datagear.web.controller.AbstractDataAnalysisController.WebContext结构由{ contextPath: "", attributes: { ... } }修改为{ ... }，需要在这里兼容处理
-	dashboardFactory._compatWebContext = function(webContext)
+	//从6.0.0版本起，渲染上下文中移除了org.datagear.web.controller.AbstractDataAnalysisController.WebContext信息，需要在这里兼容处理
+	dashboardFactory._compatWebContext = function(renderContext)
 	{
-		if(webContext == null)
+		if(renderContext == null)
 			return;
 		
-		var attributes = {};
+		//5.5.0版本WebContext结构
+		var webContext = { contextPath: "", attributes: {} };
 		
-		for(var name in webContext)
+		for(var name in renderContext.attributes)
 		{
-			if(name == "contextPath")
-				continue;
+			let value = renderContext.attributes[name];
+			let del = false;
 			
-			attributes[name] = webContext[name];
-			delete webContext[name];
+			if(name == renderContextAttrConst.CONTEXT_PATH)
+			{
+				webContext.contextPath = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.UPDATE_DATA_URL)
+			{
+				webContext.attributes["updateDashboardURL"] = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.LOAD_CHART_URL)
+			{
+				webContext.attributes["loadChartURL"] = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.HEARTBEAT_URL)
+			{
+				webContext.attributes["heartbeatURL"] = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.UNLOAD_URL)
+			{
+				webContext.attributes["unloadURL"] = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.PLUGIN_RES_URL_PREFIX)
+			{
+				webContext.attributes["pluginResUrlPrefix"] = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.SESSION_NAME)
+			{
+				webContext.attributes["sessionName"] = value;
+				del = true;
+			}
+			else if(name == renderContextAttrConst.SESSION_VALUE)
+			{
+				webContext.attributes["sessionValue"] = value;
+				del = true;
+			}
+			
+			if(del)
+			{
+				delete renderContext.attributes[name];
+			}
 		}
 		
-		webContext.attributes = attributes;
+		renderContext.attributes[renderContextAttrConst.WEB_CONTEXT] = webContext;
 	};
 	
 	dashboardFactory._initRenderContext = function(dashboard)
 	{
-		var dashboardTheme = dashboard.renderContextAttr(renderContextAttrConst.dashboardTheme);
+		var dashboardTheme = dashboard.renderContextAttr(renderContextAttrConst.DASHBOARD_THEME);
 		var chartTheme = (dashboardTheme && dashboardTheme.chartTheme ? dashboardTheme.chartTheme : {});
-		dashboard.renderContextAttr(renderContextAttrConst.chartTheme, chartTheme);
+		dashboard.renderContextAttr(renderContextAttrConst.CHART_THEME, chartTheme);
 	};
 	
 	dashboardFactory._initChart = function(dashboard, chart)
@@ -908,9 +952,9 @@
 	 */
 	dashboardBase._initRenderContext = function()
 	{
-		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.dashboardTheme);
-		var webContext = this.renderContextAttr(renderContextAttrConst.webContext);
-		var chartTheme = this.renderContextAttr(renderContextAttrConst.chartTheme);
+		var dashboardTheme = this.renderContextAttr(renderContextAttrConst.DASHBOARD_THEME);
+		var webContext = this.renderContextAttr(renderContextAttrConst.WEB_CONTEXT);
+		var chartTheme = this.renderContextAttr(renderContextAttrConst.CHART_THEME);
 		
 		chartFactory.initRenderContext(this.renderContext, webContext, chartTheme);
 		
@@ -2834,7 +2878,7 @@
 	 */
 	dashboardBase.user = function()
 	{
-		var user = this.renderContextAttr(renderContextAttrConst.user);
+		var user = this.renderContextAttr(renderContextAttrConst.USER);
 		
 		if(user == null)
 			throw new Error("get user not support");
