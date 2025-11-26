@@ -143,12 +143,16 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 // renderContextAttrConst开始
 //----------------------------------------
 
+//org.datagear.web.analysis.RenderContextAttrs
 renderContextAttrConst.DASHBOARD_THEME = "DG_DASHBOARD_THEME";
 renderContextAttrConst.USER = "DG_USER";
+renderContextAttrConst.LOCALE = "DG_LOCALE";
 renderContextAttrConst.UPDATE_DATA_URL ="DG_UPDATE_DATA_URL";
 renderContextAttrConst.LOAD_CHART_URL = "DG_LOAD_CHART_URL";
 renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
 renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
+renderContextAttrConst.SESSION_NAME = "DG_SESSION_NAME";
+renderContextAttrConst.SESSION_VALUE = "DG_SESSION_VALUE";
 
 //----------------------------------------
 // renderContextAttrConst结束
@@ -211,7 +215,6 @@ DF.heartbeatConfig = (DF.heartbeatConfig ||
 		{
 			//org.datagear.web.controller.DashboardVisualController.HEARTBEAT_PARAM_DASHBOARD_ID
 			dashboardIdParamName: "dashboardId",
-			//org.datagear.web.controller.AbstractDataAnalysisController.HEARTBEAT_INTERVAL_MS
 			interval: 1000 * 60 * 5
 		});
 

@@ -217,9 +217,12 @@ elementAttrConst.ATTR_VALUES = "dg-chart-attr-values";
 // renderContextAttrConst开始
 //----------------------------------------
 
+//org.datagear.web.analysis.RenderContextAttrs
+renderContextAttrConst.CHART_THEME = "DG_CHART_THEME";
 renderContextAttrConst.CONTEXT_PATH = "DG_CONTEXT_PATH";
 renderContextAttrConst.PLUGIN_RES_URL_PREFIX = "DG_PLUGIN_RES_URL_PREFIX";
-renderContextAttrConst.CHART_THEME = "DG_CHART_THEME";
+
+//原始图表主题，仅页面端使用
 renderContextAttrConst.ORIGINAL_CHART_THEME = "DG_ORIGINAL_CHART_THEME";
 
 //----------------------------------------

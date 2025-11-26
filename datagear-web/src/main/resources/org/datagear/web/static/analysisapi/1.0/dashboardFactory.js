@@ -211,7 +211,6 @@
 			{
 				//org.datagear.web.controller.DashboardVisualController.HEARTBEAT_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
-				//org.datagear.web.controller.AbstractDataAnalysisController.HEARTBEAT_INTERVAL_MS
 				interval: 1000 * 60 * 5
 			});
 	

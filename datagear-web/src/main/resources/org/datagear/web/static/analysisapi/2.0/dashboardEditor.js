@@ -31,7 +31,7 @@
 	/**看板工厂*/
 	var CF = global.chartFactory;
 	var DF = global.dashboardFactory;
-	var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttrConst = {}));
+	var renderContextAttrConst = CF.renderContextAttrConst;
 	var DE = (DF.dashboardEditor || (DF.dashboardEditor = {}));
 	var i18n = (DE.i18n || (DE.i18n = {}));
 	
@@ -53,8 +53,8 @@
 	i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
 	i18n.bindChartElementMustBeDiv = "绑定图表的元素必须是<div>元素";
 	
-	//参考org.datagear.web.controller.DashboardVisualController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
-	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (DE.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
+	//参考org.datagear.web.controller.DashboardVisualController.RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
+	var RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (DE.RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
 	
 	var BODY_CLASS_VISUAL_EDITOR = (DE.BODY_CLASS_VISUAL_EDITOR = "dg-show-ve");
 	
@@ -1863,7 +1863,7 @@
 			eles.push(chartDiv);
 		}
 		
-		var loadChartsEle = (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? refEle : refEle.parent());
+		var loadChartsEle = (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? refEle : CF.eleOfParent(refEle));
 		DE._loadUnsolvedChartsInElement(loadChartsEle);
 		
 		return eles;
@@ -3560,7 +3560,7 @@
 	//结构参考：org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfo
 	DE._editHtmlInfo = function()
 	{
-		return DE.dashboard.renderContextValue(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
+		return DE.dashboard.renderContextValue(RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
 	};
 	
 	//反转义编辑HTML（转义操作由后台执行）

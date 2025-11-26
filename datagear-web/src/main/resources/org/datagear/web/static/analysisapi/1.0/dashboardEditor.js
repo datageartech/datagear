@@ -52,8 +52,8 @@
 	i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
 	i18n.bindChartElementMustBeDiv = "绑定图表的元素必须是<div>元素";
 	
-	//参考org.datagear.web.controller.DashboardVisualController.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
-	var DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
+	//参考org.datagear.web.controller.DashboardVisualController.RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
+	var RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = (editor.RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = "DG_EDIT_HTML_INFO");
 	
 	var BODY_CLASS_VISUAL_EDITOR = (editor.BODY_CLASS_VISUAL_EDITOR = "dg-show-ve");
 	
@@ -3578,7 +3578,7 @@
 	//结构参考：org.datagear.web.controller.DashboardVisualController.DashboardShowForEdit.EditHtmlInfo
 	editor._editHtmlInfo = function()
 	{
-		return this.dashboard.renderContextAttr(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
+		return this.dashboard.renderContextAttr(RENDER_CONTEXT_ATTR_EDIT_HTML_INFO);
 	};
 	
 	//反转义编辑HTML（转义操作由后台执行）

@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DashboardResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TplDashboardWidgetResManager;
@@ -63,7 +64,6 @@ import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.Global;
-import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.html.DefaultFilterHandler;
@@ -119,16 +119,20 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	public static final String UNLOAD_PARAM_DASHBOARD_ID = AbstractDataAnalysisController.UNLOAD_PARAM_DASHBOARD_ID;
 
 	/**
-	 * 看板内置渲染上下文属性名：{@linkplain EditHtmlInfo}。
+	 * 渲染上下文属性名：{@linkplain EditHtmlInfo}。
 	 */
-	public static final String DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = RenderContextAttrs.BUILTIN_ATTR_PREFIX
+	public static final String RENDER_CONTEXT_ATTR_EDIT_HTML_INFO = RenderContextAttrs.BUILTIN_ATTR_PREFIX
 			+ "EDIT_HTML_INFO";
 
 	/**
-	 * 看板分享密码占位。
+	 * 看板展示URL的请求参数名：编辑模板。仅用于可视化编辑看板模板功能。
 	 */
-	public static final String DASHBOARD_SHARE_SET_PASSWORD_PLACEHOLDER = "DSP-PLACEHOLDER-"
-			+ IDUtil.randomIdOnTime20();
+	public static final String SHOW_PARAM_EDIT_TEMPLATE = ChartDefinition.BUILTIN_ATTR_PREFIX + "EDIT_TEMPLATE";
+
+	/**
+	 * 看板展示URL的请求参数名：自定义模板内容。仅用于可视化编辑看板模板功能。
+	 */
+	public static final String SHOW_PARAM_TEMPLATE_CONTENT = ChartDefinition.BUILTIN_ATTR_PREFIX + "TEMPLATE_CONTENT";
 
 	public static final String DASHBOARD_SHOW_AUTH_PARAM_NAME = "name";
 
@@ -711,7 +715,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			String template, boolean isShowForEdit) throws Exception
 	{
 		String showHtml = (isShowForEdit
-				? buildShowForEditShowHtml(request.getParameter(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT))
+				? buildShowForEditShowHtml(request.getParameter(SHOW_PARAM_TEMPLATE_CONTENT))
 				: "");
 		EditHtmlInfo editHtmlInfo = (isShowForEdit ? buildShowForEditEditHtmlInfo(showHtml) : null);
 
@@ -744,10 +748,10 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			inflateWebRenderContext(request, renderContext);
 
 			// 移除参数中的模板内容，一是它不应该传入页面，二是它可能包含"</script>"子串，传回浏览器端时会导致页面解析出错
-			renderContext.remove(DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT);
+			renderContext.remove(SHOW_PARAM_TEMPLATE_CONTENT);
 
 			if (isShowForEdit)
-				renderContext.put(DASHBOARD_BUILTIN_RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
+				renderContext.put(RENDER_CONTEXT_ATTR_EDIT_HTML_INFO, editHtmlInfo);
 
 			if (showHtmlIn != null)
 			{
@@ -883,7 +887,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 
 	protected boolean isDashboardShowForEditParam(HttpServletRequest request)
 	{
-		String editTemplate = request.getParameter(DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE);
+		String editTemplate = request.getParameter(SHOW_PARAM_EDIT_TEMPLATE);
 		// 有编辑模板请求参数
 		return StringUtil.toBoolean(editTemplate);
 	}

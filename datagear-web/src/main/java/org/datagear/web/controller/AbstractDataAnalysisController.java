@@ -72,26 +72,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 */
 	public static final String DASHBOARD_SHOW_PARAM_VALUE_AUTO_THEME = "auto";
 
-	/**
-	 * 看板展示URL的请求参数名：编辑模板。仅用于可视化编辑看板模板功能。
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_EDIT_TEMPLATE = ChartDefinition.BUILTIN_ATTR_PREFIX
-			+ "EDIT_TEMPLATE";
-
-	/**
-	 * 看板展示URL的请求参数名：自定义模板内容。仅用于可视化编辑看板模板功能。
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_TEMPLATE_CONTENT = ChartDefinition.BUILTIN_ATTR_PREFIX
-			+ "TEMPLATE_CONTENT";
-
 	/** 看板心跳URL后缀 */
 	public static final String HEARTBEAT_TAIL_URL = "/heartbeat";
 
 	/** 看板卸载URL后缀 */
 	public static final String UNLOAD_TAIL_URL = "/unload";
-
-	/** 看板心跳频率 */
-	public static final long HEARTBEAT_INTERVAL_MS = 1000 * 60 * 5;
 
 	/** 看板心跳参数：看板ID */
 	public static final String HEARTBEAT_PARAM_DASHBOARD_ID = "dashboardId";
