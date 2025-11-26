@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util;
+package org.datagear.web.analysis;
 
 import javax.servlet.http.HttpServletRequest;
 

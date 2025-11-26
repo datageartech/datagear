@@ -2831,7 +2831,7 @@
 	/**
 	 * 获取当前用户信息。
 	 * 
-	 * @returns 用户信息，格式参考：org.datagear.web.util.WebDashboardQueryConverter.AnalysisUser
+	 * @returns 用户信息，格式参考：org.datagear.web.analysis.AnalysisUser
 	 */
 	dashboardBase.user = function()
 	{

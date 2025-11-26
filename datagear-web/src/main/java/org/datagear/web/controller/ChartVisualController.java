@@ -48,7 +48,7 @@ import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetS
 import org.datagear.util.IOUtil;
 import org.datagear.util.version.VersionPattern;
 import org.datagear.web.analysis.DashboardApiVersion;
-import org.datagear.web.util.SessionDashboardInfoSupport.DashboardInfo;
+import org.datagear.web.analysis.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

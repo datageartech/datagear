@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util;
+package org.datagear.web.analysis;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -33,7 +33,6 @@ import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.cache.CacheAware;
-import org.datagear.web.analysis.DashboardApiVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;

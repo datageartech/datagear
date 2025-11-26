@@ -21,15 +21,15 @@ import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.RenderContext;
 
 /**
- * {@linkplain RenderContext}属性名常量。
+ * {@linkplain RenderContext}支持类。
  * <p>
- * 注意：谨慎重构这些常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
+ * 注意：谨慎重构此类的常量值，因为它可能已被用于系统已创建的看板中，重构它将导致这些看板展示页面出错。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class RenderContextAttrs
+public class RenderContextSupport
 {
 	/**
 	 * 内置属性名前缀。

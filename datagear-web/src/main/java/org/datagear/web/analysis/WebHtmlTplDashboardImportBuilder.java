@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util;
+package org.datagear.web.analysis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,10 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.Global;
-import org.datagear.web.analysis.DashboardApiVersion;
+import org.datagear.web.analysis.ChartPluginManagerJsFactory.ChartPluginManagerJs;
 import org.datagear.web.controller.ChartPluginVisualResController;
 import org.datagear.web.controller.ServerTimeJsController;
-import org.datagear.web.util.ChartPluginManagerJsFactory.ChartPluginManagerJs;
+import org.datagear.web.util.WebUtils;
 
 /**
  * Web {@linkplain HtmlTplDashboardImportBuilder}。

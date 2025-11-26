@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.util;
+package org.datagear.web.analysis;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +29,7 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.LoadableChartWidgets;
+import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 
 /**
