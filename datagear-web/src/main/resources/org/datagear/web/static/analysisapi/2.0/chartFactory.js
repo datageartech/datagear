@@ -3963,18 +3963,28 @@ chartProto.resultRowArrayDatas = function(dataSetResult, fields, row, count)
 };
 
 /**
- * 获取数据集结果数据的行对象指定字段值。
+ * 获取/设置数据集结果数据行对象指定字段值。
  * 
  * @param rowObj 行对象，格式为：{ ... }
  * @param field 数据集字段对象、字段名
+ * @param value 可选，要设置的字段值
+ * @returns 要获取的字段值，没有则是null
  */
-chartProto.resultDataRowCell = function(rowObj, field)
+chartProto.resultDataRowCell = function(rowObj, field, value)
 {
-	if(rowObj == null || field == null)
-		return null;
-	
-	var name = (field.name !== undefined ? field.name : field);
-	return rowObj[name];
+	if(arguments.length <= 2)
+	{
+		if(rowObj == null || field == null)
+			return null;
+		
+		let name = (field.name !== undefined ? field.name : field);
+		return rowObj[name];
+	}
+	else
+	{
+		let name = (field.name !== undefined ? field.name : field);
+		rowObj[name] = value;
+	}
 };
 
 /**
