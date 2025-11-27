@@ -238,11 +238,11 @@ builtinOptionNames.updateAppendMode = "updateAppendMode";
 /** 内置图表选项名：内置工具（参数/数据） */
 builtinOptionNames.builtinTool = "builtinTool";
 
-/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
-CF.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
+/** 图表元素标识样式类名，所有已绘制的图表元素都会添加此样式类名 */
+CF.CHART_IDENTITY_STYLE_NAME = "dg-chart-identity";
 
-/** 关键字：可作为定位父元素的样式类名 */
-CF.CHART_STYLE_NAME_FOR_RELATIVE = "dg-position-relative";
+/** 图表元素相对定位的样式类名，图表元素必须添加此样式类，使得内部工具栏可以相对定位 */
+CF.CHART_RELATIVE_STYLE_NAME = "dg-chart-relative";
 
 /** 看板引入库标识属性，同：org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.DASHBOARD_LIB_NAME_ATTR */
 CF.LIB_ATTR_NAME = "dg-lib-name";
@@ -1158,9 +1158,9 @@ chartProto.doRender = function()
 	var theme = this.theme();
 	var options = this.options();
 	
-	CF.eleAddClass(ele, CF.CHART_STYLE_NAME_FOR_INDICATION);
+	CF.eleAddClass(ele, CF.CHART_IDENTITY_STYLE_NAME);
 	//必须添加相对定位样式
-	CF.eleAddClass(ele, CF.CHART_STYLE_NAME_FOR_RELATIVE);
+	CF.eleAddClass(ele, CF.CHART_RELATIVE_STYLE_NAME);
 	CF.addThemeRefEntity(theme, this.id());
 	this._createChartThemeCssIfNon();
 	CF.eleAddClass(ele, this.themeStyleName());
@@ -1463,9 +1463,9 @@ chartProto._doDestroy = function()
 	var classes =
 	[
 		this.themeStyleName(),
-		CF.CHART_STYLE_NAME_FOR_RELATIVE,
+		CF.CHART_RELATIVE_STYLE_NAME,
 		"dg-chart-beautify-scrollbar",
-		CF.CHART_STYLE_NAME_FOR_INDICATION
+		CF.CHART_IDENTITY_STYLE_NAME
 	];
 	
 	CF.eleRemoveClass(ele, classes);

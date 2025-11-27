@@ -35,13 +35,12 @@
 	box-sizing: border-box !important;
 	overflow: auto !important;
 }
-.dg-chart-for-indication{
+.dg-chart-relative{
+	/*必须设为相对定位，使得内部工具栏可以相对定位*/
+	position: relative;
 	/*为图表元素设置最小尺寸，避免看板中插入图表元素时由于没设尺寸无法显示的问题*/
 	min-width: 10px;
 	min-height: 10px;
-}
-.dg-position-relative{
-	position: relative;
 }
 .dg-opacity-hide{
 	opacity: 0 !important;
