@@ -2913,10 +2913,10 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 数据集字段名、字段索引、字段对象
- * @param sign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
+ * @param dataSign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
  * @returns 数据标记名字符串数组，空数组表示没有
  */
-chartProto.dataSetFieldSigns = function(dataSetBind, field, sign)
+chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldOf(dataSetBind, field);
@@ -2932,8 +2932,8 @@ chartProto.dataSetFieldSigns = function(dataSetBind, field, sign)
 	}
 	else
 	{
-		sign = this._toDataSignValues(sign);
-		dataSetBind.fieldSigns[fieldName] = sign;
+		dataSign = this._toDataSignValues(dataSign);
+		dataSetBind.fieldSigns[fieldName] = dataSign;
 	}
 };
 
@@ -3765,21 +3765,6 @@ chartProto._isDataSetParamUnready = function(dataSetParam, paramValues)
 };
 
 /**
- * 获取数据集结果数据指定字段、指定行的单元格值，没有则返回null。
- * 
- * @param dataSetResult 数据集结果
- * @param field 数据集字段对象、字段名
- * @param row 行索引，可选，默认为：0
- */
-chartProto.resultDataCell = function(dataSetResult, field, row)
-{
-	row = (row == null ? 0 : row);
-	
-	var re = this.resultRowArrayDatas(dataSetResult, field, row, 1);
-	return (re.length > 0 ? re[0] : null);
-};
-
-/**
  * 将数据集结果数据的行对象按照指定fields顺序转换为列值数组。
  * 
  * @param dataSetResult 数据集结果
@@ -3985,7 +3970,7 @@ chartProto.resultRowArrayDatas = function(dataSetResult, fields, row, count)
  */
 chartProto.resultDataRowCell = function(rowObj, field)
 {
-	if(!rowObj || !field)
+	if(rowObj == null || field == null)
 		return null;
 	
 	var name = (field.name !== undefined ? field.name : field);

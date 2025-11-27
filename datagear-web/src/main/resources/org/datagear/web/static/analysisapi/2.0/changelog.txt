@@ -46,6 +46,7 @@ chart.elementStyle()			x
 chart.styleString()				x
 chart.refreshData()	-> chart.refresh()
 chart.disableSetting() -> chart.disableTool()
+chart.resultDataCell()			x
 
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()
