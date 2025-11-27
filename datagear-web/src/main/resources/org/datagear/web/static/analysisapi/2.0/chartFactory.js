@@ -911,7 +911,7 @@ chartProto.theme = function(theme)
 		if(this._theme == null)
 			this._theme = this._renderContextChartTheme();
 		
-		return this._theme
+		return this._theme;
 	}
 	else
 	{
@@ -4455,30 +4455,36 @@ CF.elesOfMatches = function(eles, selector)
  * 获取元素的前一个兄弟元素
  * 
  * @param ele HTML元素
+ * @param forNode 可选，是否返回节点（可能是注释、文本节点）而非HTML元素，默认值为：false
  */
-CF.eleOfPrev = function(ele)
+CF.eleOfPrev = function(ele, forNode)
 {
-	return (ele == null ? undefined : ele.previousSibling);
+	forNode = (forNode === undefined ? false : forNode);
+	return (ele == null ? undefined : (forNode ? ele.previousSibling : ele.previousElementSibling));
 };
 
 /**
  * 获取元素的后一个兄弟元素
  * 
  * @param ele HTML元素
+ * @param forNode 可选，是否返回节点（可能是注释、文本节点）而非HTML元素，默认值为：false
  */
-CF.eleOfNext = function(ele)
+CF.eleOfNext = function(ele, forNode)
 {
-	return (ele == null ? undefined : ele.nextSibling);
+	forNode = (forNode === undefined ? false : forNode);
+	return (ele == null ? undefined : (forNode ? ele.nextSibling : ele.nextElementSibling));
 };
 
 /**
  * 获取元素的第一个子元素
  * 
  * @param ele HTML元素
+ * @param forNode 可选，是否返回节点（可能是注释、文本节点）而非HTML元素，默认值为：false
  */
-CF.eleOfFirstChild = function(ele)
+CF.eleOfFirstChild = function(ele, forNode)
 {
-	return (ele == null ? undefined : ele.firstElementChild);
+	forNode = (forNode === undefined ? false : forNode);
+	return (ele == null ? undefined : (forNode ? ele.firstChild : ele.firstElementChild));
 };
 
 /**
@@ -4495,20 +4501,12 @@ CF.eleOfParent = function(ele)
  * 获取元素的全部子元素
  * 
  * @param ele HTML元素
+ * @param forNode 可选，是否返回节点（可能是注释、文本节点）而非HTML元素，默认值为：false
  */
-CF.elesOfChildren = function(ele)
+CF.elesOfChildren = function(ele, forNode)
 {
-	return (ele == null ? undefined : Array.from(ele.children));
-};
-
-/**
- * 获取元素的全部子节点
- * 
- * @param ele HTML元素
- */
-CF.elesOfChildNode = function(ele)
-{
-	return (ele == null ? undefined : Array.from(ele.childNodes));
+	forNode = (forNode === undefined ? false : forNode);
+	return (ele == null ? undefined : (forNode ? Array.from(ele.childNodes) : Array.from(ele.children)));
 };
 
 /**

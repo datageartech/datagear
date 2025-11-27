@@ -3044,7 +3044,7 @@
 		{
 			var children = CF.elesOfChildren(refEle);
 			
-			if(DE._isEmptyElement(children))
+			if(CF.isEmpty(children))
 			{
 				var innerHtml = DE._getInnerHTML(refEle);
 				if(DE._isOnlyEmptyOrFormat(innerHtml))
@@ -3067,7 +3067,7 @@
 			var insertTailFormat = false;
 			
 			var children = CF.elesOfChildren(refEle);
-			if(DE._isEmptyElement(children))
+			if(CF.isEmpty(children))
 			{
 				var innerHtml = DE._getInnerHTML(refEle);
 				if(DE._isOnlyEmptyOrFormat(innerHtml))
@@ -3098,7 +3098,7 @@
 	{
 		//在每一个<!--dgInsertFmtEnd-->注释节点前插入格式文本
 		//注意：这里不应该使用替换HTML内容文本后再设置的方式，因为会新建DOM对象而导致旧DOM引用失效
-		CF.elesOfChildNode(ele).forEach(function(node)
+		CF.elesOfChildren(ele, true).forEach(function(node)
 		{
 			if(node.nodeType == HTML_NODE_TYPE_COMMENT && node.nodeValue == "dgInsertFmtEnd")
 			{
