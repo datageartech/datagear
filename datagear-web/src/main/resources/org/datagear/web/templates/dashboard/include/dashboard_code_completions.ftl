@@ -26,10 +26,10 @@
 	[
 		{name: "dg-chart-attr-values", value: "dg-chart-attr-values=",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-attr-values' />", categories: ["div"]},
-		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"true\"",
+		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"false\"",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-auto-resize' />", categories: ["body", "div"]},
-		{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting=",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", categories: ["body", "div"]},
+		{name: "dg-chart-disable-tool", value: "dg-chart-disable-tool=",
+			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-tool' />", categories: ["body", "div"]},
 		{name: "dg-chart-link", value: "dg-chart-link=",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", categories: ["div"]},
 		{name: "dg-chart-listener", value: "dg-chart-listener=",
@@ -54,8 +54,8 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", categories: ["form"]},
 		{name: "dg-dashboard-listener", value: "dg-dashboard-listener=",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", categories: ["body"]},
-		{name: "dg-echarts-theme", value: "dg-echarts-theme=",
-			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", categories: ["body", "div"]},
+		{name: "dg-api-version", value: "dg-api-version=",
+				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-api-version' />", categories: ["html"]},
 		{name: "dg-dashboard-unimport", value: "dg-dashboard-unimport=",
 				displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-unimport' />", categories: ["html"]},
 		{name: "dg-dashboard-var", value: "dg-dashboard-var=",
@@ -66,7 +66,59 @@
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-code' />", categories: ["html", "script"]}
 	];
 	
-	po.codeEditorCompletionsJsFunction = window.dashboardApiCompletions;
+	po.codeEditorCompletionsJsFunction = [];
+	
+	po.isJsPublicApi = function(name, value)
+	{
+		return (name && !name.startsWith("_") && chartFactory.isFunction(value));
+	};
+	
+	po.jsApiCompletionComparator = function(a, b)
+	{
+		var an = (a.name || "");
+		var bn = (b.name || "");
+		
+		if(an == bn)
+			return 0;
+		else
+			return (an > bn ? 1 : -1);
+	};
+	
+	var dashboardProto = dashboardFactory.Dashboard.prototype;
+	var chartProto = chartFactory.Chart.prototype;
+	var dashboardApiCompletions = [];
+	var chartApiCompletions = [];
+	
+	for(var name in dashboardProto)
+	{
+		if(po.isJsPublicApi(name, dashboardProto[name]))
+		{
+			var completion =
+			{
+				name: name, value: name + "(", displayName: name + "()", displayComment: "dashboard", categories: ["dashboard"]
+			};
+			
+			dashboardApiCompletions.push(completion);
+		}
+	}
+	
+	for(var name in chartProto)
+	{
+		if(po.isJsPublicApi(name, chartProto[name]))
+		{
+			var completion =
+			{
+				name: name, value: name + "(", displayName: name + "() ", displayComment: "chart", categories: ["chart"]
+			};
+			
+			chartApiCompletions.push(completion);
+		}
+	}
+	
+	dashboardApiCompletions.sort(po.jsApiCompletionComparator);
+	chartApiCompletions.sort(po.jsApiCompletionComparator);
+	po.codeEditorCompletionsJsFunction = po.codeEditorCompletionsJsFunction.concat(dashboardApiCompletions);
+	po.codeEditorCompletionsJsFunction = po.codeEditorCompletionsJsFunction.concat(chartApiCompletions);
 })
 (${pid});
 </script>

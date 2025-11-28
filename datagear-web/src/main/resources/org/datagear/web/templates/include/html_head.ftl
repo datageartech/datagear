@@ -64,7 +64,6 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/analysisapi/2.0/chartFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/analysisapi/2.0/dashboardFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/analysisapi/2.0/chartTool.js?v=${clientCacheCode}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/dashboardApiList.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/pages/include/page.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/pages/dashboard/include/dashboardDesign.js?v=${clientCacheCode}" type="text/javascript"></script>
 ${detectNewVersionResult.script?no_esc}

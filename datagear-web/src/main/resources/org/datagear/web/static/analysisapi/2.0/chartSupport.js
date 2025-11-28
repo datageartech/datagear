@@ -7698,10 +7698,10 @@ EU.init = function(chart, opts)
  */
 EU.themeName = function(chart)
 {
-	var themeName = CF.eleAttr(chart.element(), CF.elementAttrConst.ECHARTS_THEME);
+	var themeName = CF.eleAttr(chart.element(), EU.ELE_ATTR_ECHARTS_THEME);
 	
 	if(!themeName)
-		themeName = CF.eleAttr(document.body, CF.elementAttrConst.ECHARTS_THEME);
+		themeName = CF.eleAttr(document.body, EU.ELE_ATTR_ECHARTS_THEME);
 	
 	return themeName;
 };
