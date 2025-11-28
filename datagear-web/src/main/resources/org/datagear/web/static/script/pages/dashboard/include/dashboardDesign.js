@@ -309,10 +309,12 @@ $.inflateDashboardDesignEditor = function(po)
 		{
 			var myTagToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "tag");
 			var myCategory = (myTagToken ? myTagToken.string : null);
+			//仅对最新API版本的看板支持补全
+			var completionSource = (po.isLatestApiVersionInCdeEditor(codeEditor) ? po.codeEditorEleAttrCompletions : []);
 			
 			var completions =
 			{
-				list: po.findCompletionList(po.codeEditorCompletionsTagAttr, tokenString, myCategory),
+				list: po.findCompletionList(completionSource, tokenString, myCategory),
 				from: CodeMirror.Pos(cursor.line, token.start),
 				to: CodeMirror.Pos(cursor.line, token.end)
 			};
@@ -326,6 +328,8 @@ $.inflateDashboardDesignEditor = function(po)
 					function(token){ return (token.type == "variable" || token.type == "variable-2"); });
 			var myVarToken = (myVarTokenInfo ? myVarTokenInfo.token : null);
 			var myCategory = (myVarToken ? myVarToken.string : "");
+			//仅对最新API版本的看板支持补全
+			var completionSource = (po.isLatestApiVersionInCdeEditor(codeEditor) ? po.codeEditorJsApiCompletions() : []);
 			
 			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
 			// *dashboard*
@@ -339,13 +343,98 @@ $.inflateDashboardDesignEditor = function(po)
 			
 			var completions =
 			{
-				list: po.findCompletionList(po.codeEditorCompletionsJsFunction, (tokenString == "." ? "" : tokenString), myCategory),
+				list: po.findCompletionList(completionSource, (tokenString == "." ? "" : tokenString), myCategory),
 				from: CodeMirror.Pos(cursor.line, (tokenString == "." ? token.start + 1 : token.start)),
 				to: CodeMirror.Pos(cursor.line, token.end)
 			};
 			
 			return completions;
 		}
+	};
+	
+	//org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_ATTR_NAME_API_VERSION
+	po.apiVersionRegexInHtml = /dg\-api\-version\=['"]?([\d\.]*)['"]?/;
+	//org.datagear.web.analysis.DashboardApiVersion.V2
+	po.latestApiVersion = "2.0";
+	
+	po.isLatestApiVersionInCdeEditor = function(codeEditor)
+	{
+		var apiVersion = po.resolveApiVersionInCdeEditor(codeEditor);
+		return (po.latestApiVersion == apiVersion);
+	};
+	
+	po.resolveApiVersionInCdeEditor = function(codeEditor)
+	{
+		var apiVersion = null;
+		
+		var cursor = codeEditor.getSearchCursor(po.apiVersionRegexInHtml);
+		if(cursor.findNext())
+		{
+			let matches = (cursor.pos ? cursor.pos.match : null);
+			apiVersion = (matches && matches.length > 1 ? matches[1] : null);
+		}
+		
+		return apiVersion;
+	};
+	
+	po.codeEditorJsApiCompletions = function()
+	{
+		if(po._codeEditorJsApiCompletions == null)
+		{
+			let dashboardProto = dashboardFactory.Dashboard.prototype;
+			let chartProto = chartFactory.Chart.prototype;
+			let dashboardApiCompletions = [];
+			let chartApiCompletions = [];
+			
+			for(let name in dashboardProto)
+			{
+				if(po.isJsPublicApi(name, dashboardProto[name]))
+				{
+					let completion =
+					{
+						name: name, value: name + "(", displayName: name + "()", displayComment: "dashboard", categories: ["dashboard"]
+					};
+					
+					dashboardApiCompletions.push(completion);
+				}
+			}
+			
+			for(let name in chartProto)
+			{
+				if(po.isJsPublicApi(name, chartProto[name]))
+				{
+					let completion =
+					{
+						name: name, value: name + "(", displayName: name + "() ", displayComment: "chart", categories: ["chart"]
+					};
+					
+					chartApiCompletions.push(completion);
+				}
+			}
+			
+			dashboardApiCompletions.sort(po.jsApiCompletionComparator);
+			chartApiCompletions.sort(po.jsApiCompletionComparator);
+			po._codeEditorJsApiCompletions = dashboardApiCompletions;
+			po._codeEditorJsApiCompletions = po._codeEditorJsApiCompletions.concat(chartApiCompletions);
+		}
+		
+		return po._codeEditorJsApiCompletions;
+	};
+	
+	po.isJsPublicApi = function(name, value)
+	{
+		return (name && !name.startsWith("_") && chartFactory.isFunction(value));
+	};
+	
+	po.jsApiCompletionComparator = function(a, b)
+	{
+		var an = (a.name || "");
+		var bn = (b.name || "");
+		
+		if(an == bn)
+			return 0;
+		else
+			return (an > bn ? 1 : -1);
 	};
 	
 	po.getEditResInfos = function()

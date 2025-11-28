@@ -22,7 +22,7 @@
 <script type="text/javascript">
 (function(po)
 {
-	po.codeEditorCompletionsTagAttr =
+	po.codeEditorEleAttrCompletions =
 	[
 		{name: "dg-chart-attr-values", value: "dg-chart-attr-values=",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-attr-values' />", categories: ["div"]},
@@ -65,60 +65,6 @@
 		{name: "dg-dashboard-code", value: "dg-dashboard-code=",
 			displayComment: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-code' />", categories: ["html", "script"]}
 	];
-	
-	po.codeEditorCompletionsJsFunction = [];
-	
-	po.isJsPublicApi = function(name, value)
-	{
-		return (name && !name.startsWith("_") && chartFactory.isFunction(value));
-	};
-	
-	po.jsApiCompletionComparator = function(a, b)
-	{
-		var an = (a.name || "");
-		var bn = (b.name || "");
-		
-		if(an == bn)
-			return 0;
-		else
-			return (an > bn ? 1 : -1);
-	};
-	
-	var dashboardProto = dashboardFactory.Dashboard.prototype;
-	var chartProto = chartFactory.Chart.prototype;
-	var dashboardApiCompletions = [];
-	var chartApiCompletions = [];
-	
-	for(var name in dashboardProto)
-	{
-		if(po.isJsPublicApi(name, dashboardProto[name]))
-		{
-			var completion =
-			{
-				name: name, value: name + "(", displayName: name + "()", displayComment: "dashboard", categories: ["dashboard"]
-			};
-			
-			dashboardApiCompletions.push(completion);
-		}
-	}
-	
-	for(var name in chartProto)
-	{
-		if(po.isJsPublicApi(name, chartProto[name]))
-		{
-			var completion =
-			{
-				name: name, value: name + "(", displayName: name + "() ", displayComment: "chart", categories: ["chart"]
-			};
-			
-			chartApiCompletions.push(completion);
-		}
-	}
-	
-	dashboardApiCompletions.sort(po.jsApiCompletionComparator);
-	chartApiCompletions.sort(po.jsApiCompletionComparator);
-	po.codeEditorCompletionsJsFunction = po.codeEditorCompletionsJsFunction.concat(dashboardApiCompletions);
-	po.codeEditorCompletionsJsFunction = po.codeEditorCompletionsJsFunction.concat(chartApiCompletions);
 })
 (${pid});
 </script>
