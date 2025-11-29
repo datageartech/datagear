@@ -4636,13 +4636,28 @@ CF.eleBefore = function(ele, sibling)
 	if(ele == null)
 		return;
 	
-	if(CF.isString(sibling))
+	if(ele.nodeType === Node.ELEMENT_NODE)
 	{
-		ele.insertAdjacentHTML("beforebegin", sibling);
+		if(CF.isString(sibling))
+		{
+			ele.insertAdjacentHTML("beforebegin", sibling);
+		}
+		else
+		{
+			ele.before(sibling);
+		}
 	}
 	else
 	{
-		ele.before(sibling);
+		let parent = CF.eleOfParent(ele);
+		
+		if(CF.isString(sibling))
+			sibling = CF.eleCreateByHtml(sibling);
+		
+		if(parent == null || sibling == null)
+			return;
+		
+		parent.insertBefore(sibling, ele);
 	}
 };
 
@@ -4657,13 +4672,28 @@ CF.eleAfter = function(ele, sibling)
 	if(ele == null)
 		return;
 	
-	if(CF.isString(sibling))
+	if(ele.nodeType === Node.ELEMENT_NODE)
 	{
-		ele.insertAdjacentHTML("afterend", sibling);
+		if(CF.isString(sibling))
+		{
+			ele.insertAdjacentHTML("afterend", sibling);
+		}
+		else
+		{
+			ele.after(sibling);
+		}
 	}
 	else
 	{
-		ele.after(sibling);
+		let parent = CF.eleOfParent(ele);
+		
+		if(CF.isString(sibling))
+			sibling = CF.eleCreateByHtml(sibling);
+		
+		if(parent == null || sibling == null)
+			return;
+		
+		parent.insertBefore(sibling, CF.eleOfNext(ele, true));
 	}
 };
 

@@ -82,9 +82,6 @@
 	var INSERT_TYPE_AFTER = (DE.INSERT_TYPE_AFTER = "after");
 	var INSERT_TYPE_BEFORE = (DE.INSERT_TYPE_BEFORE = "before");
 	
-	//HTML规范注释节点类型
-	var HTML_NODE_TYPE_COMMENT = (DE.HTML_NODE_TYPE_COMMENT = 8);
-	
 	//响应式布局断点
 	var RESPONSIVE_BREAKPOINTS = (DE.RESPONSIVE_BREAKPOINTS = [ "xs", "sm", "md", "lg", "xl", "2xl" ]);
 	//响应式布局名称，详细参考analysis.css中的【.dg-rsp-布局名称[-断点]-布局值】样式类定义
@@ -2855,7 +2852,7 @@
 		
 		if(highlight)
 		{
-			insertEle.addClass(ELEMENT_CLASS_NEW_INSERT);
+			CF.eleAddClass(insertEle, ELEMENT_CLASS_NEW_INSERT);
 			let ds = CF.elesOfSelector("*", insertEle);
 			ds.forEach((d) =>
 			{
@@ -3100,7 +3097,7 @@
 		//注意：这里不应该使用替换HTML内容文本后再设置的方式，因为会新建DOM对象而导致旧DOM引用失效
 		CF.elesOfChildren(ele, true).forEach(function(node)
 		{
-			if(node.nodeType == HTML_NODE_TYPE_COMMENT && node.nodeValue == "dgInsertFmtEnd")
+			if(node.nodeType == Node.COMMENT_NODE && node.nodeValue == "dgInsertFmtEnd")
 			{
 				CF.eleBefore(node, tabsText);
 			}
@@ -3291,7 +3288,7 @@
 		if(!CF.isEmpty(fontSize))
 		{
 			//从元素的css中取才能获取字体尺寸像素数
-			styleTheme.fontSize = styleEle.css("font-size");
+			styleTheme.fontSize = CF.eleCss(styleEle, "font-size");
 		}
 		
 		if(!nowTheme)
@@ -3840,7 +3837,7 @@
 		//是DOM元素
 		if(!CF.isStringOrNumber(display))
 		{
-			display = display.css("display");
+			display = CF.eleCss(display, "display");
 		}
 		
 		return display;
