@@ -3099,13 +3099,13 @@
 		{
 			if(node.nodeType == Node.COMMENT_NODE && node.nodeValue == "dgInsertFmtEnd")
 			{
-				CF.eleBefore(node, tabsText);
+				CF.eleBefore(node, CF.eleCreateText(tabsText));
 			}
 		});
 		
 		CF.elesOfChildren(ele).forEach((child) =>
 		{
-			DE._appendElementSubFormat(child, tabsText);
+			DE._appendElementSubFormat(child, CF.eleCreateText(tabsText));
 		});
 	};
 	

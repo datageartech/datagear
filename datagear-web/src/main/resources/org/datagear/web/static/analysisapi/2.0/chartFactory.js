@@ -4549,12 +4549,25 @@ CF.eleCreateWithAttr = function(name, attrName, attrValue)
  * 由HMML字符串创建元素。
  * 
  * @param html
+ * @param forNodes 可选，是否返回节点数组而非第一个节点，默认值为：false
  */
-CF.eleCreateByHtml = function(html)
+CF.eleCreateByHtml = function(html, forNodes)
 {
+	forNodes = (forNodes === undefined ? false : forNodes);
+	
 	var parser = (CF.DOM_PARSER ? CF.DOM_PARSER : (CF.DOM_PARSER = new DOMParser()));
 	var doc = parser.parseFromString(html, "text/html");
-	return (doc && doc.body ? doc.body.firstChild : null);
+	return (doc && doc.body ? (forNodes ? CF.elesOfChildren(doc.body, true) : CF.eleOfFirstChild(doc.body, true)) : null);
+};
+
+/**
+ * 创建HTML文本节点。
+ * 
+ * @param text 文本内容
+ */
+CF.eleCreateText = function(text)
+{
+	return document.createTextNode(text);
 };
 
 /**
@@ -4652,12 +4665,18 @@ CF.eleBefore = function(ele, sibling)
 		let parent = CF.eleOfParent(ele);
 		
 		if(CF.isString(sibling))
-			sibling = CF.eleCreateByHtml(sibling);
+			sibling = CF.eleCreateByHtml(sibling, true);
 		
 		if(parent == null || sibling == null)
 			return;
 		
-		parent.insertBefore(sibling, ele);
+		if(CF.isArray(sibling))
+		{
+			for(let i=0; i<sibling.length; i++)
+				parent.insertBefore(sibling[i], ele);
+		}
+		else
+			parent.insertBefore(sibling, ele);
 	}
 };
 
@@ -4688,12 +4707,20 @@ CF.eleAfter = function(ele, sibling)
 		let parent = CF.eleOfParent(ele);
 		
 		if(CF.isString(sibling))
-			sibling = CF.eleCreateByHtml(sibling);
+			sibling = CF.eleCreateByHtml(sibling, true);
 		
 		if(parent == null || sibling == null)
 			return;
 		
-		parent.insertBefore(sibling, CF.eleOfNext(ele, true));
+		let nextNode = CF.eleOfNext(ele, true);
+		
+		if(CF.isArray(sibling))
+		{
+			for(let i=0; i<sibling.length; i++)
+				parent.insertBefore(sibling[i], nextNode);
+		}
+		else
+			parent.insertBefore(sibling, nextNode);
 	}
 };
 
