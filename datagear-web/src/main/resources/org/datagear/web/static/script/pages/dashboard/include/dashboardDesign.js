@@ -1025,6 +1025,11 @@ $.inflateDashboardDesignEditor = function(po)
 		if(!dashboardEditor || !dashboardEditor.checkBindChart())
 			return false;
 		
+		var apiVersion = dashboardEditor.dashboardApiVersion();
+		var checkApiVersion = po.checkInsertChartPluginApiVersion(apiVersion, chartWidgets);
+		if(checkApiVersion === false)
+			return false;
+		
 		$.executeSilently(function()
 		{
 			dashboardEditor.bindChart(chartWidgets ? chartWidgets[0] : null);
@@ -1039,6 +1044,11 @@ $.inflateDashboardDesignEditor = function(po)
 		var insertType = po.veCurrentInsertType;
 		
 		if(!dashboardEditor || !insertType || !dashboardEditor.checkInsertChart(insertType))
+			return false;
+		
+		var apiVersion = dashboardEditor.dashboardApiVersion();
+		var checkApiVersion = po.checkInsertChartPluginApiVersion(apiVersion, chartWidgets);
+		if(checkApiVersion === false)
 			return false;
 		
 		$.executeSilently(function()
@@ -1560,7 +1570,7 @@ $.inflateDashboardDesignEditor = function(po)
 						po.veCurrentInsertType = this.insertType;
 						po.showSelectChartDialog(function(chartWidgets)
 						{
-							po.insertVeChart(chartWidgets);
+							return po.insertVeChart(chartWidgets);
 						});
 					}
 				}
@@ -2020,7 +2030,7 @@ $.inflateDashboardDesignEditor = function(po)
 									
 									po.showSelectChartDialog(function(chartWidgets)
 									{
-										po.bindOrReplaceVeChart(chartWidgets);
+										return po.bindOrReplaceVeChart(chartWidgets);
 									});
 								}
 							}

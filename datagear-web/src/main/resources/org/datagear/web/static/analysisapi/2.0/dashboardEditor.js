@@ -216,6 +216,14 @@
 	};
 	
 	/**
+	 * 获取看板API版本号。
+	 */
+	DE.dashboardApiVersion = function()
+	{
+		return this.dashboard.apiVersion();
+	};
+	
+	/**
 	 * 是否在指定changeFlag后有修改。
 	 *
 	 * @param changeFlag 待比较的变更标识

@@ -212,6 +212,11 @@
 		return this._unescapeEditHtml(editedHtml);
 	};
 	
+	editor.dashboardApiVersion = function()
+	{
+		return this.dashboard.apiVersion();
+	};
+	
 	/**
 	 * 是否在指定changeFlag后有修改。
 	 *
