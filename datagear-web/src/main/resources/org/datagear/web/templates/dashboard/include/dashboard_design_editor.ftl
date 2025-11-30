@@ -183,6 +183,7 @@
 	po.i18n.elementBoundary = "<@spring.message code='elementBoundary' />";
 	po.i18n.refresh = "<@spring.message code='refresh' />";
 	po.i18n.confirmCloseWithUnsaved= "<@spring.message code='confirmCloseWithUnsaved' />";
+	po.i18n.insertMismatchApiVersionChartDenied= "<@spring.message code='dashboard.insertMismatchApiVersionChartDenied' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditor(po);

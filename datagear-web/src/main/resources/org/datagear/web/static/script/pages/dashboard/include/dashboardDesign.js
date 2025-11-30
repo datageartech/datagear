@@ -813,13 +813,16 @@ $.inflateDashboardDesignEditor = function(po)
 			po.handleOpenSelectAction("/chart/select?multiple",
 			function(chartWidgets)
 			{
+				var closeDialog = undefined;
 				var myDialog = po.selectChartDialog();
 				var handler = myDialog.data("dashboardSelectChartHandler");
 				
 				if(handler)
-					handler(chartWidgets);
+					closeDialog = handler(chartWidgets);
 				
-				po.hideSelectChartDialog();
+				if(closeDialog !== false)
+					po.hideSelectChartDialog();
+				
 				return false;
 			},
 			{
@@ -874,6 +877,27 @@ $.inflateDashboardDesignEditor = function(po)
 	
 	po.defaultInsertChartEleStyle = "display:inline-block;width:300px;height:300px;";
 	
+	po.checkInsertChartPluginApiVersion = function(apiVersion, chartWidgets)
+	{
+		var re = true;
+		
+		for(let i=0; i<chartWidgets.length; i++)
+		{
+			let cw = chartWidgets[i];
+			let pluginApiVersion = (cw.pluginVo ? cw.pluginVo.apiVersion : null);
+			
+			if(pluginApiVersion != null && apiVersion !== pluginApiVersion)
+			{
+				let msg = po.i18n.insertMismatchApiVersionChartDenied;
+				$.tipError({ summary: $.validator.format(msg, cw.name, pluginApiVersion)});
+				re = false;
+				break;
+			}
+		}
+		
+		return re;
+	};
+	
 	po.insertCodeEditorChart = function(tab, chartWidgets)
 	{
 		if(!chartWidgets || !chartWidgets.length)
@@ -882,6 +906,11 @@ $.inflateDashboardDesignEditor = function(po)
 		var tabPanel = po.elementOfId(tab.id);
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
 		var codeEditor = po.codeEditorInstance(codeEditorEle);
+		
+		var apiVersion = po.resolveApiVersionInCdeEditor(codeEditor);
+		var checkApiVersion = po.checkInsertChartPluginApiVersion(apiVersion, chartWidgets);
+		if(checkApiVersion === false)
+			return false;
 		
 		var doc = codeEditor.getDoc();
 		var cursor = doc.getCursor();
@@ -2472,7 +2501,7 @@ $.inflateDashboardDesignEditor = function(po)
 				{
 					po.showSelectChartDialog(function(chartWidgets)
 					{
-						po.insertCodeEditorChart(tab, chartWidgets);
+						return po.insertCodeEditorChart(tab, chartWidgets);
 					});
 				}
 			},
