@@ -2868,14 +2868,19 @@ dashboardProto.destroyForm = function(form)
 };
 
 /**
- * 获取版本。
- * 具体参考：org.datagear.web.analysis.DashboardApiVersion
+ * 获取API版本。
+ * 返回值规则同：org.datagear.web.analysis.DashboardApiVersion.trimVersion(String)
  * 
- * @return 版本号，目前只有：1.0、2.0
+ * @return 版本号
  */
-dashboardProto.version = function()
+dashboardProto.apiVersion = function()
 {
-	return this._root.version;
+	var v = (this._root.apiVersion == null ? null : CF.trim(this._root.apiVersion));
+	
+	if(v == null || v == "")
+		return "1.0";
+	else
+		return v;
 };
 
 /**

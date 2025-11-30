@@ -457,13 +457,13 @@
 		dashboard._template = dashboard.template;
 		dashboard._varName = dashboard.varName;
 		dashboard._loadableChartWidgets = dashboard.loadableChartWidgets;
-		dashboard._version = dashboard.version;
+		dashboard._apiVersion = dashboard.apiVersion;
 		
 		delete dashboard.widget;
 		delete dashboard.template;
 		delete dashboard.varName;
 		delete dashboard.loadableChartWidgets;
-		delete dashboard.version;
+		delete dashboard.apiVersion;
 	};
 	
 	dashboardFactory._initStartHeartBeatIfNot = function(dashboard)
@@ -3261,15 +3261,19 @@
 	};
 	
 	/**
-	 * 获取版本。
-	 * 具体参考：org.datagear.web.analysis.DashboardApiVersion
+	 * 获取看板版本。
+	 * 返回值规则同：org.datagear.web.analysis.DashboardApiVersion.trimVersion(String)
 	 * 
-	 * @return 版本号，目前只有：1.0、2.0
-	 * @since 5.3.0 此API暂不开放，因为5.3.0版本的看板版本功能已禁用
+	 * @return 版本号
 	 */
-	dashboardBase.version = function()
+	dashboardBase.apiVersion = function()
 	{
-		return this._version;
+		var v = (this._apiVersion == null ? null : $.trim(this._apiVersion));
+		
+		if(v == null || v == "")
+			return "1.0";
+		else
+			return v;
 	};
 	
 	/**
