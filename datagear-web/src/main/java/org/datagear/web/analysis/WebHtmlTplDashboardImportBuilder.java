@@ -157,7 +157,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		List<HtmlTplDashboardImport> impts = new ArrayList<>();
 
 		String libPrefix = contextPath + PATH_LIB;
-		String apiVersion = trimDashboardApiVersion(dashboard);
+		String apiVersion = toValidDashboardApiVersion(dashboard);
 		boolean isV1 = DashboardApiVersion.isV1(apiVersion);
 		Locale locale = WebUtils.getLocale(request);
 
@@ -281,7 +281,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 
 	protected String getAnalysisPath(String contextPath, HtmlTplDashboard dashboard)
 	{
-		String apiVersion = trimDashboardApiVersion(dashboard);
+		String apiVersion = toValidDashboardApiVersion(dashboard);
 
 		if (DashboardApiVersion.isV1(apiVersion))
 		{
@@ -293,10 +293,9 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		}
 	}
 
-	protected String trimDashboardApiVersion(HtmlTplDashboard dashboard)
+	protected String toValidDashboardApiVersion(HtmlTplDashboard dashboard)
 	{
-		// 默认版本应设为V1，以兼容旧版看板
-		return DashboardApiVersion.trimVersionWithV1(dashboard.getApiVersion());
+		return DashboardApiVersion.toValidVersion(dashboard.getApiVersion());
 	}
 
 	protected boolean isEditMode(String mode)

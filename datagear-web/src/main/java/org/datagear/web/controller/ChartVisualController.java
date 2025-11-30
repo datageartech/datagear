@@ -400,7 +400,7 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		else
 		{
 			apiVersion = ((HtmlChartPlugin) plugin).getApiVersion();
-			apiVersion = DashboardApiVersion.trimVersionWithV1(apiVersion);
+			apiVersion = DashboardApiVersion.trimVersion(apiVersion);
 		}
 		
 		return apiVersion;

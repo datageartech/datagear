@@ -64,36 +64,43 @@ public class DashboardApiVersion
 	}
 
 	/**
-	 * 修整版本号。
+	 * 转换为合法版本号
 	 * 
 	 * @param version
-	 * @param defaultValue
-	 *            默认值，当{@code version}既不是{@linkplain #V1}、也不是{@linkplain #V2}时的返回值
-	 * @return
+	 * @return 只可能是{@linkplain #V1}、{@linkplain #V2}
 	 */
-	public static String trimVersion(String version, String defaultValue)
+	public static String toValidVersion(String version)
 	{
-		if (StringUtil.isEmpty(version))
-			return defaultValue;
+		version = (version == null ? null : version.trim());
 
-		version = version.trim();
+		// 兼容旧版无面端API版本的情况
+		if (StringUtil.isEmpty(version))
+			return V1;
 
 		if (V1.equals(version))
 			return V1;
-		else if (V2.equals(version))
+
+		if (V2.equals(version))
 			return V2;
-		else
-			return defaultValue;
+
+		// 返回最新版
+		return V2;
 	}
 
 	/**
-	 * 修整版本号，并在非法版本时返回{@linkplain #V1}。
+	 * 修整版本号。
 	 * 
 	 * @param version
 	 * @return
 	 */
-	public static String trimVersionWithV1(String version)
+	public static String trimVersion(String version)
 	{
-		return trimVersion(version, V1);
+		version = (version == null ? null : version.trim());
+
+		// 兼容旧版无面端API版本的情况
+		if (StringUtil.isEmpty(version))
+			return V1;
+
+		return version;
 	}
 }
