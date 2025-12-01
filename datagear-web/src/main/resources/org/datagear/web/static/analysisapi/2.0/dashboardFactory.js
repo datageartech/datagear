@@ -43,7 +43,7 @@
  *   //可选，加载数据前置回调函数
  *   onFetch: function(chart, chartQuery){ ... },
  *   //可选，更新数据出错回调函数
- *   updateError: function(chart, error){ ... }
+ *   fetchError: function(chart, error){ ... }
  * }
  * 
  * 此看板工厂扩展了图表渲染器格式：
@@ -402,9 +402,9 @@ chartProto._mergeListener = function(localListener, globalListener)
 		return this._callFunc("onFetch", [ chart, chartQuery ]);
 	};
 	
-	mergedListener.updateError = function(chart, error)
+	mergedListener.fetchError = function(chart, error)
 	{
-		return this._callFunc("updateError", [ chart, error ]);
+		return this._callFunc("fetchError", [ chart, error ]);
 	};
 	
 	return mergedListener;
@@ -1948,7 +1948,7 @@ dashboardProto._handleChartAjaxError = function(chart, error, chartQuery, logIfN
  * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
  * @param chartQuery 结果错误对应的图表查询，可能null
  * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
- * @param logIfNone 可选，如果chart.listener()没有定义updateError，是否输出默认日志，默认为：true
+ * @param logIfNone 可选，是否输出默认日志，默认为：true
  */
 dashboardProto._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
 {
@@ -1963,11 +1963,9 @@ dashboardProto._handleChartResultError = function(chart, error, chartQuery, setE
 	}
 	
 	var chartListener = chart.listener();
-	
-	if(chartListener && chartListener.updateError)
+	if(chartListener && chartListener.fetchError)
 	{
-		chartListener.updateError(chart, error);
-		return;
+		chartListener.fetchError(chart, error);
 	}
 	
 	if(logIfNone)
