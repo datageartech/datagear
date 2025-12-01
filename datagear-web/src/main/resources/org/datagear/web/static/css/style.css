@@ -583,6 +583,8 @@ label.align-tip{
 	/*防止在弹出对话框中的提示被遮挡*/
 	z-index: 999999;
 	font-size: inherit;
+	max-width: 60vw;
+	overflow: auto;
 }
 .CodeMirror-hint{
 	padding: 0.1em 0.1em;

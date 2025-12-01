@@ -388,11 +388,15 @@ $.inflateDashboardDesignEditor = function(po)
 			
 			for(let name in dashboardProto)
 			{
-				if(po.isJsPublicApi(name, dashboardProto[name]))
+				let func = dashboardProto[name];
+				
+				if(po.isJsPublicApi(name, func))
 				{
 					let completion =
 					{
-						name: name, value: name + "(", displayName: name + "()", displayComment: "dashboard", categories: ["dashboard"]
+						name: name, value: name + (func.length == 0 ? "()" : "("),
+						displayName: name + "(" + po.resolveJsFnArgsLiteral(func) + ")",
+						displayComment: "dashboard", categories: ["dashboard"]
 					};
 					
 					dashboardApiCompletions.push(completion);
@@ -401,11 +405,15 @@ $.inflateDashboardDesignEditor = function(po)
 			
 			for(let name in chartProto)
 			{
-				if(po.isJsPublicApi(name, chartProto[name]))
+				let func = chartProto[name];
+				
+				if(po.isJsPublicApi(name, func))
 				{
 					let completion =
 					{
-						name: name, value: name + "(", displayName: name + "() ", displayComment: "chart", categories: ["chart"]
+						name: name, value: name + (func.length == 0 ? "()" : "("),
+						displayName: name + "(" + po.resolveJsFnArgsLiteral(func) + ")",
+						displayComment: "chart", categories: ["chart"]
 					};
 					
 					chartApiCompletions.push(completion);
@@ -419,6 +427,15 @@ $.inflateDashboardDesignEditor = function(po)
 		}
 		
 		return po._codeEditorJsApiCompletions;
+	};
+	
+	po.resolveJsFnArgsLiteral = function(fn)
+	{
+		var fnStr = fn.toString();
+		var match = fnStr.match(/function\s*\w*\s*\(([^)]*)\)/);
+		var re = (match && match[1] != null ? $.trimStr(match[1]) : "");
+		
+		return re;
 	};
 	
 	po.isJsPublicApi = function(name, value)
