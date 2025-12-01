@@ -249,7 +249,7 @@ DF.THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
 DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
 
 /**
- * 创建看板实例，为其添加看板API，并设置状态：dashboard.statusPreInit(true)。
+ * 创建看板实例，为其添加看板API。
  * 
  * @param root 看板根对象，格式参考DF.Dashboard()
  * @returns 新看板实例
@@ -266,7 +266,7 @@ DF.init = function(root)
 	DF.startHeartBeat(root.renderContext, root.id);
 	
 	var dashboard = new DF.Dashboard(root);
-	dashboard.statusPreInit(true);
+	dashboard._statusPreInit(true);
 	
 	return dashboard;
 };
@@ -847,12 +847,9 @@ chartProto.manualRender = function(manualRender)
 
 /**
  * 初始化看板，使用<body>元素上的dg-*属性值初始化看板，使用图表元素上的dg-*属性值初始化看板内所有图表。
- * 看板初始化后处于this.statusInited()状态。
  * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。 
  * 
  * 由于直到此函数调用时，才会读取元素上的dg-*属性，因而元素dg-*属性值引用的变量仅需在此函数调用前定义即可。
- * 
- * 注意：只有this.statusPreInit()或者this.statusDestroyed()为true时，此函数才允许执行。
  * 
  * 看板生命周期：
  * dashboard.init() -->-- dashboard.render() -->-- dashboard.destroy() -->--|
@@ -867,10 +864,10 @@ dashboardProto.init = function()
 	if(!this.renderContext())
 		throw new Error("dashboard renderContext required");
 	
-	if(!this.statusPreInit() && !this.statusDestroyed())
+	if(!this._statusPreInit() && !this._statusDestroyed())
 		throw new Error("dashboard is illegal state for : init()");
 	
-	this.statusIniting(true);
+	this._statusIniting(true);
 	
 	this._initRenderContext();
 	this._initListener();
@@ -879,7 +876,7 @@ dashboardProto.init = function()
 	this._initUnloadDashboardHandler();
 	this._initCharts();
 	
-	this.statusInited(true);
+	this._statusInited(true);
 };
 
 /**
@@ -950,7 +947,7 @@ dashboardProto._initChartResizeHandler = function()
 		
 		thisDashboard._resizeChartTimeoutId = setTimeout(function()
 		{
-			if(thisDashboard.statusRendered())
+			if(thisDashboard._statusRendered())
 			{
 				var charts = thisDashboard.charts();
 				
@@ -1239,22 +1236,19 @@ dashboardProto.resultDataFormat = function(resultDataFormat)
 
 /**
  * 渲染看板。
- * 渲染中的看板处于this.statusRendering()状态，渲染完成后处于this.statusRendered()状态。 
  * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。
  * 
- * 注意：
- * 只有this.statusPreInit()或者this.statusInited()或者this.statusDestroyed()为true时，此函数才允许执行。
- * 特别地，当处于this.statusPreInit()时，此函数内部会先调用this.init()函数。
+ * 注意：当处于this._statusPreInit()时，此函数内部会先调用this.init()函数。
  */
 dashboardProto.render = function()
 {
-	if(this.statusPreInit())
+	if(this._statusPreInit())
 		this.init();
 	
-	if(!this.statusInited() && !this.statusDestroyed())
+	if(!this._statusInited() && !this._statusDestroyed())
 		throw new Error("dashboard is illegal state for : render()");
 	
-	this.statusRendering(true);
+	this._statusRendering(true);
 	
 	var doRender = true;
 	
@@ -1274,14 +1268,14 @@ dashboardProto.render = function()
  */
 dashboardProto.doRender = function()
 {
-	if(!this.statusRendering())
+	if(!this._statusRendering())
 		throw new Error("dashboard is illegal state for : doRender()");
 	
 	this._renderForms();
 	this._prepareDoRenderCharts();
 	this.startHandleCharts();
 	
-	this.statusRendered(true);
+	this._statusRendered(true);
 };
 
 dashboardProto._prepareDoRenderCharts = function()
@@ -2404,7 +2398,7 @@ dashboardProto._addLoadedChart = function(chart)
 	if(chart.statusPreInit())
 	{
 		//应设为与看板状态保持一致
-		if(this.statusInited())
+		if(this._statusInited())
 		{
 			chart.init();
 		}
@@ -2604,16 +2598,15 @@ dashboardProto.user = function()
 
 /**
  * 销毁看板，销毁所有看板表单、所有图表。
- * 销毁中的看板处于this.statusDestroying()状态，看板完成后处于this.statusDestroyed()状态。
  * 
  * @returns true 正常执行销毁；false 未执行销毁，因为看板处于销毁非法状态
  */
 dashboardProto.destroy = function()
 {
-	if(!this.isAlive() || this.statusDestroying() || this.statusDestroyed())
+	if(!this.isAlive() || this._statusDestroying() || this._statusDestroyed())
 		return false;
 	
-	this.statusDestroying(true);
+	this._statusDestroying(true);
 	
 	var doDestroy = true;
 	
@@ -2634,14 +2627,14 @@ dashboardProto.destroy = function()
  */
 dashboardProto.doDestroy = function()
 {
-	if(!this.statusDestroying())
+	if(!this._statusDestroying())
 		throw new Error("dashboard is illegal state for : doDestroy()");
 	
 	this.stopHandleCharts();
 	this._destroyCharts();
 	this._destroyForms();
 	
-	this.statusDestroyed(true);
+	this._statusDestroyed(true);
 };
 
 dashboardProto._destroyCharts = function()
@@ -2701,25 +2694,25 @@ dashboardProto.isActive = function()
 
 /**
  * 获取/设置看板状态。
- * 注意：此函数的设置操作仅设置状态值，不执行任何其他逻辑，设置看板生命周期状态应使用具体的this.status*(true)函数。
+ * 注意：此函数的设置操作仅设置状态值，不执行任何其他逻辑，设置看板生命周期状态应使用具体的this._status*(true)函数。
  * 
  * @param status 可选，要设置的状态，不设置则执行获取操作
  */
-dashboardProto.status = function(status)
+dashboardProto._status = function(status)
 {
 	if(arguments.length == 0)
 	{
-		if(this._status == null)
-			this._status = "";
+		if(this.__status == null)
+			this.__status = "";
 		
-		return this._status;
+		return this.__status;
 	}
 	else
 	{
 		if(status == null)
 			throw new Error("[status] required");
 		
-		this._status = status;
+		this.__status = status;
 	}
 };
 
@@ -2728,16 +2721,16 @@ dashboardProto.status = function(status)
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
  */
-dashboardProto.statusPreInit = function(set)
+dashboardProto._statusPreInit = function(set)
 {
 	if(set === true)
 	{
 		this._isActive = false;
 		this._isAlive = false;
-		this.status(dashboardStatusConst.PRE_INIT);
+		this._status(dashboardStatusConst.PRE_INIT);
 	}
 	else
-		return (this.status() == dashboardStatusConst.PRE_INIT);
+		return (this._status() == dashboardStatusConst.PRE_INIT);
 };
 
 /**
@@ -2745,16 +2738,16 @@ dashboardProto.statusPreInit = function(set)
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
  */
-dashboardProto.statusIniting = function(set)
+dashboardProto._statusIniting = function(set)
 {
 	if(set === true)
 	{
 		this._isActive = false;
 		this._isAlive = false;
-		this.status(dashboardStatusConst.INITING);
+		this._status(dashboardStatusConst.INITING);
 	}
 	else
-		return (this.status() == dashboardStatusConst.INITING);
+		return (this._status() == dashboardStatusConst.INITING);
 };
 
 /**
@@ -2762,16 +2755,16 @@ dashboardProto.statusIniting = function(set)
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
  */
-dashboardProto.statusInited = function(set)
+dashboardProto._statusInited = function(set)
 {
 	if(set === true)
 	{
 		this._isActive = false;
 		this._isAlive = false;
-		this.status(dashboardStatusConst.INITED);
+		this._status(dashboardStatusConst.INITED);
 	}
 	else
-		return (this.status() == dashboardStatusConst.INITED);
+		return (this._status() == dashboardStatusConst.INITED);
 };
 
 /**
@@ -2779,16 +2772,16 @@ dashboardProto.statusInited = function(set)
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
  */
-dashboardProto.statusRendering = function(set)
+dashboardProto._statusRendering = function(set)
 {
 	if(set === true)
 	{
 		this._isActive = false;
 		this._isAlive = true;
-		this.status(dashboardStatusConst.RENDERING);
+		this._status(dashboardStatusConst.RENDERING);
 	}
 	else
-		return (this.status() == dashboardStatusConst.RENDERING);
+		return (this._status() == dashboardStatusConst.RENDERING);
 };
 
 /**
@@ -2797,19 +2790,19 @@ dashboardProto.statusRendering = function(set)
  * @param set 可选，为true时设置状态；否则，判断状态
  * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的render函数，默认为：true
  */
-dashboardProto.statusRendered = function(set, postProcess)
+dashboardProto._statusRendered = function(set, postProcess)
 {
 	if(set === true)
 	{
 		this._isActive = true;
 		this._isAlive = true;
-		this.status(dashboardStatusConst.RENDERED);
+		this._status(dashboardStatusConst.RENDERED);
 		
 		if(postProcess !== false)
 			this._postProcessRendered();
 	}
 	else
-		return (this.status() == dashboardStatusConst.RENDERED);
+		return (this._status() == dashboardStatusConst.RENDERED);
 };
 
 /**
@@ -2827,16 +2820,16 @@ dashboardProto._postProcessRendered = function()
  * 
  * @param set 可选，为true时设置状态；否则，判断状态
  */
-dashboardProto.statusDestroying = function(set)
+dashboardProto._statusDestroying = function(set)
 {
 	if(set === true)
 	{
 		this._isActive = false;
 		this._isAlive = true;
-		this.status(dashboardStatusConst.DESTROYING);
+		this._status(dashboardStatusConst.DESTROYING);
 	}
 	else
-		return (this.status() == dashboardStatusConst.DESTROYING);
+		return (this._status() == dashboardStatusConst.DESTROYING);
 };
 
 /**
@@ -2845,19 +2838,19 @@ dashboardProto.statusDestroying = function(set)
  * @param set 可选，为true时设置状态；否则，判断状态
  * @param postProcess 可选，当是设置操作时，是否执行后置操作，比如调用监听器的destroy函数，默认为：true
  */
-dashboardProto.statusDestroyed = function(set, postProcess)
+dashboardProto._statusDestroyed = function(set, postProcess)
 {
 	if(set === true)
 	{
 		this._isActive = false;
 		this._isAlive = false;
-		this.status(dashboardStatusConst.DESTROYED);
+		this._status(dashboardStatusConst.DESTROYED);
 		
 		if(postProcess !== false)
 			this._postProcessDestroyed();
 	}
 	else
-		return (this.status() == dashboardStatusConst.DESTROYED);
+		return (this._status() == dashboardStatusConst.DESTROYED);
 };
 
 dashboardProto._postProcessDestroyed = function()
