@@ -391,6 +391,25 @@ chartProto._initForPost = function()
 	this._initForPostSuper();
 };
 
+//重写chart._mergeListener()函数
+chartProto._mergeListenerSuper = chartProto._mergeListener;
+chartProto._mergeListener = function(localListener, globalListener)
+{
+	var mergedListener = this._mergeListenerSuper(localListener, globalListener);
+	
+	mergedListener.onFetch = function(chart, chartQuery)
+	{
+		return this._callFunc("onFetch", [ chart, chartQuery ]);
+	};
+	
+	mergedListener.updateError = function(chart, error)
+	{
+		return this._callFunc("updateError", [ chart, error ]);
+	};
+	
+	return mergedListener;
+};
+
 //重写chart._postProcessRendered()函数
 chartProto._postProcessRenderedSuper = chartProto._postProcessRendered;
 chartProto._postProcessRendered = function()

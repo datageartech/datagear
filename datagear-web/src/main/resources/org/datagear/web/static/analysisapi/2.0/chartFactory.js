@@ -606,14 +606,79 @@ chartProto._initTheme = function()
  */
 chartProto._initListener = function()
 {
-	var listener = CF.eleAttr(this._eleNonNull(), elementAttrConst.LISTENER);
+	var localListener = CF.eleAttr(this._eleNonNull(), elementAttrConst.LISTENER);
+	var globalListener = this._bodyListener();
 	
-	if(listener)
-		listener = CF.evalSilently(listener);
+	if(!CF.isEmpty(localListener))
+		localListener = CF.evalSilently(localListener);
+	
+	if(localListener == null)
+	{
+		this.listener(globalListener);
+	}
+	else if(globalListener == null)
+	{
+		this.listener(localListener);
+	}
 	else
-		listener = this._bodyListener();
+	{
+		let mergedListener = this._mergeListener(localListener, globalListener);
+		this.listener(mergedListener);
+	}
+};
+
+chartProto._mergeListener = function(localListener, globalListener)
+{
+	var mergedListener =
+	{
+		rendered: function(chart)
+		{
+			return this._callFunc("rendered", [ chart ]);
+		},
+		updated: function(chart, chartResult)
+		{
+			return this._callFunc("updated", [ chart, chartResult ]);
+		},
+		destroyed: function(chart)
+		{
+			return this._callFunc("destroyed", [ chart ]);
+		},
+		onRender: function(chart)
+		{
+			return this._callFunc("onRender", [ chart ]);
+		},
+		onUpdate: function(chart, chartResult)
+		{
+			return this._callFunc("onUpdate", [ chart, chartResult ]);
+		},
+		onDestroy: function(chart)
+		{
+			return this._callFunc("onDestroy", [ chart ]);
+		},
+		_listeners: [ localListener, globalListener ],
+		_callFunc: function(name, args)
+		{
+			var listener = null;
+			var func = null;
+			
+			for(let i=0; i<this._listeners.length; i++)
+			{
+				if(this._listeners[i] && this._listeners[i][name] != null)
+				{
+					listener = this._listeners[i];
+					func = this._listeners[i][name];
+					break;
+				}
+			}
+			
+			if(listener != null && func != null)
+			{
+				return func.apply(listener, args);
+			}
+		}
+	};
 	
-	this.listener(listener);
+	return mergedListener;
 };
 
 chartProto._bodyListener = function()
