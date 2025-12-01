@@ -3761,11 +3761,7 @@ chartProto.resultAddition = function(dataSetResult, name, value)
  * chart.unreadyDataSetParams();
  * chart.unreadyDataSetParams(stopOnFirst);
  * chart.unreadyDataSetParams(stopOnFirst, checkIgnoreFetch);
- * chart.unreadyDataSetParams(dataSetBinds);
- * chart.unreadyDataSetParams(dataSetBinds, stopOnFirst);
- * chart.unreadyDataSetParams(dataSetBinds, stopOnFirst, checkIgnoreFetch);
  * 
- * @param dataSetBinds 可选，要查找的数据集绑定、索引数值，或者它们的数组，默认为：this.dataSetBinds()
  * @param stopOnFirst 可选，是否在找到第一个后就返回，默认值为：false
  * @param checkIgnoreFetch 可选，是否校验忽略获取结果的数据集，默认值为：false
  * @returns 未准备好的数据集参数信息数组，格式为：
@@ -3774,22 +3770,14 @@ chartProto.resultAddition = function(dataSetResult, name, value)
  * 					...
  * 				]，空数组表示都已准备好
  */
-chartProto.unreadyDataSetParams = function(dataSetBinds, stopOnFirst, checkIgnoreFetch)
+chartProto.unreadyDataSetParams = function(stopOnFirst, checkIgnoreFetch)
 {
-	//(true, ...)、(false, ...)
-	if(dataSetBinds === true || dataSetBinds === false)
-	{
-		checkIgnoreFetch = stopOnFirst;
-		stopOnFirst = dataSetBinds;
-		dataSetBinds = undefined;
-	}
-	
-	dataSetBinds = (dataSetBinds === undefined ? this.dataSetBinds() :
-						(CF.isArray(dataSetBinds) ? dataSetBinds : [ dataSetBinds ]));
 	stopOnFirst = (stopOnFirst === undefined ? false : stopOnFirst);
 	checkIgnoreFetch = (checkIgnoreFetch === undefined ? false: checkIgnoreFetch);
 	
 	var re = [];
+	
+	var dataSetBinds = this.dataSetBinds();
 	
 	for(var i=0; i<dataSetBinds.length; i++)
 	{
