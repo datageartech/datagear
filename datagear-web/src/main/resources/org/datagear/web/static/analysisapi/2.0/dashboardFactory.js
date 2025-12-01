@@ -1044,14 +1044,21 @@ dashboardProto.renderContext = function()
  * 
  * 看板初始化时会使用<body>元素的"dg-dashboard-listener"属性值执行设置操作。
  * 
- * @param listener 可选，要设置的监听器对象，没有则执行获取操作
+ * @param listener 可选，要设置的监听器对象、或者其rendered函数，没有则执行获取操作
  */
 dashboardProto.listener = function(listener)
 {
 	if(arguments.length == 0)
 		return this._listener;
 	else
+	{
+		if(listener != null && CF.isFunction(listener))
+		{
+			listener = { rendered: listener };
+		}
+		
 		this._listener = listener;
+	}
 };
 
 /**
