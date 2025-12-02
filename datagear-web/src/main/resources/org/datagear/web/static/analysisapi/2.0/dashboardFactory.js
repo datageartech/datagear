@@ -254,7 +254,7 @@ DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
  * @param root 看板根对象，格式参考DF.Dashboard()
  * @returns 新看板实例
  */
-DF.init = function(root)
+DF.create = function(root)
 {
 	if(CF.isEmpty(root.id))
 		throw new Error("[id] required");
@@ -306,17 +306,17 @@ DF.Dashboard = function(root)
 	var charts = this._root.charts;
 	for(let i=0; i<charts.length; i++)
 	{
-		charts[i] = DF.initChart(charts[i], root.renderContext, this);
+		charts[i] = DF.createChart(charts[i], root.renderContext, this);
 	}
 };
 
 //Dashboard类原型
 var dashboardProto = DF.Dashboard.prototype;
 
-DF.initChart = function(chartRoot, renderContext, dashboard)
+DF.createChart = function(chartRoot, renderContext, dashboard)
 {
 	chartRoot.renderContext = renderContext;
-	var chart = CF.init(chartRoot);
+	var chart = CF.create(chartRoot);
 	chart.dashboard(dashboard);
 	
 	return chart;
@@ -2385,7 +2385,7 @@ dashboardProto._initLoadedChart = function(chartRoot, element, chartWidgetId)
 	var eleId = CF.checkSetChartElementId(element);
 	chartRoot.elementId = eleId;
 	
-	return DF.initChart(chartRoot, this.renderContext(), this);
+	return DF.createChart(chartRoot, this.renderContext(), this);
 };
 
 dashboardProto._addLoadedChart = function(chart)

@@ -564,7 +564,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 		writeChartScripts(renderContext, dashboard, dashboardMeta);
 		writeDashboardJsInit(renderContext, dashboard, tmp1RenderContextVarName);
-		writeDashboardJsFactoryInit(renderContext, dashboard, dashboardMeta.getDashboardFactoryVar());
+		writeDashboardJsFactoryCreate(renderContext, dashboard, dashboardMeta.getDashboardFactoryVar());
 		
 		out.write(this.localGlobalVarName + "." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);

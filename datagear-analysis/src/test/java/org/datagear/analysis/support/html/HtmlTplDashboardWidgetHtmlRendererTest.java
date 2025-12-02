@@ -156,7 +156,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp="));
-			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("myDashboardFactory.create(datagearDashboardTmp);"));
 			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 			assertTrue(html.contains("datagearDashboardTmp.init();"));
 			assertTrue(html.contains("datagearDashboardTmp.render();"));
@@ -191,7 +191,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("myDashboardFactory.create(datagearDashboardTmp);"));
 			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 			
 			//缓存
@@ -224,7 +224,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("myDashboardFactory.create(datagearDashboardTmp);"));
 			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 			
 			//缓存
@@ -257,7 +257,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertFalse(html.contains(IMPORT_CONTENT_THEME));
 			assertFalse(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
-			assertTrue(html.contains("myDashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("myDashboardFactory.create(datagearDashboardTmp);"));
 			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".myDashboard=datagearDashboardTmp;"));
 			
 			//缓存
@@ -289,7 +289,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			assertTrue(html.contains("var datagearDashboardTmp"));
-			assertTrue(html.contains("dashboardFactory.init(datagearDashboardTmp);"));
+			assertTrue(html.contains("dashboardFactory.create(datagearDashboardTmp);"));
 			assertTrue(html.contains(this.renderer.getLocalGlobalVarName() + ".dashboard=datagearDashboardTmp;"));
 			
 			//缓存
@@ -1211,7 +1211,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
 			String html = getHtmlWithPrint(renderContext);
 			
-			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+			String dashboardInitCode = this.renderer
+					.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + "."
+					+ this.renderer.getDashboardFactoryCreateFuncName() + "(" + dashboard.getVarName() + ");";
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
@@ -1251,7 +1253,8 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(renderContext);
 			
 			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(
-					dashboardMeta.getDashboardFactoryVar()) + ".init(" + dashboard.getVarName() + ");";
+					dashboardMeta.getDashboardFactoryVar()) + "." + this.renderer.getDashboardFactoryCreateFuncName()
+					+ "(" + dashboard.getVarName() + ");";
 			String dashboardRenderCode = dashboard.getVarName() + "." + this.renderer.getDashboardRenderFuncName()
 					+ "();";
 
@@ -1423,7 +1426,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
 			String html = getHtmlWithPrint(renderContext);
 			
-			String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+			String dashboardInitCode = this.renderer
+					.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + "."
+					+ this.renderer.getDashboardFactoryCreateFuncName() + "(" + dashboard.getVarName() + ");";
 			String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 			
 			int scriptCloseTagIdx = html.indexOf("</script></head>");
@@ -1487,7 +1492,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
 				String html = getHtmlWithPrint(renderContext);
 				
-				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				String dashboardInitCode = this.renderer
+						.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + "."
+						+ this.renderer.getDashboardFactoryCreateFuncName() + "(" + dashboard.getVarName() + ");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code>") + "<script dg-dashboard-code>".length();
@@ -1521,7 +1528,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
 				String html = getHtmlWithPrint(renderContext);
 				
-				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				String dashboardInitCode = this.renderer
+						.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + "."
+						+ this.renderer.getDashboardFactoryCreateFuncName() + "(" + dashboard.getVarName() + ");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();
@@ -1554,7 +1563,9 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				TplDashboardMeta dashboardMeta = filterContext.getDashboardMeta();
 				String html = getHtmlWithPrint(renderContext);
 
-				String dashboardInitCode = this.renderer.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + ".init("+dashboard.getVarName()+");";
+				String dashboardInitCode = this.renderer
+						.getDashboardFactoryVarElseDft(dashboardMeta.getDashboardFactoryVar()) + "."
+						+ this.renderer.getDashboardFactoryCreateFuncName() + "(" + dashboard.getVarName() + ");";
 				String dashboardRenderCode = dashboard.getVarName() + "."+this.renderer.getDashboardRenderFuncName()+"();";
 				
 				int scriptStartTagEndIdx = html.indexOf("<script dg-dashboard-code=\"init\">") + "<script dg-dashboard-code=\"init\">".length();

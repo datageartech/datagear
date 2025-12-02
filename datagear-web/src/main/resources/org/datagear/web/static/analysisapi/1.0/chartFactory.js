@@ -355,12 +355,13 @@
 	 *				
 	 *				另参考：org.datagear.analysis.support.html.HtmlChart
 	 */
-	chartFactory.init = function(chart)
+	chartFactory.create = function(chart)
 	{
 		this._initChartBaseProperties(chart);
 		$.extend(chart, this.chartBase);
-		
 		chart.statusPreInit(true);
+		
+		return chart;
 	};
 	
 	/**

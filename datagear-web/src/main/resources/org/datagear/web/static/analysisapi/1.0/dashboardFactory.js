@@ -263,7 +263,7 @@
 	 *				
 	 *				另参考：org.datagear.analysis.Dashboard
 	 */
-	dashboardFactory.init = function(dashboard)
+	dashboardFactory.create = function(dashboard)
 	{
 		dashboardFactory._compatRenderContext(dashboard.renderContext);
 		this._initDashboardBaseProperties(dashboard);
@@ -274,7 +274,7 @@
 		
 		var charts = dashboard.charts;
 		for(var i=0; i<charts.length; i++)
-			this._initChart(dashboard, charts[i]);
+			this._createChart(dashboard, charts[i]);
 		
 		dashboard.statusPreInit(true);
 		
@@ -370,11 +370,11 @@
 		dashboard.renderContextAttr(renderContextAttrConst.CHART_THEME, chartTheme);
 	};
 	
-	dashboardFactory._initChart = function(dashboard, chart)
+	dashboardFactory._createChart = function(dashboard, chart)
 	{
 		chart.dashboard = dashboard;
 		chart.renderContext = dashboard.renderContext;
-		chartFactory.init(chart);
+		chartFactory.create(chart);
 		this._initChartOverwriteIfNone(chart);
 	};
 	
@@ -2616,7 +2616,7 @@
 		//chartFactory.elementWidgetId(element, chartWidgetId);
 		
 		chartFactory.checkSetChartElementId(element, chart);
-		dashboardFactory._initChart(this, chart);
+		dashboardFactory._createChart(this, chart);
 	};
 	
 	dashboardBase._addLoadedChart = function(chart)

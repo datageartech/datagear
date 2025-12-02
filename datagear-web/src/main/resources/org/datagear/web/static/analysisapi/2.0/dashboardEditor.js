@@ -87,10 +87,10 @@
 	//响应式布局名称，详细参考analysis.css中的【.dg-rsp-布局名称[-断点]-布局值】样式类定义
 	var RESPONSIVE_LAYOUT_NAMES = (DE.RESPONSIVE_LAYOUT_NAMES = [ "col", "h", "d" ]);
 	
-	DF._initSuperByDashboardEditor = DF.init;
-	DF.init = function(root)
+	DF._createSuperByDbdEditor = DF.create;
+	DF.create = function(root)
 	{
-		var dashboard = DF._initSuperByDashboardEditor(root);
+		var dashboard = DF._createSuperByDbdEditor(root);
 		DE.init(dashboard);
 		
 		return dashboard;

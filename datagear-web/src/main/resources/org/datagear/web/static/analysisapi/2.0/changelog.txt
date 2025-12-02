@@ -1,4 +1,5 @@
-chartFactory.init()返回新图表对象
+chartFactory.init() -> chartFactory.create() 返回新图表对象
+dashboardFactory.init() -> dashboardFactory.create() 返回新图表对象
 图表元素上的dg-chart-listener不再继承<body>元素上的
 chart.off()函数必须指定要解绑的handler函数
 chart.render()、update()函数仅接受图表结果对象参数

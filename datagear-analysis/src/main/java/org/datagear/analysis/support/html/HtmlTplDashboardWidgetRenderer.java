@@ -45,11 +45,11 @@ import org.slf4j.LoggerFactory;
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类的{@linkplain #writeHtmlTplDashboardJSFactoryInit(Writer, HtmlTplDashboard, String)}方法的JS看板渲染逻辑为：
+ * 此类的{@linkplain #writeDashboardJsFactoryCreate(HtmlTplDashboardRenderContext, HtmlTplDashboard, String)}方法的JS看板渲染逻辑为：
  * </p>
  * <code>
  * <pre>
- * dashboardFactory.init(dashboard);
+ * dashboardFactory.create(dashboard);
  * </pre>
  * </code>
  * <p>
@@ -59,9 +59,10 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * var dashboardFactory =
  * {
- *   init : function(dashboard)
+ *   create : function(dashboard)
  *   {
  *     ...
+ *     return 看板对象;
  *   }
  * };
  * </pre>
@@ -109,8 +110,8 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	/** 默认JS看板工厂变量名 */
 	private String defaultDashboardFactoryVar = DEFAULT_DASHBOARD_FACTORY_VAR;
 
-	/** JS看板工厂初始化函数名 */
-	private String dashboardFactoryInitFuncName = "init";
+	/** JS看板工厂创建看板实例的函数名 */
+	private String dashboardFactoryCreateFuncName = "create";
 
 	/** 看板对象初始化函数名 */
 	private String dashboardInitFuncName = "init";
@@ -217,14 +218,14 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		this.defaultDashboardFactoryVar = defaultDashboardFactoryVar;
 	}
 
-	public String getDashboardFactoryInitFuncName()
+	public String getDashboardFactoryCreateFuncName()
 	{
-		return dashboardFactoryInitFuncName;
+		return dashboardFactoryCreateFuncName;
 	}
 
-	public void setDashboardFactoryInitFuncName(String dashboardFactoryInitFuncName)
+	public void setDashboardFactoryCreateFuncName(String dashboardFactoryCreateFuncName)
 	{
-		this.dashboardFactoryInitFuncName = dashboardFactoryInitFuncName;
+		this.dashboardFactoryCreateFuncName = dashboardFactoryCreateFuncName;
 	}
 
 	public String getDashboardInitFuncName()
@@ -613,11 +614,11 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	}
 
 	/**
-	 * 写{@linkplain HtmlTplDashboard} JS工厂初始化代码：
+	 * 写{@linkplain HtmlTplDashboard} JS工厂创建看板实例代码：
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * dashboardFactory.init(dashboard);
+	 * [看板变量名] = dashboardFactory.create(dashboard);
 	 * </pre>
 	 * </code>
 	 * </p>
@@ -628,7 +629,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardFactoryVar()}
 	 * @throws IOException
 	 */
-	protected void writeDashboardJsFactoryInit(HtmlTplDashboardRenderContext renderContext, HtmlTplDashboard dashboard, String dashboardFactoryVar)
+	protected void writeDashboardJsFactoryCreate(HtmlTplDashboardRenderContext renderContext, HtmlTplDashboard dashboard, String dashboardFactoryVar)
 			throws IOException
 	{
 		String varName = dashboard.getVarName();
@@ -639,7 +640,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		
 		Writer out = renderContext.getWriter();
 		
-		out.write(varName + "=" + dashboardFactoryVar + "." + this.dashboardFactoryInitFuncName + "(" + varName + ");");
+		out.write(varName + "=" + dashboardFactoryVar + "." + this.dashboardFactoryCreateFuncName + "(" + varName + ");");
 		writeNewLine(out);
 	}
 	

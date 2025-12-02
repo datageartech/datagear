@@ -386,7 +386,7 @@ CF.registerGlobalLib = function(lib)
  * @param root 图表根对象，格式参考CF.Chart()函数
  * @returns 新图表实例
  */
-CF.init = function(root)
+CF.create = function(root)
 {
 	var chart = new CF.Chart(root);
 	chart.statusPreInit(true);
