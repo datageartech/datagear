@@ -833,7 +833,9 @@ chartProto.manualRender = function(manualRender)
 		}
 	}
 	else
+	{
 		this._manualRender = manualRender;
+	}
 };
 
 //----------------------------------------
@@ -2132,7 +2134,7 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * 
  * @param element 用于渲染图表的HTML元素、HTML元素ID
  * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }
+ * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
 dashboardProto.loadChart = function(element, chartWidgetId, successCallback, errorCallback)
@@ -2171,9 +2173,9 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
  * dashboard.loadCharts(elements, successCallback);
  * dashboard.loadCharts(elements, chartWidgetIds, successCallback);
  * 
- * @param elements 用于渲染图表的CSS元素选择器字符串、HTML元素数组
+ * @param elements 用于渲染图表的元素选择器字符串、HTML元素数组
  * @param chartWidgetIds 可选，要加载的图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
 dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
@@ -2215,7 +2217,7 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
  * dashboard.loadUnsolvedCharts(element, successCallback);
  * 
  * @param element 可选，限定查找的根HTML元素、HTML元素ID，默认为：<body>元素
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  * @return 要异步加载的HTML元素数组
  */
@@ -2270,7 +2272,7 @@ dashboardProto.loadUnsolvedCharts = function(element, successCallback, errorCall
  * 
  * @param elements HTML元素数组
  * @param chartWidgetIds 图表部件ID数组，与上面一一对应
- * @param successCallback 选填，加载成功回调函数：function(charts){ ... }
+ * @param successCallback 选填，加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，加载失败回调函数：function(error){ ... }
  */
 dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
@@ -2327,12 +2329,19 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 			
 			for(let i=0; i<chartRoots.length; i++)
 			{
-				charts[i] = this._initLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
-				this._addLoadedChart(charts[i]);
+				charts[i] = this._createLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
 			}
 			
-			if(successCallback)
-				successCallback(charts);
+			let add = true;
+			
+			if(successCallback != null)
+				add = successCallback(charts);
+			
+			if(add !== false)
+			{
+				for(let i=0; i<chartRoots.length; i++)
+					this._addLoadedChart(charts[i]);
+			}
 		});
 		
 		return re;
@@ -2371,13 +2380,13 @@ dashboardProto._loadingChartElement = function(element, set)
 };
 
 /**
- * 初始化异步加载的图表。
+ * 创建异步加载的图表。
  * 
  * @param chartRoot 图表根对象
  * @param element 图表HTML元素
  * @param chartWidgetId 图表部件ID
  */
-dashboardProto._initLoadedChart = function(chartRoot, element, chartWidgetId)
+dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
 {
 	//这里不应设置"dg-chart-widget"属性而破坏了元素的原生结构
 	//CF.elementWidgetId(element, chartWidgetId);

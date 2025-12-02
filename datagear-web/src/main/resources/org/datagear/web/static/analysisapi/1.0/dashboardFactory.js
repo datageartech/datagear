@@ -2387,14 +2387,14 @@
 		var successHandler = myAjaxOptions.success;
 		myAjaxOptions.success = function(chart, textStatus, jqXHR)
 		{
-			dashboard._initLoadedChart(chart, element, chartWidgetId);
+			dashboard._createLoadedChart(chart, element, chartWidgetId);
 			
 			var re = true;
 			
 			if(successHandler)
 				re = successHandler.call(this, chart, textStatus, jqXHR);
 			
-			if(re != false)
+			if(re !== false)
 				dashboard._addLoadedChart(chart);
 		};
 		
@@ -2493,14 +2493,14 @@
 		myAjaxOptions.success = function(charts, textStatus, jqXHR)
 		{
 			for(var i=0; i<charts.length; i++)
-				dashboard._initLoadedChart(charts[i], element[i], chartWidgetIds[i]);
+				dashboard._createLoadedChart(charts[i], element[i], chartWidgetIds[i]);
 			
 			var re = true;
 			
 			if(successHandler)
 				re = successHandler.call(this, charts, textStatus, jqXHR);
 			
-			if(re != false)
+			if(re !== false)
 			{
 				for(var i=0; i<charts.length; i++)
 					dashboard._addLoadedChart(charts[i]);
@@ -2608,7 +2608,7 @@
 	 * @param element 图表HTML元素、Jquery对象
 	 * @param chartWidgetId 要异步加载的图表部件ID
 	 */
-	dashboardBase._initLoadedChart = function(chart, element, chartWidgetId)
+	dashboardBase._createLoadedChart = function(chart, element, chartWidgetId)
 	{
 		element = $(element);
 		
