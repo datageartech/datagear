@@ -1873,7 +1873,7 @@
 			panel = CF.eleCreate("div", "dg-chart-tool-panel dg-chart-tool-param-panel");
 			CF.eleAppend(boxEle, panel);
 			
-			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartToolPanelOpacityOut(boxEle, panel, chart);
 			
 			let panelHead = CF.eleCreate("div", "dg-chart-tool-panel-head");
 			CF.eleAppend(panel, panelHead);
@@ -1900,7 +1900,7 @@
 			CF.eleHtml(confirmBtn, TOOL.labels.confirm);
 			CF.eleAppend(panelFoot, confirmBtn);
 			
-			TOOL.setChartSetingPanelContentSizeRange(chart, panel, panelContent, panelFoot);
+			TOOL.setChartToolPanelContentSizeRange(chart, panel, panelContent, panelFoot);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -2025,7 +2025,7 @@
 		}
 		else
 		{
-			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartToolPanelOpacityOut(boxEle, panel, chart);
 			
 			let dsbSections = CF.elesOfSelector(".dg-datasetbind-section", panel);
 			
@@ -2039,7 +2039,7 @@
 			});
 		}
 		
-		TOOL.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-param-button", boxEle), chart);
+		TOOL.adjustChartToolPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-param-button", boxEle), chart);
 		
 		//聚焦至第一个可操作输入框
 		TOOL.focusOnFirstInput(CF.eleOfSelector("form:first-child", panel));
@@ -2098,7 +2098,7 @@
 			panel = CF.eleCreate("div", "dg-chart-tool-panel dg-chart-tool-data-panel")
 			CF.eleAppend(boxEle, panel);
 			
-			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartToolPanelOpacityOut(boxEle, panel, chart);
 			
 			let panelHead = CF.eleCreate("div", "dg-chart-tool-panel-head");
 			CF.eleAppend(panel, panelHead);
@@ -2121,7 +2121,7 @@
 			CF.eleAppend(headBtns, closeBtn);
 			CF.eleOn(closeBtn, "click", () => { TOOL.closeChartToolDataPanel(chart); });
 			
-			TOOL.setChartSetingPanelContentSizeRange(chart, panel, panelContent,panelFoot);
+			TOOL.setChartToolPanelContentSizeRange(chart, panel, panelContent,panelFoot);
 			
 			for(let i=0; i<dataSetBinds.length; i++)
 			{
@@ -2152,7 +2152,7 @@
 		}
 		else
 		{
-			TOOL.showChartSetingPanelOpacityOut(boxEle, panel, chart);
+			TOOL.showChartToolPanelOpacityOut(boxEle, panel, chart);
 			
 			CF.elesOfSelector(".dg-datasetbind-section", panel).forEach((dsbSection) =>
 			{
@@ -2167,7 +2167,7 @@
 			});
 		}
 		
-		TOOL.adjustChartSetingPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-data-button", boxEle), chart);
+		TOOL.adjustChartToolPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-data-button", boxEle), chart);
 	};
 	
 	/**
@@ -2333,7 +2333,7 @@
 		return title;
 	};
 	
-	TOOL.setChartSetingPanelContentSizeRange = function(chart, panel, panelContent, panelFoot)
+	TOOL.setChartToolPanelContentSizeRange = function(chart, panel, panelContent, panelFoot)
 	{
 		var chartEle = chart.element();
 		var cw = parseInt(CF.eleCss(chartEle, "width"));
@@ -2344,7 +2344,7 @@
 		CF.eleCss(panelContent, "max-height", "55vh");
 	};
 	
-	TOOL.showChartSetingPanelOpacityOut = function(boxEle, panel, chart)
+	TOOL.showChartToolPanelOpacityOut = function(boxEle, panel, chart)
 	{
 		//先透明显示，避免布局计算错误，后续调整位置后再移除透明
 		CF.eleAddClass(panel, "dg-opacity-hide");
@@ -2355,10 +2355,10 @@
 		TOOL.eleShow(panel);
 	};
 	
-	TOOL.adjustChartSetingPanelPosition = function(boxEle, panel, btn, chart)
+	TOOL.adjustChartToolPanelPosition = function(boxEle, panel, btn, chart)
 	{
-		var docWidth = window.innerWidth;
-		var docHeight = window.innerHeight;
+		var docWidth = Math.max(window.innerWidth, document.body.scrollWidth, document.documentElement.scrollWidth);
+		var docHeight = Math.max(window.innerHeight, document.body.scrollHeight, document.documentElement.scrollHeight);
 		
 		var width = TOOL.eleOuterWidth(panel);
 		var height = TOOL.eleOuterHeight(panel);
