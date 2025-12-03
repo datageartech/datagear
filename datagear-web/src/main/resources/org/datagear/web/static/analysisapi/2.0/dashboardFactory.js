@@ -396,16 +396,8 @@ chartProto._mergeListenerSuper = chartProto._mergeListener;
 chartProto._mergeListener = function(localListener, globalListener)
 {
 	var mergedListener = this._mergeListenerSuper(localListener, globalListener);
-	
-	mergedListener.onFetch = function(chart, chartQuery)
-	{
-		return this._callFunc("onFetch", [ chart, chartQuery ]);
-	};
-	
-	mergedListener.fetchError = function(chart, error)
-	{
-		return this._callFunc("fetchError", [ chart, error ]);
-	};
+	mergedListener._addFunc("onFetch");
+	mergedListener._addFunc("fetchError");
 	
 	return mergedListener;
 };
@@ -1944,7 +1936,7 @@ dashboardProto._handleChartAjaxError = function(chart, error, chartQuery, logIfN
  * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
  * @param chartQuery 结果错误对应的图表查询，可能null
  * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
- * @param logIfNone 可选，是否输出默认日志，默认为：true
+ * @param logIfNone 可选，是否在chart.listener()未定义fetchError()函数时打印错误日志，默认为：true
  */
 dashboardProto._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
 {
@@ -1962,6 +1954,7 @@ dashboardProto._handleChartResultError = function(chart, error, chartQuery, setE
 	if(chartListener && chartListener.fetchError)
 	{
 		chartListener.fetchError(chart, error);
+		return;
 	}
 	
 	if(logIfNone)

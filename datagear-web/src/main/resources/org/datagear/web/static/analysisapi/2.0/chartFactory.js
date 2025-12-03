@@ -631,32 +631,8 @@ chartProto._mergeListener = function(localListener, globalListener)
 {
 	var mergedListener =
 	{
-		rendered: function(chart)
-		{
-			return this._callFunc("rendered", [ chart ]);
-		},
-		updated: function(chart, chartResult)
-		{
-			return this._callFunc("updated", [ chart, chartResult ]);
-		},
-		destroyed: function(chart)
-		{
-			return this._callFunc("destroyed", [ chart ]);
-		},
-		onRender: function(chart)
-		{
-			return this._callFunc("onRender", [ chart ]);
-		},
-		onUpdate: function(chart, chartResult)
-		{
-			return this._callFunc("onUpdate", [ chart, chartResult ]);
-		},
-		onDestroy: function(chart)
-		{
-			return this._callFunc("onDestroy", [ chart ]);
-		},
 		_listeners: [ localListener, globalListener ],
-		_callFunc: function(name, args)
+		_addFunc: function(name)
 		{
 			var listener = null;
 			var func = null;
@@ -671,12 +647,24 @@ chartProto._mergeListener = function(localListener, globalListener)
 				}
 			}
 			
-			if(listener != null && func != null)
+			if(listener == null || func == null)
+				return false;
+			
+			this[name] = function()
 			{
-				return func.apply(listener, args);
-			}
+				return func.apply(listener, arguments);
+			};
+			
+			return true;
 		}
 	};
+	
+	mergedListener._addFunc("rendered");
+	mergedListener._addFunc("updated");
+	mergedListener._addFunc("destroyed");
+	mergedListener._addFunc("onRender");
+	mergedListener._addFunc("onUpdate");
+	mergedListener._addFunc("onDestroy");
 	
 	return mergedListener;
 };
