@@ -36,7 +36,7 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.AUTO_RESIZE属性，用于设置图表是否自动调整大小。
  * 
- * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
+ * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.FETCH_GROUP属性，用于设置图表更新ajax分组。
  * 
  * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加如下处理函数：
  * {
@@ -130,7 +130,7 @@ elementAttrConst.LINK = "dg-chart-link";
 elementAttrConst.AUTO_RESIZE = "dg-chart-auto-resize";
 
 /**图表更新分组*/
-elementAttrConst.UPDATE_GROUP = "dg-chart-update-group";
+elementAttrConst.FETCH_GROUP = "dg-chart-fetch-group";
 
 /**图表手动渲染*/
 elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
@@ -387,7 +387,7 @@ chartProto._initForPost = function()
 {
 	this._initLinks();
 	this._initAutoResize();
-	this._initUpdateGroup();
+	this._initFetchGroup();
 	this._initForPostSuper();
 };
 
@@ -457,17 +457,17 @@ chartProto._bodyAutoResize = function()
 };
 
 /**
- * 初始化图表更新分组。
- * 此方法从body元素、图表元素的elementAttrConst.UPDATE_GROUP属性获取更新分组设置。
+ * 初始化图表取数分组。
+ * 此方法从body元素、图表元素的elementAttrConst.FETCH_GROUP属性获取更新分组设置。
  */
-chartProto._initUpdateGroup = function()
+chartProto._initFetchGroup = function()
 {
-	var updateGroup = CF.eleAttr(this.element(), elementAttrConst.UPDATE_GROUP);
+	var fetchGroup = CF.eleAttr(this.element(), elementAttrConst.FETCH_GROUP);
 	
-	if(CF.isEmpty(updateGroup))
-		updateGroup = CF.eleAttr(document.body, elementAttrConst.UPDATE_GROUP);
+	if(CF.isEmpty(fetchGroup))
+		fetchGroup = CF.eleAttr(document.body, elementAttrConst.FETCH_GROUP);
 	
-	this.updateGroup(updateGroup);
+	this.fetchGroup(fetchGroup);
 };
 
 /**
@@ -541,29 +541,29 @@ chartProto.autoResize = function(autoResize)
 };
 
 /**
- * 获取/设置图表更新分组。
+ * 获取/设置图表取数分组。
  * 如果图表从服务端加载数据比较耗时，可以为其指定一个分组标识，让其使用单独的ajax请求加载数据。
  * 注意：相同分组的图表将使用同一个ajax请求。
  * 
- * 图表初始化时会使用图表元素的"dg-chart-update-group"属性值执行设置操作。
+ * 图表初始化时会使用图表元素的"dg-chart-fetch-group"属性值执行设置操作。
  * 
- * @param group 可选，设置更新分组，没有则执行获取操作返回非null值。
+ * @param group 可选，设置取数分组，没有则执行获取操作返回非null值。
  */
-chartProto.updateGroup = function(group)
+chartProto.fetchGroup = function(group)
 {
 	if(arguments.length == 0)
 	{
-		if(this._updateGroup == null)
-			this._updateGroup = "";
+		if(this._fetchGroup == null)
+			this._fetchGroup = "";
 		
-		return this._updateGroup;
+		return this._fetchGroup;
 	}
 	else
 	{
 		if(group == null)
 			group = "";
 		
-		this._updateGroup = group;
+		this._fetchGroup = group;
 	}
 };
 
@@ -1610,7 +1610,7 @@ dashboardProto._doHandleCharts = function()
 			}
 			else
 			{
-				let group = chart.updateGroup();
+				let group = chart.fetchGroup();
 				let preUpdates = preUpdateGroups[group];
 				
 				if(preUpdates == null)
