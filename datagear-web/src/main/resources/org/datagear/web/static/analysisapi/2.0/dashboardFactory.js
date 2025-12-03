@@ -147,7 +147,7 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 renderContextAttrConst.DASHBOARD_THEME = "DG_DASHBOARD_THEME";
 renderContextAttrConst.USER = "DG_USER";
 renderContextAttrConst.LOCALE = "DG_LOCALE";
-renderContextAttrConst.UPDATE_DATA_URL ="DG_UPDATE_DATA_URL";
+renderContextAttrConst.FETCH_DATA_URL ="DG_FETCH_DATA_URL";
 renderContextAttrConst.LOAD_CHART_URL = "DG_LOAD_CHART_URL";
 renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
 renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
@@ -1629,14 +1629,14 @@ dashboardProto._doHandleCharts = function()
 		this._doHandleChartsLocal(preUpdateLocals);
 	});
 	
-	var updateDataURL = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.UPDATE_DATA_URL);
-	updateDataURL = this.contextURL(updateDataURL);
+	var fetchDataURL = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.FETCH_DATA_URL);
+	fetchDataURL = this.contextURL(fetchDataURL);
 	
 	for(let group in preUpdateGroups)
 	{
 		CF.executeSilently(() =>
 		{
-			this._doHandleChartsAjax(updateDataURL, group, preUpdateGroups[group]);
+			this._doHandleChartsAjax(fetchDataURL, group, preUpdateGroups[group]);
 		});
 	}
 };

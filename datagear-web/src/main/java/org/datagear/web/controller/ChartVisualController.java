@@ -431,10 +431,10 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 	{
 		super.inflateWebRenderContext(request, renderContext);
 
-		addUpdateDataValue(request, renderContext, resolveDataPath(request));
-		addLoadChartValue(request, renderContext, resolveLoadChartPath(request));
-		addHeartBeatValue(request, renderContext, resolveHeartbeatPath(request));
-		addUnloadValue(request, renderContext, resolveUnloadPath(request));
+		addFetchDataUrlValue(request, renderContext, resolveDataPath(request));
+		addLoadChartUrlValue(request, renderContext, resolveLoadChartPath(request));
+		addHeartBeatUrlValue(request, renderContext, resolveHeartbeatPath(request));
+		addUnloadUrlValue(request, renderContext, resolveUnloadPath(request));
 		addPluginResUrlPrefixValue(request, renderContext, resolvePluginResPathPrefix(request));
 	}
 

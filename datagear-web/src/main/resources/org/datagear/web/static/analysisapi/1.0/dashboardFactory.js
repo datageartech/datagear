@@ -144,7 +144,7 @@
 	renderContextAttrConst.USER = "DG_USER";
 	renderContextAttrConst.LOCALE = "DG_LOCALE";
 	renderContextAttrConst.CONTEXT_PATH = "DG_CONTEXT_PATH";
-	renderContextAttrConst.UPDATE_DATA_URL ="DG_UPDATE_DATA_URL";
+	renderContextAttrConst.FETCH_DATA_URL ="DG_FETCH_DATA_URL";
 	renderContextAttrConst.LOAD_CHART_URL = "DG_LOAD_CHART_URL";
 	renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
 	renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
@@ -318,7 +318,7 @@
 				webContext.contextPath = value;
 				del = true;
 			}
-			else if(name == renderContextAttrConst.UPDATE_DATA_URL)
+			else if(name == renderContextAttrConst.FETCH_DATA_URL)
 			{
 				webContext.attributes["updateDashboardURL"] = value;
 				del = true;

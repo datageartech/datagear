@@ -496,25 +496,25 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return getWebDashboardQueryConverter().convert(query, chartWidgets, user);
 	}
 
-	protected void addUpdateDataValue(HttpServletRequest request, RenderContext renderContext, String updateDataURL)
+	protected void addFetchDataUrlValue(HttpServletRequest request, RenderContext renderContext, String fetchDataURL)
 	{
-		updateDataURL = addSessionIdParamIfNotExplicitDisable(updateDataURL, request);
-		renderContext.put(RenderContextAttrs.UPDATE_DATA_URL, updateDataURL);
+		fetchDataURL = addSessionIdParamIfNotExplicitDisable(fetchDataURL, request);
+		renderContext.put(RenderContextAttrs.FETCH_DATA_URL, fetchDataURL);
 	}
 
-	protected void addLoadChartValue(HttpServletRequest request, RenderContext renderContext, String loadChartURL)
+	protected void addLoadChartUrlValue(HttpServletRequest request, RenderContext renderContext, String loadChartURL)
 	{
 		loadChartURL = addSessionIdParamIfNotExplicitDisable(loadChartURL, request);
 		renderContext.put(RenderContextAttrs.LOAD_CHART_URL, loadChartURL);
 	}
 
-	protected void addHeartBeatValue(HttpServletRequest request, RenderContext renderContext, String heartbeatURL)
+	protected void addHeartBeatUrlValue(HttpServletRequest request, RenderContext renderContext, String heartbeatURL)
 	{
 		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
 		renderContext.put(RenderContextAttrs.HEARTBEAT_URL, heartbeatURL);
 	}
 
-	protected void addUnloadValue(HttpServletRequest request, RenderContext renderContext, String unloadURL)
+	protected void addUnloadUrlValue(HttpServletRequest request, RenderContext renderContext, String unloadURL)
 	{
 		unloadURL = addSessionIdParamIfNotExplicitDisable(unloadURL, request);
 		renderContext.put(RenderContextAttrs.UNLOAD_URL, unloadURL);

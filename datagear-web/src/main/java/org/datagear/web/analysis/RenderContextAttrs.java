@@ -54,8 +54,8 @@ public class RenderContextAttrs
 	/** 应用根路径 */
 	public static final String CONTEXT_PATH = BUILTIN_ATTR_PREFIX + "CONTEXT_PATH";
 
-	/** 更新数据URL */
-	public static final String UPDATE_DATA_URL = BUILTIN_ATTR_PREFIX + "UPDATE_DATA_URL";
+	/** 获取数据URL */
+	public static final String FETCH_DATA_URL = BUILTIN_ATTR_PREFIX + "FETCH_DATA_URL";
 
 	/** 加载图表URL */
 	public static final String LOAD_CHART_URL = BUILTIN_ATTR_PREFIX + "LOAD_CHART_URL";
