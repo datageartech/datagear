@@ -335,7 +335,7 @@ page_palette.ftl
 				}
 			};
 			
-			return dashboardFactory.getStdBuiltinChartMapTree(listener);
+			return dashboardFactory.getStdBuiltinMapTree(listener);
 		}
 		//数组
 		else
@@ -350,7 +350,7 @@ page_palette.ftl
 				}
 			};
 			
-			return dashboardFactory.getStdBuiltinChartMapArray(listener);
+			return dashboardFactory.getStdBuiltinMapArray(listener);
 		}
 	};
 	

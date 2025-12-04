@@ -3618,7 +3618,7 @@
 	 *   added: function(node, parent, rootArray){}
 	 * }
 	 */
-	dashboardFactory.getStdBuiltinChartMapTree = function(listener)
+	dashboardFactory.getStdBuiltinMapTree = function(listener)
 	{
 		var re = [];
 		
@@ -3673,7 +3673,7 @@
 	 *   added: function(node, rootArray){}
 	 * }
 	 */
-	dashboardFactory.getStdBuiltinChartMapArray = function(listener)
+	dashboardFactory.getStdBuiltinMapArray = function(listener)
 	{
 		var re = [];
 		
