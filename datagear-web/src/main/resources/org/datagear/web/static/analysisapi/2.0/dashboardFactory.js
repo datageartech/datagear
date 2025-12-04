@@ -1890,8 +1890,7 @@ dashboardProto._handleChartsAjaxSuccess = function(fetchContext, dashboardResult
 		CF.executeSilently(() =>
 		{
 			let error = (chartErrors[chartId] || { type: "Error", message: "error" });
-			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chartId);
-			this._handleChartAjaxError(chart, error, chartQuery, true);
+			this._handleChartAjaxError(chart, error, true);
 		});
 	}
 };
@@ -1901,7 +1900,6 @@ dashboardProto._handleChartsAjaxError = function(fetchContext, error)
 	fetchContext.success = false;
 	
 	var charts = fetchContext.charts;
-	var dashboardQuery = fetchContext.query;
 	var errorMsg = (error && error.message ? error.message : "error");
 	var logException = true;
 	
@@ -1913,8 +1911,7 @@ dashboardProto._handleChartsAjaxError = function(fetchContext, error)
 		{
 			//结构同：org.datagear.analysis.support.ChartResultErrorMessage
 			let error = { type: "Error", message: errorMsg };
-			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
-			this._handleChartAjaxError(chart, error, chartQuery, false);
+			this._handleChartAjaxError(chart, error, false);
 		});
 	}
 	
@@ -1924,9 +1921,9 @@ dashboardProto._handleChartsAjaxError = function(fetchContext, error)
 	}
 };
 
-dashboardProto._handleChartAjaxError = function(chart, error, chartQuery, logIfNone)
+dashboardProto._handleChartAjaxError = function(chart, error, logIfNone)
 {
-	this._handleChartResultError(chart, error, chartQuery, true, logIfNone);
+	this._handleChartResultError(chart, error, true, logIfNone);
 };
 
 /**
@@ -1934,11 +1931,10 @@ dashboardProto._handleChartAjaxError = function(chart, error, chartQuery, logIfN
  * 
  * @param chart 图表对象
  * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
- * @param chartQuery 结果错误对应的图表查询，可能null
  * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
  * @param logIfNone 可选，是否在chart.listener()未定义fetchError()函数时打印错误日志，默认为：true
  */
-dashboardProto._handleChartResultError = function(chart, error, chartQuery, setErrorStatus, logIfNone)
+dashboardProto._handleChartResultError = function(chart, error, setErrorStatus, logIfNone)
 {
 	logIfNone = (logIfNone === undefined ? true : logIfNone);
 	
@@ -1970,12 +1966,12 @@ dashboardProto._handleChartResultError = function(chart, error, chartQuery, setE
  * 
  * @param chart 图表对象
  * @param chartResult 图表结果对象，参考：org.datagear.analysis.ChartResult
- * @param chartQuery 图表结果对应的查询信息，可能null
+ * @param chartQuery 图表结果对应的查询信息
  * @param force 可选，是否强制更新，默认值：false
  */
 dashboardProto._updateChart = function(chart, chartResult, chartQuery, force)
 {
-	force = (force === true);
+	force = (force === undefined ? false : force);
 	
 	try
 	{
