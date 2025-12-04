@@ -5,6 +5,7 @@
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
 	新增客户端（local）图表功能，不参与服务端交互，完全由客户端看板API操作？；
 	图表插件属性/分组新增可重复repeatable特性，用于支持属性值数组输入需求；
+	数据集参数新增JSON类型支持；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
 		图表插件添加apiVersion属性，标识支持的看板版本；
 		图表展示页根据插件的apiVersion自动加载对应看板API环境；
@@ -52,7 +53,8 @@
 				}
 			}
 		移除chart.inflateRenderOptions()、chart.inflateUpdateOptions()函数，添加chart.processRenderOptions()、chart.processUpdateOptions()函数；
-		移除jquery.datetimepicker日期组件，改为使用无依赖的组件（flatpickr）；
+		移除jquery.datetimepicker日期组件，改为使用浏览器默认日期输入框实现；
+		dg-chart-auto-resize改为使用ResizeObserver实现，只要图表元素尺寸变化，就自动chart.resize()；
 待定：
 	
 	看板可视编辑模式绝对/相对定位元素可拖拽；
