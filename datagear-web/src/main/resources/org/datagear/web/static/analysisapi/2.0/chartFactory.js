@@ -7627,8 +7627,9 @@ CF.RESIZE_CHART_TIMEOUT_MS = 300;
  */
 CF.supportObserveResizeChart = function()
 {
-	return (window.ResizeObserver != null);
-	//return false;
+	//暂时禁用此特性，因为会影响ECharts图表动画效果
+	//return (window.ResizeObserver != null);
+	return false;
 };
 
 /**
