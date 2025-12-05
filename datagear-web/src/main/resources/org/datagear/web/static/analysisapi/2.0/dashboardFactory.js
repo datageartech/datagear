@@ -2145,47 +2145,51 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
  * dashboard.loadUnsolvedCharts(successCallback);
  * dashboard.loadUnsolvedCharts(element, successCallback);
  * 
- * @param element 可选，限定查找的根HTML元素、HTML元素ID，默认为：<body>元素
+ * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
  * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  * @return 要异步加载的HTML元素数组
  */
-dashboardProto.loadUnsolvedCharts = function(element, successCallback, errorCallback)
+dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCallback)
 {
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
 	// (elements, successCallback)
-	if(CF.isFunction(element))
+	if(CF.isFunction(elements))
 	{
 		errorCallback = successCallback
-		successCallback = element;
-		element = null;
+		successCallback = elements;
+		elements = null;
 	}
 	
-	element = (element == null ? document.body : (CF.isString(element) ? CF.eleOfId(element) : element));
+	elements = (elements == null ? [ document.body ] :
+				(CF.isString(elements) ? CF.elesOfSelector(elements) : (CF.isArray(elements) ? elements : [ elements ])));
 	
-	var eleWidgetIdInfo = CF.elesWithWidgetId(element);
 	var unsolvedEles = [];
 	var unsolvedWidgetIds = [];
 	
-	for(let i=0; i<eleWidgetIdInfo.elements.length; i++)
+	for(let i=0; i<elements.length; i++)
 	{
-		let ele = eleWidgetIdInfo.elements[i];
-		let widgetId = eleWidgetIdInfo.widgetIds[i];
-		
-		if(this._loadingChartElement(ele))
-			continue;
-		
-		if(this.renderedChart(ele) != null)
-			continue;
-		
-		//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
-		if(this.chartOf(ele) != null)
-			continue;
-		
-		unsolvedEles.push(ele);
-		unsolvedWidgetIds.push(widgetId);
+		let eleWidgetIdInfo = CF.elesWithWidgetId(elements[i]);
+		for(let j=0; j<eleWidgetIdInfo.elements.length; j++)
+		{
+			let ele = eleWidgetIdInfo.elements[j];
+			let widgetId = eleWidgetIdInfo.widgetIds[j];
+			
+			if(this._loadingChartElement(ele))
+				continue;
+			
+			if(this.renderedChart(ele) != null)
+				continue;
+			
+			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
+			if(this.chartOf(ele) != null)
+				continue;
+			
+			unsolvedEles.push(ele);
+			unsolvedWidgetIds.push(widgetId);
+		}
 	}
 	
 	if(unsolvedEles.length > 0)
