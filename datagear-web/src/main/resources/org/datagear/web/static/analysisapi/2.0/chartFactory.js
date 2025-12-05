@@ -7671,8 +7671,6 @@ CF.observeResizeChart = function(chart)
 						if(chart.isActive())
 						{
 							chart.resize();
-							
-							console.log("resize chart : "+chart.name() + ", status : " + chart.status());
 						}
 					}
 				},
