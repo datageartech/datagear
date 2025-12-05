@@ -34,6 +34,8 @@
  * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.LISTENER属性来设置图表监听器，格式参考chart.listener()函数参数说明。
  * 
+ * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.AUTO_RESIZE属性，用于设置图表是否自动调整大小。
+ * 
  * 此图表工厂支持为<body>元素、图表元素添加elementAttrConst.DISABLE_TOOL属性，用于禁用图表工具，
  * 值为"true"表示禁用，其他表示启用。
  * 
@@ -196,6 +198,9 @@ elementAttrConst.THEME = "dg-chart-theme";
 
 /**图表监听器*/
 elementAttrConst.LISTENER = "dg-chart-listener";
+
+/**图表自动调整尺寸*/
+elementAttrConst.AUTO_RESIZE = "dg-chart-auto-resize";
 
 /**图表禁用工具*/
 elementAttrConst.DISABLE_TOOL = "dg-chart-disable-tool";
@@ -519,6 +524,7 @@ chartProto.init = function()
 	this._initOptions();
 	this._initTheme();
 	this._initListener();
+	this._initAutoResize();
 	this._initDisableTool();
 	this._initRenderer();
 	this._initAttrValues();
@@ -683,6 +689,40 @@ chartProto._bodyListener = function()
 };
 
 /**
+ * 初始化图表是否自动调整尺寸信息。
+ * 此方法从body元素、图表元素的elementAttrConst.AUTO_RESIZE属性获取自动调整尺寸信息。
+ */
+chartProto._initAutoResize = function()
+{
+	var autoResize = CF.eleAttr(this.element(), elementAttrConst.AUTO_RESIZE);
+	
+	if(!CF.isEmpty(autoResize))
+	{
+		//使用eval可以支持变量而非仅字面值
+		autoResize = CF.evalSilently(autoResize);
+	}
+	else
+	{
+		autoResize = this._bodyAutoResize();
+	}
+	
+	this.autoResize(autoResize !== false);
+};
+
+chartProto._bodyAutoResize = function()
+{
+	var autoResizeStr = CF.eleAttr(document.body, elementAttrConst.AUTO_RESIZE);
+	
+	if(autoResizeStr !== CF._PREV_BODY_AUTO_RESIZE_STR)
+	{
+		CF._PREV_BODY_AUTO_RESIZE_STR = autoResizeStr;
+		CF._PREV_BODY_AUTO_RESIZE = CF.evalSilently(autoResizeStr);
+	}
+	
+	return CF._PREV_BODY_AUTO_RESIZE;
+};
+
+/**
  * 初始化图表是否禁用工具。
  * 此函数依次从图表选项builtinTool.disable、图表元素的elementAttrConst.DISABLE_TOOL属性获取是否禁用值。
  */
@@ -801,6 +841,8 @@ chartProto.id = function()
 /**
  * 获取/设置图表名称。
  * 
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
+ * 
  * @param name 可选，要设置的名称
  * @returns 要获取的名称，非null
  */
@@ -867,7 +909,8 @@ chartProto.updateInterval = function(interval)
 
 /**
  * 获取/设置图表插件。
- * 设置操作应在图表渲染器执行。
+ * 
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param plugin 可选，要设置的图表插件
  * @returns 要获取的图表插件，可能为null
@@ -921,6 +964,7 @@ chartProto.renderContext = function(renderContext)
  * 获取/设置图表选项，这些选项通常用于控制图表展示、交互效果，格式为：{ ... }。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-options"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * 图表渲染器实现相关：
  * 图表渲染器应使用此函数获取并应用图表选项，另参考chart.inflateOptions()。
@@ -950,6 +994,7 @@ chartProto.options = function(options)
  * 获取/设置图表主题，格式参考：org.datagear.analysis.ChartTheme。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-theme"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * 图表渲染器实现相关：
  * 图表渲染器应使用此函数获取并应用图表主题，另参考：chart.themeGradualColor()。
@@ -1008,6 +1053,7 @@ chartProto.theme = function(theme)
  * }
  * 
  * 图表初始化时会使用图表元素的"dg-chart-listener"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param listener 可选，要设置的监听器对象，没有则执行获取操作
  * @returns 要获取的监听器，可能null
@@ -1021,9 +1067,29 @@ chartProto.listener = function(listener)
 };
 
 /**
+ * 获取/设置图表是否自动调整大小。
+ * 
+ * 图表初始化时会使用图表元素的"dg-chart-auto-resize"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
+ * 
+ * 图表渲染器实现相关：
+ * 图表渲染器应实现resize函数，以支持此特性。
+ * 
+ * @param autoResize 可选，设置为是否自动调整大小，没有则执行获取操作。
+ */
+chartProto.autoResize = function(autoResize)
+{
+	if(arguments.length == 0)
+		return (this._autoResize == true);
+	else
+		this._autoResize = autoResize;
+};
+
+/**
  * 获取/设置图表是否禁用设置。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-disable-tool"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param disable 可选，禁用设置，格式为：
  * 					//全部禁用
@@ -1096,6 +1162,7 @@ chartProto._defaultDisableTool = function()
  * 获取/设置自定义图表渲染器。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-renderer"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param renderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的图表插件渲染器函数
  * @returns 要获取的自定义图表渲染器，没有则返回null
@@ -1483,7 +1550,8 @@ chartProto.doDestroy = function()
 	if(!this.statusDestroying())
 		throw new Error("chart is illegal state for : doDestroy()");
 	
-	this._doDestroy();
+	//应在这里先销毁图表元素内部创建的元素，因为renderer.destroy()可能会清空图表元素
+	this._doDestroyTool();
 	
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
@@ -1491,13 +1559,16 @@ chartProto.doDestroy = function()
 	if(renderer && renderer.destroy)
 	{
 		renderer.destroy(this);
+		this._doDestroy();
 	}
 	else if(pluginRenderer && pluginRenderer.destroy)
 	{
 		pluginRenderer.destroy(this);
+		this._doDestroy();
 	}
 	else
 	{
+		this._doDestroy();
 		CF.eleEmpty(this._eleNonNull());
 	}
 	
@@ -1511,8 +1582,10 @@ chartProto.doDestroy = function()
 chartProto._doDestroy = function()
 {
 	var ele = this._eleNonNull();
-	var theme = this.theme();
 	
+	this._unobserveResize();
+	
+	var theme = this.theme();
 	var classes =
 	[
 		this.themeStyleName(),
@@ -1523,10 +1596,16 @@ chartProto._doDestroy = function()
 	
 	CF.eleRemoveClass(ele, classes);
 	CF.eleRemoveData(ele, CF.ELE_RENDERED_CHART_NAME);
-	
-	//应在这里先销毁图表元素内部创建的元素，因为renderer.destroy()可能会清空图表元素
-	this._doDestroyTool();
 	CF.removeThemeRefEntity(theme, this.id());
+};
+
+/**
+ * 取消监听图表尺寸变化。
+ */
+chartProto._unobserveResize = function(ele)
+{
+	ele = (ele == null ? this._eleNonNull() : ele);
+	CF.unobserveResizeChart(ele);
 };
 
 /**
@@ -1700,10 +1779,25 @@ chartProto._postProcessRendered = function()
 {
 	this._renderTool();
 	this._bindEleEventHandlers();
+	this._observeResize();
 	
 	var listener = this.listener();
 	if(listener && listener.rendered)
 		listener.rendered(this);
+};
+
+/**
+ * 监听图表尺寸变化。
+ */
+chartProto._observeResize = function()
+{
+	if(this.autoResize())
+	{
+		CF.observeResizeChart(this);
+		return true;
+	}
+	
+	return false;
 };
 
 /**
@@ -1909,6 +2003,8 @@ chartProto.status = function(status)
 /**
  * 绑定事件处理函数。
  * 
+ * 绑定操作应在图表处于chart.isActive()活跃状态时调用。
+ * 
  * 图表渲染器实现相关：
  * 图表渲染器应实现on函数，以支持此特性。
  * 
@@ -1936,7 +2032,8 @@ chartProto.on = function(type, handler)
 
 /**
  * 解绑事件处理函数。
- * 注意：此函数在图表渲染完成后才可调用。
+ * 
+ * 解绑操作应在图表处于chart.isActive()活跃状态时调用。
  * 
  * 图表渲染器实现相关：
  * 图表渲染器应实现off函数，以支持此特性。
@@ -2806,6 +2903,8 @@ chartProto._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
 /**
  * 获取/设置数据集字段别名。
  * 
+ * 设置操作应在chart.render()函数执行前调用。
+ * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 数据集字段、字段名、字段索引
  * @param alias 可选，要设置的别名，不设置则执行获取操作
@@ -2836,6 +2935,8 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 
 /**
  * 获取/设置数据集字段排序值。
+ * 
+ * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 数据集字段、字段名、字段索引
@@ -2964,6 +3065,8 @@ chartProto.hasDataSetParam = function(dataSetBinds)
 /**
  * 获取/设置指定数据集字段标记。
  * 
+ * 设置操作应在chart.render()函数执行前调用。
+ * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 数据集字段名、字段索引、字段对象
  * @param dataSign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
@@ -3062,6 +3165,9 @@ chartProto.pluginResourceURL = function(name)
  * 获取/设置指定图表属性值。
  * 注意：org.datagear.analysis.support.html.AttributeValueHtmlChartPlugin需要此函数名。
  * 
+ * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
+ * 
  * @param name 插件属性、名称
  * @param value 可选，要设置的属性值
  * @returns 
@@ -3080,6 +3186,9 @@ chartProto.attrValue = function(name, value)
 
 /**
  * 获取/设置全部图表属性值。
+ * 
+ * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
+ * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param values 可选，要设置的属性值映射表，格式为：{ 名称: 值, ... }
  * @returns { ... }
@@ -3584,6 +3693,8 @@ chartProto.dataSignFullname = function(name, dataSigns)
 /**
  * 获取/设置是否附件数据集。
  * 
+ * 设置操作应在chart.render()函数执行前调用。
+ * 
  * @param dataSetBind 数据集绑定或其索引
  * @param attachment 可选，要设置的值
  * @returns true、false
@@ -3670,6 +3781,8 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 
 /**
  * 获取/设置数据集字段标记映射表。
+ * 
+ * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param dataSigns 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
@@ -7500,6 +7613,87 @@ CF.deepEquals = function(a, b, seen)
 	seen.delete(a);
 	
 	return true;
+};
+
+/**
+ * 自动调整图表尺寸延迟毫秒数。
+ */
+CF.RESIZE_CHART_TIMEOUT_MS = 300;
+
+/**
+ * 判断CF.observeResizeChart()函数是否可用。
+ * ResizeObserver在2020年7月后才被浏览器广泛支持，具体参考：
+ * https://developer.mozilla.org/zh-CN/docs/Web/API/ResizeObserver
+ */
+CF.supportObserveResizeChart = function()
+{
+	return (window.ResizeObserver != null);
+	//return false;
+};
+
+/**
+ * 监听图表元素尺寸变化，饼调用chart.resize()调整图表尺寸。
+ */
+CF.observeResizeChart = function(chart)
+{
+	if(!CF.supportObserveResizeChart())
+		return false;
+	
+	if(CF._resizeChartObserver == null)
+	{
+		CF._resizeChartObserver = new ResizeObserver((entries) =>
+		{
+			if(CF._resizeChartTimeoutId != null)
+				clearTimeout(CF._resizeChartTimeoutId);
+			
+			let charts = [];
+			
+			for(let i=0; i<entries.length; i++)
+			{
+				let entry = entries[i];
+				let chart = (entry && entry.target != null ? CF.renderedChart(entry.target) : null);
+				
+				if(chart != null && chart.isActive())
+				{
+					charts.push(chart);
+				}
+			}
+			
+			if(charts.length > 0)
+			{
+				CF._resizeChartTimeoutId = setTimeout(function()
+				{
+					for(let i =0; i<charts.length; i++)
+					{
+						let chart = charts[i];
+						
+						if(chart.isActive())
+						{
+							chart.resize();
+							
+							console.log("resize chart : "+chart.name() + ", status : " + chart.status());
+						}
+					}
+				},
+				CF.RESIZE_CHART_TIMEOUT_MS);
+			}
+		});
+	}
+	
+	CF._resizeChartObserver.observe(chart.element());
+	
+	return true;
+};
+
+/**
+ * 取消监听图表元素尺寸变化。
+ */
+CF.unobserveResizeChart = function(ele)
+{
+	if(CF._resizeChartObserver != null && ele != null)
+	{
+		CF._resizeChartObserver.unobserve(ele);
+	}
 };
 
 //-------------

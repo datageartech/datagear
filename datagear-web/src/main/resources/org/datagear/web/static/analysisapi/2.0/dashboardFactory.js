@@ -34,8 +34,6 @@
  * 
  * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chart.links()函数说明。
  * 
- * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.AUTO_RESIZE属性，用于设置图表是否自动调整大小。
- * 
  * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.FETCH_GROUP属性，用于设置图表更新ajax分组。
  * 
  * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加如下处理函数：
@@ -125,9 +123,6 @@ elementAttrConst.MAP_URLS = "dg-chart-map-urls";
 
 /**图表联动*/
 elementAttrConst.LINK = "dg-chart-link";
-
-/**图表自动调整尺寸*/
-elementAttrConst.AUTO_RESIZE = "dg-chart-auto-resize";
 
 /**图表更新分组*/
 elementAttrConst.FETCH_GROUP = "dg-chart-fetch-group";
@@ -231,11 +226,6 @@ DF.unloadConfig = (DF.unloadConfig ||
  * 循环监视处理图表状态间隔毫秒数。
  */
 DF.HANDLE_CHART_INTERVAL_MS = 10;
-
-/**
- * 自动调整图表尺寸延迟毫秒数。
- */
-DF.RESIZE_CHART_TIMEOUT_MS = 300;
 
 /**
  * 浏览器初始化到此看板工厂JS的时间戳。
@@ -386,7 +376,6 @@ chartProto._initForPostSuper = chartProto._initForPost;
 chartProto._initForPost = function()
 {
 	this._initLinks();
-	this._initAutoResize();
 	this._initFetchGroup();
 	this._initForPostSuper();
 };
@@ -420,40 +409,6 @@ chartProto._initLinks = function()
 	links = (links ? CF.evalSilently(links) : null);
 	
 	this.links(links);
-};
-
-/**
- * 初始化图表是否自动调整尺寸信息。
- * 此方法从body元素、图表元素的elementAttrConst.AUTO_RESIZE属性获取自动调整尺寸信息。
- */
-chartProto._initAutoResize = function()
-{
-	var autoResize = CF.eleAttr(this.element(), elementAttrConst.AUTO_RESIZE);
-	
-	if(!CF.isEmpty(autoResize))
-	{
-		//使用eval可以支持变量而非仅字面值
-		autoResize = CF.evalSilently(autoResize);
-	}
-	else
-	{
-		autoResize = this._bodyAutoResize();
-	}
-	
-	this.autoResize(autoResize !== false);
-};
-
-chartProto._bodyAutoResize = function()
-{
-	var autoResizeStr = CF.eleAttr(document.body, elementAttrConst.AUTO_RESIZE);
-	
-	if(autoResizeStr !== CF._PREV_BODY_AUTO_RESIZE_STR)
-	{
-		CF._PREV_BODY_AUTO_RESIZE_STR = autoResizeStr;
-		CF._PREV_BODY_AUTO_RESIZE = CF.evalSilently(autoResizeStr);
-	}
-	
-	return CF._PREV_BODY_AUTO_RESIZE;
 };
 
 /**
@@ -520,24 +475,6 @@ chartProto.links = function(links)
 		
 		this._links = links;
 	}
-};
-
-/**
- * 获取/设置图表是否自动调整大小。
- * 
- * 图表初始化时会使用图表元素的"dg-chart-auto-resize"属性值执行设置操作。
- * 
- * 图表渲染器实现相关：
- * 图表渲染器应实现resize函数，以支持此特性。
- * 
- * @param autoResize 可选，设置为是否自动调整大小，没有则执行获取操作。
- */
-chartProto.autoResize = function(autoResize)
-{
-	if(arguments.length == 0)
-		return (this._autoResize == true);
-	else
-		this._autoResize = autoResize;
 };
 
 /**
@@ -929,6 +866,9 @@ dashboardProto._initListener = function()
  */
 dashboardProto._initChartResizeHandler = function()
 {
+	if(CF.supportObserveResizeChart())
+		return;
+	
 	//解绑之前的，确保此函数可重复调用
 	if(this._windowResizeHandler != null)
 		window.removeEventListener("resize", this._windowResizeHandler);
@@ -954,7 +894,7 @@ dashboardProto._initChartResizeHandler = function()
 				}
 			}
 		},
-		DF.RESIZE_CHART_TIMEOUT_MS);
+		CF.RESIZE_CHART_TIMEOUT_MS);
 	};
 	
 	window.addEventListener("resize", this._windowResizeHandler);
