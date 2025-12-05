@@ -424,8 +424,11 @@
 	display: flex;
 	flex-direction: row;
 	gap: 2px;
-	z-index: 8;
 	font-size: 1rem;
+	z-index: 9;
+}
+.dg-chart-tool-box-front{
+	z-index: 99999;
 }
 .dg-chart-tool-box.dg-position-leftTop{
 	left: 0.1rem;
@@ -512,7 +515,6 @@
 	padding: 0.5rem 0.8rem;
 	user-select: text;
 	-webkit-user-select: text;
-	z-index: 9;
 }
 .dg-chart-tool-panel .dg-chart-tool-panel-closebtn{
     padding: 0.2rem 0.5rem !important;

@@ -2039,6 +2039,7 @@
 			});
 		}
 		
+		CF.eleAddClass(boxEle, "dg-chart-tool-box-front");
 		TOOL.adjustChartToolPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-param-button", boxEle), chart);
 		
 		//聚焦至第一个可操作输入框
@@ -2069,6 +2070,9 @@
 	{
 		var panel = TOOL.getChartToolParamPanel(chart);
 		TOOL.eleHide(panel);
+		
+		var boxEle = CF.eleAncestorOfSelector(panel, ".dg-chart-tool-box");
+		CF.eleRemoveClass(boxEle, "dg-chart-tool-box-front");
 	};
 	
 	/**
@@ -2167,6 +2171,7 @@
 			});
 		}
 		
+		CF.eleAddClass(boxEle, "dg-chart-tool-box-front");
 		TOOL.adjustChartToolPanelPosition(boxEle, panel, CF.eleOfSelector(".dg-chart-tool-data-button", boxEle), chart);
 	};
 	
@@ -2177,6 +2182,9 @@
 	{
 		var panel = TOOL.getChartToolDataPanel(chart);
 		TOOL.eleHide(panel);
+		
+		var boxEle = CF.eleAncestorOfSelector(panel, ".dg-chart-tool-box");
+		CF.eleRemoveClass(boxEle, "dg-chart-tool-box-front");
 	};
 	
 	/**
@@ -2376,23 +2384,47 @@
 		var top = "unset";
 		var bottom = "unset";
 		
-		//按钮右侧有足够空间
-		if((docWidth - btnOffset.left - btnWidth) > widthGap)
+		var rightFirst = true;
+		if(CF.isEleMatches(boxEle, ".dg-position-rightTop, .dg-position-rightBottom, .dg-position-rightCenter"))
+			rightFirst = false;
+		
+		if(rightFirst)
 		{
-			left = btnPosition.left + btnWidth;
-		}
-		//按钮左侧有足够空间
-		else if(btnOffset.left > widthGap)
-		{
-			left = btnPosition.left - width;
+			//按钮右侧有足够空间
+			if((docWidth - btnOffset.left - btnWidth) > widthGap)
+			{
+				left = btnPosition.left + btnWidth;
+			}
+			//按钮左侧有足够空间
+			else if(btnOffset.left > widthGap)
+			{
+				left = btnPosition.left - width;
+			}
+			else
+			{
+				left = btnPosition.left - width/2;
+			}
 		}
 		else
 		{
-			left = btnPosition.left - width/2;
+			//按钮左侧有足够空间
+			if(btnOffset.left > widthGap)
+			{
+				left = btnPosition.left - width;
+			}
+			//按钮右侧有足够空间
+			else if((docWidth - btnOffset.left - btnWidth) > widthGap)
+			{
+				left = btnPosition.left + btnWidth;
+			}
+			else
+			{
+				left = btnPosition.left - width/2;
+			}
 		}
 		
 		var bottomFirst = true;
-		if(CF.isEleMatches(boxEle, "dg-position-leftBottom, dg-position-rightBottom, dg-position-centerBottom"))
+		if(CF.isEleMatches(boxEle, ".dg-position-leftBottom, .dg-position-rightBottom, .dg-position-centerBottom"))
 			bottomFirst = false;
 		
 		if(bottomFirst)
