@@ -389,7 +389,7 @@
 		tip = (tip === undefined ? true : tip);
 		ele = DE._currentElement(ele);
 		
-		if(DF._isBodyEle(ele))
+		if(DE._isBodyEle(ele))
 			return DE.selectFirstChildElement(ele, tip);
 		
 		var target = ele;
@@ -432,7 +432,7 @@
 		tip = (tip === undefined ? true : tip);
 		ele = DE._currentElement(ele);
 		
-		if(DF._isBodyEle(ele))
+		if(DE._isBodyEle(ele))
 			return DE.selectFirstChildElement(ele, tip);
 		
 		var target = ele;
@@ -516,7 +516,7 @@
 		tip = (tip === undefined ? true : tip);
 		ele = DE._currentElement(ele);
 		
-		if(DF._isBodyEle(ele))
+		if(DE._isBodyEle(ele))
 		{
 			if(tip)
 				DE.tipInfo(i18n.noSelectableParentElement);
@@ -527,13 +527,13 @@
 		var target = ele;
 		while((target = CF.eleOfParent(target)))
 		{
-			if(DE._isEmptyElement(target) || DF._isBodyEle(target) || DE._isSelectableElement(target))
+			if(DE._isEmptyElement(target) || DE._isBodyEle(target) || DE._isSelectableElement(target))
 			{
 				break;
 			}
 		}
 		
-		if(DF._isBodyEle(target) || DE._isEmptyElement(target))
+		if(DE._isBodyEle(target) || DE._isEmptyElement(target))
 		{
 			if(tip)
 				DE.tipInfo(i18n.noSelectableParentElement);
@@ -730,7 +730,7 @@
 			if(DE._isEmptyElement(ele))
 				break;
 			
-			var isBody =  DF._isBodyEle(ele);
+			var isBody =  DE._isBodyEle(ele);
 			
 			if(!DE._isSelectableElement(ele) && !isBody)
 			{
@@ -786,7 +786,7 @@
 		insertType = DE._trimInsertType(refEle, insertType);
 		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
 		
-		if(!DF._isBodyEle(insertParentEle))
+		if(!DE._isBodyEle(insertParentEle))
 			return false;
 		
 		var canInsert = true;
@@ -1229,7 +1229,7 @@
 		var styleStr = "";
 		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
 		
-		if(DF._isBodyEle(insertParentEle))
+		if(DE._isBodyEle(insertParentEle))
 			styleStr = "height:300px;";
 		else if(DE._isDisplayGrid(insertParentEle))
 			styleStr = "";
@@ -1846,7 +1846,7 @@
 		var styleStr = "";
 		var insertParentEle = DE._getInsertParentElement(refEle, insertType);
 		
-		if(DF._isBodyEle(insertParentEle))
+		if(DE._isBodyEle(insertParentEle))
 			styleStr = DE.defaultInsertChartEleStyle;
 		else
 			styleStr = "width:100%;height:100%;";
@@ -2828,7 +2828,7 @@
 			DE._setElementAttr(ele, CF.elementAttrConst.THEME, attrValue);
 	};
 	
-	DF._isBodyEle = function(ele)
+	DE._isBodyEle = function(ele)
 	{
 		return CF.isEleMatches(ele, "body");
 	};
@@ -3381,13 +3381,13 @@
 		
 		var tmpEle = ele;
 		
-		while(!DE._isEmptyElement(tmpEle) && !DF._isBodyEle(tmpEle))
+		while(!DE._isEmptyElement(tmpEle) && !DE._isBodyEle(tmpEle))
 		{
 			level += 1;
 			tmpEle = CF.eleOfParent(tmpEle);
 		}
 		
-		if(level > 0 && !DE._isEmptyElement(tmpEle) && DF._isBodyEle(tmpEle))
+		if(level > 0 && !DE._isEmptyElement(tmpEle) && DE._isBodyEle(tmpEle))
 		{
 			//编辑HTML做了转换，多内嵌了一层，参考DE._toEditIframeBodyHtml()函数，所以这里要减一层
 			if(CF.eleHasClass(tmpEle, EDIT_BODY_CLASS_FLAG))
@@ -3423,7 +3423,7 @@
 	{
 		var insertParentEle = null;
 		
-		if(DF._isBodyEle(refEle))
+		if(DE._isBodyEle(refEle))
 			insertParentEle = refEle;
 		else if(INSERT_TYPE_AFTER == insertType || INSERT_TYPE_BEFORE == insertType)
 			insertParentEle = CF.eleOfParent(refEle);
@@ -3439,7 +3439,7 @@
 		insertType = (insertType == INSERT_TYPE_AFTER || insertType == INSERT_TYPE_BEFORE
 						|| insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? insertType : INSERT_TYPE_AFTER);
 		
-		if(DF._isBodyEle(refEle))
+		if(DE._isBodyEle(refEle))
 		{
 			if(insertType == INSERT_TYPE_AFTER)
 				insertType = INSERT_TYPE_APPEND;
@@ -3787,7 +3787,7 @@
 	{
 		var editDoc = DE._editDocument();
 		
-		if(DF._isBodyEle(ele))
+		if(DE._isBodyEle(ele))
 		{
 			// <body>被转换为了<div>，参考DE._toEditIframeBodyHtml()函数
 			return CF.eleOfSelector("div", editDoc.body);
@@ -3856,7 +3856,7 @@
 		fillParent = (fillParent === true || fillParent === "true");
 		
 		var re = "";	
-		var isBodyParent = DF._isBodyEle(parentEle);
+		var isBodyParent = DE._isBodyEle(parentEle);
 		
 		if(fillParent)
 		{
