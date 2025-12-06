@@ -1583,7 +1583,7 @@ chartProto._doDestroy = function()
 {
 	var ele = this._eleNonNull();
 	
-	this._unobserveResize();
+	this._unobserveResize(ele);
 	
 	var theme = this.theme();
 	var classes =
