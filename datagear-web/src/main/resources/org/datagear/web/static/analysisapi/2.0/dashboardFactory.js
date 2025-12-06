@@ -994,21 +994,14 @@ dashboardProto.renderContext = function()
  * 
  * 看板初始化时会使用<body>元素的"dg-dashboard-listener"属性值执行设置操作。
  * 
- * @param listener 可选，要设置的监听器对象、或者其rendered函数，没有则执行获取操作
+ * @param listener 可选，要设置的监听器对象，没有则执行获取操作
  */
 dashboardProto.listener = function(listener)
 {
 	if(arguments.length == 0)
 		return this._listener;
 	else
-	{
-		if(listener != null && CF.isFunction(listener))
-		{
-			listener = { rendered: listener };
-		}
-		
 		this._listener = listener;
-	}
 };
 
 /**
@@ -1018,7 +1011,7 @@ dashboardProto.listener = function(listener)
  * @returns 要获取的地图URL映射表
  */
 dashboardProto.mapURLs = function(mapURLs)
-{	
+{
 	if(arguments.length == 0)
 		return chartMapURLs;
 	else
@@ -1026,7 +1019,7 @@ dashboardProto.mapURLs = function(mapURLs)
 };
 
 /**
- * 获取指定标识的图表，没有则返回undefined。
+ * 获取指定标识的图表，没有则返回null。
  * 
  * @param chartInfo 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
  */
@@ -2155,7 +2148,7 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
-	// (elements, successCallback)
+	// (successCallback)
 	if(CF.isFunction(elements))
 	{
 		errorCallback = successCallback
@@ -2164,7 +2157,8 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
 	}
 	
 	elements = (elements == null ? [ document.body ] :
-				(CF.isString(elements) ? CF.elesOfSelector(elements) : (CF.isArray(elements) ? elements : [ elements ])));
+				(CF.isString(elements) ? CF.elesOfSelector(elements) :
+					(CF.isArray(elements) ? elements : [ elements ])));
 	
 	var unsolvedEles = [];
 	var unsolvedWidgetIds = [];
