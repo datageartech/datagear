@@ -1644,8 +1644,13 @@
 		}
 		
 		var box = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
-		TOOL.destroyDataSetParamForm(box);
-		CF.eleRemove(box);
+		
+		//box可能还未初始化，此时不应继续执行
+		if(box != null)
+		{
+			TOOL.destroyDataSetParamForm(box);
+			CF.eleRemove(box);
+		}
 	};
 	
 	TOOL.showChartToolBox = function(chart)
