@@ -152,10 +152,6 @@
 					{
 						DE.deselectElement();
 					}
-					else if(DE._isSelectedElement(veEle))
-					{
-						//再次点击选中元素，不取消选择
-					}
 					else
 					{
 						DE.selectElement(veEle);
@@ -269,14 +265,14 @@
 	/**
 	 * 选择元素回调函数。
 	 * 
-	 * @param ele JQ元素
+	 * @param ele 选中HTML元素
 	 */
 	DE.selectElementCallback = function(ele){};
 	
 	/**
 	 * 取消选择元素回调函数。
 	 * 
-	 * @param ele JQ元素
+	 * @param ele 取消厕HTML元素、null
 	 */
 	DE.deselectElementCallback = function(ele){};
 	
@@ -350,22 +346,28 @@
 	};
 	
 	/**
-	 * 取消选中元素。
+	 * 取消选中元素，将根元素内的全部选中元素设为未选。
 	 * 
-	 * @param ele 可选，元素，默认为：当前选中元素
-	 * @param force 可选，是否强制执行，默认为：false
+	 * @param root 可选，要处理的根元素，默认为：document.body
 	 */
-	DE.deselectElement = function(ele, force)
+	DE.deselectElement = function(root)
 	{
-		ele = DE._currentElement(ele, true);
-		force = (force === undefined ? false : force);
+		var eles = DE._selectedElements(root);
 		
-		if(!DE._isEmptyElement(ele) || force)
+		for(let i=0; i<eles.length; i++)
 		{
+			let ele = eles[i];
+			
 			DE._deselectElement(ele);
 			
 			if(DE.deselectElementCallback)
 				DE.deselectElementCallback(ele);
+		}
+		
+		if(eles.length == 0)
+		{
+			if(DE.deselectElementCallback)
+				DE.deselectElementCallback(null);
 		}
 	};
 	
@@ -2956,23 +2958,19 @@
 		className = (className || "");
 		
 		var editEle = DE._editElement(ele);
-		var removeClassName = CF.eleAttr(editEle, "class");
+		var oldClassNames = CF.splitByWhitespace(CF.eleAttr(editEle, "class") || "");
 		
-		if(removeClassName)
-			DE._removeElementClassNoSync(ele, removeClassName);
+		var eleClassStr = (CF.eleAttr(ele, "class") || "");
+		eleClassStr = DE._removeClassName(eleClassStr, (name) => { return (CF.indexInArray(oldClassNames, name) > -1); });
+		eleClassStr += (CF.isEmpty(className) ? "" : " " + className);
+		
+		DE._setElementAttrNoSync(ele, "class", eleClassStr);
 		
 		//同步至编辑HTML中
-		if(!className)
+		if(CF.isEmpty(className))
 			DE._setElementAttrNoSync(editEle, "class", null);
 		else
-			DE._removeElementClassNoSync(editEle, removeClassName);
-		
-		if(className)
-		{
-			DE._addElementClassNoSync(ele, className);
-			//同步至编辑HTML中
-			DE._addElementClassNoSync(editEle, className);
-		}
+			DE._setElementAttrNoSync(editEle, "class", className);
 		
 		DE._reSelectElementIf(ele);
 		DE.changeFlag(true);
@@ -2982,7 +2980,7 @@
 	{
 		var re = "";
 		
-		var classNames = (CF.isEmpty(classStr) ? [] : classStr.split(" "));
+		var classNames = (CF.isEmpty(classStr) ? [] : CF.splitByWhitespace(classStr));
 		
 		for(var i=0; i<classNames.length; i++)
 		{
@@ -3121,16 +3119,6 @@
 	{
 		CF.eleBefore(ele, DELETE_ELE_FORMAT_FLAG);
 		DE._deleteElementNoSync(ele);
-	};
-	
-	DE._addElementClassNoSync = function(ele, className)
-	{
-		CF.eleAddClass(ele, className);
-	};
-	
-	DE._removeElementClassNoSync = function(ele, className)
-	{
-		CF.eleRemoveClass(ele, className);
 	};
 	
 	DE._setElementTextNoSync = function(ele, text)
@@ -3457,12 +3445,27 @@
 		return CF.elesWithWidgetId(ele).elements;
 	};
 	
-	DE._selectedElement = function(context)
+	DE._selectedElements = function(root)
 	{
-		if(context == null)
+		if(root == null)
+			return CF.elesOfSelector("."+ELEMENT_CLASS_SELECTED);
+		else
+		{
+			var re = CF.elesOfSelector("."+ELEMENT_CLASS_SELECTED, root);
+			
+			if(DE._isSelectedElement(root))
+				re.push(root);
+			
+			return re;
+		}
+	};
+	
+	DE._selectedElement = function(root)
+	{
+		if(root == null)
 			return CF.eleOfSelector("."+ELEMENT_CLASS_SELECTED);
 		else
-			return CF.eleOfSelector("."+ELEMENT_CLASS_SELECTED, context);
+			return CF.eleOfSelector("."+ELEMENT_CLASS_SELECTED, root);
 	};
 	
 	DE._isSelectedElement = function(ele)
@@ -3510,9 +3513,16 @@
 		return CF.eleAttr(ele, ELEMENT_ATTR_VISUAL_EDIT_ID);
 	};
 	
-	DE._getEleByVisualEditId = function(editId)
+	DE._getEleByVisualEditId = function(editId, forEditEle)
 	{
-		return CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
+		forEditEle = (forEditEle === undefined ? false : forEditEle);
+		
+		var re = CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
+		
+		if(forEditEle)
+			re = DE._editElement(re);
+		
+		return re;
 	};
 	
 	DE._nextVisualEditId = function()
