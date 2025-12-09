@@ -884,7 +884,7 @@
 		for(let i=0; i<rows; i++)
 		{
 			for(let j=0; j<columns; j++)
-				DE._insertElementFormat(div, CF.eleCreate("div"), INSERT_TYPE_APPEND);
+				DE._insertElementNoSync(div, CF.eleCreate("div"), INSERT_TYPE_APPEND);
 		}
 		
 		DE._insertElement(div, insertType, refEle, true);
@@ -931,7 +931,7 @@
 		
 		for(var i=0; i<items; i++)
 		{
-			DE._insertElementFormat(div, CF.eleCreate("div"), INSERT_TYPE_APPEND);
+			DE._insertElementNoSync(div, CF.eleCreate("div"), INSERT_TYPE_APPEND);
 		}
 		
 		DE._insertElement(div, insertType, refEle, true);
@@ -976,7 +976,7 @@
 		{
 			let itemStyleClass = DE._evalResponsiveFlexLayoutClass(model.itemLayouts[i]);
 			let itemDiv = CF.eleCreate("div", itemStyleClass);
-			DE._insertElementFormat(div, itemDiv, INSERT_TYPE_APPEND);
+			DE._insertElementNoSync(div, itemDiv, INSERT_TYPE_APPEND);
 		}
 		
 		DE._insertElement(div, insertType, refEle, true);
@@ -2853,12 +2853,12 @@
 			insertEle = CF.eleCreateByHtml(insertEle);
 		
 		DE._addVisualEditIdAttr(insertEle);
-		DE._insertElementFormat(refEle, insertEle, insertType);
+		DE._insertElementNoSync(refEle, insertEle, insertType);
 		
 		//同步至编辑HTML中
 		var editEle = DE._editElement(refEle);
 		var insertEleClone = CF.eleClone(insertEle);
-		DE._insertElementFormat(editEle, insertEleClone, insertType, true);
+		DE._insertElementNoSync(editEle, insertEleClone, insertType, true);
 		
 		if(highlight)
 		{
@@ -2880,8 +2880,9 @@
 	{
 		var editEle = DE._editElement(ele);
 		
-		DE._deleteElementFormat(editEle);
-		DE._deleteElementFormat(ele);
+		DE._deleteElementNoSync(ele);
+		//编辑元素必须后删除
+		DE._deleteElementNoSync(editEle);
 		
 		DE.changeFlag(true);
 	};
@@ -3027,7 +3028,7 @@
 		DE.changeFlag(true);
 	};
 	
-	DE._insertElementFormat = function(refEle, insertEle, insertType, formatInner)
+	DE._insertElementNoSync = function(refEle, insertEle, insertType, formatInner)
 	{
 		formatInner = (formatInner === undefined ? false : formatInner);
 		
@@ -3035,52 +3036,53 @@
 		
 		if(insertType == INSERT_TYPE_AFTER)
 		{
-			DE._insertElementAfterNoSync(refEle, insertEle);
+			CF.eleAfter(refEle, insertEle);
 			CF.eleAfter(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == INSERT_TYPE_BEFORE)
 		{
-			DE._insertElementBeforeNoSync(refEle, insertEle);
+			CF.eleBefore(refEle, insertEle);
 			CF.eleBefore(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 		}
 		else if(insertType == INSERT_TYPE_APPEND)
 		{
-			var children = CF.elesOfChildren(refEle);
+			let children = CF.elesOfChildren(refEle);
 			
 			if(CF.isEmpty(children))
 			{
 				var innerHtml = DE._getInnerHTML(refEle);
 				if(DE._isOnlyEmptyOrFormat(innerHtml))
 				{
-					DE._setInnerHTMLNoSync(refEle, "");
+					CF.eleHtml(refEle, "");
 				}
 				
 				CF.eleAppend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
-				DE._insertElementAppendNoSync(refEle, insertEle);
+				CF.eleAppend(refEle, insertEle);
 				CF.eleAppend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel) + INSERT_ELE_FORMAT_END);
 			}
 			else
 			{
-				DE._insertElementFormat(children[children.length-1], insertEle, INSERT_TYPE_AFTER, formatInner);
-				return;
+				let tailChild = children[children.length-1];
+				CF.eleAfter(tailChild, insertEle);
+				CF.eleAfter(tailChild, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
 			}
 		}
 		else if(insertType == INSERT_TYPE_PREPEND)
 		{
-			var insertTailFormat = false;
+			let insertTailFormat = false;
+			let children = CF.elesOfChildren(refEle);
 			
-			var children = CF.elesOfChildren(refEle);
 			if(CF.isEmpty(children))
 			{
-				var innerHtml = DE._getInnerHTML(refEle);
+				let innerHtml = DE._getInnerHTML(refEle);
 				if(DE._isOnlyEmptyOrFormat(innerHtml))
 				{
 					insertTailFormat = true;
-					DE._setInnerHTMLNoSync(refEle, "");
+					CF.eleHtml(refEle, "");
 				}
 			}
 			
-			DE._insertElementPrependNoSync(refEle, insertEle);
+			CF.elePrepend(refEle, insertEle);
 			CF.elePrepend(refEle, INSERT_ELE_FORMAT_START + "\n" + DE._genFormatTabs(refEleLevel+1) + INSERT_ELE_FORMAT_END);
 			
 			if(insertTailFormat)
@@ -3095,6 +3097,30 @@
 			var tabsText = DE._genFormatTabs(DE._evalElementLevel(insertEle)-1);
 			DE._appendElementSubFormat(insertEle, tabsText);
 		}
+	};
+	
+	DE._deleteElementNoSync = function(ele)
+	{
+		if(CF.eleOfParent(ele) != null)
+			CF.eleBefore(ele, DELETE_ELE_FORMAT_FLAG);
+		
+		CF.eleRemove(ele);
+	};
+	
+	DE._setElementTextNoSync = function(ele, text)
+	{
+		CF.eleText(ele, text);
+	};
+	
+	DE._setElementAttrNoSync = function(ele, name, value)
+	{
+		// value是""时不应移除
+		CF.eleAttr(ele, name, value);
+	};
+	
+	DE._setInnerHTMLNoSync = function(ele, html)
+	{
+		CF.eleHtml(ele, html);
 	};
 	
 	DE._appendElementSubFormat = function(ele, tabsText)
@@ -3113,53 +3139,6 @@
 		{
 			DE._appendElementSubFormat(child, CF.eleCreateText(tabsText));
 		});
-	};
-	
-	DE._deleteElementFormat = function(ele)
-	{
-		CF.eleBefore(ele, DELETE_ELE_FORMAT_FLAG);
-		DE._deleteElementNoSync(ele);
-	};
-	
-	DE._setElementTextNoSync = function(ele, text)
-	{
-		CF.eleText(ele, text);
-	};
-	
-	DE._setElementAttrNoSync = function(ele, name, value)
-	{
-		// value是""时不应移除
-		CF.eleAttr(ele, name, value);
-	};
-	
-	DE._insertElementAppendNoSync = function(refEle, insertEle)
-	{
-		CF.eleAppend(refEle, insertEle);
-	};
-	
-	DE._insertElementPrependNoSync = function(refEle, insertEle)
-	{
-		CF.elePrepend(refEle, insertEle);
-	};
-	
-	DE._insertElementAfterNoSync = function(refEle, insertEle)
-	{
-		CF.eleAfter(refEle, insertEle);
-	};
-	
-	DE._insertElementBeforeNoSync = function(refEle, insertEle)
-	{
-		CF.eleBefore(refEle, insertEle);
-	};
-	
-	DE._deleteElementNoSync = function(ele)
-	{
-		CF.eleRemove(ele);
-	};
-	
-	DE._setInnerHTMLNoSync = function(ele, html)
-	{
-		CF.eleHtml(ele, html);
 	};
 	
 	DE._editableElementStyles =
@@ -3517,12 +3496,15 @@
 	{
 		forEditEle = (forEditEle === undefined ? false : forEditEle);
 		
-		var re = CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
-		
 		if(forEditEle)
-			re = DE._editElement(re);
-		
-		return re;
+		{
+			let editDoc = DE._editDocument();
+			return CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']", editDoc.body);
+		}
+		else
+		{
+			return CF.eleOfSelector("["+ELEMENT_ATTR_VISUAL_EDIT_ID+"='"+editId+"']");
+		}
 	};
 	
 	DE._nextVisualEditId = function()
