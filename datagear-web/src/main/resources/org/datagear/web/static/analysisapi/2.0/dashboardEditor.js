@@ -3241,7 +3241,7 @@
 	{
 		var optionObj =
 		{
-			syncChartTheme: (styleObj.syncChartTheme == true || styleObj.syncChartTheme == "true"),
+			syncChartTheme: CF.isLiteralTrue(styleObj.syncChartTheme),
 			className: styleObj.className
 		};
 		
@@ -3863,7 +3863,7 @@
 	
 	DE._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
 	{
-		fillParent = (fillParent === true || fillParent === "true");
+		fillParent = CF.isLiteralTrue(fillParent);
 		
 		var re = "";	
 		var isBodyParent = DE._isBodyEle(parentEle);

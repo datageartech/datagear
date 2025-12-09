@@ -405,7 +405,7 @@ chartProto._postProcessRendered = function()
  */
 chartProto._initLinks = function()
 {
-	var links = CF.eleAttr(this.element(), elementAttrConst.LINK);
+	var links = CF.eleAttr(this._eleNonNull(), elementAttrConst.LINK);
 	links = (links ? CF.evalSilently(links) : null);
 	
 	this.links(links);
@@ -417,7 +417,7 @@ chartProto._initLinks = function()
  */
 chartProto._initFetchGroup = function()
 {
-	var fetchGroup = CF.eleAttr(this.element(), elementAttrConst.FETCH_GROUP);
+	var fetchGroup = CF.eleAttr(this._eleNonNull(), elementAttrConst.FETCH_GROUP);
 	
 	if(CF.isEmpty(fetchGroup))
 		fetchGroup = CF.eleAttr(document.body, elementAttrConst.FETCH_GROUP);
@@ -757,8 +757,8 @@ chartProto.manualRender = function(manualRender)
 			return (this._manualRender == true);
 		else
 		{
-			var eleValue = CF.eleAttr(this.element(), elementAttrConst.MANUAL_RENDER);
-			return (eleValue == true || eleValue == "true");
+			var eleValue = CF.eleAttr(this._eleNonNull(), elementAttrConst.MANUAL_RENDER);
+			return CF.isLiteralTrue(eleValue);
 		}
 	}
 	else

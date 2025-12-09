@@ -694,7 +694,7 @@ chartProto._bodyListener = function()
  */
 chartProto._initAutoResize = function()
 {
-	var autoResize = CF.eleAttr(this.element(), elementAttrConst.AUTO_RESIZE);
+	var autoResize = CF.eleAttr(this._eleNonNull(), elementAttrConst.AUTO_RESIZE);
 	
 	if(!CF.isEmpty(autoResize))
 	{
