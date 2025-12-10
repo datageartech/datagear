@@ -688,8 +688,9 @@ chartProto.refresh = function()
 	var unreadys = this.unreadyDataSetParams(true);
 	if(unreadys.length > 0)
 	{
-		throw new Error("chart '#"+this.elementId()+"' dataSetBinds["+unreadys[0].dataSetBindIndex
-									+"] DataSetParam["+unreadys[0].paramIndex+"]('"+unreadys[0].param.name+"') value required");
+		throw new Error(
+			CF.chartLogInfo(this) + " dataSetBinds["+unreadys[0].dataSetBindIndex
+			+"] DataSetParam["+unreadys[0].paramIndex+"]('"+unreadys[0].param.name+"') value required");
 	}
 	
 	//这里不能使用this.statusPreUpdate(true)的方式实现
@@ -1912,7 +1913,7 @@ dashboardProto._updateChart = function(chart, chartResult, chartQuery, force)
 			this._doUpdateChart(chart, chartResult, chartQuery);
 		}
 		else
-			throw new Error("chart '#"+chart.elementId()+"' not active");
+			throw new Error(CF.chartLogInfo(chart) + " not active");
 	}
 	catch(e)
 	{

@@ -515,7 +515,7 @@ CF.findPluginById = function(pluginId)
 chartProto.init = function()
 {
 	if(!this.statusPreInit() && !this.statusDestroyed())
-		throw new Error("chart is illegal state for : init()");
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : init()");
 	
 	this.statusIniting(true);
 	
@@ -545,7 +545,7 @@ chartProto._eleNonNull = function()
 	var ele = this.element();
 	
 	if(ele == null)
-		throw new Error("chart '#"+this.elementId()+"' element required");
+		throw new Error(CF.chartLogInfo(this) + " element required");
 	
 	return ele;
 };
@@ -934,7 +934,7 @@ chartProto._pluginNonNull = function()
 	var plugin = this.plugin();
 	
 	if(plugin == null)
-		throw new Error("chart plugin required");
+		throw new Error(CF.chartLogInfo(this) + " plugin required");
 	
 	return plugin;
 };
@@ -1205,10 +1205,10 @@ chartProto.render = function()
 		this.init();
 	
 	if(!this.statusInited() && !this.statusPreRender() && !this.statusDestroyed())
-		throw new Error("chart is illegal state for : render()");
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : render()");
 	
 	if(CF.renderedChart(this._eleNonNull()) != null)
-		throw new Error("element '#"+this.elementId()+"' has been rendered as chart");
+		throw new Error(CF.chartLogInfo(this) + " element has been rendered by another chart");
 	
 	this.statusRendering(true);
 	
@@ -1272,7 +1272,7 @@ chartProto._rendererLib = function()
 chartProto.doRender = function()
 {
 	if(!this.statusRendering())
-		throw new Error("chart is illegal state for : doRender()");
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : doRender()");
 	
 	var ele = this._eleNonNull();
 	var theme = this.theme();
@@ -1303,7 +1303,7 @@ chartProto.doRender = function()
 		pluginRenderer.render(this);
 	}
 	else
-		throw new Error("chart renderer required");
+		throw new Error(CF.chartLogInfo(this) + " renderer required");
 	
 	if(!async)
 		this.statusRendered(true);
@@ -1384,7 +1384,7 @@ chartProto._createChartThemeCssIfNon = function()
 chartProto.update = function(chartResult)
 {
 	if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
-		throw new Error("chart is illegal state for : update()");
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : update()");
 	
 	chartResult = (chartResult === undefined ? this.updateResult() : chartResult);
 	
@@ -1416,7 +1416,7 @@ chartProto.update = function(chartResult)
 chartProto.doUpdate = function(chartResult)
 {
 	if(!this.statusUpdating())
-		throw new Error("chart is illegal state for : doUpdate()");
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : doUpdate()");
 	
 	var appendMode = this.updateAppendMode();
 	if(appendMode && !appendMode.beforeListener)
@@ -1440,7 +1440,7 @@ chartProto.doUpdate = function(chartResult)
 		pluginRenderer.update(this, chartResult);
 	}
 	else
-		throw new Error("chart renderer required");
+		throw new Error(CF.chartLogInfo(this) + " renderer required");
 	
 	if(!async)
 		this.statusUpdated(true);
@@ -1548,7 +1548,7 @@ chartProto.destroy = function()
 chartProto.doDestroy = function()
 {
 	if(!this.statusDestroying())
-		throw new Error("chart is illegal state for : doDestroy()");
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : doDestroy()");
 	
 	//应在这里先销毁图表元素内部创建的元素，因为renderer.destroy()可能会清空图表元素
 	this._doDestroyTool();
@@ -1695,7 +1695,7 @@ chartProto._assertActive = function()
 	if(this.isActive())
 		return;
 	
-	throw new Error("chart not active");
+	throw new Error(CF.chartLogInfo(this) + " not active");
 };
 
 /**
@@ -1714,7 +1714,7 @@ chartProto._assertAlive = function()
 	if(this.isAlive())
 		return;
 	
-	throw new Error("chart not alive");
+	throw new Error(CF.chartLogInfo(this) + " not alive");
 };
 
 /**
@@ -2027,7 +2027,7 @@ chartProto.on = function(type, handler)
 		pluginRenderer.on(this, type, handler);
 	}
 	else
-		throw new Error("chart renderer.on required");
+		throw new Error(CF.chartLogInfo(this) + " renderer.on required");
 };
 
 /**
@@ -2057,7 +2057,7 @@ chartProto.off = function(type, handler)
 		pluginRenderer.off(this, type, handler);
 	}
 	else
-		throw new Error("chart renderer.off required");
+		throw new Error(CF.chartLogInfo(this) + " renderer.off required");
 };
 
 var EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "EventHandlerDelegates";
@@ -2200,7 +2200,7 @@ chartProto._dataSetBindOf = function(dataSetBind, nullable)
 	}
 	
 	if(!nullable && re == null)
-		throw new Error("no DataSetBind found for : " + dataSetBind);
+		throw new Error(CF.chartLogInfo(this) + " no DataSetBind found for : " + dataSetBind);
 	
 	return re;
 };
@@ -2895,7 +2895,7 @@ chartProto._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
 	}
 	
 	if(!nullable && re == null)
-		throw new Error("no DataSetField found for : " + fieldInfo);
+		throw new Error(CF.chartLogInfo(this) + " no DataSetField found for : " + fieldInfo);
 	
 	return re;
 };
@@ -3034,7 +3034,7 @@ chartProto._dataSetParamOf = function(dataSetBind, paramInfo, nullable)
 	}
 	
 	if(!nullable && re == null)
-		throw new Error("no DataSetParam found for : " + paramInfo);
+		throw new Error(CF.chartLogInfo(this) + " no DataSetParam found for : " + paramInfo);
 	
 	return re;
 };
@@ -3634,7 +3634,7 @@ chartProto.dataSignFullname = function(name, dataSigns)
 			dataSign = this.pluginDataSign(name, dataSigns);
 			
 			if(dataSign == null)
-				throw new Error("no DataSign found for : " + name);
+				throw new Error(CF.chartLogInfo(this) + " no DataSign found for : " + name);
 			
 			return dataSign.name;
 		}
@@ -3674,7 +3674,7 @@ chartProto.dataSignFullname = function(name, dataSigns)
 				}
 				else
 				{
-					throw new Error("no DataSign found for : name["+i+"]");
+					throw new Error(CF.chartLogInfo(this) + " no DataSign found for : name["+i+"]");
 				}
 			}
 			else
@@ -7691,6 +7691,11 @@ CF.unobserveResizeChart = function(ele)
 	{
 		CF._resizeChartObserver.unobserve(ele);
 	}
+};
+
+CF.chartLogInfo = function(chart)
+{
+	return "chart["+(chart == null ? "null" : "#"+chart.elementId())+"]";
 };
 
 //-------------
