@@ -4260,16 +4260,12 @@ chartProto.resultIgnoreFetchOf = function(chartResult, dataSetBind, ignoreFetch)
  */
 chartProto.rendererAddition = function(name)
 {
-	var re = null;
-	
-	var additions = null;
 	var renderer = this.renderer();
 	
-	//优先取自定义渲染器中的
+	//必须优先从自定义渲染器获取
 	if(renderer && renderer.additions)
 	{
-		additions = (CF.isFunction(renderer.additions) ? renderer.additions(this) : renderer.additions);
-		re = (additions ? additions[name] : undefined);
+		let re = renderer.additions[name];
 		
 		if(re !== undefined)
 			return re;
@@ -4279,11 +4275,13 @@ chartProto.rendererAddition = function(name)
 	
 	if(renderer && renderer.additions)
 	{
-		additions = (CF.isFunction(renderer.additions) ? renderer.additions(this) : renderer.additions);
-		re = (additions ? additions[name] : undefined);
+		let re = renderer.additions[name];
+		
+		if(re !== undefined)
+			return re;
 	}
 	
-	return re;
+	return null;
 };
 
 /**

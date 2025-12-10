@@ -70,3 +70,4 @@ dg-chart-update-group改名为dg-chart-fetch-group
 看板监听器函数render()改名为rendered()，destroy()改名为destroyed()
 内置图表选项builtinSetting改名为builtinTool；
 移除内置图表选项disableSetting，改为在builtinTool.disable选项支持；
+图表渲染器additions仅允许{ ... }结构，不再支持function(){}函数结构；
