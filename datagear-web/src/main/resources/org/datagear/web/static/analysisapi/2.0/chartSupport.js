@@ -6694,22 +6694,9 @@ SPT.customRenderer = function(plugin, config)
 	
 	var renderer =
 	{
-		asyncRender: function(chart)
-		{
-			var renderer = this._getCustomRenderer(chart, true);
-			
-			if(!renderer || renderer.asyncRender == null)
-				return false;
-			
-			if(CF.isFunction(renderer.asyncRender))
-				return renderer.asyncRender(chart);
-			else
-				return (renderer.asyncRender == true);
-		},
-		
 		render: function(chart)
 		{
-			var renderer = this._getCustomRenderer(chart, true);
+			var renderer = chart.renderer();
 			
 			if(renderer && renderer.render != null)
 				renderer.render(chart);
@@ -6717,22 +6704,9 @@ SPT.customRenderer = function(plugin, config)
 				this._rawRender(chart);
 		},
 		
-		asyncUpdate: function(chart, chartResult)
-		{
-			var renderer = this._getCustomRenderer(chart, true);
-			
-			if(!renderer || renderer.renderer == null)
-				return false;
-			
-			if(CF.isFunction(renderer.asyncUpdate))
-				return renderer.asyncUpdate(chart, chartResult);
-			else
-				return (renderer.asyncUpdate == true);
-		},
-		
 		update: function(chart, chartResult)
 		{
-			var renderer = this._getCustomRenderer(chart, true);
+			var renderer = chart.renderer();
 			
 			if(renderer && renderer.update != null)
 				renderer.update(chart, chartResult);
@@ -6742,58 +6716,12 @@ SPT.customRenderer = function(plugin, config)
 		
 		destroy: function(chart)
 		{
-			var renderer = this._getCustomRenderer(chart, true);
+			var renderer = chart.renderer();
 			
 			if(renderer && renderer.destroy != null)
 				renderer.destroy(chart);
 			else
 				this._rawDestroy(chart);
-		},
-		
-		on: function(chart, type, handler)
-		{
-			var renderer = this._getCustomRenderer(chart);
-			
-			if(renderer.on != null)
-				renderer.on(chart, type, handler);
-			else
-				throw new Error("chart renderer 's [on] rqeuired");
-		},
-		
-		off: function(chart, type, handler)
-		{
-			var renderer = this._getCustomRenderer(chart);
-			
-			if(renderer.off != null)
-				renderer.off(chart, type, handler);
-			else
-				throw new Error("chart renderer 's [off] rqeuired");
-		},
-		
-		resize: function(chart)
-		{
-			var renderer = this._getCustomRenderer(chart, true);
-			
-			//即使customRenderer未定义，resize操作也可以不抛出异常，因为不影响主体功能
-			if(renderer && renderer.resize != null)
-				renderer.resize(chart);
-		},
-		
-		additions: function(chart)
-		{
-			var re = null;
-			
-			var renderer = this._getCustomRenderer(chart, true);
-			
-			if(renderer)
-			{
-				if(renderer.additions)
-					re = (CF.isFunction(renderer.additions) ? renderer.additions(chart) : renderer.additions);
-				else
-					re = null;
-			}
-			
-			return re;
 		},
 		
 		_rawRender: function(chart)
@@ -6858,18 +6786,6 @@ SPT.customRenderer = function(plugin, config)
 			
 			CF.eleRemoveClass(chartEle, "dg-chart-rawdata");
 			CF.eleRemove(internal);
-		},
-		
-		_getCustomRenderer: function(chart, nullable)
-		{
-			nullable = (nullable === undefined ? false : nullable);
-			
-			var renderer = chart.renderer();
-			
-			if(renderer == null && !nullable)
-				throw new Error("chart renderer required");
-			
-			return renderer;
 		}
 	};
 	
