@@ -152,8 +152,7 @@ SPT.lineRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -304,8 +303,7 @@ SPT.barRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -470,8 +468,7 @@ SPT.barPolarRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -616,8 +613,7 @@ SPT.pieRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -823,8 +819,7 @@ SPT.gaugeRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1020,8 +1015,7 @@ SPT._scatterRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1188,8 +1182,7 @@ SPT._scatterCoordRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1318,8 +1311,7 @@ SPT.radarRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1598,8 +1590,7 @@ SPT.funnelRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2642,8 +2633,7 @@ SPT.candlestickRenderer = function(plugin, config)
 				options.xAxis.boundaryGap = [ "12%", "12%" ];
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2758,8 +2748,7 @@ SPT.heatmapRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2853,8 +2842,7 @@ SPT.treeRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2954,8 +2942,7 @@ SPT.treemapRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2994,8 +2981,7 @@ SPT.sunburstRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -3217,8 +3203,7 @@ SPT.sankeyRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -3498,8 +3483,7 @@ SPT.graphRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -3805,8 +3789,7 @@ SPT.boxplotRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -4036,8 +4019,7 @@ SPT.wordcloudRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -4182,8 +4164,7 @@ SPT.liquidfillRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -4300,8 +4281,7 @@ SPT.parallelRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -4525,8 +4505,7 @@ SPT.themeRiverRenderer = function(plugin, config)
 			};
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -4662,8 +4641,7 @@ SPT.pictorialBarRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -4822,8 +4800,7 @@ SPT.pictorialBarProgressRenderer = function(plugin, config)
 			}
 			
 			options = EU.prepareRenderOptions(chart, options);
-			var instance = EU.init(chart);
-			instance.setOption(options);
+			EU.initWithOptions(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -7691,6 +7668,16 @@ EU.init = function(chart, opts)
 };
 
 /**
+ * 将图表初始化为ECharts图表，同时设置其options。
+ */
+EU.initWithOptions = function(chart, options, opts)
+{
+	var instance = EU.init(chart, opts);
+	instance.setOption(options);
+	return instance;
+};
+
+/**
  * 获取在图表元素上（优先）或者<body>元素上通过"dg-echarts-theme"属性定义的ECharts主题名
  * 
  * @param chart 图表
@@ -8413,8 +8400,7 @@ EU.renderMapChart = function(chart, options)
 	var maps = EU.getDistinctMaps(options);
 	EU.registerMap(chart, maps, () =>
 	{
-		var instance = EU.init(chart);
-		instance.setOption(options);
+		EU.initWithOptions(chart, options);
 		chart.statusRendered(true);
 	});
 };
