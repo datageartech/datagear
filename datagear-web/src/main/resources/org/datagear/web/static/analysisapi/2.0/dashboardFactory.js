@@ -44,15 +44,6 @@
  *   fetchError: function(chart, error){ ... }
  * }
  * 
- * 此看板工厂扩展了图表渲染器格式：
- * {
- *   //图表联动源数据处理函数，默认值为：DF.resolveChartLinkData()函数
- *   //其中：
- *   //索引数值，表示图表事件处理函数对应索引数值的参数是联动源数据
- *   //图表事件处理函数，表示此函数的返回值是图表联动源数据，返回值格式应为：{ ... }、[ {...}, ... ]
- *   linkDataHander: 索引数值、function(type){ return 索引数值、图表事件处理函数; }
- * }
- * 
  * 此看板工厂支持将页面内添加了elementAttrConst.DASHBOARD_FORM属性的<form>元素构建为看板表单，具体参考dashboard._renderForms()函数说明。
  * 
  */
@@ -237,6 +228,18 @@ DF.THEME_REF_DASHBOARD_FORM_ID = "DG_REF_DASHBOARD_FORM_ID";
 
 /**图表渲染器附加属性：默认联动事件类型，默认值为："click" */
 DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
+
+/**
+ * 图表渲染器附加属性：图表联动源数据处理函数，支持格式：
+ * 索引数值、function(type){ return 索引数值、图表事件处理函数; }
+ * 
+ * 其中：
+ * 索引数值，表示图表事件处理函数对应索引数值的参数是联动源数据
+ * 图表事件处理函数，表示此函数的返回值是图表联动源数据，返回值格式应为：{ ... }、[ {...}, ... ]
+ * 
+ * 默认值为：DF.resolveChartLinkData()函数
+ */
+DF.RENDERER_ADDITION_LINK_DATA_HANDER = "linkDataHander";
 
 /**
  * 创建看板实例，为其添加看板API。
@@ -436,13 +439,13 @@ chartProto._initFetchGroup = function()
  *   //可选，联动目标图表元素ID、ID数组
  *   target: "..."、["...", ...],
  * 	 
- * 	 //可选，原始联动源数据（由图表渲染器的linkDataHander所决定）的属性路径，作为下述【数据属性名】的统一根属性名
+ * 	 //可选，原始联动源数据（由图表渲染器的DF.RENDERER_ADDITION_LINK_DATA_HANDER所决定）的属性路径，作为下述【数据属性名】的统一根属性名
  * 	 root: "..."、[ "...", ... ],
  *   
  *   //可选，联动数据参数映射表
  *   data:
  *   {
- *     //数据属性名：图表渲染器的linkDataHander所决定的联动源数据（受root配置影响）的属性路径（比如："name"、"data.value"、"[0].name"），其值将作为目标图表数据集参数值
+ *     //数据属性名：图表渲染器的DF.RENDERER_ADDITION_LINK_DATA_HANDER所决定的联动源数据（受root配置影响）的属性路径（比如："name"、"data.value"、"[0].name"），其值将作为目标图表数据集参数值
  *     //图表数据集参数索引对象：格式同dashboard._batchSetDataSetParamValues()函数的图表数据集参数索引对象
  *     "数据属性名" : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  *     ...
@@ -508,7 +511,7 @@ chartProto.fetchGroup = function(group)
  * 为指定图表联动配置绑定事件处理函数。
  * 
  * 图表渲染器实现相关：
- * 图表渲染器应实现on()函数、linkDataHander（可选），以支持此特性。
+ * 图表渲染器应实现on()函数、DF.RENDERER_ADDITION_LINK_DATA_HANDER附加属性（可选），以支持此特性。
  * 
  * @param links 图表联动配置对象、数组，格式参考chart.links()函数说明
  * @return 绑定的事件处理函数对象数组，格式为：[ { type: ..., handler: function(...){ ... } }, ... ]
@@ -525,27 +528,15 @@ chartProto.bindLinkEventHanders = function(links)
 	
 	var ehs = [];
 	
-	var triggers = this._resolveLinksTriggers(links);
 	var thisChart = this;
-	
-	var renderer = this.renderer();
-	if(renderer == null || renderer.linkDataHander == null)
-	{
-		let pluginRenderer = this._pluginRenderer();
-		if(pluginRenderer && pluginRenderer.linkDataHander != null)
-			renderer = pluginRenderer;
-	}
+	var triggers = this._resolveLinksTriggers(links);
+	var linkDataHander = this.rendererAddition(DF.RENDERER_ADDITION_LINK_DATA_HANDER);
+	var isLinkDataHanderFn = (linkDataHander != null && CF.isFunction(linkDataHander));
 	
 	for(let i=0; i<triggers.length; i++)
 	{
 		let type = triggers[i];
-		let dataHandler = null;
-		
-		if(renderer != null && renderer.linkDataHander != null)
-		{
-			dataHandler = (CF.isFunction(renderer.linkDataHander) ?
-							renderer.linkDataHander(type) : renderer.linkDataHander);
-		}
+		let dataHandler = (linkDataHander == null ? null : (isLinkDataHanderFn ? linkDataHander(type) : linkDataHander));
 		
 		//取默认
 		if(dataHandler == null)
