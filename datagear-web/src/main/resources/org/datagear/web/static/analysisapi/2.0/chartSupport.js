@@ -8627,6 +8627,11 @@ EU.inflateRendererCommons = function(renderer)
 		return re;
 	};
 	
+	renderer.additions = (renderer.additions || {});
+	
+	if(renderer.additions.defaultLinkEventType == null)
+		renderer.additions.defaultLinkEventType = "click.data";
+	
 	return renderer;		
 };
 
