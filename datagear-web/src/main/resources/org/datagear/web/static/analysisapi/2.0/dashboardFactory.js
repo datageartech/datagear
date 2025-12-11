@@ -1015,7 +1015,7 @@ dashboardProto.mapURLs = function(mapURLs)
  * 
  * @param identity 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
  */
-dashboardProto.chartOf = function(identity)
+dashboardProto.chart = function(identity)
 {
 	var charts = this.charts();
 	var index = this._chartIndex(charts, identity);
@@ -1070,12 +1070,12 @@ dashboardProto._chartIndex = function(charts, identity)
  */
 dashboardProto.addChart = function(chart)
 {
-	var exists = this.chartOf(chart);
+	var exists = this.chart(chart);
 	
 	if(exists != null)
 		return false;
 	
-	exists = this.chartOf(chart.elementId());
+	exists = this.chart(chart.elementId());
 	
 	if(exists != null)
 		return false;
@@ -1391,7 +1391,7 @@ dashboardProto.resizeChart = function(identity)
 {
 	this._assertActive();
 	
-	var chart = this.chartOf(identity);
+	var chart = this.chart(identity);
 	chart.resize();
 	
 	return chart;
@@ -1792,7 +1792,7 @@ dashboardProto._handleChartsAjaxSuccess = function(fetchContext, dashboardResult
 	
 	for(let chartId in chartResults)
 	{
-		let chart = this.chartOf(chartId);
+		let chart = this.chart(chartId);
 		
 		if(!chart)
 			continue;
@@ -1807,7 +1807,7 @@ dashboardProto._handleChartsAjaxSuccess = function(fetchContext, dashboardResult
 	
 	for(let chartId in chartErrors)
 	{
-		let chart = this.chartOf(chartId);
+		let chart = this.chart(chartId);
 		
 		if(!chart)
 			continue;
@@ -2170,7 +2170,7 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
 				continue;
 			
 			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
-			if(this.chartOf(ele) != null)
+			if(this.chart(ele) != null)
 				continue;
 			
 			unsolvedEles.push(ele);
@@ -2215,7 +2215,7 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 				+ "element has a rendered chart");
 		
 		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
-		if(this.chartOf(element) != null)
+		if(this.chart(element) != null)
 			throw new Error((elementsLen > 1 ? "the "+(i+1)+"-th " : "")
 				+ "element has a bounded chart");
 	}
@@ -2387,7 +2387,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 	
 	for(let i=0; i<targets.length; i++)
 	{
-		targetCharts[i] = this.chartOf(targets[i]);
+		targetCharts[i] = this.chart(targets[i]);
 		
 		if(targetCharts[i] == null)
 			throw new Error("no chart found for : " + targets[i]);
@@ -2467,7 +2467,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 				targetChart = targetCharts[chartIdx];
 			else
 			{
-				targetChart = this.chartOf(chartIdx);
+				targetChart = this.chart(chartIdx);
 				
 				if(targetChart == null)
 					throw new Error("no chart found for : " + chartIdx);
@@ -2848,7 +2848,7 @@ dashboardProto.chartsIn = function(element, active)
 	eles.forEach((ele) =>
 	{
 		let id = CF.eleAttr(ele, "id");
-		let chart = (CF.isEmpty(id) ? null : this.chartOf(id));
+		let chart = (CF.isEmpty(id) ? null : this.chart(id));
 		
 		if(!chart)
 			return;

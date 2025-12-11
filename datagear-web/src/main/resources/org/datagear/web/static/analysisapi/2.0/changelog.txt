@@ -52,6 +52,7 @@ chart.fetchGroup() -> chart.fetchGroup()
 
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()
+dashboard.chartOf() -> dashboard.chart()
 dashboard.renderContext -> dashboard.renderContext()
 dashboard.renderContextAttr() -> dashboard.renderContextValue()
 dashboard.loadChart()	*
