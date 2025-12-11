@@ -472,7 +472,6 @@ CF.initChartRoot = function(root)
 		delete attrValues[CF.CHART_ATTR_NAME_WIDGET];
 		delete attrValues[CF.CHART_ATTR_NAME_OPTIONS];
 		
-		//保留原始属性值集，看板可视编辑需要使用
 		//注意，初始化attrValuesOrigin的逻辑不能在chart.render()中执行，
 		//因为chart.render()可以被多次调用，chart.attrValues可能已被修改
 		root.attrValuesOrigin = CF.extend(true, {}, attrValues);
