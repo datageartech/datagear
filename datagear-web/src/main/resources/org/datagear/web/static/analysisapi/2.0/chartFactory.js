@@ -3235,6 +3235,37 @@ chartProto.pluginAttributes = function()
 };
 
 /**
+ * 获取指定名称的插件属性。
+ * 
+ * @param identity 插件属性标识：属性名、索引数值
+ * @returns 插件属性、null
+ */
+chartProto.pluginAttribute = function(identity)
+{
+	var re = null;
+	
+	var attrs = this.pluginAttributes();
+	
+	if(CF.isNumber(identity))
+	{
+		re = attrs[identity];
+	}
+	else
+	{
+		for(let i=0; i<attrs.length; i++)
+		{
+			if(attrs[i].name == identity)
+			{
+				re = attrs[i];
+				break;
+			}
+		}
+	}
+	
+	return re;
+};
+
+/**
  * 获取原始图表选项，即在定义图表时设置的图表选项。
  * 
  * @param eval 可选，可选，是否返回选项对象而非字符串，默认为：false
