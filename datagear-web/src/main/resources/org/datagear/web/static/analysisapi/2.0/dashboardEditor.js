@@ -673,7 +673,7 @@
 			return false;
 		}
 		
-		var cpas = chart.pluginAttributes();
+		var cpas = (chart.plugin() == null ? null : chart.pluginAttributes());
 		if(cpas == null || cpas.length == 0)
 		{
 			DE.tipInfo(i18n.chartPluginNoAttrDefined);
@@ -2414,7 +2414,7 @@
 		var attrValuesOrigin =  (chart.attrValuesOrigin() || {});
 		var attrValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
 		attrValuesEle = CF.evalSilently(attrValuesEle, {});
-		var cpas = chart.pluginAttributes();
+		var cpas = (chart.plugin() == null ? [] : chart.pluginAttributes());
 		
 		cpas.forEach((cpa) =>
 		{
@@ -2552,7 +2552,8 @@
 			return null;
 		
 		var chart = DE.dashboard.renderedChart(ele);
-		if(!chart)
+		
+		if(chart == null || chart.plugin() == null)
 			return null;
 		
 		return chart.pluginAttributes();
