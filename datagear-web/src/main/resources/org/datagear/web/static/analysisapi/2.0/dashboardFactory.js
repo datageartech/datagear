@@ -1013,12 +1013,12 @@ dashboardProto.mapURLs = function(mapURLs)
 /**
  * 获取指定标识的图表，没有则返回null。
  * 
- * @param chartInfo 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param identity 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
  */
-dashboardProto.chartOf = function(chartInfo)
+dashboardProto.chartOf = function(identity)
 {
 	var charts = this.charts();
-	var index = this._chartIndex(charts, chartInfo);
+	var index = this._chartIndex(charts, identity);
 	
 	return (index < 0 ? null : charts[index]);
 };
@@ -1026,34 +1026,34 @@ dashboardProto.chartOf = function(chartInfo)
 /**
  * 获取指定图表在看板图表数组中的索引号，返回-1表示未找到。
  * 
- * @param chartInfo 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
+ * @param identity 图表标识信息：图表HTML元素、图表HTML元素ID、图表对象、图表ID、图表索引数值
  */
-dashboardProto.chartIndex = function(chartInfo)
+dashboardProto.chartIndex = function(identity)
 {
 	var charts = this.charts();
-	return this._chartIndex(charts, chartInfo);
+	return this._chartIndex(charts, identity);
 };
 
 /**
  * 获取图表索引，返回-1表示未找到。
  * 
  * @param charts 待查找的图表数组
- * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
+ * @param identity 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  */
-dashboardProto._chartIndex = function(charts, chartInfo)
+dashboardProto._chartIndex = function(charts, identity)
 {
-	if(charts == null || chartInfo == null)
+	if(charts == null || identity == null)
 		return -1;
 	
-	if(CF.isHtmlEle(chartInfo))
-		chartInfo = CF.eleAttr(chartInfo, "id");
+	if(CF.isHtmlEle(identity))
+		identity = CF.eleAttr(identity, "id");
 	
 	for(let i=0; i<charts.length; i++)
 	{
 		let chart = charts[i];
 		
-		if(chart === chartInfo || chart.elementId() === chartInfo
-				|| i === chartInfo || chart.id() === chartInfo)
+		if(chart === identity || chart.elementId() === identity
+				|| i === identity || chart.id() === identity)
 		{
 			return i;
 		}
@@ -1091,14 +1091,14 @@ dashboardProto.addChart = function(chart)
 /**
  * 删除图表。
  * 
- * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
+ * @param identity 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  * @param doDestroy 选填参数，是否销毁图表，默认为true
  * @return 移除的图表对象，或者图表未找到时为null
  */
-dashboardProto.removeChart = function(chartInfo, doDestroy)
+dashboardProto.removeChart = function(identity, doDestroy)
 {
 	var charts = this.charts();
-	var index = this._chartIndex(charts, chartInfo);
+	var index = this._chartIndex(charts, identity);
 	
 	if(index < 0)
 		return null;
@@ -1384,14 +1384,14 @@ dashboardProto.renderForm = function(form, config)
 /**
  * 重新调整指定图表尺寸。
  * 
- * @param chartInfo 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
+ * @param identity 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  * @returns 图表对象
  */
-dashboardProto.resizeChart = function(chartInfo)
+dashboardProto.resizeChart = function(identity)
 {
 	this._assertActive();
 	
-	var chart = this.chartOf(chartInfo);
+	var chart = this.chartOf(identity);
 	chart.resize();
 	
 	return chart;

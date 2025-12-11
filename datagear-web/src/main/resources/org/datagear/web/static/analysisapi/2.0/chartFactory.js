@@ -2208,7 +2208,7 @@ chartProto._dataSetBindOf = function(dataSetBind, nullable)
 /**
  * 获取/设置指定第一个数据集单个参数值。
  * 
- * @param name 参数名、参数索引
+ * @param name 数据集参数标识：参数名、参数索引、参数对象
  * @param value 可选，要设置的参数值，不设置则执行获取操作
  * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
  */
@@ -2221,7 +2221,7 @@ chartProto.dataSetParamValueFirst = function(name, value, convert)
  * 获取/设置指定数据集单个参数值。
  * 
  * @param dataSetBind 指定数据集绑定或其索引
- * @param name 参数名、参数索引
+ * @param name 数据集参数标识：参数名、参数索引、参数对象
  * @param value 可选，要设置的参数值，不设置则执行获取操作
  * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
  */
@@ -2856,37 +2856,37 @@ chartProto.dataSetFields = function(dataSetBind, sort)
  * 获取指定标识的数据集字段。
  * 
  * @param dataSetBind 数据集绑定或其索引、数据集
- * @param fieldInfo 数据集字段名、字段索引、字段对象
+ * @param identity 数据集字段标识：字段名、字段索引、字段对象
  * @returns 数据集字段，没有找到则返回null
  */
-chartProto.dataSetField = function(dataSetBind, fieldInfo)
+chartProto.dataSetField = function(dataSetBind, identity)
 {
-	return this._dataSetFieldOf(dataSetBind, fieldInfo, true);
+	return this._dataSetFieldOf(dataSetBind, identity, true);
 };
 
-chartProto._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
+chartProto._dataSetFieldOf = function(dataSetBind, identity, nullable)
 {
 	nullable = (nullable === undefined ? false : nullable);
 	
 	//字段对象
-	if(fieldInfo && fieldInfo.name !== undefined)
-		return fieldInfo;
+	if(identity && identity.name !== undefined)
+		return identity;
 	
 	var re = null;
 	
 	var fields = this.dataSetFields(dataSetBind, false);
 	
 	//索引数值
-	if(CF.isNumber(fieldInfo))
+	if(CF.isNumber(identity))
 	{
-		re = fields[fieldInfo];
+		re = fields[identity];
 	}
 	else
 	{
 		//字段名
 		for(var i=0; i<fields.length; i++)
 		{
-			if(fields[i].name == fieldInfo)
+			if(fields[i].name == identity)
 			{
 				re = fields[i];
 				break;
@@ -2895,7 +2895,7 @@ chartProto._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
 	}
 	
 	if(!nullable && re == null)
-		throw new Error(CF.chartLogInfo(this) + " no DataSetField found for : " + fieldInfo);
+		throw new Error(CF.chartLogInfo(this) + " no DataSetField found for : " + identity);
 	
 	return re;
 };
@@ -2906,7 +2906,7 @@ chartProto._dataSetFieldOf = function(dataSetBind, fieldInfo, nullable)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段、字段名、字段索引
+ * @param field 数据集字段标识：字段名、字段索引、字段对象
  * @param alias 可选，要设置的别名，不设置则执行获取操作
  * @returns 要获取的别名，不会为null
  */
@@ -2939,7 +2939,7 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段、字段名、字段索引
+ * @param field 数据集字段标识：字段名、字段索引、字段对象
  * @param order 可选，要设置的排序数值，不设置则执行获取操作
  * @returns 要获取的排序数值，没有设置过则返回null
  */
@@ -2991,21 +2991,21 @@ chartProto.dataSetParams = function(dataSetBind)
  * 获取指定标识的数据集参数。
  * 
  * @param dataSetBind 数据集绑定或其索引、数据集
- * @param paramInfo 数据集参数名、参数索引、参数对象
+ * @param identity 数据集参数标识：参数名、参数索引、参数对象
  * @returns 数据集参数，没有找到则返回null
  */
-chartProto.dataSetParam = function(dataSetBind, paramInfo)
+chartProto.dataSetParam = function(dataSetBind, identity)
 {
-	return this._dataSetParamOf(dataSetBind, paramInfo, true);
+	return this._dataSetParamOf(dataSetBind, identity, true);
 };
 
-chartProto._dataSetParamOf = function(dataSetBind, paramInfo, nullable)
+chartProto._dataSetParamOf = function(dataSetBind, identity, nullable)
 {
 	nullable = (nullable === undefined ? false : nullable);
 	
 	//参数对象
-	if(paramInfo && paramInfo.name !== undefined)
-		return paramInfo;
+	if(identity && identity.name !== undefined)
+		return identity;
 	
 	var re = null;
 	
@@ -3016,16 +3016,16 @@ chartProto._dataSetParamOf = function(dataSetBind, paramInfo, nullable)
 		re =  null;
 	}
 	//索引数值
-	else if(CF.isNumber(paramInfo))
+	else if(CF.isNumber(identity))
 	{
-		re = params[paramInfo];
+		re = params[identity];
 	}
 	else
 	{
 		//参数名
 		for(var i=0; i<params.length; i++)
 		{
-			if(params[i].name == paramInfo)
+			if(params[i].name == identity)
 			{
 				re = params[i];
 				break;
@@ -3034,7 +3034,7 @@ chartProto._dataSetParamOf = function(dataSetBind, paramInfo, nullable)
 	}
 	
 	if(!nullable && re == null)
-		throw new Error(CF.chartLogInfo(this) + " no DataSetParam found for : " + paramInfo);
+		throw new Error(CF.chartLogInfo(this) + " no DataSetParam found for : " + identity);
 	
 	return re;
 };
@@ -3068,7 +3068,7 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段名、字段索引、字段对象
+ * @param field 数据集字段标识：字段名、字段索引、字段对象
  * @param dataSign 可选，不设置则执行获取操作，与this.dataSignFullname()函数参数相同、或者其数组
  * @returns 数据标记名字符串数组，空数组表示没有
  */
@@ -3738,7 +3738,7 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
  * 判断数据集字段是否有指定数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段名、字段索引、字段对象
+ * @param field 数据集字段标识：字段名、字段索引、字段对象
  * @param dataSign 与this.dataSignFullname()函数参数相同
  * @returns true、false
  */
