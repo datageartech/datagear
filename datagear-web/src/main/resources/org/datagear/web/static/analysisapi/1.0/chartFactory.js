@@ -249,6 +249,9 @@
 	/** 内置图表选项名：内置设置（参数/数据透视表） */
 	builtinOptionNames.builtinSetting = "builtinSetting";
 	
+	/** 图表元素标签名，只有此标签名的元素才会当作图表处理，同：org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_CHART_TAG_NAME */
+	chartFactory.CHART_TAG_NAME = "div";
+
 	/** 图表标识样式名，所有已绘制的图表元素都会添加此样式名 */
 	chartFactory.CHART_STYLE_NAME_FOR_INDICATION = "dg-chart-for-indication";
 	

@@ -2046,7 +2046,7 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * dashboard.loadChart(element, successCallback);
  * dashboard.loadChart(element, chartWidgetId, successCallback);
  * 
- * @param element 用于渲染图表的HTML元素、HTML元素ID
+ * @param element 用于渲染图表的<div>元素、元素ID
  * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
  * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
@@ -2057,6 +2057,9 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
 	//this._assertAlive();
 	
 	element = (CF.isString(element) ? CF.eleOfId(element) : element);
+	
+	if(!CF.isChartTagName(element))
+		throw new Error("load chart element must be : <"+CF.CHART_TAG_NAME+">");
 	
 	// (element, successCallback)
 	if(CF.isFunction(chartWidgetId))
@@ -2087,7 +2090,7 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
  * dashboard.loadCharts(elements, successCallback);
  * dashboard.loadCharts(elements, chartWidgetIds, successCallback);
  * 
- * @param elements 用于渲染图表的元素选择器字符串、HTML元素数组
+ * @param elements 用于渲染图表的<div>元素选择器字符串、<div>元素数组
  * @param chartWidgetIds 可选，要加载的图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
  * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
@@ -2111,6 +2114,9 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
 	
 	for(let i=0; i<elements.length; i++)
 	{
+		if(!CF.isChartTagName(elements[i]))
+			throw new Error("load chart "+(i+1)+"-th element must be : <"+CF.CHART_TAG_NAME+">");
+		
 		newChartWidgetIds[i] = (chartWidgetIds == null ? null : chartWidgetIds[i]);
 		
 		if(CF.isEmpty(newChartWidgetIds[i]))
@@ -2121,7 +2127,7 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
 };
 
 /**
- * 将元素内（包括自身）所有设置了"dg-chart-widget"属性，且未初始化为图表的HTML元素异步加载为图表。
+ * 将元素内（包括<div>自身）所有设置了"dg-chart-widget"属性，且未初始化为图表的<div>元素异步加载为图表。
  * 如果没有需要加载的元素，将不会执行异步请求。
  * 
  * 支持调用方式：

@@ -243,6 +243,9 @@ builtinOptionNames.updateAppendMode = "updateAppendMode";
 /** 内置图表选项名：内置工具（参数/数据） */
 builtinOptionNames.builtinTool = "builtinTool";
 
+/** 图表元素标签名，只有此标签名的元素才会当作图表处理，同：org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_CHART_TAG_NAME */
+CF.CHART_TAG_NAME = "div";
+
 /** 图表元素标识样式类名，所有已绘制的图表元素都会添加此样式类名 */
 CF.CHART_IDENTITY_STYLE_NAME = "dg-chart-identity";
 
@@ -5403,7 +5406,17 @@ CF.elementWidgetId = function(ele, widgetId)
 };
 
 /**
- * 获取HTML元素自身或其子孙元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
+ * 判断元素是否符合图表元素标签名。
+ * 
+ * @param ele HTML元素
+ */
+CF.isChartTagName = function(ele)
+{
+	return CF.isEleMatches(ele, CF.CHART_TAG_NAME);
+};
+
+/**
+ * 获取<div>元素自身或其子孙<div>元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
  * 
  * @param ele HTML元素
  * @returns { elements: [ HTML元素, ... ], widgetIds: [ "...", ... ] }
@@ -5417,13 +5430,14 @@ CF.elesWithWidgetId = function(ele)
 	
 	var widgetId = CF.elementWidgetId(ele);
 	
-	if(!CF.isEmpty(widgetId))
+	if(!CF.isEmpty(widgetId) && CF.isChartTagName(ele))
 	{
 		re.elements.push(ele);
 		re.widgetIds.push(widgetId);
 	}
 	
-	var children = CF.elesOfSelector("["+CF.elementAttrConst.WIDGET+"]", ele);
+	var children = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+CF.elementAttrConst.WIDGET+"]", ele);
+	
 	children.forEach(function(child)
 	{
 		let childWidgetId = CF.elementWidgetId(child);

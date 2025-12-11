@@ -374,6 +374,10 @@ $.inflateDashboardDesignEditor = function(po)
 			apiVersion = (matches && matches.length > 1 ? matches[1] : null);
 		}
 		
+		//默认应设为：org.datagear.web.analysis.DashboardApiVersion.V1
+		if(apiVersion == null)
+			apiVersion = "1.0";
+		
 		return apiVersion;
 	};
 	
@@ -953,7 +957,12 @@ $.inflateDashboardDesignEditor = function(po)
 		else
 		{
 			for(var i=0; i<chartWidgets.length; i++)
-				code += "<div style=\""+po.defaultInsertChartEleStyle+"\" dg-chart-widget=\""+chartWidgets[i].id+"\"><!--"+chartWidgets[i].name+"--></div>\n";
+			{
+				code += "<"+chartFactory.CHART_TAG_NAME+" style=\""+po.defaultInsertChartEleStyle+"\""
+					 +  " dg-chart-widget=\""+chartWidgets[i].id+"\">"
+					 +  "<!--"+chartWidgets[i].name+"-->"
+					 +  "</"+chartFactory.CHART_TAG_NAME+">\n";
+			}
 		}
 		
 		po.insertCodeText(codeEditor, cursor, code);

@@ -1856,7 +1856,7 @@
 		for(var i=0; i<chartWidgets.length; i++)
 		{
 			var chartWidget = chartWidgets[i];
-			var chartDiv = CF.eleCreate("div");
+			var chartDiv = CF.eleCreate(CF.CHART_TAG_NAME);
 			
 			//先设style，与源码模式一致
 			if(styleStr)
@@ -1891,7 +1891,7 @@
 		var editEle = DE._editElement(ele);
 		
 		//绑定图表的元素需要是div
-		if(DE._isEmptyElement(editEle) || !CF.isEleMatches(editEle, "div"))
+		if(DE._isEmptyElement(editEle) || !CF.isEleMatches(editEle, CF.CHART_TAG_NAME))
 		{
 			DE.tipInfo(i18n.bindChartElementMustBeDiv);
 			return false;
