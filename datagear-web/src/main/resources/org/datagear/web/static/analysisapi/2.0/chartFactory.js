@@ -414,8 +414,8 @@ CF.create = function(root)
  *				  elementId: "...",
  *				  //渲染上下文
  *				  renderContext: {...},
- *				  //可选，图表插件
- *				  plugin: {...},
+ *				  //可选，图表插件ID对象、插件ID字符串
+ *				  plugin: { id: "..." }、"...",
  *				  //可选，数据集绑定数组
  *				  dataSetBinds: [...],
  *				  //可选，更新间隔
@@ -432,7 +432,12 @@ CF.Chart = function(root)
 {
 	CF.initChartRoot(root);
 	this._root = root;
-	this._plugin = CF.findPluginById(root.plugin ? root.plugin.id : null);
+	
+	if(root.plugin != null)
+	{
+		let pluginId = (CF.isString(root.plugin) ? root.plugin : root.plugin.id);
+		this._plugin = (pluginId == null ? null : CF.findPluginById(pluginId));
+	}
 };
 
 //Chart类原型
@@ -929,16 +934,6 @@ chartProto._pluginRenderer = function()
 {
 	var plugin = this.plugin();
 	return (plugin ? plugin.renderer : null);
-};
-
-chartProto._pluginNonNull = function()
-{
-	var plugin = this.plugin();
-	
-	if(plugin == null)
-		throw new Error(CF.chartLogInfo(this) + " plugin required");
-	
-	return plugin;
 };
 
 /**
@@ -3140,8 +3135,8 @@ chartProto.isMutableModel = function(dataSetBind)
  */
 chartProto.pluginResources = function()
 {
-	var plugin = this._pluginNonNull();
-	return (plugin.resources ? plugin.resources : []);
+	var plugin = this.plugin();
+	return (plugin && plugin.resources ? plugin.resources : []);
 };
 
 /**
@@ -3155,7 +3150,11 @@ chartProto.pluginResourceURL = function(name)
 {
 	name = (name || "");
 	
-	var plugin = this._pluginNonNull();
+	var plugin = this.plugin();
+	
+	if(plugin == null)
+		throw new Error(CF.chartLogInfo(this) + " plugin required");
+	
 	var urlPrefix = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.PLUGIN_RES_URL_PREFIX);
 	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
 	url = this.contextURL(url);
@@ -3233,8 +3232,8 @@ chartProto.attrValuesOrigin = function()
  */
 chartProto.pluginAttributes = function()
 {
-	var plugin = this._pluginNonNull();
-	return (plugin.attributes ? plugin.attributes : []);
+	var plugin = this.plugin();
+	return (plugin && plugin.attributes ? plugin.attributes : []);
 };
 
 /**
@@ -3589,8 +3588,8 @@ chartProto.results = function(chartResult, dataSetResults)
  */
 chartProto.pluginAddition = function(name)
 {
-	var plugin = this._pluginNonNull();
-	return (plugin.additions ? plugin.additions[name] : null);
+	var plugin = this.plugin();
+	return (plugin && plugin.additions ? plugin.additions[name] : null);
 };
 
 /**
@@ -3600,8 +3599,8 @@ chartProto.pluginAddition = function(name)
  */
 chartProto.pluginDataSigns = function()
 {
-	var plugin = this._pluginNonNull();
-	return (plugin.dataSigns ? plugin.dataSigns : []);
+	var plugin = this.plugin();
+	return (plugin && plugin.dataSigns ? plugin.dataSigns : []);
 };
 
 /**
