@@ -124,6 +124,12 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 /**本地图表*/
 elementAttrConst.LOCAL = "dg-chart-local";
 
+/**图表更新器*/
+elementAttrConst.UPDATER = "dg-chart-updater";
+
+/**看板更新器*/
+elementAttrConst.DASHBOARD_UPDATER = "dg-dashboard-updater";
+
 //----------------------------------------
 // elementAttrConst结束
 //----------------------------------------
@@ -243,6 +249,18 @@ DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
  * 默认值为：DF.resolveChartLinkData()函数
  */
 DF.RENDERER_ADDITION_LINK_DATA_HANDER = "linkDataHander";
+
+/**
+ * 图表更新器值常量：全局
+ * 表示使用全局的看板更新器处理图表更新
+ */
+DF.CHART_UPDATER_GLOBAL = "global";
+
+/**
+ * 图表更新器值常量：空
+ * 表示使用空图表结果更新图表，空图表结果为：{ dataSetResults: [] }
+ */
+DF.CHART_UPDATER_EMPTY = "empty";
 
 /**
  * 创建看板实例，为其添加看板API。
