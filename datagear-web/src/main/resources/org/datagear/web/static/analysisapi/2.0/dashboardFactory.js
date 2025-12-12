@@ -1564,15 +1564,15 @@ dashboardProto._doHandleCharts = function()
 			this._renderChart(chart);
 	}
 	
-	var preUpdateGroups = {};
-	var preUpdateLocals = [];
 	var time = CF.currentDateMs();
+	var localGroupBundle = { groups: [], groupValues: {} };
+	var ajaxGroupBundle = { groups: [], groupValues: {} };
 	
 	for(let i=0; i<charts.length; i++)
 	{
 		let chart = charts[i];
-		
 		let wait = this._isWaitForUpdate(chart, time);
+		
 		if(wait > 0)
 		{
 			//应立即设置为HANDLING_UPDATE状态
@@ -1591,39 +1591,63 @@ dashboardProto._doHandleCharts = function()
 			
 			if(this._isLocalChart(chart))
 			{
-				preUpdateLocals.push({chart: chart, query: chartQuery});
+				this._groupChartQueries(chart, chartQuery, localGroupBundle);
 			}
 			else
 			{
-				let group = chart.fetchGroup();
-				let preUpdates = preUpdateGroups[group];
-				
-				if(preUpdates == null)
-				{
-					preUpdates = [];
-					preUpdateGroups[group] = preUpdates;
-				}
-				
-				preUpdates.push({chart: chart, query: chartQuery});
+				this._groupChartQueries(chart, chartQuery, ajaxGroupBundle);
 			}
 		}
 	}
 	
-	CF.executeSilently(() =>
+	for(let i=0; i<localGroupBundle.groups.length; i++)
 	{
-		this._doHandleChartsLocal(preUpdateLocals);
-	});
+		let group = localGroupBundle.groups[i];
+		let chartQueryPairs = localGroupBundle.groupValues[group];
+		
+		CF.executeSilently(() =>
+		{
+			this._doHandleChartsLocal(group, chartQueryPairs);
+		});
+	}
 	
 	var fetchDataURL = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.FETCH_DATA_URL);
 	fetchDataURL = this.contextURL(fetchDataURL);
 	
-	for(let group in preUpdateGroups)
+	for(let i=0; i<ajaxGroupBundle.groups.length; i++)
 	{
+		let group = ajaxGroupBundle.groups[i];
+		let chartQueryPairs = ajaxGroupBundle.groupValues[group];
+		
 		CF.executeSilently(() =>
 		{
-			this._doHandleChartsAjax(fetchDataURL, group, preUpdateGroups[group]);
+			this._doHandleChartsAjax(fetchDataURL, group, chartQueryPairs);
 		});
 	}
+};
+
+dashboardProto._groupChartQueries = function(chart, chartQuery, groupBundle)
+{
+	if(groupBundle.groups == null)
+		groupBundle.groups = [];
+	
+	if(groupBundle.groupValues == null)
+		groupBundle.groupValues = {};
+	
+	let group = chart.fetchGroup();
+	
+	if(CF.indexInArray(groupBundle.groups, group) < 0)
+		groupBundle.groups.push(group);
+	
+	let myCharts = groupBundle.groupValues[group];
+	
+	if(myCharts == null)
+	{
+		myCharts = [];
+		groupBundle.groupValues[group] = myCharts;
+	}
+	
+	myCharts.push({chart: chart, query: chartQuery});
 };
 
 dashboardProto._isWaitForRender = function(chart)
@@ -1727,19 +1751,19 @@ dashboardProto._chartsOfChartQueryPairs = function(chartQueryPairs)
 	return re;
 };
 
-dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
+dashboardProto._doHandleChartsLocal = function(group, chartQueryPairs)
 {
-	if(!chartQueryPairs || chartQueryPairs.length == 0)
+	if(CF.isEmpty(chartQueryPairs))
 		return;
 	
-	var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
 	var updateTime = CF.currentDateMs();
-	
+	var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
 	var dashboardQueryForm = this._buildDashboardQueryForm(chartQueryPairs);
 	var dashboardQuery = this._dashboardQueryOfForm(dashboardQueryForm);
 	// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 	var fetchContext =
 	{
+		group: group,
 		charts: charts,
 		query: dashboardQuery
 	};
@@ -1771,7 +1795,7 @@ dashboardProto._doHandleChartsLocal = function(chartQueryPairs)
 
 dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
 {
-	if(!chartQueryPairs || chartQueryPairs.length == 0)
+	if(CF.isEmpty(chartQueryPairs))
 		return;
 	
 	var charts = this._chartsOfChartQueryPairs(chartQueryPairs);
