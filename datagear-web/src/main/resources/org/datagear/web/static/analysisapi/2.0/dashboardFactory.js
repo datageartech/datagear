@@ -121,6 +121,9 @@ elementAttrConst.FETCH_GROUP = "dg-chart-fetch-group";
 /**图表手动渲染*/
 elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 
+/**本地图表*/
+elementAttrConst.LOCAL = "dg-chart-local";
+
 //----------------------------------------
 // elementAttrConst结束
 //----------------------------------------
@@ -301,6 +304,12 @@ DF.Dashboard = function(root)
 	{
 		charts[i] = DF.createChart(charts[i], root.renderContext, this);
 	}
+	
+	var localCharts = DF.createLocalCharts(root.renderContext, this);
+	for(let i=0; i<localCharts.length; i++)
+	{
+		charts.push(localCharts[i]);
+	}
 };
 
 //Dashboard类原型
@@ -348,12 +357,64 @@ DF.stopHeartBeat = function()
 	}
 };
 
+//创建页面内的全部本地图表
+DF.createLocalCharts = function(renderContext, dashboard)
+{
+	var re = [];
+	
+	var elesWithLocal = DF.elesWithLocal(document.body);
+	var eles = elesWithLocal.elements;
+	var locals = elesWithLocal.locals;
+	
+	for(let i=0; i<eles.length; i++)
+	{
+		let ele = eles[i];
+		let chartRoot = locals[i];
+		let localChart = DF.createLocalChart(ele, chartRoot, renderContext, dashboard);
+		re.push(localChart);
+	}
+	
+	return re;
+};
+
+//创建本地图表
+DF.createLocalChart = function(ele, chartRoot, renderContext, dashboard)
+{
+	let elementId = CF.eleAttr(ele, "id");
+	if(CF.isEmpty(elementId))
+	{
+		elementId = "localchart" + CF.uid();
+		CF.eleAttr(ele, "id", elementId);
+	}
+	
+	if(CF.isEmpty(chartRoot.id))
+		chartRoot.id = elementId;
+	
+	if(CF.isEmpty(chartRoot.name))
+		chartRoot.name = "";
+		
+	chartRoot.elementId = elementId;
+	
+	var chart = DF.createChart(chartRoot, renderContext, dashboard);
+	chart._local = true;
+	
+	return chart;
+};
+
 //----------------------------------------
 // Chart prototype start
 //----------------------------------------
 
 //Chart类原型
 var chartProto = CF.Chart.prototype;
+
+/**
+ * 是否是本地图表。
+ */
+chartProto.isLocal = function()
+{
+	return (this._local == true);
+};
 
 /**
  * 获取/设置图表所属的看板。
@@ -678,8 +739,7 @@ chartProto._isLinkByEventType = function(link, type)
 };
 
 /**
- * 从服务端获取并更新图表数据。
- * 此函数是基于状态实现的，在一个请求内的多次重复调用只会刷新一次。
+ * 请求从服务端获取并更新图表数据。
  */
 chartProto.refresh = function()
 {
@@ -1633,6 +1693,10 @@ dashboardProto._isWaitForUpdate = function(chart, currentTime)
 
 dashboardProto._isLocalChart = function(chart)
 {
+	if(chart.isLocal())
+		return true;
+	
+	//空数据集绑定的也认为是本地图表
 	var dataSetBinds = chart.dataSetBinds();
 	return (dataSetBinds.length == 0);
 };
@@ -2208,7 +2272,7 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 		let element = elements[i];
 		let chartWidgetId = chartWidgetIds[i];
 		
-		if(!chartWidgetId)
+		if(CF.isEmpty(chartWidgetId))
 			throw new Error((elementsLen > 1 ? "the "+(i+1)+"-th " : "")
 				+ "[chartWidgetId] required");
 		
@@ -2877,6 +2941,75 @@ dashboardProto.chartsIn = function(element, active)
 //----------------------------------------
 // Dashboard prototype end
 //----------------------------------------
+
+/**
+ * 获取<div>元素自身或其子孙<div>元素中带有非空本地图表属性（"dg-chart-local"）的全部元素。
+ * 
+ * @param ele HTML元素
+ * @returns { elements: [ HTML元素, ... ], locals: [ ..., ... ] }
+ */
+DF.elesWithLocal = function(ele)
+{
+	var re = { elements: [], locals: [] };
+	
+	if(ele == null)
+		return re;
+	
+	var local = DF.elementLocalAttr(ele);
+	
+	if(!CF.isEmpty(local) && CF.isChartTagName(ele))
+	{
+		local = DF.evalChartLocalValue(local);
+		
+		if(local != null)
+		{
+			re.elements.push(ele);
+			re.locals.push(local);
+		}
+	}
+	
+	var children = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+elementAttrConst.LOCAL+"]", ele);
+	
+	children.forEach(function(child)
+	{
+		let childLocal = DF.elementLocalAttr(child);
+		if(!CF.isEmpty(childLocal))
+		{
+			childLocal = DF.evalChartLocalValue(childLocal);
+			
+			if(childLocal != null)
+			{
+				re.elements.push(child);
+				re.locals.push(childLocal);
+			}
+		}
+	});
+	
+	return re;
+};
+
+/**
+ * 获取/设置HTML元素上的本地图表（"dg-chart-local"）属性值。
+ * 
+ * @param ele HTML元素
+ * @param local 选填参数，要设置的本地图表root字符串形式，不设置则执行获取操作
+ */
+DF.elementLocalAttr = function(ele, local)
+{
+	if(arguments.length == 1)
+	{
+		return CF.eleAttr(ele, elementAttrConst.LOCAL);
+	}
+	else
+	{
+		CF.eleAttr(ele, elementAttrConst.WIDGET, local);
+	}
+};
+
+DF.evalChartLocalValue = function(value)
+{
+	return CF.evalSilently(value);
+};
 
 /**
  * 从参数中解析图表联动源数据
