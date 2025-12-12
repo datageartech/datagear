@@ -34,7 +34,7 @@
  * 
  * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chart.links()函数说明。
  * 
- * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.FETCH_GROUP属性，用于设置图表更新ajax分组。
+ * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
  * 
  * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加如下处理函数：
  * {
@@ -116,7 +116,7 @@ elementAttrConst.MAP_URLS = "dg-chart-map-urls";
 elementAttrConst.LINK = "dg-chart-link";
 
 /**图表更新分组*/
-elementAttrConst.FETCH_GROUP = "dg-chart-fetch-group";
+elementAttrConst.UPDATE_GROUP = "dg-chart-update-group";
 
 /**图表手动渲染*/
 elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
@@ -440,7 +440,7 @@ chartProto._initForPostSuper = chartProto._initForPost;
 chartProto._initForPost = function()
 {
 	this._initLinks();
-	this._initFetchGroup();
+	this._initUpdateGroup();
 	this._initForPostSuper();
 };
 
@@ -477,16 +477,16 @@ chartProto._initLinks = function()
 
 /**
  * 初始化图表取数分组。
- * 此方法从body元素、图表元素的elementAttrConst.FETCH_GROUP属性获取更新分组设置。
+ * 此方法从body元素、图表元素的elementAttrConst.UPDATE_GROUP属性获取更新分组设置。
  */
-chartProto._initFetchGroup = function()
+chartProto._initUpdateGroup = function()
 {
-	var fetchGroup = CF.eleAttr(this._eleNonNull(), elementAttrConst.FETCH_GROUP);
+	var updateGroup = CF.eleAttr(this._eleNonNull(), elementAttrConst.UPDATE_GROUP);
 	
-	if(CF.isEmpty(fetchGroup))
-		fetchGroup = CF.eleAttr(document.body, elementAttrConst.FETCH_GROUP);
+	if(CF.isEmpty(updateGroup))
+		updateGroup = CF.eleAttr(document.body, elementAttrConst.UPDATE_GROUP);
 	
-	this.fetchGroup(fetchGroup);
+	this.updateGroup(updateGroup);
 };
 
 /**
@@ -546,25 +546,25 @@ chartProto.links = function(links)
  * 如果图表从服务端加载数据比较耗时，可以为其指定一个分组标识，让其使用单独的ajax请求加载数据。
  * 注意：相同分组的图表将使用同一个ajax请求。
  * 
- * 图表初始化时会使用图表元素的"dg-chart-fetch-group"属性值执行设置操作。
+ * 图表初始化时会使用图表元素的"dg-chart-update-group"属性值执行设置操作。
  * 
  * @param group 可选，设置取数分组，没有则执行获取操作返回非null值。
  */
-chartProto.fetchGroup = function(group)
+chartProto.updateGroup = function(group)
 {
 	if(arguments.length == 0)
 	{
-		if(this._fetchGroup == null)
-			this._fetchGroup = "";
+		if(this._updateGroup == null)
+			this._updateGroup = "";
 		
-		return this._fetchGroup;
+		return this._updateGroup;
 	}
 	else
 	{
 		if(group == null)
 			group = "";
 		
-		this._fetchGroup = group;
+		this._updateGroup = group;
 	}
 };
 
@@ -1634,7 +1634,7 @@ dashboardProto._groupChartQueries = function(chart, chartQuery, groupBundle)
 	if(groupBundle.groupValues == null)
 		groupBundle.groupValues = {};
 	
-	let group = chart.fetchGroup();
+	let group = chart.updateGroup();
 	
 	if(CF.indexInArray(groupBundle.groups, group) < 0)
 		groupBundle.groups.push(group);

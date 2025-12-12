@@ -48,7 +48,6 @@ chart.styleString()				x
 chart.refreshData()	-> chart.refresh()
 chart.disableSetting() -> chart.disableTool()
 chart.resultDataCell()			x
-chart.fetchGroup() -> chart.fetchGroup()
 
 dashboard.id -> dashboard.id()
 dashboard.charts -> dashboard.charts()
@@ -65,7 +64,6 @@ dashboard.resizeAllCharts() -> dashboard.resizeCharts()
 
 dg-chart-auto-resize默认值为true
 dg-chart-disable-setting改名为dg-chart-disable-tool
-dg-chart-update-group改名为dg-chart-fetch-group
 
 图表监听器函数render()改名为rendered()，update()改名为updated()，destroy()改名为destroyed()
 看板监听器函数render()改名为rendered()，destroy()改名为destroyed()
