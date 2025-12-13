@@ -263,6 +263,12 @@ DF.CHART_UPDATER_GLOBAL = "global";
 DF.CHART_UPDATER_EMPTY = "empty";
 
 /**
+ * 图表更新器值常量：默认
+ * 表示使用看板默认逻辑处理图表更新
+ */
+DF.CHART_UPDATER_DEFAULT = "default";
+
+/**
  * 创建看板实例，为其添加看板API。
  * 
  * @param root 看板根对象，格式参考DF.Dashboard()
@@ -1583,8 +1589,8 @@ dashboardProto._doHandleCharts = function()
 	}
 	
 	var time = CF.currentDateMs();
-	var localGroupBundle = { groups: [], groupValues: {} };
-	var ajaxGroupBundle = { groups: [], groupValues: {} };
+	var ajaxGroupBundle = { groups: [], groupQueryMap: {} };
+	var localGroupBundle = { groups: [], groupQueryMap: {} };
 	
 	for(let i=0; i<charts.length; i++)
 	{
@@ -1618,28 +1624,28 @@ dashboardProto._doHandleCharts = function()
 		}
 	}
 	
-	for(let i=0; i<localGroupBundle.groups.length; i++)
-	{
-		let group = localGroupBundle.groups[i];
-		let chartQueryPairs = localGroupBundle.groupValues[group];
-		
-		CF.executeSilently(() =>
-		{
-			this._doHandleChartsLocal(group, chartQueryPairs);
-		});
-	}
-	
 	var fetchDataURL = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.FETCH_DATA_URL);
 	fetchDataURL = this.contextURL(fetchDataURL);
 	
 	for(let i=0; i<ajaxGroupBundle.groups.length; i++)
 	{
 		let group = ajaxGroupBundle.groups[i];
-		let chartQueryPairs = ajaxGroupBundle.groupValues[group];
+		let groupQuery = ajaxGroupBundle.groupQueryMap[group];
 		
 		CF.executeSilently(() =>
 		{
-			this._doHandleChartsAjax(fetchDataURL, group, chartQueryPairs);
+			this._doHandleChartsAjax(fetchDataURL, groupQuery);
+		});
+	}
+	
+	for(let i=0; i<localGroupBundle.groups.length; i++)
+	{
+		let group = localGroupBundle.groups[i];
+		let groupQuery = localGroupBundle.groupQueryMap[group];
+		
+		CF.executeSilently(() =>
+		{
+			this._doHandleChartsLocal(groupQuery);
 		});
 	}
 };
@@ -1649,23 +1655,23 @@ dashboardProto._groupChartQueries = function(chart, chartQuery, groupBundle)
 	if(groupBundle.groups == null)
 		groupBundle.groups = [];
 	
-	if(groupBundle.groupValues == null)
-		groupBundle.groupValues = {};
+	if(groupBundle.groupQueryMap == null)
+		groupBundle.groupQueryMap = {};
 	
 	let group = chart.updateGroup();
 	
 	if(CF.indexInArray(groupBundle.groups, group) < 0)
 		groupBundle.groups.push(group);
 	
-	let myCharts = groupBundle.groupValues[group];
+	let groupQuery = groupBundle.groupQueryMap[group];
 	
-	if(myCharts == null)
+	if(groupQuery == null)
 	{
-		myCharts = [];
-		groupBundle.groupValues[group] = myCharts;
+		groupQuery = { group: group, chartQueries: [] };
+		groupBundle.groupQueryMap[group] = groupQuery;
 	}
 	
-	myCharts.push({chart: chart, query: chartQuery});
+	groupQuery.chartQueries.push({chart: chart, query: chartQuery});
 };
 
 dashboardProto._isWaitForRender = function(chart)
@@ -1769,8 +1775,10 @@ dashboardProto._chartsOfChartQueryPairs = function(chartQueryPairs)
 	return re;
 };
 
-dashboardProto._doHandleChartsLocal = function(group, chartQueryPairs)
+dashboardProto._doHandleChartsLocal = function(groupQuery)
 {
+	var chartQueryPairs = (groupQuery ? groupQuery.chartQueries : null);
+	
 	if(CF.isEmpty(chartQueryPairs))
 		return;
 	
@@ -1781,7 +1789,7 @@ dashboardProto._doHandleChartsLocal = function(group, chartQueryPairs)
 	// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 	var fetchContext =
 	{
-		group: group,
+		group: groupQuery.group,
 		charts: charts,
 		query: dashboardQuery
 	};
@@ -1798,21 +1806,31 @@ dashboardProto._doHandleChartsLocal = function(group, chartQueryPairs)
 		{
 			let chart = charts[i];
 			let chartQuery = this._chartQueryOfDashboardQuery(dashboardQuery, chart.id());
-			let chartResult = {};
-			//设置空数据集结果数组，避免后续出现空指针异常
-			chart.results(chartResult, []);
+			let chartResult = this._buildEmptyChartResult(chart);
 			
 			this._updateChart(chart, chartResult, chartQuery, true);
 		}
 	}
 	finally
 	{
-		this._setChartsUpdateTime(charts, updateTime);			
+		this._setChartsUpdateTime(charts, updateTime);
 	}
 };
 
-dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
+dashboardProto._buildEmptyChartResult = function(chart)
 {
+	var  re = {};
+	
+	//设置空数据集结果数组，避免后续出现空指针异常
+	chart.results(re, []);
+	
+	return re;
+};
+
+dashboardProto._doHandleChartsAjax = function(url, groupQuery)
+{
+	var chartQueryPairs = (groupQuery ? groupQuery.chartQueries : null);
+	
 	if(CF.isEmpty(chartQueryPairs))
 		return;
 	
@@ -1822,7 +1840,7 @@ dashboardProto._doHandleChartsAjax = function(url, group, chartQueryPairs)
 	// 加载上下文对象，使用此上下文对象可以简化回调函数参数，也易于扩展
 	var fetchContext =
 	{
-		group: group,
+		group: groupQuery.group,
 		charts: charts,
 		query: dashboardQuery,
 		//此次请求是否成功，将在后续设置
