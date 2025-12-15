@@ -2650,7 +2650,7 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 			if(add !== false)
 			{
 				for(let i=0; i<chartRoots.length; i++)
-					this._addLoadedChart(charts[i]);
+					this._addChartCareStatus(charts[i]);
 			}
 		});
 		
@@ -2707,7 +2707,7 @@ dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
 	return DF.createChart(chartRoot, this.renderContext(), this);
 };
 
-dashboardProto._addLoadedChart = function(chart)
+dashboardProto._addChartCareStatus = function(chart)
 {
 	this.addChart(chart);
 	
@@ -2727,6 +2727,137 @@ dashboardProto._addLoadedChart = function(chart)
 			chart.statusPreRender(true);
 		}
 	}
+};
+
+/**
+ * 创建本地图表。
+ * 
+ * 支持调用方式：
+ * dashboard.createChart(element);
+ * dashboard.createChart(element, chartRoot);
+ * dashboard.createChart(element, add);
+ * dashboard.createChart(element, chartRoot, add);
+ * 
+ * @param element 用于渲染图表的<div>元素、元素ID
+ * @param chartRoot 选填，要创建的图表根对象，结构同DF.createLocalChart()函数的同名参数，如果不设置，将从元素的"dg-chart-local"属性取
+ * @param add 可选，是否加入看板，默认值为：true
+ * @returns 创建的本地图表
+ */
+dashboardProto.createChart = function(element, chartRoot, add)
+{
+	element = (CF.isString(element) ? CF.eleOfId(element) : element);
+	
+	if(!CF.isChartTagName(element))
+		throw new Error("create chart element must be : <"+CF.CHART_TAG_NAME+">");
+	
+	if(this.renderedChart(element) != null)
+		throw new Error("element has a rendered chart");
+	
+	//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
+	if(this.chart(element) != null)
+		throw new Error("element has a bounded chart");
+	
+	//(element, add)
+	if(chartRoot === true || chartRoot === false)
+	{
+		add = chartRoot;
+		chartRoot = undefined;
+	}
+	
+	add = (add === undefined ? true : add);
+	
+	if(CF.isEmpty(chartRoot))
+	{
+		chartRoot = DF.elementLocalAttr(element);
+		if(!CF.isEmpty(chartRoot))
+		{
+			chartRoot = DF.evalChartLocalValue(chartRoot);
+		}
+	}
+	
+	if(CF.isEmpty(chartRoot))
+		throw new Error("[chartRoot] required");
+	
+	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+	
+	if(add)
+		this._addChartCareStatus(chart);
+	
+	return chart;
+};
+
+/**
+ * 将元素内（包括<div>自身）所有设置了"dg-chart-local"属性，且未初始化为图表的<div>元素创建为本地图表。
+ * 
+ * 支持调用方式：
+ * dashboard.createUnsolvedCharts();
+ * dashboard.createUnsolvedCharts(elements);
+ * dashboard.createUnsolvedCharts(add);
+ * dashboard.createUnsolvedCharts(elements, add);
+ * 
+ * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
+ * @param add 可选，是否加入看板，默认值为：true
+ * @return 创建的本地图表数组
+ */
+dashboardProto.createUnsolvedCharts = function(elements, add)
+{
+	//(add)
+	if(elements === true || elements === false)
+	{
+		add = elements;
+		elements = undefined;
+	}
+	
+	//创建图表无需看板已渲染
+	//this._assertAlive();
+	
+	elements = (elements == null ? [ document.body ] :
+				(CF.isString(elements) ? CF.elesOfSelector(elements) :
+					(CF.isArray(elements) ? elements : [ elements ])));
+	
+	add = (add === undefined ? true : add);
+	
+	var re = [];
+	
+	for(let i=0; i<elements.length; i++)
+	{
+		let elesWithLocal = DF.elesWithLocal(elements[i], false);
+		let eles = elesWithLocal.elements;
+		let locals = elesWithLocal.locals;
+		
+		for(let j=0; j<eles.length; j++)
+		{
+			let ele = eles[j];
+			
+			if(this.renderedChart(ele) != null)
+				continue;
+			
+			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
+			if(this.chart(ele) != null)
+				continue;
+			
+			let chartRoot = locals[j];
+			
+			if(!CF.isEmpty(chartRoot))
+				chartRoot = DF.evalChartLocalValue(chartRoot);
+			
+			if(CF.isEmpty(chartRoot))
+				continue;
+			
+			let localChart = DF.createLocalChart(ele, chartRoot, this.renderContext(), this);
+			re.push(localChart);
+		}
+	}
+	
+	if(add)
+	{
+		for(let i=0; i<re.length; i++)
+		{
+			this._addChartCareStatus(re[i]);
+		}
+	}
+	
+	return re;
 };
 
 /**
@@ -3267,10 +3398,13 @@ dashboardProto.chartsIn = function(element, active)
  * 获取<div>元素自身或其子孙<div>元素中带有非空本地图表属性（"dg-chart-local"）的全部元素。
  * 
  * @param ele HTML元素
+ * @param eval 可选，是否转换为对象，默认值为：true
  * @returns { elements: [ HTML元素, ... ], locals: [ ..., ... ] }
  */
-DF.elesWithLocal = function(ele)
+DF.elesWithLocal = function(ele, eval)
 {
+	eval = (eval === undefined ? true : eval);
+	
 	var re = { elements: [], locals: [] };
 	
 	if(ele == null)
@@ -3280,7 +3414,8 @@ DF.elesWithLocal = function(ele)
 	
 	if(!CF.isEmpty(local) && CF.isChartTagName(ele))
 	{
-		local = DF.evalChartLocalValue(local);
+		if(eval)
+			local = DF.evalChartLocalValue(local);
 		
 		if(local != null)
 		{
@@ -3296,7 +3431,8 @@ DF.elesWithLocal = function(ele)
 		let childLocal = DF.elementLocalAttr(child);
 		if(!CF.isEmpty(childLocal))
 		{
-			childLocal = DF.evalChartLocalValue(childLocal);
+			if(eval)
+				childLocal = DF.evalChartLocalValue(childLocal);
 			
 			if(childLocal != null)
 			{
