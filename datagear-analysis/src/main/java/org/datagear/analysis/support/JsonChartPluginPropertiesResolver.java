@@ -50,18 +50,18 @@ import org.datagear.util.i18n.Label;
  * <pre>
  * {
  *   id : "...",
- *   nameLabel : "..." 或者 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
- *   descLabel : "..." 或者 { ... },
- *   icons : "..." 或者 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
+ *   nameLabel : "..." 、 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
+ *   descLabel : "..." 、 { ... },
+ *   icons : "..." 、 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
  *   attributes :  [ { ... }, ... ],
  *   dataSigns : [ { ... }, ... ],
- *   dataSetRange: { ... },
+ *   dataSetRange: 数值 、 "none" 、 { ... },
  *   version : "...",
  *   order: 整数值,
- *   categories: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
+ *   categories: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],
  *   或者（兼容3.0.1版本格式）
- *   category: "..." 或者 {name: "...", ...} 或者 ["...", "...", ...] 或者 [ {name: "...", ...}, {name: "...", ...}, ... ],
- *   categoryOrders: 整数值 或者 [ 整数值, 整数值, ... ],
+ *   category: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],
+ *   categoryOrders: 整数值 、 [ 整数值, 整数值, ... ],
  *   author: "...",
  *   contact: "...",
  *   issueDate: "...",
@@ -94,6 +94,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
+
+	/**
+	 * {@linkplain #JSON_PROPERTY_DATA_SET_RANGE}属性的特殊值：{@code "none"}
+	 * <p>
+	 * 此值表示{@linkplain ChartPluginDataSetRange}的值为：<code>{ main: { min: 0, max: 0 }, attachment: { min: 0, max: 0 } }</code>
+	 * </p>
+	 */
+	public static final String DATA_SET_RANGE_NONE = "none";
 
 	/**
 	 * 3.0.1版本的单类别属性名，已在3.1.0版本中被{@linkplain #JSON_PROPERTY_CATEGORIES}代替。
@@ -628,7 +636,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	/**
 	 * 将对象转换为{@linkplain ChartPluginDataSetRange}。
 	 * <p>
-	 * 支持如下三种格式：
+	 * 支持如下四种格式：
 	 * </p>
 	 * <p>
 	 * 仅定义{@linkplain ChartPluginDataSetRange#getMain()}的{@linkplain Range#getMin()}格式：
@@ -652,6 +660,16 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 *   //可选
 	 *   max: 数值
 	 * }
+	 * </pre>
+	 * </code>
+	 * </p>
+	 * <p>
+	 * 定义{@linkplain #DATA_SET_RANGE_NONE}表示的格式：
+	 * </p>
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * "none"
 	 * </pre>
 	 * </code>
 	 * </p>
@@ -701,6 +719,23 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			ChartPluginDataSetRange dsr = createChartPluginDataSetRange();
 			dsr.setMain(mainRange);
 			
+			return dsr;
+		}
+		else if ((obj instanceof String) && DATA_SET_RANGE_NONE.equalsIgnoreCase((String) obj))
+		{
+			ChartPluginDataSetRange dsr = createChartPluginDataSetRange();
+
+			Range main = createRange();
+			main.setMin(0);
+			main.setMax(0);
+
+			Range attachment = createRange();
+			attachment.setMin(0);
+			attachment.setMax(0);
+
+			dsr.setMain(main);
+			dsr.setAttachment(attachment);
+
 			return dsr;
 		}
 		else if (obj instanceof Map<?, ?>)

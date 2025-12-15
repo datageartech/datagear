@@ -819,6 +819,27 @@ public class JsonChartPluginPropertiesResolverTest
 			assertEquals(3, dsr.getAttachment().getMin().intValue());
 			assertEquals(4, dsr.getAttachment().getMax().intValue());
 		}
+
+		{
+			{
+				String value = "none";
+				ChartPluginDataSetRange dsr = this.jsonChartPluginPropertiesResolver.convertToDataSetRange(value);
+
+				assertEquals(0, dsr.getMain().getMin().intValue());
+				assertEquals(0, dsr.getMain().getMax().intValue());
+				assertEquals(0, dsr.getAttachment().getMin().intValue());
+				assertEquals(0, dsr.getAttachment().getMax().intValue());
+			}
+			{
+				String value = "None";
+				ChartPluginDataSetRange dsr = this.jsonChartPluginPropertiesResolver.convertToDataSetRange(value);
+
+				assertEquals(0, dsr.getMain().getMin().intValue());
+				assertEquals(0, dsr.getMain().getMax().intValue());
+				assertEquals(0, dsr.getAttachment().getMin().intValue());
+				assertEquals(0, dsr.getAttachment().getMax().intValue());
+			}
+		}
 	}
 
 	@Test
