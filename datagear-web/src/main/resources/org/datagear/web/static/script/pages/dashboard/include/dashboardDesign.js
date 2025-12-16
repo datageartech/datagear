@@ -143,17 +143,42 @@ $.inflateDashboardDesignEditor = function(po)
 		var idx = $.inArrayById(items, po.resContentTabId(resName));
 		
 		if(idx > -1)
+		{
 			pm.resContentTabs.activeIndex = idx;
+		}
 		else
 		{
-			var tab = po.toResContentTab(resName, isTemplate);
-			pm.resContentTabs.items.push(tab);
+			let tab = po.toResContentTab(resName, isTemplate);
+			items.push(tab);
 			
 			//直接设置activeIndex不会滚动到新加的卡片
 			po.vueNextTick(function()
 			{
-				pm.resContentTabs.activeIndex = pm.resContentTabs.items.length - 1;
+				pm.resContentTabs.activeIndex = items.length - 1;
 			});
+		}
+	};
+	
+	po.updateMenuVisibleForTab = function(tab)
+	{
+		var pm = po.vuePageModel();
+		po.updateMenuItemVisibleForTemplateTab(pm.codeEditMenuItems, tab);
+	};
+	
+	po.updateMenuItemVisibleForTemplateTab = function(items, tab)
+	{
+		if(items == null)
+			return;
+		
+		for(let i=0; i<items.length; i++)
+		{
+			let item = items[i];
+			
+			if(item.forTemplate)
+				item.visible = tab.isTemplate;
+			
+			if(item.items != null)
+				po.updateMenuItemVisibleForTemplateTab(item.items, tab);
 		}
 	};
 	
@@ -248,6 +273,13 @@ $.inflateDashboardDesignEditor = function(po)
 		
 		if(po.focusOnEditorAfterSetContent(tab))
 			codeEditor.focus();
+	};
+	
+	po.resContentTabByIndex = function(index)
+	{
+		var pm = po.vuePageModel();
+		var items = pm.resContentTabs.items;
+		return items[index];
 	};
 	
 	po.focusOnEditorAfterSetContent = function(tab)
@@ -493,32 +525,31 @@ $.inflateDashboardDesignEditor = function(po)
 		
 		if(!noContent)
 		{
-			if(tab.editMode == "code")
+			if(tab.editMode == "visual")
+			{
+				var dashboardEditor = po.visualDashboardEditorByTab(tab);
+				info.content = dashboardEditor.editedHtml();
+			}
+			else
 			{
 				var editorEle = po.elementOfId(po.resCodeEditorEleId(tab));
 				var codeEditor = po.codeEditorInstance(editorEle);
 				info.content = po.getCodeText(codeEditor);
-			}
-			else
-			{
-				var dashboardEditor = po.visualDashboardEditorByTab(tab);
-				info.content = dashboardEditor.editedHtml();
 			}
 		}
 		
 		return info;
 	};
 	
-	po.getCurrentEditResInfo = function(noContent)
-	{
-		return po.getEditResInfo(po.getCurrentEditTab(), noContent);
-	};
-	
 	po.getCurrentEditTab = function()
 	{
 		var pm = po.vuePageModel();
-		var items = pm.resContentTabs.items;
-		return items[pm.resContentTabs.activeIndex];
+		return po.resContentTabByIndex(pm.resContentTabs.activeIndex);
+	};
+	
+	po.getCurrentEditResInfo = function(noContent)
+	{
+		return po.getEditResInfo(po.getCurrentEditTab(), noContent);
 	};
 	
 	po.saveResInfo = function(tab)
@@ -658,24 +689,7 @@ $.inflateDashboardDesignEditor = function(po)
 		var visualEditorIfmWrapper = visualEditorIfm.parent();
 		var visualEditorWrapper = visualEditorIfmWrapper.parent();
 		
-		if(tab.editMode == "code")
-		{
-			var veChangeFlag = codeEditorEle.data("veChangeFlag");
-			var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
-			
-			//有修改
-			if(veChangeFlag != null && dashboardEditor && dashboardEditor.isChanged(veChangeFlag))
-			{
-				po.setCodeText(codeEditor, dashboardEditor.editedHtml());
-				
-				visualEditorIfmWrapper.data("codeChangeFlag", codeEditor.changeGeneration());
-				codeEditorEle.data("veChangeFlag", dashboardEditor.changeFlag());
-			}
-			
-			codeEditorWrapper.removeClass("opacity-hide");
-			visualEditorWrapper.addClass("opacity-hide");
-		}
-		else
+		if(tab.editMode == "visual")
 		{
 			var codeChangeFlag = visualEditorIfmWrapper.data("codeChangeFlag");
 			
@@ -695,6 +709,23 @@ $.inflateDashboardDesignEditor = function(po)
 			
 			codeEditorWrapper.addClass("opacity-hide");
 			visualEditorWrapper.removeClass("opacity-hide");
+		}
+		else
+		{
+			var veChangeFlag = codeEditorEle.data("veChangeFlag");
+			var dashboardEditor = po.visualDashboardEditorByIframe(visualEditorIfm);
+			
+			//有修改
+			if(veChangeFlag != null && dashboardEditor && dashboardEditor.isChanged(veChangeFlag))
+			{
+				po.setCodeText(codeEditor, dashboardEditor.editedHtml());
+				
+				visualEditorIfmWrapper.data("codeChangeFlag", codeEditor.changeGeneration());
+				codeEditorEle.data("veChangeFlag", dashboardEditor.changeFlag());
+			}
+			
+			codeEditorWrapper.removeClass("opacity-hide");
+			visualEditorWrapper.addClass("opacity-hide");
 		}
 	};
 	
@@ -771,12 +802,7 @@ $.inflateDashboardDesignEditor = function(po)
 
 	po.visualDashboardEditorByTab = function(tab)
 	{
-		if(tab == null)
-		{
-			var pm = po.vuePageModel();
-			var items = pm.resContentTabs.items;
-			tab = items[pm.resContentTabs.activeIndex];
-		}
+		tab = (tab == null ? po.getCurrentEditTab() : tab);
 		
 		if(!tab)
 			return null;
@@ -1002,6 +1028,27 @@ $.inflateDashboardDesignEditor = function(po)
 		var text = (doc.getLine(cursor.line).substring(cursor.ch) || "");
 		
 		return text;
+	};
+	
+	po.handleInsertCodeEditorChart = function(create, tab)
+	{
+		tab = (tab == null ? po.getCurrentEditTab() : tab);
+		
+		if(create)
+		{
+			po.openAddChartPanel(function(chartWidget)
+			{
+				chartWidget = [ chartWidget ];
+				po.insertCodeEditorChart(tab, chartWidget);
+			});
+		}
+		else
+		{
+			po.showSelectChartDialog(function(chartWidgets)
+			{
+				return po.insertCodeEditorChart(tab, chartWidgets);
+			});
+		}
 	};
 	
 	//如果插入了看板创建用户没有权限的图表，这里给出提示
@@ -1367,20 +1414,38 @@ $.inflateDashboardDesignEditor = function(po)
 	{
 		var pm = po.vuePageModel();
 		
-		if(pm.quickExecuteMenuItem && pm.quickExecuteMenuItem.commandExec)
-			pm.quickExecuteMenuItem.commandExec();
+		if(pm.veQuickExecuteMenuItem && pm.veQuickExecuteMenuItem.commandExec)
+			pm.veQuickExecuteMenuItem.commandExec();
 	};
 	
 	po.veQuickExecuteMenuItem = function(menuItem)
 	{
 		var pm = po.vuePageModel();
-		pm.quickExecuteMenuItem = menuItem;
+		pm.veQuickExecuteMenuItem = menuItem;
+		pm.veQuickExecuteTooltip = po.buildQuickExecuteTooltip(menuItem);
+	};
+	
+	po.codeQuickExecute = function(tab)
+	{
+		var pm = po.vuePageModel();
 		
+		if(pm.codeQuickExecuteMenuItem && pm.codeQuickExecuteMenuItem.commandExec)
+			pm.codeQuickExecuteMenuItem.commandExec();
+	};
+	
+	po.codeQuickExecuteMenuItem = function(menuItem)
+	{
+		var pm = po.vuePageModel();
+		pm.codeQuickExecuteMenuItem = menuItem;
+		pm.codeQuickExecuteTooltip = po.buildQuickExecuteTooltip(menuItem);
+	};
+	
+	po.buildQuickExecuteTooltip = function(menuItem)
+	{
 		var tooltip = "";
 		if(menuItem)
 		{
-			var tooltip = "";
-			var labelPath = [ menuItem.label ];
+			let labelPath = [ menuItem.label ];
 			if(menuItem.parentLabelPath)
 			{
 				labelPath = ($.isArray(menuItem.parentLabelPath) ?
@@ -1393,7 +1458,7 @@ $.inflateDashboardDesignEditor = function(po)
 			});
 		}
 		
-		pm.quickExecuteTooltip = tooltip;
+		return tooltip;
 	};
 	
 	po.veRefresh = function()
@@ -1970,6 +2035,42 @@ $.inflateDashboardDesignEditor = function(po)
 			codeEditMenuItems:
 			[
 				{
+					label: po.i18n.insert,
+					class: "ve-insert-menuitem",
+					forTemplate: true,
+					items:
+					[
+						{
+							label: po.i18n.chartTipSelect,
+							class: "for-open-chart-panel",
+							parentLabelPath: po.i18n.insert,
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.codeQuickExecuteMenuItem(this);
+								po.handleInsertCodeEditorChart(false);
+							}
+						},
+						{
+							label: po.i18n.chartTipCreate,
+							parentLabelPath: po.i18n.insert,
+							visible: po.enableInsertNewChart,
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.codeQuickExecuteMenuItem(this);
+								po.handleInsertCodeEditorChart(true);
+							}
+						}
+					]
+				},
+				{
 					label: po.i18n.save,
 					command: function(e)
 					{
@@ -2465,22 +2566,28 @@ $.inflateDashboardDesignEditor = function(po)
 					]
 				}
 			],
-			quickExecuteMenuItem: null,
-			quickExecuteTooltip: " ", //XXX 默认空字符串的话后续没有效果！？
-			onQuickExecute: function(e, tab)
+			veQuickExecuteMenuItem: null,
+			veQuickExecuteTooltip: " ", //XXX 默认空字符串的话后续没有效果！？
+			onVeQuickExecute: function(e, tab)
 			{
 				e.stopPropagation();
 				po.element().click();
-				
 				po.veQuickExecute(tab);
+			},
+			codeQuickExecuteMenuItem: null,
+			codeQuickExecuteTooltip: " ", //XXX 默认空字符串的话后续没有效果！？
+			onCodeQuickExecute: function(e, tab)
+			{
+				e.stopPropagation();
+				po.element().click();
+				po.codeQuickExecute(tab);
 			}
 		});
 		
 		po.vueMethod(
 		{
-			onResourceContentTabChange: function()
+			onResourceContentTabChange: function(e)
 			{
-				
 			},
 			
 			onResourceContentTabMenuToggle: function(e, tab)
@@ -2521,27 +2628,6 @@ $.inflateDashboardDesignEditor = function(po)
 				po.initVisualDashboardEditor(tab);
 			},
 			
-			onInsertCodeEditorChart: function(e, tab, create)
-			{
-				create = (create == null ? false: create);
-				
-				if(create)
-				{
-					po.openAddChartPanel(function(chartWidget)
-					{
-						chartWidget = [ chartWidget ];
-						po.insertCodeEditorChart(tab, chartWidget);
-					});
-				}
-				else
-				{
-					po.showSelectChartDialog(function(chartWidgets)
-					{
-						return po.insertCodeEditorChart(tab, chartWidgets);
-					});
-				}
-			},
-			
 			formatVeElePathDisplayName: function(elePath)
 			{
 				return $.truncateIf(elePath.displayName, "...", elePath.tagName.length+17);
@@ -2567,6 +2653,8 @@ $.inflateDashboardDesignEditor = function(po)
 			
 			if(newActiveTab)
 			{
+				po.updateMenuVisibleForTab(newActiveTab);
+				
 				po.vueNextTick(function()
 				{
 					po.loadResContentIfNon(newActiveTab);

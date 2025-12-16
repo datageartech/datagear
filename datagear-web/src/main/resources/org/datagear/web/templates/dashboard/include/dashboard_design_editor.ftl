@@ -45,18 +45,13 @@
 				<div class="my-1">
 					<p-selectbutton v-model="tab.editMode" :options="pm.templateEditModeOptions"
 						option-label="name" option-value="value" class="text-sm" @change="onChangeEditMode($event, tab)"
-						v-if="tab.isTemplate">
+						:disabled="!tab.isTemplate">
 					</p-selectbutton>
 				</div>
-				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'code'">
-					<div class="p-buttonset flex align-items-stretch">
-						<p-button icon="pi pi-list" label="<@spring.message code='selectChart' />" severity="secondary" class="p-button-sm for-open-chart-panel" title="<@spring.message code='dashboard.insertChart.select' />"
-							@click="onInsertCodeEditorChart($event, tab, false)" v-if="tab.isTemplate">
-						</p-button>
-						<p-button icon="pi pi-plus" label="<@spring.message code='createChart' />" severity="secondary" class="p-button-sm" title="<@spring.message code='dashboard.insertChart.create' />"
-							@click="onInsertCodeEditorChart($event, tab, true)" v-if="tab.isTemplate && pm.enableInsertNewChart">
-						</p-button>
-					</div>
+				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode != 'visual'">
+					<p-button label="<@spring.message code='quickExecute' />" @click="pm.onCodeQuickExecute($event, tab)"
+						class="p-button-sm" :disabled="pm.codeQuickExecuteMenuItem == null" v-tooltip.top="pm.codeQuickExecuteTooltip" v-if="tab.isTemplate">
+					</p-button>
 					<p-menubar :model="pm.codeEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 						<template #end>
 							<div class="p-inputgroup pl-2">
@@ -67,8 +62,8 @@
 					</p-menubar>
 				</div>
 				<div class="flex" v-if="!pm.isReadonlyAction && tab.editMode == 'visual'" v-if="tab.isTemplate">
-					<p-button label="<@spring.message code='quickExecute' />" @click="pm.onQuickExecute($event, tab)"
-						class="p-button-sm" :disabled="pm.quickExecuteMenuItem == null" v-tooltip.top="pm.quickExecuteTooltip">
+					<p-button label="<@spring.message code='quickExecute' />" @click="pm.onVeQuickExecute($event, tab)"
+						class="p-button-sm" :disabled="pm.veQuickExecuteMenuItem == null" v-tooltip.top="pm.veQuickExecuteTooltip">
 					</p-button>
 					<p-menubar :model="pm.tplVisualEditMenuItems" class="ve-menubar light-menubar no-root-icon-menubar border-none pl-2 text-sm z-99">
 					</p-menubar>
