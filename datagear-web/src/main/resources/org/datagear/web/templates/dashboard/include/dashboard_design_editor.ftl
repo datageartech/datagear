@@ -155,8 +155,7 @@
 	po.i18n.parentElement = "<@spring.message code='parentElement' />";
 	po.i18n.cancelSelect = "<@spring.message code='cancelSelect' />";
 	po.i18n.insert = "<@spring.message code='insert' />";
-	po.i18n.bindOrReplaceChartTipSelect = "<@spring.message code='bindOrReplaceChartTipSelect' />";
-	po.i18n.bindOrReplaceChartTipCreate = "<@spring.message code='bindOrReplaceChartTipCreate' />";
+	po.i18n.bindOrReplaceChart = "<@spring.message code='bindOrReplaceChart' />";
 	po.i18n.outerInsertAfter = "<@spring.message code='outerInsertAfter' />";
 	po.i18n.outerInsertBefore = "<@spring.message code='outerInsertBefore' />";
 	po.i18n.innerInsertAfter = "<@spring.message code='innerInsertAfter' />";

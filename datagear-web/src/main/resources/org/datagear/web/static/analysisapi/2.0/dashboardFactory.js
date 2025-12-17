@@ -3463,6 +3463,26 @@ DF.elementLocalAttr = function(ele, local)
 	}
 };
 
+DF.chartWidgetToEleLocalAttrVal = function(chartWidget)
+{
+	var pluginId = null;
+	
+	//org.datagear.management.domain.HtmlChartWidgetEntity
+	if(chartWidget.pluginVo)
+	{
+		pluginId = chartWidget.pluginVo.id;
+	}
+	//org.datagear.analysis.support.ChartWidget
+	else if(chartWidget.plugin)
+	{
+		pluginId = chartWidget.plugin.id;
+	}
+	
+	var obj = { plugin: pluginId };
+	
+	return CF.serializeBySingleQuote(obj);
+};
+
 DF.evalChartLocalValue = function(value)
 {
 	return CF.evalSilently(value);

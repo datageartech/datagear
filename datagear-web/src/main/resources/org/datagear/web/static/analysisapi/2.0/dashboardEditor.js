@@ -2527,7 +2527,7 @@
 				attrValuesMerge[p] = attrValues[p];
 		}
 		
-		var eleAttrValue = DE._serializeForAttrValue(attrValuesMerge);
+		var eleAttrValue = CF.serializeBySingleQuote(attrValuesMerge);
 		
 		if(DE._isEmptyJsonObjStr(eleAttrValue))
 			DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, null);
@@ -2823,7 +2823,7 @@
 				trim[p] = v;
 		}
 		
-		var attrValue = DE._serializeForAttrValue(trim);
+		var attrValue = CF.serializeBySingleQuote(trim);
 		
 		if(DE._isEmptyJsonObjStr(attrValue))
 			DE._setElementAttr(ele, CF.elementAttrConst.THEME, null);
@@ -3586,98 +3586,6 @@
 			if(ele)
 				re.push(ele);
 		}
-		
-		return re;
-	};
-	
-	//将符合JSON规范的对象序列化为元素属性值字符串
-	//注意：此函数使用单引号而非双引号作为引号符，因为双引号会被HTML转义为'&quot;'，对源码不友好
-	DE._serializeForAttrValue = function(obj)
-	{
-		if(obj == null)
-			return null;
-		
-		if(CF.isString(obj))
-		{
-			return DE._toSingleQuoteJsString(obj, true);
-		}
-		else if(CF.isNumber(obj) || CF.isBoolean(obj))
-		{
-			return obj;
-		}
-		else if(CF.isArray(obj))
-		{
-			var str = "[";
-			
-			for(var i=0; i<obj.length; i++)
-			{
-				var vstr = DE._serializeForAttrValue(obj[i]);
-				if(vstr != null && vstr !== "")
-				{
-					if(str != "[")
-						str += ",";
-					
-					str += vstr;
-				}
-			}
-			
-			str += "]";
-			
-			return str;
-		}
-		else if(CF.isPlainObject(obj))
-		{
-			var str = "{";
-			
-			for(var p in obj)
-			{
-				var vstr = DE._serializeForAttrValue(obj[p]);
-				if(vstr != null && vstr !== "")
-				{
-					if(str != "{")
-						str += ",";
-					
-					str += DE._serializeForAttrValue(p) + ":" + vstr;
-				}
-			}
-			
-			str += "}";
-			
-			return str;
-		}
-		else
-			return DE._serializeForAttrValue(obj.toString());
-	};
-	
-	DE._toSingleQuoteJsString = function(str, quote)
-	{
-		quote = (quote === undefined ? false : quote);
-		
-		if(str == null)
-			return str;
-		
-		var re = (quote ? "'" : "");
-		
-		for(var i=0; i<str.length; i++)
-		{
-			var c = str.charAt(i);
-			
-			if(c == '\'')
-				re += "\\'";
-			else if(c == '\n')
-				re += "\\n";
-			else if(c == '\r')
-				re += "\\r";
-			else if(c == '\t')
-				re += "\\t";
-			else if(c == '\\')
-				re += "\\\\";
-			else
-				re += c;
-		}
-		
-		if(quote)
-			re += "'";
 		
 		return re;
 	};

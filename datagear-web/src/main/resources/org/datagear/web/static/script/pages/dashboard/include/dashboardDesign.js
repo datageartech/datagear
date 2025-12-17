@@ -988,6 +988,7 @@ $.inflateDashboardDesignEditor = function(po)
 			let name = (plugin.nameLabel && plugin.nameLabel.value ? plugin.nameLabel.value : plugin.id);
 			//org.datagear.management.domain.HtmlChartWidgetEntity
 			cws[i] = { id: plugin.id, name: name, pluginVo: plugin  };
+			cws[i].forLocalChart = true;
 		}
 		
 		return (isArray ? cws : cws[0]);
@@ -1016,7 +1017,7 @@ $.inflateDashboardDesignEditor = function(po)
 		return re;
 	};
 	
-	po.insertCodeEditorChart = function(tab, chartWidgets, asLocal)
+	po.insertCodeEditorChart = function(tab, chartWidgets)
 	{
 		if(!chartWidgets || !chartWidgets.length)
 			return;
@@ -1037,8 +1038,9 @@ $.inflateDashboardDesignEditor = function(po)
 		var text = po.getTemplatePrevTagText(codeEditor, cursor);
 		var textNext = po.getTemplateNextText(codeEditor, cursor);
 		var chartWidget0 = chartWidgets[0];
-		var attrName = (asLocal ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
-		var attrValue0 = (asLocal ? "{plugin: '"+(chartWidget0.pluginVo ? chartWidget0.pluginVo.id : "")+"'}" : chartWidget0.id);
+		var forLocalChart0 = (chartWidget0.forLocalChart === true);
+		var attrName = (forLocalChart0 ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
+		var attrValue0 = (forLocalChart0 ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget0) : chartWidget0.id);
 		
 		// =
 		if(/=\s*$/g.test(text))
@@ -1066,7 +1068,8 @@ $.inflateDashboardDesignEditor = function(po)
 			for(let i=0; i<chartWidgets.length; i++)
 			{
 				let chartWidget = chartWidgets[i];
-				let attrValue = (asLocal ? "{plugin: '"+(chartWidget.pluginVo ? chartWidget.pluginVo.id : "")+"'}" : chartWidget.id);
+				let forLocalChart = (chartWidget.forLocalChart === true);
+				let attrValue = (forLocalChart ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 				
 				code += "<"+chartFactory.CHART_TAG_NAME+" style=\""+po.defaultInsertChartEleStyle+"\""
 					 +  " "+attrName+"=\""+attrValue+"\">"
@@ -1078,10 +1081,7 @@ $.inflateDashboardDesignEditor = function(po)
 		po.insertCodeText(codeEditor, cursor, code);
 		codeEditor.focus();
 		
-		if(!asLocal)
-		{
-			po.tipChartPermissionIfNeed(chartWidgets);
-		}
+		po.tipChartPermissionIfNeed(chartWidgets);
 	};
 	
 	po.getTemplatePrevTagText = function(codeEditor, cursor)
@@ -1122,11 +1122,21 @@ $.inflateDashboardDesignEditor = function(po)
 	{
 		if(!chartWidgets || chartWidgets.length == 0)
 			return;
+			
+		var realCws = [];
+		for(let i=0; i<chartWidgets.length; i++)
+		{
+			if(chartWidgets[i].forLocalChart !== true)
+				realCws.push(chartWidgets[i]);
+		}
+		
+		if(realCws.length == 0)
+			return;
 		
 		var fm = po.vueFormModel();
 		if(fm.createUser && fm.createUser.id && po.currentUserId != fm.createUser.id)
 		{
-			var chartWidgetIds = $.propertyValue(chartWidgets, "id");
+			var chartWidgetIds = $.propertyValue(realCws, "id");
 			
 			po.ajaxJson("/chart/hasReadPermission",
 			{
@@ -1134,11 +1144,11 @@ $.inflateDashboardDesignEditor = function(po)
 				success: function(response)
 				{
 					var msg = po.i18n.insertNoPermissionChart;
-					for(var i=0; i<chartWidgets.length; i++)
+					for(let i=0; i<realCws.length; i++)
 					{
 						if(!response[i])
 						{
-							var cw = chartWidgets[i];
+							let cw = realCws[i];
 							$.tipWarn({ summary: $.validator.format(msg, cw.name, cw.id), life: 5000});
 						}
 					}
@@ -1759,6 +1769,40 @@ $.inflateDashboardDesignEditor = function(po)
 					}
 				}
 			},
+			{
+				label: po.i18n.chartTipLocal,
+				insertType: insertType,
+				parentLabelPath: parentLabelPath,
+				command: function(e)
+				{
+					e.item.commandExec();
+				},
+				commandExec: function()
+				{
+					po.veQuickExecuteMenuItem(this);
+					
+					var tab = po.getCurrentEditTab();
+					var apiVersion = po.resolveApiVersionInTabCode(tab);
+					var dashboardEditor = po.visualDashboardEditorByTab(tab);
+					
+					if(po.checkUnsupportedFnIfApiVersionV1(apiVersion))
+					{
+						if(dashboardEditor)
+						{
+							if(!dashboardEditor.checkInsertChart(this.insertType))
+								return;
+							
+							po.veCurrentInsertType = this.insertType;
+							po.showSelectPluginDialog(function(plugin)
+							{
+								alert("TODO");
+								//var cw = po.wrapPluginToChartWidget(plugin);
+								//po.insertVeChart(cw);
+							});
+						}
+					}
+				}
+			},
 			{ separator: true },
 			{
 				label: po.i18n.gridLayout,
@@ -2101,7 +2145,6 @@ $.inflateDashboardDesignEditor = function(po)
 			[
 				{
 					label: po.i18n.insert,
-					class: "ve-insert-menuitem",
 					forTemplate: true,
 					items:
 					[
@@ -2146,7 +2189,6 @@ $.inflateDashboardDesignEditor = function(po)
 						{
 							label: po.i18n.chartTipLocal,
 							parentLabelPath: po.i18n.insert,
-							visible: po.enableInsertNewChart,
 							command: function(e)
 							{
 								e.item.commandExec();
@@ -2163,7 +2205,7 @@ $.inflateDashboardDesignEditor = function(po)
 									po.showSelectPluginDialog(function(plugin)
 									{
 										var cw = po.wrapPluginToChartWidget(plugin);
-										return po.insertCodeEditorChart(tab, [ cw ], true);
+										return po.insertCodeEditorChart(tab, [ cw ]);
 									});
 								}
 							}
@@ -2234,81 +2276,121 @@ $.inflateDashboardDesignEditor = function(po)
 				},
 				{
 					label: po.i18n.insert,
-					class: "ve-insert-menuitem",
 					items:
 					[
 						{
-							label: po.i18n.bindOrReplaceChartTipSelect,
-							parentLabelPath: po.i18n.insert,
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
+							label: po.i18n.bindOrReplaceChart,
+							items:
+							[
 								{
-									if(!dashboardEditor.checkBindChart())
-										return;
-									
-									po.showSelectChartDialog(function(chartWidgets)
+									label: po.i18n.chartTipSelect,
+									parentLabelPath: [ po.i18n.insert, po.i18n.bindOrReplaceChart ],
+									command: function(e)
 									{
-										return po.bindOrReplaceVeChart(chartWidgets);
-									});
-								}
-							}
-						},
-						{
-							label: po.i18n.bindOrReplaceChartTipCreate,
-							parentLabelPath: po.i18n.insert,
-							visible: po.enableInsertNewChart,
-							command: function(e)
-							{
-								e.item.commandExec();
-							},
-							commandExec: function()
-							{
-								po.veQuickExecuteMenuItem(this);
-								
-								var dashboardEditor = po.visualDashboardEditorByTab();
-								if(dashboardEditor)
+										e.item.commandExec();
+									},
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkBindChart())
+												return;
+											
+											po.showSelectChartDialog(function(chartWidgets)
+											{
+												return po.bindOrReplaceVeChart(chartWidgets);
+											});
+										}
+									}
+								},
 								{
-									if(!dashboardEditor.checkBindChart())
-										return;
-									
-									po.openAddChartPanel(function(chartWidget)
+									label: po.i18n.chartTipCreate,
+									parentLabelPath: [ po.i18n.insert, po.i18n.bindOrReplaceChart ],
+									visible: po.enableInsertNewChart,
+									command: function(e)
 									{
-										chartWidget = [ chartWidget ];
-										po.bindOrReplaceVeChart(chartWidget);
-									});
+										e.item.commandExec();
+									},
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var dashboardEditor = po.visualDashboardEditorByTab();
+										if(dashboardEditor)
+										{
+											if(!dashboardEditor.checkBindChart())
+												return;
+											
+											po.openAddChartPanel(function(chartWidget)
+											{
+												chartWidget = [ chartWidget ];
+												po.bindOrReplaceVeChart(chartWidget);
+											});
+										}
+									}
+								},
+								{
+									label: po.i18n.chartTipLocal,
+									parentLabelPath: [ po.i18n.insert, po.i18n.bindOrReplaceChart ],
+									command: function(e)
+									{
+										e.item.commandExec();
+									},
+									commandExec: function()
+									{
+										po.veQuickExecuteMenuItem(this);
+										
+										var tab = po.getCurrentEditTab();
+										var apiVersion = po.resolveApiVersionInTabCode(tab);
+										var dashboardEditor = po.visualDashboardEditorByTab(tab);
+										
+										if(po.checkUnsupportedFnIfApiVersionV1(apiVersion))
+										{
+											if(dashboardEditor)
+											{
+												if(!dashboardEditor.checkBindChart())
+													return;
+												
+												po.showSelectPluginDialog(function(plugin)
+												{
+													alert("TODO");
+													//var cw = po.wrapPluginToChartWidget(plugin);
+													//po.bindOrReplaceVeChart(cw);
+												});
+											}
+										}
+									}
 								}
-							}
+							]
 						},
 						{ separator: true },
 						{
 							label: po.i18n.outerInsertAfter,
+							class: "ve-insert-submenu-offset",
 							items: po.buildTplVisualInsertMenuItems("after", [po.i18n.insert, po.i18n.outerInsertAfter])
 						},
 						{
 							label: po.i18n.outerInsertBefore,
+							class: "ve-insert-submenu-offset",
 							items: po.buildTplVisualInsertMenuItems("before", [po.i18n.insert, po.i18n.outerInsertBefore])
 						},
 						{
 							label: po.i18n.innerInsertAfter,
+							class: "ve-insert-submenu-offset",
 							items: po.buildTplVisualInsertMenuItems("append", [po.i18n.insert, po.i18n.innerInsertAfter])
 						},
 						{
 							label: po.i18n.innerInsertBefore,
+							class: "ve-insert-submenu-offset",
 							items: po.buildTplVisualInsertMenuItems("prepend", [po.i18n.insert, po.i18n.innerInsertBefore])
 						}
 					]
 				},
 				{
 					label: po.i18n.edit,
-					class: "ve-edit-menuitem",
 					items:
 					[
 						{
@@ -2442,6 +2524,7 @@ $.inflateDashboardDesignEditor = function(po)
 						},
 						{
 							label: po.i18n.chart,
+							class: "ve-edit-submenu-offset",
 							items:
 							[
 								{

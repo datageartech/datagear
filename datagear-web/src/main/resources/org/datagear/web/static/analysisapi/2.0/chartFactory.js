@@ -7741,6 +7741,91 @@ CF.chartLogInfo = function(chart)
 	return "chart["+(chart == null ? "null" : "#"+chart.elementId())+"]";
 };
 
+/**
+ * 将符合JSON规范的对象序列化为单引号的JSON变体字符串
+ */
+CF.serializeBySingleQuote = function(obj)
+{
+	if(obj == null)
+		return (obj + "");
+	
+	if(CF.isString(obj))
+	{
+		return CF._serializeSingleQuoteStr(obj, true);
+	}
+	else if(CF.isNumber(obj) || CF.isBoolean(obj))
+	{
+		return (obj + "");
+	}
+	else if(CF.isArray(obj))
+	{
+		let str = "[";
+		
+		for(let i=0; i<obj.length; i++)
+		{
+			if(str != "[")
+				str += ",";
+			
+			str += CF.serializeBySingleQuote(obj[i]);
+		}
+		
+		str += "]";
+		
+		return str;
+	}
+	else if(CF.isPlainObject(obj))
+	{
+		let str = "{";
+		
+		for(let p in obj)
+		{
+			if(str != "{")
+				str += ",";
+			
+			str += CF.serializeBySingleQuote(p) + ":" + CF.serializeBySingleQuote(obj[p]);
+		}
+		
+		str += "}";
+		
+		return str;
+	}
+	else
+		return CF.serializeBySingleQuote(obj.toString());
+};
+
+CF._serializeSingleQuoteStr = function(str, quote)
+{
+	quote = (quote === undefined ? false : quote);
+	
+	if(str == null)
+		return str;
+	
+	var re = (quote ? "'" : "");
+	
+	for(let i=0; i<str.length; i++)
+	{
+		let c = str.charAt(i);
+		
+		if(c === '\'')
+			re += "\\'";
+		else if(c === '\n')
+			re += "\\n";
+		else if(c === '\r')
+			re += "\\r";
+		else if(c === '\t')
+			re += "\\t";
+		else if(c === '\\')
+			re += "\\\\";
+		else
+			re += c;
+	}
+	
+	if(quote)
+		re += "'";
+	
+	return re;
+};
+
 //-------------
 // < 已弃用函数 start
 //-------------
