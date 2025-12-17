@@ -851,75 +851,125 @@ $.inflateDashboardDesignEditor = function(po)
 		return (iframe.contentDocument || iframe.contentWindow.document);
 	};
 	
+	po.selectChartDialogId = $.uid("selectchart");
+	po.selectPluginDialogId = $.uid("selectplugin");
+	
 	po.showSelectChartDialog = function(selectHandler)
 	{
-		var dialog = po.selectChartDialog();
+		po.showPersistSelectDialog(
+			po.selectChartDialogId,
+			po.i18n.chart+" - "+po.i18n.select,
+			"/chart/select?multiple",
+			selectHandler
+		);
+	};
+	
+	po.closeSelectChartDialog = function()
+	{
+		var dialog = $("#"+po.selectChartDialogId, document.body);
+		$.closeDialog(dialog);
+	};
+	
+	po.showSelectPluginDialog = function(selectHandler)
+	{
+		po.showPersistSelectDialog(
+			po.selectPluginDialogId,
+			po.i18n.chartPlugin+" - "+po.i18n.select,
+			"/chartPlugin/select",
+			selectHandler
+		);
+	};
+	
+	po.closeSelectPluginDialog = function()
+	{
+		var dialog = $("#"+po.selectPluginDialogId, document.body);
+		$.closeDialog(dialog);
+	};
+	
+	po.showPersistSelectDialog = function(dialogId, dialogTitle, url, selectHandler, options)
+	{
+		options = $.extend(true,
+		{
+			styleClass: "table-sm",
+			width: "50vw",
+			position: "right",
+		},
+		options);
+		
+		var dialog = $("#"+dialogId, document.body);
 		
 		if(dialog.length == 0)
 		{
-			po.handleOpenSelectAction("/chart/select?multiple",
-			function(chartWidgets)
+			po.handleOpenSelectAction(url,
+			function(selectedData)
 			{
 				var closeDialog = undefined;
-				var myDialog = po.selectChartDialog();
-				var handler = myDialog.data("dashboardSelectChartHandler");
+				var myDialog = $("#"+dialogId, document.body);
+				var handler = myDialog.data("persistSelectDialogHandler");
 				
 				if(handler)
-					closeDialog = handler(chartWidgets);
+					closeDialog = handler(selectedData);
 				
 				if(closeDialog !== false)
-					po.hideSelectChartDialog();
+					po.hidePersistSelectDialog(dialogId);
 				
 				return false;
 			},
 			{
+				dialogId: dialogId,
 				modal: true,
 				closable: false,
-				styleClass: "dashboard-select-chart-wrapper table-sm",
-				templateHeader: "<span class='p-dialog-title'>"+po.i18n.chart+" - "+po.i18n.select+"</span>"
+				styleClass: "dashboard-pst-select-dialog " + options.styleClass,
+				templateHeader: "<span class='p-dialog-title'>"+dialogTitle+"</span>"
 								+"<div class='dialog-btns p-dialog-header-icons'>"
 								+"	<p-button type='button' icon='pi pi-times' class='p-dialog-header-icon p-dialog-header-close p-link' @click='onCustomHide'></p-button>"
 								+"</div>",
-				width: "50vw",
-				position: "right",
+				width: options.width,
+				position: options.position,
 				onShow: function(dialog)
 				{
-					dialog.data("dashboardSelectChartHandler", selectHandler);
+					dialog.data("persistSelectDialogHandler", selectHandler);
 				},
 				onSetup: function(setup)
 				{
 					setup.onCustomHide = function()
 					{
-						po.hideSelectChartDialog();
+						po.hidePersistSelectDialog(dialogId);
 					};
 				}
 			});
 		}
 		else
 		{
-			dialog.data("dashboardSelectChartHandler", selectHandler);
+			dialog.data("persistSelectDialogHandler", selectHandler);
 			
 			var dialogMask = dialog.parent();
 			dialogMask.removeClass("opacity-hide");
 		}
 	};
 	
-	po.hideSelectChartDialog = function()
+	po.hidePersistSelectDialog = function(dialogId)
 	{
-		var dialog = po.selectChartDialog();
+		var dialog = $("#"+dialogId, document.body);
 		var dialogMask = dialog.parent();
 		dialogMask.addClass("opacity-hide");
 	};
 	
-	po.closeSelectChartDialog = function()
+	po.wrapPluginToChartWidget = function(plugin)
 	{
-		var dialog = po.selectChartDialog();
-		$.closeDialog(dialog);
-	};
-	
-	po.selectChartDialog = function()
-	{
-		return $(".dashboard-select-chart-wrapper", document.body);
+		var isArray = Array.isArray(plugin);
+		var plugins = (isArray ? plugin : [ plugin ]);
+		
+		var cws = [];
+		for(let i=0; i<plugins.length; i++)
+		{
+			let plugin = plugins[i];
+			let name = (plugin.nameLabel && plugin.nameLabel.value ? plugin.nameLabel.value : plugin.id);
+			//org.datagear.management.domain.HtmlChartWidgetEntity
+			cws[i] = { id: plugin.id, name: name, pluginVo: plugin  };
+		}
+		
+		return (isArray ? cws : cws[0]);
 	};
 	
 	po.defaultInsertChartEleStyle = "display:inline-block;width:300px;height:300px;";
@@ -945,7 +995,7 @@ $.inflateDashboardDesignEditor = function(po)
 		return re;
 	};
 	
-	po.insertCodeEditorChart = function(tab, chartWidgets)
+	po.insertCodeEditorChart = function(tab, chartWidgets, asLocal)
 	{
 		if(!chartWidgets || !chartWidgets.length)
 			return;
@@ -963,30 +1013,43 @@ $.inflateDashboardDesignEditor = function(po)
 		var cursor = doc.getCursor();
 		var code = "";
 		
-		var chartId = chartWidgets[0].id;
 		var text = po.getTemplatePrevTagText(codeEditor, cursor);
 		var textNext = po.getTemplateNextText(codeEditor, cursor);
+		var chartWidget0 = chartWidgets[0];
+		var attrName = (asLocal ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
+		var attrValue0 = (asLocal ? "{plugin: '"+(chartWidget0.pluginVo ? chartWidget0.pluginVo.id : "")+"'}" : chartWidget0.id);
 		
 		// =
 		if(/=\s*$/g.test(text))
-			code = "\"" + chartId + "\"";
+		{
+			code = "\"" + attrValue0 + "\"";
+		}
 		// ="... 或 ='...
 		else if(/=\s*['"][^'"]*$/g.test(text))
-			code = chartId;
+		{
+			code = attrValue0;
+		}
 		// <...
 		else if(/<[^>]*$/g.test(text))
-			code = " dg-chart-widget=\""+chartId+"\"";
+		{
+			code = " "+attrName+"=\""+attrValue0+"\"";
+		}
 		// "..." 或 '...'
 		else if(/['"][^'"]*$/g.test(text) && /^[^'"]*['"]/g.test(textNext))
-			code = chartId;
+		{
+			code = attrValue0;
+		}
 		// >...
 		else
 		{
-			for(var i=0; i<chartWidgets.length; i++)
+			for(let i=0; i<chartWidgets.length; i++)
 			{
+				let chartWidget = chartWidgets[i];
+				let attrValue = (asLocal ? "{plugin: '"+(chartWidget.pluginVo ? chartWidget.pluginVo.id : "")+"'}" : chartWidget.id);
+				
 				code += "<"+chartFactory.CHART_TAG_NAME+" style=\""+po.defaultInsertChartEleStyle+"\""
-					 +  " dg-chart-widget=\""+chartWidgets[i].id+"\">"
-					 +  "<!--"+chartWidgets[i].name+"-->"
+					 +  " "+attrName+"=\""+attrValue+"\">"
+					 +  (chartWidget.name ? "<!--"+chartWidget.name+"-->" : "")
 					 +  "</"+chartFactory.CHART_TAG_NAME+">\n";
 			}
 		}
@@ -994,7 +1057,10 @@ $.inflateDashboardDesignEditor = function(po)
 		po.insertCodeText(codeEditor, cursor, code);
 		codeEditor.focus();
 		
-		po.tipChartPermissionIfNeed(chartWidgets);
+		if(!asLocal)
+		{
+			po.tipChartPermissionIfNeed(chartWidgets);
+		}
 	};
 	
 	po.getTemplatePrevTagText = function(codeEditor, cursor)
@@ -1028,27 +1094,6 @@ $.inflateDashboardDesignEditor = function(po)
 		var text = (doc.getLine(cursor.line).substring(cursor.ch) || "");
 		
 		return text;
-	};
-	
-	po.handleInsertCodeEditorChart = function(create, tab)
-	{
-		tab = (tab == null ? po.getCurrentEditTab() : tab);
-		
-		if(create)
-		{
-			po.openAddChartPanel(function(chartWidget)
-			{
-				chartWidget = [ chartWidget ];
-				po.insertCodeEditorChart(tab, chartWidget);
-			});
-		}
-		else
-		{
-			po.showSelectChartDialog(function(chartWidgets)
-			{
-				return po.insertCodeEditorChart(tab, chartWidgets);
-			});
-		}
 	};
 	
 	//如果插入了看板创建用户没有权限的图表，这里给出提示
@@ -1641,7 +1686,6 @@ $.inflateDashboardDesignEditor = function(po)
 		[
 			{
 				label: po.i18n.chartTipSelect,
-				class: "for-open-chart-panel",
 				insertType: insertType,
 				parentLabelPath: parentLabelPath,
 				command: function(e)
@@ -2042,7 +2086,6 @@ $.inflateDashboardDesignEditor = function(po)
 					[
 						{
 							label: po.i18n.chartTipSelect,
-							class: "for-open-chart-panel",
 							parentLabelPath: po.i18n.insert,
 							command: function(e)
 							{
@@ -2051,7 +2094,12 @@ $.inflateDashboardDesignEditor = function(po)
 							commandExec: function()
 							{
 								po.codeQuickExecuteMenuItem(this);
-								po.handleInsertCodeEditorChart(false);
+								
+								var tab = po.getCurrentEditTab();
+								po.showSelectChartDialog(function(chartWidgets)
+								{
+									return po.insertCodeEditorChart(tab, chartWidgets);
+								});
 							}
 						},
 						{
@@ -2065,7 +2113,33 @@ $.inflateDashboardDesignEditor = function(po)
 							commandExec: function()
 							{
 								po.codeQuickExecuteMenuItem(this);
-								po.handleInsertCodeEditorChart(true);
+								
+								var tab = po.getCurrentEditTab();
+								po.openAddChartPanel(function(chartWidget)
+								{
+									chartWidget = [ chartWidget ];
+									po.insertCodeEditorChart(tab, chartWidget);
+								});
+							}
+						},
+						{
+							label: po.i18n.chartTipLocal,
+							parentLabelPath: po.i18n.insert,
+							visible: po.enableInsertNewChart,
+							command: function(e)
+							{
+								e.item.commandExec();
+							},
+							commandExec: function()
+							{
+								po.codeQuickExecuteMenuItem(this);
+								
+								var tab = po.getCurrentEditTab();
+								po.showSelectPluginDialog(function(plugin)
+								{
+									var cw = po.wrapPluginToChartWidget(plugin);
+									return po.insertCodeEditorChart(tab, [ cw ], true);
+								});
 							}
 						}
 					]
@@ -2139,7 +2213,6 @@ $.inflateDashboardDesignEditor = function(po)
 					[
 						{
 							label: po.i18n.bindOrReplaceChartTipSelect,
-							class: "for-open-chart-panel",
 							parentLabelPath: po.i18n.insert,
 							command: function(e)
 							{

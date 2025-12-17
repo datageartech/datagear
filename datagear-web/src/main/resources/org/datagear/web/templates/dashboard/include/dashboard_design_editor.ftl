@@ -125,11 +125,13 @@
 	po.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
 	po.i18n.bindChartElementMustBeDiv = "<@spring.message code='dashboard.opt.tip.bindChartElementMustBeDiv' />";
 	po.i18n.chart = "<@spring.message code='chart' />";
+	po.i18n.chartPlugin = "<@spring.message code='chartPlugin' />";
 	po.i18n.select = "<@spring.message code='select' />";
 	po.i18n.insertNoPermissionChart = "<@spring.message code='dashboard.insertNoPermissionChart' />";
 	po.i18n["dashboard.opt.edit.eleAttr.eleRequired"] = "<@spring.message code='dashboard.opt.edit.eleAttr.eleRequired' />";
 	po.i18n.chartTipSelect = "<@spring.message code='chartTipSelect' />";
 	po.i18n.chartTipCreate = "<@spring.message code='chartTipCreate' />";
+	po.i18n.chartTipLocal = "<@spring.message code='chartTipLocal' />";
 	po.i18n.gridLayout = "<@spring.message code='gridLayout' />";
 	po.i18n.flexLayout = "<@spring.message code='flexLayout' />";
 	po.i18n.divElement = "<@spring.message code='divElement' />";

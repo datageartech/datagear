@@ -34,6 +34,8 @@
 	 * 				target : document.body,
 	 *              //当target是页内元素时，是否打开为对话框，默认为：true
 	 *              dialog: true,
+	 *              //当dialog=true时，对话框元素ID
+	 * 				dialogId: "",
 	 *              //当dialog=true时，是否作为模态框
 	 * 				modal: true,
 	 *              //当dialog=true时，是否可关闭
@@ -106,7 +108,7 @@
 				if(options.dialog)
 				{
 					const rootEleId = $.uid("app");
-					const dialogEleId = rootEleId+"dialog";
+					const dialogEleId = (options.dialogId ? options.dialogId : rootEleId+"dialog");
 					const rootEle = $("<div id='"+rootEleId+"' dialog-ele-id='"+dialogEleId+"' />").appendTo(container);
 					
 					rootEle.addClass("vue-app-dialog");

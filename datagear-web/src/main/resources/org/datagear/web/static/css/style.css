@@ -879,10 +879,10 @@ label.align-tip{
 .page-dashboard-design .p-menubar.ve-menubar .ve-edit-menuitem .p-submenu-list > .p-menuitem-active > .p-submenu-list{
 	top: -200%;
 }
-.dashboard-select-chart-wrapper > .p-dialog-header .p-dialog-header-icons{
+.dashboard-pst-select-dialog > .p-dialog-header .p-dialog-header-icons{
 	display: none;
 }
-.dashboard-select-chart-wrapper > .p-dialog-header .dialog-btns{
+.dashboard-pst-select-dialog > .p-dialog-header .dialog-btns{
 	display: block;
 }
 .dashboard-select-global-res-wrapper > .p-dialog-header .p-dialog-header-icons{
