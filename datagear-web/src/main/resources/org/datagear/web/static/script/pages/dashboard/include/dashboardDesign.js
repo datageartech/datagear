@@ -342,7 +342,7 @@ $.inflateDashboardDesignEditor = function(po)
 			var myTagToken = po.findPrevTokenOfType(codeEditor, doc, cursor, token, "tag");
 			var myCategory = (myTagToken ? myTagToken.string : null);
 			//仅对最新API版本的看板支持补全
-			var completionSource = (po.isLatestApiVersionInCdeEditor(codeEditor) ? po.codeEditorEleAttrCompletions : []);
+			var completionSource = (po.isLatestApiVersionInCodeEditor(codeEditor) ? po.codeEditorEleAttrCompletions : []);
 			
 			var completions =
 			{
@@ -361,7 +361,7 @@ $.inflateDashboardDesignEditor = function(po)
 			var myVarToken = (myVarTokenInfo ? myVarTokenInfo.token : null);
 			var myCategory = (myVarToken ? myVarToken.string : "");
 			//仅对最新API版本的看板支持补全
-			var completionSource = (po.isLatestApiVersionInCdeEditor(codeEditor) ? po.codeEditorJsApiCompletions() : []);
+			var completionSource = (po.isLatestApiVersionInCodeEditor(codeEditor) ? po.codeEditorJsApiCompletions() : []);
 			
 			//无法确定要补全的是看板还是图表对象，所以这里采用：完全匹配变量名，否则就全部提示
 			// *dashboard*
@@ -388,14 +388,35 @@ $.inflateDashboardDesignEditor = function(po)
 	po.apiVersionRegexInHtml = /dg\-api\-version\=['"]?([\d\.]*)['"]?/;
 	//org.datagear.web.analysis.DashboardApiVersion.V2
 	po.latestApiVersion = "2.0";
+	//org.datagear.web.analysis.DashboardApiVersion.V1
+	po.apiVersionV1 = "1.0";
 	
-	po.isLatestApiVersionInCdeEditor = function(codeEditor)
+	po.isLatestApiVersionInCodeEditor = function(codeEditor)
 	{
-		var apiVersion = po.resolveApiVersionInCdeEditor(codeEditor);
+		var apiVersion = po.resolveApiVersionInCodeEditor(codeEditor);
 		return (po.latestApiVersion == apiVersion);
 	};
 	
-	po.resolveApiVersionInCdeEditor = function(codeEditor)
+	po.checkUnsupportedFnIfApiVersionV1 = function(apiVersion)
+	{
+		if(po.apiVersionV1 == apiVersion)
+		{
+			let msg = $.validator.format(po.i18n.unsupportedFnForApiVersion, po.apiVersionV1);
+			$.tipError({ summary: msg });
+			return false;
+		}
+		
+		return true;
+	};
+	
+	po.resolveApiVersionInTabCode = function(tab)
+	{
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
+		return po.resolveApiVersionInCodeEditor(codeEditor);	
+	};
+	
+	po.resolveApiVersionInCodeEditor = function(codeEditor)
 	{
 		var apiVersion = null;
 		
@@ -408,7 +429,7 @@ $.inflateDashboardDesignEditor = function(po)
 		
 		//默认应设为：org.datagear.web.analysis.DashboardApiVersion.V1
 		if(apiVersion == null)
-			apiVersion = "1.0";
+			apiVersion = po.apiVersionV1;
 		
 		return apiVersion;
 	};
@@ -1004,7 +1025,7 @@ $.inflateDashboardDesignEditor = function(po)
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab), tabPanel);
 		var codeEditor = po.codeEditorInstance(codeEditorEle);
 		
-		var apiVersion = po.resolveApiVersionInCdeEditor(codeEditor);
+		var apiVersion = po.resolveApiVersionInCodeEditor(codeEditor);
 		var checkApiVersion = po.checkInsertChartPluginApiVersion(apiVersion, chartWidgets);
 		if(checkApiVersion === false)
 			return false;
@@ -2135,11 +2156,16 @@ $.inflateDashboardDesignEditor = function(po)
 								po.codeQuickExecuteMenuItem(this);
 								
 								var tab = po.getCurrentEditTab();
-								po.showSelectPluginDialog(function(plugin)
+								var apiVersion = po.resolveApiVersionInTabCode(tab);
+								
+								if(po.checkUnsupportedFnIfApiVersionV1(apiVersion))
 								{
-									var cw = po.wrapPluginToChartWidget(plugin);
-									return po.insertCodeEditorChart(tab, [ cw ], true);
-								});
+									po.showSelectPluginDialog(function(plugin)
+									{
+										var cw = po.wrapPluginToChartWidget(plugin);
+										return po.insertCodeEditorChart(tab, [ cw ], true);
+									});
+								}
 							}
 						}
 					]
