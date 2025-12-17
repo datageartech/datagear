@@ -407,16 +407,16 @@ DF.createLocalChart = function(ele, chartRoot, renderContext, dashboard)
 	let elementId = CF.eleAttr(ele, "id");
 	if(CF.isEmpty(elementId))
 	{
-		elementId = "localchart" + CF.uid();
+		elementId = "ele" + CF.uid();
 		CF.eleAttr(ele, "id", elementId);
 	}
 	
 	if(CF.isEmpty(chartRoot.id))
-		chartRoot.id = elementId;
+		chartRoot.id = CF.uid() + "lc";
 	
 	if(CF.isEmpty(chartRoot.name))
 		chartRoot.name = "";
-		
+	
 	chartRoot.elementId = elementId;
 	
 	var chart = DF.createChart(chartRoot, renderContext, dashboard);
