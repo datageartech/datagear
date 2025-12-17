@@ -1039,7 +1039,7 @@ $.inflateDashboardDesignEditor = function(po)
 		var textNext = po.getTemplateNextText(codeEditor, cursor);
 		var chartWidget0 = chartWidgets[0];
 		var forLocalChart0 = (chartWidget0.forLocalChart === true);
-		var attrName = (forLocalChart0 ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
+		var attrName0 = (forLocalChart0 ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
 		var attrValue0 = (forLocalChart0 ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget0) : chartWidget0.id);
 		
 		// =
@@ -1055,7 +1055,7 @@ $.inflateDashboardDesignEditor = function(po)
 		// <...
 		else if(/<[^>]*$/g.test(text))
 		{
-			code = " "+attrName+"=\""+attrValue0+"\"";
+			code = " "+attrName0+"=\""+attrValue0+"\"";
 		}
 		// "..." 或 '...'
 		else if(/['"][^'"]*$/g.test(text) && /^[^'"]*['"]/g.test(textNext))
@@ -1069,6 +1069,7 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				let chartWidget = chartWidgets[i];
 				let forLocalChart = (chartWidget.forLocalChart === true);
+				let attrName = (forLocalChart === true ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
 				let attrValue = (forLocalChart ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 				
 				code += "<"+chartFactory.CHART_TAG_NAME+" style=\""+po.defaultInsertChartEleStyle+"\""
