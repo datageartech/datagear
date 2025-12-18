@@ -386,7 +386,7 @@ DF.createLocalCharts = function(renderContext, dashboard)
 {
 	var re = [];
 	
-	var elesWithLocal = DF.elesWithLocal(document.body);
+	var elesWithLocal = DF.elesWithLocal(document.body, true);
 	var eles = elesWithLocal.elements;
 	var locals = elesWithLocal.locals;
 	
@@ -2840,7 +2840,7 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	
 	for(let i=0; i<elements.length; i++)
 	{
-		let elesWithLocal = DF.elesWithLocal(elements[i], false);
+		let elesWithLocal = DF.elesWithLocal(elements[i]);
 		let eles = elesWithLocal.elements;
 		let locals = elesWithLocal.locals;
 		
@@ -3417,12 +3417,12 @@ dashboardProto.chartsIn = function(element, active)
  * 获取<div>元素自身或其子孙<div>元素中带有非空本地图表属性（"dg-chart-local"）的全部元素。
  * 
  * @param ele HTML元素
- * @param eval 可选，是否转换为对象，默认值为：true
+ * @param eval 可选，是否转换为对象，默认值为：false
  * @returns { elements: [ HTML元素, ... ], locals: [ ..., ... ] }
  */
 DF.elesWithLocal = function(ele, eval)
 {
-	eval = (eval === undefined ? true : eval);
+	eval = (eval === undefined ? false : eval);
 	
 	var re = { elements: [], locals: [] };
 	

@@ -3437,7 +3437,10 @@
 	//注意：返回的图表元素中可能有还未渲染为图表的元素
 	DE._getChartElements = function(ele)
 	{
-		return CF.elesWithWidgetId(ele).elements;
+		var eles = CF.elesWithWidgetId(ele).elements;
+		var localEles = DF.elesWithLocal(ele).elements;
+		
+		return eles.concat(localEles);
 	};
 	
 	DE._selectedElements = function(root)
