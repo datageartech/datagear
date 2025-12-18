@@ -3,17 +3,15 @@
 	数据源防护支持正则表达式，支持URL和连接属性的或关系；
 	匿名用户始终不开放数据源的SQL工作台、数据导入/导出功能；
 	看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
-	新增客户端（local）图表功能，不参与服务端交互，完全由客户端看板API操作？；
 	图表插件属性/分组新增可重复repeatable特性，用于支持属性值数组输入需求；
 	数据集参数新增JSON类型支持；
 	图表联动添加【回退】默认工具按钮，恢复联动目标图表上一次的参数状态；
-	看板可直接插入声明了零数据集绑定的图表插件作为页面端组件，无需新建图表；
+	看板可通过dg-chart-local定义本地图表，本地图表无需在【图表】模块里定义，由dg-chart-updater定义更新数据逻辑（默认空数据）；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
 		图表插件添加apiVersion属性，标识支持的看板版本；
-		图表展示页根据插件的apiVersion自动加载对应看板API环境；
-		看板编辑页新增看板版本设置项，展示页根据此版本号加载对应看板API环境；
+		看板模板新增dg-api-version功能，标识看板API版本，加载对应的看板API；
 		图表监听器、chart.update()等的results参数结构改为chartResult（对象结构，易于扩展）；
-		chartFactory.init()改为prototype实现；
+		看板、图表对象改为采用prototype实现；
 		dashboard.charts -> dashboard.charts()；
 		dashboard.renderContext -> dashboard.renderContext()；
 		chart.dashboard -> chart.dashboard()；
@@ -26,18 +24,14 @@
 		chart.updateInterval -> chart.updateInterval()；
 		chart.updateResults() -> chart.updateResult()；
 		chart.extValue() -> chart.liveData()；
-		chart.loadMap()改为fetch实现；
-		chart.render()、update()函数仅接受图表结果对象参数；
 		chart.off()函数必须指定要解绑的handler函数；
 		移除chart.loadMap()函数;
-		图表元素上的dg-chart-listener不再继承<body>元素上的；
 		移除chart.resetDataSetParamValuesFirst()、chart.resetDataSetParamValues()函数；
-		内置图表插件数据结构由value数组改为更常用的name/value结构；
+		新增看板API2.0的全部内置图表插件；
 		chart.dataSetFieldOfSign()函数取消nonNull参数逻辑，chart.dataSetFieldsOfSign()函数取消nonEmpty参数逻辑（定义图表时已经校验，这里无需再处理，增加函数复杂性）；
-		移除ECharts内置看板库，改为通过图表插件depend依赖库引入（只需引入名称，库源由系统环境提供）；
-		移除jQuery，库加载改为采用Promise实现（尝试scriptEle.async=false顺序加载）；
+		移除ECharts内置看板库，改为通过图表插件depend依赖库引入（只需引入名称，库源由系统内置依赖库环境提供）；
+		移除jQuery，库加载改为采用Promise实现（scriptEle.async=false确保顺序加载）；
 		移除chart.elementJquery()函数；
-		看板内置资源库移除ECharts，改为在图表插件库中引入（内置共用库），避免仅表格看板仍加载ECharts库；
 		图表JS对象移除ECharts相关API，改为以内置插件依赖库的方式支持；
 		图表JS对象loadMap()改为loadResource()、dg-chart-map-urls改为dg-chart-resource-urls？；
 		内置标签卡移除字体尺寸CSS样式；
@@ -54,7 +48,7 @@
 					return ...;
 				}
 			}
-		移除chart.inflateRenderOptions()、chart.inflateUpdateOptions()函数，添加chart.processRenderOptions()、chart.processUpdateOptions()函数；
+		移除chart.inflateRenderOptions()、chart.inflateUpdateOptions()函数，改为由插件自决定；
 		移除jquery.datetimepicker日期组件，改为使用浏览器默认日期输入框实现；
 		dg-chart-auto-resize改为使用ResizeObserver实现，只要图表元素尺寸变化，就自动chart.resize()；
 待定：
