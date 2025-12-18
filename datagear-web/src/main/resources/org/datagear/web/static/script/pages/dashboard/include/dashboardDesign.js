@@ -1069,7 +1069,7 @@ $.inflateDashboardDesignEditor = function(po)
 			{
 				let chartWidget = chartWidgets[i];
 				let forLocalChart = (chartWidget.forLocalChart === true);
-				let attrName = (forLocalChart === true ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
+				let attrName = (forLocalChart ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
 				let attrValue = (forLocalChart ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 				
 				code += "<"+chartFactory.CHART_TAG_NAME+" style=\""+po.defaultInsertChartEleStyle+"\""
@@ -1796,9 +1796,8 @@ $.inflateDashboardDesignEditor = function(po)
 							po.veCurrentInsertType = this.insertType;
 							po.showSelectPluginDialog(function(plugin)
 							{
-								alert("TODO");
-								//var cw = po.wrapPluginToChartWidget(plugin);
-								//po.insertVeChart(cw);
+								var cw = po.wrapPluginToChartWidget(plugin);
+								po.insertVeChart(cw);
 							});
 						}
 					}
@@ -2327,8 +2326,7 @@ $.inflateDashboardDesignEditor = function(po)
 											
 											po.openAddChartPanel(function(chartWidget)
 											{
-												chartWidget = [ chartWidget ];
-												po.bindOrReplaceVeChart(chartWidget);
+												po.bindOrReplaceVeChart([ chartWidget ]);
 											});
 										}
 									}
@@ -2357,9 +2355,8 @@ $.inflateDashboardDesignEditor = function(po)
 												
 												po.showSelectPluginDialog(function(plugin)
 												{
-													alert("TODO");
-													//var cw = po.wrapPluginToChartWidget(plugin);
-													//po.bindOrReplaceVeChart(cw);
+													var cw = po.wrapPluginToChartWidget(plugin);
+													po.bindOrReplaceVeChart([ cw ]);
 												});
 											}
 										}

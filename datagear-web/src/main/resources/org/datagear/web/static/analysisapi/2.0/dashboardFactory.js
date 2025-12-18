@@ -407,17 +407,36 @@ DF.createLocalChart = function(ele, chartRoot, renderContext, dashboard)
 	let elementId = CF.eleAttr(ele, "id");
 	if(CF.isEmpty(elementId))
 	{
-		elementId = "ele" + CF.uid();
+		elementId = CF.uid() + "ele";
 		CF.eleAttr(ele, "id", elementId);
 	}
 	
 	if(CF.isEmpty(chartRoot.id))
 		chartRoot.id = CF.uid() + "lc";
 	
-	if(CF.isEmpty(chartRoot.name))
+	if(chartRoot.name == null)
 		chartRoot.name = "";
 	
 	chartRoot.elementId = elementId;
+	
+	var dataSetBinds = chartRoot.dataSetBinds;
+	if(dataSetBinds != null)
+	{
+		for(let i=0; i<dataSetBinds.length; i++)
+		{
+			let dsb = dataSetBinds[i];
+			let dataSet = (dsb == null ? null : dsb.dataSet);
+			
+			if(dataSet != null)
+			{
+				if(CF.isEmpty(dataSet.id))
+					dataSet.id = CF.uid() + "dst";
+				
+				if(dataSet.name == null)
+					dataSet.name = "";
+			}
+		}
+	}
 	
 	var chart = DF.createChart(chartRoot, renderContext, dashboard);
 	chart._local = true;

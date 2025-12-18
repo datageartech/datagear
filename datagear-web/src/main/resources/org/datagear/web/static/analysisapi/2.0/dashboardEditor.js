@@ -1853,16 +1853,19 @@
 		else
 			styleStr = "width:100%;height:100%;";
 		
-		for(var i=0; i<chartWidgets.length; i++)
+		for(let i=0; i<chartWidgets.length; i++)
 		{
-			var chartWidget = chartWidgets[i];
-			var chartDiv = CF.eleCreate(CF.CHART_TAG_NAME);
+			let chartWidget = chartWidgets[i];
+			let forLocalChart = (chartWidget.forLocalChart === true);
+			let attrName = (forLocalChart ? CF.elementAttrConst.LOCAL : CF.elementAttrConst.WIDGET);
+			let attrValue = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
+			let chartDiv = CF.eleCreate(CF.CHART_TAG_NAME);
 			
 			//先设style，与源码模式一致
 			if(styleStr)
 				CF.eleAttr(chartDiv, "style", styleStr);
 			
-			CF.eleAttr(chartDiv, CF.elementAttrConst.WIDGET, chartWidget.id);
+			CF.eleAttr(chartDiv, attrName, attrValue);
 			CF.eleHtml(chartDiv, "<!--"+chartWidget.name+"-->");
 			
 			DE._insertElement(chartDiv, insertType, refEle);
@@ -1923,8 +1926,17 @@
 			DE._removeAndDestroyChart(ele);
 		}
 		
-		DE._setElementAttr(ele, CF.elementAttrConst.WIDGET, chartWidget.id);
-		DE.dashboard.loadChart(ele);
+		var forLocalChart = (chartWidget.forLocalChart === true);
+		var attrName = (forLocalChart ? CF.elementAttrConst.LOCAL : CF.elementAttrConst.WIDGET);
+		var attrValue = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
+		
+		if(forLocalChart)
+			DE._setElementAttr(ele, CF.elementAttrConst.WIDGET, null);
+		else
+			DE._setElementAttr(ele, CF.elementAttrConst.LOCAL, null);
+		
+		DE._setElementAttr(ele, attrName, attrValue);
+		DE._loadUnsolvedChartsInElement(ele);
 		
 		return ele;
 	};
@@ -1965,7 +1977,9 @@
 			return false;
 		
 		DE._removeAndDestroyChart(ele);
+		
 		DE._setElementAttr(ele, CF.elementAttrConst.WIDGET, null);
+		DE._setElementAttr(ele, CF.elementAttrConst.LOCAL, null);
 		
 		return ele;
 	};
@@ -2751,6 +2765,7 @@
 	DE._loadUnsolvedChartsInElement = function(ele)
 	{
 		DE.dashboard.loadUnsolvedCharts(ele);
+		DE.dashboard.createUnsolvedCharts(ele);
 	};
 	
 	DE._setElementChartOptions = function(ele, chartOptionsStr)
