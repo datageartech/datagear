@@ -152,4 +152,38 @@ public class ChartPluginDataSetRange implements Serializable
 			return getClass().getSimpleName() + " [min=" + min + ", max=" + max + "]";
 		}
 	}
+
+	/**
+	 * 是否是严格的0值范围，即：
+	 * <ul>
+	 * <li>不是{@code null}</li>
+	 * <li>{@linkplain ChartPluginDataSetRange#getMain()}的{@linkplain Range#getMax()}、{@linkplain Range#getMin()}都是{@code 0}值</li>
+	 * <li>{@linkplain ChartPluginDataSetRange#getAttachment()}的{@linkplain Range#getMax()}、{@linkplain Range#getMin()}都是{@code 0}值</li>
+	 * </ul>
+	 * 
+	 * @param dataSetRange
+	 * @return
+	 */
+	public static boolean isStrictZeroRange(ChartPluginDataSetRange dataSetRange)
+	{
+		if (dataSetRange == null)
+			return false;
+
+		Range main = dataSetRange.getMain();
+		Range attachment = dataSetRange.getAttachment();
+
+		if (main == null || main.getMax() == null || main.getMin() == null)
+			return false;
+
+		if (attachment == null || attachment.getMax() == null || attachment.getMin() == null)
+			return false;
+
+		if (main.getMax().intValue() != 0 || main.getMin().intValue() != 0)
+			return false;
+
+		if (attachment.getMax().intValue() != 0 || attachment.getMin().intValue() != 0)
+			return false;
+
+		return true;
+	}
 }

@@ -83,6 +83,8 @@
 <script>
 (function(po)
 {
+	po.isForLocal = ("${(local!false)?string('true', 'false')}" == "true");
+	
 	po.refresh = function()
 	{
 		po.submitSearchForm();
@@ -99,7 +101,7 @@
 	{
 		po.updatePageData([]);
 		
-		po.ajaxJson("/chartPlugin/selectData",
+		po.ajaxJson("/chartPlugin/selectData" + (po.isForLocal ? "?local=true" : ""),
 		{
 			data: formData,
 			success: function(response)

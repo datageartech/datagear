@@ -83,7 +83,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/upload")
-	public String upload(HttpServletRequest request, org.springframework.ui.Model model)
+	public String upload(HttpServletRequest request, Model model)
 	{
 		setFormAction(model, REQUEST_ACTION_UPLOAD, SUBMIT_ACTION_SAVE_UPLOAD);
 		
@@ -160,7 +160,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/download")
-	public void download(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	public void download(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String[] ids) throws Exception
 	{
 		setDownloadResponseHeader(request, response, "chartPlugins.zip");
@@ -202,7 +202,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/manage")
-	public String manage(HttpServletRequest request, org.springframework.ui.Model model)
+	public String manage(HttpServletRequest request, Model model)
 	{
 		model.addAttribute(KEY_REQUEST_ACTION, REQUEST_ACTION_MANAGE);
 		setReadonlyAction(model);
@@ -212,13 +212,12 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartPluginView> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQuery)
+			Model model, @RequestBody(required = false) DataFilterPagingQuery pagingQuery)
 			throws Exception
 	{
 		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 		List<HtmlChartPluginView> chartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword(),
-				pagingQuery.getDataFilter());
+				pagingQuery.getDataFilter(), false);
 
 		PagingData<HtmlChartPluginView> pagingData = new PagingData<>(pagingQuery.getPage(), chartPluginViews.size(),
 				pagingQuery.getPageSize());
@@ -228,23 +227,25 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/select")
-	public String select(HttpServletRequest request, org.springframework.ui.Model model)
+	public String select(HttpServletRequest request, Model model,
+			@RequestParam(value = "local", required = false) Boolean local)
 	{
 		setSelectAction(request, model);
+		model.addAttribute("local", local);
+
 		return "/chartPlugin/chartPlugin_select";
 	}
 
 	@RequestMapping(value = "/selectData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Categorization> selectData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQuery)
-			throws Exception
+			Model model, @RequestParam(value = "local", required = false) Boolean local,
+			@RequestBody(required = false) DataFilterPagingQuery pagingQuery) throws Exception
 	{
 		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 
 		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword(),
-				pagingQuery.getDataFilter());
+				pagingQuery.getDataFilter(), local);
 		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);
 
 		return categorizations;

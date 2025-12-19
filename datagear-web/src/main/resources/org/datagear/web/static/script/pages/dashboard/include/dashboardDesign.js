@@ -891,12 +891,14 @@ $.inflateDashboardDesignEditor = function(po)
 		$.closeDialog(dialog);
 	};
 	
-	po.showSelectPluginDialog = function(selectHandler)
+	po.showSelectPluginDialog = function(selectHandler, local)
 	{
+		local = (local === undefined ? true : local);
+		
 		po.showPersistSelectDialog(
 			po.selectPluginDialogId,
 			po.i18n.chartPlugin+" - "+po.i18n.select,
-			"/chartPlugin/select",
+			"/chartPlugin/select" + (local ? "?local=true" : ""),
 			selectHandler
 		);
 	};

@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttribute;
+import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetBind;
@@ -209,10 +210,13 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @param keyword
 	 * @param apiVersion
 	 *            允许{@code null}
+	 * @param local
+	 *            是否仅查询本地图表插件（{@linkplain ChartPlugin#getDataSetRange()}不为{@code null}，且各值都为0）
+	 *            允许{@code null}
 	 * @return
 	 */
 	protected List<HtmlChartPluginView> findHtmlChartPluginViews(HttpServletRequest request, String keyword,
-			String apiVersion)
+			String apiVersion, Boolean local)
 	{
 		List<HtmlChartPluginView> pluginViews = new ArrayList<>();
 
@@ -228,6 +232,10 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			for (HtmlChartPlugin plugin : plugins)
 			{
 				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
+					continue;
+
+				if (local != null && Boolean.TRUE.equals(local)
+						&& !ChartPluginDataSetRange.isStrictZeroRange(plugin.getDataSetRange()))
 					continue;
 
 				pluginViews.add(toHtmlChartPluginView(plugin, themeName, locale));
