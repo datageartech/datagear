@@ -6792,6 +6792,105 @@ SPT.customRenderer = function(plugin, config)
 	return renderer;
 };
 
+//日期时间
+
+SPT.datetimeRenderer = function(plugin, config)
+{
+	config = CF.extend(true,
+	{
+	},
+	config);
+	
+	var renderer =
+	{
+		render: function(chart)
+		{
+			var options= {};
+			
+			var chartEle = chart.element();
+			CF.eleAddClass(chartEle, "dg-chart-datetime");
+			
+			var internal = CF.eleCreate("div", "dg-chart-container");
+			CF.eleAppend(chartEle, internal);
+			chart.internal(internal);
+			
+			chart.inflateOptions(options);
+			SPT.processRenderOptions(chart, options);
+		},
+		
+		update: function(chart)
+		{
+			var options = {};
+			options = chart.inflateOptions(options);
+			SPT.processUpdateOptions(chart, options);
+			
+			this._clearInterval(chart);
+			this._updateCurrentDatetime(chart, options);
+			var intervalId = setInterval(() =>
+			{
+				this._updateCurrentDatetime(chart, options);
+			},
+			1000);
+			
+			chart.liveData(this._intervalIdName, intervalId);
+		},
+		
+		destroy: function(chart)
+		{
+			this._clearInterval(chart);
+			
+			var chartEle = chart.element();
+			var internal = chart.internal();
+			CF.eleRemove(internal);
+			CF.eleRemoveClass(chartEle, "dg-chart-datetime");
+		},
+		
+		_intervalIdName: "datetimeInterval",
+		
+		_clearInterval: function(chart)
+		{
+			var intervalId = chart.liveData(this._intervalIdName);
+			
+			if(intervalId != null)
+			{
+				clearInterval(intervalId);
+				chart.liveData(this._intervalIdName, null);
+			}
+		},
+		
+		_updateCurrentDatetime: function(chart, options, value)
+		{
+			value = (value == null ? this._currentDateTimeStr(options) : value);
+			
+			var internal = chart.internal();
+			CF.eleHtml(internal, value);
+		},
+		
+		_currentDateTimeStr: function(options)
+		{
+			//TODO 改为采用day.js.org支持格式化
+			
+			var dt = new Date();
+			var y = dt.getFullYear();
+			var mt = dt.getMonth() + 1;
+			var day = dt.getDate();
+			var h = dt.getHours();
+			var m = dt.getMinutes();
+			var s = dt.getSeconds();
+			
+			mt = (mt < 10 ? "0"+mt : mt);
+			day = (day < 10 ? "0"+day : day);
+			h = (h < 10 ? "0"+h : h);
+			m = (m < 10 ? "0"+m : m);
+			s = (s < 10 ? "0"+s : s);
+			
+			return y + "-" + mt + "-" + day + " " + h + ":" + m + ":" + s;
+		}
+	};
+	
+	return renderer;
+};
+
 //---------------------------------------------------------
 //    公用函数开始
 //---------------------------------------------------------
