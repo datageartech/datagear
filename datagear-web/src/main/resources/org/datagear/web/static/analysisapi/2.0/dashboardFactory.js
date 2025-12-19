@@ -896,8 +896,18 @@ chartProto.isLocal = function()
  * 					DF.CHART_UPDATER_EMPTY、
  * 					DF.CHART_UPDATER_DEFAULT、
  * 					//更新处理函数
- * 					//context 更新上下文，格式为：{ dashboard: 看板对象, chart: 图表对象, query: { ... }, update: function(chartResult){}, error: function(error){} }
- * 					//其中：chartResult格式应同org.datagear.analysis.ChartResult；error格式应为：{ message: "..." }
+ * 					//context 更新上下文，格式为：
+ * 					//{
+ * 					//  dashboard: 看板对象,
+ * 					//  chart: 图表对象,
+ * 					//  query: { ... },
+ * 					//  update: function(chartResult){},
+ * 					//  error: function(error){}
+ * 					//}
+ * 					//其中：
+ * 					//query 格式同org.datagear.analysis.ChartQuery
+ * 					//chartResult 格式应同org.datagear.analysis.ChartResult
+ * 					//error 格式应为：{ message: "..." }
  * 					//更新处理函数应在准备完数据后调用context.update(chartResult)，准备出错后调用context.error(error)
  * 					function(context){ ... }
  */
@@ -1329,9 +1339,19 @@ dashboardProto.resultDataFormat = function(resultDataFormat)
  * 
  * @param updater 可选，要设置的更新器，格式允许：
  * 					//更新处理函数
- * 					//context 更新上下文，格式为：{ dashboard: 看板对象, group: "...", chartQueries: { ... }, update: function(dashboardResult){}, error: function(error){} }
- * 					//其中：dashboardResult格式应同org.datagear.analysis.DashboardResult；error格式应为：{ message: "..." }
- * 					//更新处理函数应在准备完数据后调用context.update(chartResult)，准备出错后调用context.error(error)
+ * 					//context 更新上下文，格式为：
+ * 					//{
+ * 					//  dashboard: 看板对象,
+ * 					//  group: "...",
+ * 					//  chartQueries: [ { chart: 图表对象, query: chartQuery }, ... ],
+ * 					//  update: function(dashboardResult){},
+ * 					//  error: function(error){}
+ * 					//}
+ * 					//其中：
+ * 					//chartQuery 格式同org.datagear.analysis.ChartQuery
+ * 					//dashboardResult 格式应同org.datagear.analysis.DashboardResult
+ * 					//error 格式应为：{ message: "..." }
+ * 					//更新处理函数应在准备完数据后调用context.update(dashboardResult)，准备出错后调用context.error(error)
  * 					function(context){ ... }
  */
 dashboardProto.updater = function(updater)
