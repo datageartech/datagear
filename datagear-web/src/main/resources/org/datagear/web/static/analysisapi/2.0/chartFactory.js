@@ -7826,6 +7826,235 @@ CF._serializeSingleQuoteStr = function(str, quote)
 	return re;
 };
 
+/**
+ * 日期格式化支持函数。
+ * 其中：
+ * "yyyy"、"yyy"、"yy"、"y"表示年份；
+ * "MM"、"M"表示月份；
+ * "dd"、"d"表示天数；
+ * "HH"、"H"表示小时；
+ * "mm"、"m"表示分钟；
+ * "ss"、"s"表示秒数；
+ * "SSS"、"SS"、"S"表示毫秒数
+ * 
+ * 上述格式定义参考自java.time.format.DateTimeFormatter类
+ */
+CF.dateFormatter =
+{
+	format: function(date, format)
+	{
+		var re = "";
+		
+		var parts = this._parseFormat(format);
+		
+		for(let i=0; i<parts.length; i++)
+		{
+			let part = parts[i];
+			
+			if(part.isSymbol)
+				re += this._formatSymbolValue(date, part);
+			else
+				re += part.text;
+		}
+		
+		return re;
+	},
+	
+	parse: function(dateStr, format)
+	{
+		var dateObj=
+		{
+			year: 0, month: 1, day: 1, hour: 0, minute: 0, second: 0, ms: 0
+		};
+		
+		var parts = this._parseFormat(format);
+		var idx = 0;
+		
+		for(let i=0; i<parts.length; i++)
+		{
+			if(idx >= dateStr.length)
+				break;
+			
+			let part = parts[i];
+			let partNext = ((i+1) >= parts.length ? null : parts[i+1]);
+			
+			if(part.isSymbol)
+			{
+				let endIdx = -1;
+				
+				if(partNext == null)
+					endIdx = dateStr.length;
+				else if(!partNext.isSymbol)
+					endIdx = dateStr.indexOf(partNext.text, idx+1);
+				
+				endIdx = (endIdx < 0 ? (idx + part.count) : endIdx);
+				
+				this._parseSymbolValue(dateObj, dateStr.substring(idx, endIdx), part);
+				idx = endIdx;
+			}
+			else
+			{
+				idx += part.text.length;
+			}
+		}
+		
+		return new Date(dateObj.year, dateObj.month-1, dateObj.day, dateObj.hour, dateObj.minute, dateObj.second, dateObj.ms);
+	},
+	
+	_parseSymbolValue: function(dateObj, str, symbolPart)
+	{
+		var symbol = symbolPart.symbol;
+		
+		//毫秒数需要在右侧补0
+		if(symbol === 'S' && str.length < 3)
+			str = this._trimLength(str, 3, false, false);
+		
+		var value = parseInt(str);
+		
+		if(isNaN(value))
+			return;
+		
+		if("y" === symbol)
+		{
+			dateObj.year = value;
+		}
+		else if("M" === symbol)
+		{
+			dateObj.month = value;
+		}
+		else if("d" === symbol)
+		{
+			dateObj.day = value;
+		}
+		else if("H" === symbol)
+		{
+			dateObj.hour = value;
+		}
+		else if("m" === symbol)
+		{
+			dateObj.minute = value;
+		}
+		else if("s" === symbol)
+		{
+			dateObj.second = value;
+		}
+		else if("S" === symbol)
+		{
+			dateObj.ms = value;
+		}
+	},
+	
+	_formatSymbolValue: function(date, symbolPart)
+	{
+		var re = "";
+		
+		var symbol = symbolPart.symbol;
+		var count = symbolPart.count;
+		
+		if("y" === symbol)
+		{
+			re = this._trimLength(date.getFullYear(), count, true, true);
+		}
+		else if("M" === symbol)
+		{
+			re = this._trimLength(date.getMonth()+1, count, true, false);
+		}
+		else if("d" === symbol)
+		{
+			re = this._trimLength(date.getDate(), count, true, false);
+		}
+		else if("H" === symbol)
+		{
+			re = this._trimLength(date.getHours(), count, true, false);
+		}
+		else if("m" === symbol)
+		{
+			re = this._trimLength(date.getMinutes(), count, true, false);
+		}
+		else if("s" === symbol)
+		{
+			re = this._trimLength(date.getSeconds(), count, true, false);
+		}
+		else if("S" === symbol)
+		{
+			re = this._trimLength(date.getMilliseconds(), count, false, true);
+		}
+		
+		return re;
+	},
+	
+	_trimLength: function(value, length, rightMajor, handleCut)
+	{
+		value = value +"";
+		rightMajor = (rightMajor === undefined ? true : rightMajor);
+		handleCut = (handleCut === undefined ? false : handleCut);
+		
+		var re;
+		
+		if(value.length < length)
+		{
+			re = value;
+			
+			while(re.length < length)
+				re = (rightMajor ? "0"+re : re+"0");
+		}
+		else if(value.length > length && handleCut)
+		{
+			re = "";
+			
+			for(let i=0; i<length; i++)
+				re += (rightMajor ? value[value.length-length+i] : value[i]);
+		}
+		else
+			re = value;
+		
+		return re;
+	},
+	
+	_parseFormat: function(format)
+	{
+		var re = [];
+		
+		var symbol = "";
+		var symbolCount = 0;
+		
+		for(let i=0; i<=format.length; i++)
+		{
+			let c = (i == format.length ? null : format[i]);
+			
+			if(c !== symbol && symbolCount > 0)
+			{
+				re.push({ isSymbol: true, symbol: symbol, count: symbolCount });
+				symbol = "";
+				symbolCount = 0;
+			}
+			
+			if(c == null) {}
+			else if(this._isSymbol(c))
+			{
+				symbol = c;
+				symbolCount += 1;
+			}
+			else
+			{
+				if(re.length == 0 || re[re.length-1].isSymbol)
+					re.push({ isSymbol: false, text: "" });
+				
+				re[re.length-1].text += c;
+			}
+		}
+		
+		return re;
+	},
+	
+	_isSymbol: function(c)
+	{
+		return this._symbols[c];
+	},
+	
+	_symbols: { "y": true, "M": true, "d": true, "H": true, "m": true, "s": true, "S": true }
+};
+
 //-------------
 // < 已弃用函数 start
 //-------------
