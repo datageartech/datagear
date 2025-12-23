@@ -7841,7 +7841,7 @@ CF._serializeSingleQuoteStr = function(str, quote)
  */
 CF.dateFormatter =
 {
-	format: function(date, format)
+	formatDate: function(date, format)
 	{
 		var re = "";
 		
@@ -7860,7 +7860,7 @@ CF.dateFormatter =
 		return re;
 	},
 	
-	parse: function(dateStr, format)
+	parseDate: function(dateStr, format)
 	{
 		var dateObj=
 		{
@@ -7903,8 +7903,18 @@ CF.dateFormatter =
 	
 	convertFormat: function(dateStr, srcFormat, destFormat)
 	{
-		var date = this.parse(dateStr, srcFormat);
-		return this.format(date, destFormat);
+		var date = this.parseDate(dateStr, srcFormat);
+		return this.formatDate(date, destFormat);
+	},
+	
+	formatYear: function(yearNumber)
+	{
+		return this._trimLength(yearNumber, 4, true, false);
+	},
+	
+	formatMonth: function(monthNumber)
+	{
+		return this._trimLength(monthNumber+1, 2, true, false);
 	},
 	
 	hasYear: function(format)

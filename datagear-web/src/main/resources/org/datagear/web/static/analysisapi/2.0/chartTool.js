@@ -517,13 +517,13 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
-	 * "{ format: '...y...m...d...' }"  //数据集定义功能时
-	 * { format: '...y...m...d...' }    //看板表单功能时
+	 * "{ format: '...yyyy...MM...dd...' }"  //数据集定义功能时
+	 * { format: '...yyyy...MM...dd...' }    //看板表单功能时
 	 * 
 	 * 其中：
-	 * y：年份（4位长度）
-	 * m：月份（2位长度，01-12）
-	 * d：天（2位长度，01-31）
+	 * yyyy：年份（4位长度）
+	 * MM：月份（2位长度，01-12）
+	 * dd：天（2位长度，01-31）
 	 * 
 	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
 	 * 
@@ -536,7 +536,8 @@
 	TOOL.renderDspFormInputDate = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var options = TOOL.evalDataSetParamInputPayload(dataSetParam, {});
-		options = CF.extend({ format: "y-m-d" }, options);
+		options = CF.extend({ format: "yyyy-MM-dd" }, options);
+		TOOL.dateFormatter.convertOldFormatOptions(options);
 		
 		let input;
 		
@@ -548,7 +549,7 @@
 			CF.eleAppend(parent, inputsWrapper);
 			
 			input = CF.eleCreate("input", "dg-dspform-input dg-date-widget-hidden");
-			CF.eleAttr(input, "dg-date-src-format", (hasMonth ? "y-m" : "y"));
+			CF.eleAttr(input, "dg-date-src-format", (hasMonth ? "yyyy-MM" : "yyyy"));
 			CF.eleAttr(input, "dg-date-dest-format", options.format);
 			CF.eleAttr(input, "type", "hidden");
 			CF.eleAttr(input, "name", dataSetParam.name);
@@ -615,7 +616,7 @@
 		else
 		{
 			input = CF.eleCreate("input", "dg-dspform-input");
-			CF.eleAttr(input, "dg-date-src-format", "y-m-d");
+			CF.eleAttr(input, "dg-date-src-format", "yyyy-MM-dd");
 			CF.eleAttr(input, "dg-date-dest-format", options.format);
 			CF.eleAttr(input, "type", "date");
 			CF.eleAttr(input, "id", CF.uid());
@@ -636,13 +637,13 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
-	 * "{ format: '...h...i...s...' }"  //数据集定义功能时
-	 * { format: '...h...i...s...' }    //看板表单功能时
+	 * "{ format: '...HH...mm...ss...' }"  //数据集定义功能时
+	 * { format: '...HH...mm...ss...' }    //看板表单功能时
 	 * 
 	 * 其中：
-	 * h：小时（2位长度24时制，00-23）
-	 * i：分钟（2位长度，00-59）
-	 * s：秒数（2位长度，00-59）
+	 * HH：小时（2位长度24时制，00-23）
+	 * mm：分钟（2位长度，00-59）
+	 * ss：秒数（2位长度，00-59）
 	 * 
 	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
 	 * 
@@ -655,10 +656,11 @@
 	TOOL.renderDspFormInputTime = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var options = TOOL.evalDataSetParamInputPayload(dataSetParam, {});
-		options = CF.extend({ format: "h:i:s" }, options);
+		options = CF.extend({ format: "HH:mm:ss" }, options);
+		TOOL.dateFormatter.convertOldFormatOptions(options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
-		CF.eleAttr(input, "dg-date-src-format", "h:i:s");
+		CF.eleAttr(input, "dg-date-src-format", "HH:mm:ss");
 		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "time");
 		CF.eleAttr(input, "id", CF.uid());
@@ -681,16 +683,16 @@
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串、
-	 * "{ format: '...y...m...d...h...i...s...' }"  //数据集定义功能时
-	 * { format: '...y...m...d...h...i...s...' }    //看板表单功能时
+	 * "{ format: '...yyyy...MM...dd...HH...mm...ss...' }"  //数据集定义功能时
+	 * { format: '...yyyy...MM...dd...HH...mm...ss...' }    //看板表单功能时
 	 * 
 	 * 其中：
-	 * y：年份（4位长度）
-	 * m：月份（2位长度，01-12）
-	 * d：天（2位长度，01-31）
-	 * h：小时（2位长度24时制，00-23）
-	 * i：分钟（2位长度，00-59）
-	 * s：秒数（2位长度，00-59）
+	 * yyyy：年份（4位长度）
+	 * MM：月份（2位长度，01-12）
+	 * dd：天（2位长度，01-31）
+	 * HH：小时（2位长度24时制，00-23）
+	 * mm：分钟（2位长度，00-59）
+	 * ss：秒数（2位长度，00-59）
 	 * 
 	 * 注意：上述format只是发送至服务端的格式，显示格式由输入框自身决定。
 	 * 
@@ -703,10 +705,11 @@
 	TOOL.renderDspFormInputDateTime = function(form, formOptions, parent, dataSetParam, value)
 	{
 		var options = TOOL.evalDataSetParamInputPayload(dataSetParam, {});
-		options = CF.extend({ format: "y-m-d h:i:s" }, options);
+		options = CF.extend({ format: "yyyy-MM-dd HH:mm:ss" }, options);
+		TOOL.dateFormatter.convertOldFormatOptions(options);
 		
 		var input = CF.eleCreate("input", "dg-dspform-input");
-		CF.eleAttr(input, "dg-date-src-format", "y-m-dTh:i:s");
+		CF.eleAttr(input, "dg-date-src-format", "yyyy-MM-ddTHH:mm:ss");
 		CF.eleAttr(input, "dg-date-dest-format", options.format);
 		CF.eleAttr(input, "type", "datetime-local");
 		CF.eleAttr(input, "id", CF.uid());
@@ -891,180 +894,7 @@
 	
 	//日期格式解析支持类，支持"...y...m...d...h...i...s..."格式日期解析
 	//注意：这里保留了大写'Y'标识符，以兼容旧数据集预览时的格式
-	TOOL.dateFormatter =
-	{
-		hasYear: function(format)
-		{
-			return (format != null && (format.indexOf("y") >= 0 || format.indexOf("Y") >= 0));
-		},
-		hasMonth: function(format)
-		{
-			return (format != null && format.indexOf("m") >= 0);
-		},
-		hasDay: function(format)
-		{
-			return (format != null && format.indexOf("d") >= 0);
-		},
-		hasSecond: function(format)
-		{
-			return (format != null && format.indexOf("s") >= 0);
-		},
-		convertFormat: function(src, srcFormat, destFormat)
-		{
-			var date = this.parseDate(src, srcFormat);
-			return this.formatDate(date, destFormat);
-		},
-		parseDate: function(date, format)
-		{
-			date = (date || "");
-			
-			var dateObj=
-			{
-				y: 0, m: 1, d: 1,
-				h: 0, i: 0, s: 0
-			};
-			
-			format = this._parseFormat(format);
-			
-			var idx = 0;
-			for(var j=0; j<format.length; j++)
-			{
-				var fmt = format[j];
-				
-				if(fmt == 'y' || fmt == 'Y')
-					idx = this._readAndParseSet(date, idx, 4, dateObj, "y");
-				else if(fmt == 'm')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "m");
-				else if(fmt == 'd')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "d");
-				else if(fmt == 'H' || fmt == 'h')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "h");
-				else if(fmt == 'i')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "i");
-				else if(fmt == 's')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "s");
-				else
-					idx += fmt.length;
-			}
-			
-			return new Date(dateObj.y, dateObj.m - 1, dateObj.d, dateObj.h, dateObj.i, dateObj.s, 0);
-		},
-		formatDate: function (date, format)
-		{
-			var re = "";
-			
-			var y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate(),
-				h = date.getHours(), i = date.getMinutes(), s = date.getSeconds();
-			
-			format = this._parseFormat(format);
-			
-			for(var j=0; j<format.length; j++)
-			{
-				var fmt = format[j];
-				
-				if(fmt == 'y' || fmt == 'Y')
-					re += this.formatYear(y);
-				else if(fmt == 'm')
-					re += this.paddingLeftZero(m, 2);
-				else if(fmt == 'd')
-					re += this.paddingLeftZero(d, 2);
-				else if(fmt == 'H' || fmt == 'h')
-					re += this.paddingLeftZero(h, 2);
-				else if(fmt == 'i')
-					re += this.paddingLeftZero(i, 2);
-				else if(fmt == 's')
-					re += this.paddingLeftZero(s, 2);
-				else
-					re += fmt;
-			}
-			
-			return re;
-		},
-		formatYear: function(yearNumber)
-		{
-			return this.paddingLeftZero(yearNumber, 4);
-		},
-		paddingLeftZero: function(number, length)
-		{
-			var re = number + "";
-			
-			while(re.length < length)
-				re = "0" + re;
-			
-			return re;
-		},
-		_parseFormat: function(format)
-		{
-			format = (format || "");
-			
-			if(this._formatArrayCache[format])
-				return this._formatArrayCache[format];
-			
-			var re = [];
-			
-			var tmp = "";
-			for(var i=0; i<format.length; i++)
-			{
-				var c = format[i];
-				
-				if(c == 'y' || c == 'Y' || c == 'm' || c == 'd'
-					 || c == 'H' || c == 'h' || c == 'i' || c == 's')
-				{
-					if(tmp)
-					{
-						re.push(tmp);
-						tmp = "";
-					}
-					
-					re.push(c);
-				}
-				else
-					tmp += c;
-			}
-			
-			if(tmp)
-				re.push(tmp);
-			
-			this._formatArrayCache[format] = re;
-			
-			return re;
-		},
-		_readAndParseSet: function(str, index, maxCount, obj, propName)
-		{
-			index = (index == null ? 0 : index);
-			endIdx = (index + maxCount > str.length ? str.length : index + maxCount);
-			
-			var sub = "";
-			
-			for(; index<endIdx; index++)
-			{
-				var c = str[index];
-				
-				if(c >= '0' && c <= '9')
-				{
-					if(sub == '0')
-					{
-						if(c == '0')
-							;
-						else
-							sub = c;
-					}
-					else
-						sub += c;
-				}
-				else
-				{
-					break;
-				}
-			}
-			
-			if(sub)
-				obj[propName] = parseInt(sub);
-			
-			return index;
-		},
-		_formatArrayCache:{}
-	};
+	TOOL.dateFormatter = CF.dateFormatter;
 	
 	TOOL.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
 	{
@@ -1393,7 +1223,7 @@
 				date = (CF.isEmpty(value) ? null : TOOL.dateFormatter.parseDate(value, CF.eleAttr(inputHidden, "dg-date-dest-format")));
 			
 			let yearValue = (date == null ? "" : TOOL.dateFormatter.formatYear(date.getFullYear()));
-			let monthValue = (date == null ? "" : TOOL.dateFormatter.formatDate(date, "m"));
+			let monthValue = (date == null ? "" : TOOL.dateFormatter.formatMonth(date.getMonth()));
 			
 			TOOL.eleSetYearSelectOptions(yearSelect, (date == null ? null : date.getFullYear()));
 			TOOL.eleSelectSetValue(yearSelect, yearValue);
