@@ -7901,6 +7901,105 @@ CF.dateFormatter =
 		return new Date(dateObj.year, dateObj.month-1, dateObj.day, dateObj.hour, dateObj.minute, dateObj.second, dateObj.ms);
 	},
 	
+	convertFormat: function(dateStr, srcFormat, destFormat)
+	{
+		var date = this.parse(dateStr, srcFormat);
+		return this.format(date, destFormat);
+	},
+	
+	hasYear: function(format)
+	{
+		return (format != null && format.indexOf("y") >= 0);
+	},
+	
+	hasMonth: function(format)
+	{
+		return (format != null && format.indexOf("M") >= 0);
+	},
+	
+	hasDay: function(format)
+	{
+		return (format != null && format.indexOf("d") >= 0);
+	},
+	
+	hasHour: function(format)
+	{
+		return (format != null && format.indexOf("H") >= 0);
+	},
+	
+	hasMinute: function(format)
+	{
+		return (format != null && format.indexOf("m") >= 0);
+	},
+	
+	hasSecond: function(format)
+	{
+		return (format != null && format.indexOf("s") >= 0);
+	},
+	
+	/**
+	 * 将看板API1.0采用的的旧版日期格式转化为这里的新格式。
+	 */
+	convertOldFormatOptions: function(options)
+	{
+		//兼容格式默认必须当作是true，以兼容系统中存在的旧版日期格式相关设置
+		if(options.compatibleFormat === false)
+			return false;
+		
+		if(options.format == null)
+			return false;
+		
+		if(!this._isOldFormat(options.format))
+			return false;
+		
+		options.format = this._fromOldFormat(options.format);
+		return true;
+	},
+	
+	/**
+	 * 将看板API1.0采用的的旧版日期格式转化为这里的新格式。
+	 * 旧版格式规范："...Y|y...m...d...H|h...i...s..."
+	 * 其中：
+	 * Y|y ：年份，四位长度，不足补0
+	 * m   ：月份，两位长度，不足补0
+	 * d   ：日，两位长度，不足补0
+	 * H|h ：时，两位长度，不足补0
+	 * i   ：分，两位长度，不足补0
+	 * s   ：秒，两位长度，不足补0
+	 */
+	_fromOldFormat: function(oldFormat)
+	{
+		var re = oldFormat.replace(/[Yy]/g, "yyyy");
+		re = re.replace(/m/g, "MM");
+		re = re.replace(/d/g, "dd");
+		re = re.replace(/[Hh]/g, "HH");
+		re = re.replace(/i/g, "mm");
+		re = re.replace(/s/g, "ss");
+		
+		return re;
+	},
+	
+	_isOldFormat: function(format)
+	{
+		var re = true;
+		
+		var parts = this._parseFormat(format);
+		
+		for(let i=0; i<parts.length; i++)
+		{
+			let part = parts[i];
+			
+			//只要任一符号长度大于1，就不认为是旧版格式
+			if(part.isSymbol && part.count > 1)
+			{
+				re = false;
+				break;
+			}
+		}
+		
+		return re;
+	},
+	
 	_parseSymbolValue: function(dateObj, str, symbolPart)
 	{
 		var symbol = symbolPart.symbol;
