@@ -492,12 +492,8 @@
 	chartSetting.renderDataSetParamFormInputDate = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
-		options = $.extend(
-		{
-			format: "Y-m-d",
-			timepicker: false,
-		},
-		options);
+		options = $.extend({ format: "Y-m-d", timepicker: false, }, options);
+		chartSetting.dateFormatter.convertOldFormatOptions(options);
 		
 		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
 			.attr("value", (value == null ? "" : value)).appendTo($parent);
@@ -534,13 +530,8 @@
 	chartSetting.renderDataSetParamFormInputTime = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
-		options = $.extend(
-		{
-			format: "H:i:s",
-			datepicker: false,
-			step:10,
-		},
-		options);
+		options = $.extend({ format: "H:i:s", datepicker: false, step:10, }, options);
+		chartSetting.dateFormatter.convertOldFormatOptions(options);
 		
 		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
 			.attr("value", (value == null ? "" : value)).appendTo($parent);
@@ -584,12 +575,8 @@
 	chartSetting.renderDataSetParamFormInputDateTime = function($form, $parent, dataSetParam, value, formOptions)
 	{
 		var options = chartSetting.evalDataSetParamInputPayload(dataSetParam, {});
-		options = $.extend(
-		{
-			format: "Y-m-d H:i:s",
-			step:10
-		},
-		options);
+		options = $.extend({ format: "Y-m-d H:i:s", step:10 }, options);
+		chartSetting.dateFormatter.convertOldFormatOptions(options);
 		
 		var $input = $("<input type='text' class='dg-dspv-form-input dg-dspv-form-widget-date' />").attr("name", dataSetParam.name)
 			.attr("value", (value == null ? "" : value)).appendTo($parent);
@@ -812,7 +799,12 @@
 		options);
 		
 		//年份选择器
-		if("Y" == options.format || "y" == options.format)
+		if(chartSetting.dateFormatter.hasYear(options.format)
+			&& !chartSetting.dateFormatter.hasMonth(options.format)
+			&& !chartSetting.dateFormatter.hasDay(options.format)
+			&& !chartSetting.dateFormatter.hasHour(options.format)
+			&& !chartSetting.dateFormatter.hasMinute(options.format)
+			&& !chartSetting.dateFormatter.hasSecond(options.format))
 		{
 			//显示确定按钮，用于直接选中默认年份
 			options.showApplyButton = true;
@@ -869,158 +861,363 @@
 	chartSetting.datetimepickerInit = function()
 	{
 		$.datetimepicker.setLocale('zh');
-		$.datetimepicker.setDateFormatter(chartSetting.datetimepickerDateFormatter);
+		$.datetimepicker.setDateFormatter(chartSetting.datetimepickerFormatter);
 	};
 	
-	//默认$.datetimepicker的DateFormatter有缺陷，支持格式有限，且对于"ymd"格式无法解析，所以这里重写
-	chartSetting.datetimepickerDateFormatter =
+	chartSetting.datetimepickerFormatter =
 	{
-		parseDate: function(date, format)
+		formatDate: function(date, format)
 		{
-			date = (date || "");
+			var options = { format: format };
+			chartSetting.dateFormatter.convertOldFormatOptions(options);
 			
-			var dateObj=
-			{
-				y: 0, m: 1, d: 1,
-				h: 0, i: 0, s: 0
-			};
-			
-			format = this._parseFormat(format);
-			
-			var idx = 0;
-			for(var j=0; j<format.length; j++)
-			{
-				var fmt = format[j];
-				
-				if(fmt == 'Y' || fmt == 'y')
-					idx = this._readAndParseSet(date, idx, 4, dateObj, "y");
-				else if(fmt == 'm')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "m");
-				else if(fmt == 'd')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "d");
-				else if(fmt == 'H' || fmt == 'h')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "h");
-				else if(fmt == 'i')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "i");
-				else if(fmt == 's')
-					idx = this._readAndParseSet(date, idx, 2, dateObj, "s");
-				else
-					idx += fmt.length;
-			}
-			
-			return new Date(dateObj.y, dateObj.m - 1, dateObj.d, dateObj.h, dateObj.i, dateObj.s, 0);
+			return chartSetting.dateFormatter.formatDate(date, options.format);
 		},
-		formatDate: function (date, format)
+		
+		parseDate: function(dateStr, format)
+		{
+			return chartSetting.dateFormatter.parseDate(dateStr, format);
+		}
+	};
+	
+	/**
+	 * 完全复制自../2.0/chartTool.js的TOOL.dateFormatter。
+	 * 具体原由参考TOOL.dateFormatter.convertOldFormatOptions函数说明。
+	 */
+	chartSetting.dateFormatter =
+	{
+		formatDate: function(date, format)
 		{
 			var re = "";
 			
-			var y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate(),
-				h = date.getHours(), i = date.getMinutes(), s = date.getSeconds();
+			var parts = this._parseFormat(format);
 			
-			format = this._parseFormat(format);
-			
-			for(var j=0; j<format.length; j++)
+			for(let i=0; i<parts.length; i++)
 			{
-				var fmt = format[j];
+				let part = parts[i];
 				
-				if(fmt == 'Y' || fmt == 'y')
-					re += this._paddingLeftZero(y, 4);
-				else if(fmt == 'm')
-					re += this._paddingLeftZero(m, 2);
-				else if(fmt == 'd')
-					re += this._paddingLeftZero(d, 2);
-				else if(fmt == 'H' || fmt == 'h')
-					re += this._paddingLeftZero(h, 2);
-				else if(fmt == 'i')
-					re += this._paddingLeftZero(i, 2);
-				else if(fmt == 's')
-					re += this._paddingLeftZero(s, 2);
+				if(part.isSymbol)
+					re += this._formatSymbolValue(date, part);
 				else
-					re += fmt;
+					re += part.text;
 			}
 			
 			return re;
 		},
-		_parseFormat: function(format)
+		
+		parseDate: function(dateStr, format)
 		{
-			format = (format || "");
-			
-			if(this._formatArrayCache[format])
-				return this._formatArrayCache[format];
-			
-			var re = [];
-			
-			var tmp = "";
-			for(var i=0; i<format.length; i++)
+			var dateObj=
 			{
-				var c = format[i];
+				year: 0, month: 1, day: 1, hour: 0, minute: 0, second: 0, ms: 0
+			};
+			
+			var parts = this._parseFormat(format);
+			var idx = 0;
+			
+			for(let i=0; i<parts.length; i++)
+			{
+				if(idx >= dateStr.length)
+					break;
 				
-				if(c == 'Y' || c == 'y' || c == 'm' || c == 'd'
-					 || c == 'H' || c == 'h' || c == 'i' || c == 's')
+				let part = parts[i];
+				let partNext = ((i+1) >= parts.length ? null : parts[i+1]);
+				
+				if(part.isSymbol)
 				{
-					if(tmp)
-					{
-						re.push(tmp);
-						tmp = "";
-					}
+					let endIdx = -1;
 					
-					re.push(c);
+					if(partNext == null)
+						endIdx = dateStr.length;
+					else if(!partNext.isSymbol)
+						endIdx = dateStr.indexOf(partNext.text, idx+1);
+					
+					endIdx = (endIdx < 0 ? (idx + part.count) : endIdx);
+					
+					this._parseSymbolValue(dateObj, dateStr.substring(idx, endIdx), part);
+					idx = endIdx;
 				}
 				else
-					tmp += c;
+				{
+					idx += part.text.length;
+				}
 			}
 			
-			if(tmp)
-				re.push(tmp);
+			return new Date(dateObj.year, dateObj.month-1, dateObj.day, dateObj.hour, dateObj.minute, dateObj.second, dateObj.ms);
+		},
+		
+		convertFormat: function(dateStr, srcFormat, destFormat)
+		{
+			var date = this.parseDate(dateStr, srcFormat);
+			return this.formatDate(date, destFormat);
+		},
+		
+		formatYear: function(yearNumber)
+		{
+			return this._trimLength(yearNumber, 4, true, false);
+		},
+		
+		formatMonth: function(monthNumber)
+		{
+			return this._trimLength(monthNumber+1, 2, true, false);
+		},
+		
+		hasYear: function(format)
+		{
+			return (format != null && format.indexOf("y") >= 0);
+		},
+		
+		hasMonth: function(format)
+		{
+			return (format != null && format.indexOf("M") >= 0);
+		},
+		
+		hasDay: function(format)
+		{
+			return (format != null && format.indexOf("d") >= 0);
+		},
+		
+		hasHour: function(format)
+		{
+			return (format != null && format.indexOf("H") >= 0);
+		},
+		
+		hasMinute: function(format)
+		{
+			return (format != null && format.indexOf("m") >= 0);
+		},
+		
+		hasSecond: function(format)
+		{
+			return (format != null && format.indexOf("s") >= 0);
+		},
+		
+		/**
+		 * 将1.0的API采用的的旧版日期格式转化为这里的新格式。
+		 * 在2.0的API中，日期类的数据集参数输入框格式进行了重新设计，但是因为存在使用了1.0的API时日期格式定义的数据集，
+		 * 所以2.0时仍要兼容1.0的格式。同样地，1.0中也要兼容2.0的格式。
+		 */
+		convertOldFormatOptions: function(options)
+		{
+			//兼容格式默认必须当作是true，以兼容系统中存在的旧版日期格式相关设置
+			if(options.compatibleFormat === false)
+				return false;
 			
-			this._formatArrayCache[format] = re;
+			if(options.format == null)
+				return false;
+			
+			if(!this._isOldFormat(options.format))
+				return false;
+			
+			options.format = this._fromOldFormat(options.format);
+			return true;
+		},
+		
+		/**
+		 * 将看板API1.0采用的的旧版日期格式转化为这里2.0的新格式。
+		 * 旧版格式规范："...Y|y...m...d...H|h...i...s..."
+		 * 其中：
+		 * Y|y ：年份，四位长度，不足补0
+		 * m   ：月份，两位长度，不足补0
+		 * d   ：日，两位长度，不足补0
+		 * H|h ：时，两位长度，不足补0
+		 * i   ：分，两位长度，不足补0
+		 * s   ：秒，两位长度，不足补0
+		 */
+		_fromOldFormat: function(oldFormat)
+		{
+			var re = oldFormat.replace(/[Yy]/g, "yyyy");
+			re = re.replace(/m/g, "MM");
+			re = re.replace(/d/g, "dd");
+			re = re.replace(/[Hh]/g, "HH");
+			re = re.replace(/i/g, "mm");
+			re = re.replace(/s/g, "ss");
 			
 			return re;
 		},
-		_readAndParseSet: function(str, index, maxCount, obj, propName)
+		
+		_isOldFormat: function(format)
 		{
-			index = (index == null ? 0 : index);
-			endIdx = (index + maxCount > str.length ? str.length : index + maxCount);
+			var re = true;
 			
-			var sub = "";
+			var parts = this._parseFormat(format);
 			
-			for(; index<endIdx; index++)
+			for(let i=0; i<parts.length; i++)
 			{
-				var c = str[index];
+				let part = parts[i];
 				
-				if(c >= '0' && c <= '9')
+				//只要任一符号长度大于1，就不认为是旧版格式
+				if(part.isSymbol && part.count > 1)
 				{
-					if(sub == '0')
-					{
-						if(c == '0')
-							;
-						else
-							sub = c;
-					}
-					else
-						sub += c;
-				}
-				else
-				{
+					re = false;
 					break;
 				}
 			}
 			
-			if(sub)
-				obj[propName] = parseInt(sub);
-			
-			return index;
+			return re;
 		},
-		_paddingLeftZero: function(number, length)
+		
+		_parseSymbolValue: function(dateObj, str, symbolPart)
 		{
-			var re = number + "";
+			var symbol = symbolPart.symbol;
 			
-			while(re.length < length)
-				re = "0" + re;
+			//毫秒数需要在右侧补0
+			if(symbol === 'S' && str.length < 3)
+				str = this._trimLength(str, 3, false, false);
+			
+			var value = parseInt(str);
+			
+			if(isNaN(value))
+				return;
+			
+			if("y" === symbol)
+			{
+				dateObj.year = value;
+			}
+			else if("M" === symbol)
+			{
+				dateObj.month = value;
+			}
+			else if("d" === symbol)
+			{
+				dateObj.day = value;
+			}
+			else if("H" === symbol)
+			{
+				dateObj.hour = value;
+			}
+			else if("m" === symbol)
+			{
+				dateObj.minute = value;
+			}
+			else if("s" === symbol)
+			{
+				dateObj.second = value;
+			}
+			else if("S" === symbol)
+			{
+				dateObj.ms = value;
+			}
+		},
+		
+		_formatSymbolValue: function(date, symbolPart)
+		{
+			var re = "";
+			
+			var symbol = symbolPart.symbol;
+			var count = symbolPart.count;
+			
+			if("y" === symbol)
+			{
+				re = this._trimLength(date.getFullYear(), count, true, true);
+			}
+			else if("M" === symbol)
+			{
+				re = this._trimLength(date.getMonth()+1, count, true, false);
+			}
+			else if("d" === symbol)
+			{
+				re = this._trimLength(date.getDate(), count, true, false);
+			}
+			else if("H" === symbol)
+			{
+				re = this._trimLength(date.getHours(), count, true, false);
+			}
+			else if("m" === symbol)
+			{
+				re = this._trimLength(date.getMinutes(), count, true, false);
+			}
+			else if("s" === symbol)
+			{
+				re = this._trimLength(date.getSeconds(), count, true, false);
+			}
+			else if("S" === symbol)
+			{
+				re = this._trimLength(date.getMilliseconds(), count, false, true);
+			}
 			
 			return re;
 		},
-		_formatArrayCache:{}
+		
+		_trimLength: function(value, length, rightMajor, handleCut)
+		{
+			value = value +"";
+			rightMajor = (rightMajor === undefined ? true : rightMajor);
+			handleCut = (handleCut === undefined ? false : handleCut);
+			
+			var re;
+			
+			if(value.length < length)
+			{
+				re = value;
+				
+				while(re.length < length)
+					re = (rightMajor ? "0"+re : re+"0");
+			}
+			else if(value.length > length && handleCut)
+			{
+				re = "";
+				
+				for(let i=0; i<length; i++)
+					re += (rightMajor ? value[value.length-length+i] : value[i]);
+			}
+			else
+				re = value;
+			
+			return re;
+		},
+		
+		_parseFormat: function(format)
+		{
+			var re = this._formatCache[format];
+			
+			if(re != null)
+				return re;
+			
+			re = [];
+			
+			var symbol = "";
+			var symbolCount = 0;
+			
+			for(let i=0; i<=format.length; i++)
+			{
+				let c = (i == format.length ? null : format[i]);
+				
+				if(c !== symbol && symbolCount > 0)
+				{
+					re.push({ isSymbol: true, symbol: symbol, count: symbolCount });
+					symbol = "";
+					symbolCount = 0;
+				}
+				
+				if(c == null) {}
+				else if(this._isSymbol(c))
+				{
+					symbol = c;
+					symbolCount += 1;
+				}
+				else
+				{
+					if(re.length == 0 || re[re.length-1].isSymbol)
+						re.push({ isSymbol: false, text: "" });
+					
+					re[re.length-1].text += c;
+				}
+			}
+			
+			this._formatCache[format] = re;
+			
+			return re;
+		},
+		
+		_formatCache: {},
+		
+		_isSymbol: function(c)
+		{
+			return this._symbols[c];
+		},
+		
+		_symbols: { "y": true, "M": true, "d": true, "H": true, "m": true, "s": true, "S": true }
 	};
 	
 	/**

@@ -1015,7 +1015,9 @@ TOOL.dateFormatter =
 	},
 	
 	/**
-	 * 将看板API1.0采用的的旧版日期格式转化为这里的新格式。
+	 * 将1.0的API采用的的旧版日期格式转化为这里的新格式。
+	 * 在2.0的API中，日期类的数据集参数输入框格式进行了重新设计，但是因为存在使用了1.0的API时日期格式定义的数据集，
+	 * 所以2.0时仍要兼容1.0的格式。同样地，1.0中也要兼容2.0的格式。
 	 */
 	convertOldFormatOptions: function(options)
 	{
@@ -1034,7 +1036,7 @@ TOOL.dateFormatter =
 	},
 	
 	/**
-	 * 将看板API1.0采用的的旧版日期格式转化为这里的新格式。
+	 * 将看板API1.0采用的的旧版日期格式转化为这里2.0的新格式。
 	 * 旧版格式规范："...Y|y...m...d...H|h...i...s..."
 	 * 其中：
 	 * Y|y ：年份，四位长度，不足补0
@@ -1189,7 +1191,12 @@ TOOL.dateFormatter =
 	
 	_parseFormat: function(format)
 	{
-		var re = [];
+		var re = this._formatCache[format];
+		
+		if(re != null)
+			return re;
+		
+		re = [];
 		
 		var symbol = "";
 		var symbolCount = 0;
@@ -1220,8 +1227,12 @@ TOOL.dateFormatter =
 			}
 		}
 		
+		this._formatCache[format] = re;
+		
 		return re;
 	},
+	
+	_formatCache: {},
 	
 	_isSymbol: function(c)
 	{
