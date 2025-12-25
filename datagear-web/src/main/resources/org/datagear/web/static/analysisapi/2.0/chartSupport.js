@@ -6805,7 +6805,31 @@ SPT.datetimeRenderer = function(plugin, config)
 	{
 		render: function(chart)
 		{
-			var options= {};
+			var options=
+			{
+				//可选，格式
+				format: "yyyy-MM-dd HH:mm:ss E",
+				//可选，是否实时刷新
+				realtime: true,
+				//可选，当realtime为true时的实时更新间隔毫秒数，默认值：1000
+				interval: 1000,
+				//可选，获取当前日期值的函数，每次刷新时都会调用，如果返回的不是Date对象，将直接显示，不会进行格式化
+				// chart 当前图表对象
+				value: function(chart)
+				{
+					return new Date();
+				},
+				//可选，停止实时更新判断函数，格式为：
+				// //value 上述value()函数的返回值
+				// //chart 当前图表对象
+				// function(value, chart){ return true、false; }
+				stopRealtime: null,
+				//可选，星期数组
+				weekDays: [ "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" ]
+			};
+			
+			chart.inflateOptions(options);
+			SPT.processRenderOptions(chart, options);
 			
 			var chartEle = chart.element();
 			CF.eleAddClass(chartEle, "dg-chart-datetime");
@@ -6813,26 +6837,34 @@ SPT.datetimeRenderer = function(plugin, config)
 			var internal = CF.eleCreate("div", "dg-chart-container");
 			CF.eleAppend(chartEle, internal);
 			chart.internal(internal);
-			
-			chart.inflateOptions(options);
-			SPT.processRenderOptions(chart, options);
 		},
 		
 		update: function(chart)
 		{
 			var options = {};
+			options = chart.inflateOptions(options, SPT.liveDataRenderOptions(chart));
 			options = chart.inflateOptions(options);
 			SPT.processUpdateOptions(chart, options);
 			
 			this._clearInterval(chart);
-			this._updateCurrentDatetime(chart, options);
-			var intervalId = setInterval(() =>
-			{
-				this._updateCurrentDatetime(chart, options);
-			},
-			1000);
+			var stopRealtime = this._updateCurrentValue(chart, options);
 			
-			chart.liveData(this._intervalIdName, intervalId);
+			if(options.realtime && !stopRealtime)
+			{
+				let interval = options.interval;
+				let intervalId = setInterval(() =>
+				{
+					var myStopRealtime = this._updateCurrentValue(chart, options);
+					
+					if(myStopRealtime)
+					{
+						this._clearInterval(chart);
+					}
+				},
+				interval);
+				
+				chart.liveData(this._intervalIdName, intervalId);
+			}
 		},
 		
 		destroy: function(chart)
@@ -6858,34 +6890,174 @@ SPT.datetimeRenderer = function(plugin, config)
 			}
 		},
 		
-		_updateCurrentDatetime: function(chart, options, value)
+		_updateCurrentValue: function(chart, options)
 		{
-			value = (value == null ? this._currentDateTimeStr(options) : value);
-			
+			var value = options.value(chart);
+			var displayVal = this._formatDate(value, options);
 			var internal = chart.internal();
-			CF.eleHtml(internal, value);
+			CF.eleHtml(internal, displayVal);
+			
+			var stopRealtime = (options.stopRealtime == null ? false : options.stopRealtime(value, chart));
+			return stopRealtime;
 		},
 		
-		_currentDateTimeStr: function(options)
+		//格式化日期，options.format支持格式："...yyyy...MM...dd...HH...mm...ss...SSS...E..."，其中：'E'表示星期
+		_formatDate: function(date, options)
 		{
-			//TODO 改为采用day.js.org支持格式化
+			var re = "";
 			
-			var dt = new Date();
-			var y = dt.getFullYear();
-			var mt = dt.getMonth() + 1;
-			var day = dt.getDate();
-			var h = dt.getHours();
-			var m = dt.getMinutes();
-			var s = dt.getSeconds();
+			var format = options.format;
 			
-			mt = (mt < 10 ? "0"+mt : mt);
-			day = (day < 10 ? "0"+day : day);
-			h = (h < 10 ? "0"+h : h);
-			m = (m < 10 ? "0"+m : m);
-			s = (s < 10 ? "0"+s : s);
+			if(date == null)
+			{
+				re = "";
+			}
+			else if(!(date instanceof Date))
+			{
+				re = date;
+			}
+			else
+			{
+				let parts = this._parseFormat(format);
+				
+				for(let i=0; i<parts.length; i++)
+				{
+					let part = parts[i];
+					
+					if(part.isSymbol)
+						re += this._formatSymbolValue(date, part, options);
+					else
+						re += part.text;
+				}
+			}
 			
-			return y + "-" + mt + "-" + day + " " + h + ":" + m + ":" + s;
-		}
+			return re;
+		},
+		
+		_parseFormat: function(format)
+		{
+			var re = this._formatCache[format];
+			
+			if(re != null)
+				return re;
+			
+			re = [];
+			
+			var symbol = "";
+			var symbolCount = 0;
+			
+			for(let i=0; i<=format.length; i++)
+			{
+				let c = (i == format.length ? null : format[i]);
+				
+				if(c !== symbol && symbolCount > 0)
+				{
+					re.push({ isSymbol: true, symbol: symbol, count: symbolCount });
+					symbol = "";
+					symbolCount = 0;
+				}
+				
+				if(c == null) {}
+				else if(this._isSymbol(c))
+				{
+					symbol = c;
+					symbolCount += 1;
+				}
+				else
+				{
+					if(re.length == 0 || re[re.length-1].isSymbol)
+						re.push({ isSymbol: false, text: "" });
+					
+					re[re.length-1].text += c;
+				}
+			}
+			
+			this._formatCache[format] = re;
+			
+			return re;
+		},
+		
+		_formatSymbolValue: function(date, symbolPart, options)
+		{
+			var re = "";
+			
+			var symbol = symbolPart.symbol;
+			var count = symbolPart.count;
+			var weekDays = (options.weekDays || []);
+			
+			if("y" === symbol)
+			{
+				re = this._trimLength(date.getFullYear(), count, true, true);
+			}
+			else if("M" === symbol)
+			{
+				re = this._trimLength(date.getMonth()+1, count, true, false);
+			}
+			else if("d" === symbol)
+			{
+				re = this._trimLength(date.getDate(), count, true, false);
+			}
+			else if("H" === symbol)
+			{
+				re = this._trimLength(date.getHours(), count, true, false);
+			}
+			else if("m" === symbol)
+			{
+				re = this._trimLength(date.getMinutes(), count, true, false);
+			}
+			else if("s" === symbol)
+			{
+				re = this._trimLength(date.getSeconds(), count, true, false);
+			}
+			else if("S" === symbol)
+			{
+				re = this._trimLength(date.getMilliseconds(), count, false, true);
+			}
+			else if("E" === symbol)
+			{
+				let weekDayIndex = date.getDay();
+				re = weekDays[weekDayIndex];
+			}
+			
+			return re;
+		},
+		
+		_trimLength: function(value, length, rightMajor, handleCut)
+		{
+			value = value +"";
+			rightMajor = (rightMajor === undefined ? true : rightMajor);
+			handleCut = (handleCut === undefined ? false : handleCut);
+			
+			var re;
+			
+			if(value.length < length)
+			{
+				re = value;
+				
+				while(re.length < length)
+					re = (rightMajor ? "0"+re : re+"0");
+			}
+			else if(value.length > length && handleCut)
+			{
+				re = "";
+				
+				for(let i=0; i<length; i++)
+					re += (rightMajor ? value[value.length-length+i] : value[i]);
+			}
+			else
+				re = value;
+			
+			return re;
+		},
+		
+		_formatCache: {},
+		
+		_isSymbol: function(c)
+		{
+			return this._symbols[c];
+		},
+		
+		_symbols: { "y": true, "M": true, "d": true, "H": true, "m": true, "s": true, "S": true, "E": true }
 	};
 	
 	return renderer;
