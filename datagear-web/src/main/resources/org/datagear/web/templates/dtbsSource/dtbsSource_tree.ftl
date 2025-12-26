@@ -681,7 +681,13 @@
 					});
 				}
 			},
-			{ separator: true },
+			{
+				separator: true,
+				visible: function()
+				{
+					return !po.isDisableSqlpad() || !po.isDisableImportData() || !po.isDisableExportData();
+				}
+			},
 			{
 				label: "<@spring.message code='refresh' />",
 				command: function()
