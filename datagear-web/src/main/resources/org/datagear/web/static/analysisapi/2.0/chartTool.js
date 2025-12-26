@@ -1747,12 +1747,23 @@ TOOL.getDataSetParamFormFoot = function(form)
 	return CF.eleOfSelector(".dg-dspform-foot", form);
 };
 
+TOOL.isNoNeedParamTool = function(chart, disableTool)
+{
+	return ((disableTool && disableTool.param == true) || !chart.hasDataSetParam());
+};
+
+TOOL.isNoNeedDataTool = function(chart, disableTool)
+{
+	return ((disableTool && disableTool.data == true) || CF.isEmpty(chart.dataSetBinds()));
+};
+
 TOOL.bindChartToolPanelEvent = function(chart)
 {
 	var disableTool = chart.disableTool();
-	var noNeedParam = (disableTool.param == true || !chart.hasDataSetParam());
+	var noNeedParam = TOOL.isNoNeedParamTool(chart, disableTool);
+	var noNeedData = TOOL.isNoNeedDataTool(chart, disableTool);
 	
-	if(noNeedParam && disableTool.data == true)
+	if(noNeedParam && noNeedData)
 		return false;
 	
 	var chartOptions = chart.options();
@@ -1832,6 +1843,8 @@ TOOL.unbindChartToolPanelEvent = function(chart)
 TOOL.showChartToolBox = function(chart)
 {
 	var disableTool = chart.disableTool();
+	var noNeedParam = TOOL.isNoNeedParamTool(chart, disableTool);
+	var noNeedData = TOOL.isNoNeedDataTool(chart, disableTool);
 	
 	var chartEle = chart.element();
 	var boxEle = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
@@ -1858,7 +1871,7 @@ TOOL.showChartToolBox = function(chart)
 		TOOL.setChartToolBoxThemeStyle(chart, boxEle);
 		
 		//参数
-		if(!disableTool.param && chart.hasDataSetParam())
+		if(!noNeedParam)
 		{
 			let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-tool-button dg-chart-tool-param-button");
 			CF.eleHtml(button, TOOL.labels.param);
@@ -1887,7 +1900,7 @@ TOOL.showChartToolBox = function(chart)
 		}
 		
 		//数据
-		if(!disableTool.data)
+		if(!noNeedData)
 		{
 			let button = CF.eleCreateWithAttr("button", "type", "button", "class", "dg-chart-tool-button dg-chart-tool-data-button");
 			CF.eleHtml(button, TOOL.labels.data);
