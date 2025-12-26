@@ -100,6 +100,7 @@
 (function(po)
 {
 	po.currentUserId = "${currentUser.id}";
+	po.currentAnonymous = ("${currentUser.anonymous?string('true', 'false')}"  == "true");
 
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='dtbsSource.pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='dtbsSource.pleaseSelectAtLeastOne' />";
@@ -140,6 +141,21 @@
 		}
 		
 		return re;
+	};
+	
+	po.isDisableSqlpad = function()
+	{
+		return po.currentAnonymous;
+	};
+	
+	po.isDisableImportData = function()
+	{
+		return po.currentAnonymous;
+	};
+	
+	po.isDisableExportData = function()
+	{
+		return po.currentAnonymous;
 	};
 	
 	po.searchByType = function(type)
@@ -622,6 +638,10 @@
 			{ separator: true },
 			{
 				label: "<@spring.message code='module.sqlpad' />",
+				visible: function()
+				{
+					return !po.isDisableSqlpad();
+				},
 				command: function()
 				{
 					po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
@@ -633,6 +653,10 @@
 			},
 			{
 				label: "<@spring.message code='module.importData' />",
+				visible: function()
+				{
+					return !po.isDisableImportData();
+				},
 				command: function()
 				{
 					po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
@@ -644,6 +668,10 @@
 			},
 			{
 				label: "<@spring.message code='module.exportData' />",
+				visible: function()
+				{
+					return !po.isDisableExportData();
+				},
 				command: function()
 				{
 					po.executeOnFirstAwareDtbsSourceNode(function(dtbsSourceNode)
