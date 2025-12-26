@@ -36,12 +36,14 @@
 		INSERT INTO DATAGEAR_DATA_SET_PAR
 			(
 			PAR_DS_ID, PAR_NAME, PAR_TYPE, PAR_REQUIRED, PAR_DESC,
-			PAR_INPUT_TYPE, PAR_INPUT_PAYLOAD, PAR_ORDER
+			PAR_INPUT_TYPE, PAR_INPUT_PAYLOAD, PAR_ORDER,
+			PAR_LABEL
 			)
 		VALUES
 			(
 			#{entity.dataSetId}, #{entity.child.name}, #{entity.child.type}, #{entity.child.required}, #{entity.child.desc, jdbcType=VARCHAR},
-			 #{entity.child.inputType, jdbcType=VARCHAR}, #{entity.child.inputPayload, jdbcType=VARCHAR}, #{entity.order}
+			#{entity.child.inputType, jdbcType=VARCHAR}, #{entity.child.inputPayload, jdbcType=VARCHAR}, #{entity.order},
+			#{entity.child.label, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -116,7 +118,8 @@
 			PAR_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PAR_NAME AS ${_iq_}child.name${_iq_},
 			PAR_TYPE AS ${_iq_}child.type${_iq_},
-			PAR_REQUIRED AS ${_iq_}child.required${_iq_},
+			PAR_REQUIRED AS ${_iq_}child.required${_iq_}, 
+			PAR_LABEL AS ${_iq_}child.label${_iq_},
 			PAR_DESC AS ${_iq_}child.desc${_iq_},
 			PAR_INPUT_TYPE AS ${_iq_}child.inputType${_iq_},
 			PAR_INPUT_PAYLOAD AS ${_iq_}child.inputPayload${_iq_}, 

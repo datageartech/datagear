@@ -33,8 +33,11 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 	/** 是否必须 */
 	private boolean required;
 
+	/** 展示标签 */
+	private String label = null;
+
 	/** 参数描述 */
-	private String desc;
+	private String desc = null;
 
 	/** 界面输入框类型 */
 	private String inputType;
@@ -62,6 +65,16 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 	public void setRequired(boolean required)
 	{
 		this.required = required;
+	}
+
+	public String getLabel()
+	{
+		return label;
+	}
+
+	public void setLabel(String label)
+	{
+		this.label = label;
 	}
 
 	public boolean hasDesc()
@@ -104,8 +117,8 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [required=" + required + ", desc=" + desc + ", inputType=" + inputType
-				+ ", inputPayload=" + inputPayload + "]";
+		return getClass().getSimpleName() + " [required=" + required + ", label=" + label + ", desc=" + desc
+				+ ", inputType=" + inputType + ", inputPayload=" + inputPayload + "]";
 	}
 
 	/**

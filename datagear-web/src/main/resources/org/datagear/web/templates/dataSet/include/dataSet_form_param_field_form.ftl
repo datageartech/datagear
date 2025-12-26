@@ -65,6 +65,16 @@ page_simple_form.ftl
 					</div>
 				</div>
 				<div class="field grid">
+					<label for="${pid}dspFormLabel" class="field-label col-12 mb-2">
+						<@spring.message code='displayName' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}dspFormLabel" v-model="pm.dataSetParamForm.data.label" type="text"
+							class="input w-full" name="label" maxlength="100">
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
 					<label for="${pid}dspFormDesc" class="field-label col-12 mb-2">
 						<@spring.message code='desc' />
 					</label>

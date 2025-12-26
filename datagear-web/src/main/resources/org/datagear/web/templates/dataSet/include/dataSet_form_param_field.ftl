@@ -71,6 +71,8 @@ dataSet_form_param_field_form.ftl
 							{{formatParamRequired(data)}}
 						</template>
 					</p-column>
+					<p-column field="label" header="<@spring.message code='displayName' />" class="col-name">
+					</p-column>
 					<p-column field="desc" header="<@spring.message code='desc' />" class="col-name">
 					</p-column>
 					<p-column field="inputType" header="<@spring.message code='inputType' />" class="col-name">
