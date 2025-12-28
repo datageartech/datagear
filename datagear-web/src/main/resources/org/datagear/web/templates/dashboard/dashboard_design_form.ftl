@@ -43,15 +43,13 @@
 				</div>
 			</div>
 			<div class="field grid mb-0 flex-grow-1 flex flex-column">
-		        <div class="field-input col-12 flex-grow-1 flex flex-column">
-		        	<div class="grid grid-nogutter flex-grow-1 align-items-stretch">
-		        		<div class="col-8 md:col-9 pr-1">
-		        			<#include "include/dashboard_design_editor.ftl">
-		        		</div>
-		        		<div class="col-4 md:col-3 pl-2">
-		        			<#include "include/dashboard_design_resource.ftl">
-		        		</div>
-		        	</div>
+		        <div class="field-input col-12 flex-grow-1 flex flex-row align-items-stretch">
+	        		<div class="design-editor-wrapper flex-grow-1 pr-1">
+	        			<#include "include/dashboard_design_editor.ftl">
+	        		</div>
+	        		<div class="design-resource-wrapper flex-grow-0 pl-2">
+	        			<#include "include/dashboard_design_resource.ftl">
+	        		</div>
 		        </div>
 			</div>
 		</div>

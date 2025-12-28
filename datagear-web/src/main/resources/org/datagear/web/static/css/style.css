@@ -838,8 +838,16 @@ label.align-tip{
 	width: 40vw;
 }
 
+.page-dashboard-design.page-form .page-form-content,
+.page-dashboard-design.page-form form.readonly.show-foot .page-form-content{
+	max-height: unset;
+}
 .p-dialog .page-dashboard-design{
 	height: 70vh !important;
+}
+.page-dashboard-design .design-resource-wrapper{
+	width: 20vw;
+	min-width: 10rem;
 }
 .page-dashboard-design .p-tabview .p-tabview-panels{
 	padding: 0.25rem 0 0 0;
