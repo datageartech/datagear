@@ -74,10 +74,10 @@
 					<div :id="resCodeEditorEleId(tab)" class="code-editor"></div>
 				</div>
 				<div class="visual-editor-wrapper res-editor-wrapper opacity-hide p-component p-inputtext p-0 w-full h-full absolute">
-					<div class="visual-editor-ele-path-wrapper text-color-secondary text-sm overflow-x-auto overflow-y-hidden">
+					<div class="visual-editor-ele-path-wrapper text-color-secondary text-sm border-round overflow-x-auto overflow-y-hidden">
 						<div class="ele-path white-space-nowrap">
-							<span class="opacity-60" v-if="tab.veElementPath == null || tab.veElementPath.length == 0">
-								<small><@spring.message code='clickForSelEleThenOpt' /></small>
+							<span class="opacity-60" v-if="!pm.isReadonlyAction && (tab.veElementPath == null || tab.veElementPath.length == 0)">
+								<small><@spring.message code='dashboard.veditor.optGuide' /></small>
 							</span>
 							<span v-for="(ep, epIdx) in tab.veElementPath" :key="epIdx">
 								<span class="info-separator p-1 opacity-50" v-if="epIdx > 0">&gt;</span>

@@ -854,11 +854,14 @@ label.align-tip{
 }
 .page-dashboard-design .res-editor-wrapper .visual-editor-ele-path-wrapper{
 	position: absolute;
-	left: 0.4rem;
-	top: 0.2rem;
-	right: 0.3rem;
+	left: 1px;
+	top: 1px;
+	right: 1px;
 	z-index: 2;
 	overflow: hidden;
+	background: var(--surface-ground);
+    padding: 0 0.2rem;
+    height: 1.2rem;
 }
 .page-dashboard-design .res-editor-wrapper .visual-editor-iframe-wrapper{
 	position: absolute;
