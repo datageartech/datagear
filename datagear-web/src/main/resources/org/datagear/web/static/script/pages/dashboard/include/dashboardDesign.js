@@ -4344,16 +4344,6 @@ $.inflateDashboardDesignResource = function(po)
 		{
 			po.closeSelectGlobalResDialog();
 		});
-
-		po.element().click(function(e)
-		{
-			var targetEle = $(e.target);
-			
-			if(targetEle.hasClass("for-open-global-res-panel") || targetEle.closest(".for-open-global-res-panel").length > 0)
-				;//保持选择图表对话框
-			else
-				po.hideSelectGlobalResDialog();
-		});
 	};
 };
 
