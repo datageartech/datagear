@@ -274,7 +274,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		pluginView.setOrder(chartPlugin.getOrder());
 		pluginView.setCategories(Category.clone(chartPlugin.getCategories(), locale));
 		pluginView.setCategoryOrders(chartPlugin.getCategoryOrders());
-		pluginView.setAttributes(ChartPluginAttribute.clone(chartPlugin.getAttributes(), locale));
+		pluginView.setAttributes(ChartPluginAttribute.toLocale(chartPlugin.getAttributes(), locale));
 		pluginView.setAuthor(chartPlugin.getAuthor());
 		pluginView.setContact(chartPlugin.getContact());
 		pluginView.setIssueDate(chartPlugin.getIssueDate());

@@ -2440,7 +2440,7 @@
 	/**
 	 * 获取看板图表插件属性内置地图选项集。
 	 */
-	editor.getChartPluginAttributeInputOptionsForMap = function(asTree)
+	editor.getChartPluginInputAttrInputOptionsForMap = function(asTree)
 	{
 		var re = [];
 		

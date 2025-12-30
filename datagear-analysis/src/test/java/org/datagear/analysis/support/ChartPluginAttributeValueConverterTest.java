@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.ChartPluginAttribute;
+import org.datagear.analysis.ChartPluginInputAttribute;
 import org.junit.Test;
 
 /**
@@ -44,11 +44,15 @@ public class ChartPluginAttributeValueConverterTest
 	@Test
 	public void convertTest()
 	{
-		List<ChartPluginAttribute> chartPluginAttributes = new ArrayList<>();
-		chartPluginAttributes.add(new ChartPluginAttribute("name", ChartPluginAttribute.DataType.STRING, true));
-		chartPluginAttributes.add(new ChartPluginAttribute("size", ChartPluginAttribute.DataType.NUMBER, true));
-		chartPluginAttributes.add(new ChartPluginAttribute("enable", ChartPluginAttribute.DataType.BOOLEAN, true));
+		List<ChartPluginInputAttribute> chartPluginAttributes = new ArrayList<>();
+		chartPluginAttributes
+				.add(new ChartPluginInputAttribute("name", ChartPluginInputAttribute.DataType.STRING, true));
+		chartPluginAttributes
+				.add(new ChartPluginInputAttribute("size", ChartPluginInputAttribute.DataType.NUMBER, true));
+		chartPluginAttributes
+				.add(new ChartPluginInputAttribute("enable", ChartPluginInputAttribute.DataType.BOOLEAN, true));
 		
+		@SuppressWarnings("deprecation")
 		ChartPluginAttributeValueConverter converter = new ChartPluginAttributeValueConverter();
 
 		{

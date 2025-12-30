@@ -20,7 +20,6 @@ package org.datagear.web.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +29,6 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResultDataFormat;
-import org.datagear.analysis.support.ChartPluginAttributeValueConverter;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.Authorization;
@@ -91,8 +89,6 @@ public class ChartController extends AbstractChartPluginAwareController
 
 	@Autowired
 	private AnalysisProjectAwareSupport analysisProjectAwareSupport;
-
-	private ChartPluginAttributeValueConverter chartPluginAttributeValueConverter = new ChartPluginAttributeValueConverter();
 
 	public ChartController()
 	{
@@ -167,17 +163,6 @@ public class ChartController extends AbstractChartPluginAwareController
 	public void setAnalysisProjectAwareSupport(AnalysisProjectAwareSupport analysisProjectAwareSupport)
 	{
 		this.analysisProjectAwareSupport = analysisProjectAwareSupport;
-	}
-
-	public ChartPluginAttributeValueConverter getChartPluginAttributeValueConverter()
-	{
-		return chartPluginAttributeValueConverter;
-	}
-
-	public void setChartPluginAttributeValueConverter(
-			ChartPluginAttributeValueConverter chartPluginAttributeValueConverter)
-	{
-		this.chartPluginAttributeValueConverter = chartPluginAttributeValueConverter;
 	}
 
 	@RequestMapping("/add")
@@ -485,12 +470,15 @@ public class ChartController extends AbstractChartPluginAwareController
 			}
 		}
 
-		Map<String, Object> attrValues = entity.getAttrValues();
-		if (attrValues != null && plugin != null)
-		{
-			attrValues = getChartPluginAttributeValueConverter().convert(attrValues, plugin.getAttributes());
-			entity.setAttrValues(attrValues);
-		}
+		// 插件属性值应在界面端进行数据类型转换
+		// Map<String, Object> attrValues = entity.getAttrValues();
+		// if (attrValues != null && plugin != null)
+		// {
+		// attrValues =
+		// getChartPluginAttributeValueConverter().convert(attrValues,
+		// plugin.getAttributes());
+		// entity.setAttrValues(attrValues);
+		// }
 	}
 
 	protected void toFormResponseData(HttpServletRequest request, HtmlChartWidgetEntity entity)

@@ -178,7 +178,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			LabelUtil.concrete(plugin, this, locale);
 			setResources(ChartPluginResourceJson.valuesOf(plugin.getResources()));
 			setIconResourceNames(plugin.getIconResourceNames());
-			setAttributes(ChartPluginAttribute.clone(plugin.getAttributes(), locale));
+			setAttributes(ChartPluginAttribute.toLocale(plugin.getAttributes(), locale));
 			setDataSigns(DataSign.clone(plugin.getDataSigns(), locale));
 			setDataSetRange(plugin.getDataSetRange());
 			setVersion(plugin.getVersion());

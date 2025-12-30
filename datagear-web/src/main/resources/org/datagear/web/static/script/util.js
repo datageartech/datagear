@@ -628,6 +628,7 @@
 	$.TYPEOF_NUMBER = "number";
 	$.TYPEOF_BOOLEAN = "boolean";
 	$.TYPEOF_TYPE_OBJECT = "object";
+	$.DECIMAL_REGEX = /^-?(?:\d+\.\d*|\.\d+)$/;
 	
 	$.isTypeString = function(obj)
 	{
@@ -653,6 +654,25 @@
 	{
 		val = parseInt(val);
 		return (!isNaN(val) ? val : dftVal);
+	};
+	
+	$.parseToNumber = function(val)
+	{
+		if(val == null)
+			return null;
+		
+		if($.isTypeNumber(val))
+			return val;
+		
+		if($.isTypeString(val))
+		{
+			if($.DECIMAL_REGEX.test(val))
+				return parseFloat(val);
+			else
+				return parseInt(val);
+		}
+		
+		return parseFloat(val);
 	};
 	
 	$.findNameByValue = function(array, value)

@@ -23,8 +23,8 @@
 page_boolean_options.ftl
 page_palette.ftl
 -->
-<#assign ChartPluginAttributeType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
-<#assign ChartPluginAttributeInputType=statics['org.datagear.analysis.ChartPluginAttribute$InputType']>
+<#assign ChartPluginInputAttrType=statics['org.datagear.analysis.ChartPluginInputAttribute$DataType']>
+<#assign ChartPluginInputAttrInputType=statics['org.datagear.analysis.ChartPluginInputAttribute$InputType']>
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<div v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
@@ -39,7 +39,7 @@ page_palette.ftl
 					</span>
 					<span class="text-color-secondary text-sm ml-1">{{cpa.name}}</span>
 				</label>
-				<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginAttribute.InputType.RADIO">
+				<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
 						<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
 							<p-radiobutton :input-id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
@@ -50,7 +50,7 @@ page_palette.ftl
 		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
 		        	</div>
 				</div>
-				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.SELECT">
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
 					<div v-if="cpa.inputPayload.multiple == true">
 						<div v-if="cpa.inputPayload.treeSelect == true">
 							<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
@@ -64,7 +64,7 @@ page_palette.ftl
 						</div>
 					</div>
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
-						v-else-if="cpa.inputPayload.multiple == pm.ChartPluginAttribute.MultipleRepeat">
+						v-else-if="cpa.inputPayload.multiple == pm.ChartPluginInputAttribute.MultipleRepeat">
 						<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
 							<div class="flex mb-1 gap-2">
 								<div class="flex-grow-1 flex">
@@ -107,7 +107,7 @@ page_palette.ftl
 		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
 		        	</div>
 				</div>
-				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.CHECKBOX">
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
 						<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
 							<p-checkbox :input-id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
@@ -118,7 +118,7 @@ page_palette.ftl
 		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
 		        	</div>
 				</div>
-				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.COLOR">
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
 					<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.inputPayload.multiple">
 						<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
 							<div class="flex mb-1 gap-2">
@@ -156,7 +156,7 @@ page_palette.ftl
 		        		<input :name="cpa.name" required type="text" class="validate-proxy" />
 		        	</div>
 				</div>
-				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginAttribute.InputType.TEXTAREA">
+				<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
 					<p-textarea :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
 						class="input w-full" maxlength="2000">
 					</p-textarea>
@@ -186,22 +186,22 @@ page_palette.ftl
 <script>
 (function(po)
 {
-	po.ChartPluginAttribute =
+	po.ChartPluginInputAttribute =
 	{
 		DataType:
 		{
-			STRING: "${ChartPluginAttributeType.STRING}",
-			BOOLEAN: "${ChartPluginAttributeType.BOOLEAN}",
-			NUMBER: "${ChartPluginAttributeType.NUMBER}"
+			STRING: "${ChartPluginInputAttrType.STRING}",
+			BOOLEAN: "${ChartPluginInputAttrType.BOOLEAN}",
+			NUMBER: "${ChartPluginInputAttrType.NUMBER}"
 		},
 		InputType:
 		{
-			TEXT: "${ChartPluginAttributeInputType.TEXT}",
-			SELECT: "${ChartPluginAttributeInputType.SELECT}",
-			RADIO: "${ChartPluginAttributeInputType.RADIO}",
-			CHECKBOX: "${ChartPluginAttributeInputType.CHECKBOX}",
-			TEXTAREA: "${ChartPluginAttributeInputType.TEXTAREA}",
-			COLOR: "${ChartPluginAttributeInputType.COLOR}"
+			TEXT: "${ChartPluginInputAttrInputType.TEXT}",
+			SELECT: "${ChartPluginInputAttrInputType.SELECT}",
+			RADIO: "${ChartPluginInputAttrInputType.RADIO}",
+			CHECKBOX: "${ChartPluginInputAttrInputType.CHECKBOX}",
+			TEXTAREA: "${ChartPluginInputAttrInputType.TEXTAREA}",
+			COLOR: "${ChartPluginInputAttrInputType.COLOR}"
 		},
 		InputPayload:
 		{
@@ -224,10 +224,10 @@ page_palette.ftl
 		$.each(cpas, function(i, cpa)
 		{
 			//布尔型默认作为RADIO处理
-			if(cpa.type == po.ChartPluginAttribute.DataType.BOOLEAN)
+			if(cpa.type == po.ChartPluginInputAttribute.DataType.BOOLEAN)
 			{
 				if(!cpa.inputType)
-					cpa.inputType = po.ChartPluginAttribute.InputType.RADIO;
+					cpa.inputType = po.ChartPluginInputAttribute.InputType.RADIO;
 				
 				if(!cpa.inputPayload)
 				{
@@ -239,28 +239,28 @@ page_palette.ftl
 			var inputType = cpa.inputType;
 			
 			//下拉框、单选、复选框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
-			if(inputType == po.ChartPluginAttribute.InputType.SELECT
-					|| inputType == po.ChartPluginAttribute.InputType.RADIO
-					|| inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+			if(inputType == po.ChartPluginInputAttribute.InputType.SELECT
+					|| inputType == po.ChartPluginInputAttribute.InputType.RADIO
+					|| inputType == po.ChartPluginInputAttribute.InputType.CHECKBOX)
 			{
 				var inputPayload = (cpa.inputPayload || []);
 				
 				//数组、"DG_MAP"：转换为{ multiple: false, options: ... }格式
-				if($.isArray(inputPayload) || (inputPayload == po.ChartPluginAttribute.InputPayload.DG_MAP))
+				if($.isArray(inputPayload) || (inputPayload == po.ChartPluginInputAttribute.InputPayload.DG_MAP))
 					inputPayload = { multiple: false, options: inputPayload };
 				
 				//{ options: "DG_MAP" }：转换为实际地图数据options
-				po.trimChartPluginAttributeInputPayloadIfMap(cpa, inputPayload);
+				po.trimChartPluginInputAttrInputPayloadIfMap(cpa, inputPayload);
 				
 				//默认multiple为false
 				inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
-				po.trimChartPluginAttributeInputOptions(cpa, inputPayload);
+				po.trimChartPluginInputAttrInputOptions(cpa, inputPayload);
 				
-				if(inputType == po.ChartPluginAttribute.InputType.RADIO)
+				if(inputType == po.ChartPluginInputAttribute.InputType.RADIO)
 				{
 					inputPayload.multiple = false;
 				}
-				else if(inputType == po.ChartPluginAttribute.InputType.CHECKBOX)
+				else if(inputType == po.ChartPluginInputAttribute.InputType.CHECKBOX)
 				{
 					inputPayload.multiple = true;
 				}
@@ -268,7 +268,7 @@ page_palette.ftl
 				cpa.inputPayload = inputPayload;
 			}
 			//颜色框：将inputPayload转换为标准的{multiple: ...}格式
-			else if(inputType == po.ChartPluginAttribute.InputType.COLOR)
+			else if(inputType == po.ChartPluginInputAttribute.InputType.COLOR)
 			{
 				var inputPayload = cpa.inputPayload;
 				
@@ -280,7 +280,7 @@ page_palette.ftl
 				//"multiple"
 				else if($.isTypeString(inputPayload))
 				{
-					inputPayload = { multiple: (inputPayload == po.ChartPluginAttribute.InputPayload.MULTIPLE) };
+					inputPayload = { multiple: (inputPayload == po.ChartPluginInputAttribute.InputPayload.MULTIPLE) };
 				}
 				//不支持数值、布尔型、数组
 				else if($.isTypeNumber(inputPayload) || $.isTypeBoolean(inputPayload) || $.isArray(inputPayload))
@@ -300,25 +300,25 @@ page_palette.ftl
 		return cpas;
 	};
 	
-	po.trimChartPluginAttributeInputPayloadIfMap = function(chartPluginAttr, inputPayload)
+	po.trimChartPluginInputAttrInputPayloadIfMap = function(chartPluginAttr, inputPayload)
 	{
 		var options = inputPayload.options;
 		
 		//内置地图
-		if(options == po.ChartPluginAttribute.InputPayload.DG_MAP)
+		if(options == po.ChartPluginInputAttribute.InputPayload.DG_MAP)
 		{
 			//只有下拉列表才使用树形结构，单选框、复选框只能使用平铺数组
 			if(inputPayload.treeSelect == null
-					&& chartPluginAttr.inputType == po.ChartPluginAttribute.InputType.SELECT)
+					&& chartPluginAttr.inputType == po.ChartPluginInputAttribute.InputType.SELECT)
 			{
 				inputPayload.treeSelect = true;
 			}
 			
-			inputPayload.options = po.getChartPluginAttributeInputOptionsForMap(inputPayload.treeSelect);
+			inputPayload.options = po.getChartPluginInputAttrInputOptionsForMap(inputPayload.treeSelect);
 		}
 	};
 	
-	po.getChartPluginAttributeInputOptionsForMap = function(asTree)
+	po.getChartPluginInputAttrInputOptionsForMap = function(asTree)
 	{
 		//树
 		if(asTree)
@@ -354,7 +354,7 @@ page_palette.ftl
 		}
 	};
 	
-	po.trimChartPluginAttributeInputOptions = function(chartPluginAttr, inputPayload)
+	po.trimChartPluginInputAttrInputOptions = function(chartPluginAttr, inputPayload)
 	{
 		if(!inputPayload.options)
 			inputPayload.options = [];
@@ -444,7 +444,7 @@ page_palette.ftl
 			var inputType = cpa.inputType;
 			var inputPayload = cpa.inputPayload;
 			var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
-			var isMultipleSelect = (inputPayload && (inputPayload.multiple == true || inputPayload.multiple == po.ChartPluginAttribute.MultipleRepeat));
+			var isMultipleSelect = (inputPayload && (inputPayload.multiple == true || inputPayload.multiple == po.ChartPluginInputAttribute.MultipleRepeat));
 			
 			//需先转换树组件Model
 			if(isTreeSelect)
@@ -539,13 +539,13 @@ page_palette.ftl
 			
 			return re;
 		}
-		else if(type == po.ChartPluginAttribute.DataType.BOOLEAN)
+		else if(type == po.ChartPluginInputAttribute.DataType.BOOLEAN)
 		{
 			return (value == true || value == "true" || value == "1" || value > 0 ? true : false);
 		}
-		else if(type == po.ChartPluginAttribute.DataType.NUMBER)
+		else if(type == po.ChartPluginInputAttribute.DataType.NUMBER)
 		{
-			return parseFloat(value);
+			return $.parseToNumber(value);
 		}
 		else
 			return value;
@@ -618,7 +618,7 @@ page_palette.ftl
 	
 	po.vuePageModel(
 	{
-		ChartPluginAttribute: po.ChartPluginAttribute,
+		ChartPluginInputAttribute: po.ChartPluginInputAttribute,
 		chartAttrValuesForm:
 		{
 			attributes: [],
@@ -651,7 +651,7 @@ page_palette.ftl
 		var validateRules = {};
 		$.each(cpas, function(i, cpa)
 		{
-			if(cpa.type == po.ChartPluginAttribute.DataType.NUMBER)
+			if(cpa.type == po.ChartPluginInputAttribute.DataType.NUMBER)
 				validateRules[cpa.name] = { "number": true };
 		});
 		

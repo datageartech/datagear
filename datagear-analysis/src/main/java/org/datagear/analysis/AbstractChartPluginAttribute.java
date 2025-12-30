@@ -15,11 +15,13 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.pluginattr;
+package org.datagear.analysis;
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.util.i18n.AbstractLabeled;
+import org.datagear.util.i18n.LabelUtil;
 
 /**
  * 抽象{@linkplain ChartPluginAttribute}。
@@ -94,5 +96,14 @@ public abstract class AbstractChartPluginAttribute extends AbstractLabeled
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
+	}
+
+	protected void copyToLocale(AbstractChartPluginAttribute target, Locale locale)
+	{
+		target.setName(this.name);
+		target.setRequired(this.required);
+		target.setArray(this.array);
+		target.setAdditions(this.additions);
+		LabelUtil.concrete(this, target, locale);
 	}
 }

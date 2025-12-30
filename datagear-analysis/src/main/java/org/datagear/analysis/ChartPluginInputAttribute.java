@@ -15,15 +15,12 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis.pluginattr;
+package org.datagear.analysis;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-
-import org.datagear.analysis.NameTypeInputAware;
-import org.datagear.util.i18n.LabelUtil;
 
 /**
  * 输入项图表插件属性。
@@ -41,6 +38,7 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
+	public static final String PROPERTY_GROUP = "group";
 
 	/** 类型 */
 	private String type;
@@ -50,7 +48,16 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 
 	/** 输入框载荷 */
 	private Object inputPayload = null;
-	
+
+	/**
+	 * 所属分组。
+	 * 
+	 * @deprecated 用于兼容旧的5.5.0版本的{@code ChartPluginAttribute}格式，
+	 *             在6.0版本起已被{@linkplain ChartPluginGroupAttribute}取代
+	 */
+	@Deprecated
+	private Group group = null;
+
 	public ChartPluginInputAttribute()
 	{
 		super();
@@ -60,6 +67,31 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	{
 		super(name);
 		this.type = type;
+	}
+
+	public ChartPluginInputAttribute(String name, String type, boolean required)
+	{
+		super(name);
+		this.type = type;
+		setRequired(required);
+	}
+
+	/**
+	 * 获取名称，不应为空。
+	 */
+	@Override
+	public String getName()
+	{
+		return super.getName();
+	}
+
+	/**
+	 * 设置名称，不应为空。
+	 */
+	@Override
+	public void setName(String name)
+	{
+		super.setName(name);
 	}
 
 	/**
@@ -103,21 +135,27 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 		this.inputPayload = inputPayload;
 	}
 
-	/**
-	 * 复制为指定{@linkplain Locale}的对象。
-	 * 
-	 * @param locale
-	 * @return
-	 */
-	public ChartPluginInputAttribute clone(Locale locale)
+	@Deprecated
+	public Group getGroup()
 	{
-		ChartPluginInputAttribute target = new ChartPluginInputAttribute(getName(), this.type);
-		target.setRequired(isRequired());
-		target.setArray(isArray());
+		return group;
+	}
+
+	@Deprecated
+	public void setGroup(Group group)
+	{
+		this.group = group;
+	}
+
+	@Override
+	public ChartPluginInputAttribute toLocale(Locale locale)
+	{
+		ChartPluginInputAttribute target = new ChartPluginInputAttribute();
+		copyToLocale(target, locale);
+		target.setType(this.type);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
-		target.setAdditions(getAdditions());
-		LabelUtil.concrete(this, target, locale);
+		target.setGroup(this.group != null ? this.group.clone(locale) : null);
 
 		return target;
 	}
@@ -136,7 +174,7 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	 * @param locale
 	 * @return
 	 */
-	public static List<ChartPluginInputAttribute> clone(List<ChartPluginInputAttribute> attributes,
+	public static List<ChartPluginInputAttribute> toLocale(List<ChartPluginInputAttribute> attributes,
 			Locale locale)
 	{
 		if (attributes == null)
@@ -148,7 +186,7 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 		List<ChartPluginInputAttribute> re = new ArrayList<ChartPluginInputAttribute>(attributes.size());
 
 		for (ChartPluginInputAttribute attribute : attributes)
-			re.add(attribute.clone(locale));
+			re.add(attribute.toLocale(locale));
 
 		return re;
 	}

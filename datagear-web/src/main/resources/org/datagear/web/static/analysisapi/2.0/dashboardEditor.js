@@ -2443,7 +2443,7 @@ DE.getElementChartAttrValuesForReset = function(ele)
 /**
  * 获取看板图表插件属性内置地图选项集。
  */
-DE.getChartPluginAttributeInputOptionsForMap = function(asTree)
+DE.getChartPluginInputAttrInputOptionsForMap = function(asTree)
 {
 	var re = [];
 	

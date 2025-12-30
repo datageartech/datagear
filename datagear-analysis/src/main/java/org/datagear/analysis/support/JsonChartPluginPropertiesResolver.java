@@ -35,6 +35,8 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
+import org.datagear.analysis.ChartPluginGroupAttribute;
+import org.datagear.analysis.ChartPluginInputAttribute;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
 import org.datagear.util.IOUtil;
@@ -499,6 +501,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param obj
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	protected ChartPluginAttribute convertToAttribute(Object obj)
 	{
 		if (obj == null)
@@ -509,40 +512,86 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
+			boolean isGroup = (map.containsKey(ChartPluginGroupAttribute.PROPERTY_CHILDREN));
+			String name = convertToString(map.get(ChartPluginAttribute.PROPERTY_NAME));
 
-			String name = (String) map.get(ChartPluginAttribute.PROPERTY_NAME);
-			if (name == null || name.isEmpty())
-				return null;
+			if (isGroup)
+			{
+				ChartPluginGroupAttribute attribute = createChartPluginGroupAttribute();
 
-			ChartPluginAttribute attribute = createChartPluginAttribute();
-			attribute.setName(name);
-			attribute.setType(convertToAttributeType(map.get(ChartPluginAttribute.PROPERTY_TYPE)));
-			attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
-			attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
-			attribute.setRequired(convertToAttributeRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
-			attribute.setInputType(convertToAttributeInputType(map.get(ChartPluginAttribute.PROPERTY_INPUT_TYPE)));
-			attribute.setInputPayload(convertToAttributeInputPayload(map.get(ChartPluginAttribute.PROPERTY_INPUT_PAYLOAD)));
-			attribute.setGroup(convertToAttributeGroup(map.get(ChartPluginAttribute.PROPERTY_GROUP)));
-			attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
+				attribute.setName(name);
+				attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
+				attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
+				attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
+				attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
+				attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
 
-			return attribute;
+				List<ChartPluginInputAttribute> children = null;
+				
+				List<ChartPluginAttribute> tmpChildren = convertToAttributes(
+						map.get(ChartPluginGroupAttribute.PROPERTY_CHILDREN));
+
+				if(tmpChildren != null)
+				{
+					children = new ArrayList<>(tmpChildren.size());
+
+					for(ChartPluginAttribute tmpChild : tmpChildren)
+					{
+						if (tmpChild != null && (tmpChild instanceof ChartPluginInputAttribute))
+							children.add((ChartPluginInputAttribute) tmpChild);
+					}
+				}
+
+				attribute.setChildren(children);
+
+				return attribute;
+			}
+			else
+			{
+				// ChartPluginInputAttribute不允许名称为空
+				if (StringUtil.isEmpty(name))
+					return null;
+
+				ChartPluginInputAttribute attribute = createChartPluginInputAttribute();
+
+				attribute.setName(name);
+				attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
+				attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
+				attribute.setType(convertToInputAttrType(map.get(ChartPluginInputAttribute.PROPERTY_TYPE)));
+				attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
+				attribute.setInputType(
+						convertToInputAttrInputType(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_TYPE)));
+				attribute.setInputPayload(
+						convertToInputAttrInputPayload(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_PAYLOAD)));
+				attribute.setGroup(convertToInputAttrGroup(map.get(ChartPluginInputAttribute.PROPERTY_GROUP)));
+				attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
+
+				return attribute;
+			}
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ ChartPluginAttribute.class.getName() + "] unsupported");
 	}
 
-	protected boolean convertToAttributeRequired(Object v)
+	protected boolean convertToAttrRequired(Object v)
 	{
 		// 不要修改这里的默认值，因为会影响插件规范
 		boolean dftValue = false;
 		return convertToBoolean(v, dftValue);
 	}
 
-	protected String convertToAttributeType(Object obj)
+	protected boolean convertToAttrArray(Object v)
 	{
 		// 不要修改这里的默认值，因为会影响插件规范
-		String dftValue = ChartPluginAttribute.DataType.STRING;
+		boolean dftValue = false;
+		return convertToBoolean(v, dftValue);
+	}
+
+	protected String convertToInputAttrType(Object obj)
+	{
+		// 不要修改这里的默认值，因为会影响插件规范
+		String dftValue = ChartPluginInputAttribute.DataType.STRING;
 
 		if (obj instanceof String)
 		{
@@ -552,17 +601,17 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			{
 				return dftValue;
 			}
-			if(ChartPluginAttribute.DataType.STRING.equalsIgnoreCase(str))
+			if (ChartPluginInputAttribute.DataType.STRING.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.STRING;
+				return ChartPluginInputAttribute.DataType.STRING;
 			}
-			else if(ChartPluginAttribute.DataType.BOOLEAN.equalsIgnoreCase(str))
+			else if (ChartPluginInputAttribute.DataType.BOOLEAN.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.BOOLEAN;
+				return ChartPluginInputAttribute.DataType.BOOLEAN;
 			}
-			else if(ChartPluginAttribute.DataType.NUMBER.equalsIgnoreCase(str))
+			else if (ChartPluginInputAttribute.DataType.NUMBER.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.NUMBER;
+				return ChartPluginInputAttribute.DataType.NUMBER;
 			}
 			else
 				return str;
@@ -571,22 +620,22 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return dftValue;
 	}
 
-	protected String convertToAttributeInputType(Object obj)
+	protected String convertToInputAttrInputType(Object obj)
 	{
 		if(obj == null)
 			return  null;
 		else if (obj instanceof String)
 			return (String) obj;
 		else
-			return ChartPluginAttribute.InputType.TEXT;
+			return ChartPluginInputAttribute.InputType.TEXT;
 	}
 
-	protected Object convertToAttributeInputPayload(Object obj)
+	protected Object convertToInputAttrInputPayload(Object obj)
 	{
 		return obj;
 	}
 
-	protected Group convertToAttributeGroup(Object obj)
+	protected Group convertToInputAttrGroup(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -1033,9 +1082,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return new Label();
 	}
 
-	protected ChartPluginAttribute createChartPluginAttribute()
+	protected ChartPluginGroupAttribute createChartPluginGroupAttribute()
 	{
-		return new ChartPluginAttribute();
+		return new ChartPluginGroupAttribute();
+	}
+
+	protected ChartPluginInputAttribute createChartPluginInputAttribute()
+	{
+		return new ChartPluginInputAttribute();
 	}
 
 	protected DataSign createDataSign()

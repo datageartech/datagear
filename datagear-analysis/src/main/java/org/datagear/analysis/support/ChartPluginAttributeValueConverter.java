@@ -18,14 +18,15 @@
 package org.datagear.analysis.support;
 
 import org.datagear.analysis.ChartPluginAttribute;
-import org.datagear.analysis.ChartPluginAttribute.DataType;
+import org.datagear.analysis.ChartPluginInputAttribute.DataType;
 
 /**
  * {@linkplain ChartPluginAttribute}值转换器。
  * 
  * @author datagear@163.com
- *
+ * @deprecated 插件属性值没有后台相关逻辑和安全风险，所以不必在后台进行类型转换
  */
+@Deprecated
 public class ChartPluginAttributeValueConverter extends DataValueConverter
 {
 	public ChartPluginAttributeValueConverter()
