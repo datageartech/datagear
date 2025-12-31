@@ -67,7 +67,9 @@ $.vueComponents = function()
 		"p-multiselect": primevue.multiselect,
 		"p-treeselect": primevue.treeselect,
 		"p-breadcrumb": primevue.breadcrumb,
-		"p-badge": primevue.badge
+		"p-badge": primevue.badge,
+		"p-accordion": primevue.accordion,
+		"p-accordion-tab": primevue.accordiontab
 	};
 	
 	return components;

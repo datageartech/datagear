@@ -825,8 +825,10 @@ label.align-tip{
 .chart-attr-values-form .page-form-content textarea{
 	height: 6rem;
 }
-.chart-form-chart-attr-values .chart-attr-values-form .page-form-content{
+.p-dialog .page-chart-attr-values .chart-attr-values-form .page-form-content{
 	width: 40vw;
+	/*对话框高度 - 对话框header高度 - 表单foot高度*/
+	height: calc(90vh - 6rem - 4.5rem);
 }
 
 .page-dashboard-design.page-form .page-form-content,
@@ -900,9 +902,6 @@ label.align-tip{
 	width: 36vw;
 	/*对话框高度 - 表单foot高度 - 对话框header高度 - 选项卡条高度*/
 	height: calc(90vh - 5rem - 6rem - 4rem);
-}
-.dashboard-form-chart-attr-values .chart-attr-values-form .page-form-content{
-	width: 40vw;
 }
 
 .current-analysis-project-wrapper .ap-name-btn{

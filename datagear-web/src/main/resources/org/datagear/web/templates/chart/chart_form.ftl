@@ -474,7 +474,7 @@
 	<!-- 这里使用对话框组件而非弹出面板组件，因为其内部存在下拉框等组件，使用弹出面板时会出现错位问题 -->
 	<p-dialog header="<@spring.message code='chartAttribute' />" append-to="body" position="center" :dismissable-mask="true"
 		v-model:visible="pm.attrValuesPanelShown" id="${pid}attrValuesPanel" @show="onAttrValuesPanelShow">
-		<div class="page page-form chart-form-chart-attr-values">
+		<div class="page page-form page-chart-attr-values chart-form-chart-attr-values">
 			<#include "include/chart_attr_values_form.ftl">
 		</div>
 	</p-dialog>
