@@ -27,10 +27,10 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0 p-1">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-form horizontal">
-	<form id="${pid}form" class="flex flex-column" :class="{readonly: pm.isReadonlyAction}">
+<div id="${pid}" class="page page-form h-full">
+	<form id="${pid}form" class="flex flex-column h-full" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 			<div class="field grid">
 				<label for="${pid}name" class="field-label col-12 mb-2 md:col-3 md:mb-0">

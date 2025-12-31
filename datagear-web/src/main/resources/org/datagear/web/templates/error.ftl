@@ -31,7 +31,7 @@
 	<#include "include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="m-0 surface-ground">
+<body class="h-screen m-0 surface-ground">
 <#if isAjaxRequest>
 	<div class="operation-message ${operationMessage.type}">
 		<div class="message">
@@ -45,8 +45,8 @@
 	</div>
 <#else>
 	<#include "include/page_obj.ftl">
-	<div id="${pid}" class="page horizontal">
-		<div class="flex flex-column h-screen m-0">
+	<div id="${pid}" class="page h-full">
+		<div class="flex flex-column h-full">
 			<#-- 这里不能引用page_main_header.ftl，参考CustomFreeMarkerView类内注释 -->
 			<#include "include/page_main_header_simple.ftl">
 			<div class="flex-grow-1 p-0">

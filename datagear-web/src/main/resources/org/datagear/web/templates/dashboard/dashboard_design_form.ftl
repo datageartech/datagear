@@ -29,7 +29,7 @@
 </head>
 <body class="p-card no-border h-screen m-0 p-1">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-form horizontal h-full page-dashboard-design">
+<div id="${pid}" class="page page-form h-full page-dashboard-design">
 	<form id="${pid}form" class="flex flex-column h-full" :class="{readonly: pm.isReadonlyAction}">
 		<div class="page-form-content flex-grow-1 px-2 py-1 flex flex-column overflow-y-auto">
 			<div class="field grid flex-grow-0 mb-1">

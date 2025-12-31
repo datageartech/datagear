@@ -26,10 +26,10 @@
 	<#include "../include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="p-card no-border">
+<body class="p-card no-border h-screen m-0 p-1">
 <#include "../include/page_obj.ftl">
-<div id="${pid}" class="page page-form horizontal">
-	<form id="${pid}form" class="flex flex-column">
+<div id="${pid}" class="page page-form h-full">
+	<form id="${pid}form" class="flex flex-column h-full">
 		<div class="page-form-content flex-grow-1 pr-2 py-1 overflow-y-auto">
 			<pre id="${pid}logContent" class="w-full"></pre>
 		</div>

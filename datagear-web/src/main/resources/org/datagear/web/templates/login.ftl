@@ -27,10 +27,10 @@
 	<#include "include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="m-0 surface-ground">
+<body class="h-screen m-0 surface-ground">
 <#include "include/page_obj.ftl">
-<div id="${pid}" class="page page-form horizontal page-login">
-	<div class="flex flex-column m-0" :class="pm.isNotTopPage ? 'h-auto' : 'h-screen'">
+<div id="${pid}" class="page page-form h-full page-login">
+	<div class="flex flex-column h-full">
 		<#include "include/page_main_header.ftl">
 		<div class="flex-grow-1 p-0">
 			<div class="grid grid-nogutter justify-content-center">

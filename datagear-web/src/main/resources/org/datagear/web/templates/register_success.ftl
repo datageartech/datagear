@@ -28,10 +28,10 @@
 	<#include "include/html_app_name_suffix.ftl">
 </title>
 </head>
-<body class="m-0 surface-ground">
+<body class="h-screen m-0 surface-ground">
 <#include "include/page_obj.ftl">
-<div id="${pid}" class="page horizontal">
-	<div class="flex flex-column h-screen m-0">
+<div id="${pid}" class="page h-full">
+	<div class="flex flex-column h-full">
 		<#include "include/page_main_header.ftl">
 		<div class="flex-grow-1 p-0">
 			<div class="grid grid-nogutter justify-content-center">
