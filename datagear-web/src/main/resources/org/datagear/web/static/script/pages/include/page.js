@@ -1854,8 +1854,10 @@ $.inflatePagePalette = function(po)
 			
 			onPalettePanelShow: function(e){},
 			
-			onSelectPaletteColor: function(color)
+			onSelectPaletteColor: function(color, close)
 			{
+				close = (close === undefined ? false : close);
+				
 				if(pm.palette.modelObj != null && pm.palette.modelProp != null)
 				{
 					pm.palette.value = color;
@@ -1863,7 +1865,10 @@ $.inflatePagePalette = function(po)
 					pm.palette.modelObj[pm.palette.modelProp] = color;
 				}
 				
-				//po.vueUnref(po.concatPid("palettePanelEle")).hide();
+				if(close)
+				{
+					po.vueUnref(po.concatPid("palettePanelEle")).hide();
+				}
 			},
 			
 			onSelectPaletteColorPicker: function(e)

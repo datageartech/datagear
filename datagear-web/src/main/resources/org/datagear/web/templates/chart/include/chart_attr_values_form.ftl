@@ -31,7 +31,7 @@ page_palette.ftl
 			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups"
 				:header="group.nameLabel && group.nameLabel.value ? group.nameLabel.value : group.name">
 				<div class="field grid" v-for="(cpa, cpaIdx) in group.children">
-					<label :for="'${pid}cpattr_'+cpa.name" class="field-label col-12 mb-2"
+					<label :for="cpa.domId" class="field-label col-12 mb-2"
 						:title="cpa.descLabel && cpa.descLabel.value ? cpa.descLabel.value : null">
 						<span>
 							{{cpa.nameLabel && cpa.nameLabel.value ? cpa.nameLabel.value : cpa.name}}
@@ -41,8 +41,8 @@ page_palette.ftl
 					<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
 						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
 							<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-								<p-radiobutton :input-id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
-								<label :for="'${pid}cpattr_'+cpa.name+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+								<p-radiobutton :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
+								<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
 							</div>
 						</div>
 			        	<div class="validate-msg" v-if="cpa.required">
@@ -52,12 +52,12 @@ page_palette.ftl
 					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
 						<div v-if="cpa.inputPayload.multiple == true">
 							<div v-if="cpa.inputPayload.treeSelect == true">
-								<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+								<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
 									selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />">
 								</p-treeselect>
 							</div>
 							<div v-else>
-								<p-multiselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+								<p-multiselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
 									option-label="name" option-value="value" :show-clear="true" class="input w-full">
 								</p-multiselect>
 							</div>
@@ -67,10 +67,10 @@ page_palette.ftl
 							<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
 								<div class="flex mb-1 gap-2">
 									<div class="flex-grow-1 flex">
-										<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+										<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
 											class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
 										</p-treeselect>
-										<p-dropdown :id="'${pid}cpattr_'+cpa.name+'_'+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
+										<p-dropdown :id="cpa.domId+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
 											option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
 										</p-dropdown>
 									</div>
@@ -86,18 +86,18 @@ page_palette.ftl
 									</div>
 								</div>
 							</div>
-							<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-								<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormAddValue(cpa.name)"></p-button>
+							<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly && (pm.chartAttrValuesForm.attrValues[cpa.name] == null || pm.chartAttrValuesForm.attrValues[cpa.name].length == 0)">
+								<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertValue($event, cpa.name)"></p-button>
 							</div>
 						</div>
 						<div v-else>
 							<div v-if="cpa.inputPayload.treeSelect == true">
-								<p-treeselect :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+								<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
 									class="input w-full" placeholder="<@spring.message code='none' />">
 								</p-treeselect>
 							</div>
 							<div v-else>
-								<p-dropdown :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+								<p-dropdown :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
 									option-label="name" option-value="value" :show-clear="!cpa.required" class="input w-full">
 								</p-dropdown>
 							</div>
@@ -109,8 +109,8 @@ page_palette.ftl
 					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
 						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
 							<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-								<p-checkbox :input-id="'${pid}cpattr_'+cpa.name+'_'+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
-								<label :for="'${pid}cpattr_'+cpa.name+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
+								<p-checkbox :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
+								<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
 							</div>
 						</div>
 			        	<div class="validate-msg" v-if="cpa.required">
@@ -122,7 +122,7 @@ page_palette.ftl
 							<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
 								<div class="flex mb-1 gap-2">
 									<div class="flex-grow-1 flex">
-										<p-inputtext :id="'${pid}cpattr_'+cpa.name+'_'+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
+										<p-inputtext :id="cpa.domId+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
 											class="input flex-grow-1 mr-1">
 										</p-inputtext>
 										<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
@@ -130,22 +130,22 @@ page_palette.ftl
 									</div>
 									<div class="flex gap-1">
 										<p-button type="button" icon="pi pi-plus" severity="secondary"
-											@click="onChartAttrValuesFormInsertColor($event, cpa.name, colorIdx)"
+											@click="onChartAttrValuesFormInsertValue($event, cpa.name, colorIdx)"
 											v-if="!pm.chartAttrValuesForm.readonly">
 										</p-button>
 										<p-button type="button" icon="pi pi-minus" severity="danger"
-											@click="onChartAttrValuesFormRemoveColor($event, cpa.name, colorIdx)"
+											@click="onChartAttrValuesFormRemoveValue($event, cpa.name, colorIdx)"
 											v-if="!pm.chartAttrValuesForm.readonly">
 										</p-button>
 									</div>
 								</div>
 							</div>
-							<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-								<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormAddColor(cpa.name)"></p-button>
+							<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly && (pm.chartAttrValuesForm.attrValues[cpa.name] == null || pm.chartAttrValuesForm.attrValues[cpa.name].length == 0)">
+								<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertValue($event, cpa.name)"></p-button>
 							</div>
 						</div>
 						<div class="flex" v-else>
-							<p-inputtext :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+							<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
 								class="input flex-grow-1 mr-1" maxlength="100">
 							</p-inputtext>
 							<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name]}" class="palette-btn surface-border"
@@ -156,16 +156,16 @@ page_palette.ftl
 			        	</div>
 					</div>
 					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
-						<p-textarea :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
-							class="input w-full" maxlength="2000">
+						<p-textarea :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+							class="input w-full">
 						</p-textarea>
 			        	<div class="validate-msg" v-if="cpa.required">
 			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
 			        	</div>
 					</div>
 					<div class="field-input col-12" v-else>
-						<p-inputtext :id="'${pid}cpattr_'+cpa.name" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
-							class="input w-full" maxlength="1000">
+						<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+							class="input w-full">
 						</p-inputtext>
 			        	<div class="validate-msg" v-if="cpa.required">
 			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
@@ -219,6 +219,8 @@ page_palette.ftl
 		return (attr != null && attr.children !== undefined);
 	};
 	
+	po.chartPluginAttributeDomIdIdx = 0;
+	
 	po.trimChartPluginAttributes = function(cpas, clone)
 	{
 		cpas = (cpas == null ? [] : cpas);
@@ -230,6 +232,8 @@ page_palette.ftl
 		for(var i=0; i<cpas.length; i++)
 		{
 			var cpa = cpas[i];
+			
+			cpa.domId = po.concatPid("cpattr_"+ (po.chartPluginAttributeDomIdIdx++)+"_");
 			
 			if(po.isChartPluginGroupAttr(cpa))
 			{
@@ -723,7 +727,7 @@ page_palette.ftl
 	
 	po.vueMethod(
 	{
-		onChartAttrValuesFormAddValue: function(propName)
+		onChartAttrValuesFormInsertValue: function(e, propName, idx)
 		{
 			var pm = po.vuePageModel();
 			var attrValues = pm.chartAttrValuesForm.attrValues;
@@ -731,7 +735,10 @@ page_palette.ftl
 			if(!attrValues[propName])
 				attrValues[propName] = [];
 			
-			attrValues[propName].push("");
+			if(idx == null)
+				attrValues[propName].push("");
+			else
+				attrValues[propName].splice(idx+1, 0, "");
 		},
 		
 		onChartAttrValuesFormRemoveValue: function(e, propName, idx)
@@ -739,40 +746,6 @@ page_palette.ftl
 			var pm = po.vuePageModel();
 			var attrValues = pm.chartAttrValuesForm.attrValues;
 			attrValues[propName].splice(idx, 1);
-		},
-		
-		onChartAttrValuesFormInsertValue: function(e, propName, idx)
-		{
-			var pm = po.vuePageModel();
-			var attrValues = pm.chartAttrValuesForm.attrValues;
-			//不在idx+1位置插入，这样无法在第一个之前插入
-			attrValues[propName].splice(idx, 0, "");
-		},
-		
-		onChartAttrValuesFormAddColor: function(propName)
-		{
-			var pm = po.vuePageModel();
-			var attrValues = pm.chartAttrValuesForm.attrValues;
-			
-			if(!attrValues[propName])
-				attrValues[propName] = [];
-			
-			attrValues[propName].push("");
-		},
-		
-		onChartAttrValuesFormRemoveColor: function(e, propName, idx)
-		{
-			var pm = po.vuePageModel();
-			var attrValues = pm.chartAttrValuesForm.attrValues;
-			attrValues[propName].splice(idx, 1);
-		},
-		
-		onChartAttrValuesFormInsertColor: function(e, propName, idx)
-		{
-			var pm = po.vuePageModel();
-			var attrValues = pm.chartAttrValuesForm.attrValues;
-			//不在idx+1位置插入，这样无法在第一个之前插入
-			attrValues[propName].splice(idx, 0, "");
 		}
 	});
 })

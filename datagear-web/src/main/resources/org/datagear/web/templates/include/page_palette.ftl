@@ -27,7 +27,7 @@
 				<div v-for="(color, colorIndex) in groupColors.colors" :title="color"
 					class="border-1 border-round-sm cursor-pointer" style="padding:1px;"
 					:class="(pm.palette.value == color ? 'border-700' : 'surface-border hover:border-500')"
-					@click="onSelectPaletteColor(color, index)">
+					@click="onSelectPaletteColor(color, true)">
 					<div :style="{background: color}" style="width:1.2rem;height:1.2rem;" class="border-round-sm">
 					</div>
 				</div>
@@ -39,7 +39,7 @@
 			<div v-for="(color, colorIndex) in pm.palette.pureColors" :title="color"
 				class="border-1 border-round-sm cursor-pointer" style="padding:1px;"
 				:class="(pm.palette.value == color ? 'border-700' : 'surface-border hover:border-500')"
-				@click="onSelectPaletteColor(color, index)">
+				@click="onSelectPaletteColor(color, true)">
 				<div :style="{background: color}" style="width:1.2rem;height:1.2rem;" class="border-round-sm">
 				</div>
 			</div>

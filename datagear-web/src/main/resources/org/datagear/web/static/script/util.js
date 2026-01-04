@@ -836,6 +836,12 @@
 		return (prefix ? prefix : "uid") + time + seq;
 	};
 	
+	//是否为null、undefined、空字符串、空数组
+	$.isEmpty = function(v)
+	{
+		return (v == null || v === "" || ($.isArray(v) && v.length === 0));
+	};
+	
 	//是否为空
 	$.isEmptyValue = function(value, checkElement, checkProperty)
 	{
