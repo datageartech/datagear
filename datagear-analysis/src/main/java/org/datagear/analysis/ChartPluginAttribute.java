@@ -42,6 +42,7 @@ public interface ChartPluginAttribute extends Labeled, NameAware, AdditionsAware
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_REQUIRED = "required";
+	String PROPERTY_ARRAY = "array";
 	String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
 
 	@Override

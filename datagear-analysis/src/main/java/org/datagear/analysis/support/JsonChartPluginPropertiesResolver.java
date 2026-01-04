@@ -523,7 +523,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 				attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
 				attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
 				attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
-				attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
+				attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_ARRAY)));
 				attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
 
 				List<ChartPluginInputAttribute> children = null;
@@ -559,6 +559,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 				attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
 				attribute.setType(convertToInputAttrType(map.get(ChartPluginInputAttribute.PROPERTY_TYPE)));
 				attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
+				attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_ARRAY)));
 				attribute.setInputType(
 						convertToInputAttrInputType(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_TYPE)));
 				attribute.setInputPayload(
