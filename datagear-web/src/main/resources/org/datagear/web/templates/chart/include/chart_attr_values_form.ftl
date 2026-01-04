@@ -36,10 +36,9 @@ page_palette.ftl
 						<span>
 							{{cpa.nameLabel && cpa.nameLabel.value ? cpa.nameLabel.value : cpa.name}}
 						</span>
-						<span class="text-color-secondary text-sm ml-1">{{cpa.name}}</span>
 					</label>
 					<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
-						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
+						<div class="input p-inputtext p-component p-2">
 							<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
 								<p-radiobutton :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
 								<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
@@ -63,7 +62,7 @@ page_palette.ftl
 							</div>
 						</div>
 						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
-							v-else-if="cpa.inputPayload.multiple == pm.ChartPluginInputAttribute.MultipleRepeat">
+							v-else-if="cpa.array">
 							<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
 								<div class="flex mb-1 gap-2">
 									<div class="flex-grow-1 flex">
@@ -107,7 +106,7 @@ page_palette.ftl
 			        	</div>
 					</div>
 					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
-						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0">
+						<div class="input p-inputtext p-component p-2">
 							<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
 								<p-checkbox :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
 								<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
@@ -118,7 +117,7 @@ page_palette.ftl
 			        	</div>
 					</div>
 					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
-						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.inputPayload.multiple">
+						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.array">
 							<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
 								<div class="flex mb-1 gap-2">
 									<div class="flex-grow-1 flex">
@@ -210,7 +209,7 @@ page_palette.ftl
 			//地图
 			DG_MAP: "DG_MAP"
 		},
-		//下拉框inputPayload.multiple="repeat"值，表示可重复选取
+		//5.5.0旧版的下拉框inputPayload.multiple="repeat"值，表示可重复选取
 		MultipleRepeat: "repeat"
 	};
 	
@@ -313,12 +312,26 @@ page_palette.ftl
 				
 				cpa.inputPayload = inputPayload;
 			}
+			
+			//将5.5.0旧版的{inputPayload: {multiple: "repeat"}}格式转换为6.0新版的{array: true, inputPayload: {multiple: false}}
+			if(cpa.inputPayload && cpa.inputPayload.multiple === po.ChartPluginInputAttribute.MultipleRepeat)
+			{
+				cpa.array = true;
+				cpa.inputPayload.multiple = false;
+			}
+			
+			//将5.5.0旧版的颜色输入框{inputPayload: {multiple: true}}格式转换为6.0新版的{array: true}
+			if(cpa.inputType == po.ChartPluginInputAttribute.InputType.COLOR
+					&& cpa.inputPayload && cpa.inputPayload.multiple === true)
+			{
+				cpa.array = true;
+			}
 		};
 		
 		return cpas;
 	};
 	
-	po.trimChartPluginInputAttrInputPayloadIfMap = function(chartPluginAttr, inputPayload)
+	po.trimChartPluginInputAttrInputPayloadIfMap = function(cpa, inputPayload)
 	{
 		var options = inputPayload.options;
 		
@@ -327,7 +340,7 @@ page_palette.ftl
 		{
 			//只有下拉列表才使用树形结构，单选框、复选框只能使用平铺数组
 			if(inputPayload.treeSelect == null
-					&& chartPluginAttr.inputType == po.ChartPluginInputAttribute.InputType.SELECT)
+					&& cpa.inputType == po.ChartPluginInputAttribute.InputType.SELECT)
 			{
 				inputPayload.treeSelect = true;
 			}
@@ -372,7 +385,7 @@ page_palette.ftl
 		}
 	};
 	
-	po.trimChartPluginInputAttrInputOptions = function(chartPluginAttr, inputPayload)
+	po.trimChartPluginInputAttrInputOptions = function(cpa, inputPayload)
 	{
 		if(!inputPayload.options)
 			inputPayload.options = [];
@@ -430,40 +443,44 @@ page_palette.ftl
 				continue;
 			}
 			
-			var group = null;
-			var myGroup = (cpa.group || {});
+			//无分组的，建立虚拟分组，统一结构、易于处理
+			var virtualGroup = {};
+			
+			//处理5.0.0旧版的org.datagear.analysis.ChartPluginInputAttribute.group
+			if(cpa.group != null)
+				virtualGroup = cpa.group;
 			
 			//没有定义分组，如果末尾是【未分组】，则使用；否则，新建【未分组】
-			if(!myGroup.name)
+			if(!virtualGroup.name)
 			{
 				var groupTail = (groups.length > 0 ? groups[groups.length - 1] : null);
 				
 				if(groupTail && po.isVirtualChartPluginGroupAttr(groupTail) && groupTail.name == "")
 				{
-					group = groupTail;
+					virtualGroup = groupTail;
 				}
 				else
 				{
-					group = { name: "", nameLabel: { value: "<@spring.message code='ungrouped' />" }, children: [], virtual: true };
-					groups.push(group);
+					virtualGroup = { name: "", nameLabel: { value: "<@spring.message code='ungrouped' />" }, children: [], virtual: true };
+					groups.push(virtualGroup);
 				}
 			}
 			//有分组，查找或新建
 			else
 			{
-				var idx = po.findVirtualChartPluginAttrIdxByName(groups, myGroup.name);
+				var idx = po.findVirtualChartPluginAttrIdxByName(groups, virtualGroup.name);
 				if(idx >= 0)
 				{
-					group = groups[idx];
+					virtualGroup = groups[idx];
 				}
 				else
 				{
-					group = { name: myGroup.name, nameLabel: myGroup.nameLabel, children: [], virtual: true };
-					groups.push(group);
+					virtualGroup = { name: virtualGroup.name, nameLabel: virtualGroup.nameLabel, children: [], virtual: true };
+					groups.push(virtualGroup);
 				}
 			}
 			
-			group.children.push(cpa);
+			virtualGroup.children.push(cpa);
 		};
 		
 		return groups;
@@ -483,18 +500,19 @@ page_palette.ftl
 		
 		var re = $.extend(true, {}, attrValues);
 		
-		$.each(cpas, function(i, cpa)
+		for(var i=0; i<cpas.length; i++)
 		{
+			var cpa = cpas[i];
 			var v = re[cpa.name];
 			
 			var inputType = cpa.inputType;
 			var inputPayload = cpa.inputPayload;
 			var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
-			var isMultipleSelect = (inputPayload && (inputPayload.multiple == true || inputPayload.multiple == po.ChartPluginInputAttribute.MultipleRepeat));
+			var isArrayValue = (cpa.array || (inputPayload && inputPayload.multiple == true));
 			
 			//需先转换树组件Model
 			if(isTreeSelect)
-				v = po.trimChartAttrValueIfTreeModel(v, !isMultipleSelect);
+				v = po.trimChartAttrValueIfTreeModel(v, !isArrayValue);
 			
 			//需转换类型
 			v = po.toChartAttrTypeValue(cpa.type, v);
@@ -502,7 +520,7 @@ page_palette.ftl
 			if(v != null)
 			{
 				//多选输入框应强制转换为数组
-				if(isMultipleSelect && !$.isArray(v))
+				if(isArrayValue && !$.isArray(v))
 				{
 					v = [ v ];
 				}
@@ -546,7 +564,7 @@ page_palette.ftl
 			}
 			
 			re[cpa.name] = v;
-		});
+		};
 		
 		return re;
 	};
@@ -675,7 +693,7 @@ page_palette.ftl
 		}
 	});
 	
-	po.setupChartAttrValuesForm = function(chartPluginAttributes, attrValues, options)
+	po.setupChartAttrValuesForm = function(cpas, attrValues, options)
 	{
 		options = $.extend(
 		{
@@ -685,7 +703,7 @@ page_palette.ftl
 		},
 		options);
 		
-		var cpas = po.trimChartPluginAttributes(chartPluginAttributes);
+		var cpas = po.trimChartPluginAttributes(cpas);
 		
 		var pm = po.vuePageModel();
 		pm.chartAttrValuesForm.attributes = cpas;
