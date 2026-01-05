@@ -3592,7 +3592,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 								if(dashboardEditor)
 									attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
 								
-								po.setChartAttrValuesFormAttrValues(attrValuesReset);
+								po.setChartAttrValuesFormData(attrValuesReset);
 							}
 						}
 					]

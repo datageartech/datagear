@@ -36,19 +36,19 @@ page_palette.ftl
 						<template #icons>
 							<div class="inline-flex gap-1 mx-2 vertical-align-top text-xs" v-if="group.array && !pm.chartAttrValuesForm.readonly">
 								<p-button type="button" severity="secondary"
-									@click="onMoveUpDataSetBind($event, dsbIdx)">
+									@click="">
 									<@spring.message code='moveUp' />
 								</p-button>
 								<p-button type="button" severity="secondary"
-									@click="onMoveDownDataSetBind($event, dsbIdx)">
+									@click="">
 									<@spring.message code='moveDown' />
 								</p-button>
 								<p-button type="button" severity="secondary"
-									@click="onChartAttrValuesFormInsertValue($event, cpa.name, svIdx)">
+									@click="">
 									<@spring.message code='insert' />
 								</p-button>
 								<p-button type="button" severity="danger"
-									@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)">
+									@click="">
 									<@spring.message code='delete' />
 								</p-button>
 							</div>
@@ -62,7 +62,7 @@ page_palette.ftl
 								<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
 									<div class="input p-inputtext p-component p-2">
 										<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-											<p-radiobutton :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
+											<p-radiobutton :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.data[cpa.name]"></p-radiobutton>
 											<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
 										</div>
 									</div>
@@ -73,25 +73,25 @@ page_palette.ftl
 								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
 									<div v-if="cpa.inputPayload.multiple == true">
 										<div v-if="cpa.inputPayload.treeSelect == true">
-											<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+											<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" :options="cpa.inputPayload.options"
 												selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />">
 											</p-treeselect>
 										</div>
 										<div v-else>
-											<p-multiselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+											<p-multiselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" :options="cpa.inputPayload.options"
 												option-label="name" option-value="value" :show-clear="true" class="input w-full">
 											</p-multiselect>
 										</div>
 									</div>
 									<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
 										v-else-if="cpa.array">
-										<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
+										<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.data[cpa.name]" :key="svIdx">
 											<div class="flex mb-1 gap-2">
 												<div class="flex-grow-1 flex">
-													<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+													<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" :options="cpa.inputPayload.options"
 														class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
 													</p-treeselect>
-													<p-dropdown :id="cpa.domId+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
+													<p-dropdown :id="cpa.domId+svIdx" v-model="pm.chartAttrValuesForm.data[cpa.name][svIdx]" :options="cpa.inputPayload.options"
 														option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
 													</p-dropdown>
 												</div>
@@ -113,12 +113,12 @@ page_palette.ftl
 									</div>
 									<div v-else>
 										<div v-if="cpa.inputPayload.treeSelect == true">
-											<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+											<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" :options="cpa.inputPayload.options"
 												class="input w-full" placeholder="<@spring.message code='none' />">
 											</p-treeselect>
 										</div>
 										<div v-else>
-											<p-dropdown :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+											<p-dropdown :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" :options="cpa.inputPayload.options"
 												option-label="name" option-value="value" :show-clear="!cpa.required" class="input w-full">
 											</p-dropdown>
 										</div>
@@ -130,7 +130,7 @@ page_palette.ftl
 								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
 									<div class="input p-inputtext p-component p-2">
 										<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-											<p-checkbox :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
+											<p-checkbox :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.data[cpa.name]"></p-checkbox>
 											<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
 										</div>
 									</div>
@@ -140,14 +140,14 @@ page_palette.ftl
 								</div>
 								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
 									<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.array">
-										<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
+										<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.data[cpa.name]" :key="colorIdx">
 											<div class="flex mb-1 gap-2">
 												<div class="flex-grow-1 flex">
-													<p-inputtext :id="cpa.domId+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
+													<p-inputtext :id="cpa.domId+colorIdx" v-model="pm.chartAttrValuesForm.data[cpa.name][colorIdx]" type="text"
 														class="input flex-grow-1 mr-1">
 													</p-inputtext>
-													<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
-														@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
+													<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.data[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
+														@click="showPalettePanel($event, pm.chartAttrValuesForm.data[cpa.name], colorIdx)"></p-button>
 												</div>
 												<div class="flex gap-1">
 													<p-button type="button" icon="pi pi-plus" severity="secondary"
@@ -166,18 +166,18 @@ page_palette.ftl
 										</div>
 									</div>
 									<div class="flex" v-else>
-										<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+										<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" type="text"
 											class="input flex-grow-1 mr-1" maxlength="100">
 										</p-inputtext>
-										<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name]}" class="palette-btn surface-border"
-											@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues, cpa.name)"></p-button>
+										<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.data[cpa.name]}" class="palette-btn surface-border"
+											@click="showPalettePanel($event, pm.chartAttrValuesForm.data, cpa.name)"></p-button>
 									</div>
 						        	<div class="validate-msg" v-if="cpa.required">
 						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
 						        	</div>
 								</div>
 								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
-									<p-textarea :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+									<p-textarea :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" type="text"
 										class="input w-full">
 									</p-textarea>
 						        	<div class="validate-msg" v-if="cpa.required">
@@ -185,7 +185,7 @@ page_palette.ftl
 						        	</div>
 								</div>
 								<div class="field-input col-12" v-else>
-									<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+									<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.data[cpa.name]" type="text"
 										class="input w-full">
 									</p-inputtext>
 						        	<div class="validate-msg" v-if="cpa.required">
@@ -201,6 +201,7 @@ page_palette.ftl
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+		<p-button type="button" label="<@spring.message code='clear' />" severity="secondary" @click="onClearChartAttrValuesFormData"></p-button>
 		
 		<p-button v-for="(btn, btnIdx) in pm.chartAttrValuesForm.buttons" :key="btnIdx"
 			type="button" class="p-button-secondary" :label="btn.name" @click="btn.clickHandler">
@@ -238,6 +239,9 @@ page_palette.ftl
 		MultipleRepeat: "repeat"
 	};
 	
+	//根分组的name值，其包含的属性值应直接保存至根属性值对象下
+	po.rootChartPluginGroupAttrName = "";
+	
 	po.isChartPluginGroupAttr = function(attr)
 	{
 		return (attr != null && attr.children !== undefined);
@@ -262,6 +266,7 @@ page_palette.ftl
 			
 			if(po.isChartPluginGroupAttr(cpa))
 			{
+				po.trimChartPluginGroupAttr(cpa);
 				po.trimChartPluginAttributes(cpa.children, false);
 				continue;
 			}
@@ -357,6 +362,19 @@ page_palette.ftl
 		return cpas;
 	};
 	
+	po.trimChartPluginGroupAttr = function(cpa)
+	{
+		if(!po.isChartPluginGroupAttr(cpa))
+			return;
+		
+		//无name的分组不允许启用array=true特性，因为分组包含的属性值无法存储为对象数组
+		if($.isEmpty(cpa.name))
+		{
+			cpa.name = po.rootChartPluginGroupAttrName;
+			cpa.array = false;
+		}
+	};
+	
 	po.trimChartPluginInputAttrInputPayloadIfMap = function(cpa, inputPayload)
 	{
 		var options = inputPayload.options;
@@ -442,11 +460,11 @@ page_palette.ftl
 		return (group != null && group.virtual);
 	};
 	
-	po.findVirtualChartPluginAttrIdxByName = function(groups, name)
+	po.findVirtualChartPluginAttrIdxByName = function(groups, virtualName)
 	{
 		for(var i=0; i<groups.length; i++)
 		{
-			if(po.isVirtualChartPluginGroupAttr(groups[i]) && groups[i].name == name)
+			if(po.isVirtualChartPluginGroupAttr(groups[i]) && groups[i].virtualName == virtualName)
 			{
 				return i;
 			}
@@ -455,7 +473,7 @@ page_palette.ftl
 		return -1;
 	};
 	
-	po.trimChartPluginAttrByGroup = function(cpas)
+	po.splitChartPluginAttrByGroup = function(cpas)
 	{
 		var groups = [];
 		
@@ -477,17 +495,17 @@ page_palette.ftl
 				virtualGroup = cpa.group;
 			
 			//没有定义分组，如果末尾是【未分组】，则使用；否则，新建【未分组】
-			if(!virtualGroup.name)
+			if($.isEmpty(virtualGroup.name))
 			{
 				var groupTail = (groups.length > 0 ? groups[groups.length - 1] : null);
 				
-				if(groupTail && po.isVirtualChartPluginGroupAttr(groupTail) && groupTail.name == "")
+				if(groupTail && po.isVirtualChartPluginGroupAttr(groupTail) && groupTail.virtualName == "")
 				{
 					virtualGroup = groupTail;
 				}
 				else
 				{
-					virtualGroup = { name: "", children: [], virtual: true };
+					virtualGroup = { name: po.rootChartPluginGroupAttrName, children: [], virtual: true, virtualName: "" };
 					groups.push(virtualGroup);
 				}
 			}
@@ -501,14 +519,24 @@ page_palette.ftl
 				}
 				else
 				{
-					virtualGroup = { name: virtualGroup.name, nameLabel: virtualGroup.nameLabel, children: [], virtual: true };
+					virtualGroup =
+					{
+						name: po.rootChartPluginGroupAttrName,
+						nameLabel: virtualGroup.nameLabel, children: [],
+						virtual: true, virtualName: virtualGroup.name
+					};
+					
 					groups.push(virtualGroup);
 				}
 			}
 			
-			if(!virtualGroup.nameLabel || !virtualGroup.nameLabel.value)
-				virtualGroup.nameLabel = { value: "<@spring.message code='ungrouped' />" };
+			if(!virtualGroup.nameLabel || $.isEmpty(virtualGroup.nameLabel.value))
+			{
+				var nameLabelValue = ($.isEmpty(virtualGroup.virtualName) ? "<@spring.message code='ungrouped' />" : virtualGroup.virtualName);
+				virtualGroup.nameLabel = { value: nameLabelValue };
+			}
 			
+			po.trimChartPluginGroupAttr(virtualGroup);
 			virtualGroup.children.push(cpa);
 		};
 		
@@ -527,15 +555,15 @@ page_palette.ftl
 	};
 	
 	//整理图表属性值：类型转换、选项值限定
-	po.trimChartAttrValues = function(attrValues, cpas)
+	po.toTrimChartAttrValues = function(attrValues, cpas)
 	{
 		//注意：attrValues中对于没有在cpas定义的属性值应原样保留，
 		//因为看板的dg-chart-attr-values应允许定义图表插件属性之外的扩展值
 		
-		if(!attrValues)
+		if(attrValues == null)
 			return null;
 		
-		if(!cpas || cpas.length == 0)
+		if(cpas == null || cpas.length == 0)
 			return attrValues;
 		
 		var re = $.extend(true, {}, attrValues);
@@ -552,7 +580,7 @@ page_palette.ftl
 			
 			//需先转换树组件Model
 			if(isTreeSelect)
-				v = po.trimChartAttrValueIfTreeModel(v, !isArrayValue);
+				v = po.toTrimChartAttrValueIfTreeModel(v, !isArrayValue);
 			
 			//需转换类型
 			v = po.toChartAttrTypeValue(cpa.type, v);
@@ -610,7 +638,7 @@ page_palette.ftl
 	};
 	
 	//树组件Model结构是：{ v0: true, ... }，需进行转换
-	po.trimChartAttrValueIfTreeModel = function(treeModel, single)
+	po.toTrimChartAttrValueIfTreeModel = function(treeModel, single)
 	{
 		//不是树组件Model的应原样返回
 		if(!treeModel || !$.isPlainObject(treeModel))
@@ -645,7 +673,7 @@ page_palette.ftl
 		}
 		else if(type == po.ChartPluginInputAttribute.DataType.BOOLEAN)
 		{
-			return (value == true || value == "true" || value == "1" || value > 0 ? true : false);
+			return (value == true || value === "true" || value === "1" ? true : false);
 		}
 		else if(type == po.ChartPluginInputAttribute.DataType.NUMBER)
 		{
@@ -655,29 +683,30 @@ page_palette.ftl
 			return value;
 	};
 	
-	po.toChartAttrValuesFormModel = function(attrValues, cpas)
+	po.toChartAttrValuesFormData = function(attrValues, cpas)
 	{
-		var formValues = $.extend(true, {}, (attrValues || {}));
+		var data = $.extend(true, {}, (attrValues || {}));
 		
 		if(!cpas || cpas.length == 0)
-			return attrValues;
+			return data;
 		
-		$.each(cpas, function(i, cpa)
+		for(var i=0; i<cpas.length; i++)
 		{
-			var v = formValues[cpa.name];
+			var cpa = cpas[i];
+			var v = data[cpa.name];
 			
 			if(v == null)
-				return;
+				continue;
 			
 			var inputPayload = cpa.inputPayload;
 			var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
 			
 			//转换为树组件Model
 			if(isTreeSelect)
-				formValues[cpa.name] = po.chartAttrValueToTreeModel(v);
-		});
+				data[cpa.name] = po.chartAttrValueToTreeModel(v);
+		};
 		
-		return formValues;
+		return data;
 	};
 	
 	//插件属性值转换为树组件Model，它的模型结构是：{ v0: true, ... }
@@ -727,7 +756,7 @@ page_palette.ftl
 		{
 			attributes: [],
 			groups: [],
-			attrValues: {},
+			data: {},
 			readonly: false,
 			buttons: []
 		}
@@ -747,10 +776,10 @@ page_palette.ftl
 		
 		var pm = po.vuePageModel();
 		pm.chartAttrValuesForm.attributes = cpas;
-		pm.chartAttrValuesForm.groups = po.trimChartPluginAttrByGroup(cpas);
+		pm.chartAttrValuesForm.groups = po.splitChartPluginAttrByGroup(cpas);
 		pm.chartAttrValuesForm.buttons = options.buttons;
 		pm.chartAttrValuesForm.readonly = options.readonly;
-		po.setChartAttrValuesFormAttrValues(attrValues);
+		po.setChartAttrValuesFormData(attrValues);
 		
 		var validateRules = {};
 		$.each(cpas, function(i, cpa)
@@ -760,35 +789,45 @@ page_palette.ftl
 		});
 		
 		var form = po.elementOfId("${pid}chartAttrValuesForm", document.body);
-		po.setupSimpleForm(form, pm.chartAttrValuesForm.attrValues,
+		po.setupSimpleForm(form, pm.chartAttrValuesForm.data,
 		{
 			rules: validateRules,
 			submitHandler: function()
 			{
 				if(options && options.submitHandler)
 				{
-					var formData = po.trimChartAttrValues(po.vueRaw(pm.chartAttrValuesForm.attrValues), pm.chartAttrValuesForm.attributes);
-					options.submitHandler(formData);
+					var attrValues = po.toTrimChartAttrValues(po.vueRaw(pm.chartAttrValuesForm.data), pm.chartAttrValuesForm.attributes);
+					options.submitHandler(attrValues);
 				}
 			}
 		});
 	};
 	
-	po.setChartAttrValuesFormAttrValues = function(attrValues)
+	po.setChartAttrValuesFormData = function(attrValues)
 	{
 		var pm = po.vuePageModel();
 		var cpas = pm.chartAttrValuesForm.attributes;
-		var formValues = po.toChartAttrValuesFormModel(attrValues, cpas);
-		
-		pm.chartAttrValuesForm.attrValues = formValues;
+		var data = po.toChartAttrValuesFormData(attrValues, cpas);
+		pm.chartAttrValuesForm.data = data;
 	};
 	
 	po.vueMethod(
 	{
+		onClearChartAttrValuesFormData: function()
+		{
+			po.confirm(
+			{
+				message: "<@spring.message code='confirmClearAllChartAttr' />",
+				accept: function()
+				{
+					po.setChartAttrValuesFormData({});
+				} 
+			});
+		},
 		onChartAttrValuesFormInsertValue: function(e, propName, idx)
 		{
 			var pm = po.vuePageModel();
-			var attrValues = pm.chartAttrValuesForm.attrValues;
+			var attrValues = pm.chartAttrValuesForm.data;
 			
 			if(!attrValues[propName])
 				attrValues[propName] = [];
@@ -802,7 +841,7 @@ page_palette.ftl
 		onChartAttrValuesFormRemoveValue: function(e, propName, idx)
 		{
 			var pm = po.vuePageModel();
-			var attrValues = pm.chartAttrValuesForm.attrValues;
+			var attrValues = pm.chartAttrValuesForm.data;
 			attrValues[propName].splice(idx, 1);
 		}
 	});

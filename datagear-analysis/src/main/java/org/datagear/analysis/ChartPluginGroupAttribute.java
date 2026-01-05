@@ -64,12 +64,23 @@ public class ChartPluginGroupAttribute extends AbstractChartPluginAttribute
 	}
 
 	/**
-	 * 设置名称，当为{@code null}或者{@code ""}时表明{@linkplain #getChildren()}描述的是插件属性值根对象的基本属性值。
+	 * 设置名称，当为{@code null}或者{@code ""}时表明{@linkplain #getChildren()}描述的是插件属性值根对象的基本属性值，
+	 * 另参考{@linkplain #isArray()}。
 	 */
 	@Override
 	public void setName(String name)
 	{
 		super.setName(name);
+	}
+
+	/**
+	 * 当{@linkplain #getName()}为{@code null}或者{@code ""}时，无论此值是否为{@code true}，都应强制作为{@code false}处理，
+	 * 因为此时分组包含的属性值无法存储为对象数组，
+	 */
+	@Override
+	public boolean isArray()
+	{
+		return super.isArray();
 	}
 
 	/**
