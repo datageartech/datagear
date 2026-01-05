@@ -430,6 +430,14 @@ label.align-tip{
 .p-panel.no-panel-border .p-panel-content{
 	border-width: 0;
 }
+.p-panel.disable-p-panel .p-panel-header{
+	border-width: 0;
+	display: none;
+}
+.p-panel.disable-p-panel .p-panel-content{
+	border-width: 0;
+	padding: 0;
+}
 .p-fieldset.fieldset-sm .p-fieldset-legend{
 	padding-top: 0.7rem;
 	padding-bottom: 0.7rem;

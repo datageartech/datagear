@@ -29,147 +29,172 @@ page_palette.ftl
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<p-accordion :multiple="true" :active-index="[0]">
 			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups"
-				:header="group.nameLabel && group.nameLabel.value ? group.nameLabel.value : group.name">
-				<div class="field grid" v-for="(cpa, cpaIdx) in group.children">
-					<label :for="cpa.domId" class="field-label col-12 mb-2"
-						:title="cpa.descLabel && cpa.descLabel.value ? cpa.descLabel.value : null">
-						<span>
-							{{cpa.nameLabel && cpa.nameLabel.value ? cpa.nameLabel.value : cpa.name}}
-						</span>
-					</label>
-					<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
-						<div class="input p-inputtext p-component p-2">
-							<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-								<p-radiobutton :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
-								<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
+				:header="group.nameLabel.value">
+				<div class="flex flex-column gap-2">
+					<p-panel :class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="'#1'"
+						:toggleable="group.array" class="no-panel-border">
+						<template #icons>
+							<div class="inline-flex gap-1 mx-2 vertical-align-top text-xs" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+								<p-button type="button" severity="secondary"
+									@click="onMoveUpDataSetBind($event, dsbIdx)">
+									<@spring.message code='moveUp' />
+								</p-button>
+								<p-button type="button" severity="secondary"
+									@click="onMoveDownDataSetBind($event, dsbIdx)">
+									<@spring.message code='moveDown' />
+								</p-button>
+								<p-button type="button" severity="secondary"
+									@click="onChartAttrValuesFormInsertValue($event, cpa.name, svIdx)">
+									<@spring.message code='insert' />
+								</p-button>
+								<p-button type="button" severity="danger"
+									@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)">
+									<@spring.message code='delete' />
+								</p-button>
 							</div>
-						</div>
-			        	<div class="validate-msg" v-if="cpa.required">
-			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
-			        	</div>
-					</div>
-					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
-						<div v-if="cpa.inputPayload.multiple == true">
-							<div v-if="cpa.inputPayload.treeSelect == true">
-								<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-									selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />">
-								</p-treeselect>
-							</div>
-							<div v-else>
-								<p-multiselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-									option-label="name" option-value="value" :show-clear="true" class="input w-full">
-								</p-multiselect>
-							</div>
-						</div>
-						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
-							v-else-if="cpa.array">
-							<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
-								<div class="flex mb-1 gap-2">
-									<div class="flex-grow-1 flex">
-										<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-											class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
-										</p-treeselect>
-										<p-dropdown :id="cpa.domId+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
-											option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
-										</p-dropdown>
+						</template>
+						<div>
+							<div class="field grid" v-for="(cpa, cpaIdx) in group.children">
+								<label :for="cpa.domId" class="field-label col-12 mb-2"
+									:title="cpa.descLabel && cpa.descLabel.value ? cpa.descLabel.value : null">
+									<span>{{cpa.nameLabel.value}}</span>
+								</label>
+								<div class="field-input col-12" v-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
+									<div class="input p-inputtext p-component p-2">
+										<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
+											<p-radiobutton :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-radiobutton>
+											<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
+										</div>
 									</div>
-									<div class="flex gap-1">
-										<p-button type="button" icon="pi pi-plus" severity="secondary"
-											@click="onChartAttrValuesFormInsertValue($event, cpa.name, svIdx)"
-											v-if="!pm.chartAttrValuesForm.readonly">
-										</p-button>
-										<p-button type="button" icon="pi pi-minus" severity="danger"
-											@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)"
-											v-if="!pm.chartAttrValuesForm.readonly">
-										</p-button>
-									</div>
+						        	<div class="validate-msg" v-if="cpa.required">
+						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+						        	</div>
 								</div>
-							</div>
-							<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly && (pm.chartAttrValuesForm.attrValues[cpa.name] == null || pm.chartAttrValuesForm.attrValues[cpa.name].length == 0)">
-								<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertValue($event, cpa.name)"></p-button>
-							</div>
-						</div>
-						<div v-else>
-							<div v-if="cpa.inputPayload.treeSelect == true">
-								<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-									class="input w-full" placeholder="<@spring.message code='none' />">
-								</p-treeselect>
-							</div>
-							<div v-else>
-								<p-dropdown :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
-									option-label="name" option-value="value" :show-clear="!cpa.required" class="input w-full">
-								</p-dropdown>
-							</div>
-						</div>
-			        	<div class="validate-msg" v-if="cpa.required">
-			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
-			        	</div>
-					</div>
-					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
-						<div class="input p-inputtext p-component p-2">
-							<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
-								<p-checkbox :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
-								<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
-							</div>
-						</div>
-			        	<div class="validate-msg" v-if="cpa.required">
-			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
-			        	</div>
-					</div>
-					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
-						<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.array">
-							<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
-								<div class="flex mb-1 gap-2">
-									<div class="flex-grow-1 flex">
-										<p-inputtext :id="cpa.domId+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
-											class="input flex-grow-1 mr-1">
+								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
+									<div v-if="cpa.inputPayload.multiple == true">
+										<div v-if="cpa.inputPayload.treeSelect == true">
+											<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+												selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />">
+											</p-treeselect>
+										</div>
+										<div v-else>
+											<p-multiselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+												option-label="name" option-value="value" :show-clear="true" class="input w-full">
+											</p-multiselect>
+										</div>
+									</div>
+									<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
+										v-else-if="cpa.array">
+										<div v-for="(sv, svIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="svIdx">
+											<div class="flex mb-1 gap-2">
+												<div class="flex-grow-1 flex">
+													<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+														class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
+													</p-treeselect>
+													<p-dropdown :id="cpa.domId+svIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][svIdx]" :options="cpa.inputPayload.options"
+														option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
+													</p-dropdown>
+												</div>
+												<div class="flex gap-1">
+													<p-button type="button" icon="pi pi-plus" severity="secondary"
+														@click="onChartAttrValuesFormInsertValue($event, cpa.name, svIdx)"
+														v-if="!pm.chartAttrValuesForm.readonly">
+													</p-button>
+													<p-button type="button" icon="pi pi-minus" severity="danger"
+														@click="onChartAttrValuesFormRemoveValue($event, cpa.name, svIdx)"
+														v-if="!pm.chartAttrValuesForm.readonly">
+													</p-button>
+												</div>
+											</div>
+										</div>
+										<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
+											<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertValue($event, cpa.name)"></p-button>
+										</div>
+									</div>
+									<div v-else>
+										<div v-if="cpa.inputPayload.treeSelect == true">
+											<p-treeselect :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+												class="input w-full" placeholder="<@spring.message code='none' />">
+											</p-treeselect>
+										</div>
+										<div v-else>
+											<p-dropdown :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" :options="cpa.inputPayload.options"
+												option-label="name" option-value="value" :show-clear="!cpa.required" class="input w-full">
+											</p-dropdown>
+										</div>
+									</div>
+						        	<div class="validate-msg" v-if="cpa.required">
+						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+						        	</div>
+								</div>
+								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
+									<div class="input p-inputtext p-component p-2">
+										<div v-for="(ip, ipIdx) in cpa.inputPayload.options" class="inline-block mr-2">
+											<p-checkbox :input-id="cpa.domId+ipIdx" :value="ip.value" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]"></p-checkbox>
+											<label :for="cpa.domId+ipIdx" class="ml-1">{{ip.name}}</label>
+										</div>
+									</div>
+						        	<div class="validate-msg" v-if="cpa.required">
+						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+						        	</div>
+								</div>
+								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
+									<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="cpa.array">
+										<div v-for="(color, colorIdx) in pm.chartAttrValuesForm.attrValues[cpa.name]" :key="colorIdx">
+											<div class="flex mb-1 gap-2">
+												<div class="flex-grow-1 flex">
+													<p-inputtext :id="cpa.domId+colorIdx" v-model="pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]" type="text"
+														class="input flex-grow-1 mr-1">
+													</p-inputtext>
+													<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
+														@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
+												</div>
+												<div class="flex gap-1">
+													<p-button type="button" icon="pi pi-plus" severity="secondary"
+														@click="onChartAttrValuesFormInsertValue($event, cpa.name, colorIdx)"
+														v-if="!pm.chartAttrValuesForm.readonly">
+													</p-button>
+													<p-button type="button" icon="pi pi-minus" severity="danger"
+														@click="onChartAttrValuesFormRemoveValue($event, cpa.name, colorIdx)"
+														v-if="!pm.chartAttrValuesForm.readonly">
+													</p-button>
+												</div>
+											</div>
+										</div>
+										<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
+											<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertValue($event, cpa.name)"></p-button>
+										</div>
+									</div>
+									<div class="flex" v-else>
+										<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+											class="input flex-grow-1 mr-1" maxlength="100">
 										</p-inputtext>
-										<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name][colorIdx]}" class="palette-btn surface-border mr-1"
-											@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues[cpa.name], colorIdx)"></p-button>
+										<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name]}" class="palette-btn surface-border"
+											@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues, cpa.name)"></p-button>
 									</div>
-									<div class="flex gap-1">
-										<p-button type="button" icon="pi pi-plus" severity="secondary"
-											@click="onChartAttrValuesFormInsertValue($event, cpa.name, colorIdx)"
-											v-if="!pm.chartAttrValuesForm.readonly">
-										</p-button>
-										<p-button type="button" icon="pi pi-minus" severity="danger"
-											@click="onChartAttrValuesFormRemoveValue($event, cpa.name, colorIdx)"
-											v-if="!pm.chartAttrValuesForm.readonly">
-										</p-button>
-									</div>
+						        	<div class="validate-msg" v-if="cpa.required">
+						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+						        	</div>
+								</div>
+								<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
+									<p-textarea :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+										class="input w-full">
+									</p-textarea>
+						        	<div class="validate-msg" v-if="cpa.required">
+						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+						        	</div>
+								</div>
+								<div class="field-input col-12" v-else>
+									<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
+										class="input w-full">
+									</p-inputtext>
+						        	<div class="validate-msg" v-if="cpa.required">
+						        		<input :name="cpa.name" required type="text" class="validate-proxy" />
+						        	</div>
 								</div>
 							</div>
-							<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly && (pm.chartAttrValuesForm.attrValues[cpa.name] == null || pm.chartAttrValuesForm.attrValues[cpa.name].length == 0)">
-								<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertValue($event, cpa.name)"></p-button>
-							</div>
 						</div>
-						<div class="flex" v-else>
-							<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
-								class="input flex-grow-1 mr-1" maxlength="100">
-							</p-inputtext>
-							<p-button type="button" :style="{'background-color': pm.chartAttrValuesForm.attrValues[cpa.name]}" class="palette-btn surface-border"
-								@click="showPalettePanel($event, pm.chartAttrValuesForm.attrValues, cpa.name)"></p-button>
-						</div>
-			        	<div class="validate-msg" v-if="cpa.required">
-			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
-			        	</div>
-					</div>
-					<div class="field-input col-12" v-else-if="cpa.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
-						<p-textarea :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
-							class="input w-full">
-						</p-textarea>
-			        	<div class="validate-msg" v-if="cpa.required">
-			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
-			        	</div>
-					</div>
-					<div class="field-input col-12" v-else>
-						<p-inputtext :id="cpa.domId" v-model="pm.chartAttrValuesForm.attrValues[cpa.name]" type="text"
-							class="input w-full">
-						</p-inputtext>
-			        	<div class="validate-msg" v-if="cpa.required">
-			        		<input :name="cpa.name" required type="text" class="validate-proxy" />
-			        	</div>
-					</div>
+					</p-panel>
 				</div>
 			</p-accordion-tab>
 		</p-accordion>
@@ -232,6 +257,7 @@ page_palette.ftl
 		{
 			var cpa = cpas[i];
 			
+			po.trimChartPluginAttrNameLabel(cpa);
 			cpa.domId = po.concatPid("cpattr_"+ (po.chartPluginAttributeDomIdIdx++)+"_");
 			
 			if(po.isChartPluginGroupAttr(cpa))
@@ -461,7 +487,7 @@ page_palette.ftl
 				}
 				else
 				{
-					virtualGroup = { name: "", nameLabel: { value: "<@spring.message code='ungrouped' />" }, children: [], virtual: true };
+					virtualGroup = { name: "", children: [], virtual: true };
 					groups.push(virtualGroup);
 				}
 			}
@@ -480,10 +506,24 @@ page_palette.ftl
 				}
 			}
 			
+			if(!virtualGroup.nameLabel || !virtualGroup.nameLabel.value)
+				virtualGroup.nameLabel = { value: "<@spring.message code='ungrouped' />" };
+			
 			virtualGroup.children.push(cpa);
 		};
 		
 		return groups;
+	};
+	
+	po.trimChartPluginAttrNameLabel = function(cpa)
+	{
+		if(!cpa)
+			return;
+		
+		if(cpa.nameLabel && cpa.nameLabel.value)
+			return;
+		
+		cpa.nameLabel = { value: cpa.name };
 	};
 	
 	//整理图表属性值：类型转换、选项值限定
@@ -756,7 +796,7 @@ page_palette.ftl
 			if(idx == null)
 				attrValues[propName].push("");
 			else
-				attrValues[propName].splice(idx+1, 0, "");
+				attrValues[propName].splice(idx, 0, "");
 		},
 		
 		onChartAttrValuesFormRemoveValue: function(e, propName, idx)
