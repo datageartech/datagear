@@ -32,10 +32,10 @@ page_palette.ftl
 				:header="group.nameLabel.value">
 				<div class="flex flex-column gap-2">
 					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.name]"
-						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="'#1'"
+						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="'#'+(grpDataEleIdx+1)"
 						:toggleable="group.array" class="no-panel-border">
 						<template #icons>
-							<div class="inline-flex gap-1 mx-2 vertical-align-top text-xs" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+							<div class="inline-flex gap-1 mx-2 vertical-align-top text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
 								<p-button type="button" severity="secondary"
 									@click="">
 									<@spring.message code='moveUp' />
@@ -49,7 +49,7 @@ page_palette.ftl
 									<@spring.message code='insert' />
 								</p-button>
 								<p-button type="button" severity="danger"
-									@click="">
+									@click="onChartAttrValuesFormRemoveGrpEle($event, group.name, grpDataEleIdx)">
 									<@spring.message code='delete' />
 								</p-button>
 							</div>
@@ -88,7 +88,7 @@ page_palette.ftl
 									<div v-for="(sv, svIdx) in grpDataEle[cpa.name]" :key="svIdx">
 										<div class="flex mb-1 gap-2">
 											<div class="flex-grow-1 flex">
-												<p-treeselect :id="cpa.domId" v-model="grpDataEle[cpa.name]" :options="cpa.inputPayload.options"
+												<p-treeselect :id="cpa.domId" v-model="grpDataEle[cpa.name][svIdx]" :options="cpa.inputPayload.options"
 													class="input w-full" placeholder="<@spring.message code='none' />" v-if="cpa.inputPayload.treeSelect == true">
 												</p-treeselect>
 												<p-dropdown :id="cpa.domId+svIdx" v-model="grpDataEle[cpa.name][svIdx]" :options="cpa.inputPayload.options"
@@ -194,6 +194,11 @@ page_palette.ftl
 							</div>
 						</div>
 					</p-panel>
+					<div class="text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+						<p-button type="button" severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group.name)">
+							<@spring.message code='add' />
+						</p-button>
+					</div>
 				</div>
 			</p-accordion-tab>
 		</p-accordion>
@@ -597,7 +602,19 @@ page_palette.ftl
 					po.toTrimChartAttrValues(v[j], cpa.children, false);
 				
 				if(!cpa.array)
+				{
 					v = v[0];
+					
+					//删除由po.toChartAttrValuesFormData()生成的值
+					if(v != null && $.isEmptyObject(v))
+						v = undefined;
+				}
+				else
+				{
+					//删除由po.toChartAttrValuesFormData()生成的值
+					if(v.length == 0)
+						v = undefined;
+				}
 			}
 			else
 			{
@@ -889,6 +906,25 @@ page_palette.ftl
 					po.setChartAttrValuesFormData({});
 				} 
 			});
+		},
+		onChartAttrValuesFormInsertGrpEle: function(e, groupName, idx)
+		{
+			var pm = po.vuePageModel();
+			var data = pm.chartAttrValuesForm.data;
+
+			if(!data[groupName])
+				data[groupName] = [];
+			
+			if(idx == null)
+				data[groupName].push({});
+			else
+				data[groupName].splice(idx, 0, {});
+		},
+		onChartAttrValuesFormRemoveGrpEle: function(e, groupName, idx)
+		{
+			var pm = po.vuePageModel();
+			var data = pm.chartAttrValuesForm.data;
+			data[groupName].splice(idx, 1);
 		},
 		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, propName, idx)
 		{
