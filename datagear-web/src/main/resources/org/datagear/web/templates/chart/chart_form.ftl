@@ -537,8 +537,8 @@
 		});
 		
 		//这里必须整理属性值，因为存在切换图表类型而不编辑图表属性的情况
-		var cpas = po.trimChartPluginAttributes(data.pluginVo ? data.pluginVo.attributes : null);
-		data.attrValues = po.toTrimChartAttrValues(data.attrValues, cpas);
+		var groupCpas = po.trimChartPluginAttrByGroup(data.pluginVo ? data.pluginVo.attributes : null);
+		data.attrValues = po.toTrimChartAttrValues(data.attrValues, groupCpas);
 		
 		var pm = po.vuePageModel();
 		if(pm.enableResultDataFormat)
