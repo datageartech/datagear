@@ -32,7 +32,7 @@ page_palette.ftl
 				:header="group.nameLabel.value">
 				<div class="flex flex-column gap-2">
 					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.name]"
-						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="'#'+(grpDataEleIdx+1)"
+						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+' #'+(grpDataEleIdx+1)"
 						:toggleable="group.array" class="no-panel-border">
 						<template #icons>
 							<div class="inline-flex gap-1 mx-2 vertical-align-top text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
@@ -97,18 +97,18 @@ page_palette.ftl
 											</div>
 											<div class="flex gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary"
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa.name, svIdx)"
+													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa, svIdx)"
 													v-if="!pm.chartAttrValuesForm.readonly">
 												</p-button>
 												<p-button type="button" icon="pi pi-minus" severity="danger"
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, cpa.name, svIdx)"
+													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, cpa, svIdx)"
 													v-if="!pm.chartAttrValuesForm.readonly">
 												</p-button>
 											</div>
 										</div>
 									</div>
 									<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-										<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa.name)"></p-button>
+										<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa)"></p-button>
 									</div>
 								</div>
 								<div v-else>
@@ -151,18 +151,18 @@ page_palette.ftl
 											</div>
 											<div class="flex gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary"
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa.name, colorIdx)"
+													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa, colorIdx)"
 													v-if="!pm.chartAttrValuesForm.readonly">
 												</p-button>
 												<p-button type="button" icon="pi pi-minus" severity="danger"
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, cpa.name, colorIdx)"
+													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, cpa, colorIdx)"
 													v-if="!pm.chartAttrValuesForm.readonly">
 												</p-button>
 											</div>
 										</div>
 									</div>
 									<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-										<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa.name)"></p-button>
+										<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, cpa)"></p-button>
 									</div>
 								</div>
 								<div class="flex" v-else>
@@ -195,8 +195,8 @@ page_palette.ftl
 						</div>
 					</p-panel>
 					<div class="text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
-						<p-button type="button" severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group.name)">
-							<@spring.message code='add' />
+						<p-button type="button" icon="pi pi-plus" :label="group.nameLabel.value"
+							severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group.name)">
 						</p-button>
 					</div>
 				</div>
@@ -592,9 +592,10 @@ page_palette.ftl
 			var v = re[cpa.name];
 			
 			if(v == null)
+			{
 				continue;
-			
-			if(po.isChartPluginGroupAttr(cpa))
+			}
+			else if(po.isChartPluginGroupAttr(cpa))
 			{
 				v = ($.isArray(v) ? v : [ v ]);
 				
@@ -618,6 +619,9 @@ page_palette.ftl
 			}
 			else
 			{
+				if(cpa.array && !$.isArray(v))
+					v = [ v ];
+				
 				var inputType = cpa.inputType;
 				var inputPayload = cpa.inputPayload;
 				var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
@@ -686,10 +690,10 @@ page_palette.ftl
 	};
 	
 	//树组件Model结构是：{ v0: true, ... }，需进行转换
-	po.toTrimChartAttrValueIfTreeModel = function(treeModel, single)
+	po.toTrimChartAttrValueIfTreeModel = function(treeModel)
 	{
 		//不是树组件Model的应原样返回
-		if(!treeModel || !$.isPlainObject(treeModel))
+		if(treeModel == null || !$.isPlainObject(treeModel))
 			return treeModel;
 		
 		var values = [];
@@ -780,32 +784,77 @@ page_palette.ftl
 				if(v == null)
 					continue;
 				
-				var inputPayload = cpa.inputPayload;
-				var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
+				if(!$.isArray(v))
+				{
+					if(cpa.inputPayload && cpa.inputPayload.multiple == true)
+						v = [ v ];
+					
+					if(cpa.array)
+						v = [ v ];
+					
+					data[cpa.name] = v;
+				}
 				
 				//转换为树组件Model
-				if(isTreeSelect)
-					data[cpa.name] = po.chartAttrValueToTreeModel(v);
+				po.toChartAttrValuesFormDataTreeModel(data, cpa, v);
 			}
 		};
 		
 		return data;
 	};
 	
-	//插件属性值转换为树组件Model，它的模型结构是：{ v0: true, ... }
-	po.chartAttrValueToTreeModel = function(value)
+	//插件属性值转换为树组件Model
+	// "v0" -> { v0: true }
+	// [ "v0", "v1", ... ] -> { v0: true, v1: true, ... }、[ { v0: true }, { v1: true }, ... ]
+	// [ [ "v0", "v1" ], ... ] -> [ { v0: true, v1: true, ... }, ... ]
+	po.toChartAttrValuesFormDataTreeModel = function(data, cpa, value)
 	{
-		if(value != null && $.isPlainObject(value))
-			return value;
+		if(value == null)
+			return;
 		
-		var re = {};
+		var isTreeSelect = (cpa.inputPayload && cpa.inputPayload.treeSelect == true);
 		
-		if(value != null)
+		if(!isTreeSelect)
+			return;
+		
+		value = ($.isArray(value) ? value : [ value ]);
+		
+		var re;
+		
+		if(cpa.array)
 		{
-			value = ($.isArray(value) ? value : [ value ]);
-			$.each(value, function(i, v)
+			re = [];
+			
+			for(var i=0; i<value.length; i++)
 			{
-				re[v] = true;
+				var rei = (re[i] = {});
+				var vi = value[i];
+				
+				if(vi == null)
+					continue;
+				
+				if($.isArray(vi))
+				{
+					vi.forEach((vii) =>
+					{
+						if(vii != null)
+							rei[vii] = true;
+					});
+				}
+				else
+				{
+					rei[vi] = true;
+				}
+			}
+		}
+		else
+		{
+			re = {};
+			
+			value.forEach((vi) =>
+			{
+				if(vi != null)
+					re[vi] = true;
 			});
 		}
 		
@@ -926,19 +975,24 @@ page_palette.ftl
 			var data = pm.chartAttrValuesForm.data;
 			data[groupName].splice(idx, 1);
 		},
-		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, propName, idx)
+		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, cpa, idx)
 		{
+			var propName = cpa.name;
+			var isTreeSelect = (cpa.inputPayload && cpa.inputPayload.treeSelect == true);
+			
 			if(grpDataEle[propName] == null)
 				grpDataEle[propName] = [];
 			
 			if(idx == null)
-				grpDataEle[propName].push("");
+				grpDataEle[propName].push(isTreeSelect ? {} : "");
 			else
-				grpDataEle[propName].splice(idx, 0, "");
+				grpDataEle[propName].splice(idx, 0, isTreeSelect ? {} : "");
 		},
 		
-		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, propName, idx)
+		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, cpa, idx)
 		{
+			var propName = cpa.name;
+			
 			if(grpDataEle[propName] == null)
 				return;
 			
