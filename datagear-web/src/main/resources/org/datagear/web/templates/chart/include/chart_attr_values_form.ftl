@@ -597,7 +597,6 @@ page_palette.ftl
 			
 			if(v == null)
 			{
-				continue;
 			}
 			else if(po.isChartPluginGroupAttr(attr))
 			{
@@ -610,15 +609,15 @@ page_palette.ftl
 				{
 					v = v[0];
 					
-					//删除由po.toChartAttrValuesFormData()生成的值
+					//删除由po.toChartAttrValuesFormData()生成的空对象
 					if(v != null && $.isEmptyObject(v))
-						v = undefined;
+						v = null;
 				}
 				else
 				{
-					//删除由po.toChartAttrValuesFormData()生成的值
+					//删除由po.toChartAttrValuesFormData()生成的空数组
 					if(v.length == 0)
-						v = undefined;
+						v = null;
 				}
 			}
 			else
@@ -626,33 +625,22 @@ page_palette.ftl
 				v = po.decodeChartAttrValueTreeModel(attr, v);
 				v = po.trimChartAttrValueArray(attr, v);
 				v = po.toChartAttrTypeValue(attr, v);
-				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
-				v = po.trimChartAttrValueByPayloadOptions(attr, v);
 			}
 			
-			re[attr.name] = v;
+			if(v == null)
+			{
+				//null值不应保留，以支持后续组对象的判空逻辑
+				delete re[attr.name];
+			}
+			else
+			{
+				re[attr.name] = v;
+			}
 		};
 		
 		delete re[po.rootChartPluginGroupAttrName];
 		
 		return re;
-	};
-
-	po.trimChartAttrValueArray = function(inputAttr, value)
-	{
-		if(value == null)
-			return value;
-		
-		if(!$.isArray(value))
-		{
-			if(inputAttr.inputPayload && inputAttr.inputPayload.multiple == true)
-				value = [ value ];
-			
-			if(inputAttr.array)
-				value = [ value ];
-		}
-		
-		return value;
 	};
 	
 	//树组件Model转换为图表属性值，另参考po.encodeChartAttrValueTreeModel()函数
@@ -670,19 +658,17 @@ page_palette.ftl
 		
 		if($.isPlainObject(value))
 			value = [ value ];
-				
+		
 		var re;
-
+		
 		if($.isArray(value))
 		{
 			re = [];
 			
-			for(var i=0; i<value.length; i++)
+			value.forEach((vi) =>
 			{
-				var vi = value[i];
-				
 				if(vi == null)
-					continue;
+					return;
 				
 				if($.isPlainObject(vi))
 				{
@@ -690,23 +676,25 @@ page_palette.ftl
 					
 					for(var vip in vi)
 					{
-						rei.push(vip);
+						if(vip != null)
+							rei.push(vip);
 					}
 					
-					if(isMultiple)
+					if(rei.length > 0)
 					{
-						re.push(rei);
-					}
-					else if(rei[0] != null)
-					{
-						re.push(rei[0]);
+						if(isMultiple)
+							re.push(rei);
+						else
+						{
+							re.push(rei[0]);
+						}
 					}
 				}
 				else
 				{
 					re.push(vi);
 				}
-			}
+			});
 			
 			if(!inputAttr.array)
 				re = re[0];
@@ -717,9 +705,29 @@ page_palette.ftl
 		return re;
 	};
 	
+	po.trimChartAttrValueArray = function(inputAttr, value)
+	{
+		if(value == null)
+			return value;
+		
+		if(!$.isArray(value))
+		{
+			if(inputAttr.inputPayload && inputAttr.inputPayload.multiple == true)
+				value = [ value ];
+			
+			if(inputAttr.array)
+				value = [ value ];
+		}
+		
+		return value;
+	};
+	
 	po.toChartAttrTypeValue = function(inputAttr, value)
 	{
 		var type = inputAttr.type;
+		
+		if(type != po.ChartPluginInputAttribute.DataType.STRING && value === "")
+			value = null;
 		
 		if(value == null)
 		{
@@ -731,92 +739,50 @@ page_palette.ftl
 			
 			value.forEach((vi) =>
 			{
-				re.push(po.toChartAttrTypeValue(inputAttr, vi));
-			});
-			
-			return re;
-		}
-		else if(type == po.ChartPluginInputAttribute.DataType.BOOLEAN)
-		{
-			return (value == true || value === "true" || value === "1" ? true : false);
-		}
-		else if(type == po.ChartPluginInputAttribute.DataType.NUMBER)
-		{
-			return $.parseToNumber(value);
-		}
-		else
-			return value;
-	};
-	
-	po.trimChartAttrValueByPayloadOptions = function(inputAttr, value)
-	{
-		if(value == null)
-			return value;
-		
-		var inputPayload = inputAttr.inputPayload;
-		var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
-		var payloadOptions = (inputPayload && inputPayload.options ? inputPayload.options : null);
-		
-		if(payloadOptions == null || !$.isArray(payloadOptions))
-			return value;
-		
-		if($.isArray(value))
-		{
-			var vnew = [];
-			
-			value.forEach((vi) =>
-			{
-				if(vi == null)
-					return;
+				vi = po.toChartAttrTypeValue(inputAttr, vi);
 				
-				if($.isArray(vi))
-				{
-					var vnewi = [];
-					
-					vi.forEach((vii) =>
-					{
-						if(vii == null)
-							return;
-						
-						if(po.isInChartPluginInputAttrPayloadOptions(payloadOptions, vii, isTreeSelect))
-							vnewi.push(vii);
-					});
-					
-					if(vnewi.length > 0)
-						vnew.push(vnewi);
-				}
-				else
-				{
-					if(po.isInChartPluginInputAttrPayloadOptions(payloadOptions, vi, isTreeSelect))
-						vnew.push(vi);
-				}
+				if(vi != null)
+					re.push(vi);
 			});
 			
-			value = vnew;
+			return (re.length > 0 ? re : null);
 		}
 		else
 		{
-			if(!po.isInChartPluginInputAttrPayloadOptions(payloadOptions, value, isTreeSelect))
-				value = undefined;
+			if(type == po.ChartPluginInputAttribute.DataType.BOOLEAN)
+			{
+				value = (value == true || value === "true" || value === "1" ? true : false);
+			}
+			else if(type == po.ChartPluginInputAttribute.DataType.NUMBER)
+			{
+				value = $.parseToNumber(value);
+				value = (isNaN(value) ? null : value);
+			}
+			
+			if(value != null)
+			{
+				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
+				var inputPayload = inputAttr.inputPayload;
+				var payloadOptions = (inputPayload && inputPayload.options ? inputPayload.options : null);
+				var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
+				
+				if(payloadOptions != null && $.isArray(payloadOptions))
+				{
+					if(isTreeSelect)
+					{
+						if($.inTreeArrayById(payloadOptions, value, "key") != true)
+							value = null;
+					}
+					else
+					{
+						if($.inArrayById(payloadOptions, value, "value") < 0)
+							value = null;
+					}
+				}
+			}
+			
+			return value;
 		}
-		
-		return value;
-	};
-	
-	po.isInChartPluginInputAttrPayloadOptions = function(payloadOptions, value, isTreeSelect)
-	{
-		if(isTreeSelect)
-		{
-			if($.inTreeArrayById(payloadOptions, value, "key") != true)
-				return false;
-		}
-		else
-		{
-			if($.inArrayById(payloadOptions, value, "value") < 0)
-				return false;
-		}
-		
-		return true;
 	};
 	
 	po.toChartAttrValuesFormData = function(attrValues, attrs, clone)
@@ -895,13 +861,12 @@ page_palette.ftl
 		{
 			re = [];
 			
-			for(var i=0; i<value.length; i++)
+			value.forEach((vi) =>
 			{
-				var rei = (re[i] = {});
-				var vi = value[i];
-				
 				if(vi == null)
-					continue;
+					return;
+				
+				var rei = {};
 				
 				if($.isArray(vi))
 				{
@@ -915,7 +880,9 @@ page_palette.ftl
 				{
 					rei[vi] = true;
 				}
-			}
+				
+				re.push(rei);
+			});
 		}
 		else
 		{
@@ -1056,9 +1023,9 @@ page_palette.ftl
 				grpDataEle[propName] = [];
 			
 			if(idx == null)
-				grpDataEle[propName].push(isTreeSelect ? {} : "");
+				grpDataEle[propName].push(isTreeSelect ? {} : null);
 			else
-				grpDataEle[propName].splice(idx, 0, isTreeSelect ? {} : "");
+				grpDataEle[propName].splice(idx, 0, isTreeSelect ? {} : null);
 		},
 		
 		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, attr, idx)
