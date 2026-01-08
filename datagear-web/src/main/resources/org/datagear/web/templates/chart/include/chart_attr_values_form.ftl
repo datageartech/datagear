@@ -28,8 +28,11 @@ page_palette.ftl
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<p-accordion :multiple="true" :active-index="[0]">
-			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups"
-				:header="group.nameLabel.value">
+			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
+				<template #header>
+					<span>{{group.nameLabel.value}}</span>
+					<span class="text-color-secondary text-sm ml-1">{{group.virtual ? "" : group.name}}</span>
+				</template>
 				<div class="flex flex-column gap-2">
 					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.name]"
 						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+' #'+(grpDataEleIdx+1)"
@@ -58,21 +61,9 @@ page_palette.ftl
 							<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx" class="field-label col-12 mb-2"
 								:title="attr.descLabel && attr.descLabel.value ? attr.descLabel.value : null">
 								<span>{{attr.nameLabel.value}}</span>
+								<span class="text-color-secondary text-sm ml-1">{{attr.name}}</span>
 							</label>
-							<div class="field-input col-12" v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
-								<div class="input p-inputtext p-component p-2">
-									<div v-for="(ip, ipIdx) in attr.inputPayload.options" class="inline-block mr-2">
-										<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+ipIdx"
-											:value="ip.value" v-model="grpDataEle[attr.name]">
-										</p-radiobutton>
-										<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
-									</div>
-								</div>
-					        	<div class="validate-msg" v-if="attr.required">
-					        		<input :name="attr.name" required type="text" class="validate-proxy" />
-					        	</div>
-							</div>
-							<div class="field-input col-12" v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
+							<div class="field-input col-12" v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
 								<div v-if="attr.inputPayload.multiple == true">
 									<div v-if="attr.inputPayload.treeSelect == true">
 										<p-treeselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
@@ -85,32 +76,31 @@ page_palette.ftl
 										</p-multiselect>
 									</div>
 								</div>
-								<div class="input border-1px-transparent p-inputtext p-component px-0 py-0"
-									v-else-if="attr.array">
-									<div v-for="(sv, svIdx) in grpDataEle[attr.name]" :key="svIdx">
-										<div class="flex mb-1 gap-2">
-											<div class="flex-grow-1 flex">
-												<p-treeselect v-model="grpDataEle[attr.name][svIdx]" :options="attr.inputPayload.options"
-													class="input w-full" placeholder="<@spring.message code='none' />" v-if="attr.inputPayload.treeSelect == true">
-												</p-treeselect>
-												<p-dropdown v-model="grpDataEle[attr.name][svIdx]" :options="attr.inputPayload.options"
-													option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
-												</p-dropdown>
-											</div>
-											<div class="flex gap-1">
-												<p-button type="button" icon="pi pi-plus" severity="secondary"
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, svIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
-												</p-button>
-												<p-button type="button" icon="pi pi-minus" severity="danger"
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, svIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
-												</p-button>
-											</div>
+								<div class="flex flex-column gap-1" v-else-if="attr.array">
+									<div v-for="(val, valIdx) in grpDataEle[attr.name]" :key="valIdx" class="flex gap-2">
+										<div class="flex-grow-1 flex">
+											<p-treeselect v-model="grpDataEle[attr.name][valIdx]" :options="attr.inputPayload.options"
+												class="input w-full" placeholder="<@spring.message code='none' />" v-if="attr.inputPayload.treeSelect == true">
+											</p-treeselect>
+											<p-dropdown v-model="grpDataEle[attr.name][valIdx]" :options="attr.inputPayload.options"
+												option-label="name" option-value="value" class="input flex-grow-1 mr-1" v-else>
+											</p-dropdown>
+										</div>
+										<div class="flex gap-1">
+											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, valIdx)"
+												v-if="!pm.chartAttrValuesForm.readonly">
+											</p-button>
+											<p-button type="button" icon="pi pi-minus" severity="danger" outlined 
+												@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, valIdx)"
+												v-if="!pm.chartAttrValuesForm.readonly">
+											</p-button>
 										</div>
 									</div>
-									<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-										<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)"></p-button>
+									<div v-if="!pm.chartAttrValuesForm.readonly">
+										<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+											@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
+										</p-button>
 									</div>
 								</div>
 								<div v-else>
@@ -129,49 +119,37 @@ page_palette.ftl
 					        		<input :name="attr.name" required type="text" class="validate-proxy" />
 					        	</div>
 							</div>
-							<div class="field-input col-12" v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
-								<div class="input p-inputtext p-component p-2">
-									<div v-for="(ip, ipIdx) in attr.inputPayload.options" class="inline-block mr-2">
-										<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+ipIdx"
-											:value="ip.value" v-model="grpDataEle[attr.name]">
-										</p-checkbox>
-										<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+ipIdx" class="ml-1">{{ip.name}}</label>
-									</div>
-								</div>
-					        	<div class="validate-msg" v-if="attr.required">
-					        		<input :name="attr.name" required type="text" class="validate-proxy" />
-					        	</div>
-							</div>
 							<div class="field-input col-12" v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
-								<div class="input border-1px-transparent p-inputtext p-component px-0 py-0" v-if="attr.array">
-									<div v-for="(color, colorIdx) in grpDataEle[attr.name]" :key="colorIdx">
-										<div class="flex mb-1 gap-2">
-											<div class="flex-grow-1 flex">
-												<p-inputtext v-model="grpDataEle[attr.name][colorIdx]" type="text"
-													class="input flex-grow-1 mr-1">
-												</p-inputtext>
-												<p-button type="button" :style="{'background-color': grpDataEle[attr.name][colorIdx]}" class="palette-btn surface-border mr-1"
-													@click="showPalettePanel($event, grpDataEle[attr.name], colorIdx)"></p-button>
-											</div>
-											<div class="flex gap-1">
-												<p-button type="button" icon="pi pi-plus" severity="secondary"
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, colorIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
-												</p-button>
-												<p-button type="button" icon="pi pi-minus" severity="danger"
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, colorIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
-												</p-button>
-											</div>
+								<div class="flex flex-column gap-1" v-if="attr.array">
+									<div v-for="(val, valIdx) in grpDataEle[attr.name]" :key="valIdx" class="flex gap-2">
+										<div class="flex-grow-1 flex gap-1">
+											<p-inputtext v-model="grpDataEle[attr.name][valIdx]" type="text"
+												class="input flex-grow-1">
+											</p-inputtext>
+											<p-button type="button" :style="{'background-color': grpDataEle[attr.name][valIdx]}"
+												class="palette-btn surface-border mr-1"
+												@click="showPalettePanel($event, grpDataEle[attr.name], valIdx)"></p-button>
+										</div>
+										<div class="flex gap-1">
+											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, valIdx)"
+												v-if="!pm.chartAttrValuesForm.readonly">
+											</p-button>
+											<p-button type="button" icon="pi pi-minus" severity="danger" outlined
+												@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, valIdx)"
+												v-if="!pm.chartAttrValuesForm.readonly">
+											</p-button>
 										</div>
 									</div>
-									<div class="mt-1" v-if="!pm.chartAttrValuesForm.readonly">
-										<p-button type="button" icon="pi pi-plus" severity="secondary" @click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)"></p-button>
+									<div v-if="!pm.chartAttrValuesForm.readonly">
+										<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+											@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
+										</p-button>
 									</div>
 								</div>
-								<div class="flex" v-else>
+								<div class="flex gap-1" v-else>
 									<p-inputtext v-model="grpDataEle[attr.name]" type="text"
-										class="input flex-grow-1 mr-1" maxlength="100">
+										class="input flex-grow-1" maxlength="100">
 									</p-inputtext>
 									<p-button type="button" :style="{'background-color': grpDataEle[attr.name]}" class="palette-btn surface-border"
 										@click="showPalettePanel($event, grpDataEle, attr.name)"></p-button>
@@ -180,18 +158,62 @@ page_palette.ftl
 					        		<input :name="attr.name" required type="text" class="validate-proxy" />
 					        	</div>
 							</div>
-							<div class="field-input col-12" v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
-								<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
-									v-model="grpDataEle[attr.name]" type="text" class="input w-full">
-								</p-textarea>
+							<div class="field-input col-12" v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO || attr.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
+								<div class="input p-inputtext p-component p-2 flex gap-3">
+									<div v-for="(val, valIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
+										<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+valIdx"
+											:value="val.value" v-model="grpDataEle[attr.name]"
+											 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
+										</p-radiobutton>
+										<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+valIdx"
+											:value="val.value" v-model="grpDataEle[attr.name]"
+											v-else>
+										</p-checkbox>
+										<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+valIdx">{{val.name}}</label>
+									</div>
+								</div>
 					        	<div class="validate-msg" v-if="attr.required">
 					        		<input :name="attr.name" required type="text" class="validate-proxy" />
 					        	</div>
 							</div>
 							<div class="field-input col-12" v-else>
-								<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
-									v-model="grpDataEle[attr.name]" type="text" class="input w-full">
-								</p-inputtext>
+								<div class="flex flex-column gap-1" v-if="attr.array">
+									<div v-for="(val, valIdx) in grpDataEle[attr.name]" :key="valIdx" class="flex gap-2">
+										<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+valIdx"
+											v-model="grpDataEle[attr.name][valIdx]" type="text" class="input flex-grow-1"
+											 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
+										</p-textarea>
+										<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+valIdx"
+											v-model="grpDataEle[attr.name][valIdx]" type="text" class="input flex-grow-1"
+											v-else>
+										</p-inputtext>
+										<div class="flex gap-1">
+											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, valIdx)"
+												v-if="!pm.chartAttrValuesForm.readonly">
+											</p-button>
+											<p-button type="button" icon="pi pi-minus" severity="danger" outlined
+												@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, valIdx)"
+												v-if="!pm.chartAttrValuesForm.readonly">
+											</p-button>
+										</div>
+									</div>
+									<div v-if="!pm.chartAttrValuesForm.readonly">
+										<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+											@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
+										</p-button>
+									</div>
+								</div>
+								<div v-else>
+									<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
+										v-model="grpDataEle[attr.name]" type="text" class="input w-full"
+										v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
+									</p-textarea>
+									<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
+										v-model="grpDataEle[attr.name]" type="text" class="input w-full"
+										v-else>
+									</p-inputtext>
+								</div>
 					        	<div class="validate-msg" v-if="attr.required">
 					        		<input :name="attr.name" required type="text" class="validate-proxy" />
 					        	</div>
@@ -424,47 +446,32 @@ page_palette.ftl
 				
 				attr.inputPayload = inputPayload;
 			}
-			//颜色框：将inputPayload转换为标准的{multiple: ...}格式
+			//颜色框
 			else if(inputType == po.ChartPluginInputAttribute.InputType.COLOR)
 			{
 				var inputPayload = attr.inputPayload;
 				
-				//null
-				if(inputPayload == null)
+				//将5.5.0旧版inputPayload格式{ multiple: true }、"multiple"转换为attr.array=true格式
+				if(inputPayload != null)
 				{
-					inputPayload = { multiple: false };
+					if(inputPayload.multiple == true)
+					{
+						attr.array = true;
+						inputPayload.multiple = false;
+					}
+					else if(inputPayload == po.ChartPluginInputAttribute.InputPayload.MULTIPLE)
+					{
+						attr.array = true;
+						attr.inputPayload = null;
+					}
 				}
-				//"multiple"
-				else if($.isTypeString(inputPayload))
-				{
-					inputPayload = { multiple: (inputPayload == po.ChartPluginInputAttribute.InputPayload.MULTIPLE) };
-				}
-				//不支持数值、布尔型、数组
-				else if($.isTypeNumber(inputPayload) || $.isTypeBoolean(inputPayload) || $.isArray(inputPayload))
-				{
-					inputPayload = { multiple: false };
-				}
-				//{...}
-				else
-				{
-					inputPayload.multiple = (inputPayload.multiple == null ? false : true);
-				}
-				
-				attr.inputPayload = inputPayload;
 			}
 			
 			//将5.5.0旧版的{inputPayload: {multiple: "repeat"}}格式转换为6.0新版的{array: true, inputPayload: {multiple: false}}
-			if(attr.inputPayload && attr.inputPayload.multiple === po.ChartPluginInputAttribute.MultipleRepeat)
+			if(attr.inputPayload && attr.inputPayload.multiple == po.ChartPluginInputAttribute.MultipleRepeat)
 			{
 				attr.array = true;
 				attr.inputPayload.multiple = false;
-			}
-			
-			//将5.5.0旧版的颜色输入框{inputPayload: {multiple: true}}格式转换为6.0新版的{array: true}
-			if(attr.inputType == po.ChartPluginInputAttribute.InputType.COLOR
-					&& attr.inputPayload && attr.inputPayload.multiple === true)
-			{
-				attr.array = true;
 			}
 		};
 		
