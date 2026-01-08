@@ -536,9 +536,10 @@
 			dsb.dataSet = undefined;
 		});
 		
-		//这里必须整理属性值，因为存在切换图表类型而不编辑图表属性的情况
-		var groupCpas = po.trimChartPluginAttrByGroup(data.pluginVo ? data.pluginVo.attributes : null);
-		data.attrValues = po.toTrimChartAttrValues(data.attrValues, groupCpas);
+		//这里必须重新转换属性值，因为存在切换图表类型而不编辑图表属性的情况
+		var groupedAttrs = po.trimChartPluginAttrByGroup(data.pluginVo ? data.pluginVo.attributes : null);
+		var attrFormData = po.chartAttrValuesToFormData(data.attrValues, groupedAttrs);
+		data.attrValues = po.formDataToChartAttrValues(attrFormData, groupedAttrs);
 		
 		var pm = po.vuePageModel();
 		if(pm.enableResultDataFormat)
