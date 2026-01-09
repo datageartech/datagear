@@ -2532,15 +2532,8 @@ DE.setElementChartAttrValues = function(attrValues, ele)
 	
 	var chart = DE.dashboard.renderedChart(ele);
 	var attrValuesOrigin = (chart.attrValuesOrigin() || {});
-	var attrValuesMerge = {};
-	
 	//应该只设置有修改的图表属性值，这样在图表模块再次编辑其他图表属性值才能应用于所有引用它看板
-	for(let p in attrValues)
-	{
-		if(!CF.deepEquals(attrValuesOrigin[p], attrValues[p]))
-			attrValuesMerge[p] = attrValues[p];
-	}
-	
+	var attrValuesMerge = DE._leastCopyJsonChanged(attrValues, attrValuesOrigin, {});
 	var eleAttrValue = CF.serializeBySingleQuote(attrValuesMerge);
 	
 	if(DE._isEmptyJsonObjStr(eleAttrValue))
@@ -3785,6 +3778,59 @@ DE._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
 		re = "height:300px;";
 	else
 		re = "height:100%;";
+	
+	return re;
+};
+
+DE._LEAST_COPY_JSON_UNCHANED_RESULT = {};
+
+DE._leastCopyJsonChanged = function(src, original, unchangeResult)
+{
+	if(CF.deepEquals(src, original))
+		return unchangeResult;
+	
+	var re;
+	
+	if(CF.isArray(src))
+	{
+		re = [];
+		
+		for(let i=0; i<src.length; i++)
+		{
+			let srcVal = src[i];
+			let copyVal = DE._leastCopyJsonChanged(srcVal, original[i], DE._LEAST_COPY_JSON_UNCHANED_RESULT);
+			
+			//数组不能忽略相等元素，必须添加占位值
+			if(copyVal === DE._LEAST_COPY_JSON_UNCHANED_RESULT)
+			{
+				if(CF.isArray(srcVal))
+					copyVal = [];
+				else if(CF.isPlainObject(srcVal))
+					copyVal = {};
+				else
+					copyVal = srcVal;
+			}
+			
+			re[i] = copyVal;
+		}
+	}
+	else if(CF.isPlainObject(src))
+	{
+		re = {};
+		
+		for(let p in src)
+		{
+			let srcVal = src[p];
+			let copyVal = DE._leastCopyJsonChanged(srcVal, original[p], DE._LEAST_COPY_JSON_UNCHANED_RESULT);
+			
+			if(copyVal !== DE._LEAST_COPY_JSON_UNCHANED_RESULT)
+				re[p] = copyVal;
+		}
+	}
+	else
+	{
+		re = src;
+	}
 	
 	return re;
 };
