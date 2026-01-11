@@ -48,6 +48,11 @@
 							@tab-change="onCategoryMenuItemChange" class="vertical-tabmenu">
 						</p-tabmenu>
 					</div>
+					<div class="flex-grow-0 flex justify-content-center py-2 pr-2" v-if="pm.uncategorizedMenuItem != null">
+						<p-button type="button" class="mr-1" :label="pm.uncategorizedMenuItem.label" severity="secondary" text
+							@click="onScrollToCategoryDataview(pm.uncategorizedMenuItem.id)">
+						</p-button>
+					</div>
 					<div class="flex-grow-0 text-right">
 						<@spring.message code='totalWithColon' />
 						<span class="px-2">{{pm.pluginTotal}}</span>
@@ -117,6 +122,7 @@
 		
 		pm.categorizations = categorizations;
 		pm.categoryMenuItems = po.toCategoryMenuItems(categorizations);
+		pm.uncategorizedMenuItem = po.deleteUncategorizedMenuItem(pm.categoryMenuItems);
 		pm.categoryMenuActiveIndex = 0;
 		pm.selectedChartPlugin = null;
 		pm.selectedChartPluginId = null;
@@ -149,9 +155,33 @@
 			re.push(
 			{
 				label: po.formatCategoryNameLabel(ct),
-				id: po.toCategorizationEleId(ct)
+				id: po.toCategorizationEleId(ct),
+				categoryName: ct.category.name
 			});
 		});
+		
+		return re;
+	};
+	
+	po.deleteUncategorizedMenuItem = function(categoryMenuItems)
+	{
+		var idx = -1;
+		for(var i=0; i<categoryMenuItems.length; i++)
+		{
+			if($.isEmpty(categoryMenuItems[i].categoryName))
+			{
+				idx = i;
+				break;
+			}
+		}
+		
+		var re = null;
+		
+		if(idx >= 0)
+		{
+			re = categoryMenuItems[idx];
+			categoryMenuItems.splice(idx, 1);
+		}
 		
 		return re;
 	};
@@ -169,11 +199,19 @@
 		return po.pid + (ctc.name || "uncategorized");
 	};
 	
+	po.scrollToCategoryDataview = function(id)
+	{
+		var ctEle = po.elementOfId(id);
+		var top = ctEle.position().top;
+		po.element(".chart-plugins-scroller").animate({scrollTop:top}, 'fast');
+	};
+	
 	po.vuePageModel(
 	{
 		categorizations: [],
 		pluginTotal: 0,
 		categoryMenuItems: [],
+		uncategorizedMenuItem: null,
 		categoryMenuActiveIndex: 0,
 		selectedChartPlugin: null,
 		selectedChartPluginId: null
@@ -205,10 +243,12 @@
 		{
 			var items = po.vuePageModel().categoryMenuItems;
 			var item = items[e.index];
-			
-			var ctEle = po.elementOfId(item.id);
-			var top = ctEle.position().top;
-			po.element(".chart-plugins-scroller").animate({scrollTop:top}, 'fast');
+			po.scrollToCategoryDataview(item.id);
+		},
+		
+		onScrollToCategoryDataview: function(id)
+		{
+			po.scrollToCategoryDataview(id);
 		},
 		
 		onSelectChartPlugin: function(chartPlugin)
