@@ -97,14 +97,6 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	List<ChartPluginAttribute> getAttributes();
 
 	/**
-	 * 获取指定名称的{@linkplain ChartPluginAttribute}，没有找到则返回{@code null}。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	ChartPluginAttribute getAttribute(String name);
-
-	/**
 	 * 获取{@linkplain DataSign}列表。
 	 * <p>
 	 * 返回{@code null}表示没有。

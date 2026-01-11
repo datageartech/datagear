@@ -193,12 +193,6 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public ChartPluginAttribute getAttribute(String name)
-	{
-		return NameAwareUtil.find(this.attributes, name);
-	}
-
-	@Override
 	public List<DataSign> getDataSigns()
 	{
 		return dataSigns;
