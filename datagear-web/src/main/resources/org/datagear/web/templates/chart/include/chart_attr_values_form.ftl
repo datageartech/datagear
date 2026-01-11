@@ -317,8 +317,6 @@ page_palette.ftl
 		return (attr != null && attr.children !== undefined);
 	};
 	
-	po.chartPluginAttributeDomIdIdx = 0;
-
 	po.trimChartPluginAttrByGroup = function(attrs)
 	{
 		attrs = po.trimChartPluginAttributes(attrs);
@@ -335,53 +333,55 @@ page_palette.ftl
 				continue;
 			}
 			
-			//无分组的，建立虚拟分组，统一结构、易于处理
-			var virtualGroup = {};
+			//未定义分组的，建立虚拟分组，统一结构、易于处理
+			var virtualGroup = { name: "", children: [], nameLabel: { value: "" }, virtual: true };
 			
-			//处理5.0.0旧版的org.datagear.analysis.ChartPluginInputAttribute.group
-			if(attr.group != null)
-				virtualGroup = attr.group;
-			
-			//没有定义分组，如果末尾是【未分组】，则使用；否则，新建【未分组】
-			if($.isEmpty(virtualGroup.name))
+			//兼容5.0.0旧版的org.datagear.analysis.ChartPluginInputAttribute.group
+			if(attr.group != null && !$.isEmpty(attr.group.name))
 			{
+				virtualGroup.nameLabel.value = attr.group.name;
+			}
+			
+			//无分组名称标签的，只在末尾分组相同时才使用，否则新建
+			if($.isEmpty(virtualGroup.nameLabel.value))
+			{
+				virtualGroup.nameLabel.value = "<@spring.message code='ungrouped' />";
+				
 				var groupTail = (groups.length > 0 ? groups[groups.length - 1] : null);
 				
-				if(groupTail && po.isVirtualChartPluginGroupAttr(groupTail) && groupTail.virtualName == "")
+				if(groupTail && po.isVirtualChartPluginGroupAttr(groupTail)
+						&& groupTail.nameLabel && groupTail.nameLabel.value == virtualGroup.nameLabel.value)
 				{
 					virtualGroup = groupTail;
 				}
 				else
 				{
-					virtualGroup = { name: po.rootChartPluginGroupAttrName, children: [], virtual: true, virtualName: "" };
 					groups.push(virtualGroup);
 				}
 			}
-			//有分组，查找或新建
+			//有分组名称标签的，查找或新建
 			else
 			{
-				var idx = po.findVirtualChartPluginAttrIdxByName(groups, virtualGroup.name);
-				if(idx >= 0)
+				var existIdx = -1;
+				
+				for(var j=0; j<groups.length; j++)
 				{
-					virtualGroup = groups[idx];
+					if(po.isVirtualChartPluginGroupAttr(groups[j])
+							&& groups[j].nameLabel && groups[j].nameLabel.value == virtualGroup.nameLabel.value)
+					{
+						existIdx = j;
+						break;
+					}
+				}
+				
+				if(existIdx >= 0)
+				{
+					virtualGroup = groups[existIdx];
 				}
 				else
 				{
-					virtualGroup =
-					{
-						name: po.rootChartPluginGroupAttrName,
-						nameLabel: virtualGroup.nameLabel, children: [],
-						virtual: true, virtualName: virtualGroup.name
-					};
-					
 					groups.push(virtualGroup);
 				}
-			}
-			
-			if(!virtualGroup.nameLabel || $.isEmpty(virtualGroup.nameLabel.value))
-			{
-				var nameLabelValue = ($.isEmpty(virtualGroup.virtualName) ? "<@spring.message code='ungrouped' />" : virtualGroup.virtualName);
-				virtualGroup.nameLabel = { value: nameLabelValue };
 			}
 			
 			po.trimChartPluginGroupAttr(virtualGroup);
@@ -406,19 +406,8 @@ page_palette.ftl
 	{
 		return (groupAttr != null && groupAttr.virtual);
 	};
-	
-	po.findVirtualChartPluginAttrIdxByName = function(groups, virtualName)
-	{
-		for(var i=0; i<groups.length; i++)
-		{
-			if(po.isVirtualChartPluginGroupAttr(groups[i]) && groups[i].virtualName == virtualName)
-			{
-				return i;
-			}
-		}
-		
-		return -1;
-	};
+
+	po.chartPluginAttributeDomIdIdx = 0;
 	
 	po.trimChartPluginAttributes = function(attrs, clone)
 	{
@@ -523,10 +512,10 @@ page_palette.ftl
 		if(!po.isChartPluginGroupAttr(groupAttr))
 			return;
 		
-		//无name的分组不允许启用array=true特性，因为分组包含的属性值无法存储为对象数组
 		if($.isEmpty(groupAttr.name))
 		{
 			groupAttr.name = po.rootChartPluginGroupAttrName;
+			//无name的分组不允许启用array=true特性，因为分组包含的属性值无法存储为对象数组
 			groupAttr.array = false;
 		}
 	};
