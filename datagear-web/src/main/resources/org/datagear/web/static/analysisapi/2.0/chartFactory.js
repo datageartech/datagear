@@ -3169,14 +3169,12 @@ chartProto.pluginResourceURL = function(name)
  * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
  * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
- * @param name 插件属性、名称
+ * @param name 属性名
  * @param value 可选，要设置的属性值
  * @returns 
  */
 chartProto.attrValue = function(name, value)
 {
-	name = (name && name.name !== undefined ? name.name : name);
-	
 	var attrValues = this.attrValues();
 	
 	if(arguments.length <= 1)
@@ -3234,37 +3232,6 @@ chartProto.pluginAttributes = function()
 {
 	var plugin = this.plugin();
 	return (plugin && plugin.attributes ? plugin.attributes : []);
-};
-
-/**
- * 获取指定名称的插件属性。
- * 
- * @param identity 插件属性标识：属性名、索引数值
- * @returns 插件属性、null
- */
-chartProto.pluginAttribute = function(identity)
-{
-	var re = null;
-	
-	var attrs = this.pluginAttributes();
-	
-	if(CF.isNumber(identity))
-	{
-		re = attrs[identity];
-	}
-	else
-	{
-		for(let i=0; i<attrs.length; i++)
-		{
-			if(attrs[i].name == identity)
-			{
-				re = attrs[i];
-				break;
-			}
-		}
-	}
-	
-	return re;
 };
 
 /**
