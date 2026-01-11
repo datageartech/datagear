@@ -3169,18 +3169,70 @@ chartProto.pluginResourceURL = function(name)
  * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
  * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
- * @param name 属性名
+ * @param name 属性名、插件属性数组元素
  * @param value 可选，要设置的属性值
  * @returns 
  */
 chartProto.attrValue = function(name, value)
 {
 	var attrValues = this.attrValues();
+	var isAsStrName = (CF.isString(name) || name == null);
 	
 	if(arguments.length <= 1)
-		return attrValues[name];
+	{
+		if(isAsStrName)
+			return attrValues[name];
+		else
+		{
+			//插件属性
+			let pluginAttr = name;
+			
+			if(!CF.isEmpty(pluginAttr.name))
+				return attrValues[pluginAttr.name];
+			else
+			{
+				let re = null;
+				
+				if(!CF.isEmpty(pluginAttr.children))
+				{
+					re = {};
+					
+					for(let i=0; i<pluginAttr.children.length; i++)
+					{
+						let inputAttrName = pluginAttr.children[i].name;
+						re[inputAttrName] = attrValues[inputAttrName];
+					}
+				}
+				
+				return re;
+			}
+		}
+	}
 	else
-		attrValues[name] = value;
+	{
+		if(isAsStrName)
+			attrValues[name] = value;
+		else
+		{
+			//插件属性
+			let pluginAttr = name;
+			
+			if(!CF.isEmpty(pluginAttr.name))
+				attrValues[pluginAttr.name] = value;
+			else
+			{
+				if(!CF.isEmpty(pluginAttr.children))
+				{
+					for(let i=0; i<pluginAttr.children.length; i++)
+					{
+						let inputAttrName = pluginAttr.children[i].name;
+						let inputAttrValue = (value == null ? value : value[inputAttrName]);
+						attrValues[inputAttrName] = inputAttrValue;
+					}
+				}
+			}
+		}
+	}
 };
 
 /**
