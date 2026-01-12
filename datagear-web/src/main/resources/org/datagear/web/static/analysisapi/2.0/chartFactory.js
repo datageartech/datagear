@@ -3187,7 +3187,7 @@ chartProto.attrValue = function(name, value)
 			//插件属性
 			let pluginAttr = name;
 			
-			if(!CF.isEmpty(pluginAttr.name))
+			if(pluginAttr.name != null)
 				return attrValues[pluginAttr.name];
 			else
 			{

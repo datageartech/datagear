@@ -31,11 +31,11 @@ page_palette.ftl
 			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
 				<template #header>
 					<span>{{group.nameLabel.value}}</span>
-					<span class="text-color-secondary text-sm ml-1">{{group.emptyOriginName ? "" : group.name}}</span>
+					<span class="text-color-secondary text-sm ml-1">{{group.name == null ? "" : group.name}}</span>
 				</template>
 				<div class="flex flex-column gap-3">
-					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.name]"
-						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.chartAttrValuesForm.data[group.name].length"
+					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.pname]"
+						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.chartAttrValuesForm.data[group.pname].length"
 						:toggleable="group.array" class="no-panel-border panel-icon-align-center">
 						<template #icons>
 							<div class="inline-flex gap-1 mx-2 text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
@@ -66,23 +66,23 @@ page_palette.ftl
 							<div class="field-input col-12">
 								<div v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
 									<div class="flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
+										<div v-for="(vi, viIdx) in grpDataEle[attr.pname]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 flex" v-if="attr.inputPayload.multiple">
-												<p-treeselect v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
+												<p-treeselect v-model="grpDataEle[attr.pname][viIdx]" :options="attr.inputPayload.options"
 													selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />"
 													v-if="attr.inputPayload.treeSelect == true">
 												</p-treeselect>
-												<p-multiselect v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
+												<p-multiselect v-model="grpDataEle[attr.pname][viIdx]" :options="attr.inputPayload.options"
 													option-label="name" option-value="value" :show-clear="true" class="input w-full"
 													v-else>
 												</p-multiselect>
 											</div>
 											<div class="flex-grow-1 flex" v-else>
-												<p-treeselect v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
+												<p-treeselect v-model="grpDataEle[attr.pname][viIdx]" :options="attr.inputPayload.options"
 													class="input w-full" placeholder="<@spring.message code='none' />"
 													v-if="attr.inputPayload.treeSelect == true">
 												</p-treeselect>
-												<p-dropdown v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
+												<p-dropdown v-model="grpDataEle[attr.pname][viIdx]" :options="attr.inputPayload.options"
 													option-label="name" option-value="value" class="input flex-grow-1 mr-1"
 													v-else>
 												</p-dropdown>
@@ -105,21 +105,21 @@ page_palette.ftl
 										</div>
 									</div>
 									<div v-else-if="attr.inputPayload.multiple">
-										<p-treeselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
+										<p-treeselect v-model="grpDataEle[attr.pname]" :options="attr.inputPayload.options"
 											selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />"
 											v-if="attr.inputPayload.treeSelect == true">
 										</p-treeselect>
-										<p-multiselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
+										<p-multiselect v-model="grpDataEle[attr.pname]" :options="attr.inputPayload.options"
 											option-label="name" option-value="value" :show-clear="true" class="input w-full"
 											v-else>
 										</p-multiselect>
 									</div>
 									<div v-else>
-										<p-treeselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
+										<p-treeselect v-model="grpDataEle[attr.pname]" :options="attr.inputPayload.options"
 											class="input w-full" placeholder="<@spring.message code='none' />"
 											 v-if="attr.inputPayload.treeSelect == true">
 										</p-treeselect>
-										<p-dropdown v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
+										<p-dropdown v-model="grpDataEle[attr.pname]" :options="attr.inputPayload.options"
 											option-label="name" option-value="value" :show-clear="!attr.required" class="input w-full"
 											v-else>
 										</p-dropdown>
@@ -127,14 +127,14 @@ page_palette.ftl
 								</div>
 								<div v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
 									<div class="flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
+										<div v-for="(vi, viIdx) in grpDataEle[attr.pname]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 flex gap-1">
-												<p-inputtext v-model="grpDataEle[attr.name][viIdx]" type="text"
+												<p-inputtext v-model="grpDataEle[attr.pname][viIdx]" type="text"
 													class="input flex-grow-1">
 												</p-inputtext>
-												<p-button type="button" :style="{'background-color': grpDataEle[attr.name][viIdx]}"
+												<p-button type="button" :style="{'background-color': grpDataEle[attr.pname][viIdx]}"
 													class="palette-btn surface-border mr-1"
-													@click="showPalettePanel($event, grpDataEle[attr.name], viIdx)"></p-button>
+													@click="showPalettePanel($event, grpDataEle[attr.pname], viIdx)"></p-button>
 											</div>
 											<div class="flex align-items-center gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
@@ -154,24 +154,24 @@ page_palette.ftl
 										</div>
 									</div>
 									<div class="flex gap-1" v-else>
-										<p-inputtext v-model="grpDataEle[attr.name]" type="text"
+										<p-inputtext v-model="grpDataEle[attr.pname]" type="text"
 											class="input flex-grow-1" maxlength="100">
 										</p-inputtext>
-										<p-button type="button" :style="{'background-color': grpDataEle[attr.name]}" class="palette-btn surface-border"
-											@click="showPalettePanel($event, grpDataEle, attr.name)"></p-button>
+										<p-button type="button" :style="{'background-color': grpDataEle[attr.pname]}" class="palette-btn surface-border"
+											@click="showPalettePanel($event, grpDataEle, attr.pname)"></p-button>
 									</div>
 								</div>
 								<div v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO || attr.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
 									<div class="input flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
+										<div v-for="(vi, viIdx) in grpDataEle[attr.pname]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
 												<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
 													<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
-														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
+														:value="opt.value" v-model="grpDataEle[attr.pname][viIdx]"
 														 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
 													</p-radiobutton>
 													<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
-														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
+														:value="opt.value" v-model="grpDataEle[attr.pname][viIdx]"
 														v-else>
 													</p-checkbox>
 													<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx">{{opt.name}}</label>
@@ -197,11 +197,11 @@ page_palette.ftl
 									<div class="input p-inputtext p-component p-2 flex gap-3" v-else>
 										<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
 											<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
-												:value="opt.value" v-model="grpDataEle[attr.name]"
+												:value="opt.value" v-model="grpDataEle[attr.pname]"
 												 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
 											</p-radiobutton>
 											<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
-												:value="opt.value" v-model="grpDataEle[attr.name]"
+												:value="opt.value" v-model="grpDataEle[attr.pname]"
 												v-else>
 											</p-checkbox>
 											<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx">{{opt.name}}</label>
@@ -210,13 +210,13 @@ page_palette.ftl
 								</div>
 								<div v-else>
 									<div class="input flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
+										<div v-for="(vi, viIdx) in grpDataEle[attr.pname]" :key="viIdx" class="flex gap-2">
 											<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
-												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
+												v-model="grpDataEle[attr.pname][viIdx]" type="text" class="flex-grow-1"
 												 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
 											</p-textarea>
 											<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
-												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
+												v-model="grpDataEle[attr.pname][viIdx]" type="text" class="flex-grow-1"
 												v-else>
 											</p-inputtext>
 											<div class="flex align-items-center gap-1">
@@ -238,17 +238,17 @@ page_palette.ftl
 									</div>
 									<div v-else>
 										<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
-											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
+											v-model="grpDataEle[attr.pname]" type="text" class="input w-full"
 											v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
 										</p-textarea>
 										<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
-											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
+											v-model="grpDataEle[attr.pname]" type="text" class="input w-full"
 											v-else>
 										</p-inputtext>
 									</div>
 								</div>
 					        	<div class="validate-msg" v-if="attr.required">
-					        		<input :name="group.name+'['+grpDataEleIdx+'].'+attr.name" required type="text" class="validate-proxy" />
+					        		<input :name="group.pname+'['+grpDataEleIdx+'].'+attr.pname" required type="text" class="validate-proxy" />
 					        	</div>
 							</div>
 						</div>
@@ -302,12 +302,18 @@ page_palette.ftl
 		MultipleRepeat: "repeat"
 	};
 	
-	//根分组的name值，其包含的属性值应直接保存至根属性值对象下
-	po.rootChartPluginGroupAttrName = "rootCpgaName${pid}";
+	//根分组的pname值，其包含的属性值直接保存至根属性值对象下
+	po.rootChartPluginGroupPname = "cpgaName${pid}";
+	po.chartPluginGroupPnamePrefix = "pname${pid}";
 	
 	po.isChartPluginGroupAttr = function(attr)
 	{
 		return (attr != null && attr.children !== undefined);
+	};
+	
+	po.isRootChartPluginGroupAttr = function(attr)
+	{
+		return (po.isChartPluginGroupAttr(attr) && attr.name == null);
 	};
 	
 	po.trimChartPluginAttrByGroup = function(attrs)
@@ -327,7 +333,7 @@ page_palette.ftl
 			}
 			
 			//未定义分组的，建立虚拟分组，统一结构、易于处理
-			var virtualGroup = { name: "", children: [], nameLabel: { value: "" }, virtual: true };
+			var virtualGroup = { children: [], nameLabel: { value: "" }, virtual: true };
 			
 			//兼容5.0.0旧版的org.datagear.analysis.ChartPluginInputAttribute.group
 			if(attr.group != null && !$.isEmpty(attr.group.name))
@@ -377,29 +383,18 @@ page_palette.ftl
 				}
 			}
 			
-			po.trimChartPluginGroupAttr(virtualGroup);
+			po.trimChartPluginAttribute(virtualGroup);
 			virtualGroup.children.push(attr);
-		};
+		}
 		
 		return groups;
-	};
-	
-	po.trimChartPluginAttrNameLabel = function(attr)
-	{
-		if(!attr)
-			return;
-		
-		if(attr.nameLabel && attr.nameLabel.value)
-			return;
-		
-		attr.nameLabel = { value: attr.name };
 	};
 	
 	po.isVirtualChartPluginGroupAttr = function(groupAttr)
 	{
 		return (groupAttr != null && groupAttr.virtual);
 	};
-
+	
 	po.chartPluginAttributeDomIdIdx = 0;
 	
 	po.trimChartPluginAttributes = function(attrs, clone)
@@ -414,16 +409,34 @@ page_palette.ftl
 		{
 			var attr = attrs[i];
 			
-			po.trimChartPluginAttrNameLabel(attr);
-			attr.domId = po.concatPid("cpattr_"+ (po.chartPluginAttributeDomIdIdx++));
+			po.trimChartPluginAttribute(attr);
 			
 			if(po.isChartPluginGroupAttr(attr))
 			{
-				po.trimChartPluginGroupAttr(attr);
 				po.trimChartPluginAttributes(attr.children, false);
-				continue;
 			}
-			
+		}
+		
+		return attrs;
+	};
+	
+	po.trimChartPluginAttribute = function(attr)
+	{
+		po.setChartPluginAttrPname(attr);
+		attr.domId = po.concatPid("cpattr_"+ (po.chartPluginAttributeDomIdIdx++));
+		attr.nameLabel = (attr.nameLabel == null ? {} : attr.nameLabel);
+		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? attr.name : attr.nameLabel.value);
+		
+		if(po.isChartPluginGroupAttr(attr))
+		{
+			//无name的分组不允许启用array=true特性，因为分组包含的属性值无法存储为对象数组
+			if(po.isRootChartPluginGroupAttr(attr))
+			{
+				attr.array = false;
+			}
+		}
+		else
+		{
 			//布尔型默认作为RADIO处理
 			if(attr.type == po.ChartPluginInputAttribute.DataType.BOOLEAN)
 			{
@@ -495,23 +508,36 @@ page_palette.ftl
 				attr.array = true;
 				attr.inputPayload.multiple = false;
 			}
-		};
-		
-		return attrs;
+		}
 	};
 	
-	po.trimChartPluginGroupAttr = function(groupAttr)
+	//设置插件属性的合法JS变量名pname，避免UI中有需要拼接attr.name时非法
+	po.setChartPluginAttrPname = function(attr)
 	{
-		if(!po.isChartPluginGroupAttr(groupAttr))
-			return;
+		if(po._chartPluginAttrPnameMap == null)
+			po._chartPluginAttrPnameMap = {};
 		
-		if($.isEmpty(groupAttr.name))
+		if(po._chartPluginAttrPnameSeq == null)
+			po._chartPluginAttrPnameSeq = 0;
+		
+		var pname;
+		
+		if(po.isChartPluginGroupAttr(attr) && po.isRootChartPluginGroupAttr(attr))
 		{
-			groupAttr.name = po.rootChartPluginGroupAttrName;
-			groupAttr.emptyOriginName = true;
-			//无name的分组不允许启用array=true特性，因为分组包含的属性值无法存储为对象数组
-			groupAttr.array = false;
+			pname = po.rootChartPluginGroupPname;
 		}
+		else
+		{
+			pname = po._chartPluginAttrPnameMap[attr.name];
+			
+			if(pname == null)
+			{
+				pname = po.chartPluginGroupPnamePrefix+ (po._chartPluginAttrPnameSeq++);
+				po._chartPluginAttrPnameMap[attr.name] = pname;
+			}
+		}
+		
+		attr.pname = pname;
 	};
 	
 	po.trimChartPluginInputAttrInputPayloadIfMap = function(inputAttr, inputPayload)
@@ -606,24 +632,24 @@ page_palette.ftl
 			return formData;
 		
 		//要先清除循环引用，复制完后再恢复
-		var rootObjRef = formData[po.rootChartPluginGroupAttrName];
+		var rootObjRef = formData[po.rootChartPluginGroupPname];
 		if(rootObjRef !== undefined)
 		{
-			delete formData[po.rootChartPluginGroupAttrName];
+			delete formData[po.rootChartPluginGroupPname];
 		}
 		
 		var re = (clone ? $.extend(true, {}, formData) : formData);
 		
 		if(rootObjRef !== undefined)
 		{
-			formData[po.rootChartPluginGroupAttrName] = rootObjRef;
-			re[po.rootChartPluginGroupAttrName] = re;
+			formData[po.rootChartPluginGroupPname] = rootObjRef;
+			re[po.rootChartPluginGroupPname] = re;
 		}
 		
 		for(var i=0; i<groupedAttrs.length; i++)
 		{
 			var attr = groupedAttrs[i];
-			var v = re[attr.name];
+			var v = re[attr.pname];
 			
 			if(v == null)
 			{
@@ -657,18 +683,20 @@ page_palette.ftl
 				v = po.toChartAttrTypeValue(attr, v);
 			}
 			
-			if(v == null)
-			{
-				//null值不应保留，以支持后续组对象的判空逻辑
-				delete re[attr.name];
-			}
-			else
+			//null值不应保留，以支持后续组对象的判空逻辑
+			if(v != null && !po.isRootChartPluginGroupAttr(attr))
 			{
 				re[attr.name] = v;
 			}
 		};
 		
-		delete re[po.rootChartPluginGroupAttrName];
+		for(var i=0; i<groupedAttrs.length; i++)
+		{
+			var attr = groupedAttrs[i];
+			
+			if(attr.pname !== attr.name)
+				delete re[attr.pname];
+		}
 		
 		return re;
 	};
@@ -844,7 +872,7 @@ page_palette.ftl
 				}
 				else
 				{
-					if(attr.name == po.rootChartPluginGroupAttrName)
+					if(po.isRootChartPluginGroupAttr(attr))
 						v = data;
 					
 					if(v == null)
@@ -864,8 +892,16 @@ page_palette.ftl
 				v = po.encodeChartAttrValueTreeModel(attr, v);
 			}
 			
-			data[attr.name] = v;
+			data[attr.pname] = v;
 		};
+		
+		for(var i=0; i<groupedAttrs.length; i++)
+		{
+			var attr = groupedAttrs[i];
+			
+			if(attr.name != null && attr.name != attr.pname)
+				delete data[attr.name];
+		}
 		
 		return data;
 	};
@@ -983,7 +1019,7 @@ page_palette.ftl
 		{
 			var attr = attrs[i];
 			if(attr.type == po.ChartPluginInputAttribute.DataType.NUMBER)
-				validateRules[attr.name] = { "number": true };
+				validateRules[attr.pname] = { "number": true };
 		};
 		
 		var form = po.elementOfId("${pid}chartAttrValuesForm", document.body);
@@ -1027,7 +1063,7 @@ page_palette.ftl
 		
 		onChartAttrValuesFormMoveUpGrpEle: function(e, group, idx)
 		{
-			var groupName = group.name;
+			var groupName = group.pname;
 			var pm = po.vuePageModel();
 			var data = pm.chartAttrValuesForm.data;
 			var groupData = data[groupName];
@@ -1043,7 +1079,7 @@ page_palette.ftl
 		
 		onChartAttrValuesFormMoveDownGrpEle: function(e, group, idx)
 		{
-			var groupName = group.name;
+			var groupName = group.pname;
 			var pm = po.vuePageModel();
 			var data = pm.chartAttrValuesForm.data;
 			var groupData = data[groupName];
@@ -1059,7 +1095,7 @@ page_palette.ftl
 		
 		onChartAttrValuesFormInsertGrpEle: function(e, group, idx)
 		{
-			var groupName = group.name;
+			var groupName = group.pname;
 			var pm = po.vuePageModel();
 			var data = pm.chartAttrValuesForm.data;
 
@@ -1079,7 +1115,7 @@ page_palette.ftl
 				message: "<@spring.message code='confirmDeleteThisDataAsk' />",
 				accept: function()
 				{
-					var groupName = group.name;
+					var groupName = group.pname;
 					var pm = po.vuePageModel();
 					var data = pm.chartAttrValuesForm.data;
 					data[groupName].splice(idx, 1);
@@ -1089,7 +1125,7 @@ page_palette.ftl
 		
 		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, attr, idx)
 		{
-			var propName = attr.name;
+			var propName = attr.pname;
 			var isTreeSelect = (attr.inputPayload && attr.inputPayload.treeSelect == true);
 			
 			if(grpDataEle[propName] == null)
@@ -1103,7 +1139,7 @@ page_palette.ftl
 		
 		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, attr, idx)
 		{
-			var propName = attr.name;
+			var propName = attr.pname;
 			
 			if(grpDataEle[propName] == null)
 				return;
