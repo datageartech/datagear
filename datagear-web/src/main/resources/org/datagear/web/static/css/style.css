@@ -430,6 +430,10 @@ label.align-tip{
 .p-panel.no-panel-border .p-panel-content{
 	border-width: 0;
 }
+.p-panel.panel-icon-align-center .p-panel-icons{
+	display: flex;
+	align-items: center;
+}
 .p-panel.disable-p-panel .p-panel-header{
 	border-width: 0;
 	display: none;

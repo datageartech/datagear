@@ -31,24 +31,24 @@ page_palette.ftl
 			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
 				<template #header>
 					<span>{{group.nameLabel.value}}</span>
-					<span class="text-color-secondary text-sm ml-1">{{group.virtual ? "" : group.name}}</span>
+					<span class="text-color-secondary text-sm ml-1">{{group.emptyOriginName ? "" : group.name}}</span>
 				</template>
 				<div class="flex flex-column gap-2">
 					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.name]"
-						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+' #'+(grpDataEleIdx+1)"
-						:toggleable="group.array" class="no-panel-border">
+						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.chartAttrValuesForm.data[group.name].length"
+						:toggleable="group.array" class="no-panel-border panel-icon-align-center">
 						<template #icons>
-							<div class="inline-flex gap-1 mx-2 vertical-align-top text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+							<div class="inline-flex gap-1 mx-2 text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
 								<p-button type="button" severity="secondary"
-									@click="">
+									@click="onChartAttrValuesFormMoveUpGrpEle($event, group, grpDataEleIdx)">
 									<@spring.message code='moveUp' />
 								</p-button>
 								<p-button type="button" severity="secondary"
-									@click="">
+									@click="onChartAttrValuesFormMoveDownGrpEle($event, group, grpDataEleIdx)">
 									<@spring.message code='moveDown' />
 								</p-button>
 								<p-button type="button" severity="secondary"
-									@click="">
+									@click="onChartAttrValuesFormInsertGrpEle($event, group, grpDataEleIdx)">
 									<@spring.message code='insert' />
 								</p-button>
 								<p-button type="button" severity="danger"
@@ -271,7 +271,7 @@ page_palette.ftl
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
-		<p-button type="button" label="<@spring.message code='clear' />" severity="secondary" @click="onClearChartAttrValuesFormData"></p-button>
+		<p-button type="button" label="<@spring.message code='clear' />" severity="danger" @click="onClearChartAttrValuesFormData"></p-button>
 		
 		<p-button v-for="(btn, btnIdx) in pm.chartAttrValuesForm.buttons" :key="btnIdx"
 			type="button" class="p-button-secondary" :label="btn.name" @click="btn.clickHandler">
@@ -515,6 +515,7 @@ page_palette.ftl
 		if($.isEmpty(groupAttr.name))
 		{
 			groupAttr.name = po.rootChartPluginGroupAttrName;
+			groupAttr.emptyOriginName = true;
 			//无name的分组不允许启用array=true特性，因为分组包含的属性值无法存储为对象数组
 			groupAttr.array = false;
 		}
@@ -1030,6 +1031,39 @@ page_palette.ftl
 				} 
 			});
 		},
+		
+		onChartAttrValuesFormMoveUpGrpEle: function(e, group, idx)
+		{
+			var groupName = group.name;
+			var pm = po.vuePageModel();
+			var data = pm.chartAttrValuesForm.data;
+			var groupData = data[groupName];
+			
+			if(idx > 0)
+			{
+				var me = groupData[idx];
+				var prev = groupData[idx-1];
+				groupData[idx-1] = me;
+				groupData[idx] = prev;
+			}
+		},
+		
+		onChartAttrValuesFormMoveDownGrpEle: function(e, group, idx)
+		{
+			var groupName = group.name;
+			var pm = po.vuePageModel();
+			var data = pm.chartAttrValuesForm.data;
+			var groupData = data[groupName];
+			
+			if(idx < (groupData.length -1))
+			{
+				var me = groupData[idx];
+				var next = groupData[idx+1];
+				groupData[idx+1] = me;
+				groupData[idx] = next;
+			}
+		},
+		
 		onChartAttrValuesFormInsertGrpEle: function(e, group, idx)
 		{
 			var groupName = group.name;
@@ -1044,13 +1078,22 @@ page_palette.ftl
 			else
 				data[groupName].splice(idx, 0, {});
 		},
+		
 		onChartAttrValuesFormRemoveGrpEle: function(e, group, idx)
 		{
-			var groupName = group.name;
-			var pm = po.vuePageModel();
-			var data = pm.chartAttrValuesForm.data;
-			data[groupName].splice(idx, 1);
+			po.confirm(
+			{
+				message: "<@spring.message code='confirmDeleteThisDataAsk' />",
+				accept: function()
+				{
+					var groupName = group.name;
+					var pm = po.vuePageModel();
+					var data = pm.chartAttrValuesForm.data;
+					data[groupName].splice(idx, 1);
+				} 
+			});
 		},
+		
 		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, attr, idx)
 		{
 			var propName = attr.name;
