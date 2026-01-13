@@ -1068,6 +1068,20 @@ page_palette.ftl
 		pm.chartAttrValuesForm.data = data;
 	};
 	
+	po.clearChartAttrValuesFormData = function()
+	{
+		var pm = po.vuePageModel();
+		var groups = pm.chartAttrValuesForm.groups;
+		var data = pm.chartAttrValuesForm.data;
+		
+		for(let p in data)
+		{
+			delete data[p];
+		}
+		
+		po.chartAttrValuesToFormData(data, groups, false);
+	};
+	
 	po.vueMethod(
 	{
 		onClearChartAttrValuesFormData: function()
@@ -1077,7 +1091,7 @@ page_palette.ftl
 				message: "<@spring.message code='confirmClearAllChartAttr' />",
 				accept: function()
 				{
-					po.setChartAttrValuesFormData({});
+					po.clearChartAttrValuesFormData();
 				} 
 			});
 		},
