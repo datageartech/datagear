@@ -25,7 +25,7 @@ import java.util.Locale;
 /**
  * 输入项图表插件属性。
  * <p>
- * 一个输入项描述插件属性值对象中的一个可输入的基本属性值。
+ * 一个输入项描述{@linkplain ChartDefinition#getAttrValues()}中的一个基本型属性值的UI交互操作元信息。
  * </p>
  * 
  * @author datagear@163.com

@@ -313,6 +313,7 @@ page_palette.ftl
 	
 	po.isRootChartPluginGroupAttr = function(attr)
 	{
+		//参考org.datagear.analysis.ChartPluginGroupAttribute描述
 		return (po.isChartPluginGroupAttr(attr) && attr.name == null);
 	};
 	
@@ -387,6 +388,25 @@ page_palette.ftl
 			virtualGroup.children.push(attr);
 		}
 		
+		//检查并一致设置同名分组的array值，避免UI处理混乱
+		for(var i=0; i<groups.length; i++)
+		{
+			var group = groups[i];
+			var prevSameGroup = null;
+			
+			for(var j=0; j<i; j++)
+			{
+				if(groups[j].name == group.name)
+				{
+					prevSameGroup = groups[j];
+					break;
+				}
+			}
+			
+			if(prevSameGroup != null)
+				group.array = prevSameGroup.array;
+		}
+		
 		return groups;
 	};
 	
@@ -426,6 +446,7 @@ page_palette.ftl
 		attr.domId = po.concatPid("cpattr_"+ (po.chartPluginAttributeDomIdIdx++));
 		attr.nameLabel = (attr.nameLabel == null ? {} : attr.nameLabel);
 		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? attr.name : attr.nameLabel.value);
+		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? "<@spring.message code='unnamed' />" : attr.nameLabel.value);
 		
 		if(po.isChartPluginGroupAttr(attr))
 		{

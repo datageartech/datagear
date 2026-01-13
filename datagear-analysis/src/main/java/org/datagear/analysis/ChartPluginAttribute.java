@@ -29,8 +29,8 @@ import org.datagear.util.i18n.Labeled;
 /**
  * 图表插件属性。
  * <p>
- * 一个插件属性描述插件属性值根对象的一个属性值，
- * 目前仅包括{@linkplain ChartPluginGroupAttribute}、{@linkplain ChartPluginInputAttribute}。
+ * 一个插件属性描述由插件绘制图表的{@linkplain ChartDefinition#getAttrValues()}的一个属性值的UI交互操作元信息，
+ * 包括：{@linkplain ChartPluginGroupAttribute}、{@linkplain ChartPluginInputAttribute}。
  * </p>
  * 
  * @author datagear@163.com

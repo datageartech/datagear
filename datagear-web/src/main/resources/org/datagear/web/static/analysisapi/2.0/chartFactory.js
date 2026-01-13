@@ -3187,9 +3187,7 @@ chartProto.attrValue = function(name, value)
 			//插件属性
 			let pluginAttr = name;
 			
-			if(pluginAttr.name != null)
-				return attrValues[pluginAttr.name];
-			else
+			if(this._isRootPluginGroupAttr(pluginAttr))
 			{
 				let re = null;
 				
@@ -3206,6 +3204,8 @@ chartProto.attrValue = function(name, value)
 				
 				return re;
 			}
+			else
+				return attrValues[pluginAttr.name];
 		}
 	}
 	else
@@ -3217,9 +3217,7 @@ chartProto.attrValue = function(name, value)
 			//插件属性
 			let pluginAttr = name;
 			
-			if(pluginAttr.name != null)
-				attrValues[pluginAttr.name] = value;
-			else
+			if(this._isRootPluginGroupAttr(pluginAttr))
 			{
 				if(!CF.isEmpty(pluginAttr.children))
 				{
@@ -3231,8 +3229,16 @@ chartProto.attrValue = function(name, value)
 					}
 				}
 			}
+			else
+				attrValues[pluginAttr.name] = value;
 		}
 	}
+};
+
+chartProto._isRootPluginGroupAttr = function(pluginAttr)
+{
+	//参考org.datagear.analysis.ChartPluginGroupAttribute描述
+	return (pluginAttr != null && pluginAttr.children !== undefined && pluginAttr.name == null);
 };
 
 /**

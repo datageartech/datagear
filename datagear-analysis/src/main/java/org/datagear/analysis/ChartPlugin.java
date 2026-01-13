@@ -91,6 +91,11 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	 * <p>
 	 * 返回{@code null}表示没有。
 	 * </p>
+	 * <p>
+	 * 返回列表中，对于{@linkplain ChartPluginGroupAttribute#getName()}，是允许重复的，
+	 * 以支持将{@linkplain ChartDefinition#getAttrValues()}中的对象型属性值（或其自身）拆分为多个分组交互，
+	 * 但是它们的{@linkplain ChartPluginGroupAttribute#isArray()}应是相同的；对于{@linkplain ChartPluginInputAttribute#getName()}，不应重复。
+	 * </p>
 	 * 
 	 * @return
 	 */

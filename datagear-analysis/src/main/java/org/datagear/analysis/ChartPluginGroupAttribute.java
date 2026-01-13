@@ -23,8 +23,7 @@ import java.util.Locale;
 /**
  * 分组图表插件属性。
  * <p>
- * 一个分组描述插件属性值根对象中的一个对象型属性值（当{@linkplain #getName()}为{@code null}或者{@code ""}时则是根对象），
- * 包含多个{@linkplain ChartPluginInputAttribute}，每一个则描述这个对象的一个基本属性值。
+ * 一个分组包含多个{@linkplain ChartPluginInputAttribute}，描述{@linkplain ChartDefinition#getAttrValues()}的一个对象型属性值（当{@linkplain #getName()}为{@code null}时则是其自身）的UI交互操作元信息。
  * </p>
  * 
  * @author datagear@163.com
@@ -55,7 +54,7 @@ public class ChartPluginGroupAttribute extends AbstractChartPluginAttribute
 	}
 
 	/**
-	 * 获取名称，可能为{@code null}，具体参考{@linkplain #setName(String)}。
+	 * 获取名称，可能为{@code null}。
 	 */
 	@Override
 	public String getName()
@@ -64,8 +63,7 @@ public class ChartPluginGroupAttribute extends AbstractChartPluginAttribute
 	}
 
 	/**
-	 * 设置名称，当为{@code null}或者{@code ""}时表明{@linkplain #getChildren()}描述的是插件属性值根对象的基本属性值，
-	 * 另参考{@linkplain #isArray()}。
+	 * 设置名称。
 	 */
 	@Override
 	public void setName(String name)
@@ -74,7 +72,7 @@ public class ChartPluginGroupAttribute extends AbstractChartPluginAttribute
 	}
 
 	/**
-	 * 当{@linkplain #getName()}为{@code null}或者{@code ""}时，无论此值是否为{@code true}，都应强制作为{@code false}处理，
+	 * 当{@linkplain #getName()}为{@code null}时，无论此值是否为{@code true}，都应强制作为{@code false}处理，
 	 * 因为此时分组包含的属性值无法存储为对象数组，
 	 */
 	@Override
@@ -85,6 +83,9 @@ public class ChartPluginGroupAttribute extends AbstractChartPluginAttribute
 
 	/**
 	 * 获取子级{@linkplain ChartPluginInputAttribute}列表，为空或{@code null}表示没有。
+	 * <p>
+	 * 子级{@linkplain ChartPluginInputAttribute#getName()}不应重复。
+	 * </p>
 	 * 
 	 * @return
 	 */
