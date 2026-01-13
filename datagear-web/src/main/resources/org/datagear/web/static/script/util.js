@@ -1424,7 +1424,7 @@
 	 */
 	$.propPathValue = function(obj, propPath, value)
 	{
-		var setOpt = (value !== undefined);
+		var setOpt = (arguments.length > 2);
 		
 		if(setOpt && obj == null)
 			return;
@@ -1432,36 +1432,34 @@
 		var propArray = $.splitPropPath(propPath);
 		var parent = obj;
 		
-		for(var i=0; i<propArray.length; i++)
+		for(let i=0; i<propArray.length; i++)
 		{
 			if(parent == null && !setOpt)
 				return null;
 			
-			var pn = propArray[i];
-			var isEle = (pn.length >= 3 && pn.charAt(0) == '[' && pn.charAt(pn.length-1) == ']' );
-			var eleIdx = (isEle ? parseInt(pn.substring(1, pn.length-1)) : null);
-			var pv = parent[(isEle ? eleIdx : pn)];
+			let pn = propArray[i];
 			
 			if(i == (propArray.length - 1))
 			{
 				if(!setOpt)
 				{
-					return pv;
+					return parent[pn.name];
 				}
 				else
 				{
-					parent[(isEle ? eleIdx : pn)] = value;
+					parent[pn.name] = value;
 				}
 			}
 			else
 			{
+				let pv = parent[pn.name];
+				
 				//设置操作，补全中间对象
 				if(setOpt && pv == null)
 				{
-					var pnNext = propArray[i+1];
-					var isPnNextEle = (pnNext.length >= 3 && pnNext.charAt(0) == '[' && pnNext.charAt(pnNext.length-1) == ']' );
-					pv = (isPnNextEle ? [] : {});
-					parent[(isEle ? eleIdx : pn)] = pv;
+					let pnNext = propArray[i+1];
+					pv = (pnNext.forElement ? [] : {});
+					parent[pn.name] = pv;
 				}
 				
 				parent = pv;
@@ -1471,51 +1469,104 @@
 	
 	/**
 	 * 拆分属性路径字符串为数组。
+	 * 比如，对于字符串：
+	 * aa.bb[0].cc['dd']["ee"]
+	 * 将返回：
+	 * [ { name: "aa" }, { name: "bb" }, { name: 0, forElement: true }, { name: "cc" }, { name: "dd" }, { name: "ee" } ]
 	 * 
-	 * @param str 属性路径字符串，格式为："a.b[0].c"，拆分为：["a", "b", "[0]", "c"]
+	 * @param str 属性路径字符串，格式示例：aa.bb[0].cc['dd']["ee"]
 	 */
 	$.splitPropPath = function(str)
 	{
 		var array = [];
 		
 		var ele = "";
-		for(var i=0; i<str.length; i++)
+		for(let i=0; i<=str.length; i++)
 		{
-			var c = str.charAt(i);
+			let segment = null;
 			
-			if(c == '\\')
+			if(i < str.length)
 			{
-				if((i + 1) < str.length)
-					ele += str.charAt(i+1);
-				i+=1;
-			}
-			else if(c == '.')
-			{
-				if(ele)
-					array.push(ele);
-				ele = "";
-			}
-			else if(c == '[')
-			{
-				if(ele)
-					array.push(ele);
-				ele = c;
-			}
-			else if(c == ']')
-			{
-				if(ele)
-					array.push(ele+c);
-				ele = "";
+				let c = str.charAt(i);
+				
+				if(c == '\\')
+				{
+					if((i + 1) < str.length)
+						ele += str.charAt(i+1);
+					
+					i+=1;
+				}
+				else if(c == '.')
+				{
+					if(ele)
+						segment = ele;
+					
+					ele = "";
+				}
+				else if(c == '[')
+				{
+					if(ele)
+						segment = ele;
+					
+					ele = c;
+				}
+				else if(c == ']')
+				{
+					if(ele)
+						segment = ele+c;
+					
+					ele = "";
+				}
+				else
+					ele += c;
 			}
 			else
-				ele += c;
+			{
+				if(ele)
+					segment = ele;
+			}
+			
+			if(segment)
+			{
+				let segmentInfo = { name: segment, forElement: false };
+				let matchInfo = $.SQUARE_BRACKET_ELE_ACCESSOR.exec(segment);
+				
+				if(matchInfo != null)
+				{
+					segmentInfo.name = parseInt(matchInfo[1]);
+					segmentInfo.forElement = true;
+				}
+				else
+				{
+					matchInfo = $.SQUARE_BRACKET_PROP_ACCESSOR_1.exec(segment);
+					
+					if(matchInfo != null)
+						segmentInfo.name = matchInfo[1];
+					else
+					{
+						matchInfo = $.SQUARE_BRACKET_PROP_ACCESSOR_2.exec(segment);
+						
+						if(matchInfo != null)
+							segmentInfo.name = matchInfo[1];
+					}
+				}
+				
+				array.push(segmentInfo);
+				segment = null;
+			}
 		}
-		
-		if(ele)
-			array.push(ele);
 		
 		return array;
 	};
+	
+	//方括号数组元素访问符正则表达式
+	$.SQUARE_BRACKET_ELE_ACCESSOR = /^\s*\[\s*(\d+)\s*\]\s*$/;
+	
+	//方括号对象属性访问符正则表达式
+	$.SQUARE_BRACKET_PROP_ACCESSOR_1 = /^\s*\[\s*\"([^\"]*)\"\s*\]\s*$/;
+	
+	//方括号对象属性访问符正则表达式
+	$.SQUARE_BRACKET_PROP_ACCESSOR_2 = /^\s*\[\s*\'([^\']*)\'\s*\]\s*$/;
 	
 	/**
 	 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
@@ -2186,17 +2237,6 @@
 //重写支持Vue响数据模型的验证方法
 $.validator.addMethod("required", function(value, ele)
 {
-	ele = $(ele);
-	
-	if(ele.hasClass("validate-proxy"))
-	{
-		var reactiveFormModel = $(this.currentForm).data("reactiveFormModel");
-		var name = ele.attr("name");
-		
-		if(reactiveFormModel && name)
-			value = Vue.toRaw(reactiveFormModel[name]);
-	}
-	
 	return !$.isEmptyValue(value, true, false);
 });
 
@@ -2235,17 +2275,16 @@ $.fn.extend(
 				{
 					//代理属性名
 					var name = thisEle.attr("name");
-					var realValue = Vue.toRaw(reactiveFormModel[name]);
-					return realValue;
+					value = $.propPathValue(reactiveFormModel, name);
+					value = Vue.toRaw(value);
 				}
 				else if(thisEle.hasClass("validate-normalizer"))
 				{
 					var name = thisEle.attr("name");
-					var realValue = options["customNormalizers"][name]();
-					return realValue;
+					value = options["customNormalizers"][name]();
 				}
-				else
-					return value;
+				
+				return value;
 			},
 			showErrors: function(errorMap, errorList)
 			{

@@ -89,7 +89,7 @@
 		        		</div>
 		        	</div>
 		        	<div class="validate-msg">
-		        		<input name="pluginVo" required type="text" class="validate-proxy" />
+		        		<input name="pluginVo.id" required type="text" class="validate-proxy" />
 		        	</div>
 				</div>
 			</div>

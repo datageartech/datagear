@@ -177,7 +177,7 @@
 				
 				var value = (slotProps.data ? slotProps.data[column.name] : "");
 				
-				if($.isEmptyValue(value))
+				if($.isEmpty(value))
 					return "";
 				
 				if($.tableMeta.isBinaryColumn(column))

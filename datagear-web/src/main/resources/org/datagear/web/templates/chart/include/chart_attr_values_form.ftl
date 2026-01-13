@@ -997,7 +997,7 @@ page_palette.ftl
 		
 		$.each(attrs, function(i, attr)
 		{
-			if(attr.required && $.isEmptyValue(attrValues[attr.name]))
+			if(attr.required && $.isEmpty(attrValues[attr.name]))
 				re = false;
 			
 			return re;

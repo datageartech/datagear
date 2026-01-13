@@ -1226,7 +1226,7 @@
 		{
 			var value = (slotProps.data ? slotProps.data[column.name] : "");
 			
-			if($.isEmptyValue(value))
+			if($.isEmpty(value))
 				return "";
 			
 			var renderValue = $.truncateIf(value);
