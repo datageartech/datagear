@@ -2191,10 +2191,41 @@
 (function($, undefined)
 {
 
-//重写"required"校验方法，支持数组校验
+//复制自jquery.validate.min.js中的methods.number校验方法
+$.NUMBER_VALIDATOR_REGEX = /^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/;
+
+$.matchesNumberDeep = function(value)
+{
+	if($.isTypeNumber(value))
+		return true;
+		
+	if($.isArray(value))
+	{
+		for(let i=0; i<value.length; i++)
+		{
+			if(!$.matchesNumberDeep(value[i]))
+				return false;
+		}
+		
+		return true;
+	}
+	else
+		return $.NUMBER_VALIDATOR_REGEX.test(value);
+};
+
+//重写"required"校验函数，以支持Vue表单数据模型
 $.validator.addMethod("required", function(value, ele)
 {
 	return !$.isEmpty(value);
+});
+
+//重写"number"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("number", function(value, ele)
+{
+	if($.isEmpty(value))
+		return true;
+	
+	return $.matchesNumberDeep(value);
 });
 
 $.fn.extend(

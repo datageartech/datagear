@@ -33,7 +33,7 @@ page_palette.ftl
 					<span>{{group.nameLabel.value}}</span>
 					<span class="text-color-secondary text-sm ml-1">{{group.name == null ? "" : group.name}}</span>
 				</template>
-				<div class="flex flex-column gap-3">
+				<div class="flex flex-column gap-3 mb-2">
 					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.pname]"
 						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.chartAttrValuesForm.data[group.pname].length"
 						:toggleable="group.array" class="no-panel-border panel-icon-align-center">
@@ -248,16 +248,24 @@ page_palette.ftl
 									</div>
 								</div>
 					        	<div class="validate-msg" v-if="attr.required">
-					        		<input :name="group.pname+'['+grpDataEleIdx+'].'+attr.pname" required type="text" class="validate-proxy" />
+					        		<input :name="group.pname+'['+grpDataEleIdx+'].'+attr.pname" required type="text" class="validate-proxy"
+					        			:class="{'number': attr.type == pm.ChartPluginInputAttribute.DataType.NUMBER}" />
 					        	</div>
 							</div>
 						</div>
 					</p-panel>
-					<div class="text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
-						<p-button type="button" icon="pi pi-plus" :label="group.nameLabel.value"
-							severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group)">
-						</p-button>
-					</div>
+					<div>
+						<div class="text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+							<p-button type="button" icon="pi pi-plus" :label="group.nameLabel.value"
+								severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group)">
+							</p-button>
+						</div>
+						<div class="field-input" v-if="group.required">
+				        	<div class="validate-msg">
+				        		<input :name="group.pname" required type="text" class="validate-proxy" />
+				        	</div>
+			        	</div>
+		        	</div>
 				</div>
 			</p-accordion-tab>
 		</p-accordion>
