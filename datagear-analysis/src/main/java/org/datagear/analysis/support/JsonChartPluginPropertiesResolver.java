@@ -564,6 +564,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 						convertToInputAttrInputType(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_TYPE)));
 				attribute.setInputPayload(
 						convertToInputAttrInputPayload(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_PAYLOAD)));
+				attribute.setDefaultValue(map.get(ChartPluginInputAttribute.PROPERTY_DEFAULT_VALUE));
 				attribute.setGroup(convertToInputAttrGroup(map.get(ChartPluginInputAttribute.PROPERTY_GROUP)));
 				attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
 

@@ -38,6 +38,7 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
+	public static final String PROPERTY_DEFAULT_VALUE = "defaultValue";
 	public static final String PROPERTY_GROUP = "group";
 
 	/** 类型 */
@@ -48,6 +49,9 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 
 	/** 输入框载荷 */
 	private Object inputPayload = null;
+
+	/** 默认值 */
+	private Object defaultValue = null;
 
 	/**
 	 * 所属分组。
@@ -135,6 +139,16 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 		this.inputPayload = inputPayload;
 	}
 
+	public Object getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	public void setDefaultValue(Object defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+
 	@Deprecated
 	public Group getGroup()
 	{
@@ -155,6 +169,8 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 		target.setType(this.type);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
+		target.setDefaultValue(this.defaultValue);
+		;
 		target.setGroup(this.group != null ? this.group.clone(locale) : null);
 
 		return target;
@@ -164,7 +180,7 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", required=" + isRequired() + ", array="
-				+ isArray() + ", type=" + type + ", inputType=" + inputType + "]";
+				+ isArray() + ", type=" + type + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
 	}
 
 	/**

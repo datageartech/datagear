@@ -278,6 +278,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 				assertEquals("a3", a3.getName());
 				assertEquals(ChartPluginInputAttribute.DataType.STRING, a3.getType());
+				assertEquals("a", a3.getDefaultValue());
 				assertNull(a3.getGroup());
 				{
 					List<?> inputPayload = (List<?>)a3.getInputPayload();
@@ -288,6 +289,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 				assertEquals("a4", a4.getName());
 				assertEquals(ChartPluginInputAttribute.DataType.NUMBER, a4.getType());
+				assertEquals(2, a4.getDefaultValue());
 				assertNull(a4.getGroup());
 				{
 					List<?> inputPayload = (List<?>)a4.getInputPayload();
@@ -299,6 +301,7 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("a5", a5.getName());
 				assertEquals(ChartPluginInputAttribute.DataType.BOOLEAN, a5.getType());
 				assertNull(a5.getInputPayload());
+				assertEquals(false, a5.getDefaultValue());
 				assertNull(a5.getGroup());
 
 				assertEquals("a6", a6.getName());

@@ -180,16 +180,19 @@
   		{
 			name : 'a3',
 			type : 'string',
-			inputPayload: [ "a", "b" ]
+			inputPayload: [ "a", "b" ],
+			defaultValue: "a"
 		},
   		{
 			name : 'a4',
 			type : 'number',
-			inputPayload: [ 2, 3 ]
+			inputPayload: [ 2, 3 ],
+			defaultValue: 2
 		},
   		{
 			name : 'a5',
-			type : 'boolean'
+			type : 'boolean',
+			defaultValue: false
 		},
   		{
 			name : 'a6',
