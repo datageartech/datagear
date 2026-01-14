@@ -842,49 +842,6 @@
 		return (v == null || v === "" || ($.isArray(v) && v.length === 0));
 	};
 	
-	//是否为空
-	$.isEmptyValue = function(value, checkElement, checkProperty)
-	{
-		checkElement = (checkElement == null ? false : checkElement);
-		checkProperty = (checkProperty == null ? false : checkProperty);
-		
-		if(value == null)
-			return true;
-		else if($.isTypeString(value))
-			return (value.length == 0);
-		else if($.isArray(value))
-		{
-			if(!checkElement)
-				return (value.length == 0);
-			else
-			{
-				for(var i=0; i<value.length; i++)
-				{
-					if($.isEmptyValue(value[i], false, false))
-						return true;
-				}
-				
-				return (value.length == 0);
-			}
-		}
-		else if($.isPlainObject(value))
-		{
-			var pcount = 0;
-			
-			for(var p in value)
-			{
-				pcount++;
-				
-				if(checkProperty && $.isEmptyValue(value[p], false, false))
-					return true;
-			}
-			
-			return (pcount == 0);
-		}
-		else
-			return false;
-	};
-	
 	/**
 	 * 比较版本号。
 	 * 支持版本号格式示例：
@@ -2234,10 +2191,10 @@
 (function($, undefined)
 {
 
-//重写支持Vue响数据模型的验证方法
+//重写"required"校验方法，支持数组校验
 $.validator.addMethod("required", function(value, ele)
 {
-	return !$.isEmptyValue(value, true, false);
+	return !$.isEmpty(value);
 });
 
 $.fn.extend(
