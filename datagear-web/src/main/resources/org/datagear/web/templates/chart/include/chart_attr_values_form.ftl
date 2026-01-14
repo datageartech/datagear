@@ -247,9 +247,9 @@ page_palette.ftl
 										</p-inputtext>
 									</div>
 								</div>
-					        	<div class="validate-msg" v-if="attr.required">
-					        		<input :name="group.pname+'['+grpDataEleIdx+'].'+attr.pname" required type="text" class="validate-proxy"
-					        			:class="{'number': attr.type == pm.ChartPluginInputAttribute.DataType.NUMBER}" />
+					        	<div class="validate-msg">
+					        		<input :name="group.pname+'['+grpDataEleIdx+'].'+attr.pname" type="text" class="validate-proxy"
+					        			:class="{'required': attr.required, 'number': attr.type == pm.ChartPluginInputAttribute.DataType.NUMBER}" />
 					        	</div>
 							</div>
 						</div>
@@ -1162,7 +1162,7 @@ page_palette.ftl
 					var pm = po.vuePageModel();
 					var data = pm.chartAttrValuesForm.data;
 					data[groupName].splice(idx, 1);
-				} 
+				}
 			});
 		},
 		
