@@ -2191,8 +2191,7 @@
 (function($, undefined)
 {
 
-//复制自jquery.validate.min.js中的methods.number校验方法
-$.NUMBER_VALIDATOR_REGEX = /^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/;
+$.NUMBER_VALIDATOR_REGEX = /^-?\d+\.?\d*$/;
 
 $.matchesNumberDeep = function(value)
 {
