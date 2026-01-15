@@ -2614,7 +2614,7 @@ chartProto.mapURL = function(name)
 };
 
 /**
- * 将源选项对象深度合并至目标选项中。
+ * 将源选项对象深度合并至目标选项中，合并后，修改目标选项任意属性都不会影响源选项。
  * 此函数支持如下调用方式：
  * inflateOptions(target);
  * inflateOptions(target, filter);
@@ -2630,7 +2630,7 @@ chartProto.mapURL = function(name)
  */
 chartProto.inflateOptions = function(target, source, filter)
 {
-	if(filter === undefined && (source === true || source === false || CF.isFunction(source)))
+	if(arguments.length < 3 && (source === true || source === false || CF.isFunction(source)))
 	{
 		filter = source;
 		source = undefined;
@@ -6286,6 +6286,9 @@ var ObjectFunctionString = fnToString.call(Object);
  */
 CF.isPlainObject = function(obj)
 {
+	if(obj == null || typeof(obj) !== "object" || Array.isArray(obj))
+		return false;
+	
 	var proto, Ctor;
 
 	if ( !obj || toString.call( obj ) !== "[object Object]" ) {
@@ -6317,10 +6320,14 @@ CF.isEmptyObject = function(obj)
 };
 
 /**
- * 合并对象并返回（修改自3.7.1版本的jQuery.extend函数）。
+ * 将source_1至source_n依次合并至target并返回target。
+ * 注意：不支持循环依赖。
+ * 
  * 调用方式：
- * 浅合并：CF.extend(target, src1, src2, ...)
- * 深合并：CF.extend(true, target, src1, src2, ...)
+ * 浅合并：CF.extend(target, source_1, ..., source_n)
+ * 深合并：CF.extend(true, target, source_1, ..., source_n)
+ * 
+ * 此函数修改自3.7.1版本的jQuery.extend函数。
  */
 CF.extend = function()
 {
