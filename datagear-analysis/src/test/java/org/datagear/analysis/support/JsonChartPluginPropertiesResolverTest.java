@@ -34,9 +34,11 @@ import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPluginAttribute;
+import org.datagear.analysis.ChartPluginAttributeGroup;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.ChartPluginInputAttribute;
+import org.datagear.analysis.ChartPluginObjectAttribute;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
 import org.datagear.analysis.RenderContext;
@@ -313,6 +315,59 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals(ChartPluginAttribute.DataType.STRING, a7.getType());
 				assertNull(a7.getInputPayload());
 				assertNull(a7.getGroup());
+			}
+
+			{
+				ChartPluginObjectAttribute a8 = (ChartPluginObjectAttribute) chartPluginAttributes.get(8);
+
+				assertEquals("a8", a8.getName());
+				assertEquals(ChartPluginAttribute.DataType.OBJECT, a8.getType());
+				assertEquals("对象-a8", a8.getNameLabel().getValue());
+				assertEquals("对象-a8-描述", a8.getDescLabel().getValue());
+
+				List<ChartPluginAttribute> a8Chilren = a8.getChildren();
+
+				assertEquals(4, a8Chilren.size());
+				assertEquals("a8.1", a8Chilren.get(0).getName());
+				assertEquals(ChartPluginAttribute.DataType.STRING, a8Chilren.get(0).getType());
+				assertEquals("a8.2", a8Chilren.get(1).getName());
+				assertEquals("a8.3", a8Chilren.get(2).getName());
+				assertEquals(ChartPluginAttribute.DataType.OBJECT, a8Chilren.get(2).getType());
+				assertEquals("a8.4", a8Chilren.get(3).getName());
+
+				{
+					List<ChartPluginAttribute> a8_3Chilren = ((ChartPluginObjectAttribute) a8Chilren.get(2))
+							.getChildren();
+
+					assertEquals(2, a8_3Chilren.size());
+					assertEquals("a8.3.1", a8_3Chilren.get(0).getName());
+					assertEquals(ChartPluginAttribute.DataType.STRING, a8_3Chilren.get(0).getType());
+				}
+
+				List<ChartPluginAttributeGroup> groups = a8.getGroups();
+
+				assertEquals(2, groups.size());
+
+				{
+					ChartPluginAttributeGroup group = groups.get(0);
+					List<String> names = group.getNames();
+
+					assertEquals("a8-分组-1", group.getNameLabel().getValue());
+					assertEquals("a8-分组-1-描述", group.getDescLabel().getValue());
+					assertEquals(2, names.size());
+					assertEquals("a8.2", names.get(0));
+					assertEquals("a8.3", names.get(1));
+					assertEquals("a8.1 == 'ok'", group.getAdditions().get("displayIf"));
+				}
+
+				{
+					ChartPluginAttributeGroup group = groups.get(1);
+					List<String> names = group.getNames();
+
+					assertEquals("a8-分组-2", group.getNameLabel().getValue());
+					assertEquals(1, names.size());
+					assertEquals("a8.4", names.get(0));
+				}
 			}
 
 			{

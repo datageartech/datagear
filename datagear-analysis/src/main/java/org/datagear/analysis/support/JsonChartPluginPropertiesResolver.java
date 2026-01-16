@@ -30,9 +30,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.analysis.AbstractChartPluginAttribute;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttribute;
+import org.datagear.analysis.ChartPluginAttributeGroup;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.ChartPluginInputAttribute;
@@ -339,7 +341,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
 			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
 			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
-			dataSign.setAdditions(convertToDataSignAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
+			dataSign.setAdditions(convertToAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
 
 			dataSign.setChildren(convertToDataSigns(map.get(DataSign.PROPERTY_CHILDREN), dataSign));
 	
@@ -429,18 +431,6 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return convertToBoolean(v, dftValue);
 	}
 
-	@SuppressWarnings("unchecked")
-	protected Map<String, ?> convertToDataSignAdditions(Object obj)
-	{
-		if (obj == null)
-			return null;
-		else if (obj instanceof Map<?, ?>)
-			return (Map<String, ?>) obj;
-		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ DataSign.class.getName() + ".additions] unsupported");
-	}
-
 	/**
 	 * 将对象转换为{@linkplain ChartPluginAttribute}列表。
 	 * <p>
@@ -525,40 +515,41 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			if (StringUtil.isEmpty(name))
 				return null;
 
+			AbstractChartPluginAttribute attribute;
+
+			if (isObject)
+				attribute = createChartPluginObjectAttribute();
+			else
+				attribute = createChartPluginInputAttribute();
+
+			attribute.setName(name);
+			attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
+			attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
+			attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
+			attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_ARRAY)));
+			attribute.setAdditions(convertToAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
+
 			if (isObject)
 			{
-				ChartPluginObjectAttribute attribute = createChartPluginObjectAttribute();
+				ChartPluginObjectAttribute objAttr = (ChartPluginObjectAttribute) attribute;
 
-				attribute.setName(name);
-				attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
-				attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
-				attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
-				attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_ARRAY)));
-				attribute.setChildren(convertToAttributes(map.get(ChartPluginObjectAttribute.PROPERTY_CHILDREN)));
-				attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
-
-				return attribute;
+				objAttr.setChildren(convertToAttributes(map.get(ChartPluginObjectAttribute.PROPERTY_CHILDREN)));
+				objAttr.setGroups(convertToAttrGroups(map.get(ChartPluginObjectAttribute.PROPERTY_GROUPS)));
 			}
 			else
 			{
-				ChartPluginInputAttribute attribute = createChartPluginInputAttribute();
+				ChartPluginInputAttribute inputAttr = (ChartPluginInputAttribute) attribute;
 
-				attribute.setName(name);
-				attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
-				attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
-				attribute.setType(convertToAttrType(map.get(ChartPluginInputAttribute.PROPERTY_TYPE)));
-				attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
-				attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_ARRAY)));
-				attribute.setInputType(
+				inputAttr.setType(convertToAttrType(map.get(ChartPluginInputAttribute.PROPERTY_TYPE)));
+				inputAttr.setInputType(
 						convertToInputAttrInputType(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_TYPE)));
-				attribute.setInputPayload(
+				inputAttr.setInputPayload(
 						convertToInputAttrInputPayload(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_PAYLOAD)));
-				attribute.setDefaultValue(map.get(ChartPluginInputAttribute.PROPERTY_DEFAULT_VALUE));
-				attribute.setGroup(convertToInputAttrGroup(map.get(ChartPluginInputAttribute.PROPERTY_GROUP)));
-				attribute.setAdditions(convertToAttributeAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
-
-				return attribute;
+				inputAttr.setDefaultValue(map.get(ChartPluginInputAttribute.PROPERTY_DEFAULT_VALUE));
+				inputAttr.setGroup(convertToInputAttrGroup(map.get(ChartPluginInputAttribute.PROPERTY_GROUP)));
 			}
+
+			return attribute;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
@@ -630,6 +621,106 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return obj;
 	}
 
+	protected List<ChartPluginAttributeGroup> convertToAttrGroups(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+
+			List<ChartPluginAttributeGroup> groups = new ArrayList<>();
+
+			for (Object ele : array)
+			{
+				ChartPluginAttributeGroup attribute = convertToAttrGroup(ele);
+
+				if (attribute != null)
+					groups.add(attribute);
+			}
+
+			if (groups.isEmpty())
+				return null;
+
+			return groups;
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			Object[] array = new Object[collection.size()];
+			collection.toArray(array);
+
+			return convertToAttrGroups(array);
+		}
+		else
+		{
+			Object[] array = new Object[] { obj };
+			return convertToAttrGroups(array);
+		}
+	}
+
+	protected ChartPluginAttributeGroup convertToAttrGroup(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof ChartPluginAttributeGroup)
+			return (ChartPluginAttributeGroup) obj;
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			ChartPluginAttributeGroup group = createChartPluginAttributeGroup();
+
+			group.setNameLabel(convertToLabel(map.get(ChartPluginAttributeGroup.PROPERTY_NAME_LABEL)));
+			group.setDescLabel(convertToLabel(map.get(ChartPluginAttributeGroup.PROPERTY_DESC_LABEL)));
+			group.setNames(convertToAttrGroupNames(map.get(ChartPluginAttributeGroup.PROPERTY_NAMES)));
+			group.setAdditions(convertToAdditions(map.get(ChartPluginAttributeGroup.PROPERTY_ADDITIONS)));
+
+			return group;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ ChartPluginAttributeGroup.class.getName() + "] unsupported");
+	}
+
+	protected List<String> convertToAttrGroupNames(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof String)
+		{
+			return Arrays.asList((String) obj);
+		}
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+
+			List<String> names = new ArrayList<>();
+
+			for (Object ele : array)
+			{
+				if (ele != null && (ele instanceof String))
+					names.add((String) ele);
+			}
+
+			if (names.isEmpty())
+				return null;
+
+			return names;
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			Object[] array = new Object[collection.size()];
+			collection.toArray(array);
+			return convertToAttrGroupNames(array);
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ ChartPluginAttributeGroup.class.getName() + ".names] unsupported");
+	}
+
 	protected Group convertToInputAttrGroup(Object obj)
 	{
 		if (obj == null)
@@ -663,18 +754,6 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ Group.class.getName() + "] unsupported");
-	}
-
-	@SuppressWarnings("unchecked")
-	protected Map<String, ?> convertToAttributeAdditions(Object obj)
-	{
-		if(obj == null)
-			return  null;
-		else if (obj instanceof Map<?, ?>)
-			return (Map<String, ?>) obj;
-		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttribute.class.getName() + ".additions] unsupported");
 	}
 
 	/**
@@ -937,8 +1016,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else if (obj instanceof Map<?, ?>)
 			return (Map<String, ?>) obj;
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPlugin.class.getName() + ".additions] unsupported");
+			throw new UnsupportedOperationException(
+					"Convert object of type [" + obj.getClass().getName() + "] to [additions] unsupported");
 	}
 
 	/**
@@ -1085,6 +1164,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	protected ChartPluginInputAttribute createChartPluginInputAttribute()
 	{
 		return new ChartPluginInputAttribute();
+	}
+
+	protected ChartPluginAttributeGroup createChartPluginAttributeGroup()
+	{
+		return new ChartPluginAttributeGroup();
 	}
 
 	protected DataSign createDataSign()

@@ -101,9 +101,7 @@ public interface ChartPluginAttribute extends Labeled, NameTypeAware, AdditionsA
 		List<ChartPluginAttribute> re = new ArrayList<>(attributes.size());
 
 		for (ChartPluginAttribute attribute : attributes)
-		{
 			re.add(attribute == null ? null : attribute.toLocale(locale));
-		}
 
 		return re;
 	}

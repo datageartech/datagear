@@ -200,6 +200,48 @@
 		},
   		{
 			name : 'a7'
+		},
+		{
+			name: "a8",
+			nameLabel: "对象-a8",
+			descLabel: "对象-a8-描述",
+			children:
+			[
+				{
+					name: "a8.1"
+				},
+				{
+					name: "a8.2"
+				},
+				{
+					name: "a8.3",
+					children:
+					[
+						{
+							name: "a8.3.1"
+						},
+						{
+							name: "a8.3.2"
+						}
+					]
+				},
+				{
+					name: "a8.4"
+				}
+			],
+			groups:
+			[
+				{
+					nameLabel: "a8-分组-1",
+					descLabel: "a8-分组-1-描述",
+					names: [ "a8.2", "a8.3" ],
+					additions: { displayIf: "a8.1 == 'ok'" }
+				},
+				{
+					nameLabel: "a8-分组-2",
+					names: "a8.4"
+				}
+			]
 		}
 	],
 	version : "0.1.0",

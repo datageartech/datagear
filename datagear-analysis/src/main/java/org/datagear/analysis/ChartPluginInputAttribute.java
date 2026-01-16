@@ -157,24 +157,6 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + isRequired()
 				+ ", array=" + isArray() + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
 	}
-
-	/**
-	 * {@linkplain ChartPluginInputAttribute#getType()}枚举。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class DataType
-	{
-		/** 字符串 */
-		public static final String STRING = "STRING";
-
-		/** 布尔值 */
-		public static final String BOOLEAN = "BOOLEAN";
-
-		/** 数值 */
-		public static final String NUMBER = "NUMBER";
-	}
 	
 	/**
 	 * 常用的{@linkplain ChartPluginInputAttribute#getInputType()}枚举。

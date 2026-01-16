@@ -34,8 +34,13 @@ public class ChartPluginObjectAttribute extends AbstractChartPluginAttribute
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROPERTY_CHILDREN = "children";
+	public static final String PROPERTY_GROUPS = "groups";
 
+	/** 子级{@linkplain ChartPluginAttribute}列表 */
 	private List<ChartPluginAttribute> children = null;
+
+	/** 上述{@linkplain #children}的分组信息 */
+	private List<ChartPluginAttributeGroup> groups = null;
 
 	public ChartPluginObjectAttribute()
 	{
@@ -87,6 +92,16 @@ public class ChartPluginObjectAttribute extends AbstractChartPluginAttribute
 		this.children = children;
 	}
 
+	public List<ChartPluginAttributeGroup> getGroups()
+	{
+		return groups;
+	}
+
+	public void setGroups(List<ChartPluginAttributeGroup> groups)
+	{
+		this.groups = groups;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -100,6 +115,7 @@ public class ChartPluginObjectAttribute extends AbstractChartPluginAttribute
 		ChartPluginObjectAttribute target = new ChartPluginObjectAttribute();
 		copyToLocale(target, locale);
 		target.setChildren(ChartPluginAttribute.toLocale(this.children, locale));
+		target.setGroups(ChartPluginAttributeGroup.toLocale(this.groups, locale));
 
 		return target;
 	}
