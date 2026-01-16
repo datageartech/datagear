@@ -177,6 +177,22 @@ public abstract class DataValueConverter
 	 */
 	protected abstract Object convertValue(Object value, String type) throws DataValueConvertionException;
 
+	protected Number convertToInteger(Object value, String numberType)
+	{
+		Number re = convertToNumber(value, numberType);
+
+		if (re == null)
+			return null;
+
+		if (re instanceof Integer)
+			return re;
+
+		if (re instanceof Long)
+			return re;
+
+		return narrowIfIntegerRange(re.longValue());
+	}
+
 	protected Number convertToNumber(Object value, String numberType)
 	{
 		if (value == null)
@@ -199,11 +215,7 @@ public abstract class DataValueConverter
 				else
 				{
 					Long re = Long.valueOf(str);
-
-					if (re <= Integer.MAX_VALUE && re >= Integer.MIN_VALUE)
-						return re.intValue();
-					else
-						return re.longValue();
+					return narrowIfIntegerRange(re);
 				}
 			}
 			catch (NumberFormatException e)
@@ -213,6 +225,17 @@ public abstract class DataValueConverter
 		}
 
 		return (Number) convertExt(value, numberType);
+	}
+
+	protected Number narrowIfIntegerRange(Long value)
+	{
+		if (value == null)
+			return null;
+
+		if (value <= Integer.MAX_VALUE && value >= Integer.MIN_VALUE)
+			return value.intValue();
+		else
+			return value;
 	}
 
 	protected String convertToString(Object value, String stringType)

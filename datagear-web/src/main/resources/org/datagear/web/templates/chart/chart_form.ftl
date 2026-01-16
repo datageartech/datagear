@@ -17,7 +17,6 @@
  *
 -->
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
-<#assign ChartPluginInputAttributeType=statics['org.datagear.analysis.ChartPluginInputAttribute$DataType']>
 <#assign DataSign=statics['org.datagear.analysis.DataSign']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">

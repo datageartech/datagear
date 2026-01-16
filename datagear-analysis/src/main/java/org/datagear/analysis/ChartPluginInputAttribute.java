@@ -17,9 +17,6 @@
 
 package org.datagear.analysis;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -35,14 +32,10 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
 	public static final String PROPERTY_DEFAULT_VALUE = "defaultValue";
 	public static final String PROPERTY_GROUP = "group";
-
-	/** 类型 */
-	private String type;
 
 	/** 输入框类型 */
 	private String inputType = null;
@@ -57,7 +50,7 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	 * 所属分组。
 	 * 
 	 * @deprecated 用于兼容旧的5.5.0版本的{@code ChartPluginAttribute}格式，
-	 *             在6.0版本起已被{@linkplain ChartPluginGroupAttribute}取代
+	 *             在6.0版本起已被{@linkplain ChartPluginObjectAttribute}取代
 	 */
 	@Deprecated
 	private Group group = null;
@@ -69,14 +62,12 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 
 	public ChartPluginInputAttribute(String name, String type)
 	{
-		super(name);
-		this.type = type;
+		super(name, type);
 	}
 
 	public ChartPluginInputAttribute(String name, String type, boolean required)
 	{
-		super(name);
-		this.type = type;
+		super(name, type);
 		setRequired(required);
 	}
 
@@ -96,20 +87,6 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	public void setName(String name)
 	{
 		super.setName(name);
-	}
-
-	/**
-	 * 获取数据类型，参考{@linkplain DataType}。
-	 */
-	@Override
-	public String getType()
-	{
-		return type;
-	}
-
-	public void setType(String type)
-	{
-		this.type = type;
 	}
 
 	/**
@@ -166,11 +143,9 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	{
 		ChartPluginInputAttribute target = new ChartPluginInputAttribute();
 		copyToLocale(target, locale);
-		target.setType(this.type);
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		target.setDefaultValue(this.defaultValue);
-		;
 		target.setGroup(this.group != null ? this.group.clone(locale) : null);
 
 		return target;
@@ -179,32 +154,8 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + getName() + ", required=" + isRequired() + ", array="
-				+ isArray() + ", type=" + type + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
-	}
-
-	/**
-	 * 复制为指定{@linkplain Locale}的对象。
-	 * 
-	 * @param attributes
-	 * @param locale
-	 * @return
-	 */
-	public static List<ChartPluginInputAttribute> toLocale(List<ChartPluginInputAttribute> attributes,
-			Locale locale)
-	{
-		if (attributes == null)
-			return null;
-
-		if (attributes.isEmpty())
-			return Collections.emptyList();
-
-		List<ChartPluginInputAttribute> re = new ArrayList<ChartPluginInputAttribute>(attributes.size());
-
-		for (ChartPluginInputAttribute attribute : attributes)
-			re.add(attribute.toLocale(locale));
-
-		return re;
+		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + isRequired()
+				+ ", array=" + isArray() + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
 	}
 
 	/**

@@ -36,6 +36,8 @@ public abstract class AbstractChartPluginAttribute extends AbstractLabeled
 
 	private String name;
 
+	private String type;
+
 	private boolean required = false;
 
 	private boolean array = false;
@@ -48,10 +50,11 @@ public abstract class AbstractChartPluginAttribute extends AbstractLabeled
 		super();
 	}
 
-	public AbstractChartPluginAttribute(String name)
+	public AbstractChartPluginAttribute(String name, String type)
 	{
 		super();
 		this.name = name;
+		this.type = type;
 	}
 
 	@Override
@@ -63,6 +66,17 @@ public abstract class AbstractChartPluginAttribute extends AbstractLabeled
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+
+	@Override
+	public String getType()
+	{
+		return type;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
 	}
 
 	@Override
@@ -101,6 +115,7 @@ public abstract class AbstractChartPluginAttribute extends AbstractLabeled
 	protected void copyToLocale(AbstractChartPluginAttribute target, Locale locale)
 	{
 		target.setName(this.name);
+		target.setType(this.type);
 		target.setRequired(this.required);
 		target.setArray(this.array);
 		target.setAdditions(this.additions);

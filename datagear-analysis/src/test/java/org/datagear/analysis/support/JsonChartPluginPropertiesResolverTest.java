@@ -179,7 +179,7 @@ public class JsonChartPluginPropertiesResolverTest
 				ChartPluginInputAttribute a0 = (ChartPluginInputAttribute) chartPluginAttributes.get(0);
 
 				assertEquals("title", a0.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.STRING, a0.getType());
+				assertEquals(ChartPluginAttribute.DataType.STRING, a0.getType());
 
 				Label nameLabel = a0.getNameLabel();
 				assertEquals("标题", nameLabel.getValue());
@@ -225,7 +225,7 @@ public class JsonChartPluginPropertiesResolverTest
 				ChartPluginInputAttribute a1 = (ChartPluginInputAttribute) chartPluginAttributes.get(1);
 
 				assertEquals("interval", a1.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.NUMBER, a1.getType());
+				assertEquals(ChartPluginAttribute.DataType.NUMBER, a1.getType());
 
 				Label nameLabel = a1.getNameLabel();
 				assertEquals("间隔", nameLabel.getValue());
@@ -263,7 +263,7 @@ public class JsonChartPluginPropertiesResolverTest
 				ChartPluginInputAttribute a7 = (ChartPluginInputAttribute) chartPluginAttributes.get(7);
 
 				assertEquals("a2", a2.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.BOOLEAN, a2.getType());
+				assertEquals(ChartPluginAttribute.DataType.BOOLEAN, a2.getType());
 				assertNull(a2.getGroup());
 				{
 					List<?> inputPayload = (List<?>)a2.getInputPayload();
@@ -277,7 +277,7 @@ public class JsonChartPluginPropertiesResolverTest
 				}
 
 				assertEquals("a3", a3.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.STRING, a3.getType());
+				assertEquals(ChartPluginAttribute.DataType.STRING, a3.getType());
 				assertEquals("a", a3.getDefaultValue());
 				assertNull(a3.getGroup());
 				{
@@ -288,7 +288,7 @@ public class JsonChartPluginPropertiesResolverTest
 				}
 
 				assertEquals("a4", a4.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.NUMBER, a4.getType());
+				assertEquals(ChartPluginAttribute.DataType.NUMBER, a4.getType());
 				assertEquals(2, a4.getDefaultValue());
 				assertNull(a4.getGroup());
 				{
@@ -299,7 +299,7 @@ public class JsonChartPluginPropertiesResolverTest
 				}
 
 				assertEquals("a5", a5.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.BOOLEAN, a5.getType());
+				assertEquals(ChartPluginAttribute.DataType.BOOLEAN, a5.getType());
 				assertNull(a5.getInputPayload());
 				assertEquals(false, a5.getDefaultValue());
 				assertNull(a5.getGroup());
@@ -310,7 +310,7 @@ public class JsonChartPluginPropertiesResolverTest
 				assertNull(a6.getGroup());
 
 				assertEquals("a7", a7.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.STRING, a7.getType());
+				assertEquals(ChartPluginAttribute.DataType.STRING, a7.getType());
 				assertNull(a7.getInputPayload());
 				assertNull(a7.getGroup());
 			}
@@ -516,7 +516,7 @@ public class JsonChartPluginPropertiesResolverTest
 						.get(0);
 
 				assertEquals("title", chartPluginAttribute.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.STRING, chartPluginAttribute.getType());
+				assertEquals(ChartPluginAttribute.DataType.STRING, chartPluginAttribute.getType());
 
 				Label nameLabel = chartPluginAttribute.getNameLabel();
 				assertEquals("标题", nameLabel.getValue());
@@ -534,7 +534,7 @@ public class JsonChartPluginPropertiesResolverTest
 						.get(1);
 
 				assertEquals("interval", chartPluginAttribute.getName());
-				assertEquals(ChartPluginInputAttribute.DataType.NUMBER, chartPluginAttribute.getType());
+				assertEquals(ChartPluginAttribute.DataType.NUMBER, chartPluginAttribute.getType());
 
 				Label nameLabel = chartPluginAttribute.getNameLabel();
 				assertEquals("间隔", nameLabel.getValue());

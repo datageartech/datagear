@@ -18,7 +18,7 @@
 package org.datagear.analysis.support;
 
 import org.datagear.analysis.ChartPluginAttribute;
-import org.datagear.analysis.ChartPluginInputAttribute.DataType;
+import org.datagear.analysis.ChartPluginAttribute.DataType;
 
 /**
  * {@linkplain ChartPluginAttribute}值转换器。
@@ -41,6 +41,8 @@ public class ChartPluginAttributeValueConverter extends DataValueConverter
 			return convertToString(value, DataType.STRING);
 		else if (DataType.NUMBER.equals(type))
 			return convertToNumber(value, DataType.NUMBER);
+		else if (DataType.INTEGER.equals(type))
+			return convertToInteger(value, DataType.INTEGER);
 		else if (DataType.BOOLEAN.equals(type))
 			return convertToBoolean(value, DataType.BOOLEAN);
 		else
