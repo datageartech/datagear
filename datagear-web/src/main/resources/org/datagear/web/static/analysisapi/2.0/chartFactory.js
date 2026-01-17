@@ -1571,7 +1571,7 @@ chartProto.doDestroy = function()
 	
 	this.internal(null);
 	//最后清空，因为上面逻辑可能会使用到
-	this._clearLiveData();
+	this._clearLiveValue();
 	
 	this.statusDestroyed(true);
 };
@@ -2057,7 +2057,7 @@ chartProto.off = function(type, handler)
 		throw new Error(CF.chartLogInfo(this) + " renderer.off required");
 };
 
-var EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "EventHandlerDelegates";
+var EVENT_HANDLER_DELEGATES_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "EventHandlerDelegates";
 
 /**
  * 注册图表事件处理函数代理。
@@ -2075,12 +2075,12 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 	var delegateObj = (arguments.length <= 1 ?
 						type : { type: type, handler: handler, delegate: delegate });
 	
-	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
+	var delegateObjs = this.liveValue(EVENT_HANDLER_DELEGATES_LIVE_VALUE_NAME);
 	
 	if(delegateObjs == null)
 	{
 		delegateObjs = [];
-		this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME, delegateObjs);
+		this.liveValue(EVENT_HANDLER_DELEGATES_LIVE_VALUE_NAME, delegateObjs);
 	}
 	
 	delegateObjs.push(delegateObj);
@@ -2098,7 +2098,7 @@ chartProto.findEventHandlerDelegates = function(filter)
 {
 	var re = [];
 	
-	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
+	var delegateObjs = this.liveValue(EVENT_HANDLER_DELEGATES_LIVE_VALUE_NAME);
 	
 	if(delegateObjs == null)
 		return re;
@@ -2128,7 +2128,7 @@ chartProto.removeEventHandlerDelegate = function(filter)
 {
 	var re = [];
 	
-	var delegateObjs = this.liveData(EVENT_HANDLER_DELEGATES_LIVE_DATA_NAME);
+	var delegateObjs = this.liveValue(EVENT_HANDLER_DELEGATES_LIVE_VALUE_NAME);
 	
 	if(delegateObjs == null)
 		return re;
@@ -2375,7 +2375,7 @@ chartProto.isInstance = function(chartWidgetId)
 	return (this.widgetId() == chartWidgetId);
 };
 
-var INTERNAL_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "Internal";
+var INTERNAL_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "Internal";
 
 /**
  * 获取/设置图表底层组件。
@@ -2390,9 +2390,9 @@ var INTERNAL_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "Internal";
 chartProto.internal = function(internal)
 {
 	if(arguments.length == 0)
-		return this.liveData(INTERNAL_LIVE_DATA_NAME);
+		return this.liveValue(INTERNAL_LIVE_VALUE_NAME);
 	else
-		this.liveData(INTERNAL_LIVE_DATA_NAME, internal);
+		this.liveValue(INTERNAL_LIVE_VALUE_NAME, internal);
 };
 
 /**
@@ -2417,24 +2417,24 @@ chartProto.renderContextValue = function(name, value)
  * @param name 名称
  * @param value 要设置的数据，可选，不设置则执行获取操作
  */
-chartProto.liveData = function(name, data)
+chartProto.liveValue = function(name, value)
 {
 	if(arguments.length <= 1)
 	{
-		return (this._liveDatas ? this._liveDatas[name] : null);
+		return (this._liveValues ? this._liveValues[name] : null);
 	}
 	else
 	{
-		if(this._liveDatas == null)
-			this._liveDatas = {};
+		if(this._liveValues == null)
+			this._liveValues = {};
 		
-		this._liveDatas[name] = data;
+		this._liveValues[name] = value;
 	}
 };
 
-chartProto._clearLiveData = function()
+chartProto._clearLiveValue = function()
 {
-	this._liveDatas = {};
+	this._liveValues = {};
 };
 
 /**
@@ -3517,7 +3517,7 @@ chartProto.loadLib = function(lib, callback)
 	CF.loadLib(lib,  callback, this.renderContext(), contextCharts);
 };
 
-var UPDATE_RESULT_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateResult";
+var UPDATE_RESULT_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateResult";
 
 /**
  * 获取/设置此次图表结果。
@@ -3529,9 +3529,9 @@ var UPDATE_RESULT_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateResult";
 chartProto.updateResult = function(chartResult)
 {
 	if(arguments.length == 0)
-		return this.liveData(UPDATE_RESULT_LIVE_DATA_NAME);
+		return this.liveValue(UPDATE_RESULT_LIVE_VALUE_NAME);
 	else
-		this.liveData(UPDATE_RESULT_LIVE_DATA_NAME, chartResult);
+		this.liveValue(UPDATE_RESULT_LIVE_VALUE_NAME, chartResult);
 };
 
 /**

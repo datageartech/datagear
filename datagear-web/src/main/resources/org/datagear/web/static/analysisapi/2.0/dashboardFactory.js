@@ -822,26 +822,26 @@ chartProto.refresh = function()
 	this._requestRefresh();
 };
 
-var UPDATE_TIME_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
+var UPDATE_TIME_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
 
 chartProto._updateTime = function(time)
 {
 	if(arguments.length == 0)
-		return this.liveData(UPDATE_TIME_LIVE_DATA_NAME);
+		return this.liveValue(UPDATE_TIME_LIVE_VALUE_NAME);
 	else
-		this.liveData(UPDATE_TIME_LIVE_DATA_NAME, time);
+		this.liveValue(UPDATE_TIME_LIVE_VALUE_NAME, time);
 };
 
-var REQUEST_REFRESH_LIVE_DATA_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshes";
+var REQUEST_REFRESH_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshes";
 
 chartProto._requestRefresh = function()
 {
 	var chartQuery = this.dashboard()._buildChartQuery(this);
-	var rrds = this.liveData(REQUEST_REFRESH_LIVE_DATA_NAME);
+	var rrds = this.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
 	if(rrds == null)
 	{
 		rrds = [];
-		this.liveData(REQUEST_REFRESH_LIVE_DATA_NAME, rrds);
+		this.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME, rrds);
 	}
 	
 	rrds.push(chartQuery);
@@ -849,7 +849,7 @@ chartProto._requestRefresh = function()
 
 chartProto._isRequestRefresh = function()
 {
-	var rrds = this.liveData(REQUEST_REFRESH_LIVE_DATA_NAME);
+	var rrds = this.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
 	return (rrds != null && rrds.length > 0);
 };
 
@@ -1741,7 +1741,7 @@ dashboardProto._doHandleCharts = function()
 			//由chart.refresh()函数触发
 			if(wait == 2)
 			{
-				let rrds = chart.liveData(REQUEST_REFRESH_LIVE_DATA_NAME);
+				let rrds = chart.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
 				chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
 			}
 			

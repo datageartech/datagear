@@ -43,11 +43,11 @@ SPT.PROCESS_RENDER_OPTIONS_OPTION_NAME = "processRenderOptions";
 //扩展图表选项名：处理图表更新选项
 SPT.PROCESS_UPDATE_OPTIONS_OPTION_NAME = "processUpdateOptions";
 
-//在chart.liveData()中存储渲染选项的名称
-SPT.RENDER_OPTIONS_LIVE_DATA_NAME = "renderOptions";
+//在chart.liveValue()中存储渲染选项的名称
+SPT.RENDER_OPTIONS_LIVE_VALUE_NAME = "renderOptions";
 
-//在chart.liveData()中存储更新选项的名称
-SPT.UPDATE_OPTIONS_LIVE_DATA_NAME = "updateOptions";
+//在chart.liveValue()中存储更新选项的名称
+SPT.UPDATE_OPTIONS_LIVE_VALUE_NAME = "updateOptions";
 
 //图表数据属性名：原始类别
 SPT.ORIGINAL_CATEGORY_PROP_NAME = "originalCategory";
@@ -463,7 +463,7 @@ SPT.barPolarRenderer = function(plugin, config)
 				if(options.radiusAxis.type === "value")
 				{
 					options.radiusAxis.type = "category";
-					chart.liveData("dataNameToString", true);
+					chart.liveValue("dataNameToString", true);
 				}
 			}
 			
@@ -498,7 +498,7 @@ SPT.barPolarRenderer = function(plugin, config)
 					let data = chart.resultMapDatas(result, fieldMap);
 					SPT.originalDataOfResult(data, chart, result);
 					
-					if(chart.liveData("dataNameToString"))
+					if(chart.liveValue("dataNameToString"))
 						SPT.convertArrayValueEleToString(data);
 					
 					SPT.splitDataByCategory(data, categoryNames, categoryDatasMap);
@@ -526,7 +526,7 @@ SPT.barPolarRenderer = function(plugin, config)
 						let data = chart.resultMapDatas(result, fieldMap);
 						SPT.originalDataOfResult(data, chart, result);
 						
-						if(chart.liveData("dataNameToString"))
+						if(chart.liveValue("dataNameToString"))
 							SPT.convertArrayValueEleToString(data);
 						
 						let mySeries = { name: legendName, data: data };
@@ -1316,7 +1316,7 @@ SPT.radarRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			
 			var legendData = [];
@@ -4169,7 +4169,7 @@ SPT.liquidfillRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			
 			var seriesName = "";
@@ -5085,7 +5085,7 @@ SPT.tableRenderer = function(plugin, config)
 			this._stopCarousel(chart);
 			chart.internal().destroy(true);
 			chartEle.removeClass("dg-chart-table dg-hide-title dg-text-nowrap dg-chart-table-carousel");
-			chartEle.removeClass(chart.liveData(CF.builtinPropName("TableChartLocalStyleName")));
+			chartEle.removeClass(chart.liveValue(CF.builtinPropName("TableChartLocalStyleName")));
 			jQuery(".dg-chart-container", chartEle).remove();
 		},
 		
@@ -5382,21 +5382,21 @@ SPT.tableRenderer = function(plugin, config)
 			
 			options.ajax = function(data, callback, settings)
 			{
-				var ajaxInfos = chart.liveData("serverSidePagingAjaxInfos");
+				var ajaxInfos = chart.liveValue("serverSidePagingAjaxInfos");
 				if(ajaxInfos == null)
 				{
 					ajaxInfos = [];
-					chart.liveData("serverSidePagingAjaxInfos", ajaxInfos);
+					chart.liveValue("serverSidePagingAjaxInfos", ajaxInfos);
 				}
 				
 				ajaxInfos.push({ data: data, callback: callback, settings: settings });
 				
-				var refreshInfo = chart.liveData("serverSidePagingRefreshInfo");
+				var refreshInfo = chart.liveValue("serverSidePagingRefreshInfo");
 				
 				//由图表API触发，此时已获取到数据，不应再执行chart.refresh()函数
 				if(refreshInfo != null)
 				{
-					chart.liveData("serverSidePagingRefreshInfo", null);
+					chart.liveValue("serverSidePagingRefreshInfo", null);
 					
 					if(chart.isActive())
 						thisRenderer._updateInternalData(chart, refreshInfo.chartResult, refreshInfo.updateOptions);
@@ -5412,7 +5412,7 @@ SPT.tableRenderer = function(plugin, config)
 			
 			this._updateInternalOption(options, function(updateOptions, chart, chartResult)
 			{
-				var ajaxInfos = (chart.liveData("serverSidePagingAjaxInfos") || []);
+				var ajaxInfos = (chart.liveValue("serverSidePagingAjaxInfos") || []);
 				
 				//由表格内部操作触发
 				if(ajaxInfos.length > 0)
@@ -5433,7 +5433,7 @@ SPT.tableRenderer = function(plugin, config)
 						ajaxInfo.callback(pagingData);
 					}
 					
-					chart.liveData("serverSidePagingAjaxInfos", []);
+					chart.liveValue("serverSidePagingAjaxInfos", []);
 				}
 				//由图表API触发，比如：参数表单提交、chart.refresh()
 				else
@@ -5443,7 +5443,7 @@ SPT.tableRenderer = function(plugin, config)
 						thisRenderer._updatePagingState(chart, pagingState);
 					
 					var refreshInfo = { updateOptions: updateOptions, chartResult: chartResult };
-					chart.liveData("serverSidePagingRefreshInfo", refreshInfo);
+					chart.liveValue("serverSidePagingRefreshInfo", refreshInfo);
 					
 					var drawPagingArg = (serverSidePaging.drawPagingArg == null ? false : serverSidePaging.drawPagingArg);
 					if(CF.isFunction(drawPagingArg))
@@ -5573,7 +5573,7 @@ SPT.tableRenderer = function(plugin, config)
 				forceUpdate = true;
 				
 				jQuery(chart.element()).addClass(name);
-				chart.liveData(CF.builtinPropName("TableChartLocalStyleName"), name);
+				chart.liveValue(CF.builtinPropName("TableChartLocalStyleName"), name);
 			}
 			
 			chart.themeStyleSheet(name, () =>
@@ -5809,7 +5809,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_updateInternalData: function(chart, chartResult, updateOptions)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			
 			//自定义更新底层组件数据，当启用serverSide后，需要自定义调用其ajax配置项的callback更新数据，而非这里
 			//格式为：function(updateOptions, chart, chartResult){ ... }
@@ -5872,7 +5872,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_prepareCarousel: function(chart)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			
 			//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
 			if(renderOptions.serverSide == true || this._serverSidePagingOption(renderOptions) != null)
@@ -5913,7 +5913,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		_startCarousel: function(chart)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			
 			//此时需禁用轮播功能，不然dataTable.draw()会导致死循环
 			if(renderOptions.serverSide == true || this._serverSidePagingOption(renderOptions) != null)
@@ -6467,7 +6467,7 @@ SPT.selectRenderer = function(plugin, config)
 		
 		update: function(chart, chartResult)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			var dataSetBinds = SPT.dataSetBindsMainFetched(chart, chartResult);
 			var options = { data: [] };
 			
@@ -6627,7 +6627,7 @@ SPT.selectRenderer = function(plugin, config)
 		
 		_drawDataOptions: function(chart, options)
 		{
-			var renderOptions = SPT.liveDataRenderOptions(chart);
+			var renderOptions = SPT.liveValueRenderOptions(chart);
 			var internal = chart.internal();
 			var bindDataName = this._itemBindDataName();
 			
@@ -6842,7 +6842,7 @@ SPT.datetimeRenderer = function(plugin, config)
 		update: function(chart)
 		{
 			var options = {};
-			options = chart.inflateOptions(options, SPT.liveDataRenderOptions(chart));
+			options = chart.inflateOptions(options, SPT.liveValueRenderOptions(chart));
 			options = chart.inflateOptions(options);
 			SPT.processUpdateOptions(chart, options);
 			
@@ -6863,7 +6863,7 @@ SPT.datetimeRenderer = function(plugin, config)
 				},
 				interval);
 				
-				chart.liveData(this._intervalIdName, intervalId);
+				chart.liveValue(this._intervalIdName, intervalId);
 			}
 		},
 		
@@ -6881,12 +6881,12 @@ SPT.datetimeRenderer = function(plugin, config)
 		
 		_clearInterval: function(chart)
 		{
-			var intervalId = chart.liveData(this._intervalIdName);
+			var intervalId = chart.liveValue(this._intervalIdName);
 			
 			if(intervalId != null)
 			{
 				clearInterval(intervalId);
-				chart.liveData(this._intervalIdName, null);
+				chart.liveValue(this._intervalIdName, null);
 			}
 		},
 		
@@ -7739,19 +7739,19 @@ SPT.processRenderOptions = function(chart, renderOptions, set)
 	
 	if(set)
 	{
-		SPT.liveDataRenderOptions(chart, renderOptions);
+		SPT.liveValueRenderOptions(chart, renderOptions);
 	}
 	
 	return renderOptions;
 };
 
 //获取/设置图表渲染选项
-SPT.liveDataRenderOptions = function(chart, renderOptions)
+SPT.liveValueRenderOptions = function(chart, renderOptions)
 {
 	if(arguments.length <= 1)
-		return chart.liveData(SPT.RENDER_OPTIONS_LIVE_DATA_NAME);
+		return chart.liveValue(SPT.RENDER_OPTIONS_LIVE_VALUE_NAME);
 	else
-		chart.liveData(SPT.RENDER_OPTIONS_LIVE_DATA_NAME, renderOptions);
+		chart.liveValue(SPT.RENDER_OPTIONS_LIVE_VALUE_NAME, renderOptions);
 };
 
 //调用chart.options()中的processUpdateOptions选项函数处理图表更新选项，格式为：function(updateOptions, chart){ ... }
@@ -7769,19 +7769,19 @@ SPT.processUpdateOptions = function(chart, updateOptions, set)
 	
 	if(set)
 	{
-		SPT.liveDataUpdateOptions(chart, updateOptions);
+		SPT.liveValueUpdateOptions(chart, updateOptions);
 	}
 	
 	return updateOptions;
 };
 
 //获取/设置图表更新选项
-SPT.liveDataUpdateOptions = function(chart, updateOptions)
+SPT.liveValueUpdateOptions = function(chart, updateOptions)
 {
 	if(arguments.length <= 1)
-		return chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME);
+		return chart.liveValue(SPT.UPDATE_OPTIONS_LIVE_VALUE_NAME);
 	else
-		chart.liveData(SPT.UPDATE_OPTIONS_LIVE_DATA_NAME, updateOptions);
+		chart.liveValue(SPT.UPDATE_OPTIONS_LIVE_VALUE_NAME, updateOptions);
 };
 
 SPT.EVENT_TYPE_FOR_DATA_SUFFIX = ".data";
@@ -8595,7 +8595,7 @@ EU.renderMapChart = function(chart, options)
 //更新ECharts地图类图表
 EU.updateMapChart = function(chart, updateOptions)
 {
-	var renderOptions = SPT.liveDataRenderOptions(chart);
+	var renderOptions = SPT.liveValueRenderOptions(chart);
 	var renderMaps = EU.getDistinctMaps(renderOptions);
 	var updateMaps = EU.getDistinctMaps(updateOptions);
 	var mapChanged = (renderMaps.length !== updateMaps.length);
@@ -8990,7 +8990,7 @@ EU.inflateUpdateAxisData = function(chart, updateOptions, updateAxis, valueExtra
 	
 	updateAxis.data = axisData;
 	
-	EU.sortUpdateAxisData(SPT.liveDataRenderOptions(chart), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
+	EU.sortUpdateAxisData(SPT.liveValueRenderOptions(chart), updateOptions, updateAxis, true, sortSeriesData, valueExtractors);
 };
 
 /**
