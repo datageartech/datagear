@@ -1,0 +1,191 @@
+/*
+ * Copyright 2018-present datagear.tech
+ *
+ * This file is part of DataGear.
+ *
+ * DataGear is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Lesser General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * DataGear is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along with DataGear.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.datagear.analysis.form;
+
+import java.util.Locale;
+
+import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.Group;
+import org.datagear.analysis.NameTypeInputAware;
+
+/**
+ * 输入项图表插件属性。
+ * <p>
+ * 一个输入项描述{@linkplain ChartDefinition#getAttrValues()}中的一个基本型属性值的UI交互操作元信息。
+ * </p>
+ * 
+ * @author datagear@163.com
+ *
+ */
+public class InputFormProperty extends AbstractFormProperty implements NameTypeInputAware
+{
+	private static final long serialVersionUID = 1L;
+
+	public static final String PROPERTY_INPUT_TYPE = "inputType";
+	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
+	public static final String PROPERTY_DEFAULT_VALUE = "defaultValue";
+	public static final String PROPERTY_GROUP = "group";
+
+	/** 输入框类型 */
+	private String inputType = null;
+
+	/** 输入框载荷 */
+	private Object inputPayload = null;
+
+	/** 默认值 */
+	private Object defaultValue = null;
+
+	/**
+	 * 所属分组。
+	 * 
+	 * @deprecated 用于兼容旧的5.5.0版本的{@code ChartPluginAttribute}格式，
+	 *             在6.0版本起已被{@linkplain ObjectFormProperty}取代
+	 */
+	@Deprecated
+	private Group group = null;
+
+	public InputFormProperty()
+	{
+		super();
+	}
+
+	public InputFormProperty(String name, String type)
+	{
+		super(name, type);
+	}
+
+	public InputFormProperty(String name, String type, boolean required)
+	{
+		super(name, type);
+		setRequired(required);
+	}
+
+	/**
+	 * 获取名称，不应为空。
+	 */
+	@Override
+	public String getName()
+	{
+		return super.getName();
+	}
+
+	/**
+	 * 设置名称，不应为空。
+	 */
+	@Override
+	public void setName(String name)
+	{
+		super.setName(name);
+	}
+
+	/**
+	 * 获取输入框类型，常用类型参考{@linkplain InputType}。
+	 * 
+	 * @return 可能为{@code null}
+	 */
+	@Override
+	public String getInputType()
+	{
+		return inputType;
+	}
+
+	public void setInputType(String inputType)
+	{
+		this.inputType = inputType;
+	}
+
+	@Override
+	public Object getInputPayload()
+	{
+		return inputPayload;
+	}
+
+	public void setInputPayload(Object inputPayload)
+	{
+		this.inputPayload = inputPayload;
+	}
+
+	public Object getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	public void setDefaultValue(Object defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+
+	@Deprecated
+	public Group getGroup()
+	{
+		return group;
+	}
+
+	@Deprecated
+	public void setGroup(Group group)
+	{
+		this.group = group;
+	}
+
+	@Override
+	public InputFormProperty toLocale(Locale locale)
+	{
+		InputFormProperty target = new InputFormProperty();
+		copyToLocale(target, locale);
+		target.setInputType(this.inputType);
+		target.setInputPayload(this.inputPayload);
+		target.setDefaultValue(this.defaultValue);
+		target.setGroup(this.group != null ? this.group.clone(locale) : null);
+
+		return target;
+	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + isRequired()
+				+ ", array=" + isArray() + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
+	}
+	
+	/**
+	 * 常用的{@linkplain InputFormProperty#getInputType()}枚举。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class InputType
+	{
+		/** 文本框 */
+		public static final String TEXT = "text";
+
+		/** 下拉框 */
+		public static final String SELECT = "select";
+
+		/** 单选框 */
+		public static final String RADIO = "radio";
+
+		/** 复选框 */
+		public static final String CHECKBOX = "checkbox";
+
+		/** 文本域 */
+		public static final String TEXTAREA = "textarea";
+
+		/** 颜色 */
+		public static final String COLOR = "color";
+	}
+}
