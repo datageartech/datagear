@@ -141,14 +141,20 @@ public class ChartPluginInputAttribute extends AbstractChartPluginAttribute impl
 	@Override
 	public ChartPluginInputAttribute toLocale(Locale locale)
 	{
-		ChartPluginInputAttribute target = new ChartPluginInputAttribute();
-		copyToLocale(target, locale);
+		ChartPluginInputAttribute target = (ChartPluginInputAttribute) super.toLocale(locale);
+
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		target.setDefaultValue(this.defaultValue);
-		target.setGroup(this.group != null ? this.group.clone(locale) : null);
+		target.setGroup(this.group != null ? this.group.toLocale(locale) : null);
 
 		return target;
+	}
+
+	@Override
+	protected AbstractChartPluginAttribute createEmpty()
+	{
+		return new ChartPluginInputAttribute();
 	}
 
 	@Override

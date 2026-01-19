@@ -107,18 +107,26 @@ public abstract class AbstractFormProperty extends AbstractLabeled
 		return additions;
 	}
 
+	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
 	}
 
-	protected void copyToLocale(AbstractFormProperty target, Locale locale)
+	@Override
+	public AbstractFormProperty toLocale(Locale locale)
 	{
+		AbstractFormProperty target = createEmpty();
+
 		target.setName(this.name);
 		target.setType(this.type);
 		target.setRequired(this.required);
 		target.setArray(this.array);
 		target.setAdditions(this.additions);
 		LabelUtil.concrete(this, target, locale);
+
+		return target;
 	}
+
+	protected abstract AbstractFormProperty createEmpty();
 }

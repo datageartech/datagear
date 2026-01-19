@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.LabelUtil;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 抽象{@linkplain ChartPluginAttribute}。
@@ -30,7 +31,7 @@ import org.datagear.util.i18n.LabelUtil;
  *
  */
 public abstract class AbstractChartPluginAttribute extends AbstractLabeled
-		implements ChartPluginAttribute
+		implements ChartPluginAttribute, Localizable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -107,18 +108,26 @@ public abstract class AbstractChartPluginAttribute extends AbstractLabeled
 		return additions;
 	}
 
+	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
 	}
 
-	protected void copyToLocale(AbstractChartPluginAttribute target, Locale locale)
+	@Override
+	public AbstractChartPluginAttribute toLocale(Locale locale)
 	{
+		AbstractChartPluginAttribute target = createEmpty();
+
 		target.setName(this.name);
 		target.setType(this.type);
 		target.setRequired(this.required);
 		target.setArray(this.array);
 		target.setAdditions(this.additions);
 		LabelUtil.concrete(this, target, locale);
+
+		return target;
 	}
+
+	protected abstract AbstractChartPluginAttribute createEmpty();
 }

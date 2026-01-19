@@ -18,13 +18,10 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 图表插件属性。
@@ -36,7 +33,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public interface ChartPluginAttribute extends Labeled, NameTypeAware, AdditionsAware, Serializable
+public interface ChartPluginAttribute extends Labeled, NameTypeAware, AdditionsAware, Localizable, Serializable
 {
 	String PROPERTY_NAME = "name";
 	String PROPERTY_TYPE = "type";
@@ -81,30 +78,8 @@ public interface ChartPluginAttribute extends Labeled, NameTypeAware, AdditionsA
 	 * @param locale
 	 * @return
 	 */
+	@Override
 	ChartPluginAttribute toLocale(Locale locale);
-
-	/**
-	 * 复制并转换为指定{@linkplain Locale}下的{@linkplain ChartPluginAttribute}列表。
-	 * 
-	 * @param attributes
-	 * @param locale
-	 * @return
-	 */
-	static List<ChartPluginAttribute> toLocale(Collection<? extends ChartPluginAttribute> attributes, Locale locale)
-	{
-		if (attributes == null)
-			return null;
-
-		if (attributes.isEmpty())
-			return Collections.emptyList();
-
-		List<ChartPluginAttribute> re = new ArrayList<>(attributes.size());
-
-		for (ChartPluginAttribute attribute : attributes)
-			re.add(attribute == null ? null : attribute.toLocale(locale));
-
-		return re;
-	}
 
 	/**
 	 * {@linkplain ChartPluginAttribute#getType()}枚举。

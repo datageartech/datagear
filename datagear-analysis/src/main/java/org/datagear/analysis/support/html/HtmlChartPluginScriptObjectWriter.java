@@ -27,17 +27,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartPluginAttribute;
 import org.datagear.analysis.ChartPluginResource;
-import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.LabelUtil;
+import org.datagear.util.i18n.Localizable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -178,12 +176,12 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			LabelUtil.concrete(plugin, this, locale);
 			setResources(ChartPluginResourceJson.valuesOf(plugin.getResources()));
 			setIconResourceNames(plugin.getIconResourceNames());
-			setAttributes(ChartPluginAttribute.toLocale(plugin.getAttributes(), locale));
-			setDataSigns(DataSign.clone(plugin.getDataSigns(), locale));
+			setAttributes(Localizable.toLocale(plugin.getAttributes(), locale));
+			setDataSigns(Localizable.toLocale(plugin.getDataSigns(), locale));
 			setDataSetRange(plugin.getDataSetRange());
 			setVersion(plugin.getVersion());
 			setOrder(plugin.getOrder());
-			setCategories(Category.clone(plugin.getCategories(), locale));
+			setCategories(Localizable.toLocale(plugin.getCategories(), locale));
 			setCategoryOrders(plugin.getCategoryOrders());
 			setAuthor(plugin.getAuthor());
 			setContact(plugin.getContact());

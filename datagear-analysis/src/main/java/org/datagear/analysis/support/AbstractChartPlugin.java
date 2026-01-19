@@ -312,6 +312,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 		return additions;
 	}
 
+	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;

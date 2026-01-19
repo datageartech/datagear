@@ -34,7 +34,6 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_RESOURCES = "resources";
-	String PROPERTY_ATTRIBUTES = "attributes";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_DATA_SET_RANGE = "dataSetRange";
 	String PROPERTY_VERSION = "version";
@@ -45,6 +44,12 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String PROPERTY_CONTACT = "contact";
 	String PROPERTY_ISSUE_DATE = "issueDate";
 	String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
+
+	/**
+	 * @deprecated 5.5.0及以下版本格式需要
+	 */
+	@Deprecated
+	String PROPERTY_ATTRIBUTES = "attributes";
 
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";

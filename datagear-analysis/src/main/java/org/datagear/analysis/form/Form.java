@@ -20,12 +20,15 @@ package org.datagear.analysis.form;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.analysis.AdditionsAware;
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.Label;
+import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 表单。
@@ -34,7 +37,7 @@ import org.datagear.util.i18n.Labeled;
  *
  */
 public class Form extends AbstractLabeled
-		implements GroupFormProperties, Labeled, AdditionsAware, DefaultValueAware, Serializable
+		implements GroupFormProperties, Labeled, AdditionsAware, DefaultValueAware, Localizable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -79,6 +82,14 @@ public class Form extends AbstractLabeled
 		this.groups = groups;
 	}
 
+	/**
+	 * 获取{@linkplain FormProperty}列表，为空或{@code null}表示没有。
+	 * <p>
+	 * 列表中{@linkplain FormProperty#getName()}不应重复。
+	 * </p>
+	 * 
+	 * @return
+	 */
 	@Override
 	public List<FormProperty> getProperties()
 	{
@@ -123,5 +134,23 @@ public class Form extends AbstractLabeled
 	public void setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
+	}
+
+	@Override
+	public Form toLocale(Locale locale)
+	{
+		Form target = createEmpty();
+
+		target.setProperties(Localizable.toLocale(this.properties, locale));
+		target.setGroups(Localizable.toLocale(this.groups, locale));
+		target.setDefaultValue(this.defaultValue);
+		LabelUtil.concrete(this, target, locale);
+
+		return target;
+	}
+
+	protected Form createEmpty()
+	{
+		return new Form();
 	}
 }

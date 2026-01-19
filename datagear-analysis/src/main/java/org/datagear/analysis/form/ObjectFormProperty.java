@@ -20,6 +20,8 @@ package org.datagear.analysis.form;
 import java.util.List;
 import java.util.Locale;
 
+import org.datagear.util.i18n.Localizable;
+
 /**
  * 对象型图表插件属性。
  * <p>
@@ -130,12 +132,18 @@ public class ObjectFormProperty extends AbstractFormProperty implements GroupFor
 	@Override
 	public ObjectFormProperty toLocale(Locale locale)
 	{
-		ObjectFormProperty target = new ObjectFormProperty();
-		copyToLocale(target, locale);
-		target.setProperties(FormProperty.toLocale(this.properties, locale));
-		target.setGroups(FormPropertyGroup.toLocale(this.groups, locale));
+		ObjectFormProperty target = (ObjectFormProperty) super.toLocale(locale);
+
+		target.setProperties(Localizable.toLocale(this.properties, locale));
+		target.setGroups(Localizable.toLocale(this.groups, locale));
 		target.setDefaultValue(this.defaultValue);
 
 		return target;
+	}
+
+	@Override
+	protected ObjectFormProperty createEmpty()
+	{
+		return new ObjectFormProperty();
 	}
 }

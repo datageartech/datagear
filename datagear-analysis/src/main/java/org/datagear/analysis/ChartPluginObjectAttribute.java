@@ -20,6 +20,8 @@ package org.datagear.analysis;
 import java.util.List;
 import java.util.Locale;
 
+import org.datagear.util.i18n.Localizable;
+
 /**
  * 对象型图表插件属性。
  * <p>
@@ -112,11 +114,17 @@ public class ChartPluginObjectAttribute extends AbstractChartPluginAttribute
 	@Override
 	public ChartPluginObjectAttribute toLocale(Locale locale)
 	{
-		ChartPluginObjectAttribute target = new ChartPluginObjectAttribute();
-		copyToLocale(target, locale);
-		target.setChildren(ChartPluginAttribute.toLocale(this.children, locale));
-		target.setGroups(ChartPluginAttributeGroup.toLocale(this.groups, locale));
+		ChartPluginObjectAttribute target = (ChartPluginObjectAttribute) super.toLocale(locale);
+
+		target.setChildren(Localizable.toLocale(this.children, locale));
+		target.setGroups(Localizable.toLocale(this.groups, locale));
 
 		return target;
+	}
+
+	@Override
+	protected ChartPluginObjectAttribute createEmpty()
+	{
+		return new ChartPluginObjectAttribute();
 	}
 }

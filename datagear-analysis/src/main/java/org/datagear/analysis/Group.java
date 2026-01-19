@@ -18,13 +18,12 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 分组。
@@ -39,7 +38,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class Group extends AbstractLabeled implements NameAware, Serializable
+public class Group extends AbstractLabeled implements NameAware, Localizable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -84,19 +83,21 @@ public class Group extends AbstractLabeled implements NameAware, Serializable
 		this.order = order;
 	}
 
-	/**
-	 * 复制为指定{@linkplain Locale}的对象。
-	 * 
-	 * @param locale
-	 * @return
-	 */
-	public Group clone(Locale locale)
+	@Override
+	public Group toLocale(Locale locale)
 	{
-		Group target = new Group(this.name);
+		Group target = createEmpty();
+
+		target.setName(this.name);
 		target.setOrder(this.order);
 		LabelUtil.concrete(this, target, locale);
 
 		return target;
+	}
+
+	protected Group createEmpty()
+	{
+		return new Group();
 	}
 
 	@Override
@@ -104,25 +105,5 @@ public class Group extends AbstractLabeled implements NameAware, Serializable
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", nameLabel=" + getNameLabel() + ", descLabel="
 				+ getDescLabel() + ", order=" + order + "]";
-	}
-
-	/**
-	 * 复制为指定{@linkplain Locale}的对象。
-	 * 
-	 * @param categories
-	 * @param locale
-	 * @return
-	 */
-	public static List<Group> clone(List<Group> categories, Locale locale)
-	{
-		if (categories == null)
-			return null;
-
-		List<Group> re = new ArrayList<Group>(categories.size());
-
-		for (Group category : categories)
-			re.add(category.clone(locale));
-
-		return re;
 	}
 }

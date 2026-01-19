@@ -18,7 +18,6 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +25,7 @@ import java.util.Map;
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 数据标记。
@@ -41,7 +41,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class DataSign extends AbstractLabeled implements AdditionsAware, Serializable
+public class DataSign extends AbstractLabeled implements AdditionsAware, Localizable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -178,6 +178,7 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 		return additions;
 	}
 
+	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
@@ -189,25 +190,25 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 	 * @param locale
 	 * @return
 	 */
-	public DataSign clone(Locale locale)
+	@Override
+	public DataSign toLocale(Locale locale)
 	{
-		DataSign re = new DataSign(this.name, this.targets, this.required, this.multiple);
+		DataSign re = createEmpty();
+
+		re.setName(this.name);
+		re.setTargets(this.targets);
+		re.setRequired(this.required);
+		re.setMultiple(this.multiple);
 		re.setAdditions(this.additions);
 		LabelUtil.concrete(this, re, locale);
-
-		if (this.children != null)
-		{
-			List<DataSign> reChildren = new ArrayList<>(this.children.size());
-
-			for (DataSign dataSign : this.children)
-			{
-				reChildren.add(dataSign.clone(locale));
-			}
-
-			re.setChildren(reChildren);
-		}
+		re.setChildren(Localizable.toLocale(this.children, locale));
 
 		return re;
+	}
+
+	protected DataSign createEmpty()
+	{
+		return new DataSign();
 	}
 
 	@Override
@@ -216,25 +217,5 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Seriali
 		return getClass().getSimpleName() + " [name=" + name + ", targets=" + targets + ", required=" + required
 				+ ", multiple=" + multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel()
 				+ ", additions=" + additions + "]";
-	}
-
-	/**
-	 * 复制为指定{@linkplain Locale}的对象。
-	 * 
-	 * @param dataSigns
-	 * @param locale
-	 * @return
-	 */
-	public static List<DataSign> clone(List<DataSign> dataSigns, Locale locale)
-	{
-		if (dataSigns == null)
-			return null;
-
-		List<DataSign> re = new ArrayList<DataSign>(dataSigns.size());
-
-		for (DataSign dataSign : dataSigns)
-			re.add(dataSign.clone(locale));
-
-		return re;
 	}
 }

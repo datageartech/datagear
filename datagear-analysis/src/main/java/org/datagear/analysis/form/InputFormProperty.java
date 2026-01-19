@@ -124,8 +124,8 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 	@Override
 	public InputFormProperty toLocale(Locale locale)
 	{
-		InputFormProperty target = new InputFormProperty();
-		copyToLocale(target, locale);
+		InputFormProperty target = (InputFormProperty) super.toLocale(locale);
+
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		target.setDefaultValue(this.defaultValue);
@@ -133,6 +133,12 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 		return target;
 	}
 
+	@Override
+	protected InputFormProperty createEmpty()
+	{
+		return new InputFormProperty();
+	}
+	
 	@Override
 	public String toString()
 	{

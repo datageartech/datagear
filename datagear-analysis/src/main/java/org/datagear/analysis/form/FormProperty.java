@@ -18,15 +18,12 @@
 package org.datagear.analysis.form;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 import org.datagear.analysis.AdditionsAware;
 import org.datagear.analysis.NameTypeAware;
 import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 表单属性。
@@ -38,7 +35,8 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public interface FormProperty extends Labeled, NameTypeAware, AdditionsAware, DefaultValueAware, Serializable
+public interface FormProperty
+		extends Labeled, NameTypeAware, AdditionsAware, DefaultValueAware, Localizable, Serializable
 {
 	String PROPERTY_NAME = "name";
 	String PROPERTY_TYPE = "type";
@@ -77,34 +75,6 @@ public interface FormProperty extends Labeled, NameTypeAware, AdditionsAware, De
 	 */
 	boolean isArray();
 
-	/**
-	 * 复制并转换为指定{@linkplain Locale}下的{@linkplain FormProperty}。
-	 * 
-	 * @param locale
-	 * @return
-	 */
+	@Override
 	FormProperty toLocale(Locale locale);
-
-	/**
-	 * 复制并转换为指定{@linkplain Locale}下的{@linkplain FormProperty}列表。
-	 * 
-	 * @param attributes
-	 * @param locale
-	 * @return
-	 */
-	static List<FormProperty> toLocale(Collection<? extends FormProperty> attributes, Locale locale)
-	{
-		if (attributes == null)
-			return null;
-
-		if (attributes.isEmpty())
-			return Collections.emptyList();
-
-		List<FormProperty> re = new ArrayList<>(attributes.size());
-
-		for (FormProperty attribute : attributes)
-			re.add(attribute == null ? null : attribute.toLocale(locale));
-
-		return re;
-	}
 }

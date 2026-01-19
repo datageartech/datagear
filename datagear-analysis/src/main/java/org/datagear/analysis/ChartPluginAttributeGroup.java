@@ -18,7 +18,6 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +26,7 @@ import java.util.Map;
 import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * 图表插件属性分组。
@@ -34,7 +34,7 @@ import org.datagear.util.i18n.Labeled;
  * @author datagear@163.com
  *
  */
-public class ChartPluginAttributeGroup extends AbstractLabeled implements AdditionsAware, Serializable
+public class ChartPluginAttributeGroup extends AbstractLabeled implements AdditionsAware, Localizable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -76,6 +76,7 @@ public class ChartPluginAttributeGroup extends AbstractLabeled implements Additi
 		return additions;
 	}
 
+	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
@@ -87,13 +88,21 @@ public class ChartPluginAttributeGroup extends AbstractLabeled implements Additi
 	 * @param locale
 	 * @return
 	 */
+	@Override
 	public ChartPluginAttributeGroup toLocale(Locale locale)
 	{
-		ChartPluginAttributeGroup target = new ChartPluginAttributeGroup(this.names);
-		LabelUtil.concrete(this, target, locale);
+		ChartPluginAttributeGroup target = createEmpty();
+
+		target.setNames(this.names);
 		target.setAdditions(this.additions);
+		LabelUtil.concrete(this, target, locale);
 
 		return target;
+	}
+
+	protected ChartPluginAttributeGroup createEmpty()
+	{
+		return new ChartPluginAttributeGroup();
 	}
 
 	@Override
@@ -101,28 +110,5 @@ public class ChartPluginAttributeGroup extends AbstractLabeled implements Additi
 	{
 		return getClass().getSimpleName() + " [names=" + names + ", nameLabel=" + getNameLabel() + ", descLabel="
 				+ getDescLabel() + "]";
-	}
-
-	/**
-	 * 复制为指定{@linkplain Locale}的对象。
-	 * 
-	 * @param groups
-	 * @param locale
-	 * @return
-	 */
-	public static List<ChartPluginAttributeGroup> toLocale(List<ChartPluginAttributeGroup> groups, Locale locale)
-	{
-		if (groups == null)
-			return null;
-
-		if (groups.isEmpty())
-			return Collections.emptyList();
-
-		List<ChartPluginAttributeGroup> re = new ArrayList<ChartPluginAttributeGroup>(groups.size());
-
-		for (ChartPluginAttributeGroup group : groups)
-			re.add(group.toLocale(locale));
-
-		return re;
 	}
 }
