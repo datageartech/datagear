@@ -1,0 +1,227 @@
+{
+	id : "pie-chart",
+	"nameLabel" :
+	{
+		value : '饼图',
+		localeValues :
+		{
+			'en' : 'pie chart',
+			'zh' : '饼图中文'
+		}
+	},
+	descLabel :
+	{
+		value : '饼图描述',
+		localeValues :
+		{
+			'en' : 'pie chart desc',
+			'zh' : '饼图描述中文'
+		}
+	},
+	manualLabel :
+	{
+		value : '饼图指南',
+		localeValues :
+		{
+			'en' : 'pie chart manual',
+			'zh' : '饼图指南中文'
+		}
+	},
+	icons :
+	{
+		'LIGHT' :  'icon-0.png',
+		'DARK' :  'icon-1.png'
+	},
+	dataSigns :
+	[
+  		{
+			name : 'x-value',
+			required : false,
+			multiple : false,
+			nameLabel :
+			{
+				value : 'X值',
+				localeValues :
+				{
+					'en' : 'X value',
+					'zh' : 'X值中文'
+				}
+			},
+			descLabel :
+			{
+				value : 'X值描述',
+				localeValues :
+				{
+					'en' : 'X value desc',
+					'zh' : 'X值描述中文'
+				}
+			},
+			additions:
+			{
+				for: "field",
+				name: "x-val"
+			}
+		},
+		{
+			name : 'y-value',
+			required : true,
+			multiple : true,
+			nameLabel :
+			{
+				value : 'Y值',
+				localeValues :
+				{
+					'en' : 'Y value',
+					'zh' : 'Y值中文'
+				}
+			},
+  			descLabel :
+  			{
+  				value : 'Y值描述',
+  				localeValues :
+  				{
+  					'en' : 'Y value desc',
+  					'zh' : 'Y值描述中文'
+  				}
+  			}
+		},
+		{
+			name: "simple-value"
+		}
+	],
+	dataSetRange:
+	{
+		min: 1
+	},
+	attributes :
+	[
+  		{
+			name : 'title',
+			type : 'STRING',
+			nameLabel :
+			{
+				value : '标题',
+				localeValues :
+				{
+					'en' : 'title',
+					'zh' : '标题中文'
+				}
+			},
+			descLabel :
+			{
+				value : '标题描述',
+				localeValues :
+				{
+					'en' : 'title desc',
+					'zh' : '标题描述中文'
+				}
+			},
+			group:
+			{
+				name: "group-0",
+				nameLabel :
+				{
+					value : '分组-0',
+					localeValues :
+					{
+						'en' : 'group-0',
+						'zh' : '分组-0-中文'
+					}
+				},
+				descLabel :
+				{
+					value : '分组-0-描述',
+					localeValues :
+					{
+						'en' : 'group-0 desc',
+						'zh' : '分组-0-描述-中文'
+					}
+				},
+				order: 99
+			},
+			additions:
+			{
+				for: "that",
+				optionPath: "title.text",
+				priority: 3
+			}
+		},
+		{
+			name : 'interval',
+			type : 'NUMBER',
+			nameLabel :
+			{
+				value : '间隔',
+				localeValues :
+				{
+					'en' : 'interval',
+					'zh' : '间隔中文'
+				}
+			},
+  			descLabel :
+  			{
+  				value : '间隔描述',
+  				localeValues :
+  				{
+  					'en' : 'interval desc',
+  					'zh' : '间隔描述中文'
+  				}
+  			},
+  			required: true,
+  			inputType: "mytype",
+  			inputPayload: "mypayload",
+			group: "group-1"
+		},
+  		{
+			name : 'a2',
+			type : 'BOOLEAN',
+			inputPayload: [ {name: "a", value: 2}, {name: "b", value: 3} ]
+		},
+  		{
+			name : 'a3',
+			type : 'string',
+			inputPayload: [ "a", "b" ],
+			defaultValue: "a"
+		},
+  		{
+			name : 'a4',
+			type : 'number',
+			inputPayload: [ 2, 3 ],
+			defaultValue: 2
+		},
+  		{
+			name : 'a5',
+			type : 'boolean',
+			defaultValue: false
+		},
+  		{
+			name : 'a6',
+			type : 'custom'
+		},
+  		{
+			name : 'a7'
+		}
+	],
+	version : "0.1.0",
+	order : 2,
+	categories :
+	[
+		{
+			name : 'line',
+			nameLabel : "nameLabel-line",
+			descLabel : "descLabel-line",
+			order: 41
+		},
+		{
+			name : 'bar',
+			nameLabel : "nameLabel-bar",
+			descLabel : "descLabel-bar",
+			order: 51
+		}
+	],
+	categoryOrders: [ 41, 51 ],
+	author: "test",
+	issueDate: "2024-09-01",
+	platformVersion: "5.3.0+",
+	additions: { name: "aaa", value: 3 }
+}

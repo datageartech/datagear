@@ -30,17 +30,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.AbstractChartPluginAttribute;
 import org.datagear.analysis.Category;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPluginAttribute;
-import org.datagear.analysis.ChartPluginAttributeGroup;
+import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
-import org.datagear.analysis.ChartPluginInputAttribute;
-import org.datagear.analysis.ChartPluginObjectAttribute;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Group;
+import org.datagear.analysis.form.AbstractFormProperty;
+import org.datagear.analysis.form.Form;
+import org.datagear.analysis.form.FormProperty;
+import org.datagear.analysis.form.FormPropertyGroup;
+import org.datagear.analysis.form.InputFormProperty;
+import org.datagear.analysis.form.ObjectFormProperty;
+import org.datagear.analysis.form.PropertyInputType;
+import org.datagear.analysis.form.PropertyType;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
@@ -57,7 +62,8 @@ import org.datagear.util.i18n.Label;
  *   nameLabel : "..." 、 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  *   descLabel : "..." 、 { ... },
  *   icons : "..." 、 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
- *   attributes :  [ { ... }, ... ],
+ *   attributeForm : { ... },
+ *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同attributeForm
  *   dataSigns : [ { ... }, ... ],
  *   dataSetRange: 数值 、 "none" 、 { ... },
  *   version : "...",
@@ -86,7 +92,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ID = ChartPlugin.PROPERTY_ID;
 	public static final String JSON_PROPERTY_NAME_LABEL = ChartPlugin.PROPERTY_NAME_LABEL;
 	public static final String JSON_PROPERTY_DESC_LABEL = ChartPlugin.PROPERTY_DESC_LABEL;
-	public static final String JSON_PROPERTY_ATTRIBUTES = ChartPlugin.PROPERTY_ATTRIBUTES;
+	public static final String JSON_PROPERTY_ATTRIBUTE_FORM = ChartPlugin.PROPERTY_ATTRIBUTE_FORM;
 	public static final String JSON_PROPERTY_DATA_SIGNS = ChartPlugin.PROPERTY_DATA_SIGNS;
 	public static final String JSON_PROPERTY_DATA_SET_RANGE = ChartPlugin.PROPERTY_DATA_SET_RANGE;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
@@ -98,6 +104,25 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本格式
+	 */
+	@Deprecated
+	public static final String JSON_PROPERTY_ATTRIBUTES = ChartPlugin.PROPERTY_ATTRIBUTES;
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginInputAttribute.group}格式
+	 */
+	@Deprecated
+	public static final String JSON_PROPERTY_INPUT_ATTR_GROUP = "group";
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginInputAttribute.group}格式
+	 */
+	@Deprecated
+	public static final String INPUT_PROPERTY_ADDITION_OLD_GROUP = ChartDefinition.BUILTIN_ATTR_PREFIX
+			+ "GROUP_FOR_5_5_0";
 
 	/**
 	 * {@linkplain #JSON_PROPERTY_DATA_SET_RANGE}属性的特殊值：{@code "none"}
@@ -135,7 +160,12 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
 		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
-		chartPlugin.setAttributes(convertToAttributes(properties.get(JSON_PROPERTY_ATTRIBUTES)));
+
+		if (properties.containsKey(JSON_PROPERTY_ATTRIBUTE_FORM))
+			chartPlugin.setAttributeForm(convertToAttributeForm(properties.get(JSON_PROPERTY_ATTRIBUTE_FORM)));
+		else if (properties.containsKey(JSON_PROPERTY_ATTRIBUTES))
+			chartPlugin.setAttributeForm(convertToAttributeFormForV5_5_0(properties.get(JSON_PROPERTY_ATTRIBUTES)));
+
 		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS), null));
 		chartPlugin.setDataSetRange(convertToDataSetRange(properties.get(JSON_PROPERTY_DATA_SET_RANGE)));
 		chartPlugin.setVersion(convertToString(properties.get(JSON_PROPERTY_VERSION)));
@@ -432,13 +462,46 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	}
 
 	/**
-	 * 将对象转换为{@linkplain ChartPluginAttribute}列表。
+	 * 将对象转换为{@linkplain ChartPluginAttributeForm}。
 	 * <p>
 	 * 支持格式如下：
-	 * </p>
 	 * <p>
 	 * <code>{ ... }</code>
 	 * </p>
+	 * 
+	 * @return
+	 */
+	protected ChartPluginAttributeForm convertToAttributeForm(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof ChartPluginAttributeForm)
+			return ((ChartPluginAttributeForm) obj);
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			ChartPluginAttributeForm form = createChartPluginAttributeForm();
+			form.setName(convertToString(map.get(ChartPluginAttributeForm.PROPERTY_NAME)));
+			form.setProperties(convertToFormProperties(map.get(Form.PROPERTY_PROPERTIES)));
+			form.setGroups(convertToFormPropertyGroups(map.get(Form.PROPERTY_GROUPS)));
+			form.setNameLabel(convertToLabel(map.get(Form.PROPERTY_NAME_LABEL)));
+			form.setDescLabel(convertToLabel(map.get(Form.PROPERTY_DESC_LABEL)));
+			form.setAdditions(convertToAdditions(map.get(Form.PROPERTY_ADDITIONS)));
+			form.setDefaultValue(map.get(Form.PROPERTY_DEFAULT_VALUE));
+
+			return form;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ ChartPluginAttributeForm.class.getName() + "] unsupported");
+	}
+
+	/**
+	 * 将{@code 5.5.0}版的对象转换为{@linkplain ChartPluginAttributeForm}。
+	 * <p>
+	 * 支持格式如下：
 	 * <p>
 	 * <code>[ { ... }, ... ]</code>
 	 * </p>
@@ -446,7 +509,26 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param obj
 	 * @return
 	 */
-	protected List<ChartPluginAttribute> convertToAttributes(Object obj)
+	protected ChartPluginAttributeForm convertToAttributeFormForV5_5_0(Object obj)
+	{
+		List<FormProperty> properties = convertToFormProperties(obj);
+
+		if (properties == null)
+			return null;
+
+		ChartPluginAttributeForm form = createChartPluginAttributeForm();
+		form.setProperties(properties);
+
+		return form;
+	}
+
+	/**
+	 * 将对象转换为{@linkplain FormProperty}列表。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected List<FormProperty> convertToFormProperties(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -454,20 +536,20 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		{
 			Object[] array = (Object[]) obj;
 
-			List<ChartPluginAttribute> attributes = new ArrayList<>();
+			List<FormProperty> properties = new ArrayList<>();
 
 			for (Object ele : array)
 			{
-				ChartPluginAttribute attribute = convertToAttribute(ele);
+				FormProperty property = convertToFormProperty(ele);
 
-				if (attribute != null)
-					attributes.add(attribute);
+				if (property != null)
+					properties.add(property);
 			}
 
-			if (attributes.isEmpty())
+			if (properties.isEmpty())
 				return null;
 
-			return attributes;
+			return properties;
 		}
 		else if (obj instanceof Collection<?>)
 		{
@@ -475,105 +557,118 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Object[] array = new Object[collection.size()];
 			collection.toArray(array);
 
-			return convertToAttributes(array);
+			return convertToFormProperties(array);
 		}
 		else
 		{
 			Object[] array = new Object[] { obj };
-
-			return convertToAttributes(array);
+			return convertToFormProperties(array);
 		}
 	}
 
 	/**
-	 * 将对象转换为{@linkplain ChartPluginAttribute}。
+	 * 将对象转换为{@linkplain FormProperty}。
 	 * 
 	 * @param obj
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
-	protected ChartPluginAttribute convertToAttribute(Object obj)
+	protected FormProperty convertToFormProperty(Object obj)
 	{
 		if (obj == null)
 			return null;
-		else if (obj instanceof ChartPluginAttribute)
+		else if (obj instanceof FormProperty)
 		{
-			ChartPluginAttribute attr = (ChartPluginAttribute) obj;
+			FormProperty prop = (FormProperty) obj;
 
-			if (StringUtil.isEmpty(attr.getName()))
-				throw new IllegalArgumentException(ChartPluginAttribute.class.getSimpleName() + ".name required");
+			if (StringUtil.isEmpty(prop.getName()))
+				throw new IllegalArgumentException(FormProperty.class.getSimpleName() + ".name required");
 
-			return attr;
+			return prop;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
-			boolean isObject = (map.containsKey(ChartPluginObjectAttribute.PROPERTY_CHILDREN));
-			String name = convertToString(map.get(ChartPluginAttribute.PROPERTY_NAME));
+
+			String type = convertToString(map.get(FormProperty.PROPERTY_TYPE));
+			boolean isObject = (PropertyType.OBJECT.equalsIgnoreCase(type)
+					|| map.containsKey(ObjectFormProperty.PROPERTY_PROPERTIES));
+			String name = convertToString(map.get(FormProperty.PROPERTY_NAME));
 
 			if (StringUtil.isEmpty(name))
 				return null;
 
-			AbstractChartPluginAttribute attribute;
+			AbstractFormProperty prop;
 
 			if (isObject)
-				attribute = createChartPluginObjectAttribute();
+				prop = createObjectFormProperty();
 			else
-				attribute = createChartPluginInputAttribute();
+				prop = createInputFormProperty();
 
-			attribute.setName(name);
-			attribute.setNameLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_NAME_LABEL)));
-			attribute.setDescLabel(convertToLabel(map.get(ChartPluginAttribute.PROPERTY_DESC_LABEL)));
-			attribute.setRequired(convertToAttrRequired(map.get(ChartPluginAttribute.PROPERTY_REQUIRED)));
-			attribute.setArray(convertToAttrArray(map.get(ChartPluginAttribute.PROPERTY_ARRAY)));
-			attribute.setAdditions(convertToAdditions(map.get(ChartPluginAttribute.PROPERTY_ADDITIONS)));
+			prop.setName(name);
+			prop.setNameLabel(convertToLabel(map.get(FormProperty.PROPERTY_NAME_LABEL)));
+			prop.setDescLabel(convertToLabel(map.get(FormProperty.PROPERTY_DESC_LABEL)));
+			prop.setRequired(convertToFormPropertyRequired(map.get(FormProperty.PROPERTY_REQUIRED)));
+			prop.setArray(convertToFormPropertyArray(map.get(FormProperty.PROPERTY_ARRAY)));
+			prop.setAdditions(convertToAdditions(map.get(FormProperty.PROPERTY_ADDITIONS)));
+			prop.setDefaultValue(map.get(FormProperty.PROPERTY_DEFAULT_VALUE));
 
 			if (isObject)
 			{
-				ChartPluginObjectAttribute objAttr = (ChartPluginObjectAttribute) attribute;
+				ObjectFormProperty objProp = (ObjectFormProperty) prop;
 
-				objAttr.setChildren(convertToAttributes(map.get(ChartPluginObjectAttribute.PROPERTY_CHILDREN)));
-				objAttr.setGroups(convertToAttrGroups(map.get(ChartPluginObjectAttribute.PROPERTY_GROUPS)));
+				objProp.setProperties(convertToFormProperties(map.get(ObjectFormProperty.PROPERTY_PROPERTIES)));
+				objProp.setGroups(convertToFormPropertyGroups(map.get(ObjectFormProperty.PROPERTY_GROUPS)));
 			}
 			else
 			{
-				ChartPluginInputAttribute inputAttr = (ChartPluginInputAttribute) attribute;
+				InputFormProperty inputProp = (InputFormProperty) prop;
 
-				inputAttr.setType(convertToAttrType(map.get(ChartPluginInputAttribute.PROPERTY_TYPE)));
-				inputAttr.setInputType(
-						convertToInputAttrInputType(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_TYPE)));
-				inputAttr.setInputPayload(
-						convertToInputAttrInputPayload(map.get(ChartPluginInputAttribute.PROPERTY_INPUT_PAYLOAD)));
-				inputAttr.setDefaultValue(map.get(ChartPluginInputAttribute.PROPERTY_DEFAULT_VALUE));
-				inputAttr.setGroup(convertToInputAttrGroup(map.get(ChartPluginInputAttribute.PROPERTY_GROUP)));
+				inputProp.setType(convertToFormPropertyType(type));
+				inputProp.setInputType(
+						convertToInputFormPropertyInputType(map.get(InputFormProperty.PROPERTY_INPUT_TYPE)));
+				inputProp.setInputPayload(
+						convertToInputFormPropertyInputPayload(map.get(InputFormProperty.PROPERTY_INPUT_PAYLOAD)));
+				inputProp.setDefaultValue(map.get(FormProperty.PROPERTY_DEFAULT_VALUE));
+
+				// 将旧版分组信息存入附加数据中，便于前端恢复旧版格式
+				Group group = convertToInputFormPropertyGroupForV5_5_0(map.get(JSON_PROPERTY_INPUT_ATTR_GROUP));
+				if (group != null)
+				{
+					@SuppressWarnings("unchecked")
+					Map<String, Object> additions = (Map<String, Object>) inputProp.getAdditions();
+					additions = (additions == null ? new HashMap<>()
+							: (additions instanceof HashMap<?, ?> ? additions : new HashMap<>(additions)));
+					additions.put(INPUT_PROPERTY_ADDITION_OLD_GROUP, group);
+					inputProp.setAdditions(additions);
+				}
 			}
 
-			return attribute;
+			return prop;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttribute.class.getName() + "] unsupported");
+					+ FormProperty.class.getName() + "] unsupported");
 	}
 
-	protected boolean convertToAttrRequired(Object v)
+	protected boolean convertToFormPropertyRequired(Object v)
 	{
 		// 不要修改这里的默认值，因为会影响插件规范
 		boolean dftValue = false;
 		return convertToBoolean(v, dftValue);
 	}
 
-	protected boolean convertToAttrArray(Object v)
+	protected boolean convertToFormPropertyArray(Object v)
 	{
 		// 不要修改这里的默认值，因为会影响插件规范
 		boolean dftValue = false;
 		return convertToBoolean(v, dftValue);
 	}
 
-	protected String convertToAttrType(Object obj)
+	protected String convertToFormPropertyType(Object obj)
 	{
 		// 不要修改这里的默认值，因为会影响插件规范
-		String dftValue = ChartPluginAttribute.DataType.STRING;
+		String dftValue = PropertyType.STRING;
 
 		if (obj instanceof String)
 		{
@@ -583,22 +678,23 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			{
 				return dftValue;
 			}
-			if (ChartPluginAttribute.DataType.STRING.equalsIgnoreCase(str))
+			if (PropertyType.STRING.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.STRING;
+				return PropertyType.STRING;
 			}
-			else if (ChartPluginAttribute.DataType.BOOLEAN.equalsIgnoreCase(str))
+			else if (PropertyType.BOOLEAN.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.BOOLEAN;
+				return PropertyType.BOOLEAN;
 			}
-			else if (ChartPluginAttribute.DataType.INTEGER.equalsIgnoreCase(str))
+			else if (PropertyType.INTEGER.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.INTEGER;
+				return PropertyType.INTEGER;
 			}
-			else if (ChartPluginAttribute.DataType.NUMBER.equalsIgnoreCase(str))
+			else if (PropertyType.NUMBER.equalsIgnoreCase(str))
 			{
-				return ChartPluginAttribute.DataType.NUMBER;
+				return PropertyType.NUMBER;
 			}
+			// 留有自定义可能
 			else
 				return str;
 		}
@@ -606,22 +702,22 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return dftValue;
 	}
 
-	protected String convertToInputAttrInputType(Object obj)
+	protected String convertToInputFormPropertyInputType(Object obj)
 	{
 		if(obj == null)
 			return  null;
 		else if (obj instanceof String)
 			return (String) obj;
 		else
-			return ChartPluginInputAttribute.InputType.TEXT;
+			return PropertyInputType.TEXT;
 	}
 
-	protected Object convertToInputAttrInputPayload(Object obj)
+	protected Object convertToInputFormPropertyInputPayload(Object obj)
 	{
 		return obj;
 	}
 
-	protected List<ChartPluginAttributeGroup> convertToAttrGroups(Object obj)
+	protected List<FormPropertyGroup> convertToFormPropertyGroups(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -629,14 +725,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		{
 			Object[] array = (Object[]) obj;
 
-			List<ChartPluginAttributeGroup> groups = new ArrayList<>();
+			List<FormPropertyGroup> groups = new ArrayList<>();
 
 			for (Object ele : array)
 			{
-				ChartPluginAttributeGroup attribute = convertToAttrGroup(ele);
+				FormPropertyGroup group = convertToFormPropertyGroup(ele);
 
-				if (attribute != null)
-					groups.add(attribute);
+				if (group != null)
+					groups.add(group);
 			}
 
 			if (groups.isEmpty())
@@ -650,41 +746,41 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Object[] array = new Object[collection.size()];
 			collection.toArray(array);
 
-			return convertToAttrGroups(array);
+			return convertToFormPropertyGroups(array);
 		}
 		else
 		{
 			Object[] array = new Object[] { obj };
-			return convertToAttrGroups(array);
+			return convertToFormPropertyGroups(array);
 		}
 	}
 
-	protected ChartPluginAttributeGroup convertToAttrGroup(Object obj)
+	protected FormPropertyGroup convertToFormPropertyGroup(Object obj)
 	{
 		if (obj == null)
 			return null;
-		else if (obj instanceof ChartPluginAttributeGroup)
-			return (ChartPluginAttributeGroup) obj;
+		else if (obj instanceof FormPropertyGroup)
+			return (FormPropertyGroup) obj;
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			ChartPluginAttributeGroup group = createChartPluginAttributeGroup();
+			FormPropertyGroup group = createFormPropertyGroup();
 
-			group.setNameLabel(convertToLabel(map.get(ChartPluginAttributeGroup.PROPERTY_NAME_LABEL)));
-			group.setDescLabel(convertToLabel(map.get(ChartPluginAttributeGroup.PROPERTY_DESC_LABEL)));
-			group.setNames(convertToAttrGroupNames(map.get(ChartPluginAttributeGroup.PROPERTY_NAMES)));
-			group.setAdditions(convertToAdditions(map.get(ChartPluginAttributeGroup.PROPERTY_ADDITIONS)));
+			group.setNameLabel(convertToLabel(map.get(FormPropertyGroup.PROPERTY_NAME_LABEL)));
+			group.setDescLabel(convertToLabel(map.get(FormPropertyGroup.PROPERTY_DESC_LABEL)));
+			group.setNames(convertToFormPropertyGroupNames(map.get(FormPropertyGroup.PROPERTY_NAMES)));
+			group.setAdditions(convertToAdditions(map.get(FormPropertyGroup.PROPERTY_ADDITIONS)));
 
 			return group;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttributeGroup.class.getName() + "] unsupported");
+					+ FormPropertyGroup.class.getName() + "] unsupported");
 	}
 
-	protected List<String> convertToAttrGroupNames(Object obj)
+	protected List<String> convertToFormPropertyGroupNames(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -714,14 +810,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Collection<?> collection = (Collection<?>) obj;
 			Object[] array = new Object[collection.size()];
 			collection.toArray(array);
-			return convertToAttrGroupNames(array);
+			return convertToFormPropertyGroupNames(array);
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttributeGroup.class.getName() + ".names] unsupported");
+					+ FormPropertyGroup.class.getName() + ".names] unsupported");
 	}
 
-	protected Group convertToInputAttrGroup(Object obj)
+	protected Group convertToInputFormPropertyGroupForV5_5_0(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -1156,19 +1252,24 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return new Label();
 	}
 
-	protected ChartPluginObjectAttribute createChartPluginObjectAttribute()
+	protected ChartPluginAttributeForm createChartPluginAttributeForm()
 	{
-		return new ChartPluginObjectAttribute();
+		return new ChartPluginAttributeForm();
 	}
 
-	protected ChartPluginInputAttribute createChartPluginInputAttribute()
+	protected ObjectFormProperty createObjectFormProperty()
 	{
-		return new ChartPluginInputAttribute();
+		return new ObjectFormProperty();
 	}
 
-	protected ChartPluginAttributeGroup createChartPluginAttributeGroup()
+	protected InputFormProperty createInputFormProperty()
 	{
-		return new ChartPluginAttributeGroup();
+		return new InputFormProperty();
+	}
+
+	protected FormPropertyGroup createFormPropertyGroup()
+	{
+		return new FormPropertyGroup();
 	}
 
 	protected DataSign createDataSign()

@@ -34,6 +34,7 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_RESOURCES = "resources";
+	String PROPERTY_ATTRIBUTE_FORM = "attributeForm";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_DATA_SET_RANGE = "dataSetRange";
 	String PROPERTY_VERSION = "version";
@@ -92,14 +93,11 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String getIconResourceName(String themeName);
 
 	/**
-	 * 获取{@linkplain ChartPluginAttribute}列表，{@code null}或空表示没有。
-	 * <p>
-	 * 返回列表中的{@linkplain ChartPluginAttribute#getName()}不应重复。
-	 * </p>
+	 * 获取{@linkplain ChartPluginAttributeForm}，{@code null}表示没有。
 	 * 
 	 * @return
 	 */
-	List<ChartPluginAttribute> getAttributes();
+	ChartPluginAttributeForm getAttributeForm();
 
 	/**
 	 * 获取{@linkplain DataSign}列表。

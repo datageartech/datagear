@@ -17,14 +17,14 @@
 
 package org.datagear.analysis.support;
 
-import org.datagear.analysis.ChartPluginAttribute;
-import org.datagear.analysis.ChartPluginAttribute.DataType;
+import org.datagear.analysis.ChartPluginAttributeForm;
+import org.datagear.analysis.form.PropertyType;
 
 /**
- * {@linkplain ChartPluginAttribute}值转换器。
+ * {@linkplain ChartPluginAttributeForm}值转换器。
  * 
  * @author datagear@163.com
- * @deprecated 插件属性值没有后台相关逻辑和安全风险，所以不必在后台进行类型转换
+ * @deprecated 插件属性表单数据值没有后台相关逻辑和安全风险，所以不必在后台进行类型转换
  */
 @Deprecated
 public class ChartPluginAttributeValueConverter extends DataValueConverter
@@ -37,14 +37,14 @@ public class ChartPluginAttributeValueConverter extends DataValueConverter
 	@Override
 	protected Object convertValue(Object value, String type) throws DataValueConvertionException
 	{
-		if (DataType.STRING.equals(type))
-			return convertToString(value, DataType.STRING);
-		else if (DataType.NUMBER.equals(type))
-			return convertToNumber(value, DataType.NUMBER);
-		else if (DataType.INTEGER.equals(type))
-			return convertToInteger(value, DataType.INTEGER);
-		else if (DataType.BOOLEAN.equals(type))
-			return convertToBoolean(value, DataType.BOOLEAN);
+		if (PropertyType.STRING.equals(type))
+			return convertToString(value, PropertyType.STRING);
+		else if (PropertyType.NUMBER.equals(type))
+			return convertToNumber(value, PropertyType.NUMBER);
+		else if (PropertyType.INTEGER.equals(type))
+			return convertToInteger(value, PropertyType.INTEGER);
+		else if (PropertyType.BOOLEAN.equals(type))
+			return convertToBoolean(value, PropertyType.BOOLEAN);
 		else
 			return convertExt(value, type);
 	}
