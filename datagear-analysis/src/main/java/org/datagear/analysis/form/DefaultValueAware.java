@@ -15,34 +15,29 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis;
-
-import java.util.Map;
+package org.datagear.analysis.form;
 
 /**
- * 带有附加属性的相关类。
+ * 默认值相关类。
  * 
  * @author datagear@163.com
  *
  */
-public interface AdditionsAware
+public interface DefaultValueAware
 {
-	public static final String PROPERTY_ADDITIONS = "additions";
+	String PROPERTY_DEFAULT_VALUE = "defaultValue";
 
 	/**
-	 * 获取附加属性集。
-	 * <p>
-	 * 返回{@code null}或空表示没有。
-	 * </p>
+	 * 获取默认值。
 	 * 
 	 * @return
 	 */
-	Map<String, ?> getAdditions();
+	Object getDefaultValue();
 
 	/**
-	 * 设置附加属性集。
+	 * 设置默认值。
 	 * 
-	 * @param additions
+	 * @param defaultValue
 	 */
-	void setAdditions(Map<String, ?> additions);
+	void setDefaultValue(Object defaultValue);
 }

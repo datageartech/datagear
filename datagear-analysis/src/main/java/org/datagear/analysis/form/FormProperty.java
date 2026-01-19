@@ -25,21 +25,20 @@ import java.util.List;
 import java.util.Locale;
 
 import org.datagear.analysis.AdditionsAware;
-import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.NameTypeAware;
 import org.datagear.util.i18n.Labeled;
 
 /**
  * 表单属性。
  * <p>
- * 一个插件属性描述由插件绘制图表的{@linkplain ChartDefinition#getAttrValues()}中的一个属性值的UI交互操作元信息，
+ * 一个表单属性描述{@linkplain Form}中的一个UI交互操作元信息，
  * 包括：{@linkplain ObjectFormProperty}、{@linkplain InputFormProperty}。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public interface FormProperty extends Labeled, NameTypeAware, AdditionsAware, Serializable
+public interface FormProperty extends Labeled, NameTypeAware, AdditionsAware, DefaultValueAware, Serializable
 {
 	String PROPERTY_NAME = "name";
 	String PROPERTY_TYPE = "type";

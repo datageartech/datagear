@@ -19,12 +19,31 @@ package org.datagear.analysis.form;
 
 import java.util.List;
 
-public interface FormPropertiesGroup
+/**
+ * 分组表单属性集。
+ * 
+ * @author datagear@163.com
+ *
+ */
+public interface GroupFormProperties
 {
 	String PROPERTY_PROPERTIES = "properties";
 	String PROPERTY_GROUPS = "groups";
 
+	/**
+	 * {@linkplain FormProperty}列表。
+	 * 
+	 * @return {@code null}或空表示没有
+	 */
 	List<FormProperty> getProperties();
 
+	/**
+	 * {@linkplain FormPropertyGroup}列表。
+	 * <p>
+	 * 其中的{@linkplain FormPropertyGroup#getNames()}是上述{@linkplain #getProperties()}中的{@linkplain FormProperty#getName()}。
+	 * </p>
+	 * 
+	 * @return {@code null}或空表示没有
+	 */
 	List<FormPropertyGroup> getGroups();
 }

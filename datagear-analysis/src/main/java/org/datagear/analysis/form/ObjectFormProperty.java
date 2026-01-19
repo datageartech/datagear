@@ -20,29 +20,31 @@ package org.datagear.analysis.form;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.analysis.ChartDefinition;
-
 /**
  * 对象型图表插件属性。
  * <p>
- * 一个对象型图表插件属性包含多个{@linkplain FormProperty}，描述{@linkplain ChartDefinition#getAttrValues()}中的一个对象型属性值的UI交互操作元信息。
+ * 一个对象型图表插件属性包含多个{@linkplain FormProperty}，描述{@linkplain Form}中的一个对象型UI交互操作元信息。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ObjectFormProperty extends AbstractFormProperty implements FormPropertiesGroup
+public class ObjectFormProperty extends AbstractFormProperty implements GroupFormProperties, DefaultValueAware
 {
 	private static final long serialVersionUID = 1L;
 	
-	public static final String PROPERTY_PROPERTIES = FormPropertiesGroup.PROPERTY_PROPERTIES;
-	public static final String PROPERTY_GROUPS = FormPropertiesGroup.PROPERTY_GROUPS;
+	public static final String PROPERTY_PROPERTIES = GroupFormProperties.PROPERTY_PROPERTIES;
+	public static final String PROPERTY_GROUPS = GroupFormProperties.PROPERTY_GROUPS;
+	public static final String PROPERTY_DEFAULT_VALUE = DefaultValueAware.PROPERTY_DEFAULT_VALUE;
 
 	/** 子级{@linkplain FormProperty}列表 */
 	private List<FormProperty> properties = null;
 
 	/** 上述{@linkplain #properties}的分组信息 */
 	private List<FormPropertyGroup> groups = null;
+
+	/** 默认值 */
+	private Object defaultValue = null;
 
 	public ObjectFormProperty()
 	{
@@ -107,6 +109,18 @@ public class ObjectFormProperty extends AbstractFormProperty implements FormProp
 	}
 
 	@Override
+	public Object getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	@Override
+	public void setDefaultValue(Object defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+
+	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", required=" + isRequired() + ", array="
@@ -120,6 +134,7 @@ public class ObjectFormProperty extends AbstractFormProperty implements FormProp
 		copyToLocale(target, locale);
 		target.setProperties(FormProperty.toLocale(this.properties, locale));
 		target.setGroups(FormPropertyGroup.toLocale(this.groups, locale));
+		target.setDefaultValue(this.defaultValue);
 
 		return target;
 	}

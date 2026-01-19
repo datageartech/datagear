@@ -18,11 +18,110 @@
 package org.datagear.analysis.form;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.AdditionsAware;
+import org.datagear.util.i18n.AbstractLabeled;
+import org.datagear.util.i18n.Label;
 import org.datagear.util.i18n.Labeled;
 
-public interface Form extends FormPropertiesGroup, Labeled, AdditionsAware, Serializable
+/**
+ * 表单。
+ * 
+ * @author datagear@163.com
+ *
+ */
+public class Form extends AbstractLabeled
+		implements GroupFormProperties, Labeled, AdditionsAware, DefaultValueAware, Serializable
 {
+	private static final long serialVersionUID = 1L;
 
+	private List<FormProperty> properties = Collections.emptyList();
+
+	private List<FormPropertyGroup> groups = null;
+
+	private Map<String, ?> additions = null;
+
+	private Object defaultValue = null;
+
+	public Form()
+	{
+		super();
+	}
+
+	public Form(List<FormProperty> properties)
+	{
+		super();
+		this.properties = properties;
+	}
+
+	public Form(Label nameLabel, List<FormProperty> properties)
+	{
+		super();
+		super.setNameLabel(nameLabel);
+		this.properties = properties;
+	}
+
+	public Form(List<FormProperty> properties, List<FormPropertyGroup> groups)
+	{
+		super();
+		this.properties = properties;
+		this.groups = groups;
+	}
+
+	public Form(Label nameLabel, List<FormProperty> properties, List<FormPropertyGroup> groups)
+	{
+		super();
+		super.setNameLabel(nameLabel);
+		this.properties = properties;
+		this.groups = groups;
+	}
+
+	@Override
+	public List<FormProperty> getProperties()
+	{
+		return properties;
+	}
+
+	public void setProperties(List<FormProperty> properties)
+	{
+		this.properties = properties;
+	}
+
+	@Override
+	public List<FormPropertyGroup> getGroups()
+	{
+		return groups;
+	}
+
+	public void setGroups(List<FormPropertyGroup> groups)
+	{
+		this.groups = groups;
+	}
+
+	@Override
+	public Map<String, ?> getAdditions()
+	{
+		return additions;
+	}
+
+	@Override
+	public void setAdditions(Map<String, ?> additions)
+	{
+		this.additions = additions;
+	}
+
+	@Override
+	public Object getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	@Override
+	public void setDefaultValue(Object defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
 }

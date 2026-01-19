@@ -15,34 +15,31 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.analysis;
-
-import java.util.Map;
+package org.datagear.analysis.form;
 
 /**
- * 带有附加属性的相关类。
+ * 常用的{@linkplain InputFormProperty#getInputType()}枚举。
  * 
  * @author datagear@163.com
  *
  */
-public interface AdditionsAware
+public class PropertyInputType
 {
-	public static final String PROPERTY_ADDITIONS = "additions";
+	/** 文本框 */
+	public static final String TEXT = "text";
 
-	/**
-	 * 获取附加属性集。
-	 * <p>
-	 * 返回{@code null}或空表示没有。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	Map<String, ?> getAdditions();
+	/** 下拉框 */
+	public static final String SELECT = "select";
 
-	/**
-	 * 设置附加属性集。
-	 * 
-	 * @param additions
-	 */
-	void setAdditions(Map<String, ?> additions);
+	/** 单选框 */
+	public static final String RADIO = "radio";
+
+	/** 复选框 */
+	public static final String CHECKBOX = "checkbox";
+
+	/** 文本域 */
+	public static final String TEXTAREA = "textarea";
+
+	/** 颜色 */
+	public static final String COLOR = "color";
 }

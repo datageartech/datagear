@@ -19,14 +19,12 @@ package org.datagear.analysis.form;
 
 import java.util.Locale;
 
-import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.Group;
 import org.datagear.analysis.NameTypeInputAware;
 
 /**
- * 输入项图表插件属性。
+ * 输入框表单属性。
  * <p>
- * 一个输入项描述{@linkplain ChartDefinition#getAttrValues()}中的一个基本型属性值的UI交互操作元信息。
+ * 一个输入框属性描述{@linkplain Form}中的一个基本型的UI交互操作元信息。
  * </p>
  * 
  * @author datagear@163.com
@@ -38,7 +36,7 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 
 	public static final String PROPERTY_INPUT_TYPE = "inputType";
 	public static final String PROPERTY_INPUT_PAYLOAD = "inputPayload";
-	public static final String PROPERTY_DEFAULT_VALUE = "defaultValue";
+	public static final String PROPERTY_DEFAULT_VALUE = DefaultValueAware.PROPERTY_DEFAULT_VALUE;
 	public static final String PROPERTY_GROUP = "group";
 
 	/** 输入框类型 */
@@ -49,15 +47,6 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 
 	/** 默认值 */
 	private Object defaultValue = null;
-
-	/**
-	 * 所属分组。
-	 * 
-	 * @deprecated 用于兼容旧的5.5.0版本的{@code ChartPluginAttribute}格式，
-	 *             在6.0版本起已被{@linkplain ObjectFormProperty}取代
-	 */
-	@Deprecated
-	private Group group = null;
 
 	public InputFormProperty()
 	{
@@ -94,7 +83,7 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 	}
 
 	/**
-	 * 获取输入框类型，常用类型参考{@linkplain InputType}。
+	 * 获取输入框类型，常用类型参考{@linkplain PropertyInputType}。
 	 * 
 	 * @return 可能为{@code null}
 	 */
@@ -120,26 +109,16 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 		this.inputPayload = inputPayload;
 	}
 
+	@Override
 	public Object getDefaultValue()
 	{
 		return defaultValue;
 	}
 
+	@Override
 	public void setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
-	}
-
-	@Deprecated
-	public Group getGroup()
-	{
-		return group;
-	}
-
-	@Deprecated
-	public void setGroup(Group group)
-	{
-		this.group = group;
 	}
 
 	@Override
@@ -150,7 +129,6 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
 		target.setDefaultValue(this.defaultValue);
-		target.setGroup(this.group != null ? this.group.clone(locale) : null);
 
 		return target;
 	}
@@ -160,32 +138,5 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + isRequired()
 				+ ", array=" + isArray() + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
-	}
-	
-	/**
-	 * 常用的{@linkplain InputFormProperty#getInputType()}枚举。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class InputType
-	{
-		/** 文本框 */
-		public static final String TEXT = "text";
-
-		/** 下拉框 */
-		public static final String SELECT = "select";
-
-		/** 单选框 */
-		public static final String RADIO = "radio";
-
-		/** 复选框 */
-		public static final String CHECKBOX = "checkbox";
-
-		/** 文本域 */
-		public static final String TEXTAREA = "textarea";
-
-		/** 颜色 */
-		public static final String COLOR = "color";
 	}
 }

@@ -30,7 +30,7 @@ import org.datagear.util.i18n.LabelUtil;
 import org.datagear.util.i18n.Labeled;
 
 /**
- * 图表插件属性分组。
+ * 表单属性分组。
  * 
  * @author datagear@163.com
  *
@@ -77,6 +77,7 @@ public class FormPropertyGroup extends AbstractLabeled implements AdditionsAware
 		return additions;
 	}
 
+	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
