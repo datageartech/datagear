@@ -46,12 +46,6 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String PROPERTY_ISSUE_DATE = "issueDate";
 	String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
 
-	/**
-	 * @deprecated 5.5.0及以下版本格式需要
-	 */
-	@Deprecated
-	String PROPERTY_ATTRIBUTES = "attributes";
-
 	/** 默认图标主题名 */
 	String DEFAULT_ICON_THEME_NAME = "default";
 

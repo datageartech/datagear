@@ -64,11 +64,17 @@ import org.datagear.util.TextParserSupport;
  */
 public class HtmlChartPluginJsDefResolver extends TextParserSupport
 {
+	/**
+	 * @deprecated 仅用于兼容4.0.0版本的{@code org.datagear.analysis.support.html.HtmlChartPlugin.chartRenderer}。
+	 */
+	@Deprecated
+	public static final String PLUGIN_PROPERTY_RENDERER_OLD = "chartRenderer";
+
 	protected static final String PROPERTY_RENDERER_DQ = "\"" + HtmlChartPlugin.PROPERTY_RENDERER + "\"";
 	protected static final String PROPERTY_RENDERER_SQ = "'" + HtmlChartPlugin.PROPERTY_RENDERER + "'";
 
-	protected static final String PROPERTY_RENDERER_OLD_DQ = "\"" + HtmlChartPlugin.PROPERTY_RENDERER_OLD + "\"";
-	protected static final String PROPERTY_RENDERER_OLD_SQ = "'" + HtmlChartPlugin.PROPERTY_RENDERER_OLD + "'";
+	protected static final String PROPERTY_RENDERER_OLD_DQ = "\"" + PLUGIN_PROPERTY_RENDERER_OLD + "\"";
+	protected static final String PROPERTY_RENDERER_OLD_SQ = "'" + PLUGIN_PROPERTY_RENDERER_OLD + "'";
 
 	public HtmlChartPluginJsDefResolver()
 	{
@@ -172,7 +178,7 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 					if (prevStr.equals(HtmlChartPlugin.PROPERTY_RENDERER)
 							|| prevStr.equals(PROPERTY_RENDERER_DQ) || prevStr.equals(PROPERTY_RENDERER_SQ)
 							//兼容旧版本的"chartRenderer"渲染器属性名
-							|| prevStr.equals(HtmlChartPlugin.PROPERTY_RENDERER_OLD)
+							|| prevStr.equals(PLUGIN_PROPERTY_RENDERER_OLD)
 							|| prevStr.equals(PROPERTY_RENDERER_OLD_DQ) || prevStr.equals(PROPERTY_RENDERER_OLD_SQ))
 					{
 						writeAfterJsObject(in, rendererOut, false);

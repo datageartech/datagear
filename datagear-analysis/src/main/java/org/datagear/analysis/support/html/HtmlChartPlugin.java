@@ -65,14 +65,6 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 	/** 属性名：图表渲染器 */
 	public static final String PROPERTY_RENDERER = "renderer";
 	
-	/**
-	 * 属性名：旧版本（4.0.0及以前版本）图表渲染器，将在未来版本移除
-	 * 
-	 * @deprecated
-	 */
-	@Deprecated
-	public static final String PROPERTY_RENDERER_OLD = "chartRenderer";
-	
 	/** 属性名：支持的平台版本 */
 	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
 

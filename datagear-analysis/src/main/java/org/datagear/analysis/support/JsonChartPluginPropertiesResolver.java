@@ -106,19 +106,19 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
 
 	/**
-	 * @deprecated 仅用于兼容5.5.0及以下版本格式
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.attributes}格式
 	 */
 	@Deprecated
-	public static final String JSON_PROPERTY_ATTRIBUTES = ChartPlugin.PROPERTY_ATTRIBUTES;
+	public static final String JSON_PROPERTY_ATTRIBUTES = "attributes";
 
 	/**
-	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginInputAttribute.group}格式
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginAttribute.group}格式
 	 */
 	@Deprecated
 	public static final String JSON_PROPERTY_INPUT_ATTR_GROUP = "group";
 
 	/**
-	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginInputAttribute.group}格式
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginAttribute.group}格式
 	 */
 	@Deprecated
 	public static final String INPUT_PROPERTY_ADDITION_OLD_GROUP = ChartDefinition.BUILTIN_ATTR_PREFIX

@@ -23,8 +23,8 @@
 page_boolean_options.ftl
 page_palette.ftl
 -->
-<#assign ChartPluginAttrType=statics['org.datagear.analysis.ChartPluginAttribute$DataType']>
-<#assign ChartPluginInputAttrInputType=statics['org.datagear.analysis.ChartPluginInputAttribute$InputType']>
+<#assign FormPropertyType=statics['org.datagear.analysis.form.PropertyType']>
+<#assign FormPropertyInputType=statics['org.datagear.analysis.form.PropertyInputType']>
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<p-accordion :multiple="true" :active-index="[0]">
@@ -64,7 +64,7 @@ page_palette.ftl
 								<span class="text-color-secondary text-sm ml-1">{{attr.name}}</span>
 							</label>
 							<div class="field-input col-12">
-								<div v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.SELECT">
+								<div v-if="attr.inputType == pm.FormPropertyInputType.SELECT">
 									<div class="flex flex-column gap-1" v-if="attr.array">
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 flex" v-if="attr.inputPayload.multiple">
@@ -125,7 +125,7 @@ page_palette.ftl
 										</p-dropdown>
 									</div>
 								</div>
-								<div v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.COLOR">
+								<div v-else-if="attr.inputType == pm.FormPropertyInputType.COLOR">
 									<div class="flex flex-column gap-1" v-if="attr.array">
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 flex gap-1">
@@ -161,14 +161,14 @@ page_palette.ftl
 											@click="showPalettePanel($event, grpDataEle, attr.name)"></p-button>
 									</div>
 								</div>
-								<div v-else-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO || attr.inputType == pm.ChartPluginInputAttribute.InputType.CHECKBOX">
+								<div v-else-if="attr.inputType == pm.FormPropertyInputType.RADIO || attr.inputType == pm.FormPropertyInputType.CHECKBOX">
 									<div class="input flex flex-column gap-1" v-if="attr.array">
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
 												<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
 													<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
 														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
-														 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
+														 v-if="attr.inputType == pm.FormPropertyInputType.RADIO">
 													</p-radiobutton>
 													<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
 														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
@@ -198,7 +198,7 @@ page_palette.ftl
 										<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
 											<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
 												:value="opt.value" v-model="grpDataEle[attr.name]"
-												 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.RADIO">
+												 v-if="attr.inputType == pm.FormPropertyInputType.RADIO">
 											</p-radiobutton>
 											<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
 												:value="opt.value" v-model="grpDataEle[attr.name]"
@@ -213,7 +213,7 @@ page_palette.ftl
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
 												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
-												 v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
+												 v-if="attr.inputType == pm.FormPropertyInputType.TEXTAREA">
 											</p-textarea>
 											<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
 												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
@@ -239,7 +239,7 @@ page_palette.ftl
 									<div v-else>
 										<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
 											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
-											v-if="attr.inputType == pm.ChartPluginInputAttribute.InputType.TEXTAREA">
+											v-if="attr.inputType == pm.FormPropertyInputType.TEXTAREA">
 										</p-textarea>
 										<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
 											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
@@ -249,7 +249,7 @@ page_palette.ftl
 								</div>
 					        	<div class="validate-msg">
 					        		<input :name="'[\''+toLiteralPluginAttrName(group.name)+'\']['+grpDataEleIdx+'][\''+toLiteralPluginAttrName(attr.name)+'\']'" type="text" class="validate-proxy"
-					        			:class="{'required': attr.required, 'number': attr.type == pm.ChartPluginAttribute.DataType.NUMBER}" />
+					        			:class="{'required': attr.required, 'number': attr.type == pm.FormPropertyType.NUMBER}" />
 					        	</div>
 							</div>
 						</div>
@@ -282,36 +282,32 @@ page_palette.ftl
 <script>
 (function(po)
 {
-	po.ChartPluginAttribute =
+	po.FormPropertyType =
 	{
-		DataType:
-		{
-			STRING: "${ChartPluginAttrType.STRING}",
-			BOOLEAN: "${ChartPluginAttrType.BOOLEAN}",
-			INTEGER: "${ChartPluginAttrType.INTEGER}",
-			NUMBER: "${ChartPluginAttrType.NUMBER}",
-			OBJECT: "${ChartPluginAttrType.OBJECT}"
-		}	
+		STRING: "${FormPropertyType.STRING}",
+		BOOLEAN: "${FormPropertyType.BOOLEAN}",
+		INTEGER: "${FormPropertyType.INTEGER}",
+		NUMBER: "${FormPropertyType.NUMBER}",
+		OBJECT: "${FormPropertyType.OBJECT}"
 	};
 	
-	po.ChartPluginInputAttribute =
+	po.FormPropertyInputType =
 	{
-		InputType:
-		{
-			TEXT: "${ChartPluginInputAttrInputType.TEXT}",
-			SELECT: "${ChartPluginInputAttrInputType.SELECT}",
-			RADIO: "${ChartPluginInputAttrInputType.RADIO}",
-			CHECKBOX: "${ChartPluginInputAttrInputType.CHECKBOX}",
-			TEXTAREA: "${ChartPluginInputAttrInputType.TEXTAREA}",
-			COLOR: "${ChartPluginInputAttrInputType.COLOR}"
-		},
-		InputPayload:
-		{
-			//多选
-			MULTIPLE: "multiple",
-			//地图
-			DG_MAP: "DG_MAP"
-		},
+		TEXT: "${FormPropertyInputType.TEXT}",
+		SELECT: "${FormPropertyInputType.SELECT}",
+		RADIO: "${FormPropertyInputType.RADIO}",
+		CHECKBOX: "${FormPropertyInputType.CHECKBOX}",
+		TEXTAREA: "${FormPropertyInputType.TEXTAREA}",
+		COLOR: "${FormPropertyInputType.COLOR}"
+	};
+	
+	po.FormPropertyInputPayload =
+	{
+		//多选
+		MULTIPLE: "multiple",
+		//地图
+		DG_MAP: "DG_MAP",
+		
 		//5.5.0旧版的下拉框inputPayload.multiple="repeat"值，表示可重复选取
 		MultipleRepeat: "repeat"
 	};
@@ -325,14 +321,14 @@ page_palette.ftl
 	//根插件对象属性的name值，其包含的属性值直接保存至根属性值对象下
 	po.rootPluginObjectAttrName = "cpgaName${pid}";
 	
-	po.isChartPluginObjectAttr = function(attr)
+	po.isObjectFormProperty = function(attr)
 	{
-		return (attr != null && attr.type == po.ChartPluginAttribute.DataType.OBJECT);
+		return (attr != null && attr.type == po.FormPropertyType.OBJECT);
 	};
 	
 	po.isRootChartPluginObjectAttr = function(attr)
 	{
-		return (po.isChartPluginObjectAttr(attr) && attr.name == po.rootPluginObjectAttrName);
+		return (po.isObjectFormProperty(attr) && attr.name == po.rootPluginObjectAttrName);
 	};
 	
 	po.trimChartPluginAttrByGroup = function(attrs)
@@ -345,7 +341,7 @@ page_palette.ftl
 		{
 			var attr = attrs[i];
 			
-			if(po.isChartPluginObjectAttr(attr))
+			if(po.isObjectFormProperty(attr))
 			{
 				groups.push(attr);
 				continue;
@@ -354,11 +350,11 @@ page_palette.ftl
 			//未定义分组的，建立虚拟分组，统一结构、易于处理
 			var virtualGroup =
 			{
-				name: po.rootPluginObjectAttrName, type: po.ChartPluginAttribute.DataType.OBJECT,
+				name: po.rootPluginObjectAttrName, type: po.FormPropertyType.OBJECT,
 				array: false, children: [], nameLabel: { value: "" }, virtual: true
 			};
 			
-			//兼容处理org.datagear.analysis.ChartPluginInputAttribute.group
+			//兼容处理5.5.0版本的org.datagear.analysis.ChartPluginAttribute.group
 			if(attr.group != null && !$.isEmpty(attr.group.name))
 			{
 				virtualGroup.nameLabel.value = attr.group.name;
@@ -453,7 +449,7 @@ page_palette.ftl
 			
 			po.trimChartPluginAttribute(attr);
 			
-			if(po.isChartPluginObjectAttr(attr))
+			if(po.isObjectFormProperty(attr))
 			{
 				po.trimChartPluginAttributes(attr.children, false);
 			}
@@ -469,16 +465,16 @@ page_palette.ftl
 		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? attr.name : attr.nameLabel.value);
 		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? "<@spring.message code='unnamed' />" : attr.nameLabel.value);
 		
-		if(po.isChartPluginObjectAttr(attr))
+		if(po.isObjectFormProperty(attr))
 		{
 		}
 		else
 		{
 			//布尔型默认作为RADIO处理
-			if(attr.type == po.ChartPluginAttribute.DataType.BOOLEAN)
+			if(attr.type == po.FormPropertyType.BOOLEAN)
 			{
 				if(!attr.inputType)
-					attr.inputType = po.ChartPluginInputAttribute.InputType.RADIO;
+					attr.inputType = po.FormPropertyInputType.RADIO;
 				
 				if(!attr.inputPayload)
 				{
@@ -490,14 +486,14 @@ page_palette.ftl
 			var inputType = attr.inputType;
 			
 			//下拉框、单选、复选框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
-			if(inputType == po.ChartPluginInputAttribute.InputType.SELECT
-					|| inputType == po.ChartPluginInputAttribute.InputType.RADIO
-					|| inputType == po.ChartPluginInputAttribute.InputType.CHECKBOX)
+			if(inputType == po.FormPropertyInputType.SELECT
+					|| inputType == po.FormPropertyInputType.RADIO
+					|| inputType == po.FormPropertyInputType.CHECKBOX)
 			{
 				var inputPayload = (attr.inputPayload || []);
 				
 				//数组、"DG_MAP"：转换为{ multiple: false, options: ... }格式
-				if($.isArray(inputPayload) || (inputPayload == po.ChartPluginInputAttribute.InputPayload.DG_MAP))
+				if($.isArray(inputPayload) || (inputPayload == po.FormPropertyInputPayload.DG_MAP))
 					inputPayload = { multiple: false, options: inputPayload };
 				
 				//{ options: "DG_MAP" }：转换为实际地图数据options
@@ -507,11 +503,11 @@ page_palette.ftl
 				inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
 				po.trimChartPluginInputAttrInputOptions(attr, inputPayload);
 				
-				if(inputType == po.ChartPluginInputAttribute.InputType.RADIO)
+				if(inputType == po.FormPropertyInputType.RADIO)
 				{
 					inputPayload.multiple = false;
 				}
-				else if(inputType == po.ChartPluginInputAttribute.InputType.CHECKBOX)
+				else if(inputType == po.FormPropertyInputType.CHECKBOX)
 				{
 					inputPayload.multiple = true;
 				}
@@ -519,7 +515,7 @@ page_palette.ftl
 				attr.inputPayload = inputPayload;
 			}
 			//颜色框
-			else if(inputType == po.ChartPluginInputAttribute.InputType.COLOR)
+			else if(inputType == po.FormPropertyInputType.COLOR)
 			{
 				var inputPayload = attr.inputPayload;
 				
@@ -531,7 +527,7 @@ page_palette.ftl
 						attr.array = true;
 						inputPayload.multiple = false;
 					}
-					else if(inputPayload == po.ChartPluginInputAttribute.InputPayload.MULTIPLE)
+					else if(inputPayload == po.FormPropertyInputPayload.MULTIPLE)
 					{
 						attr.array = true;
 						attr.inputPayload = null;
@@ -540,7 +536,7 @@ page_palette.ftl
 			}
 			
 			//将5.5.0旧版的{inputPayload: {multiple: "repeat"}}格式转换为6.0新版的{array: true, inputPayload: {multiple: false}}
-			if(attr.inputPayload && attr.inputPayload.multiple == po.ChartPluginInputAttribute.MultipleRepeat)
+			if(attr.inputPayload && attr.inputPayload.multiple == po.FormPropertyInputPayload.MultipleRepeat)
 			{
 				attr.array = true;
 				attr.inputPayload.multiple = false;
@@ -553,11 +549,11 @@ page_palette.ftl
 		var options = inputPayload.options;
 		
 		//内置地图
-		if(options == po.ChartPluginInputAttribute.InputPayload.DG_MAP)
+		if(options == po.FormPropertyInputPayload.DG_MAP)
 		{
 			//只有下拉列表才使用树形结构，单选框、复选框只能使用平铺数组
 			if(inputPayload.treeSelect == null
-					&& inputAttr.inputType == po.ChartPluginInputAttribute.InputType.SELECT)
+					&& inputAttr.inputType == po.FormPropertyInputType.SELECT)
 			{
 				inputPayload.treeSelect = true;
 			}
@@ -660,7 +656,7 @@ page_palette.ftl
 			if(v == null)
 			{
 			}
-			else if(po.isChartPluginObjectAttr(attr))
+			else if(po.isObjectFormProperty(attr))
 			{
 				v = ($.isArray(v) ? v : [ v ]);
 				
@@ -785,7 +781,7 @@ page_palette.ftl
 	{
 		var type = inputAttr.type;
 		
-		if(type != po.ChartPluginAttribute.DataType.STRING && value === "")
+		if(type != po.FormPropertyType.STRING && value === "")
 			value = null;
 		
 		if(value == null)
@@ -808,11 +804,11 @@ page_palette.ftl
 		}
 		else
 		{
-			if(type == po.ChartPluginAttribute.DataType.BOOLEAN)
+			if(type == po.FormPropertyType.BOOLEAN)
 			{
 				value = (value == true || value === "true" || value === "1" ? true : false);
 			}
-			else if(type == po.ChartPluginAttribute.DataType.NUMBER)
+			else if(type == po.FormPropertyType.NUMBER)
 			{
 				value = $.parseToNumber(value);
 				value = (isNaN(value) ? null : value);
@@ -861,7 +857,7 @@ page_palette.ftl
 			var attr = groupedAttrs[i];
 			var v = data[attr.name];
 			
-			if(po.isChartPluginObjectAttr(attr))
+			if(po.isObjectFormProperty(attr))
 			{
 				if(attr.array)
 				{
@@ -979,8 +975,8 @@ page_palette.ftl
 	
 	po.vuePageModel(
 	{
-		ChartPluginAttribute: po.ChartPluginAttribute,
-		ChartPluginInputAttribute: po.ChartPluginInputAttribute,
+		FormPropertyType: po.FormPropertyType,
+		FormPropertyInputType: po.FormPropertyInputType,
 		chartAttrValuesForm:
 		{
 			groups: [],
@@ -1011,7 +1007,7 @@ page_palette.ftl
 		for(var i=0; i<attrs.length; i++)
 		{
 			var attr = attrs[i];
-			if(attr.type == po.ChartPluginAttribute.DataType.NUMBER)
+			if(attr.type == po.FormPropertyType.NUMBER)
 				validateRules[attr.name] = { "number": true };
 		};
 		

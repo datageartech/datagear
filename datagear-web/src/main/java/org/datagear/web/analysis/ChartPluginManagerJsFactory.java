@@ -19,6 +19,7 @@ package org.datagear.web.analysis;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -26,9 +27,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.form.FormProperty;
+import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.html.ExceptionMsgHtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlChartPluginJsDefResolver;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -265,7 +271,6 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append("})(this);");
 	}
 
-	@SuppressWarnings("deprecation")
 	protected void appendPluginJs(String apiVersion, StringBuilder buffer, HtmlChartPlugin plugin, String managerVar,
 			String pluginVar, Locale locale) throws IOException
 	{
@@ -277,11 +282,8 @@ public class ChartPluginManagerJsFactory implements CacheAware
 
 			if (DashboardApiVersion.isV1(apiVersion))
 			{
-				// @deprecated
-				// 兼容4.0.0版本的HtmlChartPlugin.PROPERTY_RENDERER_OLD属性名
-				out.write(pluginVar + "." + HtmlChartPlugin.PROPERTY_RENDERER_OLD + " = " + pluginVar + "."
-						+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
-				out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
+				appendPluginJsForV4_0_0(out, apiVersion, plugin, managerVar, pluginVar, locale);
+				appendPluginJsForV5_5_0(out, apiVersion, plugin, managerVar, pluginVar, locale);
 			}
 
 			out.write(managerVar + ".plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
@@ -296,6 +298,53 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append(out.toString());
 	}
 	
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.attributes}
+	 * @param out
+	 * @param apiVersion
+	 * @param plugin
+	 * @param managerVar
+	 * @param pluginVar
+	 * @param locale
+	 * @throws IOException
+	 */
+	@Deprecated
+	protected void appendPluginJsForV5_5_0(Writer out, String apiVersion, HtmlChartPlugin plugin,
+			String managerVar, String pluginVar, Locale locale) throws IOException
+	{
+		out.write("if(" + pluginVar + "." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " != null){");
+		out.write("  var attributes = (" + pluginVar + "." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_ATTRIBUTES
+				+ " = " + pluginVar + "." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + "."
+				+ ChartPluginAttributeForm.PROPERTY_PROPERTIES + ");");
+		out.write("  " + pluginVar + "." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " = undefined;");
+		out.write("  for(var i=0; i<attributes.length; i++){");
+		out.write("    if(attributes[i]." + FormProperty.PROPERTY_ADDITIONS + ")");
+		out.write("      attributes[i]." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_INPUT_ATTR_GROUP
+				+ " = attributes[i]." + FormProperty.PROPERTY_ADDITIONS
+				+ "[\"" + JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP + "\"];");
+		out.write("  }");
+		out.write("}");
+	}
+
+	/**
+	 * @deprecated 仅用于兼容4.0.0版本的{@code org.datagear.analysis.support.html.HtmlChartPlugin.chartRenderer}。
+	 * @param out
+	 * @param apiVersion
+	 * @param plugin
+	 * @param managerVar
+	 * @param pluginVar
+	 * @param locale
+	 * @throws IOException
+	 */
+	@Deprecated
+	protected void appendPluginJsForV4_0_0(Writer out, String apiVersion, HtmlChartPlugin plugin, String managerVar,
+			String pluginVar, Locale locale) throws IOException
+	{
+		out.write(pluginVar + "." + HtmlChartPluginJsDefResolver.PLUGIN_PROPERTY_RENDERER_OLD + " = " + pluginVar + "."
+				+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
+		out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
+	}
+
 	/**
 	 * 获取缓存关键字。
 	 * <p>
