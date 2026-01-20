@@ -20,6 +20,7 @@ package org.datagear.analysis.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.analysis.Category;
@@ -37,7 +39,7 @@ import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.Group;
+import org.datagear.analysis.NameAware;
 import org.datagear.analysis.form.AbstractFormProperty;
 import org.datagear.analysis.form.Form;
 import org.datagear.analysis.form.FormProperty;
@@ -48,7 +50,11 @@ import org.datagear.analysis.form.PropertyInputType;
 import org.datagear.analysis.form.PropertyType;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.i18n.AbstractLabeled;
 import org.datagear.util.i18n.Label;
+import org.datagear.util.i18n.LabelUtil;
+import org.datagear.util.i18n.Labeled;
+import org.datagear.util.i18n.Localizable;
 
 /**
  * JSON {@linkplain ChartPlugin}属性解析器。
@@ -1295,5 +1301,79 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	protected Range createRange()
 	{
 		return new Range();
+	}
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.Group}
+	 */
+	@Deprecated
+	protected static class Group extends AbstractLabeled implements NameAware, Localizable, Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		public static final String PROPERTY_NAME = "name";
+		public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
+		public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
+		public static final String PROPERTY_ORDER = "order";
+
+		private String name;
+
+		private int order = 0;
+
+		public Group()
+		{
+			super();
+		}
+
+		public Group(String name)
+		{
+			super();
+			this.name = name;
+		}
+
+		@Override
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public int getOrder()
+		{
+			return order;
+		}
+
+		public void setOrder(int order)
+		{
+			this.order = order;
+		}
+
+		@Override
+		public Group toLocale(Locale locale)
+		{
+			Group target = createEmpty();
+
+			target.setName(this.name);
+			target.setOrder(this.order);
+			LabelUtil.concrete(this, target, locale);
+
+			return target;
+		}
+
+		protected Group createEmpty()
+		{
+			return new Group();
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [name=" + name + ", nameLabel=" + getNameLabel() + ", descLabel="
+					+ getDescLabel() + ", order=" + order + "]";
+		}
 	}
 }
