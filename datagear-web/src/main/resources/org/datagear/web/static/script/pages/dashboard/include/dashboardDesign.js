@@ -3563,16 +3563,16 @@ $.inflateDashboardDesignEditorForms = function(po)
 			onVeChartAttrValuesPanelShow: function()
 			{
 				var dashboardEditor = po.visualDashboardEditorByTab();
-				var cpas = [];
+				var attrForm = {};
 				var attrValues = [];
 				
 				if(dashboardEditor)
 				{
-					cpas = (dashboardEditor.getElementChartPluginAttrs() || []);
+					attrForm = (dashboardEditor.getElementChartPluginAttributeForm() || {});
 					attrValues = (dashboardEditor.getElementChartAttrValues() || {});
 				}
 				
-				po.setupChartAttrValuesForm(cpas, attrValues,
+				po.setupChartAttrValuesForm(attrForm, attrValues,
 				{
 					submitHandler: function(avs)
 					{

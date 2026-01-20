@@ -673,8 +673,8 @@ DE.checkAttrChartElement = function(ele)
 		return false;
 	}
 	
-	var cpas = (chart.plugin() == null ? null : chart.pluginAttributes());
-	if(cpas == null || cpas.length == 0)
+	var form = (chart.plugin() == null ? null : chart.pluginAttributeForm());
+	if(form == null || form.properties == null || form.properties.length == 0)
 	{
 		DE.tipInfo(i18n.chartPluginNoAttrDefined);
 		return false;
@@ -2428,12 +2428,23 @@ DE.getElementChartAttrValuesForReset = function(ele)
 	var attrValuesOrigin =  (chart.attrValuesOrigin() || {});
 	var attrValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
 	attrValuesEle = CF.evalSilently(attrValuesEle, {});
-	var cpas = (chart.plugin() == null ? [] : chart.pluginAttributes());
 	
-	cpas.forEach((cpa) =>
+	var attributeForm = chart.pluginAttributeForm();
+	if(attributeForm != null)
 	{
-		delete attrValuesEle[cpa.name];
-	});
+		if(attributeForm.name != null)
+		{
+			delete attrValuesEle[attributeForm.name];
+		}
+		else
+		{
+			var formProperties = (attributeForm.properties || []);
+			formProperties.forEach((prop) =>
+			{
+				delete attrValuesEle[prop.name];
+			});
+		}
+	}
 	
 	//保留元素上定义的图表插件属性之外的扩展值
 	var re = CF.extend(true, {}, attrValuesOrigin, attrValuesEle);
@@ -2547,11 +2558,11 @@ DE.setElementChartAttrValues = function(attrValues, ele)
 };
 
 /**
- * 获取图表元素的ChartPluginAttribute数组。
+ * 获取图表元素的ChartPluginAttributeForm。
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
-DE.getElementChartPluginAttrs = function(ele)
+DE.getElementChartPluginAttributeForm = function(ele)
 {
 	ele = DE._currentElement(ele, true);
 	
@@ -2563,7 +2574,7 @@ DE.getElementChartPluginAttrs = function(ele)
 	if(chart == null || chart.plugin() == null)
 		return null;
 	
-	return chart.pluginAttributes();
+	return chart.pluginAttributeForm();
 };
 
 /**

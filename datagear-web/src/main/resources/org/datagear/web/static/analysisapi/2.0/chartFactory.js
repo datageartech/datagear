@@ -3230,14 +3230,14 @@ chartProto.attrValuesOrigin = function()
 };
 
 /**
- * 获取所有插件属性。
+ * 获取插件属性表单。
  * 
- * @returns []
+ * @returns
  */
-chartProto.pluginAttributes = function()
+chartProto.pluginAttributeForm = function()
 {
 	var plugin = this.plugin();
-	return (plugin && plugin.attributes ? plugin.attributes : []);
+	return (plugin ? plugin.attributeForm : null);
 };
 
 /**

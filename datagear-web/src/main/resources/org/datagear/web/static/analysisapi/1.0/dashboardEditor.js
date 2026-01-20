@@ -2549,11 +2549,11 @@
 	};
 	
 	/**
-	 * 获取图表元素的ChartPluginAttribute数组。
+	 * 获取图表元素的ChartPluginAttributeForm。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartPluginAttrs = function(ele)
+	editor.getElementChartPluginAttributeForm = function(ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -2564,7 +2564,13 @@
 		if(!chart)
 			return null;
 		
-		return chart.pluginAttributes();
+		var attrs = chart.pluginAttributes();
+		
+		if(attrs == null || attrs.length == 0)
+			return null;
+		
+		var form = { properties: attrs };
+		return form;
 	};
 	
 	/**
