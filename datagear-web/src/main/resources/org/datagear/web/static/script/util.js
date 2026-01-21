@@ -2121,19 +2121,27 @@
 			showApiVersion: false,
 			showPlatformVersion: false,
 			apiVersionDesc: "",
-			platformVersionDesc: ""
+			platformVersionDesc: "",
+			iconUrlHandler: undefined
 		},
 		options);
 		
+		// 后台会处理只保留ChartPlugin.DEFAULT_ICON_THEME_NAME图标名
+		var iconUrl = (chartPlugin && chartPlugin.iconResourceNames ? chartPlugin.iconResourceNames["default"] : null);
+		iconUrl = (iconUrl ? contextPath +"/chartPlugin/icon/" + encodeURIComponent(chartPlugin.id) : null);
+		
+		if(options.iconUrlHandler != null)
+			iconUrl = options.iconUrlHandler(iconUrl, chartPlugin, contextPath);
+		
 		var html = "<div class='plugin-info flex align-items-center justify-content-"+options.justifyContent
 					+(options.vertical ? " flex-column block " : " flex-row inline ")
-					+(!chartPlugin || !chartPlugin.iconUrl ? " no-icon " : "")
+					+(!chartPlugin || !iconUrl ? " no-icon " : "")
 					+"'>";
 		
 		if(chartPlugin && chartPlugin.id)
 		{
-			if(chartPlugin.iconUrl)
-				html += "<div class='plugin-icon' style='background-image:url("+contextPath+$.escapeHtml(chartPlugin.iconUrl)+")'></div>";
+			if(iconUrl)
+				html += "<div class='plugin-icon' style='background-image:url("+iconUrl+")'></div>";
 			
 			var name = (chartPlugin.nameLabel ? (chartPlugin.nameLabel.value || chartPlugin.id) : chartPlugin.id);
 			name = $.escapeHtml(name || "");

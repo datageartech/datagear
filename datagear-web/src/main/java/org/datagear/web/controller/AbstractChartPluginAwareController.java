@@ -20,11 +20,7 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -33,13 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetResult;
-import org.datagear.analysis.support.ChartPluginCategorizationResolver;
-import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
@@ -48,12 +41,7 @@ import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.management.domain.DataSetBindVO;
 import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.util.IOUtil;
-import org.datagear.util.KeywordMatcher;
-import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
-import org.datagear.util.i18n.Label;
-import org.datagear.util.i18n.LabelUtil;
-import org.datagear.util.i18n.Localizable;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ServletContextAware;
@@ -72,10 +60,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	@Autowired
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
 
-	private ChartPluginCategorizationResolver chartPluginCategorizationResolver = new ChartPluginCategorizationResolver();
-
-	private KeywordMatcher keywordMatcher = new KeywordMatcher();
-
 	private ServletContext servletContext;
 
 	public AbstractChartPluginAwareController()
@@ -93,27 +77,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
 	}
 
-	public ChartPluginCategorizationResolver getChartPluginCategorizationResolver()
-	{
-		return chartPluginCategorizationResolver;
-	}
-
-	public void setChartPluginCategorizationResolver(
-			ChartPluginCategorizationResolver chartPluginCategorizationResolver)
-	{
-		this.chartPluginCategorizationResolver = chartPluginCategorizationResolver;
-	}
-
-	public KeywordMatcher getKeywordMatcher()
-	{
-		return keywordMatcher;
-	}
-
-	public void setKeywordMatcher(KeywordMatcher keywordMatcher)
-	{
-		this.keywordMatcher = keywordMatcher;
-	}
-
 	public ServletContext getServletContext()
 	{
 		return servletContext;
@@ -123,11 +86,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	public void setServletContext(ServletContext servletContext)
 	{
 		this.servletContext = servletContext;
-	}
-
-	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginView> chartPluginVOs)
-	{
-		return this.chartPluginCategorizationResolver.resolve(chartPluginVOs);
 	}
 
 	protected void writeChartPluginResource(HttpServletRequest request, HttpServletResponse response,
@@ -181,112 +139,62 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return loader.loadAll(directory);
 	}
 
-	/**
-	 * 根据ID获取。
-	 * 
-	 * @param request
-	 * @param id
-	 * @return 返回{@code null}表示未找到
-	 */
-	protected HtmlChartPluginView getHtmlChartPluginView(HttpServletRequest request, String id)
+	protected HtmlChartPlugin getHtmlChartPlugin(String id, boolean nonNull)
 	{
 		ChartPlugin plugin = getDirectoryHtmlChartPluginManager().get(id);
 
-		if (plugin == null || !(plugin instanceof HtmlChartPlugin))
+		if (plugin != null && !(plugin instanceof HtmlChartPlugin))
+			plugin = null;
+
+		if (plugin == null)
+		{
+			if(nonNull)
+				checkNonNullEntity(plugin);
+			else
+				return null;
+		}
+
+		return (HtmlChartPlugin) plugin;
+	}
+
+	protected HtmlChartPluginVo toHtmlChartPluginVo(HttpServletRequest request, HtmlChartPlugin plugin)
+	{
+		if (plugin == null)
 			return null;
 
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
-		
-		return toHtmlChartPluginView((HtmlChartPlugin) plugin, themeName, locale);
+		return toHtmlChartPluginVo(plugin, themeName, locale);
 	}
 
-	/**
-	 * 查找插件视图对象列表。
-	 * 
-	 * @param request
-	 * @param keyword
-	 * @param apiVersion
-	 *            允许{@code null}
-	 * @param local
-	 *            是否仅查询本地图表插件（{@linkplain ChartPlugin#getDataSetRange()}不为{@code null}，且各值都为0）
-	 *            允许{@code null}
-	 * @return
-	 */
-	protected List<HtmlChartPluginView> findHtmlChartPluginViews(HttpServletRequest request, String keyword,
-			String apiVersion, Boolean local)
+	protected HtmlChartPluginVo toHtmlChartPluginVo(HtmlChartPlugin plugin, String themeName, Locale locale)
 	{
-		List<HtmlChartPluginView> pluginViews = new ArrayList<>();
+		if (plugin == null)
+			return null;
 
-		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class,
-				HTML_CHART_PLUGIN_SORT);
+		HtmlChartPluginVo vo = new HtmlChartPluginVo(plugin, locale);
+		inflateThemeIconResourceNames(vo, themeName);
 
-		if (plugins != null)
-		{
-			Locale locale = WebUtils.getLocale(request);
-			String themeName = resolveChartPluginIconThemeName(request);
-			boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
-
-			for (HtmlChartPlugin plugin : plugins)
-			{
-				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
-					continue;
-
-				if (local != null && Boolean.TRUE.equals(local)
-						&& !ChartPluginDataSetRange.isStrictZeroRange(plugin.getDataSetRange()))
-					continue;
-
-				pluginViews.add(toHtmlChartPluginView(plugin, themeName, locale));
-			}
-		}
-
-		return this.keywordMatcher.match(pluginViews, keyword, new MatchValue<HtmlChartPluginView>()
-				{
-					@Override
-					public String[] get(HtmlChartPluginView t)
-					{
-						return new String[] { (t.getNameLabel() == null ? null : t.getNameLabel().getValue()),
-						(t.getDescLabel() == null ? null : t.getDescLabel().getValue()), t.getAuthor() };
-					}
-				});
-	}
-
-	protected HtmlChartPluginView toHtmlChartPluginView(HttpServletRequest request, HtmlChartPlugin chartPlugin)
-	{
-		Locale locale = WebUtils.getLocale(request);
-		String themeName = resolveChartPluginIconThemeName(request);
-
-		return toHtmlChartPluginView(chartPlugin, themeName, locale);
-	}
-
-	protected HtmlChartPluginView toHtmlChartPluginView(HtmlChartPlugin chartPlugin, String themeName, Locale locale)
-	{
-		HtmlChartPluginView pluginView = new HtmlChartPluginView();
-
-		pluginView.setId(chartPlugin.getId());
-		LabelUtil.concrete(chartPlugin, pluginView, locale);
-		pluginView.setIconUrl(resolveIconUrl(chartPlugin, themeName));
-		pluginView.setDataSigns(Localizable.toLocale(chartPlugin.getDataSigns(), locale));
-		pluginView.setDataSetRange(chartPlugin.getDataSetRange());
-		pluginView.setVersion(chartPlugin.getVersion());
-		pluginView.setOrder(chartPlugin.getOrder());
-		pluginView.setCategories(Localizable.toLocale(chartPlugin.getCategories(), locale));
-		pluginView.setCategoryOrders(chartPlugin.getCategoryOrders());
-		pluginView.setAttributeForm(
-				chartPlugin.getAttributeForm() == null ? null : chartPlugin.getAttributeForm().toLocale(locale));
-		pluginView.setAuthor(chartPlugin.getAuthor());
-		pluginView.setContact(chartPlugin.getContact());
-		pluginView.setIssueDate(chartPlugin.getIssueDate());
-		pluginView.setPlatformVersion(chartPlugin.getPlatformVersion());
-		pluginView.setApiVersion(chartPlugin.getApiVersion());
-
-		return pluginView;
+		return vo;
 	}
 
 	protected String resolveChartPluginIconThemeName(HttpServletRequest request)
 	{
 		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
 		return dashboardTheme.getName();
+	}
+
+	protected void inflateThemeIconResourceNames(HtmlChartPlugin plugin, String themeName)
+	{
+		if (plugin == null)
+			return;
+
+		String iconResName = plugin.getIconResourceName(themeName);
+
+		if (StringUtil.isEmpty(iconResName))
+			plugin.setIconResourceNames(Collections.emptyMap());
+		else
+			plugin.setIconResourceNames(Collections.singletonMap(ChartPlugin.DEFAULT_ICON_THEME_NAME, iconResName));
 	}
 
 	/**
@@ -324,39 +232,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	}
 
 	/**
-	 * {@linkplain HtmlChartPlugin}视图对象。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class HtmlChartPluginView extends HtmlChartPluginVo implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private String iconUrl = null;
-
-		public HtmlChartPluginView()
-		{
-			super();
-		}
-
-		public HtmlChartPluginView(String id, Label nameLabel)
-		{
-			super(id, nameLabel);
-		}
-
-		public String getIconUrl()
-		{
-			return iconUrl;
-		}
-
-		public void setIconUrl(String iconUrl)
-		{
-			this.iconUrl = iconUrl;
-		}
-	}
-
-	/**
 	 * {@linkplain DataSetBind}视图对象。
 	 * 
 	 * @author datagear@163.com
@@ -391,33 +266,4 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			return null;
 		}
 	}
-
-	/**
-	 * 图表插件排序器。
-	 * <p>
-	 * {@linkplain HtmlChartPlugin#getApiVersion()}越大越靠前、{@linkplain HtmlChartPlugin#getOrder()}越小越靠前。
-	 * </p>
-	 */
-	protected static final Comparator<HtmlChartPlugin> HTML_CHART_PLUGIN_SORT = new Comparator<HtmlChartPlugin>()
-	{
-		@Override
-		public int compare(HtmlChartPlugin o1, HtmlChartPlugin o2)
-		{
-			String apiVersion1 = o1.getApiVersion();
-			String apiVersion2 = o2.getApiVersion();
-			
-			if(apiVersion1 == null)
-				apiVersion1 = "";
-			if(apiVersion2 == null)
-				apiVersion2 = "";
-			
-			// 越大越靠前
-			int re = (0 - apiVersion1.compareTo(apiVersion2));
-
-			if (re == 0)
-				re = Integer.valueOf(o1.getOrder()).compareTo(o2.getOrder());
-
-			return re;
-		}
-	};
 }

@@ -1229,15 +1229,18 @@
 		{
 			po.handleOpenSelectAction("/chartPlugin/select", function(plugin)
 			{
-				po.extPluginDataSigns(plugin);
-				
-				var fm = po.vueFormModel();
-				var pm = po.vuePageModel();
-				
-				fm.pluginVo = plugin;
-				po.unmergeChartDsbs(fm);
-				po.mergeChartDsbs(fm);
-				pm.pluginHasDataSetSign = po.containsDataSetSign(fm.pluginVo);
+				po.getJson("/chartPlugin/detailValue/"+encodeURIComponent(plugin.id), function(plugin)
+				{
+					po.extPluginDataSigns(plugin);
+					
+					var fm = po.vueFormModel();
+					var pm = po.vuePageModel();
+					
+					fm.pluginVo = plugin;
+					po.unmergeChartDsbs(fm);
+					po.mergeChartDsbs(fm);
+					pm.pluginHasDataSetSign = po.containsDataSetSign(fm.pluginVo);
+				});
 			});
 		},
 		

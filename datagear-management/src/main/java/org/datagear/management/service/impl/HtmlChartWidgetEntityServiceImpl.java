@@ -376,19 +376,8 @@ public class HtmlChartWidgetEntityServiceImpl
 				entity.setPlugin(full);
 			else
 			{
-				if (full != null)
-				{
-					pluginVo.setId(full.getId());
-					pluginVo.setNameLabel(full.getNameLabel());
-					pluginVo.setDescLabel(full.getDescLabel());
-					pluginVo.setIconResourceNames(full.getIconResourceNames());
-					pluginVo.setVersion(full.getVersion());
-					pluginVo.setApiVersion(full.getApiVersion());
-					pluginVo.setPlatformVersion(full.getPlatformVersion());
-					pluginVo.setAuthor(full.getAuthor());
-					pluginVo.setContact(full.getContact());
-					pluginVo.setIssueDate(full.getIssueDate());
-				}
+				pluginVo = new HtmlChartPluginVo(full);
+				entity.setPluginVo(pluginVo);
 			}
 		}
 	}

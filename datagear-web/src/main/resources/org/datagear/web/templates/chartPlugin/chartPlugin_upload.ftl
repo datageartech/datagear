@@ -88,9 +88,6 @@
 		$.each(cps, function(idx, cp)
 		{
 			cp.key = cp.id + seq;
-			
-			if(cp.iconUrl)
-				cp.iconUrl = $.addParam(cp.iconUrl, "tmpPluginFileName", fm.pluginFileName);
 		});
 		
 		pm.chartPlugins.plugins = cps;
@@ -108,7 +105,21 @@
 	{
 		formatChartPlugin: function(chartPlugin)
 		{
-			return $.toChartPluginHtml(chartPlugin, po.contextPath);
+			var html = $.toChartPluginHtml(chartPlugin, po.contextPath,
+			{
+				iconUrlHandler: function(iconUrl)
+				{
+					if(iconUrl)
+					{
+						var fm = po.vueFormModel();
+						iconUrl = $.addParam(iconUrl, "tmpPluginFileName", fm.pluginFileName);
+					}
+					
+					return iconUrl;
+				}
+			});
+			
+			return html;
 		},
 		
 		onUploaded: function(e)

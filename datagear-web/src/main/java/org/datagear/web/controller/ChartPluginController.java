@@ -18,7 +18,9 @@
 package org.datagear.web.controller;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,13 +33,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.support.ChartPluginCategorizationResolver;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlChartPluginJson;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
+import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.KeywordMatcher;
+import org.datagear.util.KeywordMatcher.MatchValue;
 import org.datagear.util.StringUtil;
+import org.datagear.util.i18n.Localizable;
 import org.datagear.util.query.PagingData;
 import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -67,6 +76,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@Autowired
 	private File tempDirectory;
 
+	private ChartPluginCategorizationResolver chartPluginCategorizationResolver = new ChartPluginCategorizationResolver();
+
+	private KeywordMatcher keywordMatcher = new KeywordMatcher();
+
 	public ChartPluginController()
 	{
 		super();
@@ -80,6 +93,27 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public ChartPluginCategorizationResolver getChartPluginCategorizationResolver()
+	{
+		return chartPluginCategorizationResolver;
+	}
+
+	public void setChartPluginCategorizationResolver(
+			ChartPluginCategorizationResolver chartPluginCategorizationResolver)
+	{
+		this.chartPluginCategorizationResolver = chartPluginCategorizationResolver;
+	}
+
+	public KeywordMatcher getKeywordMatcher()
+	{
+		return keywordMatcher;
+	}
+
+	public void setKeywordMatcher(KeywordMatcher keywordMatcher)
+	{
+		this.keywordMatcher = keywordMatcher;
 	}
 
 	@RequestMapping("/upload")
@@ -126,14 +160,14 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			}
 		}
 
-		List<HtmlChartPluginView> pluginInfos = new ArrayList<>();
+		List<HtmlChartPluginVo> pluginInfos = new ArrayList<>();
 
 		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPluginsThrow(myTmpDirectory);
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
 
 		for (HtmlChartPlugin chartPlugin : loadedPlugins)
-			pluginInfos.add(toHtmlChartPluginView(chartPlugin, themeName, locale));
+			pluginInfos.add(toHtmlChartPluginVo(chartPlugin, themeName, locale));
 
 		Map<String, Object> results = new HashMap<>();
 		results.put("pluginFileName", pluginFileName);
@@ -185,8 +219,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
-		HtmlChartPlugin plugin = (HtmlChartPlugin) getDirectoryHtmlChartPluginManager().get(id);
-		setFormModel(model, toHtmlChartPluginView(request, plugin));
+		HtmlChartPlugin plugin = getHtmlChartPlugin(id, true);
+		setFormModel(model, toHtmlChartPluginVo(request, plugin));
 
 		return "/chartPlugin/chartPlugin_form";
 	}
@@ -211,17 +245,17 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<HtmlChartPluginView> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<HtmlChartPluginVo> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			Model model, @RequestBody(required = false) DataFilterPagingQuery pagingQuery)
 			throws Exception
 	{
 		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
-		List<HtmlChartPluginView> chartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword(),
-				pagingQuery.getDataFilter(), false);
+		List<HtmlChartPluginVo> pluginVos = findHtmlChartPluginVos(request, pagingQuery.getKeyword(),
+				pagingQuery.getDataFilter(), false, false);
 
-		PagingData<HtmlChartPluginView> pagingData = new PagingData<>(pagingQuery.getPage(), chartPluginViews.size(),
+		PagingData<HtmlChartPluginVo> pagingData = new PagingData<>(pagingQuery.getPage(), pluginVos.size(),
 				pagingQuery.getPageSize());
-		pagingData.setItems(chartPluginViews.subList(pagingData.getStartIndex(), pagingData.getEndIndex()));
+		pagingData.setItems(pluginVos.subList(pagingData.getStartIndex(), pagingData.getEndIndex()));
 
 		return pagingData;
 	}
@@ -244,11 +278,21 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 
-		List<HtmlChartPluginView> htmlChartPluginViews = findHtmlChartPluginViews(request, pagingQuery.getKeyword(),
-				pagingQuery.getDataFilter(), local);
-		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginViews);
+		List<HtmlChartPluginVo> pluginVos = findHtmlChartPluginVos(request, pagingQuery.getKeyword(),
+				pagingQuery.getDataFilter(), local, true);
+		List<Categorization> categorizations = resolveCategorizations(pluginVos);
+		simplifyForSelectData(categorizations);
 
 		return categorizations;
+	}
+
+	@RequestMapping(value = "/detailValue/{id}", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public HtmlChartPlugin detailValue(HttpServletRequest request, @PathVariable("id") String id) throws Exception
+	{
+		HtmlChartPlugin plugin = getHtmlChartPlugin(id, true);
+		plugin = new HtmlChartPluginJson(plugin, WebUtils.getLocale(request));
+		return plugin;
 	}
 
 	@RequestMapping("/icon/{pluginId:.+}")
@@ -292,6 +336,100 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		writeChartPluginResource(request, response, webRequest, chartPlugin, iconResource);
 	}
 
+	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginVo> chartPluginVOs)
+	{
+		return this.chartPluginCategorizationResolver.resolve(chartPluginVOs);
+	}
+
+	protected void simplifyForSelectData(List<Categorization> categorizations)
+	{
+		if (categorizations == null || categorizations.size() == 0)
+			return;
+
+		for (Categorization ct : categorizations)
+		{
+			List<ChartPlugin> plugins = ct.getChartPlugins();
+
+			if (plugins == null)
+				continue;
+
+			for (ChartPlugin plugin : plugins)
+			{
+				if (!(plugin instanceof HtmlChartPlugin))
+					continue;
+
+				HtmlChartPlugin hp = (HtmlChartPlugin) plugin;
+
+				// 不需要显示的都设为null，减少数据传输量
+				hp.setCategories(null);
+				hp.setCategoryOrders(null);
+				hp.setDataSigns(null);
+				hp.setResources(null);
+			}
+		}
+	}
+
+	/**
+	 * 查找插件值对象列表。
+	 * 
+	 * @param request
+	 * @param keyword
+	 * @param apiVersion
+	 *            允许{@code null}
+	 * @param local
+	 *            是否仅查询本地图表插件（{@linkplain ChartPlugin#getDataSetRange()}不为{@code null}，且各值都为0）
+	 *            允许{@code null}
+	 * @param forCategory
+	 * @return
+	 */
+	protected List<HtmlChartPluginVo> findHtmlChartPluginVos(HttpServletRequest request, String keyword,
+			String apiVersion, Boolean local, boolean forCategory)
+	{
+		List<HtmlChartPluginVo> pluginViews = new ArrayList<>();
+
+		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class,
+				HTML_CHART_PLUGIN_SORT);
+
+		if (plugins != null)
+		{
+			Locale locale = WebUtils.getLocale(request);
+			String themeName = resolveChartPluginIconThemeName(request);
+			boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
+
+			for (HtmlChartPlugin plugin : plugins)
+			{
+				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
+					continue;
+
+				if (local != null && Boolean.TRUE.equals(local)
+						&& !ChartPluginDataSetRange.isStrictZeroRange(plugin.getDataSetRange()))
+					continue;
+
+				pluginViews.add(forCategory ? toHtmlChartPluginVoForCategory(plugin, themeName, locale)
+						: toHtmlChartPluginVo(plugin, themeName, locale));
+			}
+		}
+
+		return this.keywordMatcher.match(pluginViews, keyword, new MatchValue<HtmlChartPluginVo>()
+		{
+			@Override
+			public String[] get(HtmlChartPluginVo t)
+			{
+				return new String[] { (t.getNameLabel() == null ? null : t.getNameLabel().getValue()),
+						(t.getDescLabel() == null ? null : t.getDescLabel().getValue()), t.getAuthor() };
+			}
+		});
+	}
+
+	protected HtmlChartPluginVo toHtmlChartPluginVoForCategory(HtmlChartPlugin chartPlugin, String themeName,
+			Locale locale)
+	{
+		HtmlChartPluginVo vo = toHtmlChartPluginVo(chartPlugin, themeName, locale);
+		vo.setCategories(Localizable.toLocale(chartPlugin.getCategories(), locale));
+		vo.setCategoryOrders(chartPlugin.getCategoryOrders());
+		return vo;
+	}
+
 	public static class saveUploadForm implements ControllerForm
 	{
 		private static final long serialVersionUID = 1L;
@@ -313,4 +451,52 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			this.pluginFileName = pluginFileName;
 		}
 	}
+
+	/**
+	 * {@linkplain HtmlChartPlugin}视图对象。
+	 *
+	 */
+	public static class HtmlChartPluginView extends HtmlChartPluginJson implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		public HtmlChartPluginView()
+		{
+			super();
+		}
+
+		public HtmlChartPluginView(HtmlChartPlugin plugin, Locale locale)
+		{
+			super(plugin, locale);
+		}
+	}
+
+	/**
+	 * 图表插件排序器。
+	 * <p>
+	 * {@linkplain HtmlChartPlugin#getApiVersion()}越大越靠前、{@linkplain HtmlChartPlugin#getOrder()}越小越靠前。
+	 * </p>
+	 */
+	protected static final Comparator<HtmlChartPlugin> HTML_CHART_PLUGIN_SORT = new Comparator<HtmlChartPlugin>()
+	{
+		@Override
+		public int compare(HtmlChartPlugin o1, HtmlChartPlugin o2)
+		{
+			String apiVersion1 = o1.getApiVersion();
+			String apiVersion2 = o2.getApiVersion();
+
+			if (apiVersion1 == null)
+				apiVersion1 = "";
+			if (apiVersion2 == null)
+				apiVersion2 = "";
+
+			// 越大越靠前
+			int re = (0 - apiVersion1.compareTo(apiVersion2));
+
+			if (re == 0)
+				re = Integer.valueOf(o1.getOrder()).compareTo(o2.getOrder());
+
+			return re;
+		}
+	};
 }

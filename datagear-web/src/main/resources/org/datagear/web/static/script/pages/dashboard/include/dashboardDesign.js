@@ -891,9 +891,22 @@ $.inflateDashboardDesignEditor = function(po)
 		$.closeDialog(dialog);
 	};
 	
-	po.showSelectPluginDialog = function(selectHandler, local)
+	po.showSelectPluginDialog = function(selectHandler, detailValue, local)
 	{
+		detailValue = (detailValue === undefined ? false : detailValue);
 		local = (local === undefined ? true : local);
+		
+		if(detailValue)
+		{
+			let originSelectHandler = selectHandler;
+			selectHandler = function(plugin)
+			{
+				po.getJson("/chartPlugin/detailValue/"+encodeURIComponent(plugin.id), function(plugin)
+				{
+					originSelectHandler(plugin);
+				});
+			};
+		}
 		
 		po.showPersistSelectDialog(
 			po.selectPluginDialogId,

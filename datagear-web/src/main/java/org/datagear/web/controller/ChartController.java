@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResultDataFormat;
@@ -76,9 +75,6 @@ public class ChartController extends AbstractChartPluginAwareController
 	private AnalysisProjectService analysisProjectService;
 
 	@Autowired
-	private ChartPluginManager chartPluginManager;
-
-	@Autowired
 	private DataSetEntityService dataSetEntityService;
 
 	@Autowired
@@ -113,16 +109,6 @@ public class ChartController extends AbstractChartPluginAwareController
 	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
 	{
 		this.analysisProjectService = analysisProjectService;
-	}
-
-	public ChartPluginManager getChartPluginManager()
-	{
-		return chartPluginManager;
-	}
-
-	public void setChartPluginManager(ChartPluginManager chartPluginManager)
-	{
-		this.chartPluginManager = chartPluginManager;
 	}
 
 	public DataSetEntityService getDataSetEntityService()
@@ -454,8 +440,8 @@ public class ChartController extends AbstractChartPluginAwareController
 		HtmlChartPlugin plugin = null;
 		if (!StringUtil.isEmpty(pluginId))
 		{
-			plugin = (HtmlChartPlugin) this.chartPluginManager.get(pluginId);
-			pluginVo = (plugin == null ? null : new HtmlChartPluginVo(plugin.getId(), plugin.getNameLabel()));
+			plugin = getHtmlChartPlugin(pluginId, false);
+			pluginVo = (plugin == null ? null : new HtmlChartPluginVo(plugin));
 			entity.setPluginVo(pluginVo);
 		}
 
@@ -469,36 +455,22 @@ public class ChartController extends AbstractChartPluginAwareController
 				vo.setQuery(query);
 			}
 		}
-
-		// 插件属性值应在界面端进行数据类型转换
-		// Map<String, Object> attrValues = entity.getAttrValues();
-		// if (attrValues != null && plugin != null)
-		// {
-		// attrValues =
-		// getChartPluginAttributeValueConverter().convert(attrValues,
-		// plugin.getAttributes());
-		// entity.setAttrValues(attrValues);
-		// }
 	}
 
 	protected void toFormResponseData(HttpServletRequest request, HtmlChartWidgetEntity entity)
 	{
-		HtmlChartPlugin plugin = entity.getPluginVo();
-
-		if (plugin != null)
-			entity.setPluginVo(getHtmlChartPluginView(request, plugin.getId()));
-
+		entity.setPluginVo(toHtmlChartPluginVo(request, entity.getPluginVo()));
 		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
 	}
 
 	protected void toQueryResponseData(HttpServletRequest request, List<HtmlChartWidgetEntity> items)
 	{
-		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
+		Locale locale = WebUtils.getLocale(request);
 
 		for (HtmlChartWidgetEntity entity : items)
 		{
-			entity.setPluginVo(toHtmlChartPluginView(entity.getPluginVo(), themeName, locale));
+			entity.setPluginVo(toHtmlChartPluginVo(entity.getPluginVo(), themeName, locale));
 		}
 	}
 

@@ -130,6 +130,29 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		this.chartWriter = chartWriter;
 	}
 
+	public HtmlChartPlugin(HtmlChartPlugin plugin)
+	{
+		this(plugin.getId(), plugin.getNameLabel(), plugin.getRenderer(), plugin.getPluginWriter(),
+				plugin.getRenderContextWriter(), plugin.getChartWriter());
+
+		setDescLabel(plugin.getDescLabel());
+		setResources(plugin.getResources());
+		setIconResourceNames(plugin.getIconResourceNames());
+		setAttributeForm(plugin.getAttributeForm());
+		setDataSigns(plugin.getDataSigns());
+		setDataSetRange(plugin.getDataSetRange());
+		setVersion(plugin.getVersion());
+		setOrder(plugin.getOrder());
+		setCategories(plugin.getCategories());
+		setCategoryOrders(plugin.getCategoryOrders());
+		setAuthor(plugin.getAuthor());
+		setContact(plugin.getContact());
+		setIssueDate(plugin.getIssueDate());
+		setPlatformVersion(plugin.getPlatformVersion());
+		setApiVersion(plugin.getApiVersion());
+		setAdditions(plugin.getAdditions());
+	}
+
 	public JsChartRenderer getRenderer()
 	{
 		return renderer;
