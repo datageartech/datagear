@@ -45,9 +45,6 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 	/** 输入框载荷 */
 	private Object inputPayload = null;
 
-	/** 默认值 */
-	private Object defaultValue = null;
-
 	public InputFormProperty()
 	{
 		super();
@@ -110,25 +107,12 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 	}
 
 	@Override
-	public Object getDefaultValue()
-	{
-		return defaultValue;
-	}
-
-	@Override
-	public void setDefaultValue(Object defaultValue)
-	{
-		this.defaultValue = defaultValue;
-	}
-
-	@Override
 	public InputFormProperty toLocale(Locale locale)
 	{
 		InputFormProperty target = (InputFormProperty) super.toLocale(locale);
 
 		target.setInputType(this.inputType);
 		target.setInputPayload(this.inputPayload);
-		target.setDefaultValue(this.defaultValue);
 
 		return target;
 	}
@@ -143,6 +127,6 @@ public class InputFormProperty extends AbstractFormProperty implements NameTypeI
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + isRequired()
-				+ ", array=" + isArray() + ", inputType=" + inputType + ", defaultValue=" + defaultValue + "]";
+				+ ", array=" + isArray() + ", inputType=" + inputType + "]";
 	}
 }

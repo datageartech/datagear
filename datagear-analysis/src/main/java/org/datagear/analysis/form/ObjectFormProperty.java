@@ -45,9 +45,6 @@ public class ObjectFormProperty extends AbstractFormProperty implements GroupFor
 	/** 上述{@linkplain #properties}的分组信息 */
 	private List<FormPropertyGroup> groups = null;
 
-	/** 默认值 */
-	private Object defaultValue = null;
-
 	public ObjectFormProperty()
 	{
 		super();
@@ -111,18 +108,6 @@ public class ObjectFormProperty extends AbstractFormProperty implements GroupFor
 	}
 
 	@Override
-	public Object getDefaultValue()
-	{
-		return defaultValue;
-	}
-
-	@Override
-	public void setDefaultValue(Object defaultValue)
-	{
-		this.defaultValue = defaultValue;
-	}
-
-	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", required=" + isRequired() + ", array="
@@ -136,7 +121,6 @@ public class ObjectFormProperty extends AbstractFormProperty implements GroupFor
 
 		target.setProperties(Localizable.toLocale(this.properties, locale));
 		target.setGroups(Localizable.toLocale(this.groups, locale));
-		target.setDefaultValue(this.defaultValue);
 
 		return target;
 	}

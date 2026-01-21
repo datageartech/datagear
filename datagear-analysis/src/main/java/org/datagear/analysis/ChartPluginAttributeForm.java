@@ -20,10 +20,8 @@ package org.datagear.analysis;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.analysis.form.Form;
 import org.datagear.analysis.form.FormProperty;
-import org.datagear.analysis.form.FormPropertyGroup;
-import org.datagear.util.i18n.Label;
+import org.datagear.analysis.form.ObjectFormProperty;
 
 /**
  * 图表插件属性表单。
@@ -34,7 +32,7 @@ import org.datagear.util.i18n.Label;
  * @author datagear@163.com
  *
  */
-public class ChartPluginAttributeForm extends Form implements NameAware
+public class ChartPluginAttributeForm extends ObjectFormProperty implements NameAware
 {
 	private static final long serialVersionUID = 1L;
 
@@ -49,46 +47,12 @@ public class ChartPluginAttributeForm extends Form implements NameAware
 
 	public ChartPluginAttributeForm(List<FormProperty> properties)
 	{
-		super(properties);
+		super(null, properties);
 	}
 
 	public ChartPluginAttributeForm(String name, List<FormProperty> properties)
 	{
-		super(properties);
-		this.name = name;
-	}
-
-	public ChartPluginAttributeForm(List<FormProperty> properties, List<FormPropertyGroup> groups)
-	{
-		super(properties, groups);
-	}
-
-	public ChartPluginAttributeForm(String name, List<FormProperty> properties, List<FormPropertyGroup> groups)
-	{
-		super(properties, groups);
-		this.name = name;
-	}
-
-	public ChartPluginAttributeForm(Label nameLabel, List<FormProperty> properties)
-	{
-		super(nameLabel, properties);
-	}
-
-	public ChartPluginAttributeForm(String name, Label nameLabel, List<FormProperty> properties)
-	{
-		super(nameLabel, properties);
-		this.name = name;
-	}
-
-	public ChartPluginAttributeForm(Label nameLabel, List<FormProperty> properties, List<FormPropertyGroup> groups)
-	{
-		super(nameLabel, properties, groups);
-	}
-
-	public ChartPluginAttributeForm(String name, Label nameLabel, List<FormProperty> properties,
-			List<FormPropertyGroup> groups)
-	{
-		super(nameLabel, properties, groups);
+		super(name, properties);
 		this.name = name;
 	}
 
@@ -98,18 +62,14 @@ public class ChartPluginAttributeForm extends Form implements NameAware
 	 * 此名称表示表单数据应存储在{@linkplain ChartDefinition#getAttrValues()}中的名称。
 	 * </p>
 	 * <p>
-	 * 如果为{@code null}，表示表单数据以其包含的{@linkplain #getProperties()}的{@linkplain FormProperty#getName()}分散存储在{@linkplain ChartDefinition#getAttrValues()}中。
+	 * 如果为{@code null}，表示表单数据以其包含的{@linkplain #getProperties()}的{@linkplain FormProperty#getName()}
+	 * 分散存储在{@linkplain ChartDefinition#getAttrValues()}中。
 	 * </p>
 	 */
 	@Override
 	public String getName()
 	{
 		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
 	}
 
 	@Override

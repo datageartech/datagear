@@ -42,6 +42,9 @@ public abstract class AbstractFormProperty extends AbstractLabeled
 
 	private boolean array = false;
 
+	/** 默认值 */
+	private Object defaultValue = null;
+
 	/** 扩展属性 */
 	private Map<String, ?> additions = null;
 
@@ -102,6 +105,18 @@ public abstract class AbstractFormProperty extends AbstractLabeled
 	}
 
 	@Override
+	public Object getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	@Override
+	public void setDefaultValue(Object defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+
+	@Override
 	public Map<String, ?> getAdditions()
 	{
 		return additions;
@@ -122,6 +137,7 @@ public abstract class AbstractFormProperty extends AbstractLabeled
 		target.setType(this.type);
 		target.setRequired(this.required);
 		target.setArray(this.array);
+		target.setDefaultValue(this.defaultValue);
 		target.setAdditions(this.additions);
 		LabelUtil.concrete(this, target, locale);
 
