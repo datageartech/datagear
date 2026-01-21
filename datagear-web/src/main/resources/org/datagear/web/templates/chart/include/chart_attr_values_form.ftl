@@ -248,7 +248,7 @@ page_palette.ftl
 									</div>
 								</div>
 					        	<div class="validate-msg">
-					        		<input :name="'[\''+toLiteralPluginAttrName(group.name)+'\']['+grpDataEleIdx+'][\''+toLiteralPluginAttrName(attr.name)+'\']'" type="text" class="validate-proxy"
+					        		<input :name="toPropPathLiteral(group.name, grpDataEleIdx, attr.name)" type="text" class="validate-proxy"
 					        			:class="{'required': attr.required, 'number': attr.type == pm.FormPropertyType.NUMBER}" />
 					        	</div>
 							</div>
@@ -310,12 +310,6 @@ page_palette.ftl
 		
 		//5.5.0旧版的下拉框inputPayload.multiple="repeat"值，表示可重复选取
 		MultipleRepeat: "repeat"
-	};
-	
-	po.toLiteralPluginAttrName = function(name)
-	{
-		//TODO
-		return name;
 	};
 	
 	//根插件对象属性的name值，其包含的属性值直接保存至根属性值对象下
@@ -625,14 +619,14 @@ page_palette.ftl
 	};
 	
 	//将由po.chartAttrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
-	po.formDataToChartAttrValues = function(formData, groupedAttrs, clone)
+	po.formDataToChartAttrValues = function(formData, pluginAttrForm, clone)
 	{
 		clone = (clone === undefined ? true : clone);
 		
-		//注意：formData中对于没有在groupedAttrs定义的属性值应原样保留，
+		//注意：formData中对于没有在pluginAttrForm定义的属性值应原样保留，
 		//因为看板的dg-chart-attr-values应允许定义图表插件属性之外的扩展值
 		
-		if(formData == null || $.isEmpty(groupedAttrs))
+		if(formData == null || pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
 			return formData;
 		
 		//要先清除循环引用，复制完后再恢复
@@ -648,9 +642,10 @@ page_palette.ftl
 			re[po.rootPluginObjectAttrName] = re;
 		}
 		
-		for(var i=0; i<groupedAttrs.length; i++)
+		var formProperties = pluginAttrForm.properties;
+		for(var i=0; i<formProperties.length; i++)
 		{
-			var attr = groupedAttrs[i];
+			var attr = formProperties[i];
 			var v = re[attr.name];
 			
 			if(v == null)
@@ -840,7 +835,7 @@ page_palette.ftl
 		}
 	};
 	
-	po.chartAttrValuesToFormData = function(attrValues, groupedAttrs, clone)
+	po.chartAttrValuesToFormData = function(attrValues, pluginAttrForm, clone)
 	{
 		clone = (clone === undefined ? true : clone);
 		
@@ -849,12 +844,13 @@ page_palette.ftl
 		if(clone)
 			data = $.extend(true, {}, data);
 		
-		if($.isEmpty(groupedAttrs))
+		if(pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
 			return data;
-		
-		for(var i=0; i<groupedAttrs.length; i++)
+
+		var formProperties = pluginAttrForm.properties;
+		for(var i=0; i<formProperties.length; i++)
 		{
-			var attr = groupedAttrs[i];
+			var attr = formProperties[i];
 			var v = data[attr.name];
 			
 			if(po.isObjectFormProperty(attr))
@@ -986,7 +982,7 @@ page_palette.ftl
 		}
 	});
 	
-	po.setupChartAttrValuesForm = function(attrs, attrValues, options)
+	po.setupChartAttrValuesForm = function(pluginAttrForm, attrValues, options)
 	{
 		options = $.extend(
 		{
@@ -997,31 +993,22 @@ page_palette.ftl
 		options);
 		
 		var pm = po.vuePageModel();
-		pm.chartAttrValuesForm.groups = po.trimChartPluginAttrByGroup(attrs);
+		pm.chartAttrValuesForm.pluginAttrForm = pluginAttrForm;
+		pm.chartAttrValuesForm.groups = po.trimChartPluginAttrByGroup(pluginAttrForm);
 		pm.chartAttrValuesForm.buttons = options.buttons;
 		pm.chartAttrValuesForm.readonly = options.readonly;
 		po.setChartAttrValuesFormData(attrValues);
 		
-		var validateRules = {};
-		
-		for(var i=0; i<attrs.length; i++)
-		{
-			var attr = attrs[i];
-			if(attr.type == po.FormPropertyType.NUMBER)
-				validateRules[attr.name] = { "number": true };
-		};
-		
 		var form = po.elementOfId("${pid}chartAttrValuesForm", document.body);
 		po.setupSimpleForm(form, pm.chartAttrValuesForm.data,
 		{
-			rules: validateRules,
 			submitHandler: function()
 			{
 				if(options && options.submitHandler)
 				{
-					var groups = pm.chartAttrValuesForm.groups;
+					var pluginAttrForm = pm.chartAttrValuesForm.pluginAttrForm;
 					var data = po.vueRaw(pm.chartAttrValuesForm.data);
-					var attrValues = po.formDataToChartAttrValues(data, groups);
+					var attrValues = po.formDataToChartAttrValues(data, pluginAttrForm);
 					options.submitHandler(attrValues);
 				}
 			}
@@ -1031,15 +1018,15 @@ page_palette.ftl
 	po.setChartAttrValuesFormData = function(attrValues)
 	{
 		var pm = po.vuePageModel();
-		var groups = pm.chartAttrValuesForm.groups;
-		var data = po.chartAttrValuesToFormData(attrValues, groups);
+		var pluginAttrForm = pm.chartAttrValuesForm.pluginAttrForm;
+		var data = po.chartAttrValuesToFormData(attrValues, pluginAttrForm);
 		pm.chartAttrValuesForm.data = data;
 	};
 	
 	po.clearChartAttrValuesFormData = function()
 	{
 		var pm = po.vuePageModel();
-		var groups = pm.chartAttrValuesForm.groups;
+		var pluginAttrForm = pm.chartAttrValuesForm.pluginAttrForm;
 		var data = pm.chartAttrValuesForm.data;
 		
 		for(let p in data)
@@ -1047,14 +1034,14 @@ page_palette.ftl
 			delete data[p];
 		}
 		
-		po.chartAttrValuesToFormData(data, groups, false);
+		po.chartAttrValuesToFormData(data, pluginAttrForm, false);
 	};
 	
 	po.vueMethod(
 	{
-		toLiteralPluginAttrName: function(name)
+		toPropPathLiteral: function()
 		{
-			return po.toLiteralPluginAttrName(name);
+			return $.concatPropPath.apply($, arguments);
 		},
 		
 		onClearChartAttrValuesFormData: function()

@@ -6041,7 +6041,7 @@ CF.currentDateMs = function()
  */
 CF.escapeHtml = function(value)
 {
-	if(!CF.isString(value))
+	if(value == null || !CF.isString(value))
 		return value;
 	
 	var epn = "";
@@ -6058,8 +6058,6 @@ CF.escapeHtml = function(value)
 			epn += '&amp;';
 		else if(c == '"')
 			epn += '&quot;';
-		else if(c == '\'')
-			epn += '&#39;';
 		else
 			epn += c;
 	}

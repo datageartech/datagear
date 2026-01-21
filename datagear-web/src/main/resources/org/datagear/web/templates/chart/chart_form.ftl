@@ -536,9 +536,9 @@
 		});
 		
 		//这里必须重新转换属性值，因为存在切换图表类型而不编辑图表属性的情况
-		var groupedAttrs = po.trimChartPluginAttrByGroup(data.pluginVo ? data.pluginVo.attributes : null);
-		var attrFormData = po.chartAttrValuesToFormData(data.attrValues, groupedAttrs);
-		data.attrValues = po.formDataToChartAttrValues(attrFormData, groupedAttrs);
+		var pluginAttrForm = (data.pluginVo ? data.pluginVo.attributeForm : null);
+		var attrFormData = po.chartAttrValuesToFormData(data.attrValues, pluginAttrForm);
+		data.attrValues = po.formDataToChartAttrValues(attrFormData, pluginAttrForm);
 		
 		var pm = po.vuePageModel();
 		if(pm.enableResultDataFormat)
@@ -1501,9 +1501,9 @@
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var chartPluginAttrs = po.vueRaw(fm.pluginVo ? (fm.pluginVo.attributes || []) : []);
+			var pluginAttrForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.attributeForm : null);
 			var attrValues = po.vueRaw(fm.attrValues);
-			po.setupChartAttrValuesForm(chartPluginAttrs, attrValues,
+			po.setupChartAttrValuesForm(pluginAttrForm, attrValues,
 			{
 				submitHandler: function(avs)
 				{

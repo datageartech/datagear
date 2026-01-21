@@ -1516,6 +1516,57 @@
 		return array;
 	};
 	
+	$.concatPropPath = function(ele0, ele1, ele2)
+	{
+		var re = "";
+		
+		for(var i=0; i<arguments.length; i++)
+		{
+			var ni = arguments[i];
+			var isStr = $.isTypeString(ni);
+			
+			re += "[";
+			
+			if(isStr)
+				re += "\"";
+			
+			re += (isStr ? $.escapePropPathEle(ni) : ni);
+			
+			if(isStr)
+				re += "\"";
+			
+			re += "]";
+		}
+		
+		return re;
+	};
+	
+	$.escapePropPathEle = function(str)
+	{
+		if(str == null)
+			return str;
+		
+		var re = "";
+		
+		for(let i=0; i<str.length; i++)
+		{
+			let c = str.charAt(i);
+			
+			if(c === '.')
+				re += "\\.";
+			else if(c === '[')
+				re += "\\[";
+			else if(c === ']')
+				re += "\\]";
+			else if(c === '\\')
+				re += "\\\\";
+			else
+				re += c;
+		}
+		
+		return re;
+	};
+	
 	//方括号数组元素访问符正则表达式
 	$.SQUARE_BRACKET_ELE_ACCESSOR = /^\s*\[\s*(\d+)\s*\]\s*$/;
 	
