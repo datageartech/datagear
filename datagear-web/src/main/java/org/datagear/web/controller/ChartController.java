@@ -459,7 +459,9 @@ public class ChartController extends AbstractChartPluginAwareController
 
 	protected void toFormResponseData(HttpServletRequest request, HtmlChartWidgetEntity entity)
 	{
-		entity.setPluginVo(toHtmlChartPluginVo(request, entity.getPluginVo()));
+		HtmlChartPluginVo pluginVo = entity.getPluginVo();
+		HtmlChartPlugin plugin = getHtmlChartPlugin((pluginVo == null ? null : pluginVo.getId()), false);
+		entity.setPluginVo(toHtmlChartPluginVo(request, plugin, true));
 		entity.setDataSetBinds(toDataSetBindViews(entity.getDataSetBinds()));
 	}
 
@@ -470,7 +472,7 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		for (HtmlChartWidgetEntity entity : items)
 		{
-			entity.setPluginVo(toHtmlChartPluginVo(entity.getPluginVo(), themeName, locale));
+			entity.setPluginVo(toHtmlChartPluginVo(entity.getPluginVo(), false, locale, themeName));
 		}
 	}
 

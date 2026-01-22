@@ -72,6 +72,21 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 		return name;
 	}
 
+	/**
+	 * 图表插件属性表单不允许数组，应始终返回{@code false}。
+	 */
+	@Override
+	public boolean isArray()
+	{
+		return false;
+	}
+
+	@Override
+	public void setArray(boolean array)
+	{
+		// 不抛出异常，避免相关反射库操作异常
+	}
+
 	@Override
 	public ChartPluginAttributeForm toLocale(Locale locale)
 	{

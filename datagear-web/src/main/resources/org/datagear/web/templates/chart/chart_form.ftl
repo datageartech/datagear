@@ -250,10 +250,10 @@
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}attrValues" class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
-							:disabled="!fm.pluginVo || !fm.pluginVo.attributes || fm.pluginVo.attributes.length==0"
+							:disabled="!fm.pluginVo || !fm.pluginVo.attributeForm || !fm.pluginVo.attributeForm.properties || fm.pluginVo.attributeForm.properties.length==0"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
-			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && (!fm.pluginVo.attributes || fm.pluginVo.attributes.length==0)">
+			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && (!fm.pluginVo.attributeForm || !fm.pluginVo.attributeForm.properties || fm.pluginVo.attributeForm.properties.length==0)">
 			        		<@spring.message code='chart.attrValues.noAttrDefined' />
 			        	</div>
 		        	</div>
@@ -537,8 +537,7 @@
 		
 		//这里必须重新转换属性值，因为存在切换图表类型而不编辑图表属性的情况
 		var pluginAttrForm = (data.pluginVo ? data.pluginVo.attributeForm : null);
-		var attrFormData = po.chartAttrValuesToFormData(data.attrValues, pluginAttrForm);
-		data.attrValues = po.formDataToChartAttrValues(attrFormData, pluginAttrForm);
+		data.attrValues = po.avo.toTrimAttrValues(data.attrValues, pluginAttrForm);
 		
 		var pm = po.vuePageModel();
 		if(pm.enableResultDataFormat)
@@ -1501,7 +1500,7 @@
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var pluginAttrForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.attributeForm : null);
+			var pluginAttrForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.attributeForm : {});
 			var attrValues = po.vueRaw(fm.attrValues);
 			po.setupChartAttrValuesForm(pluginAttrForm, attrValues,
 			{

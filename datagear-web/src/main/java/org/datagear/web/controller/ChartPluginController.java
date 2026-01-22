@@ -167,7 +167,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		String themeName = resolveChartPluginIconThemeName(request);
 
 		for (HtmlChartPlugin chartPlugin : loadedPlugins)
-			pluginInfos.add(toHtmlChartPluginVo(chartPlugin, themeName, locale));
+			pluginInfos.add(toHtmlChartPluginVo(chartPlugin, false, locale, themeName));
 
 		Map<String, Object> results = new HashMap<>();
 		results.put("pluginFileName", pluginFileName);
@@ -220,7 +220,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlChartPlugin plugin = getHtmlChartPlugin(id, true);
-		setFormModel(model, toHtmlChartPluginVo(request, plugin));
+		setFormModel(model, toHtmlChartPluginVo(request, plugin, false));
 
 		return "/chartPlugin/chartPlugin_form";
 	}
@@ -291,7 +291,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public HtmlChartPlugin detailValue(HttpServletRequest request, @PathVariable("id") String id) throws Exception
 	{
 		HtmlChartPlugin plugin = getHtmlChartPlugin(id, true);
-		plugin = new HtmlChartPluginJson(plugin, WebUtils.getLocale(request));
+		plugin = toHtmlChartPluginVo(request, plugin, true);
 		return plugin;
 	}
 
@@ -406,7 +406,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 					continue;
 
 				pluginViews.add(forCategory ? toHtmlChartPluginVoForCategory(plugin, themeName, locale)
-						: toHtmlChartPluginVo(plugin, themeName, locale));
+						: toHtmlChartPluginVo(plugin, false, locale, themeName));
 			}
 		}
 
@@ -424,7 +424,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	protected HtmlChartPluginVo toHtmlChartPluginVoForCategory(HtmlChartPlugin chartPlugin, String themeName,
 			Locale locale)
 	{
-		HtmlChartPluginVo vo = toHtmlChartPluginVo(chartPlugin, themeName, locale);
+		HtmlChartPluginVo vo = toHtmlChartPluginVo(chartPlugin, false, locale, themeName);
 		vo.setCategories(Localizable.toLocale(chartPlugin.getCategories(), locale));
 		vo.setCategoryOrders(chartPlugin.getCategoryOrders());
 		return vo;

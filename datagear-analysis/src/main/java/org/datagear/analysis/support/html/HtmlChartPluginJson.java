@@ -50,11 +50,9 @@ public class HtmlChartPluginJson extends HtmlChartPlugin
 		super();
 	}
 
-	public HtmlChartPluginJson(String id, Label nameLabel, JsChartRenderer renderer,
-			HtmlChartPluginScriptObjectWriter pluginWriter, HtmlRenderContextScriptObjectWriter renderContextWriter,
-			HtmlChartScriptObjectWriter chartWriter)
+	public HtmlChartPluginJson(String id, Label nameLabel)
 	{
-		super(id, nameLabel, renderer, pluginWriter, renderContextWriter, chartWriter);
+		super(id, nameLabel, null, null, null, null);
 	}
 
 	public HtmlChartPluginJson(HtmlChartPlugin plugin)
@@ -66,10 +64,14 @@ public class HtmlChartPluginJson extends HtmlChartPlugin
 	public HtmlChartPluginJson(HtmlChartPlugin plugin, Locale locale)
 	{
 		this(plugin);
+		initLocalized(plugin, locale);
+	}
 
+	protected void initLocalized(HtmlChartPlugin plugin, Locale locale)
+	{
 		LabelUtil.concrete(plugin, this, locale);
-		setAttributeForm(plugin.getAttributeForm() == null ? null : plugin.getAttributeForm().toLocale(locale));
 		setDataSigns(Localizable.toLocale(plugin.getDataSigns(), locale));
+		setAttributeForm(plugin.getAttributeForm() == null ? null : plugin.getAttributeForm().toLocale(locale));
 		setCategories(Localizable.toLocale(plugin.getCategories(), locale));
 	}
 

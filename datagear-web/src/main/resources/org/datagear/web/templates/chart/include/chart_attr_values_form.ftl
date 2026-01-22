@@ -25,20 +25,21 @@ page_palette.ftl
 -->
 <#assign FormPropertyType=statics['org.datagear.analysis.form.PropertyType']>
 <#assign FormPropertyInputType=statics['org.datagear.analysis.form.PropertyInputType']>
-<form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.chartAttrValuesForm.readonly}">
+<#assign JsonChartPluginPropertiesResolver=statics['org.datagear.analysis.support.JsonChartPluginPropertiesResolver']>
+<form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<p-accordion :multiple="true" :active-index="[0]">
-			<p-accordion-tab v-for="(group, groupIdx) in pm.chartAttrValuesForm.groups">
+			<p-accordion-tab v-for="(group, groupIdx) in pm.avoModel.groups">
 				<template #header>
 					<span>{{group.nameLabel.value}}</span>
 					<span class="text-color-secondary text-sm ml-1">{{group.virtual ? "" : group.name}}</span>
 				</template>
 				<div class="flex flex-column gap-3 mb-2">
-					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.chartAttrValuesForm.data[group.name]"
-						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.chartAttrValuesForm.data[group.name].length"
+					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.avoModel.data[group.name]"
+						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.avoModel.data[group.name].length"
 						:toggleable="group.array" class="no-panel-border panel-icon-align-center">
 						<template #icons>
-							<div class="inline-flex gap-1 mx-2 text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+							<div class="inline-flex gap-1 mx-2 text-sm" v-if="group.array && !pm.avoModel.readonly">
 								<p-button type="button" severity="secondary"
 									@click="onChartAttrValuesFormMoveUpGrpEle($event, group, grpDataEleIdx)">
 									<@spring.message code='moveUp' />
@@ -64,7 +65,7 @@ page_palette.ftl
 								<span class="text-color-secondary text-sm ml-1">{{attr.name}}</span>
 							</label>
 							<div class="field-input col-12">
-								<div v-if="attr.inputType == pm.FormPropertyInputType.SELECT">
+								<div v-if="attr.inputType == pm.avoModel.FormPropertyInputType.SELECT">
 									<div class="flex flex-column gap-1" v-if="attr.array">
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 flex" v-if="attr.inputPayload.multiple">
@@ -90,15 +91,15 @@ page_palette.ftl
 											<div class="flex align-items-center gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 												<p-button type="button" icon="pi pi-minus" severity="danger" outlined 
 													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 											</div>
 										</div>
-										<div v-if="!pm.chartAttrValuesForm.readonly">
+										<div v-if="!pm.avoModel.readonly">
 											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
 											</p-button>
@@ -125,7 +126,7 @@ page_palette.ftl
 										</p-dropdown>
 									</div>
 								</div>
-								<div v-else-if="attr.inputType == pm.FormPropertyInputType.COLOR">
+								<div v-else-if="attr.inputType == pm.avoModel.FormPropertyInputType.COLOR">
 									<div class="flex flex-column gap-1" v-if="attr.array">
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 flex gap-1">
@@ -139,15 +140,15 @@ page_palette.ftl
 											<div class="flex align-items-center gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 												<p-button type="button" icon="pi pi-minus" severity="danger" outlined
 													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 											</div>
 										</div>
-										<div v-if="!pm.chartAttrValuesForm.readonly">
+										<div v-if="!pm.avoModel.readonly">
 											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
 											</p-button>
@@ -161,14 +162,14 @@ page_palette.ftl
 											@click="showPalettePanel($event, grpDataEle, attr.name)"></p-button>
 									</div>
 								</div>
-								<div v-else-if="attr.inputType == pm.FormPropertyInputType.RADIO || attr.inputType == pm.FormPropertyInputType.CHECKBOX">
+								<div v-else-if="attr.inputType == pm.avoModel.FormPropertyInputType.RADIO || attr.inputType == pm.avoModel.FormPropertyInputType.CHECKBOX">
 									<div class="input flex flex-column gap-1" v-if="attr.array">
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
 												<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
 													<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
 														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
-														 v-if="attr.inputType == pm.FormPropertyInputType.RADIO">
+														 v-if="attr.inputType == pm.avoModel.FormPropertyInputType.RADIO">
 													</p-radiobutton>
 													<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
 														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
@@ -180,15 +181,15 @@ page_palette.ftl
 											<div class="flex align-items-center gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 												<p-button type="button" icon="pi pi-minus" severity="danger" outlined
 													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 											</div>
 										</div>
-										<div v-if="!pm.chartAttrValuesForm.readonly">
+										<div v-if="!pm.avoModel.readonly">
 											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
 											</p-button>
@@ -198,7 +199,7 @@ page_palette.ftl
 										<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
 											<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
 												:value="opt.value" v-model="grpDataEle[attr.name]"
-												 v-if="attr.inputType == pm.FormPropertyInputType.RADIO">
+												 v-if="attr.inputType == pm.avoModel.FormPropertyInputType.RADIO">
 											</p-radiobutton>
 											<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
 												:value="opt.value" v-model="grpDataEle[attr.name]"
@@ -213,7 +214,7 @@ page_palette.ftl
 										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
 											<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
 												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
-												 v-if="attr.inputType == pm.FormPropertyInputType.TEXTAREA">
+												 v-if="attr.inputType == pm.avoModel.FormPropertyInputType.TEXTAREA">
 											</p-textarea>
 											<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
 												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
@@ -222,15 +223,15 @@ page_palette.ftl
 											<div class="flex align-items-center gap-1">
 												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 												<p-button type="button" icon="pi pi-minus" severity="danger" outlined
 													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.chartAttrValuesForm.readonly">
+													v-if="!pm.avoModel.readonly">
 												</p-button>
 											</div>
 										</div>
-										<div v-if="!pm.chartAttrValuesForm.readonly">
+										<div v-if="!pm.avoModel.readonly">
 											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
 												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
 											</p-button>
@@ -239,7 +240,7 @@ page_palette.ftl
 									<div v-else>
 										<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
 											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
-											v-if="attr.inputType == pm.FormPropertyInputType.TEXTAREA">
+											v-if="attr.inputType == pm.avoModel.FormPropertyInputType.TEXTAREA">
 										</p-textarea>
 										<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
 											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
@@ -249,13 +250,13 @@ page_palette.ftl
 								</div>
 					        	<div class="validate-msg">
 					        		<input :name="toPropPathLiteral(group.name, grpDataEleIdx, attr.name)" type="text" class="validate-proxy"
-					        			:class="{'required': attr.required, 'number': attr.type == pm.FormPropertyType.NUMBER}" />
+					        			:class="{'required': attr.required, 'number': attr.type == pm.avoModel.FormPropertyType.NUMBER}" />
 					        	</div>
 							</div>
 						</div>
 					</p-panel>
 					<div>
-						<div class="text-sm" v-if="group.array && !pm.chartAttrValuesForm.readonly">
+						<div class="text-sm" v-if="group.array && !pm.avoModel.readonly">
 							<p-button type="button" icon="pi pi-plus" :label="group.nameLabel.value"
 								severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group)">
 							</p-button>
@@ -274,7 +275,7 @@ page_palette.ftl
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
 		<p-button type="button" label="<@spring.message code='clear' />" severity="danger" @click="onClearChartAttrValuesFormData"></p-button>
 		
-		<p-button v-for="(btn, btnIdx) in pm.chartAttrValuesForm.buttons" :key="btnIdx"
+		<p-button v-for="(btn, btnIdx) in pm.avoModel.buttons" :key="btnIdx"
 			type="button" class="p-button-secondary" :label="btn.name" @click="btn.clickHandler">
 		</p-button>
 	</div>
@@ -282,7 +283,9 @@ page_palette.ftl
 <script>
 (function(po)
 {
-	po.FormPropertyType =
+	var avo = (po.avo || (po.avo = {}));
+	
+	avo.FormPropertyType =
 	{
 		STRING: "${FormPropertyType.STRING}",
 		BOOLEAN: "${FormPropertyType.BOOLEAN}",
@@ -291,7 +294,7 @@ page_palette.ftl
 		OBJECT: "${FormPropertyType.OBJECT}"
 	};
 	
-	po.FormPropertyInputType =
+	avo.FormPropertyInputType =
 	{
 		TEXT: "${FormPropertyInputType.TEXT}",
 		SELECT: "${FormPropertyInputType.SELECT}",
@@ -301,7 +304,7 @@ page_palette.ftl
 		COLOR: "${FormPropertyInputType.COLOR}"
 	};
 	
-	po.FormPropertyInputPayload =
+	avo.FormPropertyInputPayload =
 	{
 		//多选
 		MULTIPLE: "multiple",
@@ -312,251 +315,175 @@ page_palette.ftl
 		MultipleRepeat: "repeat"
 	};
 	
+	avo.INPUT_PROPERTY_ADDITION_OLD_GROUP = "${JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP}";
+	
 	//根插件对象属性的name值，其包含的属性值直接保存至根属性值对象下
-	po.rootPluginObjectAttrName = "cpgaName${pid}";
+	avo.rootObjectPropertyName = "cpgaName${pid}";
 	
-	po.isObjectFormProperty = function(attr)
+	avo.isObjectProperty = function(prop)
 	{
-		return (attr != null && attr.type == po.FormPropertyType.OBJECT);
+		return (prop != null && prop.type == avo.FormPropertyType.OBJECT);
 	};
 	
-	po.isRootChartPluginObjectAttr = function(attr)
+	avo.isRootObjectProperty = function(prop)
 	{
-		return (po.isObjectFormProperty(attr) && attr.name == po.rootPluginObjectAttrName);
+		return (avo.isObjectProperty(prop) && prop.name == avo.rootObjectPropertyName);
 	};
 	
-	po.trimChartPluginAttrByGroup = function(attrs)
+	//将org.datagear.analysis.form.FormProperty转换为标准格式
+	avo.toTrimProperty = function(prop, clone)
 	{
-		attrs = po.trimChartPluginAttributes(attrs);
-		
-		var groups = [];
-		
-		for(var i=0; i<attrs.length; i++)
-		{
-			var attr = attrs[i];
-			
-			if(po.isObjectFormProperty(attr))
-			{
-				groups.push(attr);
-				continue;
-			}
-			
-			//未定义分组的，建立虚拟分组，统一结构、易于处理
-			var virtualGroup =
-			{
-				name: po.rootPluginObjectAttrName, type: po.FormPropertyType.OBJECT,
-				array: false, children: [], nameLabel: { value: "" }, virtual: true
-			};
-			
-			//兼容处理5.5.0版本的org.datagear.analysis.ChartPluginAttribute.group
-			if(attr.group != null && !$.isEmpty(attr.group.name))
-			{
-				virtualGroup.nameLabel.value = attr.group.name;
-			}
-			
-			//无分组名称标签的，只在末尾分组相同时才使用，否则新建
-			if($.isEmpty(virtualGroup.nameLabel.value))
-			{
-				virtualGroup.nameLabel.value = "<@spring.message code='ungrouped' />";
-				
-				var groupTail = (groups.length > 0 ? groups[groups.length - 1] : null);
-				
-				if(groupTail && po.isVirtualChartPluginObjectAttr(groupTail)
-						&& groupTail.nameLabel && groupTail.nameLabel.value == virtualGroup.nameLabel.value)
-				{
-					virtualGroup = groupTail;
-				}
-				else
-				{
-					groups.push(virtualGroup);
-				}
-			}
-			//有分组名称标签的，查找或新建
-			else
-			{
-				var existIdx = -1;
-				
-				for(var j=0; j<groups.length; j++)
-				{
-					if(po.isVirtualChartPluginObjectAttr(groups[j])
-							&& groups[j].nameLabel && groups[j].nameLabel.value == virtualGroup.nameLabel.value)
-					{
-						existIdx = j;
-						break;
-					}
-				}
-				
-				if(existIdx >= 0)
-				{
-					virtualGroup = groups[existIdx];
-				}
-				else
-				{
-					groups.push(virtualGroup);
-				}
-			}
-			
-			po.trimChartPluginAttribute(virtualGroup);
-			virtualGroup.children.push(attr);
-		}
-		
-		//检查并一致设置同名分组的array值，避免UI处理混乱
-		for(var i=0; i<groups.length; i++)
-		{
-			var group = groups[i];
-			var prevSameGroup = null;
-			
-			for(var j=0; j<i; j++)
-			{
-				if(groups[j].name == group.name)
-				{
-					prevSameGroup = groups[j];
-					break;
-				}
-			}
-			
-			if(prevSameGroup != null)
-				group.array = prevSameGroup.array;
-		}
-		
-		return groups;
-	};
-	
-	po.isVirtualChartPluginObjectAttr = function(objectAttr)
-	{
-		return (objectAttr != null && objectAttr.virtual);
-	};
-	
-	po.chartPluginAttributeDomIdIdx = 0;
-	
-	po.trimChartPluginAttributes = function(attrs, clone)
-	{
-		attrs = (attrs == null ? [] : attrs);
 		clone = (clone === undefined ? true : clone);
 		
-		if(clone)
-			attrs = $.extend(true, [], attrs);
+		if(prop == null)
+			return prop;
 		
-		for(var i=0; i<attrs.length; i++)
+		var re = (clone ? $.extend(true, {}, prop) : prop);
+		
+		avo.trimProperty(re);
+		
+		if(avo.isObjectProperty(re) && !$.isEmpty(re.properties))
 		{
-			var attr = attrs[i];
-			
-			po.trimChartPluginAttribute(attr);
-			
-			if(po.isObjectFormProperty(attr))
+			for(var i=0; i<re.properties.length; i++)
 			{
-				po.trimChartPluginAttributes(attr.children, false);
+				avo.toTrimProperty(re.properties[i], false);
 			}
 		}
 		
-		return attrs;
+		return re;
 	};
 	
-	po.trimChartPluginAttribute = function(attr)
+	avo.propertyDomIdIndex = 0;
+	
+	avo.trimProperty = function(prop)
 	{
-		attr.domId = po.concatPid("cpattr_"+ (po.chartPluginAttributeDomIdIdx++));
-		attr.nameLabel = (attr.nameLabel == null ? {} : attr.nameLabel);
-		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? attr.name : attr.nameLabel.value);
-		attr.nameLabel.value = ($.isEmpty(attr.nameLabel.value) ? "<@spring.message code='unnamed' />" : attr.nameLabel.value);
+		prop.domId = po.concatPid("avoprop_"+ (avo.propertyDomIdIndex++));
+		prop.nameLabel = (prop.nameLabel == null ? {} : prop.nameLabel);
+		prop.nameLabel.value = ($.isEmpty(prop.nameLabel.value) ? prop.name : prop.nameLabel.value);
+		prop.nameLabel.value = ($.isEmpty(prop.nameLabel.value) ? "<@spring.message code='unnamed' />" : prop.nameLabel.value);
+		prop.isTrimmed = true;
 		
-		if(po.isObjectFormProperty(attr))
+		if(avo.isObjectProperty(prop))
+			return;
+		
+		//布尔型默认作为RADIO处理
+		if(prop.type == avo.FormPropertyType.BOOLEAN)
 		{
-		}
-		else
-		{
-			//布尔型默认作为RADIO处理
-			if(attr.type == po.FormPropertyType.BOOLEAN)
+			if(!prop.inputType)
+				prop.inputType = avo.FormPropertyInputType.RADIO;
+			
+			if(!prop.inputPayload)
 			{
-				if(!attr.inputType)
-					attr.inputType = po.FormPropertyInputType.RADIO;
-				
-				if(!attr.inputPayload)
-				{
-					var pm = po.vuePageModel();
-					attr.inputPayload = po.vueRaw(pm.booleanOptions);
-				}
+				var pm = po.vuePageModel();
+				prop.inputPayload = po.vueRaw(pm.booleanOptions);
+			}
+		}
+		
+		var inputType = prop.inputType;
+		
+		//下拉框、单选、复选框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
+		if(inputType == avo.FormPropertyInputType.SELECT
+				|| inputType == avo.FormPropertyInputType.RADIO
+				|| inputType == avo.FormPropertyInputType.CHECKBOX)
+		{
+			var inputPayload = (prop.inputPayload || []);
+			
+			//数组、"DG_MAP"：转换为{ multiple: false, options: ... }格式
+			if($.isArray(inputPayload) || (inputPayload == avo.FormPropertyInputPayload.DG_MAP))
+				inputPayload = { multiple: false, options: inputPayload };
+			
+			//{ options: "DG_MAP" }：转换为实际地图数据options
+			avo.trimPropertyInputPayloadIfMap(prop, inputPayload);
+			
+			//默认multiple为false
+			inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
+			avo.trimPropertyInputOptions(prop, inputPayload);
+			
+			if(inputType == avo.FormPropertyInputType.RADIO)
+			{
+				inputPayload.multiple = false;
+			}
+			else if(inputType == avo.FormPropertyInputType.CHECKBOX)
+			{
+				inputPayload.multiple = true;
 			}
 			
-			var inputType = attr.inputType;
+			prop.inputPayload = inputPayload;
+		}
+		//颜色框
+		else if(inputType == avo.FormPropertyInputType.COLOR)
+		{
+			var inputPayload = prop.inputPayload;
 			
-			//下拉框、单选、复选框：将inputPayload转换为{multiple: ..., options: [{name: ..., value: ...}, ...]}格式
-			if(inputType == po.FormPropertyInputType.SELECT
-					|| inputType == po.FormPropertyInputType.RADIO
-					|| inputType == po.FormPropertyInputType.CHECKBOX)
+			//将5.5.0旧版inputPayload格式{ multiple: true }、"multiple"转换为prop.array=true格式
+			if(inputPayload != null)
 			{
-				var inputPayload = (attr.inputPayload || []);
-				
-				//数组、"DG_MAP"：转换为{ multiple: false, options: ... }格式
-				if($.isArray(inputPayload) || (inputPayload == po.FormPropertyInputPayload.DG_MAP))
-					inputPayload = { multiple: false, options: inputPayload };
-				
-				//{ options: "DG_MAP" }：转换为实际地图数据options
-				po.trimChartPluginInputAttrInputPayloadIfMap(attr, inputPayload);
-				
-				//默认multiple为false
-				inputPayload.multiple = (inputPayload.multiple == null ? false : inputPayload.multiple);
-				po.trimChartPluginInputAttrInputOptions(attr, inputPayload);
-				
-				if(inputType == po.FormPropertyInputType.RADIO)
+				if(inputPayload.multiple == true)
 				{
+					prop.array = true;
 					inputPayload.multiple = false;
 				}
-				else if(inputType == po.FormPropertyInputType.CHECKBOX)
+				else if(inputPayload == avo.FormPropertyInputPayload.MULTIPLE)
 				{
-					inputPayload.multiple = true;
-				}
-				
-				attr.inputPayload = inputPayload;
-			}
-			//颜色框
-			else if(inputType == po.FormPropertyInputType.COLOR)
-			{
-				var inputPayload = attr.inputPayload;
-				
-				//将5.5.0旧版inputPayload格式{ multiple: true }、"multiple"转换为attr.array=true格式
-				if(inputPayload != null)
-				{
-					if(inputPayload.multiple == true)
-					{
-						attr.array = true;
-						inputPayload.multiple = false;
-					}
-					else if(inputPayload == po.FormPropertyInputPayload.MULTIPLE)
-					{
-						attr.array = true;
-						attr.inputPayload = null;
-					}
+					prop.array = true;
+					prop.inputPayload = null;
 				}
 			}
-			
-			//将5.5.0旧版的{inputPayload: {multiple: "repeat"}}格式转换为6.0新版的{array: true, inputPayload: {multiple: false}}
-			if(attr.inputPayload && attr.inputPayload.multiple == po.FormPropertyInputPayload.MultipleRepeat)
-			{
-				attr.array = true;
-				attr.inputPayload.multiple = false;
-			}
+		}
+		
+		//将5.5.0旧版的{inputPayload: {multiple: "repeat"}}格式转换为6.0新版的{array: true, inputPayload: {multiple: false}}
+		if(prop.inputPayload && prop.inputPayload.multiple == avo.FormPropertyInputPayload.MultipleRepeat)
+		{
+			prop.array = true;
+			prop.inputPayload.multiple = false;
 		}
 	};
 	
-	po.trimChartPluginInputAttrInputPayloadIfMap = function(inputAttr, inputPayload)
+	avo.trimPropertyInputPayloadIfMap = function(inputProp, inputPayload)
 	{
 		var options = inputPayload.options;
 		
 		//内置地图
-		if(options == po.FormPropertyInputPayload.DG_MAP)
+		if(options == avo.FormPropertyInputPayload.DG_MAP)
 		{
 			//只有下拉列表才使用树形结构，单选框、复选框只能使用平铺数组
 			if(inputPayload.treeSelect == null
-					&& inputAttr.inputType == po.FormPropertyInputType.SELECT)
+					&& inputProp.inputType == avo.FormPropertyInputType.SELECT)
 			{
 				inputPayload.treeSelect = true;
 			}
 			
-			inputPayload.options = po.getChartPluginInputAttrInputOptionsForMap(inputPayload.treeSelect);
+			inputPayload.options = avo.propertyInputOptionsForMap(inputPayload.treeSelect);
 		}
 	};
 	
-	po.getChartPluginInputAttrInputOptionsForMap = function(asTree)
+	avo.trimPropertyInputOptions = function(inputProp, inputPayload)
+	{
+		if(!inputPayload.options)
+			inputPayload.options = [];
+		
+		//支持非数组格式
+		if(!$.isArray(inputPayload.options))
+			inputPayload.options = [ inputPayload.options ];
+		
+		var options = inputPayload.options;
+		
+		//转换为标准的[ {name: ..., value: ...}, ... ]格式
+		$.each(options, function(i, io)
+		{
+			//支持元素为基本类型
+			if(io == null || $.isTypeString(io) || $.isTypeNumber(io) || $.isTypeBoolean(io))
+			{
+				options[i] = { name: io, value: io };
+			}
+			
+			//支持{value: ...}格式的元素
+			if(io.name == null)
+				io.name = (io.value == null ? "null" : io.value);
+		});
+	};
+
+	avo.propertyInputOptionsForMap = function(asTree)
 	{
 		//树
 		if(asTree)
@@ -592,119 +519,386 @@ page_palette.ftl
 		}
 	};
 	
-	po.trimChartPluginInputAttrInputOptions = function(inputAttr, inputPayload)
+	//将org.datagear.analysis.form.ObjectFormProperty.properties分组整理
+	avo.groupProperties = function(objProp)
 	{
-		if(!inputPayload.options)
-			inputPayload.options = [];
+		if(objProp == null)
+			return;
 		
-		//支持非数组格式
-		if(!$.isArray(inputPayload.options))
-			inputPayload.options = [ inputPayload.options ];
+		if($.isEmpty(objProp.properties))
+			return;
 		
-		var options = inputPayload.options;
-		
-		//转换为标准的[ {name: ..., value: ...}, ... ]格式
-		$.each(options, function(i, io)
+		var oldGroups = avo.resolveOldGroup(objProp.properties);
+		if(oldGroups.length > 0)
 		{
-			//支持元素为基本类型
-			if(io == null || $.isTypeString(io) || $.isTypeNumber(io) || $.isTypeBoolean(io))
-			{
-				options[i] = { name: io, value: io };
-			}
-			
-			//支持{value: ...}格式的元素
-			if(io.name == null)
-				io.name = (io.value == null ? "null" : io.value);
-		});
-	};
-	
-	//将由po.chartAttrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
-	po.formDataToChartAttrValues = function(formData, pluginAttrForm, clone)
-	{
-		clone = (clone === undefined ? true : clone);
-		
-		//注意：formData中对于没有在pluginAttrForm定义的属性值应原样保留，
-		//因为看板的dg-chart-attr-values应允许定义图表插件属性之外的扩展值
-		
-		if(formData == null || pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
-			return formData;
-		
-		//要先清除循环引用，复制完后再恢复
-		var rootObjRef = formData[po.rootPluginObjectAttrName];
-		if(rootObjRef !== undefined)
-			delete formData[po.rootPluginObjectAttrName];
-		
-		var re = (clone ? $.extend(true, {}, formData) : formData);
-		
-		if(rootObjRef !== undefined)
-		{
-			formData[po.rootPluginObjectAttrName] = rootObjRef;
-			re[po.rootPluginObjectAttrName] = re;
+			objProp.groups = (objProp.groups == null ? [] : objProp.groups);
+			objProp.groups = objProp.groups.concat(oldGroups);
 		}
 		
-		var formProperties = pluginAttrForm.properties;
-		for(var i=0; i<formProperties.length; i++)
+		var groupProps = [];
+		var groups = (objProp.groups || []);
+		var props = objProp.properties;
+		
+		for(var i=0; i<props.length; i++)
 		{
-			var attr = formProperties[i];
-			var v = re[attr.name];
+			var prop = props[i];
+			var myGroup = null;
+			var groupIdx = avo.findGroupIdxByPropName(groupProps, prop.name);
 			
-			if(v == null)
+			if(groupIdx >= 0)
+				myGroup = groupProps[groupIdx];
+			else
 			{
-			}
-			else if(po.isObjectFormProperty(attr))
-			{
-				v = ($.isArray(v) ? v : [ v ]);
-				
-				for(var j=0; j<v.length; j++)
-					po.formDataToChartAttrValues(v[j], attr.children, false);
-				
-				if(!attr.array)
+				groupIdx = avo.findGroupIdxByPropName(groups, prop.name);
+				if(groupIdx >= 0)
 				{
-					v = v[0];
-					
-					//删除由po.chartAttrValuesToFormData()生成的空对象
-					if(v != null && $.isEmptyObject(v))
-						v = null;
+					myGroup = groups[groupIdx];
+					groupProps.push(myGroup);
+				}
+			}
+			
+			if(myGroup == null)
+			{
+				if(groupProps.length > 0 && groupProps[groupProps.length-1].virtual)
+				{
+					myGroup = groupProps[groupProps.length-1];
 				}
 				else
 				{
-					//删除由po.chartAttrValuesToFormData()生成的空数组
-					if(v.length == 0)
-						v = null;
+					myGroup = { nameLabel: { value: "<@spring.message code='ungrouped' />" }, virtual: true };
+					groupProps.push(myGroup);
 				}
 			}
+			
+			myGroup.properties = (myGroup.properties == null ? [] : myGroup.properties);
+			myGroup.properties.push(prop);
+			
+			if(avo.isObjectProperty(prop))
+				avo.groupProperties(prop);
+		}
+		
+		objProp.groupProps = groupProps;
+	};
+	
+	avo.findGroupIdxByPropName = function(groups, propName)
+	{
+		if(groups == null)
+			return -1;
+		
+		for(var i=0; i<groups.length; i++)
+		{
+			if(groups[i].names && groups[i].names.findIndex(propName) > -1)
+				return i;
+		}
+		
+		return -1;
+	};
+	
+	//兼容处理5.5.0版本的org.datagear.analysis.ChartPluginAttribute.group
+	avo.resolveOldGroup = function(props)
+	{
+		var groups = [];
+		
+		for(var i=0; i<props.length; i++)
+		{
+			var prop = props[i];
+			
+			if(!prop || !prop.additions || !prop.additions[avo.INPUT_PROPERTY_ADDITION_OLD_GROUP])
+				continue;
+			
+			var oldGroup = prop.additions[avo.INPUT_PROPERTY_ADDITION_OLD_GROUP];
+			
+			var group =
+			{
+				nameLabel: { value: "" }, names: []
+			};
+			
+			if(!$.isEmpty(oldGroup.name))
+				group.nameLabel.value = oldGroup.name;
+			else if(oldGroup.nameLabel && !$.isEmpty(oldGroup.nameLabel.value))
+				group.nameLabel.value = oldGroup.nameLabel.value;
+			
+			//无分组名称标签的，只在末尾分组相同时才使用，否则新建
+			if($.isEmpty(group.nameLabel.value))
+			{
+				group.nameLabel.value = "<@spring.message code='ungrouped' />";
+				var groupTail = (groups.length > 0 ? groups[groups.length - 1] : null);
+				
+				if(groupTail && groupTail.nameLabel && groupTail.nameLabel.value == group.nameLabel.value)
+				{
+					group = groupTail;
+				}
+				else
+				{
+					groups.push(group);
+				}
+			}
+			//有分组名称标签的，查找或新建
 			else
 			{
-				v = po.decodeChartAttrValueTreeModel(attr, v);
-				v = po.trimChartAttrValueArray(attr, v);
-				v = po.toChartAttrTypeValue(attr, v);
+				var existIdx = -1;
+				
+				for(var j=0; j<groups.length; j++)
+				{
+					if(groups[j].nameLabel && groups[j].nameLabel.value == group.nameLabel.value)
+					{
+						existIdx = j;
+						break;
+					}
+				}
+				
+				if(existIdx >= 0)
+				{
+					group = groups[existIdx];
+				}
+				else
+				{
+					groups.push(group);
+				}
 			}
 			
-			//null值不应保留，以支持后续组对象的判空逻辑
-			if(v == null)
-				delete re[attr.name];
-			else
-				re[attr.name] = v;
-		};
+			group.names.push(prop.name);
+		}
 		
-		delete re[po.rootPluginObjectAttrName];
+		return groups;
+	};
+	
+	//图表属性值对象转换为org.datagear.analysis.ChartPluginAttributeForm的表单数据模型
+	avo.attrValuesToFormData = function(attrValues, pluginAttrForm, clone)
+	{
+		clone = (clone === undefined ? true : clone);
+		
+		var re = (attrValues || {});
+		
+		if(clone)
+			re = $.extend(true, {}, re);
+		
+		if(pluginAttrForm == null)
+			return re;
+		
+		if(!pluginAttrForm.isTrimmed)
+			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
+		
+		var name = pluginAttrForm.name;
+		
+		if(name == null)
+		{
+			avo.doAttrValuesToFormData(re, pluginAttrForm);
+		}
+		else
+		{
+			if(re[name] == null)
+				re[name] = {};
+			
+			avo.doAttrValuesToFormData(re[name], pluginAttrForm);
+		}
 		
 		return re;
 	};
 	
-	//树组件Model转换为图表属性值，另参考po.encodeChartAttrValueTreeModel()函数
-	po.decodeChartAttrValueTreeModel = function(inputAttr, value)
+	avo.doAttrValuesToFormData = function(attrValues, objProperty)
+	{
+		if(attrValues == null || objProperty == null || $.isEmpty(objProperty.properties))
+			return;
+		
+		var data = attrValues;
+		var props = objProperty.properties;
+		
+		for(var i=0; i<props.length; i++)
+		{
+			var prop = props[i];
+			var v = data[prop.name];
+			
+			if(avo.isObjectProperty(prop))
+			{
+				//创建UI占位模型
+				if(v == null)
+					v = (prop.array ? [] : {});
+				
+				if(prop.array)
+				{
+					if(!$.isArray(v))
+						v = [ v ];
+					
+					for(var j=0; j<v.length; j++)
+						avo.doAttrValuesToFormData(v[j], prop);
+				}
+				else
+				{
+					avo.doAttrValuesToFormData(v, prop);
+				}
+			}
+			else
+			{
+				v = avo.trimChartAttrValueArray(prop, v);
+				v = avo.encodeAttrValueTreeModel(prop, v);
+			}
+			
+			data[prop.name] = v;
+		};
+		
+		return data;
+	};
+	
+	//图表属性值转换为树组件Model
+	// "v0" -> { v0: true }
+	// [ "v0", "v1", ... ] -> { v0: true, v1: true, ... }、[ { v0: true }, { v1: true }, ... ]
+	// [ [ "v0", "v1" ], ... ] -> [ { v0: true, v1: true, ... }, ... ]
+	avo.encodeAttrValueTreeModel = function(inputProp, value)
 	{
 		if(value == null)
 			return value;
 		
-		var isTreeSelect = (inputAttr.inputPayload && inputAttr.inputPayload.treeSelect == true);
+		var isTreeSelect = (inputProp.inputPayload && inputProp.inputPayload.treeSelect == true);
 		
 		if(!isTreeSelect)
 			return value;
 		
-		var isArray = inputAttr.array;
-		var isMultiple = (inputAttr.inputPayload && inputAttr.inputPayload.multiple == true);
+		value = ($.isArray(value) ? value : [ value ]);
+		
+		var re;
+		
+		if(inputProp.array)
+		{
+			re = [];
+			
+			value.forEach((vi) =>
+			{
+				if(vi == null)
+					return;
+				
+				var rei = {};
+				
+				if($.isArray(vi))
+				{
+					vi.forEach((vii) =>
+					{
+						if(vii != null)
+							rei[vii] = true;
+					});
+				}
+				else
+				{
+					rei[vi] = true;
+				}
+				
+				re.push(rei);
+			});
+		}
+		else
+		{
+			re = {};
+			
+			value.forEach((vi) =>
+			{
+				if(vi != null)
+					re[vi] = true;
+			});
+		}
+		
+		return re;
+	};
+	
+	//将由avo.attrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
+	avo.formDataToAttrValues = function(formData, pluginAttrForm)
+	{
+		var re = (formData || {});
+		re = $.extend(true, {}, re);
+		
+		if(pluginAttrForm == null)
+			return re;
+		
+		if(!pluginAttrForm.isTrimmed)
+			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
+		
+		var name = pluginAttrForm.name;
+		
+		if(name == null)
+		{
+			avo.doFormDataToAttrValues(re, pluginAttrForm);
+		}
+		else
+		{
+			var v = re[name];
+			
+			if(v != null)
+				avo.doFormDataToAttrValues(v, pluginAttrForm);
+			
+			//删除由avo.attrValuesToFormData()生成的空对象
+			if(v == null && $.isEmptyObject(v))
+				delete re[name];
+		}
+		
+		return re;
+	};
+	
+	avo.doFormDataToAttrValues = function(formData, objProperty)
+	{
+		//注意：formData中对于没有在objProperty定义的属性值应原样保留，
+		//因为看板的dg-chart-attr-values应允许定义图表插件属性之外的扩展值
+		
+		if(formData == null || objProperty == null || $.isEmpty(objProperty.properties))
+			return formData;
+		
+		var data = formData;
+		var props = objProperty.properties;
+		
+		for(var i=0; i<props.length; i++)
+		{
+			var prop = props[i];
+			var v = data[prop.name];
+			
+			if(v == null)
+			{
+			}
+			else if(avo.isObjectProperty(prop))
+			{
+				if($.isArray(v))
+				{
+					for(var j=0; j<v.length; j++)
+						avo.doFormDataToAttrValues(v[j], prop);
+					
+					//由avo.doAttrValuesToFormData()生成的空数组置为null，后续删除
+					if(v.length == 0)
+						v = null;
+				}
+				else
+				{
+					avo.doFormDataToAttrValues(v, prop);
+					
+					//由avo.doAttrValuesToFormData()生成的空对象置为null，后续删除
+					if($.isEmptyObject(v))
+						v = null;
+				}
+			}
+			else
+			{
+				v = avo.decodeAttrValueTreeModel(prop, v);
+				v = avo.trimChartAttrValueArray(prop, v);
+				v = avo.toChartAttrTypeValue(prop, v);
+			}
+			
+			//null值不应保留，以支持后续组对象的判空逻辑
+			if(v == null)
+				delete data[prop.name];
+			else
+				data[prop.name] = v;
+		};
+	};
+	
+	//树组件Model转换为图表属性值，另参考avo.encodeAttrValueTreeModel()函数
+	avo.decodeAttrValueTreeModel = function(inputProp, value)
+	{
+		if(value == null)
+			return value;
+		
+		var isTreeSelect = (inputProp.inputPayload && inputProp.inputPayload.treeSelect == true);
+		
+		if(!isTreeSelect)
+			return value;
+		
+		var isArray = inputProp.array;
+		var isMultiple = (inputProp.inputPayload && inputProp.inputPayload.multiple == true);
 		
 		if($.isPlainObject(value))
 			value = [ value ];
@@ -755,28 +949,28 @@ page_palette.ftl
 		return re;
 	};
 	
-	po.trimChartAttrValueArray = function(inputAttr, value)
+	avo.trimChartAttrValueArray = function(inputProp, value)
 	{
 		if(value == null)
 			return value;
 		
 		if(!$.isArray(value))
 		{
-			if(inputAttr.inputPayload && inputAttr.inputPayload.multiple == true)
+			if(inputProp.inputPayload && inputProp.inputPayload.multiple == true)
 				value = [ value ];
 			
-			if(inputAttr.array)
+			if(inputProp.array)
 				value = [ value ];
 		}
 		
 		return value;
 	};
 	
-	po.toChartAttrTypeValue = function(inputAttr, value)
+	avo.toChartAttrTypeValue = function(inputProp, value)
 	{
-		var type = inputAttr.type;
+		var type = inputProp.type;
 		
-		if(type != po.FormPropertyType.STRING && value === "")
+		if(type != avo.FormPropertyType.STRING && value === "")
 			value = null;
 		
 		if(value == null)
@@ -789,7 +983,7 @@ page_palette.ftl
 			
 			value.forEach((vi) =>
 			{
-				vi = po.toChartAttrTypeValue(inputAttr, vi);
+				vi = avo.toChartAttrTypeValue(inputProp, vi);
 				
 				if(vi != null)
 					re.push(vi);
@@ -799,11 +993,11 @@ page_palette.ftl
 		}
 		else
 		{
-			if(type == po.FormPropertyType.BOOLEAN)
+			if(type == avo.FormPropertyType.BOOLEAN)
 			{
 				value = (value == true || value === "true" || value === "1" ? true : false);
 			}
-			else if(type == po.FormPropertyType.NUMBER)
+			else if(type == avo.FormPropertyType.NUMBER)
 			{
 				value = $.parseToNumber(value);
 				value = (isNaN(value) ? null : value);
@@ -812,7 +1006,7 @@ page_palette.ftl
 			if(value != null)
 			{
 				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
-				var inputPayload = inputAttr.inputPayload;
+				var inputPayload = inputProp.inputPayload;
 				var payloadOptions = (inputPayload && inputPayload.options ? inputPayload.options : null);
 				var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
 				
@@ -835,132 +1029,32 @@ page_palette.ftl
 		}
 	};
 	
-	po.chartAttrValuesToFormData = function(attrValues, pluginAttrForm, clone)
+	avo.toTrimAttrValues = function(attrValues, pluginAttrForm)
 	{
-		clone = (clone === undefined ? true : clone);
+		if(attrValues == null || pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
+			return attrValues;
 		
-		var data = (attrValues || {});
+		if(!pluginAttrForm.isTrimmed)
+			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
 		
-		if(clone)
-			data = $.extend(true, {}, data);
+		var formData = avo.attrValuesToFormData(attrValues, pluginAttrForm);
+		attrValues = po.formDataToAttrValues(formData, pluginAttrForm);
 		
-		if(pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
-			return data;
-
-		var formProperties = pluginAttrForm.properties;
-		for(var i=0; i<formProperties.length; i++)
-		{
-			var attr = formProperties[i];
-			var v = data[attr.name];
-			
-			if(po.isObjectFormProperty(attr))
-			{
-				if(attr.array)
-				{
-					if(v == null)
-						v = [];
-					else if(!$.isArray(v))
-						v = [ v ];
-				}
-				else
-				{
-					if(po.isRootChartPluginObjectAttr(attr))
-						v = data;
-					
-					if(v == null)
-						v = {};
-					
-					//也将值转化为数组结构，便于UI统一处理
-					if(!$.isArray(v))
-						v = [ v ];
-				}
-				
-				for(var j=0; j<v.length; j++)
-					po.chartAttrValuesToFormData(v[j], attr.children, false);
-			}
-			else
-			{
-				v = po.trimChartAttrValueArray(attr, v);
-				v = po.encodeChartAttrValueTreeModel(attr, v);
-			}
-			
-			data[attr.name] = v;
-		};
-		
-		return data;
+		return attrValues;
 	};
 	
-	//图表属性值转换为树组件Model
-	// "v0" -> { v0: true }
-	// [ "v0", "v1", ... ] -> { v0: true, v1: true, ... }、[ { v0: true }, { v1: true }, ... ]
-	// [ [ "v0", "v1" ], ... ] -> [ { v0: true, v1: true, ... }, ... ]
-	po.encodeChartAttrValueTreeModel = function(inputAttr, value)
+	avo.validateChartAttrValuesRequired = function(props, attrValues)
 	{
-		if(value == null)
-			return value;
-		
-		var isTreeSelect = (inputAttr.inputPayload && inputAttr.inputPayload.treeSelect == true);
-		
-		if(!isTreeSelect)
-			return value;
-		
-		value = ($.isArray(value) ? value : [ value ]);
-		
-		var re;
-		
-		if(inputAttr.array)
-		{
-			re = [];
-			
-			value.forEach((vi) =>
-			{
-				if(vi == null)
-					return;
-				
-				var rei = {};
-				
-				if($.isArray(vi))
-				{
-					vi.forEach((vii) =>
-					{
-						if(vii != null)
-							rei[vii] = true;
-					});
-				}
-				else
-				{
-					rei[vi] = true;
-				}
-				
-				re.push(rei);
-			});
-		}
-		else
-		{
-			re = {};
-			
-			value.forEach((vi) =>
-			{
-				if(vi != null)
-					re[vi] = true;
-			});
-		}
-		
-		return re;
-	};
-	
-	po.validateChartAttrValuesRequired = function(attrs, attrValues)
-	{
-		if(!attrs)
+		if(!props)
 			return true;
 		
 		attrValues = (attrValues || {});
 		
 		var re = true;
 		
-		$.each(attrs, function(i, attr)
+		$.each(props, function(i, prop)
 		{
-			if(attr.required && $.isEmpty(attrValues[attr.name]))
+			if(prop.required && $.isEmpty(attrValues[prop.name]))
 				re = false;
 			
 			return re;
@@ -969,18 +1063,27 @@ page_palette.ftl
 		return re;
 	};
 	
-	po.vuePageModel(
+	avo.setFormAttrValues = function(attrValues)
 	{
-		FormPropertyType: po.FormPropertyType,
-		FormPropertyInputType: po.FormPropertyInputType,
-		chartAttrValuesForm:
+		var pm = po.vuePageModel();
+		var pluginAttrForm = pm.avoModel.pluginAttrForm;
+		var data = avo.attrValuesToFormData(attrValues, pluginAttrForm);
+		pm.avoModel.data = data;
+	};
+	
+	avo.clearFormData = function()
+	{
+		var pm = po.vuePageModel();
+		var pluginAttrForm = pm.avoModel.pluginAttrForm;
+		var data = pm.avoModel.data;
+		
+		for(let p in data)
 		{
-			groups: [],
-			data: {},
-			readonly: false,
-			buttons: []
+			delete data[p];
 		}
-	});
+		
+		avo.attrValuesToFormData(data, pluginAttrForm, false);
+	};
 	
 	po.setupChartAttrValuesForm = function(pluginAttrForm, attrValues, options)
 	{
@@ -993,49 +1096,40 @@ page_palette.ftl
 		options);
 		
 		var pm = po.vuePageModel();
-		pm.chartAttrValuesForm.pluginAttrForm = pluginAttrForm;
-		pm.chartAttrValuesForm.groups = po.trimChartPluginAttrByGroup(pluginAttrForm);
-		pm.chartAttrValuesForm.buttons = options.buttons;
-		pm.chartAttrValuesForm.readonly = options.readonly;
-		po.setChartAttrValuesFormData(attrValues);
+		pm.avoModel.pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
+		avo.groupProperties(pm.avoModel.pluginAttrForm);
+		pm.avoModel.buttons = options.buttons;
+		pm.avoModel.readonly = options.readonly;
+		avo.setFormAttrValues(attrValues);
 		
 		var form = po.elementOfId("${pid}chartAttrValuesForm", document.body);
-		po.setupSimpleForm(form, pm.chartAttrValuesForm.data,
+		po.setupSimpleForm(form, pm.avoModel.data,
 		{
 			submitHandler: function()
 			{
 				if(options && options.submitHandler)
 				{
-					var pluginAttrForm = pm.chartAttrValuesForm.pluginAttrForm;
-					var data = po.vueRaw(pm.chartAttrValuesForm.data);
-					var attrValues = po.formDataToChartAttrValues(data, pluginAttrForm);
+					var pluginAttrForm = pm.avoModel.pluginAttrForm;
+					var data = po.vueRaw(pm.avoModel.data);
+					var attrValues = avo.formDataToAttrValues(data, pluginAttrForm);
 					options.submitHandler(attrValues);
 				}
 			}
 		});
 	};
 	
-	po.setChartAttrValuesFormData = function(attrValues)
+	po.vuePageModel(
 	{
-		var pm = po.vuePageModel();
-		var pluginAttrForm = pm.chartAttrValuesForm.pluginAttrForm;
-		var data = po.chartAttrValuesToFormData(attrValues, pluginAttrForm);
-		pm.chartAttrValuesForm.data = data;
-	};
-	
-	po.clearChartAttrValuesFormData = function()
-	{
-		var pm = po.vuePageModel();
-		var pluginAttrForm = pm.chartAttrValuesForm.pluginAttrForm;
-		var data = pm.chartAttrValuesForm.data;
-		
-		for(let p in data)
+		avoModel:
 		{
-			delete data[p];
+			FormPropertyType: avo.FormPropertyType,
+			FormPropertyInputType: avo.FormPropertyInputType,
+			data: {},
+			readonly: false,
+			buttons: [],
+			groups: []
 		}
-		
-		po.chartAttrValuesToFormData(data, pluginAttrForm, false);
-	};
+	});
 	
 	po.vueMethod(
 	{
@@ -1051,7 +1145,7 @@ page_palette.ftl
 				message: "<@spring.message code='confirmClearAllChartAttr' />",
 				accept: function()
 				{
-					po.clearChartAttrValuesFormData();
+					avo.clearFormData();
 				} 
 			});
 		},
@@ -1060,7 +1154,7 @@ page_palette.ftl
 		{
 			var groupName = group.name;
 			var pm = po.vuePageModel();
-			var data = pm.chartAttrValuesForm.data;
+			var data = pm.avoModel.data;
 			var groupData = data[groupName];
 			
 			if(idx > 0)
@@ -1076,7 +1170,7 @@ page_palette.ftl
 		{
 			var groupName = group.name;
 			var pm = po.vuePageModel();
-			var data = pm.chartAttrValuesForm.data;
+			var data = pm.avoModel.data;
 			var groupData = data[groupName];
 			
 			if(idx < (groupData.length -1))
@@ -1092,7 +1186,7 @@ page_palette.ftl
 		{
 			var groupName = group.name;
 			var pm = po.vuePageModel();
-			var data = pm.chartAttrValuesForm.data;
+			var data = pm.avoModel.data;
 
 			if(!data[groupName])
 				data[groupName] = [];
@@ -1112,16 +1206,16 @@ page_palette.ftl
 				{
 					var groupName = group.name;
 					var pm = po.vuePageModel();
-					var data = pm.chartAttrValuesForm.data;
+					var data = pm.avoModel.data;
 					data[groupName].splice(idx, 1);
 				}
 			});
 		},
 		
-		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, attr, idx)
+		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, prop, idx)
 		{
-			var propName = attr.name;
-			var isTreeSelect = (attr.inputPayload && attr.inputPayload.treeSelect == true);
+			var propName = prop.name;
+			var isTreeSelect = (prop.inputPayload && prop.inputPayload.treeSelect == true);
 			
 			if(grpDataEle[propName] == null)
 				grpDataEle[propName] = [];
@@ -1132,9 +1226,9 @@ page_palette.ftl
 				grpDataEle[propName].splice(idx, 0, isTreeSelect ? {} : null);
 		},
 		
-		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, attr, idx)
+		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, prop, idx)
 		{
-			var propName = attr.name;
+			var propName = prop.name;
 			
 			if(grpDataEle[propName] == null)
 				return;

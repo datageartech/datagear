@@ -141,7 +141,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 
 	protected HtmlChartPlugin getHtmlChartPlugin(String id, boolean nonNull)
 	{
-		ChartPlugin plugin = getDirectoryHtmlChartPluginManager().get(id);
+		ChartPlugin plugin = (id == null ? null : getDirectoryHtmlChartPluginManager().get(id));
 
 		if (plugin != null && !(plugin instanceof HtmlChartPlugin))
 			plugin = null;
@@ -157,22 +157,23 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return (HtmlChartPlugin) plugin;
 	}
 
-	protected HtmlChartPluginVo toHtmlChartPluginVo(HttpServletRequest request, HtmlChartPlugin plugin)
+	protected HtmlChartPluginVo toHtmlChartPluginVo(HttpServletRequest request, HtmlChartPlugin plugin, boolean detail)
 	{
 		if (plugin == null)
 			return null;
 
 		Locale locale = WebUtils.getLocale(request);
 		String themeName = resolveChartPluginIconThemeName(request);
-		return toHtmlChartPluginVo(plugin, themeName, locale);
+		return toHtmlChartPluginVo(plugin, detail, locale, themeName);
 	}
 
-	protected HtmlChartPluginVo toHtmlChartPluginVo(HtmlChartPlugin plugin, String themeName, Locale locale)
+	protected HtmlChartPluginVo toHtmlChartPluginVo(HtmlChartPlugin plugin, boolean detail, Locale locale,
+			String themeName)
 	{
 		if (plugin == null)
 			return null;
 
-		HtmlChartPluginVo vo = new HtmlChartPluginVo(plugin, locale);
+		HtmlChartPluginVo vo = new HtmlChartPluginVo(plugin, detail, locale);
 		inflateThemeIconResourceNames(vo, themeName);
 
 		return vo;

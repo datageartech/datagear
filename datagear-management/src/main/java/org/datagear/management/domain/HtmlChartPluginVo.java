@@ -41,31 +41,48 @@ public class HtmlChartPluginVo extends HtmlChartPluginJson
 
 	public HtmlChartPluginVo(String id)
 	{
-		super.setId(id);
+		super(id, null);
 	}
 
 	public HtmlChartPluginVo(String id, Label nameLabel)
 	{
-		super(id, nameLabel, null, null, null, null);
+		super(id, nameLabel);
 	}
 
 	public HtmlChartPluginVo(HtmlChartPlugin plugin)
 	{
-		super(plugin.getId(), plugin.getNameLabel(), null, null, null, null);
+		this(plugin, false);
+	}
 
-		setDescLabel(plugin.getDescLabel());
-		setIconResourceNames(plugin.getIconResourceNames());
-		setVersion(plugin.getVersion());
-		setApiVersion(plugin.getApiVersion());
-		setPlatformVersion(plugin.getPlatformVersion());
-		setAuthor(plugin.getAuthor());
-		setContact(plugin.getContact());
-		setIssueDate(plugin.getIssueDate());
+	public HtmlChartPluginVo(HtmlChartPlugin plugin, boolean detail)
+	{
+		super(plugin);
+
+		if (!detail)
+		{
+			setResources(null);
+			setAttributeForm(null);
+			setDataSigns(null);
+			setDataSetRange(null);
+			setCategories(null);
+			setCategoryOrders(null);
+			setAdditions(null);
+		}
 	}
 
 	public HtmlChartPluginVo(HtmlChartPlugin plugin, Locale locale)
 	{
 		this(plugin);
 		LabelUtil.concrete(plugin, this, locale);
+	}
+
+	public HtmlChartPluginVo(HtmlChartPlugin plugin, boolean detail, Locale locale)
+	{
+		this(plugin, detail);
+
+		if (detail)
+			initLocalized(plugin, locale);
+		else
+			LabelUtil.concrete(plugin, this, locale);
 	}
 }
