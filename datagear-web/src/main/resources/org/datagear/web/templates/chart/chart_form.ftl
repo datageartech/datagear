@@ -1063,8 +1063,8 @@
 	
 	$.validator.addMethod("chartAttrValuesRequired", function(chart)
 	{
-		var cpas = (chart.pluginVo ? chart.pluginVo.attributes : null);
-		return po.validateChartAttrValuesRequired(cpas, chart.attrValues);
+		var attributeForm = (chart.pluginVo ? chart.pluginVo.attributeForm : null);
+		return po.avo.validateAttrValuesRequired(attributeForm, chart.attrValues);
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);

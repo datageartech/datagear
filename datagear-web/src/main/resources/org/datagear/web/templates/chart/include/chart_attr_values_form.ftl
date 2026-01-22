@@ -856,29 +856,27 @@ page_palette.ftl
 			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
 		
 		var formData = avo.attrValuesToFormData(attrValues, pluginAttrForm);
-		attrValues = po.formDataToAttrValues(formData, pluginAttrForm);
+		attrValues = avo.formDataToAttrValues(formData, pluginAttrForm);
 		
 		return attrValues;
 	};
 	
-	avo.validateChartAttrValuesRequired = function(props, attrValues)
+	avo.validateAttrValuesRequired = function(pluginAttrForm, attrValues)
 	{
-		if(!props)
+		if(!pluginAttrForm || $.isEmpty(pluginAttrForm.properties))
 			return true;
 		
 		attrValues = (attrValues || {});
+		var props = pluginAttrForm.properties;
 		
-		var re = true;
-		
-		$.each(props, function(i, prop)
+		for(var i=0; i<props.length; i++)
 		{
+			var prop = props[i];
 			if(prop.required && $.isEmpty(attrValues[prop.name]))
-				re = false;
-			
-			return re;
-		});
+				return false;
+		};
 		
-		return re;
+		return true;
 	};
 	
 	avo.setFormAttrValues = function(attrValues)
