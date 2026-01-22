@@ -29,244 +29,62 @@ page_palette.ftl
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<p-accordion :multiple="true" :active-index="[0]">
-			<p-accordion-tab v-for="(group, groupIdx) in pm.avoModel.groups">
+			<p-accordion-tab v-for="(group, groupIdx) in pm.avoModel.pluginAttrForm.groupProps">
 				<template #header>
 					<span>{{group.nameLabel.value}}</span>
 					<span class="text-color-secondary text-sm ml-1">{{group.virtual ? "" : group.name}}</span>
 				</template>
 				<div class="flex flex-column gap-3 mb-2">
-					<p-panel v-for="(grpDataEle, grpDataEleIdx) in pm.avoModel.data[group.name]"
-						:class="{ 'disable-p-panel': !group.array, 'p-card': group.array }" :header="group.nameLabel.value+'-'+(grpDataEleIdx+1)+'/'+pm.avoModel.data[group.name].length"
-						:toggleable="group.array" class="no-panel-border panel-icon-align-center">
-						<template #icons>
-							<div class="inline-flex gap-1 mx-2 text-sm" v-if="group.array && !pm.avoModel.readonly">
-								<p-button type="button" severity="secondary"
-									@click="onChartAttrValuesFormMoveUpGrpEle($event, group, grpDataEleIdx)">
-									<@spring.message code='moveUp' />
-								</p-button>
-								<p-button type="button" severity="secondary"
-									@click="onChartAttrValuesFormMoveDownGrpEle($event, group, grpDataEleIdx)">
-									<@spring.message code='moveDown' />
-								</p-button>
-								<p-button type="button" severity="secondary"
-									@click="onChartAttrValuesFormInsertGrpEle($event, group, grpDataEleIdx)">
-									<@spring.message code='insert' />
-								</p-button>
-								<p-button type="button" severity="danger"
-									@click="onChartAttrValuesFormRemoveGrpEle($event, group, grpDataEleIdx)">
-									<@spring.message code='delete' />
-								</p-button>
-							</div>
-						</template>
-						<div class="field grid" v-for="(attr, attrIdx) in group.children">
-							<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx" class="field-label col-12 mb-2"
-								:title="attr.descLabel && attr.descLabel.value ? attr.descLabel.value : null">
-								<span>{{attr.nameLabel.value}}</span>
-								<span class="text-color-secondary text-sm ml-1">{{attr.name}}</span>
-							</label>
-							<div class="field-input col-12">
-								<div v-if="attr.inputType == pm.avoModel.FormPropertyInputType.SELECT">
-									<div class="flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
-											<div class="flex-grow-1 flex" v-if="attr.inputPayload.multiple">
-												<p-treeselect v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
-													selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />"
-													v-if="attr.inputPayload.treeSelect == true">
-												</p-treeselect>
-												<p-multiselect v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
-													option-label="name" option-value="value" :show-clear="true" class="input w-full"
-													v-else>
-												</p-multiselect>
-											</div>
-											<div class="flex-grow-1 flex" v-else>
-												<p-treeselect v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
-													class="input w-full" placeholder="<@spring.message code='none' />"
-													v-if="attr.inputPayload.treeSelect == true">
-												</p-treeselect>
-												<p-dropdown v-model="grpDataEle[attr.name][viIdx]" :options="attr.inputPayload.options"
-													option-label="name" option-value="value" class="input flex-grow-1 mr-1"
-													v-else>
-												</p-dropdown>
-											</div>
-											<div class="flex align-items-center gap-1">
-												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-												<p-button type="button" icon="pi pi-minus" severity="danger" outlined 
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-											</div>
-										</div>
-										<div v-if="!pm.avoModel.readonly">
-											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
-											</p-button>
-										</div>
+					<div v-for="(prop, propIdx) in group.properties">
+						<div v-if="prop.type == pm.avoModel.FormPropertyType.OBJECT && prop.array">
+							<p-panel v-for="(propDataEle, propDataEleIdx) in pm.avoModel.data[prop.name]"
+								:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+pm.avoModel.data[prop.name].length"
+								:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+								<template #icons>
+									<div class="inline-flex gap-1 mx-2 text-sm" v-if="!pm.avoModel.readonly">
+										<p-button type="button" severity="secondary"
+											@click="onChartAttrValuesFormMoveUpGrpEle($event, prop, propDataEleIdx)">
+											<@spring.message code='moveUp' />
+										</p-button>
+										<p-button type="button" severity="secondary"
+											@click="onChartAttrValuesFormMoveDownGrpEle($event, prop, propDataEleIdx)">
+											<@spring.message code='moveDown' />
+										</p-button>
+										<p-button type="button" severity="secondary"
+											@click="onChartAttrValuesFormInsertGrpEle($event, prop, propDataEleIdx)">
+											<@spring.message code='insert' />
+										</p-button>
+										<p-button type="button" severity="danger"
+											@click="onChartAttrValuesFormRemoveGrpEle($event, prop, propDataEleIdx)">
+											<@spring.message code='delete' />
+										</p-button>
 									</div>
-									<div v-else-if="attr.inputPayload.multiple">
-										<p-treeselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
-											selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />"
-											v-if="attr.inputPayload.treeSelect == true">
-										</p-treeselect>
-										<p-multiselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
-											option-label="name" option-value="value" :show-clear="true" class="input w-full"
-											v-else>
-										</p-multiselect>
-									</div>
-									<div v-else>
-										<p-treeselect v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
-											class="input w-full" placeholder="<@spring.message code='none' />"
-											 v-if="attr.inputPayload.treeSelect == true">
-										</p-treeselect>
-										<p-dropdown v-model="grpDataEle[attr.name]" :options="attr.inputPayload.options"
-											option-label="name" option-value="value" :show-clear="!attr.required" class="input w-full"
-											v-else>
-										</p-dropdown>
-									</div>
+								</template>
+							</p-panel>
+							<div>
+								<div class="text-sm" v-if="!pm.avoModel.readonly">
+									<p-button type="button" icon="pi pi-plus" :label="prop.nameLabel.value"
+										severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, prop)">
+									</p-button>
 								</div>
-								<div v-else-if="attr.inputType == pm.avoModel.FormPropertyInputType.COLOR">
-									<div class="flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
-											<div class="flex-grow-1 flex gap-1">
-												<p-inputtext v-model="grpDataEle[attr.name][viIdx]" type="text"
-													class="input flex-grow-1">
-												</p-inputtext>
-												<p-button type="button" :style="{'background-color': grpDataEle[attr.name][viIdx]}"
-													class="palette-btn surface-border mr-1"
-													@click="showPalettePanel($event, grpDataEle[attr.name], viIdx)"></p-button>
-											</div>
-											<div class="flex align-items-center gap-1">
-												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-												<p-button type="button" icon="pi pi-minus" severity="danger" outlined
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-											</div>
-										</div>
-										<div v-if="!pm.avoModel.readonly">
-											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
-											</p-button>
-										</div>
-									</div>
-									<div class="flex gap-1" v-else>
-										<p-inputtext v-model="grpDataEle[attr.name]" type="text"
-											class="input flex-grow-1" maxlength="100">
-										</p-inputtext>
-										<p-button type="button" :style="{'background-color': grpDataEle[attr.name]}" class="palette-btn surface-border"
-											@click="showPalettePanel($event, grpDataEle, attr.name)"></p-button>
-									</div>
-								</div>
-								<div v-else-if="attr.inputType == pm.avoModel.FormPropertyInputType.RADIO || attr.inputType == pm.avoModel.FormPropertyInputType.CHECKBOX">
-									<div class="input flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
-											<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
-												<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
-													<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
-														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
-														 v-if="attr.inputType == pm.avoModel.FormPropertyInputType.RADIO">
-													</p-radiobutton>
-													<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx"
-														:value="opt.value" v-model="grpDataEle[attr.name][viIdx]"
-														v-else>
-													</p-checkbox>
-													<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx+'_'+viIdx">{{opt.name}}</label>
-												</div>
-											</div>
-											<div class="flex align-items-center gap-1">
-												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-												<p-button type="button" icon="pi pi-minus" severity="danger" outlined
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-											</div>
-										</div>
-										<div v-if="!pm.avoModel.readonly">
-											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
-											</p-button>
-										</div>
-									</div>
-									<div class="input p-inputtext p-component p-2 flex gap-3" v-else>
-										<div v-for="(opt, optIdx) in attr.inputPayload.options" class="inline-flex align-items-center gap-1">
-											<p-radiobutton :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
-												:value="opt.value" v-model="grpDataEle[attr.name]"
-												 v-if="attr.inputType == pm.avoModel.FormPropertyInputType.RADIO">
-											</p-radiobutton>
-											<p-checkbox :input-id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx"
-												:value="opt.value" v-model="grpDataEle[attr.name]"
-												v-else>
-											</p-checkbox>
-											<label :for="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+optIdx">{{opt.name}}</label>
-										</div>
-									</div>
-								</div>
-								<div v-else>
-									<div class="input flex flex-column gap-1" v-if="attr.array">
-										<div v-for="(vi, viIdx) in grpDataEle[attr.name]" :key="viIdx" class="flex gap-2">
-											<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
-												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
-												 v-if="attr.inputType == pm.avoModel.FormPropertyInputType.TEXTAREA">
-											</p-textarea>
-											<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx+'_'+viIdx"
-												v-model="grpDataEle[attr.name][viIdx]" type="text" class="flex-grow-1"
-												v-else>
-											</p-inputtext>
-											<div class="flex align-items-center gap-1">
-												<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-													@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-												<p-button type="button" icon="pi pi-minus" severity="danger" outlined
-													@click="onChartAttrValuesFormRemoveGrpEleEle($event, grpDataEle, attr, viIdx)"
-													v-if="!pm.avoModel.readonly">
-												</p-button>
-											</div>
-										</div>
-										<div v-if="!pm.avoModel.readonly">
-											<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-												@click="onChartAttrValuesFormInsertGrpEleEle($event, grpDataEle, attr)">
-											</p-button>
-										</div>
-									</div>
-									<div v-else>
-										<p-textarea :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
-											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
-											v-if="attr.inputType == pm.avoModel.FormPropertyInputType.TEXTAREA">
-										</p-textarea>
-										<p-inputtext :id="attr.domId+'_'+groupIdx+'_'+grpDataEleIdx"
-											v-model="grpDataEle[attr.name]" type="text" class="input w-full"
-											v-else>
-										</p-inputtext>
-									</div>
-								</div>
-					        	<div class="validate-msg">
-					        		<input :name="toPropPathLiteral(group.name, grpDataEleIdx, attr.name)" type="text" class="validate-proxy"
-					        			:class="{'required': attr.required, 'number': attr.type == pm.avoModel.FormPropertyType.NUMBER}" />
+								<div class="field-input" v-if="group.required">
+						        	<div class="validate-msg">
+						        		<input :name="prop.name" required type="text" class="validate-proxy" />
+						        	</div>
 					        	</div>
-							</div>
-						</div>
-					</p-panel>
-					<div>
-						<div class="text-sm" v-if="group.array && !pm.avoModel.readonly">
-							<p-button type="button" icon="pi pi-plus" :label="group.nameLabel.value"
-								severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, group)">
-							</p-button>
-						</div>
-						<div class="field-input" v-if="group.required">
-				        	<div class="validate-msg">
-				        		<input :name="group.name" required type="text" class="validate-proxy" />
 				        	</div>
-			        	</div>
-		        	</div>
+						</div>
+						<div v-else-if="prop.type == pm.avoModel.FormPropertyType.OBJECT">
+							<p-panel :header="prop.nameLabel.value"
+								:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+							</p-panel>
+						</div>
+						<div v-else>
+							<dg-input-prop-field :input-prop="prop" prop-name-path="" :form-data="pm.avoModel.data"
+								:readonly="pm.avoModel.readonly" :prop-type-def="pm.avoModel.FormPropertyType" :prop-input-type-def="pm.avoModel.FormPropertyInputType">
+							</dg-input-prop-field>
+						</div>
+					</div>
 				</div>
 			</p-accordion-tab>
 		</p-accordion>
@@ -519,7 +337,7 @@ page_palette.ftl
 		}
 	};
 	
-	//将org.datagear.analysis.form.ObjectFormProperty.properties分组整理
+	//将org.datagear.analysis.form.ObjectFormProperty.properties分组整理至groupProps中
 	avo.groupProperties = function(objProp)
 	{
 		if(objProp == null)
@@ -1085,6 +903,82 @@ page_palette.ftl
 		avo.attrValuesToFormData(data, pluginAttrForm, false);
 	};
 	
+	avo.moveUpArrayValEle = function(formData, prop, idx)
+	{
+		var array = formData[prop.name];
+		
+		if(idx > 0)
+		{
+			var me = array[idx];
+			var prev = array[idx-1];
+			array[idx-1] = me;
+			array[idx] = prev;
+		}
+	},
+	
+	avo.moveDownArrayValEle = function(formData, prop, idx)
+	{
+		var array = formData[prop.name];
+		
+		if(idx < (array.length -1))
+		{
+			var me = array[idx];
+			var next = array[idx+1];
+			array[idx+1] = me;
+			array[idx] = next;
+		}
+	},
+	
+	avo.insertArrayValEle = function(formData, prop, idx)
+	{
+		var array = formData[prop.name];
+		
+		if(array == null)
+		{
+			array = [];
+			formData[prop.name] = array;
+		}
+		
+		var ele = null;
+		
+		if(avo.isObjectProperty(prop))
+			ele = {};
+		else
+		{
+			var isTreeSelect = (prop.inputPayload && prop.inputPayload.treeSelect == true);
+			ele = (isTreeSelect ? {} : null);
+		}
+		
+		if(idx == null)
+			array.push(ele);
+		else
+			array.splice(idx, 0, ele);
+	},
+	
+	avo.removeArrayValEle = function(formData, prop, idx)
+	{
+		var array = formData[prop.name];
+		
+		if(array == null)
+			return;
+		
+		if(avo.isObjectProperty(prop))
+		{
+			po.confirm(
+			{
+				message: "<@spring.message code='confirmDeleteThisDataAsk' />",
+				accept: function()
+				{
+					array.splice(idx, 1);
+				}
+			});
+		}
+		else
+		{
+			array.splice(idx, 1);
+		}
+	};
+	
 	po.setupChartAttrValuesForm = function(pluginAttrForm, attrValues, options)
 	{
 		options = $.extend(
@@ -1095,9 +989,11 @@ page_palette.ftl
 		},
 		options);
 		
+		pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
+		avo.groupProperties(pluginAttrForm);
+		
 		var pm = po.vuePageModel();
-		pm.avoModel.pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
-		avo.groupProperties(pm.avoModel.pluginAttrForm);
+		pm.avoModel.pluginAttrForm = pluginAttrForm;
 		pm.avoModel.buttons = options.buttons;
 		pm.avoModel.readonly = options.readonly;
 		avo.setFormAttrValues(attrValues);
@@ -1124,10 +1020,10 @@ page_palette.ftl
 		{
 			FormPropertyType: avo.FormPropertyType,
 			FormPropertyInputType: avo.FormPropertyInputType,
+			pluginAttrForm: {},
 			data: {},
 			readonly: false,
-			buttons: [],
-			groups: []
+			buttons: []
 		}
 	});
 	
@@ -1235,6 +1131,235 @@ page_palette.ftl
 			
 			grpDataEle[propName].splice(idx, 1);
 		}
+	});
+	
+	po.vueDefineComponent(
+	{
+		name: "dg-input-prop-field",
+		props:
+		{
+			inputProp: { type: Object },
+			propNamePath: { type: String },
+			formData: { type: Object },
+			readonly: { type: Boolean },
+			propTypeDef: { type: Object },
+			propInputTypeDef: { type: Object }
+		},
+		template:
+		`
+		<div class="field grid">
+			<label :for="inputProp.domId+'.'+propNamePath+'.'+inputProp.name" class="field-label col-12 mb-2"
+				:title="inputProp.descLabel && inputProp.descLabel.value ? inputProp.descLabel.value : null">
+				<span>{{inputProp.nameLabel.value}}</span>
+				<span class="text-color-secondary text-sm ml-1">{{inputProp.name}}</span>
+			</label>
+			<div class="field-input col-12">
+				<div v-if="inputProp.inputType == propInputTypeDef.SELECT">
+					<div class="flex flex-column gap-1" v-if="inputProp.array">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+							<div class="flex-grow-1 flex" v-if="inputProp.inputPayload.multiple">
+								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
+									selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />"
+									v-if="inputProp.inputPayload.treeSelect == true">
+								</p-treeselect>
+								<p-multiselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
+									option-label="name" option-value="value" :show-clear="true" class="input w-full"
+									v-else>
+								</p-multiselect>
+							</div>
+							<div class="flex-grow-1 flex" v-else>
+								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
+									class="input w-full" placeholder="<@spring.message code='none' />"
+									v-if="inputProp.inputPayload.treeSelect == true">
+								</p-treeselect>
+								<p-dropdown v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
+									option-label="name" option-value="value" class="input flex-grow-1 mr-1"
+									v-else>
+								</p-dropdown>
+							</div>
+							<div class="flex align-items-center gap-1">
+								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+									@click="insertArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+								<p-button type="button" icon="pi pi-minus" severity="danger" outlined 
+									@click="removeArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+							</div>
+						</div>
+						<div v-if="!readonly">
+							<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+								@click="insertArrayValEle(formData, inputProp)">
+							</p-button>
+						</div>
+					</div>
+					<div v-else-if="inputProp.inputPayload.multiple">
+						<p-treeselect v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
+							selection-mode="multiple" class="input w-full" placeholder="<@spring.message code='none' />"
+							v-if="inputProp.inputPayload.treeSelect == true">
+						</p-treeselect>
+						<p-multiselect v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
+							option-label="name" option-value="value" :show-clear="true" class="input w-full"
+							v-else>
+						</p-multiselect>
+					</div>
+					<div v-else>
+						<p-treeselect v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
+							class="input w-full" placeholder="<@spring.message code='none' />"
+							 v-if="inputProp.inputPayload.treeSelect == true">
+						</p-treeselect>
+						<p-dropdown v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
+							option-label="name" option-value="value" :show-clear="!inputProp.required" class="input w-full"
+							v-else>
+						</p-dropdown>
+					</div>
+				</div>
+				<div v-else-if="inputProp.inputType == propInputTypeDef.COLOR">
+					<div class="flex flex-column gap-1" v-if="inputProp.array">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+							<div class="flex-grow-1 flex gap-1">
+								<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text"
+									class="input flex-grow-1">
+								</p-inputtext>
+								<p-button type="button" :style="{'background-color': formData[inputProp.name][viIdx]}"
+									class="palette-btn surface-border mr-1"
+									@click="showPalettePanel($event, formData[inputProp.name], viIdx)"></p-button>
+							</div>
+							<div class="flex align-items-center gap-1">
+								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+									@click="insertArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+								<p-button type="button" icon="pi pi-minus" severity="danger" outlined
+									@click="removeArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+							</div>
+						</div>
+						<div v-if="!readonly">
+							<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+								@click="insertArrayValEle(formData, inputProp)">
+							</p-button>
+						</div>
+					</div>
+					<div class="flex gap-1" v-else>
+						<p-inputtext v-model="formData[inputProp.name]" type="text"
+							class="input flex-grow-1" maxlength="100">
+						</p-inputtext>
+						<p-button type="button" :style="{'background-color': formData[inputProp.name]}" class="palette-btn surface-border"
+							@click="showPalettePanel($event, formData, inputProp.name)"></p-button>
+					</div>
+				</div>
+				<div v-else-if="inputProp.inputType == propInputTypeDef.RADIO || inputProp.inputType == propInputTypeDef.CHECKBOX">
+					<div class="input flex flex-column gap-1" v-if="inputProp.array">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+							<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
+								<div v-for="(opt, optIdx) in inputProp.inputPayload.options" class="inline-flex align-items-center gap-1">
+									<p-radiobutton :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx+'.'+viIdx"
+										:value="opt.value" v-model="formData[inputProp.name][viIdx]"
+										 v-if="inputProp.inputType == propInputTypeDef.RADIO">
+									</p-radiobutton>
+									<p-checkbox :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx+'.'+viIdx"
+										:value="opt.value" v-model="formData[inputProp.name][viIdx]"
+										v-else>
+									</p-checkbox>
+									<label :for="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx+'.'+viIdx">{{opt.name}}</label>
+								</div>
+							</div>
+							<div class="flex align-items-center gap-1">
+								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+									@click="insertArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+								<p-button type="button" icon="pi pi-minus" severity="danger" outlined
+									@click="removeArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+							</div>
+						</div>
+						<div v-if="!readonly">
+							<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+								@click="insertArrayValEle(formData, inputProp)">
+							</p-button>
+						</div>
+					</div>
+					<div class="input p-inputtext p-component p-2 flex gap-3" v-else>
+						<div v-for="(opt, optIdx) in inputProp.inputPayload.options" class="inline-flex align-items-center gap-1">
+							<p-radiobutton :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx"
+								:value="opt.value" v-model="formData[inputProp.name]"
+								 v-if="inputProp.inputType == propInputTypeDef.RADIO">
+							</p-radiobutton>
+							<p-checkbox :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx"
+								:value="opt.value" v-model="formData[inputProp.name]"
+								v-else>
+							</p-checkbox>
+							<label :for="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx">{{opt.name}}</label>
+						</div>
+					</div>
+				</div>
+				<div v-else>
+					<div class="input flex flex-column gap-1" v-if="inputProp.array">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+							<p-textarea v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
+								 v-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
+							</p-textarea>
+							<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
+								v-else>
+							</p-inputtext>
+							<div class="flex align-items-center gap-1">
+								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+									@click="insertArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+								<p-button type="button" icon="pi pi-minus" severity="danger" outlined
+									@click="removeArrayValEle(formData, inputProp, viIdx)"
+									v-if="!readonly">
+								</p-button>
+							</div>
+						</div>
+						<div v-if="!readonly">
+							<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
+								@click="insertArrayValEle(formData, inputProp)">
+							</p-button>
+						</div>
+					</div>
+					<div v-else>
+						<p-textarea :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
+							v-model="formData[inputProp.name]" type="text" class="input w-full"
+							v-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
+						</p-textarea>
+						<p-inputtext :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
+							v-model="formData[inputProp.name]" type="text" class="input w-full"
+							v-else>
+						</p-inputtext>
+					</div>
+				</div>
+	        	<div class="validate-msg">
+	        		<input :name="concatPropNamePath(propNamePath, inputProp)" type="text" class="validate-proxy"
+	        			:class="{'required': inputProp.required, 'number': inputProp.type == propTypeDef.NUMBER}" />
+	        	</div>
+			</div>
+		</div>
+		`,
+		
+		methods:
+		{
+			concatPropNamePath: function(propNamePath, inputProp)
+			{
+				return (propNamePath ? propNamePath+"." : "") + $.escapePropPathEle(inputProp.name);
+			},
+			insertArrayValEle: function(array, prop, idx)
+			{
+				avo.insertArrayValEle(array, prop, idx);
+			},
+			removeArrayValEle: function(array, prop, idx)
+			{
+				avo.removeArrayValEle(array, prop, idx);
+			}
+		},
+		
+		components: $.vueComponents()
 	});
 })
 (${pid});

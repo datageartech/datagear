@@ -469,6 +469,14 @@ $.inflatePageObj = function(po)
 			this._vueComponents[name] = value;
 	};
 	
+	//自定义Vue组件
+	po.vueDefineComponent = function(component)
+	{
+		var name = component.name;
+		var cmp = Vue.defineComponent(component);
+		this.vueComponent(name, cmp);
+	};
+	
 	//设置vue监听
 	po.vueWatch = function(target, callback)
 	{
