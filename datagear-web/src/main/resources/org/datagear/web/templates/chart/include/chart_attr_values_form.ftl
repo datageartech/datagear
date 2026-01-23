@@ -28,66 +28,10 @@ page_palette.ftl
 <#assign JsonChartPluginPropertiesResolver=statics['org.datagear.analysis.support.JsonChartPluginPropertiesResolver']>
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
-		<p-accordion :multiple="true" :active-index="[0]">
-			<p-accordion-tab v-for="(group, groupIdx) in pm.avoModel.pluginAttrForm.groupProps">
-				<template #header>
-					<span>{{group.nameLabel.value}}</span>
-					<span class="text-color-secondary text-sm ml-1">{{group.virtual ? "" : group.name}}</span>
-				</template>
-				<div class="flex flex-column gap-3 mb-2">
-					<div v-for="(prop, propIdx) in group.properties">
-						<div v-if="prop.type == pm.avoModel.FormPropertyType.OBJECT && prop.array">
-							<p-panel v-for="(propDataEle, propDataEleIdx) in pm.avoModel.data[prop.name]"
-								:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+pm.avoModel.data[prop.name].length"
-								:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
-								<template #icons>
-									<div class="inline-flex gap-1 mx-2 text-sm" v-if="!pm.avoModel.readonly">
-										<p-button type="button" severity="secondary"
-											@click="onChartAttrValuesFormMoveUpGrpEle($event, prop, propDataEleIdx)">
-											<@spring.message code='moveUp' />
-										</p-button>
-										<p-button type="button" severity="secondary"
-											@click="onChartAttrValuesFormMoveDownGrpEle($event, prop, propDataEleIdx)">
-											<@spring.message code='moveDown' />
-										</p-button>
-										<p-button type="button" severity="secondary"
-											@click="onChartAttrValuesFormInsertGrpEle($event, prop, propDataEleIdx)">
-											<@spring.message code='insert' />
-										</p-button>
-										<p-button type="button" severity="danger"
-											@click="onChartAttrValuesFormRemoveGrpEle($event, prop, propDataEleIdx)">
-											<@spring.message code='delete' />
-										</p-button>
-									</div>
-								</template>
-							</p-panel>
-							<div>
-								<div class="text-sm" v-if="!pm.avoModel.readonly">
-									<p-button type="button" icon="pi pi-plus" :label="prop.nameLabel.value"
-										severity="secondary" @click="onChartAttrValuesFormInsertGrpEle($event, prop)">
-									</p-button>
-								</div>
-								<div class="field-input" v-if="group.required">
-						        	<div class="validate-msg">
-						        		<input :name="prop.name" required type="text" class="validate-proxy" />
-						        	</div>
-					        	</div>
-				        	</div>
-						</div>
-						<div v-else-if="prop.type == pm.avoModel.FormPropertyType.OBJECT">
-							<p-panel :header="prop.nameLabel.value"
-								:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
-							</p-panel>
-						</div>
-						<div v-else>
-							<dg-input-prop-field :input-prop="prop" prop-name-path="" :form-data="pm.avoModel.data"
-								:readonly="pm.avoModel.readonly" :prop-type-def="pm.avoModel.FormPropertyType" :prop-input-type-def="pm.avoModel.FormPropertyInputType">
-							</dg-input-prop-field>
-						</div>
-					</div>
-				</div>
-			</p-accordion-tab>
-		</p-accordion>
+		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginAttrForm" :prop-name-path=""
+			:form-data="pm.avoModel.data" :readonly="pm.avoModel.readonly" :prop-type-def="pm.avoModel.FormPropertyType"
+			:prop-input-type-def="pm.avoModel.FormPropertyInputType">
+		</dg-obj-prop-field>
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
@@ -405,7 +349,7 @@ page_palette.ftl
 		
 		for(var i=0; i<groups.length; i++)
 		{
-			if(groups[i].names && groups[i].names.findIndex(propName) > -1)
+			if(groups[i].names && groups[i].names.indexOf(propName) > -1)
 				return i;
 		}
 		
@@ -977,6 +921,14 @@ page_palette.ftl
 		}
 	};
 	
+	avo.concatPropNamePath = function(propNamePath, name)
+	{
+		if($.isTypeNumber(name))
+			return (propNamePath ? propNamePath : "") + "["+name+"]";
+		else
+			return (propNamePath ? propNamePath+"." : "") + $.escapePropPathEle(name);
+	};
+	
 	po.setupChartAttrValuesForm = function(pluginAttrForm, attrValues, options)
 	{
 		options = $.extend(
@@ -1018,7 +970,7 @@ page_palette.ftl
 		{
 			FormPropertyType: avo.FormPropertyType,
 			FormPropertyInputType: avo.FormPropertyInputType,
-			pluginAttrForm: {},
+			pluginAttrForm: { groupProps: [] },
 			data: {},
 			readonly: false,
 			buttons: []
@@ -1027,11 +979,6 @@ page_palette.ftl
 	
 	po.vueMethod(
 	{
-		toPropPathLiteral: function()
-		{
-			return $.concatPropPath.apply($, arguments);
-		},
-		
 		onClearChartAttrValuesFormData: function()
 		{
 			po.confirm(
@@ -1042,96 +989,10 @@ page_palette.ftl
 					avo.clearFormData();
 				} 
 			});
-		},
-		
-		onChartAttrValuesFormMoveUpGrpEle: function(e, group, idx)
-		{
-			var groupName = group.name;
-			var pm = po.vuePageModel();
-			var data = pm.avoModel.data;
-			var groupData = data[groupName];
-			
-			if(idx > 0)
-			{
-				var me = groupData[idx];
-				var prev = groupData[idx-1];
-				groupData[idx-1] = me;
-				groupData[idx] = prev;
-			}
-		},
-		
-		onChartAttrValuesFormMoveDownGrpEle: function(e, group, idx)
-		{
-			var groupName = group.name;
-			var pm = po.vuePageModel();
-			var data = pm.avoModel.data;
-			var groupData = data[groupName];
-			
-			if(idx < (groupData.length -1))
-			{
-				var me = groupData[idx];
-				var next = groupData[idx+1];
-				groupData[idx+1] = me;
-				groupData[idx] = next;
-			}
-		},
-		
-		onChartAttrValuesFormInsertGrpEle: function(e, group, idx)
-		{
-			var groupName = group.name;
-			var pm = po.vuePageModel();
-			var data = pm.avoModel.data;
-
-			if(!data[groupName])
-				data[groupName] = [];
-			
-			if(idx == null)
-				data[groupName].push({});
-			else
-				data[groupName].splice(idx, 0, {});
-		},
-		
-		onChartAttrValuesFormRemoveGrpEle: function(e, group, idx)
-		{
-			po.confirm(
-			{
-				message: "<@spring.message code='confirmDeleteThisDataAsk' />",
-				accept: function()
-				{
-					var groupName = group.name;
-					var pm = po.vuePageModel();
-					var data = pm.avoModel.data;
-					data[groupName].splice(idx, 1);
-				}
-			});
-		},
-		
-		onChartAttrValuesFormInsertGrpEleEle: function(e, grpDataEle, prop, idx)
-		{
-			var propName = prop.name;
-			var isTreeSelect = (prop.inputPayload && prop.inputPayload.treeSelect == true);
-			
-			if(grpDataEle[propName] == null)
-				grpDataEle[propName] = [];
-			
-			if(idx == null)
-				grpDataEle[propName].push(isTreeSelect ? {} : null);
-			else
-				grpDataEle[propName].splice(idx, 0, isTreeSelect ? {} : null);
-		},
-		
-		onChartAttrValuesFormRemoveGrpEleEle: function(e, grpDataEle, prop, idx)
-		{
-			var propName = prop.name;
-			
-			if(grpDataEle[propName] == null)
-				return;
-			
-			grpDataEle[propName].splice(idx, 1);
 		}
 	});
 	
-	po.vueDefineComponent(
+	var inputPropFieldCmp = po.vueDefineComponent(
 	{
 		name: "dg-input-prop-field",
 		props:
@@ -1334,7 +1195,7 @@ page_palette.ftl
 					</div>
 				</div>
 	        	<div class="validate-msg">
-	        		<input :name="concatPropNamePath(propNamePath, inputProp)" type="text" class="validate-proxy"
+	        		<input :name="concatPropNamePath(propNamePath, inputProp.name)" type="text" class="validate-proxy"
 	        			:class="{'required': inputProp.required, 'number': inputProp.type == propTypeDef.NUMBER}" />
 	        	</div>
 			</div>
@@ -1343,21 +1204,139 @@ page_palette.ftl
 		
 		methods:
 		{
-			concatPropNamePath: function(propNamePath, inputProp)
+			concatPropNamePath: function(propNamePath, name)
 			{
-				return (propNamePath ? propNamePath+"." : "") + $.escapePropPathEle(inputProp.name);
+				return avo.concatPropNamePath(propNamePath, name);
 			},
-			insertArrayValEle: function(array, prop, idx)
+			insertArrayValEle: function(formData, prop, idx)
 			{
-				avo.insertArrayValEle(array, prop, idx);
+				avo.insertArrayValEle(formData, prop, idx);
 			},
-			removeArrayValEle: function(array, prop, idx)
+			removeArrayValEle: function(formData, prop, idx)
 			{
-				avo.removeArrayValEle(array, prop, idx);
+				avo.removeArrayValEle(formData, prop, idx);
+			},
+			showPalettePanel: function(e, modelObj, modelProp)
+			{
+				po.showPalettePanel(e, modelObj, modelProp);
 			}
 		},
 		
 		components: $.vueComponents()
+	});
+	
+	var objPropFieldCmpDepends = $.vueComponents();
+	objPropFieldCmpDepends["dg-input-prop-field"] = inputPropFieldCmp;
+
+	po.vueDefineComponent(
+	{
+		name: "dg-obj-prop-field",
+		props:
+		{
+			objProp: { type: Object },
+			propNamePath: { type: String },
+			formData: { type: Object },
+			readonly: { type: Boolean },
+			propTypeDef: { type: Object },
+			propInputTypeDef: { type: Object }
+		},
+		template:
+		`
+		<p-accordion :multiple="true" :active-index="[0]" :class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}">
+			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps">
+				<template #header>
+					<span>{{group.nameLabel.value}}</span>
+				</template>
+				<div>
+					<div v-for="(prop, propIdx) in group.properties">
+						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
+							<p-panel :header="prop.nameLabel.value" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+								<div class="flex flex-column gap-3 mb-2">
+									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
+										:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+formData[prop.name].length"
+										:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+										<template #icons>
+											<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
+												<p-button type="button" severity="secondary"
+													@click="moveUpArrayValEle(formData, prop, propDataEleIdx)">
+													<@spring.message code='moveUp' />
+												</p-button>
+												<p-button type="button" severity="secondary"
+													@click="moveDownArrayValEle(formData, prop, propDataEleIdx)">
+													<@spring.message code='moveDown' />
+												</p-button>
+												<p-button type="button" severity="secondary"
+													@click="insertArrayValEle(formData, prop, propDataEleIdx)">
+													<@spring.message code='insert' />
+												</p-button>
+												<p-button type="button" severity="danger"
+													@click="removeArrayValEle(formData, prop, propDataEleIdx)">
+													<@spring.message code='delete' />
+												</p-button>
+											</div>
+										</template>
+										<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(concatPropNamePath(propNamePath, prop.name), propDataEleIdx)"
+											:form-data="propDataEle" :readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef">
+										</dg-obj-prop-field>
+									</p-panel>
+									<div>
+										<div class="text-sm" v-if="!readonly">
+											<p-button type="button" icon="pi pi-plus" :label="prop.nameLabel.value"
+												severity="secondary" @click="insertArrayValEle(formData, prop)">
+											</p-button>
+										</div>
+										<div class="field-input" v-if="group.required">
+								        	<div class="validate-msg">
+								        		<input :name="prop.name" required type="text" class="validate-proxy" />
+								        	</div>
+							        	</div>
+						        	</div>
+					        	</div>
+					        </p-panel>
+						</div>
+						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
+							<p-panel :header="prop.nameLabel.value" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+								<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData[prop.name]"
+									:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef">
+								</dg-obj-prop-field>
+							</p-panel>
+						</div>
+						<div v-else>
+							<dg-input-prop-field :input-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData"
+								:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef">
+							</dg-input-prop-field>
+						</div>
+					</div>
+				</div>
+			</p-accordion-tab>
+		</p-accordion>
+		`,
+		
+		methods:
+		{
+			concatPropNamePath: function(propNamePath, name)
+			{
+				return avo.concatPropNamePath(propNamePath, name);
+			},
+			moveUpArrayValEle: function(formData, prop, idx)
+			{
+				avo.moveUpArrayValEle(formData, prop, idx);
+			},
+			moveDownArrayValEle: function(formData, prop, idx)
+			{
+				avo.moveDownArrayValEle(formData, prop, idx);
+			},
+			insertArrayValEle: function(formData, prop, idx)
+			{
+				avo.insertArrayValEle(formData, prop, idx);
+			},
+			removeArrayValEle: function(formData, prop, idx)
+			{
+				avo.removeArrayValEle(formData, prop, idx);
+			}
+		},
+		
+		components: objPropFieldCmpDepends
 	});
 })
 (${pid});

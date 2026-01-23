@@ -463,6 +463,13 @@ label.align-tip{
 .p-colorpicker.preview-h-full .p-colorpicker-preview{
 	height: 100%;
 }
+.p-accordion.disable-accordion .p-accordion-header{
+	display: none;
+}
+.p-accordion.disable-accordion .p-accordion-content{
+	padding: 0;
+	border-width: 0;
+}
 
 /*单行阶段*/
 .inline-steps .p-steps .p-steps-item .p-menuitem-link,

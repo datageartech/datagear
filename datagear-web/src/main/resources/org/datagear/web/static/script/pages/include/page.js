@@ -475,6 +475,8 @@ $.inflatePageObj = function(po)
 		var name = component.name;
 		var cmp = Vue.defineComponent(component);
 		this.vueComponent(name, cmp);
+		
+		return cmp;
 	};
 	
 	//设置vue监听
