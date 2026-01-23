@@ -3115,13 +3115,13 @@ $.inflateDashboardDesignEditorForms = function(po)
 	};
 	
 	//重写chart_attr_values_form.ftl中的函数
-	po.getChartPluginInputAttrInputOptionsForMap = function(asTree)
+	po.getChartAttrValuesInputOptionsForMap = function(asTree)
 	{
 		var re = [];
 		
 		var dashboardEditor = po.visualDashboardEditorByTab();
 		if(dashboardEditor)
-			re = dashboardEditor.getChartPluginInputAttrInputOptionsForMap(asTree);
+			re = dashboardEditor.getChartAttrValuesInputOptionsForMap(asTree);
 		
 		return re;
 	};

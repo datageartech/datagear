@@ -2440,7 +2440,7 @@
 	/**
 	 * 获取看板图表插件属性内置地图选项集。
 	 */
-	editor.getChartPluginInputAttrInputOptionsForMap = function(asTree)
+	editor.getChartAttrValuesInputOptionsForMap = function(asTree)
 	{
 		var re = [];
 		
@@ -2569,7 +2569,9 @@
 		if(attrs == null || attrs.length == 0)
 			return null;
 		
-		var form = { properties: attrs };
+		//org.datagear.analysis.ChartPluginAttributeForm
+		//这里需要设置type为org.datagear.analysis.form.PropertyType.OBJECT
+		var form = { type: "OBJECT", properties: attrs, array: false };
 		return form;
 	};
 	

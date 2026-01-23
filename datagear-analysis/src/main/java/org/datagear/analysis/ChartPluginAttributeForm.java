@@ -43,17 +43,20 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	public ChartPluginAttributeForm()
 	{
 		super();
+		super.setArray(false);
 	}
 
 	public ChartPluginAttributeForm(List<FormProperty> properties)
 	{
 		super(null, properties);
+		super.setArray(false);
 	}
 
 	public ChartPluginAttributeForm(String name, List<FormProperty> properties)
 	{
 		super(name, properties);
 		this.name = name;
+		super.setArray(false);
 	}
 
 	/**
@@ -78,13 +81,14 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	@Override
 	public boolean isArray()
 	{
-		return false;
+		return super.isArray();
 	}
 
 	@Override
 	public void setArray(boolean array)
 	{
 		// 不抛出异常，避免相关反射库操作异常
+		super.setArray(false);
 	}
 
 	@Override
