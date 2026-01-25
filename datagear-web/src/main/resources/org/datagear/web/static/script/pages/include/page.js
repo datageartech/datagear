@@ -3254,7 +3254,7 @@ $.inflateChartAttrValuesForm = function(po)
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
 						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
-							<p-panel :header="prop.nameLabel.value" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+							<p-panel :header="prop.nameLabel.value+'-'+formData[prop.name].length" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
 								<div class="flex flex-column gap-3 mb-2">
 									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
 										:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+formData[prop.name].length"
@@ -3306,7 +3306,7 @@ $.inflateChartAttrValuesForm = function(po)
 							</p-panel>
 						</div>
 						<div v-else>
-							<dg-input-prop-field :input-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData"
+							<dg-input-prop-field :input-prop="prop" :prop-name-path="propNamePath" :form-data="formData"
 								:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n">
 							</dg-input-prop-field>
 						</div>
