@@ -90,6 +90,7 @@ page_palette.ftl
 	po.i18n.moveDown = "<@spring.message code='moveDown' />";
 	po.i18n.insert = "<@spring.message code='insert' />";
 	po.i18n.del = "<@spring.message code='delete' />";
+	po.i18n.enable = "<@spring.message code='enable' />";
 	
 	//page.js
 	$.inflateChartAttrValuesForm(po);

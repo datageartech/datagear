@@ -2463,6 +2463,9 @@ $.inflateChartAttrValuesForm = function(po)
 		var data = attrValues;
 		var props = objProperty.properties;
 		
+		data[avo.ctrlPropName] = { propEnableds: {} };
+		var propEnableds = data[avo.ctrlPropName].propEnableds;
+		
 		for(var i=0; i<props.length; i++)
 		{
 			var prop = props[i];
@@ -2489,6 +2492,8 @@ $.inflateChartAttrValuesForm = function(po)
 					
 					if(v != null)
 						avo.doAttrValuesToFormData(v, prop);
+					
+					propEnableds[prop.name] = [ (v != null) ];
 				}
 			}
 			else
@@ -2499,8 +2504,6 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			data[prop.name] = v;
 		};
-		
-		data[avo.ctrlPropName] = { propEnabled: {} };
 		
 		return data;
 	};
@@ -3319,10 +3322,10 @@ $.inflateChartAttrValuesForm = function(po)
 								<template #icons>
 									<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly && !prop.required">
 										<p-checkbox :input-id="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'"
-											:value="true" v-model="formData[ctrlPropName].propEnabled[prop.name]"
-											@change="onEnableObjProp(formData, prop, formData[ctrlPropName].propEnabled[prop.name])">
+											:value="true" v-model="formData[ctrlPropName].propEnableds[prop.name]"
+											@change="onEnableObjProp(formData, prop, formData[ctrlPropName].propEnableds)">
 										</p-checkbox>
-										<label :for="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'">启用</label>
+										<label :for="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'">{{i18n.enable}}</label>
 									</div>
 								</template>
 								<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData[prop.name]"
@@ -3364,16 +3367,29 @@ $.inflateChartAttrValuesForm = function(po)
 			{
 				avo.removeArrayValEle(formData, prop, idx);
 			},
-			onEnableObjProp: function(formData, prop, enable)
+			onEnableObjProp: function(formData, prop, propEnableds)
 			{
-				if(enable && enable[0])
+				var propName = prop.name;
+				var enabled = propEnableds[propName];
+				
+				if(enabled && enabled[0])
 				{
-					if(formData[prop.name] == null)
-						formData[prop.name] = avo.doAttrValuesToFormData({}, prop);
+					formData[propName] = avo.doAttrValuesToFormData({}, prop);
 				}
 				else
 				{
-					delete formData[prop.name];
+					po.confirm(
+					{
+						message: po.i18n.confirmDeleteThisDataAsk,
+						accept: function()
+						{
+							delete formData[propName];
+						},
+						reject: function()
+						{
+							propEnableds[propName] = [ true ];
+						}
+					});
 				}
 			}
 		},
