@@ -463,10 +463,10 @@ label.align-tip{
 .p-colorpicker.preview-h-full .p-colorpicker-preview{
 	height: 100%;
 }
-.p-accordion.disable-accordion .p-accordion-header{
+.p-accordion.disable-accordion >div >.p-accordion-header{
 	display: none;
 }
-.p-accordion.disable-accordion .p-accordion-content{
+.p-accordion.disable-accordion >div >div >.p-accordion-content{
 	padding: 0;
 	border-width: 0;
 }

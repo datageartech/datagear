@@ -2324,6 +2324,8 @@ $.inflateChartAttrValuesForm = function(po)
 				}
 			}
 			
+			myGroup.nameLabel = (myGroup.nameLabel == null ? {} : myGroup.nameLabel);
+			myGroup.nameLabel.value = ($.isEmpty(myGroup.nameLabel.value) ? po.i18n.unnamed : myGroup.nameLabel.value);
 			myGroup.properties = (myGroup.properties == null ? [] : myGroup.properties);
 			myGroup.properties.push(prop);
 			
