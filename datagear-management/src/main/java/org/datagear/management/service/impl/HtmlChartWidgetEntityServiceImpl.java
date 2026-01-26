@@ -376,7 +376,7 @@ public class HtmlChartWidgetEntityServiceImpl
 				entity.setPlugin(full);
 			else
 			{
-				pluginVo = new HtmlChartPluginVo(full);
+				pluginVo = (full == null ? null : new HtmlChartPluginVo(full));
 				entity.setPluginVo(pluginVo);
 			}
 		}
