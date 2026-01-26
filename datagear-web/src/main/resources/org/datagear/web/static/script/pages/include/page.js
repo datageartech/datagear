@@ -69,7 +69,8 @@ $.vueComponents = function()
 		"p-breadcrumb": primevue.breadcrumb,
 		"p-badge": primevue.badge,
 		"p-accordion": primevue.accordion,
-		"p-accordion-tab": primevue.accordiontab
+		"p-accordion-tab": primevue.accordiontab,
+		"p-toggle-button": primevue.togglebutton
 	};
 	
 	return components;
@@ -2419,6 +2420,8 @@ $.inflateChartAttrValuesForm = function(po)
 		return groups;
 	};
 	
+	avo.ctrlPropName = po.concatPid("avoctlprop");
+	
 	//图表属性值对象转换为org.datagear.analysis.ChartPluginAttributeForm的表单数据模型
 	avo.attrValuesToFormData = function(attrValues, pluginAttrForm, clone)
 	{
@@ -2467,12 +2470,12 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			if(avo.isObjectProperty(prop))
 			{
-				//创建UI占位模型
-				if(v == null)
-					v = (prop.array ? [] : {});
-				
 				if(prop.array)
 				{
+					//创建UI占位模型
+					if(v == null)
+						v = [];
+					
 					if(!$.isArray(v))
 						v = [ v ];
 					
@@ -2481,7 +2484,11 @@ $.inflateChartAttrValuesForm = function(po)
 				}
 				else
 				{
-					avo.doAttrValuesToFormData(v, prop);
+					if(v == null && prop.required)
+						v = {};
+					
+					if(v != null)
+						avo.doAttrValuesToFormData(v, prop);
 				}
 			}
 			else
@@ -2492,6 +2499,8 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			data[prop.name] = v;
 		};
+		
+		data[avo.ctrlPropName] = { propEnabled: {} };
 		
 		return data;
 	};
@@ -2640,6 +2649,8 @@ $.inflateChartAttrValuesForm = function(po)
 			else
 				data[prop.name] = v;
 		};
+		
+		delete data[avo.ctrlPropName];
 	};
 	
 	//树组件Model转换为图表属性值，另参考avo.encodeAttrValueTreeModel()函数
@@ -2977,7 +2988,8 @@ $.inflateChartAttrValuesForm = function(po)
 			formData: {},
 			readonly: false,
 			buttons: [],
-			i18n: po.i18n
+			i18n: po.i18n,
+			ctrlPropName: avo.ctrlPropName
 		}
 	});
 	
@@ -3244,7 +3256,8 @@ $.inflateChartAttrValuesForm = function(po)
 			readonly: { type: Boolean },
 			propTypeDef: { type: Object },
 			propInputTypeDef: { type: Object },
-			i18n: { type: Object }
+			i18n: { type: Object },
+			ctrlPropName: { type: String }
 		},
 		template:
 		`
@@ -3282,7 +3295,8 @@ $.inflateChartAttrValuesForm = function(po)
 											</div>
 										</template>
 										<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(concatPropNamePath(propNamePath, prop.name), propDataEleIdx)"
-											:form-data="propDataEle" :readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n">
+											:form-data="propDataEle" :readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
+											:ctrl-prop-name="ctrlPropName">
 										</dg-obj-prop-field>
 									</p-panel>
 									<div>
@@ -3302,8 +3316,18 @@ $.inflateChartAttrValuesForm = function(po)
 						</div>
 						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
 							<p-panel :header="prop.nameLabel.value" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+								<template #icons>
+									<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly && !prop.required">
+										<p-checkbox :input-id="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'"
+											:value="true" v-model="formData[ctrlPropName].propEnabled[prop.name]"
+											@change="onEnableObjProp(formData, prop, formData[ctrlPropName].propEnabled[prop.name])">
+										</p-checkbox>
+										<label :for="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'">启用</label>
+									</div>
+								</template>
 								<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData[prop.name]"
-									:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n">
+									:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
+									:ctrl-prop-name="ctrlPropName" v-if="formData[prop.name] != null">
 								</dg-obj-prop-field>
 							</p-panel>
 						</div>
@@ -3339,6 +3363,18 @@ $.inflateChartAttrValuesForm = function(po)
 			removeArrayValEle: function(formData, prop, idx)
 			{
 				avo.removeArrayValEle(formData, prop, idx);
+			},
+			onEnableObjProp: function(formData, prop, enable)
+			{
+				if(enable && enable[0])
+				{
+					if(formData[prop.name] == null)
+						formData[prop.name] = avo.doAttrValuesToFormData({}, prop);
+				}
+				else
+				{
+					delete formData[prop.name];
+				}
 			}
 		},
 		

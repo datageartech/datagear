@@ -2252,16 +2252,20 @@
 
 $.NUMBER_VALIDATOR_REGEX = /^-?\d+\.?\d*$/;
 
-$.matchesNumberDeep = function(value)
+$.matchesNumberForValidator = function(value)
 {
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value))
+		return true;
+	
 	if($.isTypeNumber(value))
 		return true;
-		
+	
 	if($.isArray(value))
 	{
 		for(let i=0; i<value.length; i++)
 		{
-			if(!$.matchesNumberDeep(value[i]))
+			if(!$.matchesNumberForValidator(value[i]))
 				return false;
 		}
 		
@@ -2280,10 +2284,7 @@ $.validator.addMethod("required", function(value, ele)
 //重写"number"校验函数，以支持Vue表单数据模型
 $.validator.addMethod("number", function(value, ele)
 {
-	if($.isEmpty(value))
-		return true;
-	
-	return $.matchesNumberDeep(value);
+	return $.matchesNumberForValidator(value);
 });
 
 $.fn.extend(
