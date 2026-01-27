@@ -99,7 +99,7 @@
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}dataSetBindVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx" :header="formatDsbHeaderName(dsb)" :toggleable="true" class="p-card mb-2 no-panel-border">
+						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx" :header="formatDsbHeaderName(dsb)" :toggleable="true" class="mb-2">
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
 									@click="onMoveUpDataSetBind($event, dsbIdx)" v-if="!pm.isReadonlyAction">

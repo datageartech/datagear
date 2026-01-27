@@ -435,11 +435,6 @@ label.align-tip{
 .p-datatable-table .col-last{
 	max-width: 50%;
 }
-/*无边框面板*/
-.p-panel.no-panel-border .p-panel-header,
-.p-panel.no-panel-border .p-panel-content{
-	border-width: 0;
-}
 .p-panel.panel-icon-align-center .p-panel-icons{
 	display: flex;
 	align-items: center;

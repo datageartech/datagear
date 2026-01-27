@@ -2275,6 +2275,27 @@ $.matchesNumberForValidator = function(value)
 		return $.NUMBER_VALIDATOR_REGEX.test(value);
 };
 
+$.detailRequiredForValidator = function(value)
+{
+	if($.isEmpty(value))
+		return false;
+		
+	if($.isArray(value))
+	{
+		for(var i=0; i<value.length; i++)
+		{
+			if(!$.detailRequiredForValidator(value[i]))
+				return false;
+		}
+	}
+	else if($.isPlainObject(value) && $.isEmptyObject(value))
+	{
+		return false;
+	}
+	
+	return true;
+};
+
 //重写"required"校验函数，以支持Vue表单数据模型
 $.validator.addMethod("required", function(value, ele)
 {
@@ -2285,6 +2306,12 @@ $.validator.addMethod("required", function(value, ele)
 $.validator.addMethod("number", function(value, ele)
 {
 	return $.matchesNumberForValidator(value);
+});
+
+//新增数组元素非空、对象非空校验函数
+$.validator.addMethod("detailRequired", function(value, ele)
+{
+	return $.detailRequiredForValidator(value);
 });
 
 $.fn.extend(

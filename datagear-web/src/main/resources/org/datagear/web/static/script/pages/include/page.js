@@ -3032,25 +3032,25 @@ $.inflateChartAttrValuesForm = function(po)
 			</label>
 			<div class="field-input col-12">
 				<div v-if="inputProp.inputType == propInputTypeDef.SELECT">
-					<div class="flex flex-column gap-1" v-if="inputProp.array">
+					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
 							<div class="flex-grow-1 flex" v-if="inputProp.inputPayload.multiple">
 								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									selection-mode="multiple" class="input w-full" :placeholder="i18n.none"
+									selection-mode="multiple" class="w-full" :placeholder="i18n.none"
 									v-if="inputProp.inputPayload.treeSelect == true">
 								</p-treeselect>
 								<p-multiselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									option-label="name" option-value="value" :show-clear="true" class="input w-full"
+									option-label="name" option-value="value" :show-clear="true" class="w-full"
 									v-else>
 								</p-multiselect>
 							</div>
 							<div class="flex-grow-1 flex" v-else>
 								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									class="input w-full" :placeholder="i18n.none"
+									class="w-full" :placeholder="i18n.none"
 									v-if="inputProp.inputPayload.treeSelect == true">
 								</p-treeselect>
 								<p-dropdown v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									option-label="name" option-value="value" class="input flex-grow-1 mr-1"
+									option-label="name" option-value="value" class="flex-grow-1 mr-1"
 									v-else>
 								</p-dropdown>
 							</div>
@@ -3093,11 +3093,11 @@ $.inflateChartAttrValuesForm = function(po)
 					</div>
 				</div>
 				<div v-else-if="inputProp.inputType == propInputTypeDef.COLOR">
-					<div class="flex flex-column gap-1" v-if="inputProp.array">
+					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
 							<div class="flex-grow-1 flex gap-1">
 								<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text"
-									class="input flex-grow-1">
+									class="flex-grow-1">
 								</p-inputtext>
 								<p-button type="button" :style="{'background-color': formData[inputProp.name][viIdx]}"
 									class="palette-btn surface-border mr-1"
@@ -3129,7 +3129,7 @@ $.inflateChartAttrValuesForm = function(po)
 					</div>
 				</div>
 				<div v-else-if="inputProp.inputType == propInputTypeDef.RADIO || inputProp.inputType == propInputTypeDef.CHECKBOX">
-					<div class="input flex flex-column gap-1" v-if="inputProp.array">
+					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
 							<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
 								<div v-for="(opt, optIdx) in inputProp.inputPayload.options" class="inline-flex align-items-center gap-1">
@@ -3176,7 +3176,7 @@ $.inflateChartAttrValuesForm = function(po)
 					</div>
 				</div>
 				<div v-else>
-					<div class="input flex flex-column gap-1" v-if="inputProp.array">
+					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
 							<p-textarea v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
 								 v-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
@@ -3201,20 +3201,18 @@ $.inflateChartAttrValuesForm = function(po)
 							</p-button>
 						</div>
 					</div>
-					<div v-else>
-						<p-textarea :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
-							v-model="formData[inputProp.name]" type="text" class="input w-full"
-							v-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
-						</p-textarea>
-						<p-inputtext :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
-							v-model="formData[inputProp.name]" type="text" class="input w-full"
-							v-else>
-						</p-inputtext>
-					</div>
+					<p-textarea :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
+						v-model="formData[inputProp.name]" type="text" class="input w-full"
+						v-else-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
+					</p-textarea>
+					<p-inputtext :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
+						v-model="formData[inputProp.name]" type="text" class="input w-full"
+						v-else>
+					</p-inputtext>
 				</div>
 	        	<div class="validate-msg">
 	        		<input :name="concatPropNamePath(propNamePath, inputProp.name)" type="text" class="validate-proxy"
-	        			:class="{'required': inputProp.required, 'number': inputProp.type == propTypeDef.NUMBER}" />
+	        			:class="{'detailRequired': inputProp.required, 'number': inputProp.type == propTypeDef.NUMBER}" />
 	        	</div>
 			</div>
 		</div>
@@ -3272,7 +3270,7 @@ $.inflateChartAttrValuesForm = function(po)
 					<div v-for="(prop, propIdx) in group.properties">
 						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
 							<p-panel :header="prop.nameLabel.value+(formData[prop.name] == null ? '' : '-'+formData[prop.name].length)" :toggleable="false"
-								class="sm-header-y-padding no-panel-border panel-icon-align-center p-card" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+								class="sm-header-y-padding panel-icon-align-center" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #icons>
 									<div class="inline-flex align-items-center gap-2 text-sm">
 										<p-selectbutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
@@ -3287,7 +3285,7 @@ $.inflateChartAttrValuesForm = function(po)
 								<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
 									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
 										:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+formData[prop.name].length"
-										:toggleable="true" class="sm-header-y-padding no-panel-border panel-icon-align-center p-card">
+										:toggleable="true" class="sm-header-y-padding panel-icon-align-center">
 										<template #icons>
 											<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
 												<p-button type="button" severity="secondary"
@@ -3329,7 +3327,7 @@ $.inflateChartAttrValuesForm = function(po)
 					        </p-panel>
 						</div>
 						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
-							<p-panel :header="prop.nameLabel.value" :toggleable="false" class="sm-header-y-padding no-panel-border panel-icon-align-center p-card"
+							<p-panel :header="prop.nameLabel.value" :toggleable="false" class="sm-header-y-padding panel-icon-align-center"
 								:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #icons>
 									<div class="inline-flex align-items-center gap-2 text-sm">
