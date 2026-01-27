@@ -2463,8 +2463,9 @@ $.inflateChartAttrValuesForm = function(po)
 		var data = attrValues;
 		var props = objProperty.properties;
 		
-		data[avo.ctrlPropName] = { propEnableds: {} };
+		data[avo.ctrlPropName] = { propEnableds: {}, propCollapseds: {} };
 		var propEnableds = data[avo.ctrlPropName].propEnableds;
+		var propCollapseds = data[avo.ctrlPropName].propCollapseds;
 		
 		for(var i=0; i<props.length; i++)
 		{
@@ -2473,28 +2474,29 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			if(avo.isObjectProperty(prop))
 			{
+				//必填项设初值
+				if(v == null && prop.required)
+					v = (prop.array ? [] : {});
+				
 				if(prop.array)
 				{
-					//创建UI占位模型
-					if(v == null)
-						v = [];
-					
-					if(!$.isArray(v))
-						v = [ v ];
-					
-					for(var j=0; j<v.length; j++)
-						avo.doAttrValuesToFormData(v[j], prop);
+					if(v != null)
+					{
+						if(!$.isArray(v))
+							v = [ v ];
+						
+						for(var j=0; j<v.length; j++)
+							avo.doAttrValuesToFormData(v[j], prop);
+					}
 				}
 				else
 				{
-					if(v == null && prop.required)
-						v = {};
-					
 					if(v != null)
 						avo.doAttrValuesToFormData(v, prop);
-					
-					propEnableds[prop.name] = [ (v != null) ];
 				}
+				
+				propEnableds[prop.name] = (v != null);
+				propCollapseds[prop.name] = !prop.required;
 			}
 			else
 			{
@@ -2992,7 +2994,12 @@ $.inflateChartAttrValuesForm = function(po)
 			readonly: false,
 			buttons: [],
 			i18n: po.i18n,
-			ctrlPropName: avo.ctrlPropName
+			ctrlPropName: avo.ctrlPropName,
+			enableOptions:
+			[
+				{name: po.i18n.enable, value: true},
+				{name: po.i18n.disable, value: false}
+			]
 		}
 	});
 	
@@ -3260,7 +3267,8 @@ $.inflateChartAttrValuesForm = function(po)
 			propTypeDef: { type: Object },
 			propInputTypeDef: { type: Object },
 			i18n: { type: Object },
-			ctrlPropName: { type: String }
+			ctrlPropName: { type: String },
+			enableOptions: { type: Object }
 		},
 		template:
 		`
@@ -3272,8 +3280,20 @@ $.inflateChartAttrValuesForm = function(po)
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
 						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
-							<p-panel :header="prop.nameLabel.value+'-'+formData[prop.name].length" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
-								<div class="flex flex-column gap-3 mb-2">
+							<p-panel :header="prop.nameLabel.value+(formData[prop.name] == null ? '' : '-'+formData[prop.name].length)" :toggleable="false"
+								class="sm-y-padding no-panel-border panel-icon-align-center p-card" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+								<template #icons>
+									<div class="inline-flex align-items-center gap-2 text-sm">
+										<p-selectbutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
+											:options="enableOptions" option-label="name" option-value="value" :allow-empty="false"
+											@change="onEnableObjProp(formData, prop)" v-if="!readonly && !prop.required">
+										</p-selectbutton>
+										<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
+											severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
+										</p-button>
+									</div>
+								</template>
+								<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
 									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
 										:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+formData[prop.name].length"
 										:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
@@ -3299,7 +3319,7 @@ $.inflateChartAttrValuesForm = function(po)
 										</template>
 										<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(concatPropNamePath(propNamePath, prop.name), propDataEleIdx)"
 											:form-data="propDataEle" :readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
-											:ctrl-prop-name="ctrlPropName">
+											:ctrl-prop-name="ctrlPropName" :enable-options="enableOptions">
 										</dg-obj-prop-field>
 									</p-panel>
 									<div>
@@ -3318,19 +3338,22 @@ $.inflateChartAttrValuesForm = function(po)
 					        </p-panel>
 						</div>
 						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
-							<p-panel :header="prop.nameLabel.value" :toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+							<p-panel :header="prop.nameLabel.value" :toggleable="false" class="sm-y-padding no-panel-border panel-icon-align-center p-card"
+								:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #icons>
-									<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly && !prop.required">
-										<p-checkbox :input-id="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'"
-											:value="true" v-model="formData[ctrlPropName].propEnableds[prop.name]"
-											@change="onEnableObjProp(formData, prop, formData[ctrlPropName].propEnableds)">
-										</p-checkbox>
-										<label :for="prop.domId+'.'+propNamePath+'.'+prop.name+'-enablecheckbox'">{{i18n.enable}}</label>
+									<div class="inline-flex align-items-center gap-2 text-sm">
+										<p-selectbutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
+											:options="enableOptions" option-label="name" option-value="value" :allow-empty="false"
+											@change="onEnableObjProp(formData, prop)" v-if="!readonly && !prop.required">
+										</p-selectbutton>
+										<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
+											severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
+										</p-button>
 									</div>
 								</template>
 								<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData[prop.name]"
 									:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
-									:ctrl-prop-name="ctrlPropName" v-if="formData[prop.name] != null">
+									:ctrl-prop-name="ctrlPropName" :enable-options="enableOptions" v-if="formData[prop.name] != null">
 								</dg-obj-prop-field>
 							</p-panel>
 						</div>
@@ -3367,14 +3390,18 @@ $.inflateChartAttrValuesForm = function(po)
 			{
 				avo.removeArrayValEle(formData, prop, idx);
 			},
-			onEnableObjProp: function(formData, prop, propEnableds)
+			onEnableObjProp: function(formData, prop)
 			{
 				var propName = prop.name;
-				var enabled = propEnableds[propName];
+				var ctrlPropName = this.ctrlPropName;
+				var ctrlObj = formData[ctrlPropName];
+				var propEnableds = ctrlObj.propEnableds;
+				var propCollapseds = ctrlObj.propCollapseds;
 				
-				if(enabled && enabled[0])
+				if(propEnableds[propName])
 				{
-					formData[propName] = avo.doAttrValuesToFormData({}, prop);
+					formData[propName] = (prop.array ? [] : avo.doAttrValuesToFormData({}, prop));;
+					propCollapseds[propName] = false;
 				}
 				else
 				{
@@ -3384,13 +3411,23 @@ $.inflateChartAttrValuesForm = function(po)
 						accept: function()
 						{
 							delete formData[propName];
+							propEnableds[propName] = false;
+							propCollapseds[propName] = true;
 						},
 						reject: function()
 						{
-							propEnableds[propName] = [ true ];
 						}
 					});
 				}
+			},
+			
+			onToggleObjPropPanel: function(formData, prop)
+			{
+				var ctrlPropName = this.ctrlPropName;
+				var ctrlObj = formData[ctrlPropName];
+				var propCollapseds = ctrlObj.propCollapseds;
+				propCollapseds[prop.name] = !propCollapseds[prop.name];
+				
 			}
 		},
 		

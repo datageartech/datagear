@@ -31,7 +31,7 @@ page_palette.ftl
 		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginAttrForm" :prop-name-path=""
 			:form-data="pm.avoModel.formData" :readonly="pm.avoModel.readonly" :prop-type-def="pm.avoModel.FormPropertyType"
 			:prop-input-type-def="pm.avoModel.FormPropertyInputType" :i18n="pm.avoModel.i18n"
-			:ctrl-prop-name="pm.avoModel.ctrlPropName">
+			:ctrl-prop-name="pm.avoModel.ctrlPropName" :enable-options="pm.avoModel.enableOptions">
 		</dg-obj-prop-field>
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
@@ -91,6 +91,7 @@ page_palette.ftl
 	po.i18n.insert = "<@spring.message code='insert' />";
 	po.i18n.del = "<@spring.message code='delete' />";
 	po.i18n.enable = "<@spring.message code='enable' />";
+	po.i18n.disable = "<@spring.message code='disable' />";
 	
 	//page.js
 	$.inflateChartAttrValuesForm(po);

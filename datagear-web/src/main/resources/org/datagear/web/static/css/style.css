@@ -173,10 +173,20 @@ label.align-tip{
 	border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+.text-sm,
 .text-sm .p-button,
 .text-sm.p-button{
 	font-size: .875rem;
 }
+.text-sm .p-button.p-button-icon-only,
+.text-sm.p-button.p-button-icon-only{
+	width: 2rem;
+}
+.text-sm .p-button.p-button-icon-only.p-button-rounded,
+.text-sm.p-button.p-button-icon-only.p-button-rounded{
+	height: 2rem;
+}
+.text-xs,
 .text-xs .p-button,
 .text-xs.p-button{
 	font-size: .75rem;
@@ -442,6 +452,13 @@ label.align-tip{
 	border-width: 0;
 	padding: 0;
 }
+.p-panel.sm-y-padding .p-panel-header{
+	padding: 0.5rem 1rem;
+}
+.p-panel.hide-panel-content .p-panel-content{
+	display: none;
+}
+
 .p-fieldset.fieldset-sm .p-fieldset-legend{
 	padding-top: 0.7rem;
 	padding-bottom: 0.7rem;
