@@ -2588,14 +2588,13 @@ $.inflateChartAttrValuesForm = function(po)
 		else
 		{
 			var name = pluginAttrForm.name;
-			
 			var v = re[name];
 			
 			if(v != null)
 				avo.doFormDataToAttrValues(v, pluginAttrForm);
 			
 			//删除由avo.attrValuesToFormData()生成的空对象
-			if(v == null && $.isEmptyObject(v))
+			if(v == null || $.isEmptyObject(v))
 				delete re[name];
 		}
 		
@@ -2627,18 +2626,10 @@ $.inflateChartAttrValuesForm = function(po)
 				{
 					for(var j=0; j<v.length; j++)
 						avo.doFormDataToAttrValues(v[j], prop);
-					
-					//由avo.doAttrValuesToFormData()生成的空数组置为null，后续删除
-					if(v.length == 0)
-						v = null;
 				}
 				else
 				{
 					avo.doFormDataToAttrValues(v, prop);
-					
-					//由avo.doAttrValuesToFormData()生成的空对象置为null，后续删除
-					if($.isEmptyObject(v))
-						v = null;
 				}
 			}
 			else
@@ -3272,7 +3263,7 @@ $.inflateChartAttrValuesForm = function(po)
 		},
 		template:
 		`
-		<p-accordion :multiple="true" :active-index="[0]" :class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}">
+		<p-accordion :multiple="true" :active-index="[0]" :class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
 			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps">
 				<template #header>
 					<span>{{group.nameLabel.value}}</span>
@@ -3281,7 +3272,7 @@ $.inflateChartAttrValuesForm = function(po)
 					<div v-for="(prop, propIdx) in group.properties">
 						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
 							<p-panel :header="prop.nameLabel.value+(formData[prop.name] == null ? '' : '-'+formData[prop.name].length)" :toggleable="false"
-								class="sm-y-padding no-panel-border panel-icon-align-center p-card" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+								class="sm-header-y-padding no-panel-border panel-icon-align-center p-card" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #icons>
 									<div class="inline-flex align-items-center gap-2 text-sm">
 										<p-selectbutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
@@ -3296,7 +3287,7 @@ $.inflateChartAttrValuesForm = function(po)
 								<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
 									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
 										:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+formData[prop.name].length"
-										:toggleable="true" class="no-panel-border panel-icon-align-center p-card">
+										:toggleable="true" class="sm-header-y-padding no-panel-border panel-icon-align-center p-card">
 										<template #icons>
 											<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
 												<p-button type="button" severity="secondary"
@@ -3338,7 +3329,7 @@ $.inflateChartAttrValuesForm = function(po)
 					        </p-panel>
 						</div>
 						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
-							<p-panel :header="prop.nameLabel.value" :toggleable="false" class="sm-y-padding no-panel-border panel-icon-align-center p-card"
+							<p-panel :header="prop.nameLabel.value" :toggleable="false" class="sm-header-y-padding no-panel-border panel-icon-align-center p-card"
 								:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #icons>
 									<div class="inline-flex align-items-center gap-2 text-sm">

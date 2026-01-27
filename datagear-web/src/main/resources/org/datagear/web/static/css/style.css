@@ -452,7 +452,7 @@ label.align-tip{
 	border-width: 0;
 	padding: 0;
 }
-.p-panel.sm-y-padding .p-panel-header{
+.p-panel.sm-header-y-padding .p-panel-header{
 	padding: 0.5rem 1rem;
 }
 .p-panel.hide-panel-content .p-panel-content{
@@ -486,6 +486,10 @@ label.align-tip{
 .p-accordion.disable-accordion >div >div >.p-accordion-content{
 	padding: 0;
 	border-width: 0;
+}
+.p-accordion.sm-header-y-padding .p-accordion-header .p-accordion-header-link{
+	padding: 0.8rem 1rem;
+	
 }
 
 /*单行阶段*/
