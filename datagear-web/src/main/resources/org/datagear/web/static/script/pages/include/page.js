@@ -3263,17 +3263,17 @@ $.inflateChartAttrValuesForm = function(po)
 		template:
 		`
 		<p-accordion :multiple="true" :active-index="[0]" :class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
-			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps">
+			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps" :pt="{root:{'class':'invalid-indicator'}}">
 				<template #header>
-					<span>{{group.nameLabel.value}}</span>
+					<label class='color-for-invalid'>{{group.nameLabel.value}}</label>
 				</template>
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
 						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
 							<p-panel :toggleable="false"
-								class="sm-header-y-padding panel-icon-align-center" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+								class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #header>
-									<label :class="{'required-label': prop.required}">
+									<label :class="{'required-label': prop.required}" class="color-for-invalid">
 										<span class="font-bold">{{prop.nameLabel.value}}</span>
 										<span class="text-color-secondary text-sm ml-1">
 											{{formData[prop.name] == null ? '' : formData[prop.name].length}}
@@ -3293,9 +3293,9 @@ $.inflateChartAttrValuesForm = function(po)
 								</template>
 								<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
 									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
-										:toggleable="true" class="sm-header-y-padding panel-icon-align-center">
+										:toggleable="true" class="sm-header-y-padding panel-icon-align-center invalid-indicator">
 										<template #header>
-											<label>
+											<label class="color-for-invalid">
 												<span class="font-bold">{{prop.nameLabel.value}}</span>
 												<span class="text-color-secondary text-sm ml-1">
 													{{(propDataEleIdx+1)+'/'+formData[prop.name].length}}
@@ -3343,10 +3343,10 @@ $.inflateChartAttrValuesForm = function(po)
 					        </p-panel>
 						</div>
 						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
-							<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center"
+							<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center invalid-indicator"
 								:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 								<template #header>
-									<label class="font-bold" :class="{'required-label': prop.required}">{{prop.nameLabel.value}}</label>
+									<label class="font-bold color-for-invalid" :class="{'required-label': prop.required}">{{prop.nameLabel.value}}</label>
 								</template>
 								<template #icons>
 									<div class="inline-flex align-items-center gap-3 text-sm">

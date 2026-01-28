@@ -2314,6 +2314,33 @@ $.validator.addMethod("detailRequired", function(value, ele)
 	return $.detailRequiredForValidator(value);
 });
 
+$.toggleInvalidForAncestor = function(ele, invalid)
+{
+	if(ele == null || ele.length == 0)
+		return;
+		
+	ele = $(ele);
+	
+	if(ele.is("form") || ele.is("body"))
+		return;
+	
+	if(ele.hasClass("invalid-indicator"))
+	{
+		if(invalid)
+		{
+			if(!ele.hasClass("p-invalid"))
+				ele.addClass("p-invalid");
+		}
+		else
+		{
+			if(ele.hasClass("p-invalid"))
+				ele.removeClass("p-invalid");
+		}
+	}
+	
+	$.toggleInvalidForAncestor(ele.parent(), invalid);
+};
+
 $.fn.extend(
 {
 	/**
@@ -2368,6 +2395,7 @@ $.fn.extend(
 					const field = $(ele).closest(".field-input");
 					$("small.p-error", field).hide();
 					$(".input:first", field).removeClass("p-invalid");
+					$.toggleInvalidForAncestor(ele, false);
 				});
 				
 				$.each(errorList, function(idx, error)
@@ -2383,6 +2411,7 @@ $.fn.extend(
 					
 					input.addClass("p-invalid");
 					errorEle.html(error.message).show();
+					$.toggleInvalidForAncestor(error.element, true);
 				});
 			}
 		},

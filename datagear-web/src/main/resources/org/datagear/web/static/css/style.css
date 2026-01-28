@@ -699,6 +699,12 @@ label.required-label::before,
 	max-height: calc(90vh - 6rem - 1rem);
 }
 
+/*表单输入项验证错误祖先元素高亮*/
+.p-panel.invalid-indicator.p-invalid > .p-panel-header .color-for-invalid,
+.p-accordion-tab.invalid-indicator.p-invalid > .p-accordion-header .color-for-invalid{
+	color: var(--danger-color);
+}
+
 .plugin-info .plugin-icon{
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
