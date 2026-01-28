@@ -3026,6 +3026,7 @@ $.inflateChartAttrValuesForm = function(po)
 		`
 		<div class="field grid">
 			<label :for="inputProp.domId+'.'+propNamePath+'.'+inputProp.name" class="field-label col-12 mb-2"
+				:class="{'required-label': inputProp.required}"
 				:title="inputProp.descLabel && inputProp.descLabel.value ? inputProp.descLabel.value : null">
 				<span>{{inputProp.nameLabel.value}}</span>
 				<span class="text-color-secondary text-sm ml-1">{{inputProp.name}}</span>
@@ -3269,14 +3270,22 @@ $.inflateChartAttrValuesForm = function(po)
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
 						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
-							<p-panel :header="prop.nameLabel.value+(formData[prop.name] == null ? '' : '-'+formData[prop.name].length)" :toggleable="false"
+							<p-panel :toggleable="false"
 								class="sm-header-y-padding panel-icon-align-center" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+								<template #header>
+									<label :class="{'required-label': prop.required}">
+										<span class="font-bold">{{prop.nameLabel.value}}</span>
+										<span class="text-color-secondary text-sm ml-1">
+											{{formData[prop.name] == null ? '' : formData[prop.name].length}}
+										</span>
+									</label>
+								</template>
 								<template #icons>
-									<div class="inline-flex align-items-center gap-2 text-sm">
-										<p-selectbutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-											:options="enableOptions" option-label="name" option-value="value" :allow-empty="false"
-											@change="onEnableObjProp(formData, prop)" v-if="!readonly && !prop.required">
-										</p-selectbutton>
+									<div class="inline-flex align-items-center gap-3 text-sm">
+										<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
+											:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
+											@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
+										</p-togglebutton>
 										<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
 											severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
 										</p-button>
@@ -3284,8 +3293,15 @@ $.inflateChartAttrValuesForm = function(po)
 								</template>
 								<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
 									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
-										:header="prop.nameLabel.value+'-'+(propDataEleIdx+1)+'/'+formData[prop.name].length"
 										:toggleable="true" class="sm-header-y-padding panel-icon-align-center">
+										<template #header>
+											<label>
+												<span class="font-bold">{{prop.nameLabel.value}}</span>
+												<span class="text-color-secondary text-sm ml-1">
+													{{(propDataEleIdx+1)+'/'+formData[prop.name].length}}
+												</span>
+											</label>
+										</template>
 										<template #icons>
 											<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
 												<p-button type="button" severity="secondary"
@@ -3327,14 +3343,17 @@ $.inflateChartAttrValuesForm = function(po)
 					        </p-panel>
 						</div>
 						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
-							<p-panel :header="prop.nameLabel.value" :toggleable="false" class="sm-header-y-padding panel-icon-align-center"
+							<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center"
 								:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+								<template #header>
+									<label class="font-bold" :class="{'required-label': prop.required}">{{prop.nameLabel.value}}</label>
+								</template>
 								<template #icons>
-									<div class="inline-flex align-items-center gap-2 text-sm">
-										<p-selectbutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-											:options="enableOptions" option-label="name" option-value="value" :allow-empty="false"
-											@change="onEnableObjProp(formData, prop)" v-if="!readonly && !prop.required">
-										</p-selectbutton>
+									<div class="inline-flex align-items-center gap-3 text-sm">
+										<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
+											:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
+											@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
+										</p-togglebutton>
 										<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
 											severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
 										</p-button>
@@ -3379,7 +3398,7 @@ $.inflateChartAttrValuesForm = function(po)
 			{
 				avo.removeArrayValEle(formData, prop, idx);
 			},
-			onEnableObjProp: function(formData, prop)
+			onEnableObjProp: function(e, formData, prop)
 			{
 				var propName = prop.name;
 				var ctrlPropName = this.ctrlPropName;
@@ -3405,6 +3424,7 @@ $.inflateChartAttrValuesForm = function(po)
 						},
 						reject: function()
 						{
+							propEnableds[propName] = true;
 						}
 					});
 				}
