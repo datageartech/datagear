@@ -2593,9 +2593,17 @@ $.inflateChartAttrValuesForm = function(po)
 			if(v != null)
 				avo.doFormDataToAttrValues(v, pluginAttrForm);
 			
-			//删除由avo.attrValuesToFormData()生成的空对象
-			if(v == null || $.isEmptyObject(v))
-				delete re[name];
+			if(pluginAttrForm.required)
+			{
+				if(v == null)
+					re[name] = {};
+			}
+			else
+			{
+				//删除由avo.attrValuesToFormData()生成的空对象
+				if(v == null || $.isEmptyObject(v))
+					delete re[name];
+			}
 		}
 		
 		return re;
@@ -2804,27 +2812,6 @@ $.inflateChartAttrValuesForm = function(po)
 		attrValues = avo.formDataToAttrValues(formData, pluginAttrForm);
 		
 		return attrValues;
-	};
-	
-	avo.validateAttrValuesRequired = function(pluginAttrForm, attrValues)
-	{
-		if(!pluginAttrForm || $.isEmpty(pluginAttrForm.properties))
-			return true;
-		
-		attrValues = (attrValues || {});
-		attrValues = (avo.isRootDataAttrForm(pluginAttrForm) ? attrValues : attrValues[pluginAttrForm.name]);
-		attrValues = (attrValues || {});
-		
-		var props = pluginAttrForm.properties;
-		
-		for(var i=0; i<props.length; i++)
-		{
-			var prop = props[i];
-			if(prop.required && $.isEmpty(attrValues[prop.name]))
-				return false;
-		};
-		
-		return true;
 	};
 	
 	avo.setFormAttrValues = function(attrValues)

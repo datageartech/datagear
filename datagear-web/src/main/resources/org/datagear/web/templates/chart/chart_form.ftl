@@ -514,6 +514,7 @@
 {
 	po.submitUrl = "/chart/"+po.submitAction;
 	po.disableSaveShow = ("${(disableSaveShow!false)?string('true', 'false')}"  == "true");
+	po.attrValuesValidated = true;
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -968,8 +969,10 @@
 		chartFactory.chartTool.renderDataSetParamForm(wrapper[0], params, formOptions);
 	};
 	
-	$.validator.addMethod("dataSetSignRequired", function(chart, element)
+	$.validator.addMethod("dataSetSignRequired", function(context, element)
 	{
+		var po = context.po;
+		var chart = context.chart;
 		var re = po.validateDataSetBindDataSign(chart);
 		
 		if(re == true)
@@ -996,8 +999,11 @@
 		}
 	});
 
-	$.validator.addMethod("validateDataSetRange", function(chart, element)
+	$.validator.addMethod("validateDataSetRange", function(context, element)
 	{
+		var po = context.po;
+		var chart = context.chart;
+		
 		var re = true;
 		
 		var dsr = (chart.pluginVo ? chart.pluginVo.dataSetRange : null);
@@ -1061,10 +1067,17 @@
 		return re;
 	});
 	
-	$.validator.addMethod("chartAttrValuesRequired", function(chart)
+	$.validator.addMethod("validateChartAttrValues", function(context)
 	{
+		var po = context.po;
+		var chart = context.chart;
 		var attributeForm = (chart.pluginVo ? chart.pluginVo.attributeForm : null);
-		return po.avo.validateAttrValuesRequired(attributeForm, chart.attrValues);
+		
+		if(attributeForm == null)
+			return true;
+		
+		return (po.attrValuesValidated == true)
+			return true;
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -1097,21 +1110,24 @@
 			updateInterval: {"integer": true},
 			dataSetSignCheckVal: { "dataSetSignRequired": true },
 			validateDataSetRangeVal: { "validateDataSetRange": true },
-			chartAttrValuesCheckVal: { "chartAttrValuesRequired": true }
+			chartAttrValuesCheckVal: { "validateChartAttrValues": true }
 		},
 		customNormalizers:
 		{
 			dataSetSignCheckVal: function()
 			{
-				return po.vueFormModel();
+				var context = { po: po, chart: po.vueFormModel() };
+				return context;
 			},
 			validateDataSetRangeVal: function()
 			{
-				return po.vueFormModel();
+				var context = { po: po, chart: po.vueFormModel() };
+				return context;
 			},
 			chartAttrValuesCheckVal: function()
 			{
-				return po.vueFormModel();
+				var context = { po: po, chart: po.vueFormModel() };
+				return context;
 			}
 		},
 		messages:
@@ -1130,7 +1146,7 @@
 					return $(element).data("invalidMsg");
 				}
 			},
-			chartAttrValuesCheckVal: "<@spring.message code='chart.attrValues.required' />"
+			chartAttrValuesCheckVal: "<@spring.message code='chart.attrValues.editRequired' />"
 		}
 	});
 	
@@ -1239,6 +1255,7 @@
 					po.unmergeChartDsbs(fm);
 					po.mergeChartDsbs(fm);
 					pm.pluginHasDataSetSign = po.containsDataSetSign(fm.pluginVo);
+					po.attrValuesValidated = false;
 				});
 			});
 		},
@@ -1508,6 +1525,7 @@
 				{
 					fm.attrValues = avs;
 					pm.attrValuesPanelShown = false;
+					po.attrValuesValidated = true;
 				},
 				readonly: pm.isReadonlyAction
 			});
