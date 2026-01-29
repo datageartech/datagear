@@ -2570,7 +2570,7 @@ $.inflateChartAttrValuesForm = function(po)
 	};
 	
 	//将由avo.attrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
-	avo.formDataToAttrValues = function(formData, pluginAttrForm)
+	avo.formDataToAttrValues = function(formData, pluginAttrForm, strictMode)
 	{
 		var re = (formData || {});
 		re = $.extend(true, {}, re);
@@ -2583,7 +2583,7 @@ $.inflateChartAttrValuesForm = function(po)
 		
 		if(avo.isRootDataAttrForm(pluginAttrForm))
 		{
-			avo.doFormDataToAttrValues(re, pluginAttrForm);
+			avo.doFormDataToAttrValues(re, pluginAttrForm, strictMode);
 		}
 		else
 		{
@@ -2591,7 +2591,7 @@ $.inflateChartAttrValuesForm = function(po)
 			var v = re[name];
 			
 			if(v != null)
-				avo.doFormDataToAttrValues(v, pluginAttrForm);
+				avo.doFormDataToAttrValues(v, pluginAttrForm, true);
 			
 			if(pluginAttrForm.required)
 			{
@@ -2609,21 +2609,23 @@ $.inflateChartAttrValuesForm = function(po)
 		return re;
 	};
 	
-	avo.doFormDataToAttrValues = function(formData, objProperty)
+	avo.doFormDataToAttrValues = function(formData, objProperty, strictMode)
 	{
-		//注意：formData中对于没有在objProperty定义的属性值应原样保留，
-		//因为看板的dg-chart-attr-values应允许定义图表插件属性之外的扩展值
-		
-		if(formData == null || objProperty == null || $.isEmpty(objProperty.properties))
+		if(formData == null)
 			return formData;
 		
 		var data = formData;
-		var props = objProperty.properties;
+		var props = (objProperty == null ? null : objProperty.properties);
+		props = (props == null ? [] : props);
+		var propNameMap = {};
 		
 		for(var i=0; i<props.length; i++)
 		{
 			var prop = props[i];
-			var v = data[prop.name];
+			var propName = prop.name;
+			var v = data[propName];
+			
+			propNameMap[propName] = true;
 			
 			if(v == null)
 			{
@@ -2633,11 +2635,11 @@ $.inflateChartAttrValuesForm = function(po)
 				if($.isArray(v))
 				{
 					for(var j=0; j<v.length; j++)
-						avo.doFormDataToAttrValues(v[j], prop);
+						avo.doFormDataToAttrValues(v[j], prop, true);
 				}
 				else
 				{
-					avo.doFormDataToAttrValues(v, prop);
+					avo.doFormDataToAttrValues(v, prop, true);
 				}
 			}
 			else
@@ -2647,12 +2649,22 @@ $.inflateChartAttrValuesForm = function(po)
 				v = avo.toChartAttrTypeValue(prop, v);
 			}
 			
-			//null值不应保留，以支持后续组对象的判空逻辑
+			//null值无需保留，占用空间
 			if(v == null)
-				delete data[prop.name];
+				delete data[propName];
 			else
-				data[prop.name] = v;
+				data[propName] = v;
 		};
+		
+		//严格模式，删除未定义的属性值
+		if(strictMode)
+		{
+			for(var p in data)
+			{
+				if(propNameMap[p] !== true)
+					delete data[p];
+			}
+		}
 		
 		delete data[avo.ctrlPropName];
 	};
@@ -2800,26 +2812,15 @@ $.inflateChartAttrValuesForm = function(po)
 		}
 	};
 	
-	avo.toTrimAttrValues = function(attrValues, pluginAttrForm)
-	{
-		if(attrValues == null || pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
-			return attrValues;
-		
-		if(!pluginAttrForm.isTrimmed)
-			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
-		
-		var formData = avo.attrValuesToFormData(attrValues, pluginAttrForm);
-		attrValues = avo.formDataToAttrValues(formData, pluginAttrForm);
-		
-		return attrValues;
-	};
-	
 	avo.setFormAttrValues = function(attrValues)
 	{
 		var pm = po.vuePageModel();
 		var pluginAttrForm = pm.avoModel.pluginAttrForm;
 		var rootData = avo.attrValuesToFormData(attrValues, pluginAttrForm);
+		var formData = (avo.isRootDataAttrForm(pluginAttrForm) ? rootData : rootData[pluginAttrForm.name]);
+		
 		pm.avoModel.rootData = rootData;
+		pm.avoModel.formData = formData;
 		
 		return rootData;
 	};
@@ -2928,7 +2929,8 @@ $.inflateChartAttrValuesForm = function(po)
 		{
 			submitHandler: null,
 			buttons: [],
-			readonly: false
+			readonly: false,
+			strictSubmitData: false
 		},
 		options);
 		
@@ -2939,10 +2941,7 @@ $.inflateChartAttrValuesForm = function(po)
 		pm.avoModel.pluginAttrForm = pluginAttrForm;
 		pm.avoModel.buttons = options.buttons;
 		pm.avoModel.readonly = options.readonly;
-		
-		var rootData = avo.setFormAttrValues(attrValues);
-		var formData = (avo.isRootDataAttrForm(pluginAttrForm) ? rootData : rootData[pluginAttrForm.name]);
-		pm.avoModel.formData = formData;
+		avo.setFormAttrValues(attrValues);
 		
 		var form = po.elementOfId(avo.chartAttrValuesFormEleId, document.body);
 		po.setupSimpleForm(form, pm.avoModel.formData,
@@ -2953,7 +2952,7 @@ $.inflateChartAttrValuesForm = function(po)
 				{
 					var pluginAttrForm = pm.avoModel.pluginAttrForm;
 					var data = po.vueRaw(pm.avoModel.rootData);
-					var attrValues = avo.formDataToAttrValues(data, pluginAttrForm);
+					var attrValues = avo.formDataToAttrValues(data, pluginAttrForm, options.strictSubmitData);
 					options.submitHandler(attrValues);
 				}
 			}

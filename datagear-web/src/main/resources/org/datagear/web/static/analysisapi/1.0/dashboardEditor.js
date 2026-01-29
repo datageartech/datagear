@@ -2396,12 +2396,17 @@
 		if(!this._checkNotEmptyElement(ele))
 			return null;
 		
+		var attrValues = null;
 		var chart = this.dashboard.renderedChart(ele);
-		var attrValues = (chart ? chart.attrValues() : null);
+		
+		//这里不能直接使用chart.attrValues()，因为可能已被图表实例修改
+		var attrValuesOrigin =  chart.attrValuesOrigin();
+		var attrValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
+		attrValuesEle = chartFactory.evalSilently(attrValuesEle, null);
 		
 		//应复制一份，避免被不可预料的修改
-		if(attrValues != null)
-			attrValues = $.extend(true, {}, attrValues);
+		if(attrValuesOrigin != null || attrValuesEle != null)
+			attrValues = $.extend(true, {}, attrValuesOrigin, attrValuesEle);
 		
 		return attrValues;
 	};

@@ -536,10 +536,6 @@
 			dsb.dataSet = undefined;
 		});
 		
-		//这里必须重新转换属性值，因为存在切换图表类型而不编辑图表属性的情况
-		var pluginAttrForm = (data.pluginVo ? data.pluginVo.attributeForm : null);
-		data.attrValues = po.avo.toTrimAttrValues(data.attrValues, pluginAttrForm);
-		
 		var pm = po.vuePageModel();
 		if(pm.enableResultDataFormat)
 			data.resultDataFormat = po.vueRaw(pm.resultDataFormat);
@@ -1527,10 +1523,12 @@
 					pm.attrValuesPanelShown = false;
 					po.attrValuesValidated = true;
 				},
-				readonly: pm.isReadonlyAction
+				readonly: pm.isReadonlyAction,
+				//此时不允许自由编辑图表属性，因此应是严格数据模式
+				strictSubmitData: true
 			});
 		},
-
+		
 		onShowOptionsPanel: function(e)
 		{
 			po.vueUnref("${pid}optionsPanelEle").toggle(e);

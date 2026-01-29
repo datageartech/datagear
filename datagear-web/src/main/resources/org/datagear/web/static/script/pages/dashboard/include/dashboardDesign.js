@@ -3605,10 +3605,12 @@ $.inflateDashboardDesignEditorForms = function(po)
 								if(dashboardEditor)
 									attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
 								
-								po.setChartAttrValuesFormData(attrValuesReset);
+								po.avo.setFormAttrValues(attrValuesReset);
 							}
 						}
-					]
+					],
+					//此时允许自由编辑图表属性，因此应不是严格数据模式
+					strictSubmitData: false
 				});
 			},
 			
