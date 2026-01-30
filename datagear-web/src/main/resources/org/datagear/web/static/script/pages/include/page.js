@@ -2854,6 +2854,31 @@ $.inflateChartAttrValuesForm = function(po)
 		avo.attrValuesToFormData(rootData, pluginAttrForm, false);
 	};
 	
+	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginAttrForm)
+	{
+		var re = attrValues;
+		
+		if(attrValues == null)
+			return re;
+		
+		if(pluginAttrForm == null)
+		{
+			re = {};
+		}
+		else if($.isEmpty(pluginAttrForm.properties))
+		{
+			re = {};
+			
+			if(!avo.isRootDataAttrForm(pluginAttrForm) && pluginAttrForm.required)
+			{
+				var name = pluginAttrForm.name;
+				re[name] = {};
+			}
+		}
+		
+		return re;
+	};
+	
 	avo.moveUpArrayValEle = function(formData, prop, idx)
 	{
 		var array = formData[prop.name];

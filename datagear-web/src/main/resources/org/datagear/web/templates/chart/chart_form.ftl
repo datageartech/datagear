@@ -250,10 +250,10 @@
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}attrValues" class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
-							:disabled="!fm.pluginVo || !fm.pluginVo.attributeForm || !fm.pluginVo.attributeForm.properties || fm.pluginVo.attributeForm.properties.length==0"
+							:disabled="isEmptyPluginAttributeForm(fm.pluginVo)"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
-			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && (!fm.pluginVo.attributeForm || !fm.pluginVo.attributeForm.properties || fm.pluginVo.attributeForm.properties.length==0)">
+			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && isEmptyPluginAttributeForm(fm.pluginVo)">
 			        		<@spring.message code='chart.attrValues.noAttrDefined' />
 			        	</div>
 		        	</div>
@@ -542,9 +542,15 @@
 		else
 			data.resultDataFormat = undefined;
 		
+		data.attrValues = po.avo.clearAttrValuesIfNoneAttrForm(data.attrValues, data.pluginVo.attributeForm);
 		data.pluginVo = (data.pluginVo ? { id: data.pluginVo.id } : null);
 		
 		action.options.saveAndShowAction = po.inSaveAndShowAction();
+	};
+	
+	po.isEmptyPluginAttributeForm = function(plugin)
+	{
+		return (!plugin || !plugin.attributeForm || !plugin.attributeForm.properties || plugin.attributeForm.properties.length==0);
 	};
 	
 	po.validateDataSetBindDataSign = function(chart)
@@ -1219,6 +1225,11 @@
 		isDataSignTargetDataset: function(dataSign)
 		{
 			return po.isDataSignTargetDataset(dataSign);
+		},
+		
+		isEmptyPluginAttributeForm: function(plugin)
+		{
+			return po.isEmptyPluginAttributeForm(plugin);
 		},
 		
 		onDeleteAnalysisProject: function()
