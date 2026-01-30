@@ -321,7 +321,7 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals(false, a5.getDefaultValue());
 
 				assertEquals("a6", a6.getName());
-				assertEquals("custom", a6.getType());
+				assertEquals(PropertyType.STRING, a6.getType());
 				assertNull(a6.getInputPayload());
 
 				assertEquals("a7", a7.getName());
@@ -664,7 +664,7 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals(false, a5.getDefaultValue());
 
 				assertEquals("a6", a6.getName());
-				assertEquals("custom", a6.getType());
+				assertEquals(PropertyType.STRING, a6.getType());
 				assertNull(a6.getInputPayload());
 
 				assertEquals("a7", a7.getName());

@@ -643,14 +643,16 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
-
-			String type = convertToString(map.get(FormProperty.PROPERTY_TYPE));
-			boolean isObject = (PropertyType.OBJECT.equalsIgnoreCase(type)
-					|| map.containsKey(ObjectFormProperty.PROPERTY_PROPERTIES));
 			String name = convertToString(map.get(FormProperty.PROPERTY_NAME));
 
 			if (StringUtil.isEmpty(name))
 				return null;
+
+			String type = convertToString(map.get(FormProperty.PROPERTY_TYPE));
+			type = PropertyType.normalize(type, type);
+
+			boolean isObject = (PropertyType.OBJECT.equals(type)
+					|| (StringUtil.isEmpty(type) && map.containsKey(ObjectFormProperty.PROPERTY_PROPERTIES)));
 
 			AbstractFormProperty prop;
 
@@ -678,7 +680,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			{
 				InputFormProperty inputProp = (InputFormProperty) prop;
 
-				inputProp.setType(convertToFormPropertyType(type));
+				inputProp.setType(convertToInputFormPropertyType(type));
 				inputProp.setInputType(
 						convertToInputFormPropertyInputType(map.get(InputFormProperty.PROPERTY_INPUT_TYPE)));
 				inputProp.setInputPayload(
@@ -719,41 +721,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return convertToBoolean(v, dftValue);
 	}
 
-	protected String convertToFormPropertyType(Object obj)
+	protected String convertToInputFormPropertyType(String str)
 	{
 		// 不要修改这里的默认值，因为会影响插件规范
 		String dftValue = PropertyType.STRING;
-
-		if (obj instanceof String)
-		{
-			String str = (String) obj;
-			
-			if (StringUtil.isEmpty(str))
-			{
-				return dftValue;
-			}
-			if (PropertyType.STRING.equalsIgnoreCase(str))
-			{
-				return PropertyType.STRING;
-			}
-			else if (PropertyType.BOOLEAN.equalsIgnoreCase(str))
-			{
-				return PropertyType.BOOLEAN;
-			}
-			else if (PropertyType.INTEGER.equalsIgnoreCase(str))
-			{
-				return PropertyType.INTEGER;
-			}
-			else if (PropertyType.NUMBER.equalsIgnoreCase(str))
-			{
-				return PropertyType.NUMBER;
-			}
-			// 留有自定义可能
-			else
-				return str;
-		}
-		else
-			return dftValue;
+		return PropertyType.normalize(str, dftValue);
 	}
 
 	protected String convertToInputFormPropertyInputType(Object obj)

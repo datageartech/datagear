@@ -39,4 +39,34 @@ public class PropertyType
 
 	/** 对象 */
 	public static final String OBJECT = "OBJECT";
+
+	/**
+	 * 规范类型。
+	 * 
+	 * @param type
+	 * @param dftValue
+	 * @return
+	 */
+	public static String normalize(String type, String dftValue)
+	{
+		if (type == null)
+			return dftValue;
+
+		if (STRING.equalsIgnoreCase(type))
+			return STRING;
+
+		if (BOOLEAN.equalsIgnoreCase(type))
+			return BOOLEAN;
+
+		if (INTEGER.equalsIgnoreCase(type))
+			return INTEGER;
+
+		if (NUMBER.equalsIgnoreCase(type))
+			return NUMBER;
+
+		if (OBJECT.equalsIgnoreCase(type))
+			return OBJECT;
+
+		return dftValue;
+	}
 }
