@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -195,13 +194,35 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 从JSON字符串解析并设置{@linkplain ChartPlugin}属性。
 	 * 
 	 * @param chartPlugin
-	 * @param json
+	 * @param pluginJson
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, String json) throws IOException
+	public void resolveChartPluginProperties(T chartPlugin, String pluginJson) throws IOException
+	{
+		resolveChartPluginProperties(chartPlugin, pluginJson, null);
+	}
+
+	/**
+	 * 从JSON字符串解析并设置{@linkplain ChartPlugin}属性。
+	 * 
+	 * @param chartPlugin
+	 * @param pluginJson
+	 * @param attributeFormJson
+	 *            允许{@code null}
+	 * @throws IOException
+	 */
+	public void resolveChartPluginProperties(T chartPlugin, String pluginJson, String attributeFormJson)
+			throws IOException
 	{
 		@SuppressWarnings("unchecked")
-		Map<String, Object> properties = JsonSupport.parseNonStardand(json, Map.class);
+		Map<String, Object> properties = JsonSupport.parseNonStardand(pluginJson, Map.class);
+
+		if (!StringUtil.isEmpty(attributeFormJson))
+		{
+			Object attributeForm = JsonSupport.parseNonStardand(pluginJson, Map.class);
+			properties.put(JSON_PROPERTY_ATTRIBUTE_FORM, attributeForm);
+		}
+
 		resolveChartPluginProperties(chartPlugin, properties);
 	}
 
@@ -209,42 +230,69 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
 	 * 
 	 * @param chartPlugin
-	 * @param jsonReader
+	 * @param pluginJsonIn
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, Reader jsonReader) throws IOException
+	public void resolveChartPluginProperties(T chartPlugin, Reader pluginJsonIn) throws IOException
 	{
-		String json = null;
-
-		StringWriter writer = null;
-		try
-		{
-			writer = new StringWriter();
-			IOUtil.write(jsonReader, writer);
-		}
-		finally
-		{
-			IOUtil.close(writer);
-		}
-
-		json = writer.toString();
-
-		resolveChartPluginProperties(chartPlugin, json);
+		resolveChartPluginProperties(chartPlugin, pluginJsonIn, null);
 	}
 
 	/**
 	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
 	 * 
 	 * @param chartPlugin
-	 * @param in
+	 * @param pluginJsonIn
+	 * @param attributeFormIn
+	 *            允许{@code null}
+	 * @throws IOException
+	 */
+	public void resolveChartPluginProperties(T chartPlugin, Reader pluginJsonIn, Reader attributeFormIn)
+			throws IOException
+	{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> properties = JsonSupport.parseNonStardand(pluginJsonIn, Map.class);
+
+		if (attributeFormIn != null)
+		{
+			Object attributeForm = JsonSupport.parseNonStardand(attributeFormIn, Map.class);
+			properties.put(JSON_PROPERTY_ATTRIBUTE_FORM, attributeForm);
+		}
+
+		resolveChartPluginProperties(chartPlugin, properties);
+	}
+
+	/**
+	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
+	 * 
+	 * @param chartPlugin
+	 * @param pluginJsonIn
 	 * @param encoding
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, InputStream in, String encoding)
+	public void resolveChartPluginProperties(T chartPlugin, InputStream pluginJsonIn, String encoding)
 			throws IOException
 	{
-		Reader reader = IOUtil.getReader(in, encoding);
-		resolveChartPluginProperties(chartPlugin, reader);
+		resolveChartPluginProperties(chartPlugin, pluginJsonIn, null, encoding);
+	}
+
+	/**
+	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
+	 * 
+	 * @param chartPlugin
+	 * @param pluginJsonIn
+	 * @param attributeFormIn
+	 *            允许{@code null}
+	 * @param encoding
+	 * @throws IOException
+	 */
+	public void resolveChartPluginProperties(T chartPlugin, InputStream pluginJsonIn, InputStream attributeFormIn,
+			String encoding) throws IOException
+	{
+		Reader reader = IOUtil.getReader(pluginJsonIn, encoding);
+		Reader reader1 = (attributeFormIn == null ? null : IOUtil.getReader(attributeFormIn, encoding));
+
+		resolveChartPluginProperties(chartPlugin, reader, reader1);
 	}
 
 	/**

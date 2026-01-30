@@ -29,7 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.support.FileChartPluginResource;
 import org.datagear.analysis.support.ZipEntryChartPluginResource;
 import org.datagear.util.FileUtil;
@@ -142,7 +144,7 @@ public class HtmlChartPluginLoaderTest
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
 
-		Assert.assertEquals(6, list.size());
+		Assert.assertEquals(8, list.size());
 
 		Collections.sort(list, new Comparator<HtmlChartPlugin>()
 		{
@@ -204,6 +206,42 @@ public class HtmlChartPluginLoaderTest
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			Assert.assertTrue(chartRenderer.getCodeValue().contains("(function(localPlugin)"));
 		}
+
+		{
+			HtmlChartPlugin plugin = list.get(6);
+
+			Assert.assertEquals("plugin07-6.0-attributeform-file", plugin.getId());
+			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
+			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
+			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
+
+			{
+				ChartPluginAttributeForm attributeForm = plugin.getAttributeForm();
+				Assert.assertNotNull(attributeForm);
+
+				List<FormProperty> formProperties = attributeForm.getProperties();
+				assertEquals(1, formProperties.size());
+				assertEquals("id", formProperties.get(0).getName());
+			}
+		}
+
+		{
+			HtmlChartPlugin plugin = list.get(7);
+
+			Assert.assertEquals("plugin08-6.0-attributeform-file", plugin.getId());
+			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
+			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
+			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
+
+			{
+				ChartPluginAttributeForm attributeForm = plugin.getAttributeForm();
+				Assert.assertNotNull(attributeForm);
+
+				List<FormProperty> formProperties = attributeForm.getProperties();
+				assertEquals(1, formProperties.size());
+				assertEquals("id", formProperties.get(0).getName());
+			}
+		}
 	}
 
 	@Test
@@ -248,7 +286,7 @@ public class HtmlChartPluginLoaderTest
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
 
-		Assert.assertEquals(6, list.size());
+		Assert.assertEquals(8, list.size());
 
 		for (HtmlChartPlugin plugin : plugins)
 		{

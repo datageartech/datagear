@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,7 +53,8 @@ import org.datagear.util.StringUtil;
  * <code>
  * <pre>
  * |---- plugin.json
- * |---- renderer.js    //可选，当plugin.json里没有定义renderer（或chartRenderer）属性时必须
+ * |---- renderer.js         //可选，当plugin.json里没有定义renderer（或chartRenderer）属性时必须
+ * |---- attributeform.json  //可选，当希望在单独文件中定义插件的attributeForm时使用
  * |---- ...
  * </pre>
  * </code>
@@ -102,6 +104,11 @@ public class HtmlChartPluginLoader
 	 * 图表渲染器JS文件名
 	 */
 	public static final String FILE_NAME_RENDERER = "renderer.js";
+
+	/**
+	 * 插件属性表单JSON文件名
+	 */
+	public static final String FILE_NAME_ATTRIBUTEFORM = "attributeform.json";
 	
 	private HtmlChartPluginJsDefResolver pluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 
@@ -479,32 +486,46 @@ public class HtmlChartPluginLoader
 	{
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
-		JsDefContent jsDefContent = null;
+		Reader pluginIn = null;
+		Reader attributeFormIn = null;
+		Reader rendererIn = null;
 
-		ZipEntry zipEntry = null;
-		while ((zipEntry = in.getNextEntry()) != null)
+		try
 		{
-			String name = zipEntry.getName();
+			ZipEntry zipEntry = null;
+			while ((zipEntry = in.getNextEntry()) != null)
+			{
+				String name = zipEntry.getName();
 
-			if (zipEntry.isDirectory())
-				;
-			else if (name.equals(FILE_NAME_PLUGIN))
-			{
-				Reader pluginIn = IOUtil.getReader(in, this.encoding);
-				jsDefContent = this.pluginJsDefResolver.resolve(pluginIn);
-				inflateChartPluginProperties(plugin, jsDefContent);
-			}
-			else if (name.equals(FILE_NAME_RENDERER))
-			{
-				if (jsDefContent == null || !jsDefContent.hasPluginRenderer())
+				if (zipEntry.isDirectory())
+					;
+				else if (name.equals(FILE_NAME_PLUGIN))
 				{
-					Reader rendererIn = IOUtil.getReader(in, this.encoding);
-					String rendererCodeValue = IOUtil.readString(rendererIn, false);
-					plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
+					Reader reader = IOUtil.getReader(in, this.encoding);
+					pluginIn = new StringReader(IOUtil.readString(reader, false));
 				}
+				else if (name.equals(FILE_NAME_ATTRIBUTEFORM))
+				{
+					Reader reader = IOUtil.getReader(in, this.encoding);
+					attributeFormIn = new StringReader(IOUtil.readString(reader, false));
+				}
+				else if (name.equals(FILE_NAME_RENDERER))
+				{
+					Reader reader = IOUtil.getReader(in, this.encoding);
+					rendererIn = new StringReader(IOUtil.readString(reader, false));
+				}
+
+				in.closeEntry();
 			}
 
-			in.closeEntry();
+			if (pluginIn != null)
+				inflateChartPluginProperties(plugin, pluginIn, attributeFormIn, rendererIn);
+		}
+		finally
+		{
+			IOUtil.close(pluginIn);
+			IOUtil.close(attributeFormIn);
+			IOUtil.close(rendererIn);
 		}
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
@@ -533,25 +554,19 @@ public class HtmlChartPluginLoader
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
 		Reader pluginIn = null;
+		Reader attributeFormIn = null;
 		Reader rendererIn = null;
 
 		try
 		{
-			pluginIn = IOUtil.getReader(pluginFile, this.encoding);
-			JsDefContent jsDefContent = this.pluginJsDefResolver.resolve(pluginIn);
-			inflateChartPluginProperties(plugin, jsDefContent);
-			
-			if (!jsDefContent.hasPluginRenderer())
-			{
-				File rendererFile = FileUtil.getFile(directory, FILE_NAME_RENDERER);
-				if (rendererFile.exists())
-				{
-					rendererIn = IOUtil.getReader(rendererFile, this.encoding);
-					String rendererCodeValue = IOUtil.readString(rendererIn, false);
-					plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
-				}
-			}
+			File attributeFormFile = FileUtil.getFile(directory, FILE_NAME_ATTRIBUTEFORM);
+			File rendererFile = FileUtil.getFile(directory, FILE_NAME_RENDERER);
 
+			pluginIn = IOUtil.getReader(pluginFile, this.encoding);
+			attributeFormIn = (attributeFormFile.exists() ? IOUtil.getReader(attributeFormFile, this.encoding) : null);
+			rendererIn = (rendererFile.exists() ? IOUtil.getReader(rendererFile, this.encoding) : null);
+
+			inflateChartPluginProperties(plugin, pluginIn, attributeFormIn, rendererIn);
 			inflateChartPluginResources(plugin, directory);
 		}
 		catch (HtmlChartPluginLoadException e)
@@ -565,6 +580,7 @@ public class HtmlChartPluginLoader
 		finally
 		{
 			IOUtil.close(pluginIn);
+			IOUtil.close(attributeFormIn);
 			IOUtil.close(rendererIn);
 		}
 
@@ -577,17 +593,41 @@ public class HtmlChartPluginLoader
 		return plugin;
 	}
 
-	protected void inflateChartPluginProperties(HtmlChartPlugin plugin, JsDefContent jsDefContent) throws Exception
+	/**
+	 * 填充插件属性。
+	 * 
+	 * @param plugin
+	 * @param pluginJsonIn
+	 * @param attributeFormIn
+	 *            允许{@code null}
+	 * @param rendererIn
+	 *            允许{@code null}
+	 * @throws Exception
+	 */
+	protected void inflateChartPluginProperties(HtmlChartPlugin plugin, Reader pluginJsonIn, Reader attributeFormIn,
+			Reader rendererIn) throws Exception
 	{
-		if (!StringUtil.isEmpty(jsDefContent.getPluginJson()))
+		// 渲染器在独立文件中定义
+		if (rendererIn != null)
 		{
-			this.jsonPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
+			this.jsonPluginPropertiesResolver.resolveChartPluginProperties(plugin, pluginJsonIn, attributeFormIn);
+			String rendererCodeValue = IOUtil.readString(rendererIn, false);
+			plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
+		}
+		else
+		{
+			JsDefContent jsDefContent = this.pluginJsDefResolver.resolve(pluginJsonIn);
 
-			// 内联渲染器格式
-			if (jsDefContent.hasPluginRenderer())
+			if (!StringUtil.isEmpty(jsDefContent.getPluginJson()))
 			{
-				String rendererCodeValue = jsDefContent.getPluginRenderer();
-				plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_OBJECT, rendererCodeValue));
+				this.jsonPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
+
+				// 内联渲染器格式
+				if (jsDefContent.hasPluginRenderer())
+				{
+					String rendererCodeValue = jsDefContent.getPluginRenderer();
+					plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_OBJECT, rendererCodeValue));
+				}
 			}
 		}
 
