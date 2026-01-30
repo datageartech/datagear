@@ -7950,29 +7950,36 @@ EU.registerMap = function(chart, name, complete)
 				{
 					fetch(mapUrl).then((response) =>
 					{
-						if(!response.ok)
-							throw new Error(response.statusText ? response.statusText : response.status+"");
-						
-						let headers = response.headers;
-						let contentType = (headers.get("Content-Type") || "");
-						//是否SVG地图
-						let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(mapUrl));
-						
-						if(isSvg)
+						if(response.ok)
 						{
-							response.text().then((svgText) =>
+							let headers = response.headers;
+							let contentType = (headers.get("Content-Type") || "");
+							//是否SVG地图
+							let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(mapUrl));
+							
+							if(isSvg)
 							{
-								echarts.registerMap(myName, {svg: svgText});
-								resolve();
-							});
+								response.text().then((svgText) =>
+								{
+									echarts.registerMap(myName, {svg: svgText});
+									resolve();
+								});
+							}
+							else
+							{
+								response.json().then((geoJSON) =>
+								{
+									echarts.registerMap(myName, {geoJSON: geoJSON});
+									resolve();
+								});
+							}
 						}
 						else
 						{
-							response.json().then((geoJSON) =>
-							{
-								echarts.registerMap(myName, {geoJSON: geoJSON});
-								resolve();
-							});
+							//使用一个空白GeoJSON，避免因未成功注册地图导致图表交互报错
+							let geoJSON = {"type": "FeatureCollection","features": []};
+							echarts.registerMap(myName, {geoJSON: geoJSON});
+							resolve();
 						}
 					})
 					.catch((e) =>
