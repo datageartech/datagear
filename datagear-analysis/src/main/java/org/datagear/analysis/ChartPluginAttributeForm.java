@@ -38,8 +38,6 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 
 	public static final String PROPERTY_NAME = "name";
 
-	private String name = null;
-
 	public ChartPluginAttributeForm()
 	{
 		super();
@@ -55,7 +53,6 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	public ChartPluginAttributeForm(String name, List<FormProperty> properties)
 	{
 		super(name, properties);
-		this.name = name;
 		super.setArray(false);
 	}
 
@@ -72,7 +69,7 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	@Override
 	public String getName()
 	{
-		return name;
+		return super.getName();
 	}
 
 	/**
@@ -96,7 +93,7 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	{
 		ChartPluginAttributeForm target = (ChartPluginAttributeForm) super.toLocale(locale);
 
-		target.setName(this.name);
+		target.setName(this.getName());
 
 		return target;
 	}
