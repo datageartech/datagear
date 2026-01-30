@@ -2831,9 +2831,24 @@ $.inflateChartAttrValuesForm = function(po)
 		var pluginAttrForm = pm.avoModel.pluginAttrForm;
 		var rootData = pm.avoModel.rootData;
 		
-		for(let p in rootData)
+		if(avo.isRootDataAttrForm(pluginAttrForm))
 		{
-			delete rootData[p];
+			for(let p in rootData)
+				delete rootData[p];
+		}
+		else
+		{
+			var name = pluginAttrForm.name;
+			var formData = pm.avoModel.formData;
+			
+			for(let p in rootData)
+			{
+				if(p != name)
+					delete rootData[p];
+			}
+			
+			for(let p in formData)
+				delete formData[p];
 		}
 		
 		avo.attrValuesToFormData(rootData, pluginAttrForm, false);
