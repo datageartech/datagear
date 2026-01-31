@@ -466,33 +466,19 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else if (v instanceof Collection<?>)
 		{
 			Collection<?> collection = (Collection<?>) v;
-			targets = new String[collection.size()];
+			List<String> targetList = new ArrayList<String>(collection.size());
 
-			int idx = 0;
 			for (Object ele : collection)
 			{
 				if (ele instanceof String)
 				{
 					String eleStr = (String) ele;
-					String dsv;
-
-					if (DataSign.TARGET_DATASET.equalsIgnoreCase(eleStr))
-					{
-						dsv = DataSign.TARGET_DATASET;
-					}
-					else if (DataSign.TARGET_FIELD.equalsIgnoreCase(eleStr))
-					{
-						dsv = DataSign.TARGET_FIELD;
-					}
-					else
-					{
-						dsv = eleStr;
-					}
-
-					targets[idx] = dsv;
-					idx++;
+					String target = DataSign.normalizeTarget(eleStr, eleStr);
+					targetList.add(target);
 				}
 			}
+
+			targets = targetList.toArray(new String[targetList.size()]);
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + v.getClass().getName() + "] to ["

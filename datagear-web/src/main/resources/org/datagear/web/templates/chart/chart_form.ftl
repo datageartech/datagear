@@ -515,6 +515,8 @@
 	po.submitUrl = "/chart/"+po.submitAction;
 	po.disableSaveShow = ("${(disableSaveShow!false)?string('true', 'false')}"  == "true");
 	po.attrValuesValidated = true;
+	po.DS_TARGET_FIELD = "${DataSign.TARGET_FIELD}";
+	po.DS_TARGET_DATASET = "${DataSign.TARGET_DATASET}";
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -911,7 +913,7 @@
 		if(targets == null || targets.length == 0)
 			return true;
 		
-		return ($.inArray("${DataSign.TARGET_FIELD}", targets) > -1);
+		return ($.inArray(po.DS_TARGET_FIELD, targets) > -1);
 	};
 	
 	po.isDataSignTargetDataset = function(dataSign)
@@ -922,7 +924,7 @@
 		if(targets == null || targets.length == 0)
 			return false;
 		
-		return ($.inArray("${DataSign.TARGET_DATASET}", targets) > -1);
+		return ($.inArray(po.DS_TARGET_DATASET, targets) > -1);
 	};
 	
 	po.formatDataSignLabel = function(dataSign)

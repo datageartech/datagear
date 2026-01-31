@@ -30,6 +30,7 @@ import java.util.Locale;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.form.PropertyType;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
@@ -358,6 +359,33 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append(newLine);
 		buffer.append("  }");
 		buffer.append(newLine);
+		buffer.append("  compatDataSignForV5_5_0(plugin." + ChartPlugin.PROPERTY_DATA_SIGNS + ");");
+		buffer.append(newLine);
+		buffer.append("}");
+
+		buffer.append(newLine);
+		buffer.append("function compatDataSignForV5_5_0(dataSigns){");
+		buffer.append(newLine);
+		buffer.append("  if(dataSigns == null || dataSigns.length == 0) return;");
+		buffer.append(newLine);
+		buffer.append("  for(var i=0; i<dataSigns.length; i++){");
+		buffer.append(newLine);
+		buffer.append("    var targets = (dataSigns[i].targets == null ? [] : dataSigns[i].targets);");
+		buffer.append(newLine);
+		buffer.append("    for(var j=0; j<targets.length; j++){");
+		buffer.append(newLine);
+		buffer.append("      if(targets[j] == \"" + DataSign.TARGET_FIELD + "\"){ " //
+				+ "targets[j] = \"" + DataSignTargetV5_5_0.TARGET_FIELD + "\"; }");
+		buffer.append(newLine);
+		buffer.append("      else if(targets[j] == \"" + DataSign.TARGET_DATASET + "\"){ " //
+				+ "targets[j] = \"" + DataSignTargetV5_5_0.TARGET_DATASET + "\"; }");
+		buffer.append(newLine);
+		buffer.append("    }");
+		buffer.append(newLine);
+		buffer.append("  }");
+		buffer.append(newLine);
+		buffer.append("  compatDataSignForV5_5_0(dataSigns." + DataSign.PROPERTY_CHILDREN + ");");
+		buffer.append(newLine);
 		buffer.append("}");
 	}
 
@@ -467,7 +495,27 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	}
 
 	/**
-	 * {@code 5.5.0}版本的{@linkplain PropertyType}类型值，详细参考：{@code org.datagear.analysis.ChartPluginAttribute.DataType}。
+	 * {@code 5.5.0}版本的{@linkplain DataSign}目标枚举，详细参考：{@code org.datagear.analysis.DataSign}。
+	 * 
+	 * @author datagear@163.com
+	 * @deprecated 仅用于兼容{@code 5.5.0}相关格式
+	 */
+	@Deprecated
+	protected static class DataSignTargetV5_5_0
+	{
+		/**
+		 * 标记目标：字段
+		 */
+		public static final String TARGET_FIELD = "FIELD";
+
+		/**
+		 * 标记目标：数据集
+		 */
+		public static final String TARGET_DATASET = "DATASET";
+	}
+
+	/**
+	 * {@code 5.5.0}版本的{@linkplain PropertyType}类型枚举，详细参考：{@code org.datagear.analysis.ChartPluginAttribute.DataType}。
 	 * 
 	 * @author datagear@163.com
 	 * @deprecated 仅用于兼容{@code 5.5.0}相关格式

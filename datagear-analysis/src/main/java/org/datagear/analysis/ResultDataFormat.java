@@ -42,7 +42,7 @@ public class ResultDataFormat extends DateFormat
 	/**
 	 * 格式化类型：无，表示不格式化，保持原类型
 	 */
-	public static final String TYPE_NONE = "NONE";
+	public static final String TYPE_NONE = "none";
 
 	/** 日期格式化类型 */
 	private String dateType = TYPE_STRING;
@@ -202,6 +202,9 @@ public class ResultDataFormat extends DateFormat
 
 		if (TYPE_STRING.equalsIgnoreCase(type))
 			return TYPE_STRING;
+
+		if (TYPE_NONE.equalsIgnoreCase(type))
+			return TYPE_NONE;
 
 		return dftType;
 	}

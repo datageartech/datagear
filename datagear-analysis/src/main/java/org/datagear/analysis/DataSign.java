@@ -57,12 +57,12 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 	/**
 	 * 标记目标：字段
 	 */
-	public static final String TARGET_FIELD = "FIELD";
+	public static final String TARGET_FIELD = "field";
 
 	/**
 	 * 标记目标：数据集
 	 */
-	public static final String TARGET_DATASET = "DATASET";
+	public static final String TARGET_DATASET = "dataset";
 
 	/**
 	 * 标记目标数组：字段。
@@ -217,5 +217,26 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 		return getClass().getSimpleName() + " [name=" + name + ", targets=" + targets + ", required=" + required
 				+ ", multiple=" + multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel()
 				+ ", additions=" + additions + "]";
+	}
+
+	/**
+	 * 规范目标。
+	 * 
+	 * @param target
+	 * @param dftTarget
+	 * @return
+	 */
+	public static String normalizeTarget(String target, String dftTarget)
+	{
+		if (target == null)
+			return dftTarget;
+
+		if (TARGET_FIELD.equalsIgnoreCase(target))
+			return TARGET_FIELD;
+
+		if (TARGET_DATASET.equalsIgnoreCase(target))
+			return TARGET_DATASET;
+
+		return dftTarget;
 	}
 }
