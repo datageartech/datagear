@@ -2076,10 +2076,9 @@ $.inflateChartAttrValuesForm = function(po)
 		return (prop != null && (prop.type == avo.FormPropertyType.OBJECT || prop.properties !== undefined));
 	};
 	
-	avo.isRootDataAttrForm = function(pluginAttrForm)
+	avo.isRootPluginAttrForm = function(pluginAttrForm)
 	{
-		//参考org.datagear.analysis.ChartPluginAttributeForm.getName()说明
-		return (pluginAttrForm != null && pluginAttrForm.name == null);
+		return chartFactory.isRootPluginAttributeForm(pluginAttrForm);
 	};
 	
 	//将org.datagear.analysis.form.FormProperty转换为标准格式
@@ -2438,7 +2437,7 @@ $.inflateChartAttrValuesForm = function(po)
 		if(!pluginAttrForm.isTrimmed)
 			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
 		
-		if(avo.isRootDataAttrForm(pluginAttrForm))
+		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
 			avo.doAttrValuesToFormData(re, pluginAttrForm);
 		}
@@ -2576,12 +2575,12 @@ $.inflateChartAttrValuesForm = function(po)
 		re = $.extend(true, {}, re);
 		
 		if(pluginAttrForm == null)
-			return re;
+			pluginAttrForm = { properties: [] };
 		
 		if(!pluginAttrForm.isTrimmed)
 			pluginAttrForm = avo.toTrimProperty(pluginAttrForm);
 		
-		if(avo.isRootDataAttrForm(pluginAttrForm))
+		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
 			avo.doFormDataToAttrValues(re, pluginAttrForm, strictMode);
 		}
@@ -2817,7 +2816,7 @@ $.inflateChartAttrValuesForm = function(po)
 		var pm = po.vuePageModel();
 		var pluginAttrForm = pm.avoModel.pluginAttrForm;
 		var rootData = avo.attrValuesToFormData(attrValues, pluginAttrForm);
-		var formData = (avo.isRootDataAttrForm(pluginAttrForm) ? rootData : rootData[pluginAttrForm.name]);
+		var formData = (avo.isRootPluginAttrForm(pluginAttrForm) ? rootData : rootData[pluginAttrForm.name]);
 		
 		pm.avoModel.rootData = rootData;
 		pm.avoModel.formData = formData;
@@ -2831,7 +2830,7 @@ $.inflateChartAttrValuesForm = function(po)
 		var pluginAttrForm = pm.avoModel.pluginAttrForm;
 		var rootData = pm.avoModel.rootData;
 		
-		if(avo.isRootDataAttrForm(pluginAttrForm))
+		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
 			for(let p in rootData)
 				delete rootData[p];
@@ -2869,7 +2868,7 @@ $.inflateChartAttrValuesForm = function(po)
 		{
 			re = {};
 			
-			if(!avo.isRootDataAttrForm(pluginAttrForm) && pluginAttrForm.required)
+			if(!avo.isRootPluginAttrForm(pluginAttrForm) && pluginAttrForm.required)
 			{
 				var name = pluginAttrForm.name;
 				re[name] = {};

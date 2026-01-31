@@ -6160,6 +6160,16 @@
 	//----------------------------------------
 	
 	/**
+	 * 是否根级插件属性表单。
+	 * 根级插件属性表单的name为null，具体参考：
+	 * org.datagear.analysis.ChartPluginAttributeForm.getName()说明
+	 */
+	chartFactory.isRootPluginAttributeForm = function(pluginAttributeForm)
+	{
+		return (pluginAttributeForm != null && pluginAttributeForm.name == null);
+	};
+	
+	/**
 	 * 获取原始数据索引的原始数据。
 	 * 
 	 * @param chart 图表对象

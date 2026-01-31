@@ -3250,11 +3250,7 @@ chartProto.pluginAttributeValues = function()
 	if(form == null)
 		return null;
 	
-	if(form.name != null)
-	{
-		return this.attrValue(form.name);
-	}
-	else
+	if(CF.isRootPluginAttributeForm(form))
 	{
 		let re = {};
 		
@@ -3265,6 +3261,10 @@ chartProto.pluginAttributeValues = function()
 		});
 		
 		return re;
+	}
+	else
+	{
+		return this.attrValue(form.name);
 	}
 };
 
@@ -4356,6 +4356,16 @@ chartProto.dataSetBindsFetched = function(dataSetBinds, chartResult)
 //----------------------------------------
 // Chart prototype end
 //----------------------------------------
+
+/**
+ * 是否根级插件属性表单。
+ * 根级插件属性表单的name为null，具体参考：
+ * org.datagear.analysis.ChartPluginAttributeForm.getName()说明
+ */
+CF.isRootPluginAttributeForm = function(pluginAttributeForm)
+{
+	return (pluginAttributeForm != null && pluginAttributeForm.name == null);
+};
 
 var THEME_STYLE_NAME_PROP = CF.BUILTIN_PROP_PREFIX + "StyleName";
 
