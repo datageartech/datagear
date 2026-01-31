@@ -26,19 +26,19 @@ package org.datagear.analysis.form;
 public class PropertyType
 {
 	/** 字符串 */
-	public static final String STRING = "STRING";
+	public static final String STRING = "string";
 
 	/** 布尔值 */
-	public static final String BOOLEAN = "BOOLEAN";
+	public static final String BOOLEAN = "boolean";
 
 	/** 整数 */
-	public static final String INTEGER = "INTEGER";
+	public static final String INTEGER = "integer";
 
 	/** 数值 */
-	public static final String NUMBER = "NUMBER";
+	public static final String NUMBER = "number";
 
 	/** 对象 */
-	public static final String OBJECT = "OBJECT";
+	public static final String OBJECT = "object";
 
 	/**
 	 * 规范类型。

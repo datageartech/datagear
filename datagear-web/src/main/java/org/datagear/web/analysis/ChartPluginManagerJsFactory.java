@@ -31,6 +31,7 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.form.FormProperty;
+import org.datagear.analysis.form.PropertyType;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.html.ExceptionMsgHtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
@@ -252,17 +253,20 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append(managerVar + ".plugins = (" + managerVar + ".plugins || {});");
 		buffer.append(newLine);
 
+		buffer.append("if(" + managerVar + ".get == null){" + managerVar
+				+ ".get = function(id){ return this.plugins[id]; }; }");
+		buffer.append(newLine);
+
 		if (DashboardApiVersion.isV1(apiVersion))
 		{
 			// @deprecated
 			// 兼容1.8.1版本的window.chartPluginManager变量名
 			buffer.append("global.chartPluginManager = " + managerVar + ";");
 			buffer.append(newLine);
-		}
 
-		buffer.append("if(" + managerVar + ".get == null){" + managerVar
-				+ ".get = function(id){ return this.plugins[id]; }; }");
-		buffer.append(newLine);
+			appendCompatFuncForV5_5_0(apiVersion, buffer, managerVar, newLine);
+			buffer.append(newLine);
+		}
 	}
 
 	protected void appendManagerJsEnd(StringBuilder buffer, String newLine)
@@ -275,6 +279,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 			String pluginVar, Locale locale) throws IOException
 	{
 		StringWriter out = new StringWriter();
+		String newLine = this.htmlChartPluginScriptObjectWriter.getNewLine();
 
 		try
 		{
@@ -283,12 +288,14 @@ public class ChartPluginManagerJsFactory implements CacheAware
 			if (DashboardApiVersion.isV1(apiVersion))
 			{
 				appendPluginJsForV4_0_0(out, apiVersion, plugin, managerVar, pluginVar, locale);
+				out.write(newLine);
 				appendPluginJsForV5_5_0(out, apiVersion, plugin, managerVar, pluginVar, locale);
+				out.write(newLine);
 			}
 
 			out.write(managerVar + ".plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
 					+ pluginVar + ";");
-			out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
+			out.write(newLine);
 		}
 		finally
 		{
@@ -299,7 +306,62 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	}
 	
 	/**
-	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.attributes}
+	 * @param apiVersion
+	 * @param buffer
+	 * @param managerVar
+	 * @param newLine
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginAttribute}、{@code org.datagear.analysis.ChartPlugin.attributes}
+	 */
+	@Deprecated
+	protected void appendCompatFuncForV5_5_0(String apiVersion, StringBuilder buffer, String managerVar, String newLine)
+	{
+		buffer.append("function compatForV5_5_0(plugin){");
+		buffer.append(newLine);
+		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " != null){");
+		buffer.append(newLine);
+		buffer.append(
+				"    var attributes = (plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_ATTRIBUTES
+						+ " = plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + "."
+				+ ChartPluginAttributeForm.PROPERTY_PROPERTIES + ");");
+		buffer.append(newLine);
+		buffer.append("    plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " = undefined;");
+		buffer.append(newLine);
+		buffer.append("    var attributesLen = (attributes == null ? 0 : attributes.length);");
+		buffer.append(newLine);
+		buffer.append("    for(var i=0; i<attributesLen; i++){");
+		buffer.append(newLine);
+		buffer.append("      var attr = attributes[i];");
+		buffer.append(newLine);
+		buffer.append("      if(attr." + FormProperty.PROPERTY_ADDITIONS + "){ " //
+				+ "attr." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_INPUT_ATTR_GROUP //
+				+ " = attr." + FormProperty.PROPERTY_ADDITIONS + "[\""
+				+ JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP + "\"]; }");
+		buffer.append(newLine);
+		
+		buffer.append("      if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.STRING + "\"){ " //
+				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.STRING + "\"; }");
+		buffer.append(newLine);
+		buffer.append("      else if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.BOOLEAN + "\"){ " //
+				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.BOOLEAN + "\"; }");
+		buffer.append(newLine);
+		buffer.append("      else if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.INTEGER + "\"){ " //
+				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.INTEGER + "\"; }");
+		buffer.append(newLine);
+		buffer.append("      else if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.NUMBER + "\"){ " //
+				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.NUMBER + "\"; }");
+		buffer.append(newLine);
+		buffer.append("      else if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.OBJECT + "\"){ " //
+				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.OBJECT + "\"; }");
+		buffer.append(newLine);
+		
+		buffer.append("    }");
+		buffer.append(newLine);
+		buffer.append("  }");
+		buffer.append(newLine);
+		buffer.append("}");
+	}
+
+	/**
 	 * @param out
 	 * @param apiVersion
 	 * @param plugin
@@ -307,27 +369,17 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	 * @param pluginVar
 	 * @param locale
 	 * @throws IOException
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.attributes}
 	 */
 	@Deprecated
 	protected void appendPluginJsForV5_5_0(Writer out, String apiVersion, HtmlChartPlugin plugin,
 			String managerVar, String pluginVar, Locale locale) throws IOException
 	{
-		out.write("if(" + pluginVar + "." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " != null){");
-		out.write("  var attributes = (" + pluginVar + "." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_ATTRIBUTES
-				+ " = " + pluginVar + "." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + "."
-				+ ChartPluginAttributeForm.PROPERTY_PROPERTIES + ");");
-		out.write("  " + pluginVar + "." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " = undefined;");
-		out.write("  for(var i=0; i<attributes.length; i++){");
-		out.write("    if(attributes[i]." + FormProperty.PROPERTY_ADDITIONS + ")");
-		out.write("      attributes[i]." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_INPUT_ATTR_GROUP
-				+ " = attributes[i]." + FormProperty.PROPERTY_ADDITIONS
-				+ "[\"" + JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP + "\"];");
-		out.write("  }");
-		out.write("}");
+		out.write("compatForV5_5_0(" + pluginVar + ");");
 	}
 
 	/**
-	 * @deprecated 仅用于兼容4.0.0版本的{@code org.datagear.analysis.support.html.HtmlChartPlugin.chartRenderer}。
+	 * 
 	 * @param out
 	 * @param apiVersion
 	 * @param plugin
@@ -335,6 +387,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	 * @param pluginVar
 	 * @param locale
 	 * @throws IOException
+	 * @deprecated 仅用于兼容4.0.0版本的{@code org.datagear.analysis.support.html.HtmlChartPlugin.chartRenderer}。
 	 */
 	@Deprecated
 	protected void appendPluginJsForV4_0_0(Writer out, String apiVersion, HtmlChartPlugin plugin, String managerVar,
@@ -342,7 +395,6 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	{
 		out.write(pluginVar + "." + HtmlChartPluginJsDefResolver.PLUGIN_PROPERTY_RENDERER_OLD + " = " + pluginVar + "."
 				+ HtmlChartPlugin.PROPERTY_RENDERER + ";");
-		out.write(this.htmlChartPluginScriptObjectWriter.getNewLine());
 	}
 
 	/**
@@ -412,5 +464,30 @@ public class ChartPluginManagerJsFactory implements CacheAware
 
 			return this.scripts.get(idx);
 		}
+	}
+
+	/**
+	 * {@code 5.5.0}版本的{@linkplain PropertyType}类型值，详细参考：{@code org.datagear.analysis.ChartPluginAttribute.DataType}。
+	 * 
+	 * @author datagear@163.com
+	 * @deprecated 仅用于兼容{@code 5.5.0}相关格式
+	 */
+	@Deprecated
+	protected static class PropertyTypeV5_5_0
+	{
+		/** 字符串 */
+		public static final String STRING = "STRING";
+
+		/** 布尔值 */
+		public static final String BOOLEAN = "BOOLEAN";
+
+		/** 整数 */
+		public static final String INTEGER = "INTEGER";
+
+		/** 数值 */
+		public static final String NUMBER = "NUMBER";
+
+		/** 对象 */
+		public static final String OBJECT = "OBJECT";
 	}
 }

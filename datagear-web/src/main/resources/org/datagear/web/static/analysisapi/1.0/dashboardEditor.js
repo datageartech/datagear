@@ -2576,7 +2576,7 @@
 		
 		//org.datagear.analysis.ChartPluginAttributeForm
 		//这里需要设置type为org.datagear.analysis.form.PropertyType.OBJECT
-		var form = { type: "OBJECT", properties: attrs, array: false };
+		var form = { type: "object", properties: attrs, array: false };
 		return form;
 	};
 	
