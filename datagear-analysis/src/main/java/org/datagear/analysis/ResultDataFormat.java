@@ -32,12 +32,12 @@ public class ResultDataFormat extends DateFormat
 	/**
 	 * 格式化类型：数值，表示格式化为数值
 	 */
-	public static final String TYPE_NUMBER = "NUMBER";
+	public static final String TYPE_NUMBER = "number";
 
 	/**
 	 * 格式化类型：字符串，表示格式化为字符串
 	 */
-	public static final String TYPE_STRING = "STRING";
+	public static final String TYPE_STRING = "string";
 
 	/**
 	 * 格式化类型：无，表示不格式化，保持原类型
@@ -65,7 +65,7 @@ public class ResultDataFormat extends DateFormat
 
 	public void setDateType(String dateType)
 	{
-		this.dateType = dateType;
+		this.dateType = normalizeType(dateType);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class ResultDataFormat extends DateFormat
 
 	public void setTimeType(String timeType)
 	{
-		this.timeType = timeType;
+		this.timeType = normalizeType(timeType);
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class ResultDataFormat extends DateFormat
 
 	public void setTimestampType(String timestampType)
 	{
-		this.timestampType = timestampType;
+		this.timestampType = normalizeType(timestampType);
 	}
 
 	/**
@@ -172,5 +172,37 @@ public class ResultDataFormat extends DateFormat
 		return getClass().getSimpleName() + " [dateType=" + dateType
 				+ ", dateFormat=" + getDateFormat() + ", timeType=" + timeType + ", timeFormat=" + getTimeFormat()
 				+ ", timestampType=" + timestampType + ", timestampFormat=" + getTimestampFormat() + "]";
+	}
+
+	/**
+	 * 规范类型。
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public static String normalizeType(String type)
+	{
+		return normalizeType(type, TYPE_STRING);
+	}
+
+	/**
+	 * 规范类型。
+	 * 
+	 * @param type
+	 * @param dftType
+	 * @return
+	 */
+	public static String normalizeType(String type, String dftType)
+	{
+		if (type == null)
+			return dftType;
+
+		if (TYPE_NUMBER.equalsIgnoreCase(type))
+			return TYPE_NUMBER;
+
+		if (TYPE_STRING.equalsIgnoreCase(type))
+			return TYPE_STRING;
+
+		return dftType;
 	}
 }

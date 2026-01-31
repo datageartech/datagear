@@ -276,12 +276,90 @@
 	/**图表渲染器附加属性：是否支持忽略获取结果，默认值为：false */
 	chartFactory.RENDERER_ADDITION_SUPPORT_IGNORE_FETCH = "supportIgnoreFetch";
 	
-	//org.datagear.analysis.DataSetParam.DataType
+	//5.5.0版本：org.datagear.analysis.DataSetParam.DataType
 	chartFactory.DataSetParamType =
 	{
 		STRING: "STRING",
 		BOOLEAN: "BOOLEAN",
-		NUMBER: "NUMBER"
+		INTEGER: "INTEGER",
+		NUMBER: "NUMBER",
+		//兼容处理类型，逻辑参考：org.datagear.analysis.DataSetParam.DataType.normalize(String)
+		normalize: function(type)
+		{
+			type = (type == null ? null : (type+"").toUpperCase());
+			
+			if(type == this.STRING)
+				return this.STRING;
+			else if(type == this.BOOLEAN)
+				return this.BOOLEAN;
+			else if(type == this.INTEGER)
+				return this.INTEGER;
+			else if(type == this.NUMBER)
+				return this.NUMBER;
+			else
+				return this.STRING;
+		}
+	};
+	
+	//5.5.0版本：org.datagear.analysis.DataSetField.DataType
+	chartFactory.DataSetFieldDataType =
+	{
+		STRING: "STRING",
+		BOOLEAN: "BOOLEAN",
+		NUMBER: "NUMBER",
+		INTEGER: "INTEGER",
+		DECIMAL: "DECIMAL",
+		DATE: "DATE",
+		TIME: "TIME",
+		TIMESTAMP: "TIMESTAMP",
+		UNKNOWN: "UNKNOWN",
+		//兼容处理类型，逻辑参考：org.datagear.analysis.DataSetField.DataType.normalize(String)
+		normalize: function(type)
+		{
+			type = (type == null ? null : (type+"").toUpperCase());
+			
+			if(type == this.STRING)
+				return this.STRING;
+			else if(type == this.BOOLEAN)
+				return this.BOOLEAN;
+			else if(type == this.NUMBER)
+				return this.NUMBER;
+			else if(type == this.INTEGER)
+				return this.INTEGER;
+			else if(type == this.DECIMAL)
+				return this.DECIMAL;
+			else if(type == this.DATE)
+				return this.DATE;
+			else if(type == this.TIME)
+				return this.TIME;
+			else if(type == this.TIMESTAMP)
+				return this.TIMESTAMP;
+			else if(type == this.UNKNOWN)
+				return this.UNKNOWN;
+			else
+				return this.UNKNOWN;
+		}
+	};
+	
+	//5.5.0版本：org.datagear.analysis.ResultDataFormat.TYPE_*
+	chartFactory.ResultDataFormatType =
+	{
+		//TYPE_NUMBER
+		NUMBER: "NUMBER",
+		//TYPE_STRING
+		STRING: "STRING",
+		//兼容处理类型，逻辑参考：org.datagear.analysis.ResultDataFormat.normalizeType(String)
+		normalize: function(type)
+		{
+			type = (type == null ? null : (type+"").toUpperCase());
+			
+			if(type == this.NUMBER)
+				return this.NUMBER;
+			else if(type == this.STRING)
+				return this.STRING;
+			else
+				return this.STRING;
+		}
 	};
 	
 	/**
@@ -409,7 +487,40 @@
 				dsb.dataSet.properties = dsb.dataSet.fields;
 			}
 			// > @deprecated 兼容5.0.0版本的DataSetBind.dataSet.properties，将在未来版本移除，已被DataSetBind.dataSet.fields取代
+			
+			// < @deprecated 兼容5.5.0版本的DataSetField.DataType，将在未来版本移除
+			if(dsb.dataSet)
+			{
+				var fields = (dsb.dataSet.fields || []);
+				for(var j=0; j<fields.length; j++)
+				{
+					if(fields[j])
+						fields[j].type = chartFactory.DataSetFieldDataType.normalize(fields[j].type);
+				}
+			}
+			// > @deprecated 兼容5.5.0版本的DataSetField.DataType，将在未来版本移除
+			
+			// < @deprecated 兼容5.5.0版本的DataSetParam.DataType，将在未来版本移除
+			if(dsb.dataSet)
+			{
+				var params = (dsb.dataSet.params || []);
+				for(var j=0; j<params.length; j++)
+				{
+					if(params[j])
+						params[j].type = chartFactory.DataSetParamType.normalize(params[j].type);
+				}
+			}
+			// > @deprecated 兼容5.5.0版本的DataSetParam.DataType，将在未来版本移除
 		}
+		
+		// < @deprecated 兼容5.5.0版本的ResultDataFormat.TYPE_NUMBER、ResultDataFormat.TYPE_STRING，将在未来版本移除
+		if(chart.resultDataFormat)
+		{
+			chart.resultDataFormat.dateType = chartFactory.ResultDataFormatType.normalize(chart.resultDataFormat.dateType);
+			chart.resultDataFormat.timeType = chartFactory.ResultDataFormatType.normalize(chart.resultDataFormat.timeType);
+			chart.resultDataFormat.timestampType = chartFactory.ResultDataFormatType.normalize(chart.resultDataFormat.timestampType);
+		}
+		// > @deprecated 兼容5.5.0版本的ResultDataFormat.TYPE_NUMBER、ResultDataFormat.TYPE_STRING，将在未来版本移除
 		
 		chart._dataSetBinds = (chart.dataSetBinds || []);
 		delete chart.dataSetBinds;

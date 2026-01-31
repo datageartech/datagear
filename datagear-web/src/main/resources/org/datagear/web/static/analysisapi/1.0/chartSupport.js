@@ -20,12 +20,11 @@
  * 全局变量名：window.chartFactory.chartSupport
  * 
  * 加载时依赖：
- *   无
+ *   chartFactory.js
  * 
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
- *   chartFactory.js
  */
 (function(global)
 {
@@ -8774,28 +8773,8 @@
 	//    公用函数开始
 	//---------------------------------------------------------
 	
-	//org.datagear.analysis.DataSetField.DataType
-	chartSupport.DataSetFieldDataType =
-	{
-		STRING: "STRING",
-		BOOLEAN: "BOOLEAN",
-		NUMBER: "NUMBER",
-		INTEGER: "INTEGER",
-		DECIMAL: "DECIMAL",
-		DATE: "DATE",
-		TIME: "TIME",
-		TIMESTAMP: "TIMESTAMP",
-		UNKNOWN: "UNKNOWN"
-	};
-	
-	//org.datagear.analysis.ResultDataFormat.TYPE_*
-	chartSupport.ResultDataFormatType =
-	{
-		//TYPE_NUMBER
-		NUMBER: "NUMBER",
-		//TYPE_STRING
-		STRING: "STRING"
-	};
+	chartSupport.DataSetFieldDataType = chartFactory.DataSetFieldDataType;
+	chartSupport.ResultDataFormatType = chartFactory.ResultDataFormatType;
 	
 	/**
 	 * 计算指定数据集字段的坐标轴类型。

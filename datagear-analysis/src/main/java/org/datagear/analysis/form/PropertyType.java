@@ -44,13 +44,13 @@ public class PropertyType
 	 * 规范类型。
 	 * 
 	 * @param type
-	 * @param dftValue
+	 * @param dftType
 	 * @return
 	 */
-	public static String normalize(String type, String dftValue)
+	public static String normalize(String type, String dftType)
 	{
 		if (type == null)
-			return dftValue;
+			return dftType;
 
 		if (STRING.equalsIgnoreCase(type))
 			return STRING;
@@ -67,6 +67,6 @@ public class PropertyType
 		if (OBJECT.equalsIgnoreCase(type))
 			return OBJECT;
 
-		return dftValue;
+		return dftType;
 	}
 }

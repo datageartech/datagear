@@ -282,9 +282,10 @@ CF.ELE_RENDERED_CHART_NAME = CF.BUILTIN_PROP_PREFIX + "RenderedChart";
 //org.datagear.analysis.DataSetParam.DataType
 CF.DataSetParamType =
 {
-	STRING: "STRING",
-	BOOLEAN: "BOOLEAN",
-	NUMBER: "NUMBER"
+	STRING: "string",
+	BOOLEAN: "boolean",
+	INTEGER: "integer",
+	NUMBER: "number"
 };
 
 /**

@@ -52,16 +52,22 @@ public class DataSetField extends AbstractNameTypeAware implements Cloneable
 
 	public DataSetField(String name, String type)
 	{
-		super(name, type);
+		super(name, DataType.normalize(type));
 	}
 
 	public DataSetField(DataSetField field)
 	{
-		super(field.getName(), field.getType());
+		super(field.getName(), DataType.normalize(field.getType()));
 		this.label = field.label;
 		this.defaultValue = field.defaultValue;
 		this.evaluated = field.evaluated;
 		this.expression = field.expression;
+	}
+
+	@Override
+	public void setType(String type)
+	{
+		super.setType(DataType.normalize(type));
 	}
 
 	public boolean hasLabel()
@@ -155,31 +161,84 @@ public class DataSetField extends AbstractNameTypeAware implements Cloneable
 	public static class DataType
 	{
 		/** 字符串 */
-		public static final String STRING = "STRING";
+		public static final String STRING = "string";
 
 		/** 布尔值 */
-		public static final String BOOLEAN = "BOOLEAN";
+		public static final String BOOLEAN = "boolean";
 
 		/** 数值，可能是整数或者小数 */
-		public static final String NUMBER = "NUMBER";
+		public static final String NUMBER = "number";
 
 		/** 整数 */
-		public static final String INTEGER = "INTEGER";
+		public static final String INTEGER = "integer";
 
 		/** 小数 */
-		public static final String DECIMAL = "DECIMAL";
+		public static final String DECIMAL = "decimal";
 
 		/** 日期 */
-		public static final String DATE = "DATE";
+		public static final String DATE = "date";
 
 		/** 时间 */
-		public static final String TIME = "TIME";
+		public static final String TIME = "time";
 
 		/** 时间戳 */
-		public static final String TIMESTAMP = "TIMESTAMP";
+		public static final String TIMESTAMP = "timestamp";
 
 		/** 未知类型 */
-		public static final String UNKNOWN = "UNKNOWN";
+		public static final String UNKNOWN = "unknown";
+
+		/**
+		 * 规范类型。
+		 * 
+		 * @param type
+		 * @return
+		 */
+		public static String normalize(String type)
+		{
+			return normalize(type, UNKNOWN);
+		}
+
+		/**
+		 * 规范类型。
+		 * 
+		 * @param type
+		 * @param dftType
+		 * @return
+		 */
+		public static String normalize(String type, String dftType)
+		{
+			if (type == null)
+				return dftType;
+
+			if (STRING.equalsIgnoreCase(type))
+				return STRING;
+
+			if (BOOLEAN.equalsIgnoreCase(type))
+				return BOOLEAN;
+
+			if (NUMBER.equalsIgnoreCase(type))
+				return NUMBER;
+
+			if (INTEGER.equalsIgnoreCase(type))
+				return INTEGER;
+
+			if (DECIMAL.equalsIgnoreCase(type))
+				return DECIMAL;
+
+			if (DATE.equalsIgnoreCase(type))
+				return DATE;
+
+			if (TIME.equalsIgnoreCase(type))
+				return TIME;
+
+			if (TIMESTAMP.equalsIgnoreCase(type))
+				return TIMESTAMP;
+
+			if (UNKNOWN.equalsIgnoreCase(type))
+				return UNKNOWN;
+
+			return dftType;
+		}
 
 		/**
 		 * 解析对象的数据类型。

@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetQuery;
 import org.junit.Test;
 
@@ -50,8 +50,9 @@ public class DataSetParamValueConverterTest
 
 		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("name", DataSetParam.DataType.STRING, true));
-		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
+		params.add(new DataSetParam("size", DataSetParam.DataType.INTEGER, true));
 		params.add(new DataSetParam("enable", DataSetParam.DataType.BOOLEAN, true));
+		params.add(new DataSetParam("price", DataSetParam.DataType.NUMBER, true));
 
 		CsvValueDataSet dataSet = new CsvValueDataSet("test", "test", fields, "name \n aaa");
 		dataSet.setParams(params);
@@ -81,6 +82,7 @@ public class DataSetParamValueConverterTest
 			query.setParamValue("name", "aaa");
 			query.setParamValue("size", "3");
 			query.setParamValue("enable", "true");
+			query.setParamValue("price", "6.3");
 			query.setParamValue("other0", 5);
 			query.setParamValue("other1", "false");
 
@@ -89,15 +91,47 @@ public class DataSetParamValueConverterTest
 			assertEquals("aaa", actual.getParamValue("name"));
 			assertEquals(3, ((Integer) actual.getParamValue("size")).intValue());
 			assertEquals(true, ((Boolean) actual.getParamValue("enable")).booleanValue());
+			assertEquals(true, ((Double) actual.getParamValue("price")).doubleValue() > 6.2);
 			assertEquals(5, ((Integer) actual.getParamValue("other0")).intValue());
 			assertEquals("false", actual.getParamValue("other1"));
 		}
 
 		{
 			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("name", "aaa");
+			query.setParamValue("size", 3);
+			query.setParamValue("enable", true);
+			query.setParamValue("price", 6.3D);
+
+			DataSetQuery actual = converter.convert(query, dataSet, true);
+
+			assertEquals("aaa", actual.getParamValue("name"));
+			assertEquals(3, ((Integer) actual.getParamValue("size")).intValue());
+			assertEquals(true, ((Boolean) actual.getParamValue("enable")).booleanValue());
+			assertEquals(true, ((Double) actual.getParamValue("price")).doubleValue() > 6.2);
+		}
+
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("name", "aaa");
+			query.setParamValue("size", 3.2D);
+			query.setParamValue("enable", true);
+			query.setParamValue("price", 6.3D);
+
+			DataSetQuery actual = converter.convert(query, dataSet, true);
+
+			assertEquals("aaa", actual.getParamValue("name"));
+			assertEquals(3, ((Integer) actual.getParamValue("size")).intValue());
+			assertEquals(true, ((Boolean) actual.getParamValue("enable")).booleanValue());
+			assertEquals(true, ((Double) actual.getParamValue("price")).doubleValue() > 6.2);
+		}
+
+		{
+			DataSetQuery query = new DataSetQuery();
 			query.setParamValue("name", new String[] { "aaa", "bbb" });
-			query.setParamValue("size", new String[] { "3", "4" });
+			query.setParamValue("size", new String[] { "3", "4", "6.6", "8.1" });
 			query.setParamValue("enable", new String[] { "true", "false" });
+			query.setParamValue("price", new String[] { "3.5", "2.7" });
 			query.setParamValue("other0", new int[] { 5, 6 });
 			query.setParamValue("other1", new boolean[] { false, false });
 
@@ -105,6 +139,7 @@ public class DataSetParamValueConverterTest
 			Object[] actualName = actual.getParamValue("name");
 			Object[] actualSize = actual.getParamValue("size");
 			Object[] actualEnable = actual.getParamValue("enable");
+			Object[] actualPrice = actual.getParamValue("price");
 			int[] actualOther0 = actual.getParamValue("other0");
 			boolean[] actualOther1 = actual.getParamValue("other1");
 
@@ -112,13 +147,19 @@ public class DataSetParamValueConverterTest
 			assertEquals("aaa", actualName[0]);
 			assertEquals("bbb", actualName[1]);
 
-			assertEquals(2, actualSize.length);
+			assertEquals(4, actualSize.length);
 			assertEquals(3, ((Integer) actualSize[0]).intValue());
 			assertEquals(4, ((Integer) actualSize[1]).intValue());
+			assertEquals(6, ((Integer) actualSize[2]).intValue());
+			assertEquals(8, ((Integer) actualSize[3]).intValue());
 
 			assertEquals(2, actualEnable.length);
 			assertEquals(true, ((Boolean) actualEnable[0]).booleanValue());
 			assertEquals(false, ((Boolean) actualEnable[1]).booleanValue());
+
+			assertEquals(2, actualPrice.length);
+			assertEquals(true, ((Double) actualPrice[0]).doubleValue() > 3.3);
+			assertEquals(true, ((Double) actualPrice[1]).doubleValue() < 2.8);
 
 			assertEquals(2, actualOther0.length);
 			assertEquals(5, actualOther0[0]);

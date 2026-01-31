@@ -21,11 +21,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.NameTypeAware;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetParam.DataType;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.NameTypeAware;
 
 /**
  * {@linkplain DataSetParam}值转换器。
@@ -122,6 +122,8 @@ public class DataSetParamValueConverter extends DataValueConverter
 	{
 		if (DataType.STRING.equals(type))
 			return convertToString(value, DataType.STRING);
+		else if (DataType.INTEGER.equals(type))
+			return convertToInteger(value, DataType.INTEGER);
 		else if (DataType.NUMBER.equals(type))
 			return convertToNumber(value, DataType.NUMBER);
 		else if (DataType.BOOLEAN.equals(type))
