@@ -184,7 +184,7 @@
 				else
 					chartSetting.renderDataSetParamFormInputText($form, $valueDiv, dsp, value, options);
 			}
-			else if(dsp.type == chartFactory.DataSetParamType.NUMBER)
+			else if(dsp.type == chartFactory.DataSetParamType.NUMBER || dsp.type == chartFactory.DataSetParamType.INTEGER)
 			{
 				if(dsp.inputType == InputType.SELECT)
 					chartSetting.renderDataSetParamFormInputSelect($form, $valueDiv, dsp, value, options);
@@ -364,6 +364,20 @@
 		});
 	};
 	
+	chartSetting.addDataSetParamInputValidation = function(dataSetParam, $input)
+	{
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type || chartFactory.DataSetParamType.INTEGER == dataSetParam.type)
+		{
+			$input.attr("dg-validation-number", "true");
+			
+			if(chartFactory.DataSetParamType.INTEGER == dataSetParam.type)
+				$input.attr("dg-validation-integer", "true");
+		}
+	};
+	
 	/**
 	 * 渲染表单项标签。
 	 * 
@@ -395,11 +409,7 @@
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value == null ? "" : value)).appendTo($parent);
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 	};
 	
 	/**
@@ -466,11 +476,7 @@
 				$opt.attr("selected", "selected");
 		}
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 	};
 	
 	/**
@@ -501,11 +507,7 @@
 		if(chartSetting.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 		
 		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
 		chartFactory.derivedElements($form, $wrapper);
@@ -539,11 +541,7 @@
 		if(chartSetting.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 		
 		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
 		chartFactory.derivedElements($form, $wrapper);
@@ -584,11 +582,7 @@
 		if(chartSetting.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 		
 		var $wrapper = chartSetting.renderDatetimePicker($input, options, formOptions.chartTheme);
 		chartFactory.derivedElements($form, $wrapper);
@@ -649,11 +643,7 @@
 			if((value+"") == (optVal+""))
 				$input.attr("checked", "checked");
 			
-			if((dataSetParam.required+"") == "true")
-				$input.attr("dg-validation-required", "true");
-			
-			if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-				$input.attr("dg-validation-number", "true");
+			chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 		}
 	};
 	
@@ -717,11 +707,7 @@
 			if(chartSetting.containsValueForString(value, optVal))
 				$input.attr("checked", "checked");
 			
-			if((dataSetParam.required+"") == "true")
-				$input.attr("dg-validation-required", "true");
-			
-			if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-				$input.attr("dg-validation-number", "true");
+			chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 		}
 	};
 	
@@ -739,11 +725,7 @@
 		var $input = $("<textarea class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.text(value == null ? "" : value).appendTo($parent);
 		
-		if((dataSetParam.required+"") == "true")
-			$input.attr("dg-validation-required", "true");
-		
-		if(chartFactory.DataSetParamType.NUMBER == dataSetParam.type)
-			$input.attr("dg-validation-number", "true");
+		chartSetting.addDataSetParamInputValidation(dataSetParam, $input);
 	};
 	
 	/**
@@ -1438,6 +1420,7 @@
 		});
 		
 		var regexNumber = /^-?\d+\.?\d*$/;
+		var regexInteger = /^-?\d+$/;
 		
 		$itemValue.each(function()
 		{
@@ -1447,6 +1430,8 @@
 				return;
 			
 			var type = $number.attr("type");
+			var mustInteger = ($number.attr("dg-validation-integer") != null);
+			var myRegex = (mustInteger ? regexInteger : regexNumber);
 			
 			if(type == "checkbox" || type == "radio")
 			{
@@ -1459,7 +1444,7 @@
 						break;
 					
 					var val = $(checkeds[i]).attr("value");
-					myValid = (chartFactory.isNullOrEmpty(val) ? true : regexNumber.test(val));
+					myValid = (chartFactory.isNullOrEmpty(val) ? true : myRegex.test(val));
 				}
 				
 				if(!myValid)
@@ -1481,7 +1466,7 @@
 					if(!myValid)
 						break;
 					
-					myValid = (chartFactory.isNullOrEmpty(val[i]) ? true : regexNumber.test(val[i]));
+					myValid = (chartFactory.isNullOrEmpty(val[i]) ? true : myRegex.test(val[i]));
 				}
 				
 				if(!myValid)

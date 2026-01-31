@@ -326,6 +326,7 @@ page_simple_form.ftl
 		dataSetParamDataTypeOptions:
 		[
 			{name: "<@spring.message code='dataSetParam.DataType.STRING' />", value: "${ParamDataType.STRING}"},
+			{name: "<@spring.message code='dataSetParam.DataType.INTEGER' />", value: "${ParamDataType.INTEGER}"},
 			{name: "<@spring.message code='dataSetParam.DataType.NUMBER' />", value: "${ParamDataType.NUMBER}"},
 			{name: "<@spring.message code='dataSetParam.DataType.BOOLEAN' />", value: "${ParamDataType.BOOLEAN}"}
 		],

@@ -196,7 +196,7 @@ TOOL.renderDataSetParamForm = function(parent, dataSetParams, options)
 			else
 				input = TOOL.renderDspFormInputText(form, options, valueDiv, dsp, value);
 		}
-		else if(dsp.type == CF.DataSetParamType.NUMBER)
+		else if(dsp.type == CF.DataSetParamType.NUMBER || dsp.type == CF.DataSetParamType.INTEGER)
 		{
 			if(dsp.inputType == InputType.SELECT)
 				input = TOOL.renderDspFormInputSelect(form, options, valueDiv, dsp, value);
@@ -391,6 +391,20 @@ TOOL.dspFormThemeStyle = function(chartTheme, isSubStyle)
 	});
 };
 
+TOOL.addDspFormInputValidation = function(dataSetParam, input)
+{
+	if(CF.isLiteralTrue(dataSetParam.required))
+		CF.eleAttr(input, "dg-validation-check-required", "true");
+	
+	if(CF.DataSetParamType.NUMBER == dataSetParam.type || CF.DataSetParamType.INTEGER == dataSetParam.type)
+	{
+		CF.eleAttr(input, "dg-validation-check-number", "true");
+		
+		if(CF.DataSetParamType.INTEGER == dataSetParam.type)
+			CF.eleAttr(input, "dg-validation-check-integer", "true");
+	}
+};
+
 /**
  * 渲染表单项标签。
  * 
@@ -427,12 +441,7 @@ TOOL.renderDspFormInputText = function(form, formOptions, parent, dataSetParam, 
 	CF.eleAttr(input, "id", CF.uid());
 	CF.eleAttr(input, "name", dataSetParam.name);
 	
-	if(CF.isLiteralTrue(dataSetParam.required))
-		CF.eleAttr(input, "dg-validation-check-required", "true");
-	
-	if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-		CF.eleAttr(input, "dg-validation-check-number", "true");
-	
+	TOOL.addDspFormInputValidation(dataSetParam, input);
 	CF.eleAppend(parent, input);
 	TOOL.eleInputActualValue(input, value);
 	
@@ -502,12 +511,7 @@ TOOL.renderDspFormInputSelect = function(form, formOptions, parent, dataSetParam
 		CF.eleAppend(input, opt);
 	}
 	
-	if(CF.isLiteralTrue(dataSetParam.required))
-		CF.eleAttr(input, "dg-validation-check-required", "true");
-	
-	if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-		CF.eleAttr(input, "dg-validation-check-number", "true");
-	
+	TOOL.addDspFormInputValidation(dataSetParam, input);
 	TOOL.eleInputActualValue(input, value);
 	
 	return input;
@@ -557,8 +561,7 @@ TOOL.renderDspFormInputDate = function(form, formOptions, parent, dataSetParam, 
 		CF.eleAttr(input, "dg-label-for-id", inputId);
 		CF.eleAppend(inputsWrapper, input);
 		
-		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-check-required", "true");
+		TOOL.addDspFormInputValidation(dataSetParam, input);
 		
 		let inputs = CF.eleCreate("div", "dg-date-widget-inputs");
 		CF.eleAppend(inputsWrapper, inputs);
@@ -623,8 +626,7 @@ TOOL.renderDspFormInputDate = function(form, formOptions, parent, dataSetParam, 
 		CF.eleAttr(input, "id", CF.uid());
 		CF.eleAttr(input, "name", dataSetParam.name);
 		
-		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-check-required", "true");
+		TOOL.addDspFormInputValidation(dataSetParam, input);
 		
 		CF.eleAppend(parent, input);
 		TOOL.eleInputActualValue(input, value);
@@ -670,8 +672,7 @@ TOOL.renderDspFormInputTime = function(form, formOptions, parent, dataSetParam, 
 	if(TOOL.dateFormatter.hasSecond(options.format))
 		CF.eleAttr(input, "step", "1");
 	
-	if(CF.isLiteralTrue(dataSetParam.required))
-		CF.eleAttr(input, "dg-validation-check-required", "true");
+	TOOL.addDspFormInputValidation(dataSetParam, input);
 	
 	CF.eleAppend(parent, input);
 	TOOL.eleInputActualValue(input, value);
@@ -719,8 +720,7 @@ TOOL.renderDspFormInputDateTime = function(form, formOptions, parent, dataSetPar
 	if(TOOL.dateFormatter.hasSecond(options.format))
 		CF.eleAttr(input, "step", "1");
 	
-	if(CF.isLiteralTrue(dataSetParam.required))
-		CF.eleAttr(input, "dg-validation-check-required", "true");
+	TOOL.addDspFormInputValidation(dataSetParam, input);
 	
 	CF.eleAppend(parent, input);
 	TOOL.eleInputActualValue(input, value);
@@ -782,12 +782,7 @@ TOOL.renderDspFormInputRadio = function(form, formOptions, parent, dataSetParam,
 		CF.eleHtml(label, optName);
 		CF.eleAppend(wrapper, label);
 		
-		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-check-required", "true");
-		
-		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-			CF.eleAttr(input, "dg-validation-check-number", "true");
-		
+		TOOL.addDspFormInputValidation(dataSetParam, input);
 		TOOL.eleInputActualValue(input, value);
 	}
 	
@@ -850,12 +845,7 @@ TOOL.renderDspFormInputCheckbox = function(form, formOptions, parent, dataSetPar
 		CF.eleHtml(label, optName);
 		CF.eleAppend(wrapper, label);
 		
-		if(CF.isLiteralTrue(dataSetParam.required))
-			CF.eleAttr(input, "dg-validation-check-required", "true");
-		
-		if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-			CF.eleAttr(input, "dg-validation-check-number", "true");
-		
+		TOOL.addDspFormInputValidation(dataSetParam, input);
 		TOOL.eleInputActualValue(input, value);
 	}
 	
@@ -879,12 +869,7 @@ TOOL.renderDspFormInputTextarea = function(form, formOptions, parent, dataSetPar
 	CF.eleAttr(input, "name", dataSetParam.name);
 	CF.eleAttr(input, "value", (value == null ? "" : value));
 	
-	if(CF.isLiteralTrue(dataSetParam.required))
-		CF.eleAttr(input, "dg-validation-check-required", "true");
-	
-	if(CF.DataSetParamType.NUMBER == dataSetParam.type)
-		CF.eleAttr(input, "dg-validation-check-number", "true");
-	
+	TOOL.addDspFormInputValidation(dataSetParam, input);
 	CF.eleAppend(parent, input);
 	TOOL.eleInputActualValue(input, value);
 	
@@ -1255,6 +1240,7 @@ TOOL.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
 };
 
 TOOL.NUMBER_REGEX = /^-?\d+\.?\d*$/;
+TOOL.INTEGER_REGEX = /^-?\d+$/;
 
 /**
  * 校验数据集参数值表单的必填项、数值项。
@@ -1325,6 +1311,7 @@ TOOL.validateDspForm = function(form)
 		
 		let type = TOOL.eleInputType(inputs[0]);
 		let isCheckboxRadio = (type == "checkbox" || type == "radio");
+		let mustInteger = (CF.eleAttr(inputs[0], "dg-validation-check-integer") != null);
 		let checkedValues = [];
 		
 		inputs.forEach((input) =>
@@ -1341,7 +1328,7 @@ TOOL.validateDspForm = function(form)
 				val = (CF.isEmpty(val) ? [] : (CF.isArray(val) ? val : [ val ]));
 				let indicator = (type == "hidden" ? CF.eleAncestorOfSelector(input, ".dg-dspform-inputs-wrapper") : input);
 				
-				if(!TOOL.isNonEmptyAllNumberic(val))
+				if(!TOOL.isNonEmptyAllNumberic(val, mustInteger))
 				{
 					CF.eleAddClass(indicator, "dg-validation-number");
 					validationOk = false;
@@ -1355,7 +1342,7 @@ TOOL.validateDspForm = function(form)
 		{
 			let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dspform-inputs-wrapper");
 			
-			if(!TOOL.isNonEmptyAllNumberic(checkedValues))
+			if(!TOOL.isNonEmptyAllNumberic(checkedValues, mustInteger))
 			{
 				CF.eleAddClass(inputsWrapper, "dg-validation-number");
 				validationOk = false;
@@ -1687,8 +1674,12 @@ TOOL.eleInputType = function(input)
 	return type;
 };
 
-TOOL.isNonEmptyAllNumberic = function(array)
+TOOL.isNonEmptyAllNumberic = function(array, forInteger)
 {
+	forInteger = (forInteger === undefined ? false : forInteger);
+	
+	var regex = (forInteger ? TOOL.INTEGER_REGEX : TOOL.NUMBER_REGEX);
+	
 	for(let i=0; i<array.length; i++)
 	{
 		let val = array[i];
@@ -1696,7 +1687,7 @@ TOOL.isNonEmptyAllNumberic = function(array)
 		if(CF.isEmpty(val) || CF.isNumber(val))
 			continue;
 		
-		if(!TOOL.NUMBER_REGEX.test(val))
+		if(!regex.test(val))
 			return false;
 	}
 	

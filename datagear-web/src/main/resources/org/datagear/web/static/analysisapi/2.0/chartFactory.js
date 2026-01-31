@@ -7588,6 +7588,27 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 			}
 		}
 	}
+	else if(CF.DataSetParamType.INTEGER == dataSetParam.type)
+	{
+		if(CF.isNumber(value))
+		{
+			re = parseInt(value);
+		}
+		else
+		{
+			re = Number(value);
+			
+			//如果由字符串转数值丢失精度，则撤销转换，交由后台处理
+			if(CF.isString(value) && re.toString() != value)
+			{
+				re = value;
+			}
+			else
+			{
+				re = parseInt(re);
+			}
+		}
+	}
 	
 	return re;
 };
