@@ -18,6 +18,7 @@
 -->
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
 <#assign DataSign=statics['org.datagear.analysis.DataSign']>
+<#assign DashboardApiVersion=statics['org.datagear.web.analysis.DashboardApiVersion']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -517,6 +518,7 @@
 	po.attrValuesValidated = true;
 	po.DS_TARGET_FIELD = "${DataSign.TARGET_FIELD}";
 	po.DS_TARGET_DATASET = "${DataSign.TARGET_DATASET}";
+	po.DashboardApiVersion = { LATEST_VERSION: "${DashboardApiVersion.LATEST_VERSION}" };
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -1264,6 +1266,13 @@
 					po.mergeChartDsbs(fm);
 					pm.pluginHasDataSetSign = po.containsDataSetSign(fm.pluginVo);
 					po.attrValuesValidated = false;
+					
+					if(plugin && po.DashboardApiVersion.LATEST_VERSION != plugin.apiVersion)
+					{
+						var msg = $.validator.format("<@spring.message code='chart.plugin.apiVersion.deprecated' />",
+								plugin.apiVersion, po.DashboardApiVersion.LATEST_VERSION);
+						$.tipWarn(msg);
+					}
 				});
 			});
 		},
