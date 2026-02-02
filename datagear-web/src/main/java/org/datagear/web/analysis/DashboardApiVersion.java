@@ -22,7 +22,7 @@ import org.datagear.util.StringUtil;
 /**
  * 看板页面端API版本。
  * <p>
- * 从系统{@code 6.0.0}版本起，整个看板页面端API都进行了重构， 为了解决旧版看板的兼容问题，引入了看板API版本概念，
+ * 系统从{@code 6.0.0}版本起，整个看板页面端API都进行了重构， 为了解决旧版看板的兼容问题，引入了看板API版本概念，
  * 通过在看板里{@code <html>}标签上使用{@code dg-api-version}控制看板API版本切换。
  * </p>
  * 
@@ -40,6 +40,11 @@ public class DashboardApiVersion
 	 * 版本：{@code 2.0}（6.0.0及以上版本的页面端看板API）
 	 */
 	public static final String V2 = "2.0";
+
+	/**
+	 * 最新版本
+	 */
+	public static final String LATEST_VERSION = V2;
 
 	/**
 	 * 是否{@code 1.0}版本。
@@ -71,20 +76,9 @@ public class DashboardApiVersion
 	 */
 	public static String toValidVersion(String version)
 	{
-		version = (version == null ? null : version.trim());
-
-		// 兼容旧版无面端API版本的情况
-		if (StringUtil.isEmpty(version))
-			return V1;
-
-		if (V1.equals(version))
-			return V1;
-
-		if (V2.equals(version))
-			return V2;
-
-		// 返回最新版
-		return V2;
+		// 默认应返回最新版
+		String latestVersion = LATEST_VERSION;
+		return normalize(version, latestVersion);
 	}
 
 	/**
@@ -95,12 +89,30 @@ public class DashboardApiVersion
 	 */
 	public static String trimVersion(String version)
 	{
+		return normalize(version, version);
+	}
+
+	/**
+	 * 规范版本号。
+	 * 
+	 * @param version
+	 * @param dftVersion
+	 * @return
+	 */
+	public static String normalize(String version, String dftVersion)
+	{
 		version = (version == null ? null : version.trim());
 
-		// 兼容旧版无面端API版本的情况
+		// 为空时必须设为V1，以兼容旧版无API版本的情况
 		if (StringUtil.isEmpty(version))
 			return V1;
 
-		return version;
+		if (V1.equalsIgnoreCase(version))
+			return V1;
+
+		if (V2.equalsIgnoreCase(version))
+			return V2;
+
+		return dftVersion;
 	}
 }

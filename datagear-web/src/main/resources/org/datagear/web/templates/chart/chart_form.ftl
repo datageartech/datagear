@@ -1080,8 +1080,7 @@
 		if(attributeForm == null)
 			return true;
 		
-		return (po.attrValuesValidated == true)
-			return true;
+		return (po.attrValuesValidated == true);
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
