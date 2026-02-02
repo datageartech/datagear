@@ -316,7 +316,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	@Deprecated
 	protected void appendCompatFuncForV5_5_0(String apiVersion, StringBuilder buffer, String managerVar, String newLine)
 	{
-		buffer.append("function compatForV5_5_0(plugin){");
+		buffer.append(managerVar + ".compatForV5_5_0 = function(plugin){");
 		buffer.append(newLine);
 		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " != null){");
 		buffer.append(newLine);
@@ -359,12 +359,12 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append(newLine);
 		buffer.append("  }");
 		buffer.append(newLine);
-		buffer.append("  compatDataSignForV5_5_0(plugin." + ChartPlugin.PROPERTY_DATA_SIGNS + ");");
+		buffer.append("  " + managerVar + ".compatDataSignForV5_5_0(plugin." + ChartPlugin.PROPERTY_DATA_SIGNS + ");");
 		buffer.append(newLine);
-		buffer.append("}");
+		buffer.append("};");
 
 		buffer.append(newLine);
-		buffer.append("function compatDataSignForV5_5_0(dataSigns){");
+		buffer.append(managerVar + ".compatDataSignForV5_5_0 = function(dataSigns){");
 		buffer.append(newLine);
 		buffer.append("  if(dataSigns == null || dataSigns.length == 0) return;");
 		buffer.append(newLine);
@@ -382,11 +382,12 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append(newLine);
 		buffer.append("    }");
 		buffer.append(newLine);
+		buffer.append(
+				"    " + managerVar + ".compatDataSignForV5_5_0(dataSigns[i]." + DataSign.PROPERTY_CHILDREN + ");");
+		buffer.append(newLine);
 		buffer.append("  }");
 		buffer.append(newLine);
-		buffer.append("  compatDataSignForV5_5_0(dataSigns." + DataSign.PROPERTY_CHILDREN + ");");
-		buffer.append(newLine);
-		buffer.append("}");
+		buffer.append("};");
 	}
 
 	/**
@@ -403,7 +404,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	protected void appendPluginJsForV5_5_0(Writer out, String apiVersion, HtmlChartPlugin plugin,
 			String managerVar, String pluginVar, Locale locale) throws IOException
 	{
-		out.write("compatForV5_5_0(" + pluginVar + ");");
+		out.write(managerVar + ".compatForV5_5_0(" + pluginVar + ");");
 	}
 
 	/**
