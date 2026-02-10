@@ -42,7 +42,12 @@ public abstract class AbstractFormProperty extends AbstractLabeled
 
 	private boolean array = false;
 
-	/** 默认值 */
+	/**
+	 * 默认值。
+	 * <p>
+	 * 注意：当{@linkplain #isArray()}为{@code true}时，此值应是元素的默认值。
+	 * </p>
+	 */
 	private Object defaultValue = null;
 
 	/** 扩展属性 */

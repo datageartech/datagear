@@ -2499,6 +2499,10 @@ $.inflateChartAttrValuesForm = function(po)
 			}
 			else
 			{
+				//为null且非数组时，使用默认值
+				if(v == null && !prop.array)
+					v = avo.clonePropDefaultValue(prop);
+				
 				v = avo.trimChartAttrValueArray(prop, v);
 				v = avo.encodeAttrValueTreeModel(prop, v);
 			}
@@ -2509,12 +2513,30 @@ $.inflateChartAttrValuesForm = function(po)
 		return data;
 	};
 	
+	avo.clonePropDefaultValue = function(prop)
+	{
+		var re;
+		
+		if(prop.defaultValue == null)
+			re = prop.defaultValue;
+		else if(avo.isObjectProperty(prop))
+			re = $.extend(true, {}, prop.defaultValue);
+		else if($.isArray(prop.defaultValue))
+			re = $.extend(true, [], prop.defaultValue);
+		else
+			re = prop.defaultValue;
+		
+		return re;
+	};
+	
 	//图表属性值转换为树组件Model
 	// "v0" -> { v0: true }
 	// [ "v0", "v1", ... ] -> { v0: true, v1: true, ... }、[ { v0: true }, { v1: true }, ... ]
 	// [ [ "v0", "v1" ], ... ] -> [ { v0: true, v1: true, ... }, ... ]
-	avo.encodeAttrValueTreeModel = function(inputProp, value)
+	avo.encodeAttrValueTreeModel = function(inputProp, value, handleArrayProp)
 	{
+		handleArrayProp = (handleArrayProp === undefined ? true : handleArrayProp);
+		
 		if(value == null)
 			return value;
 		
@@ -2527,7 +2549,7 @@ $.inflateChartAttrValuesForm = function(po)
 		
 		var re;
 		
-		if(inputProp.array)
+		if(handleArrayProp && inputProp.array)
 		{
 			re = [];
 			
@@ -2917,11 +2939,13 @@ $.inflateChartAttrValuesForm = function(po)
 		var ele = null;
 		
 		if(avo.isObjectProperty(prop))
-			ele = {};
+		{
+			ele = avo.doAttrValuesToFormData({}, prop);
+		}
 		else
 		{
-			var isTreeSelect = (prop.inputPayload && prop.inputPayload.treeSelect == true);
-			ele = (isTreeSelect ? {} : null);
+			ele = avo.clonePropDefaultValue(prop);
+			ele = avo.encodeAttrValueTreeModel(prop, ele, false);
 		}
 		
 		if(idx == null)
@@ -3433,7 +3457,7 @@ $.inflateChartAttrValuesForm = function(po)
 				
 				if(propEnableds[propName])
 				{
-					formData[propName] = (prop.array ? [] : avo.doAttrValuesToFormData({}, prop));;
+					formData[propName] = (prop.array ? [] : avo.doAttrValuesToFormData({}, prop));
 					propCollapseds[propName] = false;
 				}
 				else
