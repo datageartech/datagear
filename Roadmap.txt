@@ -6,7 +6,7 @@
 		ok ChartPlugin.attributes重构为attributeForm；
 		ok 默认值支持方式；
 		输入框校验规则：maxLength、minLength、maximum、minimum；
-		显示隐藏控制：displayIf，格式："$.showTtitle && @.series[0].type == 'line'"；
+		启用/禁用控制：enable/disable，格式："$.showTtitle && @.series[0].type == 'line'"；
 		引用；{ "@refId": "seriesTypeOptions" } 表示引用attributeForm.additions.seriesTypeOptions；
 		chart.pluginAttributeValues支持遍历修改、默认值使用选项；
 	整理chartLibRegistry.js；
