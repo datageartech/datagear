@@ -74,8 +74,14 @@
 			</div>
 		</div>
 		<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
-			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
-			<p-button type="button" label="<@spring.message code='saveAndDesign' />" @click="onSaveAndDesign"></p-button>
+			<div class="flex gap-2" v-if="pm.isSaveAndDesignFirst">
+				<p-button type="submit" label="<@spring.message code='saveAndDesign' />"></p-button>
+				<p-button type="button" label="<@spring.message code='onlySave' />" @click="onSaveNoDesign"></p-button>
+			</div>
+			<div class="flex gap-2" v-else>
+				<p-button type="submit" label="<@spring.message code='save' />"></p-button>
+				<p-button type="button" label="<@spring.message code='saveAndDesign' />" @click="onSaveAndDesign"></p-button>
+			</div>
 		</div>
 	</form>
 </div>
@@ -102,6 +108,11 @@
 		action.options.inSaveAndDesignAction = po.inSaveAndDesignAction();
 	};
 	
+	po.isSaveAndDesignFirst = function()
+	{
+		return (po.isAddAction || po.isCopyAction);
+	};
+	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
 	
@@ -119,7 +130,10 @@
 		}
 	});
 
-	po.vuePageModel({});
+	po.vuePageModel(
+	{
+		isSaveAndDesignFirst: po.isSaveAndDesignFirst()
+	});
 	
 	po.vueMethod(
 	{
@@ -140,6 +154,8 @@
 		
 		onSaveAndDesign: function(e)
 		{
+			var state = po.inSaveAndDesignAction();
+			
 			try
 			{
 				po.inSaveAndDesignAction(true);
@@ -147,10 +163,27 @@
 			}
 			finally
 			{
+				po.inSaveAndDesignAction(state);
+			}
+		},
+		
+		onSaveNoDesign: function(e)
+		{
+			var state = po.inSaveAndDesignAction();
+			
+			try
+			{
 				po.inSaveAndDesignAction(false);
+				po.form().submit();
+			}
+			finally
+			{
+				po.inSaveAndDesignAction(state);
 			}
 		}
 	});
+	
+	po.inSaveAndDesignAction(po.isSaveAndDesignFirst());
 })
 (${pid});
 </script>
