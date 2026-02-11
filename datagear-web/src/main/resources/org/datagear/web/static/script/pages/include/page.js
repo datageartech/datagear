@@ -2801,6 +2801,10 @@ $.inflateChartAttrValuesForm = function(po)
 			{
 				value = (value == true || value === "true" || value === "1" ? true : false);
 			}
+			else if(type == avo.FormPropertyType.INTEGER)
+			{
+				value = $.parseIntWithDefault(value, null);
+			}
 			else if(type == avo.FormPropertyType.NUMBER)
 			{
 				value = $.parseToNumber(value);
@@ -3147,7 +3151,7 @@ $.inflateChartAttrValuesForm = function(po)
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
 							<div class="flex-grow-1 flex gap-1">
 								<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text"
-									class="flex-grow-1">
+									class="flex-grow-1" maxlength="200">
 								</p-inputtext>
 								<p-button type="button" :style="{'background-color': formData[inputProp.name][viIdx]}"
 									class="palette-btn surface-border mr-1"
@@ -3172,7 +3176,7 @@ $.inflateChartAttrValuesForm = function(po)
 					</div>
 					<div class="flex gap-1" v-else>
 						<p-inputtext v-model="formData[inputProp.name]" type="text"
-							class="input flex-grow-1" maxlength="100">
+							class="input flex-grow-1" maxlength="200">
 						</p-inputtext>
 						<p-button type="button" :style="{'background-color': formData[inputProp.name]}" class="palette-btn surface-border"
 							@click="showPalettePanel($event, formData, inputProp.name)"></p-button>
@@ -3262,7 +3266,15 @@ $.inflateChartAttrValuesForm = function(po)
 				</div>
 	        	<div class="validate-msg">
 	        		<input :name="concatPropNamePath(propNamePath, inputProp.name)" type="text" class="validate-proxy"
-	        			:class="{'detailRequired': inputProp.required, 'number': inputProp.type == propTypeDef.NUMBER}" />
+	        			:detailrequired="inputProp.required ? 'true' : null"
+	        			:integer="inputProp.type == propTypeDef.INTEGER ? 'true' : null"
+	        			:number="inputProp.type == propTypeDef.NUMBER ? 'true' : null"
+	        			:minlength="inputProp.type == propTypeDef.STRING && inputProp.additions && inputProp.additions['minLength'] != null ? inputProp.additions['minLength'] : null"
+	        			:maxlength="inputProp.type == propTypeDef.STRING && inputProp.additions && inputProp.additions['maxLength'] != null ? inputProp.additions['maxLength'] : null"
+	        			:min="(inputProp.type == propTypeDef.INTEGER || inputProp.type == propTypeDef.NUMBER) && inputProp.additions && inputProp.additions['min'] != null ? inputProp.additions['min'] : null"
+	        			:max="(inputProp.type == propTypeDef.INTEGER || inputProp.type == propTypeDef.NUMBER) && inputProp.additions && inputProp.additions['max'] != null ? inputProp.additions['max'] : null"
+	        			:minsize="inputProp.array && inputProp.additions && inputProp.additions['minSize'] != null ? inputProp.additions['minSize'] : null"
+	        			:maxsize="inputProp.array && inputProp.additions && inputProp.additions['maxSize'] != null ? inputProp.additions['maxSize'] : null" />
 	        	</div>
 			</div>
 		</div>

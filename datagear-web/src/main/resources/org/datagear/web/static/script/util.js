@@ -2250,9 +2250,56 @@
 (function($, undefined)
 {
 
+$.INTEGER_VALIDATOR_REGEX = /^-?\d+$/;
 $.NUMBER_VALIDATOR_REGEX = /^-?\d+\.?\d*$/;
 
-$.matchesNumberForValidator = function(value)
+$.detailrequiredForValidator = function(value)
+{
+	if($.isEmpty(value))
+		return false;
+	
+	if($.isArray(value))
+	{
+		for(var i=0; i<value.length; i++)
+		{
+			if(!$.detailrequiredForValidator(value[i]))
+				return false;
+		}
+	}
+	else if($.isPlainObject(value) && $.isEmptyObject(value))
+	{
+		return false;
+	}
+	
+	return true;
+};
+
+$.integerForValidator = function(value)
+{
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value))
+		return true;
+	
+	if($.isTypeNumber(value))
+	{
+		return $.INTEGER_VALIDATOR_REGEX.test(value+"");
+	}
+	
+	if($.isArray(value))
+	{
+		for(let i=0; i<value.length; i++)
+		{
+			if(!$.integerForValidator(value[i]))
+				return false;
+		}
+		
+		return true;
+	}
+	else
+		return $.INTEGER_VALIDATOR_REGEX.test(value);
+};
+
+$.numberForValidator = function(value)
 {
 	//空值应在required中校验，而非这里
 	if($.isEmpty(value))
@@ -2265,7 +2312,7 @@ $.matchesNumberForValidator = function(value)
 	{
 		for(let i=0; i<value.length; i++)
 		{
-			if(!$.matchesNumberForValidator(value[i]))
+			if(!$.numberForValidator(value[i]))
 				return false;
 		}
 		
@@ -2275,50 +2322,206 @@ $.matchesNumberForValidator = function(value)
 		return $.NUMBER_VALIDATOR_REGEX.test(value);
 };
 
-$.detailRequiredForValidator = function(value)
+$.minForValidator = function(value, min)
 {
-	if($.isEmpty(value))
-		return false;
-		
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value) || isNaN(min))
+		return true;
+	
 	if($.isArray(value))
 	{
-		for(var i=0; i<value.length; i++)
+		for(let i=0; i<value.length; i++)
 		{
-			if(!$.detailRequiredForValidator(value[i]))
+			if(!$.minForValidator(value[i], min))
 				return false;
 		}
+		
+		return true;
 	}
-	else if($.isPlainObject(value) && $.isEmptyObject(value))
+	else if($.isTypeNumber(value))
 	{
-		return false;
+		return (value >= min);
 	}
-	
-	return true;
+	else
+	{
+		value = $.parseToNumber(value);
+		value = (isNaN(value) ? null : value);
+		return $.minForValidator(value, min);
+	}
 };
 
+$.maxForValidator = function(value, max)
+{
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value) || isNaN(max))
+		return true;
+	
+	if($.isArray(value))
+	{
+		for(let i=0; i<value.length; i++)
+		{
+			if(!$.maxForValidator(value[i], max))
+				return false;
+		}
+		
+		return true;
+	}
+	else if($.isTypeNumber(value))
+	{
+		return (value <= max);
+	}
+	else
+	{
+		value = $.parseToNumber(value);
+		value = (isNaN(value) ? null : value);
+		return $.maxForValidator(value, max);
+	}
+};
+
+$.minlengthForValidator = function(value, minlength)
+{
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value) || isNaN(minlength))
+		return true;
+	
+	if($.isArray(value))
+	{
+		for(let i=0; i<value.length; i++)
+		{
+			if(!$.minlengthForValidator(value[i], minlength))
+				return false;
+		}
+		
+		return true;
+	}
+	else
+	{
+		value = ($.isTypeString(value) ? value : (value+""));
+		return (value.length >= minlength);
+	}
+};
+
+$.maxlengthForValidator = function(value, maxlength)
+{
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value) || isNaN(maxlength))
+		return true;
+	
+	if($.isArray(value))
+	{
+		for(let i=0; i<value.length; i++)
+		{
+			if(!$.maxlengthForValidator(value[i], maxlength))
+				return false;
+		}
+		
+		return true;
+	}
+	else
+	{
+		value = ($.isTypeString(value) ? value : (value+""));
+		return (value.length <= maxlength);
+	}
+};
+
+$.minsizeForValidator = function(value, minsize)
+{
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value) || isNaN(minsize))
+		return true;
+	
+	if($.isArray(value))
+	{
+		return (value.length >= minsize);
+	}
+	else
+		return true;
+};
+
+$.maxsizeForValidator = function(value, maxsize)
+{
+	//空值应在required中校验，而非这里
+	if($.isEmpty(value) || isNaN(maxsize))
+		return true;
+	
+	if($.isArray(value))
+	{
+		return (value.length <= maxsize);
+	}
+	else
+		return true;
+};
 //重写"required"校验函数，以支持Vue表单数据模型
 $.validator.addMethod("required", function(value, ele)
 {
 	return !$.isEmpty(value);
 });
 
+//新增数组元素非空、对象非空校验函数
+$.validator.addMethod("detailrequired", function(value, ele)
+{
+	return $.detailrequiredForValidator(value);
+});
+
+//重写"integer"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("integer", function(value, ele)
+{
+	return $.integerForValidator(value);
+});
+
 //重写"number"校验函数，以支持Vue表单数据模型
 $.validator.addMethod("number", function(value, ele)
 {
-	return $.matchesNumberForValidator(value);
+	return $.numberForValidator(value);
 });
 
-//新增数组元素非空、对象非空校验函数
-$.validator.addMethod("detailRequired", function(value, ele)
+//重写"min"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("min", function(value, ele)
 {
-	return $.detailRequiredForValidator(value);
+	var min = parseFloat($(ele).attr("min"));
+	return $.minForValidator(value, min);
+});
+
+//重写"max"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("max", function(value, ele)
+{
+	var max = parseFloat($(ele).attr("max"));
+	return $.maxForValidator(value, max);
+});
+
+//重写"minlength"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("minlength", function(value, ele)
+{
+	var minlength = parseInt($(ele).attr("minlength"));
+	return $.minlengthForValidator(value, minlength);
+});
+
+//重写"maxlength"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("maxlength", function(value, ele)
+{
+	var maxlength = parseInt($(ele).attr("maxlength"));
+	return $.maxlengthForValidator(value, maxlength);
+});
+
+//重写"minsize"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("minsize", function(value, ele)
+{
+	var minsize = parseInt($(ele).attr("minsize"));
+	return $.minsizeForValidator(value, minsize);
+});
+
+//重写"maxsize"校验函数，以支持Vue表单数据模型
+$.validator.addMethod("maxsize", function(value, ele)
+{
+	var maxsize = parseInt($(ele).attr("maxsize"));
+	return $.maxsizeForValidator(value, maxsize);
 });
 
 $.toggleInvalidForAncestor = function(ele, invalid)
 {
 	if(ele == null || ele.length == 0)
 		return;
-		
+	
 	ele = $(ele);
 	
 	if(ele.is("form") || ele.is("body"))
