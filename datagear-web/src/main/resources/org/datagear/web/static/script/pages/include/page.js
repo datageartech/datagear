@@ -3122,18 +3122,16 @@ $.inflateChartAttrValuesForm = function(po)
 									v-if="inputProp.inputPayload.treeSelect == true">
 								</p-treeselect>
 								<p-dropdown v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									option-label="name" option-value="value" class="flex-grow-1 mr-1"
+									option-label="name" option-value="value" class="flex-grow-1"
 									v-else>
 								</p-dropdown>
 							</div>
-							<div class="flex align-items-center gap-1">
+							<div class="flex align-items-center gap-1" v-if="!readonly">
 								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-									@click="insertArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="insertArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 								<p-button type="button" icon="pi pi-minus" severity="danger" outlined 
-									@click="removeArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="removeArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 							</div>
 						</div>
@@ -3172,17 +3170,15 @@ $.inflateChartAttrValuesForm = function(po)
 									class="flex-grow-1" maxlength="200">
 								</p-inputtext>
 								<p-button type="button" :style="{'background-color': formData[inputProp.name][viIdx]}"
-									class="palette-btn surface-border mr-1"
+									class="palette-btn surface-border"
 									@click="showPalettePanel($event, formData[inputProp.name], viIdx)"></p-button>
 							</div>
-							<div class="flex align-items-center gap-1">
+							<div class="flex align-items-center gap-1" v-if="!readonly">
 								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-									@click="insertArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="insertArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 								<p-button type="button" icon="pi pi-minus" severity="danger" outlined
-									@click="removeArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="removeArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 							</div>
 						</div>
@@ -3216,14 +3212,12 @@ $.inflateChartAttrValuesForm = function(po)
 									<label :for="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx+'.'+viIdx">{{opt.name}}</label>
 								</div>
 							</div>
-							<div class="flex align-items-center gap-1">
+							<div class="flex align-items-center gap-1" v-if="!readonly">
 								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-									@click="insertArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="insertArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 								<p-button type="button" icon="pi pi-minus" severity="danger" outlined
-									@click="removeArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="removeArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 							</div>
 						</div>
@@ -3256,14 +3250,12 @@ $.inflateChartAttrValuesForm = function(po)
 							<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
 								v-else>
 							</p-inputtext>
-							<div class="flex align-items-center gap-1">
+							<div class="flex align-items-center gap-1" v-if="!readonly">
 								<p-button type="button" icon="pi pi-plus" severity="secondary" outlined
-									@click="insertArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="insertArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 								<p-button type="button" icon="pi pi-minus" severity="danger" outlined
-									@click="removeArrayValEle(formData, inputProp, viIdx)"
-									v-if="!readonly">
+									@click="removeArrayValEle(formData, inputProp, viIdx)">
 								</p-button>
 							</div>
 						</div>
