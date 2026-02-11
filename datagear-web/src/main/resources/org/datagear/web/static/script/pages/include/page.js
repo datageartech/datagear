@@ -2071,6 +2071,8 @@ $.inflateChartAttrValuesForm = function(po)
 {
 	var avo = (po.avo || (po.avo = {}));
 	
+	avo.REF_ID_NAME = "$refId";
+	
 	avo.isObjectProperty = function(prop)
 	{
 		return (prop != null && (prop.type == avo.FormPropertyType.OBJECT || prop.properties !== undefined));
@@ -2082,22 +2084,23 @@ $.inflateChartAttrValuesForm = function(po)
 	};
 	
 	//将org.datagear.analysis.form.FormProperty转换为标准格式
-	avo.toTrimProperty = function(prop, clone)
+	avo.toTrimProperty = function(prop, clone, rootProp)
 	{
 		clone = (clone === undefined ? true : clone);
+		rootProp = (rootProp === undefined ? prop : rootProp);
 		
 		if(prop == null)
 			return prop;
 		
 		var re = (clone ? $.extend(true, {}, prop) : prop);
 		
-		avo.trimProperty(re);
+		avo.doTrimProperty(re, rootProp);
 		
 		if(avo.isObjectProperty(re) && !$.isEmpty(re.properties))
 		{
 			for(var i=0; i<re.properties.length; i++)
 			{
-				avo.toTrimProperty(re.properties[i], false);
+				avo.toTrimProperty(re.properties[i], false, rootProp);
 			}
 		}
 		
@@ -2106,8 +2109,11 @@ $.inflateChartAttrValuesForm = function(po)
 	
 	avo.propertyDomIdIndex = 0;
 	
-	avo.trimProperty = function(prop)
+	avo.doTrimProperty = function(prop, rootProp)
 	{
+		if(prop.isTrimmed)
+			return;
+		
 		prop.domId = po.concatPid("avoprop_"+ (avo.propertyDomIdIndex++));
 		prop.nameLabel = (prop.nameLabel == null ? {} : prop.nameLabel);
 		prop.nameLabel.value = ($.isEmpty(prop.nameLabel.value) ? prop.name : prop.nameLabel.value);
@@ -2116,6 +2122,8 @@ $.inflateChartAttrValuesForm = function(po)
 		
 		if(avo.isObjectProperty(prop))
 			return;
+		
+		var rootAdditions = (rootProp ? rootProp.additions : null);
 		
 		//布尔型默认作为RADIO处理
 		if(prop.type == avo.FormPropertyType.BOOLEAN)
@@ -2126,7 +2134,7 @@ $.inflateChartAttrValuesForm = function(po)
 			if(!prop.inputPayload)
 			{
 				var pm = po.vuePageModel();
-				prop.inputPayload = po.vueRaw(pm.booleanOptions);
+				prop.inputPayload = $.extend(true, [], po.vueRaw(pm.booleanOptions));
 			}
 		}
 		
@@ -2137,6 +2145,23 @@ $.inflateChartAttrValuesForm = function(po)
 				|| inputType == avo.FormPropertyInputType.RADIO
 				|| inputType == avo.FormPropertyInputType.CHECKBOX)
 		{
+			//处理inputPayload中的引用
+			if(prop.inputPayload != null)
+			{
+				//处理inputPayload格式：{ "$refId": ... }
+				if(prop.inputPayload[avo.REF_ID_NAME] !== undefined)
+				{
+					var refId = prop.inputPayload[avo.REF_ID_NAME];
+					prop.inputPayload = (rootAdditions ? $.deepClonePlain(rootAdditions[refId]) : null);
+				}
+				//处理inputPayload.options格式：{ "$refId": ... }
+				else if(prop.inputPayload.options && prop.inputPayload.options[avo.REF_ID_NAME] !== undefined)
+				{
+					var refId = prop.inputPayload.options[avo.REF_ID_NAME];
+					prop.inputPayload.options = (rootAdditions ? $.deepClonePlain(rootAdditions[refId]) : null);
+				}
+			}
+			
 			var inputPayload = (prop.inputPayload || []);
 			
 			//数组、"DG_MAP"：转换为{ multiple: false, options: ... }格式
@@ -2518,20 +2543,8 @@ $.inflateChartAttrValuesForm = function(po)
 	
 	avo.clonePropDefaultValue = function(prop)
 	{
-		var re;
-		
 		var dftValue = prop.defaultValue;
-		
-		if(dftValue == null)
-			re = dftValue;
-		else if($.isArray(dftValue))
-			re = $.extend(true, [], dftValue);
-		else if($.isPlainObject(dftValue))
-			re = $.extend(true, {}, dftValue);
-		else
-			re = dftValue;
-		
-		return re;
+		return $.deepClonePlain(dftValue);
 	};
 	
 	//图表属性值转换为树组件Model

@@ -1689,6 +1689,23 @@
 		}
 	};
 	
+	//深度拷贝无循环依赖的对象
+	$.deepClonePlain = function(plain)
+	{
+		var re;
+		
+		if(plain == null)
+			re = plain;
+		else if($.isArray(plain))
+			re = $.extend(true, [], plain);
+		else if($.isPlainObject(plain))
+			re = $.extend(true, {}, plain);
+		else
+			re = plain;
+		
+		return re;
+	};
+	
 	/**
 	 * 静默执行函数。
 	 * 
