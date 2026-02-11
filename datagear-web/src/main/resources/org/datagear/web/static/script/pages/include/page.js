@@ -2422,9 +2422,10 @@ $.inflateChartAttrValuesForm = function(po)
 	avo.ctrlPropName = po.concatPid("avoctlprop");
 	
 	//图表属性值对象转换为org.datagear.analysis.ChartPluginAttributeForm的表单数据模型
-	avo.attrValuesToFormData = function(attrValues, pluginAttrForm, clone)
+	avo.attrValuesToFormData = function(attrValues, pluginAttrForm, clone, initDftValue)
 	{
 		clone = (clone === undefined ? true : clone);
+		initDftValue = (initDftValue === undefined ? true : initDftValue);
 		
 		var re = (attrValues || {});
 		
@@ -2439,7 +2440,7 @@ $.inflateChartAttrValuesForm = function(po)
 		
 		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
-			avo.doAttrValuesToFormData(re, pluginAttrForm);
+			avo.doAttrValuesToFormData(re, pluginAttrForm, initDftValue);
 		}
 		else
 		{
@@ -2448,14 +2449,16 @@ $.inflateChartAttrValuesForm = function(po)
 			if(re[name] == null)
 				re[name] = {};
 			
-			avo.doAttrValuesToFormData(re[name], pluginAttrForm);
+			avo.doAttrValuesToFormData(re[name], pluginAttrForm, initDftValue);
 		}
 		
 		return re;
 	};
 	
-	avo.doAttrValuesToFormData = function(attrValues, objProperty)
+	avo.doAttrValuesToFormData = function(attrValues, objProperty, initDftValue)
 	{
+		initDftValue = (initDftValue === undefined ? true : initDftValue);
+		
 		if(attrValues == null || objProperty == null || $.isEmpty(objProperty.properties))
 			return;
 		
@@ -2485,13 +2488,13 @@ $.inflateChartAttrValuesForm = function(po)
 							v = [ v ];
 						
 						for(var j=0; j<v.length; j++)
-							avo.doAttrValuesToFormData(v[j], prop);
+							avo.doAttrValuesToFormData(v[j], prop, initDftValue);
 					}
 				}
 				else
 				{
 					if(v != null)
-						avo.doAttrValuesToFormData(v, prop);
+						avo.doAttrValuesToFormData(v, prop, initDftValue);
 				}
 				
 				propEnableds[prop.name] = (v != null);
@@ -2500,7 +2503,7 @@ $.inflateChartAttrValuesForm = function(po)
 			else
 			{
 				//为null且非数组时，使用默认值
-				if(v == null && !prop.array)
+				if(initDftValue && v == null && !prop.array)
 					v = avo.clonePropDefaultValue(prop);
 				
 				v = avo.trimChartAttrValueArray(prop, v);
@@ -2517,14 +2520,16 @@ $.inflateChartAttrValuesForm = function(po)
 	{
 		var re;
 		
-		if(prop.defaultValue == null)
-			re = prop.defaultValue;
-		else if(avo.isObjectProperty(prop))
-			re = $.extend(true, {}, prop.defaultValue);
-		else if($.isArray(prop.defaultValue))
-			re = $.extend(true, [], prop.defaultValue);
+		var dftValue = prop.defaultValue;
+		
+		if(dftValue == null)
+			re = dftValue;
+		else if($.isArray(dftValue))
+			re = $.extend(true, [], dftValue);
+		else if($.isPlainObject(dftValue))
+			re = $.extend(true, {}, dftValue);
 		else
-			re = prop.defaultValue;
+			re = dftValue;
 		
 		return re;
 	};
@@ -2876,7 +2881,7 @@ $.inflateChartAttrValuesForm = function(po)
 				delete formData[p];
 		}
 		
-		avo.attrValuesToFormData(rootData, pluginAttrForm, false);
+		avo.attrValuesToFormData(rootData, pluginAttrForm, false, false);
 	};
 	
 	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginAttrForm)
