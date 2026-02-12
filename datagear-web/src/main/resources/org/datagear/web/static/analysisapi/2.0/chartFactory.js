@@ -5539,7 +5539,7 @@ CF.evalSilently = function(str, defaultValue)
 	
 	try
 	{
-		re = Function("return ("+str+");")();
+		re = new Function("return ("+str+");")();
 	}
 	catch(e)
 	{
@@ -5620,7 +5620,7 @@ CF.propertyPathValue = function(obj, propertyPath)
 					CF.PROPERTY_PATH_FUNCTIONS.shift();
 			}
 			
-			func = Function("obj", "return ("+propertyPath+");");
+			func = new Function("obj", "return ("+propertyPath+");");
 			CF.PROPERTY_PATH_FUNCTIONS.push({ name: propertyPath, value: func });
 		}
 		

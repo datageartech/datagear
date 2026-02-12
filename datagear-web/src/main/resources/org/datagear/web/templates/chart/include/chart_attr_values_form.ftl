@@ -29,9 +29,10 @@ page_palette.ftl
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
 		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginAttrForm" :prop-name-path=""
-			:form-data="pm.avoModel.formData" :readonly="pm.avoModel.readonly" :prop-type-def="pm.avoModel.FormPropertyType"
+			:form-data="pm.avoModel.formData" :root-form-data="pm.avoModel.formData" :prop-type-def="pm.avoModel.FormPropertyType"
 			:prop-input-type-def="pm.avoModel.FormPropertyInputType" :i18n="pm.avoModel.i18n"
-			:ctrl-prop-name="pm.avoModel.ctrlPropName" :enable-options="pm.avoModel.enableOptions">
+			:ctrl-prop-name="pm.avoModel.ctrlPropName" :enable-options="pm.avoModel.enableOptions"
+			:readonly="pm.avoModel.readonly">
 		</dg-obj-prop-field>
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">

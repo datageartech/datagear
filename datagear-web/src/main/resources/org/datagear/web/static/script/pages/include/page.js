@@ -2072,6 +2072,10 @@ $.inflateChartAttrValuesForm = function(po)
 	var avo = (po.avo || (po.avo = {}));
 	
 	avo.REF_ID_NAME = "$refId";
+	avo.DISABLEIF_NAME = "disableIf";
+	avo.ENABLEIF_NAME = "enableIf";
+	avo.EVAL_ENABLED_FUNC_ROOT_DATA_ARG = "$root";
+	avo.EVAL_ENABLED_FUNC_THIS_DATA_ARG = "$this";
 	
 	avo.isObjectProperty = function(prop)
 	{
@@ -2114,14 +2118,23 @@ $.inflateChartAttrValuesForm = function(po)
 		if(prop.isTrimmed)
 			return;
 		
+		prop.isTrimmed = true;
 		prop.domId = po.concatPid("avoprop_"+ (avo.propertyDomIdIndex++));
 		prop.nameLabel = (prop.nameLabel == null ? {} : prop.nameLabel);
 		prop.nameLabel.value = ($.isEmpty(prop.nameLabel.value) ? prop.name : prop.nameLabel.value);
 		prop.nameLabel.value = ($.isEmpty(prop.nameLabel.value) ? po.i18n.unnamed : prop.nameLabel.value);
-		prop.isTrimmed = true;
+		avo.buildEvalEnabledFunc(prop);
 		
 		if(avo.isObjectProperty(prop))
+		{
+			if(prop.groups != null)
+			{
+				for(var i=0; i<prop.groups.length; i++)
+					avo.buildEvalEnabledFunc(prop.groups[i]);
+			}
+			
 			return;
+		}
 		
 		var rootAdditions = (rootProp ? rootProp.additions : null);
 		
@@ -2442,6 +2455,35 @@ $.inflateChartAttrValuesForm = function(po)
 		}
 		
 		return groups;
+	};
+	
+	avo.buildEvalEnabledFunc = function(additionsAware)
+	{
+		if(additionsAware == null || additionsAware.additions == null)
+			return;
+		
+		var additions = additionsAware.additions;
+		var disableIf = additions[avo.DISABLEIF_NAME];
+		var enableIf = additions[avo.ENABLEIF_NAME];
+		
+		if($.isEmpty(disableIf) && $.isEmpty(enableIf))
+			return;
+		
+		var funcBody = "try{ ";
+		
+		//仅允许disableIf和enableIf的其中之一有效，且disableIf优先
+		if(!$.isEmpty(disableIf))
+		{
+			funcBody += "if(("+disableIf+") === true) { return false; } else { return true; }";
+		}
+		else if(!$.isEmpty(enableIf))
+		{
+			funcBody += "if(("+enableIf+") === true) { return true; } else { return false; }";
+		}
+		
+		funcBody += " } catch(e) { return true; }";
+		
+		additionsAware.evalEnabledFunc = new Function(avo.EVAL_ENABLED_FUNC_ROOT_DATA_ARG, avo.EVAL_ENABLED_FUNC_THIS_DATA_ARG, funcBody);
 	};
 	
 	avo.ctrlPropName = po.concatPid("avoctlprop");
@@ -3008,6 +3050,16 @@ $.inflateChartAttrValuesForm = function(po)
 			return (propNamePath ? propNamePath+"." : "") + $.escapePropPathEle(name);
 	};
 	
+	avo.evalEleEnabled = function(enableHandler, rootFormData, formData)
+	{
+		if(enableHandler == null || enableHandler.evalEnabledFunc == null)
+			return true;
+		
+		//函数体里的this应指向formData
+		var re = (enableHandler.evalEnabledFunc.call(formData, rootFormData, formData) !== false);
+		return re;
+	};
+	
 	po.setupChartAttrValuesForm = function(pluginAttrForm, attrValues, options)
 	{
 		options = $.extend(
@@ -3088,6 +3140,7 @@ $.inflateChartAttrValuesForm = function(po)
 			inputProp: { type: Object },
 			propNamePath: { type: String },
 			formData: { type: Object },
+			rootFormData: { type: Object },
 			readonly: { type: Boolean },
 			propTypeDef: { type: Object },
 			propInputTypeDef: { type: Object },
@@ -3105,7 +3158,7 @@ $.inflateChartAttrValuesForm = function(po)
 			<div class="field-input col-12">
 				<div v-if="inputProp.inputType == propInputTypeDef.SELECT">
 					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
-						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" class="flex gap-2">
 							<div class="flex-grow-1 flex" v-if="inputProp.inputPayload.multiple">
 								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
 									selection-mode="multiple" class="w-full" :placeholder="i18n.none"
@@ -3166,7 +3219,7 @@ $.inflateChartAttrValuesForm = function(po)
 				</div>
 				<div v-else-if="inputProp.inputType == propInputTypeDef.COLOR">
 					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
-						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" class="flex gap-2">
 							<div class="flex-grow-1 flex gap-1">
 								<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text"
 									class="flex-grow-1" maxlength="200">
@@ -3202,7 +3255,7 @@ $.inflateChartAttrValuesForm = function(po)
 				</div>
 				<div v-else-if="inputProp.inputType == propInputTypeDef.RADIO || inputProp.inputType == propInputTypeDef.CHECKBOX">
 					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
-						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" class="flex gap-2">
 							<div class="flex-grow-1 p-inputtext p-component p-2 flex gap-3">
 								<div v-for="(opt, optIdx) in inputProp.inputPayload.options" class="inline-flex align-items-center gap-1">
 									<p-radiobutton :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name+'.'+optIdx+'.'+viIdx"
@@ -3249,7 +3302,7 @@ $.inflateChartAttrValuesForm = function(po)
 				</div>
 				<div v-else>
 					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
-						<div v-for="(vi, viIdx) in formData[inputProp.name]" :key="viIdx" class="flex gap-2">
+						<div v-for="(vi, viIdx) in formData[inputProp.name]" class="flex gap-2">
 							<p-textarea v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
 								 v-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
 							</p-textarea>
@@ -3332,6 +3385,7 @@ $.inflateChartAttrValuesForm = function(po)
 			objProp: { type: Object },
 			propNamePath: { type: String },
 			formData: { type: Object },
+			rootFormData: { type: Object },
 			readonly: { type: Boolean },
 			propTypeDef: { type: Object },
 			propInputTypeDef: { type: Object },
@@ -3341,113 +3395,122 @@ $.inflateChartAttrValuesForm = function(po)
 		},
 		template:
 		`
-		<p-accordion :multiple="true" :active-index="[0]" :class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
-			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps" :pt="{root:{'class':'invalid-indicator'}}">
+		<p-accordion :multiple="true" :active-index="[0]"
+			:class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
+			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps" :pt="{root:{'class':'invalid-indicator'}}"
+				:disabled="evalEleEnabled(group, rootFormData, formData) == false">
 				<template #header>
 					<label class='color-for-invalid'>{{group.nameLabel.value}}</label>
 				</template>
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
-						<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
-							<p-panel :toggleable="false"
-								class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
-								<template #header>
-									<label :class="{'required-label': prop.required}" class="color-for-invalid">
-										<span class="font-bold">{{prop.nameLabel.value}}</span>
-										<span class="text-color-secondary text-sm ml-1">
-											{{formData[prop.name] == null ? '' : formData[prop.name].length}}
-										</span>
-									</label>
-								</template>
-								<template #icons>
-									<div class="inline-flex align-items-center gap-3 text-sm">
-										<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-											:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
-											@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
-										</p-togglebutton>
-										<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
-											severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
-										</p-button>
-									</div>
-								</template>
-								<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
-									<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
-										:toggleable="true" class="sm-header-y-padding panel-icon-align-center invalid-indicator">
-										<template #header>
-											<label class="color-for-invalid">
-												<span class="font-bold">{{prop.nameLabel.value}}</span>
-												<span class="text-color-secondary text-sm ml-1">
-													{{(propDataEleIdx+1)+'/'+formData[prop.name].length}}
-												</span>
-											</label>
-										</template>
-										<template #icons>
-											<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
-												<p-button type="button" severity="secondary"
-													@click="moveUpArrayValEle(formData, prop, propDataEleIdx)">
-													{{i18n.moveUp}}
-												</p-button>
-												<p-button type="button" severity="secondary"
-													@click="moveDownArrayValEle(formData, prop, propDataEleIdx)">
-													{{i18n.moveDown}}
-												</p-button>
-												<p-button type="button" severity="secondary"
-													@click="insertArrayValEle(formData, prop, propDataEleIdx)">
-													{{i18n.insert}}
-												</p-button>
-												<p-button type="button" severity="danger"
-													@click="removeArrayValEle(formData, prop, propDataEleIdx)">
-													{{i18n.del}}
-												</p-button>
-											</div>
-										</template>
-										<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(concatPropNamePath(propNamePath, prop.name), propDataEleIdx)"
-											:form-data="propDataEle" :readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
-											:ctrl-prop-name="ctrlPropName" :enable-options="enableOptions">
-										</dg-obj-prop-field>
-									</p-panel>
-									<div>
-										<div class="text-sm" v-if="!readonly">
-											<p-button type="button" icon="pi pi-plus" :label="prop.nameLabel.value"
-												severity="secondary" @click="insertArrayValEle(formData, prop)">
+						<div v-if="evalEleEnabled(group, rootFormData, formData) && evalEleEnabled(prop, rootFormData, formData)">
+							<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
+								<p-panel :toggleable="false"
+									class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+									<template #header>
+										<label :class="{'required-label': prop.required}" class="color-for-invalid">
+											<span class="font-bold">{{prop.nameLabel.value}}</span>
+											<span class="text-color-secondary text-sm ml-1">
+												{{formData[prop.name] == null ? '' : formData[prop.name].length}}
+											</span>
+										</label>
+									</template>
+									<template #icons>
+										<div class="inline-flex align-items-center gap-3 text-sm">
+											<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
+												:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
+												@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
+											</p-togglebutton>
+											<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
+												severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
 											</p-button>
 										</div>
-										<div class="field-input" v-if="group.required">
-								        	<div class="validate-msg">
-								        		<input :name="prop.name" required type="text" class="validate-proxy" />
+									</template>
+									<div class="flex flex-column gap-3 mb-2"  v-if="formData[prop.name] != null">
+										<p-panel v-for="(propDataEle, propDataEleIdx) in formData[prop.name]"
+											:toggleable="true" class="sm-header-y-padding panel-icon-align-center invalid-indicator">
+											<template #header>
+												<label class="color-for-invalid">
+													<span class="font-bold">{{prop.nameLabel.value}}</span>
+													<span class="text-color-secondary text-sm ml-1">
+														{{(propDataEleIdx+1)+'/'+formData[prop.name].length}}
+													</span>
+												</label>
+											</template>
+											<template #icons>
+												<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
+													<p-button type="button" severity="secondary"
+														@click="moveUpArrayValEle(formData, prop, propDataEleIdx)">
+														{{i18n.moveUp}}
+													</p-button>
+													<p-button type="button" severity="secondary"
+														@click="moveDownArrayValEle(formData, prop, propDataEleIdx)">
+														{{i18n.moveDown}}
+													</p-button>
+													<p-button type="button" severity="secondary"
+														@click="insertArrayValEle(formData, prop, propDataEleIdx)">
+														{{i18n.insert}}
+													</p-button>
+													<p-button type="button" severity="danger"
+														@click="removeArrayValEle(formData, prop, propDataEleIdx)">
+														{{i18n.del}}
+													</p-button>
+												</div>
+											</template>
+											<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(concatPropNamePath(propNamePath, prop.name), propDataEleIdx)"
+												:form-data="propDataEle" :root-form-data="rootFormData" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
+												:ctrl-prop-name="ctrlPropName" :enable-options="enableOptions"
+												:readonly="readonly">
+											</dg-obj-prop-field>
+										</p-panel>
+										<div>
+											<div class="text-sm" v-if="!readonly">
+												<p-button type="button" icon="pi pi-plus" :label="prop.nameLabel.value"
+													severity="secondary" @click="insertArrayValEle(formData, prop)">
+												</p-button>
+											</div>
+											<div class="field-input" v-if="group.required">
+									        	<div class="validate-msg">
+									        		<input :name="prop.name" required type="text" class="validate-proxy" />
+									        	</div>
 								        	</div>
 							        	</div>
 						        	</div>
-					        	</div>
-					        </p-panel>
-						</div>
-						<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
-							<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center invalid-indicator"
-								:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
-								<template #header>
-									<label class="font-bold color-for-invalid" :class="{'required-label': prop.required}">{{prop.nameLabel.value}}</label>
-								</template>
-								<template #icons>
-									<div class="inline-flex align-items-center gap-3 text-sm">
-										<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-											:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
-											@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
-										</p-togglebutton>
-										<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
-											severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
-										</p-button>
-									</div>
-								</template>
-								<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)" :form-data="formData[prop.name]"
-									:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
-									:ctrl-prop-name="ctrlPropName" :enable-options="enableOptions" v-if="formData[prop.name] != null">
-								</dg-obj-prop-field>
-							</p-panel>
-						</div>
-						<div v-else>
-							<dg-input-prop-field :input-prop="prop" :prop-name-path="propNamePath" :form-data="formData"
-								:readonly="readonly" :prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n">
-							</dg-input-prop-field>
+						        </p-panel>
+							</div>
+							<div class="mb-3" v-else-if="prop.type == propTypeDef.OBJECT">
+								<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center invalid-indicator"
+									:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
+									<template #header>
+										<label class="font-bold color-for-invalid" :class="{'required-label': prop.required}">{{prop.nameLabel.value}}</label>
+									</template>
+									<template #icons>
+										<div class="inline-flex align-items-center gap-3 text-sm">
+											<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
+												:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
+												@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
+											</p-togglebutton>
+											<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
+												severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
+											</p-button>
+										</div>
+									</template>
+									<dg-obj-prop-field :obj-prop="prop" :prop-name-path="concatPropNamePath(propNamePath, prop.name)"
+										:form-data="formData[prop.name]" :root-form-data="rootFormData"
+										:prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
+										:ctrl-prop-name="ctrlPropName" :enable-options="enableOptions"
+										:readonly="readonly" v-if="formData[prop.name] != null">
+									</dg-obj-prop-field>
+								</p-panel>
+							</div>
+							<div v-else>
+								<dg-input-prop-field :input-prop="prop" :prop-name-path="propNamePath"
+									:form-data="formData" :root-form-data="rootFormData"
+									:prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
+									:readonly="readonly">
+								</dg-input-prop-field>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -3508,14 +3571,16 @@ $.inflateChartAttrValuesForm = function(po)
 					});
 				}
 			},
-			
 			onToggleObjPropPanel: function(formData, prop)
 			{
 				var ctrlPropName = this.ctrlPropName;
 				var ctrlObj = formData[ctrlPropName];
 				var propCollapseds = ctrlObj.propCollapseds;
 				propCollapseds[prop.name] = !propCollapseds[prop.name];
-				
+			},
+			evalEleEnabled: function(enableHandler, rootFormData, formData)
+			{
+				return avo.evalEleEnabled(enableHandler, rootFormData, formData);
 			}
 		},
 		
