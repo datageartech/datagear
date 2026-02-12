@@ -6903,14 +6903,14 @@
 		
 		try
 		{
-			re = Function("return ("+str+");")();
+			re = new Function("return ("+str+");")();
 		}
 		catch(e)
 		{
 			chartFactory.logException(e);
 		}
 		
-		return (re || defaultValue);
+		return (re != null ? re : defaultValue);
 	};
 	
 	/**
