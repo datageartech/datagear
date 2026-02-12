@@ -93,6 +93,8 @@ page_palette.ftl
 	po.i18n.del = "<@spring.message code='delete' />";
 	po.i18n.enable = "<@spring.message code='enable' />";
 	po.i18n.disable = "<@spring.message code='disable' />";
+	po.i18n.actived = "<@spring.message code='actived' />";
+	po.i18n.cleared = "<@spring.message code='cleared' />";
 	
 	//page.js
 	$.inflateChartAttrValuesForm(po);

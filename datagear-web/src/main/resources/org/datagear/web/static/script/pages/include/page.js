@@ -2712,7 +2712,7 @@ $.inflateChartAttrValuesForm = function(po)
 		props = (props == null ? [] : props);
 		var propNameMap = {};
 		
-		var propDisableIfs = (data[avo.ctrlPropName] ? data[avo.ctrlPropName].propDisableIfs : null);
+		var propEnableIfs = (data[avo.ctrlPropName] ? data[avo.ctrlPropName].propEnableIfs : null);
 		
 		for(var i=0; i<props.length; i++)
 		{
@@ -2744,7 +2744,7 @@ $.inflateChartAttrValuesForm = function(po)
 			}
 			
 			//null值无需保留，占用空间
-			if(v == null || (propDisableIfs != null && propDisableIfs[propName] == true))
+			if(v == null || (propEnableIfs != null && propEnableIfs[propName] === false))
 				delete data[propName];
 			else
 				data[propName] = v;
@@ -3087,7 +3087,7 @@ $.inflateChartAttrValuesForm = function(po)
 			return (propNamePath ? propNamePath+"." : "") + $.escapePropPathEle(name);
 	};
 	
-	avo.evalEleEnabled = function(enableHandler, rootFormData, formData)
+	avo.evalEnableIf = function(enableHandler, rootFormData, formData)
 	{
 		if(enableHandler == null || enableHandler.evalEnabledFunc == null)
 			return true;
@@ -3452,13 +3452,13 @@ $.inflateChartAttrValuesForm = function(po)
 		<p-accordion :multiple="true" :active-index="[0]"
 			:class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
 			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps" :pt="{root:{'class':'invalid-indicator'}}"
-				:disabled="evalEleEnabled(group, null, rootFormData, formData, null) == false">
+				:disabled="evalEnableIf(group, null, rootFormData, formData, null) == false">
 				<template #header>
 					<label class='color-for-invalid'>{{group.nameLabel.value}}</label>
 				</template>
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
-						<div v-if="evalEleEnabled(prop, group, rootFormData, formData, prop)">
+						<div v-if="evalEnableIf(prop, group, rootFormData, formData, prop)">
 							<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
 								<p-panel :toggleable="false"
 									class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
@@ -3473,7 +3473,7 @@ $.inflateChartAttrValuesForm = function(po)
 									<template #icons>
 										<div class="inline-flex align-items-center gap-3 text-sm">
 											<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-												:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
+												:on-label="i18n.actived" :off-label="i18n.cleared" on-icon="pi pi-check" off-icon="pi pi-times"
 												@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
 											</p-togglebutton>
 											<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
@@ -3538,7 +3538,7 @@ $.inflateChartAttrValuesForm = function(po)
 									<template #icons>
 										<div class="inline-flex align-items-center gap-3 text-sm">
 											<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-												:on-label="i18n.enable" :off-label="i18n.disable" on-icon="pi pi-check" off-icon="pi pi-times"
+												:on-label="i18n.actived" :off-label="i18n.cleared" on-icon="pi pi-check" off-icon="pi pi-times"
 												@change="onEnableObjProp($event, formData, prop)" v-if="!readonly && !prop.required">
 											</p-togglebutton>
 											<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
@@ -3628,26 +3628,27 @@ $.inflateChartAttrValuesForm = function(po)
 				var propCollapseds = ctrlObj.propCollapseds;
 				propCollapseds[prop.name] = !propCollapseds[prop.name];
 			},
-			evalEleEnabled: function(enableHandler, parentEnableHandler, rootFormData, formData, prop)
+			evalEnableIf: function(enableHandler, parentEnableHandler, rootFormData, formData, prop)
 			{
 				var enabled = true;
 				
 				if(parentEnableHandler != null)
-					enabled = avo.evalEleEnabled(parentEnableHandler, rootFormData, formData);
+					enabled = avo.evalEnableIf(parentEnableHandler, rootFormData, formData);
 				
 				if(enabled)
-					enabled = avo.evalEleEnabled(enableHandler, rootFormData, formData);
+					enabled = avo.evalEnableIf(enableHandler, rootFormData, formData);
 				
 				if(prop != null)
 				{
+					var propName = prop.name;
 					var ctrlPropName = this.ctrlPropName;
 					var ctrlObj = formData[ctrlPropName];
-					var propDisableIfs = ctrlObj.propDisableIfs;
+					var propEnableIfs = ctrlObj.propEnableIfs;
 					
-					if(propDisableIfs == null)
-						propDisableIfs = (ctrlObj.propDisableIfs = {});
+					if(propEnableIfs == null)
+						propEnableIfs = (ctrlObj.propEnableIfs = {});
 					
-					propDisableIfs[prop.name] = !enabled;
+					propEnableIfs[propName] = enabled;
 				}
 				
 				return enabled;
