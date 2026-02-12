@@ -34,6 +34,7 @@ $.vueComponents = function()
 		"p-datatable": primevue.datatable,
 		"p-column": primevue.column,
 		"p-inputtext": primevue.inputtext,
+		"p-inputnumber": primevue.inputnumber,
 		"p-checkbox": primevue.checkbox,
 		"p-textarea": primevue.textarea,
 		"p-card": primevue.card,
@@ -2532,9 +2533,10 @@ $.inflateChartAttrValuesForm = function(po)
 		var data = attrValues;
 		var props = objProperty.properties;
 		
-		data[avo.ctrlPropName] = { propEnableds: {}, propCollapseds: {} };
+		data[avo.ctrlPropName] = { propEnableds: {}, propCollapseds: {}, propViewValues: {} };
 		var propEnableds = data[avo.ctrlPropName].propEnableds;
 		var propCollapseds = data[avo.ctrlPropName].propCollapseds;
+		var propViewValues = data[avo.ctrlPropName].propViewValues;
 		
 		for(var i=0; i<props.length; i++)
 		{
@@ -2574,7 +2576,12 @@ $.inflateChartAttrValuesForm = function(po)
 					v = avo.clonePropDefaultValue(prop);
 				
 				v = avo.trimChartAttrValueArray(prop, v);
-				v = avo.encodeAttrValueTreeModel(prop, v);
+				
+				//不能采用直接转换v的方式，因为enableIf/disableIf功能需要访问标准数据结构
+				if(avo.isPropTreeSelectInput(prop))
+				{
+					propViewValues[prop.name] = avo.encodeAttrValueTreeModel(prop, v);
+				}
 			}
 			
 			data[prop.name] = v;
@@ -2589,6 +2596,11 @@ $.inflateChartAttrValuesForm = function(po)
 		return $.deepClonePlain(dftValue);
 	};
 	
+	avo.isPropTreeSelectInput = function(prop)
+	{
+		return (prop && prop.inputPayload && prop.inputPayload.treeSelect == true);
+	};
+	
 	//图表属性值转换为树组件Model
 	// "v0" -> { v0: true }
 	// [ "v0", "v1", ... ] -> { v0: true, v1: true, ... }、[ { v0: true }, { v1: true }, ... ]
@@ -2600,7 +2612,7 @@ $.inflateChartAttrValuesForm = function(po)
 		if(value == null)
 			return value;
 		
-		var isTreeSelect = (inputProp.inputPayload && inputProp.inputPayload.treeSelect == true);
+		var isTreeSelect = avo.isPropTreeSelectInput(inputProp);
 		
 		if(!isTreeSelect)
 			return value;
@@ -2700,6 +2712,8 @@ $.inflateChartAttrValuesForm = function(po)
 		props = (props == null ? [] : props);
 		var propNameMap = {};
 		
+		var propDisableIfs = (data[avo.ctrlPropName] ? data[avo.ctrlPropName].propDisableIfs : null);
+		
 		for(var i=0; i<props.length; i++)
 		{
 			var prop = props[i];
@@ -2725,13 +2739,12 @@ $.inflateChartAttrValuesForm = function(po)
 			}
 			else
 			{
-				v = avo.decodeAttrValueTreeModel(prop, v);
 				v = avo.trimChartAttrValueArray(prop, v);
 				v = avo.toChartAttrTypeValue(prop, v);
 			}
 			
 			//null值无需保留，占用空间
-			if(v == null)
+			if(v == null || (propDisableIfs != null && propDisableIfs[propName] == true))
 				delete data[propName];
 			else
 				data[propName] = v;
@@ -2756,7 +2769,7 @@ $.inflateChartAttrValuesForm = function(po)
 		if(value == null)
 			return value;
 		
-		var isTreeSelect = (inputProp.inputPayload && inputProp.inputPayload.treeSelect == true);
+		var isTreeSelect = avo.isPropTreeSelectInput(inputProp);
 		
 		if(!isTreeSelect)
 			return value;
@@ -2876,7 +2889,7 @@ $.inflateChartAttrValuesForm = function(po)
 				//应将值限定为待选值集合内，比如图表插件升级后inputPayload有所删减，那么这里的旧值应删除
 				var inputPayload = inputProp.inputPayload;
 				var payloadOptions = (inputPayload && inputPayload.options ? inputPayload.options : null);
-				var isTreeSelect = (inputPayload && inputPayload.treeSelect == true);
+				var isTreeSelect = avo.isPropTreeSelectInput(inputProp);
 				
 				if(payloadOptions != null && $.isArray(payloadOptions))
 				{
@@ -2995,12 +3008,10 @@ $.inflateChartAttrValuesForm = function(po)
 		var array = formData[prop.name];
 		
 		if(array == null)
-		{
-			array = [];
-			formData[prop.name] = array;
-		}
+			formData[prop.name] = (array = []);
 		
 		var ele = null;
+		var isTreeSelect = false;
 		
 		if(avo.isObjectProperty(prop))
 		{
@@ -3009,13 +3020,29 @@ $.inflateChartAttrValuesForm = function(po)
 		else
 		{
 			ele = avo.clonePropDefaultValue(prop);
-			ele = avo.encodeAttrValueTreeModel(prop, ele, false);
+			isTreeSelect = avo.isPropTreeSelectInput(prop);
 		}
 		
 		if(idx == null)
 			array.push(ele);
 		else
 			array.splice(idx, 0, ele);
+		
+		if(isTreeSelect)
+		{
+			var propViewValues = formData[avo.ctrlPropName].propViewValues;
+			var viewArray = propViewValues[prop.name];
+			
+			if(viewArray == null)
+				propViewValues[prop.name] = (viewArray = []);
+			
+			var treeEle = avo.encodeAttrValueTreeModel(prop, ele, false);
+			
+			if(idx == null)
+				viewArray.push(treeEle);
+			else
+				viewArray.splice(idx, 0, treeEle);
+		}
 	},
 	
 	avo.removeArrayValEle = function(formData, prop, idx)
@@ -3039,6 +3066,16 @@ $.inflateChartAttrValuesForm = function(po)
 		else
 		{
 			array.splice(idx, 1);
+			
+			var isTreeSelect = avo.isPropTreeSelectInput(prop);
+			if(isTreeSelect)
+			{
+				var propViewValues = formData[avo.ctrlPropName].propViewValues;
+				var viewArray = propViewValues[prop.name];
+				
+				if(viewArray != null)
+					viewArray.splice(idx, 1);
+			}
 		}
 	};
 	
@@ -3144,7 +3181,8 @@ $.inflateChartAttrValuesForm = function(po)
 			readonly: { type: Boolean },
 			propTypeDef: { type: Object },
 			propInputTypeDef: { type: Object },
-			i18n: { type: Object }
+			i18n: { type: Object },
+			ctrlPropName: { type: String }
 		},
 		template:
 		`
@@ -3160,8 +3198,8 @@ $.inflateChartAttrValuesForm = function(po)
 					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" class="flex gap-2">
 							<div class="flex-grow-1 flex" v-if="inputProp.inputPayload.multiple">
-								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									selection-mode="multiple" class="w-full" :placeholder="i18n.none"
+								<p-treeselect v-model="formData[ctrlPropName].propViewValues[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
+									selection-mode="multiple" class="w-full" :placeholder="i18n.none" @change="onTreeSelectChange($event, formData, inputProp)"
 									v-if="inputProp.inputPayload.treeSelect == true">
 								</p-treeselect>
 								<p-multiselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
@@ -3170,8 +3208,8 @@ $.inflateChartAttrValuesForm = function(po)
 								</p-multiselect>
 							</div>
 							<div class="flex-grow-1 flex" v-else>
-								<p-treeselect v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
-									class="w-full" :placeholder="i18n.none"
+								<p-treeselect v-model="formData[ctrlPropName].propViewValues[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
+									class="w-full" :placeholder="i18n.none" @change="onTreeSelectChange($event, formData, inputProp)"
 									v-if="inputProp.inputPayload.treeSelect == true">
 								</p-treeselect>
 								<p-dropdown v-model="formData[inputProp.name][viIdx]" :options="inputProp.inputPayload.options"
@@ -3197,8 +3235,8 @@ $.inflateChartAttrValuesForm = function(po)
 						</div>
 					</div>
 					<div v-else-if="inputProp.inputPayload.multiple">
-						<p-treeselect v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
-							selection-mode="multiple" class="input w-full" :placeholder="i18n.none"
+						<p-treeselect v-model="formData[ctrlPropName].propViewValues[inputProp.name]" :options="inputProp.inputPayload.options"
+							selection-mode="multiple" class="input w-full" :placeholder="i18n.none" @change="onTreeSelectChange($event, formData, inputProp)"
 							v-if="inputProp.inputPayload.treeSelect == true">
 						</p-treeselect>
 						<p-multiselect v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
@@ -3207,8 +3245,8 @@ $.inflateChartAttrValuesForm = function(po)
 						</p-multiselect>
 					</div>
 					<div v-else>
-						<p-treeselect v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
-							class="input w-full" :placeholder="i18n.none"
+						<p-treeselect v-model="formData[ctrlPropName].propViewValues[inputProp.name]" :options="inputProp.inputPayload.options"
+							class="input w-full" :placeholder="i18n.none" @change="onTreeSelectChange($event, formData, inputProp)"
 							 v-if="inputProp.inputPayload.treeSelect == true">
 						</p-treeselect>
 						<p-dropdown v-model="formData[inputProp.name]" :options="inputProp.inputPayload.options"
@@ -3303,8 +3341,15 @@ $.inflateChartAttrValuesForm = function(po)
 				<div v-else>
 					<div class="input p-inputtext p-component flex flex-column gap-1" v-if="inputProp.array">
 						<div v-for="(vi, viIdx) in formData[inputProp.name]" class="flex gap-2">
-							<p-textarea v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
-								 v-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
+							<p-inputnumber v-model="formData[inputProp.name][viIdx]" :use-grouping="false" class="flex-grow-1"
+								v-if="inputProp.type == propTypeDef.INTEGER">
+							</p-inputnumber>
+							<p-inputnumber v-model="formData[inputProp.name][viIdx]" :use-grouping="false" class="flex-grow-1"
+								:min-fraction-digits="0" :max-fraction-digits="20"
+								v-else-if="inputProp.type == propTypeDef.NUMBER">
+							</p-inputnumber>
+							<p-textarea v-model="formData[inputProp.name][viIdx]" class="flex-grow-1"
+								v-else-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
 							</p-textarea>
 							<p-inputtext v-model="formData[inputProp.name][viIdx]" type="text" class="flex-grow-1"
 								v-else>
@@ -3326,8 +3371,17 @@ $.inflateChartAttrValuesForm = function(po)
 							</p-button>
 						</div>
 					</div>
+					<p-inputnumber :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
+						v-model="formData[inputProp.name]" :use-grouping="false" class="input w-full"
+						v-else-if="inputProp.type == propTypeDef.INTEGER">
+					</p-inputnumber>
+					<p-inputnumber :input-id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
+						v-model="formData[inputProp.name]" :use-grouping="false" class="input w-full"
+						:min-fraction-digits="0" :max-fraction-digits="20"
+						v-else-if="inputProp.type == propTypeDef.NUMBER">
+					</p-inputnumber>
 					<p-textarea :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
-						v-model="formData[inputProp.name]" type="text" class="input w-full"
+						v-model="formData[inputProp.name]" class="input w-full"
 						v-else-if="inputProp.inputType == propInputTypeDef.TEXTAREA">
 					</p-textarea>
 					<p-inputtext :id="inputProp.domId+'.'+propNamePath+'.'+inputProp.name"
@@ -3368,6 +3422,14 @@ $.inflateChartAttrValuesForm = function(po)
 			showPalettePanel: function(e, modelObj, modelProp)
 			{
 				po.showPalettePanel(e, modelObj, modelProp);
+			},
+			onTreeSelectChange: function(e, formData, prop)
+			{
+				var propName = prop.name;
+				var ctrlPropName = this.ctrlPropName;
+				var ctrlObj = formData[ctrlPropName];
+				var propViewValues = ctrlObj.propViewValues;
+				formData[propName] = avo.decodeAttrValueTreeModel(prop, propViewValues[propName]);
 			}
 		},
 		
@@ -3398,13 +3460,13 @@ $.inflateChartAttrValuesForm = function(po)
 		<p-accordion :multiple="true" :active-index="[0]"
 			:class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
 			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps" :pt="{root:{'class':'invalid-indicator'}}"
-				:disabled="evalEleEnabled(group, rootFormData, formData) == false">
+				:disabled="evalEleEnabled(group, null, rootFormData, formData, null) == false">
 				<template #header>
 					<label class='color-for-invalid'>{{group.nameLabel.value}}</label>
 				</template>
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
-						<div v-if="evalEleEnabled(group, rootFormData, formData) && evalEleEnabled(prop, rootFormData, formData)">
+						<div v-if="evalEleEnabled(prop, group, rootFormData, formData, prop)">
 							<div class="mb-3" v-if="prop.type == propTypeDef.OBJECT && prop.array">
 								<p-panel :toggleable="false"
 									class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
@@ -3440,21 +3502,17 @@ $.inflateChartAttrValuesForm = function(po)
 											</template>
 											<template #icons>
 												<div class="inline-flex gap-1 mx-2 text-sm" v-if="!readonly">
-													<p-button type="button" severity="secondary"
+													<p-button type="button" severity="secondary" icon="pi pi-arrow-up" :title="i18n.moveUp"
 														@click="moveUpArrayValEle(formData, prop, propDataEleIdx)">
-														{{i18n.moveUp}}
 													</p-button>
-													<p-button type="button" severity="secondary"
+													<p-button type="button" severity="secondary" icon="pi pi-arrow-down" :title="i18n.moveDown"
 														@click="moveDownArrayValEle(formData, prop, propDataEleIdx)">
-														{{i18n.moveDown}}
 													</p-button>
-													<p-button type="button" severity="secondary"
+													<p-button type="button" severity="secondary" icon="pi pi-plus" :title="i18n.insert"
 														@click="insertArrayValEle(formData, prop, propDataEleIdx)">
-														{{i18n.insert}}
 													</p-button>
-													<p-button type="button" severity="danger"
+													<p-button type="button" severity="danger" icon="pi pi-minus" :title="i18n.del"
 														@click="removeArrayValEle(formData, prop, propDataEleIdx)">
-														{{i18n.del}}
 													</p-button>
 												</div>
 											</template>
@@ -3508,7 +3566,7 @@ $.inflateChartAttrValuesForm = function(po)
 								<dg-input-prop-field :input-prop="prop" :prop-name-path="propNamePath"
 									:form-data="formData" :root-form-data="rootFormData"
 									:prop-type-def="propTypeDef" :prop-input-type-def="propInputTypeDef" :i18n="i18n"
-									:readonly="readonly">
+									:ctrl-prop-name="ctrlPropName" :readonly="readonly">
 								</dg-input-prop-field>
 							</div>
 						</div>
@@ -3578,9 +3636,29 @@ $.inflateChartAttrValuesForm = function(po)
 				var propCollapseds = ctrlObj.propCollapseds;
 				propCollapseds[prop.name] = !propCollapseds[prop.name];
 			},
-			evalEleEnabled: function(enableHandler, rootFormData, formData)
+			evalEleEnabled: function(enableHandler, parentEnableHandler, rootFormData, formData, prop)
 			{
-				return avo.evalEleEnabled(enableHandler, rootFormData, formData);
+				var enabled = true;
+				
+				if(parentEnableHandler != null)
+					enabled = avo.evalEleEnabled(parentEnableHandler, rootFormData, formData);
+				
+				if(enabled)
+					enabled = avo.evalEleEnabled(enableHandler, rootFormData, formData);
+				
+				if(prop != null)
+				{
+					var ctrlPropName = this.ctrlPropName;
+					var ctrlObj = formData[ctrlPropName];
+					var propDisableIfs = ctrlObj.propDisableIfs;
+					
+					if(propDisableIfs == null)
+						propDisableIfs = (ctrlObj.propDisableIfs = {});
+					
+					propDisableIfs[prop.name] = !enabled;
+				}
+				
+				return enabled;
 			}
 		},
 		

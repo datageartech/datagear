@@ -7,7 +7,7 @@
 		ok 默认值支持方式；
 		ok 输入框校验规则：maxLength、minLength、max、min、maxSize、minSize；
 		ok 引用；{ "$refId": "seriesTypeOptions" } 表示引用attributeForm.additions.seriesTypeOptions；
-		启用/禁用控制：enable/disable，格式："$.showTtitle && @.series[0].type == 'line'"；
+		ok 禁用/启用控制：disableIf/enableIf，格式："$root.showTtitle && $this.series[0].type == 'line'"；
 		chart.pluginAttributeValues支持遍历修改、默认值使用选项；
 	整理chartLibRegistry.js；
 	数据集参数新增JSON类型支持；
