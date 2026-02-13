@@ -450,18 +450,18 @@ label.required-label::before,
 	display: flex;
 	align-items: center;
 }
-.p-panel.disable-p-panel .p-panel-header{
+.p-panel.disable-p-panel >.p-panel-header{
 	border-width: 0;
 	display: none;
 }
-.p-panel.disable-p-panel .p-panel-content{
+.p-panel.disable-p-panel >div >.p-panel-content{
 	border-width: 0;
 	padding: 0;
 }
 .p-panel.sm-header-y-padding .p-panel-header{
 	padding: 0.5rem 1rem;
 }
-.p-panel.hide-panel-content .p-panel-content{
+.p-panel.hide-panel-content >div >.p-panel-content{
 	display: none;
 }
 

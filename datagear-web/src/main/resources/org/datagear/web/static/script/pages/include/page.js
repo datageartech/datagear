@@ -2373,6 +2373,9 @@ $.inflateChartAttrValuesForm = function(po)
 				avo.groupProperties(prop);
 		}
 		
+		for(var i=0; i<groupProps.length; i++)
+			groupProps[i].groupCollapsed = (i != 0);
+		
 		objProp.groupProps = groupProps;
 	};
 	
@@ -2546,7 +2549,10 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			if(avo.isObjectProperty(prop))
 			{
-				//这里无需处理null时的初始化逻辑，会在avo.evalEnableIf()函数中执行
+				//null必填项应在这里初始化，即使在avo.evalEnableIf()函数中有相关逻辑，不然avo.clearFormData()逻辑不对
+				if(v == null && prop.required)
+					v = (prop.array ? [] : {});
+				
 				if(v != null)
 				{
 					if(prop.array)
@@ -3549,12 +3555,18 @@ $.inflateChartAttrValuesForm = function(po)
 		},
 		template:
 		`
-		<p-accordion :multiple="true" :active-index="[0]"
-			:class="{'disable-accordion': objProp.groupProps.length==1 && objProp.groupProps[0].virtual}" class="sm-header-y-padding">
-			<p-accordion-tab v-for="(group, groupIdx) in objProp.groupProps" :pt="{root:{'class':'invalid-indicator'}}"
-				:disabled="evalEnableIf(rootFormData, formData, group) == false">
+		<div class="flex flex-column">
+			<p-panel :toggleable="false" v-for="(group, groupIdx) in objProp.groupProps" class="sm-header-y-padding panel-icon-align-center invalid-indicator"
+				:class="{'disable-p-panel': group.virtual, 'mb-3': !group.virtual, 'hide-panel-content': (!group.virtual && group.groupCollapsed), 'hidden': (evalEnableIf(rootFormData, formData, group) == false)}">
 				<template #header>
-					<label class='color-for-invalid'>{{group.nameLabel.value}}</label>
+					<label class='font-bold color-for-invalid'>{{group.nameLabel.value}}</label>
+				</template>
+				<template #icons>
+					<div class="inline-flex align-items-center gap-3 text-sm">
+						<p-button type="button" :icon="group.groupCollapsed ? 'pi pi-angle-down' : 'pi pi-angle-up'"
+							severity="secondary" text rounded @click="onToggleGroupPanel(group)" v-if="!group.virtual">
+						</p-button>
+					</div>
 				</template>
 				<div>
 					<div v-for="(prop, propIdx) in group.properties">
@@ -3563,7 +3575,7 @@ $.inflateChartAttrValuesForm = function(po)
 								<p-panel :toggleable="false"
 									class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 									<template #header>
-										<label :class="{'required-label': prop.required}" class="color-for-invalid">
+										<label :class="{'required-label': prop.required, 'text-color-secondary': formData[prop.name] == null}" class="color-for-invalid">
 											<span class="font-bold">{{prop.nameLabel.value}}</span>
 											<span class="text-color-secondary text-sm ml-1">
 												{{formData[prop.name] == null ? '' : formData[prop.name].length}}
@@ -3633,7 +3645,9 @@ $.inflateChartAttrValuesForm = function(po)
 								<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center invalid-indicator"
 									:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 									<template #header>
-										<label class="font-bold color-for-invalid" :class="{'required-label': prop.required}">{{prop.nameLabel.value}}</label>
+										<label class="font-bold color-for-invalid" :class="{'required-label': prop.required, 'text-color-secondary': formData[prop.name] == null}">
+											{{prop.nameLabel.value}}
+										</label>
 									</template>
 									<template #icons>
 										<div class="inline-flex align-items-center gap-3 text-sm">
@@ -3664,8 +3678,8 @@ $.inflateChartAttrValuesForm = function(po)
 						</div>
 					</div>
 				</div>
-			</p-accordion-tab>
-		</p-accordion>
+			</p-panel>
+		</div>
 		`,
 		
 		methods:
@@ -3700,6 +3714,10 @@ $.inflateChartAttrValuesForm = function(po)
 				var ctrlObj = formData[ctrlPropName];
 				var propCollapseds = ctrlObj.propCollapseds;
 				propCollapseds[prop.name] = !propCollapseds[prop.name];
+			},
+			onToggleGroupPanel: function(group)
+			{
+				group.groupCollapsed = !group.groupCollapsed;
 			},
 			evalEnableIf: function(rootFormData, formData, enableHandler, parentEnableHandler)
 			{
