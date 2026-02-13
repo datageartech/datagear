@@ -8,11 +8,8 @@
 		ok 输入框校验规则：maxLength、minLength、max、min、maxSize、minSize；
 		ok 引用；{ "$refId": "seriesTypeOptions" } 表示引用attributeForm.additions.seriesTypeOptions；
 		ok 禁用/启用控制：disableIf/enableIf，格式："$root.showTtitle && $this.series[0].type == 'line'"；
-		chart.pluginAttributeValues支持遍历修改、默认值使用选项；
 	整理chartLibRegistry.js；
-	数据集参数新增JSON类型支持；
-	图表联动添加【回退】默认工具按钮，恢复联动目标图表上一次的参数状态；
-	数据源防护支持正则表达式，支持URL和连接属性的或关系；
+	chartPluginManager.js对于无效的key在block=0时返回全部，其他block为空；
 	ok 看板API2.0可通过dg-chart-local定义本地图表，本地图表无需在【图表】模块里定义，由dg-chart-updater定义更新数据逻辑（默认空数据）；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
 		ok 图表插件添加apiVersion属性，标识支持的看板版本；
@@ -59,6 +56,9 @@
 			}
 待定：
 	
+	数据源防护支持正则表达式，支持URL和连接属性的或关系；
+	数据集参数新增JSON类型支持；
+	图表联动添加【回退】默认工具按钮，恢复联动目标图表上一次的参数状态；
 	看板可视编辑模式绝对/相对定位元素可拖拽；
 	内置图表插件新增数据卡片，将每行数据渲染为一个数据卡片；
 	图表插件数据标记自动绑定；
