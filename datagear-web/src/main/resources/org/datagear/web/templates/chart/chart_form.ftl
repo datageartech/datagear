@@ -515,7 +515,7 @@
 {
 	po.submitUrl = "/chart/"+po.submitAction;
 	po.disableSaveShow = ("${(disableSaveShow!false)?string('true', 'false')}"  == "true");
-	po.attrValuesValidated = true;
+	po.bakPluginAttrValuesMap = {};
 	po.DS_TARGET_FIELD = "${DataSign.TARGET_FIELD}";
 	po.DS_TARGET_DATASET = "${DataSign.TARGET_DATASET}";
 	po.DashboardApiVersion = { LATEST_VERSION: "${DashboardApiVersion.LATEST_VERSION}" };
@@ -1082,7 +1082,9 @@
 		if(attributeForm == null)
 			return true;
 		
-		return (po.attrValuesValidated == true);
+		var fm = po.vueFormModel();
+		
+		return po.avo.validateAttrValuesRequired(fm.attrValues, attributeForm);
 	});
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -1252,20 +1254,28 @@
 		
 		onSelectChartPlugin: function()
 		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			var oldPluginId = (fm.pluginVo ? fm.pluginVo.id : "");
+			
 			po.handleOpenSelectAction("/chartPlugin/select", function(plugin)
 			{
 				po.getJson("/chartPlugin/detailValue/"+encodeURIComponent(plugin.id), function(plugin)
 				{
 					po.extPluginDataSigns(plugin);
 					
-					var fm = po.vueFormModel();
-					var pm = po.vuePageModel();
-					
 					fm.pluginVo = plugin;
 					po.unmergeChartDsbs(fm);
 					po.mergeChartDsbs(fm);
 					pm.pluginHasDataSetSign = po.containsDataSetSign(fm.pluginVo);
-					po.attrValuesValidated = false;
+					
+					po.bakPluginAttrValuesMap[oldPluginId] = fm.attrValues;
+					
+					if(po.bakPluginAttrValuesMap[plugin.id] != null)
+						fm.attrValues = po.bakPluginAttrValuesMap[plugin.id];
+					else
+						fm.attrValues = {};
 					
 					if(plugin && po.DashboardApiVersion.LATEST_VERSION != plugin.apiVersion)
 					{
@@ -1542,7 +1552,6 @@
 				{
 					fm.attrValues = avs;
 					pm.attrValuesPanelShown = false;
-					po.attrValuesValidated = true;
 				},
 				readonly: pm.isReadonlyAction,
 				//此时不允许自由编辑图表属性，因此应是严格数据模式
