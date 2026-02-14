@@ -27,7 +27,7 @@ page_palette.ftl
 <#assign FormPropertyInputType=statics['org.datagear.analysis.form.PropertyInputType']>
 <#assign JsonChartPluginPropertiesResolver=statics['org.datagear.analysis.support.JsonChartPluginPropertiesResolver']>
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
-	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-scroll">
 		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginAttrForm" :prop-name-path=""
 			:form-data="pm.avoModel.formData" :root-form-data="pm.avoModel.formData" :prop-type-def="pm.avoModel.FormPropertyType"
 			:prop-input-type-def="pm.avoModel.FormPropertyInputType" :i18n="pm.avoModel.i18n"
@@ -95,6 +95,7 @@ page_palette.ftl
 	po.i18n.disable = "<@spring.message code='disable' />";
 	po.i18n.actived = "<@spring.message code='actived' />";
 	po.i18n.cleared = "<@spring.message code='cleared' />";
+	po.i18n.activeOrClear = "<@spring.message code='activeOrClear' />";
 	
 	//page.js
 	$.inflateChartAttrValuesForm(po);

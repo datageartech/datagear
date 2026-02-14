@@ -35,6 +35,7 @@ $.vueComponents = function()
 		"p-column": primevue.column,
 		"p-inputtext": primevue.inputtext,
 		"p-inputnumber": primevue.inputnumber,
+		"p-inputswitch": primevue.inputswitch,
 		"p-checkbox": primevue.checkbox,
 		"p-textarea": primevue.textarea,
 		"p-card": primevue.card,
@@ -70,8 +71,7 @@ $.vueComponents = function()
 		"p-breadcrumb": primevue.breadcrumb,
 		"p-badge": primevue.badge,
 		"p-accordion": primevue.accordion,
-		"p-accordion-tab": primevue.accordiontab,
-		"p-toggle-button": primevue.togglebutton
+		"p-accordion-tab": primevue.accordiontab
 	};
 	
 	return components;
@@ -3621,7 +3621,7 @@ $.inflateChartAttrValuesForm = function(po)
 								<p-panel :toggleable="false"
 									class="sm-header-y-padding panel-icon-align-center invalid-indicator" :class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 									<template #header>
-										<label :class="{'required-label': prop.required, 'text-color-secondary': formData[prop.name] == null}" class="color-for-invalid">
+										<label :class="{'required-label': prop.required, 'opacity-60': formData[prop.name] == null}" class="color-for-invalid">
 											<span class="font-bold">{{prop.nameLabel.value}}</span>
 											<span class="text-color-secondary text-sm ml-1">
 												{{formData[prop.name] == null ? '' : formData[prop.name].length}}
@@ -3630,10 +3630,9 @@ $.inflateChartAttrValuesForm = function(po)
 									</template>
 									<template #icons>
 										<div class="inline-flex align-items-center gap-3 text-sm">
-											<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-												:on-label="i18n.actived" :off-label="i18n.cleared" on-icon="pi pi-check" off-icon="pi pi-times"
+											<p-inputswitch v-model="formData[ctrlPropName].propEnableds[prop.name]" :title="i18n.activeOrClear"
 												@change="onEnableObjProp(formData, prop)" v-if="!readonly && !prop.required">
-											</p-togglebutton>
+											</p-inputswitch>
 											<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
 												severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
 											</p-button>
@@ -3691,16 +3690,15 @@ $.inflateChartAttrValuesForm = function(po)
 								<p-panel :toggleable="false" class="sm-header-y-padding panel-icon-align-center invalid-indicator"
 									:class="{'hide-panel-content': formData[ctrlPropName].propCollapseds[prop.name]}">
 									<template #header>
-										<label class="font-bold color-for-invalid" :class="{'required-label': prop.required, 'text-color-secondary': formData[prop.name] == null}">
+										<label class="font-bold color-for-invalid" :class="{'required-label': prop.required, 'opacity-60': formData[prop.name] == null}">
 											{{prop.nameLabel.value}}
 										</label>
 									</template>
 									<template #icons>
 										<div class="inline-flex align-items-center gap-3 text-sm">
-											<p-togglebutton v-model="formData[ctrlPropName].propEnableds[prop.name]"
-												:on-label="i18n.actived" :off-label="i18n.cleared" on-icon="pi pi-check" off-icon="pi pi-times"
+											<p-inputswitch v-model="formData[ctrlPropName].propEnableds[prop.name]" :title="i18n.activeOrClear"
 												@change="onEnableObjProp(formData, prop)" v-if="!readonly && !prop.required">
-											</p-togglebutton>
+											</p-inputswitch>
 											<p-button type="button" :icon="formData[ctrlPropName].propCollapseds[prop.name] ? 'pi pi-angle-down' : 'pi pi-angle-up'"
 												severity="secondary" text rounded @click="onToggleObjPropPanel(formData, prop)" :disabled="formData[prop.name] == null">
 											</p-button>
