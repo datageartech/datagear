@@ -2552,7 +2552,7 @@ $.inflateChartAttrValuesForm = function(po)
 		var data = attrValues;
 		var props = objProperty.properties;
 		
-		data[avo.ctrlPropName] = { propEnableds: {}, propCollapseds: {}, propViewValues: {}, propBakValues: {} };
+		data[avo.ctrlPropName] = { propEnableds: {}, propCollapseds: {}, propViewValues: {}, propBakValues: {}, propEnableIfs: {} };
 		var propEnableds = data[avo.ctrlPropName].propEnableds;
 		var propCollapseds = data[avo.ctrlPropName].propCollapseds;
 		var propViewValues = data[avo.ctrlPropName].propViewValues;
@@ -2729,6 +2729,8 @@ $.inflateChartAttrValuesForm = function(po)
 		props = (props == null ? [] : props);
 		var propNameMap = {};
 		
+		var propEnableIfs = (data[avo.ctrlPropName] ? data[avo.ctrlPropName].propEnableIfs : null);
+		
 		for(var i=0; i<props.length; i++)
 		{
 			var prop = props[i];
@@ -2760,6 +2762,9 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			//null值无需保留，占用空间
 			if(v == null)
+				delete data[propName];
+			//禁用的值应删除
+			else if(propEnableIfs != null && propEnableIfs[propName] === false)
 				delete data[propName];
 			else
 				data[propName] = v;
@@ -3105,51 +3110,48 @@ $.inflateChartAttrValuesForm = function(po)
 	avo.evalEnableIf = function(rootFormData, formData, enableHandler, parentEnableHandler)
 	{
 		var enable = avo.doEvalEnableIfWithParent(rootFormData, formData, enableHandler, parentEnableHandler);
-		var isChanged = (enableHandler._prevEnableIfValue !== enable);
 		
-		if(isChanged)
+		var ctrlPropName = this.ctrlPropName;
+		var propEnableIfs = formData[ctrlPropName].propEnableIfs;
+		var propEnableIfsRaw = null;
+		var props = null;
+		
+		//同步propEnableIfs信息
+		//注意：不要在这里执行其他写响应式模型的操作，会导致死循环
+		
+		//分组
+		if(enableHandler.isGroup == true)
 		{
-			enableHandler._prevEnableIfValue = enable;
+			props = (enableHandler.properties || []);
 			
-			var ctrlPropName = this.ctrlPropName;
-			
-			//不能直接执行这些可能修改数据模型的逻辑，会导致死循环
-			po.vueNextTick(function()
+			for(var i=0; i<props.length; i++)
 			{
-				var props = null;
+				var prop = props[i];
+				var propName = prop.name;
 				
-				//分组
-				if(enableHandler.isGroup == true)
-					props = enableHandler.properties;
-				//属性
-				else if(enableHandler.name !== undefined)
-					props = [ enableHandler ];
-				
-				if(props != null)
+				if(propEnableIfs[propName] !== enable)
 				{
-					var ctrlObj = formData[ctrlPropName];
-					var propBakValues = ctrlObj.propBakValues;
+					//必须转化为raw后再执行写操作，不然可能导致响应式死循环
+					if(propEnableIfsRaw == null)
+						propEnableIfsRaw = po.vueRaw(propEnableIfs);
 					
-					for(var i=0; i<props.length; i++)
-					{
-						var prop = props[i];
-						var propName = prop.name;
-						
-						if(enable)
-						{
-							if(formData[propName] == null && propBakValues[propName] != null)
-								formData[propName] = propBakValues[propName];
-							
-							if(formData[propName] == null && prop.required && avo.isObjectProperty(prop))
-								formData[propName] = (prop.array ? [] : avo.doAttrValuesToFormData({}, prop));
-						}
-						else
-						{
-							avo.delAndBakPropValue(formData, propName, propBakValues);
-						}
-					}
+					propEnableIfsRaw[propName] = enable;
 				}
-			});
+			}
+		}
+		//属性
+		else if(enableHandler.name !== undefined)
+		{
+			var propName = enableHandler.name;
+			
+			if(propEnableIfs[propName] !== enable)
+			{
+				//必须转化为raw后再执行写操作，不然可能导致响应式UI死循环
+				if(propEnableIfsRaw == null)
+					propEnableIfsRaw = po.vueRaw(propEnableIfs);
+				
+				propEnableIfsRaw[propName] = enable;
+			}
 		}
 		
 		return enable;
