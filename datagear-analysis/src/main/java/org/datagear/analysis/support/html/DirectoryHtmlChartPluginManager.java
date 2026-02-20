@@ -37,7 +37,6 @@ import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.analysis.support.ConcurrentChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
-import org.datagear.util.LastModifiedService;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 基于文件目录的{@linkplain ChartPluginManager}。
  * <p>
- * 此类管理指定目录下符合{@linkplain HtmlChartPluginLoader}规范的{@linkplain HtmlChartPlugin}，并会在修改操作时及时刷新。
+ * 注意：如果目录内的文件有修改，此类不会自动同步，需要手动调用{@linkplain #refresh()}同步。
  * </p>
  * <p>
  * 此类是线程安全的。
@@ -58,43 +57,34 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryHtmlChartPluginManager.class);
 
-	protected static final String LAST_MODIFIED_NAME = DirectoryHtmlChartPluginManager.class.getName();
-
 	/** 插件文件主目录 */
 	private File directory;
 
 	private HtmlChartPluginLoader htmlChartPluginLoader;
-
-	private LastModifiedService lastModifiedService;
 
 	/** 临时文件目录，用于存放临时文件 */
 	private File tmpDirectory = null;
 
 	private Map<String, String> _pluginIdFileNameMap = new HashMap<>();
 	private Map<String, FileCheckTime> _fileNameCheckTimeMap = new HashMap<>();
-	private volatile long _lastModified = LastModifiedService.LAST_MODIFIED_INIT;
 
 	public DirectoryHtmlChartPluginManager()
 	{
 		super();
 	}
 
-	public DirectoryHtmlChartPluginManager(File directory, HtmlChartPluginLoader htmlChartPluginLoader,
-			LastModifiedService lastModifiedService)
+	public DirectoryHtmlChartPluginManager(File directory, HtmlChartPluginLoader htmlChartPluginLoader)
 	{
 		super();
 		this.directory = directory;
 		this.htmlChartPluginLoader = htmlChartPluginLoader;
-		this.lastModifiedService = lastModifiedService;
 	}
 
-	public DirectoryHtmlChartPluginManager(String directory, HtmlChartPluginLoader htmlChartPluginLoader,
-			LastModifiedService lastModifiedService)
+	public DirectoryHtmlChartPluginManager(String directory, HtmlChartPluginLoader htmlChartPluginLoader)
 	{
 		super();
 		this.directory = FileUtil.getDirectory(directory);
 		this.htmlChartPluginLoader = htmlChartPluginLoader;
-		this.lastModifiedService = lastModifiedService;
 	}
 
 	public File getDirectory()
@@ -127,16 +117,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		this.htmlChartPluginLoader = htmlChartPluginLoader;
 	}
 
-	public LastModifiedService getLastModifiedService()
-	{
-		return lastModifiedService;
-	}
-
-	public void setLastModifiedService(LastModifiedService lastModifiedService)
-	{
-		this.lastModifiedService = lastModifiedService;
-	}
-
 	public void setTmpDirectory(File tmpDirectory)
 	{
 		this.tmpDirectory = tmpDirectory;
@@ -167,18 +147,11 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		this._fileNameCheckTimeMap = fileNameCheckTimeMap;
 	}
 
-	protected long getLastModified()
-	{
-		return _lastModified;
-	}
-
-	protected void setLastModified(long _lastModified)
-	{
-		this._lastModified = _lastModified;
-	}
-
 	/**
 	 * 初始化。
+	 * <p>
+	 * 加载{@linkplain #getDirectory()}中的所有插件。
+	 * </p>
 	 */
 	public void init()
 	{
@@ -187,49 +160,13 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 	/**
 	 * 刷新。
+	 * <p>
+	 * 检查并同步加载{@linkplain #getDirectory()}中的插件。
+	 * </p>
 	 */
 	public void refresh()
 	{
 		this.checkForReload();
-	}
-
-	@Override
-	public ChartPlugin get(String id)
-	{
-		readCheckForReload();
-		return super.get(id);
-	}
-
-	@Override
-	public <T extends ChartPlugin> List<T> getAll(Class<? super T> renderContextType)
-	{
-		readCheckForReload();
-		return super.getAll(renderContextType);
-	}
-
-	@Override
-	public List<ChartPlugin> getAll()
-	{
-		readCheckForReload();
-		return super.getAll();
-	}
-
-	@Override
-	public boolean register(ChartPlugin chartPlugin)
-	{
-		boolean re = super.register(chartPlugin);
-		this.updateLastModified();
-
-		return re;
-	}
-
-	@Override
-	public ChartPlugin[] remove(String... ids)
-	{
-		ChartPlugin[] re = super.remove(ids);
-		this.updateLastModified();
-
-		return re;
 	}
 
 	/**
@@ -259,8 +196,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			writeLock.unlock();
 		}
 
-		updateLastModified();
-
 		return ids;
 	}
 
@@ -271,8 +206,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 */
 	public void download(ZipOutputStream out, String... ids) throws IOException
 	{
-		readCheckForReload();
-
 		ReadLock readLock = this.lock.readLock();
 
 		try
@@ -463,31 +396,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		return null;
 	}
 
-	protected void updateLastModified()
-	{
-		this.lastModifiedService.setLastModifiedNow(LAST_MODIFIED_NAME);
-	}
-
-	/**
-	 * 读取操作检查加载。
-	 * 
-	 * @return
-	 */
-	protected boolean readCheckForReload()
-	{
-		if (this.lastModifiedService.isModified(LAST_MODIFIED_NAME, this._lastModified))
-		{
-			this._lastModified = this.lastModifiedService.getLastModified(LAST_MODIFIED_NAME);
-			checkForReload();
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	/**
 	 * 检查{@linkplain #directory}目录下的插件文件，如果文件有修改，则重新加载它们对应的插件。
 	 */
@@ -515,7 +423,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					break;
 				}
 
-				if (fileCheckTime.isTimeout())
+				if (fileCheckTime.isModified())
 					reloads.add(fileCheckTime);
 
 			}
@@ -802,12 +710,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			return this.file.exists();
 		}
 
-		public boolean isTimeout()
+		public boolean isModified()
 		{
 			long fileModified = resolveLastModified(this.file);
-
 			boolean timeout = (fileModified > this.lastModified);
-
 			this.lastModified = fileModified;
 
 			return timeout;
@@ -816,7 +722,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [file=" + file + ", lastModified=" + lastModified + "]";
+			return getClass().getSimpleName() + " [file=" + file.getName() + ", lastModified=" + lastModified + "]";
 		}
 
 		protected long resolveLastModified(File file)

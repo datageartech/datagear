@@ -59,6 +59,10 @@ public abstract class ApplicationProperties implements Serializable
 	@Value("${chartPluginRootDirectory}")
 	private String chartPluginRootDirectory;
 
+	/** 刷新图表插件主目录间隔 */
+	@Value("${refreshChartPluginRootDirInterval}")
+	private String refreshChartPluginRootDirInterval;
+
 	/** 看板主目录 */
 	@Value("${dashboardRootDirectory}")
 	private String dashboardRootDirectory;
@@ -295,6 +299,16 @@ public abstract class ApplicationProperties implements Serializable
 	protected void setChartPluginRootDirectory(String chartPluginRootDirectory)
 	{
 		this.chartPluginRootDirectory = chartPluginRootDirectory;
+	}
+
+	public String getRefreshChartPluginRootDirInterval()
+	{
+		return refreshChartPluginRootDirInterval;
+	}
+
+	protected void setRefreshChartPluginRootDirInterval(String refreshChartPluginRootDirInterval)
+	{
+		this.refreshChartPluginRootDirInterval = refreshChartPluginRootDirInterval;
 	}
 
 	public String getDashboardRootDirectory()

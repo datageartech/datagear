@@ -17,6 +17,7 @@
 
 package org.datagear.web.config;
 
+import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.web.util.DirectoryCleaner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -64,7 +65,28 @@ public class SchedulingConfigSupport implements SchedulingConfigurer
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar)
 	{
+		configRefreshDirectoryHtmlChartPluginManagerTask(taskRegistrar);
 		configCleanTempDirectoryTask(taskRegistrar);
+	}
+
+	/**
+	 * 配置定时刷新{@linkplain DirectoryHtmlChartPluginManager}任务。
+	 * 
+	 * @param taskRegistrar
+	 */
+	protected void configRefreshDirectoryHtmlChartPluginManagerTask(ScheduledTaskRegistrar taskRegistrar)
+	{
+		DirectoryHtmlChartPluginManager manager = getCoreConfig().directoryHtmlChartPluginManager();
+
+		taskRegistrar.addCronTask(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				manager.refresh();
+			}
+			//
+		}, getCoreConfig().getApplicationProperties().getRefreshChartPluginRootDirInterval());
 	}
 
 	/**

@@ -33,7 +33,6 @@ import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ZipEntryChartPluginResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
-import org.datagear.util.SimpleLastModifiedService;
 import org.junit.Test;
 
 /**
@@ -60,7 +59,7 @@ public class DirectoryHtmlChartPluginManagerTest
 		HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
 
 		DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager = new DirectoryHtmlChartPluginManager(
-				managerDirectory, htmlChartPluginLoader, new SimpleLastModifiedService());
+				managerDirectory, htmlChartPluginLoader);
 		directoryHtmlChartPluginManager.setTmpDirectory(tmpDirectory);
 
 		FileUtil.clearDirectory(managerDirectory);
