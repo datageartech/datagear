@@ -1532,7 +1532,7 @@ chartProto.destroy = function()
 	if(listener && listener.onDestroy)
 		doDestroy = listener.onDestroy(this);
 	
-	if(doDestroy != false)
+	if(doDestroy !== false)
 	{
 		this.doDestroy();
 	}
