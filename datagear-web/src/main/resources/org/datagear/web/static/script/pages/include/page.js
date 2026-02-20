@@ -2974,24 +2974,17 @@ $.inflateChartAttrValuesForm = function(po)
 	
 	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginAttrForm)
 	{
-		var re = attrValues;
+		var re = (attrValues || {});
 		
-		if(attrValues == null)
-			return re;
+		if(pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
+			re = {};
 		
-		if(pluginAttrForm == null)
+		if(pluginAttrForm != null && !avo.isRootPluginAttrForm(pluginAttrForm) && pluginAttrForm.required)
 		{
-			re = {};
-		}
-		else if($.isEmpty(pluginAttrForm.properties))
-		{
-			re = {};
+			var name = pluginAttrForm.name;
 			
-			if(!avo.isRootPluginAttrForm(pluginAttrForm) && pluginAttrForm.required)
-			{
-				var name = pluginAttrForm.name;
+			if(re[name] == null)
 				re[name] = {};
-			}
 		}
 		
 		return re;
