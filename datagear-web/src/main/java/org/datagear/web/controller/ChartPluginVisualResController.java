@@ -31,6 +31,7 @@ import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.util.StringUtil;
 import org.datagear.web.analysis.ChartPluginManagerJsFactory;
 import org.datagear.web.analysis.ChartPluginManagerJsFactory.ChartPluginManagerJs;
+import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -131,12 +132,13 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 		writeChartPluginResource(request, response, webRequest, chartPlugin, resource);
 	}
 
-	@RequestMapping("/chartPluginManager.js")
+	@RequestMapping("/manager/{apiVersion}/chartPluginManager.js")
 	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			@PathVariable("apiVersion") String apiVersion,
 			@RequestParam(value = MANAGER_JS_KEY_PARAM, required = false) String managerJsKey,
-			@RequestParam(value = MANAGER_JS_BLOCK_PARAM, required = false) Integer managerJsBlock,
-			@RequestParam(value = API_VERSION_PARAM, required = false) String apiVersion) throws Exception
+			@RequestParam(value = MANAGER_JS_BLOCK_PARAM, required = false) Integer managerJsBlock) throws Exception
 	{
+		apiVersion = DashboardApiVersion.toValidVersion(apiVersion);
 		ChartPluginManagerJs managerJs = null;
 
 		if (!StringUtil.isEmpty(managerJsKey))

@@ -261,10 +261,9 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 		for (int i = 0; i < scriptCount; i++)
 		{
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTPLUGINMANAGER,
-					contextPath + "/vres/plugin/chartPluginManager.js" //
+					contextPath + "/vres/plugin/manager/" + apiVersion + "/chartPluginManager.js" //
 							+ "?" + ChartPluginVisualResController.MANAGER_JS_KEY_PARAM + "=" + key //
 							+ "&" + ChartPluginVisualResController.MANAGER_JS_BLOCK_PARAM + "=" + i //
-							+ "&" + ChartPluginVisualResController.API_VERSION_PARAM + "=" + apiVersion //
 							+ "&v=" + Global.VERSION));
 		}
 	}
