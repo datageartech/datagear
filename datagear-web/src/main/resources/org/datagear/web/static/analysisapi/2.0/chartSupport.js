@@ -5581,8 +5581,9 @@ SPT.tableRenderer = function(plugin, config)
 				var theme = chart.theme();
 				
 				var rowBgColor ="rgba(0,0,0,0)";
-				var rowOddBgColor = chart.themeGradualColor(0.5) + "0F";
 				var borderColor = chart.themeGradualColor(0.4);
+				var rowOddBgColor = chart.themeGradualColor(0.5);
+				rowOddBgColor = (rowOddBgColor.length > 7 ? rowOddBgColor.substring(0, 7) : rowOddBgColor) + "0F";
 				
 				var tableStyle =
 				{
@@ -5620,8 +5621,8 @@ SPT.tableRenderer = function(plugin, config)
 						},
 						rowSelected:
 						{
-							"color": theme.color,
-							"background-color": chart.themeGradualColor(0.3)
+							"color": theme.highlightTheme.color,
+							"background-color": theme.highlightTheme.backgroundColor
 						}
 					},
 					foot:
@@ -8043,6 +8044,8 @@ EU._buildEchartsTheme = function(chart)
 	var areaBorderColor0 = chart.themeGradualColor(0.3);
 	var areaColor1 = chart.themeGradualColor(0.25);
 	var areaBorderColor1 = chart.themeGradualColor(0.5);
+	var areaColor2 = chart.themeGradualColor(0.4);
+	var areaBorderColor2 = chart.themeGradualColor(0.6);
 	var shadowColor = chart.themeGradualColor(0.9);
 	var emptyAreaColor = chart.themeGradualColor(0);
 	var emptyBorderColor = areaColor0;
@@ -8072,7 +8075,7 @@ EU._buildEchartsTheme = function(chart)
 			"emphasis" : { "lineStyle" : { "width" : 4 } }
 		},
 		"radar" : {
-			"name" : { "textStyle" : { "color" : chartTheme.legendTheme.color } },
+			"name" : { "textStyle" : { "color" : chartTheme.color } },
 			"axisLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
 			"splitLine" : { "lineStyle" : { "color" : areaBorderColor0 } },
 			"splitArea" : { "areaStyle" : { "color" : [ areaColor0, chartTheme.backgroundColor ] } },
@@ -8156,8 +8159,8 @@ EU._buildEchartsTheme = function(chart)
 			}
 		},
 		"gauge" : {
-			"title" : { "color" : chartTheme.legendTheme.color },
-			"detail": { "color": chartTheme.legendTheme.color },
+			"title" : { "color" : chartTheme.color },
+			"detail": { "color": chartTheme.color },
 			"progress": { "show": true, "roundCap": true },
 			"axisLine": { "show": true,
 				"lineStyle": { "color" : [ [ 1, areaColor0 ] ] }
@@ -8230,13 +8233,21 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"map" : {
 			"roam" : true,
-			"itemStyle" : { "areaColor" : areaBorderColor0, "borderColor" : areaBorderColor1, "borderWidth" : 0.5 },
+			"itemStyle" : { "areaColor" : areaColor1, "borderColor" : areaBorderColor1, "borderWidth" : 0.5 },
 			"label" : { "show": true, "color" : chartTheme.color },
 			"emphasis" : {
+				"label": { "color" : chartTheme.color },
+				"itemStyle": {
+					"areaColor" : areaColor2,
+					"borderColor" : areaBorderColor2,
+					"borderWidth" : 1
+				}
+			},
+			"select" : {
 				"label": { "color" : chartTheme.highlightTheme.color },
 				"itemStyle": {
 					"areaColor" : chartTheme.highlightTheme.backgroundColor,
-					"borderColor" : chart.themeGradualColor(chartTheme.highlightTheme, 0.3),
+					"borderColor" : areaBorderColor2,
 					"borderWidth" : 1
 				}
 			}
@@ -8247,13 +8258,21 @@ EU._buildEchartsTheme = function(chart)
 			"emphasis": { "lineStyle": { "width": 5, "shadowBlur" : 5, "shadowOffsetX" : 0, "shadowColor" : shadowColor } }
 		},
 		"geo" : {
-			"itemStyle" : { "areaColor" : areaBorderColor0, "borderColor" : areaBorderColor1, "borderWidth" : 0.5 },
+			"itemStyle" : { "areaColor" : areaColor1, "borderColor" : areaBorderColor1, "borderWidth" : 0.5 },
 			"label" : { "color" : chartTheme.color },
 			"emphasis" : {
+				"label": { "color" : chartTheme.color },
+				"itemStyle": {
+					"areaColor" : areaColor2,
+					"borderColor" : areaBorderColor2,
+					"borderWidth" : 1
+				}
+			},
+			"select" : {
 				"label": { "color" : chartTheme.highlightTheme.color },
 				"itemStyle": {
 					"areaColor" : chartTheme.highlightTheme.backgroundColor,
-					"borderColor" : chart.themeGradualColor(chartTheme.highlightTheme, 0.3),
+					"borderColor" : areaBorderColor2,
 					"borderWidth" : 1
 				}
 			}
@@ -8309,7 +8328,7 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"tooltip" : {
 			"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
-			"borderColor" : chart.themeGradualColor(chartTheme.tooltipTheme, 0.3),
+			"borderColor" : areaBorderColor1,
 			"borderWidth" : 1,
 			"textStyle" : { color: chartTheme.tooltipTheme.color },
 			"axisPointer" : {
@@ -8318,18 +8337,18 @@ EU._buildEchartsTheme = function(chart)
 			}
 		},
 		"timeline" : {
-			"lineStyle" : { "color" : axisColor, "width" : 1 },
-			"itemStyle" : { "color" : chartTheme.color, "borderWidth" : 1 },
-			"controlStyle" : { "color" : chartTheme.color, "borderColor" : borderColor, "borderWidth" : 0.5 },
+			"lineStyle" : { "color" : areaColor1, "width" : 1 },
+			"itemStyle" : { "color" : areaColor1, "borderColor" : areaColor1, "borderWidth" : 1 },
+			"controlStyle" : { "color" : areaColor1, "borderColor" : areaColor1, "borderWidth" : 0.5 },
 			"checkpointStyle" : {
-				"color" : chartTheme.highlightTheme.backgroundColor,
-				"borderColor" : chart.themeGradualColor(chartTheme.tooltipTheme, 0.3)
+				"color" : areaColor2,
+				"borderColor" : areaColor2
 			},
 			"label" : { "color" : axisColor },
 			"emphasis" : {
-				"itemStyle" : { "color" : chartTheme.color },
-				"controlStyle" : { "color" : chartTheme.color, "borderColor" : borderColor, "borderWidth" : 0.5 },
-				"label" : { "color" : chartTheme.color }
+				"itemStyle" : { "color" : areaColor2, "borderColor" : areaColor2 },
+				"controlStyle" : { "color" : areaColor2, "borderColor" : areaColor2, "borderWidth" : 0.5 },
+				"label" : { "color" : axisColor }
 			}
 		},
 		"visualMap" : {

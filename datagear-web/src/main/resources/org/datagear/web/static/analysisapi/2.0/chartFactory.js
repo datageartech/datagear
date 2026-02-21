@@ -3354,8 +3354,8 @@ chartProto.statusInited = function(set)
  * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
  * 
  * @param theme 可选，主题对象，默认为：this.theme()
- * @param factor 渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色
- * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"
+ * @param factor 渐变因子，其中：0-1 表示最接近实际背景色至最接近前景色的颜色、小于0 表示背景色、大于1 表示前景色
+ * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"、"#FFFFFFFF"
  */
 chartProto.themeGradualColor = function(theme, factor)
 {
@@ -6529,7 +6529,7 @@ CF.inflateChartTheme = function(theme)
 {
 	CF.inflateThemeActualBgColor(theme);
 	
-	if(theme.color && theme.actualBackgroundColor)
+	if(theme.color)
 	{
 		var titleThemeGen =
 		{
@@ -6540,52 +6540,33 @@ CF.inflateChartTheme = function(theme)
 		
 		theme.titleTheme = (!theme.titleTheme ? titleThemeGen : CF.extend(true, titleThemeGen, theme.titleTheme));
 		
-		var legendThemeGen =
+		if(theme.actualBackgroundColor)
 		{
-			name: "legendTheme",
-			color: CF.themeGradualColor(theme, 0.9),
-			backgroundColor: "transparent"
-		};
-		
-		theme.legendTheme = (!theme.legendTheme ? legendThemeGen : CF.extend(true, legendThemeGen, theme.legendTheme));
-		
-		var tooltipThemeGen =
-		{
-			name: "tooltipTheme",
-			color: theme.actualBackgroundColor,
-			backgroundColor: CF.themeGradualColor(theme, 0.7)
-		};
-		
-		theme.tooltipTheme = (!theme.tooltipTheme ? tooltipThemeGen : CF.extend(true, tooltipThemeGen, theme.tooltipTheme));
-		
-		var highlightThemeGen =
-		{
-			name: "highlightTheme",
-			color: theme.actualBackgroundColor,
-			backgroundColor: CF.themeGradualColor(theme, 0.8)
-		};
-		
-		theme.highlightTheme = (!theme.highlightTheme ? highlightThemeGen : CF.extend(true, highlightThemeGen, theme.highlightTheme));
-	}
-	else if(theme.color)
-	{
-		var titleThemeGen =
-		{
-			name: "titleTheme",
-			color: theme.color,
-			backgroundColor: "transparent"
-		};
-		
-		theme.titleTheme = (!theme.titleTheme ? titleThemeGen : CF.extend(true, titleThemeGen, theme.titleTheme));
-		
-		var legendThemeGen =
-		{
-			name: "legendTheme",
-			color: theme.color,
-			backgroundColor: "transparent"
-		};
-		
-		theme.legendTheme = (!theme.legendTheme ? legendThemeGen : CF.extend(true, legendThemeGen, theme.legendTheme));
+			var legendThemeGen =
+			{
+				name: "legendTheme",
+				color: CF.themeGradualColor(theme, 0.9),
+				backgroundColor: "transparent"
+			};
+			
+			var tooltipThemeGen =
+			{
+				name: "tooltipTheme",
+				color: theme.actualBackgroundColor,
+				backgroundColor: CF.themeGradualColor(theme, 0.7)
+			};
+			
+			var highlightThemeGen =
+			{
+				name: "highlightTheme",
+				color: theme.actualBackgroundColor,
+				backgroundColor: CF.themeGradualColor(theme, 0.5)
+			};
+			
+			theme.legendTheme = (!theme.legendTheme ? legendThemeGen : CF.extend(true, legendThemeGen, theme.legendTheme));
+			theme.tooltipTheme = (!theme.tooltipTheme ? tooltipThemeGen : CF.extend(true, tooltipThemeGen, theme.tooltipTheme));
+			theme.highlightTheme = (!theme.highlightTheme ? highlightThemeGen : CF.extend(true, highlightThemeGen, theme.highlightTheme));
+		}
 	}
 	
 	if(theme.fontSize)
