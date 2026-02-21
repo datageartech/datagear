@@ -315,10 +315,6 @@ CF.initGlobalChartTheme = function(renderContext)
 	CF.renderContextValue(renderContext, renderContextAttrConst.ORIGINAL_CHART_THEME, theme);
 	theme = CF.extend(true, {}, theme);
 	
-	CF.inflateThemeActualBgColor(theme);
-	
-	var rawTheme = null;
-	
 	if(CF.isEmpty(theme.name))
 		theme.name = "chartTheme";
 	
@@ -329,6 +325,8 @@ CF.initGlobalChartTheme = function(renderContext)
 	if(CF.isEmpty(theme.backgroundColor))
 		theme.backgroundColor = "transparent";
 	
+	CF.inflateThemeActualBgColor(theme);
+	
 	if(CF.isEmpty(theme.actualBackgroundColor))
 		theme.actualBackgroundColor = "#FFF";
 	
@@ -338,7 +336,7 @@ CF.initGlobalChartTheme = function(renderContext)
 	if(CF.isEmpty(theme.graphRangeColors))
 		theme.graphRangeColors = ["#58A52D", "#FFD700", "#FF4500"];
 	
-	CF.inflateThemeActualBgColor(theme);
+	var rawTheme = null;
 	
 	var bodyThemeValue = CF.eleAttr(document.body, elementAttrConst.THEME);
 	if(bodyThemeValue)
@@ -5665,7 +5663,7 @@ var THEME_GRADUAL_COLORS_NAME = CF.BUILTIN_PROP_PREFIX + "GradualColors";
  * 获取主题从背景色（actualBackgroundColor、backgroundColor）到前景色（color）之间的渐变因子对应的颜色。
  * 这个颜色是背景色（actualBackgroundColor、backgroundColor）与前景色（color）之间的某个颜色。
  * 
- * @param theme 主题对象，格式为：{ color: "...", actualBackgroundColor: "..." }
+ * @param theme 主题对象，格式为：{ color: "...", actualBackgroundColor: "...", backgroundColor: "..." }
  * @param factor 渐变因子，0-1之间的小数，其中0表示最接近实际背景色的颜色、1表示最接近前景色的颜色，小于0表示返回实际背景色，大于1表示返回前景色
  * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"
  */
@@ -5725,6 +5723,7 @@ CF.evalGradualColors = function(start, end, count, rgb)
 	end = this.parseColor(end);
 	
 	count = count + 1;
+	var middleIdx = parseInt(count/2);
 	
 	for(var i=1; i<count; i++)
 	{
@@ -5734,8 +5733,19 @@ CF.evalGradualColors = function(start, end, count, rgb)
 		color.g = parseInt(start.g + (end.g - start.g)/count*i);
 		color.b = parseInt(start.b + (end.b - start.b)/count*i);
 		
+		//前半取start透明度，后半取end透明度
+		if(i <= middleIdx)
+			color.a = (start.a != null ? start.a : null);
+		else
+			color.a = (end.a != null ? end.a : null);
+		
 		if(rgb)
-			color = "rgb("+color.r+","+color.g+","+color.b+")";
+		{
+			if(color.a != null)
+				color = "rgba("+color.r+","+color.g+","+color.b+","+color.a+")";
+			else
+				color = "rgb("+color.r+","+color.g+","+color.b+")";
+		}
 		else
 			color = CF.colorToHexStr(color, true);
 		
@@ -6501,8 +6511,11 @@ CF.themeInflated = function(theme, inflated)
 
 CF.inflateThemeActualBgColor = function(theme)
 {
+	if(!CF.isEmpty(theme.actualBackgroundColor))
+		return false;
+	
 	//如果设置了非透明backgroundColor，那么也应同时设置actualBackgroundColor
-	if(theme.backgroundColor && theme.backgroundColor != "transparent")
+	if(!CF.isEmpty(theme.backgroundColor) && theme.backgroundColor != "transparent")
 	{
 		theme.actualBackgroundColor = theme.backgroundColor;
 		return true;
@@ -6514,8 +6527,7 @@ CF.inflateThemeActualBgColor = function(theme)
 //填充图表主题，如果图表主题已设置了color、backgroundColor、actualBackgroundColor、fontSize，则尝试自动填充其他相关的主题属性。
 CF.inflateChartTheme = function(theme)
 {
-	if(CF.isEmpty(theme.actualBackgroundColor))
-		CF.inflateThemeActualBgColor(theme);
+	CF.inflateThemeActualBgColor(theme);
 	
 	if(theme.color && theme.actualBackgroundColor)
 	{
