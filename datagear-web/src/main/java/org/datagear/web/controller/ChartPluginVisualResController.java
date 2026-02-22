@@ -135,24 +135,29 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 	@RequestMapping("/manager/{apiVersion}/chartPluginManager.js")
 	public void chartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("apiVersion") String apiVersion,
-			@RequestParam(value = MANAGER_JS_KEY_PARAM, required = false) String managerJsKey,
-			@RequestParam(value = MANAGER_JS_BLOCK_PARAM, required = false) Integer managerJsBlock) throws Exception
+			@RequestParam(value = MANAGER_JS_KEY_PARAM, required = false) String key,
+			@RequestParam(value = MANAGER_JS_BLOCK_PARAM, required = false) Integer block) throws Exception
 	{
 		apiVersion = DashboardApiVersion.toValidVersion(apiVersion);
 		ChartPluginManagerJs managerJs = null;
+		boolean expiredKey = false;
 
-		if (!StringUtil.isEmpty(managerJsKey))
-		{
-			managerJs = this.chartPluginManagerJsFactory.getByKey(managerJsKey);
-		}
-		else
+		if (StringUtil.isEmpty(key))
 		{
 			managerJs = this.chartPluginManagerJsFactory.latest(WebUtils.getLocale(request), apiVersion);
 		}
+		else
+		{
+			managerJs = this.chartPluginManagerJsFactory.getByKey(key);
 
-		long lastModified = (managerJs == null ? -1 : managerJs.getLastModified());
+			if (managerJs == null)
+			{
+				expiredKey = true;
+				managerJs = this.chartPluginManagerJsFactory.latest(WebUtils.getLocale(request), apiVersion);
+			}
+		}
 
-		if (webRequest.checkNotModified(lastModified))
+		if (webRequest.checkNotModified(managerJs.getLastModified()))
 			return;
 
 		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
@@ -160,23 +165,27 @@ public class ChartPluginVisualResController extends AbstractChartPluginAwareCont
 
 		PrintWriter out = response.getWriter();
 
-		if (managerJs != null)
+		if (block == null)
 		{
-			if (managerJsBlock != null)
-			{
-				String script = (managerJs == null ? null : managerJs.getScript(managerJsBlock));
-
-				if (script != null)
-					out.write(script);
-			}
-			else
+			List<String> scripts = managerJs.getScripts();
+			for (String script : scripts)
+				out.println(script);
+		}
+		else if (expiredKey)
+		{
+			if (block.intValue() == 0)
 			{
 				List<String> scripts = managerJs.getScripts();
 				for (String script : scripts)
-				{
 					out.println(script);
-				}
 			}
+			else
+				out.write("");
+		}
+		else
+		{
+			String script = managerJs.getScript(block);
+			out.write(script == null ? "" : script);
 		}
 	}
 }

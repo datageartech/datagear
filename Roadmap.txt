@@ -3,7 +3,6 @@
 	ok 匿名用户始终不开放数据源的SQL工作台、数据导入/导出功能；
 	ok 看板展示页chartPluginManager.js分组加载，避免单个文件尺寸过大；
 	重构org.datagear.analysis.ChartTheme结构：
-		graphColors -> itemColors
 		graphRangeColors -> valueMapColors
 	重构图表插件属性功能：
 		ok ChartPlugin.attributes重构为attributeForm；
@@ -12,7 +11,6 @@
 		ok 引用；{ "$refId": "seriesTypeOptions" } 表示引用attributeForm.additions.seriesTypeOptions；
 		ok 禁用/启用控制：disableIf/enableIf，格式："$root.showTtitle && $this.series[0].type == 'line'"；
 	整理chartLibRegistry.js；
-	chartPluginManager.js对于无效的key在block=0时返回全部，其他block为空；
 	ok 看板API2.0可通过dg-chart-local定义本地图表，本地图表无需在【图表】模块里定义，由dg-chart-updater定义更新数据逻辑（默认空数据）；
 	新增看板版本设计概念，1.0 保留现有看板API；2.0 移除已弃用看板API，将看板/图表API中的字段都改为函数：
 		ok 图表插件添加apiVersion属性，标识支持的看板版本；
