@@ -315,9 +315,6 @@ CF.initGlobalChartTheme = function(renderContext)
 	CF.renderContextValue(renderContext, renderContextAttrConst.ORIGINAL_CHART_THEME, theme);
 	theme = CF.extend(true, {}, theme);
 	
-	if(CF.isEmpty(theme.name))
-		theme.name = "chartTheme";
-	
 	if(CF.isEmpty(theme.color))
 		theme.color = "#333";
 	
@@ -6533,7 +6530,6 @@ CF.inflateChartTheme = function(theme)
 	{
 		var titleThemeGen =
 		{
-			name: "titleTheme",
 			color: theme.color,
 			backgroundColor: "transparent"
 		};
@@ -6544,21 +6540,18 @@ CF.inflateChartTheme = function(theme)
 		{
 			var legendThemeGen =
 			{
-				name: "legendTheme",
 				color: CF.themeGradualColor(theme, 0.9),
 				backgroundColor: "transparent"
 			};
 			
 			var tooltipThemeGen =
 			{
-				name: "tooltipTheme",
 				color: theme.actualBackgroundColor,
 				backgroundColor: CF.themeGradualColor(theme, 0.7)
 			};
 			
 			var highlightThemeGen =
 			{
-				name: "highlightTheme",
 				color: theme.actualBackgroundColor,
 				backgroundColor: CF.themeGradualColor(theme, 0.5)
 			};

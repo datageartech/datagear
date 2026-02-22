@@ -23,11 +23,14 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public class DashboardTheme extends Theme
+public class DashboardTheme extends Theme implements NameAware
 {
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROPERTY_CHART_THEME = "chartTheme";
+
+	/** 主题名称 */
+	private String name;
 
 	private ChartTheme chartTheme;
 
@@ -38,8 +41,20 @@ public class DashboardTheme extends Theme
 
 	public DashboardTheme(String name, String color, String backgroundColor, ChartTheme chartTheme)
 	{
-		super(name, color, backgroundColor);
+		super(color, backgroundColor);
+		this.name = name;
 		this.chartTheme = chartTheme;
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public ChartTheme getChartTheme()

@@ -64,10 +64,10 @@ public class ChartTheme extends Theme
 	{
 	}
 
-	public ChartTheme(String name, String color, String backgroundColor, String actualBackgroundColor,
+	public ChartTheme(String color, String backgroundColor, String actualBackgroundColor,
 			String[] graphColors, String[] graphRangeColors)
 	{
-		super(name, color, backgroundColor);
+		super(color, backgroundColor);
 		this.setActualBackgroundColor(actualBackgroundColor);
 		this.graphColors = graphColors;
 		this.graphRangeColors = graphRangeColors;
@@ -192,7 +192,7 @@ public class ChartTheme extends Theme
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + getName() + ", color=" + getColor() + ", backgroundColor="
+		return getClass().getSimpleName() + " [color=" + getColor() + ", backgroundColor="
 				+ getBackgroundColor() + ", fontSize=" + getFontSize() + ", actualBackgroundColor="
 				+ actualBackgroundColor + ", graphColors=" + Arrays.toString(graphColors) + ", graphRangeColors="
 				+ Arrays.toString(graphRangeColors) + ", titleTheme=" + titleTheme

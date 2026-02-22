@@ -25,12 +25,9 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class Theme implements NameAware, Serializable
+public class Theme implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 主题名称 */
-	private String name;
 
 	/** 前景色 */
 	private String color;
@@ -46,23 +43,11 @@ public class Theme implements NameAware, Serializable
 		super();
 	}
 
-	public Theme(String name, String color, String backgroundColor)
+	public Theme(String color, String backgroundColor)
 	{
 		super();
-		this.name = name;
 		this.color = color;
 		this.backgroundColor = backgroundColor;
-	}
-	
-	@Override
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
 	}
 
 	public String getColor()
@@ -108,7 +93,7 @@ public class Theme implements NameAware, Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", color=" + color + ", backgroundColor="
+		return getClass().getSimpleName() + " [color=" + color + ", backgroundColor="
 				+ backgroundColor + ", fontSize=" + fontSize + "]";
 	}
 }

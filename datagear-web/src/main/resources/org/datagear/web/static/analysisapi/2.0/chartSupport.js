@@ -8328,7 +8328,7 @@ EU._buildEchartsTheme = function(chart)
 		},
 		"tooltip" : {
 			"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
-			"borderColor" : areaBorderColor1,
+			"borderColor" : chart.themeGradualColor(chartTheme.tooltipTheme, 0.3),
 			"borderWidth" : 1,
 			"textStyle" : { color: chartTheme.tooltipTheme.color },
 			"axisPointer" : {
