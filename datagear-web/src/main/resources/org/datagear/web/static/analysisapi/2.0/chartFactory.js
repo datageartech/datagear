@@ -6526,56 +6526,19 @@ CF.inflateChartTheme = function(theme)
 {
 	CF.inflateThemeActualBgColor(theme);
 	
-	if(theme.color)
+	if(theme.color && theme.actualBackgroundColor)
 	{
-		var titleThemeGen =
+		var highlightThemeGen =
 		{
-			color: theme.color,
-			backgroundColor: "transparent"
+			color: theme.actualBackgroundColor,
+			backgroundColor: CF.themeGradualColor(theme, 0.6)
 		};
 		
-		theme.titleTheme = (!theme.titleTheme ? titleThemeGen : CF.extend(true, titleThemeGen, theme.titleTheme));
-		
-		if(theme.actualBackgroundColor)
-		{
-			var legendThemeGen =
-			{
-				color: CF.themeGradualColor(theme, 0.9),
-				backgroundColor: "transparent"
-			};
-			
-			var tooltipThemeGen =
-			{
-				color: theme.actualBackgroundColor,
-				backgroundColor: CF.themeGradualColor(theme, 0.7)
-			};
-			
-			var highlightThemeGen =
-			{
-				color: theme.actualBackgroundColor,
-				backgroundColor: CF.themeGradualColor(theme, 0.5)
-			};
-			
-			theme.legendTheme = (!theme.legendTheme ? legendThemeGen : CF.extend(true, legendThemeGen, theme.legendTheme));
-			theme.tooltipTheme = (!theme.tooltipTheme ? tooltipThemeGen : CF.extend(true, tooltipThemeGen, theme.tooltipTheme));
-			theme.highlightTheme = (!theme.highlightTheme ? highlightThemeGen : CF.extend(true, highlightThemeGen, theme.highlightTheme));
-		}
+		theme.highlightTheme = (!theme.highlightTheme ? highlightThemeGen : CF.extend(true, highlightThemeGen, theme.highlightTheme));
 	}
 	
 	if(theme.fontSize)
 	{
-		theme.titleTheme = (theme.titleTheme ? theme.titleTheme : {});
-		if(!theme.titleTheme.fontSize)
-			theme.titleTheme.fontSize = theme.fontSize;
-		
-		theme.legendTheme = (theme.legendTheme ? theme.legendTheme : {});
-		if(!theme.legendTheme.fontSize)
-			theme.legendTheme.fontSize = theme.fontSize;
-		
-		theme.tooltipTheme = (theme.tooltipTheme ? theme.tooltipTheme : {});
-		if(!theme.tooltipTheme.fontSize)
-			theme.tooltipTheme.fontSize = theme.fontSize;
-		
 		theme.highlightTheme = (theme.highlightTheme ? theme.highlightTheme : {});
 		if(!theme.highlightTheme.fontSize)
 			theme.highlightTheme.fontSize = theme.fontSize;

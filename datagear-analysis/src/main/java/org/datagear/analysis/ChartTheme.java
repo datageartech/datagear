@@ -22,7 +22,7 @@ import java.util.Arrays;
 /**
  * 图表主题。
  * <p>
- * {@linkplain #getTitleTheme()}、{@linkplain #getLegendTheme()}、{@linkplain #getTooltipTheme()}、{@linkplain #getHighlightTheme()}不是必填的，
+ * {@linkplain #getHighlightTheme()}不是必填的，
  * 它们可以由展现界面根据{@linkplain #getColor()}、{@linkplain #getActualBackgroundColor()}自动生成。
  * </p>
  * <p>
@@ -48,16 +48,7 @@ public class ChartTheme extends Theme
 	/** 值域映射范围图形条目颜色 */
 	private String[] graphRangeColors;
 
-	/** 标题主题 */
-	private Theme titleTheme = null;
-
-	/** 图例主题 */
-	private Theme legendTheme = null;
-
-	/** 提示框主题 */
-	private Theme tooltipTheme = null;
-
-	/** 高亮区主题 */
+	/** 高亮/选中等元素主题 */
 	private Theme highlightTheme = null;
 
 	public ChartTheme()
@@ -129,51 +120,6 @@ public class ChartTheme extends Theme
 		this.graphRangeColors = graphRangeColors;
 	}
 
-	public boolean hasTitleTheme()
-	{
-		return (this.titleTheme != null);
-	}
-
-	public Theme getTitleTheme()
-	{
-		return titleTheme;
-	}
-
-	public void setTitleTheme(Theme titleTheme)
-	{
-		this.titleTheme = titleTheme;
-	}
-
-	public boolean hasLegendTheme()
-	{
-		return (this.legendTheme != null);
-	}
-
-	public Theme getLegendTheme()
-	{
-		return legendTheme;
-	}
-
-	public void setLegendTheme(Theme legendTheme)
-	{
-		this.legendTheme = legendTheme;
-	}
-
-	public boolean hasTooltipTheme()
-	{
-		return (this.tooltipTheme != null);
-	}
-
-	public Theme getTooltipTheme()
-	{
-		return tooltipTheme;
-	}
-
-	public void setTooltipTheme(Theme tooltipTheme)
-	{
-		this.tooltipTheme = tooltipTheme;
-	}
-
 	public boolean hasHighlightTheme()
 	{
 		return (this.highlightTheme != null);
@@ -195,8 +141,6 @@ public class ChartTheme extends Theme
 		return getClass().getSimpleName() + " [color=" + getColor() + ", backgroundColor="
 				+ getBackgroundColor() + ", fontSize=" + getFontSize() + ", actualBackgroundColor="
 				+ actualBackgroundColor + ", graphColors=" + Arrays.toString(graphColors) + ", graphRangeColors="
-				+ Arrays.toString(graphRangeColors) + ", titleTheme=" + titleTheme
-				+ ", legendTheme=" + legendTheme + ", tooltipTheme=" + tooltipTheme + ", highlightTheme="
-				+ highlightTheme + "]";
+				+ Arrays.toString(graphRangeColors) + ", highlightTheme=" + highlightTheme + "]";
 	}
 }

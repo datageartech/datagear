@@ -5649,10 +5649,6 @@ SPT.tableRenderer = function(plugin, config)
 				var css=
 				[
 					{
-						name: (isLocalStyle ? "." + name : "") + " .dg-chart-table-title",
-						value: { "font-size": CF.toCssFontSize(theme.titleTheme.fontSize) }
-					},
-					{
 						name: qualifier + " table.dataTable",
 						value: CF.styleString(tableStyle.table)
 					},
@@ -5754,15 +5750,6 @@ SPT.tableRenderer = function(plugin, config)
 						value: { "outline": "2px solid " + borderColor }
 					}
 				];
-				
-				if(!isLocalStyle)
-				{
-					css.push(
-					{
-						name: " .dg-chart-table-title",
-						value: { "color": theme.titleTheme.color, "background-color": theme.titleTheme.backgroundColor }
-					});
-				}
 				
 				return css;
 			},
@@ -8056,14 +8043,14 @@ EU._buildEchartsTheme = function(chart)
 	{
 		"color" : chartTheme.graphColors,
 		"backgroundColor" : chartTheme.backgroundColor,
-		"textStyle" : {},
+		"textStyle" : { "color" : chartTheme.color },
 		"title" : {
 	        "left" : "center",
 	        //6.0版本标题默认top有变动，需要明确设置为0才能兼容旧版
 	        "top": 0,
-			"textStyle" : { "color" : chartTheme.titleTheme.color },
-			"subtextStyle" : { "color" : chartTheme.titleTheme.color },
-			"backgroundColor" : chartTheme.titleTheme.backgroundColor
+			"textStyle" : { "color" : chartTheme.color },
+			"subtextStyle" : { "color" : chartTheme.color },
+			"backgroundColor" : "transparent"
 		},
 		"line" : {
 			"itemStyle" : { "borderWidth" : 2 },
@@ -8321,16 +8308,16 @@ EU._buildEchartsTheme = function(chart)
 		"legend" : {
 			"orient": "horizontal",
 			"top": 25,
-			"textStyle" : { "color" : chartTheme.legendTheme.color },
+			"textStyle" : { "color" : chart.themeGradualColor(0.8) },
 			"inactiveColor" : axisScaleLineColor,
 			"inactiveBorderColor": axisColor,
-			"backgroundColor" : chartTheme.legendTheme.backgroundColor
+			"backgroundColor" : "transparent"
 		},
 		"tooltip" : {
-			"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
-			"borderColor" : chart.themeGradualColor(chartTheme.tooltipTheme, 0.3),
+			"backgroundColor" : chart.themeGradualColor(0.7),
+			"borderColor" : chart.themeGradualColor(0.5),
 			"borderWidth" : 1,
-			"textStyle" : { color: chartTheme.tooltipTheme.color },
+			"textStyle" : { color: chartTheme.actualBackgroundColor },
 			"axisPointer" : {
 				"lineStyle" : { "color" : axisColor, "width" : 1 },
 				"crossStyle" : { "color" : axisColor, "width" : 1 }
@@ -8372,31 +8359,26 @@ EU._buildEchartsTheme = function(chart)
 	};
 	
 	//不能在上述theme中直接设置fontSize，因为即时值为null，仍然会改变默认字体
-	
-	if(chartTheme.fontSize)
+	var fontSize = (chartTheme.fontSize == null ? null : parseFloat(chartTheme.fontSize));
+	if(fontSize != null && !isNaN(fontSize) && fontSize > 0)
 	{
-		theme.textStyle = (theme.textStyle || {});
-		theme.textStyle.fontSize = chartTheme.fontSize;
+		var subFontSize = fontSize*4/5;
+		subFontSize = (subFontSize < 1 ? 1 : subFontSize);
 		
-		theme.categoryAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.valueAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.logAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.timeAxis.axisLabel.textStyle.fontSize = chartTheme.fontSize;
-		theme.gauge.title.fontSize = chartTheme.fontSize;
-		theme.gauge.detail.fontSize = chartTheme.fontSize;
-		theme.gauge.axisLabel.fontSize = chartTheme.fontSize;
-		theme.sankey.label.fontSize = chartTheme.fontSize;
-		theme.themeRiver.label.fontSize = chartTheme.fontSize;
+		theme.textStyle.fontSize = fontSize;
+		theme.title.textStyle.fontSize = fontSize;
+		theme.title.subtextStyle.fontSize = subFontSize;
+		theme.tooltip.textStyle.fontSize = fontSize;
+		theme.categoryAxis.axisLabel.textStyle.fontSize = fontSize;
+		theme.valueAxis.axisLabel.textStyle.fontSize = fontSize;
+		theme.logAxis.axisLabel.textStyle.fontSize = fontSize;
+		theme.timeAxis.axisLabel.textStyle.fontSize = fontSize;
+		theme.gauge.title.fontSize = fontSize;
+		theme.gauge.detail.fontSize = fontSize;
+		theme.gauge.axisLabel.fontSize = fontSize;
+		theme.sankey.label.fontSize = fontSize;
+		theme.themeRiver.label.fontSize = fontSize;
 	}
-	
-	if(chartTheme.titleTheme.fontSize)
-		theme.title.textStyle.fontSize = chartTheme.titleTheme.fontSize;
-	
-	if(chartTheme.legendTheme.fontSize)
-		theme.legend.textStyle.fontSize = chartTheme.legendTheme.fontSize;
-	
-	if(chartTheme.tooltipTheme.fontSize)
-		theme.tooltip.textStyle.fontSize = chartTheme.tooltipTheme.fontSize;
 	
 	return theme;
 };
