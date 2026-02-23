@@ -62,20 +62,24 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 属性名：图表渲染器 */
+	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_RENDERER = "renderer";
-	
-	/** 属性名：支持的平台版本 */
 	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
-
-	/** 属性名：支持的看板页面端API版本 */
 	public static final String PROPERTY_API_VERSION = "apiVersion";
 
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
 
-	/** JS图表渲染器 */
-	private JsChartRenderer renderer;
+	/** 插件类型，默认需为{@linkplain HtmlChartPluginType#NORMAL} */
+	private String type = HtmlChartPluginType.NORMAL;
+
+	/**
+	 * JS图表渲染器。
+	 * <p>
+	 * 当{@linkplain #type}值为{@linkplain HtmlChartPluginType#LIB}时允许{@code null}。
+	 * </p>
+	 */
+	private JsChartRenderer renderer = null;
 
 	/**
 	 * 支持的平台版本模式，比如：{@code >=6.0}。
@@ -135,6 +139,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		this(plugin.getId(), plugin.getNameLabel(), plugin.getRenderer(), plugin.getPluginWriter(),
 				plugin.getRenderContextWriter(), plugin.getChartWriter());
 
+		setType(plugin.getType());
 		setDescLabel(plugin.getDescLabel());
 		setResources(plugin.getResources());
 		setIconResourceNames(plugin.getIconResourceNames());
@@ -151,6 +156,16 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		setPlatformVersion(plugin.getPlatformVersion());
 		setApiVersion(plugin.getApiVersion());
 		setAdditions(plugin.getAdditions());
+	}
+
+	public String getType()
+	{
+		return type;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
 	}
 
 	public JsChartRenderer getRenderer()

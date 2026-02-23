@@ -98,38 +98,48 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
 	{
 		JsChartRenderer renderer = plugin.getRenderer();
-		String codeType = renderer.getCodeType();
 
 		out.write(varName + "." + HtmlChartPlugin.PROPERTY_RENDERER + "=");
-		writeNewLine(out);
 		
-		if (JsChartRenderer.CODE_TYPE_OBJECT.equals(codeType))
+		if (renderer == null)
 		{
-			writeHtmlChartRendererCodeValue(out, renderer);
-			out.write(";");
-			writeNewLine(out);
-		}
-		else if (JsChartRenderer.CODE_TYPE_INVOKE.equals(codeType))
-		{
-			String tmpVarName = this.localRendererVarNameForInvode;
-
-			out.write("(function(" + JsChartRenderer.INVOKE_CONTEXT_PLUGIN_VAR + "){");
-			writeNewLine(out);
-			out.write("try{ ");
-			writeNewLine(out);
-			out.write("var " + tmpVarName + " =");
-			writeNewLine(out);
-			writeHtmlChartRendererCodeValue(out, renderer);
-			writeNewLine(out);
-			out.write("return " + tmpVarName + ";");
-			writeNewLine(out);
-			out.write("}catch(e){ if(typeof(console) !== \"undefined\"){ if(console.error){ console.error(e); } } }");
-			writeNewLine(out);
-			out.write("})(" + varName + ");");
+			out.write("null;");
 			writeNewLine(out);
 		}
 		else
-			throw new IOException("Unsupported JsChartRenderer code type : " + codeType);
+		{
+			String codeType = renderer.getCodeType();
+			writeNewLine(out);
+
+			if (JsChartRenderer.CODE_TYPE_OBJECT.equals(codeType))
+			{
+				writeHtmlChartRendererCodeValue(out, renderer);
+				out.write(";");
+				writeNewLine(out);
+			}
+			else if (JsChartRenderer.CODE_TYPE_INVOKE.equals(codeType))
+			{
+				String tmpVarName = this.localRendererVarNameForInvode;
+
+				out.write("(function(" + JsChartRenderer.INVOKE_CONTEXT_PLUGIN_VAR + "){");
+				writeNewLine(out);
+				out.write("try{ ");
+				writeNewLine(out);
+				out.write("var " + tmpVarName + " =");
+				writeNewLine(out);
+				writeHtmlChartRendererCodeValue(out, renderer);
+				writeNewLine(out);
+				out.write("return " + tmpVarName + ";");
+				writeNewLine(out);
+				out.write(
+						"}catch(e){ if(typeof(console) !== \"undefined\"){ if(console.error){ console.error(e); } } }");
+				writeNewLine(out);
+				out.write("})(" + varName + ");");
+				writeNewLine(out);
+			}
+			else
+				throw new IOException("Unsupported JsChartRenderer code type : " + codeType);
+		}
 	}
 
 	protected void writeHtmlChartRendererCodeValue(Writer out, JsChartRenderer renderer) throws IOException

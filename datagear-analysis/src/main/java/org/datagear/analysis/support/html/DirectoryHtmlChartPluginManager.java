@@ -649,25 +649,6 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		return name;
 	}
 
-	@Override
-	protected boolean isLegalChartPlugin(ChartPlugin chartPlugin)
-	{
-		boolean legal = super.isLegalChartPlugin(chartPlugin);
-
-		if (legal)
-		{
-			if (chartPlugin instanceof HtmlChartPlugin)
-			{
-				HtmlChartPlugin htmlChartPlugin = (HtmlChartPlugin) chartPlugin;
-
-				if (htmlChartPlugin.getRenderer() == null)
-					legal = false;
-			}
-		}
-
-		return legal;
-	}
-
 	protected File createTmpWorkDirectory() throws IOException
 	{
 		if (this.tmpDirectory != null)

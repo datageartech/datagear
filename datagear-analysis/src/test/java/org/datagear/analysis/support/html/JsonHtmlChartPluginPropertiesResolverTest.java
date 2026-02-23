@@ -45,6 +45,7 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("5.2.0", chartPlugin.getPlatformVersion());
+		assertEquals(HtmlChartPluginType.NORMAL, chartPlugin.getType());
 	}
 
 	@Test
@@ -57,5 +58,45 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("2.0", chartPlugin.getApiVersion());
+		assertEquals(HtmlChartPluginType.NORMAL, chartPlugin.getType());
+	}
+
+	@Test
+	public void resolveChartPluginPropertiesTest_type_lib() throws IOException
+	{
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-type-lib.json");
+
+		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
+		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
+
+		assertEquals("2.0", chartPlugin.getApiVersion());
+		assertEquals(HtmlChartPluginType.LIB, chartPlugin.getType());
+	}
+
+	@Test
+	public void resolveChartPluginPropertiesTest_type_normal() throws IOException
+	{
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-type-normal.json");
+
+		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
+		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
+
+		assertEquals("2.0", chartPlugin.getApiVersion());
+		assertEquals(HtmlChartPluginType.NORMAL, chartPlugin.getType());
+	}
+
+	@Test
+	public void resolveChartPluginPropertiesTest_type_unknown() throws IOException
+	{
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-type-unknown.json");
+
+		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
+		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
+
+		assertEquals("2.0", chartPlugin.getApiVersion());
+		assertEquals(HtmlChartPluginType.NORMAL, chartPlugin.getType());
 	}
 }

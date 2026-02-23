@@ -40,6 +40,7 @@ import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categoriz
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginJson;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
+import org.datagear.analysis.support.html.HtmlChartPluginType;
 import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -251,7 +252,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	{
 		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 		List<HtmlChartPluginVo> pluginVos = findHtmlChartPluginVos(request, pagingQuery.getKeyword(),
-				pagingQuery.getDataFilter(), false, false);
+				pagingQuery.getDataFilter(), null, false, false);
 
 		PagingData<HtmlChartPluginVo> pagingData = new PagingData<>(pagingQuery.getPage(), pluginVos.size(),
 				pagingQuery.getPageSize());
@@ -279,7 +280,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		pagingQuery = (pagingQuery == null ? new DataFilterPagingQuery() : pagingQuery);
 
 		List<HtmlChartPluginVo> pluginVos = findHtmlChartPluginVos(request, pagingQuery.getKeyword(),
-				pagingQuery.getDataFilter(), local, true);
+				pagingQuery.getDataFilter(), HtmlChartPluginType.NORMAL, local, true);
 		List<Categorization> categorizations = resolveCategorizations(pluginVos);
 		simplifyForSelectData(categorizations);
 
@@ -376,6 +377,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	 * @param keyword
 	 * @param apiVersion
 	 *            允许{@code null}
+	 * @param type
+	 *            允许{@code null}
 	 * @param local
 	 *            是否仅查询本地图表插件（{@linkplain ChartPlugin#getDataSetRange()}不为{@code null}，且各值都为0）
 	 *            允许{@code null}
@@ -383,7 +386,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	 * @return
 	 */
 	protected List<HtmlChartPluginVo> findHtmlChartPluginVos(HttpServletRequest request, String keyword,
-			String apiVersion, Boolean local, boolean forCategory)
+			String apiVersion, String type, Boolean local, boolean forCategory)
 	{
 		List<HtmlChartPluginVo> pluginViews = new ArrayList<>();
 
@@ -395,9 +398,13 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			Locale locale = WebUtils.getLocale(request);
 			String themeName = resolveChartPluginIconThemeName(request);
 			boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
+			boolean typeEmpty = StringUtil.isEmpty(type);
 
 			for (HtmlChartPlugin plugin : plugins)
 			{
+				if (!typeEmpty && !type.equals(plugin.getType()))
+					continue;
+
 				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))
 					continue;
 
