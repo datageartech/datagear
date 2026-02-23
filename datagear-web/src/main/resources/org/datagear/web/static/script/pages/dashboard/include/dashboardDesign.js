@@ -3576,14 +3576,12 @@ $.inflateDashboardDesignEditorForms = function(po)
 			onVeChartAttrValuesPanelShow: function()
 			{
 				var dashboardEditor = po.visualDashboardEditorByTab();
-				var attrForm = {};
-				var attrValues = [];
 				
-				if(dashboardEditor)
-				{
-					attrForm = (dashboardEditor.getElementChartPluginAttributeForm() || {});
-					attrValues = (dashboardEditor.getElementChartAttrValues() || {});
-				}
+				if(!dashboardEditor)
+					return;
+				
+				var attrForm = (dashboardEditor.getElementChartPluginAttributeForm() || {});
+				var attrValues = (dashboardEditor.getElementChartAttrValues() || {});
 				
 				po.setupChartAttrValuesForm(attrForm, attrValues,
 				{
@@ -3600,17 +3598,15 @@ $.inflateDashboardDesignEditorForms = function(po)
 							name: po.i18n.resetToOrigin,
 							clickHandler: function()
 							{
-								var attrValuesReset = {};
-								
-								if(dashboardEditor)
-									attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
-								
+								var attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
 								po.avo.setFormAttrValues(attrValuesReset);
 							}
 						}
 					],
+					showClearBtn: false,
 					//此时允许自由编辑图表属性，因此应不是严格数据模式
-					strictSubmitData: false
+					strictSubmitData: false,
+					retainDataNullProp: dashboardEditor.retainNullChartAttrValue()
 				});
 			},
 			

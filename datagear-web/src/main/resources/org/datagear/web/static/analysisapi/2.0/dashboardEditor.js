@@ -2399,18 +2399,9 @@ DE.getElementChartAttrValues = function(ele)
 	if(!DE._checkNotEmptyElement(ele))
 		return null;
 	
-	var attrValues = null;
 	var chart = DE.dashboard.renderedChart(ele);
+	var attrValues = CF.evalChartInitAttrValues(chart.element(), chart.attrValuesOrigin());
 	
-	//这里不能直接使用chart.attrValues()，因为可能已被图表实例修改
-	var attrValuesOrigin =  chart.attrValuesOrigin();
-	var attrValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
-	attrValuesEle = CF.evalSilently(attrValuesEle, null);
-	
-	//应复制一份，避免被不可预料的修改
-	if(attrValuesOrigin != null || attrValuesEle != null)
-		attrValues = CF.extend(true, {}, attrValuesOrigin, attrValuesEle);
-		
 	return attrValues;
 };
 
@@ -2437,17 +2428,18 @@ DE.getElementChartAttrValuesForReset = function(ele)
 	var attributeForm = chart.pluginAttributeForm();
 	if(attributeForm != null)
 	{
-		if(attributeForm.name != null)
-		{
-			delete attrValuesEle[attributeForm.name];
-		}
-		else
+		if(CF.isRootPluginAttributeForm(attributeForm))
 		{
 			var formProperties = (attributeForm.properties || []);
 			formProperties.forEach((prop) =>
 			{
 				delete attrValuesEle[prop.name];
 			});
+		}
+		if(attributeForm.name != null)
+		{
+			var name = attributeForm.name;
+			delete attrValuesEle[name];
 		}
 	}
 	
@@ -2531,6 +2523,15 @@ DE.checkSetElementChartAttrValues = function(ele)
 };
 
 /**
+ * 对于DE.setElementChartAttrValues()的attrValues参数，是否需要保留其中的null值
+ */
+DE.retainNullChartAttrValue = function()
+{
+	//需保留null值，以支持继承复制时删除原始图表属性值，具体参考CF.evalChartInitAttrValues()函数
+	return true;
+};
+
+/**
  * 设置图表元素的图表属性值。
  * 
  * @param attrValues 要设置的图表主题对象，格式为：{ ... }
@@ -2548,9 +2549,20 @@ DE.setElementChartAttrValues = function(attrValues, ele)
 	
 	var chart = DE.dashboard.renderedChart(ele);
 	var attrValuesOrigin = (chart.attrValuesOrigin() || {});
-	//应该只设置有修改的图表属性值，这样在图表模块再次编辑其他图表属性值才能应用于所有引用它看板
-	var attrValuesMerge = DE._leastCopyJsonChanged(attrValues, attrValuesOrigin, {});
-	var eleAttrValue = CF.serializeBySingleQuote(attrValuesMerge);
+	//只需保留有修改的属性值即可，具体参考CF.evalChartInitAttrValues()函数
+	var changedAttrValues = {};
+	
+	for(var p in attrValues)
+	{
+		var v = attrValues[p];
+		var vo = attrValuesOrigin[p];
+		var eq = ((v == null && vo == null) || CF.deepEquals(v, vo));
+		
+		if(!eq)
+			changedAttrValues[p] = v;
+	}
+	
+	var eleAttrValue = CF.serializeBySingleQuote(changedAttrValues);
 	
 	if(DE._isEmptyJsonObjStr(eleAttrValue))
 		DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, null);
@@ -3794,59 +3806,6 @@ DE._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
 		re = "height:300px;";
 	else
 		re = "height:100%;";
-	
-	return re;
-};
-
-DE._LEAST_COPY_JSON_UNCHANED_RESULT = {};
-
-DE._leastCopyJsonChanged = function(src, original, unchangeResult)
-{
-	if(CF.deepEquals(src, original))
-		return unchangeResult;
-	
-	var re;
-	
-	if(CF.isArray(src))
-	{
-		re = [];
-		
-		for(let i=0; i<src.length; i++)
-		{
-			let srcVal = src[i];
-			let copyVal = DE._leastCopyJsonChanged(srcVal, (original == null ? null : original[i]), DE._LEAST_COPY_JSON_UNCHANED_RESULT);
-			
-			//数组不能忽略相等元素，必须添加占位值
-			if(copyVal === DE._LEAST_COPY_JSON_UNCHANED_RESULT)
-			{
-				if(CF.isArray(srcVal))
-					copyVal = [];
-				else if(CF.isPlainObject(srcVal))
-					copyVal = {};
-				else
-					copyVal = srcVal;
-			}
-			
-			re[i] = copyVal;
-		}
-	}
-	else if(CF.isPlainObject(src))
-	{
-		re = {};
-		
-		for(let p in src)
-		{
-			let srcVal = src[p];
-			let copyVal = DE._leastCopyJsonChanged(srcVal, (original == null ? null : original[p]), DE._LEAST_COPY_JSON_UNCHANED_RESULT);
-			
-			if(copyVal !== DE._LEAST_COPY_JSON_UNCHANED_RESULT)
-				re[p] = copyVal;
-		}
-	}
-	else
-	{
-		re = src;
-	}
 	
 	return re;
 };

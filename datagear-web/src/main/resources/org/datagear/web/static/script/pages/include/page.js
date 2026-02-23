@@ -2508,38 +2508,44 @@ $.inflateChartAttrValuesForm = function(po)
 	};
 	
 	avo.ctrlPropName = po.concatPid("avoctlprop");
+	avo.unrelatedPropName = po.concatPid("unrelatedProp");
 	
 	//图表属性值对象转换为org.datagear.analysis.ChartPluginAttributeForm的表单数据模型
-	avo.attrValuesToFormData = function(attrValues, pluginAttrForm, clone, initDftValue)
+	avo.attrValuesToFormData = function(attrValues, formData, pluginAttrForm, initDftValue)
 	{
-		clone = (clone === undefined ? true : clone);
+		attrValues = (attrValues || {});
+		formData = (formData || {});
 		initDftValue = (initDftValue === undefined ? true : initDftValue);
 		
-		var re = (attrValues || {});
-		
-		if(clone)
-			re = $.extend(true, {}, re);
-		
 		if(pluginAttrForm == null)
-			return re;
-		
-		pluginAttrForm = avo.toGroupTrimProperty(pluginAttrForm);
-		
-		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
-			avo.doAttrValuesToFormData(re, pluginAttrForm, initDftValue);
+			formData = $.extend(true, formData, attrValues);
 		}
 		else
 		{
-			var name = pluginAttrForm.name;
+			pluginAttrForm = avo.toGroupTrimProperty(pluginAttrForm);
 			
-			if(re[name] == null)
-				re[name] = {};
+			if(avo.isRootPluginAttrForm(pluginAttrForm))
+			{
+				formData = $.extend(true, formData, attrValues);
+			}
+			else
+			{
+				var name = pluginAttrForm.name;
+				formData = $.extend(true, formData, attrValues[name]);
+				formData[avo.unrelatedPropName] = {};
+				
+				for(var p in attrValues)
+				{
+					if(p != name)
+						formData[avo.unrelatedPropName][p] = attrValues[p];
+				}
+			}
 			
-			avo.doAttrValuesToFormData(re[name], pluginAttrForm, initDftValue);
+			avo.doAttrValuesToFormData(formData, pluginAttrForm, initDftValue);
 		}
 		
-		return re;
+		return formData;
 	};
 	
 	avo.doAttrValuesToFormData = function(attrValues, objProperty, initDftValue)
@@ -2681,10 +2687,11 @@ $.inflateChartAttrValuesForm = function(po)
 	};
 	
 	//将由avo.attrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
-	avo.formDataToAttrValues = function(formData, pluginAttrForm, strictMode)
+	avo.formDataToAttrValues = function(formData, pluginAttrForm, strictMode, retainNull)
 	{
-		var re = (formData || {});
-		re = $.extend(true, {}, re);
+		formData = (formData || {});
+		
+		var re;
 		
 		if(pluginAttrForm == null)
 			pluginAttrForm = { properties: [] };
@@ -2693,33 +2700,34 @@ $.inflateChartAttrValuesForm = function(po)
 		
 		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
-			avo.doFormDataToAttrValues(re, pluginAttrForm, strictMode);
+			re = $.extend(true, {}, formData);
+			avo.doFormDataToAttrValues(re, pluginAttrForm, strictMode, retainNull);
 		}
 		else
 		{
+			re = {};
+			
+			var unrelateds = (formData[avo.unrelatedPropName] || {});
+			delete formData[avo.unrelatedPropName];
+			
 			var name = pluginAttrForm.name;
-			var v = re[name];
+			re[name] = $.extend(true, {}, formData);
+			avo.doFormDataToAttrValues(re[name], pluginAttrForm, true, false);
 			
-			if(v != null)
-				avo.doFormDataToAttrValues(v, pluginAttrForm, true);
-			
-			if(pluginAttrForm.required)
+			if(!strictMode)
 			{
-				if(v == null)
-					re[name] = {};
-			}
-			else
-			{
-				//删除由avo.attrValuesToFormData()生成的空对象
-				if(v == null || $.isEmptyObject(v))
-					delete re[name];
+				for(var p in unrelateds)
+				{
+					if(p != name)
+						re[p] = unrelateds[p];
+				}
 			}
 		}
 		
 		return re;
 	};
 	
-	avo.doFormDataToAttrValues = function(formData, objProperty, strictMode)
+	avo.doFormDataToAttrValues = function(formData, objProperty, strictMode, retainNull)
 	{
 		if(formData == null)
 			return formData;
@@ -2747,11 +2755,11 @@ $.inflateChartAttrValuesForm = function(po)
 				if($.isArray(v))
 				{
 					for(var j=0; j<v.length; j++)
-						avo.doFormDataToAttrValues(v[j], prop, true);
+						avo.doFormDataToAttrValues(v[j], prop, true, false);
 				}
 				else
 				{
-					avo.doFormDataToAttrValues(v, prop, true);
+					avo.doFormDataToAttrValues(v, prop, true, false);
 				}
 			}
 			else
@@ -2760,14 +2768,28 @@ $.inflateChartAttrValuesForm = function(po)
 				v = avo.toChartAttrTypeValue(prop, v);
 			}
 			
-			//null值无需保留，占用空间
+			if(propEnableIfs != null && propEnableIfs[propName] === false)
+				v = null;
+			
 			if(v == null)
-				delete data[propName];
-			//禁用的值应删除
-			else if(propEnableIfs != null && propEnableIfs[propName] === false)
-				delete data[propName];
+			{
+				if(retainNull)
+				{
+					if(v === undefined)
+						v = null;
+					
+					data[propName] = v;
+				}
+				else
+				{
+					//不必要时删除null值，以免占用空间
+					delete data[propName];
+				}
+			}
 			else
+			{
 				data[propName] = v;
+			}
 		};
 		
 		//严格模式，删除未定义的属性值
@@ -2867,7 +2889,8 @@ $.inflateChartAttrValuesForm = function(po)
 	{
 		var type = inputProp.type;
 		
-		if(type != avo.FormPropertyType.STRING && value === "")
+		//对于UI输入框，空字符串应视为null
+		if(value === "")
 			value = null;
 		
 		if(value == null)
@@ -2881,11 +2904,11 @@ $.inflateChartAttrValuesForm = function(po)
 			value.forEach((vi) =>
 			{
 				vi = avo.toChartAttrTypeValue(inputProp, vi);
-				
-				if(vi != null)
-					re.push(vi);
+				//数组中的null元素应保留
+				re.push(vi);
 			});
 			
+			//对于UI输入框，空数组应视为null
 			return (re.length > 0 ? re : null);
 		}
 		else
@@ -2930,46 +2953,21 @@ $.inflateChartAttrValuesForm = function(po)
 		}
 	};
 	
-	avo.setFormAttrValues = function(attrValues)
+	avo.setFormAttrValues = function(attrValues, initDftValue)
 	{
 		var pm = po.vuePageModel();
 		var pluginAttrForm = pm.avoModel.pluginAttrForm;
-		var rootData = avo.attrValuesToFormData(attrValues, pluginAttrForm);
-		var formData = (avo.isRootPluginAttrForm(pluginAttrForm) ? rootData : rootData[pluginAttrForm.name]);
+		var formData = pm.avoModel.formData;
 		
-		pm.avoModel.rootData = rootData;
-		pm.avoModel.formData = formData;
+		for(var p in formData)
+			delete formData[p];
 		
-		return rootData;
+		avo.attrValuesToFormData(attrValues, formData, pluginAttrForm, initDftValue);
 	};
 	
 	avo.clearFormData = function()
 	{
-		var pm = po.vuePageModel();
-		var pluginAttrForm = pm.avoModel.pluginAttrForm;
-		var rootData = pm.avoModel.rootData;
-		
-		if(avo.isRootPluginAttrForm(pluginAttrForm))
-		{
-			for(let p in rootData)
-				delete rootData[p];
-		}
-		else
-		{
-			var name = pluginAttrForm.name;
-			var formData = pm.avoModel.formData;
-			
-			for(let p in rootData)
-			{
-				if(p != name)
-					delete rootData[p];
-			}
-			
-			for(let p in formData)
-				delete formData[p];
-		}
-		
-		avo.attrValuesToFormData(rootData, pluginAttrForm, false, false);
+		avo.setFormAttrValues({}, false);
 	};
 	
 	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginAttrForm)
@@ -3035,6 +3033,10 @@ $.inflateChartAttrValuesForm = function(po)
 			ele = avo.clonePropDefaultValue(prop);
 			isTreeSelect = avo.isPropTreeSelectInput(prop);
 		}
+		
+		//undefined应置为null，因为数组的undefined元素表示空槽，不符合这里的需求
+		if(ele === undefined)
+			ele = null;
 		
 		if(idx == null)
 			array.push(ele);
@@ -3250,9 +3252,11 @@ $.inflateChartAttrValuesForm = function(po)
 		options = $.extend(
 		{
 			submitHandler: null,
+			showClearBtn: true,
 			buttons: [],
 			readonly: false,
-			strictSubmitData: false
+			strictSubmitData: false,
+			retainDataNullProp: false
 		},
 		options);
 		
@@ -3262,6 +3266,7 @@ $.inflateChartAttrValuesForm = function(po)
 		pm.avoModel.pluginAttrForm = pluginAttrForm;
 		pm.avoModel.buttons = options.buttons;
 		pm.avoModel.readonly = options.readonly;
+		pm.avoModel.showClearBtn = options.showClearBtn;
 		avo.setFormAttrValues(attrValues);
 		
 		var form = po.elementOfId(avo.chartAttrValuesFormEleId, document.body);
@@ -3272,8 +3277,8 @@ $.inflateChartAttrValuesForm = function(po)
 				if(options && options.submitHandler)
 				{
 					var pluginAttrForm = pm.avoModel.pluginAttrForm;
-					var data = po.vueRaw(pm.avoModel.rootData);
-					var attrValues = avo.formDataToAttrValues(data, pluginAttrForm, options.strictSubmitData);
+					var data = po.vueRaw(pm.avoModel.formData);
+					var attrValues = avo.formDataToAttrValues(data, pluginAttrForm, options.strictSubmitData, options.retainDataNullProp);
 					options.submitHandler(attrValues);
 				}
 			}
@@ -3287,8 +3292,8 @@ $.inflateChartAttrValuesForm = function(po)
 			FormPropertyType: avo.FormPropertyType,
 			FormPropertyInputType: avo.FormPropertyInputType,
 			pluginAttrForm: { groupProps: [] },
-			rootData: {},
 			formData: {},
+			showClearBtn: true,
 			readonly: false,
 			buttons: [],
 			i18n: po.i18n,
@@ -3303,7 +3308,7 @@ $.inflateChartAttrValuesForm = function(po)
 	
 	po.vueMethod(
 	{
-		onClearChartAttrValuesFormData: function()
+		onClearChartAttrValuesForm: function()
 		{
 			po.confirm(
 			{

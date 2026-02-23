@@ -801,12 +801,7 @@ chartProto._initRenderer = function()
  */
 chartProto._initAttrValues = function()
 {
-	var attrValues = CF.eleAttr(this._eleNonNull(), elementAttrConst.ATTR_VALUES);
-	attrValues = (attrValues ? CF.evalSilently(attrValues) : null);
-	//注意：应该使用this.attrValuesOrigin()作为合并基础，因为可能this.attrValues()执行修改操作，
-	//比如修改后chart.destroy()后再chart.render()
-	attrValues = CF.extend(true, {}, this.attrValuesOrigin(), attrValues);
-	
+	var attrValues = CF.evalChartInitAttrValues(this._eleNonNull(), this.attrValuesOrigin());
 	this.attrValues(attrValues);
 };
 
@@ -4352,6 +4347,33 @@ chartProto.dataSetBindsFetched = function(dataSetBinds, chartResult)
 //----------------------------------------
 // Chart prototype end
 //----------------------------------------
+
+/**
+ * 计算图表初始属性值集。
+ */
+CF.evalChartInitAttrValues = function(chartEle, attrValuesOrigin)
+{
+	var attrValues = CF.eleAttr(chartEle, elementAttrConst.ATTR_VALUES);
+	attrValues = (CF.isEmpty(attrValues) ? {} : CF.evalSilently(attrValues, {}));
+	
+	var merges = {};
+	
+	if(attrValuesOrigin != null)
+	{
+		for(var p in attrValuesOrigin)
+		{
+			if(attrValues[p] === undefined)
+				merges[p] = attrValuesOrigin[p];
+		}
+		
+		//这里应深度复制，以免后续操作修改原始值
+		merges = CF.extend(true, {}, merges);
+	}
+	
+	CF.extend(attrValues, merges);
+	
+	return attrValues;
+};
 
 /**
  * 是否根级插件属性表单。

@@ -2515,6 +2515,15 @@
 	};
 	
 	/**
+	 * 对于editor.setElementChartAttrValues()的attrValues参数，是否需要保留其中的null值
+	 */
+	editor.retainNullChartAttrValue = function()
+	{
+		//不需保留null值，因为未支持删除原始图表属性值，具体参考chart._initAttrValues()函数
+		return false;
+	};
+	
+	/**
 	 * 设置图表元素的图表属性值。
 	 * 
 	 * @param attrValues 要设置的图表主题对象，格式为：{ ... }

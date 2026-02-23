@@ -1555,7 +1555,9 @@
 				},
 				readonly: pm.isReadonlyAction,
 				//此时不允许自由编辑图表属性，因此应是严格数据模式
-				strictSubmitData: true
+				strictSubmitData: true,
+				//此时不存在继承复制场景，不必保留null值
+				retainDataNullProp: false
 			});
 		},
 		

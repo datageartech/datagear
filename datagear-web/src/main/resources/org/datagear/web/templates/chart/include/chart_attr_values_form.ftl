@@ -37,7 +37,9 @@ page_palette.ftl
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
-		<p-button type="button" label="<@spring.message code='clearEmpty' />" severity="danger" @click="onClearChartAttrValuesFormData"></p-button>
+		<p-button type="button" label="<@spring.message code='clearEmpty' />" severity="danger" @click="onClearChartAttrValuesForm"
+			v-if="pm.avoModel.showClearBtn">
+		</p-button>
 		
 		<p-button v-for="(btn, btnIdx) in pm.avoModel.buttons" :key="btnIdx"
 			type="button" class="p-button-secondary" :label="btn.name" @click="btn.clickHandler">
