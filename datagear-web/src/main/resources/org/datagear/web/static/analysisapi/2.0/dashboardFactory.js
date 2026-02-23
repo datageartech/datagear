@@ -357,9 +357,8 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 		DF._heartbeatIntervalId = null;
 	}
 	
-	var contextPath = CF.renderContextContextPath(renderContext);
 	var heartbeatURL = CF.renderContextValNonNull(renderContext, renderContextAttrConst.HEARTBEAT_URL);
-	heartbeatURL = CF.toContextPathURL(contextPath, heartbeatURL);
+	heartbeatURL = CF.toRenderContextPathURL(renderContext, heartbeatURL);
 	
 	DF._heartbeatIntervalId = setInterval(function()
 	{
@@ -3359,8 +3358,7 @@ dashboardProto._postProcessDestroyed = function()
 dashboardProto.contextURL = function(url)
 {
 	var renderContext = this.renderContext();
-	var contextPath = CF.renderContextContextPath(renderContext);
-	return CF.toContextPathURL(contextPath, url);
+	return CF.toRenderContextPathURL(renderContext, url);
 };
 
 /**

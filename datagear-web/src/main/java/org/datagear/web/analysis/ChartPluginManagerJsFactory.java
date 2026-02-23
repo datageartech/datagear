@@ -258,6 +258,10 @@ public class ChartPluginManagerJsFactory implements CacheAware
 				+ ".get = function(id){ return this.plugins[id]; }; }");
 		buffer.append(newLine);
 
+		buffer.append("if(" + managerVar + ".getAll == null){" + managerVar
+				+ ".getAll = function(){ return this.plugins; }; }");
+		buffer.append(newLine);
+
 		if (DashboardApiVersion.isV1(apiVersion))
 		{
 			// @deprecated

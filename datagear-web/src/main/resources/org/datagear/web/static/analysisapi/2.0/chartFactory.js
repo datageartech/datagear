@@ -288,6 +288,13 @@ CF.DataSetParamType =
 	NUMBER: "number"
 };
 
+//org.datagear.analysis.support.html.HtmlChartPluginType
+CF.HtmlChartPluginType =
+{
+	NORMAL: "normal",
+	LIB: "lib"
+};
+
 /**
  * 初始化渲染上下文。
  * 注意：此函数应在初始化图表前（chart.init()函数调用前）且<body>后调用。
@@ -493,6 +500,19 @@ CF.findPluginById = function(pluginId)
 		plugin = CF.chartPluginManager.get(pluginId);
 	
 	return plugin;
+};
+
+CF.getAllPlugins = function()
+{
+	var re = null;
+	
+	if(CF.chartPluginManager && CF.chartPluginManager.getAll)
+		re = CF.chartPluginManager.getAll();
+	
+	if(re == null)
+		re = {};
+	
+	return re;
 };
 
 //----------------------------------------
@@ -1241,14 +1261,19 @@ chartProto._rendererLib = function()
 	
 	if(lib != null)
 	{
-		lib = CF.trimCustomRendererLib(lib, this);
+		lib = CF.trimCustomRendererLib(lib, this.renderContext());
 	}
 	else //其次插件渲染器
 	{
-		lib = CF.rendererLib(this._pluginRenderer());
+		let plugin = this.plugin();
 		
-		if(lib != null)
-			lib = CF.trimPluginRendererLib(lib, this);
+		if(plugin != null)
+		{
+			lib = CF.rendererLib(plugin.renderer);
+			
+			if(lib != null)
+				lib = CF.trimPluginRendererLib(lib, this.renderContext(), plugin);
+		}
 	}
 	
 	return lib;
@@ -3139,17 +3164,12 @@ chartProto.pluginResources = function()
  */
 chartProto.pluginResourceURL = function(name)
 {
-	name = (name || "");
-	
 	var plugin = this.plugin();
 	
 	if(plugin == null)
 		throw new Error(CF.chartLogInfo(this) + " plugin required");
 	
-	var urlPrefix = CF.renderContextValNonNull(this.renderContext(), renderContextAttrConst.PLUGIN_RES_URL_PREFIX);
-	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
-	url = this.contextURL(url);
-	
+	var url = CF.toPluginResourceURL(this.renderContext(), plugin, name);
 	return url;
 };
 
@@ -3516,8 +3536,7 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 chartProto.contextURL = function(url)
 {
 	var renderContext = this.renderContext();
-	var contextPath = CF.renderContextContextPath(renderContext);
-	return CF.toContextPathURL(contextPath, url);
+	return CF.toRenderContextPathURL(renderContext, url);
 };
 
 /**
@@ -5392,10 +5411,16 @@ CF.renderContextChartTheme = function(renderContext, chartTheme)
  * 只有当URL以"/"开头时才会添加系统根路径前缀，否则，将直接返回原URL。
  * 当需要访问系统内其他功能模块的资源时，应为其URL添加系统根路径前缀。
  * 
- * @param contextPath 系统根路径
+ * @param renderContext 渲染上下文
  * @param url 可选，要处理的URL
  * @return 添加后的新URL，如果未设置url参数，将返回系统根路径
  */
+CF.toRenderContextPathURL = function(renderContext, url)
+{
+	var contextPath = CF.renderContextContextPath(renderContext);
+	return CF.toContextPathURL(contextPath, url);
+};
+
 CF.toContextPathURL = function(contextPath, url)
 {
 	// (contextPath)
@@ -5413,6 +5438,25 @@ CF.toContextPathURL = function(contextPath, url)
 		
 		return url;
 	}
+};
+
+/**
+ * 将指定资源名称转换为系统URL。
+ * 
+ * @param renderContext 渲染上下文
+ * @param plugin 图表插件
+ * @param name 插件资源名
+ * @return 系统URL
+ */
+CF.toPluginResourceURL = function(renderContext, plugin, name)
+{
+	name = (name || "");
+	
+	var urlPrefix = CF.renderContextValNonNull(renderContext, renderContextAttrConst.PLUGIN_RES_URL_PREFIX);
+	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
+	url = CF.toRenderContextPathURL(renderContext, url);
+	
+	return url;
 };
 
 /**
@@ -6894,7 +6938,15 @@ CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
 	
 	if(bestLib == null)
 	{
-		bestLib = CF.findBestLibInCharts(lib, contextCharts);
+		bestLib = CF.findBestLibInCharts(lib, renderContext, contextCharts);
+		
+		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
+			return false;
+	}
+	
+	if(bestLib == null)
+	{
+		bestLib = CF.findBestLibInContextPlugins(lib, renderContext);
 		
 		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
 			return false;
@@ -6939,7 +6991,7 @@ CF.findBestLibInGlobal = function(baseLib, renderContext)
 };
 
 //查找与baseLib同名的最新版的可用库；否则，将返回null
-CF.findBestLibInCharts = function(baseLib, charts)
+CF.findBestLibInCharts = function(baseLib, renderContext, charts)
 {
 	var re = null;
 	
@@ -6947,35 +6999,42 @@ CF.findBestLibInCharts = function(baseLib, charts)
 	{
 		let acceptVersion = baseLib.acceptVersion;
 		let rendererBestLib = baseLib;
-		let rendererBestLibChart = null;
 		let pluginBestLib = baseLib;
-		let pluginBestLibChart = null;
+		let pluginBest = null;
 		
 		for(let i=0; i<charts.length; i++)
 		{
 			let chart = charts[i];
 			let renderer = chart.renderer();
-			let rendererLib = CF.rendererLib(renderer);
-			let myBestLib = CF.findBestLibInLibs(rendererBestLib, rendererLib, acceptVersion);
 			
-			if(myBestLib !== rendererBestLib)
+			if(renderer != null)
 			{
-				rendererBestLib = myBestLib;
-				rendererBestLibChart = chart;
+				let rendererLib = CF.rendererLib(renderer);
+				let myBestLib = CF.findBestLibInLibs(rendererBestLib, rendererLib, acceptVersion);
+				
+				if(myBestLib !== rendererBestLib)
+				{
+					rendererBestLib = myBestLib;
+				}
 			}
 		}
 		
 		for(let i=0; i<charts.length; i++)
 		{
 			let chart = charts[i];
-			let renderer = chart._pluginRenderer();
-			let rendererLib = CF.rendererLib(renderer);
-			let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
+			let plugin = chart.plugin();
 			
-			if(myBestLib !== pluginBestLib)
+			if(plugin != null)
 			{
-				pluginBestLib = myBestLib;
-				pluginBestLibChart = chart;
+				let renderer = plugin.renderer;
+				let rendererLib = CF.rendererLib(renderer);
+				let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
+				
+				if(myBestLib !== pluginBestLib)
+				{
+					pluginBestLib = myBestLib;
+					pluginBest = plugin;
+				}
 			}
 		}
 		
@@ -6985,15 +7044,81 @@ CF.findBestLibInCharts = function(baseLib, charts)
 		if(re != null && re !== baseLib)
 		{
 			//整理依赖库源URL
-			if(re === rendererBestLib && rendererBestLibChart != null)
+			if(re === rendererBestLib)
 			{
-				re = CF.trimCustomRendererLib(re, pluginBestLibChart);
+				re = CF.trimCustomRendererLib(re, renderContext);
 			}
-			else if(re === pluginBestLib && pluginBestLibChart != null)
+			else if(re === pluginBestLib && pluginBest != null)
 			{
-				re = CF.trimPluginRendererLib(re, pluginBestLibChart);
+				re = CF.trimPluginRendererLib(re, renderContext, pluginBest);
 			}
 		}
+	}
+	
+	if(re == null)
+		re = baseLib;
+	
+	if(re != null && (CF.isEmpty(re.version) || CF.isEmpty(re.source)))
+		re = null;
+	
+	return re;
+};
+
+//查找与baseLib同名的最新版的可用库；否则，将返回null
+CF.findBestLibInContextPlugins = function(baseLib, renderContext)
+{
+	var re = null;
+	
+	var plugins = CF.getAllPlugins();
+	var acceptVersion = baseLib.acceptVersion;
+	var pluginBestLib = baseLib;
+	var pluginBest = null;
+	
+	//优先从专用的依赖库插件中取
+	for(let id in plugins)
+	{
+		let plugin = plugins[id];
+		
+		if(plugin && CF.HtmlChartPluginType.LIB == plugin.type)
+		{
+			let renderer = plugin.renderer;
+			let rendererLib = CF.rendererLib(renderer);
+			let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
+			
+			if(myBestLib !== pluginBestLib)
+			{
+				pluginBestLib = myBestLib;
+				pluginBest = plugin;
+			}
+		}
+	}
+	
+	//其次从其他插件中取
+	if(pluginBestLib === baseLib)
+	{
+		for(let id in plugins)
+		{
+			let plugin = plugins[id];
+			
+			if(plugin && CF.HtmlChartPluginType.LIB != plugin.type)
+			{
+				let renderer = plugin.renderer;
+				let rendererLib = CF.rendererLib(renderer);
+				let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
+				
+				if(myBestLib !== pluginBestLib)
+				{
+					pluginBestLib = myBestLib;
+					pluginBest = plugin;
+				}
+			}
+		}
+	}
+	
+	if(pluginBest != null && pluginBestLib !== baseLib)
+	{
+		//整理依赖库源URL
+		re = CF.trimPluginRendererLib(pluginBestLib, renderContext, pluginBest);
 	}
 	
 	if(re == null)
@@ -7369,37 +7494,46 @@ CF.trimGlobalLib = function(lib, renderContext)
 	{
 		if(url.indexOf("/") == 0)
 		{
-			let contextPath = CF.renderContextContextPath(renderContext);
-			return CF.toContextPathURL(contextPath, url);
+			return CF.toRenderContextPathURL(renderContext, url);
 		}
 		else
+		{
 			return url;
+		}
 	});
 };
 
 //整理由chart.renderer().depend获取的依赖库
 //库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示相对当前页面路径
-CF.trimCustomRendererLib = function(lib, chart)
+CF.trimCustomRendererLib = function(lib, renderContext)
 {
 	return CF.doTrimRendererLib(lib, (url) =>
 	{
 		if(url.indexOf("/") == 0)
-			url = chart.contextURL(url);
+		{
+			return CF.toRenderContextPathURL(renderContext, url);
+		}
 		else
+		{
 			return url;
+		}
 	});
 };
 
 //整理由chart.plugin.renderer.depend获取的依赖库
 //库源URL整理规则：以"/"开头 表示相对应用根据路径URL；以"http"、"https"开头 表示绝对路径；其他，表示插件资源路径
-CF.trimPluginRendererLib = function(lib, chart)
+CF.trimPluginRendererLib = function(lib, renderContext, plugin)
 {
 	return CF.doTrimRendererLib(lib, (url) =>
 	{
 		if(url.indexOf("/") == 0)
-			url = chart.contextURL(url);
+		{
+			return CF.toRenderContextPathURL(renderContext, url);
+		}
 		else
-			return chart.pluginResourceURL(url);
+		{
+			return CF.toPluginResourceURL(renderContext, plugin, url);
+		}
 	});
 };
 
