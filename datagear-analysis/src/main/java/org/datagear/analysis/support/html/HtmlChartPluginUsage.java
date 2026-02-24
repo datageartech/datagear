@@ -18,15 +18,15 @@
 package org.datagear.analysis.support.html;
 
 /**
- * {@linkplain HtmlChartPlugin}类型定义。
+ * {@linkplain HtmlChartPlugin}用途枚举定义。
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlChartPluginType
+public class HtmlChartPluginUsage
 {
 	/**
-	 * 插件类型：正常。
+	 * 插件用途：正常。
 	 * <p>
 	 * 表明插件是具有正常渲染图表的功能。
 	 * </p>
@@ -34,7 +34,7 @@ public class HtmlChartPluginType
 	public static final String NORMAL = "normal";
 
 	/**
-	 * 插件类型：依赖库。
+	 * 插件用途：依赖库。
 	 * <p>
 	 * 表明插件不具有渲染图表的功能，仅用于提供依赖库。
 	 * </p>
@@ -42,7 +42,7 @@ public class HtmlChartPluginType
 	public static final String LIB = "lib";
 
 	/**
-	 * 规范类型。
+	 * 规范用途。
 	 * 
 	 * @param type
 	 * @return
@@ -53,7 +53,7 @@ public class HtmlChartPluginType
 	}
 
 	/**
-	 * 规范类型。
+	 * 规范用途。
 	 * 
 	 * @param type
 	 * @param dftType

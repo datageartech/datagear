@@ -61,7 +61,7 @@ public class HtmlChartPluginLoaderTest
 
 		HtmlChartPlugin plugin = loader.load(directory);
 		Assert.assertEquals("plugin01", plugin.getId());
-		assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+		assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 		assertEquals("icon-01.png", plugin.getIconResourceName(ChartPlugin.DEFAULT_ICON_THEME_NAME));
 
 		assertTrue(plugin.getRenderer() instanceof StringJsChartRenderer);
@@ -101,7 +101,7 @@ public class HtmlChartPluginLoaderTest
 
 		HtmlChartPlugin plugin = loader.loadZip(file);
 		Assert.assertEquals("plugin03", plugin.getId());
-		assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+		assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
 		assertTrue(plugin.getRenderer() instanceof StringJsChartRenderer);
 		StringJsChartRenderer renderer = (StringJsChartRenderer) plugin.getRenderer();
@@ -160,7 +160,7 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(0);
 			Assert.assertEquals("plugin01", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertEquals(1, icons.size());
@@ -170,7 +170,7 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(1);
 			Assert.assertEquals("plugin02", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
@@ -180,7 +180,7 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(2);
 			Assert.assertEquals("plugin03", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
@@ -190,7 +190,7 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(3);
 			Assert.assertEquals("plugin04", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
 			Map<String, String> icons = plugin.getIconResourceNames();
 			Assert.assertNotNull(icons.get("light"));
@@ -200,7 +200,7 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(4);
 			Assert.assertEquals("plugin05", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_OBJECT, chartRenderer.getCodeType());
 			Assert.assertEquals(" { render: function(chart){ } }", chartRenderer.getCodeValue());
@@ -209,7 +209,7 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(5);
 			Assert.assertEquals("plugin06", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			Assert.assertTrue(chartRenderer.getCodeValue().contains("(function(localPlugin)"));
@@ -219,7 +219,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(6);
 
 			Assert.assertEquals("plugin07-6.0-attributeform-file", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
@@ -238,7 +238,7 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(7);
 
 			Assert.assertEquals("plugin08-6.0-attributeform-file", plugin.getId());
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
@@ -265,7 +265,7 @@ public class HtmlChartPluginLoaderTest
 
 		HtmlChartPlugin plugin = loader.load(directory);
 		Assert.assertEquals("plugin01", plugin.getId());
-		assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+		assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 		Assert.assertEquals("9.9.9", plugin.getApiVersion());
 	}
 
@@ -280,7 +280,7 @@ public class HtmlChartPluginLoaderTest
 
 		HtmlChartPlugin plugin = loader.loadZip(file);
 		Assert.assertEquals("plugin03", plugin.getId());
-		assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+		assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 		Assert.assertEquals("9.9.9", plugin.getApiVersion());
 	}
 
@@ -302,7 +302,7 @@ public class HtmlChartPluginLoaderTest
 
 		for (HtmlChartPlugin plugin : plugins)
 		{
-			assertEquals(HtmlChartPluginType.NORMAL, plugin.getType());
+			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			Assert.assertEquals("9.9.9", plugin.getApiVersion());
 		}
 	}

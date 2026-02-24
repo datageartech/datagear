@@ -288,8 +288,8 @@ CF.DataSetParamType =
 	NUMBER: "number"
 };
 
-//org.datagear.analysis.support.html.HtmlChartPluginType
-CF.HtmlChartPluginType =
+//org.datagear.analysis.support.html.HtmlChartPluginUsage
+CF.HtmlChartPluginUsage =
 {
 	NORMAL: "normal",
 	LIB: "lib"
@@ -7079,7 +7079,7 @@ CF.findBestLibInContextPlugins = function(baseLib, renderContext)
 	{
 		let plugin = plugins[id];
 		
-		if(plugin && CF.HtmlChartPluginType.LIB == plugin.type)
+		if(plugin && CF.HtmlChartPluginUsage.LIB == plugin.usage)
 		{
 			let renderer = plugin.renderer;
 			let rendererLib = CF.rendererLib(renderer);
@@ -7101,7 +7101,7 @@ CF.findBestLibInContextPlugins = function(baseLib, renderContext)
 		{
 			let plugin = plugins[id];
 			
-			if(plugin && CF.HtmlChartPluginType.LIB != plugin.type)
+			if(plugin && CF.HtmlChartPluginUsage.LIB != plugin.usage)
 			{
 				let renderer = plugin.renderer;
 				let rendererLib = CF.rendererLib(renderer);

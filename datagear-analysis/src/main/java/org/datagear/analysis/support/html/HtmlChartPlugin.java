@@ -62,23 +62,15 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final String PROPERTY_TYPE = "type";
 	public static final String PROPERTY_RENDERER = "renderer";
 	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
 	public static final String PROPERTY_API_VERSION = "apiVersion";
+	public static final String PROPERTY_USAGE = "usage";
 
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
 
-	/** 插件类型，默认需为{@linkplain HtmlChartPluginType#NORMAL} */
-	private String type = HtmlChartPluginType.NORMAL;
-
-	/**
-	 * JS图表渲染器。
-	 * <p>
-	 * 当{@linkplain #type}值为{@linkplain HtmlChartPluginType#LIB}时允许{@code null}。
-	 * </p>
-	 */
+	/** JS图表渲染器 */
 	private JsChartRenderer renderer = null;
 
 	/**
@@ -102,6 +94,14 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 	 * </p>
 	 */
 	private String apiVersion = "";
+
+	/**
+	 * 插件用途。
+	 * <p>
+	 * 默认需为{@linkplain HtmlChartPluginUsage#NORMAL}
+	 * </p>
+	 */
+	private String usage = HtmlChartPluginUsage.NORMAL;
 
 	private HtmlChartPluginScriptObjectWriter pluginWriter;
 
@@ -139,7 +139,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		this(plugin.getId(), plugin.getNameLabel(), plugin.getRenderer(), plugin.getPluginWriter(),
 				plugin.getRenderContextWriter(), plugin.getChartWriter());
 
-		setType(plugin.getType());
+		setUsage(plugin.getUsage());
 		setDescLabel(plugin.getDescLabel());
 		setResources(plugin.getResources());
 		setIconResourceNames(plugin.getIconResourceNames());
@@ -156,16 +156,6 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		setPlatformVersion(plugin.getPlatformVersion());
 		setApiVersion(plugin.getApiVersion());
 		setAdditions(plugin.getAdditions());
-	}
-
-	public String getType()
-	{
-		return type;
-	}
-
-	public void setType(String type)
-	{
-		this.type = type;
 	}
 
 	public JsChartRenderer getRenderer()
@@ -198,6 +188,16 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 	public void setApiVersion(String apiVersion)
 	{
 		this.apiVersion = apiVersion;
+	}
+
+	public String getUsage()
+	{
+		return usage;
+	}
+
+	public void setUsage(String usage)
+	{
+		this.usage = usage;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getPluginWriter()
