@@ -7175,7 +7175,7 @@ CF.isValidLoadableLib = function(lib)
 	if(lib == null)
 		return false;
 		
-	if(CF.isEmpty(re.version) || CF.isEmpty(re.source))
+	if(CF.isEmpty(lib.version) || CF.isEmpty(lib.source))
 		return false;
 	
 	return true;
