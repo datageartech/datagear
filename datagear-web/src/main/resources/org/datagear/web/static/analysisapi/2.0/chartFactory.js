@@ -6936,7 +6936,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
 	if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
 		return false;
 	
-	if(bestLib == null)
+	if(bestLib == null || bestLib === lib)
 	{
 		bestLib = CF.findBestLibInCharts(lib, renderContext, contextCharts);
 		
@@ -6944,7 +6944,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
 			return false;
 	}
 	
-	if(bestLib == null)
+	if(bestLib == null || bestLib === lib)
 	{
 		bestLib = CF.findBestLibInContextPlugins(lib, renderContext);
 		
