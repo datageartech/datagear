@@ -6682,11 +6682,18 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 		
 		if(bestLib == null)
 		{
-			CF.logException("no lib found for : " + lib.name + (CF.isEmpty(lib.acceptVersion) ? "" : " "+lib.acceptVersion));
+			CF.logException("no lib found for [" + lib.name +"]" + (CF.isEmpty(lib.acceptVersion) ? "" : " "+lib.acceptVersion));
 			continue;
 		}
 		
-		if(bestLib === false || (CF.libIndex(unloadeds, bestLib.name) > -1))
+		if(bestLib === false)
+		{
+			let stateObj = CF.libState(lib);
+			CF.logIfLibVersionMismatch(lib, (stateObj == null ? null : stateObj.lib));
+			continue;
+		}
+		
+		if(CF.libIndex(unloadeds, bestLib.name) > -1)
 			continue;
 		
 		unloadeds.push(bestLib);
@@ -6729,6 +6736,35 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 	}
 };
 
+CF.logIfLibVersionMismatch = function(needLib, loadedLib)
+{
+	if(needLib == null || loadedLib == null || needLib === loadedLib)
+		return;
+	
+	var mismatch = false;
+	var needVersion = null;
+	
+	if(!CF.isEmpty(needLib.acceptVersion))
+	{
+		if(!CF.isLibVersionAccepted(loadedLib.version, needLib.acceptVersion))
+		{
+			mismatch = true;
+			needVersion = needLib.acceptVersion;
+		}
+	}
+	else if(!CF.isEmpty(needLib.version) && needLib.version !== loadedLib.version)
+	{
+		mismatch = true;
+		needVersion = needLib.version;
+	}
+	
+	if(mismatch)
+	{
+		CF.logWarn("lib [" + needLib.name + "] " + loadedLib.version
+			+ " has been loaded, but " + needVersion + " version required, this may cause compatibility errors");
+	}
+};
+
 //根据依赖优先级排序库，被依赖库靠前
 CF.sortLibsByDepend = function(libs)
 {
@@ -6755,6 +6791,8 @@ CF.loadLibInner = function(libs, callback)
 	for(let i=0; i<libs.length; i++)
 	{
 		let stateObj = CF.libState(libs[i], true);
+		
+		CF.logIfLibVersionMismatch(libs[i], stateObj.lib);
 		
 		if(stateObj.state === CF.LIB_STATE_INIT)
 		{
@@ -7166,14 +7204,14 @@ CF.resolveBestLibBaseFirst = function(baseLib, compareLib, acceptVersion)
 	
 	var name = CF.resolveSameLibName(baseLib.name, compareLib.name);
 	
-	if(name != null && CF.isLibVersionAccepted(name, compareLib.version, acceptVersion))
+	if(name != null && CF.isLibVersionAccepted(compareLib.version, acceptVersion))
 	{
 		if(CF.isEmpty(baseLib.version) || CF.isEmpty(baseLib.source))
 		{
 			re = compareLib;
 		}
 		//应只在更高版本时才替换
-		else if(CF.compareLibVersion(name, baseLib.version, compareLib.version) < 0)
+		else if(CF.compareLibVersion(baseLib.version, compareLib.version) < 0)
 		{
 			re = compareLib;
 		}
@@ -7182,7 +7220,7 @@ CF.resolveBestLibBaseFirst = function(baseLib, compareLib, acceptVersion)
 	return re;
 };
 
-CF.isLibVersionAccepted = function(name, version, acceptVersion)
+CF.isLibVersionAccepted = function(version, acceptVersion)
 {
 	if(CF.isEmpty(acceptVersion))
 		return true;
@@ -7197,9 +7235,9 @@ CF.isLibVersionAccepted = function(name, version, acceptVersion)
 		if(acceptObj == null)
 			continue;
 		
-		let compareMin = (acceptObj.min == null ? 1 : CF.compareLibVersion(name, version, acceptObj.min));
+		let compareMin = (acceptObj.min == null ? 1 : CF.compareLibVersion(version, acceptObj.min));
 		let acceptMin = (acceptObj.includeMin ? (compareMin >= 0) : (compareMin > 0));
-		let compareMax = (acceptObj.max == null ? -1 : CF.compareLibVersion(name, version, acceptObj.max));
+		let compareMax = (acceptObj.max == null ? -1 : CF.compareLibVersion(version, acceptObj.max));
 		let acceptMax = (acceptObj.includeMax ? (compareMax <= 0) : (compareMax < 0));
 		
 		if(acceptMin && acceptMax)
@@ -7295,12 +7333,11 @@ CF.resolveAcceptVersionObj = function(acceptVersion)
 /**
  * 比较库版本号。
  * 
- * @param name 库名
  * @param v1
  * @param v2
  * @returns -1 v1低于v2；0 v1等于v2；1 v1高于v2
  */
-CF.compareLibVersion = function(name, v1, v2)
+CF.compareLibVersion = function(v1, v2)
 {
 	return CF.compareVersion(v1, v2);
 };
