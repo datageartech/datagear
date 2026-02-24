@@ -7022,7 +7022,7 @@ CF.findBestLibInGlobal = function(baseLib, renderContext)
 		re = CF.trimGlobalLib(re, renderContext);
 	}
 	
-	if(CF.isEmpty(re.version) || CF.isEmpty(re.source))
+	if(!CF.isValidLoadableLib(re))
 		re = null;
 	
 	return re;
@@ -7096,7 +7096,7 @@ CF.findBestLibInCharts = function(baseLib, renderContext, charts)
 	if(re == null)
 		re = baseLib;
 	
-	if(re != null && (CF.isEmpty(re.version) || CF.isEmpty(re.source)))
+	if(!CF.isValidLoadableLib(re))
 		re = null;
 	
 	return re;
@@ -7164,10 +7164,21 @@ CF.findBestLibInContextPlugins = function(baseLib, renderContext)
 	if(re == null)
 		re = baseLib;
 	
-	if(re != null && (CF.isEmpty(re.version) || CF.isEmpty(re.source)))
+	if(!CF.isValidLoadableLib(re))
 		re = null;
 	
 	return re;
+};
+
+CF.isValidLoadableLib = function(lib)
+{
+	if(lib == null)
+		return false;
+		
+	if(CF.isEmpty(re.version) || CF.isEmpty(re.source))
+		return false;
+	
+	return true;
 };
 
 //查找更可用的库；否则，返回baseLib
@@ -7197,7 +7208,7 @@ CF.resolveBestLibBaseFirst = function(baseLib, compareLib, acceptVersion)
 	if(compareLib == null || baseLib === compareLib)
 		return baseLib;
 	
-	if(CF.isEmpty(compareLib.version) || CF.isEmpty(compareLib.source))
+	if(!CF.isValidLoadableLib(compareLib))
 		return baseLib;
 	
 	var re = baseLib;
@@ -7206,7 +7217,7 @@ CF.resolveBestLibBaseFirst = function(baseLib, compareLib, acceptVersion)
 	
 	if(name != null && CF.isLibVersionAccepted(compareLib.version, acceptVersion))
 	{
-		if(CF.isEmpty(baseLib.version) || CF.isEmpty(baseLib.source))
+		if(!CF.isValidLoadableLib(baseLib))
 		{
 			re = compareLib;
 		}
