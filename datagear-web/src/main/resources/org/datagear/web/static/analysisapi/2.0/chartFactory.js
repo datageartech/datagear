@@ -7093,7 +7093,8 @@ CF.findBestLibInContextPlugins = function(baseLib, renderContext)
 		}
 	}
 	
-	//其次从其他插件中取
+	//不应从非lib类型的插件加载依赖库，一是安全考虑，另外主要的原因是未来可能客户端仅会加载必要的插件
+	/*
 	if(pluginBestLib === baseLib)
 	{
 		for(let id in plugins)
@@ -7114,6 +7115,7 @@ CF.findBestLibInContextPlugins = function(baseLib, renderContext)
 			}
 		}
 	}
+	*/
 	
 	if(pluginBest != null && pluginBestLib !== baseLib)
 	{
