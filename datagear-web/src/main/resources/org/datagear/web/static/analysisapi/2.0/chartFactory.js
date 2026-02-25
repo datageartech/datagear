@@ -6644,7 +6644,19 @@ CF.inflateChartTheme = function(theme)
  *   loaded: function(){ ... }
  * }
  * 
- * @param lib 库对象、数组，比如：{ name: "jQuery" } 表示加载任意版本的jQuery；{ name: "jQuery", acceptVersion: ">=1.8" } 表示加载大于或等于1.8版本的任意版本的jQuery
+ * 对于依赖库，通常有以下几种定义格式：
+ * 1、{ name: "mylib" }
+ * 		表示不提供实际依赖库，希望运行环境加载任意版本的mylib库
+ * 2、{ name: "mylib", acceptVersion: "^1.0" }
+ * 		表示不提供实际依赖库，希望运行环境加载匹配"^1.0"版本的mylib库
+ * 3、{ name: "mylib", version: "0.9", acceptVersion: "^1.0" }
+ * 		表示不提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的mylib库，并且在没有匹配时无效
+ * 4、{ name: "mylib", version: "0.9", acceptVersion: "^1.0", source: ... }
+ * 		表示提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的mylib库，并且在没有匹配时作为候选加载库
+ * 5、{ name: "mylib", version: "0.9", source: ... }
+ * 		表示提供实0.9版本的际依赖库，作为候选加载库
+ * 
+ * @param lib 库对象、数组
  * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
  * @param renderContext
  * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
@@ -6654,8 +6666,10 @@ CF.loadLib = function(lib, callback, renderContext, contextCharts)
 	lib = (lib == null ? [] : (CF.isArray(lib) ? lib : [ lib ]));
 	contextCharts = (contextCharts == null ? [] : contextCharts);
 	
+	var libPlugins = CF.allContextPluginsForLoadLib();
+	
 	var unloadeds = [];
-	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, contextCharts);
+	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, libPlugins, contextCharts);
 	
 	if(unloadeds.length == 0)
 	{
@@ -6669,7 +6683,7 @@ CF.loadLib = function(lib, callback, renderContext, contextCharts)
 };
 
 //解析libs相关的所有待加载库，填充至unloadeds中
-CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
+CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, contextCharts)
 {
 	for(let i=0; i<libs.length; i++)
 	{
@@ -6678,7 +6692,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 		if(lib == null || CF.isEmpty(lib.name))
 			continue;
 		
-		let bestLib = CF.findUnloadedBestLib(lib, renderContext, contextCharts);
+		let bestLib = CF.findUnloadedBestLib(lib, renderContext, libPlugins, contextCharts);
 		
 		if(bestLib == null)
 		{
@@ -6730,10 +6744,29 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 			
 			if(dependLibs.length > 0)
 			{
-				CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, contextCharts);
+				CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, libPlugins, contextCharts);
 			}
 		}
 	}
+};
+
+CF.allContextPluginsForLoadLib = function()
+{
+	var plugins = CF.getAllPlugins();
+	var libPlugins = [];
+	
+	for(let id in plugins)
+	{
+		let plugin = plugins[id];
+		
+		//不应从非lib类型的插件加载依赖库，一是安全考虑，另外主要的原因是未来可能客户端仅会加载必要的插件
+		if(plugin && CF.HtmlChartPluginUsage.LIB == plugin.usage)
+		{
+			libPlugins.push(plugin);
+		}
+	}
+	
+	return libPlugins;
 };
 
 CF.logIfLibVersionMismatch = function(needLib, loadedLib)
@@ -6960,7 +6993,7 @@ CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
 //查找未加载的最新版可用库
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
-CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
+CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 {
 	if(lib == null)
 		return false;
@@ -6968,206 +7001,84 @@ CF.findUnloadedBestLib = function(lib, renderContext, contextCharts)
 	if(CF.isLibLoaded(lib))
 		return false;
 	
-	//应该优先使用全局依赖库，安全统一
-	let bestLib = CF.findBestLibInGlobal(lib, renderContext);
+	var bestLibInfo = null;
+	var libInfos = [];
 	
-	if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
-		return false;
+	CF.inflateCandidateLibInfoInGlobalLib(libInfos, lib);
+	CF.inflateCandidateLibInfoInLibPlugins(libInfos, lib, libPlugins);
+	CF.inflateCandidateLibInfoInContextCharts(libInfos, lib, contextCharts);
 	
-	if(bestLib == null || bestLib === lib)
-	{
-		bestLib = CF.findBestLibInCharts(lib, renderContext, contextCharts);
-		
-		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
-			return false;
-	}
+	CF.sortLibInfosAsc(libInfos);
+	bestLibInfo = CF.findBestLibInfo(libInfos, lib.acceptVersion);
 	
-	if(bestLib == null || bestLib === lib)
-	{
-		bestLib = CF.findBestLibInContextPlugins(lib, renderContext);
-		
-		if(bestLib != null && bestLib !== lib && CF.isLibLoaded(bestLib))
-			return false;
-	}
-	
-	if(bestLib == null)
+	if(bestLibInfo == null)
 		return null;
 	
-	//如果bestLib有可接受版本，则查找其可接受的最新版可用库
-	if(bestLib !== lib && !CF.isEmpty(bestLib.acceptVersion))
+	if(bestLibInfo.lib !== lib && CF.isLibLoaded(bestLibInfo.lib))
+		return false;
+	
+	var bestLib = bestLibInfo.lib;
+	
+	if(bestLibInfo.from == "global")
 	{
-		let bestLibAccept = CF.findUnloadedBestLib(bestLib, renderContext, contextCharts);
-		
-		if(bestLibAccept != null && bestLibAccept !== bestLib)
-		{
-			if(bestLibAccept === false)
-				return false;
-			else
-				bestLib = bestLibAccept;
-		}
+		bestLib = CF.trimGlobalLib(bestLib, renderContext);
+	}
+	else if(bestLibInfo.from == "customRenderer")
+	{
+		bestLib = CF.trimCustomRendererLib(bestLib, renderContext);
+	}
+	else if(bestLibInfo.from == "plugin")
+	{
+		bestLib = CF.trimPluginRendererLib(bestLib, renderContext, bestLibInfo.plugin);
 	}
 	
 	return bestLib;
 };
 
-//查找与baseLib同名的全局最新版的可用库；否则，将返回null
-CF.findBestLibInGlobal = function(baseLib, renderContext)
+CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
 {
-	var re = baseLib;
-	
-	re = CF.findBestLibInLibs(baseLib, globalLibs, baseLib.acceptVersion);
-	
-	if(re !== baseLib)
+	for(let i=ascLibInfos.length-1; i>=0; i--)
 	{
-		re = CF.trimGlobalLib(re, renderContext);
+		let libInfo = ascLibInfos[i]; 
+		let lib = libInfo.lib;
+		
+		if(!CF.isLibVersionAccepted(lib.version, acceptVersion))
+			continue;
+		
+		if(CF.isValidLoadableLib(lib))
+		{
+			return libInfo;
+		}
+		//允许不带source的重定向库，比如：{ name: "aaa", version: "1.0", acceptVersion: "2.0" }，表示将1.0版本的库重定向至2.0版本的库
+		else if(!CF.isEmpty(lib.acceptVersion))
+		{
+			let newLibInfos = Array.from(ascLibInfos);
+			newLibInfos.splice(i, 1);
+			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.acceptVersion);
+			
+			if(redirectLibInfo != null)
+				return redirectLibInfo;
+		}
 	}
 	
-	if(!CF.isValidLoadableLib(re))
-		re = null;
-	
-	return re;
+	return null;
 };
 
-//查找与baseLib同名的最新版的可用库；否则，将返回null
-CF.findBestLibInCharts = function(baseLib, renderContext, charts)
+//将库信息数组升序排列，版本号越高越靠后、priority越大越靠后
+CF.sortLibInfosAsc = function(libInfos)
 {
-	var re = null;
-	
-	if(!CF.isEmpty(charts))
+	libInfos.sort(function(lio1, lio2)
 	{
-		let acceptVersion = baseLib.acceptVersion;
-		let rendererBestLib = baseLib;
-		let pluginBestLib = baseLib;
-		let pluginBest = null;
+		let lib1 = lio1.lib;
+		let lib2 = lio2.lib;
 		
-		for(let i=0; i<charts.length; i++)
-		{
-			let chart = charts[i];
-			let renderer = chart.renderer();
-			
-			if(renderer != null)
-			{
-				let rendererLib = CF.rendererLib(renderer);
-				let myBestLib = CF.findBestLibInLibs(rendererBestLib, rendererLib, acceptVersion);
-				
-				if(myBestLib !== rendererBestLib)
-				{
-					rendererBestLib = myBestLib;
-				}
-			}
-		}
+		let re = CF.compareLibVersion(lib1.version, lib2.version);
 		
-		for(let i=0; i<charts.length; i++)
-		{
-			let chart = charts[i];
-			let plugin = chart.plugin();
-			
-			if(plugin != null)
-			{
-				let renderer = plugin.renderer;
-				let rendererLib = CF.rendererLib(renderer);
-				let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
-				
-				if(myBestLib !== pluginBestLib)
-				{
-					pluginBestLib = myBestLib;
-					pluginBest = plugin;
-				}
-			}
-		}
+		if(re == 0)
+			re = lio1.priority - lio2.priority;
 		
-		//图表渲染器在看板页面定义，所以其依赖库应该优先使用
-		re = CF.resolveBestLibBaseFirst(rendererBestLib, pluginBestLib, acceptVersion);
-		
-		if(re != null && re !== baseLib)
-		{
-			//整理依赖库源URL
-			if(re === rendererBestLib)
-			{
-				re = CF.trimCustomRendererLib(re, renderContext);
-			}
-			else if(re === pluginBestLib && pluginBest != null)
-			{
-				re = CF.trimPluginRendererLib(re, renderContext, pluginBest);
-			}
-		}
-	}
-	
-	if(re == null)
-		re = baseLib;
-	
-	if(!CF.isValidLoadableLib(re))
-		re = null;
-	
-	return re;
-};
-
-//查找与baseLib同名的最新版的可用库；否则，将返回null
-CF.findBestLibInContextPlugins = function(baseLib, renderContext)
-{
-	var re = null;
-	
-	var plugins = CF.getAllPlugins();
-	var acceptVersion = baseLib.acceptVersion;
-	var pluginBestLib = baseLib;
-	var pluginBest = null;
-	
-	//优先从专用的依赖库插件中取
-	for(let id in plugins)
-	{
-		let plugin = plugins[id];
-		
-		if(plugin && CF.HtmlChartPluginUsage.LIB == plugin.usage)
-		{
-			let renderer = plugin.renderer;
-			let rendererLib = CF.rendererLib(renderer);
-			let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
-			
-			if(myBestLib !== pluginBestLib)
-			{
-				pluginBestLib = myBestLib;
-				pluginBest = plugin;
-			}
-		}
-	}
-	
-	//不应从非lib类型的插件加载依赖库，一是安全考虑，另外主要的原因是未来可能客户端仅会加载必要的插件
-	/*
-	if(pluginBestLib === baseLib)
-	{
-		for(let id in plugins)
-		{
-			let plugin = plugins[id];
-			
-			if(plugin && CF.HtmlChartPluginUsage.LIB != plugin.usage)
-			{
-				let renderer = plugin.renderer;
-				let rendererLib = CF.rendererLib(renderer);
-				let myBestLib = CF.findBestLibInLibs(pluginBestLib, rendererLib, acceptVersion);
-				
-				if(myBestLib !== pluginBestLib)
-				{
-					pluginBestLib = myBestLib;
-					pluginBest = plugin;
-				}
-			}
-		}
-	}
-	*/
-	
-	if(pluginBest != null && pluginBestLib !== baseLib)
-	{
-		//整理依赖库源URL
-		re = CF.trimPluginRendererLib(pluginBestLib, renderContext, pluginBest);
-	}
-	
-	if(re == null)
-		re = baseLib;
-	
-	if(!CF.isValidLoadableLib(re))
-		re = null;
-	
-	return re;
+		return re;
+	});
 };
 
 CF.isValidLoadableLib = function(lib)
@@ -7181,54 +7092,132 @@ CF.isValidLoadableLib = function(lib)
 	return true;
 };
 
-//查找更可用的库；否则，返回baseLib
-CF.findBestLibInLibs = function(baseLib, libs, acceptVersion)
+//插件依赖库优先级，由高到底依次是：全局库、lib用途的插件、看板内的自定义图表渲染器、图表插件
+CF.LIB_PRIORITY_GLOBAL_LIB = 9;
+CF.LIB_PRIORITY_LIB_PLUGIN = 8;
+CF.LIB_PRIORITY_CUSTOM_RENDERER = 7;
+CF.LIB_PRIORITY_CHART_PLUGIN = 6;
+
+CF.inflateCandidateLibInfoInGlobalLib = function(libInfos, baseLib)
 {
-	if(libs == null)
-		return baseLib;
-	
-	var bestLib = baseLib;
-	
-	if(CF.isArray(libs))
+	for(let i=0; i<CF.globalLibs.length; i++)
 	{
-		for(let i=0; i<libs.length; i++)
-			bestLib = CF.resolveBestLibBaseFirst(bestLib, libs[i], acceptVersion);
+		let lib = CF.globalLibs[i];
+		
+		if(CF.isCandidateLib(lib, baseLib))
+		{
+			libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_GLOBAL_LIB, from: "global" });
+		}
 	}
-	else
-	{
-		bestLib = CF.resolveBestLibBaseFirst(bestLib, libs, acceptVersion);
-	}
-	
-	return bestLib;
 };
 
-//如果compareLib更可用，返回compareLib；否则，返回baseLib
-CF.resolveBestLibBaseFirst = function(baseLib, compareLib, acceptVersion)
+CF.inflateCandidateLibInfoInLibPlugins = function(libInfos, baseLib, libPlugins)
 {
-	if(compareLib == null || baseLib === compareLib)
-		return baseLib;
+	if(libPlugins == null)
+		return;
 	
-	if(!CF.isValidLoadableLib(compareLib))
-		return baseLib;
-	
-	var re = baseLib;
-	
-	var name = CF.resolveSameLibName(baseLib.name, compareLib.name);
-	
-	if(name != null && CF.isLibVersionAccepted(compareLib.version, acceptVersion))
+	for(let i=0; i<libPlugins.length; i++)
 	{
-		if(!CF.isValidLoadableLib(baseLib))
+		let plugin = libPlugins[i];
+		CF.inflateCandidateLibInfoInPlugin(libInfos, baseLib, plugin, CF.LIB_PRIORITY_LIB_PLUGIN);
+	}
+};
+
+CF.inflateCandidateLibInfoInContextCharts = function(libInfos, baseLib, contextCharts)
+{
+	if(contextCharts == null)
+		return;
+	
+	for(let i=0; i<contextCharts.length; i++)
+	{
+		let chart = contextCharts[i];
+		
+		if(chart == null)
+			continue;
+		
+		let renderer = chart.renderer();
+		let plugin = chart.plugin();
+		
+		CF.inflateCandidateLibInfoInCustomRenderer(libInfos, baseLib, renderer, CF.LIB_PRIORITY_CUSTOM_RENDERER);
+		CF.inflateCandidateLibInfoInPlugin(libInfos, baseLib, plugin, CF.LIB_PRIORITY_CHART_PLUGIN);
+	}
+};
+
+CF.inflateCandidateLibInfoInPlugin = function(libInfos, baseLib, plugin, priority)
+{
+	if(plugin == null)
+		return;
+	
+	let renderer = plugin.renderer;
+	let rendererLib = CF.rendererLib(renderer);
+	
+	if(rendererLib == null)
+		return;
+	
+	rendererLib = (rendererLib == null ? [] : (CF.isArray(rendererLib) ? rendererLib : [ rendererLib ]));
+	
+	for(let i=0; i<rendererLib.length; i++)
+	{
+		let lib = rendererLib[i];
+		
+		if(CF.isCandidateLib(lib, baseLib))
 		{
-			re = compareLib;
-		}
-		//应只在更高版本时才替换
-		else if(CF.compareLibVersion(baseLib.version, compareLib.version) < 0)
-		{
-			re = compareLib;
+			libInfos.push({ lib: lib, priority: priority, from: "plugin", plugin: plugin });
 		}
 	}
+};
+
+CF.inflateCandidateLibInfoInCustomRenderer = function(libInfos, baseLib, renderer, priority)
+{
+	if(renderer == null)
+		return;
 	
-	return re;
+	let rendererLib = CF.rendererLib(renderer);
+	
+	if(rendererLib == null)
+		return;
+	
+	rendererLib = (rendererLib == null ? [] : (CF.isArray(rendererLib) ? rendererLib : [ rendererLib ]));
+	
+	for(let i=0; i<rendererLib.length; i++)
+	{
+		let lib = rendererLib[i];
+		
+		if(CF.isCandidateLib(lib, baseLib))
+		{
+			libInfos.push({ lib: lib, priority: priority, from: "customRenderer", renderer: renderer });
+		}
+	}
+};
+
+CF.isCandidateLib = function(lib, baseLib)
+{
+	if(lib == null || baseLib == null)
+		return false;
+	
+	if(!CF.isUsableLib(lib))
+		return false;
+	
+	var name = CF.resolveSameLibName(baseLib.name, lib.name);
+	
+	if(name == null)
+		return false;
+	
+	return true;
+};
+
+CF.isUsableLib = function(lib)
+{
+	if(lib == null)
+		return false;
+	
+	if(CF.isEmpty(lib.name) || CF.isEmpty(lib.version))
+		return false;
+	
+	if(CF.isEmpty(lib.source) && CF.isEmpty(lib.acceptVersion))
+		return false;
+	
+	return true;
 };
 
 CF.isLibVersionAccepted = function(version, acceptVersion)
