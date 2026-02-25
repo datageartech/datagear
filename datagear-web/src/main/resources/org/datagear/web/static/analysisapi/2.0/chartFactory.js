@@ -6656,6 +6656,8 @@ CF.inflateChartTheme = function(theme)
  * 5、{ name: "mylib", version: "0.9", source: ... }
  * 		表示提供实0.9版本的际依赖库，作为候选加载库
  * 
+ * 对于公用库，建议采用第2、3、4种格式，对于私有库，建议采用第5种格式。
+ * 
  * @param lib 库对象、数组
  * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
  * @param renderContext
@@ -7049,9 +7051,10 @@ CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
 		{
 			return libInfo;
 		}
-		//允许不带source的重定向库，比如：{ name: "aaa", version: "1.0", acceptVersion: "2.0" }，表示将1.0版本的库重定向至2.0版本的库
+		//重定向库
 		else if(!CF.isEmpty(lib.acceptVersion))
 		{
+			//需先复制并删除lib，避免死循环
 			let newLibInfos = Array.from(ascLibInfos);
 			newLibInfos.splice(i, 1);
 			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.acceptVersion);
@@ -7398,23 +7401,15 @@ CF.isLibLoadedInEnv = function(lib)
 //解析库名称交集第一个，返回null表示无交集
 CF.resolveSameLibName = function(baseLibName, compareLibName)
 {
-	if(baseLibName == null || baseLibName.length == 0
-		|| compareLibName == null || compareLibName.length == 0)
-	{
+	if(baseLibName == null || compareLibName == null)
 		return null;
-	}
 	
-	var baseNameArray = (!CF.isString(baseLibName));
+	var baseNameArray = CF.isArray(baseLibName);
 	
 	if(baseLibName === compareLibName)
-	{
-		if(!baseNameArray)
-			return baseLibName;
-		else
-			return baseLibName[0];
-	}
+		return (baseNameArray ? baseLibName[0] : baseLibName);
 	
-	var compareNameArray = (!CF.isString(compareLibName));
+	var compareNameArray = CF.isArray(compareLibName);
 	
 	if(!baseNameArray && !compareNameArray)
 	{
@@ -7422,19 +7417,19 @@ CF.resolveSameLibName = function(baseLibName, compareLibName)
 	}
 	else if(!baseNameArray)
 	{
-		var idx = CF.indexInArray(compareLibName, baseLibName);
+		let idx = CF.indexInArray(compareLibName, baseLibName);
 		return (idx > -1 ? baseLibName : null);
 	}
 	else if(!compareNameArray)
 	{
-		var idx = CF.indexInArray(baseLibName, compareLibName);
+		let idx = CF.indexInArray(baseLibName, compareLibName);
 		return (idx > -1 ? compareLibName : null);
 	}
 	else
 	{
-		for(var i=0; i<baseLibName; i++)
+		for(let i=0; i<baseLibName.length; i++)
 		{
-			var idx = CF.indexInArray(compareLibName, baseLibName[i]);
+			let idx = CF.indexInArray(compareLibName, baseLibName[i]);
 			if(idx > -1)
 			{
 				return baseLibName[i];

@@ -9184,7 +9184,7 @@
 		}
 		else
 		{
-			for(var i=0; i<baseLibName; i++)
+			for(var i=0; i<baseLibName.length; i++)
 			{
 				var idx = chartFactory.indexInArray(compareLibName, baseLibName[i]);
 				if(idx > -1)
