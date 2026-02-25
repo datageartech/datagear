@@ -6644,7 +6644,7 @@ CF.inflateChartTheme = function(theme)
  *   loaded: function(){ ... }
  * }
  * 
- * @param lib 库对象、数组
+ * @param lib 库对象、数组，比如：{ name: "jQuery" } 表示加载任意版本的jQuery；{ name: "jQuery", acceptVersion: ">=1.8" } 表示加载大于或等于1.8版本的任意版本的jQuery
  * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
  * @param renderContext
  * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
@@ -6675,7 +6675,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, contextCharts)
 	{
 		let lib = libs[i];
 		
-		if(lib == null)
+		if(lib == null || CF.isEmpty(lib.name))
 			continue;
 		
 		let bestLib = CF.findUnloadedBestLib(lib, renderContext, contextCharts);
@@ -7174,8 +7174,8 @@ CF.isValidLoadableLib = function(lib)
 {
 	if(lib == null)
 		return false;
-		
-	if(CF.isEmpty(lib.version) || CF.isEmpty(lib.source))
+	
+	if(CF.isEmpty(lib.name) || CF.isEmpty(lib.version) || CF.isEmpty(lib.source))
 		return false;
 	
 	return true;
