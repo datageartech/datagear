@@ -6615,8 +6615,10 @@ CF.inflateChartTheme = function(theme)
  * 加载图表渲染器依赖库，并在全部加载完成后（无论是否成功）执行回调函数。
  * 库对象结构为：
  * {
- *   //库名称，应尽量使用库本身定义的全局名称
- *   name: "..."、[ "...", ... ],
+ *   //库名称
+ *   name: "...",
+ *   //可选，库别名，仅用于默认loaded判断，具体参考CF.isLibLoadedInEnv()函数
+ *   alias: "..."、[ "...", ... ],
  *   //可选，图表渲染器对于此库可兼容接受的版本范围，为空表示接受任意版本。
  *   //当是数组是，任一接受即可
  *   acceptVersion: "..."、[ "...", ... ],
@@ -6639,8 +6641,7 @@ CF.inflateChartTheme = function(theme)
  *   function(){ return ...; },
  *   //可选，依赖库名称/对象/数组，不设置表示不依赖任何库
  *   depend: "..."、{ name: 格式同上述name, acceptVersion: 格式同上述acceptVersion }、[ "..."、{ ... }、... ],
- *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。
- *   //默认值是：如果this.name已在window下定义，返回true；否则，返回false。
+ *   //可选，检查当前环境是否已经加载了这个名称的库，返回值：true 是；其他 否。默认逻辑参考CF.isLibLoadedInEnv()函数。
  *   loaded: function(){ ... }
  * }
  * 
@@ -6698,7 +6699,8 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 		
 		if(bestLib == null)
 		{
-			CF.logException("no lib found for [" + lib.name +"]" + (CF.isEmpty(lib.acceptVersion) ? "" : " "+lib.acceptVersion));
+			CF.logException("no lib found for : " + lib.name +
+				(CF.isEmpty(lib.acceptVersion) ? (CF.isEmpty(lib.version) ? "" : " "+lib.version) : " "+lib.acceptVersion));
 			continue;
 		}
 		
@@ -6795,7 +6797,7 @@ CF.logIfLibVersionMismatch = function(needLib, loadedLib)
 	
 	if(mismatch)
 	{
-		CF.logWarn("lib [" + needLib.name + "] " + loadedLib.version
+		CF.logWarn("lib " + needLib.name + " " + loadedLib.version
 			+ " has been loaded, but " + needVersion + " version required, this may cause compatibility errors");
 	}
 };
@@ -6808,7 +6810,8 @@ CF.sortLibsByDepend = function(libs)
 		for (let j = 0; j < len - 1 - i; j++)
 		{
 			//libs[j+1]是否依赖libs[j]
-			let dj = (libs[j+1].depend != null && CF.resolveSameLibName(libs[j+1].depend, libs[j].name) != null);
+			let dj = CF.isLibDependName(libs[j+1].depend, libs[j].name);
+			
 			if(!dj)
 			{
 				let tmp = libs[j];
@@ -6817,6 +6820,36 @@ CF.sortLibsByDepend = function(libs)
 			}
 		}
 	}
+};
+
+CF.isLibDependName = function(libDepend, name)
+{
+	if(CF.isEmpty(libDepend))
+		return false;
+	
+	// "..."
+	if(CF.isString(libDepend))
+	{
+		return (libDepend == name);
+	}
+	//[ ... ]
+	else if(CF.isArray(libDepend))
+	{
+		for(let i=0; i<libDepend.length; i++)
+		{
+			if(CF.isLibDependName(libDepend[i], name))
+				return true;
+		}
+		
+		return false;
+	}
+	// { name: "..." }
+	else if(libDepend.name !== undefined)
+	{
+		return CF.isLibDependName(libDepend.name, name);
+	}
+	
+	return false;
 };
 
 CF.loadLibInner = function(libs, callback)
@@ -7201,12 +7234,7 @@ CF.isCandidateLib = function(lib, baseLib)
 	if(!CF.isUsableLib(lib))
 		return false;
 	
-	var name = CF.resolveSameLibName(baseLib.name, lib.name);
-	
-	if(name == null)
-		return false;
-	
-	return true;
+	return (baseLib.name == lib.name);
 };
 
 CF.isUsableLib = function(lib)
@@ -7350,7 +7378,7 @@ CF.libIndex = function(libs, name)
 {
 	for(var i=0; i<libs.length; i++)
 	{
-		if(CF.resolveSameLibName(libs[i].name, name))
+		if(libs[i].name == name)
 			return i;
 	}
 	
@@ -7383,60 +7411,27 @@ CF.isLibLoadedInEnv = function(lib)
 	}
 	else
 	{
-		if(CF.isArray(lib.name))
+		if(window[lib.name] !== undefined)
+			return true;
+		
+		if(!CF.isEmpty(lib.alias))
 		{
-			for(let i=0; i<lib.name.length; i++)
+			if(CF.isArray(lib.alias))
 			{
-				if(window[lib.name[i]] !== undefined)
+				for(let i=0; i<lib.alias.length; i++)
+				{
+					if(window[lib.alias[i]] !== undefined)
+						return true;
+				}
+			}
+			else
+			{
+				if(window[lib.alias] !== undefined)
 					return true;
 			}
 		}
-		else
-		{
-			return (window[lib.name] !== undefined);
-		}
-	}
-};
-
-//解析库名称交集第一个，返回null表示无交集
-CF.resolveSameLibName = function(baseLibName, compareLibName)
-{
-	if(baseLibName == null || compareLibName == null)
-		return null;
-	
-	var baseNameArray = CF.isArray(baseLibName);
-	
-	if(baseLibName === compareLibName)
-		return (baseNameArray ? baseLibName[0] : baseLibName);
-	
-	var compareNameArray = CF.isArray(compareLibName);
-	
-	if(!baseNameArray && !compareNameArray)
-	{
-		return null;
-	}
-	else if(!baseNameArray)
-	{
-		let idx = CF.indexInArray(compareLibName, baseLibName);
-		return (idx > -1 ? baseLibName : null);
-	}
-	else if(!compareNameArray)
-	{
-		let idx = CF.indexInArray(baseLibName, compareLibName);
-		return (idx > -1 ? compareLibName : null);
-	}
-	else
-	{
-		for(let i=0; i<baseLibName.length; i++)
-		{
-			let idx = CF.indexInArray(compareLibName, baseLibName[i]);
-			if(idx > -1)
-			{
-				return baseLibName[i];
-			}
-		}
 		
-		return null;
+		return false;
 	}
 };
 
@@ -7445,50 +7440,26 @@ CF.resolveSameLibName = function(baseLibName, compareLibName)
  * 
  * @param lib 库对象
  * @param nonNull 可选，是否返回非null
- * @param createState 当要返回nonNull时，需要创建的状态
+ * @param createState 可选，当要返回nonNull时，需要创建的状态
  */
 CF.libState = function(lib, nonNull, createState)
 {
+	nonNull = (nonNull === undefined ? false : nonNull);
+	
 	var states = CF.LIB_STATES;
 	
-	if(nonNull !== true)
+	if(!nonNull)
 	{
-		if(CF.isString(lib.name))
-		{
-			return states[lib.name];
-		}
-		else
-		{
-			for(var i=0; i<lib.name.length; i++)
-			{
-				if(states[lib.name[i]])
-				{
-					return states[lib.name[i]];
-				}
-			}
-		}
-		
-		return null;
+		return states[lib.name];
 	}
 	else
 	{
-		var stateObj = CF.libState(lib);
+		var stateObj = states[lib.name];
 		
 		if(stateObj == null)
 		{
 			stateObj = CF.createLibState(lib, createState);
-			
-			if(CF.isString(lib.name))
-			{
-				states[lib.name] = stateObj;
-			}
-			else
-			{
-				for(var i=0; i<lib.name.length; i++)
-				{
-					states[lib.name[i]] = stateObj;
-				}
-			}
+			states[lib.name] = stateObj;
 		}
 		
 		return stateObj;
