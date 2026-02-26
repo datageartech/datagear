@@ -1258,22 +1258,18 @@ chartProto._rendererLib = function()
 {
 	//优先自定义渲染器
 	var lib = CF.rendererLib(this.renderer());
-	
 	if(lib != null)
 	{
 		lib = CF.trimCustomRendererLib(lib, this.renderContext());
 	}
-	else //其次插件渲染器
+	//其次插件渲染器
+	else
 	{
 		let plugin = this.plugin();
+		lib = (plugin == null ? null : CF.rendererLib(plugin.renderer));
 		
-		if(plugin != null)
-		{
-			lib = CF.rendererLib(plugin.renderer);
-			
-			if(lib != null)
-				lib = CF.trimPluginRendererLib(lib, this.renderContext(), plugin);
-		}
+		if(lib != null)
+			lib = CF.trimPluginRendererLib(lib, this.renderContext(), plugin);
 	}
 	
 	return lib;
@@ -6669,7 +6665,7 @@ CF.loadLib = function(lib, callback, renderContext, contextCharts)
 	lib = (lib == null ? [] : (CF.isArray(lib) ? lib : [ lib ]));
 	contextCharts = (contextCharts == null ? [] : contextCharts);
 	
-	var libPlugins = CF.allContextPluginsForLoadLib();
+	var libPlugins = CF.allContextLibPlugins();
 	
 	var unloadeds = [];
 	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, libPlugins, contextCharts);
@@ -6754,20 +6750,28 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 	}
 };
 
-CF.allContextPluginsForLoadLib = function()
+CF.allContextLibPlugins = function()
 {
-	var plugins = CF.getAllPlugins();
-	var libPlugins = [];
+	var libPlugins = CF._allContextLibPlugins;
 	
-	for(let id in plugins)
+	if(libPlugins == null)
 	{
-		let plugin = plugins[id];
+		libPlugins = [];
+		let plugins = CF.getAllPlugins();
 		
-		//不应从非lib类型的插件加载依赖库，一是安全考虑，另外主要的原因是未来可能客户端仅会加载必要的插件
-		if(plugin && CF.HtmlChartPluginUsage.LIB == plugin.usage)
+		for(let id in plugins)
 		{
-			libPlugins.push(plugin);
+			let plugin = plugins[id];
+			
+			//不应从非lib类型的插件加载依赖库，一是安全考虑，另外主要的原因是未来可能客户端仅会加载必要的插件
+			if(plugin && CF.HtmlChartPluginUsage.LIB == plugin.usage)
+			{
+				libPlugins.push(plugin);
+			}
 		}
+		
+		//目前系统内所有插件都是在看板页面内全部加载的，所以可以这里缓存，具体参考chartPluginManager.js相关逻辑
+		CF._allContextLibPlugins = libPlugins;
 	}
 	
 	return libPlugins;
