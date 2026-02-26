@@ -34,6 +34,7 @@ var EU = (SPT.echartsUtil || (SPT.echartsUtil = {}));
 
 SPT.ECHARTS_RENDERER_DEPEND =
 [
+	//经查阅echarts官方文档，其最新版6.0除了部分样式外（已在EU._buildEchartsTheme()函数中兼容处理）都兼容5.x版本，所以这里无需限定版本上限
 	{ name: "echarts", acceptVersion: ">=5.0" }
 ];
 
@@ -4914,6 +4915,7 @@ SPT.tableRenderer = function(plugin, config)
 				"lib/DataTables-2.3.1/datatables.min.css",
 				"lib/DataTables-2.3.1/datatables.min.js"
 			],
+			//经测试，此表格库兼容最新版的jQuery-4.0版本，所以这里无需限定版本上限
 			depend: { name: "jQuery", acceptVersion: ">=1.8" }
 		},
 		render: function(chart)
