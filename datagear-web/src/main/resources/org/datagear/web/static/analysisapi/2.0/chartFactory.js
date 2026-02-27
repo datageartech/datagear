@@ -6704,8 +6704,8 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 		
 		if(bestLib == null)
 		{
-			CF.logException("no lib found for " + lib.name +
-				(CF.isEmpty(lib.acceptVersion) ? (CF.isEmpty(lib.version) ? "" : " "+lib.version) : " "+lib.acceptVersion));
+			CF.logException("no "+lib.name+" lib found"+(CF.isEmpty(lib.acceptVersion) ?
+				(CF.isEmpty(lib.version) ? "" : " for version "+JSON.stringify(lib.version)) : " for version "+JSON.stringify(lib.acceptVersion)));
 			continue;
 		}
 		
@@ -7038,17 +7038,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 		return false;
 	
 	//采用取最小acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
-	var bestAcceptVersion = null;
-	var bestAcceptVersionResult = CF.intersectAcceptVersionResult(lib, contextCharts);
-	
-	if(bestAcceptVersionResult.acceptNone)
-	{
-		CF.logException("no best acceptVersion found for lib " + lib.name
-			+ ", ["+bestAcceptVersionResult.prevAcceptVersion+"] will be used for search instead");
-		bestAcceptVersion = bestAcceptVersionResult.prevAcceptVersion;
-	}
-	else
-		bestAcceptVersion = bestAcceptVersionResult.acceptVersion;
+	var bestAcceptVersion = CF.intersectAcceptVersionInCharts(lib, contextCharts);
 	
 	var bestLibInfo = null;
 	var libInfos = [];
@@ -7092,9 +7082,13 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 };
 
 //计算acceptVersion交集，返回结果只有result.acceptNone=true时才表示无交集，result.acceptVersion符合CF.loadLib()中定义的acceptVersion规则
-CF.intersectAcceptVersionResult = function(lib, contextCharts)
+CF.intersectAcceptVersionInCharts = function(lib, contextCharts)
 {
-	var result = { acceptNone: false, acceptVersion: lib.acceptVersion };
+	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion };
+	var libName = lib.name;
+	
+	var logs = [];
+	logs.push({ name: libName, acceptVersion: result.acceptVersion });
 	
 	if(contextCharts != null)
 	{
@@ -7106,43 +7100,76 @@ CF.intersectAcceptVersionResult = function(lib, contextCharts)
 				continue;
 			
 			let chartLib = chart._rendererLib(false);
-			CF.intersectAcceptVersionResultInLibs(result, lib.name, chartLib);
+			let hasLib = CF.intersectAcceptVersionResultInLibs(result, libName, chartLib);
+			
+			if(hasLib)
+				logs.push({ name: libName, acceptVersion: result.acceptVersion, chart: CF.chartLogInfo(chart) });
 			
 			if(result.acceptNone)
+			{
+				CF.logException("no valid acceptVersion found for lib "+libName
+					+" by "+CF.chartLogInfo(chart)+", ["+result.prevAcceptVersion+"] is used for search");
+				
+				result.acceptVersion = result.prevAcceptVersion;
 				break;
+			}
 		}
 	}
 	
-	return result;
+	//打印日志，便于调试
+	if(result.acceptNone)
+	{
+		let logsStr = libName+" lib acceptVersion eval log:";
+		for(let i=0; i<logs.length; i++)
+		{
+			logsStr += "\n";
+			logsStr += JSON.stringify(logs[i]);
+		}
+		
+		CF.logWarn(logsStr);
+	}
+	
+	return result.acceptVersion;
 };
 
 CF.intersectAcceptVersionResultInLibs = function(result, name, libs)
 {
 	if(CF.isEmpty(libs))
-		return;
+		return false;
+	
+	var hasLib = false;
 	
 	libs = (CF.isArray(libs) ? libs : [ libs ]);
 	
 	for(let i=0; i<libs.length; i++)
 	{
 		let lib = libs[i];
+		let myHasLib = false;
 		
 		if(CF.isLibWithName(lib, name))
+		{
+			myHasLib = true;
 			CF.intersectAcceptVersionResultInLib(result, lib);
+		}
 		else
 		{
 			let dependLibs = CF.dependLibsOfLib(lib);
-			CF.intersectAcceptVersionResultInLibs(result, name, dependLibs);
+			myHasLib = CF.intersectAcceptVersionResultInLibs(result, name, dependLibs);
 		}
+		
+		if(!hasLib && myHasLib)
+			hasLib = true;
 		
 		if(result.acceptNone)
 			break;
 	}
+	
+	return hasLib;
 };
 
 CF.intersectAcceptVersionResultInLib = function(result, lib)
 {
-	if(lib == null || CF.isEmpty(lib.acceptVersion))
+	if(lib == null || CF.isEmpty(lib.acceptVersion) || result.acceptVersion === lib.acceptVersion)
 		return;
 	
 	if(CF.isEmpty(result.acceptVersion))
