@@ -1254,13 +1254,16 @@ chartProto._renderInner = function()
 	}
 };
 
-chartProto._rendererLib = function()
+chartProto._rendererLib = function(trim)
 {
+	trim = (trim === undefined ? true : trim);
+	
 	//优先自定义渲染器
 	var lib = CF.rendererLib(this.renderer());
 	if(lib != null)
 	{
-		lib = CF.trimCustomRendererLib(lib, this.renderContext());
+		if(trim)
+			lib = CF.trimCustomRendererLib(lib, this.renderContext());
 	}
 	//其次插件渲染器
 	else
@@ -1268,7 +1271,7 @@ chartProto._rendererLib = function()
 		let plugin = this.plugin();
 		lib = (plugin == null ? null : CF.rendererLib(plugin.renderer));
 		
-		if(lib != null)
+		if(lib != null && trim)
 			lib = CF.trimPluginRendererLib(lib, this.renderContext(), plugin);
 	}
 	
@@ -6615,8 +6618,8 @@ CF.inflateChartTheme = function(theme)
  *   name: "...",
  *   //可选，库别名，仅用于默认loaded判断，具体参考CF.isLibLoadedInEnv()函数
  *   alias: "..."、[ "...", ... ],
- *   //可选，图表渲染器对于此库可兼容接受的版本范围，为空表示接受任意版本。
- *   //当是数组是，任一接受即可
+ *   //可选，可兼容接受的版本范围，为空表示接受任意版本。当是数组时，表示接受其中任一版本即可。
+ *   //格式参考CF.resolveAcceptVersionObj()函数
  *   acceptVersion: "..."、[ "...", ... ],
  *   //可选，可提供的库源版本号，为空表示不提供，应符合语义化版本规范："X.Y.Z"、"X.Y.Z-BUILD"
  *   version: "...",
@@ -6691,11 +6694,14 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 		if(lib == null || CF.isEmpty(lib.name))
 			continue;
 		
+		if(CF.libIndex(unloadeds, lib.name) > -1)
+			continue;
+		
 		let bestLib = CF.findUnloadedBestLib(lib, renderContext, libPlugins, contextCharts);
 		
 		if(bestLib == null)
 		{
-			CF.logException("no lib found for : " + lib.name +
+			CF.logException("no lib found for " + lib.name +
 				(CF.isEmpty(lib.acceptVersion) ? (CF.isEmpty(lib.version) ? "" : " "+lib.version) : " "+lib.acceptVersion));
 			continue;
 		}
@@ -6707,47 +6713,38 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 			continue;
 		}
 		
-		if(CF.libIndex(unloadeds, bestLib.name) > -1)
-			continue;
-		
 		unloadeds.push(bestLib);
 		
 		//处理依赖
-		if(!CF.isEmpty(bestLib.depend))
+		let dependLibs = CF.dependLibsOfLib(bestLib);
+		if(!CF.isEmpty(dependLibs))
 		{
-			let depends = (CF.isArray(bestLib.depend) ? bestLib.depend : [ bestLib.depend ]);
-			let dependLibs = [];
-			
-			for(let j=0; j<depends.length; j++)
-			{
-				let depend = depends[j];
-				let dependName = (depend == null ? null : (CF.isString(depend) ? depend : depend.name));
-				
-				if(CF.isEmpty(dependName))
-					continue;
-				
-				depend = (depend === dependName ? { name: depend } : depend);
-				
-				//检查并使用原始libs中的具有详细信息的库
-				if(CF.isEmpty(depend.acceptVersion))
-				{
-					let libIdx = CF.libIndex(libs, dependName);
-					if(libIdx > -1)
-					{
-						depend = libs[libIdx];
-						dependName = depend.name;
-					}
-				}
-				
-				dependLibs.push(depend);
-			}
-			
-			if(dependLibs.length > 0)
-			{
-				CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, libPlugins, contextCharts);
-			}
+			CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, libPlugins, contextCharts);
 		}
 	}
+};
+
+CF.dependLibsOfLib = function(lib)
+{
+	if(lib == null || lib.depend == null)
+		return null;
+	
+	var dependLibs = [];
+	var depends = (CF.isArray(lib.depend) ? lib.depend : [ lib.depend ]);
+	
+	for(let i=0; i<depends.length; i++)
+	{
+		let depend = depends[i];
+		let dependName = (depend == null ? null : (CF.isString(depend) ? depend : depend.name));
+		
+		if(CF.isEmpty(dependName))
+			continue;
+		
+		depend = (depend === dependName ? { name: dependName } : depend);
+		dependLibs.push(depend);
+	}
+	
+	return dependLibs;
 };
 
 CF.allContextLibPlugins = function()
@@ -7034,11 +7031,21 @@ CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
 CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 {
-	if(lib == null)
-		return false;
-	
 	if(CF.isLibLoaded(lib))
 		return false;
+	
+	//采用取最小acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
+	var bestAcceptVersion = null;
+	var bestAcceptVersionResult = CF.intersectAcceptVersionResult(lib, contextCharts);
+	
+	if(bestAcceptVersionResult.acceptNone)
+	{
+		CF.logException("no best acceptVersion found for lib " + lib.name
+			+ ", ["+bestAcceptVersionResult.prevAcceptVersion+"] will be used for search instead");
+		bestAcceptVersion = bestAcceptVersionResult.prevAcceptVersion;
+	}
+	else
+		bestAcceptVersion = bestAcceptVersionResult.acceptVersion;
 	
 	var bestLibInfo = null;
 	var libInfos = [];
@@ -7047,8 +7054,11 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 	CF.inflateCandidateLibInfoInLibPlugins(libInfos, lib, libPlugins);
 	CF.inflateCandidateLibInfoInContextCharts(libInfos, lib, contextCharts);
 	
+	if(CF.isCandidateLib(lib, lib))
+		libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
+	
 	CF.sortLibInfosAsc(libInfos);
-	bestLibInfo = CF.findBestLibInfo(libInfos, lib.acceptVersion);
+	bestLibInfo = CF.findBestLibInfo(libInfos, bestAcceptVersion);
 	
 	if(bestLibInfo == null)
 		return null;
@@ -7070,8 +7080,103 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 	{
 		bestLib = CF.trimPluginRendererLib(bestLib, renderContext, bestLibInfo.plugin);
 	}
+	else if(bestLibInfo.from == "input")
+	{
+		//无需处理
+	}
 	
 	return bestLib;
+};
+
+//计算acceptVersion交集，返回结果只有result.acceptNone=true时才表示无交集，result.acceptVersion符合CF.loadLib()中定义的acceptVersion规则
+CF.intersectAcceptVersionResult = function(lib, contextCharts)
+{
+	var result = { acceptNone: false, acceptVersion: lib.acceptVersion };
+	
+	if(contextCharts != null)
+	{
+		for(let i=0; i<contextCharts.length; i++)
+		{
+			let chart = contextCharts[i];
+			
+			if(chart == null)
+				continue;
+			
+			let chartLib = chart._rendererLib(false);
+			CF.intersectAcceptVersionResultInLibs(result, lib.name, chartLib);
+			
+			if(result.acceptNone)
+				break;
+		}
+	}
+	
+	return result;
+};
+
+CF.intersectAcceptVersionResultInLibs = function(result, name, libs)
+{
+	if(!CF.isEmpty(libs))
+	{
+		if(CF.isArray(libs))
+		{
+			for(let i=0; i<libs.length; i++)
+			{
+				let lib = libs[i];
+				
+				if(CF.isLibWithName(lib, name))
+					CF.intersectAcceptVersionResultInLib(result, lib);
+				else
+					CF.intersectAcceptVersionResultInLibs(result, name, (lib == null ? null : lib.depend));
+				
+				if(result.acceptNone)
+					break;
+			}
+		}
+		else
+		{
+			if(CF.isLibWithName(libs, name))
+				CF.intersectAcceptVersionResultInLib(result, libs);
+			else
+				CF.intersectAcceptVersionResultInLibs(result, name, libs.depend);
+		}
+	}
+};
+
+CF.intersectAcceptVersionResultInLib = function(result, lib)
+{
+	if(lib == null || CF.isEmpty(lib.acceptVersion))
+		return;
+	
+	if(CF.isEmpty(result.acceptVersion))
+	{
+		result.prevAcceptVersion = result.acceptVersion;
+		result.acceptVersion = lib.acceptVersion;
+		return;
+	}
+	
+	var acceptVersions = (CF.isArray(result.acceptVersion) ? result.acceptVersion : [ result.acceptVersion ]);
+	var libAcceptVersions = (CF.isArray(lib.acceptVersion) ? lib.acceptVersion : [ lib.acceptVersion ]);
+	
+	result.acceptNone = true;
+	result.prevAcceptVersion = result.acceptVersion;
+	result.acceptVersion = [];
+	
+	for(let i=0; i<acceptVersions.length; i++)
+	{
+		for(let j=0; j<libAcceptVersions.length; j++)
+		{
+			let intersect = CF.intersectAcceptVersion(acceptVersions[i], libAcceptVersions[j]);
+			
+			if(intersect != -1)
+			{
+				if(result.acceptNone == true)
+					result.acceptNone = false;
+				
+				if(!CF.isEmpty(intersect) && CF.indexInArray(result.acceptVersion, intersect) < 0)
+					result.acceptVersion.push(intersect);
+			}
+		}
+	}
 };
 
 CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
@@ -7132,11 +7237,12 @@ CF.isValidLoadableLib = function(lib)
 	return true;
 };
 
-//插件依赖库优先级，由高到底依次是：全局库、lib用途的插件、看板内的自定义图表渲染器、图表插件
+//插件依赖库优先级，由高到底依次是：全局库、lib用途的插件、看板内的自定义图表渲染器、图表插件、CF.loadLib()传入的参数
 CF.LIB_PRIORITY_GLOBAL_LIB = 9;
 CF.LIB_PRIORITY_LIB_PLUGIN = 8;
 CF.LIB_PRIORITY_CUSTOM_RENDERER = 7;
 CF.LIB_PRIORITY_CHART_PLUGIN = 6;
+CF.LIB_PRIORITY_INPUT = 5;
 
 CF.inflateCandidateLibInfoInGlobalLib = function(libInfos, baseLib)
 {
@@ -7238,7 +7344,7 @@ CF.isCandidateLib = function(lib, baseLib)
 	if(!CF.isUsableLib(lib))
 		return false;
 	
-	return (baseLib.name == lib.name);
+	return CF.isLibWithName(baseLib, lib.name);
 };
 
 CF.isUsableLib = function(lib)
@@ -7282,10 +7388,141 @@ CF.isLibVersionAccepted = function(version, acceptVersion)
 	return false;
 };
 
+//计算两个acceptVersion的交集acceptVersion，返回-1表示无交集
+//注意：null和""表示接受任意版本
+CF.intersectAcceptVersion = function(acceptVersion1, acceptVersion2)
+{
+	if(acceptVersion1 == acceptVersion2)
+		return acceptVersion1;
+	
+	if(CF.isEmpty(acceptVersion1))
+		return acceptVersion2;
+	
+	if(CF.isEmpty(acceptVersion2))
+		return acceptVersion1;
+	
+	var intersectObj = CF.extend({}, CF._ACCEPT_ANY_VERSION_OBJ);
+	var acceptObj1 = CF.resolveAcceptVersionObj(acceptVersion1);
+	var acceptObj2 = CF.resolveAcceptVersionObj(acceptVersion2);
+	
+	if(CF.isEmpty(acceptObj1.min) && CF.isEmpty(acceptObj2.min))
+	{
+		intersectObj.min = null;
+	}
+	else if(CF.isEmpty(acceptObj1.min))
+	{
+		intersectObj.min = acceptObj2.min;
+		intersectObj.includeMin = acceptObj2.includeMin;
+	}
+	else if(CF.isEmpty(acceptObj2.min))
+	{
+		intersectObj.min = acceptObj1.min;
+		intersectObj.includeMin = acceptObj1.includeMin;
+	}
+	else
+	{
+		let compareMin = CF.compareLibVersion(acceptObj1.min, acceptObj2.min);
+		
+		if(compareMin == 0)
+		{
+			intersectObj.min = acceptObj1.min;
+			intersectObj.includeMin = (acceptObj1.includeMin && acceptObj2.includeMin);
+		}
+		else if(compareMin < 0)
+		{
+			intersectObj.min = acceptObj2.min;
+			intersectObj.includeMin = acceptObj2.includeMin;
+		}
+		else
+		{
+			intersectObj.min = acceptObj1.min;
+			intersectObj.includeMin = acceptObj1.includeMin;
+		}
+	}
+	
+	if(CF.isEmpty(acceptObj1.max) && CF.isEmpty(acceptObj2.max))
+	{
+		intersectObj.max = null;
+	}
+	else if(CF.isEmpty(acceptObj1.max))
+	{
+		intersectObj.max = acceptObj2.max;
+		intersectObj.includeMax = acceptObj2.includeMax;
+	}
+	else if(CF.isEmpty(acceptObj2.max))
+	{
+		intersectObj.max = acceptObj1.max;
+		intersectObj.includeMax = acceptObj1.includeMax;
+	}
+	else
+	{
+		let compareMax = CF.compareLibVersion(acceptObj1.max, acceptObj2.max);
+		
+		if(compareMax == 0)
+		{
+			intersectObj.max = acceptObj1.max;
+			intersectObj.includeMax = (acceptObj1.includeMax && acceptObj2.includeMax);
+		}
+		else if(compareMax < 0)
+		{
+			intersectObj.max = acceptObj1.max;
+			intersectObj.includeMax = acceptObj1.includeMax;
+		}
+		else
+		{
+			intersectObj.max = acceptObj2.max;
+			intersectObj.includeMax = acceptObj2.includeMax;
+		}
+	}
+	
+	if(!CF.isEmpty(intersectObj.min) && !CF.isEmpty(intersectObj.max))
+	{
+		//检查交集本身的范围是否合法
+		var compareSelf = CF.compareLibVersion(intersectObj.min, intersectObj.max);
+		
+		//min大于max
+		if(compareSelf > 0)
+			return -1;
+		
+		//min等于max但是都不包含自身
+		if(compareSelf == 0 && (!intersectObj.includeMin || !intersectObj.includeMax))
+			return -1;
+	}
+	
+	var re = "";
+	
+	if(!CF.isEmpty(intersectObj.min))
+		re += (intersectObj.includeMin ? ">=" : ">") + intersectObj.min;
+	
+	if(!CF.isEmpty(intersectObj.max))
+	{
+		if(!CF.isEmpty(re))
+			re += " ";
+		
+		re += (intersectObj.includeMax ? "<=" : "<") + intersectObj.max;
+	}
+	
+	return re;
+};
+
 CF._ACCEPT_VERSION_OBJS = {};
 CF._ACCEPT_ANY_VERSION_OBJ = { min: null, includeMin: true, max: null, includeMax: true };
 
-//解析接受版本对象，支持格式：null（接受任意）、""（接受任意）、"1.0"、"^1.0"、"~1.0"、">1.0"、">=1.0"、"<1.0"、"<=1.0"、">=1.0 <2.0"
+//，
+/**
+ * 解析接受版本对象，支持格式如下：
+ * null            接受任意版本
+ * ""              接受任意版本
+ * "1.0"           仅接受1.0版本
+ * "^1.1"          接受大于等于1.1且小于2.0的版本
+ * "~1.1"          接受大于等于1.1且小于1.2.0的版本
+ * ">1.1"          接受大于1.1的版本
+ * ">=1.1"         接受大于等于1.1的版本
+ * "<1.1"          接受小于1.1的版本
+ * "<=1.1"         接受小于等于1.1的版本
+ * ">=1.1 <3.0"    接受大于等于1.1且小于3.0的版本
+ * ">=1.1 <=3.0"    接受大于等于1.1且小于等于3.0的版本
+ */
 CF.resolveAcceptVersionObj = function(acceptVersion)
 {
 	acceptVersion = CF.trim(acceptVersion);
@@ -7382,11 +7619,16 @@ CF.libIndex = function(libs, name)
 {
 	for(var i=0; i<libs.length; i++)
 	{
-		if(libs[i].name == name)
+		if(CF.isLibWithName(libs[i], name))
 			return i;
 	}
 	
 	return -1;
+};
+
+CF.isLibWithName = function(lib, name)
+{
+	return (lib != null && lib.name == name);
 };
 
 CF.isLibLoaded = function(lib)
