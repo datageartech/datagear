@@ -6623,6 +6623,9 @@ CF.inflateChartTheme = function(theme)
  *   acceptVersion: "..."、[ "...", ... ],
  *   //可选，可提供的库源版本号，为空表示不提供，应符合语义化版本规范："X.Y.Z"、"X.Y.Z-BUILD"
  *   version: "...",
+ *   //可选，重定向版本范围，为空表示表示不重定向，如果不为空，当系统要加载此库且重定向目标库存在时，将转而加载重定向目标库。
+ *   //格式参考CF.resolveAcceptVersionObj()函数
+ *   redirectVersion: "..."、[ "...", ... ],
  *   //可选，可提供的库源信息，为空表示不提供
  *   source:
  *   //库源URL
@@ -7115,30 +7118,25 @@ CF.intersectAcceptVersionResult = function(lib, contextCharts)
 
 CF.intersectAcceptVersionResultInLibs = function(result, name, libs)
 {
-	if(!CF.isEmpty(libs))
+	if(CF.isEmpty(libs))
+		return;
+	
+	libs = (CF.isArray(libs) ? libs : [ libs ]);
+	
+	for(let i=0; i<libs.length; i++)
 	{
-		if(CF.isArray(libs))
-		{
-			for(let i=0; i<libs.length; i++)
-			{
-				let lib = libs[i];
-				
-				if(CF.isLibWithName(lib, name))
-					CF.intersectAcceptVersionResultInLib(result, lib);
-				else
-					CF.intersectAcceptVersionResultInLibs(result, name, (lib == null ? null : lib.depend));
-				
-				if(result.acceptNone)
-					break;
-			}
-		}
+		let lib = libs[i];
+		
+		if(CF.isLibWithName(lib, name))
+			CF.intersectAcceptVersionResultInLib(result, lib);
 		else
 		{
-			if(CF.isLibWithName(libs, name))
-				CF.intersectAcceptVersionResultInLib(result, libs);
-			else
-				CF.intersectAcceptVersionResultInLibs(result, name, libs.depend);
+			let dependLibs = CF.dependLibsOfLib(lib);
+			CF.intersectAcceptVersionResultInLibs(result, name, dependLibs);
 		}
+		
+		if(result.acceptNone)
+			break;
 	}
 };
 
@@ -7194,12 +7192,12 @@ CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
 			return libInfo;
 		}
 		//重定向库
-		else if(!CF.isEmpty(lib.acceptVersion))
+		else if(!CF.isEmpty(lib.redirectVersion))
 		{
 			//需先复制并删除lib，避免死循环
 			let newLibInfos = Array.from(ascLibInfos);
 			newLibInfos.splice(i, 1);
-			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.acceptVersion);
+			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.redirectVersion);
 			
 			if(redirectLibInfo != null)
 				return redirectLibInfo;
@@ -7355,10 +7353,10 @@ CF.isUsableLib = function(lib)
 	if(CF.isEmpty(lib.name) || CF.isEmpty(lib.version))
 		return false;
 	
-	if(CF.isEmpty(lib.source) && CF.isEmpty(lib.acceptVersion))
-		return false;
+	if(!CF.isEmpty(lib.source) || !CF.isEmpty(lib.redirectVersion))
+		return true;
 	
-	return true;
+	return false;
 };
 
 CF.isLibVersionAccepted = function(version, acceptVersion)
