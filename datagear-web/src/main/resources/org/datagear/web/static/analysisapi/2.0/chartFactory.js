@@ -6306,7 +6306,27 @@ CF.trimStrArray = function(strArray)
 	}
 	
 	return strArray;
-}
+};
+
+CF.arrayContentEquals = function(a, b)
+{
+	if (a === b)
+		return true;
+	
+	if(!CF.isArray(a) || !CF.isArray(b))
+		return false;
+	
+	if(a.length !== b.length)
+		return false;
+
+	for(let i=0; i<a.length; i++)
+	{
+		if(a[i] !== b[i])
+			return false;
+	}
+	
+	return true;
+};
 
 CF.toJsonString = function(obj)
 {
@@ -7034,6 +7054,7 @@ CF.resolveLibSourceType = function(url)
 
 CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
+CF.LIB_ACCEPTVERSION_CACHE = {};
 
 //查找未加载的最新版可用库
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
@@ -7042,8 +7063,12 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 	if(CF.isLibLoaded(lib))
 		return false;
 	
+	var libName = lib.name;
+	
 	//采用取最小acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
-	var bestAcceptVersion = CF.intersectAcceptVersionInCharts(lib, contextCharts);
+	var bestAcceptVersion = CF.LIB_ACCEPTVERSION_CACHE[libName];
+	if(bestAcceptVersion === undefined)
+		bestAcceptVersion = CF.intersectAcceptVersionInCharts(lib, contextCharts);
 	
 	var bestLibInfo = null;
 	var libInfos = [];
@@ -7083,51 +7108,51 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 		//无需处理
 	}
 	
+	CF.LIB_ACCEPTVERSION_CACHE[libName] = (bestAcceptVersion === undefined ? null : bestAcceptVersion);
+	
 	return bestLib;
 };
 
 //计算acceptVersion交集，返回结果只有result.acceptNone=true时才表示无交集，result.acceptVersion符合CF.loadLib()中定义的acceptVersion规则
 CF.intersectAcceptVersionInCharts = function(lib, contextCharts)
 {
-	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion, breakAcceptVersion: undefined };
 	var libName = lib.name;
+	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion, breakAcceptVersion: undefined };
 	
 	var logs = [];
 	logs.push({ name: libName, acceptVersion: result.acceptVersion });
 	
-	if(contextCharts != null)
+	for(let i=0; i<contextCharts.length; i++)
 	{
-		for(let i=0; i<contextCharts.length; i++)
+		let chart = contextCharts[i];
+		
+		if(chart == null)
+			continue;
+		
+		let chartLib = chart._rendererLib(false);
+		let hasLib = CF.intersectAcceptVersionResultInLibs(result, libName, chartLib);
+		
+		if(hasLib)
 		{
-			let chart = contextCharts[i];
-			
-			if(chart == null)
-				continue;
-			
-			let chartLib = chart._rendererLib(false);
-			let hasLib = CF.intersectAcceptVersionResultInLibs(result, libName, chartLib);
-			
-			if(hasLib)
+			if(result.acceptNone)
 			{
-				if(result.acceptNone)
-				{
-					result.acceptVersion = result.prevAcceptVersion;
-					logs.push({ name: libName, acceptVersion: "NONE", chart: CF.chartLogInfo(chart), breaker: result.breakAcceptVersion });
-					
-					let logMsg = "lib "+libName +" no valid acceptVersion found for by "+CF.chartLogInfo(chart)
-						+", "+JSON.stringify(result.prevAcceptVersion)+" is used for loading try.";
-					//打印详细日志，便于调试
-					for(let logIdx=0; logIdx<logs.length; logIdx++)
-						logMsg += "\n" + JSON.stringify(logs[logIdx]);
-					
-					CF.logException(logMsg);
-					
-					break;
-				}
-				else
-				{
-					logs.push({ name: libName, acceptVersion: result.acceptVersion, chart: CF.chartLogInfo(chart) });
-				}
+				//打印详细日志，便于调试
+				logs.push({ name: libName, acceptVersion: "NONE", chart: CF.chartLogInfo(chart), breaker: result.breakAcceptVersion });
+				let logMsg = "lib "+libName +" acceptVersion breaked by "+CF.chartLogInfo(chart)
+					+", its requirement will be ignored.";
+				for(let logIdx=0; logIdx<logs.length; logIdx++)
+					logMsg += "\n" + JSON.stringify(logs[logIdx]);
+				CF.logException(logMsg);
+				
+				//恢复上一次继续计算
+				logs.splice(logs.length-1, 1);
+				result.acceptNone = false;
+				result.acceptVersion = result.prevAcceptVersion;
+				result.breakAcceptVersion = undefined;
+			}
+			else
+			{
+				logs.push({ name: libName, acceptVersion: result.acceptVersion, chart: CF.chartLogInfo(chart) });
 			}
 		}
 	}
