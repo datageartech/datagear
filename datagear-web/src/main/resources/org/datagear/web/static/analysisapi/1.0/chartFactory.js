@@ -9540,13 +9540,13 @@
 			}
 			else
 			{
-				re = Number(value);
+				re = new Number(value);
 				
 				//如果由字符串转数值丢失精度，则撤销转换，交由后台处理
-				if(chartFactory.isString(value) && re.toString() != value)
-				{
+				if(isNaN(re) || (chartFactory.isString(value) && re.toString() != value))
 					re = value;
-				}
+				else
+					re = re.valueOf();
 			}
 		}
 		else if(chartFactory.DataSetParamType.INTEGER == dataSetParam.type)
@@ -9557,17 +9557,13 @@
 			}
 			else
 			{
-				re = Number(value);
+				re = new Number(value);
 				
 				//如果由字符串转数值丢失精度，则撤销转换，交由后台处理
-				if(chartFactory.isString(value) && re.toString() != value)
-				{
+				if(isNaN(re) || (chartFactory.isString(value) && re.toString() != value))
 					re = value;
-				}
 				else
-				{
 					re = parseInt(re);
-				}
 			}
 		}
 		

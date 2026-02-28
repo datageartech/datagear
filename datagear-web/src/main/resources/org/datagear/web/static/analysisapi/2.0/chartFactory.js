@@ -7991,13 +7991,13 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 		}
 		else
 		{
-			re = Number(value);
+			re = new Number(value);
 			
 			//如果由字符串转数值丢失精度，则撤销转换，交由后台处理
-			if(CF.isString(value) && re.toString() != value)
-			{
+			if(isNaN(re) || (CF.isString(value) && re.toString() != value))
 				re = value;
-			}
+			else
+				re = re.valueOf();
 		}
 	}
 	else if(CF.DataSetParamType.INTEGER == dataSetParam.type)
@@ -8008,17 +8008,13 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 		}
 		else
 		{
-			re = Number(value);
+			re = new Number(value);
 			
 			//如果由字符串转数值丢失精度，则撤销转换，交由后台处理
-			if(CF.isString(value) && re.toString() != value)
-			{
+			if(isNaN(re) || (CF.isString(value) && re.toString() != value))
 				re = value;
-			}
 			else
-			{
 				re = parseInt(re);
-			}
 		}
 	}
 	
