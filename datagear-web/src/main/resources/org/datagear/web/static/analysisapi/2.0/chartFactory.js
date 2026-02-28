@@ -3540,7 +3540,10 @@ chartProto.contextURL = function(url)
 
 /**
  * 加载库，并在全部加载完成后（无论是否成功）执行回调函数。
- * 注意：如果在图表渲染器的render/update函数中调用此函数，应该首先设置其asyncRender/asyncUpdate为true，
+ * 注意：
+ * 系统会从环境中选择尽量兼容的依赖库加载，并不一定是传入的lib库。
+ * 注意：
+ * 如果在图表渲染器的render/update函数中调用此函数，应该首先设置其asyncRender/asyncUpdate为true，
  * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
  * 
  * @param lib 库对象、数组，结构参考CF.loadLib()函数说明，注意，其中库源URL应是可以直接加载的
@@ -6652,14 +6655,16 @@ CF.inflateChartTheme = function(theme)
  * 		表示不提供实际依赖库，希望运行环境加载任意版本的mylib库
  * 2、{ name: "mylib", acceptVersion: "^1.0" }
  * 		表示不提供实际依赖库，希望运行环境加载匹配"^1.0"版本的mylib库
- * 3、{ name: "mylib", version: "0.9", acceptVersion: "^1.0" }
+ * 3、{ name: "mylib", version: "0.9", redirectVersion: "^1.0" }
  * 		表示不提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的mylib库，并且在没有匹配时无效
- * 4、{ name: "mylib", version: "0.9", acceptVersion: "^1.0", source: ... }
+ * 4、{ name: "mylib", version: "0.9", redirectVersion: "^1.0", source: ... }
  * 		表示提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的mylib库，并且在没有匹配时作为候选加载库
  * 5、{ name: "mylib", version: "0.9", source: ... }
  * 		表示提供实0.9版本的际依赖库，作为候选加载库
+ * 6、{ name: "mylib", version: "0.9", source: ..., acceptVersion: "^1.0" }
+ * 		表示提供实0.9版本的际依赖库，作为候选加载库，同时支持兼容加载"^1.0"版本的mylib库
  * 
- * 对于公用库，建议采用第2、3、4种格式，对于私有库，建议采用第5种格式。
+ * 对于公用库，建议采用第2、3、4种格式，对于私有库，建议采用第5、6种格式。
  * 
  * @param lib 库对象、数组
  * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
@@ -6802,7 +6807,7 @@ CF.logIfLibVersionMismatch = function(needLib, loadedLib)
 	if(mismatch)
 	{
 		CF.logWarn("lib " + needLib.name + " " + loadedLib.version
-			+ " has been loaded, but " + needVersion + " version required, this may cause compatibility errors");
+			+ " has been loaded, but " + JSON.stringify(needVersion) + " version required, this may cause compatibility errors");
 	}
 };
 
@@ -7084,7 +7089,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 //计算acceptVersion交集，返回结果只有result.acceptNone=true时才表示无交集，result.acceptVersion符合CF.loadLib()中定义的acceptVersion规则
 CF.intersectAcceptVersionInCharts = function(lib, contextCharts)
 {
-	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion };
+	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion, breakAcceptVersion: undefined };
 	var libName = lib.name;
 	
 	var logs = [];
@@ -7103,30 +7108,28 @@ CF.intersectAcceptVersionInCharts = function(lib, contextCharts)
 			let hasLib = CF.intersectAcceptVersionResultInLibs(result, libName, chartLib);
 			
 			if(hasLib)
-				logs.push({ name: libName, acceptVersion: result.acceptVersion, chart: CF.chartLogInfo(chart) });
-			
-			if(result.acceptNone)
 			{
-				CF.logException("no valid acceptVersion found for lib "+libName
-					+" by "+CF.chartLogInfo(chart)+", ["+result.prevAcceptVersion+"] is used for search");
-				
-				result.acceptVersion = result.prevAcceptVersion;
-				break;
+				if(result.acceptNone)
+				{
+					result.acceptVersion = result.prevAcceptVersion;
+					logs.push({ name: libName, acceptVersion: "NONE", chart: CF.chartLogInfo(chart), breaker: result.breakAcceptVersion });
+					
+					let logMsg = "lib "+libName +" no valid acceptVersion found for by "+CF.chartLogInfo(chart)
+						+", "+JSON.stringify(result.prevAcceptVersion)+" is used for loading try.";
+					//打印详细日志，便于调试
+					for(let logIdx=0; logIdx<logs.length; logIdx++)
+						logMsg += "\n" + JSON.stringify(logs[logIdx]);
+					
+					CF.logException(logMsg);
+					
+					break;
+				}
+				else
+				{
+					logs.push({ name: libName, acceptVersion: result.acceptVersion, chart: CF.chartLogInfo(chart) });
+				}
 			}
 		}
-	}
-	
-	//打印日志，便于调试
-	if(result.acceptNone)
-	{
-		let logsStr = libName+" lib acceptVersion eval log:";
-		for(let i=0; i<logs.length; i++)
-		{
-			logsStr += "\n";
-			logsStr += JSON.stringify(logs[i]);
-		}
-		
-		CF.logWarn(logsStr);
 	}
 	
 	return result.acceptVersion;
@@ -7202,6 +7205,9 @@ CF.intersectAcceptVersionResultInLib = function(result, lib)
 			}
 		}
 	}
+	
+	if(result.acceptNone)
+		result.breakAcceptVersion = lib.acceptVersion;
 };
 
 CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
