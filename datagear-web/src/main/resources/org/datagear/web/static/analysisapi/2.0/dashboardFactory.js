@@ -2471,7 +2471,7 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * 
  * @param element 用于渲染图表的<div>元素、元素ID
  * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回false图表将不会加入看板
+ * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
 dashboardProto.loadChart = function(element, chartWidgetId, successCallback, errorCallback)
@@ -2515,7 +2515,7 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
  * 
  * @param elements 用于渲染图表的<div>元素选择器字符串、<div>元素数组
  * @param chartWidgetIds 可选，要加载的图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
 dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
@@ -2560,7 +2560,7 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
  * dashboard.loadUnsolvedCharts(element, successCallback);
  * 
  * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  * @return 要异步加载的HTML元素数组
  */
@@ -2620,7 +2620,7 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
  * 
  * @param elements HTML元素数组
  * @param chartWidgetIds 图表部件ID数组，与上面一一对应
- * @param successCallback 选填，加载成功回调函数：function(charts){ ... }，返回false图表将不会加入看板
+ * @param successCallback 选填，加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
  * @param errorCallback 选填，加载失败回调函数：function(error){ ... }
  */
 dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
@@ -2680,16 +2680,21 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 				charts[i] = this._createLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
 			}
 			
-			let add = true;
+			let callbackResult = true;
 			
 			if(successCallback != null)
-				add = successCallback(charts);
+				callbackResult = successCallback(charts);
 			
-			if(add !== false)
+			//返回非false，则加入看板
+			if(callbackResult !== false)
 			{
 				for(let i=0; i<chartRoots.length; i++)
 					this._addChartCareStatus(charts[i]);
 			}
+			
+			//返回的是函数，则调用，以支持在图表加入看板后再执行回调
+			if(callbackResult != null && CF.isFunction(callbackResult))
+				callbackResult(charts);
 		});
 		
 		return re;
