@@ -73,7 +73,7 @@
 				<div class="field-input col-12">
 					<div class="p-component p-inputtext">
 						<div class="flex flex-row pb-2" v-if="!pm.isReadonlyAction">
-							<div class="h-opts flex-grow-1">
+							<div class="flex-grow-1 flex align-items-center gap-1">
 								<p-button type="button" label="<@spring.message code='add' />"
 									@click="onAddPropertyPattern" class="p-button-secondary p-button-sm">
 								</p-button>

@@ -208,14 +208,14 @@
 										title="<@spring.message code='chart.dsb.paramValue.desc' />">
 										<@spring.message code='parameter' />
 									</label>
-									<div class="field-input col-12 md:col-9 h-opts">
+									<div class="field-input col-12 md:col-9 flex align-items-center gap-1">
 										<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
 											aria:haspopup="true" aria-controls="${pid}paramPanel"
 											@click="onShowParamPanel($event, dsb)" class="p-button-secondary">
 										</p-button>
 										<p-button type="button" label="<@spring.message code='clear' />"
 											@click="onClearParamValues($event, dsb)" class="p-button-secondary p-button-danger"
-											v-if="!pm.isReadonlyAction">
+											:disabled="dsbParamValuesCount(dsb) == 0" v-if="!pm.isReadonlyAction">
 										</p-button>
 									</div>
 								</div>
@@ -1235,6 +1235,20 @@
 		isEmptyPluginAttributeForm: function(plugin)
 		{
 			return po.isEmptyPluginAttributeForm(plugin);
+		},
+		
+		dsbParamValuesCount: function(dataSetBind)
+		{
+			var re = 0;
+			var pvs = (dataSetBind.query ? dataSetBind.query.paramValues : null);
+			
+			if(pvs != null)
+			{
+				for(var p in pvs)
+					re++;
+			}
+			
+			return re;
 		},
 		
 		onDeleteAnalysisProject: function()

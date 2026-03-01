@@ -568,18 +568,6 @@ label.required-label::before,
 	border-radius: 1em;
 }
 
-/*横向操作组*/
-.h-opts > *{
-	margin-left: 0.15em;
-	margin-right: 0.15em;
-}
-.h-opts > *:first-child{
-	margin-left: 0;
-}
-.h-opts > *:last-child{
-	margin-right: 0;
-}
-
 /*表单验证信息*/
 .field{
 	margin-bottom: 1.2rem;

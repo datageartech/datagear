@@ -35,7 +35,7 @@ dataSet_form_param_field_form.ftl
 	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
 			<div class="flex flex-row pb-2" v-if="!pm.isReadonlyAction">
-				<div class="h-opts flex-grow-1">
+				<div class="flex-grow-1 flex align-items-center gap-1">
 					<p-button type="button" label="<@spring.message code='add' />"
 						@click="onAddParam" class="p-button-secondary p-button-sm">
 					</p-button>
@@ -95,24 +95,22 @@ dataSet_form_param_field_form.ftl
 	<div class="field-input col-12">
 		<div class="p-component p-inputtext">
 			<div class="flex justify-content-between flex-row pb-2" v-if="!pm.isReadonlyAction">
-				<div class="flex">
-					<div class="h-opts">
-						<p-button type="button" label="<@spring.message code='add' />"
-							@click="onAddField" class="p-button-secondary p-button-sm">
-						</p-button>
-						<p-button type="button" label="<@spring.message code='edit' />"
-							@click="onEditField" class="p-button-secondary p-button-sm">
-						</p-button>
-						<p-button type="button" label="<@spring.message code='moveUp' />"
-							@click="onMoveUpField" class="p-button-secondary p-button-sm">
-						</p-button>
-						<p-button type="button" label="<@spring.message code='moveDown' />"
-							@click="onMoveDownField" class="p-button-secondary p-button-sm">
-						</p-button>
-						<p-button type="button" label="<@spring.message code='delete' />"
-							@click="onDeleteField" class="p-button-danger p-button-sm">
-						</p-button>
-					</div>
+				<div class="flex align-items-center gap-1">
+					<p-button type="button" label="<@spring.message code='add' />"
+						@click="onAddField" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='edit' />"
+						@click="onEditField" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='moveUp' />"
+						@click="onMoveUpField" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='moveDown' />"
+						@click="onMoveDownField" class="p-button-secondary p-button-sm">
+					</p-button>
+					<p-button type="button" label="<@spring.message code='delete' />"
+						@click="onDeleteField" class="p-button-danger p-button-sm">
+					</p-button>
 				</div>
 				<div>
 					<p-button type="button" label="<@spring.message code='dataFormat' />"
