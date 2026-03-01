@@ -209,6 +209,13 @@ TOOL.renderDataSetParamForm = function(parent, dataSetParams, options)
 			else
 				input = TOOL.renderDspFormInputText(form, options, valueDiv, dsp, value);
 		}
+		else if(dsp.type == CF.DataSetParamType.OBJECT)
+		{
+			if(dsp.inputType == InputType.TEXT)
+				input = TOOL.renderDspFormInputText(form, options, valueDiv, dsp, value);
+			else
+				input = TOOL.renderDspFormInputTextarea(form, options, valueDiv, dsp, value);
+		}
 		
 		let inputId = (input ? CF.eleAttr(input, "id") : null);
 		inputId = (CF.isEmpty(inputId) ? CF.eleAttr(input, "dg-label-for-id") : inputId);
@@ -402,6 +409,11 @@ TOOL.addDspFormInputValidation = function(dataSetParam, input)
 		
 		if(CF.DataSetParamType.INTEGER == dataSetParam.type)
 			CF.eleAttr(input, "dg-validation-check-integer", "true");
+	}
+	
+	if(CF.DataSetParamType.OBJECT == dataSetParam.type)
+	{
+		CF.eleAttr(input, "dg-validation-check-object", "true");
 	}
 };
 
@@ -1340,7 +1352,7 @@ TOOL.validateDspForm = function(form)
 		
 		if(isCheckboxRadio)
 		{
-			let inputsWrapper = CF.eleOfSelector(valueWrapper, ".dg-dspform-inputs-wrapper");
+			let inputsWrapper = CF.eleOfSelector(".dg-dspform-inputs-wrapper", valueWrapper);
 			
 			if(!TOOL.isNonEmptyAllNumberic(checkedValues, mustInteger))
 			{
@@ -1515,6 +1527,9 @@ TOOL.eleInputActualValue = function(input, value)
 		}
 		else
 		{
+			if(CF.eleAttr(input, "dg-validation-check-object"))
+				value = TOOL.objectParamValueToInputValue(value);
+			
 			if(CF.isEleMatches(input, ".dg-date-widget-hidden"))
 			{
 				TOOL.eleDateWidgetValue(input, value);
@@ -1526,6 +1541,17 @@ TOOL.eleInputActualValue = function(input, value)
 			}
 		}
 	}
+};
+
+TOOL.objectParamValueToInputValue = function(value)
+{
+	if(value == null)
+		return "";
+	
+	if(CF.isString(value))
+		return value;
+	
+	return CF.toJsonString(value, true);
 };
 
 TOOL.eleDateWidgetValue = function(inputHidden, value)

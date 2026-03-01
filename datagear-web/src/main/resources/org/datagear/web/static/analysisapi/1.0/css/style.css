@@ -423,6 +423,10 @@
 	border-width: 1px;
 	border-style: solid;
 }
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value textarea{
+	height: 9vh;
+	min-height: 3rem;
+}
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-inputs-wrapper{
 	border: 1px solid transparent;
 }

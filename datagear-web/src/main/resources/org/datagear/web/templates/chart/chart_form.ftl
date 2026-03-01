@@ -945,7 +945,7 @@
 		if(!dataSetBind.query)
 			dataSetBind.query = {};
 		
-		var formOptions = $.extend(
+		var formOptions =
 		{
 			submitText: "<@spring.message code='confirm' />",
 			yesText: "<@spring.message code='yes' />",
@@ -967,7 +967,7 @@
 				
 				po.vueUnref("${pid}paramPanelEle").hide();
 			}
-		});
+		};
 		
 		wrapper.empty();
 		

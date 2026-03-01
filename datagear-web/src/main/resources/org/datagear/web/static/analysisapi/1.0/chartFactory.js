@@ -283,6 +283,7 @@
 		BOOLEAN: "BOOLEAN",
 		INTEGER: "INTEGER",
 		NUMBER: "NUMBER",
+		OBJECT: "OBJECT",
 		//兼容处理类型，逻辑参考：org.datagear.analysis.DataSetParam.DataType.normalize(String)
 		normalize: function(type)
 		{
@@ -296,6 +297,8 @@
 				return this.INTEGER;
 			else if(type == this.NUMBER)
 				return this.NUMBER;
+			else if(type == this.OBJECT)
+				return this.OBJECT;
 			else
 				return this.STRING;
 		}
@@ -7414,9 +7417,12 @@
 		return (type == "string" || type == "number");
 	};
 	
-	chartFactory.toJsonString = function(obj)
+	chartFactory.toJsonString = function(obj, pretty)
 	{
-		return JSON.stringify(obj);
+		if(pretty == null)
+			return JSON.stringify(obj);
+		else
+			return JSON.stringify(obj, null, 2);
 	};
 	
 	chartFactory.isJsonString = function(str)
@@ -9505,7 +9511,23 @@
 		
 		var re = value;
 		
-		if($.isArray(value))
+		if(chartFactory.DataSetParamType.OBJECT == dataSetParam.type)
+		{
+			if(chartFactory.isString(value))
+			{
+				if(value == "")
+					re = null;
+				else
+				{
+					//如果失败则撤销转换，交由后台处理
+					//这里不使用JSON.parse()函数，以允许单引号等非标准格式
+					re = chartFactory.evalSilently(value, value);
+				}
+			}
+			else
+				re = value;
+		}
+		else if($.isArray(value))
 		{
 			re = [];
 			

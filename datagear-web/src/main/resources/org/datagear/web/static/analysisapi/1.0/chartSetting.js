@@ -197,6 +197,15 @@
 				else
 					chartSetting.renderDataSetParamFormInputText($form, $valueDiv, dsp, value, options);
 			}
+			else if(dsp.type == chartFactory.DataSetParamType.OBJECT)
+			{
+				var inputVal = chartSetting.objectParamValueToInputValue(value);
+				
+				if(dsp.inputType == InputType.TEXT)
+					chartSetting.renderDataSetParamFormInputText($form, $valueDiv, dsp, inputVal, options);
+				else
+					chartSetting.renderDataSetParamFormInputTextarea($form, $valueDiv, dsp, inputVal, options);
+			}
 		}
 		
 		if(!options.readonly)
@@ -292,6 +301,17 @@
 		});
 	};
 	
+	chartSetting.objectParamValueToInputValue = function(value)
+	{
+		if(value == null)
+			return "";
+		
+		if(chartFactory.isString(value))
+			return value;
+		
+		return chartFactory.toJsonString(value, true);
+	};
+	
 	chartSetting.dataSetParamValueFormThemeStyle = function(chartTheme, isSubStyle)
 	{
 		var name = chartFactory.builtinPropName("DataSetParamValueForm" + (isSubStyle ? "SubYes" : "SubNo"));
@@ -375,6 +395,11 @@
 			
 			if(chartFactory.DataSetParamType.INTEGER == dataSetParam.type)
 				$input.attr("dg-validation-integer", "true");
+		}
+		
+		if(chartFactory.DataSetParamType.OBJECT == dataSetParam.type)
+		{
+			$input.attr("dg-validation-object", "true");
 		}
 	};
 	
@@ -1578,6 +1603,9 @@
 				return;
 			
 			var value = paramValueObj[name];
+			
+			if($this.attr("dg-validation-object"))
+				value = chartSetting.objectParamValueToInputValue(value);
 			
 			if($this.is("input"))
 			{

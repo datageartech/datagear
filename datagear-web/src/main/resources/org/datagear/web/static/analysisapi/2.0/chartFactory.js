@@ -285,7 +285,8 @@ CF.DataSetParamType =
 	STRING: "string",
 	BOOLEAN: "boolean",
 	INTEGER: "integer",
-	NUMBER: "number"
+	NUMBER: "number",
+	OBJECT: "object"
 };
 
 //org.datagear.analysis.support.html.HtmlChartPluginUsage
@@ -2226,7 +2227,10 @@ chartProto._dataSetBindOf = function(dataSetBind, nullable)
  */
 chartProto.dataSetParamValueFirst = function(name, value, convert)
 {
-	return this.dataSetParamValue(0, name, value, convert);
+	if(arguments.length <= 1)
+		return this.dataSetParamValue(0, name);
+	else
+		this.dataSetParamValue(0, name, value, convert);
 };
 
 /**
@@ -2274,7 +2278,10 @@ chartProto.dataSetParamValue = function(dataSetBind, name, value, convert)
  */
 chartProto.dataSetParamValuesFirst = function(paramValues, increment, convert)
 {
-	return this.dataSetParamValues(0, paramValues, increment, convert);
+	if(arguments.length == 0)
+		return this.dataSetParamValues(0);
+	else
+		this.dataSetParamValues(0, paramValues, increment, convert);
 };
 
 /**
@@ -6328,9 +6335,12 @@ CF.arrayContentEquals = function(a, b)
 	return true;
 };
 
-CF.toJsonString = function(obj)
+CF.toJsonString = function(obj, pretty)
 {
-	return JSON.stringify(obj);
+	if(pretty == null)
+		return JSON.stringify(obj);
+	else
+		return JSON.stringify(obj, null, 2);
 };
 
 CF.isJsonString = function(str)
@@ -7956,7 +7966,23 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 	
 	var re = value;
 	
-	if(CF.isArray(value))
+	if(CF.DataSetParamType.OBJECT == dataSetParam.type)
+	{
+		if(CF.isString(value))
+		{
+			if(value == "")
+				re = null;
+			else
+			{
+				//如果失败则撤销转换，交由后台处理
+				//这里不使用JSON.parse()函数，以允许单引号等非标准格式
+				re = chartFactory.evalSilently(value, value);
+			}
+		}
+		else
+			re = value;
+	}
+	else if(CF.isArray(value))
 	{
 		re = [];
 		
