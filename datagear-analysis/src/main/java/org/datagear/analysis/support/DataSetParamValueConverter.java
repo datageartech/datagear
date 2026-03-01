@@ -118,6 +118,15 @@ public class DataSetParamValueConverter extends DataValueConverter
 	}
 
 	@Override
+	public Object convert(Object value, String type) throws DataValueConvertionException
+	{
+		if (DataType.OBJECT.equals(type))
+			return convertToObjectType(value);
+		else
+			return super.convert(value, type);
+	}
+
+	@Override
 	protected Object convertValue(Object value, String type) throws DataValueConvertionException
 	{
 		if (DataType.STRING.equals(type))
@@ -130,5 +139,32 @@ public class DataSetParamValueConverter extends DataValueConverter
 			return convertToBoolean(value, DataType.BOOLEAN);
 		else
 			return convertExt(value, type);
+	}
+
+	/**
+	 * 转换为{@linkplain DataType#OBJECT}类型的对象。
+	 * <p>
+	 * 对于{@code value}参数，此方法仅允许{@code null}、{@linkplain String}、{@linkplain Map}、{@linkplain List}、数组
+	 * </p>
+	 * 
+	 * @param value
+	 * @return
+	 * @throws DataValueConvertionException
+	 */
+	protected Object convertToObjectType(Object value) throws DataValueConvertionException
+	{
+		Object re = value;
+
+		if (value instanceof String)
+			re = convertJsonToObj((String) value, DataType.OBJECT);
+
+		if (re == null)
+			return re;
+
+		// 必须限定类型，避免与允许的String类型逻辑冲突
+		if ((re instanceof Map<?, ?>) || (re instanceof List<?>) || (re instanceof Object[]))
+			return re;
+
+		return convertExt(value, DataType.OBJECT);
 	}
 }

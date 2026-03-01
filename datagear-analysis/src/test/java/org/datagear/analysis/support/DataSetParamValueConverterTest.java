@@ -23,7 +23,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetField;
@@ -53,6 +56,8 @@ public class DataSetParamValueConverterTest
 		params.add(new DataSetParam("size", DataSetParam.DataType.INTEGER, true));
 		params.add(new DataSetParam("enable", DataSetParam.DataType.BOOLEAN, true));
 		params.add(new DataSetParam("price", DataSetParam.DataType.NUMBER, true));
+		params.add(new DataSetParam("order", DataSetParam.DataType.OBJECT, false));
+		params.add(new DataSetParam("orders", DataSetParam.DataType.OBJECT, false));
 
 		CsvValueDataSet dataSet = new CsvValueDataSet("test", "test", fields, "name \n aaa");
 		dataSet.setParams(params);
@@ -85,6 +90,7 @@ public class DataSetParamValueConverterTest
 			query.setParamValue("price", "6.3");
 			query.setParamValue("other0", 5);
 			query.setParamValue("other1", "false");
+			query.setParamValue("other2", Collections.singletonMap("value", "aaa"));
 
 			DataSetQuery actual = converter.convert(query, dataSet, true);
 
@@ -94,6 +100,7 @@ public class DataSetParamValueConverterTest
 			assertEquals(true, ((Double) actual.getParamValue("price")).doubleValue() > 6.2);
 			assertEquals(5, ((Integer) actual.getParamValue("other0")).intValue());
 			assertEquals("false", actual.getParamValue("other1"));
+			assertEquals("aaa", ((Map<?, ?>) actual.getParamValue("other2")).get("value"));
 		}
 
 		{
@@ -168,6 +175,88 @@ public class DataSetParamValueConverterTest
 			assertEquals(2, actualOther1.length);
 			assertEquals(false, actualOther1[0]);
 			assertEquals(false, actualOther1[1]);
+		}
+	}
+
+	@Test
+	public void convertTest_DataSetQuery_DataSet_object()
+	{
+		DataSetParamValueConverter converter = new DataSetParamValueConverter();
+
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("order", null);
+			query.setParamValue("orders", null);
+
+			DataSetQuery actual = converter.convert(query, dataSet, true);
+
+			assertNull(actual.getParamValue("order"));
+			assertNull(actual.getParamValue("orders"));
+		}
+
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("order", "");
+			query.setParamValue("orders", "");
+
+			DataSetQuery actual = converter.convert(query, dataSet, true);
+
+			assertNull(actual.getParamValue("order"));
+			assertNull(actual.getParamValue("orders"));
+		}
+
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("order", "{name: \"aaa\", value: 3}");
+			query.setParamValue("orders", "['a', 'b', { name: \"c\" }]");
+
+			DataSetQuery actual = converter.convert(query, dataSet, true);
+
+			{
+				Map<?, ?> value = (Map<?, ?>) actual.getParamValue("order");
+				assertEquals("aaa", value.get("name"));
+				assertEquals(3, value.get("value"));
+			}
+			{
+				List<?> value = (List<?>) actual.getParamValue("orders");
+				assertEquals("a", value.get(0));
+				assertEquals("b", value.get(1));
+
+				Map<?, ?> v2 = (Map<?, ?>) value.get(2);
+				assertEquals("c", v2.get("name"));
+			}
+		}
+
+		{
+			DataSetQuery query = new DataSetQuery();
+
+			Map<String, Object> pv1 = new HashMap<>();
+			pv1.put("name", "aaa");
+			pv1.put("value", 3);
+
+			List<Object> pv2 = new ArrayList<>();
+			pv2.add("a");
+			pv2.add("b");
+			pv2.add(Collections.singletonMap("name", "c"));
+
+			query.setParamValue("order", pv1);
+			query.setParamValue("orders", pv2);
+
+			DataSetQuery actual = converter.convert(query, dataSet, true);
+
+			{
+				Map<?, ?> value = (Map<?, ?>) actual.getParamValue("order");
+				assertEquals("aaa", value.get("name"));
+				assertEquals(3, value.get("value"));
+			}
+			{
+				List<?> value = (List<?>) actual.getParamValue("orders");
+				assertEquals("a", value.get(0));
+				assertEquals("b", value.get(1));
+
+				Map<?, ?> v2 = (Map<?, ?>) value.get(2);
+				assertEquals("c", v2.get("name"));
+			}
 		}
 	}
 }

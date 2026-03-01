@@ -737,4 +737,43 @@ public class StringUtilTest
 					actual);
 		}
 	}
+
+	@Test
+	public void truncateTest()
+	{
+		{
+			String s = null;
+			assertEquals(null, StringUtil.truncate(s, 100, null));
+		}
+
+		{
+			String s = "a";
+			assertEquals("", StringUtil.truncate(s, 0, null));
+		}
+
+		{
+			String s = "abcdef";
+			assertEquals("abc", StringUtil.truncate(s, 3, null));
+		}
+
+		{
+			String s = "abcdef";
+			assertEquals("abc", StringUtil.truncate(s, 3, ""));
+		}
+
+		{
+			String s = "abcdef";
+			assertEquals("abc...", StringUtil.truncate(s, 3, "..."));
+		}
+
+		{
+			Object o = new Integer(3);
+			assertEquals(o, StringUtil.truncate(o, 3, "..."));
+		}
+
+		{
+			Object o = "abcdef";
+			assertEquals("abc...", StringUtil.truncate(o, 3, "..."));
+		}
+	}
 }

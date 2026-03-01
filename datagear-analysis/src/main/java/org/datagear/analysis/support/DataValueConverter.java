@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.datagear.analysis.NameTypeAware;
 import org.datagear.analysis.NameTypeInputAware;
+import org.datagear.util.StringUtil;
 
 /**
  * 数据值转换器。
@@ -139,7 +140,7 @@ public abstract class DataValueConverter
 	protected Object convertArray(Object[] values, String type) throws DataValueConvertionException
 	{
 		if (values == null)
-			throw new IllegalArgumentException("[values] must not be null");
+			return null;
 
 		Object[] target = new Object[values.length];
 
@@ -154,7 +155,7 @@ public abstract class DataValueConverter
 	protected Object convertCollection(Collection<?> values, String type) throws DataValueConvertionException
 	{
 		if (values == null)
-			throw new IllegalArgumentException("[values] must not be null");
+			return null;
 
 		List<Object> target = new ArrayList<>(values.size());
 
@@ -232,7 +233,9 @@ public abstract class DataValueConverter
 		if (value == null)
 			return null;
 
-		if (value <= Integer.MAX_VALUE && value >= Integer.MIN_VALUE)
+		long lv = value.longValue();
+
+		if (lv <= Integer.MAX_VALUE && lv >= Integer.MIN_VALUE)
 			return value.intValue();
 		else
 			return value;
@@ -270,10 +273,33 @@ public abstract class DataValueConverter
 		return (Boolean) convertExt(value, booleanType);
 	}
 
+	/**
+	 * 将符合JSON规范的字符串转换为对象。
+	 * 
+	 * @param value
+	 * @param objectType
+	 * @return
+	 */
+	protected Object convertJsonToObj(String value, String objectType)
+	{
+		if (StringUtil.isEmpty(value))
+			return null;
+		
+		try
+		{
+			Object re = JsonSupport.parseNonStardand(value, Object.class);
+			return re;
+		}
+		catch(Exception e)
+		{
+			return convertExt(value, objectType);
+		}
+	}
+
 	protected Object convertExt(Object value, String type) throws DataValueConvertionException
 	{
 		throw new DataValueConvertionException(value, type,
-				"Convert [" + value + "] to type [" + type + "] is not supported");
+				"Convert [" + StringUtil.truncate(value, 20, "...") + "] to type [" + type + "] is not supported");
 	}
 
 	/**

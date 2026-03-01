@@ -52,6 +52,7 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 
 	public DataSetParam(String name, String type, boolean required)
 	{
+		// 这里需要规范类型，以兼容5.5.0版遗留type枚举定义数据
 		super(name, DataType.normalize(type));
 		this.required = required;
 	}
@@ -59,6 +60,7 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 	@Override
 	public void setType(String type)
 	{
+		// 这里需要规范类型，以兼容5.5.0版遗留type枚举定义数据
 		super.setType(DataType.normalize(type));
 	}
 
@@ -147,6 +149,9 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 		/** 数值 */
 		public static final String NUMBER = "number";
 
+		/** 对象 */
+		public static final String OBJECT = "object";
+
 		/**
 		 * 规范类型。
 		 * 
@@ -181,6 +186,9 @@ public class DataSetParam extends AbstractNameTypeAware implements NameTypeInput
 
 			if (NUMBER.equalsIgnoreCase(type))
 				return NUMBER;
+
+			if (OBJECT.equalsIgnoreCase(type))
+				return OBJECT;
 
 			return dftType;
 		}

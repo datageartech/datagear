@@ -886,4 +886,44 @@ public class StringUtil
 			return o.toString();
 		}
 	}
+
+	/**
+	 * 截断字符串。
+	 * 
+	 * @param o
+	 * @param len
+	 * @param ellipsis
+	 * @return
+	 */
+	public static Object truncate(Object o, int len, String ellipsis)
+	{
+		if (o == null)
+			return o;
+
+		if (o instanceof String)
+			o = truncate((String) o, len, ellipsis);
+
+		return o;
+	}
+
+	/**
+	 * 截断字符串。
+	 * 
+	 * @param s
+	 * @param len
+	 * @param ellipsis
+	 * @return
+	 */
+	public static String truncate(String s, int len, String ellipsis)
+	{
+		if (s == null || s.length() <= len)
+			return s;
+
+		s = s.substring(0, len);
+
+		if (ellipsis != null)
+			s += ellipsis;
+
+		return s;
+	}
 }
