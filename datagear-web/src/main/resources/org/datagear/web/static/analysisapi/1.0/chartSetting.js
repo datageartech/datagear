@@ -1398,6 +1398,11 @@
 		return typeof(str) == "string";
 	};
 	
+	chartSetting.NUMBER_REGEX = /^-?\d+\.?\d*$/;
+	chartSetting.INTEGER_REGEX = /^-?\d+$/;
+	chartSetting.JSON_OBJECT_REGEX = /^\s*\{[\s\S]*\}\s*$/;
+	chartSetting.JSON_ARRAY_REGEX = /^\s*\[[\s\S]*\]\s*$/;
+	
 	/**
 	 * 校验数据集参数值表单的必填项、数值项。
 	 * 
@@ -1444,9 +1449,6 @@
 			}
 		});
 		
-		var regexNumber = /^-?\d+\.?\d*$/;
-		var regexInteger = /^-?\d+$/;
-		
 		$itemValue.each(function()
 		{
 			var $number = $("[dg-validation-number]", this);
@@ -1456,7 +1458,7 @@
 			
 			var type = $number.attr("type");
 			var mustInteger = ($number.attr("dg-validation-integer") != null);
-			var myRegex = (mustInteger ? regexInteger : regexNumber);
+			var myRegex = (mustInteger ? chartSetting.INTEGER_REGEX : chartSetting.NUMBER_REGEX);
 			
 			if(type == "checkbox" || type == "radio")
 			{
@@ -1502,6 +1504,25 @@
 				else
 					$number.removeClass("dg-validation-number");
 			}
+		});
+		
+		$itemValue.each(function()
+		{
+			var $required = $("[dg-validation-object]", this);
+			
+			if($required.length == 0)
+				return;
+			
+			var val = $required.val();
+			
+			if(!chartFactory.isNullOrEmpty(val) && !chartSetting.JSON_OBJECT_REGEX.test(val)
+				&& !chartSetting.JSON_ARRAY_REGEX.test(val))
+			{
+				$required.addClass("dg-validation-object");
+				validationOk = false;
+			}
+			else
+				$required.removeClass("dg-validation-object");
 		});
 		
 		return validationOk;

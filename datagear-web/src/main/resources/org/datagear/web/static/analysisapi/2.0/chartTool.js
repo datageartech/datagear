@@ -1253,6 +1253,8 @@ TOOL.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
 
 TOOL.NUMBER_REGEX = /^-?\d+\.?\d*$/;
 TOOL.INTEGER_REGEX = /^-?\d+$/;
+TOOL.JSON_OBJECT_REGEX = /^\s*\{[\s\S]*\}\s*$/;
+TOOL.JSON_ARRAY_REGEX = /^\s*\[[\s\S]*\]\s*$/;
 
 /**
  * 校验数据集参数值表单的必填项、数值项。
@@ -1362,6 +1364,27 @@ TOOL.validateDspForm = function(form)
 			else
 				CF.eleRemoveClass(inputsWrapper, "dg-validation-number");
 		}
+	});
+	
+	valueWrappers.forEach((valueWrapper) =>
+	{
+		let inputs = CF.elesOfSelector("[dg-validation-check-object]", valueWrapper);
+		
+		if(CF.isEmpty(inputs))
+			return;
+		
+		inputs.forEach((input) =>
+		{
+			let val = TOOL.eleInputActualValue(input);
+			
+			if(!CF.isEmpty(val) && !TOOL.JSON_OBJECT_REGEX.test(val) && !TOOL.JSON_ARRAY_REGEX.test(val))
+			{
+				CF.eleAddClass(input, "dg-validation-object");
+				validationOk = false;
+			}
+			else
+				CF.eleRemoveClass(input, "dg-validation-object");
+		});
 	});
 	
 	return validationOk;

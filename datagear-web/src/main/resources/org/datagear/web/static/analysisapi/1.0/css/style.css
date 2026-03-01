@@ -431,7 +431,8 @@
 	border: 1px solid transparent;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-validation-required,
-.dg-dspv-form .dg-dspv-form-content .dg-validation-number{
+.dg-dspv-form .dg-dspv-form-content .dg-validation-number,
+.dg-dspv-form .dg-dspv-form-content .dg-validation-object{
 	border-color: red !important;
 }
 .dg-dspv-form .dg-dspv-form-foot{

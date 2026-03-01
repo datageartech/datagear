@@ -400,7 +400,8 @@
 	border-style: solid;
 }
 .dg-dspform .dg-validation-required,
-.dg-dspform .dg-validation-number{
+.dg-dspform .dg-validation-number,
+.dg-dspform .dg-validation-object{
 	border-color: red !important;
 }
 .dg-dspform .dg-dspform-foot{
