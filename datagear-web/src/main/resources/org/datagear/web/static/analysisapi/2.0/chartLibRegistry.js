@@ -38,6 +38,7 @@ CF.registerGlobalLib(
 		version: "5.6.0",
 		source: "/static/analysislib/echarts-5.6.0/echarts.min.js"
 	},
+	//新发布的jQuery-4.0.0并未明确其支持的浏览器最低版本，所以暂不引入
 	{
 		name: "jQuery",
 		version: "3.7.1",
