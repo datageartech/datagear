@@ -557,20 +557,15 @@ chartProto._initUpdater = function()
  *   //默认值参考DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE说明
  *   trigger: ...、[ ... ],
  *   
- *   //可选，联动目标图表元素ID、ID数组
- *   target: "..."、["...", ...],
+ *   //同dashboard._batchSetDataSetParamValues()函数的batchSet参数的target属性
+ *   target: ...,
  * 	 
- * 	 //可选，原始联动源数据（由图表渲染器的DF.RENDERER_ADDITION_LINK_DATA_HANDER所决定）的属性路径，作为下述【数据属性名】的统一根属性名
- * 	 root: "..."、[ "...", ... ],
+ * 	 //同dashboard._batchSetDataSetParamValues()函数的batchSet参数的root属性
+ * 	 root: ...,
  *   
- *   //可选，联动数据参数映射表
- *   data:
- *   {
- *     //数据属性名：图表渲染器的DF.RENDERER_ADDITION_LINK_DATA_HANDER所决定的联动源数据（受root配置影响）的属性路径（比如："name"、"data.value"、"[0].name"），其值将作为目标图表数据集参数值
- *     //图表数据集参数索引对象：格式同dashboard._batchSetDataSetParamValues()函数的图表数据集参数索引对象
- *     "数据属性名" : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
- *     ...
- *   }
+ *   //同dashboard._batchSetDataSetParamValues()函数的batchSet参数的data属性
+ *   //其中的sourceData参考dashboard.bindLinkEventHanders()函数
+ *   data: ...
  * }
  * 
  * 图表初始化时会使用图表元素的"dg-chart-link"属性值执行设置操作。
@@ -725,7 +720,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 {
 	this._assertActive();
 	
-	if(!links)
+	if(links == null)
 		return false;
 	
 	if(!CF.isArray(links))
@@ -1463,12 +1458,15 @@ dashboardProto._assertActive = function()
  * {
  *   //必选，表单输入项对象、数组
  *   items: 表单输输入项对象 或者 [ 表单输输入项对象, ... ],
- *   //可选，表单提交操作时执行的联动图表设置
+ *   //可选，表单提交操作时执行的联动图表设置，格式同dashboard._batchSetDataSetParamValues()函数的batchSet参数，
+ *   //其中：name即是表单输入项名称；value函数的sourceValueContext参数为：[ 表单数据对象、表单HTML元素 ]
  *   link: 图表联动配置对象,
  *   //可选，表单提交按钮文本
  *   submitText: "...",
- *   //表单渲染完成回调函数
- *   render: function(form){ ... }
+ *   //可选，表单渲染完成回调函数
+ *   rendered: function(form){ ... },
+ *   //可选，表单提交完成回调函数，返回false将阻止图表联动
+ *   submit: function(formData){ ... }
  * }
  * 
  * 表单输输入项对象格式为：
@@ -1487,24 +1485,10 @@ dashboardProto._assertActive = function()
  *   inputType: "...",
  *   //可选，输入框配置，参考chartTool.renderDataSetParamForm函数说明
  *   inputPayload: ...,
- *   //可选，输入项的联动数据映射设置
+ *   //可选，输入项的联动设置，【图表数据集参数索引对象】同dashboard._batchSetDataSetParamValues()函数中的格式
  *   link: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ]
  * }
  * 或者，简写为其name属性值。
- * 
- * 图表联动配置对象格式为：
- * {
- *   //必选，联动目标图表元素ID、ID数组
- *   target: "..."、["...", ...],
- *   //可选，联动数据参数映射表
- *   data:
- *   {
- *     表单输入项名称 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
- *     ...
- * }
- * 或者，简写为图表联动配置对象的target属性值。
- * 
- * 图表数据集参数索引对象格式参考dashboard._batchSetDataSetParamValues()函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单HTML元素。
  * 
  * @param form 要渲染的<form>表单HTML元素、HTML元素ID，表单结构允许灵活自定义，具体参考chartTool.renderDataSetParamForm
  * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
@@ -1520,16 +1504,27 @@ dashboardProto.renderForm = function(form, config)
 	if(config == null)
 		config = CF.evalSilently(CF.eleAttr(form, elementAttrConst.DASHBOARD_FORM), {});
 	
+	//必须深度复制，因为元素上设置的可能是变量
+	config = CF.extend(true, {}, config);
+	
 	var dashboard = this;
 	var globalTheme = CF.renderContextChartTheme(this.renderContext());
-	//构建用于批量设置数据集参数值的对象
-	var batchSet = { target: [], data: {} };
+	var batchSet = (config.link || {});
 	
-	config = CF.extend(
+	if(batchSet.data == null)
+		batchSet.data = [];
+	
+	config._originalSubmit = config.submit;
+	config.submit = function(formData)
 	{
-		submit: function(formData)
+		let thisForm = this;
+		let doLink = true;
+		
+		if(config._originalSubmit != null)
+			doLink = config._originalSubmit.call(thisForm, formData);
+		
+		if(doLink !== false)
 		{
-			let thisForm = this;
 			let charts = dashboard._batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
 			
 			for(let i=0; i<charts.length; i++)
@@ -1540,50 +1535,36 @@ dashboardProto.renderForm = function(form, config)
 				});
 			}
 		}
-	},
-	config);
+	};
 	
-	if(config.link)
-	{
-		let link = config.link;
-		
-		//转换简写格式
-		if(CF.isString(link) || CF.isArray(link))
-			link = { target: link };
-		
-		batchSet.target = link.target;
-		//新构建data对象，因为可能会在下面被修改
-		batchSet.data = (link.data ? CF.extend({}, link.data) : {});
-	}
-	
-	var items = [];
+	var items = (config.items == null ? [] : (CF.isArray(config.items) ? config.items : [ config.items ]));
 	var defaultValues = {};
+	var batchSetData = batchSet.data;
+	var batchSetDataArray = CF.isArray(batchSetData);
 	
-	var sourceItems = (config.items || []);
-	if(!CF.isArray(sourceItems))
-		sourceItems = [ sourceItems ];
-	
-	for(let i=0; i<sourceItems.length; i++)
+	for(let i=0; i<items.length; i++)
 	{
-		let item = sourceItems[i];
+		let item = items[i];
 		
 		if(CF.isString(item))
+		{
 			item = { name: item };
-		else
-			//确保不影响初始对象
-			item = CF.extend({}, item);
+			items[i] = item;
+		}
 		
 		if(!item.type)
 			item.type = CF.DataSetParamType.STRING;
 		
-		items.push(item);
-		
 		if(item.value != null)
 			defaultValues[item.name] = item.value;
 		
-		//合并输入项的link设置
 		if(item.link != null)
-			batchSet.data[item.name] = item.link;
+		{
+			if(batchSetDataArray)
+				batchSetData.push({ name: item.name, index: item.link });
+			else
+				batchSetData[item.name] = item.link;
+		}
 	}
 	
 	config.paramValues = defaultValues;
@@ -2920,9 +2901,24 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
  * 					  {
  * 					    源数据属性名: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
  * 					    ...
- * 					  }
+ * 					  }、
+ * 					  [
+ * 					    {
+ * 					      //源数据属性名
+ * 					      name: "...",
+ * 					      
+ * 					      index: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
+ * 					      
+ * 					      //可选，自定义源参数值处理函数，返回要设置的目标参数值
+ * 					      //sourceValue 源参数值
+ * 					      //sourceValueContext 源参数值上下文对象
+ * 					      value: function(sourceValue, sourceValueContext){ return ...; }
+ * 					    },
+ * 					    ...
+ * 					  ]
  * 					}
- * 					上述【源数据属性名】可以是源数据中的简单属性名（比如："name"、"value"），也可以是属性路径（比如："order.name"、"[0].name"、"['order'].product.name"）。
+ * 					上述【源数据属性名】可以是源数据中的简单属性名（比如："name"、"value"），
+ * 					也可以是属性路径（比如："order.name"、"[0].name"、"['order'].product.name"）。
  * 					【图表数据集参数索引对象】用于确定【源数据属性名】对应值要设置到的目标图表数据集参数，格式为：
  * 					{
  *                    //可选，可以是上述批量设置对象的target数组中的索引，也可以是图表元素ID、图表ID、看板图表数组索引，默认值为：0
@@ -2932,12 +2928,7 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
  * 					  dataSet: ...,
  * 					  
  * 					  //可选，目标图表数据集的参数数组索引/参数名，默认为：0
- * 					  param: ...,
- * 					  
- * 					  //可选，自定义源参数值处理函数，返回要设置的目标参数值
- * 					  //sourceValue 源参数值
- * 					  //sourceValueContext 源参数值上下文对象
- * 					  value: function(sourceValue, sourceValueContext){ return ...; }
+ * 					  param: ...
  * 					}
  * 					或者，可简写为上述图表数据集参数索引对象的"param"属性值
  * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
@@ -2958,20 +2949,38 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 			throw new Error("no chart found for : " + targets[i]);
 	}
 	
-	var dataMap = (batchSet.data || {});
+	var dataMaps = (batchSet.data || []);
+	//{ "...": ..., ... } 转换为 [ {}, ... ]
+	if(!CF.isArray(dataMaps))
+	{
+		let dataMapArray = [];
+		
+		for(let name in dataMaps)
+			dataMapArray.push({ name: name, index: dataMaps[name] });
+		
+		dataMaps = dataMapArray;
+	}
+	
 	var hasGetValueFunc = CF.isFunction(sourceData.getValue);
 	var propPathRoots = (CF.isEmpty(batchSet.root) ? [""] : (CF.isArray(batchSet.root) ? batchSet.root : [ batchSet.root ]));
 	
 	var sourceValueContextArgs = [ "place-holder-for-source-value" ];
 	sourceValueContextArgs = sourceValueContextArgs.concat(CF.isArray(sourceValueContext) ? sourceValueContext : [ sourceValueContext ]);
 	
-	for(let name in dataMap)
+	for(let i=0; i<dataMaps.length; i++)
 	{
+		let dataMap = dataMaps[i];
+		let name = dataMap.name;
+		let index = (dataMap.index == null ? null : (CF.isArray(dataMap.index) ? dataMap.index : [ dataMap.index ]));
+		let dataValueHandler = dataMap.value;
 		let dataValue = null;
 		
-		for(let i=0; i<propPathRoots.length; i++)
+		if(CF.isEmpty(index))
+			continue;
+		
+		for(let j=0; j<propPathRoots.length; j++)
 		{
-			let propPath = CF.concatPropertyPath(propPathRoots[i], name);
+			let propPath = CF.concatPropertyPath(propPathRoots[j], name);
 			
 			if(hasGetValueFunc)
 			{
@@ -2990,39 +2999,29 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 				break;
 		}
 		
-		let indexes = dataMap[name];
-		
-		if(!CF.isArray(indexes))
-			indexes = [ indexes ];
-		
-		for(let i=0; i<indexes.length; i++)
+		if(dataValueHandler != null)
 		{
-			let indexObj = indexes[i];
-			
+			sourceValueContextArgs[0] = dataValue;
+			dataValue = dataValueHandler.apply(dataMap, sourceValueContextArgs);
+		}
+		
+		for(let j=0; j<index.length; j++)
+		{
+			let indexEle = index[j];
 			let chartIdx = 0;
 			let dataSetIdx = 0;
 			let param = 0;
-			let paramValue = null;
 			
 			//参数名/索引号
-			if(CF.isStringOrNumber(indexObj))
+			if(CF.isStringOrNumber(indexEle))
 			{
-				param = indexObj;
-				paramValue = dataValue;
+				param = indexEle;
 			}
 			else
 			{
-				chartIdx = (indexObj.chart != null ? indexObj.chart : chartIdx);
-				dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : dataSetIdx);
-				param = (indexObj.param != null ? indexObj.param : param);
-				
-				if(indexObj.value != null)
-				{
-					sourceValueContextArgs[0] = dataValue;
-					paramValue = indexObj.value.apply(indexObj, sourceValueContextArgs);
-				}
-				else
-					paramValue = dataValue;
+				chartIdx = (indexEle.chart != null ? indexEle.chart : chartIdx);
+				dataSetIdx = (indexEle.dataSet != null ? indexEle.dataSet : dataSetIdx);
+				param = (indexEle.param != null ? indexEle.param : param);
 			}
 			
 			let targetChart = null;
@@ -3041,7 +3040,7 @@ dashboardProto._batchSetDataSetParamValues = function(sourceData, batchSet, sour
 					targetCharts.push(targetChart);
 			}
 			
-			targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
+			targetChart.dataSetParamValue(dataSetIdx, param, dataValue);
 		}
 	}
 	
