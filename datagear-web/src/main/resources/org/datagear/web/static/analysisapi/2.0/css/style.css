@@ -564,6 +564,9 @@
 	margin: 0.5rem 0;
 	border-radius: 3px;
 }
+.dg-chart-tool-panel .dg-datasetbind-section.dg-datasetbind-ignored{
+	opacity: 0.5;
+}
 .dg-chart-tool-panel .dg-datasetbind-section-head{
 	overflow: hidden;
 	white-space: nowrap;

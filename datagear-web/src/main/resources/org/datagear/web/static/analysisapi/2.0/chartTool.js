@@ -68,16 +68,17 @@ TOOL.labels = (TOOL.labels ||
  * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam，也可附加"label"属性，用于定义输入项标签
  * @param options 渲染配置项，格式为：
  * 			{
- *              chartTheme: {...}              //可选，用于支持渲染表单样式的图表主题
- *              inChartElement: false,          //可选，要渲染的表单是否处于图表元素内	 
- * 				submit: function(formData){},  //可选，提交处理函数
- * 				paramValues: {...},     	   //可选，初始参数值
- * 				readonly: false,			   //可选，是否只读
- * 				submitText: "...",       	   //可选，提交按钮文本内容
- *              labelColon: "..."              //可选，标签冒号值
- * 				yesText: "...",       		   //可选，"是"选项文本内容
- * 				noText: "...",       		   //可选，"否"选项文本内容
- * 				rendered: function(form){}	   //可选，渲染后回调函数
+ *              chartTheme: {...}                   //可选，用于支持渲染表单样式的图表主题
+ *              inChartElement: false,              //可选，要渲染的表单是否处于图表元素内
+ *              validated: function(ok){},          //可选，校验结果回调函数
+ * 				submit: function(formData){},       //可选，提交处理函数
+ * 				paramValues: {...},     	        //可选，初始参数值
+ * 				readonly: false,			        //可选，是否只读
+ * 				submitText: "...",       	        //可选，提交按钮文本内容
+ *              labelColon: "..."                   //可选，标签冒号值
+ * 				yesText: "...",       		        //可选，"是"选项文本内容
+ * 				noText: "...",       		        //可选，"否"选项文本内容
+ * 				rendered: function(form){}	        //可选，渲染后回调函数
  * 			}
  * @return 表单HTML元素
  */
@@ -250,9 +251,18 @@ TOOL.renderDataSetParamForm = function(parent, dataSetParams, options)
 		let submitBtn = CF.eleOfSelector("[type='submit']", foot);
 		
 		if(validationOk)
+		{
+			CF.eleRemoveClass(this, "dg-form-invalid");
 			CF.eleRemoveClass(submitBtn, "dg-form-invalid");
+		}
 		else
+		{
+			CF.eleAddClass(this, "dg-form-invalid");
 			CF.eleAddClass(submitBtn, "dg-form-invalid");
+		}
+		
+		if(options.validated)
+			options.validated.call(this, validationOk);
 		
 		if(!validationOk)
 			return false;
@@ -879,7 +889,6 @@ TOOL.renderDspFormInputTextarea = function(form, formOptions, parent, dataSetPar
 	CF.eleAttr(input, "type", "text");
 	CF.eleAttr(input, "id", CF.uid());
 	CF.eleAttr(input, "name", dataSetParam.name);
-	CF.eleAttr(input, "value", (value == null ? "" : value));
 	
 	TOOL.addDspFormInputValidation(dataSetParam, input);
 	CF.eleAppend(parent, input);
@@ -2163,6 +2172,11 @@ TOOL.openChartToolParamPanel = function(boxEle, chart)
 			{
 				chartTheme: chart.theme(),
 				inChartElement: true,
+				validated: function(ok)
+				{
+					if(!ok)
+						CF.eleAddClass(confirmBtn, "dg-param-value-form-invalid");
+				},
 				submit: function()
 				{
 					confirmBtn.click();
@@ -2292,9 +2306,15 @@ TOOL.toggleParamFormContentByIgnoreFetch = function(panel, section, chart, dataS
 	var content = CF.eleOfSelector(".dg-datasetbind-section-content", section);
 	
 	if(ignoreFetch)
+	{
+		CF.eleAddClass(section, "dg-datasetbind-ignored");
 		TOOL.eleHide(content);
+	}
 	else
+	{
+		CF.eleRemoveClass(section, "dg-datasetbind-ignored");
 		TOOL.eleShow(content);
+	}
 };
 
 /**
