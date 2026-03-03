@@ -5441,9 +5441,7 @@ SPT.tableRenderer = function(plugin, config)
 				else
 				{
 					serverSidePaging.param(data, chart);
-					
-					if(chart.isActive())
-						chart.refresh();
+					chart.refresh();
 				}
 			};
 			

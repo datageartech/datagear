@@ -784,9 +784,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 		
 		CF.executeSilently(function()
 		{
-			//处于活跃状态则执行刷新，否则，只设置了参数即可
-			if(chart.isActive())
-				chart.refresh();
+			chart.refresh();
 		});
 	}
 };
@@ -798,11 +796,13 @@ chartProto._isLinkByEventType = function(link, type)
 };
 
 /**
- * 请求从服务端获取并更新图表数据。
+ * 请求获取数据并更新图表。
+ * 此函数可以在图表处于任何状态时调用，等到图表处于活跃状态时，会真正发送请求获取数据后更新图表。
  */
 chartProto.refresh = function()
 {
-	this._assertActive();
+	//不限制必须处于激活状态，以支持更多场景
+	//this._assertActive();
 	
 	var unreadys = this.unreadyDataSetParams(true);
 	if(unreadys.length > 0)
@@ -1538,9 +1538,7 @@ dashboardProto.renderForm = function(form, config)
 				
 				CF.executeSilently(function()
 				{
-					//处于活跃状态则执行刷新，否则，只设置了参数即可
-					if(chart.isActive())
-						chart.refresh();
+					chart.refresh();
 				});
 			}
 		}
@@ -1716,6 +1714,17 @@ dashboardProto._doHandleCharts = function()
 	{
 		let chart = charts[i];
 		let wait = this._isWaitForUpdate(chart, time);
+		let chartQuery = null;
+		
+		//由chart.refresh()函数触发
+		if(wait == 2)
+		{
+			let rrds = chart.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
+			chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
+			
+			if(chartQuery == null)
+				wait = 0;
+		}
 		
 		if(wait > 0)
 		{
@@ -1724,15 +1733,6 @@ dashboardProto._doHandleCharts = function()
 			
 			let chartUpdater = chart.updater();
 			chartUpdater = (CF.isEmpty(chartUpdater) ? DF.CHART_UPDATER_DEFAULT : chartUpdater);
-			
-			let chartQuery = null;
-			
-			//由chart.refresh()函数触发
-			if(wait == 2)
-			{
-				let rrds = chart.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
-				chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
-			}
 			
 			chartQuery = (chartQuery == null ? this._buildChartQuery(chart) : chartQuery);
 			
@@ -1884,12 +1884,7 @@ dashboardProto._isWaitForUpdate = function(chart, currentTime)
 		
 		if(wait == 1)
 		{
-			//应升级为优先级更高的刷新操作，且无需判断参数是否准备好
-			if(isRequestRefresh)
-			{
-				wait = 2;
-			}
-			else if(chart.unreadyDataSetParams(true).length > 0)
+			if(chart.unreadyDataSetParams(true).length > 0)
 			{
 				//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 				chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
