@@ -496,9 +496,6 @@ chartProto._postProcessRendered = function()
 {
 	this.bindLinkEventHanders(this.links());
 	this._postProcessRenderedSuper();
-	
-	var dashboard = this.dashboard();
-	dashboard._renderedForDoRenderChart(this);
 };
 
 /**
@@ -806,9 +803,10 @@ chartProto.refresh = function()
 	var unreadys = this.unreadyDataSetParams(true);
 	if(unreadys.length > 0)
 	{
+		let unready0 = unreadys[0];
 		throw new Error(
-			CF.chartLogInfo(this) + " dataSetBinds["+unreadys[0].dataSetBindIndex
-			+"] DataSetParam["+unreadys[0].paramIndex+"]('"+unreadys[0].param.name+"') value required");
+			CF.chartLogInfo(this) + " dataSetBinds["+unready0.dataSetBindIndex
+			+"] DataSetParam["+unready0.paramIndex+"]('"+unready0.param.name+"') value required");
 	}
 	
 	//这里不能使用this.statusPreUpdate(true)的方式实现
@@ -1400,14 +1398,11 @@ dashboardProto.doRender = function()
 	if(!this._statusRendering())
 		throw new Error("dashboard is illegal state for : doRender()");
 	
-	this._clearDoRenderChart();
-	
 	this._renderForms();
 	this._prepareDoRenderCharts();
 	this.startHandleCharts();
 	
-	//需要触发一次，以处理没有任何图表的场景
-	this._renderedForDoRenderChart(null);
+	this._statusRendered(true);
 };
 
 dashboardProto._prepareDoRenderCharts = function()
@@ -1424,83 +1419,7 @@ dashboardProto._prepareDoRenderCharts = function()
 		if(chart.statusInited() || chart.statusDestroyed())
 		{
 			chart.statusPreRender(true);
-			this._registerDoRenderChart(chart);
 		}
-	}
-};
-
-dashboardProto._doRenderChartInfo = function()
-{
-	if(this.__doRenderChartInfo == null)
-		this.__doRenderChartInfo = { executed: false, chartRendereds: {} };
-	
-	return this.__doRenderChartInfo;
-};
-
-dashboardProto._clearDoRenderChart = function()
-{
-	this.__doRenderChartInfo = { executed: false, chartRendereds: {} };
-};
-
-dashboardProto._registerDoRenderChart = function(chart)
-{
-	var info = this._doRenderChartInfo();
-	var chartId = chart.id();
-	info.chartRendereds[chartId] = { rendered: false };
-};
-
-dashboardProto._renderedForDoRenderChart = function(chart)
-{
-	var info = this._doRenderChartInfo();
-	
-	if(info.executed === true)
-		return;
-	
-	var doExecute = false;
-	var chartRendereds = info.chartRendereds;
-	
-	if(chart == null)
-	{
-		let count = 0;
-		
-		for(let id in chartRendereds)
-		{
-			count++;
-			break;
-		}
-		
-		doExecute = (count === 0);
-	}
-	else
-	{
-		let chartId = chart.id();
-		let chartRendered = chartRendereds[chartId];
-		
-		if(chartRendered == null)
-		{
-			doExecute = false;
-		}
-		else
-		{
-			chartRendered.rendered = true;
-			doExecute = true;
-			
-			for(let id in chartRendereds)
-			{
-				let myChartRendered = chartRendereds[id];
-				if(myChartRendered.rendered !== true)
-				{
-					doExecute = false;
-					break;
-				}
-			}
-		}
-	}
-	
-	if(doExecute)
-	{
-		info.executed = true;
-		this._statusRendered(true);
 	}
 };
 
