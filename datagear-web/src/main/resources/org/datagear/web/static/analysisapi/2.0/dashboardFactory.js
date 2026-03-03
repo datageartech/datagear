@@ -780,9 +780,13 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 	
 	for(let i=0; i<targetCharts.length; i++)
 	{
+		let chart = targetCharts[i];
+		
 		CF.executeSilently(function()
 		{
-			targetCharts[i].refresh();
+			//处于活跃状态则执行刷新，否则，只设置了参数即可
+			if(chart.isActive())
+				chart.refresh();
 		});
 	}
 };
@@ -1530,9 +1534,13 @@ dashboardProto.renderForm = function(form, config)
 			
 			for(let i=0; i<charts.length; i++)
 			{
+				let chart = charts[i];
+				
 				CF.executeSilently(function()
 				{
-					charts[i].refresh();
+					//处于活跃状态则执行刷新，否则，只设置了参数即可
+					if(chart.isActive())
+						chart.refresh();
 				});
 			}
 		}
