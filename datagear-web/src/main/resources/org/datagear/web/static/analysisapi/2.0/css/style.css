@@ -627,75 +627,91 @@
 .dg-dashboard-form.dg-dspform .dg-dspform-item-value .dg-dspform-inputs-wrapper{
     background: transparent !important;
 }
+.dg-dashboard-form.dg-dspform .dg-dspform-head{
+	display: none;
+}
 .dg-dashboard-form.dg-dspform .dg-dspform-content{
 	padding: 0 0;
 }
 /*单行表单：dg-inline*/
-.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-head,
+.dg-dashboard-form.dg-dspform.dg-inline{
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
 .dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-content,
 .dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-foot,
 .dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item{
-	display: inline;
+	display: inline-flex;
+	align-items: center;
+}
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-content{
+	gap: 1rem;
 }
 .dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item{
-	padding-right: 1rem;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-label{
+	padding-top: 0;
+	padding-bottom: 0;
 }
 .dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-foot{
-	padding-left: 0.5rem;
 	padding-top: 0;
+	padding-bottom: 0;
 }
-.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-label,
-.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-value{
-	display: inline-block;
+/*2、3、4、5列*/
+.dg-dashboard-form.dg-dspform.dg-col-2,
+.dg-dashboard-form.dg-dspform.dg-col-3,
+.dg-dashboard-form.dg-dspform.dg-col-4,
+.dg-dashboard-form.dg-dspform.dg-col-5{
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
 }
-.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-label,
-.dg-dashboard-form.dg-dspform.dg-inline .dg-dspform-item-value{
-	display: inline-block;
+.dg-dashboard-form.dg-dspform.dg-col-2 .dg-dspform-content,
+.dg-dashboard-form.dg-dspform.dg-col-3 .dg-dspform-content,
+.dg-dashboard-form.dg-dspform.dg-col-4 .dg-dspform-content,
+.dg-dashboard-form.dg-dspform.dg-col-5 .dg-dspform-content{
+	display: grid;
+	column-gap: 1rem;
+	row-gap: 0.5rem;
 }
-/*两列表单：dg-col-2*/
-.dg-dashboard-form.dg-dspform.dg-col-2 .dg-dspform-item{
-	display: inline-block;
-	width: 50%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
+.dg-dashboard-form.dg-dspform.dg-col-2 .dg-dspform-content{
+	grid-template-columns: 1fr 1fr;
 }
-/*三列表单：dg-col-3*/
-.dg-dashboard-form.dg-dspform.dg-col-3 .dg-dspform-item{
-	display: inline-block;
-	width: 33.3%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
+.dg-dashboard-form.dg-dspform.dg-col-3 .dg-dspform-content{
+	grid-template-columns: 1fr 1fr 1fr;
 }
-/*四列表单：dg-col-4*/
-.dg-dashboard-form.dg-dspform.dg-col-4 .dg-dspform-item{
-	display: inline-block;
-	width: 25%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
+.dg-dashboard-form.dg-dspform.dg-col-4 .dg-dspform-content{
+	grid-template-columns: 1fr 1fr 1fr 1fr;
 }
-/*五列表单：dg-col-5*/
+.dg-dashboard-form.dg-dspform.dg-col-5 .dg-dspform-content{
+	grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+.dg-dashboard-form.dg-dspform.dg-col-2 .dg-dspform-item,
+.dg-dashboard-form.dg-dspform.dg-col-3 .dg-dspform-item,
+.dg-dashboard-form.dg-dspform.dg-col-4 .dg-dspform-item,
 .dg-dashboard-form.dg-dspform.dg-col-5 .dg-dspform-item{
-	display: inline-block;
-	width: 20%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+.dg-dashboard-form.dg-dspform.dg-col-2 .dg-dspform-foot,
+.dg-dashboard-form.dg-dspform.dg-col-3 .dg-dspform-foot,
+.dg-dashboard-form.dg-dspform.dg-col-4 .dg-dspform-foot,
+.dg-dashboard-form.dg-dspform.dg-col-5 .dg-dspform-foot{
+	padding-top: 0;
+	padding-bottom: 0;
 }
 /*条目单行：dg-item-inline*/
-.dg-dashboard-form.dg-dspform.dg-item-inline .dg-dspform-item-label,
-.dg-dashboard-form.dg-dspform.dg-item-inline .dg-dspform-item-value{
-	display: inline-block;
+.dg-dashboard-form.dg-dspform.dg-item-inline .dg-dspform-item{
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+}
+.dg-dashboard-form.dg-dspform.dg-item-inline .dg-dspform-item-label{
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 /*响应式布局，断点尺寸参考自tailwindcss-v3，样式类名参考自bootstrap*/
