@@ -5656,10 +5656,6 @@ CF.executeSilently = function(func, exceptionHandler)
 	}
 };
 
-//属性路径函数缓存，元素结构：{ name: "", value: ... }
-CF.PROPERTY_PATH_FUNCTIONS = [];
-CF.PROPERTY_PATH_FUNCTIONS_SIZE = 100;
-
 /**
  * 获取对象指定属性路径的值。
  * 
@@ -5672,40 +5668,14 @@ CF.propertyPathValue = function(obj, propertyPath)
 	if(obj == null)
 		return undefined;
 	
+	var re = undefined;
+	
 	//构建eval表达式
 	propertyPath = CF.concatPropertyPath("obj", propertyPath);
 	
-	var func = null;
-	
-	for(let i=(CF.PROPERTY_PATH_FUNCTIONS.length-1); i>=0; i--)
-	{
-		let fo = CF.PROPERTY_PATH_FUNCTIONS[i];
-		if(fo && fo.name === propertyPath)
-		{
-			func = fo.value;
-			break;
-		}
-	}
-	
-	var re = undefined;
-	
 	try
 	{
-		if(func == null)
-		{
-			if(CF.PROPERTY_PATH_FUNCTIONS.length >= CF.PROPERTY_PATH_FUNCTIONS_SIZE)
-			{
-				let delCount = parseInt(CF.PROPERTY_PATH_FUNCTIONS_SIZE*2/10);
-				delCount = (delCount < 1 ? 1 : delCount);
-				
-				for(let i=0; i<delCount; i++)
-					CF.PROPERTY_PATH_FUNCTIONS.shift();
-			}
-			
-			func = new Function("obj", "return ("+propertyPath+");");
-			CF.PROPERTY_PATH_FUNCTIONS.push({ name: propertyPath, value: func });
-		}
-		
+		let func = new Function("obj", "return ("+propertyPath+");");
 		re = func(obj);
 	}
 	catch(e)
