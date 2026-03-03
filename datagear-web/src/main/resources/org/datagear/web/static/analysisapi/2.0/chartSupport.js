@@ -5093,10 +5093,11 @@ SPT.tableRenderer = function(plugin, config)
 		
 		on: function(chart, type, handler)
 		{
+			var thisRenderer = this;
 			var internal = chart.internal();
+			var actualType = SPT.actualEventTypeForData(type);
 			var delegate;
 			
-			var actualType = SPT.actualEventTypeForData(type);
 			if(this._isSupportEventTypeForData(actualType))
 			{
 				type = actualType;
@@ -5110,16 +5111,24 @@ SPT.tableRenderer = function(plugin, config)
 						return;
 					
 					var data = [];
+					var dtInit = dt.init();
 					
 					for(let i=0; i<indexes.length; i++)
 						data.push(dt.row(indexes[i]).data());
 					
+					//同时提供数组格式的数据，以支持根据列索引获取数据或联动图表
+					var columnData = thisRenderer._objDatasToColumnDatas(data, dtInit.columns);
+					
 					//单选应仅设置单行数据
-					var dtInit = dt.init();
 					if(dtInit.select === "single" || (dtInit.select && dtInit.select.style === "single"))
+					{
 						data = data[0];
+						columnData = columnData[0];
+					}
 					
 					SPT.eventData(e, data);
+					e[thisRenderer._eventColumnDataName] = columnData;
+					
 					return SPT.invokeEventHandler(chart, handler, arguments);
 				};
 			}
@@ -5154,6 +5163,32 @@ SPT.tableRenderer = function(plugin, config)
 		additions:
 		{
 			defaultLinkEventType: "select.data"
+		},
+		
+		_eventColumnDataName: "columnData",
+		
+		_objDatasToColumnDatas: function(objs, columns)
+		{
+			var re = [];
+			
+			if(objs != null)
+			{
+				for(let i=0; i<objs.length; i++)
+				{
+					let obj = objs[i];
+					let colData = [];
+					
+					for(let j=0; j<columns.length; j++)
+					{
+						let name = columns[j].data;
+						colData.push(CF.isEmpty(name) ? null : CF.propertyPathValue(obj, name));
+					}
+					
+					re.push(colData);
+				}
+			}
+			
+			return re;
 		},
 		
 		_isSupportEventTypeForData: function(type)
