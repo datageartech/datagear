@@ -1399,7 +1399,7 @@ dashboardProto.render = function()
 	if(listener && listener.onRender)
 		doRender = listener.onRender(this);
 	
-	if(doRender != false)
+	if(doRender !== false)
 	{
 		this.doRender();
 	}

@@ -1427,7 +1427,7 @@ chartProto.update = function(chartResult)
 	if(listener && listener.onUpdate)
 		doUpdate = listener.onUpdate(this, chartResult);
 	
-	if(doUpdate != false)
+	if(doUpdate !== false)
 	{
 		this.doUpdate(chartResult);
 	}
@@ -4495,7 +4495,7 @@ CF.themeStyleSheet = function(theme, name, css, force)
 	
 	var styleName = CF.themeStyleName(theme);
 	
-	if(info && (force != true))
+	if(info && (force !== true))
 		return styleName;
 	
 	if(info == null)
