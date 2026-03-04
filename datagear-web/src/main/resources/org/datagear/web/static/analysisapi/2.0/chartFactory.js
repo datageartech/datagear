@@ -1345,18 +1345,6 @@ chartProto._createChartThemeCssIfNon = function()
 			{
 				name:
 				[
-					".dg-chart-beautify-scrollbar",
-					".dg-chart-beautify-scrollbar *"
-				],
-				value:
-				{
-					"scrollbar-color": thumbBgColor+" "+theme.backgroundColor,
-					"scrollbar-width": "thin"
-				}
-			},
-			{
-				name:
-				[
 					".dg-chart-beautify-scrollbar::-webkit-scrollbar",
 					".dg-chart-beautify-scrollbar *::-webkit-scrollbar"
 				],
@@ -1389,6 +1377,18 @@ chartProto._createChartThemeCssIfNon = function()
 				value:
 				{
 					"background": theme.backgroundColor
+				}
+			},
+			{
+				name:
+				[
+					".dg-chart-beautify-scrollbar",
+					".dg-chart-beautify-scrollbar *"
+				],
+				value:
+				{
+					"scrollbar-color": thumbBgColor+" "+theme.backgroundColor,
+					"scrollbar-width": "thin"
 				}
 			}
 		];
