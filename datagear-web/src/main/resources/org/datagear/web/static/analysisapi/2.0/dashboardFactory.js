@@ -1105,15 +1105,8 @@ dashboardProto._initCharts = function()
 	{
 		let chart = charts[i];
 		
-		if(chart.manualRender())
+		if(this._isChartPreventHandle(chart))
 			continue;
-		
-		//如果图表元素不存在（比如在<template></template>里），应忽略初始化
-		if(chart.element() == null)
-		{
-			CF.logWarn("chart '#"+chart.elementId()+"' element not found, init() ignored");
-			continue;
-		}
 		
 		if(chart.statusPreInit() || chart.statusDestroyed())
 		{
@@ -1128,6 +1121,21 @@ dashboardProto._initChart = function(chart)
 	{
 		chart.init();
 	});
+};
+
+dashboardProto._isChartPreventHandle = function(chart)
+{
+	if(chart == null)
+		return true;
+	
+	//图表元素不存在，比如在<template></template>里
+	if(chart.element() == null)
+		return true;
+	
+	if(chart.manualRender())
+		return true;
+	
+	return false;
 };
 
 /**
@@ -1421,7 +1429,7 @@ dashboardProto._prepareDoRenderCharts = function()
 	{
 		let chart = charts[i];
 		
-		if(chart.manualRender())
+		if(this._isChartPreventHandle(chart))
 			continue;
 		
 		if(chart.statusInited() || chart.statusDestroyed())
@@ -2735,7 +2743,7 @@ dashboardProto._addChartCareStatus = function(chart)
 {
 	this.addChart(chart);
 	
-	if(chart.manualRender())
+	if(this._isChartPreventHandle(chart))
 		return;
 	
 	if(chart.statusPreInit())
