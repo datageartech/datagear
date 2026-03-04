@@ -796,8 +796,9 @@ chartProto._isLinkByEventType = function(link, type)
 };
 
 /**
- * 请求获取数据并更新图表。
+ * 请求一次获取数据并刷新图表。
  * 此函数可以在图表处于任何状态时调用，等到图表处于活跃状态时，会真正发送请求获取数据后更新图表。
+ * 调用chart.destroy()后将清除所有等待的刷新请求。
  */
 chartProto.refresh = function()
 {
@@ -818,24 +819,17 @@ chartProto.refresh = function()
 	//可能会出现已设置的statusPreUpdate()状态被PARAM_VALUE_REQUIRED状态覆盖的情况，
 	//而导致refresh()失效
 	
-	this._requestRefresh();
-};
-
-var UPDATE_TIME_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
-
-chartProto._updateTime = function(time)
-{
-	if(arguments.length == 0)
-		return this.liveValue(UPDATE_TIME_LIVE_VALUE_NAME);
-	else
-		this.liveValue(UPDATE_TIME_LIVE_VALUE_NAME, time);
+	var chartQuery = this.dashboard()._buildChartQuery(this);
+	this._requestRefresh(chartQuery);
 };
 
 var REQUEST_REFRESH_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "ReqRefreshes";
 
-chartProto._requestRefresh = function()
+chartProto._requestRefresh = function(chartQuery)
 {
-	var chartQuery = this.dashboard()._buildChartQuery(this);
+	if(chartQuery == null)
+		return;
+	
 	var rrds = this.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
 	if(rrds == null)
 	{
@@ -846,10 +840,20 @@ chartProto._requestRefresh = function()
 	rrds.push(chartQuery);
 };
 
-chartProto._isRequestRefresh = function()
+chartProto._pollRequestRefreshQuery = function()
 {
-	var rrds = this.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
-	return (rrds != null && rrds.length > 0);
+	let rrds = this.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
+	return (rrds == null || rrds.length == 0 ? null : rrds.shift());
+};
+
+var UPDATE_TIME_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateTime";
+
+chartProto._updateTime = function(time)
+{
+	if(arguments.length == 0)
+		return this.liveValue(UPDATE_TIME_LIVE_VALUE_NAME);
+	else
+		this.liveValue(UPDATE_TIME_LIVE_VALUE_NAME, time);
 };
 
 /**
@@ -1713,28 +1717,15 @@ dashboardProto._doHandleCharts = function()
 	for(let i=0; i<charts.length; i++)
 	{
 		let chart = charts[i];
-		let wait = this._isWaitForUpdate(chart, time);
-		let chartQuery = null;
+		let chartQuery = this._waitForUpdateQuery(chart, time);
 		
-		//由chart.refresh()函数触发
-		if(wait == 2)
-		{
-			let rrds = chart.liveValue(REQUEST_REFRESH_LIVE_VALUE_NAME);
-			chartQuery = (rrds == null || rrds.length == 0 ? null : rrds.shift());
-			
-			if(chartQuery == null)
-				wait = 0;
-		}
-		
-		if(wait > 0)
+		if(chartQuery != null)
 		{
 			//应立即设置为HANDLING_UPDATE状态
 			chart.status(chartStatusConst.HANDLING_UPDATE);
 			
 			let chartUpdater = chart.updater();
 			chartUpdater = (CF.isEmpty(chartUpdater) ? DF.CHART_UPDATER_DEFAULT : chartUpdater);
-			
-			chartQuery = (chartQuery == null ? this._buildChartQuery(chart) : chartQuery);
 			
 			if(DF.CHART_UPDATER_GLOBAL === chartUpdater)
 			{
@@ -1842,58 +1833,63 @@ dashboardProto._isWaitForRender = function(chart)
 };
 
 /**
- * 给定图表是否在等待更新数据。
+ * 获取正在等在等待更新查询。
+ * 
  * @param chart
  * @param currentTime
- * @returns 0 否；1 是，但不是refresh()触发；2 是，并且由refresh()触发
+ * @returns null表示没有
  */
-dashboardProto._isWaitForUpdate = function(chart, currentTime)
+dashboardProto._waitForUpdateQuery = function(chart, currentTime)
 {
 	if(!chart.isActive())
-		return 0;
+		return null;
 	
-	var wait = 0;
-	
+	var chartQuery = null;
 	var status = chart.status();
 	
 	if(status == chartStatusConst.HANDLING_UPDATE)
 	{
-		wait = 0;
+		chartQuery = null;
 	}
 	else
 	{
-		var updateInterval = chart.updateInterval();
-		var isRequestRefresh = chart._isRequestRefresh();
+		//刷新操作是主动请求的，应优先
+		chartQuery = chart._pollRequestRefreshQuery();
 		
-		if(isRequestRefresh)
+		if(chartQuery == null)
 		{
-			wait = 2;
-		}
-		else if(chart.statusRendered() || chart.statusPreUpdate())
-		{
-			wait = 1;
-		}
-		else if(updateInterval > -1 && (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
-		{
-			var prevUpdateTime = chart._updateTime();
-			if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
+			let wait = false;
+			var updateInterval = chart.updateInterval();
+			
+			if(chart.statusRendered() || chart.statusPreUpdate())
 			{
-				wait = 1;
+				wait = true;
 			}
-		}
-		
-		if(wait == 1)
-		{
-			if(chart.unreadyDataSetParams(true).length > 0)
+			else if(updateInterval > -1 && (chart.statusUpdated() || status == chartStatusConst.UPDATE_ERROR))
 			{
-				//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
-				chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
-				wait = 0;
+				var prevUpdateTime = chart._updateTime();
+				if(prevUpdateTime == null || (currentTime - prevUpdateTime) >= updateInterval)
+				{
+					wait = true;
+				}
 			}
+			
+			if(wait)
+			{
+				if(chart.unreadyDataSetParams(true).length > 0)
+				{
+					//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
+					chart.status(chartStatusConst.PARAM_VALUE_REQUIRED);
+					wait = false;
+				}
+			}
+			
+			if(wait)
+				chartQuery = this._buildChartQuery(chart);
 		}
 	}
 	
-	return wait;
+	return chartQuery;
 };
 
 dashboardProto._isLocalChart = function(chart)
