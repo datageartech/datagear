@@ -2871,6 +2871,33 @@ page_palette.ftl
 	</div>
 </p-overlaypanel>
 
+<p-dialog :header="pm.vepts.customInsertChartEleAttr" append-to="body"
+	position="center" :modal="true" v-model:visible="pm.vepss.customInsertChartEleAttrShown" @show="onCustomInsertChartEleAttrPanelShow">
+	<div class="page page-form">
+		<form id="${pid}customInsertChartEleAttrForm" class="flex flex-column">
+			<div class="page-form-content size-30vw flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}customInsertChartEleAttrValue" class="field-label col-12 mb-2">
+						<@spring.message code='value' />
+					</label>
+					<div class="field-input col-12">
+						<div class="p-inputgroup">
+							<span class="p-inputgroup-addon">&lt;div</span>
+							<p-inputtext id="${pid}customInsertChartEleAttrValue" v-model="pm.vepms.customInsertChartEleAttr.value" type="text"
+								class="input w-full" name="width" autofocus>
+							</p-inputtext>
+							<span class="p-inputgroup-addon">&gt;</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+				<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
+			</div>
+		</form>
+	</div>
+</p-dialog>
+
 <script>
 (function(po)
 {

@@ -809,8 +809,6 @@ $.inflateDashboardDesignEditor = function(po)
 			veIframe.data("veEnableElementBoundary", this.enableElementBoundary());
 			veIframe.data("veChangeFlag", this.changeFlag());
 		};
-		
-		dashboardEditor.defaultInsertChartEleStyle = po.defaultInsertChartEleStyle;
 	};
 	
 	po.visualDashboardEditorByIframe = function(visualEditorIfm)
@@ -1009,7 +1007,22 @@ $.inflateDashboardDesignEditor = function(po)
 		return (isArray ? cws : cws[0]);
 	};
 	
-	po.defaultInsertChartEleStyle = "display:inline-block;width:300px;height:300px;";
+	po.customInsertChartEleAttrValue = function(attr)
+	{
+		var name = "DG_DD_INSERT_CHART_ELE_ATTR";
+		var dftValue = "style=\"display:inline-block;width:25vw;height:25vh;\"";
+		
+		if(attr === undefined)
+		{
+			let value = $.localStorageItem(name);
+			value = (value == null ? dftValue : value);
+			return value;
+		}
+		else
+		{
+			$.localStorageItem(name, attr);
+		}
+	};
 	
 	po.checkInsertChartPluginApiVersion = function(apiVersion, chartWidgets)
 	{
@@ -1080,6 +1093,8 @@ $.inflateDashboardDesignEditor = function(po)
 		// >...
 		else
 		{
+			let customAtt = po.customInsertChartEleAttrValue();
+			
 			for(let i=0; i<chartWidgets.length; i++)
 			{
 				let chartWidget = chartWidgets[i];
@@ -1087,7 +1102,7 @@ $.inflateDashboardDesignEditor = function(po)
 				let attrName = (forLocalChart ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
 				let attrValue = (forLocalChart ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 				
-				code += "<"+chartFactory.CHART_TAG_NAME+" style=\""+po.defaultInsertChartEleStyle+"\""
+				code += "<"+chartFactory.CHART_TAG_NAME + ($.isEmpty(customAtt) ? "" : " "+customAtt)
 					 +  " "+attrName+"=\""+attrValue+"\">"
 					 +  (chartWidget.name ? "<!--"+chartWidget.name+"-->" : "")
 					 +  "</"+chartFactory.CHART_TAG_NAME+">\n";
@@ -2233,6 +2248,19 @@ $.inflateDashboardDesignEditor = function(po)
 					{
 						po.saveResInfo(po.getCurrentEditTab());
 					}
+				},
+				{
+					label: po.i18n.more,
+					items:
+					[
+						{
+							label: po.i18n.customInsertChartEleAttr,
+							command: function()
+							{
+								po.showCustomInsertChartEleAttrPanel();
+							}
+						}
+					]
 				}
 			],
 			tplVisualEditMenuItems:
@@ -3139,6 +3167,19 @@ $.inflateDashboardDesignEditorForms = function(po)
 		return editorOptions;
 	};
 	
+	po.showCustomInsertChartEleAttrPanel = function(model)
+	{
+		model = (model == null ? { value: po.customInsertChartEleAttrValue() } : model);
+		
+		var pm = po.vuePageModel();
+		pm.veshs.customInsertChartEleAttr = function(model)
+		{
+			po.customInsertChartEleAttrValue(model.value);
+		};
+		pm.vepms.customInsertChartEleAttr = $.extend(true, {}, model);
+		pm.vepss.customInsertChartEleAttrShown = true;
+	};
+	
 	po.showVeGridLayoutPanel = function(showFillParent)
 	{
 		showFillParent = (showFillParent == null ? false : showFillParent);
@@ -3299,7 +3340,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 				chartThemeShown: false,
 				styleShown: false,
 				eleIdShown: false,
-				iframeShown: false
+				iframeShown: false,
+				customInsertChartEleAttrShown: false
 			},
 			//可视编辑操作对话框标题
 			vepts:
@@ -3318,7 +3360,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 				chartTheme: po.i18n.chartTheme,
 				style: po.i18n.style,
 				eleId: po.i18n.elementId,
-				iframe: po.i18n.iframe
+				iframe: po.i18n.iframe,
+				customInsertChartEleAttr: po.i18n.customInsertChartEleAttr
 			},
 			//可视编辑操作对话框表单模型
 			vepms:
@@ -3337,7 +3380,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 				chartTheme: po.veDftChartThemeModel(),
 				style: {},
 				eleId: {},
-				iframe: po.veDftIframeModel()
+				iframe: po.veDftIframeModel(),
+				customInsertChartEleAttr: {}
 			},
 			//可视编辑操作对话框提交处理函数
 			veshs:
@@ -3353,7 +3397,8 @@ $.inflateDashboardDesignEditorForms = function(po)
 				chartTheme: function(model){},
 				style: function(model){},
 				eleId: function(model){},
-				iframe: function(model){}
+				iframe: function(model){},
+				customInsertChartEleAttr: function(model){}
 			},
 			veGridLayoutPanelShowFillParent: false,
 			veFlexLayoutPanelShowFillParent: false,
@@ -3405,6 +3450,19 @@ $.inflateDashboardDesignEditorForms = function(po)
 			formatHxtitleOptionLabel: function(option)
 			{
 				return "<"+option.value+">"+option.name+"</"+option.value+">";
+			},
+			
+			onCustomInsertChartEleAttrPanelShow: function()
+			{
+				var form = po.elementOfPidPrefix("customInsertChartEleAttrForm", document.body);
+				
+				po.setupSimpleForm(form, pm.vepms.customInsertChartEleAttr, function()
+				{
+					if(pm.veshs.customInsertChartEleAttr(pm.vepms.customInsertChartEleAttr) !== false)
+					{
+						pm.vepss.customInsertChartEleAttrShown = false;
+					}
+				});
 			},
 			
 			onVeGridLayoutPanelShow: function()

@@ -184,6 +184,7 @@
 	po.i18n.confirmCloseWithUnsaved = "<@spring.message code='confirmCloseWithUnsaved' />";
 	po.i18n.insertMismatchApiVersionChartDenied = "<@spring.message code='dashboard.insertMismatchApiVersionChartDenied' />";
 	po.i18n.unsupportedFnForApiVersion = "<@spring.message code='dashboard.unsupportedFnForApiVersion' />";
+	po.i18n.customInsertChartEleAttr = "<@spring.message code='customInsertChartEleAttr' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditor(po);

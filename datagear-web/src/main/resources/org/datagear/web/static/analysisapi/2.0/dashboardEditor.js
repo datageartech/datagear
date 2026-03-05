@@ -1818,7 +1818,7 @@ DE.checkInsertChart = function(insertType, refEle)
 };
 
 //插入图表元素时的默认元素样式
-DE.defaultInsertChartEleStyle = "";
+DE.defaultInsertChartEleStyle = "display:inline-block;width:25vw;height:25vh;";
 
 /**
  * 插入图表。
@@ -1861,7 +1861,6 @@ DE.insertChart = function(chartWidgets, insertType, refEle)
 		let attrValue = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 		let chartDiv = CF.eleCreate(CF.CHART_TAG_NAME);
 		
-		//先设style，与源码模式一致
 		if(styleStr)
 			CF.eleAttr(chartDiv, "style", styleStr);
 		

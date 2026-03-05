@@ -1824,7 +1824,7 @@
 	};
 	
 	//插入图表元素时的默认元素样式
-	editor.defaultInsertChartEleStyle = "";
+	editor.defaultInsertChartEleStyle = "display:inline-block;width:25vw;height:25vh;";
 	
 	/**
 	 * 插入图表。
@@ -1865,7 +1865,6 @@
 			
 			var chartDiv = $("<div></div>");
 			
-			//先设style，与源码模式一致
 			if(styleStr)
 				chartDiv.attr("style", styleStr);
 			
