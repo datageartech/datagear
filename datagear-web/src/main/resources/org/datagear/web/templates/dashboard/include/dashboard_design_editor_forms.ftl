@@ -2898,6 +2898,36 @@ page_palette.ftl
 	</div>
 </p-dialog>
 
+<p-overlaypanel ref="${pid}codeReplacePanelEle" append-to="body" id="${pid}codeReplacePanel" @show="onCodeReplacePanelShow">
+	<div class="pb-2">
+		<label class="text-lg font-bold">
+			<@spring.message code='replace' />
+		</label>
+	</div>
+	<div class="page page-form">
+		<form id="${pid}codeReplaceForm" class="flex flex-column">
+			<div class="page-form-content size-20vw flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid mb-0">
+					<label for="${pid}codeReplaceToValue" class="field-label col-12 mb-2">
+						<@spring.message code='replaceTo' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}codeReplaceToValue" v-model="pm.vepms.codeReplace.value" type="text"
+							class="input w-full" name="toValue" autofocus>
+						</p-inputtext>
+					</div>
+				</div>
+			</div>
+			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
+				<p-button type="submit" label="<@spring.message code='replace' />"></p-button>
+				<p-button type="button" severity="secondary" label="<@spring.message code='replaceAll' />"
+					@click="onReplaceAllInCodeEditor($event)">
+				</p-button>
+			</div>
+		</form>
+	</div>
+</p-overlaypanel>
+
 <script>
 (function(po)
 {

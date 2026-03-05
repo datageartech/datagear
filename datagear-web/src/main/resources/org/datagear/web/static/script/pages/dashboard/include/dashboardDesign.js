@@ -664,36 +664,69 @@ $.inflateDashboardDesignEditor = function(po)
 		return re;
 	};
 	
-	po.searchInCodeEditor = function(tab)
+	po.searchInCodeEditor = function(tab, noTipIfNone)
 	{
+		noTipIfNone = (noTipIfNone === undefined ? false : noTipIfNone);
+		
 		var text = tab.searchCodeKeyword;
 		
 		if(!text)
-			return;
+			return false;
 		
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
 		var codeEditor = po.codeEditorInstance(codeEditorEle);
-		
-		var prevSearchText = codeEditorEle.data("prevSearchText");
-		var cursor = codeEditorEle.data("prevSearchCursor");
 		var doc = codeEditor.getDoc();
-		
-		if(!cursor || text != prevSearchText)
-		{
-			cursor = codeEditor.getSearchCursor(text);
-			codeEditorEle.data("prevSearchCursor", cursor);
-			codeEditorEle.data("prevSearchText", text)
-		}
-		
-		codeEditor.focus();
+		var cursor = doc.getCursor("to");
+		doc.setSelection(cursor);
+		cursor = codeEditor.getSearchCursor(text, cursor);
 		
 		if(cursor.findNext())
 			doc.setSelection(cursor.from(), cursor.to());
 		else
 		{
-			//下次从头搜索
-			codeEditorEle.data("prevSearchCursor", null);
+			cursor = codeEditor.getSearchCursor(text, {line: 0, ch: 0});
+			
+			if(cursor.findNext())
+				doc.setSelection(cursor.from(), cursor.to());
+			else
+			{
+				if(noTipIfNone !== true)
+					$.tipInfo(po.i18n.noMatchesFound);
+				
+				return false;
+			}
 		}
+	};
+	
+	po.replaceInCodeEditor = function(tab, replaceTo, replaceAll, replaceInfo)
+	{
+		var text = tab.searchCodeKeyword;
+		
+		if(!text)
+			return false;
+		
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
+		var doc = codeEditor.getDoc();
+		var selectText = doc.getSelection();
+		var hasMatches;
+		
+		if(selectText == text)
+		{
+			doc.replaceSelection(replaceTo);
+			hasMatches = po.searchInCodeEditor(tab, (replaceAll === true));
+			
+			if(replaceInfo != null)
+			{
+				replaceInfo.count = (replaceInfo.count == null ? 0 : replaceInfo.count);
+				replaceInfo.count++;
+			}
+		}
+		else
+			hasMatches = po.searchInCodeEditor(tab, (replaceAll === true));
+		
+		if(hasMatches !== false && replaceAll === true)
+			po.replaceInCodeEditor(tab, replaceTo, true, replaceInfo);
 	};
 	
 	//可视模式加载页面后的dashboardEditor.changeFlag()初始值值，
@@ -3320,10 +3353,11 @@ $.inflateDashboardDesignEditorForms = function(po)
 	po.setupResourceEditorForms = function()
 	{
 		po.vueRef(po.concatPid("optionsOriginPanelEle"), null);
+		po.vueRef(po.concatPid("codeReplacePanelEle"), null);
 		
 		po.vuePageModel(
 		{
-			//可视编辑操作对话框是否显示
+			//操作对话框是否显示
 			vepss:
 			{
 				gridLayoutShown: false,
@@ -3343,7 +3377,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				iframeShown: false,
 				customInsertChartEleAttrShown: false
 			},
-			//可视编辑操作对话框标题
+			//操作对话框标题
 			vepts:
 			{
 				gridLayout: po.i18n.gridLayout,
@@ -3363,7 +3397,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				iframe: po.i18n.iframe,
 				customInsertChartEleAttr: po.i18n.customInsertChartEleAttr
 			},
-			//可视编辑操作对话框表单模型
+			//操作对话框表单模型
 			vepms:
 			{
 				gridLayout: po.veDftGridLayoutModel(),
@@ -3381,9 +3415,10 @@ $.inflateDashboardDesignEditorForms = function(po)
 				style: {},
 				eleId: {},
 				iframe: po.veDftIframeModel(),
-				customInsertChartEleAttr: {}
+				customInsertChartEleAttr: {},
+				codeReplace: {}
 			},
-			//可视编辑操作对话框提交处理函数
+			//操作对话框提交处理函数
 			veshs:
 			{
 				responsiveFlex: function(model){},
@@ -3809,6 +3844,46 @@ $.inflateDashboardDesignEditorForms = function(po)
 						pm.vepss.iframeShown = false;
 					}
 				});
+			},
+			
+			onToggleCodeReplacePanel: function(e, tab)
+			{
+				e.stopPropagation();
+				po.vueUnref(po.concatPid("codeReplacePanelEle")).hide();
+				
+				//直接show会导致面板还停留在上一个元素上
+				po.vueNextTick(function()
+				{
+					po.codeReplaceTabMenuTargetId = tab.id;
+					po.vueUnref(po.concatPid("codeReplacePanelEle")).show(e);
+				});
+			},
+			
+			onCodeReplacePanelShow: function(e)
+			{
+				var form = po.elementOfPidPrefix("codeReplaceForm", document.body);
+				pm.vepms.codeReplace.value = "";
+				
+				po.setupSimpleForm(form, pm.vepms.codeReplace, function()
+				{
+					var tab = po.getCurrentEditTab();
+					po.replaceInCodeEditor(tab, pm.vepms.codeReplace.value, false);
+				});
+			},
+			
+			onReplaceAllInCodeEditor: function(e)
+			{
+				var tab = po.getCurrentEditTab();
+				var replaceInfo = { count: 0 };
+				var doExecute = po.replaceInCodeEditor(tab, pm.vepms.codeReplace.value, true, replaceInfo);
+				
+				if(doExecute !== false)
+				{
+					if(replaceInfo.count == 0)
+						$.tipInfo(po.i18n.noMatchesFound);
+					else
+						$.tipInfo($.validator.format(po.i18n.replacedWithCount, replaceInfo.count));
+				}
 			}
 		});
 		

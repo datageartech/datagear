@@ -57,6 +57,9 @@
 							<div class="p-inputgroup pl-2">
 								<p-inputtext type="text" v-model="tab.searchCodeKeyword" class="text-sm p-0 px-1" style="width:9rem;" @keydown.enter.prevent="onSearchInCodeEditor($event, tab)"></p-inputtext>
 								<p-button type="button" icon="pi pi-search" class="p-button-secondary p-button-sm" @click="onSearchInCodeEditor($event, tab)"></p-button>
+								<p-button type="button" icon="pi pi-angle-down" class="p-button-secondary p-button-sm"
+									aria:haspopup="true" aria-controls="${pid}codeReplacePanel"
+									@click="onToggleCodeReplacePanel($event, tab)"></p-button>
 							</div>
 						</template>
 					</p-menubar>
@@ -185,6 +188,8 @@
 	po.i18n.insertMismatchApiVersionChartDenied = "<@spring.message code='dashboard.insertMismatchApiVersionChartDenied' />";
 	po.i18n.unsupportedFnForApiVersion = "<@spring.message code='dashboard.unsupportedFnForApiVersion' />";
 	po.i18n.customInsertChartEleAttr = "<@spring.message code='customInsertChartEleAttr' />";
+	po.i18n.noMatchesFound = "<@spring.message code='noMatchesFound' />";
+	po.i18n.replacedWithCount = "<@spring.message code='replacedWithCount' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditor(po);
