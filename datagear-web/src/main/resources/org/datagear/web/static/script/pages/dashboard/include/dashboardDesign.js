@@ -664,14 +664,13 @@ $.inflateDashboardDesignEditor = function(po)
 		return re;
 	};
 	
-	po.searchInCodeEditor = function(tab, noTipIfNone)
+	po.searchInCodeEditor = function(tab, text, noTipIfNone)
 	{
-		noTipIfNone = (noTipIfNone === undefined ? false : noTipIfNone);
-		
-		var text = tab.searchCodeKeyword;
-		
 		if(!text)
 			return false;
+		
+		tab = (tab == null ? po.getCurrentEditTab() : tab);
+		noTipIfNone = (noTipIfNone === undefined ? false : noTipIfNone);
 		
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
 		var codeEditor = po.codeEditorInstance(codeEditorEle);
@@ -698,35 +697,37 @@ $.inflateDashboardDesignEditor = function(po)
 		}
 	};
 	
-	po.replaceInCodeEditor = function(tab, replaceTo, replaceAll, replaceInfo)
+	po.replaceInCodeEditor = function(tab, source, replaceTo, options)
 	{
-		var text = tab.searchCodeKeyword;
-		
-		if(!text)
+		if(!source)
 			return false;
+		
+		tab = (tab == null ? po.getCurrentEditTab() : tab);
+		options = (options || { replaceAll: false,  replaceInfo: null });
 		
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
 		var codeEditor = po.codeEditorInstance(codeEditorEle);
 		var doc = codeEditor.getDoc();
 		var selectText = doc.getSelection();
-		var hasMatches;
 		
-		if(selectText == text)
+		if(selectText == source)
 		{
 			doc.replaceSelection(replaceTo);
-			hasMatches = po.searchInCodeEditor(tab, (replaceAll === true));
 			
-			if(replaceInfo != null)
+			if(options.replaceInfo != null)
 			{
-				replaceInfo.count = (replaceInfo.count == null ? 0 : replaceInfo.count);
-				replaceInfo.count++;
+				options.replaceInfo.count = (options.replaceInfo.count == null ? 0 : options.replaceInfo.count);
+				options.replaceInfo.count++;
 			}
 		}
-		else
-			hasMatches = po.searchInCodeEditor(tab, (replaceAll === true));
 		
-		if(hasMatches !== false && replaceAll === true)
-			po.replaceInCodeEditor(tab, replaceTo, true, replaceInfo);
+		if(options.replaceAll)
+		{
+			var searched = po.searchInCodeEditor(tab, source, true);
+			
+			if(searched !== false)
+				po.replaceInCodeEditor(tab, source, replaceTo, options);
+		}
 	};
 	
 	//可视模式加载页面后的dashboardEditor.changeFlag()初始值值，
@@ -2874,11 +2875,6 @@ $.inflateDashboardDesignEditor = function(po)
 				po.handleChangeEditMode(tab);
 			},
 			
-			onSearchInCodeEditor: function(e, tab)
-			{
-				po.searchInCodeEditor(tab);
-			},
-			
 			onVisualEditorIframeLoad: function(e, tab)
 			{
 				po.initVisualDashboardEditor(tab);
@@ -3357,7 +3353,12 @@ $.inflateDashboardDesignEditorForms = function(po)
 		
 		po.vuePageModel(
 		{
-			//操作对话框是否显示
+			codeSearch: { model: { value: "" } },
+			codeReplace:
+			{
+				model: {}
+			},
+			//可视编辑模式操作对话框是否显示
 			vepss:
 			{
 				gridLayoutShown: false,
@@ -3377,7 +3378,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				iframeShown: false,
 				customInsertChartEleAttrShown: false
 			},
-			//操作对话框标题
+			//可视编辑模式操作对话框标题
 			vepts:
 			{
 				gridLayout: po.i18n.gridLayout,
@@ -3397,7 +3398,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				iframe: po.i18n.iframe,
 				customInsertChartEleAttr: po.i18n.customInsertChartEleAttr
 			},
-			//操作对话框表单模型
+			//可视编辑模式操作对话框表单模型
 			vepms:
 			{
 				gridLayout: po.veDftGridLayoutModel(),
@@ -3415,10 +3416,9 @@ $.inflateDashboardDesignEditorForms = function(po)
 				style: {},
 				eleId: {},
 				iframe: po.veDftIframeModel(),
-				customInsertChartEleAttr: {},
-				codeReplace: {}
+				customInsertChartEleAttr: {}
 			},
-			//操作对话框提交处理函数
+			//可视编辑模式操作对话框提交处理函数
 			veshs:
 			{
 				responsiveFlex: function(model){},
@@ -3846,44 +3846,77 @@ $.inflateDashboardDesignEditorForms = function(po)
 				});
 			},
 			
-			onToggleCodeReplacePanel: function(e, tab)
+			onSearchInCodeEditor: function(e, tab)
 			{
-				e.stopPropagation();
-				po.vueUnref(po.concatPid("codeReplacePanelEle")).hide();
-				
-				//直接show会导致面板还停留在上一个元素上
-				po.vueNextTick(function()
-				{
-					po.codeReplaceTabMenuTargetId = tab.id;
-					po.vueUnref(po.concatPid("codeReplacePanelEle")).show(e);
-				});
+				var text = pm.codeSearch.model.value;
+				po.searchInCodeEditor(tab, text);
+			},
+			
+			onToggleCodeReplacePanel: function(e)
+			{
+				po.vueUnref(po.concatPid("codeReplacePanelEle")).toggle(e);
 			},
 			
 			onCodeReplacePanelShow: function(e)
 			{
 				var form = po.elementOfPidPrefix("codeReplaceForm", document.body);
-				pm.vepms.codeReplace.value = "";
+				var model = pm.codeReplace.model;
 				
-				po.setupSimpleForm(form, pm.vepms.codeReplace, function()
+				if(!$.isEmpty(pm.codeSearch.model.value))
+					model.source = pm.codeSearch.model.value;
+				
+				model.replaceTo = "";
+				
+				po.setupSimpleForm(form, model,
 				{
-					var tab = po.getCurrentEditTab();
-					po.replaceInCodeEditor(tab, pm.vepms.codeReplace.value, false);
+					invalidHandler: function()
+					{
+						model.submitType = "";
+					},
+					submitHandler:function()
+					{
+						var tab = po.getCurrentEditTab();
+						
+						if(model.submitType == "next")
+						{
+							po.searchInCodeEditor(tab, model.source);
+						}
+						else if(model.submitType == "replaceAll")
+						{
+							var options = { replaceAll: true, replaceInfo: { count: 0 } };
+							var doExecute = po.replaceInCodeEditor(tab, model.source, model.replaceTo, options);
+							
+							if(doExecute !== false)
+							{
+								if(options.replaceInfo.count == 0)
+									$.tipInfo(po.i18n.noMatchesFound);
+								else
+									$.tipInfo($.validator.format(po.i18n.replacedWithCount, options.replaceInfo.count));
+							}
+						}
+						else
+							po.replaceInCodeEditor(tab, model.source, model.replaceTo);
+						
+						model.submitType = "";
+					}
 				});
+			},
+			
+			onCodeReplaceSearchNext: function(e)
+			{
+				var form = po.elementOfPidPrefix("codeReplaceForm", document.body);
+				var model = pm.codeReplace.model;
+				model.submitType = "next";
+				form.submit();
 			},
 			
 			onReplaceAllInCodeEditor: function(e)
 			{
-				var tab = po.getCurrentEditTab();
-				var replaceInfo = { count: 0 };
-				var doExecute = po.replaceInCodeEditor(tab, pm.vepms.codeReplace.value, true, replaceInfo);
+				var form = po.elementOfPidPrefix("codeReplaceForm", document.body);
+				var model = pm.codeReplace.model;
+				model.submitType = "replaceAll";
+				form.submit();
 				
-				if(doExecute !== false)
-				{
-					if(replaceInfo.count == 0)
-						$.tipInfo(po.i18n.noMatchesFound);
-					else
-						$.tipInfo($.validator.format(po.i18n.replacedWithCount, replaceInfo.count));
-				}
 			}
 		});
 		

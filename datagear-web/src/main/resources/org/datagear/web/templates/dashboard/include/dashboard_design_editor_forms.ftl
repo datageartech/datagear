@@ -2906,20 +2906,33 @@ page_palette.ftl
 	</div>
 	<div class="page page-form">
 		<form id="${pid}codeReplaceForm" class="flex flex-column">
-			<div class="page-form-content size-20vw flex-grow-1 px-2 py-1 overflow-y-auto">
-				<div class="field grid mb-0">
+			<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+				<div class="field grid">
+					<label for="${pid}codeReplaceSourceValue" class="field-label col-12 mb-2">
+						<@spring.message code='find' />
+					</label>
+					<div class="field-input col-12">
+						<p-inputtext id="${pid}codeReplaceSourceValue" v-model="pm.codeReplace.model.source" type="text"
+							class="input w-full" name="source" required>
+						</p-inputtext>
+					</div>
+				</div>
+				<div class="field grid">
 					<label for="${pid}codeReplaceToValue" class="field-label col-12 mb-2">
 						<@spring.message code='replaceTo' />
 					</label>
 					<div class="field-input col-12">
-						<p-inputtext id="${pid}codeReplaceToValue" v-model="pm.vepms.codeReplace.value" type="text"
-							class="input w-full" name="toValue" autofocus>
+						<p-inputtext id="${pid}codeReplaceToValue" v-model="pm.codeReplace.model.replaceTo" type="text"
+							class="input w-full" name="replaceTo" autofocus>
 						</p-inputtext>
 					</div>
 				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 				<p-button type="submit" label="<@spring.message code='replace' />"></p-button>
+				<p-button type="button" severity="secondary" label="<@spring.message code='nextPalce' />"
+					@click="onCodeReplaceSearchNext($event)">
+				</p-button>
 				<p-button type="button" severity="secondary" label="<@spring.message code='replaceAll' />"
 					@click="onReplaceAllInCodeEditor($event)">
 				</p-button>
