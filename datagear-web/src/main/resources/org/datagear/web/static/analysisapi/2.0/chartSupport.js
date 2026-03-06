@@ -5125,6 +5125,7 @@ SPT.tableRenderer = function(plugin, config)
 					}
 					
 					SPT.eventData(e, data);
+					SPT.eventSourceChart(e, chart);
 					e[thisRenderer._eventColumnDataName] = columnData;
 					
 					return SPT.invokeEventHandler(chart, handler, arguments);
@@ -6285,6 +6286,7 @@ SPT.labelRenderer = function(plugin, config)
 				{
 					let data = CF.eleData(item, bindDataName);
 					SPT.eventData(e, data);
+					SPT.eventSourceChart(e, chart);
 				}
 				
 				return SPT.invokeEventHandler(chart, handler, arguments);
@@ -6547,6 +6549,7 @@ SPT.selectRenderer = function(plugin, config)
 						data = data[0];
 					
 					SPT.eventData(e, data);
+					SPT.eventSourceChart(e, chart);
 				}
 				
 				return SPT.invokeEventHandler(chart, handler, arguments);
@@ -7793,6 +7796,15 @@ SPT.eventData = function(e, data)
 		e.data = data;
 };
 
+//获取/设置事件对象的"sourceChart"属性值
+SPT.eventSourceChart = function(e, sourceChart)
+{
+	if(arguments.length <= 1)
+		return e.sourceChart;
+	else
+		e.sourceChart = sourceChart;
+};
+
 //获取全局ECharts对象
 EU._echarts = function()
 {
@@ -8839,8 +8851,9 @@ EU.inflateRendererCommons = function(renderer)
 		type = this._toEventTypeObj(type);
 		
 		var internal = chart.internal();
-		var delegate = function()
+		var delegate = function(e)
 		{
+			SPT.eventSourceChart(e, chart);
 			return SPT.invokeEventHandler(chart, handler, arguments);
 		};
 		
