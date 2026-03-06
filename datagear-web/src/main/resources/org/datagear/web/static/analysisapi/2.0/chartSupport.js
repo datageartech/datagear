@@ -5095,12 +5095,10 @@ SPT.tableRenderer = function(plugin, config)
 		{
 			var thisRenderer = this;
 			var internal = chart.internal();
-			var actualType = SPT.actualEventTypeForData(type);
 			var delegate;
 			
-			if(this._isSupportEventTypeForData(actualType))
+			if(this._isSupportEventTypeForData(type))
 			{
-				type = actualType;
 				delegate = function(e, dt, type, indexes)
 				{
 					//暂时仅支持行级事件
@@ -5147,8 +5145,6 @@ SPT.tableRenderer = function(plugin, config)
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			type = SPT.actualEventTypeForData(type, type);
-			
 			var delegates = chart.removeEventHandlerDelegate((d) =>
 			{
 				return SPT.eventHandlerDelegateFilter(d, type, handler);
@@ -5162,7 +5158,7 @@ SPT.tableRenderer = function(plugin, config)
 		
 		additions:
 		{
-			defaultLinkEventType: "select.data"
+			defaultLinkEventType: "select"
 		},
 		
 		_eventColumnDataName: "columnData",
@@ -6281,31 +6277,18 @@ SPT.labelRenderer = function(plugin, config)
 		on: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var delegate;
-			
-			var actualType = SPT.actualEventTypeForData(type);
-			if(actualType != null)
+			var bindDataName = this._itemBindDataName();
+			var delegate = function(e)
 			{
-				let bindDataName = this._itemBindDataName();
-				type = actualType;
-				delegate = function(e)
+				var item = CF.eleAncestorOfSelector(e.target, ".dg-chart-label-item");
+				if(item != null)
 				{
-					var item = CF.eleAncestorOfSelector(e.target, ".dg-chart-label-item");
-					if(item != null)
-					{
-						let data = CF.eleData(item, bindDataName);
-						SPT.eventData(e, data);
-						return SPT.invokeEventHandler(chart, handler, arguments);
-					}
-				};
-			}
-			else
-			{
-				delegate = function()
-				{
-					return SPT.invokeEventHandler(chart, handler, arguments);
-				};
-			}
+					let data = CF.eleData(item, bindDataName);
+					SPT.eventData(e, data);
+				}
+				
+				return SPT.invokeEventHandler(chart, handler, arguments);
+			};
 			
 			chart.registerEventHandlerDelegate(type, handler, delegate);
 			internal.addEventListener(type, delegate);
@@ -6314,8 +6297,6 @@ SPT.labelRenderer = function(plugin, config)
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			type = SPT.actualEventTypeForData(type, type);
-			
 			var delegates = chart.removeEventHandlerDelegate((d) =>
 			{
 				return SPT.eventHandlerDelegateFilter(d, type, handler);
@@ -6329,7 +6310,7 @@ SPT.labelRenderer = function(plugin, config)
 		
 		additions:
 		{
-			defaultLinkEventType: "click.data"
+			defaultLinkEventType: "click"
 		},
 		
 		_drawDataOptions: function(chart, options)
@@ -6548,41 +6529,28 @@ SPT.selectRenderer = function(plugin, config)
 		on: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			var delegate;
-			
-			var actualType = SPT.actualEventTypeForData(type);
-			if(actualType != null)
+			var bindDataName = this._itemBindDataName();
+			var delegate = function(e)
 			{
-				let bindDataName = this._itemBindDataName();
-				type = actualType;
-				delegate = function(e)
+				var selectedItems = Array.from(internal.selectedOptions);
+				
+				if(selectedItems.length > 0)
 				{
-					var selectedItems = Array.from(internal.selectedOptions);
-					
-					if(selectedItems.length > 0)
+					let data = [];
+					selectedItems.forEach((item) =>
 					{
-						let data = [];
-						selectedItems.forEach((item) =>
-						{
-							let di = CF.eleData(item, bindDataName);
-							data.push(di);
-						});
-						
-						if(!CF.eleAttr(internal, "multiple"))
-							data = data[0];
-						
-						SPT.eventData(e, data);
-						return SPT.invokeEventHandler(chart, handler, arguments);
-					}
-				};
-			}
-			else
-			{
-				delegate = function()
-				{
-					return SPT.invokeEventHandler(chart, handler, arguments);
-				};
-			}
+						let di = CF.eleData(item, bindDataName);
+						data.push(di);
+					});
+					
+					if(!CF.eleAttr(internal, "multiple"))
+						data = data[0];
+					
+					SPT.eventData(e, data);
+				}
+				
+				return SPT.invokeEventHandler(chart, handler, arguments);
+			};
 			
 			chart.registerEventHandlerDelegate(type, handler, delegate);
 			internal.addEventListener(type, delegate);
@@ -6591,8 +6559,6 @@ SPT.selectRenderer = function(plugin, config)
 		off: function(chart, type, handler)
 		{
 			var internal = chart.internal();
-			type = SPT.actualEventTypeForData(type, type);
-			
 			var delegates = chart.removeEventHandlerDelegate((d) =>
 			{
 				return SPT.eventHandlerDelegateFilter(d, type, handler);
@@ -6606,7 +6572,7 @@ SPT.selectRenderer = function(plugin, config)
 		
 		additions:
 		{
-			defaultLinkEventType: "change.data"
+			defaultLinkEventType: "change"
 		},
 		
 		_themeStyleSheet: function(chart)
@@ -7807,28 +7773,6 @@ SPT.liveValueUpdateOptions = function(chart, updateOptions)
 		chart.liveValue(SPT.UPDATE_OPTIONS_LIVE_VALUE_NAME, updateOptions);
 };
 
-SPT.EVENT_TYPE_FOR_DATA_SUFFIX = ".data";
-
-//是否是扩展的数据的事件类型（以'.data'结尾）
-SPT.isEventTypeForData = function(type)
-{
-	if(type == null || !CF.isString(type))
-		return false;
-	
-	return type.endsWith(SPT.EVENT_TYPE_FOR_DATA_SUFFIX);
-};
-
-//获取扩展数据事件类型的实际事件类型，不是则返回null或者typeIfNot
-SPT.actualEventTypeForData = function(type, typeIfNot)
-{
-	typeIfNot = (typeIfNot == null ? null : typeIfNot);
-	
-	if(!SPT.isEventTypeForData(type))
-		return typeIfNot;
-	
-	return type.substring(0, type.length - SPT.EVENT_TYPE_FOR_DATA_SUFFIX.length);
-};
-
 SPT.eventHandlerDelegateFilter = function(delegateObj, type, handler)
 {
 	return (delegateObj.type === type && delegateObj.handler === handler);
@@ -8886,7 +8830,7 @@ EU.inflateRendererCommons = function(renderer)
 	 * 
 	 * @param chart
 	 * @param type 事件类型，支持格式：
-	 * 						1、"click"、"mouseenter"、"click.data"、"mouseenter.data"等事件类型字符串
+	 * 						1、"click"、"mouseenter"等事件类型字符串
 	 * 						2、{ name: "...", query: ... }，其中name表示事件类型，比如"click"、"mousemove"，query表示过滤条件，同ECharts的on函数的query参数
 	 * @param handler 事件处理函数，格式为：function(...){ ... }，参数与底层ECharts相同，函数内部this指向chart
 	 */
@@ -8932,11 +8876,11 @@ EU.inflateRendererCommons = function(renderer)
 	{
 		var re;
 		
-		var actualType = SPT.actualEventTypeForData(type);
-		if(actualType != null)
-			re = { name: actualType, query: "series" };
+		//默认应绑定至带有数据信息的系列上
+		if(CF.isString(type))
+			re = { name: type, query: "series" };
 		else
-			re = (CF.isString(type) ? { name: type } : type);
+			re = type;
 		
 		return re;
 	};
@@ -8944,7 +8888,7 @@ EU.inflateRendererCommons = function(renderer)
 	renderer.additions = (renderer.additions || {});
 	
 	if(renderer.additions.defaultLinkEventType == null)
-		renderer.additions.defaultLinkEventType = "click.data";
+		renderer.additions.defaultLinkEventType = "click";
 	
 	return renderer;		
 };
