@@ -703,6 +703,7 @@ $.inflateDashboardDesignEditor = function(po)
 			return false;
 		
 		tab = (tab == null ? po.getCurrentEditTab() : tab);
+		replaceTo = (replaceTo == null ? "" : replaceTo);
 		options = (options || { replaceAll: false,  replaceInfo: null });
 		
 		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
