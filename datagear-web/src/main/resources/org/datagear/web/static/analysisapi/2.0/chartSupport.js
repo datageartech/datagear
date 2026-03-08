@@ -4954,6 +4954,8 @@ SPT.tableRenderer = function(plugin, config)
 				renderCell: undefined,
 				//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 				carousel: undefined,
+				//服务端分页，格式参考this._processServerSidePagingOptions()函数
+				serverSidePaging: undefined,
 				//是否禁用条纹样式效果
 				disableStripe: false,
 				//是否禁用悬浮样式效果
@@ -5384,7 +5386,24 @@ SPT.tableRenderer = function(plugin, config)
 		 *   serverSidePaging:
 		 *   {
 		 *      //必填，将data中的分页查询信息设置为图表数据集参数
-		 *      param: function(data, chart){ ... },
+		 *      param: 
+		 *      {
+		 *        "<分页数据data属性路径>" : 数值、{ dataSet: 数值、param: 数值、"<参数名>" },
+		 *        ...
+		 *      }、
+		 *      [
+		 *        {
+		 *          name: "<分页数据data属性路径>",
+		 *          index: 数值、{ dataSet: 数值、param: 数值、"<参数名>",
+		 *          //可选，自定义源参数值处理函数，返回要设置的目标参数值
+		 *          //sourceValue 分页数据data中name的值
+		 *          //data 分页数据data
+		 *          value: function(sourceValue, data){ return ...; }
+		 *        },
+		 *        ...
+		 *      ]、
+		 *      //自定义设置函数
+		 *      function(data, chart){ ... },
 		 *      //可选（与totalFieldName、totalValue三选一），数据集附加数据中总记录数关键字
 		 *      totalAdditionName: "...",
 		 *      //可选（与totalAdditionName、totalValue三选一），附件数据集中总记录数字段名
@@ -5437,7 +5456,19 @@ SPT.tableRenderer = function(plugin, config)
 				}
 				else
 				{
-					serverSidePaging.param(data, chart);
+					if(CF.isFunction(serverSidePaging.param))
+						serverSidePaging.param(data, chart);
+					else
+					{
+						let paramBatchSet =
+						{
+							target: chart,
+							data: serverSidePaging.param
+						};
+						
+						chart.dashboard().batchSetDataSetParamValues(data, paramBatchSet, data);
+					}
+					
 					chart.refresh();
 				}
 			};
