@@ -17,6 +17,7 @@
 
 package org.datagear.web.analysis;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ public class WebDashboardQueryConverter
 {
 	private DashboardQueryConverter dashboardQueryConverter;
 
+	private DataSetQueryParams dataSetQueryParams = new DataSetQueryParams();
+
 	public WebDashboardQueryConverter()
 	{
 		super();
@@ -60,6 +63,16 @@ public class WebDashboardQueryConverter
 	public void setDashboardQueryConverter(DashboardQueryConverter dashboardQueryConverter)
 	{
 		this.dashboardQueryConverter = dashboardQueryConverter;
+	}
+
+	public DataSetQueryParams getDataSetQueryParams()
+	{
+		return dataSetQueryParams;
+	}
+
+	public void setDataSetQueryParams(DataSetQueryParams dataSetQueryParams)
+	{
+		this.dataSetQueryParams = dataSetQueryParams;
 	}
 
 	/**
@@ -98,7 +111,7 @@ public class WebDashboardQueryConverter
 			AnalysisUser analysisUser)
 	{
 		DashboardQuery re = this.dashboardQueryConverter.convert(query, chartDefs);
-		inflateAnalysisUser(re, analysisUser);
+		setBuiltinParamValues(re, analysisUser);
 
 		return re;
 	}
@@ -128,7 +141,7 @@ public class WebDashboardQueryConverter
 	public DataSetQuery convert(DataSetQuery dataSetQuery, DataSet dataSet, AnalysisUser analysisUser)
 	{
 		DataSetQuery re = getDataSetParamValueConverter().convert(dataSetQuery, dataSet);
-		inflateAnalysisUser(re, analysisUser);
+		setBuiltinParamValues(re, analysisUser, LocalDateTime.now());
 
 		return re;
 	}
@@ -172,7 +185,7 @@ public class WebDashboardQueryConverter
 	{
 		Map<String, ?> converted = convert(paramValues, dataSetParams);
 		DataSetQuery re = DataSetQuery.valueOf(converted);
-		inflateAnalysisUser(re, analysisUser);
+		setBuiltinParamValues(re, analysisUser, LocalDateTime.now());
 
 		return re;
 	}
@@ -190,14 +203,15 @@ public class WebDashboardQueryConverter
 	}
 
 	/**
-	 * 将{@linkplain AnalysisUser}填充至{@linkplain DashboardQuery}包含的所有{@linkplain DataSetQuery}。
+	 * 将内置参数设置至{@linkplain DashboardQuery}包含的所有{@linkplain DataSetQuery}。
 	 * 
 	 * @param query
 	 * @param analysisUser
 	 */
-	public void inflateAnalysisUser(DashboardQuery query, AnalysisUser analysisUser)
+	public void setBuiltinParamValues(DashboardQuery query, AnalysisUser analysisUser)
 	{
 		List<String> analysisRoleNames = analysisUser.getEnabledRoleNames();
+		LocalDateTime dateTime = LocalDateTime.now();
 
 		Map<String, ChartQuery> chartQueries = query.getChartQueries();
 
@@ -208,33 +222,47 @@ public class WebDashboardQueryConverter
 
 			for (DataSetQuery dataSetQuery : dataSetQueries)
 			{
-				analysisUser.setParamValue(dataSetQuery, analysisRoleNames);
+				setBuiltinParamValues(dataSetQuery, analysisUser, analysisRoleNames, dateTime);
 			}
 		}
 	}
 
 	/**
-	 * 将{@linkplain AnalysisUser}填充至{@linkplain DataSetQuery}。
+	 * 将内置参数设置至{@linkplain DataSetQuery}。
 	 * 
 	 * @param query
 	 * @param user
 	 */
-	public void inflateAnalysisUser(DataSetQuery query, User user)
+	public void setBuiltinParamValues(DataSetQuery query, User user)
 	{
 		AnalysisUser analysisUser = toAnalysisUser(user);
-		inflateAnalysisUser(query, analysisUser);
+		setBuiltinParamValues(query, analysisUser, getAnalysisRoleNames(analysisUser), LocalDateTime.now());
 	}
 
 	/**
-	 * 将{@linkplain AnalysisUser}填充至{@linkplain DataSetQuery}。
+	 * 将内置参数设置至{@linkplain DataSetQuery}。
 	 * 
 	 * @param query
 	 * @param analysisUser
+	 * @param dateTime
 	 */
-	public void inflateAnalysisUser(DataSetQuery query, AnalysisUser analysisUser)
+	protected void setBuiltinParamValues(DataSetQuery query, AnalysisUser analysisUser, LocalDateTime dateTime)
 	{
-		List<String> analysisRoleNames = analysisUser.getEnabledRoleNames();
-		analysisUser.setParamValue(query, analysisRoleNames);
+		setBuiltinParamValues(query, analysisUser, getAnalysisRoleNames(analysisUser), dateTime);
+	}
+
+	/**
+	 * 将内置参数设置至{@linkplain DataSetQuery}。
+	 * 
+	 * @param query
+	 * @param analysisUser
+	 * @param analysisRoleNames
+	 * @param dateTime
+	 */
+	protected void setBuiltinParamValues(DataSetQuery query, AnalysisUser analysisUser, List<String> analysisRoleNames,
+			LocalDateTime dateTime)
+	{
+		this.dataSetQueryParams.setParamValues(query, analysisUser, analysisRoleNames, dateTime);
 	}
 
 	/**
@@ -246,6 +274,11 @@ public class WebDashboardQueryConverter
 	public AnalysisUser toAnalysisUser(User user)
 	{
 		return new AnalysisUser(user);
+	}
+
+	protected List<String> getAnalysisRoleNames(AnalysisUser analysisUser)
+	{
+		return analysisUser.getEnabledRoleNames();
 	}
 
 	protected DataSetParamValueConverter getDataSetParamValueConverter()

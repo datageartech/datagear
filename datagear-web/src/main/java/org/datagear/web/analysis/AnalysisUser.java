@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetQuery;
 import org.datagear.management.domain.User;
 
 /**
@@ -41,27 +39,6 @@ import org.datagear.management.domain.User;
 public class AnalysisUser implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * 内置数据集参数：当前用户。
-	 * <p>
-	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
-	 * </p>
-	 */
-	public static final String DATA_SET_PARAM_NAME_CURRENT_USER = DataSetQuery.BUILTIN_PARAM_PREFIX + "USER";
-
-	/**
-	 * 内置数据集参数：当前角色名集。
-	 * <p>
-	 * 在数据集的参数化语境内，虽然可以通过{@code DG_USERS.ROLES}获取角色名集，但是语法较为繁琐，
-	 * 考虑到角色名集可能使用较频繁，所以单独定义。
-	 * </p>
-	 * <p>
-	 * 注意：谨慎重构此常量值，因为它可能已被用于系统已创建的数据集中，重构它将导致这些数据集执行出错。
-	 * </p>
-	 */
-	public static final String DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES = DataSetQuery.BUILTIN_PARAM_PREFIX
-			+ "ROLE_NAMES";
 
 	/** ID */
 	private String id;
@@ -193,41 +170,6 @@ public class AnalysisUser implements Serializable
 	{
 		return getClass().getSimpleName() + " [id=" + id + ", name=" + name + ", realName=" + realName + ", admin="
 				+ admin + ", anonymous=" + anonymous + ", roles=" + roles + "]";
-	}
-
-	/**
-	 * 将此{@linkplain AnalysisUser}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_USER}名、
-	 * {@linkplain #getEnabledRoleNames(AnalysisUser)}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES}
-	 * 名加入{@linkplain DataSetQuery#getParamValues()}。
-	 * <p>
-	 * 使得参数化数据集{@linkplain DataSet#getResult(DataSetQuery)}可支持根据当前数据分析用户、角色返回不同的数据。
-	 * </p>
-	 * 
-	 * @param dataSetQuery
-	 */
-	public void setParamValue(DataSetQuery dataSetQuery)
-	{
-		setParamValue(dataSetQuery, getEnabledRoleNames());
-	}
-
-	/**
-	 * 将此{@linkplain AnalysisUser}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_USER}名、
-	 * {@code analysisRoleNames}以{@linkplain #DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES}
-	 * 名加入{@linkplain DataSetQuery#getParamValues()}。
-	 * <p>
-	 * 使得参数化数据集{@linkplain DataSet#getResult(DataSetQuery)}可支持根据当前数据分析用户、角色返回不同的数据。
-	 * </p>
-	 * 
-	 * @param dataSetQuery
-	 * @param analysisRoleNames
-	 */
-	public void setParamValue(DataSetQuery dataSetQuery, List<String> analysisRoleNames)
-	{
-		if (analysisRoleNames == null)
-			throw new IllegalArgumentException("[analysisRoleNames] required");
-
-		dataSetQuery.setParamValue(DATA_SET_PARAM_NAME_CURRENT_USER, this);
-		dataSetQuery.setParamValue(DATA_SET_PARAM_NAME_CURRENT_ROLE_NAMES, analysisRoleNames);
 	}
 
 	/**
