@@ -20,5 +20,5 @@
 页脚
 -->
 <div class="page-foot text-right text-xs opacity-50 text-color-secondary pr-1 flex-grow-0">
-	<span class="text-color-secondary">Copyright 2018-2025 datagear.tech</span>
+	<span class="text-color-secondary">Copyright 2018-2026 datagear.tech</span>
 </div>
