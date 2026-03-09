@@ -7927,12 +7927,21 @@ EU.registerMap = function(chart, name, complete)
 	name = (CF.isArray(name) ? name : [ name ]);
 	
 	var echarts = EU._echarts();
-	
 	var needLoads = [];
 	
 	for(let i=0; i<name.length; i++)
 	{
+		let needLoad = false;
+		
 		if(echarts.getMap(name[i]) == null)
+			needLoad = true;
+		else
+		{
+			let state = EU.MAP_REGISTER_STATES[name[i]];
+			needLoad = (state != null && state.fetchOk === false);
+		}
+		
+		if(needLoad)
 			needLoads.push(name[i]);
 	}
 	
@@ -7951,55 +7960,58 @@ EU.registerMap = function(chart, name, complete)
 		let myName = name[i];
 		let state = EU.MAP_REGISTER_STATES[myName];
 		
-		if(state == null)
+		if(state == null || state.fetchOk === false)
 		{
+			state = { fetchOk: undefined, loadPromise: undefined };
 			let mapUrl = chart.mapURL(myName);
-			state =
+			let loadPromise = new Promise(function(resolve, reject)
 			{
-				loadPromise: new Promise(function(resolve, reject)
+				fetch(mapUrl).then((response) =>
 				{
-					fetch(mapUrl).then((response) =>
+					if(response.ok)
 					{
-						if(response.ok)
+						let headers = response.headers;
+						let contentType = (headers.get("Content-Type") || "");
+						//是否SVG地图
+						let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(mapUrl));
+						
+						if(isSvg)
 						{
-							let headers = response.headers;
-							let contentType = (headers.get("Content-Type") || "");
-							//是否SVG地图
-							let isSvg = (/svg/i.test(contentType) || /(\.svg$)|(\.svg[\?\#])/i.test(mapUrl));
-							
-							if(isSvg)
+							response.text().then((svgText) =>
 							{
-								response.text().then((svgText) =>
-								{
-									echarts.registerMap(myName, {svg: svgText});
-									resolve();
-								});
-							}
-							else
-							{
-								response.json().then((geoJSON) =>
-								{
-									echarts.registerMap(myName, {geoJSON: geoJSON});
-									resolve();
-								});
-							}
+								echarts.registerMap(myName, {svg: svgText});
+								resolve();
+							});
 						}
 						else
 						{
-							//使用一个空白GeoJSON，避免因未成功注册地图导致图表交互报错
-							let geoJSON = {"type": "FeatureCollection","features": []};
-							echarts.registerMap(myName, {geoJSON: geoJSON});
-							resolve();
+							response.json().then((geoJSON) =>
+							{
+								echarts.registerMap(myName, {geoJSON: geoJSON});
+								resolve();
+							});
 						}
-					})
-					.catch((e) =>
+						
+						state.fetchOk = true;
+					}
+					else
 					{
-						EU.MAP_REGISTER_STATES[myName] = null;
-						reject();
-					});
+						//使用一个空白GeoJSON，避免因未成功注册地图导致图表交互报错
+						let geoJSON = {"type": "FeatureCollection","features": []};
+						echarts.registerMap(myName, {geoJSON: geoJSON});
+						resolve();
+						
+						state.fetchOk = false;
+					}
 				})
-			};
+				.catch((e) =>
+				{
+					EU.MAP_REGISTER_STATES[myName] = null;
+					reject();
+				});
+			});
 			
+			state.loadPromise = loadPromise;
 			EU.MAP_REGISTER_STATES[myName] = state;
 		}
 		
