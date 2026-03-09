@@ -191,7 +191,7 @@
 	po.i18n.find = "<@spring.message code='find' />";
 	po.i18n.noMatchesFound = "<@spring.message code='noMatchesFound' />";
 	po.i18n.replacedWithCount = "<@spring.message code='replacedWithCount' />";
-	po.i18n.nextPalce = "<@spring.message code='nextPalce' />";
+	po.i18n.findNextPlace = "<@spring.message code='findNextPlace' />";
 	
 	//dashboardDesign.js
 	$.inflateDashboardDesignEditor(po);

@@ -2913,7 +2913,7 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}codeReplaceSourceValue" v-model="pm.codeReplace.model.source" type="text"
-							class="input w-full" name="source" required>
+							class="input w-full" name="source" required autofocus>
 						</p-inputtext>
 					</div>
 				</div>
@@ -2923,16 +2923,16 @@ page_palette.ftl
 					</label>
 					<div class="field-input col-12">
 						<p-inputtext id="${pid}codeReplaceToValue" v-model="pm.codeReplace.model.replaceTo" type="text"
-							class="input w-full" name="replaceTo" autofocus>
+							class="input w-full" name="replaceTo">
 						</p-inputtext>
 					</div>
 				</div>
 			</div>
 			<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
-				<p-button type="submit" label="<@spring.message code='replace' />"></p-button>
-				<p-button type="button" severity="secondary" label="<@spring.message code='nextPalce' />"
+				<p-button type="button" severity="secondary" label="<@spring.message code='findNextPlace' />"
 					@click="onCodeReplaceSearchNext($event)">
 				</p-button>
+				<p-button type="submit" label="<@spring.message code='replace' />"></p-button>
 				<p-button type="button" severity="secondary" label="<@spring.message code='replaceAll' />"
 					@click="onReplaceAllInCodeEditor($event)">
 				</p-button>
