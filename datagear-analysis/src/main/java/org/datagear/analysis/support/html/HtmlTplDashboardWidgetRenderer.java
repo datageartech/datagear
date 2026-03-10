@@ -484,8 +484,9 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		HtmlChartWidget widget = new HtmlChartWidget(this.htmlChartWidgetIdForGetException,
 				"HtmlChartWidgetForException", ChartDefinition.EMPTY_DATA_SET_BINDS, plugin);
 
+		// 这里不添加t.getMessage()，因为其中可能存在敏感信息，不应发送至客户端
 		widget.setAttrValue(plugin.getAttrName(), "Chart widget '"
-				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
+				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception, see server logs for detail");
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + exceptionWidgetId
