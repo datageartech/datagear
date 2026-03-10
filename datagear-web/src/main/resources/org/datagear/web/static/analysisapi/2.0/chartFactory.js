@@ -6663,22 +6663,22 @@ CF.inflateChartTheme = function(theme)
  * }
  * 
  * 对于依赖库，通常有以下几种定义格式：
- * 1、{ name: "mylib" }
- * 		表示不提供实际依赖库，希望运行环境加载任意版本的mylib库
- * 2、{ name: "mylib", acceptVersion: "^1.0" }
- * 		表示不提供实际依赖库，希望运行环境加载匹配"^1.0"版本的mylib库
- * 3、{ name: "mylib", version: "0.9", redirectVersion: "^1.0" }
- * 		表示不提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的mylib库，并且在没有匹配时无效
- * 4、{ name: "mylib", version: "0.9", redirectVersion: "^1.0", source: ... }
- * 		表示提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的mylib库，并且在没有匹配时作为候选加载库
- * 5、{ name: "mylib", version: "0.9", source: ... }
+ * 1、"somelib"、{ name: "somelib" }
+ * 		表示不提供实际依赖库，希望运行环境加载任意版本的somlib库
+ * 2、{ name: "somelib", acceptVersion: "^1.0" }
+ * 		表示不提供实际依赖库，希望运行环境加载匹配"^1.0"版本的somlib库
+ * 3、{ name: "somelib", version: "0.9", redirectVersion: "^1.0" }
+ * 		表示不提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的somlib库，并且在没有匹配时无效
+ * 4、{ name: "somelib", version: "0.9", redirectVersion: "^1.0", source: ... }
+ * 		表示提供实际依赖库，对于希望加载0.9版本的需求，重定向至匹配"^1.0"版本的somlib库，并且在没有匹配时作为候选加载库
+ * 5、{ name: "somelib", version: "0.9", source: ... }
  * 		表示提供实0.9版本的际依赖库，作为候选加载库
- * 6、{ name: "mylib", version: "0.9", source: ..., acceptVersion: "^1.0" }
- * 		表示提供实0.9版本的际依赖库，作为候选加载库，同时支持兼容加载"^1.0"版本的mylib库
+ * 6、{ name: "somelib", version: "0.9", source: ..., acceptVersion: "^1.0" }
+ * 		表示提供实0.9版本的际依赖库，作为候选加载库，同时支持兼容加载"^1.0"版本的somlib库
  * 
  * 对于公用库，建议采用第2、3、4种格式，对于私有库，建议采用第5、6种格式。
  * 
- * @param lib 库对象、数组
+ * @param lib 库对象、名称字符串、数组
  * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
  * @param renderContext
  * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
@@ -6711,6 +6711,9 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 	{
 		let lib = libs[i];
 		
+		if(lib != null && CF.isString(lib))
+			lib = { name: lib };
+
 		if(lib == null || CF.isEmpty(lib.name))
 			continue;
 		
