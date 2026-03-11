@@ -62,11 +62,25 @@
 .dg-chart-table.dg-hide-title .dg-chart-table-title{
 	display: none;
 }
-.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable thead th,
-.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable thead td,
-.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable tbody th,
-.dg-chart-table.dg-text-nowrap .dg-chart-table-content table.dataTable tbody td{
+.dg-chart-table .dg-chart-table-content table.dataTable thead th,
+.dg-chart-table .dg-chart-table-content table.dataTable thead td{
 	white-space: nowrap;
+}
+.dg-chart-table.dg-whitespace-nowrap .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-whitespace-nowrap .dg-chart-table-content table.dataTable tbody td{
+	white-space: nowrap;
+}
+.dg-chart-table.dg-whitespace-normal .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-whitespace-normal .dg-chart-table-content table.dataTable tbody td{
+	white-space: normal;
+}
+.dg-chart-table.dg-whitespace-pre .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-whitespace-pre .dg-chart-table-content table.dataTable tbody td{
+	white-space: pre;
+}
+.dg-chart-table.dg-whitespace-pre-wrap .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table.dg-whitespace-pre-wrap .dg-chart-table-content table.dataTable tbody td{
+	white-space: pre-wrap;
 }
 .dg-chart-table .dg-chart-container{
 	position: absolute;

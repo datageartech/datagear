@@ -4960,8 +4960,12 @@ SPT.tableRenderer = function(plugin, config)
 				disableStripe: false,
 				//是否禁用悬浮样式效果
 				disableHover: false,
-				//是否禁用文本不换行
-				disableWrapText: false,
+				//空白符处理格式
+				//"nowrap"   始终不换行
+				//"normal"   默认不换行，直到父元素空间不够时换行
+				//"pre"      始终保留原始格式
+				//"pre-wrap" 默认保留原始格式，直到父元素空间不够时换行
+				whitespaceFormat: "nowrap",
 				
 				//DataTable配置项
 				columns: columns,
@@ -5011,8 +5015,8 @@ SPT.tableRenderer = function(plugin, config)
 			if(carousel.enable)
 				chartEle.addClass("dg-chart-table-carousel");
 			
-			if(!options.disableWrapText)
-				chartEle.addClass("dg-text-nowrap");
+			if(options.whitespaceFormat)
+				chartEle.addClass("dg-whitespace-"+options.whitespaceFormat);
 			
 			var containerEle = jQuery("<div class='dg-chart-container' />").appendTo(chartEle);
 			var chartTitle = jQuery("<div class='dg-chart-table-title' />").appendTo(containerEle);
@@ -5088,7 +5092,8 @@ SPT.tableRenderer = function(plugin, config)
 			
 			this._stopCarousel(chart);
 			chart.internal().destroy(true);
-			chartEle.removeClass("dg-chart-table dg-hide-title dg-text-nowrap dg-chart-table-carousel");
+			chartEle.removeClass("dg-chart-table dg-hide-title dg-chart-table-carousel"
+				+ " dg-whitespace-nowrap dg-whitespace-normal dg-whitespace-pre dg-whitespace-pre-wrap");
 			chartEle.removeClass(chart.liveValue(CF.builtinPropName("TableChartLocalStyleName")));
 			jQuery(".dg-chart-container", chartEle).remove();
 		},
