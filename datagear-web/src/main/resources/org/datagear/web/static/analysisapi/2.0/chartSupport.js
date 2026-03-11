@@ -5332,49 +5332,51 @@ SPT.tableRenderer = function(plugin, config)
 		 */
 		_processCarouselOptions: function(chart, options)
 		{
+			var carousel = this._carouselOption(options);
+			
 			//标准轮播格式
 			var carouselObj =
 			{
 				//是否开启，true 开启；false 禁用；"auto" 只有在行溢出时才开启
-				enable: false,
+				enable: (carousel != null),
 				//滚动间隔毫秒数，或者返回间隔毫秒数的函数：
 				//currentRow 当前可见行
 				//visibleHeight 当前可见行的剩余可见高度
 				//height 当前可见行高度
 				//function(currentRow, visibleHeight, height){ return ...; }
 				interval: 50,
-				//滚动跨度像素数，或者返回跨度像素数的函数：
-				//function(currentRow, visibleHeight, height){ return ...; }
-				span: 1,
 				//是否在鼠标悬停时暂停轮播
 				pauseOnHover: true,
 				//是否隐藏纵向滚动条
 				hideVerticalScrollbar: true,
+				
+				//后面这两个选项暂不开放，因为可能会导致上述interval函数的参数值混乱
+				
+				//滚动跨度像素数，或者返回跨度像素数的函数：
+				//function(currentRow, visibleHeight, height){ return ...; }
+				span: 1,
 				//溢出删除个数，小于这个数的轮播溢出行数，不会执行删除操作
 				overflowCount: 2
 			};
 			
-			var carousel = this._carouselOption(options);
-			
-			if(carousel == null)
+			if(carousel != null)
 			{
-				
-			}
-			//true、false、"auto"
-			else if(carousel === true || carousel === false || CF.isString(carousel))
-			{
-				carouselObj.enable = carousel;
-			}
-			//间隔数值、函数
-			else if(CF.isNumber(carousel) || CF.isFunction(carousel))
-			{
-				carouselObj.enable = true;
-				carouselObj.interval = carousel;
-			}
-			//轮播对象
-			else
-			{
-				carouselObj = CF.extend(true, carouselObj, carousel);
+				//true、false、"auto"
+				if(carousel === true || carousel === false || CF.isString(carousel))
+				{
+					carouselObj.enable = carousel;
+				}
+				//间隔数值、函数
+				else if(CF.isNumber(carousel) || CF.isFunction(carousel))
+				{
+					carouselObj.enable = true;
+					carouselObj.interval = carousel;
+				}
+				//轮播对象
+				else
+				{
+					carouselObj = CF.extend(true, carouselObj, carousel);
+				}
 			}
 			
 			this._carouselOption(options, carouselObj);
@@ -6007,6 +6009,7 @@ SPT.tableRenderer = function(plugin, config)
 			
 			var carousel = this._carouselOption(renderOptions);
 			var doCarousel = true;
+			var interval = null;
 			
 			//元素隐藏时会因为高度计算有问题导致浏览器卡死，所以隐藏式不实际执行轮播
 			if(scrollBody.is(":hidden"))
@@ -6025,9 +6028,9 @@ SPT.tableRenderer = function(plugin, config)
 				scrollTop = (Math.abs(scrollTop) || 0);
 				
 				let tableBody = dataTable.table().body();
-				let currentRow = undefined;
-				let currentRowHeight = undefined;
-				let currentRowVisibleHeight = undefined;
+				let currentRow = null;
+				let currentRowHeight = null;
+				let currentRowVisibleHeight = null;
 				
 				let offset = 0;
 				let removeRowIndexes = [];
@@ -6085,26 +6088,16 @@ SPT.tableRenderer = function(plugin, config)
 						carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : carousel.span);
 				
 				scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
-			}
-			
-			var interval = null;
-			
-			if(!CF.isFunction(carousel.interval))
-			{
-				interval = carousel.interval;
-			}
-			else
-			{
-				if(doCarousel)
-				{
-					interval = carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
-				}
+				
+				if(!CF.isFunction(carousel.interval))
+					interval = carousel.interval;
 				else
-				{
-					//没有执行轮播时，无法执行interval函数，所以采用默认处理间隔（同轮播默认间隔）
-					interval = 50;
-				}
+					interval = carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight);
 			}
+			
+			//没有执行轮播时，无法执行interval函数，所以采用默认处理间隔（同轮播默认间隔）
+			if(!doCarousel)
+				interval = 50;
 			
 			var intervalId = setTimeout(() =>
 			{
