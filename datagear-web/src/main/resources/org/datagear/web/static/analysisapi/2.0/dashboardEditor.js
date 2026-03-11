@@ -1413,7 +1413,7 @@ DE.getHyperlinkAttr = function(ele)
 	
 	ele = DE._editElement(ele);
 	
-	attrObj.content = CF.trim(ele.html());
+	attrObj.content = CF.trim(CF.eleHtml(ele));
 	attrObj.href = (CF.eleAttr(ele, "href") || "");
 	attrObj.target = (CF.eleAttr(ele, "target") || "");
 	
