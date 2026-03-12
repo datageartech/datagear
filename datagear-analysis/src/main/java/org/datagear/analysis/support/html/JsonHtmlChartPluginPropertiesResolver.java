@@ -51,11 +51,6 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 
 	/**
 	 * {@linkplain DataSign#getName()}命名规范。
-	 * <p>
-	 * 对于{@linkplain DashboardApiVersion#V2}起的插件，
-	 * 必须以{@code [a-z]}、{@code [A-Z]}、{@code '_'}、{@code '$'}之一开头，后续只能额外包含{@code [0-9]}字符，
-	 * 因为{@linkplain DataSetBind#getFieldSigns()}中需要以分隔符层级拼接{@linkplain DataSign#getName()}，必须限制命名规范以避免歧义。
-	 * </p>
 	 */
 	public static final Pattern DATA_SIGN_NAME_PATTERN = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*$");
 
@@ -96,6 +91,11 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 
 	/**
 	 * 校验{@linkplain DataSign#getName()}。
+	 * <p>
+	 * 对于{@linkplain DashboardApiVersion#V2}起的插件，
+	 * 必须以{@code [a-z]}、{@code [A-Z]}、{@code '_'}、{@code '$'}之一开头，且后续只能额外包含{@code [0-9]}字符，
+	 * 因为{@linkplain DataSetBind#getFieldSigns()}中需要以分隔符层级拼接{@linkplain DataSign#getName()}，必须限制命名规范以避免歧义。
+	 * </p>
 	 * 
 	 * @param dataSign
 	 */
