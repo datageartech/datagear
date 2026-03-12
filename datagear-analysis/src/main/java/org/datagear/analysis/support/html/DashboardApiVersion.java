@@ -15,7 +15,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.datagear.web.analysis;
+package org.datagear.analysis.support.html;
 
 import org.datagear.util.StringUtil;
 

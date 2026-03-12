@@ -64,12 +64,14 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 	{
 		T chartPlugin = getChartPlugin();
 
+		String apiVersion = convertToString(properties.get(JSON_PROPERTY_API_VERSION));
+		chartPlugin.setApiVersion(DashboardApiVersion.trimVersion(apiVersion));
+
 		String usage = convertToString(properties.get(JSON_PROPERTY_USAGE));
 		usage = HtmlChartPluginUsage.normalize(usage);
 
 		chartPlugin.setUsage(usage);
 		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
-		chartPlugin.setApiVersion(convertToString(properties.get(JSON_PROPERTY_API_VERSION)));
 		return super.resolveProperties(properties);
 	}
 }

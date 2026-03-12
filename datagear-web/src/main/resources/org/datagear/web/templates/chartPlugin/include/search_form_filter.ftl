@@ -16,7 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
-<#assign DashboardApiVersion=statics['org.datagear.web.analysis.DashboardApiVersion']>
+<#assign DashboardApiVersion=statics['org.datagear.analysis.support.html.DashboardApiVersion']>
 <#include "../../include/page_search_form_dropdown.ftl">
 <script>
 (function(po)

@@ -18,7 +18,7 @@
 -->
 <#assign ResultDataFormat=statics['org.datagear.analysis.ResultDataFormat']>
 <#assign DataSign=statics['org.datagear.analysis.DataSign']>
-<#assign DashboardApiVersion=statics['org.datagear.web.analysis.DashboardApiVersion']>
+<#assign DashboardApiVersion=statics['org.datagear.analysis.support.html.DashboardApiVersion']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>

@@ -386,9 +386,9 @@ $.inflateDashboardDesignEditor = function(po)
 	
 	//org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_ATTR_NAME_API_VERSION
 	po.apiVersionRegexInHtml = /dg\-api\-version\=['"]?([\d\.]*)['"]?/;
-	//org.datagear.web.analysis.DashboardApiVersion.V2
+	//org.datagear.analysis.support.html.DashboardApiVersion.V2
 	po.latestApiVersion = "2.0";
-	//org.datagear.web.analysis.DashboardApiVersion.V1
+	//org.datagear.analysis.support.html.DashboardApiVersion.V1
 	po.apiVersionV1 = "1.0";
 	
 	po.isLatestApiVersionInCodeEditor = function(codeEditor)
@@ -427,7 +427,7 @@ $.inflateDashboardDesignEditor = function(po)
 			apiVersion = (matches && matches.length > 1 ? matches[1] : null);
 		}
 		
-		//默认应设为：org.datagear.web.analysis.DashboardApiVersion.V1
+		//默认应设为：org.datagear.analysis.support.html.DashboardApiVersion.V1
 		if(apiVersion == null)
 			apiVersion = po.apiVersionV1;
 		

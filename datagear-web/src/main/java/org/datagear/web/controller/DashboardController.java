@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.TplDashboardWidgetResManager;
+import org.datagear.analysis.support.html.DashboardApiVersion;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.SimpleHtmlTplOption;
@@ -55,7 +56,6 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.function.OnceSupplier;
 import org.datagear.util.query.PagingData;
-import org.datagear.web.analysis.DashboardApiVersion;
 import org.datagear.web.config.ApplicationProperties;
 import org.datagear.web.util.AnalysisProjectAwareSupport;
 import org.datagear.web.util.OperationMessage;

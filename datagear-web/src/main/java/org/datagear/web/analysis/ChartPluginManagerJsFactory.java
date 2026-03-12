@@ -34,6 +34,7 @@ import org.datagear.analysis.DataSign;
 import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.form.PropertyType;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
+import org.datagear.analysis.support.html.DashboardApiVersion;
 import org.datagear.analysis.support.html.ExceptionMsgHtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginJsDefResolver;

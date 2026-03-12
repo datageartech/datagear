@@ -76,7 +76,7 @@ var builtinMaps = (DF.builtinMaps || (DF.builtinMaps = []));
 
 var builtinMapBaseURL = (DF.builtinMapBaseURL || (DF.builtinMapBaseURL = "/static/analysislib/geojson/"));
 
-/** 看板版本常量，参考：org.datagear.web.analysis.DashboardApiVersion */
+/** 看板版本常量，参考：org.datagear.analysis.support.html.DashboardApiVersion */
 var apiVersion = (dashboardFactory.apiVersion || (dashboardFactory.apiVersion = { V1: "1.0", V2: "2.0" }));
 
 //----------------------------------------
@@ -3371,7 +3371,7 @@ dashboardProto.destroyForm = function(form)
 
 /**
  * 获取API版本。
- * 返回值规则同：org.datagear.web.analysis.DashboardApiVersion.trimVersion(String)
+ * 返回值规则同：org.datagear.analysis.support.html.DashboardApiVersion.trimVersion(String)
  * 
  * @return 版本号
  */

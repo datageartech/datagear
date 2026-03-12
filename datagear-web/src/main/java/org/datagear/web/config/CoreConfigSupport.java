@@ -120,7 +120,6 @@ import org.datagear.util.html.HtmlFilter;
 import org.datagear.util.sqlvalidator.InvalidPatternSqlValidator;
 import org.datagear.util.sqlvalidator.SqlValidator;
 import org.datagear.util.version.ChangelogResolver;
-import org.datagear.web.analysis.ApiVersionHtmlChartPluginLoadedProcessor;
 import org.datagear.web.analysis.ChartPluginManagerJsFactory;
 import org.datagear.web.analysis.SessionDashboardInfoSupport;
 import org.datagear.web.analysis.WebDashboardQueryConverter;
@@ -787,8 +786,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public HtmlChartPluginLoader htmlChartPluginLoader()
 	{
 		HtmlChartPluginLoader bean = new HtmlChartPluginLoader();
-		bean.setLoadedProcessor(new ApiVersionHtmlChartPluginLoadedProcessor());
-
 		return bean;
 	}
 
