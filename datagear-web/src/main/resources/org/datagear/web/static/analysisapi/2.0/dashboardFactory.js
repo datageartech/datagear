@@ -1411,6 +1411,9 @@ dashboardProto._prepareDoRenderCharts = function()
 		if(this._isChartPreventHandle(chart))
 			continue;
 		
+		if(chart.statusPreInit())
+			this._initChart(chart);
+		
 		if(chart.statusInited() || chart.statusDestroyed())
 		{
 			chart.statusPreRender(true);
@@ -2727,16 +2730,19 @@ dashboardProto._addChartCareStatus = function(chart)
 	
 	if(chart.statusPreInit())
 	{
-		//应设为与看板状态保持一致
-		if(this._statusInited())
+		CF.executeSilently(() =>
 		{
-			chart.init();
-		}
-		else if(this.isAlive())
-		{
-			chart.init();
-			chart.statusPreRender(true);
-		}
+			//应设为与看板状态保持一致
+			if(this._statusInited())
+			{
+				chart.init();
+			}
+			else if(this.isAlive())
+			{
+				chart.init();
+				chart.statusPreRender(true);
+			}
+		});
 	}
 };
 
