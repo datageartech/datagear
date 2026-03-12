@@ -85,9 +85,6 @@ import org.datagear.util.i18n.Localizable;
  * }
  * </pre>
  * </code>
- * <p>
- * 此类是线程安全的。
- * </p>
  * 
  * @author datagear@163.com
  *
@@ -145,22 +142,42 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	@Deprecated
 	public static final String JSON_PROPERTY_CATEGORY_3_0_1 = "category";
 
+	private T chartPlugin;
+
 	public JsonChartPluginPropertiesResolver()
 	{
 		super();
 	}
 
+	public JsonChartPluginPropertiesResolver(T chartPlugin)
+	{
+		super();
+		this.chartPlugin = chartPlugin;
+	}
+
+	public T getChartPlugin()
+	{
+		return chartPlugin;
+	}
+
+	public void setChartPlugin(T chartPlugin)
+	{
+		this.chartPlugin = chartPlugin;
+	}
+
 	/**
-	 * 从映射表解析并设置{@linkplain ChartPlugin}属性。
+	 * 从映射表解析并设置{@linkplain #getChartPlugin()}属性。
 	 * <p>
 	 * 它会进行必要的类型转换。
 	 * </p>
 	 * 
-	 * @param chartPlugin
 	 * @param properties
+	 * @return {@linkplain #getChartPlugin()}
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, Map<String, ?> properties)
+	public T resolveProperties(Map<String, ?> properties)
 	{
+		T chartPlugin = getChartPlugin();
+
 		chartPlugin.setId(convertToString(properties.get(JSON_PROPERTY_ID)));
 		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
@@ -188,30 +205,32 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		chartPlugin.setContact(convertToString(properties.get(JSON_PROPERTY_CONTACT)));
 		chartPlugin.setIssueDate(convertToString(properties.get(JSON_PROPERTY_ISSUE_DATE)));
 		chartPlugin.setAdditions(convertToAdditions(properties.get(JSON_PROPERTY_ADDITIONS)));
+
+		return chartPlugin;
 	}
 
 	/**
-	 * 从JSON字符串解析并设置{@linkplain ChartPlugin}属性。
+	 * 从JSON字符串解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
-	 * @param chartPlugin
 	 * @param pluginJson
+	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, String pluginJson) throws IOException
+	public T resolveProperties(String pluginJson) throws IOException
 	{
-		resolveChartPluginProperties(chartPlugin, pluginJson, null);
+		return resolveProperties(pluginJson, null);
 	}
 
 	/**
-	 * 从JSON字符串解析并设置{@linkplain ChartPlugin}属性。
+	 * 从JSON字符串解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
-	 * @param chartPlugin
 	 * @param pluginJson
 	 * @param attributeFormJson
 	 *            允许{@code null}
+	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, String pluginJson, String attributeFormJson)
+	public T resolveProperties(String pluginJson, String attributeFormJson)
 			throws IOException
 	{
 		@SuppressWarnings("unchecked")
@@ -223,31 +242,31 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			properties.put(JSON_PROPERTY_ATTRIBUTE_FORM, attributeForm);
 		}
 
-		resolveChartPluginProperties(chartPlugin, properties);
+		return resolveProperties(properties);
 	}
 
 	/**
-	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
+	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
-	 * @param chartPlugin
 	 * @param pluginJsonIn
+	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, Reader pluginJsonIn) throws IOException
+	public T resolveProperties(Reader pluginJsonIn) throws IOException
 	{
-		resolveChartPluginProperties(chartPlugin, pluginJsonIn, null);
+		return resolveProperties(pluginJsonIn, null);
 	}
 
 	/**
-	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
+	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
-	 * @param chartPlugin
 	 * @param pluginJsonIn
 	 * @param attributeFormIn
 	 *            允许{@code null}
+	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, Reader pluginJsonIn, Reader attributeFormIn)
+	public T resolveProperties(Reader pluginJsonIn, Reader attributeFormIn)
 			throws IOException
 	{
 		@SuppressWarnings("unchecked")
@@ -259,40 +278,39 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			properties.put(JSON_PROPERTY_ATTRIBUTE_FORM, attributeForm);
 		}
 
-		resolveChartPluginProperties(chartPlugin, properties);
+		return resolveProperties(properties);
 	}
 
 	/**
-	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
+	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
-	 * @param chartPlugin
 	 * @param pluginJsonIn
 	 * @param encoding
+	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, InputStream pluginJsonIn, String encoding)
+	public T resolveProperties(InputStream pluginJsonIn, String encoding)
 			throws IOException
 	{
-		resolveChartPluginProperties(chartPlugin, pluginJsonIn, null, encoding);
+		return resolveProperties(pluginJsonIn, null, encoding);
 	}
 
 	/**
-	 * 从JSON输入流解析并设置{@linkplain ChartPlugin}属性。
+	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
-	 * @param chartPlugin
 	 * @param pluginJsonIn
 	 * @param attributeFormIn
 	 *            允许{@code null}
 	 * @param encoding
+	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(T chartPlugin, InputStream pluginJsonIn, InputStream attributeFormIn,
+	public T resolveProperties(InputStream pluginJsonIn, InputStream attributeFormIn,
 			String encoding) throws IOException
 	{
 		Reader reader = IOUtil.getReader(pluginJsonIn, encoding);
 		Reader reader1 = (attributeFormIn == null ? null : IOUtil.getReader(attributeFormIn, encoding));
-
-		resolveChartPluginProperties(chartPlugin, reader, reader1);
+		return resolveProperties(reader, reader1);
 	}
 
 	/**

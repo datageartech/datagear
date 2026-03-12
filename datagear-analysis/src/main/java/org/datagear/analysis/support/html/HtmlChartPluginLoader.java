@@ -607,10 +607,13 @@ public class HtmlChartPluginLoader
 	protected void inflateChartPluginProperties(HtmlChartPlugin plugin, Reader pluginJsonIn, Reader attributeFormIn,
 			Reader rendererIn) throws Exception
 	{
+		JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> propertiesResolver = createPluginPropertiesResolver(
+				plugin);
+
 		// 渲染器在独立文件中定义
 		if (rendererIn != null)
 		{
-			this.jsonPluginPropertiesResolver.resolveChartPluginProperties(plugin, pluginJsonIn, attributeFormIn);
+			propertiesResolver.resolveProperties(pluginJsonIn, attributeFormIn);
 			String rendererCodeValue = IOUtil.readString(rendererIn, false);
 			plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
 		}
@@ -620,7 +623,7 @@ public class HtmlChartPluginLoader
 
 			if (!StringUtil.isEmpty(jsDefContent.getPluginJson()))
 			{
-				this.jsonPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
+				propertiesResolver.resolveProperties(jsDefContent.getPluginJson());
 
 				// 内联渲染器格式
 				if (jsDefContent.hasPluginRenderer())
@@ -751,5 +754,11 @@ public class HtmlChartPluginLoader
 	protected HtmlChartPlugin createHtmlChartPlugin()
 	{
 		return new HtmlChartPlugin();
+	}
+
+	protected JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> createPluginPropertiesResolver(
+			HtmlChartPlugin plugin)
+	{
+		return new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>(plugin);
 	}
 }

@@ -18,6 +18,7 @@
 package org.datagear.analysis.support.html;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 
@@ -35,9 +36,6 @@ import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
  * }
  * </pre>
  * </code>
- * <p>
- * 此类是线程安全的。
- * </p>
  * 
  * @author datagear@163.com
  *
@@ -49,20 +47,29 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 	public static final String JSON_PROPERTY_PLATFORM_VERSION = HtmlChartPlugin.PROPERTY_PLATFORM_VERSION;
 	public static final String JSON_PROPERTY_API_VERSION = HtmlChartPlugin.PROPERTY_API_VERSION;
 
+	public static final Pattern DATA_SIGN_NAME_PATTERN = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*$");
+
 	public JsonHtmlChartPluginPropertiesResolver()
 	{
 		super();
 	}
 
-	@Override
-	public void resolveChartPluginProperties(T chartPlugin, Map<String, ?> properties)
+	public JsonHtmlChartPluginPropertiesResolver(T chartPlugin)
 	{
+		super(chartPlugin);
+	}
+
+	@Override
+	public T resolveProperties(Map<String, ?> properties)
+	{
+		T chartPlugin = getChartPlugin();
+
 		String usage = convertToString(properties.get(JSON_PROPERTY_USAGE));
 		usage = HtmlChartPluginUsage.normalize(usage);
 
 		chartPlugin.setUsage(usage);
-		super.resolveChartPluginProperties(chartPlugin, properties);
 		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
 		chartPlugin.setApiVersion(convertToString(properties.get(JSON_PROPERTY_API_VERSION)));
+		return super.resolveProperties(properties);
 	}
 }

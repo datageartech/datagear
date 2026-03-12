@@ -58,11 +58,9 @@ import org.junit.Test;
  */
 public class JsonChartPluginPropertiesResolverTest
 {
-	private JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>();
-
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Test
-	public void resolveChartPluginPropertiesTest() throws IOException
+	public void resolvePropertiesTest() throws IOException
 	{
 		Locale enLocale = new Locale("en");
 		Locale zhLocale = new Locale("zh");
@@ -72,7 +70,9 @@ public class JsonChartPluginPropertiesResolverTest
 					.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, IOUtil.CHARSET_UTF_8);
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());
@@ -418,7 +418,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Test
-	public void resolveChartPluginPropertiesTest_5_5_0() throws IOException
+	public void resolvePropertiesTest_5_5_0() throws IOException
 	{
 		Locale enLocale = new Locale("en");
 		Locale zhLocale = new Locale("zh");
@@ -429,8 +429,9 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-5.5.0.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
-					IOUtil.CHARSET_UTF_8);
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());
@@ -708,13 +709,15 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
-	public void resolveChartPluginPropertiesTest_author_issueDate() throws IOException
+	public void resolvePropertiesTest_author_issueDate() throws IOException
 	{
 		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
 				"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-author-issueDate.json");
 
 		TestChartPlugin chartPlugin = new TestChartPlugin();
-		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+		JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+				chartPlugin);
+		resolver.resolveProperties(jsonInputStream,
 				IOUtil.CHARSET_UTF_8);
 
 		assertEquals("author-issueDate", chartPlugin.getId());
@@ -723,13 +726,15 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
-	public void resolveChartPluginPropertiesTest_contact() throws IOException
+	public void resolvePropertiesTest_contact() throws IOException
 	{
 		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
 				"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-contact.json");
 
 		TestChartPlugin chartPlugin = new TestChartPlugin();
-		resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+		JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+				chartPlugin);
+		resolver.resolveProperties(jsonInputStream,
 				IOUtil.CHARSET_UTF_8);
 
 		assertEquals("contact", chartPlugin.getId());
@@ -739,7 +744,7 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
-	public void resolveChartPluginPropertiesTest_dataSetRange() throws IOException
+	public void resolvePropertiesTest_dataSetRange() throws IOException
 	{
 		{
 			InputStream jsonInputStream = getClass().getClassLoader()
@@ -747,7 +752,9 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSetRange-number.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream,
 					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("dataset-range-number", chartPlugin.getId());
@@ -766,7 +773,9 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSetRange.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream,
 					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
@@ -782,14 +791,16 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
-	public void resolveChartPluginPropertiesTest_string_categories() throws IOException
+	public void resolvePropertiesTest_string_categories() throws IOException
 	{
 		{
 			InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
 					"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-string-categories.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream,
 					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
@@ -820,7 +831,7 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
-	public void resolveChartPluginPropertiesTest_3_0_1() throws IOException
+	public void resolvePropertiesTest_3_0_1() throws IOException
 	{
 		Locale enLocale = new Locale("en");
 		Locale zhLocale = new Locale("zh");
@@ -831,7 +842,9 @@ public class JsonChartPluginPropertiesResolverTest
 							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-3.0.1.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream,
 					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
@@ -958,14 +971,16 @@ public class JsonChartPluginPropertiesResolverTest
 	}
 
 	@Test
-	public void resolveChartPluginPropertiesTest_5_4_0_dataSetSign() throws IOException
+	public void resolvePropertiesTest_5_4_0_dataSetSign() throws IOException
 	{
 		{
 			InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
 					"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-5.4.0-dataSetSign.json");
 
 			TestChartPlugin chartPlugin = new TestChartPlugin();
-			resolver.resolveChartPluginProperties(chartPlugin, jsonInputStream,
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream,
 					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("dataSetSign", chartPlugin.getId());
@@ -1094,15 +1109,19 @@ public class JsonChartPluginPropertiesResolverTest
 	@Test
 	public void convertToDataSetRangeTest()
 	{
+		TestChartPlugin chartPlugin = new TestChartPlugin();
+		JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+				chartPlugin);
+
 		{
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(null);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(null);
 			assertNull(dsr);
 		}
 
 		{
 			int min = 1;
 			
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(min);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(min);
 
 			assertEquals(1, dsr.getMain().getMin().intValue());
 			assertNull(dsr.getMain().getMax());
@@ -1115,7 +1134,7 @@ public class JsonChartPluginPropertiesResolverTest
 			main.put(ChartPluginDataSetRange.Range.PROPERTY_MIN, 1);
 			main.put(ChartPluginDataSetRange.Range.PROPERTY_MAX, 2);
 
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(main);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(main);
 
 			assertEquals(1, dsr.getMain().getMin().intValue());
 			assertEquals(2, dsr.getMain().getMax().intValue());
@@ -1127,7 +1146,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Map<String, Object> main = new HashMap<String, Object>();
 			main.put(ChartPluginDataSetRange.Range.PROPERTY_MIN, 1);
 
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(main);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(main);
 
 			assertEquals(1, dsr.getMain().getMin().intValue());
 			assertNull(dsr.getMain().getMax());
@@ -1149,7 +1168,7 @@ public class JsonChartPluginPropertiesResolverTest
 			map.put(ChartPluginDataSetRange.PROPERTY_MAIN, main);
 			map.put(ChartPluginDataSetRange.PROPERTY_ATTACHMENT, attachment);
 
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(map);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(map);
 
 			assertEquals(1, dsr.getMain().getMin().intValue());
 			assertEquals(2, dsr.getMain().getMax().intValue());
@@ -1167,7 +1186,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 			map.put(ChartPluginDataSetRange.PROPERTY_MAIN, main);
 
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(map);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(map);
 
 			assertEquals(1, dsr.getMain().getMin().intValue());
 			assertEquals(2, dsr.getMain().getMax().intValue());
@@ -1184,7 +1203,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 			map.put(ChartPluginDataSetRange.PROPERTY_ATTACHMENT, attachment);
 
-			ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(map);
+			ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(map);
 
 			assertNull(dsr.getMain());
 
@@ -1195,7 +1214,7 @@ public class JsonChartPluginPropertiesResolverTest
 		{
 			{
 				String value = "none";
-				ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(value);
+				ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(value);
 
 				assertEquals(0, dsr.getMain().getMin().intValue());
 				assertEquals(0, dsr.getMain().getMax().intValue());
@@ -1204,7 +1223,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 			{
 				String value = "None";
-				ChartPluginDataSetRange dsr = this.resolver.convertToDataSetRange(value);
+				ChartPluginDataSetRange dsr = resolver.convertToDataSetRange(value);
 
 				assertEquals(0, dsr.getMain().getMin().intValue());
 				assertEquals(0, dsr.getMain().getMax().intValue());
@@ -1217,8 +1236,12 @@ public class JsonChartPluginPropertiesResolverTest
 	@Test
 	public void convertToRangeTest()
 	{
+		TestChartPlugin chartPlugin = new TestChartPlugin();
+		JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+				chartPlugin);
+
 		{
-			Range r = this.resolver.convertToRange(null);
+			Range r = resolver.convertToRange(null);
 
 			assertNull(r);
 		}
@@ -1226,7 +1249,7 @@ public class JsonChartPluginPropertiesResolverTest
 		{
 			Map<String, Object> range = new HashMap<String, Object>();
 
-			Range r = this.resolver.convertToRange(range);
+			Range r = resolver.convertToRange(range);
 
 			assertNull(r);
 		}
@@ -1235,7 +1258,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Map<String, Object> range = new HashMap<String, Object>();
 			range.put(ChartPluginDataSetRange.Range.PROPERTY_MIN, 1);
 
-			Range r = this.resolver.convertToRange(range);
+			Range r = resolver.convertToRange(range);
 
 			assertEquals(1, r.getMin().intValue());
 			assertNull(r.getMax());
@@ -1245,7 +1268,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Map<String, Object> range = new HashMap<String, Object>();
 			range.put(ChartPluginDataSetRange.Range.PROPERTY_MAX, 2);
 
-			Range r = this.resolver.convertToRange(range);
+			Range r = resolver.convertToRange(range);
 
 			assertNull(r.getMin());
 			assertEquals(2, r.getMax().intValue());
@@ -1256,7 +1279,7 @@ public class JsonChartPluginPropertiesResolverTest
 			range.put(ChartPluginDataSetRange.Range.PROPERTY_MIN, 1);
 			range.put(ChartPluginDataSetRange.Range.PROPERTY_MAX, 2);
 
-			Range r = this.resolver.convertToRange(range);
+			Range r = resolver.convertToRange(range);
 
 			assertEquals(1, r.getMin().intValue());
 			assertEquals(2, r.getMax().intValue());
