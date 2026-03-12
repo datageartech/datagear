@@ -18,10 +18,14 @@
 package org.datagear.analysis.support.html;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.datagear.analysis.DataSign;
 import org.datagear.util.IOUtil;
 import org.junit.Test;
 
@@ -106,5 +110,79 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 
 		assertEquals("2.0", chartPlugin.getApiVersion());
 		assertEquals(HtmlChartPluginUsage.NORMAL, chartPlugin.getUsage());
+	}
+
+	@Test
+	public void convertToDataSignTest() throws IOException
+	{
+		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
+		JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> resolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>(
+				chartPlugin);
+
+		{
+			chartPlugin.setApiVersion(DashboardApiVersion.V1);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", "3.5");
+
+			DataSign dataSign = resolver.convertToDataSign(map, null);
+			assertEquals("3.5", dataSign.getName());
+		}
+
+		{
+			chartPlugin.setApiVersion(DashboardApiVersion.V2);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", "3.5");
+
+			assertThrows(IllegalArgumentException.class, () ->
+			{
+				DataSign dataSign = resolver.convertToDataSign(map, null);
+				assertEquals("3.5", dataSign.getName());
+			});
+		}
+
+		{
+			chartPlugin.setApiVersion(DashboardApiVersion.V2);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", "a.b");
+
+			assertThrows(IllegalArgumentException.class, () ->
+			{
+				DataSign dataSign = resolver.convertToDataSign(map, null);
+				assertEquals("a.b", dataSign.getName());
+			});
+		}
+
+		{
+			chartPlugin.setApiVersion(DashboardApiVersion.V2);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", "abc");
+
+			DataSign dataSign = resolver.convertToDataSign(map, null);
+			assertEquals("abc", dataSign.getName());
+		}
+
+		{
+			chartPlugin.setApiVersion(DashboardApiVersion.V2);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", "_123");
+
+			DataSign dataSign = resolver.convertToDataSign(map, null);
+			assertEquals("_123", dataSign.getName());
+		}
+
+		{
+			chartPlugin.setApiVersion(DashboardApiVersion.V2);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", "$a123");
+
+			DataSign dataSign = resolver.convertToDataSign(map, null);
+			assertEquals("$a123", dataSign.getName());
+		}
 	}
 }
