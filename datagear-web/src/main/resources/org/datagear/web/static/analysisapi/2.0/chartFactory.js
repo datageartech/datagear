@@ -4008,21 +4008,18 @@ chartProto.resultColumnArrayDatas = function(dataSetResult, fields, row, count)
 	{
 		for(let i=0; i<fields.length; i++)
 		{
-			let name = (fields[i].name !== undefined ? fields[i].name : fields[i]);
 			let column = [];
 			
 			for(let j=row; j<endIdx; j++)
-				column.push(datas[j] == null ? null : datas[j][name]);
+				column.push(this.resultDataRowCell(datas[j], fields[i]));
 			
 			re[i] = column;
 		}
 	}
 	else
 	{
-		let name = (fields.name !== undefined ? fields.name : fields);
-		
 		for(let i=row; i<endIdx; i++)
-			re.push(datas[i] == null ? null : datas[i][name]);
+			re.push(this.resultDataRowCell(datas[i], fields));
 	}
 	
 	return re;
@@ -4090,21 +4087,18 @@ chartProto.resultMapDatas = function(dataSetResult, fieldMap, row, count)
 			{
 				let field = fieldMap[name];
 				
-				if(field == null){}
+				if(field == null)
+				{}
 				else if(fieldIsArray[name])
 				{
 					obj[name] = [];
 					
 					for(let j=0; j<field.length; j++)
-					{
-						let fname = (field[j].name !== undefined ? field[j].name : field[j]);
-						obj[name][j] = di[fname];
-					}
+						obj[name][j] = this.resultDataRowCell(di, field[j]);
 				}
 				else
 				{
-					let fname = (field.name !== undefined ? field.name : field);
-					obj[name] = di[fname];
+					obj[name] = this.resultDataRowCell(di, field);
 				}
 			}
 		}
@@ -4161,20 +4155,15 @@ chartProto.resultRowArrayDatas = function(dataSetResult, fields, row, count)
 			let row = [];
 			
 			for(let j=0; j<fields.length; j++)
-			{
-				let name = (fields[j].name !== undefined ? fields[j].name : fields[j]);
-				row[j] = (di == null ? null : di[name]);
-			}
+				row[j] = this.resultDataRowCell(di, fields[j]);
 			
 			re.push(row);
 		}
 	}
 	else
 	{
-		let name = (fields.name !== undefined ? fields.name : fields);
-		
 		for(let i=row; i<endIdx; i++)
-			re.push(datas[i] == null ? null : datas[i][name]);
+			re.push(this.resultDataRowCell(datas[i], fields));
 	}
 	
 	return re;
