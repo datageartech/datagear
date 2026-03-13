@@ -6704,7 +6704,7 @@ CF.loadLib = function(lib, callback, renderContext, contextCharts)
 	var libPlugins = CF.allContextLibPlugins();
 	
 	var unloadeds = [];
-	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, libPlugins, contextCharts);
+	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, libPlugins, contextCharts, lib);
 	
 	if(unloadeds.length == 0)
 	{
@@ -6718,8 +6718,10 @@ CF.loadLib = function(lib, callback, renderContext, contextCharts)
 };
 
 //解析libs相关的所有待加载库，填充至unloadeds中
-CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, contextCharts)
+CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, contextCharts, inputLibs)
 {
+	inputLibs = (inputLibs === undefined ? libs : inputLibs);
+	
 	for(let i=0; i<libs.length; i++)
 	{
 		let lib = libs[i];
@@ -6733,7 +6735,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 		if(CF.libIndex(unloadeds, lib.name) > -1)
 			continue;
 		
-		let bestLib = CF.findUnloadedBestLib(lib, renderContext, libPlugins, contextCharts);
+		let bestLib = CF.findUnloadedBestLib(lib, renderContext, libPlugins, contextCharts, inputLibs);
 		
 		if(bestLib == null)
 		{
@@ -6755,7 +6757,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 		let dependLibs = CF.dependLibsOfLib(bestLib);
 		if(!CF.isEmpty(dependLibs))
 		{
-			CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, libPlugins, contextCharts);
+			CF.inflateUnloadedLibs(unloadeds, dependLibs, renderContext, libPlugins, contextCharts, inputLibs);
 		}
 	}
 };
@@ -7066,7 +7068,7 @@ CF.LIB_ACCEPTVERSION_CACHE = {};
 
 //查找未加载的最新版可用库
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
-CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
+CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts, inputLibs)
 {
 	if(CF.isLibLoaded(lib))
 		return false;
@@ -7084,6 +7086,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts)
 	CF.inflateCandidateLibInfoInGlobalLib(libInfos, lib);
 	CF.inflateCandidateLibInfoInLibPlugins(libInfos, lib, libPlugins);
 	CF.inflateCandidateLibInfoInContextCharts(libInfos, lib, contextCharts);
+	CF.inflateCandidateLibInfoInInputLibs(libInfos, lib, inputLibs);
 	
 	if(CF.isCandidateLib(lib, lib))
 		libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
@@ -7350,6 +7353,21 @@ CF.inflateCandidateLibInfoInContextCharts = function(libInfos, baseLib, contextC
 		
 		CF.inflateCandidateLibInfoInCustomRenderer(libInfos, baseLib, renderer, CF.LIB_PRIORITY_CUSTOM_RENDERER);
 		CF.inflateCandidateLibInfoInPlugin(libInfos, baseLib, plugin, CF.LIB_PRIORITY_CHART_PLUGIN);
+	}
+};
+
+CF.inflateCandidateLibInfoInInputLibs = function(libInfos, baseLib, inputLibs)
+{
+	inputLibs = (inputLibs == null ? [] : (CF.isArray(inputLibs) ? inputLibs : [ inputLibs ]));
+	
+	for(let i=0; i<inputLibs.length; i++)
+	{
+		let lib = inputLibs[i];
+		
+		if(CF.isCandidateLib(lib, baseLib))
+		{
+			libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
+		}
 	}
 };
 
