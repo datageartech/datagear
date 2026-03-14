@@ -61,7 +61,12 @@ public class NameAwareUtil
 		
 		for (int i = 0, len = list.size(); i < len; i++)
 		{
-			if (StringUtil.isEquals(name, list.get(i).getName()))
+			T li = list.get(i);
+
+			if (li == null)
+				continue;
+
+			if (StringUtil.isEquals(name, li.getName()))
 				return i;
 		}
 

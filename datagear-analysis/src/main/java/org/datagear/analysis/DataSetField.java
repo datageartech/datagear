@@ -19,6 +19,7 @@ package org.datagear.analysis;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * 数据集字段信息。
@@ -29,7 +30,7 @@ import java.math.BigInteger;
  * @author datagear@163.com
  *
  */
-public class DataSetField extends AbstractNameTypeAware implements Cloneable
+public class DataSetField extends AbstractNameTypeAware implements DataSetFieldsAware, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -44,6 +45,22 @@ public class DataSetField extends AbstractNameTypeAware implements Cloneable
 
 	/** 计算表达式 */
 	private String expression = null;
+
+	/**
+	 * 对象类型的字段集合。
+	 * <p>
+	 * 注意：此值默认必须为{@code null}，以兼容{@code <=5.5.0}版本没有此属性的逻辑。
+	 * </p>
+	 */
+	private List<DataSetField> fields = null;
+
+	/**
+	 * 是否数组。
+	 * <p>
+	 * 注意：此值默认必须为{@code false}，以兼容{@code <=5.5.0}版本没有此属性的逻辑。
+	 * </p>
+	 */
+	private boolean array = false;
 
 	public DataSetField()
 	{
@@ -137,6 +154,33 @@ public class DataSetField extends AbstractNameTypeAware implements Cloneable
 	public void setExpression(String expression)
 	{
 		this.expression = expression;
+	}
+
+	@Override
+	public List<DataSetField> getFields()
+	{
+		return fields;
+	}
+
+	public void setFields(List<DataSetField> fields)
+	{
+		this.fields = fields;
+	}
+
+	public boolean isArray()
+	{
+		return array;
+	}
+
+	public void setArray(boolean array)
+	{
+		this.array = array;
+	}
+
+	@Override
+	public DataSetField getField(String name)
+	{
+		return NameAwareUtil.find(this.fields, name);
 	}
 
 	@Override

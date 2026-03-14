@@ -25,7 +25,7 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public interface DataSet extends Identifiable
+public interface DataSet extends DataSetFieldsAware, Identifiable
 {
 	/**
 	 * 获取名称。
@@ -43,21 +43,6 @@ public interface DataSet extends Identifiable
 	 * @return
 	 */
 	boolean isMutableModel();
-
-	/**
-	 * 获取{@linkplain DataSetField}列表。
-	 * 
-	 * @return 返回空列表则表示没有
-	 */
-	List<DataSetField> getFields();
-
-	/**
-	 * 获取指定名称的{@linkplain DataSetField}，没有则返回{@code null}。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	DataSetField getField(String name);
 
 	/**
 	 * 获取参数列表。
