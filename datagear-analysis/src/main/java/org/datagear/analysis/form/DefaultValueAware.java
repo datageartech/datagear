@@ -33,11 +33,4 @@ public interface DefaultValueAware
 	 * @return
 	 */
 	Object getDefaultValue();
-
-	/**
-	 * 设置默认值。
-	 * 
-	 * @param defaultValue
-	 */
-	void setDefaultValue(Object defaultValue);
 }

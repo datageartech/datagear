@@ -70,7 +70,6 @@ public class ChartQuery implements ResultDataFormatAware, Serializable
 		return resultDataFormat;
 	}
 
-	@Override
 	public void setResultDataFormat(ResultDataFormat resultDataFormat)
 	{
 		this.resultDataFormat = resultDataFormat;

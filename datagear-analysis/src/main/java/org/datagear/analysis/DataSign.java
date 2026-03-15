@@ -178,7 +178,6 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 		return additions;
 	}
 
-	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;

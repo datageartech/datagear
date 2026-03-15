@@ -31,11 +31,4 @@ public interface ResultDataFormatAware
 	 * @return 返回{@code null}表示没有设置
 	 */
 	ResultDataFormat getResultDataFormat();
-
-	/**
-	 * 设置{@linkplain ResultDataFormat}。
-	 * 
-	 * @param format
-	 */
-	void setResultDataFormat(ResultDataFormat format);
 }

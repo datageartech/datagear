@@ -36,11 +36,4 @@ public interface IgnoreFetchAware
 	 * @return
 	 */
 	boolean isIgnoreFetch();
-
-	/**
-	 * 设置是否忽略获取结果
-	 * 
-	 * @param ignoreFetch
-	 */
-	void setIgnoreFetch(boolean ignoreFetch);
 }

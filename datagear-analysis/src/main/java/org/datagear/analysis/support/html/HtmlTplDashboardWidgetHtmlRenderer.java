@@ -903,7 +903,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			return apiVersion;
 		}
 
-		@Override
 		public void setApiVersion(String apiVersion)
 		{
 			this.apiVersion = apiVersion;

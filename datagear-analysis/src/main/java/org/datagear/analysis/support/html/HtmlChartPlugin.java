@@ -184,7 +184,6 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		return apiVersion;
 	}
 
-	@Override
 	public void setApiVersion(String apiVersion)
 	{
 		this.apiVersion = apiVersion;

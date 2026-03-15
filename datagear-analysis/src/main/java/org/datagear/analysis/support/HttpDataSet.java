@@ -359,7 +359,6 @@ public class HttpDataSet extends AbstractResolvableDataSet implements ResultJson
 		return resultJsonRule;
 	}
 
-	@Override
 	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
 		this.resultJsonRule = resultJsonRule;

@@ -72,7 +72,6 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		return resultJsonRule;
 	}
 
-	@Override
 	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
 		this.resultJsonRule = resultJsonRule;

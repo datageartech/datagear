@@ -189,7 +189,6 @@ public class ChartDefinition extends AbstractIdentifiable implements ResultDataF
 	 * 
 	 * @param dataFormat
 	 */
-	@Override
 	public void setResultDataFormat(ResultDataFormat resultDataFormat)
 	{
 		this.resultDataFormat = resultDataFormat;

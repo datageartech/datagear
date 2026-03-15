@@ -112,7 +112,6 @@ public class DataSetQuery implements ResultDataFormatAware, IgnoreFetchAware, Se
 	 * 
 	 * @param dataFormat
 	 */
-	@Override
 	public void setResultDataFormat(ResultDataFormat resultDataFormat)
 	{
 		this.resultDataFormat = resultDataFormat;
@@ -139,7 +138,6 @@ public class DataSetQuery implements ResultDataFormatAware, IgnoreFetchAware, Se
 		return ignoreFetch;
 	}
 
-	@Override
 	public void setIgnoreFetch(boolean ignoreFetch)
 	{
 		this.ignoreFetch = ignoreFetch;

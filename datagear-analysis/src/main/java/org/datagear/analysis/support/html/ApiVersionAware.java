@@ -31,11 +31,4 @@ public interface ApiVersionAware
 	 * @return {@code null}或空字符串表示未定义
 	 */
 	String getApiVersion();
-
-	/**
-	 * 设置看板页面端API版本，比如：{@code 1.0}、{@code 2.0}。
-	 * 
-	 * @param apiVersion
-	 */
-	void setApiVersion(String apiVersion);
 }

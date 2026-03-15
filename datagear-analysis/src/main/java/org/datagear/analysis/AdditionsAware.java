@@ -38,11 +38,4 @@ public interface AdditionsAware
 	 * @return
 	 */
 	Map<String, ?> getAdditions();
-
-	/**
-	 * 设置附加属性集。
-	 * 
-	 * @param additions
-	 */
-	void setAdditions(Map<String, ?> additions);
 }

@@ -118,7 +118,6 @@ public class Form extends AbstractLabeled
 		return additions;
 	}
 
-	@Override
 	public void setAdditions(Map<String, ?> additions)
 	{
 		this.additions = additions;
@@ -130,7 +129,6 @@ public class Form extends AbstractLabeled
 		return defaultValue;
 	}
 
-	@Override
 	public void setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;

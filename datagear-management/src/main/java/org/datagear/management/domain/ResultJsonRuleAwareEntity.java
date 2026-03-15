@@ -30,6 +30,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public interface ResultJsonRuleAwareEntity extends ResultJsonRuleAware
 {
+
+	/**
+	 * 设置{@linkplain ResultJsonRule}。
+	 * 
+	 * @param resultJsonRule
+	 */
+	void setResultJsonRule(ResultJsonRule resultJsonRule);
+
 	/**
 	 * 仅用于ORM。
 	 * <p>

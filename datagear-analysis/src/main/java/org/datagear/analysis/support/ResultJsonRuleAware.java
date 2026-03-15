@@ -31,11 +31,4 @@ public interface ResultJsonRuleAware
 	 * @return
 	 */
 	ResultJsonRule getResultJsonRule();
-
-	/**
-	 * 设置{@linkplain ResultJsonRule}。
-	 * 
-	 * @param resultJsonRule
-	 */
-	void setResultJsonRule(ResultJsonRule resultJsonRule);
 }

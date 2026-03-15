@@ -117,7 +117,6 @@ public class DataSetResult implements AdditionsAware, IgnoreFetchAware, Serializ
 		return ignoreFetch;
 	}
 
-	@Override
 	public void setIgnoreFetch(boolean ignoreFetch)
 	{
 		this.ignoreFetch = ignoreFetch;

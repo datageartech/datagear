@@ -94,7 +94,6 @@ public class HtmlTplDashboard extends TplDashboard implements ApiVersionAware
 		return apiVersion;
 	}
 
-	@Override
 	public void setApiVersion(String apiVersion)
 	{
 		this.apiVersion = apiVersion;

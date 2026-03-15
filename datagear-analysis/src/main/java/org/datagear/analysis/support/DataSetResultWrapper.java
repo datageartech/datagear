@@ -72,7 +72,6 @@ public class DataSetResultWrapper implements ResultJsonRuleAware
 		return resultJsonRule;
 	}
 
-	@Override
 	public void setResultJsonRule(ResultJsonRule resultJsonRule)
 	{
 		this.resultJsonRule = resultJsonRule;
