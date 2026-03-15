@@ -3960,7 +3960,7 @@ chartProto._isDataSetParamUnready = function(dataSetParam, paramValues)
 /**
  * 将数据集结果数据的行对象按照指定fields顺序转换为列值数组。
  * 
- * @param dataSetResult 数据集结果
+ * @param dataSetResult 数据集结果、数据对象数组
  * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
  * @param row 行索引，以0开始，可选，默认值为：0
  * @param count 获取的最多行数，可选，默认为全部
@@ -3973,7 +3973,7 @@ chartProto.resultColumnArrayDatas = function(dataSetResult, fields, row, count)
 	if(!dataSetResult || !fields)
 		return re;
 	
-	var datas = this.resultDatas(dataSetResult);
+	var datas = (CF.isArray(dataSetResult) ? dataSetResult : this.resultDatas(dataSetResult));
 	
 	row = (row == null ? 0 : row);
 	var endIdx = (count == null ? datas.length : (row + count));
@@ -4003,7 +4003,7 @@ chartProto.resultColumnArrayDatas = function(dataSetResult, fields, row, count)
 /**
  * 获取数据集结果数据指定行索引的元素。
  * 
- * @param dataSetResult 数据集结果
+ * @param dataSetResult 数据集结果、数据对象数组
  * @param row 行索引数值、数值数组
  * @returns 数据对象、据对象数组，当result、row为null时，将返回null
  */
@@ -4012,7 +4012,7 @@ chartProto.resultDataRow = function(dataSetResult, row)
 	if(dataSetResult == null || dataSetResult.data == null || row == null)
 		return null;
 	
-	var datas = this.resultDatas(dataSetResult);
+	var datas = (CF.isArray(dataSetResult) ? dataSetResult : this.resultDatas(dataSetResult));
 	
 	if(!CF.isArray(row))
 	{
@@ -4032,7 +4032,7 @@ chartProto.resultDataRow = function(dataSetResult, row)
 /**
  * 获取数据集结果数据经字段映射后的数据对象数组。
  * 
- * @param dataSetResult 数据集结果
+ * @param dataSetResult 数据集结果、数据对象数组
  * @param fieldMap 返回字段映射表，格式为：{ 返回对象字段名: 数据集字段对象、字段名、字段数组、字段名数组 }
  * @param row 可选，行索引，以0开始，默认为：0
  * @param count 可选，获取结果数据的最多行数，默认为全部
@@ -4042,7 +4042,7 @@ chartProto.resultMapDatas = function(dataSetResult, fieldMap, row, count)
 {
 	var re = [];
 	
-	var datas = this.resultDatas(dataSetResult);
+	var datas = (CF.isArray(dataSetResult) ? dataSetResult : this.resultDatas(dataSetResult));
 	row = (row == null ? 0 : row);
 	var endIdx = (count == null ? datas.length : (row + count));
 	endIdx = (endIdx > datas.length ? datas.length : endIdx);
@@ -4087,7 +4087,7 @@ chartProto.resultMapDatas = function(dataSetResult, fieldMap, row, count)
 /**
  * 获取数据集结果数据的名/值对象数组。
  * 
- * @param dataSetResult 数据集结果
+ * @param dataSetResult 数据集结果、数据对象数组
  * @param nameField 名称数据集字段对象、字段名
  * @param valueField 值数据集字段对象、字段名、数组
  * @param row 可选，行索引，以0开始，默认为：0
@@ -4103,7 +4103,7 @@ chartProto.resultNameValueDatas = function(dataSetResult, nameField, valueField,
 /**
  * 将数据集结果数据的行对象按照指定fields顺序转换为行值数组。
  * 
- * @param dataSetResult 数据集结果
+ * @param dataSetResult 数据集结果、数据对象数组
  * @param fields 数据集字段对象数组、字段名数组、字段对象、字段名
  * @param row 可选，行索引，默认为：0
  * @param count 可选，获取的最多行数，默认为全部
@@ -4116,7 +4116,7 @@ chartProto.resultRowArrayDatas = function(dataSetResult, fields, row, count)
 	if(!dataSetResult || !fields)
 		return re;
 	
-	var datas = this.resultDatas(dataSetResult);
+	var datas = (CF.isArray(dataSetResult) ? dataSetResult : this.resultDatas(dataSetResult));
 	
 	row = (row == null ? 0 : row);
 	var endIdx = (count == null ? datas.length : (row + count));
