@@ -3819,55 +3819,6 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 };
 
 /**
- * 获取/设置数据集字段标记映射表。
- * 
- * 设置操作应在chart.render()函数执行前调用。
- * 
- * @param dataSetBind 数据集绑定或其索引
- * @param dataSigns 可选，要设置的数据标记映射表，格式为：{ 数据集字段名: 与this.dataSignFullname()函数参数相同、或者其数组, ... }，不设置则执行获取操作
- * @param increment 可选，设置操作时是否执行增量设置，仅设置signs中出现的项，true 是；false 否。默认值为：false
- * @returns 要获取的标记映射表，格式为：{ 数据集字段名: 标记名字符串数组、null, ... }，不会为null
- */
-chartProto.dataSetFieldsSigns = function(dataSetBind, dataSigns, increment)
-{
-	dataSetBind = this._dataSetBindOf(dataSetBind);
-	increment = (increment === undefined ? false : increment);
-	
-	if(arguments.length <= 1)
-	{
-		if(dataSetBind.fieldSigns == null)
-			dataSetBind.fieldSigns = {};
-		
-		return dataSetBind.fieldSigns;
-	}
-	else
-	{
-		var trimSigns = {};
-		
-		if(dataSigns)
-		{
-			for(var p in dataSigns)
-			{
-				var ps = this._toDataSignValues(dataSigns[p]);
-				trimSigns[p] = ps;
-			}
-		}
-		
-		if(dataSetBind.fieldSigns == null || !increment)
-		{
-			dataSetBind.fieldSigns = trimSigns;
-		}
-		else
-		{
-			for(var p in trimSigns)
-			{
-				dataSetBind.fieldSigns[p] = trimSigns[p];
-			}
-		}
-	}
-};
-
-/**
  * 获取/设置数据集结果指定名称的附加数据。
  * 
  * @param dataSetResult 数据集结果
