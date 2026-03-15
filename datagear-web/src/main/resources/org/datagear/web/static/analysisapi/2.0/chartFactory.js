@@ -3673,9 +3673,9 @@ chartProto.pluginDataSign = function(name, dataSigns)
 /**
  * 获取数据标记全名。
  * 
- * @param name 字符串全名、数据标记数组索引数值、数据标记对象，或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
+ * @param name 数据标记全名字符串、索引数值、数据标记对象，或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
  * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
- * @returns 标记全名，层级间以'.'分隔，可能是null
+ * @returns 标记全名，当name为null时将直接返回null
  */
 chartProto.dataSignFullname = function(name, dataSigns)
 {
@@ -3690,67 +3690,42 @@ chartProto.dataSignFullname = function(name, dataSigns)
 	
 	if(!isArray)
 	{
-		var dataSign = null;
-		
-		//插件数据标记数组索引数值
-		if(CF.isNumber(name))
+		//数据标记对象
+		if(name.fullname !== undefined)
 		{
-			dataSign = this.pluginDataSign(name, dataSigns);
+			return name.fullname;
+		}
+		//数据标记名、索引数值
+		else
+		{
+			let dataSign = this.pluginDataSign(name, dataSigns);
 			
 			if(dataSign == null)
 				throw new Error(CF.chartLogInfo(this) + " no DataSign found for : " + name);
 			
-			return dataSign.name;
+			return dataSign.fullname;
 		}
-		//数据标记对象
-		else if(name.name !== undefined)
-		{
-			dataSign = name;
-		}
-		
-		return (dataSign ? dataSign.name : null);
 	}
 	else
 	{
-		var re = "";
+		let dataSign = null;
 		
-		//默认查找数据标记数组，不能设为undefined，纤细参考this.pluginDataSign()函数
-		var dftDataSigns = [];
-		
-		for(var i=0; i<name.length; i++)
+		for(let i=0; i<name.length; i++)
 		{
-			var myPart = null;
-			
-			var ni = name[i];
-			var dataSign = this.pluginDataSign(ni, dataSigns);
+			let ni = name[i];
+			dataSign = this.pluginDataSign(ni, dataSigns);
 			
 			if(dataSign == null)
-			{
-				if(ni == null || CF.isString(ni))
-				{
-					myPart = ni;
-				}
-				//数据标记对象
-				else if(ni.name !== undefined)
-				{
-					myPart = ni.name;
-					dataSign = ni;
-				}
-				else
-				{
-					throw new Error(CF.chartLogInfo(this) + " no DataSign found for : name["+i+"]");
-				}
-			}
-			else
-			{
-				myPart = dataSign.name;
-			}
+				throw new Error(CF.chartLogInfo(this) + " no DataSign found for : name[" + i + "]");
 			
-			re += (re ? (CF.DATA_SIGN_FULLNAME_SEPARATOR + myPart) : myPart);
-			dataSigns = (dataSign && dataSign.children ? dataSign.children : dftDataSigns);
+			//不能设为undefined，纤细参考this.pluginDataSign()函数
+			dataSigns = (dataSign.children ? dataSign.children : null);
 		}
 		
-		return re;
+		if(dataSign == null)
+			throw new Error(CF.chartLogInfo(this) + " no DataSign found for : " + name);
+		
+		return dataSign.fullname;
 	}
 };
 

@@ -799,7 +799,7 @@
 		{
 			var dsn = dataSigns[i];
 			dsn.extLabel = (parent && parent.extLabel ?
-					(parent.extLabel + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
+					(parent.extLabel + "." + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
 			
 			if(dsn.children)
 				po.extDataSigns(dsn.children, dsn);
