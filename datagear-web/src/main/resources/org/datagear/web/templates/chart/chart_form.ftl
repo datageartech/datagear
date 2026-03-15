@@ -123,8 +123,8 @@
 											<div class="p-inputgroup">
 												<div :id="'${pid}dsbSign_'+dsbIdx"
 													class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
-													<p-chip v-for="sign in dsb.extSignObjs" :key="sign.extFullname" :label="sign.extLabel" class="mb-2"
-														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetDataSign(dsb, sign.extFullname)">
+													<p-chip v-for="sign in dsb.extSignObjs" :key="sign.fullname" :label="sign.extLabel" class="mb-2"
+														:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetDataSign(dsb, sign.fullname)">
 													</p-chip>
 												</div>
 												<p-button type="button" icon="pi pi-plus" severity="info"
@@ -146,8 +146,8 @@
 											<div class="p-inputgroup">
 												<div :id="'${pid}dsbpidSign_'+dsbIdx+'_'+dfIdx"
 													class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
-													<p-chip v-for="sign in df.extDsbInfo.signObjs" :key="sign.extFullname" :label="sign.extLabel" class="mb-2"
-														:removable="!pm.isReadonlyAction" @remove="onRemoveFieldDataSign(df, sign.extFullname)">
+													<p-chip v-for="sign in df.extDsbInfo.signObjs" :key="sign.fullname" :label="sign.extLabel" class="mb-2"
+														:removable="!pm.isReadonlyAction" @remove="onRemoveFieldDataSign(df, sign.fullname)">
 													</p-chip>
 												</div>
 												<p-button type="button" icon="pi pi-plus"
@@ -327,7 +327,7 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
-			<div v-for="ds in pm.candidateDataSigns" :key="ds.extFullname" class="mb-2">
+			<div v-for="ds in pm.candidateDataSigns" :key="ds.fullname" class="mb-2">
 				<div class="flex align-items-center gap-1">
 					<div>
 						<div class="p-inputgroup">
@@ -581,7 +581,7 @@
 				if(dsb.attachment == true)
 					continue;
 				
-				if($.inArrayById(dsb.extSignObjs, requiredSign.extFullname, "extFullname") > -1)
+				if($.inArrayById(dsb.extSignObjs, requiredSign.fullname, "fullname") > -1)
 				{
 					contains = true;
 					break;
@@ -617,7 +617,7 @@
 					var field = fields[k];
 					var signObjs = (field.extDsbInfo ? (field.extDsbInfo.signObjs || []) : []);
 					
-					if($.inArrayById(signObjs, requiredSign.extFullname, "extFullname") > -1)
+					if($.inArrayById(signObjs, requiredSign.fullname, "fullname") > -1)
 					{
 						contains = true;
 						break;
@@ -659,7 +659,7 @@
 		{
 			var signObjs = dataSetBinds[i].extSignObjs;
 			
-			if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") > -1)
+			if($.inArrayById(signObjs, dataSign.fullname, "fullname") > -1)
 				return true;
 		}
 		
@@ -675,7 +675,7 @@
 			var field = fields[i];
 			var signObjs = (field.extDsbInfo ? (field.extDsbInfo.signObjs || []) : []);
 			
-			if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") > -1)
+			if($.inArrayById(signObjs, dataSign.fullname, "fullname") > -1)
 				return true;
 		}
 		
@@ -753,8 +753,8 @@
 			var fieldSigns = [];
 			$.each(signObjs, function(fsIdx, signObj)
 			{
-				if(po.findDataSignByFullname(dataSigns, signObj.extFullname) != null)
-					fieldSigns.push(signObj.extFullname);
+				if(po.findDataSignByFullname(dataSigns, signObj.fullname) != null)
+					fieldSigns.push(signObj.fullname);
 			});
 			
 			if(fieldSigns.length > 0)
@@ -773,9 +773,9 @@
 		{
 			$.each(dataSetBind.extSignObjs, function(idx, signObj)
 			{
-				var dataSign = po.findDataSignByFullname(dataSigns, signObj.extFullname, false);
+				var dataSign = po.findDataSignByFullname(dataSigns, signObj.fullname, false);
 				if(dataSign != null)
-					dataSetBind.dataSetSigns.push(signObj.extFullname);
+					dataSetBind.dataSetSigns.push(signObj.fullname);
 			});
 		}
 		
@@ -798,9 +798,8 @@
 		for(var i=0; i<dataSigns.length; i++)
 		{
 			var dsn = dataSigns[i];
-			
-			dsn.extFullname = (parent && parent.extFullname ? (parent.extFullname + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + dsn.name) : dsn.name);
-			dsn.extLabel = (parent && parent.extLabel ? (parent.extLabel + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
+			dsn.extLabel = (parent && parent.extLabel ?
+					(parent.extLabel + chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
 			
 			if(dsn.children)
 				po.extDataSigns(dsn.children, dsn);
@@ -837,7 +836,7 @@
 		//应该先广度搜索、再深度搜索
 		for(var i=0; i<dataSigns.length; i++)
 		{
-			if(dataSigns[i].extFullname == fullname)
+			if(dataSigns[i].fullname == fullname)
 				return dataSigns[i];
 		}
 		
@@ -1441,7 +1440,7 @@
 					
 					var signObjs = pm.dataSetBindForSign.extSignObjs;
 					
-					if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") < 0)
+					if($.inArrayById(signObjs, dataSign.fullname, "fullname") < 0)
 						signObjs.push(dataSign);
 					
 					po.vueUnref("${pid}dataSignsPanelEle").hide();
@@ -1461,7 +1460,7 @@
 					
 					var signObjs = pm.dataSetFieldForSign.extDsbInfo.signObjs;
 					
-					if($.inArrayById(signObjs, dataSign.extFullname, "extFullname") < 0)
+					if($.inArrayById(signObjs, dataSign.fullname, "fullname") < 0)
 						signObjs.push(dataSign);
 					
 					po.vueUnref("${pid}dataSignsPanelEle").hide();
@@ -1472,7 +1471,7 @@
 		onRemoveDataSetDataSign: function(dataSetBind, dataSigName)
 		{
 			var signObjs = dataSetBind.extSignObjs;
-			var removed = $.removeById(signObjs, dataSigName, "extFullname");
+			var removed = $.removeById(signObjs, dataSigName, "fullname");
 			
 			if(removed && removed.children)
 			{
@@ -1484,7 +1483,7 @@
 					
 					for(var j=0; j<fields.length; j++)
 					{
-						$.removeById(fields[j].extDsbInfo.signObjs, signObjChild.extFullname, "extFullname");
+						$.removeById(fields[j].extDsbInfo.signObjs, signObjChild.fullname, "fullname");
 					}
 				}
 			}
@@ -1493,7 +1492,7 @@
 		onRemoveFieldDataSign: function(dataSetField, dataSigName)
 		{
 			var signObjs = dataSetField.extDsbInfo.signObjs;
-			$.removeById(signObjs, dataSigName, "extFullname");
+			$.removeById(signObjs, dataSigName, "fullname");
 		},
 		
 		onUpdateIntervalTypeChange: function(e)

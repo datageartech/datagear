@@ -41,7 +41,8 @@ import org.datagear.util.i18n.Localizable;
  * @author datagear@163.com
  *
  */
-public class DataSign extends AbstractLabeled implements AdditionsAware, Localizable, Serializable
+public class DataSign extends AbstractLabeled
+		implements NameAware, FullnameAware, AdditionsAware, Localizable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -71,6 +72,9 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 
 	/** 名称 */
 	private String name;
+
+	/** 全名 */
+	private String fullname;
 
 	/**
 	 * 标记目标。
@@ -108,20 +112,22 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 		super();
 	}
 
-	public DataSign(String name, boolean required, boolean multiple)
+	public DataSign(String name, String fullname, boolean required, boolean multiple)
 	{
-		this(name, TARGETS_FIELDS, required, multiple);
+		this(name, fullname, TARGETS_FIELDS, required, multiple);
 	}
 
-	public DataSign(String name, String[] targets, boolean required, boolean multiple)
+	public DataSign(String name, String fullname, String[] targets, boolean required, boolean multiple)
 	{
 		super();
 		this.name = name;
+		this.fullname = fullname;
 		this.targets = targets;
 		this.required = required;
 		this.multiple = multiple;
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;
@@ -130,6 +136,17 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+
+	@Override
+	public String getFullname()
+	{
+		return fullname;
+	}
+
+	public void setFullname(String fullname)
+	{
+		this.fullname = fullname;
 	}
 
 	public String[] getTargets()
@@ -195,6 +212,7 @@ public class DataSign extends AbstractLabeled implements AdditionsAware, Localiz
 		DataSign re = createEmpty();
 
 		re.setName(this.name);
+		re.setFullname(this.fullname);
 		re.setTargets(this.targets);
 		re.setRequired(this.required);
 		re.setMultiple(this.multiple);

@@ -38,6 +38,7 @@ import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.FullnameSpec;
 import org.datagear.analysis.NameAware;
 import org.datagear.analysis.form.AbstractFormProperty;
 import org.datagear.analysis.form.Form;
@@ -432,12 +433,13 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Map<String, ?> map = (Map<String, ?>) obj;
 	
 			String name = (String) map.get(DataSign.PROPERTY_NAME);
-			if (name == null || name.isEmpty())
+			if (StringUtil.isEmpty(name))
 				return null;
 	
 			DataSign dataSign = createDataSign();
 
 			dataSign.setName(name);
+			dataSign.setFullname(FullnameSpec.toFullname(name, (parent == null ? null : parent.getFullname())));
 			dataSign.setTargets(convertToDataSignTargets(map.get(DataSign.PROPERTY_TARGETS), parent));
 			dataSign.setRequired(convertToDataSignRequired(map.get(DataSign.PROPERTY_REQUIRED)));
 			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
