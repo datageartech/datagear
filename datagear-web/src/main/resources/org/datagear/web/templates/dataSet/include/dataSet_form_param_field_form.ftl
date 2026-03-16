@@ -140,6 +140,16 @@ page_simple_form.ftl
 					</div>
 				</div>
 				<div class="field grid">
+					<label for="${pid}dsppFormArray" class="field-label col-12 mb-2">
+						<@spring.message code='array' />
+					</label>
+					<div class="field-input col-12">
+						<p-selectbutton id="${pid}dsppFormArray" v-model="pm.dataSetFieldForm.data.array" :options="pm.booleanOptions"
+							option-label="name" option-value="value" class="input w-full">
+						</p-selectbutton>
+					</div>
+				</div>
+				<div class="field grid">
 					<label for="${pid}dsppFormLabel" class="field-label col-12 mb-2"
 						title="<@spring.message code='dataSetField.label.desc' />">
 						<@spring.message code='displayName' />
@@ -294,6 +304,7 @@ page_simple_form.ftl
 				{
 					name: "",
 					type: "${FieldDataType.STRING}",
+					array: false,
 					evaluated: false
 				},
 				po.vueRaw(data));
@@ -352,6 +363,7 @@ page_simple_form.ftl
 			{name: "<@spring.message code='dataSetField.DataType.TIME' />", value: "${FieldDataType.TIME}"},
 			{name: "<@spring.message code='dataSetField.DataType.TIMESTAMP' />", value: "${FieldDataType.TIMESTAMP}"},
 			{name: "<@spring.message code='dataSetField.DataType.BOOLEAN' />", value: "${FieldDataType.BOOLEAN}"},
+			{name: "<@spring.message code='dataSetField.DataType.OBJECT' />", value: "${FieldDataType.OBJECT}"},
 			{name: "<@spring.message code='dataSetField.DataType.UNKNOWN' />", value: "${FieldDataType.UNKNOWN}"}
 		]
 	});
@@ -467,6 +479,10 @@ page_simple_form.ftl
 		{
 			return po.formatBooleanValue(data.evaluated);
 		},
+		formatFieldArray: function(data)
+		{
+			return po.formatBooleanValue(data.array);
+		}
 	});
 })
 (${pid});

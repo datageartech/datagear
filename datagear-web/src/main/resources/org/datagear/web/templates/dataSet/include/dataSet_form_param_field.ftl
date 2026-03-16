@@ -181,6 +181,11 @@ dataSet_form_param_field_form.ftl
 							{{formatFieldType(data)}}
 						</template>
 					</p-column>
+					<p-column field="array" header="<@spring.message code='array' />" class="col-name">
+						<template #body="{data}">
+							{{formatFieldArray(data)}}
+						</template>
+					</p-column>
 					<p-column field="label" header="<@spring.message code='displayName' />" class="col-name">
 					</p-column>
 					<p-column field="defaultValue" header="<@spring.message code='defaultValue' />" class="col-name">

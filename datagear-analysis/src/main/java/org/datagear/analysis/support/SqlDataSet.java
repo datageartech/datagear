@@ -433,9 +433,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			boolean resolveTypeByValue = DataType.UNKNOWN.equals(field.getType());
 
 			if (resolveTypeByValue)
-			{
-				field.setType(resolveFieldDataType(row0.get(field.getName())));
-			}
+				resolveFieldDataType(field, row0.get(field.getName()));
 		}
 	}
 

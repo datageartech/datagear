@@ -280,10 +280,9 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		{
 			for (Map.Entry<String, ?> entry : jsonObj.entrySet())
 			{
+				DataSetField field = new DataSetField(entry.getKey(), DataSetField.DataType.UNKNOWN);
 				Object value = entry.getValue();
-				String type = DataSetField.DataType.resolveDataType(value);
-
-				DataSetField field = new DataSetField(entry.getKey(), type);
+				resolveFieldDataType(field, value);
 
 				// JSON数值只有NUMBER类型
 				if (DataSetField.DataType.INTEGER.equals(field.getType())

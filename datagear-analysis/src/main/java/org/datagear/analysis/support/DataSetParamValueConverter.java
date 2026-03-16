@@ -25,7 +25,6 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetParam.DataType;
 import org.datagear.analysis.DataSetQuery;
-import org.datagear.analysis.NameTypeAware;
 
 /**
  * {@linkplain DataSetParam}值转换器。
@@ -33,7 +32,7 @@ import org.datagear.analysis.NameTypeAware;
  * @author datagear@163.com
  *
  */
-public class DataSetParamValueConverter extends DataValueConverter
+public class DataSetParamValueConverter extends DataValueConverter<DataSetParam>
 {
 	public DataSetParamValueConverter()
 	{
@@ -111,7 +110,7 @@ public class DataSetParamValueConverter extends DataValueConverter
 	 * </p>
 	 */
 	@Override
-	public Map<String, Object> convert(Map<String, ?> paramValues, Collection<? extends NameTypeAware> dataSetParams)
+	public Map<String, Object> convert(Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 			throws DataValueConvertionException
 	{
 		return super.convert(paramValues, dataSetParams);

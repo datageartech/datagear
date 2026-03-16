@@ -166,7 +166,7 @@ public class WebDashboardQueryConverter
 	 * @param user
 	 * @return
 	 */
-	public DataSetQuery convert(Map<String, ?> paramValues, Collection<? extends DataSetParam> dataSetParams, User user)
+	public DataSetQuery convert(Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams, User user)
 	{
 		AnalysisUser analysisUser = toAnalysisUser(user);
 		return convert(paramValues, dataSetParams, analysisUser);
@@ -180,7 +180,7 @@ public class WebDashboardQueryConverter
 	 * @param analysisUser
 	 * @return
 	 */
-	public DataSetQuery convert(Map<String, ?> paramValues, Collection<? extends DataSetParam> dataSetParams,
+	public DataSetQuery convert(Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams,
 			AnalysisUser analysisUser)
 	{
 		Map<String, ?> converted = convert(paramValues, dataSetParams);
@@ -197,7 +197,7 @@ public class WebDashboardQueryConverter
 	 * @param dataSetParams
 	 * @return
 	 */
-	public Map<String, ?> convert(Map<String, ?> paramValues, Collection<? extends DataSetParam> dataSetParams)
+	public Map<String, ?> convert(Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
 		return getDataSetParamValueConverter().convert(paramValues, dataSetParams);
 	}

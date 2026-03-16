@@ -462,9 +462,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 					}
 
 					Object value = row.get(rawDataFieldNames.get(i));
-
-					if (value != null)
-						field.setType(resolveFieldDataType(value));
+					resolveFieldDataType(field, value);
 				}
 
 				if (resolvedFieldTypeCount == fieldLen)

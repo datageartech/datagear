@@ -41,7 +41,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class DataSetFieldValueConverter extends DataValueConverter
+public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 {
 	private DataFormat dataFormat;
 
@@ -131,12 +131,7 @@ public class DataSetFieldValueConverter extends DataValueConverter
 			else if (value instanceof java.util.Date)
 				return convertDateValue((java.util.Date) value, type);
 			else
-			{
-				if (DataType.UNKNOWN.equals(type))
-					return value;
-				else
-					throw new DataValueConvertionException(value, type);
-			}
+				return convertObjectValue(value, type);
 		}
 		catch (DataValueConvertionException e)
 		{
@@ -180,7 +175,7 @@ public class DataSetFieldValueConverter extends DataValueConverter
 			return new Timestamp(date.getTime());
 		}
 		else
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, type);
 	}
 
 	protected Object convertBooleanValue(Boolean value, String type) throws Throwable
@@ -196,7 +191,7 @@ public class DataSetFieldValueConverter extends DataValueConverter
 		else if (DataType.NUMBER.equals(type) || DataType.INTEGER.equals(type) || DataType.DECIMAL.equals(type))
 			return (Boolean.TRUE.equals(value) ? 1 : 0);
 		else
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, type);
 	}
 
 	protected Object convertNumberValue(Number value, String type) throws Throwable
@@ -232,7 +227,7 @@ public class DataSetFieldValueConverter extends DataValueConverter
 		else if (DataType.TIMESTAMP.equals(type))
 			return new Timestamp(value.longValue());
 		else
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, type);
 	}
 
 	protected Object convertDateValue(java.util.Date value, String type) throws Throwable
@@ -258,7 +253,7 @@ public class DataSetFieldValueConverter extends DataValueConverter
 		else if (DataType.TIMESTAMP.equals(type))
 			return new Timestamp(value.getTime());
 		else
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, type);
 	}
 
 	protected Object convertTimeValue(Time value, String type) throws Throwable
@@ -282,7 +277,7 @@ public class DataSetFieldValueConverter extends DataValueConverter
 		else if (DataType.TIMESTAMP.equals(type))
 			return new Timestamp(value.getTime());
 		else
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, type);
 	}
 
 	protected Object convertTimestampValue(Timestamp value, String type) throws Throwable
@@ -306,6 +301,20 @@ public class DataSetFieldValueConverter extends DataValueConverter
 		else if (DataType.TIME.equals(type))
 			return new Time(value.getTime());
 		else
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, type);
+	}
+
+	protected Object convertObjectValue(Object value, String type) throws Throwable
+	{
+		if (DataType.OBJECT.equals(type) || DataType.UNKNOWN.equals(type))
+			return value;
+
+		if (value == null)
+			return null;
+
+		if (DataType.STRING.equals(type))
+			return value.toString();
+		else
+			return convertExt(value, type);
 	}
 }

@@ -520,7 +520,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 解析{@linkplain DataSetField.DataType}类型。
+	 * 解析{@linkplain DataSetField#getType()}。
 	 * 
 	 * @param value
 	 * @return
@@ -530,6 +530,26 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return DataSetField.DataType.resolveDataType(value);
 	}
 	
+	/**
+	 * 解析{@linkplain DataSetField#setType(String)}、{@linkplain DataSetField#setArray(boolean)}。
+	 * 
+	 * @param field
+	 * @param value
+	 */
+	protected void resolveFieldDataType(DataSetField field, Object value)
+	{
+		if (DataSetField.DataType.isLikeArray(value))
+		{
+			field.setArray(true);
+			field.setType(DataSetField.DataType.resolveArrayEleDataType(value));
+		}
+		else
+		{
+			field.setArray(false);
+			field.setType(resolveFieldDataType(value));
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	protected List<Map<String, Object>> listRowsToMapRows(List<List<Object>> data, List<DataSetField> fields)
 	{

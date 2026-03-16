@@ -36,7 +36,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public abstract class DataValueConverter
+public abstract class DataValueConverter<T extends NameTypeAware>
 {
 	/** 正则表达式：小数 */
 	public static final Pattern PATTERN_DECIMAL_NUMBER = Pattern.compile("^[^\\.]+\\.[^\\.]+$");
@@ -60,7 +60,7 @@ public abstract class DataValueConverter
 	 * @return
 	 * @throws DataValueConvertionException
 	 */
-	public Map<String, Object> convert(Map<String, ?> nameValues, Collection<? extends NameTypeAware> nameTypeAwares)
+	public Map<String, Object> convert(Map<String, ?> nameValues, Collection<T> nameTypeAwares)
 			throws DataValueConvertionException
 	{
 		if (nameValues == null)
@@ -70,7 +70,7 @@ public abstract class DataValueConverter
 
 		if (nameTypeAwares != null)
 		{
-			for (NameTypeAware dnt : nameTypeAwares)
+			for (T dnt : nameTypeAwares)
 			{
 				String name = dnt.getName();
 
@@ -101,7 +101,7 @@ public abstract class DataValueConverter
 	 * @return
 	 * @throws DataValueConvertionException
 	 */
-	public <T extends NameTypeAware> Object convert(Object value, T nameTypeAware) throws DataValueConvertionException
+	public Object convert(Object value, T nameTypeAware) throws DataValueConvertionException
 	{
 		return convert(value, nameTypeAware.getType());
 	}
