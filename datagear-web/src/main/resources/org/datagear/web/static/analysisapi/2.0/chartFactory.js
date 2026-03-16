@@ -2512,15 +2512,16 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort)
 		if(count > -1 && re.length >= count)
 			break;
 		
+		let field = fields[i];
 		let matches = false;
 		
 		if(dataSign == null)
-			matches = this.isDataSetFieldSigned(dataSetBind, fields[i], null);
+			matches = this.isDataSetFieldSigned(dataSetBind, field, null);
 		else
-			matches = (dataSignObj == null ? false : this.isDataSetFieldSigned(dataSetBind, fields[i], dataSignObj));
+			matches = (dataSignObj == null ? false : this.isDataSetFieldSigned(dataSetBind, field, dataSignObj));
 		
 		if(matches)
-			re.push(fields[i]);
+			re.push(field);
 	}
 	
 	return re;
@@ -2948,9 +2949,12 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldOf(dataSetBind, field);
 	
+	if(dataSetBind.fieldAliases == null)
+		dataSetBind.fieldAliases = {};
+	
 	if(arguments.length <= 2)
 	{
-		let re = (dataSetBind.fieldAliases ? dataSetBind.fieldAliases[field.name] : null);
+		let re = dataSetBind.fieldAliases[field.name];
 		
 		if(!re)
 			re = (field.label ||  field.name);
@@ -2958,10 +2962,7 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 		return (re || "");
 	}
 	else
-	{
-		if(!dataSetBind.fieldAliases)
-			dataSetBind.fieldAliases = {};
-		
+	{	
 		dataSetBind.fieldAliases[field.name] = alias;
 	}
 };
@@ -2981,16 +2982,15 @@ chartProto.dataSetFieldOrder = function(dataSetBind, field, order)
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldOf(dataSetBind, field);
 	
+	if(dataSetBind.fieldOrders == null)
+		dataSetBind.fieldOrders = {};
+	
 	if(arguments.length <= 2)
 	{
-		return (dataSetBind.fieldOrders ?
-						dataSetBind.fieldOrders[field.name] : null);
+		return dataSetBind.fieldOrders[field.name];
 	}
 	else
 	{
-		if(!dataSetBind.fieldOrders)
-			dataSetBind.fieldOrders = {};
-		
 		dataSetBind.fieldOrders[field.name] = order;
 	}
 };
@@ -3473,11 +3473,13 @@ chartProto.dataSetBindAt = function(index)
  * 获取全部主件数据集绑定，或者设置了指定数据标记的全部主件数据集绑定。
  * 主件数据集绑定的用途是绘制图表。
  * 
- * @param dataSign 可选，要筛选的数据集标记，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns []，空数组表示没有主件数据集绑定
  */
 chartProto.dataSetBindsMain = function(dataSign)
 {
+	dataSign = (arguments.length < 1 ? false : dataSign);
+	
 	return this._dataSetBindsOf(-1, false, dataSign);
 };
 
@@ -3485,11 +3487,13 @@ chartProto.dataSetBindsMain = function(dataSign)
  * 获取第一个主件数据集绑定，或者设置了指定数据标记的第一个主件数据集绑定。
  * 主件数据集绑定的用途是绘制图表。
  * 
- * @param dataSign 可选，要筛选的数据集标记，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns 数据集绑定、null
  */
 chartProto.dataSetBindMain = function(dataSign)
 {
+	dataSign = (arguments.length < 1 ? false : dataSign);
+	
 	var re = this._dataSetBindsOf(1, false, dataSign);
 	return (re.length > 0 ? re[0] : null);
 };
@@ -3498,11 +3502,13 @@ chartProto.dataSetBindMain = function(dataSign)
  * 获取全部附件数据集绑定，或者设置了指定数据标记的全部附件数据集绑定。
  * 附件数据集绑定的用途不是绘制图表。
  * 
- * @param dataSign 可选，要筛选的数据集标记，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns []，空数组表示没有附件数据集绑定
  */
 chartProto.dataSetBindsAttachment = function(dataSign)
 {
+	dataSign = (arguments.length < 1 ? false : dataSign);
+	
 	return this._dataSetBindsOf(-1, true, dataSign);
 };
 
@@ -3510,11 +3516,13 @@ chartProto.dataSetBindsAttachment = function(dataSign)
  * 获取第一个附件数据集绑定，或者设置了指定数据标记的第一个附件数据集绑定。
  * 附件数据集绑定的用途不是绘制图表。
  * 
- * @param dataSign 可选，要筛选的数据集标记，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns 数据集绑定、null
  */
 chartProto.dataSetBindAttachment = function(dataSign)
 {
+	dataSign = (arguments.length < 1 ? false : dataSign);
+	
 	var re = this._dataSetBindsOf(1, true, dataSign);
 	return (re.length > 0 ? re[0] : null);
 };
@@ -3524,7 +3532,7 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 	var re = [];
 	
 	var dataSetBinds = this.dataSetBinds();
-	var dataSignObj = this.pluginDataSign(dataSign);
+	var dataSignObj = (dataSign === false ? null : this.pluginDataSign(dataSign));
 	
 	for(let i=0; i<dataSetBinds.length; i++)
 	{
@@ -3532,15 +3540,12 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 			break;
 		
 		let dsb = dataSetBinds[i];
+		let matches = false;
 		let dsbAttachment = this.dataSetAttachment(dsb);
 		
 		if((!attachment && dsbAttachment) || (attachment && !dsbAttachment))
-			continue;
-		
-		let matches = false;
-		
-		//忽略匹配数据标记
-		if(dataSign === undefined)
+			matches = false;
+		else if(dataSign === false) //忽略数据标记匹配
 			matches = true;
 		else if(dataSign == null)
 			matches = this.isDataSetSigned(dsb, null);
@@ -3803,11 +3808,11 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
+	if(dataSetBind.dataSetSigns == null)
+		dataSetBind.dataSetSigns = [];
+	
 	if(arguments.length <= 1)
 	{
-		if(dataSetBind.dataSetSigns == null)
-			dataSetBind.dataSetSigns = [];
-		
 		return dataSetBind.dataSetSigns;
 	}
 	else
