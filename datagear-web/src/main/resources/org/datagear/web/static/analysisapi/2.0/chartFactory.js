@@ -3102,7 +3102,7 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 数据集字段标识：字段名、字段索引、字段对象
- * @param dataSign 可选，不设置则执行获取操作，与this.pluginDataSign()函数的name参数相同、或者其数组
+ * @param dataSign 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
  * @returns 数据标记名字符串数组，空数组表示没有
  */
 chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
@@ -3139,8 +3139,15 @@ chartProto._toDataSignValues = function(dataSigns)
 	for(let i=0; i<dataSigns.length; i++)
 	{
 		let dsi = dataSigns[i];
-		let dataSignObj = this.pluginDataSign(dsi);
-		let fullname = (dataSignObj == null ? null : dataSignObj.fullname);
+		let fullname = null;
+		
+		if(dsi != null)
+		{
+			if(CF.isString(dsi))
+				fullname = dsi;
+			else if(dsi.fullname !== undefined)
+				fullname = dsi.fullname;
+		}
 		
 		//标记数组不应包含null，也不应有重复项
 		if(fullname != null && CF.indexInArray(re, fullname) < 0)
@@ -3801,7 +3808,7 @@ chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
  * 获取/设置数据集数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param dataSigns 可选，要设置的标记，与this.pluginDataSign()函数的name参数相同、或者其数组
+ * @param dataSigns 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
  * @returns 标记数组，空数组表示没有
  */
 chartProto.dataSetSigns = function(dataSetBind, dataSigns)
