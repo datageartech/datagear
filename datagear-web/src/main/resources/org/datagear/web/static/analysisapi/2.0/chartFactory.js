@@ -7887,23 +7887,48 @@ CF.doTrimRendererLibSourceUrl = function(singleLib, singleSource, relativeUrlHan
  */
 CF.rendererLib = function(renderer)
 {
+	var re;
+	
 	if(!renderer || renderer.depend === undefined)
 	{
-		return undefined;
+		re = undefined;
 	}
-	
-	if(renderer.depend == null)
+	else if(renderer.depend == null)
 	{
-		return null;
+		re = null;
 	}
 	else if(CF.isFunction(renderer.depend))
 	{
-		return renderer.depend();
+		re = renderer.depend();
 	}
 	else
 	{
-		return renderer.depend;
+		re = renderer.depend;
 	}
+	
+	if(re != null)
+	{
+		if(CF.isArray(re))
+		{
+			let newRe = [];
+			
+			for(let i=0; i<re.length; i++)
+			{
+				if(CF.isString(re[i]))
+					newRe[i] = { name: re[i] };
+				else
+					newRe[i] = re[i];
+			}
+			
+			re = newRe;
+		}
+		else if(CF.isString(re))
+		{
+			re = { name: re };
+		}
+	}
+	
+	return re;
 };
 
 //以http://或者https://开头的正则表达式
