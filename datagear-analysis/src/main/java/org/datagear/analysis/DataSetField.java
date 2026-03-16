@@ -30,9 +30,12 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class DataSetField extends AbstractNameTypeAware implements DataSetFieldsAware, Cloneable
+public class DataSetField extends AbstractNameTypeAware implements DataSetFieldsAware, FullnameAware, Cloneable
 {
 	private static final long serialVersionUID = 1L;
+
+	/** 全名 */
+	private String fullname;
 
 	/** 展示标签 */
 	private String label = null;
@@ -70,15 +73,25 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 	public DataSetField(String name, String type)
 	{
 		super(name, DataType.normalize(type));
+		this.fullname = FullnameSpec.toFullname(name, null);
+	}
+
+	public DataSetField(String name, String fullname, String type)
+	{
+		super(name, DataType.normalize(type));
+		this.fullname = fullname;
 	}
 
 	public DataSetField(DataSetField field)
 	{
 		super(field.getName(), DataType.normalize(field.getType()));
+		this.fullname = field.fullname;
 		this.label = field.label;
 		this.defaultValue = field.defaultValue;
 		this.evaluated = field.evaluated;
 		this.expression = field.expression;
+		this.fields = field.fields;
+		this.array = field.array;
 	}
 
 	@Override
@@ -87,9 +100,15 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 		super.setType(DataType.normalize(type));
 	}
 
-	public boolean hasLabel()
+	@Override
+	public String getFullname()
 	{
-		return (this.label != null && !this.label.isEmpty());
+		return fullname;
+	}
+
+	public void setFullname(String fullname)
+	{
+		this.fullname = fullname;
 	}
 
 	public String getLabel()
@@ -192,8 +211,9 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", label=" + label
-				+ ", defaultValue=" + defaultValue + ", evaluated=" + evaluated + ", expression=" + expression + "]";
+		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", fullname=" + fullname
+				+ ", label=" + label + ", defaultValue=" + defaultValue + ", evaluated=" + evaluated + ", expression="
+				+ expression + "]";
 	}
 
 	/**

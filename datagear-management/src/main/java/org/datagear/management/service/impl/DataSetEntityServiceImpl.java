@@ -27,6 +27,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetParam;
+import org.datagear.analysis.FullnameSpec;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.DataFormat;
 import org.datagear.analysis.support.HttpDataSet;
@@ -592,11 +593,64 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		List<DataSetFieldPO> fieldPOs = selectListMybatis("getFieldPOs", params);
 		List<DataSetField> fields = DataSetFieldPO.to(fieldPOs);
-		dataSetEntity.setFields(fields);
+		dataSetEntity.setFields(arrangeDataSetFields(fields));
 
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", params);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
 		dataSetEntity.setParams(dataSetParams);
+	}
+
+	/**
+	 * 按照父子关系整理{@linkplain DataSetField}列表。
+	 * 
+	 * @param fields
+	 * @return
+	 */
+	protected List<DataSetField> arrangeDataSetFields(List<DataSetField> fields)
+	{
+		if (fields == null || fields.isEmpty())
+			return fields;
+
+		List<DataSetField> re = new ArrayList<>(fields.size());
+
+		// 兼容<=5.5.0版本数据中没有fullname的场景
+		for (DataSetField field : fields)
+		{
+			if (StringUtil.isEmpty(field.getFullname()))
+				field.setFullname(FullnameSpec.toFullname(field.getName(), null));
+		}
+
+		for (DataSetField field : fields)
+		{
+			String name = field.getName();
+			String fullname = field.getFullname();
+
+			if (FullnameSpec.isTopFullname(fullname, name))
+				re.add(field);
+			else
+			{
+				for (DataSetField parent : fields)
+				{
+					if (parent == field)
+						continue;
+
+					if (fullname.equals(FullnameSpec.toFullname(name, parent.getFullname())))
+					{
+						List<DataSetField> children = parent.getFields();
+						if (children == null)
+						{
+							children = new ArrayList<>();
+							parent.setFields(children);
+						}
+
+						children.add(field);
+						break;
+					}
+				}
+			}
+		}
+
+		return re;
 	}
 
 	protected SqlDataSetEntity getSqlDataSetEntityById(String id)
@@ -722,6 +776,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (entity == null)
 			return;
 
+		inflateFieldsFullname(entity.getFields(), null);
+
 		Map<String, Object> delParams = buildParamMap();
 		delParams.put("dataSetId", entity.getId());
 
@@ -738,6 +794,20 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 				insertMybatis("insertFieldPO", insertParams);
 			}
+		}
+	}
+
+	protected void inflateFieldsFullname(List<DataSetField> fields, DataSetField parent)
+	{
+		if (fields == null || fields.isEmpty())
+			return;
+
+		String parentFullname = (parent == null ? null : parent.getFullname());
+
+		for (DataSetField field : fields)
+		{
+			field.setFullname(FullnameSpec.toFullname(field.getName(), parentFullname));
+			inflateFieldsFullname(field.getFields(), field);
 		}
 	}
 

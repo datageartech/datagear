@@ -20,15 +20,15 @@
 	<insert id="insertFieldPO">
 		INSERT INTO DATAGEAR_DATA_SET_PROP
 			(
-			PROP_DS_ID, PROP_NAME, PROP_TYPE, PROP_LABEL,
-			PROP_DFT_VALUE, PROP_EVALUATED, PROP_EXPRESSION,
-			PROP_ORDER
+			PROP_DS_ID, PROP_NAME, PROP_TYPE, PROP_FULLNAME,
+			PROP_LABEL, PROP_DFT_VALUE, PROP_EVALUATED,
+			PROP_EXPRESSION, PROP_ORDER
 			)
 		VALUES
 			(
-			#{entity.dataSetId}, #{entity.child.name}, #{entity.child.type}, #{entity.child.label, jdbcType=VARCHAR},
-			#{entity.child.defaultValue, jdbcType=VARCHAR}, #{entity.child.evaluated}, #{entity.child.expression, jdbcType=VARCHAR}, 
-			#{entity.order}
+			#{entity.dataSetId}, #{entity.child.name}, #{entity.child.type}, #{entity.child.fullname, jdbcType=VARCHAR},
+			#{entity.child.label, jdbcType=VARCHAR}, #{entity.child.defaultValue, jdbcType=VARCHAR}, #{entity.child.evaluated},
+			#{entity.child.expression, jdbcType=VARCHAR}, #{entity.order}
 			)
 	</insert>
 	
@@ -100,6 +100,7 @@
 			PROP_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PROP_NAME AS ${_iq_}child.name${_iq_},
 			PROP_TYPE AS ${_iq_}child.type${_iq_},
+			PROP_FULLNAME AS ${_iq_}fullname${_iq_},
 			PROP_LABEL AS ${_iq_}child.label${_iq_},
 			PROP_DFT_VALUE AS ${_iq_}child.defaultValue${_iq_},
 			PROP_EVALUATED AS ${_iq_}child.evaluated${_iq_},

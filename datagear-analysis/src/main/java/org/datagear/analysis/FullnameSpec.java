@@ -128,6 +128,24 @@ public class FullnameSpec
 		return names;
 	}
 
+	/**
+	 * 是否顶层全名。
+	 * 
+	 * @param fullname
+	 * @param name
+	 * @return
+	 */
+	public static boolean isTopFullname(String fullname, String name)
+	{
+		if (StringUtil.isEmpty(fullname))
+			throw new IllegalArgumentException("[fullname] requied");
+
+		if (StringUtil.isEmpty(name))
+			throw new IllegalArgumentException("[name] requied");
+
+		return fullname.equals(toFullname(name, null));
+	}
+
 	protected static String escapeName(String name)
 	{
 		StringBuilder re = new StringBuilder();

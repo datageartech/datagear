@@ -129,50 +129,55 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 		if (merge == null)
 			merge = Collections.emptyList();
 
-		List<DataSetField> dps = new ArrayList<DataSetField>(base.size());
+		List<DataSetField> dfs = new ArrayList<DataSetField>(base.size());
 		for (DataSetField field : base)
-			dps.add(field.clone());
+			dfs.add(field.clone());
 
-		for (DataSetField dp : dps)
+		for (DataSetField df : dfs)
 		{
-			DataSetField mp = NameAwareUtil.find(merge, dp.getName());
+			DataSetField mp = NameAwareUtil.find(merge, df.getName());
 			
 			if(mp != null)
 			{
-				dp.setType(mp.getType());
-				dp.setLabel(mp.getLabel());
-				dp.setDefaultValue(mp.getDefaultValue());
-				dp.setEvaluated(mp.isEvaluated());
-				dp.setExpression(mp.getExpression());
+				df.setType(mp.getType());
+				df.setFullname(mp.getFullname());
+				df.setLabel(mp.getLabel());
+				df.setDefaultValue(mp.getDefaultValue());
+				df.setEvaluated(mp.isEvaluated());
+				df.setExpression(mp.getExpression());
+				df.setArray(mp.isArray());
+
+				if (mp.getFields() != null)
+					df.setFields(mergeFields(df.getFields(), mp.getFields()));
 			}
 		}
 
-		for (DataSetField mp : merge)
+		for (DataSetField mf : merge)
 		{
-			if (NameAwareUtil.find(dps, mp.getName()) == null)
-				dps.add(mp);
+			if (NameAwareUtil.find(dfs, mf.getName()) == null)
+				dfs.add(mf);
 		}
 
 		final List<? extends DataSetField> mergedFinal = merge;
 
-		dps.sort(new Comparator<DataSetField>()
+		dfs.sort(new Comparator<DataSetField>()
 		{
 			@Override
-			public int compare(DataSetField o1, DataSetField o2)
+			public int compare(DataSetField df1, DataSetField df2)
 			{
 				// 优先按照merged列表中的顺序重排
-				int o1Idx = NameAwareUtil.findIndex(mergedFinal, o1.getName());
-				int o2Idx = NameAwareUtil.findIndex(mergedFinal, o2.getName());
+				int o1Idx = NameAwareUtil.findIndex(mergedFinal, df1.getName());
+				int o2Idx = NameAwareUtil.findIndex(mergedFinal, df2.getName());
 
 				if (o1Idx < 0)
-					o1Idx = NameAwareUtil.findIndex(dps, o1.getName());
+					o1Idx = NameAwareUtil.findIndex(dfs, df1.getName());
 				if (o2Idx < 0)
-					o2Idx = NameAwareUtil.findIndex(dps, o2.getName());
+					o2Idx = NameAwareUtil.findIndex(dfs, df2.getName());
 
 				return Integer.valueOf(o1Idx).compareTo(o2Idx);
 			}
 		});
 
-		return dps;
+		return dfs;
 	}
 }
