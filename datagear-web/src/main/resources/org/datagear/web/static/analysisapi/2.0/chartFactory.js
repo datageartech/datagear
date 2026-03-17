@@ -2480,7 +2480,7 @@ chartProto._clearLiveValue = function()
  */
 chartProto.dataSetFieldOfSign = function(dataSetBind, dataSign)
 {
-	var re = this._dataSetFieldsOfSign(dataSetBind, dataSign, 1, false);
+	var re = this._dataSetFieldsOfSign(dataSetBind, dataSign);
 	return (re.length > 0 ? re[0] : null);
 };
 
@@ -2489,32 +2489,24 @@ chartProto.dataSetFieldOfSign = function(dataSetBind, dataSign)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
- * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
  * @return []
  */
-chartProto.dataSetFieldsOfSign = function(dataSetBind, dataSign, sort)
+chartProto.dataSetFieldsOfSign = function(dataSetBind, dataSign)
 {
-	return this._dataSetFieldsOfSign(dataSetBind, dataSign, -1, sort);
+	return this._dataSetFieldsOfSign(dataSetBind, dataSign);
 };
 
-chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort)
+chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	sort = (sort === undefined ? true : sort);
 	
 	var re = [];
 	
 	var fields = this.dataSetFields(dataSetBind);
 	var dataSignObj = this.pluginDataSign(dataSign);
 	
-	if(sort)
-		fields = this.sortDataSetFields(dataSetBind, fields);
-	
 	for(let i=0; i<fields.length; i++)
 	{
-		if(count > -1 && re.length >= count)
-			break;
-		
 		let field = fields[i];
 		let matches = false;
 		
@@ -2527,6 +2519,8 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort)
 			re.push(field);
 	}
 	
+	re = this.sortDataSetFields(dataSetBind, re);
+	
 	return re;
 };
 
@@ -2535,13 +2529,13 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param fields 数据集字段数组
- * @return
+ * @return fields
  */
 chartProto.sortDataSetFields = function(dataSetBind, fields)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
-	if(fields == null)
+	if(fields == null || fields.length < 2)
 		return fields;
 	
 	var fos = [];
@@ -2573,12 +2567,10 @@ chartProto.sortDataSetFields = function(dataSetBind, fields)
 		return re;
 	});
 	
-	var re = [];
-	
 	for(var i=0; i<fos.length; i++)
-		re[i] = fos[i].field;
+		fields[i] = fos[i].field;
 	
-	return re;
+	return fields;
 };
 
 /**
