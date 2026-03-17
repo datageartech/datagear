@@ -89,7 +89,7 @@ public class DataSetBind implements Serializable
 	 * 设置{@linkplain #getDataSet()}的标记，
 	 * <p>
 	 * 其元素应是{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}中
-	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getName()}集合。
+	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getFullname()}。
 	 * </p>
 	 * 
 	 * @param dataSetSigns
@@ -107,13 +107,9 @@ public class DataSetBind implements Serializable
 	/**
 	 * 设置字段标记映射表。
 	 * <p>
-	 * 其关键字是{@linkplain #getDataSet()}的{@linkplain DataSetField#getName()}，
-	 * 值集合元素则是{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}中
-	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_FIELD}的{@linkplain DataSign#getName()}，
-	 * 或者，是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}全名，
-	 * 格式为：<code>"数据集标记名.字段标记名"</code>，
-	 * 其中，<code>数据集标记名</code>是{@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_DATASET}的{@linkplain DataSign#getName()}，
-	 * <code>字段标记名</code>则是其{@linkplain DataSign#getChildren()}的{@linkplain DataSign#getName()}。
+	 * 其关键字应是{@linkplain #getDataSet()}的{@linkplain DataSetField#getFullname()}，
+	 * 值元素应是{@linkplain Chart#getPlugin()}的{@linkplain ChartPlugin#getDataSigns()}中
+	 * {@linkplain DataSign#getTarget()}为{@linkplain DataSign#TARGET_FIELD}的{@linkplain DataSign#getFullname()}。
 	 * </p>
 	 * 
 	 * @param fieldSigns
@@ -174,6 +170,14 @@ public class DataSetBind implements Serializable
 		return fieldAliases;
 	}
 
+	/**
+	 * 设置字段别名。
+	 * <p>
+	 * 其关键字应是{@linkplain #getDataSet()}的{@linkplain DataSetField#getFullname()}。
+	 * </p>
+	 * 
+	 * @param fieldAliases
+	 */
 	public void setFieldAliases(Map<String, String> fieldAliases)
 	{
 		this.fieldAliases = fieldAliases;
@@ -184,6 +188,14 @@ public class DataSetBind implements Serializable
 		return fieldOrders;
 	}
 
+	/**
+	 * 设置字段排序。
+	 * <p>
+	 * 其关键字应是{@linkplain #getDataSet()}的{@linkplain DataSetField#getFullname()}。
+	 * </p>
+	 * 
+	 * @param fieldOrders
+	 */
 	public void setFieldOrders(Map<String, ? extends Number> fieldOrders)
 	{
 		this.fieldOrders = fieldOrders;
