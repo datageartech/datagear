@@ -2491,7 +2491,7 @@ chartProto.dataSetFieldOfSign = function(dataSetBind, fieldsOwner, dataSign)
 		fieldsOwner = dataSetBind;
 	}
 	
-	var re = this._dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign);
+	var re = this._dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign, 1);
 	return (re.length > 0 ? re[0] : null);
 };
 
@@ -2515,10 +2515,10 @@ chartProto.dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
 		fieldsOwner = dataSetBind;
 	}
 	
-	return this._dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign);
+	return this._dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign, -1);
 };
 
-chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
+chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign, count)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
@@ -2527,8 +2527,13 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
 	var fields = this.dataSetFields(fieldsOwner);
 	var dataSignObj = this.pluginDataSign(dataSign);
 	
+	fields = this.sortDataSetFields(dataSetBind, fields);
+	
 	for(let i=0; i<fields.length; i++)
 	{
+		if(count > -1 && re.length >= count)
+			break;
+		
 		let field = fields[i];
 		let matches = false;
 		
@@ -2541,23 +2546,21 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
 			re.push(field);
 	}
 	
-	re = this.sortDataSetFields(dataSetBind, re);
-	
 	return re;
 };
 
 /**
- * 排序数据集字段数组。
+ * 排序数据集字段并返回一个新的排序好的数组。
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param fields 数据集字段数组
- * @return fields
+ * @return []
  */
 chartProto.sortDataSetFields = function(dataSetBind, fields)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
-	if(fields == null || fields.length < 2)
+	if(fields == null)
 		return fields;
 	
 	var fos = [];
@@ -2590,9 +2593,9 @@ chartProto.sortDataSetFields = function(dataSetBind, fields)
 	});
 	
 	for(var i=0; i<fos.length; i++)
-		fields[i] = fos[i].field;
+		fos[i] = fos[i].field;
 	
-	return fields;
+	return fos;
 };
 
 /**

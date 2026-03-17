@@ -5238,7 +5238,7 @@ SPT.tableRenderer = function(plugin, config)
 				if(!fields || fields.length == 0)
 				{
 					fields = chart.dataSetFields(dataSetBind);
-					chart.sortDataSetFields(dataSetBind, fields);
+					fields = chart.sortDataSetFields(dataSetBind, fields);
 				}
 				
 				for(let j=0; j<fields.length; j++)

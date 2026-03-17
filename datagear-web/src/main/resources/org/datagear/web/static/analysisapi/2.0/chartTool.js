@@ -2461,7 +2461,7 @@ TOOL.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
 	var dataSetFields = chart.dataSetFields(dataSetBind);
 	var signFields = [];
 	
-	chart.sortDataSetFields(dataSetBind, dataSetFields);
+	dataSetFields = chart.sortDataSetFields(dataSetBind, dataSetFields);
 	
 	for(let i=0; i<dataSetFields.length; i++)
 	{
