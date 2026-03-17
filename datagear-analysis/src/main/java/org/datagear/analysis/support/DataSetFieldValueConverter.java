@@ -108,6 +108,29 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 	}
 
 	@Override
+	public Object convert(Object value, DataSetField field) throws DataValueConvertionException
+	{
+		Object re = super.convert(value, field);
+
+		// 数组与非数组互转
+		if (re != null)
+		{
+			boolean likeArray = DataType.isLikeArray(re);
+
+			if(likeArray && !field.isArray())
+			{
+				re = DataType.getLikeArrayFirstEle(re);
+			}
+			else if (!likeArray && field.isArray())
+			{
+				re = DataType.wrapToLikeArray(re);
+			}
+		}
+
+		return re;
+	}
+
+	@Override
 	protected Object convertValue(Object value, String type) throws DataValueConvertionException
 	{
 		if (value == null)
@@ -313,7 +336,7 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 			return null;
 
 		if (DataType.STRING.equals(type))
-			return value.toString();
+			return convertObjToJsonString(value, type);
 		else
 			return convertExt(value, type);
 	}

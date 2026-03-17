@@ -296,6 +296,29 @@ public abstract class DataValueConverter<T extends NameTypeAware>
 		}
 	}
 
+	/**
+	 * 将对象转为JSON字符串。
+	 * 
+	 * @param obj
+	 * @param stringType
+	 * @return
+	 */
+	protected Object convertObjToJsonString(Object value, String stringType)
+	{
+		if (value == null)
+			return null;
+
+		try
+		{
+			String re = JsonSupport.generate(value);
+			return re;
+		}
+		catch (Exception e)
+		{
+			return convertExt(value, stringType);
+		}
+	}
+
 	protected Object convertExt(Object value, String type) throws DataValueConvertionException
 	{
 		throw new DataValueConvertionException(value, type,

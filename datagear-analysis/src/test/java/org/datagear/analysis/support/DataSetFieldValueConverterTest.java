@@ -19,11 +19,15 @@ package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.datagear.analysis.DataSetField;
 import org.junit.Test;
@@ -39,6 +43,93 @@ public class DataSetFieldValueConverterTest
 	public DataSetFieldValueConverterTest()
 	{
 		super();
+	}
+
+	@Test
+	public void convertTest_Object_DataSetField()
+	{
+		DataFormat format = new DataFormat();
+		DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
+		
+		{
+			String value = "3";
+			DataSetField field = new DataSetField("field", DataSetField.DataType.INTEGER);
+			Object actual = converter.convert(value, field);
+			assertEquals(3, ((Integer) actual).intValue());
+		}
+
+		{
+			Object value = Collections.singletonMap("name", "aaa");
+			DataSetField field = new DataSetField("field", DataSetField.DataType.OBJECT);
+			Object actual = converter.convert(value, field);
+			assertEquals(value, actual);
+		}
+
+		{
+			Object value = Collections.singletonMap("name", "aaa");
+			DataSetField field = new DataSetField("field", DataSetField.DataType.STRING);
+			Object actual = converter.convert(value, field);
+			assertEquals("{\"name\":\"aaa\"}", actual);
+		}
+
+		{
+			DataSetField field = new DataSetField("field", DataSetField.DataType.INTEGER);
+			field.setArray(true);
+
+			{
+				String[] value = new String[] { "3", "4", "5" };
+
+				Object[] actual = (Object[]) converter.convert(value, field);
+				assertEquals(3, actual.length);
+				assertEquals(3, ((Integer) actual[0]).intValue());
+				assertEquals(4, ((Integer) actual[1]).intValue());
+				assertEquals(5, ((Integer) actual[2]).intValue());
+			}
+			
+			{
+				List<String> value = Arrays.asList("3", "4", "5");
+
+				List<?> actual = (List<?>) converter.convert(value, field);
+				assertEquals(3, actual.size());
+				assertEquals(3, ((Integer) actual.get(0)).intValue());
+				assertEquals(4, ((Integer) actual.get(1)).intValue());
+				assertEquals(5, ((Integer) actual.get(2)).intValue());
+			}
+			
+			{
+				String value = "3";
+
+				List<?> actual = (List<?>) converter.convert(value, field);
+				assertEquals(1, actual.size());
+				assertEquals(3, ((Integer) actual.get(0)).intValue());
+			}
+		}
+
+		{
+			DataSetField field = new DataSetField("field", DataSetField.DataType.INTEGER);
+			field.setArray(false);
+
+			{
+				String[] value = new String[] { "3", "4", "5" };
+
+				Object actual = converter.convert(value, field);
+				assertEquals(3, ((Integer) actual).intValue());
+			}
+
+			{
+				List<String> value = Arrays.asList("3", "4", "5");
+
+				Object actual = converter.convert(value, field);
+				assertEquals(3, ((Integer) actual).intValue());
+			}
+
+			{
+				String value = "3";
+
+				Object actual = converter.convert(value, field);
+				assertEquals(3, ((Integer) actual).intValue());
+			}
+		}
 	}
 
 	@Test
@@ -495,6 +586,31 @@ public class DataSetFieldValueConverterTest
 			Timestamp value = new Timestamp(System.currentTimeMillis());
 			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.TIME);
 			assertEquals(value.getTime(), ((java.sql.Time) actual).getTime());
+		}
+	}
+
+	@Test
+	public void convertObjectValueTest() throws Throwable
+	{
+		DataFormat format = new DataFormat();
+		DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
+
+		{
+			Object value = Collections.singletonMap("name", "aaa");
+			Object actual = converter.convertObjectValue(value, DataSetField.DataType.OBJECT);
+			assertTrue(value == actual);
+		}
+
+		{
+			Object value = Collections.singletonMap("name", "aaa");
+			Object actual = converter.convertObjectValue(value, DataSetField.DataType.OBJECT);
+			assertTrue(value == actual);
+		}
+
+		{
+			Object value = Collections.singletonMap("name", "aaa");
+			Object actual = converter.convertObjectValue(value, DataSetField.DataType.STRING);
+			assertEquals("{\"name\":\"aaa\"}", actual);
 		}
 	}
 

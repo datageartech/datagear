@@ -19,6 +19,7 @@ package org.datagear.analysis;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -334,17 +335,21 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 
 		/**
 		 * 获取像数组对象的第一个元素。
+		 * <p>
+		 * 如果不像数组，将返回{@code null}。
+		 * </p>
 		 * 
 		 * @param likeArray
 		 * @return
 		 */
 		public static Object getLikeArrayFirstEle(Object likeArray)
 		{
+			if (likeArray == null)
+				return null;
+			
 			Object ele = null;
 
-			if (likeArray == null)
-				ele = null;
-			else if (likeArray instanceof Object[])
+			if (likeArray instanceof Object[])
 			{
 				Object[] array = (Object[]) likeArray;
 				ele = (array.length > 0 ? array[0] : null);
@@ -360,6 +365,20 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 			}
 
 			return ele;
+		}
+
+		/**
+		 * 将对象包装为像数组。
+		 * 
+		 * @param o
+		 * @return
+		 */
+		public static Object wrapToLikeArray(Object o)
+		{
+			if (o == null)
+				return null;
+
+			return Arrays.asList(o);
 		}
 
 		/**
