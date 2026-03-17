@@ -34,6 +34,15 @@
 					name: "range",
 					nameLabel: "数据集标记01-范围",
 					targets: [ "aaa", "bbb" ]
+				},
+				{
+					name: "subSigns",
+					nameLabel: "字段子级标记",
+					children:
+					[
+						{ name: "aaa" },
+						{ name: "bbb" }
+					]
 				}
 			]
 		},

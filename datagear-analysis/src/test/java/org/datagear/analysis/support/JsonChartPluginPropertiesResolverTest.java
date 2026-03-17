@@ -1018,7 +1018,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 				List<DataSign> children = dataSign.getChildren();
 				assertNotNull(children);
-				assertEquals(4, children.size());
+				assertEquals(5, children.size());
 
 				{
 					DataSign ds = children.get(0);
@@ -1073,6 +1073,41 @@ public class JsonChartPluginPropertiesResolverTest
 					assertTrue(ds.isRequired());
 					assertFalse(ds.isMultiple());
 					assertEquals("数据集标记01-范围", ds.getNameLabel().getValue());
+				}
+
+				{
+					DataSign ds = children.get(4);
+					String[] dsTargets = ds.getTargets();
+					List<DataSign> subSigns = ds.getChildren();
+
+					assertEquals("subSigns", ds.getName());
+					assertEquals(1, dsTargets.length);
+					assertEquals(DataSign.TARGET_FIELD, dsTargets[0]);
+					assertTrue(ds.isRequired());
+					assertFalse(ds.isMultiple());
+					assertEquals(2, subSigns.size());
+
+					{
+						DataSign sub = subSigns.get(0);
+						String[] subTargets = ds.getTargets();
+
+						assertEquals("aaa", sub.getName());
+						assertEquals(1, subTargets.length);
+						assertEquals(DataSign.TARGET_FIELD, subTargets[0]);
+						assertTrue(sub.isRequired());
+						assertFalse(sub.isMultiple());
+					}
+
+					{
+						DataSign sub = subSigns.get(1);
+						String[] subTargets = ds.getTargets();
+
+						assertEquals("bbb", sub.getName());
+						assertEquals(1, subTargets.length);
+						assertEquals(DataSign.TARGET_FIELD, subTargets[0]);
+						assertTrue(sub.isRequired());
+						assertFalse(sub.isMultiple());
+					}
 				}
 			}
 

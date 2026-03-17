@@ -446,7 +446,6 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
 			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
 			dataSign.setAdditions(convertToAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
-
 			dataSign.setChildren(convertToDataSigns(map.get(DataSign.PROPERTY_CHILDREN), dataSign));
 	
 			return dataSign;
@@ -470,7 +469,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	{
 		String[] targets;
 
-		// 设为默认值，以兼容旧版逻辑
+		// 设为默认值，以兼容<=5.3.0版本逻辑
 		if(v == null)
 		{
 			targets = DataSign.TARGETS_FIELDS;
