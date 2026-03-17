@@ -4288,7 +4288,7 @@
 	 * 
 	 * @param name 字符串全名、数据标记数组索引数值、数据标记对象，或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
 	 * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
-	 * @returns 标记全名，当name为null时将直接返回null
+	 * @returns 标记全名，层级间以'.'分隔，可能是null
 	 * @since 5.4.0
 	 */
 	chartBase.dataSignFullname = function(name, dataSigns)
@@ -4304,42 +4304,67 @@
 		
 		if(!isArray)
 		{
-			//数据标记对象
-			if(name.fullname !== undefined)
+			var dataSign = null;
+			
+			//插件数据标记数组索引数值
+			if(chartFactory.isNumber(name))
 			{
-				return name.fullname;
-			}
-			//数据标记名、索引数值
-			else
-			{
-				var dataSign = this.pluginDataSign(name, dataSigns);
+				dataSign = this.pluginDataSign(name, dataSigns);
 				
 				if(dataSign == null)
 					throw new Error("no DataSign found for : " + name);
 				
-				return dataSign.fullname;
+				return dataSign.name;
 			}
+			//数据标记对象
+			else if(name.name !== undefined)
+			{
+				dataSign = name;
+			}
+			
+			return (dataSign ? dataSign.name : null);
 		}
 		else
 		{
-			var dataSign = null;
+			var re = "";
+			
+			//默认查找数据标记数组，不能设为undefined，纤细参考this.pluginDataSign()函数
+			var dftDataSigns = [];
 			
 			for(var i=0; i<name.length; i++)
 			{
+				var myPart = null;
+				
 				var ni = name[i];
-				dataSign = this.pluginDataSign(ni, dataSigns);
+				var dataSign = this.pluginDataSign(ni, dataSigns);
 				
 				if(dataSign == null)
-					throw new Error("no DataSign found for : name[" + i + "]");
+				{
+					if(ni == null || chartFactory.isString(ni))
+					{
+						myPart = ni;
+					}
+					//数据标记对象
+					else if(ni.name !== undefined)
+					{
+						myPart = ni.name;
+						dataSign = ni;
+					}
+					else
+					{
+						throw new Error("no DataSign found for : name["+i+"]");
+					}
+				}
+				else
+				{
+					myPart = dataSign.name;
+				}
 				
-				//不能设为undefined，纤细参考this.pluginDataSign()函数
-				dataSigns = (dataSign.children ? dataSign.children : null);
+				re += (re ? (chartFactory.DATA_SIGN_FULLNAME_SEPARATOR + myPart) : myPart);
+				dataSigns = (dataSign && dataSign.children ? dataSign.children : dftDataSigns);
 			}
 			
-			if(dataSign == null)
-				throw new Error("no DataSign found for : " + name);
-			
-			return dataSign.fullname;
+			return re;
 		}
 	};
 	
