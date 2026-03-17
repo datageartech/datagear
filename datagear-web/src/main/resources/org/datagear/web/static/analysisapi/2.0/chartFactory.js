@@ -2475,7 +2475,7 @@ chartProto._clearLiveValue = function()
  * 获取指定标记的数据集字段，没有则返回null。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param dataSign 与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集字段
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
  * @return 数据集字段、null
  */
 chartProto.dataSetFieldOfSign = function(dataSetBind, dataSign)
@@ -2488,7 +2488,7 @@ chartProto.dataSetFieldOfSign = function(dataSetBind, dataSign)
  * 获取指定标记的数据集字段数组。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param dataSign 与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集字段
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
  * @param sort 可选，是否对返回结果进行重排序，true 是；false 否。默认值为：true
  * @return []
  */
@@ -2504,8 +2504,11 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort)
 	
 	var re = [];
 	
-	var fields = this.dataSetFields(dataSetBind, sort);
+	var fields = this.dataSetFields(dataSetBind);
 	var dataSignObj = this.pluginDataSign(dataSign);
+	
+	if(sort)
+		fields = this.sortDataSetFields(dataSetBind, fields);
 	
 	for(let i=0; i<fields.length; i++)
 	{
@@ -2523,6 +2526,57 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign, count, sort)
 		if(matches)
 			re.push(field);
 	}
+	
+	return re;
+};
+
+/**
+ * 排序数据集字段数组。
+ * 
+ * @param dataSetBind 数据集绑定或其索引
+ * @param fields 数据集字段数组
+ * @return
+ */
+chartProto.sortDataSetFields = function(dataSetBind, fields)
+{
+	dataSetBind = this._dataSetBindOf(dataSetBind);
+	
+	if(fields == null)
+		return fields;
+	
+	var fos = [];
+	
+	for(let i=0; i<fields.length; i++)
+	{
+		let f = fields[i];
+		fos[i] = { field: f, order: this.dataSetFieldOrder(dataSetBind, f), index: i };
+	}
+	
+	fos.sort(function(a, b)
+	{
+		var oa = (a.order != null ? a.order : a.index);
+		var ob = (b.order != null ? b.order : b.index);
+		
+		var re = (oa - ob);
+		
+		if(re == 0)
+		{
+			//上面逻辑已保证这里不会出现(a.order == null && b.order == null)的情况
+			if(a.order == null)
+				re = 1;
+			else if(b.order == null)
+				re = -1;
+			else
+				re = a.index - b.index;
+		}
+		
+		return re;
+	});
+	
+	var re = [];
+	
+	for(var i=0; i<fos.length; i++)
+		re[i] = fos[i].field;
 	
 	return re;
 };
@@ -2809,81 +2863,27 @@ chartProto.dataSetAlias = function(dataSetBind, alias)
 
 /**
  * 获取数据集字段数组。
- * 返回数组排序遵循如下规则：
- * 排序值越小越靠前；
- * 属性默认具有与其索引相同的排序值；
- * 当两个属性具有相同排序值时，设置了fieldOrders中排序值的那个属性靠前排（前置插入），否则，属性索引小的那个靠前排。
  * 
- * @param dataSetBind 数据集绑定或其索引、数据集
- * @param sort 可选，当dataSetBind是数据集绑定时，是否依据其fieldOrders对返回结果进行重排序，true 是；false 否。默认值为：true
+ * @param dataSetBind 数据集绑定或其索引、数据集、数据集字段
  * @returns 数据集字段数组，返回空数组表示没有
  */
-chartProto.dataSetFields = function(dataSetBind, sort)
+chartProto.dataSetFields = function(dataSetBind)
 {
-	sort = (sort === undefined ? true : sort);
+	var fields;
 	
-	var dataSet;
-	var isDataSet;
-	
-	//数据集
-	if(dataSetBind && dataSetBind.params !== undefined)
+	//数据集、数据集字段
+	if(dataSetBind && dataSetBind.fields !== undefined)
 	{
-		dataSet = dataSetBind;
-		isDataSet = true;
+		fields = dataSetBind.fields;
 	}
 	//数据集绑定、索引数值
 	else
 	{
 		dataSetBind = this._dataSetBindOf(dataSetBind);
-		dataSet = dataSetBind.dataSet;
-		isDataSet = false;
+		fields = (dataSetBind && dataSetBind.dataSet ? dataSetBind.dataSet.fields : null);
 	}
 	
-	var fields = (dataSet && dataSet.fields ? dataSet.fields : []);
-	
-	if(isDataSet || !sort)
-		return fields;
-	
-	var fieldOrders = dataSetBind.fieldOrders;
-	
-	if(!fieldOrders)
-		return fields;
-	
-	var pos = [];
-	
-	for(var i=0; i<fields.length; i++)
-	{
-		var p = fields[i];
-		pos[i] = { field: p, order: fieldOrders[p.name], index: i };
-	}
-	
-	pos.sort(function(a, b)
-	{
-		var oa = (a.order != null ? a.order : a.index);
-		var ob = (b.order != null ? b.order : b.index);
-		
-		var re = (oa - ob);
-		
-		if(re == 0)
-		{
-			//上面逻辑已保证这里不会出现(a.order == null && b.order == null)的情况
-			if(a.order == null)
-				re = 1;
-			else if(b.order == null)
-				re = -1;
-			else
-				re = a.index - b.index;
-		}
-		
-		return re;
-	});
-	
-	var re = [];
-	
-	for(var i=0; i<pos.length; i++)
-		re[i] = pos[i].field;
-	
-	return re;
+	return (fields == null ? [] : fields);
 };
 
 /**
@@ -2908,7 +2908,7 @@ chartProto._dataSetFieldOf = function(dataSetBind, identity, nullable)
 	
 	var re = null;
 	
-	var fields = this.dataSetFields(dataSetBind, false);
+	var fields = this.dataSetFields(dataSetBind);
 	
 	//索引数值
 	if(CF.isNumber(identity))
@@ -3480,7 +3480,7 @@ chartProto.dataSetBindAt = function(index)
  * 获取全部主件数据集绑定，或者设置了指定数据标记的全部主件数据集绑定。
  * 主件数据集绑定的用途是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns []，空数组表示没有主件数据集绑定
  */
 chartProto.dataSetBindsMain = function(dataSign)
@@ -3494,7 +3494,7 @@ chartProto.dataSetBindsMain = function(dataSign)
  * 获取第一个主件数据集绑定，或者设置了指定数据标记的第一个主件数据集绑定。
  * 主件数据集绑定的用途是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns 数据集绑定、null
  */
 chartProto.dataSetBindMain = function(dataSign)
@@ -3509,7 +3509,7 @@ chartProto.dataSetBindMain = function(dataSign)
  * 获取全部附件数据集绑定，或者设置了指定数据标记的全部附件数据集绑定。
  * 附件数据集绑定的用途不是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns []，空数组表示没有附件数据集绑定
  */
 chartProto.dataSetBindsAttachment = function(dataSign)
@@ -3523,7 +3523,7 @@ chartProto.dataSetBindsAttachment = function(dataSign)
  * 获取第一个附件数据集绑定，或者设置了指定数据标记的第一个附件数据集绑定。
  * 附件数据集绑定的用途不是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的name参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns 数据集绑定、null
  */
 chartProto.dataSetBindAttachment = function(dataSign)
@@ -3660,36 +3660,36 @@ chartProto.pluginDataSigns = function()
 /**
  * 获取图表插件指定数据标记。
  * 
- * @param name 数据标记名称、索引数值、数据标记对象（将直接返回），或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
+ * @param identity 数据标记标识：名称、索引数值、数据标记对象（将直接返回），或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
  * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
-chartProto.pluginDataSign = function(name, dataSigns)
+chartProto.pluginDataSign = function(identity, dataSigns)
 {
-	if(name == null)
+	if(identity == null)
 		return null;
 	
-	if(this._isDataSignObj(name))
-		return name;
+	if(this._isDataSignObj(identity))
+		return identity;
 	
 	dataSigns = (dataSigns === undefined ? this.pluginDataSigns() : dataSigns);
 	
 	if(dataSigns == null)
 		return null;
 	
-	var isArray = CF.isArray(name);
+	var isArray = CF.isArray(identity);
 	
 	if(!isArray)
 	{
-		return this._findDataSign(dataSigns, name);
+		return this._findDataSign(dataSigns, identity);
 	}
 	else
 	{
 		let dataSign = null;
 		
-		for(let i=0; i<name.length; i++)
+		for(let i=0; i<identity.length; i++)
 		{
-			let ni = name[i];
+			let ni = identity[i];
 			dataSign = this._findDataSign(dataSigns, ni);
 			
 			if(dataSign == null)
@@ -3760,7 +3760,7 @@ chartProto.dataSetAttachment = function(dataSetBind, attachment)
  * 判断数据集是否有指定数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param dataSign 与this.pluginDataSign()函数的name参数相同，为null表示匹配无任何标记的
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示匹配无任何标记的
  * @returns true、false
  */
 chartProto.isDataSetSigned = function(dataSetBind, dataSign)
@@ -3785,7 +3785,7 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 数据集字段标识：字段名、字段索引、字段对象
- * @param dataSign 与this.pluginDataSign()函数的name参数相同，为null表示匹配无任何标记的
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示匹配无任何标记的
  * @returns true、false
  */
 chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)

@@ -1415,7 +1415,7 @@ SPT.radarRenderer = function(plugin, config)
 			var nameFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
 			var maxFields = chart.dataSetFieldsOfSign(dataSetBind, 3);
 			
-			var fields = chart.dataSetFields(dataSetBind, false);
+			var fields = chart.dataSetFields(dataSetBind);
 			for(let i=0; i<nameFields.length; i++)
 			{
 				let nameField = nameFields[i];
@@ -5236,7 +5236,10 @@ SPT.tableRenderer = function(plugin, config)
 				let dataSetBind = dataSetBinds[i];
 				let fields = chart.dataSetFieldsOfSign(dataSetBind, 0);
 				if(!fields || fields.length == 0)
+				{
 					fields = chart.dataSetFields(dataSetBind);
+					chart.sortDataSetFields(dataSetBind, fields);
+				}
 				
 				for(let j=0; j<fields.length; j++)
 				{
