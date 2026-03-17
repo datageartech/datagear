@@ -2473,36 +2473,58 @@ chartProto._clearLiveValue = function()
 
 /**
  * 获取指定标记的数据集字段，没有则返回null。
+ * 此函数支持如下调用方式：
+ * dataSetFieldOfSign(dataSetBind, dataSign);
+ * dataSetFieldOfSign(dataSetBind, fieldsOwner, dataSign);
  * 
  * @param dataSetBind 数据集绑定或其索引
+ * @param fieldsOwner 可选，数据集绑定或其索引、数据集、父级数据集字段，默认值为：dataSetBind
  * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
  * @return 数据集字段、null
  */
-chartProto.dataSetFieldOfSign = function(dataSetBind, dataSign)
+chartProto.dataSetFieldOfSign = function(dataSetBind, fieldsOwner, dataSign)
 {
-	var re = this._dataSetFieldsOfSign(dataSetBind, dataSign);
+	// (dataSetBind, dataSign)
+	if(dataSign === undefined)
+	{
+		dataSign = fieldsOwner;
+		fieldsOwner = dataSetBind;
+	}
+	
+	var re = this._dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign);
 	return (re.length > 0 ? re[0] : null);
 };
 
 /**
  * 获取指定标记的数据集字段数组。
+ * 此函数支持如下调用方式：
+ * dataSetFieldsOfSign(dataSetBind, dataSign);
+ * dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign);
  * 
  * @param dataSetBind 数据集绑定或其索引
+ * @param fieldsOwner 可选，数据集绑定或其索引、数据集、父级数据集字段，默认值为：dataSetBind
  * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
  * @return []
  */
-chartProto.dataSetFieldsOfSign = function(dataSetBind, dataSign)
+chartProto.dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
 {
-	return this._dataSetFieldsOfSign(dataSetBind, dataSign);
+	// (dataSetBind, dataSign)
+	if(dataSign === undefined)
+	{
+		dataSign = fieldsOwner;
+		fieldsOwner = dataSetBind;
+	}
+	
+	return this._dataSetFieldsOfSign(dataSetBind, fieldsOwner, dataSign);
 };
 
-chartProto._dataSetFieldsOfSign = function(dataSetBind, dataSign)
+chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
 	var re = [];
 	
-	var fields = this.dataSetFields(dataSetBind);
+	var fields = this.dataSetFields(fieldsOwner);
 	var dataSignObj = this.pluginDataSign(dataSign);
 	
 	for(let i=0; i<fields.length; i++)
@@ -2856,23 +2878,23 @@ chartProto.dataSetAlias = function(dataSetBind, alias)
 /**
  * 获取数据集字段数组。
  * 
- * @param dataSetBind 数据集绑定或其索引、数据集、数据集字段
+ * @param owner 数据集绑定或其索引、数据集、父级数据集字段
  * @returns 数据集字段数组，返回空数组表示没有
  */
-chartProto.dataSetFields = function(dataSetBind)
+chartProto.dataSetFields = function(owner)
 {
 	var fields;
 	
 	//数据集、数据集字段
-	if(dataSetBind && dataSetBind.fields !== undefined)
+	if(owner && owner.fields !== undefined)
 	{
-		fields = dataSetBind.fields;
+		fields = owner.fields;
 	}
 	//数据集绑定、索引数值
 	else
 	{
-		dataSetBind = this._dataSetBindOf(dataSetBind);
-		fields = (dataSetBind && dataSetBind.dataSet ? dataSetBind.dataSet.fields : null);
+		owner = this._dataSetBindOf(owner);
+		fields = (owner && owner.dataSet ? owner.dataSet.fields : null);
 	}
 	
 	return (fields == null ? [] : fields);
@@ -2881,49 +2903,82 @@ chartProto.dataSetFields = function(dataSetBind)
 /**
  * 获取指定标识的数据集字段。
  * 
- * @param dataSetBind 数据集绑定或其索引、数据集
- * @param identity 数据集字段标识：字段名、字段索引、字段对象
+ * @param owner 数据集绑定或其索引、数据集、父级数据集字段
+ * @param identity 数据集字段标识：字段名、字段索引、字段对象（将直接返回），或者由字段名/字段索引/字段对象组成的层级数组（数组索引表示查找层级）
  * @returns 数据集字段，没有找到则返回null
  */
-chartProto.dataSetField = function(dataSetBind, identity)
+chartProto.dataSetField = function(owner, identity)
 {
-	return this._dataSetFieldOf(dataSetBind, identity, true);
-};
-
-chartProto._dataSetFieldOf = function(dataSetBind, identity, nullable)
-{
-	nullable = (nullable === undefined ? false : nullable);
-	
 	//字段对象
-	if(identity && identity.name !== undefined)
+	if(this._isDataSetFieldObj(identity))
 		return identity;
 	
-	var re = null;
+	var fields = this.dataSetFields(owner);
+	var isArray = CF.isArray(identity);
 	
-	var fields = this.dataSetFields(dataSetBind);
-	
-	//索引数值
-	if(CF.isNumber(identity))
+	if(!isArray)
 	{
-		re = fields[identity];
+		return this._findDataSetField(fields, identity);
 	}
 	else
 	{
-		//字段名
-		for(var i=0; i<fields.length; i++)
+		let re = null;
+		
+		for(let i=0; i<identity.length; i++)
 		{
-			if(fields[i].name == identity)
-			{
-				re = fields[i];
+			let ni = identity[i];
+			re = this._findDataSetField(fields, ni);
+			
+			if(re == null)
 				break;
+			
+			if(i < (identity.length - 1))
+				fields = this.dataSetFields(re);
+		}
+		
+		return re;
+	}
+};
+
+chartProto._findDataSetField = function(fields, name)
+{
+	if(fields == null || name == null)
+		return null;
+	
+	if(CF.isNumber(name))
+	{
+		return fields[name];
+	}
+	else
+	{
+		if(this._isDataSetFieldObj(name))
+			name = name.name;
+		
+		for(let i=0; i<fields.length; i++)
+		{
+			if(fields[i] && fields[i].name == name)
+			{
+				return fields[i];
 			}
 		}
+		
+		return null;
 	}
+};
+
+chartProto._isDataSetFieldObj = function(o)
+{
+	return (o != null && o.name !== undefined);
+};
+
+chartProto._dataSetFieldNonNull = function(dataSetBind, identity)
+{
+	var field = this.dataSetField(dataSetBind, identity);
 	
-	if(!nullable && re == null)
+	if(field == null)
 		throw new Error(CF.chartLogInfo(this) + " no DataSetField found for : " + identity);
 	
-	return re;
+	return field;
 };
 
 /**
@@ -2932,21 +2987,21 @@ chartProto._dataSetFieldOf = function(dataSetBind, identity, nullable)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段标识：字段名、字段索引、字段对象
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param alias 可选，要设置的别名，不设置则执行获取操作
  * @returns 要获取的别名，不会为null
  */
 chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	field = this._dataSetFieldOf(dataSetBind, field);
+	field = this._dataSetFieldNonNull(dataSetBind, field);
 	
 	if(dataSetBind.fieldAliases == null)
 		dataSetBind.fieldAliases = {};
 	
 	if(arguments.length <= 2)
 	{
-		let re = dataSetBind.fieldAliases[field.name];
+		let re = dataSetBind.fieldAliases[field.fullname];
 		
 		if(!re)
 			re = (field.label ||  field.name);
@@ -2954,8 +3009,8 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 		return (re || "");
 	}
 	else
-	{	
-		dataSetBind.fieldAliases[field.name] = alias;
+	{
+		dataSetBind.fieldAliases[field.fullname] = alias;
 	}
 };
 
@@ -2965,25 +3020,25 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段标识：字段名、字段索引、字段对象
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param order 可选，要设置的排序数值，不设置则执行获取操作
  * @returns 要获取的排序数值，没有设置过则返回null
  */
 chartProto.dataSetFieldOrder = function(dataSetBind, field, order)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	field = this._dataSetFieldOf(dataSetBind, field);
+	field = this._dataSetFieldNonNull(dataSetBind, field);
 	
 	if(dataSetBind.fieldOrders == null)
 		dataSetBind.fieldOrders = {};
 	
 	if(arguments.length <= 2)
 	{
-		return dataSetBind.fieldOrders[field.name];
+		return dataSetBind.fieldOrders[field.fullname];
 	}
 	else
 	{
-		dataSetBind.fieldOrders[field.name] = order;
+		dataSetBind.fieldOrders[field.fullname] = order;
 	}
 };
 
@@ -3093,28 +3148,27 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段标识：字段名、字段索引、字段对象
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param dataSign 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
  * @returns 数据标记名字符串数组，空数组表示没有
  */
 chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	field = this._dataSetFieldOf(dataSetBind, field);
-	var fieldName = field.name;
+	field = this._dataSetFieldNonNull(dataSetBind, field);
 	
 	if(dataSetBind.fieldSigns == null)
 		dataSetBind.fieldSigns = {};
 	
 	if(arguments.length <= 2)
 	{
-		var re = dataSetBind.fieldSigns[fieldName];
+		var re = dataSetBind.fieldSigns[field.fullname];
 		return (re == null ? [] : re);
 	}
 	else
 	{
 		dataSign = this._toDataSignValues(dataSign);
-		dataSetBind.fieldSigns[fieldName] = dataSign;
+		dataSetBind.fieldSigns[field.fullname] = dataSign;
 	}
 };
 
@@ -3390,6 +3444,7 @@ chartProto.statusInited = function(set)
  */
 chartProto.themeGradualColor = function(theme, factor)
 {
+	// (factor)
 	if(factor === undefined)
 	{
 		factor = theme;
@@ -3687,7 +3742,8 @@ chartProto.pluginDataSign = function(identity, dataSigns)
 			if(dataSign == null)
 				break;
 			
-			dataSigns = dataSign.children;
+			if(i < (identity.length - 1))
+				dataSigns = dataSign.children;
 		}
 		
 		return dataSign;
@@ -3776,7 +3832,7 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
  * 判断数据集字段是否有指定数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 数据集字段标识：字段名、字段索引、字段对象
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示匹配无任何标记的
  * @returns true、false
  */
