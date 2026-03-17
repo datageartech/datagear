@@ -2548,17 +2548,7 @@ TOOL.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
 TOOL.evalDataSetBindDataTableColumnTitle = function(chart, dataSetBind, dataSetField)
 {
 	var title = chart.dataSetFieldAlias(dataSetBind, dataSetField);
-	title = (title == dataSetField.name ? title : title + "-" + dataSetField.name);
-	var signs = (chart.dataSetFieldSigns(dataSetBind, dataSetField) || []);
-	var signInfo = "";
-	
-	for(var i=0; i<signs.length; i++)
-	{
-		if(signs[i])
-			signInfo += (signInfo ? "," + signs[i] : signs[i]);
-	}
-	
-	return (signInfo ? title + " (" + signInfo +")" : title);
+	return title;
 };
 
 TOOL.updateChartToolDataTableData = function(chart, dataSetBinds, index, table)
