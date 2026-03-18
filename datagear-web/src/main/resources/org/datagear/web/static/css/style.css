@@ -366,7 +366,11 @@ label.required-label::before,
 .p-datatable.table-sm .p-datatable-thead > tr > th,
 .p-datatable.table-sm .p-datatable-tbody > tr > td,
 .table-sm .p-datatable .p-datatable-thead > tr > th,
-.table-sm .p-datatable .p-datatable-tbody > tr > td{
+.table-sm .p-datatable .p-datatable-tbody > tr > td,
+.p-treetable.table-sm .p-treetable-thead > tr > th,
+.p-treetable.table-sm .p-treetable-tbody > tr > td,
+.table-sm .p-treetable .p-treetable-thead > tr > th,
+.table-sm .p-treetable .p-treetable-tbody > tr > td{
 	padding: 0.5rem 1rem;
 }
 .p-datatable.table-sm .p-datatable-tbody > tr > td .p-row-toggler,
@@ -382,13 +386,17 @@ label.required-label::before,
 	height: 1.5rem !important;
 	padding: 0.2rem 0.2rem !important;
 }
-.p-datatable-table th,
-.p-datatable-table td{
+.p-datatable table th,
+.p-datatable table td,
+.p-treetable table th,
+.p-treetable table td{
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-.p-datatable .p-column-resizer::after{
+.p-datatable .p-column-resizer::after,
+.p-treetable .p-column-resizer::after
+{
     content: "";
     position: absolute;
     top: 50%;
@@ -399,51 +407,63 @@ label.required-label::before,
     margin-top: -0.4em;
     background: var(--surface-d);
 }
-.p-datatable-table .col-check{
+.p-datatable table .col-check,
+.p-treetable table .col-check{
 	min-width: 3.5em;
 	max-width: 3.5em;
 	width: 3.5em;
 }
-.p-datatable-table .col-id{
+.p-datatable table .col-id,
+.p-treetable table .col-id{
 	min-width: 15em;
 }
-.p-datatable-table .col-row-number{
+.p-datatable table .col-row-number,
+.p-treetable table .col-row-number{
 	min-width: 5em;
 	max-width: 7em;
 	overflow: hidden;
 }
-.p-datatable-table .col-row-number-sm{
+.p-datatable table .col-row-number-sm,
+.p-treetable table .col-row-number-sm{
+	width: 5em;
 	min-width: 5em;
-	max-width: 5em;
 	overflow: hidden;
 }
-.p-datatable-table .col-edit-btn{
-	min-width: 6rem;
-	max-width: 6rem;
+.p-datatable table .col-edit-btn,
+.p-treetable table .col-edit-btn{
+	width: 6em;
+	min-width: 6em;
 }
-.p-datatable-table .col-name{
+.p-datatable table .col-name,
+.p-treetable table .col-name{
 	width: 12em;
 	min-width: 12em;
 }
-.p-datatable-table .col-desc{
+.p-datatable table .col-desc,
+.p-treetable table .col-desc{
 	width: 15em;
 	min-width: 15em;
 }
-.p-datatable-table .col-user{
+.p-datatable table .col-user,
+.p-treetable table .col-user{
 	width: 10em;
 	min-width: 10em;
 }
-.p-datatable-table .col-datetime{
+.p-datatable table .col-datetime,
+.p-treetable table .col-datetime{
 	min-width: 12em;
 }
-.p-datatable-table .col-version{
+.p-datatable table .col-version,
+.p-treetable table .col-version{
 	min-width: 8em;
 }
-.p-datatable-table .col-boolean{
+.p-datatable table .col-boolean,
+.p-treetable table .col-boolean{
+	width: 6em;
 	min-width: 6em;
-	max-width: 6em;
 }
-.p-datatable-table .col-last{
+.p-datatable table .col-last,
+.p-treetable table .col-last{
 	max-width: 50%;
 }
 .p-panel.panel-icon-align-center .p-panel-icons{

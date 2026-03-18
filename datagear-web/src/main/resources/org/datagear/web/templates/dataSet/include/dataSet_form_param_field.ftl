@@ -67,7 +67,7 @@ dataSet_form_param_field_form.ftl
 							{{formatParamType(data)}}
 						</template>
 					</p-column>
-					<p-column field="required" header="<@spring.message code='isRequired' />" class="col-name">
+					<p-column field="required" header="<@spring.message code='isRequired' />" class="col-boolean">
 						<template #body="{data}">
 							{{formatParamRequired(data)}}
 						</template>
@@ -175,28 +175,28 @@ dataSet_form_param_field_form.ftl
 					v-model:expanded-keys="pm.expandedFieldKeys"
 					:resizable-columns="true" column-resize-mode="expand"
 					selection-mode="multiple" :meta-key-selection="true" data-key="key" class="fields-table table-sm">
-					<p-column field="name" header="<@spring.message code='name' />" expander class="col-name">
+					<p-column field="name" header="<@spring.message code='name' />" expander>
 					</p-column>
-					<p-column field="type" header="<@spring.message code='type' />" class="col-name">
+					<p-column field="type" header="<@spring.message code='type' />">
 						<template #body="{node}">
 							{{formatFieldType(node.data)}}
 						</template>
 					</p-column>
-					<p-column field="array" header="<@spring.message code='array' />" class="col-name">
+					<p-column field="array" header="<@spring.message code='array' />">
 						<template #body="{node}">
 							{{formatFieldArray(node.data)}}
 						</template>
 					</p-column>
-					<p-column field="label" header="<@spring.message code='displayName' />" class="col-name">
+					<p-column field="label" header="<@spring.message code='displayName' />">
 					</p-column>
-					<p-column field="defaultValue" header="<@spring.message code='defaultValue' />" class="col-name">
+					<p-column field="defaultValue" header="<@spring.message code='defaultValue' />">
 					</p-column>
-					<p-column field="evaluated" header="<@spring.message code='enableExpression' />" class="col-name">
+					<p-column field="evaluated" header="<@spring.message code='enableExpression' />">
 						<template #body="{node}">
 							{{formatFieldEvaludated(node.data)}}
 						</template>
 					</p-column>
-					<p-column field="expression" header="<@spring.message code='expression' />" class="col-name">
+					<p-column field="expression" header="<@spring.message code='expression' />">
 					</p-column>
 				</p-treetable>
 			</div>
