@@ -178,7 +178,7 @@
 			if(pm.saveMustPreview)
 			{
 				var myPreviewFingerprint = po.toPreviewFingerprint(action.options.data);
-				if(!$.equalsForSameType(myPreviewFingerprint, po._prevPreviewFingerprint)
+				if(!$.deepEquals(myPreviewFingerprint, po._prevPreviewFingerprint)
 						|| !po.isPreviewSuccess())
 				{
 					$.tipInfo("<@spring.message code='dataSet.previewRequired' />");

@@ -904,18 +904,15 @@
 	 * 
 	 * @param str 必选，待截断的字符串
 	 * @param suffix 可选，截断后缀，默认为“...”
-	 * @param length 可选，截断长度，默认为47
+	 * @param length 可选，截断长度，默认为50
 	 */
 	$.truncateIf = function(str, suffix, length)
 	{
-		if(suffix == undefined)
-			suffix = "...";
-		
-		if(length == undefined)
-			length = 47;
+		suffix = (suffix == null ? "..." : suffix);
+		length = (length == null ? 50 : length);
 		
 		if(typeof(str) == "string" && str.length > length)
-			str = str.substr(0, length) + suffix;
+			str = str.substring(0, length) + suffix;
 		
 		return str;
 	};
@@ -1136,51 +1133,87 @@
 		return re;
 	};
 	
-	//判断两个结构相同的对象是否相等
-	$.equalsForSameType = function(a, b)
+	/**
+	 * 深度判断两个对象是否相等。
+	 * 支持比较基本类型、Date类型，以及由它们组成的对象、数组。
+	 * 
+	 * @param a
+	 * @param b
+	 * @param seen 可选，对象缓存
+	 */
+	$.deepEquals = function(a, b, seen)
 	{
-		if(a == null)
-			return (b == null);
-		else if(b == null)
-			return (a == null);
-		
-		var typea = typeof(a);
-		var typeb = typeof(b);
-		
-		if(typea != typeb)
-		{
+		if(Object.is(a, b))
+	    	return true;
+	    
+	    if(typeof(a) !== typeof(b))
+	    	return false;
+	    
+		if (a === null || b === null || typeof(a) !== 'object')
+	    	return false;
+	    
+	    if((a instanceof Date) && (b instanceof Date))
+	    	return (a.getTime() === b.getTime());
+	    
+	    var aIsArray = Array.isArray(a);
+	    
+	    if(aIsArray !== Array.isArray(b))
 			return false;
-		}
-		else if(typea == $.TYPEOF_TYPE_OBJECT)
-		{
-			if($.isArray(a))
+		
+		if(aIsArray && a.length !== b.length)
+			return false;
+		
+		if(seen == null)
+			seen = new WeakMap();
+		
+		if (seen.has(a))
+	    	return (seen.get(a) === b);
+	    
+	    seen.set(a, b);
+	    
+	    if(aIsArray)
+	    {
+			for(let i=0; i<a.length; i++)
 			{
-				if(a.length != b.length)
+				if(!$.deepEquals(a[i], b[i], seen))
+				{
+					seen.delete(a);
 					return false;
-				
-				for(var i=0; i<a.length; i++)
-				{
-					if(!$.equalsForSameType(a[i], b[i]))
-						return false;
 				}
 			}
-			else
-			{
-				for(var p in a)
-				{
-					if(!$.equalsForSameType(a[p], b[p]))
-						return false;
-				}
-			}
-			
-			return true;
 		}
 		else
 		{
-			return (a == b);
+			let akeys = Object.keys(a);
+			let bkeys = Object.keys(b);
+			
+			if(akeys.length !== bkeys.length)
+			{
+				seen.delete(a);
+				return false;
+			}
+			
+			for(let key of akeys)
+			{
+				if(!Object.prototype.hasOwnProperty.call(b, key))
+				{
+					seen.delete(a);
+					return false;
+				}
+				
+				if(!$.deepEquals(a[key], b[key], seen))
+				{
+					seen.delete(a);
+					return false;
+				}
+			}
 		}
+		
+		seen.delete(a);
+		
+		return true;
 	};
-	
+
 	/**
 	 * 将字符串按照'/'或'\'路径分隔符拆分。
 	 */
