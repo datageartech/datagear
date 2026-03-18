@@ -71,7 +71,8 @@ $.vueComponents = function()
 		"p-breadcrumb": primevue.breadcrumb,
 		"p-badge": primevue.badge,
 		"p-accordion": primevue.accordion,
-		"p-accordion-tab": primevue.accordiontab
+		"p-accordion-tab": primevue.accordiontab,
+		"p-treetable": primevue.treetable
 	};
 	
 	return components;
@@ -2938,7 +2939,7 @@ $.inflateChartAttrValuesForm = function(po)
 				{
 					if(isTreeSelect)
 					{
-						if($.inTreeArrayById(payloadOptions, value, "key") != true)
+						if($.findTreeArrayById(payloadOptions, value, "key") == null)
 							value = null;
 					}
 					else

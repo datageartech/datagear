@@ -170,7 +170,6 @@
 			po.trimPreviewQueryFetchSize(previewQuery);
 			
 			action.options.data = { dataSet: action.options.data, query: po.vueRaw(previewQuery), view: po.isViewAction };
-			
 			po._prevPreviewFingerprint = po.toPreviewFingerprint(action.options.data.dataSet);
 		}
 		else
@@ -209,16 +208,16 @@
 		if(!fm.mutableModel && !pm.isReadonlyAction && pm.autoGenerateField)
 		{
 			fm.fields = response.fields;
-			pm.selectedFields = [];
+			po.inflateFieldTreeNodes(response.fields);
 			
 			if(po._prevPreviewFingerprint)
 				po._prevPreviewFingerprint.fields = $.extend(true, [], response.fields);
 		}
 		
 		var previewColumns = [];
-		$.each(fm.fields, function(i, p)
+		$.each(fm.fields, function(i, f)
 		{
-			previewColumns.push({ name: p.name, label: p.name, style: "" });	
+			previewColumns.push({ name: f.name, label: f.name, style: "" });	
 		});
 		
 		if(fm.mutableModel)

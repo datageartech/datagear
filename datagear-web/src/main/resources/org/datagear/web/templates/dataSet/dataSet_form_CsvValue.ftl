@@ -86,6 +86,8 @@
 	
 	po.beforeSubmitForm = function(action)
 	{
+		po.handleBeforeSubmitForm(action);
+		
 		var data = action.options.data;
 		data.value = po.getCodeText(po.codeEditor);
 		

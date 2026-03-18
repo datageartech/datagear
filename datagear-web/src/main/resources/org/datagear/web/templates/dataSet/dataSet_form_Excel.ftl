@@ -147,6 +147,8 @@
 	
 	po.beforeSubmitForm = function(action)
 	{
+		po.handleBeforeSubmitForm(action);
+		
 		if(!po.beforeSubmitFormWithPreview(action))
 			return false;
 	};

@@ -100,7 +100,7 @@
 			PROP_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PROP_NAME AS ${_iq_}child.name${_iq_},
 			PROP_TYPE AS ${_iq_}child.type${_iq_},
-			PROP_FULLNAME AS ${_iq_}fullname${_iq_},
+			PROP_FULLNAME AS ${_iq_}child.fullname${_iq_},
 			PROP_ARRAY AS ${_iq_}child.array${_iq_},
 			PROP_LABEL AS ${_iq_}child.label${_iq_},
 			PROP_DFT_VALUE AS ${_iq_}child.defaultValue${_iq_},

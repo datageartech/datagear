@@ -91,6 +91,8 @@
 	
 	po.beforeSubmitForm = function(action)
 	{
+		po.handleBeforeSubmitForm(action);
+		
 		var data = action.options.data;
 		data.sql = po.getCodeText(po.codeEditor);
 		data.connectionFactory = undefined;

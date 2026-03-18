@@ -34,6 +34,14 @@ dataSet_form_preview.ftl
 		dataSet.fields = (dataSet.fields == null ? [] : dataSet.fields);
 		dataSet.params = (dataSet.params == null ? [] : dataSet.params);
 		dataSet.dataFormat = (dataSet.dataFormat == null ? {} : dataSet.dataFormat);
+		
+		po.inflateFieldTreeNodes(dataSet.fields);
+	};
+
+	po.handleBeforeSubmitForm = function(action)
+	{
+		var pm = po.vuePageModel();
+		action.options.data.fields = po.treeNodesToFields(pm.fieldTreeNodes);
 	};
 	
 	po.createWorkspaceEditor = function(dom, options)

@@ -697,25 +697,54 @@
 		return -1;
 	};
 	
-	$.inTreeArrayById = function(treeArray, idValue, idPropName, childrenPropName)
+	$.findTreeArrayById = function(treeArray, idValue, idPropName, childrenPropName)
 	{
 		idPropName = (idPropName == null ? "id" : idPropName);
 		childrenPropName = (childrenPropName == null ? "children" : childrenPropName);
 		
+		if(treeArray == null)
+			return null;
+		
 		var idx = $.inArrayById(treeArray, idValue, idPropName);
 		
 		if(idx > -1)
-			return true;
-			
+			return treeArray[idx];
+		
 		for(var i=0; i<treeArray.length; i++)
 		{
 			var children = (treeArray[i] ?  treeArray[i][childrenPropName] : null);
+			var child = $.findTreeArrayById(children, idValue, idPropName, childrenPropName);
 			
-			if(children && $.inTreeArrayById(children, idValue, idPropName, childrenPropName))
-				return true;
+			if(child != null)
+				return child;
 		}
 		
-		return false;
+		return null;
+	};
+	
+	$.removeTreeArrayById = function(treeArray, idValue, idPropName, childrenPropName)
+	{
+		idPropName = (idPropName == null ? "id" : idPropName);
+		childrenPropName = (childrenPropName == null ? "children" : childrenPropName);
+		
+		if(treeArray == null)
+			return null;
+		
+		var removed = $.removeById(treeArray, idValue, idPropName);
+		
+		if(removed != null)
+			return removed;
+		
+		for(var i=0; i<treeArray.length; i++)
+		{
+			var children = (treeArray[i] ?  treeArray[i][childrenPropName] : null);
+			var removed = $.removeTreeArrayById(children, idValue, idPropName, childrenPropName);
+			
+			if(removed != null)
+				return removed;
+		}
+		
+		return null;
 	};
 	
 	$.removeById = function(array, idValue, idPropName)
@@ -983,6 +1012,19 @@
 		});
 		
 		return (isArray ? re : re[0]);
+	};
+	
+	$.propCountOfObj = function(obj)
+	{
+		if(obj == null)
+			return 0;
+		
+		var re = 0;
+		
+		for(var p in obj)
+			re++;
+		
+		return re;
 	};
 	
 	/**
