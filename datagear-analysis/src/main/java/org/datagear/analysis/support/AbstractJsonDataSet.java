@@ -19,7 +19,6 @@ package org.datagear.analysis.support;
 
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +89,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			List<DataSetField> fields = null;
 
 			if (resolveFields)
-				fields = resolveFields(result.getData());
+				fields = resolveFields(result.getData(), START_RESOLVE_FIELDS_DEPTH);
 
 			return toResourceResult(result, fields);
 		}
@@ -206,11 +205,12 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	 * 
 	 * @param data
 	 *            允许{@code null}
+	 * @param depth
 	 * @return
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<DataSetField> resolveFields(Object data) throws Throwable
+	protected List<DataSetField> resolveFields(Object data, int depth) throws Throwable
 	{
 		if (data == null)
 		{
@@ -218,41 +218,12 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		}
 		else if (data instanceof Map<?, ?>)
 		{
-			return resolveJsonObjFields((Map<String, ?>) data);
+			return resolveJsonObjFields((Map<String, ?>) data, depth);
 		}
-		else if (data instanceof Collection<?>)
+		else if (DataSetField.DataType.isLikeArray(data))
 		{
-			Collection<?> collection = (Collection<?>) data;
-
-			Object ele = null;
-
-			for (Object obj : collection)
-			{
-				if (obj != null)
-				{
-					ele = obj;
-					break;
-				}
-			}
-
-			return resolveFields(ele);
-		}
-		else if (data instanceof Object[])
-		{
-			Object[] array = (Object[]) data;
-
-			Object ele = null;
-
-			for (Object obj : array)
-			{
-				if (obj != null)
-				{
-					ele = obj;
-					break;
-				}
-			}
-
-			return resolveFields(ele);
+			Object ele = DataSetField.DataType.getLikeArrayFirstEle(data);
+			return resolveFields(ele, depth);
 		}
 		else
 		{
@@ -265,11 +236,15 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	 * 解析{@linkplain DataSetField}。
 	 * 
 	 * @param jsonObj
+	 * @param depth
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetField> resolveJsonObjFields(Map<String, ?> jsonObj) throws Throwable
+	protected List<DataSetField> resolveJsonObjFields(Map<String, ?> jsonObj, int depth) throws Throwable
 	{
+		if (depth >= END_RESOLVE_FIELDS_DEPTH)
+			return Collections.emptyList();
+
 		List<DataSetField> fields = new ArrayList<>();
 
 		if (jsonObj == null)
@@ -288,6 +263,9 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 				if (DataSetField.DataType.INTEGER.equals(field.getType())
 						|| DataSetField.DataType.DECIMAL.equals(field.getType()))
 					field.setType(DataSetField.DataType.NUMBER);
+
+				if (DataSetField.DataType.OBJECT.equals(field.getType()))
+					field.setFields(resolveFields(value, depth + 1));
 
 				fields.add(field);
 			}

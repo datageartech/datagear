@@ -89,9 +89,13 @@ dataSet_form_param_field_form.ftl
 	</div>
 </div>
 <div class="field grid">
-	<label for="${pid}fields" class="field-label col-12 mb-2"
-		title="<@spring.message code='dataSet.fields.desc' />">
-		<@spring.message code='field' />
+	<label for="${pid}fields" class="field-label col-12 mb-2 flex-column align-items-start">
+		<div>
+			<@spring.message code='field' />
+		</div>
+		<div class="text-xs text-color-secondary">
+			<@spring.message code='dataSet.fields.desc' />
+		</div>
 	</label>
 	<div class="field-input col-12">
 		<div class="p-component p-inputtext">

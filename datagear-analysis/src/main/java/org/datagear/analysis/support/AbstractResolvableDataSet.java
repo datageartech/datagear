@@ -40,6 +40,10 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 {
 	private static final long serialVersionUID = 1L;
 
+	protected static final int START_RESOLVE_FIELDS_DEPTH = 0;
+
+	protected static final int END_RESOLVE_FIELDS_DEPTH = 3;
+
 	public AbstractResolvableDataSet()
 	{
 		super();
