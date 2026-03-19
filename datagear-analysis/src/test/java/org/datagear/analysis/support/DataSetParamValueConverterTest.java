@@ -32,6 +32,7 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetQuery;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -257,6 +258,17 @@ public class DataSetParamValueConverterTest
 				Map<?, ?> v2 = (Map<?, ?>) value.get(2);
 				assertEquals("c", v2.get("name"));
 			}
+		}
+
+		{
+			DataSetQuery query = new DataSetQuery();
+			query.setParamValue("order", "invalid-json-1");
+			query.setParamValue("orders", "invalid-json-2");
+
+			Assert.assertThrows(DataValueConvertionException.class, () ->
+			{
+				converter.convert(query, dataSet, true);
+			});
 		}
 	}
 }

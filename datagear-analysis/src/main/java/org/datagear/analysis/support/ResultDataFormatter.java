@@ -18,7 +18,11 @@
 package org.datagear.analysis.support;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.ResultDataFormat;
 
 /**
@@ -69,6 +73,54 @@ public class ResultDataFormatter
 	}
 	
 	/**
+	 * 是否支持格式化。
+	 * 
+	 * @param field
+	 * @return
+	 */
+	public boolean canFormat(DataSetField field)
+	{
+		if (field == null)
+			return false;
+
+		String type = field.getType();
+
+		if (DataSetField.DataType.TIMESTAMP.equals(type))
+			return true;
+
+		if (DataSetField.DataType.TIME.equals(type))
+			return true;
+
+		if (DataSetField.DataType.DATE.equals(type))
+			return true;
+
+		return false;
+	}
+
+	/**
+	 * 是否支持格式化。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public boolean canFormat(Object value)
+	{
+		if (value == null)
+			return false;
+
+		if (value instanceof java.sql.Timestamp)
+			return true;
+
+		if (value instanceof java.sql.Time)
+			return true;
+
+		if (value instanceof java.util.Date)
+			return true;
+
+		return false;
+	}
+
+	/**
 	 * 格式化。
 	 * 
 	 * @param value
@@ -76,9 +128,34 @@ public class ResultDataFormatter
 	 */
 	public Object format(Object value)
 	{
+		if (value == null)
+			return value;
+
+		if (value instanceof Collection<?>)
+		{
+			Collection<?> values = (Collection<?>) value;
+			List<Object> re = new ArrayList<>(values.size());
+			
+			for(Object v : values)
+				re.add(format(v));
+
+			return re;
+		}
+		
+		if (value instanceof Object[])
+		{
+			Object[] values = (Object[]) value;
+			Object[] re = new Object[values.length];
+
+			for (int i = 0; i < values.length; i++)
+				re[i] = format(values[i]);
+
+			return re;
+		}
+
 		Object re = value;
 		
-		if(value instanceof java.sql.Timestamp)
+		if (value instanceof java.sql.Timestamp)
 		{
 			String type = this.resultDataFormat.getTimestampType();
 			

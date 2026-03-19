@@ -264,7 +264,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 						|| DataSetField.DataType.DECIMAL.equals(field.getType()))
 					field.setType(DataSetField.DataType.NUMBER);
 
-				if (DataSetField.DataType.OBJECT.equals(field.getType()))
+				if (DataSetField.DataType.isObjectType(field))
 					field.setFields(resolveFields(value, depth + 1));
 
 				fields.add(field);

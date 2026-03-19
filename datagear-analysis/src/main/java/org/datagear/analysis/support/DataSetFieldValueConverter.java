@@ -24,6 +24,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetField.DataType;
@@ -54,6 +57,11 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 	 * 是否忽略{@linkplain BigDecimal}至{@linkplain DataType#DECIMAL}的转换。
 	 */
 	private boolean ignoreBigDecimalToDecimal = true;
+
+	/**
+	 * 对于映射表，是否执行严格模式：true 不保留无对应字段的值；false 保留无对应字段的值
+	 */
+	private boolean strictForMap = true;
 
 	private SimpleDateFormat _dateFormat = null;
 	private SimpleDateFormat _timeFormat = null;
@@ -107,21 +115,68 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		this.ignoreBigDecimalToDecimal = ignoreBigDecimalToDecimal;
 	}
 
-	@Override
-	public Object convert(Object value, DataSetField field) throws DataValueConvertionException
+	public boolean isStrictForMap()
 	{
-		Object re = super.convert(value, field);
+		return strictForMap;
+	}
+
+	public void setStrictForMap(boolean strictForMap)
+	{
+		this.strictForMap = strictForMap;
+	}
+
+	/**
+	 * 转换字段值映射表，返回一个经转换的新映射表。
+	 * <p>
+	 * 转换规则受{@linkplain #isStrictForMap()}影响。
+	 * </p>
+	 * 
+	 * @param fieldValues
+	 *            允许为{@code null}
+	 * @param targets
+	 *            允许为{@code null}
+	 * @return
+	 */
+	public Map<String, Object> convert(Map<String, ?> fieldValues, Collection<DataSetField> targets)
+	{
+		if (fieldValues == null)
+			return null;
+
+		Map<String, Object> re = (isStrictForMap() ? new HashMap<>() : new HashMap<>(fieldValues));
+
+		if (targets != null)
+		{
+			for (DataSetField target : targets)
+			{
+				String name = target.getName();
+				Object value = fieldValues.get(name);
+				value = convert(value, target);
+
+				re.put(name, value);
+			}
+		}
+
+		return re;
+	}
+
+	@Override
+	public Object convert(Object value, DataSetField target) throws DataValueConvertionException
+	{
+		if (value == null && target != null)
+			value = target.getDefaultValue();
+
+		Object re = super.convert(value, target);
 
 		// 数组与非数组互转
-		if (re != null)
+		if (re != null && target != null)
 		{
 			boolean likeArray = DataType.isLikeArray(re);
 
-			if(likeArray && !field.isArray())
+			if(likeArray && !target.isArray())
 			{
 				re = DataType.getLikeArrayFirstEle(re);
 			}
-			else if (!likeArray && field.isArray())
+			else if (!likeArray && target.isArray())
 			{
 				re = DataType.wrapToLikeArray(re);
 			}
@@ -131,30 +186,29 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 	}
 
 	@Override
-	protected Object convertValue(Object value, String type) throws DataValueConvertionException
+	protected Object convertValue(Object value, DataSetField target) throws DataValueConvertionException
 	{
-		if (value == null)
-			return null;
-
-		if (type == null)
+		if (value == null || target == null || DataType.UNKNOWN.equals(target.getType()))
 			return value;
 
 		try
 		{
 			if (value instanceof String)
-				return convertStringValue((String) value, type);
+				return convertStringValue((String) value, target);
 			else if (value instanceof Boolean)
-				return convertBooleanValue((Boolean) value, type);
+				return convertBooleanValue((Boolean) value, target);
 			else if (value instanceof Number)
-				return convertNumberValue((Number) value, type);
+				return convertNumberValue((Number) value, target);
 			else if (value instanceof Time)
-				return convertTimeValue((Time) value, type);
+				return convertTimeValue((Time) value, target);
 			else if (value instanceof Timestamp)
-				return convertTimestampValue((Timestamp) value, type);
+				return convertTimestampValue((Timestamp) value, target);
 			else if (value instanceof java.util.Date)
-				return convertDateValue((java.util.Date) value, type);
+				return convertDateValue((java.util.Date) value, target);
+			else if (value instanceof Map<?, ?>)
+				return convertMapValue((Map<?, ?>) value, target);
 			else
-				return convertObjectValue(value, type);
+				return convertExt(value, target);
 		}
 		catch (DataValueConvertionException e)
 		{
@@ -162,16 +216,21 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		}
 		catch (Throwable t)
 		{
-			throw new DataValueConvertionException(value, type);
+			return convertExt(value, target);
 		}
 	}
 
-	protected Object convertStringValue(String value, String type) throws Throwable
+	protected Object convertStringValue(String value, DataSetField target) throws Throwable
 	{
-		if (DataType.STRING.equals(type) || DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null || value.isEmpty())
+		String type = target.getType();
+
+		if (DataType.STRING.equals(type))
+			return value;
+
+		if (value.isEmpty())
 			return null;
 
 		if (DataType.BOOLEAN.equals(type))
@@ -197,33 +256,43 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 			java.util.Date date = convertToDateWithInteger(value, this._timestampFormat);
 			return new Timestamp(date.getTime());
 		}
+		else if (DataType.isObjectType(type))
+		{
+			// 必须采用严格模式，避免与允许的String类型逻辑冲突
+			Object obj = convertJsonToObjStrictly(value, target);
+			return obj;
+		}
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
-	protected Object convertBooleanValue(Boolean value, String type) throws Throwable
+	protected Object convertBooleanValue(Boolean value, DataSetField target) throws Throwable
 	{
-		if (DataType.BOOLEAN.equals(type) || DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null)
-			return null;
+		String type = target.getType();
+
+		if (DataType.BOOLEAN.equals(type))
+			return value;
 
 		if (DataType.STRING.equals(type))
 			return value.toString();
 		else if (DataType.NUMBER.equals(type) || DataType.INTEGER.equals(type) || DataType.DECIMAL.equals(type))
 			return (Boolean.TRUE.equals(value) ? 1 : 0);
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
-	protected Object convertNumberValue(Number value, String type) throws Throwable
+	protected Object convertNumberValue(Number value, DataSetField target) throws Throwable
 	{
-		if (DataType.NUMBER.equals(type) || DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null)
-			return null;
+		String type = target.getType();
+
+		if (DataType.NUMBER.equals(type))
+			return value;
 
 		if (DataType.STRING.equals(type))
 			return this._numberFormat.format(value);
@@ -250,16 +319,15 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.TIMESTAMP.equals(type))
 			return new Timestamp(value.longValue());
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
-	protected Object convertDateValue(java.util.Date value, String type) throws Throwable
+	protected Object convertDateValue(java.util.Date value, DataSetField target) throws Throwable
 	{
-		if (DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null)
-			return null;
+		String type = target.getType();
 
 		if (DataType.STRING.equals(type))
 			return this._dateFormat.format(value);
@@ -276,16 +344,18 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.TIMESTAMP.equals(type))
 			return new Timestamp(value.getTime());
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
-	protected Object convertTimeValue(Time value, String type) throws Throwable
+	protected Object convertTimeValue(Time value, DataSetField target) throws Throwable
 	{
-		if (DataType.TIME.equals(type) || DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null)
-			return null;
+		String type = target.getType();
+
+		if (DataType.TIME.equals(type))
+			return value;
 
 		if (DataType.STRING.equals(type))
 			return this._timeFormat.format(value);
@@ -300,16 +370,18 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.TIMESTAMP.equals(type))
 			return new Timestamp(value.getTime());
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
-	protected Object convertTimestampValue(Timestamp value, String type) throws Throwable
+	protected Object convertTimestampValue(Timestamp value, DataSetField target) throws Throwable
 	{
-		if (DataType.TIMESTAMP.equals(type) || DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null)
-			return null;
+		String type = target.getType();
+
+		if (DataType.TIMESTAMP.equals(type))
+			return value;
 
 		if (DataType.STRING.equals(type))
 			return this._timestampFormat.format(value);
@@ -324,20 +396,26 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.TIME.equals(type))
 			return new Time(value.getTime());
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
-	protected Object convertObjectValue(Object value, String type) throws Throwable
+	@SuppressWarnings("unchecked")
+	protected Object convertMapValue(Map<?, ?> value, DataSetField target) throws Throwable
 	{
-		if (DataType.OBJECT.equals(type) || DataType.UNKNOWN.equals(type))
+		if (value == null || target == null)
 			return value;
 
-		if (value == null)
-			return null;
+		String type = target.getType();
 
-		if (DataType.STRING.equals(type))
-			return convertObjToJsonString(value, type);
+		if (DataType.isObjectType(type))
+		{
+			return convert((Map<String, ?>) value, target.getFields());
+		}
+		else if (DataType.STRING.equals(type))
+		{
+			return convertObjToJsonString(value, target);
+		}
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 }

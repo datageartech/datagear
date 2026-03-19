@@ -314,6 +314,28 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 		}
 
 		/**
+		 * 是否是{@linkplain #OBJECT}类型。
+		 * 
+		 * @param type
+		 * @return
+		 */
+		public static boolean isObjectType(String type)
+		{
+			return OBJECT.equals(type);
+		}
+
+		/**
+		 * 是否是{@linkplain #OBJECT}类型。
+		 * 
+		 * @param field
+		 * @return
+		 */
+		public static boolean isObjectType(DataSetField field)
+		{
+			return (field != null && isObjectType(field.getType()));
+		}
+
+		/**
 		 * 是否像数组的对象。
 		 * 
 		 * @param obj

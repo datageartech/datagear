@@ -19,6 +19,7 @@ package org.datagear.analysis.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Time;
@@ -27,7 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.DataSetField;
 import org.junit.Test;
@@ -46,6 +49,48 @@ public class DataSetFieldValueConverterTest
 	}
 
 	@Test
+	public void convertTest_Map_Collection()
+	{
+		List<DataSetField> fields = Arrays.asList(new DataSetField("name", DataSetField.DataType.STRING),
+				new DataSetField("value", DataSetField.DataType.INTEGER));
+
+		DataFormat format = new DataFormat();
+
+		{
+			DataSetFieldValueConverter converterStrict = new DataSetFieldValueConverter(format);
+			converterStrict.setStrictForMap(true);
+
+			Map<String, Object> value = new HashMap<>();
+			value.put("name", "aaa");
+			value.put("value", "3");
+			value.put("inexists", "nonono");
+
+			Map<String, ?> actual = converterStrict.convert(value, fields);
+
+			assertEquals(2, actual.size());
+			assertEquals("aaa", actual.get("name"));
+			assertEquals(3, actual.get("value"));
+		}
+
+		{
+			DataSetFieldValueConverter converterStrict = new DataSetFieldValueConverter(format);
+			converterStrict.setStrictForMap(false);
+
+			Map<String, Object> value = new HashMap<>();
+			value.put("name", "aaa");
+			value.put("value", "3");
+			value.put("inexists", "nonono");
+
+			Map<String, ?> actual = converterStrict.convert(value, fields);
+
+			assertEquals(3, actual.size());
+			assertEquals("aaa", actual.get("name"));
+			assertEquals(3, actual.get("value"));
+			assertEquals("nonono", actual.get("inexists"));
+		}
+	}
+
+	@Test
 	public void convertTest_Object_DataSetField()
 	{
 		DataFormat format = new DataFormat();
@@ -61,8 +106,12 @@ public class DataSetFieldValueConverterTest
 		{
 			Object value = Collections.singletonMap("name", "aaa");
 			DataSetField field = new DataSetField("field", DataSetField.DataType.OBJECT);
-			Object actual = converter.convert(value, field);
-			assertEquals(value, actual);
+			field.setFields(Arrays.asList(new DataSetField("name", DataSetField.DataType.STRING)));
+			@SuppressWarnings("unchecked")
+			Map<String, ?> actual = (Map<String, ?>) converter.convert(value, field);
+
+			assertEquals(1, actual.size());
+			assertEquals("aaa", actual.get("name"));
 		}
 
 		{
@@ -139,7 +188,7 @@ public class DataSetFieldValueConverterTest
 		DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
 
 		{
-			Object actual = converter.convertValue(null, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertValue(null, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertNull(actual);
 		}
 		{
@@ -147,36 +196,36 @@ public class DataSetFieldValueConverterTest
 			assertEquals("true", actual);
 		}
 		{
-			Object actual = converter.convertValue("true", DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertValue("true", mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.TRUE, actual);
 		}
 		{
-			Object actual = converter.convertValue(true, DataSetField.DataType.STRING);
+			Object actual = converter.convertValue(true, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals("true", actual);
 		}
 		{
-			Object actual = converter.convertValue(3, DataSetField.DataType.STRING);
+			Object actual = converter.convertValue(3, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals("3", actual);
 		}
 		{
 			Time time = new Time(System.currentTimeMillis());
-			Object actual = converter.convertValue(time, DataSetField.DataType.STRING);
+			Object actual = converter.convertValue(time, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(formatDate(time, format.getTimeFormat()), actual);
 		}
 		{
 			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertValue(timestamp, DataSetField.DataType.STRING);
+			Object actual = converter.convertValue(timestamp, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(formatDate(timestamp, format.getTimestampFormat()), actual);
 		}
 		{
 			Date date = new Date();
-			Object actual = converter.convertValue(date, DataSetField.DataType.STRING);
+			Object actual = converter.convertValue(date, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(formatDate(date, format.getDateFormat()), actual);
 		}
 		{
-			int a = 3;
-			Object actual = converter.convertValue(a, DataSetField.DataType.UNKNOWN);
-			assertEquals(3, actual);
+			Map<String, ?> value = Collections.singletonMap("name", "aaa");
+			Object actual = converter.convertValue(value, mockFieldForType(DataSetField.DataType.UNKNOWN));
+			assertTrue(value == actual);
 		}
 	}
 
@@ -188,85 +237,103 @@ public class DataSetFieldValueConverterTest
 
 		{
 			String value = "aaa";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(value, actual);
 		}
 
 		{
-			String value = "aaa";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.UNKNOWN);
-			assertEquals(value, actual);
-		}
-
-		{
-			Object actual = converter.convertStringValue(null, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertStringValue(null, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertNull(actual);
 		}
 		{
-			Object actual = converter.convertStringValue("", DataSetField.DataType.NUMBER);
+			Object actual = converter.convertStringValue("", mockFieldForType(DataSetField.DataType.NUMBER));
 			assertNull(actual);
 		}
 
 		{
 			String value = "true";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.TRUE, actual);
 		}
 		{
 			String value = "1";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.TRUE, actual);
 		}
 		{
 			String value = "false";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.FALSE, actual);
 		}
 		{
 			String value = "0";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.FALSE, actual);
 		}
 
 		{
 			String value = "3.2";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(3.2d, ((Number) actual).doubleValue(), 0.1d);
 		}
 
 		{
 			String value = "3";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(3, ((Integer) actual).intValue());
 		}
 		{
 			String value = "3.2";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(3, ((Integer) actual).intValue());
 		}
 
 		{
 			String value = "3.2";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(3.2d, ((Double) actual).doubleValue(), 0.1d);
 		}
 
 		{
 			String value = "2022-10-24";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.DATE);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.DATE));
 			assertEquals(value, formatDate((Date) actual, format.getDateFormat()));
 		}
 
 		{
 			String value = "11:32:45";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.TIME);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.TIME));
 			assertEquals(value, formatDate((Time) actual, format.getTimeFormat()));
 		}
 
 		{
 			String value = "2022-10-24 11:32:45";
-			Object actual = converter.convertStringValue(value, DataSetField.DataType.TIMESTAMP);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.TIMESTAMP));
 			assertEquals(value, formatDate((Timestamp) actual, format.getTimestampFormat()));
+		}
+
+		{
+			String value = "{name: 'aaa', value: 'vvv'}";
+			@SuppressWarnings("unchecked")
+			Map<String, ?> actual = (Map<String, ?>)converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.OBJECT));
+			assertEquals("aaa", actual.get("name"));
+			assertEquals("vvv", actual.get("value"));
+		}
+
+		{
+			String value = "['a', 'b', 'c']";
+			List<?> actual = (List<?>) converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.OBJECT));
+			assertEquals("a", actual.get(0));
+			assertEquals("b", actual.get(1));
+			assertEquals("c", actual.get(2));
+		}
+
+		{
+			String value = "invalid";
+			assertThrows(DataValueConvertionException.class, () ->
+			{
+				converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.OBJECT));
+			});
 		}
 	}
 
@@ -278,62 +345,56 @@ public class DataSetFieldValueConverterTest
 
 		{
 			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(value, actual);
 		}
 
 		{
-			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.UNKNOWN);
-			assertEquals(value, actual);
-		}
-
-		{
-			Object actual = converter.convertBooleanValue(null, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertBooleanValue(null, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertNull(actual);
 		}
 
 		{
 			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals("true", actual);
 		}
 		{
 			boolean value = false;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals("false", actual);
 		}
 
 		{
 			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(1, actual);
 		}
 		{
 			boolean value = false;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(0, actual);
 		}
 
 		{
 			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(1, actual);
 		}
 		{
 			boolean value = false;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(0, actual);
 		}
 
 		{
 			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(1, actual);
 		}
 		{
 			boolean value = false;
-			Object actual = converter.convertBooleanValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(0, actual);
 		}
 	}
@@ -346,65 +407,59 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Number value = 3;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value, actual);
 		}
 
 		{
-			Number value = 3;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.UNKNOWN);
-			assertEquals(value, actual);
-		}
-
-		{
-			Object actual = converter.convertNumberValue(null, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertNumberValue(null, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertNull(actual);
 		}
 
 		{
 			Number value = 3;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals("3", actual);
 		}
 
 		{
 			Number value = 3;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.TRUE, actual);
 		}
 		{
 			Number value = 0;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.BOOLEAN);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.BOOLEAN));
 			assertEquals(Boolean.FALSE, actual);
 		}
 
 		{
 			Number value = 3;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(3, ((Long) actual).intValue());
 		}
 
 		{
 			Number value = 3.2d;
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(3.2d, ((Double) actual).doubleValue(), 0.1);
 		}
 
 		{
 			Number value = new Date().getTime();
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.DATE);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.DATE));
 			assertEquals(value.longValue(), ((java.sql.Date) actual).getTime());
 		}
 
 		{
 			Number value = new Time(System.currentTimeMillis()).getTime();
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.TIME);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.TIME));
 			assertEquals(value.longValue(), ((Time) actual).getTime());
 		}
 
 		{
 			Number value = new Timestamp(System.currentTimeMillis()).getTime();
-			Object actual = converter.convertNumberValue(value, DataSetField.DataType.TIMESTAMP);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.TIMESTAMP));
 			assertEquals(value.longValue(), ((Timestamp) actual).getTime());
 		}
 	}
@@ -416,55 +471,49 @@ public class DataSetFieldValueConverterTest
 		DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
 
 		{
-			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.UNKNOWN);
-			assertEquals(value, actual);
-		}
-
-		{
-			Object actual = converter.convertDateValue(null, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertDateValue(null, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertNull(actual);
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(formatDate(value, format.getDateFormat()), actual);
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.DATE);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.DATE));
 			assertEquals(value.getTime(), ((java.sql.Date) actual).getTime());
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.TIME);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.TIME));
 			assertEquals(value.getTime(), ((java.sql.Time) actual).getTime());
 		}
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, DataSetField.DataType.TIMESTAMP);
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.TIMESTAMP));
 			assertEquals(value.getTime(), ((java.sql.Timestamp) actual).getTime());
 		}
 	}
@@ -477,54 +526,48 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.TIME);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.TIME));
 			assertEquals(value, actual);
 		}
 
 		{
-			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.UNKNOWN);
-			assertEquals(value, actual);
-		}
-
-		{
-			Object actual = converter.convertTimeValue(null, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertTimeValue(null, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertNull(actual);
 		}
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(formatDate(value, format.getTimeFormat()), actual);
 		}
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.DATE);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.DATE));
 			assertEquals(value.getTime(), ((java.sql.Date) actual).getTime());
 		}
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, DataSetField.DataType.TIMESTAMP);
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.TIMESTAMP));
 			assertEquals(value.getTime(), ((java.sql.Timestamp) actual).getTime());
 		}
 	}
@@ -537,85 +580,135 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.TIMESTAMP);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.TIMESTAMP));
 			assertEquals(value, actual);
 		}
 
 		{
-			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.UNKNOWN);
-			assertEquals(value, actual);
-		}
-
-		{
-			Object actual = converter.convertTimestampValue(null, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertTimestampValue(null, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertNull(actual);
 		}
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.STRING);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.STRING));
 			assertEquals(formatDate(value, format.getTimestampFormat()), actual);
 		}
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.NUMBER);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.INTEGER);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.DECIMAL);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.DATE);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.DATE));
 			assertEquals(value.getTime(), ((java.sql.Date) actual).getTime());
 		}
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, DataSetField.DataType.TIME);
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.TIME));
 			assertEquals(value.getTime(), ((java.sql.Time) actual).getTime());
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void convertObjectValueTest() throws Throwable
+	public void convertMapValueTest() throws Throwable
 	{
 		DataFormat format = new DataFormat();
-		DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
+
+		DataSetField field = mockFieldForType(DataSetField.DataType.OBJECT);
+		field.setFields(Arrays.asList(new DataSetField("name", DataSetField.DataType.STRING),
+				new DataSetField("value", DataSetField.DataType.INTEGER)));
 
 		{
-			Object value = Collections.singletonMap("name", "aaa");
-			Object actual = converter.convertObjectValue(value, DataSetField.DataType.OBJECT);
-			assertTrue(value == actual);
+			DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
+			converter.setStrictForMap(true);
+
+			{
+				Map<String, Object> value = new HashMap<>();
+				value.put("name", "aaa");
+				value.put("value", "3");
+				value.put("inexists", "inexists");
+
+				Map<String, ?> actual = (Map<String, ?>) converter.convertMapValue(value, field);
+
+				assertEquals(2, actual.size());
+				assertEquals("aaa", actual.get("name"));
+				assertEquals(3, actual.get("value"));
+			}
+
+			{
+				Map<?, ?> value = Collections.singletonMap("name", "aaa");
+				Object actual = converter.convertMapValue(value, mockFieldForType(DataSetField.DataType.STRING));
+				assertEquals("{\"name\":\"aaa\"}", actual);
+			}
+
+			{
+				Map<?, ?> value = Collections.singletonMap("name", "aaa");
+				assertThrows(DataValueConvertionException.class, () ->
+				{
+					converter.convertMapValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
+				});
+			}
 		}
 
 		{
-			Object value = Collections.singletonMap("name", "aaa");
-			Object actual = converter.convertObjectValue(value, DataSetField.DataType.OBJECT);
-			assertTrue(value == actual);
-		}
+			DataSetFieldValueConverter converter = new DataSetFieldValueConverter(format);
+			converter.setStrictForMap(false);
 
-		{
-			Object value = Collections.singletonMap("name", "aaa");
-			Object actual = converter.convertObjectValue(value, DataSetField.DataType.STRING);
-			assertEquals("{\"name\":\"aaa\"}", actual);
+			{
+				Map<String, Object> value = new HashMap<>();
+				value.put("name", "aaa");
+				value.put("value", "3");
+				value.put("inexists", "nonono");
+
+				Map<String, ?> actual = (Map<String, ?>) converter.convertMapValue(value, field);
+
+				assertEquals(3, actual.size());
+				assertEquals("aaa", actual.get("name"));
+				assertEquals(3, actual.get("value"));
+				assertEquals("nonono", actual.get("inexists"));
+			}
+
+			{
+				Map<?, ?> value = Collections.singletonMap("name", "aaa");
+				Object actual = converter.convertMapValue(value, mockFieldForType(DataSetField.DataType.STRING));
+				assertEquals("{\"name\":\"aaa\"}", actual);
+			}
+
+			{
+				Map<?, ?> value = Collections.singletonMap("name", "aaa");
+				assertThrows(DataValueConvertionException.class, () ->
+				{
+					converter.convertMapValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
+				});
+			}
 		}
 	}
 
 	protected String formatDate(Date date, String format)
 	{
 		return new SimpleDateFormat(format).format(date);
+	}
+
+	protected DataSetField mockFieldForType(String type)
+	{
+		return new DataSetField("mock-name", type);
 	}
 }

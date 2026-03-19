@@ -18,6 +18,7 @@
 package org.datagear.analysis.support;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,62 +109,92 @@ public class DataSetParamValueConverter extends DataValueConverter<DataSetParam>
 	 * 存在不定义{@linkplain DataSet#getParams()}而传递参数给内部<code>Freemarker</code>模板的应用场景，
 	 * 也会存在传递系统上下文变量的场景（比如传递系统当前用户）。
 	 * </p>
+	 * 
+	 * @param paramValues
+	 *            允许为{@code null}
+	 * @param targets
+	 *            允许为{@code null}
+	 * @return
 	 */
-	@Override
-	public Map<String, Object> convert(Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
-			throws DataValueConvertionException
+	public Map<String, Object> convert(Map<String, ?> paramValues, Collection<DataSetParam> targets)
 	{
-		return super.convert(paramValues, dataSetParams);
+		if (paramValues == null)
+			return null;
+
+		Map<String, Object> re = new HashMap<>(paramValues);
+
+		if (targets != null)
+		{
+			for (DataSetParam target : targets)
+			{
+				String name = target.getName();
+
+				if (!paramValues.containsKey(name))
+					continue;
+
+				Object value = paramValues.get(name);
+				value = convert(value, target);
+
+				re.put(name, value);
+			}
+		}
+
+		return re;
 	}
 
 	@Override
-	public Object convert(Object value, String type) throws DataValueConvertionException
+	public Object convert(Object value, DataSetParam target) throws DataValueConvertionException
 	{
-		if (DataType.OBJECT.equals(type))
-			return convertToObjectType(value);
+		if (value == null || target == null)
+			return value;
+
+		if (DataType.OBJECT.equals(target.getType()))
+			return convertToObjectType(value, target);
 		else
-			return super.convert(value, type);
+			return super.convert(value, target);
 	}
 
 	@Override
-	protected Object convertValue(Object value, String type) throws DataValueConvertionException
+	protected Object convertValue(Object value, DataSetParam target) throws DataValueConvertionException
 	{
+		if (value == null || target == null)
+			return value;
+
+		String type = target.getType();
+
 		if (DataType.STRING.equals(type))
-			return convertToString(value, DataType.STRING);
+			return convertToString(value, target);
 		else if (DataType.INTEGER.equals(type))
-			return convertToInteger(value, DataType.INTEGER);
+			return convertToInteger(value, target);
 		else if (DataType.NUMBER.equals(type))
-			return convertToNumber(value, DataType.NUMBER);
+			return convertToNumber(value, target);
 		else if (DataType.BOOLEAN.equals(type))
-			return convertToBoolean(value, DataType.BOOLEAN);
+			return convertToBoolean(value, target);
 		else
-			return convertExt(value, type);
+			return convertExt(value, target);
 	}
 
 	/**
 	 * 转换为{@linkplain DataType#OBJECT}类型的对象。
-	 * <p>
-	 * 对于{@code value}参数，此方法仅允许{@code null}、{@linkplain String}、{@linkplain Map}、{@linkplain List}、数组
-	 * </p>
 	 * 
 	 * @param value
+	 *            仅允许{@code null}、{@linkplain String}、{@linkplain Map}、{@linkplain List}、数组
+	 * @param target
 	 * @return
 	 * @throws DataValueConvertionException
 	 */
-	protected Object convertToObjectType(Object value) throws DataValueConvertionException
+	protected Object convertToObjectType(Object value, DataSetParam target) throws DataValueConvertionException
 	{
-		Object re = value;
-
-		if (value instanceof String)
-			re = convertJsonToObj((String) value, DataType.OBJECT);
-
-		if (re == null)
-			return re;
-
-		// 必须限定类型，避免与允许的String类型逻辑冲突
-		if ((re instanceof Map<?, ?>) || (re instanceof List<?>) || (re instanceof Object[]))
-			return re;
-
-		return convertExt(value, DataType.OBJECT);
+		if (value == null)
+			return null;
+		else if (isStrictJsonObject(value))
+			return value;
+		else if (value instanceof String)
+		{
+			// 必须采用严格模式，避免与允许的String类型逻辑冲突
+			return convertJsonToObjStrictly((String) value, target);
+		}
+		else
+			return convertExt(value, target);
 	}
 }
