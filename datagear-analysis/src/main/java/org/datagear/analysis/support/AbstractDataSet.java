@@ -35,7 +35,7 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.ResultDataFormat;
-import org.datagear.analysis.support.DataSetFieldExpEvaluator.ValueSetter;
+import org.datagear.analysis.support.DataSetFieldExpEvaluator.FieldValueAccessor;
 import org.datagear.analysis.support.datasettpl.DataSetFmkTemplateResolvers;
 import org.datagear.analysis.support.datasettpl.SqlTemplateResult;
 import org.datagear.analysis.support.datasettpl.TemplateContext;
@@ -232,6 +232,9 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	{
 		Object data = null;
 
+		DataSetFieldValueConverter converter = createDataSetFieldValueConverter();
+		ResultDataFormatter formatter = (format == null ? null : new ResultDataFormatter(format));
+
 		if (rawData == null)
 		{
 			data = null;
@@ -240,13 +243,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			Collection<Map<String, ?>> rawCollection = (Collection<Map<String, ?>>) rawData;
 
-			data = convertRawDataToResult(rawCollection, fields, fetchSize, format);
+			data = convertRawDataToResult(rawCollection, fields, fetchSize, converter, formatter);
 		}
 		else if (rawData instanceof Map<?, ?>[])
 		{
 			Map<?, ?>[] rawArray = (Map<?, ?>[]) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawArray);
-			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, fields, fetchSize, format);
+			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, fields, fetchSize, converter,
+					formatter);
 
 			data = dataList.toArray(new Map<?, ?>[dataList.size()]);
 		}
@@ -254,7 +258,8 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		{
 			Map<?, ?> rawMap = (Map<?, ?>) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawMap);
-			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, fields, -1, format);
+			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, fields, -1, converter,
+					formatter);
 
 			data = dataList.get(0);
 		}
@@ -263,24 +268,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 					"Unsupported raw data type : " + rawData.getClass().getSimpleName());
 
 		return data;
-	}
-
-	/**
-	 * 转换原始数据。
-	 * 
-	 * @param rawData
-	 * @param fields
-	 * @param fetchSize  获取条数，小于{@code 0}表示全部
-	 * @param format     允许为{@code null}
-	 * @return
-	 * @throws Throwable
-	 */
-	protected List<Map<String, Object>> convertRawDataToResult(Collection<? extends Map<String, ?>> rawData,
-			List<DataSetField> fields, int fetchSize, ResultDataFormat format) throws Throwable
-	{
-		DataSetFieldValueConverter converter = createDataSetFieldValueConverter();
-		ResultDataFormatter formatter = (format == null ? null : new ResultDataFormatter(format));
-		return convertRawDataToResult(rawData, fields, fetchSize, converter, formatter);
 	}
 
 	/**
@@ -320,18 +307,26 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return data;
 	}
 	
-	protected void evalResultData(List<Map<String, Object>> data, List<DataSetField> fields,
+	protected void evalResultData(Object data, List<DataSetField> fields,
 			DataSetFieldValueConverter converter)
 	{
 		DataSetFieldExpEvaluator evaluator = getDataSetFieldExpEvaluator();
 		
-		evaluator.eval(fields, data, new ValueSetter<Map<String, Object>>()
+		evaluator.eval(data, fields, new FieldValueAccessor()
 		{
+			@SuppressWarnings("unchecked")
 			@Override
-			public void set(DataSetField field, int fieldIndex, Map<String, Object> data, Object value)
+			public void set(Object row, DataSetField field, Object value)
 			{
 				value = converter.convert(value, field);
-				data.put(field.getName(), value);
+				((Map<String, Object>) row).put(field.getName(), value);
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object get(Object row, DataSetField field)
+			{
+				return ((Map<String, Object>) row).get(field.getName());
 			}
 		});
 	}

@@ -18,6 +18,7 @@
 package org.datagear.analysis.support;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +91,7 @@ import org.springframework.expression.Expression;
  * 其中，{@code A}、{@code B}、{@code C}、{@code D}、{@code E}为上述上下文合法的表达式。
  * </p>
  * <p>
- * 对于{@linkplain #eval(List, List, ValueSetter)}方法，
+ * 对于{@linkplain #eval(List, List, FieldValueAccessor)}方法，
  * 表达式中的{@code 字段名}可以是{@code fields}列表中任意的{@linkplain DataSetField#getName()}，取值规范如下所示：
  * </p>
  * <p>
@@ -240,46 +241,80 @@ public class DataSetFieldExpEvaluator
 	 * 具体参考此类说明：{@linkplain DataSetFieldExpEvaluator}。
 	 * </p>
 	 * 
+	 * @param data
 	 * @param fields
-	 * @param datas
-	 * @param valueSetter
-	 * @returns {@code true} 执行了计算和设置；{@code false}
-	 *          未执行计算和设置，因为{@code fields}中没有需计算的
+	 * @param fieldValueAccessor
 	 * @throws DataSetFieldExpEvaluatorException
 	 */
-	public <T> boolean eval(List<DataSetField> fields, List<T> datas, ValueSetter<? super T> valueSetter)
+	public void eval(Object data, List<DataSetField> fields, FieldValueAccessor fieldValueAccessor)
 			throws DataSetFieldExpEvaluatorException
 	{
-		int plen = fields.size();
-		List<Expression> expressions = new ArrayList<Expression>(plen);
-		int count = parseExpressions(fields, expressions);
-		
-		if (count < 1)
-			return false;
+		if (data == null || fields == null)
+			return;
+
+		EvaluationContext context = buildEvaluationContext();
+		eval(data, fields, fieldValueAccessor, context);
+	}
+
+	protected void eval(Object data, List<DataSetField> fields, FieldValueAccessor fieldValueAccessor, EvaluationContext context)
+			throws DataSetFieldExpEvaluatorException
+	{
+		if (data == null || fields == null)
+			return;
+
+		int fieldLen = fields.size();
+		List<Expression> expressions = new ArrayList<Expression>(fieldLen);
+		parseExpressions(fields, expressions);
+
+		if (data instanceof Collection<?>)
+		{
+			Collection<?> datas = (Collection<?>) data;
+
+			for (Object row : datas)
+				evalRow(row, fields, fieldValueAccessor, context, expressions);
+		}
+		else if (data instanceof Object[])
+		{
+			Object[] datas = (Object[]) data;
+
+			for (Object row : datas)
+				evalRow(row, fields, fieldValueAccessor, context, expressions);
+		}
+		else
+			evalRow(data, fields, fieldValueAccessor, context, expressions);
+	}
+
+	protected void evalRow(Object row, List<DataSetField> fields, FieldValueAccessor fieldValueAccessor,
+			EvaluationContext context, List<Expression> expressions) throws DataSetFieldExpEvaluatorException
+	{
+		if (row == null || fields == null)
+			return;
 
 		DataSetField field = null;
 
 		try
 		{
-			EvaluationContext context = buildEvaluationContext();
-
-			for (T data : datas)
+			// 必须按顺序计算，确保表达式中的字段取值逻辑符合规范
+			for (int i = 0, len = fields.size(); i < len; i++)
 			{
-				// 必须按顺序计算，确保表达式中的字段取值逻辑符合规范
-				for (int i = 0; i < plen; i++)
-				{
-					field = fields.get(i);
-					Expression expression = expressions.get(i);
+				field = fields.get(i);
+				Expression expression = expressions.get(i);
+				Object value = null;
 
-					if (expression != null)
-					{
-						Object value = doEvalSingle(expression, context, data);
-						valueSetter.set(field, i, data, value);
-					}
+				if (expression != null)
+				{
+					value = doEvalSingle(expression, context, row);
+					fieldValueAccessor.set(row, field, value);
+				}
+
+				if (DataSetField.DataType.isObjectType(field))
+				{
+					if (value == null)
+						value = fieldValueAccessor.get(row, field);
+
+					eval(value, field.getFields(), fieldValueAccessor, context);
 				}
 			}
-
-			return true;
 		}
 		catch (DataSetFieldExpEvaluatorException e)
 		{
@@ -379,23 +414,31 @@ public class DataSetFieldExpEvaluator
 	}
 
 	/**
-	 * 计算结果值设置器。
+	 * 字段值访问器。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static interface ValueSetter<T>
+	public static interface FieldValueAccessor
 	{
 		/**
 		 * 设置计算结果值。
 		 * 
-		 * @param field
-		 * @params fieldIndex
-		 * @param data
+		 * @param row
 		 *            待设置{@code value}的数据对象
+		 * @param field
 		 * @param value
 		 *            计算结果值
 		 */
-		void set(DataSetField field, int fieldIndex, T data, Object value);
+		void set(Object row, DataSetField field, Object value);
+
+		/**
+		 * 获取字段值。
+		 * 
+		 * @param row
+		 * @param field
+		 * @return
+		 */
+		Object get(Object row, DataSetField field);
 	}
 }

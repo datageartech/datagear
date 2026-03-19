@@ -320,8 +320,9 @@ public class AbstractDataSetTest
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void convertRawDataToResultTest_expression() throws Throwable
+	public void resolveResultDataTest_expression() throws Throwable
 	{
 		TestAbstractDataSet dataSet = new TestAbstractDataSet();
 
@@ -333,9 +334,16 @@ public class AbstractDataSetTest
 		raw0.put("v2", 7);
 		raw0.put("s0", "aaa");
 
+		Map<String, Object> vobj = new HashMap<String, Object>();
+		vobj.put("f0", 6);
+		vobj.put("f1", "7");
+
+		raw0.put("obj", vobj);
+
 		Collections.addAll(rawData, raw0);
 
 		List<DataSetField> fields = new ArrayList<DataSetField>();
+
 		{
 			DataSetField p0 = new DataSetField("v0", DataSetField.DataType.INTEGER);
 			DataSetField p1 = new DataSetField("v1", DataSetField.DataType.NUMBER);
@@ -356,19 +364,39 @@ public class AbstractDataSetTest
 
 			Collections.addAll(fields, p0, p1, p2, p3, avg, suffix);
 		}
+		{
+			DataSetField obj = new DataSetField("obj", DataSetField.DataType.OBJECT);
+			obj.setFields(new ArrayList<>());
+			fields.add(obj);
 
-		List<Map<String, Object>> resultData = dataSet.convertRawDataToResult(rawData, fields, -1, null);
+			DataSetField f0 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+			DataSetField f1 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+			DataSetField f2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+
+			f2.setEvaluated(true);
+			f2.setExpression("f0 + f1");
+
+			Collections.addAll(obj.getFields(), f0, f1, f2);
+		}
+
+		List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawData, fields,
+				-1, null);
 
 		assertEquals(rawData.size(), resultData.size());
 
 		{
 			Map<String, Object> re0 = resultData.get(0);
+			Map<String, Object> reobj = (Map<String, Object>) re0.get("obj");
 
 			assertEquals(raw0.get("v0"), ((Number) re0.get("v0")).toString());
 			assertEquals(raw0.get("v1"), ((Number) re0.get("v1")).toString());
 			assertEquals(27, ((Number) re0.get("v2")).intValue());
 			assertEquals(4, ((Number) re0.get("avg")).intValue());
 			assertEquals("aaa-sufix", re0.get("suffix"));
+			
+			assertEquals(6, reobj.get("f0"));
+			assertEquals(7, reobj.get("f1"));
+			assertEquals(13, reobj.get("f2"));
 		}
 	}
 

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetField;
-import org.datagear.analysis.support.DataSetFieldExpEvaluator.ValueSetter;
+import org.datagear.analysis.support.DataSetFieldExpEvaluator.FieldValueAccessor;
 import org.junit.Test;
 
 /**
@@ -554,7 +554,7 @@ public class DataSetFieldExpEvaluatorTest
 	}
 
 	@Test
-	public void evalTest_List_DataSetField()
+	public void evalTest_Object_List_DataSetField()
 	{
 		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
 
@@ -562,6 +562,13 @@ public class DataSetFieldExpEvaluatorTest
 		data.put("v0", 2);
 		data.put("v1", 3);
 		data.put("v2", 4);
+
+		Map<String, Object> v4 = new HashMap<String, Object>();
+		v4.put("v40", 6);
+		v4.put("v41", 7);
+		v4.put("v42", 8);
+
+		data.put("v4", v4);
 
 		Collections.addAll(datas, data);
 
@@ -583,13 +590,42 @@ public class DataSetFieldExpEvaluatorTest
 
 			Collections.addAll(fields, p0, p1, p2, p3);
 		}
-
-		this.evaluator.eval(fields, datas, new ValueSetter<Map<String, Object>>()
 		{
+			DataSetField p4 = new DataSetField("v4", DataSetField.DataType.OBJECT);
+			p4.setFields(new ArrayList<>());
+			fields.add(p4);
+
+			DataSetField p40 = new DataSetField("v40", DataSetField.DataType.INTEGER);
+			DataSetField p41 = new DataSetField("v41", DataSetField.DataType.INTEGER);
+			DataSetField p42 = new DataSetField("v42", DataSetField.DataType.INTEGER);
+			DataSetField p43 = new DataSetField("v43", DataSetField.DataType.INTEGER);
+
+			p41.setEvaluated(true);
+			p41.setExpression("v40 + v41 + v42");
+
+			p42.setEvaluated(true);
+			p42.setExpression("v40 + v41");
+
+			p43.setEvaluated(true);
+			p43.setExpression("v40 + v41 - v42");
+
+			Collections.addAll(p4.getFields(), p40, p41, p42, p43);
+		}
+
+		this.evaluator.eval(datas, fields, new FieldValueAccessor()
+		{
+			@SuppressWarnings("unchecked")
 			@Override
-			public void set(DataSetField field, int fieldIndex, Map<String, Object> data, Object value)
+			public void set(Object row, DataSetField field, Object value)
 			{
-				data.put(field.getName(), value);
+				((Map<String, Object>) row).put(field.getName(), value);
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object get(Object row, DataSetField field)
+			{
+				return ((Map<String, Object>) row).get(field.getName());
 			}
 		});
 
@@ -597,37 +633,11 @@ public class DataSetFieldExpEvaluatorTest
 		assertEquals(9, ((Number) data.get("v1")).intValue());
 		assertEquals(11, ((Number) data.get("v2")).intValue());
 		assertEquals(22, ((Number) data.get("v3")).intValue());
-	}
 
-	@Test
-	public void evalTest_List_DataSetField_noExpression()
-	{
-		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
-
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("v0", 2);
-		data.put("s0", "aaa");
-
-		Collections.addAll(datas, data);
-
-		List<DataSetField> fields = new ArrayList<DataSetField>();
-		{
-			DataSetField p0 = new DataSetField("v0", DataSetField.DataType.INTEGER);
-			DataSetField p1 = new DataSetField("s0", DataSetField.DataType.STRING);
-
-			Collections.addAll(fields, p0, p1);
-		}
-
-		boolean evaled = this.evaluator.eval(fields, datas, new ValueSetter<Map<String, Object>>()
-		{
-			@Override
-			public void set(DataSetField field, int fieldIndex, Map<String, Object> data, Object value)
-			{
-				data.put(field.getName(), value);
-			}
-		});
-
-		assertFalse(evaled);
+		assertEquals(6, ((Number) v4.get("v40")).intValue());
+		assertEquals(21, ((Number) v4.get("v41")).intValue());
+		assertEquals(27, ((Number) v4.get("v42")).intValue());
+		assertEquals(0, ((Number) v4.get("v43")).intValue());
 	}
 
 	protected static class ExpBean

@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -52,7 +53,18 @@ public class DataSetFieldValueConverterTest
 	public void convertTest_Map_Collection()
 	{
 		List<DataSetField> fields = Arrays.asList(new DataSetField("name", DataSetField.DataType.STRING),
-				new DataSetField("value", DataSetField.DataType.INTEGER));
+				new DataSetField("value", DataSetField.DataType.INTEGER), new DataSetField("obj", DataSetField.DataType.OBJECT));
+
+		{
+			DataSetField field = fields.get(2);
+			field.setFields(new ArrayList<>());
+
+			DataSetField f0 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+			DataSetField f1 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+			DataSetField f2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+
+			Collections.addAll(field.getFields(), f0, f1, f2);
+		}
 
 		DataFormat format = new DataFormat();
 
@@ -63,13 +75,43 @@ public class DataSetFieldValueConverterTest
 			Map<String, Object> value = new HashMap<>();
 			value.put("name", "aaa");
 			value.put("value", "3");
+			Map<String, Object> vobj = new HashMap<>();
+			value.put("obj", vobj);
+			value.put("inexists", "nonono");
+
+			vobj.put("f0", 3);
+			vobj.put("f1", "4");
+			vobj.put("f2", "5");
+
+			Map<String, ?> actual = converterStrict.convert(value, fields);
+			@SuppressWarnings("unchecked")
+			Map<String, ?> actualObj = (Map<String, ?>) actual.get("obj");
+
+			assertEquals(3, actual.size());
+			assertEquals("aaa", actual.get("name"));
+			assertEquals(3, actual.get("value"));
+
+			assertEquals(3, actualObj.get("f0"));
+			assertEquals(4, actualObj.get("f1"));
+			assertEquals(5, actualObj.get("f2"));
+		}
+
+		{
+			DataSetFieldValueConverter converterStrict = new DataSetFieldValueConverter(format);
+			converterStrict.setStrictForMap(true);
+
+			Map<String, Object> value = new HashMap<>();
+			value.put("name", "aaa");
+			value.put("value", "3");
+			value.put("obj", null);
 			value.put("inexists", "nonono");
 
 			Map<String, ?> actual = converterStrict.convert(value, fields);
 
-			assertEquals(2, actual.size());
+			assertEquals(3, actual.size());
 			assertEquals("aaa", actual.get("name"));
 			assertEquals(3, actual.get("value"));
+			assertEquals(null, actual.get("obj"));
 		}
 
 		{
@@ -79,13 +121,15 @@ public class DataSetFieldValueConverterTest
 			Map<String, Object> value = new HashMap<>();
 			value.put("name", "aaa");
 			value.put("value", "3");
+			value.put("obj", null);
 			value.put("inexists", "nonono");
 
 			Map<String, ?> actual = converterStrict.convert(value, fields);
 
-			assertEquals(3, actual.size());
+			assertEquals(4, actual.size());
 			assertEquals("aaa", actual.get("name"));
 			assertEquals(3, actual.get("value"));
+			assertEquals(null, actual.get("obj"));
 			assertEquals("nonono", actual.get("inexists"));
 		}
 	}
@@ -436,7 +480,7 @@ public class DataSetFieldValueConverterTest
 		{
 			Number value = 3;
 			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.INTEGER));
-			assertEquals(3, ((Long) actual).intValue());
+			assertEquals(3, ((Integer) actual).intValue());
 		}
 
 		{

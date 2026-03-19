@@ -238,7 +238,10 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.NUMBER.equals(type))
 			return this._numberFormat.parse(value);
 		else if (DataType.INTEGER.equals(type))
-			return this._numberFormat.parse(value).intValue();
+		{
+			Long number = this._numberFormat.parse(value).longValue();
+			return narrowIfIntegerRange(number);
+		}
 		else if (DataType.DECIMAL.equals(type))
 			return this._numberFormat.parse(value).doubleValue();
 		else if (DataType.DATE.equals(type))
@@ -302,8 +305,11 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		{
 			if (this.ignoreBigIntegerToInteger && (value instanceof BigInteger))
 				return value;
-			else
+			else if (value instanceof Float || value instanceof Double || value instanceof BigDecimal
+					|| value instanceof BigInteger)
 				return value.longValue();
+			else
+				return value;
 		}
 		else if (DataType.DECIMAL.equals(type))
 		{
