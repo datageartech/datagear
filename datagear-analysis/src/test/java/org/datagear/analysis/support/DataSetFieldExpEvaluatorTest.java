@@ -553,26 +553,12 @@ public class DataSetFieldExpEvaluatorTest
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void evalTest_Object_List_DataSetField()
 	{
-		List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
-
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("v0", 2);
-		data.put("v1", 3);
-		data.put("v2", 4);
-
-		Map<String, Object> v4 = new HashMap<String, Object>();
-		v4.put("v40", 6);
-		v4.put("v41", 7);
-		v4.put("v42", 8);
-
-		data.put("v4", v4);
-
-		Collections.addAll(datas, data);
-
 		List<DataSetField> fields = new ArrayList<DataSetField>();
+
 		{
 			DataSetField p0 = new DataSetField("v0", DataSetField.DataType.INTEGER);
 			DataSetField p1 = new DataSetField("v1", DataSetField.DataType.INTEGER);
@@ -591,53 +577,197 @@ public class DataSetFieldExpEvaluatorTest
 			Collections.addAll(fields, p0, p1, p2, p3);
 		}
 		{
-			DataSetField p4 = new DataSetField("v4", DataSetField.DataType.OBJECT);
-			p4.setFields(new ArrayList<>());
-			fields.add(p4);
+			DataSetField fobj = new DataSetField("obj", DataSetField.DataType.OBJECT);
+			fobj.setFields(new ArrayList<>());
+			fields.add(fobj);
 
-			DataSetField p40 = new DataSetField("v40", DataSetField.DataType.INTEGER);
-			DataSetField p41 = new DataSetField("v41", DataSetField.DataType.INTEGER);
-			DataSetField p42 = new DataSetField("v42", DataSetField.DataType.INTEGER);
-			DataSetField p43 = new DataSetField("v43", DataSetField.DataType.INTEGER);
+			DataSetField fobj0 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+			DataSetField fobj1 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+			DataSetField fobj2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+			DataSetField fobj3 = new DataSetField("f3", DataSetField.DataType.INTEGER);
 
-			p41.setEvaluated(true);
-			p41.setExpression("v40 + v41 + v42");
+			fobj1.setEvaluated(true);
+			fobj1.setExpression("f0 + f1 + f2");
 
-			p42.setEvaluated(true);
-			p42.setExpression("v40 + v41");
+			fobj2.setEvaluated(true);
+			fobj2.setExpression("f0 + f1");
 
-			p43.setEvaluated(true);
-			p43.setExpression("v40 + v41 - v42");
+			fobj3.setEvaluated(true);
+			fobj3.setExpression("f0 + f1 - f2");
 
-			Collections.addAll(p4.getFields(), p40, p41, p42, p43);
+			Collections.addAll(fobj.getFields(), fobj0, fobj1, fobj2, fobj3);
+		}
+		{
+			DataSetField fobjs = new DataSetField("objs", DataSetField.DataType.OBJECT);
+			fobjs.setArray(true);
+			fobjs.setFields(new ArrayList<>());
+			fields.add(fobjs);
+
+			DataSetField fobj0 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+			DataSetField fobj1 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+			DataSetField fobj2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+
+			fobj2.setEvaluated(true);
+			fobj2.setExpression("f0 + f1");
+
+			Collections.addAll(fobjs.getFields(), fobj0, fobj1, fobj2);
 		}
 
-		this.evaluator.eval(datas, fields, new FieldValueAccessor()
+		// 集合类型
 		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public void set(Object row, DataSetField field, Object value)
+			List<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
+
+			Map<String, Object> data0 = new HashMap<String, Object>();
+			data0.put("v0", 2);
+			data0.put("v1", 3);
+			data0.put("v2", 4);
+
+			Map<String, Object> vobj = new HashMap<String, Object>();
+			vobj.put("f0", 6);
+			vobj.put("f1", 7);
+			vobj.put("f2", 8);
+
+			data0.put("obj", vobj);
+
+			Map<String, Object> vobjs0 = new HashMap<String, Object>();
+			vobjs0.put("f0", 13);
+			vobjs0.put("f1", 7);
+			vobjs0.put("f2", 8);
+
+			Map<String, Object> vobjs1 = new HashMap<String, Object>();
+			vobjs1.put("f0", 23);
+			vobjs1.put("f1", 7);
+			vobjs1.put("f2", 8);
+
+			data0.put("objs", Arrays.asList(vobjs0, vobjs1));
+
+			Map<String, Object> data1 = new HashMap<String, Object>();
+			data1.put("v0", 3);
+			data1.put("v1", 4);
+			data1.put("v2", 5);
+
+			Collections.addAll(datas, data0, data1);
+
+			this.evaluator.eval(datas, fields, new FieldValueAccessor()
 			{
-				((Map<String, Object>) row).put(field.getName(), value);
-			}
+				@Override
+				public void set(Object row, DataSetField field, Object value)
+				{
+					((Map<String, Object>) row).put(field.getName(), value);
+				}
 
-			@SuppressWarnings("unchecked")
-			@Override
-			public Object get(Object row, DataSetField field)
+				@Override
+				public Object get(Object row, DataSetField field)
+				{
+					return ((Map<String, Object>) row).get(field.getName());
+				}
+			});
+
 			{
-				return ((Map<String, Object>) row).get(field.getName());
+				assertEquals(2, ((Number) data0.get("v0")).intValue());
+				assertEquals(9, ((Number) data0.get("v1")).intValue());
+				assertEquals(11, ((Number) data0.get("v2")).intValue());
+				assertEquals(22, ((Number) data0.get("v3")).intValue());
+
+				assertEquals(6, ((Number) vobj.get("f0")).intValue());
+				assertEquals(21, ((Number) vobj.get("f1")).intValue());
+				assertEquals(27, ((Number) vobj.get("f2")).intValue());
+				assertEquals(0, ((Number) vobj.get("f3")).intValue());
+
+				assertEquals(13, ((Number) vobjs0.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs0.get("f1")).intValue());
+				assertEquals(20, ((Number) vobjs0.get("f2")).intValue());
+
+				assertEquals(23, ((Number) vobjs1.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs1.get("f1")).intValue());
+				assertEquals(30, ((Number) vobjs1.get("f2")).intValue());
 			}
-		});
+			{
+				assertEquals(3, ((Number) data1.get("v0")).intValue());
+				assertEquals(12, ((Number) data1.get("v1")).intValue());
+				assertEquals(15, ((Number) data1.get("v2")).intValue());
+				assertEquals(30, ((Number) data1.get("v3")).intValue());
+			}
+		}
 
-		assertEquals(2, ((Number) data.get("v0")).intValue());
-		assertEquals(9, ((Number) data.get("v1")).intValue());
-		assertEquals(11, ((Number) data.get("v2")).intValue());
-		assertEquals(22, ((Number) data.get("v3")).intValue());
+		// 数组类型
+		{
+			Map<?, ?>[] dataArray = new HashMap<?, ?>[2];
+			Map<String, Object>[] datas = (Map<String, Object>[]) dataArray;
 
-		assertEquals(6, ((Number) v4.get("v40")).intValue());
-		assertEquals(21, ((Number) v4.get("v41")).intValue());
-		assertEquals(27, ((Number) v4.get("v42")).intValue());
-		assertEquals(0, ((Number) v4.get("v43")).intValue());
+			Map<String, Object> data0 = new HashMap<String, Object>();
+			data0.put("v0", 2);
+			data0.put("v1", 3);
+			data0.put("v2", 4);
+
+			Map<String, Object> vobj = new HashMap<String, Object>();
+			vobj.put("f0", 6);
+			vobj.put("f1", 7);
+			vobj.put("f2", 8);
+
+			data0.put("obj", vobj);
+
+			Map<String, Object> vobjs0 = new HashMap<String, Object>();
+			vobjs0.put("f0", 13);
+			vobjs0.put("f1", 7);
+			vobjs0.put("f2", 8);
+
+			Map<String, Object> vobjs1 = new HashMap<String, Object>();
+			vobjs1.put("f0", 23);
+			vobjs1.put("f1", 7);
+			vobjs1.put("f2", 8);
+
+			data0.put("objs", Arrays.asList(vobjs0, vobjs1).toArray());
+
+			Map<String, Object> data1 = new HashMap<String, Object>();
+			data1.put("v0", 3);
+			data1.put("v1", 4);
+			data1.put("v2", 5);
+
+			datas[0] = data0;
+			datas[1] = data1;
+
+			this.evaluator.eval(datas, fields, new FieldValueAccessor()
+			{
+				@Override
+				public void set(Object row, DataSetField field, Object value)
+				{
+					((Map<String, Object>) row).put(field.getName(), value);
+				}
+
+				@Override
+				public Object get(Object row, DataSetField field)
+				{
+					return ((Map<String, Object>) row).get(field.getName());
+				}
+			});
+
+			{
+				assertEquals(2, ((Number) data0.get("v0")).intValue());
+				assertEquals(9, ((Number) data0.get("v1")).intValue());
+				assertEquals(11, ((Number) data0.get("v2")).intValue());
+				assertEquals(22, ((Number) data0.get("v3")).intValue());
+
+				assertEquals(6, ((Number) vobj.get("f0")).intValue());
+				assertEquals(21, ((Number) vobj.get("f1")).intValue());
+				assertEquals(27, ((Number) vobj.get("f2")).intValue());
+				assertEquals(0, ((Number) vobj.get("f3")).intValue());
+
+				assertEquals(13, ((Number) vobjs0.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs0.get("f1")).intValue());
+				assertEquals(20, ((Number) vobjs0.get("f2")).intValue());
+
+				assertEquals(23, ((Number) vobjs1.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs1.get("f1")).intValue());
+				assertEquals(30, ((Number) vobjs1.get("f2")).intValue());
+			}
+			{
+				assertEquals(3, ((Number) data1.get("v0")).intValue());
+				assertEquals(12, ((Number) data1.get("v1")).intValue());
+				assertEquals(15, ((Number) data1.get("v2")).intValue());
+				assertEquals(30, ((Number) data1.get("v3")).intValue());
+			}
+		}
 	}
 
 	protected static class ExpBean

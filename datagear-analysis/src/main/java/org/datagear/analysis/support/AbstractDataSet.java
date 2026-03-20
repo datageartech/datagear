@@ -219,11 +219,14 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	/**
 	 * 解析结果数据。
 	 * 
-	 * @param rawData    {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 * @param rawData
+	 *            {@code Collection<Map<String, ?>>}、{@code Object[]}（元素需为{@code Map<String, ?>}）、{@code Map<String, ?>}、{@code null}
 	 * @param fields
-	 * @param fetchSize  获取条数，小于{@code 0}表示全部
-	 * @param format     允许为{@code null}
-	 * @return {@code List<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 * @param fetchSize
+	 *            获取条数，小于{@code 0}表示全部
+	 * @param format
+	 *            允许为{@code null}
+	 * @return {@code List<Map<String, ?>>}、{@code Object[]}、{@code Map<String, ?>}、{@code null}
 	 * @throws Throwable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -242,17 +245,16 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		else if (rawData instanceof Collection<?>)
 		{
 			Collection<Map<String, ?>> rawCollection = (Collection<Map<String, ?>>) rawData;
-
 			data = convertRawDataToResult(rawCollection, fields, fetchSize, converter, formatter);
 		}
-		else if (rawData instanceof Map<?, ?>[])
+		else if (rawData instanceof Object[])
 		{
-			Map<?, ?>[] rawArray = (Map<?, ?>[]) rawData;
+			Object[] rawArray = (Object[]) rawData;
 			List<Map<String, ?>> rawCollection = (List) Arrays.asList(rawArray);
 			List<Map<String, Object>> dataList = convertRawDataToResult(rawCollection, fields, fetchSize, converter,
 					formatter);
 
-			data = dataList.toArray(new Map<?, ?>[dataList.size()]);
+			data = dataList.toArray(new Object[dataList.size()]);
 		}
 		else if (rawData instanceof Map<?, ?>)
 		{
@@ -335,12 +337,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 格式化结果数据。
 	 * 
 	 * @param data
-	 *            {@code Collection<Map<String, ?>>}、{@code Map<String, ?>[]}、{@code Map<String, ?>}、{@code null}
+	 *            {@code Collection<Map<String, ?>>}、{@code Object[]}（元素需为{@code Map<String, ?>}）、{@code Map<String, ?>}、{@code null}
 	 * @param fields
 	 *            允许{@code null}
 	 * @param formatter
 	 *            允许{@code null}
 	 */
+	@SuppressWarnings("unchecked")
 	protected void formatResultData(Object data, List<DataSetField> fields,
 			ResultDataFormatter formatter)
 	{
@@ -349,23 +352,20 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		if (data instanceof Collection<?>)
 		{
-			@SuppressWarnings("unchecked")
-			Collection<Map<String, Object>> datas = (Collection<Map<String, Object>>) data;
+			Collection<?> datas = (Collection<?>) data;
 
-			for (Map<String, Object> row : datas)
-				formatResultDataRow(row, fields, formatter);
+			for (Object row : datas)
+				formatResultDataRow((Map<String, Object>) row, fields, formatter);
 		}
 		else if (data instanceof Object[])
 		{
-			@SuppressWarnings("unchecked")
-			Map<String, Object>[] datas = (Map<String, Object>[]) data;
+			Object[] datas = (Object[]) data;
 
-			for (Map<String, Object> row : datas)
-				formatResultDataRow(row, fields, formatter);
+			for (Object row : datas)
+				formatResultDataRow((Map<String, Object>) row, fields, formatter);
 		}
 		else if (data instanceof Map<?, ?>)
 		{
-			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) data;
 			formatResultDataRow(map, fields, formatter);
 		}

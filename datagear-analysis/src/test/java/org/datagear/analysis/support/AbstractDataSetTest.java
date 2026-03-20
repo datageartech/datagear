@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -397,6 +398,258 @@ public class AbstractDataSetTest
 			assertEquals(6, reobj.get("f0"));
 			assertEquals(7, reobj.get("f1"));
 			assertEquals(13, reobj.get("f2"));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveResultDataTest_nest_fields() throws Throwable
+	{
+		TestAbstractDataSet dataSet = new TestAbstractDataSet();
+
+		DataFormat dataFormat = dataSet.createDataSetFieldValueConverter().getDataFormat();
+		SimpleDateFormat timestampFormat = new SimpleDateFormat(dataFormat.getTimestampFormat());
+
+		List<DataSetField> fields = new ArrayList<DataSetField>();
+
+		{
+			DataSetField p0 = new DataSetField("v0", DataSetField.DataType.INTEGER);
+			DataSetField p1 = new DataSetField("v1", DataSetField.DataType.INTEGER);
+			DataSetField p2 = new DataSetField("v2", DataSetField.DataType.INTEGER);
+
+			p2.setEvaluated(true);
+			p2.setExpression("v0 + v1");
+
+			Collections.addAll(fields, p0, p1, p2);
+		}
+		{
+			DataSetField fobj = new DataSetField("obj", DataSetField.DataType.OBJECT);
+			fobj.setFields(new ArrayList<>());
+			fields.add(fobj);
+
+			DataSetField fobj0 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+			DataSetField fobj1 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+			DataSetField fobj2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+			DataSetField fobj3 = new DataSetField("f3", DataSetField.DataType.TIMESTAMP);
+
+			fobj2.setEvaluated(true);
+			fobj2.setExpression("f0 + f1");
+
+			Collections.addAll(fobj.getFields(), fobj0, fobj1, fobj2, fobj3);
+		}
+		{
+			DataSetField fobjs = new DataSetField("objs", DataSetField.DataType.OBJECT);
+			fobjs.setArray(true);
+			fobjs.setFields(new ArrayList<>());
+			fields.add(fobjs);
+
+			DataSetField fobj0 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+			DataSetField fobj1 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+			DataSetField fobj2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+			DataSetField fobj3 = new DataSetField("f3", DataSetField.DataType.TIMESTAMP);
+
+			fobj2.setEvaluated(true);
+			fobj2.setExpression("f0 + f1");
+
+			DataSetField fobj4 = new DataSetField("f4", DataSetField.DataType.OBJECT);
+			fobj4.setFields(new ArrayList<>());
+
+			{
+				DataSetField fobj40 = new DataSetField("f0", DataSetField.DataType.INTEGER);
+				DataSetField fobj41 = new DataSetField("f1", DataSetField.DataType.INTEGER);
+				DataSetField fobj42 = new DataSetField("f2", DataSetField.DataType.INTEGER);
+				DataSetField fobj43 = new DataSetField("f3", DataSetField.DataType.TIMESTAMP);
+
+				fobj42.setEvaluated(true);
+				fobj42.setExpression("f0 * f1");
+
+				Collections.addAll(fobj4.getFields(), fobj40, fobj41, fobj42, fobj43);
+			}
+
+			Collections.addAll(fobjs.getFields(), fobj0, fobj1, fobj2, fobj3, fobj4);
+		}
+
+		// 集合类型
+		{
+			List<Map<String, Object>> rawDatas = new ArrayList<Map<String, Object>>();
+
+			{
+				Map<String, Object> data0 = new HashMap<String, Object>();
+				data0.put("v0", 2);
+				data0.put("v1", "3");
+				data0.put("v2", 4);
+
+				Map<String, Object> vobj = new HashMap<String, Object>();
+				vobj.put("f0", "6");
+				vobj.put("f1", 7);
+				vobj.put("f2", 8);
+				vobj.put("f3", "2026-01-01 11:12:13");
+
+				data0.put("obj", vobj);
+
+				Map<String, Object> vobjs0 = new HashMap<String, Object>();
+				vobjs0.put("f0", 13);
+				vobjs0.put("f1", "7");
+				vobjs0.put("f2", 8);
+				vobjs0.put("f3", "2026-01-02 11:12:13");
+
+				Map<String, Object> vobjs04 = new HashMap<String, Object>();
+				vobjs04.put("f0", "2");
+				vobjs04.put("f1", 5);
+				vobjs04.put("f2", 9);
+				vobjs04.put("f3", "2026-01-03 11:12:13");
+
+				vobjs0.put("f4", vobjs04);
+
+				Map<String, Object> vobjs1 = new HashMap<String, Object>();
+				vobjs1.put("f0", "23");
+				vobjs1.put("f1", 7);
+				vobjs1.put("f2", 8);
+				vobjs1.put("f3", "2026-01-04 11:12:13");
+
+				data0.put("objs", Arrays.asList(vobjs0, vobjs1));
+
+				Map<String, Object> data1 = new HashMap<String, Object>();
+				data1.put("v0", 3);
+				data1.put("v1", "4");
+				data1.put("v2", 5);
+
+				Collections.addAll(rawDatas, data0, data1);
+			}
+
+			List<Map<String, Object>> resultData = (List<Map<String, Object>>) dataSet.resolveResultData(rawDatas,
+					fields, -1, null);
+
+			Map<String, Object> data0 = resultData.get(0);
+			Map<String, Object> vobj = (Map<String, Object>) data0.get("obj");
+			List<Map<String, Object>> vobjs = (List<Map<String, Object>>) data0.get("objs");
+			Map<String, Object> vobjs0 = vobjs.get(0);
+			Map<String, Object> vobjs04 = (Map<String, Object>) vobjs0.get("f4");
+			Map<String, Object> vobjs1 = vobjs.get(1);
+			Map<String, Object> data1 = resultData.get(1);
+
+			{
+				assertEquals(2, ((Number) data0.get("v0")).intValue());
+				assertEquals(3, ((Number) data0.get("v1")).intValue());
+				assertEquals(5, ((Number) data0.get("v2")).intValue());
+
+				assertEquals(6, ((Number) vobj.get("f0")).intValue());
+				assertEquals(7, ((Number) vobj.get("f1")).intValue());
+				assertEquals(13, ((Number) vobj.get("f2")).intValue());
+				assertEquals("2026-01-01 11:12:13", timestampFormat.format(((Date) vobj.get("f3"))));
+
+				assertEquals(13, ((Number) vobjs0.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs0.get("f1")).intValue());
+				assertEquals(20, ((Number) vobjs0.get("f2")).intValue());
+				assertEquals("2026-01-02 11:12:13", timestampFormat.format(((Date) vobjs0.get("f3"))));
+
+				assertEquals(2, ((Number) vobjs04.get("f0")).intValue());
+				assertEquals(5, ((Number) vobjs04.get("f1")).intValue());
+				assertEquals(10, ((Number) vobjs04.get("f2")).intValue());
+				assertEquals("2026-01-03 11:12:13", timestampFormat.format(((Date) vobjs04.get("f3"))));
+
+				assertEquals(23, ((Number) vobjs1.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs1.get("f1")).intValue());
+				assertEquals(30, ((Number) vobjs1.get("f2")).intValue());
+				assertEquals("2026-01-04 11:12:13", timestampFormat.format(((Date) vobjs1.get("f3"))));
+			}
+			{
+				assertEquals(3, ((Number) data1.get("v0")).intValue());
+				assertEquals(4, ((Number) data1.get("v1")).intValue());
+				assertEquals(7, ((Number) data1.get("v2")).intValue());
+			}
+		}
+
+		// 数组类型
+		{
+			Map<?, ?>[] rawDataArray = new HashMap<?, ?>[2];
+			Map<String, Object>[] rawDatas = (Map<String, Object>[]) rawDataArray;
+
+			{
+				Map<String, Object> data0 = new HashMap<String, Object>();
+				data0.put("v0", 2);
+				data0.put("v1", "3");
+				data0.put("v2", 4);
+
+				Map<String, Object> vobj = new HashMap<String, Object>();
+				vobj.put("f0", "6");
+				vobj.put("f1", 7);
+				vobj.put("f2", 8);
+				vobj.put("f3", "2026-01-01 11:12:13");
+
+				data0.put("obj", vobj);
+
+				Map<String, Object> vobjs0 = new HashMap<String, Object>();
+				vobjs0.put("f0", 13);
+				vobjs0.put("f1", "7");
+				vobjs0.put("f2", 8);
+				vobjs0.put("f3", "2026-01-02 11:12:13");
+
+				Map<String, Object> vobjs04 = new HashMap<String, Object>();
+				vobjs04.put("f0", "2");
+				vobjs04.put("f1", 5);
+				vobjs04.put("f2", 9);
+				vobjs04.put("f3", "2026-01-03 11:12:13");
+
+				vobjs0.put("f4", vobjs04);
+
+				Map<String, Object> vobjs1 = new HashMap<String, Object>();
+				vobjs1.put("f0", "23");
+				vobjs1.put("f1", 7);
+				vobjs1.put("f2", 8);
+				vobjs1.put("f3", "2026-01-04 11:12:13");
+
+				data0.put("objs", Arrays.asList(vobjs0, vobjs1).toArray());
+
+				Map<String, Object> data1 = new HashMap<String, Object>();
+				data1.put("v0", 3);
+				data1.put("v1", "4");
+				data1.put("v2", 5);
+
+				rawDatas[0] = data0;
+				rawDatas[1] = data1;
+			}
+
+			Object[] resultData = (Object[]) dataSet.resolveResultData(rawDatas, fields, -1, null);
+
+			Map<String, Object> data0 = (Map<String, Object>) resultData[0];
+			Map<String, Object> vobj = (Map<String, Object>) data0.get("obj");
+			Object[] vobjs = (Object[]) data0.get("objs");
+			Map<String, Object> vobjs0 = (Map<String, Object>) vobjs[0];
+			Map<String, Object> vobjs04 = (Map<String, Object>) vobjs0.get("f4");
+			Map<String, Object> vobjs1 = (Map<String, Object>) vobjs[1];
+			Map<String, Object> data1 = (Map<String, Object>) resultData[1];
+
+			{
+				assertEquals(2, ((Number) data0.get("v0")).intValue());
+				assertEquals(3, ((Number) data0.get("v1")).intValue());
+				assertEquals(5, ((Number) data0.get("v2")).intValue());
+
+				assertEquals(6, ((Number) vobj.get("f0")).intValue());
+				assertEquals(7, ((Number) vobj.get("f1")).intValue());
+				assertEquals(13, ((Number) vobj.get("f2")).intValue());
+				assertEquals("2026-01-01 11:12:13", timestampFormat.format(((Date) vobj.get("f3"))));
+
+				assertEquals(13, ((Number) vobjs0.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs0.get("f1")).intValue());
+				assertEquals(20, ((Number) vobjs0.get("f2")).intValue());
+				assertEquals("2026-01-02 11:12:13", timestampFormat.format(((Date) vobjs0.get("f3"))));
+
+				assertEquals(2, ((Number) vobjs04.get("f0")).intValue());
+				assertEquals(5, ((Number) vobjs04.get("f1")).intValue());
+				assertEquals(10, ((Number) vobjs04.get("f2")).intValue());
+				assertEquals("2026-01-03 11:12:13", timestampFormat.format(((Date) vobjs04.get("f3"))));
+
+				assertEquals(23, ((Number) vobjs1.get("f0")).intValue());
+				assertEquals(7, ((Number) vobjs1.get("f1")).intValue());
+				assertEquals(30, ((Number) vobjs1.get("f2")).intValue());
+				assertEquals("2026-01-04 11:12:13", timestampFormat.format(((Date) vobjs1.get("f3"))));
+			}
+			{
+				assertEquals(3, ((Number) data1.get("v0")).intValue());
+				assertEquals(4, ((Number) data1.get("v1")).intValue());
+				assertEquals(7, ((Number) data1.get("v2")).intValue());
+			}
 		}
 	}
 
