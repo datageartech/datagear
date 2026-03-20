@@ -2496,7 +2496,11 @@ TOOL.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
 			fieldName: signFields[i].name,
 			render: function(data)
 			{
-				return CF.escapeHtml(data[this.fieldName]);
+				let value = data[this.fieldName];
+				if(value != null && (CF.isArray(value) || CF.isPlainObject(value)))
+					value = JSON.stringify(value);
+				
+				return CF.escapeHtml(value);
 			}
 		};
 		
@@ -2510,7 +2514,7 @@ TOOL.initDataSetBindDataTable = function(chart, dataSetBinds, index, parent)
 			title: TOOL.labels.dataDetail,
 			render: function(data)
 			{
-				return CF.toJsonString(data);
+				return JSON.stringify(data);
 			}
 		});
 	}

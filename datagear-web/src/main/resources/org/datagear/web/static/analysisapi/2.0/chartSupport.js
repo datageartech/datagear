@@ -5322,7 +5322,12 @@ SPT.tableRenderer = function(plugin, config)
 								return options.renderCell(value, name, rowIndex, columnIndex, row, meta);
 							}
 							else
+							{
+								if(value != null && (CF.isArray(value) || CF.isPlainObject(value)))
+									value = JSON.stringify(value);
+								
 								return CF.escapeHtml(value);
+							}
 						}
 						//其他绘制，比如排序
 						else
