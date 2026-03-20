@@ -70,6 +70,33 @@ public class NameAwareUtilTest
 		}
 	}
 
+	@Test
+	public void findIndexesTest()
+	{
+		{
+			List<TestNameObject> list = new ArrayList<>();
+			list.add(new TestNameObject("aaa"));
+			list.add(new TestNameObject("bbb"));
+			list.add(new TestNameObject("bbb"));
+			list.add(null);
+			list.add(new TestNameObject("ccc"));
+			list.add(new TestNameObject(null));
+			list.add(new TestNameObject("CCC"));
+
+			{
+				List<Integer> actual = NameAwareUtil.findIndexes(list, "ccc", false);
+				assertEquals(1, actual.size());
+				assertEquals(4, actual.get(0).intValue());
+			}
+			{
+				List<Integer> actual = NameAwareUtil.findIndexes(list, "ccc", true);
+				assertEquals(2, actual.size());
+				assertEquals(4, actual.get(0).intValue());
+				assertEquals(6, actual.get(1).intValue());
+			}
+		}
+	}
+
 	protected static class TestNameObject implements NameAware
 	{
 		private String name = null;

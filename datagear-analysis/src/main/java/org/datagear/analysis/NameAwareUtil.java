@@ -18,6 +18,7 @@
 package org.datagear.analysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.datagear.util.StringUtil;
@@ -91,6 +92,42 @@ public class NameAwareUtil
 		for (String name : names)
 			re.add(find(list, name));
 		
+		return re;
+	}
+
+	/**
+	 * 查找与指定名称相同{@linkplain NameAware}的索引列表。
+	 * 
+	 * @param <T>
+	 * @param list
+	 *            允许为{@code null}
+	 * @param name
+	 * @param ignoreCase
+	 *            是否忽略大小写
+	 * @return 空列表表示未找到
+	 */
+	public static <T extends NameAware> List<Integer> findIndexes(List<T> list, String name, boolean ignoreCase)
+	{
+		if (list == null)
+			return Collections.emptyList();
+
+		List<Integer> re = new ArrayList<>(3);
+
+		for (int i = 0, len = list.size(); i < len; i++)
+		{
+			T li = list.get(i);
+
+			if (li == null)
+				continue;
+
+			String myName = li.getName();
+
+			if (StringUtil.isEquals(name, myName))
+				re.add(i);
+			else if (ignoreCase && name != null && myName != null && name.equalsIgnoreCase(myName))
+				re.add(i);
+		}
+
 		return re;
 	}
 }

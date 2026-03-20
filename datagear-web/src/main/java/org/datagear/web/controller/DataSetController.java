@@ -25,10 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +36,7 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.NameAwareUtil;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractResolvableResourceDataSet;
 import org.datagear.analysis.support.ProfileDataSet;
@@ -1436,65 +1435,49 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		if (isEmpty(entity.getId()) || isBlank(entity.getName()))
 			throw new IllegalInputException();
 
-		List<DataSetParam> params = entity.getParams();
-		if (params != null)
-		{
-			Set<String> names = new HashSet<>();
-
-			for (DataSetParam param : params)
-			{
-				String name = param.getName();
-
-				if(isEmpty(name))
-				{
-					throw new OperationMessageException(optMsgFail(request, "paramNameRequired"));
-				}
-				else
-				{
-					// 参数名限定为：不允许忽略大小写的重名。
-					// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
-					String upperCaseName = name.toUpperCase();
-
-					if (names.contains(upperCaseName))
-					{
-						throw new OperationMessageException(optMsgFail(request, "paramNameMustBeUniqueIgnoreCase"));
-					}
-					else
-						names.add(upperCaseName);
-				}
-			}
-		}
-
-		List<DataSetField> fields = entity.getFields();
-		if (fields != null)
-		{
-			Set<String> names = new HashSet<>();
-
-			for (DataSetField field : fields)
-			{
-				String name = field.getName();
-
-				if(isEmpty(name))
-				{
-					throw new OperationMessageException(optMsgFail(request, "fieldNameRequired"));
-				}
-				else
-				{
-					// 字段名限定为：不允许忽略大小写的重名。
-					// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
-					String upperCaseName = name.toUpperCase();
-
-					if (names.contains(upperCaseName))
-					{
-						throw new OperationMessageException(optMsgFail(request, "fieldNameMustBeUniqueIgnoreCase"));
-					}
-					else
-						names.add(upperCaseName);
-				}
-			}
-		}
-
+		checkSaveDataSetParams(request, entity.getParams());
+		checkSaveDataSetFields(request, entity.getFields());
 		checkSaveRefAnalysisProject(request, user, entity, persist);
+	}
+
+	protected void checkSaveDataSetParams(HttpServletRequest request, List<DataSetParam> params)
+	{
+		if (params == null)
+			return;
+
+		// 参数名限定为：不允许忽略大小写的重名。
+		// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
+		boolean ignoreCase = true;
+
+		for (DataSetParam param : params)
+		{
+			if (isEmpty(param.getName()))
+				throw new OperationMessageException(optMsgFail(request, "paramNameRequired"));
+			
+			if (NameAwareUtil.findIndexes(params, param.getName(), ignoreCase).size() > 1)
+				throw new OperationMessageException(optMsgFail(request, "paramNameMustBeUniqueIgnoreCase"));
+		}
+	}
+
+	protected void checkSaveDataSetFields(HttpServletRequest request, List<DataSetField> fields)
+	{
+		if (fields == null)
+			return;
+
+		// 字段名限定为：不允许忽略大小写的重名。
+		// 因为某些数据库是大小写不敏感的，如果不做此限定，存储时会因为违反存唯一约束而报错
+		boolean ignoreCase = true;
+
+		for (DataSetField field : fields)
+		{
+			if (isEmpty(field.getName()))
+				throw new OperationMessageException(optMsgFail(request, "fieldNameRequired"));
+
+			if (NameAwareUtil.findIndexes(fields, field.getName(), ignoreCase).size() > 1)
+				throw new OperationMessageException(optMsgFail(request, "fieldNameMustBeUniqueIgnoreCase"));
+
+			checkSaveDataSetFields(request, field.getFields());
+		}
 	}
 
 	protected void trimSqlDataSetEntity(SqlDataSetEntity entity)

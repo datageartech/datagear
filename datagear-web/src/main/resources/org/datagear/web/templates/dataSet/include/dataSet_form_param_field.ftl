@@ -229,20 +229,19 @@ dataSet_form_param_field_form.ftl
 	
 	po.vueRef("${pid}dataSourceFormatPanelEle", null);
 	
-	po.hasDuplicateNameNoCase = function(array, name, ignoreIdx)
+	po.hasSameNameIgnoreCase = function(array, name, ignoreIdx)
 	{
-		name = (name || "").toUpperCase();
+		name = (name || "").toLowerCase();
 		
 		for(var i=0; i<array.length; i++)
 		{
-			if(i != ignoreIdx)
-			{
-				var myName = (array[i].name || "").toUpperCase();
-				if(name == myName)
-				{
-					return true;
-				}
-			}
+			if(i === ignoreIdx)
+				continue;
+			
+			var myName = (array[i].name || "").toLowerCase();
+			
+			if(name == myName)
+				return true;
 		}
 		
 		return false;
@@ -369,7 +368,7 @@ dataSet_form_param_field_form.ftl
 			{
 				var fm = po.vueFormModel();
 				
-				if(po.hasDuplicateNameNoCase(fm.params, dsp.name))
+				if(po.hasSameNameIgnoreCase(fm.params, dsp.name))
 				{
 					$.tipWarn("<@spring.message code='paramNameMustBeUniqueIgnoreCase' />");
 					return false;
@@ -391,14 +390,13 @@ dataSet_form_param_field_form.ftl
 			
 			po.showDataSetParamForm("<@spring.message code='edit' />", dsp, function(dsp)
 			{
-				if(po.hasDuplicateNameNoCase(fm.params, dsp.name, dspIdx))
+				if(po.hasSameNameIgnoreCase(fm.params, dsp.name, dspIdx))
 				{
 					$.tipWarn("<@spring.message code='paramNameMustBeUniqueIgnoreCase' />");
 					return false;
 				}
 				
 				fm.params[dspIdx] = dsp;
-				pm.selectedParams = [];
 			});
 		},
 		onAddField: function(e)
@@ -431,7 +429,7 @@ dataSet_form_param_field_form.ftl
 			
 			po.showDataSetFieldForm("<@spring.message code='add' />", {}, function(field)
 			{
-				if(po.hasDuplicateNameNoCase(addFields, field.name))
+				if(po.hasSameNameIgnoreCase(addFields, field.name))
 				{
 					$.tipWarn("<@spring.message code='fieldNameMustBeUniqueIgnoreCase' />");
 					return false;
@@ -466,7 +464,7 @@ dataSet_form_param_field_form.ftl
 			
 			po.showDataSetFieldForm("<@spring.message code='edit' />", fieldNode.data, function(field)
 			{
-				if(po.hasDuplicateNameNoCase(editFields, field.name, editFieldIdx))
+				if(po.hasSameNameIgnoreCase(editFields, field.name, editFieldIdx))
 				{
 					$.tipWarn("<@spring.message code='fieldNameMustBeUniqueIgnoreCase' />");
 					return false;
@@ -492,13 +490,12 @@ dataSet_form_param_field_form.ftl
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var sps = $.wrapAsArray(po.vueRaw(pm.selectedParams));
+			var ps = $.wrapAsArray(po.vueRaw(pm.selectedParams));
 			
-			$.each(sps, function(idx, sp)
-			{
-				$.removeById(fm.params, sp.name, "name");
-				pm.selectedParams = [];
-			});
+			for(var i=0; i<ps.length; i++)
+				$.removeById(fm.params, ps[i].name, "name");
+			
+			pm.selectedParams = [];
 		},
 		onMoveField: function(e, dir)
 		{
