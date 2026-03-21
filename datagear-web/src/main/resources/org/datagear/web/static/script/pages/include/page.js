@@ -1042,8 +1042,7 @@ $.inflatePageForm = function(po)
 		if(options.ignoreIfViewAction && (po.isViewAction || url == "#"))
 			return;
 		
-		var fm = po.vueFormModel();
-		options = $.extend(true, options, { data: po.vueRaw(fm) });
+		options = $.extend(true, options, { data: po.prepareSubmitData() });
 		
 		var successHandlers = (options.success ? [].concat(options.success) : []);
 		successHandlers.push(function(response)
@@ -1066,6 +1065,14 @@ $.inflatePageForm = function(po)
 		}
 		
 		return false;
+	};
+	
+	po.prepareSubmitData = function()
+	{
+		var fm = po.vueFormModel();
+		//默认深度复制，确保后续修改不会影响表单效果
+		var data = $.extend(true, {}, po.vueRaw(fm));
+		return data;
 	};
 	
 	//返回false会阻止表单提交
