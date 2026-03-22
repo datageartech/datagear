@@ -3784,6 +3784,9 @@ $.inflateChartAttrValuesForm = function(po)
 //填充chart_form.ftl
 $.inflateChartForm = function(po)
 {
+	//数据标记附加属性中的字段匹配器属性名
+	po.DATASIGN_ADDITION_FIELD_MATCHERS = "fieldMatchers";
+	
 	po.inSaveAndShowAction = function(val)
 	{
 		if(val === undefined)
@@ -4238,7 +4241,7 @@ $.inflateChartForm = function(po)
 	
 	po.evalCandidateDataSignsForField = function(chartPlugin, dataSetBind, dataSetFieldNode)
 	{
-		var re = [];
+		var dataSigns = [];
 		
 		var parentBindDataSigns = null;
 		
@@ -4258,7 +4261,7 @@ $.inflateChartForm = function(po)
 				for(var i=0; i<pluginDataSigns.length; i++)
 				{
 					if(po.isDataSignTargetField(pluginDataSigns[i]))
-						re.push(pluginDataSigns[i]);
+						dataSigns.push(pluginDataSigns[i]);
 				}
 			}
 		}
@@ -4269,11 +4272,73 @@ $.inflateChartForm = function(po)
 			{
 				var children = parentBindDataSigns[i].children;
 				if(children != null)
-					re = re.concat(children);
+					dataSigns = dataSigns.concat(children);
 			}
 		}
 		
+		var re = [];
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dataSign = dataSigns[i];
+			
+			if(po.isDataSignMatchesField(dataSign, dataSetFieldNode.data))
+				re.push(dataSign);
+		}
+		
 		return re;
+	};
+	
+	po.isDataSignMatchesField = function(dataSign, dataSetField)
+	{
+		var matchers = (dataSign.additions ? dataSign.additions[po.DATASIGN_ADDITION_FIELD_MATCHERS] : null);
+		
+		if($.isEmpty(matchers))
+			return true;
+		
+		matchers = ($.isArray(matchers) ? matchers : [ matchers ]);
+		
+		for(var i=0; i<matchers.length; i++)
+		{
+			//只要任一匹配即可
+			if(po.isDataSignMatcherMatchesField(dataSetField, matchers[i]))
+				return true;
+		}
+		
+		return false;
+	};
+	
+	//字段是否匹配给定matcher。
+	//matcher结构：{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false }
+	po.isDataSignMatcherMatchesField = function(dataSetField, matcher)
+	{
+		if(matcher == null)
+			return true;
+		
+		var fieldType = dataSetField.type;
+		var fieldArray = dataSetField.array;
+		
+		if(matcher.inTypes != null)
+		{
+			var inTypes = ($.isArray(matcher.inTypes) ? matcher.inTypes : [ matcher.inTypes ]);
+			if($.inArray(fieldType, inTypes) < 0)
+				return false;
+		}
+		
+		if(matcher.notInTypes != null)
+		{
+			var notInTypes = ($.isArray(matcher.notInTypes) ? matcher.notInTypes : [ matcher.notInTypes ]);
+			if($.inArray(fieldType, notInTypes) >= 0)
+				return false;
+		}
+		
+		if(matcher.array != null)
+		{
+			if(fieldArray != matcher.array)
+				return false;
+		}
+		
+		return true;
 	};
 	
 	po.isDataSignTargetField = function(dataSign)
