@@ -153,7 +153,7 @@
 												<template #body="{node}">
 													<div class="flex gap-1">
 														<div>{{node.data.name}}</div>
-														<div class="flex opacity-60" style="gap:1px;">
+														<div class="flex opacity-70" style="gap:1px;">
 															<p-badge :value="formatDataSetFieldType(node.data.type)" severity="secondary" class="p-badge-secondary text-xs font-normal"></p-badge>
 															<p-badge value="<@spring.message code='array' />" severity="secondary" class="p-badge-warning text-xs font-normal"
 																v-if="node.data.array">
