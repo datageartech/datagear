@@ -179,7 +179,7 @@ dataSet_form_param_field_form.ftl
 					v-model:expanded-keys="pm.expandedFieldKeys"
 					:resizable-columns="true" column-resize-mode="expand"
 					selection-mode="multiple" :meta-key-selection="true" data-key="key" class="fields-table table-sm">
-					<p-column field="name" header="<@spring.message code='name' />" expander>
+					<p-column field="name" header="<@spring.message code='name' />" expander style="flex-grow:2;">
 					</p-column>
 					<p-column field="type" header="<@spring.message code='type' />">
 						<template #body="{node}">
