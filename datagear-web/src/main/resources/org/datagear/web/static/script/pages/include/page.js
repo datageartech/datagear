@@ -4609,9 +4609,9 @@ $.inflateChartForm = function(po)
 				return po.i18n.emptyDesc;
 		},
 		
-		formatDsbHeaderName: function(dataSetBind)
+		formatDsbHeaderName: function(dataSetBind, index, count)
 		{
-			return po.i18n.dataSetOfColon + dataSetBind.dataSet.name;
+			return (index+1) + "/" + count + " " + po.i18n.dataSetOfColon + dataSetBind.dataSet.name;
 		},
 		
 		formatDataSetFieldType: function(type)
