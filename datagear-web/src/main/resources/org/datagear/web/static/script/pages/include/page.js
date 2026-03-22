@@ -3781,5 +3781,1257 @@ $.inflateChartAttrValuesForm = function(po)
 	});
 };
 
+//填充chart_form.ftl
+$.inflateChartForm = function(po)
+{
+	po.inSaveAndShowAction = function(val)
+	{
+		if(val === undefined)
+			return (po._inSaveAndShowAction == true);
+		
+		po._inSaveAndShowAction = val;
+	};
+	
+	po.prepareSubmitData = function()
+	{
+		var fm = po.vueFormModel();
+		var data = $.extend({}, po.vueRaw(fm));
+		
+		for(var p in data)
+		{
+			var v = data[p];
+			
+			if(p == "dataSetBindVOs")
+			{
+				var dsbs = $.extend([], v);
+				v = dsbs;
+				
+				for(var i=0; i<dsbs.length; i++)
+				{
+					dsbs[i] = $.extend({}, dsbs[i]);
+					
+					po.restoreDataSetBind(dsbs[i], data.pluginVo);
+					dsbs[i].summaryDataSetEntity = dsbs[i].dataSet;
+					dsbs[i].dataSet = undefined;
+				}
+			}
+			else
+				v = $.deepClonePlain(v);
+			
+			data[p] = v;
+		}
+
+		var pm = po.vuePageModel();
+		if(pm.enableResultDataFormat)
+			data.resultDataFormat = po.vueRaw(pm.resultDataFormat);
+		else
+			data.resultDataFormat = undefined;
+		
+		data.attrValues = po.avo.clearAttrValuesIfNoneAttrForm(data.attrValues, data.pluginVo.attributeForm);
+		data.pluginVo = (data.pluginVo ? { id: data.pluginVo.id } : null);
+		
+		return data;
+	};
+	
+	po.beforeSubmitForm = function(action)
+	{
+		action.options.saveAndShowAction = po.inSaveAndShowAction();
+	};
+	
+	po.isEmptyPluginAttributeForm = function(plugin)
+	{
+		return (!plugin || !plugin.attributeForm || !plugin.attributeForm.properties || plugin.attributeForm.properties.length==0);
+	};
+	
+	po.validateDataSetBindDataSign = function(chart)
+	{
+		var chartPlugin = chart.pluginVo;
+
+		if(chartPlugin == null || $.isEmpty(chartPlugin.dataSigns))
+			return true;
+		
+		var dataSetBinds = (chart.dataSetBindVOs || []);
+		
+		var requiredDataSetSigns = po.evalCandidateDataSignsForDataSet(chartPlugin);
+		requiredDataSetSigns = po.getRequiredDataSigns(requiredDataSetSigns);
+		
+		for(var i=0; i<requiredDataSetSigns.length; i++)
+		{
+			var requiredSign = requiredDataSetSigns[i];
+			var contains = false;
+			
+			for(var j=0; j<dataSetBinds.length; j++)
+			{
+				var dsb = dataSetBinds[j];
+				
+				if(dsb.attachment == true)
+					continue;
+				
+				if($.inArrayById(dsb.bindDataSigns, requiredSign.fullname, "fullname") > -1)
+				{
+					contains = true;
+					break;
+				}
+			}
+			
+			if(!contains)
+			{
+				var invalidInfo = { type: "dataset", dataSign: requiredSign };
+				return invalidInfo;
+			}
+		}
+		
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var dsb = dataSetBinds[i];
+			
+			if(dsb.attachment == true)
+				continue;
+			
+			var invalidInfo = po.validateDataSetFieldDataSign(chartPlugin, dsb, dsb.fieldNodes);
+			
+			if(invalidInfo !== true)
+				return invalidInfo;
+		}
+		
+		return true;
+	};
+	
+	po.validateDataSetFieldDataSign = function(chartPlugin, dataSetBind, dataSetFieldNodes)
+	{
+		if(chartPlugin == null || $.isEmpty(chartPlugin.dataSigns)
+				|| dataSetBind == null || $.isEmpty(dataSetFieldNodes))
+		{
+			return true;
+		}
+
+		var requiredDataSigns = po.evalCandidateDataSignsForField(chartPlugin, dataSetBind, dataSetFieldNodes[0]);
+		requiredDataSigns = po.getRequiredDataSigns(requiredDataSigns);
+		
+		for(var i=0; i<requiredDataSigns.length; i++)
+		{
+			var requiredDataSign = requiredDataSigns[i];
+			var bind = false;
+			
+			for(var j=0; j<dataSetFieldNodes.length; j++)
+			{
+				var dataSetFieldNode = dataSetFieldNodes[j];
+				var bindDataSigns = (dataSetFieldNode.bindDataSigns || []);
+				
+				if($.inArrayById(bindDataSigns, requiredDataSign.fullname, "fullname") >= 0)
+				{
+					bind = true;
+					break;
+				}
+			}
+			
+			if(!bind)
+			{
+				var invalidInfo = {  type: "field", dataSet: dataSetBind.dataSet, dataSign: requiredDataSign };
+				return invalidInfo;
+			}
+		}
+		
+		for(var i=0; i<dataSetFieldNodes.length; i++)
+		{
+			var dataSetFieldNode = dataSetFieldNodes[i];
+
+			if(dataSetFieldNode.children)
+			{
+				var invalidInfo = po.validateDataSetFieldDataSign(chartPlugin, dataSetBind, dataSetFieldNode.children);
+
+				if(invalidInfo !== true)
+					return invalidInfo;
+			}
+		}
+		
+		return true;
+	};
+	
+	po.getRequiredDataSigns = function(dataSigns)
+	{
+		var re = [];
+		
+		if(!dataSigns)
+			return re;
+		
+		$.each(dataSigns, function(idx, dataSign)
+		{
+			if(dataSign.required == true)
+				re.push(dataSign);
+		});
+		
+		return re;
+	};
+	
+	po.hasDataSetSigned = function(dataSetBinds, dataSign)
+	{
+		dataSetBinds = (dataSetBinds == null ? [] : dataSetBinds);
+		
+		for(var i=0; i<dataSetBinds.length; i++)
+		{
+			var bindDataSigns = dataSetBinds[i].bindDataSigns;
+			
+			if($.inArrayById(bindDataSigns, dataSign.fullname, "fullname") > -1)
+				return true;
+		}
+		
+		return false;
+	};
+	
+	po.hasDataSetFieldSigned = function(dataSetBind, dataSign)
+	{
+		var fields = (dataSetBind.dataSet.fields || []);
+		
+		for(var i=0; i<fields.length; i++)
+		{
+			var field = fields[i];
+			var bindDataSigns = (field.extDsbInfo ? (field.extDsbInfo.bindDataSigns || []) : []);
+			
+			if($.inArrayById(bindDataSigns, dataSign.fullname, "fullname") > -1)
+				return true;
+		}
+		
+		return false;
+	};
+	
+	po.assembleDataSetBinds = function(chart)
+	{
+		var dsbs = (chart.dataSetBindVOs || []);
+		$.each(dsbs, function(idx, dsb)
+		{
+			po.assembleDataSetBind(dsb, chart.pluginVo);
+		});
+	};
+	
+	po.assembleDataSetBind = function(dataSetBind, chartPlugin)
+	{
+		var fields = (dataSetBind.dataSet ? dataSetBind.dataSet.fields : []);
+		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		
+		dataSetBind.fieldNodes = (po.dataSetFieldsToTreeNodes(fields, dataSetBind, chartPlugin) || []);
+		dataSetBind.bindDataSigns = [];
+		
+		if(dataSetBind.dataSetSigns)
+		{
+			$.each(dataSetBind.dataSetSigns, function(idx, signName)
+			{
+				var dataSign = po.findDataSignByFullname(dataSigns, signName, false);
+				if(dataSign != null)
+					dataSetBind.bindDataSigns.push(dataSign);
+			});
+		}
+	};
+	
+	po.dataSetFieldsToTreeNodes = function(fields, dataSetBind, chartPlugin, parentNode)
+	{
+		if(fields == null)
+			return null;
+		
+		var re = [];
+		
+		for(var i=0; i<fields.length; i++)
+		{
+			var field = fields[i];
+			re[i] = po.dataSetFieldToTreeNode(field, dataSetBind, chartPlugin, parentNode);
+		}
+		
+		return re;
+	};
+	
+	po.dataSetFieldToTreeNode = function(field, dataSetBind, chartPlugin, parentNode)
+	{
+		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		
+		var node =
+		{
+			key: field.fullname, data: field, leaf: po.isLeafDataSetField(field), parentNode: parentNode,
+			fullname: field.fullname,
+			bindDataSigns: [], alias: (dataSetBind.fieldAliases ? dataSetBind.fieldAliases[field.fullname] : null),
+			order: (dataSetBind.fieldOrders ? dataSetBind.fieldOrders[field.fullname] : null)
+		};
+		
+		var bindDataSigns = [];
+		
+		var fieldSigns = (dataSetBind.fieldSigns ? (dataSetBind.fieldSigns[field.fullname] || []) : []);
+		$.each(fieldSigns, function(fsIdx, signName)
+		{
+			var dataSign = po.findDataSignByFullname(dataSigns, signName);
+			if(dataSign != null)
+				bindDataSigns.push(dataSign);
+		});
+		
+		node.bindDataSigns = bindDataSigns;
+		
+		if(!node.leaf)
+			node.children = po.dataSetFieldsToTreeNodes(field.fields, dataSetBind, chartPlugin, node);
+		
+		return node;
+	};
+	
+	po.isLeafDataSetField = function(field)
+	{
+		return $.isEmpty(field.fields);
+	};
+
+	po.restoreDataSetBinds = function(chart)
+	{
+		var dsbs = (chart.dataSetBindVOs || []);
+		$.each(dsbs, function(idx, dsb)
+		{
+			po.restoreDataSetBind(dsb, chart.pluginVo);
+		});
+	};
+	
+	po.restoreDataSetBind = function(dataSetBind, chartPlugin)
+	{
+		po.restoreDataSetFields(dataSetBind.fieldNodes, dataSetBind, chartPlugin);
+		
+		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		dataSetBind.dataSetSigns = [];
+		
+		if(dataSetBind.bindDataSigns)
+		{
+			$.each(dataSetBind.bindDataSigns, function(idx, bindDataSign)
+			{
+				var dataSign = po.findDataSignByFullname(dataSigns, bindDataSign.fullname, false);
+				if(dataSign != null)
+					dataSetBind.dataSetSigns.push(bindDataSign.fullname);
+			});
+		}
+		
+		dataSetBind.fieldNodes = undefined;
+		dataSetBind.bindDataSigns = undefined;
+	};
+	
+	po.restoreDataSetFields = function(fieldNodes, dataSetBind, chartPlugin)
+	{
+		if(fieldNodes == null)
+			return;
+		
+		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		dataSetBind.fieldSigns = (dataSetBind.fieldSigns || {});
+		dataSetBind.fieldAliases = (dataSetBind.fieldAliases || {});
+		dataSetBind.fieldOrders = (dataSetBind.fieldOrders || {});
+		
+		$.each(fieldNodes, function(idx, fieldNode)
+		{
+			var bindDataSigns = (fieldNode.bindDataSigns || []);
+			
+			var fieldSigns = [];
+			$.each(bindDataSigns, function(fsIdx, bindDataSign)
+			{
+				if(po.findDataSignByFullname(dataSigns, bindDataSign.fullname) != null)
+					fieldSigns.push(bindDataSign.fullname);
+			});
+			
+			if(fieldSigns.length > 0)
+				dataSetBind.fieldSigns[fieldNode.fullname] = fieldSigns;
+			else
+				dataSetBind.fieldSigns[fieldNode.fullname] = undefined;
+			
+			if(!$.isEmpty(fieldNode.alias))
+				dataSetBind.fieldAliases[fieldNode.fullname] = fieldNode.alias;
+			
+			if(!$.isEmpty(fieldNode.order))
+			{
+				var order = parseInt(fieldNode.order);
+				dataSetBind.fieldOrders[fieldNode.fullname] = (isNaN(order) ? undefined : order);
+			}
+			
+			if(fieldNode.children)
+				po.restoreDataSetFields(fieldNode.children, dataSetBind, chartPlugin);
+		});
+	};
+	
+	po.assemblePlugin = function(plugin)
+	{
+		if(!plugin)
+			return;
+		
+		plugin.dataSigns = po.assemblePluginDataSigns(plugin.dataSigns);
+	};
+	
+	po.assemblePluginDataSigns = function(dataSigns, parent)
+	{
+		dataSigns = (dataSigns ? dataSigns : []);
+		parent = (parent == null ? null : parent);
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dsn = dataSigns[i];
+			dsn.extLabel = (parent && parent.extLabel ?
+					(parent.extLabel + "." + po.formatDataSignLabel(dsn)) : po.formatDataSignLabel(dsn));
+			
+			if(dsn.children)
+				po.assemblePluginDataSigns(dsn.children, dsn);
+		}
+		
+		return dataSigns;
+	};
+	
+	po.pluginHasDataSetSign = function(plugin)
+	{
+		var dataSigns = (plugin ? plugin.dataSigns : null);
+		
+		if(!dataSigns)
+			return false;
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(po.isDataSignTargetDataSet(dataSigns[i]))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	};
+	
+	po.findDataSignByFullname = function(dataSigns, fullname, deepSearch)
+	{
+		deepSearch = (deepSearch == null ? true : deepSearch);
+		
+		if(!dataSigns)
+			return null;
+		
+		//应该先广度搜索、再深度搜索
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(dataSigns[i].fullname == fullname)
+				return dataSigns[i];
+		}
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(dataSigns[i].children)
+			{
+				var d = po.findDataSignByFullname(dataSigns[i].children, fullname);
+				if(d != null)
+					return d;
+			}
+		}
+		
+		return null;
+	};
+
+	po.evalCandidateDataSignsForDataSet = function(chartPlugin)
+	{
+		var re = [];
+		var dataSigns = (chartPlugin ? chartPlugin.dataSigns : null);
+		
+		if(!dataSigns)
+			return re;
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dsi = dataSigns[i];
+			
+			if(po.isDataSignTargetDataSet(dsi))
+			{
+				re.push(dsi);
+			}
+		}
+		
+		return re;
+	};
+	
+	po.evalCandidateDataSignsForField = function(chartPlugin, dataSetBind, dataSetFieldNode)
+	{
+		var re = [];
+		
+		var parentBindDataSigns = null;
+		
+		//子级字段只能使用父字段绑定数据标记的子级数据标记
+		if(dataSetFieldNode.parentNode != null)
+		{
+			parentBindDataSigns = dataSetFieldNode.parentNode.bindDataSigns;
+		}
+		//顶级字段可以使用插件的顶级数据标记、以及所属数据集绑定的数据标记的子级数据标记
+		else
+		{
+			parentBindDataSigns = dataSetBind.bindDataSigns;
+			
+			var pluginDataSigns = (chartPlugin ? chartPlugin.dataSigns : null);
+			if(pluginDataSigns != null)
+			{
+				for(var i=0; i<pluginDataSigns.length; i++)
+				{
+					if(po.isDataSignTargetField(pluginDataSigns[i]))
+						re.push(pluginDataSigns[i]);
+				}
+			}
+		}
+		
+		if(parentBindDataSigns != null)
+		{
+			for(var i=0; i<parentBindDataSigns.length; i++)
+			{
+				var children = parentBindDataSigns[i].children;
+				if(children != null)
+					re = re.concat(children);
+			}
+		}
+		
+		return re;
+	};
+	
+	po.isDataSignTargetField = function(dataSign)
+	{
+		var targets = dataSign.targets;
+		
+		//兼容旧版逻辑
+		if(targets == null || targets.length == 0)
+			return true;
+		
+		return ($.inArray(po.DS_TARGET_FIELD, targets) > -1);
+	};
+	
+	po.isDataSignTargetDataSet = function(dataSign)
+	{
+		var targets = dataSign.targets;
+		
+		//兼容旧版逻辑
+		if(targets == null || targets.length == 0)
+			return false;
+		
+		return ($.inArray(po.DS_TARGET_DATASET, targets) > -1);
+	};
+	
+	po.formatDataSignLabel = function(dataSign)
+	{
+		if(dataSign.nameLabel && dataSign.nameLabel.value)
+			return dataSign.nameLabel.value;
+		else
+			return dataSign.name;
+	};
+	
+	po.removeBindDataSign = function(node, fullname)
+	{
+		if(node == null || fullname == null || node.bindDataSigns == null)
+			return;
+		
+		var bindDataSigns = node.bindDataSigns;
+		var removed = $.removeById(bindDataSigns, fullname, "fullname");
+		
+		//子节点也要同步删除
+		if(removed && removed.children)
+		{
+			var subDataSigns = removed.children;
+			var subNodes = null;
+			
+			//node是数据集绑定
+			if(node.fieldNodes != null)
+				subNodes = node.fieldNodes;
+			//node是数据集字段节点
+			else if(node.children != null)
+				subNodes = node.children;
+			
+			if(subNodes != null)
+			{
+				for(var i =0; i<subNodes.length; i++)
+				{
+					var subNode = subNodes[i];
+					
+					for(var j=0; j<subDataSigns.length; j++)
+					{
+						po.removeBindDataSign(subNode, subDataSigns[j].fullname, "fullname");
+					}
+				}
+			}
+		}
+	};
+	
+	po.inflateParamPanel = function(dataSetBind)
+	{
+		var wrapper = $(".paramvalue-form-wrapper", po.elementOfId(po.concatPid("paramPanel"), document.body));
+		var pm = po.vuePageModel();
+		
+		if(!dataSetBind.query)
+			dataSetBind.query = {};
+		
+		var formOptions =
+		{
+			submitText: po.i18n.confirm,
+			yesText: po.i18n.yes,
+			noText: po.i18n.no,
+			paramValues: po.vueRaw(dataSetBind.query.paramValues),
+			readonly: pm.isReadonlyAction,
+			rendered: function(form)
+			{
+				$(".dg-dspform-input:not([type='radio'],[type='checkbox']), .dg-dspform-inputs-wrapper", this).addClass("p-inputtext p-component w-full");
+				$(".dg-date-widget-inputs select", this).addClass("p-inputtext p-component");
+				$(".dg-dspform-content button", this).addClass("p-button p-button-secondary p-component");
+				$(".dg-dspform-foot button", this).addClass("p-button p-component");
+				$.focusOnFirstInput(this);
+			},
+			submit: function()
+			{
+				var paramValues = chartFactory.chartTool.getDataSetParamFormData(this);
+				dataSetBind.query.paramValues = paramValues;
+				
+				po.vueUnref(po.concatPid("paramPanelEle")).hide();
+			}
+		};
+		
+		wrapper.empty();
+		
+		var params = $.extend(true, [], po.vueRaw(dataSetBind.dataSet.params));
+		chartFactory.chartTool.renderDataSetParamForm(wrapper[0], params, formOptions);
+	};
+	
+	$.validator.addMethod("dataSetSignRequired", function(context, element)
+	{
+		var po = context.po;
+		var chart = context.chart;
+		var re = po.validateDataSetBindDataSign(chart);
+		
+		if(re == true)
+		{
+			$(element).removeData("invalidMsg");
+			return true;
+		}
+		else
+		{
+			var msg = "Unknown";
+			
+			if(re.type == "dataset")
+			{
+				msg = $.validator.format(po.i18n["chart.dataSetSign.required"], re.dataSign.extLabel);
+			}
+			else if(re.type == "field")
+			{
+				msg = $.validator.format(po.i18n["chart.fieldSign.required"], re.dataSet.name, re.dataSign.extLabel);
+			}
+			
+			$(element).data("invalidMsg", msg);
+			return false;
+		}
+	});
+
+	$.validator.addMethod("validateDataSetRange", function(context, element)
+	{
+		var po = context.po;
+		var chart = context.chart;
+		
+		var re = true;
+		
+		var dsr = (chart.pluginVo ? chart.pluginVo.dataSetRange : null);
+		var dsbs = (chart.dataSetBindVOs || []);
+		var mainCount = 0;
+		var attachmentCount = 0;
+		
+		$.each(dsbs, function(i, dsb)
+		{
+			if(dsb.attachment)
+				attachmentCount++;
+			else
+				mainCount++;
+		});
+		
+		var msg = "";
+		var minMsg = po.i18n.noLimit;
+		var maxMsg = po.i18n.noLimit;
+		
+		if(re && dsr && dsr.main)
+		{
+			if(dsr.main.min != null)
+			{
+				minMsg = dsr.main.min;
+				re = (re ? (mainCount >= dsr.main.min) : false);
+			}
+			
+			if(dsr.main.max != null)
+			{
+				maxMsg = dsr.main.max;
+				re = (re ? (mainCount <= dsr.main.max) : false);
+			}
+			
+			if(!re)
+				msg = $.validator.format(po.i18n["chart.validateDataSetRange.main"], minMsg, maxMsg, mainCount);
+		}
+		
+		if(re && dsr && dsr.attachment)
+		{
+			if(dsr.attachment.min != null)
+			{
+				minMsg = dsr.attachment.min;
+				re = (re ? (attachmentCount >= dsr.attachment.min) : false);
+			}
+			
+			if(dsr.attachment.max != null)
+			{
+				maxMsg = dsr.attachment.max;
+				re = (re ? (attachmentCount <= dsr.attachment.max) : false);
+			}
+			
+			if(!re)
+				msg = $.validator.format(po.i18n["chart.validateDataSetRange.attachment"], minMsg, maxMsg, attachmentCount);
+		}
+		
+		if(re)
+			$(element).removeData("invalidMsg");
+		else
+			$(element).data("invalidMsg", msg);
+		
+		return re;
+	});
+	
+	$.validator.addMethod("validateChartAttrValues", function(context)
+	{
+		var po = context.po;
+		var chart = context.chart;
+		var attributeForm = (chart.pluginVo ? chart.pluginVo.attributeForm : null);
+		
+		if(attributeForm == null)
+			return true;
+		
+		var fm = po.vueFormModel();
+		
+		return po.avo.validateAttrValuesRequired(fm.attrValues, attributeForm);
+	});
+	
+	var formModel = po.formModel;
+	formModel.pluginVo = (formModel.pluginVo == null ? {} : formModel.pluginVo);
+	po.assemblePlugin(formModel.pluginVo);
+	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
+	formModel.dataSetBindVOs = (formModel.dataSetBindVOs == null ? [] : formModel.dataSetBindVOs);
+	formModel.plugin = undefined;
+	formModel.dataSetBinds = undefined;
+	formModel.attrValues = (formModel.attrValues || {});
+	po.assembleDataSetBinds(formModel);
+	
+	po.setupForm(formModel,
+	{
+		success : function(response)
+		{
+			var fm = po.vueFormModel();
+			var chart = response.data;
+			
+			fm.id = chart.id;
+			
+			var options = this;
+			if(options.saveAndShowAction)
+				window.open(po.concatContextPath("/cv/"+encodeURIComponent(chart.id)+"/"), "show-chart-"+chart.id);
+		}
+	},
+	{
+		rules:
+		{
+			updateInterval: {"integer": true},
+			dataSetSignCheckVal: { "dataSetSignRequired": true },
+			validateDataSetRangeVal: { "validateDataSetRange": true },
+			chartAttrValuesCheckVal: { "validateChartAttrValues": true }
+		},
+		customNormalizers:
+		{
+			dataSetSignCheckVal: function()
+			{
+				var context = { po: po, chart: po.vueFormModel() };
+				return context;
+			},
+			validateDataSetRangeVal: function()
+			{
+				var context = { po: po, chart: po.vueFormModel() };
+				return context;
+			},
+			chartAttrValuesCheckVal: function()
+			{
+				var context = { po: po, chart: po.vueFormModel() };
+				return context;
+			}
+		},
+		messages:
+		{
+			dataSetSignCheckVal:
+			{
+				dataSetSignRequired: function(val, element)
+				{
+					return $(element).data("invalidMsg");
+				}
+			},
+			validateDataSetRangeVal:
+			{
+				validateDataSetRange: function(val, element)
+				{
+					return $(element).data("invalidMsg");
+				}
+			},
+			chartAttrValuesCheckVal: po.i18n["chart.attrValues.editRequired"]
+		}
+	});
+	
+	po.vuePageModel(
+	{
+		disableSaveShow: po.disableSaveShow,
+		pluginHasDataSetSign: po.pluginHasDataSetSign(formModel.pluginVo),
+		candidateDataSigns: [],
+		candidateDataSignTarget: "",
+		dataSignDetail: { label: "", detail: "" },
+		dataSignDetailShown: false,
+		dataSignTarget: "field",
+		dataSetBindForSign: null,
+		dataSetFieldNodeForSign: null,
+		updateIntervalType: (formModel.updateInterval > -1 ? "interval" : "none"),
+		updateIntervalTypeOptions: po.updateIntervalTypeOptions,
+		resultDataFormat: po.initResultDataFormat,
+		enableResultDataFormat: po.enableResultDataFormat,
+		dateOrTimeTypeOptions: po.dateOrTimeTypeOptions,
+		optionsFormModel: { options: "" },
+		attrValuesPanelShown: false
+	});
+	
+	po.vueRef(po.concatPid("dataSignsPanelEle"), null);
+	po.vueRef(po.concatPid("dataSignDetailPanelEle"), null);
+	po.vueRef(po.concatPid("paramPanelEle"), null);
+	po.vueRef(po.concatPid("dataFormatPanelEle"), null);
+	po.vueRef(po.concatPid("pluginVoDescEle"), null);
+	po.vueRef(po.concatPid("optionsPanelEle"), null);
+	po.vueRef(po.concatPid("fieldMorePanelEle"), null);
+	
+	po.vueMethod(
+	{
+		formatChartPlugin: function(chartPlugin)
+		{
+			return $.toChartPluginHtml(chartPlugin, po.contextPath,
+						{
+							justifyContent: "start", showVersion:true, showApiVersion:true, showPlatformVersion: true,
+							apiVersionDesc: po.i18n["chartPlugin.apiVersion.desc"],
+							platformVersionDesc: po.i18n["chartPlugin.platformVersion.desc"]
+						});
+		},
+		
+		formatChartPluginDesc: function(chartPlugin)
+		{
+			if(chartPlugin && chartPlugin.descLabel && chartPlugin.descLabel.value)
+				return chartPlugin.descLabel.value;
+			else
+				return po.i18n.emptyDesc;
+		},
+		
+		formatDsbHeaderName: function(dataSetBind)
+		{
+			return po.i18n.dataSetOfColon + dataSetBind.dataSet.name;
+		},
+		
+		formatDataSetFieldType: function(type)
+		{
+			return $.findNameByValue(po.DataSetFieldTypes, type);
+		},
+		
+		isDataSignTargetField: function(dataSign)
+		{
+			return po.isDataSignTargetField(dataSign);
+		},
+		
+		isDataSignTargetDataSet: function(dataSign)
+		{
+			return po.isDataSignTargetDataSet(dataSign);
+		},
+		
+		isEmptyPluginAttributeForm: function(plugin)
+		{
+			return po.isEmptyPluginAttributeForm(plugin);
+		},
+		
+		dsbParamValuesCount: function(dataSetBind)
+		{
+			var re = 0;
+			var pvs = (dataSetBind.query ? dataSetBind.query.paramValues : null);
+			
+			if(pvs != null)
+			{
+				for(var p in pvs)
+					re++;
+			}
+			
+			return re;
+		},
+		
+		onDeleteAnalysisProject: function()
+		{
+			var fm = po.vueFormModel();
+			fm.analysisProject = {};
+		},
+		
+		onSelectAnalysisProject: function()
+		{
+			po.handleOpenSelectAction("/analysisProject/select", function(analysisProject)
+			{
+				var fm = po.vueFormModel();
+				fm.analysisProject = analysisProject;
+			});
+		},
+		
+		onSelectChartPlugin: function()
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			var oldPluginId = (fm.pluginVo ? fm.pluginVo.id : "");
+			
+			po.handleOpenSelectAction("/chartPlugin/select", function(plugin)
+			{
+				po.getJson("/chartPlugin/detailValue/"+encodeURIComponent(plugin.id), function(plugin)
+				{
+					po.assemblePlugin(plugin);
+					
+					fm.pluginVo = plugin;
+					po.restoreDataSetBinds(fm);
+					po.assembleDataSetBinds(fm);
+					pm.pluginHasDataSetSign = po.pluginHasDataSetSign(fm.pluginVo);
+					
+					po.bakPluginAttrValuesMap[oldPluginId] = fm.attrValues;
+					
+					if(po.bakPluginAttrValuesMap[plugin.id] != null)
+						fm.attrValues = po.bakPluginAttrValuesMap[plugin.id];
+					else
+						fm.attrValues = {};
+					
+					if(plugin && po.DashboardApiVersion.LATEST_VERSION != plugin.apiVersion)
+					{
+						var msg = $.validator.format(po.i18n["chart.plugin.apiVersion.deprecated"],
+								plugin.apiVersion, po.DashboardApiVersion.LATEST_VERSION);
+						$.tipWarn(msg);
+					}
+				});
+			});
+		},
+		
+		onAddDataSet: function()
+		{
+			po.handleOpenSelectAction("/dataSet/select?multiple", function(dataSets)
+			{
+				var data = $.propertyValueParam(dataSets, "id");
+				
+				po.getJson("/dataSet/getProfileDataSetByIds", data, function(dataSets)
+				{
+					var fm = po.vueFormModel();
+					
+					$.each(dataSets, function(idx, dataSet)
+					{
+						var dsb =
+						{
+							dataSet: dataSet,
+							dataSetSigns: [],
+							fieldSigns: {},
+							fieldAliases: {},
+							fieldOrders: {},
+							attachment: false
+						};
+						
+						po.assembleDataSetBind(dsb);
+						fm.dataSetBindVOs.push(dsb);
+					});
+				});
+			});
+		},
+		
+		onMoveUpDataSetBind: function(e, dsbIdx)
+		{
+			var fm = po.vueFormModel();
+			if(dsbIdx > 0)
+			{
+				var prev = fm.dataSetBindVOs[dsbIdx - 1];
+				fm.dataSetBindVOs[dsbIdx - 1] = fm.dataSetBindVOs[dsbIdx];
+				fm.dataSetBindVOs[dsbIdx] = prev;
+			}
+		},
+		
+		onMoveDownDataSetBind: function(e, dsbIdx)
+		{
+			var fm = po.vueFormModel();
+			if((dsbIdx + 1) < fm.dataSetBindVOs.length)
+			{
+				var next = fm.dataSetBindVOs[dsbIdx + 1];
+				fm.dataSetBindVOs[dsbIdx + 1] = fm.dataSetBindVOs[dsbIdx];
+				fm.dataSetBindVOs[dsbIdx] = next;
+			}
+		},
+		
+		onDeleteDataSetBind: function(e, dsbIdx)
+		{
+			var fm = po.vueFormModel();
+			fm.dataSetBindVOs.splice(dsbIdx, 1);
+		},
+		
+		onShowDataSignPanel: function(e, dataSetBind, dataSetFieldNode)
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			var chartPlugin = fm.pluginVo;
+			
+			//直接show会导致面板还停留在上一个元素上
+			po.vueUnref(po.concatPid("dataSignsPanelEle")).hide();
+			po.vueNextTick(function()
+			{
+				pm.dataSignTarget = (dataSetFieldNode != null ? "field" : "dataset");
+				pm.dataSetBindForSign = dataSetBind;
+				pm.dataSetFieldNodeForSign = (dataSetFieldNode != null ? dataSetFieldNode : null);
+				
+				if(dataSetFieldNode != null)
+				{
+					pm.candidateDataSigns = po.evalCandidateDataSignsForField(chartPlugin, dataSetBind, dataSetFieldNode);
+					pm.candidateDataSignTarget = "field";
+				}
+				else
+				{
+					pm.candidateDataSigns = po.evalCandidateDataSignsForDataSet(chartPlugin);
+					pm.candidateDataSignTarget = "dataset";
+				}
+				
+				po.vueUnref(po.concatPid("dataSignsPanelEle")).show(e);
+			});
+		},
+		
+		onShowDataSignDetail: function(e, dataSign)
+		{
+			var pm = po.vuePageModel();
+			
+			//直接show会导致面板还停留在上一个元素上
+			po.vueUnref(po.concatPid("dataSignDetailPanelEle")).hide();
+			po.vueNextTick(function()
+			{
+				pm.dataSignDetail.label = dataSign.extLabel;
+				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
+				
+				po.vueUnref(po.concatPid("dataSignDetailPanelEle")).show(e);
+			});
+		},
+		
+		onDataSignDetailPanelShow: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSignDetailShown = true;
+		},
+		
+		onDataSignDetailPanelHide: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSignDetailShown = false;
+		},
+		
+		onUpdateDataSignDetailPanel: function(e, dataSign)
+		{
+			var pm = po.vuePageModel();
+			if(pm.dataSignDetailShown)
+			{
+				pm.dataSignDetail.label = dataSign.extLabel;
+				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
+			}
+		},
+		
+		onAddDataSign: function(e, dataSign)
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			if(pm.dataSignTarget == "dataset")
+			{
+				if(pm.dataSetBindForSign)
+				{
+					if(!dataSign.multiple && po.hasDataSetSigned(fm.dataSetBindVOs, dataSign))
+					{
+						var msg = $.validator.format(po.i18n["chart.dataSetWithSignExist"], dataSign.extLabel);
+						$.tipWarn(msg);
+						return;
+					}
+					
+					var bindDataSigns = pm.dataSetBindForSign.bindDataSigns;
+					
+					if($.inArrayById(bindDataSigns, dataSign.fullname, "fullname") < 0)
+						bindDataSigns.push(dataSign);
+					
+					po.vueUnref(po.concatPid("dataSignsPanelEle")).hide();
+				}
+			}
+			else if(pm.dataSignTarget == "field")
+			{
+				if(pm.dataSetBindForSign && pm.dataSetFieldNodeForSign)
+				{
+					if(!dataSign.multiple && po.hasDataSetFieldSigned(pm.dataSetBindForSign, dataSign))
+					{
+						var msg = $.validator.format(po.i18n["chart.fieldWithSignExist"],
+								pm.dataSetBindForSign.dataSet.name, dataSign.extLabel);
+						$.tipWarn(msg);
+						return;
+					}
+					
+					var bindDataSigns = pm.dataSetFieldNodeForSign.bindDataSigns;
+					
+					if($.inArrayById(bindDataSigns, dataSign.fullname, "fullname") < 0)
+						bindDataSigns.push(dataSign);
+					
+					po.vueUnref(po.concatPid("dataSignsPanelEle")).hide();
+				}
+			}
+		},
+		
+		onRemoveDataSetSign: function(dataSetBind, dataSigName)
+		{
+			po.removeBindDataSign(dataSetBind, dataSigName);
+		},
+		
+		onRemoveDataSetFieldSign: function(dataSetFieldNode, dataSigName)
+		{
+			po.removeBindDataSign(dataSetFieldNode, dataSigName);
+		},
+		
+		onUpdateIntervalTypeChange: function(e)
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			if(e.value == "none")
+			{
+				po._updateIntervalBackup = fm.updateInterval;
+				fm.updateInterval = -1;
+			}
+			else if(e.value == "interval")
+			{
+				if(po._updateIntervalBackup != null && po._updateIntervalBackup > -1)
+					fm.updateInterval = po._updateIntervalBackup;
+				else
+					fm.updateInterval = 1000;
+			}
+		},
+		
+		onShowParamPanel: function(e, dataSetBind)
+		{
+			po._currentDataSetBindForParam = dataSetBind;
+			po.vueUnref(po.concatPid("paramPanelEle")).toggle(e);
+		},
+		
+		onParamPanelShow: function(e)
+		{
+			if(po._currentDataSetBindForParam)
+				po.inflateParamPanel(po._currentDataSetBindForParam);
+		},
+		
+		onParamPanelHide: function(e)
+		{
+			var wrapper = $(".paramvalue-form-wrapper", po.elementOfId(po.concatPid("paramPanel"), document.body));
+			chartFactory.chartTool.destroyDataSetParamForm(wrapper[0]);
+		},
+		
+		onClearParamValues: function(e, dataSetBind)
+		{
+			dataSetBind.query.paramValues = {};
+		},
+		
+		onShowDataFormatPanel: function(e)
+		{
+			po.vueUnref(po.concatPid("dataFormatPanelEle")).toggle(e);
+		},
+		
+		onShowChartPluginDesc: function(e)
+		{
+			po.vueUnref(po.concatPid("pluginVoDescEle")).toggle(e);
+		},
+		
+		onShowAttrValuesPanel: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.attrValuesPanelShown = true;
+		},
+		
+		onAttrValuesPanelShow: function()
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			var pluginAttrForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.attributeForm : {});
+			var attrValues = po.vueRaw(fm.attrValues);
+			po.setupChartAttrValuesForm(pluginAttrForm, attrValues,
+			{
+				submitHandler: function(avs)
+				{
+					fm.attrValues = avs;
+					pm.attrValuesPanelShown = false;
+				},
+				readonly: pm.isReadonlyAction,
+				//此时不允许自由编辑图表属性，因此应是严格数据模式
+				strictSubmitData: true,
+				//此时不存在继承复制场景，不必保留null值
+				retainDataNullProp: false
+			});
+		},
+		
+		onShowOptionsPanel: function(e)
+		{
+			po.vueUnref(po.concatPid("optionsPanelEle")).toggle(e);
+		},
+		
+		onOptionsPanelShow: function()
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			var options = po.vueRaw(fm.options);
+			
+			var form = po.elementOfId(po.concatPid("optionsForm"), document.body);
+			var codeEditorEle = po.elementOfId(po.concatPid("optionsContentCodeEditor"), form);
+			
+			var editorOptions =
+			{
+				value: "",
+				matchBrackets: true,
+				autoCloseBrackets: true,
+				mode: {name: "javascript", json: true}
+			};
+			
+			codeEditorEle.empty();
+			var codeEditor = po.createCodeEditor(codeEditorEle, editorOptions);
+			po.setCodeTextTimeout(codeEditor, (options || ""), true);
+			
+			po.setupSimpleForm(form, pm.optionsFormModel, function()
+			{
+				pm.optionsFormModel.options = po.getCodeText(codeEditor);
+				fm.options = pm.optionsFormModel.options;
+				po.vueUnref(po.concatPid("optionsPanelEle")).hide();
+			});
+		},
+		
+		onShowFieldMorePanel: function(e, dataSetFieldNode)
+		{
+			var pm = po.vuePageModel();
+			
+			//直接show会导致面板还停留在上一个元素上
+			po.vueUnref(po.concatPid("fieldMorePanelEle")).hide();
+			po.vueNextTick(function()
+			{
+				pm.dataSetFieldNodeForSign = dataSetFieldNode;
+				po.vueUnref(po.concatPid("fieldMorePanelEle")).show(e);
+			});
+		},
+		
+		onFieldMorePanelShow: function()
+		{
+			var fm = po.vueFormModel();
+			var pm = po.vuePageModel();
+			
+			var form = po.elementOfId(po.concatPid("fielMoreForm"), document.body);
+			
+			po.setupSimpleForm(form, pm.dataSetFieldNodeForSign, function()
+			{
+				po.vueUnref(po.concatPid("fieldMorePanelEle")).hide();
+			});
+		},
+		
+		onSaveAndShow: function(e)
+		{
+			try
+			{
+				po.inSaveAndShowAction(true);
+				po.form().submit();
+			}
+			finally
+			{
+				po.inSaveAndShowAction(false);
+			}
+		}
+	});
+	
+	po.setupPalette();
+};
+
 })
 (jQuery);
