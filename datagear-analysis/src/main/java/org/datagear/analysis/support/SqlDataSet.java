@@ -489,7 +489,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 			case Types.NUMERIC:
 			case Types.REAL:
 			{
-				dataType = DataType.DECIMAL;
+				dataType = DataType.NUMBER;
 				break;
 			}
 

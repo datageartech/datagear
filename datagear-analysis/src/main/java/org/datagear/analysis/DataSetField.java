@@ -17,7 +17,6 @@
 
 package org.datagear.analysis;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
@@ -239,9 +238,6 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 		/** 整数 */
 		public static final String INTEGER = "integer";
 
-		/** 小数 */
-		public static final String DECIMAL = "decimal";
-
 		/** 日期 */
 		public static final String DATE = "date";
 
@@ -256,6 +252,14 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 
 		/** 未知类型 */
 		public static final String UNKNOWN = "unknown";
+
+		/**
+		 * 小数。
+		 * 
+		 * @deprecated 仅用于兼容<=5.5.0版本的{@code DECIMAL}类型，在>=6.0.0版本起已废弃并会被{@linkplain #normalize(String)}转换为{@linkplain #NUMBER}类型
+		 */
+		@Deprecated
+		private static final String DECIMAL = "decimal";
 
 		/**
 		 * 规范类型。
@@ -286,14 +290,11 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 			if (BOOLEAN.equalsIgnoreCase(type))
 				return BOOLEAN;
 
-			if (NUMBER.equalsIgnoreCase(type))
+			if (NUMBER.equalsIgnoreCase(type) || DECIMAL.equalsIgnoreCase(type))
 				return NUMBER;
 
 			if (INTEGER.equalsIgnoreCase(type))
 				return INTEGER;
-
-			if (DECIMAL.equalsIgnoreCase(type))
-				return DECIMAL;
 
 			if (DATE.equalsIgnoreCase(type))
 				return DATE;
@@ -432,8 +433,6 @@ public class DataSetField extends AbstractNameTypeAware implements DataSetFields
 			else if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer || obj instanceof Long
 					|| obj instanceof BigInteger)
 				return INTEGER;
-			else if (obj instanceof Float || obj instanceof Double || obj instanceof BigDecimal)
-				return DECIMAL;
 			else if (obj instanceof Number)
 				return NUMBER;
 			else if (obj instanceof java.sql.Time)

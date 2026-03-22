@@ -164,13 +164,13 @@ public class JsonDirectoryFileDataSetTest
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("value", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+				assertEquals(DataSetField.DataType.INTEGER, field.getType());
 			}
 
 			{
 				DataSetField field = fields.get(2);
 				assertEquals("尺寸", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+				assertEquals(DataSetField.DataType.INTEGER, field.getType());
 			}
 
 			{

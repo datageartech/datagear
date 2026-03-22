@@ -334,8 +334,8 @@ public class DataSetFieldValueConverterTest
 
 		{
 			String value = "3.2";
-			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
-			assertEquals(3.2d, ((Double) actual).doubleValue(), 0.1d);
+			Object actual = converter.convertStringValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
+			assertEquals(3.2d, ((Number) actual).doubleValue(), 0.1d);
 		}
 
 		{
@@ -433,12 +433,12 @@ public class DataSetFieldValueConverterTest
 
 		{
 			boolean value = true;
-			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(1, actual);
 		}
 		{
 			boolean value = false;
-			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
+			Object actual = converter.convertBooleanValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(0, actual);
 		}
 	}
@@ -485,8 +485,8 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Number value = 3.2d;
-			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
-			assertEquals(3.2d, ((Double) actual).doubleValue(), 0.1);
+			Object actual = converter.convertNumberValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
+			assertEquals(3.2d, ((Number) actual).doubleValue(), 0.1);
 		}
 
 		{
@@ -539,7 +539,7 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Date value = new Date();
-			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
+			Object actual = converter.convertDateValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
@@ -599,7 +599,7 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Time value = new Time(System.currentTimeMillis());
-			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
+			Object actual = converter.convertTimeValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 
@@ -653,7 +653,7 @@ public class DataSetFieldValueConverterTest
 
 		{
 			Timestamp value = new Timestamp(System.currentTimeMillis());
-			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.DECIMAL));
+			Object actual = converter.convertTimestampValue(value, mockFieldForType(DataSetField.DataType.NUMBER));
 			assertEquals(value.getTime(), ((Long) actual).longValue());
 		}
 

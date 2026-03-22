@@ -259,11 +259,6 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 				Object value = entry.getValue();
 				resolveFieldDataType(field, value);
 
-				// JSON数值只有NUMBER类型
-				if (DataSetField.DataType.INTEGER.equals(field.getType())
-						|| DataSetField.DataType.DECIMAL.equals(field.getType()))
-					field.setType(DataSetField.DataType.NUMBER);
-
 				if (DataSetField.DataType.isObjectType(field))
 					field.setFields(resolveFields(value, depth + 1));
 

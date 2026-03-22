@@ -7103,7 +7103,6 @@ SPT.DataSetFieldDataType =
 	BOOLEAN: "boolean",
 	NUMBER: "number",
 	INTEGER: "integer",
-	DECIMAL: "decimal",
 	DATE: "date",
 	TIME: "time",
 	TIMESTAMP: "timestamp",
@@ -7178,8 +7177,7 @@ SPT.isDataTypeNumber = function(dataSetField)
 {
 	var dataType = (dataSetField ? (dataSetField.type || dataSetField) : "");
 	return (dataType == SPT.DataSetFieldDataType.NUMBER
-			|| dataType == SPT.DataSetFieldDataType.INTEGER
-			|| dataType == SPT.DataSetFieldDataType.DECIMAL);
+			|| dataType == SPT.DataSetFieldDataType.INTEGER);
 };
 
 /**

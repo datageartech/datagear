@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetField;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.junit.Test;
@@ -145,13 +145,13 @@ public class JsonValueDataSetTest
 			{
 				DataSetField property = fields.get(1);
 				assertEquals("value", property.getName());
-				assertEquals(DataSetField.DataType.NUMBER, property.getType());
+				assertEquals(DataSetField.DataType.INTEGER, property.getType());
 			}
 
 			{
 				DataSetField field = fields.get(2);
 				assertEquals("size", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+				assertEquals(DataSetField.DataType.INTEGER, field.getType());
 			}
 		}
 

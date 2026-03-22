@@ -281,7 +281,7 @@ public class HttpDataSetTest
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("value", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+				assertEquals(DataSetField.DataType.INTEGER, field.getType());
 			}
 		}
 
@@ -502,7 +502,7 @@ public class HttpDataSetTest
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("value", field.getName());
-				assertEquals(DataSetField.DataType.NUMBER, field.getType());
+				assertEquals(DataSetField.DataType.INTEGER, field.getType());
 			}
 		}
 

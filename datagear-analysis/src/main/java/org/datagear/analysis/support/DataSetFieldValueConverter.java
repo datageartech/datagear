@@ -54,11 +54,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 	private boolean ignoreBigIntegerToInteger = true;
 
 	/**
-	 * 是否忽略{@linkplain BigDecimal}至{@linkplain DataType#DECIMAL}的转换。
-	 */
-	private boolean ignoreBigDecimalToDecimal = true;
-
-	/**
 	 * 对于映射表，是否执行严格模式：true 不保留无对应字段的值；false 保留无对应字段的值
 	 */
 	private boolean strictForMap = true;
@@ -103,16 +98,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 	public void setIgnoreBigIntegerToInteger(boolean ignoreBigIntegerToInteger)
 	{
 		this.ignoreBigIntegerToInteger = ignoreBigIntegerToInteger;
-	}
-
-	public boolean isIgnoreBigDecimalToDecimal()
-	{
-		return ignoreBigDecimalToDecimal;
-	}
-
-	public void setIgnoreBigDecimalToDecimal(boolean ignoreBigDecimalToDecimal)
-	{
-		this.ignoreBigDecimalToDecimal = ignoreBigDecimalToDecimal;
 	}
 
 	public boolean isStrictForMap()
@@ -242,8 +227,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 			Long number = this._numberFormat.parse(value).longValue();
 			return narrowIfIntegerRange(number);
 		}
-		else if (DataType.DECIMAL.equals(type))
-			return this._numberFormat.parse(value).doubleValue();
 		else if (DataType.DATE.equals(type))
 		{
 			java.util.Date date = convertToDateWithInteger(value, this._dateFormat);
@@ -281,7 +264,7 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 
 		if (DataType.STRING.equals(type))
 			return value.toString();
-		else if (DataType.NUMBER.equals(type) || DataType.INTEGER.equals(type) || DataType.DECIMAL.equals(type))
+		else if (DataType.NUMBER.equals(type) || DataType.INTEGER.equals(type))
 			return (Boolean.TRUE.equals(value) ? 1 : 0);
 		else
 			return convertExt(value, target);
@@ -311,13 +294,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 			else
 				return value;
 		}
-		else if (DataType.DECIMAL.equals(type))
-		{
-			if (this.ignoreBigDecimalToDecimal && (value instanceof BigDecimal))
-				return value;
-			else
-				return value.doubleValue();
-		}
 		else if (DataType.DATE.equals(type))
 			return new Date(value.longValue());
 		else if (DataType.TIME.equals(type))
@@ -340,8 +316,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.NUMBER.equals(type))
 			return value.getTime();
 		else if (DataType.INTEGER.equals(type))
-			return value.getTime();
-		else if (DataType.DECIMAL.equals(type))
 			return value.getTime();
 		else if (DataType.DATE.equals(type))
 			return new Date(value.getTime());
@@ -369,8 +343,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 			return value.getTime();
 		else if (DataType.INTEGER.equals(type))
 			return value.getTime();
-		else if (DataType.DECIMAL.equals(type))
-			return value.getTime();
 		else if (DataType.DATE.equals(type))
 			return new Date(value.getTime());
 		else if (DataType.TIMESTAMP.equals(type))
@@ -394,8 +366,6 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		else if (DataType.NUMBER.equals(type))
 			return value.getTime();
 		else if (DataType.INTEGER.equals(type))
-			return value.getTime();
-		else if (DataType.DECIMAL.equals(type))
 			return value.getTime();
 		else if (DataType.DATE.equals(type))
 			return new Date(value.getTime());

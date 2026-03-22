@@ -151,7 +151,7 @@ public class DataSetResultWrapperTest
 				{
 					DataSetField p = fields.get(1);
 					assertEquals("value", p.getName());
-					assertEquals(DataSetField.DataType.NUMBER, p.getType());
+					assertEquals(DataSetField.DataType.INTEGER, p.getType());
 				}
 			}
 		}

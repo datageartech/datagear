@@ -355,7 +355,7 @@ public class AbstractDataSetTest
 			p2.setEvaluated(true);
 			p2.setExpression("v2 * 3 + v1");
 
-			DataSetField avg = new DataSetField("avg", DataSetField.DataType.DECIMAL);
+			DataSetField avg = new DataSetField("avg", DataSetField.DataType.NUMBER);
 			avg.setEvaluated(true);
 			avg.setExpression("(v0 + v1)/2");
 

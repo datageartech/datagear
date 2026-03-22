@@ -504,9 +504,8 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 		// 易变模型要保留全部数据
 		converter.setStrictForMap(!isMutableModel());
-		// 这里应设为true，可避免精度丢失，同时可保留BigDecimal的原始小数位数
+		// 这里应设为true，可避免精度丢失
 		converter.setIgnoreBigIntegerToInteger(true);
-		converter.setIgnoreBigDecimalToDecimal(true);
 
 		return converter;
 	}

@@ -168,13 +168,13 @@ public class ExcelDirectoryFileDataSetTest
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("value", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
 				DataSetField field = fields.get(2);
 				assertEquals("size", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
@@ -243,13 +243,13 @@ public class ExcelDirectoryFileDataSetTest
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("value", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
 				DataSetField field = fields.get(2);
 				assertEquals("size", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
@@ -320,7 +320,7 @@ public class ExcelDirectoryFileDataSetTest
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("size", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
@@ -380,19 +380,19 @@ public class ExcelDirectoryFileDataSetTest
 			{
 				DataSetField field = fields.get(0);
 				assertEquals("a", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
 				DataSetField field = fields.get(1);
 				assertEquals("b", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 
 			{
 				DataSetField field = fields.get(2);
 				assertEquals("c", field.getName());
-				assertEquals(DataSetField.DataType.DECIMAL, field.getType());
+				assertEquals(DataSetField.DataType.NUMBER, field.getType());
 			}
 		}
 

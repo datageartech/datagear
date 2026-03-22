@@ -35,7 +35,7 @@ import org.datagear.util.i18n.Localizable;
  * 使用此类标记{@linkplain DataSet}、{@linkplain DataSetField}，{@linkplain ChartPlugin}则依据它们构建图表数据，进行图表绘制。
  * </p>
  * <p>
- * 数据标记分为两类：数据集标记、字段标记，通过{@linkplain #getTarget()}区分。
+ * 数据标记分为两类：数据集标记、字段标记，通过{@linkplain #getTargets()}区分。
  * </p>
  * 
  * @author datagear@163.com
