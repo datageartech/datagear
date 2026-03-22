@@ -373,7 +373,7 @@ $.inflatePageObj = function(po)
 	//删除操作确认
 	po.confirmDelete = function(acceptHandler, rejectHandler)
 	{
-		var msg = this.i18n.confirmDeleteAsk;
+		var msg = this.i18n.confirmDelSelectedAsk;
 		this.confirm({ message: msg, accept: acceptHandler, reject: rejectHandler });
 	};
 	
@@ -4609,11 +4609,6 @@ $.inflateChartForm = function(po)
 				return po.i18n.emptyDesc;
 		},
 		
-		formatDsbHeaderName: function(dataSetBind, index, count)
-		{
-			return (index+1) + "/" + count + " " + po.i18n.dataSetOfColon + dataSetBind.dataSet.name;
-		},
-		
 		formatDataSetFieldType: function(type)
 		{
 			return $.findNameByValue(po.DataSetFieldTypes, type);
@@ -4751,8 +4746,15 @@ $.inflateChartForm = function(po)
 		
 		onDeleteDataSetBind: function(e, dsbIdx)
 		{
-			var fm = po.vueFormModel();
-			fm.dataSetBindVOs.splice(dsbIdx, 1);
+			po.confirm(
+			{
+				message: po.i18n["chart.confirmDelThisDsb"],
+				accept: function()
+				{
+					var fm = po.vueFormModel();
+					fm.dataSetBindVOs.splice(dsbIdx, 1);
+				}
+			});
 		},
 		
 		onShowDataSignPanel: function(e, dataSetBind, dataSetFieldNode)

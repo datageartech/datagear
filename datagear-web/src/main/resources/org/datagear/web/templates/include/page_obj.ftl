@@ -41,7 +41,7 @@ var ${pid} =
 		confirm: "<@spring.message code='confirm' />",
 		cancel : "<@spring.message code='cancel' />",
 		operationConfirm : "<@spring.message code='operationConfirm' />",
-		confirmDeleteAsk: "<@spring.message code='confirmDeleteAsk' />",
+		confirmDelSelectedAsk: "<@spring.message code='confirmDelSelectedAsk' />",
 	}
 };
 

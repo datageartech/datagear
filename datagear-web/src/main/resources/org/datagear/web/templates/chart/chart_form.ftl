@@ -101,8 +101,15 @@
 				</label>
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}dataSetBindVOs" class="chart-datasets input p-component p-inputtext w-full overflow-auto p-2">
-						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx"
-							:header="formatDsbHeaderName(dsb, dsbIdx, fm.dataSetBindVOs.length)" :toggleable="true" class="mb-2">
+						<p-panel v-for="(dsb, dsbIdx) in fm.dataSetBindVOs" :key="dsbIdx" :toggleable="true" class="mb-2">
+							<template #header>
+								<label>
+									<span class="font-bold">{{dsb.dataSet.name}}</span>
+									<span class="text-color-secondary text-sm ml-1">
+										{{(dsbIdx+1)+'/'+fm.dataSetBindVOs.length}}
+									</span>
+								</label>
+							</template>
 							<template #icons>
 								<p-button icon="pi pi-arrow-up" class="p-button-sm p-button-secondary p-button-rounded p-button-text mr-2"
 									@click="onMoveUpDataSetBind($event, dsbIdx)" v-if="!pm.isReadonlyAction">
@@ -600,6 +607,7 @@
 	
 	po.i18n.yes = "<@spring.message code='yes' />";
 	po.i18n.no = "<@spring.message code='no' />";
+	po.i18n["chart.confirmDelThisDsb"] = "<@spring.message code='chart.confirmDelThisDsb' />";
 	po.i18n["chart.dataSetSign.required"] = "<@spring.message code='chart.dataSetSign.required' />";
 	po.i18n["chart.fieldSign.required"] = "<@spring.message code='chart.fieldSign.required' />";
 	po.i18n.noLimit = "<@spring.message code='noLimit' />";

@@ -104,7 +104,7 @@
 
 	po.i18n.pleaseSelectOnlyOne = "<@spring.message code='dtbsSource.pleaseSelectOnlyOne' />";
 	po.i18n.pleaseSelectAtLeastOne = "<@spring.message code='dtbsSource.pleaseSelectAtLeastOne' />";
-	po.i18n.confirmDeleteAsk = "<@spring.message code='dtbsSource.confirmDeleteAsk' />";
+	po.i18n.confirmDelSelectedAsk = "<@spring.message code='dtbsSource.confirmDelSelectedAsk' />";
 	
 	po.dtbsSourceTabTypeTable = "table";
 	po.dtbsSourceTabTypeSqlpad = "sqlpad";

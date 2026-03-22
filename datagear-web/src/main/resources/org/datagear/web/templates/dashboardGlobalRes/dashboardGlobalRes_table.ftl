@@ -82,7 +82,7 @@
 <script>
 (function(po)
 {
-	po.i18n.confirmDeleteAsk = "<@spring.message code='confirmDeleteFileAsk' />";
+	po.i18n.confirmDelSelectedAsk = "<@spring.message code='confirmDeleteFileAsk' />";
 	
 	po.onlyDirectory = ("${(onlyDirectory!false)?string('true', 'false')}"  == "true");
 	po.inflateEntityActionIdPropName = "path";
