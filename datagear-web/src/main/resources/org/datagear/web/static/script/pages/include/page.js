@@ -3784,8 +3784,33 @@ $.inflateChartAttrValuesForm = function(po)
 //填充chart_form.ftl
 $.inflateChartForm = function(po)
 {
-	//数据标记附加属性中的字段匹配器属性名
-	po.DATASIGN_ADDITION_FIELD_MATCHERS = "fieldMatchers";
+	//org.datagear.analysis.DataSetField.DataType.OBJECT
+	po.DataSetFieldDataType_OBJECT = "object";
+	//org.datagear.analysis.DataSetField.DataType.UNKNOWN
+	po.DataSetFieldDataType_UNKNOWN = "unknown";
+	
+	//字段匹配器简化常量定义
+	//匹配器结构规范：{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false }
+	//只要其中任一属性不匹配，则表示匹配器不通过，null表示此属性匹配通过
+	po.DATASIGN_FIELD_MATCHERS =
+	{
+		"primitive": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ] },
+		"primitive-array": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: true },
+		"primitive-nonarray": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: false },
+		"object": { inTypes: [ po.DataSetFieldDataType_OBJECT ] },
+		"object-array": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: true },
+		"object-nonarray": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: false },
+		"array": { array: true },
+		"nonarray": { array: false }
+	};
+	po.DATASIGN_FIELD_MATCHERS["p"] = po.DATASIGN_FIELD_MATCHERS["primitive"];
+	po.DATASIGN_FIELD_MATCHERS["p-a"] = po.DATASIGN_FIELD_MATCHERS["primitive-array"];
+	po.DATASIGN_FIELD_MATCHERS["p-na"] = po.DATASIGN_FIELD_MATCHERS["primitive-nonarray"];
+	po.DATASIGN_FIELD_MATCHERS["o"] = po.DATASIGN_FIELD_MATCHERS["object"];
+	po.DATASIGN_FIELD_MATCHERS["o-a"] = po.DATASIGN_FIELD_MATCHERS["object-array"];
+	po.DATASIGN_FIELD_MATCHERS["o-na"] = po.DATASIGN_FIELD_MATCHERS["object-nonarray"];
+	po.DATASIGN_FIELD_MATCHERS["a"] = po.DATASIGN_FIELD_MATCHERS["array"];
+	po.DATASIGN_FIELD_MATCHERS["na"] = po.DATASIGN_FIELD_MATCHERS["nonarray"];
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -4321,27 +4346,29 @@ $.inflateChartForm = function(po)
 	
 	po.isDataSignMatchesField = function(dataSign, dataSetField)
 	{
-		var matchers = (dataSign.additions ? dataSign.additions[po.DATASIGN_ADDITION_FIELD_MATCHERS] : null);
+		var fieldMatcher = dataSign.fieldMatcher;
 		
-		if($.isEmpty(matchers))
+		//未定义时应返回true
+		if($.isEmpty(fieldMatcher))
 			return true;
 		
-		matchers = ($.isArray(matchers) ? matchers : [ matchers ]);
+		fieldMatcher = ($.isArray(fieldMatcher) ? fieldMatcher : [ fieldMatcher ]);
 		
-		for(var i=0; i<matchers.length; i++)
+		for(var i=0; i<fieldMatcher.length; i++)
 		{
 			//只要任一匹配即可
-			if(po.isDataSignMatcherMatchesField(dataSetField, matchers[i]))
+			if(po.isDataSignMatcherMatchesField(dataSetField, fieldMatcher[i]))
 				return true;
 		}
 		
 		return false;
 	};
 	
-	//字段是否匹配给定matcher。
-	//matcher结构：{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false }
 	po.isDataSignMatcherMatchesField = function(dataSetField, matcher)
 	{
+		if(matcher != null && $.isTypeString(matcher))
+			matcher = po.DATASIGN_FIELD_MATCHERS[matcher];
+		
 		if(matcher == null)
 			return true;
 		

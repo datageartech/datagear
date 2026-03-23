@@ -87,6 +87,10 @@
 		},
 		{
 			name: "simple-value"
+		},
+		{
+			name: "signWithFieldMatcher",
+			fieldMatcher: "primitive"
 		}
 	],
 	dataSetRange:

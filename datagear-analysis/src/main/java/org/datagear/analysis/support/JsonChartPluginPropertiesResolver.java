@@ -447,6 +447,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
 			dataSign.setAdditions(convertToAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
 			dataSign.setChildren(convertToDataSigns(map.get(DataSign.PROPERTY_CHILDREN), dataSign));
+			dataSign.setFieldMatcher(map.get(DataSign.PROPERTY_FIELD_MATCHER));
 	
 			return dataSign;
 		}

@@ -54,6 +54,7 @@ public class DataSign extends AbstractLabeled
 	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
 	public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	public static final String PROPERTY_ADDITIONS = AdditionsAware.PROPERTY_ADDITIONS;
+	public static final String PROPERTY_FIELD_MATCHER = "fieldMatcher";
 
 	/**
 	 * 标记目标：字段
@@ -106,6 +107,15 @@ public class DataSign extends AbstractLabeled
 
 	/** 附加属性 */
 	private Map<String, ?> additions = null;
+
+	/**
+	 * 字段匹配器，当{@linkplain #targets}里包含{@linkplain #TARGET_FIELD}时，
+	 * 定义此{@linkplain DataSign}允许绑定的{@linkplain DataSetField}。
+	 * <p>
+	 * 此属性主要是为交互操作界面定义的，所以这里不定义其具体类型，由操作界面环境定义。
+	 * </p>
+	 */
+	private Object fieldMatcher = null;
 
 	public DataSign()
 	{
@@ -200,6 +210,16 @@ public class DataSign extends AbstractLabeled
 		this.additions = additions;
 	}
 
+	public Object getFieldMatcher()
+	{
+		return fieldMatcher;
+	}
+
+	public void setFieldMatcher(Object fieldMatcher)
+	{
+		this.fieldMatcher = fieldMatcher;
+	}
+
 	/**
 	 * 复制为指定{@linkplain Locale}的对象。
 	 * 
@@ -217,6 +237,7 @@ public class DataSign extends AbstractLabeled
 		re.setRequired(this.required);
 		re.setMultiple(this.multiple);
 		re.setAdditions(this.additions);
+		re.setFieldMatcher(this.fieldMatcher);
 		LabelUtil.concrete(this, re, locale);
 		re.setChildren(Localizable.toLocale(this.children, locale));
 
@@ -231,9 +252,8 @@ public class DataSign extends AbstractLabeled
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", targets=" + targets + ", required=" + required
-				+ ", multiple=" + multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel()
-				+ ", additions=" + additions + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", fullname=" + fullname + ", targets=" + targets
+				+ ", required=" + required + ", multiple=" + multiple + "]";
 	}
 
 	/**

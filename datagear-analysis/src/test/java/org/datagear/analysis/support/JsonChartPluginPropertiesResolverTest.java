@@ -111,7 +111,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
-			assertEquals(3, dataSigns.size());
+			assertEquals(4, dataSigns.size());
 
 			{
 				DataSign dataSign = dataSigns.get(0);
@@ -163,6 +163,13 @@ public class JsonChartPluginPropertiesResolverTest
 				assertFalse(dataSign.isMultiple());
 				assertNull(dataSign.getNameLabel());
 				assertNull(dataSign.getDescLabel());
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(3);
+
+				assertEquals("signWithFieldMatcher", dataSign.getName());
+				assertEquals("primitive", dataSign.getFieldMatcher());
 			}
 
 			{
