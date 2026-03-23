@@ -134,7 +134,7 @@
 													:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetSign(dsb, sign.fullname)">
 												</p-chip>
 											</div>
-											<p-button type="button" icon="pi pi-plus" severity="info"
+											<p-button type="button" icon="pi pi-plus"
 												aria:haspopup="true" aria-controls="${pid}dataSignsPanel"
 												@click="onShowDataSignPanel($event, dsb)" v-if="!pm.isReadonlyAction">
 											</p-button>
@@ -324,7 +324,7 @@
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 			<p-button type="button" label="<@spring.message code='saveAndShow' />" @click="onSaveAndShow" v-if="!pm.disableSaveShow"></p-button>
 		</div>
-	</form>
+	</form> 
 	<p-overlaypanel ref="${pid}dataSignsPanelEle" append-to="body"
 		:show-close-icon="false" id="${pid}dataSignsPanel">
 		<div class="pb-2">
@@ -333,30 +333,30 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
-			<div v-for="ds in pm.candidateDataSigns" :key="ds.fullname" class="mb-2">
+			<div v-for="dsInfo in pm.candidateDataSignInfos" :key="dsInfo.dataSign.fullname" class="mb-2">
 				<div class="flex align-items-center gap-1">
 					<div>
 						<div class="p-inputgroup">
-							<p-button type="button" :label="ds.extLabel" icon="pi pi-plus" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataSet(ds) ? 'info' : '')"
-								@click="onAddDataSign($event, ds)" class="white-space-nowrap">
+							<p-button type="button" :label="dsInfo.dataSign.extLabel" icon="pi pi-plus" :disabled="!dsInfo.matches"
+								@click="onAddDataSign($event, dsInfo.dataSign)" class="white-space-nowrap">
 							</p-button>
-							<p-button type="button" icon="pi pi-info-circle" :severity="(pm.candidateDataSignTarget == 'dataset' && isDataSignTargetDataSet(ds) ? 'info' : '')"
+							<p-button type="button" icon="pi pi-info-circle"
 								aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
-								@click="onShowDataSignDetail($event, ds)" @mouseover="onUpdateDataSignDetailPanel($event, ds)">
+								@click="onShowDataSignDetail($event, dsInfo.dataSign)" @mouseover="onUpdateDataSignDetailPanel($event, dsInfo.dataSign)">
 							</p-button>
 						</div>
 					</div>
 					<div class="flex align-items-center" style="gap:1px;">
 						<p-badge severity="info" class="font-normal white-space-nowrap">
-							{{ds.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
+							{{dsInfo.dataSign.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
 						</p-badge>
-						<p-badge :severity="ds.required ? 'danger' : 'info'" class="font-normal white-space-nowrap">
-							{{ds.required ? "<@spring.message code='requiredInput' />" : "<@spring.message code='optionalInput' />"}}
+						<p-badge :severity="dsInfo.dataSign.required ? 'danger' : 'info'" class="font-normal white-space-nowrap">
+							{{dsInfo.dataSign.required ? "<@spring.message code='requiredInput' />" : "<@spring.message code='optionalInput' />"}}
 						</p-badge>
 					</div>
 				</div>
 			</div>
-			<div class="flex flex-column gap-2" v-if="pm.candidateDataSigns.length == 0">
+			<div class="flex flex-column gap-2" v-if="pm.candidateDataSignInfos.length == 0">
 				<div class="flex align-items-center gap-1">
 					<i class="pi pi-info-circle"></i>
 					<span><@spring.message code='chart.noAvaliableDataSign' /></span>

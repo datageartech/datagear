@@ -3855,7 +3855,7 @@ $.inflateChartForm = function(po)
 		
 		var dataSetBinds = (chart.dataSetBindVOs || []);
 		
-		var requiredDataSetSigns = po.evalCandidateDataSignsForDataSet(chartPlugin);
+		var requiredDataSetSigns = po.findCandidateDataSignsForDataSet(chartPlugin);
 		requiredDataSetSigns = po.getRequiredDataSigns(requiredDataSetSigns);
 		
 		for(var i=0; i<requiredDataSetSigns.length; i++)
@@ -3902,13 +3902,13 @@ $.inflateChartForm = function(po)
 	
 	po.validateDataSetFieldDataSign = function(chartPlugin, dataSetBind, dataSetFieldNodes)
 	{
-		if(chartPlugin == null || $.isEmpty(chartPlugin.dataSigns)
-				|| dataSetBind == null || $.isEmpty(dataSetFieldNodes))
+		if(chartPlugin == null || $.isEmpty(chartPlugin.dataSigns) || dataSetBind == null)
 		{
 			return true;
 		}
-
-		var requiredDataSigns = po.evalCandidateDataSignsForField(chartPlugin, dataSetBind, dataSetFieldNodes[0]);
+		
+		var fieldParentNode = ($.isEmpty(dataSetFieldNodes) ? null : dataSetFieldNodes[0].parentNode);
+		var requiredDataSigns = po.findCandidateDataSignsForField(chartPlugin, dataSetBind, fieldParentNode);
 		requiredDataSigns = po.getRequiredDataSigns(requiredDataSigns);
 		
 		for(var i=0; i<requiredDataSigns.length; i++)
@@ -4218,7 +4218,7 @@ $.inflateChartForm = function(po)
 		return null;
 	};
 
-	po.evalCandidateDataSignsForDataSet = function(chartPlugin)
+	po.findCandidateDataSignsForDataSet = function(chartPlugin)
 	{
 		var re = [];
 		var dataSigns = (chartPlugin ? chartPlugin.dataSigns : null);
@@ -4239,16 +4239,16 @@ $.inflateChartForm = function(po)
 		return re;
 	};
 	
-	po.evalCandidateDataSignsForField = function(chartPlugin, dataSetBind, dataSetFieldNode)
+	po.findCandidateDataSignsForField = function(chartPlugin, dataSetBind, fieldParentNode)
 	{
-		var dataSigns = [];
+		var re = [];
 		
 		var parentBindDataSigns = null;
 		
 		//子级字段只能使用父字段绑定数据标记的子级数据标记
-		if(dataSetFieldNode.parentNode != null)
+		if(fieldParentNode != null)
 		{
-			parentBindDataSigns = dataSetFieldNode.parentNode.bindDataSigns;
+			parentBindDataSigns = fieldParentNode.bindDataSigns;
 		}
 		//顶级字段可以使用插件的顶级数据标记、以及所属数据集绑定的数据标记的子级数据标记
 		else
@@ -4261,7 +4261,7 @@ $.inflateChartForm = function(po)
 				for(var i=0; i<pluginDataSigns.length; i++)
 				{
 					if(po.isDataSignTargetField(pluginDataSigns[i]))
-						dataSigns.push(pluginDataSigns[i]);
+						re.push(pluginDataSigns[i]);
 				}
 			}
 		}
@@ -4272,18 +4272,48 @@ $.inflateChartForm = function(po)
 			{
 				var children = parentBindDataSigns[i].children;
 				if(children != null)
-					dataSigns = dataSigns.concat(children);
+					re = re.concat(children);
 			}
 		}
 		
+		return re;
+	};
+	
+	po.evalDataSignMatchInfoForDataSet = function(chartPlugin, dataSetBind)
+	{
+		var dataSigns = po.findCandidateDataSignsForDataSet(chartPlugin);
+		
 		var re = [];
+		
+		if($.isEmpty(dataSigns))
+			return re;
 		
 		for(var i=0; i<dataSigns.length; i++)
 		{
 			var dataSign = dataSigns[i];
-			
-			if(po.isDataSignMatchesField(dataSign, dataSetFieldNode.data))
-				re.push(dataSign);
+			var rei = { dataSign: dataSign, matches: true };
+			re.push(rei);
+		}
+		
+		return re;
+	};
+	
+	po.evalDataSignMatchInfoForField = function(chartPlugin, dataSetBind, dataSetFieldNode)
+	{
+		var dataSigns = po.findCandidateDataSignsForField(chartPlugin, dataSetBind, dataSetFieldNode.parentNode);
+		
+		var re = [];
+		
+		if($.isEmpty(dataSigns))
+			return re;
+		
+		var dataSetField = dataSetFieldNode.data;
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dataSign = dataSigns[i];
+			var rei = { dataSign: dataSign, matches: po.isDataSignMatchesField(dataSign, dataSetField) };
+			re.push(rei);
 		}
 		
 		return re;
@@ -4630,7 +4660,7 @@ $.inflateChartForm = function(po)
 	{
 		disableSaveShow: po.disableSaveShow,
 		pluginHasDataSetSign: po.pluginHasDataSetSign(formModel.pluginVo),
-		candidateDataSigns: [],
+		candidateDataSignInfos: [],
 		candidateDataSignTarget: "",
 		dataSignDetail: { label: "", detail: "" },
 		dataSignDetailShown: false,
@@ -4838,12 +4868,12 @@ $.inflateChartForm = function(po)
 				
 				if(dataSetFieldNode != null)
 				{
-					pm.candidateDataSigns = po.evalCandidateDataSignsForField(chartPlugin, dataSetBind, dataSetFieldNode);
+					pm.candidateDataSignInfos = po.evalDataSignMatchInfoForField(chartPlugin, dataSetBind, dataSetFieldNode);
 					pm.candidateDataSignTarget = "field";
 				}
 				else
 				{
-					pm.candidateDataSigns = po.evalCandidateDataSignsForDataSet(chartPlugin);
+					pm.candidateDataSignInfos = po.evalDataSignMatchInfoForDataSet(chartPlugin, dataSetBind);
 					pm.candidateDataSignTarget = "dataset";
 				}
 				
