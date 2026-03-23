@@ -18,10 +18,7 @@
 package org.datagear.analysis.support.html;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 
-import org.datagear.analysis.DataSetBind;
-import org.datagear.analysis.DataSign;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 
 /**
@@ -49,11 +46,6 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 	public static final String JSON_PROPERTY_PLATFORM_VERSION = HtmlChartPlugin.PROPERTY_PLATFORM_VERSION;
 	public static final String JSON_PROPERTY_API_VERSION = HtmlChartPlugin.PROPERTY_API_VERSION;
 
-	/**
-	 * {@linkplain DataSign#getName()}命名规范。
-	 */
-	public static final Pattern DATA_SIGN_NAME_PATTERN = Pattern.compile("^[a-zA-Z_$][a-zA-Z0-9_$]*$");
-
 	public JsonHtmlChartPluginPropertiesResolver()
 	{
 		super();
@@ -78,40 +70,5 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 		chartPlugin.setUsage(usage);
 		chartPlugin.setPlatformVersion(convertToString(properties.get(JSON_PROPERTY_PLATFORM_VERSION)));
 		return super.resolveProperties(properties);
-	}
-
-	@Override
-	protected DataSign convertToDataSign(Object obj, DataSign parent)
-	{
-		DataSign dataSign = super.convertToDataSign(obj, parent);
-		checkDataSignName(dataSign);
-
-		return dataSign;
-	}
-
-	/**
-	 * 校验{@linkplain DataSign#getName()}。
-	 * <p>
-	 * 对于{@linkplain DashboardApiVersion#V2}起的插件，
-	 * 必须以{@code [a-z]}、{@code [A-Z]}、{@code '_'}、{@code '$'}之一开头，且后续只能额外包含{@code [0-9]}字符，
-	 * 因为{@linkplain DataSetBind#getFieldSigns()}中需要以分隔符层级拼接{@linkplain DataSign#getName()}，必须限制命名规范以避免歧义。
-	 * </p>
-	 * 
-	 * @param dataSign
-	 */
-	protected void checkDataSignName(DataSign dataSign)
-	{
-		if (dataSign == null)
-			return;
-
-		String apiVersion = getChartPlugin().getApiVersion();
-
-		// 旧的1.0版本时的插件没有限制，这里需要忽略处理，以兼容旧版
-		if (DashboardApiVersion.isV1(apiVersion))
-			return;
-		
-		if(!DATA_SIGN_NAME_PATTERN.matcher(dataSign.getName()).matches())
-			throw new IllegalArgumentException("DataSign name '" + dataSign.getName()
-					+ "' illegal, it must matches pattern \"" + DATA_SIGN_NAME_PATTERN.toString() + "\"");
 	}
 }

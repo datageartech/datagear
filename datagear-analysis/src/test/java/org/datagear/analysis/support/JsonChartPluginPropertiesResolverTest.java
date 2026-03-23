@@ -111,7 +111,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();
-			assertEquals(4, dataSigns.size());
+			assertEquals(5, dataSigns.size());
 
 			{
 				DataSign dataSign = dataSigns.get(0);
@@ -167,6 +167,12 @@ public class JsonChartPluginPropertiesResolverTest
 
 			{
 				DataSign dataSign = dataSigns.get(3);
+
+				assertEquals("sign-special-char-.#%*()", dataSign.getName());
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(4);
 
 				assertEquals("signWithFieldMatcher", dataSign.getName());
 				assertEquals("primitive", dataSign.getFieldMatcher());

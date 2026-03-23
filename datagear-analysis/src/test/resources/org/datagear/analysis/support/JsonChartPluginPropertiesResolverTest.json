@@ -89,6 +89,9 @@
 			name: "simple-value"
 		},
 		{
+			name: "sign-special-char-.#%*()"
+		},
+		{
 			name: "signWithFieldMatcher",
 			fieldMatcher: "primitive"
 		}
