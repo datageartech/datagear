@@ -3794,23 +3794,23 @@ $.inflateChartForm = function(po)
 	//只要其中任一属性不匹配，则表示匹配器不通过，null表示此属性匹配通过
 	po.DATASIGN_FIELD_MATCHERS =
 	{
-		"primitive": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ] },
-		"primitive-array": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: true },
-		"primitive-nonarray": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: false },
-		"object": { inTypes: [ po.DataSetFieldDataType_OBJECT ] },
-		"object-array": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: true },
-		"object-nonarray": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: false },
-		"array": { array: true },
-		"nonarray": { array: false }
+		//primitive
+		"p": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ] },
+		//primitive-array
+		"pa": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: true },
+		//primitive-nonarray
+		"pna": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: false },
+		//object
+		"o": { inTypes: [ po.DataSetFieldDataType_OBJECT ] },
+		//object-array
+		"oa": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: true },
+		//object-nonarray
+		"ona": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: false },
+		//array
+		"a": { array: true },
+		//nonarray
+		"na": { array: false }
 	};
-	po.DATASIGN_FIELD_MATCHERS["p"] = po.DATASIGN_FIELD_MATCHERS["primitive"];
-	po.DATASIGN_FIELD_MATCHERS["p-a"] = po.DATASIGN_FIELD_MATCHERS["primitive-array"];
-	po.DATASIGN_FIELD_MATCHERS["p-na"] = po.DATASIGN_FIELD_MATCHERS["primitive-nonarray"];
-	po.DATASIGN_FIELD_MATCHERS["o"] = po.DATASIGN_FIELD_MATCHERS["object"];
-	po.DATASIGN_FIELD_MATCHERS["o-a"] = po.DATASIGN_FIELD_MATCHERS["object-array"];
-	po.DATASIGN_FIELD_MATCHERS["o-na"] = po.DATASIGN_FIELD_MATCHERS["object-nonarray"];
-	po.DATASIGN_FIELD_MATCHERS["a"] = po.DATASIGN_FIELD_MATCHERS["array"];
-	po.DATASIGN_FIELD_MATCHERS["na"] = po.DATASIGN_FIELD_MATCHERS["nonarray"];
 	
 	po.inSaveAndShowAction = function(val)
 	{
