@@ -94,6 +94,41 @@
 		{
 			name: "signWithFieldMatcher",
 			fieldMatcher: "primitive"
+		},
+		{
+			name: "nestDataSetSign",
+			targets: "dataset",
+			children:
+			[
+				{
+					name: "s0",
+					children:
+					[
+						{ name: "s00", children: [ { name: "s000" } ] },
+						{ name: "s01", fieldMatcher: "fm01" }
+					]
+				},
+				{
+					name: "s1"
+				}
+			]
+		},
+		{
+			name: "nestFieldSign",
+			children:
+			[
+				{
+					name: "s0",
+					children:
+					[
+						{ name: "s00", children: [ { name: "s000", fieldMatcher: "fm000" } ] },
+						{ name: "s01" }
+					]
+				},
+				{
+					name: "s1"
+				}
+			]
 		}
 	],
 	dataSetRange:
