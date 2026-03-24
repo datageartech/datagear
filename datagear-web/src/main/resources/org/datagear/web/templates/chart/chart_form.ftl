@@ -129,8 +129,8 @@
 									</label>
 									<div class="field-input col-12 md:col-9">
 										<div class="p-inputgroup">
-											<div class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
-												<p-chip v-for="sign in dsb.bindDataSigns" :key="sign.fullname" :label="sign.extLabel" class="mb-2"
+											<div class="input p-component p-inputtext border-round-left overflow-auto flex flex-wrap align-items-start gap-1" style="height:4rem;">
+												<p-chip v-for="sign in dsb.bindDataSigns" :key="sign.fullname" :label="sign.extLabel" class="text-sm"
 													:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetSign(dsb, sign.fullname)">
 												</p-chip>
 											</div>
@@ -165,8 +165,8 @@
 											<p-column header="<@spring.message code='dataSign' />" class="col-20">
 												<template #body="{node}">
 													<div class="p-inputgroup">
-														<div class="input p-component p-inputtext border-round-left overflow-auto" style="height:4rem;">
-															<p-chip v-for="sign in node.bindDataSigns" :key="sign.fullname" :label="sign.extLabel" class="mb-2"
+														<div class="input p-component p-inputtext border-round-left overflow-auto flex flex-wrap align-items-start gap-1" style="height:4rem;">
+															<p-chip v-for="sign in node.bindDataSigns" :key="sign.fullname" :label="sign.extLabel" class="text-sm"
 																:removable="!pm.isReadonlyAction" @remove="onRemoveDataSetFieldSign(node, sign.fullname)">
 															</p-chip>
 														</div>
@@ -333,26 +333,28 @@
 			</label>
 		</div>
 		<div class="panel-content-size-xs-mwh overflow-auto p-2">
-			<div v-for="dsInfo in pm.candidateDataSignInfos" :key="dsInfo.dataSign.fullname" class="mb-2">
-				<div class="flex align-items-center gap-1">
-					<div>
-						<div class="p-inputgroup">
-							<p-button type="button" :label="dsInfo.dataSign.extLabel" icon="pi pi-plus" :disabled="!dsInfo.matches"
-								@click="onAddDataSign($event, dsInfo.dataSign)" class="white-space-nowrap">
-							</p-button>
-							<p-button type="button" icon="pi pi-info-circle"
-								aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
-								@click="onShowDataSignDetail($event, dsInfo.dataSign)" @mouseover="onUpdateDataSignDetailPanel($event, dsInfo.dataSign)">
-							</p-button>
+			<div class="flex flex-column gap-1" v-if="pm.candidateDataSignInfos.length > 0">
+				<div v-for="dsInfo in pm.candidateDataSignInfos" :key="dsInfo.dataSign.fullname">
+					<div class="flex align-items-center gap-1">
+						<div>
+							<div class="p-inputgroup">
+								<p-button type="button" :label="dsInfo.dataSign.extLabel" icon="pi pi-plus" :disabled="!dsInfo.matches"
+									@click="onAddDataSign($event, dsInfo.dataSign)" class="white-space-nowrap">
+								</p-button>
+								<p-button type="button" icon="pi pi-info-circle"
+									aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
+									@click="onShowDataSignDetail($event, dsInfo.dataSign)">
+								</p-button>
+							</div>
 						</div>
-					</div>
-					<div class="flex align-items-center" style="gap:1px;">
-						<p-badge severity="info" class="font-normal white-space-nowrap">
-							{{dsInfo.dataSign.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
-						</p-badge>
-						<p-badge :severity="dsInfo.dataSign.required ? 'danger' : 'info'" class="font-normal white-space-nowrap">
-							{{dsInfo.dataSign.required ? "<@spring.message code='requiredInput' />" : "<@spring.message code='optionalInput' />"}}
-						</p-badge>
+						<div class="flex align-items-center" style="gap:1px;">
+							<p-badge severity="info" class="font-normal white-space-nowrap">
+								{{dsInfo.dataSign.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
+							</p-badge>
+							<p-badge :severity="dsInfo.dataSign.required ? 'danger' : 'info'" class="font-normal white-space-nowrap">
+								{{dsInfo.dataSign.required ? "<@spring.message code='requiredInput' />" : "<@spring.message code='optionalInput' />"}}
+							</p-badge>
+						</div>
 					</div>
 				</div>
 			</div>
