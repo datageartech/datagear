@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetField.DataType;
@@ -46,6 +47,9 @@ import org.datagear.util.StringUtil;
  */
 public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 {
+	/** 正则表达式：JSON数组 */
+	protected static final Pattern PATTERN_JSON_ARRAY = Pattern.compile("^\\s*\\[.*\\]\\s*$");
+
 	private DataFormat dataFormat;
 
 	/**
@@ -135,6 +139,7 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 			{
 				String name = target.getName();
 				Object value = fieldValues.get(name);
+				value = tryPrepareStringToPrimitiveArray(value, target);
 				value = convert(value, target);
 
 				re.put(name, value);
@@ -142,6 +147,42 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		}
 
 		return re;
+	}
+
+	protected Object tryPrepareStringToPrimitiveArray(Object value, DataSetField target)
+	{
+		if (value == null || target == null || !target.isArray())
+			return value;
+
+		if (!(value instanceof String))
+			return value;
+
+		String type = target.getType();
+		boolean isPrimitive = (DataType.BOOLEAN.equals(type) || DataType.NUMBER.equals(type)
+				|| DataType.INTEGER.equals(type) || DataType.DATE.equals(type) || DataType.TIME.equals(type)
+				|| DataType.TIMESTAMP.equals(type));
+
+		if (!isPrimitive)
+			return value;
+
+		String strValue = (String) value;
+
+		if (!PATTERN_JSON_ARRAY.matcher(strValue).matches())
+			return value;
+
+		try
+		{
+			Object re = JsonSupport.parseNonStardand(strValue, Object.class);
+
+			if (DataType.isLikeArray(re))
+				return re;
+			else
+				return strValue;
+		}
+		catch (Exception e)
+		{
+			return strValue;
+		}
 	}
 
 	@Override

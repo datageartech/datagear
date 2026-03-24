@@ -49,11 +49,16 @@ public class DataSetFieldValueConverterTest
 		super();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void convertTest_Map_Collection()
 	{
 		List<DataSetField> fields = Arrays.asList(new DataSetField("name", DataSetField.DataType.STRING),
-				new DataSetField("value", DataSetField.DataType.INTEGER), new DataSetField("obj", DataSetField.DataType.OBJECT));
+				new DataSetField("value", DataSetField.DataType.INTEGER),
+				new DataSetField("obj", DataSetField.DataType.OBJECT),
+				new DataSetField("sizes", DataSetField.DataType.INTEGER),
+				new DataSetField("values", DataSetField.DataType.NUMBER),
+				new DataSetField("types", DataSetField.DataType.STRING));
 
 		{
 			DataSetField field = fields.get(2);
@@ -64,6 +69,18 @@ public class DataSetFieldValueConverterTest
 			DataSetField f2 = new DataSetField("f2", DataSetField.DataType.INTEGER);
 
 			Collections.addAll(field.getFields(), f0, f1, f2);
+		}
+		{
+			DataSetField field = fields.get(3);
+			field.setArray(true);
+		}
+		{
+			DataSetField field = fields.get(4);
+			field.setArray(true);
+		}
+		{
+			DataSetField field = fields.get(5);
+			field.setArray(true);
 		}
 
 		DataFormat format = new DataFormat();
@@ -78,18 +95,35 @@ public class DataSetFieldValueConverterTest
 			Map<String, Object> vobj = new HashMap<>();
 			value.put("obj", vobj);
 			value.put("inexists", "nonono");
+			value.put("sizes", "[1, 2, 3]");
+			value.put("values", " [1.5, 3.6] ");
+			value.put("types", " ['a','b'] ");
 
 			vobj.put("f0", 3);
 			vobj.put("f1", "4");
 			vobj.put("f2", "5");
 
 			Map<String, ?> actual = converterStrict.convert(value, fields);
-			@SuppressWarnings("unchecked")
 			Map<String, ?> actualObj = (Map<String, ?>) actual.get("obj");
+			List<Integer> sizesActual = (List<Integer>) actual.get("sizes");
+			List<Number> valuesActual = (List<Number>) actual.get("values");
+			List<String> typesActual = (List<String>) actual.get("types");
 
-			assertEquals(3, actual.size());
+			assertEquals(6, actual.size());
 			assertEquals("aaa", actual.get("name"));
 			assertEquals(3, actual.get("value"));
+
+			assertEquals(3, sizesActual.size());
+			assertEquals(1, sizesActual.get(0).intValue());
+			assertEquals(2, sizesActual.get(1).intValue());
+			assertEquals(3, sizesActual.get(2).intValue());
+
+			assertEquals(2, valuesActual.size());
+			assertEquals(1.5d, valuesActual.get(0).doubleValue(), 0.1d);
+			assertEquals(3.6d, valuesActual.get(1).doubleValue(), 0.1d);
+
+			assertEquals(1, typesActual.size());
+			assertEquals(" ['a','b'] ", typesActual.get(0));
 
 			assertEquals(3, actualObj.get("f0"));
 			assertEquals(4, actualObj.get("f1"));
@@ -108,7 +142,7 @@ public class DataSetFieldValueConverterTest
 
 			Map<String, ?> actual = converterStrict.convert(value, fields);
 
-			assertEquals(3, actual.size());
+			assertEquals(6, actual.size());
 			assertEquals("aaa", actual.get("name"));
 			assertEquals(3, actual.get("value"));
 			assertEquals(null, actual.get("obj"));
@@ -126,7 +160,7 @@ public class DataSetFieldValueConverterTest
 
 			Map<String, ?> actual = converterStrict.convert(value, fields);
 
-			assertEquals(4, actual.size());
+			assertEquals(7, actual.size());
 			assertEquals("aaa", actual.get("name"));
 			assertEquals(3, actual.get("value"));
 			assertEquals(null, actual.get("obj"));
