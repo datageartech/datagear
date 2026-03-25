@@ -588,17 +588,29 @@
 	po.DS_TARGET_FIELD = "${DataSign.TARGET_FIELD}";
 	po.DS_TARGET_DATASET = "${DataSign.TARGET_DATASET}";
 	po.DashboardApiVersion = { LATEST_VERSION: "${DashboardApiVersion.LATEST_VERSION}" };
-	po.DataSetFieldTypes =
+	po.DataSetFieldType =
+	{
+		STRING: "${FieldDataType.STRING}",
+		NUMBER: "${FieldDataType.NUMBER}",
+		INTEGER: "${FieldDataType.INTEGER}",
+		DATE: "${FieldDataType.DATE}",
+		TIME: "${FieldDataType.TIME}",
+		TIMESTAMP: "${FieldDataType.TIMESTAMP}",
+		BOOLEAN: "${FieldDataType.BOOLEAN}",
+		OBJECT: "${FieldDataType.OBJECT}",
+		UNKNOWN: "${FieldDataType.UNKNOWN}"
+	};
+	po.dataSetFieldTypeOptions =
 	[
-		{name: "<@spring.message code='dataSetField.DataType.STRING' />", value: "${FieldDataType.STRING}"},
-		{name: "<@spring.message code='dataSetField.DataType.NUMBER' />", value: "${FieldDataType.NUMBER}"},
-		{name: "<@spring.message code='dataSetField.DataType.INTEGER' />", value: "${FieldDataType.INTEGER}"},
-		{name: "<@spring.message code='dataSetField.DataType.DATE' />", value: "${FieldDataType.DATE}"},
-		{name: "<@spring.message code='dataSetField.DataType.TIME' />", value: "${FieldDataType.TIME}"},
-		{name: "<@spring.message code='dataSetField.DataType.TIMESTAMP' />", value: "${FieldDataType.TIMESTAMP}"},
-		{name: "<@spring.message code='dataSetField.DataType.BOOLEAN' />", value: "${FieldDataType.BOOLEAN}"},
-		{name: "<@spring.message code='dataSetField.DataType.OBJECT' />", value: "${FieldDataType.OBJECT}"},
-		{name: "<@spring.message code='dataSetField.DataType.UNKNOWN' />", value: "${FieldDataType.UNKNOWN}"}
+		{ name: "<@spring.message code='dataSetField.DataType.STRING' />", value: po.DataSetFieldType.STRING },
+		{ name: "<@spring.message code='dataSetField.DataType.NUMBER' />", value: po.DataSetFieldType.NUMBER },
+		{ name: "<@spring.message code='dataSetField.DataType.INTEGER' />", value: po.DataSetFieldType.INTEGER },
+		{ name: "<@spring.message code='dataSetField.DataType.DATE' />", value: po.DataSetFieldType.DATE },
+		{ name: "<@spring.message code='dataSetField.DataType.TIME' />", value: po.DataSetFieldType.TIME },
+		{ name: "<@spring.message code='dataSetField.DataType.TIMESTAMP' />", value: po.DataSetFieldType.TIMESTAMP },
+		{ name: "<@spring.message code='dataSetField.DataType.BOOLEAN' />", value: po.DataSetFieldType.BOOLEAN },
+		{ name: "<@spring.message code='dataSetField.DataType.OBJECT' />", value: po.DataSetFieldType.OBJECT },
+		{ name: "<@spring.message code='dataSetField.DataType.UNKNOWN' />", value: po.DataSetFieldType.UNKNOWN }
 	];
 	po.updateIntervalTypeOptions =
 	[

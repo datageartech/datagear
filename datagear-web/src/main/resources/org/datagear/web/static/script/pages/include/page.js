@@ -3784,33 +3784,42 @@ $.inflateChartAttrValuesForm = function(po)
 //填充chart_form.ftl
 $.inflateChartForm = function(po)
 {
-	//org.datagear.analysis.DataSetField.DataType.OBJECT
-	po.DataSetFieldDataType_OBJECT = "object";
-	//org.datagear.analysis.DataSetField.DataType.UNKNOWN
-	po.DataSetFieldDataType_UNKNOWN = "unknown";
-	
 	//字段匹配器简化常量定义
 	//匹配器结构规范：{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false }
 	//只要其中任一属性不匹配，则表示匹配器不通过，null表示此属性匹配通过
 	po.DATASIGN_FIELD_MATCHERS =
 	{
 		//primitive
-		"p": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ] },
-		//primitive-array
-		"pa": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: true },
-		//primitive-nonarray
-		"pna": { notInTypes: [ po.DataSetFieldDataType_OBJECT, po.DataSetFieldDataType_UNKNOWN ], array: false },
+		"p": { notInTypes: [ po.DataSetFieldType.OBJECT, po.DataSetFieldType.UNKNOWN ] },
+		//non-primitive
+		"np": { inTypes: [ po.DataSetFieldType.OBJECT, po.DataSetFieldType.UNKNOWN ] },
+		//string
+		"s": { inTypes: [ po.DataSetFieldType.STRING ] },
+		//non-string
+		"ns": { notInTypes: [ po.DataSetFieldType.STRING ] },
+		//number
+		"n": { inTypes: [ po.DataSetFieldType.NUMBER, po.DataSetFieldType.INTEGER ] },
+		//non-number
+		"nn": { notInTypes: [ po.DataSetFieldType.NUMBER, po.DataSetFieldType.INTEGER ] },
+		//date
+		"d": { inTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] },
+		//non-date
+		"nd": { notInTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] },
+		//boolean
+		"b": { inTypes: [ po.DataSetFieldType.BOOLEAN ] },
+		//non-boolean
+		"nb": { notInTypes: [ po.DataSetFieldType.BOOLEAN ] },
 		//object
-		"o": { inTypes: [ po.DataSetFieldDataType_OBJECT ] },
-		//object-array
-		"oa": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: true },
-		//object-nonarray
-		"ona": { inTypes: [ po.DataSetFieldDataType_OBJECT ], array: false },
+		"o": { inTypes: [ po.DataSetFieldType.OBJECT ] },
+		//non-object
+		"no": { notInTypes: [ po.DataSetFieldType.OBJECT ] },
 		//array
-		"a": { array: true },
+		"array": { array: true },
 		//nonarray
-		"na": { array: false }
+		"nonarray": { array: false }
 	};
+	//组合上述常量匹配器的分隔符，比如："p-nb-nn-nonarray" 表示：是基本类型且不是boolean类型且不是number类型且不是数组
+	po.DATASIGN_FIELD_MATCHER_SEPARATOR = "-";
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -4356,21 +4365,55 @@ $.inflateChartForm = function(po)
 		
 		for(var i=0; i<fieldMatcher.length; i++)
 		{
-			//只要任一匹配即可
-			if(po.isDataSignMatcherMatchesField(dataSetField, fieldMatcher[i]))
+			//只要任一匹配即认为匹配
+			if(po.isDataSignMatchersMatchesField(dataSetField, fieldMatcher[i]))
 				return true;
 		}
 		
 		return false;
 	};
 	
+	po.isDataSignMatchersMatchesField = function(dataSetField, matchers)
+	{
+		//此时未定义的应返回false
+		if($.isEmpty(matchers))
+			return false;
+		
+		matchers = ($.isArray(matchers) ? matchers : [ matchers ]);
+		
+		for(var i=0; i<matchers.length; i++)
+		{
+			//只要任一不匹配即认为不匹配
+			if(!po.isDataSignMatcherMatchesField(dataSetField, matchers[i]))
+				return false;
+		}
+		
+		return true;
+	}
+	
 	po.isDataSignMatcherMatchesField = function(dataSetField, matcher)
 	{
-		if(matcher != null && $.isTypeString(matcher))
-			matcher = po.DATASIGN_FIELD_MATCHERS[matcher];
+		//此时未定义的应返回false
+		if($.isEmpty(matcher))
+			return false;
 		
-		if(matcher == null)
-			return true;
+		if($.isTypeString(matcher))
+		{
+			var ms = matcher.split(po.DATASIGN_FIELD_MATCHER_SEPARATOR);
+			var matchers = [];
+			
+			for(var i=0; i<ms.length; i++)
+			{
+				var msi = ms[i].trim();
+				var myMatcher = po.DATASIGN_FIELD_MATCHERS[msi];
+				
+				//未定义的应忽略
+				if(myMatcher != null)
+					matchers.push(myMatcher);
+			}
+			
+			return po.isDataSignMatchersMatchesField(dataSetField, matchers);
+		}
 		
 		var fieldType = dataSetField.type;
 		var fieldArray = dataSetField.array;
@@ -4733,7 +4776,7 @@ $.inflateChartForm = function(po)
 		
 		formatDataSetFieldType: function(type)
 		{
-			return $.findNameByValue(po.DataSetFieldTypes, type);
+			return $.findNameByValue(po.dataSetFieldTypeOptions, type);
 		},
 		
 		isDataSignTargetField: function(dataSign)
