@@ -3784,42 +3784,28 @@ $.inflateChartAttrValuesForm = function(po)
 //填充chart_form.ftl
 $.inflateChartForm = function(po)
 {
-	//字段匹配器简化常量定义
+	//内置简化数据标记字段匹配器定义
 	//匹配器结构规范：{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false }
 	//只要其中任一属性不匹配，则表示匹配器不通过，null表示此属性匹配通过
 	po.DATASIGN_FIELD_MATCHERS =
 	{
-		//primitive
-		"p": { notInTypes: [ po.DataSetFieldType.OBJECT, po.DataSetFieldType.UNKNOWN ] },
-		//non-primitive
-		"np": { inTypes: [ po.DataSetFieldType.OBJECT, po.DataSetFieldType.UNKNOWN ] },
-		//string
 		"s": { inTypes: [ po.DataSetFieldType.STRING ] },
-		//non-string
-		"ns": { notInTypes: [ po.DataSetFieldType.STRING ] },
-		//number
-		"n": { inTypes: [ po.DataSetFieldType.NUMBER, po.DataSetFieldType.INTEGER ] },
-		//non-number
-		"nn": { notInTypes: [ po.DataSetFieldType.NUMBER, po.DataSetFieldType.INTEGER ] },
-		//date
-		"d": { inTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] },
-		//non-date
-		"nd": { notInTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] },
-		//boolean
+		"n": { inTypes: [ po.DataSetFieldType.NUMBER ] },
+		"i": { inTypes: [ po.DataSetFieldType.INTEGER ] },
+		"d": { inTypes: [ po.DataSetFieldType.DATE ] },
+		"t": { inTypes: [ po.DataSetFieldType.TIME ] },
+		"ts": { inTypes: [ po.DataSetFieldType.TIMESTAMP ] },
 		"b": { inTypes: [ po.DataSetFieldType.BOOLEAN ] },
-		//non-boolean
-		"nb": { notInTypes: [ po.DataSetFieldType.BOOLEAN ] },
-		//object
 		"o": { inTypes: [ po.DataSetFieldType.OBJECT ] },
-		//non-object
-		"no": { notInTypes: [ po.DataSetFieldType.OBJECT ] },
-		//array
-		"array": { array: true },
-		//nonarray
-		"nonarray": { array: false }
+		"u": { inTypes: [ po.DataSetFieldType.UNKNOWN ] },
+		"a": { array: true },
+		//基本类
+		"P": { notInTypes: [ po.DataSetFieldType.OBJECT, po.DataSetFieldType.UNKNOWN ] },
+		//数值类
+		"N": { inTypes: [ po.DataSetFieldType.NUMBER, po.DataSetFieldType.INTEGER ] },
+		//日期类
+		"D": { inTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] }
 	};
-	//组合上述常量匹配器的分隔符，比如："p-nb-nn-nonarray" 表示：是基本类型且不是boolean类型且不是number类型且不是数组
-	po.DATASIGN_FIELD_MATCHER_SEPARATOR = "-";
 	
 	po.inSaveAndShowAction = function(val)
 	{
@@ -4353,6 +4339,16 @@ $.inflateChartForm = function(po)
 		return re;
 	};
 	
+	/**
+	 * 判断数据标记是否匹配给定字段。
+	 * dataSign.fieldMatcher支持如下格式：
+	 * matcher
+	 * [ matcher, ... ] 它们之间是【或】关系
+	 * 其中，matcher支持如下格式：
+	 * "..."		比如："(s || d) && !a"，字符含义参考po.DATASIGN_FIELD_MATCHERS
+	 * { ... }		格式参考po.DATASIGN_FIELD_MATCHERS
+	 * [ ... ]		元素可以是："..."、{ ... }，它们之间是【且】的关系
+	 */
 	po.isDataSignMatchesField = function(dataSign, dataSetField)
 	{
 		var fieldMatcher = dataSign.fieldMatcher;
@@ -4398,22 +4394,45 @@ $.inflateChartForm = function(po)
 			return false;
 		
 		if($.isTypeString(matcher))
+			return po.isDataSignMatcherStrMatchesField(dataSetField, matcher);
+		else
+			return po.isDataSignMatcherObjMatchesField(dataSetField, matcher);
+	};
+	
+	po.isDataSignMatcherStrMatchesField = function(dataSetField, matcher)
+	{
+		//此时未定义的应返回false
+		if($.isEmpty(matcher))
+			return false;
+		
+		var matchesObj = {};
+		var fnBody = "";
+		
+		for(var n in po.DATASIGN_FIELD_MATCHERS)
 		{
-			var ms = matcher.split(po.DATASIGN_FIELD_MATCHER_SEPARATOR);
-			var matchers = [];
-			
-			for(var i=0; i<ms.length; i++)
-			{
-				var msi = ms[i].trim();
-				var myMatcher = po.DATASIGN_FIELD_MATCHERS[msi];
-				
-				//未定义的应忽略
-				if(myMatcher != null)
-					matchers.push(myMatcher);
-			}
-			
-			return po.isDataSignMatchersMatchesField(dataSetField, matchers);
+			matchesObj[n] = po.isDataSignMatcherObjMatchesField(dataSetField, po.DATASIGN_FIELD_MATCHERS[n]);
+			fnBody += "var " + n + " = matchesObj['" + n + "'];\n";
 		}
+		
+		fnBody += "return ("+matcher+");";
+		
+		try
+		{
+			var func = new Function("matchesObj", fnBody);
+			return func(matchesObj);
+		}
+		catch(e)
+		{
+			chartFactory.logException(e);
+			return false;
+		}
+	};
+	
+	po.isDataSignMatcherObjMatchesField = function(dataSetField, matcher)
+	{
+		//此时未定义的应返回false
+		if($.isEmpty(matcher))
+			return false;
 		
 		var fieldType = dataSetField.type;
 		var fieldArray = dataSetField.array;
