@@ -4002,16 +4002,24 @@ $.inflateChartForm = function(po)
 		return false;
 	};
 	
-	po.hasDataSetFieldSigned = function(dataSetBind, dataSign)
+	po.hasSubDataSetFieldSigned = function(parentNode, dataSign)
 	{
-		var fields = (dataSetBind.dataSet.fields || []);
+		var subNodes = null;
 		
-		for(var i=0; i<fields.length; i++)
+		//parentNode是数据集绑定
+		if(parentNode.fieldNodes != null)
+			subNodes = parentNode.fieldNodes;
+		//parentNode是数据集字段节点
+		else if(parentNode.children != null)
+			subNodes = parentNode.children;
+		
+		if(subNodes == null)
+			return false;
+		
+		for(var i=0; i<subNodes.length; i++)
 		{
-			var field = fields[i];
-			var bindDataSigns = (field.extDsbInfo ? (field.extDsbInfo.bindDataSigns || []) : []);
-			
-			if($.inArrayById(bindDataSigns, dataSign.fullname, "fullname") > -1)
+			var subNode = subNodes[i];
+			if($.inArrayById(subNode.bindDataSigns, dataSign.fullname, "fullname") > -1)
 				return true;
 		}
 		
@@ -5035,7 +5043,8 @@ $.inflateChartForm = function(po)
 			{
 				if(pm.dataSetBindForSign && pm.dataSetFieldNodeForSign)
 				{
-					if(!dataSign.multiple && po.hasDataSetFieldSigned(pm.dataSetBindForSign, dataSign))
+					var parentNode = (pm.dataSetFieldNodeForSign.parentNode != null ? pm.dataSetFieldNodeForSign.parentNode : pm.dataSetBindForSign);
+					if(!dataSign.multiple && po.hasSubDataSetFieldSigned(parentNode, dataSign))
 					{
 						var msg = $.validator.format(po.i18n["chart.fieldWithSignExist"],
 								pm.dataSetBindForSign.dataSet.name, dataSign.extLabel);
