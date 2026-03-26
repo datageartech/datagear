@@ -4093,7 +4093,7 @@ $.inflateChartForm = function(po)
 		$.each(fieldSigns, function(fsIdx, signName)
 		{
 			var dataSign = po.findDataSignByFullname(dataSigns, signName);
-			if(dataSign != null)
+			if(dataSign != null && po.isDataSignMatchesField(dataSign, field))
 				bindDataSigns.push(dataSign);
 		});
 		
