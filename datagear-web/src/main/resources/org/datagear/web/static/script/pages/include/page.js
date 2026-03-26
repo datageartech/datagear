@@ -3785,10 +3785,12 @@ $.inflateChartAttrValuesForm = function(po)
 $.inflateChartForm = function(po)
 {
 	//内置简化数据标记字段匹配器定义
-	//匹配器结构规范：{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false }
+	//匹配器结构规范：
+	//{ inTypes: null、"..."、[ "...", ... ], notInTypes: null、"..."、[ "...", ... ], array: null、true、false, evaluated: null、true、false }
 	//只要其中任一属性不匹配，则表示匹配器不通过，null表示此属性匹配通过
 	po.DATASIGN_FIELD_MATCHERS =
 	{
+		//类型
 		"s": { inTypes: [ po.DataSetFieldType.STRING ] },
 		"n": { inTypes: [ po.DataSetFieldType.NUMBER ] },
 		"i": { inTypes: [ po.DataSetFieldType.INTEGER ] },
@@ -3798,13 +3800,16 @@ $.inflateChartForm = function(po)
 		"b": { inTypes: [ po.DataSetFieldType.BOOLEAN ] },
 		"o": { inTypes: [ po.DataSetFieldType.OBJECT ] },
 		"u": { inTypes: [ po.DataSetFieldType.UNKNOWN ] },
-		"a": { array: true },
-		//基本类
+		//类型：基本类
 		"P": { notInTypes: [ po.DataSetFieldType.OBJECT, po.DataSetFieldType.UNKNOWN ] },
-		//数值类
+		//类型：数值类
 		"N": { inTypes: [ po.DataSetFieldType.NUMBER, po.DataSetFieldType.INTEGER ] },
-		//日期类
-		"D": { inTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] }
+		//类型：日期类
+		"D": { inTypes: [ po.DataSetFieldType.DATE, po.DataSetFieldType.TIME, po.DataSetFieldType.TIMESTAMP ] },
+		//数组
+		"array": { array: true },
+		//计算字段
+		"evaluated": { evaluated: true }
 	};
 	
 	po.inSaveAndShowAction = function(val)
@@ -4353,7 +4358,7 @@ $.inflateChartForm = function(po)
 	 * matcher
 	 * [ matcher, ... ] 它们之间是【或】关系
 	 * 其中，matcher支持如下格式：
-	 * "..."		比如："(s || d) && !a"，字符含义参考po.DATASIGN_FIELD_MATCHERS
+	 * "..."		比如："(s || d) && !array"，字符含义参考po.DATASIGN_FIELD_MATCHERS
 	 * { ... }		格式参考po.DATASIGN_FIELD_MATCHERS
 	 * [ ... ]		元素可以是："..."、{ ... }，它们之间是【且】的关系
 	 */
@@ -4444,6 +4449,7 @@ $.inflateChartForm = function(po)
 		
 		var fieldType = dataSetField.type;
 		var fieldArray = dataSetField.array;
+		var fieldEvaluated = dataSetField.evaluated;
 		
 		if(matcher.inTypes != null)
 		{
@@ -4462,6 +4468,12 @@ $.inflateChartForm = function(po)
 		if(matcher.array != null)
 		{
 			if(fieldArray != matcher.array)
+				return false;
+		}
+		
+		if(matcher.evaluated != null)
+		{
+			if(fieldEvaluated != matcher.evaluated)
 				return false;
 		}
 		
