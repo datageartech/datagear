@@ -7097,24 +7097,14 @@ SPT.datetimeRenderer = function(plugin, config)
 //---------------------------------------------------------
 
 //org.datagear.analysis.DataSetField.DataType
-SPT.DataSetFieldDataType =
-{
-	STRING: "string",
-	BOOLEAN: "boolean",
-	NUMBER: "number",
-	INTEGER: "integer",
-	DATE: "date",
-	TIME: "time",
-	TIMESTAMP: "timestamp",
-	UNKNOWN: "unknown"
-};
+SPT.DataSetFieldDataType = CF.DataSetFieldDataType;
 
 //org.datagear.analysis.ResultDataFormat.TYPE_*
 SPT.ResultDataFormatType =
 {
-	//TYPE_NUMBER
+	//org.datagear.analysis.ResultDataFormat.TYPE_NUMBER
 	NUMBER: "number",
-	//TYPE_STRING
+	//org.datagear.analysis.ResultDataFormat.TYPE_STRING
 	STRING: "string"
 };
 

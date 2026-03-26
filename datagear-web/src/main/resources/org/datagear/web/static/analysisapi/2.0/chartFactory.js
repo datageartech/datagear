@@ -289,6 +289,20 @@ CF.DataSetParamType =
 	OBJECT: "object"
 };
 
+//org.datagear.analysis.DataSetField.DataType
+CF.DataSetFieldDataType =
+{
+	STRING: "string",
+	BOOLEAN: "boolean",
+	NUMBER: "number",
+	INTEGER: "integer",
+	DATE: "date",
+	TIME: "time",
+	TIMESTAMP: "timestamp",
+	OBJECT: "object",
+	UNKNOWN: "unknown"
+};
+
 //org.datagear.analysis.support.html.HtmlChartPluginUsage
 CF.HtmlChartPluginUsage =
 {
