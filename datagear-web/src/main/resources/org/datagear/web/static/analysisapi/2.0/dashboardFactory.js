@@ -2450,7 +2450,7 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
-	element = (CF.isString(element) ? CF.eleOfId(element) : element);
+	element = this._toElementCareId(element);
 	
 	if(!CF.isChartTagName(element))
 		throw new Error("load chart element must be : <"+CF.CHART_TAG_NAME+">");
@@ -2494,7 +2494,7 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
 	//异步加载无需看板已渲染
 	//this._assertAlive();
 	
-	elements = (CF.isString(elements) ? CF.elesOfSelector(elements) : elements);
+	elements = this._toElementArray(elements);
 	
 	// (elements, successCallback)
 	if(CF.isFunction(chartWidgetIds))
@@ -2518,6 +2518,45 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
 	}
 	
 	this._loadCharts(elements, newChartWidgetIds, successCallback, errorCallback);
+};
+
+dashboardProto._toElementCareId = function(element)
+{
+	if(element == null)
+		return null;
+	
+	//元素ID
+	if(CF.isString(element))
+		return CF.eleOfId(element);
+	
+	//元素对象
+	return element;
+};
+
+dashboardProto._toElementArray = function(elements)
+{
+	if(elements == null)
+		return null;
+	
+	//元素选择器字符串
+	if(CF.isString(elements))
+		return CF.elesOfSelector(elements);
+	
+	//元素数组
+	if(CF.isArray(elements))
+		return elements;
+	
+	//元素
+	if(CF.isHtmlEle(elements))
+		return [ elements ];
+	
+	//类数组对象，比如：NodeList
+	if(elements.length !== undefined)
+		return Array.from(elements);
+	
+	//其他
+	var re = [ elements ];
+	return re;
 };
 
 /**
@@ -2548,9 +2587,8 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
 		elements = null;
 	}
 	
-	elements = (elements == null ? [ document.body ] :
-				(CF.isString(elements) ? CF.elesOfSelector(elements) :
-					(CF.isArray(elements) ? elements : [ elements ])));
+	elements = this._toElementArray(elements);
+	elements = (elements == null ? [ document.body ] : elements);
 	
 	var unsolvedEles = [];
 	var unsolvedWidgetIds = [];
@@ -2762,7 +2800,7 @@ dashboardProto._addChartCareStatus = function(chart)
  */
 dashboardProto.createChart = function(element, chartRoot, add)
 {
-	element = (CF.isString(element) ? CF.eleOfId(element) : element);
+	element = this._toElementCareId(element);
 	
 	if(!CF.isChartTagName(element))
 		throw new Error("create chart element must be : <"+CF.CHART_TAG_NAME+">");
@@ -2828,9 +2866,8 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	//创建图表无需看板已渲染
 	//this._assertAlive();
 	
-	elements = (elements == null ? [ document.body ] :
-				(CF.isString(elements) ? CF.elesOfSelector(elements) :
-					(CF.isArray(elements) ? elements : [ elements ])));
+	elements = this._toElementArray(elements);
+	elements = (elements == null ? [ document.body ] : elements);
 	
 	add = (add === undefined ? true : add);
 	
@@ -3394,7 +3431,7 @@ dashboardProto.apiVersion = function()
  */
 dashboardProto.chartsIn = function(element, active)
 {
-	element = (CF.isString(element) ? CF.eleOfId(element) : element);
+	element = this._toElementCareId(element);
 	active = (active === undefined ? false : active);
 	
 	var re = [];
