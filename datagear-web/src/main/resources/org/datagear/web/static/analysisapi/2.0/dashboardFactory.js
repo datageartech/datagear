@@ -1614,7 +1614,7 @@ dashboardProto.resizeCharts = function(charts)
 };
 
 /**
- * 重新调整指定元素内（包括自身）包含的所有活跃图表的尺寸。
+ * 重新调整指定元素内包含的所有活跃图表的尺寸。
  * 
  * @param element HTML元素、HTML元素ID
  * @return 已调整尺寸的图表数组：[ ... ]
@@ -3428,7 +3428,7 @@ dashboardProto.apiVersion = function()
 };
 
 /**
- * 获取指定元素内（包括自身）包含的所有图表。
+ * 获取指定元素内包含的所有图表。
  *
  * @param element HTML元素、HTML元素ID
  * @return [ ... ]
@@ -3440,17 +3440,14 @@ dashboardProto.chartsIn = function(element)
 	var re = [];
 	
 	var eles = CF.elesOfSelector("[id]", element);
-	eles.unshift(element);
 	
 	eles.forEach((ele) =>
 	{
 		let id = CF.eleAttr(ele, "id");
 		let chart = (CF.isEmpty(id) ? null : this.chart(id));
 		
-		if(chart == null)
-			return;
-		
-		re.push(chart);
+		if(chart != null)
+			re.push(chart);
 	});
 	
 	return re;
