@@ -1614,21 +1614,26 @@ dashboardProto.resizeCharts = function(charts)
 };
 
 /**
- * 重新调整指定元素内（包括自身）包含的所有图表尺寸。
+ * 重新调整指定元素内（包括自身）包含的所有活跃图表的尺寸。
  * 
  * @param element HTML元素、HTML元素ID
  * @return 已调整尺寸的图表数组：[ ... ]
  */
 dashboardProto.resizeChartsIn = function(element)
 {
-	var charts = this.chartsIn(element, true);
+	var re = [];
+	var charts = this.chartsIn(element);
 	
 	charts.forEach((chart) =>
 	{
-		chart.resize();
+		if(chart.isActive())
+		{
+			chart.resize();
+			re.push(chart);
+		}
 	});
 	
-	return charts;
+	return re;
 };
 
 /**
@@ -3426,13 +3431,11 @@ dashboardProto.apiVersion = function()
  * 获取指定元素内（包括自身）包含的所有图表。
  *
  * @param element HTML元素、HTML元素ID
- * @param active 可选，是否仅返回已完成渲染且未执行销毁的图表，true 是；false 否。默认值：false
  * @return [ ... ]
  */
-dashboardProto.chartsIn = function(element, active)
+dashboardProto.chartsIn = function(element)
 {
 	element = this._toElementCareId(element);
-	active = (active === undefined ? false : active);
 	
 	var re = [];
 	
@@ -3444,11 +3447,10 @@ dashboardProto.chartsIn = function(element, active)
 		let id = CF.eleAttr(ele, "id");
 		let chart = (CF.isEmpty(id) ? null : this.chart(id));
 		
-		if(!chart)
+		if(chart == null)
 			return;
 		
-		if(!active || (active && chart.isActive()))
-			re.push(chart);
+		re.push(chart);
 	});
 	
 	return re;
