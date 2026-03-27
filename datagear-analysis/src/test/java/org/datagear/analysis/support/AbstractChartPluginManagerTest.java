@@ -25,6 +25,7 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
+import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 import org.junit.Test;
 
@@ -112,75 +113,108 @@ public class AbstractChartPluginManagerTest
 	@Test
 	public void registerChartPluginTest()
 	{
-		SimpleChartPluginManager pm = new SimpleChartPluginManager();
+		{
+			SimpleChartPluginManager pm = new SimpleChartPluginManager();
+
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0"));
+				p.setVersion("0.2");
+				boolean registered = pm.registerChartPlugin(p, false);
+				assertTrue(registered);
+			}
+
+			{
+				TestChartPlugin p = new TestChartPlugin("test1", new Label("test1"));
+				boolean registered = pm.registerChartPlugin(p, false);
+				assertTrue(registered);
+			}
+
+			// 未指定版本号
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-1"));
+				assertFalse(pm.registerChartPlugin(p, false));
+				assertEquals("test0", pm.get("test0").getNameLabel().getValue());
+			}
+
+			// 旧版本号
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-2"));
+				p.setVersion("0.1");
+				assertFalse(pm.registerChartPlugin(p, false));
+				assertEquals("test0", pm.get("test0").getNameLabel().getValue());
+			}
+
+			// 相同版本号
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-3"));
+				p.setVersion("0.2");
+				assertFalse(pm.registerChartPlugin(p, false));
+				assertEquals("test0", pm.get("test0").getNameLabel().getValue());
+			}
+
+			// 新版本号
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-4"));
+				p.setVersion("0.3");
+				assertTrue(pm.registerChartPlugin(p, false));
+				assertEquals("test0-4", pm.get("test0").getNameLabel().getValue());
+			}
+
+			// 都没有版本号
+			{
+				TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-1"));
+				assertTrue(pm.registerChartPlugin(p, false));
+				assertEquals("test1-1", pm.get("test1").getNameLabel().getValue());
+			}
+			{
+				TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-2"));
+				assertTrue(pm.registerChartPlugin(p, false));
+				assertEquals("test1-2", pm.get("test1").getNameLabel().getValue());
+			}
+			{
+				TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-3"));
+				assertTrue(pm.registerChartPlugin(p, false));
+				assertEquals("test1-3", pm.get("test1").getNameLabel().getValue());
+			}
+
+			// 已注册的没有版本号
+			{
+				TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-4"));
+				p.setVersion("0.0.1");
+				assertTrue(pm.registerChartPlugin(p, false));
+				assertEquals("test1-4", pm.get("test1").getNameLabel().getValue());
+			}
+		}
 
 		{
-			TestChartPlugin p = new TestChartPlugin("test0", new Label("test0"));
-			p.setVersion("0.2");
-			boolean registered = pm.registerChartPlugin(p);
-			assertTrue(registered);
-		}
+			SimpleChartPluginManager pm = new SimpleChartPluginManager();
 
-		{
-			TestChartPlugin p = new TestChartPlugin("test1", new Label("test1"));
-			boolean registered = pm.registerChartPlugin(p);
-			assertTrue(registered);
-		}
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0"));
+				p.setVersion("0.2");
+				boolean registered = pm.registerChartPlugin(p, false);
+				assertTrue(registered);
+			}
 
-		// 未指定版本号
-		{
-			TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-1"));
-			assertFalse(pm.registerChartPlugin(p));
-			assertEquals("test0", pm.get("test0").getNameLabel().getValue());
-		}
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0"));
+				p.setVersion("0.1");
+				boolean registered = pm.registerChartPlugin(p, true);
+				assertTrue(registered);
 
-		// 旧版本号
-		{
-			TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-2"));
-			p.setVersion("0.1");
-			assertFalse(pm.registerChartPlugin(p));
-			assertEquals("test0", pm.get("test0").getNameLabel().getValue());
-		}
+				TestChartPlugin actual = (TestChartPlugin) pm.get("test0");
+				assertEquals("0.1", actual.getVersion());
+			}
 
-		// 相同版本号
-		{
-			TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-3"));
-			p.setVersion("0.2");
-			assertFalse(pm.registerChartPlugin(p));
-			assertEquals("test0", pm.get("test0").getNameLabel().getValue());
-		}
+			{
+				TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-1"));
+				boolean registered = pm.registerChartPlugin(p, true);
+				assertTrue(registered);
 
-		// 新版本号
-		{
-			TestChartPlugin p = new TestChartPlugin("test0", new Label("test0-4"));
-			p.setVersion("0.3");
-			assertTrue(pm.registerChartPlugin(p));
-			assertEquals("test0-4", pm.get("test0").getNameLabel().getValue());
-		}
-
-		// 都没有版本号
-		{
-			TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-1"));
-			assertTrue(pm.registerChartPlugin(p));
-			assertEquals("test1-1", pm.get("test1").getNameLabel().getValue());
-		}
-		{
-			TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-2"));
-			assertTrue(pm.registerChartPlugin(p));
-			assertEquals("test1-2", pm.get("test1").getNameLabel().getValue());
-		}
-		{
-			TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-3"));
-			assertTrue(pm.registerChartPlugin(p));
-			assertEquals("test1-3", pm.get("test1").getNameLabel().getValue());
-		}
-
-		// 已注册的没有版本号
-		{
-			TestChartPlugin p = new TestChartPlugin("test1", new Label("test1-4"));
-			p.setVersion("0.0.1");
-			assertTrue(pm.registerChartPlugin(p));
-			assertEquals("test1-4", pm.get("test1").getNameLabel().getValue());
+				TestChartPlugin actual = (TestChartPlugin) pm.get("test0");
+				assertTrue(StringUtil.isEmpty(actual.getVersion()));
+				assertEquals("test0-1", actual.getNameLabel().getValue());
+			}
 		}
 	}
 

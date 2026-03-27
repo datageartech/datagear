@@ -42,7 +42,7 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager
 	@Override
 	public boolean register(ChartPlugin chartPlugin)
 	{
-		return registerChartPlugin(chartPlugin);
+		return registerChartPlugin(chartPlugin, false);
 	}
 
 	@Override

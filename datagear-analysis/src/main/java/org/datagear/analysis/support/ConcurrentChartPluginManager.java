@@ -52,7 +52,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 		try
 		{
 			writeLock.lock();
-			return registerChartPlugin(chartPlugin);
+			return registerChartPlugin(chartPlugin, false);
 		}
 		finally
 		{

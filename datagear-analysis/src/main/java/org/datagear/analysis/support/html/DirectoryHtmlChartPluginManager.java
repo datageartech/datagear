@@ -298,7 +298,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (!sameName.exists())
 		{
 			IOUtil.copyInto(uploadPluginFile, this.directory);
-			re = registerHtmlChartPlugin(uploadPlugin, sameName);
+			re = registerHtmlChartPlugin(uploadPlugin, sameName, false);
 		}
 		else
 		{
@@ -310,7 +310,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			{
 				FileUtil.deleteFile(sameName);
 				IOUtil.copyInto(uploadPluginFile, this.directory);
-				re = registerHtmlChartPlugin(uploadPlugin, sameName);
+				re = registerHtmlChartPlugin(uploadPlugin, sameName, false);
 			}
 			else
 			{
@@ -321,7 +321,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					{
 						FileUtil.deleteFile(sameName);
 						IOUtil.copyInto(uploadPluginFile, this.directory);
-						re = registerHtmlChartPlugin(uploadPlugin, sameName);
+						re = registerHtmlChartPlugin(uploadPlugin, sameName, false);
 					}
 				}
 				// 不同ID的插件，则删除它，载入新的
@@ -330,7 +330,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					removeChartPlugin(loadedPluginId);
 
 					IOUtil.copyInto(uploadPluginFile, this.directory);
-					re = registerHtmlChartPlugin(uploadPlugin, sameName);
+					re = registerHtmlChartPlugin(uploadPlugin, sameName, false);
 				}
 			}
 		}
@@ -424,14 +424,22 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				}
 
 				if (fileCheckTime.isModified())
+				{
 					reloads.add(fileCheckTime);
 
+					if (LOGGER.isDebugEnabled())
+						LOGGER.debug("Chart plugin file [" + fileCheckTime.getFileName()
+								+ "] has been modified, reload is coming");
+				}
 			}
 
 			if (hasDelete)
 			{
 				for (File child : children)
 					reloads.add(new FileCheckTime(child));
+
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("Some chart plugin file has been deleted, full reload is coming");
 			}
 			else
 			{
@@ -451,7 +459,14 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					}
 
 					if (!loaded)
-						reloads.add(new FileCheckTime(child));
+					{
+						FileCheckTime fileCheckTime = new FileCheckTime(child);
+						reloads.add(fileCheckTime);
+
+						if (LOGGER.isDebugEnabled())
+							LOGGER.debug("Chart plugin file [" + fileCheckTime.getFileName()
+									+ "] is new, load is coming");
+					}
 				}
 			}
 		}
@@ -476,7 +491,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			}
 
 			for (FileCheckTime reload : reloads)
-				loadAndRegisterHtmlChartPlugin(reload.getFile());
+				loadAndRegisterHtmlChartPlugin(reload.getFile(), true);
+
+			if (LOGGER.isInfoEnabled())
+				LOGGER.info("Loaded " + reloads.size() + " chart plugins");
 		}
 		finally
 		{
@@ -491,12 +509,12 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 *            {@linkplain #directory}目录下的一个文件
 	 * @return
 	 */
-	protected HtmlChartPlugin loadAndRegisterHtmlChartPlugin(File file)
+	protected HtmlChartPlugin loadAndRegisterHtmlChartPlugin(File file, boolean ignoreCheck)
 	{
 		try
 		{
 			HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadFile(file);
-			return registerHtmlChartPlugin(plugin, file);
+			return registerHtmlChartPlugin(plugin, file, ignoreCheck);
 		}
 		catch (Throwable t)
 		{
@@ -515,9 +533,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 * @param plugin
 	 * @param file
 	 *            {@linkplain #directory}目录下的一个文件
+	 * @param ignoreCheck
 	 * @return
 	 */
-	protected HtmlChartPlugin registerHtmlChartPlugin(HtmlChartPlugin plugin, File file)
+	protected HtmlChartPlugin registerHtmlChartPlugin(HtmlChartPlugin plugin, File file, boolean ignoreCheck)
 	{
 		String fileName = file.getName();
 
@@ -525,7 +544,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			plugin = null;
 		else
 		{
-			if (registerChartPlugin(plugin))
+			if (registerChartPlugin(plugin, ignoreCheck))
 			{
 				inflateCagetory(plugin);
 				this._pluginIdFileNameMap.put(plugin.getId(), fileName);
@@ -665,7 +684,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 */
 	protected static class FileCheckTime
 	{
-		private File file;
+		private final File file;
 		private volatile long lastModified;
 
 		public FileCheckTime(File file)
@@ -680,10 +699,9 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			return file;
 		}
 
-		public void setFile(File file)
+		public String getFileName()
 		{
-			this.file = file;
-			this.lastModified = resolveLastModified(file);
+			return this.file.getName();
 		}
 
 		public boolean isFileExists()
@@ -694,10 +712,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		public boolean isModified()
 		{
 			long fileModified = resolveLastModified(this.file);
-			boolean timeout = (fileModified > this.lastModified);
+			boolean modified = (fileModified != this.lastModified);
 			this.lastModified = fileModified;
 
-			return timeout;
+			return modified;
 		}
 
 		@Override

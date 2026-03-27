@@ -69,18 +69,19 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	/**
 	 * 注册一个{@linkplain ChartPlugin}。
 	 * <p>
-	 * 如果已存在一个更高版本的，则注册失败，返回{@code false}。
+	 * 如果{@code ignoreCheck}为{@code false}，且已存在一个更高版本的，则注册失败，返回{@code false}。
 	 * </p>
 	 * 
 	 * @param chartPlugin
+	 * @param ignoreCheck
 	 * @return
 	 */
-	protected boolean registerChartPlugin(ChartPlugin chartPlugin)
+	protected boolean registerChartPlugin(ChartPlugin chartPlugin, boolean ignoreCheck)
 	{
 		checkLegalChartPlugin(chartPlugin);
 
 		ChartPlugin old = this.chartPluginMap.get(chartPlugin.getId());
-		boolean canPut = canReplaceForSameId(chartPlugin, old);
+		boolean canPut = (ignoreCheck ? true : canReplaceForSameId(chartPlugin, old));
 
 		if (canPut)
 			this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
