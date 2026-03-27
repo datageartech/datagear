@@ -114,7 +114,13 @@ public class DataSign extends AbstractLabeled
 	 * <p>
 	 * 此属性主要是为交互操作界面定义的，所以这里不定义其具体类型，由操作界面环境定义。
 	 * </p>
+	 * 
+	 * @deprecated 此属性是6.0.0版本新增的，考虑再三，决定暂不开放，因为从整体系统功能来说，
+	 *             增加字段匹配器功能来限制其可绑定到的字段，反倒降低了系统灵活性，
+	 *             比如：先将数据标记绑定到一个类型不匹配的字段上，然后可以在看板里将数据转换为匹配的类型。
+	 *             如果采用了字段匹配器，将无法支持上述功能。后续版本考虑在{@linkplain DataSetBind}里添加虚拟字段功能后，再考虑开放此字段匹配器功能。
 	 */
+	@Deprecated
 	private Object fieldMatcher = null;
 
 	public DataSign()
