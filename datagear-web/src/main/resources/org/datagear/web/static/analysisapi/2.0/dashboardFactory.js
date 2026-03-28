@@ -1592,7 +1592,7 @@ dashboardProto.resizeChart = function(identity)
 };
 
 /**
- * 重新调整活跃图表尺寸。
+ * 重新调整给定图表数组中活跃图表的尺寸。
  * 
  * @param charts 可选，要调整的图表数组，如果未设置，则是全部看板图表
  */
@@ -1605,7 +1605,7 @@ dashboardProto.resizeCharts = function(charts)
 	
 	if(charts != null)
 	{
-		this.charts().forEach((chart) =>
+		charts.forEach((chart) =>
 		{
 			if(chart.isActive())
 				chart.resize();
@@ -1614,7 +1614,7 @@ dashboardProto.resizeCharts = function(charts)
 };
 
 /**
- * 重新调整指定元素内包含的所有活跃图表的尺寸。
+ * 重新调整指定元素内（不包括元素自身）包含的所有已加入看板的活跃图表的尺寸。
  * 
  * @param element HTML元素、HTML元素ID
  * @return 已调整尺寸的图表数组：[ ... ]
@@ -2565,7 +2565,7 @@ dashboardProto._toElementArray = function(elements)
 };
 
 /**
- * 将元素内（包括<div>自身）所有设置了"dg-chart-widget"属性，且未初始化为图表的<div>元素异步加载为图表。
+ * 将元素自身或其包含的元素中所有设置了"dg-chart-widget"属性、且未初始化为图表的<div>元素异步加载为图表。
  * 如果没有需要加载的元素，将不会执行异步请求。
  * 
  * 支持调用方式：
@@ -2573,6 +2573,7 @@ dashboardProto._toElementArray = function(elements)
  * dashboard.loadUnsolvedCharts(element);
  * dashboard.loadUnsolvedCharts(successCallback);
  * dashboard.loadUnsolvedCharts(element, successCallback);
+ * dashboard.loadUnsolvedCharts(element, successCallback, errorCallback);
  * 
  * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
  * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
@@ -2847,7 +2848,7 @@ dashboardProto.createChart = function(element, chartRoot, add)
 };
 
 /**
- * 将元素内（包括<div>自身）所有设置了"dg-chart-local"属性，且未初始化为图表的<div>元素创建为本地图表。
+ * 将元素自身或其包含的元素中所有设置了"dg-chart-local"属性、且未初始化为图表的<div>元素创建为本地图表。
  * 
  * 支持调用方式：
  * dashboard.createUnsolvedCharts();
@@ -3428,7 +3429,7 @@ dashboardProto.apiVersion = function()
 };
 
 /**
- * 获取指定元素内包含的所有图表。
+ * 获取指定元素内（不包括元素自身）包含的所有已加入看板的图表。
  *
  * @param element HTML元素、HTML元素ID
  * @return [ ... ]
