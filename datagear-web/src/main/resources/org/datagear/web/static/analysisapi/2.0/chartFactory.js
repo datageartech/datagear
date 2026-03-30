@@ -2385,9 +2385,11 @@ chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment, co
 };
 
 /**
- * 获取渲染此图表的图表部件ID。
+ * 获取实际渲染此图表的图表部件ID。
  * 正常来说，此函数的返回值与期望渲染的图表部件ID相同（通常是this.elementWidgetId()的返回值），
  * 当不同时，表明服务端因加载图表异常（未找到或出现错误）而使用了一个备用图表，用于在页面展示异常信息。
+ * 
+ * @returns 实际图表部件ID，对于本地图表，此函数将返回null
  */
 chartProto.widgetId = function()
 {
@@ -2397,6 +2399,8 @@ chartProto.widgetId = function()
 
 /**
  * 获取图表HTML元素。
+ * 
+ * @returns 图表HTML元素，不存在时将返回null
  */
 chartProto.element = function()
 {
@@ -2406,7 +2410,8 @@ chartProto.element = function()
 
 /**
  * 获取图表HTML元素上的图表部件ID（"dg-chart-widget"属性值）。
- * 如果图表HTML元素上未设置过图表部件ID，将返回null。
+ * 
+ * @returns 图表部件ID，如果图表HTML元素上未设置图表部件ID，将返回null。
  */
 chartProto.elementWidgetId = function()
 {
