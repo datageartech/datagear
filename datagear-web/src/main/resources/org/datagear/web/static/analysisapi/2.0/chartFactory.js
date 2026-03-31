@@ -265,11 +265,6 @@ CF.CHART_ATTR_NAME_OPTIONS = "DG_CHART_OPTIONS";
  */
 CF.CHART_ATTR_NAME_WIDGET = "DG_CHART_WIDGET";
 
-/**
- * 数据标记全名分隔符
- */
-CF.DATA_SIGN_FULLNAME_SEPARATOR = ".";
-
 /**内置名字标识片段*/
 CF.BUILTIN_NAME_PART = "datagear";
 
@@ -3003,6 +2998,16 @@ chartProto._dataSetFieldNonNull = function(dataSetBind, identity)
 	return field;
 };
 
+chartProto._fullnameOfFieldNonNull = function(field)
+{
+	var re = (field == null ? null : field.fullname);
+	
+	if(re == null)
+		throw new Error(CF.chartLogInfo(this) + " DataSetField[name='"+field.name+"'] fullname required");
+	
+	return re;
+};
+
 /**
  * 获取/设置数据集字段别名。
  * 
@@ -3017,13 +3022,14 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldNonNull(dataSetBind, field);
+	var fullname = this._fullnameOfFieldNonNull(field);
 	
 	if(dataSetBind.fieldAliases == null)
 		dataSetBind.fieldAliases = {};
 	
 	if(arguments.length <= 2)
 	{
-		let re = dataSetBind.fieldAliases[field.fullname];
+		let re = dataSetBind.fieldAliases[fullname];
 		
 		if(!re)
 			re = (field.label ||  field.name);
@@ -3032,7 +3038,7 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 	}
 	else
 	{
-		dataSetBind.fieldAliases[field.fullname] = alias;
+		dataSetBind.fieldAliases[fullname] = alias;
 	}
 };
 
@@ -3050,17 +3056,18 @@ chartProto.dataSetFieldOrder = function(dataSetBind, field, order)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldNonNull(dataSetBind, field);
+	var fullname = this._fullnameOfFieldNonNull(field);
 	
 	if(dataSetBind.fieldOrders == null)
 		dataSetBind.fieldOrders = {};
 	
 	if(arguments.length <= 2)
 	{
-		return dataSetBind.fieldOrders[field.fullname];
+		return dataSetBind.fieldOrders[fullname];
 	}
 	else
 	{
-		dataSetBind.fieldOrders[field.fullname] = order;
+		dataSetBind.fieldOrders[fullname] = order;
 	}
 };
 
@@ -3178,19 +3185,20 @@ chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldNonNull(dataSetBind, field);
+	var fullname = this._fullnameOfFieldNonNull(field);
 	
 	if(dataSetBind.fieldSigns == null)
 		dataSetBind.fieldSigns = {};
 	
 	if(arguments.length <= 2)
 	{
-		var re = dataSetBind.fieldSigns[field.fullname];
+		var re = dataSetBind.fieldSigns[fullname];
 		return (re == null ? [] : re);
 	}
 	else
 	{
 		dataSign = this._toDataSignValues(dataSign);
-		dataSetBind.fieldSigns[field.fullname] = dataSign;
+		dataSetBind.fieldSigns[fullname] = dataSign;
 	}
 };
 
@@ -3826,6 +3834,16 @@ chartProto.dataSetAttachment = function(dataSetBind, attachment)
 	}
 };
 
+chartProto._fullnameOfDataSignNonNull = function(dataSign)
+{
+	var re = (dataSign == null ? null : dataSign.fullname);
+	
+	if(re == null)
+		throw new Error(CF.chartLogInfo(this) + " plugin DataSign[name='"+dataSign.name+"'] fullname required");
+	
+	return re;
+};
+
 /**
  * 判断数据集是否有指定数据标记。
  * 
@@ -3847,7 +3865,9 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
 	if(dataSignObj == null)
 		return false;
 	
-	return (CF.indexInArray(dss, dataSignObj.fullname) >= 0);
+	var fullname = this._fullnameOfDataSignNonNull(dataSignObj);
+	
+	return (CF.indexInArray(dss, fullname) >= 0);
 };
 
 /**
@@ -3871,7 +3891,9 @@ chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
 	if(dataSignObj == null)
 		return false;
 	
-	return (CF.indexInArray(fieldSigns, dataSignObj.fullname) >= 0);
+	var fullname = this._fullnameOfDataSignNonNull(dataSignObj);
+	
+	return (CF.indexInArray(fieldSigns, fullname) >= 0);
 };
 
 /**
