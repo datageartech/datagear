@@ -31,6 +31,7 @@ import java.util.Set;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.support.FileChartPluginResource;
 import org.datagear.analysis.support.ZipEntryChartPluginResource;
@@ -218,11 +219,17 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(6);
 
-			Assert.assertEquals("plugin07-6.0-attributeform-file", plugin.getId());
+			Assert.assertEquals("plugin07-6.0-split-files", plugin.getId());
 			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
+
+			{
+				List<DataSign> dataSigns = plugin.getDataSigns();
+				assertEquals(1, dataSigns.size());
+				assertEquals("category", dataSigns.get(0).getName());
+			}
 
 			{
 				ChartPluginAttributeForm attributeForm = plugin.getAttributeForm();
@@ -237,11 +244,17 @@ public class HtmlChartPluginLoaderTest
 		{
 			HtmlChartPlugin plugin = list.get(7);
 
-			Assert.assertEquals("plugin08-6.0-attributeform-file", plugin.getId());
+			Assert.assertEquals("plugin08-6.0-split-files", plugin.getId());
 			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 			StringJsChartRenderer chartRenderer = (StringJsChartRenderer) plugin.getRenderer();
 			assertEquals(JsChartRenderer.CODE_TYPE_INVOKE, chartRenderer.getCodeType());
 			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
+
+			{
+				List<DataSign> dataSigns = plugin.getDataSigns();
+				assertEquals(1, dataSigns.size());
+				assertEquals("name", dataSigns.get(0).getName());
+			}
 
 			{
 				ChartPluginAttributeForm attributeForm = plugin.getAttributeForm();

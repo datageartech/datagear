@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -219,31 +220,36 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 */
 	public T resolveProperties(String pluginJson) throws IOException
 	{
-		return resolveProperties(pluginJson, null);
+		return resolveProperties(pluginJson, null, null);
 	}
 
 	/**
 	 * 从JSON字符串解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
 	 * @param pluginJson
+	 * @param dataSignsJson
+	 *            允许{@code null}
 	 * @param attributeFormJson
 	 *            允许{@code null}
-	 * @return {@linkplain #getChartPlugin()}
+	 * @return
 	 * @throws IOException
 	 */
-	public T resolveProperties(String pluginJson, String attributeFormJson)
-			throws IOException
+	public T resolveProperties(String pluginJson, String dataSignsJson, String attributeFormJson) throws IOException
 	{
-		@SuppressWarnings("unchecked")
-		Map<String, Object> properties = JsonSupport.parseNonStardand(pluginJson, Map.class);
+		Reader pluginIn = new StringReader(pluginJson);
+		Reader dataSignsIn = (StringUtil.isEmpty(dataSignsJson) ? null : new StringReader(dataSignsJson));
+		Reader attributeFormIn = (StringUtil.isEmpty(attributeFormJson) ? null : new StringReader(attributeFormJson));
 
-		if (!StringUtil.isEmpty(attributeFormJson))
+		try
 		{
-			Object attributeForm = JsonSupport.parseNonStardand(pluginJson, Map.class);
-			properties.put(JSON_PROPERTY_ATTRIBUTE_FORM, attributeForm);
+			return resolveProperties(pluginIn, dataSignsIn, attributeFormIn);
 		}
-
-		return resolveProperties(properties);
+		finally
+		{
+			IOUtil.close(pluginIn);
+			IOUtil.close(dataSignsIn);
+			IOUtil.close(attributeFormIn);
+		}
 	}
 
 	/**
@@ -255,23 +261,31 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 */
 	public T resolveProperties(Reader pluginJsonIn) throws IOException
 	{
-		return resolveProperties(pluginJsonIn, null);
+		return resolveProperties(pluginJsonIn, null, null);
 	}
 
 	/**
 	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
 	 * @param pluginJsonIn
+	 * @param dataSignsIn
+	 *            允许{@code null}
 	 * @param attributeFormIn
 	 *            允许{@code null}
 	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public T resolveProperties(Reader pluginJsonIn, Reader attributeFormIn)
+	public T resolveProperties(Reader pluginJsonIn, Reader dataSignsIn, Reader attributeFormIn)
 			throws IOException
 	{
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = JsonSupport.parseNonStardand(pluginJsonIn, Map.class);
+
+		if (dataSignsIn != null)
+		{
+			Object dataSigns = JsonSupport.parseNonStardand(dataSignsIn, List.class);
+			properties.put(JSON_PROPERTY_DATA_SIGNS, dataSigns);
+		}
 
 		if (attributeFormIn != null)
 		{
@@ -293,25 +307,28 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public T resolveProperties(InputStream pluginJsonIn, String encoding)
 			throws IOException
 	{
-		return resolveProperties(pluginJsonIn, null, encoding);
+		return resolveProperties(pluginJsonIn, null, null, encoding);
 	}
 
 	/**
 	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
 	 * @param pluginJsonIn
+	 * @param dataSignsIn
+	 *            允许{@code null}
 	 * @param attributeFormIn
 	 *            允许{@code null}
 	 * @param encoding
 	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public T resolveProperties(InputStream pluginJsonIn, InputStream attributeFormIn,
+	public T resolveProperties(InputStream pluginJsonIn, InputStream dataSignsIn, InputStream attributeFormIn,
 			String encoding) throws IOException
 	{
-		Reader reader = IOUtil.getReader(pluginJsonIn, encoding);
-		Reader reader1 = (attributeFormIn == null ? null : IOUtil.getReader(attributeFormIn, encoding));
-		return resolveProperties(reader, reader1);
+		Reader pluginReader = IOUtil.getReader(pluginJsonIn, encoding);
+		Reader dataSignsReader = (dataSignsIn == null ? null : IOUtil.getReader(dataSignsIn, encoding));
+		Reader attributeFormReader = (attributeFormIn == null ? null : IOUtil.getReader(attributeFormIn, encoding));
+		return resolveProperties(pluginReader, dataSignsReader, attributeFormReader);
 	}
 
 	/**
