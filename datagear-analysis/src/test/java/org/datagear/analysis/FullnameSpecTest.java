@@ -18,9 +18,9 @@
 package org.datagear.analysis;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
-
-import java.util.List;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -72,113 +72,28 @@ public class FullnameSpecTest
 		}
 
 		{
-			String name = "a.a\\a\"a\'a[a]a";
+			String name = "a.a\\a";
 			String fullname = FullnameSpec.toFullname(name, null);
-			assertEquals("a\\.a\\\\a\\\"a\\\'a\\[a\\]a", fullname);
-		}
-
-		{
-			String name = "b.b\\b\"b\'b[b]b";
-			String fullname = FullnameSpec.toFullname(name, "a\\.a\\\\a\\\"a\\\'a\\[a\\]a");
-			assertEquals("a\\.a\\\\a\\\"a\\\'a\\[a\\]a.b\\.b\\\\b\\\"b\\\'b\\[b\\]b", fullname);
-		}
-
-		{
-			String name = "c.c\\c\"c\'c[c]c";
-			String fullname = FullnameSpec.toFullname(name,
-					"a\\.a\\\\a\\\"a\\\'a\\[a\\]a.b\\.b\\\\b\\\"b\\\'b\\[b\\]b");
-			assertEquals("a\\.a\\\\a\\\"a\\\'a\\[a\\]a.b\\.b\\\\b\\\"b\\\'b\\[b\\]b.c\\.c\\\\c\\\"c\\\'c\\[c\\]c",
-					fullname);
+			assertEquals("a\\.a\\\\a", fullname);
 		}
 	}
 
 	@Test
-	public void fromFullnameTest()
+	public void isTopFullnameTest()
 	{
 		{
-			String fullname = null;
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(0, names.size());
-		}
-
-		{
-			String fullname = "";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(0, names.size());
-		}
-
-		{
-			String fullname = "...";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(0, names.size());
-		}
-
-		{
 			String fullname = "aaa";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(1, names.size());
-			assertEquals("aaa", names.get(0));
-		}
-
-		{
-			String fullname = ".aaa";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(1, names.size());
-			assertEquals("aaa", names.get(0));
-		}
-
-		{
-			String fullname = "aaa.";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(1, names.size());
-			assertEquals("aaa", names.get(0));
-		}
-
-		{
-			String fullname = ".aaa.";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(1, names.size());
-			assertEquals("aaa", names.get(0));
+			assertTrue(FullnameSpec.isTopFullname(fullname, "aaa"));
 		}
 
 		{
 			String fullname = "aaa.bbb";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(2, names.size());
-			assertEquals("aaa", names.get(0));
-			assertEquals("bbb", names.get(1));
+			assertFalse(FullnameSpec.isTopFullname(fullname, "aaa"));
 		}
 
 		{
-			String fullname = "aaa.bbb.ccc";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(3, names.size());
-			assertEquals("aaa", names.get(0));
-			assertEquals("bbb", names.get(1));
-			assertEquals("ccc", names.get(2));
-		}
-
-		{
-			String fullname = "a\\.a\\\\a\\\"a\\\'a\\[a\\]a";
-			List<String> names = FullnameSpec.fromFullname(fullname);
-			assertEquals(1, names.size());
-			assertEquals("a.a\\a\"a\'a[a]a", names.get(0));
-		}
-
-		{
-			List<String> names = FullnameSpec.fromFullname("a\\.a\\\\a\\\"a\\\'a\\[a\\]a.b\\.b\\\\b\\\"b\\\'b\\[b\\]b");
-			assertEquals(2, names.size());
-			assertEquals("a.a\\a\"a\'a[a]a", names.get(0));
-			assertEquals("b.b\\b\"b\'b[b]b", names.get(1));
-		}
-
-		{
-			List<String> names = FullnameSpec.fromFullname(
-					"a\\.a\\\\a\\\"a\\\'a\\[a\\]a.b\\.b\\\\b\\\"b\\\'b\\[b\\]b.c\\.c\\\\c\\\"c\\\'c\\[c\\]c");
-			assertEquals(3, names.size());
-			assertEquals("a.a\\a\"a\'a[a]a", names.get(0));
-			assertEquals("b.b\\b\"b\'b[b]b", names.get(1));
-			assertEquals("c.c\\c\"c\'c[c]c", names.get(2));
+			String fullname = "aaa\\.bbb";
+			assertTrue(FullnameSpec.isTopFullname(fullname, "aaa.bbb"));
 		}
 	}
 }

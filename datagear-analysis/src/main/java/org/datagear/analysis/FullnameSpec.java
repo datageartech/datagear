@@ -17,10 +17,6 @@
 
 package org.datagear.analysis;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.datagear.util.StringUtil;
 
 /**
@@ -48,9 +44,7 @@ public class FullnameSpec
 	 * </p>
 	 */
 	public static final char[] RESERVED_CHARS = new char[] {
-			SEPARATOR, ESCAPER,
-			// 下面这几个字符目前没有用到，留有后续扩展
-			'\"', '\'', '[', ']'
+			SEPARATOR, ESCAPER
 	};
 
 	/**
@@ -72,60 +66,6 @@ public class FullnameSpec
 			name = parentFullname + SEPARATOR + name;
 
 		return name;
-	}
-
-	/**
-	 * 拆分全名。
-	 * 
-	 * @param fullname
-	 * @return
-	 */
-	public static List<String> fromFullname(String fullname)
-	{
-		if (StringUtil.isEmpty(fullname))
-			return Collections.emptyList();
-
-		List<String> names = new ArrayList<>();
-
-		StringBuilder segment = new StringBuilder();
-		for (int i = 0, len = fullname.length(); i < len;)
-		{
-			char c = fullname.charAt(i);
-
-			if (c == ESCAPER)
-			{
-				if (i < len - 1)
-					segment.append(fullname.charAt(i + 1));
-
-				i += 2;
-			}
-			else
-			{
-				if (c == SEPARATOR)
-				{
-					String name = segment.toString();
-
-					// 空name是非法格式，应忽略
-					if (!name.isEmpty())
-					{
-						names.add(name);
-						segment.setLength(0);
-					}
-				}
-				else
-					segment.append(c);
-
-				i += 1;
-			}
-		}
-
-		String name = segment.toString();
-
-		// 空name是非法格式，应忽略
-		if (!name.isEmpty())
-			names.add(name);
-
-		return names;
 	}
 
 	/**
