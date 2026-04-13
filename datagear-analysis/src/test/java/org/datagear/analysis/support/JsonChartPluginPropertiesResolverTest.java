@@ -183,6 +183,7 @@ public class JsonChartPluginPropertiesResolverTest
 				List<DataSign> children0 = dataSign.getChildren();
 
 				assertEquals("nestDataSetSign", dataSign.getName());
+				assertEquals("nestDataSetSign", dataSign.getFullname());
 				assertEquals(1, dataSign.getTargets().length);
 				assertEquals(DataSign.TARGET_DATASET, dataSign.getTargets()[0]);
 				assertEquals(2, children0.size());
@@ -192,6 +193,7 @@ public class JsonChartPluginPropertiesResolverTest
 					List<DataSign> children1 = child.getChildren();
 
 					assertEquals("s0", child.getName());
+					assertEquals("nestDataSetSign.s0", child.getFullname());
 					assertEquals(1, child.getTargets().length);
 					assertEquals(DataSign.TARGET_FIELD, child.getTargets()[0]);
 					assertEquals(2, children1.size());
@@ -201,6 +203,7 @@ public class JsonChartPluginPropertiesResolverTest
 						List<DataSign> children2 = child1.getChildren();
 
 						assertEquals("s00", child1.getName());
+						assertEquals("nestDataSetSign.s0.s00", child1.getFullname());
 						assertEquals(1, child1.getTargets().length);
 						assertEquals(DataSign.TARGET_FIELD, child1.getTargets()[0]);
 						assertEquals(1, children2.size());
@@ -208,6 +211,7 @@ public class JsonChartPluginPropertiesResolverTest
 						{
 							DataSign child2 = children2.get(0);
 							assertEquals("s000", child2.getName());
+							assertEquals("nestDataSetSign.s0.s00.s000", child2.getFullname());
 							assertEquals(1, child2.getTargets().length);
 							assertEquals(DataSign.TARGET_FIELD, child2.getTargets()[0]);
 						}
@@ -215,6 +219,8 @@ public class JsonChartPluginPropertiesResolverTest
 					{
 						DataSign child1 = children1.get(1);
 						assertEquals("s01", child1.getName());
+						assertEquals("nestDataSetSign.s0.s01", child1.getFullname());
+						assertEquals(1, child1.getTargets().length);
 						assertEquals(1, child1.getTargets().length);
 						assertEquals(DataSign.TARGET_FIELD, child1.getTargets()[0]);
 						assertEquals("fm01", child1.getFieldMatcher());
@@ -223,7 +229,9 @@ public class JsonChartPluginPropertiesResolverTest
 
 				{
 					DataSign child = children0.get(1);
+
 					assertEquals("s1", child.getName());
+					assertEquals("nestDataSetSign-s1", child.getFullname());
 					assertEquals(1, child.getTargets().length);
 					assertEquals(DataSign.TARGET_FIELD, child.getTargets()[0]);
 				}
@@ -234,6 +242,7 @@ public class JsonChartPluginPropertiesResolverTest
 				List<DataSign> children0 = dataSign.getChildren();
 
 				assertEquals("nestFieldSign", dataSign.getName());
+				assertEquals("nestCustomFullname", dataSign.getFullname());
 				assertEquals(1, dataSign.getTargets().length);
 				assertEquals(DataSign.TARGET_FIELD, dataSign.getTargets()[0]);
 				assertEquals(2, children0.size());
@@ -243,6 +252,7 @@ public class JsonChartPluginPropertiesResolverTest
 					List<DataSign> children1 = child.getChildren();
 
 					assertEquals("s0", child.getName());
+					assertEquals("nestCustomFullname.s0", child.getFullname());
 					assertEquals(1, child.getTargets().length);
 					assertEquals(DataSign.TARGET_FIELD, child.getTargets()[0]);
 					assertEquals(2, children1.size());
@@ -252,6 +262,7 @@ public class JsonChartPluginPropertiesResolverTest
 						List<DataSign> children2 = child1.getChildren();
 
 						assertEquals("s00", child1.getName());
+						assertEquals("nestCustomFullname.s0.s00", child1.getFullname());
 						assertEquals(1, child1.getTargets().length);
 						assertEquals(DataSign.TARGET_FIELD, child1.getTargets()[0]);
 						assertEquals(1, children2.size());
@@ -259,6 +270,7 @@ public class JsonChartPluginPropertiesResolverTest
 						{
 							DataSign child2 = children2.get(0);
 							assertEquals("s000", child2.getName());
+							assertEquals("nestCustomFullname.s0.s00.s000", child2.getFullname());
 							assertEquals(1, child2.getTargets().length);
 							assertEquals(DataSign.TARGET_FIELD, child2.getTargets()[0]);
 							assertEquals("fm000", child2.getFieldMatcher());
@@ -267,6 +279,7 @@ public class JsonChartPluginPropertiesResolverTest
 					{
 						DataSign child1 = children1.get(1);
 						assertEquals("s01", child1.getName());
+						assertEquals("nestCustomFullname.s0.s01", child1.getFullname());
 						assertEquals(1, child1.getTargets().length);
 						assertEquals(DataSign.TARGET_FIELD, child1.getTargets()[0]);
 					}
@@ -275,6 +288,7 @@ public class JsonChartPluginPropertiesResolverTest
 				{
 					DataSign child = children0.get(1);
 					assertEquals("s1", child.getName());
+					assertEquals("nestFieldSign-s1", child.getFullname());
 					assertEquals(1, child.getTargets().length);
 					assertEquals(DataSign.TARGET_FIELD, child.getTargets()[0]);
 				}

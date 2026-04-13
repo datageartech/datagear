@@ -47,6 +47,7 @@ public class DataSign extends AbstractLabeled
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_FULLNAME = "fullname";
 	public static final String PROPERTY_TARGETS = "targets";
 	public static final String PROPERTY_REQUIRED = "required";
 	public static final String PROPERTY_MULTIPLE = "multiple";

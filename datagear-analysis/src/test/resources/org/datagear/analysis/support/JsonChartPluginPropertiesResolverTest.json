@@ -109,12 +109,14 @@
 					]
 				},
 				{
-					name: "s1"
+					name: "s1",
+					fullname: "nestDataSetSign-s1"
 				}
 			]
 		},
 		{
 			name: "nestFieldSign",
+			fullname: "nestCustomFullname",
 			children:
 			[
 				{
@@ -126,7 +128,8 @@
 					]
 				},
 				{
-					name: "s1"
+					name: "s1",
+					fullname: "nestFieldSign-s1"
 				}
 			]
 		}

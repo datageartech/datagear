@@ -452,11 +452,15 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			String name = (String) map.get(DataSign.PROPERTY_NAME);
 			if (StringUtil.isEmpty(name))
 				return null;
+
+			String fullname = (String) map.get(DataSign.PROPERTY_FULLNAME);
+			if(StringUtil.isEmpty(fullname))
+				fullname = FullnameSpec.toFullname(name, (parent == null ? null : parent.getFullname()));
 	
 			DataSign dataSign = createDataSign();
 
 			dataSign.setName(name);
-			dataSign.setFullname(FullnameSpec.toFullname(name, (parent == null ? null : parent.getFullname())));
+			dataSign.setFullname(fullname);
 			dataSign.setTargets(convertToDataSignTargets(map.get(DataSign.PROPERTY_TARGETS), parent));
 			dataSign.setRequired(convertToDataSignRequired(map.get(DataSign.PROPERTY_REQUIRED)));
 			dataSign.setMultiple(convertToDataSignMultiple(map.get(DataSign.PROPERTY_MULTIPLE)));
