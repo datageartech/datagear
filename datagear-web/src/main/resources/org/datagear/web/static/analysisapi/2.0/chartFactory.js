@@ -2921,10 +2921,27 @@ chartProto.dataSetFields = function(owner)
  * 获取指定标识的数据集字段。
  * 
  * @param owner 数据集绑定或其索引、数据集、父级数据集字段
- * @param identity 数据集字段标识：字段名、字段索引、字段对象（将直接返回），或者由字段名/字段索引/字段对象组成的层级数组（数组索引表示查找层级）
+ * @param identity 数据集字段标识：字段名、字段索引、字段对象（将直接返回）
  * @returns 数据集字段，没有找到则返回null
  */
 chartProto.dataSetField = function(owner, identity)
+{
+	//字段对象
+	if(this._isDataSetFieldObj(identity))
+		return identity;
+	
+	var fields = this.dataSetFields(owner);
+	return this._findDataSetField(fields, identity);
+};
+
+/**
+ * 嵌套查找指定标识的数据集字段。
+ * 
+ * @param owner 数据集绑定或其索引、数据集、父级数据集字段
+ * @param identity 数据集字段标识：字段全名、字段索引、字段对象（将直接返回），或者由字段名/字段索引/字段对象组成的层级数组（数组索引表示查找层级）
+ * @returns 数据集字段，没有找到则返回null
+ */
+chartProto.dataSetFieldNested = function(owner, identity)
 {
 	//字段对象
 	if(this._isDataSetFieldObj(identity))
@@ -2935,7 +2952,12 @@ chartProto.dataSetField = function(owner, identity)
 	
 	if(!isArray)
 	{
-		return this._findDataSetField(fields, identity);
+		//字段索引
+		if(CF.isNumber(identity))
+			return this._findDataSetField(fields, identity);
+		//字段全名
+		else
+			return this._findDataSetFieldByFullname(fields, identity);
 	}
 	else
 	{
@@ -2983,14 +3005,38 @@ chartProto._findDataSetField = function(fields, name)
 	}
 };
 
+chartProto._findDataSetFieldByFullname = function(fields, fullname)
+{
+	if(fields == null || fullname == null)
+		return null;
+	
+	for(let i=0; i<fields.length; i++)
+	{
+		let field = fields[i];
+		
+		if(field && field.fullname == fullname)
+			return field;
+		
+		if(field.fields != null)
+		{
+			let subField = this._findDataSetFieldByFullname(field.fields, fullname);
+			
+			if(subField != null)
+				return subField;
+		}
+	}
+	
+	return null;
+};
+
 chartProto._isDataSetFieldObj = function(o)
 {
 	return (o != null && o.name !== undefined);
 };
 
-chartProto._dataSetFieldNonNull = function(dataSetBind, identity)
+chartProto._dataSetFieldNestedNonNull = function(dataSetBind, identity)
 {
-	var field = this.dataSetField(dataSetBind, identity);
+	var field = this.dataSetFieldNested(dataSetBind, identity);
 	
 	if(field == null)
 		throw new Error(CF.chartLogInfo(this) + " no DataSetField found for : " + identity);
@@ -3014,14 +3060,14 @@ chartProto._fullnameOfFieldNonNull = function(field)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetField()函数的identity参数相同
+ * @param field 与this.dataSetFieldNested()函数的identity参数相同
  * @param alias 可选，要设置的别名，不设置则执行获取操作
  * @returns 要获取的别名，不会为null
  */
 chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	field = this._dataSetFieldNonNull(dataSetBind, field);
+	field = this._dataSetFieldNestedNonNull(dataSetBind, field);
 	var fullname = this._fullnameOfFieldNonNull(field);
 	
 	if(dataSetBind.fieldAliases == null)
@@ -3048,14 +3094,14 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetField()函数的identity参数相同
+ * @param field 与this.dataSetFieldNested()函数的identity参数相同
  * @param order 可选，要设置的排序数值，不设置则执行获取操作
  * @returns 要获取的排序数值，没有设置过则返回null
  */
 chartProto.dataSetFieldOrder = function(dataSetBind, field, order)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	field = this._dataSetFieldNonNull(dataSetBind, field);
+	field = this._dataSetFieldNestedNonNull(dataSetBind, field);
 	var fullname = this._fullnameOfFieldNonNull(field);
 	
 	if(dataSetBind.fieldOrders == null)
@@ -3177,14 +3223,14 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetField()函数的identity参数相同
+ * @param field 与this.dataSetFieldNested()函数的identity参数相同
  * @param dataSign 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
  * @returns 数据标记名字符串数组，空数组表示没有
  */
 chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
-	field = this._dataSetFieldNonNull(dataSetBind, field);
+	field = this._dataSetFieldNestedNonNull(dataSetBind, field);
 	var fullname = this._fullnameOfFieldNonNull(field);
 	
 	if(dataSetBind.fieldSigns == null)
@@ -3874,7 +3920,7 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
  * 判断数据集字段是否有指定数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetField()函数的identity参数相同
+ * @param field 与this.dataSetFieldNested()函数的identity参数相同
  * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示匹配无任何标记的
  * @returns true、false
  */
