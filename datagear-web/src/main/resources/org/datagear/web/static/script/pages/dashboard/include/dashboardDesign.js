@@ -3674,7 +3674,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				if(!dashboardEditor)
 					return;
 				
-				var attrForm = (dashboardEditor.getElementChartPluginAttributeForm() || {});
+				var attrForm = (dashboardEditor.getElementChartPluginForm() || {});
 				var attrValues = (dashboardEditor.getElementChartAttrValues() || {});
 				
 				po.setupChartAttrValuesForm(attrForm, attrValues,

@@ -61,7 +61,7 @@ public class HtmlChartPluginVo extends HtmlChartPluginJson
 		if (!detail)
 		{
 			setResources(null);
-			setAttributeForm(null);
+			setForm(null);
 			setDataSigns(null);
 			setDataSetRange(null);
 			setCategories(null);

@@ -33,7 +33,7 @@ import java.util.Map;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartPluginAttributeForm;
+import org.datagear.analysis.ChartPluginForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
@@ -78,7 +78,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getNameLabel());
 			assertNotNull(chartPlugin.getDescLabel());
 			assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
-			assertNotNull(chartPlugin.getAttributeForm());
+			assertNotNull(chartPlugin.getForm());
 			assertNotNull(chartPlugin.getDataSigns());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
@@ -301,10 +301,11 @@ public class JsonChartPluginPropertiesResolverTest
 				assertNull(dataSetRange.getAttachment());
 			}
 
-			ChartPluginAttributeForm attributeForm = chartPlugin.getAttributeForm();
-			List<FormProperty> formProperties = attributeForm.getProperties();
-			List<FormPropertyGroup> propertyGroups = attributeForm.getGroups();
+			ChartPluginForm form = chartPlugin.getForm();
+			List<FormProperty> formProperties = form.getProperties();
+			List<FormPropertyGroup> propertyGroups = form.getGroups();
 			
+			assertEquals(ChartPluginForm.FORM_VALUE_ATTR_NAME, form.getName());
 			assertNotNull(formProperties);
 			assertNotNull(propertyGroups);
 			assertEquals(2, propertyGroups.size());
@@ -566,7 +567,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getNameLabel());
 			assertNotNull(chartPlugin.getDescLabel());
 			assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
-			assertNotNull(chartPlugin.getAttributeForm());
+			assertNotNull(chartPlugin.getForm());
 			assertNotNull(chartPlugin.getDataSigns());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
@@ -660,8 +661,10 @@ public class JsonChartPluginPropertiesResolverTest
 				assertNull(dataSetRange.getAttachment());
 			}
 
-			ChartPluginAttributeForm attributeForm = chartPlugin.getAttributeForm();
-			List<FormProperty> formProperties = attributeForm.getProperties();
+			ChartPluginForm form = chartPlugin.getForm();
+			List<FormProperty> formProperties = form.getProperties();
+
+			assertNull(form.getName());
 
 			{
 				FormProperty prop0 = formProperties.get(0);
@@ -980,7 +983,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getNameLabel());
 			assertNotNull(chartPlugin.getDescLabel());
 			assertTrue(chartPlugin.getIconResourceNames().size() > 0);
-			assertNotNull(chartPlugin.getAttributeForm());
+			assertNotNull(chartPlugin.getForm());
 			assertNotNull(chartPlugin.getDataSigns());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
@@ -1008,8 +1011,8 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			ChartPluginAttributeForm attributeForm = chartPlugin.getAttributeForm();
-			List<FormProperty> formProperties = attributeForm.getProperties();
+			ChartPluginForm form = chartPlugin.getForm();
+			List<FormProperty> formProperties = form.getProperties();
 
 			{
 				InputFormProperty prop = (InputFormProperty) formProperties
