@@ -6274,13 +6274,13 @@
 	//----------------------------------------
 	
 	/**
-	 * 是否根级插件属性表单。
-	 * 根级插件属性表单的name为null，具体参考：
-	 * org.datagear.analysis.ChartPluginAttributeForm.getName()说明
+	 * 是否根级插件配置表单。
+	 * 根级插件配置表单的name为null，具体参考：
+	 * org.datagear.analysis.ChartPluginConfigForm.getName()说明
 	 */
-	chartFactory.isRootPluginAttributeForm = function(pluginAttributeForm)
+	chartFactory.isRootPluginConfigForm = function(pluginConfigForm)
 	{
-		return (pluginAttributeForm != null && pluginAttributeForm.name == null);
+		return (pluginConfigForm != null && pluginConfigForm.name == null);
 	};
 	
 	/**

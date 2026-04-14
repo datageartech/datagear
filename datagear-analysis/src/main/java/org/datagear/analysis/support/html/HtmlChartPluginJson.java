@@ -71,7 +71,7 @@ public class HtmlChartPluginJson extends HtmlChartPlugin
 	{
 		LabelUtil.concrete(plugin, this, locale);
 		setDataSigns(Localizable.toLocale(plugin.getDataSigns(), locale));
-		setAttributeForm(plugin.getAttributeForm() == null ? null : plugin.getAttributeForm().toLocale(locale));
+		setConfigForm(plugin.getConfigForm() == null ? null : plugin.getConfigForm().toLocale(locale));
 		setCategories(Localizable.toLocale(plugin.getCategories(), locale));
 	}
 

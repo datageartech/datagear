@@ -22,35 +22,42 @@ import java.util.Locale;
 
 import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.form.ObjectFormProperty;
+import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
+import org.datagear.analysis.support.html.DashboardApiVersion;
 
 /**
- * 图表插件属性表单。
+ * 图表插件配置表单。
  * <p>
- * 此类描述{@linkplain ChartPlugin#renderChart(ChartDefinition, RenderContext)}的{@linkplain ChartDefinition#getAttrValues()}的UI交互操作表单信息。
+ * 此类描述{@linkplain ChartPlugin}可进行UI交互的配置表单信息。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChartPluginAttributeForm extends ObjectFormProperty implements NameAware
+public class ChartPluginConfigForm extends ObjectFormProperty implements NameAware
 {
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * 配置值在{@linkplain ChartDefinition#getAttrValues()}中的存储属性名。
+	 */
+	public static final String CONFIG_VALUE_ATTR_NAME = ChartDefinition.BUILTIN_ATTR_PREFIX + "CONFIG_VALUE";
+
 	public static final String PROPERTY_NAME = "name";
 
-	public ChartPluginAttributeForm()
+	public ChartPluginConfigForm()
 	{
 		super();
 		super.setArray(false);
 	}
 
-	public ChartPluginAttributeForm(List<FormProperty> properties)
+	public ChartPluginConfigForm(List<FormProperty> properties)
 	{
 		super(null, properties);
 		super.setArray(false);
 	}
 
-	public ChartPluginAttributeForm(String name, List<FormProperty> properties)
+	public ChartPluginConfigForm(String name, List<FormProperty> properties)
 	{
 		super(name, properties);
 		super.setArray(false);
@@ -65,6 +72,13 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	 * 如果为{@code null}，表示表单数据以其包含的{@linkplain #getProperties()}的{@linkplain FormProperty#getName()}
 	 * 分散存储在{@linkplain ChartDefinition#getAttrValues()}中。
 	 * </p>
+	 * <p>
+	 * 对于{@linkplain DashboardApiVersion#V2}版本的{@linkplain ChartPlugin}，此值会被设为固定的{@linkplain #CONFIG_VALUE_ATTR_NAME}，
+	 * 因为存储位置是系统内部逻辑，不应对外开放，详细参考{@linkplain JsonChartPluginPropertiesResolver}相关逻辑。
+	 * </p>
+	 * <p>
+	 * 对于旧的{@linkplain DashboardApiVersion#V1}版本的{@linkplain ChartPlugin}，此值会为{@code null}，已兼容旧版逻辑。
+	 * </p>
 	 */
 	@Override
 	public String getName()
@@ -73,7 +87,7 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	}
 
 	/**
-	 * 图表插件属性表单不允许数组，应始终返回{@code false}。
+	 * 图表插件配置表单不允许数组，应始终返回{@code false}。
 	 */
 	@Override
 	public boolean isArray()
@@ -89,9 +103,9 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	}
 
 	@Override
-	public ChartPluginAttributeForm toLocale(Locale locale)
+	public ChartPluginConfigForm toLocale(Locale locale)
 	{
-		ChartPluginAttributeForm target = (ChartPluginAttributeForm) super.toLocale(locale);
+		ChartPluginConfigForm target = (ChartPluginConfigForm) super.toLocale(locale);
 
 		target.setName(this.getName());
 
@@ -99,9 +113,9 @@ public class ChartPluginAttributeForm extends ObjectFormProperty implements Name
 	}
 
 	@Override
-	protected ChartPluginAttributeForm createEmpty()
+	protected ChartPluginConfigForm createEmpty()
 	{
-		return new ChartPluginAttributeForm();
+		return new ChartPluginConfigForm();
 	}
 
 }

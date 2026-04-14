@@ -35,7 +35,7 @@ import java.util.Map;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPluginAttributeForm;
+import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
@@ -69,8 +69,8 @@ import org.datagear.util.i18n.Localizable;
  *   nameLabel : "..." 、 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  *   descLabel : "..." 、 { ... },
  *   icons : "..." 、 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
- *   attributeForm : { ... },
- *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同attributeForm
+ *   configForm : { ... },
+ *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同configForm
  *   dataSigns : [ { ... }, ... ],
  *   dataSetRange: 数值 、 "none" 、 { ... },
  *   version : "...",
@@ -96,7 +96,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ID = ChartPlugin.PROPERTY_ID;
 	public static final String JSON_PROPERTY_NAME_LABEL = ChartPlugin.PROPERTY_NAME_LABEL;
 	public static final String JSON_PROPERTY_DESC_LABEL = ChartPlugin.PROPERTY_DESC_LABEL;
-	public static final String JSON_PROPERTY_ATTRIBUTE_FORM = ChartPlugin.PROPERTY_ATTRIBUTE_FORM;
+	public static final String JSON_PROPERTY_CONFIG_FORM = ChartPlugin.PROPERTY_CONFIG_FORM;
 	public static final String JSON_PROPERTY_DATA_SIGNS = ChartPlugin.PROPERTY_DATA_SIGNS;
 	public static final String JSON_PROPERTY_DATA_SET_RANGE = ChartPlugin.PROPERTY_DATA_SET_RANGE;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
@@ -185,10 +185,10 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
 		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
 
-		if (properties.containsKey(JSON_PROPERTY_ATTRIBUTE_FORM))
-			chartPlugin.setAttributeForm(convertToAttributeForm(properties.get(JSON_PROPERTY_ATTRIBUTE_FORM)));
+		if (properties.containsKey(JSON_PROPERTY_CONFIG_FORM))
+			chartPlugin.setConfigForm(convertToConfigForm(properties.get(JSON_PROPERTY_CONFIG_FORM)));
 		else if (properties.containsKey(JSON_PROPERTY_ATTRIBUTES))
-			chartPlugin.setAttributeForm(convertToAttributeFormForV5_5_0(properties.get(JSON_PROPERTY_ATTRIBUTES)));
+			chartPlugin.setConfigForm(convertToConfigFormForV5_5_0(properties.get(JSON_PROPERTY_ATTRIBUTES)));
 
 		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS), null));
 		chartPlugin.setDataSetRange(convertToDataSetRange(properties.get(JSON_PROPERTY_DATA_SET_RANGE)));
@@ -229,26 +229,26 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param pluginJson
 	 * @param dataSignsJson
 	 *            允许{@code null}
-	 * @param attributeFormJson
+	 * @param configFormJson
 	 *            允许{@code null}
 	 * @return
 	 * @throws IOException
 	 */
-	public T resolveProperties(String pluginJson, String dataSignsJson, String attributeFormJson) throws IOException
+	public T resolveProperties(String pluginJson, String dataSignsJson, String configFormJson) throws IOException
 	{
 		Reader pluginIn = new StringReader(pluginJson);
 		Reader dataSignsIn = (StringUtil.isEmpty(dataSignsJson) ? null : new StringReader(dataSignsJson));
-		Reader attributeFormIn = (StringUtil.isEmpty(attributeFormJson) ? null : new StringReader(attributeFormJson));
+		Reader configFormIn = (StringUtil.isEmpty(configFormJson) ? null : new StringReader(configFormJson));
 
 		try
 		{
-			return resolveProperties(pluginIn, dataSignsIn, attributeFormIn);
+			return resolveProperties(pluginIn, dataSignsIn, configFormIn);
 		}
 		finally
 		{
 			IOUtil.close(pluginIn);
 			IOUtil.close(dataSignsIn);
-			IOUtil.close(attributeFormIn);
+			IOUtil.close(configFormIn);
 		}
 	}
 
@@ -270,12 +270,12 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param pluginJsonIn
 	 * @param dataSignsIn
 	 *            允许{@code null}
-	 * @param attributeFormIn
+	 * @param configFormIn
 	 *            允许{@code null}
 	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public T resolveProperties(Reader pluginJsonIn, Reader dataSignsIn, Reader attributeFormIn)
+	public T resolveProperties(Reader pluginJsonIn, Reader dataSignsIn, Reader configFormIn)
 			throws IOException
 	{
 		@SuppressWarnings("unchecked")
@@ -287,10 +287,10 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			properties.put(JSON_PROPERTY_DATA_SIGNS, dataSigns);
 		}
 
-		if (attributeFormIn != null)
+		if (configFormIn != null)
 		{
-			Object attributeForm = JsonSupport.parseNonStardand(attributeFormIn, Map.class);
-			properties.put(JSON_PROPERTY_ATTRIBUTE_FORM, attributeForm);
+			Object configForm = JsonSupport.parseNonStardand(configFormIn, Map.class);
+			properties.put(JSON_PROPERTY_CONFIG_FORM, configForm);
 		}
 
 		return resolveProperties(properties);
@@ -316,19 +316,19 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param pluginJsonIn
 	 * @param dataSignsIn
 	 *            允许{@code null}
-	 * @param attributeFormIn
+	 * @param configFormIn
 	 *            允许{@code null}
 	 * @param encoding
 	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public T resolveProperties(InputStream pluginJsonIn, InputStream dataSignsIn, InputStream attributeFormIn,
+	public T resolveProperties(InputStream pluginJsonIn, InputStream dataSignsIn, InputStream configFormIn,
 			String encoding) throws IOException
 	{
 		Reader pluginReader = IOUtil.getReader(pluginJsonIn, encoding);
 		Reader dataSignsReader = (dataSignsIn == null ? null : IOUtil.getReader(dataSignsIn, encoding));
-		Reader attributeFormReader = (attributeFormIn == null ? null : IOUtil.getReader(attributeFormIn, encoding));
-		return resolveProperties(pluginReader, dataSignsReader, attributeFormReader);
+		Reader configFormReader = (configFormIn == null ? null : IOUtil.getReader(configFormIn, encoding));
+		return resolveProperties(pluginReader, dataSignsReader, configFormReader);
 	}
 
 	/**
@@ -543,7 +543,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	}
 
 	/**
-	 * 将对象转换为{@linkplain ChartPluginAttributeForm}。
+	 * 将对象转换为{@linkplain ChartPluginConfigForm}。
 	 * <p>
 	 * 支持格式如下：
 	 * <p>
@@ -552,35 +552,40 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 
 	 * @return
 	 */
-	protected ChartPluginAttributeForm convertToAttributeForm(Object obj)
+	protected ChartPluginConfigForm convertToConfigForm(Object obj)
 	{
+		ChartPluginConfigForm form = null;
+
 		if (obj == null)
-			return null;
-		else if (obj instanceof ChartPluginAttributeForm)
-			return ((ChartPluginAttributeForm) obj);
+			form = null;
+		else if (obj instanceof ChartPluginConfigForm)
+			form = ((ChartPluginConfigForm) obj);
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			ChartPluginAttributeForm form = createChartPluginAttributeForm();
-			form.setName(convertToString(map.get(ChartPluginAttributeForm.PROPERTY_NAME)));
+			form = createChartPluginConfigForm();
+			form.setName(convertToString(map.get(ChartPluginConfigForm.PROPERTY_NAME)));
 			form.setProperties(convertToFormProperties(map.get(Form.PROPERTY_PROPERTIES)));
 			form.setGroups(convertToFormPropertyGroups(map.get(Form.PROPERTY_GROUPS)));
 			form.setNameLabel(convertToLabel(map.get(Form.PROPERTY_NAME_LABEL)));
 			form.setDescLabel(convertToLabel(map.get(Form.PROPERTY_DESC_LABEL)));
 			form.setAdditions(convertToAdditions(map.get(Form.PROPERTY_ADDITIONS)));
 			form.setDefaultValue(map.get(Form.PROPERTY_DEFAULT_VALUE));
-
-			return form;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginAttributeForm.class.getName() + "] unsupported");
+					+ ChartPluginConfigForm.class.getName() + "] unsupported");
+
+		if (form != null)
+			form.setName(ChartPluginConfigForm.CONFIG_VALUE_ATTR_NAME);
+
+		return form;
 	}
 
 	/**
-	 * 将{@code 5.5.0}版的对象转换为{@linkplain ChartPluginAttributeForm}。
+	 * 将{@code 5.5.0}版的对象转换为{@linkplain ChartPluginConfigForm}。
 	 * <p>
 	 * 支持格式如下：
 	 * <p>
@@ -590,14 +595,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param obj
 	 * @return
 	 */
-	protected ChartPluginAttributeForm convertToAttributeFormForV5_5_0(Object obj)
+	protected ChartPluginConfigForm convertToConfigFormForV5_5_0(Object obj)
 	{
 		List<FormProperty> properties = convertToFormProperties(obj);
 
 		if (properties == null)
 			return null;
 
-		ChartPluginAttributeForm form = createChartPluginAttributeForm();
+		ChartPluginConfigForm form = createChartPluginConfigForm();
 		form.setProperties(properties);
 
 		return form;
@@ -1305,9 +1310,9 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return new Label();
 	}
 
-	protected ChartPluginAttributeForm createChartPluginAttributeForm()
+	protected ChartPluginConfigForm createChartPluginConfigForm()
 	{
-		return new ChartPluginAttributeForm();
+		return new ChartPluginConfigForm();
 	}
 
 	protected ObjectFormProperty createObjectFormProperty()

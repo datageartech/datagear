@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPluginAttributeForm;
+import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.form.FormProperty;
@@ -323,14 +323,14 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	{
 		buffer.append(managerVar + ".compatForV5_5_0 = function(plugin){");
 		buffer.append(newLine);
-		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " != null){");
+		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + " != null){");
 		buffer.append(newLine);
 		buffer.append(
 				"    var attributes = (plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_ATTRIBUTES
-						+ " = plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + "."
-				+ ChartPluginAttributeForm.PROPERTY_PROPERTIES + ");");
+						+ " = plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + "."
+				+ ChartPluginConfigForm.PROPERTY_PROPERTIES + ");");
 		buffer.append(newLine);
-		buffer.append("    plugin." + ChartPlugin.PROPERTY_ATTRIBUTE_FORM + " = undefined;");
+		buffer.append("    plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + " = undefined;");
 		buffer.append(newLine);
 		buffer.append("    var attributesLen = (attributes == null ? 0 : attributes.length);");
 		buffer.append(newLine);

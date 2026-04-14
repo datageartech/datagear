@@ -17,7 +17,7 @@
  *
 -->
 <#--
-图表属性值集表单
+图表配置表单
 
 依赖：
 page_boolean_options.ftl
@@ -28,7 +28,7 @@ page_palette.ftl
 <#assign JsonChartPluginPropertiesResolver=statics['org.datagear.analysis.support.JsonChartPluginPropertiesResolver']>
 <form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-scroll">
-		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginAttrForm" :prop-name-path=""
+		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginConfigForm" :prop-name-path=""
 			:form-data="pm.avoModel.formData" :root-form-data="pm.avoModel.formData" :prop-type-def="pm.avoModel.FormPropertyType"
 			:prop-input-type-def="pm.avoModel.FormPropertyInputType" :i18n="pm.avoModel.i18n"
 			:ctrl-prop-name="pm.avoModel.ctrlPropName" :enable-options="pm.avoModel.enableOptions"

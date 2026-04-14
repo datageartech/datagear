@@ -25,7 +25,7 @@ import java.util.Map;
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPluginAttributeForm;
+import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
@@ -51,7 +51,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	
 	private Map<String, String> iconResourceNames = Collections.emptyMap();
 
-	private ChartPluginAttributeForm attributeForm = null;
+	private ChartPluginConfigForm configForm = null;
 
 	private List<DataSign> dataSigns = Collections.emptyList();
 
@@ -182,14 +182,14 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public ChartPluginAttributeForm getAttributeForm()
+	public ChartPluginConfigForm getConfigForm()
 	{
-		return attributeForm;
+		return configForm;
 	}
 
-	public void setAttributeForm(ChartPluginAttributeForm attributeForm)
+	public void setConfigForm(ChartPluginConfigForm configForm)
 	{
-		this.attributeForm = attributeForm;
+		this.configForm = configForm;
 	}
 
 	@Override
