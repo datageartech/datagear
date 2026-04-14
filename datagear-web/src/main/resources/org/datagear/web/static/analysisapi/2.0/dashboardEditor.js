@@ -2391,7 +2391,7 @@ DE.getGlobalChartTheme = function()
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
-DE.getElementChartAttrValues = function(ele)
+DE.getElementChartConfigValues = function(ele)
 {
 	ele = DE._currentElement(ele, true);
 	
@@ -2399,9 +2399,9 @@ DE.getElementChartAttrValues = function(ele)
 		return null;
 	
 	var chart = DE.dashboard.renderedChart(ele);
-	var attrValues = CF.evalChartInitAttrValues(chart.element(), chart.attrValuesOrigin());
+	var configValues = CF.evalChartInitConfigValues(chart.element(), chart.configValuesOrigin());
 	
-	return attrValues;
+	return configValues;
 };
 
 /**
@@ -2409,7 +2409,7 @@ DE.getElementChartAttrValues = function(ele)
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
-DE.getElementChartAttrValuesForReset = function(ele)
+DE.getElementChartConfigValuesForReset = function(ele)
 {
 	ele = DE._currentElement(ele, true);
 	
@@ -2420,9 +2420,9 @@ DE.getElementChartAttrValuesForReset = function(ele)
 	if(!chart)
 		return null;
 	
-	var attrValuesOrigin =  (chart.attrValuesOrigin() || {});
-	var attrValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
-	attrValuesEle = CF.evalSilently(attrValuesEle, {});
+	var configValuesOrigin =  (chart.configValuesOrigin() || {});
+	var configValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
+	configValuesEle = CF.evalSilently(configValuesEle, {});
 	
 	var configForm = chart.pluginConfigForm();
 	if(configForm != null)
@@ -2432,25 +2432,25 @@ DE.getElementChartAttrValuesForReset = function(ele)
 			var formProperties = (configForm.properties || []);
 			formProperties.forEach((prop) =>
 			{
-				delete attrValuesEle[prop.name];
+				delete configValuesEle[prop.name];
 			});
 		}
 		if(configForm.name != null)
 		{
 			var name = configForm.name;
-			delete attrValuesEle[name];
+			delete configValuesEle[name];
 		}
 	}
 	
 	//保留元素上定义的图表插件属性之外的扩展值
-	var re = CF.extend(true, {}, attrValuesOrigin, attrValuesEle);
+	var re = CF.extend(true, {}, configValuesOrigin, configValuesEle);
 	return re;
 };
 
 /**
  * 获取看板图表插件属性内置地图选项集。
  */
-DE.getChartAttrValuesInputOptionsForMap = function(asTree)
+DE.getChartConfigValuesInputOptionsForMap = function(asTree)
 {
 	var re = [];
 	
@@ -2512,61 +2512,61 @@ DE.getChartAttrValuesInputOptionsForMap = function(asTree)
 };
 
 /**
- * 校验setElementChartAttrValues操作。
+ * 校验setElementChartConfigValues操作。
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
-DE.checkSetElementChartAttrValues = function(ele)
+DE.checkSetElementChartConfigValues = function(ele)
 {
 	return DE.checkAttrChartElement(ele);
 };
 
 /**
- * 对于DE.setElementChartAttrValues()的attrValues参数，是否需要保留其中的null值
+ * 对于DE.setElementChartConfigValues()的configValues参数，是否需要保留其中的null值
  */
-DE.retainNullChartAttrValue = function()
+DE.retainNullChartConfigValue = function()
 {
-	//需保留null值，以支持继承复制时删除原始图表属性值，具体参考CF.evalChartInitAttrValues()函数
+	//需保留null值，以支持继承复制时删除原始图表属性值，具体参考CF.evalChartInitConfigValues()函数
 	return true;
 };
 
 /**
  * 设置图表元素的图表属性值。
  * 
- * @param attrValues 要设置的图表主题对象，格式为：{ ... }
+ * @param configValues 要设置的图表主题对象，格式为：{ ... }
  * @param ele 可选，元素，默认为：当前选中元素
  * 
  * @returns 元素、false
  */
-DE.setElementChartAttrValues = function(attrValues, ele)
+DE.setElementChartConfigValues = function(configValues, ele)
 {
-	attrValues = (attrValues || {});
+	configValues = (configValues || {});
 	ele = DE._currentElement(ele, true);
 	
-	if(!DE.checkSetElementChartAttrValues(ele))
+	if(!DE.checkSetElementChartConfigValues(ele))
 		return false;
 	
 	var chart = DE.dashboard.renderedChart(ele);
-	var attrValuesOrigin = (chart.attrValuesOrigin() || {});
-	//只需保留有修改的属性值即可，具体参考CF.evalChartInitAttrValues()函数
-	var changedAttrValues = {};
+	var configValuesOrigin = (chart.configValuesOrigin() || {});
+	//只需保留有修改的属性值即可，具体参考CF.evalChartInitConfigValues()函数
+	var changedConfigValues = {};
 	
-	for(var p in attrValues)
+	for(var p in configValues)
 	{
-		var v = attrValues[p];
-		var vo = attrValuesOrigin[p];
+		var v = configValues[p];
+		var vo = configValuesOrigin[p];
 		var eq = ((v == null && vo == null) || CF.deepEquals(v, vo));
 		
 		if(!eq)
-			changedAttrValues[p] = v;
+			changedConfigValues[p] = v;
 	}
 	
-	var eleAttrValue = CF.serializeBySingleQuote(changedAttrValues);
+	var eleConfigValue = CF.serializeBySingleQuote(changedConfigValues);
 	
-	if(DE._isEmptyJsonObjStr(eleAttrValue))
+	if(DE._isEmptyJsonObjStr(eleConfigValue))
 		DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, null);
 	else
-		DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, eleAttrValue);
+		DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, eleConfigValue);
 	
 	DE._reRenderChart(chart);
 	

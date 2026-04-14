@@ -1483,7 +1483,7 @@ $.inflateDashboardDesignEditor = function(po)
 		});
 	};
 	
-	po.setVeElementChartAttrValues = function(model)
+	po.setVeElementChartConfigValues = function(model)
 	{
 		var dashboardEditor = po.visualDashboardEditorByTab();
 		
@@ -1492,7 +1492,7 @@ $.inflateDashboardDesignEditor = function(po)
 		
 		$.executeSilently(function()
 		{
-			dashboardEditor.setElementChartAttrValues(model);
+			dashboardEditor.setElementChartConfigValues(model);
 		});
 	};
 	
@@ -2630,7 +2630,7 @@ $.inflateDashboardDesignEditor = function(po)
 									}
 								},
 								{
-									label: po.i18n.chartAttribute,
+									label: po.i18n.chartConfig,
 									parentLabelPath: [po.i18n.edit, po.i18n.chart],
 									command: function(e)
 									{
@@ -2643,14 +2643,14 @@ $.inflateDashboardDesignEditor = function(po)
 										var dashboardEditor = po.visualDashboardEditorByTab();
 										if(dashboardEditor)
 										{
-											if(!dashboardEditor.checkSetElementChartAttrValues())
+											if(!dashboardEditor.checkSetElementChartConfigValues())
 												return;
 											
-											po.showVeChartAttrValuesPanel(function(model)
+											po.showVeChartConfigValuesPanel(function(model)
 											{
-												return po.setVeElementChartAttrValues(model);
+												return po.setVeElementChartConfigValues(model);
 											},
-											dashboardEditor.getElementChartAttrValues());
+											dashboardEditor.getElementChartConfigValues());
 										}
 									}
 								},
@@ -3173,13 +3173,13 @@ $.inflateDashboardDesignEditorForms = function(po)
 	};
 	
 	//重写chart_attr_values_form.ftl中的函数
-	po.getChartAttrValuesInputOptionsForMap = function(asTree)
+	po.getChartConfigInputOptionsForMap = function(asTree)
 	{
 		var re = [];
 		
 		var dashboardEditor = po.visualDashboardEditorByTab();
 		if(dashboardEditor)
-			re = dashboardEditor.getChartAttrValuesInputOptionsForMap(asTree);
+			re = dashboardEditor.getChartConfigInputOptionsForMap(asTree);
 		
 		return re;
 	};
@@ -3291,13 +3291,13 @@ $.inflateDashboardDesignEditorForms = function(po)
 		pm.vepss.dashboardSizeShown = true;
 	};
 
-	po.showVeChartAttrValuesPanel = function(submitHandler, model, title)
+	po.showVeChartConfigValuesPanel = function(submitHandler, model, title)
 	{
 		var pm = po.vuePageModel();
-		pm.veshs.chartAttrValues = submitHandler;
+		pm.veshs.chartConfigValues = submitHandler;
 		if(title)
-			pm.vepts.chartAttrValues = title; 
-		pm.vepss.chartAttrValuesShown = true;
+			pm.vepts.chartConfigValues = title; 
+		pm.vepss.chartConfigValuesShown = true;
 	};
 	
 	po.showVeChartOptionsPanel = function(submitHandler, model, title, global)
@@ -3372,7 +3372,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				videoShown: false,
 				dashboardSizeShown: false,
 				chartOptionsShown: false,
-				chartAttrValuesShown: false,
+				chartConfigValuesShown: false,
 				chartThemeShown: false,
 				styleShown: false,
 				eleIdShown: false,
@@ -3392,7 +3392,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				video: po.i18n.video,
 				dashboardSize: po.i18n.dashboardSize,
 				chartOptions: po.i18n.chartOptions,
-				chartAttrValues: po.i18n.chartAttribute + " dg-chart-attr-values",
+				chartConfigValues: po.i18n.chartConfig + " dg-chart-attr-values",
 				chartTheme: po.i18n.chartTheme,
 				style: po.i18n.style,
 				eleId: po.i18n.elementId,
@@ -3412,7 +3412,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				video: po.veDftVideoModel(),
 				dashboardSize: { scale: "auto" },
 				chartOptions: { value: "" },
-				chartAttrValues: {},
+				chartConfigValues: {},
 				chartTheme: po.veDftChartThemeModel(),
 				style: {},
 				eleId: {},
@@ -3429,7 +3429,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				hyperlink: function(model){},
 				video: function(model){},
 				chartOptions: function(model){},
-				chartAttrValues: function(model){},
+				chartConfigValues: function(model){},
 				chartTheme: function(model){},
 				style: function(model){},
 				eleId: function(model){},
@@ -3667,7 +3667,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				}
 			},
 			
-			onVeChartAttrValuesPanelShow: function()
+			onVeChartConfigValuesPanelShow: function()
 			{
 				var dashboardEditor = po.visualDashboardEditorByTab();
 				
@@ -3675,15 +3675,15 @@ $.inflateDashboardDesignEditorForms = function(po)
 					return;
 				
 				var attrForm = (dashboardEditor.getElementChartPluginConfigForm() || {});
-				var attrValues = (dashboardEditor.getElementChartAttrValues() || {});
+				var configValues = (dashboardEditor.getElementChartConfigValues() || {});
 				
-				po.setupChartAttrValuesForm(attrForm, attrValues,
+				po.setupChartConfigValuesForm(attrForm, configValues,
 				{
 					submitHandler: function(avs)
 					{
-						if(pm.veshs.chartAttrValues(avs) !== false)
+						if(pm.veshs.chartConfigValues(avs) !== false)
 						{
-							pm.vepss.chartAttrValuesShown = false;
+							pm.vepss.chartConfigValuesShown = false;
 						}
 					},
 					buttons:
@@ -3692,15 +3692,15 @@ $.inflateDashboardDesignEditorForms = function(po)
 							name: po.i18n.resetToOrigin,
 							clickHandler: function()
 							{
-								var attrValuesReset = (dashboardEditor.getElementChartAttrValuesForReset() || {});
-								po.avo.setFormAttrValues(attrValuesReset);
+								var configValuesReset = (dashboardEditor.getElementChartConfigValuesForReset() || {});
+								po.avo.setFormConfigValues(configValuesReset);
 							}
 						}
 					],
 					showClearBtn: false,
 					//此时允许自由编辑图表属性，因此应不是严格数据模式
 					strictSubmitData: false,
-					retainDataNullProp: dashboardEditor.retainNullChartAttrValue()
+					retainDataNullProp: dashboardEditor.retainNullChartConfigValue()
 				});
 			},
 			

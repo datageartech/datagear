@@ -39,7 +39,7 @@ public class ChartPluginConfigForm extends ObjectFormProperty implements NameAwa
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 配置值在{@linkplain ChartDefinition#getAttrValues()}中的存储属性名。
+	 * 配置值在{@linkplain ChartDefinition#getConfigValues()}中的存储属性名。
 	 */
 	public static final String CONFIG_VALUE_ATTR_NAME = ChartDefinition.BUILTIN_ATTR_PREFIX + "CONFIG_VALUE";
 
@@ -66,11 +66,11 @@ public class ChartPluginConfigForm extends ObjectFormProperty implements NameAwa
 	/**
 	 * 获取名称。
 	 * <p>
-	 * 此名称表示表单数据应存储在{@linkplain ChartDefinition#getAttrValues()}中的名称。
+	 * 此名称表示表单数据应存储在{@linkplain ChartDefinition#getConfigValues()}中的名称。
 	 * </p>
 	 * <p>
 	 * 如果为{@code null}，表示表单数据以其包含的{@linkplain #getProperties()}的{@linkplain FormProperty#getName()}
-	 * 分散存储在{@linkplain ChartDefinition#getAttrValues()}中。
+	 * 分散存储在{@linkplain ChartDefinition#getConfigValues()}中。
 	 * </p>
 	 * <p>
 	 * 对于{@linkplain DashboardApiVersion#V2}版本的{@linkplain ChartPlugin}，此值会被设为固定的{@linkplain #CONFIG_VALUE_ATTR_NAME}，

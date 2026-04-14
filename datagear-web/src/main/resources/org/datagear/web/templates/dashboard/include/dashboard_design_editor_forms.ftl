@@ -865,8 +865,8 @@ page_palette.ftl
 	</div>
 </p-dialog>
 
-<p-dialog :header="pm.vepts.chartAttrValues" append-to="body"
-	position="center" :modal="true" v-model:visible="pm.vepss.chartAttrValuesShown" @show="onVeChartAttrValuesPanelShow">
+<p-dialog :header="pm.vepts.chartConfigValues" append-to="body"
+	position="center" :modal="true" v-model:visible="pm.vepss.chartConfigValuesShown" @show="onVeChartConfigValuesPanelShow">
 	<div class="page page-form page-chart-attr-values dashboard-form-chart-attr-values">
 		<#include "../../chart/include/chart_attr_values_form.ftl">
 	</div>
@@ -2956,7 +2956,7 @@ page_palette.ftl
 	po.i18n.video = "<@spring.message code='video' />";
 	po.i18n.dashboardSize = "<@spring.message code='dashboardSize' />";
 	po.i18n.chartOptions = "<@spring.message code='chartOptions' />";
-	po.i18n.chartAttribute = "<@spring.message code='chartAttribute' />";
+	po.i18n.chartConfig = "<@spring.message code='chartConfig' />";
 	po.i18n.chartTheme = "<@spring.message code='chartTheme' />";
 	po.i18n.style = "<@spring.message code='style' />";
 	po.i18n.elementId = "<@spring.message code='elementId' />";

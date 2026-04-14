@@ -435,8 +435,8 @@ CF.create = function(root)
  *				  updateInterval: 数值,
  *				  //可选，图表结果数据格式
  *				  resultDataFormat: {...},
- *				  //可选，图表属性
- *				  attrValues: {...}
+ *				  //可选，图表配置
+ *				  configValues: {...}
  *				}
  *				
  *				另参考：org.datagear.analysis.support.html.HtmlChart
@@ -483,19 +483,19 @@ CF.initChartRoot = function(root)
 		}
 	}
 	
-	if(root.attrValues != null)
+	if(root.configValues != null)
 	{
-		let attrValues = root.attrValues;
+		let configValues = root.configValues;
 		
-		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
-		root.widget = attrValues[CF.CHART_ATTR_NAME_WIDGET];
-		root.optionsOrigin = attrValues[CF.CHART_ATTR_NAME_OPTIONS];
-		delete attrValues[CF.CHART_ATTR_NAME_WIDGET];
-		delete attrValues[CF.CHART_ATTR_NAME_OPTIONS];
+		//将内置属性值提取出来，避免被chart.configValues()设置操作清除
+		root.widget = configValues[CF.CHART_ATTR_NAME_WIDGET];
+		root.optionsOrigin = configValues[CF.CHART_ATTR_NAME_OPTIONS];
+		delete configValues[CF.CHART_ATTR_NAME_WIDGET];
+		delete configValues[CF.CHART_ATTR_NAME_OPTIONS];
 		
-		//注意，初始化attrValuesOrigin的逻辑不能在chart.render()中执行，
-		//因为chart.render()可以被多次调用，chart.attrValues可能已被修改
-		root.attrValuesOrigin = CF.extend(true, {}, attrValues);
+		//注意，初始化configValuesOrigin的逻辑不能在chart.render()中执行，
+		//因为chart.render()可以被多次调用，root.configValues可能已被修改
+		root.configValuesOrigin = CF.extend(true, {}, configValues);
 	}
 };
 
@@ -560,7 +560,7 @@ chartProto.init = function()
 	this._initAutoResize();
 	this._initDisableTool();
 	this._initRenderer();
-	this._initAttrValues();
+	this._initConfigValues();
 	this._initUpdateAppendMode();
 	
 	this._initForPost();
@@ -826,13 +826,13 @@ chartProto._initRenderer = function()
 };
 
 /**
- * 初始化图表属性值集。
+ * 初始化图表配置值集。
  * 此函数从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
  */
-chartProto._initAttrValues = function()
+chartProto._initConfigValues = function()
 {
-	var attrValues = CF.evalChartInitAttrValues(this._eleNonNull(), this.attrValuesOrigin());
-	this.attrValues(attrValues);
+	var configValues = CF.evalChartInitConfigValues(this._eleNonNull(), this.configValuesOrigin());
+	this.configValues(configValues);
 };
 
 /**
@@ -3323,54 +3323,54 @@ chartProto.pluginResourceURL = function(name)
 };
 
 /**
- * 获取/设置指定图表属性值。
- * 注意：org.datagear.analysis.support.html.AttributeValueHtmlChartPlugin需要此函数名。
+ * 获取/设置指定图表配置值。
+ * 注意：org.datagear.analysis.support.html.ConfigValueHtmlChartPlugin需要此函数名。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
  * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
- * @param name 属性名
- * @param value 可选，要设置的属性值
+ * @param name 配置名
+ * @param value 可选，要设置的配置值
  * @returns 
  */
-chartProto.attrValue = function(name, value)
+chartProto.configValue = function(name, value)
 {
-	var attrValues = this.attrValues();
+	var configValues = this.configValues();
 	
 	if(arguments.length < 2)
 	{
-		return attrValues[name];
+		return configValues[name];
 	}
 	else
 	{
-		attrValues[name] = value;
+		configValues[name] = value;
 	}
 };
 
 /**
- * 获取/设置全部图表属性值。
+ * 获取/设置全部图表配置值。
  * 
  * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
  * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
- * @param values 可选，要设置的属性值映射表，格式为：{ 名称: 值, ... }
+ * @param values 可选，要设置的配置值映射表，格式为：{ 名称: 值, ... }
  * @returns { ... }
  */
-chartProto.attrValues = function(values)
+chartProto.configValues = function(values)
 {
 	if(arguments.length == 0)
 	{
-		if(this._root.attrValues == null)
-			this._root.attrValues = {};
+		if(this._root.configValues == null)
+			this._root.configValues = {};
 		
-		return this._root.attrValues;
+		return this._root.configValues;
 	}
 	else
 	{
 		if(values == null)
 			throw new Error("[values] required");
 		
-		this._root.attrValues = values;
+		this._root.configValues = values;
 	}
 };
 
@@ -3379,12 +3379,12 @@ chartProto.attrValues = function(values)
  * 
  * @returns {}，非null
  */
-chartProto.attrValuesOrigin = function()
+chartProto.configValuesOrigin = function()
 {
-	if(this._root.attrValuesOrigin == null)
-		this._root.attrValuesOrigin = {};
+	if(this._root.configValuesOrigin == null)
+		this._root.configValuesOrigin = {};
 	
-	return this._root.attrValuesOrigin;
+	return this._root.configValuesOrigin;
 };
 
 /**
@@ -3396,36 +3396,6 @@ chartProto.pluginConfigForm = function()
 {
 	var plugin = this.plugin();
 	return (plugin ? plugin.configForm : null);
-};
-
-/**
- * 获取插件配置值。
- * 
- * @returns {}、null
- */
-chartProto.pluginConfigValue = function()
-{
-	var form = this.pluginConfigForm();
-	
-	if(form == null)
-		return null;
-	
-	if(CF.isRootPluginConfigForm(form))
-	{
-		let re = {};
-		
-		let formProperties = (form.properties || []);
-		formProperties.forEach((fp) =>
-		{
-			re[fp.name] = this.attrValue(fp.name);
-		});
-		
-		return re;
-	}
-	else
-	{
-		return this.attrValue(form.name);
-	}
 };
 
 /**
@@ -4517,30 +4487,30 @@ chartProto.dataSetBindsFetched = function(dataSetBinds, chartResult)
 //----------------------------------------
 
 /**
- * 计算图表初始属性值集。
+ * 计算图表初始配置值集。
  */
-CF.evalChartInitAttrValues = function(chartEle, attrValuesOrigin)
+CF.evalChartInitConfigValues = function(chartEle, configValuesOrigin)
 {
-	var attrValues = CF.eleAttr(chartEle, elementAttrConst.ATTR_VALUES);
-	attrValues = (CF.isEmpty(attrValues) ? {} : CF.evalSilently(attrValues, {}));
+	var configValues = CF.eleAttr(chartEle, elementAttrConst.ATTR_VALUES);
+	configValues = (CF.isEmpty(configValues) ? {} : CF.evalSilently(configValues, {}));
 	
 	var merges = {};
 	
-	if(attrValuesOrigin != null)
+	if(configValuesOrigin != null)
 	{
-		for(var p in attrValuesOrigin)
+		for(var p in configValuesOrigin)
 		{
-			if(attrValues[p] === undefined)
-				merges[p] = attrValuesOrigin[p];
+			if(configValues[p] === undefined)
+				merges[p] = configValuesOrigin[p];
 		}
 		
 		//这里应深度复制，以免后续操作修改原始值
 		merges = CF.extend(true, {}, merges);
 	}
 	
-	CF.extend(attrValues, merges);
+	CF.extend(configValues, merges);
 	
-	return attrValues;
+	return configValues;
 };
 
 /**

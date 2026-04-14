@@ -17,7 +17,7 @@
 
 package org.datagear.analysis.support.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringWriter;
 
@@ -64,7 +64,8 @@ public class HtmlChartWidgetJsonRendererTest
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"name\":\"chart-widget-01-name\""));
 		assertTrue(json.contains("\"dataSetBinds\":[]"));
-		assertTrue(json.contains("\"attrValues\":{\"DG_CHART_WIDGET\":{\"id\":\""+HTML_CHART_WIDGET_ID_01+"\"}}"));
+		assertTrue(
+				json.contains("\"configValues\":{\"DG_CHART_WIDGET\":{\"id\":\"" + HTML_CHART_WIDGET_ID_01 + "\"}}"));
 		assertTrue(json.contains("\"updateInterval\":-1"));
 		assertTrue(json.contains("\"plugin\":{\"id\": \"pie-chart\"}"));
 		assertTrue(json.contains("\"renderContext\":{}"));
@@ -82,9 +83,11 @@ public class HtmlChartWidgetJsonRendererTest
 		
 		assertTrue(json.startsWith("["));
 		assertTrue(json.contains("\"name\":\"chart-widget-01-name\""));
-		assertTrue(json.contains("\"attrValues\":{\"DG_CHART_WIDGET\":{\"id\":\""+HTML_CHART_WIDGET_ID_01+"\"}}"));
+		assertTrue(
+				json.contains("\"configValues\":{\"DG_CHART_WIDGET\":{\"id\":\"" + HTML_CHART_WIDGET_ID_01 + "\"}}"));
 		assertTrue(json.contains("\"name\":\"chart-widget-02-name\""));
-		assertTrue(json.contains("\"attrValues\":{\"DG_CHART_WIDGET\":{\"id\":\""+HTML_CHART_WIDGET_ID_02+"\"}}"));
+		assertTrue(
+				json.contains("\"configValues\":{\"DG_CHART_WIDGET\":{\"id\":\"" + HTML_CHART_WIDGET_ID_02 + "\"}}"));
 		assertTrue(json.endsWith("]"));
 	}
 }

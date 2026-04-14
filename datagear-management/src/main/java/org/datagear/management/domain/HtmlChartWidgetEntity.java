@@ -196,7 +196,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	}
 
 	/**
-	 * 获取{@linkplain #getAttrValues()}的JSON字符串形式。
+	 * 获取{@linkplain #getConfigValues()}的JSON字符串形式。
 	 * <p>
 	 * 目前仅用于Mybatis持久存储。
 	 * </p>
@@ -204,41 +204,41 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	 * @return
 	 */
 	@JsonIgnore
-	public String getAttrValuesJson()
+	public String getConfigValuesJson()
 	{
-		Map<String, ?> attrValues = getAttrValues();
+		Map<String, ?> configValues = getConfigValues();
 		
-		if(attrValues == null)
+		if(configValues == null)
 			return null;
 		else
-			return JsonSupport.generate(attrValues, "");
+			return JsonSupport.generate(configValues, "");
 	}
 
 	/**
-	 * 设置{@linkplain #setAttrValues(Map)}的JSON字符串形式。
+	 * 设置{@linkplain #setConfigValues(Map)}的JSON字符串形式。
 	 * <p>
 	 * 目前仅用于Mybatis持久存储。
 	 * </p>
 	 * 
-	 * @param attrValuesJson
+	 * @param configValuesJson
 	 */
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public void setAttrValuesJson(String attrValuesJson)
+	public void setConfigValuesJson(String configValuesJson)
 	{
-		Map<String, Object> attrValues = null;
+		Map<String, Object> configValues = null;
 		
-		if(!StringUtil.isEmpty(attrValuesJson))
-			attrValues = JsonSupport.parse(attrValuesJson, Map.class, null);
+		if(!StringUtil.isEmpty(configValuesJson))
+			configValues = JsonSupport.parse(configValuesJson, Map.class, null);
 		
-		setAttrValues(attrValues);
+		setConfigValues(configValues);
 	}
 
 	@Override
 	protected ChartDefinition buildChartDefinition(String id) throws RenderException
 	{
 		ChartDefinition chartDefinition = super.buildChartDefinition(id);
-		chartDefinition.setAttrValue(ATTR_CHART_OPTIONS, this.options);
+		chartDefinition.setConfigValue(ATTR_CHART_OPTIONS, this.options);
 		
 		return chartDefinition;
 	}
@@ -263,11 +263,11 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 			entity.setDataSetBindVOs(cloned);
 		}
 
-		Map<String, Object> attrValues = this.getAttrValues();
-		if (attrValues != null)
+		Map<String, Object> configValues = this.getConfigValues();
+		if (configValues != null)
 		{
-			Map<String, Object> attrValuesClone = new HashMap<String, Object>(attrValues);
-			entity.setAttrValues(attrValuesClone);
+			Map<String, Object> configValuesClone = new HashMap<String, Object>(configValues);
+			entity.setConfigValues(configValuesClone);
 		}
 
 		return entity;

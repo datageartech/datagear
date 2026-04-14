@@ -173,7 +173,7 @@
 	po.i18n.style = "<@spring.message code='style' />";
 	po.i18n.chartTheme = "<@spring.message code='chartTheme' />";
 	po.i18n.chartOptions = "<@spring.message code='chartOptions' />";
-	po.i18n.chartAttribute = "<@spring.message code='chartAttribute' />";
+	po.i18n.chartConfig = "<@spring.message code='chartConfig' />";
 	po.i18n.textContent = "<@spring.message code='textContent' />";
 	po.i18n.elementSetting = "<@spring.message code='elementSetting' />";
 	po.i18n.elementId = "<@spring.message code='elementId' />";

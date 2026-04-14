@@ -433,8 +433,8 @@
 	 *				  updateInterval: 数值,
 	 *				  //可选，图表结果数据格式
 	 *				  resultDataFormat: {...},
-	 *				  //图表属性
-	 *				  attrValues: {...}
+	 *				  //图表配置
+	 *				  configValues: {...}
 	 *				}
 	 *				
 	 *				另参考：org.datagear.analysis.support.html.HtmlChart
@@ -532,23 +532,23 @@
 		chart.chartDataSets = chart._dataSetBinds;
 		// > @deprecated 兼容4.7.0版本的chart.chartDataSets，将在未来版本移除，已被chart._dataSetBinds取代
 		
-		chart._attrValues = (chart.attrValues || {});
+		chart._configValues = (chart.configValues || {});
 		chart._options = (chart._options || {});
 		
 		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
-		chart._widget = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
-		chart._optionsOrigin = chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
-		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
-		delete chart._attrValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		chart._widget = chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
+		chart._optionsOrigin = chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		delete chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
+		delete chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
 		
 		//保留原始属性值集，看板可视编辑需要使用
-		//注意，初始化_attrValuesOrigin的逻辑不能在chartBase.render()中执行，
-		//因为chartBase.render()可以被多次调用，chart._attrValues可能已被修改
-		chart._attrValuesOrigin = $.extend(true, {}, chart._attrValues);
+		//注意，初始化_configValuesOrigin的逻辑不能在chartBase.render()中执行，
+		//因为chartBase.render()可以被多次调用，chart._configValues可能已被修改
+		chart._configValuesOrigin = $.extend(true, {}, chart._configValues);
 		//chart.resultDataFormat属性与后面的chart.resultDataFormat()冲突，因此这里重构一下
 		chart._resultDataFormat = chart.resultDataFormat;
 		
-		delete chart.attrValues;
+		delete chart.configValues;
 		delete chart.resultDataFormat;
 		
 		if(chartFactory.chartPluginManager && chartFactory.chartPluginManager.get)
@@ -617,7 +617,7 @@
 		this._initDisableSetting();
 		this._initEventHandlers();
 		this._initRenderer();
-		this._initAttrValues();
+		this._initConfigValues();
 		this._initUpdateAppendMode();
 		
 		this._initForPost();
@@ -935,15 +935,15 @@
 	 * 初始化图表属性值集。
 	 * 此函数从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
 	 */
-	chartBase._initAttrValues = function()
+	chartBase._initConfigValues = function()
 	{
-		var attrValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
-		attrValues = (attrValues ? chartFactory.evalSilently(attrValues) : null);
+		var configValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
+		configValues = (configValues ? chartFactory.evalSilently(configValues) : null);
 		//注意：应该使用this.attrValuesOrigin()作为合并基础，因为可能this.attrValues()执行修改操作，
 		//比如修改后chart.destroy()后再chart.render()
-		attrValues = $.extend(true, {}, this.attrValuesOrigin(), attrValues);
+		configValues = $.extend(true, {}, this.attrValuesOrigin(), configValues);
 		
-		this.attrValues(attrValues);
+		this.attrValues(configValues);
 	};
 	
 	/**
@@ -3819,7 +3819,7 @@
 	
 	/**
 	 * 获取/设置指定图表属性值。
-	 * 注意：org.datagear.analysis.support.html.AttributeValueHtmlChartPlugin需要此函数名。
+	 * 注意：org.datagear.analysis.support.html.ConfigValueHtmlChartPlugin需要此函数名。
 	 * 
 	 * @param name 插件属性、名称
 	 * @param value 可选，要设置的属性值
@@ -3831,9 +3831,9 @@
 		name = (name && name.name != null ? name.name : name);
 		
 		if(value === undefined)
-			return this._attrValues[name];
+			return this._configValues[name];
 		else
-			this._attrValues[name] = value;
+			this._configValues[name] = value;
 	};
 	
 	/**
@@ -3846,9 +3846,9 @@
 	chartBase.attrValues = function(values)
 	{
 		if(values === undefined)
-			return this._attrValues;
+			return this._configValues;
 		else
-			this._attrValues = (values ? values : {});
+			this._configValues = (values ? values : {});
 	};
 	
 	/**
@@ -3859,7 +3859,7 @@
 	 */
 	chartBase.attrValuesOrigin = function()
 	{
-		return this._attrValuesOrigin;
+		return this._configValuesOrigin;
 	};
 	
 	/**

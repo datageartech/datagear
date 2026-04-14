@@ -21,12 +21,12 @@ import org.datagear.analysis.ChartDefinition;
 import org.datagear.util.i18n.Label;
 
 /**
- * 专门用于渲染异常消息的{@linkplain AttributeValueHtmlChartPlugin}。
+ * 专门用于渲染异常消息的{@linkplain ConfigValueHtmlChartPlugin}。
  * 
  * @author datagear@163.com
  *
  */
-public class ExceptionMsgHtmlChartPlugin extends AttributeValueHtmlChartPlugin
+public class ExceptionMsgHtmlChartPlugin extends ConfigValueHtmlChartPlugin
 {
 	private static final long serialVersionUID = 1L;
 
@@ -38,7 +38,7 @@ public class ExceptionMsgHtmlChartPlugin extends AttributeValueHtmlChartPlugin
 	public static final String DEFAULT_ID = "org.datagear.exceptionMsg";
 
 	/**
-	 * 存储在{@linkplain ChartDefinition#getAttrValues()}中的异常消息属性名。
+	 * 存储在{@linkplain ChartDefinition#getConfigValues()}中的异常消息属性名。
 	 */
 	public static final String DEFAULT_ATTR_NAME = ChartDefinition.BUILTIN_ATTR_PREFIX + "EXCEPTION_MESSAGE";
 

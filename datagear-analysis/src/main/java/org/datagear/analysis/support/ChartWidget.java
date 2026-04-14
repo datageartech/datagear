@@ -123,7 +123,7 @@ public class ChartWidget extends ChartDefinition
 		chartDefinition.setId(id);
 		
 		// 添加图表对应的部件信息
-		chartDefinition.setAttrValue(ATTR_CHART_WIDGET, new ChartWidgetId(this.getId()));
+		chartDefinition.setConfigValue(ATTR_CHART_WIDGET, new ChartWidgetId(this.getId()));
 
 		return chartDefinition;
 	}
@@ -151,7 +151,7 @@ public class ChartWidget extends ChartDefinition
 		if (chart == null)
 			return null;
 		
-		ChartWidgetId cwi = (ChartWidgetId)chart.getAttrValue(ATTR_CHART_WIDGET);
+		ChartWidgetId cwi = (ChartWidgetId)chart.getConfigValue(ATTR_CHART_WIDGET);
 		return (cwi == null ? null : cwi.getId());
 	}
 	

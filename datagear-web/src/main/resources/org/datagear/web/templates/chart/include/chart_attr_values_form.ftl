@@ -26,7 +26,7 @@ page_palette.ftl
 <#assign FormPropertyType=statics['org.datagear.analysis.form.PropertyType']>
 <#assign FormPropertyInputType=statics['org.datagear.analysis.form.PropertyInputType']>
 <#assign JsonChartPluginPropertiesResolver=statics['org.datagear.analysis.support.JsonChartPluginPropertiesResolver']>
-<form id="${pid}chartAttrValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
+<form id="${pid}chartConfigValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-scroll">
 		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginConfigForm" :prop-name-path=""
 			:form-data="pm.avoModel.formData" :root-form-data="pm.avoModel.formData" :prop-type-def="pm.avoModel.FormPropertyType"
@@ -37,7 +37,7 @@ page_palette.ftl
 	</div>
 	<div class="page-form-foot flex-grow-0 flex justify-content-center gap-2 pt-2">
 		<p-button type="submit" label="<@spring.message code='confirm' />"></p-button>
-		<p-button type="button" label="<@spring.message code='clearEmpty' />" severity="danger" @click="onClearChartAttrValuesForm"
+		<p-button type="button" label="<@spring.message code='clearEmpty' />" severity="danger" @click="onClearChartConfigValuesForm"
 			v-if="pm.avoModel.showClearBtn">
 		</p-button>
 		
@@ -82,12 +82,12 @@ page_palette.ftl
 	};
 	
 	avo.INPUT_PROPERTY_ADDITION_OLD_GROUP = "${JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP}";
-	avo.chartAttrValuesFormEleId = "${pid}chartAttrValuesForm";
+	avo.chartConfigValuesFormEleId = "${pid}chartConfigValuesForm";
 	
 	po.i18n.confirmDeleteThisDataAsk = "<@spring.message code='confirmDeleteThisDataAsk' />";
 	po.i18n.ungrouped = "<@spring.message code='ungrouped' />";
 	po.i18n.unnamed = "<@spring.message code='unnamed' />";
-	po.i18n.confirmClearAllChartAttr = "<@spring.message code='confirmClearAllChartAttr' />";
+	po.i18n.confirmClearAllChartConfig = "<@spring.message code='confirmClearAllChartConfig' />";
 	po.i18n.none = "<@spring.message code='none' />";
 	po.i18n.moveUp = "<@spring.message code='moveUp' />";
 	po.i18n.moveDown = "<@spring.message code='moveDown' />";
@@ -100,7 +100,7 @@ page_palette.ftl
 	po.i18n.activeOrClear = "<@spring.message code='activeOrClear' />";
 	
 	//page.js
-	$.inflateChartAttrValuesForm(po);
+	$.inflateChartConfigValuesForm(po);
 })
 (${pid});
 </script>

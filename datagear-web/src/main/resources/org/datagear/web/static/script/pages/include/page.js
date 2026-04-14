@@ -2076,7 +2076,7 @@ $.inflatePageTabView = function(po)
 };
 
 //初始化chart_attr_values_form.ftl页面对象
-$.inflateChartAttrValuesForm = function(po)
+$.inflateChartConfigValuesForm = function(po)
 {
 	var avo = (po.avo || (po.avo = {}));
 	
@@ -2294,8 +2294,8 @@ $.inflateChartAttrValuesForm = function(po)
 	
 	avo.propertyInputOptionsForMap = function(asTree)
 	{
-		if(po.getChartAttrValuesInputOptionsForMap != null)
-			return po.getChartAttrValuesInputOptionsForMap(asTree);
+		if(po.getChartConfigInputOptionsForMap != null)
+			return po.getChartConfigInputOptionsForMap(asTree);
 		
 		//树
 		if(asTree)
@@ -2519,15 +2519,15 @@ $.inflateChartAttrValuesForm = function(po)
 	avo.unrelatedPropName = po.concatPid("unrelatedProp");
 	
 	//图表属性值对象转换为org.datagear.analysis.ChartPluginConfigForm的表单数据模型
-	avo.attrValuesToFormData = function(attrValues, formData, pluginConfigForm, initDftValue)
+	avo.configValuesToFormData = function(configValues, formData, pluginConfigForm, initDftValue)
 	{
-		attrValues = (attrValues || {});
+		configValues = (configValues || {});
 		formData = (formData || {});
 		initDftValue = (initDftValue === undefined ? true : initDftValue);
 		
 		if(pluginConfigForm == null)
 		{
-			formData = $.extend(true, formData, attrValues);
+			formData = $.extend(true, formData, configValues);
 		}
 		else
 		{
@@ -2535,35 +2535,35 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			if(avo.isRootPluginConfigForm(pluginConfigForm))
 			{
-				formData = $.extend(true, formData, attrValues);
+				formData = $.extend(true, formData, configValues);
 			}
 			else
 			{
 				var name = pluginConfigForm.name;
-				formData = $.extend(true, formData, attrValues[name]);
+				formData = $.extend(true, formData, configValues[name]);
 				formData[avo.unrelatedPropName] = {};
 				
-				for(var p in attrValues)
+				for(var p in configValues)
 				{
 					if(p != name)
-						formData[avo.unrelatedPropName][p] = attrValues[p];
+						formData[avo.unrelatedPropName][p] = configValues[p];
 				}
 			}
 			
-			avo.doAttrValuesToFormData(formData, pluginConfigForm, initDftValue);
+			avo.doConfigValuesToFormData(formData, pluginConfigForm, initDftValue);
 		}
 		
 		return formData;
 	};
 	
-	avo.doAttrValuesToFormData = function(attrValues, objProperty, initDftValue)
+	avo.doConfigValuesToFormData = function(configValues, objProperty, initDftValue)
 	{
 		initDftValue = (initDftValue === undefined ? true : initDftValue);
 		
-		if(attrValues == null || objProperty == null || $.isEmpty(objProperty.properties))
+		if(configValues == null || objProperty == null || $.isEmpty(objProperty.properties))
 			return;
 		
-		var data = attrValues;
+		var data = configValues;
 		var props = objProperty.properties;
 		
 		data[avo.ctrlPropName] = { propEnableds: {}, propCollapseds: {}, propViewValues: {}, propBakValues: {}, propEnableIfs: {} };
@@ -2590,11 +2590,11 @@ $.inflateChartAttrValuesForm = function(po)
 							v = [ v ];
 						
 						for(var j=0; j<v.length; j++)
-							avo.doAttrValuesToFormData(v[j], prop, initDftValue);
+							avo.doConfigValuesToFormData(v[j], prop, initDftValue);
 					}
 					else
 					{
-						avo.doAttrValuesToFormData(v, prop, initDftValue);
+						avo.doConfigValuesToFormData(v, prop, initDftValue);
 					}
 				}
 				
@@ -2607,12 +2607,12 @@ $.inflateChartAttrValuesForm = function(po)
 				if(initDftValue && v == null && !prop.array)
 					v = avo.clonePropDefaultValue(prop);
 				
-				v = avo.trimChartAttrValueArray(prop, v);
+				v = avo.trimChartConfigValueArray(prop, v);
 				
 				//不能采用直接转换v的方式，因为enableIf/disableIf功能需要访问标准数据结构
 				if(avo.isPropTreeSelectInput(prop))
 				{
-					propViewValues[prop.name] = avo.encodeAttrValueTreeModel(prop, v);
+					propViewValues[prop.name] = avo.encodeConfigValueTreeModel(prop, v);
 				}
 			}
 			
@@ -2637,7 +2637,7 @@ $.inflateChartAttrValuesForm = function(po)
 	// "v0" -> { v0: true }
 	// [ "v0", "v1", ... ] -> { v0: true, v1: true, ... }、[ { v0: true }, { v1: true }, ... ]
 	// [ [ "v0", "v1" ], ... ] -> [ { v0: true, v1: true, ... }, ... ]
-	avo.encodeAttrValueTreeModel = function(inputProp, value, handleArrayProp)
+	avo.encodeConfigValueTreeModel = function(inputProp, value, handleArrayProp)
 	{
 		handleArrayProp = (handleArrayProp === undefined ? true : handleArrayProp);
 		
@@ -2694,8 +2694,8 @@ $.inflateChartAttrValuesForm = function(po)
 		return re;
 	};
 	
-	//将由avo.attrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
-	avo.formDataToAttrValues = function(formData, pluginConfigForm, strictMode, retainNull)
+	//将由avo.configValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
+	avo.formDataToConfigValues = function(formData, pluginConfigForm, strictMode, retainNull)
 	{
 		formData = (formData || {});
 		
@@ -2709,7 +2709,7 @@ $.inflateChartAttrValuesForm = function(po)
 		if(avo.isRootPluginConfigForm(pluginConfigForm))
 		{
 			re = $.extend(true, {}, formData);
-			avo.doFormDataToAttrValues(re, pluginConfigForm, strictMode, retainNull);
+			avo.doFormDataToConfigValues(re, pluginConfigForm, strictMode, retainNull);
 		}
 		else
 		{
@@ -2720,7 +2720,7 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			var name = pluginConfigForm.name;
 			re[name] = $.extend(true, {}, formData);
-			avo.doFormDataToAttrValues(re[name], pluginConfigForm, true, false);
+			avo.doFormDataToConfigValues(re[name], pluginConfigForm, true, false);
 			
 			if(!strictMode)
 			{
@@ -2735,7 +2735,7 @@ $.inflateChartAttrValuesForm = function(po)
 		return re;
 	};
 	
-	avo.doFormDataToAttrValues = function(formData, objProperty, strictMode, retainNull)
+	avo.doFormDataToConfigValues = function(formData, objProperty, strictMode, retainNull)
 	{
 		if(formData == null)
 			return formData;
@@ -2763,17 +2763,17 @@ $.inflateChartAttrValuesForm = function(po)
 				if($.isArray(v))
 				{
 					for(var j=0; j<v.length; j++)
-						avo.doFormDataToAttrValues(v[j], prop, true, false);
+						avo.doFormDataToConfigValues(v[j], prop, true, false);
 				}
 				else
 				{
-					avo.doFormDataToAttrValues(v, prop, true, false);
+					avo.doFormDataToConfigValues(v, prop, true, false);
 				}
 			}
 			else
 			{
-				v = avo.trimChartAttrValueArray(prop, v);
-				v = avo.toChartAttrTypeValue(prop, v);
+				v = avo.trimChartConfigValueArray(prop, v);
+				v = avo.toChartConfigTypeValue(prop, v);
 			}
 			
 			if(propEnableIfs != null && propEnableIfs[propName] === false)
@@ -2813,8 +2813,8 @@ $.inflateChartAttrValuesForm = function(po)
 		delete data[avo.ctrlPropName];
 	};
 	
-	//树组件Model转换为图表属性值，另参考avo.encodeAttrValueTreeModel()函数
-	avo.decodeAttrValueTreeModel = function(inputProp, value)
+	//树组件Model转换为图表属性值，另参考avo.encodeConfigValueTreeModel()函数
+	avo.decodeConfigValueTreeModel = function(inputProp, value)
 	{
 		if(value == null)
 			return value;
@@ -2876,7 +2876,7 @@ $.inflateChartAttrValuesForm = function(po)
 		return re;
 	};
 	
-	avo.trimChartAttrValueArray = function(inputProp, value)
+	avo.trimChartConfigValueArray = function(inputProp, value)
 	{
 		if(value == null)
 			return value;
@@ -2893,7 +2893,7 @@ $.inflateChartAttrValuesForm = function(po)
 		return value;
 	};
 	
-	avo.toChartAttrTypeValue = function(inputProp, value)
+	avo.toChartConfigTypeValue = function(inputProp, value)
 	{
 		var type = inputProp.type;
 		
@@ -2911,7 +2911,7 @@ $.inflateChartAttrValuesForm = function(po)
 			
 			value.forEach((vi) =>
 			{
-				vi = avo.toChartAttrTypeValue(inputProp, vi);
+				vi = avo.toChartConfigTypeValue(inputProp, vi);
 				//数组中的null元素应保留
 				re.push(vi);
 			});
@@ -2961,7 +2961,7 @@ $.inflateChartAttrValuesForm = function(po)
 		}
 	};
 	
-	avo.setFormAttrValues = function(attrValues, initDftValue)
+	avo.setFormConfigValues = function(configValues, initDftValue)
 	{
 		var pm = po.vuePageModel();
 		var pluginConfigForm = pm.avoModel.pluginConfigForm;
@@ -2970,17 +2970,17 @@ $.inflateChartAttrValuesForm = function(po)
 		for(var p in formData)
 			delete formData[p];
 		
-		avo.attrValuesToFormData(attrValues, formData, pluginConfigForm, initDftValue);
+		avo.configValuesToFormData(configValues, formData, pluginConfigForm, initDftValue);
 	};
 	
 	avo.clearFormData = function()
 	{
-		avo.setFormAttrValues({}, false);
+		avo.setFormConfigValues({}, false);
 	};
 	
-	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginConfigForm)
+	avo.clearConfigValuesIfNoneAttrForm = function(configValues, pluginConfigForm)
 	{
-		var re = (attrValues || {});
+		var re = (configValues || {});
 		
 		if(pluginConfigForm == null || $.isEmpty(pluginConfigForm.properties))
 			re = {};
@@ -3034,7 +3034,7 @@ $.inflateChartAttrValuesForm = function(po)
 		
 		if(avo.isObjectProperty(prop))
 		{
-			ele = avo.doAttrValuesToFormData({}, prop);
+			ele = avo.doConfigValuesToFormData({}, prop);
 		}
 		else
 		{
@@ -3059,7 +3059,7 @@ $.inflateChartAttrValuesForm = function(po)
 			if(viewArray == null)
 				propViewValues[prop.name] = (viewArray = []);
 			
-			var treeEle = avo.encodeAttrValueTreeModel(prop, ele, false);
+			var treeEle = avo.encodeConfigValueTreeModel(prop, ele, false);
 			
 			if(idx == null)
 				viewArray.push(treeEle);
@@ -3197,7 +3197,7 @@ $.inflateChartAttrValuesForm = function(po)
 			if(propBakValues[propName] != null)
 				formData[propName] = propBakValues[propName];
 			else
-				formData[propName] = (objProp.array ? [] : avo.doAttrValuesToFormData({}, objProp));
+				formData[propName] = (objProp.array ? [] : avo.doConfigValuesToFormData({}, objProp));
 			
 			propCollapseds[propName] = false;
 		}
@@ -3222,16 +3222,16 @@ $.inflateChartAttrValuesForm = function(po)
 		}
 	};
 	
-	avo.validateAttrValuesRequired = function(attrValues, pluginConfigForm)
+	avo.validateConfigValuesRequired = function(configValues, pluginConfigForm)
 	{
 		pluginConfigForm = avo.toGroupTrimProperty(pluginConfigForm);
 		
 		var formData = null;
 		
 		if(avo.isRootPluginConfigForm(pluginConfigForm))
-			formData = attrValues;
+			formData = configValues;
 		else
-			formData = (attrValues == null ? null : attrValues[pluginConfigForm.name]);
+			formData = (configValues == null ? null : configValues[pluginConfigForm.name]);
 		
 		formData = (formData == null ? {} : formData);
 		
@@ -3255,7 +3255,7 @@ $.inflateChartAttrValuesForm = function(po)
 		return true;
 	};
 	
-	po.setupChartAttrValuesForm = function(pluginConfigForm, attrValues, options)
+	po.setupChartConfigValuesForm = function(pluginConfigForm, configValues, options)
 	{
 		options = $.extend(
 		{
@@ -3275,9 +3275,9 @@ $.inflateChartAttrValuesForm = function(po)
 		pm.avoModel.buttons = options.buttons;
 		pm.avoModel.readonly = options.readonly;
 		pm.avoModel.showClearBtn = options.showClearBtn;
-		avo.setFormAttrValues(attrValues);
+		avo.setFormConfigValues(configValues);
 		
-		var form = po.elementOfId(avo.chartAttrValuesFormEleId, document.body);
+		var form = po.elementOfId(avo.chartConfigValuesFormEleId, document.body);
 		po.setupSimpleForm(form, pm.avoModel.formData,
 		{
 			submitHandler: function()
@@ -3286,8 +3286,8 @@ $.inflateChartAttrValuesForm = function(po)
 				{
 					var pluginConfigForm = pm.avoModel.pluginConfigForm;
 					var data = po.vueRaw(pm.avoModel.formData);
-					var attrValues = avo.formDataToAttrValues(data, pluginConfigForm, options.strictSubmitData, options.retainDataNullProp);
-					options.submitHandler(attrValues);
+					var configValues = avo.formDataToConfigValues(data, pluginConfigForm, options.strictSubmitData, options.retainDataNullProp);
+					options.submitHandler(configValues);
 				}
 			}
 		});
@@ -3316,11 +3316,11 @@ $.inflateChartAttrValuesForm = function(po)
 	
 	po.vueMethod(
 	{
-		onClearChartAttrValuesForm: function()
+		onClearChartConfigValuesForm: function()
 		{
 			po.confirm(
 			{
-				message: po.i18n.confirmClearAllChartAttr,
+				message: po.i18n.confirmClearAllChartConfig,
 				accept: function()
 				{
 					avo.clearFormData();
@@ -3581,7 +3581,7 @@ $.inflateChartAttrValuesForm = function(po)
 				var ctrlPropName = this.ctrlPropName;
 				var ctrlObj = formData[ctrlPropName];
 				var propViewValues = ctrlObj.propViewValues;
-				formData[propName] = avo.decodeAttrValueTreeModel(prop, propViewValues[propName]);
+				formData[propName] = avo.decodeConfigValueTreeModel(prop, propViewValues[propName]);
 			}
 		},
 		
@@ -3855,7 +3855,7 @@ $.inflateChartForm = function(po)
 		else
 			data.resultDataFormat = undefined;
 		
-		data.attrValues = po.avo.clearAttrValuesIfNoneAttrForm(data.attrValues, data.pluginVo.configForm);
+		data.configValues = po.avo.clearConfigValuesIfNoneAttrForm(data.configValues, data.pluginVo.configForm);
 		data.pluginVo = (data.pluginVo ? { id: data.pluginVo.id } : null);
 		
 		return data;
@@ -4681,7 +4681,7 @@ $.inflateChartForm = function(po)
 		return re;
 	});
 	
-	$.validator.addMethod("validateChartAttrValues", function(context)
+	$.validator.addMethod("validateChartConfigValues", function(context)
 	{
 		var po = context.po;
 		var chart = context.chart;
@@ -4692,7 +4692,7 @@ $.inflateChartForm = function(po)
 		
 		var fm = po.vueFormModel();
 		
-		return po.avo.validateAttrValuesRequired(fm.attrValues, configForm);
+		return po.avo.validateConfigValuesRequired(fm.configValues, configForm);
 	});
 	
 	var formModel = po.formModel;
@@ -4702,7 +4702,7 @@ $.inflateChartForm = function(po)
 	formModel.dataSetBindVOs = (formModel.dataSetBindVOs == null ? [] : formModel.dataSetBindVOs);
 	formModel.plugin = undefined;
 	formModel.dataSetBinds = undefined;
-	formModel.attrValues = (formModel.attrValues || {});
+	formModel.configValues = (formModel.configValues || {});
 	po.assembleDataSetBinds(formModel);
 	
 	po.setupForm(formModel,
@@ -4725,7 +4725,7 @@ $.inflateChartForm = function(po)
 			updateInterval: {"integer": true},
 			dataSetSignCheckVal: { "dataSetSignRequired": true },
 			validateDataSetRangeVal: { "validateDataSetRange": true },
-			chartAttrValuesCheckVal: { "validateChartAttrValues": true }
+			chartConfigValuesCheckVal: { "validateChartConfigValues": true }
 		},
 		customNormalizers:
 		{
@@ -4739,7 +4739,7 @@ $.inflateChartForm = function(po)
 				var context = { po: po, chart: po.vueFormModel() };
 				return context;
 			},
-			chartAttrValuesCheckVal: function()
+			chartConfigValuesCheckVal: function()
 			{
 				var context = { po: po, chart: po.vueFormModel() };
 				return context;
@@ -4761,7 +4761,7 @@ $.inflateChartForm = function(po)
 					return $(element).data("invalidMsg");
 				}
 			},
-			chartAttrValuesCheckVal: po.i18n["chart.attrValues.editRequired"]
+			chartConfigValuesCheckVal: po.i18n["chart.configValues.editRequired"]
 		}
 	});
 	
@@ -4782,7 +4782,7 @@ $.inflateChartForm = function(po)
 		enableResultDataFormat: po.enableResultDataFormat,
 		dateOrTimeTypeOptions: po.dateOrTimeTypeOptions,
 		optionsFormModel: { options: "" },
-		attrValuesPanelShown: false
+		configValuesPanelShown: false
 	});
 	
 	po.vueRef(po.concatPid("dataSignsPanelEle"), null);
@@ -4880,12 +4880,12 @@ $.inflateChartForm = function(po)
 					po.assembleDataSetBinds(fm);
 					pm.pluginHasDataSetSign = po.pluginHasDataSetSign(fm.pluginVo);
 					
-					po.bakPluginAttrValuesMap[oldPluginId] = fm.attrValues;
+					po.bakPluginConfigValuesMap[oldPluginId] = fm.configValues;
 					
-					if(po.bakPluginAttrValuesMap[plugin.id] != null)
-						fm.attrValues = po.bakPluginAttrValuesMap[plugin.id];
+					if(po.bakPluginConfigValuesMap[plugin.id] != null)
+						fm.configValues = po.bakPluginConfigValuesMap[plugin.id];
 					else
-						fm.attrValues = {};
+						fm.configValues = {};
 					
 					if(plugin && po.DashboardApiVersion.LATEST_VERSION != plugin.apiVersion)
 					{
@@ -5136,24 +5136,24 @@ $.inflateChartForm = function(po)
 			po.vueUnref(po.concatPid("pluginVoDescEle")).toggle(e);
 		},
 		
-		onShowAttrValuesPanel: function(e)
+		onShowConfigValuesPanel: function(e)
 		{
 			var pm = po.vuePageModel();
-			pm.attrValuesPanelShown = true;
+			pm.configValuesPanelShown = true;
 		},
 		
-		onAttrValuesPanelShow: function()
+		onConfigValuesPanelShow: function()
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
 			var pluginConfigForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.configForm : {});
-			var attrValues = po.vueRaw(fm.attrValues);
-			po.setupChartAttrValuesForm(pluginConfigForm, attrValues,
+			var configValues = po.vueRaw(fm.configValues);
+			po.setupChartConfigValuesForm(pluginConfigForm, configValues,
 			{
 				submitHandler: function(avs)
 				{
-					fm.attrValues = avs;
-					pm.attrValuesPanelShown = false;
+					fm.configValues = avs;
+					pm.configValuesPanelShown = false;
 				},
 				readonly: pm.isReadonlyAction,
 				//此时不允许自由编辑图表属性，因此应是严格数据模式

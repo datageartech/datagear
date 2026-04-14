@@ -22,49 +22,50 @@ import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
 /**
- * 仅渲染图表指定属性值的{@linkplain HtmlChartPlugin}。
+ * 仅渲染图表指定配置值的{@linkplain HtmlChartPlugin}。
  * <p>
- * 它从{@linkplain ChartDefinition#getAttrValues()}获取{@linkplain #getAttrName()}对应的值，并将其作为图表内容渲染。
+ * 它从{@linkplain ChartDefinition#getConfigValues()}获取{@linkplain #getConfigName()}对应的值，并将其作为图表内容渲染。
  * </p>
  * <p>
  * 注意：此插件的页面端要求如下：
  * </p>
  * <p>
- * {@code chart.element()} 函数，用于获取图表HTML元素 <br>
- * {@code chart.attrValue(name)} 函数，用于获取图表指定名称的图表属性值
+ * {@code chart.element()}函数，用于获取图表HTML元素 <br>
+ * {@code chart.configValue(name)}或者{@code chart.attrValue(name)}
+ * 函数，用于获取图表指定名称的图表配置值
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
+public class ConfigValueHtmlChartPlugin extends HtmlChartPlugin
 {
 	private static final long serialVersionUID = 1L;
 
-	private String attrName;
+	private String configName;
 
-	public AttributeValueHtmlChartPlugin()
+	public ConfigValueHtmlChartPlugin()
 	{
 		super();
 	}
 
-	public AttributeValueHtmlChartPlugin(String id, Label nameLabel, String attrName)
+	public ConfigValueHtmlChartPlugin(String id, Label nameLabel, String configName)
 	{
 		super(id, nameLabel, null, HtmlChartPluginScriptObjectWriter.INSTANCE,
 				HtmlRenderContextScriptObjectWriter.INSTANCE, HtmlChartScriptObjectWriter.INSTANCE);
-		this.attrName = attrName;
-		super.setRenderer(buildJsChartRenderer(attrName));
+		this.configName = configName;
+		super.setRenderer(buildJsChartRenderer(configName));
 	}
 
-	public String getAttrName()
+	public String getConfigName()
 	{
-		return attrName;
+		return configName;
 	}
 
-	public void setAttrName(String attrName)
+	public void setConfigName(String configName)
 	{
-		this.attrName = attrName;
-		super.setRenderer(buildJsChartRenderer(attrName));
+		this.configName = configName;
+		super.setRenderer(buildJsChartRenderer(configName));
 	}
 
 	protected StringJsChartRenderer buildJsChartRenderer(String attrName)
@@ -76,7 +77,11 @@ public class AttributeValueHtmlChartPlugin extends HtmlChartPlugin
 				+ "	render : function(chart)" + newLine //
 				+ "	{" + newLine + //
 				"		var element = chart.element();" + newLine //
-				+ "		var value = chart.attrValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
+				+ "		var value;" + newLine //
+				+ "		if(chart.configValue != null)" + newLine //
+				+ "			value = chart.configValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
+				+ "		else if(chart.attrValue != null)" + newLine //
+				+ "			value = chart.attrValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
 				+ "		element.innerHTML = " + valueExp + ";" + newLine //
 				+ "	}," + newLine //
 				+ "	update : function(){}" + newLine //

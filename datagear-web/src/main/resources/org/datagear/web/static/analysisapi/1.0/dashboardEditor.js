@@ -2384,30 +2384,30 @@
 	};
 	
 	/**
-	 * 获取图表元素的图表属性值。
+	 * 获取图表元素的图表配置。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartAttrValues = function(ele)
+	editor.getElementChartConfigValues = function(ele)
 	{
 		ele = this._currentElement(ele, true);
 		
 		if(!this._checkNotEmptyElement(ele))
 			return null;
 		
-		var attrValues = null;
+		var configValues = null;
 		var chart = this.dashboard.renderedChart(ele);
 		
 		//这里不能直接使用chart.attrValues()，因为可能已被图表实例修改
-		var attrValuesOrigin =  chart.attrValuesOrigin();
-		var attrValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
-		attrValuesEle = chartFactory.evalSilently(attrValuesEle, null);
+		var configValuesOrigin =  chart.attrValuesOrigin();
+		var configValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
+		configValuesEle = chartFactory.evalSilently(configValuesEle, null);
 		
 		//应复制一份，避免被不可预料的修改
-		if(attrValuesOrigin != null || attrValuesEle != null)
-			attrValues = $.extend(true, {}, attrValuesOrigin, attrValuesEle);
+		if(configValuesOrigin != null || configValuesEle != null)
+			configValues = $.extend(true, {}, configValuesOrigin, configValuesEle);
 		
-		return attrValues;
+		return configValues;
 	};
 	
 	/**
@@ -2415,7 +2415,7 @@
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartAttrValuesForReset = function(ele)
+	editor.getElementChartConfigValuesForReset = function(ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -2426,25 +2426,25 @@
 		if(!chart)
 			return null;
 		
-		var attrValuesOrigin =  (chart.attrValuesOrigin() || {});
-		var attrValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
-		attrValuesEle = chartFactory.evalSilently(attrValuesEle, {});
+		var configValuesOrigin =  (chart.attrValuesOrigin() || {});
+		var configValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
+		configValuesEle = chartFactory.evalSilently(configValuesEle, {});
 		var cpas = chart.pluginAttributes();
 		
 		$.each(cpas, function(i, cpa)
 		{
-			delete attrValuesEle[cpa.name];
+			delete configValuesEle[cpa.name];
 		});
 		
 		//保留元素上定义的图表插件属性之外的扩展值
-		var re = $.extend(true, {}, attrValuesOrigin, attrValuesEle);
+		var re = $.extend(true, {}, configValuesOrigin, configValuesEle);
 		return re;
 	};
 	
 	/**
-	 * 获取看板图表插件属性内置地图选项集。
+	 * 获取看板图表插件配置内置地图选项集。
 	 */
-	editor.getChartAttrValuesInputOptionsForMap = function(asTree)
+	editor.getChartConfigInputOptionsForMap = function(asTree)
 	{
 		var re = [];
 		
@@ -2504,57 +2504,57 @@
 	};
 	
 	/**
-	 * 校验setElementChartAttrValues操作。
+	 * 校验setElementChartConfigValues操作。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.checkSetElementChartAttrValues = function(ele)
+	editor.checkSetElementChartConfigValues = function(ele)
 	{
 		return this.checkAttrChartElement(ele);
 	};
 	
 	/**
-	 * 对于editor.setElementChartAttrValues()的attrValues参数，是否需要保留其中的null值
+	 * 对于editor.setElementChartConfigValues()的configValues参数，是否需要保留其中的null值
 	 */
-	editor.retainNullChartAttrValue = function()
+	editor.retainNullChartConfigValue = function()
 	{
-		//不需保留null值，因为未支持删除原始图表属性值，具体参考chart._initAttrValues()函数
+		//不需保留null值，因为未支持删除原始图表配置值，具体参考chart._initConfigValues()函数
 		return false;
 	};
 	
 	/**
-	 * 设置图表元素的图表属性值。
+	 * 设置图表元素的图表配置值。
 	 * 
-	 * @param attrValues 要设置的图表主题对象，格式为：{ ... }
+	 * @param configValues 要设置的图表配置对象，格式为：{ ... }
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 * 
 	 * @returns 元素、false
 	 */
-	editor.setElementChartAttrValues = function(attrValues, ele)
+	editor.setElementChartConfigValues = function(configValues, ele)
 	{
-		attrValues = (attrValues || {});
+		configValues = (configValues || {});
 		ele = this._currentElement(ele, true);
 		
-		if(!this.checkSetElementChartAttrValues(ele))
+		if(!this.checkSetElementChartConfigValues(ele))
 			return false;
 		
 		var chart = this.dashboard.renderedChart(ele);
-		var attrValuesOrigin = (chart.attrValuesOrigin() || {});
-		var attrValuesMerge = {};
+		var configValuesOrigin = (chart.attrValuesOrigin() || {});
+		var configValuesMerge = {};
 		
 		//应该只设置有修改的图表属性值，这样在图表模块再次编辑其他图表属性值才能应用于所有引用它看板
-		for(var p in attrValues)
+		for(var p in configValues)
 		{
-			if(!this._deepEqualsForJson(attrValuesOrigin[p], attrValues[p]))
-				attrValuesMerge[p] = attrValues[p];
+			if(!this._deepEqualsForJson(configValuesOrigin[p], configValues[p]))
+				configValuesMerge[p] = configValues[p];
 		}
 		
-		var eleAttrValue = this._serializeForAttrValue(attrValuesMerge);
+		var eleConfigValue = this._serializeForConfigValue(configValuesMerge);
 		
-		if(this._isEmptyJsonObjStr(eleAttrValue))
+		if(this._isEmptyJsonObjStr(eleConfigValue))
 			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, null);
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleAttrValue);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.ATTR_VALUES, eleConfigValue);
 		
 		this._reRenderChart(chart);
 		
@@ -2857,7 +2857,7 @@
 				trim[p] = v;
 		}
 		
-		var attrValue = this._serializeForAttrValue(trim);
+		var attrValue = this._serializeForConfigValue(trim);
 		
 		if(this._isEmptyJsonObjStr(attrValue))
 			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, null);
@@ -3638,7 +3638,7 @@
 	
 	//将符合JSON规范的对象序列化为元素属性值字符串
 	//注意：此函数使用单引号而非双引号作为引号符，因为双引号会被HTML转义为'&quot;'，对源码不友好
-	editor._serializeForAttrValue = function(obj)
+	editor._serializeForConfigValue = function(obj)
 	{
 		if(obj == null)
 			return null;
@@ -3659,7 +3659,7 @@
 			
 			for(var i=0; i<obj.length; i++)
 			{
-				var vstr = this._serializeForAttrValue(obj[i]);
+				var vstr = this._serializeForConfigValue(obj[i]);
 				if(vstr != null && vstr !== "")
 				{
 					if(str != "[")
@@ -3679,13 +3679,13 @@
 			
 			for(var p in obj)
 			{
-				var vstr = this._serializeForAttrValue(obj[p]);
+				var vstr = this._serializeForConfigValue(obj[p]);
 				if(vstr != null && vstr !== "")
 				{
 					if(str != "{")
 						str += ",";
 					
-					str += this._serializeForAttrValue(p) + ":" + vstr;
+					str += this._serializeForConfigValue(p) + ":" + vstr;
 				}
 			}
 			
@@ -3694,7 +3694,7 @@
 			return str;
 		}
 		else
-			return this._serializeForAttrValue(obj.toString());
+			return this._serializeForConfigValue(obj.toString());
 	};
 	
 	editor._toSingleQuoteJsString = function(str, quote)

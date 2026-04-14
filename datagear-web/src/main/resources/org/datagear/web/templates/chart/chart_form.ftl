@@ -250,22 +250,22 @@
 				</div>
 			</div>
 			<div class="field grid">
-				<label for="${pid}attrValues" class="field-label col-12 mb-2 md:col-3 md:mb-0"
-					title="<@spring.message code='chart.attrValues.desc' />">
-					<@spring.message code='chartAttribute' />
+				<label for="${pid}configValues" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='chart.configValues.desc' />">
+					<@spring.message code='chartConfig' />
 				</label>
 				<div class="field-input col-12 md:col-9">
-					<div id="${pid}attrValues" class="flex align-items-center">
+					<div id="${pid}configValues" class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
 							:disabled="isEmptyPluginConfigForm(fm.pluginVo)"
-							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
+							@click="onShowConfigValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
 			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && isEmptyPluginConfigForm(fm.pluginVo)">
-			        		<@spring.message code='chart.attrValues.noAttrDefined' />
+			        		<@spring.message code='chart.configValues.noConfigDefined' />
 			        	</div>
 		        	</div>
 		        	<div class="validate-msg">
-		        		<input name="chartAttrValuesCheckVal" type="text" class="validate-normalizer" />
+		        		<input name="chartConfigValuesCheckVal" type="text" class="validate-normalizer" />
 		        	</div>
 				</div>
 			</div>
@@ -494,8 +494,8 @@
 		</div>
 	</p-overlaypanel>
 	<!-- 这里使用对话框组件而非弹出面板组件，因为其内部存在下拉框等组件，使用弹出面板时会出现错位问题 -->
-	<p-dialog header="<@spring.message code='chartAttribute' />" append-to="body" position="center" :modal="true"
-		v-model:visible="pm.attrValuesPanelShown" id="${pid}attrValuesPanel" @show="onAttrValuesPanelShow">
+	<p-dialog header="<@spring.message code='chartConfig' />" append-to="body" position="center" :modal="true"
+		v-model:visible="pm.configValuesPanelShown" id="${pid}configValuesPanel" @show="onConfigValuesPanelShow">
 		<div class="page page-form page-chart-attr-values chart-form-chart-attr-values">
 			<#include "include/chart_attr_values_form.ftl">
 		</div>
@@ -584,7 +584,7 @@
 		{ name: "<@spring.message code='string' />", value: "${ResultDataFormat.TYPE_STRING}" },
 		{ name: "<@spring.message code='number' />", value: "${ResultDataFormat.TYPE_NUMBER}" }
 	];
-	po.bakPluginAttrValuesMap = {};
+	po.bakPluginConfigValuesMap = {};
 	po.DS_TARGET_FIELD = "${DataSign.TARGET_FIELD}";
 	po.DS_TARGET_DATASET = "${DataSign.TARGET_DATASET}";
 	po.DashboardApiVersion = { LATEST_VERSION: "${DashboardApiVersion.LATEST_VERSION}" };
@@ -626,7 +626,7 @@
 	po.i18n.noLimit = "<@spring.message code='noLimit' />";
 	po.i18n["chart.validateDataSetRange.main"] = "<@spring.message code='chart.validateDataSetRange.main' />";
 	po.i18n["chart.validateDataSetRange.attachment"] = "<@spring.message code='chart.validateDataSetRange.attachment' />";
-	po.i18n["chart.attrValues.editRequired"] = "<@spring.message code='chart.attrValues.editRequired' />";
+	po.i18n["chart.configValues.editRequired"] = "<@spring.message code='chart.configValues.editRequired' />";
 	po.i18n["chartPlugin.apiVersion.desc"] = "<@spring.message code='chartPlugin.apiVersion.desc' />";
 	po.i18n["chartPlugin.platformVersion.desc"] = "<@spring.message code='chartPlugin.platformVersion.desc' />";
 	po.i18n.emptyDesc = "<@spring.message code='emptyDesc' />";
