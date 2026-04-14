@@ -673,7 +673,7 @@ DE.checkAttrChartElement = function(ele)
 		return false;
 	}
 	
-	var form = (chart.plugin() == null ? null : chart.pluginForm());
+	var form = (chart.plugin() == null ? null : chart.pluginAttributeForm());
 	if(form == null || form.properties == null || form.properties.length == 0)
 	{
 		DE.tipInfo(i18n.chartPluginNoAttrDefined);
@@ -2424,20 +2424,20 @@ DE.getElementChartAttrValuesForReset = function(ele)
 	var attrValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
 	attrValuesEle = CF.evalSilently(attrValuesEle, {});
 	
-	var pluginForm = chart.pluginForm();
-	if(pluginForm != null)
+	var attributeForm = chart.pluginAttributeForm();
+	if(attributeForm != null)
 	{
-		if(CF.isRootPluginForm(pluginForm))
+		if(CF.isRootPluginAttributeForm(attributeForm))
 		{
-			var formProperties = (pluginForm.properties || []);
+			var formProperties = (attributeForm.properties || []);
 			formProperties.forEach((prop) =>
 			{
 				delete attrValuesEle[prop.name];
 			});
 		}
-		if(pluginForm.name != null)
+		if(attributeForm.name != null)
 		{
-			var name = pluginForm.name;
+			var name = attributeForm.name;
 			delete attrValuesEle[name];
 		}
 	}
@@ -2574,11 +2574,11 @@ DE.setElementChartAttrValues = function(attrValues, ele)
 };
 
 /**
- * 获取图表元素的ChartPluginForm。
+ * 获取图表元素的ChartPluginAttributeForm。
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
-DE.getElementChartPluginForm = function(ele)
+DE.getElementChartPluginAttributeForm = function(ele)
 {
 	ele = DE._currentElement(ele, true);
 	
@@ -2590,7 +2590,7 @@ DE.getElementChartPluginForm = function(ele)
 	if(chart == null || chart.plugin() == null)
 		return null;
 	
-	return chart.pluginForm();
+	return chart.pluginAttributeForm();
 };
 
 /**

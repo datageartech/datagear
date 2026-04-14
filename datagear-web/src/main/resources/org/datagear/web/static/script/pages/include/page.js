@@ -2091,9 +2091,9 @@ $.inflateChartAttrValuesForm = function(po)
 		return (prop != null && (prop.type == avo.FormPropertyType.OBJECT || prop.properties !== undefined));
 	};
 	
-	avo.isRootPluginForm = function(pluginForm)
+	avo.isRootPluginAttrForm = function(pluginAttrForm)
 	{
-		return chartFactory.isRootPluginForm(pluginForm);
+		return chartFactory.isRootPluginAttributeForm(pluginAttrForm);
 	};
 	
 	avo.toGroupTrimProperty = function(prop)
@@ -2518,28 +2518,28 @@ $.inflateChartAttrValuesForm = function(po)
 	avo.ctrlPropName = po.concatPid("avoctlprop");
 	avo.unrelatedPropName = po.concatPid("unrelatedProp");
 	
-	//图表属性值对象转换为org.datagear.analysis.ChartPluginForm的表单数据模型
-	avo.attrValuesToFormData = function(attrValues, formData, pluginForm, initDftValue)
+	//图表属性值对象转换为org.datagear.analysis.ChartPluginAttributeForm的表单数据模型
+	avo.attrValuesToFormData = function(attrValues, formData, pluginAttrForm, initDftValue)
 	{
 		attrValues = (attrValues || {});
 		formData = (formData || {});
 		initDftValue = (initDftValue === undefined ? true : initDftValue);
 		
-		if(pluginForm == null)
+		if(pluginAttrForm == null)
 		{
 			formData = $.extend(true, formData, attrValues);
 		}
 		else
 		{
-			pluginForm = avo.toGroupTrimProperty(pluginForm);
+			pluginAttrForm = avo.toGroupTrimProperty(pluginAttrForm);
 			
-			if(avo.isRootPluginForm(pluginForm))
+			if(avo.isRootPluginAttrForm(pluginAttrForm))
 			{
 				formData = $.extend(true, formData, attrValues);
 			}
 			else
 			{
-				var name = pluginForm.name;
+				var name = pluginAttrForm.name;
 				formData = $.extend(true, formData, attrValues[name]);
 				formData[avo.unrelatedPropName] = {};
 				
@@ -2550,7 +2550,7 @@ $.inflateChartAttrValuesForm = function(po)
 				}
 			}
 			
-			avo.doAttrValuesToFormData(formData, pluginForm, initDftValue);
+			avo.doAttrValuesToFormData(formData, pluginAttrForm, initDftValue);
 		}
 		
 		return formData;
@@ -2695,21 +2695,21 @@ $.inflateChartAttrValuesForm = function(po)
 	};
 	
 	//将由avo.attrValuesToFormData()函数生成的表单数据转换为图表属性值对象，执行类型转换、选项值限定等
-	avo.formDataToAttrValues = function(formData, pluginForm, strictMode, retainNull)
+	avo.formDataToAttrValues = function(formData, pluginAttrForm, strictMode, retainNull)
 	{
 		formData = (formData || {});
 		
 		var re;
 		
-		if(pluginForm == null)
-			pluginForm = { properties: [] };
+		if(pluginAttrForm == null)
+			pluginAttrForm = { properties: [] };
 		
-		pluginForm = avo.toGroupTrimProperty(pluginForm);
+		pluginAttrForm = avo.toGroupTrimProperty(pluginAttrForm);
 		
-		if(avo.isRootPluginForm(pluginForm))
+		if(avo.isRootPluginAttrForm(pluginAttrForm))
 		{
 			re = $.extend(true, {}, formData);
-			avo.doFormDataToAttrValues(re, pluginForm, strictMode, retainNull);
+			avo.doFormDataToAttrValues(re, pluginAttrForm, strictMode, retainNull);
 		}
 		else
 		{
@@ -2718,9 +2718,9 @@ $.inflateChartAttrValuesForm = function(po)
 			var unrelateds = (formData[avo.unrelatedPropName] || {});
 			delete formData[avo.unrelatedPropName];
 			
-			var name = pluginForm.name;
+			var name = pluginAttrForm.name;
 			re[name] = $.extend(true, {}, formData);
-			avo.doFormDataToAttrValues(re[name], pluginForm, true, false);
+			avo.doFormDataToAttrValues(re[name], pluginAttrForm, true, false);
 			
 			if(!strictMode)
 			{
@@ -2964,13 +2964,13 @@ $.inflateChartAttrValuesForm = function(po)
 	avo.setFormAttrValues = function(attrValues, initDftValue)
 	{
 		var pm = po.vuePageModel();
-		var pluginForm = pm.avoModel.pluginForm;
+		var pluginAttrForm = pm.avoModel.pluginAttrForm;
 		var formData = pm.avoModel.formData;
 		
 		for(var p in formData)
 			delete formData[p];
 		
-		avo.attrValuesToFormData(attrValues, formData, pluginForm, initDftValue);
+		avo.attrValuesToFormData(attrValues, formData, pluginAttrForm, initDftValue);
 	};
 	
 	avo.clearFormData = function()
@@ -2978,16 +2978,16 @@ $.inflateChartAttrValuesForm = function(po)
 		avo.setFormAttrValues({}, false);
 	};
 	
-	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginForm)
+	avo.clearAttrValuesIfNoneAttrForm = function(attrValues, pluginAttrForm)
 	{
 		var re = (attrValues || {});
 		
-		if(pluginForm == null || $.isEmpty(pluginForm.properties))
+		if(pluginAttrForm == null || $.isEmpty(pluginAttrForm.properties))
 			re = {};
 		
-		if(pluginForm != null && !avo.isRootPluginForm(pluginForm) && pluginForm.required)
+		if(pluginAttrForm != null && !avo.isRootPluginAttrForm(pluginAttrForm) && pluginAttrForm.required)
 		{
-			var name = pluginForm.name;
+			var name = pluginAttrForm.name;
 			
 			if(re[name] == null)
 				re[name] = {};
@@ -3222,20 +3222,20 @@ $.inflateChartAttrValuesForm = function(po)
 		}
 	};
 	
-	avo.validateAttrValuesRequired = function(attrValues, pluginForm)
+	avo.validateAttrValuesRequired = function(attrValues, pluginAttrForm)
 	{
-		pluginForm = avo.toGroupTrimProperty(pluginForm);
+		pluginAttrForm = avo.toGroupTrimProperty(pluginAttrForm);
 		
 		var formData = null;
 		
-		if(avo.isRootPluginForm(pluginForm))
+		if(avo.isRootPluginAttrForm(pluginAttrForm))
 			formData = attrValues;
 		else
-			formData = (attrValues == null ? null : attrValues[pluginForm.name]);
+			formData = (attrValues == null ? null : attrValues[pluginAttrForm.name]);
 		
 		formData = (formData == null ? {} : formData);
 		
-		var groupProps = (pluginForm.groupProps || []);
+		var groupProps = (pluginAttrForm.groupProps || []);
 		
 		for(var i=0; i<groupProps.length; i++)
 		{
@@ -3255,7 +3255,7 @@ $.inflateChartAttrValuesForm = function(po)
 		return true;
 	};
 	
-	po.setupChartAttrValuesForm = function(pluginForm, attrValues, options)
+	po.setupChartAttrValuesForm = function(pluginAttrForm, attrValues, options)
 	{
 		options = $.extend(
 		{
@@ -3268,10 +3268,10 @@ $.inflateChartAttrValuesForm = function(po)
 		},
 		options);
 		
-		pluginForm = avo.toGroupTrimProperty(pluginForm);
+		pluginAttrForm = avo.toGroupTrimProperty(pluginAttrForm);
 		
 		var pm = po.vuePageModel();
-		pm.avoModel.pluginForm = pluginForm;
+		pm.avoModel.pluginAttrForm = pluginAttrForm;
 		pm.avoModel.buttons = options.buttons;
 		pm.avoModel.readonly = options.readonly;
 		pm.avoModel.showClearBtn = options.showClearBtn;
@@ -3284,9 +3284,9 @@ $.inflateChartAttrValuesForm = function(po)
 			{
 				if(options && options.submitHandler)
 				{
-					var pluginForm = pm.avoModel.pluginForm;
+					var pluginAttrForm = pm.avoModel.pluginAttrForm;
 					var data = po.vueRaw(pm.avoModel.formData);
-					var attrValues = avo.formDataToAttrValues(data, pluginForm, options.strictSubmitData, options.retainDataNullProp);
+					var attrValues = avo.formDataToAttrValues(data, pluginAttrForm, options.strictSubmitData, options.retainDataNullProp);
 					options.submitHandler(attrValues);
 				}
 			}
@@ -3299,7 +3299,7 @@ $.inflateChartAttrValuesForm = function(po)
 		{
 			FormPropertyType: avo.FormPropertyType,
 			FormPropertyInputType: avo.FormPropertyInputType,
-			pluginForm: { groupProps: [] },
+			pluginAttrForm: { groupProps: [] },
 			formData: {},
 			showClearBtn: true,
 			readonly: false,
@@ -3855,7 +3855,7 @@ $.inflateChartForm = function(po)
 		else
 			data.resultDataFormat = undefined;
 		
-		data.attrValues = po.avo.clearAttrValuesIfNoneAttrForm(data.attrValues, data.pluginVo.form);
+		data.attrValues = po.avo.clearAttrValuesIfNoneAttrForm(data.attrValues, data.pluginVo.attributeForm);
 		data.pluginVo = (data.pluginVo ? { id: data.pluginVo.id } : null);
 		
 		return data;
@@ -3866,9 +3866,9 @@ $.inflateChartForm = function(po)
 		action.options.saveAndShowAction = po.inSaveAndShowAction();
 	};
 	
-	po.isEmptyPluginForm = function(plugin)
+	po.isEmptyPluginAttributeForm = function(plugin)
 	{
-		return (!plugin || !plugin.form || !plugin.form.properties || plugin.form.properties.length==0);
+		return (!plugin || !plugin.attributeForm || !plugin.attributeForm.properties || plugin.attributeForm.properties.length==0);
 	};
 	
 	po.validateDataSetBindDataSign = function(chart)
@@ -4685,14 +4685,14 @@ $.inflateChartForm = function(po)
 	{
 		var po = context.po;
 		var chart = context.chart;
-		var pluginForm = (chart.pluginVo ? chart.pluginVo.form : null);
+		var attributeForm = (chart.pluginVo ? chart.pluginVo.attributeForm : null);
 		
-		if(pluginForm == null)
+		if(attributeForm == null)
 			return true;
 		
 		var fm = po.vueFormModel();
 		
-		return po.avo.validateAttrValuesRequired(fm.attrValues, pluginForm);
+		return po.avo.validateAttrValuesRequired(fm.attrValues, attributeForm);
 	});
 	
 	var formModel = po.formModel;
@@ -4828,9 +4828,9 @@ $.inflateChartForm = function(po)
 			return po.isDataSignTargetDataSet(dataSign);
 		},
 		
-		isEmptyPluginForm: function(plugin)
+		isEmptyPluginAttributeForm: function(plugin)
 		{
-			return po.isEmptyPluginForm(plugin);
+			return po.isEmptyPluginAttributeForm(plugin);
 		},
 		
 		dsbParamValuesCount: function(dataSetBind)
@@ -5146,9 +5146,9 @@ $.inflateChartForm = function(po)
 		{
 			var fm = po.vueFormModel();
 			var pm = po.vuePageModel();
-			var pluginForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.form : {});
+			var pluginAttrForm = po.vueRaw(fm.pluginVo ? fm.pluginVo.attributeForm : {});
 			var attrValues = po.vueRaw(fm.attrValues);
-			po.setupChartAttrValuesForm(pluginForm, attrValues,
+			po.setupChartAttrValuesForm(pluginAttrForm, attrValues,
 			{
 				submitHandler: function(avs)
 				{

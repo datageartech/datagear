@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPluginForm;
+import org.datagear.analysis.ChartPluginAttributeForm;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.form.FormProperty;
@@ -232,10 +232,10 @@ public class HtmlChartPluginLoaderTest
 			}
 
 			{
-				ChartPluginForm form = plugin.getForm();
-				Assert.assertNotNull(form);
+				ChartPluginAttributeForm attributeForm = plugin.getAttributeForm();
+				Assert.assertNotNull(attributeForm);
 
-				List<FormProperty> formProperties = form.getProperties();
+				List<FormProperty> formProperties = attributeForm.getProperties();
 				assertEquals(1, formProperties.size());
 				assertEquals("id", formProperties.get(0).getName());
 			}
@@ -257,10 +257,10 @@ public class HtmlChartPluginLoaderTest
 			}
 
 			{
-				ChartPluginForm form = plugin.getForm();
-				Assert.assertNotNull(form);
+				ChartPluginAttributeForm attributeForm = plugin.getAttributeForm();
+				Assert.assertNotNull(attributeForm);
 
-				List<FormProperty> formProperties = form.getProperties();
+				List<FormProperty> formProperties = attributeForm.getProperties();
 				assertEquals(1, formProperties.size());
 				assertEquals("id", formProperties.get(0).getName());
 			}

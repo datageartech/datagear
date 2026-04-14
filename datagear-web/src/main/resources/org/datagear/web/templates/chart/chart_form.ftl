@@ -257,10 +257,10 @@
 				<div class="field-input col-12 md:col-9">
 					<div id="${pid}attrValues" class="flex align-items-center">
 						<p-button type="button" :label="pm.isReadonlyAction ? '<@spring.message code='view' />' : '<@spring.message code='edit' />'"
-							:disabled="isEmptyPluginForm(fm.pluginVo)"
+							:disabled="isEmptyPluginAttributeForm(fm.pluginVo)"
 							@click="onShowAttrValuesPanel" class="p-button-secondary mr-2">
 						</p-button>
-			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && isEmptyPluginForm(fm.pluginVo)">
+			        	<div class="desc text-color-secondary text-sm" v-if="fm.pluginVo && isEmptyPluginAttributeForm(fm.pluginVo)">
 			        		<@spring.message code='chart.attrValues.noAttrDefined' />
 			        	</div>
 		        	</div>

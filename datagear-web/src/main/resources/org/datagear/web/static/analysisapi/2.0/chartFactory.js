@@ -3388,29 +3388,29 @@ chartProto.attrValuesOrigin = function()
 };
 
 /**
- * 获取插件表单。
+ * 获取插件属性表单。
  * 
  * @returns
  */
-chartProto.pluginForm = function()
+chartProto.pluginAttributeForm = function()
 {
 	var plugin = this.plugin();
-	return (plugin ? plugin.form : null);
+	return (plugin ? plugin.attributeForm : null);
 };
 
 /**
- * 获取插件表单值。
+ * 获取插件属性值集。
  * 
  * @returns {}、null
  */
-chartProto.pluginFormValue = function()
+chartProto.pluginAttributeValues = function()
 {
-	var form = this.pluginForm();
+	var form = this.pluginAttributeForm();
 	
 	if(form == null)
 		return null;
 	
-	if(CF.isRootPluginForm(form))
+	if(CF.isRootPluginAttributeForm(form))
 	{
 		let re = {};
 		
@@ -4544,13 +4544,13 @@ CF.evalChartInitAttrValues = function(chartEle, attrValuesOrigin)
 };
 
 /**
- * 是否根级插件表单。
- * 根级插件表单的name为null，具体参考：
- * org.datagear.analysis.ChartPluginForm.getName()说明
+ * 是否根级插件属性表单。
+ * 根级插件属性表单的name为null，具体参考：
+ * org.datagear.analysis.ChartPluginAttributeForm.getName()说明
  */
-CF.isRootPluginForm = function(pluginForm)
+CF.isRootPluginAttributeForm = function(pluginAttributeForm)
 {
-	return (pluginForm != null && pluginForm.name == null);
+	return (pluginAttributeForm != null && pluginAttributeForm.name == null);
 };
 
 var THEME_STYLE_NAME_PROP = CF.BUILTIN_PROP_PREFIX + "StyleName";

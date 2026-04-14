@@ -2562,11 +2562,11 @@
 	};
 	
 	/**
-	 * 获取图表元素的ChartPluginForm。
+	 * 获取图表元素的ChartPluginAttributeForm。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
-	editor.getElementChartPluginForm = function(ele)
+	editor.getElementChartPluginAttributeForm = function(ele)
 	{
 		ele = this._currentElement(ele, true);
 		
@@ -2582,7 +2582,7 @@
 		if(attrs == null || attrs.length == 0)
 			return null;
 		
-		//org.datagear.analysis.ChartPluginForm
+		//org.datagear.analysis.ChartPluginAttributeForm
 		//这里需要设置type为org.datagear.analysis.form.PropertyType.OBJECT
 		var form = { type: "object", properties: attrs, array: false };
 		return form;
