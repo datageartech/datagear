@@ -40,10 +40,10 @@ public class ExceptionMsgHtmlChartPlugin extends ConfigValueHtmlChartPlugin
 	/**
 	 * 存储在{@linkplain ChartDefinition#getConfigValues()}中的异常消息属性名。
 	 */
-	public static final String DEFAULT_ATTR_NAME = ChartDefinition.BUILTIN_NAME_PREFIX + "EXCEPTION_MESSAGE";
+	public static final String CONFIG_NAME_EXCEPTION_MESSAGE = ChartDefinition.BUILTIN_NAME_PREFIX + "EXCEPTION_MESSAGE";
 
 	public ExceptionMsgHtmlChartPlugin()
 	{
-		super(DEFAULT_ID, new Label(ExceptionMsgHtmlChartPlugin.class.getSimpleName()), DEFAULT_ATTR_NAME);
+		super(DEFAULT_ID, new Label(ExceptionMsgHtmlChartPlugin.class.getSimpleName()), CONFIG_NAME_EXCEPTION_MESSAGE);
 	}
 }
