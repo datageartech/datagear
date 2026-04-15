@@ -3675,10 +3675,10 @@ $.inflateDashboardDesignEditorForms = function(po)
 				if(!dashboardEditor)
 					return;
 				
-				var attrForm = (dashboardEditor.getElementChartPluginConfigForm() || {});
+				var configForm = (dashboardEditor.getElementChartPluginConfigForm() || {});
 				var configValues = (dashboardEditor.getElementChartConfigValues() || {});
 				
-				po.setupChartConfigValuesForm(attrForm, configValues,
+				po.setupChartConfigValuesForm(configForm, configValues,
 				{
 					submitHandler: function(avs)
 					{
@@ -3699,7 +3699,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 						}
 					],
 					showClearBtn: false,
-					//此时允许自由编辑图表属性，因此应不是严格数据模式
+					//此时允许自由编辑图表配置，因此应不是严格数据模式
 					strictSubmitData: false,
 					retainDataNullProp: dashboardEditor.retainNullChartConfigValue()
 				});

@@ -6274,16 +6274,6 @@
 	//----------------------------------------
 	
 	/**
-	 * 是否根级插件配置表单。
-	 * 根级插件配置表单的name为null，具体参考：
-	 * org.datagear.analysis.ChartPluginConfigForm.getName()说明
-	 */
-	chartFactory.isRootPluginConfigForm = function(pluginConfigForm)
-	{
-		return (pluginConfigForm != null && pluginConfigForm.name == null);
-	};
-	
-	/**
 	 * 获取原始数据索引的原始数据。
 	 * 
 	 * @param chart 图表对象

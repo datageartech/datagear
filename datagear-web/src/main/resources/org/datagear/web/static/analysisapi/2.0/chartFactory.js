@@ -827,7 +827,7 @@ chartProto._initRenderer = function()
 
 /**
  * 初始化图表配置值集。
- * 此函数从图表元素的elementAttrConst.CONFIG_VALUES属性获取图表属性值集。
+ * 此函数从图表元素的elementAttrConst.CONFIG_VALUES属性获取图表配置值。
  */
 chartProto._initConfigValues = function()
 {
@@ -3375,7 +3375,7 @@ chartProto.configValues = function(values)
 };
 
 /**
- * 获取全部原始图表属性值，通常是在定义图表时设置的，未与"dg-chart-config-values"合并。
+ * 获取全部原始图表配置值，通常是在定义图表时设置的，未与"dg-chart-config-values"合并。
  * 
  * @returns {}，非null
  */
@@ -4511,16 +4511,6 @@ CF.evalChartInitConfigValues = function(chartEle, configValuesOrigin)
 	CF.extend(configValues, merges);
 	
 	return configValues;
-};
-
-/**
- * 是否根级插件配置表单。
- * 根级插件配置表单的name为null，具体参考：
- * org.datagear.analysis.ChartPluginConfigForm.getName()说明
- */
-CF.isRootPluginConfigForm = function(pluginConfigForm)
-{
-	return (pluginConfigForm != null && pluginConfigForm.name == null);
 };
 
 var THEME_STYLE_NAME_PROP = CF.BUILTIN_PROP_PREFIX + "StyleName";

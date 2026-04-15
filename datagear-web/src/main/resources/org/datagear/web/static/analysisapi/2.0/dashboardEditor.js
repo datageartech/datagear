@@ -2395,7 +2395,7 @@ DE.getChartConfigValuesAttrName = function()
 };
 
 /**
- * 获取图表元素的图表属性值。
+ * 获取图表元素的图表配置值。
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
@@ -2413,7 +2413,7 @@ DE.getElementChartConfigValues = function(ele)
 };
 
 /**
- * 获取图表元素的重置图表属性值。
+ * 获取图表元素的重置图表配置值。
  * 
  * @param ele 可选，元素，默认为：当前选中元素
  */
@@ -2435,19 +2435,11 @@ DE.getElementChartConfigValuesForReset = function(ele)
 	var configForm = chart.pluginConfigForm();
 	if(configForm != null)
 	{
-		if(CF.isRootPluginConfigForm(configForm))
+		var formProperties = (configForm.properties || []);
+		formProperties.forEach((prop) =>
 		{
-			var formProperties = (configForm.properties || []);
-			formProperties.forEach((prop) =>
-			{
-				delete configValuesEle[prop.name];
-			});
-		}
-		if(configForm.name != null)
-		{
-			var name = configForm.name;
-			delete configValuesEle[name];
-		}
+			delete configValuesEle[prop.name];
+		});
 	}
 	
 	//保留元素上定义的图表插件属性之外的扩展值
@@ -2534,12 +2526,12 @@ DE.checkSetElementChartConfigValues = function(ele)
  */
 DE.retainNullChartConfigValue = function()
 {
-	//需保留null值，以支持继承复制时删除原始图表属性值，具体参考CF.evalChartInitConfigValues()函数
+	//需保留null值，以支持继承复制时删除原始图表配置值，具体参考CF.evalChartInitConfigValues()函数
 	return true;
 };
 
 /**
- * 设置图表元素的图表属性值。
+ * 设置图表元素的图表配置值。
  * 
  * @param configValues 要设置的图表主题对象，格式为：{ ... }
  * @param ele 可选，元素，默认为：当前选中元素

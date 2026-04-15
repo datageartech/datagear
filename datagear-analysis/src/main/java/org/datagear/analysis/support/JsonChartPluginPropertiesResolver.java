@@ -566,7 +566,6 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Map<String, ?> map = (Map<String, ?>) obj;
 
 			form = createChartPluginConfigForm();
-			form.setName(convertToString(map.get(ChartPluginConfigForm.PROPERTY_NAME)));
 			form.setProperties(convertToFormProperties(map.get(Form.PROPERTY_PROPERTIES)));
 			form.setGroups(convertToFormPropertyGroups(map.get(Form.PROPERTY_GROUPS)));
 			form.setNameLabel(convertToLabel(map.get(Form.PROPERTY_NAME_LABEL)));
@@ -577,9 +576,6 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ ChartPluginConfigForm.class.getName() + "] unsupported");
-
-		if (form != null)
-			form.setName(ChartPluginConfigForm.CONFIG_VALUE_ATTR_NAME);
 
 		return form;
 	}
