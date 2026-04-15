@@ -2406,8 +2406,8 @@
 		var configValues = null;
 		var chart = this.dashboard.renderedChart(ele);
 		
-		//这里不能直接使用chart.attrValues()，因为可能已被图表实例修改
-		var configValuesOrigin =  chart.attrValuesOrigin();
+		//这里不能直接使用chart.configValues()，因为可能已被图表实例修改
+		var configValuesOrigin =  chart.configValuesOrigin();
 		var configValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
 		configValuesEle = chartFactory.evalSilently(configValuesEle, null);
 		
@@ -2419,7 +2419,7 @@
 	};
 	
 	/**
-	 * 获取图表元素的重置图表属性值。
+	 * 获取图表元素的重置图表配置值。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素
 	 */
@@ -2434,7 +2434,7 @@
 		if(!chart)
 			return null;
 		
-		var configValuesOrigin =  (chart.attrValuesOrigin() || {});
+		var configValuesOrigin =  (chart.configValuesOrigin() || {});
 		var configValuesEle = chart.elementJquery().attr(chartFactory.elementAttrConst.ATTR_VALUES);
 		configValuesEle = chartFactory.evalSilently(configValuesEle, {});
 		var cpas = chart.pluginAttributes();
@@ -2547,10 +2547,10 @@
 			return false;
 		
 		var chart = this.dashboard.renderedChart(ele);
-		var configValuesOrigin = (chart.attrValuesOrigin() || {});
+		var configValuesOrigin = (chart.configValuesOrigin() || {});
 		var configValuesMerge = {};
 		
-		//应该只设置有修改的图表属性值，这样在图表模块再次编辑其他图表属性值才能应用于所有引用它看板
+		//应该只设置有修改的图表配置值，这样在图表模块再次编辑其他图表配置值才能应用于所有引用它看板
 		for(var p in configValues)
 		{
 			if(!this._deepEqualsForJson(configValuesOrigin[p], configValues[p]))
@@ -2803,8 +2803,8 @@
 			return;
 		}
 		
-		var attrValue = (chartOptionsStr ? chartOptionsStr : "{}");
-		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, attrValue);
+		var value = (chartOptionsStr ? chartOptionsStr : "{}");
+		this._setElementAttr(ele, chartFactory.elementAttrConst.OPTIONS, value);
 	};
 	
 	editor._getElementChartOptions = function(ele)
@@ -2865,12 +2865,12 @@
 				trim[p] = v;
 		}
 		
-		var attrValue = this._serializeForConfigValue(trim);
+		var value = this._serializeForConfigValue(trim);
 		
-		if(this._isEmptyJsonObjStr(attrValue))
+		if(this._isEmptyJsonObjStr(value))
 			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, null);
 		else
-			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, attrValue);
+			this._setElementAttr(ele, chartFactory.elementAttrConst.THEME, value);
 	};
 	
 	/**

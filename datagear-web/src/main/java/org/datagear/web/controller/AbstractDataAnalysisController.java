@@ -360,7 +360,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param templateContent
 	 * @return
 	 */
-	protected Map<String, String> escapeDashboardRenderContextAttrValue(Map<String, String> value)
+	protected Map<String, String> escapeDashboardRenderContextValue(Map<String, String> value)
 	{
 		if (value == null || value.isEmpty())
 			return value;
@@ -368,7 +368,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		Map<String, String> re = new HashMap<String, String>(value.size());
 
 		for (Map.Entry<String, String> entry : value.entrySet())
-			re.put(entry.getKey(), escapeDashboardRenderContextAttrValue(entry.getValue()));
+			re.put(entry.getKey(), escapeDashboardRenderContextValue(entry.getValue()));
 
 		return re;
 	}
@@ -382,7 +382,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * @param templateContent
 	 * @return
 	 */
-	protected String escapeDashboardRenderContextAttrValue(String value)
+	protected String escapeDashboardRenderContextValue(String value)
 	{
 		return (value == null ? null : value.replace("</", "<\\/"));
 	}

@@ -1310,12 +1310,12 @@
 	/**
 	 * 获取/设置渲染上下文的属性值。
 	 * 
-	 * @param attrName
-	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+	 * @param name
+	 * @param value 要设置的属性值，可选，不设置则执行获取操作
 	 */
-	dashboardBase.renderContextAttr = function(attrName, attrValue)
+	dashboardBase.renderContextAttr = function(name, value)
 	{
-		return chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
+		return chartFactory.renderContextAttr(this.renderContext, name, value);
 	};
 	
 	/**

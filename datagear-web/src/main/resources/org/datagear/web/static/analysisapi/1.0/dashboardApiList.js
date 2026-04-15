@@ -74,12 +74,12 @@ global.dashboardApiCompletions =
 	/*{name: "version", value: "version()", displayName: "version()", displayComment: "dashboard", categories: ["dashboard"]},*/
 	
 	//图表JS对象
-	{name: "attrValue", value: "attrValue(", displayName: "attrValue() ", displayComment: "chart", categories: ["chart"]},
-	{name: "attrValues", value: "attrValues(", displayName: "attrValues() ", displayComment: "chart", categories: ["chart"]},
-	{name: "attrValuesOrigin", value: "attrValuesOrigin()", displayName: "attrValuesOrigin() ", displayComment: "chart", categories: ["chart"]},
 	{name: "autoResize", value: "autoResize(", displayName: "autoResize() ", displayComment: "chart", categories: ["chart"]},
 	{name: "bindLinksEventHanders", value: "bindLinksEventHanders(", displayName: "bindLinksEventHanders() ", displayComment: "chart", categories: ["chart"]},
 	{name: "callEventHandler", value: "callEventHandler(", displayName: "callEventHandler() ", displayComment: "chart", categories: ["chart"]},
+	{name: "configValue", value: "configValue(", displayName: "configValue() ", displayComment: "chart", categories: ["chart"]},
+	{name: "configValues", value: "configValues(", displayName: "configValues() ", displayComment: "chart", categories: ["chart"]},
+	{name: "configValuesOrigin", value: "configValuesOrigin()", displayName: "configValuesOrigin() ", displayComment: "chart", categories: ["chart"]},
 	{name: "contextURL", value: "contextURL(", displayName: "contextURL() ", displayComment: "chart", categories: ["chart"]},
 	{name: "dashboard", value: "dashboard", displayName: "dashboard ", displayComment: "chart", categories: ["chart"]},
 	{name: "dataSetAlias", value: "dataSetAlias(", displayName: "dataSetAlias() ", displayComment: "chart", categories: ["chart"]},

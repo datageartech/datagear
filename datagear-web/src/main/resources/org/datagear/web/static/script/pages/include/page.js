@@ -2398,7 +2398,10 @@ $.inflateChartConfigValuesForm = function(po)
 		}
 		
 		for(var i=0; i<groupProps.length; i++)
+		{
+			avo.buildEvalEnabledFunc(groupProps[i]);
 			groupProps[i].groupCollapsed = (i != 0);
+		}
 		
 		gfpObj.groupProps = groupProps;
 	};

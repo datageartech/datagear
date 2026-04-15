@@ -880,9 +880,9 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			placeholderSources = fh.getPlaceholderSources();
 		}
 
-		return new EditHtmlInfo(escapeDashboardRenderContextAttrValue(beforeBodyHtml),
-				escapeDashboardRenderContextAttrValue(bodyHtml), escapeDashboardRenderContextAttrValue(afterBodyHtml),
-				escapeDashboardRenderContextAttrValue(placeholderSources));
+		return new EditHtmlInfo(escapeDashboardRenderContextValue(beforeBodyHtml),
+				escapeDashboardRenderContextValue(bodyHtml), escapeDashboardRenderContextValue(afterBodyHtml),
+				escapeDashboardRenderContextValue(placeholderSources));
 	}
 
 	protected boolean isDashboardShowForEditParam(HttpServletRequest request)

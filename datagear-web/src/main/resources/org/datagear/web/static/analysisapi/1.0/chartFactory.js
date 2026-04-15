@@ -214,7 +214,7 @@
 	/**图表渲染器*/
 	elementAttrConst.RENDERER = "dg-chart-renderer";
 	
-	/**图表属性值*/
+	/**图表配置值*/
 	elementAttrConst.ATTR_VALUES = "dg-chart-attr-values";
 	
 	//----------------------------------------
@@ -535,7 +535,7 @@
 		chart._configValues = (chart.configValues || {});
 		chart._options = (chart._options || {});
 		
-		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
+		//将内置属性值提取出来，避免被chart.configValues()设置操作清除
 		chart._widget = chart._configValues[chartFactory._CHART_CONFIG_NAME_WIDGET];
 		chart._optionsOrigin = chart._configValues[chartFactory._CHART_CONFIG_NAME_OPTIONS];
 		delete chart._configValues[chartFactory._CHART_CONFIG_NAME_WIDGET];
@@ -932,18 +932,18 @@
 	};
 	
 	/**
-	 * 初始化图表属性值集。
-	 * 此函数从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
+	 * 初始化图表配置值集。
+	 * 此函数从图表元素的elementAttrConst.ATTR_VALUES属性获取图表配置值集。
 	 */
 	chartBase._initConfigValues = function()
 	{
 		var configValues = this.elementJquery().attr(elementAttrConst.ATTR_VALUES);
 		configValues = (configValues ? chartFactory.evalSilently(configValues) : null);
-		//注意：应该使用this.attrValuesOrigin()作为合并基础，因为可能this.attrValues()执行修改操作，
+		//注意：应该使用this.configValuesOrigin()作为合并基础，因为可能this.configValues()执行修改操作，
 		//比如修改后chart.destroy()后再chart.render()
-		configValues = $.extend(true, {}, this.attrValuesOrigin(), configValues);
+		configValues = $.extend(true, {}, this.configValuesOrigin(), configValues);
 		
-		this.attrValues(configValues);
+		this.configValues(configValues);
 	};
 	
 	/**
@@ -2288,12 +2288,12 @@
 	/**
 	 * 获取/设置图表渲染上下文的属性值。
 	 * 
-	 * @param attrName
-	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+	 * @param name
+	 * @param value 要设置的属性值，可选，不设置则执行获取操作
 	 */
-	chartBase.renderContextAttr = function(attrName, attrValue)
+	chartBase.renderContextAttr = function(name, value)
 	{
-		return chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
+		return chartFactory.renderContextAttr(this.renderContext, name, value);
 	};
 	
 	/**
@@ -3818,15 +3818,15 @@
 	};
 	
 	/**
-	 * 获取/设置指定图表属性值。
+	 * 获取/设置指定图表配置值。
 	 * 注意：org.datagear.analysis.support.html.ConfigValueHtmlChartPlugin需要此函数名。
 	 * 
-	 * @param name 插件属性、名称
+	 * @param name 名称、插件属性对象
 	 * @param value 可选，要设置的属性值
 	 * @returns 
-	 * @since 4.2.0
+	 * @since 6.0.0
 	 */
-	chartBase.attrValue = function(name, value)
+	chartBase.configValue = function(name, value)
 	{
 		name = (name && name.name != null ? name.name : name);
 		
@@ -3837,13 +3837,13 @@
 	};
 	
 	/**
-	 * 获取/设置全部图表属性值。
+	 * 获取/设置全部图表配置值。
 	 * 
-	 * @param values 可选，要设置的属性值映射表，格式为：{ 名称: 值, ... }
+	 * @param values 可选，要设置的配置值映射表，格式为：{ 名称: 值, ... }
 	 * @returns { ... }
-	 * @since 4.2.0
+	 * @since 6.0.0
 	 */
-	chartBase.attrValues = function(values)
+	chartBase.configValues = function(values)
 	{
 		if(values === undefined)
 			return this._configValues;
@@ -3852,12 +3852,12 @@
 	};
 	
 	/**
-	 * 获取全部原始图表属性值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
+	 * 获取全部原始图表配置值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
 	 * 
 	 * @returns { ... }
-	 * @since 4.2.0
+	 * @since 6.0.0
 	 */
-	chartBase.attrValuesOrigin = function()
+	chartBase.configValuesOrigin = function()
 	{
 		return this._configValuesOrigin;
 	};
@@ -5159,6 +5159,56 @@
 	//-------------
 	// < 已弃用函数 start
 	//-------------
+	
+	// < @deprecated 兼容5.5.0版本的API，将在未来版本移除，请使用chartBase.configValue()函数
+	/**
+	 * 获取/设置指定图表配置值。
+	 * 注意：org.datagear.analysis.support.html.ConfigValueHtmlChartPlugin需要此函数名。
+	 * 
+	 * @param name 插件属性、名称
+	 * @param value 可选，要设置的属性值
+	 * @returns 
+	 * @since 4.2.0
+	 */
+	chartBase.attrValue = function(name, value)
+	{
+		if(value === undefined)
+			return this.configValue(name);
+		else
+			this.configValue(name, value);
+	};
+	// > @deprecated 兼容5.5.0版本的API，将在未来版本移除，请使用chartBase.configValue()函数
+	
+	// < @deprecated 兼容5.5.0版本的API，将在未来版本移除，请使用chartBase.configValues()函数
+	/**
+	 * 获取/设置全部图表配置值。
+	 * 
+	 * @param values 可选，要设置的属性值映射表，格式为：{ 名称: 值, ... }
+	 * @returns { ... }
+	 * @since 4.2.0
+	 */
+	chartBase.attrValues = function(values)
+	{
+		if(values === undefined)
+			return this.configValues();
+		else
+			this.configValues(values);
+	};
+	// > @deprecated 兼容5.5.0版本的API，将在未来版本移除，请使用chartBase.configValues()函数
+	
+	// < @deprecated 兼容5.5.0版本的API，将在未来版本移除，请使用chartBase.configValuesOrigin()函数
+	/**
+	 * 获取全部原始图表配置值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
+	 * 
+	 * @returns { ... }
+	 * @since 4.2.0
+	 */
+	chartBase.attrValuesOrigin = function()
+	{
+		return this.configValuesOrigin();
+	};
+	// > @deprecated 兼容5.5.0版本的API，将在未来版本移除，请使用chartBase.configValuesOrigin()函数
+	
 	
 	// < @deprecated 兼容5.3.1版本的API，将在未来版本移除，请使用chartBase.resultValueDatas()函数
 	/**
@@ -6704,15 +6754,15 @@
 	 * 获取/设置渲染上下文的属性值。
 	 * 
 	 * @param renderContext
-	 * @param attrName
-	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+	 * @param name
+	 * @param value 要设置的属性值，可选，不设置则执行获取操作
 	 */
-	chartFactory.renderContextAttr = function(renderContext, attrName, attrValue)
+	chartFactory.renderContextAttr = function(renderContext, name, value)
 	{
-		if(attrValue === undefined)
-			return renderContext.attributes[attrName];
+		if(value === undefined)
+			return renderContext.attributes[name];
 		else
-			return renderContext.attributes[attrName] = attrValue;
+			return renderContext.attributes[name] = value;
 	};
 	
 	/**

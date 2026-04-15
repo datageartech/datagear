@@ -31,8 +31,7 @@ import org.datagear.util.i18n.Label;
  * </p>
  * <p>
  * {@code chart.element()}函数，用于获取图表HTML元素 <br>
- * {@code chart.configValue(name)}或者{@code chart.attrValue(name)}
- * 函数，用于获取图表指定名称的图表配置值
+ * {@code chart.configValue(name)}函数，用于获取图表指定名称的图表配置值
  * </p>
  * 
  * @author datagear@163.com
@@ -77,11 +76,7 @@ public class ConfigValueHtmlChartPlugin extends HtmlChartPlugin
 				+ "	render : function(chart)" + newLine //
 				+ "	{" + newLine + //
 				"		var element = chart.element();" + newLine //
-				+ "		var value;" + newLine //
-				+ "		if(chart.configValue != null)" + newLine //
-				+ "			value = chart.configValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
-				+ "		else if(chart.attrValue != null)" + newLine //
-				+ "			value = chart.attrValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
+				+ "		var value = chart.configValue(" + StringUtil.toJavaScriptString(attrName) + ");" + newLine //
 				+ "		element.innerHTML = " + valueExp + ";" + newLine //
 				+ "	}," + newLine //
 				+ "	update : function(){}" + newLine //

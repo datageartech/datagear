@@ -4508,6 +4508,8 @@ CF.evalChartInitConfigValues = function(chartEle, configValuesOrigin)
 		merges = CF.extend(true, {}, merges);
 	}
 	
+	//仅合并在图表元素上未定义的原始配置项，使得图表元素上定义的配置项支持删除在定义图表时设置的配置项，
+	//不过这样也有一个缺点：如果后续在定义图表时修改了相关配置项，也会被忽略
 	CF.extend(configValues, merges);
 	
 	return configValues;
@@ -4866,9 +4868,9 @@ CF.eleCreate = function(name, classValue)
  * 
  * @param name 元素名，比如："div"、"a"
  * @param attrName 可选，要设置的属性名
- * @param attrValue 可选，要设置的属性值，应与attrName成对
+ * @param attrVal 可选，要设置的属性值，应与attrName成对
  */
-CF.eleCreateWithAttr = function(name, attrName, attrValue)
+CF.eleCreateWithAttr = function(name, attrName, attrVal)
 {
 	var ele = document.createElement(name);
 	

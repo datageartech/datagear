@@ -1858,13 +1858,13 @@ DE.insertChart = function(chartWidgets, insertType, refEle)
 		let chartWidget = chartWidgets[i];
 		let forLocalChart = (chartWidget.forLocalChart === true);
 		let attrName = (forLocalChart ? CF.elementAttrConst.LOCAL : CF.elementAttrConst.WIDGET);
-		let attrValue = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
+		let attrVal = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 		let chartDiv = CF.eleCreate(CF.CHART_TAG_NAME);
 		
 		if(styleStr)
 			CF.eleAttr(chartDiv, "style", styleStr);
 		
-		CF.eleAttr(chartDiv, attrName, attrValue);
+		CF.eleAttr(chartDiv, attrName, attrVal);
 		CF.eleHtml(chartDiv, "<!--"+chartWidget.name+"-->");
 		
 		DE._insertElement(chartDiv, insertType, refEle);
@@ -1927,14 +1927,14 @@ DE.bindChart = function(chartWidget, ele)
 	
 	var forLocalChart = (chartWidget.forLocalChart === true);
 	var attrName = (forLocalChart ? CF.elementAttrConst.LOCAL : CF.elementAttrConst.WIDGET);
-	var attrValue = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
+	var attrVal = (forLocalChart ? DF.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 	
 	if(forLocalChart)
 		DE._setElementAttr(ele, CF.elementAttrConst.WIDGET, null);
 	else
 		DE._setElementAttr(ele, CF.elementAttrConst.LOCAL, null);
 	
-	DE._setElementAttr(ele, attrName, attrValue);
+	DE._setElementAttr(ele, attrName, attrVal);
 	DE._loadUnsolvedChartsInElement(ele);
 	
 	return ele;
@@ -2796,8 +2796,8 @@ DE._setElementChartOptions = function(ele, chartOptionsStr)
 		return;
 	}
 	
-	var attrValue = (chartOptionsStr ? chartOptionsStr : "{}");
-	DE._setElementAttr(ele, CF.elementAttrConst.OPTIONS, attrValue);
+	var value = (chartOptionsStr ? chartOptionsStr : "{}");
+	DE._setElementAttr(ele, CF.elementAttrConst.OPTIONS, value);
 };
 
 DE._getElementChartOptions = function(ele)
@@ -2858,12 +2858,12 @@ DE._setElementChartTheme = function(ele, chartTheme)
 			trim[p] = v;
 	}
 	
-	var attrValue = CF.serializeBySingleQuote(trim);
+	var value = CF.serializeBySingleQuote(trim);
 	
-	if(DE._isEmptyJsonObjStr(attrValue))
+	if(DE._isEmptyJsonObjStr(value))
 		DE._setElementAttr(ele, CF.elementAttrConst.THEME, null);
 	else
-		DE._setElementAttr(ele, CF.elementAttrConst.THEME, attrValue);
+		DE._setElementAttr(ele, CF.elementAttrConst.THEME, value);
 };
 
 DE._isBodyEle = function(ele)

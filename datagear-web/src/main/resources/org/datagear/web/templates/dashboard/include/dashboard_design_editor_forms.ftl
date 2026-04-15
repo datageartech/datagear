@@ -2877,13 +2877,13 @@ page_palette.ftl
 		<form id="${pid}customInsertChartEleAttrForm" class="flex flex-column">
 			<div class="page-form-content size-30vw flex-grow-1 px-2 py-1 overflow-y-auto">
 				<div class="field grid">
-					<label for="${pid}customInsertChartEleAttrValue" class="field-label col-12 mb-2">
+					<label for="${pid}customInsertChartEleAttrVal" class="field-label col-12 mb-2">
 						<@spring.message code='value' />
 					</label>
 					<div class="field-input col-12">
 						<div class="p-inputgroup">
 							<span class="p-inputgroup-addon">&lt;div</span>
-							<p-inputtext id="${pid}customInsertChartEleAttrValue" v-model="pm.vepms.customInsertChartEleAttr.value" type="text"
+							<p-inputtext id="${pid}customInsertChartEleAttrVal" v-model="pm.vepms.customInsertChartEleAttr.value" type="text"
 								class="input w-full" name="width" autofocus>
 							</p-inputtext>
 							<span class="p-inputgroup-addon">&gt;</span>

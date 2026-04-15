@@ -1042,7 +1042,7 @@ $.inflateDashboardDesignEditor = function(po)
 		return (isArray ? cws : cws[0]);
 	};
 	
-	po.customInsertChartEleAttrValue = function(attr)
+	po.customInsertChartEleAttrVal = function(attr)
 	{
 		var name = "DG_DD_INSERT_CHART_ELE_ATTR";
 		var dftValue = "style=\"display:inline-block;width:25vw;height:25vh;\"";
@@ -1103,42 +1103,42 @@ $.inflateDashboardDesignEditor = function(po)
 		var chartWidget0 = chartWidgets[0];
 		var forLocalChart0 = (chartWidget0.forLocalChart === true);
 		var attrName0 = (forLocalChart0 ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
-		var attrValue0 = (forLocalChart0 ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget0) : chartWidget0.id);
+		var attrVal0 = (forLocalChart0 ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget0) : chartWidget0.id);
 		
 		// =
 		if(/=\s*$/g.test(text))
 		{
-			code = "\"" + attrValue0 + "\"";
+			code = "\"" + attrVal0 + "\"";
 		}
 		// ="... 或 ='...
 		else if(/=\s*['"][^'"]*$/g.test(text))
 		{
-			code = attrValue0;
+			code = attrVal0;
 		}
 		// <...
 		else if(/<[^>]*$/g.test(text))
 		{
-			code = " "+attrName0+"=\""+attrValue0+"\"";
+			code = " "+attrName0+"=\""+attrVal0+"\"";
 		}
 		// "..." 或 '...'
 		else if(/['"][^'"]*$/g.test(text) && /^[^'"]*['"]/g.test(textNext))
 		{
-			code = attrValue0;
+			code = attrVal0;
 		}
 		// >...
 		else
 		{
-			let customAtt = po.customInsertChartEleAttrValue();
+			let customAtt = po.customInsertChartEleAttrVal();
 			
 			for(let i=0; i<chartWidgets.length; i++)
 			{
 				let chartWidget = chartWidgets[i];
 				let forLocalChart = (chartWidget.forLocalChart === true);
 				let attrName = (forLocalChart ? chartFactory.elementAttrConst.LOCAL : chartFactory.elementAttrConst.WIDGET);
-				let attrValue = (forLocalChart ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
+				let attrVal = (forLocalChart ? dashboardFactory.chartWidgetToEleLocalAttrVal(chartWidget) : chartWidget.id);
 				
 				code += "<"+chartFactory.CHART_TAG_NAME + ($.isEmpty(customAtt) ? "" : " "+customAtt)
-					 +  " "+attrName+"=\""+attrValue+"\">"
+					 +  " "+attrName+"=\""+attrVal+"\">"
 					 +  (chartWidget.name ? "<!--"+chartWidget.name+"-->" : "")
 					 +  "</"+chartFactory.CHART_TAG_NAME+">\n";
 			}
@@ -3200,12 +3200,12 @@ $.inflateDashboardDesignEditorForms = function(po)
 	
 	po.showCustomInsertChartEleAttrPanel = function(model)
 	{
-		model = (model == null ? { value: po.customInsertChartEleAttrValue() } : model);
+		model = (model == null ? { value: po.customInsertChartEleAttrVal() } : model);
 		
 		var pm = po.vuePageModel();
 		pm.veshs.customInsertChartEleAttr = function(model)
 		{
-			po.customInsertChartEleAttrValue(model.value);
+			po.customInsertChartEleAttrVal(model.value);
 		};
 		pm.vepms.customInsertChartEleAttr = $.extend(true, {}, model);
 		pm.vepss.customInsertChartEleAttrShown = true;

@@ -302,7 +302,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			}
 		}
 
-		// 图表属性
+		// 图表元素属性
 		{
 			String template = "<html><head></head><body>" + HtmlChartPlugin.HTML_NEW_LINE
 					+ "<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>" + HtmlChartPlugin.HTML_NEW_LINE

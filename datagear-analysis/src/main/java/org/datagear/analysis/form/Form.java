@@ -142,6 +142,7 @@ public class Form extends AbstractLabeled
 		target.setProperties(Localizable.toLocale(this.properties, locale));
 		target.setGroups(Localizable.toLocale(this.groups, locale));
 		target.setDefaultValue(this.defaultValue);
+		target.setAdditions(this.additions);
 		LabelUtil.concrete(this, target, locale);
 
 		return target;
