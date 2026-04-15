@@ -65,7 +65,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/**
 	 * 看板展示URL的请求参数名：系统主题。
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = ChartDefinition.BUILTIN_ATTR_PREFIX + "THEME";
+	public static final String DASHBOARD_SHOW_PARAM_THEME_NAME = ChartDefinition.BUILTIN_NAME_PREFIX + "THEME";
 
 	/**
 	 * 看板展示URL的请求参数值：自动设置系统主题。
@@ -101,7 +101,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	 * </code>
 	 * </p>
 	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = ChartDefinition.BUILTIN_ATTR_PREFIX
+	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = ChartDefinition.BUILTIN_NAME_PREFIX
 			+ "SAFE_SESSION";
 
 	/**

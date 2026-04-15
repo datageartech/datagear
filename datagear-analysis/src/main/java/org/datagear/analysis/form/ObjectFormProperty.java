@@ -23,9 +23,9 @@ import java.util.Locale;
 import org.datagear.util.i18n.Localizable;
 
 /**
- * 对象型图表插件属性。
+ * 对象型表单属性。
  * <p>
- * 一个对象型图表插件属性包含多个{@linkplain FormProperty}，描述{@linkplain Form}中的一个对象型UI交互操作元信息。
+ * 一个对象型表单属性包含多个{@linkplain FormProperty}，描述{@linkplain Form}中的一个对象型UI交互操作元信息。
  * </p>
  * 
  * @author datagear@163.com

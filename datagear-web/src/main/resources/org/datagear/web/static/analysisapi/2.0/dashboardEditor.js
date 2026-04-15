@@ -2387,6 +2387,14 @@ DE.getGlobalChartTheme = function()
 };
 
 /**
+ * 获取图表配置属性名。
+ */
+DE.getChartConfigValuesAttrName = function()
+{
+	return chartFactory.elementAttrConst.CONFIG_VALUES;
+};
+
+/**
  * 获取图表元素的图表属性值。
  * 
  * @param ele 可选，元素，默认为：当前选中元素
@@ -2421,7 +2429,7 @@ DE.getElementChartConfigValuesForReset = function(ele)
 		return null;
 	
 	var configValuesOrigin =  (chart.configValuesOrigin() || {});
-	var configValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.ATTR_VALUES);
+	var configValuesEle = CF.eleAttr(chart.element(), CF.elementAttrConst.CONFIG_VALUES);
 	configValuesEle = CF.evalSilently(configValuesEle, {});
 	
 	var configForm = chart.pluginConfigForm();
@@ -2448,9 +2456,9 @@ DE.getElementChartConfigValuesForReset = function(ele)
 };
 
 /**
- * 获取看板图表插件属性内置地图选项集。
+ * 获取看板图表配置内置地图选项集。
  */
-DE.getChartConfigValuesInputOptionsForMap = function(asTree)
+DE.getChartConfigInputOptionsForMap = function(asTree)
 {
 	var re = [];
 	
@@ -2564,9 +2572,9 @@ DE.setElementChartConfigValues = function(configValues, ele)
 	var eleConfigValue = CF.serializeBySingleQuote(changedConfigValues);
 	
 	if(DE._isEmptyJsonObjStr(eleConfigValue))
-		DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, null);
+		DE._setElementAttr(ele, CF.elementAttrConst.CONFIG_VALUES, null);
 	else
-		DE._setElementAttr(ele, CF.elementAttrConst.ATTR_VALUES, eleConfigValue);
+		DE._setElementAttr(ele, CF.elementAttrConst.CONFIG_VALUES, eleConfigValue);
 	
 	DE._reRenderChart(chart);
 	

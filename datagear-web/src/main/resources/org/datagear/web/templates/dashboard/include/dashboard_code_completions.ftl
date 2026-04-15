@@ -24,8 +24,8 @@
 {
 	po.codeEditorEleAttrCompletions =
 	[
-		{name: "dg-chart-attr-values", value: "dg-chart-attr-values=",
-			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-attr-values' />", categories: ["div"]},
+		{name: "dg-chart-config-values", value: "dg-chart-config-values=",
+			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-config-values' />", categories: ["div"]},
 		{name: "dg-chart-auto-resize", value: "dg-chart-auto-resize=\"false\"",
 			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-auto-resize' />", categories: ["body", "div"]},
 		{name: "dg-chart-disable-tool", value: "dg-chart-disable-tool=",

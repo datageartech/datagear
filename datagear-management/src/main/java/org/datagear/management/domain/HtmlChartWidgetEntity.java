@@ -50,8 +50,8 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 
 	protected static final DataSetBindVO[] EMPTY_CHART_DATA_VO_SET = new DataSetBindVO[0];
 
-	/** 图表部件渲染时的图表选项信息 */
-	public static final String ATTR_CHART_OPTIONS = BUILTIN_ATTR_PREFIX + "CHART_OPTIONS";
+	/** 图表部件渲染时的图表选项内置配置名 */
+	public static final String CONFIG_NAME_CHART_OPTIONS = BUILTIN_NAME_PREFIX + "CHART_OPTIONS";
 
 	private HtmlChartPluginVo pluginVo;
 
@@ -238,7 +238,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	protected ChartDefinition buildChartDefinition(String id) throws RenderException
 	{
 		ChartDefinition chartDefinition = super.buildChartDefinition(id);
-		chartDefinition.setConfigValue(ATTR_CHART_OPTIONS, this.options);
+		chartDefinition.setConfigValue(CONFIG_NAME_CHART_OPTIONS, this.options);
 		
 		return chartDefinition;
 	}

@@ -41,7 +41,7 @@ public class ChartPluginConfigForm extends ObjectFormProperty implements NameAwa
 	/**
 	 * 配置值在{@linkplain ChartDefinition#getConfigValues()}中的存储属性名。
 	 */
-	public static final String CONFIG_VALUE_ATTR_NAME = ChartDefinition.BUILTIN_ATTR_PREFIX + "CONFIG_VALUE";
+	public static final String CONFIG_VALUE_ATTR_NAME = ChartDefinition.BUILTIN_NAME_PREFIX + "CONFIG_VALUE";
 
 	public static final String PROPERTY_NAME = "name";
 

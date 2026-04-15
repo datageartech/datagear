@@ -2075,7 +2075,7 @@ $.inflatePageTabView = function(po)
 	};
 };
 
-//初始化chart_attr_values_form.ftl页面对象
+//初始化chart_config_values_form.ftl页面对象
 $.inflateChartConfigValuesForm = function(po)
 {
 	var avo = (po.avo || (po.avo = {}));

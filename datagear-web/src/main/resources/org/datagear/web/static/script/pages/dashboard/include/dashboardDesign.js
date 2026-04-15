@@ -2650,7 +2650,8 @@ $.inflateDashboardDesignEditor = function(po)
 											{
 												return po.setVeElementChartConfigValues(model);
 											},
-											dashboardEditor.getElementChartConfigValues());
+											dashboardEditor.getElementChartConfigValues(),
+											po.i18n.chartConfig + " " + dashboardEditor.getChartConfigValuesAttrName());
 										}
 									}
 								},
@@ -3172,7 +3173,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 		return re;
 	};
 	
-	//重写chart_attr_values_form.ftl中的函数
+	//重写chart_config_values_form.ftl中的函数
 	po.getChartConfigInputOptionsForMap = function(asTree)
 	{
 		var re = [];
@@ -3392,7 +3393,7 @@ $.inflateDashboardDesignEditorForms = function(po)
 				video: po.i18n.video,
 				dashboardSize: po.i18n.dashboardSize,
 				chartOptions: po.i18n.chartOptions,
-				chartConfigValues: po.i18n.chartConfig + " dg-chart-attr-values",
+				chartConfigValues: po.i18n.chartConfig,
 				chartTheme: po.i18n.chartTheme,
 				style: po.i18n.style,
 				eleId: po.i18n.elementId,

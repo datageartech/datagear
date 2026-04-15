@@ -2384,6 +2384,14 @@
 	};
 	
 	/**
+	 * 获取图表配置属性名。
+	 */
+	editor.getChartConfigValuesAttrName = function()
+	{
+		return chartFactory.elementAttrConst.ATTR_VALUES;
+	};
+	
+	/**
 	 * 获取图表元素的图表配置。
 	 * 
 	 * @param ele 可选，元素，默认为：当前选中元素

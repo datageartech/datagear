@@ -873,10 +873,10 @@ label.required-label::before,
 .page-form-chart .p-fieldset.fieldset-sm .p-fieldset-legend .p-fieldset-legend-text{
 	justify-content: flex-start;
 }
-.chart-attr-values-form .page-form-content textarea{
+.chart-config-values-form .page-form-content textarea{
 	height: 6rem;
 }
-.p-dialog .page-chart-attr-values .chart-attr-values-form .page-form-content{
+.p-dialog .page-chart-config-values .chart-config-values-form .page-form-content{
 	width: 40vw;
 	/*对话框高度 - 对话框header高度 - 表单foot高度*/
 	height: calc(90vh - 6rem - 4.5rem);

@@ -19,10 +19,10 @@ package org.datagear.analysis.support;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.DataSetBind;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.util.IDUtil;
@@ -44,8 +44,8 @@ public class ChartWidget extends ChartDefinition
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 图表部件渲染时的部件信息属性名 */
-	public static final String ATTR_CHART_WIDGET = BUILTIN_ATTR_PREFIX + "CHART_WIDGET";
+	/** 图表部件渲染时的部件信息内置配置名 */
+	public static final String CONFIG_NAME_CHART_WIDGET = BUILTIN_NAME_PREFIX + "CHART_WIDGET";
 
 	private ChartPlugin plugin;
 
@@ -123,7 +123,7 @@ public class ChartWidget extends ChartDefinition
 		chartDefinition.setId(id);
 		
 		// 添加图表对应的部件信息
-		chartDefinition.setConfigValue(ATTR_CHART_WIDGET, new ChartWidgetId(this.getId()));
+		chartDefinition.setConfigValue(CONFIG_NAME_CHART_WIDGET, new ChartWidgetId(this.getId()));
 
 		return chartDefinition;
 	}
@@ -151,7 +151,7 @@ public class ChartWidget extends ChartDefinition
 		if (chart == null)
 			return null;
 		
-		ChartWidgetId cwi = (ChartWidgetId)chart.getConfigValue(ATTR_CHART_WIDGET);
+		ChartWidgetId cwi = (ChartWidgetId)chart.getConfigValue(CONFIG_NAME_CHART_WIDGET);
 		return (cwi == null ? null : cwi.getId());
 	}
 	

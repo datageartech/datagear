@@ -37,7 +37,7 @@ public class RenderContextAttrs
 	 * 由于看板展示URL的请求参数会添加至渲染上下文属性中，为了避免名字冲突，所有内置属性名都应采用此前缀。
 	 * </p>
 	 */
-	public static final String BUILTIN_ATTR_PREFIX = ChartDefinition.BUILTIN_ATTR_PREFIX;
+	public static final String BUILTIN_ATTR_PREFIX = ChartDefinition.BUILTIN_NAME_PREFIX;
 
 	/** 看板主题 */
 	public static final String DASHBOARD_THEME = BUILTIN_ATTR_PREFIX + "DASHBOARD_THEME";

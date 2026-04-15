@@ -496,8 +496,8 @@
 	<!-- 这里使用对话框组件而非弹出面板组件，因为其内部存在下拉框等组件，使用弹出面板时会出现错位问题 -->
 	<p-dialog header="<@spring.message code='chartConfig' />" append-to="body" position="center" :modal="true"
 		v-model:visible="pm.configValuesPanelShown" id="${pid}configValuesPanel" @show="onConfigValuesPanelShow">
-		<div class="page page-form page-chart-attr-values chart-form-chart-attr-values">
-			<#include "include/chart_attr_values_form.ftl">
+		<div class="page page-form page-chart-config-values chart-form-chart-config-values">
+			<#include "include/chart_config_values_form.ftl">
 		</div>
 	</p-dialog>
 	<p-overlaypanel ref="${pid}optionsPanelEle" append-to="body" id="${pid}optionsPanel" @show="onOptionsPanelShow">

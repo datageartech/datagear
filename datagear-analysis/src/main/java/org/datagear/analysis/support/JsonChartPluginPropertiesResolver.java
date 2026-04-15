@@ -125,7 +125,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginAttribute.group}格式
 	 */
 	@Deprecated
-	public static final String INPUT_PROPERTY_ADDITION_OLD_GROUP = ChartDefinition.BUILTIN_ATTR_PREFIX
+	public static final String INPUT_PROPERTY_ADDITION_OLD_GROUP = ChartDefinition.BUILTIN_NAME_PREFIX
 			+ "GROUP_FOR_5_5_0";
 
 	/**

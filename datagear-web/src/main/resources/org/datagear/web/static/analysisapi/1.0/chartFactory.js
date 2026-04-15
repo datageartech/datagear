@@ -259,14 +259,14 @@
 	chartFactory.LIB_ATTR_NAME = "dg-lib-name";
 	
 	/**
-	 * 图表属性值集中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.ATTR_CHART_OPTIONS
+	 * 图表配置中的图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.CONFIG_NAME_CHART_OPTIONS
 	 */
-	chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS = "DG_CHART_OPTIONS";
+	chartFactory._CHART_CONFIG_NAME_OPTIONS = "DG_CHART_OPTIONS";
 	
 	/**
-	 * 图表属性值集中图表部件名，同：org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
+	 * 图表配置中的图表部件名，同：org.datagear.analysis.support.ChartWidget.CONFIG_NAME_CHART_WIDGET
 	 */
-	chartFactory._CHART_ATTR_VALUE_NAME_WIDGET = "DG_CHART_WIDGET";
+	chartFactory._CHART_CONFIG_NAME_WIDGET = "DG_CHART_WIDGET";
 	
 	/**
 	 * 数据标记全名分隔符
@@ -536,10 +536,10 @@
 		chart._options = (chart._options || {});
 		
 		//将内置属性值提取出来，避免被chart.attrValues()设置操作清除
-		chart._widget = chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
-		chart._optionsOrigin = chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
-		delete chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_WIDGET];
-		delete chart._configValues[chartFactory._CHART_ATTR_VALUE_NAME_OPTIONS];
+		chart._widget = chart._configValues[chartFactory._CHART_CONFIG_NAME_WIDGET];
+		chart._optionsOrigin = chart._configValues[chartFactory._CHART_CONFIG_NAME_OPTIONS];
+		delete chart._configValues[chartFactory._CHART_CONFIG_NAME_WIDGET];
+		delete chart._configValues[chartFactory._CHART_CONFIG_NAME_OPTIONS];
 		
 		//保留原始属性值集，看板可视编辑需要使用
 		//注意，初始化_configValuesOrigin的逻辑不能在chartBase.render()中执行，

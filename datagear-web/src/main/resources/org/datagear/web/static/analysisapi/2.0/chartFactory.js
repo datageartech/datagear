@@ -211,8 +211,8 @@ elementAttrConst.ON = "dg-chart-on-";
 /**图表渲染器*/
 elementAttrConst.RENDERER = "dg-chart-renderer";
 
-/**图表属性值*/
-elementAttrConst.ATTR_VALUES = "dg-chart-attr-values";
+/**图表配置值*/
+elementAttrConst.CONFIG_VALUES = "dg-chart-config-values";
 
 //----------------------------------------
 // elementAttrConst结束
@@ -256,14 +256,14 @@ CF.CHART_RELATIVE_STYLE_NAME = "dg-chart-relative";
 CF.LIB_ATTR_NAME = "dg-lib-name";
 
 /**
- * 图表属性值集中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.ATTR_CHART_OPTIONS
+ * 图表配置中图表选项名，同：org.datagear.management.domain.HtmlChartWidgetEntity.CONFIG_NAME_CHART_OPTIONS
  */
-CF.CHART_ATTR_NAME_OPTIONS = "DG_CHART_OPTIONS";
+CF.CHART_CONFIG_NAME_OPTIONS = "DG_CHART_OPTIONS";
 
 /**
- * 图表属性值集中图表部件名，同：org.datagear.analysis.support.ChartWidget.ATTR_CHART_WIDGET
+ * 图表配置中的图表部件名，同：org.datagear.analysis.support.ChartWidget.CONFIG_NAME_CHART_WIDGET
  */
-CF.CHART_ATTR_NAME_WIDGET = "DG_CHART_WIDGET";
+CF.CHART_CONFIG_NAME_WIDGET = "DG_CHART_WIDGET";
 
 /**内置名字标识片段*/
 CF.BUILTIN_NAME_PART = "datagear";
@@ -488,10 +488,10 @@ CF.initChartRoot = function(root)
 		let configValues = root.configValues;
 		
 		//将内置属性值提取出来，避免被chart.configValues()设置操作清除
-		root.widget = configValues[CF.CHART_ATTR_NAME_WIDGET];
-		root.optionsOrigin = configValues[CF.CHART_ATTR_NAME_OPTIONS];
-		delete configValues[CF.CHART_ATTR_NAME_WIDGET];
-		delete configValues[CF.CHART_ATTR_NAME_OPTIONS];
+		root.widget = configValues[CF.CHART_CONFIG_NAME_WIDGET];
+		root.optionsOrigin = configValues[CF.CHART_CONFIG_NAME_OPTIONS];
+		delete configValues[CF.CHART_CONFIG_NAME_WIDGET];
+		delete configValues[CF.CHART_CONFIG_NAME_OPTIONS];
 		
 		//注意，初始化configValuesOrigin的逻辑不能在chart.render()中执行，
 		//因为chart.render()可以被多次调用，root.configValues可能已被修改
@@ -827,7 +827,7 @@ chartProto._initRenderer = function()
 
 /**
  * 初始化图表配置值集。
- * 此函数从图表元素的elementAttrConst.ATTR_VALUES属性获取图表属性值集。
+ * 此函数从图表元素的elementAttrConst.CONFIG_VALUES属性获取图表属性值集。
  */
 chartProto._initConfigValues = function()
 {
@@ -3326,7 +3326,7 @@ chartProto.pluginResourceURL = function(name)
  * 获取/设置指定图表配置值。
  * 注意：org.datagear.analysis.support.html.ConfigValueHtmlChartPlugin需要此函数名。
  * 
- * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
+ * 图表初始化时会使用图表元素的"dg-chart-config-values"属性值执行设置操作。
  * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param name 配置名
@@ -3350,7 +3350,7 @@ chartProto.configValue = function(name, value)
 /**
  * 获取/设置全部图表配置值。
  * 
- * 图表初始化时会使用图表元素的"dg-chart-attr-values"属性值执行设置操作。
+ * 图表初始化时会使用图表元素的"dg-chart-config-values"属性值执行设置操作。
  * 设置操作应在chart.init()函数执行后且chart.render()函数执行前调用。
  * 
  * @param values 可选，要设置的配置值映射表，格式为：{ 名称: 值, ... }
@@ -3375,7 +3375,7 @@ chartProto.configValues = function(values)
 };
 
 /**
- * 获取全部原始图表属性值，通常是在定义图表时设置的，未与"dg-chart-attr-values"合并。
+ * 获取全部原始图表属性值，通常是在定义图表时设置的，未与"dg-chart-config-values"合并。
  * 
  * @returns {}，非null
  */
@@ -4491,7 +4491,7 @@ chartProto.dataSetBindsFetched = function(dataSetBinds, chartResult)
  */
 CF.evalChartInitConfigValues = function(chartEle, configValuesOrigin)
 {
-	var configValues = CF.eleAttr(chartEle, elementAttrConst.ATTR_VALUES);
+	var configValues = CF.eleAttr(chartEle, elementAttrConst.CONFIG_VALUES);
 	configValues = (CF.isEmpty(configValues) ? {} : CF.evalSilently(configValues, {}));
 	
 	var merges = {};

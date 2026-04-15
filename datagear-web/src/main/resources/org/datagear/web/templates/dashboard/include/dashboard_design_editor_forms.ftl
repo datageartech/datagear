@@ -867,8 +867,8 @@ page_palette.ftl
 
 <p-dialog :header="pm.vepts.chartConfigValues" append-to="body"
 	position="center" :modal="true" v-model:visible="pm.vepss.chartConfigValuesShown" @show="onVeChartConfigValuesPanelShow">
-	<div class="page page-form page-chart-attr-values dashboard-form-chart-attr-values">
-		<#include "../../chart/include/chart_attr_values_form.ftl">
+	<div class="page page-form page-chart-config-values dashboard-form-chart-config-values">
+		<#include "../../chart/include/chart_config_values_form.ftl">
 	</div>
 </p-dialog>
 

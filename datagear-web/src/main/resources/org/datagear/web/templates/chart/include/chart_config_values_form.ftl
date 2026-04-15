@@ -26,7 +26,7 @@ page_palette.ftl
 <#assign FormPropertyType=statics['org.datagear.analysis.form.PropertyType']>
 <#assign FormPropertyInputType=statics['org.datagear.analysis.form.PropertyInputType']>
 <#assign JsonChartPluginPropertiesResolver=statics['org.datagear.analysis.support.JsonChartPluginPropertiesResolver']>
-<form id="${pid}chartConfigValuesForm" class="chart-attr-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
+<form id="${pid}chartConfigValuesForm" class="chart-config-values-form flex flex-column" :class="{readonly: pm.avoModel.readonly}">
 	<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-scroll">
 		<dg-obj-prop-field :obj-prop="pm.avoModel.pluginConfigForm" :prop-name-path=""
 			:form-data="pm.avoModel.formData" :root-form-data="pm.avoModel.formData" :prop-type-def="pm.avoModel.FormPropertyType"
