@@ -24,11 +24,11 @@
 	po.searchFilterMenuItems =
 	[
 		{
-			label: "${DashboardApiVersion.V2}",
+			label: "<@spring.message code='DashboardApiVersion.V2' />",
 			value: "${DashboardApiVersion.V2}"
 		},
 		{
-			label: "${DashboardApiVersion.V1}",
+			label: "<@spring.message code='DashboardApiVersion.V1' />",
 			value: "${DashboardApiVersion.V1}"
 		}
 	];
