@@ -358,17 +358,20 @@
 					</div>
 				</div>
 			</div>
-			<div class="flex flex-column gap-2" v-if="pm.candidateDataSignInfos.length == 0">
+			<div class="flex flex-column gap-2" v-else>
 				<div class="flex align-items-center gap-1">
 					<i class="pi pi-info-circle"></i>
 					<span><@spring.message code='chart.noAvaliableDataSign' /></span>
 				</div>
 				<div class="text-color-secondary text-sm">
-					<span v-if="fm.pluginVo == null">
+					<span v-if="fm.pluginVo == null || fm.pluginVo.id == null || fm.pluginVo.id == ''">
 						<@spring.message code='chart.noAvaliableDataSign.desc1' />
 					</span>
-					<span v-else>
+					<span v-else-if="fm.pluginVo.dataSigns == null || fm.pluginVo.dataSigns.length == 0">
 						<@spring.message code='chart.noAvaliableDataSign.desc2' />
+					</span>
+					<span v-else>
+						<@spring.message code='chart.noAvaliableDataSign.desc3' />
 					</span>
 				</div>
 			</div>
@@ -635,6 +638,7 @@
 	po.i18n["chart.dataSetWithSignExist"] = "<@spring.message code='chart.dataSetWithSignExist' />";
 	po.i18n["chart.fieldWithSignExist"] = "<@spring.message code='chart.fieldWithSignExist' />";
 	
+	//page.js
 	$.inflateChartForm(po);
 })
 (${pid});
