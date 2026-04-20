@@ -6424,7 +6424,7 @@ CF.arrayContentEquals = function(a, b)
 	
 	if(a.length !== b.length)
 		return false;
-
+	
 	for(let i=0; i<a.length; i++)
 	{
 		if(a[i] !== b[i])
@@ -6751,13 +6751,13 @@ CF.inflateChartTheme = function(theme)
  *   //可选，库别名，仅用于默认loaded判断，具体参考CF.isLibLoadedInEnv()函数
  *   alias: "..."、[ "...", ... ],
  *   //可选，可兼容接受的版本范围，为空表示接受任意版本。当是数组时，表示接受其中任一版本即可。
- *   //格式参考CF.parseAtomicAcceptVersion()函数
- *   acceptVersion: "..."、[ "...", ... ],
+ *   //格式参考CF.splitAcceptVersionByOr()和CF.parseAtomicAcceptVersion()函数
+ *   acceptVersion: "...",
  *   //可选，可提供的库源版本号，为空表示不提供，应符合语义化版本规范："X.Y.Z"、"X.Y.Z-BUILD"
  *   version: "...",
  *   //可选，重定向版本范围，为空表示表示不重定向，如果不为空，当系统要加载此库且重定向目标库存在时，将转而加载重定向目标库。
- *   //格式参考CF.parseAtomicAcceptVersion()函数
- *   redirectVersion: "..."、[ "...", ... ],
+ *   //格式参考CF.splitAcceptVersionByOr()和CF.parseAtomicAcceptVersion()函数
+ *   redirectVersion: "...",
  *   //可选，可提供的库源信息，为空表示不提供
  *   source:
  *   //库源URL
@@ -6923,10 +6923,11 @@ CF.logIfLibVersionMismatch = function(needLib, loadedLib)
 	
 	var mismatch = false;
 	var needVersion = null;
+	var needAcceptVersions = CF.splitAcceptVersionByOr(needLib.acceptVersion);
 	
-	if(!CF.isEmpty(needLib.acceptVersion))
+	if(!CF.isEmpty(needAcceptVersions))
 	{
-		if(!CF.isLibVersionAccepted(loadedLib.version, needLib.acceptVersion))
+		if(!CF.isLibVersionAccepted(loadedLib.version, needAcceptVersions))
 		{
 			mismatch = true;
 			needVersion = needLib.acceptVersion;
@@ -7168,7 +7169,6 @@ CF.resolveLibSourceType = function(url)
 
 CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
-CF.LIB_ACCEPTVERSION_CACHE = {};
 
 //查找未加载的最新版可用库
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
@@ -7177,12 +7177,11 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	if(CF.isLibLoaded(lib))
 		return false;
 	
-	var libName = lib.name;
+	//采用取acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
+	var acceptVersionResult = CF.intersectAcceptVersionResultInCharts(lib, contextCharts);
 	
-	//采用取最小acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
-	var bestAcceptVersion = CF.LIB_ACCEPTVERSION_CACHE[libName];
-	if(bestAcceptVersion === undefined)
-		bestAcceptVersion = CF.intersectAcceptVersionsInCharts(lib, contextCharts);
+	if(acceptVersionResult.acceptNone)
+		return null;
 	
 	var bestLibInfo = null;
 	var libInfos = [];
@@ -7196,7 +7195,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 		libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
 	
 	CF.sortLibInfosAsc(libInfos);
-	bestLibInfo = CF.findBestLibInfo(libInfos, bestAcceptVersion);
+	bestLibInfo = CF.findBestLibInfo(libInfos, acceptVersionResult.acceptVersions);
 	
 	if(bestLibInfo == null)
 		return null;
@@ -7223,19 +7222,31 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 		//无需处理
 	}
 	
-	CF.LIB_ACCEPTVERSION_CACHE[libName] = (bestAcceptVersion === undefined ? null : bestAcceptVersion);
-	
 	return bestLib;
 };
 
-//计算acceptVersion交集，返回结果只有result.acceptNone=true时才表示无交集，result.acceptVersion符合CF.loadLib()中定义的acceptVersion规则
-CF.intersectAcceptVersionsInCharts = function(lib, contextCharts)
+CF.LIB_ACCEPT_VERSION_RESULT_CACHE = {};
+
+/**
+ * 计算acceptVersion交集结果，返回结果只有result.acceptNone=true时才表示无交集，
+ * result.acceptVersions数组元素之间是【或】关系，如果为null或空数组表示接受任意版本
+ */
+CF.intersectAcceptVersionResultInCharts = function(lib, contextCharts)
 {
 	var libName = lib.name;
-	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion, breakAcceptVersion: undefined };
+	var result = CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName];
+	
+	if(result != null)
+		return result;
+	
+	result =
+	{
+		acceptNone: false, prevAcceptVersions: null, breakAcceptVersion: undefined,
+		acceptVersions: CF.splitAcceptVersionByOr(lib.acceptVersion)
+	};
 	
 	var logs = [];
-	logs.push({ name: libName, acceptVersion: result.acceptVersion });
+	logs.push({ name: libName, acceptVersions: result.acceptVersions });
 	
 	for(let i=0; i<contextCharts.length; i++)
 	{
@@ -7252,7 +7263,7 @@ CF.intersectAcceptVersionsInCharts = function(lib, contextCharts)
 			if(result.acceptNone)
 			{
 				//打印详细日志，便于调试
-				logs.push({ name: libName, acceptVersion: "NONE", chart: CF.chartLogInfo(chart), breaker: result.breakAcceptVersion });
+				logs.push({ name: libName, acceptVersions: "NONE", chart: CF.chartLogInfo(chart), breaker: result.breakAcceptVersion });
 				let logMsg = "lib "+libName +" acceptVersion breaked by "+CF.chartLogInfo(chart)
 					+", its requirement will be ignored.";
 				for(let logIdx=0; logIdx<logs.length; logIdx++)
@@ -7262,17 +7273,19 @@ CF.intersectAcceptVersionsInCharts = function(lib, contextCharts)
 				//恢复上一次继续计算
 				logs.splice(logs.length-1, 1);
 				result.acceptNone = false;
-				result.acceptVersion = result.prevAcceptVersion;
+				result.acceptVersions = result.prevAcceptVersions;
 				result.breakAcceptVersion = undefined;
 			}
 			else
 			{
-				logs.push({ name: libName, acceptVersion: result.acceptVersion, chart: CF.chartLogInfo(chart) });
+				logs.push({ name: libName, acceptVersions: result.acceptVersions, chart: CF.chartLogInfo(chart) });
 			}
 		}
 	}
 	
-	return result.acceptVersion;
+	CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName] = result;
+	
+	return result;
 };
 
 CF.intersectAcceptVersionResultInLibs = function(result, name, libs)
@@ -7312,22 +7325,25 @@ CF.intersectAcceptVersionResultInLibs = function(result, name, libs)
 
 CF.intersectAcceptVersionResultInLib = function(result, lib)
 {
-	if(lib == null || CF.isEmpty(lib.acceptVersion) || result.acceptVersion === lib.acceptVersion)
+	if(lib == null || CF.isEmpty(lib.acceptVersion))
 		return;
 	
-	if(CF.isEmpty(result.acceptVersion))
+	var libAcceptVersions = CF.splitAcceptVersionByOr(lib.acceptVersion);
+	
+	if(CF.isEmpty(libAcceptVersions) || CF.arrayContentEquals(result.acceptVersions, libAcceptVersions))
+		return;
+	
+	if(CF.isEmpty(result.acceptVersions))
 	{
-		result.prevAcceptVersion = result.acceptVersion;
-		result.acceptVersion = lib.acceptVersion;
+		result.prevAcceptVersions = result.acceptVersions;
+		result.acceptVersions = libAcceptVersions;
 		return;
 	}
 	
-	var acceptVersions = (CF.isArray(result.acceptVersion) ? result.acceptVersion : [ result.acceptVersion ]);
-	var libAcceptVersions = (CF.isArray(lib.acceptVersion) ? lib.acceptVersion : [ lib.acceptVersion ]);
-	
+	var acceptVersions = result.acceptVersions;
 	result.acceptNone = true;
-	result.prevAcceptVersion = result.acceptVersion;
-	result.acceptVersion = [];
+	result.prevAcceptVersions = result.acceptVersions;
+	result.acceptVersions = [];
 	
 	for(let i=0; i<acceptVersions.length; i++)
 	{
@@ -7340,8 +7356,8 @@ CF.intersectAcceptVersionResultInLib = function(result, lib)
 				if(result.acceptNone == true)
 					result.acceptNone = false;
 				
-				if(!CF.isEmpty(intersect) && CF.indexInArray(result.acceptVersion, intersect) < 0)
-					result.acceptVersion.push(intersect);
+				if(!CF.isEmpty(intersect) && CF.indexInArray(result.acceptVersions, intersect) < 0)
+					result.acceptVersions.push(intersect);
 			}
 		}
 	}
@@ -7564,7 +7580,7 @@ CF.isLibVersionAccepted = function(version, acceptVersion)
 	{
 		acceptVersions = CF.splitAcceptVersionByOr(acceptVersion);
 		
-		if(acceptVersions == null)
+		if(CF.isEmpty(acceptVersions))
 			return true;
 	}
 	
@@ -7716,6 +7732,9 @@ CF._ACCEPT_VERSION_OR_OPT_REGEX = /\s*\|\|\s*/;
 /**
  * 按照"||"操作符拆分acceptVersion为数组，支持格式：
  * "acceptVersion || acceptVersion || acceptVersion"
+ * 
+ * @param acceptVersion 包含"||"操作符的acceptVersion字符串
+ * @returns [ ... ]，返回null表示无acceptVersion
  */
 CF.splitAcceptVersionByOr = function(acceptVersion)
 {
