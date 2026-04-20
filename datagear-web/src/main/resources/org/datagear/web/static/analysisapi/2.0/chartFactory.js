@@ -7558,10 +7558,6 @@ CF.isLibVersionAccepted = function(version, acceptVersion)
 	for(let i=0; i<acceptVersion.length; i++)
 	{
 		let acceptObj = CF.resolveAcceptVersionObj(acceptVersion[i]);
-		
-		if(acceptObj == null)
-			continue;
-		
 		let compareMin = (acceptObj.min == null ? 1 : CF.compareLibVersion(version, acceptObj.min));
 		let acceptMin = (acceptObj.includeMin ? (compareMin >= 0) : (compareMin > 0));
 		let compareMax = (acceptObj.max == null ? -1 : CF.compareLibVersion(version, acceptObj.max));
@@ -7587,7 +7583,7 @@ CF.intersectAcceptVersion = function(acceptVersion1, acceptVersion2)
 	if(CF.isEmpty(acceptVersion2))
 		return acceptVersion1;
 	
-	var intersectObj = CF.extend({}, CF._ACCEPT_ANY_VERSION_OBJ);
+	var intersectObj = CF.acceptAnyVersionObj();
 	var acceptObj1 = CF.resolveAcceptVersionObj(acceptVersion1);
 	var acceptObj2 = CF.resolveAcceptVersionObj(acceptVersion2);
 	
@@ -7692,9 +7688,25 @@ CF.intersectAcceptVersion = function(acceptVersion1, acceptVersion2)
 };
 
 CF._ACCEPT_VERSION_OBJS = {};
-CF._ACCEPT_ANY_VERSION_OBJ = { min: null, includeMin: true, max: null, includeMax: true };
 
-//，
+CF.acceptAnyVersionObj = function()
+{
+	var re = { min: null, includeMin: true, max: null, includeMax: true };
+	return re;
+};
+
+/**
+ * 解析接受版本对象数组，元素之间是【或】关系，支持格式：
+ * [表达式-1] || [表达式-2] || [表达式-3]
+ * 其中，[表达式-*] 格式参考CF.resolveAcceptVersionObj()函数说明
+ */
+CF.resolveAcceptVersionObjs = function(acceptVersion)
+{
+	var re = [];
+	//TODO
+	return re;
+};
+
 /**
  * 解析接受版本对象，支持格式如下：
  * null            接受任意版本
@@ -7714,14 +7726,14 @@ CF.resolveAcceptVersionObj = function(acceptVersion)
 	acceptVersion = CF.trim(acceptVersion);
 	
 	if(CF.isEmpty(acceptVersion))
-		return CF._ACCEPT_ANY_VERSION_OBJ;
+		return CF.acceptAnyVersionObj();
 	
 	var re = CF._ACCEPT_VERSION_OBJS[acceptVersion];
 	
 	if(re != null)
 		return re;
 	
-	re = CF.extend({}, CF._ACCEPT_ANY_VERSION_OBJ);
+	re = CF.acceptAnyVersionObj();
 	
 	var splits = CF.splitByWhitespace(acceptVersion);
 	for(let i=0;i<splits.length; i++)
