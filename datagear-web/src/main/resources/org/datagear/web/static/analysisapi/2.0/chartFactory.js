@@ -69,8 +69,8 @@
  *   off: function(chart, type, handler){ ... },
  *   //可选，销毁图表函数
  *   destroy: function(chart){ ... },
- *   //可选，渲染器附加数据
- *   additions: { 名: 值, ... }、function(chart){ return { 名: 值, ... }; };
+ *   //可选，渲染器名/值附加数据
+ *   additions: { ... }、function(){ return { ... }; };
  * }
  * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
@@ -4422,28 +4422,31 @@ chartProto.resultIgnoreFetchOf = function(chartResult, dataSetBind, ignoreFetch)
  */
 chartProto.rendererAddition = function(name)
 {
-	var renderer = this.renderer();
-	
 	//必须优先从自定义渲染器获取
-	if(renderer && renderer.additions)
-	{
-		let re = renderer.additions[name];
-		
-		if(re !== undefined)
-			return re;
-	}
+	var re = this._rendererAddition(this.renderer(), name);
 	
-	renderer = this._pluginRenderer();
+	if(re == null)
+		re = this._rendererAddition(this._pluginRenderer(), name);
 	
-	if(renderer && renderer.additions)
-	{
-		let re = renderer.additions[name];
-		
-		if(re !== undefined)
-			return re;
-	}
+	return re;
+};
+
+chartProto._rendererAddition = function(renderer, name)
+{
+	if(renderer == null || renderer.additions == null)
+		return undefined;
 	
-	return null;
+	var additions = null;
+	
+	if(CF.isFunction(renderer.additions))
+		additions = renderer.additions();
+	else
+		additions = renderer.additions;
+	
+	if(additions == null)
+		return undefined;
+	
+	return additions[name];
 };
 
 /**
