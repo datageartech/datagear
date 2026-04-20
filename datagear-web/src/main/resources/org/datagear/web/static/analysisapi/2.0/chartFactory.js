@@ -6751,12 +6751,12 @@ CF.inflateChartTheme = function(theme)
  *   //可选，库别名，仅用于默认loaded判断，具体参考CF.isLibLoadedInEnv()函数
  *   alias: "..."、[ "...", ... ],
  *   //可选，可兼容接受的版本范围，为空表示接受任意版本。当是数组时，表示接受其中任一版本即可。
- *   //格式参考CF.resolveAcceptVersionObj()函数
+ *   //格式参考CF.parseAtomicAcceptVersion()函数
  *   acceptVersion: "..."、[ "...", ... ],
  *   //可选，可提供的库源版本号，为空表示不提供，应符合语义化版本规范："X.Y.Z"、"X.Y.Z-BUILD"
  *   version: "...",
  *   //可选，重定向版本范围，为空表示表示不重定向，如果不为空，当系统要加载此库且重定向目标库存在时，将转而加载重定向目标库。
- *   //格式参考CF.resolveAcceptVersionObj()函数
+ *   //格式参考CF.parseAtomicAcceptVersion()函数
  *   redirectVersion: "..."、[ "...", ... ],
  *   //可选，可提供的库源信息，为空表示不提供
  *   source:
@@ -7182,7 +7182,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	//采用取最小acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
 	var bestAcceptVersion = CF.LIB_ACCEPTVERSION_CACHE[libName];
 	if(bestAcceptVersion === undefined)
-		bestAcceptVersion = CF.intersectAcceptVersionInCharts(lib, contextCharts);
+		bestAcceptVersion = CF.intersectAcceptVersionsInCharts(lib, contextCharts);
 	
 	var bestLibInfo = null;
 	var libInfos = [];
@@ -7229,7 +7229,7 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 };
 
 //计算acceptVersion交集，返回结果只有result.acceptNone=true时才表示无交集，result.acceptVersion符合CF.loadLib()中定义的acceptVersion规则
-CF.intersectAcceptVersionInCharts = function(lib, contextCharts)
+CF.intersectAcceptVersionsInCharts = function(lib, contextCharts)
 {
 	var libName = lib.name;
 	var result = { acceptNone: false, prevAcceptVersion: null, acceptVersion: lib.acceptVersion, breakAcceptVersion: undefined };
@@ -7333,7 +7333,7 @@ CF.intersectAcceptVersionResultInLib = function(result, lib)
 	{
 		for(let j=0; j<libAcceptVersions.length; j++)
 		{
-			let intersect = CF.intersectAcceptVersion(acceptVersions[i], libAcceptVersions[j]);
+			let intersect = CF.intersectAtomicAcceptVersion(acceptVersions[i], libAcceptVersions[j]);
 			
 			if(intersect != -1)
 			{
@@ -7547,17 +7547,33 @@ CF.isUsableLib = function(lib)
 	return false;
 };
 
+/**
+ * 判断给定库的version是否符合acceptVersion
+ * 
+ * @param version 版本号
+ * @param acceptVersion 接受版本号，支持格式：CF.loadLib()函数中lib的acceptVersion格式、[ ... ]
+ */
 CF.isLibVersionAccepted = function(version, acceptVersion)
 {
 	if(CF.isEmpty(acceptVersion))
 		return true;
 	
-	if(!CF.isArray(acceptVersion))
-		acceptVersion = [ acceptVersion ];
+	var acceptVersions = acceptVersion;
 	
-	for(let i=0; i<acceptVersion.length; i++)
+	if(CF.isString(acceptVersions))
 	{
-		let acceptObj = CF.resolveAcceptVersionObj(acceptVersion[i]);
+		acceptVersions = CF.splitAcceptVersionByOr(acceptVersion);
+		
+		if(acceptVersions == null)
+			return true;
+	}
+	
+	if(!CF.isArray(acceptVersions))
+		acceptVersions = [ acceptVersions ];
+	
+	for(let i=0; i<acceptVersions.length; i++)
+	{
+		let acceptObj = CF.parseAtomicAcceptVersion(acceptVersions[i]);
 		let compareMin = (acceptObj.min == null ? 1 : CF.compareLibVersion(version, acceptObj.min));
 		let acceptMin = (acceptObj.includeMin ? (compareMin >= 0) : (compareMin > 0));
 		let compareMax = (acceptObj.max == null ? -1 : CF.compareLibVersion(version, acceptObj.max));
@@ -7570,9 +7586,15 @@ CF.isLibVersionAccepted = function(version, acceptVersion)
 	return false;
 };
 
-//计算两个acceptVersion的交集acceptVersion，返回-1表示无交集
-//注意：null和""表示接受任意版本
-CF.intersectAcceptVersion = function(acceptVersion1, acceptVersion2)
+/**
+ * 计算两个原子acceptVersion的交集acceptVersion。
+ * 注意：null和""表示接受任意版本。
+ * 
+ * @param acceptVersion1 不包含"||"操作符的acceptVersion
+ * @param acceptVersion2 不包含"||"操作符的acceptVersion
+ * @returns acceptVersion，不会包含"||"操作符，返回-1表示无交集
+ */
+CF.intersectAtomicAcceptVersion = function(acceptVersion1, acceptVersion2)
 {
 	if(acceptVersion1 == acceptVersion2)
 		return acceptVersion1;
@@ -7584,8 +7606,8 @@ CF.intersectAcceptVersion = function(acceptVersion1, acceptVersion2)
 		return acceptVersion1;
 	
 	var intersectObj = CF.acceptAnyVersionObj();
-	var acceptObj1 = CF.resolveAcceptVersionObj(acceptVersion1);
-	var acceptObj2 = CF.resolveAcceptVersionObj(acceptVersion2);
+	var acceptObj1 = CF.parseAtomicAcceptVersion(acceptVersion1);
+	var acceptObj2 = CF.parseAtomicAcceptVersion(acceptVersion2);
 	
 	if(CF.isEmpty(acceptObj1.min) && CF.isEmpty(acceptObj2.min))
 	{
@@ -7689,26 +7711,33 @@ CF.intersectAcceptVersion = function(acceptVersion1, acceptVersion2)
 
 CF._ACCEPT_VERSION_OBJS = {};
 
-CF.acceptAnyVersionObj = function()
-{
-	var re = { min: null, includeMin: true, max: null, includeMax: true };
-	return re;
-};
+CF._ACCEPT_VERSION_OR_OPT_REGEX = /\s*\|\|\s*/;
 
 /**
- * 解析接受版本对象数组，元素之间是【或】关系，支持格式：
- * [表达式-1] || [表达式-2] || [表达式-3]
- * 其中，[表达式-*] 格式参考CF.resolveAcceptVersionObj()函数说明
+ * 按照"||"操作符拆分acceptVersion为数组，支持格式：
+ * "acceptVersion || acceptVersion || acceptVersion"
  */
-CF.resolveAcceptVersionObjs = function(acceptVersion)
+CF.splitAcceptVersionByOr = function(acceptVersion)
 {
+	acceptVersion = CF.trim(acceptVersion);
+	
+	if(CF.isEmpty(acceptVersion))
+		return null;
+	
 	var re = [];
-	//TODO
-	return re;
+	
+	var splits = acceptVersion.split(CF._ACCEPT_VERSION_OR_OPT_REGEX);
+	for(let i=0; i<splits.length; i++)
+	{
+		if(!CF.isEmpty(splits[i]))
+			re.push(splits[i]);
+	}
+	
+	return (re.length == 0 ? null : re);
 };
 
 /**
- * 解析接受版本对象，支持格式如下：
+ * 解析不包含"||"操作符的acceptVersion为对象，支持格式如下：
  * null            接受任意版本
  * ""              接受任意版本
  * "1.0"           仅接受1.0版本
@@ -7720,13 +7749,17 @@ CF.resolveAcceptVersionObjs = function(acceptVersion)
  * "<=1.1"         接受小于等于1.1的版本
  * ">=1.1 <3.0"    接受大于等于1.1且小于3.0的版本
  * ">=1.1 <=3.0"    接受大于等于1.1且小于等于3.0的版本
+ * 
+ * @returns 接受版本号对象，格式参考CF.acceptAnyVersionObj()函数，不应被修改
  */
-CF.resolveAcceptVersionObj = function(acceptVersion)
+CF.parseAtomicAcceptVersion = function(acceptVersion)
 {
-	acceptVersion = CF.trim(acceptVersion);
+	//acceptVersion对象
+	if(acceptVersion != null && acceptVersion.min !== undefined && acceptVersion.includeMin !== undefined)
+		return acceptVersion;
 	
-	if(CF.isEmpty(acceptVersion))
-		return CF.acceptAnyVersionObj();
+	acceptVersion = CF.trim(acceptVersion);
+	acceptVersion = (acceptVersion == null ? "" : acceptVersion);
 	
 	var re = CF._ACCEPT_VERSION_OBJS[acceptVersion];
 	
@@ -7735,68 +7768,77 @@ CF.resolveAcceptVersionObj = function(acceptVersion)
 	
 	re = CF.acceptAnyVersionObj();
 	
-	var splits = CF.splitByWhitespace(acceptVersion);
-	for(let i=0;i<splits.length; i++)
+	if(!CF.isEmpty(acceptVersion))
 	{
-		let part = splits[i];
-		
-		if(part.startsWith("^"))
+		var splits = CF.splitByWhitespace(acceptVersion);
+		for(let i=0;i<splits.length; i++)
 		{
-			let maxObj = CF.parseVersion(part.substring(1));
-			maxObj.major = maxObj.major + 1;
-			maxObj.minor = 0;
-			maxObj.revision = 0;
-			maxObj.build = "";
+			let part = splits[i];
 			
-			re.min = part.substring(1);
-			re.includeMin = true;
-			re.max = CF.versionToString(maxObj);
-			re.includeMax = false;
-		}
-		else if(part.startsWith("~"))
-		{
-			let maxObj = CF.parseVersion(part.substring(1));
-			maxObj.major = maxObj.major;
-			maxObj.minor = maxObj.minor + 1;
-			maxObj.revision = 0;
-			maxObj.build = "";
-			
-			re.min = part.substring(1);
-			re.includeMin = true;
-			re.max = CF.versionToString(maxObj);
-			re.includeMax = false;
-		}
-		else if(part.startsWith(">="))
-		{
-			re.min = part.substring(2);
-			re.includeMin = true;
-		}
-		else if(part.startsWith(">"))
-		{
-			re.min = part.substring(1);
-			re.includeMin = false;
-		}
-		else if(part.startsWith("<="))
-		{
-			re.max = part.substring(2);
-			re.includeMax = true;
-		}
-		else if(part.startsWith("<"))
-		{
-			re.max = part.substring(1);
-			re.includeMax = false;
-		}
-		else
-		{
-			re.min = part;
-			re.includeMin = true;
-			re.max = part;
-			re.includeMax = true;
+			if(part.startsWith("^"))
+			{
+				let maxObj = CF.parseVersion(part.substring(1));
+				maxObj.major = maxObj.major + 1;
+				maxObj.minor = 0;
+				maxObj.revision = 0;
+				maxObj.build = "";
+				
+				re.min = part.substring(1);
+				re.includeMin = true;
+				re.max = CF.versionToString(maxObj);
+				re.includeMax = false;
+			}
+			else if(part.startsWith("~"))
+			{
+				let maxObj = CF.parseVersion(part.substring(1));
+				maxObj.major = maxObj.major;
+				maxObj.minor = maxObj.minor + 1;
+				maxObj.revision = 0;
+				maxObj.build = "";
+				
+				re.min = part.substring(1);
+				re.includeMin = true;
+				re.max = CF.versionToString(maxObj);
+				re.includeMax = false;
+			}
+			else if(part.startsWith(">="))
+			{
+				re.min = part.substring(2);
+				re.includeMin = true;
+			}
+			else if(part.startsWith(">"))
+			{
+				re.min = part.substring(1);
+				re.includeMin = false;
+			}
+			else if(part.startsWith("<="))
+			{
+				re.max = part.substring(2);
+				re.includeMax = true;
+			}
+			else if(part.startsWith("<"))
+			{
+				re.max = part.substring(1);
+				re.includeMax = false;
+			}
+			else
+			{
+				re.min = part;
+				re.includeMin = true;
+				re.max = part;
+				re.includeMax = true;
+			}
 		}
 	}
 	
 	CF._ACCEPT_VERSION_OBJS[acceptVersion] = re;
 	
+	return re;
+};
+
+CF.acceptAnyVersionObj = function()
+{
+	var re = { min: null, includeMin: true, max: null, includeMax: true };
 	return re;
 };
 
