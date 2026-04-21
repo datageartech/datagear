@@ -7170,6 +7170,8 @@ CF.resolveLibSourceType = function(url)
 CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
+CF.LIB_ACCEPT_VERSION_RESULT_CACHE = {};
+
 //查找未加载的最新版可用库
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
 CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts, inputLibs)
@@ -7177,8 +7179,12 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	if(CF.isLibLoaded(lib))
 		return false;
 	
+	var libName = lib.name;
+	var acceptVersionResult = CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName];
+	
 	//采用取acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
-	var acceptVersionResult = CF.intersectAcceptVersionResultInCharts(lib, contextCharts);
+	if(acceptVersionResult == null)
+		acceptVersionResult = CF.intersectAcceptVersionResultInCharts(lib, contextCharts);
 	
 	if(acceptVersionResult.acceptNone)
 		return null;
@@ -7222,10 +7228,10 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 		//无需处理
 	}
 	
+	CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName] = acceptVersionResult;
+	
 	return bestLib;
 };
-
-CF.LIB_ACCEPT_VERSION_RESULT_CACHE = {};
 
 /**
  * 计算acceptVersion交集结果，返回结果只有result.acceptNone=true时才表示无交集，
@@ -7234,12 +7240,7 @@ CF.LIB_ACCEPT_VERSION_RESULT_CACHE = {};
 CF.intersectAcceptVersionResultInCharts = function(lib, contextCharts)
 {
 	var libName = lib.name;
-	var result = CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName];
-	
-	if(result != null)
-		return result;
-	
-	result =
+	var result =
 	{
 		acceptNone: false, prevAcceptVersions: null, breakAcceptVersion: undefined,
 		acceptVersions: CF.splitAcceptVersionByOr(lib.acceptVersion)
@@ -7282,8 +7283,6 @@ CF.intersectAcceptVersionResultInCharts = function(lib, contextCharts)
 			}
 		}
 	}
-	
-	CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName] = result;
 	
 	return result;
 };
