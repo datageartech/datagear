@@ -7542,10 +7542,10 @@ CF.isCandidateLib = function(lib, baseLib)
 	if(lib == null || baseLib == null)
 		return false;
 	
-	if(!CF.isUsableLib(lib))
+	if(!CF.isLibWithName(baseLib, lib.name))
 		return false;
 	
-	return CF.isLibWithName(baseLib, lib.name);
+	return CF.isUsableLib(lib);
 };
 
 CF.isUsableLib = function(lib)
