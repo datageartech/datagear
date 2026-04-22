@@ -6832,7 +6832,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 		
 		if(lib != null && CF.isString(lib))
 			lib = { name: lib };
-
+		
 		if(lib == null || CF.isEmpty(lib.name))
 			continue;
 		
@@ -7170,8 +7170,6 @@ CF.resolveLibSourceType = function(url)
 CF.LIB_JS_SOURCE_REGEX = /\.(js)$/i;
 CF.LIB_CSS_SOURCE_REGEX = /\.(css)$/i;
 
-CF.LIB_ACCEPT_VERSION_RESULT_CACHE = {};
-
 //查找未加载的最新版可用库
 //返回值：false 表示最新版可用库已加载；null 未找到可用库；bestLib 找到最新版可用库
 CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts, inputLibs)
@@ -7179,12 +7177,12 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	if(CF.isLibLoaded(lib))
 		return false;
 	
-	var libName = lib.name;
-	var acceptVersionResult = CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName];
+	var stateObj = CF.libState(lib);
+	if(stateObj && stateObj.lib)
+		return stateObj.lib;
 	
 	//采用取acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
-	if(acceptVersionResult == null)
-		acceptVersionResult = CF.intersectAcceptVersionResultInCharts(lib, contextCharts);
+	var acceptVersionResult = CF.intersectAcceptVersionResultInCharts(lib, contextCharts);
 	
 	if(acceptVersionResult.acceptNone)
 		return null;
@@ -7200,7 +7198,6 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	if(CF.isCandidateLib(lib, lib))
 		libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
 	
-	CF.sortLibInfosAsc(libInfos);
 	bestLibInfo = CF.findBestLibInfo(libInfos, acceptVersionResult.acceptVersions);
 	
 	if(bestLibInfo == null)
@@ -7228,8 +7225,6 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 		//无需处理
 	}
 	
-	CF.LIB_ACCEPT_VERSION_RESULT_CACHE[libName] = acceptVersionResult;
-	
 	return bestLib;
 };
 
@@ -7242,6 +7237,7 @@ CF.intersectAcceptVersionResultInCharts = function(lib, contextCharts)
 	var libName = lib.name;
 	var result =
 	{
+		name: libName,
 		acceptNone: false, prevAcceptVersions: null, breakAcceptVersion: undefined,
 		acceptVersions: CF.splitAcceptVersionByOr(lib.acceptVersion)
 	};
@@ -7365,9 +7361,35 @@ CF.intersectAcceptVersionResultInLib = function(result, lib)
 		result.breakAcceptVersion = lib.acceptVersion;
 };
 
-CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
+CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 {
-	for(let i=ascLibInfos.length-1; i>=0; i--)
+	libInfosSorted = (libInfosSorted === undefined ? false : libInfosSorted);
+	
+	var ascLibInfos = libInfos;
+	
+	//将库信息数组升序排列，版本号越低越靠前、priority越大越靠前，
+	//使得此函数返回符合acceptVersion要求中版本最低的、priority最高的作为最优库。
+	//这是一个保守策略，避免当acceptVersion未限定版本上限、而系统又引入高版本的不兼容库时，导致图表逻辑出错。
+	//这种保守策略也会有一个问题，系统引入的新版本库可能始终不会被使用，
+	//为解决这个问题，在依赖库中加入了redirectVersion策略，可以将旧版库重定向至新版库。
+	if(!libInfosSorted)
+	{
+		ascLibInfos = Array.from(ascLibInfos);
+		ascLibInfos.sort(function(lio1, lio2)
+		{
+			let lib1 = lio1.lib;
+			let lib2 = lio2.lib;
+			
+			let re = CF.compareLibVersion(lib1.version, lib2.version);
+			
+			if(re == 0)
+				re = lio2.priority - lio1.priority;
+			
+			return re;
+		});
+	}
+	
+	for(let i=0; i<ascLibInfos.length; i++)
 	{
 		let libInfo = ascLibInfos[i]; 
 		let lib = libInfo.lib;
@@ -7375,41 +7397,24 @@ CF.findBestLibInfo = function(ascLibInfos, acceptVersion)
 		if(!CF.isLibVersionAccepted(lib.version, acceptVersion))
 			continue;
 		
-		if(CF.isValidLoadableLib(lib))
-		{
-			return libInfo;
-		}
-		//重定向库
-		else if(!CF.isEmpty(lib.redirectVersion))
+		//重定向库应优先处理
+		if(!CF.isEmpty(lib.redirectVersion))
 		{
 			//需先复制并删除lib，避免死循环
 			let newLibInfos = Array.from(ascLibInfos);
 			newLibInfos.splice(i, 1);
-			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.redirectVersion);
+			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.redirectVersion, true);
 			
 			if(redirectLibInfo != null)
 				return redirectLibInfo;
 		}
+		else if(CF.isValidLoadableLib(lib))
+		{
+			return libInfo;
+		}
 	}
 	
 	return null;
-};
-
-//将库信息数组升序排列，版本号越高越靠后、priority越大越靠后
-CF.sortLibInfosAsc = function(libInfos)
-{
-	libInfos.sort(function(lio1, lio2)
-	{
-		let lib1 = lio1.lib;
-		let lib2 = lio2.lib;
-		
-		let re = CF.compareLibVersion(lib1.version, lib2.version);
-		
-		if(re == 0)
-			re = lio1.priority - lio2.priority;
-		
-		return re;
-	});
 };
 
 CF.isValidLoadableLib = function(lib)
@@ -7556,10 +7561,11 @@ CF.isUsableLib = function(lib)
 	if(CF.isEmpty(lib.name) || CF.isEmpty(lib.version))
 		return false;
 	
-	if(!CF.isEmpty(lib.source) || !CF.isEmpty(lib.redirectVersion))
-		return true;
+	//应至少有其一
+	if(CF.isEmpty(lib.source) && CF.isEmpty(lib.redirectVersion))
+		return false;
 	
-	return false;
+	return true;
 };
 
 /**
