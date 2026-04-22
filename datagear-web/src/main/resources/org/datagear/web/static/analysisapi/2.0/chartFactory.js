@@ -7364,18 +7364,17 @@ CF.intersectAcceptVersionResultInLib = function(result, lib)
 CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 {
 	libInfosSorted = (libInfosSorted === undefined ? false : libInfosSorted);
-	
-	var ascLibInfos = libInfos;
+	var sortedLibInfos = libInfos;
 	
 	//将库信息数组升序排列，版本号越低越靠前、priority越大越靠前，
-	//使得此函数返回符合acceptVersion要求中版本最低的、priority最高的作为最优库。
+	//使得此函数返回符合acceptVersion要求中版本最低的、priority最高的那个作为最优库。
 	//这是一个保守策略，避免当acceptVersion未限定版本上限、而系统又引入高版本的不兼容库时，导致图表逻辑出错。
 	//这种保守策略也会有一个问题，系统引入的新版本库可能始终不会被使用，
-	//为解决这个问题，在依赖库中加入了redirectVersion策略，可以将旧版库重定向至新版库。
+	//为解决这个问题，在依赖库中加入了redirectVersion功能，可以将旧版库重定向至新版库。
 	if(!libInfosSorted)
 	{
-		ascLibInfos = Array.from(ascLibInfos);
-		ascLibInfos.sort(function(lio1, lio2)
+		sortedLibInfos = Array.from(libInfos);
+		sortedLibInfos.sort(function(lio1, lio2)
 		{
 			let lib1 = lio1.lib;
 			let lib2 = lio2.lib;
@@ -7389,9 +7388,9 @@ CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 		});
 	}
 	
-	for(let i=0; i<ascLibInfos.length; i++)
+	for(let i=0; i<sortedLibInfos.length; i++)
 	{
-		let libInfo = ascLibInfos[i]; 
+		let libInfo = sortedLibInfos[i]; 
 		let lib = libInfo.lib;
 		
 		if(!CF.isLibVersionAccepted(lib.version, acceptVersion))
@@ -7401,7 +7400,7 @@ CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 		if(!CF.isEmpty(lib.redirectVersion))
 		{
 			//需先复制并删除lib，避免死循环
-			let newLibInfos = Array.from(ascLibInfos);
+			let newLibInfos = Array.from(sortedLibInfos);
 			newLibInfos.splice(i, 1);
 			let redirectLibInfo = CF.findBestLibInfo(newLibInfos, lib.redirectVersion, true);
 			
