@@ -7181,24 +7181,31 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	if(stateObj && stateObj.lib)
 		return stateObj.lib;
 	
-	//采用取acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板库版本
+	//采用取看板范围内acceptVersion交集的方式，可以确保系统在引入某个库的新版本后，不影响已有的看板
 	var acceptVersionResult = CF.intersectAcceptVersionResultInCharts(lib, contextCharts);
 	
 	if(acceptVersionResult.acceptNone)
 		return null;
 	
+	var acceptVersions = acceptVersionResult.acceptVersions;
 	var bestLibInfo = null;
 	var libInfos = [];
 	
 	CF.inflateCandidateLibInfoInGlobalLib(libInfos, lib);
 	CF.inflateCandidateLibInfoInLibPlugins(libInfos, lib, libPlugins);
-	CF.inflateCandidateLibInfoInContextCharts(libInfos, lib, contextCharts);
-	CF.inflateCandidateLibInfoInInputLibs(libInfos, lib, inputLibs);
 	
-	if(CF.isCandidateLib(lib, lib))
-		libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
-	
-	bestLibInfo = CF.findBestLibInfo(libInfos, acceptVersionResult.acceptVersions);
+	//优先使用全局库和库插件中的依赖库，它们更安全稳定
+	bestLibInfo = CF.findBestLibInfo(libInfos, acceptVersions);
+	if(bestLibInfo == null)
+	{
+		CF.inflateCandidateLibInfoInContextCharts(libInfos, lib, contextCharts);
+		CF.inflateCandidateLibInfoInInputLibs(libInfos, lib, inputLibs);
+		
+		if(CF.isCandidateLib(lib, lib))
+			libInfos.push({ lib: lib, priority: CF.LIB_PRIORITY_INPUT, from: "input" });
+		
+		bestLibInfo = CF.findBestLibInfo(libInfos, acceptVersions);
+	}
 	
 	if(bestLibInfo == null)
 		return null;
@@ -7212,13 +7219,13 @@ CF.findUnloadedBestLib = function(lib, renderContext, libPlugins, contextCharts,
 	{
 		bestLib = CF.trimGlobalLib(bestLib, renderContext);
 	}
-	else if(bestLibInfo.from == "customRenderer")
-	{
-		bestLib = CF.trimCustomRendererLib(bestLib, renderContext);
-	}
 	else if(bestLibInfo.from == "plugin")
 	{
 		bestLib = CF.trimPluginRendererLib(bestLib, renderContext, bestLibInfo.plugin);
+	}
+	else if(bestLibInfo.from == "customRenderer")
+	{
+		bestLib = CF.trimCustomRendererLib(bestLib, renderContext);
 	}
 	else if(bestLibInfo.from == "input")
 	{
@@ -7366,6 +7373,9 @@ CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 	libInfosSorted = (libInfosSorted === undefined ? false : libInfosSorted);
 	var sortedLibInfos = libInfos;
 	
+	if(CF.isEmpty(sortedLibInfos))
+		return null;
+	
 	//将库信息数组升序排列，版本号越低越靠前、priority越大越靠前，
 	//使得此函数返回符合acceptVersion要求中版本最低的、priority最高的那个作为最优库。
 	//这是一个保守策略，避免当acceptVersion未限定版本上限、而系统又引入高版本的不兼容库时，导致图表逻辑出错。
@@ -7373,7 +7383,7 @@ CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 	//为解决这个问题，在依赖库中加入了redirectVersion功能，可以将旧版库重定向至新版库。
 	if(!libInfosSorted)
 	{
-		sortedLibInfos = Array.from(libInfos);
+		sortedLibInfos = Array.from(sortedLibInfos);
 		sortedLibInfos.sort(function(lio1, lio2)
 		{
 			let lib1 = lio1.lib;
