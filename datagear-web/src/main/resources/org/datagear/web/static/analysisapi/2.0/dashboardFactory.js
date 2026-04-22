@@ -2702,10 +2702,7 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 			
 			//返回非false，则加入看板
 			if(callbackResult !== false)
-			{
-				for(let i=0; i<chartRoots.length; i++)
-					this._addChartCareStatus(charts[i]);
-			}
+				this._addChartsCareStatus(charts);
 			
 			//返回的是函数，则调用，以支持在图表加入看板后再执行回调
 			if(callbackResult != null && CF.isFunction(callbackResult))
@@ -2765,28 +2762,37 @@ dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
 	return DF.createChart(chartRoot, this.renderContext(), this);
 };
 
-dashboardProto._addChartCareStatus = function(chart)
+dashboardProto._addChartsCareStatus = function(charts)
 {
-	this.addChart(chart);
+	charts = (CF.isArray(charts) ? charts : [ charts ]);
 	
-	if(this._isChartPreventHandle(chart))
-		return;
+	for(let i=0; i<charts.length; i++)
+		this.addChart(charts[i]);
 	
-	if(chart.statusPreInit())
+	//应先全部加入看板后再进行渲染，确保依赖库加载逻辑有全量的参考依赖库
+	for(let i=0; i<charts.length; i++)
 	{
-		CF.executeSilently(() =>
+		let chart = charts[i];
+		
+		if(this._isChartPreventHandle(chart))
+			continue;
+		
+		if(chart.statusPreInit())
 		{
-			//应设为与看板状态保持一致
-			if(this._statusInited())
+			CF.executeSilently(() =>
 			{
-				chart.init();
-			}
-			else if(this.isAlive())
-			{
-				chart.init();
-				chart.statusPreRender(true);
-			}
-		});
+				//应设为与看板状态保持一致
+				if(this._statusInited())
+				{
+					chart.init();
+				}
+				else if(this.isAlive())
+				{
+					chart.init();
+					chart.statusPreRender(true);
+				}
+			});
+		}
 	}
 };
 
@@ -2842,7 +2848,7 @@ dashboardProto.createChart = function(element, chartRoot, add)
 	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
 	
 	if(add)
-		this._addChartCareStatus(chart);
+		this._addChartsCareStatus(chart);
 	
 	return chart;
 };
@@ -2910,12 +2916,7 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	}
 	
 	if(add)
-	{
-		for(let i=0; i<re.length; i++)
-		{
-			this._addChartCareStatus(re[i]);
-		}
-	}
+		this._addChartsCareStatus(re);
 	
 	return re;
 };
