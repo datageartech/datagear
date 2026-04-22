@@ -7381,6 +7381,17 @@ CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 			
 			let re = CF.compareLibVersion(lib1.version, lib2.version);
 			
+			//相同版本时，带有redirectVersion信息的应靠前，优先起作用
+			if(re == 0)
+			{
+				if(CF.isEmpty(lib1.redirectVersion) && CF.isEmpty(lib2.redirectVersion))
+					re = 0;
+				else if(CF.isEmpty(lib1.redirectVersion))
+					re = 1;
+				else if(CF.isEmpty(lib2.redirectVersion))
+					re = -1;
+			}
+			
 			if(re == 0)
 				re = lio2.priority - lio1.priority;
 			
