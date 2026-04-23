@@ -56,8 +56,6 @@
 			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-dashboard-listener' />", categories: ["body"]},
 		{name: "dg-api-version", value: "dg-api-version=",
 				displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-api-version' />", categories: ["html"]},
-		{name: "dg-dashboard-unimport", value: "dg-dashboard-unimport=",
-				displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-dashboard-unimport' />", categories: ["html"]},
 		{name: "dg-dashboard-var", value: "dg-dashboard-var=",
 			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-dashboard-var' />", categories: ["html"]},
 		{name: "dg-loadable-chart-widgets", value: "dg-loadable-chart-widgets=",
