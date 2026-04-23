@@ -6828,10 +6828,7 @@ CF.inflateUnloadedLibs = function(unloadeds, libs, renderContext, libPlugins, co
 	
 	for(let i=0; i<libs.length; i++)
 	{
-		let lib = libs[i];
-		
-		if(lib != null && CF.isString(lib))
-			lib = { name: lib };
+		let lib = CF.wrapRendererLib(libs[i]);
 		
 		if(lib == null || CF.isEmpty(lib.name))
 			continue;
@@ -6876,14 +6873,9 @@ CF.dependLibsOfLib = function(lib)
 	
 	for(let i=0; i<depends.length; i++)
 	{
-		let depend = depends[i];
-		let dependName = (depend == null ? null : (CF.isString(depend) ? depend : depend.name));
-		
-		if(CF.isEmpty(dependName))
-			continue;
-		
-		depend = (depend === dependName ? { name: dependName } : depend);
-		dependLibs.push(depend);
+		let depend = CF.wrapRendererLib(depends[i]);
+		if(depend != null)
+			dependLibs.push(depend);
 	}
 	
 	return dependLibs;
@@ -7457,9 +7449,11 @@ CF.LIB_PRIORITY_INPUT = 5;
 
 CF.inflateCandidateLibInfoInGlobalLib = function(libInfos, baseLib)
 {
-	for(let i=0; i<CF.globalLibs.length; i++)
+	var globalLibs = CF.globalLibs;
+	
+	for(let i=0; i<globalLibs.length; i++)
 	{
-		let lib = CF.globalLibs[i];
+		let lib = CF.wrapRendererLib(globalLibs[i]);
 		
 		if(CF.isCandidateLib(lib, baseLib))
 		{
@@ -7506,7 +7500,7 @@ CF.inflateCandidateLibInfoInInputLibs = function(libInfos, baseLib, inputLibs)
 	
 	for(let i=0; i<inputLibs.length; i++)
 	{
-		let lib = inputLibs[i];
+		let lib = CF.wrapRendererLib(inputLibs[i]);
 		
 		if(CF.isCandidateLib(lib, baseLib))
 		{
@@ -8179,21 +8173,30 @@ CF.rendererLib = function(renderer)
 			
 			for(let i=0; i<re.length; i++)
 			{
-				if(CF.isString(re[i]))
-					newRe[i] = { name: re[i] };
-				else
-					newRe[i] = re[i];
+				let lib = CF.wrapRendererLib(re[i]);
+				if(lib != null)
+					newRe.push(lib);
 			}
 			
 			re = newRe;
 		}
-		else if(CF.isString(re))
-		{
-			re = { name: re };
-		}
+		else
+			re = CF.wrapRendererLib(re);
 	}
 	
 	return re;
+};
+
+CF.wrapRendererLib = function(lib)
+{
+	if(lib == null)
+		return null;
+	
+	//库名称
+	if(CF.isString(lib))
+		lib = { name: lib };
+	
+	return lib;
 };
 
 //以http://或者https://开头的正则表达式
