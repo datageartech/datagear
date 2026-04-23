@@ -36,6 +36,8 @@
 			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-link' />", categories: ["div"]},
 		{name: "dg-chart-listener", value: "dg-chart-listener=",
 			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-listener' />", categories: ["body", "div"]},
+		{name: "dg-chart-local", value: "dg-chart-local=",
+			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-local' />", categories: ["div"]},
 		{name: "dg-chart-manual-render", value: "dg-chart-manual-render=\"true\"",
 			displayComment: "<@spring.message code='dashboard.codeEditor.attr.dg-chart-manual-render' />", categories: ["div"]},
 		{name: "dg-chart-map-urls", value: "dg-chart-map-urls=",
