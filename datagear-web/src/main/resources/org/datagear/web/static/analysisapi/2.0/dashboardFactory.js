@@ -71,14 +71,6 @@ var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttr
 /**看板状态常量*/
 var dashboardStatusConst = (DF.dashboardStatusConst || (DF.dashboardStatusConst = {}));
 
-/** 内置地图 */
-var builtinMaps = (DF.builtinMaps || (DF.builtinMaps = []));
-
-var builtinMapBaseURL = (DF.builtinMapBaseURL || (DF.builtinMapBaseURL = "/static/analysislib/geojson/"));
-
-/** 看板版本常量，参考：org.datagear.analysis.support.html.DashboardApiVersion */
-var apiVersion = (dashboardFactory.apiVersion || (dashboardFactory.apiVersion = { V1: "1.0", V2: "2.0" }));
-
 //----------------------------------------
 // chartStatusConst开始
 //----------------------------------------
@@ -963,27 +955,14 @@ dashboardProto._initRenderContext = function()
  */
 dashboardProto._initMapURLs = function()
 {
-	var mapURLs = {};
-	
-	for(let i=0; i<builtinMaps.length; i++)
-	{
-		let bm = builtinMaps[i];
-		let names = (CF.isArray(bm.name) ? bm.name : [ bm.name ]);
-		let map = bm.map;
-		let isRelativeMap = (map.charAt(0) !== '/');
-		
-		for(let j=0; j<names.length; j++)
-		{
-			mapURLs[names[j]] = (isRelativeMap ? builtinMapBaseURL+map : map);
-		}
-	}
-	
+	var mapURLs = null;
 	var mapURLsBody = CF.eleAttr(document.body, elementAttrConst.MAP_URLS);
 	
 	if(mapURLsBody)
 		mapURLs = CF.extend(mapURLs, CF.evalSilently(mapURLsBody, {}));
 	
-	this.mapURLs(mapURLs);
+	if(mapURLs != null)
+		this.mapURLs(mapURLs);
 };
 
 /**
@@ -1178,7 +1157,7 @@ dashboardProto.mapURLs = function(mapURLs)
 	if(arguments.length == 0)
 		return chartMapURLs;
 	else
-		CF.extend(chartMapURLs, mapURLs);
+		CF.extend(true, chartMapURLs, mapURLs);
 };
 
 /**
@@ -3634,168 +3613,6 @@ DF.fetchOptsOfPostForm = function(formData)
 DF.msgOfResponse = function(response)
 {
 	return (response.statusText ? response.statusText : response.status+"");
-};
-
-/**
- * 注册内置地图。
- * 
- * @param builtinMap 内置地图，格式支持：
-					{
-						//地图名、数组
-					  	name: "..."、["...", ...],
-						//地图文件路径，以'/'开头表示绝对路径，否则，表示相对于builtinMapBaseURL内路径
-						map: "...",
-						//可选，行政区划名称
-						adname: "...",
-						//可选，行政区划编码
-						"adcode": "...",
-						//可选，上级行政区划编码
-						"parent": "..." 
-					}、
-					[ { ... }, ... ]
- */
-DF.registerBuiltinMap = function(builtinMap)
-{
-	builtinMap = (CF.isArray(builtinMap) ? builtinMap : [ builtinMap ]);
-	
-	for(let i=0; i<builtinMap.length; i++)
-	{
-		let cm = builtinMap[i];
-		
-		if(cm == null || CF.isEmpty(cm.name) || CF.isEmpty(cm.map))
-			continue;
-		
-		cm = CF.extend(true, {}, builtinMap[i]);
-		
-		if(cm.adcode != null && cm.adname == null)
-			cm.adname = cm.adcode;
-		
-		//确保cm.name中包含cm.adcode
-		if(cm.adcode != null)
-		{
-			if(CF.isArray(cm.name))
-			{
-				if(CF.indexInArray(cm.name, cm.adcode) < 0)
-					cm.name.push(cm.adcode);
-			}
-			else
-			{
-				if(cm.name != cm.adcode)
-				{
-					cm.name = [ cm.name ];
-					cm.name.push(cm.adcode);
-				}
-			}
-		}
-		
-		builtinMaps.push(cm);
-	}
-};
-
-/**
- * 获取标准内置地图信息树形结构。
- * 返回一个数组，其中每个元素都可能是树形结构根节点，节点格式为：
- * {
- *   //地图名
- *   mapName: "...",
- *   //显示标签
- *   mapLabel: "...",
- *   //子节点，为null表示没有
- *   mapChildren: [ ... ],
- * }
- * 
- * @param listener 可选，节点监听器，格式为：
- * {
- *   //节点添加后置处理函数，parent为null表明节点添加到了rootArray中
- *   added: function(node, parent, rootArray){}
- * }
- */
-DF.getStdBuiltinMapTree = function(listener)
-{
-	var re = [];
-	
-	var nodeCache = {};
-	
-	for(let i=0; i<builtinMaps.length; i++)
-	{
-		let bm = builtinMaps[i];
-		
-		if(!bm.adname || !bm.adcode)
-			continue;
-		
-		//DF.registerBuiltinMap()函数已经确保了adcode可以用作地图名
-		//而且它是全局唯一的，最合适
-		let node = { mapName: bm.adcode, mapLabel: bm.adname };
-		let parentNode = (bm.parent ? nodeCache[bm.parent] : null);
-		let addTo = re;
-		
-		if(parentNode)
-		{
-			if(!parentNode.mapChildren)
-				parentNode.mapChildren = [];
-			
-			addTo = parentNode.mapChildren;
-		}
-		
-		//删除旧的
-		let existIdx = CF.indexInArrayOfProp(addTo, node.mapName, "mapName");
-		if(existIdx >= 0)
-			addTo.splice(existIdx, 1);
-		
-		addTo.push(node);
-		
-		if(listener && listener.added)
-			listener.added(node, parentNode, re);
-		
-		nodeCache[bm.adcode] = node;
-	}
-	
-	return re;
-};
-
-/**
- * 获取标准内置图表地图平铺数组。
- * 返回一个数组，其中元素格式为：
- * {
- *   //地图名
- *   mapName: "...",
- *   //显示标签
- *   mapLabel: "..."
- * }
- * 
- * @param listener 可选，节点监听器，格式为：
- * {
- *   //节点添加后置处理函数
- *   added: function(node, rootArray){}
- * }
- */
-DF.getStdBuiltinMapArray = function(listener)
-{
-	var re = [];
-	
-	for(let i=0; i<builtinMaps.length; i++)
-	{
-		let bm = builtinMaps[i];
-		
-		if(!bm.adname || !bm.adcode)
-			continue;
-		
-		//DF.registerBuiltinMap()函数已经确保了adcode可以用作地图名
-		//而且它是全局唯一的，最合适
-		let node = { mapName: bm.adcode, mapLabel: bm.adname };
-		
-		//删除旧的
-		let existIdx = CF.indexInArrayOfProp(re, node.mapName, "mapName");
-		if(existIdx >= 0)
-			re.splice(existIdx, 1);
-		
-		re.push(node);
-		
-		if(listener && listener.added)
-			listener.added(node, re);
-	}
-	
-	return re;
 };
 
 })(this, window);

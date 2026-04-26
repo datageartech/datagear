@@ -113,18 +113,25 @@ var chartStatusConst = (CF.chartStatusConst || (CF.chartStatusConst = {}));
 var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
 
 /**
- * 图表地图映射表。
- * 地图类图表的地图名称与其地图数据地址映射表，用于为chart.mapURL()函数提供支持。
- * 此映射表默认为空，用户可以填充它以扩展地图名映射。
- * 映射表格式示例：
+ * 图表地图集合，用于为chart.mapURL()函数提供支持，默认为空，用户可以填充它以扩展地图。
+ * 集合格式：
  * {
- *   //绝对路径映射
- *   china: "/map/china.json",
- *   //相对路径映射
- *   beijing: "map/beijing.json",
- *   //相对路径映射
- *   shanghai: "../map/shanghai.json",
- *   //自定义映射逻辑函数，用于处理未设置对应关系的映射
+ *   //可选，地图名/URL映射表
+ *   maps:
+ *   {
+ *     "...":
+ *     {
+ *       //地图URL，"/aaa/bbb.json" 系统绝对路径；"aaa/bbb.json" 相对路径；"../aaa/bbb.json" 相对路径
+ *       url: "..."
+ *     },
+ *     ...
+ *   },
+ *   //可选，地图名处理函数，处理后再去maps中查找
+ *   mapName: function(name)
+ *   {
+ *     return "...";
+ *   },
+ *   //可选，自定义映射逻辑函数，用于处理未设置对应关系的映射
  *   mapURL: function(name)
  *   {
  *     return "...";
@@ -398,6 +405,30 @@ CF.registerGlobalLib = function(lib)
 	else
 	{
 		globalLibs.push(lib);
+	}
+};
+
+/**
+ * 注册地图URL信息。
+ * 
+ * @param name 地图名、数组
+ * @param value 地图URL信息，格式参考chartMapURLs.maps
+ */
+CF.registerMapURL = function(name, value)
+{
+	var maps = (chartMapURLs.maps || (chartMapURLs.maps = {}));
+	
+	if(CF.isArray(name))
+	{
+		for(let i=0; i<name.length; i++)
+		{
+			let ni = name[i];
+			maps[ni] = value;
+		}
+	}
+	else
+	{
+		maps[name] = value;
 	}
 };
 
@@ -2725,9 +2756,11 @@ chartProto.resultDatasOf = function(chartResult, dataSetBind)
  */
 chartProto.mapURL = function(name)
 {
-	var url = chartMapURLs[name];
+	var key = (chartMapURLs.mapName != null ? chartMapURLs.mapName(name) : name);
+	var mapInfo = (chartMapURLs.maps ? chartMapURLs.maps[key] : null);
+	var url = (mapInfo ? mapInfo.url : null);
 	
-	if(CF.isEmpty(url) && CF.isFunction(chartMapURLs.mapURL))
+	if(CF.isEmpty(url) && chartMapURLs.mapURL != null)
 		url = chartMapURLs.mapURL(name);
 	
 	url = this.contextURL(CF.isEmpty(url) ? name : url);

@@ -8609,7 +8609,7 @@ EU.initChartMap = function(chart, options)
 /**
  * 获取默认地图名。
  * 地图类图表需要默认地图执行render初始渲染。
- * 注意：返回的默认地图名应是在dashboardFactory.registerBuiltinMap()中注册的。
+ * 注意：返回的默认地图名应是已通过chartFactory.registerMapURL()中注册的。
  */
 EU.defaultMapName = function()
 {
