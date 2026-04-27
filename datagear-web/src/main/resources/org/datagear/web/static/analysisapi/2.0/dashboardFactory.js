@@ -1144,7 +1144,7 @@ dashboardProto.listener = function(listener)
 /**
  * 获取/设置地图处理器。
  * 
- * @param mapHandler 可选，要设置的地图处理器，仅会覆盖同名的地图URL映射，格式参考CF.mapHandler、CF.toStdMapHandler()说明
+ * @param mapHandler 可选，要设置的地图处理器，格式参考CF.registerMapHandler()说明
  * @returns 要获取的地图处理器
  */
 dashboardProto.mapHandler = function(mapHandler)
@@ -1153,8 +1153,7 @@ dashboardProto.mapHandler = function(mapHandler)
 		return CF.mapHandler;
 	else
 	{
-		mapHandler = CF.toStdMapHandler(mapHandler);
-		CF.extend(true, CF.mapHandler, mapHandler);
+		CF.registerMapHandler(mapHandler);
 	}
 };
 

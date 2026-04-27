@@ -436,9 +436,11 @@ CF.registerMapURL = function(name, value)
 };
 
 /**
- * 转换为标准的地图处理器对象，将mapHandler.values中的字符串值转换为：{ url: "..." }格式
+ * 注册地图处理器
+ * 
+ * @param mapHandler 地图处理器，格式同CF.mapHandler，另外mapHandler.values中的值可以是url字符串，mapHandler.values中新的值将添加，同名值将覆盖
  */
-CF.toStdMapHandler = function(mapHandler)
+CF.registerMapHandler = function(mapHandler)
 {
 	if(mapHandler && mapHandler.values != null)
 	{
@@ -455,7 +457,7 @@ CF.toStdMapHandler = function(mapHandler)
 		}
 	}
 	
-	return mapHandler;
+	CF.extend(true, CF.mapHandler, mapHandler);
 };
 
 /**
