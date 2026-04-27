@@ -2489,7 +2489,7 @@ DE.getChartConfigInputOptionsForMap = function(asTree)
 	
 	var customOptions = [];
 	
-	var mapHandler = CF.eleAttr(document.body, CF.elementAttrConst.MAP_URLS);
+	var mapHandler = CF.eleAttr(document.body, CF.elementAttrConst.MAP_HANDLER);
 	mapHandler = (mapHandler ? CF.evalSilently(mapHandler, {}) : {});
 	
 	if(mapHandler.values != null)

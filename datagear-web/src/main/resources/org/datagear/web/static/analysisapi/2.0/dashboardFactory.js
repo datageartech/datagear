@@ -29,8 +29,8 @@
  * 此看板工厂支持为<body>元素添加elementAttrConst.DASHBOARD_LISTENER属性，用于指定看板监听器JS对象名，
  * 看板监听器格式参考dashboard.listener()函数说明。
  * 
- * 此看板工厂支持为<body>元素添加elementAttrConst.MAP_URLS属性，用于扩展或替换内置地图，格式为：
- * {customMap:'map/custom.json', china: 'map/myChina.json'}
+ * 此看板工厂支持为<body>元素添加elementAttrConst.MAP_HANDLER属性，用于扩展或替换内置地图，格式为：
+ * { values: { customMap:'map/custom.json', china: 'map/myChina.json' } }
  * 
  * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chart.links()函数说明。
  * 
@@ -98,8 +98,8 @@ elementAttrConst.DASHBOARD_LISTENER = "dg-dashboard-listener";
 /**看板表单*/
 elementAttrConst.DASHBOARD_FORM = "dg-dashboard-form";
 
-/**图表地图URL映射表*/
-elementAttrConst.MAP_URLS = "dg-chart-map-urls";
+/**地图处理器*/
+elementAttrConst.MAP_HANDLER = "dg-map-handler";
 
 /**图表联动*/
 elementAttrConst.LINK = "dg-chart-link";
@@ -947,12 +947,12 @@ dashboardProto._initRenderContext = function()
 };
 
 /**
- * 初始化地图URL映射表。
- * 它将body元素的elementAttrConst.MAP_URLS属性值设置为地图URL映射表。
+ * 初始化地图处理器。
+ * 它将body元素的elementAttrConst.MAP_HANDLER属性值设置为地图处理器。
  */
 dashboardProto._initMapHandler = function()
 {
-	var mapHandler = CF.eleAttr(document.body, elementAttrConst.MAP_URLS);
+	var mapHandler = CF.eleAttr(document.body, elementAttrConst.MAP_HANDLER);
 	
 	if(mapHandler)
 		mapHandler = CF.evalSilently(mapHandler, {});

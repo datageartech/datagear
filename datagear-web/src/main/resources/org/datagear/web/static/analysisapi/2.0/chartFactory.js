@@ -114,7 +114,7 @@ var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
 
 /**
  * 图表地图处理器，用于为chart.mapURL()函数提供支持，默认为空，用户可以填充它以扩展地图。
- * 集合格式：
+ * 处理器格式：
  * {
  *   //可选，地图名/URL值映射表
  *   values:
@@ -131,7 +131,7 @@ var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
  *   {
  *     return "...";
  *   },
- *   //可选，自定义映射逻辑函数，用于处理未设置对应关系的映射
+ *   //可选，当values中未找到时，获取指定名称的地图URL
  *   url: function(name)
  *   {
  *     return "...";
