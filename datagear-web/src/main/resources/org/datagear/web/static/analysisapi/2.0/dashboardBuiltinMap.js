@@ -187,14 +187,14 @@ DF.resolveStdBuiltinMapInfo = function()
 {
 	var re = [];
 	
-	var maps = (CF.chartMapURLs.maps || {});
+	var values = (CF.mapHandler.values || {});
 	
-	for(let name in maps)
+	for(let name in values)
 	{
-		let info = maps[name];
+		let value = values[name];
 		
-		if(!CF.isEmpty(info.adcode) && name === info.adcode)
-			re.push(info);
+		if(!CF.isEmpty(value.adcode) && name === value.adcode)
+			re.push(value);
 	}
 	
 	re.sort(function(a, b)

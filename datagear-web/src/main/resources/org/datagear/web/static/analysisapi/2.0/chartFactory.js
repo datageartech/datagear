@@ -113,11 +113,11 @@ var chartStatusConst = (CF.chartStatusConst || (CF.chartStatusConst = {}));
 var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
 
 /**
- * 图表地图集合，用于为chart.mapURL()函数提供支持，默认为空，用户可以填充它以扩展地图。
+ * 图表地图处理器，用于为chart.mapURL()函数提供支持，默认为空，用户可以填充它以扩展地图。
  * 集合格式：
  * {
- *   //可选，地图名/URL映射表
- *   maps:
+ *   //可选，地图名/URL值映射表
+ *   values:
  *   {
  *     "...":
  *     {
@@ -126,19 +126,19 @@ var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
  *     },
  *     ...
  *   },
- *   //可选，地图名处理函数，处理后再去maps中查找
- *   mapName: function(name)
+ *   //可选，地图名处理函数，处理后再去values中查找
+ *   name: function(name)
  *   {
  *     return "...";
  *   },
  *   //可选，自定义映射逻辑函数，用于处理未设置对应关系的映射
- *   mapURL: function(name)
+ *   url: function(name)
  *   {
  *     return "...";
  *   }
  * }
  */
-var chartMapURLs = (CF.chartMapURLs || (CF.chartMapURLs = {}));
+var mapHandler = (CF.mapHandler || (CF.mapHandler = {}));
 
 /** 渲染上下文属性名常量 */
 var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttrConst = {}));
@@ -412,24 +412,50 @@ CF.registerGlobalLib = function(lib)
  * 注册地图URL信息。
  * 
  * @param name 地图名、数组
- * @param value 地图URL信息，格式参考chartMapURLs.maps
+ * @param value 地图URL对象/字符串、null，格式参考mapHandler.values
  */
 CF.registerMapURL = function(name, value)
 {
-	var maps = (chartMapURLs.maps || (chartMapURLs.maps = {}));
+	var values = (mapHandler.values || (mapHandler.values = {}));
+	
+	if(value != null && CF.isString(value))
+		value = { url: value };
 	
 	if(CF.isArray(name))
 	{
 		for(let i=0; i<name.length; i++)
 		{
 			let ni = name[i];
-			maps[ni] = value;
+			values[ni] = value;
 		}
 	}
 	else
 	{
-		maps[name] = value;
+		values[name] = value;
 	}
+};
+
+/**
+ * 转换为标准的地图处理器对象，将mapHandler.values中的字符串值转换为：{ url: "..." }格式
+ */
+CF.toStdMapHandler = function(mapHandler)
+{
+	if(mapHandler && mapHandler.values != null)
+	{
+		mapHandler = CF.extend(true, {}, mapHandler);
+		
+		for(let name in mapHandler.values)
+		{
+			let value = mapHandler.values[name];
+			if(value != null && CF.isString(value))
+			{
+				value = { url: value };
+				mapHandler.values[name] = value;
+			}
+		}
+	}
+	
+	return mapHandler;
 };
 
 /**
@@ -2750,18 +2776,18 @@ chartProto.resultDatasOf = function(chartResult, dataSetBind)
 
 /**
  * 获取指定地图名对应的地图数据地址。
- * 此函数先从CF.chartMapURLs查找对应的地址，如果没有，则直接返回name作为地址。
+ * 此函数先从CF.mapHandler查找对应的地址，如果没有，则直接返回name作为地址。
  * 
  * @param name 地图名称
  */
 chartProto.mapURL = function(name)
 {
-	var key = (chartMapURLs.mapName != null ? chartMapURLs.mapName(name) : name);
-	var mapInfo = (chartMapURLs.maps ? chartMapURLs.maps[key] : null);
-	var url = (mapInfo ? mapInfo.url : null);
+	var key = (mapHandler.name != null ? mapHandler.name(name) : name);
+	var value = (mapHandler.values ? mapHandler.values[key] : null);
+	var url = (value ? value.url : null);
 	
-	if(CF.isEmpty(url) && chartMapURLs.mapURL != null)
-		url = chartMapURLs.mapURL(name);
+	if(CF.isEmpty(url) && mapHandler.url != null)
+		url = mapHandler.url(name);
 	
 	url = this.contextURL(CF.isEmpty(url) ? name : url);
 	

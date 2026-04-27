@@ -2487,26 +2487,24 @@ DE.getChartConfigInputOptionsForMap = function(asTree)
 		re = DF.getStdBuiltinMapArray(listener);
 	}
 	
-	var mapURLs = [];
+	var customOptions = [];
 	
-	var mapURLsBody = CF.eleAttr(document.body, CF.elementAttrConst.MAP_URLS);
-	mapURLsBody = (mapURLsBody ? CF.evalSilently(mapURLsBody, {}) : {});
+	var mapHandler = CF.eleAttr(document.body, CF.elementAttrConst.MAP_URLS);
+	mapHandler = (mapHandler ? CF.evalSilently(mapHandler, {}) : {});
 	
-	for(let p in mapURLsBody)
+	if(mapHandler.values != null)
 	{
-		let v = mapURLsBody[p];
-		
-		if(p && CF.isString(v))
+		for(let p in mapHandler.values)
 		{
 			if(asTree)
-				mapURLs.push({ key: p, label: p });
+				customOptions.push({ key: p, label: p });
 			else
-				mapURLs.push({ name: p, value: p });
+				customOptions.push({ name: p, value: p });
 		}
 	}
 	
-	if(mapURLs.length > 0)
-		re = mapURLs.concat(re);
+	if(customOptions.length > 0)
+		re = customOptions.concat(re);
 	
 	return re;
 };

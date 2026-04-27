@@ -62,9 +62,6 @@ var chartStatusConst = (CF.chartStatusConst || (CF.chartStatusConst = {}));
 /**HTML元素属性常量*/
 var elementAttrConst = (CF.elementAttrConst || (CF.elementAttrConst = {}));
 
-/** 图表地图映射表，详细格式参考CF.chartMapURLs */
-var chartMapURLs = (CF.chartMapURLs || (CF.chartMapURLs = {}));
-
 /** 渲染上下文属性名常量 */
 var renderContextAttrConst = (CF.renderContextAttrConst || (CF.renderContextAttrConst = {}));
 
@@ -932,7 +929,7 @@ dashboardProto.init = function()
 	
 	this._initRenderContext();
 	this._initListener();
-	this._initMapURLs();
+	this._initMapHandler();
 	this._initUpdater();
 	this._initChartResizeHandler();
 	this._initUnloadDashboardHandler();
@@ -953,16 +950,14 @@ dashboardProto._initRenderContext = function()
  * 初始化地图URL映射表。
  * 它将body元素的elementAttrConst.MAP_URLS属性值设置为地图URL映射表。
  */
-dashboardProto._initMapURLs = function()
+dashboardProto._initMapHandler = function()
 {
-	var mapURLs = null;
-	var mapURLsBody = CF.eleAttr(document.body, elementAttrConst.MAP_URLS);
+	var mapHandler = CF.eleAttr(document.body, elementAttrConst.MAP_URLS);
 	
-	if(mapURLsBody)
-		mapURLs = CF.extend(mapURLs, CF.evalSilently(mapURLsBody, {}));
+	if(mapHandler)
+		mapHandler = CF.evalSilently(mapHandler, {});
 	
-	if(mapURLs != null)
-		this.mapURLs(mapURLs);
+	this.mapHandler(mapHandler);
 };
 
 /**
@@ -1147,17 +1142,20 @@ dashboardProto.listener = function(listener)
 };
 
 /**
- * 获取/设置地图URL映射表。
- *
- * @param mapURLs 可选，要设置的地图URL映射表，仅会覆盖同名的地图URL映射，格式为参考CF.chartMapURLs说明
- * @returns 要获取的地图URL映射表
+ * 获取/设置地图处理器。
+ * 
+ * @param mapHandler 可选，要设置的地图处理器，仅会覆盖同名的地图URL映射，格式参考CF.mapHandler、CF.toStdMapHandler()说明
+ * @returns 要获取的地图处理器
  */
-dashboardProto.mapURLs = function(mapURLs)
+dashboardProto.mapHandler = function(mapHandler)
 {
 	if(arguments.length == 0)
-		return chartMapURLs;
+		return CF.mapHandler;
 	else
-		CF.extend(true, chartMapURLs, mapURLs);
+	{
+		mapHandler = CF.toStdMapHandler(mapHandler);
+		CF.extend(true, CF.mapHandler, mapHandler);
+	}
 };
 
 /**
