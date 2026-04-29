@@ -2303,14 +2303,13 @@ chartProto._dataSetBindOf = function(dataSetBind, nullable)
  * 
  * @param name 数据集参数标识：参数名、参数索引、参数对象
  * @param value 可选，要设置的参数值，不设置则执行获取操作
- * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
  */
-chartProto.dataSetParamValueFirst = function(name, value, convert)
+chartProto.dataSetParamValueFirst = function(name, value)
 {
 	if(arguments.length <= 1)
 		return this.dataSetParamValue(0, name);
 	else
-		this.dataSetParamValue(0, name, value, convert);
+		this.dataSetParamValue(0, name, value);
 };
 
 /**
@@ -2319,9 +2318,8 @@ chartProto.dataSetParamValueFirst = function(name, value, convert)
  * @param dataSetBind 指定数据集绑定或其索引
  * @param name 数据集参数标识：参数名、参数索引、参数对象
  * @param value 可选，要设置的参数值，不设置则执行获取操作
- * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
  */
-chartProto.dataSetParamValue = function(dataSetBind, name, value, convert)
+chartProto.dataSetParamValue = function(dataSetBind, name, value)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
@@ -2345,7 +2343,7 @@ chartProto.dataSetParamValue = function(dataSetBind, name, value, convert)
 		var myParamValues = {};
 		myParamValues[name] = value;
 		
-		this.dataSetParamValues(dataSetBind, myParamValues, true, convert);
+		this.dataSetParamValues(dataSetBind, myParamValues, true);
 	}
 };
 
@@ -2354,14 +2352,13 @@ chartProto.dataSetParamValue = function(dataSetBind, name, value, convert)
  * 
  * @param paramValues 可选，要设置的参数名/值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
  * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
- * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
  */
-chartProto.dataSetParamValuesFirst = function(paramValues, increment, convert)
+chartProto.dataSetParamValuesFirst = function(paramValues, increment)
 {
 	if(arguments.length == 0)
 		return this.dataSetParamValues(0);
 	else
-		this.dataSetParamValues(0, paramValues, increment, convert);
+		this.dataSetParamValues(0, paramValues, increment);
 };
 
 /**
@@ -2370,10 +2367,9 @@ chartProto.dataSetParamValuesFirst = function(paramValues, increment, convert)
  * @param dataSetBind 指定数据集绑定或其索引
  * @param paramValues 可选，要设置的参数值集对象，或者是与数据集参数数组元素一一对应的参数值数组，不设置则执行获取操作
  * @param increment 可选，是否增量设置，保留未在paramValues中出现的参数值，默认值为：false
- * @param convert 可选，设置操作时是否将value转换为符合参数类型，默认值为：false
  * @returns 要获取的参数值集，不会null
  */
-chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment, convert)
+chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	
@@ -2393,7 +2389,6 @@ chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment, co
 	{
 		paramValues = (paramValues == null ? {} : paramValues);
 		increment = (increment === undefined ? false : increment);
-		convert = (convert === undefined ? false : convert);
 		
 		var params;
 		
@@ -2406,25 +2401,10 @@ chartProto.dataSetParamValues = function(dataSetBind, paramValues, increment, co
 			for(var i=0; i<len; i++)
 			{
 				var name = params[i].name;
-				paramValuesObj[name] = (convert ? CF.convertDataSetParamValue(params[i], paramValues[i]) : paramValues[i]);
+				paramValuesObj[name] = paramValues[i];
 			}
 			
 			paramValues = paramValuesObj;
-		}
-		else
-		{
-			if(convert)
-			{
-				params = this.dataSetParams(dataSetBind);
-				for(var i=0; i<params.length; i++)
-				{
-					var name = params[i].name;
-					if(paramValues[name] !== undefined)
-					{
-						paramValues[name] = CF.convertDataSetParamValue(params[i], paramValues[name]);
-					}
-				}
-			}
 		}
 		
 		if(increment)
