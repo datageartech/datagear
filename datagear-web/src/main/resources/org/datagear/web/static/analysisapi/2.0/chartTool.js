@@ -61,6 +61,8 @@ TOOL.labels = (TOOL.labels ||
 	dataDetail: "数据明细"
 });
 
+TOOL.FORM_DATASETPARAMS = "dataSetParams";
+
 /**
  * 渲染数据集参数表单。
  * 
@@ -109,6 +111,7 @@ TOOL.renderDataSetParamForm = function(parent, dataSetParams, options)
 	}
 	
 	CF.eleAddClass(form, "dg-dspform");
+	CF.eleData(form, TOOL.FORM_DATASETPARAMS, dataSetParams);
 	
 	//创建表单样式表
 	if(options.chartTheme)
@@ -1403,7 +1406,7 @@ TOOL.validateDspForm = function(form)
  * 获取数据集参数表单的参数值对象。
  * 
  * 图表参数化数据集要求这里的表单返回对象必须符合以下规则：
- * 1. 所有输入项必须在返回对象中出现；（避免出现因未出现而导致无法覆盖上次设置数据集参数值的情况）
+ * 1. 所有输入项必须在返回对象中出现；（避免因未出现而导致无法覆盖上次设置数据集参数值的情况）
  * 2. 如果返回对象的某个属性值为空字符串，则应将其置为null；（表示未填写，用于支持参数化数据集的“<#if param??>”语法）
  * 3. 如果返回对象的某个属性值为空数组，则应将其置为null；（表示未填写，用于支持参数化数据集的“<#if param??>”语法）
  * 4. 如果返回对象的某个属性值为数组，则元素不允许出现null；
@@ -1478,6 +1481,20 @@ TOOL.getDataSetParamFormData = function(form)
 		let v = re[name];
 		
 		if(CF.isEmpty(v))
+			re[name] = null;
+	}
+	
+	var dataSetParams = (CF.eleData(form, TOOL.FORM_DATASETPARAMS) || []);
+	for(let i=0; i<dataSetParams.length; i++)
+	{
+		let dsp = dataSetParams[i];
+		let name = dsp.name;
+		
+		//转换类型
+		re[name] = CF.convertDataSetParamValue(dsp, re[name]);
+		
+		//未出现的应设为null
+		if(re[name] === undefined)
 			re[name] = null;
 	}
 	
@@ -2224,12 +2241,10 @@ TOOL.openChartToolParamPanel = function(boxEle, chart)
 				
 				let chartOptions = chart.options();
 				let builtinTool = CF.builtinOptionValue(chartOptions, builtinOptionNames.builtinTool);
-				let convertParamFormValue = (builtinTool ? builtinTool.convertParamFormValue : undefined);
-				convertParamFormValue = (convertParamFormValue === undefined ? true : convertParamFormValue);
 				
 				for(let i=0; i<paramValuess.length; i++)
 				{
-					TOOL.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues, convertParamFormValue);
+					TOOL.dataSetBindParamValues(chart, paramValuess[i].index, paramValuess[i].paramValues);
 				}
 				
 				let doRefresh = true;
@@ -2294,10 +2309,10 @@ TOOL.openChartToolParamPanel = function(boxEle, chart)
 	TOOL.focusOnFirstInput(CF.eleOfSelector("form:first-child", panel));
 };
 
-TOOL.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues, convert)
+TOOL.dataSetBindParamValues = function(chart, dataSetBindIndex, paramValues)
 {
 	//这里设置参数应采用inflate模式，因为数据集允许隐式参数（未明确定义数据集参数的参数化语法），这里不应清除它们
-	chart.dataSetParamValues(dataSetBindIndex, paramValues, true, convert);
+	chart.dataSetParamValues(dataSetBindIndex, paramValues, true);
 };
 
 TOOL.toggleParamFormContentByIgnoreFetch = function(panel, section, chart, dataSetBindIndex)

@@ -8265,15 +8265,20 @@ CF.HTTP_S_PREFIX_REGEX = /^(http:\/\/|https:\/\/)/i;
 
 /**
  * 尝试将给定值转换为符合数据集参数类型
+ * 
+ * @param type CF.DataSetParamType.*类型字符串、{ type: "..." }
+ * @param value 值
  */
-CF.convertDataSetParamValue = function(dataSetParam, value)
+CF.convertDataSetParamValue = function(type, value)
 {
-	if(!dataSetParam || value == null)
+	type = (type && type.type !== undefined ? type.type : type);
+	
+	if(type == null || value == null)
 		return value;
 	
 	var re = value;
 	
-	if(CF.DataSetParamType.OBJECT == dataSetParam.type)
+	if(CF.DataSetParamType.OBJECT == type)
 	{
 		if(CF.isString(value))
 		{
@@ -8295,14 +8300,14 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 		
 		for(var i=0; i<value.length; i++)
 		{
-			re[i] = CF.convertDataSetParamValue(dataSetParam, value[i]);
+			re[i] = CF.convertDataSetParamValue(type, value[i]);
 		}
 	}
-	else if(CF.DataSetParamType.STRING == dataSetParam.type)
+	else if(CF.DataSetParamType.STRING == type)
 	{
 		re = (CF.isString(value) ? value : value.toString());
 	}
-	else if(CF.DataSetParamType.BOOLEAN == dataSetParam.type)
+	else if(CF.DataSetParamType.BOOLEAN == type)
 	{
 		if(value === true || value === false)
 		{
@@ -8316,7 +8321,7 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 		else
 			re = (value ? true : false);
 	}
-	else if(CF.DataSetParamType.NUMBER == dataSetParam.type)
+	else if(CF.DataSetParamType.NUMBER == type)
 	{
 		if(CF.isNumber(value))
 		{
@@ -8333,7 +8338,7 @@ CF.convertDataSetParamValue = function(dataSetParam, value)
 				re = re.valueOf();
 		}
 	}
-	else if(CF.DataSetParamType.INTEGER == dataSetParam.type)
+	else if(CF.DataSetParamType.INTEGER == type)
 	{
 		if(CF.isNumber(value))
 		{

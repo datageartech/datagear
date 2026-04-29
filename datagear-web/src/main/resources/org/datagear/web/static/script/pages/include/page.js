@@ -4517,11 +4517,9 @@ $.inflateChartForm = function(po)
 				$(".dg-dspform-foot button", this).addClass("p-button p-component");
 				$.focusOnFirstInput(this);
 			},
-			submit: function()
+			submit: function(formData)
 			{
-				var paramValues = chartFactory.chartTool.getDataSetParamFormData(this);
-				dataSetBind.query.paramValues = paramValues;
-				
+				dataSetBind.query.paramValues = formData;
 				po.vueUnref(po.concatPid("paramPanelEle")).hide();
 			}
 		};

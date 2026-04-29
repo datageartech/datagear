@@ -310,10 +310,9 @@
 				$(".dg-dspform-foot button", this).addClass("p-button p-component");
 				$.focusOnFirstInput(this);
 			},
-			submit: function()
+			submit: function(formData)
 			{
-				pm.previewQuery.paramValues = chartFactory.chartTool.getDataSetParamFormData(this);
-				
+				pm.previewQuery.paramValues = formData;
 				po.inParamFormSubmitAction(true);
 				po.triggerPreview();
 			}
