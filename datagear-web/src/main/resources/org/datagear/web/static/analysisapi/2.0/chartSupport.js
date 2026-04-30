@@ -5475,13 +5475,13 @@ SPT.tableRenderer = function(plugin, config)
 						serverSidePaging.param(data, chart);
 					else
 					{
-						let paramBatchSet =
+						let paramBatchConfig =
 						{
 							target: chart,
 							data: serverSidePaging.param
 						};
 						
-						chart.dashboard().batchSetDataSetParamValues(data, paramBatchSet, data);
+						chart.dashboard().batchSetDataSetParamValues(data, paramBatchConfig, data);
 					}
 					
 					chart.refresh();
