@@ -34,8 +34,11 @@
 		<div class="page-form-content flex-grow-1 px-2 py-1 flex flex-column overflow-y-auto">
 			<div class="field grid flex-grow-0 mb-1">
 				<div class="field-label col-12 mb-0 flex flex-row align-items-center gap-1">
-					<label>
-						{{fm.name}}
+					<label class="flex align-items-center gap-1">
+						<span>{{fm.name}}</span>
+						<p-tag severity="warning" rounded title="<@spring.message code='dashboardApiVersion' />">
+							<small>{{fm.apiVersion}}</small>
+						</p-tag>
 					</label>
        				<p-button type="button" icon="pi pi-info-circle" size="small" rounded v-if="fm.description"
 						@click="onShowDashboardDesc" class="p-button-secondary p-button-text p-1">

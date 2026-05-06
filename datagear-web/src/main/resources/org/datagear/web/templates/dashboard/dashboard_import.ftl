@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign DashboardApiVersion=statics['org.datagear.analysis.support.html.DashboardApiVersion']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -83,6 +84,17 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}apiVersion" class="field-label col-12 mb-2 md:col-3 md:mb-0"
+					title="<@spring.message code='dashboard.apiVersion.desc' />">
+					<@spring.message code='apiVersion' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<p-dropdown id="${pid}apiVersion" v-model="fm.apiVersion"
+						:options="pm.dashboardApiVersionOptions" option-label="name" option-value="value" class="input w-full">
+					</p-dropdown>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}ownerProject" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='ownerProject' />
 				</label>
@@ -131,6 +143,18 @@
 	po.submitUrl = "/dashboard/"+po.submitAction;
 	
 	var availableCharsetNames = $.unescapeHtmlForJson(<@writeJson var=availableCharsetNames />);
+
+	po.dashboardApiVersionOptions =
+	[
+		{
+			name: "<@spring.message code='DashboardApiVersion.V2' />",
+			value: "${DashboardApiVersion.V2}"
+		},
+		{
+			name: "<@spring.message code='DashboardApiVersion.V1' />",
+			value: "${DashboardApiVersion.V1}"
+		}
+	];
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
 	formModel.analysisProject = (formModel.analysisProject == null ? {} : formModel.analysisProject);
@@ -138,6 +162,7 @@
 	
 	po.vuePageModel(
 	{
+		dashboardApiVersionOptions: po.dashboardApiVersionOptions,
 		availableCharsetNames: availableCharsetNames,
 		uploadFileUrl: po.concatContextPath("/dashboard/uploadImportFile")
 	});

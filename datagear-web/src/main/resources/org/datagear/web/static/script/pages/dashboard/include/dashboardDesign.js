@@ -427,8 +427,14 @@ $.inflateDashboardDesignEditor = function(po)
 			apiVersion = (matches && matches.length > 1 ? matches[1] : null);
 		}
 		
+		if($.isEmpty(apiVersion))
+		{
+			var fm = po.vueFormModel();
+			apiVersion = fm.apiVersion;
+		}
+		
 		//默认应设为：org.datagear.analysis.support.html.DashboardApiVersion.V1
-		if(apiVersion == null)
+		if($.isEmpty(apiVersion))
 			apiVersion = po.apiVersionV1;
 		
 		return apiVersion;

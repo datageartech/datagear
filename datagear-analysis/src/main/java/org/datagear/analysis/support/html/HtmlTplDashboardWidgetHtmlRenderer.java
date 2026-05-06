@@ -510,7 +510,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	{
 		dashboard.setVarName(dashboardMeta.getDashboardVar());
 		dashboard.setLoadChartPolicy(dashboardMeta.getLoadChartPolicy());
-		dashboard.setApiVersion(dashboardMeta.getApiVersion());
+
+		if (!StringUtil.isEmpty(dashboardMeta.getApiVersion()))
+			dashboard.setApiVersion(dashboardMeta.getApiVersion());
 	}
 
 	/**

@@ -72,7 +72,8 @@ $.vueComponents = function()
 		"p-badge": primevue.badge,
 		"p-accordion": primevue.accordion,
 		"p-accordion-tab": primevue.accordiontab,
-		"p-treetable": primevue.treetable
+		"p-treetable": primevue.treetable,
+		"p-tag": primevue.tag
 	};
 	
 	return components;

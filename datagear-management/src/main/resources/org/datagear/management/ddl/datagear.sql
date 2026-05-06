@@ -603,8 +603,6 @@ ALTER TABLE DATAGEAR_SCHEMA ADD COLUMN SCHEMA_SCHM_NAME VARCHAR(100);
 /*看板表添加版本列*/
 ALTER TABLE DATAGEAR_HTML_DASHBOARD ADD COLUMN HD_VERSION VARCHAR(50);
 
-UPDATE DATAGEAR_HTML_DASHBOARD SET HD_VERSION = '1.0' WHERE HD_VERSION IS NULL OR HD_VERSION = '';
-
 
 /*-----------------------------------------*/
 /*--version[5.3.1], DO NOT EDIT THIS LINE!*/
@@ -668,9 +666,6 @@ VALUES('MYSQL_DISABLE_LOADLOCAL_3','jdbc:mysql:*','false',999,'true',CURRENT_TIM
 /*-----------------------------------------*/
 /*--version[6.0.0], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
-
-/*2025-09-15*/
-/*DATAGEAR_HTML_DASHBOARD表的HD_VERSION列已弃用，暂不删除，留着备用*/
 
 /*2025-12-26*/
 /*添加数据集参数标签列*/

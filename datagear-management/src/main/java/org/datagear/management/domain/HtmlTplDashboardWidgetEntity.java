@@ -22,6 +22,7 @@ import java.util.Date;
 
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.analysis.support.JsonSupport;
+import org.datagear.analysis.support.html.DashboardApiVersion;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.StringUtil;
@@ -68,6 +69,8 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	public HtmlTplDashboardWidgetEntity()
 	{
 		super();
+		// 默认值必须设为V1，以兼容旧版逻辑
+		setApiVersion(DashboardApiVersion.V1);
 	}
 
 	public HtmlTplDashboardWidgetEntity(String id, String template, HtmlTplDashboardWidgetRenderer renderer,
@@ -76,6 +79,8 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 		super(id, template, renderer, resManager);
 		this.name = name;
 		this.createUser = createUser;
+		// 默认值必须设为V1，以兼容旧版逻辑
+		setApiVersion(DashboardApiVersion.V1);
 	}
 
 	public String getName()
@@ -146,6 +151,14 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	public void setDescription(String description)
 	{
 		this.description = description;
+	}
+
+	@Override
+	public void setApiVersion(String apiVersion)
+	{
+		// 默认值必须设为V1，以兼容旧版逻辑
+		apiVersion = DashboardApiVersion.normalize(apiVersion, apiVersion);
+		super.setApiVersion(apiVersion);
 	}
 
 	@Override

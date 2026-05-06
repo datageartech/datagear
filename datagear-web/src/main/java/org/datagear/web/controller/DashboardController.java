@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.TplDashboardWidgetResManager;
+import org.datagear.analysis.support.html.ApiVersionAware;
 import org.datagear.analysis.support.html.DashboardApiVersion;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
@@ -185,6 +186,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		HtmlTplDashboardWidgetEntity entity = createInstance();
 		entity.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		entity.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
+		entity.setApiVersion(DashboardApiVersion.V2);
 
 		return entity;
 	}
@@ -711,6 +713,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	protected DashboardImportForm createImportForm(HttpServletRequest request, Model model)
 	{
 		DashboardImportForm form = new DashboardImportForm();
+		form.setApiVersion(DashboardApiVersion.V2);
 		return form;
 	}
 
@@ -896,6 +899,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		entity.setTemplateSplit(form.getTemplate());
 		entity.setTemplateEncoding(templateEncoding);
 		entity.setName(form.getName());
+		entity.setApiVersion(form.getApiVersion());
 		entity.setAnalysisProject(form.getAnalysisProject());
 		inflateCreateUserAndTime(entity, user);
 		inflateSaveEntity(request, user, entity);
@@ -1438,7 +1442,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		}
 	}
 
-	public static class DashboardImportForm implements ControllerForm
+	public static class DashboardImportForm implements ControllerForm, ApiVersionAware
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -1447,6 +1451,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		private String template;
 
 		private String dashboardFileName;
+
+		private String apiVersion;
 
 		private String zipFileNameEncoding;
 
@@ -1485,6 +1491,17 @@ public class DashboardController extends AbstractDataAnalysisController
 		public void setDashboardFileName(String dashboardFileName)
 		{
 			this.dashboardFileName = dashboardFileName;
+		}
+
+		@Override
+		public String getApiVersion()
+		{
+			return apiVersion;
+		}
+
+		public void setApiVersion(String apiVersion)
+		{
+			this.apiVersion = apiVersion;
 		}
 
 		public String getZipFileNameEncoding()

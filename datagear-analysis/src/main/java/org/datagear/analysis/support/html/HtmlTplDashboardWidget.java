@@ -35,13 +35,20 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboardWidget extends TplDashboardWidget
+public class HtmlTplDashboardWidget extends TplDashboardWidget implements ApiVersionAware
 {
 	private static final long serialVersionUID = 1L;
 
 	private transient HtmlTplDashboardWidgetRenderer renderer;
 
 	private transient TplDashboardWidgetResManager resManager;
+
+	/**
+	 * API版本。
+	 * 
+	 * @since 6.0.0
+	 */
+	private String apiVersion = null;
 
 	public HtmlTplDashboardWidget()
 	{
@@ -83,7 +90,18 @@ public class HtmlTplDashboardWidget extends TplDashboardWidget
 	{
 		this.resManager = resManager;
 	}
-	
+
+	@Override
+	public String getApiVersion()
+	{
+		return apiVersion;
+	}
+
+	public void setApiVersion(String apiVersion)
+	{
+		this.apiVersion = apiVersion;
+	}
+
 	@Override
 	public HtmlTplDashboard render(TplDashboardRenderContext renderContext) throws RenderException
 	{
