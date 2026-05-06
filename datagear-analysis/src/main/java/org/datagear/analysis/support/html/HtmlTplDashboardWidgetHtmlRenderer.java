@@ -57,7 +57,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  *     dg-dashboard-factory="..."
  *     dg-dashboard-var="..."
  *     dg-dashboard-unimport="..."
- *     dg-loadable-chart-widgets="..."
+ *     dg-load-chart-policy="..."
  *     dg-dashboard-code="..."
  *     dg-api-version="..."
  *     dg-dashboard-auto-render="..."（已废弃）
@@ -87,7 +87,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardRenderContext#getImportList()}），多个以“,”隔开
  * </p>
  * <p>
- * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadableChartWidgets}），多个以“,”隔开
+ * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadChartPolicy}），多个以“,”隔开
  * </p>
  * <p>
  * <code>html dg-dashboard-code</code>：选填，自定义看板脚本写入内容，可选值参考下面的<code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>
@@ -138,16 +138,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT = DASHBOARD_ELEMENT_ATTR_PREFIX
 			+ "dashboard-unimport";
 
-	/** {@code dg-loadable-chart-widgets} */
-	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
-			+ "loadable-chart-widgets";
-
 	/**
-	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 * {@code dg-load-chart-policy}
+	 * 
+	 * @since 6.0.0
 	 */
-	@Deprecated
-	public static final String DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER = DASHBOARD_ELEMENT_ATTR_PREFIX
-			+ "dashboard-auto-render";
+	public static final String DEFAULT_ATTR_NAME_LOAD_CHART_POLICY = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "load-chart-policy";
 
 	/** {@code dg-dashboard-code} */
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_CODE = DASHBOARD_ELEMENT_ATTR_PREFIX
@@ -161,6 +158,20 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	/** {@code dg-chart-auto-resize} */
 	public static final String ATTR_NAME_CHART_AUTO_RESIZE = DASHBOARD_ELEMENT_ATTR_PREFIX + "chart-auto-resize";
+
+	/**
+	 * @deprecated {@code dg-loadable-chart-widgets}特性已被{@linkplain #DEFAULT_ATTR_NAME_LOAD_CHART_POLICY}取代，这里保留仅用于兼容旧版
+	 */
+	@Deprecated
+	public static final String DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "loadable-chart-widgets";
+
+	/**
+	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，这里保留仅用于兼容旧版
+	 */
+	@Deprecated
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER = DASHBOARD_ELEMENT_ATTR_PREFIX
+			+ "dashboard-auto-render";
 
 	public static final String DASHBOARD_CODE_ATTR_VALUE_INSTANCE = "instance";
 	
@@ -177,16 +188,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	/** 属性名：看板导入排除项 */
 	private String attrNameDashboardUnimport = DEFAULT_ATTR_NAME_DASHBOARD_UNIMPORT;
 
-	/** 属性名：异步加载图表部件模式 */
-	private String attrNameLoadableChartWidgets = DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS;
-
 	/**
-	 * 属性名：是否自动执行看板渲染函数
+	 * 属性名：异步加载图表策略
 	 * 
-	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 * @since 6.0.0
 	 */
-	@Deprecated
-	private String attrNameDashboardAutoRender = DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER;
+	private String attrNameLoadChartPolicy = DEFAULT_ATTR_NAME_LOAD_CHART_POLICY;
 
 	/** 属性名：写入看板脚本标识属性 */
 	private String attrNameDashboardCode = DEFAULT_ATTR_NAME_DASHBOARD_CODE;
@@ -199,6 +206,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 
 	/** 属性名：图表部件ID */
 	private String attrNameChartWidget = DEFAULT_ATTR_NAME_CHART_WIDGET;
+
+	/**
+	 * 属性名：是否自动执行看板渲染函数
+	 * 
+	 * @deprecated {@code dg-dashboard-auto-render}特性已在4.4.0版本废弃，后续版本将移除
+	 */
+	@Deprecated
+	private String attrNameDashboardAutoRender = DEFAULT_ATTR_NAME_DASHBOARD_AUTO_RENDER;
 
 	/**全局JS对象（通常是：window）的局部变量名*/
 	private String localGlobalVarName = Global.PRODUCT_NAME_EN_LC + "Global" + IDUtil.toStringOfMaxRadix();
@@ -245,14 +260,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		this.attrNameDashboardUnimport = attrNameDashboardUnimport;
 	}
 
-	public String getAttrNameLoadableChartWidgets()
+	public String getAttrNameLoadChartPolicy()
 	{
-		return attrNameLoadableChartWidgets;
+		return attrNameLoadChartPolicy;
 	}
 
-	public void setAttrNameLoadableChartWidgets(String attrNameLoadableChartWidgets)
+	public void setAttrNameLoadChartPolicy(String attrNameLoadChartPolicy)
 	{
-		this.attrNameLoadableChartWidgets = attrNameLoadableChartWidgets;
+		this.attrNameLoadChartPolicy = attrNameLoadChartPolicy;
 	}
 
 	/**
@@ -501,7 +516,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 	protected void inflateDashboardPrerequired(HtmlTplDashboard dashboard, TplDashboardMeta dashboardMeta)
 	{
 		dashboard.setVarName(dashboardMeta.getDashboardVar());
-		dashboard.setLoadableChartWidgets(dashboardMeta.getLoadableChartWidgets());
+		dashboard.setLoadChartPolicy(dashboardMeta.getLoadChartPolicy());
 		dashboard.setApiVersion(dashboardMeta.getApiVersion());
 	}
 
@@ -804,8 +819,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		/** 图表信息 */
 		private List<TplChartMeta> chartMetas = new ArrayList<>();
 		
-		/** 异步加载信息 */
-		private LoadableChartWidgets loadableChartWidgets = null;
+		/** 异步加载规则 */
+		private LoadChartPolicy loadChartPolicy = null;
 		
 		/**
 		 * 标签开始前置插入内容：标签索引 -&gt; 插入内容
@@ -948,14 +963,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 			this.chartMetas.add(tplChartMeta);
 		}
 
-		public LoadableChartWidgets getLoadableChartWidgets()
+		public LoadChartPolicy getLoadChartPolicy()
 		{
-			return loadableChartWidgets;
+			return loadChartPolicy;
 		}
 
-		public void setLoadableChartWidgets(LoadableChartWidgets loadableChartWidgets)
+		public void setLoadChartPolicy(LoadChartPolicy loadChartPolicy)
 		{
-			this.loadableChartWidgets = loadableChartWidgets;
+			this.loadChartPolicy = loadChartPolicy;
 		}
 
 		public Map<Integer, List<TplDashboardInserter>> getBeforeWriteTagStartInsertersMap()
@@ -1591,11 +1606,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 				{
 					this.filterContext.getDashboardMeta().setDashboardUnimport(trim(entry.getValue()));
 				}
-				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameLoadableChartWidgets()
-						.equalsIgnoreCase(name))
+				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameLoadChartPolicy().equalsIgnoreCase(name)
+						|| HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_ATTR_NAME_LOADABLE_CHART_WIDGETS
+								.equalsIgnoreCase(name))
 				{
 					this.filterContext.getDashboardMeta()
-							.setLoadableChartWidgets(resolveLoadableChartWidgets(trim(entry.getValue())));
+							.setLoadChartPolicy(resolveLoadChartPolicy(trim(entry.getValue())));
 				}
 				else if (HtmlTplDashboardWidgetHtmlRenderer.this.getAttrNameDashboardCode().equalsIgnoreCase(name))
 				{
@@ -1616,30 +1632,30 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 					this.filterContext.getDashboardMeta());
 		}
 		
-		protected LoadableChartWidgets resolveLoadableChartWidgets(String str)
+		protected LoadChartPolicy resolveLoadChartPolicy(String str)
 		{
 			if(StringUtil.isEmpty(str))
 			{
 				return null;
 			}
-			else if(LoadableChartWidgets.PATTERN_ALL.equalsIgnoreCase(str))
+			else if(LoadChartPolicy.PATTERN_ALL.equalsIgnoreCase(str))
 			{
-				return LoadableChartWidgets.all();
+				return LoadChartPolicy.all();
 			}
-			else if(LoadableChartWidgets.PATTERN_NONE.equalsIgnoreCase(str))
+			else if(LoadChartPolicy.PATTERN_NONE.equalsIgnoreCase(str))
 			{
-				return LoadableChartWidgets.none();
+				return LoadChartPolicy.none();
 			}
-			else if(LoadableChartWidgets.PATTERN_PERMITTED.equalsIgnoreCase(str))
+			else if(LoadChartPolicy.PATTERN_PERMITTED.equalsIgnoreCase(str))
 			{
-				return LoadableChartWidgets.permitted();
+				return LoadChartPolicy.permitted();
 			}
 			else
 			{
 				List<String> widgetIdList = StringUtil.splitWithTrim(str, ",");
 				Set<String> widgetIdSet = new HashSet<String>(widgetIdList);
 				
-				return LoadableChartWidgets.list(widgetIdSet);
+				return LoadChartPolicy.list(widgetIdSet);
 			}
 		}
 		

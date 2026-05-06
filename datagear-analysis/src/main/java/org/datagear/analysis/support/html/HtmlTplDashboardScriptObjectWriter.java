@@ -94,16 +94,16 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 			setCharts(Collections.EMPTY_LIST);
 			setApiVersion(dashboard.getApiVersion());
 			
-			LoadableChartWidgets lcws = dashboard.getLoadableChartWidgets();
-			setLoadableChartWidgets(lcws == null ? null : new LoadableChartWidgetsJson(lcws));
+			LoadChartPolicy lp = dashboard.getLoadChartPolicy();
+			setLoadChartPolicy(lp == null ? null : new LoadChartPolicyJson(lp));
 		}
 	}
 	
-	protected static class LoadableChartWidgetsJson extends LoadableChartWidgets
+	protected static class LoadChartPolicyJson extends LoadChartPolicy
 	{
 		private static final long serialVersionUID = 1L;
 
-		public LoadableChartWidgetsJson(LoadableChartWidgets pattern)
+		public LoadChartPolicyJson(LoadChartPolicy pattern)
 		{
 			super(pattern.getPattern());
 			setChartWidgetIds(pattern.getChartWidgetIds());

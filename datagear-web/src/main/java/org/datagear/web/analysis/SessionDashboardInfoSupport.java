@@ -28,8 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
-import org.datagear.analysis.support.html.LoadableChartWidgets;
-import org.datagear.web.util.ExpiredSessionAttrManager;
+import org.datagear.analysis.support.html.LoadChartPolicy;
 import org.datagear.web.util.ExpiredSessionAttrManager.ExpiredSessionAttr;
 
 /**
@@ -119,7 +118,7 @@ public class SessionDashboardInfoSupport
 		/** 看板部件ID */
 		private final String dashboardWidgetId;
 
-		private final LoadableChartWidgets loadableChartWidgets;
+		private final LoadChartPolicy loadChartPolicy;
 
 		/** 图表ID-图表部件ID映射表 */
 		private final Map<String, String> chartIdToChartWidgetIds = new HashMap<String, String>();
@@ -132,7 +131,7 @@ public class SessionDashboardInfoSupport
 		{
 			this.dashboardId = dashboard.getId();
 			this.dashboardWidgetId = dashboard.getWidget().getId();
-			this.loadableChartWidgets = dashboard.getLoadableChartWidgets();
+			this.loadChartPolicy = dashboard.getLoadChartPolicy();
 
 			if (dashboard.hasChart())
 			{
@@ -158,9 +157,9 @@ public class SessionDashboardInfoSupport
 		/**
 		 * @return 可能为{@code null}
 		 */
-		public LoadableChartWidgets getLoadableChartWidgets()
+		public LoadChartPolicy getLoadChartPolicy()
 		{
-			return loadableChartWidgets;
+			return loadChartPolicy;
 		}
 
 		public synchronized Map<String, String> getChartIdToChartWidgetIds()

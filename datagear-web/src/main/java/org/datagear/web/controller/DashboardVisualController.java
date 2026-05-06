@@ -52,7 +52,7 @@ import org.datagear.analysis.support.html.HtmlTitleHandler;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.analysis.support.html.LoadableChartWidgets;
+import org.datagear.analysis.support.html.LoadChartPolicy;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DashboardShareSet;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
@@ -960,7 +960,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 
 		try
 		{
-			handleLoadChartPattern(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets,
+			handleLoadChartPolicy(user, dashboardInfo, dashboardWidget, chartWidgetIds, chartWidgets,
 					dashboardWidgetRenderer, loadChartForEditor);
 
 			for (int i = 0; i < chartWidgetIds.length; i++)
@@ -987,38 +987,38 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		}
 	}
 
-	protected void handleLoadChartPattern(User currentUser, DashboardInfo dashboardInfo,
+	protected void handleLoadChartPolicy(User currentUser, DashboardInfo dashboardInfo,
 			HtmlTplDashboardWidgetEntity dashboardWidget, String[] chartWidgetIds, HtmlChartWidget[] chartWidgets,
 			HtmlTplDashboardWidgetRenderer renderer, boolean loadChartForEditor) throws Throwable
 	{
-		LoadableChartWidgets lcws = null;
+		LoadChartPolicy policy = null;
 
 		// 看板可视编辑模式时，插入图表操作不应受看板内定义的异步加载权限控制
 		if (loadChartForEditor)
 		{
 			// 看板展示时是根据创建用户权限加载图表的，这里也应保持一致
 			if (Authorization.canEdit(dashboardWidget.getDataPermission()))
-				lcws = LoadableChartWidgets.all();
+				policy = LoadChartPolicy.all();
 			else
-				lcws = LoadableChartWidgets.none();
+				policy = LoadChartPolicy.none();
 		}
 		else
 		{
-			lcws = dashboardInfo.getLoadableChartWidgets();
+			policy = dashboardInfo.getLoadChartPolicy();
 
 			// 默认应设为permitted，防止用户在看板内异步加载任意图表部件
-			if (lcws == null)
-				lcws = LoadableChartWidgets.permitted();
+			if (policy == null)
+				policy = LoadChartPolicy.permitted();
 		}
 
 		// 可异步加载看板创建者有权限的所有图表
-		if (lcws.isPatternAll())
+		if (policy.isPatternAll())
 		{
 			// 使用看板创建用户
 			ChartWidgetSourceContext.set(createChartWidgetSourceContextForCreator(dashboardWidget));
 		}
 		// 不可异步加载任何图表
-		else if (lcws.isPatternNone())
+		else if (policy.isPatternNone())
 		{
 			for (int i = 0; i < chartWidgetIds.length; i++)
 			{
@@ -1029,19 +1029,19 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			}
 		}
 		// 仅可异步加载当前用户有权限的图表
-		else if (lcws.isPatternPermitted())
+		else if (policy.isPatternPermitted())
 		{
 			// 使用当前用户
 			ChartWidgetSourceContext.set(new ChartWidgetSourceContext(currentUser));
 		}
 		// 仅可异步加载看板创建者有权限的、且在指定列表内的图表
-		else if (lcws.isPatternList())
+		else if (policy.isPatternList())
 		{
 			for (int i = 0; i < chartWidgetIds.length; i++)
 			{
 				String chartWidgetId = chartWidgetIds[i];
 
-				if (!lcws.inList(chartWidgetId))
+				if (!policy.inList(chartWidgetId))
 				{
 					PermissionDeniedException e = new PermissionDeniedException("Permission denied");
 					chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
@@ -1059,7 +1059,7 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 				String chartWidgetId = chartWidgetIds[i];
 
 				PermissionDeniedException e = new PermissionDeniedException(
-						"Permission denied for unknown pattern '" + lcws.getPattern() + "'");
+						"Permission denied for unknown pattern '" + policy.getPattern() + "'");
 				chartWidgets[i] = renderer.getHtmlChartWidgetForException(chartWidgetId, e);
 			}
 		}

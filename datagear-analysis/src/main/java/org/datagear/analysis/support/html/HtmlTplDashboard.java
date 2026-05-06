@@ -34,10 +34,10 @@ public class HtmlTplDashboard extends TplDashboard implements ApiVersionAware
 	/** 看板JS对象变量名 */
 	private String varName;
 	
-	private LoadableChartWidgets loadableChartWidgets = null;
+	private LoadChartPolicy loadChartPolicy = null;
 
 	/**
-	 * 看板采用的页面端API版本，比如：{@code 1.0}、{@code 2.0}，{@code null}或空表示未定义
+	 * 看板采用的页面端API版本，参考{@linkplain DashboardApiVersion}，{@code null}或空表示未定义
 	 */
 	private String apiVersion = null;
 
@@ -78,14 +78,14 @@ public class HtmlTplDashboard extends TplDashboard implements ApiVersionAware
 		this.varName = varName;
 	}
 
-	public LoadableChartWidgets getLoadableChartWidgets()
+	public LoadChartPolicy getLoadChartPolicy()
 	{
-		return loadableChartWidgets;
+		return loadChartPolicy;
 	}
 
-	public void setLoadableChartWidgets(LoadableChartWidgets loadableChartWidgets)
+	public void setLoadChartPolicy(LoadChartPolicy loadChartPolicy)
 	{
-		this.loadableChartWidgets = loadableChartWidgets;
+		this.loadChartPolicy = loadChartPolicy;
 	}
 
 	@Override

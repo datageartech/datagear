@@ -41,7 +41,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
-import org.datagear.analysis.support.html.LoadableChartWidgets;
+import org.datagear.analysis.support.html.LoadChartPolicy;
 import org.datagear.analysis.support.html.SimpleHtmlTplOption;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
@@ -359,8 +359,8 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
 		String htmlTitle = entity.getName();
 		// 图表展示页面应禁用异步加载功能，避免越权访问隐患
-		String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadableChartWidgets() + "=\""
-				+ LoadableChartWidgets.PATTERN_NONE + "\" "
+		String htmlAttr = this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameLoadChartPolicy() + "=\""
+				+ LoadChartPolicy.PATTERN_NONE + "\" "
 				+ this.htmlTplDashboardWidgetHtmlRenderer.getAttrNameApiVersion() + "=\"" + apiVersion + "\"";
 		// 看板页面端API-1.0中默认不自动调整尺寸，需要明确设置
 		String bodyAttr = (isV1 ? HtmlTplDashboardWidgetHtmlRenderer.ATTR_NAME_CHART_AUTO_RESIZE + "=\"true\"" : "");

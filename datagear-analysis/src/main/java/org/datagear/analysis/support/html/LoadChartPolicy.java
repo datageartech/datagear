@@ -22,12 +22,12 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * 看板可在页面通过JS异步加载的图表部件。
+ * 看板页面通过JS异步加载图表策略。
  * 
  * @author datagear@163.com
  * 
  */
-public class LoadableChartWidgets implements Serializable
+public class LoadChartPolicy implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -47,7 +47,7 @@ public class LoadableChartWidgets implements Serializable
 	
 	private Set<String> chartWidgetIds = Collections.emptySet();
 
-	public LoadableChartWidgets(String pattern)
+	public LoadChartPolicy(String pattern)
 	{
 		super();
 		this.pattern = pattern;
@@ -101,24 +101,24 @@ public class LoadableChartWidgets implements Serializable
 		return this.chartWidgetIds.contains(chartWidgetId);
 	}
 	
-	public static LoadableChartWidgets all()
+	public static LoadChartPolicy all()
 	{
-		return new LoadableChartWidgets(PATTERN_ALL);
+		return new LoadChartPolicy(PATTERN_ALL);
 	}
 	
-	public static LoadableChartWidgets none()
+	public static LoadChartPolicy none()
 	{
-		return new LoadableChartWidgets(PATTERN_NONE);
+		return new LoadChartPolicy(PATTERN_NONE);
 	}
 	
-	public static LoadableChartWidgets permitted()
+	public static LoadChartPolicy permitted()
 	{
-		return new LoadableChartWidgets(PATTERN_PERMITTED);
+		return new LoadChartPolicy(PATTERN_PERMITTED);
 	}
 	
-	public static LoadableChartWidgets list(Set<String> chartWidgetIds)
+	public static LoadChartPolicy list(Set<String> chartWidgetIds)
 	{
-		LoadableChartWidgets re = new LoadableChartWidgets(PATTERN_LIST);
+		LoadChartPolicy re = new LoadChartPolicy(PATTERN_LIST);
 		re.setChartWidgetIds(chartWidgetIds);
 		
 		return re;

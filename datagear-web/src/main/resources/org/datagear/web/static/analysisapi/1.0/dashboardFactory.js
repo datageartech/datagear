@@ -456,13 +456,13 @@
 		dashboard._widget = dashboard.widget;
 		dashboard._template = dashboard.template;
 		dashboard._varName = dashboard.varName;
-		dashboard._loadableChartWidgets = dashboard.loadableChartWidgets;
+		dashboard._loadChartPolicy = dashboard.loadChartPolicy;
 		dashboard._apiVersion = dashboard.apiVersion;
 		
 		delete dashboard.widget;
 		delete dashboard.template;
 		delete dashboard.varName;
-		delete dashboard.loadableChartWidgets;
+		delete dashboard.loadChartPolicy;
 		delete dashboard.apiVersion;
 	};
 	
