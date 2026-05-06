@@ -32,7 +32,6 @@ import java.util.Set;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -60,7 +59,6 @@ import org.springframework.cache.Cache.ValueWrapper;
  *     dg-load-chart-policy="..."
  *     dg-dashboard-code="..."
  *     dg-api-version="..."
- *     dg-dashboard-auto-render="..."（已废弃）
  *     &gt;
  * ...
  * &lt;head&gt;
@@ -87,17 +85,13 @@ import org.springframework.cache.Cache.ValueWrapper;
  * <code>html dg-dashboard-unimport</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardRenderContext#getImportList()}），多个以“,”隔开
  * </p>
  * <p>
- * <code>html dg-loadable-charts</code>：选填，定义看板网页允许在页面端通过JS异步加载的{@linkplain ChartWidget}模式（{@linkplain LoadChartPolicy}），多个以“,”隔开
+ * <code>html dg-load-chart-policy</code>：选填，定义看板网页允许在页面端通过JS异步加载图表策略，另参考{@linkplain LoadChartPolicy}
  * </p>
  * <p>
  * <code>html dg-dashboard-code</code>：选填，自定义看板脚本写入内容，可选值参考下面的<code>&lt;script dg-dashboard-code="..."&gt;&lt;/script&gt;</code>
  * </p>
  * <p>
- * <code>html dg-api-version</code>：选填，自定义看板页面端API版本，比如：{@code 1.0}、{@code 2.0}
- * </p>
- * <p>
- * <code>html dg-dashboard-auto-render</code>：已在4.4.0版本废弃，选填，定义看板网页是否自动执行渲染函数，可选值：{@code "true"}
- * 是；{@code "false"} 否。默认值为：{@code "true"}
+ * <code>html dg-api-version</code>：选填，自定义看板页面端API版本，另参考{@linkplain DashboardApiVersion}
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
@@ -111,8 +105,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * {@code "instance"} ：不仅写入调用看板初始化函数的代码，不写入调用看板渲染函数的代码； <br>
  * {@code "init"} ：仅写入调用看板初始化函数的代码，不写入调用看板渲染函数的代码； <br>
  * {@code "render"} ：写入调用看板初始化函数的代码，写入调用看板渲染函数的代码； <br>
- * {@code 其他}
- * ：由<code>&lt;html&gt;</code>上的<code>dg-dashboard-code</code>、<code>dg-dashboard-auto-render</code>决定。
+ * {@code 其他} ：由<code>&lt;html&gt;</code>上的<code>dg-dashboard-code</code>决定。
  * </p>
  * 
  * @author datagear@163.com
