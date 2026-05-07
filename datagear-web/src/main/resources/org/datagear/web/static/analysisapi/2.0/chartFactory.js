@@ -2532,7 +2532,7 @@ chartProto._clearLiveValue = function()
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param fieldsOwner 可选，数据集绑定或其索引、数据集、父级数据集字段，默认值为：dataSetBind
- * @param dataSign 与this.pluginDataSignNested()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
  * @return 数据集字段、null
  */
 chartProto.dataSetFieldOfSign = function(dataSetBind, fieldsOwner, dataSign)
@@ -2556,7 +2556,7 @@ chartProto.dataSetFieldOfSign = function(dataSetBind, fieldsOwner, dataSign)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param fieldsOwner 可选，数据集绑定或其索引、数据集、父级数据集字段，默认值为：dataSetBind
- * @param dataSign 与this.pluginDataSignNested()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集字段
  * @return []
  */
 chartProto.dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign)
@@ -2578,7 +2578,7 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign, c
 	var re = [];
 	
 	var fields = this.dataSetFields(fieldsOwner);
-	var dataSignObj = this.pluginDataSignNested(dataSign);
+	var dataSignObj = this.pluginDataSign(dataSign);
 	
 	fields = this.sortDataSetFields(dataSetBind, fields);
 	
@@ -2959,13 +2959,13 @@ chartProto.dataSetFields = function(owner)
 };
 
 /**
- * 获取指定标识的数据集字段。
+ * 获取指定标识的数据集字段，不会深度查找。
  * 
  * @param owner 数据集绑定或其索引、数据集、父级数据集字段
  * @param identity 数据集字段标识：字段名、字段索引、字段对象（将直接返回）
  * @returns 数据集字段，没有找到则返回null
  */
-chartProto.dataSetField = function(owner, identity)
+chartProto.dataSetFieldFlat = function(owner, identity)
 {
 	//字段对象
 	if(this._isDataSetFieldObj(identity))
@@ -2976,13 +2976,13 @@ chartProto.dataSetField = function(owner, identity)
 };
 
 /**
- * 嵌套查找指定标识的数据集字段。
+ * 深度查找指定标识的数据集字段。
  * 
  * @param owner 数据集绑定或其索引、数据集、父级数据集字段
  * @param identity 数据集字段标识：字段全名、字段索引、字段对象（将直接返回），或者由字段名/字段索引/字段对象组成的层级数组（数组索引表示查找层级）
  * @returns 数据集字段，没有找到则返回null
  */
-chartProto.dataSetFieldNested = function(owner, identity)
+chartProto.dataSetField = function(owner, identity)
 {
 	//字段对象
 	if(this._isDataSetFieldObj(identity))
@@ -3077,7 +3077,7 @@ chartProto._isDataSetFieldObj = function(o)
 
 chartProto._dataSetFieldNestedNonNull = function(dataSetBind, identity)
 {
-	var field = this.dataSetFieldNested(dataSetBind, identity);
+	var field = this.dataSetField(dataSetBind, identity);
 	
 	if(field == null)
 		throw new Error(CF.chartLogInfo(this) + " no DataSetField found for : " + identity);
@@ -3101,7 +3101,7 @@ chartProto._fullnameOfFieldNonNull = function(field)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetFieldNested()函数的identity参数相同
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param alias 可选，要设置的别名，不设置则执行获取操作
  * @returns 要获取的别名，不会为null
  */
@@ -3135,7 +3135,7 @@ chartProto.dataSetFieldAlias = function(dataSetBind, field, alias)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetFieldNested()函数的identity参数相同
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param order 可选，要设置的排序数值，不设置则执行获取操作
  * @returns 要获取的排序数值，没有设置过则返回null
  */
@@ -3264,7 +3264,7 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 设置操作应在chart.render()函数执行前调用。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetFieldNested()函数的identity参数相同
+ * @param field 与this.dataSetField()函数的identity参数相同
  * @param dataSign 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
  * @returns 数据标记名字符串数组，空数组表示没有
  */
@@ -3614,7 +3614,7 @@ chartProto.dataSetBindAt = function(index)
  * 获取全部主件数据集绑定，或者设置了指定数据标记的全部主件数据集绑定。
  * 主件数据集绑定的用途是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSignNested()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns []，空数组表示没有主件数据集绑定
  */
 chartProto.dataSetBindsMain = function(dataSign)
@@ -3628,7 +3628,7 @@ chartProto.dataSetBindsMain = function(dataSign)
  * 获取第一个主件数据集绑定，或者设置了指定数据标记的第一个主件数据集绑定。
  * 主件数据集绑定的用途是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSignNested()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns 数据集绑定、null
  */
 chartProto.dataSetBindMain = function(dataSign)
@@ -3643,7 +3643,7 @@ chartProto.dataSetBindMain = function(dataSign)
  * 获取全部附件数据集绑定，或者设置了指定数据标记的全部附件数据集绑定。
  * 附件数据集绑定的用途不是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSignNested()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns []，空数组表示没有附件数据集绑定
  */
 chartProto.dataSetBindsAttachment = function(dataSign)
@@ -3657,7 +3657,7 @@ chartProto.dataSetBindsAttachment = function(dataSign)
  * 获取第一个附件数据集绑定，或者设置了指定数据标记的第一个附件数据集绑定。
  * 附件数据集绑定的用途不是绘制图表。
  * 
- * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSignNested()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
+ * @param dataSign 可选，如果设置，表示按指定数据集标记筛选，与this.pluginDataSign()函数的identity参数相同，为null表示筛选无任何标记的数据集绑定
  * @returns 数据集绑定、null
  */
 chartProto.dataSetBindAttachment = function(dataSign)
@@ -3673,7 +3673,7 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 	var re = [];
 	
 	var dataSetBinds = this.dataSetBinds();
-	var dataSignObj = (dataSign === false ? null : this.pluginDataSignNested(dataSign));
+	var dataSignObj = (dataSign === false ? null : this.pluginDataSign(dataSign));
 	
 	for(let i=0; i<dataSetBinds.length; i++)
 	{
@@ -3804,13 +3804,13 @@ chartProto.pluginDataSigns = function(owner)
 };
 
 /**
- * 获取图表插件指定标识的数据标记。
+ * 获取图表插件指定标识的数据标记，不会深度查找。
  * 
  * @param identity 数据标记标识：名称、索引数值、数据标记对象（将直接返回）
  * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
-chartProto.pluginDataSign = function(identity, dataSigns)
+chartProto.pluginDataSignFlat = function(identity, dataSigns)
 {
 	if(identity == null)
 		return null;
@@ -3827,13 +3827,13 @@ chartProto.pluginDataSign = function(identity, dataSigns)
 };
 
 /**
- * 嵌套查找图表插件指定标识的数据标记。
+ * 深度查找图表插件指定标识的数据标记。
  * 
  * @param identity 数据标记标识：全名、索引数值、数据标记对象（将直接返回），或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
  * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
-chartProto.pluginDataSignNested = function(identity, dataSigns)
+chartProto.pluginDataSign = function(identity, dataSigns)
 {
 	if(identity == null)
 		return null;
@@ -3969,7 +3969,7 @@ chartProto._fullnameOfDataSignNonNull = function(dataSign)
  * 判断数据集是否有指定数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param dataSign 与this.pluginDataSignNested()函数的identity参数相同，为null表示匹配无任何标记的
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示匹配无任何标记的
  * @returns true、false
  */
 chartProto.isDataSetSigned = function(dataSetBind, dataSign)
@@ -3981,7 +3981,7 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
 	if(dataSign == null && CF.isEmpty(dss))
 		return true;
 	
-	var dataSignObj = this.pluginDataSignNested(dataSign);
+	var dataSignObj = this.pluginDataSign(dataSign);
 	
 	if(dataSignObj == null)
 		return false;
@@ -3995,8 +3995,8 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
  * 判断数据集字段是否有指定数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param field 与this.dataSetFieldNested()函数的identity参数相同
- * @param dataSign 与this.pluginDataSignNested()函数的identity参数相同，为null表示匹配无任何标记的
+ * @param field 与this.dataSetField()函数的identity参数相同
+ * @param dataSign 与this.pluginDataSign()函数的identity参数相同，为null表示匹配无任何标记的
  * @returns true、false
  */
 chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
@@ -4007,7 +4007,7 @@ chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
 	if(dataSign == null && CF.isEmpty(fieldSigns))
 		return true;
 	
-	var dataSignObj = this.pluginDataSignNested(dataSign);
+	var dataSignObj = this.pluginDataSign(dataSign);
 	
 	if(dataSignObj == null)
 		return false;

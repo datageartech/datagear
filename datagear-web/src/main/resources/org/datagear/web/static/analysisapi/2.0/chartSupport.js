@@ -5605,7 +5605,7 @@ SPT.tableRenderer = function(plugin, config)
 					}
 					
 					if(recordsTotal == null && serverSidePaging.totalFieldName != null
-						&& chart.dataSetField(dsbs[i], serverSidePaging.totalFieldName) != null)
+						&& chart.dataSetFieldFlat(dsbs[i], serverSidePaging.totalFieldName) != null)
 					{
 						var colValues = chart.resultColumnArrayDatas(result, serverSidePaging.totalFieldName);
 						recordsTotal = SPT.findNonNull(colValues);
