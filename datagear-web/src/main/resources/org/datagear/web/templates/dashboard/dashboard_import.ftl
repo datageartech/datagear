@@ -124,8 +124,6 @@
 						<@spring.message code='dashboard.import.notice.1' />
 						<br>
 						<@spring.message code='dashboard.import.notice.2' />
-						<br>
-						<@spring.message code='dashboard.import.notice.3' />
 					</small>
 		        </div>
 			</div>
