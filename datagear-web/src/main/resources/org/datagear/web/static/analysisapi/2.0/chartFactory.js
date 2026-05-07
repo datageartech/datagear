@@ -7461,7 +7461,8 @@ CF.findBestLibInfo = function(libInfos, acceptVersion, libInfosSorted)
 			if(redirectLibInfo != null)
 				return redirectLibInfo;
 		}
-		else if(CF.isValidLoadableLib(lib))
+		
+		if(CF.isValidLoadableLib(lib))
 		{
 			return libInfo;
 		}
