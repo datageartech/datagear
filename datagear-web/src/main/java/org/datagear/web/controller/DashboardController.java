@@ -439,10 +439,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 	protected SimpleHtmlTplOption buildDftSimpleHtmlTplOption(HtmlTplDashboardWidgetEntity entity)
 	{
-		HtmlTplDashboardWidgetHtmlRenderer renderer = getHtmlTplDashboardWidgetHtmlRenderer();
-
 		SimpleHtmlTplOption tplOption = new SimpleHtmlTplOption();
-		tplOption.setHtmlAttr(renderer.getAttrNameApiVersion() + "=\"" + DashboardApiVersion.V2 + "\"");
 		tplOption.setCharset(
 				entity == null ? HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING : entity.getTemplateEncoding());
 		tplOption.setViewport(SimpleHtmlTplOption.DEFAULT_VIEWPORT);
