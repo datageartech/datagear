@@ -1472,7 +1472,7 @@ dashboardProto.renderForm = function(form, config)
 {
 	this._assertAlive();
 	
-	form = (CF.isString(form) ? CF.eleOfId(form) : form);
+	form = this._toElementCareId(form);
 	
 	CF.eleAddClass(form, "dg-dashboard-form");
 	
@@ -3138,7 +3138,7 @@ dashboardProto.doDestroy = function()
 	
 	this.stopHandleCharts();
 	this._destroyCharts();
-	this._destroyForms();
+	this._destroyAllForms();
 	
 	this._statusDestroyed(true);
 };
@@ -3161,9 +3161,9 @@ dashboardProto._destroyChart = function(chart)
 	});
 };
 
-dashboardProto._destroyForms = function()
+dashboardProto._destroyAllForms = function()
 {
-	var forms = CF.elesOfSelector("form[dg-dashboard-form]");
+	var forms = CF.elesOfSelector("form.dg-dashboard-form");
 	
 	forms.forEach((form) =>
 	{
@@ -3178,6 +3178,7 @@ dashboardProto._destroyForm = function(form)
 {
 	CF.executeSilently(() =>
 	{
+		CF.eleRemoveClass(form, "dg-dashboard-form");
 		CF.chartTool.destroyDataSetParamForm(form);
 	});
 };
@@ -3380,13 +3381,18 @@ dashboardProto.contextURL = function(url)
 };
 
 /**
- * 销毁元素内（包括自身）包含的所有看板表单。
+ * 销毁看板表单。
  * 
- * @param form HTML元素
+ * @param form 表单HTML元素、HTML元素ID
  */
 dashboardProto.destroyForm = function(form)
 {
-	this._destroyForm(form);
+	form = this._toElementCareId(form);
+	
+	if(CF.isEleMatches(form, "form.dg-dashboard-form"))
+	{
+		this._destroyForm(form);
+	}
 };
 
 /**
