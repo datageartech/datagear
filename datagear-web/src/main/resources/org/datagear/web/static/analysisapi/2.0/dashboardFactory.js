@@ -2968,6 +2968,8 @@ dashboardProto.dataSetParamValueBatched = function(sourceData, batchConfig, sour
 			throw new Error("no chart found for : " + targets[i]);
 	}
 	
+	var re = Array.from(targetCharts);
+	
 	var dataMaps = (batchConfig.data || []);
 	//{ "...": ..., ... } 转换为 [ {}, ... ]
 	if(!CF.isArray(dataMaps))
@@ -2980,6 +2982,7 @@ dashboardProto.dataSetParamValueBatched = function(sourceData, batchConfig, sour
 		dataMaps = dataMapArray;
 	}
 	
+	var isTargetsEmpty = CF.isEmpty(targets);
 	var isSourceDataFunc = CF.isFunction(sourceData);
 	var propPathRoots = (CF.isEmpty(batchConfig.root) ? [""] : (CF.isArray(batchConfig.root) ? batchConfig.root : [ batchConfig.root ]));
 	
@@ -3041,8 +3044,13 @@ dashboardProto.dataSetParamValueBatched = function(sourceData, batchConfig, sour
 			let targetChart = null;
 			
 			//优先使用batchConfig.target中的索引号
-			if(CF.isNumber(chartIdx) && targets[chartIdx] != null)
+			if(CF.isNumber(chartIdx) && !isTargetsEmpty)
+			{
 				targetChart = targetCharts[chartIdx];
+				
+				if(targetChart == null)
+					throw new Error("no chart found in [batchConfig.targets] for : " + chartIdx);
+			}
 			else
 			{
 				targetChart = (chartIdx instanceof CF.Chart ? chartIdx : this.chart(chartIdx));
@@ -3050,15 +3058,15 @@ dashboardProto.dataSetParamValueBatched = function(sourceData, batchConfig, sour
 				if(targetChart == null)
 					throw new Error("no chart found for : " + chartIdx);
 				
-				if(CF.indexInArray(targetCharts, targetChart) < 0)
-					targetCharts.push(targetChart);
+				if(CF.indexInArray(re, targetChart) < 0)
+					re.push(targetChart);
 			}
 			
 			targetChart.dataSetParamValue(dataSetIdx, param, dataValue);
 		}
 	}
 	
-	return targetCharts;
+	return re;
 };
 
 /**
