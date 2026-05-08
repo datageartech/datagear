@@ -5481,7 +5481,7 @@ SPT.tableRenderer = function(plugin, config)
 							data: serverSidePaging.param
 						};
 						
-						chart.dashboard().batchSetDataSetParamValues(data, paramBatchConfig, data);
+						chart.dashboard().dataSetParamValueBatched(data, paramBatchConfig, data);
 					}
 					
 					chart.refresh();

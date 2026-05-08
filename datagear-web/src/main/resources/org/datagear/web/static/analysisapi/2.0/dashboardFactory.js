@@ -546,13 +546,13 @@ chartProto._initUpdater = function()
  *   //默认值参考DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE说明
  *   trigger: ...、[ ... ],
  *   
- *   //同dashboard.batchSetDataSetParamValues()函数的batchConfig参数的target属性
+ *   //同dashboard.dataSetParamValueBatched()函数的batchConfig参数的target属性
  *   target: ...,
  * 	 
- * 	 //同dashboard.batchSetDataSetParamValues()函数的batchConfig参数的root属性
+ * 	 //同dashboard.dataSetParamValueBatched()函数的batchConfig参数的root属性
  * 	 root: ...,
  *   
- *   //同dashboard.batchSetDataSetParamValues()函数的batchConfig参数的data属性
+ *   //同dashboard.dataSetParamValueBatched()函数的batchConfig参数的data属性
  *   //其中的sourceData参考dashboard.bindLinkEventHanders()函数
  *   data: ...
  * }
@@ -737,7 +737,7 @@ chartProto._handleChartEventLink = function(type, linkSrcData, links)
 		if(!this._isLinkByEventType(link, type))
 			continue;
 		
-		let myTargetCharts = dashboard.batchSetDataSetParamValues(batchSource, link, linkSrcData);
+		let myTargetCharts = dashboard.dataSetParamValueBatched(batchSource, link, linkSrcData);
 		
 		for(let j=0; j<myTargetCharts.length; j++)
 		{
@@ -1433,7 +1433,7 @@ dashboardProto._assertActive = function()
  * {
  *   //必选，表单输入项对象、数组
  *   items: 表单输输入项对象 或者 [ 表单输输入项对象, ... ],
- *   //可选，表单提交操作时执行的联动图表设置，格式同dashboard.batchSetDataSetParamValues()函数的batchConfig参数，
+ *   //可选，表单提交操作时执行的联动图表设置，格式同dashboard.dataSetParamValueBatched()函数的batchConfig参数，
  *   //其中：name即是表单输入项名称；value函数的sourceContext参数为：[ 表单数据对象、表单HTML元素 ]
  *   link: 图表联动配置对象,
  *   //可选，表单提交按钮文本
@@ -1460,7 +1460,7 @@ dashboardProto._assertActive = function()
  *   inputType: "...",
  *   //可选，输入框配置，参考chartTool.renderDataSetParamForm函数说明
  *   inputPayload: ...,
- *   //可选，输入项的联动设置，【图表数据集参数索引对象】同dashboard.batchSetDataSetParamValues()函数中的格式
+ *   //可选，输入项的联动设置，【图表数据集参数索引对象】同dashboard.dataSetParamValueBatched()函数中的格式
  *   link: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ]
  * }
  * 或者，简写为其name属性值。
@@ -1500,7 +1500,7 @@ dashboardProto.renderForm = function(form, config)
 		
 		if(doLink !== false)
 		{
-			let charts = dashboard.batchSetDataSetParamValues(formData, batchConfig, [ formData, thisForm ]);
+			let charts = dashboard.dataSetParamValueBatched(formData, batchConfig, [ formData, thisForm ]);
 			
 			for(let i=0; i<charts.length; i++)
 			{
@@ -2953,7 +2953,7 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
  * @param sourceContext 可选，传递给图表数据集参数索引对象的value函数sourceContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
  * @return 批量设置的图表对象数组
  */
-dashboardProto.batchSetDataSetParamValues = function(sourceData, batchConfig, sourceContext)
+dashboardProto.dataSetParamValueBatched = function(sourceData, batchConfig, sourceContext)
 {
 	sourceContext = (sourceContext === undefined ? sourceData : sourceContext);
 	
