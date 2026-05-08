@@ -2451,7 +2451,20 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
 	(charts) =>
 	{
 		if(successCallback)
-			return successCallback(charts[0]);
+		{
+			var successResult = successCallback(charts[0]);
+			
+			if(CF.isFunction(successResult))
+			{
+				var originalSuccessResult = successResult;
+				successResult = function(charts)
+				{
+					originalSuccessResult(charts[0]);
+				};
+			}
+			
+			return successResult;
+		}
 	},
 	errorCallback);
 };
