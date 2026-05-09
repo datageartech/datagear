@@ -1552,17 +1552,17 @@ dashboardProto.renderForm = function(form, config)
 };
 
 /**
- * 重新调整指定图表尺寸。
+ * 如果图表处于活跃状态，则重新调整其尺寸。
  * 
  * @param identity 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
  * @returns 图表对象
  */
 dashboardProto.resizeChart = function(identity)
 {
-	this._assertActive();
-	
 	var chart = this.chart(identity);
-	chart.resize();
+	
+	if(chart.isActive())
+		chart.resize();
 	
 	return chart;
 };
@@ -1571,10 +1571,11 @@ dashboardProto.resizeChart = function(identity)
  * 重新调整给定图表数组中活跃图表的尺寸。
  * 
  * @param charts 可选，要调整的图表数组，如果未设置，则是全部看板图表
+ * @return 已调整尺寸的图表数组：[ ... ]
  */
 dashboardProto.resizeCharts = function(charts)
 {
-	this._assertActive();
+	var re = [];
 	
 	if(charts === undefined)
 		charts = this.charts();
@@ -1584,9 +1585,14 @@ dashboardProto.resizeCharts = function(charts)
 		charts.forEach((chart) =>
 		{
 			if(chart.isActive())
+			{
 				chart.resize();
+				re.push(chart);
+			}
 		});
 	}
+	
+	return re;
 };
 
 /**
@@ -1597,19 +1603,8 @@ dashboardProto.resizeCharts = function(charts)
  */
 dashboardProto.resizeChartsIn = function(element)
 {
-	var re = [];
 	var charts = this.chartsIn(element);
-	
-	charts.forEach((chart) =>
-	{
-		if(chart.isActive())
-		{
-			chart.resize();
-			re.push(chart);
-		}
-	});
-	
-	return re;
+	return this.resizeCharts(charts);
 };
 
 /**
