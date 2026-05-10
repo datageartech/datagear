@@ -1239,7 +1239,7 @@ dashboardProto.addChart = function(chart)
  * 删除图表。
  * 
  * @param identity 图表标识信息：图表HTML元素ID、图表对象、图表ID、图表索引数值、图表HTML元素
- * @param doDestroy 选填参数，是否销毁图表，默认为true
+ * @param doDestroy 选填，是否销毁图表，默认为：false
  * @return 移除的图表对象，或者图表未找到时为null
  */
 dashboardProto.removeChart = function(identity, doDestroy)
@@ -1252,7 +1252,7 @@ dashboardProto.removeChart = function(identity, doDestroy)
 	
 	var removed = charts.splice(index, 1)[0];
 	
-	if(doDestroy !== false)
+	if(doDestroy === true)
 		this._destroyChart(removed);
 	
 	return removed;
