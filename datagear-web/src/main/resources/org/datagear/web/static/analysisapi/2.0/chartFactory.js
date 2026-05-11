@@ -530,18 +530,6 @@ CF.initChartRoot = function(root)
 	if(CF.isEmpty(root.renderContext))
 		throw new Error("chart [renderContext] required");
 	
-	var dsbs = root.dataSetBinds;
-	
-	if(dsbs != null)
-	{
-		for(let i=0; i<dsbs.length; i++)
-		{
-			let dsb = dsbs[i];
-			//添加index属性，后续需要根据索引获取结果集等信息
-			dsb.index = i;
-		}
-	}
-	
 	if(root.configValues != null)
 	{
 		let configValues = root.configValues;
@@ -2662,7 +2650,7 @@ chartProto.sortDataSetFields = function(dataSetBind, fields)
 chartProto.resultOf = function(chartResult, dataSetBind, dataSetResult)
 {
 	var dataSetResults = this.results(chartResult);
-	var index = (CF.isNumber(dataSetBind) ? dataSetBind : (dataSetBind != null ? dataSetBind.index : null));
+	var index = (CF.isNumber(dataSetBind) ? dataSetBind : this.dataSetBindIndex(dataSetBind));
 	
 	if(arguments.length <= 2)
 	{
@@ -3608,6 +3596,25 @@ chartProto.dataSetBindAt = function(index)
 {
 	var dsbs = this.dataSetBinds();
 	return dsbs[index];
+};
+
+/**
+ * 获取指定数据集绑定的索引数值。
+ * 
+ * @param dataSetBind 数据集绑定
+ * @returns 索引数值，-1表示没有
+ */
+chartProto.dataSetBindIndex = function(dataSetBind)
+{
+	var dsbs = this.dataSetBinds();
+	
+	for(let i=0; i<dsbs.length; i++)
+	{
+		if(dsbs[i] === dataSetBind)
+			return i;
+	}
+	
+	return -1;
 };
 
 /**
