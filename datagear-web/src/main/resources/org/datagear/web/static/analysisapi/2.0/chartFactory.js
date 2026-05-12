@@ -518,17 +518,33 @@ var chartProto = CF.Chart.prototype;
 //初始化图表根对象基础属性
 CF.initChartRoot = function(root)
 {
-	if(CF.isEmpty(root.id))
-		throw new Error("chart [id] required");
-	
-	if(root.name == null)
-		throw new Error("chart [name] required");
-	
 	if(CF.isEmpty(root.elementId))
 		throw new Error("chart [elementId] required");
 	
+	if(CF.isEmpty(root.id))
+		throw new Error("chart[#"+root.elementId+"] [id] required");
+	
+	if(root.name == null)
+		throw new Error("chart[#"+root.elementId+"] [name] required");
+	
 	if(CF.isEmpty(root.renderContext))
-		throw new Error("chart [renderContext] required");
+		throw new Error("chart[#"+root.elementId+"] [renderContext] required");
+	
+	//自动生成数据集字段fullname
+	var dsbs = (root.dataSetBinds || []);
+	for(let i=0; i<dsbs.length; i++)
+	{
+		let dataSet = dsbs[i].dataSet;
+		
+		if(dataSet == null)
+			throw new Error("chart[#"+root.elementId+"] dataSetBinds["+i+"].dataSet required");
+		
+		if(dataSet.name == null)
+			throw new Error("chart[#"+root.elementId+"] dataSetBinds["+i+"].dataSet.name required");
+		
+		CF.initDataSetFields(dataSet.fields, null, root, i);
+		CF.initDataSetParams(dataSet.params, root, i);
+	}
 	
 	if(root.configValues != null)
 	{
@@ -543,6 +559,53 @@ CF.initChartRoot = function(root)
 		//注意，初始化configValuesOrigin的逻辑不能在chart.render()中执行，
 		//因为chart.render()可以被多次调用，root.configValues可能已被修改
 		root.configValuesOrigin = CF.extend(true, {}, configValues);
+	}
+};
+
+CF.initDataSetFields = function(fields, parentField, chartRoot, dataSetBindIndex)
+{
+	if(CF.isEmpty(fields))
+		return;
+	
+	var parentFullname = (parentField == null ? null : parentField.fullname);
+	
+	for(let i=0; i<fields.length; i++)
+	{
+		let field = fields[i];
+		
+		if(field == null)
+			throw new Error("chart[#"+chartRoot.elementId+"] dataSetBinds["+dataSetBindIndex+"].dataSet.*.fields["+i+"] required");
+		
+		if(CF.isEmpty(field.name))
+			throw new Error("chart[#"+chartRoot.elementId+"] dataSetBinds["+dataSetBindIndex+"].dataSet.*.fields["+i+"].name required");
+		
+		if(CF.isEmpty(field.type))
+			throw new Error("chart[#"+chartRoot.elementId+"] dataSetBinds["+dataSetBindIndex+"].dataSet.*.fields["+i+"].type required");
+		
+		if(CF.isEmpty(field.fullname))
+			field.fullname = CF.toFullname(field.name, parentFullname);
+		
+		CF.initDataSetFields(field.fields, field, chartRoot, dataSetBindIndex);
+	}
+};
+
+CF.initDataSetParams = function(params, chartRoot, dataSetBindIndex)
+{
+	if(CF.isEmpty(params))
+		return;
+	
+	for(let i=0; i<params.length; i++)
+	{
+		let param = params[i];
+		
+		if(param == null)
+			throw new Error("chart[#"+chartRoot.elementId+"] dataSetBinds["+dataSetBindIndex+"].dataSet.params["+i+"] required");
+		
+		if(CF.isEmpty(param.name))
+			throw new Error("chart[#"+chartRoot.elementId+"] dataSetBinds["+dataSetBindIndex+"].dataSet.params["+i+"].name required");
+		
+		if(CF.isEmpty(param.type))
+			throw new Error("chart[#"+chartRoot.elementId+"] dataSetBinds["+dataSetBindIndex+"].dataSet.params["+i+"].type required");
 	}
 };
 
@@ -8596,6 +8659,33 @@ CF._serializeSingleQuoteStr = function(str, quote)
 		re += "'";
 	
 	return re;
+};
+
+/**
+ * 转换为全名。
+ * 与后台org.datagear.analysis.FullnameSpec逻辑保持一致。
+ */
+CF.toFullname = function(name, parentFullname)
+{
+	if(CF.isEmpty(name))
+		throw new Error("[name] required");
+	
+	var escapedName = "";
+	
+	for(let i=0; i<name.length; i++)
+	{
+		let c = name.charAt(i);
+		
+		if(c === '.' || c === '\\')
+			escapedName += '\\';
+		
+		escapedName += c;
+	}
+	
+	if(!CF.isEmpty(parentFullname))
+		escapedName = parentFullname + '.' + escapedName;
+	
+	return escapedName;
 };
 
 //-------------
