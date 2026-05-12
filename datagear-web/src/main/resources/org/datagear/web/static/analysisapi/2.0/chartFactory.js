@@ -1422,7 +1422,7 @@ chartProto.doRender = function()
 	
 	CF.eleData(ele, CF.ELE_RENDERED_CHART_NAME, this);
 	
-	var async = this.isAsyncRender();
+	var async = this._isAsyncRender();
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
 	
@@ -1571,7 +1571,7 @@ chartProto.doUpdate = function(chartResult)
 	//先保存结果，确保updateResult()在渲染器的update函数作用域内可用
 	this.updateResult(chartResult);
 	
-	var async = this.isAsyncUpdate(chartResult);
+	var async = this._isAsyncUpdate(chartResult);
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
 	
@@ -1764,7 +1764,7 @@ chartProto._doDestroyTool = function()
 /**
  * 图表的render函数是否是异步的。
  */
-chartProto.isAsyncRender = function()
+chartProto._isAsyncRender = function()
 {
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
@@ -1795,7 +1795,7 @@ chartProto.isAsyncRender = function()
  * 
  * @param chartResult 图表结果
  */
-chartProto.isAsyncUpdate = function(chartResult)
+chartProto._isAsyncUpdate = function(chartResult)
 {
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
@@ -2238,7 +2238,7 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 /**
  * 查找图表事件处理函数代理信息。
  * 
- * @param filter 查找过滤函数，格式为：function(delegateObj){ return true、false; }，返回true表示匹配
+ * @param filter 可选，查找过滤函数，格式为：function(delegateObj){ return true、false; }，返回true表示匹配
  * @returns [ ... ]，空数组表示没有
  */
 chartProto.findEventHandlerDelegates = function(filter)
@@ -2254,7 +2254,7 @@ chartProto.findEventHandlerDelegates = function(filter)
 	{
 		let delegateObj = delegateObjs[i];
 		
-		if(filter(delegateObj))
+		if(filter == null || filter(delegateObj))
 		{
 			re.push(delegateObj);
 		}
