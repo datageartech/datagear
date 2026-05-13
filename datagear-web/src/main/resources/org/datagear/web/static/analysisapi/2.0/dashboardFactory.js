@@ -1309,40 +1309,6 @@ dashboardProto._syncAddedChartsStatus = function(charts)
 	}
 };
 
-dashboardProto._addChartsCareStatus = function(charts)
-{
-	charts = (CF.isArray(charts) ? charts : [ charts ]);
-	
-	for(let i=0; i<charts.length; i++)
-		this.addChart(charts[i]);
-	
-	//应先全部加入看板后再进行渲染，确保依赖库加载逻辑有全量的参考依赖库
-	for(let i=0; i<charts.length; i++)
-	{
-		let chart = charts[i];
-		
-		if(this._isChartRejectInit(chart))
-			continue;
-		
-		if(chart.statusPreInit())
-		{
-			CF.executeSilently(() =>
-			{
-				//应设为与看板状态保持一致
-				if(this._statusInited())
-				{
-					chart.init();
-				}
-				else if(this.isAlive())
-				{
-					chart.init();
-					chart.statusPreRender(true);
-				}
-			});
-		}
-	}
-};
-
 /**
  * 删除图表。
  * 
@@ -2526,7 +2492,7 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * 
  * @param element 用于渲染图表的<div>元素、元素ID
  * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
+ * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回false时图表将不加入看板。
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
 dashboardProto.loadChart = function(element, chartWidgetId, successCallback, errorCallback)
@@ -2554,20 +2520,7 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
 	(charts) =>
 	{
 		if(successCallback)
-		{
-			var successResult = successCallback(charts[0]);
-			
-			if(CF.isFunction(successResult))
-			{
-				var originalSuccessResult = successResult;
-				successResult = function(charts)
-				{
-					originalSuccessResult(charts[0]);
-				};
-			}
-			
-			return successResult;
-		}
+			return successCallback(charts[0]);
 	},
 	errorCallback);
 };
@@ -2583,7 +2536,7 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
  * 
  * @param elements 用于渲染图表的<div>元素选择器字符串、<div>元素数组
  * @param chartWidgetIds 可选，要加载的图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值false时图表将不加入看板。
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  */
 dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
@@ -2668,7 +2621,7 @@ dashboardProto._toElementArray = function(elements)
  * dashboard.loadUnsolvedCharts(element, successCallback, errorCallback);
  * 
  * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
+ * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false时图表将不加入看板。
  * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
  * @return 要异步加载的HTML元素数组
  */
@@ -2727,7 +2680,7 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
  * 
  * @param elements HTML元素数组
  * @param chartWidgetIds 图表部件ID数组，与上面一一对应
- * @param successCallback 选填，加载成功回调函数：function(charts){ ... }，返回值：false 图表不加入看板；function(charts){} 在图表加入看板后执行回调；其他 图表加入看板。
+ * @param successCallback 选填，加载成功回调函数：function(charts){ ... }，返回false时图表将不加入看板。
  * @param errorCallback 选填，加载失败回调函数：function(error){ ... }
  */
 dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
@@ -2794,11 +2747,10 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 			
 			//返回非false，则加入看板
 			if(callbackResult !== false)
-				this._addChartsCareStatus(charts);
-			
-			//返回的是函数，则调用，以支持在图表加入看板后再执行回调
-			if(callbackResult != null && CF.isFunction(callbackResult))
-				callbackResult(charts);
+			{
+				//应同步图表状态
+				this.addCharts(charts, true);
+			}
 		});
 		
 		return re;
@@ -2906,7 +2858,10 @@ dashboardProto.createChart = function(element, chartRoot, add)
 	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
 	
 	if(add)
-		this._addChartsCareStatus(chart);
+	{
+		//应同步图表状态
+		this.addChart(chart, true);
+	}
 	
 	return chart;
 };
@@ -2974,7 +2929,10 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	}
 	
 	if(add)
-		this._addChartsCareStatus(re);
+	{
+		//应同步图表状态
+		this.addCharts(re, true);
+	}
 	
 	return re;
 };
