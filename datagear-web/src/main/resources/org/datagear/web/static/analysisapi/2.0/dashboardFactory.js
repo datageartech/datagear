@@ -1058,7 +1058,7 @@ dashboardProto._initCharts = function()
 	{
 		let chart = charts[i];
 		
-		if(this._isChartPreventHandle(chart))
+		if(this._isChartRejectInit(chart))
 			continue;
 		
 		if(chart.statusPreInit() || chart.statusDestroyed())
@@ -1068,15 +1068,7 @@ dashboardProto._initCharts = function()
 	}
 };
 
-dashboardProto._initChart = function(chart)
-{
-	CF.executeSilently(() =>
-	{
-		chart.init();
-	});
-};
-
-dashboardProto._isChartPreventHandle = function(chart)
+dashboardProto._isChartRejectInit = function(chart)
 {
 	if(chart == null)
 		return true;
@@ -1089,6 +1081,14 @@ dashboardProto._isChartPreventHandle = function(chart)
 		return true;
 	
 	return false;
+};
+
+dashboardProto._initChart = function(chart)
+{
+	CF.executeSilently(() =>
+	{
+		chart.init();
+	});
 };
 
 /**
@@ -1210,12 +1210,14 @@ dashboardProto._chartIndex = function(charts, identity)
 };
 
 /**
- * 添加已经初始化的图表。
+ * 将单个图表添加至看板。
  * 如果图表已添加至看板，或者图表HTML元素已被看板中的其他图表使用，将不会再次添加，直接返回false。
  * 
  * @param chart 图表对象
+ * @param syncStatus 可选，是否同步图表状态，默认值为：false
+ * @returns true 已添加；false 未添加
  */
-dashboardProto.addChart = function(chart)
+dashboardProto.addChart = function(chart, syncStatus)
 {
 	var exists = this.chart(chart);
 	
@@ -1227,12 +1229,118 @@ dashboardProto.addChart = function(chart)
 	if(exists != null)
 		return false;
 	
-	//这里不应限制仅能添加未渲染的图表，因为应允许已完成渲染的图表先从看板移除，后续再加入看板
-	
 	var charts = this.charts();
 	charts.push(chart);
 	
+	if(syncStatus === true)
+		this._syncAddedChartsStatus(chart);
+	
 	return true;
+};
+
+/**
+ * 将多个图表添加至看板。
+ * 如果某个图表已添加至看板，或者图表HTML元素已被看板中的其他图表使用，将不会再次添加。
+ * 
+ * @param charts 图表对象、数组
+ * @param syncStatus 可选，是否同步图表状态，默认值为：false
+ * @returns [ ... ]，是否添加布尔值数组，其中：true 已添加；false 未添加
+ */
+dashboardProto.addCharts = function(charts, syncStatus)
+{
+	charts = (CF.isArray(charts) ? charts : [ charts ]);
+	
+	var re = [];
+	var addedCharts = [];
+	
+	for(let i=0; i<charts.length; i++)
+	{
+		let chart = charts[i];
+		
+		if(this.addChart(chart, false))
+		{
+			re.push(true);
+			addedCharts.push(chart);
+		}
+		else
+		{
+			re.push(false);
+		}
+	}
+	
+	//应先全部加入看板后再进行渲染，确保依赖库加载逻辑有全量的参考依赖库
+	if(syncStatus === true)
+		this._syncAddedChartsStatus(addedCharts);
+	
+	return re;
+};
+
+//将添加的图表状态与看板状态同步
+dashboardProto._syncAddedChartsStatus = function(charts)
+{
+	if(charts == null)
+		return;
+	
+	charts = (CF.isArray(charts) ? charts : [ charts ]);
+	
+	for(let i=0; i<charts.length; i++)
+	{
+		let chart = charts[i];
+		
+		if(this._isChartRejectInit(chart))
+			continue;
+		
+		if(chart.statusPreInit())
+		{
+			CF.executeSilently(() =>
+			{
+				//应设为与看板状态保持一致
+				if(this._statusInited())
+				{
+					chart.init();
+				}
+				else if(this.isAlive())
+				{
+					chart.init();
+					chart.statusPreRender(true);
+				}
+			});
+		}
+	}
+};
+
+dashboardProto._addChartsCareStatus = function(charts)
+{
+	charts = (CF.isArray(charts) ? charts : [ charts ]);
+	
+	for(let i=0; i<charts.length; i++)
+		this.addChart(charts[i]);
+	
+	//应先全部加入看板后再进行渲染，确保依赖库加载逻辑有全量的参考依赖库
+	for(let i=0; i<charts.length; i++)
+	{
+		let chart = charts[i];
+		
+		if(this._isChartRejectInit(chart))
+			continue;
+		
+		if(chart.statusPreInit())
+		{
+			CF.executeSilently(() =>
+			{
+				//应设为与看板状态保持一致
+				if(this._statusInited())
+				{
+					chart.init();
+				}
+				else if(this.isAlive())
+				{
+					chart.init();
+					chart.statusPreRender(true);
+				}
+			});
+		}
+	}
 };
 
 /**
@@ -1384,7 +1492,7 @@ dashboardProto._prepareDoRenderCharts = function()
 	{
 		let chart = charts[i];
 		
-		if(this._isChartPreventHandle(chart))
+		if(this._isChartRejectInit(chart))
 			continue;
 		
 		if(chart.statusPreInit())
@@ -2744,40 +2852,6 @@ dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
 	chartRoot.elementId = eleId;
 	
 	return DF.createChart(chartRoot, this.renderContext(), this);
-};
-
-dashboardProto._addChartsCareStatus = function(charts)
-{
-	charts = (CF.isArray(charts) ? charts : [ charts ]);
-	
-	for(let i=0; i<charts.length; i++)
-		this.addChart(charts[i]);
-	
-	//应先全部加入看板后再进行渲染，确保依赖库加载逻辑有全量的参考依赖库
-	for(let i=0; i<charts.length; i++)
-	{
-		let chart = charts[i];
-		
-		if(this._isChartPreventHandle(chart))
-			continue;
-		
-		if(chart.statusPreInit())
-		{
-			CF.executeSilently(() =>
-			{
-				//应设为与看板状态保持一致
-				if(this._statusInited())
-				{
-					chart.init();
-				}
-				else if(this.isAlive())
-				{
-					chart.init();
-					chart.statusPreRender(true);
-				}
-			});
-		}
-	}
 };
 
 /**
