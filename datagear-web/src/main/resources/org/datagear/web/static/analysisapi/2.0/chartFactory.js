@@ -3570,24 +3570,16 @@ chartProto.statusInited = function(set)
 /**
  * 获取此图表的图表主题指定渐变因子的颜色。
  * 这个颜色是图表主题的背景色（actualBackgroundColor、backgroundColor）与前景色（color）之间的某个颜色。
- * 此函数支持的调用格式：
- * chart.themeGradualColor(factor);
- * chart.themeGradualColor(theme, factor);
- * 
  * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
  * 
- * @param theme 可选，主题对象，默认为：this.theme()
  * @param factor 渐变因子，其中：0-1 表示最接近实际背景色至最接近前景色的颜色、小于0 表示背景色、大于1 表示前景色
+ * @param theme 可选，主题对象，默认为：this.theme()
  * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"、"#FFFFFFFF"
  */
-chartProto.themeGradualColor = function(theme, factor)
+chartProto.themeGradualColor = function(factor, theme)
 {
-	// (factor)
-	if(factor === undefined)
-	{
-		factor = theme;
+	if(theme == null)
 		theme = this.theme();
-	}
 	
 	return CF.themeGradualColor(theme, factor);
 };
