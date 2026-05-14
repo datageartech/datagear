@@ -3573,14 +3573,11 @@ chartProto.statusInited = function(set)
  * 图表渲染器在绘制图表时，可以使用此函数获取的颜色来设置图表配色。
  * 
  * @param factor 渐变因子，其中：0-1 表示最接近实际背景色至最接近前景色的颜色、小于0 表示背景色、大于1 表示前景色
- * @param theme 可选，主题对象，默认为：this.theme()
  * @returns 与factor匹配的颜色字符串，格式类似："#FFFFFF"、"#FFFFFFFF"
  */
-chartProto.themeGradualColor = function(factor, theme)
+chartProto.themeGradualColor = function(factor)
 {
-	if(theme == null)
-		theme = this.theme();
-	
+	var theme = this.theme();
 	return CF.themeGradualColor(theme, factor);
 };
 
