@@ -2808,19 +2808,20 @@ dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
 
 /**
  * 创建本地图表。
+ * 后续版本可能会按需加载图表插件，导致此函数需要异步加载创建图表引用的图表插件，
+ * 所以先设计为不直接返回图表对象，而是采用callback的方式。
  * 
  * 支持调用方式：
  * dashboard.createChart(element);
  * dashboard.createChart(element, chartRoot);
- * dashboard.createChart(element, add);
- * dashboard.createChart(element, chartRoot, add);
+ * dashboard.createChart(element, callback);
+ * dashboard.createChart(element, chartRoot, callback);
  * 
  * @param element 用于渲染图表的<div>元素、元素ID
  * @param chartRoot 选填，要创建的图表根对象，结构同DF.createLocalChart()函数的同名参数，如果不设置，将从元素的"dg-chart-local"属性取
- * @param add 可选，是否加入看板，默认值为：true
- * @returns 创建的本地图表
+ * @param callback 可选，创建成功回调函数，格式为：function(chart){ ... }，返回false时图表将不加入看板。
  */
-dashboardProto.createChart = function(element, chartRoot, add)
+dashboardProto.createChart = function(element, chartRoot, callback)
 {
 	element = this._toElementCareId(element);
 	
@@ -2834,14 +2835,12 @@ dashboardProto.createChart = function(element, chartRoot, add)
 	if(this.chart(element) != null)
 		throw new Error("element has a bounded chart");
 	
-	//(element, add)
-	if(chartRoot === true || chartRoot === false)
+	//(element, callback)
+	if(CF.isFunction(chartRoot))
 	{
-		add = chartRoot;
+		callback = chartRoot;
 		chartRoot = undefined;
 	}
-	
-	add = (add === undefined ? true : add);
 	
 	if(CF.isEmpty(chartRoot))
 	{
@@ -2856,35 +2855,38 @@ dashboardProto.createChart = function(element, chartRoot, add)
 		throw new Error("[chartRoot] required");
 	
 	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+	var add = true;
 	
-	if(add)
+	if(callback)
+		add = callback(chart);
+	
+	if(add !== false)
 	{
 		//应同步图表状态
 		this.addChart(chart, true);
 	}
-	
-	return chart;
 };
 
 /**
  * 将元素自身或其包含的元素中所有设置了"dg-chart-local"属性、且未初始化为图表的<div>元素创建为本地图表。
+ * 后续版本可能会按需加载图表插件，导致此函数需要异步加载创建图表引用的图表插件，
+ * 所以先设计为不直接返回图表对象，而是采用callback的方式。
  * 
  * 支持调用方式：
  * dashboard.createUnsolvedCharts();
  * dashboard.createUnsolvedCharts(elements);
- * dashboard.createUnsolvedCharts(add);
- * dashboard.createUnsolvedCharts(elements, add);
+ * dashboard.createUnsolvedCharts(callback);
+ * dashboard.createUnsolvedCharts(elements, callback);
  * 
  * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
- * @param add 可选，是否加入看板，默认值为：true
- * @return 创建的本地图表数组
+ * @param callback 可选，创建成功回调函数，格式为：function(charts){ ... }，返回false时图表将不加入看板。
  */
-dashboardProto.createUnsolvedCharts = function(elements, add)
+dashboardProto.createUnsolvedCharts = function(elements, callback)
 {
-	//(add)
-	if(elements === true || elements === false)
+	//(callback)
+	if(CF.isFunction(elements))
 	{
-		add = elements;
+		callback = elements;
 		elements = undefined;
 	}
 	
@@ -2894,9 +2896,7 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	elements = this._toElementArray(elements);
 	elements = (elements == null ? [ document.body ] : elements);
 	
-	add = (add === undefined ? true : add);
-	
-	var re = [];
+	var charts = [];
 	
 	for(let i=0; i<elements.length; i++)
 	{
@@ -2924,17 +2924,20 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 				continue;
 			
 			let localChart = DF.createLocalChart(ele, chartRoot, this.renderContext(), this);
-			re.push(localChart);
+			charts.push(localChart);
 		}
 	}
 	
-	if(add)
+	var add = true;
+	
+	if(callback)
+		add = callback(charts);
+	
+	if(add !== false)
 	{
 		//应同步图表状态
-		this.addCharts(re, true);
+		this.addCharts(charts, true);
 	}
-	
-	return re;
 };
 
 /**
