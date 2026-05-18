@@ -2826,7 +2826,7 @@ dashboardProto.createChart = function(element, chartRoot, callback)
 	element = this._toElementCareId(element);
 	
 	if(!CF.isChartTagName(element))
-		throw new Error("create chart element must be : <"+CF.CHART_TAG_NAME+">");
+		throw new Error("chart element must be : <"+CF.CHART_TAG_NAME+">");
 	
 	if(this.renderedChart(element) != null)
 		throw new Error("element has a rendered chart");
@@ -2864,6 +2864,86 @@ dashboardProto.createChart = function(element, chartRoot, callback)
 	{
 		//应同步图表状态
 		this.addChart(chart, true);
+	}
+};
+
+/**
+ * 创建本地图表。
+ * 后续版本可能会按需加载图表插件，导致此函数需要异步加载创建图表引用的图表插件，
+ * 所以先设计为不直接返回图表对象，而是采用callback的方式。
+ * 
+ * 支持调用方式：
+ * dashboard.createCharts(element);
+ * dashboard.createCharts(element, chartRoot);
+ * dashboard.createCharts(element, callback);
+ * dashboard.createCharts(element, chartRoot, callback);
+ * 
+ * @param elements 用于渲染图表的<div>元素选择器字符串、<div>元素数组
+ * @param chartRoots 选填，要创建的图表根对象数组，结构同DF.createLocalChart()函数的同名参数，如果不设置，将从元素的"dg-chart-local"属性取
+ * @param callback 可选，创建成功回调函数，格式为：function(chart){ ... }，返回false时图表将不加入看板。
+ */
+dashboardProto.createCharts = function(elements, chartRoots, callback)
+{
+	elements = this._toElementArray(elements);
+	
+	//(elements, callback)
+	if(CF.isFunction(chartRoots))
+	{
+		callback = chartRoots;
+		chartRoots = undefined;
+	}
+	
+	var newChartRoots = [];
+	
+	for(let i=0; i<elements.length; i++)
+	{
+		let element = elements[i];
+		let chartRoot = (chartRoots == null ? null : chartRoots[i]);
+		
+		if(!CF.isChartTagName(element))
+			throw new Error("chart elements["+i+"] must be : <"+CF.CHART_TAG_NAME+">");
+		
+		if(this.renderedChart(element) != null)
+			throw new Error("elements["+i+"] has a rendered chart");
+		
+		//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
+		if(this.chart(element) != null)
+			throw new Error("elements["+i+"] has a bounded chart");
+		
+		if(CF.isEmpty(chartRoot))
+		{
+			chartRoot = DF.elementLocalAttr(element);
+			if(!CF.isEmpty(chartRoot))
+			{
+				chartRoot = DF.evalChartLocalValue(chartRoot);
+			}
+		}
+		
+		if(CF.isEmpty(chartRoot))
+			throw new Error("chartRoots["+i+"] required");
+		
+		newChartRoots.push(chartRoot);
+	}
+	
+	var charts = [];
+	
+	for(let i=0; i<elements.length; i++)
+	{
+		let element = elements[i];
+		let chartRoot = newChartRoots[i];
+		let chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+		charts.push(chart);
+	}
+	
+	var add = true;
+	
+	if(callback)
+		add = callback(charts);
+	
+	if(add !== false)
+	{
+		//应同步图表状态
+		this.addCharts(charts, true);
 	}
 };
 
