@@ -49,7 +49,8 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private List<ChartPluginResource> resources = Collections.emptyList();
 	
-	private Map<String, String> iconResourceNames = Collections.emptyMap();
+	/** 图标资源名映射表，名为主题名，值为图标URL */
+	private Map<String, String> icons = Collections.emptyMap();
 
 	private ChartPluginConfigForm configForm = null;
 
@@ -119,14 +120,14 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 		this.resources = (List<ChartPluginResource>) resources;
 	}
 
-	public Map<String, String> getIconResourceNames()
+	public Map<String, String> getIcons()
 	{
-		return iconResourceNames;
+		return icons;
 	}
 
-	public void setIconResourceNames(Map<String, String> iconResourceNames)
+	public void setIcons(Map<String, String> icons)
 	{
-		this.iconResourceNames = iconResourceNames;
+		this.icons = icons;
 	}
 
 	@Override
@@ -138,7 +139,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	@Override
 	public String getIconResourceName(String themeName)
 	{
-		if (this.iconResourceNames == null || this.iconResourceNames.isEmpty())
+		if (this.icons == null || this.icons.isEmpty())
 			return null;
 
 		themeName = (themeName == null ? "" : themeName.toLowerCase());
@@ -149,7 +150,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 		Map<String, String> lowerKeyMap = new HashMap<String, String>();
 
-		for (Map.Entry<String, String> entry : this.iconResourceNames.entrySet())
+		for (Map.Entry<String, String> entry : this.icons.entrySet())
 			lowerKeyMap.put(entry.getKey().toLowerCase(), entry.getValue());
 
 		for (Map.Entry<String, String> entry : lowerKeyMap.entrySet())
@@ -173,7 +174,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 		else if (!StringUtil.isEmpty(likeResName))
 			resName = likeResName;
 		else
-			resName = this.iconResourceNames.get(DEFAULT_ICON_THEME_NAME);
+			resName = this.icons.get(DEFAULT_ICON_THEME_NAME);
 
 		if (StringUtil.isEmpty(resName))
 			resName = firstResName;

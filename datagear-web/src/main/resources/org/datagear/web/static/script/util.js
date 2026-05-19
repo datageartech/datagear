@@ -2270,7 +2270,7 @@
 		options);
 		
 		// 后台会处理只保留ChartPlugin.DEFAULT_ICON_THEME_NAME图标名
-		var iconUrl = (chartPlugin && chartPlugin.iconResourceNames ? chartPlugin.iconResourceNames["default"] : null);
+		var iconUrl = (chartPlugin && chartPlugin.icons ? chartPlugin.icons["default"] : null);
 		iconUrl = (iconUrl ? contextPath +"/chartPlugin/icon/" + encodeURIComponent(chartPlugin.id) : null);
 		
 		if(options.iconUrlHandler != null)

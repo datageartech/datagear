@@ -316,12 +316,16 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	 * @param buffer
 	 * @param managerVar
 	 * @param newLine
-	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginAttribute}、{@code org.datagear.analysis.ChartPlugin.attributes}
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPluginAttribute}、
+	 *             {@code org.datagear.analysis.ChartPlugin.attributes}、
+	 *             {@code ChartPlugin.iconResourceNames}
 	 */
 	@Deprecated
 	protected void appendCompatFuncForV5_5_0(String apiVersion, StringBuilder buffer, String managerVar, String newLine)
 	{
 		buffer.append(managerVar + ".compatForV5_5_0 = function(plugin){");
+		buffer.append(newLine);
+		buffer.append("  plugin.iconResourceNames=plugin.icons;");
 		buffer.append(newLine);
 		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + " != null){");
 		buffer.append(newLine);

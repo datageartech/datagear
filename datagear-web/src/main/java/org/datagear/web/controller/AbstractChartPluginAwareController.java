@@ -174,7 +174,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			return null;
 
 		HtmlChartPluginVo vo = new HtmlChartPluginVo(plugin, detail, locale);
-		inflateThemeIconResourceNames(vo, themeName);
+		inflatePluginThemeIcons(vo, themeName);
 
 		return vo;
 	}
@@ -185,7 +185,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return dashboardTheme.getName();
 	}
 
-	protected void inflateThemeIconResourceNames(HtmlChartPlugin plugin, String themeName)
+	protected void inflatePluginThemeIcons(HtmlChartPlugin plugin, String themeName)
 	{
 		if (plugin == null)
 			return;
@@ -193,9 +193,9 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		String iconResName = plugin.getIconResourceName(themeName);
 
 		if (StringUtil.isEmpty(iconResName))
-			plugin.setIconResourceNames(Collections.emptyMap());
+			plugin.setIcons(Collections.emptyMap());
 		else
-			plugin.setIconResourceNames(Collections.singletonMap(ChartPlugin.DEFAULT_ICON_THEME_NAME, iconResName));
+			plugin.setIcons(Collections.singletonMap(ChartPlugin.DEFAULT_ICON_THEME_NAME, iconResName));
 	}
 
 	/**

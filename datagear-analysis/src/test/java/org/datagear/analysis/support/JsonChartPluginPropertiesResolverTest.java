@@ -77,7 +77,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());
 			assertNotNull(chartPlugin.getDescLabel());
-			assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
+			assertNotNull(chartPlugin.getIcons().size() > 0);
 			assertNotNull(chartPlugin.getConfigForm());
 			assertNotNull(chartPlugin.getDataSigns());
 			assertEquals("0.1.0", chartPlugin.getVersion());
@@ -104,7 +104,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				Map<String, String> icons = chartPlugin.getIconResourceNames();
+				Map<String, String> icons = chartPlugin.getIcons();
 
 				assertEquals("icon-0.png", icons.get("LIGHT"));
 				assertEquals("icon-1.png", icons.get("DARK"));
@@ -565,7 +565,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());
 			assertNotNull(chartPlugin.getDescLabel());
-			assertNotNull(chartPlugin.getIconResourceNames().size() > 0);
+			assertNotNull(chartPlugin.getIcons().size() > 0);
 			assertNotNull(chartPlugin.getConfigForm());
 			assertNotNull(chartPlugin.getDataSigns());
 			assertEquals("0.1.0", chartPlugin.getVersion());
@@ -592,7 +592,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				Map<String, String> icons = chartPlugin.getIconResourceNames();
+				Map<String, String> icons = chartPlugin.getIcons();
 
 				assertEquals("icon-0.png", icons.get("LIGHT"));
 				assertEquals("icon-1.png", icons.get("DARK"));
@@ -979,7 +979,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertEquals("pie-chart", chartPlugin.getId());
 			assertNotNull(chartPlugin.getNameLabel());
 			assertNotNull(chartPlugin.getDescLabel());
-			assertTrue(chartPlugin.getIconResourceNames().size() > 0);
+			assertTrue(chartPlugin.getIcons().size() > 0);
 			assertNotNull(chartPlugin.getConfigForm());
 			assertNotNull(chartPlugin.getDataSigns());
 			assertEquals("0.1.0", chartPlugin.getVersion());
@@ -1002,7 +1002,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				Map<String, String> icons = chartPlugin.getIconResourceNames();
+				Map<String, String> icons = chartPlugin.getIcons();
 
 				assertEquals("icon-0.png", icons.get("LIGHT"));
 				assertEquals("icon-1.png", icons.get("DARK"));

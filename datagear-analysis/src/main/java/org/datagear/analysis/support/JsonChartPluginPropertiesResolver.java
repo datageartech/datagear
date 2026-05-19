@@ -68,7 +68,7 @@ import org.datagear.util.i18n.Localizable;
  *   id : "...",
  *   nameLabel : "..." 、 { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  *   descLabel : "..." 、 { ... },
- *   icons : "..." 、 { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
+ *   icons : "..." 、 { "light" : "icons/light.png", "dark" : "icons/dark.png" },
  *   configForm : { ... },
  *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同configForm
  *   dataSigns : [ { ... }, ... ],
@@ -183,7 +183,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		chartPlugin.setId(convertToString(properties.get(JSON_PROPERTY_ID)));
 		chartPlugin.setNameLabel(convertToLabel(properties.get(JSON_PROPERTY_NAME_LABEL)));
 		chartPlugin.setDescLabel(convertToLabel(properties.get(JSON_PROPERTY_DESC_LABEL)));
-		chartPlugin.setIconResourceNames(convertToIconResourceNames(properties.get(JSON_PROPERTY_ICONS)));
+		chartPlugin.setIcons(convertToIcons(properties.get(JSON_PROPERTY_ICONS)));
 
 		if (properties.containsKey(JSON_PROPERTY_CONFIG_FORM))
 			chartPlugin.setConfigForm(convertToConfigForm(properties.get(JSON_PROPERTY_CONFIG_FORM)));
@@ -346,7 +346,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param obj
 	 * @return
 	 */
-	protected Map<String, String> convertToIconResourceNames(Object obj)
+	protected Map<String, String> convertToIcons(Object obj)
 	{
 		if (obj == null)
 		{

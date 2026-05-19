@@ -163,7 +163,7 @@ public class HtmlChartPluginLoaderTest
 			Assert.assertEquals("plugin01", plugin.getId());
 			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
-			Map<String, String> icons = plugin.getIconResourceNames();
+			Map<String, String> icons = plugin.getIcons();
 			Assert.assertEquals(1, icons.size());
 			Assert.assertNotNull(icons.get(ChartPlugin.DEFAULT_ICON_THEME_NAME));
 		}
@@ -173,7 +173,7 @@ public class HtmlChartPluginLoaderTest
 			Assert.assertEquals("plugin02", plugin.getId());
 			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
-			Map<String, String> icons = plugin.getIconResourceNames();
+			Map<String, String> icons = plugin.getIcons();
 			Assert.assertNotNull(icons.get("light"));
 			Assert.assertNotNull(icons.get("dark"));
 		}
@@ -183,7 +183,7 @@ public class HtmlChartPluginLoaderTest
 			Assert.assertEquals("plugin03", plugin.getId());
 			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
-			Map<String, String> icons = plugin.getIconResourceNames();
+			Map<String, String> icons = plugin.getIcons();
 			Assert.assertNotNull(icons.get("light"));
 			Assert.assertNotNull(icons.get("dark"));
 		}
@@ -193,7 +193,7 @@ public class HtmlChartPluginLoaderTest
 			Assert.assertEquals("plugin04", plugin.getId());
 			assertEquals(HtmlChartPluginUsage.NORMAL, plugin.getUsage());
 
-			Map<String, String> icons = plugin.getIconResourceNames();
+			Map<String, String> icons = plugin.getIcons();
 			Assert.assertNotNull(icons.get("light"));
 			Assert.assertNotNull(icons.get("dark"));
 		}
