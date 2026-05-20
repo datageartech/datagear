@@ -2859,20 +2859,19 @@ dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
 
 /**
  * 创建本地图表。
- * 后续版本可能会按需加载图表插件，导致此函数需要异步加载创建图表引用的图表插件，
- * 所以先设计为不直接返回图表对象，而是采用callback的方式。
  * 
  * 支持调用方式：
  * dashboard.createChart(element);
  * dashboard.createChart(element, chartRoot);
- * dashboard.createChart(element, callback);
- * dashboard.createChart(element, chartRoot, callback);
+ * dashboard.createChart(element, add);
+ * dashboard.createChart(element, chartRoot, add);
  * 
  * @param element 用于渲染图表的<div>元素、元素ID
  * @param chartRoot 选填，要创建的图表根对象，结构同DF.createLocalChart()函数的同名参数，如果不设置，将从元素的"dg-chart-local"属性取
- * @param callback 可选，创建成功回调函数，格式为：function(chart){ ... }，返回false时图表将不加入看板。
+ * @param add 可选，是否在创建完成后加入看板，默认值为：true
+ * @returns Promise，兑现时表示已创建完成、且已设置其插件，兑现值为：创建的图表对象
  */
-dashboardProto.createChart = function(element, chartRoot, callback)
+dashboardProto.createChart = function(element, chartRoot, add)
 {
 	element = this._toElementCareId(element);
 	
@@ -2886,16 +2885,17 @@ dashboardProto.createChart = function(element, chartRoot, callback)
 	if(this.chart(element) != null)
 		throw new Error("element has a bounded chart");
 	
-	//(element, callback)
-	if(CF.isFunction(chartRoot))
+	//(element, add)
+	if(chartRoot === true || chartRoot === false)
 	{
-		callback = chartRoot;
+		add = chartRoot;
 		chartRoot = undefined;
 	}
 	
 	if(CF.isEmpty(chartRoot))
 	{
 		chartRoot = DF.elementLocalAttr(element);
+		
 		if(!CF.isEmpty(chartRoot))
 		{
 			chartRoot = DF.evalChartLocalValue(chartRoot);
@@ -2905,42 +2905,48 @@ dashboardProto.createChart = function(element, chartRoot, callback)
 	if(CF.isEmpty(chartRoot))
 		throw new Error("[chartRoot] required");
 	
-	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
-	var add = true;
-	
-	if(callback)
-		add = callback(chart);
+	var promise = new Promise((resolve) =>
+	{
+		var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+		
+		//TODO 与this._initCharts()函数一样，图表插件改为在这里按需异步加载
+		resolve(chart);
+	});
 	
 	if(add !== false)
 	{
-		//应同步图表状态
-		this.addChart(chart, true);
+		promise.then((chart) =>
+		{
+			//应同步图表状态
+			this.addChart(chart, true);
+		});
 	}
+	
+	return promise;
 };
 
 /**
  * 创建本地图表。
- * 后续版本可能会按需加载图表插件，导致此函数需要异步加载创建图表引用的图表插件，
- * 所以先设计为不直接返回图表对象，而是采用callback的方式。
  * 
  * 支持调用方式：
  * dashboard.createCharts(element);
- * dashboard.createCharts(element, chartRoot);
- * dashboard.createCharts(element, callback);
- * dashboard.createCharts(element, chartRoot, callback);
+ * dashboard.createCharts(element, chartRoots);
+ * dashboard.createCharts(element, add);
+ * dashboard.createCharts(element, chartRoots, add);
  * 
  * @param elements 用于渲染图表的<div>元素选择器字符串、<div>元素数组
  * @param chartRoots 选填，要创建的图表根对象数组，结构同DF.createLocalChart()函数的同名参数，如果不设置，将从元素的"dg-chart-local"属性取
- * @param callback 可选，创建成功回调函数，格式为：function(chart){ ... }，返回false时图表将不加入看板。
+ * @param add 可选，是否在创建完成后加入看板，默认值为：true
+ * @returns Promise，兑现时表示已创建完成、且已设置其插件，兑现值为：创建的图表对象数组
  */
-dashboardProto.createCharts = function(elements, chartRoots, callback)
+dashboardProto.createCharts = function(elements, chartRoots, add)
 {
 	elements = this._toElementArray(elements);
 	
-	//(elements, callback)
-	if(CF.isFunction(chartRoots))
+	//(elements, add)
+	if(chartRoots === true || chartRoots === false)
 	{
-		callback = chartRoots;
+		add = chartRoots;
 		chartRoots = undefined;
 	}
 	
@@ -2976,99 +2982,107 @@ dashboardProto.createCharts = function(elements, chartRoots, callback)
 		newChartRoots.push(chartRoot);
 	}
 	
-	var charts = [];
-	
-	for(let i=0; i<elements.length; i++)
+	var promise = new Promise((resolve) =>
 	{
-		let element = elements[i];
-		let chartRoot = newChartRoots[i];
-		let chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
-		charts.push(chart);
-	}
-	
-	var add = true;
-	
-	if(callback)
-		add = callback(charts);
+		var charts = [];
+		
+		for(let i=0; i<elements.length; i++)
+		{
+			let element = elements[i];
+			let chartRoot = newChartRoots[i];
+			let chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+			charts.push(chart);
+		}
+		
+		//TODO 与this._initCharts()函数一样，图表插件改为在这里按需异步加载
+		resolve(charts);
+	});
 	
 	if(add !== false)
 	{
-		//应同步图表状态
-		this.addCharts(charts, true);
+		promise.then((charts) =>
+		{
+			//应同步图表状态
+			this.addCharts(charts, true);
+		});
 	}
+	
+	return promise;
 };
 
 /**
  * 将元素自身或其包含的元素中所有设置了"dg-chart-local"属性、且未初始化为图表的<div>元素创建为本地图表。
- * 后续版本可能会按需加载图表插件，导致此函数需要异步加载创建图表引用的图表插件，
- * 所以先设计为不直接返回图表对象，而是采用callback的方式。
  * 
  * 支持调用方式：
  * dashboard.createUnsolvedCharts();
  * dashboard.createUnsolvedCharts(elements);
- * dashboard.createUnsolvedCharts(callback);
- * dashboard.createUnsolvedCharts(elements, callback);
+ * dashboard.createUnsolvedCharts(add);
+ * dashboard.createUnsolvedCharts(elements, add);
  * 
  * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
- * @param callback 可选，创建成功回调函数，格式为：function(charts){ ... }，返回false时图表将不加入看板。
+ * @param add 可选，是否在创建完成后加入看板，默认值为：true
+ * @returns Promise，兑现时表示已创建完成、且已设置其插件，兑现值为：创建的图表对象数组
  */
-dashboardProto.createUnsolvedCharts = function(elements, callback)
+dashboardProto.createUnsolvedCharts = function(elements, add)
 {
-	//(callback)
-	if(CF.isFunction(elements))
+	//(add)
+	if(elements === true || elements === false)
 	{
-		callback = elements;
+		add = elements;
 		elements = undefined;
 	}
-	
-	//创建图表无需看板已渲染
-	//this._assertAlive();
 	
 	elements = this._toElementArray(elements);
 	elements = (elements == null ? [ document.body ] : elements);
 	
-	var charts = [];
-	
-	for(let i=0; i<elements.length; i++)
+	var promise = new Promise((resolve) =>
 	{
-		let elesWithLocal = DF.elesWithLocal(elements[i]);
-		let eles = elesWithLocal.elements;
-		let locals = elesWithLocal.locals;
+		var charts = [];
 		
-		for(let j=0; j<eles.length; j++)
+		for(let i=0; i<elements.length; i++)
 		{
-			let ele = eles[j];
+			let elesWithLocal = DF.elesWithLocal(elements[i]);
+			let eles = elesWithLocal.elements;
+			let locals = elesWithLocal.locals;
 			
-			if(this.renderedChart(ele) != null)
-				continue;
-			
-			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
-			if(this.chart(ele) != null)
-				continue;
-			
-			let chartRoot = locals[j];
-			
-			if(!CF.isEmpty(chartRoot))
-				chartRoot = DF.evalChartLocalValue(chartRoot);
-			
-			if(CF.isEmpty(chartRoot))
-				continue;
-			
-			let localChart = DF.createLocalChart(ele, chartRoot, this.renderContext(), this);
-			charts.push(localChart);
+			for(let j=0; j<eles.length; j++)
+			{
+				let ele = eles[j];
+				
+				if(this.renderedChart(ele) != null)
+					continue;
+				
+				//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
+				if(this.chart(ele) != null)
+					continue;
+				
+				let chartRoot = locals[j];
+				
+				if(!CF.isEmpty(chartRoot))
+					chartRoot = DF.evalChartLocalValue(chartRoot);
+				
+				if(CF.isEmpty(chartRoot))
+					continue;
+				
+				let localChart = DF.createLocalChart(ele, chartRoot, this.renderContext(), this);
+				charts.push(localChart);
+			}
 		}
-	}
-	
-	var add = true;
-	
-	if(callback)
-		add = callback(charts);
+		
+		//TODO 与this._initCharts()函数一样，图表插件改为在这里按需异步加载
+		resolve(charts);
+	});
 	
 	if(add !== false)
 	{
-		//应同步图表状态
-		this.addCharts(charts, true);
+		promise.then((charts) =>
+		{
+			//应同步图表状态
+			this.addCharts(charts, true);
+		});
 	}
+	
+	return promise;
 };
 
 /**
