@@ -914,6 +914,8 @@ chartProto.updater = function(updater)
  *       |                       |                                          |
  *       |                       |---------------------<--------------------| 
  *       |------------------------------<-----------------------------------| 
+ * 
+ * @returns Promise 兑现时表示初始化已完成
  */
 dashboardProto.init = function()
 {
@@ -922,20 +924,30 @@ dashboardProto.init = function()
 	if(!this.renderContext())
 		throw new Error("dashboard renderContext required");
 	
-	if(!this._statusPreInit() && !this._statusDestroyed())
+	var validStatus = (this._statusPreInit() || this._statusDestroyed());
+	
+	if(!validStatus)
 		throw new Error("dashboard is illegal state for : init()");
 	
 	this._statusIniting(true);
 	
-	this._initRenderContext();
-	this._initListener();
-	this._initMapHandler();
-	this._initUpdater();
-	this._initChartResizeHandler();
-	this._initUnloadDashboardHandler();
-	this._initCharts();
+	var initPromise = new Promise((resolve) =>
+	{
+		this._initRenderContext();
+		this._initListener();
+		this._initMapHandler();
+		this._initUpdater();
+		this._initChartResizeHandler();
+		this._initUnloadDashboardHandler();
+		
+		var initChartsPromise = this._initCharts();
+		initChartsPromise.then(() => { this._statusInited(true); });
+		
+		resolve(initChartsPromise);
+	});
 	
-	this._statusInited(true);
+	this._initPromise = initPromise;
+	return initPromise;
 };
 
 /**
@@ -1052,20 +1064,31 @@ dashboardProto._initUnloadDashboardHandler = function()
 
 dashboardProto._initCharts = function()
 {
-	var charts = this.charts();
+	//TODO 图表插件改为在这里按需异步加载，以解决目前预先加载全部插件可能带来的问题，
+	//比如：某些插件体积过大导致页面加载缓慢、未来添加用户私有插件管理功能而无法预先全部加载等等。
+	//注意：图表插件用途为"lib"的仍应预先全部加载，因为chart.loadLib()内部逻辑需要。
 	
-	for(let i=0; i<charts.length; i++)
+	var promise = new Promise((resolve) =>
 	{
-		let chart = charts[i];
+		var charts = this.charts();
 		
-		if(this._isChartRejectInit(chart))
-			continue;
-		
-		if(chart.statusPreInit() || chart.statusDestroyed())
+		for(let i=0; i<charts.length; i++)
 		{
-			this._initChart(chart);
+			let chart = charts[i];
+			
+			if(this._isChartRejectInit(chart))
+				continue;
+			
+			if(chart.statusPreInit() || chart.statusDestroyed())
+			{
+				this._initChart(chart);
+			}
 		}
-	}
+		
+		resolve(true);
+	});
+	
+	return promise;
 };
 
 dashboardProto._isChartRejectInit = function(chart)
@@ -1411,27 +1434,48 @@ dashboardProto.updater = function(updater)
  * 此函数在看板生命周期内仅允许调用一次，在dashboard.destroy()后允许再次调用。
  * 
  * 注意：当处于this._statusPreInit()时，此函数内部会先调用this.init()函数。
+ * 
+ * @returns Promise 兑现时表示渲染已完成
  */
 dashboardProto.render = function()
 {
-	if(this._statusPreInit())
-		this.init();
+	var validStatus = (this._statusPreInit() || this._statusIniting()
+			|| this._statusInited() || this._statusDestroyed());
 	
-	if(!this._statusInited() && !this._statusDestroyed())
+	if(!validStatus)
 		throw new Error("dashboard is illegal state for : render()");
 	
-	this._statusRendering(true);
+	var initPromise = null;
 	
-	var doRender = true;
+	if(this._statusPreInit())
+		initPromise = this.init();
+	else
+		initPromise = this._initPromise;
 	
-	var listener = this.listener();
-	if(listener && listener.onRender)
-		doRender = listener.onRender(this);
+	if(initPromise == null || this._renderExecuting)
+		throw new Error("dashboard is illegal state for : render()");
 	
-	if(doRender !== false)
+	this._renderExecuting = true;
+	
+	var renderPromise = initPromise.then(() =>
 	{
-		this.doRender();
-	}
+		this._statusRendering(true);
+		
+		var doRender = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onRender)
+			doRender = listener.onRender(this);
+		
+		//如果listener.onRender()返回false，表示在其内部已执行了this.doRender()函数，这里不应再执行
+		if(doRender !== false)
+			this.doRender();
+		
+		return true;
+	});
+	
+	this._renderPromise = renderPromise;
+	return renderPromise;
 };
 
 /**
@@ -1443,11 +1487,18 @@ dashboardProto.doRender = function()
 	if(!this._statusRendering())
 		throw new Error("dashboard is illegal state for : doRender()");
 	
-	this._renderForms();
-	this._prepareDoRenderCharts();
-	this.startHandleCharts();
-	
-	this._statusRendered(true);
+	try
+	{
+		this._renderForms();
+		this._prepareDoRenderCharts();
+		this.startHandleCharts();
+		
+		this._statusRendered(true);
+	}
+	finally
+	{
+		this._renderExecuting = false;
+	}
 };
 
 dashboardProto._prepareDoRenderCharts = function()
@@ -2829,7 +2880,7 @@ dashboardProto.createChart = function(element, chartRoot, callback)
 		throw new Error("chart element must be : <"+CF.CHART_TAG_NAME+">");
 	
 	if(this.renderedChart(element) != null)
-		throw new Error("element has a rendered chart");
+		throw new Error("element has a bounded chart");
 	
 	//看板中可能存在已初始化但是未渲染的图表，也不应允许异步加载
 	if(this.chart(element) != null)
@@ -3236,11 +3287,14 @@ dashboardProto.user = function()
 /**
  * 销毁看板，销毁所有看板表单、所有图表。
  * 
- * @returns true 正常执行销毁；false 未执行销毁，因为看板处于销毁非法状态
+ * @returns true 已销毁；false 未执行，因为看板处于销毁非法状态
  */
 dashboardProto.destroy = function()
 {
-	if(!this.isAlive() || this._statusDestroying() || this._statusDestroyed())
+	if(this._statusDestroyed())
+		return true;
+	
+	if(!this.isActive() || this._statusDestroying())
 		return false;
 	
 	this._statusDestroying(true);
@@ -3251,10 +3305,9 @@ dashboardProto.destroy = function()
 	if(listener && listener.onDestroy)
 		doDestroy = listener.onDestroy(this);
 	
+	//如果listener.onDestroy()返回false，表示在其内部已执行了this.doDestroy()函数，这里不应再执行
 	if(doDestroy !== false)
-	{
 		this.doDestroy();
-	}
 	
 	return true;
 };

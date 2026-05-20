@@ -6453,6 +6453,11 @@ CF.isStringOrNumber = function(v)
 	return (type === "string" || type === "number");
 };
 
+CF.isPromise = function(v)
+{
+	return (v != null && (v instanceof Promise));
+};
+
 //是否为null、undefined、空字符串、空数组
 CF.isEmpty = function(v)
 {
