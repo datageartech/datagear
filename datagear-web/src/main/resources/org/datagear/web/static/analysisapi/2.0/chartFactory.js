@@ -43,7 +43,7 @@
  * 
  * 此图表工厂支持为图表元素添加elementAttrConst.RENDERER属性来自定义、扩展图表渲染器，具体参考chart.renderer()函数说明。
  * 
- * 此图表工厂要求图表插件的图表渲染器（chart.plugin().renderer）格式为：
+ * 此图表工厂要求图表插件（可选）的图表渲染器（chart.plugin().renderer）格式为：
  * {
  *   //可选，渲染器依赖库，具体结构参考CF.loadLib()函数说明
  *   //注意库源URL规范不同，具体参考CF.trimPluginRendererLib()函数说明
@@ -475,6 +475,7 @@ CF.create = function(root)
 
 /**
  * 创建图表类实例。
+ * 注意：创建后还应先执行chart.plugin(plugin)或chart.renderer(renderer)函数，才能渲染图表。
  * 
  * @param root 图表根对象，格式应为：
  *				{
@@ -486,8 +487,6 @@ CF.create = function(root)
  *				  elementId: "...",
  *				  //渲染上下文
  *				  renderContext: {...},
- *				  //可选，图表插件ID对象、插件ID字符串
- *				  plugin: { id: "..." }、"...",
  *				  //可选，数据集绑定数组
  *				  dataSetBinds: [...],
  *				  //可选，更新间隔
@@ -504,12 +503,6 @@ CF.Chart = function(root)
 {
 	CF.initChartRoot(root);
 	this._root = root;
-	
-	if(root.plugin != null)
-	{
-		let pluginId = (CF.isString(root.plugin) ? root.plugin : root.plugin.id);
-		this._plugin = (pluginId == null ? null : CF.findPluginById(pluginId));
-	}
 };
 
 //Chart类原型

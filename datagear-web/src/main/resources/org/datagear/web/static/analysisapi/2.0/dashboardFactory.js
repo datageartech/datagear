@@ -432,6 +432,38 @@ DF.createLocalChart = function(ele, chartRoot, renderContext, dashboard)
 	return chart;
 };
 
+//异步加载和填充图表插件，读取chart._root.plugin信息（参考org.datagear.analysis.support.html.HtmlChart类），
+//加载插件，调用chart.plugin(plugin)设置
+DF.inflateChartPlugin = function(charts)
+{
+	var chartArray = (CF.isArray(charts) ? charts : [ charts ]);
+	
+	var promise = new Promise((resolve) =>
+	{
+		//TODO 图表插件改为在这里按需异步加载，以解决目前预先加载全部插件可能带来的问题，
+		//比如：某些插件体积过大导致页面加载缓慢、未来添加用户私有插件管理功能而无法预先全部加载等等。
+		//注意：图表插件用途为"lib"的仍应预先全部加载，因为chart.loadLib()内部逻辑需要。
+		
+		for(let i=0; i<chartArray.length; i++)
+		{
+			let chart = chartArray[i];
+			
+			if(chart.plugin() == null)
+			{
+				let chartRoot = chart._root;
+				let plugin = chartRoot.plugin;
+				let pluginId = (plugin == null ? null : (CF.isString(plugin) ? plugin : plugin.id));
+				plugin = (pluginId == null ? null : CF.findPluginById(pluginId));
+				chart.plugin(plugin);
+			}
+		}
+		
+		resolve(charts);
+	});
+	
+	return promise;
+};
+
 //----------------------------------------
 // Chart prototype start
 //----------------------------------------
@@ -1115,32 +1147,7 @@ dashboardProto._initChart = function(chart)
 
 dashboardProto._inflateChartPlugin = function(charts)
 {
-	var chartArray = (CF.isArray(charts) ? charts : [ charts ]);
-	
-	var promise = new Promise((resolve) =>
-	{
-		//TODO 图表插件改为在这里按需异步加载，以解决目前预先加载全部插件可能带来的问题，
-		//比如：某些插件体积过大导致页面加载缓慢、未来添加用户私有插件管理功能而无法预先全部加载等等。
-		//注意：图表插件用途为"lib"的仍应预先全部加载，因为chart.loadLib()内部逻辑需要。
-		
-		for(let i=0; i<chartArray.length; i++)
-		{
-			let chart = chartArray[i];
-			
-			if(chart.plugin() == null)
-			{
-				let chartRoot = chart._root;
-				let plugin = chartRoot.plugin;
-				let pluginId = (plugin == null ? null : (CF.isString(plugin) ? plugin : plugin.id));
-				plugin = (pluginId == null ? null : CF.findPluginById(pluginId));
-				chart.plugin(plugin);
-			}
-		}
-		
-		resolve(charts);
-	});
-	
-	return promise;
+	return DF.inflateChartPlugin(charts);
 };
 
 /**
