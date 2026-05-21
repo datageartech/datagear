@@ -944,7 +944,6 @@ dashboardProto.init = function()
 		initChartsPromise = initChartsPromise.then(() =>
 		{
 			this._statusInited(true);
-			return true;
 		});
 		
 		resolve(initChartsPromise);
@@ -1068,10 +1067,9 @@ dashboardProto._initUnloadDashboardHandler = function()
 
 dashboardProto._initCharts = function()
 {
-	var charts = this.charts();
-	var promise = this._inflateChartPlugins(charts);
+	var promise = this._inflateChartPlugin(this.charts());
 	
-	promise = promise.then(() =>
+	promise = promise.then((charts) =>
 	{
 		for(let i=0; i<charts.length; i++)
 		{
@@ -1086,7 +1084,7 @@ dashboardProto._initCharts = function()
 			}
 		}
 		
-		return true;
+		return charts;
 	});
 	
 	return promise;
@@ -1115,9 +1113,9 @@ dashboardProto._initChart = function(chart)
 	});
 };
 
-dashboardProto._inflateChartPlugins = function(charts)
+dashboardProto._inflateChartPlugin = function(charts)
 {
-	charts = (CF.isArray(charts) ? charts : [ charts ]);
+	var chartArray = (CF.isArray(charts) ? charts : [ charts ]);
 	
 	var promise = new Promise((resolve) =>
 	{
@@ -1125,9 +1123,9 @@ dashboardProto._inflateChartPlugins = function(charts)
 		//比如：某些插件体积过大导致页面加载缓慢、未来添加用户私有插件管理功能而无法预先全部加载等等。
 		//注意：图表插件用途为"lib"的仍应预先全部加载，因为chart.loadLib()内部逻辑需要。
 		
-		for(let i=0; i<charts.length; i++)
+		for(let i=0; i<chartArray.length; i++)
 		{
-			let chart = charts[i];
+			let chart = chartArray[i];
 			
 			if(chart.plugin() == null)
 			{
@@ -1139,7 +1137,7 @@ dashboardProto._inflateChartPlugins = function(charts)
 			}
 		}
 		
-		resolve(true);
+		resolve(charts);
 	});
 	
 	return promise;
@@ -2569,42 +2567,39 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * 支持调用方式：
  * dashboard.loadChart(element);
  * dashboard.loadChart(element, chartWidgetId);
- * dashboard.loadChart(element, successCallback);
- * dashboard.loadChart(element, chartWidgetId, successCallback);
+ * dashboard.loadChart(element, add);
+ * dashboard.loadChart(element, chartWidgetId, add);
  * 
  * @param element 用于渲染图表的<div>元素、元素ID
  * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(chart){ ... }，返回false时图表将不加入看板。
- * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
+ * @param add 可选，是否在加载完成后加入看板，默认值为：true
+ * @returns Promise 兑现时表示已加载完成，兑现值为：已加载的图表
  */
-dashboardProto.loadChart = function(element, chartWidgetId, successCallback, errorCallback)
+dashboardProto.loadChart = function(element, chartWidgetId, add)
 {
-	//异步加载无需看板已渲染
-	//this._assertAlive();
+	//(element, add)
+	if(chartWidgetId === true || chartWidgetId === false)
+	{
+		add = chartWidgetId;
+		chartWidgetId = undefined;
+	}
 	
 	element = this._toElementCareId(element);
 	
 	if(!CF.isChartTagName(element))
 		throw new Error("load chart element must be : <"+CF.CHART_TAG_NAME+">");
 	
-	// (element, successCallback)
-	if(CF.isFunction(chartWidgetId))
-	{
-		errorCallback = successCallback
-		successCallback = chartWidgetId;
-		chartWidgetId = null;
-	}
-	
 	if(!chartWidgetId)
 		chartWidgetId = CF.elementWidgetId(element);
 	
-	this._loadCharts([ element ], [ chartWidgetId ],
-	(charts) =>
+	var promise = this._loadCharts([ element ], [ chartWidgetId ], add);
+	
+	promise = promise.then((charts) =>
 	{
-		if(successCallback)
-			return successCallback(charts[0]);
-	},
-	errorCallback);
+		return charts[0];
+	});
+	
+	return promise;
 };
 
 /**
@@ -2613,28 +2608,24 @@ dashboardProto.loadChart = function(element, chartWidgetId, successCallback, err
  * 支持调用方式：
  * dashboard.loadCharts(elements);
  * dashboard.loadCharts(elements, chartWidgetIds);
- * dashboard.loadCharts(elements, successCallback);
- * dashboard.loadCharts(elements, chartWidgetIds, successCallback);
+ * dashboard.loadCharts(elements, add);
+ * dashboard.loadCharts(elements, chartWidgetIds, add);
  * 
  * @param elements 用于渲染图表的<div>元素选择器字符串、<div>元素数组
  * @param chartWidgetIds 可选，要加载的图表部件ID数组，如果不设置，将从元素的"dg-chart-widget"属性取
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回值false时图表将不加入看板。
- * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
+ * @param add 可选，是否在加载完成后加入看板，默认值为：true
+ * @returns Promise 兑现时表示已加载完成，兑现值为：已加载的图表数组
  */
-dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
+dashboardProto.loadCharts = function(elements, chartWidgetIds, add)
 {
-	//异步加载无需看板已渲染
-	//this._assertAlive();
+	//(elements, add)
+	if(chartWidgetIds === true || chartWidgetIds === false)
+	{
+		add = chartWidgetIds;
+		chartWidgetIds = undefined;
+	}
 	
 	elements = this._toElementArray(elements);
-	
-	// (elements, successCallback)
-	if(CF.isFunction(chartWidgetIds))
-	{
-		errorCallback = successCallback
-		successCallback = chartWidgetIds;
-		chartWidgetIds = null;
-	}
 	
 	var newChartWidgetIds = [];
 	
@@ -2649,7 +2640,8 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, successCallback, 
 			newChartWidgetIds[i] = CF.elementWidgetId(elements[i]);
 	}
 	
-	this._loadCharts(elements, newChartWidgetIds, successCallback, errorCallback);
+	var promise = this._loadCharts(elements, newChartWidgetIds, add);
+	return promise;
 };
 
 dashboardProto._toElementCareId = function(element)
@@ -2698,26 +2690,20 @@ dashboardProto._toElementArray = function(elements)
  * 支持调用方式：
  * dashboard.loadUnsolvedCharts();
  * dashboard.loadUnsolvedCharts(element);
- * dashboard.loadUnsolvedCharts(successCallback);
- * dashboard.loadUnsolvedCharts(element, successCallback);
- * dashboard.loadUnsolvedCharts(element, successCallback, errorCallback);
+ * dashboard.loadUnsolvedCharts(add);
+ * dashboard.loadUnsolvedCharts(element, add);
  * 
  * @param elements 可选，限定查找的根HTML元素选择器字符串、根HTML元素数组、根HTML元素，默认为：<body>元素
- * @param successCallback 选填，图表加载成功回调函数：function(charts){ ... }，返回false时图表将不加入看板。
- * @param errorCallback 选填，图表加载失败回调函数：function(error){ ... }
- * @return 要异步加载的HTML元素数组
+ * @param add 可选，是否在加载完成后加入看板，默认值为：true
+ * @returns Promise 兑现时表示已加载完成，兑现值为：已加载的图表数组
  */
-dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCallback)
+dashboardProto.loadUnsolvedCharts = function(elements, add)
 {
-	//异步加载无需看板已渲染
-	//this._assertAlive();
-	
-	// (successCallback)
-	if(CF.isFunction(elements))
+	//(add)
+	if(elements === true || elements === false)
 	{
-		errorCallback = successCallback
-		successCallback = elements;
-		elements = null;
+		add = elements;
+		elements = undefined;
 	}
 	
 	elements = this._toElementArray(elements);
@@ -2749,12 +2735,8 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
 		}
 	}
 	
-	if(unsolvedEles.length > 0)
-	{
-		this._loadCharts(unsolvedEles, unsolvedWidgetIds, successCallback, errorCallback);
-	}
-	
-	return unsolvedEles;
+	var promise = this._loadCharts(unsolvedEles, unsolvedWidgetIds, add);
+	return promise;
 };
 
 /**
@@ -2762,11 +2744,17 @@ dashboardProto.loadUnsolvedCharts = function(elements, successCallback, errorCal
  * 
  * @param elements HTML元素数组
  * @param chartWidgetIds 图表部件ID数组，与上面一一对应
- * @param successCallback 选填，加载成功回调函数：function(charts){ ... }，返回false时图表将不加入看板。
- * @param errorCallback 选填，加载失败回调函数：function(error){ ... }
+ * @param add 可选，是否在加载完成后加入看板，默认值为：true
+ * @returns Promise 兑现时表示已加载完成，兑现值为：已加载的图表数组
  */
-dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback, errorCallback)
+dashboardProto._loadCharts = function(elements, chartWidgetIds, add)
 {
+	if(CF.isEmpty(elements))
+	{
+		let promise = new Promise((resolve) => { resolve([]); });
+		return promise;
+	}
+	
 	var elementsLen = elements.length;
 	for(let i=0; i<elementsLen; i++)
 	{
@@ -2802,48 +2790,51 @@ dashboardProto._loadCharts = function(elements, chartWidgetIds, successCallback,
 	
 	this._loadingChartElement(elements, true);
 	
-	fetch(loadChartURL, DF.fetchOptsOfPostForm(formData))
+	var promise = fetch(loadChartURL, DF.fetchOptsOfPostForm(formData))
 	.then((response) =>
 	{
 		if(!response.ok)
 			throw new Error(DF.msgOfResponse(response));
 		
+		return response.json();
+	})
+	.then((data) =>
+	{
+		let chartRoots = (data || []);
+		let charts = [];
+		
+		for(let i=0; i<chartRoots.length; i++)
+		{
+			charts[i] = this._createLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
+		}
+		
 		this._loadingChartElement(elements, false);
 		
-		let re = response.json();
+		return charts;
+	})
+	.then((charts) =>
+	{
+		var icpPromise = this._inflateChartPlugin(charts);
 		
-		re.then((data) =>
+		if(add !== false)
 		{
-			let chartRoots = (data || []);
-			let charts = [];
-			
-			for(let i=0; i<chartRoots.length; i++)
-			{
-				charts[i] = this._createLoadedChart(chartRoots[i], elements[i], chartWidgetIds[i]);
-			}
-			
-			let callbackResult = true;
-			
-			if(successCallback != null)
-				callbackResult = successCallback(charts);
-			
-			//返回非false，则加入看板
-			if(callbackResult !== false)
+			icpPromise = icpPromise.then((charts) =>
 			{
 				//应同步图表状态
 				this.addCharts(charts, true);
-			}
-		});
+				return charts;
+			});
+		}
 		
-		return re;
+		return icpPromise;
 	})
 	.catch((error) =>
 	{
 		this._loadingChartElement(elements, false);
-		
-		if(errorCallback != null)
-			errorCallback(error);
+		return error;
 	});
+	
+	return promise;
 };
 
 //获取单个/设置多个HTML元素是否正在加载图表
@@ -2937,18 +2928,17 @@ dashboardProto.createChart = function(element, chartRoot, add)
 		throw new Error("[chartRoot] required");
 	
 	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
-	var promise = this._inflateChartPlugins(chart);
+	var promise = this._inflateChartPlugin(chart);
 	
-	promise = promise.then(() =>
+	if(add !== false)
 	{
-		if(add !== false)
+		promise = promise.then((chart) =>
 		{
 			//应同步图表状态
 			this.addChart(chart, true);
-		}
-		
-		return chart;
-	});
+			return chart;
+		});
+	}
 	
 	return promise;
 };
@@ -3020,18 +3010,17 @@ dashboardProto.createCharts = function(elements, chartRoots, add)
 		charts.push(chart);
 	}
 	
-	var promise = this._inflateChartPlugins(charts);
+	var promise = this._inflateChartPlugin(charts);
 	
-	promise = promise.then(() =>
+	if(add !== false)
 	{
-		if(add !== false)
+		promise = promise.then((charts) =>
 		{
 			//应同步图表状态
 			this.addCharts(charts, true);
-		}
-		
-		return charts;
-	});
+			return charts;
+		});
+	}
 	
 	return promise;
 };
@@ -3093,18 +3082,17 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 		}
 	}
 	
-	var promise = this._inflateChartPlugins(charts);
+	var promise = this._inflateChartPlugin(charts);
 	
-	promise = promise.then(() =>
+	if(add !== false)
 	{
-		if(add !== false)
+		promise = promise.then((charts) =>
 		{
 			//应同步图表状态
 			this.addCharts(charts, true);
-		}
-		
-		return charts;
-	});
+			return charts;
+		});
+	}
 	
 	return promise;
 };
