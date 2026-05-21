@@ -1107,12 +1107,12 @@ dashboardProto._initCharts = function()
 		{
 			let chart = charts[i];
 			
-			if(this._isChartRejectInit(chart))
-				continue;
-			
 			if(chart.statusPreInit() || chart.statusDestroyed())
 			{
-				this._initChart(chart);
+				if(!this._isChartRejectInit(chart))
+				{
+					this._initChart(chart);
+				}
 			}
 		}
 		
@@ -1346,24 +1346,24 @@ dashboardProto._syncAddedChartsStatus = function(charts)
 	{
 		let chart = charts[i];
 		
-		if(this._isChartRejectInit(chart))
-			continue;
-		
 		if(chart.statusPreInit())
 		{
-			CF.executeSilently(() =>
+			if(!this._isChartRejectInit(chart))
 			{
-				//应设为与看板状态保持一致
-				if(this._statusInited())
+				CF.executeSilently(() =>
 				{
-					chart.init();
-				}
-				else if(this.isAlive())
-				{
-					chart.init();
-					chart.statusPreRender(true);
-				}
-			});
+					//应设为与看板状态保持一致
+					if(this._statusInited())
+					{
+						chart.init();
+					}
+					else if(this.isAlive())
+					{
+						chart.init();
+						chart.statusPreRender(true);
+					}
+				});
+			}
 		}
 	}
 };
@@ -1497,6 +1497,10 @@ dashboardProto.render = function()
 	{
 		this._statusRendering(true);
 		
+		//确保在listener.onRender()之前所有必要的图表都已初始化完（比如在dashboard.destroy()后添加的图表），
+		//使得在listener.onRender()可以最终修改已初始化的图表信息
+		this._checkAndInitChartsBeforeRender();
+		
 		var doRender = true;
 		
 		var listener = this.listener();
@@ -1512,6 +1516,24 @@ dashboardProto.render = function()
 	
 	this._renderPromise = renderPromise;
 	return renderPromise;
+};
+
+dashboardProto._checkAndInitChartsBeforeRender = function()
+{
+	var charts = this.charts();
+	
+	for(let i=0; i<charts.length; i++)
+	{
+		let chart = charts[i];
+		
+		if(chart.statusPreInit())
+		{
+			if(!this._isChartRejectInit(chart))
+			{
+				this._initChart(chart);
+			}
+		}
+	}
 };
 
 /**
@@ -1545,15 +1567,12 @@ dashboardProto._prepareDoRenderCharts = function()
 	{
 		let chart = charts[i];
 		
-		if(this._isChartRejectInit(chart))
-			continue;
-		
-		if(chart.statusPreInit())
-			this._initChart(chart);
-		
 		if(chart.statusInited() || chart.statusDestroyed())
 		{
-			chart.statusPreRender(true);
+			if(!this._isChartRejectInit(chart))
+			{
+				chart.statusPreRender(true);
+			}
 		}
 	}
 };
