@@ -941,7 +941,11 @@ dashboardProto.init = function()
 		this._initUnloadDashboardHandler();
 		
 		var initChartsPromise = this._initCharts();
-		initChartsPromise.then(() => { this._statusInited(true); });
+		initChartsPromise = initChartsPromise.then(() =>
+		{
+			this._statusInited(true);
+			return true;
+		});
 		
 		resolve(initChartsPromise);
 	});
@@ -1064,14 +1068,11 @@ dashboardProto._initUnloadDashboardHandler = function()
 
 dashboardProto._initCharts = function()
 {
-	//TODO 图表插件改为在这里按需异步加载，以解决目前预先加载全部插件可能带来的问题，
-	//比如：某些插件体积过大导致页面加载缓慢、未来添加用户私有插件管理功能而无法预先全部加载等等。
-	//注意：图表插件用途为"lib"的仍应预先全部加载，因为chart.loadLib()内部逻辑需要。
+	var charts = this.charts();
+	var promise = this._inflateChartPlugins(charts);
 	
-	var promise = new Promise((resolve) =>
+	promise = promise.then(() =>
 	{
-		var charts = this.charts();
-		
 		for(let i=0; i<charts.length; i++)
 		{
 			let chart = charts[i];
@@ -1085,7 +1086,7 @@ dashboardProto._initCharts = function()
 			}
 		}
 		
-		resolve(true);
+		return true;
 	});
 	
 	return promise;
@@ -1112,6 +1113,36 @@ dashboardProto._initChart = function(chart)
 	{
 		chart.init();
 	});
+};
+
+dashboardProto._inflateChartPlugins = function(charts)
+{
+	charts = (CF.isArray(charts) ? charts : [ charts ]);
+	
+	var promise = new Promise((resolve) =>
+	{
+		//TODO 图表插件改为在这里按需异步加载，以解决目前预先加载全部插件可能带来的问题，
+		//比如：某些插件体积过大导致页面加载缓慢、未来添加用户私有插件管理功能而无法预先全部加载等等。
+		//注意：图表插件用途为"lib"的仍应预先全部加载，因为chart.loadLib()内部逻辑需要。
+		
+		for(let i=0; i<charts.length; i++)
+		{
+			let chart = charts[i];
+			
+			if(chart.plugin() == null)
+			{
+				let chartRoot = chart._root;
+				let plugin = chartRoot.plugin;
+				let pluginId = (plugin == null ? null : (CF.isString(plugin) ? plugin : plugin.id));
+				plugin = (pluginId == null ? null : CF.findPluginById(pluginId));
+				chart.plugin(plugin);
+			}
+		}
+		
+		resolve(true);
+	});
+	
+	return promise;
 };
 
 /**
@@ -2905,22 +2936,19 @@ dashboardProto.createChart = function(element, chartRoot, add)
 	if(CF.isEmpty(chartRoot))
 		throw new Error("[chartRoot] required");
 	
-	var promise = new Promise((resolve) =>
-	{
-		var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
-		
-		//TODO 与this._initCharts()函数一样，图表插件改为在这里按需异步加载
-		resolve(chart);
-	});
+	var chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+	var promise = this._inflateChartPlugins(chart);
 	
-	if(add !== false)
+	promise = promise.then(() =>
 	{
-		promise.then((chart) =>
+		if(add !== false)
 		{
 			//应同步图表状态
 			this.addChart(chart, true);
-		});
-	}
+		}
+		
+		return chart;
+	});
 	
 	return promise;
 };
@@ -2982,30 +3010,28 @@ dashboardProto.createCharts = function(elements, chartRoots, add)
 		newChartRoots.push(chartRoot);
 	}
 	
-	var promise = new Promise((resolve) =>
-	{
-		var charts = [];
-		
-		for(let i=0; i<elements.length; i++)
-		{
-			let element = elements[i];
-			let chartRoot = newChartRoots[i];
-			let chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
-			charts.push(chart);
-		}
-		
-		//TODO 与this._initCharts()函数一样，图表插件改为在这里按需异步加载
-		resolve(charts);
-	});
+	var charts = [];
 	
-	if(add !== false)
+	for(let i=0; i<elements.length; i++)
 	{
-		promise.then((charts) =>
+		let element = elements[i];
+		let chartRoot = newChartRoots[i];
+		let chart = DF.createLocalChart(element, chartRoot, this.renderContext(), this);
+		charts.push(chart);
+	}
+	
+	var promise = this._inflateChartPlugins(charts);
+	
+	promise = promise.then(() =>
+	{
+		if(add !== false)
 		{
 			//应同步图表状态
 			this.addCharts(charts, true);
-		});
-	}
+		}
+		
+		return charts;
+	});
 	
 	return promise;
 };
@@ -3035,52 +3061,50 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	elements = this._toElementArray(elements);
 	elements = (elements == null ? [ document.body ] : elements);
 	
-	var promise = new Promise((resolve) =>
-	{
-		var charts = [];
-		
-		for(let i=0; i<elements.length; i++)
-		{
-			let elesWithLocal = DF.elesWithLocal(elements[i]);
-			let eles = elesWithLocal.elements;
-			let locals = elesWithLocal.locals;
-			
-			for(let j=0; j<eles.length; j++)
-			{
-				let ele = eles[j];
-				
-				if(this.renderedChart(ele) != null)
-					continue;
-				
-				//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
-				if(this.chart(ele) != null)
-					continue;
-				
-				let chartRoot = locals[j];
-				
-				if(!CF.isEmpty(chartRoot))
-					chartRoot = DF.evalChartLocalValue(chartRoot);
-				
-				if(CF.isEmpty(chartRoot))
-					continue;
-				
-				let localChart = DF.createLocalChart(ele, chartRoot, this.renderContext(), this);
-				charts.push(localChart);
-			}
-		}
-		
-		//TODO 与this._initCharts()函数一样，图表插件改为在这里按需异步加载
-		resolve(charts);
-	});
+	var charts = [];
 	
-	if(add !== false)
+	for(let i=0; i<elements.length; i++)
 	{
-		promise.then((charts) =>
+		let elesWithLocal = DF.elesWithLocal(elements[i]);
+		let eles = elesWithLocal.elements;
+		let locals = elesWithLocal.locals;
+		
+		for(let j=0; j<eles.length; j++)
+		{
+			let ele = eles[j];
+			
+			if(this.renderedChart(ele) != null)
+				continue;
+			
+			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
+			if(this.chart(ele) != null)
+				continue;
+			
+			let chartRoot = locals[j];
+			
+			if(!CF.isEmpty(chartRoot))
+				chartRoot = DF.evalChartLocalValue(chartRoot);
+			
+			if(CF.isEmpty(chartRoot))
+				continue;
+			
+			let localChart = DF.createLocalChart(ele, chartRoot, this.renderContext(), this);
+			charts.push(localChart);
+		}
+	}
+	
+	var promise = this._inflateChartPlugins(charts);
+	
+	promise = promise.then(() =>
+	{
+		if(add !== false)
 		{
 			//应同步图表状态
 			this.addCharts(charts, true);
-		});
-	}
+		}
+		
+		return charts;
+	});
 	
 	return promise;
 };
