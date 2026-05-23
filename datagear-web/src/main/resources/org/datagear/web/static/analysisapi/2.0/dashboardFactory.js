@@ -1270,7 +1270,7 @@ dashboardProto._chartIndex = function(charts, identity)
 
 /**
  * 将单个图表添加至看板。
- * 如果图表已添加至看板，或者图表HTML元素已被看板中的其他图表使用，将不会再次添加，直接返回false。
+ * 如果图表已添加至看板，将不会再次添加，直接返回false。
  * 
  * @param chart 图表对象
  * @param syncStatus 可选，是否同步图表状态，默认值为：false
@@ -1278,14 +1278,9 @@ dashboardProto._chartIndex = function(charts, identity)
  */
 dashboardProto.addChart = function(chart, syncStatus)
 {
-	var exists = this.chart(chart);
+	var idx = this.chartIndex(chart);
 	
-	if(exists != null)
-		return false;
-	
-	exists = this.chart(chart.elementId());
-	
-	if(exists != null)
+	if(idx >= 0)
 		return false;
 	
 	var charts = this.charts();
@@ -1299,7 +1294,7 @@ dashboardProto.addChart = function(chart, syncStatus)
 
 /**
  * 将多个图表添加至看板。
- * 如果某个图表已添加至看板，或者图表HTML元素已被看板中的其他图表使用，将不会再次添加。
+ * 如果某个图表已添加至看板，将不会再次添加。
  * 
  * @param charts 图表对象、数组
  * @param syncStatus 可选，是否同步图表状态，默认值为：false
