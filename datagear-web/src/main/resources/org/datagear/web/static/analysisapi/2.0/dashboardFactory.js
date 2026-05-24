@@ -947,7 +947,7 @@ chartProto.updater = function(updater)
  *       |                       |---------------------<--------------------| 
  *       |------------------------------<-----------------------------------| 
  * 
- * @returns Promise 兑现时表示初始化已完成
+ * @returns Promise 兑现时表示初始化已完成，无兑现值
  */
 dashboardProto.init = function()
 {
@@ -1466,7 +1466,7 @@ dashboardProto.updater = function(updater)
  * 
  * 注意：当处于this._statusPreInit()时，此函数内部会先调用this.init()函数。
  * 
- * @returns Promise 兑现时表示渲染已完成
+ * @returns Promise 兑现时表示渲染已完成，无兑现值
  */
 dashboardProto.render = function()
 {
@@ -1505,8 +1505,6 @@ dashboardProto.render = function()
 		//如果listener.onRender()返回false，表示在其内部已执行了this.doRender()函数，这里不应再执行
 		if(doRender !== false)
 			this.doRender();
-		
-		return true;
 	});
 	
 	this._renderPromise = renderPromise;
@@ -3352,7 +3350,7 @@ dashboardProto.destroy = function()
 	if(listener && listener.onDestroy)
 		doDestroy = listener.onDestroy(this);
 	
-	//如果listener.onDestroy()返回false，表示在其内部已执行了this.doDestroy()函数，这里不应再执行
+	//为false表示listener.onDestroy()内部已执行了this.doDestroy()函数
 	if(doDestroy !== false)
 		this.doDestroy();
 	

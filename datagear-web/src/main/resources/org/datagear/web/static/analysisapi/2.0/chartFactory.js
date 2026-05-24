@@ -48,13 +48,9 @@
  *   //可选，渲染器依赖库，具体结构参考CF.loadLib()函数说明
  *   //注意库源URL规范不同，具体参考CF.trimPluginRendererLib()函数说明
  *   depend: { ... }、[ {...}, ... ]、function(){ return { ... }、[ {...}, ... ]; }
- *   //可选，渲染图表函数是否是异步函数，默认为false
- *   asyncRender: true、false、function(chart){ ...; return true 或者 false; }
- *   //必选，渲染图表函数
+ *   //必选，渲染图表函数，返回Promise表示是异步函数，且兑现时表示已完成渲染
  *   render: function(chart){ ... },
- *   //可选，更新图表数据函数是否是异步函数，默认为false
- *   asyncUpdate: true、false、function(chart, chartResult){ ...; return true 或者 false; }
- *   //必选，更新图表数据函数
+ *   //必选，更新图表数据函数，返回Promise表示是异步函数，且兑现时表示已完成更新
  *   //chartResult 要更新的图表结果
  *   update: function(chart, chartResult){ ... },
  *   //可选，调整图表尺寸函数
@@ -71,33 +67,6 @@
  *   destroy: function(chart){ ... },
  *   //可选，渲染器名/值附加数据
  *   additions: { ... }、function(){ return { ... }; };
- * }
- * 
- * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
- * {
- *   asyncRender: true,
- *   
- *   render: function(chart)
- *   {
- *     fetch("...").then(function()
- *     {
- *       ...
- *       //将图表状态设置为已完成render
- *       chart.statusRendered(true);
- *     });
- *   },
- *   
- *   asyncUpdate: true,
- *   
- *   update: function(chart, chartResult)
- *   {
- *     fetch("...").then(function()
- *     {
- *       ...
- *       //将图表状态设置为已完成update
- *       chart.statusUpdated(true);
- *     });
- *   }
  * }
  */
 (function(global, window)
@@ -1319,6 +1288,8 @@ chartProto.resultDataFormat = function(resultDataFormat)
  * 注意：
  * 只有this.statusPreInit()或者this.statusInited()或者this.statusPreRender()或者statusDestroyed()为true，此函数才允许执行。
  * 特别地，当处于this.statusPreInit()时，此函数内部会先调用this.init()函数。
+ * 
+ * @returns Promise 兑现时表示已完成渲染，无兑现值
  */
 chartProto.render = function()
 {
@@ -1333,19 +1304,23 @@ chartProto.render = function()
 	
 	this.statusRendering(true);
 	
+	var promise = null;
 	var lib = this._rendererLib();
 	
 	if(lib != null)
 	{
-		this.loadLib(lib, () =>
+		promise = this.loadLib(lib);
+		promise = promise.then(() =>
 		{
-			this._renderInner();
+			return this._renderInner();
 		});
 	}
 	else
 	{
-		this._renderInner();
+		promise = this._renderInner();
 	}
+	
+	return promise;
 };
 
 chartProto._contextCharts = function()
@@ -1356,15 +1331,20 @@ chartProto._contextCharts = function()
 chartProto._renderInner = function()
 {
 	var doRender = true;
+	this._renderPromise = null;
 	
 	var listener = this.listener();
 	if(listener && listener.onRender)
 		doRender = listener.onRender(this);
 	
+	//为false表示listener.onRender()内部已执行this.doRender()函数
 	if(doRender !== false)
-	{
 		this.doRender();
-	}
+	
+	if(this._renderPromise == null)
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : render()");
+	
+	return this._renderPromise;
 };
 
 chartProto._rendererLib = function(trim)
@@ -1393,6 +1373,8 @@ chartProto._rendererLib = function(trim)
 
 /**
  * 调用底层图表渲染器的render函数，执行渲染。
+ * 
+ * @returns Promise 兑现时表示已完成渲染，无兑现值
  */
 chartProto.doRender = function()
 {
@@ -1415,23 +1397,32 @@ chartProto.doRender = function()
 	
 	CF.eleData(ele, CF.ELE_RENDERED_CHART_NAME, this);
 	
-	var async = this._isAsyncRender();
+	var promise = null;
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
 	
 	if(renderer && renderer.render)
 	{
-		renderer.render(this);
+		promise = renderer.render(this);
 	}
 	else if(pluginRenderer)
 	{
-		pluginRenderer.render(this);
+		promise = pluginRenderer.render(this);
 	}
 	else
 		throw new Error(CF.chartLogInfo(this) + " renderer required");
 	
-	if(!async)
+	//不是Promise表示renderer.render()函数是同步执行的
+	if(!CF.isPromise(promise))
+		promise = Promise.resolve(true);
+	
+	promise = promise.then(() =>
+	{
 		this.statusRendered(true);
+	});
+	
+	this._renderPromise = promise;
+	return promise;
 };
 
 var CHART_STYLE_SHEET_NAME = CF.BUILTIN_PROP_PREFIX + "ChartBasicStyle";
@@ -1517,6 +1508,7 @@ chartProto._createChartThemeCssIfNon = function()
  * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此函数才会执行。
  * 
  * @param chartResult 可选，图表结果，如果不设置，将使用this.updateResult()的返回值
+ * @returns Promise 兑现时表示已完成更新，无兑现值
  */
 chartProto.update = function(chartResult)
 {
@@ -1534,21 +1526,27 @@ chartProto.update = function(chartResult)
 	}
 	
 	var doUpdate = true;
+	this._updatePromise = null;
 	
 	var listener = this.listener();
 	if(listener && listener.onUpdate)
 		doUpdate = listener.onUpdate(this, chartResult);
 	
+	//为false表示listener.onUpdate()内部已执行this.doUpdate()函数
 	if(doUpdate !== false)
-	{
 		this.doUpdate(chartResult);
-	}
+	
+	if(this._updatePromise == null)
+		throw new Error(CF.chartLogInfo(this) + " is illegal state for : update()");
+	
+	return this._updatePromise;
 };
 
 /**
  * 调用底层图表渲染器的update函数，执行更新数据。
  * 
  * @param chartResult 图表结果
+ * @returns Promise 兑现时表示已完成更新，无兑现值
  */
 chartProto.doUpdate = function(chartResult)
 {
@@ -1564,23 +1562,32 @@ chartProto.doUpdate = function(chartResult)
 	//先保存结果，确保updateResult()在渲染器的update函数作用域内可用
 	this.updateResult(chartResult);
 	
-	var async = this._isAsyncUpdate(chartResult);
+	var promise = null;
 	var renderer = this.renderer();
 	var pluginRenderer = this._pluginRenderer();
 	
 	if(renderer && renderer.update)
 	{
-		renderer.update(this, chartResult);
+		promise = renderer.update(this, chartResult);
 	}
 	else if(pluginRenderer)
 	{
-		pluginRenderer.update(this, chartResult);
+		promise = pluginRenderer.update(this, chartResult);
 	}
 	else
 		throw new Error(CF.chartLogInfo(this) + " renderer required");
 	
-	if(!async)
+	//不是Promise表示renderer.update()函数是同步执行的
+	if(!CF.isPromise(promise))
+		promise = Promise.resolve(true);
+	
+	promise = promise.then(() =>
+	{
 		this.statusUpdated(true);
+	});
+	
+	this._updatePromise = promise;
+	return promise;
 };
 
 //将上次更新结果前置合并至给定图表的结果
@@ -1656,11 +1663,14 @@ chartProto.resize = function()
  * 图表渲染器实现相关：
  * 图表渲染器应实现destroy函数，以支持此特性。
  * 
- * @returns true 正常执行销毁；false 未执行销毁，因为图表处于销毁非法状态
+ * @returns true 已销毁；false 未执行销毁，因为图表处于销毁非法状态
  */
 chartProto.destroy = function()
 {
-	if(!this.isAlive() || this.statusDestroying() || this.statusDestroyed())
+	if(this.statusDestroyed())
+		return true;
+	
+	if(!this.isActive() || this.statusDestroying())
 		return false;
 	
 	this.statusDestroying(true);
@@ -1671,10 +1681,9 @@ chartProto.destroy = function()
 	if(listener && listener.onDestroy)
 		doDestroy = listener.onDestroy(this);
 	
+	//为false表示listener.onDestroy()内部已执行了this.doDestroy()函数
 	if(doDestroy !== false)
-	{
 		this.doDestroy();
-	}
 	
 	return true;
 };
@@ -1752,68 +1761,6 @@ chartProto._doDestroyTool = function()
 {
 	if(CF.chartTool && CF.chartTool.unbindChartToolPanelEvent)
 		CF.chartTool.unbindChartToolPanelEvent(this);
-};
-
-/**
- * 图表的render函数是否是异步的。
- */
-chartProto._isAsyncRender = function()
-{
-	var renderer = this.renderer();
-	var pluginRenderer = this._pluginRenderer();
-	
-	if(renderer && renderer.asyncRender !== undefined)
-	{
-		if(CF.isFunction(renderer.asyncRender))
-		{
-			return (renderer.asyncRender(this) === true);
-		}
-		else
-			return (renderer.asyncRender === true);
-	}
-	
-	if(!pluginRenderer)
-		return false;
-	
-	if(CF.isFunction(pluginRenderer.asyncRender))
-	{
-		return (pluginRenderer.asyncRender(this) === true);
-	}
-	else
-		return (pluginRenderer.asyncRender === true);
-};
-
-/**
- * 图表的update函数是否是异步的。
- * 
- * @param chartResult 图表结果
- */
-chartProto._isAsyncUpdate = function(chartResult)
-{
-	var renderer = this.renderer();
-	var pluginRenderer = this._pluginRenderer();
-	
-	if(renderer && renderer.asyncUpdate !== undefined)
-	{
-		if(CF.isFunction(renderer.asyncUpdate))
-		{
-			return (renderer.asyncUpdate(this, chartResult) === true);
-		}
-		else
-			return (renderer.asyncUpdate === true);
-	}
-	
-	if(!pluginRenderer)
-		return false;
-	
-	if(CF.isFunction(pluginRenderer.asyncUpdate))
-	{
-		return (pluginRenderer.asyncUpdate(this, chartResult) === true);
-	}
-	else
-	{
-		return (pluginRenderer.asyncUpdate === true);
-	}
 };
 
 /**
@@ -3767,22 +3714,17 @@ chartProto.contextURL = function(url)
 };
 
 /**
- * 加载库，并在全部加载完成后（无论是否成功）执行回调函数。
+ * 加载库。
  * 注意：
  * 系统会从环境中选择尽量兼容的依赖库加载，并不一定是传入的lib库。
- * 注意：
- * 如果在图表渲染器的render/update函数中调用此函数，应该首先设置其asyncRender/asyncUpdate为true，
- * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
  * 
  * @param lib 库对象、数组，结构参考CF.loadLib()函数说明，注意，其中库源URL应是可以直接加载的
- * @param callback 可选，加载完成后回调函数（无论是否成功都将执行），格式参考CF.loadLib()函数说明
+ * @returns Promise 兑现时表示加载完成（无论是否成功），无兑现值
  */
-chartProto.loadLib = function(lib, callback)
+chartProto.loadLib = function(lib)
 {
-	callback = (callback ? callback : function(){});
-	
 	var contextCharts = this._contextCharts();
-	CF.loadLib(lib,  callback, this.renderContext(), contextCharts);
+	return CF.loadLib(lib, this.renderContext(), contextCharts);
 };
 
 var UPDATE_RESULT_LIVE_VALUE_NAME = CF.BUILTIN_PROP_PREFIX + "UpdateResult";
@@ -6894,29 +6836,32 @@ CF.inflateChartTheme = function(theme)
  * 对于公用库，建议采用第2、3、4种格式，对于私有库，建议采用第5、6种格式。
  * 
  * @param lib 库对象、名称字符串、数组
- * @param callback 加载完成后回调函数（无论是否成功都将执行），格式为：function(){ ... }
  * @param renderContext
  * @param contextCharts 可选，上下文图表数组，对于相同名称的库，将在contextCharts中加载最新版本那个，默认值：[]
+ * @returns Promise 兑现时表示加载完成（无论是否成功）
  */
-CF.loadLib = function(lib, callback, renderContext, contextCharts)
+CF.loadLib = function(lib, renderContext, contextCharts)
 {
 	lib = (lib == null ? [] : (CF.isArray(lib) ? lib : [ lib ]));
 	contextCharts = (contextCharts == null ? [] : contextCharts);
 	
 	var libPlugins = CF.allContextLibPlugins();
-	
 	var unloadeds = [];
 	CF.inflateUnloadedLibs(unloadeds, lib, renderContext, libPlugins, contextCharts, lib);
 	
+	var promise = null;
+	
 	if(unloadeds.length == 0)
 	{
-		callback();
+		promise = Promise.resolve();
 	}
 	else
 	{
 		CF.sortLibsByDepend(unloadeds);
-		CF.loadLibInner(unloadeds, callback);
+		promise = CF.loadLibInner(unloadeds);
 	}
+	
+	return promise;
 };
 
 //解析libs相关的所有待加载库，填充至unloadeds中
@@ -7086,7 +7031,7 @@ CF.isLibDependName = function(libDepend, name)
 	return false;
 };
 
-CF.loadLibInner = function(libs, callback)
+CF.loadLibInner = function(libs)
 {
 	var libPromises = [];
 	
@@ -7132,10 +7077,16 @@ CF.loadLibInner = function(libs, callback)
 		}
 	}
 	
-	Promise.all(libPromises).finally(function()
+	//应忽略库加载出错，更符合需求
+	var promise = new Promise((resolve)=>
 	{
-		callback();
+		Promise.all(libPromises).finally(function()
+		{
+			resolve();
+		});
 	});
+	
+	return promise;
 };
 
 CF.loadSingleLibSource = function(lib, source)

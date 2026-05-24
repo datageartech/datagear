@@ -1653,8 +1653,6 @@ SPT.mapRenderer = function(plugin, config)
 	var renderer =
 	{
 		depend: SPT.ECHARTS_RENDERER_DEPEND,
-		asyncRender: true,
-		asyncUpdate: true,
 		
 		render: function(chart)
 		{
@@ -1682,7 +1680,7 @@ SPT.mapRenderer = function(plugin, config)
 					EU.initChartMap(chart, renderOptions);
 				});
 			
-			EU.renderMapChart(chart, options);
+			return EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1725,7 +1723,7 @@ SPT.mapRenderer = function(plugin, config)
 			
 			var options = { visualMap: visualMap, series: series };
 			options = EU.prepareUpdateOptions(chart, options);
-			EU.updateMapChart(chart, options);
+			return EU.updateMapChart(chart, options);
 		}
 	};
 	
@@ -1769,8 +1767,6 @@ SPT._mapScatterRenderer = function(plugin, config)
 	var renderer =
 	{
 		depend: SPT.ECHARTS_RENDERER_DEPEND,
-		asyncRender: true,
-		asyncUpdate: true,
 		
 		render: function(chart)
 		{
@@ -1809,7 +1805,7 @@ SPT._mapScatterRenderer = function(plugin, config)
 					EU.initChartMap(chart, renderOptions);
 				});
 			
-			EU.renderMapChart(chart, options);
+			return EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -1887,7 +1883,7 @@ SPT._mapScatterRenderer = function(plugin, config)
 				options.geo = { map: map };
 			
 			options = EU.prepareUpdateOptions(chart, options);
-			EU.updateMapChart(chart, options);
+			return EU.updateMapChart(chart, options);
 		},
 		
 		_configSingleSeries: function(chart, series, hasValueField)
@@ -1914,8 +1910,6 @@ SPT.mapGraphRenderer = function(plugin, config)
 	var renderer =
 	{
 		depend: SPT.ECHARTS_RENDERER_DEPEND,
-		asyncRender: true,
-		asyncUpdate: true,
 		
 		render: function(chart)
 		{
@@ -1959,7 +1953,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 					EU.initChartMap(chart, renderOptions);
 				});
 			
-			EU.renderMapChart(chart, options);
+			return EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2018,7 +2012,7 @@ SPT.mapGraphRenderer = function(plugin, config)
 				options.geo = { map: map };
 			
 			options = EU.prepareUpdateOptions(chart, options);
-			EU.updateMapChart(chart, options);
+			return EU.updateMapChart(chart, options);
 		},
 		
 		_inflateCommonOptions: function(chart, chartResult, dataSetBinds, dsbIndex, options)
@@ -2238,8 +2232,6 @@ SPT.mapLinesRenderer = function(plugin, config)
 	var renderer =
 	{
 		depend: SPT.ECHARTS_RENDERER_DEPEND,
-		asyncRender: true,
-		asyncUpdate: true,
 		
 		render: function(chart)
 		{
@@ -2260,7 +2252,7 @@ SPT.mapLinesRenderer = function(plugin, config)
 					EU.initChartMap(chart, renderOptions);
 				});
 			
-			EU.renderMapChart(chart, options);
+			return EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2337,7 +2329,7 @@ SPT.mapLinesRenderer = function(plugin, config)
 				options.geo = { map: map };
 			
 			options = EU.prepareUpdateOptions(chart, options);
-			EU.updateMapChart(chart, options);
+			return EU.updateMapChart(chart, options);
 		}
 	};
 	
@@ -2357,8 +2349,6 @@ SPT.mapFlylineRenderer = function(plugin, config)
 	var renderer =
 	{
 		depend: SPT.ECHARTS_RENDERER_DEPEND,
-		asyncRender: true,
-		asyncUpdate: true,
 		
 		render: function(chart)
 		{
@@ -2388,7 +2378,7 @@ SPT.mapFlylineRenderer = function(plugin, config)
 					EU.initChartMap(chart, renderOptions);
 				});
 			
-			EU.renderMapChart(chart, options);
+			return EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2471,7 +2461,7 @@ SPT.mapFlylineRenderer = function(plugin, config)
 				options.geo = { map: map };
 			
 			options = EU.prepareUpdateOptions(chart, options);
-			EU.updateMapChart(chart, options);
+			return EU.updateMapChart(chart, options);
 		}
 	};
 	
@@ -2491,8 +2481,6 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 	var renderer =
 	{
 		depend: SPT.ECHARTS_RENDERER_DEPEND,
-		asyncRender: true,
-		asyncUpdate: true,
 		
 		render: function(chart)
 		{
@@ -2513,7 +2501,7 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 					EU.initChartMap(chart, renderOptions);
 				});
 			
-			EU.renderMapChart(chart, options);
+			return EU.renderMapChart(chart, options);
 		},
 		
 		update: function(chart, chartResult)
@@ -2569,7 +2557,7 @@ SPT.mapHeatmapRenderer = function(plugin, config)
 				options.geo = { map: map };
 			
 			options = EU.prepareUpdateOptions(chart, options);
-			EU.updateMapChart(chart, options);
+			return EU.updateMapChart(chart, options);
 		},
 		
 		_evalPointSize: function(chart)
@@ -7909,14 +7897,12 @@ EU.themeNameOfChartTheme = function(chart)
 /**
  * 为图表注册指定名称的地图（GeoJSON、SVG）至ECharts，并在注册完成后执行回调函数。
  * 如果地图未加载，将在加载后再注册。
- * 注意：如果在图表渲染器的render()、update()函数中调用此函数，应该首先设置渲染器的asyncRender、asyncUpdate，
- * 并在complete中调用chart.statusRendered(true)、chart.statusUpdated(true)。
  * 
  * @param chart 图表
  * @param name 地图名称、地图名称数组
- * @param complete 可选，注册完成后（无论是否成功）的回调函数，格式为：function(){ ... }
+ * @returns Promise 兑现时表示已注册完成
  */
-EU.registerMap = function(chart, name, complete)
+EU.registerMap = function(chart, name)
 {
 	name = (CF.isArray(name) ? name : [ name ]);
 	
@@ -7941,10 +7927,8 @@ EU.registerMap = function(chart, name, complete)
 	
 	if(needLoads.length == 0)
 	{
-		if(complete != null)
-			complete();
-		
-		return;
+		let promise = Promise.resolve();
+		return promise;
 	}
 	
 	var loadPromises = [];
@@ -8012,11 +7996,15 @@ EU.registerMap = function(chart, name, complete)
 		loadPromises.push(state.loadPromise);
 	}
 	
-	Promise.all(loadPromises).finally(function()
+	var promise = new Promise((resolve) =>
 	{
-		if(complete != null)
-			complete();
+		Promise.all(loadPromises).finally(function()
+		{
+			resolve();
+		});
 	});
+	
+	return promise;
 };
 
 /**
@@ -8621,11 +8609,14 @@ EU.defaultMapName = function()
 EU.renderMapChart = function(chart, options)
 {
 	var maps = EU.getDistinctMaps(options);
-	EU.registerMap(chart, maps, () =>
+	var promise = EU.registerMap(chart, maps);
+	
+	promise = promise.then(() =>
 	{
 		EU.initWithOptions(chart, options);
-		chart.statusRendered(true);
 	});
+	
+	return promise;
 };
 
 //更新ECharts地图类图表
@@ -8652,11 +8643,14 @@ EU.updateMapChart = function(chart, updateOptions)
 		EU.resetMapOptions(updateOptions);
 	
 	var maps = EU.getDistinctMaps(updateOptions);
-	EU.registerMap(chart, maps, () =>
+	var promise = EU.registerMap(chart, maps);
+	
+	promise = promise.then(() =>
 	{
 		EU.setOptionsReplaceMerge(chart, updateOptions);
-		chart.statusUpdated(true);
 	});
+	
+	return promise;
 };
 
 //仅提取ECharts地图类图表选项中的不重复地图名信息
