@@ -113,11 +113,11 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 /**本地图表*/
 elementAttrConst.LOCAL = "dg-chart-local";
 
-/**图表更新器*/
-elementAttrConst.UPDATER = "dg-chart-updater";
+/**图表数据获取器*/
+elementAttrConst.FETCHER = "dg-chart-fetcher";
 
-/**看板更新器*/
-elementAttrConst.DASHBOARD_UPDATER = "dg-dashboard-updater";
+/**看板数据获取器*/
+elementAttrConst.DASHBOARD_FETCHER = "dg-dashboard-fetcher";
 
 //----------------------------------------
 // elementAttrConst结束
@@ -240,22 +240,22 @@ DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
 DF.RENDERER_ADDITION_LINK_DATA_HANDER = "linkDataHander";
 
 /**
- * 图表更新器值常量：全局
- * 表示使用全局的看板更新器处理图表更新
+ * 图表数据获取器值常量：全局
+ * 表示使用全局的看板数据获取器处理图表更新
  */
-DF.CHART_UPDATER_GLOBAL = "global";
+DF.CHART_FETCHER_GLOBAL = "global";
 
 /**
- * 图表更新器值常量：空
+ * 图表数据获取器值常量：空
  * 表示使用空图表结果更新图表，空图表结果为：{ dataSetResults: [] }
  */
-DF.CHART_UPDATER_EMPTY = "empty";
+DF.CHART_FETCHER_EMPTY = "empty";
 
 /**
- * 图表更新器值常量：默认
+ * 图表数据获取器值常量：默认
  * 表示使用看板默认逻辑处理图表更新
  */
-DF.CHART_UPDATER_DEFAULT = "default";
+DF.CHART_FETCHER_DEFAULT = "default";
 
 /**
  * 创建看板实例，为其添加看板API。
@@ -496,7 +496,7 @@ chartProto._initForPost = function()
 {
 	this._initLinks();
 	this._initUpdateGroup();
-	this._initUpdater();
+	this._initFetcher();
 	this._initForPostSuper();
 };
 
@@ -546,28 +546,28 @@ chartProto._initUpdateGroup = function()
 };
 
 /**
- * 初始化图表更新器。
- * 此方法从图表元素的elementAttrConst.UPDATER属性获取图表更新器。
+ * 初始化图表数据获取器。
+ * 此方法从图表元素的elementAttrConst.FETCHER属性获取图表数据获取器。
  */
-chartProto._initUpdater = function()
+chartProto._initFetcher = function()
 {
-	var updater = CF.eleAttr(this._eleNonNull(), elementAttrConst.UPDATER);
+	var fetcher = CF.eleAttr(this._eleNonNull(), elementAttrConst.FETCHER);
 	
-	if(CF.isEmpty(updater))
+	if(CF.isEmpty(fetcher))
 	{
-		updater = null;
+		fetcher = null;
 	}
-	else if(updater == DF.CHART_UPDATER_GLOBAL || updater == DF.CHART_UPDATER_EMPTY
-			|| updater == DF.CHART_UPDATER_DEFAULT)
+	else if(fetcher == DF.CHART_FETCHER_GLOBAL || fetcher == DF.CHART_FETCHER_EMPTY
+			|| fetcher == DF.CHART_FETCHER_DEFAULT)
 	{
-		updater = updater;
+		fetcher = fetcher;
 	}
 	else
 	{
-		updater = CF.evalSilently(updater);
+		fetcher = CF.evalSilently(fetcher);
 	}
 	
-	this.updater(updater);
+	this.fetcher(fetcher);
 };
 
 /**
@@ -892,37 +892,33 @@ chartProto.isLocal = function()
 };
 
 /**
- * 获取/设置图表更新器。
+ * 获取/设置图表数据获取器。
  * 
- * @param updater 可选，要设置的更新器，格式允许：
- * 					DF.CHART_UPDATER_GLOBAL、
- * 					DF.CHART_UPDATER_EMPTY、
- * 					DF.CHART_UPDATER_DEFAULT、
- * 					//更新处理函数
- * 					//context 更新上下文，格式为：
+ * @param fetcher 可选，要设置的获取器，格式允许：
+ * 					DF.CHART_FETCHER_GLOBAL、
+ * 					DF.CHART_FETCHER_EMPTY、
+ * 					DF.CHART_FETCHER_DEFAULT、
+ * 					//获取函数
+ * 					//context 获取上下文，格式为：
  * 					//{
  * 					//  dashboard: 看板对象,
  * 					//  chart: 图表对象,
- * 					//  query: { ... },
- * 					//  update: function(chartResult){},
- * 					//  error: function(error){}
+ * 					//  query: { ... }
  * 					//}
  * 					//其中：
  * 					//query 格式同org.datagear.analysis.ChartQuery
- * 					//chartResult 格式应同org.datagear.analysis.ChartResult
- * 					//error 格式应为：{ message: "..." }
- * 					//更新处理函数应在准备完数据后调用context.update(chartResult)，准备出错后调用context.error(error)
+ * 					//此函数应返回ChartResult对象，或者兑现值为ChartResult对象的Promise对象
  * 					function(context){ ... }
  */
-chartProto.updater = function(updater)
+chartProto.fetcher = function(fetcher)
 {
 	if(arguments.length == 0)
 	{
-		return this._updater;
+		return this._fetcher;
 	}
 	else
 	{
-		this._updater = updater;
+		this._fetcher = fetcher;
 	}
 };
 
@@ -968,7 +964,7 @@ dashboardProto.init = function()
 		this._initRenderContext();
 		this._initListener();
 		this._initMapHandler();
-		this._initUpdater();
+		this._initFetcher();
 		this._initChartResizeHandler();
 		this._initUnloadDashboardHandler();
 		
@@ -1022,19 +1018,19 @@ dashboardProto._initListener = function()
 };
 
 /**
- * 初始化看板更新器。
- * 此方法从<body>元素的elementAttrConst.DASHBOARD_UPDATER属性获取看板更新器。
+ * 初始化看板数据获取器。
+ * 此方法从<body>元素的elementAttrConst.DASHBOARD_FETCHER属性获取看板数据获取器。
  */
-dashboardProto._initUpdater = function()
+dashboardProto._initFetcher = function()
 {
-	var updater = CF.eleAttr(document.body, elementAttrConst.DASHBOARD_UPDATER);
+	var fetcher = CF.eleAttr(document.body, elementAttrConst.DASHBOARD_FETCHER);
 	
-	if(CF.isEmpty(updater))
-		updater = null;
+	if(CF.isEmpty(fetcher))
+		fetcher = null;
 	else
-		updater = CF.evalSilently(updater);
+		fetcher = CF.evalSilently(fetcher);
 	
-	this.updater(updater);
+	this.fetcher(fetcher);
 };
 
 /**
@@ -1429,34 +1425,29 @@ dashboardProto.resultDataFormat = function(resultDataFormat)
 };
 
 /**
- * 获取/设置看板更新器。
+ * 获取/设置看板数据获取器。
  * 
- * @param updater 可选，要设置的更新器，格式允许：
- * 					//更新处理函数
+ * @param fetcher 可选，要设置的获取器，格式允许：
  * 					//context 更新上下文，格式为：
  * 					//{
  * 					//  dashboard: 看板对象,
  * 					//  group: "...",
- * 					//  chartQueries: [ { chart: 图表对象, query: chartQuery }, ... ],
- * 					//  update: function(dashboardResult){},
- * 					//  error: function(error){}
+ * 					//  chartQueries: [ { chart: 图表对象, query: chartQuery }, ... ]
  * 					//}
  * 					//其中：
  * 					//chartQuery 格式同org.datagear.analysis.ChartQuery
- * 					//dashboardResult 格式应同org.datagear.analysis.DashboardResult
- * 					//error 格式应为：{ message: "..." }
- * 					//更新处理函数应在准备完数据后调用context.update(dashboardResult)，准备出错后调用context.error(error)
+ * 					//此函数应返回DashboardResult对象，或者兑现值为DashboardResult对象的Promise对象
  * 					function(context){ ... }
  */
-dashboardProto.updater = function(updater)
+dashboardProto.fetcher = function(fetcher)
 {
 	if(arguments.length == 0)
 	{
-		return this._updater;
+		return this._fetcher;
 	}
 	else
 	{
-		this._updater = updater;
+		this._fetcher = fetcher;
 	}
 };
 
@@ -1850,8 +1841,8 @@ dashboardProto._doHandleCharts = function()
 	var time = CF.currentDateMs();
 	var ajaxGroupBundle = { groups: [], groupQueryMap: {} };
 	var localGroupBundle = { groups: [], groupQueryMap: {} };
-	var globalUpdaterGroupBundle = { groups: [], groupQueryMap: {} };
-	var funcUpdaterGroupBundle = { groups: [], groupQueryMap: {} };
+	var globalFetcherGroupBundle = { groups: [], groupQueryMap: {} };
+	var funcFetcherGroupBundle = { groups: [], groupQueryMap: {} };
 	
 	for(let i=0; i<charts.length; i++)
 	{
@@ -1863,20 +1854,20 @@ dashboardProto._doHandleCharts = function()
 			//应立即设置为HANDLING_UPDATE状态
 			chart.status(chartStatusConst.HANDLING_UPDATE);
 			
-			let chartUpdater = chart.updater();
-			chartUpdater = (CF.isEmpty(chartUpdater) ? DF.CHART_UPDATER_DEFAULT : chartUpdater);
+			let chartFetcher = chart.fetcher();
+			chartFetcher = (CF.isEmpty(chartFetcher) ? DF.CHART_FETCHER_DEFAULT : chartFetcher);
 			
-			if(DF.CHART_UPDATER_GLOBAL === chartUpdater)
+			if(DF.CHART_FETCHER_GLOBAL === chartFetcher)
 			{
-				this._groupChartQueries(chart, chartQuery, globalUpdaterGroupBundle);
+				this._groupChartQueries(chart, chartQuery, globalFetcherGroupBundle);
 			}
-			else if(DF.CHART_UPDATER_EMPTY === chartUpdater)
+			else if(DF.CHART_FETCHER_EMPTY === chartFetcher)
 			{
 				this._groupChartQueries(chart, chartQuery, localGroupBundle);
 			}
-			else if(CF.isFunction(chartUpdater))
+			else if(CF.isFunction(chartFetcher))
 			{
-				this._groupChartQueries(chart, chartQuery, funcUpdaterGroupBundle);
+				this._groupChartQueries(chart, chartQuery, funcFetcherGroupBundle);
 			}
 			else
 			{
@@ -1911,19 +1902,19 @@ dashboardProto._doHandleCharts = function()
 		});
 	}
 	
-	if(!CF.isEmpty(globalUpdaterGroupBundle.groups))
+	if(!CF.isEmpty(globalFetcherGroupBundle.groups))
 	{
-		this._handleGroupBundle(globalUpdaterGroupBundle, (groupQuery) =>
+		this._handleGroupBundle(globalFetcherGroupBundle, (groupQuery) =>
 		{
-			this._doHandleChartsGlobalUpdater(groupQuery);
+			this._doHandleChartsGlobalFetcher(groupQuery);
 		});
 	}
 	
-	if(!CF.isEmpty(funcUpdaterGroupBundle.groups))
+	if(!CF.isEmpty(funcFetcherGroupBundle.groups))
 	{
-		this._handleGroupBundle(funcUpdaterGroupBundle, (groupQuery) =>
+		this._handleGroupBundle(funcFetcherGroupBundle, (groupQuery) =>
 		{
-			this._doHandleChartsFuncUpdater(groupQuery);
+			this._doHandleChartsFuncFetcher(groupQuery);
 		});
 	}
 };
@@ -2067,13 +2058,18 @@ dashboardProto._chartsOfChartQueryPairs = function(chartQueryPairs)
 	return re;
 };
 
-dashboardProto._doHandleChartsGlobalUpdater = function(groupQuery)
+dashboardProto._doHandleChartsGlobalFetcher = function(groupQuery)
 {
 	var chartQueries = groupQuery.chartQueries;
 	var fetchContext = this._groupQueryToFetchContext(groupQuery);
 	
 	if(CF.isEmpty(chartQueries) || fetchContext == null)
 		return;
+	
+	var fetcher = this.fetcher();
+	
+	if(fetcher == null)
+		throw new Error("dashboard fetcher required");
 	
 	//这里不允许异常中断
 	CF.executeSilently(() =>
@@ -2086,54 +2082,53 @@ dashboardProto._doHandleChartsGlobalUpdater = function(groupQuery)
 	{
 		dashboard: thisDashboard,
 		group: groupQuery.group,
-		chartQueries: groupQuery.chartQueries,
-		update: function(dashboardResult)
-		{
-			//此函数不应抛出异常
-			CF.executeSilently(() =>
-			{
-				try
-				{
-					thisDashboard._handleChartsFetchSuccess(fetchContext, dashboardResult);
-				}
-				finally
-				{
-					thisDashboard._setChartsUpdateTime(fetchContext.charts, CF.currentDateMs());
-				}
-			});
-		},
-		error: function(error)
-		{
-			//此函数不应抛出异常
-			CF.executeSilently(() =>
-			{
-				try
-				{
-					thisDashboard._handleChartsFetchError(fetchContext, error);
-				}
-				finally
-				{
-					thisDashboard._setChartsUpdateTime(fetchContext.charts, CF.currentDateMs());
-				}
-			});
-		}
+		chartQueries: groupQuery.chartQueries
 	};
 	
-	var updater = this.updater();
+	var fetchPromise = new Promise((resolve) =>
+	{
+		var fetchResult = fetcher(context);
+		
+		if(fetchResult == null)
+			throw new Error("dashboard fetcher return value required");
+		
+		//fetchResult可以是DashboardResult对象、或兑现值为DashboardResult的Promise对象
+		resolve(fetchResult);
+	});
 	
-	if(updater == null)
+	fetchPromise.then((dashboardResult) =>
 	{
-		//这里不应抛出异常，因为需要设置图表状态
-		let error = { message: "dashboard updater required" };
-		context.error(error);
-	}
-	else
+		//不应抛出异常
+		CF.executeSilently(() =>
+		{
+			try
+			{
+				thisDashboard._handleChartsFetchSuccess(fetchContext, dashboardResult);
+			}
+			finally
+			{
+				thisDashboard._setChartsUpdateTime(fetchContext.charts, CF.currentDateMs());
+			}
+		});
+	})
+	.catch((error) =>
 	{
-		updater(context);
-	}
+		//不应抛出异常
+		CF.executeSilently(() =>
+		{
+			try
+			{
+				thisDashboard._handleChartsFetchError(fetchContext, error);
+			}
+			finally
+			{
+				thisDashboard._setChartsUpdateTime(fetchContext.charts, CF.currentDateMs());
+			}
+		});
+	});
 };
 
-dashboardProto._doHandleChartsFuncUpdater = function(groupQuery)
+dashboardProto._doHandleChartsFuncFetcher = function(groupQuery)
 {
 	var chartQueries = groupQuery.chartQueries;
 	var fetchContext = this._groupQueryToFetchContext(groupQuery);
@@ -2153,48 +2148,54 @@ dashboardProto._doHandleChartsFuncUpdater = function(groupQuery)
 	{
 		let chart = chartQueries[i].chart;
 		let query = chartQueries[i].query;
-		let updater = chart.updater();
+		let fetcher = chart.fetcher();
 		let context =
 		{
 			dashboard: thisDashboard,
 			chart: chart,
-			query: query,
-			update: function(chartResult)
-			{
-				//此函数不应抛出异常
-				CF.executeSilently(() =>
-				{
-					try
-					{
-						thisDashboard._updateChart(chart, chartResult, query, true);
-					}
-					finally
-					{
-						chart._updateTime(CF.currentDateMs());
-					}
-				});
-			},
-			error: function(error)
-			{
-				//此函数不应抛出异常
-				CF.executeSilently(() =>
-				{
-					try
-					{
-						thisDashboard._handleChartFetchError(chart, error, true);
-					}
-					finally
-					{
-						chart._updateTime(CF.currentDateMs());
-					}
-				});
-			}
+			query: query
 		};
 		
-		//这里不允许异常中断
-		CF.executeSilently(() =>
+		let fetchPromise = new Promise((resolve) =>
 		{
-			updater(context);
+			var fetchResult = fetcher(context);
+			
+			if(fetchResult == null)
+				throw new Error(CF.chartLogInfo(chart) + " fetcher return value required");
+			
+			//fetchResult可以是ChartResult对象、或兑现值为ChartResult的Promise对象
+			resolve(fetchResult);
+		});
+		
+		fetchPromise.then((chartResult) =>
+		{
+			//不应抛出异常
+			CF.executeSilently(() =>
+			{
+				try
+				{
+					thisDashboard._updateChart(chart, chartResult, query, true);
+				}
+				finally
+				{
+					chart._updateTime(CF.currentDateMs());
+				}
+			});
+		})
+		.catch((error) =>
+		{
+			//不应抛出异常
+			CF.executeSilently(() =>
+			{
+				try
+				{
+					thisDashboard._handleChartFetchError(chart, error, true);
+				}
+				finally
+				{
+					chart._updateTime(CF.currentDateMs());
+				}
+			});
 		});
 	}
 };
