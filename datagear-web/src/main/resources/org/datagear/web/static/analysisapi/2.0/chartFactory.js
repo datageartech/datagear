@@ -1134,9 +1134,9 @@ chartProto.theme = function(theme)
  *   updated: function(chart, chartResult){ ... },
  *   //可选，销毁图表完成回调函数
  *   destroyed: function(chart){ ... },
- *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
+ *   //可选，渲染图表前置回调函数，当返回false、或者返回兑现值为false的Promise时，后续将不再执行渲染图表
  *   onRender: function(chart){ ... },
- *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
+ *   //可选，更新图表数据前置回调函数，当返回false、或者返回兑现值为false的Promise时，后续将不再执行更新图表
  *   onUpdate: function(chart, chartResult){ ... },
  *   //可选，销毁图表前置回调函数，返回false将阻止销毁图表
  *   onDestroy: function(chart){ ... }
@@ -1330,21 +1330,53 @@ chartProto._contextCharts = function()
 
 chartProto._renderInner = function()
 {
-	var doRender = true;
+	var promise;
+	
+	var onRenderReturn = undefined;
 	this._renderPromise = null;
 	
 	var listener = this.listener();
 	if(listener && listener.onRender)
-		doRender = listener.onRender(this);
+		onRenderReturn = listener.onRender(this);
 	
-	//为false表示listener.onRender()内部已执行this.doRender()函数
-	if(doRender !== false)
-		this.doRender();
+	if(CF.isPromise(onRenderReturn))
+	{
+		//是this.doRender()函数的返回值，表示listener.onRender()内部已同步执行this.doRender()函数
+		if(onRenderReturn === this._renderPromise)
+		{
+			promise = onRenderReturn;
+		}
+		else
+		{
+			promise = onRenderReturn.then((doRender) =>
+			{
+				//兑现值为false，表示listener.onRender()内部已异步执行this.doRender()函数
+				if(doRender === false)
+				{
+					return;
+				}
+				else
+				{
+					return this.doRender();
+				}
+			});
+		}
+	}
+	//为false，表示listener.onRender()内部已同步执行this.doRender()函数
+	else if(onRenderReturn === false)
+	{
+		promise = this._renderPromise;
+		
+		if(promise == null)
+			throw new Error(CF.chartLogInfo(this) + " is illegal state for : render()");
+	}
+	//其他值
+	else
+	{
+		promise = this.doRender();
+	}
 	
-	if(this._renderPromise == null)
-		throw new Error(CF.chartLogInfo(this) + " is illegal state for : render()");
-	
-	return this._renderPromise;
+	return promise;
 };
 
 chartProto._rendererLib = function(trim)
@@ -1525,21 +1557,53 @@ chartProto.update = function(chartResult)
 		chartResult = this._appendUpdateResult(chartResult, appendMode);
 	}
 	
-	var doUpdate = true;
+	var promise;
+	
+	var onUpdateReturn = true;
 	this._updatePromise = null;
 	
 	var listener = this.listener();
 	if(listener && listener.onUpdate)
-		doUpdate = listener.onUpdate(this, chartResult);
+		onUpdateReturn = listener.onUpdate(this, chartResult);
 	
-	//为false表示listener.onUpdate()内部已执行this.doUpdate()函数
-	if(doUpdate !== false)
-		this.doUpdate(chartResult);
+	if(CF.isPromise(onUpdateReturn))
+	{
+		//是this.doUpdate()函数的返回值，表示listener.onUpdate()内部已同步执行this.doUpdate()函数
+		if(onUpdateReturn === this._updatePromise)
+		{
+			promise = onUpdateReturn;
+		}
+		else
+		{
+			promise = onUpdateReturn.then((doRender) =>
+			{
+				//兑现值为false，表示listener.onUpdate()内部已异步执行this.doUpdate()函数
+				if(doRender === false)
+				{
+					return;
+				}
+				else
+				{
+					return this.doUpdate(chartResult);
+				}
+			});
+		}
+	}
+	//为false，表示listener.onUpdate()内部已同步执行this.doUpdate()函数
+	else if(onUpdateReturn === false)
+	{
+		promise = this._updatePromise;
+		
+		if(promise == null)
+			throw new Error(CF.chartLogInfo(this) + " is illegal state for : update()");
+	}
+	//其他值
+	else
+	{
+		promise = this.doUpdate(chartResult);
+	}
 	
-	if(this._updatePromise == null)
-		throw new Error(CF.chartLogInfo(this) + " is illegal state for : update()");
-	
-	return this._updatePromise;
+	return promise;
 };
 
 /**

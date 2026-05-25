@@ -1178,7 +1178,7 @@ dashboardProto.renderContext = function()
  *   rendered: function(dashboard){ ... },
  *   //可选，销毁看板后置回调函数
  *   destroyed: function(dashboard){ ... },
- *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
+ *   //可选，渲染看板前置回调函数，当返回false、或者返回兑现值为false的Promise时，后续将不再执行看板图表
  *   onRender: function(dashboard){ ... },
  *   //可选，销毁看板前置回调函数，返回false将阻止销毁看板
  *   onDestroy: function(dashboard){ ... }
@@ -1487,15 +1487,39 @@ dashboardProto.render = function()
 		//使得在listener.onRender()可以最终修改已初始化的图表信息
 		this._checkAndInitChartsBeforeRender();
 		
-		var doRender = true;
+		var onRenderReturn = true;
 		
 		var listener = this.listener();
 		if(listener && listener.onRender)
-			doRender = listener.onRender(this);
+			onRenderReturn = listener.onRender(this);
 		
-		//如果listener.onRender()返回false，表示在其内部已执行了this.doRender()函数，这里不应再执行
-		if(doRender !== false)
+		if(CF.isPromise(onRenderReturn))
+		{
+			onRenderReturn = onRenderReturn.then((doRender) =>
+			{
+				//兑现值为false，表示listener.onRender()内部已异步执行this.doRender()函数
+				if(doRender === false)
+				{
+					return;
+				}
+				else
+				{
+					return this.doRender();
+				}
+			});
+			
+			return onRenderReturn;
+		}
+		//为false，表示listener.onRender()内部已同步执行this.doRender()函数
+		else if(onRenderReturn === false)
+		{
+			return;
+		}
+		//其他值
+		else
+		{
 			this.doRender();
+		}
 	});
 	
 	this._renderPromise = renderPromise;
