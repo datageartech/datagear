@@ -2369,7 +2369,6 @@ dashboardProto._handleChartsFetchError = function(fetchContext, error)
 	fetchContext.error = true;
 	
 	var charts = fetchContext.charts;
-	var errorMsg = (error && error.message ? error.message : "error");
 	var logException = true;
 	
 	for(let i=0; i<charts.length; i++)
@@ -2378,15 +2377,13 @@ dashboardProto._handleChartsFetchError = function(fetchContext, error)
 		
 		CF.executeSilently(() =>
 		{
-			//结构同：org.datagear.analysis.support.ChartResultErrorMessage
-			let error = { type: "Error", message: errorMsg };
 			this._handleChartFetchError(chart, error, false);
 		});
 	}
 	
 	if(logException)
 	{
-		CF.logException("fetch charts data error : " + errorMsg);
+		CF.logException(error);
 	}
 };
 
@@ -2399,16 +2396,14 @@ dashboardProto._handleChartFetchError = function(chart, error, logIfNone)
  * 处理图表结果错误。
  * 
  * @param chart 图表对象
- * @param error 图表结果错误信息对象，结构参考：org.datagear.analysis.support.ChartResultErrorMessage
+ * @param error 错误信息字符串、Error对象、错误信息对象：{ message: "..." }
  * @param setErrorStatus 是否将图表状态更新为：chartStatusConst.UPDATE_ERROR
  * @param logIfNone 可选，是否在chart.listener()未定义fetchError()函数时打印错误日志，默认为：true
  */
 dashboardProto._handleChartResultError = function(chart, error, setErrorStatus, logIfNone)
 {
+	error = this._toStdError(error);
 	logIfNone = (logIfNone === undefined ? true : logIfNone);
-	
-	if(!chart)
-		return;
 	
 	if(setErrorStatus)
 	{
@@ -2424,10 +2419,31 @@ dashboardProto._handleChartResultError = function(chart, error, setErrorStatus, 
 	
 	if(logIfNone)
 	{
-		let type = (error && error.type ? error.type : "Error");
-		let message = (error && error.message ? error.message : "chart result error");
-		CF.logException("chart '#"+chart.elementId()+"' " + type + " : " + message);
+		CF.logException("chart '#"+chart.elementId()+"' error : " + error.message);
 	}
+};
+
+dashboardProto._toStdError = function(error)
+{
+	if(error == null)
+	{
+		error = new Error("error");
+	}
+	else if(error instanceof Error)
+	{
+	}
+	else if(CF.isString(error))
+	{
+		error = new Error(error);
+	}
+	else
+	{
+		//org.datagear.analysis.support.ChartResultErrorMessage
+		let message = (error.message || "error");
+		error = new Error(message);
+	}
+	
+	return error;
 };
 
 /**
