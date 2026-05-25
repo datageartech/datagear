@@ -34,7 +34,7 @@
  * 
  * 此看板工厂支持为图表元素添加elementAttrConst.LINK属性，用于设置图表联动，具体格式参考chart.links()函数说明。
  * 
- * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.UPDATE_GROUP属性，用于设置图表更新ajax分组。
+ * 此看板工厂支持为<body>元素、图表元素添加elementAttrConst.FETCH_GROUP属性，用于设置图表更新ajax分组。
  * 
  * 此看板工厂扩展了图表监听器功能，支持为图表监听器添加如下处理函数：
  * {
@@ -104,8 +104,8 @@ elementAttrConst.MAP_HANDLER = "dg-map-handler";
 /**图表联动*/
 elementAttrConst.LINK = "dg-chart-link";
 
-/**图表更新分组*/
-elementAttrConst.UPDATE_GROUP = "dg-chart-update-group";
+/**图表取数分组*/
+elementAttrConst.FETCH_GROUP = "dg-chart-fetch-group";
 
 /**图表手动渲染*/
 elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
@@ -113,10 +113,10 @@ elementAttrConst.MANUAL_RENDER = "dg-chart-manual-render";
 /**本地图表*/
 elementAttrConst.LOCAL = "dg-chart-local";
 
-/**图表数据获取器*/
+/**图表取数器*/
 elementAttrConst.FETCHER = "dg-chart-fetcher";
 
-/**看板数据获取器*/
+/**看板取数器*/
 elementAttrConst.DASHBOARD_FETCHER = "dg-dashboard-fetcher";
 
 //----------------------------------------
@@ -240,19 +240,19 @@ DF.RENDERER_ADDITION_DTF_LINK_EVENT_TYPE = "defaultLinkEventType";
 DF.RENDERER_ADDITION_LINK_DATA_HANDER = "linkDataHander";
 
 /**
- * 图表数据获取器值常量：全局
- * 表示使用全局的看板数据获取器处理图表更新
+ * 图表取数器值常量：全局
+ * 表示使用全局的看板取数器处理图表更新
  */
 DF.CHART_FETCHER_GLOBAL = "global";
 
 /**
- * 图表数据获取器值常量：空
+ * 图表取数器值常量：空
  * 表示使用空图表结果更新图表，空图表结果为：{ dataSetResults: [] }
  */
 DF.CHART_FETCHER_EMPTY = "empty";
 
 /**
- * 图表数据获取器值常量：默认
+ * 图表取数器值常量：默认
  * 表示使用看板默认逻辑处理图表更新
  */
 DF.CHART_FETCHER_DEFAULT = "default";
@@ -495,7 +495,7 @@ chartProto._initForPostSuper = chartProto._initForPost;
 chartProto._initForPost = function()
 {
 	this._initLinks();
-	this._initUpdateGroup();
+	this._initFetchGroup();
 	this._initFetcher();
 	this._initForPostSuper();
 };
@@ -532,22 +532,22 @@ chartProto._initLinks = function()
 };
 
 /**
- * 初始化图表更新分组。
- * 此方法从body元素、图表元素的elementAttrConst.UPDATE_GROUP属性获取更新分组设置。
+ * 初始化图表取数分组。
+ * 此方法从body元素、图表元素的elementAttrConst.FETCH_GROUP属性获取取数分组设置。
  */
-chartProto._initUpdateGroup = function()
+chartProto._initFetchGroup = function()
 {
-	var updateGroup = CF.eleAttr(this._eleNonNull(), elementAttrConst.UPDATE_GROUP);
+	var group = CF.eleAttr(this._eleNonNull(), elementAttrConst.FETCH_GROUP);
 	
-	if(CF.isEmpty(updateGroup))
-		updateGroup = CF.eleAttr(document.body, elementAttrConst.UPDATE_GROUP);
+	if(CF.isEmpty(group))
+		group = CF.eleAttr(document.body, elementAttrConst.FETCH_GROUP);
 	
-	this.updateGroup(updateGroup);
+	this.fetchGroup(group);
 };
 
 /**
- * 初始化图表数据获取器。
- * 此方法从图表元素的elementAttrConst.FETCHER属性获取图表数据获取器。
+ * 初始化图表取数器。
+ * 此方法从图表元素的elementAttrConst.FETCHER属性获取图表取数器。
  */
 chartProto._initFetcher = function()
 {
@@ -618,29 +618,29 @@ chartProto.links = function(links)
 };
 
 /**
- * 获取/设置图表更新分组。
+ * 获取/设置图表取数分组。
  * 如果图表从服务端加载数据比较耗时，可以为其指定一个分组标识，让其使用单独的ajax请求加载数据。
  * 注意：相同分组的图表将使用同一个ajax请求。
  * 
- * 图表初始化时会使用图表元素的"dg-chart-update-group"属性值执行设置操作。
+ * 图表初始化时会使用图表元素的"dg-chart-fetch-group"属性值执行设置操作。
  * 
- * @param group 可选，设置更新分组，没有则执行获取操作返回非null值。
+ * @param group 可选，设置取数分组，没有则执行获取操作返回非null值。
  */
-chartProto.updateGroup = function(group)
+chartProto.fetchGroup = function(group)
 {
 	if(arguments.length == 0)
 	{
-		if(this._updateGroup == null)
-			this._updateGroup = "";
+		if(this._fetchGroup == null)
+			this._fetchGroup = "";
 		
-		return this._updateGroup;
+		return this._fetchGroup;
 	}
 	else
 	{
 		if(group == null)
 			group = "";
 		
-		this._updateGroup = group;
+		this._fetchGroup = group;
 	}
 };
 
@@ -892,7 +892,7 @@ chartProto.isLocal = function()
 };
 
 /**
- * 获取/设置图表数据获取器。
+ * 获取/设置图表取数器。
  * 
  * @param fetcher 可选，要设置的获取器，格式允许：
  * 					DF.CHART_FETCHER_GLOBAL、
@@ -1018,8 +1018,8 @@ dashboardProto._initListener = function()
 };
 
 /**
- * 初始化看板数据获取器。
- * 此方法从<body>元素的elementAttrConst.DASHBOARD_FETCHER属性获取看板数据获取器。
+ * 初始化看板取数器。
+ * 此方法从<body>元素的elementAttrConst.DASHBOARD_FETCHER属性获取看板取数器。
  */
 dashboardProto._initFetcher = function()
 {
@@ -1425,7 +1425,7 @@ dashboardProto.resultDataFormat = function(resultDataFormat)
 };
 
 /**
- * 获取/设置看板数据获取器。
+ * 获取/设置看板取数器。
  * 
  * @param fetcher 可选，要设置的获取器，格式允许：
  * 					//context 更新上下文，格式为：
@@ -1965,7 +1965,7 @@ dashboardProto._groupChartQueries = function(chart, chartQuery, groupBundle)
 	if(groupBundle.groupQueryMap == null)
 		groupBundle.groupQueryMap = {};
 	
-	let group = chart.updateGroup();
+	let group = chart.fetchGroup();
 	
 	if(CF.indexInArray(groupBundle.groups, group) < 0)
 		groupBundle.groups.push(group);
