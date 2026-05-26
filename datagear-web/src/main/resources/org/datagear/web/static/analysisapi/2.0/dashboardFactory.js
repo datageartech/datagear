@@ -1436,7 +1436,7 @@ dashboardProto.resultDataFormat = function(resultDataFormat)
  * 					//}
  * 					//其中：
  * 					//chartQuery 格式同org.datagear.analysis.ChartQuery
- * 					//此函数应返回DashboardResult对象，或者兑现值为DashboardResult对象的Promise对象
+ * 					//此函数应返回org.datagear.analysis.support.ErrorMessageDashboardResult对象，或者兑现值为ErrorMessageDashboardResult对象的Promise对象
  * 					function(context){ ... }
  */
 dashboardProto.fetcher = function(fetcher)
@@ -2116,7 +2116,7 @@ dashboardProto._doHandleChartsGlobalFetcher = function(groupQuery)
 		if(fetchResult == null)
 			throw new Error("dashboard fetcher return value required");
 		
-		//fetchResult可以是DashboardResult对象、或兑现值为DashboardResult的Promise对象
+		//fetchResult可以是ErrorMessageDashboardResult对象、或兑现值为ErrorMessageDashboardResult的Promise对象
 		resolve(fetchResult);
 	});
 	
@@ -2241,7 +2241,7 @@ dashboardProto._doHandleChartsLocal = function(groupQuery)
 	
 	try
 	{
-		//org.datagear.analysis.DashboardResult
+		//org.datagear.analysis.support.ErrorMessageDashboardResult
 		let dashboardResult = { chartResults: {} };
 		
 		for(let i=0; i<charts.length; i++)
