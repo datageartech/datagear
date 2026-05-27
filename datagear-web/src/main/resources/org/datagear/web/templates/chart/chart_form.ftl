@@ -80,7 +80,7 @@
 						</p-button>
 					</div>
 		        	<div class="desc text-color-secondary pt-1">
-		        		<div class="flex flex-row align-items-center gap-1">
+		        		<div class="flex flex-row align-items-center gap-2">
 			        		<div class="flex flex-row align-items-center gap-1" style="max-width:85%;"
 			        			v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
 			        			<div class="white-space-nowrap overflow-hidden text-overflow-ellipsis text-sm">
