@@ -91,7 +91,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	protected void writeChartPluginResource(HttpServletRequest request, HttpServletResponse response,
 			WebRequest webRequest, ChartPlugin chartPlugin, ChartPluginResource resource) throws Exception
 	{
-		if (resource == null)
+		if (chartPlugin == null || resource == null)
 		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
@@ -174,6 +174,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			return null;
 
 		HtmlChartPluginVo vo = new HtmlChartPluginVo(plugin, detail, locale);
+		vo.setHasManual(plugin.getResource(HtmlChartPluginLoader.FILE_NAME_MANUAL) != null);
 		inflatePluginThemeIcons(vo, themeName);
 
 		return vo;

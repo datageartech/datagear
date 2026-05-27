@@ -1075,6 +1075,44 @@
 		return epn;
 	};
 	
+	/**
+	 * 转义HTML标签符号'<'、'>'。
+	 * 
+	 * @param text 要转义的文本
+	 */
+	$.escapeHtmlTag = function(text)
+	{
+		if(text == null || !$.isTypeString(text))
+			return text;
+		
+		var epn = "";
+		
+		for(var i=0; i<text.length; i++)
+		{
+			var c = text.charAt(i);
+			
+			switch(c)
+			{
+				case '<':
+				{
+					epn += "&lt;";
+					break;
+				}
+				case '>':
+				{
+					epn += "&gt;";
+					break;
+				}
+				default:
+				{
+					epn += c;
+				}
+			}
+		}
+		
+		return epn;
+	};
+	
 	//反转义JSON里的HTML关键字。
 	$.unescapeHtmlForJson = function(json)
 	{

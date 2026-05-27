@@ -56,6 +56,7 @@ import org.datagear.util.StringUtil;
  * |---- renderer.js             //可选，当plugin.json里没有定义renderer（或chartRenderer）属性时必须
  * |---- plugin-datasigns.json   //可选，当希望在单独文件中定义插件的dataSigns时使用，格式应为：[ ... ]
  * |---- plugin-configform.json  //可选，当希望在单独文件中定义插件的configForm时使用，格式应为：{ ... }
+ * |---- manual.md               //可选，使用手册文件，此文件可有可无，不影响插件解析流程，这里主要是定义使用手册文件名规范
  * |---- ...
  * </pre>
  * </code>
@@ -116,6 +117,14 @@ public class HtmlChartPluginLoader
 	 */
 	public static final String FILE_NAME_CONFIGFORM = "plugin-configform.json";
 	
+	/**
+	 * 使用手册Markdown文件名。
+	 * <p>
+	 * 此文件可有可无，不影响插件解析流程，这里主要是定义使用手册文件名规范。
+	 * </p>
+	 */
+	public static final String FILE_NAME_MANUAL = "manual.md";
+
 	private HtmlChartPluginJsDefResolver pluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 
 	private JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> jsonPluginPropertiesResolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>();

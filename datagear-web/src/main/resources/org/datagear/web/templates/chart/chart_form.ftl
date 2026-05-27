@@ -80,13 +80,22 @@
 						</p-button>
 					</div>
 		        	<div class="desc text-color-secondary pt-1">
-		        		<div class="flex flex-row align-items-center gap-1" v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
-		        			<div class="white-space-nowrap overflow-hidden text-overflow-ellipsis text-sm" style="max-width:90%;">
-		        				{{fm.pluginVo.descLabel.value}}
-		        			</div>
-	        				<p-button type="button" icon="pi pi-angle-down" size="small" rounded
-								@click="onShowChartPluginDesc" class="p-button-secondary p-button-text p-1">
-							</p-button>
+		        		<div class="flex flex-row align-items-center gap-1">
+			        		<div class="flex flex-row align-items-center gap-1" style="max-width:85%;"
+			        			v-if="fm.pluginVo && fm.pluginVo.descLabel && fm.pluginVo.descLabel.value">
+			        			<div class="white-space-nowrap overflow-hidden text-overflow-ellipsis text-sm">
+			        				{{fm.pluginVo.descLabel.value}}
+			        			</div>
+		        				<p-button type="button" icon="pi pi-angle-down" size="small" rounded
+									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text p-1">
+								</p-button>
+			        		</div>
+			        		<div class="flex flex-row align-items-center gap-1"
+			        			v-if="fm.pluginVo && fm.pluginVo.hasManual">
+		        				<p-button type="button" icon="pi pi-book" size="small" rounded title="<@spring.message code='useManual' />"
+									@click="onShowChartPluginManual" class="p-button-secondary p-button-text p-1">
+								</p-button>
+			        		</div>
 		        		</div>
 		        	</div>
 		        	<div class="validate-msg">

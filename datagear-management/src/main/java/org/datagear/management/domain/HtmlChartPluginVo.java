@@ -34,6 +34,9 @@ public class HtmlChartPluginVo extends HtmlChartPluginJson
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 是否有手册文件 */
+	private boolean hasManual = false;
+
 	public HtmlChartPluginVo()
 	{
 		super();
@@ -84,5 +87,15 @@ public class HtmlChartPluginVo extends HtmlChartPluginJson
 			initLocalized(plugin, locale);
 		else
 			LabelUtil.concrete(plugin, this, locale);
+	}
+
+	public boolean isHasManual()
+	{
+		return hasManual;
+	}
+
+	public void setHasManual(boolean hasManual)
+	{
+		this.hasManual = hasManual;
 	}
 }

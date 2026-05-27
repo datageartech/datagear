@@ -18,7 +18,6 @@
 package org.datagear.web.controller;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,7 +37,6 @@ import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlChartPluginJson;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartPluginUsage;
 import org.datagear.management.domain.HtmlChartPluginVo;
@@ -296,6 +294,36 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		return plugin;
 	}
 
+	@RequestMapping("/manual/{id}")
+	public String chartPluginManual(HttpServletRequest request, HttpServletResponse response, Model model,
+			@PathVariable("id") String id)
+	{
+		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
+
+		HtmlChartPlugin plugin = getHtmlChartPlugin(id, true);
+		setFormModel(model, toHtmlChartPluginVo(request, plugin, false));
+
+		return "/chartPlugin/chartPlugin_manual";
+	}
+
+	@RequestMapping("/manualContent/{id}")
+	public void chartPluginManualContent(HttpServletRequest request, HttpServletResponse response,
+			WebRequest webRequest, @PathVariable("id") String pluginId) throws Exception
+	{
+		ChartPlugin chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
+
+		if (chartPlugin == null)
+		{
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		response.setContentType(CONTENT_TYPE_HTML);
+
+		ChartPluginResource manualRes = chartPlugin.getResource(HtmlChartPluginLoader.FILE_NAME_MANUAL);
+		writeChartPluginResource(request, response, webRequest, chartPlugin, manualRes);
+	}
+
 	@RequestMapping("/icon/{pluginId:.+}")
 	public void chartPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("pluginId") String pluginId,
@@ -454,25 +482,6 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		public void setPluginFileName(String pluginFileName)
 		{
 			this.pluginFileName = pluginFileName;
-		}
-	}
-
-	/**
-	 * {@linkplain HtmlChartPlugin}视图对象。
-	 *
-	 */
-	public static class HtmlChartPluginView extends HtmlChartPluginJson implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		public HtmlChartPluginView()
-		{
-			super();
-		}
-
-		public HtmlChartPluginView(HtmlChartPlugin plugin, Locale locale)
-		{
-			super(plugin, locale);
 		}
 	}
 

@@ -95,6 +95,19 @@
 		        </div>
 			</div>
 			<div class="field grid">
+				<label for="${pid}manual" class="field-label col-12 mb-2 md:col-3 md:mb-0">
+					<@spring.message code='useManual' />
+				</label>
+		        <div class="field-input col-12 md:col-9">
+		        	<div v-if="fm.hasManual">
+		        		<p-button label="<@spring.message code='view' />" text @click="openManual(fm.id)"></p-button>
+		        	</div>
+		        	<div v-else>
+		        		<@spring.message code='none' />
+		        	</div>
+		        </div>
+			</div>
+			<div class="field grid">
 				<label for="${pid}author" class="field-label col-12 mb-2 md:col-3 md:mb-0">
 					<@spring.message code='author' />
 				</label>
@@ -147,6 +160,11 @@
 		formatChartPlugin: function(chartPlugin)
 		{
 			return $.toChartPluginHtml(chartPlugin, po.contextPath);
+		},
+		
+		openManual: function(id)
+		{
+			po.open("/chartPlugin/manual/" + encodeURIComponent(id), { target: "_blank" });
 		}
 	});
 })

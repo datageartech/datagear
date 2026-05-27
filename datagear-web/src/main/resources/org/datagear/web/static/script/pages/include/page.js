@@ -276,7 +276,9 @@ $.inflatePageObj = function(po)
 		
 		if(options.fullUrl !== true)
 			url = this.concatContextPath(url);
-		url = $.addParam(url, this.ppidParamName, this.pid);
+		
+		if(options.target !== '_blank' || (options.target === '_blank' && options.addParentPid === true))
+			url = $.addParam(url, this.ppidParamName, this.pid);
 		
 		$.open(url, (options || {}));
 	};
@@ -5081,6 +5083,15 @@ $.inflateChartForm = function(po)
 		onShowChartPluginDesc: function(e)
 		{
 			po.vueUnref(po.concatPid("pluginVoDescEle")).toggle(e);
+		},
+		
+		onShowChartPluginManual: function()
+		{
+			var fm = po.vueFormModel();
+			if(fm.pluginVo && fm.pluginVo.id && fm.pluginVo.hasManual)
+			{
+				po.open("/chartPlugin/manual/" + encodeURIComponent(fm.pluginVo.id), { target: "_blank" });
+			}
 		},
 		
 		onShowConfigValuesPanel: function(e)
