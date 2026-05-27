@@ -987,3 +987,28 @@ label.required-label::before,
 	width: 20rem;
 	overflow: hidden;
 }
+
+.page-chart-plugin-manual .manual-content{
+	line-height: 1.5em;
+}
+.page-chart-plugin-manual .manual-content code{
+	background-color: var(--surface-100);
+	padding: 0.2rem;
+	border-radius: var(--border-radius);
+	border: 1px solid var(--surface-200);
+}
+.page-chart-plugin-manual .manual-content pre code{
+	display: block;
+	padding: 0.5rem;
+	line-height: 1.5em;
+	overflow: auto;
+}
+.page-chart-plugin-manual .manual-content a,
+.page-chart-plugin-manual .manual-content a:link,
+.page-chart-plugin-manual .manual-content a:visited,
+.page-chart-plugin-manual .manual-content a:active{
+	color: var(--primary-color);
+}
+.page-chart-plugin-manual .manual-content a:hover{
+	color: var(--primary-600);
+}

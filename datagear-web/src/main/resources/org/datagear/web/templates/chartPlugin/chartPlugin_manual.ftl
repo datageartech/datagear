@@ -21,9 +21,6 @@
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<#if !isAjaxRequest>
-<script src="${contextPath}/static/lib/marked-18.0.4/marked.umd.js" type="text/javascript"></script>
-</#if>
 <title>
 	<@spring.message code='module.chartPlugin' />
 	- <@spring.message code='useManual' />
@@ -57,9 +54,7 @@
 					</span>
 				</div>
 			</div>
-			<div>
-				<div v-html="pm.manualHtml"></div>
-			</div>
+			<div v-html="pm.manualHtml" class="manual-content"></div>
 		</div>
 	</form>
 </div>

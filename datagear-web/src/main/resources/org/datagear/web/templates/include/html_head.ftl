@@ -60,6 +60,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/lib/codemirror-5.64.0/lib/codemirror.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/codemirror-5.64.0/pkg/codemirror-bundle.js" type="text/javascript"></script>
 <script src="${contextPath}/static/lib/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
+<script src="${contextPath}/static/lib/marked-18.0.4/marked.umd.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/util.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/analysisapi/2.0/chartFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
 <script src="${contextPath}/static/analysisapi/2.0/dashboardFactory.js?v=${clientCacheCode}" type="text/javascript"></script>
