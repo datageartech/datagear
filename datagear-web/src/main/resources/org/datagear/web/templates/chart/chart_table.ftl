@@ -124,7 +124,7 @@
 				label: "<@spring.message code='editInNewWindow' />",
 				command: function()
 				{
-					po.handleOpenOfAction("/chart/edit", {target: "_blank"});
+					po.handleOpenOfAction("/chart/edit", {target: "_blank", appendIdToPath: true});
 				}
 			}
 		],
@@ -183,12 +183,12 @@
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/chart/edit", {width: "70vw"});
+			po.handleOpenOfAction("/chart/edit", {width: "70vw", appendIdToPath: true});
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/chart/view", {width: "70vw"});
+			po.handleOpenOfAction("/chart/view", {width: "70vw", appendIdToPath: true});
 		},
 
 		onShare: function()

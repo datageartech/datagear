@@ -190,7 +190,7 @@
 				label: "<@spring.message code='editInNewWindow' />",
 				command: function()
 				{
-					po.handleOpenOfAction("/dataSet/edit", {target: "_blank"});
+					po.handleOpenOfAction("/dataSet/edit", {target: "_blank", appendIdToPath: true});
 				}
 			}
 		]
@@ -212,12 +212,12 @@
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dataSet/edit", {width: "70vw"});
+			po.handleOpenOfAction("/dataSet/edit", {width: "70vw", appendIdToPath: true});
 		},
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dataSet/view", {width: "70vw"});
+			po.handleOpenOfAction("/dataSet/view", {width: "70vw", appendIdToPath: true});
 		},
 
 		onShare: function()

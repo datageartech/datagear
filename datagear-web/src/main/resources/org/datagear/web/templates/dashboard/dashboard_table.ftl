@@ -164,7 +164,7 @@
 		
 		onEdit: function()
 		{
-			po.handleOpenOfAction("/dashboard/edit");
+			po.handleOpenOfAction("/dashboard/edit", {appendIdToPath: true});
 		},
 		
 		onDesign: function()
@@ -177,7 +177,7 @@
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/dashboard/view", {width: "90vw"});
+			po.handleOpenOfAction("/dashboard/view", {width: "90vw", appendIdToPath: true});
 		},
 
 		onShare: function()

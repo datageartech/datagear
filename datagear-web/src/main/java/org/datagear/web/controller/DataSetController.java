@@ -75,6 +75,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -526,9 +527,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		entity.setId(null);
 	}
 
-	@RequestMapping("/edit")
+	@RequestMapping("/edit/{id}")
 	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
-			@RequestParam("id") String id) throws Throwable
+			@PathVariable("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
 
@@ -690,9 +691,9 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		return optSuccessDataResponseEntity(request, entity);
 	}
 
-	@RequestMapping("/view")
+	@RequestMapping("/view/{id}")
 	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
-			@RequestParam("id") String id) throws Throwable
+			@PathVariable("id") String id) throws Throwable
 	{
 		User user = getCurrentUser();
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);

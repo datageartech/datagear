@@ -747,7 +747,7 @@ $.inflatePageManager = function(po)
 	{
 		var id = $.propertyValue(entityOrArray, po.inflateEntityActionIdPropName);
 		
-		if($.CONTENT_TYPE_JSON == action.options.contentType)
+		if(action.options && $.CONTENT_TYPE_JSON == action.options.contentType)
 		{
 			var options = action.options;
 			if(options.data == null)
@@ -767,7 +767,15 @@ $.inflatePageManager = function(po)
 					action.url = $.addParam(action.url, po.inflateEntityActionIdParamName, id[i], true);
 			}
 			else
-				action.url = $.addParam(action.url, po.inflateEntityActionIdParamName, id);
+			{
+				if(action.options && action.options.appendIdToPath)
+				{
+					var idPathNode = (action.url.charAt(action.url.length - 1) == '/' ? "" : "/") + encodeURIComponent(id);
+					action.url += idPathNode;
+				}
+				else
+					action.url = $.addParam(action.url, po.inflateEntityActionIdParamName, id);
+			}
 		}
 	};
 	

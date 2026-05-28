@@ -398,7 +398,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess dashboardModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/dashboard/add", "/dashboard/edit", "/dashboard/copy", "/dashboard/design/**", //
+				"/dashboard/add", "/dashboard/edit/**", "/dashboard/copy", "/dashboard/design/**", //
 				"/dashboard/saveAdd", "/dashboard/saveEdit", "/dashboard/saveDesign", //
 				"/dashboard/saveTemplateNames", "/dashboard/deleteResource", "/dashboard/uploadResourceFile", //
 				"/dashboard/saveUploadResourceFile", "/dashboard/saveResourceContent", "/dashboard/import", //
@@ -424,7 +424,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess chartModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/chart/add", "/chart/saveAdd", "/chart/edit", "/chart/saveEdit", //
+				"/chart/add", "/chart/saveAdd", "/chart/edit/**", "/chart/saveEdit", //
 				"/chart/copy", "/chart/delete");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/chart/**");
@@ -446,7 +446,7 @@ public class SecurityConfigSupport
 	protected ModuleAccess dataSetModuleAccess()
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
-				"/dataSet/add/**", "/dataSet/saveAdd/**", "/dataSet/edit", "/dataSet/saveEdit/**",
+				"/dataSet/add/**", "/dataSet/saveAdd/**", "/dataSet/edit/**", "/dataSet/saveEdit/**",
 				"/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/dataSet/**");

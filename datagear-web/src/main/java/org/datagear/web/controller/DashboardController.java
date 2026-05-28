@@ -219,9 +219,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		return optSuccessDataResponseEntity(request, entity);
 	}
 
-	@RequestMapping("/edit")
+	@RequestMapping("/edit/{id}")
 	public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
-			@RequestParam("id") String id) throws Exception
+			@PathVariable("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 		setFormAction(model, REQUEST_ACTION_EDIT, SUBMIT_ACTION_SAVE_EDIT);
@@ -902,9 +902,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		inflateSaveEntity(request, user, entity);
 	}
 
-	@RequestMapping("/view")
+	@RequestMapping("/view/{id}")
 	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
-			@RequestParam("id") String id) throws Exception
+			@PathVariable("id") String id) throws Exception
 	{
 		User user = getCurrentUser();
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
