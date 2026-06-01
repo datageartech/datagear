@@ -219,7 +219,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
 		HtmlChartPlugin plugin = getHtmlChartPlugin(id, true);
-		setFormModel(model, toHtmlChartPluginVo(request, plugin, false));
+		setFormModel(model, toHtmlChartPluginVo(request, plugin, true));
 
 		return "/chartPlugin/chartPlugin_form";
 	}

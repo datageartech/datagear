@@ -697,6 +697,15 @@ label.required-label::before,
 	/*对话框高度 - 对话框header高度 - 底部留白高度*/
 	max-height: calc(90vh - 6rem - 1rem);
 }
+.p-dialog .page-form .page-form-content.full-height,
+.p-dialog .page-form.show-foot form.readonly .page-form-content.full-height{
+	/*对话框高度 - 对话框header高度 - 表单foot高度*/
+	height: calc(90vh - 6rem - 4.5rem);
+}
+.p-dialog .page-form form.readonly .page-form-content.full-height{
+	/*对话框高度 - 对话框header高度 - 底部留白高度*/
+	height: calc(90vh - 6rem - 1rem);
+}
 
 /*表单输入项验证错误祖先元素高亮*/
 .p-panel.invalid-indicator.p-invalid > .p-panel-header .color-for-invalid,

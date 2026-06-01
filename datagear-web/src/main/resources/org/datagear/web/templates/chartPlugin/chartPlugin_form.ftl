@@ -16,6 +16,7 @@
  * If not, see <https://www.gnu.org/licenses/>.
  *
 -->
+<#assign DataSign=statics['org.datagear.analysis.DataSign']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -31,7 +32,7 @@
 <#include "../include/page_obj.ftl">
 <div id="${pid}" class="page page-form h-full">
 	<form id="${pid}form" class="flex flex-column h-full" :class="{readonly: pm.isReadonlyAction}">
-		<div class="page-form-content flex-grow-1 px-2 py-1 overflow-y-auto">
+		<div class="page-form-content full-height flex-grow-1 px-2 py-1 overflow-y-auto">
 			<p-tabview class="xs-tabview" @tab-change="onTabViewChange">
 				<p-tabpanel header="<@spring.message code='basicInfo' />">
 					<div class="py-2">
@@ -130,17 +131,74 @@
 					</div>
 				</p-tabpanel>
 				<p-tabpanel header="<@spring.message code='dataSign' />">
-					<div class="py-2">
+					<div class="py-2" v-if="pm.dataSignTreeNodes && pm.dataSignTreeNodes.length > 0">
+						<p-treetable :value="pm.dataSignTreeNodes" :scrollable="true"
+							:resizable-columns="true" column-resize-mode="expand"
+							data-key="fullname" class="table-sm p-component p-inputtext">
+							<p-column field="name" header="<@spring.message code='name' />" expander>
+							</p-column>
+							<p-column header="<@spring.message code='label' />">
+								<template #body="{node}">
+									{{node.data.nameLabel && node.data.nameLabel.value ? node.data.nameLabel.value : ''}}
+								</template>
+							</p-column>
+							<p-column field="fullname" header="<@spring.message code='fullname' />">
+							</p-column>
+							<p-column header="<@spring.message code='target' />">
+								<template #body="{node}">
+									<div class="flex align-items-center" style="gap:1px;" v-if="node.data.targets">
+										<p-badge severity="info" class="font-normal white-space-nowrap"
+											v-for="(tgt, tgtIdx) in node.data.targets" :key="tgtIdx">
+											<span v-if="tgt == '${DataSign.TARGET_FIELD}'">
+												<@spring.message code='field' />
+											</span>
+											<span v-else-if="tgt == '${DataSign.TARGET_DATASET}'">
+												<@spring.message code='dataSet' />
+											</span>
+										</p-badge>
+									</div>
+								</template>
+							</p-column>
+							<p-column header="<@spring.message code='requiredInput' />">
+								<template #body="{node}">
+									<p-badge :severity="node.data.required ? 'danger' : 'info'" class="font-normal white-space-nowrap">
+										{{node.data.required ? "<@spring.message code='requiredInput' />" : "<@spring.message code='optionalInput' />"}}
+									</p-badge>
+								</template>
+							</p-column>
+							<p-column header="<@spring.message code='multipleSelect' />">
+								<template #body="{node}">
+									<p-badge severity="info" class="font-normal white-space-nowrap">
+										{{node.data.multiple ? "<@spring.message code='multipleSelect' />" : "<@spring.message code='singleSelect' />"}}
+									</p-badge>
+								</template>
+							</p-column>
+							<p-column header="<@spring.message code='desc' />">
+								<template #body="{node}">
+									<p-button type="button" icon="pi pi-info-circle" severity="info" text rounded
+										aria:haspopup="true" aria-controls="${pid}dataSignDetailPanel"
+										:disabled="!node.data.descLabel || !node.data.descLabel.value"
+										@click="onShowDataSignDetail($event, node.data)">
+									</p-button>
+								</template>
+							</p-column>
+						</p-treetable>
+					</div>
+					<div class="py-2" v-else>
+						<@spring.message code='none' />
 					</div>
 				</p-tabpanel>
 				<p-tabpanel header="<@spring.message code='useManual' />">
-					<div class="py-2">
+					<div class="py-2" v-if="pm.manualHtml">
 						<div class="flex justify-content-end relative">
 							<p-button type="button" icon="pi pi-external-link" size="small" rounded text severity="secondary"
 								@click="onOpenManualInNewWindow" class="p-1 absolute" style="top:-0.3rem;">
 							</p-button>
 						</div>
 						<div v-html="pm.manualHtml" class="chart-plugin-manual"></div>
+					</div>
+					<div class="py-2" v-else>
+						<@spring.message code='none' />
 					</div>
 				</p-tabpanel>
 			</p-tabview>
@@ -149,6 +207,22 @@
 			<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 		</div>
 	</form>
+	<p-overlaypanel ref="${pid}dataSignDetailPanelEle" :show-close-icon="true" append-to="body" id="${pid}dataSignDetailPanel"
+		@show="onDataSignDetailPanelShow" @hide="onDataSignDetailPanelHide">
+		<div class="pb-2">
+			<label class="text-lg font-bold">
+				<@spring.message code='desc' />
+			</label>
+		</div>
+		<div class="panel-content-size-xxs flex flex-column p-2">
+			<div class="flex-grow-0 font-bold">
+				{{pm.dataSignDetail.label}}
+			</div>
+			<div class="flex-grow-1 overflow-auto p-3">
+				{{pm.dataSignDetail.detail}}
+			</div>
+		</div>
+	</p-overlaypanel>
 </div>
 <#include "../include/page_form.ftl">
 <script>
@@ -165,12 +239,31 @@
 			tipError: false,
 			success: function(data)
 			{
-				data = (data ? data : "<@spring.message code='none' />");
+				data = (data ? data : "");
 				//不允许任何HTML标签，避免安全风险
 				data = $.escapeHtmlTag(data);
 				pm.manualHtml = marked.parse(data);
 			}
 		});
+	};
+	
+	po.toDataSignTreeNodes = function(dataSigns)
+	{
+		if(dataSigns == null)
+			return dataSigns;
+
+		var re = [];
+		
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			var dataSign = dataSigns[i];
+			var children = dataSign.children;
+			
+			re[i] = { key: dataSign.fullname, data: dataSign, leaf: (children == null || children.length == 0) };
+			re[i].children = po.toDataSignTreeNodes(children);
+		}
+		
+		return re;
 	};
 	
 	var formModel = $.unescapeHtmlForJson(<@writeJson var=formModel />);
@@ -181,7 +274,9 @@
 	
 	po.vuePageModel(
 	{
-		manualHtml: null
+		dataSignTreeNodes: po.toDataSignTreeNodes(formModel.dataSigns),
+		manualHtml: null,
+		dataSignDetail: {}
 	});
 	
 	po.vueMethod(
@@ -212,8 +307,37 @@
 		{
 			var fm = po.vueFormModel();
 			po.open("/chartPlugin/manual/" + encodeURIComponent(fm.id), { target: "_blank" });
+		},
+
+		onShowDataSignDetail: function(e, dataSign)
+		{
+			var pm = po.vuePageModel();
+			
+			//直接show会导致面板还停留在上一个元素上
+			po.vueUnref(po.concatPid("dataSignDetailPanelEle")).hide();
+			po.vueNextTick(function()
+			{
+				pm.dataSignDetail.label = (dataSign.nameLabel && dataSign.nameLabel.value ? dataSign.nameLabel.value : dataSign.name);
+				pm.dataSignDetail.detail = (dataSign.descLabel ? (dataSign.descLabel.value || "") : "");
+				
+				po.vueUnref(po.concatPid("dataSignDetailPanelEle")).show(e);
+			});
+		},
+		
+		onDataSignDetailPanelShow: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSignDetailShown = true;
+		},
+		
+		onDataSignDetailPanelHide: function(e)
+		{
+			var pm = po.vuePageModel();
+			pm.dataSignDetailShown = false;
 		}
 	});
+	
+	po.vueRef(po.concatPid("dataSignDetailPanelEle"), null);
 })
 (${pid});
 </script>
