@@ -36,7 +36,7 @@
 		</div>
 		<div class="operations col-12 flex gap-1 flex-wrap md:justify-content-end" :class="pm.isSelectAction ? 'md:col-6' : 'md:col-8'">
 			<p-button label="<@spring.message code='confirm' />" @click="onSelect"></p-button>
-			<p-button label="<@spring.message code='view' />" @click="onView" class="p-button-secondary"></p-button>
+			<p-splitbutton label="<@spring.message code='view' />" :model="pm.viewBtnItems" @click="onView" class="p-button-secondary"></p-splitbutton>
 		</div>
 	</div>
 	<div class="page-content flex-grow-1 overflow-auto">
@@ -214,7 +214,17 @@
 		uncategorizedMenuItem: null,
 		categoryMenuActiveIndex: 0,
 		selectedChartPlugin: null,
-		selectedChartPluginId: null
+		selectedChartPluginId: null,
+		viewBtnItems:
+		[
+			{
+				label: "<@spring.message code='viewInNewWindow' />",
+				command: function()
+				{
+					po.handleOpenOfAction("/chartPlugin/view", {target: "_blank", appendIdToPath: true});
+				}
+			}
+		]
 	});
 	
 	po.vueMethod(
