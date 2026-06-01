@@ -988,27 +988,27 @@ label.required-label::before,
 	overflow: hidden;
 }
 
-.page-chart-plugin-manual .manual-content{
+.chart-plugin-manual{
 	line-height: 1.5em;
 }
-.page-chart-plugin-manual .manual-content code{
+.chart-plugin-manual code{
 	background-color: var(--surface-100);
 	padding: 0.2rem;
 	border-radius: var(--border-radius);
 	border: 1px solid var(--surface-200);
 }
-.page-chart-plugin-manual .manual-content pre code{
+.chart-plugin-manual pre code{
 	display: block;
 	padding: 0.5rem;
 	line-height: 1.5em;
 	overflow: auto;
 }
-.page-chart-plugin-manual .manual-content a,
-.page-chart-plugin-manual .manual-content a:link,
-.page-chart-plugin-manual .manual-content a:visited,
-.page-chart-plugin-manual .manual-content a:active{
+.chart-plugin-manual a,
+.chart-plugin-manual a:link,
+.chart-plugin-manual a:visited,
+.chart-plugin-manual a:active{
 	color: var(--primary-color);
 }
-.page-chart-plugin-manual .manual-content a:hover{
+.chart-plugin-manual a:hover{
 	color: var(--primary-600);
 }

@@ -5093,12 +5093,12 @@ $.inflateChartForm = function(po)
 			po.vueUnref(po.concatPid("pluginVoDescEle")).toggle(e);
 		},
 		
-		onShowChartPluginManual: function()
+		onShowChartPluginDetail: function()
 		{
 			var fm = po.vueFormModel();
-			if(fm.pluginVo && fm.pluginVo.id && fm.pluginVo.hasManual)
+			if(fm.pluginVo && fm.pluginVo.id)
 			{
-				po.open("/chartPlugin/manual/" + encodeURIComponent(fm.pluginVo.id), { target: "_blank" });
+				po.open("/chartPlugin/view/" + encodeURIComponent(fm.pluginVo.id), { target: "_blank" });
 			}
 		},
 		

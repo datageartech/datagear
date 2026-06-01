@@ -90,10 +90,9 @@
 									@click="onShowChartPluginDesc" class="p-button-secondary p-button-text p-1">
 								</p-button>
 			        		</div>
-			        		<div class="flex flex-row align-items-center gap-1"
-			        			v-if="fm.pluginVo && fm.pluginVo.hasManual">
-		        				<p-button type="button" icon="pi pi-book" size="small" rounded title="<@spring.message code='useManual' />"
-									@click="onShowChartPluginManual" class="p-button-secondary p-button-text p-1">
+			        		<div class="flex flex-row align-items-center gap-1" v-if="fm.pluginVo && fm.pluginVo.id">
+		        				<p-button type="button" icon="pi pi-external-link" size="small" rounded title="<@spring.message code='view' />"
+									@click="onShowChartPluginDetail" class="p-button-secondary p-button-text p-1">
 								</p-button>
 			        		</div>
 		        		</div>

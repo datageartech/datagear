@@ -118,7 +118,7 @@
 		
 		onView: function()
 		{
-			po.handleOpenOfAction("/chartPlugin/view");
+			po.handleOpenOfAction("/chartPlugin/view", {appendIdToPath: true});
 		},
 		
 		onDelete: function()

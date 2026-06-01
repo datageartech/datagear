@@ -538,7 +538,7 @@ public class SecurityConfigSupport
 
 		UrlsAccess icon = new UrlsAccess(dataAnalystAuthManager, "/chartPlugin/icon/**");
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthManager,
-				"/chartPlugin/view", "/chartPlugin/select", "/chartPlugin/selectData", "/chartPlugin/detailValue/**",
+				"/chartPlugin/view/**", "/chartPlugin/select", "/chartPlugin/selectData", "/chartPlugin/detailValue/**",
 				"/chartPlugin/manual/**", "/chartPlugin/manualContent/**");
 		UrlsAccess edit = new UrlsAccess(adminAuthorizationManager(), "/chartPlugin/**");
 

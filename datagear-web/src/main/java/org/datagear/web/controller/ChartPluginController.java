@@ -212,9 +212,9 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		}
 	}
 
-	@RequestMapping("/view")
+	@RequestMapping("/view/{id}")
 	public String view(HttpServletRequest request, HttpServletResponse response, Model model,
-			@RequestParam("id") String id)
+			@PathVariable("id") String id)
 	{
 		setFormAction(model, REQUEST_ACTION_VIEW, SUBMIT_ACTION_NONE);
 
@@ -321,7 +321,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		response.setContentType(CONTENT_TYPE_HTML);
 
 		ChartPluginResource manualRes = chartPlugin.getResource(HtmlChartPluginLoader.FILE_NAME_MANUAL);
-		writeChartPluginResource(request, response, webRequest, chartPlugin, manualRes);
+
+		// 没有时不必输出404
+		if (manualRes != null)
+			writeChartPluginResource(request, response, webRequest, chartPlugin, manualRes);
 	}
 
 	@RequestMapping("/icon/{pluginId:.+}")

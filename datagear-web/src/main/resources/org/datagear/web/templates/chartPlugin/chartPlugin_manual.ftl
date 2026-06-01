@@ -54,7 +54,7 @@
 					</span>
 				</div>
 			</div>
-			<div v-html="pm.manualHtml" class="manual-content"></div>
+			<div v-html="pm.manualHtml" class="chart-plugin-manual"></div>
 		</div>
 	</form>
 </div>
@@ -73,13 +73,10 @@
 			tipError: false,
 			success: function(data)
 			{
+				data = (data ? data : "<@spring.message code='none' />");
 				//不允许任何HTML标签，避免安全风险
 				data = $.escapeHtmlTag(data);
 				pm.manualHtml = marked.parse(data);
-			},
-			error: function()
-			{
-				pm.manualHtml = "<@spring.message code='none' />";
 			}
 		});
 	};
@@ -91,7 +88,7 @@
 	
 	po.vuePageModel(
 	{
-		manualHtml: marked.parse("# Hello")
+		manualHtml: ""
 	});
 	
 	po.vueMethod(
