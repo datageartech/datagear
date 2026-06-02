@@ -32,108 +32,112 @@
 		'LIGHT' :  'icon-0.png',
 		'DARK' :  'icon-1.png'
 	},
-	dataSigns :
-	[
-  		{
-			name : 'x-value',
-			required : false,
-			multiple : false,
-			nameLabel :
-			{
-				value : 'X值',
-				localeValues :
+	dataSignSpec:
+	{
+		dataSigns :
+		[
+	  		{
+				name : 'x-value',
+				required : false,
+				multiple : false,
+				nameLabel :
 				{
-					'en' : 'X value',
-					'zh' : 'X值中文'
+					value : 'X值',
+					localeValues :
+					{
+						'en' : 'X value',
+						'zh' : 'X值中文'
+					}
+				},
+				descLabel :
+				{
+					value : 'X值描述',
+					localeValues :
+					{
+						'en' : 'X value desc',
+						'zh' : 'X值描述中文'
+					}
+				},
+				additions:
+				{
+					for: "field",
+					name: "x-val"
 				}
 			},
-			descLabel :
 			{
-				value : 'X值描述',
-				localeValues :
+				name : 'y-value',
+				required : true,
+				multiple : true,
+				nameLabel :
 				{
-					'en' : 'X value desc',
-					'zh' : 'X值描述中文'
-				}
+					value : 'Y值',
+					localeValues :
+					{
+						'en' : 'Y value',
+						'zh' : 'Y值中文'
+					}
+				},
+	  			descLabel :
+	  			{
+	  				value : 'Y值描述',
+	  				localeValues :
+	  				{
+	  					'en' : 'Y value desc',
+	  					'zh' : 'Y值描述中文'
+	  				}
+	  			}
 			},
-			additions:
 			{
-				for: "field",
-				name: "x-val"
+				name: "simple-value"
+			},
+			{
+				name: "sign-special-char-.#%*()"
+			},
+			{
+				name: "signWithFieldMatcher",
+				fieldMatcher: "primitive"
+			},
+			{
+				name: "nestDataSetSign",
+				targets: "dataset",
+				children:
+				[
+					{
+						name: "s0",
+						children:
+						[
+							{ name: "s00", children: [ { name: "s000" } ] },
+							{ name: "s01", fieldMatcher: "fm01" }
+						]
+					},
+					{
+						name: "s1",
+						fullname: "nestDataSetSign-s1"
+					}
+				]
+			},
+			{
+				name: "nestFieldSign",
+				fullname: "nestCustomFullname",
+				children:
+				[
+					{
+						name: "s0",
+						children:
+						[
+							{ name: "s00", children: [ { name: "s000", fieldMatcher: "fm000" } ] },
+							{ name: "s01" }
+						]
+					},
+					{
+						name: "s1",
+						fullname: "nestFieldSign-s1"
+					}
+				]
 			}
-		},
-		{
-			name : 'y-value',
-			required : true,
-			multiple : true,
-			nameLabel :
-			{
-				value : 'Y值',
-				localeValues :
-				{
-					'en' : 'Y value',
-					'zh' : 'Y值中文'
-				}
-			},
-  			descLabel :
-  			{
-  				value : 'Y值描述',
-  				localeValues :
-  				{
-  					'en' : 'Y value desc',
-  					'zh' : 'Y值描述中文'
-  				}
-  			}
-		},
-		{
-			name: "simple-value"
-		},
-		{
-			name: "sign-special-char-.#%*()"
-		},
-		{
-			name: "signWithFieldMatcher",
-			fieldMatcher: "primitive"
-		},
-		{
-			name: "nestDataSetSign",
-			targets: "dataset",
-			children:
-			[
-				{
-					name: "s0",
-					children:
-					[
-						{ name: "s00", children: [ { name: "s000" } ] },
-						{ name: "s01", fieldMatcher: "fm01" }
-					]
-				},
-				{
-					name: "s1",
-					fullname: "nestDataSetSign-s1"
-				}
-			]
-		},
-		{
-			name: "nestFieldSign",
-			fullname: "nestCustomFullname",
-			children:
-			[
-				{
-					name: "s0",
-					children:
-					[
-						{ name: "s00", children: [ { name: "s000", fieldMatcher: "fm000" } ] },
-						{ name: "s01" }
-					]
-				},
-				{
-					name: "s1",
-					fullname: "nestFieldSign-s1"
-				}
-			]
-		}
-	],
+		],
+		additions: { "name": "dataSignSpec" }
+	},
 	dataSetRange:
 	{
 		min: 1

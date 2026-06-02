@@ -32,6 +32,7 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.DataSignSpec;
 import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.support.FileChartPluginResource;
 import org.datagear.analysis.support.ZipEntryChartPluginResource;
@@ -226,7 +227,8 @@ public class HtmlChartPluginLoaderTest
 			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
 
 			{
-				List<DataSign> dataSigns = plugin.getDataSigns();
+				DataSignSpec dataSignSpec = plugin.getDataSignSpec();
+				List<DataSign> dataSigns = dataSignSpec.getDataSigns();
 				assertEquals(1, dataSigns.size());
 				assertEquals("category", dataSigns.get(0).getName());
 			}
@@ -251,7 +253,8 @@ public class HtmlChartPluginLoaderTest
 			assertTrue(chartRenderer.getCodeValue().contains("(function(plugin)"));
 
 			{
-				List<DataSign> dataSigns = plugin.getDataSigns();
+				DataSignSpec dataSignSpec = plugin.getDataSignSpec();
+				List<DataSign> dataSigns = dataSignSpec.getDataSigns();
 				assertEquals(1, dataSigns.size());
 				assertEquals("name", dataSigns.get(0).getName());
 			}

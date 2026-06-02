@@ -274,7 +274,7 @@
 	
 	po.vuePageModel(
 	{
-		dataSignTreeNodes: po.toDataSignTreeNodes(formModel.dataSigns),
+		dataSignTreeNodes: po.toDataSignTreeNodes(formModel.dataSignSpec ? formModel.dataSignSpec.dataSigns : null),
 		manualHtml: null,
 		dataSignDetail: {}
 	});

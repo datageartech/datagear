@@ -3852,8 +3852,8 @@ chartProto.pluginDataSigns = function(owner)
 	var re;
 	
 	//插件
-	if(owner && owner.dataSigns !== undefined)
-		re = owner.dataSigns;
+	if(owner && owner.dataSignSpec !== undefined)
+		re = (owner.dataSignSpec ? owner.dataSignSpec.dataSigns : null);
 	//父级数据标记
 	else if(owner && owner.children !== undefined)
 		re = owner.children;
@@ -3865,10 +3865,10 @@ chartProto.pluginDataSigns = function(owner)
  * 获取图表插件指定标识的数据标记，不会深度查找。
  * 
  * @param identity 数据标记标识：名称、索引数值、数据标记对象（将直接返回）
- * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
+ * @param owner 可选，要查找的数据标记数组、图表插件、父级数据标记对象，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
-chartProto.pluginDataSignFlat = function(identity, dataSigns)
+chartProto.pluginDataSignFlat = function(identity, owner)
 {
 	if(identity == null)
 		return null;
@@ -3876,7 +3876,8 @@ chartProto.pluginDataSignFlat = function(identity, dataSigns)
 	if(this._isDataSignObj(identity))
 		return identity;
 	
-	dataSigns = (dataSigns === undefined ? this.pluginDataSigns() : dataSigns);
+	var dataSigns = (owner === undefined ? this.pluginDataSigns() :
+		(owner == null || CF.isArray(owner) ? owner : this.pluginDataSigns(owner)));
 	
 	if(dataSigns == null)
 		return null;
@@ -3888,10 +3889,10 @@ chartProto.pluginDataSignFlat = function(identity, dataSigns)
  * 深度查找图表插件指定标识的数据标记。
  * 
  * @param identity 数据标记标识：全名、索引数值、数据标记对象（将直接返回），或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
- * @param dataSigns 可选，要查找的数据标记数组，默认为：this.pluginDataSigns()
+ * @param owner 可选，要查找的数据标记数组、图表插件、父级数据标记对象，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
-chartProto.pluginDataSign = function(identity, dataSigns)
+chartProto.pluginDataSign = function(identity, owner)
 {
 	if(identity == null)
 		return null;
@@ -3899,7 +3900,8 @@ chartProto.pluginDataSign = function(identity, dataSigns)
 	if(this._isDataSignObj(identity))
 		return identity;
 	
-	dataSigns = (dataSigns === undefined ? this.pluginDataSigns() : dataSigns);
+	var dataSigns = (owner === undefined ? this.pluginDataSigns() :
+		(owner == null || CF.isArray(owner) ? owner : this.pluginDataSigns(owner)));
 	
 	if(dataSigns == null)
 		return null;

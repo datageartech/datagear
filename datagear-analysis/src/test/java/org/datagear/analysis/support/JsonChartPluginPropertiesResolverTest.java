@@ -37,6 +37,7 @@ import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.DataSignSpec;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.form.FormProperty;
@@ -79,7 +80,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getDescLabel());
 			assertNotNull(chartPlugin.getIcons().size() > 0);
 			assertNotNull(chartPlugin.getConfigForm());
-			assertNotNull(chartPlugin.getDataSigns());
+			assertNotNull(chartPlugin.getDataSignSpec());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
 			assertNotNull(chartPlugin.getCategories());
@@ -110,8 +111,16 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			List<DataSign> dataSigns = chartPlugin.getDataSigns();
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
 			assertEquals(7, dataSigns.size());
+
+			{
+				Map<String, ?> additions = dataSignSpec.getAdditions();
+
+				assertNotNull(additions);
+				assertEquals("dataSignSpec", additions.get("name"));
+			}
 
 			{
 				DataSign dataSign = dataSigns.get(0);
@@ -567,7 +576,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getDescLabel());
 			assertNotNull(chartPlugin.getIcons().size() > 0);
 			assertNotNull(chartPlugin.getConfigForm());
-			assertNotNull(chartPlugin.getDataSigns());
+			assertNotNull(chartPlugin.getDataSignSpec());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
 			assertNotNull(chartPlugin.getCategories());
@@ -598,7 +607,8 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("icon-1.png", icons.get("DARK"));
 			}
 
-			List<DataSign> dataSigns = chartPlugin.getDataSigns();
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
 			assertEquals(3, dataSigns.size());
 
 			{
@@ -981,7 +991,7 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getDescLabel());
 			assertTrue(chartPlugin.getIcons().size() > 0);
 			assertNotNull(chartPlugin.getConfigForm());
-			assertNotNull(chartPlugin.getDataSigns());
+			assertNotNull(chartPlugin.getDataSignSpec());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
 			assertNotNull(chartPlugin.getCategories());
@@ -1047,7 +1057,8 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
 			}
 
-			List<DataSign> dataSigns = chartPlugin.getDataSigns();
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
 
 			{
 				DataSign dataSign = dataSigns.get(0);
@@ -1119,7 +1130,8 @@ public class JsonChartPluginPropertiesResolverTest
 				assertEquals("数据集标记", nameLabel.getValue());
 			}
 
-			List<DataSign> dataSigns = chartPlugin.getDataSigns();
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
 
 			{
 				DataSign dataSign = dataSigns.get(0);

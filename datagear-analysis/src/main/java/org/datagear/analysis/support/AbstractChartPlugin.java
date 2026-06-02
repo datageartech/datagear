@@ -28,7 +28,7 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
-import org.datagear.analysis.DataSign;
+import org.datagear.analysis.DataSignSpec;
 import org.datagear.analysis.NameAwareUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
@@ -54,7 +54,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private ChartPluginConfigForm configForm = null;
 
-	private List<DataSign> dataSigns = Collections.emptyList();
+	private DataSignSpec dataSignSpec = null;
 
 	private ChartPluginDataSetRange dataSetRange = null;
 
@@ -194,29 +194,14 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public List<DataSign> getDataSigns()
+	public DataSignSpec getDataSignSpec()
 	{
-		return dataSigns;
+		return dataSignSpec;
 	}
 
-	public void setDataSigns(List<DataSign> dataSigns)
+	public void setDataSignSpec(DataSignSpec dataSignSpec)
 	{
-		this.dataSigns = dataSigns;
-	}
-
-	@Override
-	public DataSign getDataSign(String name)
-	{
-		if (this.dataSigns == null)
-			return null;
-
-		for (DataSign dataSign : this.dataSigns)
-		{
-			if (dataSign.getName().equals(name))
-				return dataSign;
-		}
-
-		return null;
+		this.dataSignSpec = dataSignSpec;
 	}
 
 	@Override

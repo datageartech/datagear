@@ -395,7 +395,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 				// 不需要显示的都设为null，减少数据传输量
 				hp.setCategories(null);
 				hp.setCategoryOrders(null);
-				hp.setDataSigns(null);
+				hp.setDataSignSpec(null);
 				hp.setResources(null);
 			}
 		}

@@ -39,6 +39,7 @@ import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.DataSignSpec;
 import org.datagear.analysis.FullnameSpec;
 import org.datagear.analysis.NameAware;
 import org.datagear.analysis.form.AbstractFormProperty;
@@ -70,14 +71,14 @@ import org.datagear.util.i18n.Localizable;
  *   descLabel : "..." 、 { ... },
  *   icons : "..." 、 { "light" : "icons/light.png", "dark" : "icons/dark.png" },
  *   configForm : { ... },
+ *   dataSignSpec: { ... },
  *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同configForm
- *   dataSigns : [ { ... }, ... ],
+ *   dataSigns : [ { ... }, ... ],   //兼容5.5.0格式，功能同dataSignSpec
  *   dataSetRange: 数值 、 "none" 、 { ... },
  *   version : "...",
  *   order: 整数值,
  *   categories: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],
- *   或者（兼容3.0.1版本格式）
- *   category: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],
+ *   category: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],  //兼容3.0.1版本格式，功能同categories
  *   categoryOrders: 整数值 、 [ 整数值, 整数值, ... ],
  *   author: "...",
  *   contact: "...",
@@ -96,8 +97,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ID = ChartPlugin.PROPERTY_ID;
 	public static final String JSON_PROPERTY_NAME_LABEL = ChartPlugin.PROPERTY_NAME_LABEL;
 	public static final String JSON_PROPERTY_DESC_LABEL = ChartPlugin.PROPERTY_DESC_LABEL;
+	public static final String JSON_PROPERTY_DATA_SIGN_SPEC = ChartPlugin.PROPERTY_DATA_SIGN_SPEC;
 	public static final String JSON_PROPERTY_CONFIG_FORM = ChartPlugin.PROPERTY_CONFIG_FORM;
-	public static final String JSON_PROPERTY_DATA_SIGNS = ChartPlugin.PROPERTY_DATA_SIGNS;
 	public static final String JSON_PROPERTY_DATA_SET_RANGE = ChartPlugin.PROPERTY_DATA_SET_RANGE;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
 	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
@@ -108,6 +109,12 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.dataSigns}格式
+	 */
+	@Deprecated
+	public static final String JSON_PROPERTY_DATA_SIGNS = "dataSigns";
 
 	/**
 	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.attributes}格式
@@ -190,7 +197,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else if (properties.containsKey(JSON_PROPERTY_ATTRIBUTES))
 			chartPlugin.setConfigForm(convertToConfigFormForV5_5_0(properties.get(JSON_PROPERTY_ATTRIBUTES)));
 
-		chartPlugin.setDataSigns(convertToDataSigns(properties.get(JSON_PROPERTY_DATA_SIGNS), null));
+		if(properties.containsKey(JSON_PROPERTY_DATA_SIGN_SPEC))
+			chartPlugin.setDataSignSpec(convertToDataSignSpec(properties.get(JSON_PROPERTY_DATA_SIGN_SPEC)));
+		else if (properties.containsKey(JSON_PROPERTY_DATA_SIGNS))
+			chartPlugin.setDataSignSpec(convertToDataSignSpecForV_5_5_0(properties.get(JSON_PROPERTY_DATA_SIGNS)));
+
 		chartPlugin.setDataSetRange(convertToDataSetRange(properties.get(JSON_PROPERTY_DATA_SET_RANGE)));
 		chartPlugin.setVersion(convertToString(properties.get(JSON_PROPERTY_VERSION)));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
@@ -373,6 +384,51 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else
 			throw new UnsupportedOperationException(
 					"Convert object of type [" + obj.getClass().getName() + "] to icon map unsupported");
+	}
+
+	protected DataSignSpec convertToDataSignSpec(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof DataSignSpec)
+			return (DataSignSpec) obj;
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			DataSignSpec spec = createDataSignSpec();
+
+			spec.setDataSigns(convertToDataSigns(map.get(DataSignSpec.PROPERTY_DATA_SIGNS), null));
+			spec.setAdditions(convertToAdditions(map.get(DataSign.PROPERTY_ADDITIONS)));
+
+			return spec;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ DataSignSpec.class.getName() + "] unsupported");
+	}
+
+	/**
+	 * 将{@code 5.5.0}版的对象转换为{@linkplain DataSignSpec}。
+	 * <p>
+	 * 支持格式如下：
+	 * <p>
+	 * <code>[ { ... }, ... ]</code>
+	 * </p>
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected DataSignSpec convertToDataSignSpecForV_5_5_0(Object obj)
+	{
+		List<DataSign> dataSigns = convertToDataSigns(obj, null);
+
+		if (dataSigns == null)
+			return null;
+
+		DataSignSpec spec = new DataSignSpec(dataSigns);
+		return spec;
 	}
 
 	/**
@@ -1324,6 +1380,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	protected FormPropertyGroup createFormPropertyGroup()
 	{
 		return new FormPropertyGroup();
+	}
+
+	protected DataSignSpec createDataSignSpec()
+	{
+		return new DataSignSpec();
 	}
 
 	protected DataSign createDataSign()

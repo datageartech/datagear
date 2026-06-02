@@ -31,6 +31,7 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSign;
+import org.datagear.analysis.DataSignSpec;
 import org.datagear.analysis.form.FormProperty;
 import org.datagear.analysis.form.PropertyType;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
@@ -324,17 +325,29 @@ public class ChartPluginManagerJsFactory implements CacheAware
 	protected void appendCompatFuncForV5_5_0(String apiVersion, StringBuilder buffer, String managerVar, String newLine)
 	{
 		buffer.append(managerVar + ".compatForV5_5_0 = function(plugin){");
+
+		buffer.append(newLine);
+		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_DATA_SIGN_SPEC + " != null){");
+		buffer.append(newLine);
+		buffer.append("    plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_DATA_SIGNS + "=plugin."
+				+ ChartPlugin.PROPERTY_DATA_SIGN_SPEC + "." + DataSignSpec.PROPERTY_DATA_SIGNS + ";");
+		buffer.append(newLine);
+		buffer.append("    plugin." + ChartPlugin.PROPERTY_DATA_SIGN_SPEC + "=undefined;");
+		buffer.append(newLine);
+		buffer.append("  }");
+
 		buffer.append(newLine);
 		buffer.append("  plugin.iconResourceNames=plugin.icons;");
 		buffer.append(newLine);
+
 		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + " != null){");
 		buffer.append(newLine);
 		buffer.append(
 				"    var attributes = (plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_ATTRIBUTES
 						+ " = plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + "."
-				+ ChartPluginConfigForm.PROPERTY_PROPERTIES + ");");
+						+ ChartPluginConfigForm.PROPERTY_PROPERTIES + ");");
 		buffer.append(newLine);
-		buffer.append("    plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + " = undefined;");
+		buffer.append("    plugin." + ChartPlugin.PROPERTY_CONFIG_FORM + "=undefined;");
 		buffer.append(newLine);
 		buffer.append("    var attributesLen = (attributes == null ? 0 : attributes.length);");
 		buffer.append(newLine);
@@ -347,7 +360,6 @@ public class ChartPluginManagerJsFactory implements CacheAware
 				+ " = attr." + FormProperty.PROPERTY_ADDITIONS + "[\""
 				+ JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP + "\"]; }");
 		buffer.append(newLine);
-		
 		buffer.append("      if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.STRING + "\"){ " //
 				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.STRING + "\"; }");
 		buffer.append(newLine);
@@ -363,13 +375,15 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append("      else if(attr." + FormProperty.PROPERTY_TYPE + " == \"" + PropertyType.OBJECT + "\"){ " //
 				+ "attr." + FormProperty.PROPERTY_TYPE + " = \"" + PropertyTypeV5_5_0.OBJECT + "\"; }");
 		buffer.append(newLine);
-		
 		buffer.append("    }");
 		buffer.append(newLine);
 		buffer.append("  }");
+
 		buffer.append(newLine);
-		buffer.append("  " + managerVar + ".compatDataSignForV5_5_0(plugin." + ChartPlugin.PROPERTY_DATA_SIGNS + ");");
+		buffer.append("  " + managerVar + ".compatDataSignForV5_5_0(plugin."
+				+ JsonChartPluginPropertiesResolver.JSON_PROPERTY_DATA_SIGNS + ");");
 		buffer.append(newLine);
+
 		buffer.append("};");
 
 		buffer.append(newLine);
