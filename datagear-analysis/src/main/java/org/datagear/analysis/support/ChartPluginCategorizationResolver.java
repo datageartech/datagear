@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.datagear.analysis.Category;
+import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.util.StringUtil;
 
@@ -54,18 +55,20 @@ public class ChartPluginCategorizationResolver
 
 		for (ChartPlugin chartPlugin : chartPlugins)
 		{
-			List<Category> categories = chartPlugin.getCategories();
-			List<Integer> categoryOrders = chartPlugin.getCategoryOrders();
+			List<CategoryJoin> categoryJoins = chartPlugin.getCategoryJoins();
 
-			if (categories == null || categories.isEmpty())
-				uncategorizeds.add(new ChartPluginInfo(chartPlugin, chartPlugin.getOrder()));
-			else
+			boolean added = false;
+
+			if (categoryJoins != null)
 			{
-				for (int i = 0; i < categories.size(); i++)
+				for (int i = 0; i < categoryJoins.size(); i++)
 				{
-					Category category = categories.get(i);
-					Integer order = (categoryOrders == null || categoryOrders.size() < (i + 1) ? chartPlugin.getOrder()
-							: categoryOrders.get(i));
+					CategoryJoin categoryJoin = categoryJoins.get(i);
+					Category category = categoryJoin.getCategory();
+					int order = categoryJoin.getOrder();
+
+					if (category == null)
+						continue;
 
 					CategorizationInfo categorizationInfo = null;
 
@@ -89,10 +92,14 @@ public class ChartPluginCategorizationResolver
 						categorizationInfos.add(categorizationInfo);
 					}
 
-					categorizationInfo.addChartPluginInfo(new ChartPluginInfo(chartPlugin,
-							(order == null ? chartPlugin.getOrder() : order.intValue())));
+					categorizationInfo
+							.addChartPluginInfo(new ChartPluginInfo(chartPlugin, order, chartPlugin.getOrder()));
+					added = true;
 				}
 			}
+
+			if (!added)
+				uncategorizeds.add(new ChartPluginInfo(chartPlugin, 0, chartPlugin.getOrder()));
 		}
 
 		Collections.sort(categorizationInfos);
@@ -185,19 +192,17 @@ public class ChartPluginCategorizationResolver
 
 	protected static class ChartPluginInfo implements Comparable<ChartPluginInfo>
 	{
-		private ChartPlugin chartPlugin;
+		private final ChartPlugin chartPlugin;
 
-		private int order;
+		private final int categoryOrder;
 
-		public ChartPluginInfo()
-		{
-			super();
-		}
+		private final int order;
 
-		public ChartPluginInfo(ChartPlugin chartPlugin, int order)
+		public ChartPluginInfo(ChartPlugin chartPlugin, int categoryOrder, int order)
 		{
 			super();
 			this.chartPlugin = chartPlugin;
+			this.categoryOrder = categoryOrder;
 			this.order = order;
 		}
 
@@ -206,9 +211,9 @@ public class ChartPluginCategorizationResolver
 			return chartPlugin;
 		}
 
-		public void setChartPlugin(ChartPlugin chartPlugin)
+		public int getCategoryOrder()
 		{
-			this.chartPlugin = chartPlugin;
+			return categoryOrder;
 		}
 
 		public int getOrder()
@@ -216,15 +221,15 @@ public class ChartPluginCategorizationResolver
 			return order;
 		}
 
-		public void setOrder(int order)
-		{
-			this.order = order;
-		}
-
 		@Override
 		public int compareTo(ChartPluginInfo o)
 		{
-			return this.order - o.order;
+			int re = this.categoryOrder - o.categoryOrder;
+
+			if (re == 0)
+				re = this.order - o.order;
+
+			return re;
 		}
 	}
 

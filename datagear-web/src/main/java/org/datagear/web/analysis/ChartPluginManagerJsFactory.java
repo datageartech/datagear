@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginManager;
@@ -333,6 +334,27 @@ public class ChartPluginManagerJsFactory implements CacheAware
 				+ ChartPlugin.PROPERTY_DATA_SIGN_SPEC + "." + DataSignSpec.PROPERTY_DATA_SIGNS + ";");
 		buffer.append(newLine);
 		buffer.append("    plugin." + ChartPlugin.PROPERTY_DATA_SIGN_SPEC + "=undefined;");
+		buffer.append(newLine);
+		buffer.append("  }");
+
+		buffer.append(newLine);
+		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_CATEGORY_JOINS + " != null){");
+		buffer.append(newLine);
+		buffer.append("    plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORIES + "=[];");
+		buffer.append(newLine);
+		buffer.append("    plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORY_ORDERS + "=[];");
+		buffer.append(newLine);
+		buffer.append("    for(var i=0; i<plugin." + ChartPlugin.PROPERTY_CATEGORY_JOINS + ".length; i++){");
+		buffer.append(newLine);
+		buffer.append("      plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORIES + "[i]=plugin."
+				+ ChartPlugin.PROPERTY_CATEGORY_JOINS + "[i]." + CategoryJoin.PROPERTY_CATEGORY + ";");
+		buffer.append(newLine);
+		buffer.append("      plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORY_ORDERS + "[i]=plugin."
+				+ ChartPlugin.PROPERTY_CATEGORY_JOINS + "[i]." + CategoryJoin.PROPERTY_ORDER + ";");
+		buffer.append(newLine);
+		buffer.append("    }");
+		buffer.append(newLine);
+		buffer.append("    plugin." + ChartPlugin.PROPERTY_CATEGORY_JOINS + "=undefined;");
 		buffer.append(newLine);
 		buffer.append("  }");
 

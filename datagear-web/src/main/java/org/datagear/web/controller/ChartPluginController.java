@@ -393,8 +393,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 				HtmlChartPlugin hp = (HtmlChartPlugin) plugin;
 
 				// 不需要显示的都设为null，减少数据传输量
-				hp.setCategories(null);
-				hp.setCategoryOrders(null);
+				hp.setCategoryJoins(null);
 				hp.setDataSignSpec(null);
 				hp.setResources(null);
 			}
@@ -461,8 +460,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			Locale locale)
 	{
 		HtmlChartPluginVo vo = toHtmlChartPluginVo(chartPlugin, false, locale, themeName);
-		vo.setCategories(Localizable.toLocale(chartPlugin.getCategories(), locale));
-		vo.setCategoryOrders(chartPlugin.getCategoryOrders());
+		vo.setCategoryJoins(Localizable.toLocale(chartPlugin.getCategoryJoins(), locale));
 		return vo;
 	}
 

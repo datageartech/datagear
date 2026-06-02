@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.analysis.Category;
+import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
@@ -72,14 +73,10 @@ import org.datagear.util.i18n.Localizable;
  *   icons : "..." 、 { "light" : "icons/light.png", "dark" : "icons/dark.png" },
  *   configForm : { ... },
  *   dataSignSpec: { dataSigns: [ ... ] }、[ ... ],
- *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同configForm
- *   dataSigns : [ { ... }, ... ],   //兼容5.5.0格式，功能同dataSignSpec
  *   dataSetRange: 数值 、 "none" 、 { ... },
  *   version : "...",
  *   order: 整数值,
- *   categories: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],
- *   category: "..." 、 {name: "...", ...} 、 ["...", "...", ...] 、 [ {name: "...", ...}, {name: "...", ...}, ... ],  //兼容3.0.1版本格式，功能同categories
- *   categoryOrders: 整数值 、 [ 整数值, 整数值, ... ],
+ *   categoryJoins: ...,
  *   author: "...",
  *   contact: "...",
  *   issueDate: "...",
@@ -102,13 +99,24 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_DATA_SET_RANGE = ChartPlugin.PROPERTY_DATA_SET_RANGE;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
 	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
-	public static final String JSON_PROPERTY_CATEGORIES = ChartPlugin.PROPERTY_CATEGORIES;
-	public static final String JSON_PROPERTY_CATEGORY_ORDERS = ChartPlugin.PROPERTY_CATEGORY_ORDERS;
+	public static final String JSON_PROPERTY_CATEGORY_JOINS = ChartPlugin.PROPERTY_CATEGORY_JOINS;
 	public static final String JSON_PROPERTY_AUTHOR = ChartPlugin.PROPERTY_AUTHOR;
 	public static final String JSON_PROPERTY_CONTACT = ChartPlugin.PROPERTY_CONTACT;
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
 	public static final String JSON_PROPERTY_ICONS = "icons";
 	public static final String JSON_PROPERTY_ADDITIONS = ChartPlugin.PROPERTY_ADDITIONS;
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.categories}格式
+	 */
+	@Deprecated
+	public static final String JSON_PROPERTY_CATEGORIES = "categories";
+
+	/**
+	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.categoryOrders}格式
+	 */
+	@Deprecated
+	public static final String JSON_PROPERTY_CATEGORY_ORDERS = "categoryOrders";
 
 	/**
 	 * @deprecated 仅用于兼容5.5.0及以下版本的{@code org.datagear.analysis.ChartPlugin.dataSigns}格式
@@ -136,20 +144,20 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			+ "GROUP_FOR_5_5_0";
 
 	/**
-	 * {@linkplain #JSON_PROPERTY_DATA_SET_RANGE}属性的特殊值：{@code "none"}
-	 * <p>
-	 * 此值表示{@linkplain ChartPluginDataSetRange}的值为：<code>{ main: { min: 0, max: 0 }, attachment: { min: 0, max: 0 } }</code>
-	 * </p>
-	 */
-	public static final String DATA_SET_RANGE_NONE = "none";
-
-	/**
 	 * 3.0.1版本的单类别属性名，已在3.1.0版本中被{@linkplain #JSON_PROPERTY_CATEGORIES}代替。
 	 * 
 	 * @deprecated
 	 */
 	@Deprecated
 	public static final String JSON_PROPERTY_CATEGORY_3_0_1 = "category";
+
+	/**
+	 * {@linkplain #JSON_PROPERTY_DATA_SET_RANGE}属性的特殊值：{@code "none"}
+	 * <p>
+	 * 此值表示{@linkplain ChartPluginDataSetRange}的值为：<code>{ main: { min: 0, max: 0 }, attachment: { min: 0, max: 0 } }</code>
+	 * </p>
+	 */
+	public static final String DATA_SET_RANGE_NONE = "none";
 
 	private T chartPlugin;
 
@@ -206,13 +214,18 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		chartPlugin.setVersion(convertToString(properties.get(JSON_PROPERTY_VERSION)));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
 
-		Object categoriesObj = properties.get(JSON_PROPERTY_CATEGORIES);
-		if (categoriesObj == null)
-			categoriesObj = properties.get(JSON_PROPERTY_CATEGORY_3_0_1);
-		chartPlugin.setCategories(convertToCategories(categoriesObj));
+		if (properties.containsKey(JSON_PROPERTY_CATEGORY_JOINS))
+			chartPlugin.setCategoryJoins(convertToCategoryJoins(properties.get(JSON_PROPERTY_CATEGORY_JOINS)));
+		else
+		{
+			Object categories = properties.get(JSON_PROPERTY_CATEGORIES);
+			if (categories == null)
+				categories = properties.get(JSON_PROPERTY_CATEGORY_3_0_1);
 
-		chartPlugin.setCategoryOrders(
-				convertToCategoryOrders(properties.get(JSON_PROPERTY_CATEGORY_ORDERS), chartPlugin.getOrder()));
+			Object categoryOrders = properties.get(JSON_PROPERTY_CATEGORY_ORDERS);
+
+			chartPlugin.setCategoryJoins(convertToCategoryJoinsForV5_5_0(categories, categoryOrders));
+		}
 
 		chartPlugin.setAuthor(convertToString(properties.get(JSON_PROPERTY_AUTHOR)));
 		chartPlugin.setContact(convertToString(properties.get(JSON_PROPERTY_CONTACT)));
@@ -1119,6 +1132,133 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return range;
 	}
 
+	protected List<CategoryJoin> convertToCategoryJoins(Object obj)
+	{
+		if (obj == null)
+			return null;
+
+		if (obj instanceof CategoryJoin)
+		{
+			return Arrays.asList((CategoryJoin) obj);
+		}
+		// "..." 类别名
+		else if (obj instanceof String)
+		{
+			return convertToCategoryJoins(Arrays.asList(obj));
+		}
+		// { category: ..., order: ... }
+		else if (obj instanceof Map<?, ?>)
+		{
+			return convertToCategoryJoins(Arrays.asList(obj));
+		}
+		// [ ... ]
+		else if (obj instanceof Object[])
+		{
+			return convertToCategoryJoins(Arrays.asList((Object[]) obj));
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+
+			List<CategoryJoin> categoryJoins = new ArrayList<>();
+
+			for (Object o : collection)
+			{
+				CategoryJoin categoryJoin = convertToCategoryJoin(o);
+				if (categoryJoin != null)
+					categoryJoins.add(categoryJoin);
+			}
+
+			return categoryJoins;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ CategoryJoin.class.getName() + "] list unsupported");
+	}
+
+	protected List<CategoryJoin> convertToCategoryJoinsForV5_5_0(Object categoriesObj, Object categoryOrdersObj)
+	{
+		if(categoriesObj == null)
+			return null;
+		
+		List<Category> categories = convertToCategories(categoriesObj);
+
+		if (categories == null)
+			return null;
+
+		List<Integer> categoryOrders = convertToCategoryOrders(categoryOrdersObj);
+
+		List<CategoryJoin> categoryJoins = new ArrayList<>();
+
+		for (int i = 0; i < categories.size(); i++)
+		{
+			Category category = categories.get(i);
+			Integer categoryOrder = (categoryOrders == null || categoryOrders.size() <= i ? null
+					: categoryOrders.get(i));
+
+			CategoryJoin categoryJoin = createCategoryJoin();
+			categoryJoin.setCategory(category);
+			if (categoryOrder != null)
+				categoryJoin.setOrder(categoryOrder);
+
+			categoryJoins.add(categoryJoin);
+		}
+
+		return categoryJoins;
+	}
+
+	protected CategoryJoin convertToCategoryJoin(Object obj)
+	{
+		if (obj == null)
+			return null;
+
+		// "..." 类别名
+		if (obj instanceof String)
+		{
+			Category category = convertToCategory(obj);
+			CategoryJoin categoryJoin = createCategoryJoin();
+			categoryJoin.setCategory(category);
+
+			return categoryJoin;
+		}
+		else if(obj instanceof Map<?, ?>)
+		{
+			CategoryJoin categoryJoin = null;
+
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			// CategoryJoin
+			if(map.containsKey(CategoryJoin.PROPERTY_CATEGORY))
+			{
+				Category category = convertToCategory(map.get(CategoryJoin.PROPERTY_CATEGORY));
+
+				if (category != null)
+				{
+					categoryJoin = createCategoryJoin();
+					categoryJoin.setCategory(category);
+					categoryJoin.setOrder(convertToInt(map.get(CategoryJoin.PROPERTY_ORDER), 0));
+				}
+			}
+			// Category
+			else if (map.containsKey(Category.PROPERTY_NAME))
+			{
+				Category category = convertToCategory(obj);
+
+				if (category != null)
+				{
+					categoryJoin = createCategoryJoin();
+					categoryJoin.setCategory(category);
+				}
+			}
+
+			return categoryJoin;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ CategoryJoin.class.getName() + "] unsupported");
+	}
+
 	/**
 	 * 将对象转换为{@linkplain Category}列表。
 	 * <p>
@@ -1139,23 +1279,77 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 */
 	protected List<Category> convertToCategories(Object obj)
 	{
-		List<Category> categories = new ArrayList<Category>(1);
-		convertToCategories(categories, obj);
+		if (obj == null)
+			return null;
 
-		return categories;
+		if (obj instanceof Category)
+		{
+			return Arrays.asList((Category) obj);
+		}
+		else if ((obj instanceof String) || (obj instanceof Map<?, ?>))
+		{
+			Category category = convertToCategory(obj);
+			return (category == null ? null : Arrays.asList(category));
+		}
+		else if (obj instanceof Object[])
+		{
+			return convertToCategories(Arrays.asList((Object[]) obj));
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			List<Category> categories = new ArrayList<>();
+
+			Collection<?> collection = (Collection<?>) obj;
+			for (Object ele : collection)
+			{
+				Category category = convertToCategory(ele);
+				if (category != null)
+					categories.add(category);
+			}
+
+			return categories;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Category.class.getName() + "] list unsupported");
 	}
 
-	protected void convertToCategories(List<Category> categories, Object obj)
+	protected List<Integer> convertToCategoryOrders(Object obj)
 	{
 		if (obj == null)
-			return;
-		else if (obj instanceof Category)
-			categories.add((Category) obj);
-		else if (obj instanceof String)
+			return null;
+
+		if (obj instanceof Object[])
+		{
+			return convertToCategoryOrders(Arrays.asList((Object[]) obj));
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			List<Integer> orders = new ArrayList<>();
+
+			Collection<?> collection = (Collection<?>) obj;
+			for (Object ele : collection)
+				orders.add(convertToInt(ele, 0));
+
+			return orders;
+		}
+		else
+		{
+			return Arrays.asList(convertToInt(obj, 0));
+		}
+	}
+
+	protected Category convertToCategory(Object obj)
+	{
+		if (obj == null)
+			return null;
+
+		if (obj instanceof String)
 		{
 			Category category = createCategory();
 			category.setName((String) obj);
-			categories.add(category);
+
+			return category;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
@@ -1163,8 +1357,9 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Map<String, ?> map = (Map<String, ?>) obj;
 
 			String name = (String) map.get(Category.PROPERTY_NAME);
+
 			if (name == null)
-				return;
+				return null;
 
 			Category category = createCategory();
 			category.setName(name);
@@ -1173,51 +1368,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			category.setDescLabel(convertToLabel(map.get(Category.PROPERTY_DESC_LABEL)));
 			category.setOrder(convertToInt(map.get(Category.PROPERTY_ORDER), category.getOrder()));
 
-			categories.add(category);
-		}
-		else if (obj instanceof Collection<?>)
-		{
-			Collection<?> collection = (Collection<?>) obj;
-			for (Object ele : collection)
-				convertToCategories(categories, ele);
-		}
-		else if (obj instanceof Object[])
-		{
-			Object[] array = (Object[]) obj;
-			for (Object ele : array)
-				convertToCategories(categories, ele);
+			return category;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ Category.class.getName() + "] unsupported");
-	}
-
-	protected List<Integer> convertToCategoryOrders(Object obj, int defaultOrder)
-	{
-		List<Integer> orders = new ArrayList<Integer>(1);
-
-		if (obj != null)
-			convertToCategoryOrders(orders, obj, defaultOrder);
-
-		return orders;
-	}
-
-	protected void convertToCategoryOrders(List<Integer> orders, Object obj, int defaultOrder)
-	{
-		if (obj instanceof Collection<?>)
-		{
-			Collection<?> collection = (Collection<?>) obj;
-			for (Object ele : collection)
-				convertToCategoryOrders(orders, ele, defaultOrder);
-		}
-		else if (obj instanceof Object[])
-		{
-			Object[] array = (Object[]) obj;
-			for (Object ele : array)
-				convertToCategoryOrders(orders, ele, defaultOrder);
-		}
-		else
-			orders.add(convertToInt(obj, defaultOrder));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1349,8 +1504,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			}
 		}
 		else
-			throw new UnsupportedOperationException(
-					"Convert object [" + obj + "] to [" + Integer.class.getName() + "] unsupported");
+			return defaultValue;
 	}
 	
 	protected String convertToString(Object obj)
@@ -1396,6 +1550,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	protected DataSign createDataSign()
 	{
 		return new DataSign();
+	}
+
+	protected CategoryJoin createCategoryJoin()
+	{
+		return new CategoryJoin();
 	}
 
 	protected Category createCategory()

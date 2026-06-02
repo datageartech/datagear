@@ -302,22 +302,29 @@
 	},
 	version : "0.1.0",
 	order : 2,
-	categories :
+	categoryJoins :
 	[
 		{
-			name : 'line',
-			nameLabel : "nameLabel-line",
-			descLabel : "descLabel-line",
-			order: 41
+			category:
+			{
+				name : 'line',
+				nameLabel : "nameLabel-line",
+				descLabel : "descLabel-line",
+				order: 41
+			},
+			order: 6
 		},
 		{
-			name : 'bar',
-			nameLabel : "nameLabel-bar",
-			descLabel : "descLabel-bar",
-			order: 51
+			category:
+			{
+				name : 'bar',
+				nameLabel : "nameLabel-bar",
+				descLabel : "descLabel-bar",
+				order: 51
+			},
+			order: 3
 		}
 	],
-	categoryOrders: [ 41, 51 ],
 	author: "test",
 	issueDate: "2024-09-01",
 	platformVersion: "5.3.0+",

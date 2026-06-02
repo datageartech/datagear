@@ -67,8 +67,7 @@ public class HtmlChartPluginVo extends HtmlChartPluginJson
 			setConfigForm(null);
 			setDataSignSpec(null);
 			setDataSetRange(null);
-			setCategories(null);
-			setCategoryOrders(null);
+			setCategoryJoins(null);
 			setAdditions(null);
 		}
 	}
