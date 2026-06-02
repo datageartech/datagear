@@ -3840,9 +3840,20 @@ chartProto.pluginAddition = function(name)
 };
 
 /**
+ * 获取图表插件数据标记规范。
+ * 
+ * @returns 数据标记规范对象，没有则返回null
+ */
+chartProto.pluginDataSignSpec = function()
+{
+	var plugin = this.plugin();
+	return (plugin ? plugin.dataSignSpec : null);
+};
+
+/**
  * 获取图表插件所有数据标记。
  * 
- * @param owner 可选，图表插件、父级数据标记对象，默认为：this.plugin()
+ * @param owner 可选，图表插件、数据标记规范对象、父级数据标记对象，默认为：this.plugin()
  * @returns []，空数组表示没有
  */
 chartProto.pluginDataSigns = function(owner)
@@ -3851,12 +3862,24 @@ chartProto.pluginDataSigns = function(owner)
 	
 	var re;
 	
-	//插件
-	if(owner && owner.dataSignSpec !== undefined)
-		re = (owner.dataSignSpec ? owner.dataSignSpec.dataSigns : null);
-	//父级数据标记
-	else if(owner && owner.children !== undefined)
-		re = owner.children;
+	if(owner != null)
+	{
+		//插件
+		if(owner.dataSignSpec !== undefined)
+		{
+			re = (owner.dataSignSpec ? owner.dataSignSpec.dataSigns : null);
+		}
+		//数据标记规范对象
+		else if(owner.dataSigns !== undefined)
+		{
+			re = owner.dataSigns;
+		}
+		//父级数据标记
+		else if(owner.children !== undefined)
+		{
+			re = owner.children;
+		}
+	}
 	
 	return (re == null  ? [] : re);
 };
@@ -3865,7 +3888,7 @@ chartProto.pluginDataSigns = function(owner)
  * 获取图表插件指定标识的数据标记，不会深度查找。
  * 
  * @param identity 数据标记标识：名称、索引数值、数据标记对象（将直接返回）
- * @param owner 可选，要查找的数据标记数组、图表插件、父级数据标记对象，默认为：this.pluginDataSigns()
+ * @param owner 可选，要查找的数据标记数组、图表插件、数据标记规范对象、父级数据标记对象，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
 chartProto.pluginDataSignFlat = function(identity, owner)
@@ -3889,7 +3912,7 @@ chartProto.pluginDataSignFlat = function(identity, owner)
  * 深度查找图表插件指定标识的数据标记。
  * 
  * @param identity 数据标记标识：全名、索引数值、数据标记对象（将直接返回），或者由数据标记名/索引数值/对象组成的层级数组（数组索引表示查找层级）
- * @param owner 可选，要查找的数据标记数组、图表插件、父级数据标记对象，默认为：this.pluginDataSigns()
+ * @param owner 可选，要查找的数据标记数组、图表插件、数据标记规范对象、父级数据标记对象，默认为：this.pluginDataSigns()
  * @returns 数据标记，没有找到则是null
  */
 chartProto.pluginDataSign = function(identity, owner)
