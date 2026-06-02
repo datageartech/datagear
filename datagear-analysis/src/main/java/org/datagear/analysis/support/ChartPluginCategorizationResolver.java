@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.util.StringUtil;
 
 /**
@@ -55,17 +55,17 @@ public class ChartPluginCategorizationResolver
 
 		for (ChartPlugin chartPlugin : chartPlugins)
 		{
-			List<CategoryJoin> categoryJoins = chartPlugin.getCategoryJoins();
+			List<ChartPluginCategoryInfo> categoryInfos = chartPlugin.getCategoryInfos();
 
 			boolean added = false;
 
-			if (categoryJoins != null)
+			if (categoryInfos != null)
 			{
-				for (int i = 0; i < categoryJoins.size(); i++)
+				for (int i = 0; i < categoryInfos.size(); i++)
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(i);
-					Category category = categoryJoin.getCategory();
-					int order = categoryJoin.getOrder();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(i);
+					Category category = categoryInfo.getCategory();
+					int order = categoryInfo.getOrder();
 
 					if (category == null)
 						continue;

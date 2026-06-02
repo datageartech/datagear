@@ -33,9 +33,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
@@ -76,7 +76,7 @@ import org.datagear.util.i18n.Localizable;
  *   dataSetRange: 数值 、 "none" 、 { ... },
  *   version : "...",
  *   order: 整数值,
- *   categoryJoins: ...,
+ *   categoryInfos: ...,
  *   author: "...",
  *   contact: "...",
  *   issueDate: "...",
@@ -99,7 +99,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	public static final String JSON_PROPERTY_DATA_SET_RANGE = ChartPlugin.PROPERTY_DATA_SET_RANGE;
 	public static final String JSON_PROPERTY_VERSION = ChartPlugin.PROPERTY_VERSION;
 	public static final String JSON_PROPERTY_ORDER = ChartPlugin.PROPERTY_ORDER;
-	public static final String JSON_PROPERTY_CATEGORY_JOINS = ChartPlugin.PROPERTY_CATEGORY_JOINS;
+	public static final String JSON_PROPERTY_CATEGORY_INFOS = ChartPlugin.PROPERTY_CATEGORY_INFOS;
 	public static final String JSON_PROPERTY_AUTHOR = ChartPlugin.PROPERTY_AUTHOR;
 	public static final String JSON_PROPERTY_CONTACT = ChartPlugin.PROPERTY_CONTACT;
 	public static final String JSON_PROPERTY_ISSUE_DATE = ChartPlugin.PROPERTY_ISSUE_DATE;
@@ -214,8 +214,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		chartPlugin.setVersion(convertToString(properties.get(JSON_PROPERTY_VERSION)));
 		chartPlugin.setOrder(convertToInt(properties.get(JSON_PROPERTY_ORDER), chartPlugin.getOrder()));
 
-		if (properties.containsKey(JSON_PROPERTY_CATEGORY_JOINS))
-			chartPlugin.setCategoryJoins(convertToCategoryJoins(properties.get(JSON_PROPERTY_CATEGORY_JOINS)));
+		if (properties.containsKey(JSON_PROPERTY_CATEGORY_INFOS))
+			chartPlugin.setCategoryInfos(convertToCategoryInfos(properties.get(JSON_PROPERTY_CATEGORY_INFOS)));
 		else
 		{
 			Object categories = properties.get(JSON_PROPERTY_CATEGORIES);
@@ -224,7 +224,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 
 			Object categoryOrders = properties.get(JSON_PROPERTY_CATEGORY_ORDERS);
 
-			chartPlugin.setCategoryJoins(convertToCategoryJoinsForV5_5_0(categories, categoryOrders));
+			chartPlugin.setCategoryInfos(convertToCategoryInfosForV5_5_0(categories, categoryOrders));
 		}
 
 		chartPlugin.setAuthor(convertToString(properties.get(JSON_PROPERTY_AUTHOR)));
@@ -1132,51 +1132,51 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return range;
 	}
 
-	protected List<CategoryJoin> convertToCategoryJoins(Object obj)
+	protected List<ChartPluginCategoryInfo> convertToCategoryInfos(Object obj)
 	{
 		if (obj == null)
 			return null;
 
-		if (obj instanceof CategoryJoin)
+		if (obj instanceof ChartPluginCategoryInfo)
 		{
-			return Arrays.asList((CategoryJoin) obj);
+			return Arrays.asList((ChartPluginCategoryInfo) obj);
 		}
 		// "..." 类别名
 		else if (obj instanceof String)
 		{
-			return convertToCategoryJoins(Arrays.asList(obj));
+			return convertToCategoryInfos(Arrays.asList(obj));
 		}
-		// { category: ..., order: ... }
+		// { }
 		else if (obj instanceof Map<?, ?>)
 		{
-			return convertToCategoryJoins(Arrays.asList(obj));
+			return convertToCategoryInfos(Arrays.asList(obj));
 		}
 		// [ ... ]
 		else if (obj instanceof Object[])
 		{
-			return convertToCategoryJoins(Arrays.asList((Object[]) obj));
+			return convertToCategoryInfos(Arrays.asList((Object[]) obj));
 		}
 		else if (obj instanceof Collection<?>)
 		{
 			Collection<?> collection = (Collection<?>) obj;
 
-			List<CategoryJoin> categoryJoins = new ArrayList<>();
+			List<ChartPluginCategoryInfo> categoryInfos = new ArrayList<>();
 
 			for (Object o : collection)
 			{
-				CategoryJoin categoryJoin = convertToCategoryJoin(o);
-				if (categoryJoin != null)
-					categoryJoins.add(categoryJoin);
+				ChartPluginCategoryInfo categoryInfo = convertToCategoryInfo(o);
+				if (categoryInfo != null)
+					categoryInfos.add(categoryInfo);
 			}
 
-			return categoryJoins;
+			return categoryInfos;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ CategoryJoin.class.getName() + "] list unsupported");
+					+ ChartPluginCategoryInfo.class.getName() + "] list unsupported");
 	}
 
-	protected List<CategoryJoin> convertToCategoryJoinsForV5_5_0(Object categoriesObj, Object categoryOrdersObj)
+	protected List<ChartPluginCategoryInfo> convertToCategoryInfosForV5_5_0(Object categoriesObj, Object categoryOrdersObj)
 	{
 		if(categoriesObj == null)
 			return null;
@@ -1188,7 +1188,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 
 		List<Integer> categoryOrders = convertToCategoryOrders(categoryOrdersObj);
 
-		List<CategoryJoin> categoryJoins = new ArrayList<>();
+		List<ChartPluginCategoryInfo> categoryInfos = new ArrayList<>();
 
 		for (int i = 0; i < categories.size(); i++)
 		{
@@ -1196,18 +1196,18 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Integer categoryOrder = (categoryOrders == null || categoryOrders.size() <= i ? null
 					: categoryOrders.get(i));
 
-			CategoryJoin categoryJoin = createCategoryJoin();
-			categoryJoin.setCategory(category);
+			ChartPluginCategoryInfo categoryInfo = createCategoryInfo();
+			categoryInfo.setCategory(category);
 			if (categoryOrder != null)
-				categoryJoin.setOrder(categoryOrder);
+				categoryInfo.setOrder(categoryOrder);
 
-			categoryJoins.add(categoryJoin);
+			categoryInfos.add(categoryInfo);
 		}
 
-		return categoryJoins;
+		return categoryInfos;
 	}
 
-	protected CategoryJoin convertToCategoryJoin(Object obj)
+	protected ChartPluginCategoryInfo convertToCategoryInfo(Object obj)
 	{
 		if (obj == null)
 			return null;
@@ -1216,28 +1216,28 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		if (obj instanceof String)
 		{
 			Category category = convertToCategory(obj);
-			CategoryJoin categoryJoin = createCategoryJoin();
-			categoryJoin.setCategory(category);
+			ChartPluginCategoryInfo categoryInfo = createCategoryInfo();
+			categoryInfo.setCategory(category);
 
-			return categoryJoin;
+			return categoryInfo;
 		}
 		else if(obj instanceof Map<?, ?>)
 		{
-			CategoryJoin categoryJoin = null;
+			ChartPluginCategoryInfo categoryInfo = null;
 
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			// CategoryJoin
-			if(map.containsKey(CategoryJoin.PROPERTY_CATEGORY))
+			// CategoryInfo
+			if(map.containsKey(ChartPluginCategoryInfo.PROPERTY_CATEGORY))
 			{
-				Category category = convertToCategory(map.get(CategoryJoin.PROPERTY_CATEGORY));
+				Category category = convertToCategory(map.get(ChartPluginCategoryInfo.PROPERTY_CATEGORY));
 
 				if (category != null)
 				{
-					categoryJoin = createCategoryJoin();
-					categoryJoin.setCategory(category);
-					categoryJoin.setOrder(convertToInt(map.get(CategoryJoin.PROPERTY_ORDER), 0));
+					categoryInfo = createCategoryInfo();
+					categoryInfo.setCategory(category);
+					categoryInfo.setOrder(convertToInt(map.get(ChartPluginCategoryInfo.PROPERTY_ORDER), 0));
 				}
 			}
 			// Category
@@ -1247,16 +1247,16 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 
 				if (category != null)
 				{
-					categoryJoin = createCategoryJoin();
-					categoryJoin.setCategory(category);
+					categoryInfo = createCategoryInfo();
+					categoryInfo.setCategory(category);
 				}
 			}
 
-			return categoryJoin;
+			return categoryInfo;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ CategoryJoin.class.getName() + "] unsupported");
+					+ ChartPluginCategoryInfo.class.getName() + "] unsupported");
 	}
 
 	/**
@@ -1552,9 +1552,9 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		return new DataSign();
 	}
 
-	protected CategoryJoin createCategoryJoin()
+	protected ChartPluginCategoryInfo createCategoryInfo()
 	{
-		return new CategoryJoin();
+		return new ChartPluginCategoryInfo();
 	}
 
 	protected Category createCategory()

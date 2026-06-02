@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.analysis.CategoryJoin;
+import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginManager;
@@ -338,23 +338,23 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append("  }");
 
 		buffer.append(newLine);
-		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_CATEGORY_JOINS + " != null){");
+		buffer.append("  if(plugin." + ChartPlugin.PROPERTY_CATEGORY_INFOS + " != null){");
 		buffer.append(newLine);
 		buffer.append("    plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORIES + "=[];");
 		buffer.append(newLine);
 		buffer.append("    plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORY_ORDERS + "=[];");
 		buffer.append(newLine);
-		buffer.append("    for(var i=0; i<plugin." + ChartPlugin.PROPERTY_CATEGORY_JOINS + ".length; i++){");
+		buffer.append("    for(var i=0; i<plugin." + ChartPlugin.PROPERTY_CATEGORY_INFOS + ".length; i++){");
 		buffer.append(newLine);
 		buffer.append("      plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORIES + "[i]=plugin."
-				+ ChartPlugin.PROPERTY_CATEGORY_JOINS + "[i]." + CategoryJoin.PROPERTY_CATEGORY + ";");
+				+ ChartPlugin.PROPERTY_CATEGORY_INFOS + "[i]." + ChartPluginCategoryInfo.PROPERTY_CATEGORY + ";");
 		buffer.append(newLine);
 		buffer.append("      plugin." + JsonChartPluginPropertiesResolver.JSON_PROPERTY_CATEGORY_ORDERS + "[i]=plugin."
-				+ ChartPlugin.PROPERTY_CATEGORY_JOINS + "[i]." + CategoryJoin.PROPERTY_ORDER + ";");
+				+ ChartPlugin.PROPERTY_CATEGORY_INFOS + "[i]." + ChartPluginCategoryInfo.PROPERTY_ORDER + ";");
 		buffer.append(newLine);
 		buffer.append("    }");
 		buffer.append(newLine);
-		buffer.append("    plugin." + ChartPlugin.PROPERTY_CATEGORY_JOINS + "=undefined;");
+		buffer.append("    plugin." + ChartPlugin.PROPERTY_CATEGORY_INFOS + "=undefined;");
 		buffer.append(newLine);
 		buffer.append("  }");
 

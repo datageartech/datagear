@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
-import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
@@ -62,7 +62,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private int order = 0;
 
-	private List<CategoryJoin> categoryJoins = null;
+	private List<ChartPluginCategoryInfo> categoryInfos = null;
 
 	private String author = "";
 
@@ -236,14 +236,14 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public List<CategoryJoin> getCategoryJoins()
+	public List<ChartPluginCategoryInfo> getCategoryInfos()
 	{
-		return categoryJoins;
+		return categoryInfos;
 	}
 
-	public void setCategoryJoins(List<CategoryJoin> categoryJoins)
+	public void setCategoryInfos(List<ChartPluginCategoryInfo> categoryInfos)
 	{
-		this.categoryJoins = categoryJoins;
+		this.categoryInfos = categoryInfos;
 	}
 
 	@Override

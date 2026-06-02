@@ -25,15 +25,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.datagear.analysis.Category;
-import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginDataSetRange.Range;
@@ -84,8 +85,8 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getDataSignSpec());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
-			assertNotNull(chartPlugin.getCategoryJoins());
-			assertEquals(2, chartPlugin.getCategoryJoins().size());
+			assertNotNull(chartPlugin.getCategoryInfos());
+			assertEquals(2, chartPlugin.getCategoryInfos().size());
 			assertEquals("test", chartPlugin.getAuthor());
 			assertEquals("2024-09-01", chartPlugin.getIssueDate());
 
@@ -519,28 +520,28 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				List<CategoryJoin> categoryJoins = chartPlugin.getCategoryJoins();
+				List<ChartPluginCategoryInfo> categoryInfos = chartPlugin.getCategoryInfos();
 
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(0);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(0);
+					Category category = categoryInfo.getCategory();
 					assertEquals("line", category.getName());
 					assertEquals("nameLabel-line", category.getNameLabel().getValue());
 					assertEquals("descLabel-line", category.getDescLabel().getValue());
 					assertEquals(41, category.getOrder());
 
-					assertEquals(6, categoryJoin.getOrder());
+					assertEquals(6, categoryInfo.getOrder());
 				}
 
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(1);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(1);
+					Category category = categoryInfo.getCategory();
 					assertEquals("bar", category.getName());
 					assertEquals("nameLabel-bar", category.getNameLabel().getValue());
 					assertEquals("descLabel-bar", category.getDescLabel().getValue());
 					assertEquals(51, category.getOrder());
 
-					assertEquals(3, categoryJoin.getOrder());
+					assertEquals(3, categoryInfo.getOrder());
 				}
 			}
 
@@ -678,23 +679,23 @@ public class JsonChartPluginPropertiesResolverTest
 					IOUtil.CHARSET_UTF_8);
 
 			assertEquals("pie-chart", chartPlugin.getId());
-			assertEquals(2, chartPlugin.getCategoryJoins().size());
+			assertEquals(2, chartPlugin.getCategoryInfos().size());
 
 			{
-				List<CategoryJoin> categoryJoins = chartPlugin.getCategoryJoins();
+				List<ChartPluginCategoryInfo> categoryInfos = chartPlugin.getCategoryInfos();
 
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(0);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(0);
+					Category category = categoryInfo.getCategory();
 					assertEquals("line", category.getName());
 					assertNull(category.getNameLabel());
 
-					assertEquals(41, categoryJoin.getOrder());
+					assertEquals(41, categoryInfo.getOrder());
 				}
 
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(1);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(1);
+					Category category = categoryInfo.getCategory();
 					assertEquals("bar", category.getName());
 					assertNull(category.getNameLabel());
 				}
@@ -727,8 +728,8 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getDataSignSpec());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
-			assertNotNull(chartPlugin.getCategoryJoins());
-			assertEquals(2, chartPlugin.getCategoryJoins().size());
+			assertNotNull(chartPlugin.getCategoryInfos());
+			assertEquals(2, chartPlugin.getCategoryInfos().size());
 			assertEquals("test", chartPlugin.getAuthor());
 			assertEquals("2024-09-01", chartPlugin.getIssueDate());
 	
@@ -959,28 +960,28 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 	
 			{
-				List<CategoryJoin> categoryJoins = chartPlugin.getCategoryJoins();
+				List<ChartPluginCategoryInfo> categoryInfos = chartPlugin.getCategoryInfos();
 	
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(0);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(0);
+					Category category = categoryInfo.getCategory();
 					assertEquals("line", category.getName());
 					assertEquals("nameLabel-line", category.getNameLabel().getValue());
 					assertEquals("descLabel-line", category.getDescLabel().getValue());
 					assertEquals(41, category.getOrder());
 
-					assertEquals(41, categoryJoin.getOrder());
+					assertEquals(41, categoryInfo.getOrder());
 				}
 	
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(1);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(1);
+					Category category = categoryInfo.getCategory();
 					assertEquals("bar", category.getName());
 					assertEquals("nameLabel-bar", category.getNameLabel().getValue());
 					assertEquals("descLabel-bar", category.getDescLabel().getValue());
 					assertEquals(51, category.getOrder());
 
-					assertEquals(51, categoryJoin.getOrder());
+					assertEquals(51, categoryInfo.getOrder());
 				}
 			}
 	
@@ -1018,8 +1019,8 @@ public class JsonChartPluginPropertiesResolverTest
 			assertNotNull(chartPlugin.getDataSignSpec());
 			assertEquals("0.1.0", chartPlugin.getVersion());
 			assertEquals(2, chartPlugin.getOrder());
-			assertNotNull(chartPlugin.getCategoryJoins());
-			assertEquals(1, chartPlugin.getCategoryJoins().size());
+			assertNotNull(chartPlugin.getCategoryInfos());
+			assertEquals(1, chartPlugin.getCategoryInfos().size());
 
 			{
 				Label nameLabel = chartPlugin.getNameLabel();
@@ -1121,11 +1122,11 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			{
-				List<CategoryJoin> categoryJoins = chartPlugin.getCategoryJoins();
+				List<ChartPluginCategoryInfo> categoryInfos = chartPlugin.getCategoryInfos();
 
 				{
-					CategoryJoin categoryJoin = categoryJoins.get(0);
-					Category category = categoryJoin.getCategory();
+					ChartPluginCategoryInfo categoryInfo = categoryInfos.get(0);
+					Category category = categoryInfo.getCategory();
 					assertEquals("line", category.getName());
 					assertEquals("nameLabel", category.getNameLabel().getValue());
 					assertEquals("descLabel", category.getDescLabel().getValue());
@@ -1303,6 +1304,101 @@ public class JsonChartPluginPropertiesResolverTest
 				assertFalse(dataSign.isMultiple());
 				assertNull(dataSign.getNameLabel());
 				assertNull(dataSign.getChildren());
+			}
+		}
+	}
+
+	@Test
+	public void convertToCategoryInfosTest()
+	{
+		TestChartPlugin chartPlugin = new TestChartPlugin();
+		JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+				chartPlugin);
+
+		{
+			List<ChartPluginCategoryInfo> categoryInfos = resolver.convertToCategoryInfos("a");
+
+			assertEquals(1, categoryInfos.size());
+
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(0);
+				Category category = ci.getCategory();
+
+				assertEquals("a", category.getName());
+				assertEquals(0, ci.getOrder());
+			}
+		}
+
+		{
+			List<ChartPluginCategoryInfo> categoryInfos = resolver.convertToCategoryInfos(new String[] { "a", "b" });
+
+			assertEquals(2, categoryInfos.size());
+
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(0);
+				Category category = ci.getCategory();
+
+				assertEquals("a", category.getName());
+				assertEquals(0, ci.getOrder());
+			}
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(1);
+				Category category = ci.getCategory();
+
+				assertEquals("b", category.getName());
+				assertEquals(0, ci.getOrder());
+			}
+		}
+
+		{
+			List<ChartPluginCategoryInfo> categoryInfos = resolver.convertToCategoryInfos(Arrays.asList("a", "b"));
+
+			assertEquals(2, categoryInfos.size());
+
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(0);
+				Category category = ci.getCategory();
+
+				assertEquals("a", category.getName());
+				assertEquals(0, ci.getOrder());
+			}
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(1);
+				Category category = ci.getCategory();
+
+				assertEquals("b", category.getName());
+				assertEquals(0, ci.getOrder());
+			}
+		}
+
+		{
+			Map<String, Object> ci0 = new HashMap<>();
+			ci0.put("category", "line");
+			ci0.put("order", 3);
+
+			Map<String, Object> ci1 = new HashMap<>();
+			ci1.put("name", "bar");
+			ci1.put("order", 2);
+
+			List<ChartPluginCategoryInfo> categoryInfos = resolver.convertToCategoryInfos(Arrays.asList(ci0, ci1));
+
+			assertEquals(2, categoryInfos.size());
+
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(0);
+				Category category = ci.getCategory();
+
+				assertEquals("line", category.getName());
+				assertEquals(0, category.getOrder());
+				assertEquals(3, ci.getOrder());
+			}
+			{
+				ChartPluginCategoryInfo ci = categoryInfos.get(1);
+				Category category = ci.getCategory();
+
+				assertEquals("bar", category.getName());
+				assertEquals(2, category.getOrder());
+				assertEquals(0, ci.getOrder());
 			}
 		}
 	}

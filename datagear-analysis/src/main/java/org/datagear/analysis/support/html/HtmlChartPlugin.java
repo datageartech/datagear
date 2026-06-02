@@ -148,7 +148,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		setDataSetRange(plugin.getDataSetRange());
 		setVersion(plugin.getVersion());
 		setOrder(plugin.getOrder());
-		setCategoryJoins(plugin.getCategoryJoins());
+		setCategoryInfos(plugin.getCategoryInfos());
 		setAuthor(plugin.getAuthor());
 		setContact(plugin.getContact());
 		setIssueDate(plugin.getIssueDate());

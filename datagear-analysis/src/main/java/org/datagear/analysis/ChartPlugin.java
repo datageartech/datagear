@@ -39,7 +39,7 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String PROPERTY_DATA_SET_RANGE = "dataSetRange";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
-	String PROPERTY_CATEGORY_JOINS = "categoryJoins";
+	String PROPERTY_CATEGORY_INFOS = "categoryInfos";
 	String PROPERTY_AUTHOR = "author";
 	String PROPERTY_CONTACT = "contact";
 	String PROPERTY_ISSUE_DATE = "issueDate";
@@ -143,11 +143,11 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	int getOrder();
 
 	/**
-	 * 获取所属类别。
+	 * 获取所属类别信息。
 	 * 
 	 * @return {@code null}表示无类别
 	 */
-	List<CategoryJoin> getCategoryJoins();
+	List<ChartPluginCategoryInfo> getCategoryInfos();
 
 	/**
 	 * 获取作者。

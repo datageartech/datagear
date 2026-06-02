@@ -23,12 +23,12 @@ import java.util.Locale;
 import org.datagear.util.i18n.Localizable;
 
 /**
- * 所属类别信息。
+ * 图表插件所属类别信息。
  * 
  * @author datagear@163.com
  *
  */
-public class CategoryJoin implements Localizable, Serializable
+public class ChartPluginCategoryInfo implements Localizable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -41,18 +41,18 @@ public class CategoryJoin implements Localizable, Serializable
 	/** 在类别内排序值 */
 	private int order = 0;
 
-	public CategoryJoin()
+	public ChartPluginCategoryInfo()
 	{
 		super();
 	}
 
-	public CategoryJoin(Category category)
+	public ChartPluginCategoryInfo(Category category)
 	{
 		super();
 		this.category = category;
 	}
 
-	public CategoryJoin(Category category, int order)
+	public ChartPluginCategoryInfo(Category category, int order)
 	{
 		super();
 		this.category = category;
@@ -80,9 +80,9 @@ public class CategoryJoin implements Localizable, Serializable
 	}
 
 	@Override
-	public CategoryJoin toLocale(Locale locale)
+	public ChartPluginCategoryInfo toLocale(Locale locale)
 	{
-		CategoryJoin target = createEmpty();
+		ChartPluginCategoryInfo target = createEmpty();
 
 		target.setCategory(this.category == null ? null : this.category.toLocale(locale));
 		target.setOrder(this.order);
@@ -90,8 +90,8 @@ public class CategoryJoin implements Localizable, Serializable
 		return target;
 	}
 
-	protected CategoryJoin createEmpty()
+	protected ChartPluginCategoryInfo createEmpty()
 	{
-		return new CategoryJoin();
+		return new ChartPluginCategoryInfo();
 	}
 }

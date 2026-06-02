@@ -72,7 +72,7 @@ public class HtmlChartPluginJson extends HtmlChartPlugin
 		LabelUtil.concrete(plugin, this, locale);
 		setDataSignSpec(plugin.getDataSignSpec() == null ? null : plugin.getDataSignSpec().toLocale(locale));
 		setConfigForm(plugin.getConfigForm() == null ? null : plugin.getConfigForm().toLocale(locale));
-		setCategoryJoins(Localizable.toLocale(plugin.getCategoryJoins(), locale));
+		setCategoryInfos(Localizable.toLocale(plugin.getCategoryInfos(), locale));
 	}
 
 	@JsonIgnore

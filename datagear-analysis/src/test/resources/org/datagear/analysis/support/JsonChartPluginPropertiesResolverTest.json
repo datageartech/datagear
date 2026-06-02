@@ -302,7 +302,7 @@
 	},
 	version : "0.1.0",
 	order : 2,
-	categoryJoins :
+	categoryInfos :
 	[
 		{
 			category:
