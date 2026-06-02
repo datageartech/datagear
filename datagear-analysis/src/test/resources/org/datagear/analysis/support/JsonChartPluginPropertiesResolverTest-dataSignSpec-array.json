@@ -1,0 +1,9 @@
+{
+	id : "test",
+	nameLabel : "test",
+	dataSignSpec:
+	[
+  		{ name : 'name' },
+  		{ name : 'value' }
+	]
+}

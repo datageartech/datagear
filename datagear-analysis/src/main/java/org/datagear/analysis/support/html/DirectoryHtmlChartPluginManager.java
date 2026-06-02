@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.zip.ZipOutputStream;
 
 import org.datagear.analysis.Category;
+import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.support.AbstractChartPlugin;
@@ -563,15 +564,16 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (plugin == null)
 			return;
 
-		List<Category> categories = plugin.getCategories();
+		List<CategoryJoin> categoryJoins = plugin.getCategoryJoins();
 
-		if (categories == null)
+		if (categoryJoins == null)
 			return;
 
-		for (int i = 0; i < categories.size(); i++)
+		for (int i = 0; i < categoryJoins.size(); i++)
 		{
-			Category category = categories.get(i);
-			String categoryName = category.getName();
+			CategoryJoin categoryJoin = categoryJoins.get(i);
+			Category category = categoryJoin.getCategory();
+			String categoryName = (category == null ? null : category.getName());
 
 			Map<String, ChartPlugin> map = getChartPluginMap();
 
@@ -583,19 +585,20 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					if (!(chartPlugin instanceof AbstractChartPlugin))
 						continue;
 
-					List<Category> myCategories = chartPlugin.getCategories();
+					List<CategoryJoin> myCategoryJoins = chartPlugin.getCategoryJoins();
 
-					if (myCategories == null)
+					if (myCategoryJoins == null)
 						continue;
 
-					for (int j = 0; j < myCategories.size(); j++)
+					for (int j = 0; j < myCategoryJoins.size(); j++)
 					{
-						Category myCategory = myCategories.get(j);
+						CategoryJoin myCategoryJoin = myCategoryJoins.get(j);
+						Category myCategory = myCategoryJoin.getCategory();
 
 						if (myCategory != null && myCategory != category
 								&& StringUtil.isEquals(myCategory.getName(), categoryName))
 						{
-							myCategories.set(j, category);
+							myCategoryJoin.setCategory(category);
 						}
 					}
 				}
@@ -605,15 +608,17 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			{
 				for (ChartPlugin chartPlugin : map.values())
 				{
-					List<Category> myCategories = chartPlugin.getCategories();
+					List<CategoryJoin> myCategoryJoins = chartPlugin.getCategoryJoins();
 
-					if (myCategories == null)
+					if (myCategoryJoins == null)
 						continue;
 
 					Category fullCategory = null;
 
-					for (Category myCategory : myCategories)
+					for (CategoryJoin myCategoryJoin : myCategoryJoins)
 					{
+						Category myCategory = myCategoryJoin.getCategory();
+
 						if (myCategory != null && myCategory != category && myCategory.hasNameLabel()
 								&& StringUtil.isEquals(myCategory.getName(), categoryName))
 						{
@@ -624,7 +629,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 					if (fullCategory != null)
 					{
-						categories.set(i, fullCategory);
+						categoryJoin.setCategory(fullCategory);
 						break;
 					}
 				}

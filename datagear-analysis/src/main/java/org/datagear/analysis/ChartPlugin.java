@@ -35,12 +35,11 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_RESOURCES = "resources";
 	String PROPERTY_CONFIG_FORM = "configForm";
-	String PROPERTY_DATA_SIGNS = "dataSigns";
+	String PROPERTY_DATA_SIGN_SPEC = "dataSignSpec";
 	String PROPERTY_DATA_SET_RANGE = "dataSetRange";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
-	String PROPERTY_CATEGORIES = "categories";
-	String PROPERTY_CATEGORY_ORDERS = "categoryOrders";
+	String PROPERTY_CATEGORY_JOINS = "categoryJoins";
 	String PROPERTY_AUTHOR = "author";
 	String PROPERTY_CONTACT = "contact";
 	String PROPERTY_ISSUE_DATE = "issueDate";
@@ -94,22 +93,14 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	ChartPluginConfigForm getConfigForm();
 
 	/**
-	 * 获取{@linkplain DataSign}列表。
+	 * 获取{@linkplain DataSignSpec}。
 	 * <p>
 	 * 返回{@code null}表示没有。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	List<DataSign> getDataSigns();
-
-	/**
-	 * 获取指定名称的{@linkplain DataSign}，没有找到则返回{@code null}。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	DataSign getDataSign(String name);
+	DataSignSpec getDataSignSpec();
 
 	/**
 	 * 获取{@linkplain ChartPluginDataSetRange}。
@@ -154,22 +145,9 @@ public interface ChartPlugin extends Identifiable, Labeled, AdditionsAware
 	/**
 	 * 获取所属类别。
 	 * 
-	 * @return 返回{@code null}表示无类别
+	 * @return {@code null}表示无类别
 	 */
-	List<Category> getCategories();
-
-	/**
-	 * 获取上述所属类别中的排序值。
-	 * <p>
-	 * 如果没有{@linkplain #getCategories()}中对应索引的排序值，则取{@linkplain #getOrder()}。
-	 * </p>
-	 * <p>
-	 * 返回{@code null}或空列表表示无排序。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	List<Integer> getCategoryOrders();
+	List<CategoryJoin> getCategoryJoins();
 
 	/**
 	 * 获取作者。

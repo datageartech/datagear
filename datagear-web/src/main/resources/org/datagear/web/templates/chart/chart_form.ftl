@@ -375,7 +375,7 @@
 					<span v-if="fm.pluginVo == null || fm.pluginVo.id == null || fm.pluginVo.id == ''">
 						<@spring.message code='chart.noAvaliableDataSign.desc1' />
 					</span>
-					<span v-else-if="fm.pluginVo.dataSigns == null || fm.pluginVo.dataSigns.length == 0">
+					<span v-else-if="fm.pluginVo.dataSignSpec == null || fm.pluginVo.dataSignSpec.dataSigns == null || fm.pluginVo.dataSignSpec.dataSigns.length == 0">
 						<@spring.message code='chart.noAvaliableDataSign.desc2' />
 					</span>
 					<span v-else>

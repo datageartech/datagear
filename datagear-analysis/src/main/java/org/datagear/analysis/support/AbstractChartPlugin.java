@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
-import org.datagear.analysis.Category;
+import org.datagear.analysis.CategoryJoin;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginDataSetRange;
 import org.datagear.analysis.ChartPluginResource;
-import org.datagear.analysis.DataSign;
+import org.datagear.analysis.DataSignSpec;
 import org.datagear.analysis.NameAwareUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
@@ -54,7 +54,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private ChartPluginConfigForm configForm = null;
 
-	private List<DataSign> dataSigns = Collections.emptyList();
+	private DataSignSpec dataSignSpec = null;
 
 	private ChartPluginDataSetRange dataSetRange = null;
 
@@ -62,9 +62,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private int order = 0;
 
-	private List<Category> categories = Collections.emptyList();
-
-	private List<Integer> categoryOrders = Collections.emptyList();
+	private List<CategoryJoin> categoryJoins = null;
 
 	private String author = "";
 
@@ -194,29 +192,14 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public List<DataSign> getDataSigns()
+	public DataSignSpec getDataSignSpec()
 	{
-		return dataSigns;
+		return dataSignSpec;
 	}
 
-	public void setDataSigns(List<DataSign> dataSigns)
+	public void setDataSignSpec(DataSignSpec dataSignSpec)
 	{
-		this.dataSigns = dataSigns;
-	}
-
-	@Override
-	public DataSign getDataSign(String name)
-	{
-		if (this.dataSigns == null)
-			return null;
-
-		for (DataSign dataSign : this.dataSigns)
-		{
-			if (dataSign.getName().equals(name))
-				return dataSign;
-		}
-
-		return null;
+		this.dataSignSpec = dataSignSpec;
 	}
 
 	@Override
@@ -253,25 +236,14 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public List<Category> getCategories()
+	public List<CategoryJoin> getCategoryJoins()
 	{
-		return categories;
+		return categoryJoins;
 	}
 
-	public void setCategories(List<Category> categories)
+	public void setCategoryJoins(List<CategoryJoin> categoryJoins)
 	{
-		this.categories = categories;
-	}
-
-	@Override
-	public List<Integer> getCategoryOrders()
-	{
-		return categoryOrders;
-	}
-
-	public void setCategoryOrders(List<Integer> categoryOrders)
-	{
-		this.categoryOrders = categoryOrders;
+		this.categoryJoins = categoryJoins;
 	}
 
 	@Override

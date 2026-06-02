@@ -3830,11 +3830,19 @@ $.inflateChartForm = function(po)
 		return (!plugin || !plugin.configForm || !plugin.configForm.properties || plugin.configForm.properties.length==0);
 	};
 	
+	po.pluginDataSigns = function(chartPlugin)
+	{
+		if(chartPlugin == null || chartPlugin.dataSignSpec == null)
+			return null;
+			
+		return chartPlugin.dataSignSpec.dataSigns;
+	};
+	
 	po.validateDataSetBindDataSign = function(chart)
 	{
 		var chartPlugin = chart.pluginVo;
 
-		if(chartPlugin == null || $.isEmpty(chartPlugin.dataSigns))
+		if(chartPlugin == null || $.isEmpty(po.pluginDataSigns(chartPlugin)))
 			return true;
 		
 		var dataSetBinds = (chart.dataSetBindVOs || []);
@@ -3886,7 +3894,7 @@ $.inflateChartForm = function(po)
 	
 	po.validateDataSetFieldDataSign = function(chartPlugin, dataSetBind, dataSetFieldNodes)
 	{
-		if(chartPlugin == null || $.isEmpty(chartPlugin.dataSigns) || dataSetBind == null)
+		if(chartPlugin == null || $.isEmpty(po.pluginDataSigns(chartPlugin)) || dataSetBind == null)
 		{
 			return true;
 		}
@@ -4002,7 +4010,7 @@ $.inflateChartForm = function(po)
 	po.assembleDataSetBind = function(dataSetBind, chartPlugin)
 	{
 		var fields = (dataSetBind.dataSet ? dataSetBind.dataSet.fields : []);
-		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = (po.pluginDataSigns(chartPlugin) || []);
 		
 		dataSetBind.fieldNodes = (po.dataSetFieldsToTreeNodes(fields, dataSetBind, chartPlugin) || []);
 		dataSetBind.bindDataSigns = [];
@@ -4036,7 +4044,7 @@ $.inflateChartForm = function(po)
 	
 	po.dataSetFieldToTreeNode = function(field, dataSetBind, chartPlugin, parentNode)
 	{
-		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = (po.pluginDataSigns(chartPlugin) || []);
 		
 		var node =
 		{
@@ -4082,7 +4090,7 @@ $.inflateChartForm = function(po)
 	{
 		po.restoreDataSetFields(dataSetBind.fieldNodes, dataSetBind, chartPlugin);
 		
-		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = (po.pluginDataSigns(chartPlugin) || []);
 		dataSetBind.dataSetSigns = [];
 		
 		if(dataSetBind.bindDataSigns)
@@ -4104,7 +4112,7 @@ $.inflateChartForm = function(po)
 		if(fieldNodes == null)
 			return;
 		
-		var dataSigns = (chartPlugin && chartPlugin.dataSigns ? chartPlugin.dataSigns : []);
+		var dataSigns = (po.pluginDataSigns(chartPlugin) || []);
 		dataSetBind.fieldSigns = (dataSetBind.fieldSigns || {});
 		dataSetBind.fieldAliases = (dataSetBind.fieldAliases || {});
 		dataSetBind.fieldOrders = (dataSetBind.fieldOrders || {});
@@ -4141,10 +4149,10 @@ $.inflateChartForm = function(po)
 	
 	po.assemblePlugin = function(plugin)
 	{
-		if(!plugin)
+		if(plugin == null || plugin.dataSignSpec == null || plugin.dataSignSpec.dataSigns == null)
 			return;
 		
-		plugin.dataSigns = po.assemblePluginDataSigns(plugin.dataSigns);
+		plugin.dataSignSpec.dataSigns = po.assemblePluginDataSigns(plugin.dataSignSpec.dataSigns);
 	};
 	
 	po.assemblePluginDataSigns = function(dataSigns, parent)
@@ -4167,7 +4175,7 @@ $.inflateChartForm = function(po)
 	
 	po.pluginHasDataSetSign = function(plugin)
 	{
-		var dataSigns = (plugin ? plugin.dataSigns : null);
+		var dataSigns = po.pluginDataSigns(plugin);
 		
 		if(!dataSigns)
 			return false;
@@ -4213,7 +4221,7 @@ $.inflateChartForm = function(po)
 	po.findCandidateDataSignsForDataSet = function(chartPlugin)
 	{
 		var re = [];
-		var dataSigns = (chartPlugin ? chartPlugin.dataSigns : null);
+		var dataSigns = po.pluginDataSigns(chartPlugin);
 		
 		if(!dataSigns)
 			return re;
@@ -4247,7 +4255,7 @@ $.inflateChartForm = function(po)
 		{
 			parentBindDataSigns = dataSetBind.bindDataSigns;
 			
-			var pluginDataSigns = (chartPlugin ? chartPlugin.dataSigns : null);
+			var pluginDataSigns = po.pluginDataSigns(chartPlugin);
 			if(pluginDataSigns != null)
 			{
 				for(var i=0; i<pluginDataSigns.length; i++)
